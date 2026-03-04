@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" width="120" height="140">
+  <defs>
+    <linearGradient id="main" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0.2" y1="0" x2="0.6" y2="0.8">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.45"/>
+      <stop offset="40%" stop-color="#fff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="drip" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1e1b4b" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M22 12 C18 8, 12 11, 12 18 L12 88 C12 95, 18 100, 24 96 L98 58 C105 54, 105 44, 98 40 Z" fill="url(#main)"/>
+    <path d="M22 12 C18 8, 12 11, 12 18 L12 88 C12 95, 18 100, 24 96 L98 58 C105 54, 105 44, 98 40 Z" fill="url(#sheen)"/>
+    <path d="M28 96 Q28 94, 27 96 L25 108 Q24 118, 27 118 Q30 118, 29 108 Z" fill="url(#drip)"/>
+    <path d="M52 88 Q52 86, 50 88 L48 106 Q46 126, 50 126 Q54 126, 52 106 Z" fill="url(#drip)"/>
+    <path d="M72 76 Q72 74, 70 76 L69 90 Q68 104, 71 104 Q74 104, 73 90 Z" fill="url(#drip)"/>
+    <path d="M88 64 Q88 62, 87 64 L86 72 Q85 80, 88 80 Q91 80, 89 72 Z" fill="url(#drip)"/>
+    <ellipse cx="50" cy="132" rx="3" ry="4" fill="url(#drip)"/>
+  </g>
+</svg>
