@@ -111,7 +111,7 @@ html {
 
 /* Reusable font-family utility for Google Sans Flex */
 .font-display {
-  font-family: 'Google Sans Flex', sans-serif;
+  font-family: "Google Sans Flex", sans-serif;
 }
 
 /* Reusable gold gradient for primary CTA buttons */
@@ -121,8 +121,8 @@ html {
 
 /* Shared auth input styling */
 .input-auth {
-  @apply w-full px-4 py-2.5 rounded-xl border border-white/20 bg-white/10 text-white text-sm outline-none transition-all placeholder:text-white/30;
-  font-family: 'Google Sans Flex', sans-serif;
+  @apply w-full px-4 py-2.5 rounded-2xl border border-white/20 bg-white/10 text-white text-sm outline-none transition-all placeholder:text-white/30;
+  font-family: "Google Sans Flex", sans-serif;
 }
 .input-auth:focus {
   @apply border-purple-400 ring-2 ring-purple-400/30;
@@ -203,5 +203,8 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  button {
+    cursor: pointer;
   }
 }

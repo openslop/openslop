@@ -52,7 +52,7 @@ export default function EmailSentCard({
       }
     >
       <GradientButton type="button" onClick={onResend} disabled={loading}>
-        {loading ? "Sending..." : resendLabel ?? "Send another login link"}
+        {loading ? "Sending..." : (resendLabel ?? "Send another login link")}
       </GradientButton>
       {error && <p className="text-red-400 text-sm text-center">{error}</p>}
     </OnboardingCard>

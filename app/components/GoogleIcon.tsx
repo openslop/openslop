@@ -1,4 +1,8 @@
-export default function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
+export default function GoogleIcon({
+  className = "w-4 h-4",
+}: {
+  className?: string;
+}) {
   return (
     <svg className={className} viewBox="0 0 24 24">
       <path
