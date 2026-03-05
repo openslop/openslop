@@ -1,6 +1,7 @@
 "use client";
 
 import OnboardingCard from "./OnboardingCard";
+import GradientButton from "./GradientButton";
 
 interface EmailSentCardProps {
   email: string;
@@ -50,18 +51,9 @@ export default function EmailSentCard({
         </button>
       }
     >
-      <button
-        type="button"
-        onClick={onResend}
-        disabled={loading}
-        className="w-full py-2.5 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-        style={{
-          fontFamily: "'Google Sans Flex', sans-serif",
-          background: "linear-gradient(135deg, #b8860b, #d4a017, #c4922a)",
-        }}
-      >
-        {loading ? "Sending..." : (resendLabel ?? "Send another login link")}
-      </button>
+      <GradientButton type="button" onClick={onResend} disabled={loading}>
+        {loading ? "Sending..." : resendLabel ?? "Send another login link"}
+      </GradientButton>
       {error && <p className="text-red-400 text-sm text-center">{error}</p>}
     </OnboardingCard>
   );

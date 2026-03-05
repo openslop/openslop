@@ -11,10 +11,7 @@ export default function Editor({ user }: { user: EditorUser }) {
       <div className="absolute top-6 left-6">
         <UserProfile email={user.email} avatarUrl={user.avatarUrl} />
       </div>
-      <h1
-        className="text-3xl font-light"
-        style={{ fontFamily: "'Google Sans Flex', sans-serif" }}
-      >
+      <h1 className="text-3xl font-light font-display">
         Editor
       </h1>
       <p className="text-white/60 text-sm">{user.email}</p>

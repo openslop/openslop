@@ -33,10 +33,7 @@ export default function OnboardingCard({
         {icon ?? <OpenSlopLogo className="w-14 h-auto text-white" />}
 
         {/* Heading */}
-        <h1
-          className="text-2xl sm:text-3xl font-light text-white text-center"
-          style={{ fontFamily: "'Google Sans Flex', sans-serif" }}
-        >
+        <h1 className="text-2xl sm:text-3xl font-light text-white text-center font-display">
           {heading}
         </h1>
 
@@ -44,10 +41,7 @@ export default function OnboardingCard({
         {extra}
 
         {/* Subtitle */}
-        <p
-          className="text-white/50 text-center text-xs sm:text-sm font-light leading-relaxed"
-          style={{ fontFamily: "'Google Sans Flex', sans-serif" }}
-        >
+        <p className="text-white/50 text-center text-xs sm:text-sm font-light leading-relaxed font-display">
           {subtitle}
         </p>
 
@@ -57,10 +51,7 @@ export default function OnboardingCard({
         </div>
 
         {/* Footer */}
-        <p
-          className="text-white/40 text-xs sm:text-sm"
-          style={{ fontFamily: "'Google Sans Flex', sans-serif" }}
-        >
+        <p className="text-white/40 text-xs sm:text-sm font-display">
           {footer}
         </p>
       </div>

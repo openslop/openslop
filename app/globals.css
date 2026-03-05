@@ -109,6 +109,25 @@ html {
   color-scheme: dark;
 }
 
+/* Reusable font-family utility for Google Sans Flex */
+.font-display {
+  font-family: 'Google Sans Flex', sans-serif;
+}
+
+/* Reusable gold gradient for primary CTA buttons */
+.bg-gradient-gold {
+  background: linear-gradient(135deg, #b8860b, #d4a017, #c4922a);
+}
+
+/* Shared auth input styling */
+.input-auth {
+  @apply w-full px-4 py-2.5 rounded-xl border border-white/20 bg-white/10 text-white text-sm outline-none transition-all placeholder:text-white/30;
+  font-family: 'Google Sans Flex', sans-serif;
+}
+.input-auth:focus {
+  @apply border-purple-400 ring-2 ring-purple-400/30;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
