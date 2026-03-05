@@ -14,7 +14,7 @@
 
 <br />
 
-![OpenSlop Demo](https://placehold.co/800x450/1a1a2e/FFFFFF?text=Demo+GIF+Coming+Soon)
+<img src="./assets/openslop-demo.gif" alt="OpenSlop - your free AI video creator" width="100%">
 
 </div>
 
@@ -86,13 +86,13 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 
 ## Tech Stack
 
-| Layer | Tech |
-|-------|------|
-| Framework | [Next.js 16](https://nextjs.org) (App Router) |
-| Language | [TypeScript 5](https://www.typescriptlang.org) |
-| UI | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) |
-| Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS) |
-| Icons | [Lucide](https://lucide.dev) |
+| Layer     | Tech                                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------------------ |
+| Framework | [Next.js 16](https://nextjs.org) (App Router)                                                                |
+| Language  | [TypeScript 5](https://www.typescriptlang.org)                                                               |
+| UI        | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) |
+| Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
+| Icons     | [Lucide](https://lucide.dev)                                                                                 |
 
 ## Project Structure
 
@@ -116,14 +116,14 @@ openslop/
 
 ## Scripts
 
-| Command | What it does |
-|---------|--------------|
-| `npm run dev` | Start the dev server |
-| `npm run build` | Production build |
-| `npm run start` | Start the production server |
-| `npm run lint` | Run ESLint |
-| `npm run db:push` | Push migrations to Supabase |
-| `npm run db:reset` | Reset the database |
+| Command            | What it does                |
+| ------------------ | --------------------------- |
+| `npm run dev`      | Start the dev server        |
+| `npm run build`    | Production build            |
+| `npm run start`    | Start the production server |
+| `npm run lint`     | Run ESLint                  |
+| `npm run db:push`  | Push migrations to Supabase |
+| `npm run db:reset` | Reset the database          |
 
 ## Contributing
 
