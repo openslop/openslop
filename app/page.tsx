@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Editor from "./components/Editor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
+import GradientButton from "./components/GradientButton";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -49,25 +50,15 @@ export default async function Home() {
         </>
       }
     >
-      <p
-        className="text-white/70 text-sm font-medium"
-        style={{ fontFamily: "'Google Sans Flex', sans-serif" }}
-      >
+      <p className="text-white/70 text-sm font-medium font-display">
         Have an access code?
       </p>
 
       <AccessCodeInput />
 
-      <button
-        type="button"
-        className="w-full mt-2 py-2.5 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
-        style={{
-          fontFamily: "'Google Sans Flex', sans-serif",
-          background: "linear-gradient(135deg, #b8860b, #d4a017, #c4922a)",
-        }}
-      >
+      <GradientButton type="button" className="mt-2">
         Get Started
-      </button>
+      </GradientButton>
     </OnboardingCard>
   );
 }
