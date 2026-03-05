@@ -25,15 +25,15 @@ export default function UserProfile({ email, avatarUrl }: UserProfileProps) {
     router.refresh();
   };
 
-  const initials = email
-    .split("@")[0]
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = email.split("@")[0].slice(0, 2).toUpperCase();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <button
+          type="button"
+          className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <Avatar className="h-9 w-9 cursor-pointer">
             {avatarUrl && <AvatarImage src={avatarUrl} alt={email} />}
             <AvatarFallback className="bg-white/10 text-white text-xs">

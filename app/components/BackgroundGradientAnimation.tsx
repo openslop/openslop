@@ -14,7 +14,7 @@ export default function BackgroundGradientAnimation() {
     curX.current += (tgX.current - curX.current) / 20;
     curY.current += (tgY.current - curY.current) / 20;
     interactiveRef.current.style.transform = `translate(${Math.round(
-      curX.current
+      curX.current,
     )}px, ${Math.round(curY.current)}px)`;
     requestAnimationFrame(move);
   }, []);

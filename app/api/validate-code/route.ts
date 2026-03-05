@@ -22,15 +22,24 @@ export async function POST(request: NextRequest) {
   }
 
   if (!data.is_active) {
-    return NextResponse.json({ error: "This code is no longer active" }, { status: 401 });
+    return NextResponse.json(
+      { error: "This code is no longer active" },
+      { status: 401 },
+    );
   }
 
   if (data.expires_at && new Date(data.expires_at) < new Date()) {
-    return NextResponse.json({ error: "This code has expired" }, { status: 401 });
+    return NextResponse.json(
+      { error: "This code has expired" },
+      { status: 401 },
+    );
   }
 
   if (data.max_uses && data.current_uses >= data.max_uses) {
-    return NextResponse.json({ error: "This code has reached its usage limit" }, { status: 401 });
+    return NextResponse.json(
+      { error: "This code has reached its usage limit" },
+      { status: 401 },
+    );
   }
 
   // Increment usage count
