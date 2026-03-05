@@ -23,6 +23,7 @@ export default function LoginPage() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: false,
       },
     });
 
@@ -59,21 +60,7 @@ export default function LoginPage() {
   }
 
   return (
-    <OnboardingCard
-      heading="Login"
-      subtitle="Welcome back to OpenSlop"
-      footer={
-        <>
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
-          >
-            Sign up
-          </Link>
-        </>
-      }
-    >
+    <OnboardingCard heading="Login" subtitle="Welcome back to OpenSlop">
       <form onSubmit={handleMagicLink} className="w-full flex flex-col gap-3">
         <input
           type="email"
