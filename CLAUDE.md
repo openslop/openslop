@@ -4,3 +4,4 @@
 - Prefer code simplicity as much as possible
 - Prefer smaller subcomponents and helper functions neatly organized in idiomatic folders as much as possible
 - Prefer idiomatic NextJS, React, Supabase, Shadcn conventions and best practices as much as possible
+- After each change, run `npx prettier --write .` in project root to ensure formatting is consistent

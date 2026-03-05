@@ -38,7 +38,7 @@ export default function AccessCodeInput() {
         setLoading(false);
       }
     },
-    [router]
+    [router],
   );
 
   const handleChange = (index: number, value: string) => {
@@ -59,7 +59,10 @@ export default function AccessCodeInput() {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     if (e.key === "Backspace" && !values[index] && index > 0) {
       const next = [...values];
       next[index - 1] = "";
@@ -98,7 +101,9 @@ export default function AccessCodeInput() {
         {values.map((val, i) => (
           <input
             key={i}
-            ref={(el) => { inputRefs.current[i] = el; }}
+            ref={(el) => {
+              inputRefs.current[i] = el;
+            }}
             type="text"
             inputMode="text"
             maxLength={1}

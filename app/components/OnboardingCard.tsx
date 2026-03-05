@@ -9,7 +9,14 @@ interface OnboardingCardProps {
   extra?: React.ReactNode;
 }
 
-export default function OnboardingCard({ heading, subtitle, children, footer, icon, extra }: OnboardingCardProps) {
+export default function OnboardingCard({
+  heading,
+  subtitle,
+  children,
+  footer,
+  icon,
+  extra,
+}: OnboardingCardProps) {
   return (
     <div className="flex min-h-screen items-center justify-center px-3 sm:px-4 py-8">
       {/* Top-left branding */}
@@ -21,7 +28,7 @@ export default function OnboardingCard({ heading, subtitle, children, footer, ic
       </span>
 
       {/* Outer glass card */}
-      <div className="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-black/30 backdrop-blur-3xl shadow-[0_8px_40px_rgba(120,60,220,0.15),0_2px_12px_rgba(0,0,0,0.3)] p-5 sm:p-8 flex flex-col items-center gap-4 sm:gap-6">
+      <div className="w-full max-w-lg rounded-4xl sm:rounded-3xl bg-black/30 backdrop-blur-xl shadow-[0_8px_40px_rgba(120,60,220,0.15),0_2px_12px_rgba(0,0,0,0.3)] p-5 sm:p-8 flex flex-col items-center gap-4 sm:gap-6">
         {/* Icon or Logo */}
         {icon ?? <OpenSlopLogo className="w-14 h-auto text-white" />}
 

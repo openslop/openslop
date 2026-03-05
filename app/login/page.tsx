@@ -97,9 +97,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      {error && (
-        <p className="text-red-400 text-sm text-center">{error}</p>
-      )}
+      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
       {/* Divider */}
       <div className="w-full flex items-center gap-3">
