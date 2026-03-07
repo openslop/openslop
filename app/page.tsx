@@ -1,9 +1,17 @@
+import fs from "fs";
+import path from "path";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import Editor from "./components/Editor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
 import GradientButton from "./components/GradientButton";
+
+const icons = fs
+  .readdirSync(path.join(process.cwd(), "public/icons"))
+  .filter((file) => file.endsWith(".svg"))
+  .sort();
 
 export default async function Home() {
   const supabase = await createClient();
@@ -17,6 +25,7 @@ export default async function Home() {
         user={{
           email: user.email ?? "",
           avatarUrl: user.user_metadata?.avatar_url,
+          name: user.user_metadata?.full_name,
         }}
       />
     );
@@ -28,13 +37,15 @@ export default async function Home() {
       subtitle="OpenSlop is your free, open-source video creator that brings together all your favorite AI tools, helping you get more done with less effort."
       extra={
         <div className="w-full flex items-center justify-center gap-3 sm:gap-5 rounded-full border border-white/10 bg-white/5 px-4 sm:px-6 py-2.5 sm:py-3">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-white/10 border border-white/10 flex items-center justify-center text-white/30 text-[10px] sm:text-xs font-medium"
-            >
-              AI
-            </div>
+          {icons.map((icon) => (
+            <Image
+              key={icon}
+              src={`/icons/${icon}`}
+              alt={icon.replace(".svg", "")}
+              width={28}
+              height={28}
+              className="w-7 h-7 sm:w-8 sm:h-8"
+            />
           ))}
         </div>
       }

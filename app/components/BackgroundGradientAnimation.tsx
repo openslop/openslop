@@ -14,7 +14,7 @@ export default function BackgroundGradientAnimation() {
     curX.current += (tgX.current - curX.current) / 20;
     curY.current += (tgY.current - curY.current) / 20;
     interactiveRef.current.style.transform = `translate(${Math.round(
-      curX.current,
+      curX.current
     )}px, ${Math.round(curY.current)}px)`;
     requestAnimationFrame(move);
   }, []);
@@ -114,7 +114,7 @@ export default function BackgroundGradientAnimation() {
         />
 
         {/* Interactive pointer blob */}
-        <div
+        {/* <div
           ref={interactiveRef}
           className="absolute w-full h-full top-[-50%] left-[-50%] opacity-35"
           style={{
@@ -122,7 +122,7 @@ export default function BackgroundGradientAnimation() {
               "radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0%, transparent 80%)",
             mixBlendMode: "hard-light",
           }}
-        />
+        /> */}
       </div>
     </div>
   );
