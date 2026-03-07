@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
 import OnboardingCard from "../components/OnboardingCard";
 import EmailSentCard from "../components/EmailSentCard";
 import GradientButton from "../components/GradientButton";

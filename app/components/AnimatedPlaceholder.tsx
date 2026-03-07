@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef } from "react";
 
 const SUGGESTIONS = [
-  "a claymation children's story about little red riding hood…",
+  "a claymation children’s story about little red riding hood…",
   "a cinematic AI music video with powerful synthwave energy",
-  "an infographic explainer video answering 'what if the world stops spinning?'",
+  "an infographic explainer video answering ‘what if the world stops spinning?’",
   "a documentary-style video about the rise and fall of Rome…",
   "a heartwarming animal rescue video about a stray dog saved from a flood…",
   "a short animated cat story about a mischievous kitten…",
@@ -21,28 +21,28 @@ export default function AnimatedPlaceholder({ active }: { active: boolean }) {
   const [phase, setPhase] = useState<"visible" | "exiting" | "entering">(
     "visible",
   );
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exitTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enterTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!active) return;
 
-    const clear = () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-
     const EXITING_DELAY = 2500;
     const ENTERING_DELAY = EXITING_DELAY + 20;
 
-    timeoutRef.current = setTimeout(() => {
+    exitTimeout.current = setTimeout(() => {
       setPhase("exiting");
     }, EXITING_DELAY);
 
-    timeoutRef.current = setTimeout(() => {
+    enterTimeout.current = setTimeout(() => {
       setIndex((prev) => (prev + 1) % SUGGESTIONS.length);
       setPhase("entering");
     }, ENTERING_DELAY);
 
-    return clear;
+    return () => {
+      if (exitTimeout.current) clearTimeout(exitTimeout.current);
+      if (enterTimeout.current) clearTimeout(enterTimeout.current);
+    };
   }, [active, index, phase]);
 
   const animationClass =

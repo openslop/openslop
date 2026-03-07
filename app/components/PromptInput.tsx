@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
-import ModeToggle from "./ModeToggle";
+import ModeToggle, { type Mode } from "./ModeToggle";
 
-type Mode = "prompt" | "script";
 
 const SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.

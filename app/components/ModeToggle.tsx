@@ -1,4 +1,4 @@
-type Mode = "prompt" | "script";
+export type Mode = "prompt" | "script";
 
 export default function ModeToggle({
   mode,
