@@ -114,6 +114,15 @@ html {
   font-family: "Google Sans Flex", sans-serif;
 }
 
+.font-title {
+  font-family: var(--font-instrument-serif), serif;
+  font-weight: 400;
+}
+
+.font-body {
+  font-family: "Satoshi", sans-serif;
+}
+
 /* Reusable gold gradient for primary CTA buttons */
 .bg-gradient-gold {
   background: linear-gradient(135deg, #b8860b, #d4a017, #c4922a);
@@ -207,4 +216,22 @@ html {
   button {
     cursor: pointer;
   }
+}
+
+/* Reusable grain texture overlay — add .grain to any positioned element */
+.grain {
+  isolation: isolate;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("/grain.png");
+  background-size: 25px 25px;
+  background-repeat: repeat;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 1;
 }
