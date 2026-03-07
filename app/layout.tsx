@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import BackgroundGradientAnimation from "./components/BackgroundGradientAnimation";
 
@@ -11,6 +11,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +33,7 @@ export default function RootLayout({
     <html lang="en" className="dark bg-[#0a0a0a]">
       <head>
         <link
-          href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,600,700&display=swap"
+          href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,600,700&f[]=satoshi@400,500,700&display=swap"
           rel="stylesheet"
         />
         <link
@@ -36,11 +42,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0a0a]`}
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased bg-[#0a0a0a]`}
       >
         <BackgroundGradientAnimation />
 
-        <div className="relative z-10">{children}</div>
+        <div className="relative">{children}</div>
       </body>
     </html>
   );
