@@ -1,38 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-
 export default function BackgroundGradientAnimation() {
-  const interactiveRef = useRef<HTMLDivElement>(null);
-  const curX = useRef(0);
-  const curY = useRef(0);
-  const tgX = useRef(0);
-  const tgY = useRef(0);
-
-  const move = useCallback(() => {
-    if (!interactiveRef.current) return;
-    curX.current += (tgX.current - curX.current) / 20;
-    curY.current += (tgY.current - curY.current) / 20;
-    interactiveRef.current.style.transform = `translate(${Math.round(
-      curX.current
-    )}px, ${Math.round(curY.current)}px)`;
-    requestAnimationFrame(move);
-  }, []);
-
-  useEffect(() => {
-    requestAnimationFrame(move);
-  }, [move]);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    tgX.current = e.clientX;
-    tgY.current = e.clientY;
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [handleMouseMove]);
-
   return (
     <div className="fixed inset-0 z-0 overflow-hidden">
       {/* Base gradient background */}
@@ -112,17 +80,6 @@ export default function BackgroundGradientAnimation() {
             mixBlendMode: "hard-light",
           }}
         />
-
-        {/* Interactive pointer blob */}
-        {/* <div
-          ref={interactiveRef}
-          className="absolute w-full h-full top-[-50%] left-[-50%] opacity-35"
-          style={{
-            background:
-              "radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0%, transparent 80%)",
-            mixBlendMode: "hard-light",
-          }}
-        /> */}
       </div>
     </div>
   );
