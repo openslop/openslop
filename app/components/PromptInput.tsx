@@ -5,7 +5,6 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import ModeToggle, { type Mode } from "./ModeToggle";
 
-
 const SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
 A large silver moon glows softly above peaceful clouds.
@@ -53,7 +52,7 @@ export default function PromptInput() {
               />
             </div>
             {hasText && (
-              <button className="ml-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1f1528] text-violet-300 transition-colors hover:bg-[#2a1d38]">
+              <button className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-colors hover:bg-[#2a1d38]">
                 <ArrowRight className="h-4 w-4" />
               </button>
             )}
@@ -69,7 +68,7 @@ export default function PromptInput() {
             />
             {hasText && (
               <div className="flex justify-end pt-2">
-                <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1f1528] text-violet-300 transition-colors hover:bg-[#2a1d38]">
+                <button className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-colors hover:bg-[#2a1d38]">
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
