@@ -10,7 +10,7 @@ export default function ModeToggle({
   return (
     <div className="relative flex rounded-full border border-white/10 bg-white/5 p-1.5">
       <div
-        className="grain absolute inset-1 w-[calc(50%-4px)] rounded-full bg-[#2d2040] transition-transform duration-300 ease-out"
+        className="grain grain-12 absolute inset-1 w-[calc(50%-4px)] rounded-full bg-[#2d2040]/60 transition-transform duration-300 ease-out"
         style={{
           transform: mode === "prompt" ? "translateX(0)" : "translateX(100%)",
         }}
