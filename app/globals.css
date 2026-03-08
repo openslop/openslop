@@ -54,13 +54,13 @@
 
 @keyframes moveHorizontal {
   0% {
-    transform: translateX(-50%) translateY(-10%);
+    transform: translateX(-20%) translateY(-10%);
   }
   50% {
-    transform: translateX(50%) translateY(10%);
+    transform: translateX(20%) translateY(-5%);
   }
   100% {
-    transform: translateX(-50%) translateY(-10%);
+    transform: translateX(-20%) translateY(-10%);
   }
 }
 
@@ -78,13 +78,13 @@
 
 @keyframes moveVertical {
   0% {
-    transform: translateY(-50%);
+    transform: translateY(-25%);
   }
   50% {
-    transform: translateY(50%);
+    transform: translateY(25%);
   }
   100% {
-    transform: translateY(-50%);
+    transform: translateY(-25%);
   }
 }
 
@@ -229,7 +229,7 @@ html {
   inset: 0;
   border-radius: inherit;
   background-image: url("/grain.png");
-  background-size: 25px 25px;
+  background-size: 50px 50px;
   background-repeat: repeat;
   opacity: 0.5;
   pointer-events: none;

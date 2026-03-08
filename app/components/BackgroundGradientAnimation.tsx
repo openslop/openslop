@@ -40,7 +40,8 @@ export default function BackgroundGradientAnimation() {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(135deg, rgb(108, 0, 162) 0%, rgb(0, 17, 82) 100%)",
+            // "linear-gradient(135deg, rgb(108, 0, 162) 0%, rgb(0, 17, 82) 100%)",
+            "linear-gradient(135deg, rgb(78, 31, 153) 0%, rgb(28, 28, 112) 100%)",
         }}
       />
 
@@ -68,27 +69,19 @@ export default function BackgroundGradientAnimation() {
           className="absolute w-[80%] h-[80%] top-[calc(50%-40%)] left-[calc(50%-40%)] animate-first opacity-70"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(18, 113, 255, 0.8) 0%, transparent 50%)",
+              // "radial-gradient(circle at center, rgba(18, 113, 255, 0.8) 0%, transparent 50%)",
+              "radial-gradient(circle at center, rgb(75, 134, 206) 0%, transparent 50%)",
             mixBlendMode: "hard-light",
           }}
         />
 
         {/* Blob 2 — magenta, circular reverse */}
         <div
-          className="absolute w-[80%] h-[80%] top-[calc(50%-40%)] left-[calc(50%-40%)] animate-second opacity-70"
+          className="absolute w-[90%] h-[90%] top-[calc(50%-45%)] left-[calc(50%-45%)] opacity-70"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(221, 74, 255, 0.8) 0%, transparent 50%)",
-            mixBlendMode: "hard-light",
-          }}
-        />
-
-        {/* Blob 3 — cyan, circular */}
-        <div
-          className="absolute w-[80%] h-[80%] top-[calc(50%-40%)] left-[calc(50%-40%)] animate-third opacity-35"
-          style={{
-            background:
-              "radial-gradient(circle at center, rgba(100, 220, 255, 0.8) 0%, transparent 50%)",
+              // "radial-gradient(circle at center, rgba(221, 74, 255, 0.8) 0%, transparent 50%)",
+              "radial-gradient(circle at center, rgb(178, 74, 230) 0%, transparent 50%)",
             mixBlendMode: "hard-light",
           }}
         />
@@ -98,31 +91,22 @@ export default function BackgroundGradientAnimation() {
           className="absolute w-[80%] h-[80%] top-[calc(50%-40%)] left-[calc(50%-40%)] animate-fourth opacity-70"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(200, 50, 50, 0.8) 0%, transparent 50%)",
-            mixBlendMode: "hard-light",
-          }}
-        />
-
-        {/* Blob 5 — yellow, circular */}
-        <div
-          className="absolute w-[80%] h-[80%] top-[calc(50%-40%)] left-[calc(50%-40%)] animate-fifth opacity-50"
-          style={{
-            background:
-              "radial-gradient(circle at center, rgba(180, 180, 50, 0.8) 0%, transparent 50%)",
+              "radial-gradient(circle at center, rgb(155, 48, 128) 0%, transparent 50%)",
             mixBlendMode: "hard-light",
           }}
         />
 
         {/* Interactive pointer blob */}
-        {/* <div
+        <div
           ref={interactiveRef}
           className="absolute w-full h-full top-[-50%] left-[-50%] opacity-35"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0%, transparent 80%)",
+              // "radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0%, transparent 80%)",
+              "radial-gradient(circle at center, rgb(40, 152, 244) 0%, transparent 80%)",
             mixBlendMode: "hard-light",
           }}
-        /> */}
+        />
       </div>
     </div>
   );
