@@ -1,37 +1,43 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
 export default function BackgroundGradientAnimation() {
   const interactiveRef = useRef<HTMLDivElement>(null);
-  const curX = useRef(0);
-  const curY = useRef(0);
-  const tgX = useRef(0);
-  const tgY = useRef(0);
-
-  const move = useCallback(() => {
-    if (!interactiveRef.current) return;
-    curX.current += (tgX.current - curX.current) / 20;
-    curY.current += (tgY.current - curY.current) / 20;
-    interactiveRef.current.style.transform = `translate(${Math.round(
-      curX.current
-    )}px, ${Math.round(curY.current)}px)`;
-    requestAnimationFrame(move);
-  }, []);
 
   useEffect(() => {
-    requestAnimationFrame(move);
-  }, [move]);
+    const el = interactiveRef.current;
+    if (!el) return;
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    tgX.current = e.clientX;
-    tgY.current = e.clientY;
+    let currentX = window.innerWidth / 2;
+    let currentY = window.innerHeight / 2;
+    let targetX = currentX;
+    let targetY = currentY;
+    let frame = 0;
+
+    const handleMove = (e: MouseEvent) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+    };
+
+    const animate = () => {
+      currentX += (targetX - currentX) / 12;
+      currentY += (targetY - currentY) / 12;
+
+      el.style.left = `${currentX}px`;
+      el.style.top = `${currentY}px`;
+
+      frame = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    frame = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      cancelAnimationFrame(frame);
+    };
   }, []);
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [handleMouseMove]);
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden">
@@ -99,11 +105,12 @@ export default function BackgroundGradientAnimation() {
         {/* Interactive pointer blob */}
         <div
           ref={interactiveRef}
-          className="absolute w-full h-full top-[-50%] left-[-50%] opacity-35"
+          className="pointer-events-none absolute z-30 w-[1500px] h-[1500px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-[60px]"
           style={{
+            left: "50vw",
+            top: "50vh",
             background:
-              // "radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0%, transparent 80%)",
-              "radial-gradient(circle at center, rgb(40, 152, 244) 0%, transparent 80%)",
+              "radial-gradient(circle at center, rgba(40,152,244,0.9) 0%, transparent 75%)",
             mixBlendMode: "hard-light",
           }}
         />
