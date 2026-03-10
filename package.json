@@ -11,7 +11,9 @@
     "db:migrate": "supabase migration up",
     "db:reset": "supabase db reset",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -33,6 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prettier": "^3.8.1",
     "shadcn": "^3.8.5",
     "supabase": "^2.76.16",
     "tailwindcss": "^4",
