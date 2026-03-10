@@ -1,10 +1,37 @@
 import Cartesia from "@cartesia/cartesia-js";
+import type { VoiceInfo } from "@/lib/connectors/types";
 
 export class CartesiaTTS {
   private client: Cartesia;
 
   constructor(apiKey: string) {
     this.client = new Cartesia({ apiKey });
+  }
+
+  async search(params: {
+    query?: string;
+    gender?: string;
+    language?: string;
+    limit?: number;
+  }): Promise<VoiceInfo[]> {
+    const page = await this.client.voices.list({
+      q: params.query || undefined,
+      gender: params.gender as
+        | "masculine"
+        | "feminine"
+        | "gender_neutral"
+        | undefined,
+      limit: params.limit || 20,
+    });
+
+    return page.data.map((voice) => ({
+      id: voice.id,
+      name: voice.name,
+      language: voice.language,
+      gender: voice.gender ?? undefined,
+      description: voice.description,
+      previewUrl: voice.preview_file_url ?? undefined,
+    }));
   }
 
   async generate(params: { prompt: string; voiceId: string; model?: string }) {
