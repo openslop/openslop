@@ -68,7 +68,7 @@ describe("OpenSlop providers integration", () => {
     await c.init();
     expect(await c.validate()).toBe(true);
     expect(await c.listModels()).toHaveLength(1);
-    const result = await c.generate({ text: "hello", voiceId: "default" });
+    const result = await c.generate({ prompt: "hello", voiceId: "default" });
     expect(result.data).toBeInstanceOf(ArrayBuffer);
 
     const voices = await c.searchVoices({ query: "test" });

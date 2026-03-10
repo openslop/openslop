@@ -34,7 +34,7 @@ export abstract class BaseConnector<
   async generate(params: TParams): Promise<TResult> {
     try {
       const prompt = await runTransformPrompt(this.plugins, params.prompt);
-      let transformed = await runBeforeGenerate(this.plugins, {
+      const transformed = await runBeforeGenerate(this.plugins, {
         ...params,
         prompt,
       });
