@@ -14,6 +14,10 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@cartesia/cartesia-js": "^3.0.0",
+    "@elevenlabs/elevenlabs-js": "^2.38.1",
+    "@runware/sdk-js": "^1.2.5",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.98.0",
     "class-variance-authority": "^0.7.1",
@@ -21,6 +25,7 @@
     "dotenv": "^17.3.1",
     "lucide-react": "^0.576.0",
     "next": "16.1.6",
+    "pino": "^10.3.1",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
