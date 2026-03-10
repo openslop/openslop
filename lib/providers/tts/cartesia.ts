@@ -24,14 +24,16 @@ export class CartesiaTTS {
       limit: params.limit || 20,
     });
 
-    return page.data.map((voice) => ({
-      id: voice.id,
-      name: voice.name,
-      language: voice.language,
-      gender: voice.gender ?? undefined,
-      description: voice.description,
-      previewUrl: voice.preview_file_url ?? undefined,
-    }));
+    return page.data
+      .map((voice) => ({
+        id: voice.id,
+        name: voice.name,
+        language: voice.language,
+        gender: voice.gender ?? undefined,
+        description: voice.description,
+        previewUrl: voice.preview_file_url ?? undefined,
+      }))
+      .filter((voice) => voice.language === params.language);
   }
 
   async generate(params: { prompt: string; voiceId: string; model?: string }) {
