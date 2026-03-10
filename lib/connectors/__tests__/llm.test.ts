@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { OpenSlopLLM } from "../llm/openslop";
 import type { ConnectorPlugin } from "../types";
 

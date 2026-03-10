@@ -23,7 +23,6 @@ export default function PromptInput() {
   const [scriptValue, setScriptValue] = useState("");
 
   const value = mode === "prompt" ? promptValue : scriptValue;
-  const setValue = mode === "prompt" ? setPromptValue : setScriptValue;
   const hasText = value.trim().length > 0;
 
   return (

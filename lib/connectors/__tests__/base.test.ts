@@ -7,6 +7,9 @@ class TestConnector extends BaseConnector {
   async listModels(): Promise<ModelInfo[]> {
     return [{ id: "test", name: "Test" }];
   }
+  protected async _generate(): Promise<unknown> {
+    return {};
+  }
 }
 
 describe("BaseConnector", () => {
