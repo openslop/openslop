@@ -1,13 +1,24 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopSFX } from "../sfx/openslop";
 import type { ConnectorPlugin } from "../types";
 
+function mockBinaryResponse(data: number[] = [0]) {
+  return new Response(new Uint8Array(data).buffer, {
+    status: 200,
+    headers: { "content-type": "audio/mpeg" },
+  });
+}
+
 describe("BaseSFXConnector", () => {
-  it("generates stub audio", async () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockBinaryResponse());
+  });
+
+  it("generates audio via provider", async () => {
     const connector = new OpenSlopSFX({ provider: "openslop", apiKey: "" });
     const result = await connector.generate({ prompt: "explosion" });
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
-    expect(result.format).toBe("mp3");
+    expect(result).toBeInstanceOf(ArrayBuffer);
   });
 
   it("runs plugins in order", async () => {

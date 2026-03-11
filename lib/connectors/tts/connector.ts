@@ -1,19 +1,19 @@
 import { BaseConnector } from "../base";
 import type {
-  AudioResult,
   TTSConnector,
   TTSGenerateParams,
+  TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "../types";
 
 export abstract class BaseTTSConnector
-  extends BaseConnector<TTSGenerateParams, AudioResult>
+  extends BaseConnector<TTSGenerateParams, TTSResult>
   implements TTSConnector
 {
   readonly type = "tts" as const;
 
-  protected abstract _generate(params: TTSGenerateParams): Promise<AudioResult>;
+  protected abstract _generate(params: TTSGenerateParams): Promise<TTSResult>;
 
   abstract searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }

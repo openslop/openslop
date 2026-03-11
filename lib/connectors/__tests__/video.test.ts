@@ -1,8 +1,28 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopVideo } from "../video/openslop";
 import type { ConnectorPlugin } from "../types";
 
+function mockJsonResponse(data: unknown) {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+const jobResponse = {
+  jobId: "j1",
+  status: "completed",
+  resultUrl: "https://v.mp4",
+};
+
 describe("BaseVideoConnector", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      mockJsonResponse(jobResponse),
+    );
+  });
+
   it("generates a video job", async () => {
     const connector = new OpenSlopVideo({ provider: "openslop", apiKey: "" });
     const result = await connector.generate({ prompt: "a sunset" });
@@ -11,6 +31,9 @@ describe("BaseVideoConnector", () => {
   });
 
   it("polls a job", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      mockJsonResponse({ jobId: "job-123", status: "completed" }),
+    );
     const connector = new OpenSlopVideo({ provider: "openslop", apiKey: "" });
     const result = await connector.poll("job-123");
     expect(result.jobId).toBe("job-123");
@@ -44,18 +67,15 @@ describe("BaseVideoConnector", () => {
   });
 
   it("runs onError plugin on failure", async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error("video failed"));
     const errors: string[] = [];
 
-    class FailingVideo extends OpenSlopVideo {
-      protected async _generate(): Promise<never> {
-        throw new Error("video failed");
-      }
-    }
-
-    const connector = new FailingVideo({
+    const connector = new OpenSlopVideo({
       provider: "openslop",
       apiKey: "",
-      plugins: [{ name: "err", onError: (e) => void errors.push(e.message) }],
+      plugins: [
+        { name: "err", onError: (e: Error) => void errors.push(e.message) },
+      ],
     });
 
     await expect(connector.generate({ prompt: "test" })).rejects.toThrow();

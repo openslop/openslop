@@ -30,16 +30,15 @@ describe("ElevenLabsMusic", () => {
     vi.clearAllMocks();
   });
 
-  it("generates music with defaults", async () => {
+  it("generates music and returns ArrayBuffer", async () => {
     const audio = new Uint8Array([1, 2, 3, 4]);
     mockCompose.mockResolvedValue(mockReadableStream(audio));
 
     const provider = new ElevenLabsMusic("test-key");
     const result = await provider.generate({ prompt: "jazz" });
 
-    expect(result.format).toBe("mp3");
-    expect(result.durationSeconds).toBe(30);
-    expect(result.data).toBe(Buffer.from(audio).toString("base64"));
+    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(new Uint8Array(result)).toEqual(audio);
     expect(mockCompose).toHaveBeenCalledWith({
       prompt: "jazz",
       musicLengthMs: 30000,
@@ -52,12 +51,8 @@ describe("ElevenLabsMusic", () => {
     mockCompose.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
 
     const provider = new ElevenLabsMusic("test-key");
-    const result = await provider.generate({
-      prompt: "rock",
-      durationSeconds: 60,
-    });
+    await provider.generate({ prompt: "rock", durationSeconds: 60 });
 
-    expect(result.durationSeconds).toBe(60);
     expect(mockCompose).toHaveBeenCalledWith(
       expect.objectContaining({ musicLengthMs: 60000 }),
     );

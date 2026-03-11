@@ -157,17 +157,15 @@ describe("API routes", () => {
   });
 
   describe("POST /api/v1/music", () => {
-    it("generates music", async () => {
+    it("returns binary audio response", async () => {
       const { POST } = await import("@/app/api/v1/music/route");
-      mockMusicGenerate.mockResolvedValue({
-        data: "audio-base64",
-        format: "mp3",
-        durationSeconds: 30,
-      });
+      mockMusicGenerate.mockResolvedValue(new ArrayBuffer(4));
 
       const res = await POST(makeRequest("/api/v1/music", { prompt: "jazz" }));
       expect(res.status).toBe(200);
-      expect((await res.json()).format).toBe("mp3");
+      expect(res.headers.get("content-type")).toBe("audio/mpeg");
+      const buf = await res.arrayBuffer();
+      expect(buf.byteLength).toBe(4);
     });
 
     it("returns 400 for missing prompt", async () => {
@@ -178,19 +176,17 @@ describe("API routes", () => {
   });
 
   describe("POST /api/v1/sfx", () => {
-    it("generates sfx", async () => {
+    it("returns binary audio response", async () => {
       const { POST } = await import("@/app/api/v1/sfx/route");
-      mockSFXGenerate.mockResolvedValue({
-        data: "sfx-base64",
-        format: "mp3",
-        durationSeconds: 5,
-      });
+      mockSFXGenerate.mockResolvedValue(new ArrayBuffer(3));
 
       const res = await POST(
         makeRequest("/api/v1/sfx", { prompt: "explosion" }),
       );
       expect(res.status).toBe(200);
-      expect((await res.json()).data).toBe("sfx-base64");
+      expect(res.headers.get("content-type")).toBe("audio/mpeg");
+      const buf = await res.arrayBuffer();
+      expect(buf.byteLength).toBe(3);
     });
 
     it("returns 400 for invalid model", async () => {
@@ -247,9 +243,7 @@ describe("API routes", () => {
       const { POST } = await import("@/app/api/v1/tts/route");
       mockTTSGenerate.mockResolvedValue({
         data: "audio",
-        format: "raw",
-        durationSeconds: 1.5,
-        wordTimestamps: { words: ["hi"], start: [0], end: [0.5] },
+        textTimestamps: [{ text: "hi", start: 0, end: 0.5 }],
       });
 
       const res = await POST(
@@ -258,7 +252,7 @@ describe("API routes", () => {
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.wordTimestamps.words).toEqual(["hi"]);
+      expect(json.textTimestamps[0].text).toBe("hi");
     });
 
     it("returns 400 when voiceId missing", async () => {
@@ -282,7 +276,11 @@ describe("API routes", () => {
         { id: "v1", name: "Voice 1", language: "en" },
       ]);
 
-      const req = makeRequest("/api/v1/tts/voices?q=english", undefined, "GET");
+      const req = makeRequest(
+        "/api/v1/tts/voices?query=english",
+        undefined,
+        "GET",
+      );
       const res = await GET(req);
       const json = await res.json();
 

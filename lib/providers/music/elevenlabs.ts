@@ -1,4 +1,5 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import type { MusicGenerateParams } from "@/lib/connectors/types";
 
 export class ElevenLabsMusic {
   private client: ElevenLabsClient;
@@ -7,11 +8,7 @@ export class ElevenLabsMusic {
     this.client = new ElevenLabsClient({ apiKey });
   }
 
-  async generate(params: {
-    prompt: string;
-    durationSeconds?: number;
-    model?: string;
-  }) {
+  async generate(params: MusicGenerateParams) {
     const stream = await this.client.music.compose({
       prompt: params.prompt,
       musicLengthMs: (params.durationSeconds || 30) * 1000,
@@ -35,10 +32,6 @@ export class ElevenLabsMusic {
       offset += chunk.length;
     }
 
-    return {
-      data: Buffer.from(buffer).toString("base64"),
-      format: "mp3" as const,
-      durationSeconds: params.durationSeconds || 30,
-    };
+    return buffer.buffer as ArrayBuffer;
   }
 }

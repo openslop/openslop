@@ -1,20 +1,40 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopLLM } from "../llm/openslop";
 import type { ConnectorPlugin } from "../types";
 
+function mockJsonResponse(data: unknown) {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+const llmResult = { text: "Hello", model: "test-model" };
+
 describe("BaseLLMConnector", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      mockJsonResponse(llmResult),
+    );
+  });
+
   it("runs transformPrompt plugin", async () => {
+    let transformedPrompt = "";
     const plugin: ConnectorPlugin = {
       name: "transform",
-      transformPrompt: (p) => `transformed: ${p}`,
+      transformPrompt: (p) => {
+        transformedPrompt = `transformed: ${p}`;
+        return transformedPrompt;
+      },
     };
     const connector = new OpenSlopLLM({
       provider: "openslop",
       apiKey: "",
       plugins: [plugin],
     });
-    const result = await connector.generate({ prompt: "test" });
-    expect(result.text).toContain("transformed: test");
+    await connector.generate({ prompt: "test" });
+    expect(transformedPrompt).toBe("transformed: test");
   });
 
   it("runs afterGenerate plugin", async () => {
@@ -35,19 +55,14 @@ describe("BaseLLMConnector", () => {
   });
 
   it("runs onError plugin when _generate fails", async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error("generation failed"));
     const errors: string[] = [];
     const plugin: ConnectorPlugin = {
       name: "error-handler",
       onError: (e) => void errors.push(e.message),
     };
 
-    class FailingLLM extends OpenSlopLLM {
-      protected async _generate(): Promise<never> {
-        throw new Error("generation failed");
-      }
-    }
-
-    const connector = new FailingLLM({
+    const connector = new OpenSlopLLM({
       provider: "openslop",
       apiKey: "",
       plugins: [plugin],

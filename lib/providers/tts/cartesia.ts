@@ -1,5 +1,10 @@
 import Cartesia from "@cartesia/cartesia-js";
-import type { VoiceInfo } from "@/lib/connectors/types";
+import type {
+  TextTimestamp,
+  TTSGenerateParams,
+  VoiceInfo,
+  VoiceSearchParams,
+} from "@/lib/connectors/types";
 
 export class CartesiaTTS {
   private client: Cartesia;
@@ -8,12 +13,9 @@ export class CartesiaTTS {
     this.client = new Cartesia({ apiKey });
   }
 
-  async search(params: {
-    query?: string;
-    gender?: string;
-    language?: string;
-    limit?: number;
-  }): Promise<VoiceInfo[]> {
+  async search(
+    params: VoiceSearchParams & { limit?: number },
+  ): Promise<VoiceInfo[]> {
     const page = await this.client.voices.list({
       q: params.query || undefined,
       gender: params.gender as
@@ -36,17 +38,13 @@ export class CartesiaTTS {
       .filter((voice) => voice.language === params.language);
   }
 
-  async generate(params: { prompt: string; voiceId: string; model?: string }) {
+  async generate(params: TTSGenerateParams) {
     const ws = await this.client.tts.websocket();
     await ws.connect();
 
     try {
       const audioChunks: Buffer[] = [];
-      const wordTimestamps: {
-        words: string[];
-        start: number[];
-        end: number[];
-      } = { words: [], start: [], end: [] };
+      const textTimestamps: TextTimestamp[] = [];
 
       for await (const response of ws.generate({
         model_id: params.model || "sonic-3",
@@ -58,6 +56,9 @@ export class CartesiaTTS {
           sample_rate: 44100,
         },
         add_timestamps: true,
+        ...(params.speed !== undefined && {
+          speed: params.speed as "slow" | "normal" | "fast",
+        }),
       })) {
         if (response.type === "chunk" && response.audio) {
           audioChunks.push(
@@ -67,20 +68,22 @@ export class CartesiaTTS {
           );
         }
         if (response.type === "timestamps" && response.word_timestamps) {
-          wordTimestamps.words.push(...response.word_timestamps.words);
-          wordTimestamps.start.push(...response.word_timestamps.start);
-          wordTimestamps.end.push(...response.word_timestamps.end);
+          const { words, start, end } = response.word_timestamps;
+          for (let i = 0; i < words.length; i++) {
+            textTimestamps.push({
+              text: words[i],
+              start: start[i],
+              end: end[i],
+            });
+          }
         }
       }
 
       const combined = Buffer.concat(audioChunks);
-      const durationSeconds = combined.length / (44100 * 4); // 32-bit float = 4 bytes per sample
 
       return {
         data: combined.toString("base64"),
-        format: "raw" as const,
-        durationSeconds,
-        wordTimestamps,
+        textTimestamps,
       };
     } finally {
       ws.close();
