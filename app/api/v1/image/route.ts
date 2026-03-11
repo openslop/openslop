@@ -7,7 +7,7 @@ import { logger } from "@/lib/api/logger";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, model, width, height } = body;
+    const { prompt, model, width, height, format, referenceImage } = body;
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
@@ -15,7 +15,14 @@ export async function POST(request: NextRequest) {
       return badRequest(`Invalid model. Supported: ${IMAGE_MODELS.join(", ")}`);
 
     const provider = getImageProvider();
-    const result = await provider.generate({ prompt, model, width, height });
+    const result = await provider.generate({
+      prompt,
+      model,
+      width,
+      height,
+      format,
+      referenceImage,
+    });
 
     return NextResponse.json(result);
   } catch (error) {

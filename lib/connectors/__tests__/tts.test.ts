@@ -1,15 +1,35 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopTTS } from "../tts/openslop";
 import type { ConnectorPlugin } from "../types";
 
+function mockJsonResponse(data: unknown) {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+const ttsResult = {
+  data: "audio-base64",
+  textTimestamps: [{ text: "hello", start: 0, end: 0.5 }],
+};
+
 describe("BaseTTSConnector", () => {
-  it("generates stub audio", async () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      mockJsonResponse(ttsResult),
+    );
+  });
+
+  it("generates TTS via provider", async () => {
     const connector = new OpenSlopTTS({ provider: "openslop", apiKey: "" });
     const result = await connector.generate({
       prompt: "hello",
       voiceId: "default",
     });
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
+    expect(result.data).toBe("audio-base64");
+    expect(result.textTimestamps).toHaveLength(1);
   });
 
   it("runs transformPrompt on prompt field", async () => {
@@ -26,22 +46,19 @@ describe("BaseTTSConnector", () => {
       prompt: "hello",
       voiceId: "default",
     });
-    expect(result.format).toBe("mp3");
+    expect(result.data).toBe("audio-base64");
   });
 
   it("runs onError plugin on failure", async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error("tts failed"));
     const errors: string[] = [];
 
-    class FailingTTS extends OpenSlopTTS {
-      protected async _generate(): Promise<never> {
-        throw new Error("tts failed");
-      }
-    }
-
-    const connector = new FailingTTS({
+    const connector = new OpenSlopTTS({
       provider: "openslop",
       apiKey: "",
-      plugins: [{ name: "err", onError: (e) => void errors.push(e.message) }],
+      plugins: [
+        { name: "err", onError: (e: Error) => void errors.push(e.message) },
+      ],
     });
 
     await expect(

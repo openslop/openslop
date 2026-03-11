@@ -1,20 +1,25 @@
 import { BaseMusicConnector } from "../connector";
+import { OpenSlopMusic as OpenSlopMusicProvider } from "@/lib/providers/music/openslop";
 import type {
-  AudioResult,
+  ConnectorConfig,
   ModelInfo,
   MusicGenerateParams,
 } from "@/lib/connectors/types";
+import { MUSIC_MODELS } from "./models";
 
 export class OpenSlopMusic extends BaseMusicConnector {
-  async listModels(): Promise<ModelInfo[]> {
-    return [{ id: "openslop-default", name: "OpenSlop Default" }];
+  private provider: OpenSlopMusicProvider;
+
+  constructor(config: ConnectorConfig) {
+    super(config);
+    this.provider = new OpenSlopMusicProvider(config.baseUrl);
   }
 
-  protected async _generate(params: MusicGenerateParams): Promise<AudioResult> {
-    return {
-      data: new ArrayBuffer(0),
-      format: params.format ?? "mp3",
-      durationSeconds: params.durationSeconds ?? 30,
-    };
+  async listModels(): Promise<ModelInfo[]> {
+    return MUSIC_MODELS.map((id) => ({ id, name: id }));
+  }
+
+  protected async _generate(params: MusicGenerateParams): Promise<ArrayBuffer> {
+    return this.provider.generate(params);
   }
 }

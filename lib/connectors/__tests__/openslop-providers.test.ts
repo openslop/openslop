@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopLLM } from "../llm/openslop";
 import { OpenSlopMusic } from "../music/openslop";
 import { OpenSlopSFX } from "../sfx/openslop";
@@ -8,86 +8,156 @@ import { OpenSlopVideo } from "../video/openslop";
 
 const config = { provider: "openslop", apiKey: "test" };
 
-describe("OpenSlop providers integration", () => {
-  it("LLM: full lifecycle", async () => {
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+function binaryResponse(data: number[]) {
+  return new Response(new Uint8Array(data).buffer, {
+    status: 200,
+    headers: { "content-type": "audio/mpeg" },
+  });
+}
+
+describe("OpenSlop connectors (via providers)", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("LLM: generate calls /api/v1/llm", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        text: "Hello",
+        model: "test-model",
+        usage: { inputTokens: 5, outputTokens: 3 },
+      }),
+    );
+
     const c = new OpenSlopLLM(config);
-    await c.init();
-    expect(await c.validate()).toBe(true);
-    const models = await c.listModels();
-    expect(models).toHaveLength(1);
-    expect(models[0].id).toBe("openslop-default");
-
     const result = await c.generate({ prompt: "hello" });
-    expect(result.text).toContain("hello");
-    expect(result.model).toBe("openslop-default");
 
-    const chunks: string[] = [];
+    expect(result.text).toBe("Hello");
+    expect(result.model).toBe("test-model");
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/v1/llm",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("LLM: stream calls /api/v1/llm with stream=true", async () => {
+    const sseData =
+      'data: {"text":"Hi","done":false}\n\ndata: {"text":"","done":true}\n\n';
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(sseData, {
+        status: 200,
+        headers: { "content-type": "text/event-stream" },
+      }),
+    );
+
+    const c = new OpenSlopLLM(config);
+    const chunks: { text: string; done: boolean }[] = [];
     for await (const chunk of c.stream({ prompt: "hi" })) {
-      chunks.push(chunk.text);
-      expect(chunk.done).toBe(true);
+      chunks.push(chunk);
     }
-    expect(chunks).toHaveLength(1);
 
-    await c.destroy();
+    expect(chunks).toEqual([
+      { text: "Hi", done: false },
+      { text: "", done: true },
+    ]);
   });
 
-  it("Music: full lifecycle", async () => {
+  it("Music: generate returns ArrayBuffer", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(binaryResponse([1, 2, 3]));
+
     const c = new OpenSlopMusic(config);
-    await c.init();
-    expect(await c.validate()).toBe(true);
-    expect(await c.listModels()).toHaveLength(1);
     const result = await c.generate({ prompt: "jazz" });
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
-    expect(result.format).toBe("mp3");
-    await c.destroy();
+
+    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(new Uint8Array(result)).toEqual(new Uint8Array([1, 2, 3]));
   });
 
-  it("SFX: full lifecycle", async () => {
+  it("SFX: generate returns ArrayBuffer", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(binaryResponse([4, 5]));
+
     const c = new OpenSlopSFX(config);
-    await c.init();
-    expect(await c.validate()).toBe(true);
-    expect(await c.listModels()).toHaveLength(1);
     const result = await c.generate({ prompt: "boom" });
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
-    await c.destroy();
+
+    expect(result).toBeInstanceOf(ArrayBuffer);
   });
 
-  it("Image: full lifecycle", async () => {
+  it("Image: generate returns ImageResult", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        data: "base64img",
+        format: "png",
+        width: 512,
+        height: 512,
+      }),
+    );
+
     const c = new OpenSlopImage(config);
-    await c.init();
-    expect(await c.validate()).toBe(true);
-    expect(await c.listModels()).toHaveLength(1);
     const result = await c.generate({ prompt: "mountain" });
-    expect(result.type).toBe("base64");
-    expect(result.data).toBeTruthy();
-    await c.destroy();
+
+    expect(result.data).toBe("base64img");
+    expect(result.format).toBe("png");
   });
 
-  it("TTS: full lifecycle with voice search", async () => {
+  it("TTS: generate returns TTSResult", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        data: "audio-base64",
+        textTimestamps: [{ text: "hello", start: 0, end: 0.5 }],
+      }),
+    );
+
     const c = new OpenSlopTTS(config);
-    await c.init();
-    expect(await c.validate()).toBe(true);
-    expect(await c.listModels()).toHaveLength(1);
-    const result = await c.generate({ prompt: "hello", voiceId: "default" });
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
+    const result = await c.generate({ prompt: "hello", voiceId: "v1" });
 
-    const voices = await c.searchVoices({ query: "test" });
-    expect(voices).toHaveLength(1);
-    expect(voices[0].id).toBe("openslop-voice");
-    await c.destroy();
+    expect(result.data).toBe("audio-base64");
+    expect(result.textTimestamps).toHaveLength(1);
+    expect(result.textTimestamps[0].text).toBe("hello");
   });
 
-  it("Video: full lifecycle with poll", async () => {
-    const c = new OpenSlopVideo(config);
-    await c.init();
-    expect(await c.validate()).toBe(true);
-    expect(await c.listModels()).toHaveLength(1);
-    const job = await c.generate({ prompt: "sunset" });
-    expect(job.status).toBe("completed");
+  it("TTS: searchVoices calls /api/v1/tts/voices", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ voices: [{ id: "v1", name: "Voice 1", language: "en" }] }),
+    );
 
-    const polled = await c.poll(job.jobId);
+    const c = new OpenSlopTTS(config);
+    const voices = await c.searchVoices({ query: "test" });
+
+    expect(voices).toHaveLength(1);
+    expect(voices[0].id).toBe("v1");
+  });
+
+  it("Video: generate submits job", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ jobId: "j1", status: "processing" }),
+    );
+
+    const c = new OpenSlopVideo(config);
+    const job = await c.generate({ prompt: "sunset" });
+
+    expect(job.jobId).toBe("j1");
+    expect(job.status).toBe("processing");
+  });
+
+  it("Video: poll returns job status", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        jobId: "j1",
+        status: "completed",
+        resultUrl: "https://v.mp4",
+      }),
+    );
+
+    const c = new OpenSlopVideo(config);
+    const polled = await c.poll("j1");
+
     expect(polled.status).toBe("completed");
-    expect(polled.resultUrl).toBeTruthy();
-    await c.destroy();
+    expect(polled.resultUrl).toBe("https://v.mp4");
   });
 });

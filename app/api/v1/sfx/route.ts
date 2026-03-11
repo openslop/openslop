@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getSFXProvider } from "@/lib/api/providers";
 import { badRequest, serverError } from "@/lib/api/response";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
@@ -15,9 +15,11 @@ export async function POST(request: NextRequest) {
       return badRequest(`Invalid model. Supported: ${SFX_MODELS.join(", ")}`);
 
     const provider = getSFXProvider();
-    const result = await provider.generate({ prompt, model, durationSeconds });
+    const buffer = await provider.generate({ prompt, model, durationSeconds });
 
-    return NextResponse.json(result);
+    return new Response(buffer, {
+      headers: { "content-type": "audio/mpeg" },
+    });
   } catch (error) {
     logger.error(error, "SFX generation failed");
     return serverError("SFX generation failed");

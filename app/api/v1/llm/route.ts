@@ -7,8 +7,15 @@ import { logger } from "@/lib/api/logger";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, model, systemPrompt, maxTokens, temperature, stream } =
-      body;
+    const {
+      prompt,
+      model,
+      systemPrompt,
+      thinkingLevel,
+      maxTokens,
+      temperature,
+      stream,
+    } = body;
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
@@ -16,19 +23,21 @@ export async function POST(request: NextRequest) {
       return badRequest(`Invalid model. Supported: ${LLM_MODELS.join(", ")}`);
 
     const provider = getLLMProvider();
+    const genParams = {
+      prompt,
+      model,
+      systemPrompt,
+      thinkingLevel,
+      maxTokens,
+      temperature,
+    };
 
     if (stream) {
       const encoder = new TextEncoder();
       const readable = new ReadableStream({
         async start(controller) {
           try {
-            for await (const chunk of provider.stream({
-              prompt,
-              model,
-              systemPrompt,
-              maxTokens,
-              temperature,
-            })) {
+            for await (const chunk of provider.stream(genParams)) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`),
               );
@@ -50,13 +59,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const result = await provider.generate({
-      prompt,
-      model,
-      systemPrompt,
-      maxTokens,
-      temperature,
-    });
+    const result = await provider.generate(genParams);
 
     return NextResponse.json(result);
   } catch (error) {

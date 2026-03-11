@@ -1,8 +1,20 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopMusic } from "../music/openslop";
 import type { ConnectorPlugin } from "../types";
 
+function mockBinaryResponse(data: number[] = [0]) {
+  return new Response(new Uint8Array(data).buffer, {
+    status: 200,
+    headers: { "content-type": "audio/mpeg" },
+  });
+}
+
 describe("BaseMusicConnector", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockBinaryResponse());
+  });
+
   it("runs transformPrompt plugin", async () => {
     const plugin: ConnectorPlugin = {
       name: "transform",
@@ -13,18 +25,14 @@ describe("BaseMusicConnector", () => {
       apiKey: "",
       plugins: [plugin],
     });
-    // Plugin runs but result is stub audio — just verify no error
     const result = await connector.generate({ prompt: "rock song" });
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
+    expect(result).toBeInstanceOf(ArrayBuffer);
   });
 
   it("runs afterGenerate plugin", async () => {
     const plugin: ConnectorPlugin = {
       name: "after",
-      afterGenerate: (r) => ({
-        ...(r as object),
-        durationSeconds: 999,
-      }),
+      afterGenerate: () => new ArrayBuffer(42),
     };
     const connector = new OpenSlopMusic({
       provider: "openslop",
@@ -32,22 +40,19 @@ describe("BaseMusicConnector", () => {
       plugins: [plugin],
     });
     const result = await connector.generate({ prompt: "test" });
-    expect(result.durationSeconds).toBe(999);
+    expect(result.byteLength).toBe(42);
   });
 
   it("runs onError plugin on failure", async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error("music failed"));
     const errors: string[] = [];
 
-    class FailingMusic extends OpenSlopMusic {
-      protected async _generate(): Promise<never> {
-        throw new Error("music failed");
-      }
-    }
-
-    const connector = new FailingMusic({
+    const connector = new OpenSlopMusic({
       provider: "openslop",
       apiKey: "",
-      plugins: [{ name: "err", onError: (e) => void errors.push(e.message) }],
+      plugins: [
+        { name: "err", onError: (e: Error) => void errors.push(e.message) },
+      ],
     });
 
     await expect(connector.generate({ prompt: "test" })).rejects.toThrow();

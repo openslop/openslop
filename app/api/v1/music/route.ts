@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getMusicProvider } from "@/lib/api/providers";
 import { badRequest, serverError } from "@/lib/api/response";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
@@ -15,9 +15,11 @@ export async function POST(request: NextRequest) {
       return badRequest(`Invalid model. Supported: ${MUSIC_MODELS.join(", ")}`);
 
     const provider = getMusicProvider();
-    const result = await provider.generate({ prompt, model, durationSeconds });
+    const buffer = await provider.generate({ prompt, model, durationSeconds });
 
-    return NextResponse.json(result);
+    return new Response(buffer, {
+      headers: { "content-type": "audio/mpeg" },
+    });
   } catch (error) {
     logger.error(error, "Music generation failed");
     return serverError("Music generation failed");

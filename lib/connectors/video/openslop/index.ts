@@ -1,28 +1,30 @@
 import { BaseVideoConnector } from "../connector";
+import { OpenSlopVideo as OpenSlopVideoProvider } from "@/lib/providers/video/openslop";
 import type {
+  ConnectorConfig,
   ModelInfo,
   VideoGenerateParams,
   VideoJob,
 } from "@/lib/connectors/types";
+import { VIDEO_MODELS } from "./models";
 
 export class OpenSlopVideo extends BaseVideoConnector {
+  private provider: OpenSlopVideoProvider;
+
+  constructor(config: ConnectorConfig) {
+    super(config);
+    this.provider = new OpenSlopVideoProvider(config.baseUrl);
+  }
+
   async listModels(): Promise<ModelInfo[]> {
-    return [{ id: "openslop-default", name: "OpenSlop Default" }];
+    return VIDEO_MODELS.map((id) => ({ id, name: id }));
   }
 
-  protected async _generate(_params: VideoGenerateParams): Promise<VideoJob> {
-    return {
-      jobId: "openslop-job-1",
-      status: "completed",
-      resultUrl: "https://example.com/placeholder.mp4",
-    };
+  protected async _generate(params: VideoGenerateParams): Promise<VideoJob> {
+    return this.provider.submit(params);
   }
 
-  async poll(_jobId: string): Promise<VideoJob> {
-    return {
-      jobId: _jobId,
-      status: "completed",
-      resultUrl: "https://example.com/placeholder.mp4",
-    };
+  async poll(jobId: string): Promise<VideoJob> {
+    return this.provider.poll(jobId);
   }
 }

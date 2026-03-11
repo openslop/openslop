@@ -26,7 +26,7 @@ describe("CartesiaTTS", () => {
   });
 
   describe("generate", () => {
-    it("collects audio chunks and word timestamps", async () => {
+    it("collects audio chunks and text timestamps", async () => {
       const audioData = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]);
       const responses = [
         { type: "chunk", audio: audioData },
@@ -52,14 +52,11 @@ describe("CartesiaTTS", () => {
         voiceId: "voice-1",
       });
 
-      expect(result.format).toBe("raw");
       expect(result.data).toBe(audioData.toString("base64"));
-      expect(result.wordTimestamps).toEqual({
-        words: ["hello", "world"],
-        start: [0.0, 0.5],
-        end: [0.4, 0.9],
-      });
-      expect(result.durationSeconds).toBe(audioData.length / (44100 * 4));
+      expect(result.textTimestamps).toEqual([
+        { text: "hello", start: 0.0, end: 0.4 },
+        { text: "world", start: 0.5, end: 0.9 },
+      ]);
       expect(mockConnect).toHaveBeenCalled();
       expect(mockClose).toHaveBeenCalled();
     });

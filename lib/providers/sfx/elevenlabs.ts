@@ -1,4 +1,5 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import type { SFXGenerateParams } from "@/lib/connectors/types";
 
 export class ElevenLabsSFX {
   private client: ElevenLabsClient;
@@ -7,11 +8,7 @@ export class ElevenLabsSFX {
     this.client = new ElevenLabsClient({ apiKey });
   }
 
-  async generate(params: {
-    prompt: string;
-    durationSeconds?: number;
-    model?: string;
-  }) {
+  async generate(params: SFXGenerateParams) {
     const stream = await this.client.textToSoundEffects.convert({
       text: params.prompt,
       durationSeconds: params.durationSeconds || 5,
@@ -34,10 +31,6 @@ export class ElevenLabsSFX {
       offset += chunk.length;
     }
 
-    return {
-      data: Buffer.from(buffer).toString("base64"),
-      format: "mp3" as const,
-      durationSeconds: params.durationSeconds || 5,
-    };
+    return buffer.buffer as ArrayBuffer;
   }
 }

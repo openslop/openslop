@@ -1,33 +1,32 @@
 import { BaseTTSConnector } from "../connector";
+import { OpenSlopTTS as OpenSlopTTSProvider } from "@/lib/providers/tts/openslop";
 import type {
-  AudioResult,
+  ConnectorConfig,
   ModelInfo,
   TTSGenerateParams,
+  TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
+import { TTS_MODELS } from "./models";
 
 export class OpenSlopTTS extends BaseTTSConnector {
+  private provider: OpenSlopTTSProvider;
+
+  constructor(config: ConnectorConfig) {
+    super(config);
+    this.provider = new OpenSlopTTSProvider(config.baseUrl);
+  }
+
   async listModels(): Promise<ModelInfo[]> {
-    return [{ id: "openslop-default", name: "OpenSlop Default" }];
+    return TTS_MODELS.map((id) => ({ id, name: id }));
   }
 
-  protected async _generate(params: TTSGenerateParams): Promise<AudioResult> {
-    return {
-      data: new ArrayBuffer(0),
-      format: params.format ?? "mp3",
-      durationSeconds: 1,
-    };
+  protected async _generate(params: TTSGenerateParams): Promise<TTSResult> {
+    return this.provider.generate(params);
   }
 
-  async searchVoices(_params: VoiceSearchParams): Promise<VoiceInfo[]> {
-    return [
-      {
-        id: "openslop-voice",
-        name: "OpenSlop Default Voice",
-        language: "en",
-        gender: "neutral",
-      },
-    ];
+  async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
+    return this.provider.searchVoices(params);
   }
 }

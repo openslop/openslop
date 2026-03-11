@@ -7,7 +7,7 @@ import { logger } from "@/lib/api/logger";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, voiceId, model } = body;
+    const { prompt, voiceId, model, speed, volume, format } = body;
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
@@ -17,7 +17,14 @@ export async function POST(request: NextRequest) {
       return badRequest(`Invalid model. Supported: ${TTS_MODELS.join(", ")}`);
 
     const provider = getTTSProvider();
-    const result = await provider.generate({ prompt, voiceId, model });
+    const result = await provider.generate({
+      prompt,
+      voiceId,
+      model,
+      speed,
+      volume,
+      format,
+    });
 
     return NextResponse.json(result);
   } catch (error) {
