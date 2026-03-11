@@ -1,40 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getVideoProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
-import { logger } from "@/lib/api/logger";
+import { createApiHandler, createModelValidator } from "@/lib/api/handler";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { prompt, model, referenceImage, duration, width, height } = body;
-
-    if (!prompt || typeof prompt !== "string")
-      return badRequest("prompt is required");
-    if (model && !VIDEO_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${VIDEO_MODELS.join(", ")}`);
-    if (
-      referenceImage &&
-      (typeof referenceImage !== "string" ||
-        !referenceImage.match(/^data:[a-z]+\/[a-z+.-]+;base64,/i))
-    )
-      return badRequest(
-        "referenceImage must be a data URI (e.g. data:image/png;base64,...)",
-      );
-
+export const POST = createApiHandler({
+  validations: [
+    { field: "prompt", required: true, type: "string" },
+    { field: "model", validator: createModelValidator(VIDEO_MODELS) },
+    {
+      field: "referenceImage",
+      validator: (value) => {
+        if (
+          typeof value === "string" &&
+          !value.match(/^data:[a-z]+\/[a-z+.-]+;base64,/i)
+        ) {
+          return "referenceImage must be a data URI (e.g. data:image/png;base64,...)";
+        }
+        return null;
+      },
+    },
+  ],
+  handler: async (body) => {
     const provider = getVideoProvider();
-    const result = await provider.submit({
-      prompt,
-      model,
-      referenceImage,
-      duration,
-      width,
-      height,
+    return provider.submit({
+      prompt: body.prompt as string,
+      model: body.model as string | undefined,
+      referenceImage: body.referenceImage as string | undefined,
+      duration: body.duration as number | undefined,
+      width: body.width as number | undefined,
+      height: body.height as number | undefined,
     });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error(error, "Video submission failed");
-    return serverError("Video submission failed");
-  }
-}
+  },
+  errorMessage: "Video submission failed",
+});

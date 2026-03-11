@@ -1,25 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getMusicProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
-import { logger } from "@/lib/api/logger";
+import { createApiHandler, createModelValidator } from "@/lib/api/handler";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { prompt, model, durationSeconds } = body;
-
-    if (!prompt || typeof prompt !== "string")
-      return badRequest("prompt is required");
-    if (model && !MUSIC_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${MUSIC_MODELS.join(", ")}`);
-
+export const POST = createApiHandler({
+  validations: [
+    { field: "prompt", required: true, type: "string" },
+    { field: "model", validator: createModelValidator(MUSIC_MODELS) },
+  ],
+  handler: async (body) => {
     const provider = getMusicProvider();
-    const result = await provider.generate({ prompt, model, durationSeconds });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error(error, "Music generation failed");
-    return serverError("Music generation failed");
-  }
-}
+    return provider.generate({
+      prompt: body.prompt as string,
+      model: body.model as string | undefined,
+      durationSeconds: body.durationSeconds as number | undefined,
+    });
+  },
+  errorMessage: "Music generation failed",
+});

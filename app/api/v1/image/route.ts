@@ -1,25 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getImageProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
 import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
-import { logger } from "@/lib/api/logger";
+import { createApiHandler, createModelValidator } from "@/lib/api/handler";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { prompt, model, width, height } = body;
-
-    if (!prompt || typeof prompt !== "string")
-      return badRequest("prompt is required");
-    if (model && !IMAGE_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${IMAGE_MODELS.join(", ")}`);
-
+export const POST = createApiHandler({
+  validations: [
+    { field: "prompt", required: true, type: "string" },
+    { field: "model", validator: createModelValidator(IMAGE_MODELS) },
+  ],
+  handler: async (body) => {
     const provider = getImageProvider();
-    const result = await provider.generate({ prompt, model, width, height });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error(error, "Image generation failed");
-    return serverError("Image generation failed");
-  }
-}
+    return provider.generate({
+      prompt: body.prompt as string,
+      model: body.model as string | undefined,
+      width: body.width as number | undefined,
+      height: body.height as number | undefined,
+    });
+  },
+  errorMessage: "Image generation failed",
+});

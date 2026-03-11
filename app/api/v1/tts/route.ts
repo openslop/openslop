@@ -1,27 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getTTSProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
 import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
-import { logger } from "@/lib/api/logger";
+import { createApiHandler, createModelValidator } from "@/lib/api/handler";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { prompt, voiceId, model } = body;
-
-    if (!prompt || typeof prompt !== "string")
-      return badRequest("prompt is required");
-    if (!voiceId || typeof voiceId !== "string")
-      return badRequest("voiceId is required");
-    if (model && !TTS_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${TTS_MODELS.join(", ")}`);
-
+export const POST = createApiHandler({
+  validations: [
+    { field: "prompt", required: true, type: "string" },
+    { field: "voiceId", required: true, type: "string" },
+    { field: "model", validator: createModelValidator(TTS_MODELS) },
+  ],
+  handler: async (body) => {
     const provider = getTTSProvider();
-    const result = await provider.generate({ prompt, voiceId, model });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error(error, "TTS generation failed");
-    return serverError("TTS generation failed");
-  }
-}
+    return provider.generate({
+      prompt: body.prompt as string,
+      voiceId: body.voiceId as string,
+      model: body.model as string | undefined,
+    });
+  },
+  errorMessage: "TTS generation failed",
+});
