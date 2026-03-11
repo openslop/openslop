@@ -65,7 +65,8 @@ EOF
 
 ### 4. Push and create PR
 
-- Push the branch: `git push -u origin HEAD`
+- Push the branch: `git push -u origin HEAD --force-with-lease`
+  - Force push is expected here because step 2 rewrites history via squash.
 - Create the PR with `gh pr create`:
   - **Title**: same as the commit subject line.
   - **Body**: use this template:
