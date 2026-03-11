@@ -1,4 +1,5 @@
 import { Runware } from "@runware/sdk-js";
+import type { VideoGenerateParams } from "@/lib/connectors/types";
 
 export class RunwareVideo {
   private apiKey: string;
@@ -7,14 +8,7 @@ export class RunwareVideo {
     this.apiKey = apiKey;
   }
 
-  async submit(params: {
-    prompt: string;
-    model?: string;
-    referenceImage?: string;
-    duration?: number;
-    width?: number;
-    height?: number;
-  }) {
+  async submit(params: VideoGenerateParams) {
     const runware = new Runware({ apiKey: this.apiKey });
     try {
       const result = await runware.videoInference({

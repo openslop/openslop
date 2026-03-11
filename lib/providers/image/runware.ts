@@ -1,4 +1,5 @@
 import { Runware } from "@runware/sdk-js";
+import type { ImageGenerateParams } from "@/lib/connectors/types";
 
 export class RunwareImage {
   private apiKey: string;
@@ -7,12 +8,7 @@ export class RunwareImage {
     this.apiKey = apiKey;
   }
 
-  async generate(params: {
-    prompt: string;
-    model?: string;
-    width?: number;
-    height?: number;
-  }) {
+  async generate(params: ImageGenerateParams) {
     const runware = new Runware({ apiKey: this.apiKey });
     try {
       const results = await runware.imageInference({

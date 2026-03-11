@@ -2,9 +2,7 @@ export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
 export type ProviderKey = "openslop";
 
-export type AudioFormat = "mp3" | "wav" | "ogg" | "flac";
 export type ImageFormat = "png" | "jpeg" | "webp";
-export type VideoFormat = "mp4" | "webm";
 
 export type ModelInfo = {
   id: string;
@@ -64,36 +62,30 @@ export interface LLMConnector extends Connector {
   stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk>;
 }
 
-// Audio types (shared by Music, SFX, TTS)
-
-export type AudioResult = {
-  data: ArrayBuffer;
-  format: AudioFormat;
-  durationSeconds: number;
-};
+// Music types
 
 export type MusicGenerateParams = {
   prompt: string;
   model?: string;
-  format?: AudioFormat;
-  durationSeconds?: number;
-};
-
-export type SFXGenerateParams = {
-  prompt: string;
-  model?: string;
-  format?: AudioFormat;
   durationSeconds?: number;
 };
 
 export interface MusicConnector extends Connector {
   readonly type: "music";
-  generate(params: MusicGenerateParams): Promise<AudioResult>;
+  generate(params: MusicGenerateParams): Promise<ArrayBuffer>;
 }
+
+// SFX types
+
+export type SFXGenerateParams = {
+  prompt: string;
+  model?: string;
+  durationSeconds?: number;
+};
 
 export interface SFXConnector extends Connector {
   readonly type: "sfx";
-  generate(params: SFXGenerateParams): Promise<AudioResult>;
+  generate(params: SFXGenerateParams): Promise<ArrayBuffer>;
 }
 
 // Image types
@@ -112,7 +104,6 @@ export type ImageResult = {
   format: ImageFormat;
   width: number;
   height: number;
-  type: "base64" | "url";
 };
 
 export interface ImageConnector extends Connector {
@@ -122,13 +113,20 @@ export interface ImageConnector extends Connector {
 
 // TTS types
 
+export type TextTimestamp = { text: string; start: number; end: number };
+
+export type TTSResult = {
+  data: string;
+  textTimestamps: TextTimestamp[];
+};
+
 export type TTSGenerateParams = {
   prompt: string;
   voiceId: string;
   model?: string;
-  speed?: number;
+  speed?: number | string;
   volume?: number;
-  format?: AudioFormat;
+  format?: string;
 };
 
 export type VoiceInfo = {
@@ -150,7 +148,7 @@ export type VoiceSearchParams = {
 
 export interface TTSConnector extends Connector {
   readonly type: "tts";
-  generate(params: TTSGenerateParams): Promise<AudioResult>;
+  generate(params: TTSGenerateParams): Promise<TTSResult>;
   searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }
 
@@ -159,11 +157,10 @@ export interface TTSConnector extends Connector {
 export type VideoGenerateParams = {
   prompt: string;
   model?: string;
-  referenceImageUrl?: string;
-  durationSeconds?: number;
+  referenceImage?: string;
+  duration?: number;
   width?: number;
   height?: number;
-  format?: VideoFormat;
 };
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
@@ -185,10 +182,10 @@ export interface VideoConnector extends Connector {
 // Plugin type aliases
 
 export type LLMPlugin = ConnectorPlugin<LLMGenerateParams, LLMGenerateResult>;
-export type MusicPlugin = ConnectorPlugin<MusicGenerateParams, AudioResult>;
-export type SFXPlugin = ConnectorPlugin<SFXGenerateParams, AudioResult>;
+export type MusicPlugin = ConnectorPlugin<MusicGenerateParams, ArrayBuffer>;
+export type SFXPlugin = ConnectorPlugin<SFXGenerateParams, ArrayBuffer>;
 export type ImagePlugin = ConnectorPlugin<ImageGenerateParams, ImageResult>;
-export type TTSPlugin = ConnectorPlugin<TTSGenerateParams, AudioResult>;
+export type TTSPlugin = ConnectorPlugin<TTSGenerateParams, TTSResult>;
 export type VideoPlugin = ConnectorPlugin<VideoGenerateParams, VideoJob>;
 
 // Factory types

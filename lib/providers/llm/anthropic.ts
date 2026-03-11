@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import type { LLMGenerateParams } from "@/lib/connectors/types";
 
 export class AnthropicLLM {
   private client: Anthropic;
@@ -7,13 +8,7 @@ export class AnthropicLLM {
     this.client = new Anthropic({ apiKey });
   }
 
-  async generate(params: {
-    prompt: string;
-    model?: string;
-    systemPrompt?: string;
-    maxTokens?: number;
-    temperature?: number;
-  }) {
+  async generate(params: LLMGenerateParams) {
     const response = await this.client.messages.create({
       model: params.model || "claude-sonnet-4-5-20250929",
       max_tokens: params.maxTokens || 4096,
@@ -37,13 +32,9 @@ export class AnthropicLLM {
     };
   }
 
-  async *stream(params: {
-    prompt: string;
-    model?: string;
-    systemPrompt?: string;
-    maxTokens?: number;
-    temperature?: number;
-  }): AsyncGenerator<{ text: string; done: boolean }> {
+  async *stream(
+    params: LLMGenerateParams,
+  ): AsyncGenerator<{ text: string; done: boolean }> {
     const stream = this.client.messages.stream({
       model: params.model || "claude-sonnet-4-5-20250929",
       max_tokens: params.maxTokens || 4096,

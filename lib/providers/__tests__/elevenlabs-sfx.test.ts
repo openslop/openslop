@@ -30,16 +30,15 @@ describe("ElevenLabsSFX", () => {
     vi.clearAllMocks();
   });
 
-  it("generates sfx with defaults", async () => {
+  it("generates sfx and returns ArrayBuffer", async () => {
     const audio = new Uint8Array([5, 6, 7]);
     mockConvert.mockResolvedValue(mockReadableStream(audio));
 
     const provider = new ElevenLabsSFX("test-key");
     const result = await provider.generate({ prompt: "boom" });
 
-    expect(result.format).toBe("mp3");
-    expect(result.durationSeconds).toBe(5);
-    expect(result.data).toBe(Buffer.from(audio).toString("base64"));
+    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(new Uint8Array(result)).toEqual(audio);
     expect(mockConvert).toHaveBeenCalledWith({
       text: "boom",
       durationSeconds: 5,
@@ -51,12 +50,8 @@ describe("ElevenLabsSFX", () => {
     mockConvert.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
 
     const provider = new ElevenLabsSFX("test-key");
-    const result = await provider.generate({
-      prompt: "crash",
-      durationSeconds: 10,
-    });
+    await provider.generate({ prompt: "crash", durationSeconds: 10 });
 
-    expect(result.durationSeconds).toBe(10);
     expect(mockConvert).toHaveBeenCalledWith(
       expect.objectContaining({ durationSeconds: 10 }),
     );
