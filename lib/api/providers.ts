@@ -11,26 +11,39 @@ function requireEnv(name: string): string {
   return value;
 }
 
+const cache = new Map<string, unknown>();
+
+function cached<T>(key: string, factory: () => T): T {
+  if (!cache.has(key)) cache.set(key, factory());
+  return cache.get(key) as T;
+}
+
 export function getImageProvider() {
-  return new RunwareImage(requireEnv("RUNWARE_API_KEY"));
+  return cached("image", () => new RunwareImage(requireEnv("RUNWARE_API_KEY")));
 }
 
 export function getVideoProvider() {
-  return new RunwareVideo(requireEnv("RUNWARE_API_KEY"));
+  return cached("video", () => new RunwareVideo(requireEnv("RUNWARE_API_KEY")));
 }
 
 export function getMusicProvider() {
-  return new ElevenLabsMusic(requireEnv("ELEVENLABS_API_KEY"));
+  return cached(
+    "music",
+    () => new ElevenLabsMusic(requireEnv("ELEVENLABS_API_KEY")),
+  );
 }
 
 export function getSFXProvider() {
-  return new ElevenLabsSFX(requireEnv("ELEVENLABS_API_KEY"));
+  return cached(
+    "sfx",
+    () => new ElevenLabsSFX(requireEnv("ELEVENLABS_API_KEY")),
+  );
 }
 
 export function getLLMProvider() {
-  return new AnthropicLLM(requireEnv("ANTHROPIC_API_KEY"));
+  return cached("llm", () => new AnthropicLLM(requireEnv("ANTHROPIC_API_KEY")));
 }
 
 export function getTTSProvider() {
-  return new CartesiaTTS(requireEnv("CARTESIA_API_KEY"));
+  return cached("tts", () => new CartesiaTTS(requireEnv("CARTESIA_API_KEY")));
 }

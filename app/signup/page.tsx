@@ -81,6 +81,8 @@ export default function SignupPage() {
       <form onSubmit={handleMagicLink} className="w-full flex flex-col gap-3">
         <input
           type="text"
+          name="fullName"
+          autoComplete="name"
           placeholder="Full Name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
@@ -89,6 +91,8 @@ export default function SignupPage() {
         />
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -96,11 +100,15 @@ export default function SignupPage() {
           required
         />
         <GradientButton type="submit" disabled={loading} className="mt-1">
-          {loading ? "Sending..." : "Send signup link"}
+          {loading ? "Sending\u2026" : "Send signup link"}
         </GradientButton>
       </form>
 
-      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+      {error && (
+        <p aria-live="polite" className="text-red-400 text-sm text-center">
+          {error}
+        </p>
+      )}
 
       <OrDivider />
       <GoogleOAuthButton onClick={handleGoogleSignup} />
