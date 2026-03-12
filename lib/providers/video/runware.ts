@@ -1,10 +1,13 @@
 import { Runware } from "@runware/sdk-js";
-import type { VideoGenerateParams } from "@/lib/connectors/types";
+import type { VideoGenerateParams, VideoJob } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
+import { awaitCompletion } from "../poll";
 
-export class RunwareVideo {
+export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
   private apiKey: string;
 
   constructor(apiKey: string) {
+    super();
     this.apiKey = apiKey;
   }
 
@@ -34,6 +37,11 @@ export class RunwareVideo {
     } finally {
       runware.disconnect?.();
     }
+  }
+
+  async generate(params: VideoGenerateParams): Promise<VideoJob> {
+    const job = await this.submit(params);
+    return awaitCompletion((id) => this.poll(id), job.jobId);
   }
 
   async poll(jobId: string) {

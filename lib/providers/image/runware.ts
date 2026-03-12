@@ -1,10 +1,15 @@
 import { Runware } from "@runware/sdk-js";
-import type { ImageGenerateParams } from "@/lib/connectors/types";
+import type { ImageGenerateParams, ImageResult } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class RunwareImage {
+export class RunwareImage extends BaseProvider<
+  ImageGenerateParams,
+  ImageResult
+> {
   private apiKey: string;
 
   constructor(apiKey: string) {
+    super();
     this.apiKey = apiKey;
   }
 

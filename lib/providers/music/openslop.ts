@@ -1,10 +1,15 @@
 import { OpenSlopClient } from "@/lib/clients/openslop";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class OpenSlopMusic {
+export class OpenSlopMusic extends BaseProvider<
+  MusicGenerateParams,
+  ArrayBuffer
+> {
   private client: OpenSlopClient;
 
   constructor(baseUrl?: string) {
+    super();
     this.client = new OpenSlopClient(baseUrl);
   }
 

@@ -1,3 +1,4 @@
+import type { BaseProvider } from "@/lib/providers/base";
 import { BaseConnector } from "../base";
 import type {
   ImageConnector,
@@ -5,13 +6,12 @@ import type {
   ImageResult,
 } from "../types";
 
-export abstract class BaseImageConnector
-  extends BaseConnector<ImageGenerateParams, ImageResult>
+export abstract class BaseImageConnector<
+  TProvider extends BaseProvider<ImageGenerateParams, ImageResult> =
+    BaseProvider<ImageGenerateParams, ImageResult>,
+>
+  extends BaseConnector<ImageGenerateParams, ImageResult, TProvider>
   implements ImageConnector
 {
   readonly type = "image" as const;
-
-  protected abstract _generate(
-    params: ImageGenerateParams,
-  ): Promise<ImageResult>;
 }
