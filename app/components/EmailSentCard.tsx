@@ -3,6 +3,22 @@
 import OnboardingCard from "./OnboardingCard";
 import GradientButton from "./GradientButton";
 
+const EnvelopeIcon = (
+  <svg
+    className="w-14 h-14 text-white"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1}
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+    />
+  </svg>
+);
+
 interface EmailSentCardProps {
   email: string;
   subtitle?: string;
@@ -26,21 +42,7 @@ export default function EmailSentCard({
     <OnboardingCard
       heading="Email sent!"
       subtitle={subtitle ?? `We sent a login link to ${email}`}
-      icon={
-        <svg
-          className="w-14 h-14 text-white"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-          />
-        </svg>
-      }
+      icon={EnvelopeIcon}
       footer={
         <button
           type="button"
@@ -52,7 +54,7 @@ export default function EmailSentCard({
       }
     >
       <GradientButton type="button" onClick={onResend} disabled={loading}>
-        {loading ? "Sending..." : (resendLabel ?? "Send another login link")}
+        {loading ? "Sending\u2026" : (resendLabel ?? "Send another login link")}
       </GradientButton>
       {error && <p className="text-red-400 text-sm text-center">{error}</p>}
     </OnboardingCard>

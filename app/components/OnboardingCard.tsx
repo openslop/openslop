@@ -33,7 +33,7 @@ export default function OnboardingCard({
         {icon ?? <OpenSlopLogo className="w-14 h-auto text-white" />}
 
         {/* Heading */}
-        <h1 className="text-2xl sm:text-3xl font-light text-white text-center font-display">
+        <h1 className="text-2xl sm:text-3xl font-light text-white text-center font-display text-wrap-balance">
           {heading}
         </h1>
 

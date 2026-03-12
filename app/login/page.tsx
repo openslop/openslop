@@ -63,6 +63,8 @@ export default function LoginPage() {
       <form onSubmit={handleMagicLink} className="w-full flex flex-col gap-3">
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -70,11 +72,15 @@ export default function LoginPage() {
           required
         />
         <GradientButton type="submit" disabled={loading} className="mt-1">
-          {loading ? "Sending..." : "Send login link"}
+          {loading ? "Sending\u2026" : "Send login link"}
         </GradientButton>
       </form>
 
-      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+      {error && (
+        <p aria-live="polite" className="text-red-400 text-sm text-center">
+          {error}
+        </p>
+      )}
 
       <OrDivider />
       <GoogleOAuthButton onClick={handleGoogleLogin} />

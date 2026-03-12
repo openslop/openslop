@@ -9,7 +9,7 @@ export default function GradientButton({
 }: GradientButtonProps) {
   return (
     <button
-      className={`relative grain w-full py-2.5 rounded-2xl text-white font-semibold text-sm font-display transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 bg-gradient-gold ${className}`}
+      className={`relative grain w-full py-2.5 rounded-2xl text-white font-semibold text-sm font-display transition-[filter,transform] hover:brightness-[1.15] active:scale-[0.98] disabled:opacity-50 bg-gradient-gold ${className}`}
       {...props}
     >
       {children}

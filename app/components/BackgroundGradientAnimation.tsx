@@ -9,6 +9,11 @@ export default function BackgroundGradientAnimation() {
     const el = interactiveRef.current;
     if (!el) return;
 
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReduced) return;
+
     let currentX = window.innerWidth / 2;
     let currentY = window.innerHeight / 2;
     let targetX = currentX;
@@ -24,13 +29,12 @@ export default function BackgroundGradientAnimation() {
       currentX += (targetX - currentX) / 12;
       currentY += (targetY - currentY) / 12;
 
-      el.style.left = `${currentX}px`;
-      el.style.top = `${currentY}px`;
+      el.style.transform = `translate(${currentX - 750}px, ${currentY - 750}px)`;
 
       frame = requestAnimationFrame(animate);
     };
 
-    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mousemove", handleMove, { passive: true });
     frame = requestAnimationFrame(animate);
 
     return () => {
@@ -52,7 +56,7 @@ export default function BackgroundGradientAnimation() {
       />
 
       {/* SVG blur filter */}
-      <svg className="hidden">
+      <svg className="hidden" aria-hidden="true">
         <filter id="blurMe">
           <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
           <feColorMatrix
@@ -105,10 +109,11 @@ export default function BackgroundGradientAnimation() {
         {/* Interactive pointer blob */}
         <div
           ref={interactiveRef}
-          className="pointer-events-none absolute z-30 w-[1500px] h-[1500px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-[60px]"
+          className="pointer-events-none absolute z-30 w-[1500px] h-[1500px] rounded-full opacity-50 blur-[60px]"
           style={{
-            left: "50vw",
-            top: "50vh",
+            left: 0,
+            top: 0,
+            willChange: "transform",
             background:
               "radial-gradient(circle at center, rgba(40,152,244,0.9) 0%, transparent 75%)",
             mixBlendMode: "hard-light",

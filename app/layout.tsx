@@ -32,6 +32,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark bg-[#0a0a0a]">
       <head>
+        <meta name="theme-color" content="#0a0a0a" />
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <link
           href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,600,700&f[]=satoshi@400,500,700&display=swap"
           rel="stylesheet"
