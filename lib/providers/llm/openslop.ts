@@ -4,11 +4,16 @@ import type {
   LLMGenerateResult,
   LLMStreamChunk,
 } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class OpenSlopLLM {
+export class OpenSlopLLM extends BaseProvider<
+  LLMGenerateParams,
+  LLMGenerateResult
+> {
   private client: OpenSlopClient;
 
   constructor(baseUrl?: string) {
+    super();
     this.client = new OpenSlopClient(baseUrl);
   }
 

@@ -133,16 +133,24 @@ describe("OpenSlop connectors (via providers)", () => {
     expect(voices[0].id).toBe("v1");
   });
 
-  it("Video: generate submits job", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({ jobId: "j1", status: "processing" }),
-    );
+  it("Video: generate submits and polls job", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        jsonResponse({ jobId: "j1", status: "processing" }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          jobId: "j1",
+          status: "completed",
+          resultUrl: "https://v.mp4",
+        }),
+      );
 
     const c = new OpenSlopVideo(config);
     const job = await c.generate({ prompt: "sunset" });
 
     expect(job.jobId).toBe("j1");
-    expect(job.status).toBe("processing");
+    expect(job.status).toBe("completed");
   });
 
   it("Video: poll returns job status", async () => {

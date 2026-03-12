@@ -1,10 +1,18 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { LLMGenerateParams } from "@/lib/connectors/types";
+import type {
+  LLMGenerateParams,
+  LLMGenerateResult,
+} from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class AnthropicLLM {
+export class AnthropicLLM extends BaseProvider<
+  LLMGenerateParams,
+  LLMGenerateResult
+> {
   private client: Anthropic;
 
   constructor(apiKey: string) {
+    super();
     this.client = new Anthropic({ apiKey });
   }
 

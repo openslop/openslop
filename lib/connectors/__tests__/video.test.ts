@@ -9,7 +9,8 @@ function mockJsonResponse(data: unknown) {
   });
 }
 
-const jobResponse = {
+const submitResponse = { jobId: "j1", status: "processing" };
+const completedResponse = {
   jobId: "j1",
   status: "completed",
   resultUrl: "https://v.mp4",
@@ -18,12 +19,13 @@ const jobResponse = {
 describe("BaseVideoConnector", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      mockJsonResponse(jobResponse),
-    );
   });
 
   it("generates a video job", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(mockJsonResponse(submitResponse))
+      .mockResolvedValueOnce(mockJsonResponse(completedResponse));
+
     const connector = new OpenSlopVideo({ provider: "openslop", apiKey: "" });
     const result = await connector.generate({ prompt: "a sunset" });
     expect(result.status).toBe("completed");
@@ -31,7 +33,7 @@ describe("BaseVideoConnector", () => {
   });
 
   it("polls a job", async () => {
-    vi.mocked(fetch).mockResolvedValue(
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
       mockJsonResponse({ jobId: "job-123", status: "completed" }),
     );
     const connector = new OpenSlopVideo({ provider: "openslop", apiKey: "" });
@@ -41,6 +43,10 @@ describe("BaseVideoConnector", () => {
   });
 
   it("runs plugins in order", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(mockJsonResponse(submitResponse))
+      .mockResolvedValueOnce(mockJsonResponse(completedResponse));
+
     const order: string[] = [];
     const plugin: ConnectorPlugin = {
       name: "tracker",
@@ -67,7 +73,7 @@ describe("BaseVideoConnector", () => {
   });
 
   it("runs onError plugin on failure", async () => {
-    vi.mocked(fetch).mockRejectedValue(new Error("video failed"));
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("video failed"));
     const errors: string[] = [];
 
     const connector = new OpenSlopVideo({

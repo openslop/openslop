@@ -1,10 +1,15 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class ElevenLabsSFX {
+export class ElevenLabsSFX extends BaseProvider<
+  SFXGenerateParams,
+  ArrayBuffer
+> {
   private client: ElevenLabsClient;
 
   constructor(apiKey: string) {
+    super();
     this.client = new ElevenLabsClient({ apiKey });
   }
 

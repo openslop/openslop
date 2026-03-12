@@ -1,3 +1,4 @@
+import type { BaseProvider } from "@/lib/providers/base";
 import {
   runAfterGenerate,
   runBeforeGenerate,
@@ -10,16 +11,23 @@ import type {
   ConnectorPlugin,
   ConnectorType,
   ModelInfo,
+  PluginContext,
 } from "./types";
 
 export abstract class BaseConnector<
   TParams extends { prompt: string } = { prompt: string },
   TResult = unknown,
+  TProvider extends BaseProvider<TParams, TResult> = BaseProvider<
+    TParams,
+    TResult
+  >,
 > implements Connector {
   abstract readonly type: ConnectorType;
   protected plugins: ConnectorPlugin[];
+  protected provider: TProvider;
 
-  constructor(protected config: ConnectorConfig) {
+  constructor(provider: TProvider, config: ConnectorConfig) {
+    this.provider = provider;
     this.plugins = config.plugins ?? [];
   }
 
@@ -32,20 +40,24 @@ export abstract class BaseConnector<
   abstract listModels(): Promise<ModelInfo[]>;
 
   async generate(params: TParams): Promise<TResult> {
+    const ctx: PluginContext<TParams, TResult> = { provider: this.provider };
     try {
-      const prompt = await runTransformPrompt(this.plugins, params.prompt);
-      const transformed = await runBeforeGenerate(this.plugins, {
-        ...params,
-        prompt,
-      });
+      const prompt = await runTransformPrompt(this.plugins, params.prompt, ctx);
+      const transformed = await runBeforeGenerate(
+        this.plugins,
+        { ...params, prompt },
+        ctx,
+      );
       let result = await this._generate(transformed);
-      result = await runAfterGenerate(this.plugins, result);
+      result = await runAfterGenerate(this.plugins, result, ctx);
       return result;
     } catch (error) {
-      await runOnError(this.plugins, error as Error);
+      await runOnError(this.plugins, error as Error, ctx);
       throw error;
     }
   }
 
-  protected abstract _generate(params: TParams): Promise<TResult>;
+  protected async _generate(params: TParams): Promise<TResult> {
+    return this.provider.generate(params);
+  }
 }
