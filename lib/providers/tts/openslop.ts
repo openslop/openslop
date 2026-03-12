@@ -5,11 +5,13 @@ import type {
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class OpenSlopTTS {
+export class OpenSlopTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
   private client: OpenSlopClient;
 
   constructor(baseUrl?: string) {
+    super();
     this.client = new OpenSlopClient(baseUrl);
   }
 

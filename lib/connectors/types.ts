@@ -1,3 +1,5 @@
+import type { BaseProvider } from "@/lib/providers/base";
+
 export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
 export type ProviderKey = "openslop";
@@ -10,12 +12,28 @@ export type ModelInfo = {
   description?: string;
 };
 
+export interface PluginContext<TParams = unknown, TResult = unknown> {
+  provider: BaseProvider<TParams, TResult>;
+}
+
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
   name: string;
-  beforeGenerate?(params: TParams): TParams | Promise<TParams>;
-  afterGenerate?(result: TResult): TResult | Promise<TResult>;
-  transformPrompt?(prompt: string): string | Promise<string>;
-  onError?(error: Error): void | Promise<void>;
+  beforeGenerate?(
+    params: TParams,
+    ctx?: PluginContext<TParams, TResult>,
+  ): TParams | Promise<TParams>;
+  afterGenerate?(
+    result: TResult,
+    ctx?: PluginContext<TParams, TResult>,
+  ): TResult | Promise<TResult>;
+  transformPrompt?(
+    prompt: string,
+    ctx?: PluginContext<TParams, TResult>,
+  ): string | Promise<string>;
+  onError?(
+    error: Error,
+    ctx?: PluginContext<TParams, TResult>,
+  ): void | Promise<void>;
 }
 
 export interface ConnectorConfig {

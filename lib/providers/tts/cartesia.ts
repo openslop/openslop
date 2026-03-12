@@ -2,14 +2,17 @@ import Cartesia from "@cartesia/cartesia-js";
 import type {
   TextTimestamp,
   TTSGenerateParams,
+  TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class CartesiaTTS {
+export class CartesiaTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
   private client: Cartesia;
 
   constructor(apiKey: string) {
+    super();
     this.client = new Cartesia({ apiKey });
   }
 

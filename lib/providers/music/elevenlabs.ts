@@ -1,10 +1,15 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
+import { BaseProvider } from "../base";
 
-export class ElevenLabsMusic {
+export class ElevenLabsMusic extends BaseProvider<
+  MusicGenerateParams,
+  ArrayBuffer
+> {
   private client: ElevenLabsClient;
 
   constructor(apiKey: string) {
+    super();
     this.client = new ElevenLabsClient({ apiKey });
   }
 
