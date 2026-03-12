@@ -7,7 +7,9 @@ const CODE_LENGTH = 6;
 
 export default function AccessCodeInput() {
   const router = useRouter();
-  const [values, setValues] = useState<string[]>(Array(CODE_LENGTH).fill(""));
+  const [values, setValues] = useState<string[]>(() =>
+    Array(CODE_LENGTH).fill(""),
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -112,16 +114,26 @@ export default function AccessCodeInput() {
             onKeyDown={(e) => handleKeyDown(i, e)}
             onPaste={i === 0 ? handlePaste : undefined}
             disabled={loading}
-            className="w-9 h-11 sm:w-11 sm:h-13 text-center text-base sm:text-lg font-semibold rounded-md sm:rounded-lg border border-white/20 bg-white/10 text-white outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all disabled:opacity-50 placeholder:text-white/30"
+            aria-label={`Code character ${i + 1}`}
+            spellCheck={false}
+            autoComplete="off"
+            className="w-9 h-11 sm:w-11 sm:h-13 text-center text-base sm:text-lg font-semibold rounded-md sm:rounded-lg border border-white/20 bg-white/10 text-white outline-none focus-visible:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400/30 transition-[border-color,box-shadow,opacity] disabled:opacity-50 placeholder:text-white/30"
             autoFocus={i === 0}
           />
         ))}
       </div>
       {error && (
-        <p className="text-red-500 text-sm text-center mt-3">{error}</p>
+        <p aria-live="polite" className="text-red-500 text-sm text-center mt-3">
+          {error}
+        </p>
       )}
       {loading && (
-        <p className="text-zinc-400 text-sm text-center mt-3">Validating...</p>
+        <p
+          aria-live="polite"
+          className="text-zinc-400 text-sm text-center mt-3"
+        >
+          Validating&hellip;
+        </p>
       )}
     </div>
   );
