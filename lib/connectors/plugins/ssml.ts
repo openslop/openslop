@@ -37,7 +37,7 @@ const SSML_SYSTEM_PROMPT = dedent`
 
   ### Character Dialogue XML Tags
   - Each character's  entire dialogue is wrapped in character XML tags with required attributes being name, gender, age, pitch, accent, and emotion. Example: 
-    <narrator gender="male" age="adult" pitch="low" accent="american" texture="wise" emotion="neutral">Lyra steps forward. </character>
+    <narrator gender="male" age="adult" pitch="low" accent="american" texture="wise" emotion="neutral">Lyra steps forward. </narrator>
     <character name="Lyra" gender="female" age="adult" pitch="high" accent="british" texture="wise" emotion="excited">"Truce?"</character>
   - Frequently use nonverbalisms to exaggerate the emotion. Example: <character name="Mia" gender="female" age="adult" pitch="medium" accent="american" texture="friendly" emotion="happy">"[laughter] That's the way I want it!"</character>.
   - Allowed list of nonverbalisms: [laughter]. Do not use any other nonverbalisms.
@@ -78,13 +78,13 @@ const SSML_SYSTEM_PROMPT = dedent`
   - The descriptions within <sound> tags should be common, simple, short, clear ASMR pleasing sound descriptions like rain, wind, fire crackling, footsteps, etc.
   - Transient sound tags should be inserted frequently within the narrative prose to describe sounds that are described by the narrator.
   - Transient sound tags should be placed right after the narrative prose that describes the sound. Example:
-    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="calm">Hana slowly walks into the room</character>
+    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="calm">Hana slowly walks into the room</narrator>
     <sound type="ambient">footsteps</sound>
-    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="calm">and opens the door</character>
+    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="calm">and opens the door</narrator>
     <sound type="transient">door creaks</sound>
-    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="anticipation">Vladimir takes out his sword</character>
+    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="anticipation">Vladimir takes out his sword</narrator>
     <sound type="transient">sword draw</sound>
-    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="threatened">and swings it</character>
+    <narrator gender="male" age="adult" pitch="medium" accent="british" texture="wise" emotion="threatened">and swings it</narrator>
     <sound type="transient">sword swing</sound>
   - Ambient sounds should be subtle, pleasing background sounds like rain, wind, fire crackling, ocean waves, forest birds, river flowing, coffee shop ambient noise, etc.
   - Sounds should never be vocal (no sighing, no gasping, no moaning, no laughter, no crying, etc)
