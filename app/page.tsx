@@ -3,6 +3,7 @@ import path from "path";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import Editor from "./components/Editor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
@@ -21,13 +22,15 @@ export default async function Home() {
 
   if (user) {
     return (
-      <Editor
-        user={{
-          email: user.email ?? "",
-          avatarUrl: user.user_metadata?.avatar_url,
-          name: user.user_metadata?.full_name,
-        }}
-      />
+      <ConfigProvider>
+        <Editor
+          user={{
+            email: user.email ?? "",
+            avatarUrl: user.user_metadata?.avatar_url,
+            name: user.user_metadata?.full_name,
+          }}
+        />
+      </ConfigProvider>
     );
   }
 
