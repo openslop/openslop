@@ -53,8 +53,9 @@ export abstract class BaseConnector<
   }
 
   async generate(params: TParams): Promise<TResult> {
-    const { params: prepared, ctx } = await this.prepareParams(params);
+    const ctx: PluginContext<TParams, TResult> = { provider: this.provider };
     try {
+      const { params: prepared } = await this.prepareParams(params);
       let result = await this._generate(prepared);
       result = await runAfterGenerate(this.plugins, result, ctx);
       return result;
