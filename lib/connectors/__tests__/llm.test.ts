@@ -101,4 +101,48 @@ describe("BaseLLMConnector", () => {
     await connector.generate({ prompt: "test" });
     expect(order).toEqual(["transform", "before", "after"]);
   });
+
+  it("runs onError when transformPrompt throws during stream", async () => {
+    const onError = vi.fn();
+    const connector = new OpenSlopLLM({
+      provider: "openslop",
+      plugins: [
+        {
+          name: "bad-transform",
+          transformPrompt: () => {
+            throw new Error("transform failed");
+          },
+          onError,
+        },
+      ],
+    });
+    const gen = connector.stream({ prompt: "test" });
+    await expect(gen.next()).rejects.toThrow("transform failed");
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "transform failed" }),
+      expect.any(Object),
+    );
+  });
+
+  it("runs onError when beforeGenerate throws during stream", async () => {
+    const onError = vi.fn();
+    const connector = new OpenSlopLLM({
+      provider: "openslop",
+      plugins: [
+        {
+          name: "bad-before",
+          beforeGenerate: () => {
+            throw new Error("before failed");
+          },
+          onError,
+        },
+      ],
+    });
+    const gen = connector.stream({ prompt: "test" });
+    await expect(gen.next()).rejects.toThrow("before failed");
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "before failed" }),
+      expect.any(Object),
+    );
+  });
 });

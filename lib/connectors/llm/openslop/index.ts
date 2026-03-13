@@ -17,7 +17,9 @@ export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
     return LLM_MODELS.map((id) => ({ id, name: id }));
   }
 
-  async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
+  protected async *_stream(
+    params: LLMGenerateParams,
+  ): AsyncGenerator<LLMStreamChunk> {
     yield* this.provider.stream(params);
   }
 }
