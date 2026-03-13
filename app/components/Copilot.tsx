@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { ArrowRight, Sparkles, Square } from "lucide-react";
-import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import OrbLoader from "./OrbLoader";
 
 const LOADING_MESSAGES = [
@@ -20,7 +19,7 @@ interface CopilotProps {
   onSubmit: (value: string) => void;
   onStop?: () => void;
   multiline?: boolean;
-  placeholder?: string;
+  placeholder?: ReactNode;
   loading?: boolean;
 }
 
@@ -60,16 +59,21 @@ export default function Copilot({
     setValue("");
   };
 
+  const placeholderOverlay =
+    typeof placeholder !== "string" ? placeholder : undefined;
+  const placeholderText =
+    typeof placeholder === "string" ? placeholder : undefined;
+
   return (
     <div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_30px_rgba(55,30,100,0.3)] backdrop-blur-sm">
       {multiline ? (
         <div className="relative px-4 py-3">
           <textarea
             rows={6}
-            aria-label={placeholder ?? "Enter your script"}
+            aria-label="Enter your script"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder={placeholder}
+            placeholder={placeholderText}
             className="font-body w-full resize-none bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm h-[250px]"
           />
           {hasText && (
@@ -96,18 +100,18 @@ export default function Copilot({
               <LoadingText />
             ) : (
               <>
-                {!hasText && !placeholder && (
+                {!hasText && placeholderOverlay && (
                   <div className="font-body pointer-events-none absolute inset-0 flex items-center overflow-hidden text-sm">
-                    <AnimatedPlaceholder active={!hasText} />
+                    {placeholderOverlay}
                   </div>
                 )}
                 <input
                   type="text"
-                  aria-label={placeholder ?? "Describe your video"}
+                  aria-label="Describe your video"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  placeholder={placeholder}
+                  placeholder={placeholderText}
                   className="font-body w-full bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"
                 />
               </>

@@ -6,6 +6,7 @@ import { useScript } from "@/lib/script/ScriptProvider";
 import UserProfile from "./UserProfile";
 import ModeToggle from "./ModeToggle";
 import Copilot from "./Copilot";
+import AnimatedPlaceholder from "./AnimatedPlaceholder";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
@@ -80,11 +81,13 @@ export default function Editor({ user }: { user: EditorUser }) {
             multiline={!prompted && mode === "inputScript"}
             loading={loading}
             placeholder={
-              prompted
-                ? "Refine your script…"
-                : mode === "inputScript"
-                  ? INPUT_SCRIPT_PLACEHOLDER
-                  : undefined
+              prompted ? (
+                "Refine your script…"
+              ) : mode === "inputScript" ? (
+                INPUT_SCRIPT_PLACEHOLDER
+              ) : (
+                <AnimatedPlaceholder active />
+              )
             }
           />
         </div>
