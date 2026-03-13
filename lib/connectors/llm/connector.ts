@@ -1,5 +1,6 @@
 import type { BaseProvider } from "@/lib/providers/base";
 import { BaseConnector } from "../base";
+import { runOnError } from "../plugins";
 import type {
   LLMConnector,
   LLMGenerateParams,
@@ -16,5 +17,17 @@ export abstract class BaseLLMConnector<
 {
   readonly type = "llm" as const;
 
-  abstract stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk>;
+  async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
+    const { params: prepared, ctx } = await this.prepareParams(params);
+    try {
+      yield* this._stream(prepared);
+    } catch (error) {
+      await runOnError(this.plugins, error as Error, ctx);
+      throw error;
+    }
+  }
+
+  protected abstract _stream(
+    params: LLMGenerateParams,
+  ): AsyncGenerator<LLMStreamChunk>;
 }

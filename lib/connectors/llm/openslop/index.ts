@@ -10,14 +10,16 @@ import { LLM_MODELS } from "./models";
 
 export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopLLMProvider(config.baseUrl), config);
+    super(new OpenSlopLLMProvider(config.baseUrl, config.apiKey), config);
   }
 
   async listModels(): Promise<ModelInfo[]> {
     return LLM_MODELS.map((id) => ({ id, name: id }));
   }
 
-  async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
+  protected async *_stream(
+    params: LLMGenerateParams,
+  ): AsyncGenerator<LLMStreamChunk> {
     yield* this.provider.stream(params);
   }
 }

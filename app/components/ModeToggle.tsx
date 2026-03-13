@@ -1,4 +1,4 @@
-export type Mode = "prompt" | "script";
+import type { Mode } from "@/lib/config/ConfigProvider";
 
 export default function ModeToggle({
   mode,
@@ -15,7 +15,7 @@ export default function ModeToggle({
           transform: mode === "prompt" ? "translateX(0)" : "translateX(100%)",
         }}
       />
-      {(["prompt", "script"] as const).map((m) => (
+      {(["prompt", "inputScript"] as const).map((m) => (
         <button
           key={m}
           onClick={() => onChange(m)}

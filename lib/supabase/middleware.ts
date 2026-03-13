@@ -26,7 +26,7 @@ export async function updateSession(request: NextRequest) {
 
     const { error } = await supabase.auth.getUser(token);
     if (error) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error }, { status: 401 });
     }
 
     return NextResponse.next({ request });

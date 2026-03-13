@@ -29,7 +29,7 @@ export default function BackgroundGradientAnimation() {
       currentX += (targetX - currentX) / 12;
       currentY += (targetY - currentY) / 12;
 
-      el.style.transform = `translate(${currentX - 750}px, ${currentY - 750}px)`;
+      el.style.transform = `translate(calc(${currentX}px - 50%), calc(${currentY}px - 50%))`;
 
       frame = requestAnimationFrame(animate);
     };
@@ -50,8 +50,9 @@ export default function BackgroundGradientAnimation() {
         className="absolute inset-0"
         style={{
           background:
-            // "linear-gradient(135deg, rgb(108, 0, 162) 0%, rgb(0, 17, 82) 100%)",
-            "linear-gradient(135deg, rgb(78, 31, 153) 0%, rgb(28, 28, 112) 100%)",
+            "linear-gradient(135deg, rgb(108, 0, 162) 0%, rgb(0, 17, 82) 100%)",
+          // "linear-gradient(135deg, rgb(78, 31, 153) 0%, rgb(28, 28, 112) 100%)",
+          // "linear-gradient(135deg, rgb(112, 5, 165) 0%, rgb(6, 25, 101) 100%)",
         }}
       />
 
@@ -109,7 +110,7 @@ export default function BackgroundGradientAnimation() {
         {/* Interactive pointer blob */}
         <div
           ref={interactiveRef}
-          className="pointer-events-none absolute z-30 w-[1500px] h-[1500px] rounded-full opacity-50 blur-[60px]"
+          className="pointer-events-none absolute z-30 w-[100vmin] h-[100vmin] rounded-full opacity-50 blur-[60px]"
           style={{
             left: 0,
             top: 0,
