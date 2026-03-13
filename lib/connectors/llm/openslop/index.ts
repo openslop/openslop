@@ -10,7 +10,7 @@ import { LLM_MODELS } from "./models";
 
 export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopLLMProvider(config.baseUrl, config.apiKey), config);
+    super(new OpenSlopLLMProvider(config.baseUrl), config);
   }
 
   async listModels(): Promise<ModelInfo[]> {

@@ -10,7 +10,6 @@ import {
 } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { createConnector } from "@/lib/connectors/factory";
-import { createClient } from "@/lib/supabase/client";
 
 type ScriptContextValue = {
   script: string;
@@ -49,15 +48,7 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
       setScript("");
       setLoading(true);
       try {
-        const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const llmConfig = {
-          ...config.llm,
-          apiKey: session?.access_token ?? config.llm.apiKey,
-        };
-        const connector = createConnector("llm", llmConfig);
+        const connector = createConnector("llm", config.llm);
         for await (const chunk of connector.stream({ prompt })) {
           if (controller.signal.aborted) break;
           setScript((prev) => prev + chunk.text);

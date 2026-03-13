@@ -12,9 +12,9 @@ export class OpenSlopLLM extends BaseProvider<
 > {
   private client: OpenSlopClient;
 
-  constructor(baseUrl?: string, token?: string) {
+  constructor(baseUrl?: string) {
     super();
-    this.client = new OpenSlopClient(baseUrl, token);
+    this.client = new OpenSlopClient(baseUrl);
   }
 
   async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
