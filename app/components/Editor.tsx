@@ -58,7 +58,7 @@ export default function Editor({ user }: { user: EditorUser }) {
         }`}
       >
         <div
-          className={`flex flex-col items-center transition-all duration-1000 ${
+          className={`flex flex-col items-center transition-[opacity,max-height,margin-bottom] duration-1000 ${
             prompted
               ? "opacity-0 max-h-0 overflow-hidden mb-0 pointer-events-none"
               : "opacity-100 max-h-[400px] mb-6"

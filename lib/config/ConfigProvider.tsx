@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, use, useMemo, useState, type ReactNode } from "react";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { ssmlPlugin } from "../connectors/plugins/ssml";
@@ -36,7 +30,7 @@ type ConfigContextValue = {
 const ConfigContext = createContext<ConfigContextValue | null>(null);
 
 export function useConfig() {
-  const ctx = useContext(ConfigContext);
+  const ctx = use(ConfigContext);
   if (!ctx) throw new Error("useConfig must be used within ConfigProvider");
   return ctx;
 }

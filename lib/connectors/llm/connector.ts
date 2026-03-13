@@ -6,7 +6,6 @@ import type {
   LLMGenerateParams,
   LLMGenerateResult,
   LLMStreamChunk,
-  PluginContext,
 } from "../types";
 
 export abstract class BaseLLMConnector<
@@ -19,11 +18,9 @@ export abstract class BaseLLMConnector<
   readonly type = "llm" as const;
 
   async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
-    const ctx: PluginContext<LLMGenerateParams, LLMGenerateResult> = {
-      provider: this.provider,
-    };
+    const ctx = this.pluginContext();
     try {
-      const { params: prepared } = await this.prepareParams(params);
+      const prepared = await this.prepareParams(params, ctx);
       yield* this._stream(prepared);
     } catch (error) {
       await runOnError(this.plugins, error as Error, ctx);

@@ -9,4 +9,9 @@
 - Avoid unnecessary variables, properties, logic, or functions as much as possible
 - Keep the code compact, minimal, simple, and easily understandable and readable by humans
 - Avoid common React/Typescript/NextJS anti-patterns such as barrel files, prop drilling, etc. (use the best practices skills in .claude/skills for reference)
+- After completing code changes, run the following to review against best practices:
+  - `/simplify`
+  - `/vercel-composition-patterns`
+  - `/web-design-guidelines`
+  - `/vercel-react-best-practices`
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is

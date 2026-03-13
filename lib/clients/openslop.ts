@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export class OpenSlopClient {
   private baseUrl: string;
+  private supabase = createClient();
 
   constructor(baseUrl?: string) {
     this.baseUrl = baseUrl || "";
@@ -9,10 +10,9 @@ export class OpenSlopClient {
 
   private async headers(): Promise<Record<string, string>> {
     const h: Record<string, string> = { "content-type": "application/json" };
-    const supabase = createClient();
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await this.supabase.auth.getSession();
     if (session?.access_token)
       h["authorization"] = `Bearer ${session.access_token}`;
     return h;

@@ -39,23 +39,22 @@ export abstract class BaseConnector<
 
   abstract listModels(): Promise<ModelInfo[]>;
 
+  protected pluginContext(): PluginContext<TParams, TResult> {
+    return { provider: this.provider };
+  }
+
   protected async prepareParams(
     params: TParams,
-  ): Promise<{ params: TParams; ctx: PluginContext<TParams, TResult> }> {
-    const ctx: PluginContext<TParams, TResult> = { provider: this.provider };
+    ctx: PluginContext<TParams, TResult>,
+  ): Promise<TParams> {
     const prompt = await runTransformPrompt(this.plugins, params.prompt, ctx);
-    const transformed = await runBeforeGenerate(
-      this.plugins,
-      { ...params, prompt },
-      ctx,
-    );
-    return { params: transformed, ctx };
+    return runBeforeGenerate(this.plugins, { ...params, prompt }, ctx);
   }
 
   async generate(params: TParams): Promise<TResult> {
-    const ctx: PluginContext<TParams, TResult> = { provider: this.provider };
+    const ctx = this.pluginContext();
     try {
-      const { params: prepared } = await this.prepareParams(params);
+      const prepared = await this.prepareParams(params, ctx);
       let result = await this._generate(prepared);
       result = await runAfterGenerate(this.plugins, result, ctx);
       return result;

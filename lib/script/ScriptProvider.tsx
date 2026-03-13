@@ -2,8 +2,8 @@
 
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useRef,
   useState,
   type ReactNode,
@@ -22,7 +22,7 @@ type ScriptContextValue = {
 const ScriptContext = createContext<ScriptContextValue | null>(null);
 
 export function useScript() {
-  const ctx = useContext(ScriptContext);
+  const ctx = use(ScriptContext);
   if (!ctx) throw new Error("useScript must be used within ScriptProvider");
   return ctx;
 }
