@@ -51,8 +51,6 @@ export default function BackgroundGradientAnimation() {
         style={{
           background:
             "linear-gradient(135deg, rgb(108, 0, 162) 0%, rgb(0, 17, 82) 100%)",
-          // "linear-gradient(135deg, rgb(78, 31, 153) 0%, rgb(28, 28, 112) 100%)",
-          // "linear-gradient(135deg, rgb(112, 5, 165) 0%, rgb(6, 25, 101) 100%)",
         }}
       />
 
