@@ -15,10 +15,14 @@ vi.mock("@/lib/providers/sfx/elevenlabs", () => ({
 vi.mock("@/lib/providers/llm/anthropic", () => ({
   AnthropicLLM: vi.fn(),
 }));
+vi.mock("@/lib/providers/llm/mock", () => ({
+  MockLLM: vi.fn(),
+}));
 vi.mock("@/lib/providers/tts/cartesia", () => ({
   CartesiaTTS: vi.fn(),
 }));
 
+import { MockLLM } from "@/lib/providers/llm/mock";
 import {
   getImageProvider,
   getVideoProvider,
@@ -57,12 +61,12 @@ describe("provider factories", () => {
     );
   });
 
-  it("throws when ANTHROPIC_API_KEY is missing", () => {
+  it("returns MockLLM when ANTHROPIC_API_KEY is missing", () => {
     process.env = { ...originalEnv };
     delete process.env.ANTHROPIC_API_KEY;
-    expect(() => getLLMProvider()).toThrow(
-      "Missing environment variable: ANTHROPIC_API_KEY",
-    );
+    const provider = getLLMProvider();
+    expect(MockLLM).toHaveBeenCalled();
+    expect(provider).toBeInstanceOf(MockLLM);
   });
 
   it("throws when CARTESIA_API_KEY is missing", () => {

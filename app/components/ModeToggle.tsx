@@ -1,4 +1,4 @@
-export type Mode = "prompt" | "script";
+import type { Mode } from "@/lib/config/ConfigProvider";
 
 export default function ModeToggle({
   mode,
@@ -15,11 +15,11 @@ export default function ModeToggle({
           transform: mode === "prompt" ? "translateX(0)" : "translateX(100%)",
         }}
       />
-      {(["prompt", "script"] as const).map((m) => (
+      {(["prompt", "inputScript"] as const).map((m) => (
         <button
           key={m}
           onClick={() => onChange(m)}
-          className={`font-body relative z-10 rounded-full px-5 py-1.5 text-sm transition-colors duration-300 ${
+          className={`font-body relative z-10 rounded-full px-5 py-1.5 text-sm transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-violet-400/30 outline-none ${
             mode === m ? "text-violet-300" : "text-white/40 hover:text-white/60"
           }`}
         >

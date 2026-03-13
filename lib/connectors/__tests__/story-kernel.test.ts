@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BaseProvider } from "@/lib/providers/base";
-import { storyKernelPlugin } from "../plugins/story-kernel";
+import { storyModePlugin } from "../plugins/story-mode";
 import type {
   LLMGenerateParams,
   LLMGenerateResult,
@@ -19,14 +19,14 @@ class MockLLMProvider extends BaseProvider<
   }
 }
 
-describe("storyKernelPlugin", () => {
+describe("storyModePlugin", () => {
   it("calls provider to generate a story outline and rewrites the prompt", async () => {
     const provider = new MockLLMProvider();
     const ctx: PluginContext<LLMGenerateParams, LLMGenerateResult> = {
       provider,
     };
 
-    const result = await storyKernelPlugin.transformPrompt!(
+    const result = await storyModePlugin.transformPrompt!(
       "a knight and a dragon",
       ctx,
     );
@@ -38,8 +38,8 @@ describe("storyKernelPlugin", () => {
   });
 
   it("throws when no context is provided", async () => {
-    await expect(storyKernelPlugin.transformPrompt!("test")).rejects.toThrow(
-      "kernel plugin requires provider context",
+    await expect(storyModePlugin.transformPrompt!("test")).rejects.toThrow(
+      "story mode plugin requires provider context",
     );
   });
 });

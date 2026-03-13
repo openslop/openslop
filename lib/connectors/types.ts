@@ -38,7 +38,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 
 export interface ConnectorConfig {
   provider: string;
-  apiKey: string;
+  apiKey?: string;
   baseUrl?: string;
   plugins?: ConnectorPlugin[];
   options?: Record<string, unknown>;

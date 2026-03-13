@@ -3,6 +3,7 @@ import { RunwareVideo } from "@/lib/providers/video/runware";
 import { ElevenLabsMusic } from "@/lib/providers/music/elevenlabs";
 import { ElevenLabsSFX } from "@/lib/providers/sfx/elevenlabs";
 import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
+import { MockLLM } from "@/lib/providers/llm/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 
 function requireEnv(name: string): string {
@@ -41,7 +42,11 @@ export function getSFXProvider() {
 }
 
 export function getLLMProvider() {
-  return cached("llm", () => new AnthropicLLM(requireEnv("ANTHROPIC_API_KEY")));
+  return cached("llm", () => {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return new MockLLM();
+    return new AnthropicLLM(apiKey);
+  });
 }
 
 export function getTTSProvider() {

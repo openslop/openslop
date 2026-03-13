@@ -1,7 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { BaseProvider } from "@/lib/providers/base";
 import { BaseConnector } from "../base";
-import type { ConnectorConfig, ConnectorType, ModelInfo } from "../types";
+import type {
+  ConnectorConfig,
+  ConnectorPlugin,
+  ConnectorType,
+  ModelInfo,
+} from "../types";
 
 class MockProvider extends BaseProvider {
   async generate(): Promise<unknown> {
@@ -49,5 +54,51 @@ describe("BaseConnector", () => {
       apiKey: "key",
     });
     expect((c as unknown as { plugins: unknown[] }).plugins).toEqual([]);
+  });
+
+  it("runs onError when transformPrompt throws", async () => {
+    const onError = vi.fn();
+    const plugins: ConnectorPlugin[] = [
+      {
+        name: "bad-transform",
+        transformPrompt: () => {
+          throw new Error("transform failed");
+        },
+        onError,
+      },
+    ];
+    const c = new TestConnector(new MockProvider(), {
+      provider: "test",
+      plugins,
+    });
+    await expect(c.generate({ prompt: "hi" })).rejects.toThrow(
+      "transform failed",
+    );
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "transform failed" }),
+      expect.any(Object),
+    );
+  });
+
+  it("runs onError when beforeGenerate throws", async () => {
+    const onError = vi.fn();
+    const plugins: ConnectorPlugin[] = [
+      {
+        name: "bad-before",
+        beforeGenerate: () => {
+          throw new Error("before failed");
+        },
+        onError,
+      },
+    ];
+    const c = new TestConnector(new MockProvider(), {
+      provider: "test",
+      plugins,
+    });
+    await expect(c.generate({ prompt: "hi" })).rejects.toThrow("before failed");
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "before failed" }),
+      expect.any(Object),
+    );
   });
 });
