@@ -30,6 +30,7 @@ describe("BaseLLMConnector", () => {
     };
     const connector = new OpenSlopLLM({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -47,6 +48,7 @@ describe("BaseLLMConnector", () => {
     };
     const connector = new OpenSlopLLM({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -64,6 +66,7 @@ describe("BaseLLMConnector", () => {
 
     const connector = new OpenSlopLLM({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -95,6 +98,7 @@ describe("BaseLLMConnector", () => {
     ];
     const connector = new OpenSlopLLM({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins,
     });
@@ -106,6 +110,7 @@ describe("BaseLLMConnector", () => {
     const onError = vi.fn();
     const connector = new OpenSlopLLM({
       provider: "openslop",
+      model: "test-model",
       plugins: [
         {
           name: "bad-transform",
@@ -128,6 +133,7 @@ describe("BaseLLMConnector", () => {
     const onError = vi.fn();
     const connector = new OpenSlopLLM({
       provider: "openslop",
+      model: "test-model",
       plugins: [
         {
           name: "bad-before",

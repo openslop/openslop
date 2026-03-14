@@ -9,6 +9,6 @@ export class OpenSlopMusic extends BaseMusicConnector<OpenSlopMusicProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return MUSIC_MODELS.map((id) => ({ id, name: id }));
+    return Object.entries(MUSIC_MODELS).map(([name, id]) => ({ id, name }));
   }
 }

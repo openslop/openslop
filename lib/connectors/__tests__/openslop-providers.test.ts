@@ -6,7 +6,7 @@ import { OpenSlopImage } from "../image/openslop";
 import { OpenSlopTTS } from "../tts/openslop";
 import { OpenSlopVideo } from "../video/openslop";
 
-const config = { provider: "openslop", apiKey: "test" };
+const config = { provider: "openslop", model: "test-model", apiKey: "test" };
 
 function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {

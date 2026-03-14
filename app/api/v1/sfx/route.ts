@@ -11,8 +11,9 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    if (model && !SFX_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${SFX_MODELS.join(", ")}`);
+    const validModels = Object.values(SFX_MODELS);
+    if (model && !validModels.includes(model))
+      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
 
     const provider = getSFXProvider();
     const buffer = await provider.generate({ prompt, model, durationSeconds });

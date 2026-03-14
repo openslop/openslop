@@ -9,6 +9,6 @@ export class OpenSlopImage extends BaseImageConnector<OpenSlopImageProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return IMAGE_MODELS.map((id) => ({ id, name: id }));
+    return Object.entries(IMAGE_MODELS).map(([name, id]) => ({ id, name }));
   }
 }
