@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLLMProvider } from "@/lib/api/providers";
 import { badRequest, serverError } from "@/lib/api/response";
+import { validateModel } from "@/lib/api/validate-model";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 import { logger } from "@/lib/api/logger";
 
@@ -19,9 +20,8 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    const validModels = Object.values(LLM_MODELS);
-    if (model && !validModels.includes(model))
-      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
+    const modelError = validateModel(model, LLM_MODELS);
+    if (modelError) return modelError;
 
     const provider = getLLMProvider();
     const genParams = {

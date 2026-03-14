@@ -12,11 +12,16 @@ function intHash(str: string, index: number): number {
 
 function PlayButton({ color }: { color: string }) {
   return (
-    <div
+    <button
+      type="button"
+      aria-label="Play preview"
       className={`w-8 h-8 rounded-full ${color} flex items-center justify-center flex-shrink-0`}
     >
-      <Play className="w-3 h-3 text-white fill-white ml-0.5" />
-    </div>
+      <Play
+        className="w-3 h-3 text-white fill-white ml-0.5"
+        aria-hidden="true"
+      />
+    </button>
   );
 }
 
@@ -78,7 +83,7 @@ function MediaPreview({
     <div
       className={`relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor} bg-black/20 flex items-center justify-center`}
     >
-      <Icon className="w-8 h-8 text-white/20" />
+      <Icon className="w-8 h-8 text-white/20" aria-hidden="true" />
     </div>
   );
 }

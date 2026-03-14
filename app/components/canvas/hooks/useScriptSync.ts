@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Editor, Transforms, Descendant } from "slate";
+import { useEffect, useMemo } from "react";
+import { Editor, Transforms } from "slate";
 import flow from "lodash/fp/flow";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
@@ -7,14 +7,18 @@ import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import type { CanvasElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 
-export function useScriptSync(
-  editor: Editor,
-  setValue: (value: Descendant[]) => void,
-): void {
-  const { nodes } = useScript();
-  const { connectors } = useConfig();
+export function useScriptSync(editor: Editor): void {
+  const {
+    state: { nodes },
+  } = useScript();
+  const {
+    state: { connectors },
+  } = useConfig();
 
-  const normalize = flow(trimWhitespace, hydrateModel(connectors));
+  const normalize = useMemo(
+    () => flow(trimWhitespace, hydrateModel(connectors)),
+    [connectors],
+  );
 
   useEffect(() => {
     Editor.withoutNormalizing(editor, () => {
@@ -46,15 +50,17 @@ export function useScriptSync(
         }
       }
     });
-  }, [nodes, editor, setValue, normalize]);
+  }, [nodes, editor, normalize]);
 }
 
 function trimWhitespace(node: CanvasElement): CanvasElement {
-  const clone = structuredClone(node);
-  for (const child of clone.children) {
-    child.text = child.text.trim();
-  }
-  return clone;
+  return {
+    ...node,
+    children: node.children.map((child) => ({
+      ...child,
+      text: child.text.trim(),
+    })),
+  };
 }
 
 function hydrateModel(connectors: ConnectorRegistry) {

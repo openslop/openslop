@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, use, useMemo, useState, type ReactNode } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import type { ConnectorConfig, ConnectorType } from "@/lib/connectors/types";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
@@ -25,10 +26,11 @@ const defaultConnectors: ConnectorRegistry = {
 };
 
 type ConfigContextValue = {
-  connectors: ConnectorRegistry;
-  setConnectors: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
-  mode: Mode;
-  setMode: React.Dispatch<React.SetStateAction<Mode>>;
+  state: { connectors: ConnectorRegistry; mode: Mode };
+  actions: {
+    setConnectors: Dispatch<SetStateAction<ConnectorRegistry>>;
+    setMode: Dispatch<SetStateAction<Mode>>;
+  };
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -61,10 +63,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   return (
     <ConfigContext.Provider
       value={{
-        connectors: connectorsWithModePlugins,
-        setConnectors,
-        mode,
-        setMode,
+        state: { connectors: connectorsWithModePlugins, mode },
+        actions: { setConnectors, setMode },
       }}
     >
       {children}
