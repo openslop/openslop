@@ -1,28 +1,32 @@
 "use client";
 
 import { createContext, use, useMemo, useState, type ReactNode } from "react";
-import type { ConnectorConfig } from "@/lib/connectors/types";
+import type { ConnectorConfig, ConnectorType } from "@/lib/connectors/types";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
-import { ssmlPlugin } from "../connectors/plugins/ssml";
+import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
 
 export type Mode = "prompt" | "inputScript";
 
-export type AppConfig = {
-  llm: ConnectorConfig;
-};
+export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
 
-const defaultConfig: AppConfig = {
+const defaultConnectors: ConnectorRegistry = {
   llm: {
     provider: "openslop",
+    model: "Slop LLM v1",
     apiKey: "",
-    plugins: [ssmlPlugin],
+    plugins: [osmlPlugin],
   },
+  tts: { provider: "openslop", model: "Slop TTS v1", apiKey: "" },
+  image: { provider: "openslop", model: "Slop Image v1", apiKey: "" },
+  video: { provider: "openslop", model: "Slop Video v1", apiKey: "" },
+  sfx: { provider: "openslop", model: "Slop SFX v1", apiKey: "" },
+  music: { provider: "openslop", model: "Slop Music v1", apiKey: "" },
 };
 
 type ConfigContextValue = {
-  config: AppConfig;
-  setConfig: React.Dispatch<React.SetStateAction<AppConfig>>;
+  connectors: ConnectorRegistry;
+  setConnectors: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
   mode: Mode;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
 };
@@ -36,26 +40,32 @@ export function useConfig() {
 }
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<AppConfig>(defaultConfig);
+  const [connectors, setConnectors] =
+    useState<ConnectorRegistry>(defaultConnectors);
   const [mode, setMode] = useState<Mode>("prompt");
 
-  const configWithModePlugins = useMemo<AppConfig>(
+  const connectorsWithModePlugins = useMemo<ConnectorRegistry>(
     () => ({
-      ...config,
+      ...connectors,
       llm: {
-        ...config.llm,
+        ...connectors.llm,
         plugins: [
-          ...(config.llm.plugins ?? []),
+          ...(connectors.llm.plugins ?? []),
           mode === "prompt" ? storyModePlugin : scriptModePlugin,
         ],
       },
     }),
-    [config, mode],
+    [connectors, mode],
   );
 
   return (
     <ConfigContext.Provider
-      value={{ config: configWithModePlugins, setConfig, mode, setMode }}
+      value={{
+        connectors: connectorsWithModePlugins,
+        setConnectors,
+        mode,
+        setMode,
+      }}
     >
       {children}
     </ConfigContext.Provider>

@@ -7,6 +7,7 @@ import UserProfile from "./UserProfile";
 import ModeToggle from "./ModeToggle";
 import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
+import Canvas from "./canvas/Canvas";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
@@ -93,14 +94,9 @@ export default function Editor({ user }: { user: EditorUser }) {
         </div>
       </div>
 
-      {hasScript && (
-        <div className="w-full max-w-2xl px-4 pt-6">
-          <pre className="font-body whitespace-pre-wrap text-sm text-white/70">
-            {script}
-            {loading && (
-              <span className="inline-block w-2 h-4 ml-0.5 bg-violet-400/70 animate-pulse align-middle" />
-            )}
-          </pre>
+      {prompted && (
+        <div className="w-full max-w-6xl px-4 pt-6">
+          <Canvas />
         </div>
       )}
     </div>

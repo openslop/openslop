@@ -8,11 +8,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Descendant } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { createConnector } from "@/lib/connectors/factory";
+import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
 type ScriptContextValue = {
   script: string;
+  nodes: Descendant[];
   loading: boolean;
   submitPrompt: (prompt: string) => Promise<void>;
   refineScript: (prompt: string) => Promise<void>;
@@ -28,10 +31,11 @@ export function useScript() {
 }
 
 export function ScriptProvider({ children }: { children: ReactNode }) {
-  const { config } = useConfig();
+  const { connectors } = useConfig();
   const [script, setScript] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const { nodes, appendChunk } = useOSMLSerializer();
 
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
@@ -48,10 +52,11 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
       setScript("");
       setLoading(true);
       try {
-        const connector = createConnector("llm", config.llm);
+        const connector = createConnector("llm", connectors.llm);
         for await (const chunk of connector.stream({ prompt })) {
           if (controller.signal.aborted) break;
           setScript((prev) => prev + chunk.text);
+          appendChunk(chunk.text);
         }
       } finally {
         if (abortRef.current === controller) {
@@ -60,14 +65,21 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [config.llm],
+    [connectors.llm, appendChunk],
   );
 
   const refineScript = useCallback(async (_prompt: string) => {}, []);
 
   return (
     <ScriptContext.Provider
-      value={{ script, loading, submitPrompt, refineScript, stopGeneration }}
+      value={{
+        script,
+        nodes,
+        loading,
+        submitPrompt,
+        refineScript,
+        stopGeneration,
+      }}
     >
       {children}
     </ScriptContext.Provider>

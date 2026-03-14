@@ -1,0 +1,45 @@
+.sortable {
+  display: flex;
+  z-index: 0;
+}
+
+.sortable > div {
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.dragOverlay > div {
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.dragOverlay {
+  display: flex;
+  opacity: 0.95;
+  transform: scale(1.02) rotate(0.5deg);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.25),
+    0 8px 16px -4px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 4px;
+}
+
+.dragOverlay button,
+.dragButton {
+  user-select: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  display: inline-flex;
+  margin-right: 10px;
+}
+
+.dragOverlay :global(.animate-fadeInUp) {
+  animation: none;
+}

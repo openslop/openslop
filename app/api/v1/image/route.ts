@@ -11,8 +11,9 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    if (model && !IMAGE_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${IMAGE_MODELS.join(", ")}`);
+    const validModels = Object.values(IMAGE_MODELS);
+    if (model && !validModels.includes(model))
+      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
 
     const provider = getImageProvider();
     const result = await provider.generate({

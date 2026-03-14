@@ -31,7 +31,11 @@ describe("BaseImageConnector", () => {
   });
 
   it("generates image via provider", async () => {
-    const connector = new OpenSlopImage({ provider: "openslop", apiKey: "" });
+    const connector = new OpenSlopImage({
+      provider: "openslop",
+      model: "test-model",
+      apiKey: "",
+    });
     const result = await connector.generate({ prompt: "a cat" });
     expect(result.format).toBe("png");
     expect(result.width).toBe(512);
@@ -47,6 +51,7 @@ describe("BaseImageConnector", () => {
     };
     const connector = new OpenSlopImage({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });

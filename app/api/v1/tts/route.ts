@@ -13,8 +13,9 @@ export async function POST(request: NextRequest) {
       return badRequest("prompt is required");
     if (!voiceId || typeof voiceId !== "string")
       return badRequest("voiceId is required");
-    if (model && !TTS_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${TTS_MODELS.join(", ")}`);
+    const validModels = Object.values(TTS_MODELS);
+    if (model && !validModels.includes(model))
+      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
 
     const provider = getTTSProvider();
     const result = await provider.generate({

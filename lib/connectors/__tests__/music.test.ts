@@ -22,6 +22,7 @@ describe("BaseMusicConnector", () => {
     };
     const connector = new OpenSlopMusic({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -36,6 +37,7 @@ describe("BaseMusicConnector", () => {
     };
     const connector = new OpenSlopMusic({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -49,6 +51,7 @@ describe("BaseMusicConnector", () => {
 
     const connector = new OpenSlopMusic({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [
         { name: "err", onError: (e: Error) => void errors.push(e.message) },

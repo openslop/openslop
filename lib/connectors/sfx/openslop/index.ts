@@ -9,6 +9,6 @@ export class OpenSlopSFX extends BaseSFXConnector<OpenSlopSFXProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return SFX_MODELS.map((id) => ({ id, name: id }));
+    return Object.entries(SFX_MODELS).map(([name, id]) => ({ id, name }));
   }
 }

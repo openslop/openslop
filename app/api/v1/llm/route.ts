@@ -19,8 +19,9 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    if (model && !LLM_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${LLM_MODELS.join(", ")}`);
+    const validModels = Object.values(LLM_MODELS);
+    if (model && !validModels.includes(model))
+      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
 
     const provider = getLLMProvider();
     const genParams = {

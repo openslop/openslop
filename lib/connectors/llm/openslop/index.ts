@@ -14,7 +14,7 @@ export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return LLM_MODELS.map((id) => ({ id, name: id }));
+    return Object.entries(LLM_MODELS).map(([name, id]) => ({ id, name }));
   }
 
   protected async *_stream(

@@ -38,6 +38,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 
 export interface ConnectorConfig {
   provider: string;
+  model: string;
   apiKey?: string;
   baseUrl?: string;
   plugins?: ConnectorPlugin[];

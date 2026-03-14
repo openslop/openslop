@@ -23,7 +23,11 @@ describe("BaseTTSConnector", () => {
   });
 
   it("generates TTS via provider", async () => {
-    const connector = new OpenSlopTTS({ provider: "openslop", apiKey: "" });
+    const connector = new OpenSlopTTS({
+      provider: "openslop",
+      model: "test-model",
+      apiKey: "",
+    });
     const result = await connector.generate({
       prompt: "hello",
       voiceId: "default",
@@ -39,6 +43,7 @@ describe("BaseTTSConnector", () => {
     };
     const connector = new OpenSlopTTS({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -55,6 +60,7 @@ describe("BaseTTSConnector", () => {
 
     const connector = new OpenSlopTTS({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [
         { name: "err", onError: (e: Error) => void errors.push(e.message) },

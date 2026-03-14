@@ -14,7 +14,7 @@ export class OpenSlopTTS extends BaseTTSConnector<OpenSlopTTSProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return TTS_MODELS.map((id) => ({ id, name: id }));
+    return Object.entries(TTS_MODELS).map(([name, id]) => ({ id, name }));
   }
 
   async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {

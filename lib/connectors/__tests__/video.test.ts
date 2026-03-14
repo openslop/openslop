@@ -26,7 +26,11 @@ describe("BaseVideoConnector", () => {
       .mockResolvedValueOnce(mockJsonResponse(submitResponse))
       .mockResolvedValueOnce(mockJsonResponse(completedResponse));
 
-    const connector = new OpenSlopVideo({ provider: "openslop", apiKey: "" });
+    const connector = new OpenSlopVideo({
+      provider: "openslop",
+      model: "test-model",
+      apiKey: "",
+    });
     const result = await connector.generate({ prompt: "a sunset" });
     expect(result.status).toBe("completed");
     expect(result.jobId).toBeTruthy();
@@ -36,7 +40,11 @@ describe("BaseVideoConnector", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       mockJsonResponse({ jobId: "job-123", status: "completed" }),
     );
-    const connector = new OpenSlopVideo({ provider: "openslop", apiKey: "" });
+    const connector = new OpenSlopVideo({
+      provider: "openslop",
+      model: "test-model",
+      apiKey: "",
+    });
     const result = await connector.poll("job-123");
     expect(result.jobId).toBe("job-123");
     expect(result.status).toBe("completed");
@@ -65,6 +73,7 @@ describe("BaseVideoConnector", () => {
     };
     const connector = new OpenSlopVideo({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [plugin],
     });
@@ -78,6 +87,7 @@ describe("BaseVideoConnector", () => {
 
     const connector = new OpenSlopVideo({
       provider: "openslop",
+      model: "test-model",
       apiKey: "",
       plugins: [
         { name: "err", onError: (e: Error) => void errors.push(e.message) },
