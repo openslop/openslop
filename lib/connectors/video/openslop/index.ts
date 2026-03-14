@@ -13,7 +13,7 @@ export class OpenSlopVideo extends BaseVideoConnector<OpenSlopVideoProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return VIDEO_MODELS.map((id) => ({ id, name: id }));
+    return Object.entries(VIDEO_MODELS).map(([name, id]) => ({ id, name }));
   }
 
   async poll(jobId: string): Promise<VideoJob> {

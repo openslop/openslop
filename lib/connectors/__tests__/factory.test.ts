@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { createConnector } from "../factory";
 import type { ConnectorType } from "../types";
 
-const stubConfig = { provider: "openslop", apiKey: "test-key" };
+const stubConfig = {
+  provider: "openslop",
+  model: "test-model",
+  apiKey: "test-key",
+};
 
 describe("createConnector", () => {
   it("creates a valid LLM connector", () => {
@@ -12,12 +16,20 @@ describe("createConnector", () => {
 
   it("throws for unknown provider", () => {
     expect(() =>
-      createConnector("llm", { provider: "nonexistent", apiKey: "" }),
+      createConnector("llm", {
+        provider: "nonexistent",
+        model: "",
+        apiKey: "",
+      }),
     ).toThrow('Unknown provider "nonexistent" for type "llm"');
   });
 
   it("falls back to default provider when provider is empty", () => {
-    const connector = createConnector("llm", { provider: "", apiKey: "" });
+    const connector = createConnector("llm", {
+      provider: "",
+      model: "",
+      apiKey: "",
+    });
     expect(connector.type).toBe("llm");
   });
 

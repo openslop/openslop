@@ -11,8 +11,9 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    if (model && !VIDEO_MODELS.includes(model))
-      return badRequest(`Invalid model. Supported: ${VIDEO_MODELS.join(", ")}`);
+    const validModels = Object.values(VIDEO_MODELS);
+    if (model && !validModels.includes(model))
+      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
     if (
       referenceImage &&
       (typeof referenceImage !== "string" ||
