@@ -54,6 +54,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 
       if (
         CANVAS_ELEMENT_TYPES.has(type) &&
+        over?.id &&
         !CANVAS_ELEMENT_TYPES.has(over?.id as CanvasElementType)
       ) {
         const newIndex = baseItems.indexOf(over?.id as string);
