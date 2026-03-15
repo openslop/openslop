@@ -12,7 +12,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
   return (
     <div
       className={`fixed top-0 left-0 h-full z-[80] w-[calc(14rem+2.5rem)] transition-transform duration-300 motion-reduce:transition-none ${
-        open ? "translate-x-0" : "-translate-x-52"
+        open ? "translate-x-0" : "-translate-x-52 pointer-events-none"
       }`}
     >
       <div
@@ -25,7 +25,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
           type="button"
           onClick={onToggle}
           aria-label={open ? "Close sidebar" : "Open sidebar"}
-          className="absolute right-2 top-16 p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="pointer-events-auto absolute right-2 top-16 p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <PanelLeft size={23} strokeWidth={1} aria-hidden="true" />
         </button>
