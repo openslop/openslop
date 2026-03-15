@@ -6,6 +6,7 @@ import type {
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
+import { modelsFromMap } from "@/lib/connectors/types";
 import { TTS_MODELS } from "./models";
 
 export class OpenSlopTTS extends BaseTTSConnector<OpenSlopTTSProvider> {
@@ -14,7 +15,7 @@ export class OpenSlopTTS extends BaseTTSConnector<OpenSlopTTSProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return Object.entries(TTS_MODELS).map(([name, id]) => ({ id, name }));
+    return modelsFromMap(TTS_MODELS);
   }
 
   async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {

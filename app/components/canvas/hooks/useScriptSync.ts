@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { Editor, Transforms } from "slate";
-import flow from "lodash/fp/flow";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
@@ -11,10 +10,10 @@ export function useScriptSync(editor: Editor): void {
   const { nodes } = useScript();
   const { connectors } = useConfig();
 
-  const normalize = useMemo(
-    () => flow(trimWhitespace, hydrateModel(connectors)),
-    [connectors],
-  );
+  const normalize = useMemo(() => {
+    const hydrate = hydrateModel(connectors);
+    return (node: CanvasElement) => hydrate(trimWhitespace(node));
+  }, [connectors]);
 
   useEffect(() => {
     Editor.withoutNormalizing(editor, () => {

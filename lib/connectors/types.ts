@@ -12,6 +12,10 @@ export type ModelInfo = {
   description?: string;
 };
 
+export function modelsFromMap(map: Record<string, string>): ModelInfo[] {
+  return Object.entries(map).map(([name, id]) => ({ id, name }));
+}
+
 export interface PluginContext<TParams = unknown, TResult = unknown> {
   provider: BaseProvider<TParams, TResult>;
 }

@@ -23,6 +23,24 @@ interface CopilotProps {
   loading?: boolean;
 }
 
+function SubmitButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-label={label}
+      onClick={onClick}
+      className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3]"
+    >
+      <ArrowRight className="h-4 w-4" />
+    </button>
+  );
+}
+
 function LoadingText() {
   const [index, setIndex] = useState(() =>
     Math.floor(Math.random() * LOADING_MESSAGES.length),
@@ -78,13 +96,7 @@ export default function Copilot({
           />
           {hasText && (
             <div className="flex justify-end pt-2">
-              <button
-                aria-label="Submit script"
-                onClick={handleSubmit}
-                className="relative grain flex h-6 w-6 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3]"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              <SubmitButton label="Submit script" onClick={handleSubmit} />
             </div>
           )}
         </div>
@@ -127,13 +139,7 @@ export default function Copilot({
             </button>
           ) : (
             hasText && (
-              <button
-                aria-label="Submit prompt"
-                onClick={handleSubmit}
-                className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3]"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              <SubmitButton label="Submit prompt" onClick={handleSubmit} />
             )
           )}
         </div>

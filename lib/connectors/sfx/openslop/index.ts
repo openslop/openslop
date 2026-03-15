@@ -1,6 +1,7 @@
 import { BaseSFXConnector } from "../connector";
 import { OpenSlopSFX as OpenSlopSFXProvider } from "@/lib/providers/sfx/openslop";
 import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
+import { modelsFromMap } from "@/lib/connectors/types";
 import { SFX_MODELS } from "./models";
 
 export class OpenSlopSFX extends BaseSFXConnector<OpenSlopSFXProvider> {
@@ -9,6 +10,6 @@ export class OpenSlopSFX extends BaseSFXConnector<OpenSlopSFXProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return Object.entries(SFX_MODELS).map(([name, id]) => ({ id, name }));
+    return modelsFromMap(SFX_MODELS);
   }
 }

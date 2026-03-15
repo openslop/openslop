@@ -24,8 +24,7 @@ And in that garden… lived a little rabbit named Lumi…`;
 
 export default function Editor({ user }: { user: UserProfileProps }) {
   const { mode, setMode } = useConfig();
-  const { script, loading, submitPrompt, refineScript, stopGeneration } =
-    useScript();
+  const { script, loading, submitPrompt, stopGeneration } = useScript();
   const [prompted, setPrompted] = useState(false);
 
   const hasScript = script.length > 0 || loading;
@@ -77,7 +76,7 @@ export default function Editor({ user }: { user: UserProfileProps }) {
         <div className="flex w-full justify-center px-4 pl-16 animate-copilot-enter">
           <div className="w-full max-w-2xl">
             <Copilot
-              onSubmit={refineScript}
+              onSubmit={submitPrompt}
               onStop={stopGeneration}
               multiline={false}
               loading={loading}

@@ -18,14 +18,23 @@ export class OpenSlopClient {
     return h;
   }
 
-  async post<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method: "POST",
+  private async request(
+    method: string,
+    url: string,
+    body?: unknown,
+  ): Promise<Response> {
+    const res = await fetch(url, {
+      method,
       headers: await this.headers(),
-      body: JSON.stringify(body),
+      ...(body !== undefined && { body: JSON.stringify(body) }),
     });
     if (!res.ok)
       throw new Error(`OpenSlop API error: ${res.status} ${res.statusText}`);
+    return res;
+  }
+
+  async post<T>(path: string, body: unknown): Promise<T> {
+    const res = await this.request("POST", `${this.baseUrl}${path}`, body);
     return res.json() as Promise<T>;
   }
 
@@ -37,34 +46,16 @@ export class OpenSlopClient {
       ).toString();
       if (qs) url += `?${qs}`;
     }
-    const res = await fetch(url, {
-      method: "GET",
-      headers: await this.headers(),
-    });
-    if (!res.ok)
-      throw new Error(`OpenSlop API error: ${res.status} ${res.statusText}`);
+    const res = await this.request("GET", url);
     return res.json() as Promise<T>;
   }
 
   async postBinary(path: string, body: unknown): Promise<ArrayBuffer> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method: "POST",
-      headers: await this.headers(),
-      body: JSON.stringify(body),
-    });
-    if (!res.ok)
-      throw new Error(`OpenSlop API error: ${res.status} ${res.statusText}`);
+    const res = await this.request("POST", `${this.baseUrl}${path}`, body);
     return res.arrayBuffer();
   }
 
   async postStream(path: string, body: unknown): Promise<Response> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method: "POST",
-      headers: await this.headers(),
-      body: JSON.stringify(body),
-    });
-    if (!res.ok)
-      throw new Error(`OpenSlop API error: ${res.status} ${res.statusText}`);
-    return res;
+    return this.request("POST", `${this.baseUrl}${path}`, body);
   }
 }

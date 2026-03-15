@@ -9,9 +9,6 @@ export default function OrbLoader() {
               <polygon points="25,25 75,25 50,75" fill="white" />
               <polygon points="50,25 75,75 25,75" fill="white" />
               <polygon points="35,35 65,35 50,65" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
             </mask>
           </defs>
         </svg>

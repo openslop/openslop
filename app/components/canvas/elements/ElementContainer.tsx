@@ -2,7 +2,7 @@ import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import { ChevronDown } from "lucide-react";
 import type { CanvasElement } from "../types";
-import { PILL_COLORS, ZERO_WIDTH_SPACE } from "../config/constants";
+import { ATTRIBUTE_BADGE_COLORS, ZERO_WIDTH_SPACE } from "../config/constants";
 import { OutputPreview } from "./OutputPreview";
 
 interface ElementContainerProps {
@@ -49,7 +49,7 @@ export function ElementContainer({
               value ? (
                 <span
                   key={key}
-                  className={`${PILL_COLORS[index % PILL_COLORS.length]} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
+                  className={`${ATTRIBUTE_BADGE_COLORS[index % ATTRIBUTE_BADGE_COLORS.length]} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
                   title={value}
                 >
                   {value}
