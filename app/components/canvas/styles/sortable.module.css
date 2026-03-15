@@ -35,11 +35,14 @@
 .dragOverlay button,
 .dragButton {
   user-select: none;
-  background: none;
   border: none;
   font-size: 24px;
   display: inline-flex;
   margin-right: 10px;
+}
+
+.dragOverlay button {
+  background: none;
 }
 
 .dragOverlay :global(.animate-fadeInUp) {

@@ -14,6 +14,7 @@ export const renderStoryElement = (props: RenderElementProps): JSX.Element => {
       bgColor={config.bgColor}
       placeholder={config.placeholder}
       customAttributes={props.element.customAttributes}
+      visibleAttributes={config.visibleAttributes}
       {...props}
     />
   );

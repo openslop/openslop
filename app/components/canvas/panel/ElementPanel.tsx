@@ -1,9 +1,7 @@
 "use client";
 
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { ELEMENT_LIST } from "../config/elementConfigs";
 import { DraggablePanelItem } from "./DraggablePanelItem";
-
-const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);
 
 export default function ElementPanel() {
   return (

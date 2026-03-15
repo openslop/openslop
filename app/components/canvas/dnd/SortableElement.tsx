@@ -3,6 +3,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
 import type { CanvasElement } from "../types";
+import { AddElementDivider } from "../elements/AddElementDivider";
 import styles from "../styles/sortable.module.css";
 
 export function SortableElement({
@@ -34,7 +35,7 @@ export function SortableElement({
   return (
     <div {...attributes}>
       <div
-        className={styles.sortable}
+        className="flex flex-col"
         {...sortableAttributes}
         ref={setNodeRef}
         style={{
@@ -51,8 +52,8 @@ export function SortableElement({
         >
           <button
             aria-label="Drag to reorder"
-            className={`text-gray-400 hover:text-gray-600 hover:bg-gray-400
-            rounded transition-[color,background-color] duration-300 cursor-grab flex items-center
+            className={`text-gray-400 hover:text-gray-200 hover:bg-white/10
+            rounded-md p-1 transition-[color,background-color] duration-300 cursor-grab flex items-center
             active:cursor-grabbing ${styles.dragButton}`}
             style={{
               opacity: isHovered ? 1 : 0,
@@ -65,6 +66,7 @@ export function SortableElement({
           </button>
           <div>{renderElement({ attributes, children, element })}</div>
         </div>
+        <AddElementDivider element={element} />
       </div>
     </div>
   );

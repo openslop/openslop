@@ -12,6 +12,7 @@ interface ElementContainerProps {
   label: string;
   bgColor: string;
   customAttributes?: Record<string, string>;
+  visibleAttributes: string[];
   children: React.ReactNode;
   placeholder?: string;
 }
@@ -22,12 +23,16 @@ export function ElementContainer({
   label,
   bgColor,
   customAttributes,
+  visibleAttributes,
   children,
   element,
   placeholder,
 }: ElementContainerProps) {
-  const { model, ...restAttributes } = customAttributes ?? {};
-  const attributeEntries = Object.entries(restAttributes);
+  const allAttrs = customAttributes ?? {};
+  const model = allAttrs.model;
+  const visibleEntries = visibleAttributes
+    .filter((key) => key !== "model" && key in allAttrs)
+    .map((key) => [key, allAttrs[key]] as const);
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
 
   return (
@@ -45,7 +50,7 @@ export function ElementContainer({
               {icon}
               <span className="text-xs">{label}</span>
             </div>
-            {attributeEntries.map(([key, value], index) =>
+            {visibleEntries.map(([key, value], index) =>
               value ? (
                 <span
                   key={key}
@@ -56,7 +61,7 @@ export function ElementContainer({
                 </span>
               ) : null,
             )}
-            {model && (
+            {model && visibleAttributes.includes("model") && (
               <span className="inline-flex items-center bg-white/15 text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
                 {model}
                 <ChevronDown className="w-2.5 h-2.5 text-white/70 ml-0.5" />
