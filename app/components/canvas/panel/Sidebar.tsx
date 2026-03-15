@@ -12,7 +12,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
   return (
     <div
       className={`fixed top-0 left-0 h-full z-[80] w-[calc(14rem+2.5rem)] transition-transform duration-300 motion-reduce:transition-none ${
-        open ? "translate-x-0" : "-translate-x-51"
+        open ? "translate-x-0" : "-translate-x-52"
       }`}
     >
       <div
