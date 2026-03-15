@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Slate, Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
@@ -13,11 +13,12 @@ import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { SortableElement } from "./dnd/SortableElement";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { PanelItem } from "./panel/PanelItem";
-import ElementPanel from "./panel/ElementPanel";
+import Sidebar from "./panel/Sidebar";
 import { renderStoryElement } from "./elements/ElementRenderer";
 import { ELEMENT_CONFIGS } from "./config/elementConfigs";
-
 export default function Canvas() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
   const { editor, value, setValue } = useEditorSetup();
   const {
     activeId,
@@ -56,12 +57,12 @@ export default function Canvas() {
       onDragCancel={handleDragCancel}
       onDragOver={handleDragOver}
     >
-      <ElementPanel />
+      <Sidebar open={sidebarOpen} onToggle={toggleSidebar} />
 
       <Slate editor={editor} initialValue={value} onChange={setValue}>
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           <Editable
-            placeholder="Start typing your story..."
+            placeholder="Start typing your story…"
             renderElement={renderElement}
             className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />

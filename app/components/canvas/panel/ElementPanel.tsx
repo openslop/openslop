@@ -3,16 +3,17 @@
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { DraggablePanelItem } from "./DraggablePanelItem";
 
+const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);
+
 export default function ElementPanel() {
   return (
-    <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[60] pointer-events-auto">
-      <div className="p-2 min-w-[140px]">
-        <div className="flex flex-col gap-2">
-          {Object.values(ELEMENT_CONFIGS).map((item) => (
-            <DraggablePanelItem key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
+    <div className="flex flex-col gap-2">
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50">
+        Elements
+      </h2>
+      {ELEMENT_LIST.map((item) => (
+        <DraggablePanelItem key={item.id} item={item} />
+      ))}
     </div>
   );
 }
