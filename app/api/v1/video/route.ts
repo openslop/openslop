@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getVideoProvider } from "@/lib/api/providers";
 import { badRequest, serverError } from "@/lib/api/response";
+import { validateModel } from "@/lib/api/validate-model";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { logger } from "@/lib/api/logger";
 
@@ -11,9 +12,8 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    const validModels = Object.values(VIDEO_MODELS);
-    if (model && !validModels.includes(model))
-      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
+    const modelError = validateModel(model, VIDEO_MODELS);
+    if (modelError) return modelError;
     if (
       referenceImage &&
       (typeof referenceImage !== "string" ||

@@ -29,7 +29,7 @@ export default function Canvas() {
     handleDragOver,
   } = useDragAndDrop(editor, value);
 
-  useScriptSync(editor, setValue);
+  useScriptSync(editor);
 
   const renderElement = useCallback(
     (props: RenderElementProps) => (
@@ -63,16 +63,14 @@ export default function Canvas() {
           <Editable
             placeholder="Start typing your story..."
             renderElement={renderElement}
-            className="font-body text-sm leading-relaxed outline-none"
+            className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </SortableContext>
         <DragOverlay>
           {activeEditorElement && (
             <DragOverlayContent element={activeEditorElement} />
           )}
-          {activePanelItem && (
-            <PanelItem item={activePanelItem} isHovered={true} />
-          )}
+          {activePanelItem && <PanelItem item={activePanelItem} />}
         </DragOverlay>
       </Slate>
     </DndContext>

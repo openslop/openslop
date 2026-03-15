@@ -26,8 +26,8 @@ const defaultConnectors: ConnectorRegistry = {
 
 type ConfigContextValue = {
   connectors: ConnectorRegistry;
-  setConnectors: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
   mode: Mode;
+  setConnectors: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
 };
 
@@ -62,8 +62,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     <ConfigContext.Provider
       value={{
         connectors: connectorsWithModePlugins,
-        setConnectors,
         mode,
+        setConnectors,
         setMode,
       }}
     >
