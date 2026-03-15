@@ -1,20 +1,15 @@
-import { OpenSlopClient } from "@/lib/clients/openslop";
 import type {
   TTSGenerateParams,
   TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
+import { BaseOpenSlopProvider } from "../openslop-base";
 
-export class OpenSlopTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
-  private client: OpenSlopClient;
-
-  constructor(baseUrl?: string) {
-    super();
-    this.client = new OpenSlopClient(baseUrl);
-  }
-
+export class OpenSlopTTS extends BaseOpenSlopProvider<
+  TTSGenerateParams,
+  TTSResult
+> {
   async generate(params: TTSGenerateParams): Promise<TTSResult> {
     return this.client.post("/api/v1/tts", params);
   }

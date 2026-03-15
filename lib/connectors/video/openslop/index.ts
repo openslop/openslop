@@ -5,6 +5,7 @@ import type {
   ModelInfo,
   VideoJob,
 } from "@/lib/connectors/types";
+import { modelsFromMap } from "@/lib/connectors/types";
 import { VIDEO_MODELS } from "./models";
 
 export class OpenSlopVideo extends BaseVideoConnector<OpenSlopVideoProvider> {
@@ -13,7 +14,7 @@ export class OpenSlopVideo extends BaseVideoConnector<OpenSlopVideoProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return Object.entries(VIDEO_MODELS).map(([name, id]) => ({ id, name }));
+    return modelsFromMap(VIDEO_MODELS);
   }
 
   async poll(jobId: string): Promise<VideoJob> {

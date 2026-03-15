@@ -68,7 +68,9 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
     [connectors.llm, appendChunk],
   );
 
-  const refineScript = useCallback(async (_prompt: string) => {}, []);
+  const refineScript = useCallback(async (_prompt: string) => {
+    // TODO: Implement
+  }, []);
 
   return (
     <ScriptContext.Provider

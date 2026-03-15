@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getLLMProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
-import { validateModel } from "@/lib/api/validate-model";
+import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 import { logger } from "@/lib/api/logger";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+export const POST = createRouteHandler({
+  models: LLM_MODELS,
+  getProvider: getLLMProvider,
+  label: "LLM generation",
+  handle: async (provider, body) => {
     const {
       prompt,
       model,
@@ -17,13 +17,6 @@ export async function POST(request: NextRequest) {
       temperature,
       stream,
     } = body;
-
-    if (!prompt || typeof prompt !== "string")
-      return badRequest("prompt is required");
-    const modelError = validateModel(model, LLM_MODELS);
-    if (modelError) return modelError;
-
-    const provider = getLLMProvider();
     const genParams = {
       prompt,
       model,
@@ -61,10 +54,6 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await provider.generate(genParams);
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error(error, "LLM generation failed");
-    return serverError("LLM generation failed");
-  }
-}
+    return jsonResponse(result);
+  },
+});

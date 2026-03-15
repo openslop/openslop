@@ -1,6 +1,7 @@
 import { BaseMusicConnector } from "../connector";
 import { OpenSlopMusic as OpenSlopMusicProvider } from "@/lib/providers/music/openslop";
 import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
+import { modelsFromMap } from "@/lib/connectors/types";
 import { MUSIC_MODELS } from "./models";
 
 export class OpenSlopMusic extends BaseMusicConnector<OpenSlopMusicProvider> {
@@ -9,6 +10,6 @@ export class OpenSlopMusic extends BaseMusicConnector<OpenSlopMusicProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return Object.entries(MUSIC_MODELS).map(([name, id]) => ({ id, name }));
+    return modelsFromMap(MUSIC_MODELS);
   }
 }
