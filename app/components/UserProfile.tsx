@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
 
-interface UserProfileProps {
+export interface UserProfileProps {
   email: string;
   avatarUrl?: string;
   name?: string;
@@ -37,7 +37,7 @@ export default function UserProfile({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="relative z-[51] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="relative z-[91] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Avatar className="h-9 w-9 cursor-pointer">
             {avatarUrl && <AvatarImage src={avatarUrl} alt={email} />}
@@ -52,7 +52,7 @@ export default function UserProfile({
         side="bottom"
         sideOffset={-44}
         alignOffset={-8}
-        className="w-56 origin-center rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-105 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-105"
+        className="z-[90] w-56 origin-center rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-105 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-105"
       >
         <div className="flex h-[52px] items-center gap-3 pl-12 pr-4">
           <span className="truncate text-sm font-medium text-white/90 pl-1">
