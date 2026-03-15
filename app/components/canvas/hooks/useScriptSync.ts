@@ -8,12 +8,8 @@ import type { CanvasElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 
 export function useScriptSync(editor: Editor): void {
-  const {
-    state: { nodes },
-  } = useScript();
-  const {
-    state: { connectors },
-  } = useConfig();
+  const { nodes } = useScript();
+  const { connectors } = useConfig();
 
   const normalize = useMemo(
     () => flow(trimWhitespace, hydrateModel(connectors)),

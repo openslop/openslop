@@ -28,14 +28,9 @@ interface EditorUser {
 }
 
 export default function Editor({ user }: { user: EditorUser }) {
-  const {
-    state: { mode },
-    actions: { setMode },
-  } = useConfig();
-  const {
-    state: { script, loading },
-    actions: { submitPrompt, refineScript, stopGeneration },
-  } = useScript();
+  const { mode, setMode } = useConfig();
+  const { script, loading, submitPrompt, refineScript, stopGeneration } =
+    useScript();
   const [prompted, setPrompted] = useState(false);
 
   const hasScript = script.length > 0 || loading;

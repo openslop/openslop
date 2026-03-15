@@ -14,12 +14,12 @@ import { createConnector } from "@/lib/connectors/factory";
 import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
 type ScriptContextValue = {
-  state: { script: string; nodes: Descendant[]; loading: boolean };
-  actions: {
-    submitPrompt: (prompt: string) => Promise<void>;
-    refineScript: (prompt: string) => Promise<void>;
-    stopGeneration: () => void;
-  };
+  script: string;
+  nodes: Descendant[];
+  loading: boolean;
+  submitPrompt: (prompt: string) => Promise<void>;
+  refineScript: (prompt: string) => Promise<void>;
+  stopGeneration: () => void;
 };
 
 const ScriptContext = createContext<ScriptContextValue | null>(null);
@@ -31,9 +31,7 @@ export function useScript() {
 }
 
 export function ScriptProvider({ children }: { children: ReactNode }) {
-  const {
-    state: { connectors },
-  } = useConfig();
+  const { connectors } = useConfig();
   const [script, setScript] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -75,8 +73,12 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
   return (
     <ScriptContext.Provider
       value={{
-        state: { script, nodes, loading },
-        actions: { submitPrompt, refineScript, stopGeneration },
+        script,
+        nodes,
+        loading,
+        submitPrompt,
+        refineScript,
+        stopGeneration,
       }}
     >
       {children}
