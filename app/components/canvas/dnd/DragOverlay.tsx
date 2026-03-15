@@ -14,7 +14,12 @@ export function DragOverlayContent({ element }: { element: Descendant }) {
   return (
     <div className={styles.dragOverlay}>
       <Slate editor={editor} initialValue={value}>
-        <button className={`flex items-center ${styles.dragButton}`}>⠿</button>
+        <button
+          aria-label="Drag handle"
+          className={`flex items-center ${styles.dragButton}`}
+        >
+          ⠿
+        </button>
         <Editable
           readOnly={true}
           renderElement={renderStoryElement}

@@ -9,14 +9,18 @@ export type CanvasElementType =
   | "sound"
   | "music";
 
-export const CANVAS_ELEMENT_TYPES = new Set<CanvasElementType>([
+const CANVAS_ELEMENT_TYPE_LIST: CanvasElementType[] = [
   "narration",
   "character",
   "image",
   "clip",
   "sound",
   "music",
-]);
+];
+
+export const CANVAS_ELEMENT_TYPES = new Set<CanvasElementType>(
+  CANVAS_ELEMENT_TYPE_LIST,
+);
 
 export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };
 

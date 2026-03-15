@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSFXProvider } from "@/lib/api/providers";
 import { badRequest, serverError } from "@/lib/api/response";
+import { validateModel } from "@/lib/api/validate-model";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { logger } from "@/lib/api/logger";
 
@@ -11,9 +12,8 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    const validModels = Object.values(SFX_MODELS);
-    if (model && !validModels.includes(model))
-      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
+    const modelError = validateModel(model, SFX_MODELS);
+    if (modelError) return modelError;
 
     const provider = getSFXProvider();
     const buffer = await provider.generate({ prompt, model, durationSeconds });

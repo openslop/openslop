@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getImageProvider } from "@/lib/api/providers";
 import { badRequest, serverError } from "@/lib/api/response";
+import { validateModel } from "@/lib/api/validate-model";
 import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 import { logger } from "@/lib/api/logger";
 
@@ -11,9 +12,8 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string")
       return badRequest("prompt is required");
-    const validModels = Object.values(IMAGE_MODELS);
-    if (model && !validModels.includes(model))
-      return badRequest(`Invalid model. Supported: ${validModels.join(", ")}`);
+    const modelError = validateModel(model, IMAGE_MODELS);
+    if (modelError) return modelError;
 
     const provider = getImageProvider();
     const result = await provider.generate({

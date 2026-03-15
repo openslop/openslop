@@ -2,26 +2,12 @@ import { useDraggable } from "@dnd-kit/core";
 import { ElementConfig } from "../config/elementConfigs";
 import { PanelItem } from "./PanelItem";
 
-interface DraggablePanelItemProps {
-  item: ElementConfig;
-  hoveredItem: string | null;
-}
-
-export function DraggablePanelItem({
-  item,
-  hoveredItem,
-}: DraggablePanelItemProps) {
+export function DraggablePanelItem({ item }: { item: ElementConfig }) {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: item.id,
   });
 
   return (
-    <PanelItem
-      item={item}
-      isHovered={hoveredItem === item.id}
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-    />
+    <PanelItem item={item} ref={setNodeRef} {...attributes} {...listeners} />
   );
 }

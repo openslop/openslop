@@ -50,8 +50,9 @@ export function SortableElement({
           onMouseLeave={handleMouseLeave}
         >
           <button
+            aria-label="Drag to reorder"
             className={`text-gray-400 hover:text-gray-600 hover:bg-gray-400
-            rounded transition-all duration-300 cursor-grab flex items-center
+            rounded transition-[color,background-color] duration-300 cursor-grab flex items-center
             active:cursor-grabbing ${styles.dragButton}`}
             style={{
               opacity: isHovered ? 1 : 0,

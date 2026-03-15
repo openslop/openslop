@@ -73,7 +73,7 @@ export function ElementContainer({
                 {placeholder}
               </div>
             )}
-            <div className="text-white/90 text-xs leading-relaxed overflow-hidden transition-all duration-200 text-left">
+            <div className="text-white/90 text-xs leading-relaxed overflow-hidden transition-[max-height,opacity] duration-200 text-left">
               {children}
             </div>
           </div>
