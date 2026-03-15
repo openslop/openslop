@@ -18,6 +18,7 @@ type ScriptContextValue = {
   nodes: Descendant[];
   loading: boolean;
   submitPrompt: (prompt: string) => Promise<void>;
+  refineScript: (prompt: string) => Promise<void>;
   stopGeneration: () => void;
 };
 
@@ -67,6 +68,10 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
     [connectors.llm, appendChunk],
   );
 
+  const refineScript = useCallback(async (_prompt: string) => {
+    // TODO: Implement
+  }, []);
+
   return (
     <ScriptContext.Provider
       value={{
@@ -74,6 +79,7 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
         nodes,
         loading,
         submitPrompt,
+        refineScript,
         stopGeneration,
       }}
     >

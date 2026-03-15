@@ -24,7 +24,8 @@ And in that garden… lived a little rabbit named Lumi…`;
 
 export default function Editor({ user }: { user: UserProfileProps }) {
   const { mode, setMode } = useConfig();
-  const { script, loading, submitPrompt, stopGeneration } = useScript();
+  const { script, loading, submitPrompt, stopGeneration, refineScript } =
+    useScript();
   const [prompted, setPrompted] = useState(false);
 
   const hasScript = script.length > 0 || loading;
@@ -44,7 +45,19 @@ export default function Editor({ user }: { user: UserProfileProps }) {
         <UserProfile {...user} />
       </div>
 
-      {!prompted ? (
+      {prompted ? (
+        <div className="flex w-full justify-center px-4 pl-16 animate-copilot-enter">
+          <div className="w-full max-w-2xl">
+            <Copilot
+              onSubmit={refineScript}
+              onStop={stopGeneration}
+              multiline={false}
+              loading={loading}
+              placeholder="Refine your script…"
+            />
+          </div>
+        </div>
+      ) : (
         <div className="flex w-full max-w-2xl flex-col items-center px-4">
           <div
             className="flex flex-col items-center opacity-100 max-h-[400px] mb-6 transition-[opacity,max-height,margin-bottom] duration-1000"
@@ -71,18 +84,6 @@ export default function Editor({ user }: { user: UserProfileProps }) {
               )
             }
           />
-        </div>
-      ) : (
-        <div className="flex w-full justify-center px-4 pl-16 animate-copilot-enter">
-          <div className="w-full max-w-2xl">
-            <Copilot
-              onSubmit={submitPrompt}
-              onStop={stopGeneration}
-              multiline={false}
-              loading={loading}
-              placeholder="Refine your script…"
-            />
-          </div>
         </div>
       )}
 

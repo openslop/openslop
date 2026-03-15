@@ -5,15 +5,16 @@ import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import type { CanvasElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
+import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
   const { nodes } = useScript();
   const { connectors } = useConfig();
 
-  const normalize = useMemo(() => {
-    const hydrate = hydrateModel(connectors);
-    return (node: CanvasElement) => hydrate(trimWhitespace(node));
-  }, [connectors]);
+  const normalize = useMemo(
+    () => flow(trimWhitespace, hydrateModel(connectors)),
+    [connectors],
+  );
 
   useEffect(() => {
     Editor.withoutNormalizing(editor, () => {
