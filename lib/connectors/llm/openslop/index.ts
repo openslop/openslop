@@ -6,6 +6,7 @@ import type {
   LLMStreamChunk,
   ModelInfo,
 } from "@/lib/connectors/types";
+import { modelsFromMap } from "@/lib/connectors/types";
 import { LLM_MODELS } from "./models";
 
 export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
@@ -14,7 +15,7 @@ export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    return Object.entries(LLM_MODELS).map(([name, id]) => ({ id, name }));
+    return modelsFromMap(LLM_MODELS);
   }
 
   protected async *_stream(

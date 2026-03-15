@@ -1,4 +1,4 @@
-export const PILL_COLORS = [
+export const ATTRIBUTE_BADGE_COLORS = [
   "bg-rose-500",
   "bg-blue-500",
   "bg-green-500",

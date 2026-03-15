@@ -9,15 +9,12 @@ import { parseXmlTag } from "./parseXmlTag";
 
 const DEFAULT_TAG_TYPE: CanvasElementType = "narration";
 const MIN_BUFFER_LENGTH = 5;
+const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
 
 export class OSMLSerializer {
   private processedSinceLastEmit = 0;
   private buffer = "";
   private nodes: CanvasElement[] = [];
-
-  private static readonly VALID_TYPES: Set<string> = new Set(
-    CANVAS_ELEMENT_TYPES,
-  );
 
   static serialize(descendants: Descendant[]): string {
     let osml = "";
@@ -53,7 +50,7 @@ export class OSMLSerializer {
   }
 
   private parseBuffer(): boolean {
-    const tagPattern = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
+    TAG_PATTERN.lastIndex = 0;
 
     if (this.shouldFlushBuffer()) {
       this.updateCurrent(this.buffer);
@@ -65,7 +62,7 @@ export class OSMLSerializer {
     let match: RegExpExecArray | null = null;
     let updated = false;
 
-    while ((match = tagPattern.exec(this.buffer)) !== null) {
+    while ((match = TAG_PATTERN.exec(this.buffer)) !== null) {
       const text = this.buffer.slice(lastIndex, match.index);
       if (text.trim()) {
         this.updateCurrent(text);
@@ -117,7 +114,7 @@ export class OSMLSerializer {
 
   private mapTagToType(tagName: string): CanvasElementType {
     const normalized = tagName.toLowerCase();
-    return OSMLSerializer.VALID_TYPES.has(normalized)
+    return CANVAS_ELEMENT_TYPES.has(normalized as CanvasElementType)
       ? (normalized as CanvasElementType)
       : DEFAULT_TAG_TYPE;
   }

@@ -1,15 +1,10 @@
-import { OpenSlopClient } from "@/lib/clients/openslop";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
+import { BaseOpenSlopProvider } from "../openslop-base";
 
-export class OpenSlopSFX extends BaseProvider<SFXGenerateParams, ArrayBuffer> {
-  private client: OpenSlopClient;
-
-  constructor(baseUrl?: string) {
-    super();
-    this.client = new OpenSlopClient(baseUrl);
-  }
-
+export class OpenSlopSFX extends BaseOpenSlopProvider<
+  SFXGenerateParams,
+  ArrayBuffer
+> {
   async generate(params: SFXGenerateParams): Promise<ArrayBuffer> {
     return this.client.postBinary("/api/v1/sfx", params);
   }

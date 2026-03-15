@@ -1,22 +1,14 @@
-import { OpenSlopClient } from "@/lib/clients/openslop";
 import type {
   LLMGenerateParams,
   LLMGenerateResult,
   LLMStreamChunk,
 } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
+import { BaseOpenSlopProvider } from "../openslop-base";
 
-export class OpenSlopLLM extends BaseProvider<
+export class OpenSlopLLM extends BaseOpenSlopProvider<
   LLMGenerateParams,
   LLMGenerateResult
 > {
-  private client: OpenSlopClient;
-
-  constructor(baseUrl?: string) {
-    super();
-    this.client = new OpenSlopClient(baseUrl);
-  }
-
   async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
     return this.client.post("/api/v1/llm", params);
   }

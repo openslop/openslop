@@ -1,29 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getVideoProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
-import { validateModel } from "@/lib/api/validate-model";
+import { badRequest } from "@/lib/api/response";
+import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
-import { logger } from "@/lib/api/logger";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { prompt, model, referenceImage, duration, width, height } = body;
-
-    if (!prompt || typeof prompt !== "string")
-      return badRequest("prompt is required");
-    const modelError = validateModel(model, VIDEO_MODELS);
-    if (modelError) return modelError;
+export const POST = createRouteHandler({
+  models: VIDEO_MODELS,
+  getProvider: getVideoProvider,
+  label: "Video submission",
+  extraValidation: (body) => {
+    const { referenceImage } = body;
     if (
       referenceImage &&
       (typeof referenceImage !== "string" ||
-        !referenceImage.match(/^data:[a-z]+\/[a-z+.-]+;base64,/i))
+        !String(referenceImage).match(/^data:[a-z]+\/[a-z+.-]+;base64,/i))
     )
       return badRequest(
         "referenceImage must be a data URI (e.g. data:image/png;base64,...)",
       );
-
-    const provider = getVideoProvider();
+    return null;
+  },
+  handle: async (provider, body) => {
+    const { prompt, model, referenceImage, duration, width, height } = body;
     const result = await provider.submit({
       prompt,
       model,
@@ -32,10 +29,6 @@ export async function POST(request: NextRequest) {
       width,
       height,
     });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error(error, "Video submission failed");
-    return serverError("Video submission failed");
-  }
-}
+    return jsonResponse(result);
+  },
+});

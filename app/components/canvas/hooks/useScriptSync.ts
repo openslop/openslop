@@ -1,11 +1,11 @@
 import { useEffect, useMemo } from "react";
 import { Editor, Transforms } from "slate";
-import flow from "lodash/fp/flow";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import type { CanvasElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
+import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
   const { nodes } = useScript();
