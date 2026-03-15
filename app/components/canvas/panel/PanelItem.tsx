@@ -1,5 +1,5 @@
 import { GripVertical } from "lucide-react";
-import { ElementConfig, colorClasses } from "../config/elementConfigs";
+import { ElementConfig } from "../config/elementConfigs";
 
 interface PanelItemProps extends React.HTMLAttributes<HTMLDivElement> {
   item: ElementConfig;
@@ -7,24 +7,24 @@ interface PanelItemProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function PanelItem({ item, ref, ...props }: PanelItemProps) {
-  const { background, outline, hoverBackground, hoverOutline } =
-    colorClasses[item.panelColor];
-
   return (
-    <div
-      className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-move
-        transition-[transform,background-color,outline-color] duration-200
-        ${background} ${outline} ${hoverBackground} ${hoverOutline}`}
-      ref={ref}
-      {...props}
-    >
+    <div className="flex items-center gap-2 cursor-move" ref={ref} {...props}>
       <GripVertical
         size={14}
-        className="text-muted-foreground/60 flex-shrink-0"
+        className="text-white/40 flex-shrink-0"
         aria-hidden="true"
       />
-      <span className="text-muted-foreground">{item.icon}</span>
-      <span className="text-sm font-medium">{item.label}</span>
+      <div
+        className={`grain relative overflow-hidden rounded-lg ${item.bgColor} shadow-md flex-1
+          transition-[transform,filter] duration-200 motion-reduce:transition-none hover:brightness-110`}
+      >
+        <div className="relative z-10 flex items-center gap-2 px-3 py-2">
+          <span className="text-white/80">{item.icon}</span>
+          <span className="text-sm font-medium text-white/90">
+            {item.label}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
