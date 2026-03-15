@@ -25,6 +25,7 @@ export interface ElementConfig {
   bgColor: string;
   placeholder: string;
   defaultAttributes?: Record<string, string>;
+  visibleAttributes: string[];
 }
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
@@ -43,6 +44,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
       pitch: TTSPitch.Medium,
       accent: TTSAccent.American,
     },
+    visibleAttributes: ["model"],
   },
   character: {
     id: "character",
@@ -59,6 +61,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
       pitch: TTSPitch.Medium,
       accent: TTSAccent.American,
     },
+    visibleAttributes: ["model"],
   },
   image: {
     id: "image",
@@ -68,6 +71,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
     icon: <ImageIcon size={16} />,
     bgColor: "bg-cyan-600",
     placeholder: "Describe the image...",
+    visibleAttributes: ["model", "art_style"],
   },
   clip: {
     id: "clip",
@@ -77,10 +81,10 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
     icon: <Film size={16} />,
     bgColor: "bg-indigo-600",
     placeholder: "Describe the video clip...",
-
     defaultAttributes: {
       duration: "5s",
     },
+    visibleAttributes: ["model", "duration"],
   },
   sound: {
     id: "sound",
@@ -94,6 +98,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
     defaultAttributes: {
       type: SoundType.Transient,
     },
+    visibleAttributes: ["model", "type"],
   },
   music: {
     id: "music",
@@ -103,5 +108,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
     icon: <Music size={16} />,
     bgColor: "bg-violet-600",
     placeholder: "Describe the music...",
+    visibleAttributes: ["model", "length"],
   },
 };
+
+export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

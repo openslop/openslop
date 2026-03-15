@@ -12,9 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { Descendant, Editor, Transforms } from "slate";
 import { CANVAS_ELEMENT_TYPES, type CanvasElementType } from "../types";
-import { makeNodeId } from "../utils/nodeUtils";
-import { ZERO_WIDTH_SPACE } from "../config/constants";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { createElementNode } from "../utils/nodeUtils";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
@@ -58,20 +56,9 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
         !CANVAS_ELEMENT_TYPES.has(over?.id as CanvasElementType)
       ) {
         const newIndex = baseItems.indexOf(over?.id as string);
-        const config = ELEMENT_CONFIGS[type];
-        Transforms.insertNodes(
-          editor,
-          {
-            type,
-            id: makeNodeId(),
-            customAttributes: config.defaultAttributes,
-            children: [
-              { id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
-              { id: makeNodeId(), type, text: "" },
-            ],
-          },
-          { at: [newIndex < 0 ? editor.children.length : newIndex] },
-        );
+        Transforms.insertNodes(editor, createElementNode(type), {
+          at: [newIndex < 0 ? editor.children.length : newIndex],
+        });
         setActiveId(null);
         return;
       }
