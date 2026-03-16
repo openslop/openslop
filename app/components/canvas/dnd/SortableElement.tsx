@@ -9,9 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useConfig } from "@/lib/config/ConfigProvider";
 import type { CanvasElement, CanvasElementType } from "../types";
 import { ELEMENT_LIST } from "../config/elementConfigs";
-import { useInsertElement } from "../hooks/useInsertElement";
+import { insertElement } from "../utils/insertElement";
 import styles from "../styles/sortable.module.css";
 
 export function SortableElement({
@@ -26,7 +27,7 @@ export function SortableElement({
   renderElement: (props: RenderElementProps) => React.ReactNode;
 }) {
   const editor = useSlateStatic();
-  const insert = useInsertElement();
+  const { connectorDefaults } = useConfig();
   const {
     listeners,
     setNodeRef,
@@ -47,10 +48,10 @@ export function SortableElement({
   const handleInsert = useCallback(
     (type: CanvasElementType) => {
       const path = ReactEditor.findPath(editor, element);
-      insert(type, path[0] + 1);
+      insertElement(editor, type, path[0] + 1, connectorDefaults);
       setIsHovered(false);
     },
-    [editor, element, insert],
+    [connectorDefaults, editor, element],
   );
 
   return (

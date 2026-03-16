@@ -11,11 +11,12 @@ import {
   KeyboardSensor,
 } from "@dnd-kit/core";
 import { Descendant, Editor, Transforms } from "slate";
+import { useConfig } from "@/lib/config/ConfigProvider";
 import { CANVAS_ELEMENT_TYPES, type CanvasElementType } from "../types";
-import { useInsertElement } from "../hooks/useInsertElement";
+import { insertElement } from "../utils/insertElement";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
-  const insert = useInsertElement();
+  const { connectorDefaults } = useConfig();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [pendingPanelId, setPendingPanelId] = useState<UniqueIdentifier | null>(
     null,
@@ -57,7 +58,12 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
         !CANVAS_ELEMENT_TYPES.has(over?.id as CanvasElementType)
       ) {
         const newIndex = baseItems.indexOf(over?.id as string);
-        insert(type, newIndex < 0 ? editor.children.length : newIndex);
+        insertElement(
+          editor,
+          type,
+          newIndex < 0 ? editor.children.length : newIndex,
+          connectorDefaults,
+        );
         setActiveId(null);
         return;
       }
@@ -72,7 +78,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
       }
       setActiveId(null);
     },
-    [baseItems, editor, insert],
+    [baseItems, connectorDefaults, editor],
   );
 
   const handleDragCancel = useCallback(() => {
