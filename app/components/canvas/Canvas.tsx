@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Slate, Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
@@ -17,8 +17,6 @@ import Sidebar from "./panel/Sidebar";
 import { renderStoryElement } from "./elements/ElementRenderer";
 import { ELEMENT_CONFIGS } from "./config/elementConfigs";
 export default function Canvas() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
   const { editor, value, setValue } = useEditorSetup();
   const {
     activeId,
@@ -57,7 +55,7 @@ export default function Canvas() {
       onDragCancel={handleDragCancel}
       onDragOver={handleDragOver}
     >
-      <Sidebar open={sidebarOpen} onToggle={toggleSidebar} />
+      <Sidebar />
 
       <Slate editor={editor} initialValue={value} onChange={setValue}>
         <SortableContext items={items} strategy={verticalListSortingStrategy}>

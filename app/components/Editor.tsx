@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useScript } from "@/lib/script/ScriptProvider";
-import UserProfile from "./UserProfile";
 import ModeToggle from "./ModeToggle";
 import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import Canvas from "./canvas/Canvas";
-import type { UserProfileProps } from "./UserProfile";
+import UserProfile from "./UserProfile";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
@@ -22,7 +21,7 @@ there was a small glowing garden hidden on the moon.
 
 And in that garden… lived a little rabbit named Lumi…`;
 
-export default function Editor({ user }: { user: UserProfileProps }) {
+export default function Editor() {
   const { mode, setMode } = useConfig();
   const { script, loading, submitPrompt, stopGeneration, refineScript } =
     useScript();
@@ -41,10 +40,11 @@ export default function Editor({ user }: { user: UserProfileProps }) {
         hasScript ? "pt-4" : "pt-[30vh]"
       }`}
     >
-      <div className="fixed top-4 left-4 z-[100]">
-        <UserProfile {...user} />
-      </div>
-
+      {!prompted && (
+        <div className="fixed left-4 top-4 z-[100]">
+          <UserProfile />
+        </div>
+      )}
       {prompted ? (
         <div className="flex w-full justify-center px-4 pl-16 animate-copilot-enter">
           <div className="w-full max-w-2xl">
