@@ -2,7 +2,7 @@ import { GripVertical, Plus } from "lucide-react";
 import { useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
-import { renderStoryElement } from "../elements/ElementRenderer";
+import { renderStoryElement } from "../elements/ElementContainer";
 import styles from "../styles/sortable.module.css";
 
 export function DragOverlayContent({ element }: { element: Descendant }) {

@@ -4,7 +4,7 @@ import { PanelItem } from "./PanelItem";
 
 export function DraggablePanelItem({ item }: { item: ElementConfig }) {
   const { attributes, listeners, setNodeRef } = useDraggable({
-    id: item.id,
+    id: item.type,
   });
 
   return (

@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
-import { RenderElementProps, useSlateStatic, ReactEditor } from "slate-react";
+import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { CanvasElement, CanvasElementType } from "../types";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
-import { insertElement } from "../utils/insertElement";
+import { ELEMENT_LIST } from "../config/elementConfigs";
+import { useInsertElement } from "../hooks/useInsertElement";
 import styles from "../styles/sortable.module.css";
-
-const ELEMENT_TYPES = Object.values(ELEMENT_CONFIGS);
 
 export function SortableElement({
   attributes,
@@ -28,6 +26,7 @@ export function SortableElement({
   renderElement: (props: RenderElementProps) => React.ReactNode;
 }) {
   const editor = useSlateStatic();
+  const insert = useInsertElement();
   const {
     listeners,
     setNodeRef,
@@ -48,9 +47,10 @@ export function SortableElement({
   const handleInsert = useCallback(
     (type: CanvasElementType) => {
       const path = ReactEditor.findPath(editor, element);
-      insertElement(editor, type, path[0] + 1);
+      insert(type, path[0] + 1);
+      setIsHovered(false);
     },
-    [editor, element],
+    [editor, element, insert],
   );
 
   return (
@@ -92,16 +92,16 @@ export function SortableElement({
               <DropdownMenuContent
                 side="bottom"
                 align="start"
-                className="w-44 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-1"
+                className="w-40 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-1"
               >
-                {ELEMENT_TYPES.map((config) => (
+                {ELEMENT_LIST.map((config) => (
                   <DropdownMenuItem
-                    key={config.id}
+                    key={config.type}
                     onClick={() => handleInsert(config.type)}
-                    className="cursor-pointer rounded-lg py-2 text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+                    className="cursor-pointer rounded-lg py-2 text-white/70 hover:bg-white/10 hover:text-white focus:text-white focus:bg-white/10"
                   >
                     <span
-                      className={`${config.bgColor} inline-flex items-center justify-center rounded p-0.5 mr-2`}
+                      className={`${config.bgColor} inline-flex items-center justify-center rounded p-1 mr-1`}
                     >
                       {config.icon}
                     </span>

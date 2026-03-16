@@ -12,9 +12,10 @@ import {
 } from "@dnd-kit/core";
 import { Descendant, Editor, Transforms } from "slate";
 import { CANVAS_ELEMENT_TYPES, type CanvasElementType } from "../types";
-import { insertElement } from "../utils/insertElement";
+import { useInsertElement } from "../hooks/useInsertElement";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
+  const insert = useInsertElement();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [pendingPanelId, setPendingPanelId] = useState<UniqueIdentifier | null>(
     null,
@@ -56,11 +57,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
         !CANVAS_ELEMENT_TYPES.has(over?.id as CanvasElementType)
       ) {
         const newIndex = baseItems.indexOf(over?.id as string);
-        insertElement(
-          editor,
-          type,
-          newIndex < 0 ? editor.children.length : newIndex,
-        );
+        insert(type, newIndex < 0 ? editor.children.length : newIndex);
         setActiveId(null);
         return;
       }
@@ -75,7 +72,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
       }
       setActiveId(null);
     },
-    [baseItems, editor],
+    [baseItems, editor, insert],
   );
 
   const handleDragCancel = useCallback(() => {
