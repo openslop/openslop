@@ -5,6 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
+import { UserProvider } from "@/lib/user/UserProvider";
 import Editor from "./components/Editor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
@@ -25,13 +26,9 @@ export default async function Home() {
     return (
       <ConfigProvider>
         <ScriptProvider>
-          <Editor
-            user={{
-              email: user.email ?? "",
-              avatarUrl: user.user_metadata?.avatar_url,
-              name: user.user_metadata?.full_name,
-            }}
-          />
+          <UserProvider user={user}>
+            <Editor />
+          </UserProvider>
         </ScriptProvider>
       </ConfigProvider>
     );

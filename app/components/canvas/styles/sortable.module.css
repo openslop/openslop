@@ -3,13 +3,13 @@
   z-index: 0;
 }
 
-.sortable > div {
+.sortable > div:last-child {
   flex: 1;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-.dragOverlay > div {
+.dragOverlay > div:last-child {
   flex: 1;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -32,14 +32,16 @@
   padding: 4px;
 }
 
-.dragOverlay button,
-.dragButton {
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
   user-select: none;
-  background: none;
+  margin-right: 8px;
+}
+
+.actions button {
   border: none;
-  font-size: 24px;
-  display: inline-flex;
-  margin-right: 10px;
 }
 
 .dragOverlay :global(.animate-fadeInUp) {

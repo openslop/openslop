@@ -1,9 +1,20 @@
 import { useCallback, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { RenderElementProps } from "slate-react";
-import type { CanvasElement } from "../types";
+import { GripVertical, Plus } from "lucide-react";
+import { RenderElementProps, useSlateStatic, ReactEditor } from "slate-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { CanvasElement, CanvasElementType } from "../types";
+import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { insertElement } from "../utils/insertElement";
 import styles from "../styles/sortable.module.css";
+
+const ELEMENT_TYPES = Object.values(ELEMENT_CONFIGS);
 
 export function SortableElement({
   attributes,
@@ -16,6 +27,7 @@ export function SortableElement({
   children: React.ReactNode;
   renderElement: (props: RenderElementProps) => React.ReactNode;
 }) {
+  const editor = useSlateStatic();
   const {
     listeners,
     setNodeRef,
@@ -27,9 +39,19 @@ export function SortableElement({
   } = useSortable({ id: element.id });
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const showActions = isHovered || isMenuOpen;
 
   const handleMouseOver = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+  const handleInsert = useCallback(
+    (type: CanvasElementType) => {
+      const path = ReactEditor.findPath(editor, element);
+      insertElement(editor, type, path[0] + 1);
+    },
+    [editor, element],
+  );
 
   return (
     <div {...attributes}>
@@ -49,20 +71,55 @@ export function SortableElement({
           onMouseOver={handleMouseOver}
           onMouseLeave={handleMouseLeave}
         >
-          <button
-            aria-label="Drag to reorder"
-            className={`text-gray-400 hover:text-gray-600 hover:bg-gray-400
-            rounded transition-[color,background-color] duration-300 cursor-grab flex items-center
-            active:cursor-grabbing ${styles.dragButton}`}
+          <div
+            className={`self-center ${styles.actions}`}
             style={{
-              opacity: isHovered ? 1 : 0,
-              pointerEvents: isHovered ? "auto" : "none",
+              opacity: showActions ? 1 : 0,
+              pointerEvents: showActions ? "auto" : "none",
             }}
             contentEditable={false}
-            {...listeners}
           >
-            ⠿
-          </button>
+            <DropdownMenu modal={false} onOpenChange={setIsMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  aria-label="Add element"
+                  className="inline-flex items-center rounded-md p-0.5 text-white/40
+                  hover:text-white/80 hover:bg-white/10 transition-[color,background-color] duration-200"
+                >
+                  <Plus size={24} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="bottom"
+                align="start"
+                className="w-44 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-1"
+              >
+                {ELEMENT_TYPES.map((config) => (
+                  <DropdownMenuItem
+                    key={config.id}
+                    onClick={() => handleInsert(config.type)}
+                    className="cursor-pointer rounded-lg py-2 text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+                  >
+                    <span
+                      className={`${config.bgColor} inline-flex items-center justify-center rounded p-0.5 mr-2`}
+                    >
+                      {config.icon}
+                    </span>
+                    {config.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <button
+              aria-label="Drag to reorder"
+              className="inline-flex items-center rounded-md p-0.5 text-white/40
+              hover:text-white/80 hover:bg-white/10 transition-[color,background-color] duration-200
+              cursor-grab active:cursor-grabbing"
+              {...listeners}
+            >
+              <GripVertical size={24} />
+            </button>
+          </div>
           <div>{renderElement({ attributes, children, element })}</div>
         </div>
       </div>
