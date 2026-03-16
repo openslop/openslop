@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, KeyboardEvent } from "react";
 import { Slate, Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
@@ -29,6 +29,16 @@ export default function Canvas() {
   } = useDragAndDrop(editor, value);
 
   useScriptSync(editor);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.shiftKey && event.key === "Enter") {
+        event.preventDefault();
+        editor.insertText("\n");
+      }
+    },
+    [editor],
+  );
 
   const renderElement = useCallback(
     (props: RenderElementProps) => (
@@ -62,6 +72,7 @@ export default function Canvas() {
           <Editable
             placeholder="Start typing your story…"
             renderElement={renderElement}
+            onKeyDown={handleKeyDown}
             className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </SortableContext>
