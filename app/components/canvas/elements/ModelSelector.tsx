@@ -57,7 +57,7 @@ export function ModelSelector({
           <DropdownMenuItem
             key={m}
             onClick={() => handleSelect(m)}
-            className="cursor-pointer rounded-md px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+            className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
           >
             {m === model && (
               <Check className="w-3 h-3 mr-0.5 text-white" aria-hidden="true" />
