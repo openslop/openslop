@@ -17,7 +17,6 @@ import {
 import { SoundType } from "@/lib/connectors/sfx/enums";
 
 export interface ElementConfig {
-  id: string;
   type: CanvasElementType;
   connector: ConnectorType;
   label: string;
@@ -25,15 +24,15 @@ export interface ElementConfig {
   bgColor: string;
   placeholder: string;
   defaultAttributes?: Record<string, string>;
+  visibleAttributes: Record<string, string>;
 }
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   narration: {
-    id: "narration",
     type: "narration",
     connector: "tts",
     label: "Narration",
-    icon: <BookOpen size={16} />,
+    icon: <BookOpen size={16} className="text-white" />,
     bgColor: "bg-slate-600",
     placeholder: "Write the narration...",
 
@@ -43,13 +42,17 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
       pitch: TTSPitch.Medium,
       accent: TTSAccent.American,
     },
+    visibleAttributes: {
+      gender: "bg-rose-500",
+      accent: "bg-blue-500",
+      age: "bg-green-500",
+    },
   },
   character: {
-    id: "character",
     type: "character",
     connector: "tts",
     label: "Character",
-    icon: <User size={16} />,
+    icon: <User size={16} className="text-white" />,
     bgColor: "bg-amber-600",
     placeholder: "What does this character say?",
 
@@ -59,49 +62,63 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
       pitch: TTSPitch.Medium,
       accent: TTSAccent.American,
     },
+    visibleAttributes: {
+      name: "bg-purple-500",
+      age: "bg-green-500",
+      accent: "bg-blue-500",
+      gender: "bg-rose-500",
+    },
   },
   image: {
-    id: "image",
     type: "image",
     connector: "image",
     label: "Image",
-    icon: <ImageIcon size={16} />,
+    icon: <ImageIcon size={16} className="text-white" />,
     bgColor: "bg-cyan-600",
     placeholder: "Describe the image...",
+    visibleAttributes: {
+      art_style: "bg-pink-500",
+    },
   },
   clip: {
-    id: "clip",
     type: "clip",
     connector: "video",
     label: "Clip",
-    icon: <Film size={16} />,
+    icon: <Film size={16} className="text-white" />,
     bgColor: "bg-indigo-600",
     placeholder: "Describe the video clip...",
 
     defaultAttributes: {
       duration: "5s",
     },
+    visibleAttributes: {
+      duration: "bg-indigo-500",
+    },
   },
   sound: {
-    id: "sound",
     type: "sound",
     connector: "sfx",
     label: "Sound",
-    icon: <Volume2 size={16} />,
+    icon: <Volume2 size={16} className="text-white" />,
     bgColor: "bg-emerald-600",
     placeholder: "Describe the sound effect...",
 
     defaultAttributes: {
       type: SoundType.Transient,
     },
+    visibleAttributes: {
+      type: "bg-teal-500",
+    },
   },
   music: {
-    id: "music",
     type: "music",
     connector: "music",
     label: "Music",
-    icon: <Music size={16} />,
+    icon: <Music size={16} className="text-white" />,
     bgColor: "bg-violet-600",
     placeholder: "Describe the music...",
+    visibleAttributes: {},
   },
 };
+
+export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

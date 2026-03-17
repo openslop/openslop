@@ -1,19 +1,19 @@
 import { useEffect, useMemo } from "react";
 import { Editor, Transforms } from "slate";
 import { useScript } from "@/lib/script/ScriptProvider";
-import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { useConfig } from "@/lib/config/ConfigProvider";
 import type { CanvasElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
+import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
 import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
   const { nodes } = useScript();
-  const { connectors } = useConfig();
+  const { connectorDefaults } = useConfig();
 
   const normalize = useMemo(
-    () => flow(trimWhitespace, hydrateModel(connectors)),
-    [connectors],
+    () => flow(trimWhitespace, hydrateConnectorConfig(connectorDefaults)),
+    [connectorDefaults],
   );
 
   useEffect(() => {
@@ -56,18 +56,6 @@ function trimWhitespace(node: CanvasElement): CanvasElement {
       ...child,
       text: child.text.trim(),
     })),
-  };
-}
-
-function hydrateModel(connectors: ConnectorRegistry) {
-  return (node: CanvasElement): CanvasElement => {
-    const connectorType = ELEMENT_CONFIGS[node.type]?.connector;
-    const model = connectors[connectorType]?.model;
-    if (!model) return node;
-    return {
-      ...node,
-      customAttributes: { ...node.customAttributes, model },
-    };
   };
 }
 

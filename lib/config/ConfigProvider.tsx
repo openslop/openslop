@@ -1,7 +1,17 @@
 "use client";
 
 import { createContext, use, useMemo, useState, type ReactNode } from "react";
-import type { ConnectorConfig, ConnectorType } from "@/lib/connectors/types";
+import type {
+  ConnectorConfig,
+  ConnectorType,
+  ProviderKey,
+} from "@/lib/connectors/types";
+import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
+import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
+import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
+import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
+import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
+import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
@@ -10,7 +20,14 @@ export type Mode = "prompt" | "inputScript";
 
 export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
 
-const defaultConnectors: ConnectorRegistry = {
+export type ProviderConfig = { models: string[] };
+
+export type ConfiguredConnectors = Record<
+  ConnectorType,
+  Record<ProviderKey, ProviderConfig>
+>;
+
+const defaultConnectorDefaults: ConnectorRegistry = {
   llm: {
     provider: "openslop",
     model: "Slop LLM v1",
@@ -24,10 +41,23 @@ const defaultConnectors: ConnectorRegistry = {
   music: { provider: "openslop", model: "Slop Music v1", apiKey: "" },
 };
 
+const defaultConfiguredConnectors: ConfiguredConnectors = {
+  llm: { openslop: { models: Object.keys(LLM_MODELS) } },
+  image: { openslop: { models: Object.keys(IMAGE_MODELS) } },
+  tts: { openslop: { models: Object.keys(TTS_MODELS) } },
+  video: { openslop: { models: Object.keys(VIDEO_MODELS) } },
+  sfx: { openslop: { models: Object.keys(SFX_MODELS) } },
+  music: { openslop: { models: Object.keys(MUSIC_MODELS) } },
+};
+
 type ConfigContextValue = {
-  connectors: ConnectorRegistry;
+  connectorDefaults: ConnectorRegistry;
+  configuredConnectors: ConfiguredConnectors;
   mode: Mode;
-  setConnectors: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
+  setConnectorDefaults: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
+  setConfiguredConnectors: React.Dispatch<
+    React.SetStateAction<ConfiguredConnectors>
+  >;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
 };
 
@@ -40,34 +70,40 @@ export function useConfig() {
 }
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [connectors, setConnectors] =
-    useState<ConnectorRegistry>(defaultConnectors);
+  const [connectorDefaults, setConnectorDefaults] = useState<ConnectorRegistry>(
+    defaultConnectorDefaults,
+  );
+  const [configuredConnectors, setConfiguredConnectors] =
+    useState<ConfiguredConnectors>(defaultConfiguredConnectors);
   const [mode, setMode] = useState<Mode>("prompt");
 
   const connectorsWithModePlugins = useMemo<ConnectorRegistry>(
     () => ({
-      ...connectors,
+      ...connectorDefaults,
       llm: {
-        ...connectors.llm,
+        ...connectorDefaults.llm,
         plugins: [
-          ...(connectors.llm.plugins ?? []),
+          ...(connectorDefaults.llm.plugins ?? []),
           mode === "prompt" ? storyModePlugin : scriptModePlugin,
         ],
       },
     }),
-    [connectors, mode],
+    [connectorDefaults, mode],
+  );
+
+  const value = useMemo<ConfigContextValue>(
+    () => ({
+      connectorDefaults: connectorsWithModePlugins,
+      configuredConnectors,
+      mode,
+      setConnectorDefaults,
+      setConfiguredConnectors,
+      setMode,
+    }),
+    [connectorsWithModePlugins, configuredConnectors, mode],
   );
 
   return (
-    <ConfigContext.Provider
-      value={{
-        connectors: connectorsWithModePlugins,
-        mode,
-        setConnectors,
-        setMode,
-      }}
-    >
-      {children}
-    </ConfigContext.Provider>
+    <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
   );
 }

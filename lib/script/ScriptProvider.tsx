@@ -4,6 +4,7 @@ import {
   createContext,
   use,
   useCallback,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -31,7 +32,7 @@ export function useScript() {
 }
 
 export function ScriptProvider({ children }: { children: ReactNode }) {
-  const { connectors } = useConfig();
+  const { connectorDefaults } = useConfig();
   const [script, setScript] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -52,7 +53,7 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
       setScript("");
       setLoading(true);
       try {
-        const connector = createConnector("llm", connectors.llm);
+        const connector = createConnector("llm", connectorDefaults.llm);
         for await (const chunk of connector.stream({ prompt })) {
           if (controller.signal.aborted) break;
           setScript((prev) => prev + chunk.text);
@@ -65,25 +66,26 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [connectors.llm, appendChunk],
+    [connectorDefaults.llm, appendChunk],
   );
 
   const refineScript = useCallback(async (_prompt: string) => {
     // TODO: Implement
   }, []);
 
+  const value = useMemo<ScriptContextValue>(
+    () => ({
+      script,
+      nodes,
+      loading,
+      submitPrompt,
+      refineScript,
+      stopGeneration,
+    }),
+    [script, nodes, loading, submitPrompt, refineScript, stopGeneration],
+  );
+
   return (
-    <ScriptContext.Provider
-      value={{
-        script,
-        nodes,
-        loading,
-        submitPrompt,
-        refineScript,
-        stopGeneration,
-      }}
-    >
-      {children}
-    </ScriptContext.Provider>
+    <ScriptContext.Provider value={value}>{children}</ScriptContext.Provider>
   );
 }

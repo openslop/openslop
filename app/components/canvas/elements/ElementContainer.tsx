@@ -1,40 +1,33 @@
+import { JSX } from "react";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
-import { ChevronDown } from "lucide-react";
+import type { ProviderKey } from "@/lib/connectors/types";
 import type { CanvasElement } from "../types";
-import { ATTRIBUTE_BADGE_COLORS, ZERO_WIDTH_SPACE } from "../config/constants";
+import { ZERO_WIDTH_SPACE } from "../config/constants";
+import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { OutputPreview } from "./OutputPreview";
+import { ModelSelector } from "./ModelSelector";
 
 interface ElementContainerProps {
   attributes: RenderElementProps["attributes"];
   element: CanvasElement;
-  icon: React.ReactNode;
-  label: string;
-  bgColor: string;
-  customAttributes?: Record<string, string>;
   children: React.ReactNode;
-  placeholder?: string;
 }
 
 export function ElementContainer({
   attributes,
-  icon,
-  label,
-  bgColor,
-  customAttributes,
   children,
   element,
-  placeholder,
 }: ElementContainerProps) {
-  const { model, ...restAttributes } = customAttributes ?? {};
-  const attributeEntries = Object.entries(restAttributes);
+  const config = ELEMENT_CONFIGS[element.type];
+  const { model, provider } = element.customAttributes ?? {};
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
 
   return (
     <div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
       {/* Left: element card */}
       <div
-        className={`grain rounded-lg ${bgColor} p-2 shadow-md relative overflow-hidden flex-1 min-w-0`}
+        className={`grain rounded-lg ${config.bgColor} p-2 shadow-md relative overflow-hidden flex-1 min-w-0`}
       >
         <div className="relative z-10 min-w-0">
           <div
@@ -42,25 +35,27 @@ export function ElementContainer({
             contentEditable={false}
           >
             <div className="flex items-center gap-1 text-white font-medium">
-              {icon}
-              <span className="text-xs">{label}</span>
+              {config.icon}
+              <span className="text-xs">{config.label}</span>
             </div>
-            {attributeEntries.map(([key, value], index) =>
-              value ? (
+            {Object.entries(config.visibleAttributes).map(([key, color]) => {
+              const value = element.customAttributes?.[key];
+              return value ? (
                 <span
                   key={key}
-                  className={`${ATTRIBUTE_BADGE_COLORS[index % ATTRIBUTE_BADGE_COLORS.length]} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
+                  className={`${color} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
                   title={value}
                 >
                   {value}
                 </span>
-              ) : null,
-            )}
-            {model && (
-              <span className="inline-flex items-center bg-white/15 text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
-                {model}
-                <ChevronDown className="w-2.5 h-2.5 text-white/70 ml-0.5" />
-              </span>
+              ) : null;
+            })}
+            {model && provider && (
+              <ModelSelector
+                element={element}
+                model={model}
+                provider={provider as ProviderKey}
+              />
             )}
           </div>
           <div className="relative min-w-0">
@@ -70,7 +65,7 @@ export function ElementContainer({
                 style={{ userSelect: "none" }}
                 className="absolute top-0 left-0 text-white/50 text-xs text-left"
               >
-                {placeholder}
+                {config.placeholder}
               </div>
             )}
             <div className="text-white/90 text-xs leading-relaxed overflow-hidden transition-[max-height,opacity] duration-200 text-left">
@@ -84,6 +79,7 @@ export function ElementContainer({
       <div
         className="relative flex-shrink-0 w-px self-stretch mx-3 sm:mx-4"
         contentEditable={false}
+        aria-hidden="true"
       >
         <div
           className="absolute inset-0 w-px"
@@ -100,10 +96,14 @@ export function ElementContainer({
         <div className="w-full bg-white/[0.03] rounded-xl p-3 border border-white/[0.06] backdrop-blur-sm">
           <OutputPreview
             type={element.type}
-            characterName={customAttributes?.character}
+            characterName={element.customAttributes?.character}
           />
         </div>
       </div>
     </div>
   );
 }
+
+export const renderStoryElement = (props: RenderElementProps): JSX.Element => {
+  return <ElementContainer {...props} />;
+};
