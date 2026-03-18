@@ -1,7 +1,23 @@
-import { Runware } from "@runware/sdk-js";
-import type { VideoGenerateParams, VideoJob } from "@/lib/connectors/types";
+import type {
+  VideoGenerateParams,
+  VideoJob,
+  VideoJobStatus,
+} from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 import { awaitCompletion } from "../poll";
+import { withRunware } from "../runware";
+
+function toVideoJob(video: {
+  taskUUID: string;
+  status: string;
+  videoURL?: string;
+}): VideoJob {
+  return {
+    jobId: video.taskUUID,
+    status: video.status as VideoJobStatus,
+    resultUrl: video.videoURL,
+  };
+}
 
 export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
   private apiKey: string;
@@ -12,8 +28,7 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
   }
 
   async submit(params: VideoGenerateParams) {
-    const runware = new Runware({ apiKey: this.apiKey });
-    try {
+    return withRunware(this.apiKey, async (runware) => {
       const result = await runware.videoInference({
         positivePrompt: params.prompt,
         model: params.model || "bytedance:2@2",
@@ -25,18 +40,8 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
       });
 
       const video = Array.isArray(result) ? result[0] : result;
-      return {
-        jobId: video.taskUUID,
-        status: video.status as
-          | "queued"
-          | "processing"
-          | "completed"
-          | "failed",
-        resultUrl: video.videoURL,
-      };
-    } finally {
-      runware.disconnect?.();
-    }
+      return toVideoJob(video);
+    });
   }
 
   async generate(params: VideoGenerateParams): Promise<VideoJob> {
@@ -45,8 +50,7 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
   }
 
   async poll(jobId: string) {
-    const runware = new Runware({ apiKey: this.apiKey });
-    try {
+    return withRunware(this.apiKey, async (runware) => {
       const results = await runware.getResponse<{
         taskUUID: string;
         status: string;
@@ -55,18 +59,7 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
 
       const video = results?.[0];
       if (!video) throw new Error("Job not found");
-
-      return {
-        jobId: video.taskUUID,
-        status: video.status as
-          | "queued"
-          | "processing"
-          | "completed"
-          | "failed",
-        resultUrl: video.videoURL,
-      };
-    } finally {
-      runware.disconnect?.();
-    }
+      return toVideoJob(video);
+    });
   }
 }
