@@ -4,12 +4,11 @@ import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 const CODE_LENGTH = 6;
+const EMPTY_CODE = () => Array<string>(CODE_LENGTH).fill("");
 
 export default function AccessCodeInput() {
   const router = useRouter();
-  const [values, setValues] = useState<string[]>(() =>
-    Array(CODE_LENGTH).fill(""),
-  );
+  const [values, setValues] = useState<string[]>(EMPTY_CODE);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -29,7 +28,7 @@ export default function AccessCodeInput() {
           router.push(data.redirect);
         } else {
           setError(data.error || "Invalid access code");
-          setValues(Array(CODE_LENGTH).fill(""));
+          setValues(EMPTY_CODE());
           inputRefs.current[0]?.focus();
         }
       } catch {
@@ -83,7 +82,7 @@ export default function AccessCodeInput() {
 
     if (!pasted) return;
 
-    const next = Array(CODE_LENGTH).fill("");
+    const next = EMPTY_CODE();
     for (let i = 0; i < pasted.length; i++) {
       next[i] = pasted[i];
     }

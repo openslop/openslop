@@ -1,6 +1,6 @@
-import { Runware } from "@runware/sdk-js";
 import type { ImageGenerateParams, ImageResult } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
+import { withRunware } from "../runware";
 
 export class RunwareImage extends BaseProvider<
   ImageGenerateParams,
@@ -14,8 +14,7 @@ export class RunwareImage extends BaseProvider<
   }
 
   async generate(params: ImageGenerateParams) {
-    const runware = new Runware({ apiKey: this.apiKey });
-    try {
+    return withRunware(this.apiKey, async (runware) => {
       const results = await runware.imageInference({
         positivePrompt: params.prompt,
         model: params.model || "runware:z-image@turbo",
@@ -34,8 +33,6 @@ export class RunwareImage extends BaseProvider<
         width: params.width || 512,
         height: params.height || 512,
       };
-    } finally {
-      runware.disconnect?.();
-    }
+    });
   }
 }
