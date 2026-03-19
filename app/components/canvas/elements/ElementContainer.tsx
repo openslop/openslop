@@ -94,10 +94,7 @@ export function ElementContainer({
       {/* Right: preview */}
       <div className="flex-1 min-w-0 flex items-center" contentEditable={false}>
         <div className="w-full bg-white/[0.03] rounded-xl p-3 border border-white/[0.06] backdrop-blur-sm">
-          <OutputPreview
-            type={element.type}
-            characterName={element.customAttributes?.character}
-          />
+          <OutputPreview type={element.type} />
         </div>
       </div>
     </div>
