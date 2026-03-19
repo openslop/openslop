@@ -92,15 +92,3 @@ export enum TTSEmotion {
   Contemplative = "contemplative",
   Determined = "determined",
 }
-
-export enum TTSVolume {
-  Quiet = "quiet",
-  Normal = "normal",
-  Loud = "loud",
-}
-
-export enum TTSSpeed {
-  Slow = "slow",
-  Normal = "normal",
-  Fast = "fast",
-}

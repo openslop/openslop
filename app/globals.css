@@ -291,6 +291,49 @@
   }
 }
 
+.container-loader {
+  --size: 400px;
+  width: var(--size);
+  height: var(--size);
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  transform: scale(0.5);
+
+  .ball {
+    position: absolute;
+    top: var(--y, 0px);
+    margin-left: calc(var(--size) / -2 + var(--x, 0px));
+    width: calc(var(--size) + var(--i));
+    height: calc(var(--size) + var(--i));
+    background-color: var(--color);
+    border-radius: 50%;
+    animation: ballOrbit 20s linear infinite;
+    transform-origin: var(--size);
+    mix-blend-mode: hard-light;
+    animation-duration: var(--d);
+    filter: blur(58px);
+
+    &:nth-child(even) {
+      animation-direction: reverse;
+    }
+
+    &.ball-static {
+      animation: none;
+      transform: rotate(var(--rotation, 0deg));
+    }
+  }
+}
+
+@keyframes ballOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-first,
   .animate-second,
@@ -302,7 +345,8 @@
   .loader,
   .loader::before,
   .loader svg #clipping,
-  .loader svg #clipping polygon {
+  .loader svg #clipping polygon,
+  .container-loader .ball {
     animation: none;
   }
 }
@@ -437,4 +481,114 @@ html {
   opacity: 0.5;
   pointer-events: none;
   z-index: 1;
+}
+
+.grain.grain-light::after {
+  opacity: 0.3;
+}
+
+/* ========== Generate button ========== */
+.gen-btn {
+  --transition: 0.25s;
+  position: relative;
+  z-index: 10;
+  isolation: isolate;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  padding: 0.35em 0.7em 0.35em 0.6em;
+  font-size: 0.65rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background-color: rgb(71 85 105); /* slate-600 */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition:
+    background-color var(--transition),
+    box-shadow var(--transition);
+}
+
+@media (min-width: 640px) {
+  .gen-btn {
+    padding: 0.4em 0.85em 0.4em 0.7em;
+    font-size: 0.75rem;
+    border-radius: 7px;
+  }
+}
+
+@media (min-width: 768px) {
+  .gen-btn {
+    padding: 0.5em 1em 0.5em 0.8em;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+}
+
+/* Grain overlay — reuses the shared .grain pattern */
+.gen-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("/grain.png");
+  background-size: 50px 50px;
+  background-repeat: repeat;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gen-btn:hover {
+  background-color: rgb(100 116 139); /* slate-500 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.gen-btn:active {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+/* Sparkles SVG */
+.gen-btn-svg {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  margin-right: 0.2rem;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 1.5;
+  transition: stroke var(--transition);
+}
+
+@media (min-width: 640px) {
+  .gen-btn-svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 0.3rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .gen-btn-svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.35rem;
+  }
+}
+
+.gen-btn:hover .gen-btn-svg {
+  stroke: #fff;
+}
+
+.gen-btn.is-generating .gen-btn-svg {
+  animation: gen-btn-flicker 2s linear infinite 0.5s;
+}
+
+@keyframes gen-btn-flicker {
+  50% {
+    opacity: 0.3;
+  }
 }
