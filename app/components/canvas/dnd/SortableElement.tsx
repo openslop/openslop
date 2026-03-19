@@ -69,7 +69,7 @@ export function SortableElement({
       >
         <div
           className={`${styles.sortable} align-middle`}
-          onMouseOver={handleMouseOver}
+          onMouseEnter={handleMouseOver}
           onMouseLeave={handleMouseLeave}
         >
           <div
