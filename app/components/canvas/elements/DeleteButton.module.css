@@ -1,0 +1,52 @@
+.button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
+  overflow: hidden;
+  position: relative;
+  gap: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.icon {
+  width: 10px;
+  transition: transform 0.1s;
+}
+
+.icon path {
+  fill: rgba(255, 255, 255, 0.6);
+  transition: fill 0.2s;
+}
+
+.button:hover {
+  background-color: rgb(255, 69, 69);
+  gap: 0;
+}
+
+.button:hover .icon path {
+  fill: white;
+}
+
+.binTop {
+  transform-origin: bottom right;
+}
+
+.button:hover .binTop {
+  transform: rotate(30deg);
+}

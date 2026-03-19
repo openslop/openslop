@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useCallback, useState } from "react";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { ProviderKey } from "@/lib/connectors/types";
@@ -7,6 +7,7 @@ import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { OutputPreview } from "./OutputPreview";
 import { ModelSelector } from "./ModelSelector";
+import { DeleteButton } from "./DeleteButton";
 
 interface ElementContainerProps {
   attributes: RenderElementProps["attributes"];
@@ -22,13 +23,25 @@ export function ElementContainer({
   const config = ELEMENT_CONFIGS[element.type];
   const { model, provider } = element.customAttributes ?? {};
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
+  const [isCardHovered, setIsCardHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => setIsCardHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsCardHovered(false), []);
 
   return (
     <div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
       {/* Left: element card */}
       <div
         className={`grain rounded-lg ${config.bgColor} p-2 shadow-md relative overflow-hidden flex-1 min-w-0`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
+        <div
+          className="absolute top-1.5 right-1.5 z-20"
+          contentEditable={false}
+        >
+          <DeleteButton element={element} visible={isCardHovered} />
+        </div>
         <div className="relative z-10 min-w-0">
           <div
             className="flex items-center gap-1.5 mb-1 flex-wrap select-none"
