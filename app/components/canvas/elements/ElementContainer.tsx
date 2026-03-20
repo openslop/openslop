@@ -114,6 +114,6 @@ export function ElementContainer({
   );
 }
 
-export const renderStoryElement = (props: RenderElementProps): JSX.Element => {
+export const renderCanvasElement = (props: RenderElementProps): JSX.Element => {
   return <ElementContainer {...props} />;
 };

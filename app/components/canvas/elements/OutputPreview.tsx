@@ -132,21 +132,55 @@ function buildSoundwaveMask(bars: number[]) {
   )}")`;
 }
 
+function PlaceholderBalls({
+  generating,
+  staticRotations,
+}: {
+  generating: boolean;
+  staticRotations: number[];
+}) {
+  return (
+    <>
+      {PLACEHOLDER_BALLS.map((ball, i) => (
+        <span
+          key={i}
+          className={generating ? "ball" : "ball ball-static"}
+          style={
+            {
+              "--color": ball.color,
+              "--i": ball.size,
+              "--d": ball.duration,
+              "--x": ball.x,
+              "--y": ball.y,
+              ...(!generating && {
+                "--rotation": `${staticRotations[i]}deg`,
+              }),
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </>
+  );
+}
+
+function useStaticRotations() {
+  const [rotations] = useState(() =>
+    PLACEHOLDER_BALLS.map(() => Math.floor(Math.random() * 360)),
+  );
+  return rotations;
+}
+
 function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
   const { generating, seconds, handleGenerate, handleCancel } =
     useGeneratingState(onGenerate);
+  const staticRotations = useStaticRotations();
 
-  const [{ mask, staticRotations }] = useState(() => {
+  const [mask] = useState(() => {
     const bars = Array.from(
       { length: AUDIO_BAR_COUNT },
       () => 20 + Math.random() * 80,
     );
-    return {
-      mask: buildSoundwaveMask(bars),
-      staticRotations: PLACEHOLDER_BALLS.map(() =>
-        Math.floor(Math.random() * 360),
-      ),
-    };
+    return buildSoundwaveMask(bars);
   });
 
   return (
@@ -163,24 +197,10 @@ function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
         >
           <div className="absolute inset-0 bg-white/20" />
           <div className="container-loader">
-            {PLACEHOLDER_BALLS.map((ball, i) => (
-              <span
-                key={i}
-                className={generating ? "ball" : "ball ball-static"}
-                style={
-                  {
-                    "--color": ball.color,
-                    "--i": ball.size,
-                    "--d": ball.duration,
-                    "--x": ball.x,
-                    "--y": ball.y,
-                    ...(!generating && {
-                      "--rotation": `${staticRotations[i]}deg`,
-                    }),
-                  } as React.CSSProperties
-                }
-              />
-            ))}
+            <PlaceholderBalls
+              generating={generating}
+              staticRotations={staticRotations}
+            />
           </div>
         </div>
       </div>
@@ -208,10 +228,7 @@ function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
 function MediaPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
   const { generating, seconds, handleGenerate, handleCancel } =
     useGeneratingState(onGenerate);
-
-  const [staticRotations] = useState(() =>
-    PLACEHOLDER_BALLS.map(() => Math.floor(Math.random() * 360)),
-  );
+  const staticRotations = useStaticRotations();
 
   return (
     <div className="group grain grain-light relative w-full aspect-video rounded-lg overflow-hidden border flex items-center justify-center backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
@@ -227,24 +244,10 @@ function MediaPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
       </div>
       {generating && <CancelButton onClick={handleCancel} />}
       <div className="container-loader" aria-hidden="true">
-        {PLACEHOLDER_BALLS.map((ball, i) => (
-          <span
-            key={i}
-            className={generating ? "ball" : "ball ball-static"}
-            style={
-              {
-                "--color": ball.color,
-                "--i": ball.size,
-                "--d": ball.duration,
-                "--x": ball.x,
-                "--y": ball.y,
-                ...(!generating && {
-                  "--rotation": `${staticRotations[i]}deg`,
-                }),
-              } as React.CSSProperties
-            }
-          />
-        ))}
+        <PlaceholderBalls
+          generating={generating}
+          staticRotations={staticRotations}
+        />
       </div>
     </div>
   );

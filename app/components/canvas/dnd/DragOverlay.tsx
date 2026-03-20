@@ -2,7 +2,7 @@ import { GripVertical, Plus } from "lucide-react";
 import { useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
-import { renderStoryElement } from "../elements/ElementContainer";
+import { renderCanvasElement } from "../elements/ElementContainer";
 import styles from "../styles/sortable.module.css";
 
 export function DragOverlayContent({ element }: { element: Descendant }) {
@@ -31,7 +31,7 @@ export function DragOverlayContent({ element }: { element: Descendant }) {
         </div>
         <Editable
           readOnly={true}
-          renderElement={renderStoryElement}
+          renderElement={renderCanvasElement}
           className="text-xl leading-relaxed text-center break-all"
         />
       </Slate>

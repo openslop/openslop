@@ -14,7 +14,7 @@ import { SortableElement } from "./dnd/SortableElement";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { PanelItem } from "./panel/PanelItem";
 import Sidebar from "./panel/Sidebar";
-import { renderStoryElement } from "./elements/ElementContainer";
+import { renderCanvasElement } from "./elements/ElementContainer";
 import { ELEMENT_CONFIGS } from "./config/elementConfigs";
 export default function Canvas() {
   const { editor, value, setValue } = useEditorSetup();
@@ -42,7 +42,7 @@ export default function Canvas() {
 
   const renderElement = useCallback(
     (props: RenderElementProps) => (
-      <SortableElement {...props} renderElement={renderStoryElement} />
+      <SortableElement {...props} renderElement={renderCanvasElement} />
     ),
     [],
   );

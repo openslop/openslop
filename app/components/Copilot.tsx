@@ -23,11 +23,13 @@ interface CopilotProps {
   loading?: boolean;
 }
 
-function SubmitButton({
+function ActionButton({
   label,
+  icon,
   onClick,
 }: {
   label: string;
+  icon: ReactNode;
   onClick: () => void;
 }) {
   return (
@@ -36,7 +38,7 @@ function SubmitButton({
       onClick={onClick}
       className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3]"
     >
-      <ArrowRight className="h-4 w-4" />
+      {icon}
     </button>
   );
 }
@@ -96,7 +98,11 @@ export default function Copilot({
           />
           {hasText && (
             <div className="flex justify-end pt-2">
-              <SubmitButton label="Submit script" onClick={handleSubmit} />
+              <ActionButton
+                label="Submit script"
+                icon={<ArrowRight className="h-4 w-4" />}
+                onClick={handleSubmit}
+              />
             </div>
           )}
         </div>
@@ -130,16 +136,18 @@ export default function Copilot({
             )}
           </div>
           {loading ? (
-            <button
-              aria-label="Stop generation"
-              onClick={onStop}
-              className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3]"
-            >
-              <Square className="h-3 w-3 fill-current" />
-            </button>
+            <ActionButton
+              label="Stop generation"
+              icon={<Square className="h-3 w-3 fill-current" />}
+              onClick={() => onStop?.()}
+            />
           ) : (
             hasText && (
-              <SubmitButton label="Submit prompt" onClick={handleSubmit} />
+              <ActionButton
+                label="Submit prompt"
+                icon={<ArrowRight className="h-4 w-4" />}
+                onClick={handleSubmit}
+              />
             )
           )}
         </div>
