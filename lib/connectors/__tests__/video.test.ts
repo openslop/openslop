@@ -27,8 +27,9 @@ describe("BaseVideoConnector", () => {
       .mockResolvedValueOnce(mockJsonResponse(completedResponse));
 
     const connector = new OpenSlopVideo({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
     });
     const result = await connector.generate({ prompt: "a sunset" });
@@ -41,8 +42,9 @@ describe("BaseVideoConnector", () => {
       mockJsonResponse({ jobId: "job-123", status: "completed" }),
     );
     const connector = new OpenSlopVideo({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
     });
     const result = await connector.poll("job-123");
@@ -72,8 +74,9 @@ describe("BaseVideoConnector", () => {
       },
     };
     const connector = new OpenSlopVideo({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -86,8 +89,9 @@ describe("BaseVideoConnector", () => {
     const errors: string[] = [];
 
     const connector = new OpenSlopVideo({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [
         { name: "err", onError: (e: Error) => void errors.push(e.message) },

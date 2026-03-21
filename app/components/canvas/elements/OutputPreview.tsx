@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { X as XIcon, Wand2 } from "lucide-react";
-import type { CanvasElementType } from "../types";
+import { useState } from "react";
+import Image from "next/image";
+import { X as XIcon, Wand2, RotateCcw } from "lucide-react";
+import type { CanvasElementType, GenerationResult } from "../types";
 
 interface PlaceholderBall {
   color: string;
@@ -63,37 +64,32 @@ function GenerateButton({
   );
 }
 
-function useGeneratingState(onGenerate?: () => void) {
-  const [generating, setGenerating] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    if (!generating) return;
-    const start = Date.now();
-    const id = setInterval(
-      () => setSeconds(((Date.now() - start) / 1000) | 0),
-      1000,
-    );
-    return () => clearInterval(id);
-  }, [generating]);
-
-  const handleGenerate = useCallback(() => {
-    setGenerating(true);
-    setSeconds(0);
-    onGenerate?.();
-  }, [onGenerate]);
-
-  const handleCancel = useCallback(() => {
-    setGenerating(false);
-    setSeconds(0);
-  }, []);
-
-  return { generating, seconds, handleGenerate, handleCancel };
-}
-
 function WandIcon() {
   return (
     <Wand2 className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-white/40 stroke-1 drop-shadow-md" />
+  );
+}
+
+function OverlayButton({
+  onClick,
+  label,
+  className = "top-2",
+  children,
+}: {
+  onClick: () => void;
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -105,14 +101,40 @@ function CancelButton({
   className?: string;
 }) {
   return (
-    <button
-      type="button"
-      aria-label="Cancel generation"
-      className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+    <OverlayButton
       onClick={onClick}
+      label="Cancel generation"
+      className={className}
     >
       <XIcon className="w-3 h-3 text-white" />
-    </button>
+    </OverlayButton>
+  );
+}
+
+function ResultOverlay({
+  onRegenerate,
+  onDiscard,
+}: {
+  onRegenerate: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <>
+      <OverlayButton
+        onClick={onDiscard}
+        label="Discard result"
+        className="top-2 right-2"
+      >
+        <XIcon className="w-3 h-3 text-white" />
+      </OverlayButton>
+      <OverlayButton
+        onClick={onRegenerate}
+        label="Regenerate"
+        className="top-2 right-10"
+      >
+        <RotateCcw className="w-3 h-3 text-white" />
+      </OverlayButton>
+    </>
   );
 }
 
@@ -170,9 +192,61 @@ function useStaticRotations() {
   return rotations;
 }
 
-function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
-  const { generating, seconds, handleGenerate, handleCancel } =
-    useGeneratingState(onGenerate);
+function ErrorMessage({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1 text-center px-2">
+      <p className="text-red-400 text-xs truncate max-w-full">{message}</p>
+      <button
+        type="button"
+        className="text-white/60 hover:text-white text-xs underline"
+        onClick={onRetry}
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
+function AudioResult({
+  src,
+  onRegenerate,
+  onDiscard,
+}: {
+  src: string;
+  onRegenerate: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center px-2">
+      <audio src={src} controls className="w-full h-8" />
+      <ResultOverlay onRegenerate={onRegenerate} onDiscard={onDiscard} />
+    </div>
+  );
+}
+
+interface OutputPreviewProps {
+  type: CanvasElementType;
+  generating: boolean;
+  seconds: number;
+  result: GenerationResult | null;
+  error: string | null;
+  onGenerate: () => void;
+  onDiscard: () => void;
+}
+
+function AudioPlaceholder({
+  generating,
+  seconds,
+  error,
+  onGenerate,
+  onDiscard,
+}: Omit<OutputPreviewProps, "type" | "result">) {
   const staticRotations = useStaticRotations();
 
   const [mask] = useState(() => {
@@ -206,18 +280,24 @@ function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
       </div>
       <div className="absolute inset-0 grain grain-light border rounded-lg bg-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]" />
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <WandIcon />
+        {error ? (
+          <ErrorMessage message={error} onRetry={onGenerate} />
+        ) : (
+          <WandIcon />
+        )}
       </div>
-      <div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
-        <GenerateButton
-          generating={generating}
-          seconds={seconds}
-          onClick={handleGenerate}
-        />
-      </div>
+      {!error && (
+        <div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
+          <GenerateButton
+            generating={generating}
+            seconds={seconds}
+            onClick={onGenerate}
+          />
+        </div>
+      )}
       {generating && (
         <CancelButton
-          onClick={handleCancel}
+          onClick={onDiscard}
           className="top-1/2 -translate-y-1/2"
         />
       )}
@@ -225,24 +305,34 @@ function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
   );
 }
 
-function MediaPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
-  const { generating, seconds, handleGenerate, handleCancel } =
-    useGeneratingState(onGenerate);
+function MediaPlaceholder({
+  generating,
+  seconds,
+  error,
+  onGenerate,
+  onDiscard,
+}: Omit<OutputPreviewProps, "type" | "result">) {
   const staticRotations = useStaticRotations();
 
   return (
     <div className="group grain grain-light relative w-full aspect-video rounded-lg overflow-hidden border flex items-center justify-center backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
       <div className="z-10">
-        <WandIcon />
+        {error ? (
+          <ErrorMessage message={error} onRetry={onGenerate} />
+        ) : (
+          <WandIcon />
+        )}
       </div>
-      <div className="absolute top-2 left-2 z-10">
-        <GenerateButton
-          generating={generating}
-          seconds={seconds}
-          onClick={handleGenerate}
-        />
-      </div>
-      {generating && <CancelButton onClick={handleCancel} />}
+      {!error && (
+        <div className="absolute top-2 left-2 z-10">
+          <GenerateButton
+            generating={generating}
+            seconds={seconds}
+            onClick={onGenerate}
+          />
+        </div>
+      )}
+      {generating && <CancelButton onClick={onDiscard} />}
       <div className="container-loader" aria-hidden="true">
         <PlaceholderBalls
           generating={generating}
@@ -256,22 +346,22 @@ function MediaPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
 function MediaPreview({
   media,
   borderColor,
-  onGenerate,
+  onRegenerate,
+  onDiscard,
 }: {
-  media?: React.ReactNode;
+  media: React.ReactNode;
   borderColor: string;
-  onGenerate?: () => void;
+  onRegenerate: () => void;
+  onDiscard: () => void;
 }) {
-  if (media) {
-    return (
-      <div
-        className={`w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
-      >
-        {media}
-      </div>
-    );
-  }
-  return <MediaPlaceholder onGenerate={onGenerate} />;
+  return (
+    <div
+      className={`group relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
+    >
+      {media}
+      <ResultOverlay onRegenerate={onRegenerate} onDiscard={onDiscard} />
+    </div>
+  );
 }
 
 const BORDER_COLORS: Record<CanvasElementType, string> = {
@@ -292,18 +382,68 @@ const AUDIO_TYPES = new Set<CanvasElementType>([
 
 export function OutputPreview({
   type,
+  generating,
+  seconds,
+  result,
+  error,
   onGenerate,
-}: {
-  type: CanvasElementType;
-  onGenerate?: () => void;
-}) {
+  onDiscard,
+}: OutputPreviewProps) {
   if (AUDIO_TYPES.has(type)) {
-    return <AudioPlaceholder onGenerate={onGenerate} />;
+    if (result?.kind === "audio") {
+      return (
+        <AudioResult
+          src={result.src}
+          onRegenerate={onGenerate}
+          onDiscard={onDiscard}
+        />
+      );
+    }
+    return (
+      <AudioPlaceholder
+        generating={generating}
+        seconds={seconds}
+        error={error}
+        onGenerate={onGenerate}
+        onDiscard={onDiscard}
+      />
+    );
   }
+
+  if (result) {
+    const media =
+      result.kind === "image" ? (
+        <Image
+          src={result.src}
+          alt="Generated"
+          fill
+          className="object-cover"
+          unoptimized
+        />
+      ) : (
+        <video
+          src={result.src}
+          controls
+          className="w-full h-full object-cover"
+        />
+      );
+    return (
+      <MediaPreview
+        media={media}
+        borderColor={BORDER_COLORS[type] ?? "border-white/20"}
+        onRegenerate={onGenerate}
+        onDiscard={onDiscard}
+      />
+    );
+  }
+
   return (
-    <MediaPreview
-      borderColor={BORDER_COLORS[type] ?? "border-white/20"}
+    <MediaPlaceholder
+      generating={generating}
+      seconds={seconds}
+      error={error}
       onGenerate={onGenerate}
+      onDiscard={onDiscard}
     />
   );
 }

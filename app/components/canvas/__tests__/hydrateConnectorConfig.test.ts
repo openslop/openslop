@@ -4,12 +4,54 @@ import type { CanvasElement } from "../types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 
 const connectors: ConnectorRegistry = {
-  llm: { provider: "openslop", model: "llm-v1", apiKey: "" },
-  tts: { provider: "openslop", model: "tts-v1", apiKey: "" },
-  image: { provider: "openslop", model: "img-v1", apiKey: "" },
-  video: { provider: "openslop", model: "vid-v1", apiKey: "" },
-  sfx: { provider: "openslop", model: "sfx-v1", apiKey: "" },
-  music: { provider: "openslop", model: "music-v1", apiKey: "" },
+  llm: {
+    openslop: {
+      defaultModel: "llm-v1",
+      models: ["llm-v1"],
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  tts: {
+    openslop: {
+      defaultModel: "tts-v1",
+      models: ["tts-v1"],
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  image: {
+    openslop: {
+      defaultModel: "img-v1",
+      models: ["img-v1"],
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  video: {
+    openslop: {
+      defaultModel: "vid-v1",
+      models: ["vid-v1"],
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  sfx: {
+    openslop: {
+      defaultModel: "sfx-v1",
+      models: ["sfx-v1"],
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  music: {
+    openslop: {
+      defaultModel: "music-v1",
+      models: ["music-v1"],
+      isDefault: true,
+      apiKey: "",
+    },
+  },
 };
 
 function makeNode(
@@ -57,7 +99,14 @@ describe("hydrateConnectorConfig", () => {
   it("returns node unchanged when connector has no model", () => {
     const noModel: ConnectorRegistry = {
       ...connectors,
-      tts: { provider: "openslop", model: "", apiKey: "" },
+      tts: {
+        openslop: {
+          defaultModel: "",
+          models: [],
+          isDefault: true,
+          apiKey: "",
+        },
+      },
     };
     const node = makeNode("narration");
     const result = hydrateConnectorConfig(noModel)(node);

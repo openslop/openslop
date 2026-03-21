@@ -5,6 +5,7 @@ import type { ProviderKey } from "@/lib/connectors/types";
 import type { CanvasElement } from "../types";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { useGenerate } from "../hooks/useGenerate";
 import { OutputPreview } from "./OutputPreview";
 import { ModelSelector } from "./ModelSelector";
 import { DeleteButton } from "./DeleteButton";
@@ -24,6 +25,7 @@ export function ElementContainer({
   const { model, provider } = element.customAttributes ?? {};
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
   const [isCardHovered, setIsCardHovered] = useState(false);
+  const gen = useGenerate(element);
 
   const handleMouseEnter = useCallback(() => setIsCardHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsCardHovered(false), []);
@@ -107,7 +109,15 @@ export function ElementContainer({
       {/* Right: preview */}
       <div className="flex-1 min-w-0 flex items-center" contentEditable={false}>
         <div className="w-full bg-white/[0.03] rounded-xl p-3 border border-white/[0.06] backdrop-blur-sm">
-          <OutputPreview type={element.type} />
+          <OutputPreview
+            type={element.type}
+            generating={gen.generating}
+            seconds={gen.seconds}
+            result={gen.result}
+            error={gen.error}
+            onGenerate={gen.generate}
+            onDiscard={gen.discard}
+          />
         </div>
       </div>
     </div>

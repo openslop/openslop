@@ -24,21 +24,12 @@ const PROVIDERS: Record<
   video: { openslop: OpenSlopVideo },
 };
 
-const DEFAULTS: Record<ConnectorType, ProviderKey> = {
-  llm: "openslop",
-  music: "openslop",
-  sfx: "openslop",
-  image: "openslop",
-  tts: "openslop",
-  video: "openslop",
-};
-
 export function createConnector<T extends ConnectorType>(
   type: T,
+  provider: ProviderKey,
   config: ConnectorConfig,
 ): ConnectorTypeMap[T] {
-  const provider = config.provider || DEFAULTS[type];
-  const Ctor = PROVIDERS[type][provider as ProviderKey];
+  const Ctor = PROVIDERS[type][provider];
   if (!Ctor)
     throw new Error(`Unknown provider "${provider}" for type "${type}"`);
   return new Ctor(config) as ConnectorTypeMap[T];

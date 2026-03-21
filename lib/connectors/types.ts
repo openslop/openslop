@@ -41,16 +41,33 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 }
 
 export interface ConnectorConfig {
-  provider: string;
-  model: string;
+  defaultModel: string;
+  models: string[];
+  isDefault: boolean;
   apiKey?: string;
   baseUrl?: string;
   plugins?: ConnectorPlugin[];
   options?: Record<string, unknown>;
 }
 
+// Connector-level generate params (what callers pass to connector.generate)
+export interface ConnectorGenerateParams {
+  prompt: string;
+  model?: string;
+}
+
+// TTS connector accepts voice attributes; resolves voiceId internally
+export interface TTSConnectorParams extends ConnectorGenerateParams {
+  voiceId?: string;
+  gender?: string;
+  accent?: string;
+  query?: string;
+  language?: string;
+}
+
 export interface Connector {
   readonly type: ConnectorType;
+  generate(params: ConnectorGenerateParams): Promise<unknown>;
   init(): Promise<void>;
   validate(): Promise<boolean>;
   destroy(): Promise<void>;
@@ -171,7 +188,7 @@ export type VoiceSearchParams = {
 
 export interface TTSConnector extends Connector {
   readonly type: "tts";
-  generate(params: TTSGenerateParams): Promise<TTSResult>;
+  generate(params: TTSConnectorParams): Promise<TTSResult>;
   searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }
 

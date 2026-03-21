@@ -22,11 +22,11 @@ export function ModelSelector({
   provider: ProviderKey;
 }) {
   const editor = useSlateStatic();
-  const { configuredConnectors } = useConfig();
+  const { connectorConfig } = useConfig();
 
   const connectorType = ELEMENT_CONFIGS[element.type].connector;
   const availableModels =
-    configuredConnectors[connectorType]?.[provider]?.models ?? [];
+    connectorConfig[connectorType]?.[provider]?.models ?? [];
 
   const handleSelect = (newModel: string) => {
     const path = ReactEditor.findPath(editor, element);

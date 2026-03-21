@@ -21,8 +21,9 @@ describe("BaseMusicConnector", () => {
       transformPrompt: (p) => `epic: ${p}`,
     };
     const connector = new OpenSlopMusic({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -36,8 +37,9 @@ describe("BaseMusicConnector", () => {
       afterGenerate: () => new ArrayBuffer(42),
     };
     const connector = new OpenSlopMusic({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -50,8 +52,9 @@ describe("BaseMusicConnector", () => {
     const errors: string[] = [];
 
     const connector = new OpenSlopMusic({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [
         { name: "err", onError: (e: Error) => void errors.push(e.message) },

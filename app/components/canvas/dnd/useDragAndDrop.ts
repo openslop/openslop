@@ -16,7 +16,7 @@ import { CANVAS_ELEMENT_TYPES, type CanvasElementType } from "../types";
 import { insertElement } from "../utils/insertElement";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
-  const { connectorDefaults } = useConfig();
+  const { connectorConfig } = useConfig();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [pendingPanelId, setPendingPanelId] = useState<UniqueIdentifier | null>(
     null,
@@ -62,7 +62,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
           editor,
           type,
           newIndex < 0 ? editor.children.length : newIndex,
-          connectorDefaults,
+          connectorConfig,
         );
         setActiveId(null);
         return;
@@ -78,7 +78,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
       }
       setActiveId(null);
     },
-    [baseItems, connectorDefaults, editor],
+    [baseItems, connectorConfig, editor],
   );
 
   const handleDragCancel = useCallback(() => {
