@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, use, useMemo, useState, type ReactNode } from "react";
+import set from "lodash/fp/set";
 import type {
   ConnectorConfig,
   ConnectorType,
+  LLMPlugin,
   ProviderKey,
 } from "@/lib/connectors/types";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
@@ -18,6 +20,11 @@ import { storyModePlugin } from "../connectors/plugins/story-mode";
 import { getDefaultConnector } from "./connectorUtils";
 
 export type Mode = "prompt" | "inputScript";
+
+const MODE_PLUGINS: Record<Mode, LLMPlugin> = {
+  prompt: storyModePlugin,
+  inputScript: scriptModePlugin,
+};
 
 export type ConnectorRegistry = Record<
   ConnectorType,
@@ -102,19 +109,11 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       connectorConfig,
       "llm",
     );
-    return {
-      ...connectorConfig,
-      llm: {
-        ...connectorConfig.llm,
-        [provider]: {
-          ...llmConfig,
-          plugins: [
-            ...(llmConfig.plugins ?? []),
-            mode === "prompt" ? storyModePlugin : scriptModePlugin,
-          ],
-        },
-      },
-    };
+    return set(
+      ["llm", provider, "plugins"],
+      [...(llmConfig.plugins ?? []), MODE_PLUGINS[mode]],
+      connectorConfig,
+    );
   }, [connectorConfig, mode]);
 
   const value = useMemo<ConfigContextValue>(
