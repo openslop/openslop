@@ -1,7 +1,8 @@
-import { JSX, useCallback, useState } from "react";
+import { JSX, useCallback, useEffect, useState } from "react";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { ProviderKey } from "@/lib/connectors/types";
+import { generationQueue } from "@/lib/generation/queue";
 import type { CanvasElement } from "../types";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
@@ -26,6 +27,11 @@ export function ElementContainer({
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
   const [isCardHovered, setIsCardHovered] = useState(false);
   const gen = useGenerate(element);
+
+  useEffect(() => {
+    const id = element.id;
+    return () => generationQueue.discard(id);
+  }, [element.id]);
 
   const handleMouseEnter = useCallback(() => setIsCardHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsCardHovered(false), []);
@@ -112,6 +118,7 @@ export function ElementContainer({
           <OutputPreview
             type={element.type}
             generating={gen.generating}
+            queued={gen.queued}
             seconds={gen.seconds}
             result={gen.result}
             error={gen.error}

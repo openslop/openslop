@@ -25,7 +25,7 @@ const PLACEHOLDER_BALLS: PlaceholderBall[] = [
   { color: "#5eaebf", size: "16px", duration: "6.3s", x: "85px", y: "-180px" },
 ];
 
-function SparklesIcon() {
+export function SparklesIcon() {
   return (
     <svg
       className="gen-btn-svg"
@@ -43,22 +43,29 @@ function SparklesIcon() {
 
 function GenerateButton({
   generating,
+  queued,
   seconds,
   onClick,
 }: {
   generating: boolean;
+  queued: boolean;
   seconds: number;
   onClick: () => void;
 }) {
+  const active = generating || queued;
   return (
     <button
       type="button"
-      className={`gen-btn ${generating ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
-      onClick={generating ? undefined : onClick}
+      className={`gen-btn ${active ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
+      onClick={active ? undefined : onClick}
     >
       <SparklesIcon />
-      <span className={generating ? "shimmer" : ""}>
-        {generating ? `Generating ${seconds}s` : "Generate"}
+      <span className={active ? "shimmer" : ""}>
+        {queued
+          ? "Queued..."
+          : generating
+            ? `Generating ${seconds}s`
+            : "Generate"}
       </span>
     </button>
   );
@@ -233,6 +240,7 @@ function AudioResult({
 interface OutputPreviewProps {
   type: CanvasElementType;
   generating: boolean;
+  queued: boolean;
   seconds: number;
   result: GenerationResult | null;
   error: string | null;
@@ -242,6 +250,7 @@ interface OutputPreviewProps {
 
 function AudioPlaceholder({
   generating,
+  queued,
   seconds,
   error,
   onGenerate,
@@ -290,12 +299,13 @@ function AudioPlaceholder({
         <div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
           <GenerateButton
             generating={generating}
+            queued={queued}
             seconds={seconds}
             onClick={onGenerate}
           />
         </div>
       )}
-      {generating && (
+      {(generating || queued) && (
         <CancelButton
           onClick={onDiscard}
           className="top-1/2 -translate-y-1/2"
@@ -307,6 +317,7 @@ function AudioPlaceholder({
 
 function MediaPlaceholder({
   generating,
+  queued,
   seconds,
   error,
   onGenerate,
@@ -327,12 +338,13 @@ function MediaPlaceholder({
         <div className="absolute top-2 left-2 z-10">
           <GenerateButton
             generating={generating}
+            queued={queued}
             seconds={seconds}
             onClick={onGenerate}
           />
         </div>
       )}
-      {generating && <CancelButton onClick={onDiscard} />}
+      {(generating || queued) && <CancelButton onClick={onDiscard} />}
       <div className="container-loader" aria-hidden="true">
         <PlaceholderBalls
           generating={generating}
@@ -383,6 +395,7 @@ const AUDIO_TYPES = new Set<CanvasElementType>([
 export function OutputPreview({
   type,
   generating,
+  queued,
   seconds,
   result,
   error,
@@ -402,6 +415,7 @@ export function OutputPreview({
     return (
       <AudioPlaceholder
         generating={generating}
+        queued={queued}
         seconds={seconds}
         error={error}
         onGenerate={onGenerate}
@@ -440,6 +454,7 @@ export function OutputPreview({
   return (
     <MediaPlaceholder
       generating={generating}
+      queued={queued}
       seconds={seconds}
       error={error}
       onGenerate={onGenerate}
