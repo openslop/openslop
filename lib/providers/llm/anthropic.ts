@@ -16,14 +16,20 @@ export class AnthropicLLM extends BaseProvider<
     this.client = new Anthropic({ apiKey });
   }
 
-  async generate(params: LLMGenerateParams) {
-    const response = await this.client.messages.create({
+  private buildRequest(params: LLMGenerateParams) {
+    return {
       model: params.model || "claude-sonnet-4-5-20250929",
       max_tokens: params.maxTokens || 4096,
       temperature: params.temperature,
       system: params.systemPrompt || undefined,
-      messages: [{ role: "user", content: params.prompt }],
-    });
+      messages: [{ role: "user" as const, content: params.prompt }],
+    };
+  }
+
+  async generate(params: LLMGenerateParams) {
+    const response = await this.client.messages.create(
+      this.buildRequest(params),
+    );
 
     const text = response.content
       .filter((b) => b.type === "text")
@@ -43,13 +49,7 @@ export class AnthropicLLM extends BaseProvider<
   async *stream(
     params: LLMGenerateParams,
   ): AsyncGenerator<{ text: string; done: boolean }> {
-    const stream = this.client.messages.stream({
-      model: params.model || "claude-sonnet-4-5-20250929",
-      max_tokens: params.maxTokens || 4096,
-      temperature: params.temperature,
-      system: params.systemPrompt || undefined,
-      messages: [{ role: "user", content: params.prompt }],
-    });
+    const stream = this.client.messages.stream(this.buildRequest(params));
 
     for await (const event of stream) {
       if (
