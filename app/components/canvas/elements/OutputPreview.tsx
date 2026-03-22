@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { X as XIcon, Wand2 } from "lucide-react";
-import type { CanvasElementType } from "../types";
+import { useState } from "react";
+import Image from "next/image";
+import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
+import type { CanvasElementType, GenerationResult } from "../types";
 
 interface PlaceholderBall {
   color: string;
@@ -24,12 +25,13 @@ const PLACEHOLDER_BALLS: PlaceholderBall[] = [
   { color: "#5eaebf", size: "16px", duration: "6.3s", x: "85px", y: "-180px" },
 ];
 
-function SparklesIcon() {
+export function SparklesIcon() {
   return (
     <svg
       className="gen-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      aria-hidden="true"
     >
       <path
         strokeLinecap="round"
@@ -40,60 +42,67 @@ function SparklesIcon() {
   );
 }
 
+interface GenerationState {
+  generating: boolean;
+  queued: boolean;
+  seconds: number;
+}
+
 function GenerateButton({
   generating,
+  queued,
   seconds,
   onClick,
-}: {
-  generating: boolean;
-  seconds: number;
+  label = "Generate",
+  icon = <SparklesIcon />,
+  className = "",
+}: GenerationState & {
   onClick: () => void;
+  label?: string;
+  icon?: React.ReactNode;
+  className?: string;
 }) {
+  const active = generating || queued;
   return (
     <button
       type="button"
-      className={`gen-btn ${generating ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
-      onClick={generating ? undefined : onClick}
+      className={`gen-btn ${active ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity ${className}`}
+      onClick={active ? undefined : onClick}
     >
-      <SparklesIcon />
-      <span className={generating ? "shimmer" : ""}>
-        {generating ? `Generating ${seconds}s` : "Generate"}
+      {icon}
+      <span className={active ? "shimmer" : ""}>
+        {queued ? "Queued..." : generating ? `Generating ${seconds}s` : label}
       </span>
     </button>
   );
 }
 
-function useGeneratingState(onGenerate?: () => void) {
-  const [generating, setGenerating] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    if (!generating) return;
-    const start = Date.now();
-    const id = setInterval(
-      () => setSeconds(((Date.now() - start) / 1000) | 0),
-      1000,
-    );
-    return () => clearInterval(id);
-  }, [generating]);
-
-  const handleGenerate = useCallback(() => {
-    setGenerating(true);
-    setSeconds(0);
-    onGenerate?.();
-  }, [onGenerate]);
-
-  const handleCancel = useCallback(() => {
-    setGenerating(false);
-    setSeconds(0);
-  }, []);
-
-  return { generating, seconds, handleGenerate, handleCancel };
-}
-
 function WandIcon() {
   return (
     <Wand2 className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-white/40 stroke-1 drop-shadow-md" />
+  );
+}
+
+function OverlayButton({
+  onClick,
+  label,
+  className = "top-2",
+  children,
+}: {
+  onClick: () => void;
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -105,14 +114,36 @@ function CancelButton({
   className?: string;
 }) {
   return (
-    <button
-      type="button"
-      aria-label="Cancel generation"
-      className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+    <OverlayButton
       onClick={onClick}
+      label="Cancel generation"
+      className={className}
     >
       <XIcon className="w-3 h-3 text-white" />
-    </button>
+    </OverlayButton>
+  );
+}
+
+function ResultOverlay({
+  generating,
+  queued,
+  seconds,
+  onRegenerate,
+}: GenerationState & {
+  onRegenerate: () => void;
+}) {
+  return (
+    <>
+      <GenerateButton
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        onClick={onRegenerate}
+        label="Regenerate"
+        icon={<RotateCcw className="w-3 h-3" />}
+        className="absolute top-2 left-2 z-10"
+      />
+    </>
   );
 }
 
@@ -170,9 +201,57 @@ function useStaticRotations() {
   return rotations;
 }
 
-function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
-  const { generating, seconds, handleGenerate, handleCancel } =
-    useGeneratingState(onGenerate);
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-red-700 px-3 py-1.5">
+      <AlertCircle className="w-3.5 h-3.5 text-white shrink-0" />
+      <p className="text-white text-xs">{message}</p>
+    </div>
+  );
+}
+
+function AudioResult({
+  src,
+  generating,
+  queued,
+  seconds,
+  onRegenerate,
+}: GenerationState & {
+  src: string;
+  onRegenerate: () => void;
+}) {
+  return (
+    <div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center px-2">
+      <audio src={src} controls className="w-full h-8" />
+      <ResultOverlay
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        onRegenerate={onRegenerate}
+      />
+    </div>
+  );
+}
+
+interface OutputPreviewProps {
+  type: CanvasElementType;
+  generating: boolean;
+  queued: boolean;
+  seconds: number;
+  result: GenerationResult | null;
+  error: string | null;
+  onGenerate: () => void;
+  onDiscard: () => void;
+}
+
+function AudioPlaceholder({
+  generating,
+  queued,
+  seconds,
+  error,
+  onGenerate,
+  onDiscard,
+}: Omit<OutputPreviewProps, "type" | "result">) {
   const staticRotations = useStaticRotations();
 
   const [mask] = useState(() => {
@@ -206,18 +285,19 @@ function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
       </div>
       <div className="absolute inset-0 grain grain-light border rounded-lg bg-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]" />
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <WandIcon />
+        {error ? <ErrorMessage message={error} /> : <WandIcon />}
       </div>
       <div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
         <GenerateButton
           generating={generating}
+          queued={queued}
           seconds={seconds}
-          onClick={handleGenerate}
+          onClick={onGenerate}
         />
       </div>
-      {generating && (
+      {(generating || queued) && (
         <CancelButton
-          onClick={handleCancel}
+          onClick={onDiscard}
           className="top-1/2 -translate-y-1/2"
         />
       )}
@@ -225,24 +305,30 @@ function AudioPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
   );
 }
 
-function MediaPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
-  const { generating, seconds, handleGenerate, handleCancel } =
-    useGeneratingState(onGenerate);
+function MediaPlaceholder({
+  generating,
+  queued,
+  seconds,
+  error,
+  onGenerate,
+  onDiscard,
+}: Omit<OutputPreviewProps, "type" | "result">) {
   const staticRotations = useStaticRotations();
 
   return (
     <div className="group grain grain-light relative w-full aspect-video rounded-lg overflow-hidden border flex items-center justify-center backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
       <div className="z-10">
-        <WandIcon />
+        {error ? <ErrorMessage message={error} /> : <WandIcon />}
       </div>
       <div className="absolute top-2 left-2 z-10">
         <GenerateButton
           generating={generating}
+          queued={queued}
           seconds={seconds}
-          onClick={handleGenerate}
+          onClick={onGenerate}
         />
       </div>
-      {generating && <CancelButton onClick={handleCancel} />}
+      {(generating || queued) && <CancelButton onClick={onDiscard} />}
       <div className="container-loader" aria-hidden="true">
         <PlaceholderBalls
           generating={generating}
@@ -256,22 +342,28 @@ function MediaPlaceholder({ onGenerate }: { onGenerate?: () => void }) {
 function MediaPreview({
   media,
   borderColor,
-  onGenerate,
-}: {
-  media?: React.ReactNode;
+  generating,
+  queued,
+  seconds,
+  onRegenerate,
+}: GenerationState & {
+  media: React.ReactNode;
   borderColor: string;
-  onGenerate?: () => void;
+  onRegenerate: () => void;
 }) {
-  if (media) {
-    return (
-      <div
-        className={`w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
-      >
-        {media}
-      </div>
-    );
-  }
-  return <MediaPlaceholder onGenerate={onGenerate} />;
+  return (
+    <div
+      className={`group relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
+    >
+      {media}
+      <ResultOverlay
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        onRegenerate={onRegenerate}
+      />
+    </div>
+  );
 }
 
 const BORDER_COLORS: Record<CanvasElementType, string> = {
@@ -292,18 +384,75 @@ const AUDIO_TYPES = new Set<CanvasElementType>([
 
 export function OutputPreview({
   type,
+  generating,
+  queued,
+  seconds,
+  result,
+  error,
   onGenerate,
-}: {
-  type: CanvasElementType;
-  onGenerate?: () => void;
-}) {
+  onDiscard,
+}: OutputPreviewProps) {
   if (AUDIO_TYPES.has(type)) {
-    return <AudioPlaceholder onGenerate={onGenerate} />;
+    if (result?.kind === "audio") {
+      return (
+        <AudioResult
+          src={result.src}
+          generating={generating}
+          queued={queued}
+          seconds={seconds}
+          onRegenerate={onGenerate}
+        />
+      );
+    }
+    return (
+      <AudioPlaceholder
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        error={error}
+        onGenerate={onGenerate}
+        onDiscard={onDiscard}
+      />
+    );
   }
+
+  if (result) {
+    const media =
+      result.kind === "image" ? (
+        <Image
+          src={result.src}
+          alt="Generated"
+          fill
+          className="object-cover"
+          unoptimized
+        />
+      ) : (
+        <video
+          src={result.src}
+          controls
+          className="w-full h-full object-cover"
+        />
+      );
+    return (
+      <MediaPreview
+        media={media}
+        borderColor={BORDER_COLORS[type] ?? "border-white/20"}
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        onRegenerate={onGenerate}
+      />
+    );
+  }
+
   return (
-    <MediaPreview
-      borderColor={BORDER_COLORS[type] ?? "border-white/20"}
+    <MediaPlaceholder
+      generating={generating}
+      queued={queued}
+      seconds={seconds}
+      error={error}
       onGenerate={onGenerate}
+      onDiscard={onDiscard}
     />
   );
 }

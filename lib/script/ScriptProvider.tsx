@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Descendant } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
@@ -32,7 +33,7 @@ export function useScript() {
 }
 
 export function ScriptProvider({ children }: { children: ReactNode }) {
-  const { connectorDefaults } = useConfig();
+  const { connectorConfig } = useConfig();
   const [script, setScript] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -44,6 +45,11 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
+  const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
+    connectorConfig,
+    "llm",
+  );
+
   const submitPrompt = useCallback(
     async (prompt: string) => {
       abortRef.current?.abort();
@@ -53,7 +59,7 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
       setScript("");
       setLoading(true);
       try {
-        const connector = createConnector("llm", connectorDefaults.llm);
+        const connector = createConnector("llm", llmProvider, llmConfig);
         for await (const chunk of connector.stream({ prompt })) {
           if (controller.signal.aborted) break;
           setScript((prev) => prev + chunk.text);
@@ -66,7 +72,7 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [connectorDefaults.llm, appendChunk],
+    [llmProvider, llmConfig, appendChunk],
   );
 
   const refineScript = useCallback(async (_prompt: string) => {

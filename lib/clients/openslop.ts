@@ -28,8 +28,13 @@ export class OpenSlopClient {
       headers: await this.headers(),
       ...(body !== undefined && { body: JSON.stringify(body) }),
     });
-    if (!res.ok)
-      throw new Error(`OpenSlop API error: ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      const message = await res.json().then(
+        (b) => b.error || `${res.status} ${res.statusText}`,
+        () => `${res.status} ${res.statusText}`,
+      );
+      throw new Error(message);
+    }
     return res;
   }
 

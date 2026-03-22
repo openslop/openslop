@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, use, useMemo, useState, type ReactNode } from "react";
+import set from "lodash/fp/set";
 import type {
   ConnectorConfig,
   ConnectorType,
+  LLMPlugin,
   ProviderKey,
 } from "@/lib/connectors/types";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
@@ -15,49 +17,76 @@ import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
+import { getDefaultConnector } from "./connectorUtils";
 
 export type Mode = "prompt" | "inputScript";
 
-export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
-
-export type ProviderConfig = { models: string[] };
-
-export type ConfiguredConnectors = Record<
-  ConnectorType,
-  Record<ProviderKey, ProviderConfig>
->;
-
-const defaultConnectorDefaults: ConnectorRegistry = {
-  llm: {
-    provider: "openslop",
-    model: "Slop LLM v1",
-    apiKey: "",
-    plugins: [osmlPlugin],
-  },
-  tts: { provider: "openslop", model: "Slop TTS v1", apiKey: "" },
-  image: { provider: "openslop", model: "Slop Image v1", apiKey: "" },
-  video: { provider: "openslop", model: "Slop Video v1", apiKey: "" },
-  sfx: { provider: "openslop", model: "Slop SFX v1", apiKey: "" },
-  music: { provider: "openslop", model: "Slop Music v1", apiKey: "" },
+const MODE_PLUGINS: Record<Mode, LLMPlugin> = {
+  prompt: storyModePlugin,
+  inputScript: scriptModePlugin,
 };
 
-const defaultConfiguredConnectors: ConfiguredConnectors = {
-  llm: { openslop: { models: Object.keys(LLM_MODELS) } },
-  image: { openslop: { models: Object.keys(IMAGE_MODELS) } },
-  tts: { openslop: { models: Object.keys(TTS_MODELS) } },
-  video: { openslop: { models: Object.keys(VIDEO_MODELS) } },
-  sfx: { openslop: { models: Object.keys(SFX_MODELS) } },
-  music: { openslop: { models: Object.keys(MUSIC_MODELS) } },
+export type ConnectorRegistry = Record<
+  ConnectorType,
+  Record<ProviderKey, ConnectorConfig>
+>;
+
+const initialConnectorConfig: ConnectorRegistry = {
+  llm: {
+    openslop: {
+      defaultModel: "Slop LLM v1",
+      models: Object.keys(LLM_MODELS),
+      isDefault: true,
+      apiKey: "",
+      plugins: [osmlPlugin],
+    },
+  },
+  tts: {
+    openslop: {
+      defaultModel: "Slop TTS v1",
+      models: Object.keys(TTS_MODELS),
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  image: {
+    openslop: {
+      defaultModel: "Slop Image v1",
+      models: Object.keys(IMAGE_MODELS),
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  video: {
+    openslop: {
+      defaultModel: "Slop Video v1",
+      models: Object.keys(VIDEO_MODELS),
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  sfx: {
+    openslop: {
+      defaultModel: "Slop SFX v1",
+      models: Object.keys(SFX_MODELS),
+      isDefault: true,
+      apiKey: "",
+    },
+  },
+  music: {
+    openslop: {
+      defaultModel: "Slop Music v1",
+      models: Object.keys(MUSIC_MODELS),
+      isDefault: true,
+      apiKey: "",
+    },
+  },
 };
 
 type ConfigContextValue = {
-  connectorDefaults: ConnectorRegistry;
-  configuredConnectors: ConfiguredConnectors;
+  connectorConfig: ConnectorRegistry;
   mode: Mode;
-  setConnectorDefaults: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
-  setConfiguredConnectors: React.Dispatch<
-    React.SetStateAction<ConfiguredConnectors>
-  >;
+  setConnectorConfig: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
 };
 
@@ -70,37 +99,31 @@ export function useConfig() {
 }
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [connectorDefaults, setConnectorDefaults] = useState<ConnectorRegistry>(
-    defaultConnectorDefaults,
+  const [connectorConfig, setConnectorConfig] = useState<ConnectorRegistry>(
+    initialConnectorConfig,
   );
-  const [configuredConnectors, setConfiguredConnectors] =
-    useState<ConfiguredConnectors>(defaultConfiguredConnectors);
   const [mode, setMode] = useState<Mode>("prompt");
 
-  const connectorsWithModePlugins = useMemo<ConnectorRegistry>(
-    () => ({
-      ...connectorDefaults,
-      llm: {
-        ...connectorDefaults.llm,
-        plugins: [
-          ...(connectorDefaults.llm.plugins ?? []),
-          mode === "prompt" ? storyModePlugin : scriptModePlugin,
-        ],
-      },
-    }),
-    [connectorDefaults, mode],
-  );
+  const configWithModePlugins = useMemo<ConnectorRegistry>(() => {
+    const { provider, config: llmConfig } = getDefaultConnector(
+      connectorConfig,
+      "llm",
+    );
+    return set(
+      ["llm", provider, "plugins"],
+      [...(llmConfig.plugins ?? []), MODE_PLUGINS[mode]],
+      connectorConfig,
+    );
+  }, [connectorConfig, mode]);
 
   const value = useMemo<ConfigContextValue>(
     () => ({
-      connectorDefaults: connectorsWithModePlugins,
-      configuredConnectors,
+      connectorConfig: configWithModePlugins,
       mode,
-      setConnectorDefaults,
-      setConfiguredConnectors,
+      setConnectorConfig,
       setMode,
     }),
-    [connectorsWithModePlugins, configuredConnectors, mode],
+    [configWithModePlugins, mode],
   );
 
   return (

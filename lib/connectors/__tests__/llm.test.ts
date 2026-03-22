@@ -29,8 +29,9 @@ describe("BaseLLMConnector", () => {
       },
     };
     const connector = new OpenSlopLLM({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -47,8 +48,9 @@ describe("BaseLLMConnector", () => {
       }),
     };
     const connector = new OpenSlopLLM({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -65,8 +67,9 @@ describe("BaseLLMConnector", () => {
     };
 
     const connector = new OpenSlopLLM({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -97,8 +100,9 @@ describe("BaseLLMConnector", () => {
       },
     ];
     const connector = new OpenSlopLLM({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins,
     });
@@ -109,8 +113,9 @@ describe("BaseLLMConnector", () => {
   it("runs onError when transformPrompt throws during stream", async () => {
     const onError = vi.fn();
     const connector = new OpenSlopLLM({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       plugins: [
         {
           name: "bad-transform",
@@ -132,8 +137,9 @@ describe("BaseLLMConnector", () => {
   it("runs onError when beforeGenerate throws during stream", async () => {
     const onError = vi.fn();
     const connector = new OpenSlopLLM({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       plugins: [
         {
           name: "bad-before",

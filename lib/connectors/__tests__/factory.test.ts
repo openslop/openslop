@@ -3,34 +3,22 @@ import { createConnector } from "../factory";
 import type { ConnectorType } from "../types";
 
 const stubConfig = {
-  provider: "openslop",
-  model: "test-model",
+  defaultModel: "test-model",
+  models: ["test-model"],
+  isDefault: true,
   apiKey: "test-key",
 };
 
 describe("createConnector", () => {
   it("creates a valid LLM connector", () => {
-    const connector = createConnector("llm", stubConfig);
+    const connector = createConnector("llm", "openslop", stubConfig);
     expect(connector.type).toBe("llm");
   });
 
   it("throws for unknown provider", () => {
     expect(() =>
-      createConnector("llm", {
-        provider: "nonexistent",
-        model: "",
-        apiKey: "",
-      }),
+      createConnector("llm", "nonexistent" as never, stubConfig),
     ).toThrow('Unknown provider "nonexistent" for type "llm"');
-  });
-
-  it("falls back to default provider when provider is empty", () => {
-    const connector = createConnector("llm", {
-      provider: "",
-      model: "",
-      apiKey: "",
-    });
-    expect(connector.type).toBe("llm");
   });
 
   it("creates all connector types", () => {
@@ -43,7 +31,7 @@ describe("createConnector", () => {
       "video",
     ];
     for (const type of types) {
-      const connector = createConnector(type, stubConfig);
+      const connector = createConnector(type, "openslop", stubConfig);
       expect(connector.type).toBe(type);
     }
   });

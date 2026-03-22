@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, KeyboardEvent } from "react";
+import {
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  KeyboardEvent,
+  Ref,
+} from "react";
 import { Slate, Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
@@ -9,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useEditorSetup } from "./hooks/useEditorSetup";
 import { useScriptSync } from "./hooks/useScriptSync";
+import { useGenerateAll } from "./hooks/useGenerateAll";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { SortableElement } from "./dnd/SortableElement";
 import { DragOverlayContent } from "./dnd/DragOverlay";
@@ -16,7 +23,12 @@ import { PanelItem } from "./panel/PanelItem";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
 import { ELEMENT_CONFIGS } from "./config/elementConfigs";
-export default function Canvas() {
+
+export interface CanvasHandle {
+  generateAll: () => void;
+}
+
+export default function Canvas({ ref }: { ref?: Ref<CanvasHandle> }) {
   const { editor, value, setValue } = useEditorSetup();
   const {
     activeId,
@@ -29,6 +41,9 @@ export default function Canvas() {
   } = useDragAndDrop(editor, value);
 
   useScriptSync(editor);
+  const { generateAll } = useGenerateAll(editor);
+
+  useImperativeHandle(ref, () => ({ generateAll }), [generateAll]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {

@@ -27,7 +27,7 @@ vi.mock("@/lib/api/providers", () => ({
 }));
 
 vi.mock("@/lib/api/logger", () => ({
-  logger: { error: vi.fn() },
+  logger: { error: vi.fn(), warn: vi.fn() },
 }));
 
 function makeRequest(

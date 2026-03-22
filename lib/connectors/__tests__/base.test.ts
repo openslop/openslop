@@ -23,8 +23,9 @@ class TestConnector extends BaseConnector {
 
 describe("BaseConnector", () => {
   const config: ConnectorConfig = {
-    provider: "test",
-    model: "test-model",
+    defaultModel: "test-model",
+    models: ["test-model"],
+    isDefault: true,
     apiKey: "key",
     plugins: [{ name: "p1" }],
   };
@@ -51,8 +52,9 @@ describe("BaseConnector", () => {
 
   it("defaults plugins to empty array", () => {
     const c = new TestConnector(new MockProvider(), {
-      provider: "test",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "key",
     });
     expect((c as unknown as { plugins: unknown[] }).plugins).toEqual([]);
@@ -70,8 +72,9 @@ describe("BaseConnector", () => {
       },
     ];
     const c = new TestConnector(new MockProvider(), {
-      provider: "test",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       plugins,
     });
     await expect(c.generate({ prompt: "hi" })).rejects.toThrow(
@@ -95,8 +98,9 @@ describe("BaseConnector", () => {
       },
     ];
     const c = new TestConnector(new MockProvider(), {
-      provider: "test",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       plugins,
     });
     await expect(c.generate({ prompt: "hi" })).rejects.toThrow("before failed");

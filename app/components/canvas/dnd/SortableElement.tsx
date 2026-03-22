@@ -27,7 +27,7 @@ export function SortableElement({
   renderElement: (props: RenderElementProps) => React.ReactNode;
 }) {
   const editor = useSlateStatic();
-  const { connectorDefaults } = useConfig();
+  const { connectorConfig } = useConfig();
   const {
     listeners,
     setNodeRef,
@@ -48,10 +48,10 @@ export function SortableElement({
   const handleInsert = useCallback(
     (type: CanvasElementType) => {
       const path = ReactEditor.findPath(editor, element);
-      insertElement(editor, type, path[0] + 1, connectorDefaults);
+      insertElement(editor, type, path[0] + 1, connectorConfig);
       setIsHovered(false);
     },
-    [connectorDefaults, editor, element],
+    [connectorConfig, editor, element],
   );
 
   return (
