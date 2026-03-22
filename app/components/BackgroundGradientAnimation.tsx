@@ -78,7 +78,6 @@ export default function BackgroundGradientAnimation() {
           className="absolute w-[80%] h-[80%] top-[calc(50%-40%)] left-[calc(50%-40%)] animate-first opacity-70"
           style={{
             background:
-              // "radial-gradient(circle at center, rgba(18, 113, 255, 0.8) 0%, transparent 50%)",
               "radial-gradient(circle at center, rgb(75, 134, 206) 0%, transparent 50%)",
             mixBlendMode: "hard-light",
           }}
@@ -89,7 +88,6 @@ export default function BackgroundGradientAnimation() {
           className="absolute w-[90%] h-[90%] top-[calc(50%-45%)] left-[calc(50%-45%)] opacity-70"
           style={{
             background:
-              // "radial-gradient(circle at center, rgba(221, 74, 255, 0.8) 0%, transparent 50%)",
               "radial-gradient(circle at center, rgb(178, 74, 230) 0%, transparent 50%)",
             mixBlendMode: "hard-light",
           }}
