@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useScript } from "@/lib/script/ScriptProvider";
 import ModeToggle from "./ModeToggle";
 import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
-import Canvas from "./canvas/Canvas";
+import Canvas, { type CanvasHandle } from "./canvas/Canvas";
+import { SparklesIcon } from "./canvas/elements/OutputPreview";
 import UserProfile from "./UserProfile";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
@@ -25,6 +26,7 @@ export default function Editor() {
   const { mode, setMode } = useConfig();
   const { script, loading, submitPrompt, stopGeneration, refineScript } =
     useScript();
+  const canvasRef = useRef<CanvasHandle>(null);
   const [prompted, setPrompted] = useState(false);
 
   const hasScript = script.length > 0 || loading;
@@ -46,8 +48,8 @@ export default function Editor() {
         </div>
       )}
       {prompted ? (
-        <div className="flex w-full justify-center px-4 pl-16 animate-copilot-enter">
-          <div className="w-full max-w-2xl">
+        <div className="flex w-full items-stretch justify-center gap-3 px-4 pl-16 animate-copilot-enter">
+          <div className="min-w-0 flex-1 max-w-2xl">
             <Copilot
               onSubmit={refineScript}
               onStop={stopGeneration}
@@ -56,6 +58,17 @@ export default function Editor() {
               placeholder="Refine your script…"
             />
           </div>
+          {!loading && (
+            <button
+              type="button"
+              onClick={() => canvasRef.current?.generateAll()}
+              className="gen-btn shrink-0 opacity-80 hover:opacity-100 transition-opacity"
+              aria-label="Generate All"
+            >
+              <SparklesIcon />
+              <span className="hidden sm:inline">Generate All</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex w-full max-w-2xl flex-col items-center px-4">
@@ -89,7 +102,7 @@ export default function Editor() {
 
       {prompted && (
         <div className="w-full max-w-6xl px-4 pt-6">
-          <Canvas />
+          <Canvas ref={canvasRef} />
         </div>
       )}
     </div>

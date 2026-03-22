@@ -22,10 +22,11 @@ describe("BaseTTSConnector", () => {
     );
   });
 
-  it("generates TTS via provider", async () => {
+  it("generates TTS via provider with voiceId", async () => {
     const connector = new OpenSlopTTS({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
     });
     const result = await connector.generate({
@@ -36,14 +37,55 @@ describe("BaseTTSConnector", () => {
     expect(result.textTimestamps).toHaveLength(1);
   });
 
+  it("resolves voice from attributes when no voiceId", async () => {
+    const connector = new OpenSlopTTS({
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
+      apiKey: "",
+    });
+    vi.spyOn(connector, "searchVoices").mockResolvedValue([
+      { id: "voice-42", name: "Test Voice" },
+    ]);
+
+    const result = await connector.generate({
+      prompt: "hello",
+      gender: "male",
+      accent: "american",
+    });
+
+    expect(connector.searchVoices).toHaveBeenCalledWith({
+      query: undefined,
+      gender: "male",
+      accent: "american",
+      language: undefined,
+    });
+    expect(result.data).toBe("audio-base64");
+  });
+
+  it("throws when no matching voice found", async () => {
+    const connector = new OpenSlopTTS({
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
+      apiKey: "",
+    });
+    vi.spyOn(connector, "searchVoices").mockResolvedValue([]);
+
+    await expect(
+      connector.generate({ prompt: "hello", gender: "alien" }),
+    ).rejects.toThrow("No matching voice found");
+  });
+
   it("runs transformPrompt on prompt field", async () => {
     const plugin: ConnectorPlugin = {
       name: "transform",
       transformPrompt: (p) => p.toUpperCase(),
     };
     const connector = new OpenSlopTTS({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });
@@ -59,8 +101,9 @@ describe("BaseTTSConnector", () => {
     const errors: string[] = [];
 
     const connector = new OpenSlopTTS({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [
         { name: "err", onError: (e: Error) => void errors.push(e.message) },

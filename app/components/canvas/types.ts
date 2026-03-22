@@ -33,6 +33,11 @@ export type CanvasText = {
   text: string;
 };
 
+export type GenerationResult =
+  | { kind: "image"; src: string }
+  | { kind: "video"; src: string }
+  | { kind: "audio"; src: string };
+
 declare module "slate" {
   interface CustomTypes {
     Editor: CanvasEditor;

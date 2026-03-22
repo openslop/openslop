@@ -17,8 +17,9 @@ describe("BaseSFXConnector", () => {
 
   it("generates audio via provider", async () => {
     const connector = new OpenSlopSFX({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
     });
     const result = await connector.generate({ prompt: "explosion" });
@@ -43,8 +44,9 @@ describe("BaseSFXConnector", () => {
       },
     };
     const connector = new OpenSlopSFX({
-      provider: "openslop",
-      model: "test-model",
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
       apiKey: "",
       plugins: [plugin],
     });

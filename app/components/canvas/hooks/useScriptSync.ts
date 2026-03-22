@@ -9,11 +9,11 @@ import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
   const { nodes } = useScript();
-  const { connectorDefaults } = useConfig();
+  const { connectorConfig } = useConfig();
 
   const normalize = useMemo(
-    () => flow(trimWhitespace, hydrateConnectorConfig(connectorDefaults)),
-    [connectorDefaults],
+    () => flow(trimWhitespace, hydrateConnectorConfig(connectorConfig)),
+    [connectorConfig],
   );
 
   useEffect(() => {

@@ -5,9 +5,17 @@ import type { ProviderKey } from "@/lib/connectors/types";
 import type { CanvasElement } from "../types";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { useGenerate } from "../hooks/useGenerate";
 import { OutputPreview } from "./OutputPreview";
 import { ModelSelector } from "./ModelSelector";
 import { DeleteButton } from "./DeleteButton";
+
+const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
+
+function formatAttributeDisplay(key: string, value: string): string {
+  const unit = ATTRIBUTE_UNITS[key];
+  return unit ? `${value}${unit}` : value;
+}
 
 interface ElementContainerProps {
   attributes: RenderElementProps["attributes"];
@@ -24,6 +32,7 @@ export function ElementContainer({
   const { model, provider } = element.customAttributes ?? {};
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
   const [isCardHovered, setIsCardHovered] = useState(false);
+  const gen = useGenerate(element);
 
   const handleMouseEnter = useCallback(() => setIsCardHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsCardHovered(false), []);
@@ -59,7 +68,7 @@ export function ElementContainer({
                   className={`${color} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
                   title={value}
                 >
-                  {value}
+                  {formatAttributeDisplay(key, value)}
                 </span>
               ) : null;
             })}
@@ -107,7 +116,16 @@ export function ElementContainer({
       {/* Right: preview */}
       <div className="flex-1 min-w-0 flex items-center" contentEditable={false}>
         <div className="w-full bg-white/[0.03] rounded-xl p-3 border border-white/[0.06] backdrop-blur-sm">
-          <OutputPreview type={element.type} />
+          <OutputPreview
+            type={element.type}
+            generating={gen.generating}
+            queued={gen.queued}
+            seconds={gen.seconds}
+            result={gen.result}
+            error={gen.error}
+            onGenerate={gen.generate}
+            onDiscard={gen.discard}
+          />
         </div>
       </div>
     </div>
