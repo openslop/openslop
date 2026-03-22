@@ -4,8 +4,6 @@ import { generationQueue } from "@/lib/generation/queue";
 import type { CanvasElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 
-export { generateForElement } from "@/lib/generation/generateForElement";
-
 export function useGenerate(element: CanvasElement) {
   const { connectorConfig } = useConfig();
 
