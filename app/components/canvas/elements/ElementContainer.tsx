@@ -1,8 +1,7 @@
-import { JSX, useCallback, useEffect, useState } from "react";
+import { JSX, useCallback, useState } from "react";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { ProviderKey } from "@/lib/connectors/types";
-import { generationQueue } from "@/lib/generation/queue";
 import type { CanvasElement } from "../types";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
