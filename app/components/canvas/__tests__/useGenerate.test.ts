@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, type Mock } from "vitest";
-import { generateForElement } from "../hooks/useGenerate";
+import { generateForElement } from "@/lib/generation/generateForElement";
 import * as factory from "@/lib/connectors/factory";
 
 vi.mock("@/lib/connectors/factory", () => ({

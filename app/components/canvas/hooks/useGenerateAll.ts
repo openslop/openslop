@@ -15,7 +15,5 @@ export function useGenerateAll(editor: Editor) {
     generationQueue.enqueueAll(jobs);
   }, [editor, connectorConfig]);
 
-  const cancelAll = useCallback(() => generationQueue.cancelAll(), []);
-
-  return { generateAll, cancelAll };
+  return { generateAll };
 }
