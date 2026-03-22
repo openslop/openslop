@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { badRequest, serverError } from "./response";
-import { validateModel } from "./validate-model";
 import { logger } from "./logger";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,14 +19,27 @@ export function createRouteHandler<T>(options: RouteOptions<T>) {
       const body = await request.json();
       const { prompt, model } = body;
 
-      if (!prompt || typeof prompt !== "string")
+      if (!prompt || typeof prompt !== "string") {
+        logger.warn(`${options.label}: prompt is required`);
         return badRequest("prompt is required");
-      const modelError = validateModel(model, options.models);
-      if (modelError) return modelError;
+      }
+      if (model) {
+        const slug = options.models[model];
+        if (!slug) {
+          logger.warn(`${options.label}: invalid model "${model}"`);
+          return badRequest(
+            `Invalid model. Supported: ${Object.keys(options.models).join(", ")}`,
+          );
+        }
+        body.model = slug;
+      }
 
       if (options.extraValidation) {
         const validationError = options.extraValidation(body);
-        if (validationError) return validationError;
+        if (validationError) {
+          logger.warn(`${options.label}: validation failed`);
+          return validationError;
+        }
       }
 
       const provider = options.getProvider();

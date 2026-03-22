@@ -11,6 +11,13 @@ import { OutputPreview } from "./OutputPreview";
 import { ModelSelector } from "./ModelSelector";
 import { DeleteButton } from "./DeleteButton";
 
+const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
+
+function formatAttributeDisplay(key: string, value: string): string {
+  const unit = ATTRIBUTE_UNITS[key];
+  return unit ? `${value}${unit}` : value;
+}
+
 interface ElementContainerProps {
   attributes: RenderElementProps["attributes"];
   element: CanvasElement;
@@ -27,11 +34,6 @@ export function ElementContainer({
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
   const [isCardHovered, setIsCardHovered] = useState(false);
   const gen = useGenerate(element);
-
-  useEffect(() => {
-    const id = element.id;
-    return () => generationQueue.discard(id);
-  }, [element.id]);
 
   const handleMouseEnter = useCallback(() => setIsCardHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsCardHovered(false), []);
@@ -67,7 +69,7 @@ export function ElementContainer({
                   className={`${color} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
                   title={value}
                 >
-                  {value}
+                  {formatAttributeDisplay(key, value)}
                 </span>
               ) : null;
             })}

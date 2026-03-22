@@ -92,7 +92,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
     placeholder: "Describe the video clip...",
 
     defaultAttributes: {
-      duration: "5s",
+      duration: "5",
     },
     visibleAttributes: {
       duration: "bg-indigo-500",

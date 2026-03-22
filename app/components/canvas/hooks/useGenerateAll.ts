@@ -1,12 +1,11 @@
 import { useCallback } from "react";
-import { useSlateStatic } from "slate-react";
+import { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { generationQueue } from "@/lib/generation/queue";
 import type { CanvasElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 
-export function useGenerateAll() {
-  const editor = useSlateStatic();
+export function useGenerateAll(editor: Editor) {
   const { connectorConfig } = useConfig();
 
   const generateAll = useCallback(() => {

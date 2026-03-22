@@ -88,9 +88,9 @@ describe("hydrateConnectorConfig", () => {
   });
 
   it("adds model and provider for a clip (video) element", () => {
-    const result = hydrate(makeNode("clip", { duration: "5s" }));
+    const result = hydrate(makeNode("clip", { duration: "5" }));
     expect(result.customAttributes).toEqual({
-      duration: "5s",
+      duration: "5",
       model: "vid-v1",
       provider: "openslop",
     });

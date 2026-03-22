@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { X as XIcon, Wand2, RotateCcw } from "lucide-react";
+import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
 import type { CanvasElementType, GenerationResult } from "../types";
 
 interface PlaceholderBall {
@@ -31,6 +31,7 @@ export function SparklesIcon() {
       className="gen-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      aria-hidden="true"
     >
       <path
         strokeLinecap="round"
@@ -41,31 +42,36 @@ export function SparklesIcon() {
   );
 }
 
+interface GenerationState {
+  generating: boolean;
+  queued: boolean;
+  seconds: number;
+}
+
 function GenerateButton({
   generating,
   queued,
   seconds,
   onClick,
-}: {
-  generating: boolean;
-  queued: boolean;
-  seconds: number;
+  label = "Generate",
+  icon = <SparklesIcon />,
+  className = "",
+}: GenerationState & {
   onClick: () => void;
+  label?: string;
+  icon?: React.ReactNode;
+  className?: string;
 }) {
   const active = generating || queued;
   return (
     <button
       type="button"
-      className={`gen-btn ${active ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
+      className={`gen-btn ${active ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity ${className}`}
       onClick={active ? undefined : onClick}
     >
-      <SparklesIcon />
+      {icon}
       <span className={active ? "shimmer" : ""}>
-        {queued
-          ? "Queued..."
-          : generating
-            ? `Generating ${seconds}s`
-            : "Generate"}
+        {queued ? "Queued..." : generating ? `Generating ${seconds}s` : label}
       </span>
     </button>
   );
@@ -119,28 +125,24 @@ function CancelButton({
 }
 
 function ResultOverlay({
+  generating,
+  queued,
+  seconds,
   onRegenerate,
-  onDiscard,
-}: {
+}: GenerationState & {
   onRegenerate: () => void;
-  onDiscard: () => void;
 }) {
   return (
     <>
-      <OverlayButton
-        onClick={onDiscard}
-        label="Discard result"
-        className="top-2 right-2"
-      >
-        <XIcon className="w-3 h-3 text-white" />
-      </OverlayButton>
-      <OverlayButton
+      <GenerateButton
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
         onClick={onRegenerate}
         label="Regenerate"
-        className="top-2 right-10"
-      >
-        <RotateCcw className="w-3 h-3 text-white" />
-      </OverlayButton>
+        icon={<RotateCcw className="w-3 h-3" />}
+        className="absolute top-2 left-2 z-10"
+      />
     </>
   );
 }
@@ -199,40 +201,34 @@ function useStaticRotations() {
   return rotations;
 }
 
-function ErrorMessage({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
+function ErrorMessage({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 text-center px-2">
-      <p className="text-red-400 text-xs truncate max-w-full">{message}</p>
-      <button
-        type="button"
-        className="text-white/60 hover:text-white text-xs underline"
-        onClick={onRetry}
-      >
-        Retry
-      </button>
+    <div className="flex items-center gap-1.5 rounded-full bg-red-700 px-3 py-1.5">
+      <AlertCircle className="w-3.5 h-3.5 text-white shrink-0" />
+      <p className="text-white text-xs">{message}</p>
     </div>
   );
 }
 
 function AudioResult({
   src,
+  generating,
+  queued,
+  seconds,
   onRegenerate,
-  onDiscard,
-}: {
+}: GenerationState & {
   src: string;
   onRegenerate: () => void;
-  onDiscard: () => void;
 }) {
   return (
     <div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center px-2">
       <audio src={src} controls className="w-full h-8" />
-      <ResultOverlay onRegenerate={onRegenerate} onDiscard={onDiscard} />
+      <ResultOverlay
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        onRegenerate={onRegenerate}
+      />
     </div>
   );
 }
@@ -289,22 +285,16 @@ function AudioPlaceholder({
       </div>
       <div className="absolute inset-0 grain grain-light border rounded-lg bg-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]" />
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        {error ? (
-          <ErrorMessage message={error} onRetry={onGenerate} />
-        ) : (
-          <WandIcon />
-        )}
+        {error ? <ErrorMessage message={error} /> : <WandIcon />}
       </div>
-      {!error && (
-        <div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
-          <GenerateButton
-            generating={generating}
-            queued={queued}
-            seconds={seconds}
-            onClick={onGenerate}
-          />
-        </div>
-      )}
+      <div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
+        <GenerateButton
+          generating={generating}
+          queued={queued}
+          seconds={seconds}
+          onClick={onGenerate}
+        />
+      </div>
       {(generating || queued) && (
         <CancelButton
           onClick={onDiscard}
@@ -328,22 +318,16 @@ function MediaPlaceholder({
   return (
     <div className="group grain grain-light relative w-full aspect-video rounded-lg overflow-hidden border flex items-center justify-center backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
       <div className="z-10">
-        {error ? (
-          <ErrorMessage message={error} onRetry={onGenerate} />
-        ) : (
-          <WandIcon />
-        )}
+        {error ? <ErrorMessage message={error} /> : <WandIcon />}
       </div>
-      {!error && (
-        <div className="absolute top-2 left-2 z-10">
-          <GenerateButton
-            generating={generating}
-            queued={queued}
-            seconds={seconds}
-            onClick={onGenerate}
-          />
-        </div>
-      )}
+      <div className="absolute top-2 left-2 z-10">
+        <GenerateButton
+          generating={generating}
+          queued={queued}
+          seconds={seconds}
+          onClick={onGenerate}
+        />
+      </div>
       {(generating || queued) && <CancelButton onClick={onDiscard} />}
       <div className="container-loader" aria-hidden="true">
         <PlaceholderBalls
@@ -358,20 +342,26 @@ function MediaPlaceholder({
 function MediaPreview({
   media,
   borderColor,
+  generating,
+  queued,
+  seconds,
   onRegenerate,
-  onDiscard,
-}: {
+}: GenerationState & {
   media: React.ReactNode;
   borderColor: string;
   onRegenerate: () => void;
-  onDiscard: () => void;
 }) {
   return (
     <div
       className={`group relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
     >
       {media}
-      <ResultOverlay onRegenerate={onRegenerate} onDiscard={onDiscard} />
+      <ResultOverlay
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
+        onRegenerate={onRegenerate}
+      />
     </div>
   );
 }
@@ -407,8 +397,10 @@ export function OutputPreview({
       return (
         <AudioResult
           src={result.src}
+          generating={generating}
+          queued={queued}
+          seconds={seconds}
           onRegenerate={onGenerate}
-          onDiscard={onDiscard}
         />
       );
     }
@@ -445,8 +437,10 @@ export function OutputPreview({
       <MediaPreview
         media={media}
         borderColor={BORDER_COLORS[type] ?? "border-white/20"}
+        generating={generating}
+        queued={queued}
+        seconds={seconds}
         onRegenerate={onGenerate}
-        onDiscard={onDiscard}
       />
     );
   }

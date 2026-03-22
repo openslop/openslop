@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, KeyboardEvent } from "react";
+import {
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  KeyboardEvent,
+  Ref,
+} from "react";
 import { Slate, Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
@@ -16,9 +22,13 @@ import { DragOverlayContent } from "./dnd/DragOverlay";
 import { PanelItem } from "./panel/PanelItem";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
-import { SparklesIcon } from "./elements/OutputPreview";
 import { ELEMENT_CONFIGS } from "./config/elementConfigs";
-export default function Canvas() {
+
+export interface CanvasHandle {
+  generateAll: () => void;
+}
+
+export default function Canvas({ ref }: { ref?: Ref<CanvasHandle> }) {
   const { editor, value, setValue } = useEditorSetup();
   const {
     activeId,
@@ -31,7 +41,9 @@ export default function Canvas() {
   } = useDragAndDrop(editor, value);
 
   useScriptSync(editor);
-  const { generateAll } = useGenerateAll();
+  const { generateAll } = useGenerateAll(editor);
+
+  useImperativeHandle(ref, () => ({ generateAll }), [generateAll]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -79,16 +91,6 @@ export default function Canvas() {
             className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </SortableContext>
-        <div className="flex justify-end mt-4" contentEditable={false}>
-          <button
-            type="button"
-            onClick={generateAll}
-            className="gen-btn opacity-80 hover:opacity-100 transition-opacity"
-          >
-            <SparklesIcon />
-            <span>Generate All</span>
-          </button>
-        </div>
         <DragOverlay>
           {activeEditorElement && (
             <DragOverlayContent element={activeEditorElement} />
