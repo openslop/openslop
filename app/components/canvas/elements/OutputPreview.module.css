@@ -1,0 +1,48 @@
+.containerLoader {
+  --size: 400px;
+  width: var(--size);
+  height: var(--size);
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  transform: scale(0.5);
+}
+
+.ball {
+  position: absolute;
+  top: var(--y, 0px);
+  margin-left: calc(var(--size) / -2 + var(--x, 0px));
+  width: calc(var(--size) + var(--i));
+  height: calc(var(--size) + var(--i));
+  background-color: var(--color);
+  border-radius: 50%;
+  animation: ballOrbit 20s linear infinite;
+  transform-origin: var(--size);
+  mix-blend-mode: hard-light;
+  animation-duration: var(--d);
+  filter: blur(58px);
+}
+
+.ball:nth-child(even) {
+  animation-direction: reverse;
+}
+
+.ballStatic {
+  animation: none;
+  transform: rotate(var(--rotation, 0deg));
+}
+
+@keyframes ballOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ball {
+    animation: none;
+  }
+}

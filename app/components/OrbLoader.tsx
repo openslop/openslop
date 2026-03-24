@@ -1,7 +1,9 @@
+import styles from "./OrbLoader.module.css";
+
 export default function OrbLoader() {
   return (
     <div className="mr-3 h-7 w-7 shrink-0">
-      <div className="loader scale-[0.28] origin-top-left">
+      <div className={`${styles.loader} scale-[0.28] origin-top-left`}>
         <svg width="100" height="100" viewBox="0 0 100 100" aria-hidden="true">
           <defs>
             <mask id="clipping">
@@ -15,7 +17,7 @@ export default function OrbLoader() {
             </mask>
           </defs>
         </svg>
-        <div className="box" />
+        <div className={styles.box} />
       </div>
     </div>
   );

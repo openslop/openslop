@@ -1,0 +1,18 @@
+@keyframes copilotEnter {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.copilotEnter {
+  animation: copilotEnter 1000ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copilotEnter {
+    animation: none;
+  }
+}
