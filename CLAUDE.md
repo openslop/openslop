@@ -15,3 +15,8 @@
   - `/web-design-guidelines`
   - `/vercel-react-best-practices`
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is
+
+## Next.js gotchas
+
+- `next/dynamic` with `ssr: false` is a **Client Component API only**. Never use it in Server Components. If you need to lazy-load a client-only component from a Server Component, create a thin Client Component wrapper that does the dynamic import, then use that wrapper in the Server Component.
+- `proxy.ts` is the correct file name (Next.js 16 migrated from `middleware.ts` to `proxy.ts`). Do NOT rename it.
