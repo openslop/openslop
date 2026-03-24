@@ -38,6 +38,25 @@
   align-items: center;
   user-select: none;
   margin-right: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.hoverTarget {
+  display: flex;
+}
+
+.hoverTarget > div:last-child {
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.hoverTarget:hover .actions,
+.hoverTarget.menuOpen .actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .actions button {

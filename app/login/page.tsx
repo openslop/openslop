@@ -7,6 +7,7 @@ import EmailSentCard from "../components/EmailSentCard";
 import GradientButton from "../components/GradientButton";
 import OrDivider from "../components/OrDivider";
 import GoogleOAuthButton from "../components/GoogleOAuthButton";
+import authStyles from "@/app/styles/auth.module.css";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -68,7 +69,7 @@ export default function LoginPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input-auth"
+          className={authStyles.input}
           required
         />
         <GradientButton type="submit" disabled={loading} className="mt-1">

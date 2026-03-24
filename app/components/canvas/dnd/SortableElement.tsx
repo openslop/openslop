@@ -38,18 +38,12 @@ export function SortableElement({
     attributes: sortableAttributes,
   } = useSortable({ id: element.id });
 
-  const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const showActions = isHovered || isMenuOpen;
-
-  const handleMouseOver = useCallback(() => setIsHovered(true), []);
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
   const handleInsert = useCallback(
     (type: CanvasElementType) => {
       const path = ReactEditor.findPath(editor, element);
       insertElement(editor, type, path[0] + 1, connectorConfig);
-      setIsHovered(false);
     },
     [connectorConfig, editor, element],
   );
@@ -68,16 +62,10 @@ export function SortableElement({
         }}
       >
         <div
-          className={`${styles.sortable} align-middle`}
-          onMouseEnter={handleMouseOver}
-          onMouseLeave={handleMouseLeave}
+          className={`${styles.hoverTarget} align-middle${isMenuOpen ? ` ${styles.menuOpen}` : ""}`}
         >
           <div
             className={`self-center ${styles.actions}`}
-            style={{
-              opacity: showActions ? 1 : 0,
-              pointerEvents: showActions ? "auto" : "none",
-            }}
             contentEditable={false}
           >
             <DropdownMenu modal={false} onOpenChange={setIsMenuOpen}>
