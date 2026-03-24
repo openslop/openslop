@@ -9,6 +9,8 @@ import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { SparklesIcon } from "./canvas/elements/OutputPreview";
 import UserProfile from "./UserProfile";
+import editorStyles from "./Editor.module.css";
+import genStyles from "./styles/gen-button.module.css";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
@@ -48,7 +50,9 @@ export default function Editor() {
         </div>
       )}
       {prompted ? (
-        <div className="flex w-full items-stretch justify-center gap-3 px-4 pl-16 animate-copilot-enter">
+        <div
+          className={`flex w-full items-stretch justify-center gap-3 px-4 pl-16 ${editorStyles.copilotEnter}`}
+        >
           <div className="min-w-0 flex-1 max-w-2xl">
             <Copilot
               onSubmit={refineScript}
@@ -58,17 +62,16 @@ export default function Editor() {
               placeholder="Refine your script…"
             />
           </div>
-          {!loading && (
-            <button
-              type="button"
-              onClick={() => canvasRef.current?.generateAll()}
-              className="gen-btn shrink-0 opacity-80 hover:opacity-100 transition-opacity"
-              aria-label="Generate All"
-            >
-              <SparklesIcon />
-              <span className="hidden sm:inline">Generate All</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => canvasRef.current?.generateAll()}
+            className={`${genStyles.btn} shrink-0 transition-opacity ${loading ? "" : "opacity-80 hover:opacity-100"}`}
+            aria-label="Generate All"
+            disabled={loading}
+          >
+            <SparklesIcon />
+            <span className="hidden sm:inline">Generate All</span>
+          </button>
         </div>
       ) : (
         <div className="flex w-full max-w-2xl flex-col items-center px-4">

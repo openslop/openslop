@@ -2,6 +2,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
 import type { CanvasElementType, GenerationResult } from "../types";
+import genStyles from "@/app/components/styles/gen-button.module.css";
+import loaderStyles from "./OutputPreview.module.css";
 
 interface PlaceholderBall {
   color: string;
@@ -28,7 +30,7 @@ const PLACEHOLDER_BALLS: PlaceholderBall[] = [
 export function SparklesIcon() {
   return (
     <svg
-      className="gen-btn-svg"
+      className={genStyles.svg}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       aria-hidden="true"
@@ -66,7 +68,7 @@ function GenerateButton({
   return (
     <button
       type="button"
-      className={`gen-btn ${active ? "is-generating pointer-events-none" : "opacity-0 group-hover:opacity-100"} transition-opacity ${className}`}
+      className={`${genStyles.btn} ${active ? `${genStyles.generating} pointer-events-none` : "opacity-0 group-hover:opacity-100"} transition-opacity ${className}`}
       onClick={active ? undefined : onClick}
     >
       {icon}
@@ -175,7 +177,11 @@ function PlaceholderBalls({
       {PLACEHOLDER_BALLS.map((ball, i) => (
         <span
           key={i}
-          className={generating ? "ball" : "ball ball-static"}
+          className={
+            generating
+              ? loaderStyles.ball
+              : `${loaderStyles.ball} ${loaderStyles.ballStatic}`
+          }
           style={
             {
               "--color": ball.color,
@@ -275,7 +281,7 @@ function AudioPlaceholder({
           }}
         >
           <div className="absolute inset-0 bg-white/20" />
-          <div className="container-loader">
+          <div className={loaderStyles.containerLoader}>
             <PlaceholderBalls
               generating={generating}
               staticRotations={staticRotations}
@@ -329,7 +335,7 @@ function MediaPlaceholder({
         />
       </div>
       {(generating || queued) && <CancelButton onClick={onDiscard} />}
-      <div className="container-loader" aria-hidden="true">
+      <div className={loaderStyles.containerLoader} aria-hidden="true">
         <PlaceholderBalls
           generating={generating}
           staticRotations={staticRotations}
