@@ -1,4 +1,4 @@
-import { JSX, useCallback, useState } from "react";
+import { JSX } from "react";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { ProviderKey } from "@/lib/connectors/types";
@@ -31,25 +31,19 @@ export function ElementContainer({
   const config = ELEMENT_CONFIGS[element.type];
   const { model, provider } = element.customAttributes ?? {};
   const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
-  const [isCardHovered, setIsCardHovered] = useState(false);
   const gen = useGenerate(element);
-
-  const handleMouseEnter = useCallback(() => setIsCardHovered(true), []);
-  const handleMouseLeave = useCallback(() => setIsCardHovered(false), []);
 
   return (
     <div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
       {/* Left: element card */}
       <div
-        className={`grain rounded-lg ${config.bgColor} p-2 shadow-md relative overflow-hidden flex-1 min-w-0`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        className={`group/card grain rounded-lg ${config.bgColor} p-2 shadow-md relative overflow-hidden flex-1 min-w-0`}
       >
         <div
-          className="absolute top-1.5 right-1.5 z-20"
+          className="absolute top-1.5 right-1.5 z-20 opacity-0 pointer-events-none group-hover/card:opacity-100 group-hover/card:pointer-events-auto transition-opacity duration-200"
           contentEditable={false}
         >
-          <DeleteButton element={element} visible={isCardHovered} />
+          <DeleteButton element={element} />
         </div>
         <div className="relative z-10 min-w-0">
           <div
