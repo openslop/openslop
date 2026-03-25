@@ -9,19 +9,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition:
-    background-color 0.2s,
-    opacity 0.2s;
+  transition: background-color 0.2s;
   overflow: hidden;
   position: relative;
   gap: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.visible {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .icon {

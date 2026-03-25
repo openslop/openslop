@@ -135,17 +135,15 @@ function ResultOverlay({
   onRegenerate: () => void;
 }) {
   return (
-    <>
-      <GenerateButton
-        generating={generating}
-        queued={queued}
-        seconds={seconds}
-        onClick={onRegenerate}
-        label="Regenerate"
-        icon={<RotateCcw className="w-3 h-3" />}
-        className="absolute top-2 left-2 z-10"
-      />
-    </>
+    <GenerateButton
+      generating={generating}
+      queued={queued}
+      seconds={seconds}
+      onClick={onRegenerate}
+      label="Regenerate"
+      icon={<RotateCcw className="w-3 h-3" />}
+      className="absolute top-2 left-2 z-10"
+    />
   );
 }
 

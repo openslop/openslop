@@ -3,19 +3,13 @@ import { ReactEditor, useSlateStatic } from "slate-react";
 import type { CanvasElement } from "../types";
 import styles from "./DeleteButton.module.css";
 
-export function DeleteButton({
-  element,
-  visible,
-}: {
-  element: CanvasElement;
-  visible: boolean;
-}) {
+export function DeleteButton({ element }: { element: CanvasElement }) {
   const editor = useSlateStatic();
 
   return (
     <button
       aria-label="Delete element"
-      className={`${styles.button} ${visible ? styles.visible : ""}`}
+      className={styles.button}
       onMouseDown={(e) => {
         e.preventDefault();
         const path = ReactEditor.findPath(editor, element);
