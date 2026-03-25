@@ -111,19 +111,22 @@ openslop/
 |   |-- supabase/           # Supabase client helpers (browser, server, middleware)
 |   |-- utils.ts            # General utilities (cn, etc.)
 |-- supabase/migrations/    # Database migrations
-|-- middleware.ts           # Auth session refresh + route protection
+|-- proxy.ts               # Auth session refresh + route protection
 ```
 
 ## Scripts
 
-| Command            | What it does                |
-| ------------------ | --------------------------- |
-| `npm run dev`      | Start the dev server        |
-| `npm run build`    | Production build            |
-| `npm run start`    | Start the production server |
-| `npm run lint`     | Run ESLint                  |
-| `npm run db:push`  | Push migrations to Supabase |
-| `npm run db:reset` | Reset the database          |
+| Command                | What it does                |
+| ---------------------- | --------------------------- |
+| `npm run dev`          | Start the dev server        |
+| `npm run build`        | Production build            |
+| `npm run start`        | Start the production server |
+| `npm run lint`         | Run ESLint                  |
+| `npm run format:check` | Check formatting (Prettier) |
+| `npm run typecheck`    | Run TypeScript type checks  |
+| `npm run test`         | Run tests (Vitest)          |
+| `npm run db:push`      | Push migrations to Supabase |
+| `npm run db:reset`     | Reset the database          |
 
 ## Contributing
 

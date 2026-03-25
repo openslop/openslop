@@ -12,7 +12,6 @@ const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
 
 export class OSMLSerializer {
-  private processedSinceLastEmit = 0;
   private buffer = "";
   private nodes: CanvasElement[] = [];
 
@@ -88,7 +87,6 @@ export class OSMLSerializer {
     }
     const lastChild = current.children[current.children.length - 1];
     lastChild.text += text ?? "";
-    this.processedSinceLastEmit += text?.length ?? 0;
   }
 
   private appendNext(
