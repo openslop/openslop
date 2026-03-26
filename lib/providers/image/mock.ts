@@ -14,7 +14,7 @@ const MOCK_IMAGES: { file: string; format: ImageFormat }[] = [
 
 export class MockImage extends BaseProvider<ImageGenerateParams, ImageResult> {
   async generate(params: ImageGenerateParams): Promise<ImageResult> {
-    await new Promise((r) => setTimeout(r, 5000 + Math.random() * 5000));
+    await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
     const pick = MOCK_IMAGES[Math.floor(Math.random() * MOCK_IMAGES.length)];
     const data = readMockFile(pick.file).toString("base64");
     return {
