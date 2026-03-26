@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { PanelLeft } from "lucide-react";
 import UserProfile from "@/app/components/UserProfile";
 import ElementPanel from "./ElementPanel";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const onToggle = useCallback(() => setOpen((prev) => !prev), []);
+  const onToggle = () => setOpen((prev) => !prev);
   return (
     <>
       {open && (

@@ -12,7 +12,7 @@ export const POST = createRouteHandler({
     if (
       referenceImage &&
       (typeof referenceImage !== "string" ||
-        !String(referenceImage).match(/^data:[a-z]+\/[a-z+.-]+;base64,/i))
+        !referenceImage.match(/^data:[a-z]+\/[a-z+.-]+;base64,/i))
     )
       return badRequest(
         "referenceImage must be a data URI (e.g. data:image/png;base64,...)",
