@@ -50,10 +50,10 @@ export class MockLLM extends BaseProvider<
   }
 
   async *stream(): AsyncGenerator<{ text: string; done: boolean }> {
-    await delay(1000);
+    await delay(500);
     const words = MOCK_SCRIPT.split(/(?<=\s)/);
     for (const word of words) {
-      await delay(50);
+      await delay(30);
       yield { text: word, done: false };
     }
     yield { text: "", done: true };

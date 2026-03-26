@@ -47,3 +47,4 @@ supabase/.temp/
 .claude/settings.local.json
 .claude/memory/
 .claude/plans/
+.gstack/
