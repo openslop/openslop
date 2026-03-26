@@ -5,6 +5,7 @@
 
 .sortable > div:last-child {
   flex: 1;
+  min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -49,6 +50,7 @@
 
 .hoverTarget > div:last-child {
   flex: 1;
+  min-width: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }

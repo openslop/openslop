@@ -11,7 +11,7 @@ import type { GenerationResult } from "@/app/components/canvas/types";
 
 const audioFromBuffer = (buf: ArrayBuffer): GenerationResult => ({
   kind: "audio",
-  src: URL.createObjectURL(new Blob([buf], { type: "audio/mpeg" })),
+  src: URL.createObjectURL(new Blob([buf])),
 });
 
 const RESULT_CONVERTERS: Record<

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
+import { AudioPlayer } from "./AudioPlayer";
 import type { CanvasElementType, GenerationResult } from "../types";
 import genStyles from "@/app/components/styles/gen-button.module.css";
 import loaderStyles from "./OutputPreview.module.css";
@@ -215,24 +216,29 @@ function ErrorMessage({ message }: { message: string }) {
 }
 
 function AudioResult({
+  type,
   src,
   generating,
   queued,
   seconds,
   onRegenerate,
 }: GenerationState & {
+  type: CanvasElementType;
   src: string;
   onRegenerate: () => void;
 }) {
   return (
-    <div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center px-2">
-      <audio src={src} controls className="w-full h-8" />
-      <ResultOverlay
+    <div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2">
+      <GenerateButton
         generating={generating}
         queued={queued}
         seconds={seconds}
-        onRegenerate={onRegenerate}
+        onClick={onRegenerate}
+        label="Regenerate"
+        icon={<RotateCcw className="w-3 h-3" />}
+        className="shrink-0 !opacity-100"
       />
+      <AudioPlayer key={src} src={src} waveColor={WAVE_COLORS[type]} />
     </div>
   );
 }
@@ -379,6 +385,15 @@ const BORDER_COLORS: Record<CanvasElementType, string> = {
   sound: "border-emerald-500/30",
 };
 
+const WAVE_COLORS: Record<CanvasElementType, string> = {
+  character: "rgb(251, 191, 36)",
+  narration: "rgb(203, 213, 225)",
+  music: "rgb(167, 139, 250)",
+  sound: "rgb(52, 211, 153)",
+  image: "rgb(34, 211, 238)",
+  clip: "rgb(129, 140, 248)",
+};
+
 const AUDIO_TYPES = new Set<CanvasElementType>([
   "character",
   "narration",
@@ -400,6 +415,7 @@ export function OutputPreview({
     if (result?.kind === "audio") {
       return (
         <AudioResult
+          type={type}
           src={result.src}
           generating={generating}
           queued={queued}
