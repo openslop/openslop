@@ -8,6 +8,43 @@ import type {
 } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 
+const SAMPLE_RATE = 44100;
+const NUM_CHANNELS = 1;
+const ENCODING = "pcm_f32le";
+
+const PCM_WAV_PARAMS: Record<
+  string,
+  { audioFormat: number; bitsPerSample: number }
+> = {
+  pcm_f32le: { audioFormat: 3, bitsPerSample: 32 },
+  pcm_s16le: { audioFormat: 1, bitsPerSample: 16 },
+  pcm_mulaw: { audioFormat: 7, bitsPerSample: 8 },
+  pcm_alaw: { audioFormat: 6, bitsPerSample: 8 },
+};
+
+function wrapPcmInWav(pcm: Buffer): Buffer {
+  const { audioFormat, bitsPerSample } = PCM_WAV_PARAMS[ENCODING];
+  const byteRate = SAMPLE_RATE * NUM_CHANNELS * (bitsPerSample / 8);
+  const blockAlign = NUM_CHANNELS * (bitsPerSample / 8);
+  const header = Buffer.alloc(44);
+
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write("WAVE", 8);
+  header.write("fmt ", 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(audioFormat, 20);
+  header.writeUInt16LE(NUM_CHANNELS, 22);
+  header.writeUInt32LE(SAMPLE_RATE, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(pcm.length, 40);
+
+  return Buffer.concat([header, pcm]);
+}
+
 export class CartesiaTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
   private client: Cartesia;
 
@@ -55,8 +92,8 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
         voice: { mode: "id", id: params.voiceId },
         output_format: {
           container: "raw",
-          encoding: "pcm_f32le",
-          sample_rate: 44100,
+          encoding: ENCODING,
+          sample_rate: SAMPLE_RATE,
         },
         add_timestamps: true,
         ...(params.speed !== undefined && {
@@ -85,7 +122,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
       const combined = Buffer.concat(audioChunks);
 
       return {
-        data: combined.toString("base64"),
+        data: wrapPcmInWav(combined).toString("base64"),
         textTimestamps,
       };
     } finally {
