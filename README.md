@@ -99,19 +99,28 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 ```
 openslop/
 |-- app/                    # Next.js App Router pages and layouts
-|   |-- api/                # API routes
-|   |-- auth/               # Auth callback handler
+|   |-- api/v1/             # REST API (image, llm, music, sfx, tts, video)
+|   |-- auth/               # OAuth callback handler
 |   |-- components/         # App-specific React components
+|   |   |-- canvas/         # Slate-based editor canvas (drag-and-drop, elements, plugins)
 |   |-- login/              # Login page
 |   |-- signup/             # Signup page
 |   |-- page.tsx            # Home / editor
 |   |-- layout.tsx          # Root layout
 |-- components/ui/          # shadcn/ui primitives
-|-- lib/                    # Shared utilities
+|-- lib/                    # Shared libraries
+|   |-- api/                # Route handler helpers, logger, response utils
+|   |-- clients/            # HTTP client for the OpenSlop API
+|   |-- config/             # Global connector configuration (React context)
+|   |-- connectors/         # Connector abstraction per media type + plugins
+|   |-- generation/         # Generation queue and job orchestration
+|   |-- providers/          # Provider implementations (Anthropic, ElevenLabs, Cartesia, Runware, etc.)
+|   |-- script/             # Script context provider
 |   |-- supabase/           # Supabase client helpers (browser, server, middleware)
+|   |-- user/               # User context provider
 |   |-- utils.ts            # General utilities (cn, etc.)
 |-- supabase/migrations/    # Database migrations
-|-- proxy.ts               # Auth session refresh + route protection
+|-- proxy.ts                # Auth session refresh + route protection
 ```
 
 ## Scripts
