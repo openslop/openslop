@@ -27,10 +27,10 @@ const RESULT_CONVERTERS: Record<
       throw new Error(r.error ?? "Video generation failed");
     return { kind: "video", src: r.resultUrl! };
   },
-  tts: (r: TTSResult) => ({
-    kind: "audio",
-    src: `data:audio/mp3;base64,${r.data}`,
-  }),
+  tts: (r: TTSResult) =>
+    audioFromBuffer(
+      Uint8Array.from(atob(r.data), (c) => c.charCodeAt(0)).buffer,
+    ),
   music: audioFromBuffer as (raw: never) => GenerationResult,
   sfx: audioFromBuffer as (raw: never) => GenerationResult,
   llm: () => {

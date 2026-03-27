@@ -47,10 +47,13 @@ describe("generateForElement", () => {
 
   it("passes extra params to connector generate for TTS", async () => {
     const generate = vi.fn().mockResolvedValue({
-      data: "audiodata",
+      data: btoa("audiodata"),
       textTimestamps: [],
     });
     (factory.createConnector as Mock).mockReturnValue({ generate });
+
+    const mockUrl = "blob:http://localhost/mock-tts";
+    vi.spyOn(URL, "createObjectURL").mockReturnValue(mockUrl);
 
     const result = await generateForElement(
       "tts",
@@ -67,8 +70,8 @@ describe("generateForElement", () => {
         accent: "american",
       }),
     );
-    expect(result.kind).toBe("audio");
-    expect(result.src).toContain("base64,audiodata");
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    expect(result).toEqual({ kind: "audio", src: mockUrl });
   });
 
   it("converts ArrayBuffer to object URL for music", async () => {

@@ -1,6 +1,6 @@
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
-import { readMockFileAsArrayBuffer } from "../mock-utils";
+import { pickRandom, readMockFileAsArrayBuffer } from "../mock-utils";
 
 const MOCK_AUDIO = [
   { file: "mock-1.mp3" },
@@ -11,7 +11,7 @@ const MOCK_AUDIO = [
 export class MockMusic extends BaseProvider<MusicGenerateParams, ArrayBuffer> {
   async generate(): Promise<ArrayBuffer> {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
-    const pick = MOCK_AUDIO[Math.floor(Math.random() * MOCK_AUDIO.length)];
+    const pick = pickRandom(MOCK_AUDIO);
     return readMockFileAsArrayBuffer(pick.file);
   }
 }

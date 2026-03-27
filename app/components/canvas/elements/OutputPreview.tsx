@@ -387,7 +387,7 @@ const BORDER_COLORS: Record<CanvasElementType, string> = {
 
 const WAVE_COLORS: Record<CanvasElementType, string> = {
   character: "rgb(251, 191, 36)",
-  narration: "rgb(203, 213, 225)",
+  narration: "rgb(128, 128, 128)",
   music: "rgb(167, 139, 250)",
   sound: "rgb(52, 211, 153)",
   image: "rgb(34, 211, 238)",
