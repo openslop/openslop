@@ -33,7 +33,7 @@ export default function AccessCodeInput() {
         }
       } catch {
         setError("Something went wrong. Please try again.");
-        setValues(Array(CODE_LENGTH).fill(""));
+        setValues(EMPTY_CODE());
         inputRefs.current[0]?.focus();
       } finally {
         setLoading(false);
