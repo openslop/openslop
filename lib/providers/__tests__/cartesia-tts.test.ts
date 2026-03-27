@@ -52,7 +52,10 @@ describe("CartesiaTTS", () => {
         voiceId: "voice-1",
       });
 
-      expect(result.data).toBe(audioData.toString("base64"));
+      const wav = Buffer.from(result.data, "base64");
+      expect(wav.toString("ascii", 0, 4)).toBe("RIFF");
+      expect(wav.toString("ascii", 8, 12)).toBe("WAVE");
+      expect(wav.subarray(44)).toEqual(audioData);
       expect(result.textTimestamps).toEqual([
         { text: "hello", start: 0.0, end: 0.4 },
         { text: "world", start: 0.5, end: 0.9 },
