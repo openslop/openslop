@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useScript } from "@/lib/script/ScriptProvider";
-import ModeToggle from "./ModeToggle";
 import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
@@ -25,7 +24,7 @@ there was a small glowing garden hidden on the moon.
 And in that garden… lived a little rabbit named Lumi…`;
 
 export default function Editor() {
-  const { mode, setMode } = useConfig();
+  const { scriptMode, setScriptMode } = useConfig();
   const { script, loading, submitPrompt, stopGeneration, refineScript } =
     useScript();
   const canvasRef = useRef<CanvasHandle>(null);
@@ -75,25 +74,19 @@ export default function Editor() {
         </div>
       ) : (
         <div className="flex w-full max-w-2xl flex-col items-center px-4">
-          <div
-            className="flex flex-col items-center opacity-100 max-h-[400px] mb-6 transition-[opacity,max-height,margin-bottom] duration-1000"
-            style={{
-              transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-          >
-            <h1 className="font-title text-center text-[clamp(48px,12vw,85px)] tracking-[-0.04em] leading-[0.95em] text-white/90 text-wrap-balance mb-6">
-              {mode === "prompt" ? "Describe your video" : "Paste your script"}
-            </h1>
-            <ModeToggle mode={mode} onChange={setMode} />
-          </div>
+          <h1 className="font-title text-center text-[clamp(48px,12vw,85px)] tracking-[-0.04em] leading-[0.95em] text-white/90 text-wrap-balance mb-6">
+            Describe your video
+          </h1>
 
           <Copilot
             onSubmit={handleSubmit}
             onStop={stopGeneration}
-            multiline={mode === "inputScript"}
+            multiline
             loading={loading}
+            scriptMode={scriptMode}
+            onScriptModeChange={setScriptMode}
             placeholder={
-              mode === "inputScript" ? (
+              scriptMode ? (
                 INPUT_SCRIPT_PLACEHOLDER
               ) : (
                 <AnimatedPlaceholder active />
