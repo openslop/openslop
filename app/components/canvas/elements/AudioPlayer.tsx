@@ -2,6 +2,11 @@
 
 import { useRef, useState, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
 
 function formatTime(seconds: number) {
@@ -26,19 +31,24 @@ export function AudioPlayer({
 
   return (
     <div className="flex flex-1 min-w-0 items-center gap-2">
-      <button
-        type="button"
-        aria-label={playing ? "Pause" : "Play"}
-        className="shrink-0 relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-colors overflow-hidden"
-        onClick={toggle}
-        disabled={duration === 0}
-      >
-        {playing ? (
-          <Pause className="w-3 h-3 text-white" />
-        ) : (
-          <Play className="w-3 h-3 text-white ml-0.5" />
-        )}
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={playing ? "Pause" : "Play"}
+            className="shrink-0 relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-colors overflow-hidden"
+            onClick={toggle}
+            disabled={duration === 0}
+          >
+            {playing ? (
+              <Pause className="w-3 h-3 text-white" />
+            ) : (
+              <Play className="w-3 h-3 text-white ml-0.5" />
+            )}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>{playing ? "Pause" : "Play"}</TooltipContent>
+      </Tooltip>
       <Waveform
         ref={waveformRef}
         src={src}

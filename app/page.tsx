@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
 import { UserProvider } from "@/lib/user/UserProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import Editor from "./components/Editor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
@@ -24,13 +25,15 @@ export default async function Home() {
 
   if (user) {
     return (
-      <ConfigProvider>
-        <ScriptProvider>
-          <UserProvider user={user}>
-            <Editor />
-          </UserProvider>
-        </ScriptProvider>
-      </ConfigProvider>
+      <TooltipProvider>
+        <ConfigProvider>
+          <ScriptProvider>
+            <UserProvider user={user}>
+              <Editor />
+            </UserProvider>
+          </ScriptProvider>
+        </ConfigProvider>
+      </TooltipProvider>
     );
   }
 

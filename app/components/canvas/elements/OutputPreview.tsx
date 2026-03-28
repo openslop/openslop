@@ -1,6 +1,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
 import type { CanvasElementType, GenerationResult } from "../types";
 import genStyles from "@/app/components/styles/gen-button.module.css";
@@ -70,13 +76,59 @@ function GenerateButton({
     <button
       type="button"
       className={`${genStyles.btn} ${active ? `${genStyles.generating} pointer-events-none` : "opacity-0 group-hover:opacity-100"} transition-opacity ${className}`}
-      onClick={active ? undefined : onClick}
+      disabled={active}
+      onClick={onClick}
     >
       {icon}
       <span className={active ? "shimmer" : ""}>
         {queued ? "Queued..." : generating ? `Generating ${seconds}s` : label}
       </span>
     </button>
+  );
+}
+
+function RegenerateButton({
+  generating,
+  queued,
+  seconds,
+  onClick,
+  alwaysVisible = false,
+  className = "",
+}: GenerationState & {
+  onClick: () => void;
+  alwaysVisible?: boolean;
+  className?: string;
+}) {
+  const active = generating || queued;
+  const label = queued
+    ? "Queued..."
+    : generating
+      ? `Generating ${seconds}s`
+      : "Regenerate";
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className={cn(
+            "relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-[opacity,background-color] overflow-hidden",
+            active || alwaysVisible
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+            className,
+          )}
+          disabled={active}
+          onClick={onClick}
+        >
+          <RotateCcw
+            className={cn("w-3 h-3 text-white", active && "animate-spin")}
+          />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -98,14 +150,19 @@ function OverlayButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+          onClick={onClick}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -136,13 +193,11 @@ function ResultOverlay({
   onRegenerate: () => void;
 }) {
   return (
-    <GenerateButton
+    <RegenerateButton
       generating={generating}
       queued={queued}
       seconds={seconds}
       onClick={onRegenerate}
-      label="Regenerate"
-      icon={<RotateCcw className="w-3 h-3" />}
       className="absolute top-2 left-2 z-10"
     />
   );
@@ -229,14 +284,13 @@ function AudioResult({
 }) {
   return (
     <div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2">
-      <GenerateButton
+      <RegenerateButton
         generating={generating}
         queued={queued}
         seconds={seconds}
         onClick={onRegenerate}
-        label="Regenerate"
-        icon={<RotateCcw className="w-3 h-3" />}
-        className="shrink-0 !opacity-100"
+        alwaysVisible
+        className="shrink-0"
       />
       <AudioPlayer key={src} src={src} waveColor={WAVE_COLORS[type]} />
     </div>

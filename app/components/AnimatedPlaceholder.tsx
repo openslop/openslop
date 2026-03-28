@@ -1,62 +1,37 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 const SUGGESTIONS = [
-  "a claymation children’s story about little red riding hood…",
+  "a claymation children's story about little red riding hood…",
   "a cinematic AI music video with powerful synthwave energy",
-  "an infographic explainer video answering ‘what if the world stops spinning?’",
+  "an infographic explainer video answering 'what if the world stops spinning?'",
   "a documentary-style video about the rise and fall of Rome…",
   "a heartwarming animal rescue video about a stray dog saved from a flood…",
   "a short animated cat story about a mischievous kitten…",
   "a cinematic space documentary with epic music about the search for alien civilizations…",
   "a dark documentary exploring an unsettling internet mystery…",
-  "a “Top 5 Unsolved Archaeological Mysteries” video",
-  "a colorful animated children’s story about a young rabbit…",
+  "a \u201CTop 5 Unsolved Archaeological Mysteries\u201D video",
+  "a colorful animated children's story about a young rabbit…",
   "a calming bedtime documentary about life in an ancient medieval village…",
 ];
 
 export default function AnimatedPlaceholder({ active }: { active: boolean }) {
   const [index, setIndex] = useState(0);
-  const [phase, setPhase] = useState<"visible" | "exiting" | "entering">(
-    "visible",
-  );
-  const exitTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const enterTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!active) return;
-
-    const EXITING_DELAY = 2500;
-    const ENTERING_DELAY = EXITING_DELAY + 20;
-
-    exitTimeout.current = setTimeout(() => {
-      setPhase("exiting");
-    }, EXITING_DELAY);
-
-    enterTimeout.current = setTimeout(() => {
+    const id = setInterval(() => {
       setIndex((prev) => (prev + 1) % SUGGESTIONS.length);
-      setPhase("entering");
-    }, ENTERING_DELAY);
-
-    return () => {
-      if (exitTimeout.current) clearTimeout(exitTimeout.current);
-      if (enterTimeout.current) clearTimeout(enterTimeout.current);
-    };
-  }, [active, index, phase]);
-
-  const animationClass =
-    phase === "exiting"
-      ? "animate-out fade-out slide-out-to-top-2 duration-300 fill-mode-forwards"
-      : phase === "entering"
-        ? "animate-in fade-in slide-in-from-bottom-2 duration-300"
-        : "";
+    }, 3000);
+    return () => clearInterval(id);
+  }, [active]);
 
   return (
     <span
       key={index}
       aria-hidden="true"
-      className={`pointer-events-none select-none text-white/30 truncate w-full block ${animationClass}`}
+      className="animate-fadeInUp pointer-events-none block w-full select-none truncate text-white/30"
     >
       {SUGGESTIONS[index]}
     </span>
