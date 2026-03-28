@@ -5,7 +5,6 @@ import set from "lodash/fp/set";
 import type {
   ConnectorConfig,
   ConnectorType,
-  LLMPlugin,
   ProviderKey,
 } from "@/lib/connectors/types";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
@@ -18,13 +17,6 @@ import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
 import { getDefaultConnector } from "./connectorUtils";
-
-export type Mode = "prompt" | "inputScript";
-
-const MODE_PLUGINS: Record<Mode, LLMPlugin> = {
-  prompt: storyModePlugin,
-  inputScript: scriptModePlugin,
-};
 
 export type ConnectorRegistry = Record<
   ConnectorType,
@@ -85,9 +77,9 @@ const initialConnectorConfig: ConnectorRegistry = {
 
 type ConfigContextValue = {
   connectorConfig: ConnectorRegistry;
-  mode: Mode;
+  scriptMode: boolean;
   setConnectorConfig: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
-  setMode: React.Dispatch<React.SetStateAction<Mode>>;
+  setScriptMode: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -102,7 +94,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const [connectorConfig, setConnectorConfig] = useState<ConnectorRegistry>(
     initialConnectorConfig,
   );
-  const [mode, setMode] = useState<Mode>("prompt");
+  const [scriptMode, setScriptMode] = useState(false);
 
   const configWithModePlugins = useMemo<ConnectorRegistry>(() => {
     const { provider, config: llmConfig } = getDefaultConnector(
@@ -111,19 +103,22 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     );
     return set(
       ["llm", provider, "plugins"],
-      [...(llmConfig.plugins ?? []), MODE_PLUGINS[mode]],
+      [
+        ...(llmConfig.plugins ?? []),
+        scriptMode ? scriptModePlugin : storyModePlugin,
+      ],
       connectorConfig,
     );
-  }, [connectorConfig, mode]);
+  }, [connectorConfig, scriptMode]);
 
   const value = useMemo<ConfigContextValue>(
     () => ({
       connectorConfig: configWithModePlugins,
-      mode,
+      scriptMode,
       setConnectorConfig,
-      setMode,
+      setScriptMode,
     }),
-    [configWithModePlugins, mode],
+    [configWithModePlugins, scriptMode],
   );
 
   return (

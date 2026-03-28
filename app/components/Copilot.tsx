@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { ArrowRight, Sparkles, Square } from "lucide-react";
 import OrbLoader from "./OrbLoader";
+import ScriptToggle from "./ScriptToggle";
 
 const LOADING_MESSAGES = [
   "Brewing creativity…",
@@ -21,22 +22,27 @@ interface CopilotProps {
   multiline?: boolean;
   placeholder?: ReactNode;
   loading?: boolean;
+  scriptMode?: boolean;
+  onScriptModeChange?: (scriptMode: boolean) => void;
 }
 
 function ActionButton({
   label,
   icon,
   onClick,
+  disabled,
 }: {
   label: string;
   icon: ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       aria-label={label}
       onClick={onClick}
-      className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3]"
+      disabled={disabled}
+      className="relative grain ml-3 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1f1528]/60 text-violet-300 transition-[filter] hover:brightness-[1.3] disabled:opacity-30 disabled:pointer-events-none"
     >
       {icon}
     </button>
@@ -68,6 +74,8 @@ export default function Copilot({
   multiline,
   placeholder,
   loading,
+  scriptMode,
+  onScriptModeChange,
 }: CopilotProps) {
   const [value, setValue] = useState("");
 
@@ -87,24 +95,43 @@ export default function Copilot({
   return (
     <div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_30px_rgba(55,30,100,0.3)] backdrop-blur-sm">
       {multiline ? (
-        <div className="relative px-4 py-3">
-          <textarea
-            rows={6}
-            aria-label="Enter your script"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={placeholderText}
-            className="font-body w-full resize-none bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm h-[250px]"
-          />
-          {hasText && (
-            <div className="flex justify-end pt-2">
-              <ActionButton
-                label="Submit script"
-                icon={<ArrowRight className="h-4 w-4" />}
-                onClick={handleSubmit}
+        <div className="px-4 py-3">
+          {onScriptModeChange && (
+            <div className="flex items-center pb-2">
+              <ScriptToggle
+                active={!!scriptMode}
+                onChange={onScriptModeChange}
               />
             </div>
           )}
+          <div className="grid [&>*]:[grid-area:1/1]">
+            <textarea
+              rows={2}
+              aria-label="Enter your prompt"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
+                  handleSubmit();
+              }}
+              placeholder={placeholderText}
+              style={{ fieldSizing: "content" }}
+              className="font-body w-full resize-none bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"
+            />
+            {!hasText && placeholderOverlay && (
+              <div className="font-body pointer-events-none overflow-hidden text-sm">
+                {placeholderOverlay}
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end pt-2">
+            <ActionButton
+              label="Submit"
+              icon={<ArrowRight className="h-4 w-4" />}
+              onClick={handleSubmit}
+              disabled={!hasText}
+            />
+          </div>
         </div>
       ) : (
         <div className="relative flex items-center px-4 py-3">
@@ -142,13 +169,12 @@ export default function Copilot({
               onClick={() => onStop?.()}
             />
           ) : (
-            hasText && (
-              <ActionButton
-                label="Submit prompt"
-                icon={<ArrowRight className="h-4 w-4" />}
-                onClick={handleSubmit}
-              />
-            )
+            <ActionButton
+              label="Submit prompt"
+              icon={<ArrowRight className="h-4 w-4" />}
+              onClick={handleSubmit}
+              disabled={!hasText}
+            />
           )}
         </div>
       )}
