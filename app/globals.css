@@ -59,18 +59,6 @@
   }
 }
 
-@keyframes moveInCircle {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(180deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes moveVertical {
   0% {
     transform: translateY(-25%);
@@ -86,17 +74,8 @@
 .animate-first {
   animation: moveVertical 25s ease infinite;
 }
-.animate-second {
-  animation: moveInCircle 20s reverse infinite;
-}
-.animate-third {
-  animation: moveInCircle 40s linear infinite;
-}
 .animate-fourth {
   animation: moveHorizontal 20s ease infinite;
-}
-.animate-fifth {
-  animation: moveInCircle 20s ease infinite;
 }
 
 @keyframes fadeInUp {
@@ -139,10 +118,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-first,
-  .animate-second,
-  .animate-third,
   .animate-fourth,
-  .animate-fifth,
   .animate-fadeInUp {
     animation: none;
   }
