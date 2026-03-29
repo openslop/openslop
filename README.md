@@ -60,14 +60,23 @@ npm install
 3. Set up your environment variables:
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local   # or create .env.local manually
 ```
 
-Fill in your Supabase project URL and anon key:
+Required (auth and database):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+Optional (AI provider keys -- without these, the app uses mock providers):
+
+```
+ANTHROPIC_API_KEY=        # LLM (Claude)
+RUNWARE_API_KEY=          # Image + Video generation
+ELEVENLABS_API_KEY=       # Music + SFX generation
+CARTESIA_API_KEY=         # Text-to-speech
 ```
 
 4. Run the database migrations:
@@ -99,7 +108,9 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 ```
 openslop/
 |-- app/                    # Next.js App Router pages and layouts
-|   |-- api/v1/             # REST API (image, llm, music, sfx, tts, video)
+|   |-- api/
+|   |   |-- v1/             # REST API (image, llm, music, sfx, tts, video)
+|   |   |-- validate-code/  # Access code validation
 |   |-- auth/               # OAuth callback handler
 |   |-- components/         # App-specific React components
 |   |   |-- canvas/         # Slate-based editor canvas (drag-and-drop, elements, plugins)
@@ -111,6 +122,7 @@ openslop/
 |-- lib/                    # Shared libraries
 |   |-- api/                # Route handler helpers, logger, response utils
 |   |-- clients/            # HTTP client for the OpenSlop API
+|   |-- components/         # Shared UI components (Waveform, etc.)
 |   |-- config/             # Global connector configuration (React context)
 |   |-- connectors/         # Connector abstraction per media type + plugins
 |   |-- generation/         # Generation queue and job orchestration
@@ -125,17 +137,19 @@ openslop/
 
 ## Scripts
 
-| Command                | What it does                |
-| ---------------------- | --------------------------- |
-| `npm run dev`          | Start the dev server        |
-| `npm run build`        | Production build            |
-| `npm run start`        | Start the production server |
-| `npm run lint`         | Run ESLint                  |
-| `npm run format:check` | Check formatting (Prettier) |
-| `npm run typecheck`    | Run TypeScript type checks  |
-| `npm run test`         | Run tests (Vitest)          |
-| `npm run db:push`      | Push migrations to Supabase |
-| `npm run db:reset`     | Reset the database          |
+| Command                | What it does                     |
+| ---------------------- | -------------------------------- |
+| `npm run dev`          | Start the dev server             |
+| `npm run build`        | Production build                 |
+| `npm run start`        | Start the production server      |
+| `npm run lint`         | Run ESLint                       |
+| `npm run format:check` | Check formatting (Prettier)      |
+| `npm run typecheck`    | Run TypeScript type checks       |
+| `npm run test`         | Run tests in watch mode (Vitest) |
+| `npm run test:run`     | Run tests once                   |
+| `npm run db:push`      | Push migrations to Supabase      |
+| `npm run db:migrate`   | Run pending migrations           |
+| `npm run db:reset`     | Reset the database               |
 
 ## Contributing
 

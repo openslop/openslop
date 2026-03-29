@@ -13,16 +13,6 @@
   animation: colorize calc(var(--time-animation) * 3) ease-in-out infinite;
 }
 
-.loader::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-}
-
 .loader .box {
   width: 100px;
   height: 100px;
@@ -136,7 +126,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .loader,
-  .loader::before,
   .loader svg :global(#clipping),
   .loader svg :global(#clipping) polygon {
     animation: none;
