@@ -2,8 +2,9 @@
 
 import { type ReactNode, useEffect, useState } from "react";
 import { ArrowRight, Sparkles, Square } from "lucide-react";
+import type { ComposerMode } from "@/lib/config/ConfigProvider";
 import OrbLoader from "./OrbLoader";
-import ScriptToggle from "./ScriptToggle";
+import ModeToggle from "./ModeToggle";
 
 const LOADING_MESSAGES = [
   "Brewing creativity…",
@@ -22,8 +23,8 @@ interface CopilotProps {
   multiline?: boolean;
   placeholder?: ReactNode;
   loading?: boolean;
-  scriptMode?: boolean;
-  onScriptModeChange?: (scriptMode: boolean) => void;
+  composerMode?: ComposerMode;
+  onModeChange?: (mode: ComposerMode) => void;
 }
 
 function ActionButton({
@@ -74,8 +75,8 @@ export default function Copilot({
   multiline,
   placeholder,
   loading,
-  scriptMode,
-  onScriptModeChange,
+  composerMode,
+  onModeChange,
 }: CopilotProps) {
   const [value, setValue] = useState("");
 
@@ -96,12 +97,9 @@ export default function Copilot({
     <div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_30px_rgba(55,30,100,0.3)] backdrop-blur-sm">
       {multiline ? (
         <div className="px-4 py-3">
-          {onScriptModeChange && (
+          {onModeChange && composerMode && (
             <div className="flex items-center pb-2">
-              <ScriptToggle
-                active={!!scriptMode}
-                onChange={onScriptModeChange}
-              />
+              <ModeToggle value={composerMode} onChange={onModeChange} />
             </div>
           )}
           <div className="grid [&>*]:[grid-area:1/1]">
