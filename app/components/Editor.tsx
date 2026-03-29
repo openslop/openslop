@@ -4,27 +4,15 @@ import { useRef, useState } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useScript } from "@/lib/script/ScriptProvider";
 import Copilot from "./Copilot";
-import AnimatedPlaceholder from "./AnimatedPlaceholder";
+import ComposerHero from "./ComposerHero";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { SparklesIcon } from "./canvas/elements/OutputPreview";
 import UserProfile from "./UserProfile";
 import editorStyles from "./Editor.module.css";
 import genStyles from "./styles/gen-button.module.css";
 
-const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
-Soft glowing stars twinkle quietly across a deep blue sky.
-A large silver moon glows softly above peaceful clouds.
-Gentle music begins.
-
-NARRATOR (soft, soothing voice)
-High above the quiet forests and sleepy hills…
-past the drifting clouds…
-there was a small glowing garden hidden on the moon.
-
-And in that garden… lived a little rabbit named Lumi…`;
-
 export default function Editor() {
-  const { scriptMode, setScriptMode } = useConfig();
+  const { composerMode, setComposerMode } = useConfig();
   const { script, loading, submitPrompt, stopGeneration, refineScript } =
     useScript();
   const canvasRef = useRef<CanvasHandle>(null);
@@ -73,27 +61,13 @@ export default function Editor() {
           </button>
         </div>
       ) : (
-        <div className="flex w-full max-w-2xl flex-col items-center px-4">
-          <h1 className="font-title text-center text-[clamp(48px,12vw,85px)] tracking-[-0.04em] leading-[0.95em] text-white/90 text-wrap-balance mb-6">
-            Describe your video
-          </h1>
-
-          <Copilot
-            onSubmit={handleSubmit}
-            onStop={stopGeneration}
-            multiline
-            loading={loading}
-            scriptMode={scriptMode}
-            onScriptModeChange={setScriptMode}
-            placeholder={
-              scriptMode ? (
-                INPUT_SCRIPT_PLACEHOLDER
-              ) : (
-                <AnimatedPlaceholder active />
-              )
-            }
-          />
-        </div>
+        <ComposerHero
+          composerMode={composerMode}
+          onModeChange={setComposerMode}
+          loading={loading}
+          onSubmit={handleSubmit}
+          onStop={stopGeneration}
+        />
       )}
 
       {prompted && (
