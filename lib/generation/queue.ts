@@ -1,9 +1,9 @@
 import type {
   ConnectorConfig,
   ConnectorType,
+  GenerationResult,
   ProviderKey,
 } from "../connectors/types";
-import type { GenerationResult } from "@/app/components/canvas/types";
 import { generateForElement } from "./generateForElement";
 
 export type ElementSnapshot = {
@@ -28,10 +28,6 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
   result: null,
   error: null,
 };
-
-function isObjectUrl(src: string) {
-  return src.startsWith("blob:");
-}
 
 class GenerationQueue {
   private state = new Map<string, ElementSnapshot>();
@@ -123,7 +119,6 @@ class GenerationQueue {
   discard(elementId: string) {
     const hadEntry = this.isInQueue(elementId);
     if (hadEntry) this.abortJob(elementId);
-    this.revokeResult(elementId);
     this.state.delete(elementId);
     this.notify();
     if (hadEntry) this.processQueue();
@@ -146,11 +141,6 @@ class GenerationQueue {
       clearInterval(timer);
       this.timers.delete(elementId);
     }
-  }
-
-  private revokeResult(elementId: string) {
-    const src = this.state.get(elementId)?.result?.src;
-    if (src && isObjectUrl(src)) URL.revokeObjectURL(src);
   }
 
   private processQueue() {
@@ -188,7 +178,6 @@ class GenerationQueue {
     )
       .then((result) => {
         if (controller.signal.aborted) return;
-        this.revokeResult(elementId);
         this.update(elementId, {
           status: "idle",
           seconds: 0,

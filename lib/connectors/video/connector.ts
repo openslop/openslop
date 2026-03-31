@@ -1,17 +1,17 @@
-import type { BaseProvider } from "@/lib/providers/base";
-import { BaseConnector } from "../base";
-import type { VideoConnector, VideoGenerateParams, VideoJob } from "../types";
+import { BaseAssetConnector } from "../asset-base";
+import type {
+  AssetResult,
+  VideoConnector,
+  VideoGenerateParams,
+  VideoJob,
+} from "../types";
 
-export abstract class BaseVideoConnector<
-  TProvider extends BaseProvider<VideoGenerateParams, VideoJob> = BaseProvider<
-    VideoGenerateParams,
-    VideoJob
-  >,
->
-  extends BaseConnector<VideoGenerateParams, VideoJob, TProvider>
+export abstract class BaseVideoConnector
+  extends BaseAssetConnector<VideoGenerateParams, AssetResult>
   implements VideoConnector
 {
   readonly type = "video" as const;
+  readonly resultKind = "video" as const;
 
   abstract poll(jobId: string): Promise<VideoJob>;
 }

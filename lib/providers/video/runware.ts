@@ -15,7 +15,7 @@ function toVideoJob(video: {
   return {
     jobId: video.taskUUID,
     status: video.status as VideoJobStatus,
-    resultUrl: video.videoURL,
+    url: video.videoURL,
   };
 }
 

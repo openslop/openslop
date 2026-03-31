@@ -32,8 +32,6 @@ describe("RunwareImage", () => {
     expect(result).toEqual({
       data: "abc123",
       format: "png",
-      width: 512,
-      height: 512,
     });
     expect(mockImageInference).toHaveBeenCalledWith({
       positivePrompt: "a cat",

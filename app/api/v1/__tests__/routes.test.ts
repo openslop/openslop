@@ -2,8 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockImageGenerate = vi.fn();
-const mockVideoSubmit = vi.fn();
-const mockVideoPoll = vi.fn();
+const mockVideoGenerate = vi.fn();
 const mockMusicGenerate = vi.fn();
 const mockSFXGenerate = vi.fn();
 const mockLLMGenerate = vi.fn();
@@ -13,7 +12,7 @@ const mockTTSSearch = vi.fn();
 
 vi.mock("@/lib/api/providers", () => ({
   getImageProvider: () => ({ generate: mockImageGenerate }),
-  getVideoProvider: () => ({ submit: mockVideoSubmit, poll: mockVideoPoll }),
+  getVideoProvider: () => ({ generate: mockVideoGenerate }),
   getMusicProvider: () => ({ generate: mockMusicGenerate }),
   getSFXProvider: () => ({ generate: mockSFXGenerate }),
   getLLMProvider: () => ({
@@ -49,18 +48,13 @@ describe("API routes", () => {
   describe("POST /api/v1/image", () => {
     it("returns image result on success", async () => {
       const { POST } = await import("@/app/api/v1/image/route");
-      mockImageGenerate.mockResolvedValue({
-        data: "base64img",
-        format: "png",
-        width: 512,
-        height: 512,
-      });
+      mockImageGenerate.mockResolvedValue({ id: "img-abc123" });
 
       const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toBe("base64img");
+      expect(json.id).toBe("img-abc123");
     });
 
     it("returns 400 when prompt missing", async () => {
@@ -88,84 +82,43 @@ describe("API routes", () => {
   });
 
   describe("POST /api/v1/video", () => {
-    it("submits video job", async () => {
+    it("returns video result on success", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoSubmit.mockResolvedValue({
-        jobId: "j1",
-        status: "processing",
-      });
+      mockVideoGenerate.mockResolvedValue({ id: "vid-abc123" });
 
       const res = await POST(
         makeRequest("/api/v1/video", { prompt: "sunset" }),
       );
       expect(res.status).toBe(200);
-      expect((await res.json()).jobId).toBe("j1");
+      expect((await res.json()).id).toBe("vid-abc123");
     });
 
-    it("returns 400 for invalid referenceImage", async () => {
+    it("returns 400 for missing prompt", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      const res = await POST(
-        makeRequest("/api/v1/video", {
-          prompt: "test",
-          referenceImage: "not-a-data-uri",
-        }),
-      );
+      const res = await POST(makeRequest("/api/v1/video", {}));
       expect(res.status).toBe(400);
-      expect((await res.json()).error).toContain("data URI");
     });
 
-    it("accepts valid referenceImage data URI", async () => {
+    it("returns 500 on provider error", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoSubmit.mockResolvedValue({ jobId: "j2", status: "processing" });
+      mockVideoGenerate.mockRejectedValue(new Error("fail"));
 
       const res = await POST(
-        makeRequest("/api/v1/video", {
-          prompt: "animate",
-          referenceImage: "data:image/png;base64,iVBORw0KGgo",
-        }),
+        makeRequest("/api/v1/video", { prompt: "sunset" }),
       );
-      expect(res.status).toBe(200);
-    });
-  });
-
-  describe("GET /api/v1/video/[jobId]", () => {
-    it("polls video job status", async () => {
-      const { GET } = await import("@/app/api/v1/video/[jobId]/route");
-      mockVideoPoll.mockResolvedValue({
-        jobId: "j1",
-        status: "completed",
-        resultUrl: "https://v.mp4",
-      });
-
-      const req = makeRequest("/api/v1/video/j1", undefined, "GET");
-      const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
-      const json = await res.json();
-
-      expect(res.status).toBe(200);
-      expect(json.status).toBe("completed");
-      expect(json.resultUrl).toBe("https://v.mp4");
-    });
-
-    it("returns 500 on poll error", async () => {
-      const { GET } = await import("@/app/api/v1/video/[jobId]/route");
-      mockVideoPoll.mockRejectedValue(new Error("not found"));
-
-      const req = makeRequest("/api/v1/video/j1", undefined, "GET");
-      const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
       expect(res.status).toBe(500);
     });
   });
 
   describe("POST /api/v1/music", () => {
-    it("returns binary audio response", async () => {
+    it("returns music result on success", async () => {
       const { POST } = await import("@/app/api/v1/music/route");
-      mockMusicGenerate.mockResolvedValue(new ArrayBuffer(4));
+      mockMusicGenerate.mockResolvedValue({ id: "mus-abc123" });
 
       const res = await POST(makeRequest("/api/v1/music", { prompt: "jazz" }));
+      const json = await res.json();
       expect(res.status).toBe(200);
-      expect(res.headers.get("content-type")).toBe("audio/mpeg");
-      const buf = await res.arrayBuffer();
-      expect(buf.byteLength).toBe(4);
+      expect(json.id).toBe("mus-abc123");
     });
 
     it("returns 400 for missing prompt", async () => {
@@ -176,17 +129,16 @@ describe("API routes", () => {
   });
 
   describe("POST /api/v1/sfx", () => {
-    it("returns binary audio response", async () => {
+    it("returns sfx result on success", async () => {
       const { POST } = await import("@/app/api/v1/sfx/route");
-      mockSFXGenerate.mockResolvedValue(new ArrayBuffer(3));
+      mockSFXGenerate.mockResolvedValue({ id: "sfx-abc123" });
 
       const res = await POST(
         makeRequest("/api/v1/sfx", { prompt: "explosion" }),
       );
+      const json = await res.json();
       expect(res.status).toBe(200);
-      expect(res.headers.get("content-type")).toBe("audio/mpeg");
-      const buf = await res.arrayBuffer();
-      expect(buf.byteLength).toBe(3);
+      expect(json.id).toBe("sfx-abc123");
     });
 
     it("returns 400 for invalid model", async () => {
@@ -241,10 +193,7 @@ describe("API routes", () => {
   describe("POST /api/v1/tts", () => {
     it("generates tts with timestamps", async () => {
       const { POST } = await import("@/app/api/v1/tts/route");
-      mockTTSGenerate.mockResolvedValue({
-        data: "audio",
-        textTimestamps: [{ text: "hi", start: 0, end: 0.5 }],
-      });
+      mockTTSGenerate.mockResolvedValue({ id: "tts-abc123" });
 
       const res = await POST(
         makeRequest("/api/v1/tts", { prompt: "hi", voiceId: "v1" }),
@@ -252,7 +201,7 @@ describe("API routes", () => {
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.textTimestamps[0].text).toBe("hi");
+      expect(json.id).toBe("tts-abc123");
     });
 
     it("returns 400 when voiceId missing", async () => {

@@ -4,7 +4,7 @@ export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
 export type ProviderKey = "openslop";
 
-export type ImageFormat = "png" | "jpeg" | "webp";
+export type ResultKind = "image" | "video" | "audio";
 
 export type ModelInfo = {
   id: string;
@@ -17,7 +17,7 @@ export function modelsFromMap(map: Record<string, string>): ModelInfo[] {
 }
 
 export interface PluginContext<TParams = unknown, TResult = unknown> {
-  provider: BaseProvider<TParams, TResult>;
+  provider?: BaseProvider<TParams, TResult>;
 }
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
@@ -50,13 +50,11 @@ export interface ConnectorConfig {
   options?: Record<string, unknown>;
 }
 
-// Connector-level generate params (what callers pass to connector.generate)
 export interface ConnectorGenerateParams {
   prompt: string;
   model?: string;
 }
 
-// TTS connector accepts voice attributes; resolves voiceId internally
 export interface TTSConnectorParams extends ConnectorGenerateParams {
   voiceId?: string;
   gender?: string;
@@ -65,8 +63,16 @@ export interface TTSConnectorParams extends ConnectorGenerateParams {
   language?: string;
 }
 
+export type AssetResult = { url: string };
+
+export interface GenerationResult {
+  kind: ResultKind;
+  src: string;
+}
+
 export interface Connector {
   readonly type: ConnectorType;
+  readonly resultKind?: ResultKind;
   generate(params: ConnectorGenerateParams): Promise<unknown>;
   init(): Promise<void>;
   validate(): Promise<boolean>;
@@ -112,7 +118,8 @@ export type MusicGenerateParams = {
 
 export interface MusicConnector extends Connector {
   readonly type: "music";
-  generate(params: MusicGenerateParams): Promise<ArrayBuffer>;
+  readonly resultKind: "audio";
+  generate(params: MusicGenerateParams): Promise<AssetResult>;
 }
 
 // SFX types
@@ -125,7 +132,8 @@ export type SFXGenerateParams = {
 
 export interface SFXConnector extends Connector {
   readonly type: "sfx";
-  generate(params: SFXGenerateParams): Promise<ArrayBuffer>;
+  readonly resultKind: "audio";
+  generate(params: SFXGenerateParams): Promise<AssetResult>;
 }
 
 // Image types
@@ -135,28 +143,20 @@ export type ImageGenerateParams = {
   model?: string;
   width?: number;
   height?: number;
-  format?: ImageFormat;
   referenceImage?: string;
-};
-
-export type ImageResult = {
-  data: string;
-  format: ImageFormat;
-  width: number;
-  height: number;
 };
 
 export interface ImageConnector extends Connector {
   readonly type: "image";
-  generate(params: ImageGenerateParams): Promise<ImageResult>;
+  readonly resultKind: "image";
+  generate(params: ImageGenerateParams): Promise<AssetResult>;
 }
 
 // TTS types
 
 export type TextTimestamp = { text: string; start: number; end: number };
 
-export type TTSResult = {
-  data: string;
+export type TTSResult = AssetResult & {
   textTimestamps: TextTimestamp[];
 };
 
@@ -188,6 +188,7 @@ export type VoiceSearchParams = {
 
 export interface TTSConnector extends Connector {
   readonly type: "tts";
+  readonly resultKind: "audio";
   generate(params: TTSConnectorParams): Promise<TTSResult>;
   searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }
@@ -208,25 +209,26 @@ export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
 export type VideoJob = {
   jobId: string;
   status: VideoJobStatus;
-  resultUrl?: string;
+  url?: string;
   error?: string;
   progress?: number;
 };
 
 export interface VideoConnector extends Connector {
   readonly type: "video";
-  generate(params: VideoGenerateParams): Promise<VideoJob>;
+  readonly resultKind: "video";
+  generate(params: VideoGenerateParams): Promise<AssetResult>;
   poll(jobId: string): Promise<VideoJob>;
 }
 
 // Plugin type aliases
 
 export type LLMPlugin = ConnectorPlugin<LLMGenerateParams, LLMGenerateResult>;
-export type MusicPlugin = ConnectorPlugin<MusicGenerateParams, ArrayBuffer>;
-export type SFXPlugin = ConnectorPlugin<SFXGenerateParams, ArrayBuffer>;
-export type ImagePlugin = ConnectorPlugin<ImageGenerateParams, ImageResult>;
+export type MusicPlugin = ConnectorPlugin<MusicGenerateParams, AssetResult>;
+export type SFXPlugin = ConnectorPlugin<SFXGenerateParams, AssetResult>;
+export type ImagePlugin = ConnectorPlugin<ImageGenerateParams, AssetResult>;
 export type TTSPlugin = ConnectorPlugin<TTSGenerateParams, TTSResult>;
-export type VideoPlugin = ConnectorPlugin<VideoGenerateParams, VideoJob>;
+export type VideoPlugin = ConnectorPlugin<VideoGenerateParams, AssetResult>;
 
 // Factory types
 

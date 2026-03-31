@@ -2,20 +2,34 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopSFX } from "../sfx/openslop";
 import type { ConnectorPlugin } from "../types";
 
-function mockBinaryResponse(data: number[] = [0]) {
-  return new Response(new Uint8Array(data).buffer, {
+const TEST_ID = "test-id";
+const BUNDLE_URL = `/assets/sfx/openslop/${TEST_ID}`;
+const AUDIO_URL = `${BUNDLE_URL}/output.mp3`;
+
+function jsonResponse(data: unknown) {
+  return new Response(JSON.stringify(data), {
     status: 200,
-    headers: { "content-type": "audio/mpeg" },
+    headers: { "content-type": "application/json" },
   });
+}
+
+function mockFetchChain() {
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    jsonResponse({
+      id: TEST_ID,
+      provider: "openslop",
+      result: { audio: "output.mp3" },
+    }),
+  );
 }
 
 describe("BaseSFXConnector", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockBinaryResponse());
   });
 
   it("generates audio via provider", async () => {
+    mockFetchChain();
     const connector = new OpenSlopSFX({
       defaultModel: "test-model",
       models: ["test-model"],
@@ -23,10 +37,11 @@ describe("BaseSFXConnector", () => {
       apiKey: "",
     });
     const result = await connector.generate({ prompt: "explosion" });
-    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(result.url).toBe(AUDIO_URL);
   });
 
   it("runs plugins in order", async () => {
+    mockFetchChain();
     const order: string[] = [];
     const plugin: ConnectorPlugin = {
       name: "tracker",

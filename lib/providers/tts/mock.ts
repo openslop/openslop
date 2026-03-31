@@ -1,34 +1,27 @@
+import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type {
   TTSGenerateParams,
-  TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
-import { pickRandom, readMockFile } from "../mock-utils";
+import { pickRandom } from "../mock-utils";
 
-const MOCK_TTS_AUDIO = [
-  "mock-tts-1.mp3",
-  "mock-tts-2.m4a",
-  "mock-tts-3.wav",
-  "mock-tts-4.mp3",
-  "mock-tts-5.wav",
-  "mock-tts-6.m4a",
+const P = "mock";
+const TS = "timestamps.json";
+
+const MOCK_VARIANTS: BundleResponse[] = [
+  { id: "1", provider: P, result: { audio: "output.mp3", timestamps: TS } },
+  { id: "2", provider: P, result: { audio: "output.m4a", timestamps: TS } },
+  { id: "3", provider: P, result: { audio: "output.wav", timestamps: TS } },
+  { id: "4", provider: P, result: { audio: "output.mp3", timestamps: TS } },
+  { id: "5", provider: P, result: { audio: "output.wav", timestamps: TS } },
+  { id: "6", provider: P, result: { audio: "output.m4a", timestamps: TS } },
 ];
 
-export class MockTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
-  async generate(params: TTSGenerateParams): Promise<TTSResult> {
-    const data = readMockFile(pickRandom(MOCK_TTS_AUDIO)).toString("base64");
-    const words = params.prompt.split(/\s+/);
-    const wordDuration = 0.3;
-    return {
-      data,
-      textTimestamps: words.map((word, i) => ({
-        text: word,
-        start: i * wordDuration,
-        end: (i + 1) * wordDuration,
-      })),
-    };
+export class MockTTS extends BaseProvider<TTSGenerateParams, BundleResponse> {
+  async generate(): Promise<BundleResponse> {
+    return pickRandom(MOCK_VARIANTS);
   }
 
   async search(_params: VoiceSearchParams): Promise<VoiceInfo[]> {

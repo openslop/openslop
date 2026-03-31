@@ -1,6 +1,8 @@
+import type { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseVideoConnector } from "../connector";
 import { OpenSlopVideo as OpenSlopVideoProvider } from "@/lib/providers/video/openslop";
 import type {
+  AssetResult,
   ConnectorConfig,
   ModelInfo,
   VideoJob,
@@ -8,16 +10,23 @@ import type {
 import { modelsFromMap } from "@/lib/connectors/types";
 import { VIDEO_MODELS } from "./models";
 
-export class OpenSlopVideo extends BaseVideoConnector<OpenSlopVideoProvider> {
+export class OpenSlopVideo extends BaseVideoConnector {
+  protected provider: OpenSlopVideoProvider;
+
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopVideoProvider(config.baseUrl), config);
+    super(config);
+    this.provider = new OpenSlopVideoProvider(config.baseUrl);
   }
 
   async listModels(): Promise<ModelInfo[]> {
     return modelsFromMap(VIDEO_MODELS);
   }
 
-  async poll(jobId: string): Promise<VideoJob> {
-    return this.provider.poll(jobId);
+  async poll(_jobId: string): Promise<VideoJob> {
+    throw new Error("Video polling is no longer supported");
+  }
+
+  async resolveBundle(bundle: AssetBundle): Promise<AssetResult> {
+    return { url: bundle.resolve("video") };
   }
 }

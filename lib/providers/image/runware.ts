@@ -1,10 +1,15 @@
-import type { ImageGenerateParams, ImageResult } from "@/lib/connectors/types";
+import type { ImageGenerateParams } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 import { withRunware } from "../runware";
 
+type RawImageResult = {
+  data: string;
+  format: string;
+};
+
 export class RunwareImage extends BaseProvider<
   ImageGenerateParams,
-  ImageResult
+  RawImageResult
 > {
   private apiKey: string;
 
@@ -30,8 +35,6 @@ export class RunwareImage extends BaseProvider<
       return {
         data: image.imageBase64Data,
         format: "png" as const,
-        width: params.width || 512,
-        height: params.height || 512,
       };
     });
   }

@@ -20,11 +20,14 @@ function jsonResponse(data: unknown, status = 200) {
   });
 }
 
-function binaryResponse(data: number[]) {
-  return new Response(new Uint8Array(data).buffer, {
-    status: 200,
-    headers: { "content-type": "audio/mpeg" },
-  });
+const TEST_ID = "test-id";
+
+function mockAssetFetch(type: string, result: Record<string, string>) {
+  const bundleUrl = `/assets/${type}/openslop/${TEST_ID}`;
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    jsonResponse({ id: TEST_ID, provider: "openslop", result }),
+  );
+  return bundleUrl;
 }
 
 describe("OpenSlop connectors (via providers)", () => {
@@ -74,61 +77,60 @@ describe("OpenSlop connectors (via providers)", () => {
     ]);
   });
 
-  it("Music: generate returns ArrayBuffer", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(binaryResponse([1, 2, 3]));
+  it("Music: generate returns AssetResult with url", async () => {
+    const bundleUrl = mockAssetFetch("music", { audio: "output.mp3" });
 
     const c = new OpenSlopMusic(config);
     const result = await c.generate({ prompt: "jazz" });
 
-    expect(result).toBeInstanceOf(ArrayBuffer);
-    expect(new Uint8Array(result)).toEqual(new Uint8Array([1, 2, 3]));
+    expect(result.url).toBe(`${bundleUrl}/output.mp3`);
   });
 
-  it("SFX: generate returns ArrayBuffer", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(binaryResponse([4, 5]));
+  it("SFX: generate returns AssetResult with url", async () => {
+    const bundleUrl = mockAssetFetch("sfx", { audio: "output.mp3" });
 
     const c = new OpenSlopSFX(config);
     const result = await c.generate({ prompt: "boom" });
 
-    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(result.url).toBe(`${bundleUrl}/output.mp3`);
   });
 
-  it("Image: generate returns ImageResult", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({
-        data: "base64img",
-        format: "png",
-        width: 512,
-        height: 512,
-      }),
-    );
+  it("Image: generate returns AssetResult with url", async () => {
+    const bundleUrl = mockAssetFetch("image", { image: "output.png" });
 
     const c = new OpenSlopImage(config);
     const result = await c.generate({ prompt: "mountain" });
 
-    expect(result.data).toBe("base64img");
-    expect(result.format).toBe("png");
+    expect(result.url).toBe(`${bundleUrl}/output.png`);
   });
 
-  it("TTS: generate returns TTSResult", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({
-        data: "audio-base64",
-        textTimestamps: [{ text: "hello", start: 0, end: 0.5 }],
-      }),
-    );
+  it("TTS: generate returns TTSResult with url", async () => {
+    const bundleUrl = `/assets/tts/openslop/${TEST_ID}`;
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: TEST_ID,
+          provider: "openslop",
+          result: { audio: "output.wav", timestamps: "timestamps.json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse([{ text: "hello", start: 0, end: 0.5 }]),
+      );
 
     const c = new OpenSlopTTS(config);
     const result = await c.generate({ prompt: "hello", voiceId: "v1" });
 
-    expect(result.data).toBe("audio-base64");
+    expect(result.url).toBe(`${bundleUrl}/output.wav`);
     expect(result.textTimestamps).toHaveLength(1);
     expect(result.textTimestamps[0].text).toBe("hello");
   });
 
   it("TTS: searchVoices calls /api/v1/tts/voices", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({ voices: [{ id: "v1", name: "Voice 1", language: "en" }] }),
+      jsonResponse({
+        voices: [{ id: "v1", name: "Voice 1", language: "en" }],
+      }),
     );
 
     const c = new OpenSlopTTS(config);
@@ -138,39 +140,21 @@ describe("OpenSlop connectors (via providers)", () => {
     expect(voices[0].id).toBe("v1");
   });
 
-  it("Video: generate submits and polls job", async () => {
-    vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(
-        jsonResponse({ jobId: "j1", status: "processing" }),
-      )
-      .mockResolvedValueOnce(
-        jsonResponse({
-          jobId: "j1",
-          status: "completed",
-          resultUrl: "https://v.mp4",
-        }),
-      );
+  it("Video: generate returns AssetResult with url", async () => {
+    mockAssetFetch("video", {
+      video: "https://cdn.example.com/v.mp4",
+    });
 
     const c = new OpenSlopVideo(config);
-    const job = await c.generate({ prompt: "sunset" });
+    const result = await c.generate({ prompt: "sunset" });
 
-    expect(job.jobId).toBe("j1");
-    expect(job.status).toBe("completed");
+    expect(result.url).toBe("https://cdn.example.com/v.mp4");
   });
 
-  it("Video: poll returns job status", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({
-        jobId: "j1",
-        status: "completed",
-        resultUrl: "https://v.mp4",
-      }),
-    );
-
+  it("Video: poll throws not supported", async () => {
     const c = new OpenSlopVideo(config);
-    const polled = await c.poll("j1");
-
-    expect(polled.status).toBe("completed");
-    expect(polled.resultUrl).toBe("https://v.mp4");
+    await expect(c.poll("j1")).rejects.toThrow(
+      "Video polling is no longer supported",
+    );
   });
 });

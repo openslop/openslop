@@ -37,7 +37,7 @@ describe("RunwareVideo", () => {
       expect(result).toEqual({
         jobId: "job-1",
         status: "processing",
-        resultUrl: undefined,
+        url: undefined,
       });
       expect(mockVideoInference).toHaveBeenCalledWith({
         positivePrompt: "a sunset",
@@ -83,7 +83,7 @@ describe("RunwareVideo", () => {
       const result = await provider.submit({ prompt: "test" });
 
       expect(result.jobId).toBe("job-arr");
-      expect(result.resultUrl).toBe("https://v.mp4");
+      expect(result.url).toBe("https://v.mp4");
     });
 
     it("disconnects on error", async () => {
@@ -111,7 +111,7 @@ describe("RunwareVideo", () => {
       expect(result).toEqual({
         jobId: "job-1",
         status: "completed",
-        resultUrl: "https://result.mp4",
+        url: "https://result.mp4",
       });
       expect(mockDisconnect).toHaveBeenCalled();
     });

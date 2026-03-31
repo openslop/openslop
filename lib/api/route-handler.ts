@@ -54,9 +54,3 @@ export function createRouteHandler<T>(options: RouteOptions<T>) {
 export function jsonResponse(data: unknown) {
   return NextResponse.json(data);
 }
-
-export function audioResponse(buffer: ArrayBuffer) {
-  return new Response(buffer, {
-    headers: { "content-type": "audio/mpeg" },
-  });
-}

@@ -1,5 +1,4 @@
-import type { BaseProvider } from "@/lib/providers/base";
-import { BaseConnector } from "../base";
+import { BaseAssetConnector } from "../asset-base";
 import type {
   TTSConnector,
   TTSConnectorParams,
@@ -9,16 +8,12 @@ import type {
   VoiceSearchParams,
 } from "../types";
 
-export abstract class BaseTTSConnector<
-  TProvider extends BaseProvider<TTSGenerateParams, TTSResult> = BaseProvider<
-    TTSGenerateParams,
-    TTSResult
-  >,
->
-  extends BaseConnector<TTSGenerateParams, TTSResult, TProvider>
+export abstract class BaseTTSConnector
+  extends BaseAssetConnector<TTSGenerateParams, TTSResult>
   implements TTSConnector
 {
   readonly type = "tts" as const;
+  readonly resultKind = "audio" as const;
 
   abstract searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 

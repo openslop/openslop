@@ -1,17 +1,14 @@
-import type { BaseProvider } from "@/lib/providers/base";
-import { BaseConnector } from "../base";
+import { BaseAssetConnector } from "../asset-base";
 import type {
+  AssetResult,
   ImageConnector,
   ImageGenerateParams,
-  ImageResult,
 } from "../types";
 
-export abstract class BaseImageConnector<
-  TProvider extends BaseProvider<ImageGenerateParams, ImageResult> =
-    BaseProvider<ImageGenerateParams, ImageResult>,
->
-  extends BaseConnector<ImageGenerateParams, ImageResult, TProvider>
+export abstract class BaseImageConnector
+  extends BaseAssetConnector<ImageGenerateParams, AssetResult>
   implements ImageConnector
 {
   readonly type = "image" as const;
+  readonly resultKind = "image" as const;
 }

@@ -8,7 +8,8 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
-import type { CanvasElementType, GenerationResult } from "../types";
+import type { CanvasElementType } from "../types";
+import type { GenerationResult } from "@/lib/connectors/types";
 import genStyles from "@/app/components/styles/gen-button.module.css";
 import loaderStyles from "./OutputPreview.module.css";
 

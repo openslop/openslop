@@ -1,4 +1,3 @@
-import type { BaseProvider } from "@/lib/providers/base";
 import {
   runAfterGenerate,
   runBeforeGenerate,
@@ -12,22 +11,18 @@ import type {
   ConnectorType,
   ModelInfo,
   PluginContext,
+  ResultKind,
 } from "./types";
 
 export abstract class BaseConnector<
   TParams extends { prompt: string } = { prompt: string },
   TResult = unknown,
-  TProvider extends BaseProvider<TParams, TResult> = BaseProvider<
-    TParams,
-    TResult
-  >,
 > implements Connector {
   abstract readonly type: ConnectorType;
+  readonly resultKind?: ResultKind;
   protected plugins: ConnectorPlugin[];
-  protected provider: TProvider;
 
-  constructor(provider: TProvider, config: ConnectorConfig) {
-    this.provider = provider;
+  constructor(config: ConnectorConfig) {
     this.plugins = config.plugins ?? [];
   }
 
@@ -40,7 +35,7 @@ export abstract class BaseConnector<
   abstract listModels(): Promise<ModelInfo[]>;
 
   protected pluginContext(): PluginContext<TParams, TResult> {
-    return { provider: this.provider };
+    return {};
   }
 
   protected async prepareParams(
@@ -64,7 +59,5 @@ export abstract class BaseConnector<
     }
   }
 
-  protected async _generate(params: TParams): Promise<TResult> {
-    return this.provider.generate(params);
-  }
+  protected abstract _generate(params: TParams): Promise<TResult>;
 }
