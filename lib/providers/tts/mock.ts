@@ -7,16 +7,37 @@ import type {
 import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
 
-const P = "mock";
-const TS = "timestamps.json";
-
 const MOCK_VARIANTS: BundleResponse[] = [
-  { id: "1", provider: P, result: { audio: "output.mp3", timestamps: TS } },
-  { id: "2", provider: P, result: { audio: "output.m4a", timestamps: TS } },
-  { id: "3", provider: P, result: { audio: "output.wav", timestamps: TS } },
-  { id: "4", provider: P, result: { audio: "output.mp3", timestamps: TS } },
-  { id: "5", provider: P, result: { audio: "output.wav", timestamps: TS } },
-  { id: "6", provider: P, result: { audio: "output.m4a", timestamps: TS } },
+  {
+    id: "1",
+    provider: "mock",
+    result: { audio: "output.mp3", timestamps: "timestamps.json" },
+  },
+  {
+    id: "2",
+    provider: "mock",
+    result: { audio: "output.m4a", timestamps: "timestamps.json" },
+  },
+  {
+    id: "3",
+    provider: "mock",
+    result: { audio: "output.wav", timestamps: "timestamps.json" },
+  },
+  {
+    id: "4",
+    provider: "mock",
+    result: { audio: "output.mp3", timestamps: "timestamps.json" },
+  },
+  {
+    id: "5",
+    provider: "mock",
+    result: { audio: "output.wav", timestamps: "timestamps.json" },
+  },
+  {
+    id: "6",
+    provider: "mock",
+    result: { audio: "output.m4a", timestamps: "timestamps.json" },
+  },
 ];
 
 export class MockTTS extends BaseProvider<TTSGenerateParams, BundleResponse> {

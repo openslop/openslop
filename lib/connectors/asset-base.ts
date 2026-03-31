@@ -10,7 +10,9 @@ export abstract class BaseAssetConnector<
     generate(params: TParams): Promise<BundleResponse>;
   };
 
-  abstract resolveBundle(bundle: AssetBundle): Promise<TResult>;
+  async resolveBundle(bundle: AssetBundle): Promise<TResult> {
+    return { url: bundle.resolve(this.resultKind!) } as TResult;
+  }
 
   protected async _generate(params: TParams): Promise<TResult> {
     const response = await this.provider.generate(params);
