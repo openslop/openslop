@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { getSupabaseUrl, getSupabaseAnonKey } from "./env";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./env";
 
 const AUTH_ROUTES = ["/login", "/signup"];
 const API_PREFIX = "/api/v1";
@@ -19,13 +19,9 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = createServerClient(
-      getSupabaseUrl(),
-      getSupabaseAnonKey(),
-      {
-        cookies: { getAll: () => [], setAll: () => {} },
-      },
-    );
+    const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      cookies: { getAll: () => [], setAll: () => {} },
+    });
 
     const { error } = await supabase.auth.getUser(token);
     if (error) {
@@ -40,7 +36,7 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
