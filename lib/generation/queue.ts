@@ -145,7 +145,8 @@ class GenerationQueue {
 
   private processQueue() {
     while (this.controllers.size < this.batchSize && this.pending.length > 0) {
-      const job = this.pending.shift()!;
+      const job = this.pending.shift();
+      if (!job) break;
       this.runJob(job);
     }
   }

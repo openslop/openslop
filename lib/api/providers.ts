@@ -65,9 +65,10 @@ const audioToFiles =
     { key: "audio", filename: `output.${ext}`, data: r, contentType },
   ];
 
-const videoToFiles = (r: VideoJob): BundleFile[] => [
-  { key: "video", url: r.url! },
-];
+const videoToFiles = (r: VideoJob): BundleFile[] => {
+  if (!r.url) throw new Error("Video job completed without a URL");
+  return [{ key: "video", url: r.url }];
+};
 
 export function getImageProvider() {
   return cached("image", () =>
