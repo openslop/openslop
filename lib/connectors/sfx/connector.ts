@@ -1,15 +1,10 @@
-import type { BaseProvider } from "@/lib/providers/base";
-import { BaseConnector } from "../base";
-import type { SFXConnector, SFXGenerateParams } from "../types";
+import { BaseAssetConnector } from "../asset-base";
+import type { AssetResult, SFXConnector, SFXGenerateParams } from "../types";
 
-export abstract class BaseSFXConnector<
-  TProvider extends BaseProvider<SFXGenerateParams, ArrayBuffer> = BaseProvider<
-    SFXGenerateParams,
-    ArrayBuffer
-  >,
->
-  extends BaseConnector<SFXGenerateParams, ArrayBuffer, TProvider>
+export abstract class BaseSFXConnector
+  extends BaseAssetConnector<SFXGenerateParams, AssetResult>
   implements SFXConnector
 {
   readonly type = "sfx" as const;
+  readonly assetKey = "audio" as const;
 }

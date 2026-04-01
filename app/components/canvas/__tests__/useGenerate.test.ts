@@ -17,12 +17,9 @@ beforeEach(() => {
 });
 
 describe("generateForElement", () => {
-  it("resolves image connector and returns data URI", async () => {
+  it("resolves image connector and returns url", async () => {
     const generate = vi.fn().mockResolvedValue({
-      data: "abc123",
-      format: "png",
-      width: 512,
-      height: 512,
+      url: "https://blob.example.com/image.png",
     });
     (factory.createConnector as Mock).mockReturnValue({ generate });
 
@@ -40,20 +37,16 @@ describe("generateForElement", () => {
       baseConfig,
     );
     expect(result).toEqual({
-      kind: "image",
-      src: "data:image/png;base64,abc123",
+      url: "https://blob.example.com/image.png",
     });
   });
 
   it("passes extra params to connector generate for TTS", async () => {
     const generate = vi.fn().mockResolvedValue({
-      data: btoa("audiodata"),
+      url: "https://blob.example.com/tts.wav",
       textTimestamps: [],
     });
     (factory.createConnector as Mock).mockReturnValue({ generate });
-
-    const mockUrl = "blob:http://localhost/mock-tts";
-    vi.spyOn(URL, "createObjectURL").mockReturnValue(mockUrl);
 
     const result = await generateForElement(
       "tts",
@@ -70,17 +63,17 @@ describe("generateForElement", () => {
         accent: "american",
       }),
     );
-    expect(URL.createObjectURL).toHaveBeenCalled();
-    expect(result).toEqual({ kind: "audio", src: mockUrl });
+    expect(result).toEqual({
+      url: "https://blob.example.com/tts.wav",
+      textTimestamps: [],
+    });
   });
 
-  it("converts ArrayBuffer to object URL for music", async () => {
-    const buf = new ArrayBuffer(8);
-    const generate = vi.fn().mockResolvedValue(buf);
+  it("returns url for music", async () => {
+    const generate = vi.fn().mockResolvedValue({
+      url: "https://blob.example.com/music.mp3",
+    });
     (factory.createConnector as Mock).mockReturnValue({ generate });
-
-    const mockUrl = "blob:http://localhost/mock-music";
-    vi.spyOn(URL, "createObjectURL").mockReturnValue(mockUrl);
 
     const result = await generateForElement(
       "music",
@@ -90,17 +83,16 @@ describe("generateForElement", () => {
       {},
     );
 
-    expect(URL.createObjectURL).toHaveBeenCalled();
-    expect(result).toEqual({ kind: "audio", src: mockUrl });
+    expect(result).toEqual({
+      url: "https://blob.example.com/music.mp3",
+    });
   });
 
-  it("converts ArrayBuffer to object URL for sfx", async () => {
-    const buf = new ArrayBuffer(8);
-    const generate = vi.fn().mockResolvedValue(buf);
+  it("returns url for sfx", async () => {
+    const generate = vi.fn().mockResolvedValue({
+      url: "https://blob.example.com/sfx.mp3",
+    });
     (factory.createConnector as Mock).mockReturnValue({ generate });
-
-    const mockUrl = "blob:http://localhost/mock-sfx";
-    vi.spyOn(URL, "createObjectURL").mockReturnValue(mockUrl);
 
     const result = await generateForElement(
       "sfx",
@@ -110,28 +102,14 @@ describe("generateForElement", () => {
       {},
     );
 
-    expect(URL.createObjectURL).toHaveBeenCalled();
-    expect(result).toEqual({ kind: "audio", src: mockUrl });
-  });
-
-  it("handles video generation failure", async () => {
-    const generate = vi.fn().mockResolvedValue({
-      jobId: "job-1",
-      status: "failed",
-      error: "GPU timeout",
+    expect(result).toEqual({
+      url: "https://blob.example.com/sfx.mp3",
     });
-    (factory.createConnector as Mock).mockReturnValue({ generate });
-
-    await expect(
-      generateForElement("video", "openslop", baseConfig, "a scene", {}),
-    ).rejects.toThrow("GPU timeout");
   });
 
-  it("returns video URL on successful completion", async () => {
+  it("returns video url on successful generation", async () => {
     const generate = vi.fn().mockResolvedValue({
-      jobId: "job-1",
-      status: "completed",
-      resultUrl: "https://cdn.example.com/video.mp4",
+      url: "https://cdn.example.com/video.mp4",
     });
     (factory.createConnector as Mock).mockReturnValue({ generate });
 
@@ -144,16 +122,13 @@ describe("generateForElement", () => {
     );
 
     expect(result).toEqual({
-      kind: "video",
-      src: "https://cdn.example.com/video.mp4",
+      url: "https://cdn.example.com/video.mp4",
     });
   });
 
   it("passes duration as extra param for video", async () => {
     const generate = vi.fn().mockResolvedValue({
-      jobId: "job-1",
-      status: "completed",
-      resultUrl: "https://cdn.example.com/video.mp4",
+      url: "https://cdn.example.com/video.mp4",
     });
     (factory.createConnector as Mock).mockReturnValue({ generate });
 
@@ -164,14 +139,5 @@ describe("generateForElement", () => {
     expect(generate).toHaveBeenCalledWith(
       expect.objectContaining({ duration: "10" }),
     );
-  });
-
-  it("throws for LLM connector type", async () => {
-    const generate = vi.fn();
-    (factory.createConnector as Mock).mockReturnValue({ generate });
-
-    await expect(
-      generateForElement("llm", "openslop", baseConfig, "test", {}),
-    ).rejects.toThrow("LLM generation not supported");
   });
 });

@@ -14,6 +14,7 @@
   - `/vercel-composition-patterns`
   - `/web-design-guidelines`
   - `/vercel-react-best-practices`
+- Never use non-null assertions (!). Use type guards, default values, or validated helpers instead
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is
 
 ## Next.js gotchas

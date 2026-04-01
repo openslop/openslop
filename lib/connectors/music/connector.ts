@@ -1,13 +1,14 @@
-import type { BaseProvider } from "@/lib/providers/base";
-import { BaseConnector } from "../base";
-import type { MusicConnector, MusicGenerateParams } from "../types";
+import { BaseAssetConnector } from "../asset-base";
+import type {
+  AssetResult,
+  MusicConnector,
+  MusicGenerateParams,
+} from "../types";
 
-export abstract class BaseMusicConnector<
-  TProvider extends BaseProvider<MusicGenerateParams, ArrayBuffer> =
-    BaseProvider<MusicGenerateParams, ArrayBuffer>,
->
-  extends BaseConnector<MusicGenerateParams, ArrayBuffer, TProvider>
+export abstract class BaseMusicConnector
+  extends BaseAssetConnector<MusicGenerateParams, AssetResult>
   implements MusicConnector
 {
   readonly type = "music" as const;
+  readonly assetKey = "audio" as const;
 }

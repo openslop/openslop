@@ -2,11 +2,12 @@ import Cartesia from "@cartesia/cartesia-js";
 import type {
   TextTimestamp,
   TTSGenerateParams,
-  TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
+
+type RawTTSResult = { data: string; textTimestamps: TextTimestamp[] };
 
 const SAMPLE_RATE = 44100;
 const NUM_CHANNELS = 1;
@@ -45,7 +46,7 @@ function wrapPcmInWav(pcm: Buffer): Buffer {
   return Buffer.concat([header, pcm]);
 }
 
-export class CartesiaTTS extends BaseProvider<TTSGenerateParams, TTSResult> {
+export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
   private client: Cartesia;
 
   constructor(apiKey: string) {

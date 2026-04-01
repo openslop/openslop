@@ -1,6 +1,8 @@
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 
+export type ResultKind = "image" | "video" | "audio";
+
 export type CanvasElementType =
   | "narration"
   | "character"
@@ -32,11 +34,6 @@ export type CanvasText = {
   type: CanvasElementType;
   text: string;
 };
-
-export type GenerationResult =
-  | { kind: "image"; src: string }
-  | { kind: "video"; src: string }
-  | { kind: "audio"; src: string };
 
 declare module "slate" {
   interface CustomTypes {

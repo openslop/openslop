@@ -1,27 +1,20 @@
-import type {
-  ImageFormat,
-  ImageGenerateParams,
-  ImageResult,
-} from "@/lib/connectors/types";
+import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { ImageGenerateParams } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
-import { pickRandom, readMockFile } from "../mock-utils";
+import { pickRandom } from "../mock-utils";
 
-const MOCK_IMAGES: { file: string; format: ImageFormat }[] = [
-  { file: "mock-1.webp", format: "webp" },
-  { file: "mock-2.jpg", format: "jpeg" },
-  { file: "mock-3.png", format: "png" },
+const MOCK_VARIANTS: BundleResponse[] = [
+  { id: "1", provider: "mock", result: { image: "output.webp" } },
+  { id: "2", provider: "mock", result: { image: "output.jpg" } },
+  { id: "3", provider: "mock", result: { image: "output.png" } },
 ];
 
-export class MockImage extends BaseProvider<ImageGenerateParams, ImageResult> {
-  async generate(params: ImageGenerateParams): Promise<ImageResult> {
+export class MockImage extends BaseProvider<
+  ImageGenerateParams,
+  BundleResponse
+> {
+  async generate(): Promise<BundleResponse> {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
-    const pick = pickRandom(MOCK_IMAGES);
-    const data = readMockFile(pick.file).toString("base64");
-    return {
-      data,
-      format: pick.format,
-      width: params.width ?? 512,
-      height: params.height ?? 512,
-    };
+    return pickRandom(MOCK_VARIANTS);
   }
 }

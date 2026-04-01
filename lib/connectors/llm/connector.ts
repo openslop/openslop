@@ -2,6 +2,7 @@ import type { BaseProvider } from "@/lib/providers/base";
 import { BaseConnector } from "../base";
 import { runOnError } from "../plugins";
 import type {
+  ConnectorConfig,
   LLMConnector,
   LLMGenerateParams,
   LLMGenerateResult,
@@ -12,10 +13,26 @@ export abstract class BaseLLMConnector<
   TProvider extends BaseProvider<LLMGenerateParams, LLMGenerateResult> =
     BaseProvider<LLMGenerateParams, LLMGenerateResult>,
 >
-  extends BaseConnector<LLMGenerateParams, LLMGenerateResult, TProvider>
+  extends BaseConnector<LLMGenerateParams, LLMGenerateResult>
   implements LLMConnector
 {
   readonly type = "llm" as const;
+  protected provider: TProvider;
+
+  constructor(provider: TProvider, config: ConnectorConfig) {
+    super(config);
+    this.provider = provider;
+  }
+
+  protected pluginContext() {
+    return { provider: this.provider };
+  }
+
+  protected async _generate(
+    params: LLMGenerateParams,
+  ): Promise<LLMGenerateResult> {
+    return this.provider.generate(params);
+  }
 
   async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
     const ctx = this.pluginContext();

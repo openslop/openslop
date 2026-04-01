@@ -55,11 +55,6 @@ export class OpenSlopClient {
     return res.json() as Promise<T>;
   }
 
-  async postBinary(path: string, body: unknown): Promise<ArrayBuffer> {
-    const res = await this.request("POST", `${this.baseUrl}${path}`, body);
-    return res.arrayBuffer();
-  }
-
   async postStream(path: string, body: unknown): Promise<Response> {
     return this.request("POST", `${this.baseUrl}${path}`, body);
   }

@@ -12,7 +12,8 @@ export const storyModePlugin: LLMPlugin = {
     prompt: string,
     ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
   ) {
-    if (!ctx) throw new Error("story mode plugin requires provider context");
+    if (!ctx?.provider)
+      throw new Error("story mode plugin requires provider context");
     const { text: outline } = await ctx.provider.generate({
       prompt: dedent`Briefly outline an engaging story with a high-concept premise, characters, themes, conflict, twists, and a resolution. The story should be about the following: ${prompt}`,
     });

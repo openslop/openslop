@@ -1,5 +1,5 @@
 import { getMusicProvider } from "@/lib/api/providers";
-import { createRouteHandler, audioResponse } from "@/lib/api/route-handler";
+import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 
 export const POST = createRouteHandler({
@@ -8,11 +8,11 @@ export const POST = createRouteHandler({
   label: "Music generation",
   handle: async (provider, body) => {
     const { prompt, model, durationSeconds } = body;
-    const buffer = await provider.generate({
+    const result = await provider.generate({
       prompt,
       model,
       durationSeconds,
     });
-    return audioResponse(buffer);
+    return jsonResponse(result);
   },
 });

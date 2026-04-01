@@ -1,21 +1,35 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopMusic } from "../music/openslop";
-import type { ConnectorPlugin } from "../types";
+import type { AssetResult, ConnectorPlugin } from "../types";
 
-function mockBinaryResponse(data: number[] = [0]) {
-  return new Response(new Uint8Array(data).buffer, {
+const TEST_ID = "test-id";
+const BUNDLE_URL = `/assets/music/openslop/${TEST_ID}`;
+const AUDIO_URL = `${BUNDLE_URL}/output.mp3`;
+
+function jsonResponse(data: unknown) {
+  return new Response(JSON.stringify(data), {
     status: 200,
-    headers: { "content-type": "audio/mpeg" },
+    headers: { "content-type": "application/json" },
   });
+}
+
+function mockFetchChain() {
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    jsonResponse({
+      id: TEST_ID,
+      provider: "openslop",
+      result: { audio: "output.mp3" },
+    }),
+  );
 }
 
 describe("BaseMusicConnector", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(mockBinaryResponse());
   });
 
   it("runs transformPrompt plugin", async () => {
+    mockFetchChain();
     const plugin: ConnectorPlugin = {
       name: "transform",
       transformPrompt: (p) => `epic: ${p}`,
@@ -28,13 +42,17 @@ describe("BaseMusicConnector", () => {
       plugins: [plugin],
     });
     const result = await connector.generate({ prompt: "rock song" });
-    expect(result).toBeInstanceOf(ArrayBuffer);
+    expect(result).toEqual({ url: AUDIO_URL });
   });
 
   it("runs afterGenerate plugin", async () => {
+    mockFetchChain();
+    const replacement: AssetResult = {
+      url: "https://example.com/replaced.mp3",
+    };
     const plugin: ConnectorPlugin = {
       name: "after",
-      afterGenerate: () => new ArrayBuffer(42),
+      afterGenerate: () => replacement,
     };
     const connector = new OpenSlopMusic({
       defaultModel: "test-model",
@@ -44,11 +62,11 @@ describe("BaseMusicConnector", () => {
       plugins: [plugin],
     });
     const result = await connector.generate({ prompt: "test" });
-    expect(result.byteLength).toBe(42);
+    expect(result.url).toBe("https://example.com/replaced.mp3");
   });
 
   it("runs onError plugin on failure", async () => {
-    vi.mocked(fetch).mockRejectedValue(new Error("music failed"));
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("music failed"));
     const errors: string[] = [];
 
     const connector = new OpenSlopMusic({

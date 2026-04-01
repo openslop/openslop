@@ -4,9 +4,12 @@ import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
 import { modelsFromMap } from "@/lib/connectors/types";
 import { IMAGE_MODELS } from "./models";
 
-export class OpenSlopImage extends BaseImageConnector<OpenSlopImageProvider> {
+export class OpenSlopImage extends BaseImageConnector {
+  protected provider: OpenSlopImageProvider;
+
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopImageProvider(config.baseUrl), config);
+    super(config);
+    this.provider = new OpenSlopImageProvider(config.baseUrl);
   }
 
   async listModels(): Promise<ModelInfo[]> {

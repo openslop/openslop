@@ -1,6 +1,6 @@
+import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type {
   TTSGenerateParams,
-  TTSResult,
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
@@ -8,10 +8,10 @@ import { BaseOpenSlopProvider } from "../openslop-base";
 
 export class OpenSlopTTS extends BaseOpenSlopProvider<
   TTSGenerateParams,
-  TTSResult
+  BundleResponse
 > {
-  async generate(params: TTSGenerateParams): Promise<TTSResult> {
-    return this.client.post("/api/v1/tts", params);
+  async generate(params: TTSGenerateParams): Promise<BundleResponse> {
+    return this.client.post<BundleResponse>("/api/v1/tts", params);
   }
 
   async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
