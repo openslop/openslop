@@ -11,7 +11,7 @@ export abstract class BaseVideoConnector
   implements VideoConnector
 {
   readonly type = "video" as const;
-  readonly resultKind = "video" as const;
+  readonly assetKey = "video" as const;
 
   abstract poll(jobId: string): Promise<VideoJob>;
 }

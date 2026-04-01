@@ -6,5 +6,5 @@ export abstract class BaseSFXConnector
   implements SFXConnector
 {
   readonly type = "sfx" as const;
-  readonly resultKind = "audio" as const;
+  readonly assetKey = "audio" as const;
 }

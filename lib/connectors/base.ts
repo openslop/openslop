@@ -11,7 +11,6 @@ import type {
   ConnectorType,
   ModelInfo,
   PluginContext,
-  ResultKind,
 } from "./types";
 
 export abstract class BaseConnector<
@@ -19,7 +18,6 @@ export abstract class BaseConnector<
   TResult = unknown,
 > implements Connector {
   abstract readonly type: ConnectorType;
-  readonly resultKind?: ResultKind;
   protected plugins: ConnectorPlugin[];
 
   constructor(config: ConnectorConfig) {

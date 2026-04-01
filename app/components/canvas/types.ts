@@ -1,6 +1,8 @@
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 
+export type ResultKind = "image" | "video" | "audio";
+
 export type CanvasElementType =
   | "narration"
   | "character"

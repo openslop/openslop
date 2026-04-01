@@ -21,10 +21,7 @@ describe("generateForElement", () => {
     const generate = vi.fn().mockResolvedValue({
       url: "https://blob.example.com/image.png",
     });
-    (factory.createConnector as Mock).mockReturnValue({
-      generate,
-      resultKind: "image",
-    });
+    (factory.createConnector as Mock).mockReturnValue({ generate });
 
     const result = await generateForElement(
       "image",
@@ -40,8 +37,7 @@ describe("generateForElement", () => {
       baseConfig,
     );
     expect(result).toEqual({
-      kind: "image",
-      src: "https://blob.example.com/image.png",
+      url: "https://blob.example.com/image.png",
     });
   });
 
@@ -50,10 +46,7 @@ describe("generateForElement", () => {
       url: "https://blob.example.com/tts.wav",
       textTimestamps: [],
     });
-    (factory.createConnector as Mock).mockReturnValue({
-      generate,
-      resultKind: "audio",
-    });
+    (factory.createConnector as Mock).mockReturnValue({ generate });
 
     const result = await generateForElement(
       "tts",
@@ -71,8 +64,8 @@ describe("generateForElement", () => {
       }),
     );
     expect(result).toEqual({
-      kind: "audio",
-      src: "https://blob.example.com/tts.wav",
+      url: "https://blob.example.com/tts.wav",
+      textTimestamps: [],
     });
   });
 
@@ -80,10 +73,7 @@ describe("generateForElement", () => {
     const generate = vi.fn().mockResolvedValue({
       url: "https://blob.example.com/music.mp3",
     });
-    (factory.createConnector as Mock).mockReturnValue({
-      generate,
-      resultKind: "audio",
-    });
+    (factory.createConnector as Mock).mockReturnValue({ generate });
 
     const result = await generateForElement(
       "music",
@@ -94,8 +84,7 @@ describe("generateForElement", () => {
     );
 
     expect(result).toEqual({
-      kind: "audio",
-      src: "https://blob.example.com/music.mp3",
+      url: "https://blob.example.com/music.mp3",
     });
   });
 
@@ -103,10 +92,7 @@ describe("generateForElement", () => {
     const generate = vi.fn().mockResolvedValue({
       url: "https://blob.example.com/sfx.mp3",
     });
-    (factory.createConnector as Mock).mockReturnValue({
-      generate,
-      resultKind: "audio",
-    });
+    (factory.createConnector as Mock).mockReturnValue({ generate });
 
     const result = await generateForElement(
       "sfx",
@@ -117,8 +103,7 @@ describe("generateForElement", () => {
     );
 
     expect(result).toEqual({
-      kind: "audio",
-      src: "https://blob.example.com/sfx.mp3",
+      url: "https://blob.example.com/sfx.mp3",
     });
   });
 
@@ -126,10 +111,7 @@ describe("generateForElement", () => {
     const generate = vi.fn().mockResolvedValue({
       url: "https://cdn.example.com/video.mp4",
     });
-    (factory.createConnector as Mock).mockReturnValue({
-      generate,
-      resultKind: "video",
-    });
+    (factory.createConnector as Mock).mockReturnValue({ generate });
 
     const result = await generateForElement(
       "video",
@@ -140,8 +122,7 @@ describe("generateForElement", () => {
     );
 
     expect(result).toEqual({
-      kind: "video",
-      src: "https://cdn.example.com/video.mp4",
+      url: "https://cdn.example.com/video.mp4",
     });
   });
 
@@ -149,10 +130,7 @@ describe("generateForElement", () => {
     const generate = vi.fn().mockResolvedValue({
       url: "https://cdn.example.com/video.mp4",
     });
-    (factory.createConnector as Mock).mockReturnValue({
-      generate,
-      resultKind: "video",
-    });
+    (factory.createConnector as Mock).mockReturnValue({ generate });
 
     await generateForElement("video", "openslop", baseConfig, "a scene", {
       duration: "10",

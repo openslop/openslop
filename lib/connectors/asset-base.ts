@@ -6,12 +6,14 @@ export abstract class BaseAssetConnector<
   TParams extends { prompt: string },
   TResult,
 > extends BaseConnector<TParams, TResult> {
+  abstract readonly assetKey: string;
+
   protected abstract provider: {
     generate(params: TParams): Promise<BundleResponse>;
   };
 
   async resolveBundle(bundle: AssetBundle): Promise<TResult> {
-    return { url: bundle.resolve(this.resultKind!) } as TResult;
+    return { url: bundle.resolve(this.assetKey) } as TResult;
   }
 
   protected async _generate(params: TParams): Promise<TResult> {

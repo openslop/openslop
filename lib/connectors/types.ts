@@ -4,8 +4,6 @@ export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
 export type ProviderKey = "openslop";
 
-export type ResultKind = "image" | "video" | "audio";
-
 export type ModelInfo = {
   id: string;
   name: string;
@@ -65,14 +63,8 @@ export interface TTSConnectorParams extends ConnectorGenerateParams {
 
 export type AssetResult = { url: string };
 
-export interface GenerationResult {
-  kind: ResultKind;
-  src: string;
-}
-
 export interface Connector {
   readonly type: ConnectorType;
-  readonly resultKind?: ResultKind;
   generate(params: ConnectorGenerateParams): Promise<unknown>;
   init(): Promise<void>;
   validate(): Promise<boolean>;
@@ -118,7 +110,6 @@ export type MusicGenerateParams = {
 
 export interface MusicConnector extends Connector {
   readonly type: "music";
-  readonly resultKind: "audio";
   generate(params: MusicGenerateParams): Promise<AssetResult>;
 }
 
@@ -132,7 +123,6 @@ export type SFXGenerateParams = {
 
 export interface SFXConnector extends Connector {
   readonly type: "sfx";
-  readonly resultKind: "audio";
   generate(params: SFXGenerateParams): Promise<AssetResult>;
 }
 
@@ -148,7 +138,6 @@ export type ImageGenerateParams = {
 
 export interface ImageConnector extends Connector {
   readonly type: "image";
-  readonly resultKind: "image";
   generate(params: ImageGenerateParams): Promise<AssetResult>;
 }
 
@@ -188,7 +177,6 @@ export type VoiceSearchParams = {
 
 export interface TTSConnector extends Connector {
   readonly type: "tts";
-  readonly resultKind: "audio";
   generate(params: TTSConnectorParams): Promise<TTSResult>;
   searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }
@@ -216,7 +204,6 @@ export type VideoJob = {
 
 export interface VideoConnector extends Connector {
   readonly type: "video";
-  readonly resultKind: "video";
   generate(params: VideoGenerateParams): Promise<AssetResult>;
   poll(jobId: string): Promise<VideoJob>;
 }

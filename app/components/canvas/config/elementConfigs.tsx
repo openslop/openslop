@@ -6,7 +6,7 @@ import {
   Volume2,
   Music,
 } from "lucide-react";
-import type { CanvasElementType } from "../types";
+import type { CanvasElementType, ResultKind } from "../types";
 import type { ConnectorType } from "@/lib/connectors/types";
 import {
   TTSGender,
@@ -19,6 +19,7 @@ import { SoundType } from "@/lib/connectors/sfx/enums";
 export interface ElementConfig {
   type: CanvasElementType;
   connector: ConnectorType;
+  outputKind: ResultKind;
   label: string;
   icon: React.ReactNode;
   bgColor: string;
@@ -32,6 +33,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   narration: {
     type: "narration",
     connector: "tts",
+    outputKind: "audio",
     label: "Narration",
     icon: <BookOpen size={16} className="text-white" />,
     bgColor: "bg-slate-600",
@@ -53,6 +55,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   character: {
     type: "character",
     connector: "tts",
+    outputKind: "audio",
     label: "Character",
     icon: <User size={16} className="text-white" />,
     bgColor: "bg-amber-600",
@@ -75,6 +78,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   image: {
     type: "image",
     connector: "image",
+    outputKind: "image",
     label: "Image",
     icon: <ImageIcon size={16} className="text-white" />,
     bgColor: "bg-cyan-600",
@@ -86,6 +90,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   clip: {
     type: "clip",
     connector: "video",
+    outputKind: "video",
     label: "Clip",
     icon: <Film size={16} className="text-white" />,
     bgColor: "bg-indigo-600",
@@ -102,6 +107,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   sound: {
     type: "sound",
     connector: "sfx",
+    outputKind: "audio",
     label: "Sound",
     icon: <Volume2 size={16} className="text-white" />,
     bgColor: "bg-emerald-600",
@@ -117,6 +123,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
   music: {
     type: "music",
     connector: "music",
+    outputKind: "audio",
     label: "Music",
     icon: <Music size={16} className="text-white" />,
     bgColor: "bg-violet-600",

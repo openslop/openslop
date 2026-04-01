@@ -10,5 +10,5 @@ export abstract class BaseImageConnector
   implements ImageConnector
 {
   readonly type = "image" as const;
-  readonly resultKind = "image" as const;
+  readonly assetKey = "image" as const;
 }

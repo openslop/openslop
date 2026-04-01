@@ -1,7 +1,7 @@
 import type {
+  AssetResult,
   ConnectorConfig,
   ConnectorType,
-  GenerationResult,
   ProviderKey,
 } from "../connectors/types";
 import { generateForElement } from "./generateForElement";
@@ -9,7 +9,7 @@ import { generateForElement } from "./generateForElement";
 export type ElementSnapshot = {
   status: "idle" | "queued" | "generating";
   seconds: number;
-  result: GenerationResult | null;
+  result: AssetResult | null;
   error: string | null;
 };
 

@@ -13,7 +13,7 @@ export abstract class BaseTTSConnector
   implements TTSConnector
 {
   readonly type = "tts" as const;
-  readonly resultKind = "audio" as const;
+  readonly assetKey = "audio" as const;
 
   abstract searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 

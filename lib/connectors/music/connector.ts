@@ -10,5 +10,5 @@ export abstract class BaseMusicConnector
   implements MusicConnector
 {
   readonly type = "music" as const;
-  readonly resultKind = "audio" as const;
+  readonly assetKey = "audio" as const;
 }
