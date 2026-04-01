@@ -2,7 +2,8 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockImageGenerate = vi.fn();
-const mockVideoGenerate = vi.fn();
+const mockVideoSubmit = vi.fn();
+const mockVideoPoll = vi.fn();
 const mockMusicGenerate = vi.fn();
 const mockSFXGenerate = vi.fn();
 const mockLLMGenerate = vi.fn();
@@ -12,7 +13,7 @@ const mockTTSSearch = vi.fn();
 
 vi.mock("@/lib/api/providers", () => ({
   getImageProvider: () => ({ generate: mockImageGenerate }),
-  getVideoProvider: () => ({ generate: mockVideoGenerate }),
+  getVideoProvider: () => ({ submit: mockVideoSubmit, poll: mockVideoPoll }),
   getMusicProvider: () => ({ generate: mockMusicGenerate }),
   getSFXProvider: () => ({ generate: mockSFXGenerate }),
   getLLMProvider: () => ({
@@ -84,13 +85,16 @@ describe("API routes", () => {
   describe("POST /api/v1/video", () => {
     it("returns video result on success", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoGenerate.mockResolvedValue({ id: "vid-abc123" });
+      mockVideoSubmit.mockResolvedValue({
+        jobId: "vid-abc123",
+        status: "queued",
+      });
 
       const res = await POST(
         makeRequest("/api/v1/video", { prompt: "sunset" }),
       );
       expect(res.status).toBe(200);
-      expect((await res.json()).id).toBe("vid-abc123");
+      expect((await res.json()).jobId).toBe("vid-abc123");
     });
 
     it("returns 400 for missing prompt", async () => {
@@ -101,7 +105,7 @@ describe("API routes", () => {
 
     it("returns 500 on provider error", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoGenerate.mockRejectedValue(new Error("fail"));
+      mockVideoSubmit.mockRejectedValue(new Error("fail"));
 
       const res = await POST(
         makeRequest("/api/v1/video", { prompt: "sunset" }),
