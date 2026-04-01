@@ -8,7 +8,9 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
-import type { CanvasElementType, GenerationResult } from "../types";
+import type { CanvasElementType } from "../types";
+import type { AssetResult } from "@/lib/connectors/types";
+import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import genStyles from "@/app/components/styles/gen-button.module.css";
 import loaderStyles from "./OutputPreview.module.css";
 
@@ -302,7 +304,7 @@ interface OutputPreviewProps {
   generating: boolean;
   queued: boolean;
   seconds: number;
-  result: GenerationResult | null;
+  result: AssetResult | null;
   error: string | null;
   onGenerate: () => void;
   onDiscard: () => void;
@@ -448,13 +450,6 @@ const WAVE_COLORS: Record<CanvasElementType, string> = {
   clip: "rgb(129, 140, 248)",
 };
 
-const AUDIO_TYPES = new Set<CanvasElementType>([
-  "character",
-  "narration",
-  "music",
-  "sound",
-]);
-
 export function OutputPreview({
   type,
   generating,
@@ -465,12 +460,14 @@ export function OutputPreview({
   onGenerate,
   onDiscard,
 }: OutputPreviewProps) {
-  if (AUDIO_TYPES.has(type)) {
-    if (result?.kind === "audio") {
+  const { outputKind } = ELEMENT_CONFIGS[type];
+
+  if (outputKind === "audio") {
+    if (result) {
       return (
         <AudioResult
           type={type}
-          src={result.src}
+          src={result.url}
           generating={generating}
           queued={queued}
           seconds={seconds}
@@ -492,9 +489,9 @@ export function OutputPreview({
 
   if (result) {
     const media =
-      result.kind === "image" ? (
+      outputKind === "image" ? (
         <Image
-          src={result.src}
+          src={result.url}
           alt="Generated"
           fill
           className="object-cover"
@@ -502,7 +499,7 @@ export function OutputPreview({
         />
       ) : (
         <video
-          src={result.src}
+          src={result.url}
           controls
           className="w-full h-full object-cover"
         />

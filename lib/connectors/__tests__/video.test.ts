@@ -2,30 +2,33 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopVideo } from "../video/openslop";
 import type { ConnectorPlugin } from "../types";
 
-function mockJsonResponse(data: unknown) {
+const TEST_ID = "test-id";
+const VIDEO_URL = "https://cdn.example.com/v.mp4";
+
+function jsonResponse(data: unknown) {
   return new Response(JSON.stringify(data), {
     status: 200,
     headers: { "content-type": "application/json" },
   });
 }
 
-const submitResponse = { jobId: "j1", status: "processing" };
-const completedResponse = {
-  jobId: "j1",
-  status: "completed",
-  resultUrl: "https://v.mp4",
-};
+function mockFetchChain() {
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    jsonResponse({
+      id: TEST_ID,
+      provider: "openslop",
+      result: { video: VIDEO_URL },
+    }),
+  );
+}
 
 describe("BaseVideoConnector", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("generates a video job", async () => {
-    vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(mockJsonResponse(submitResponse))
-      .mockResolvedValueOnce(mockJsonResponse(completedResponse));
-
+  it("generates a video and returns AssetResult", async () => {
+    mockFetchChain();
     const connector = new OpenSlopVideo({
       defaultModel: "test-model",
       models: ["test-model"],
@@ -33,30 +36,23 @@ describe("BaseVideoConnector", () => {
       apiKey: "",
     });
     const result = await connector.generate({ prompt: "a sunset" });
-    expect(result.status).toBe("completed");
-    expect(result.jobId).toBeTruthy();
+    expect(result.url).toBe(VIDEO_URL);
   });
 
-  it("polls a job", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      mockJsonResponse({ jobId: "job-123", status: "completed" }),
-    );
+  it("poll throws not supported", async () => {
     const connector = new OpenSlopVideo({
       defaultModel: "test-model",
       models: ["test-model"],
       isDefault: true,
       apiKey: "",
     });
-    const result = await connector.poll("job-123");
-    expect(result.jobId).toBe("job-123");
-    expect(result.status).toBe("completed");
+    await expect(connector.poll("job-123")).rejects.toThrow(
+      "Video polling is no longer supported",
+    );
   });
 
   it("runs plugins in order", async () => {
-    vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(mockJsonResponse(submitResponse))
-      .mockResolvedValueOnce(mockJsonResponse(completedResponse));
-
+    mockFetchChain();
     const order: string[] = [];
     const plugin: ConnectorPlugin = {
       name: "tracker",

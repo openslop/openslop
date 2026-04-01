@@ -1,17 +1,20 @@
+import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
-import { pickRandom, readMockFileAsArrayBuffer } from "../mock-utils";
+import { pickRandom } from "../mock-utils";
 
-const MOCK_AUDIO = [
-  { file: "mock-1.mp3" },
-  { file: "mock-2.m4a" },
-  { file: "mock-3.wav" },
+const MOCK_VARIANTS: BundleResponse[] = [
+  { id: "1", provider: "mock", result: { audio: "output.mp3" } },
+  { id: "2", provider: "mock", result: { audio: "output.m4a" } },
+  { id: "3", provider: "mock", result: { audio: "output.wav" } },
 ];
 
-export class MockMusic extends BaseProvider<MusicGenerateParams, ArrayBuffer> {
-  async generate(): Promise<ArrayBuffer> {
+export class MockMusic extends BaseProvider<
+  MusicGenerateParams,
+  BundleResponse
+> {
+  async generate(): Promise<BundleResponse> {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
-    const pick = pickRandom(MOCK_AUDIO);
-    return readMockFileAsArrayBuffer(pick.file);
+    return pickRandom(MOCK_VARIANTS);
   }
 }

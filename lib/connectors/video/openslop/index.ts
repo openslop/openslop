@@ -8,16 +8,19 @@ import type {
 import { modelsFromMap } from "@/lib/connectors/types";
 import { VIDEO_MODELS } from "./models";
 
-export class OpenSlopVideo extends BaseVideoConnector<OpenSlopVideoProvider> {
+export class OpenSlopVideo extends BaseVideoConnector {
+  protected provider: OpenSlopVideoProvider;
+
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopVideoProvider(config.baseUrl), config);
+    super(config);
+    this.provider = new OpenSlopVideoProvider(config.baseUrl);
   }
 
   async listModels(): Promise<ModelInfo[]> {
     return modelsFromMap(VIDEO_MODELS);
   }
 
-  async poll(jobId: string): Promise<VideoJob> {
-    return this.provider.poll(jobId);
+  async poll(_jobId: string): Promise<VideoJob> {
+    throw new Error("Video polling is no longer supported");
   }
 }

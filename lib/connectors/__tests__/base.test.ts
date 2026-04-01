@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { BaseProvider } from "@/lib/providers/base";
 import { BaseConnector } from "../base";
 import type {
   ConnectorConfig,
@@ -8,16 +7,13 @@ import type {
   ModelInfo,
 } from "../types";
 
-class MockProvider extends BaseProvider {
-  async generate(): Promise<unknown> {
-    return {};
-  }
-}
-
 class TestConnector extends BaseConnector {
   readonly type: ConnectorType = "llm";
   async listModels(): Promise<ModelInfo[]> {
     return [{ id: "test", name: "Test" }];
+  }
+  protected async _generate(): Promise<unknown> {
+    return {};
   }
 }
 
@@ -31,27 +27,27 @@ describe("BaseConnector", () => {
   };
 
   it("init is a no-op by default", async () => {
-    const c = new TestConnector(new MockProvider(), config);
+    const c = new TestConnector(config);
     await expect(c.init()).resolves.toBeUndefined();
   });
 
   it("validate returns true by default", async () => {
-    const c = new TestConnector(new MockProvider(), config);
+    const c = new TestConnector(config);
     await expect(c.validate()).resolves.toBe(true);
   });
 
   it("destroy is a no-op by default", async () => {
-    const c = new TestConnector(new MockProvider(), config);
+    const c = new TestConnector(config);
     await expect(c.destroy()).resolves.toBeUndefined();
   });
 
   it("extracts plugins from config", () => {
-    const c = new TestConnector(new MockProvider(), config);
+    const c = new TestConnector(config);
     expect((c as unknown as { plugins: unknown[] }).plugins).toHaveLength(1);
   });
 
   it("defaults plugins to empty array", () => {
-    const c = new TestConnector(new MockProvider(), {
+    const c = new TestConnector({
       defaultModel: "test-model",
       models: ["test-model"],
       isDefault: true,
@@ -71,7 +67,7 @@ describe("BaseConnector", () => {
         onError,
       },
     ];
-    const c = new TestConnector(new MockProvider(), {
+    const c = new TestConnector({
       defaultModel: "test-model",
       models: ["test-model"],
       isDefault: true,
@@ -97,7 +93,7 @@ describe("BaseConnector", () => {
         onError,
       },
     ];
-    const c = new TestConnector(new MockProvider(), {
+    const c = new TestConnector({
       defaultModel: "test-model",
       models: ["test-model"],
       isDefault: true,

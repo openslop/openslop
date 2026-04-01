@@ -1,36 +1,35 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopImage } from "../image/openslop";
-import type { ConnectorPlugin } from "../types";
+import type { AssetResult, ConnectorPlugin } from "../types";
 
-vi.spyOn(globalThis, "fetch").mockResolvedValue(
-  new Response(
-    JSON.stringify({
-      data: "base64img",
-      format: "png",
-      width: 512,
-      height: 512,
+const TEST_ID = "test-id";
+const BUNDLE_URL = `/assets/image/openslop/${TEST_ID}`;
+const IMAGE_URL = `${BUNDLE_URL}/output.png`;
+
+function jsonResponse(data: unknown) {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+function mockFetchChain() {
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+    jsonResponse({
+      id: TEST_ID,
+      provider: "openslop",
+      result: { image: "output.png" },
     }),
-    { status: 200, headers: { "content-type": "application/json" } },
-  ),
-);
+  );
+}
 
 describe("BaseImageConnector", () => {
   beforeEach(() => {
-    vi.mocked(fetch).mockClear();
-    vi.mocked(fetch).mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          data: "base64img",
-          format: "png",
-          width: 512,
-          height: 512,
-        }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      ),
-    );
+    vi.restoreAllMocks();
   });
 
   it("generates image via provider", async () => {
+    mockFetchChain();
     const connector = new OpenSlopImage({
       defaultModel: "test-model",
       models: ["test-model"],
@@ -38,17 +37,17 @@ describe("BaseImageConnector", () => {
       apiKey: "",
     });
     const result = await connector.generate({ prompt: "a cat" });
-    expect(result.format).toBe("png");
-    expect(result.width).toBe(512);
+    expect(result.url).toBe(IMAGE_URL);
   });
 
   it("runs afterGenerate plugin", async () => {
+    mockFetchChain();
+    const replacement: AssetResult = {
+      url: "https://example.com/replaced.png",
+    };
     const plugin: ConnectorPlugin = {
       name: "resize",
-      afterGenerate: (r) => ({
-        ...(r as object),
-        width: 1024,
-      }),
+      afterGenerate: () => replacement,
     };
     const connector = new OpenSlopImage({
       defaultModel: "test-model",
@@ -58,6 +57,6 @@ describe("BaseImageConnector", () => {
       plugins: [plugin],
     });
     const result = await connector.generate({ prompt: "test" });
-    expect(result.width).toBe(1024);
+    expect(result.url).toBe("https://example.com/replaced.png");
   });
 });

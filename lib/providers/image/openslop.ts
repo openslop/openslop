@@ -1,11 +1,12 @@
-import type { ImageGenerateParams, ImageResult } from "@/lib/connectors/types";
+import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { ImageGenerateParams } from "@/lib/connectors/types";
 import { BaseOpenSlopProvider } from "../openslop-base";
 
 export class OpenSlopImage extends BaseOpenSlopProvider<
   ImageGenerateParams,
-  ImageResult
+  BundleResponse
 > {
-  async generate(params: ImageGenerateParams): Promise<ImageResult> {
-    return this.client.post("/api/v1/image", params);
+  async generate(params: ImageGenerateParams): Promise<BundleResponse> {
+    return this.client.post<BundleResponse>("/api/v1/image", params);
   }
 }

@@ -4,9 +4,12 @@ import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
 import { modelsFromMap } from "@/lib/connectors/types";
 import { SFX_MODELS } from "./models";
 
-export class OpenSlopSFX extends BaseSFXConnector<OpenSlopSFXProvider> {
+export class OpenSlopSFX extends BaseSFXConnector {
+  protected provider: OpenSlopSFXProvider;
+
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopSFXProvider(config.baseUrl), config);
+    super(config);
+    this.provider = new OpenSlopSFXProvider(config.baseUrl);
   }
 
   async listModels(): Promise<ModelInfo[]> {

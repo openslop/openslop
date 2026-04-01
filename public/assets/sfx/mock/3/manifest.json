@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "type": "sfx",
+  "createdAt": "2026-01-01T00:00:00Z",
+  "result": {
+    "audio": "output.m4a"
+  }
+}
