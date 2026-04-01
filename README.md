@@ -57,11 +57,7 @@ cd openslop
 npm install
 ```
 
-3. Set up your environment variables:
-
-```bash
-cp .env.local.example .env.local   # or create .env.local manually
-```
+3. Create a `.env.local` file with your environment variables:
 
 Required (auth and database):
 
