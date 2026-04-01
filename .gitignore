@@ -43,6 +43,9 @@ next-env.d.ts
 # Supabase CLI temp files
 supabase/.temp/
 
+# Mock assets (served from Vercel Blob)
+public/assets/
+
 # Claude Code (user-specific files only; .agents/ and .claude/skills/ are shared)
 .claude/settings.local.json
 .claude/memory/

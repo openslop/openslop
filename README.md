@@ -75,6 +75,13 @@ ELEVENLABS_API_KEY=       # Music + SFX generation
 CARTESIA_API_KEY=         # Text-to-speech
 ```
 
+Optional (asset storage -- required when using real providers above):
+
+```
+BLOB_READ_WRITE_TOKEN=    # Vercel Blob token for storing generated assets
+NEXT_PUBLIC_BLOB_URL=     # Vercel Blob store public URL
+```
+
 4. Run the database migrations:
 
 ```bash

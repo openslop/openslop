@@ -7,36 +7,57 @@ import type {
 import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
 
+const BLOB_BASE =
+  "https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/tts/mock";
+
 const MOCK_VARIANTS: BundleResponse[] = [
   {
     id: "1",
     provider: "mock",
-    result: { audio: "output.mp3", timestamps: "timestamps.json" },
+    result: {
+      audio: `${BLOB_BASE}/1/output.mp3`,
+      timestamps: `${BLOB_BASE}/1/timestamps.json`,
+    },
   },
   {
     id: "2",
     provider: "mock",
-    result: { audio: "output.m4a", timestamps: "timestamps.json" },
+    result: {
+      audio: `${BLOB_BASE}/2/output.m4a`,
+      timestamps: `${BLOB_BASE}/2/timestamps.json`,
+    },
   },
   {
     id: "3",
     provider: "mock",
-    result: { audio: "output.wav", timestamps: "timestamps.json" },
+    result: {
+      audio: `${BLOB_BASE}/3/output.wav`,
+      timestamps: `${BLOB_BASE}/3/timestamps.json`,
+    },
   },
   {
     id: "4",
     provider: "mock",
-    result: { audio: "output.mp3", timestamps: "timestamps.json" },
+    result: {
+      audio: `${BLOB_BASE}/4/output.mp3`,
+      timestamps: `${BLOB_BASE}/4/timestamps.json`,
+    },
   },
   {
     id: "5",
     provider: "mock",
-    result: { audio: "output.wav", timestamps: "timestamps.json" },
+    result: {
+      audio: `${BLOB_BASE}/5/output.wav`,
+      timestamps: `${BLOB_BASE}/5/timestamps.json`,
+    },
   },
   {
     id: "6",
     provider: "mock",
-    result: { audio: "output.m4a", timestamps: "timestamps.json" },
+    result: {
+      audio: `${BLOB_BASE}/6/output.m4a`,
+      timestamps: `${BLOB_BASE}/6/timestamps.json`,
+    },
   },
 ];
 
