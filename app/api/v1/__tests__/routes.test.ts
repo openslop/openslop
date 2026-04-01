@@ -97,6 +97,31 @@ describe("API routes", () => {
       expect((await res.json()).jobId).toBe("vid-abc123");
     });
 
+    it("returns 400 for invalid referenceImage", async () => {
+      const { POST } = await import("@/app/api/v1/video/route");
+      const res = await POST(
+        makeRequest("/api/v1/video", {
+          prompt: "test",
+          referenceImage: "not-a-data-uri",
+        }),
+      );
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toContain("data URI");
+    });
+
+    it("accepts valid referenceImage data URI", async () => {
+      const { POST } = await import("@/app/api/v1/video/route");
+      mockVideoSubmit.mockResolvedValue({ jobId: "j2", status: "processing" });
+
+      const res = await POST(
+        makeRequest("/api/v1/video", {
+          prompt: "animate",
+          referenceImage: "data:image/png;base64,iVBORw0KGgo",
+        }),
+      );
+      expect(res.status).toBe(200);
+    });
+
     it("returns 400 for missing prompt", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
       const res = await POST(makeRequest("/api/v1/video", {}));
@@ -110,6 +135,34 @@ describe("API routes", () => {
       const res = await POST(
         makeRequest("/api/v1/video", { prompt: "sunset" }),
       );
+      expect(res.status).toBe(500);
+    });
+  });
+
+  describe("GET /api/v1/video/[jobId]", () => {
+    it("polls video job status", async () => {
+      const { GET } = await import("@/app/api/v1/video/[jobId]/route");
+      mockVideoPoll.mockResolvedValue({
+        jobId: "j1",
+        status: "completed",
+        url: "https://v.mp4",
+      });
+
+      const req = makeRequest("/api/v1/video/j1", undefined, "GET");
+      const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(json.status).toBe("completed");
+      expect(json.url).toBe("https://v.mp4");
+    });
+
+    it("returns 500 on poll error", async () => {
+      const { GET } = await import("@/app/api/v1/video/[jobId]/route");
+      mockVideoPoll.mockRejectedValue(new Error("not found"));
+
+      const req = makeRequest("/api/v1/video/j1", undefined, "GET");
+      const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
       expect(res.status).toBe(500);
     });
   });
