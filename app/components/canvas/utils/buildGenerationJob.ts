@@ -25,7 +25,7 @@ export function buildGenerationJob(
     ...(attrs.model && { defaultModel: attrs.model }),
   };
 
-  const prompt = Node.string(element).replace(ZERO_WIDTH_SPACE, "").trim();
+  const prompt = Node.string(element).replaceAll(ZERO_WIDTH_SPACE, "").trim();
   if (!prompt) return null;
 
   const extraParams = pick(attrs, elementConfig.generateParams ?? []);

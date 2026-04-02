@@ -148,7 +148,7 @@ describe("drawBars", () => {
     drawBars(ctx, 100, 40, Array(200).fill(0.5), 0.3, S);
     const rectCall = calls.find((c) => c.method === "rect");
     expect(rectCall).toBeDefined();
-    expect(rectCall!.args).toEqual([0, 0, 30, 40]);
+    expect(rectCall?.args).toEqual([0, 0, 30, 40]);
   });
 
   it("bars are vertically centered", () => {
@@ -159,7 +159,7 @@ describe("drawBars", () => {
     drawBars(ctx, 6, cssH, [1.0], 0, S);
     const rr = calls.find((c) => c.method === "roundRect");
     expect(rr).toBeDefined();
-    const [x, y, w, h] = rr!.args as number[];
+    const [x, y, w, h] = rr?.args as number[];
     expect(x).toBe(0);
     expect(y).toBe(1); // centered
     expect(w).toBe(3); // barWidth
@@ -171,7 +171,7 @@ describe("drawBars", () => {
     // peak = 0 → barHeight = max(2, 0 * 38) = 2
     drawBars(ctx, 6, 40, [0], 0, S);
     const rr = calls.find((c) => c.method === "roundRect");
-    const [, , , h] = rr!.args as number[];
+    const [, , , h] = rr?.args as number[];
     expect(h).toBe(2);
   });
 
@@ -181,7 +181,7 @@ describe("drawBars", () => {
     // peak=0 → bh=2 → radius = min(10, 1, 1) = 1
     drawBars(ctx, 5, 40, [0], 0, { ...S, barWidth: 2, barRadius: 10 });
     const rr = calls.find((c) => c.method === "roundRect");
-    const radius = (rr!.args as number[])[4];
+    const radius = (rr?.args as number[])[4];
     expect(radius).toBe(1); // min(10, 2/2=1, 2/2=1)
   });
 });
