@@ -168,7 +168,7 @@ export function Waveform({
         drawRef.current();
         onReady?.();
       })
-      .catch(() => {});
+      .catch((e) => console.error("Failed to decode audio:", e));
     return () => {
       cancelled = true;
       ac.close();
