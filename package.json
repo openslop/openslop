@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "npx tsx create-snapshot.ts",
+    "postbuild": "npx tsx create-snapshot.mts",
     "start": "next start",
     "lint": "eslint",
     "db:push": "supabase db push",
