@@ -122,9 +122,11 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 
       const combined = Buffer.concat(audioChunks);
 
+      const lastTs = textTimestamps[textTimestamps.length - 1];
       return {
         data: wrapPcmInWav(combined).toString("base64"),
         textTimestamps,
+        metadata: lastTs ? { durationSec: lastTs.end } : undefined,
       };
     } finally {
       ws.close();

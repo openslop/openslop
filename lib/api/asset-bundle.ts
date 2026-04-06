@@ -5,6 +5,7 @@ export type AssetManifest = {
   type: string;
   createdAt: string;
   result: Record<string, string>;
+  metadata?: Record<string, unknown>;
 };
 
 export type BundleFileUpload = {
@@ -21,14 +22,15 @@ export type BundleFileExternal = {
 
 export type BundleFile = BundleFileUpload | BundleFileExternal;
 
-function isExternal(file: BundleFile): file is BundleFileExternal {
-  return "url" in file;
+function isUploadFile(file: BundleFile): file is BundleFileUpload {
+  return "data" in file;
 }
 
 export type BundleResponse = {
   id: string;
   provider: string;
   result: Record<string, string>;
+  metadata?: Record<string, unknown>;
 };
 
 export class AssetBundle {
@@ -63,6 +65,7 @@ export class AssetBundle {
       type,
       createdAt: "",
       result: response.result,
+      metadata: response.metadata,
     });
   }
 
@@ -81,23 +84,25 @@ export class AssetBundle {
     type: string,
     provider: string,
     files: BundleFile[],
+    metadata?: Record<string, unknown>,
   ): Promise<BundleResponse> {
     const { put } = await import("@vercel/blob");
     const id = nanoid();
     const basePath = `assets/${type}/${provider}/${id}`;
 
-    const result: Record<string, string> = {};
-    for (const file of files) {
-      if (isExternal(file)) {
-        result[file.key] = file.url;
-      } else {
-        await put(`${basePath}/${file.filename}`, file.data, {
+    await Promise.all(
+      files.filter(isUploadFile).map((file) =>
+        put(`${basePath}/${file.filename}`, file.data, {
           access: "public",
           contentType: file.contentType,
           addRandomSuffix: false,
-        });
-        result[file.key] = file.filename;
-      }
+        }),
+      ),
+    );
+
+    const result: Record<string, string> = {};
+    for (const file of files) {
+      result[file.key] = isUploadFile(file) ? file.filename : file.url;
     }
 
     const manifest: AssetManifest = {
@@ -105,6 +110,7 @@ export class AssetBundle {
       type,
       createdAt: new Date().toISOString(),
       result,
+      metadata,
     };
 
     await put(`${basePath}/manifest.json`, JSON.stringify(manifest), {
@@ -113,6 +119,6 @@ export class AssetBundle {
       addRandomSuffix: false,
     });
 
-    return { id, provider, result };
+    return { id, provider, result, metadata };
   }
 }

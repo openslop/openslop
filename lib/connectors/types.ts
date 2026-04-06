@@ -61,7 +61,7 @@ export interface TTSConnectorParams extends ConnectorGenerateParams {
   language?: string;
 }
 
-export type AssetResult = { url: string };
+export type AssetResult = { url: string; durationSec: number };
 
 export interface Connector {
   readonly type: ConnectorType;

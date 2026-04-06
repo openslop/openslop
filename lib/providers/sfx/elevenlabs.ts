@@ -3,10 +3,12 @@ import type { SFXGenerateParams } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 import { streamToBuffer } from "../stream";
 
-export class ElevenLabsSFX extends BaseProvider<
-  SFXGenerateParams,
-  ArrayBuffer
-> {
+type SFXResult = {
+  data: ArrayBuffer;
+  metadata: { durationSec: number };
+};
+
+export class ElevenLabsSFX extends BaseProvider<SFXGenerateParams, SFXResult> {
   private client: ElevenLabsClient;
 
   constructor(apiKey: string) {
@@ -15,12 +17,16 @@ export class ElevenLabsSFX extends BaseProvider<
   }
 
   async generate(params: SFXGenerateParams) {
+    const durationSeconds = params.durationSeconds ?? 5;
     const stream = await this.client.textToSoundEffects.convert({
       text: params.prompt,
-      durationSeconds: params.durationSeconds || 5,
+      durationSeconds,
       outputFormat: "mp3_22050_32",
     });
 
-    return streamToBuffer(stream);
+    return {
+      data: await streamToBuffer(stream),
+      metadata: { durationSec: durationSeconds },
+    };
   }
 }

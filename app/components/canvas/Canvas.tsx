@@ -2,8 +2,10 @@
 
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   KeyboardEvent,
   Ref,
 } from "react";
@@ -26,9 +28,16 @@ import { ELEMENT_CONFIGS } from "./config/elementConfigs";
 
 export interface CanvasHandle {
   generateAll: () => void;
+  getEditor: () => import("slate").Editor;
 }
 
-export default function Canvas({ ref }: { ref?: Ref<CanvasHandle> }) {
+export default function Canvas({
+  ref,
+  onStructureChange,
+}: {
+  ref?: Ref<CanvasHandle>;
+  onStructureChange?: (key: string) => void;
+}) {
   const { editor, value, setValue } = useEditorSetup();
   const {
     activeId,
@@ -43,7 +52,19 @@ export default function Canvas({ ref }: { ref?: Ref<CanvasHandle> }) {
   useScriptSync(editor);
   const { generateAll } = useGenerateAll(editor);
 
-  useImperativeHandle(ref, () => ({ generateAll }), [generateAll]);
+  const structureKey = value.map((el) => el.id).join(",");
+  const prevKeyRef = useRef(structureKey);
+  useEffect(() => {
+    if (structureKey !== prevKeyRef.current) {
+      prevKeyRef.current = structureKey;
+      onStructureChange?.(structureKey);
+    }
+  }, [structureKey, onStructureChange]);
+
+  useImperativeHandle(ref, () => ({ generateAll, getEditor: () => editor }), [
+    generateAll,
+    editor,
+  ]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {

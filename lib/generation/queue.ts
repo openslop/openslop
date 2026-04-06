@@ -36,6 +36,7 @@ class GenerationQueue {
   private timers = new Map<string, ReturnType<typeof setInterval>>();
   private listeners = new Set<() => void>();
   private readonly batchSize: number;
+  private _resultVersion = 0;
 
   constructor({ batchSize }: { batchSize: number }) {
     this.batchSize = batchSize;
@@ -52,12 +53,19 @@ class GenerationQueue {
     return this.state.get(id) ?? EMPTY_SNAPSHOT;
   };
 
+  getResultVersion = () => this._resultVersion;
+
   private isInQueue(id: string): boolean {
     const s = this.state.get(id)?.status;
     return s === "queued" || s === "generating";
   }
 
   private update(id: string, patch: Partial<ElementSnapshot>) {
+    if (
+      "result" in patch &&
+      patch.result !== this.getElementSnapshot(id).result
+    )
+      this._resultVersion++;
     this.state.set(id, { ...this.getElementSnapshot(id), ...patch });
   }
 
@@ -119,6 +127,7 @@ class GenerationQueue {
   discard(elementId: string) {
     const hadEntry = this.isInQueue(elementId);
     if (hadEntry) this.abortJob(elementId);
+    if (this.state.get(elementId)?.result) this._resultVersion++;
     this.state.delete(elementId);
     this.notify();
     if (hadEntry) this.processQueue();

@@ -31,7 +31,11 @@ function cached<T>(key: string, factory: () => T): T {
   return cache.get(key) as T;
 }
 
-type RawTTSResult = { data: string; textTimestamps: TextTimestamp[] };
+type RawTTSResult = {
+  data: string;
+  textTimestamps: TextTimestamp[];
+  metadata?: { durationSec: number };
+};
 
 const imageToFiles = (r: { data: string; format: string }): BundleFile[] => [
   {
@@ -42,15 +46,21 @@ const imageToFiles = (r: { data: string; format: string }): BundleFile[] => [
   },
 ];
 
+const audioToFiles =
+  (contentType: string, ext: string) =>
+  (r: { data: ArrayBuffer | Buffer }): BundleFile[] => [
+    { key: "audio", filename: `output.${ext}`, data: r.data, contentType },
+  ];
+
 const ttsToFiles =
   (contentType: string, ext: string) =>
   (r: RawTTSResult): BundleFile[] => [
-    {
-      key: "audio",
-      filename: `output.${ext}`,
-      data: Buffer.from(r.data, "base64"),
+    ...audioToFiles(
       contentType,
-    },
+      ext,
+    )({
+      data: Buffer.from(r.data, "base64"),
+    }),
     {
       key: "timestamps",
       filename: "timestamps.json",
@@ -59,15 +69,10 @@ const ttsToFiles =
     },
   ];
 
-const audioToFiles =
-  (contentType: string, ext: string) =>
-  (r: ArrayBuffer): BundleFile[] => [
-    { key: "audio", filename: `output.${ext}`, data: r, contentType },
-  ];
-
-const videoToFiles = (r: VideoJob): BundleFile[] => [
-  { key: "video", url: r.url! },
-];
+const videoToFiles = (r: VideoJob): BundleFile[] => {
+  if (!r.url) throw new Error("Video job completed without URL");
+  return [{ key: "video", url: r.url }];
+};
 
 export function getImageProvider() {
   return cached("image", () =>

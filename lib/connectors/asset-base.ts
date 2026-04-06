@@ -13,7 +13,10 @@ export abstract class BaseAssetConnector<
   };
 
   async resolveBundle(bundle: AssetBundle): Promise<TResult> {
-    return { url: bundle.resolve(this.assetKey) } as TResult;
+    return {
+      url: bundle.resolve(this.assetKey),
+      durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
+    } as TResult;
   }
 
   protected async _generate(params: TParams): Promise<TResult> {

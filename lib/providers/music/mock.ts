@@ -7,9 +7,24 @@ const BLOB_BASE =
   "https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/music/mock";
 
 const MOCK_VARIANTS: BundleResponse[] = [
-  { id: "1", provider: "mock", result: { audio: `${BLOB_BASE}/1/output.mp3` } },
-  { id: "2", provider: "mock", result: { audio: `${BLOB_BASE}/2/output.m4a` } },
-  { id: "3", provider: "mock", result: { audio: `${BLOB_BASE}/3/output.wav` } },
+  {
+    id: "1",
+    provider: "mock",
+    result: { audio: `${BLOB_BASE}/1/output.mp3` },
+    metadata: { durationSec: 30 },
+  },
+  {
+    id: "2",
+    provider: "mock",
+    result: { audio: `${BLOB_BASE}/2/output.m4a` },
+    metadata: { durationSec: 188 },
+  },
+  {
+    id: "3",
+    provider: "mock",
+    result: { audio: `${BLOB_BASE}/3/output.wav` },
+    metadata: { durationSec: 60 },
+  },
 ];
 
 export class MockMusic extends BaseProvider<

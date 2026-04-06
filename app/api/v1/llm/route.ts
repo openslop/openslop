@@ -1,5 +1,6 @@
 import { getLLMProvider } from "@/lib/api/providers";
 import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { formatSSE } from "@/lib/api/sse";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 import { logger } from "@/lib/api/logger";
 
@@ -32,9 +33,7 @@ export const POST = createRouteHandler({
         async start(controller) {
           try {
             for await (const chunk of provider.stream(genParams)) {
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`),
-              );
+              controller.enqueue(encoder.encode(formatSSE(chunk)));
             }
             controller.close();
           } catch (error) {

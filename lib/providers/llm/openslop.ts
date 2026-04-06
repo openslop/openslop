@@ -3,6 +3,7 @@ import type {
   LLMGenerateResult,
   LLMStreamChunk,
 } from "@/lib/connectors/types";
+import { readSSE } from "@/lib/api/sse";
 import { BaseOpenSlopProvider } from "../openslop-base";
 
 export class OpenSlopLLM extends BaseOpenSlopProvider<
@@ -19,23 +20,6 @@ export class OpenSlopLLM extends BaseOpenSlopProvider<
       stream: true,
     });
     if (!res.body) throw new Error("No response body");
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          yield JSON.parse(line.slice(6)) as LLMStreamChunk;
-        }
-      }
-    }
+    yield* readSSE<LLMStreamChunk>(res.body);
   }
 }

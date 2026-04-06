@@ -224,6 +224,12 @@ html {
   }
 }
 
+/* Ghost scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
 /* Reusable grain texture overlay — add .grain to any positioned element */
 .grain {
   isolation: isolate;
