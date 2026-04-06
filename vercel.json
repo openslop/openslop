@@ -1,0 +1,3 @@
+{
+  "buildCommand": "next build && node --import tsx/esm create-snapshot.ts"
+}
