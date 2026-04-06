@@ -188,6 +188,7 @@ class GenerationQueue {
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
+        console.error(`Generation failed for element ${elementId}:`, err);
         this.update(elementId, {
           status: "idle",
           seconds: 0,

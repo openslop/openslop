@@ -76,7 +76,7 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
   );
 
   const refineScript = useCallback(async (_prompt: string) => {
-    // TODO: Implement
+    console.warn("refineScript is not implemented yet");
   }, []);
 
   const value = useMemo<ScriptContextValue>(
