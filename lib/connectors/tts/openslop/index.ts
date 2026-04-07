@@ -30,7 +30,7 @@ export class OpenSlopTTS extends BaseTTSConnector {
 
   async resolveBundle(bundle: AssetBundle): Promise<TTSResult> {
     return {
-      url: bundle.resolve(this.assetKey),
+      ...(await super.resolveBundle(bundle)),
       textTimestamps: await bundle.fetchJson<TextTimestamp[]>("timestamps"),
     };
   }

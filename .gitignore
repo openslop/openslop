@@ -46,9 +46,13 @@ supabase/.temp/
 # Mock assets (served from Vercel Blob)
 public/assets/
 
+# Remotion bundle output
+.remotion/
+
 # Claude Code (user-specific files only; .agents/ and .claude/skills/ are shared)
 .claude/settings.local.json
 .claude/memory/
 .claude/plans/
 .gstack/
-.remotion/
+
+.env*.local

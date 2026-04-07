@@ -44,6 +44,7 @@ describe("BaseImageConnector", () => {
     mockFetchChain();
     const replacement: AssetResult = {
       url: "https://example.com/replaced.png",
+      durationSec: 0,
     };
     const plugin: ConnectorPlugin = {
       name: "resize",

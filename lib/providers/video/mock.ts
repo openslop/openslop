@@ -14,7 +14,12 @@ export class MockVideo extends BaseProvider<
 > {
   async generate(): Promise<BundleResponse> {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
-    return { id: "1", provider: "mock", result: { video: "output.mp4" } };
+    return {
+      id: "1",
+      provider: "mock",
+      result: { video: "output.mp4" },
+      metadata: { durationSec: 5 },
+    };
   }
 
   async submit(): Promise<VideoJob> {

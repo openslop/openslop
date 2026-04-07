@@ -44,9 +44,15 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
     });
   }
 
-  async generate(params: VideoGenerateParams): Promise<VideoJob> {
+  async generate(
+    params: VideoGenerateParams,
+  ): Promise<VideoJob & { metadata: { durationSec: number } }> {
     const job = await this.submit(params);
-    return awaitCompletion((id) => this.poll(id), job.jobId);
+    const completed = await awaitCompletion((id) => this.poll(id), job.jobId);
+    return {
+      ...completed,
+      metadata: { durationSec: params.duration ?? 5 },
+    };
   }
 
   async poll(jobId: string) {

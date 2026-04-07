@@ -1,3 +1,4 @@
+import get from "lodash/get";
 import type { BaseProvider } from "@/lib/providers/base";
 import type { BundleFile, BundleResponse } from "./asset-bundle";
 import { AssetBundle } from "./asset-bundle";
@@ -20,7 +21,12 @@ export function withBlobStorage<
     generate: async (params: TParams) => {
       const result = await provider.generate(params);
       const files = await toFiles(result);
-      return AssetBundle.upload(config.type, config.provider, files);
+      return AssetBundle.upload(
+        config.type,
+        config.provider,
+        files,
+        get(result, "metadata"),
+      );
     },
   });
 }

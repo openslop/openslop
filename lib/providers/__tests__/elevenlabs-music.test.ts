@@ -37,8 +37,9 @@ describe("ElevenLabsMusic", () => {
     const provider = new ElevenLabsMusic("test-key");
     const result = await provider.generate({ prompt: "jazz" });
 
-    expect(result).toBeInstanceOf(ArrayBuffer);
-    expect(new Uint8Array(result)).toEqual(audio);
+    expect(result.data).toBeInstanceOf(ArrayBuffer);
+    expect(new Uint8Array(result.data)).toEqual(audio);
+    expect(result.metadata.durationSec).toBe(30);
     expect(mockCompose).toHaveBeenCalledWith({
       prompt: "jazz",
       musicLengthMs: 30000,
