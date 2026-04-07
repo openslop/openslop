@@ -3,9 +3,14 @@ import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 import { streamToBuffer } from "../stream";
 
+type MusicResult = {
+  data: ArrayBuffer;
+  metadata: { durationSec: number };
+};
+
 export class ElevenLabsMusic extends BaseProvider<
   MusicGenerateParams,
-  ArrayBuffer
+  MusicResult
 > {
   private client: ElevenLabsClient;
 
@@ -15,13 +20,17 @@ export class ElevenLabsMusic extends BaseProvider<
   }
 
   async generate(params: MusicGenerateParams) {
+    const durationSeconds = params.durationSeconds ?? 30;
     const stream = await this.client.music.compose({
       prompt: params.prompt,
-      musicLengthMs: (params.durationSeconds || 30) * 1000,
+      musicLengthMs: durationSeconds * 1000,
       modelId: (params.model as "music_v1") || "music_v1",
       outputFormat: "mp3_22050_32",
     });
 
-    return streamToBuffer(stream);
+    return {
+      data: await streamToBuffer(stream),
+      metadata: { durationSec: durationSeconds },
+    };
   }
 }

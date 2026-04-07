@@ -37,8 +37,9 @@ describe("ElevenLabsSFX", () => {
     const provider = new ElevenLabsSFX("test-key");
     const result = await provider.generate({ prompt: "boom" });
 
-    expect(result).toBeInstanceOf(ArrayBuffer);
-    expect(new Uint8Array(result)).toEqual(audio);
+    expect(result.data).toBeInstanceOf(ArrayBuffer);
+    expect(new Uint8Array(result.data)).toEqual(audio);
+    expect(result.metadata.durationSec).toBe(5);
     expect(mockConvert).toHaveBeenCalledWith({
       text: "boom",
       durationSeconds: 5,

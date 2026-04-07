@@ -42,13 +42,14 @@ describe("BaseMusicConnector", () => {
       plugins: [plugin],
     });
     const result = await connector.generate({ prompt: "rock song" });
-    expect(result).toEqual({ url: AUDIO_URL });
+    expect(result).toEqual({ url: AUDIO_URL, durationSec: 0 });
   });
 
   it("runs afterGenerate plugin", async () => {
     mockFetchChain();
     const replacement: AssetResult = {
       url: "https://example.com/replaced.mp3",
+      durationSec: 0,
     };
     const plugin: ConnectorPlugin = {
       name: "after",

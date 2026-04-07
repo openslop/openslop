@@ -33,6 +33,7 @@ export default function UserProfile() {
         <DropdownMenuTrigger asChild>
           <button
             type="button"
+            suppressHydrationWarning
             className="relative z-[91] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Avatar className="h-9 w-9 cursor-pointer">

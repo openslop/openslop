@@ -94,7 +94,7 @@ export default function Copilot({
     typeof placeholder === "string" ? placeholder : undefined;
 
   return (
-    <div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_30px_rgba(55,30,100,0.3)] backdrop-blur-sm">
+    <div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_40px_rgba(55,30,100,0.5)]">
       {multiline ? (
         <div className="px-4 py-3">
           {onModeChange && composerMode && (

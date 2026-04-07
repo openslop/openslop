@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PanelLeft } from "lucide-react";
 import UserProfile from "@/app/components/UserProfile";
 import ElementPanel from "./ElementPanel";
+import PlayerPositionPanel from "./PlayerPositionPanel";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
@@ -38,6 +39,9 @@ export default function Sidebar() {
           {open && (
             <div className="mt-10 px-2">
               <ElementPanel />
+              <div className="mt-6">
+                <PlayerPositionPanel />
+              </div>
             </div>
           )}
         </div>
