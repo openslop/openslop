@@ -16,7 +16,12 @@ type RouteOptions<T> = {
 export function createRouteHandler<T>(options: RouteOptions<T>) {
   return async function POST(request: NextRequest) {
     try {
-      const body = await request.json();
+      let body: RequestBody;
+      try {
+        body = await request.json();
+      } catch {
+        return badRequest("Invalid JSON body");
+      }
       const { prompt, model } = body;
 
       if (!prompt || typeof prompt !== "string") {

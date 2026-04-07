@@ -165,6 +165,35 @@ describe("CartesiaTTS", () => {
       });
     });
 
+    it("returns all voices when language is not specified", async () => {
+      mockVoicesList.mockResolvedValue({
+        data: [
+          {
+            id: "v1",
+            name: "English Voice",
+            language: "en",
+            gender: "feminine",
+            description: "English",
+            preview_file_url: null,
+          },
+          {
+            id: "v2",
+            name: "French Voice",
+            language: "fr",
+            gender: "masculine",
+            description: "French",
+            preview_file_url: null,
+          },
+        ],
+      });
+
+      const provider = new CartesiaTTS("test-key");
+      const voices = await provider.search({ query: "voice" });
+
+      expect(voices).toHaveLength(2);
+      expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
+    });
+
     it("filters voices by language", async () => {
       mockVoicesList.mockResolvedValue({
         data: [

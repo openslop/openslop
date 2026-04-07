@@ -36,6 +36,19 @@ function makeHandler(overrides?: {
 }
 
 describe("createRouteHandler", () => {
+  it("returns 400 for malformed JSON body", async () => {
+    const handler = makeHandler();
+    const req = new NextRequest("http://localhost/api/test", {
+      method: "POST",
+      body: "not json",
+      headers: { "Content-Type": "application/json" },
+    });
+    const res = await handler(req);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toBe("Invalid JSON body");
+  });
+
   it("returns 400 when prompt is missing", async () => {
     const handler = makeHandler();
     const res = await handler(makeRequest({}));

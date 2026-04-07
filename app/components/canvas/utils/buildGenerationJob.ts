@@ -1,4 +1,3 @@
-import pick from "lodash/pick";
 import { Node } from "slate";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
@@ -28,7 +27,10 @@ export function buildGenerationJob(
   const prompt = Node.string(element).replaceAll(ZERO_WIDTH_SPACE, "").trim();
   if (!prompt) return null;
 
-  const extraParams = pick(attrs, elementConfig.generateParams ?? []);
+  const extraParams: Record<string, unknown> = {};
+  for (const key of elementConfig.generateParams ?? []) {
+    if (key in attrs) extraParams[key] = attrs[key];
+  }
 
   return {
     elementId: element.id,

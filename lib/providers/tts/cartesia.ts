@@ -76,7 +76,10 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
         description: voice.description,
         previewUrl: voice.preview_file_url ?? undefined,
       }))
-      .filter((voice) => voice.language === params.language);
+      .filter(
+        (voice) =>
+          params.language === undefined || voice.language === params.language,
+      );
   }
 
   async generate(params: TTSGenerateParams) {
