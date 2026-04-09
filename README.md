@@ -113,6 +113,7 @@ openslop/
 |-- app/                    # Next.js App Router pages and layouts
 |   |-- api/
 |   |   |-- v1/             # REST API (image, llm, music, sfx, tts, video)
+|   |   |-- render/         # Remotion video rendering endpoint
 |   |   |-- validate-code/  # Access code validation
 |   |-- auth/               # OAuth callback handler
 |   |-- components/         # App-specific React components
@@ -134,25 +135,30 @@ openslop/
 |   |-- supabase/           # Supabase client helpers (browser, server, middleware)
 |   |-- user/               # User context provider
 |   |-- utils.ts            # General utilities (cn, etc.)
+|   |-- video/              # Video rendering pipeline (Remotion integration)
+|-- remotion/               # Remotion video composition templates
 |-- supabase/migrations/    # Database migrations
 |-- proxy.ts                # Auth session refresh + route protection
 ```
 
 ## Scripts
 
-| Command                | What it does                     |
-| ---------------------- | -------------------------------- |
-| `npm run dev`          | Start the dev server             |
-| `npm run build`        | Production build                 |
-| `npm run start`        | Start the production server      |
-| `npm run lint`         | Run ESLint                       |
-| `npm run format:check` | Check formatting (Prettier)      |
-| `npm run typecheck`    | Run TypeScript type checks       |
-| `npm run test`         | Run tests in watch mode (Vitest) |
-| `npm run test:run`     | Run tests once                   |
-| `npm run db:push`      | Push migrations to Supabase      |
-| `npm run db:migrate`   | Run pending migrations           |
-| `npm run db:reset`     | Reset the database               |
+| Command                   | What it does                     |
+| ------------------------- | -------------------------------- |
+| `npm run dev`             | Start the dev server             |
+| `npm run build`           | Production build                 |
+| `npm run start`           | Start the production server      |
+| `npm run lint`            | Run ESLint                       |
+| `npm run format:check`    | Check formatting (Prettier)      |
+| `npm run typecheck`       | Run TypeScript type checks       |
+| `npm run test`            | Run tests in watch mode (Vitest) |
+| `npm run test:run`        | Run tests once                   |
+| `npm run db:push`         | Push migrations to Supabase      |
+| `npm run db:migrate`      | Run pending migrations           |
+| `npm run db:reset`        | Reset the database               |
+| `npm run remotion:studio` | Open Remotion video editor       |
+| `npm run remotion:bundle` | Bundle Remotion compositions     |
+| `npm run create-snapshot` | Generate video snapshot          |
 
 ## Contributing
 
