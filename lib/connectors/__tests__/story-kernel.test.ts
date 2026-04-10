@@ -26,10 +26,10 @@ describe("storyModePlugin", () => {
       provider,
     };
 
-    const result = await storyModePlugin.transformPrompt!(
-      "a knight and a dragon",
-      ctx,
-    );
+    const transformPrompt = storyModePlugin.transformPrompt;
+    if (!transformPrompt) throw new Error("expected transformPrompt");
+
+    const result = await transformPrompt("a knight and a dragon", ctx);
 
     expect(result).toContain(
       "A brave knight rescues a dragon who turns out to be friendly.",
@@ -38,7 +38,10 @@ describe("storyModePlugin", () => {
   });
 
   it("throws when no context is provided", async () => {
-    await expect(storyModePlugin.transformPrompt!("test")).rejects.toThrow(
+    const transformPrompt = storyModePlugin.transformPrompt;
+    if (!transformPrompt) throw new Error("expected transformPrompt");
+
+    await expect(transformPrompt("test")).rejects.toThrow(
       "story mode plugin requires provider context",
     );
   });

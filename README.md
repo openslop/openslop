@@ -112,18 +112,20 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 openslop/
 |-- app/                    # Next.js App Router pages and layouts
 |   |-- api/
+|   |   |-- render/         # Remotion video rendering endpoint (SSE progress)
 |   |   |-- v1/             # REST API (image, llm, music, sfx, tts, video)
 |   |   |-- validate-code/  # Access code validation
 |   |-- auth/               # OAuth callback handler
 |   |-- components/         # App-specific React components
 |   |   |-- canvas/         # Slate-based editor canvas (drag-and-drop, elements, plugins)
+|   |   |-- video/          # Video preview, player, and rendering UI
 |   |-- login/              # Login page
 |   |-- signup/             # Signup page
 |   |-- page.tsx            # Home / editor
 |   |-- layout.tsx          # Root layout
 |-- components/ui/          # shadcn/ui primitives
 |-- lib/                    # Shared libraries
-|   |-- api/                # Route handler helpers, logger, response utils
+|   |-- api/                # Route handler helpers, logger, SSE, response utils
 |   |-- clients/            # HTTP client for the OpenSlop API
 |   |-- components/         # Shared UI components (Waveform, etc.)
 |   |-- config/             # Global connector configuration (React context)
@@ -133,7 +135,9 @@ openslop/
 |   |-- script/             # Script context provider
 |   |-- supabase/           # Supabase client helpers (browser, server, middleware)
 |   |-- user/               # User context provider
+|   |-- video/              # Video layout engine (scene builder, element resolution)
 |   |-- utils.ts            # General utilities (cn, etc.)
+|-- remotion/               # Remotion video compositions
 |-- supabase/migrations/    # Database migrations
 |-- proxy.ts                # Auth session refresh + route protection
 ```
