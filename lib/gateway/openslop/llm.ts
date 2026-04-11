@@ -4,9 +4,9 @@ import type {
   LLMStreamChunk,
 } from "@/lib/connectors/types";
 import { readSSE } from "@/lib/api/sse";
-import { BaseOpenSlopProvider } from "../openslop-base";
+import { OpenSlopGatewayClient } from "./base";
 
-export class OpenSlopLLM extends BaseOpenSlopProvider<
+export class OpenSlopLLMGateway extends OpenSlopGatewayClient<
   LLMGenerateParams,
   LLMGenerateResult
 > {

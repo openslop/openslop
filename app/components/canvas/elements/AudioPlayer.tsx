@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState } from "react";
 import { Play, Pause } from "lucide-react";
 import {
   Tooltip,
@@ -27,8 +27,6 @@ export function AudioPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const toggle = useCallback(() => waveformRef.current?.toggle(), []);
-
   return (
     <div className="flex flex-1 min-w-0 items-center gap-2">
       <Tooltip>
@@ -37,7 +35,7 @@ export function AudioPlayer({
             type="button"
             aria-label={playing ? "Pause" : "Play"}
             className="shrink-0 relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-colors overflow-hidden"
-            onClick={toggle}
+            onClick={() => waveformRef.current?.toggle()}
             disabled={duration === 0}
           >
             {playing ? (

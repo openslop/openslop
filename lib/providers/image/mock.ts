@@ -20,7 +20,17 @@ export class MockImage extends BaseProvider<
   ImageGenerateParams,
   BundleResponse
 > {
-  async generate(): Promise<BundleResponse> {
+  protected readonly blobConfig = { type: "image", provider: "mock" };
+
+  protected toFiles() {
+    return [];
+  }
+
+  protected async store(result: BundleResponse) {
+    return result;
+  }
+
+  protected async _generate(): Promise<BundleResponse> {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
     return pickRandom(MOCK_VARIANTS);
   }

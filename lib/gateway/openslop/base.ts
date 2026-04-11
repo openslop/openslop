@@ -1,10 +1,10 @@
 import { OpenSlopClient } from "@/lib/clients/openslop";
-import { BaseProvider } from "./base";
+import { GatewayClient } from "../base";
 
-export abstract class BaseOpenSlopProvider<
+export abstract class OpenSlopGatewayClient<
   TParams = unknown,
   TResult = unknown,
-> extends BaseProvider<TParams, TResult> {
+> extends GatewayClient<TParams, TResult> {
   protected client: OpenSlopClient;
 
   constructor(baseUrl?: string) {

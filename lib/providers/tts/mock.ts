@@ -68,7 +68,17 @@ const MOCK_VARIANTS: BundleResponse[] = [
 ];
 
 export class MockTTS extends BaseProvider<TTSGenerateParams, BundleResponse> {
-  async generate(): Promise<BundleResponse> {
+  protected readonly blobConfig = { type: "tts", provider: "mock" };
+
+  protected toFiles() {
+    return [];
+  }
+
+  protected async store(result: BundleResponse) {
+    return result;
+  }
+
+  protected async _generate(): Promise<BundleResponse> {
     return pickRandom(MOCK_VARIANTS);
   }
 

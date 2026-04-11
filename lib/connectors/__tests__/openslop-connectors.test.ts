@@ -30,7 +30,7 @@ function mockAssetFetch(type: string, result: Record<string, string>) {
   return bundleUrl;
 }
 
-describe("OpenSlop connectors (via providers)", () => {
+describe("OpenSlop connectors (via gateways)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -149,12 +149,5 @@ describe("OpenSlop connectors (via providers)", () => {
     const result = await c.generate({ prompt: "sunset" });
 
     expect(result.url).toBe("https://cdn.example.com/v.mp4");
-  });
-
-  it("Video: poll throws not supported", async () => {
-    const c = new OpenSlopVideo(config);
-    await expect(c.poll("j1")).rejects.toThrow(
-      "Video polling is no longer supported",
-    );
   });
 });

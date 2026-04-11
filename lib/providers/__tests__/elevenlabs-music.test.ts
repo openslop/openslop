@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/api/asset-bundle");
+
 const mockCompose = vi.fn();
 
 vi.mock("@elevenlabs/elevenlabs-js", () => ({
@@ -30,16 +32,15 @@ describe("ElevenLabsMusic", () => {
     vi.clearAllMocks();
   });
 
-  it("generates music and returns ArrayBuffer", async () => {
+  it("generates music and uploads to blob storage", async () => {
     const audio = new Uint8Array([1, 2, 3, 4]);
     mockCompose.mockResolvedValue(mockReadableStream(audio));
 
     const provider = new ElevenLabsMusic("test-key");
     const result = await provider.generate({ prompt: "jazz" });
 
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
-    expect(new Uint8Array(result.data)).toEqual(audio);
-    expect(result.metadata.durationSec).toBe(30);
+    expect(result.result.audio).toBe("url");
+    expect(result.metadata?.durationSec).toBe(30);
     expect(mockCompose).toHaveBeenCalledWith({
       prompt: "jazz",
       musicLengthMs: 30000,

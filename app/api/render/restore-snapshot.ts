@@ -1,7 +1,7 @@
 import { get } from "@vercel/blob";
 import { Sandbox } from "@vercel/sandbox";
 
-const SANDBOX_TIMEOUT = 5 * 60 * 1000;
+const SANDBOX_TIMEOUT_MS = 2700 * 1000;
 
 const getSnapshotBlobKey = () =>
   `snapshot-cache/${process.env.VERCEL_DEPLOYMENT_ID ?? "local"}.json`;
@@ -26,6 +26,6 @@ export async function restoreSnapshot() {
 
   return Sandbox.create({
     source: { type: "snapshot", snapshotId: cache.snapshotId },
-    timeout: SANDBOX_TIMEOUT,
+    timeout: SANDBOX_TIMEOUT_MS,
   });
 }

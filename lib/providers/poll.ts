@@ -1,16 +1,15 @@
-import type { VideoJob } from "@/lib/connectors/types";
-
-export async function awaitCompletion(
-  pollFn: (jobId: string) => Promise<VideoJob>,
+export async function awaitCompletion<T>(
+  pollFn: (jobId: string) => Promise<T>,
   jobId: string,
+  isDone: (result: T) => boolean,
   intervalMs = 1000,
   timeoutMs = 300_000,
-): Promise<VideoJob> {
+): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const job = await pollFn(jobId);
-    if (job.status === "completed" || job.status === "failed") return job;
+    const result = await pollFn(jobId);
+    if (isDone(result)) return result;
     await new Promise((r) => setTimeout(r, intervalMs));
   }
-  throw new Error(`Video job ${jobId} timed out after ${timeoutMs}ms`);
+  throw new Error(`Job ${jobId} timed out after ${timeoutMs}ms`);
 }

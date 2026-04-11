@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockImageGenerate = vi.fn();
-const mockVideoSubmit = vi.fn();
+const mockVideoGenerate = vi.fn();
 const mockVideoPoll = vi.fn();
 const mockMusicGenerate = vi.fn();
 const mockSFXGenerate = vi.fn();
@@ -13,7 +13,10 @@ const mockTTSSearch = vi.fn();
 
 vi.mock("@/lib/api/providers", () => ({
   getImageProvider: () => ({ generate: mockImageGenerate }),
-  getVideoProvider: () => ({ submit: mockVideoSubmit, poll: mockVideoPoll }),
+  getVideoProvider: () => ({
+    generate: mockVideoGenerate,
+    poll: mockVideoPoll,
+  }),
   getMusicProvider: () => ({ generate: mockMusicGenerate }),
   getSFXProvider: () => ({ generate: mockSFXGenerate }),
   getLLMProvider: () => ({
@@ -85,16 +88,18 @@ describe("API routes", () => {
   describe("POST /api/v1/video", () => {
     it("returns video result on success", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoSubmit.mockResolvedValue({
-        jobId: "vid-abc123",
-        status: "queued",
+      mockVideoGenerate.mockResolvedValue({
+        id: "vid-abc123",
+        provider: "runware",
+        result: {},
+        metadata: { jobId: "task-1", durationSec: 5 },
       });
 
       const res = await POST(
         makeRequest("/api/v1/video", { prompt: "sunset" }),
       );
       expect(res.status).toBe(200);
-      expect((await res.json()).jobId).toBe("vid-abc123");
+      expect((await res.json()).id).toBe("vid-abc123");
     });
 
     it("returns 400 for invalid referenceImage", async () => {
@@ -111,7 +116,11 @@ describe("API routes", () => {
 
     it("accepts valid referenceImage data URI", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoSubmit.mockResolvedValue({ jobId: "j2", status: "processing" });
+      mockVideoGenerate.mockResolvedValue({
+        id: "j2",
+        provider: "runware",
+        result: {},
+      });
 
       const res = await POST(
         makeRequest("/api/v1/video", {
@@ -130,7 +139,7 @@ describe("API routes", () => {
 
     it("returns 500 on provider error", async () => {
       const { POST } = await import("@/app/api/v1/video/route");
-      mockVideoSubmit.mockRejectedValue(new Error("fail"));
+      mockVideoGenerate.mockRejectedValue(new Error("fail"));
 
       const res = await POST(
         makeRequest("/api/v1/video", { prompt: "sunset" }),

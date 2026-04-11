@@ -1,8 +1,8 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { ImageGenerateParams } from "@/lib/connectors/types";
-import { BaseOpenSlopProvider } from "../openslop-base";
+import { OpenSlopGatewayClient } from "./base";
 
-export class OpenSlopImage extends BaseOpenSlopProvider<
+export class OpenSlopImageGateway extends OpenSlopGatewayClient<
   ImageGenerateParams,
   BundleResponse
 > {

@@ -1,4 +1,4 @@
-import type { BaseProvider } from "@/lib/providers/base";
+import type { GatewayClient } from "@/lib/gateway/base";
 import { BaseConnector } from "../base";
 import { runOnError } from "../plugins";
 import type {
@@ -10,28 +10,28 @@ import type {
 } from "../types";
 
 export abstract class BaseLLMConnector<
-  TProvider extends BaseProvider<LLMGenerateParams, LLMGenerateResult> =
-    BaseProvider<LLMGenerateParams, LLMGenerateResult>,
+  TGateway extends GatewayClient<LLMGenerateParams, LLMGenerateResult> =
+    GatewayClient<LLMGenerateParams, LLMGenerateResult>,
 >
   extends BaseConnector<LLMGenerateParams, LLMGenerateResult>
   implements LLMConnector
 {
   readonly type = "llm" as const;
-  protected provider: TProvider;
+  protected gateway: TGateway;
 
-  constructor(provider: TProvider, config: ConnectorConfig) {
+  constructor(gateway: TGateway, config: ConnectorConfig) {
     super(config);
-    this.provider = provider;
+    this.gateway = gateway;
   }
 
   protected pluginContext() {
-    return { provider: this.provider };
+    return { gateway: this.gateway };
   }
 
   protected async _generate(
     params: LLMGenerateParams,
   ): Promise<LLMGenerateResult> {
-    return this.provider.generate(params);
+    return this.gateway.generate(params);
   }
 
   async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {

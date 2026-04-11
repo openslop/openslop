@@ -7,13 +7,23 @@ import { BaseProvider } from "../base";
 
 export class AnthropicLLM extends BaseProvider<
   LLMGenerateParams,
+  LLMGenerateResult,
   LLMGenerateResult
 > {
+  protected readonly blobConfig = { type: "llm", provider: "anthropic" };
   private client: Anthropic;
 
   constructor(apiKey: string) {
     super();
     this.client = new Anthropic({ apiKey });
+  }
+
+  protected toFiles() {
+    return [];
+  }
+
+  protected async store(result: LLMGenerateResult) {
+    return result;
   }
 
   private buildRequest(params: LLMGenerateParams) {
@@ -26,7 +36,7 @@ export class AnthropicLLM extends BaseProvider<
     };
   }
 
-  async generate(params: LLMGenerateParams) {
+  protected async _generate(params: LLMGenerateParams) {
     const response = await this.client.messages.create(
       this.buildRequest(params),
     );

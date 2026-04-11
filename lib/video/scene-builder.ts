@@ -1,4 +1,3 @@
-import last from "lodash/last";
 import type {
   ResolvedElement,
   Sequence,
@@ -12,13 +11,9 @@ const MIN_DURATION_SEC = 1;
 function createSequence(
   element: ResolvedElement | null,
   start: number,
-  duration?: number,
+  duration: number,
 ): Sequence {
-  return {
-    element,
-    start,
-    duration: duration ?? Math.max(element?.durationSec ?? 0, MIN_DURATION_SEC),
-  };
+  return { element, start, duration: Math.max(duration, MIN_DURATION_SEC) };
 }
 
 function pushSequence(
@@ -26,7 +21,13 @@ function pushSequence(
   element: ResolvedElement,
   start: number,
 ) {
-  (sequences[element.type] ??= []).push(createSequence(element, start));
+  (sequences[element.type] ??= []).push(
+    createSequence(element, start, element.durationSec),
+  );
+}
+
+function getForegroundCursor(current: Sequence | undefined, cursor: number) {
+  return current ? Math.max(cursor, current.start + current.duration) : cursor;
 }
 
 /**
@@ -46,10 +47,11 @@ export function buildVideoLayout(
   const cfg = { ...DEFAULT_CONFIG, ...config };
   const series: Sequence[] = [];
   const sequences: Record<string, Sequence[]> = {};
+  let cursor = 0;
 
   for (const element of elements) {
-    const current = last(series);
-    const cursor = current ? current.start + current.duration : 0;
+    const current = series.at(-1);
+    const foregroundCursor = getForegroundCursor(current, cursor);
 
     switch (element.role) {
       case "effect": {
@@ -57,18 +59,26 @@ export function buildVideoLayout(
         break;
       }
       case "background": {
-        const prev = last(sequences[element.type]);
+        const prev = sequences[element.type]?.at(-1);
         if (prev) {
-          prev.duration = Math.min(prev.duration, cursor - prev.start);
+          prev.duration = Math.min(
+            prev.duration,
+            foregroundCursor - prev.start,
+          );
+          if (prev.duration === 0) {
+            sequences[element.type]?.pop();
+          }
         }
-        pushSequence(sequences, element, cursor);
+        pushSequence(sequences, element, foregroundCursor);
         break;
       }
       case "foreground": {
         if (current && !current.element) {
           current.element = element;
+          current.duration = Math.max(current.duration, element.durationSec);
         } else {
-          series.push(createSequence(element, cursor));
+          cursor = foregroundCursor;
+          series.push(createSequence(element, cursor, element.durationSec));
         }
         break;
       }
@@ -76,15 +86,19 @@ export function buildVideoLayout(
         if (!current) {
           series.push(createSequence(null, cursor, element.durationSec));
         } else {
-          current.duration += element.durationSec;
+          current.duration = Math.max(
+            current.duration,
+            cursor + element.durationSec - current.start,
+          );
         }
         pushSequence(sequences, element, cursor);
+        cursor += element.durationSec;
         break;
       }
     }
   }
 
-  const lastEntry = last(series);
+  const lastEntry = series.at(-1);
   const totalDurationSec = lastEntry ? lastEntry.start + lastEntry.duration : 0;
 
   for (const seqs of Object.values(sequences)) {
@@ -97,11 +111,9 @@ export function buildVideoLayout(
   }
 
   return {
+    ...cfg,
     series,
     sequences,
-    fps: cfg.fps,
-    width: cfg.width,
-    height: cfg.height,
     totalDurationSec,
     totalFrames: Math.max(2, Math.ceil(totalDurationSec * cfg.fps)),
   };

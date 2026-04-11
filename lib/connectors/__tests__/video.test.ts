@@ -27,7 +27,7 @@ describe("BaseVideoConnector", () => {
     vi.restoreAllMocks();
   });
 
-  it("generates a video and returns AssetResult", async () => {
+  it("generates a video and returns AssetResult (sync path)", async () => {
     mockFetchChain();
     const connector = new OpenSlopVideo({
       defaultModel: "test-model",
@@ -39,15 +39,91 @@ describe("BaseVideoConnector", () => {
     expect(result.url).toBe(VIDEO_URL);
   });
 
-  it("poll throws not supported", async () => {
+  it("polls until video is ready (async path)", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: TEST_ID,
+          provider: "openslop",
+          result: {},
+          metadata: { jobId: "job-1", durationSec: 5 },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: "",
+          provider: "openslop",
+          result: {},
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: "completed-id",
+          provider: "openslop",
+          result: { video: VIDEO_URL },
+          metadata: { durationSec: 5 },
+        }),
+      );
+
     const connector = new OpenSlopVideo({
       defaultModel: "test-model",
       models: ["test-model"],
       isDefault: true,
       apiKey: "",
     });
-    await expect(connector.poll("job-123")).rejects.toThrow(
-      "Video polling is no longer supported",
+    const result = await connector.generate({ prompt: "a sunset" });
+    expect(result.url).toBe(VIDEO_URL);
+    expect(result.durationSec).toBe(5);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it("throws when async generation has no jobId", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse({
+        id: TEST_ID,
+        provider: "openslop",
+        result: {},
+      }),
+    );
+
+    const connector = new OpenSlopVideo({
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
+      apiKey: "",
+    });
+    await expect(connector.generate({ prompt: "test" })).rejects.toThrow(
+      "no jobId",
+    );
+  });
+
+  it("throws when polled job fails", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: TEST_ID,
+          provider: "openslop",
+          result: {},
+          metadata: { jobId: "job-1", durationSec: 5 },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: "",
+          provider: "openslop",
+          result: {},
+          metadata: { status: "failed", error: "GPU unavailable" },
+        }),
+      );
+
+    const connector = new OpenSlopVideo({
+      defaultModel: "test-model",
+      models: ["test-model"],
+      isDefault: true,
+      apiKey: "",
+    });
+    await expect(connector.generate({ prompt: "test" })).rejects.toThrow(
+      "GPU unavailable",
     );
   });
 

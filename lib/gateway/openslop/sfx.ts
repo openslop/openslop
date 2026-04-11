@@ -1,8 +1,8 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
-import { BaseOpenSlopProvider } from "../openslop-base";
+import { OpenSlopGatewayClient } from "./base";
 
-export class OpenSlopSFX extends BaseOpenSlopProvider<
+export class OpenSlopSFXGateway extends OpenSlopGatewayClient<
   SFXGenerateParams,
   BundleResponse
 > {
