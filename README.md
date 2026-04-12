@@ -132,6 +132,7 @@ openslop/
 |   |-- components/         # Shared UI components (Waveform, etc.)
 |   |-- config/             # Global connector configuration (React context)
 |   |-- connectors/         # Connector abstraction per media type + plugins
+|   |-- gateway/            # Gateway clients for provider APIs
 |   |-- generation/         # Generation queue and job orchestration
 |   |-- providers/          # Provider implementations (Anthropic, ElevenLabs, Cartesia, Runware, etc.)
 |   |-- script/             # Script context provider
