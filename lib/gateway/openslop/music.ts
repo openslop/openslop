@@ -1,8 +1,8 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
-import { BaseOpenSlopProvider } from "../openslop-base";
+import { OpenSlopGatewayClient } from "./base";
 
-export class OpenSlopMusic extends BaseOpenSlopProvider<
+export class OpenSlopMusicGateway extends OpenSlopGatewayClient<
   MusicGenerateParams,
   BundleResponse
 > {

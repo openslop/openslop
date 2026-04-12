@@ -35,6 +35,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+.turbo
 
 # typescript
 *.tsbuildinfo
@@ -56,3 +57,5 @@ public/assets/
 .gstack/
 
 .env*.local
+
+.remotion

@@ -1,15 +1,15 @@
 import { BaseSFXConnector } from "../connector";
-import { OpenSlopSFX as OpenSlopSFXProvider } from "@/lib/providers/sfx/openslop";
+import { OpenSlopSFXGateway } from "@/lib/gateway/openslop/sfx";
 import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
 import { modelsFromMap } from "@/lib/connectors/types";
 import { SFX_MODELS } from "./models";
 
 export class OpenSlopSFX extends BaseSFXConnector {
-  protected provider: OpenSlopSFXProvider;
+  protected gateway: OpenSlopSFXGateway;
 
   constructor(config: ConnectorConfig) {
     super(config);
-    this.provider = new OpenSlopSFXProvider(config.baseUrl);
+    this.gateway = new OpenSlopSFXGateway(config.baseUrl);
   }
 
   async listModels(): Promise<ModelInfo[]> {

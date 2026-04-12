@@ -1,17 +1,18 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
+import type { BundleFile } from "@/lib/api/asset-bundle";
+import { BaseProvider, type WithMetadata } from "../base";
 import { streamToBuffer } from "../stream";
 
 type MusicResult = {
   data: ArrayBuffer;
-  metadata: { durationSec: number };
-};
+} & WithMetadata;
 
 export class ElevenLabsMusic extends BaseProvider<
   MusicGenerateParams,
   MusicResult
 > {
+  protected readonly blobConfig = { type: "music", provider: "elevenlabs" };
   private client: ElevenLabsClient;
 
   constructor(apiKey: string) {
@@ -19,7 +20,18 @@ export class ElevenLabsMusic extends BaseProvider<
     this.client = new ElevenLabsClient({ apiKey });
   }
 
-  async generate(params: MusicGenerateParams) {
+  protected toFiles(r: MusicResult): BundleFile[] {
+    return [
+      {
+        key: "audio",
+        filename: "output.mp3",
+        data: r.data,
+        contentType: "audio/mpeg",
+      },
+    ];
+  }
+
+  protected async _generate(params: MusicGenerateParams) {
     const durationSeconds = params.durationSeconds ?? 30;
     const stream = await this.client.music.compose({
       prompt: params.prompt,

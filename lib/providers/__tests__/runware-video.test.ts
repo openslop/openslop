@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/api/asset-bundle");
+
 const mockDisconnect = vi.fn();
 const mockVideoInference = vi.fn();
 const mockGetResponse = vi.fn();
@@ -24,7 +26,7 @@ describe("RunwareVideo", () => {
   });
 
   describe("submit", () => {
-    it("submits a video job with defaults", async () => {
+    it("submits a video job with defaults and deliveryMethod async", async () => {
       mockVideoInference.mockResolvedValue({
         taskUUID: "job-1",
         status: "processing",
@@ -35,9 +37,8 @@ describe("RunwareVideo", () => {
       const result = await provider.submit({ prompt: "a sunset" });
 
       expect(result).toEqual({
-        jobId: "job-1",
-        status: "processing",
         url: undefined,
+        metadata: { jobId: "job-1", status: "processing" },
       });
       expect(mockVideoInference).toHaveBeenCalledWith({
         positivePrompt: "a sunset",
@@ -46,6 +47,7 @@ describe("RunwareVideo", () => {
         height: 512,
         duration: 5,
         outputType: "URL",
+        deliveryMethod: "async",
         inputImage: undefined,
       });
       expect(mockDisconnect).toHaveBeenCalled();
@@ -82,7 +84,7 @@ describe("RunwareVideo", () => {
       const provider = new RunwareVideo("test-key");
       const result = await provider.submit({ prompt: "test" });
 
-      expect(result.jobId).toBe("job-arr");
+      expect(result.metadata?.jobId).toBe("job-arr");
       expect(result.url).toBe("https://v.mp4");
     });
 
@@ -95,8 +97,42 @@ describe("RunwareVideo", () => {
     });
   });
 
+  describe("generate", () => {
+    it("submits and returns BundleResponse with metadata", async () => {
+      mockVideoInference.mockResolvedValue({
+        taskUUID: "job-1",
+        status: "processing",
+      });
+
+      const provider = new RunwareVideo("test-key");
+      const result = await provider.generate({ prompt: "a sunset" });
+
+      expect(result.provider).toBe("runware");
+      expect(result.metadata).toEqual({
+        jobId: "job-1",
+        status: "processing",
+        durationSec: 5,
+      });
+    });
+
+    it("uses custom duration in metadata", async () => {
+      mockVideoInference.mockResolvedValue({
+        taskUUID: "job-2",
+        status: "processing",
+      });
+
+      const provider = new RunwareVideo("test-key");
+      const result = await provider.generate({
+        prompt: "test",
+        duration: 10,
+      });
+
+      expect(result.metadata?.durationSec).toBe(10);
+    });
+  });
+
   describe("poll", () => {
-    it("returns job status", async () => {
+    it("returns BundleResponse when job is completed", async () => {
       mockGetResponse.mockResolvedValue([
         {
           taskUUID: "job-1",
@@ -108,12 +144,23 @@ describe("RunwareVideo", () => {
       const provider = new RunwareVideo("test-key");
       const result = await provider.poll("job-1");
 
-      expect(result).toEqual({
-        jobId: "job-1",
-        status: "completed",
-        url: "https://result.mp4",
-      });
+      expect(result.result.video).toBe("https://result.mp4");
       expect(mockDisconnect).toHaveBeenCalled();
+    });
+
+    it("returns empty BundleResponse when job is pending", async () => {
+      mockGetResponse.mockResolvedValue([
+        {
+          taskUUID: "job-1",
+          status: "processing",
+        },
+      ]);
+
+      const provider = new RunwareVideo("test-key");
+      const result = await provider.poll("job-1");
+
+      expect(result.id).toBe("");
+      expect(result.result).toEqual({});
     });
 
     it("throws when job not found", async () => {

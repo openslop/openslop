@@ -89,6 +89,7 @@ export class AssetBundle {
     const { put } = await import("@vercel/blob");
     const id = nanoid();
     const basePath = `assets/${type}/${provider}/${id}`;
+    console.log("uploading", files); // todo del
 
     await Promise.all(
       files.filter(isUploadFile).map((file) =>

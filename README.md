@@ -104,6 +104,8 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 | Language  | [TypeScript 5](https://www.typescriptlang.org)                                                               |
 | UI        | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) |
 | Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
+| Video     | [Remotion 4](https://remotion.dev) (composition, rendering, player)                                          |
+| Storage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (generated asset storage)                         |
 | Icons     | [Lucide](https://lucide.dev)                                                                                 |
 
 ## Project Structure
@@ -112,18 +114,20 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 openslop/
 |-- app/                    # Next.js App Router pages and layouts
 |   |-- api/
+|   |   |-- render/         # Remotion video rendering endpoint
 |   |   |-- v1/             # REST API (image, llm, music, sfx, tts, video)
 |   |   |-- validate-code/  # Access code validation
 |   |-- auth/               # OAuth callback handler
 |   |-- components/         # App-specific React components
 |   |   |-- canvas/         # Slate-based editor canvas (drag-and-drop, elements, plugins)
+|   |   |-- video/          # Video player, preview, and render controls
 |   |-- login/              # Login page
 |   |-- signup/             # Signup page
 |   |-- page.tsx            # Home / editor
 |   |-- layout.tsx          # Root layout
 |-- components/ui/          # shadcn/ui primitives
 |-- lib/                    # Shared libraries
-|   |-- api/                # Route handler helpers, logger, response utils
+|   |-- api/                # Route handler helpers, logger, response utils, blob storage
 |   |-- clients/            # HTTP client for the OpenSlop API
 |   |-- components/         # Shared UI components (Waveform, etc.)
 |   |-- config/             # Global connector configuration (React context)
@@ -133,26 +137,31 @@ openslop/
 |   |-- script/             # Script context provider
 |   |-- supabase/           # Supabase client helpers (browser, server, middleware)
 |   |-- user/               # User context provider
+|   |-- video/              # Remotion video composition and scene layout
 |   |-- utils.ts            # General utilities (cn, etc.)
+|-- remotion/               # Remotion compositions and entry point
 |-- supabase/migrations/    # Database migrations
 |-- proxy.ts                # Auth session refresh + route protection
 ```
 
 ## Scripts
 
-| Command                | What it does                     |
-| ---------------------- | -------------------------------- |
-| `npm run dev`          | Start the dev server             |
-| `npm run build`        | Production build                 |
-| `npm run start`        | Start the production server      |
-| `npm run lint`         | Run ESLint                       |
-| `npm run format:check` | Check formatting (Prettier)      |
-| `npm run typecheck`    | Run TypeScript type checks       |
-| `npm run test`         | Run tests in watch mode (Vitest) |
-| `npm run test:run`     | Run tests once                   |
-| `npm run db:push`      | Push migrations to Supabase      |
-| `npm run db:migrate`   | Run pending migrations           |
-| `npm run db:reset`     | Reset the database               |
+| Command                   | What it does                        |
+| ------------------------- | ----------------------------------- |
+| `npm run dev`             | Start the dev server                |
+| `npm run build`           | Production build                    |
+| `npm run start`           | Start the production server         |
+| `npm run lint`            | Run ESLint                          |
+| `npm run format:check`    | Check formatting (Prettier)         |
+| `npm run typecheck`       | Run TypeScript type checks          |
+| `npm run test`            | Run tests in watch mode (Vitest)    |
+| `npm run test:run`        | Run tests once                      |
+| `npm run db:push`         | Push migrations to Supabase         |
+| `npm run db:migrate`      | Run pending migrations              |
+| `npm run db:reset`        | Reset the database                  |
+| `npm run remotion:studio` | Open Remotion Studio for previewing |
+| `npm run remotion:bundle` | Bundle Remotion compositions        |
+| `npm run create-snapshot` | Create a video rendering snapshot   |
 
 ## Contributing
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BaseProvider } from "@/lib/providers/base";
+import { GatewayClient } from "@/lib/gateway/base";
 import { storyModePlugin } from "../plugins/story-mode";
 import type {
   LLMGenerateParams,
@@ -7,7 +7,7 @@ import type {
   PluginContext,
 } from "../types";
 
-class MockLLMProvider extends BaseProvider<
+class MockLLMGateway extends GatewayClient<
   LLMGenerateParams,
   LLMGenerateResult
 > {
@@ -20,10 +20,10 @@ class MockLLMProvider extends BaseProvider<
 }
 
 describe("storyModePlugin", () => {
-  it("calls provider to generate a story outline and rewrites the prompt", async () => {
-    const provider = new MockLLMProvider();
+  it("calls gateway to generate a story outline and rewrites the prompt", async () => {
+    const gateway = new MockLLMGateway();
     const ctx: PluginContext<LLMGenerateParams, LLMGenerateResult> = {
-      provider,
+      gateway,
     };
 
     const result = await storyModePlugin.transformPrompt!(
@@ -39,7 +39,7 @@ describe("storyModePlugin", () => {
 
   it("throws when no context is provided", async () => {
     await expect(storyModePlugin.transformPrompt!("test")).rejects.toThrow(
-      "story mode plugin requires provider context",
+      "story mode plugin requires gateway context",
     );
   });
 });

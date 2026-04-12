@@ -1,6 +1,6 @@
 import type { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseTTSConnector } from "../connector";
-import { OpenSlopTTS as OpenSlopTTSProvider } from "@/lib/providers/tts/openslop";
+import { OpenSlopTTSGateway } from "@/lib/gateway/openslop/tts";
 import type {
   ConnectorConfig,
   ModelInfo,
@@ -13,11 +13,11 @@ import { modelsFromMap } from "@/lib/connectors/types";
 import { TTS_MODELS } from "./models";
 
 export class OpenSlopTTS extends BaseTTSConnector {
-  protected provider: OpenSlopTTSProvider;
+  protected gateway: OpenSlopTTSGateway;
 
   constructor(config: ConnectorConfig) {
     super(config);
-    this.provider = new OpenSlopTTSProvider(config.baseUrl);
+    this.gateway = new OpenSlopTTSGateway(config.baseUrl);
   }
 
   async listModels(): Promise<ModelInfo[]> {
@@ -25,7 +25,7 @@ export class OpenSlopTTS extends BaseTTSConnector {
   }
 
   async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-    return this.provider.searchVoices(params);
+    return this.gateway.searchVoices(params);
   }
 
   async resolveBundle(bundle: AssetBundle): Promise<TTSResult> {

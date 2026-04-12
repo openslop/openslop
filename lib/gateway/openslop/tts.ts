@@ -4,9 +4,9 @@ import type {
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { BaseOpenSlopProvider } from "../openslop-base";
+import { OpenSlopGatewayClient } from "./base";
 
-export class OpenSlopTTS extends BaseOpenSlopProvider<
+export class OpenSlopTTSGateway extends OpenSlopGatewayClient<
   TTSGenerateParams,
   BundleResponse
 > {

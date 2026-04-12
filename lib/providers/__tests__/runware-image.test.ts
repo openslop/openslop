@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/api/asset-bundle");
+
 const mockDisconnect = vi.fn();
 const mockImageInference = vi.fn();
 
@@ -29,10 +31,7 @@ describe("RunwareImage", () => {
     const provider = new RunwareImage("test-key");
     const result = await provider.generate({ prompt: "a cat" });
 
-    expect(result).toEqual({
-      data: "abc123",
-      format: "png",
-    });
+    expect(result.result.image).toBe("url");
     expect(mockImageInference).toHaveBeenCalledWith({
       positivePrompt: "a cat",
       model: "runware:z-image@turbo",

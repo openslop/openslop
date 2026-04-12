@@ -21,7 +21,7 @@ export const POST = createRouteHandler({
   },
   handle: async (provider, body) => {
     const { prompt, model, referenceImage, duration, width, height } = body;
-    const result = await provider.submit({
+    const result = await provider.generate({
       prompt,
       model,
       referenceImage,

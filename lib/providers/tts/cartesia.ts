@@ -5,9 +5,13 @@ import type {
   VoiceInfo,
   VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
+import type { BundleFile } from "@/lib/api/asset-bundle";
+import { BaseProvider, type WithMetadata } from "../base";
 
-type RawTTSResult = { data: string; textTimestamps: TextTimestamp[] };
+type RawTTSResult = {
+  data: string;
+  textTimestamps: TextTimestamp[];
+} & WithMetadata;
 
 const SAMPLE_RATE = 44100;
 const NUM_CHANNELS = 1;
@@ -47,11 +51,29 @@ function wrapPcmInWav(pcm: Buffer): Buffer {
 }
 
 export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
+  protected readonly blobConfig = { type: "tts", provider: "cartesia" };
   private client: Cartesia;
 
   constructor(apiKey: string) {
     super();
     this.client = new Cartesia({ apiKey });
+  }
+
+  protected toFiles(r: RawTTSResult): BundleFile[] {
+    return [
+      {
+        key: "audio",
+        filename: "output.wav",
+        data: Buffer.from(r.data, "base64"),
+        contentType: "audio/wav",
+      },
+      {
+        key: "timestamps",
+        filename: "timestamps.json",
+        data: JSON.stringify(r.textTimestamps),
+        contentType: "application/json",
+      },
+    ];
   }
 
   async search(
@@ -76,10 +98,12 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
         description: voice.description,
         previewUrl: voice.preview_file_url ?? undefined,
       }))
-      .filter((voice) => voice.language === params.language);
+      .filter(
+        (voice) => !params.language || voice.language === params.language,
+      );
   }
 
-  async generate(params: TTSGenerateParams) {
+  protected async _generate(params: TTSGenerateParams) {
     const ws = await this.client.tts.websocket();
     await ws.connect();
 

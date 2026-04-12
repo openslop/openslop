@@ -39,9 +39,20 @@ function delay(ms: number) {
 
 export class MockLLM extends BaseProvider<
   LLMGenerateParams,
+  LLMGenerateResult,
   LLMGenerateResult
 > {
-  async generate(): Promise<LLMGenerateResult> {
+  protected readonly blobConfig = { type: "llm", provider: "mock" };
+
+  protected toFiles() {
+    return [];
+  }
+
+  protected async store(result: LLMGenerateResult) {
+    return result;
+  }
+
+  protected async _generate(): Promise<LLMGenerateResult> {
     return {
       text: MOCK_SCRIPT,
       model: "mock",

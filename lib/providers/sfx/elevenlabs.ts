@@ -1,14 +1,15 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
+import type { BundleFile } from "@/lib/api/asset-bundle";
+import { BaseProvider, type WithMetadata } from "../base";
 import { streamToBuffer } from "../stream";
 
 type SFXResult = {
   data: ArrayBuffer;
-  metadata: { durationSec: number };
-};
+} & WithMetadata;
 
 export class ElevenLabsSFX extends BaseProvider<SFXGenerateParams, SFXResult> {
+  protected readonly blobConfig = { type: "sfx", provider: "elevenlabs" };
   private client: ElevenLabsClient;
 
   constructor(apiKey: string) {
@@ -16,7 +17,18 @@ export class ElevenLabsSFX extends BaseProvider<SFXGenerateParams, SFXResult> {
     this.client = new ElevenLabsClient({ apiKey });
   }
 
-  async generate(params: SFXGenerateParams) {
+  protected toFiles(r: SFXResult): BundleFile[] {
+    return [
+      {
+        key: "audio",
+        filename: "output.mp3",
+        data: r.data,
+        contentType: "audio/mpeg",
+      },
+    ];
+  }
+
+  protected async _generate(params: SFXGenerateParams) {
     const durationSeconds = params.durationSeconds ?? 5;
     const stream = await this.client.textToSoundEffects.convert({
       text: params.prompt,

@@ -1,6 +1,3 @@
-import type { TextTimestamp, VideoJob } from "@/lib/connectors/types";
-import type { BundleFile } from "./asset-bundle";
-import { withBlobStorage } from "./with-blob-storage";
 import { RunwareImage } from "@/lib/providers/image/runware";
 import { MockImage } from "@/lib/providers/image/mock";
 import { RunwareVideo } from "@/lib/providers/video/runware";
@@ -31,59 +28,11 @@ function cached<T>(key: string, factory: () => T): T {
   return cache.get(key) as T;
 }
 
-type RawTTSResult = {
-  data: string;
-  textTimestamps: TextTimestamp[];
-  metadata?: { durationSec: number };
-};
-
-const imageToFiles = (r: { data: string; format: string }): BundleFile[] => [
-  {
-    key: "image",
-    filename: `output.${r.format}`,
-    data: Buffer.from(r.data, "base64"),
-    contentType: `image/${r.format}`,
-  },
-];
-
-const audioToFiles =
-  (contentType: string, ext: string) =>
-  (r: { data: ArrayBuffer | Buffer }): BundleFile[] => [
-    { key: "audio", filename: `output.${ext}`, data: r.data, contentType },
-  ];
-
-const ttsToFiles =
-  (contentType: string, ext: string) =>
-  (r: RawTTSResult): BundleFile[] => [
-    ...audioToFiles(
-      contentType,
-      ext,
-    )({
-      data: Buffer.from(r.data, "base64"),
-    }),
-    {
-      key: "timestamps",
-      filename: "timestamps.json",
-      data: JSON.stringify(r.textTimestamps),
-      contentType: "application/json",
-    },
-  ];
-
-const videoToFiles = (r: VideoJob): BundleFile[] => {
-  if (!r.url) throw new Error("Video job completed without URL");
-  return [{ key: "video", url: r.url }];
-};
-
 export function getImageProvider() {
   return cached("image", () =>
     withMockFallback(
       "RUNWARE_API_KEY",
-      (k) =>
-        withBlobStorage(
-          new RunwareImage(k),
-          { type: "image", provider: "runware" },
-          imageToFiles,
-        ),
+      (k) => new RunwareImage(k),
       () => new MockImage(),
     ),
   );
@@ -93,12 +42,7 @@ export function getVideoProvider() {
   return cached("video", () =>
     withMockFallback(
       "RUNWARE_API_KEY",
-      (k) =>
-        withBlobStorage(
-          new RunwareVideo(k),
-          { type: "video", provider: "runware" },
-          videoToFiles,
-        ),
+      (k) => new RunwareVideo(k),
       () => new MockVideo(),
     ),
   );
@@ -108,12 +52,7 @@ export function getMusicProvider() {
   return cached("music", () =>
     withMockFallback(
       "ELEVENLABS_API_KEY",
-      (k) =>
-        withBlobStorage(
-          new ElevenLabsMusic(k),
-          { type: "music", provider: "elevenlabs" },
-          audioToFiles("audio/mpeg", "mp3"),
-        ),
+      (k) => new ElevenLabsMusic(k),
       () => new MockMusic(),
     ),
   );
@@ -123,12 +62,7 @@ export function getSFXProvider() {
   return cached("sfx", () =>
     withMockFallback(
       "ELEVENLABS_API_KEY",
-      (k) =>
-        withBlobStorage(
-          new ElevenLabsSFX(k),
-          { type: "sfx", provider: "elevenlabs" },
-          audioToFiles("audio/mpeg", "mp3"),
-        ),
+      (k) => new ElevenLabsSFX(k),
       () => new MockSFX(),
     ),
   );
@@ -148,12 +82,7 @@ export function getTTSProvider() {
   return cached("tts", () =>
     withMockFallback(
       "CARTESIA_API_KEY",
-      (k) =>
-        withBlobStorage(
-          new CartesiaTTS(k),
-          { type: "tts", provider: "cartesia" },
-          ttsToFiles("audio/wav", "wav"),
-        ),
+      (k) => new CartesiaTTS(k),
       () => new MockTTS(),
     ),
   );

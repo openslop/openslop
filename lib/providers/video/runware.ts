@@ -3,8 +3,7 @@ import type {
   VideoJob,
   VideoJobStatus,
 } from "@/lib/connectors/types";
-import { BaseProvider } from "../base";
-import { awaitCompletion } from "../poll";
+import { BaseVideoProvider } from "./base";
 import { withRunware } from "../runware";
 
 function toVideoJob(video: {
@@ -13,13 +12,16 @@ function toVideoJob(video: {
   videoURL?: string;
 }): VideoJob {
   return {
-    jobId: video.taskUUID,
-    status: video.status as VideoJobStatus,
     url: video.videoURL,
+    metadata: {
+      jobId: video.taskUUID,
+      status: video.status as VideoJobStatus,
+    },
   };
 }
 
-export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
+export class RunwareVideo extends BaseVideoProvider {
+  protected readonly blobConfig = { type: "video", provider: "runware" };
   private apiKey: string;
 
   constructor(apiKey: string) {
@@ -36,6 +38,7 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
         height: params.height || 512,
         duration: params.duration || 5,
         outputType: "URL",
+        deliveryMethod: "async",
         inputImage: params.referenceImage,
       });
 
@@ -44,18 +47,19 @@ export class RunwareVideo extends BaseProvider<VideoGenerateParams, VideoJob> {
     });
   }
 
-  async generate(
-    params: VideoGenerateParams,
-  ): Promise<VideoJob & { metadata: { durationSec: number } }> {
+  protected async _generate(params: VideoGenerateParams): Promise<VideoJob> {
     const job = await this.submit(params);
-    const completed = await awaitCompletion((id) => this.poll(id), job.jobId);
     return {
-      ...completed,
-      metadata: { durationSec: params.duration ?? 5 },
+      ...job,
+      metadata: {
+        ...job.metadata,
+        jobId: job.metadata?.jobId ?? "",
+        durationSec: params.duration ?? 5,
+      },
     };
   }
 
-  async poll(jobId: string) {
+  protected async _poll(jobId: string): Promise<VideoJob> {
     return withRunware(this.apiKey, async (runware) => {
       const results = await runware.getResponse<{
         taskUUID: string;

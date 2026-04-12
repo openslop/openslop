@@ -1,5 +1,5 @@
 import { BaseLLMConnector } from "../connector";
-import { OpenSlopLLM as OpenSlopLLMProvider } from "@/lib/providers/llm/openslop";
+import { OpenSlopLLMGateway } from "@/lib/gateway/openslop/llm";
 import type {
   ConnectorConfig,
   LLMGenerateParams,
@@ -9,9 +9,9 @@ import type {
 import { modelsFromMap } from "@/lib/connectors/types";
 import { LLM_MODELS } from "./models";
 
-export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
+export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMGateway> {
   constructor(config: ConnectorConfig) {
-    super(new OpenSlopLLMProvider(config.baseUrl), config);
+    super(new OpenSlopLLMGateway(config.baseUrl), config);
   }
 
   async listModels(): Promise<ModelInfo[]> {
@@ -21,6 +21,6 @@ export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMProvider> {
   protected async *_stream(
     params: LLMGenerateParams,
   ): AsyncGenerator<LLMStreamChunk> {
-    yield* this.provider.stream(params);
+    yield* this.gateway.stream(params);
   }
 }

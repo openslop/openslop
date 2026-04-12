@@ -1,4 +1,5 @@
-import type { BaseProvider } from "@/lib/providers/base";
+import type { GatewayClient } from "@/lib/gateway/base";
+import type { WithMetadata } from "@/lib/providers/base";
 
 export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
@@ -15,7 +16,7 @@ export function modelsFromMap(map: Record<string, string>): ModelInfo[] {
 }
 
 export interface PluginContext<TParams = unknown, TResult = unknown> {
-  provider?: BaseProvider<TParams, TResult>;
+  gateway?: GatewayClient<TParams, TResult>;
 }
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
@@ -87,7 +88,7 @@ export type LLMGenerateResult = {
   text: string;
   model: string;
   usage?: { inputTokens: number; outputTokens: number };
-};
+} & WithMetadata;
 
 export type LLMStreamChunk = {
   text: string;
@@ -131,6 +132,7 @@ export interface SFXConnector extends Connector {
 export type ImageGenerateParams = {
   prompt: string;
   model?: string;
+  format?: string;
   width?: number;
   height?: number;
   referenceImage?: string;
@@ -194,18 +196,21 @@ export type VideoGenerateParams = {
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
 
-export type VideoJob = {
+export type VideoJobMetadata = {
   jobId: string;
-  status: VideoJobStatus;
-  url?: string;
+  durationSec?: number;
+  status?: VideoJobStatus;
   error?: string;
-  progress?: number;
 };
+
+export type VideoJob = {
+  url?: string;
+  progress?: number;
+} & WithMetadata<VideoJobMetadata>;
 
 export interface VideoConnector extends Connector {
   readonly type: "video";
   generate(params: VideoGenerateParams): Promise<AssetResult>;
-  poll(jobId: string): Promise<VideoJob>;
 }
 
 // Plugin type aliases

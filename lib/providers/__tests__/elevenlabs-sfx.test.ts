@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/api/asset-bundle");
+
 const mockConvert = vi.fn();
 
 vi.mock("@elevenlabs/elevenlabs-js", () => ({
@@ -30,16 +32,15 @@ describe("ElevenLabsSFX", () => {
     vi.clearAllMocks();
   });
 
-  it("generates sfx and returns ArrayBuffer", async () => {
+  it("generates sfx and uploads to blob storage", async () => {
     const audio = new Uint8Array([5, 6, 7]);
     mockConvert.mockResolvedValue(mockReadableStream(audio));
 
     const provider = new ElevenLabsSFX("test-key");
     const result = await provider.generate({ prompt: "boom" });
 
-    expect(result.data).toBeInstanceOf(ArrayBuffer);
-    expect(new Uint8Array(result.data)).toEqual(audio);
-    expect(result.metadata.durationSec).toBe(5);
+    expect(result.result.audio).toBe("url");
+    expect(result.metadata?.durationSec).toBe(5);
     expect(mockConvert).toHaveBeenCalledWith({
       text: "boom",
       durationSeconds: 5,
