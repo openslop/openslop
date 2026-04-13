@@ -172,4 +172,18 @@ describe("POST /api/validate-code", () => {
     const res = await POST(makeRequest({ code: "ABC123" }));
     expect(res.status).toBe(200);
   });
+
+  it("returns 500 when usage count update fails", async () => {
+    mockSelect.mockResolvedValue({
+      data: validCode({ current_uses: 0 }),
+      error: null,
+    });
+    mockUpdate.mockResolvedValue({
+      error: { message: "database write failed" },
+    });
+
+    const res = await POST(makeRequest({ code: "ABC123" }));
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toBe("Failed to validate code");
+  });
 });
