@@ -21,10 +21,8 @@ import { useGenerateAll } from "./hooks/useGenerateAll";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { SortableElement } from "./dnd/SortableElement";
 import { DragOverlayContent } from "./dnd/DragOverlay";
-import { PanelItem } from "./panel/PanelItem";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
-import { ELEMENT_CONFIGS } from "./config/elementConfigs";
 
 export interface CanvasHandle {
   generateAll: () => void;
@@ -46,7 +44,6 @@ export default function Canvas({
     handleDragStart,
     handleDragEnd,
     handleDragCancel,
-    handleDragOver,
   } = useDragAndDrop(editor, value);
 
   useScriptSync(editor);
@@ -88,18 +85,12 @@ export default function Canvas({
     [editor.children, activeId],
   );
 
-  const activePanelItem = useMemo(
-    () => ELEMENT_CONFIGS[activeId as keyof typeof ELEMENT_CONFIGS],
-    [activeId],
-  );
-
   return (
     <DndContext
       sensors={sensors}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       onDragCancel={handleDragCancel}
-      onDragOver={handleDragOver}
     >
       <Sidebar />
 
@@ -116,7 +107,6 @@ export default function Canvas({
           {activeEditorElement && (
             <DragOverlayContent element={activeEditorElement} />
           )}
-          {activePanelItem && <PanelItem item={activePanelItem} />}
         </DragOverlay>
       </Slate>
     </DndContext>
