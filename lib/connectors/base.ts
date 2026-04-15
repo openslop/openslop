@@ -52,7 +52,11 @@ export abstract class BaseConnector<
       result = await runAfterGenerate(this.plugins, result, ctx);
       return result;
     } catch (error) {
-      await runOnError(this.plugins, error as Error, ctx);
+      await runOnError(
+        this.plugins,
+        error instanceof Error ? error : new Error(String(error)),
+        ctx,
+      );
       throw error;
     }
   }

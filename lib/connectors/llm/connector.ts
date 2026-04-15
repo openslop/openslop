@@ -40,7 +40,11 @@ export abstract class BaseLLMConnector<
       const prepared = await this.prepareParams(params, ctx);
       yield* this._stream(prepared);
     } catch (error) {
-      await runOnError(this.plugins, error as Error, ctx);
+      await runOnError(
+        this.plugins,
+        error instanceof Error ? error : new Error(String(error)),
+        ctx,
+      );
       throw error;
     }
   }
