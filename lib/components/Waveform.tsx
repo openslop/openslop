@@ -4,9 +4,12 @@ import {
   useRef,
   useEffect,
   useImperativeHandle,
+  useState,
   type Ref,
   type MouseEvent,
 } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 export interface WaveformProps {
   src: string;
@@ -126,6 +129,7 @@ export function Waveform({
   const audioRef = useRef<HTMLAudioElement>(null);
   const peaksRef = useRef<number[]>([]);
   const drawRef = useRef(() => {});
+  const [loading, setLoading] = useState(true);
 
   // Keep draw function always-current without effect deps
   drawRef.current = () => {
@@ -155,7 +159,7 @@ export function Waveform({
 
   useEffect(() => {
     peaksRef.current = [];
-    drawRef.current();
+    setLoading(true);
 
     let cancelled = false;
     const ac = new AudioContext();
@@ -165,16 +169,23 @@ export function Waveform({
       .then((ab) => {
         if (cancelled) return;
         peaksRef.current = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
-        drawRef.current();
+        setLoading(false);
         onReady?.();
       })
-      .catch((e) => console.error("Failed to decode audio:", e));
+      .catch((e) => {
+        console.error("Failed to decode audio:", e);
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
       ac.close();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- onReady read via drawRef pattern, not a direct dep
   }, [src]);
+
+  useEffect(() => {
+    if (!loading) drawRef.current();
+  }, [loading]);
 
   useEffect(() => {
     drawRef.current();
@@ -225,12 +236,16 @@ export function Waveform({
 
   return (
     <>
-      <canvas
-        ref={canvasRef}
-        className={className}
-        onClick={handleClick}
-        style={{ display: "block", cursor: "pointer" }}
-      />
+      <div className={cn("relative", className)}>
+        <canvas
+          ref={canvasRef}
+          onClick={handleClick}
+          className="block size-full cursor-pointer"
+        />
+        {loading && (
+          <Skeleton className="absolute inset-0 animate-none shimmer-surface" />
+        )}
+      </div>
       <audio
         ref={audioRef}
         src={src}

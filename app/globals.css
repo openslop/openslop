@@ -116,10 +116,23 @@
   animation: shimmer 2s linear infinite;
 }
 
+/* Surface-level shimmer (for skeletons/placeholders) — same vocabulary as .shimmer but applied as a background fill */
+.shimmer-surface {
+  background: linear-gradient(
+    90deg,
+    rgba(255 255 255 / 0.04) 0%,
+    rgba(255 255 255 / 0.12) 50%,
+    rgba(255 255 255 / 0.04) 100%
+  );
+  background-size: 200% auto;
+  animation: shimmer 2s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-first,
   .animate-fourth,
-  .animate-fadeInUp {
+  .animate-fadeInUp,
+  .shimmer-surface {
     animation: none;
   }
 }
