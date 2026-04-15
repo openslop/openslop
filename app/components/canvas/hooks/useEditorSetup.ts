@@ -5,6 +5,7 @@ import { withHistory } from "slate-history";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { withNodeId } from "../plugins/withNodeId";
 import { withLayout } from "../plugins/withLayout";
+import { withScenes } from "../plugins/withScenes";
 
 const initialValue: Descendant[] = [];
 
@@ -13,7 +14,9 @@ export function useEditorSetup() {
 
   const [editor] = useState(() =>
     withNodeId(
-      withLayout(connectorConfig)(withReact(withHistory(createEditor()))),
+      withScenes(
+        withLayout(connectorConfig)(withReact(withHistory(createEditor()))),
+      ),
     ),
   );
 

@@ -1,10 +1,10 @@
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 
 export function hydrateConnectorConfig(registry: ConnectorRegistry) {
-  return (node: CanvasElement): CanvasElement => {
+  return (node: CanvasContentElement): CanvasContentElement => {
     const connectorType = ELEMENT_CONFIGS[node.type]?.connector;
     const { provider, config } = getDefaultConnector(registry, connectorType);
     if (!config?.defaultModel) return node;

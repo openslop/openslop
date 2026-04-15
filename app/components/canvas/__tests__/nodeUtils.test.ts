@@ -110,7 +110,9 @@ describe("stripIds", () => {
       children: [{ type: "image" as const, text: "", id: "t1" }],
     } as Element;
 
-    const stripped = stripIds(node) as Element;
+    const stripped = stripIds(node) as Element & {
+      customAttributes?: Record<string, string>;
+    };
     expect(stripped.type).toBe("image");
     expect(stripped.customAttributes).toEqual({ src: "url" });
   });

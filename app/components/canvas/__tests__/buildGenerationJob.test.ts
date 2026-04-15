@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 
@@ -50,10 +50,10 @@ const registry: ConnectorRegistry = {
 };
 
 function makeElement(
-  type: CanvasElement["type"],
+  type: CanvasContentElement["type"],
   text: string,
   attrs?: Record<string, string>,
-): CanvasElement {
+): CanvasContentElement {
   return {
     id: "el-1",
     type,
@@ -122,7 +122,7 @@ describe("buildGenerationJob", () => {
   });
 
   it("returns null when prompt is only zero-width space", () => {
-    const el: CanvasElement = {
+    const el: CanvasContentElement = {
       id: "el-1",
       type: "narration",
       children: [{ id: "t0", type: "narration", text: ZERO_WIDTH_SPACE }],
@@ -177,7 +177,7 @@ describe("buildGenerationJob", () => {
   });
 
   it("handles element with no customAttributes", () => {
-    const el: CanvasElement = {
+    const el: CanvasContentElement = {
       id: "el-1",
       type: "image",
       children: [{ id: "t0", type: "image", text: "A forest" }],

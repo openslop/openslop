@@ -1,4 +1,5 @@
 import type { CanvasElement } from "@/app/components/canvas/types";
+import { getContentElements } from "@/app/components/canvas/utils/nodeUtils";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import type { ResolvedElement } from "./types";
 import { ELEMENT_ROLES, LAYER_TYPES } from "./types";
@@ -9,7 +10,7 @@ export function resolveElements(
 ): ResolvedElement[] {
   const resolved: ResolvedElement[] = [];
 
-  for (const el of elements) {
+  for (const el of getContentElements(elements)) {
     const snapshot = getSnapshot(el.id);
     if (!snapshot.result) continue;
 

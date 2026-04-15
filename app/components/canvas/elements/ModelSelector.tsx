@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import { Transforms } from "slate";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
@@ -14,7 +14,7 @@ export function ModelSelector({
   model,
   provider,
 }: {
-  element: CanvasElement;
+  element: CanvasContentElement;
   model: string;
   provider: ProviderKey;
 }) {

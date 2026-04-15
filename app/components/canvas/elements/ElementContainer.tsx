@@ -2,13 +2,15 @@ import { JSX } from "react";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { ProviderKey } from "@/lib/connectors/types";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
+import { isSceneElement } from "../utils/guards";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import { OutputPreview } from "./OutputPreview";
 import { ModelSelector } from "./ModelSelector";
 import { DeleteButton } from "./DeleteButton";
+import { SceneContainer } from "./SceneContainer";
 
 const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
 
@@ -19,7 +21,7 @@ function formatAttributeDisplay(key: string, value: string): string {
 
 interface ElementContainerProps {
   attributes: RenderElementProps["attributes"];
-  element: CanvasElement;
+  element: CanvasContentElement;
   children: React.ReactNode;
 }
 
@@ -125,5 +127,12 @@ export function ElementContainer({
 }
 
 export const renderCanvasElement = (props: RenderElementProps): JSX.Element => {
-  return <ElementContainer {...props} />;
+  if (isSceneElement(props.element)) {
+    return (
+      <SceneContainer attributes={props.attributes} element={props.element}>
+        {props.children}
+      </SceneContainer>
+    );
+  }
+  return <ElementContainer {...props} element={props.element} />;
 };

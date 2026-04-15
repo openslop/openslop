@@ -1,4 +1,4 @@
-import { Editor, Transforms } from "slate";
+import { Editor, Path, Transforms } from "slate";
 import type { CanvasElementType } from "../types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { makeNodeId } from "./nodeUtils";
@@ -9,7 +9,7 @@ import { hydrateConnectorConfig } from "./hydrateConnectorConfig";
 export function insertElement(
   editor: Editor,
   type: CanvasElementType,
-  atIndex: number,
+  at: Path,
   connectors: ConnectorRegistry,
 ) {
   const config = ELEMENT_CONFIGS[type];
@@ -23,6 +23,6 @@ export function insertElement(
     ],
   };
   Transforms.insertNodes(editor, hydrateConnectorConfig(connectors)(baseNode), {
-    at: [atIndex],
+    at,
   });
 }

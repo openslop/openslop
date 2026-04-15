@@ -1,15 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { resolveElements } from "../resolve";
-import type { CanvasElement } from "@/app/components/canvas/types";
+import {
+  SCENE_TYPE,
+  type CanvasContentElement,
+  type SceneElement,
+} from "@/app/components/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 
-function makeElement(id: string, type: CanvasElement["type"]): CanvasElement {
+function makeElement(
+  id: string,
+  type: CanvasContentElement["type"],
+): CanvasContentElement {
   return {
     id,
     type,
     children: [{ id: `${id}-text`, type, text: "test" }],
   };
 }
+
+const wrap = (children: CanvasContentElement[]): SceneElement => ({
+  id: "scene-1",
+  type: SCENE_TYPE,
+  children,
+});
 
 function makeSnapshot(
   overrides: Partial<ElementSnapshot> = {},
@@ -38,7 +51,7 @@ describe("resolveElements", () => {
       }),
     };
 
-    const resolved = resolveElements(elements, (id) => snapshots[id]);
+    const resolved = resolveElements([wrap(elements)], (id) => snapshots[id]);
 
     expect(resolved).toHaveLength(2);
     expect(resolved[0]).toEqual({
@@ -71,7 +84,7 @@ describe("resolveElements", () => {
       nar1: makeSnapshot({ status: "idle", result: null }),
     };
 
-    const resolved = resolveElements(elements, (id) => snapshots[id]);
+    const resolved = resolveElements([wrap(elements)], (id) => snapshots[id]);
     expect(resolved).toHaveLength(1);
     expect(resolved[0].id).toBe("img1");
   });
@@ -82,7 +95,7 @@ describe("resolveElements", () => {
   });
 
   it("assigns correct roles and layers for all element types", () => {
-    const types: CanvasElement["type"][] = [
+    const types: CanvasContentElement["type"][] = [
       "image",
       "clip",
       "narration",
@@ -91,7 +104,7 @@ describe("resolveElements", () => {
       "sound",
     ];
     const elements = types.map((t, i) => makeElement(`el${i}`, t));
-    const resolved = resolveElements(elements, () => makeSnapshot());
+    const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 
     const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
     expect(roleMap).toEqual({
@@ -120,7 +133,7 @@ describe("resolveElements", () => {
       makeElement("nar1", "narration"),
     ];
     const noResult = makeSnapshot({ status: "idle", result: null });
-    const resolved = resolveElements(elements, () => noResult);
+    const resolved = resolveElements([wrap(elements)], () => noResult);
     expect(resolved).toEqual([]);
   });
 });

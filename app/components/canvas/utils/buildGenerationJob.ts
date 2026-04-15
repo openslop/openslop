@@ -4,12 +4,12 @@ import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import type { GenerationJob } from "@/lib/generation/queue";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 
 export function buildGenerationJob(
-  element: CanvasElement,
+  element: CanvasContentElement,
   connectorConfig: ConnectorRegistry,
 ): GenerationJob | null {
   const elementConfig = ELEMENT_CONFIGS[element.type];

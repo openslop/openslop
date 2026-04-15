@@ -9,7 +9,7 @@ export const withLayout =
 
     editor.normalizeNode = ([node, path]) => {
       if (path.length === 0 && editor.children.length < 1) {
-        insertElement(editor, "narration", 0, connectorConfig);
+        insertElement(editor, "narration", [0], connectorConfig);
       }
       return normalizeNode([node, path]);
     };
