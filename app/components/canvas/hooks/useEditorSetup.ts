@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createEditor, Descendant } from "slate";
 import { withReact } from "slate-react";
 import { withHistory } from "slate-history";
@@ -11,12 +11,10 @@ const initialValue: Descendant[] = [];
 export function useEditorSetup() {
   const { connectorConfig } = useConfig();
 
-  const editor = useMemo(
-    () =>
-      withNodeId(
-        withLayout(connectorConfig)(withReact(withHistory(createEditor()))),
-      ),
-    [connectorConfig],
+  const [editor] = useState(() =>
+    withNodeId(
+      withLayout(connectorConfig)(withReact(withHistory(createEditor()))),
+    ),
   );
 
   const [value, setValue] = useState<Descendant[]>(initialValue);
