@@ -95,7 +95,7 @@ export function ElementContainer({
 
       {/* Center divider */}
       <div
-        className="relative flex-shrink-0 w-px self-stretch mx-3 sm:mx-4"
+        className="relative flex-shrink-0 w-px self-stretch mx-3 sm:mx-4 select-none"
         contentEditable={false}
         aria-hidden="true"
       >
@@ -110,7 +110,10 @@ export function ElementContainer({
       </div>
 
       {/* Right: preview */}
-      <div className="flex-1 min-w-0 flex items-center" contentEditable={false}>
+      <div
+        className="flex-1 min-w-0 flex items-center select-none"
+        contentEditable={false}
+      >
         <OutputPreview
           type={element.type}
           generating={gen.generating}
