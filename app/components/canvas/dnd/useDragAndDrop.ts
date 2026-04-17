@@ -8,7 +8,6 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
-  KeyboardSensor,
 } from "@dnd-kit/core";
 import { Descendant, Editor, Element, Path, Transforms } from "slate";
 import { isSceneElement } from "../utils/guards";
