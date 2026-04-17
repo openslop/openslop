@@ -42,11 +42,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Increment usage count
-  await supabase
+  const { error: updateError } = await supabase
     .from("access_codes")
     .update({ current_uses: data.current_uses + 1 })
     .eq("id", data.id);
+
+  if (updateError) {
+    return NextResponse.json(
+      { error: "Failed to validate code" },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({ redirect: "/signup" });
 }
