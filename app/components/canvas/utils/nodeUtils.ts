@@ -1,7 +1,14 @@
-import { Element, Node } from "slate";
+import { Descendant, Element, Node } from "slate";
 import { nanoid } from "nanoid";
+import type { CanvasContentElement } from "../types";
+import { isSceneElement } from "./guards";
 
 export const makeNodeId = () => nanoid(16);
+
+export const getContentElements = (
+  nodes: Descendant[],
+): CanvasContentElement[] =>
+  nodes.flatMap((node) => (isSceneElement(node) ? node.children : []));
 
 export const stripIds = (node: Node): Node => {
   if (Element.isElement(node)) {

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   DragEndEvent,
+  DragOverEvent,
   DragStartEvent,
   UniqueIdentifier,
   PointerSensor,
@@ -9,19 +10,18 @@ import {
   useSensors,
   KeyboardSensor,
 } from "@dnd-kit/core";
-import { Descendant, Editor, Transforms } from "slate";
+import { Descendant, Editor, Element, Path, Transforms } from "slate";
+import { isSceneElement } from "../utils/guards";
+import type { DragTransfer } from "./DragTransferContext";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [dragTransfer, setDragTransfer] = useState<DragTransfer>(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor),
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
-  const items = useMemo<UniqueIdentifier[]>(
-    () => value.map((element) => element.id),
+  const sceneItems = useMemo<UniqueIdentifier[]>(
+    () => value.filter(isSceneElement).map((s) => s.id),
     [value],
   );
 
@@ -29,31 +29,99 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
     setActiveId(event.active.id);
   }, []);
 
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+      if (!over?.id || active.id === over.id) return;
+      if (active.data.current?.type === "scene") return;
+
+      const fromSceneId = active.data.current?.sceneId;
+      const toSceneId = over.data.current?.sceneId;
+
+      if (!fromSceneId || !toSceneId) return;
+
+      if (fromSceneId === toSceneId) {
+        setDragTransfer(null);
+        return;
+      }
+
+      const [overEntry] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => Element.isElement(n) && n.id === over.id,
+      });
+      if (!overEntry) return;
+
+      const [overNode, overPath] = overEntry;
+      const atIndex = isSceneElement(overNode)
+        ? overNode.children.length
+        : overPath[overPath.length - 1];
+
+      setDragTransfer({
+        itemId: active.id as string,
+        fromSceneId,
+        toSceneId,
+        atIndex,
+      });
+    },
+    [editor],
+  );
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
-      if (over?.id && active.id !== over.id) {
-        const newIndex = items.indexOf(over.id);
-        Transforms.moveNodes(editor, {
-          at: [],
-          match: (node) => node.id === active.id,
-          to: [newIndex],
-        });
-      }
       setActiveId(null);
+      setDragTransfer(null);
+
+      if (!over?.id || active.id === over.id) return;
+
+      const [activeEntry] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => Element.isElement(n) && n.id === active.id,
+      });
+      const [overEntry] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => Element.isElement(n) && n.id === over.id,
+      });
+      if (!activeEntry || !overEntry) return;
+
+      const [activeNode, activePath] = activeEntry;
+      const [overNode, overPath] = overEntry;
+
+      if (isSceneElement(activeNode)) {
+        const targetPath = isSceneElement(overNode)
+          ? overPath
+          : Path.parent(overPath);
+        if (!Path.equals(activePath, targetPath)) {
+          Transforms.moveNodes(editor, { at: activePath, to: targetPath });
+        }
+        return;
+      }
+
+      if (isSceneElement(overNode)) {
+        Transforms.moveNodes(editor, {
+          at: activePath,
+          to: [...overPath, overNode.children.length],
+        });
+        return;
+      }
+
+      Transforms.moveNodes(editor, { at: activePath, to: overPath });
     },
-    [editor, items],
+    [editor],
   );
 
   const handleDragCancel = useCallback(() => {
     setActiveId(null);
+    setDragTransfer(null);
   }, []);
 
   return {
     activeId,
-    items,
+    sceneItems,
+    dragTransfer,
     sensors,
     handleDragStart,
+    handleDragOver,
     handleDragEnd,
     handleDragCancel,
   };

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { Editor, Transforms } from "slate";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
 import flow from "lodash/fp/flow";
@@ -19,7 +19,7 @@ export function useScriptSync(editor: Editor): void {
   useEffect(() => {
     Editor.withoutNormalizing(editor, () => {
       for (const node of nodes) {
-        const normalized = normalize(node as CanvasElement);
+        const normalized = normalize(node as CanvasContentElement);
         if (shouldSkipNode(normalized)) continue;
 
         const [entry] = Editor.nodes(editor, {
@@ -49,7 +49,7 @@ export function useScriptSync(editor: Editor): void {
   }, [nodes, editor, normalize]);
 }
 
-function trimWhitespace(node: CanvasElement): CanvasElement {
+function trimWhitespace(node: CanvasContentElement): CanvasContentElement {
   return {
     ...node,
     children: node.children.map((child) => ({
@@ -59,6 +59,6 @@ function trimWhitespace(node: CanvasElement): CanvasElement {
   };
 }
 
-function shouldSkipNode(node: CanvasElement): boolean {
+function shouldSkipNode(node: CanvasContentElement): boolean {
   return OSMLSerializer.getTextContent(node).length === 0;
 }

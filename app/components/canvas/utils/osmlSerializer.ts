@@ -1,10 +1,10 @@
 import { Descendant } from "slate";
 import {
   CANVAS_ELEMENT_TYPES,
+  type CanvasContentElement,
   type CanvasElementType,
-  type CanvasElement,
 } from "../types";
-import { makeNodeId } from "./nodeUtils";
+import { getContentElements, makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 
 const DEFAULT_TAG_TYPE: CanvasElementType = "narration";
@@ -13,13 +13,12 @@ const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
 
 export class OSMLSerializer {
   private buffer = "";
-  private nodes: CanvasElement[] = [];
+  private nodes: CanvasContentElement[] = [];
 
   static serialize(descendants: Descendant[]): string {
     let osml = "";
 
-    for (const node of descendants) {
-      const element = node as CanvasElement;
+    for (const element of getContentElements(descendants)) {
       const content = OSMLSerializer.getTextContent(element);
       const tagName = element.type;
       const attributes = element.customAttributes ?? {};
@@ -93,7 +92,7 @@ export class OSMLSerializer {
     type: CanvasElementType,
     attributes: Record<string, string>,
   ): void {
-    const next: CanvasElement = {
+    const next: CanvasContentElement = {
       id: makeNodeId(),
       type,
       customAttributes: attributes,
@@ -117,7 +116,7 @@ export class OSMLSerializer {
       : DEFAULT_TAG_TYPE;
   }
 
-  static getTextContent(element: CanvasElement): string {
+  static getTextContent(element: CanvasContentElement): string {
     return element.children.map((child) => child.text ?? "").join("");
   }
 }

@@ -33,6 +33,10 @@
   padding: 4px;
 }
 
+.dragOverlay > .actions {
+  opacity: 1;
+}
+
 .actions {
   flex: none;
   display: flex;
@@ -55,8 +59,8 @@
   overflow-wrap: break-word;
 }
 
-.hoverTarget:hover .actions,
-.hoverTarget.menuOpen .actions {
+.hoverTarget:hover > .actions,
+.hoverTarget.menuOpen > .actions {
   opacity: 1;
   pointer-events: auto;
 }

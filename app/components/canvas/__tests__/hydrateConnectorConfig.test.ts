@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 
 const connectors: ConnectorRegistry = {
@@ -55,9 +55,9 @@ const connectors: ConnectorRegistry = {
 };
 
 function makeNode(
-  type: CanvasElement["type"],
+  type: CanvasContentElement["type"],
   customAttributes?: Record<string, string>,
-): CanvasElement {
+): CanvasContentElement {
   return {
     id: "n1",
     type,

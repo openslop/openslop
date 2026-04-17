@@ -9,8 +9,9 @@ import {
   KeyboardEvent,
   Ref,
 } from "react";
+import { Descendant, Editor, Element } from "slate";
 import { Slate, Editable, RenderElementProps } from "slate-react";
-import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -19,10 +20,15 @@ import { useEditorSetup } from "./hooks/useEditorSetup";
 import { useScriptSync } from "./hooks/useScriptSync";
 import { useGenerateAll } from "./hooks/useGenerateAll";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
-import { SortableElement } from "./dnd/SortableElement";
+import { DragTransferContext } from "./dnd/DragTransferContext";
+import type { CanvasContentElement } from "./types";
+import { isSceneElement } from "./utils/guards";
+import { SortableScene } from "./dnd/SortableScene";
+import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
+import { getContentElements } from "./utils/nodeUtils";
 
 export interface CanvasHandle {
   generateAll: () => void;
@@ -37,11 +43,16 @@ export default function Canvas({
   onStructureChange?: (key: string) => void;
 }) {
   const { editor, value, setValue } = useEditorSetup();
+
+  const contentElements = useMemo(() => getContentElements(value), [value]);
+
   const {
     activeId,
-    items,
+    sceneItems,
+    dragTransfer,
     sensors,
     handleDragStart,
+    handleDragOver,
     handleDragEnd,
     handleDragCancel,
   } = useDragAndDrop(editor, value);
@@ -49,7 +60,7 @@ export default function Canvas({
   useScriptSync(editor);
   const { generateAll } = useGenerateAll(editor);
 
-  const structureKey = value.map((el) => el.id).join(",");
+  const structureKey = contentElements.map((el) => el.id).join(",");
   const prevKeyRef = useRef(structureKey);
   useEffect(() => {
     if (structureKey !== prevKeyRef.current) {
@@ -73,42 +84,63 @@ export default function Canvas({
     [editor],
   );
 
-  const renderElement = useCallback(
-    (props: RenderElementProps) => (
-      <SortableElement {...props} renderElement={renderCanvasElement} />
-    ),
-    [],
-  );
+  const renderElement = useCallback((props: RenderElementProps) => {
+    const { element } = props;
+    if (isSceneElement(element)) {
+      return (
+        <SortableScene
+          {...props}
+          element={element}
+          renderElement={renderCanvasElement}
+        />
+      );
+    }
+    return (
+      <SortableContent
+        {...props}
+        element={element as CanvasContentElement}
+        renderElement={renderCanvasElement}
+      />
+    );
+  }, []);
 
-  const activeEditorElement = useMemo(
-    () => editor.children.find((x) => x.id === activeId),
-    [editor.children, activeId],
-  );
+  const activeElement = useMemo(() => {
+    const [entry] = Editor.nodes(editor, {
+      at: [],
+      match: (n) => Element.isElement(n) && n.id === activeId,
+    });
+    return entry?.[0] as Descendant;
+  }, [editor, activeId]);
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragEnd={handleDragEnd}
-      onDragStart={handleDragStart}
-      onDragCancel={handleDragCancel}
-    >
-      <Sidebar />
+    <DragTransferContext.Provider value={dragTransfer}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={pointerWithin}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <Sidebar />
 
-      <Slate editor={editor} initialValue={value} onChange={setValue}>
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
-          <Editable
-            placeholder="Start typing your story…"
-            renderElement={renderElement}
-            onKeyDown={handleKeyDown}
-            className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </SortableContext>
-        <DragOverlay>
-          {activeEditorElement && (
-            <DragOverlayContent element={activeEditorElement} />
-          )}
-        </DragOverlay>
-      </Slate>
-    </DndContext>
+        <Slate editor={editor} initialValue={value} onChange={setValue}>
+          <SortableContext
+            items={sceneItems}
+            strategy={verticalListSortingStrategy}
+          >
+            <Editable
+              placeholder="Start typing your story…"
+              renderElement={renderElement}
+              onKeyDown={handleKeyDown}
+              className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </SortableContext>
+          <DragOverlay>
+            {activeElement && <DragOverlayContent element={activeElement} />}
+          </DragOverlay>
+        </Slate>
+      </DndContext>
+    </DragTransferContext.Provider>
   );
 }

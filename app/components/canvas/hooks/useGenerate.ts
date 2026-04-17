@@ -1,10 +1,10 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { generationQueue } from "@/lib/generation/queue";
-import type { CanvasElement } from "../types";
+import type { CanvasContentElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 
-export function useGenerate(element: CanvasElement) {
+export function useGenerate(element: CanvasContentElement) {
   const { connectorConfig } = useConfig();
 
   const snapshot = useSyncExternalStore(generationQueue.subscribe, () =>
