@@ -1,6 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { prefetch } from "remotion";
 import type { VideoLayout } from "@/lib/video/types";
+import { PrefetchReadyStore } from "./PrefetchReadyStore";
+
+type PrefetchHandle = ReturnType<typeof prefetch>;
 
 function collectUrls(layout: VideoLayout): Set<string> {
   const urls = new Set<string>();
@@ -16,27 +19,41 @@ function collectUrls(layout: VideoLayout): Set<string> {
   return urls;
 }
 
-export function useAssetPrefetch(layout: VideoLayout | null) {
-  const activeRef = useRef(new Map<string, ReturnType<typeof prefetch>>());
+function freeStale(active: Map<string, PrefetchHandle>, desired: Set<string>) {
+  for (const [url, handle] of active) {
+    if (!desired.has(url)) {
+      handle.free();
+      active.delete(url);
+    }
+  }
+}
+
+function prefetchNew(
+  active: Map<string, PrefetchHandle>,
+  desired: Set<string>,
+  store: PrefetchReadyStore,
+) {
+  for (const url of desired) {
+    if (!active.has(url)) {
+      store.onPrefetchStart();
+      const handle = prefetch(url);
+      active.set(url, handle);
+      handle.waitUntilDone().then(store.onPrefetchEnd, store.onPrefetchEnd);
+    }
+  }
+}
+
+export function useAssetPrefetch(layout: VideoLayout | null): boolean {
+  const activeRef = useRef(new Map<string, PrefetchHandle>());
+  const [store] = useState(() => new PrefetchReadyStore());
 
   useEffect(() => {
     if (!layout) return;
     const desired = collectUrls(layout);
-    const active = activeRef.current;
-
-    for (const [url, handle] of active) {
-      if (!desired.has(url)) {
-        handle.free();
-        active.delete(url);
-      }
-    }
-
-    for (const url of desired) {
-      if (!active.has(url)) {
-        active.set(url, prefetch(url));
-      }
-    }
-  }, [layout]);
+    freeStale(activeRef.current, desired);
+    prefetchNew(activeRef.current, desired, store);
+    store.syncReady();
+  }, [layout, store]);
 
   useEffect(() => {
     const active = activeRef.current;
@@ -45,4 +62,6 @@ export function useAssetPrefetch(layout: VideoLayout | null) {
       active.clear();
     };
   }, []);
+
+  return useSyncExternalStore(store.subscribe, store.getReady);
 }

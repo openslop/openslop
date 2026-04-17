@@ -28,7 +28,7 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
   switch (element.layer) {
     case "visual":
       return element.type === "image" ? (
-        <Img src={element.url} style={coverStyle} />
+        <Img src={element.url} style={coverStyle} pauseWhenLoading />
       ) : (
         <OffthreadVideo
           src={element.url}
@@ -37,7 +37,7 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
         />
       );
     case "audio":
-      return <Html5Audio src={element.url} />;
+      return <Html5Audio src={element.url} pauseWhenBuffering />;
     default:
       return null;
   }

@@ -8,6 +8,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
+import { usePreviewCache } from "../PreviewCacheContext";
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -23,6 +24,7 @@ export function AudioPlayer({
   waveColor?: string;
 }) {
   const waveformRef = useRef<WaveformHandle>(null);
+  const peaksCache = usePreviewCache();
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -50,6 +52,7 @@ export function AudioPlayer({
       <Waveform
         ref={waveformRef}
         src={src}
+        peaksCache={peaksCache}
         waveColor={waveColor}
         className="flex-1 h-10 min-w-0"
         onPlay={() => setPlaying(true)}

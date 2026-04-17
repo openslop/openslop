@@ -120,9 +120,9 @@
 .shimmer-surface {
   background: linear-gradient(
     90deg,
-    rgba(255 255 255 / 0.04) 0%,
-    rgba(255 255 255 / 0.12) 50%,
-    rgba(255 255 255 / 0.04) 100%
+    rgba(255 255 255 / 0.06) 0%,
+    rgba(255 255 255 / 0.18) 50%,
+    rgba(255 255 255 / 0.06) 100%
   );
   background-size: 200% auto;
   animation: shimmer 2s linear infinite;

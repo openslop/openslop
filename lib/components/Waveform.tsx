@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 export interface WaveformProps {
   src: string;
+  peaksCache?: Map<string, number[]>;
   barWidth?: number;
   barGap?: number;
   barRadius?: number;
@@ -112,6 +113,7 @@ export function drawBars(
 
 export function Waveform({
   src,
+  peaksCache,
   barWidth = 3,
   barGap = 3,
   barRadius = 4,
@@ -161,6 +163,14 @@ export function Waveform({
     peaksRef.current = [];
     setLoading(true);
 
+    const cached = peaksCache?.get(src);
+    if (cached) {
+      peaksRef.current = cached;
+      setLoading(false);
+      onReady?.();
+      return;
+    }
+
     let cancelled = false;
     const ac = new AudioContext();
     fetch(src)
@@ -168,7 +178,9 @@ export function Waveform({
       .then((buf) => ac.decodeAudioData(buf))
       .then((ab) => {
         if (cancelled) return;
-        peaksRef.current = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
+        const peaks = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
+        peaksCache?.set(src, peaks);
+        peaksRef.current = peaks;
         setLoading(false);
         onReady?.();
       })
@@ -180,7 +192,7 @@ export function Waveform({
       cancelled = true;
       ac.close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- onReady read via drawRef pattern, not a direct dep
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onReady/peaksCache read via drawRef pattern, not direct deps
   }, [src]);
 
   useEffect(() => {

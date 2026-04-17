@@ -27,6 +27,7 @@
     "@elevenlabs/elevenlabs-js": "^2.38.1",
     "@remotion/cli": "^4.0.443",
     "@remotion/player": "^4.0.443",
+    "@remotion/preload": "^4.0.448",
     "@remotion/tailwind-v4": "^4.0.443",
     "@remotion/vercel": "^4.0.443",
     "@runware/sdk-js": "^1.2.5",
