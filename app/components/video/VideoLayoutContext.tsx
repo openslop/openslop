@@ -1,12 +1,23 @@
 "use client";
 
-import { createContext, use, type ReactNode } from "react";
+import { createContext, use, useMemo, type ReactNode } from "react";
 import type { Editor } from "slate";
+import { generationQueue } from "@/lib/generation/queue";
 import type { VideoLayout } from "@/lib/video/types";
 import { useAssetPrefetch } from "./useAssetPrefetch";
 import { useVideoLayout } from "./useVideoLayout";
 
-const VideoLayoutContext = createContext<VideoLayout | null>(null);
+type VideoLayoutValue = {
+  layout: VideoLayout | null;
+  ready: boolean;
+  playerKey: string;
+};
+
+const VideoLayoutContext = createContext<VideoLayoutValue>({
+  layout: null,
+  ready: false,
+  playerKey: "",
+});
 
 export function VideoLayoutProvider({
   getEditor,
@@ -18,8 +29,13 @@ export function VideoLayoutProvider({
   children: ReactNode;
 }) {
   const layout = useVideoLayout(getEditor, structureKey);
-  useAssetPrefetch(layout);
-  return <VideoLayoutContext value={layout}>{children}</VideoLayoutContext>;
+  const ready = useAssetPrefetch(layout);
+  const playerKey = `${structureKey}-${generationQueue.getResultVersion()}`;
+  const value = useMemo(
+    () => ({ layout, ready, playerKey }),
+    [layout, ready, playerKey],
+  );
+  return <VideoLayoutContext value={value}>{children}</VideoLayoutContext>;
 }
 
 export function useLayout() {

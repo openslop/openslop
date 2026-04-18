@@ -2,6 +2,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipTrigger,
@@ -406,22 +407,45 @@ function MediaPlaceholder({
 }
 
 function MediaPreview({
-  media,
+  url,
+  outputKind,
   borderColor,
   generating,
   queued,
   seconds,
   onRegenerate,
 }: GenerationState & {
-  media: React.ReactNode;
+  url: string;
+  outputKind: "image" | "video";
   borderColor: string;
   onRegenerate: () => void;
 }) {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <div
       className={`group relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
     >
-      {media}
+      {outputKind === "image" ? (
+        <Image
+          src={url}
+          alt="Generated"
+          fill
+          className="object-cover"
+          unoptimized
+          onLoad={() => setLoaded(true)}
+        />
+      ) : (
+        <video
+          src={url}
+          controls
+          className="w-full h-full object-cover"
+          onLoadedData={() => setLoaded(true)}
+        />
+      )}
+      {!loaded && (
+        <Skeleton className="absolute inset-0 animate-none shimmer-surface" />
+      )}
       <ResultOverlay
         generating={generating}
         queued={queued}
@@ -488,25 +512,11 @@ export function OutputPreview({
   }
 
   if (result) {
-    const media =
-      outputKind === "image" ? (
-        <Image
-          src={result.url}
-          alt="Generated"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      ) : (
-        <video
-          src={result.url}
-          controls
-          className="w-full h-full object-cover"
-        />
-      );
     return (
       <MediaPreview
-        media={media}
+        key={result.url}
+        url={result.url}
+        outputKind={outputKind}
         borderColor={BORDER_COLORS[type] ?? "border-white/20"}
         generating={generating}
         queued={queued}

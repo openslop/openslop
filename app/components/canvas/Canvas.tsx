@@ -29,6 +29,7 @@ import { DragOverlayContent } from "./dnd/DragOverlay";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
 import { getContentElements } from "./utils/nodeUtils";
+import { PreviewCacheProvider } from "./PreviewCacheContext";
 
 export interface CanvasHandle {
   generateAll: () => void;
@@ -113,34 +114,36 @@ export default function Canvas({
   }, [editor, activeId]);
 
   return (
-    <DragTransferContext.Provider value={dragTransfer}>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={pointerWithin}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        <Sidebar />
+    <PreviewCacheProvider>
+      <DragTransferContext.Provider value={dragTransfer}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={pointerWithin}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <Sidebar />
 
-        <Slate editor={editor} initialValue={value} onChange={setValue}>
-          <SortableContext
-            items={sceneItems}
-            strategy={verticalListSortingStrategy}
-          >
-            <Editable
-              placeholder="Start typing your story…"
-              renderElement={renderElement}
-              onKeyDown={handleKeyDown}
-              className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </SortableContext>
-          <DragOverlay>
-            {activeElement && <DragOverlayContent element={activeElement} />}
-          </DragOverlay>
-        </Slate>
-      </DndContext>
-    </DragTransferContext.Provider>
+          <Slate editor={editor} initialValue={value} onChange={setValue}>
+            <SortableContext
+              items={sceneItems}
+              strategy={verticalListSortingStrategy}
+            >
+              <Editable
+                placeholder="Start typing your story…"
+                renderElement={renderElement}
+                onKeyDown={handleKeyDown}
+                className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </SortableContext>
+            <DragOverlay>
+              {activeElement && <DragOverlayContent element={activeElement} />}
+            </DragOverlay>
+          </Slate>
+        </DndContext>
+      </DragTransferContext.Provider>
+    </PreviewCacheProvider>
   );
 }
