@@ -4,6 +4,7 @@ import { createContext, use, useMemo, useState, type ReactNode } from "react";
 import set from "lodash/fp/set";
 import type {
   ConnectorConfig,
+  ConnectorPlugin,
   ConnectorType,
   LLMPlugin,
   ProviderKey,
@@ -31,56 +32,27 @@ export type ConnectorRegistry = Record<
   Record<ProviderKey, ConnectorConfig>
 >;
 
+const openslopConfig = (
+  defaultModel: string,
+  models: Record<string, unknown>,
+  plugins?: ConnectorPlugin[],
+): Record<ProviderKey, ConnectorConfig> => ({
+  openslop: {
+    defaultModel,
+    models: Object.keys(models),
+    isDefault: true,
+    apiKey: "",
+    ...(plugins && { plugins }),
+  },
+});
+
 const initialConnectorConfig: ConnectorRegistry = {
-  llm: {
-    openslop: {
-      defaultModel: "Slop LLM v1",
-      models: Object.keys(LLM_MODELS),
-      isDefault: true,
-      apiKey: "",
-      plugins: [osmlPlugin],
-    },
-  },
-  tts: {
-    openslop: {
-      defaultModel: "Slop TTS v1",
-      models: Object.keys(TTS_MODELS),
-      isDefault: true,
-      apiKey: "",
-    },
-  },
-  image: {
-    openslop: {
-      defaultModel: "Slop Image v1",
-      models: Object.keys(IMAGE_MODELS),
-      isDefault: true,
-      apiKey: "",
-    },
-  },
-  video: {
-    openslop: {
-      defaultModel: "Slop Video v1",
-      models: Object.keys(VIDEO_MODELS),
-      isDefault: true,
-      apiKey: "",
-    },
-  },
-  sfx: {
-    openslop: {
-      defaultModel: "Slop SFX v1",
-      models: Object.keys(SFX_MODELS),
-      isDefault: true,
-      apiKey: "",
-    },
-  },
-  music: {
-    openslop: {
-      defaultModel: "Slop Music v1",
-      models: Object.keys(MUSIC_MODELS),
-      isDefault: true,
-      apiKey: "",
-    },
-  },
+  llm: openslopConfig("Slop LLM v1", LLM_MODELS, [osmlPlugin]),
+  tts: openslopConfig("Slop TTS v1", TTS_MODELS),
+  image: openslopConfig("Slop Image v1", IMAGE_MODELS),
+  video: openslopConfig("Slop Video v1", VIDEO_MODELS),
+  sfx: openslopConfig("Slop SFX v1", SFX_MODELS),
+  music: openslopConfig("Slop Music v1", MUSIC_MODELS),
 };
 
 type ConfigContextValue = {
