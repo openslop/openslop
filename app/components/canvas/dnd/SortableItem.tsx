@@ -13,6 +13,7 @@ interface SortableItemProps {
   wrapperStyle?: React.CSSProperties;
   insertOptions?: InsertOption<CanvasElementType>[];
   onInsert?: (type: CanvasElementType) => void;
+  disabled?: boolean;
   attributes: RenderElementProps["attributes"];
   element: CanvasElement;
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export function SortableItem({
   wrapperStyle,
   insertOptions,
   onInsert,
+  disabled,
   attributes,
   element,
   children,
@@ -42,6 +44,7 @@ export function SortableItem({
   } = useSortable({
     id: element.id,
     data: { type: sortableType, sceneId },
+    disabled,
   });
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,17 +65,19 @@ export function SortableItem({
         <div
           className={`${styles.hoverTarget} align-middle${isMenuOpen ? ` ${styles.menuOpen}` : ""}`}
         >
-          <div
-            className={`self-center ${styles.actions}`}
-            contentEditable={false}
-          >
-            <SortableActions
-              options={insertOptions}
-              onInsert={onInsert}
-              listeners={listeners}
-              onMenuOpenChange={setIsMenuOpen}
-            />
-          </div>
+          {!disabled && (
+            <div
+              className={`self-center ${styles.actions}`}
+              contentEditable={false}
+            >
+              <SortableActions
+                options={insertOptions}
+                onInsert={onInsert}
+                listeners={listeners}
+                onMenuOpenChange={setIsMenuOpen}
+              />
+            </div>
+          )}
           <div>{renderElement({ attributes, children, element })}</div>
         </div>
       </div>

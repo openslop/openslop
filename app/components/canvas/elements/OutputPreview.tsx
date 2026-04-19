@@ -222,7 +222,7 @@ function buildSoundwaveMask(bars: number[]) {
   )}")`;
 }
 
-function PlaceholderBalls({
+export function PlaceholderBalls({
   generating,
   staticRotations,
 }: {
@@ -257,7 +257,7 @@ function PlaceholderBalls({
   );
 }
 
-function useStaticRotations() {
+export function useStaticRotations() {
   const [rotations] = useState(() =>
     PLACEHOLDER_BALLS.map(() => Math.floor(Math.random() * 360)),
   );

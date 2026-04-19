@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, use, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  use,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import type { Editor } from "slate";
 import { generationQueue } from "@/lib/generation/queue";
 import type { VideoLayout } from "@/lib/video/types";
@@ -29,7 +35,12 @@ export function VideoLayoutProvider({
   children: ReactNode;
 }) {
   const layout = useVideoLayout(getEditor, structureKey);
-  const ready = useAssetPrefetch(layout);
+  const prefetched = useAssetPrefetch(layout);
+  const busy = useSyncExternalStore(
+    generationQueue.subscribe,
+    generationQueue.isBusy,
+  );
+  const ready = prefetched && !busy;
   const playerKey = `${structureKey}-${generationQueue.getResultVersion()}`;
   const value = useMemo(
     () => ({ layout, ready, playerKey }),

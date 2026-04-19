@@ -1,19 +1,27 @@
-import { useMemo } from "react";
+import { Children, useMemo } from "react";
 import { RenderElementProps } from "slate-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { SceneElement } from "../types";
+import { isForeground } from "../utils/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
+import { useSceneIndex } from "../hooks/useSceneIndex";
+import { useViewMode } from "../ViewModeContext";
+import { DeleteButton } from "./DeleteButton";
+import { ForegroundPreview } from "./ForegroundPreview";
 
-export function SceneContainer({
-  attributes,
-  element,
-  children,
-}: Pick<RenderElementProps, "attributes" | "children"> & {
+const COLLAPSED_MAX_VISIBLE = 3;
+
+interface SceneProps {
+  attributes: RenderElementProps["attributes"];
   element: SceneElement;
-}) {
+  children: React.ReactNode;
+}
+
+function useSceneState(element: SceneElement) {
   const childIds = useMemo(
     () => element.children.map((c) => c.id),
     [element.children],
@@ -24,19 +32,131 @@ export function SceneContainer({
     transfer &&
     element.id === transfer.toSceneId &&
     element.id !== transfer.fromSceneId;
-  const appendToEnd = isDropTarget && transfer.atIndex >= childIds.length;
+
+  return {
+    childIds,
+    sceneIndex: useSceneIndex(element.id),
+    dropPadding: {
+      paddingBottom:
+        isDropTarget && transfer.atIndex >= childIds.length
+          ? "3rem"
+          : undefined,
+      transition: "padding-bottom 200ms ease",
+    } as React.CSSProperties,
+  };
+}
+
+function SceneHeader({
+  sceneIndex,
+  collapsed,
+  onToggle,
+  element,
+}: {
+  sceneIndex: number;
+  collapsed: boolean;
+  onToggle: () => void;
+  element: SceneElement;
+}) {
+  const Icon = collapsed ? ChevronRight : ChevronDown;
+  return (
+    <div
+      className="flex items-center gap-1 select-none text-[10px] text-white/40 font-medium mb-3 h-5"
+      contentEditable={false}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        className="opacity-0 group-hover/scene:opacity-100 transition-opacity duration-200 p-0.5 -ml-1 rounded hover:bg-white/10"
+        aria-label={collapsed ? "Expand scene" : "Collapse scene"}
+      >
+        <Icon size={12} />
+      </button>
+      Scene {sceneIndex}
+      <div className="opacity-0 group-hover/scene:opacity-100 transition-opacity duration-200 p-1">
+        <DeleteButton element={element} />
+      </div>
+    </div>
+  );
+}
+
+function CollapsedScene({ attributes, element, children }: SceneProps) {
+  const { sceneIndex, dropPadding } = useSceneState(element);
+  const { toggle } = useViewMode();
+
+  const foregroundElement = useMemo(
+    () => element.children.find(isForeground) ?? null,
+    [element.children],
+  );
+
+  const childArray = Children.toArray(children);
+  const overflowCount = Math.max(0, childArray.length - COLLAPSED_MAX_VISIBLE);
 
   return (
     <div
       {...attributes}
-      style={{
-        paddingBottom: appendToEnd ? "3rem" : undefined,
-        transition: "padding-bottom 200ms ease",
-      }}
+      className="group/scene relative h-32"
+      style={dropPadding}
     >
+      <div className="flex flex-col h-full pr-[calc(8rem+0.75rem)]">
+        <SceneHeader
+          sceneIndex={sceneIndex}
+          collapsed
+          onToggle={() => toggle(element.id)}
+          element={element}
+        />
+        <div className="flex flex-col gap-0.5 flex-1 min-h-0 overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none">
+          {childArray.slice(0, COLLAPSED_MAX_VISIBLE)}
+          {overflowCount > 0 && (
+            <div className="hidden">
+              {childArray.slice(COLLAPSED_MAX_VISIBLE)}
+            </div>
+          )}
+        </div>
+        {overflowCount > 0 && (
+          <span
+            className="text-[10px] text-white/30 pl-1 select-none shrink-0 text-left"
+            contentEditable={false}
+          >
+            +{overflowCount} more
+          </span>
+        )}
+      </div>
+      {foregroundElement && (
+        <div
+          className="absolute right-0 top-0 bottom-0 w-32 select-none"
+          contentEditable={false}
+        >
+          <ForegroundPreview element={foregroundElement} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExpandedScene({ attributes, element, children }: SceneProps) {
+  const { childIds, sceneIndex, dropPadding } = useSceneState(element);
+  const { toggle } = useViewMode();
+
+  return (
+    <div {...attributes} className="group/scene" style={dropPadding}>
+      <SceneHeader
+        sceneIndex={sceneIndex}
+        collapsed={false}
+        onToggle={() => toggle(element.id)}
+        element={element}
+      />
       <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
     </div>
+  );
+}
+
+export function SceneContainer(props: SceneProps) {
+  const { isCollapsed } = useViewMode();
+  return isCollapsed(props.element.id) ? (
+    <CollapsedScene {...props} />
+  ) : (
+    <ExpandedScene {...props} />
   );
 }

@@ -55,6 +55,13 @@ class GenerationQueue {
 
   getResultVersion = () => this._resultVersion;
 
+  isBusy = (): boolean => {
+    for (const snap of this.state.values()) {
+      if (snap.status === "queued" || snap.status === "generating") return true;
+    }
+    return false;
+  };
+
   private isInQueue(id: string): boolean {
     const s = this.state.get(id)?.status;
     return s === "queued" || s === "generating";
