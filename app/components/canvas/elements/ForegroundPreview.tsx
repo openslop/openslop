@@ -4,7 +4,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CanvasContentElement } from "../types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
-import { PlaceholderBalls, useStaticRotations } from "./OutputPreview";
+import {
+  PlaceholderBalls,
+  useStaticRotations,
+  StaleIndicator,
+} from "./OutputPreview";
 import loaderStyles from "./OutputPreview.module.css";
 
 export function ForegroundPreview({
@@ -12,7 +16,7 @@ export function ForegroundPreview({
 }: {
   element: CanvasContentElement;
 }) {
-  const { result, generating } = useGenerate(element);
+  const { result, generating, stale, generate } = useGenerate(element);
   const [loaded, setLoaded] = useState(false);
   const { outputKind } = ELEMENT_CONFIGS[element.type];
   const staticRotations = useStaticRotations();
@@ -53,6 +57,7 @@ export function ForegroundPreview({
       {!loaded && (
         <Skeleton className="absolute inset-0 animate-none shimmer-surface" />
       )}
+      {stale && <StaleIndicator onClick={generate} />}
     </div>
   );
 }

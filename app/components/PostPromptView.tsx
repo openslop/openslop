@@ -67,7 +67,7 @@ function PostPromptViewInner() {
             style={{ scrollbarGutter: "stable" }}
           >
             <div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-            <div className="mx-auto max-w-6xl px-4 pt-4">
+            <div className="mx-auto max-w-6xl px-4 py-4">
               <Canvas ref={canvasRef} onStructureChange={setStructureKey} />
             </div>
           </div>

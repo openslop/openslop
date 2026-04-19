@@ -123,6 +123,7 @@ export function ElementContainer({
           seconds={gen.seconds}
           result={gen.result}
           error={gen.error}
+          stale={gen.stale}
           onGenerate={gen.generate}
           onDiscard={gen.discard}
         />

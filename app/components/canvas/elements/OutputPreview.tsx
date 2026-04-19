@@ -95,11 +95,9 @@ function RegenerateButton({
   queued,
   seconds,
   onClick,
-  alwaysVisible = false,
   className = "",
 }: GenerationState & {
   onClick: () => void;
-  alwaysVisible?: boolean;
   className?: string;
 }) {
   const active = generating || queued;
@@ -117,9 +115,6 @@ function RegenerateButton({
           aria-label={label}
           className={cn(
             "relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-[opacity,background-color] overflow-hidden",
-            active || alwaysVisible
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
             className,
           )}
           disabled={active}
@@ -184,6 +179,24 @@ function CancelButton({
     >
       <XIcon className="w-3 h-3 text-white" />
     </OverlayButton>
+  );
+}
+
+export function StaleIndicator({ onClick }: { onClick: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-full bg-amber-500/80 px-2 py-1 text-[10px] font-medium text-white transition-opacity hover:bg-amber-500"
+          onClick={onClick}
+        >
+          <AlertCircle className="w-3 h-3" />
+          Stale
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Prompt changed — click to regenerate</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -279,10 +292,12 @@ function AudioResult({
   generating,
   queued,
   seconds,
+  stale,
   onRegenerate,
 }: GenerationState & {
   type: CanvasElementType;
   src: string;
+  stale: boolean;
   onRegenerate: () => void;
 }) {
   return (
@@ -292,10 +307,10 @@ function AudioResult({
         queued={queued}
         seconds={seconds}
         onClick={onRegenerate}
-        alwaysVisible
         className="shrink-0"
       />
       <AudioPlayer key={src} src={src} waveColor={WAVE_COLORS[type]} />
+      {stale && <StaleIndicator onClick={onRegenerate} />}
     </div>
   );
 }
@@ -307,6 +322,7 @@ interface OutputPreviewProps {
   seconds: number;
   result: AssetResult | null;
   error: string | null;
+  stale: boolean;
   onGenerate: () => void;
   onDiscard: () => void;
 }
@@ -318,7 +334,7 @@ function AudioPlaceholder({
   error,
   onGenerate,
   onDiscard,
-}: Omit<OutputPreviewProps, "type" | "result">) {
+}: Omit<OutputPreviewProps, "type" | "result" | "stale">) {
   const staticRotations = useStaticRotations();
 
   const [mask] = useState(() => {
@@ -379,7 +395,7 @@ function MediaPlaceholder({
   error,
   onGenerate,
   onDiscard,
-}: Omit<OutputPreviewProps, "type" | "result">) {
+}: Omit<OutputPreviewProps, "type" | "result" | "stale">) {
   const staticRotations = useStaticRotations();
 
   return (
@@ -413,11 +429,13 @@ function MediaPreview({
   generating,
   queued,
   seconds,
+  stale,
   onRegenerate,
 }: GenerationState & {
   url: string;
   outputKind: "image" | "video";
   borderColor: string;
+  stale: boolean;
   onRegenerate: () => void;
 }) {
   const [loaded, setLoaded] = useState(false);
@@ -452,6 +470,7 @@ function MediaPreview({
         seconds={seconds}
         onRegenerate={onRegenerate}
       />
+      {stale && <StaleIndicator onClick={onRegenerate} />}
     </div>
   );
 }
@@ -481,6 +500,7 @@ export function OutputPreview({
   seconds,
   result,
   error,
+  stale,
   onGenerate,
   onDiscard,
 }: OutputPreviewProps) {
@@ -495,6 +515,7 @@ export function OutputPreview({
           generating={generating}
           queued={queued}
           seconds={seconds}
+          stale={stale}
           onRegenerate={onGenerate}
         />
       );
@@ -521,6 +542,7 @@ export function OutputPreview({
         generating={generating}
         queued={queued}
         seconds={seconds}
+        stale={stale}
         onRegenerate={onGenerate}
       />
     );

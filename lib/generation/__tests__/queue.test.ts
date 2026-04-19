@@ -31,6 +31,7 @@ function makeJob(
     config,
     prompt: "test prompt",
     extraParams: {},
+    inputs: { prompt: "test prompt", attributes: {} },
     ...overrides,
   };
 }
@@ -60,6 +61,7 @@ describe("GenerationQueue", () => {
         seconds: 0,
         result: null,
         error: null,
+        resultInputs: null,
       });
     });
   });
@@ -300,6 +302,7 @@ describe("GenerationQueue", () => {
         seconds: 0,
         result: null,
         error: null,
+        resultInputs: null,
       });
     });
 

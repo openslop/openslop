@@ -80,6 +80,10 @@ describe("buildGenerationJob", () => {
       config: expect.objectContaining({ defaultModel: "Slop TTS v1" }),
       prompt: "Hello world",
       extraParams: { gender: "male", accent: "american" },
+      inputs: {
+        prompt: "Hello world",
+        attributes: { gender: "male", accent: "american" },
+      },
     });
   });
 
@@ -94,6 +98,7 @@ describe("buildGenerationJob", () => {
       config: expect.objectContaining({ defaultModel: "Slop Image v1" }),
       prompt: "A sunset over the ocean",
       extraParams: {},
+      inputs: { prompt: "A sunset over the ocean", attributes: {} },
     });
   });
 
@@ -108,6 +113,7 @@ describe("buildGenerationJob", () => {
       config: expect.objectContaining({ defaultModel: "Slop Video v1" }),
       prompt: "A car chase",
       extraParams: { duration: "10" },
+      inputs: { prompt: "A car chase", attributes: { duration: "10" } },
     });
   });
 
