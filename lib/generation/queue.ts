@@ -5,12 +5,18 @@ import type {
   ProviderKey,
 } from "../connectors/types";
 import { generateForElement } from "./generateForElement";
+import { serializeInputs } from "./generationInputs";
+import type { GenerationInputs } from "./generationInputs";
+
+export type { GenerationInputs } from "./generationInputs";
+export { inputsEqual, isStaleResult } from "./generationInputs";
 
 export type ElementSnapshot = {
   status: "idle" | "queued" | "generating";
   seconds: number;
   result: AssetResult | null;
   error: string | null;
+  resultInputs: GenerationInputs | null;
 };
 
 export type GenerationJob = {
@@ -20,6 +26,7 @@ export type GenerationJob = {
   config: ConnectorConfig;
   prompt: string;
   extraParams: Record<string, unknown>;
+  inputs: GenerationInputs;
 };
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
@@ -27,6 +34,7 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
   seconds: 0,
   result: null,
   error: null,
+  resultInputs: null,
 };
 
 class GenerationQueue {
@@ -35,6 +43,7 @@ class GenerationQueue {
   private controllers = new Map<string, AbortController>();
   private timers = new Map<string, ReturnType<typeof setInterval>>();
   private listeners = new Set<() => void>();
+  private history = new Map<string, Map<string, AssetResult>>();
   private readonly batchSize: number;
   private _resultVersion = 0;
 
@@ -84,9 +93,15 @@ class GenerationQueue {
   }
 
   private resetToIdle(id: string) {
-    const { result, error } = this.getElementSnapshot(id);
+    const { result, error, resultInputs } = this.getElementSnapshot(id);
     if (result || error) {
-      this.state.set(id, { status: "idle", seconds: 0, result, error });
+      this.state.set(id, {
+        status: "idle",
+        seconds: 0,
+        result,
+        error,
+        resultInputs,
+      });
     } else {
       this.state.delete(id);
     }
@@ -145,6 +160,19 @@ class GenerationQueue {
     this.notify();
   }
 
+  restoreResult(elementId: string, inputs: GenerationInputs): boolean {
+    const key = serializeInputs(inputs);
+    const cached = this.history.get(elementId)?.get(key);
+    if (!cached) return false;
+    this.update(elementId, {
+      result: cached,
+      error: null,
+      resultInputs: inputs,
+    });
+    this.notify();
+    return true;
+  }
+
   private notify() {
     for (const listener of this.listeners) {
       listener();
@@ -195,11 +223,17 @@ class GenerationQueue {
     )
       .then((result) => {
         if (controller.signal.aborted) return;
+        const key = serializeInputs(job.inputs);
+        const elHistory =
+          this.history.get(elementId) ?? new Map<string, AssetResult>();
+        elHistory.set(key, result);
+        this.history.set(elementId, elHistory);
         this.update(elementId, {
           status: "idle",
           seconds: 0,
           result,
           error: null,
+          resultInputs: job.inputs,
         });
       })
       .catch((err) => {

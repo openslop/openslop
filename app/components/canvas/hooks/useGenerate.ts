@@ -1,8 +1,9 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { generationQueue } from "@/lib/generation/queue";
+import { generationQueue, isStaleResult } from "@/lib/generation/queue";
 import type { CanvasContentElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
+import { getGenerationInputs } from "../utils/getGenerationInputs";
 
 export function useGenerate(element: CanvasContentElement) {
   const { connectorConfig } = useConfig();
@@ -10,6 +11,14 @@ export function useGenerate(element: CanvasContentElement) {
   const snapshot = useSyncExternalStore(generationQueue.subscribe, () =>
     generationQueue.getElementSnapshot(element.id),
   );
+
+  const currentInputs = getGenerationInputs(element);
+  const stale = isStaleResult(snapshot, currentInputs);
+
+  useEffect(() => {
+    if (!stale) return;
+    generationQueue.restoreResult(element.id, currentInputs);
+  }, [element.id, currentInputs, stale]);
 
   const generate = useCallback(() => {
     const job = buildGenerationJob(element, connectorConfig);
@@ -30,6 +39,7 @@ export function useGenerate(element: CanvasContentElement) {
     seconds: snapshot.seconds,
     result: snapshot.result,
     error: snapshot.error,
+    stale,
     generate,
     discard,
   };

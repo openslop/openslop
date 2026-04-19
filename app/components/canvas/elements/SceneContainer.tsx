@@ -60,7 +60,7 @@ function SceneHeader({
   const Icon = collapsed ? ChevronRight : ChevronDown;
   return (
     <div
-      className="flex items-center gap-1 select-none text-[10px] text-white/40 font-medium mb-3 h-5"
+      className="flex items-center gap-1 select-none text-[10px] text-white/40 font-medium mb-2 h-5"
       contentEditable={false}
     >
       <button
@@ -72,7 +72,7 @@ function SceneHeader({
         <Icon size={12} />
       </button>
       Scene {sceneIndex}
-      <div className="opacity-0 group-hover/scene:opacity-100 transition-opacity duration-200 p-1">
+      <div className="ml-auto opacity-0 group-hover/scene:opacity-100 transition-opacity duration-200 p-1">
         <DeleteButton element={element} />
       </div>
     </div>

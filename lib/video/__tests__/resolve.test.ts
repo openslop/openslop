@@ -32,6 +32,7 @@ function makeSnapshot(
     seconds: 0,
     result: { url: "https://example.com/asset.mp3", durationSec: 5 },
     error: null,
+    resultInputs: null,
     ...overrides,
   };
 }
