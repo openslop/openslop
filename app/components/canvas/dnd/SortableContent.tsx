@@ -9,6 +9,7 @@ import type {
 } from "../types";
 import { ELEMENT_LIST } from "../config/elementConfigs";
 import { insertElement } from "../utils/insertElement";
+import { useViewMode } from "../ViewModeContext";
 import { SortableItem } from "./SortableItem";
 import { useDragTransfer } from "./DragTransferContext";
 import type { InsertOption } from "./SortableActions";
@@ -36,9 +37,11 @@ export function SortableContent({
   const editor = useSlateStatic();
   const { connectorConfig } = useConfig();
   const transfer = useDragTransfer();
+  const { isCollapsed } = useViewMode();
 
   const path = ReactEditor.findPath(editor, element);
   const sceneId = (Node.parent(editor, path) as SceneElement).id;
+  const collapsed = isCollapsed(sceneId);
 
   const insertGap =
     sceneId === transfer?.toSceneId &&
@@ -66,8 +69,9 @@ export function SortableContent({
       sceneId={sceneId}
       sortableType="content"
       wrapperStyle={wrapperStyle}
-      insertOptions={INSERT_OPTIONS}
-      onInsert={handleInsert}
+      insertOptions={collapsed ? undefined : INSERT_OPTIONS}
+      onInsert={collapsed ? undefined : handleInsert}
+      disabled={collapsed}
       attributes={attributes}
       element={element}
       renderElement={renderElement}

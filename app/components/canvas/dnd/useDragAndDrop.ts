@@ -19,7 +19,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
-  const sceneItems = useMemo<UniqueIdentifier[]>(
+  const sceneItems = useMemo<string[]>(
     () => value.filter(isSceneElement).map((s) => s.id),
     [value],
   );
@@ -54,7 +54,6 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
       const atIndex = isSceneElement(overNode)
         ? overNode.children.length
         : overPath[overPath.length - 1];
-
       setDragTransfer({
         itemId: active.id as string,
         fromSceneId,

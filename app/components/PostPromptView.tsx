@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
 import Copilot from "./Copilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
-import { SparklesIcon } from "./canvas/elements/OutputPreview";
+import { Clapperboard } from "lucide-react";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import {
   PlayerPositionProvider,
@@ -49,11 +49,11 @@ function PostPromptViewInner() {
               showPlayer();
             }}
             className={`${genStyles.btn} shrink-0 transition-opacity ${loading ? "" : "opacity-80 hover:opacity-100"}`}
-            aria-label="Generate All"
+            aria-label="Generate & Preview"
             disabled={loading}
           >
-            <SparklesIcon />
-            <span className="hidden sm:inline">Generate All</span>
+            <Clapperboard className={genStyles.svg} />
+            <span className="hidden sm:inline">Generate & Preview</span>
           </button>
         </div>
       </div>
@@ -62,7 +62,10 @@ function PostPromptViewInner() {
         {visible && isTop && <TopPlayerPanel />}
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto scrollbar-gutter-stable">
+          <div
+            className="flex-1 overflow-y-auto"
+            style={{ scrollbarGutter: "stable" }}
+          >
             <div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
             <div className="mx-auto max-w-6xl px-4 pt-4">
               <Canvas ref={canvasRef} onStructureChange={setStructureKey} />
