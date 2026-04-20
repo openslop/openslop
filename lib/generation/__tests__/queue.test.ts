@@ -340,7 +340,7 @@ describe("GenerationQueue", () => {
 
   describe("batch processing", () => {
     it("processes queued jobs after generating ones complete", async () => {
-      let resolve1: (v: { url: string }) => void;
+      let resolve1: (v: { url: string }) => void = () => {};
       const p1 = new Promise<{ url: string }>((r) => {
         resolve1 = r;
       });
@@ -360,7 +360,7 @@ describe("GenerationQueue", () => {
       expect(generationQueue.getElementSnapshot("q4").status).toBe("queued");
 
       // Complete the first job and flush microtasks
-      resolve1!({ url: "done" });
+      resolve1({ url: "done" });
       await vi.advanceTimersByTimeAsync(0);
 
       expect(generationQueue.getElementSnapshot("q1").status).toBe("idle");

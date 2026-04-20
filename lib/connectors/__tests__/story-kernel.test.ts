@@ -19,6 +19,10 @@ class MockLLMGateway extends GatewayClient<
   }
 }
 
+const { transformPrompt } = storyModePlugin;
+if (!transformPrompt)
+  throw new Error("storyModePlugin.transformPrompt is required");
+
 describe("storyModePlugin", () => {
   it("calls gateway to generate a story outline and rewrites the prompt", async () => {
     const gateway = new MockLLMGateway();
@@ -26,10 +30,7 @@ describe("storyModePlugin", () => {
       gateway,
     };
 
-    const result = await storyModePlugin.transformPrompt!(
-      "a knight and a dragon",
-      ctx,
-    );
+    const result = await transformPrompt("a knight and a dragon", ctx);
 
     expect(result).toContain(
       "A brave knight rescues a dragon who turns out to be friendly.",
@@ -38,7 +39,7 @@ describe("storyModePlugin", () => {
   });
 
   it("throws when no context is provided", async () => {
-    await expect(storyModePlugin.transformPrompt!("test")).rejects.toThrow(
+    await expect(transformPrompt("test")).rejects.toThrow(
       "story mode plugin requires gateway context",
     );
   });

@@ -9,7 +9,7 @@ import { serializeInputs } from "./generationInputs";
 import type { GenerationInputs } from "./generationInputs";
 
 export type { GenerationInputs } from "./generationInputs";
-export { inputsEqual, isStaleResult } from "./generationInputs";
+export { isStaleResult } from "./generationInputs";
 
 export type ElementSnapshot = {
   status: "idle" | "queued" | "generating";
