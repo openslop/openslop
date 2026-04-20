@@ -5,6 +5,7 @@ import {
   type CanvasElementType,
 } from "../types";
 import { getContentElements, makeNodeId } from "./nodeUtils";
+import { isSceneElement } from "./guards";
 import { parseXmlTag } from "./parseXmlTag";
 
 const DEFAULT_TAG_TYPE: CanvasElementType = "narration";
@@ -16,26 +17,35 @@ export class OSMLSerializer {
   private nodes: CanvasContentElement[] = [];
 
   static serialize(descendants: Descendant[]): string {
+    return getContentElements(descendants)
+      .map(OSMLSerializer.serializeElement)
+      .join("")
+      .trim();
+  }
+
+  static serializeWithScenes(descendants: Descendant[]): string {
     let osml = "";
-
-    for (const element of getContentElements(descendants)) {
-      const content = OSMLSerializer.getTextContent(element);
-      const tagName = element.type;
-      const attributes = element.customAttributes ?? {};
-
-      if (tagName === "narration") {
-        osml += content + "\n";
-        continue;
+    let sceneNum = 0;
+    for (const node of descendants) {
+      if (isSceneElement(node)) {
+        sceneNum++;
+        osml += `\n--- Scene ${sceneNum} ---\n`;
+        for (const child of node.children) {
+          osml += OSMLSerializer.serializeElement(child);
+        }
       }
-
-      const attrString = Object.entries(attributes)
-        .map(([key, value]) => ` ${key}="${value}"`)
-        .join("");
-
-      osml += `<${tagName}${attrString}>${content}</${tagName}>\n`;
     }
-
     return osml.trim();
+  }
+
+  private static serializeElement(element: CanvasContentElement): string {
+    const content = OSMLSerializer.getTextContent(element);
+    const tagName = element.type;
+    const attributes = element.customAttributes ?? {};
+    const attrString = Object.entries({ id: element.id, ...attributes })
+      .map(([key, value]) => ` ${key}="${value}"`)
+      .join("");
+    return `<${tagName}${attrString}>${content}</${tagName}>\n`;
   }
 
   appendChunk(chunk: string): boolean {
