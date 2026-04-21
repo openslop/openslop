@@ -1,16 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { scriptModePlugin } from "../plugins/script-mode";
 
+const { beforeGenerate } = scriptModePlugin;
+if (!beforeGenerate)
+  throw new Error("scriptModePlugin.beforeGenerate is required");
+
 describe("scriptModePlugin", () => {
   it("sets systemPrompt when none provided", () => {
-    const result = scriptModePlugin.beforeGenerate!({ prompt: "hello" });
+    const result = beforeGenerate({ prompt: "hello" });
     const sys = (result as { systemPrompt: string }).systemPrompt;
     expect(sys).toBeTruthy();
     expect(sys).toContain("script-to-XML converter");
   });
 
   it("prepends to existing systemPrompt", () => {
-    const result = scriptModePlugin.beforeGenerate!({
+    const result = beforeGenerate({
       prompt: "hello",
       systemPrompt: "custom instructions",
     });
@@ -23,7 +27,7 @@ describe("scriptModePlugin", () => {
   });
 
   it("preserves other params", () => {
-    const result = scriptModePlugin.beforeGenerate!({
+    const result = beforeGenerate({
       prompt: "test",
       model: "claude",
     }) as Record<string, unknown>;
@@ -32,7 +36,7 @@ describe("scriptModePlugin", () => {
   });
 
   it("includes key instructions in system prompt", () => {
-    const result = scriptModePlugin.beforeGenerate!({ prompt: "x" });
+    const result = beforeGenerate({ prompt: "x" });
     const sys = (result as { systemPrompt: string }).systemPrompt;
     expect(sys).toContain("ALL CAPS");
     expect(sys).toContain("NARRATOR");
