@@ -1,5 +1,6 @@
+import { NextResponse } from "next/server";
 import { getSFXProvider } from "@/lib/api/providers";
-import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { createRouteHandler } from "@/lib/api/route-handler";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 
 export const POST = createRouteHandler({
@@ -13,6 +14,6 @@ export const POST = createRouteHandler({
       model,
       durationSeconds,
     });
-    return jsonResponse(result);
+    return NextResponse.json(result);
   },
 });

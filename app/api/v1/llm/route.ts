@@ -1,5 +1,6 @@
+import { NextResponse } from "next/server";
 import { getLLMProvider } from "@/lib/api/providers";
-import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { createRouteHandler } from "@/lib/api/route-handler";
 import { formatSSE } from "@/lib/api/sse";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 import { logger } from "@/lib/api/logger";
@@ -53,6 +54,6 @@ export const POST = createRouteHandler({
     }
 
     const result = await provider.generate(genParams);
-    return jsonResponse(result);
+    return NextResponse.json(result);
   },
 });

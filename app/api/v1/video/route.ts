@@ -1,6 +1,7 @@
+import { NextResponse } from "next/server";
 import { getVideoProvider } from "@/lib/api/providers";
 import { badRequest } from "@/lib/api/response";
-import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { createRouteHandler } from "@/lib/api/route-handler";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 
 export const POST = createRouteHandler({
@@ -29,6 +30,6 @@ export const POST = createRouteHandler({
       width,
       height,
     });
-    return jsonResponse(result);
+    return NextResponse.json(result);
   },
 });

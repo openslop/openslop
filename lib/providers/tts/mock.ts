@@ -12,7 +12,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
   protected readonly variants = [
     {
       id: "1",
-      provider: "mock",
       result: {
         audio: `${BLOB_BASE}/1/output.mp3`,
         timestamps: `${BLOB_BASE}/1/timestamps.json`,
@@ -21,7 +20,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
     },
     {
       id: "2",
-      provider: "mock",
       result: {
         audio: `${BLOB_BASE}/2/output.m4a`,
         timestamps: `${BLOB_BASE}/2/timestamps.json`,
@@ -30,7 +28,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
     },
     {
       id: "3",
-      provider: "mock",
       result: {
         audio: `${BLOB_BASE}/3/output.wav`,
         timestamps: `${BLOB_BASE}/3/timestamps.json`,
@@ -39,7 +36,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
     },
     {
       id: "4",
-      provider: "mock",
       result: {
         audio: `${BLOB_BASE}/4/output.mp3`,
         timestamps: `${BLOB_BASE}/4/timestamps.json`,
@@ -48,7 +44,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
     },
     {
       id: "5",
-      provider: "mock",
       result: {
         audio: `${BLOB_BASE}/5/output.wav`,
         timestamps: `${BLOB_BASE}/5/timestamps.json`,
@@ -57,7 +52,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
     },
     {
       id: "6",
-      provider: "mock",
       result: {
         audio: `${BLOB_BASE}/6/output.m4a`,
         timestamps: `${BLOB_BASE}/6/timestamps.json`,

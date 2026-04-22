@@ -1,5 +1,6 @@
+import { NextResponse } from "next/server";
 import { getImageProvider } from "@/lib/api/providers";
-import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { createRouteHandler } from "@/lib/api/route-handler";
 import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 
 export const POST = createRouteHandler({
@@ -16,6 +17,6 @@ export const POST = createRouteHandler({
       height,
       referenceImage,
     });
-    return jsonResponse(result);
+    return NextResponse.json(result);
   },
 });

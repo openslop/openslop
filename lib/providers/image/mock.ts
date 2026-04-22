@@ -7,20 +7,8 @@ const BLOB_BASE =
 export class MockImage extends MockProvider<ImageGenerateParams> {
   protected readonly delayMs = 2000;
   protected readonly variants = [
-    {
-      id: "1",
-      provider: "mock",
-      result: { image: `${BLOB_BASE}/1/output.webp` },
-    },
-    {
-      id: "2",
-      provider: "mock",
-      result: { image: `${BLOB_BASE}/2/output.jpg` },
-    },
-    {
-      id: "3",
-      provider: "mock",
-      result: { image: `${BLOB_BASE}/3/output.png` },
-    },
+    { id: "1", result: { image: `${BLOB_BASE}/1/output.webp` } },
+    { id: "2", result: { image: `${BLOB_BASE}/2/output.jpg` } },
+    { id: "3", result: { image: `${BLOB_BASE}/3/output.png` } },
   ];
 }

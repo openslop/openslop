@@ -8,19 +8,16 @@ export class MockSFX extends MockProvider<SFXGenerateParams> {
   protected readonly variants = [
     {
       id: "1",
-      provider: "mock",
       result: { audio: `${BLOB_BASE}/1/output.mp3` },
       metadata: { durationSec: 22 },
     },
     {
       id: "2",
-      provider: "mock",
       result: { audio: `${BLOB_BASE}/2/output.wav` },
       metadata: { durationSec: 19 },
     },
     {
       id: "3",
-      provider: "mock",
       result: { audio: `${BLOB_BASE}/3/output.m4a` },
       metadata: { durationSec: 2 },
     },

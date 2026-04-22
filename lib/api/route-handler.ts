@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { badRequest, serverError } from "./response";
 import { logger } from "./logger";
 
@@ -49,8 +49,4 @@ export function createRouteHandler<T>(options: RouteOptions<T>) {
       return serverError(`${options.label} failed`);
     }
   };
-}
-
-export function jsonResponse(data: unknown) {
-  return NextResponse.json(data);
 }

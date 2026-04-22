@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { NextRequest } from "next/server";
-import { createRouteHandler, jsonResponse } from "../route-handler";
+import { NextRequest, NextResponse } from "next/server";
+import { createRouteHandler } from "../route-handler";
 
 vi.mock("../logger", () => ({
   logger: { warn: vi.fn(), error: vi.fn() },
@@ -31,7 +31,7 @@ function makeHandler(overrides?: {
     handle:
       overrides?.handle ??
       (async (_provider, body) =>
-        jsonResponse({ ok: true, prompt: body.prompt })),
+        NextResponse.json({ ok: true, prompt: body.prompt })),
   });
 }
 
@@ -64,7 +64,7 @@ describe("createRouteHandler", () => {
   });
 
   it("maps model name to slug and passes to handle", async () => {
-    const handle = vi.fn(async () => jsonResponse({ done: true }));
+    const handle = vi.fn(async () => NextResponse.json({ done: true }));
     const handler = makeHandler({ handle });
     await handler(makeRequest({ prompt: "hello", model: "model-a" }));
 
@@ -107,13 +107,5 @@ describe("createRouteHandler", () => {
     expect(res.status).toBe(500);
     const json = await res.json();
     expect(json.error).toBe("TestRoute failed");
-  });
-});
-
-describe("jsonResponse", () => {
-  it("returns a JSON NextResponse", async () => {
-    const res = jsonResponse({ foo: "bar" });
-    const json = await res.json();
-    expect(json).toEqual({ foo: "bar" });
   });
 });

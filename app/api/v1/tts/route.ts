@@ -1,6 +1,7 @@
+import { NextResponse } from "next/server";
 import { getTTSProvider } from "@/lib/api/providers";
 import { badRequest } from "@/lib/api/response";
-import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { createRouteHandler } from "@/lib/api/route-handler";
 import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 
 export const POST = createRouteHandler({
@@ -22,6 +23,6 @@ export const POST = createRouteHandler({
       volume,
       format,
     });
-    return jsonResponse(result);
+    return NextResponse.json(result);
   },
 });
