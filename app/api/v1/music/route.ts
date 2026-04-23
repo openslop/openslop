@@ -1,5 +1,6 @@
+import { NextResponse } from "next/server";
 import { getMusicProvider } from "@/lib/api/providers";
-import { createRouteHandler, jsonResponse } from "@/lib/api/route-handler";
+import { createRouteHandler } from "@/lib/api/route-handler";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 
 export const POST = createRouteHandler({
@@ -13,6 +14,6 @@ export const POST = createRouteHandler({
       model,
       durationSeconds,
     });
-    return jsonResponse(result);
+    return NextResponse.json(result);
   },
 });

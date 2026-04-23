@@ -9,12 +9,6 @@ vi.mock("../generateForElement", () => ({
   generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
-// Re-import after mock so the module picks up the mocked dependency.
-// We construct fresh instances via the class, not the singleton, to avoid
-// cross-test pollution. The class isn't exported, so we import the module
-// and use the exported singleton's constructor trick — but actually the
-// simplest approach is to just clear the singleton between tests.
-
 function makeJob(
   id: string,
   overrides?: Partial<GenerationJob>,

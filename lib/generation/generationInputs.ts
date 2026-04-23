@@ -5,7 +5,7 @@ export type GenerationInputs = {
   attributes: Record<string, string>;
 };
 
-export function inputsEqual(a: GenerationInputs, b: GenerationInputs): boolean {
+function inputsEqual(a: GenerationInputs, b: GenerationInputs): boolean {
   return a.prompt === b.prompt && isEqual(a.attributes, b.attributes);
 }
 
