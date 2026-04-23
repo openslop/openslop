@@ -3,10 +3,10 @@ import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { OpenSlopGatewayClient } from "./base";
 
 export class OpenSlopMusicGateway extends OpenSlopGatewayClient<
-  MusicGenerateParams,
-  BundleResponse
+	MusicGenerateParams,
+	BundleResponse
 > {
-  async generate(params: MusicGenerateParams): Promise<BundleResponse> {
-    return this.client.post<BundleResponse>("/api/v1/music", params);
-  }
+	async generate(params: MusicGenerateParams): Promise<BundleResponse> {
+		return this.client.post<BundleResponse>("/api/v1/music", params);
+	}
 }

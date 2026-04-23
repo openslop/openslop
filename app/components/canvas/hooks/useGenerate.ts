@@ -6,41 +6,41 @@ import { buildGenerationJob } from "../utils/buildGenerationJob";
 import { getGenerationInputs } from "../utils/getGenerationInputs";
 
 export function useGenerate(element: CanvasContentElement) {
-  const { connectorConfig } = useConfig();
+	const { connectorConfig } = useConfig();
 
-  const snapshot = useSyncExternalStore(generationQueue.subscribe, () =>
-    generationQueue.getElementSnapshot(element.id),
-  );
+	const snapshot = useSyncExternalStore(generationQueue.subscribe, () =>
+		generationQueue.getElementSnapshot(element.id),
+	);
 
-  const currentInputs = getGenerationInputs(element);
-  const stale = isStaleResult(snapshot, currentInputs);
+	const currentInputs = getGenerationInputs(element);
+	const stale = isStaleResult(snapshot, currentInputs);
 
-  useEffect(() => {
-    if (!stale) return;
-    generationQueue.restoreResult(element.id, currentInputs);
-  }, [element.id, currentInputs, stale]);
+	useEffect(() => {
+		if (!stale) return;
+		generationQueue.restoreResult(element.id, currentInputs);
+	}, [element.id, currentInputs, stale]);
 
-  const generate = useCallback(() => {
-    const job = buildGenerationJob(element, connectorConfig);
-    if (!job) {
-      generationQueue.setError(element.id, "Enter a prompt first");
-      return;
-    }
-    generationQueue.enqueue(job);
-  }, [element, connectorConfig]);
+	const generate = useCallback(() => {
+		const job = buildGenerationJob(element, connectorConfig);
+		if (!job) {
+			generationQueue.setError(element.id, "Enter a prompt first");
+			return;
+		}
+		generationQueue.enqueue(job);
+	}, [element, connectorConfig]);
 
-  const discard = useCallback(() => {
-    generationQueue.discard(element.id);
-  }, [element.id]);
+	const discard = useCallback(() => {
+		generationQueue.discard(element.id);
+	}, [element.id]);
 
-  return {
-    generating: snapshot.status === "generating",
-    queued: snapshot.status === "queued",
-    seconds: snapshot.seconds,
-    result: snapshot.result,
-    error: snapshot.error,
-    stale,
-    generate,
-    discard,
-  };
+	return {
+		generating: snapshot.status === "generating",
+		queued: snapshot.status === "queued",
+		seconds: snapshot.seconds,
+		result: snapshot.result,
+		error: snapshot.error,
+		stale,
+		generate,
+		discard,
+	};
 }

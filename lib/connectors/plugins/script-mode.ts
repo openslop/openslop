@@ -15,13 +15,13 @@ const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
 `;
 
 export const scriptModePlugin: LLMPlugin = {
-  name: "scriptMode",
-  beforeGenerate(params) {
-    return {
-      ...params,
-      systemPrompt: params.systemPrompt
-        ? `${SCRIPT_MODE_SYSTEM_PROMPT}\n\n${params.systemPrompt}`
-        : SCRIPT_MODE_SYSTEM_PROMPT,
-    };
-  },
+	name: "scriptMode",
+	beforeGenerate(params) {
+		return {
+			...params,
+			systemPrompt: params.systemPrompt
+				? `${SCRIPT_MODE_SYSTEM_PROMPT}\n\n${params.systemPrompt}`
+				: SCRIPT_MODE_SYSTEM_PROMPT,
+		};
+	},
 };

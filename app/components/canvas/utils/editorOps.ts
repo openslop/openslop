@@ -4,14 +4,14 @@ import { isContentElement } from "./guards";
 
 /** Find a content element by ID. Returns [node, path] or null. */
 export function findNodeById(
-  editor: Editor,
-  id: string,
+	editor: Editor,
+	id: string,
 ): NodeEntry<CanvasContentElement> | null {
-  const [entry] = Editor.nodes<CanvasContentElement>(editor, {
-    at: [],
-    match: (n) => isContentElement(n) && n.id === id,
-  });
-  return entry ?? null;
+	const [entry] = Editor.nodes<CanvasContentElement>(editor, {
+		at: [],
+		match: (n) => isContentElement(n) && n.id === id,
+	});
+	return entry ?? null;
 }
 
 /**
@@ -20,24 +20,24 @@ export function findNodeById(
  * replaces the full text range.
  */
 export function updateNodeText(
-  editor: Editor,
-  path: Path,
-  newText: string,
+	editor: Editor,
+	path: Path,
+	newText: string,
 ): void {
-  const currentText = Editor.string(editor, path);
-  if (currentText === newText) return;
+	const currentText = Editor.string(editor, path);
+	if (currentText === newText) return;
 
-  if (newText.startsWith(currentText)) {
-    const diff = newText.substring(currentText.length);
-    if (diff) {
-      Transforms.insertText(editor, diff, {
-        at: Editor.end(editor, path),
-      });
-    }
-  } else {
-    const range = Editor.range(editor, path);
-    Transforms.insertText(editor, newText, { at: range });
-  }
+	if (newText.startsWith(currentText)) {
+		const diff = newText.substring(currentText.length);
+		if (diff) {
+			Transforms.insertText(editor, diff, {
+				at: Editor.end(editor, path),
+			});
+		}
+	} else {
+		const range = Editor.range(editor, path);
+		Transforms.insertText(editor, newText, { at: range });
+	}
 }
 
 /**
@@ -45,18 +45,18 @@ export function updateNodeText(
  * deleted from the result.
  */
 export function setNodeAttrs(
-  editor: Editor,
-  path: Path,
-  element: CanvasContentElement,
-  attrs: Record<string, string | null>,
+	editor: Editor,
+	path: Path,
+	element: CanvasContentElement,
+	attrs: Record<string, string | null>,
 ): void {
-  const merged = { ...element.customAttributes };
-  for (const [key, value] of Object.entries(attrs)) {
-    if (value === null) {
-      delete merged[key];
-    } else {
-      merged[key] = value;
-    }
-  }
-  Transforms.setNodes(editor, { customAttributes: merged }, { at: path });
+	const merged = { ...element.customAttributes };
+	for (const [key, value] of Object.entries(attrs)) {
+		if (value === null) {
+			delete merged[key];
+		} else {
+			merged[key] = value;
+		}
+	}
+	Transforms.setNodes(editor, { customAttributes: merged }, { at: path });
 }

@@ -2,11 +2,11 @@ import dedent from "dedent";
 import { EffectType } from "../image/enums";
 import { MusicLength } from "../music/enums";
 import {
-  TTSAccent,
-  TTSAge,
-  TTSEmotion,
-  TTSGender,
-  TTSPitch,
+	TTSAccent,
+	TTSAge,
+	TTSEmotion,
+	TTSGender,
+	TTSPitch,
 } from "../tts/enums";
 import type { LLMPlugin } from "../types";
 
@@ -62,8 +62,8 @@ const OSML_SYSTEM_PROMPT = dedent`
   - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
   - For example, if there is rain in the image, add the rain overlay. If there is smoke, add the smoke overlay. If there is lightning, add the lightning overlay. If there are multiple effects, add all of them.
   - Overlays should be a comma-separated list containing any of the following: ${Object.values(
-    EffectType,
-  ).join(", ")}
+		EffectType,
+	).join(", ")}
   - Image descriptions should describe the characters (along with their gender, age, ethnicity, species, hair color, eye color, skin tone, clothing, and physical appearances), the time of day, the background, the weather (if outdoors), and objects in detail.
   - Each <image> description must be written as a fully standalone prompt, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
   - The first time a character is mentioned in each image tag description, describe the character next to their name in parentheses. Example: "Kirito (a black haired Japanese boy with brown eyes and a white shirt)..."
@@ -100,11 +100,11 @@ const OSML_SYSTEM_PROMPT = dedent`
 `;
 
 export const osmlPlugin: LLMPlugin = {
-  name: "osml",
-  beforeGenerate(params) {
-    if (!params.systemPrompt) {
-      return { ...params, systemPrompt: OSML_SYSTEM_PROMPT };
-    }
-    return params;
-  },
+	name: "osml",
+	beforeGenerate(params) {
+		if (!params.systemPrompt) {
+			return { ...params, systemPrompt: OSML_SYSTEM_PROMPT };
+		}
+		return params;
+	},
 };

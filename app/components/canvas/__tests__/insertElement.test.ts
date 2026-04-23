@@ -2,138 +2,138 @@ import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
 vi.mock("../config/elementConfigs", () => ({
-  ELEMENT_CONFIGS: {
-    image: {
-      type: "image",
-      connector: "image",
-      outputKind: "image",
-      label: "Image",
-      defaultAttributes: undefined,
-      visibleAttributes: {},
-    },
-    narration: {
-      type: "narration",
-      connector: "tts",
-      outputKind: "audio",
-      label: "Narration",
-      defaultAttributes: { gender: "male", accent: "american" },
-      visibleAttributes: {},
-    },
-  },
+	ELEMENT_CONFIGS: {
+		image: {
+			type: "image",
+			connector: "image",
+			outputKind: "image",
+			label: "Image",
+			defaultAttributes: undefined,
+			visibleAttributes: {},
+		},
+		narration: {
+			type: "narration",
+			connector: "tts",
+			outputKind: "audio",
+			label: "Narration",
+			defaultAttributes: { gender: "male", accent: "american" },
+			visibleAttributes: {},
+		},
+	},
 }));
 
 vi.mock("../utils/hydrateConnectorConfig", () => ({
-  hydrateConnectorConfig: () => (node: Record<string, unknown>) => ({
-    ...node,
-    customAttributes: {
-      ...(node.customAttributes as Record<string, string> | undefined),
-      model: "test-model",
-      provider: "openslop",
-    },
-  }),
+	hydrateConnectorConfig: () => (node: Record<string, unknown>) => ({
+		...node,
+		customAttributes: {
+			...(node.customAttributes as Record<string, string> | undefined),
+			model: "test-model",
+			provider: "openslop",
+		},
+	}),
 }));
 
 import { insertElement } from "../utils/insertElement";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 
 const connectors: ConnectorRegistry = {
-  llm: {
-    openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-  },
-  tts: {
-    openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-  },
-  image: {
-    openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-  },
-  video: {
-    openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-  },
-  sfx: {
-    openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-  },
-  music: {
-    openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-  },
+	llm: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	tts: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	image: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	video: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	sfx: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	music: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
 };
 
 function makeEditor() {
-  const editor = createEditor();
-  editor.children = [
-    {
-      id: "scene-1",
-      type: "scene",
-      children: [
-        {
-          id: "nar-1",
-          type: "narration",
-          children: [{ id: "t1", type: "narration", text: "hello" }],
-        },
-      ],
-    },
-  ];
-  return editor;
+	const editor = createEditor();
+	editor.children = [
+		{
+			id: "scene-1",
+			type: "scene",
+			children: [
+				{
+					id: "nar-1",
+					type: "narration",
+					children: [{ id: "t1", type: "narration", text: "hello" }],
+				},
+			],
+		},
+	];
+	return editor;
 }
 
 describe("insertElement", () => {
-  it("inserts a node with correct type", () => {
-    const editor = makeEditor();
-    Editor.withoutNormalizing(editor, () => {
-      insertElement(editor, "narration", [0, 1], connectors);
-    });
+	it("inserts a node with correct type", () => {
+		const editor = makeEditor();
+		Editor.withoutNormalizing(editor, () => {
+			insertElement(editor, "narration", [0, 1], connectors);
+		});
 
-    const scene = editor.children[0] as {
-      children: Array<Record<string, unknown>>;
-    };
-    const inserted = scene.children[1];
-    expect(inserted.type).toBe("narration");
-    expect(inserted.id).toBeDefined();
-    expect(inserted.children).toBeDefined();
-  });
+		const scene = editor.children[0] as {
+			children: Array<Record<string, unknown>>;
+		};
+		const inserted = scene.children[1];
+		expect(inserted.type).toBe("narration");
+		expect(inserted.id).toBeDefined();
+		expect(inserted.children).toBeDefined();
+	});
 
-  it("applies default attributes from element config", () => {
-    const editor = makeEditor();
-    Editor.withoutNormalizing(editor, () => {
-      insertElement(editor, "narration", [0, 1], connectors);
-    });
+	it("applies default attributes from element config", () => {
+		const editor = makeEditor();
+		Editor.withoutNormalizing(editor, () => {
+			insertElement(editor, "narration", [0, 1], connectors);
+		});
 
-    const scene = editor.children[0] as {
-      children: Array<Record<string, unknown>>;
-    };
-    const inserted = scene.children[1];
-    const attrs = inserted.customAttributes as Record<string, string>;
-    expect(attrs.gender).toBe("male");
-    expect(attrs.accent).toBe("american");
-  });
+		const scene = editor.children[0] as {
+			children: Array<Record<string, unknown>>;
+		};
+		const inserted = scene.children[1];
+		const attrs = inserted.customAttributes as Record<string, string>;
+		expect(attrs.gender).toBe("male");
+		expect(attrs.accent).toBe("american");
+	});
 
-  it("hydrates connector config (model and provider)", () => {
-    const editor = makeEditor();
-    Editor.withoutNormalizing(editor, () => {
-      insertElement(editor, "image", [0, 1], connectors);
-    });
+	it("hydrates connector config (model and provider)", () => {
+		const editor = makeEditor();
+		Editor.withoutNormalizing(editor, () => {
+			insertElement(editor, "image", [0, 1], connectors);
+		});
 
-    const scene = editor.children[0] as {
-      children: Array<Record<string, unknown>>;
-    };
-    const inserted = scene.children[1];
-    const attrs = inserted.customAttributes as Record<string, string>;
-    expect(attrs.model).toBe("test-model");
-    expect(attrs.provider).toBe("openslop");
-  });
+		const scene = editor.children[0] as {
+			children: Array<Record<string, unknown>>;
+		};
+		const inserted = scene.children[1];
+		const attrs = inserted.customAttributes as Record<string, string>;
+		expect(attrs.model).toBe("test-model");
+		expect(attrs.provider).toBe("openslop");
+	});
 
-  it("element without defaultAttributes gets undefined customAttributes base", () => {
-    const editor = makeEditor();
-    Editor.withoutNormalizing(editor, () => {
-      insertElement(editor, "image", [0, 1], connectors);
-    });
+	it("element without defaultAttributes gets undefined customAttributes base", () => {
+		const editor = makeEditor();
+		Editor.withoutNormalizing(editor, () => {
+			insertElement(editor, "image", [0, 1], connectors);
+		});
 
-    const scene = editor.children[0] as {
-      children: Array<Record<string, unknown>>;
-    };
-    const inserted = scene.children[1];
-    const attrs = inserted.customAttributes as Record<string, string>;
-    expect(attrs.model).toBe("test-model");
-    expect(attrs.provider).toBe("openslop");
-    expect(attrs.gender).toBeUndefined();
-  });
+		const scene = editor.children[0] as {
+			children: Array<Record<string, unknown>>;
+		};
+		const inserted = scene.children[1];
+		const attrs = inserted.customAttributes as Record<string, string>;
+		expect(attrs.model).toBe("test-model");
+		expect(attrs.provider).toBe("openslop");
+		expect(attrs.gender).toBeUndefined();
+	});
 });

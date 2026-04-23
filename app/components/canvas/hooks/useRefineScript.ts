@@ -9,59 +9,59 @@ import { applyRefineOp } from "@/lib/script/refine/applyOps";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 
 export function useRefineScript(getEditor: () => Editor | null) {
-  const { connectorConfig } = useConfig();
-  const [refineLoading, setRefineLoading] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
+	const { connectorConfig } = useConfig();
+	const [refineLoading, setRefineLoading] = useState(false);
+	const abortRef = useRef<AbortController | null>(null);
 
-  const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
-    connectorConfig,
-    "llm",
-  );
+	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
+		connectorConfig,
+		"llm",
+	);
 
-  const refineScript = useCallback(
-    async (prompt: string) => {
-      const editor = getEditor();
-      if (!editor) return;
+	const refineScript = useCallback(
+		async (prompt: string) => {
+			const editor = getEditor();
+			if (!editor) return;
 
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setRefineLoading(true);
+			abortRef.current?.abort();
+			const controller = new AbortController();
+			abortRef.current = controller;
+			setRefineLoading(true);
 
-      const osml = OSMLSerializer.serializeWithScenes(editor.children);
-      const connector = createConnector("llm", llmProvider, {
-        ...llmConfig,
-        plugins: [createRefinePlugin(osml)],
-      });
+			const osml = OSMLSerializer.serializeWithScenes(editor.children);
+			const connector = createConnector("llm", llmProvider, {
+				...llmConfig,
+				plugins: [createRefinePlugin(osml)],
+			});
 
-      const parser = new RefineOpParser();
-      const anchorMap: Record<string, string> = {};
-      try {
-        for await (const chunk of connector.stream({ prompt })) {
-          if (controller.signal.aborted) break;
-          const ops = parser.push(chunk.text);
-          for (const op of ops) {
-            applyRefineOp(editor, op, anchorMap, connectorConfig);
-          }
-        }
-        for (const op of parser.flush()) {
-          applyRefineOp(editor, op, anchorMap, connectorConfig);
-        }
-      } finally {
-        if (abortRef.current === controller) {
-          abortRef.current = null;
-          setRefineLoading(false);
-        }
-      }
-    },
-    [getEditor, llmProvider, llmConfig, connectorConfig],
-  );
+			const parser = new RefineOpParser();
+			const anchorMap: Record<string, string> = {};
+			try {
+				for await (const chunk of connector.stream({ prompt })) {
+					if (controller.signal.aborted) break;
+					const ops = parser.push(chunk.text);
+					for (const op of ops) {
+						applyRefineOp(editor, op, anchorMap, connectorConfig);
+					}
+				}
+				for (const op of parser.flush()) {
+					applyRefineOp(editor, op, anchorMap, connectorConfig);
+				}
+			} finally {
+				if (abortRef.current === controller) {
+					abortRef.current = null;
+					setRefineLoading(false);
+				}
+			}
+		},
+		[getEditor, llmProvider, llmConfig, connectorConfig],
+	);
 
-  const stopRefine = useCallback(() => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-    setRefineLoading(false);
-  }, []);
+	const stopRefine = useCallback(() => {
+		abortRef.current?.abort();
+		abortRef.current = null;
+		setRefineLoading(false);
+	}, []);
 
-  return { refineScript, refineLoading, stopRefine };
+	return { refineScript, refineLoading, stopRefine };
 }

@@ -1,6 +1,6 @@
 import type {
-  LLMGenerateParams,
-  LLMGenerateResult,
+	LLMGenerateParams,
+	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
@@ -37,116 +37,116 @@ const MOCK_SCRIPT = `<image animate="true" animation="slow pan across the villag
 type RefinementFactory = (ids: string[]) => string;
 
 const MOCK_REFINEMENTS: RefinementFactory[] = [
-  // Modify text on first element
-  (ids) =>
-    `{"op":"set","id":"${ids[0]}","text":"In a distant village, at the edge of an enchanted forest, there lived a brave girl named Red."}`,
+	// Modify text on first element
+	(ids) =>
+		`{"op":"set","id":"${ids[0]}","text":"In a distant village, at the edge of an enchanted forest, there lived a brave girl named Red."}`,
 
-  // Insert multiple elements at same anchor (tests stacking)
-  (ids) =>
-    [
-      `{"op":"insert","anchor_id":"${ids[0]}","type":"sound","text":"mystical wind chimes"}`,
-      `{"op":"insert","anchor_id":"${ids[0]}","type":"sound","text":"distant thunder"}`,
-      `{"op":"insert","anchor_id":"${ids[0]}","type":"music","text":"Tense orchestral music with deep cellos and timpani"}`,
-    ].join("\n"),
+	// Insert multiple elements at same anchor (tests stacking)
+	(ids) =>
+		[
+			`{"op":"insert","anchor_id":"${ids[0]}","type":"sound","text":"mystical wind chimes"}`,
+			`{"op":"insert","anchor_id":"${ids[0]}","type":"sound","text":"distant thunder"}`,
+			`{"op":"insert","anchor_id":"${ids[0]}","type":"music","text":"Tense orchestral music with deep cellos and timpani"}`,
+		].join("\n"),
 
-  // Remove an element then insert at same anchor (tests stale anchor fallback)
-  (ids) =>
-    [
-      `{"op":"remove","id":"${ids[1]}"}`,
-      `{"op":"insert","anchor_id":"${ids[0]}","type":"narration","text":"The forest grew darker as she ventured deeper."}`,
-    ].join("\n"),
+	// Remove an element then insert at same anchor (tests stale anchor fallback)
+	(ids) =>
+		[
+			`{"op":"remove","id":"${ids[1]}"}`,
+			`{"op":"insert","anchor_id":"${ids[0]}","type":"narration","text":"The forest grew darker as she ventured deeper."}`,
+		].join("\n"),
 
-  // Change element type (tests type change + hydration)
-  (ids) =>
-    `{"op":"set","id":"${ids[0]}","type":"character","attrs":{"name":"Red","emotion":"excited"},"text":"I can see grandmother's house from here!"}`,
+	// Change element type (tests type change + hydration)
+	(ids) =>
+		`{"op":"set","id":"${ids[0]}","type":"character","attrs":{"name":"Red","emotion":"excited"},"text":"I can see grandmother's house from here!"}`,
 
-  // Insert at top (tests position:"before" with no anchor)
-  () =>
-    [
-      `{"op":"insert","position":"before","type":"narration","text":"Long ago, in a land of endless forests..."}`,
-      `{"op":"insert","position":"before","type":"image","attrs":{"art_style":"watercolor","animate":"true"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
-    ].join("\n"),
+	// Insert at top (tests position:"before" with no anchor)
+	() =>
+		[
+			`{"op":"insert","position":"before","type":"narration","text":"Long ago, in a land of endless forests..."}`,
+			`{"op":"insert","position":"before","type":"image","attrs":{"art_style":"watercolor","animate":"true"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
+		].join("\n"),
 
-  // Multiple set ops on different elements (tests independent edits)
-  (ids) =>
-    ids
-      .slice(0, 3)
-      .map(
-        (id, i) =>
-          `{"op":"set","id":"${id}","attrs":{"emotion":"${["excited", "scared", "calm"][i]}"}}`,
-      )
-      .join("\n"),
+	// Multiple set ops on different elements (tests independent edits)
+	(ids) =>
+		ids
+			.slice(0, 3)
+			.map(
+				(id, i) =>
+					`{"op":"set","id":"${id}","attrs":{"emotion":"${["excited", "scared", "calm"][i]}"}}`,
+			)
+			.join("\n"),
 
-  // Append multiple to end (tests no-anchor stacking)
-  () =>
-    [
-      `{"op":"insert","type":"sound","text":"wolf howling in the distance"}`,
-      `{"op":"insert","type":"narration","text":"Red paused, her heart pounding."}`,
-      `{"op":"insert","type":"sound","text":"snapping twigs"}`,
-      `{"op":"insert","type":"character","attrs":{"name":"Red","emotion":"scared"},"text":"Who's there?"}`,
-    ].join("\n"),
+	// Append multiple to end (tests no-anchor stacking)
+	() =>
+		[
+			`{"op":"insert","type":"sound","text":"wolf howling in the distance"}`,
+			`{"op":"insert","type":"narration","text":"Red paused, her heart pounding."}`,
+			`{"op":"insert","type":"sound","text":"snapping twigs"}`,
+			`{"op":"insert","type":"character","attrs":{"name":"Red","emotion":"scared"},"text":"Who's there?"}`,
+		].join("\n"),
 ];
 
 function extractIds(prompt: string): string[] {
-  return [...prompt.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+	return [...prompt.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
 }
 
 function isRefineRequest(params: LLMGenerateParams): boolean {
-  return params.prompt.includes("## Refinement Request");
+	return params.prompt.includes("## Refinement Request");
 }
 
 function buildRefineResponse(params: LLMGenerateParams): string {
-  const ids = extractIds(params.prompt);
-  const factory = pickRandom(MOCK_REFINEMENTS);
-  return factory(ids);
+	const ids = extractIds(params.prompt);
+	const factory = pickRandom(MOCK_REFINEMENTS);
+	return factory(ids);
 }
 
 function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export class MockLLM extends BaseProvider<
-  LLMGenerateParams,
-  LLMGenerateResult,
-  LLMGenerateResult
+	LLMGenerateParams,
+	LLMGenerateResult,
+	LLMGenerateResult
 > {
-  protected readonly blobConfig = { type: "llm", provider: "mock" };
+	protected readonly blobConfig = { type: "llm", provider: "mock" };
 
-  protected toFiles() {
-    return [];
-  }
+	protected toFiles() {
+		return [];
+	}
 
-  protected async store(result: LLMGenerateResult) {
-    return result;
-  }
+	protected async store(result: LLMGenerateResult) {
+		return result;
+	}
 
-  protected async _generate(
-    params: LLMGenerateParams,
-  ): Promise<LLMGenerateResult> {
-    const text = isRefineRequest(params)
-      ? buildRefineResponse(params)
-      : MOCK_SCRIPT;
-    return {
-      text,
-      model: "mock",
-      usage: { inputTokens: 0, outputTokens: 0 },
-    };
-  }
+	protected async _generate(
+		params: LLMGenerateParams,
+	): Promise<LLMGenerateResult> {
+		const text = isRefineRequest(params)
+			? buildRefineResponse(params)
+			: MOCK_SCRIPT;
+		return {
+			text,
+			model: "mock",
+			usage: { inputTokens: 0, outputTokens: 0 },
+		};
+	}
 
-  async *stream(
-    params: LLMGenerateParams,
-  ): AsyncGenerator<{ text: string; done: boolean }> {
-    await delay(500);
-    const text = isRefineRequest(params)
-      ? buildRefineResponse(params)
-      : MOCK_SCRIPT;
-    let i = 0;
-    while (i < text.length) {
-      const size = 1 + Math.floor(Math.random() * 12);
-      await delay(20 + Math.random() * 40);
-      yield { text: text.slice(i, i + size), done: false };
-      i += size;
-    }
-    yield { text: "", done: true };
-  }
+	async *stream(
+		params: LLMGenerateParams,
+	): AsyncGenerator<{ text: string; done: boolean }> {
+		await delay(500);
+		const text = isRefineRequest(params)
+			? buildRefineResponse(params)
+			: MOCK_SCRIPT;
+		let i = 0;
+		while (i < text.length) {
+			const size = 1 + Math.floor(Math.random() * 12);
+			await delay(20 + Math.random() * 40);
+			yield { text: text.slice(i, i + size), done: false };
+			i += size;
+		}
+		yield { text: "", done: true };
+	}
 }

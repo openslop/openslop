@@ -5,59 +5,59 @@ import type { CanvasContentElement } from "../types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import {
-  PlaceholderBalls,
-  useStaticRotations,
-  StaleIndicator,
+	PlaceholderBalls,
+	useStaticRotations,
+	StaleIndicator,
 } from "./OutputPreview";
 import loaderStyles from "./OutputPreview.module.css";
 
 export function ForegroundPreview({
-  element,
+	element,
 }: {
-  element: CanvasContentElement;
+	element: CanvasContentElement;
 }) {
-  const { result, generating, stale, generate } = useGenerate(element);
-  const [loaded, setLoaded] = useState(false);
-  const { outputKind } = ELEMENT_CONFIGS[element.type];
-  const staticRotations = useStaticRotations();
+	const { result, generating, stale, generate } = useGenerate(element);
+	const [loaded, setLoaded] = useState(false);
+	const { outputKind } = ELEMENT_CONFIGS[element.type];
+	const staticRotations = useStaticRotations();
 
-  if (!result) {
-    return (
-      <div
-        className={`relative w-full h-full rounded-lg overflow-hidden border bg-white/[0.03]`}
-      >
-        <div className={loaderStyles.containerLoader} aria-hidden="true">
-          <PlaceholderBalls
-            generating={generating}
-            staticRotations={staticRotations}
-          />
-        </div>
-      </div>
-    );
-  }
+	if (!result) {
+		return (
+			<div
+				className={`relative w-full h-full rounded-lg overflow-hidden border bg-white/[0.03]`}
+			>
+				<div className={loaderStyles.containerLoader} aria-hidden="true">
+					<PlaceholderBalls
+						generating={generating}
+						staticRotations={staticRotations}
+					/>
+				</div>
+			</div>
+		);
+	}
 
-  return (
-    <div className={`relative w-full h-full rounded-lg overflow-hidden border`}>
-      {outputKind === "image" ? (
-        <Image
-          src={result.url}
-          alt="Scene preview"
-          fill
-          className="object-cover"
-          unoptimized
-          onLoad={() => setLoaded(true)}
-        />
-      ) : (
-        <video
-          src={result.url}
-          className="w-full h-full object-cover pointer-events-none"
-          onLoadedData={() => setLoaded(true)}
-        />
-      )}
-      {!loaded && (
-        <Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-      )}
-      {stale && <StaleIndicator onClick={generate} />}
-    </div>
-  );
+	return (
+		<div className={`relative w-full h-full rounded-lg overflow-hidden border`}>
+			{outputKind === "image" ? (
+				<Image
+					src={result.url}
+					alt="Scene preview"
+					fill
+					className="object-cover"
+					unoptimized
+					onLoad={() => setLoaded(true)}
+				/>
+			) : (
+				<video
+					src={result.url}
+					className="w-full h-full object-cover pointer-events-none"
+					onLoadedData={() => setLoaded(true)}
+				/>
+			)}
+			{!loaded && (
+				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
+			)}
+			{stale && <StaleIndicator onClick={generate} />}
+		</div>
+	);
 }

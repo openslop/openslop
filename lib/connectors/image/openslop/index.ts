@@ -5,14 +5,14 @@ import { modelsFromMap } from "@/lib/connectors/types";
 import { IMAGE_MODELS } from "./models";
 
 export class OpenSlopImage extends BaseImageConnector {
-  protected gateway: OpenSlopImageGateway;
+	protected gateway: OpenSlopImageGateway;
 
-  constructor(config: ConnectorConfig) {
-    super(config);
-    this.gateway = new OpenSlopImageGateway(config.baseUrl);
-  }
+	constructor(config: ConnectorConfig) {
+		super(config);
+		this.gateway = new OpenSlopImageGateway(config.baseUrl);
+	}
 
-  async listModels(): Promise<ModelInfo[]> {
-    return modelsFromMap(IMAGE_MODELS);
-  }
+	async listModels(): Promise<ModelInfo[]> {
+		return modelsFromMap(IMAGE_MODELS);
+	}
 }

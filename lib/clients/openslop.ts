@@ -1,61 +1,61 @@
 import { createClient } from "@/lib/supabase/client";
 
 export class OpenSlopClient {
-  private baseUrl: string;
-  private supabase = createClient();
+	private baseUrl: string;
+	private supabase = createClient();
 
-  constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || "";
-  }
+	constructor(baseUrl?: string) {
+		this.baseUrl = baseUrl || "";
+	}
 
-  private async headers(): Promise<Record<string, string>> {
-    const h: Record<string, string> = { "content-type": "application/json" };
-    const {
-      data: { session },
-    } = await this.supabase.auth.getSession();
-    if (session?.access_token)
-      h["authorization"] = `Bearer ${session.access_token}`;
-    return h;
-  }
+	private async headers(): Promise<Record<string, string>> {
+		const h: Record<string, string> = { "content-type": "application/json" };
+		const {
+			data: { session },
+		} = await this.supabase.auth.getSession();
+		if (session?.access_token)
+			h["authorization"] = `Bearer ${session.access_token}`;
+		return h;
+	}
 
-  private async request(
-    method: string,
-    url: string,
-    body?: unknown,
-  ): Promise<Response> {
-    const res = await fetch(url, {
-      method,
-      headers: await this.headers(),
-      ...(body !== undefined && { body: JSON.stringify(body) }),
-    });
-    if (!res.ok) {
-      const message = await res.json().then(
-        (b) => b.error || `${res.status} ${res.statusText}`,
-        () => `${res.status} ${res.statusText}`,
-      );
-      throw new Error(message);
-    }
-    return res;
-  }
+	private async request(
+		method: string,
+		url: string,
+		body?: unknown,
+	): Promise<Response> {
+		const res = await fetch(url, {
+			method,
+			headers: await this.headers(),
+			...(body !== undefined && { body: JSON.stringify(body) }),
+		});
+		if (!res.ok) {
+			const message = await res.json().then(
+				(b) => b.error || `${res.status} ${res.statusText}`,
+				() => `${res.status} ${res.statusText}`,
+			);
+			throw new Error(message);
+		}
+		return res;
+	}
 
-  async post<T>(path: string, body: unknown): Promise<T> {
-    const res = await this.request("POST", `${this.baseUrl}${path}`, body);
-    return res.json() as Promise<T>;
-  }
+	async post<T>(path: string, body: unknown): Promise<T> {
+		const res = await this.request("POST", `${this.baseUrl}${path}`, body);
+		return res.json() as Promise<T>;
+	}
 
-  async get<T>(path: string, params?: Record<string, string>): Promise<T> {
-    let url = `${this.baseUrl}${path}`;
-    if (params) {
-      const qs = new URLSearchParams(
-        Object.entries(params).filter(([, v]) => v !== undefined),
-      ).toString();
-      if (qs) url += `?${qs}`;
-    }
-    const res = await this.request("GET", url);
-    return res.json() as Promise<T>;
-  }
+	async get<T>(path: string, params?: Record<string, string>): Promise<T> {
+		let url = `${this.baseUrl}${path}`;
+		if (params) {
+			const qs = new URLSearchParams(
+				Object.entries(params).filter(([, v]) => v !== undefined),
+			).toString();
+			if (qs) url += `?${qs}`;
+		}
+		const res = await this.request("GET", url);
+		return res.json() as Promise<T>;
+	}
 
-  async postStream(path: string, body: unknown): Promise<Response> {
-    return this.request("POST", `${this.baseUrl}${path}`, body);
-  }
+	async postStream(path: string, body: unknown): Promise<Response> {
+		return this.request("POST", `${this.baseUrl}${path}`, body);
+	}
 }

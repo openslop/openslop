@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  createContext,
-  use,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
+	createContext,
+	use,
+	useCallback,
+	useMemo,
+	useRef,
+	useState,
+	type ReactNode,
 } from "react";
 import { Descendant } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -16,76 +16,76 @@ import { createConnector } from "@/lib/connectors/factory";
 import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
 type ScriptContextValue = {
-  script: string;
-  nodes: Descendant[];
-  loading: boolean;
-  submitPrompt: (prompt: string) => Promise<void>;
-  stopGeneration: () => void;
+	script: string;
+	nodes: Descendant[];
+	loading: boolean;
+	submitPrompt: (prompt: string) => Promise<void>;
+	stopGeneration: () => void;
 };
 
 const ScriptContext = createContext<ScriptContextValue | null>(null);
 
 export function useScript() {
-  const ctx = use(ScriptContext);
-  if (!ctx) throw new Error("useScript must be used within ScriptProvider");
-  return ctx;
+	const ctx = use(ScriptContext);
+	if (!ctx) throw new Error("useScript must be used within ScriptProvider");
+	return ctx;
 }
 
 export function ScriptProvider({ children }: { children: ReactNode }) {
-  const { connectorConfig } = useConfig();
-  const [script, setScript] = useState("");
-  const [loading, setLoading] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-  const { nodes, appendChunk } = useOSMLSerializer();
+	const { connectorConfig } = useConfig();
+	const [script, setScript] = useState("");
+	const [loading, setLoading] = useState(false);
+	const abortRef = useRef<AbortController | null>(null);
+	const { nodes, appendChunk } = useOSMLSerializer();
 
-  const stopGeneration = useCallback(() => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-    setLoading(false);
-  }, []);
+	const stopGeneration = useCallback(() => {
+		abortRef.current?.abort();
+		abortRef.current = null;
+		setLoading(false);
+	}, []);
 
-  const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
-    connectorConfig,
-    "llm",
-  );
+	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
+		connectorConfig,
+		"llm",
+	);
 
-  const submitPrompt = useCallback(
-    async (prompt: string) => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
+	const submitPrompt = useCallback(
+		async (prompt: string) => {
+			abortRef.current?.abort();
+			const controller = new AbortController();
+			abortRef.current = controller;
 
-      setScript("");
-      setLoading(true);
-      try {
-        const connector = createConnector("llm", llmProvider, llmConfig);
-        for await (const chunk of connector.stream({ prompt })) {
-          if (controller.signal.aborted) break;
-          setScript((prev) => prev + chunk.text);
-          appendChunk(chunk.text);
-        }
-      } finally {
-        if (abortRef.current === controller) {
-          abortRef.current = null;
-          setLoading(false);
-        }
-      }
-    },
-    [llmProvider, llmConfig, appendChunk],
-  );
+			setScript("");
+			setLoading(true);
+			try {
+				const connector = createConnector("llm", llmProvider, llmConfig);
+				for await (const chunk of connector.stream({ prompt })) {
+					if (controller.signal.aborted) break;
+					setScript((prev) => prev + chunk.text);
+					appendChunk(chunk.text);
+				}
+			} finally {
+				if (abortRef.current === controller) {
+					abortRef.current = null;
+					setLoading(false);
+				}
+			}
+		},
+		[llmProvider, llmConfig, appendChunk],
+	);
 
-  const value = useMemo<ScriptContextValue>(
-    () => ({
-      script,
-      nodes,
-      loading,
-      submitPrompt,
-      stopGeneration,
-    }),
-    [script, nodes, loading, submitPrompt, stopGeneration],
-  );
+	const value = useMemo<ScriptContextValue>(
+		() => ({
+			script,
+			nodes,
+			loading,
+			submitPrompt,
+			stopGeneration,
+		}),
+		[script, nodes, loading, submitPrompt, stopGeneration],
+	);
 
-  return (
-    <ScriptContext.Provider value={value}>{children}</ScriptContext.Provider>
-  );
+	return (
+		<ScriptContext.Provider value={value}>{children}</ScriptContext.Provider>
+	);
 }
