@@ -20,7 +20,6 @@ type ScriptContextValue = {
   nodes: Descendant[];
   loading: boolean;
   submitPrompt: (prompt: string) => Promise<void>;
-  refineScript: (prompt: string) => Promise<void>;
   stopGeneration: () => void;
 };
 
@@ -75,20 +74,15 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
     [llmProvider, llmConfig, appendChunk],
   );
 
-  const refineScript = useCallback(async (_prompt: string) => {
-    console.warn("refineScript is not implemented yet");
-  }, []);
-
   const value = useMemo<ScriptContextValue>(
     () => ({
       script,
       nodes,
       loading,
       submitPrompt,
-      refineScript,
       stopGeneration,
     }),
-    [script, nodes, loading, submitPrompt, refineScript, stopGeneration],
+    [script, nodes, loading, submitPrompt, stopGeneration],
   );
 
   return (

@@ -50,7 +50,8 @@
     "slate": "^0.123.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.123.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

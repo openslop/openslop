@@ -11,18 +11,21 @@ export function insertElement(
   type: CanvasElementType,
   at: Path,
   connectors: ConnectorRegistry,
-) {
+  overrides?: { attrs?: Record<string, string>; text?: string },
+): string {
   const config = ELEMENT_CONFIGS[type];
+  const id = makeNodeId();
   const baseNode = {
     type,
-    id: makeNodeId(),
-    customAttributes: config.defaultAttributes,
+    id,
+    customAttributes: overrides?.attrs ?? config.defaultAttributes,
     children: [
       { id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
-      { id: makeNodeId(), type, text: "" },
+      { id: makeNodeId(), type, text: overrides?.text ?? "" },
     ],
   };
   Transforms.insertNodes(editor, hydrateConnectorConfig(connectors)(baseNode), {
     at,
   });
+  return id;
 }

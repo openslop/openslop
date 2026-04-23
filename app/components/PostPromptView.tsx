@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
+import { generationQueue } from "@/lib/generation/queue";
 import Copilot from "./Copilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
+import { useRefineScript } from "./canvas/hooks/useRefineScript";
 import { Clapperboard } from "lucide-react";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import {
@@ -15,7 +17,7 @@ import editorStyles from "./Editor.module.css";
 import genStyles from "./styles/gen-button.module.css";
 
 function PostPromptViewInner() {
-  const { loading, refineScript, stopGeneration } = useScript();
+  const { loading: scriptLoading, stopGeneration } = useScript();
   const canvasRef = useRef<CanvasHandle>(null);
   const [structureKey, setStructureKey] = useState("");
   const { position, visible, showPlayer } = usePlayerPosition();
@@ -24,6 +26,17 @@ function PostPromptViewInner() {
     () => canvasRef.current?.getEditor() ?? null,
     [],
   );
+
+  const { refineScript, refineLoading, stopRefine } =
+    useRefineScript(getEditor);
+
+  const generating = useSyncExternalStore(
+    generationQueue.subscribe,
+    generationQueue.isBusy,
+  );
+  const loading = scriptLoading || refineLoading;
+  const busy = loading || generating;
+  const stop = scriptLoading ? stopGeneration : stopRefine;
 
   const isTop = position === "top";
 
@@ -36,7 +49,7 @@ function PostPromptViewInner() {
           <div className="min-w-0 flex-1 max-w-2xl">
             <Copilot
               onSubmit={refineScript}
-              onStop={stopGeneration}
+              onStop={stop}
               multiline={false}
               loading={loading}
               placeholder="Refine your script…"
@@ -48,9 +61,9 @@ function PostPromptViewInner() {
               canvasRef.current?.generateAll();
               showPlayer();
             }}
-            className={`${genStyles.btn} shrink-0 transition-opacity ${loading ? "" : "opacity-80 hover:opacity-100"}`}
+            className={`${genStyles.btn} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
             aria-label="Generate & Preview"
-            disabled={loading}
+            disabled={busy}
           >
             <Clapperboard className={genStyles.svg} />
             <span className="hidden sm:inline">Generate & Preview</span>

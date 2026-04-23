@@ -26,24 +26,24 @@ const wrap = (...children: CanvasContentElement[]): SceneElement => ({
 });
 
 describe("OSMLSerializer.serialize", () => {
-  it("serializes narration as plain text", () => {
+  it("serializes narration with id", () => {
     const result = OSMLSerializer.serialize([
       wrap(el("narration", "Hello world")),
     ]);
-    expect(result).toBe("Hello world");
+    expect(result).toBe('<narration id="e1">Hello world</narration>');
   });
 
-  it("serializes tagged elements with angle brackets", () => {
+  it("serializes tagged elements with id", () => {
     const result = OSMLSerializer.serialize([wrap(el("image", "a sunset"))]);
-    expect(result).toBe("<image>a sunset</image>");
+    expect(result).toBe('<image id="e1">a sunset</image>');
   });
 
-  it("includes attributes in the tag", () => {
+  it("includes attributes after id in the tag", () => {
     const result = OSMLSerializer.serialize([
       wrap(el("character", "Hi there", { name: "Lyra", gender: "female" })),
     ]);
     expect(result).toBe(
-      '<character name="Lyra" gender="female">Hi there</character>',
+      '<character id="e1" name="Lyra" gender="female">Hi there</character>',
     );
   });
 
@@ -53,7 +53,7 @@ describe("OSMLSerializer.serialize", () => {
       wrap(el("character", "Hello!", { name: "Bob" }), el("image", "forest")),
     ]);
     expect(result).toBe(
-      'Once upon a time\n<character name="Bob">Hello!</character>\n<image>forest</image>',
+      '<narration id="e1">Once upon a time</narration>\n<character id="e1" name="Bob">Hello!</character>\n<image id="e1">forest</image>',
     );
   });
 
@@ -61,7 +61,7 @@ describe("OSMLSerializer.serialize", () => {
     const result = OSMLSerializer.serialize([
       wrap(el("music", "epic orchestral")),
     ]);
-    expect(result).toBe("<music>epic orchestral</music>");
+    expect(result).toBe('<music id="e1">epic orchestral</music>');
   });
 });
 
@@ -120,6 +120,60 @@ describe("OSMLSerializer streaming", () => {
       effect: "thunder",
       volume: "loud",
     });
+  });
+});
+
+function elWithId(
+  type: CanvasContentElement["type"],
+  id: string,
+  text: string,
+  customAttributes?: Record<string, string>,
+): CanvasContentElement {
+  return {
+    id,
+    type,
+    ...(customAttributes && { customAttributes }),
+    children: [{ id: `${id}-t`, type, text }],
+  };
+}
+
+describe("OSMLSerializer.serializeWithScenes", () => {
+  it("includes scene headers with numbers", () => {
+    const result = OSMLSerializer.serializeWithScenes([
+      wrap(elWithId("narration", "n1", "Hello")),
+      wrap(elWithId("image", "img1", "sunset")),
+    ]);
+    expect(result).toContain("--- Scene 1 ---");
+    expect(result).toContain("--- Scene 2 ---");
+  });
+
+  it("serializes elements with ids inside scenes", () => {
+    const result = OSMLSerializer.serializeWithScenes([
+      wrap(elWithId("narration", "n1", "Hello")),
+    ]);
+    expect(result).toContain('<narration id="n1">Hello</narration>');
+  });
+
+  it("groups elements under their scene", () => {
+    const result = OSMLSerializer.serializeWithScenes([
+      wrap(
+        elWithId("narration", "n1", "first"),
+        elWithId("sound", "s1", "rain", { type: "ambient" }),
+      ),
+    ]);
+    const lines = result.split("\n").filter(Boolean);
+    expect(lines[0]).toBe("--- Scene 1 ---");
+    expect(lines[1]).toContain("n1");
+    expect(lines[2]).toContain("s1");
+  });
+
+  it("ignores non-scene top-level nodes", () => {
+    // serializeWithScenes only walks scene elements
+    const result = OSMLSerializer.serializeWithScenes([
+      wrap(elWithId("narration", "n1", "hello")),
+    ]);
+    expect(result).toContain("Scene 1");
+    expect(result).not.toContain("Scene 2");
   });
 });
 
