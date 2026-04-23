@@ -25,7 +25,7 @@ export class RefineOpParser {
 				try {
 					const result = refineOpSchema.safeParse(JSON.parse(l));
 					return result.success ? [result.data] : [];
-				} catch (e) {
+				} catch {
 					return [];
 				}
 			});

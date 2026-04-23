@@ -213,14 +213,7 @@ export interface VideoConnector extends Connector {
 	generate(params: VideoGenerateParams): Promise<AssetResult>;
 }
 
-// Plugin type aliases
-
 export type LLMPlugin = ConnectorPlugin<LLMGenerateParams, LLMGenerateResult>;
-export type MusicPlugin = ConnectorPlugin<MusicGenerateParams, AssetResult>;
-export type SFXPlugin = ConnectorPlugin<SFXGenerateParams, AssetResult>;
-export type ImagePlugin = ConnectorPlugin<ImageGenerateParams, AssetResult>;
-export type TTSPlugin = ConnectorPlugin<TTSGenerateParams, TTSResult>;
-export type VideoPlugin = ConnectorPlugin<VideoGenerateParams, AssetResult>;
 
 // Factory types
 
