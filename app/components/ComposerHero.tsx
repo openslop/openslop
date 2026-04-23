@@ -15,39 +15,39 @@ there was a small glowing garden hidden on the moon.
 And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero({
-  composerMode,
-  onModeChange,
-  loading,
-  onSubmit,
-  onStop,
+	composerMode,
+	onModeChange,
+	loading,
+	onSubmit,
+	onStop,
 }: {
-  composerMode: ComposerMode;
-  onModeChange: (mode: ComposerMode) => void;
-  loading: boolean;
-  onSubmit: (value: string) => void;
-  onStop: () => void;
+	composerMode: ComposerMode;
+	onModeChange: (mode: ComposerMode) => void;
+	loading: boolean;
+	onSubmit: (value: string) => void;
+	onStop: () => void;
 }) {
-  return (
-    <div className="flex w-full max-w-2xl flex-col items-center px-4">
-      <h1 className="font-title text-center text-[clamp(48px,12vw,85px)] tracking-[-0.04em] leading-[0.95em] text-white/90 text-wrap-balance mb-6">
-        Describe your video
-      </h1>
+	return (
+		<div className="flex w-full max-w-2xl flex-col items-center px-4">
+			<h1 className="font-title text-center text-[clamp(48px,12vw,85px)] tracking-[-0.04em] leading-[0.95em] text-white/90 text-wrap-balance mb-6">
+				Describe your video
+			</h1>
 
-      <Copilot
-        onSubmit={onSubmit}
-        onStop={onStop}
-        multiline
-        loading={loading}
-        composerMode={composerMode}
-        onModeChange={onModeChange}
-        placeholder={
-          composerMode === "script" ? (
-            INPUT_SCRIPT_PLACEHOLDER
-          ) : (
-            <AnimatedPlaceholder active />
-          )
-        }
-      />
-    </div>
-  );
+			<Copilot
+				onSubmit={onSubmit}
+				onStop={onStop}
+				multiline
+				loading={loading}
+				composerMode={composerMode}
+				onModeChange={onModeChange}
+				placeholder={
+					composerMode === "script" ? (
+						INPUT_SCRIPT_PLACEHOLDER
+					) : (
+						<AnimatedPlaceholder active />
+					)
+				}
+			/>
+		</div>
+	);
 }

@@ -7,23 +7,23 @@ import { buildVideoLayout } from "@/lib/video/scene-builder";
 import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
-  getEditor: () => Editor | null,
-  structureKey: string,
+	getEditor: () => Editor | null,
+	structureKey: string,
 ): VideoLayout | null {
-  const resultVersion = useSyncExternalStore(
-    generationQueue.subscribe,
-    generationQueue.getResultVersion,
-  );
+	const resultVersion = useSyncExternalStore(
+		generationQueue.subscribe,
+		generationQueue.getResultVersion,
+	);
 
-  return useMemo(() => {
-    const editor = getEditor();
-    if (!editor) return null;
-    const elements = editor.children as CanvasElement[];
-    const resolved = resolveElements(
-      elements,
-      generationQueue.getElementSnapshot,
-    );
-    return buildVideoLayout(resolved);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getEditor, structureKey, resultVersion]);
+	return useMemo(() => {
+		const editor = getEditor();
+		if (!editor) return null;
+		const elements = editor.children as CanvasElement[];
+		const resolved = resolveElements(
+			elements,
+			generationQueue.getElementSnapshot,
+		);
+		return buildVideoLayout(resolved);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [getEditor, structureKey, resultVersion]);
 }

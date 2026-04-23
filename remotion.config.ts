@@ -4,12 +4,12 @@ import { enableTailwind } from "@remotion/tailwind-v4";
 
 Config.setVideoImageFormat("jpeg");
 Config.overrideWebpackConfig((currentConfig) => ({
-  ...enableTailwind(currentConfig),
-  resolve: {
-    ...currentConfig.resolve,
-    alias: {
-      ...(currentConfig.resolve?.alias ?? {}),
-      "@": path.resolve(process.cwd()),
-    },
-  },
+	...enableTailwind(currentConfig),
+	resolve: {
+		...currentConfig.resolve,
+		alias: {
+			...(currentConfig.resolve?.alias ?? {}),
+			"@": path.resolve(process.cwd()),
+		},
+	},
 }));

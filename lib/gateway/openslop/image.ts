@@ -3,10 +3,10 @@ import type { ImageGenerateParams } from "@/lib/connectors/types";
 import { OpenSlopGatewayClient } from "./base";
 
 export class OpenSlopImageGateway extends OpenSlopGatewayClient<
-  ImageGenerateParams,
-  BundleResponse
+	ImageGenerateParams,
+	BundleResponse
 > {
-  async generate(params: ImageGenerateParams): Promise<BundleResponse> {
-    return this.client.post<BundleResponse>("/api/v1/image", params);
-  }
+	async generate(params: ImageGenerateParams): Promise<BundleResponse> {
+		return this.client.post<BundleResponse>("/api/v1/image", params);
+	}
 }

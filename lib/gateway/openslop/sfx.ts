@@ -3,10 +3,10 @@ import type { SFXGenerateParams } from "@/lib/connectors/types";
 import { OpenSlopGatewayClient } from "./base";
 
 export class OpenSlopSFXGateway extends OpenSlopGatewayClient<
-  SFXGenerateParams,
-  BundleResponse
+	SFXGenerateParams,
+	BundleResponse
 > {
-  async generate(params: SFXGenerateParams): Promise<BundleResponse> {
-    return this.client.post<BundleResponse>("/api/v1/sfx", params);
-  }
+	async generate(params: SFXGenerateParams): Promise<BundleResponse> {
+		return this.client.post<BundleResponse>("/api/v1/sfx", params);
+	}
 }

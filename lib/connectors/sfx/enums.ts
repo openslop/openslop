@@ -1,4 +1,4 @@
 export enum SoundType {
-  Transient = "transient",
-  Ambient = "ambient",
+	Transient = "transient",
+	Ambient = "ambient",
 }

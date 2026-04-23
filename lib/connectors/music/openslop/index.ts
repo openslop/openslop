@@ -5,14 +5,14 @@ import { modelsFromMap } from "@/lib/connectors/types";
 import { MUSIC_MODELS } from "./models";
 
 export class OpenSlopMusic extends BaseMusicConnector {
-  protected gateway: OpenSlopMusicGateway;
+	protected gateway: OpenSlopMusicGateway;
 
-  constructor(config: ConnectorConfig) {
-    super(config);
-    this.gateway = new OpenSlopMusicGateway(config.baseUrl);
-  }
+	constructor(config: ConnectorConfig) {
+		super(config);
+		this.gateway = new OpenSlopMusicGateway(config.baseUrl);
+	}
 
-  async listModels(): Promise<ModelInfo[]> {
-    return modelsFromMap(MUSIC_MODELS);
-  }
+	async listModels(): Promise<ModelInfo[]> {
+		return modelsFromMap(MUSIC_MODELS);
+	}
 }

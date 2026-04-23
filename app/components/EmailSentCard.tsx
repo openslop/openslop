@@ -4,59 +4,59 @@ import OnboardingCard from "./OnboardingCard";
 import GradientButton from "./GradientButton";
 
 const EnvelopeIcon = (
-  <svg
-    className="w-14 h-14 text-white"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1}
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-    />
-  </svg>
+	<svg
+		className="w-14 h-14 text-white"
+		fill="none"
+		viewBox="0 0 24 24"
+		strokeWidth={1}
+		stroke="currentColor"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+		/>
+	</svg>
 );
 
 interface EmailSentCardProps {
-  email: string;
-  subtitle?: string;
-  resendLabel?: string;
-  loading: boolean;
-  error: string;
-  onResend: () => void;
-  onEditEmail: () => void;
+	email: string;
+	subtitle?: string;
+	resendLabel?: string;
+	loading: boolean;
+	error: string;
+	onResend: () => void;
+	onEditEmail: () => void;
 }
 
 export default function EmailSentCard({
-  email,
-  subtitle,
-  resendLabel,
-  loading,
-  error,
-  onResend,
-  onEditEmail,
+	email,
+	subtitle,
+	resendLabel,
+	loading,
+	error,
+	onResend,
+	onEditEmail,
 }: EmailSentCardProps) {
-  return (
-    <OnboardingCard
-      heading="Email sent!"
-      subtitle={subtitle ?? `We sent a login link to ${email}`}
-      icon={EnvelopeIcon}
-      footer={
-        <button
-          type="button"
-          onClick={onEditEmail}
-          className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
-        >
-          Edit my email address
-        </button>
-      }
-    >
-      <GradientButton type="button" onClick={onResend} disabled={loading}>
-        {loading ? "Sending\u2026" : (resendLabel ?? "Send another login link")}
-      </GradientButton>
-      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-    </OnboardingCard>
-  );
+	return (
+		<OnboardingCard
+			heading="Email sent!"
+			subtitle={subtitle ?? `We sent a login link to ${email}`}
+			icon={EnvelopeIcon}
+			footer={
+				<button
+					type="button"
+					onClick={onEditEmail}
+					className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
+				>
+					Edit my email address
+				</button>
+			}
+		>
+			<GradientButton type="button" onClick={onResend} disabled={loading}>
+				{loading ? "Sending\u2026" : (resendLabel ?? "Send another login link")}
+			</GradientButton>
+			{error && <p className="text-red-400 text-sm text-center">{error}</p>}
+		</OnboardingCard>
+	);
 }

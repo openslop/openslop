@@ -6,80 +6,80 @@ const mockDisconnect = vi.fn();
 const mockImageInference = vi.fn();
 
 vi.mock("@runware/sdk-js", () => ({
-  Runware: class {
-    constructor() {
-      return {
-        imageInference: mockImageInference,
-        disconnect: mockDisconnect,
-      };
-    }
-  },
+	Runware: class {
+		constructor() {
+			return {
+				imageInference: mockImageInference,
+				disconnect: mockDisconnect,
+			};
+		}
+	},
 }));
 
 import { RunwareImage } from "../image/runware";
 
 describe("RunwareImage", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 
-  it("generates an image with defaults", async () => {
-    mockImageInference.mockResolvedValue([
-      { imageBase64Data: "abc123", seed: 1 },
-    ]);
+	it("generates an image with defaults", async () => {
+		mockImageInference.mockResolvedValue([
+			{ imageBase64Data: "abc123", seed: 1 },
+		]);
 
-    const provider = new RunwareImage("test-key");
-    const result = await provider.generate({ prompt: "a cat" });
+		const provider = new RunwareImage("test-key");
+		const result = await provider.generate({ prompt: "a cat" });
 
-    expect(result.result.image).toBe("url");
-    expect(mockImageInference).toHaveBeenCalledWith({
-      positivePrompt: "a cat",
-      model: "runware:z-image@turbo",
-      width: 512,
-      height: 512,
-      outputType: "base64Data",
-      numberResults: 1,
-    });
-    expect(mockDisconnect).toHaveBeenCalled();
-  });
+		expect(result.result.image).toBe("url");
+		expect(mockImageInference).toHaveBeenCalledWith({
+			positivePrompt: "a cat",
+			model: "runware:z-image@turbo",
+			width: 512,
+			height: 512,
+			outputType: "base64Data",
+			numberResults: 1,
+		});
+		expect(mockDisconnect).toHaveBeenCalled();
+	});
 
-  it("passes custom dimensions and model", async () => {
-    mockImageInference.mockResolvedValue([{ imageBase64Data: "data" }]);
+	it("passes custom dimensions and model", async () => {
+		mockImageInference.mockResolvedValue([{ imageBase64Data: "data" }]);
 
-    const provider = new RunwareImage("test-key");
-    await provider.generate({
-      prompt: "sunset",
-      model: "custom-model",
-      width: 1024,
-      height: 768,
-    });
+		const provider = new RunwareImage("test-key");
+		await provider.generate({
+			prompt: "sunset",
+			model: "custom-model",
+			width: 1024,
+			height: 768,
+		});
 
-    expect(mockImageInference).toHaveBeenCalledWith(
-      expect.objectContaining({
-        model: "custom-model",
-        width: 1024,
-        height: 768,
-      }),
-    );
-  });
+		expect(mockImageInference).toHaveBeenCalledWith(
+			expect.objectContaining({
+				model: "custom-model",
+				width: 1024,
+				height: 768,
+			}),
+		);
+	});
 
-  it("throws when no image data returned", async () => {
-    mockImageInference.mockResolvedValue([{}]);
+	it("throws when no image data returned", async () => {
+		mockImageInference.mockResolvedValue([{}]);
 
-    const provider = new RunwareImage("test-key");
-    await expect(provider.generate({ prompt: "test" })).rejects.toThrow(
-      "No image data returned",
-    );
-    expect(mockDisconnect).toHaveBeenCalled();
-  });
+		const provider = new RunwareImage("test-key");
+		await expect(provider.generate({ prompt: "test" })).rejects.toThrow(
+			"No image data returned",
+		);
+		expect(mockDisconnect).toHaveBeenCalled();
+	});
 
-  it("throws and disconnects when inference fails", async () => {
-    mockImageInference.mockRejectedValue(new Error("API error"));
+	it("throws and disconnects when inference fails", async () => {
+		mockImageInference.mockRejectedValue(new Error("API error"));
 
-    const provider = new RunwareImage("test-key");
-    await expect(provider.generate({ prompt: "test" })).rejects.toThrow(
-      "API error",
-    );
-    expect(mockDisconnect).toHaveBeenCalled();
-  });
+		const provider = new RunwareImage("test-key");
+		await expect(provider.generate({ prompt: "test" })).rejects.toThrow(
+			"API error",
+		);
+		expect(mockDisconnect).toHaveBeenCalled();
+	});
 });

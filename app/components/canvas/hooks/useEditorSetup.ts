@@ -12,20 +12,20 @@ import { withFlatPaste } from "../plugins/withFlatPaste";
 const initialValue: Descendant[] = [];
 
 export function useEditorSetup() {
-  const { connectorConfig } = useConfig();
+	const { connectorConfig } = useConfig();
 
-  const [editor] = useState(() =>
-    flow(
-      withHistory,
-      withReact,
-      withLayout(connectorConfig),
-      withScenes,
-      withFlatPaste,
-      withNodeId,
-    )(createEditor()),
-  );
+	const [editor] = useState(() =>
+		flow(
+			withHistory,
+			withReact,
+			withLayout(connectorConfig),
+			withScenes,
+			withFlatPaste,
+			withNodeId,
+		)(createEditor()),
+	);
 
-  const [value, setValue] = useState<Descendant[]>(initialValue);
+	const [value, setValue] = useState<Descendant[]>(initialValue);
 
-  return { editor, value, setValue };
+	return { editor, value, setValue };
 }

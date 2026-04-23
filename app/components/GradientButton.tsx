@@ -1,20 +1,20 @@
 import gradientStyles from "./GradientButton.module.css";
 
 interface GradientButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export default function GradientButton({
-  children,
-  className = "",
-  ...props
+	children,
+	className = "",
+	...props
 }: GradientButtonProps) {
-  return (
-    <button
-      className={`relative grain w-full py-2.5 rounded-2xl text-white font-semibold text-sm font-display transition-[filter,transform] hover:brightness-[1.15] active:scale-[0.98] disabled:opacity-50 ${gradientStyles.gradient} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  );
+	return (
+		<button
+			className={`relative grain w-full py-2.5 rounded-2xl text-white font-semibold text-sm font-display transition-[filter,transform] hover:brightness-[1.15] active:scale-[0.98] disabled:opacity-50 ${gradientStyles.gradient} ${className}`}
+			{...props}
+		>
+			{children}
+		</button>
+	);
 }

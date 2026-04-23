@@ -54,20 +54,20 @@ const REFINE_SYSTEM_PROMPT = dedent`
 `;
 
 export function createRefinePlugin(osml: string): LLMPlugin {
-  return {
-    name: "refine",
-    beforeGenerate(params) {
-      return {
-        ...params,
-        systemPrompt: REFINE_SYSTEM_PROMPT,
-      };
-    },
-    transformPrompt(prompt) {
-      return `## Current Script
+	return {
+		name: "refine",
+		beforeGenerate(params) {
+			return {
+				...params,
+				systemPrompt: REFINE_SYSTEM_PROMPT,
+			};
+		},
+		transformPrompt(prompt) {
+			return `## Current Script
       ${osml}
       
       ## Refinement Request
       ${prompt}`;
-    },
-  };
+		},
+	};
 }
