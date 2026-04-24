@@ -55,7 +55,11 @@ const initialConnectorConfig: ConnectorRegistry = {
 	music: openslopConfig("Slop Music v1", MUSIC_MODELS),
 };
 
+// TODO: replace with real project ID after projects rollout
+const MOCK_PROJECT_ID = "00000000-0000-4000-8000-000000000001";
+
 type ConfigContextValue = {
+	projectId: string;
 	connectorConfig: ConnectorRegistry;
 	composerMode: ComposerMode;
 	setConnectorConfig: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
@@ -71,6 +75,7 @@ export function useConfig() {
 }
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
+	const projectId = MOCK_PROJECT_ID;
 	const [connectorConfig, setConnectorConfig] = useState<ConnectorRegistry>(
 		initialConnectorConfig,
 	);
@@ -90,12 +95,13 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
 	const value = useMemo<ConfigContextValue>(
 		() => ({
+			projectId,
 			connectorConfig: configWithModePlugins,
 			composerMode,
 			setConnectorConfig,
 			setComposerMode,
 		}),
-		[configWithModePlugins, composerMode],
+		[projectId, configWithModePlugins, composerMode],
 	);
 
 	return (
