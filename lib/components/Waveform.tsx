@@ -1,12 +1,13 @@
 "use client";
 
 import {
-	useRef,
+	type MouseEvent,
+	type Ref,
+	useCallback,
 	useEffect,
 	useImperativeHandle,
+	useRef,
 	useState,
-	type Ref,
-	type MouseEvent,
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -130,11 +131,18 @@ export function Waveform({
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const peaksRef = useRef<number[]>([]);
-	const drawRef = useRef(() => {});
-	const [loading, setLoading] = useState(true);
+	const [loadedSrc, setLoadedSrc] = useState<string | null>(() =>
+		peaksCache?.has(src) ? src : null,
+	);
+	const loading = loadedSrc !== src;
 
-	// Keep draw function always-current without effect deps
-	drawRef.current = () => {
+	// Adjust state during render when src changes to a cached value
+	// (React-supported pattern for deriving state from props)
+	if (loading && peaksCache?.has(src)) {
+		setLoadedSrc(src);
+	}
+
+	const draw = useCallback(() => {
 		const c = canvasRef.current;
 		const a = audioRef.current;
 		if (!c) return;
@@ -149,7 +157,7 @@ export function Waveform({
 		const ctx = c.getContext("2d");
 		if (!ctx) return;
 		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-		const p = a && a.duration ? a.currentTime / a.duration : 0;
+		const p = a?.duration ? a.currentTime / a.duration : 0;
 		drawBars(ctx, cssW, cssH, peaksRef.current, p, {
 			barWidth,
 			barGap,
@@ -157,19 +165,21 @@ export function Waveform({
 			waveColor,
 			progressColor,
 		});
-	};
+	}, [barWidth, barGap, barRadius, waveColor, progressColor]);
+
+	const drawRef = useRef(draw);
+	useEffect(() => {
+		drawRef.current = draw;
+	}, [draw]);
 
 	useEffect(() => {
-		peaksRef.current = [];
-		setLoading(true);
-
 		const cached = peaksCache?.get(src);
 		if (cached) {
 			peaksRef.current = cached;
-			setLoading(false);
 			onReady?.();
 			return;
 		}
+		peaksRef.current = [];
 
 		let cancelled = false;
 		const ac = new AudioContext();
@@ -181,27 +191,27 @@ export function Waveform({
 				const peaks = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
 				peaksCache?.set(src, peaks);
 				peaksRef.current = peaks;
-				setLoading(false);
+				setLoadedSrc(src);
 				onReady?.();
 			})
 			.catch((e) => {
 				console.error("Failed to decode audio:", e);
-				if (!cancelled) setLoading(false);
+				if (!cancelled) setLoadedSrc(src);
 			});
 		return () => {
 			cancelled = true;
 			ac.close();
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- onReady/peaksCache read via drawRef pattern, not direct deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- onReady/peaksCache are stable refs, not direct deps
 	}, [src]);
 
 	useEffect(() => {
-		if (!loading) drawRef.current();
-	}, [loading]);
+		if (!loading) draw();
+	}, [loading, draw]);
 
 	useEffect(() => {
-		drawRef.current();
-	}, [barWidth, barGap, barRadius, waveColor, progressColor]);
+		draw();
+	}, [draw]);
 
 	useEffect(() => {
 		const c = canvasRef.current;
