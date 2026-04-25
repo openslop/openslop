@@ -2,12 +2,13 @@ import { useCallback } from "react";
 import { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { generationQueue, isStaleResult } from "@/lib/generation/queue";
+import { ensureCharacterAvatars } from "@/lib/project/ensureCharacterAvatars";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 import { getGenerationInputs } from "../utils/getGenerationInputs";
 import { getContentElements } from "../utils/nodeUtils";
 
 export function useGenerateAll(editor: Editor) {
-	const { connectorConfig } = useConfig();
+	const { projectId, connectorConfig } = useConfig();
 
 	const generateAll = useCallback(() => {
 		const jobs = getContentElements(editor.children)
@@ -17,8 +18,10 @@ export function useGenerateAll(editor: Editor) {
 			})
 			.map((el) => buildGenerationJob(el, connectorConfig))
 			.filter((job): job is NonNullable<typeof job> => job !== null);
-		generationQueue.enqueueAll(jobs);
-	}, [editor, connectorConfig]);
+		generationQueue
+			.before(() => ensureCharacterAvatars(projectId, connectorConfig))
+			.enqueueAll(jobs);
+	}, [editor, connectorConfig, projectId]);
 
 	return { generateAll };
 }

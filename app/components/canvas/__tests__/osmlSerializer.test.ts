@@ -3,6 +3,7 @@ import { OSMLSerializer } from "../utils/osmlSerializer";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
+	type ParsedElement,
 	type SceneElement,
 } from "../types";
 
@@ -69,7 +70,7 @@ describe("OSMLSerializer streaming", () => {
 	it("parses a single complete tag", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk("<image>a sunset</image>");
-		const nodes = s.getNodes() as CanvasContentElement[];
+		const nodes = s.getNodes() as ParsedElement[];
 
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("image");
@@ -83,7 +84,7 @@ describe("OSMLSerializer streaming", () => {
 		s.appendChunk('ice">Hello');
 		s.appendChunk(" world</character>");
 
-		const nodes = s.getNodes() as CanvasContentElement[];
+		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("character");
 		expect(nodes[0].customAttributes?.name).toBe("Alice");
@@ -96,25 +97,67 @@ describe("OSMLSerializer streaming", () => {
 		s.appendChunk("<narration>");
 		s.appendChunk("Some long narration text here");
 
-		const nodes = s.getNodes() as CanvasContentElement[];
+		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].children[0].text).toBe("Some long narration text here");
 	});
 
-	it("defaults unknown tags to narration type", () => {
+	it("preserves raw tag name for unknown tags", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk("<unknowntag>content</unknowntag>");
 
-		const nodes = s.getNodes() as CanvasContentElement[];
+		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("narration");
+		expect(nodes[0].type).toBe("unknowntag");
+	});
+
+	it("parses metadata_style metadata tag", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk(
+			"<metadata_style>Warm earth tones with watercolor style</metadata_style>",
+		);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(nodes[0].type).toBe("metadata_style");
+		expect(nodes[0].children[0].text).toBe(
+			"Warm earth tones with watercolor style",
+		);
+	});
+
+	it("parses metadata_character metadata tag with name attribute", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk(
+			'<metadata_character name="Mia">Brown hair, green eyes</metadata_character>',
+		);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(nodes[0].type).toBe("metadata_character");
+		expect(nodes[0].customAttributes?.name).toBe("Mia");
+		expect(nodes[0].children[0].text).toBe("Brown hair, green eyes");
+	});
+
+	it("parses mixed canvas and metadata tags", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk("<metadata_style>dark moody tones</metadata_style>");
+		s.appendChunk("<narration>Once upon a time</narration>");
+		s.appendChunk(
+			'<metadata_character name="Bob">tall and thin</metadata_character>',
+		);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(3);
+		expect(nodes[0].type).toBe("metadata_style");
+		expect(nodes[1].type).toBe("narration");
+		expect(nodes[2].type).toBe("metadata_character");
 	});
 
 	it("parses attributes correctly", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk('<sound effect="thunder" volume="loud">boom</sound>');
 
-		const nodes = s.getNodes() as CanvasContentElement[];
+		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].customAttributes).toEqual({
 			effect: "thunder",

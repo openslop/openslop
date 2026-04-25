@@ -9,23 +9,29 @@ export const POST = createRouteHandler({
 	getProvider: getVideoProvider,
 	label: "Video submission",
 	extraValidation: (body) => {
-		const { referenceImage } = body;
-		if (
-			referenceImage &&
-			(typeof referenceImage !== "string" ||
-				!referenceImage.match(/^data:[a-z]+\/[a-z+.-]+;base64,/i))
-		)
-			return badRequest(
-				"referenceImage must be a data URI (e.g. data:image/png;base64,...)",
-			);
+		const { referenceImages } = body;
+		if (referenceImages === undefined) return null;
+		if (!Array.isArray(referenceImages)) {
+			return badRequest("referenceImages must be an array");
+		}
+		for (const img of referenceImages) {
+			if (typeof img !== "string")
+				return badRequest("Each referenceImages entry must be a string");
+			const isDataUri = /^data:[a-z]+\/[a-z+.-]+;base64,/i.test(img);
+			const isUrl = /^https?:\/\//i.test(img);
+			if (!isDataUri && !isUrl)
+				return badRequest(
+					"Each referenceImages entry must be a data URI or an HTTP(S) URL",
+				);
+		}
 		return null;
 	},
 	handle: async (provider, body) => {
-		const { prompt, model, referenceImage, duration, width, height } = body;
+		const { prompt, model, referenceImages, duration, width, height } = body;
 		const result = await provider.generate({
 			prompt,
 			model,
-			referenceImage,
+			referenceImages,
 			duration,
 			width,
 			height,

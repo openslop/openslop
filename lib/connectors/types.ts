@@ -135,7 +135,7 @@ export type ImageGenerateParams = {
 	format?: string;
 	width?: number;
 	height?: number;
-	referenceImage?: string;
+	referenceImages?: string[];
 };
 
 export interface ImageConnector extends Connector {
@@ -188,7 +188,7 @@ export interface TTSConnector extends Connector {
 export type VideoGenerateParams = {
 	prompt: string;
 	model?: string;
-	referenceImage?: string;
+	referenceImages?: string[];
 	duration?: number;
 	width?: number;
 	height?: number;

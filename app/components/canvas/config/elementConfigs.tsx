@@ -26,7 +26,6 @@ export interface ElementConfig {
 	placeholder: string;
 	defaultAttributes?: Record<string, string>;
 	visibleAttributes: Record<string, string>;
-	generateParams?: string[];
 }
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
@@ -50,7 +49,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			accent: "bg-blue-500",
 			age: "bg-green-500",
 		},
-		generateParams: ["gender", "accent"],
 	},
 	character: {
 		type: "character",
@@ -73,7 +71,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			accent: "bg-blue-500",
 			gender: "bg-rose-500",
 		},
-		generateParams: ["gender", "accent"],
 	},
 	image: {
 		type: "image",
@@ -83,9 +80,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <ImageIcon size={16} className="text-white" />,
 		bgColor: "bg-cyan-600",
 		placeholder: "Describe the image...",
-		visibleAttributes: {
-			art_style: "bg-pink-500",
-		},
+		visibleAttributes: {},
 	},
 	clip: {
 		type: "clip",
@@ -102,7 +97,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		visibleAttributes: {
 			duration: "bg-indigo-500",
 		},
-		generateParams: ["duration"],
 	},
 	sound: {
 		type: "sound",

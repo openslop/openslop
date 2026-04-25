@@ -53,10 +53,11 @@ const OSML_SYSTEM_PROMPT = dedent`
   - The emotion should be one of the following: ${Object.values(TTSEmotion).join(", ")}.
 
   ### Image XML Tags
-  - Each scene should include an image XML tag that describes the current scene with required attributes: animate, animation, art_style. Example: <image animate="true" animation="slow zoom out revealing the full landscape" art_style="In the art style of [art style description].">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
+  - Each scene should include an image XML tag that describes the current scene with required attributes: animate, animation. Example: <image animate="true" animation="slow zoom out revealing the full landscape">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - animate: Include a required animate attribute that is either "true" or "false". This controls whether the image is animated or static.
   - animation: If animate is "true", include an animation attribute that describes the motion/camera movement for the video. The animation description should be simple, focused, and relaxing.
-  - art_style: Include a required art_style attribute that describes the art style for the image. Always use this art style for all images in this story. Example: "In the art style of [art style description].".
+	- characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
+		<image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
   - Open the story with an <image> tag that describes the image for the opening scene.
   - Frequently change the image at least every 2 narrative lines.
   - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
@@ -94,6 +95,19 @@ const OSML_SYSTEM_PROMPT = dedent`
   - length: ${Object.values(MusicLength).join(", ")}
   - The descriptions within <music> tags should be common, simple, short, clear, and direct.
   - Music should change frequently (at least once per scene) to keep the reader engaged.
+
+  ### Metadata Character XML tags
+	- Right after the metadata_style tag, emit short <metadata_character>...</metadata_character> tags that visually describe each character (excluding the narrator) in detail as if prompting an image model. Example:
+		<metadata_character name="Mia">A girl around ten years old with warm brown skin, dark curly hair falling 
+		just past her shoulders, bright hazel eyes, a small gap between her front
+		teeth. Wearing a mustard-yellow cardigan over a white tee, rolled-up denim
+		overalls, scuffed red sneakers, a canvas satchel slung across one shoulder.
+		</metadata_character>
+	- name: the exact name for the character (case-sensitive) used in the story
+
+  ### Metadata Style XML tag
+	- At the start of the story, emit a single, short <metadata_style>...</metadata_style> tag that describes the visual style of the story as if prompting an image model. Example:
+	<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
 
   ### General XML Tag Rules
   - NEVER nest XML tags within other XML tags.

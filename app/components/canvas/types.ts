@@ -50,6 +50,22 @@ export type CanvasText = {
 	text: string;
 };
 
+export type ParsedElement = {
+	id: string;
+	type: string;
+	customAttributes?: Record<string, string>;
+	children: { id: string; type: string; text: string }[];
+};
+
+export type MetadataTagType = "metadata_style" | "metadata_character";
+
+export const METADATA_TAG_TYPES = new Set<MetadataTagType>([
+	"metadata_style",
+	"metadata_character",
+]);
+
+export type { MetadataCharacter } from "@/lib/project/types";
+
 declare module "slate" {
 	interface CustomTypes {
 		Editor: CanvasEditor;

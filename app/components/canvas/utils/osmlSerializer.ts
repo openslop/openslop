@@ -1,20 +1,15 @@
 import { Descendant } from "slate";
-import {
-	CANVAS_ELEMENT_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
-} from "../types";
+import type { CanvasContentElement, ParsedElement } from "../types";
 import { getContentElements, makeNodeId } from "./nodeUtils";
 import { isSceneElement } from "./guards";
 import { parseXmlTag } from "./parseXmlTag";
 
-const DEFAULT_TAG_TYPE: CanvasElementType = "narration";
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
 
 export class OSMLSerializer {
 	private buffer = "";
-	private nodes: CanvasContentElement[] = [];
+	private nodes: ParsedElement[] = [];
 
 	static serialize(descendants: Descendant[]): string {
 		return getContentElements(descendants)
@@ -53,7 +48,7 @@ export class OSMLSerializer {
 		return this.parseBuffer();
 	}
 
-	getNodes(): Descendant[] {
+	getNodes(): ParsedElement[] {
 		return this.nodes;
 	}
 
@@ -80,7 +75,7 @@ export class OSMLSerializer {
 			const openTag = match[1];
 			if (openTag) {
 				const { tag, ...attributes } = parseXmlTag(openTag);
-				this.appendNext(this.mapTagToType(tag), attributes);
+				this.appendNext(tag, attributes);
 			}
 			lastIndex = match.index + match[0].length;
 		}
@@ -98,11 +93,8 @@ export class OSMLSerializer {
 		lastChild.text += text ?? "";
 	}
 
-	private appendNext(
-		type: CanvasElementType,
-		attributes: Record<string, string>,
-	): void {
-		const next: CanvasContentElement = {
+	private appendNext(type: string, attributes: Record<string, string>): void {
+		const next: ParsedElement = {
 			id: makeNodeId(),
 			type,
 			customAttributes: attributes,
@@ -119,14 +111,7 @@ export class OSMLSerializer {
 		);
 	}
 
-	private mapTagToType(tagName: string): CanvasElementType {
-		const normalized = tagName.toLowerCase();
-		return CANVAS_ELEMENT_TYPES.has(normalized as CanvasElementType)
-			? (normalized as CanvasElementType)
-			: DEFAULT_TAG_TYPE;
-	}
-
-	static getTextContent(element: CanvasContentElement): string {
+	static getTextContent(element: ParsedElement): string {
 		return element.children.map((child) => child.text ?? "").join("");
 	}
 }

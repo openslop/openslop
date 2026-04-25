@@ -40,6 +40,7 @@ export class RunwareImage extends BaseProvider<
 				height: params.height || 512,
 				outputType: "base64Data",
 				numberResults: 1,
+				referenceImages: params.referenceImages,
 			});
 
 			const image = results?.[0];

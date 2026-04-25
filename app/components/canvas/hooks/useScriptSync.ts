@@ -2,7 +2,11 @@ import { useEffect, useMemo } from "react";
 import { Editor, Transforms } from "slate";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import type { CanvasContentElement } from "../types";
+import {
+	CANVAS_ELEMENT_TYPES,
+	type CanvasContentElement,
+	type CanvasElementType,
+} from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
 import { findNodeById, updateNodeText } from "../utils/editorOps";
@@ -20,7 +24,10 @@ export function useScriptSync(editor: Editor): void {
 	useEffect(() => {
 		Editor.withoutNormalizing(editor, () => {
 			for (const node of nodes) {
-				const normalized = normalize(node as CanvasContentElement);
+				if (!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType)) continue;
+
+				const canvasNode = node as CanvasContentElement;
+				const normalized = normalize(canvasNode);
 				if (shouldSkipNode(normalized)) continue;
 
 				const entry = findNodeById(editor, node.id);

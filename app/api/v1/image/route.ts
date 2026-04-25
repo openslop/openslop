@@ -8,14 +8,14 @@ export const POST = createRouteHandler({
 	getProvider: getImageProvider,
 	label: "Image generation",
 	handle: async (provider, body) => {
-		const { prompt, model, format, width, height, referenceImage } = body;
+		const { prompt, model, format, width, height, referenceImages } = body;
 		const result = await provider.generate({
 			prompt,
 			model,
 			format,
 			width,
 			height,
-			referenceImage,
+			referenceImages,
 		});
 		return NextResponse.json(result);
 	},

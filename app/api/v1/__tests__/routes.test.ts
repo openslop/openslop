@@ -102,19 +102,45 @@ describe("API routes", () => {
 			expect((await res.json()).id).toBe("vid-abc123");
 		});
 
-		it("returns 400 for invalid referenceImage", async () => {
+		it("accepts requests without referenceImages", async () => {
+			const { POST } = await import("@/app/api/v1/video/route");
+			mockVideoGenerate.mockResolvedValue({
+				id: "vid-no-ref",
+				provider: "runware",
+				result: {},
+			});
+
+			const res = await POST(
+				makeRequest("/api/v1/video", { prompt: "sunset" }),
+			);
+			expect(res.status).toBe(200);
+		});
+
+		it("returns 400 for non-array referenceImages", async () => {
 			const { POST } = await import("@/app/api/v1/video/route");
 			const res = await POST(
 				makeRequest("/api/v1/video", {
 					prompt: "test",
-					referenceImage: "not-a-data-uri",
+					referenceImages: "not-an-array",
 				}),
 			);
 			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("data URI");
+			expect((await res.json()).error).toContain("must be an array");
 		});
 
-		it("accepts valid referenceImage data URI", async () => {
+		it("returns 400 for invalid referenceImages entry", async () => {
+			const { POST } = await import("@/app/api/v1/video/route");
+			const res = await POST(
+				makeRequest("/api/v1/video", {
+					prompt: "test",
+					referenceImages: ["not-a-data-uri"],
+				}),
+			);
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("data URI or an HTTP");
+		});
+
+		it("accepts valid referenceImages data URIs", async () => {
 			const { POST } = await import("@/app/api/v1/video/route");
 			mockVideoGenerate.mockResolvedValue({
 				id: "j2",
@@ -125,7 +151,24 @@ describe("API routes", () => {
 			const res = await POST(
 				makeRequest("/api/v1/video", {
 					prompt: "animate",
-					referenceImage: "data:image/png;base64,iVBORw0KGgo",
+					referenceImages: ["data:image/png;base64,iVBORw0KGgo"],
+				}),
+			);
+			expect(res.status).toBe(200);
+		});
+
+		it("accepts valid referenceImages URLs", async () => {
+			const { POST } = await import("@/app/api/v1/video/route");
+			mockVideoGenerate.mockResolvedValue({
+				id: "j3",
+				provider: "runware",
+				result: {},
+			});
+
+			const res = await POST(
+				makeRequest("/api/v1/video", {
+					prompt: "animate",
+					referenceImages: ["https://example.com/image.png"],
 				}),
 			);
 			expect(res.status).toBe(200);

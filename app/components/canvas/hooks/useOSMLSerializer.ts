@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState } from "react";
-import { Descendant } from "slate";
+import type { ParsedElement } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 
 const MAX_NODES_TO_SYNC = 3;
 
 export function useOSMLSerializer() {
 	const serializerRef = useRef<OSMLSerializer>(new OSMLSerializer());
-	const [nodes, setNodes] = useState<Descendant[]>([]);
+	const [nodes, setNodes] = useState<ParsedElement[]>([]);
 
 	const appendChunk = useCallback((chunk: string) => {
 		const updated = serializerRef.current.appendChunk(chunk);

@@ -1,4 +1,3 @@
-import pick from "lodash/pick";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
@@ -26,7 +25,6 @@ export function buildGenerationJob(
 		...baseConfig,
 		...(attributes.model && { defaultModel: attributes.model }),
 	};
-	const extraParams = pick(attributes, elementConfig.generateParams ?? []);
 
 	return {
 		elementId: element.id,
@@ -34,7 +32,7 @@ export function buildGenerationJob(
 		provider,
 		config,
 		prompt: inputs.prompt,
-		extraParams,
+		extraParams: attributes,
 		inputs,
 	};
 }

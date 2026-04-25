@@ -9,7 +9,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
-import { Descendant } from "slate";
+import type { ParsedElement } from "@/app/components/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
@@ -17,7 +17,7 @@ import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializ
 
 type ScriptContextValue = {
 	script: string;
-	nodes: Descendant[];
+	nodes: ParsedElement[];
 	loading: boolean;
 	submitPrompt: (prompt: string) => Promise<void>;
 	stopGeneration: () => void;

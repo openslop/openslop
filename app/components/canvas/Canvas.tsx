@@ -18,6 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useEditorSetup } from "./hooks/useEditorSetup";
 import { useScriptSync } from "./hooks/useScriptSync";
+import { useMetadataSync } from "./hooks/useMetadataSync";
 import { useGenerateAll } from "./hooks/useGenerateAll";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
@@ -60,6 +61,7 @@ export default function Canvas({
 	} = useDragAndDrop(editor, value);
 
 	useScriptSync(editor);
+	useMetadataSync();
 	const { generateAll } = useGenerateAll(editor);
 
 	const structureKey = contentElements.map((el) => el.id).join(",");
