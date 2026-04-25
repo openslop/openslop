@@ -35,7 +35,7 @@ const REFINE_SYSTEM_PROMPT = dedent`
 
   ## Common attributes by type
   - **narration / character**: gender (${vals(TTSGender)}), age (${vals(TTSAge)}), pitch (${vals(TTSPitch)}), accent (${vals(TTSAccent)}), texture, emotion, name (character only)
-  - **image**: animate, animation, art_style, overlays
+  - **image**: animate, animation, overlays
   - **sound**: type (${vals(SoundType)})
   - **music**: length (${vals(MusicLength)})
   - **clip**: duration (in seconds)

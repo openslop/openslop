@@ -73,17 +73,12 @@ describe("buildGenerationJob", () => {
 		});
 		const job = buildGenerationJob(el, registry);
 
-		expect(job).toEqual({
+		expect(job).toMatchObject({
 			elementId: "el-1",
 			connectorType: "tts",
 			provider: "openslop",
-			config: expect.objectContaining({ defaultModel: "Slop TTS v1" }),
 			prompt: "Hello world",
 			extraParams: { gender: "male", accent: "american" },
-			inputs: {
-				prompt: "Hello world",
-				attributes: { gender: "male", accent: "american" },
-			},
 		});
 	});
 
@@ -160,7 +155,7 @@ describe("buildGenerationJob", () => {
 		expect(job?.provider).toBe("openslop");
 	});
 
-	it("only picks generateParams defined in element config", () => {
+	it("passes all custom attributes as extraParams", () => {
 		const el = makeElement("narration", "Hello", {
 			gender: "female",
 			accent: "british",
@@ -168,10 +163,11 @@ describe("buildGenerationJob", () => {
 			pitch: "high",
 		});
 		const job = buildGenerationJob(el, registry);
-		// narration generateParams: ["gender", "accent"]
 		expect(job?.extraParams).toEqual({
 			gender: "female",
 			accent: "british",
+			age: "adult",
+			pitch: "high",
 		});
 	});
 

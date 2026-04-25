@@ -37,7 +37,7 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	resultInputs: null,
 };
 
-class GenerationQueue {
+export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
 	private pending: GenerationJob[] = [];
 	private controllers = new Map<string, AbortController>();
@@ -45,10 +45,19 @@ class GenerationQueue {
 	private listeners = new Set<() => void>();
 	private history = new Map<string, Map<string, AssetResult>>();
 	private readonly batchSize: number;
+	private pendingBefore: (() => Promise<void>) | null = null;
+	private processing = false;
 	private _resultVersion = 0;
 
 	constructor({ batchSize }: { batchSize: number }) {
 		this.batchSize = batchSize;
+	}
+
+	before(fn: () => Promise<void>): this {
+		if (!this.pendingBefore) {
+			this.pendingBefore = fn;
+		}
+		return this;
 	}
 
 	subscribe = (listener: () => void) => {
@@ -121,7 +130,7 @@ class GenerationQueue {
 		}
 		if (added) {
 			this.notify();
-			this.processQueue();
+			this.startProcessing();
 		}
 	}
 
@@ -184,6 +193,23 @@ class GenerationQueue {
 		if (timer) {
 			clearInterval(timer);
 			this.timers.delete(elementId);
+		}
+	}
+
+	private async startProcessing() {
+		if (this.processing) return;
+		this.processing = true;
+		try {
+			do {
+				if (this.pendingBefore) {
+					const fn = this.pendingBefore;
+					this.pendingBefore = null;
+					await fn();
+				}
+				this.processQueue();
+			} while (this.pendingBefore);
+		} finally {
+			this.processing = false;
 		}
 	}
 

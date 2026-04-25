@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { ConnectorConfig } from "@/lib/connectors/types";
-import type { GenerationJob } from "../queue";
+import { GenerationQueue, type GenerationJob } from "../queue";
 
 type GenerateFn = (...args: unknown[]) => Promise<unknown>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
@@ -30,20 +30,16 @@ function makeJob(
 	};
 }
 
-// We need to create fresh queue instances. The module exports a singleton,
-// but we can test it by importing the module and resetting between tests.
-// Since the class isn't exported, we'll work with the singleton and reset
-// its state by cancelling everything and discarding all elements.
-import { generationQueue } from "../queue";
+let generationQueue: GenerationQueue;
 
 describe("GenerationQueue", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		generateMock = vi.fn();
+		generationQueue = new GenerationQueue({ batchSize: 3 });
 	});
 
 	afterEach(() => {
-		generationQueue.cancelAll();
 		vi.useRealTimers();
 	});
 
@@ -382,6 +378,141 @@ describe("GenerationQueue", () => {
 			);
 
 			generationQueue.discard("t1");
+		});
+	});
+
+	describe("before", () => {
+		it("runs callback before jobs start generating", async () => {
+			const order: string[] = [];
+			const beforeProcess = vi.fn(async () => {
+				order.push("beforeProcess");
+			});
+			generateMock.mockImplementation(async () => {
+				order.push("generate");
+				return { url: "https://example.com/img.png" };
+			});
+
+			generationQueue.before(beforeProcess).enqueue(makeJob("bp1"));
+			await vi.runAllTimersAsync();
+
+			expect(beforeProcess).toHaveBeenCalledOnce();
+			expect(order).toEqual(["beforeProcess", "generate"]);
+		});
+
+		it("callback self-destructs after running", async () => {
+			const beforeProcess = vi.fn(async () => {});
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			generationQueue.before(beforeProcess).enqueue(makeJob("sd1"));
+			await vi.runAllTimersAsync();
+
+			// Enqueue another job without beforeProcess — callback should not run again
+			generationQueue.enqueue(makeJob("sd2"));
+			await vi.runAllTimersAsync();
+
+			expect(beforeProcess).toHaveBeenCalledOnce();
+		});
+
+		it("is a no-op when a beforeProcess is already pending", async () => {
+			const first = vi.fn(async () => {});
+			const second = vi.fn(async () => {});
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			generationQueue.before(first).before(second).enqueue(makeJob("noop1"));
+			await vi.runAllTimersAsync();
+
+			expect(first).toHaveBeenCalledOnce();
+			expect(second).not.toHaveBeenCalled();
+		});
+
+		it("does not invoke callback twice on back-to-back enqueues", async () => {
+			const beforeProcess = vi.fn(async () => {});
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			// First enqueue registers and clears the before callback
+			generationQueue.before(beforeProcess).enqueue(makeJob("re1"));
+			// Second enqueue without .before() — should not re-trigger
+			generationQueue.enqueue(makeJob("re2"));
+			await vi.runAllTimersAsync();
+
+			expect(beforeProcess).toHaveBeenCalledOnce();
+		});
+
+		it("allows a new before while a previous one is running", async () => {
+			let resolveFirst: () => void = () => {};
+			const firstPromise = new Promise<void>((r) => {
+				resolveFirst = r;
+			});
+			const first = vi.fn(() => firstPromise);
+			const second = vi.fn(async () => {});
+
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			// Start processing with first before
+			generationQueue.before(first).enqueue(makeJob("run1"));
+
+			// While first is running, register second for the next batch
+			generationQueue.before(second).enqueue(makeJob("run2"));
+
+			// Complete the first before
+			resolveFirst();
+			await vi.runAllTimersAsync();
+
+			expect(first).toHaveBeenCalledOnce();
+			expect(second).toHaveBeenCalledOnce();
+		});
+
+		it("does not start jobs until before() resolves on concurrent enqueue", async () => {
+			let resolveGate: () => void = () => {};
+			const gate = new Promise<void>((r) => {
+				resolveGate = r;
+			});
+			const beforeFn = vi.fn(() => gate);
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			// First enqueue triggers before()
+			generationQueue.before(beforeFn).enqueue(makeJob("g1"));
+
+			// Second enqueue while before() is still pending — guard prevents re-entry
+			generationQueue.enqueue(makeJob("g2"));
+
+			// Nothing should be generating yet
+			expect(generationQueue.getElementSnapshot("g1").status).toBe("queued");
+			expect(generationQueue.getElementSnapshot("g2").status).toBe("queued");
+			expect(generateMock).not.toHaveBeenCalled();
+
+			resolveGate();
+			await vi.runAllTimersAsync();
+
+			// Both jobs should have completed after before() resolved
+			expect(generateMock).toHaveBeenCalledTimes(2);
+			expect(generationQueue.getElementSnapshot("g1").status).toBe("idle");
+			expect(generationQueue.getElementSnapshot("g2").status).toBe("idle");
+		});
+
+		it("enqueue works normally without beforeProcess", async () => {
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			generationQueue.enqueue(makeJob("plain1"));
+			await vi.runAllTimersAsync();
+
+			const snap = generationQueue.getElementSnapshot("plain1");
+			expect(snap.status).toBe("idle");
+			expect(snap.result).toEqual({
+				url: "https://example.com/img.png",
+			});
 		});
 	});
 });

@@ -53,7 +53,7 @@ describe("RunwareVideo", () => {
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
-		it("passes referenceImage as inputImage", async () => {
+		it("passes referenceImages[0] as inputImage", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-2",
 				status: "processing",
@@ -62,7 +62,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			await provider.submit({
 				prompt: "animate this",
-				referenceImage: "data:image/png;base64,abc123",
+				referenceImages: ["data:image/png;base64,abc123"],
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(

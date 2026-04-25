@@ -5,13 +5,19 @@ import type {
 import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
 
-const MOCK_SCRIPT = `<image animate="true" animation="slow pan across the village to the forest path" art_style="In the art style of a whimsical storybook illustration with soft watercolors, gentle brush strokes, and warm lighting.">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</image>
+const MOCK_SCRIPT = `<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
+
+<metadata_character name="Red">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</metadata_character>
+
+<metadata_character name="Wolf">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</metadata_character>
+
+<image animate="true" animation="slow pan across the village to the forest path">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</image>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
 <narration gender="female" age="adult" pitch="medium" accent="american" texture="warm, grandmotherly, kind" emotion="cheerful">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</narration>
 
-<image animate="true" animation="slow zoom in on Red at her cottage door" art_style="In the art style of a whimsical storybook illustration with soft watercolors, gentle brush strokes, and warm lighting.">Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands at her cottage door holding a wicker basket filled with fresh vegetables including carrots, lettuce, and tomatoes. She smiles warmly. Morning sunlight streams through nearby trees.</image>
+<image animate="true" animation="slow zoom in on Red at her cottage door" characters="Red">Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands at her cottage door holding a wicker basket filled with fresh vegetables including carrots, lettuce, and tomatoes. She smiles warmly. Morning sunlight streams through nearby trees.</image>
 
 <narration gender="female" age="adult" pitch="medium" accent="american" texture="warm, grandmotherly, kind" emotion="happy">Red got her name from the beautiful red cloak she wore everywhere. Today, she was taking a basket of fresh vegetables to her grandmother, who lived deep in the woods.</narration>
 
@@ -21,7 +27,7 @@ const MOCK_SCRIPT = `<image animate="true" animation="slow pan across the villag
 
 <sound type="transient">footsteps on dirt path</sound>
 
-<image animate="true" animation="gentle pan through the berry bushes" art_style="In the art style of a whimsical storybook illustration with soft watercolors, gentle brush strokes, and warm lighting.">A different part of the forest with thick berry bushes full of ripe red berries. Wolf (a large gray wolf with kind amber eyes, soft fur, wearing a worn brown vest) carefully picks berries and places them in a wicker basket. Dappled sunlight filters through the forest canopy above.</image>
+<image animate="true" animation="gentle pan through the berry bushes" characters="Wolf">A different part of the forest with thick berry bushes full of ripe red berries. Wolf (a large gray wolf with kind amber eyes, soft fur, wearing a worn brown vest) carefully picks berries and places them in a wicker basket. Dappled sunlight filters through the forest canopy above.</image>
 
 <narration gender="female" age="adult" pitch="medium" accent="american" texture="warm, grandmotherly, kind" emotion="mysterious">Not far away, someone else was in the forest that morning. Wolf was gathering wild berries near the path.</narration>
 
@@ -64,7 +70,7 @@ const MOCK_REFINEMENTS: RefinementFactory[] = [
 	() =>
 		[
 			`{"op":"insert","position":"before","type":"narration","text":"Long ago, in a land of endless forests..."}`,
-			`{"op":"insert","position":"before","type":"image","attrs":{"art_style":"watercolor","animate":"true"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
+			`{"op":"insert","position":"before","type":"image","attrs":{"animate":"true"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
 		].join("\n"),
 
 	// Multiple set ops on different elements (tests independent edits)

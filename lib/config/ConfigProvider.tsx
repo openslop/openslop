@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, use, useMemo, useState, type ReactNode } from "react";
-import set from "lodash/fp/set";
 import type {
 	ConnectorConfig,
 	ConnectorPlugin,
@@ -15,10 +14,11 @@ import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
+import { createCharacterReferencesPlugin } from "../connectors/plugins/character-references";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
-import { getDefaultConnector } from "./connectorUtils";
+import { withRegistry } from "./connectorUtils";
 
 export type ComposerMode = "story" | "script";
 
@@ -81,27 +81,24 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 	);
 	const [composerMode, setComposerMode] = useState<ComposerMode>("story");
 
-	const configWithModePlugins = useMemo<ConnectorRegistry>(() => {
-		const { provider, config: llmConfig } = getDefaultConnector(
-			connectorConfig,
-			"llm",
-		);
-		return set(
-			["llm", provider, "plugins"],
-			[...(llmConfig.plugins ?? []), MODE_PLUGINS[composerMode]],
-			connectorConfig,
-		);
-	}, [connectorConfig, composerMode]);
+	const configWithPlugins = useMemo<ConnectorRegistry>(
+		() =>
+			withRegistry(connectorConfig)
+				.appendPlugins("llm", MODE_PLUGINS[composerMode])
+				.appendPlugins("image", createCharacterReferencesPlugin(projectId))
+				.build(),
+		[connectorConfig, composerMode, projectId],
+	);
 
 	const value = useMemo<ConfigContextValue>(
 		() => ({
 			projectId,
-			connectorConfig: configWithModePlugins,
+			connectorConfig: configWithPlugins,
 			composerMode,
 			setConnectorConfig,
 			setComposerMode,
 		}),
-		[projectId, configWithModePlugins, composerMode],
+		[projectId, configWithPlugins, composerMode],
 	);
 
 	return (

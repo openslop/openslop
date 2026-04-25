@@ -50,7 +50,7 @@ const registry: ConnectorRegistry = {
 };
 
 vi.mock("@/lib/config/ConfigProvider", () => ({
-	useConfig: () => ({ connectorConfig: registry }),
+	useConfig: () => ({ projectId: "test-project", connectorConfig: registry }),
 }));
 
 vi.mock("react", () => ({
@@ -60,18 +60,23 @@ vi.mock("react", () => ({
 const enqueueAllSpy = vi.fn();
 const getElementSnapshotSpy = vi.fn();
 
-vi.mock("@/lib/generation/queue", async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import("@/lib/generation/queue")>();
-	return {
-		...actual,
-		generationQueue: {
-			enqueueAll: (...args: unknown[]) => enqueueAllSpy(...args),
-			getElementSnapshot: (...args: unknown[]) =>
-				getElementSnapshotSpy(...args),
+vi.mock("@/lib/generation/queue", async () => {
+	const actual = await vi.importActual<
+		typeof import("@/lib/generation/generationInputs")
+	>("@/lib/generation/generationInputs");
+	const queue = {
+		enqueueAll: (...args: unknown[]) => enqueueAllSpy(...args),
+		getElementSnapshot: (...args: unknown[]) => getElementSnapshotSpy(...args),
+		before() {
+			return this;
 		},
 	};
+	return { generationQueue: queue, isStaleResult: actual.isStaleResult };
 });
+
+vi.mock("@/lib/project/ensureCharacterAvatars", () => ({
+	ensureCharacterAvatars: vi.fn(),
+}));
 
 function makeElement(
 	id: string,

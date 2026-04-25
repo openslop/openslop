@@ -39,7 +39,7 @@ export class RunwareVideo extends BaseVideoProvider {
 				duration: params.duration || 5,
 				outputType: "URL",
 				deliveryMethod: "async",
-				inputImage: params.referenceImage,
+				inputImage: params.referenceImages?.[0],
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;
