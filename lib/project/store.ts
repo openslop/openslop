@@ -26,10 +26,6 @@ export function getProjectStore(projectId: string): ProjectStore {
 	return store;
 }
 
-export function clearProjectStore(projectId: string) {
-	stores.delete(projectId);
-}
-
 export function useProjectStore<T>(
 	projectId: string,
 	selector: (state: ProjectContext) => T,
