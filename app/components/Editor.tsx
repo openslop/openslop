@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import { getProjectStore } from "@/lib/project/store";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 
 export default function Editor() {
 	const { script, loading, submitPrompt } = useScript();
+	const { projectId } = useConfig();
 	const [prompted, setPrompted] = useState(false);
 
 	const hasScript = script.length > 0 || loading;
 
-	const handleSubmit = (value: string) => {
+	const handleSubmit = (value: string, referenceImages: string[]) => {
+		getProjectStore(projectId).getState().setReferenceImages(referenceImages);
 		setPrompted(true);
 		submitPrompt(value);
 	};
@@ -19,7 +23,7 @@ export default function Editor() {
 	return (
 		<div
 			className={`flex min-h-screen flex-col items-center text-white transition-[padding] duration-700 ease-out ${
-				hasScript ? "" : "pt-[30vh]"
+				hasScript ? "" : "pt-[22vh]"
 			}`}
 		>
 			{prompted ? (

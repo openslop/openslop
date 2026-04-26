@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const SUGGESTIONS = [
 	"a claymation children's story about little red riding hood…",
@@ -16,24 +16,67 @@ const SUGGESTIONS = [
 	"a calming bedtime documentary about life in an ancient medieval village…",
 ];
 
+const TYPING_MS = 40;
+const ERASING_MS = 25;
+const PAUSE_AFTER_TYPE_MS = 2000;
+const PAUSE_AFTER_ERASE_MS = 300;
+
 export default function AnimatedPlaceholder({ active }: { active: boolean }) {
-	const [index, setIndex] = useState(0);
+	const [display, setDisplay] = useState("");
+	const indexRef = useRef(0);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const clear = useCallback(() => {
+		if (timerRef.current !== null) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
+	}, []);
 
 	useEffect(() => {
 		if (!active) return;
-		const id = setInterval(() => {
-			setIndex((prev) => (prev + 1) % SUGGESTIONS.length);
-		}, 3000);
-		return () => clearInterval(id);
-	}, [active]);
+
+		let count = 0;
+		let text = SUGGESTIONS[indexRef.current];
+
+		function tick() {
+			count++;
+			setDisplay(text.slice(0, count));
+			if (count < text.length) {
+				timerRef.current = setTimeout(tick, TYPING_MS);
+			} else {
+				timerRef.current = setTimeout(eraseTick, PAUSE_AFTER_TYPE_MS);
+			}
+		}
+
+		function eraseTick() {
+			count--;
+			setDisplay(text.slice(0, count));
+			if (count > 0) {
+				timerRef.current = setTimeout(eraseTick, ERASING_MS);
+			} else {
+				timerRef.current = setTimeout(nextSuggestion, PAUSE_AFTER_ERASE_MS);
+			}
+		}
+
+		function nextSuggestion() {
+			indexRef.current = (indexRef.current + 1) % SUGGESTIONS.length;
+			text = SUGGESTIONS[indexRef.current];
+			count = 0;
+			tick();
+		}
+
+		timerRef.current = setTimeout(tick, TYPING_MS);
+
+		return clear;
+	}, [active, clear]);
 
 	return (
 		<span
-			key={index}
 			aria-hidden="true"
-			className="animate-fadeInUp pointer-events-none block w-full select-none truncate text-white/30"
+			className="pointer-events-none block w-full select-none text-white/30"
 		>
-			{SUGGESTIONS[index]}
+			Create {display}
 		</span>
 	);
 }

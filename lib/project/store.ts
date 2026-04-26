@@ -5,9 +5,11 @@ import type { Metadata } from "./types";
 
 export type ProjectContext = {
 	metadata: Metadata;
+	referenceImages: string[];
 	setMetadataStyle: (style: string) => void;
 	setMetadataCharacter: (name: string, description: string) => void;
 	setCharacterAvatarUrl: (name: string, url: string) => void;
+	setReferenceImages: (urls: string[]) => void;
 };
 
 export type ProjectStore = StoreApi<ProjectContext>;
@@ -20,6 +22,7 @@ export function getProjectStore(projectId: string): ProjectStore {
 		store = createStore<ProjectContext>()(
 			immer((set) => ({
 				metadata: { style: "", characters: {} },
+				referenceImages: [],
 				setMetadataStyle: (style) =>
 					set((state) => {
 						state.metadata.style = style;
@@ -31,6 +34,10 @@ export function getProjectStore(projectId: string): ProjectStore {
 				setCharacterAvatarUrl: (name, url) =>
 					set((state) => {
 						state.metadata.characters[name].avatarUrl = url;
+					}),
+				setReferenceImages: (urls) =>
+					set((state) => {
+						state.referenceImages = urls;
 					}),
 			})),
 		);
