@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
 	images: {
@@ -23,6 +22,10 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default withBundleAnalyzer({ enabled: process.env.ANALYZE === "true" })(
-	nextConfig,
-);
+const loadConfig = async (): Promise<NextConfig> => {
+	if (process.env.ANALYZE !== "true") return nextConfig;
+	const { default: withBundleAnalyzer } = await import("@next/bundle-analyzer");
+	return withBundleAnalyzer({ enabled: true })(nextConfig);
+};
+
+export default loadConfig;
