@@ -48,6 +48,12 @@
 	transition: opacity 0.15s ease;
 }
 
+@media (max-width: 639px) {
+	.actions {
+		display: none;
+	}
+}
+
 .hoverTarget {
 	display: flex;
 }
