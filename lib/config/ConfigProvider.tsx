@@ -15,14 +15,17 @@ import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 import { createCharacterReferencesPlugin } from "../connectors/plugins/character-references";
+import { createReferenceImagesPlugin } from "../connectors/plugins/reference-images";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
+import { createTemplateModePlugin } from "../connectors/plugins/template-mode";
+import { TEMPLATES } from "../templates/templates";
 import { withRegistry } from "./connectorUtils";
 
-export type ComposerMode = "story" | "script";
+export type ComposerMode = "story" | "script" | "template";
 
-const MODE_PLUGINS: Record<ComposerMode, LLMPlugin> = {
+const MODE_PLUGINS: Record<"story" | "script", LLMPlugin> = {
 	story: storyModePlugin,
 	script: scriptModePlugin,
 };
@@ -62,8 +65,10 @@ type ConfigContextValue = {
 	projectId: string;
 	connectorConfig: ConnectorRegistry;
 	composerMode: ComposerMode;
+	selectedTemplateId: string | null;
 	setConnectorConfig: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
 	setComposerMode: React.Dispatch<React.SetStateAction<ComposerMode>>;
+	setSelectedTemplateId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -80,25 +85,34 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		initialConnectorConfig,
 	);
 	const [composerMode, setComposerMode] = useState<ComposerMode>("story");
-
-	const configWithPlugins = useMemo<ConnectorRegistry>(
-		() =>
-			withRegistry(connectorConfig)
-				.appendPlugins("llm", MODE_PLUGINS[composerMode])
-				.appendPlugins("image", createCharacterReferencesPlugin(projectId))
-				.build(),
-		[connectorConfig, composerMode, projectId],
+	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+		TEMPLATES[0]?.id ?? null,
 	);
+
+	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
+		const modePlugin =
+			composerMode === "template"
+				? createTemplateModePlugin(selectedTemplateId)
+				: MODE_PLUGINS[composerMode];
+		return withRegistry(connectorConfig)
+			.appendPlugins("llm", modePlugin)
+			.appendPlugins("image", createCharacterReferencesPlugin(projectId))
+			.appendPlugins("image", createReferenceImagesPlugin(projectId))
+			.appendPlugins("video", createReferenceImagesPlugin(projectId))
+			.build();
+	}, [connectorConfig, composerMode, selectedTemplateId, projectId]);
 
 	const value = useMemo<ConfigContextValue>(
 		() => ({
 			projectId,
 			connectorConfig: configWithPlugins,
 			composerMode,
+			selectedTemplateId,
 			setConnectorConfig,
 			setComposerMode,
+			setSelectedTemplateId,
 		}),
-		[projectId, configWithPlugins, composerMode],
+		[projectId, configWithPlugins, composerMode, selectedTemplateId],
 	);
 
 	return (

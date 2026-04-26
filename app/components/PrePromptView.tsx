@@ -8,9 +8,14 @@ import UserProfile from "./UserProfile";
 export default function PrePromptView({
 	onSubmit,
 }: {
-	onSubmit: (value: string) => void;
+	onSubmit: (value: string, referenceImages: string[]) => void;
 }) {
-	const { composerMode, setComposerMode } = useConfig();
+	const {
+		composerMode,
+		setComposerMode,
+		selectedTemplateId,
+		setSelectedTemplateId,
+	} = useConfig();
 	const { loading, stopGeneration } = useScript();
 
 	return (
@@ -21,6 +26,8 @@ export default function PrePromptView({
 			<ComposerHero
 				composerMode={composerMode}
 				onModeChange={setComposerMode}
+				selectedTemplateId={selectedTemplateId}
+				onTemplateChange={setSelectedTemplateId}
 				loading={loading}
 				onSubmit={onSubmit}
 				onStop={stopGeneration}
