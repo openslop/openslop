@@ -1,5 +1,6 @@
 "use client";
 
+import { ResizeHandle } from "./ResizeHandle";
 import { useResize } from "./useResize";
 import { VideoPanel } from "./VideoPanel";
 
@@ -28,21 +29,11 @@ export function TopPlayerPanel() {
 			>
 				<VideoPanel />
 			</div>
-			<div
+			<ResizeHandle
+				axis="vertical"
+				resizing={resizing}
 				onMouseDown={handleMouseDown}
-				className={`relative flex h-2 w-full shrink-0 cursor-row-resize items-end justify-center ${resizing ? "select-none" : ""}`}
-			>
-				<div
-					className={`h-0.5 rounded-full transition-colors ${
-						resizing ? "bg-white/40" : "bg-white/10 hover:bg-white/25"
-					}`}
-					style={{
-						width: "100%",
-						maskImage:
-							"linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
-					}}
-				/>
-			</div>
+			/>
 		</div>
 	);
 }
@@ -59,21 +50,11 @@ export function SidePlayerPanel() {
 
 	return (
 		<div className="flex shrink-0" style={{ width: size }}>
-			<div
+			<ResizeHandle
+				axis="horizontal"
+				resizing={resizing}
 				onMouseDown={handleMouseDown}
-				className={`flex h-full w-4 shrink-0 cursor-col-resize items-center justify-center ${resizing ? "select-none" : ""}`}
-			>
-				<div
-					className={`w-0.5 rounded-full transition-colors ${
-						resizing ? "bg-white/40" : "bg-white/10 hover:bg-white/25"
-					}`}
-					style={{
-						height: "100%",
-						maskImage:
-							"linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
-					}}
-				/>
-			</div>
+			/>
 			<div className="flex flex-1 flex-col justify-center overflow-hidden p-4">
 				<VideoPanel />
 			</div>
