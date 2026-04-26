@@ -8,11 +8,24 @@ const nextConfig: NextConfig = {
 		],
 	},
 	experimental: {
-		optimizePackageImports: ["lucide-react"],
+		optimizePackageImports: [
+			"lucide-react",
+			"radix-ui",
+			"@dnd-kit/core",
+			"@dnd-kit/sortable",
+			"@dnd-kit/utilities",
+			"lodash",
+		],
 	},
 	outputFileTracingIncludes: {
 		"/api/render": ["./.remotion/**/*"],
 	},
 };
 
-export default nextConfig;
+const loadConfig = async (): Promise<NextConfig> => {
+	if (process.env.ANALYZE !== "true") return nextConfig;
+	const { default: withBundleAnalyzer } = await import("@next/bundle-analyzer");
+	return withBundleAnalyzer({ enabled: true })(nextConfig);
+};
+
+export default loadConfig;
