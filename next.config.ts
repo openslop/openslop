@@ -9,7 +9,14 @@ const nextConfig: NextConfig = {
 		],
 	},
 	experimental: {
-		optimizePackageImports: ["lucide-react"],
+		optimizePackageImports: [
+			"lucide-react",
+			"radix-ui",
+			"@dnd-kit/core",
+			"@dnd-kit/sortable",
+			"@dnd-kit/utilities",
+			"lodash",
+		],
 	},
 	outputFileTracingIncludes: {
 		"/api/render": ["./.remotion/**/*"],

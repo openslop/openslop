@@ -1,9 +1,17 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { prefetch } from "remotion";
+import { useEffect, useRef, useState } from "react";
+import type { prefetch as PrefetchFn } from "remotion";
 import type { VideoLayout } from "@/lib/video/types";
-import { PrefetchReadyStore } from "./PrefetchReadyStore";
 
-type PrefetchHandle = ReturnType<typeof prefetch>;
+type PrefetchHandle = ReturnType<typeof PrefetchFn>;
+
+let prefetchPromise: Promise<typeof PrefetchFn> | null = null;
+const loadPrefetch = () =>
+	(prefetchPromise ??= import("remotion")
+		.then((m) => m.prefetch)
+		.catch((err) => {
+			prefetchPromise = null;
+			throw err;
+		}));
 
 function collectUrls(layout: VideoLayout): Set<string> {
 	const urls = new Set<string>();
@@ -19,41 +27,50 @@ function collectUrls(layout: VideoLayout): Set<string> {
 	return urls;
 }
 
-function freeStale(active: Map<string, PrefetchHandle>, desired: Set<string>) {
-	for (const [url, handle] of active) {
-		if (!desired.has(url)) {
-			handle.free();
-			active.delete(url);
-		}
-	}
-}
-
-function prefetchNew(
-	active: Map<string, PrefetchHandle>,
-	desired: Set<string>,
-	store: PrefetchReadyStore,
-) {
-	for (const url of desired) {
-		if (!active.has(url)) {
-			store.onPrefetchStart();
-			const handle = prefetch(url);
-			active.set(url, handle);
-			handle.waitUntilDone().then(store.onPrefetchEnd, store.onPrefetchEnd);
-		}
-	}
-}
-
 export function useAssetPrefetch(layout: VideoLayout | null): boolean {
 	const activeRef = useRef(new Map<string, PrefetchHandle>());
-	const [store] = useState(() => new PrefetchReadyStore());
+	const [ready, setReady] = useState(false);
 
 	useEffect(() => {
 		if (!layout) return;
-		const desired = collectUrls(layout);
-		freeStale(activeRef.current, desired);
-		prefetchNew(activeRef.current, desired, store);
-		store.syncReady();
-	}, [layout, store]);
+		let cancelled = false;
+
+		loadPrefetch().then(
+			async (prefetch) => {
+				if (cancelled) return;
+				const desired = collectUrls(layout);
+				const active = activeRef.current;
+
+				for (const [url, handle] of active) {
+					if (!desired.has(url)) {
+						handle.free();
+						active.delete(url);
+					}
+				}
+
+				let added = false;
+				for (const url of desired) {
+					if (!active.has(url)) {
+						active.set(url, prefetch(url));
+						added = true;
+					}
+				}
+
+				if (added) setReady(false);
+				await Promise.all([...active.values()].map((h) => h.waitUntilDone()));
+				if (!cancelled) setReady(true);
+			},
+			(err) => {
+				if (cancelled) return;
+				console.error("Failed to load remotion for prefetch", err);
+				setReady(true);
+			},
+		);
+
+		return () => {
+			cancelled = true;
+		};
+	}, [layout]);
 
 	useEffect(() => {
 		const active = activeRef.current;
@@ -63,5 +80,5 @@ export function useAssetPrefetch(layout: VideoLayout | null): boolean {
 		};
 	}, []);
 
-	return useSyncExternalStore(store.subscribe, store.getReady);
+	return ready;
 }

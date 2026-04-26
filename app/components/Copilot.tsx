@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import Image from "next/image";
 import {
 	CornerDownLeft,
 	ImagePlus,
@@ -121,14 +122,17 @@ function ImageThumbnail({
 
 	return (
 		<div className="group/thumb relative h-14 w-14 shrink-0">
-			<div className="h-full w-full overflow-hidden rounded-lg">
+			<div className="relative h-full w-full overflow-hidden rounded-lg">
 				{!loaded && (
 					<div className="absolute inset-0 rounded-lg shimmer-surface" />
 				)}
-				<img
+				<Image
 					src={url}
 					alt="Reference"
-					className={`h-full w-full object-cover transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+					fill
+					sizes="56px"
+					unoptimized
+					className={`object-cover transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
 					onLoad={() => setLoaded(true)}
 				/>
 			</div>
