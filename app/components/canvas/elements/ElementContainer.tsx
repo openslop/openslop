@@ -118,6 +118,7 @@ export function ElementContainer({
 			>
 				<OutputPreview
 					type={element.type}
+					characterName={element.customAttributes?.name}
 					generating={gen.generating}
 					queued={gen.queued}
 					seconds={gen.seconds}
