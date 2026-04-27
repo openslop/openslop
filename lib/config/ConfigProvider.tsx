@@ -14,6 +14,7 @@ import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
+import { createArtStylePlugin } from "../connectors/plugins/art-style";
 import { createCharacterReferencesPlugin } from "../connectors/plugins/character-references";
 import { createReferenceImagesPlugin } from "../connectors/plugins/reference-images";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
@@ -96,6 +97,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 				: MODE_PLUGINS[composerMode];
 		return withRegistry(connectorConfig)
 			.appendPlugins("llm", modePlugin)
+			.appendPlugins("image", createArtStylePlugin(projectId))
 			.appendPlugins("image", createCharacterReferencesPlugin(projectId))
 			.appendPlugins("image", createReferenceImagesPlugin(projectId))
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))
