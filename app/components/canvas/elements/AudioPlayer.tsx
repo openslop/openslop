@@ -30,7 +30,7 @@ export function AudioPlayer({
 	const [duration, setDuration] = useState(0);
 
 	return (
-		<div className="flex flex-1 min-w-0 items-center gap-2">
+		<>
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<button
@@ -54,7 +54,7 @@ export function AudioPlayer({
 				src={src}
 				peaksCache={peaksCache}
 				waveColor={waveColor}
-				className="flex-1 h-10 min-w-0"
+				className="flex-1 basis-[160px] min-w-0 h-10"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}
 				onTimeUpdate={(t, d) => {
@@ -63,9 +63,9 @@ export function AudioPlayer({
 				}}
 				onFinish={() => setPlaying(false)}
 			/>
-			<span className="shrink-0 w-16 text-right text-[10px] tabular-nums text-white/50 overflow-hidden">
+			<span className="shrink-0 ml-auto text-[10px] tabular-nums text-white/50">
 				{formatTime(currentTime)}/{formatTime(duration)}
 			</span>
-		</div>
+		</>
 	);
 }

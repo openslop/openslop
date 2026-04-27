@@ -9,6 +9,7 @@ import {
 	TooltipContent,
 } from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
+import { CharacterBadge } from "./CharacterBadge";
 import type { CanvasElementType } from "../types";
 import type { AssetResult } from "@/lib/connectors/types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
@@ -289,6 +290,7 @@ function ErrorMessage({ message }: { message: string }) {
 function AudioResult({
 	type,
 	src,
+	characterName,
 	generating,
 	queued,
 	seconds,
@@ -297,11 +299,13 @@ function AudioResult({
 }: GenerationState & {
 	type: CanvasElementType;
 	src: string;
+	characterName?: string;
 	stale: boolean;
 	onRegenerate: () => void;
 }) {
 	return (
-		<div className="group relative w-full h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2">
+		<div className="group relative w-full min-h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5">
+			{type === "character" && <CharacterBadge name={characterName} />}
 			<RegenerateButton
 				generating={generating}
 				queued={queued}
@@ -317,6 +321,7 @@ function AudioResult({
 
 interface OutputPreviewProps {
 	type: CanvasElementType;
+	characterName?: string;
 	generating: boolean;
 	queued: boolean;
 	seconds: number;
@@ -334,7 +339,7 @@ function AudioPlaceholder({
 	error,
 	onGenerate,
 	onDiscard,
-}: Omit<OutputPreviewProps, "type" | "result" | "stale">) {
+}: Omit<OutputPreviewProps, "type" | "characterName" | "result" | "stale">) {
 	const staticRotations = useStaticRotations();
 
 	const [mask] = useState(() => {
@@ -495,6 +500,7 @@ const WAVE_COLORS: Record<CanvasElementType, string> = {
 
 export function OutputPreview({
 	type,
+	characterName,
 	generating,
 	queued,
 	seconds,
@@ -512,6 +518,7 @@ export function OutputPreview({
 				<AudioResult
 					type={type}
 					src={result.url}
+					characterName={characterName}
 					generating={generating}
 					queued={queued}
 					seconds={seconds}
