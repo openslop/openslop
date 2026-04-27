@@ -66,7 +66,6 @@ describe("ensureCharacterAvatars", () => {
 		store
 			.getState()
 			.setMetadataCharacter("Alice", "A young girl with red hair");
-		store.getState().setMetadataStyle("Watercolor illustration");
 
 		generateMock.mockResolvedValue({
 			url: "https://example.com/alice.png",
@@ -79,13 +78,31 @@ describe("ensureCharacterAvatars", () => {
 
 		expect(generateMock).toHaveBeenCalledOnce();
 		const prompt = generateMock.mock.calls[0][3] as string;
-		expect(prompt).toContain("Character portrait of Alice");
-		expect(prompt).toContain("A young girl with red hair");
-		expect(prompt).toContain("Watercolor illustration");
+		expect(prompt).toBe(
+			"Character portrait of Alice. A young girl with red hair",
+		);
 
 		expect(store.getState().metadata.characters["Alice"].avatarUrl).toBe(
 			"https://example.com/alice.png",
 		);
+	});
+
+	it("does not embed metadata.style in the prompt (plugin handles it)", async () => {
+		const store = getProjectStore(PROJECT_ID);
+		store.getState().setMetadataCharacter("Alice", "A young girl");
+		store.getState().setMetadataStyle("Watercolor illustration");
+
+		generateMock.mockResolvedValue({
+			url: "https://example.com/alice.png",
+			durationSec: 0,
+		});
+
+		const { ensureCharacterAvatars } =
+			await import("../ensureCharacterAvatars");
+		await ensureCharacterAvatars(PROJECT_ID, registry);
+
+		const prompt = generateMock.mock.calls[0][3] as string;
+		expect(prompt).not.toContain("Watercolor illustration");
 	});
 
 	it("skips characters that already have an avatarUrl", async () => {
@@ -168,24 +185,5 @@ describe("ensureCharacterAvatars", () => {
 		expect(store.getState().metadata.characters["Alice"].avatarUrl).toBe(
 			"https://example.com/new-alice.png",
 		);
-	});
-
-	it("includes empty style segment when metadataStyle is empty", async () => {
-		const store = getProjectStore(PROJECT_ID);
-		store.getState().setMetadataCharacter("Eve", "A mysterious figure");
-		store.getState().setMetadataStyle("");
-
-		generateMock.mockResolvedValue({
-			url: "https://example.com/eve.png",
-			durationSec: 0,
-		});
-
-		const { ensureCharacterAvatars } =
-			await import("../ensureCharacterAvatars");
-		await ensureCharacterAvatars(PROJECT_ID, registry);
-
-		const prompt = generateMock.mock.calls[0][3] as string;
-		expect(prompt).toContain("Character portrait of Eve");
-		expect(prompt).toContain("A mysterious figure");
 	});
 });

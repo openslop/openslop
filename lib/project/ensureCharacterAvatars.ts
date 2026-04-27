@@ -8,18 +8,17 @@ export async function ensureCharacterAvatars(
 	registry: ConnectorRegistry,
 ): Promise<void> {
 	const store = getProjectStore(projectId);
-	const { characters, style } = store.getState().metadata;
+	const { characters } = store.getState().metadata;
 	const { provider, config } = getDefaultConnector(registry, "image");
 
+	// Style is prepended by the art-style plugin on the image connector chain.
 	await Promise.all(
 		Object.entries(characters)
 			.filter(([, ch]) => !ch.avatarUrl && ch.description)
 			.map(async ([name, ch]) => {
-				const prompt = [
-					`Character portrait of ${name}`,
-					ch.description,
-					style,
-				].join(". ");
+				const prompt = [`Character portrait of ${name}`, ch.description].join(
+					". ",
+				);
 
 				const result = await generateForElement(
 					"image",
