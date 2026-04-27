@@ -13,11 +13,11 @@ describe("createArtStylePlugin", () => {
 		expect(createArtStylePlugin(projectId).name).toBe("art-style");
 	});
 
-	it("prepends metadata.style with comma separator when style is set", () => {
+	it("prepends metadata.style with period separator when style is set", () => {
 		getProjectStore(projectId).getState().setMetadataStyle("cinematic anime");
 		const { transformPrompt } = createArtStylePlugin(projectId);
 		expect(transformPrompt?.("a cat on a roof")).toBe(
-			"cinematic anime, a cat on a roof",
+			"cinematic anime. a cat on a roof",
 		);
 	});
 
