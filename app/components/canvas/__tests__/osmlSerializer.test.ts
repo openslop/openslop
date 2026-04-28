@@ -41,10 +41,10 @@ describe("OSMLSerializer.serialize", () => {
 
 	it("includes attributes after id in the tag", () => {
 		const result = OSMLSerializer.serialize([
-			wrap(el("character", "Hi there", { name: "Lyra", gender: "female" })),
+			wrap(el("character", "Hi there", { name: "Lyra", emotion: "excited" })),
 		]);
 		expect(result).toBe(
-			'<character id="e1" name="Lyra" gender="female">Hi there</character>',
+			'<character id="e1" name="Lyra" emotion="excited">Hi there</character>',
 		);
 	});
 
@@ -136,6 +136,24 @@ describe("OSMLSerializer streaming", () => {
 		expect(nodes[0].type).toBe("metadata_character");
 		expect(nodes[0].customAttributes?.name).toBe("Mia");
 		expect(nodes[0].children[0].text).toBe("Brown hair, green eyes");
+	});
+
+	it("parses metadata_narration with voice attributes", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk(
+			'<metadata_narration gender="male" age="adult" pitch="low" accent="british" texture="wise"></metadata_narration>',
+		);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(nodes[0].type).toBe("metadata_narration");
+		expect(nodes[0].customAttributes).toEqual({
+			gender: "male",
+			age: "adult",
+			pitch: "low",
+			accent: "british",
+			texture: "wise",
+		});
 	});
 
 	it("parses mixed canvas and metadata tags", () => {

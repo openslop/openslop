@@ -193,13 +193,15 @@ describe("useGenerateAll", () => {
 			result: id === "a" ? { url: "https://example.com/img.png" } : null,
 			error: null,
 			resultInputs:
-				id === "a" ? { prompt: "hello", attributes: { gender: "Male" } } : null,
+				id === "a"
+					? { prompt: "hello", attributes: { emotion: "calm" } }
+					: null,
 		}));
 
 		const { useGenerateAll } = await import("../hooks/useGenerateAll");
 		const children: Descendant[] = [
 			wrapInScene([
-				makeElement("a", "narration", "hello", { gender: "Female" }),
+				makeElement("a", "narration", "hello", { emotion: "happy" }),
 				makeElement("b", "image", "sunset"),
 			]),
 		];

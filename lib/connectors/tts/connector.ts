@@ -1,5 +1,6 @@
 import { BaseAssetConnector } from "../asset-base";
 import type {
+	PluginContext,
 	TTSConnector,
 	TTSConnectorParams,
 	TTSGenerateParams,
@@ -17,22 +18,11 @@ export abstract class BaseTTSConnector
 
 	abstract searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 
+	protected pluginContext(): PluginContext<TTSGenerateParams, TTSResult> {
+		return { searchVoices: (p) => this.searchVoices(p) };
+	}
+
 	async generate(params: TTSConnectorParams): Promise<TTSResult> {
-		let { voiceId } = params;
-		if (!voiceId) {
-			const voices = await this.searchVoices({
-				query: params.query,
-				gender: params.gender,
-				accent: params.accent,
-				language: params.language,
-			});
-			if (!voices.length) throw new Error("No matching voice found");
-			voiceId = voices[0].id;
-		}
-		return super.generate({
-			prompt: params.prompt,
-			voiceId,
-			model: params.model,
-		});
+		return super.generate(params as unknown as TTSGenerateParams);
 	}
 }

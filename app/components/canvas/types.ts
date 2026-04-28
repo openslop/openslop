@@ -57,12 +57,10 @@ export type ParsedElement = {
 	children: { id: string; type: string; text: string }[];
 };
 
-export type MetadataTagType = "metadata_style" | "metadata_character";
-
-export const METADATA_TAG_TYPES = new Set<MetadataTagType>([
-	"metadata_style",
-	"metadata_character",
-]);
+export {
+	METADATA_TAG_TYPES,
+	type MetadataTagType,
+} from "./config/metadataTags";
 
 export type { MetadataCharacter } from "@/lib/project/types";
 

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopTTS } from "../tts/openslop";
+import { createVoiceSearchPlugin } from "../plugins/voice-search";
 import type { ConnectorPlugin } from "../types";
 
 const TEST_ID = "test-id";
@@ -48,13 +49,14 @@ describe("BaseTTSConnector", () => {
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
-	it("resolves voice from attributes when no voiceId", async () => {
+	it("resolves voice via voice-search plugin when no voiceId", async () => {
 		mockFetchChain();
 		const connector = new OpenSlopTTS({
 			defaultModel: "test-model",
 			models: ["test-model"],
 			isDefault: true,
 			apiKey: "",
+			plugins: [createVoiceSearchPlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([
 			{ id: "voice-42", name: "Test Voice" },
@@ -69,18 +71,22 @@ describe("BaseTTSConnector", () => {
 		expect(connector.searchVoices).toHaveBeenCalledWith({
 			query: undefined,
 			gender: "male",
+			age: undefined,
+			pitch: undefined,
 			accent: "american",
+			texture: undefined,
 			language: undefined,
 		});
 		expect(result.url).toBe(AUDIO_URL);
 	});
 
-	it("throws when no matching voice found", async () => {
+	it("throws when no matching voice found via voice-search plugin", async () => {
 		const connector = new OpenSlopTTS({
 			defaultModel: "test-model",
 			models: ["test-model"],
 			isDefault: true,
 			apiKey: "",
+			plugins: [createVoiceSearchPlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([]);
 

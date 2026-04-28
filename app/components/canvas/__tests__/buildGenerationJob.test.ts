@@ -68,8 +68,7 @@ function makeElement(
 describe("buildGenerationJob", () => {
 	it("builds a job for a narration element", () => {
 		const el = makeElement("narration", "Hello world", {
-			gender: "male",
-			accent: "american",
+			emotion: "happy",
 		});
 		const job = buildGenerationJob(el, registry);
 
@@ -78,7 +77,7 @@ describe("buildGenerationJob", () => {
 			connectorType: "tts",
 			provider: "openslop",
 			prompt: "Hello world",
-			extraParams: { gender: "male", accent: "american" },
+			extraParams: { emotion: "happy" },
 		});
 	});
 
@@ -156,18 +155,14 @@ describe("buildGenerationJob", () => {
 	});
 
 	it("passes all custom attributes as extraParams", () => {
-		const el = makeElement("narration", "Hello", {
-			gender: "female",
-			accent: "british",
-			age: "adult",
-			pitch: "high",
+		const el = makeElement("character", "Hello", {
+			name: "Lyra",
+			emotion: "excited",
 		});
 		const job = buildGenerationJob(el, registry);
 		expect(job?.extraParams).toEqual({
-			gender: "female",
-			accent: "british",
-			age: "adult",
-			pitch: "high",
+			name: "Lyra",
+			emotion: "excited",
 		});
 	});
 

@@ -8,12 +8,6 @@ import {
 } from "lucide-react";
 import type { CanvasElementType, ResultKind } from "../types";
 import type { ConnectorType } from "@/lib/connectors/types";
-import {
-	TTSGender,
-	TTSAge,
-	TTSPitch,
-	TTSAccent,
-} from "@/lib/connectors/tts/enums";
 import { SoundType } from "@/lib/connectors/sfx/enums";
 
 export interface ElementConfig {
@@ -37,17 +31,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <BookOpen size={16} className="text-white" />,
 		bgColor: "bg-slate-600",
 		placeholder: "Write the narration...",
-
-		defaultAttributes: {
-			gender: TTSGender.Male,
-			age: TTSAge.Adult,
-			pitch: TTSPitch.Medium,
-			accent: TTSAccent.American,
-		},
 		visibleAttributes: {
-			gender: "bg-rose-500",
-			accent: "bg-blue-500",
-			age: "bg-green-500",
+			emotion: "bg-pink-500",
 		},
 	},
 	character: {
@@ -58,18 +43,9 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <User size={16} className="text-white" />,
 		bgColor: "bg-amber-600",
 		placeholder: "What does this character say?",
-
-		defaultAttributes: {
-			gender: TTSGender.Male,
-			age: TTSAge.Adult,
-			pitch: TTSPitch.Medium,
-			accent: TTSAccent.American,
-		},
 		visibleAttributes: {
 			name: "bg-purple-500",
-			age: "bg-green-500",
-			accent: "bg-blue-500",
-			gender: "bg-rose-500",
+			emotion: "bg-pink-500",
 		},
 	},
 	image: {

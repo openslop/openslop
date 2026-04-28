@@ -14,7 +14,9 @@ describe("createArtStylePlugin", () => {
 	});
 
 	it("prepends metadata.style with period separator when style is set", () => {
-		getProjectStore(projectId).getState().setMetadataStyle("cinematic anime");
+		getProjectStore(projectId)
+			.getState()
+			.updateMetadata({ style: "cinematic anime" });
 		const { transformPrompt } = createArtStylePlugin(projectId);
 		expect(transformPrompt?.("a cat on a roof")).toBe(
 			"cinematic anime. a cat on a roof",
@@ -27,7 +29,7 @@ describe("createArtStylePlugin", () => {
 	});
 
 	it("returns prompt unchanged when style is whitespace-only", () => {
-		getProjectStore(projectId).getState().setMetadataStyle("   ");
+		getProjectStore(projectId).getState().updateMetadata({ style: "   " });
 		const { transformPrompt } = createArtStylePlugin(projectId);
 		expect(transformPrompt?.("a cat on a roof")).toBe("a cat on a roof");
 	});

@@ -16,7 +16,7 @@ vi.mock("../config/elementConfigs", () => ({
 			connector: "tts",
 			outputKind: "audio",
 			label: "Narration",
-			defaultAttributes: { gender: "male", accent: "american" },
+			defaultAttributes: { emotion: "neutral" },
 			visibleAttributes: {},
 		},
 	},
@@ -102,8 +102,7 @@ describe("insertElement", () => {
 		};
 		const inserted = scene.children[1];
 		const attrs = inserted.customAttributes as Record<string, string>;
-		expect(attrs.gender).toBe("male");
-		expect(attrs.accent).toBe("american");
+		expect(attrs.emotion).toBe("neutral");
 	});
 
 	it("hydrates connector config (model and provider)", () => {
@@ -134,6 +133,6 @@ describe("insertElement", () => {
 		const attrs = inserted.customAttributes as Record<string, string>;
 		expect(attrs.model).toBe("test-model");
 		expect(attrs.provider).toBe("openslop");
-		expect(attrs.gender).toBeUndefined();
+		expect(attrs.emotion).toBeUndefined();
 	});
 });

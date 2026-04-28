@@ -75,38 +75,38 @@ describe("updateNodeText", () => {
 
 describe("setNodeAttrs", () => {
 	it("merges new attrs into existing", () => {
-		const el = content("narration", "n1", "", { gender: "male" });
+		const el = content("character", "n1", "", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { accent: "british" });
+		setNodeAttrs(editor, [0, 0], el, { emotion: "excited" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(node.children[0].customAttributes).toEqual({
-			gender: "male",
-			accent: "british",
+			name: "Lyra",
+			emotion: "excited",
 		});
 	});
 
 	it("removes attrs set to null", () => {
-		const el = content("narration", "n1", "", {
-			gender: "male",
-			accent: "british",
+		const el = content("character", "n1", "", {
+			name: "Lyra",
+			emotion: "excited",
 		});
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { accent: null });
+		setNodeAttrs(editor, [0, 0], el, { emotion: null });
 
 		const node = editor.children[0] as SceneElement;
-		expect(node.children[0].customAttributes).toEqual({ gender: "male" });
+		expect(node.children[0].customAttributes).toEqual({ name: "Lyra" });
 	});
 
 	it("handles element with no existing customAttributes", () => {
 		const el = content("narration", "n1");
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { accent: "british" });
+		setNodeAttrs(editor, [0, 0], el, { emotion: "calm" });
 
 		const node = editor.children[0] as SceneElement;
-		expect(node.children[0].customAttributes).toEqual({ accent: "british" });
+		expect(node.children[0].customAttributes).toEqual({ emotion: "calm" });
 	});
 });

@@ -16,7 +16,9 @@ import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 import { createArtStylePlugin } from "../connectors/plugins/art-style";
 import { createCharacterReferencesPlugin } from "../connectors/plugins/character-references";
+import { createMetadataVoicePlugin } from "../connectors/plugins/metadata-voice";
 import { createReferenceImagesPlugin } from "../connectors/plugins/reference-images";
+import { createVoiceSearchPlugin } from "../connectors/plugins/voice-search";
 import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
@@ -101,6 +103,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 			.appendPlugins("image", createCharacterReferencesPlugin(projectId))
 			.appendPlugins("image", createReferenceImagesPlugin(projectId))
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))
+			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
+			.appendPlugins("tts", createVoiceSearchPlugin())
 			.build();
 	}, [connectorConfig, composerMode, selectedTemplateId, projectId]);
 
