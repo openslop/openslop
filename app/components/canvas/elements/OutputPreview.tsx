@@ -1,8 +1,6 @@
 import { useState } from "react";
-import Image from "next/image";
 import { X as XIcon, Wand2, RotateCcw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Tooltip,
 	TooltipTrigger,
@@ -10,6 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
 import { CharacterBadge } from "./CharacterBadge";
+import { MediaWithSkeleton } from "./MediaWithSkeleton";
 import type { CanvasElementType } from "../types";
 import type { AssetResult } from "@/lib/connectors/types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
@@ -443,32 +442,16 @@ function MediaPreview({
 	stale: boolean;
 	onRegenerate: () => void;
 }) {
-	const [loaded, setLoaded] = useState(false);
-
 	return (
 		<div
 			className={`group relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
 		>
-			{outputKind === "image" ? (
-				<Image
-					src={url}
-					alt="Generated"
-					fill
-					className="object-cover"
-					unoptimized
-					onLoad={() => setLoaded(true)}
-				/>
-			) : (
-				<video
-					src={url}
-					controls
-					className="w-full h-full object-cover"
-					onLoadedData={() => setLoaded(true)}
-				/>
-			)}
-			{!loaded && (
-				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-			)}
+			<MediaWithSkeleton
+				outputKind={outputKind}
+				src={url}
+				alt="Generated"
+				videoInteractive
+			/>
 			<ResultOverlay
 				generating={generating}
 				queued={queued}

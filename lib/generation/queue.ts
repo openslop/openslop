@@ -37,6 +37,9 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	resultInputs: null,
 };
 
+const isActive = (status: ElementSnapshot["status"]) =>
+	status === "queued" || status === "generating";
+
 export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
 	private pending: GenerationJob[] = [];
@@ -75,7 +78,7 @@ export class GenerationQueue {
 
 	isBusy = (): boolean => {
 		for (const snap of this.state.values()) {
-			if (snap.status === "queued" || snap.status === "generating") return true;
+			if (isActive(snap.status)) return true;
 		}
 		return false;
 	};
@@ -83,14 +86,14 @@ export class GenerationQueue {
 	getActiveCount = (): number => {
 		let active = 0;
 		for (const snap of this.state.values()) {
-			if (snap.status === "queued" || snap.status === "generating") active++;
+			if (isActive(snap.status)) active++;
 		}
 		return active;
 	};
 
 	private isInQueue(id: string): boolean {
 		const s = this.state.get(id)?.status;
-		return s === "queued" || s === "generating";
+		return s !== undefined && isActive(s);
 	}
 
 	private update(id: string, patch: Partial<ElementSnapshot>) {
