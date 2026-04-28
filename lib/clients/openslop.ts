@@ -29,9 +29,10 @@ export class OpenSlopClient {
 			...(body !== undefined && { body: JSON.stringify(body) }),
 		});
 		if (!res.ok) {
+			const fallback = `${res.status} ${res.statusText}`;
 			const message = await res.json().then(
-				(b) => b.error || `${res.status} ${res.statusText}`,
-				() => `${res.status} ${res.statusText}`,
+				(b) => (b && typeof b === "object" && b.error) || fallback,
+				() => fallback,
 			);
 			throw new Error(message);
 		}

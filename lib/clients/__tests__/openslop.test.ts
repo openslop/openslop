@@ -141,6 +141,19 @@ describe("OpenSlopClient", () => {
 				"403 Forbidden",
 			);
 		});
+
+		it("falls back to status text when JSON response is a primitive", async () => {
+			fetchMock.mockResolvedValue({
+				ok: false,
+				status: 502,
+				statusText: "Bad Gateway",
+				json: () => Promise.resolve("upstream failed"),
+			});
+
+			await expect(client.post("/api/v1/image", {})).rejects.toThrow(
+				"502 Bad Gateway",
+			);
+		});
 	});
 
 	describe("auth", () => {

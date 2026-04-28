@@ -35,6 +35,6 @@ export async function POST(request: NextRequest) {
 		},
 	]);
 
-	const url = `${AssetBundle.buildUrl("upload", "user", response.id)}/${file.name}`;
+	const url = `${AssetBundle.buildUrl("upload", "user", response.id)}/${encodeURIComponent(file.name)}`;
 	return NextResponse.json({ url });
 }
