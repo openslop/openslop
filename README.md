@@ -170,6 +170,10 @@ Contributions welcome. Fork the repo, make your changes, open a PR.
 
 Please read `CLAUDE.md` for the project's coding conventions before submitting.
 
+## Engineering Docs
+
+- [Maintainability Guide](./docs/maintainability.md)
+
 ## Community
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/zeP5482ced)
