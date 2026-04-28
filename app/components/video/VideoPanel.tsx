@@ -3,6 +3,7 @@
 import { useLayout } from "./VideoLayoutContext";
 import { VideoPreview } from "./VideoPreview";
 import { RenderControls } from "./RenderControls";
+import { QueueProgressBar } from "./QueueProgressBar";
 
 export function VideoPanel() {
 	const { layout, ready, playerKey } = useLayout();
@@ -14,7 +15,7 @@ export function VideoPanel() {
 				{layout && ready ? (
 					<VideoPreview key={playerKey} layout={layout} />
 				) : layout ? (
-					<div className="shimmer-surface aspect-video w-full" />
+					<QueueProgressBar />
 				) : (
 					<div className="flex aspect-video items-center justify-center text-sm text-white/40">
 						Generate assets to see the video preview

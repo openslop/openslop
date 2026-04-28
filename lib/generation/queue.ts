@@ -80,6 +80,14 @@ export class GenerationQueue {
 		return false;
 	};
 
+	getActiveCount = (): number => {
+		let active = 0;
+		for (const snap of this.state.values()) {
+			if (snap.status === "queued" || snap.status === "generating") active++;
+		}
+		return active;
+	};
+
 	private isInQueue(id: string): boolean {
 		const s = this.state.get(id)?.status;
 		return s === "queued" || s === "generating";
