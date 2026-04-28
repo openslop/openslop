@@ -1,27 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { createTemplateModePlugin } from "../plugins/template-mode";
 import { TEMPLATES } from "@/lib/templates/templates";
+import { getTemplateContent } from "@/lib/templates/content";
 
 const pickTemplate = (predicate: (id: string) => boolean) => {
 	const t = TEMPLATES.find((tmpl) => predicate(tmpl.id));
 	if (!t) throw new Error("expected at least one template fixture");
-	return t;
+	const content = getTemplateContent(t.id);
+	if (!content) throw new Error("expected template content fixture");
+	return { ...t, ...content };
 };
 
 const realTemplate = pickTemplate((id) => id === "pov-life");
 
 describe("createTemplateModePlugin", () => {
 	describe("beforeGenerate", () => {
-		it("prepends template systemPrompt when none provided", () => {
+		it("prepends template systemPrompt when none provided", async () => {
 			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
-			const result = beforeGenerate?.({ prompt: "hi" });
+			const result = await beforeGenerate?.({ prompt: "hi" });
 			const sys = (result as { systemPrompt: string }).systemPrompt;
 			expect(sys).toBe(realTemplate.systemPrompt);
 		});
 
-		it("prepends template systemPrompt before existing systemPrompt", () => {
+		it("prepends template systemPrompt before existing systemPrompt", async () => {
 			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
-			const result = beforeGenerate?.({
+			const result = await beforeGenerate?.({
 				prompt: "hi",
 				systemPrompt: "user instructions",
 			});
@@ -33,24 +36,24 @@ describe("createTemplateModePlugin", () => {
 			);
 		});
 
-		it("returns params unchanged when templateId is null", () => {
+		it("returns params unchanged when templateId is null", async () => {
 			const { beforeGenerate } = createTemplateModePlugin(null);
 			const params = { prompt: "hi", systemPrompt: "keep me" };
-			expect(beforeGenerate?.(params)).toBe(params);
+			expect(await beforeGenerate?.(params)).toBe(params);
 		});
 
-		it("returns params unchanged when templateId is unknown", () => {
+		it("returns params unchanged when templateId is unknown", async () => {
 			const { beforeGenerate } = createTemplateModePlugin("does-not-exist");
 			const params = { prompt: "hi" };
-			expect(beforeGenerate?.(params)).toBe(params);
+			expect(await beforeGenerate?.(params)).toBe(params);
 		});
 
-		it("preserves other params", () => {
+		it("preserves other params", async () => {
 			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
-			const result = beforeGenerate?.({
+			const result = (await beforeGenerate?.({
 				prompt: "hello",
 				model: "claude",
-			}) as Record<string, unknown>;
+			})) as Record<string, unknown>;
 			expect(result.prompt).toBe("hello");
 			expect(result.model).toBe("claude");
 		});
