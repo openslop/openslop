@@ -8,11 +8,22 @@ export async function GET(request: NextRequest) {
 		const { searchParams } = request.nextUrl;
 		const query = searchParams.get("query") || undefined;
 		const gender = searchParams.get("gender") || undefined;
+		const age = searchParams.get("age") || undefined;
+		const pitch = searchParams.get("pitch") || undefined;
 		const accent = searchParams.get("accent") || undefined;
+		const texture = searchParams.get("texture") || undefined;
 		const language = searchParams.get("language") || undefined;
 
 		const provider = getTTSProvider();
-		const voices = await provider.search({ query, gender, accent, language });
+		const voices = await provider.search({
+			query,
+			gender,
+			age,
+			pitch,
+			accent,
+			texture,
+			language,
+		});
 
 		return NextResponse.json({ voices });
 	} catch (error) {

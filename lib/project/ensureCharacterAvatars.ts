@@ -27,7 +27,9 @@ export async function ensureCharacterAvatars(
 					prompt,
 					{},
 				);
-				return store.getState().setCharacterAvatarUrl(name, result.url);
+				return store.getState().updateMetadata({
+					characters: { [name]: { avatarUrl: result.url } },
+				});
 			}),
 	);
 }

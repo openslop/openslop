@@ -1,14 +1,13 @@
-import { createStore, type StoreApi } from "zustand/vanilla";
+import merge from "lodash/merge";
 import { useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { Metadata } from "./types";
+import { createStore, type StoreApi } from "zustand/vanilla";
+import type { DeepPartial, Metadata } from "./types";
 
 export type ProjectContext = {
 	metadata: Metadata;
 	referenceImages: string[];
-	setMetadataStyle: (style: string) => void;
-	setMetadataCharacter: (name: string, description: string) => void;
-	setCharacterAvatarUrl: (name: string, url: string) => void;
+	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setReferenceImages: (urls: string[]) => void;
 };
 
@@ -21,19 +20,11 @@ export function getProjectStore(projectId: string): ProjectStore {
 	if (!store) {
 		store = createStore<ProjectContext>()(
 			immer((set) => ({
-				metadata: { style: "", characters: {} },
+				metadata: { style: "", narration: {}, characters: {} },
 				referenceImages: [],
-				setMetadataStyle: (style) =>
+				updateMetadata: (partial) =>
 					set((state) => {
-						state.metadata.style = style;
-					}),
-				setMetadataCharacter: (name, description) =>
-					set((state) => {
-						state.metadata.characters[name] = { description };
-					}),
-				setCharacterAvatarUrl: (name, url) =>
-					set((state) => {
-						state.metadata.characters[name].avatarUrl = url;
+						merge(state.metadata, partial);
 					}),
 				setReferenceImages: (urls) =>
 					set((state) => {

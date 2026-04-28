@@ -13,7 +13,7 @@ vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
 			connector: "tts",
 			outputKind: "audio",
 			label: "Narration",
-			defaultAttributes: { gender: "male" },
+			defaultAttributes: { emotion: "neutral" },
 			visibleAttributes: {},
 		},
 		sound: {
@@ -37,7 +37,7 @@ vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
 			connector: "tts",
 			outputKind: "audio",
 			label: "Character",
-			defaultAttributes: { gender: "female" },
+			defaultAttributes: { emotion: "neutral" },
 			visibleAttributes: {},
 		},
 		music: {
@@ -323,16 +323,16 @@ describe("applyRefineOp — set", () => {
 	it("merges attrs into existing customAttributes", () => {
 		const editor = makeEditor([
 			scene([
-				content("narration", "n1", "hello", {
-					gender: "male",
-					accent: "british",
+				content("character", "n1", "hello", {
+					name: "Lyra",
+					emotion: "neutral",
 				}),
 			]),
 		]);
 
 		applyRefineOp(
 			editor,
-			{ op: "set", id: "n1", attrs: { accent: "american", pitch: "low" } },
+			{ op: "set", id: "n1", attrs: { emotion: "excited" } },
 			{},
 			connectors,
 		);
@@ -343,25 +343,24 @@ describe("applyRefineOp — set", () => {
 		});
 		const el = node[0] as CanvasContentElement;
 		expect(el.customAttributes).toEqual({
-			gender: "male",
-			accent: "american",
-			pitch: "low",
+			name: "Lyra",
+			emotion: "excited",
 		});
 	});
 
 	it("removes attrs set to null", () => {
 		const editor = makeEditor([
 			scene([
-				content("narration", "n1", "hello", {
-					gender: "male",
-					accent: "british",
+				content("character", "n1", "hello", {
+					name: "Lyra",
+					emotion: "neutral",
 				}),
 			]),
 		]);
 
 		applyRefineOp(
 			editor,
-			{ op: "set", id: "n1", attrs: { accent: null } },
+			{ op: "set", id: "n1", attrs: { emotion: null } },
 			{},
 			connectors,
 		);
@@ -371,12 +370,12 @@ describe("applyRefineOp — set", () => {
 			match: (n) => Element.isElement(n) && n.id === "n1",
 		});
 		const el = node[0] as CanvasContentElement;
-		expect(el.customAttributes).toEqual({ gender: "male" });
+		expect(el.customAttributes).toEqual({ name: "Lyra" });
 	});
 
 	it("applies attrs and text together", () => {
 		const editor = makeEditor([
-			scene([content("narration", "n1", "old", { gender: "male" })]),
+			scene([content("character", "n1", "old", { name: "Lyra" })]),
 		]);
 
 		applyRefineOp(
@@ -384,7 +383,7 @@ describe("applyRefineOp — set", () => {
 			{
 				op: "set",
 				id: "n1",
-				attrs: { name: "Alice", gender: null },
+				attrs: { name: "Alice", emotion: "happy" },
 				text: "Hello!",
 			},
 			{},
@@ -396,7 +395,7 @@ describe("applyRefineOp — set", () => {
 			match: (n) => Element.isElement(n) && n.id === "n1",
 		});
 		const el = node[0] as CanvasContentElement;
-		expect(el.customAttributes).toEqual({ name: "Alice" });
+		expect(el.customAttributes).toEqual({ name: "Alice", emotion: "happy" });
 		expect(el.children.map((c) => c.text).join("")).toBe("Hello!");
 	});
 

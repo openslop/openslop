@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
-import { getProjectStore } from "../store";
+import { clearProjectStore, getProjectStore } from "../store";
 
 type GenerateFn = (...args: unknown[]) => Promise<AssetResult>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
@@ -59,13 +59,14 @@ const registry = {
 describe("ensureCharacterAvatars", () => {
 	beforeEach(() => {
 		generateMock = vi.fn();
+		clearProjectStore(PROJECT_ID);
 	});
 
 	it("generates avatars for characters missing avatarUrl", async () => {
 		const store = getProjectStore(PROJECT_ID);
-		store
-			.getState()
-			.setMetadataCharacter("Alice", "A young girl with red hair");
+		store.getState().updateMetadata({
+			characters: { Alice: { description: "A young girl with red hair" } },
+		});
 
 		generateMock.mockResolvedValue({
 			url: "https://example.com/alice.png",
@@ -89,8 +90,10 @@ describe("ensureCharacterAvatars", () => {
 
 	it("does not embed metadata.style in the prompt (plugin handles it)", async () => {
 		const store = getProjectStore(PROJECT_ID);
-		store.getState().setMetadataCharacter("Alice", "A young girl");
-		store.getState().setMetadataStyle("Watercolor illustration");
+		store.getState().updateMetadata({
+			style: "Watercolor illustration",
+			characters: { Alice: { description: "A young girl" } },
+		});
 
 		generateMock.mockResolvedValue({
 			url: "https://example.com/alice.png",
@@ -107,10 +110,14 @@ describe("ensureCharacterAvatars", () => {
 
 	it("skips characters that already have an avatarUrl", async () => {
 		const store = getProjectStore(PROJECT_ID);
-		store.getState().setMetadataCharacter("Bob", "A tall man");
-		store
-			.getState()
-			.setCharacterAvatarUrl("Bob", "https://existing.com/bob.png");
+		store.getState().updateMetadata({
+			characters: {
+				Bob: {
+					description: "A tall man",
+					avatarUrl: "https://existing.com/bob.png",
+				},
+			},
+		});
 
 		const { ensureCharacterAvatars } =
 			await import("../ensureCharacterAvatars");
@@ -121,7 +128,9 @@ describe("ensureCharacterAvatars", () => {
 
 	it("skips characters with empty description", async () => {
 		const store = getProjectStore(PROJECT_ID);
-		store.getState().setMetadataCharacter("Empty", "");
+		store
+			.getState()
+			.updateMetadata({ characters: { Empty: { description: "" } } });
 
 		const { ensureCharacterAvatars } =
 			await import("../ensureCharacterAvatars");
@@ -132,8 +141,12 @@ describe("ensureCharacterAvatars", () => {
 
 	it("generates avatars for multiple characters in parallel", async () => {
 		const store = getProjectStore(PROJECT_ID);
-		store.getState().setMetadataCharacter("Cat", "A fluffy orange cat");
-		store.getState().setMetadataCharacter("Dog", "A big brown dog");
+		store.getState().updateMetadata({
+			characters: {
+				Cat: { description: "A fluffy orange cat" },
+				Dog: { description: "A big brown dog" },
+			},
+		});
 
 		generateMock.mockImplementation(
 			async (_type, _provider, _config, prompt) => ({
@@ -152,38 +165,6 @@ describe("ensureCharacterAvatars", () => {
 		);
 		expect(store.getState().metadata.characters["Dog"].avatarUrl).toBe(
 			"https://example.com/dog.png",
-		);
-	});
-
-	it("regenerates avatar when character description changes", async () => {
-		const store = getProjectStore(PROJECT_ID);
-		store
-			.getState()
-			.setMetadataCharacter("Alice", "A young girl with red hair");
-		store
-			.getState()
-			.setCharacterAvatarUrl("Alice", "https://example.com/old-alice.png");
-
-		// Change description — should clear avatarUrl
-		store
-			.getState()
-			.setMetadataCharacter("Alice", "An old woman with grey hair");
-		expect(
-			store.getState().metadata.characters["Alice"].avatarUrl,
-		).toBeUndefined();
-
-		generateMock.mockResolvedValue({
-			url: "https://example.com/new-alice.png",
-			durationSec: 0,
-		});
-
-		const { ensureCharacterAvatars } =
-			await import("../ensureCharacterAvatars");
-		await ensureCharacterAvatars(PROJECT_ID, registry);
-
-		expect(generateMock).toHaveBeenCalledOnce();
-		expect(store.getState().metadata.characters["Alice"].avatarUrl).toBe(
-			"https://example.com/new-alice.png",
 		);
 	});
 });

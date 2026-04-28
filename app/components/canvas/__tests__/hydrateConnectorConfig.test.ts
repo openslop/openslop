@@ -70,10 +70,10 @@ describe("hydrateConnectorConfig", () => {
 	const hydrate = hydrateConnectorConfig(connectors);
 
 	it("adds model and provider for a tts element", () => {
-		const node = makeNode("narration", { gender: "male" });
+		const node = makeNode("narration", { emotion: "happy" });
 		const result = hydrate(node);
 		expect(result.customAttributes).toEqual({
-			gender: "male",
+			emotion: "happy",
 			model: "tts-v1",
 			provider: "openslop",
 		});
@@ -114,9 +114,9 @@ describe("hydrateConnectorConfig", () => {
 	});
 
 	it("does not mutate the original node", () => {
-		const node = makeNode("narration", { accent: "british" });
+		const node = makeNode("narration", { emotion: "calm" });
 		const result = hydrate(node);
 		expect(result).not.toBe(node);
-		expect(node.customAttributes).toEqual({ accent: "british" });
+		expect(node.customAttributes).toEqual({ emotion: "calm" });
 	});
 });

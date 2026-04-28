@@ -12,12 +12,7 @@ function setupCharacters(
 	characters: Record<string, { description: string; avatarUrl: string }>,
 ) {
 	const store = getProjectStore(PROJECT_ID);
-	for (const [name, data] of Object.entries(characters)) {
-		store.getState().setMetadataCharacter(name, data.description);
-		if (data.avatarUrl) {
-			store.getState().setCharacterAvatarUrl(name, data.avatarUrl);
-		}
-	}
+	store.getState().updateMetadata({ characters });
 }
 
 describe("character-references plugin", () => {

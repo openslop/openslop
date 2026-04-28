@@ -1,6 +1,5 @@
 import dedent from "dedent";
 import { CANVAS_ELEMENT_TYPES } from "@/app/components/canvas/types";
-import { TTSGender, TTSAge, TTSPitch, TTSAccent } from "../tts/enums";
 import { SoundType } from "../sfx/enums";
 import { MusicLength } from "../music/enums";
 import type { LLMPlugin } from "../types";
@@ -34,7 +33,8 @@ const REFINE_SYSTEM_PROMPT = dedent`
   ${ELEMENT_TYPES}
 
   ## Common attributes by type
-  - **narration / character**: gender (${vals(TTSGender)}), age (${vals(TTSAge)}), pitch (${vals(TTSPitch)}), accent (${vals(TTSAccent)}), texture, emotion, name (character only)
+  - **narration**: emotion
+  - **character**: name, emotion
   - **image**: animate, animation, overlays
   - **sound**: type (${vals(SoundType)})
   - **music**: length (${vals(MusicLength)})

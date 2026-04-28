@@ -15,8 +15,11 @@ export function modelsFromMap(map: Record<string, string>): ModelInfo[] {
 	return Object.entries(map).map(([name, id]) => ({ id, name }));
 }
 
+export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
+
 export interface PluginContext<TParams = unknown, TResult = unknown> {
 	gateway?: GatewayClient<TParams, TResult>;
+	searchVoices?: VoiceSearchFn;
 }
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
@@ -57,7 +60,11 @@ export interface ConnectorGenerateParams {
 export interface TTSConnectorParams extends ConnectorGenerateParams {
 	voiceId?: string;
 	gender?: string;
+	age?: string;
+	pitch?: string;
 	accent?: string;
+	texture?: string;
+	name?: string;
 	query?: string;
 	language?: string;
 }
@@ -173,7 +180,10 @@ export type VoiceInfo = {
 export type VoiceSearchParams = {
 	query?: string;
 	gender?: string;
+	age?: string;
+	pitch?: string;
 	accent?: string;
+	texture?: string;
 	language?: string;
 };
 
