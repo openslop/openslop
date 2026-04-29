@@ -15,9 +15,6 @@ const nextConfig: NextConfig = {
 			"@dnd-kit/sortable",
 			"@dnd-kit/utilities",
 			"lodash",
-			"remotion",
-			"@remotion/player",
-			"@remotion/preload",
 		],
 	},
 	outputFileTracingIncludes: {
