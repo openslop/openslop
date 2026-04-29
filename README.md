@@ -168,7 +168,10 @@ openslop/
 
 Contributions welcome. Fork the repo, make your changes, open a PR.
 
-Please read `CLAUDE.md` for the project's coding conventions before submitting.
+- Read [`CLAUDE.md`](CLAUDE.md) for the project's coding conventions.
+- Read [`ARCHITECTURE.md`](ARCHITECTURE.md) for an end-to-end tour of how
+  connectors, gateways, providers, and the generation queue fit together —
+  helpful before adding a new asset type or swapping a provider.
 
 ## Community
 

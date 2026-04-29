@@ -15,6 +15,16 @@ function setupCharacters(
 	store.getState().updateMetadata({ characters });
 }
 
+function runBeforeGenerate(
+	plugin: ConnectorPlugin<ParamsWithCharacters>,
+	params: ParamsWithCharacters,
+) {
+	if (!plugin.beforeGenerate) {
+		throw new Error(`Plugin "${plugin.name}" has no beforeGenerate hook`);
+	}
+	return plugin.beforeGenerate(params);
+}
+
 describe("character-references plugin", () => {
 	let plugin: ConnectorPlugin<ParamsWithCharacters>;
 
@@ -32,7 +42,7 @@ describe("character-references plugin", () => {
 			},
 		});
 
-		const result = plugin.beforeGenerate!({
+		const result = runBeforeGenerate(plugin, {
 			prompt: "Red meets Granny",
 			characters: "Red,Granny",
 		});
@@ -48,7 +58,7 @@ describe("character-references plugin", () => {
 			Wolf: { description: "A big wolf", avatarUrl: "" },
 		});
 
-		const result = plugin.beforeGenerate!({
+		const result = runBeforeGenerate(plugin, {
 			prompt: "The wolf howls",
 			characters: "Wolf",
 		});
@@ -58,8 +68,8 @@ describe("character-references plugin", () => {
 	});
 
 	it("returns params unchanged when no characters attribute", () => {
-		const params = { prompt: "A sunset" };
-		const result = plugin.beforeGenerate!(params as never);
+		const params: ParamsWithCharacters = { prompt: "A sunset" };
+		const result = runBeforeGenerate(plugin, params);
 		expect(result).toEqual(params);
 	});
 
@@ -69,7 +79,7 @@ describe("character-references plugin", () => {
 			Bob: { description: "A boy", avatarUrl: "https://img/bob.png" },
 		});
 
-		const result = plugin.beforeGenerate!({
+		const result = runBeforeGenerate(plugin, {
 			prompt: "Hello",
 			characters: " Alice , Bob ",
 		});
@@ -86,7 +96,7 @@ describe("character-references plugin", () => {
 			Bob: { description: "A boy", avatarUrl: "" },
 		});
 
-		const result = plugin.beforeGenerate!({
+		const result = runBeforeGenerate(plugin, {
 			prompt: "Hello",
 			characters: "Alice,Bob",
 		});
@@ -102,7 +112,7 @@ describe("character-references plugin", () => {
 			Alice: { description: "A girl", avatarUrl: "https://img/alice.png" },
 		});
 
-		const result = plugin.beforeGenerate!({
+		const result = runBeforeGenerate(plugin, {
 			prompt: "Hello",
 			characters: "Alice,Unknown",
 		});
