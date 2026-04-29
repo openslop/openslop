@@ -3,6 +3,12 @@ import { AssetBundle } from "@/lib/api/asset-bundle";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
+function sanitizeFilename(name: string): string {
+	const base = name.split(/[\\/]/).pop() ?? "";
+	const cleaned = base.replace(/[^A-Za-z0-9._-]/g, "_").replace(/^\.+/, "");
+	return cleaned.slice(0, 200) || "upload";
+}
+
 export async function POST(request: NextRequest) {
 	const formData = await request.formData();
 	const file = formData.get("file");
@@ -25,16 +31,17 @@ export async function POST(request: NextRequest) {
 		);
 	}
 
+	const filename = sanitizeFilename(file.name);
 	const buffer = Buffer.from(await file.arrayBuffer());
 	const response = await AssetBundle.upload("upload", "user", [
 		{
 			key: "image",
-			filename: file.name,
+			filename,
 			data: buffer,
 			contentType: file.type,
 		},
 	]);
 
-	const url = `${AssetBundle.buildUrl("upload", "user", response.id)}/${encodeURIComponent(file.name)}`;
+	const url = `${AssetBundle.buildUrl("upload", "user", response.id)}/${encodeURIComponent(filename)}`;
 	return NextResponse.json({ url });
 }
