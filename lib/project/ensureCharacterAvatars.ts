@@ -16,20 +16,24 @@ export async function ensureCharacterAvatars(
 		Object.entries(characters)
 			.filter(([, ch]) => !ch.avatarUrl && ch.description)
 			.map(async ([name, ch]) => {
-				const prompt = [`Character portrait of ${name}`, ch.description].join(
-					". ",
-				);
-
-				const result = await generateForElement(
-					"image",
-					provider,
-					config,
-					prompt,
-					{},
-				);
-				return store.getState().updateMetadata({
-					characters: { [name]: { avatarUrl: result.url } },
-				});
+				store.getState().setAvatarGenerating(name, true);
+				try {
+					const prompt = [`Character portrait of ${name}`, ch.description].join(
+						". ",
+					);
+					const result = await generateForElement(
+						"image",
+						provider,
+						config,
+						prompt,
+						{},
+					);
+					store.getState().updateMetadata({
+						characters: { [name]: { avatarUrl: result.url } },
+					});
+				} finally {
+					store.getState().setAvatarGenerating(name, false);
+				}
 			}),
 	);
 }

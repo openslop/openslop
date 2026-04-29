@@ -34,11 +34,12 @@ describe("RunwareImage", () => {
 		expect(result.result.image).toBe("url");
 		expect(mockImageInference).toHaveBeenCalledWith({
 			positivePrompt: "a cat",
-			model: "runware:z-image@turbo",
-			width: 512,
-			height: 512,
+			model: "bytedance:seedream@5.0-lite",
+			width: 2848,
+			height: 1600,
 			outputType: "base64Data",
 			numberResults: 1,
+			referenceImages: undefined,
 		});
 		expect(mockDisconnect).toHaveBeenCalled();
 	});

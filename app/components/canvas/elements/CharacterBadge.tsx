@@ -5,32 +5,63 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 
-export function CharacterBadge({ name }: { name?: string }) {
+function useCharacterAvatarUrl(name?: string) {
 	const { projectId } = useConfig();
-	const avatarUrl = useProjectStore(projectId, (state) =>
+	return useProjectStore(projectId, (state) =>
 		name ? state.metadata.characters[name]?.avatarUrl : undefined,
 	);
-	const initial = name?.trim().charAt(0).toUpperCase();
+}
 
+function CharacterAvatar({
+	name,
+	avatarUrl,
+}: {
+	name?: string;
+	avatarUrl?: string;
+}) {
+	const initial = name?.trim().charAt(0).toUpperCase();
+	return (
+		<Avatar size="sm">
+			{avatarUrl && (
+				<AvatarImage
+					src={avatarUrl}
+					alt={name ?? "Character"}
+					className="object-cover object-center"
+				/>
+			)}
+			<AvatarFallback className="bg-white/15 text-white">
+				{initial || <User className="w-3 h-3" aria-hidden="true" />}
+			</AvatarFallback>
+		</Avatar>
+	);
+}
+
+function CharacterName({ name }: { name: string }) {
+	return (
+		<span className="truncate text-xs font-medium text-white/80">{name}</span>
+	);
+}
+
+export function CharacterBadge({ name }: { name?: string }) {
+	const avatarUrl = useCharacterAvatarUrl(name);
 	return (
 		<div className="flex items-center gap-2 shrink-0 min-w-0 max-w-[140px]">
-			<Avatar size="sm" className="bg-white/10">
-				{avatarUrl && (
-					<AvatarImage
-						src={avatarUrl}
-						alt={name ?? "Character"}
-						className="object-cover object-center"
-					/>
-				)}
-				<AvatarFallback className="bg-white/10 text-white">
-					{initial || <User className="w-3 h-3" aria-hidden="true" />}
-				</AvatarFallback>
-			</Avatar>
-			{name && (
-				<span className="truncate text-xs font-medium text-white/80">
-					{name}
-				</span>
-			)}
+			<CharacterAvatar name={name} avatarUrl={avatarUrl} />
+			{name && <CharacterName name={name} />}
+		</div>
+	);
+}
+
+export function CharacterPill({ name }: { name?: string }) {
+	const avatarUrl = useCharacterAvatarUrl(name);
+	return (
+		<div
+			className={`inline-flex items-center shrink-0 max-w-[140px] rounded-full bg-white/10 ${
+				name ? "gap-1.5 pr-2" : ""
+			}`}
+		>
+			<CharacterAvatar name={name} avatarUrl={avatarUrl} />
+			{name && <CharacterName name={name} />}
 		</div>
 	);
 }

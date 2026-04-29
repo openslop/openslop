@@ -23,7 +23,7 @@ export const METADATA_TAG_CONFIGS: Record<string, MetadataTagConfig> = {
 	metadata_character: {
 		apply: (p, attrs, text) => {
 			const { name, id: _id, ...voice } = attrs;
-			if (!name || !text) return;
+			if (!name) return;
 			(p.characters ??= {})[name] = { description: text, ...voice };
 		},
 	},
