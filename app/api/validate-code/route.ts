@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const ERROR_MESSAGES: Record<string, string> = {
+	invalid: "Invalid access code",
+	inactive: "This code is no longer active",
+	expired: "This code has expired",
+};
+
 export async function POST(request: NextRequest) {
 	const body = await request.json();
 	const { code } = body;
@@ -11,26 +17,17 @@ export async function POST(request: NextRequest) {
 
 	const supabase = await createClient();
 
-	const { data, error } = await supabase
-		.from("access_codes")
-		.select("*")
-		.eq("code", code.toUpperCase())
-		.single();
+	const { data, error } = await supabase.rpc("validate_access_code", {
+		p_code: code.toUpperCase(),
+	});
 
-	if (error || !data) {
+	if (error || typeof data !== "string") {
 		return NextResponse.json({ error: "Invalid access code" }, { status: 401 });
 	}
 
-	if (!data.is_active) {
+	if (data !== "valid") {
 		return NextResponse.json(
-			{ error: "This code is no longer active" },
-			{ status: 401 },
-		);
-	}
-
-	if (data.expires_at && new Date(data.expires_at) < new Date()) {
-		return NextResponse.json(
-			{ error: "This code has expired" },
+			{ error: ERROR_MESSAGES[data] ?? "Invalid access code" },
 			{ status: 401 },
 		);
 	}

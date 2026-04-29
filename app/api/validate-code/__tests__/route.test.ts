@@ -1,21 +1,15 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const mockSelect = vi.fn();
+const mockRpc = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
 	createClient: vi.fn(() =>
 		Promise.resolve({
-			from: (table: string) => {
-				if (table !== "access_codes")
-					throw new Error(`unexpected table: ${table}`);
-				return {
-					select: () => ({
-						eq: (_col: string, _val: string) => ({
-							single: mockSelect,
-						}),
-					}),
-				};
+			rpc: (fn: string, args: Record<string, unknown>) => {
+				if (fn !== "validate_access_code")
+					throw new Error(`unexpected function: ${fn}`);
+				return mockRpc(args);
 			},
 		}),
 	),
@@ -31,16 +25,6 @@ function makeRequest(body?: unknown) {
 			body: JSON.stringify(body ?? {}),
 		},
 	);
-}
-
-function validCode(overrides?: Record<string, unknown>) {
-	return {
-		id: "code-1",
-		code: "ABC123",
-		is_active: true,
-		expires_at: null,
-		...overrides,
-	};
 }
 
 describe("POST /api/validate-code", () => {
@@ -64,69 +48,56 @@ describe("POST /api/validate-code", () => {
 		expect(res.status).toBe(400);
 	});
 
-	it("returns 401 when code is not found in database", async () => {
-		mockSelect.mockResolvedValue({
-			data: null,
-			error: { message: "not found" },
-		});
+	it("uppercases the code before calling the RPC", async () => {
+		mockRpc.mockResolvedValue({ data: "valid", error: null });
+
+		await POST(makeRequest({ code: "abc123" }));
+
+		expect(mockRpc).toHaveBeenCalledWith({ p_code: "ABC123" });
+	});
+
+	it("returns 401 when RPC reports invalid", async () => {
+		mockRpc.mockResolvedValue({ data: "invalid", error: null });
 
 		const res = await POST(makeRequest({ code: "BADCOD" }));
 		expect(res.status).toBe(401);
 		expect((await res.json()).error).toBe("Invalid access code");
 	});
 
-	it("returns 401 when code is inactive", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ is_active: false }),
-			error: null,
-		});
+	it("returns 401 when RPC reports inactive", async () => {
+		mockRpc.mockResolvedValue({ data: "inactive", error: null });
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
 		expect(res.status).toBe(401);
 		expect((await res.json()).error).toContain("no longer active");
 	});
 
-	it("returns 401 when code is expired", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ expires_at: "2020-01-01T00:00:00Z" }),
-			error: null,
-		});
+	it("returns 401 when RPC reports expired", async () => {
+		mockRpc.mockResolvedValue({ data: "expired", error: null });
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
 		expect(res.status).toBe(401);
 		expect((await res.json()).error).toContain("expired");
 	});
 
-	it("succeeds for valid code", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode(),
-			error: null,
+	it("returns 401 when RPC errors out", async () => {
+		mockRpc.mockResolvedValue({
+			data: null,
+			error: { message: "rpc failure" },
 		});
+
+		const res = await POST(makeRequest({ code: "ABC123" }));
+		expect(res.status).toBe(401);
+		expect((await res.json()).error).toBe("Invalid access code");
+	});
+
+	it("succeeds for valid code", async () => {
+		mockRpc.mockResolvedValue({ data: "valid", error: null });
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
 		const json = await res.json();
 
 		expect(res.status).toBe(200);
 		expect(json.redirect).toBe("/signup");
-	});
-
-	it("allows code with no expiry date", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ expires_at: null }),
-			error: null,
-		});
-
-		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(200);
-	});
-
-	it("allows code with future expiry", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ expires_at: "2099-12-31T00:00:00Z" }),
-			error: null,
-		});
-
-		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(200);
 	});
 });
