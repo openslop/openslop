@@ -35,24 +35,5 @@ export async function POST(request: NextRequest) {
 		);
 	}
 
-	if (data.max_uses && data.current_uses >= data.max_uses) {
-		return NextResponse.json(
-			{ error: "This code has reached its usage limit" },
-			{ status: 401 },
-		);
-	}
-
-	const { error: updateError } = await supabase
-		.from("access_codes")
-		.update({ current_uses: data.current_uses + 1 })
-		.eq("id", data.id);
-
-	if (updateError) {
-		return NextResponse.json(
-			{ error: "Failed to validate code" },
-			{ status: 500 },
-		);
-	}
-
 	return NextResponse.json({ redirect: "/signup" });
 }

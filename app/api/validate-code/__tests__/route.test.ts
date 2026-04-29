@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockSelect = vi.fn();
-const mockUpdate = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
 	createClient: vi.fn(() =>
@@ -15,9 +14,6 @@ vi.mock("@/lib/supabase/server", () => ({
 						eq: (_col: string, _val: string) => ({
 							single: mockSelect,
 						}),
-					}),
-					update: () => ({
-						eq: mockUpdate,
 					}),
 				};
 			},
@@ -43,8 +39,6 @@ function validCode(overrides?: Record<string, unknown>) {
 		code: "ABC123",
 		is_active: true,
 		expires_at: null,
-		max_uses: null,
-		current_uses: 0,
 		...overrides,
 	};
 }
@@ -103,30 +97,17 @@ describe("POST /api/validate-code", () => {
 		expect((await res.json()).error).toContain("expired");
 	});
 
-	it("returns 401 when usage limit is reached", async () => {
+	it("succeeds for valid code", async () => {
 		mockSelect.mockResolvedValue({
-			data: validCode({ max_uses: 5, current_uses: 5 }),
+			data: validCode(),
 			error: null,
 		});
-
-		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(401);
-		expect((await res.json()).error).toContain("usage limit");
-	});
-
-	it("succeeds and increments usage for valid code", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ current_uses: 2 }),
-			error: null,
-		});
-		mockUpdate.mockResolvedValue({});
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
 		const json = await res.json();
 
 		expect(res.status).toBe(200);
 		expect(json.redirect).toBe("/signup");
-		expect(mockUpdate).toHaveBeenCalled();
 	});
 
 	it("allows code with no expiry date", async () => {
@@ -134,18 +115,6 @@ describe("POST /api/validate-code", () => {
 			data: validCode({ expires_at: null }),
 			error: null,
 		});
-		mockUpdate.mockResolvedValue({});
-
-		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(200);
-	});
-
-	it("allows code with no usage limit", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ max_uses: null, current_uses: 999 }),
-			error: null,
-		});
-		mockUpdate.mockResolvedValue({});
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
 		expect(res.status).toBe(200);
@@ -156,34 +125,8 @@ describe("POST /api/validate-code", () => {
 			data: validCode({ expires_at: "2099-12-31T00:00:00Z" }),
 			error: null,
 		});
-		mockUpdate.mockResolvedValue({});
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
 		expect(res.status).toBe(200);
-	});
-
-	it("allows code with remaining uses", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ max_uses: 10, current_uses: 3 }),
-			error: null,
-		});
-		mockUpdate.mockResolvedValue({});
-
-		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(200);
-	});
-
-	it("returns 500 when usage count update fails", async () => {
-		mockSelect.mockResolvedValue({
-			data: validCode({ current_uses: 0 }),
-			error: null,
-		});
-		mockUpdate.mockResolvedValue({
-			error: { message: "database write failed" },
-		});
-
-		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(500);
-		expect((await res.json()).error).toBe("Failed to validate code");
 	});
 });
