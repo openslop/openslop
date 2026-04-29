@@ -1,4 +1,3 @@
-import set from "lodash/fp/set";
 import type {
 	ConnectorConfig,
 	ConnectorPlugin,
@@ -25,11 +24,16 @@ export function withRegistry(registry: ConnectorRegistry) {
 	const apply = (cfg: ConnectorRegistry) => ({
 		appendPlugins: (type: ConnectorType, ...plugins: ConnectorPlugin[]) => {
 			const { provider, config } = getDefaultConnector(cfg, type);
-			const next = set(
-				[type, provider, "plugins"],
-				[...(config.plugins ?? []), ...plugins],
-				cfg,
-			);
+			const next: ConnectorRegistry = {
+				...cfg,
+				[type]: {
+					...cfg[type],
+					[provider]: {
+						...config,
+						plugins: [...(config.plugins ?? []), ...plugins],
+					},
+				},
+			};
 			return apply(next);
 		},
 		build: () => cfg,

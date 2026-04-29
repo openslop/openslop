@@ -10,7 +10,7 @@ import {
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
 import { findNodeById, updateNodeText } from "../utils/editorOps";
-import flow from "lodash/fp/flow";
+import flow from "lodash/flow";
 
 export function useScriptSync(editor: Editor): void {
 	const { nodes } = useScript();
