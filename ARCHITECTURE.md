@@ -81,6 +81,11 @@ For audio providers, `lib/providers/elevenlabs.ts` exposes a
 `BaseElevenLabsAudio` class that the `music/` and `sfx/` ElevenLabs subclasses
 share — they only differ in default duration and which SDK method to call.
 
+For video, async-job types (`VideoJob`, `VideoJobStatus`, `VideoJobMetadata`,
+`VideoProviderResponse`) live in `lib/providers/video/base.ts` next to
+`BaseVideoProvider` — they are server-side concerns, not part of the connector
+contract.
+
 ## API routes
 
 Every `app/api/v1/<type>/route.ts` is built from the same factory (shown for
@@ -109,10 +114,11 @@ export const POST = createRouteHandler({
 Add `extraValidation` for type-specific checks (see TTS `voiceId` and Video
 `referenceImages` validation).
 
-Providers are resolved through `lib/api/providers.ts`, which uses a
-`withMockFallback` helper: if the relevant API key isn't set (e.g.
-`RUNWARE_API_KEY`), the route uses the mock provider instead. Provider
-instances are cached per process.
+Providers are resolved through `lib/api/providers.ts`. Each `getXProvider()`
+is built from the same `defineProvider(key, envVar, RealCtor, MockCtor)`
+helper: if the relevant API key isn't set (e.g. `RUNWARE_API_KEY`), the route
+falls back to the mock implementation. Instances are cached per process by
+`key`, so repeated calls return the same provider.
 
 ## Generation queue
 
@@ -134,7 +140,12 @@ components dispatch jobs, never call connectors directly.
 
 - `lib/project/store.ts` holds per-project metadata (characters, defaults) in a
   Zustand store, scoped by project id.
-- `lib/script/` provides a React context for the current script being edited.
+- `lib/project/ensureCharacterAvatars.ts` runs before each generation batch to
+  guarantee every referenced character has an avatar image; the queue invokes it
+  via `generationQueue.before(...)`.
+- `lib/script/ScriptProvider.tsx` provides a React context for the current
+  script being edited; `lib/script/refine/` houses transformation utilities
+  (e.g. `applyOps.ts` for applying LLM-produced refinement ops to the tree).
 - `lib/config/` stores connector configuration globally; per-element
   configuration overlays this.
 

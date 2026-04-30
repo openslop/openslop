@@ -1,10 +1,21 @@
-import type {
-	VideoGenerateParams,
-	VideoJob,
-	VideoJobMetadata,
-} from "@/lib/connectors/types";
+import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
+import type { WithMetadata } from "../base";
 import { BaseProvider } from "../base";
+
+export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
+
+export type VideoJobMetadata = {
+	jobId: string;
+	durationSec?: number;
+	status?: VideoJobStatus;
+	error?: string;
+};
+
+export type VideoJob = {
+	url?: string;
+	progress?: number;
+} & WithMetadata<VideoJobMetadata>;
 
 export type VideoProviderResponse = BundleResponse & {
 	metadata?: VideoJobMetadata;
