@@ -2,7 +2,6 @@ import { BaseAssetConnector } from "../asset-base";
 import type {
 	PluginContext,
 	TTSConnector,
-	TTSConnectorParams,
 	TTSGenerateParams,
 	TTSResult,
 	VoiceInfo,
@@ -20,9 +19,5 @@ export abstract class BaseTTSConnector
 
 	protected pluginContext(): PluginContext<TTSGenerateParams, TTSResult> {
 		return { searchVoices: (p) => this.searchVoices(p) };
-	}
-
-	async generate(params: TTSConnectorParams): Promise<TTSResult> {
-		return super.generate(params as unknown as TTSGenerateParams);
 	}
 }

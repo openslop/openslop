@@ -6,6 +6,8 @@ const mockClose = vi.fn();
 const mockGenerate = vi.fn();
 const mockConnect = vi.fn();
 const mockVoicesList = vi.fn();
+const mockEmbed = vi.fn();
+const mockEmbedMany = vi.fn();
 
 vi.mock("@cartesia/cartesia-js", () => ({
 	default: class {
@@ -18,6 +20,17 @@ vi.mock("@cartesia/cartesia-js", () => ({
 		};
 		voices = { list: mockVoicesList };
 	},
+}));
+
+vi.mock("ai", () => ({
+	embed: (...args: unknown[]) => mockEmbed(...args),
+	embedMany: (...args: unknown[]) => mockEmbedMany(...args),
+	cosineSimilarity: (a: number[], b: number[]) =>
+		a.reduce((s, x, i) => s + x * b[i], 0),
+}));
+
+vi.mock("@ai-sdk/openai", () => ({
+	openai: { embedding: () => ({}) },
 }));
 
 import { CartesiaTTS } from "../tts/cartesia";
@@ -119,7 +132,7 @@ describe("CartesiaTTS", () => {
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({
-				query: "english",
+				age: "adult",
 				language: "en",
 			});
 
@@ -142,9 +155,9 @@ describe("CartesiaTTS", () => {
 				},
 			]);
 			expect(mockVoicesList).toHaveBeenCalledWith({
-				q: "english",
+				q: "adult",
 				gender: undefined,
-				limit: 20,
+				limit: 100,
 			});
 		});
 
@@ -159,6 +172,114 @@ describe("CartesiaTTS", () => {
 				gender: "masculine",
 				limit: 5,
 			});
+		});
+
+		it("re-ranks voices by description similarity when semantic descriptors provided", async () => {
+			mockVoicesList.mockResolvedValue({
+				data: [
+					{
+						id: "v1",
+						name: "Cold",
+						language: "en",
+						gender: "feminine",
+						description: "cold robotic voice",
+						preview_file_url: null,
+					},
+					{
+						id: "v2",
+						name: "Warm",
+						language: "en",
+						gender: "feminine",
+						description: "warm british narrator",
+						preview_file_url: null,
+					},
+				],
+			});
+			mockEmbed.mockResolvedValue({ embedding: [1, 0] });
+			mockEmbedMany.mockResolvedValue({
+				embeddings: [
+					[0, 1],
+					[1, 0],
+				],
+			});
+
+			const provider = new CartesiaTTS("test-key");
+			const voices = await provider.search({ description: "warm british" });
+
+			expect(voices.map((v) => v.id)).toEqual(["v2", "v1"]);
+			expect(mockEmbed).toHaveBeenCalledWith(
+				expect.objectContaining({ value: "warm british" }),
+			);
+			expect(mockEmbedMany).toHaveBeenCalledWith(
+				expect.objectContaining({
+					values: ["cold robotic voice", "warm british narrator"],
+				}),
+			);
+		});
+
+		it("skips embedding when no semantic descriptors provided", async () => {
+			mockVoicesList.mockResolvedValue({
+				data: [
+					{
+						id: "v1",
+						name: "A",
+						language: "en",
+						gender: "masculine",
+						description: "first",
+						preview_file_url: null,
+					},
+					{
+						id: "v2",
+						name: "B",
+						language: "en",
+						gender: "masculine",
+						description: "second",
+						preview_file_url: null,
+					},
+				],
+			});
+
+			const provider = new CartesiaTTS("test-key");
+			const voices = await provider.search({ gender: "masculine" });
+
+			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
+			expect(mockEmbed).not.toHaveBeenCalled();
+			expect(mockEmbedMany).not.toHaveBeenCalled();
+		});
+
+		it("falls back to unranked results when embedding throws", async () => {
+			mockVoicesList.mockResolvedValue({
+				data: [
+					{
+						id: "v1",
+						name: "A",
+						language: "en",
+						gender: "feminine",
+						description: "first",
+						preview_file_url: null,
+					},
+					{
+						id: "v2",
+						name: "B",
+						language: "en",
+						gender: "feminine",
+						description: "second",
+						preview_file_url: null,
+					},
+				],
+			});
+			mockEmbed.mockRejectedValue(new Error("missing api key"));
+			mockEmbedMany.mockResolvedValue({
+				embeddings: [
+					[1, 0],
+					[0, 1],
+				],
+			});
+
+			const provider = new CartesiaTTS("test-key");
+			const voices = await provider.search({ description: "anything" });
+
+			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
 		});
 
 		it("filters voices by language", async () => {

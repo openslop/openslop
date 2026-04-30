@@ -16,37 +16,45 @@ describe("createVoiceSearchPlugin", () => {
 	});
 
 	it("returns params unchanged when voiceId already set", async () => {
-		const { ctx, searchVoices } = ctxWith([{ id: "x", name: "X" }]);
+		const { ctx, searchVoices } = ctxWith([
+			{ id: "x", name: "X", description: "" },
+		]);
 		const { beforeGenerate } = createVoiceSearchPlugin();
-		const params = { prompt: "hi", voiceId: "preset", gender: "male" };
+		const params = {
+			prompt: "hi",
+			voiceId: "preset",
+			gender: "masculine" as const,
+		};
 		const result = await beforeGenerate?.(params, ctx);
 		expect(result).toEqual(params);
 		expect(searchVoices).not.toHaveBeenCalled();
 	});
 
 	it("calls searchVoices with all voice descriptors", async () => {
-		const { ctx, searchVoices } = ctxWith([{ id: "v-42", name: "Forty-Two" }]);
+		const { ctx, searchVoices } = ctxWith([
+			{ id: "v-42", name: "Forty-Two", description: "" },
+		]);
 		const { beforeGenerate } = createVoiceSearchPlugin();
 		await beforeGenerate?.(
 			{
 				prompt: "hi",
-				gender: "female",
+				gender: "feminine",
 				accent: "british",
 				query: "narrator",
 				language: "en",
 				age: "adult",
 				pitch: "high",
-				texture: "raspy",
+				description: "raspy",
 				name: "Red",
 			},
 			ctx,
 		);
 		expect(searchVoices).toHaveBeenCalledWith({
-			gender: "female",
+			gender: "feminine",
 			age: "adult",
 			pitch: "high",
 			accent: "british",
-			texture: "raspy",
+			description: "raspy",
 			query: "narrator",
 			language: "en",
 		});
@@ -54,19 +62,19 @@ describe("createVoiceSearchPlugin", () => {
 
 	it("assigns first voice's id and strips descriptor/lookup fields", async () => {
 		const { ctx } = ctxWith([
-			{ id: "v-1", name: "First" },
-			{ id: "v-2", name: "Second" },
+			{ id: "v-1", name: "First", description: "" },
+			{ id: "v-2", name: "Second", description: "" },
 		]);
 		const { beforeGenerate } = createVoiceSearchPlugin();
 		const result = await beforeGenerate?.(
 			{
 				prompt: "hi",
 				model: "test-model",
-				gender: "female",
+				gender: "feminine",
 				age: "adult",
 				pitch: "high",
 				accent: "british",
-				texture: "raspy",
+				description: "raspy",
 				name: "Red",
 				query: "narrator",
 				language: "en",
@@ -80,11 +88,22 @@ describe("createVoiceSearchPlugin", () => {
 		});
 	});
 
+	it("defaults language to 'en' when not provided", async () => {
+		const { ctx, searchVoices } = ctxWith([
+			{ id: "v-1", name: "First", description: "" },
+		]);
+		const { beforeGenerate } = createVoiceSearchPlugin();
+		await beforeGenerate?.({ prompt: "hi", gender: "feminine" }, ctx);
+		expect(searchVoices).toHaveBeenCalledWith(
+			expect.objectContaining({ language: "en" }),
+		);
+	});
+
 	it("throws when searchVoices returns empty", async () => {
 		const { ctx } = ctxWith([]);
 		const { beforeGenerate } = createVoiceSearchPlugin();
 		await expect(
-			beforeGenerate?.({ prompt: "hi", gender: "alien" }, ctx),
+			beforeGenerate?.({ prompt: "hi", gender: "masculine" }, ctx),
 		).rejects.toThrow("No matching voice found");
 	});
 

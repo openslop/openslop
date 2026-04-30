@@ -7,6 +7,7 @@ const getSnapshotBlobKey = () =>
 
 const sandbox = await createSandbox({
 	resources: { vcpus: 8 },
+	timeoutInMilliseconds: 15 * 60 * 1000,
 	onProgress: ({ progress, message }) => {
 		console.log(
 			`[create-snapshot] ${message} (${Math.round(progress * 100)}%)`,

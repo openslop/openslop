@@ -5,8 +5,12 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
+import type { TTSGender } from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
+import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
+import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
+import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
 
 type RawTTSResult = {
 	data: string;
@@ -79,16 +83,35 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 	async search(
 		params: VoiceSearchParams & { limit?: number },
 	): Promise<VoiceInfo[]> {
-		const page = await this.client.voices.list({
-			q: params.query || undefined,
-			gender: params.gender as
-				| "masculine"
-				| "feminine"
-				| "gender_neutral"
-				| undefined,
-			limit: params.limit || 20,
-		});
+		const { age, gender, limit, language } = params;
+		let results = await this.searchOnce(age, gender, limit, language);
+		if (results.length === 0 && age) {
+			results = await this.searchOnce(undefined, gender, limit, language);
+		}
+		const queryText = buildQueryText(params);
+		if (!queryText) return results;
+		try {
+			return await rankBySimilarity(results, queryText);
+		} catch (err) {
+			logger.warn(
+				{ err },
+				"Voice similarity ranking failed; returning unranked results",
+			);
+			return results;
+		}
+	}
 
+	private async searchOnce(
+		query?: string,
+		gender?: TTSGender,
+		limit?: number,
+		language?: string,
+	): Promise<VoiceInfo[]> {
+		const page = await this.client.voices.list({
+			q: query,
+			gender,
+			limit: limit || 100,
+		});
 		return page.data
 			.map((voice) => ({
 				id: voice.id,
@@ -98,20 +121,18 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				description: voice.description,
 				previewUrl: voice.preview_file_url ?? undefined,
 			}))
-			.filter(
-				(voice) => !params.language || voice.language === params.language,
-			);
+			.filter((voice) => !language || voice.language === language);
 	}
 
 	protected async _generate(params: TTSGenerateParams) {
+		if (!params.voiceId) throw new Error("voiceId is required");
 		const ws = await this.client.tts.websocket();
 		await ws.connect();
 
 		try {
 			const audioChunks: Buffer[] = [];
 			const textTimestamps: TextTimestamp[] = [];
-
-			for await (const response of ws.generate({
+			const req: GenerationRequest = {
 				model_id: params.model || "sonic-3",
 				transcript: params.prompt,
 				voice: { mode: "id", id: params.voiceId },
@@ -124,7 +145,8 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				...(params.speed !== undefined && {
 					speed: params.speed as "slow" | "normal" | "fast",
 				}),
-			})) {
+			};
+			for await (const response of ws.generate(req)) {
 				if (response.type === "chunk" && response.audio) {
 					audioChunks.push(
 						Buffer.isBuffer(response.audio)
@@ -150,7 +172,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 			return {
 				data: wrapPcmInWav(combined).toString("base64"),
 				textTimestamps,
-				metadata: lastTs ? { durationSec: lastTs.end } : undefined,
+				metadata: lastTs ? { durationSec: lastTs.end + 1 } : undefined,
 			};
 		} finally {
 			ws.close();

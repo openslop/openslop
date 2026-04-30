@@ -53,10 +53,10 @@ describe("OpenSlopClient", () => {
 				json: () => Promise.resolve({ voices: [] }),
 			});
 
-			await client.get("/api/v1/tts/voices", { gender: "female" });
+			await client.get("/api/v1/tts/voices", { gender: "feminine" });
 
 			expect(fetchMock).toHaveBeenCalledWith(
-				"https://api.test.com/api/v1/tts/voices?gender=female",
+				"https://api.test.com/api/v1/tts/voices?gender=feminine",
 				expect.objectContaining({ method: "GET" }),
 			);
 		});
@@ -82,12 +82,12 @@ describe("OpenSlopClient", () => {
 			});
 
 			await client.get("/api/v1/tts/voices", {
-				gender: "male",
+				gender: "masculine",
 				age: undefined as unknown as string,
 			});
 
 			const url = fetchMock.mock.calls[0][0] as string;
-			expect(url).toContain("gender=male");
+			expect(url).toContain("gender=masculine");
 			expect(url).not.toContain("age");
 		});
 	});

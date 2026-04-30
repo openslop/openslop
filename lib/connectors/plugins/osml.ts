@@ -2,11 +2,11 @@ import dedent from "dedent";
 import { EffectType } from "../image/enums";
 import { MusicLength } from "../music/enums";
 import {
-	TTSAccent,
-	TTSAge,
+	TTS_ACCENTS,
+	TTS_AGES,
+	TTS_GENDERS,
+	TTS_PITCHES,
 	TTSEmotion,
-	TTSGender,
-	TTSPitch,
 } from "../tts/enums";
 import type { LLMPlugin } from "../types";
 
@@ -93,12 +93,12 @@ const OSML_SYSTEM_PROMPT = dedent`
 
 	### Metadata Narration XML tags
 	- Right after the metadata_style tag, emit a single, empty metadata_narration tag that describes the narrator voice. Example:
-		 <metadata_narration gender="male" age="adult" pitch="low" accent="british" texture="wise"></metadata_narration>
+		 <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>
 	- The attributes should be from the metadata Character/Narration attributes section
 
   ### Metadata Character XML tags
-	- Right after the metadata_narration tag, emit short <metadata_character>...</metadata_character> tags that visually describe each character (excluding the narrator) from the story in detail as if prompting an image model. Example:
-		<metadata_character name="Mia" gender="female" age="child" pitch="high" accent="american" texture="wise">A girl around ten years old with warm brown skin, dark curly hair falling 
+	- Right after the metadata_narration tag, emit short <metadata_character>...</metadata_character> tags that describe each character's visual appearance (excluding the narrator) from the story in detail as if prompting an image model. Example:
+		<metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="wise">A girl around ten years old with warm brown skin, dark curly hair falling
 		just past her shoulders, bright hazel eyes, a small gap between her front
 		teeth. Wearing a mustard-yellow cardigan over a white tee, rolled-up denim
 		overalls, scuffed red sneakers, a canvas satchel slung across one shoulder.
@@ -107,11 +107,11 @@ const OSML_SYSTEM_PROMPT = dedent`
 
 	### Metadata Character/Narration attributes
 	- For metadata_character and metadata_narration tags, always include these attributes in addition to any other they may have
-  - gender: ${Object.values(TTSGender).join(", ")}.
-  - age: ${Object.values(TTSAge).join(", ")}.
-  - pitch: ${Object.values(TTSPitch).join(", ")}.
-  - accent: ${Object.values(TTSAccent).join(", ")}.
-  - texture: Free-form short description of the voice texture, tone, and timbre. Example: "Bill Clinton-esque; charming", "Santa, wise, grandfatherly", "Viking, friendly, calm", etc.
+  - gender: ${TTS_GENDERS.join(", ")}.
+  - age: ${TTS_AGES.join(", ")}.
+  - pitch: ${TTS_PITCHES.join(", ")}.
+  - accent: ${TTS_ACCENTS.join(", ")}.
+  - description: A simple descriptor of the voice. Examples: Charming, Confident, Approachable, Friendly, Energetic, Casual, Mature, Warm, Clear, Upbeat, Deep, Soft, etc.
 
   ### General XML Tag Rules
   - NEVER nest XML tags within other XML tags.

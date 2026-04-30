@@ -9,7 +9,7 @@ import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 const PROJECT_ID = "test-char-refs";
 
 function setupCharacters(
-	characters: Record<string, { description: string; avatarUrl: string }>,
+	characters: Record<string, { appearance: string; avatarUrl: string }>,
 ) {
 	const store = getProjectStore(PROJECT_ID);
 	store.getState().updateMetadata({ characters });
@@ -35,9 +35,9 @@ describe("character-references plugin", () => {
 
 	it("resolves character names to avatar URLs", () => {
 		setupCharacters({
-			Red: { description: "A girl in red", avatarUrl: "https://img/red.png" },
+			Red: { appearance: "A girl in red", avatarUrl: "https://img/red.png" },
 			Granny: {
-				description: "An old woman",
+				appearance: "An old woman",
 				avatarUrl: "https://img/granny.png",
 			},
 		});
@@ -55,7 +55,7 @@ describe("character-references plugin", () => {
 
 	it("strips characters from params when no avatars found", () => {
 		setupCharacters({
-			Wolf: { description: "A big wolf", avatarUrl: "" },
+			Wolf: { appearance: "A big wolf", avatarUrl: "" },
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -75,8 +75,8 @@ describe("character-references plugin", () => {
 
 	it("handles whitespace in character CSV", () => {
 		setupCharacters({
-			Alice: { description: "A girl", avatarUrl: "https://img/alice.png" },
-			Bob: { description: "A boy", avatarUrl: "https://img/bob.png" },
+			Alice: { appearance: "A girl", avatarUrl: "https://img/alice.png" },
+			Bob: { appearance: "A boy", avatarUrl: "https://img/bob.png" },
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -92,8 +92,8 @@ describe("character-references plugin", () => {
 
 	it("filters out characters without avatars", () => {
 		setupCharacters({
-			Alice: { description: "A girl", avatarUrl: "https://img/alice.png" },
-			Bob: { description: "A boy", avatarUrl: "" },
+			Alice: { appearance: "A girl", avatarUrl: "https://img/alice.png" },
+			Bob: { appearance: "A boy", avatarUrl: "" },
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -109,7 +109,7 @@ describe("character-references plugin", () => {
 
 	it("filters out unknown character names", () => {
 		setupCharacters({
-			Alice: { description: "A girl", avatarUrl: "https://img/alice.png" },
+			Alice: { appearance: "A girl", avatarUrl: "https://img/alice.png" },
 		});
 
 		const result = runBeforeGenerate(plugin, {

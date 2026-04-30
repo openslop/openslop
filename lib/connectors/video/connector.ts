@@ -1,17 +1,13 @@
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseAssetConnector } from "../asset-base";
-import type {
-	AssetResult,
-	VideoConnector,
-	VideoGenerateParams,
-} from "../types";
+import type { AssetResult, VideoGenerateParams } from "../types";
 import type { VideoProvider } from "@/lib/providers/video/base";
 import { awaitCompletion } from "@/lib/providers/poll";
 
-export abstract class BaseVideoConnector
-	extends BaseAssetConnector<VideoGenerateParams, AssetResult>
-	implements VideoConnector
-{
+export abstract class BaseVideoConnector extends BaseAssetConnector<
+	VideoGenerateParams,
+	AssetResult
+> {
 	readonly type = "video" as const;
 	readonly assetKey = "video" as const;
 

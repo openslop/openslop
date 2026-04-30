@@ -1,5 +1,6 @@
 import type { GatewayClient } from "@/lib/gateway/base";
 import type { WithMetadata } from "@/lib/providers/base";
+import type { TTSGender } from "./tts/enums";
 
 export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
@@ -52,22 +53,10 @@ export interface ConnectorConfig {
 	options?: Record<string, unknown>;
 }
 
-export interface ConnectorGenerateParams {
+export type ConnectorGenerateParams = {
 	prompt: string;
 	model?: string;
-}
-
-export interface TTSConnectorParams extends ConnectorGenerateParams {
-	voiceId?: string;
-	gender?: string;
-	age?: string;
-	pitch?: string;
-	accent?: string;
-	texture?: string;
-	name?: string;
-	query?: string;
-	language?: string;
-}
+};
 
 export type AssetResult = { url: string; durationSec: number };
 
@@ -82,9 +71,7 @@ export interface Connector {
 
 // LLM types
 
-export type LLMGenerateParams = {
-	prompt: string;
-	model?: string;
+export type LLMGenerateParams = ConnectorGenerateParams & {
 	systemPrompt?: string;
 	thinkingLevel?: string;
 	maxTokens?: number;
@@ -110,45 +97,24 @@ export interface LLMConnector extends Connector {
 
 // Music types
 
-export type MusicGenerateParams = {
-	prompt: string;
-	model?: string;
+export type MusicGenerateParams = ConnectorGenerateParams & {
 	durationSeconds?: number;
 };
-
-export interface MusicConnector extends Connector {
-	readonly type: "music";
-	generate(params: MusicGenerateParams): Promise<AssetResult>;
-}
 
 // SFX types
 
-export type SFXGenerateParams = {
-	prompt: string;
-	model?: string;
+export type SFXGenerateParams = ConnectorGenerateParams & {
 	durationSeconds?: number;
 };
 
-export interface SFXConnector extends Connector {
-	readonly type: "sfx";
-	generate(params: SFXGenerateParams): Promise<AssetResult>;
-}
-
 // Image types
 
-export type ImageGenerateParams = {
-	prompt: string;
-	model?: string;
+export type ImageGenerateParams = ConnectorGenerateParams & {
 	format?: string;
 	width?: number;
 	height?: number;
 	referenceImages?: string[];
 };
-
-export interface ImageConnector extends Connector {
-	readonly type: "image";
-	generate(params: ImageGenerateParams): Promise<AssetResult>;
-}
 
 // TTS types
 
@@ -158,10 +124,16 @@ export type TTSResult = AssetResult & {
 	textTimestamps: TextTimestamp[];
 };
 
-export type TTSGenerateParams = {
-	prompt: string;
-	voiceId: string;
-	model?: string;
+export type TTSGenerateParams = ConnectorGenerateParams & {
+	voiceId?: string;
+	gender?: TTSGender;
+	age?: string;
+	pitch?: string;
+	accent?: string;
+	description?: string;
+	name?: string;
+	query?: string;
+	language?: string;
 	speed?: number | string;
 	volume?: number;
 	format?: string;
@@ -171,56 +143,39 @@ export type VoiceInfo = {
 	id: string;
 	name: string;
 	language?: string;
-	gender?: string;
+	gender?: TTSGender;
 	accent?: string;
-	description?: string;
+	description: string;
 	previewUrl?: string;
 };
 
 export type VoiceSearchParams = {
 	query?: string;
-	gender?: string;
+	gender?: TTSGender;
 	age?: string;
 	pitch?: string;
 	accent?: string;
-	texture?: string;
+	description?: string;
+	name?: string;
 	language?: string;
 };
 
 export interface TTSConnector extends Connector {
 	readonly type: "tts";
-	generate(params: TTSConnectorParams): Promise<TTSResult>;
+	generate(params: TTSGenerateParams): Promise<TTSResult>;
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }
 
 // Video types
 
-export type VideoGenerateParams = {
-	prompt: string;
-	model?: string;
+export type VideoGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 	duration?: number;
 	width?: number;
 	height?: number;
 };
 
-export interface VideoConnector extends Connector {
-	readonly type: "video";
-	generate(params: VideoGenerateParams): Promise<AssetResult>;
-}
-
 export type LLMPlugin = ConnectorPlugin<LLMGenerateParams, LLMGenerateResult>;
-
-// Factory types
-
-export type ConnectorTypeMap = {
-	llm: LLMConnector;
-	music: MusicConnector;
-	sfx: SFXConnector;
-	image: ImageConnector;
-	tts: TTSConnector;
-	video: VideoConnector;
-};
 
 export type ProviderConstructor<T extends Connector = Connector> = new (
 	config: ConnectorConfig,
