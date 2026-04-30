@@ -215,7 +215,11 @@ export class GenerationQueue {
 				if (this.pendingBefore) {
 					const fn = this.pendingBefore;
 					this.pendingBefore = null;
-					await fn();
+					try {
+						await fn();
+					} catch (err) {
+						console.error("GenerationQueue.before failed:", err);
+					}
 				}
 				this.processQueue();
 			} while (this.pendingBefore);

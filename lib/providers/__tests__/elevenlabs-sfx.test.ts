@@ -23,6 +23,7 @@ function mockReadableStream(data: Uint8Array) {
 				}
 				return { done: true, value: undefined };
 			},
+			releaseLock: () => {},
 		}),
 	};
 }

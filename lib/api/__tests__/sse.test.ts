@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { formatSSE, createSSEResponse, readSSE } from "../sse";
 
 function makeSSEStream(chunks: string[]): ReadableStream {
@@ -61,6 +61,30 @@ describe("createSSEResponse", () => {
 			chunks.push(decoder.decode(value));
 		}
 		expect(chunks.length).toBeGreaterThan(0);
+	});
+
+	it("closes the stream cleanly when the handler rejects (no unhandled rejection)", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const response = createSSEResponse(async (send) => {
+			await send({ type: "phase", phase: "starting", progress: 0 });
+			throw new Error("handler exploded");
+		});
+
+		const body = response.body;
+		if (!body) throw new Error("expected response body");
+		const reader = body.getReader();
+
+		const decoder = new TextDecoder();
+		let received = "";
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			received += decoder.decode(value);
+		}
+
+		expect(received).toContain('"type":"phase"');
+		expect(errorSpy).toHaveBeenCalled();
+		errorSpy.mockRestore();
 	});
 });
 

@@ -514,5 +514,24 @@ describe("GenerationQueue", () => {
 				url: "https://example.com/img.png",
 			});
 		});
+
+		it("still drains the queue when before() rejects (no jobs stuck)", async () => {
+			const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+			const beforeFn = vi.fn().mockRejectedValue(new Error("avatars failed"));
+			generateMock.mockResolvedValue({
+				url: "https://example.com/img.png",
+			});
+
+			generationQueue.before(beforeFn).enqueue(makeJob("after-fail"));
+			await vi.runAllTimersAsync();
+
+			expect(beforeFn).toHaveBeenCalledOnce();
+			expect(generateMock).toHaveBeenCalledOnce();
+			const snap = generationQueue.getElementSnapshot("after-fail");
+			expect(snap.status).toBe("idle");
+			expect(snap.result).toEqual({ url: "https://example.com/img.png" });
+			expect(errorSpy).toHaveBeenCalled();
+			errorSpy.mockRestore();
+		});
 	});
 });

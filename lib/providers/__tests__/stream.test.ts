@@ -38,4 +38,18 @@ describe("streamToBuffer", () => {
 		expect(new Uint8Array(buffer).every((b) => b === 42)).toBe(true);
 		expect(buffer.byteLength).toBe(10_000);
 	});
+
+	it("releases the reader lock on read error so the stream is not left locked", async () => {
+		const stream = new ReadableStream<Uint8Array>({
+			start(controller) {
+				controller.enqueue(new Uint8Array([1, 2]));
+				controller.error(new Error("read failed"));
+			},
+		});
+
+		await expect(streamToBuffer(stream)).rejects.toThrow("read failed");
+		// After the error, the lock must be released so the stream isn't
+		// permanently locked — verify by acquiring a new reader.
+		expect(() => stream.getReader()).not.toThrow();
+	});
 });

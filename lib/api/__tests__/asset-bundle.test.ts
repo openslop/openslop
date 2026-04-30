@@ -90,6 +90,9 @@ describe("AssetBundle", () => {
 			vi.stubGlobal(
 				"fetch",
 				vi.fn().mockResolvedValue({
+					ok: true,
+					status: 200,
+					statusText: "OK",
 					json: () => Promise.resolve(payload),
 				}),
 			);
@@ -112,6 +115,33 @@ describe("AssetBundle", () => {
 
 			vi.unstubAllGlobals();
 		});
+
+		it("throws when response is not ok", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue({
+					ok: false,
+					status: 404,
+					statusText: "Not Found",
+					json: () => Promise.resolve({}),
+				}),
+			);
+
+			const bundle = new AssetBundle(
+				"https://blob.example.com/assets/tts/cartesia/abc",
+				{
+					version: 1,
+					type: "tts",
+					createdAt: "",
+					result: { timestamps: "timestamps.json" },
+				},
+			);
+
+			await expect(bundle.fetchJson("timestamps")).rejects.toThrow(
+				/timestamps.*404/,
+			);
+			vi.unstubAllGlobals();
+		});
 	});
 
 	describe("fromId", () => {
@@ -129,6 +159,9 @@ describe("AssetBundle", () => {
 			vi.stubGlobal(
 				"fetch",
 				vi.fn().mockResolvedValue({
+					ok: true,
+					status: 200,
+					statusText: "OK",
 					json: () => Promise.resolve(manifest),
 				}),
 			);
@@ -142,6 +175,23 @@ describe("AssetBundle", () => {
 				"https://blob.example.com/assets/image/runware/abc/manifest.json",
 			);
 
+			vi.unstubAllGlobals();
+		});
+
+		it("throws when manifest response is not ok", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue({
+					ok: false,
+					status: 500,
+					statusText: "Internal Server Error",
+					json: () => Promise.resolve({}),
+				}),
+			);
+
+			await expect(
+				AssetBundle.fromId("image", "runware", "abc"),
+			).rejects.toThrow(/image\/runware\/abc.*500/);
 			vi.unstubAllGlobals();
 		});
 	});

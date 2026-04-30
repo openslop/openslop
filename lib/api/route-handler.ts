@@ -46,7 +46,8 @@ export function createRouteHandler<T>(options: RouteOptions<T>) {
 			return await options.handle(provider, body);
 		} catch (error) {
 			logger.error(error, `${options.label} failed`);
-			return serverError(`${options.label} failed: ${JSON.stringify(error)}`);
+			const message = error instanceof Error ? error.message : String(error);
+			return serverError(`${options.label} failed: ${message}`);
 		}
 	};
 }

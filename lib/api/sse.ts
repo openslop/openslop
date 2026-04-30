@@ -24,7 +24,19 @@ export function createSSEResponse(
 		await writer.write(encoder.encode(formatSSE(message)));
 	};
 
-	handler(send).finally(() => writer.close());
+	(async () => {
+		try {
+			await handler(send);
+		} catch (err) {
+			console.error("createSSEResponse handler failed:", err);
+		} finally {
+			try {
+				await writer.close();
+			} catch {
+				// writer may already be closed if the consumer disconnected
+			}
+		}
+	})();
 
 	return new Response(stream.readable, { headers: SSE_HEADERS });
 }
