@@ -279,9 +279,13 @@ export function useStaticRotations() {
 
 function ErrorMessage({ message }: { message: string }) {
 	return (
-		<div className="flex items-center gap-1.5 rounded-full bg-red-700 px-3 py-1.5">
-			<AlertCircle className="w-3.5 h-3.5 text-white shrink-0" />
-			<p className="text-white text-xs">{message}</p>
+		<div className="absolute inset-2 z-20 flex items-center justify-center pointer-events-none">
+			<div className="pointer-events-auto flex max-h-full min-w-0 max-w-full items-start gap-1.5 overflow-x-hidden overflow-y-auto rounded-lg bg-red-700 px-3 py-1.5 shadow-md">
+				<AlertCircle className="mt-px h-3.5 w-3.5 shrink-0 text-white" />
+				<p className="min-w-0 whitespace-pre-wrap break-words text-xs leading-snug text-white">
+					{message}
+				</p>
+			</div>
 		</div>
 	);
 }
@@ -372,8 +376,9 @@ function AudioPlaceholder({
 			</div>
 			<div className="absolute inset-0 grain grain-light border rounded-lg bg-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]" />
 			<div className="absolute inset-0 z-10 flex items-center justify-center">
-				{error ? <ErrorMessage message={error} /> : <WandIcon />}
+				<WandIcon />
 			</div>
+			{error && <ErrorMessage message={error} />}
 			<div className="absolute inset-0 z-10 flex items-center justify-start pl-2">
 				<GenerateButton
 					generating={generating}
@@ -405,8 +410,9 @@ function MediaPlaceholder({
 	return (
 		<div className="group grain grain-light relative w-full aspect-video rounded-lg overflow-hidden border flex items-center justify-center backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
 			<div className="z-10">
-				{error ? <ErrorMessage message={error} /> : <WandIcon />}
+				<WandIcon />
 			</div>
+			{error && <ErrorMessage message={error} />}
 			<div className="absolute top-2 left-2 z-10">
 				<GenerateButton
 					generating={generating}

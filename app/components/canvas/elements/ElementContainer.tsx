@@ -4,6 +4,7 @@ import { Node } from "slate";
 import type { ProviderKey } from "@/lib/connectors/types";
 import type { CanvasContentElement, SceneElement } from "../types";
 import { isSceneElement } from "../utils/guards";
+import { getElementCharacterNames } from "../utils/characters";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
@@ -13,6 +14,7 @@ import { ModelSelector } from "./ModelSelector";
 import { DeleteButton } from "./DeleteButton";
 import { CompactElement } from "./CompactElement";
 import { SceneContainer } from "./SceneContainer";
+import { CharacterPill } from "./CharacterBadge";
 
 const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
 
@@ -58,9 +60,13 @@ export function ElementContainer({
 							{config.icon}
 							<span className="text-xs">{config.label}</span>
 						</div>
+						{getElementCharacterNames(element).map((name) => (
+							<CharacterPill key={`char:${name}`} name={name} />
+						))}
 						{Object.entries(config.visibleAttributes).map(([key, color]) => {
 							const value = element.customAttributes?.[key];
-							return value ? (
+							if (!value) return null;
+							return (
 								<span
 									key={key}
 									className={`${color} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
@@ -68,7 +74,7 @@ export function ElementContainer({
 								>
 									{formatAttributeDisplay(key, value)}
 								</span>
-							) : null;
+							);
 						})}
 						{model && provider && (
 							<ModelSelector

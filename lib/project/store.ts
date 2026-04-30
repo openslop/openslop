@@ -1,14 +1,19 @@
+import { enableMapSet } from "immer";
 import merge from "lodash/merge";
 import { useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import type { DeepPartial, Metadata } from "./types";
 
+enableMapSet();
+
 export type ProjectContext = {
 	metadata: Metadata;
 	referenceImages: string[];
+	generatingAvatars: ReadonlySet<string>;
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setReferenceImages: (urls: string[]) => void;
+	setAvatarGenerating: (name: string, generating: boolean) => void;
 };
 
 export type ProjectStore = StoreApi<ProjectContext>;
@@ -22,6 +27,7 @@ export function getProjectStore(projectId: string): ProjectStore {
 			immer((set) => ({
 				metadata: { style: "", narration: {}, characters: {} },
 				referenceImages: [],
+				generatingAvatars: new Set(),
 				updateMetadata: (partial) =>
 					set((state) => {
 						merge(state.metadata, partial);
@@ -29,6 +35,11 @@ export function getProjectStore(projectId: string): ProjectStore {
 				setReferenceImages: (urls) =>
 					set((state) => {
 						state.referenceImages = urls;
+					}),
+				setAvatarGenerating: (name, generating) =>
+					set((state) => {
+						if (generating) state.generatingAvatars.add(name);
+						else state.generatingAvatars.delete(name);
 					}),
 			})),
 		);

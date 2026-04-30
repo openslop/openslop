@@ -1,6 +1,5 @@
 import { Children, useMemo } from "react";
 import { RenderElementProps } from "slate-react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import {
 	SortableContext,
 	verticalListSortingStrategy,
@@ -10,6 +9,7 @@ import { isForeground } from "../utils/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
 import { useSceneIndex } from "../hooks/useSceneIndex";
 import { useViewMode } from "../ViewModeContext";
+import { CollapsibleHeader } from "./CollapsibleHeader";
 import { DeleteButton } from "./DeleteButton";
 import { ForegroundPreview } from "./ForegroundPreview";
 
@@ -57,25 +57,14 @@ function SceneHeader({
 	onToggle: () => void;
 	element: SceneElement;
 }) {
-	const Icon = collapsed ? ChevronRight : ChevronDown;
 	return (
-		<div
-			className="flex items-center gap-1 select-none text-[10px] text-white/40 font-medium mb-2 h-5"
-			contentEditable={false}
-		>
-			<button
-				type="button"
-				onClick={onToggle}
-				className="opacity-0 group-hover/scene:opacity-100 transition-opacity duration-200 p-0.5 -ml-1 rounded hover:bg-white/10"
-				aria-label={collapsed ? "Expand scene" : "Collapse scene"}
-			>
-				<Icon size={12} />
-			</button>
-			Scene {sceneIndex}
-			<div className="ml-auto opacity-0 group-hover/scene:opacity-100 transition-opacity duration-200 p-1">
-				<DeleteButton element={element} />
-			</div>
-		</div>
+		<CollapsibleHeader
+			label={`Scene ${sceneIndex}`}
+			collapsed={collapsed}
+			onToggle={onToggle}
+			ariaLabel={collapsed ? "Expand scene" : "Collapse scene"}
+			rightSlot={<DeleteButton element={element} />}
+		/>
 	);
 }
 
@@ -94,7 +83,7 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 	return (
 		<div
 			{...attributes}
-			className="group/scene relative h-32"
+			className="group/collapsible relative h-32"
 			style={dropPadding}
 		>
 			<div className="flex flex-col h-full pr-[calc(8rem+0.75rem)]">
@@ -138,7 +127,7 @@ function ExpandedScene({ attributes, element, children }: SceneProps) {
 	const { toggle } = useViewMode();
 
 	return (
-		<div {...attributes} className="group/scene" style={dropPadding}>
+		<div {...attributes} className="group/collapsible" style={dropPadding}>
 			<SceneHeader
 				sceneIndex={sceneIndex}
 				collapsed={false}

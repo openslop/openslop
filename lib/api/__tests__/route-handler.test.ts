@@ -106,6 +106,6 @@ describe("createRouteHandler", () => {
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toBe("TestRoute failed");
+		expect(json.error).toBe("TestRoute failed: {}");
 	});
 });

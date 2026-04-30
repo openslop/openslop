@@ -29,6 +29,7 @@ import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
+import { AssetsSection } from "./elements/AssetsSection";
 import { getContentElements } from "./utils/nodeUtils";
 import { PreviewCacheProvider } from "./PreviewCacheContext";
 import { ViewModeProvider } from "./ViewModeContext";
@@ -131,6 +132,7 @@ export default function Canvas({
 						<Sidebar />
 
 						<Slate editor={editor} initialValue={value} onChange={setValue}>
+							<AssetsSection />
 							<SortableContext
 								items={sceneItems}
 								strategy={verticalListSortingStrategy}

@@ -44,7 +44,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		bgColor: "bg-amber-600",
 		placeholder: "What does this character say?",
 		visibleAttributes: {
-			name: "bg-purple-500",
 			emotion: "bg-pink-500",
 		},
 	},

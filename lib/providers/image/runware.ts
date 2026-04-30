@@ -35,9 +35,9 @@ export class RunwareImage extends BaseProvider<
 		return withRunware(this.apiKey, async (runware) => {
 			const results = await runware.imageInference({
 				positivePrompt: params.prompt,
-				model: params.model || "runware:z-image@turbo",
-				width: params.width || 512,
-				height: params.height || 512,
+				model: params.model || "bytedance:seedream@5.0-lite",
+				width: params.width || 2848,
+				height: params.height || 1600,
 				outputType: "base64Data",
 				numberResults: 1,
 				referenceImages: params.referenceImages,
