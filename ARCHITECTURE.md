@@ -123,7 +123,8 @@ class:
 - Enqueues `GenerationJob`s and drains them in batches via
   `generateForElement` → `createConnector(...).generate(...)`.
 - Tracks status (`idle | queued | generating`), errors, elapsed seconds, and a
-  per-element history of past results for instant cache hits when inputs match.
+  dedicated `JobHistory` cache keyed by serialized generation inputs for instant
+  per-element cache hits when inputs match.
 - Exposes a Zustand-style subscribe API used by canvas elements to render
   progress.
 
