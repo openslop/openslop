@@ -62,6 +62,26 @@ describe("createSSEResponse", () => {
 		}
 		expect(chunks.length).toBeGreaterThan(0);
 	});
+
+	it("emits an error event and closes when handler rejects with an Error", async () => {
+		const response = createSSEResponse(async () => {
+			throw new Error("boom");
+		});
+
+		const text = await response.text();
+		expect(text).toContain('"type":"error"');
+		expect(text).toContain('"message":"boom"');
+	});
+
+	it("emits a generic error message when handler rejects with a non-Error", async () => {
+		const response = createSSEResponse(async () => {
+			throw "string failure";
+		});
+
+		const text = await response.text();
+		expect(text).toContain('"type":"error"');
+		expect(text).toContain('"message":"Internal error"');
+	});
 });
 
 describe("readSSE", () => {
@@ -131,5 +151,15 @@ describe("readSSE", () => {
 			results.push(event);
 		}
 		expect(results).toEqual([{ a: 1 }]);
+	});
+
+	it("releases the underlying reader when the consumer breaks early", async () => {
+		const stream = makeSSEStream(['data: {"a":1}\n\n', 'data: {"b":2}\n\n']);
+		for await (const event of readSSE(stream)) {
+			expect(event).toEqual({ a: 1 });
+			break;
+		}
+		// If the lock had not been released, getReader() would throw.
+		expect(() => stream.getReader()).not.toThrow();
 	});
 });

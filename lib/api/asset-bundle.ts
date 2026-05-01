@@ -49,7 +49,13 @@ export class AssetBundle {
 	}
 
 	async fetchJson<T>(key: string): Promise<T> {
-		const res = await fetch(this.resolve(key));
+		const url = this.resolve(key);
+		const res = await fetch(url);
+		if (!res.ok) {
+			throw new Error(
+				`Failed to fetch "${key}" (${res.status} ${res.statusText})`,
+			);
+		}
 		return res.json() as Promise<T>;
 	}
 
@@ -76,6 +82,11 @@ export class AssetBundle {
 	): Promise<AssetBundle> {
 		const url = AssetBundle.buildUrl(type, provider, id);
 		const res = await fetch(`${url}/manifest.json`);
+		if (!res.ok) {
+			throw new Error(
+				`Failed to fetch manifest for ${type}/${provider}/${id} (${res.status} ${res.statusText})`,
+			);
+		}
 		const manifest = (await res.json()) as AssetManifest;
 		return new AssetBundle(url, manifest);
 	}

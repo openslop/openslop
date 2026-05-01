@@ -24,7 +24,12 @@ export function createSSEResponse(
 		await writer.write(encoder.encode(formatSSE(message)));
 	};
 
-	handler(send).finally(() => writer.close());
+	handler(send)
+		.catch(async (err) => {
+			const message = err instanceof Error ? err.message : "Internal error";
+			await send({ type: "error", message }).catch(() => {});
+		})
+		.finally(() => writer.close());
 
 	return new Response(stream.readable, { headers: SSE_HEADERS });
 }
@@ -34,21 +39,25 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 	const decoder = new TextDecoder();
 	let buffer = "";
 
-	for (;;) {
-		const { done, value } = await reader.read();
-		if (done) break;
-		buffer += decoder.decode(value, { stream: true });
+	try {
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			buffer += decoder.decode(value, { stream: true });
 
-		const parts = buffer.split("\n\n");
-		buffer = parts.pop() ?? "";
+			const parts = buffer.split("\n\n");
+			buffer = parts.pop() ?? "";
 
-		for (const part of parts) {
-			if (!part.startsWith("data: ")) continue;
-			try {
-				yield JSON.parse(part.slice(6)) as T;
-			} catch {
-				// skip malformed SSE events
+			for (const part of parts) {
+				if (!part.startsWith("data: ")) continue;
+				try {
+					yield JSON.parse(part.slice(6)) as T;
+				} catch {
+					// skip malformed SSE events
+				}
 			}
 		}
+	} finally {
+		reader.releaseLock();
 	}
 }
