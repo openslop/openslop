@@ -7,7 +7,7 @@ import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
 import { UserProvider } from "@/lib/user/UserProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Editor from "./components/Editor";
+import LazyEditor from "./components/LazyEditor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
 import GradientButton from "./components/GradientButton";
@@ -29,7 +29,7 @@ export default async function Home() {
 				<ConfigProvider>
 					<ScriptProvider>
 						<UserProvider user={user}>
-							<Editor />
+							<LazyEditor />
 						</UserProvider>
 					</ScriptProvider>
 				</ConfigProvider>
