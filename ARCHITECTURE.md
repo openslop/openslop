@@ -58,9 +58,8 @@ Connectors don't know about HTTP. They delegate to a `GatewayClient` that
 wraps `fetch` against `app/api/v1/<type>`. Gateways are thin: they post the
 params, surface errors, and return a `BundleResponse`.
 
-This is the seam that lets the same connector code run against the local API
-during development, against a hosted API in production, or against a mock in
-tests.
+This is the seam that lets the same connector code run against the local
+Next.js API or against a mock in tests.
 
 ### 3. `lib/providers/` — server-side model wrappers
 
@@ -157,6 +156,10 @@ components dispatch jobs, never call connectors directly.
   the Supabase session cookie on every non-static request.
 - Browser-side Supabase access goes through `lib/supabase/client.ts`;
   server-side via `lib/supabase/server.ts`.
+- `/api/v1/*` authenticates via the Supabase session cookie only (`getUser()`
+  in `lib/api/auth.ts`); requests must be same-origin. `OpenSlopClient`'s
+  `baseUrl` is for same-origin overrides only — hosted/cross-origin API
+  deployments are not supported (intentional per `e6abf7e`).
 
 ## Video rendering
 

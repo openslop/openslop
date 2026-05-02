@@ -1,17 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopClient } from "../openslop";
 
-vi.mock("@/lib/supabase/client", () => ({
-	createClient: () => ({
-		auth: {
-			getSession: () =>
-				Promise.resolve({
-					data: { session: { access_token: "test-token" } },
-				}),
-		},
-	}),
-}));
-
 describe("OpenSlopClient", () => {
 	let client: OpenSlopClient;
 	let fetchMock: ReturnType<typeof vi.fn>;
@@ -23,7 +12,7 @@ describe("OpenSlopClient", () => {
 	});
 
 	describe("post", () => {
-		it("sends POST with auth header and JSON body", async () => {
+		it("sends POST with JSON body", async () => {
 			fetchMock.mockResolvedValue({
 				ok: true,
 				json: () => Promise.resolve({ result: "ok" }),
@@ -36,10 +25,7 @@ describe("OpenSlopClient", () => {
 				"https://api.test.com/api/v1/image",
 				{
 					method: "POST",
-					headers: {
-						"content-type": "application/json",
-						authorization: "Bearer test-token",
-					},
+					headers: { "content-type": "application/json" },
 					body: JSON.stringify({ prompt: "a cat" }),
 				},
 			);
@@ -153,37 +139,6 @@ describe("OpenSlopClient", () => {
 			await expect(client.post("/api/v1/image", {})).rejects.toThrow(
 				"502 Bad Gateway",
 			);
-		});
-	});
-
-	describe("auth", () => {
-		it("omits authorization header when no session", async () => {
-			vi.resetModules();
-
-			vi.doMock("@/lib/supabase/client", () => ({
-				createClient: () => ({
-					auth: {
-						getSession: () => Promise.resolve({ data: { session: null } }),
-					},
-				}),
-			}));
-
-			const { OpenSlopClient: FreshClient } = await import("../openslop");
-			const noAuthClient = new FreshClient("https://api.test.com");
-
-			fetchMock.mockResolvedValue({
-				ok: true,
-				json: () => Promise.resolve({}),
-			});
-
-			await noAuthClient.post("/test", {});
-
-			const headers = fetchMock.mock.calls[0][1].headers as Record<
-				string,
-				string
-			>;
-			expect(headers.authorization).toBeUndefined();
-			expect(headers["content-type"]).toBe("application/json");
 		});
 	});
 });

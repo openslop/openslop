@@ -11,65 +11,27 @@ vi.mock("@supabase/ssr", () => ({
 
 import { updateSession } from "../middleware";
 
-function makeRequest(path: string, headers?: Record<string, string>) {
-	return new NextRequest(new URL(path, "http://localhost:3000"), {
-		headers: headers || {},
-	});
+function makeRequest(path: string) {
+	return new NextRequest(new URL(path, "http://localhost:3000"));
 }
 
-describe("middleware - API auth", () => {
+describe("middleware - session refresh", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
 	});
 
-	it("returns 401 for /api/v1/* without Authorization header", async () => {
-		const res = await updateSession(makeRequest("/api/v1/image"));
+	it("passes through for non-auth routes when unauthenticated", async () => {
+		mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
 
-		expect(res.status).toBe(401);
-		expect(await res.json()).toEqual({ error: "Unauthorized" });
+		const res = await updateSession(makeRequest("/"));
+		expect(res.status).toBe(200);
 	});
 
-	it("returns 401 for /api/v1/* with non-Bearer auth", async () => {
-		const res = await updateSession(
-			makeRequest("/api/v1/image", { authorization: "Basic abc123" }),
-		);
-
-		expect(res.status).toBe(401);
-	});
-
-	it("returns 401 for /api/v1/* with invalid Bearer token", async () => {
-		mockGetUser.mockResolvedValue({
-			data: { user: null },
-			error: { message: "invalid token" },
-		});
-
-		const res = await updateSession(
-			makeRequest("/api/v1/image", { authorization: "Bearer bad-token" }),
-		);
-
-		expect(res.status).toBe(401);
-		expect(mockGetUser).toHaveBeenCalledWith("bad-token");
-	});
-
-	it("passes through for /api/v1/* with valid Bearer token", async () => {
+	it("passes through for non-auth routes when authenticated", async () => {
 		mockGetUser.mockResolvedValue({
 			data: { user: { id: "user-1" } },
-			error: null,
-		});
-
-		const res = await updateSession(
-			makeRequest("/api/v1/llm", { authorization: "Bearer valid-token" }),
-		);
-
-		expect(res.status).toBe(200);
-		expect(mockGetUser).toHaveBeenCalledWith("valid-token");
-	});
-
-	it("does not interfere with non-API routes", async () => {
-		mockGetUser.mockResolvedValue({
-			data: { user: null },
 			error: null,
 		});
 
@@ -77,7 +39,7 @@ describe("middleware - API auth", () => {
 		expect(res.status).toBe(200);
 	});
 
-	it("redirects authenticated user from /login", async () => {
+	it("redirects authenticated user away from /login", async () => {
 		mockGetUser.mockResolvedValue({
 			data: { user: { id: "user-1" } },
 			error: null,
@@ -86,5 +48,22 @@ describe("middleware - API auth", () => {
 		const res = await updateSession(makeRequest("/login"));
 		expect(res.status).toBe(307);
 		expect(res.headers.get("location")).toBe("http://localhost:3000/");
+	});
+
+	it("redirects authenticated user away from /signup", async () => {
+		mockGetUser.mockResolvedValue({
+			data: { user: { id: "user-1" } },
+			error: null,
+		});
+
+		const res = await updateSession(makeRequest("/signup"));
+		expect(res.status).toBe(307);
+	});
+
+	it("does not redirect unauthenticated user from /login", async () => {
+		mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+
+		const res = await updateSession(makeRequest("/login"));
+		expect(res.status).toBe(200);
 	});
 });

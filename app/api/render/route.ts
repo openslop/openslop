@@ -4,7 +4,9 @@ import {
 	renderMediaOnVercel,
 	uploadToVercelBlob,
 } from "@remotion/vercel";
+import { getUser } from "@/lib/api/auth";
 import { logger } from "@/lib/api/logger";
+import { unauthorized } from "@/lib/api/response";
 import { createSSEResponse, type SSEMessage } from "@/lib/api/sse";
 import { COMPOSITION_ID } from "@/lib/video/types";
 import { bundleRemotionProject } from "./helpers";
@@ -17,6 +19,9 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
+	const user = await getUser();
+	if (!user) return unauthorized();
+
 	const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 	if (!blobToken) {
 		logger.error("render: BLOB_READ_WRITE_TOKEN is not set");

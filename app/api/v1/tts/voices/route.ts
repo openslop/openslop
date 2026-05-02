@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getUser } from "@/lib/api/auth";
 import { logger } from "@/lib/api/logger";
 import { getTTSProvider } from "@/lib/api/providers";
-import { serverError } from "@/lib/api/response";
+import { serverError, unauthorized } from "@/lib/api/response";
 import { genderSchema } from "@/lib/project/types";
 
 export async function GET(request: NextRequest) {
 	try {
+		const user = await getUser();
+		if (!user) return unauthorized();
+
 		const { searchParams } = request.nextUrl;
 		const query = searchParams.get("query") || undefined;
 		const gender = genderSchema.parse(searchParams.get("gender"));

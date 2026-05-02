@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getVideoProvider } from "@/lib/api/providers";
-import { badRequest, serverError } from "@/lib/api/response";
+import { getUser } from "@/lib/api/auth";
 import { logger } from "@/lib/api/logger";
+import { getVideoProvider } from "@/lib/api/providers";
+import { badRequest, serverError, unauthorized } from "@/lib/api/response";
 
 export async function GET(
 	_request: NextRequest,
 	{ params }: { params: Promise<{ jobId: string }> },
 ) {
 	try {
+		const user = await getUser();
+		if (!user) return unauthorized();
+
 		const { jobId } = await params;
 		if (!jobId) return badRequest("jobId is required");
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { bodySchema, createRouteHandler } from "../route-handler";
@@ -6,6 +6,15 @@ import { bodySchema, createRouteHandler } from "../route-handler";
 vi.mock("../logger", () => ({
 	logger: { warn: vi.fn(), error: vi.fn() },
 }));
+
+const mockGetUser = vi.fn();
+vi.mock("../auth", () => ({
+	getUser: () => mockGetUser(),
+}));
+
+beforeEach(() => {
+	mockGetUser.mockResolvedValue({ id: "user-1" });
+});
 
 function makeRequest(body: unknown) {
 	return new NextRequest("http://localhost/api/test", {
@@ -46,6 +55,15 @@ function makeHandler(overrides?: {
 }
 
 describe("createRouteHandler", () => {
+	it("returns 401 when the user is not authenticated", async () => {
+		mockGetUser.mockResolvedValue(null);
+		const generate = vi.fn();
+		const handler = makeHandler({ generate });
+		const res = await handler(makeRequest({ prompt: "hello" }));
+		expect(res.status).toBe(401);
+		expect(generate).not.toHaveBeenCalled();
+	});
+
 	it("returns 400 when prompt is missing", async () => {
 		const handler = makeHandler();
 		const res = await handler(makeRequest({}));

@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AssetBundle } from "@/lib/api/asset-bundle";
+import { getUser } from "@/lib/api/auth";
+import { unauthorized } from "@/lib/api/response";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -10,6 +12,9 @@ function sanitizeFilename(name: string): string {
 }
 
 export async function POST(request: NextRequest) {
+	const user = await getUser();
+	if (!user) return unauthorized();
+
 	const formData = await request.formData();
 	const file = formData.get("file");
 

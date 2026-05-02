@@ -29,6 +29,11 @@ vi.mock("@/lib/api/logger", () => ({
 	logger: { error: vi.fn(), warn: vi.fn() },
 }));
 
+const mockGetUser = vi.fn();
+vi.mock("@/lib/api/auth", () => ({
+	getUser: () => mockGetUser(),
+}));
+
 function makeRequest(body?: unknown, opts: { rawBody?: string } = {}) {
 	return new Request("http://localhost:3000/api/render", {
 		method: "POST",
@@ -48,6 +53,7 @@ describe("POST /api/render", () => {
 		vi.clearAllMocks();
 		vi.stubEnv("BLOB_READ_WRITE_TOKEN", "blob-token");
 		vi.stubEnv("VERCEL", "");
+		mockGetUser.mockResolvedValue({ id: "user-1" });
 		mockSandboxStop.mockResolvedValue(undefined);
 		mockCreateSandbox.mockResolvedValue({ stop: mockSandboxStop });
 		mockRestoreSnapshot.mockResolvedValue({ stop: mockSandboxStop });
@@ -63,6 +69,15 @@ describe("POST /api/render", () => {
 
 	afterEach(() => {
 		vi.unstubAllEnvs();
+	});
+
+	it("returns 401 when the user is not authenticated", async () => {
+		mockGetUser.mockResolvedValue(null);
+		const { POST } = await import("../route");
+
+		const res = await POST(makeRequest({ inputProps: {} }));
+		expect(res.status).toBe(401);
+		expect(mockCreateSandbox).not.toHaveBeenCalled();
 	});
 
 	it("returns 500 when BLOB_READ_WRITE_TOKEN is missing", async () => {
