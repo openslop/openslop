@@ -21,5 +21,10 @@ export function isStaleResult(
 }
 
 export function serializeInputs(inputs: GenerationInputs): string {
-	return JSON.stringify(inputs);
+	return JSON.stringify({
+		prompt: inputs.prompt,
+		attributes: Object.fromEntries(
+			Object.entries(inputs.attributes).sort(([a], [b]) => a.localeCompare(b)),
+		),
+	});
 }

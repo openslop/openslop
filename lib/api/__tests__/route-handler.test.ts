@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
-import { createRouteHandler } from "../route-handler";
+import { z } from "zod";
+import { bodySchema, createRouteHandler } from "../route-handler";
 
 vi.mock("../logger", () => ({
 	logger: { warn: vi.fn(), error: vi.fn() },
@@ -15,19 +16,28 @@ function makeRequest(body: unknown) {
 }
 
 const models = { "model-a": "slug-a", "model-b": "slug-b" };
+const schema = bodySchema(models, {});
+
+type Provider = {
+	generate: (body: z.infer<typeof schema>) => Promise<unknown>;
+};
 
 function makeHandler(overrides?: {
-	extraValidation?: (body: Record<string, unknown>) => Response | null;
 	handle?: (
-		provider: string,
-		body: Record<string, unknown>,
+		provider: Provider,
+		body: z.infer<typeof schema>,
 	) => Promise<Response>;
+	generate?: Provider["generate"];
 }) {
-	return createRouteHandler<string>({
-		models,
-		getProvider: () => "test-provider",
+	const provider: Provider = {
+		generate:
+			overrides?.generate ??
+			(async (body) => ({ ok: true, prompt: body.prompt })),
+	};
+	return createRouteHandler({
+		schema,
+		getProvider: () => provider,
 		label: "TestRoute",
-		...overrides,
 		handle:
 			overrides?.handle ??
 			(async (_provider, body) =>
@@ -42,6 +52,30 @@ describe("createRouteHandler", () => {
 		expect(res.status).toBe(400);
 		const json = await res.json();
 		expect(json.error).toBe("prompt is required");
+	});
+
+	it("returns 400 when body is null", async () => {
+		const handler = makeHandler();
+		const res = await handler(makeRequest(null));
+		expect(res.status).toBe(400);
+		const json = await res.json();
+		expect(json.error).toBe("Request body must be a JSON object");
+	});
+
+	it("returns 400 when body is an array", async () => {
+		const handler = makeHandler();
+		const res = await handler(makeRequest(["prompt"]));
+		expect(res.status).toBe(400);
+		const json = await res.json();
+		expect(json.error).toBe("Request body must be a JSON object");
+	});
+
+	it("returns 400 when body is a primitive", async () => {
+		const handler = makeHandler();
+		const res = await handler(makeRequest("hello"));
+		expect(res.status).toBe(400);
+		const json = await res.json();
+		expect(json.error).toBe("Request body must be a JSON object");
 	});
 
 	it("returns 400 when prompt is not a string", async () => {
@@ -69,7 +103,7 @@ describe("createRouteHandler", () => {
 		await handler(makeRequest({ prompt: "hello", model: "model-a" }));
 
 		expect(handle).toHaveBeenCalledWith(
-			"test-provider",
+			expect.objectContaining({ generate: expect.any(Function) }),
 			expect.objectContaining({ prompt: "hello", model: "slug-a" }),
 		);
 	});
@@ -82,19 +116,19 @@ describe("createRouteHandler", () => {
 		expect(json).toEqual({ ok: true, prompt: "hello" });
 	});
 
-	it("calls extraValidation and returns its response on failure", async () => {
-		const handler = makeHandler({
-			extraValidation: () =>
-				Response.json({ error: "custom" }, { status: 422 }),
+	it("defaults to provider.generate when handle is omitted", async () => {
+		const generate = vi.fn(async () => ({ url: "https://example.com/x" }));
+		const handler = createRouteHandler({
+			schema,
+			getProvider: () => ({ generate }),
+			label: "TestRoute",
 		});
 		const res = await handler(makeRequest({ prompt: "hello" }));
-		expect(res.status).toBe(422);
-	});
-
-	it("proceeds when extraValidation returns null", async () => {
-		const handler = makeHandler({ extraValidation: () => null });
-		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ url: "https://example.com/x" });
+		expect(generate).toHaveBeenCalledWith(
+			expect.objectContaining({ prompt: "hello" }),
+		);
 	});
 
 	it("returns 500 with the error message when handle throws an Error", async () => {

@@ -1,22 +1,17 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getImageProvider } from "@/lib/api/providers";
-import { createRouteHandler } from "@/lib/api/route-handler";
+import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
 import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 
+const schema = bodySchema(IMAGE_MODELS, {
+	format: z.string().optional(),
+	width: z.number().optional(),
+	height: z.number().optional(),
+	referenceImages: z.array(z.string()).optional(),
+});
+
 export const POST = createRouteHandler({
-	models: IMAGE_MODELS,
+	schema,
 	getProvider: getImageProvider,
 	label: "Image generation",
-	handle: async (provider, body) => {
-		const { prompt, model, format, width, height, referenceImages } = body;
-		const result = await provider.generate({
-			prompt,
-			model,
-			format,
-			width,
-			height,
-			referenceImages,
-		});
-		return NextResponse.json(result);
-	},
 });
