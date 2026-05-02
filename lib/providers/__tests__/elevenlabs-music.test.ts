@@ -13,18 +13,12 @@ vi.mock("@elevenlabs/elevenlabs-js", () => ({
 import { ElevenLabsMusic } from "../music/elevenlabs";
 
 function mockReadableStream(data: Uint8Array) {
-	let read = false;
-	return {
-		getReader: () => ({
-			read: async () => {
-				if (!read) {
-					read = true;
-					return { done: false, value: data };
-				}
-				return { done: true, value: undefined };
-			},
-		}),
-	};
+	return new ReadableStream<Uint8Array>({
+		start(controller) {
+			controller.enqueue(data);
+			controller.close();
+		},
+	});
 }
 
 describe("ElevenLabsMusic", () => {

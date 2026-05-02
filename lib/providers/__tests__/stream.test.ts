@@ -38,4 +38,14 @@ describe("streamToBuffer", () => {
 		expect(new Uint8Array(buffer).every((b) => b === 42)).toBe(true);
 		expect(buffer.byteLength).toBe(10_000);
 	});
+
+	it("propagates stream errors", async () => {
+		const stream = new ReadableStream<Uint8Array>({
+			start(controller) {
+				controller.enqueue(new Uint8Array([1, 2]));
+				controller.error(new Error("read failed"));
+			},
+		});
+		await expect(streamToBuffer(stream)).rejects.toThrow("read failed");
+	});
 });
