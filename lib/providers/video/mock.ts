@@ -1,5 +1,4 @@
-import type { VideoJob } from "@/lib/connectors/types";
-import type { VideoProviderResponse } from "./base";
+import type { VideoJob, VideoProviderResponse } from "./base";
 import { BaseVideoProvider } from "./base";
 import { pickRandom } from "../mock-utils";
 

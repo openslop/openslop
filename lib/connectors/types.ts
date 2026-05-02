@@ -204,20 +204,6 @@ export type VideoGenerateParams = {
 	height?: number;
 };
 
-export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
-
-export type VideoJobMetadata = {
-	jobId: string;
-	durationSec?: number;
-	status?: VideoJobStatus;
-	error?: string;
-};
-
-export type VideoJob = {
-	url?: string;
-	progress?: number;
-} & WithMetadata<VideoJobMetadata>;
-
 export interface VideoConnector extends Connector {
 	readonly type: "video";
 	generate(params: VideoGenerateParams): Promise<AssetResult>;

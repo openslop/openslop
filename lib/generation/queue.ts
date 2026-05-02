@@ -239,17 +239,7 @@ export class GenerationQueue {
 
 		this.update(elementId, { status: "generating", seconds: 0 });
 		this.notify();
-
-		const start = Date.now();
-		const timer = setInterval(() => {
-			if (this.state.get(elementId)?.status === "generating") {
-				this.update(elementId, {
-					seconds: ((Date.now() - start) / 1000) | 0,
-				});
-				this.notify();
-			}
-		}, 1000);
-		this.timers.set(elementId, timer);
+		this.startElapsedTimer(elementId);
 
 		generateForElement(
 			job.connectorType,
@@ -258,38 +248,62 @@ export class GenerationQueue {
 			job.prompt,
 			job.extraParams,
 		)
-			.then((result) => {
-				if (controller.signal.aborted) return;
-				const key = serializeInputs(job.inputs);
-				const elHistory =
-					this.history.get(elementId) ?? new Map<string, AssetResult>();
-				elHistory.set(key, result);
-				this.history.set(elementId, elHistory);
-				this.update(elementId, {
-					status: "idle",
-					seconds: 0,
-					result,
-					error: null,
-					resultInputs: job.inputs,
-				});
-			})
-			.catch((err) => {
-				if (controller.signal.aborted) return;
-				console.error(`Generation failed for element ${elementId}:`, err);
-				this.update(elementId, {
-					status: "idle",
-					seconds: 0,
-					result: null,
-					error: err instanceof Error ? err.message : String(err),
-				});
-			})
-			.finally(() => {
-				if (controller.signal.aborted) return;
-				this.stopTimer(elementId);
-				this.controllers.delete(elementId);
-				this.notify();
-				this.processQueue();
-			});
+			.then((result) => this.handleJobSuccess(job, result, controller))
+			.catch((err) => this.handleJobError(elementId, err, controller))
+			.finally(() => this.finalizeJob(elementId, controller));
+	}
+
+	private startElapsedTimer(elementId: string) {
+		const start = Date.now();
+		const timer = setInterval(() => {
+			if (this.state.get(elementId)?.status !== "generating") return;
+			this.update(elementId, { seconds: ((Date.now() - start) / 1000) | 0 });
+			this.notify();
+		}, 1000);
+		this.timers.set(elementId, timer);
+	}
+
+	private handleJobSuccess(
+		job: GenerationJob,
+		result: AssetResult,
+		controller: AbortController,
+	) {
+		if (controller.signal.aborted) return;
+		const key = serializeInputs(job.inputs);
+		const elHistory =
+			this.history.get(job.elementId) ?? new Map<string, AssetResult>();
+		elHistory.set(key, result);
+		this.history.set(job.elementId, elHistory);
+		this.update(job.elementId, {
+			status: "idle",
+			seconds: 0,
+			result,
+			error: null,
+			resultInputs: job.inputs,
+		});
+	}
+
+	private handleJobError(
+		elementId: string,
+		err: unknown,
+		controller: AbortController,
+	) {
+		if (controller.signal.aborted) return;
+		console.error(`Generation failed for element ${elementId}:`, err);
+		this.update(elementId, {
+			status: "idle",
+			seconds: 0,
+			result: null,
+			error: err instanceof Error ? err.message : String(err),
+		});
+	}
+
+	private finalizeJob(elementId: string, controller: AbortController) {
+		if (controller.signal.aborted) return;
+		this.stopTimer(elementId);
+		this.controllers.delete(elementId);
+		this.notify();
+		this.processQueue();
 	}
 }
 

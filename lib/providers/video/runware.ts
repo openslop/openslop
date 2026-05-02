@@ -1,8 +1,5 @@
-import type {
-	VideoGenerateParams,
-	VideoJob,
-	VideoJobStatus,
-} from "@/lib/connectors/types";
+import type { VideoGenerateParams } from "@/lib/connectors/types";
+import type { VideoJob, VideoJobStatus } from "./base";
 import { BaseVideoProvider } from "./base";
 import { withRunware } from "../runware";
 
