@@ -1,5 +1,13 @@
 import { nanoid } from "nanoid";
 
+async function fetchJson<T>(url: string, label: string): Promise<T> {
+	const res = await fetch(url);
+	if (!res.ok) {
+		throw new Error(`${label} (${res.status} ${res.statusText})`);
+	}
+	return res.json() as Promise<T>;
+}
+
 export type AssetManifest = {
 	version: number;
 	type: string;
@@ -49,8 +57,7 @@ export class AssetBundle {
 	}
 
 	async fetchJson<T>(key: string): Promise<T> {
-		const res = await fetch(this.resolve(key));
-		return res.json() as Promise<T>;
+		return fetchJson<T>(this.resolve(key), `Failed to fetch "${key}"`);
 	}
 
 	static buildUrl(type: string, provider: string, id: string): string {
@@ -75,8 +82,10 @@ export class AssetBundle {
 		id: string,
 	): Promise<AssetBundle> {
 		const url = AssetBundle.buildUrl(type, provider, id);
-		const res = await fetch(`${url}/manifest.json`);
-		const manifest = (await res.json()) as AssetManifest;
+		const manifest = await fetchJson<AssetManifest>(
+			`${url}/manifest.json`,
+			`Failed to fetch manifest for ${type}/${provider}/${id}`,
+		);
 		return new AssetBundle(url, manifest);
 	}
 

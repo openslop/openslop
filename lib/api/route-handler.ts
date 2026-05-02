@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { toError } from "@/lib/errors";
 import { badRequest, serverError } from "./response";
 import { logger } from "./logger";
 
@@ -46,7 +47,7 @@ export function createRouteHandler<T>(options: RouteOptions<T>) {
 			return await options.handle(provider, body);
 		} catch (error) {
 			logger.error(error, `${options.label} failed`);
-			return serverError(`${options.label} failed: ${JSON.stringify(error)}`);
+			return serverError(`${options.label} failed: ${toError(error).message}`);
 		}
 	};
 }

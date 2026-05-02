@@ -90,6 +90,9 @@ describe("AssetBundle", () => {
 			vi.stubGlobal(
 				"fetch",
 				vi.fn().mockResolvedValue({
+					ok: true,
+					status: 200,
+					statusText: "OK",
 					json: () => Promise.resolve(payload),
 				}),
 			);
@@ -112,6 +115,33 @@ describe("AssetBundle", () => {
 
 			vi.unstubAllGlobals();
 		});
+
+		it("throws a descriptive error when the response is not ok", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue({
+					ok: false,
+					status: 404,
+					statusText: "Not Found",
+				}),
+			);
+
+			const bundle = new AssetBundle(
+				"https://blob.example.com/assets/tts/cartesia/abc",
+				{
+					version: 1,
+					type: "tts",
+					createdAt: "",
+					result: { timestamps: "timestamps.json" },
+				},
+			);
+
+			await expect(bundle.fetchJson("timestamps")).rejects.toThrow(
+				/timestamps.*404.*Not Found/,
+			);
+
+			vi.unstubAllGlobals();
+		});
 	});
 
 	describe("fromId", () => {
@@ -129,6 +159,9 @@ describe("AssetBundle", () => {
 			vi.stubGlobal(
 				"fetch",
 				vi.fn().mockResolvedValue({
+					ok: true,
+					status: 200,
+					statusText: "OK",
 					json: () => Promise.resolve(manifest),
 				}),
 			);
@@ -141,6 +174,23 @@ describe("AssetBundle", () => {
 			expect(fetch).toHaveBeenCalledWith(
 				"https://blob.example.com/assets/image/runware/abc/manifest.json",
 			);
+
+			vi.unstubAllGlobals();
+		});
+
+		it("throws when manifest fetch fails", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue({
+					ok: false,
+					status: 500,
+					statusText: "Server Error",
+				}),
+			);
+
+			await expect(
+				AssetBundle.fromId("image", "runware", "missing"),
+			).rejects.toThrow(/image\/runware\/missing.*500/);
 
 			vi.unstubAllGlobals();
 		});

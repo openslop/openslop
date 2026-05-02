@@ -4,6 +4,7 @@ import type {
 	ConnectorType,
 	ProviderKey,
 } from "../connectors/types";
+import { toError } from "../errors";
 import { generateForElement } from "./generateForElement";
 import { serializeInputs } from "./generationInputs";
 import type { GenerationInputs } from "./generationInputs";
@@ -215,7 +216,11 @@ export class GenerationQueue {
 				if (this.pendingBefore) {
 					const fn = this.pendingBefore;
 					this.pendingBefore = null;
-					await fn();
+					try {
+						await fn();
+					} catch (err) {
+						console.error("GenerationQueue.before failed:", err);
+					}
 				}
 				this.processQueue();
 			} while (this.pendingBefore);
@@ -294,7 +299,7 @@ export class GenerationQueue {
 			status: "idle",
 			seconds: 0,
 			result: null,
-			error: err instanceof Error ? err.message : String(err),
+			error: toError(err).message,
 		});
 	}
 
