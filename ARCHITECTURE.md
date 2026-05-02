@@ -111,8 +111,9 @@ export const POST = createRouteHandler({
 - structured logging on warn/error
 - a `serverError` fallback
 
-Add `extraValidation` for type-specific checks (see TTS `voiceId` and Video
-`referenceImages` validation).
+Add `extraValidation` for type-specific checks. Shared validation helpers live
+in `lib/api/request-validation.ts` (for example, TTS `voiceId` and Video
+`referenceImages` checks), so route files stay orchestration-focused.
 
 Providers are resolved through `lib/api/providers.ts`. Each `getXProvider()`
 is built from the same `defineProvider(key, envVar, RealCtor, MockCtor)`
