@@ -13,6 +13,11 @@ export type MetadataTagConfig = {
 };
 
 export const METADATA_TAG_CONFIGS: Record<string, MetadataTagConfig> = {
+	metadata_title: {
+		apply: (p, _attrs, text) => {
+			if (text) p.title = text;
+		},
+	},
 	metadata_style: {
 		apply: (p, _attrs, text) => {
 			if (text) p.style = text;

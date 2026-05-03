@@ -11,6 +11,7 @@ describe("project store updateMetadata", () => {
 		store.getState().updateMetadata({ style: "cinematic" });
 
 		expect(store.getState().metadata).toEqual({
+			title: "",
 			style: "cinematic",
 			narration: {},
 			characters: {},
