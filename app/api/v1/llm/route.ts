@@ -1,32 +1,25 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { logger } from "@/lib/api/logger";
 import { getLLMProvider } from "@/lib/api/providers";
-import { createRouteHandler } from "@/lib/api/route-handler";
+import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
 import { formatSSE } from "@/lib/api/sse";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
-import { logger } from "@/lib/api/logger";
+
+const schema = bodySchema(LLM_MODELS, {
+	systemPrompt: z.string().optional(),
+	thinkingLevel: z.string().optional(),
+	maxTokens: z.number().optional(),
+	temperature: z.number().optional(),
+	stream: z.boolean().optional(),
+});
 
 export const POST = createRouteHandler({
-	models: LLM_MODELS,
+	schema,
 	getProvider: getLLMProvider,
 	label: "LLM generation",
 	handle: async (provider, body) => {
-		const {
-			prompt,
-			model,
-			systemPrompt,
-			thinkingLevel,
-			maxTokens,
-			temperature,
-			stream,
-		} = body;
-		const genParams = {
-			prompt,
-			model,
-			systemPrompt,
-			thinkingLevel,
-			maxTokens,
-			temperature,
-		};
+		const { stream, ...genParams } = body;
 
 		if (stream) {
 			const encoder = new TextEncoder();
@@ -53,7 +46,6 @@ export const POST = createRouteHandler({
 			});
 		}
 
-		const result = await provider.generate(genParams);
-		return NextResponse.json(result);
+		return NextResponse.json(await provider.generate(genParams));
 	},
 });

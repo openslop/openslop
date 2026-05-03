@@ -98,4 +98,22 @@ describe("serializeInputs", () => {
 			serializeInputs(inputs("hi", { gender: "feminine" })),
 		);
 	});
+
+	it("is stable regardless of attribute insertion order", () => {
+		expect(serializeInputs(inputs("hi", { a: "1", b: "2" }))).toBe(
+			serializeInputs(inputs("hi", { b: "2", a: "1" })),
+		);
+	});
+
+	it("agrees with isStaleResult on equivalent inputs (no false cache miss)", () => {
+		const stored = inputs("hi", { a: "1", b: "2", c: "3" });
+		const lookedUp = inputs("hi", { c: "3", a: "1", b: "2" });
+		expect(
+			isStaleResult(
+				{ result: { url: "x", durationSec: 0 }, resultInputs: stored },
+				lookedUp,
+			),
+		).toBe(false);
+		expect(serializeInputs(stored)).toBe(serializeInputs(lookedUp));
+	});
 });

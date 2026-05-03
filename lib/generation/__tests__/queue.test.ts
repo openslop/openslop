@@ -328,6 +328,56 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("restoreResult", () => {
+		it("restores cached result for the same inputs", async () => {
+			const result = { url: "https://example.com/asset.png", durationSec: 0 };
+			generateMock.mockResolvedValue(result);
+			const inputs = { prompt: "p", attributes: { a: "1", b: "2" } };
+			generationQueue.enqueue(
+				makeJob("rr1", { inputs, prompt: inputs.prompt }),
+			);
+			await vi.runAllTimersAsync();
+
+			// Simulate the result drifting by setting an error first
+			generationQueue.setError("rr1", "stale");
+			expect(generationQueue.getElementSnapshot("rr1").result).toBeNull();
+
+			const restored = generationQueue.restoreResult("rr1", inputs);
+			expect(restored).toBe(true);
+			const snap = generationQueue.getElementSnapshot("rr1");
+			expect(snap.result).toEqual(result);
+			expect(snap.error).toBeNull();
+		});
+
+		it("returns false when no cached result exists", () => {
+			const restored = generationQueue.restoreResult("never-generated", {
+				prompt: "p",
+				attributes: {},
+			});
+			expect(restored).toBe(false);
+		});
+
+		it("hits cache regardless of attribute key order (serialization stability)", async () => {
+			const result = { url: "https://example.com/asset.png", durationSec: 0 };
+			generateMock.mockResolvedValue(result);
+			generationQueue.enqueue(
+				makeJob("rr2", {
+					inputs: { prompt: "p", attributes: { a: "1", b: "2" } },
+				}),
+			);
+			await vi.runAllTimersAsync();
+			generationQueue.setError("rr2", "stale");
+
+			// Look up with reversed key insertion order
+			const restored = generationQueue.restoreResult("rr2", {
+				prompt: "p",
+				attributes: { b: "2", a: "1" },
+			});
+			expect(restored).toBe(true);
+			expect(generationQueue.getElementSnapshot("rr2").result).toEqual(result);
+		});
+	});
+
 	describe("batch processing", () => {
 		it("processes queued jobs after generating ones complete", async () => {
 			let resolve1: (v: { url: string }) => void = () => {};

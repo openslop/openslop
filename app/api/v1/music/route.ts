@@ -1,19 +1,14 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getMusicProvider } from "@/lib/api/providers";
-import { createRouteHandler } from "@/lib/api/route-handler";
+import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 
+const schema = bodySchema(MUSIC_MODELS, {
+	durationSeconds: z.number().optional(),
+});
+
 export const POST = createRouteHandler({
-	models: MUSIC_MODELS,
+	schema,
 	getProvider: getMusicProvider,
 	label: "Music generation",
-	handle: async (provider, body) => {
-		const { prompt, model, durationSeconds } = body;
-		const result = await provider.generate({
-			prompt,
-			model,
-			durationSeconds,
-		});
-		return NextResponse.json(result);
-	},
 });

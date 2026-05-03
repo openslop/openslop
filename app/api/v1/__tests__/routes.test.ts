@@ -125,7 +125,7 @@ describe("API routes", () => {
 				}),
 			);
 			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("must be an array");
+			expect((await res.json()).error).toContain("expected array");
 		});
 
 		it("returns 400 for invalid referenceImages entry", async () => {
