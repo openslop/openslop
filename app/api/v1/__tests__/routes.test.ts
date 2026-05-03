@@ -33,6 +33,11 @@ vi.mock("@/lib/api/logger", () => ({
 	logger: { error: vi.fn(), warn: vi.fn() },
 }));
 
+const mockGetUser = vi.fn();
+vi.mock("@/lib/api/auth", () => ({
+	getUser: () => mockGetUser(),
+}));
+
 function makeRequest(
 	url: string,
 	body?: Record<string, unknown>,
@@ -47,6 +52,7 @@ function makeRequest(
 describe("API routes", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockGetUser.mockResolvedValue({ id: "user-1" });
 	});
 
 	describe("POST /api/v1/image", () => {
@@ -59,6 +65,15 @@ describe("API routes", () => {
 
 			expect(res.status).toBe(200);
 			expect(json.id).toBe("img-abc123");
+		});
+
+		it("returns 401 when the user is not authenticated", async () => {
+			mockGetUser.mockResolvedValue(null);
+			const { POST } = await import("@/app/api/v1/image/route");
+
+			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+			expect(res.status).toBe(401);
+			expect(mockImageGenerate).not.toHaveBeenCalled();
 		});
 
 		it("returns 400 when prompt missing", async () => {

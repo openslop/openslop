@@ -3,38 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./env";
 
 const AUTH_ROUTES = ["/login", "/signup"];
-const API_PREFIX = "/api/v1";
 
 export async function updateSession(request: NextRequest) {
-	const { pathname } = request.nextUrl;
-
-	// Handle API routes with Bearer token auth
-	if (pathname.startsWith(API_PREFIX)) {
-		const authHeader = request.headers.get("authorization");
-		const token = authHeader?.startsWith("Bearer ")
-			? authHeader.slice(7)
-			: null;
-
-		if (!token) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
-
-		const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-			cookies: { getAll: () => [], setAll: () => {} },
-		});
-
-		const { error } = await supabase.auth.getUser(token);
-		if (error) {
-			return NextResponse.json({ error }, { status: 401 });
-		}
-
-		return NextResponse.next({ request });
-	}
-
-	// Cookie-based session refresh for non-API routes
-	let supabaseResponse = NextResponse.next({
-		request,
-	});
+	let supabaseResponse = NextResponse.next({ request });
 
 	const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 		cookies: {
@@ -45,9 +16,7 @@ export async function updateSession(request: NextRequest) {
 				cookiesToSet.forEach(({ name, value }) =>
 					request.cookies.set(name, value),
 				);
-				supabaseResponse = NextResponse.next({
-					request,
-				});
+				supabaseResponse = NextResponse.next({ request });
 				cookiesToSet.forEach(({ name, value, options }) =>
 					supabaseResponse.cookies.set(name, value, options),
 				);
@@ -60,8 +29,7 @@ export async function updateSession(request: NextRequest) {
 		data: { user },
 	} = await supabase.auth.getUser();
 
-	// Redirect authenticated users away from auth-only routes
-	if (user && AUTH_ROUTES.includes(pathname)) {
+	if (user && AUTH_ROUTES.includes(request.nextUrl.pathname)) {
 		return NextResponse.redirect(new URL("/", request.url));
 	}
 

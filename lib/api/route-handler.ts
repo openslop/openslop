@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { toError } from "@/lib/errors";
-import { badRequest, serverError } from "./response";
+import { getUser } from "./auth";
+import { badRequest, serverError, unauthorized } from "./response";
 import { logger } from "./logger";
 
 type RouteOptions<
@@ -29,6 +30,9 @@ export function createRouteHandler<
 
 	return async function POST(request: NextRequest) {
 		try {
+			const user = await getUser();
+			if (!user) return unauthorized();
+
 			const parsed = options.schema.safeParse(await request.json());
 			if (!parsed.success) {
 				const message =
