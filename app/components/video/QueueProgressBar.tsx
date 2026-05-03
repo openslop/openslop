@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { generationQueue } from "@/lib/generation/queue";
+import { PlayerShimmer } from "./PlayerShimmer";
 import styles from "./QueueProgressBar.module.css";
 
 export function QueueProgressBar() {
@@ -17,7 +18,7 @@ export function QueueProgressBar() {
 	const pct = peak === 0 ? 0 : (done / peak) * 100;
 
 	return (
-		<div className="shimmer-surface flex aspect-video w-full items-center justify-center">
+		<PlayerShimmer>
 			<div className="flex w-2/3 max-w-md flex-col items-center gap-2">
 				<div
 					className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
@@ -33,6 +34,6 @@ export function QueueProgressBar() {
 					{peak === 0 ? "Preparing…" : `${done} of ${peak} generated`}
 				</div>
 			</div>
-		</div>
+		</PlayerShimmer>
 	);
 }

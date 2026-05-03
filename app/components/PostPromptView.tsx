@@ -6,7 +6,7 @@ import { generationQueue } from "@/lib/generation/queue";
 import Copilot from "./Copilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
-import { Play } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import {
 	PlayerPositionProvider,
@@ -20,7 +20,7 @@ function PostPromptViewInner() {
 	const { loading: scriptLoading, stopGeneration } = useScript();
 	const canvasRef = useRef<CanvasHandle>(null);
 	const [structureKey, setStructureKey] = useState("");
-	const { position, visible, showPlayer } = usePlayerPosition();
+	const { position, visible } = usePlayerPosition();
 
 	const getEditor = useCallback(
 		() => canvasRef.current?.getEditor() ?? null,
@@ -57,16 +57,13 @@ function PostPromptViewInner() {
 					</div>
 					<button
 						type="button"
-						onClick={() => {
-							canvasRef.current?.generateAll();
-							showPlayer();
-						}}
+						onClick={() => canvasRef.current?.generateAll()}
 						className={`${genStyles.btn} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
-						aria-label="Play"
+						aria-label="Generate"
 						disabled={busy}
 					>
-						<Play className={genStyles.svg} aria-hidden="true" />
-						<span>Play</span>
+						<Sparkles className={genStyles.svg} aria-hidden="true" />
+						<span>Generate</span>
 					</button>
 				</div>
 			</div>
