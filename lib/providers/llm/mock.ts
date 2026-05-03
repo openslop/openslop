@@ -5,7 +5,9 @@ import type {
 import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
 
-const MOCK_SCRIPT = `<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
+const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
+
+<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
 
 <metadata_narration gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind"></metadata_narration>
 

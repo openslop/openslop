@@ -5,6 +5,7 @@ import { useScript } from "@/lib/script/ScriptProvider";
 import { generationQueue } from "@/lib/generation/queue";
 import Copilot from "./Copilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
+import { ProjectTitle } from "./canvas/ProjectTitle";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
 import { Sparkles } from "lucide-react";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
@@ -78,6 +79,7 @@ function PostPromptViewInner() {
 					>
 						<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 						<div className="mx-auto max-w-6xl px-4 py-4">
+							<ProjectTitle />
 							<Canvas ref={canvasRef} onStructureChange={setStructureKey} />
 						</div>
 					</div>

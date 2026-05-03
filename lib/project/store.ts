@@ -25,7 +25,7 @@ export function getProjectStore(projectId: string): ProjectStore {
 	if (!store) {
 		store = createStore<ProjectContext>()(
 			immer((set) => ({
-				metadata: { style: "", narration: {}, characters: {} },
+				metadata: { title: "", style: "", narration: {}, characters: {} },
 				referenceImages: [],
 				generatingAvatars: new Set(),
 				updateMetadata: (partial) =>

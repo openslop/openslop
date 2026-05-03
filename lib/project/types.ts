@@ -21,6 +21,7 @@ export type MetadataCharacter = MetadataVoice & {
 };
 
 export type Metadata = {
+	title: string;
 	style: string;
 	narration: MetadataVoice;
 	characters: Record<string, MetadataCharacter>;

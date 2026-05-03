@@ -87,8 +87,12 @@ const OSML_SYSTEM_PROMPT = dedent`
   - Music should change frequently (at least once every few scenes) to keep the reader engaged.
   - length: ${Object.values(MusicLength).join(", ")}
 
+	### Metadata Title XML tag
+	- The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:
+	<metadata_title>Little Red</metadata_title>
+
 	### Metadata Style XML tag
-	- The script must begin with a single, concise <metadata_style>...</metadata_style> tag that describes the visual style of the story as if prompting an image model. Example:
+	- Right after the metadata_title tag, emit a single, concise <metadata_style>...</metadata_style> tag that describes the visual style of the story as if prompting an image model. Example:
 	<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
 
 	### Metadata Narration XML tags

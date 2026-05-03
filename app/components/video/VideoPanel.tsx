@@ -32,7 +32,7 @@ function VideoPanelBody() {
 export function VideoPanel() {
 	const { layout, ready } = useLayout();
 	const { loading: scriptLoading } = useScript();
-	const showControls = !scriptLoading && layout?.series.length && ready;
+	const showControls = !scriptLoading && !!layout?.series.length && ready;
 
 	return (
 		<div className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
