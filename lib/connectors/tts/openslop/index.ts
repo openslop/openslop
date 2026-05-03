@@ -3,14 +3,11 @@ import { BaseTTSConnector } from "../connector";
 import { OpenSlopTTSGateway } from "@/lib/gateway/openslop/tts";
 import type {
 	ConnectorConfig,
-	ModelInfo,
 	TextTimestamp,
 	TTSResult,
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { modelsFromMap } from "@/lib/connectors/types";
-import { TTS_MODELS } from "./models";
 
 export class OpenSlopTTS extends BaseTTSConnector {
 	protected gateway: OpenSlopTTSGateway;
@@ -18,10 +15,6 @@ export class OpenSlopTTS extends BaseTTSConnector {
 	constructor(config: ConnectorConfig) {
 		super(config);
 		this.gateway = new OpenSlopTTSGateway(config.baseUrl);
-	}
-
-	async listModels(): Promise<ModelInfo[]> {
-		return modelsFromMap(TTS_MODELS);
 	}
 
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {

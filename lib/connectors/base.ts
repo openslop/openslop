@@ -10,7 +10,6 @@ import type {
 	ConnectorConfig,
 	ConnectorPlugin,
 	ConnectorType,
-	ModelInfo,
 	PluginContext,
 } from "./types";
 
@@ -30,8 +29,6 @@ export abstract class BaseConnector<
 		return true;
 	}
 	async destroy(): Promise<void> {}
-
-	abstract listModels(): Promise<ModelInfo[]>;
 
 	protected pluginContext(): PluginContext<TParams, TResult> {
 		return {};

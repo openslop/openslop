@@ -1,8 +1,6 @@
 import { BaseMusicConnector } from "../connector";
 import { OpenSlopMusicGateway } from "@/lib/gateway/openslop/music";
-import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
-import { modelsFromMap } from "@/lib/connectors/types";
-import { MUSIC_MODELS } from "./models";
+import type { ConnectorConfig } from "@/lib/connectors/types";
 
 export class OpenSlopMusic extends BaseMusicConnector {
 	protected gateway: OpenSlopMusicGateway;
@@ -10,9 +8,5 @@ export class OpenSlopMusic extends BaseMusicConnector {
 	constructor(config: ConnectorConfig) {
 		super(config);
 		this.gateway = new OpenSlopMusicGateway(config.baseUrl);
-	}
-
-	async listModels(): Promise<ModelInfo[]> {
-		return modelsFromMap(MUSIC_MODELS);
 	}
 }

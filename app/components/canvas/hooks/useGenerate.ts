@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { generationQueue, isStaleResult } from "@/lib/generation/queue";
-import { ensureCharacterAvatars } from "@/lib/project/ensureCharacterAvatars";
+import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
 import type { CanvasContentElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 import { getGenerationInputs } from "../utils/getGenerationInputs";
@@ -27,9 +27,7 @@ export function useGenerate(element: CanvasContentElement) {
 			generationQueue.setError(element.id, "Enter a prompt first");
 			return;
 		}
-		generationQueue
-			.before(() => ensureCharacterAvatars(projectId, connectorConfig))
-			.enqueue(job);
+		scheduleGeneration(job, { projectId, registry: connectorConfig });
 	}, [element, connectorConfig, projectId]);
 
 	const discard = useCallback(() => {

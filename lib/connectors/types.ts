@@ -6,16 +6,6 @@ export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
 export type ProviderKey = "openslop";
 
-export type ModelInfo = {
-	id: string;
-	name: string;
-	description?: string;
-};
-
-export function modelsFromMap(map: Record<string, string>): ModelInfo[] {
-	return Object.entries(map).map(([name, id]) => ({ id, name }));
-}
-
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
 export interface PluginContext<TParams = unknown, TResult = unknown> {
@@ -66,7 +56,6 @@ export interface Connector {
 	init(): Promise<void>;
 	validate(): Promise<boolean>;
 	destroy(): Promise<void>;
-	listModels(): Promise<ModelInfo[]>;
 }
 
 // LLM types

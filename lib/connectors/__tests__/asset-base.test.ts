@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { BaseAssetConnector } from "../asset-base";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
-import type { ConnectorConfig, ConnectorType, ModelInfo } from "../types";
+import type { ConnectorConfig, ConnectorType } from "../types";
 
 type TestParams = { prompt: string };
 type TestResult = { url: string; durationSec: number };
@@ -21,10 +21,6 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	) {
 		super(config);
 		this.gateway = { generate: generateFn ?? vi.fn() };
-	}
-
-	async listModels(): Promise<ModelInfo[]> {
-		return [{ id: "test", name: "Test" }];
 	}
 }
 
