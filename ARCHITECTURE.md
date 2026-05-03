@@ -51,6 +51,10 @@ caller gets back an `AssetResult` (or `LLMGenerateResult`, etc.).
   `"openslop"`-only — every connector ultimately calls our own REST API.
 - Plugins live in `lib/connectors/plugins/` and can be composed onto any
   connector via `ConnectorConfig.plugins`.
+- Models are declared statically per connector in `lib/connectors/<type>/openslop/models.ts`
+  and surfaced to the UI through `ConfigProvider`'s initial registry. Connectors
+  do not expose runtime model discovery — slugs are validated server-side by
+  `createRouteHandler` against the `<TYPE>_MODELS` map.
 
 ### 2. `lib/gateway/` — HTTP transport
 
@@ -131,9 +135,16 @@ class:
   per-element history of past results for instant cache hits when inputs match.
 - Exposes a Zustand-style subscribe API used by canvas elements to render
   progress.
+- Accepts a one-shot `before(fn)` setup callback that runs once before the next
+  batch is drained (used to backfill character avatars). Calls are guarded so a
+  callback only fires once even if multiple dispatchers register before the
+  queue starts processing.
 
 The queue is the single point that wires connectors into the React app — UI
-components dispatch jobs, never call connectors directly.
+components dispatch jobs, never call connectors directly. The canonical entry
+point is `lib/generation/scheduleGeneration.ts`, which wires the avatar-setup
+phase onto the queue so editor hooks (`useGenerate`, `useGenerateAll`) stay
+focused on element-level state.
 
 ## Project & script state
 

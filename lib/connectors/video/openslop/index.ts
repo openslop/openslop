@@ -1,8 +1,6 @@
 import { BaseVideoConnector } from "../connector";
 import { OpenSlopVideoGateway } from "@/lib/gateway/openslop/video";
-import type { ConnectorConfig, ModelInfo } from "@/lib/connectors/types";
-import { modelsFromMap } from "@/lib/connectors/types";
-import { VIDEO_MODELS } from "./models";
+import type { ConnectorConfig } from "@/lib/connectors/types";
 
 export class OpenSlopVideo extends BaseVideoConnector {
 	protected gateway: OpenSlopVideoGateway;
@@ -10,9 +8,5 @@ export class OpenSlopVideo extends BaseVideoConnector {
 	constructor(config: ConnectorConfig) {
 		super(config);
 		this.gateway = new OpenSlopVideoGateway(config.baseUrl);
-	}
-
-	async listModels(): Promise<ModelInfo[]> {
-		return modelsFromMap(VIDEO_MODELS);
 	}
 }

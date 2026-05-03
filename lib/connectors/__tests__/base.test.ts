@@ -1,17 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { BaseConnector } from "../base";
-import type {
-	ConnectorConfig,
-	ConnectorPlugin,
-	ConnectorType,
-	ModelInfo,
-} from "../types";
+import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "../types";
 
 class TestConnector extends BaseConnector {
 	readonly type: ConnectorType = "llm";
-	async listModels(): Promise<ModelInfo[]> {
-		return [{ id: "test", name: "Test" }];
-	}
 	protected async _generate(): Promise<unknown> {
 		return {};
 	}
