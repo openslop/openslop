@@ -12,6 +12,7 @@ import {
 export type PlayerPosition = "top" | "right";
 
 const NARROW_BREAKPOINT = 1066;
+const NARROW_QUERY = `(max-width: ${NARROW_BREAKPOINT}px)`;
 
 const PlayerPositionContext = createContext<{
 	position: PlayerPosition;
@@ -30,14 +31,14 @@ const PlayerPositionContext = createContext<{
 });
 
 export function PlayerPositionProvider({ children }: { children: ReactNode }) {
-	const [position, setPosition] = useState<PlayerPosition>("top");
-	const [visible, setVisible] = useState(false);
+	const [position, setPosition] = useState<PlayerPosition>("right");
+	const [visible, setVisible] = useState(true);
 	const [narrowViewport, setNarrowViewport] = useState(false);
 
 	const showPlayer = useCallback(() => setVisible(true), []);
 
 	useEffect(() => {
-		const mql = window.matchMedia(`(max-width: ${NARROW_BREAKPOINT}px)`);
+		const mql = window.matchMedia(NARROW_QUERY);
 		const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
 			setNarrowViewport(e.matches);
 			if (e.matches) {
