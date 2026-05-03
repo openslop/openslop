@@ -14,13 +14,16 @@ export async function ensureCharacterAvatars(
 	// Style is prepended by the art-style plugin on the image connector chain.
 	await Promise.all(
 		Object.entries(characters)
-			.filter(([, ch]) => !ch.avatarUrl && ch.description)
+			.filter(([, ch]) => !ch.avatarUrl && ch.appearance)
 			.map(async ([name, ch]) => {
 				store.getState().setAvatarGenerating(name, true);
 				try {
-					const prompt = [`Character portrait of ${name}`, ch.description].join(
-						". ",
-					);
+					const prompt = [
+						`Character portrait of ${name}`,
+						ch.appearance,
+						`A small rectangular nameplate at the bottom of the frame reads "${name}" in clean sans-serif lettering`,
+						"White background",
+					].join(". ");
 					const result = await generateForElement(
 						"image",
 						provider,

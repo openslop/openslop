@@ -23,12 +23,12 @@ describe("createMetadataVoicePlugin", () => {
 		getProjectStore(projectId)
 			.getState()
 			.updateMetadata({
-				narration: { gender: "female", accent: "british", age: "adult" },
+				narration: { gender: "feminine", accent: "british", age: "adult" },
 			});
 		const { beforeGenerate } = createMetadataVoicePlugin(projectId);
 		expect(beforeGenerate?.({ prompt: "hello" })).toEqual({
 			prompt: "hello",
-			gender: "female",
+			gender: "feminine",
 			accent: "british",
 			age: "adult",
 		});
@@ -40,11 +40,11 @@ describe("createMetadataVoicePlugin", () => {
 			.updateMetadata({
 				characters: {
 					Red: {
-						description: "A girl in red",
-						gender: "female",
+						appearance: "A girl in red",
+						gender: "feminine",
 						accent: "southern",
 						pitch: "high",
-						texture: "raspy",
+						description: "raspy",
 					},
 				},
 			});
@@ -52,10 +52,10 @@ describe("createMetadataVoicePlugin", () => {
 		expect(beforeGenerate?.({ prompt: "hi", name: "Red" })).toEqual({
 			prompt: "hi",
 			name: "Red",
-			gender: "female",
+			gender: "feminine",
 			accent: "southern",
 			pitch: "high",
-			texture: "raspy",
+			description: "raspy",
 		});
 	});
 
@@ -63,7 +63,7 @@ describe("createMetadataVoicePlugin", () => {
 		getProjectStore(projectId)
 			.getState()
 			.updateMetadata({
-				narration: { gender: "male" },
+				narration: { gender: "masculine" },
 			});
 		const { beforeGenerate } = createMetadataVoicePlugin(projectId);
 		const params = { prompt: "hi", name: "Ghost" };
@@ -74,14 +74,18 @@ describe("createMetadataVoicePlugin", () => {
 		getProjectStore(projectId)
 			.getState()
 			.updateMetadata({
-				narration: { gender: "female", accent: "british" },
+				narration: { gender: "feminine", accent: "british" },
 			});
 		const { beforeGenerate } = createMetadataVoicePlugin(projectId);
 		expect(
-			beforeGenerate?.({ prompt: "hi", gender: "male", accent: "american" }),
+			beforeGenerate?.({
+				prompt: "hi",
+				gender: "masculine",
+				accent: "american",
+			}),
 		).toEqual({
 			prompt: "hi",
-			gender: "female",
+			gender: "feminine",
 			accent: "british",
 		});
 	});
@@ -90,14 +94,14 @@ describe("createMetadataVoicePlugin", () => {
 		getProjectStore(projectId)
 			.getState()
 			.updateMetadata({
-				narration: { gender: "female" },
+				narration: { gender: "feminine" },
 			});
 		const { beforeGenerate } = createMetadataVoicePlugin(projectId);
 		const result = beforeGenerate?.({ prompt: "hi" });
-		expect(result).toEqual({ prompt: "hi", gender: "female" });
+		expect(result).toEqual({ prompt: "hi", gender: "feminine" });
 		expect(result).not.toHaveProperty("age");
 		expect(result).not.toHaveProperty("pitch");
 		expect(result).not.toHaveProperty("accent");
-		expect(result).not.toHaveProperty("texture");
+		expect(result).not.toHaveProperty("description");
 	});
 });

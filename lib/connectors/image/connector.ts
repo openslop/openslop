@@ -1,14 +1,10 @@
 import { BaseAssetConnector } from "../asset-base";
-import type {
-	AssetResult,
-	ImageConnector,
-	ImageGenerateParams,
-} from "../types";
+import type { AssetResult, ImageGenerateParams } from "../types";
 
-export abstract class BaseImageConnector
-	extends BaseAssetConnector<ImageGenerateParams, AssetResult>
-	implements ImageConnector
-{
+export abstract class BaseImageConnector extends BaseAssetConnector<
+	ImageGenerateParams,
+	AssetResult
+> {
 	readonly type = "image" as const;
 	readonly assetKey = "image" as const;
 }

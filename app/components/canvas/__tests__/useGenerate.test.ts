@@ -53,13 +53,13 @@ describe("generateForElement", () => {
 			"openslop",
 			baseConfig,
 			"hello world",
-			{ gender: "male", accent: "american" },
+			{ gender: "masculine", accent: "american" },
 		);
 
 		expect(generate).toHaveBeenCalledWith(
 			expect.objectContaining({
 				prompt: "hello world",
-				gender: "male",
+				gender: "masculine",
 				accent: "american",
 			}),
 		);

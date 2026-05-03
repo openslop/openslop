@@ -6,7 +6,7 @@ import { generationQueue } from "@/lib/generation/queue";
 import Copilot from "./Copilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
-import { Clapperboard } from "lucide-react";
+import { Play } from "lucide-react";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import {
 	PlayerPositionProvider,
@@ -62,11 +62,11 @@ function PostPromptViewInner() {
 							showPlayer();
 						}}
 						className={`${genStyles.btn} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
-						aria-label="Generate & Preview"
+						aria-label="Play"
 						disabled={busy}
 					>
-						<Clapperboard className={genStyles.svg} />
-						<span className="hidden sm:inline">Generate & Preview</span>
+						<Play className={genStyles.svg} aria-hidden="true" />
+						<span>Play</span>
 					</button>
 				</div>
 			</div>

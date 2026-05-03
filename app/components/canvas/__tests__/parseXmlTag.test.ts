@@ -7,10 +7,10 @@ describe("parseXmlTag", () => {
 	});
 
 	it("parses a tag with attributes", () => {
-		expect(parseXmlTag('character name="Lyra" gender="female"')).toEqual({
+		expect(parseXmlTag('character name="Lyra" gender="feminine"')).toEqual({
 			tag: "character",
 			name: "Lyra",
-			gender: "female",
+			gender: "feminine",
 		});
 	});
 

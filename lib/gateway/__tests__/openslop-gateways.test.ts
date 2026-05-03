@@ -116,18 +116,18 @@ describe("OpenSlop Gateway Clients", () => {
 
 		it("searches voices with query params", async () => {
 			const voices = [
-				{ id: "v1", name: "Alice", gender: "female" },
-				{ id: "v2", name: "Bob", gender: "male" },
+				{ id: "v1", name: "Alice", gender: "feminine" },
+				{ id: "v2", name: "Bob", gender: "masculine" },
 			];
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
 			const gw = new OpenSlopTTSGateway("https://api.test.com");
-			const result = await gw.searchVoices({ gender: "female" });
+			const result = await gw.searchVoices({ gender: "feminine" });
 
 			expect(result).toEqual(voices);
 			const url = fetchMock.mock.calls[0][0] as string;
 			expect(url).toContain("/api/v1/tts/voices");
-			expect(url).toContain("gender=female");
+			expect(url).toContain("gender=feminine");
 		});
 
 		it("searches voices with empty params", async () => {

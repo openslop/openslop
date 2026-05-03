@@ -141,18 +141,18 @@ describe("OSMLSerializer streaming", () => {
 	it("parses metadata_narration with voice attributes", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk(
-			'<metadata_narration gender="male" age="adult" pitch="low" accent="british" texture="wise"></metadata_narration>',
+			'<metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>',
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("metadata_narration");
 		expect(nodes[0].customAttributes).toEqual({
-			gender: "male",
+			gender: "masculine",
 			age: "adult",
 			pitch: "low",
 			accent: "british",
-			texture: "wise",
+			description: "wise",
 		});
 	});
 

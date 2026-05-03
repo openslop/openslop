@@ -1,4 +1,8 @@
-import type { DeepPartial, Metadata } from "@/lib/project/types";
+import {
+	type DeepPartial,
+	type Metadata,
+	MetadataVoiceSchema,
+} from "@/lib/project/types";
 
 export type MetadataTagConfig = {
 	apply: (
@@ -16,15 +20,17 @@ export const METADATA_TAG_CONFIGS: Record<string, MetadataTagConfig> = {
 	},
 	metadata_narration: {
 		apply: (p, attrs) => {
-			const { id: _id, ...rest } = attrs;
-			Object.assign((p.narration ??= {}), rest);
+			Object.assign((p.narration ??= {}), MetadataVoiceSchema.parse(attrs));
 		},
 	},
 	metadata_character: {
 		apply: (p, attrs, text) => {
-			const { name, id: _id, ...voice } = attrs;
+			const { name } = attrs;
 			if (!name) return;
-			(p.characters ??= {})[name] = { description: text, ...voice };
+			(p.characters ??= {})[name] = {
+				appearance: text,
+				...MetadataVoiceSchema.parse(attrs),
+			};
 		},
 	},
 };

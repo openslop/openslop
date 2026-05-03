@@ -1,16 +1,30 @@
+import type { BaseImageConnector } from "./image/connector";
 import { OpenSlopImage } from "./image/openslop";
 import { OpenSlopLLM } from "./llm/openslop";
+import type { BaseMusicConnector } from "./music/connector";
 import { OpenSlopMusic } from "./music/openslop";
+import type { BaseSFXConnector } from "./sfx/connector";
 import { OpenSlopSFX } from "./sfx/openslop";
 import { OpenSlopTTS } from "./tts/openslop";
+import type { BaseVideoConnector } from "./video/connector";
 import { OpenSlopVideo } from "./video/openslop";
 import type {
 	ConnectorConfig,
 	ConnectorType,
-	ConnectorTypeMap,
+	LLMConnector,
 	ProviderConstructor,
 	ProviderKey,
+	TTSConnector,
 } from "./types";
+
+type ConnectorTypeMap = {
+	llm: LLMConnector;
+	music: BaseMusicConnector;
+	sfx: BaseSFXConnector;
+	image: BaseImageConnector;
+	tts: TTSConnector;
+	video: BaseVideoConnector;
+};
 
 const PROVIDERS: Record<
 	ConnectorType,

@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/api/logger";
 import { getTTSProvider } from "@/lib/api/providers";
 import { serverError } from "@/lib/api/response";
-import { logger } from "@/lib/api/logger";
+import { genderSchema } from "@/lib/project/types";
 
 export async function GET(request: NextRequest) {
 	try {
 		const { searchParams } = request.nextUrl;
 		const query = searchParams.get("query") || undefined;
-		const gender = searchParams.get("gender") || undefined;
+		const gender = genderSchema.parse(searchParams.get("gender"));
 		const age = searchParams.get("age") || undefined;
 		const pitch = searchParams.get("pitch") || undefined;
 		const accent = searchParams.get("accent") || undefined;
-		const texture = searchParams.get("texture") || undefined;
+		const description = searchParams.get("description") || undefined;
 		const language = searchParams.get("language") || undefined;
 
 		const provider = getTTSProvider();
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 			age,
 			pitch,
 			accent,
-			texture,
+			description,
 			language,
 		});
 

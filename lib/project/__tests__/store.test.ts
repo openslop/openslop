@@ -19,11 +19,11 @@ describe("project store updateMetadata", () => {
 
 	it("deep-merges narration so prior voice attributes are preserved", () => {
 		const store = getProjectStore(PROJECT_ID);
-		store.getState().updateMetadata({ narration: { gender: "male" } });
+		store.getState().updateMetadata({ narration: { gender: "masculine" } });
 		store.getState().updateMetadata({ narration: { accent: "british" } });
 
 		expect(store.getState().metadata.narration).toEqual({
-			gender: "male",
+			gender: "masculine",
 			accent: "british",
 		});
 	});
@@ -31,14 +31,14 @@ describe("project store updateMetadata", () => {
 	it("preserves sibling character properties across updates", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().updateMetadata({
-			characters: { Alice: { description: "A girl" } },
+			characters: { Alice: { appearance: "A girl" } },
 		});
 		store.getState().updateMetadata({
 			characters: { Alice: { avatarUrl: "https://img/alice.png" } },
 		});
 
 		expect(store.getState().metadata.characters["Alice"]).toEqual({
-			description: "A girl",
+			appearance: "A girl",
 			avatarUrl: "https://img/alice.png",
 		});
 	});
@@ -46,10 +46,10 @@ describe("project store updateMetadata", () => {
 	it("adds new characters without removing existing ones", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().updateMetadata({
-			characters: { Alice: { description: "A girl" } },
+			characters: { Alice: { appearance: "A girl" } },
 		});
 		store.getState().updateMetadata({
-			characters: { Bob: { description: "A boy" } },
+			characters: { Bob: { appearance: "A boy" } },
 		});
 
 		expect(Object.keys(store.getState().metadata.characters).sort()).toEqual([

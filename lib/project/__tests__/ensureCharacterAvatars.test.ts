@@ -65,7 +65,7 @@ describe("ensureCharacterAvatars", () => {
 	it("generates avatars for characters missing avatarUrl", async () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().updateMetadata({
-			characters: { Alice: { description: "A young girl with red hair" } },
+			characters: { Alice: { appearance: "A young girl with red hair" } },
 		});
 
 		generateMock.mockResolvedValue({
@@ -80,7 +80,7 @@ describe("ensureCharacterAvatars", () => {
 		expect(generateMock).toHaveBeenCalledOnce();
 		const prompt = generateMock.mock.calls[0][3] as string;
 		expect(prompt).toBe(
-			"Character portrait of Alice. A young girl with red hair",
+			'Character portrait of Alice. A young girl with red hair. A small rectangular nameplate at the bottom of the frame reads "Alice" in clean sans-serif lettering. White background',
 		);
 
 		expect(store.getState().metadata.characters["Alice"].avatarUrl).toBe(
@@ -92,7 +92,7 @@ describe("ensureCharacterAvatars", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().updateMetadata({
 			style: "Watercolor illustration",
-			characters: { Alice: { description: "A young girl" } },
+			characters: { Alice: { appearance: "A young girl" } },
 		});
 
 		generateMock.mockResolvedValue({
@@ -113,7 +113,7 @@ describe("ensureCharacterAvatars", () => {
 		store.getState().updateMetadata({
 			characters: {
 				Bob: {
-					description: "A tall man",
+					appearance: "A tall man",
 					avatarUrl: "https://existing.com/bob.png",
 				},
 			},
@@ -126,11 +126,11 @@ describe("ensureCharacterAvatars", () => {
 		expect(generateMock).not.toHaveBeenCalled();
 	});
 
-	it("skips characters with empty description", async () => {
+	it("skips characters with empty appearance", async () => {
 		const store = getProjectStore(PROJECT_ID);
 		store
 			.getState()
-			.updateMetadata({ characters: { Empty: { description: "" } } });
+			.updateMetadata({ characters: { Empty: { appearance: "" } } });
 
 		const { ensureCharacterAvatars } =
 			await import("../ensureCharacterAvatars");
@@ -143,8 +143,8 @@ describe("ensureCharacterAvatars", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().updateMetadata({
 			characters: {
-				Cat: { description: "A fluffy orange cat" },
-				Dog: { description: "A big brown dog" },
+				Cat: { appearance: "A fluffy orange cat" },
+				Dog: { appearance: "A big brown dog" },
 			},
 		});
 

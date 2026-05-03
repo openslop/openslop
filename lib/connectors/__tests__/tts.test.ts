@@ -59,23 +59,23 @@ describe("BaseTTSConnector", () => {
 			plugins: [createVoiceSearchPlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([
-			{ id: "voice-42", name: "Test Voice" },
+			{ id: "voice-42", name: "Test Voice", description: "" },
 		]);
 
 		const result = await connector.generate({
 			prompt: "hello",
-			gender: "male",
+			gender: "masculine",
 			accent: "american",
 		});
 
 		expect(connector.searchVoices).toHaveBeenCalledWith({
 			query: undefined,
-			gender: "male",
+			gender: "masculine",
 			age: undefined,
 			pitch: undefined,
 			accent: "american",
-			texture: undefined,
-			language: undefined,
+			description: undefined,
+			language: "en",
 		});
 		expect(result.url).toBe(AUDIO_URL);
 	});
@@ -91,7 +91,7 @@ describe("BaseTTSConnector", () => {
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([]);
 
 		await expect(
-			connector.generate({ prompt: "hello", gender: "alien" }),
+			connector.generate({ prompt: "hello", gender: "masculine" }),
 		).rejects.toThrow("No matching voice found");
 	});
 

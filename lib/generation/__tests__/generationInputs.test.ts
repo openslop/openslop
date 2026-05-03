@@ -24,11 +24,11 @@ describe("isStaleResult", () => {
 	});
 
 	it("is false when prompts and attributes match", () => {
-		const i = inputs("hello", { gender: "male" });
+		const i = inputs("hello", { gender: "masculine" });
 		expect(
 			isStaleResult(
 				{ result: { url: "x", durationSec: 0 }, resultInputs: i },
-				inputs("hello", { gender: "male" }),
+				inputs("hello", { gender: "masculine" }),
 			),
 		).toBe(false);
 	});
@@ -50,9 +50,9 @@ describe("isStaleResult", () => {
 			isStaleResult(
 				{
 					result: { url: "x", durationSec: 0 },
-					resultInputs: inputs("hi", { gender: "male" }),
+					resultInputs: inputs("hi", { gender: "masculine" }),
 				},
-				inputs("hi", { gender: "female" }),
+				inputs("hi", { gender: "feminine" }),
 			),
 		).toBe(true);
 	});
@@ -84,8 +84,8 @@ describe("isStaleResult", () => {
 
 describe("serializeInputs", () => {
 	it("produces a stable string for identical inputs", () => {
-		const a = serializeInputs(inputs("hi", { gender: "male" }));
-		const b = serializeInputs(inputs("hi", { gender: "male" }));
+		const a = serializeInputs(inputs("hi", { gender: "masculine" }));
+		const b = serializeInputs(inputs("hi", { gender: "masculine" }));
 		expect(a).toBe(b);
 	});
 
@@ -94,8 +94,8 @@ describe("serializeInputs", () => {
 	});
 
 	it("produces different strings when attributes differ", () => {
-		expect(serializeInputs(inputs("hi", { gender: "male" }))).not.toBe(
-			serializeInputs(inputs("hi", { gender: "female" })),
+		expect(serializeInputs(inputs("hi", { gender: "masculine" }))).not.toBe(
+			serializeInputs(inputs("hi", { gender: "feminine" })),
 		);
 	});
 });

@@ -67,6 +67,7 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
 				name: "Mock Voice",
 				language: "en",
 				gender: "feminine",
+				description: "Mock voice",
 			},
 		];
 	}
