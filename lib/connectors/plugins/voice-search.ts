@@ -1,7 +1,6 @@
-import omit from "lodash/omit";
 import type { ConnectorPlugin, TTSGenerateParams } from "../types";
 
-const VOICE_DESCRIPTOR_KEYS = [
+const VOICE_DESCRIPTOR_KEYS = new Set<string>([
 	"gender",
 	"age",
 	"pitch",
@@ -10,7 +9,7 @@ const VOICE_DESCRIPTOR_KEYS = [
 	"name",
 	"query",
 	"language",
-] as const;
+]);
 
 export function createVoiceSearchPlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
@@ -32,7 +31,11 @@ export function createVoiceSearchPlugin(): ConnectorPlugin<TTSGenerateParams> {
 				language: params.language || "en",
 			});
 			if (!voices.length) throw new Error("No matching voice found");
-			return { ...omit(params, VOICE_DESCRIPTOR_KEYS), voiceId: voices[0].id };
+			const filtered: Record<string, unknown> = {};
+			for (const [key, value] of Object.entries(params)) {
+				if (!VOICE_DESCRIPTOR_KEYS.has(key)) filtered[key] = value;
+			}
+			return { ...(filtered as TTSGenerateParams), voiceId: voices[0].id };
 		},
 	};
 }

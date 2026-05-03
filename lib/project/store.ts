@@ -1,11 +1,31 @@
 import { enableMapSet } from "immer";
-import merge from "lodash/merge";
 import { useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import type { DeepPartial, Metadata } from "./types";
 
 enableMapSet();
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+	if (value === null || typeof value !== "object") return false;
+	const proto = Object.getPrototypeOf(value);
+	return proto === Object.prototype || proto === null;
+}
+
+function deepMerge(
+	target: Record<string, unknown>,
+	source: Record<string, unknown>,
+): void {
+	for (const [key, value] of Object.entries(source)) {
+		if (value === undefined) continue;
+		const current = target[key];
+		if (isPlainObject(value) && isPlainObject(current)) {
+			deepMerge(current, value);
+		} else {
+			target[key] = value;
+		}
+	}
+}
 
 export type ProjectContext = {
 	metadata: Metadata;
@@ -30,7 +50,10 @@ export function getProjectStore(projectId: string): ProjectStore {
 				generatingAvatars: new Set(),
 				updateMetadata: (partial) =>
 					set((state) => {
-						merge(state.metadata, partial);
+						deepMerge(
+							state.metadata as unknown as Record<string, unknown>,
+							partial as Record<string, unknown>,
+						);
 					}),
 				setReferenceImages: (urls) =>
 					set((state) => {

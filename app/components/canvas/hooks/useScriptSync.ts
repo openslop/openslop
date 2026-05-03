@@ -10,16 +10,15 @@ import {
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
 import { findNodeById, updateNodeText } from "../utils/editorOps";
-import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
 	const { nodes } = useScript();
 	const { connectorConfig } = useConfig();
 
-	const normalize = useMemo(
-		() => flow(trimWhitespace, hydrateConnectorConfig(connectorConfig)),
-		[connectorConfig],
-	);
+	const normalize = useMemo(() => {
+		const hydrate = hydrateConnectorConfig(connectorConfig);
+		return (node: CanvasContentElement) => hydrate(trimWhitespace(node));
+	}, [connectorConfig]);
 
 	useEffect(() => {
 		Editor.withoutNormalizing(editor, () => {
