@@ -64,6 +64,19 @@ describe("createRouteHandler", () => {
 		expect(generate).not.toHaveBeenCalled();
 	});
 
+	it("returns 400 when the body is not valid JSON", async () => {
+		const handler = makeHandler();
+		const request = new NextRequest("http://localhost/api/test", {
+			method: "POST",
+			body: "{not json",
+			headers: { "Content-Type": "application/json" },
+		});
+		const res = await handler(request);
+		expect(res.status).toBe(400);
+		const json = await res.json();
+		expect(json.error).toBe("Request body must be valid JSON");
+	});
+
 	it("returns 400 when prompt is missing", async () => {
 		const handler = makeHandler();
 		const res = await handler(makeRequest({}));

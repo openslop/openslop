@@ -33,7 +33,15 @@ export function createRouteHandler<
 			const user = await getUser();
 			if (!user) return unauthorized();
 
-			const parsed = options.schema.safeParse(await request.json());
+			let body: unknown;
+			try {
+				body = await request.json();
+			} catch {
+				logger.warn(`${options.label}: invalid JSON body`);
+				return badRequest("Request body must be valid JSON");
+			}
+
+			const parsed = options.schema.safeParse(body);
 			if (!parsed.success) {
 				const message =
 					parsed.error.issues[0]?.message ?? "Invalid request body";
