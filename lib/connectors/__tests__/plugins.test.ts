@@ -57,10 +57,10 @@ describe("plugins", () => {
 	it("runs onError for all plugins", async () => {
 		const errors: string[] = [];
 		const plugins: ConnectorPlugin[] = [
-			{ name: "a", onError: (e) => void errors.push(`a:${e.message}`) },
-			{ name: "b", onError: (e) => void errors.push(`b:${e.message}`) },
+			{ name: "a", onError: (e) => void errors.push(`a:${e}`) },
+			{ name: "b", onError: (e) => void errors.push(`b:${e}`) },
 		];
-		await runOnError(plugins, new Error("fail"));
+		await runOnError(plugins, "fail");
 		expect(errors).toEqual(["a:fail", "b:fail"]);
 	});
 

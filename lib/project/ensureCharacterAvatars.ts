@@ -1,42 +1,33 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import { generateForElement } from "@/lib/generation/generateForElement";
+import { buildCharacterAvatarPlugins } from "@/lib/connectors/plugins/imageChain";
+import { generationQueue, type GenerationJob } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
-export async function ensureCharacterAvatars(
+export const characterAvatarElementId = (name: string) =>
+	`character-avatar:${name}`;
+
+export function ensureCharacterAvatars(
 	projectId: string,
 	registry: ConnectorRegistry,
-): Promise<void> {
-	const store = getProjectStore(projectId);
-	const { characters } = store.getState().metadata;
+): void {
+	const { characters } = getProjectStore(projectId).getState().metadata;
 	const { provider, config } = getDefaultConnector(registry, "image");
 
-	// Style is prepended by the art-style plugin on the image connector chain.
-	await Promise.all(
-		Object.entries(characters)
-			.filter(([, ch]) => !ch.avatarUrl && ch.appearance)
-			.map(async ([name, ch]) => {
-				store.getState().setAvatarGenerating(name, true);
-				try {
-					const prompt = [
-						`Character portrait of ${name}`,
-						ch.appearance,
-						`A small rectangular nameplate at the bottom of the frame reads "${name}" in clean sans-serif lettering`,
-						"White background",
-					].join(". ");
-					const result = await generateForElement(
-						"image",
-						provider,
-						config,
-						prompt,
-						{},
-					);
-					store.getState().updateMetadata({
-						characters: { [name]: { avatarUrl: result.url } },
-					});
-				} finally {
-					store.getState().setAvatarGenerating(name, false);
-				}
-			}),
-	);
+	const jobs: GenerationJob[] = Object.entries(characters)
+		.filter(([, ch]) => !ch.avatarUrl && ch.appearance)
+		.map(([name]) => ({
+			elementId: characterAvatarElementId(name),
+			connectorType: "image",
+			provider,
+			config: {
+				...config,
+				plugins: buildCharacterAvatarPlugins(projectId, name),
+			},
+			prompt: "",
+			extraParams: {},
+			inputs: { prompt: name, attributes: { kind: "avatar" } },
+		}));
+
+	generationQueue.enqueueAll(jobs);
 }

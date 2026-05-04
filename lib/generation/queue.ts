@@ -4,7 +4,7 @@ import type {
 	ConnectorType,
 	ProviderKey,
 } from "../connectors/types";
-import { toError } from "../errors";
+import { errorMessage } from "../errors";
 import { generateForElement } from "./generateForElement";
 import { serializeInputs } from "./generationInputs";
 import type { GenerationInputs } from "./generationInputs";
@@ -49,19 +49,10 @@ export class GenerationQueue {
 	private listeners = new Set<() => void>();
 	private history = new Map<string, Map<string, AssetResult>>();
 	private readonly batchSize: number;
-	private pendingBefore: (() => Promise<void>) | null = null;
-	private processing = false;
 	private _resultVersion = 0;
 
 	constructor({ batchSize }: { batchSize: number }) {
 		this.batchSize = batchSize;
-	}
-
-	before(fn: () => Promise<void>): this {
-		if (!this.pendingBefore) {
-			this.pendingBefore = fn;
-		}
-		return this;
 	}
 
 	subscribe = (listener: () => void) => {
@@ -71,8 +62,8 @@ export class GenerationQueue {
 		};
 	};
 
-	getElementSnapshot = (id: string): ElementSnapshot => {
-		return this.state.get(id) ?? EMPTY_SNAPSHOT;
+	getElementSnapshot = (id?: string): ElementSnapshot => {
+		return (id && this.state.get(id)) || EMPTY_SNAPSHOT;
 	};
 
 	getResultVersion = () => this._resultVersion;
@@ -142,7 +133,7 @@ export class GenerationQueue {
 		}
 		if (added) {
 			this.notify();
-			this.startProcessing();
+			this.processQueue();
 		}
 	}
 
@@ -205,27 +196,6 @@ export class GenerationQueue {
 		if (timer) {
 			clearInterval(timer);
 			this.timers.delete(elementId);
-		}
-	}
-
-	private async startProcessing() {
-		if (this.processing) return;
-		this.processing = true;
-		try {
-			do {
-				if (this.pendingBefore) {
-					const fn = this.pendingBefore;
-					this.pendingBefore = null;
-					try {
-						await fn();
-					} catch (err) {
-						console.error("GenerationQueue.before failed:", err);
-					}
-				}
-				this.processQueue();
-			} while (this.pendingBefore);
-		} finally {
-			this.processing = false;
 		}
 	}
 
@@ -299,7 +269,7 @@ export class GenerationQueue {
 			status: "idle",
 			seconds: 0,
 			result: null,
-			error: toError(err).message,
+			error: errorMessage(err),
 		});
 	}
 

@@ -5,7 +5,7 @@ import { useResize } from "./useResize";
 import { VideoPanel } from "./VideoPanel";
 
 const TOP_DEFAULT = 300;
-const SIDE_DEFAULT = 800;
+const SIDE_DEFAULT = 560;
 const HANDLE_PX = 16;
 
 export function TopPlayerPanel() {

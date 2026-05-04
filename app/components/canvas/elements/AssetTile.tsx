@@ -1,19 +1,26 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { Hourglass, type LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { generationQueue } from "@/lib/generation/queue";
 
 export function AssetTile({
 	name,
 	previewUrl,
 	Icon,
-	loading = false,
+	elementId,
 }: {
 	name?: string;
 	previewUrl?: string;
 	Icon: LucideIcon;
-	loading?: boolean;
+	elementId?: string;
 }) {
+	const status = useSyncExternalStore(
+		generationQueue.subscribe,
+		() => generationQueue.getElementSnapshot(elementId).status,
+		() => "idle" as const,
+	);
 	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
 		<div className="flex w-16 flex-col gap-1 sm:w-20">
@@ -30,14 +37,18 @@ export function AssetTile({
 						{initial || <Icon className="h-4 w-4" />}
 					</AvatarFallback>
 				</Avatar>
-				{loading && (
+				{status === "generating" && (
 					<div
 						className="shimmer-surface absolute inset-0 rounded-md"
 						aria-hidden
 					/>
 				)}
 				<div className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/40 text-white/80">
-					<Icon className="h-2.5 w-2.5" />
+					{status === "queued" ? (
+						<Hourglass className="h-2.5 w-2.5 animate-pulse" />
+					) : (
+						<Icon className="h-2.5 w-2.5" />
+					)}
 				</div>
 			</div>
 			{name && (

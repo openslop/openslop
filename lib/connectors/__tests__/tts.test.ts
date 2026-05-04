@@ -124,14 +124,12 @@ describe("BaseTTSConnector", () => {
 			models: ["test-model"],
 			isDefault: true,
 			apiKey: "",
-			plugins: [
-				{ name: "err", onError: (e: Error) => void errors.push(e.message) },
-			],
+			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});
 
 		await expect(
 			connector.generate({ prompt: "hi", voiceId: "v" }),
 		).rejects.toThrow();
-		expect(errors).toEqual(["tts failed"]);
+		expect(errors[0]).toContain("tts failed");
 	});
 });

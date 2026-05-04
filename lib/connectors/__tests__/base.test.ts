@@ -69,7 +69,7 @@ describe("BaseConnector", () => {
 			"transform failed",
 		);
 		expect(onError).toHaveBeenCalledWith(
-			expect.objectContaining({ message: "transform failed" }),
+			expect.stringContaining("transform failed"),
 			expect.any(Object),
 		);
 	});
@@ -93,7 +93,7 @@ describe("BaseConnector", () => {
 		});
 		await expect(c.generate({ prompt: "hi" })).rejects.toThrow("before failed");
 		expect(onError).toHaveBeenCalledWith(
-			expect.objectContaining({ message: "before failed" }),
+			expect.stringContaining("before failed"),
 			expect.any(Object),
 		);
 	});

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Palette, User } from "lucide-react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
+import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { AssetTile } from "./AssetTile";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 
@@ -11,10 +12,6 @@ export function AssetsSection() {
 	const { projectId } = useConfig();
 	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
 	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
-	const generatingAvatars = useProjectStore(
-		projectId,
-		(s) => s.generatingAvatars,
-	);
 	const [collapsed, setCollapsed] = useState(false);
 
 	if (Object.keys(characters).length === 0 && referenceImages.length === 0) {
@@ -37,7 +34,7 @@ export function AssetsSection() {
 							name={name}
 							previewUrl={ch.avatarUrl}
 							Icon={User}
-							loading={generatingAvatars.has(name)}
+							elementId={characterAvatarElementId(name)}
 						/>
 					))}
 					{referenceImages.map((url, i) => (
