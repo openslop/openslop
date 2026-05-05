@@ -45,14 +45,40 @@ export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
 	private pending: GenerationJob[] = [];
 	private controllers = new Map<string, AbortController>();
-	private timers = new Map<string, ReturnType<typeof setInterval>>();
+	private jobStarts = new Map<string, number>();
+	private tickTimer: ReturnType<typeof setInterval> | null = null;
 	private listeners = new Set<() => void>();
 	private history = new Map<string, Map<string, AssetResult>>();
 	private readonly batchSize: number;
 	private _resultVersion = 0;
+	private _peakActive = 0;
 
 	constructor({ batchSize }: { batchSize: number }) {
 		this.batchSize = batchSize;
+	}
+
+	private ensureTickTimer() {
+		if (this.tickTimer || this.jobStarts.size === 0) return;
+		this.tickTimer = setInterval(() => {
+			let changed = false;
+			const now = Date.now();
+			for (const [id, start] of this.jobStarts) {
+				if (this.state.get(id)?.status !== "generating") continue;
+				const seconds = ((now - start) / 1000) | 0;
+				if (this.getElementSnapshot(id).seconds !== seconds) {
+					this.update(id, { seconds });
+					changed = true;
+				}
+			}
+			if (changed) this.notify();
+		}, 1000);
+	}
+
+	private maybeStopTickTimer() {
+		if (this.tickTimer && this.jobStarts.size === 0) {
+			clearInterval(this.tickTimer);
+			this.tickTimer = null;
+		}
 	}
 
 	subscribe = (listener: () => void) => {
@@ -82,6 +108,8 @@ export class GenerationQueue {
 		}
 		return active;
 	};
+
+	getPeakActive = (): number => this._peakActive;
 
 	private isInQueue(id: string): boolean {
 		const s = this.state.get(id)?.status;
@@ -186,17 +214,16 @@ export class GenerationQueue {
 	}
 
 	private notify() {
+		const active = this.getActiveCount();
+		this._peakActive = active === 0 ? 0 : Math.max(this._peakActive, active);
 		for (const listener of this.listeners) {
 			listener();
 		}
 	}
 
 	private stopTimer(elementId: string) {
-		const timer = this.timers.get(elementId);
-		if (timer) {
-			clearInterval(timer);
-			this.timers.delete(elementId);
-		}
+		this.jobStarts.delete(elementId);
+		this.maybeStopTickTimer();
 	}
 
 	private processQueue() {
@@ -229,13 +256,8 @@ export class GenerationQueue {
 	}
 
 	private startElapsedTimer(elementId: string) {
-		const start = Date.now();
-		const timer = setInterval(() => {
-			if (this.state.get(elementId)?.status !== "generating") return;
-			this.update(elementId, { seconds: ((Date.now() - start) / 1000) | 0 });
-			this.notify();
-		}, 1000);
-		this.timers.set(elementId, timer);
+		this.jobStarts.set(elementId, Date.now());
+		this.ensureTickTimer();
 	}
 
 	private handleJobSuccess(

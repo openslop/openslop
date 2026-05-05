@@ -143,16 +143,18 @@ function ContentElement(
 	props: RenderElementProps & { element: CanvasContentElement },
 ) {
 	const editor = useSlateStatic();
-	const { isCollapsed } = useViewMode();
-	const path = ReactEditor.findPath(editor, props.element);
-	const sceneId = (Node.parent(editor, path) as SceneElement).id;
+	const { isCollapsed, hasCollapsed } = useViewMode();
 
-	if (isCollapsed(sceneId)) {
-		return (
-			<CompactElement attributes={props.attributes} element={props.element}>
-				{props.children}
-			</CompactElement>
-		);
+	if (hasCollapsed) {
+		const path = ReactEditor.findPath(editor, props.element);
+		const sceneId = (Node.parent(editor, path) as SceneElement).id;
+		if (isCollapsed(sceneId)) {
+			return (
+				<CompactElement attributes={props.attributes} element={props.element}>
+					{props.children}
+				</CompactElement>
+			);
+		}
 	}
 	return <ElementContainer {...props} element={props.element} />;
 }
