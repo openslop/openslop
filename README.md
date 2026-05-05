@@ -164,6 +164,16 @@ openslop/
 | `npm run remotion:bundle` | Bundle Remotion compositions        |
 | `npm run create-snapshot` | Create a video rendering snapshot   |
 
+## API maintainability notes
+
+- `lib/api/route-handler.ts` is the single request boundary for `/api/v1/*`
+  routes (auth, parse, model validation, error mapping).
+- `lib/api/request-schema-fields.ts` contains reusable Zod field contracts used
+  by asset routes (shared size/duration fields and strict video
+  `referenceImages` validation).
+- Keep route modules thin: compose field helpers into `bodySchema(...)` and
+  keep provider orchestration inside `createRouteHandler(...)`.
+
 ## Contributing
 
 Contributions welcome. Fork the repo, make your changes, open a PR.

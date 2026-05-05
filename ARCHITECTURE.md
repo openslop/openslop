@@ -95,14 +95,16 @@ Every `app/api/v1/<type>/route.ts` is built from the same factory (shown for
 the `image` route):
 
 ```ts
+const schema = bodySchema(IMAGE_MODELS, {
+	format: z.string().optional(),
+	...optionalImageDimensions,
+	...optionalReferenceImages,
+});
+
 export const POST = createRouteHandler({
-	models: IMAGE_MODELS,
+	schema,
 	getProvider: getImageProvider,
 	label: "Image generation",
-	handle: async (provider, body) => {
-		const result = await provider.generate(body);
-		return NextResponse.json(result);
-	},
 });
 ```
 
@@ -114,8 +116,10 @@ export const POST = createRouteHandler({
 - structured logging on warn/error
 - a `serverError` fallback
 
-Add `extraValidation` for type-specific checks (see TTS `voiceId` and Video
-`referenceImages` validation).
+Type-specific request fields now live in `lib/api/request-schema-fields.ts`
+(`requiredVoiceId`, shared size/duration fields, and validated video
+`referenceImages`). Route files stay thin by composing these field schemas into
+`bodySchema(...)`.
 
 Providers are resolved through `lib/api/providers.ts`. Each `getXProvider()`
 is built from the same `defineProvider(key, envVar, RealCtor, MockCtor)`
