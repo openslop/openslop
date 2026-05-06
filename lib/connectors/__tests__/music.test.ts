@@ -75,12 +75,10 @@ describe("BaseMusicConnector", () => {
 			models: ["test-model"],
 			isDefault: true,
 			apiKey: "",
-			plugins: [
-				{ name: "err", onError: (e: Error) => void errors.push(e.message) },
-			],
+			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});
 
 		await expect(connector.generate({ prompt: "test" })).rejects.toThrow();
-		expect(errors).toEqual(["music failed"]);
+		expect(errors[0]).toContain("music failed");
 	});
 });

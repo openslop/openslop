@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { toError } from "@/lib/errors";
+import { stringifyError } from "../errors";
 import { getUser } from "./auth";
 import { badRequest, serverError, unauthorized } from "./response";
 import { logger } from "./logger";
@@ -43,7 +43,7 @@ export function createRouteHandler<
 			return await handle(options.getProvider(), parsed.data);
 		} catch (error) {
 			logger.error(error, `${options.label} failed`);
-			return serverError(`${options.label} failed: ${toError(error).message}`);
+			return serverError(`${options.label} failed: ${stringifyError(error)}`);
 		}
 	};
 }

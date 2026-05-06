@@ -1,4 +1,4 @@
-import { toError } from "@/lib/errors";
+import { stringifyError } from "../errors";
 
 export type SSEMessage =
 	| { type: "phase"; phase: string; progress: number; subtitle?: string }
@@ -28,7 +28,10 @@ export function createSSEResponse(
 
 	handler(send)
 		.catch((err) =>
-			send({ type: "error", message: toError(err).message }).catch(() => {}),
+			send({
+				type: "error",
+				message: stringifyError(err),
+			}).catch(() => {}),
 		)
 		.finally(() => writer.close().catch(() => {}));
 

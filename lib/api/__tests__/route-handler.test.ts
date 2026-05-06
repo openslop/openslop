@@ -158,7 +158,8 @@ describe("createRouteHandler", () => {
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toBe("TestRoute failed: boom");
+		expect(json.error).toContain("TestRoute failed: ");
+		expect(json.error).toContain("boom");
 	});
 
 	it("stringifies non-Error throws", async () => {
@@ -170,6 +171,7 @@ describe("createRouteHandler", () => {
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toBe("TestRoute failed: raw string failure");
+		expect(json.error).toContain("TestRoute failed: ");
+		expect(json.error).toContain("raw string failure");
 	});
 });

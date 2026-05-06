@@ -28,7 +28,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 		ctx?: PluginContext<TParams, TResult>,
 	): string | Promise<string>;
 	onError?(
-		error: Error,
+		error: string,
 		ctx?: PluginContext<TParams, TResult>,
 	): void | Promise<void>;
 }

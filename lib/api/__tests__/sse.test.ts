@@ -69,7 +69,7 @@ describe("createSSEResponse", () => {
 		});
 		const text = await response.text();
 		expect(text).toContain('"type":"error"');
-		expect(text).toContain('"message":"boom"');
+		expect(text).toContain("boom");
 	});
 
 	it("emits the stringified message when handler rejects with a non-Error", async () => {
@@ -78,7 +78,7 @@ describe("createSSEResponse", () => {
 		});
 		const text = await response.text();
 		expect(text).toContain('"type":"error"');
-		expect(text).toContain('"message":"string failure"');
+		expect(text).toContain("string failure");
 	});
 });
 

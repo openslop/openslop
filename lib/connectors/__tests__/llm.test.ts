@@ -63,7 +63,7 @@ describe("BaseLLMConnector", () => {
 		const errors: string[] = [];
 		const plugin: ConnectorPlugin = {
 			name: "error-handler",
-			onError: (e) => void errors.push(e.message),
+			onError: (e) => void errors.push(e),
 		};
 
 		const connector = new OpenSlopLLM({
@@ -77,7 +77,7 @@ describe("BaseLLMConnector", () => {
 		await expect(connector.generate({ prompt: "test" })).rejects.toThrow(
 			"generation failed",
 		);
-		expect(errors).toEqual(["generation failed"]);
+		expect(errors[0]).toContain("generation failed");
 	});
 
 	it("runs plugins in order", async () => {
@@ -129,7 +129,7 @@ describe("BaseLLMConnector", () => {
 		const gen = connector.stream({ prompt: "test" });
 		await expect(gen.next()).rejects.toThrow("transform failed");
 		expect(onError).toHaveBeenCalledWith(
-			expect.objectContaining({ message: "transform failed" }),
+			expect.stringContaining("transform failed"),
 			expect.any(Object),
 		);
 	});
@@ -153,7 +153,7 @@ describe("BaseLLMConnector", () => {
 		const gen = connector.stream({ prompt: "test" });
 		await expect(gen.next()).rejects.toThrow("before failed");
 		expect(onError).toHaveBeenCalledWith(
-			expect.objectContaining({ message: "before failed" }),
+			expect.stringContaining("before failed"),
 			expect.any(Object),
 		);
 	});

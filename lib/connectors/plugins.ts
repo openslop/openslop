@@ -44,7 +44,7 @@ export async function runTransformPrompt(
 
 export async function runOnError(
 	plugins: ConnectorPlugin[],
-	error: Error,
+	error: string,
 	ctx?: PluginContext,
 ): Promise<void> {
 	for (const plugin of plugins) {

@@ -1,4 +1,4 @@
-import { toError } from "@/lib/errors";
+import { stringifyError } from "../errors";
 import {
 	runAfterGenerate,
 	runBeforeGenerate,
@@ -50,7 +50,7 @@ export abstract class BaseConnector<
 			result = await runAfterGenerate(this.plugins, result, ctx);
 			return result;
 		} catch (error) {
-			await runOnError(this.plugins, toError(error), ctx);
+			await runOnError(this.plugins, stringifyError(error), ctx);
 			throw error;
 		}
 	}
