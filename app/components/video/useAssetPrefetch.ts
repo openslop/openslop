@@ -57,7 +57,11 @@ export function useAssetPrefetch(layout: VideoLayout | null): boolean {
 				}
 
 				if (added) setReady(false);
-				await Promise.all([...active.values()].map((h) => h.waitUntilDone()));
+				try {
+					await Promise.all([...active.values()].map((h) => h.waitUntilDone()));
+				} catch (err) {
+					console.error("Asset prefetch failed", err);
+				}
 				if (!cancelled) setReady(true);
 			},
 			(err) => {
