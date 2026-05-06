@@ -98,6 +98,64 @@ describe("API routes", () => {
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 			expect(res.status).toBe(500);
 		});
+
+		it("accepts requests without referenceImages", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			mockImageGenerate.mockResolvedValue({ id: "img-no-ref" });
+
+			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+			expect(res.status).toBe(200);
+		});
+
+		it("returns 400 for non-array referenceImages", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(
+				makeRequest("/api/v1/image", {
+					prompt: "cat",
+					referenceImages: "not-an-array",
+				}),
+			);
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("expected array");
+		});
+
+		it("returns 400 for invalid referenceImages entry", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(
+				makeRequest("/api/v1/image", {
+					prompt: "cat",
+					referenceImages: ["not-a-data-uri"],
+				}),
+			);
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("data URI or an HTTP");
+		});
+
+		it("accepts valid referenceImages data URIs", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			mockImageGenerate.mockResolvedValue({ id: "img-ref-data" });
+
+			const res = await POST(
+				makeRequest("/api/v1/image", {
+					prompt: "cat",
+					referenceImages: ["data:image/png;base64,iVBORw0KGgo"],
+				}),
+			);
+			expect(res.status).toBe(200);
+		});
+
+		it("accepts valid referenceImages URLs", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			mockImageGenerate.mockResolvedValue({ id: "img-ref-url" });
+
+			const res = await POST(
+				makeRequest("/api/v1/image", {
+					prompt: "cat",
+					referenceImages: ["https://example.com/image.png"],
+				}),
+			);
+			expect(res.status).toBe(200);
+		});
 	});
 
 	describe("POST /api/v1/video", () => {

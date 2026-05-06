@@ -13,10 +13,6 @@ export const optionalVideoDuration = {
 	duration: z.number().optional(),
 } as const;
 
-export const optionalReferenceImages = {
-	referenceImages: z.array(z.string()).optional(),
-} as const;
-
 export const referenceImageUrlOrDataUri = z
 	.string()
 	.refine(
@@ -29,7 +25,7 @@ export const referenceImageUrlOrDataUri = z
 		},
 	);
 
-export const optionalValidatedReferenceImages = {
+export const optionalReferenceImages = {
 	referenceImages: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 

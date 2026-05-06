@@ -1,205 +1,48 @@
 # Architecture
 
-This document explains how OpenSlop is wired together end-to-end. Read it before
-adding a new asset type, swapping a third-party API, or hooking a new generation
-step into the editor.
+A 10k-foot view of how OpenSlop fits together.
 
-## High-level layout
+## Request flow
 
 ```
-Browser (React 19, Slate, Remotion Player)
-    │
-    │ fetch /api/v1/<type>           (uses lib/clients/openslop)
-    ▼
-Next.js App Router (app/api/v1/*)    (uses lib/api/route-handler factory)
-    │
-    │ getXProvider() → BaseProvider  (lib/api/providers.ts)
-    ▼
-Provider implementation              (lib/providers/<type>/<vendor>.ts)
-    │
-    │ writes manifest.json + asset   (lib/api/asset-bundle.ts → Vercel Blob)
-    ▼
-BundleResponse { id, result, … }     (returned to the browser)
+Browser (React, Slate, Remotion)
+    ↓ fetch /api/v1/<type>
+Next.js route (app/api/v1/*)
+    ↓
+Provider (vendor adapter)
+    ↓ uploads to Vercel Blob
+Response → browser
 ```
 
-The browser then drives Remotion (`lib/video/`, `remotion/`) for composition and
-preview, and persists project state via Supabase (`lib/supabase/`).
+The browser drives Remotion for preview and persists project state via Supabase.
 
-## Three layers of abstraction
+## Three layers
 
-The generation pipeline is intentionally split into three layers. Each layer has
-a different concern and a different test surface, which is what makes it easy
-to swap providers or add new asset types without touching the others.
+The generation pipeline is split so providers and asset types can be swapped independently:
 
-### 1. `lib/connectors/` — client-facing API
-
-A **connector** is what the editor talks to. Connectors are model-agnostic and
-plugin-pipelined: they don't care how an asset gets produced, only that the
-caller gets back an `AssetResult` (or `LLMGenerateResult`, etc.).
-
-- `BaseConnector` (`base.ts`) runs the plugin pipeline:
-  `transformPrompt → beforeGenerate → _generate → afterGenerate`, with `onError`
-  on failure.
-- `BaseAssetConnector` (`asset-base.ts`) extends it for asset types and resolves
-  a `BundleResponse` to a public URL via `AssetBundle`.
-- Per-type bases (`image/connector.ts`, `music/connector.ts`, …) pin
-  `type` and `assetKey`.
-- `BaseVideoConnector` adds polling for async jobs (`awaitCompletion` in
-  `lib/providers/poll.ts`).
-- The factory (`factory.ts`) instantiates the right concrete connector from a
-  `(ConnectorType, ProviderKey)` pair. `ProviderKey` is currently
-  `"openslop"`-only — every connector ultimately calls our own REST API.
-- Plugins live in `lib/connectors/plugins/` and can be composed onto any
-  connector via `ConnectorConfig.plugins`.
-- Models are declared statically per connector in `lib/connectors/<type>/openslop/models.ts`
-  and surfaced to the UI through `ConfigProvider`'s initial registry. Connectors
-  do not expose runtime model discovery — slugs are validated server-side by
-  `createRouteHandler` against the `<TYPE>_MODELS` map.
-
-### 2. `lib/gateway/` — HTTP transport
-
-Connectors don't know about HTTP. They delegate to a `GatewayClient` that
-wraps `fetch` against `app/api/v1/<type>`. Gateways are thin: they post the
-params, surface errors, and return a `BundleResponse`.
-
-This is the seam that lets the same connector code run against the local
-Next.js API or against a mock in tests.
-
-### 3. `lib/providers/` — server-side model wrappers
-
-A **provider** is the server-side adapter for a specific vendor (Runware,
-ElevenLabs, Cartesia, Anthropic, …). Each provider extends `BaseProvider` and
-implements three things:
-
-1. `_generate(params)` — call the vendor SDK, return raw bytes/JSON plus
-   `metadata`.
-2. `toFiles(result)` — describe the asset files to upload.
-3. `blobConfig` — pick the bundle path (`assets/<type>/<provider>/<id>/`).
-
-`BaseProvider.generate()` then handles the upload via `AssetBundle.upload()`
-and returns the `BundleResponse` that gateways round-trip back to the
-connector.
-
-For audio providers, `lib/providers/elevenlabs.ts` exposes a
-`BaseElevenLabsAudio` class that the `music/` and `sfx/` ElevenLabs subclasses
-share — they only differ in default duration and which SDK method to call.
-
-For video, async-job types (`VideoJob`, `VideoJobStatus`, `VideoJobMetadata`,
-`VideoProviderResponse`) live in `lib/providers/video/base.ts` next to
-`BaseVideoProvider` — they are server-side concerns, not part of the connector
-contract.
+- **Connectors** (`lib/connectors/`) — what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`.
+- **Gateways** (`lib/gateway/`) — thin HTTP clients between connectors and our own `/api/v1/*` routes. The seam that lets connectors run against either the live API or a mock.
+- **Providers** (`lib/providers/`) — server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response.
 
 ## API routes
 
-Every `app/api/v1/<type>/route.ts` is built from the same factory (shown for
-the `image` route):
+Every `app/api/v1/<type>/route.ts` is built from a shared `createRouteHandler` factory that handles auth, parsing, model validation, and error mapping. Reusable Zod field schemas live in `lib/api/request-schema-fields.ts`. If a provider's API key isn't set, the route falls back to a mock provider.
 
-```ts
-const schema = bodySchema(IMAGE_MODELS, {
-	format: z.string().optional(),
-	...optionalImageDimensions,
-	...optionalReferenceImages,
-});
+## Editor state
 
-export const POST = createRouteHandler({
-	schema,
-	getProvider: getImageProvider,
-	label: "Image generation",
-});
-```
+- `lib/generation/queue.ts` schedules generation jobs from the editor, caches results per element, and exposes status to the UI. UI dispatches jobs; it never calls connectors directly.
+- `lib/project/store.ts` holds per-project metadata in Zustand.
+- `lib/script/` provides script context and refinement utilities.
 
-`createRouteHandler` (`lib/api/route-handler.ts`) takes care of:
+## Auth
 
-- JSON parsing
-- `prompt` validation
-- model slug resolution against the `<type>_MODELS` map
-- structured logging on warn/error
-- a `serverError` fallback
-
-Type-specific request fields now live in `lib/api/request-schema-fields.ts`
-(`requiredVoiceId`, shared size/duration fields, and validated video
-`referenceImages`). Route files stay thin by composing these field schemas into
-`bodySchema(...)`.
-
-Providers are resolved through `lib/api/providers.ts`. Each `getXProvider()`
-is built from the same `defineProvider(key, envVar, RealCtor, MockCtor)`
-helper: if the relevant API key isn't set (e.g. `RUNWARE_API_KEY`), the route
-falls back to the mock implementation. Instances are cached per process by
-`key`, so repeated calls return the same provider.
-
-## Generation queue
-
-`lib/generation/queue.ts` is the editor's task scheduler. The `GenerationQueue`
-class:
-
-- Snapshots inputs (`generationInputs.ts`) so stale results can be detected.
-- Enqueues `GenerationJob`s and drains them in batches via
-  `generateForElement` → `createConnector(...).generate(...)`.
-- Tracks status (`idle | queued | generating`), errors, elapsed seconds, and a
-  per-element history of past results for instant cache hits when inputs match.
-- Exposes a Zustand-style subscribe API used by canvas elements to render
-  progress.
-- Accepts a one-shot `before(fn)` setup callback that runs once before the next
-  batch is drained (used to backfill character avatars). Calls are guarded so a
-  callback only fires once even if multiple dispatchers register before the
-  queue starts processing.
-
-The queue is the single point that wires connectors into the React app — UI
-components dispatch jobs, never call connectors directly. The canonical entry
-point is `lib/generation/scheduleGeneration.ts`, which wires the avatar-setup
-phase onto the queue so editor hooks (`useGenerate`, `useGenerateAll`) stay
-focused on element-level state.
-
-## Project & script state
-
-- `lib/project/store.ts` holds per-project metadata (characters, defaults) in a
-  Zustand store, scoped by project id.
-- `lib/project/ensureCharacterAvatars.ts` runs before each generation batch to
-  guarantee every referenced character has an avatar image; the queue invokes it
-  via `generationQueue.before(...)`.
-- `lib/script/ScriptProvider.tsx` provides a React context for the current
-  script being edited; `lib/script/refine/` houses transformation utilities
-  (e.g. `applyOps.ts` for applying LLM-produced refinement ops to the tree).
-- `lib/config/` stores connector configuration globally; per-element
-  configuration overlays this.
-
-## Auth & request lifecycle
-
-- `proxy.ts` is the Next.js 16 proxy entry (renamed upstream from
-  `middleware.ts` — **do not rename it back**).
-- It calls `updateSession()` from `lib/supabase/middleware.ts`, which refreshes
-  the Supabase session cookie on every non-static request.
-- Browser-side Supabase access goes through `lib/supabase/client.ts`;
-  server-side via `lib/supabase/server.ts`.
-- `/api/v1/*` authenticates via the Supabase session cookie only (`getUser()`
-  in `lib/api/auth.ts`); requests must be same-origin. `OpenSlopClient`'s
-  `baseUrl` is for same-origin overrides only — hosted/cross-origin API
-  deployments are not supported (intentional per `e6abf7e`).
+- `proxy.ts` (Next.js 16's renamed middleware — keep this name) refreshes the Supabase session on each request.
+- `/api/v1/*` is same-origin only and authenticates via the Supabase session cookie.
 
 ## Video rendering
 
-- Compositions live in `remotion/` and `lib/video/`.
-- `app/api/render/route.ts` invokes Remotion's render pipeline; the bundle is
-  produced via `npm run remotion:bundle` or on-demand.
-- `app/components/video/VideoPreview.tsx` is a Client Component that
-  `next/dynamic`-imports the Remotion Player with `ssr: false` (this is the
-  only sanctioned use of `ssr: false` — see CLAUDE.md).
+Compositions live in `remotion/` and `lib/video/`. `app/api/render/route.ts` drives Remotion's render pipeline. The Player is loaded client-side only.
 
 ## Adding a new asset type
 
-If you need to introduce, say, "captions" as a first-class asset:
-
-1. Add `CaptionsGenerateParams` and `CaptionsConnector` to
-   `lib/connectors/types.ts`, plus an entry in `ConnectorTypeMap`.
-2. Create `lib/connectors/captions/connector.ts` (a `BaseCaptionsConnector`
-   extending `BaseAssetConnector`) and a `captions/openslop/index.ts`
-   implementation that wires up a gateway.
-3. Add a `lib/gateway/openslop/captions.ts` gateway client.
-4. Implement one or more providers in `lib/providers/captions/<vendor>.ts`
-   extending `BaseProvider`.
-5. Register the provider in `lib/api/providers.ts` (`getCaptionsProvider`).
-6. Add `CAPTIONS_MODELS` and `app/api/v1/captions/route.ts` using
-   `createRouteHandler`.
-7. Wire the connector into `lib/connectors/factory.ts`.
-
-Tests for each layer live in `__tests__` folders next to the code they cover.
+Add a connector + gateway + provider, register the provider in `lib/api/providers.ts`, declare a models map, and add the route under `app/api/v1/<type>`. Tests live in `__tests__` folders next to the code.

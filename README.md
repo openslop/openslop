@@ -66,20 +66,15 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Optional (AI provider keys -- without these, the app uses mock providers):
+Without provider keys, the app falls back to mock providers. To use real ones, add any of:
 
 ```
-ANTHROPIC_API_KEY=        # LLM (Claude)
-RUNWARE_API_KEY=          # Image + Video generation
-ELEVENLABS_API_KEY=       # Music + SFX generation
+ANTHROPIC_API_KEY=        # LLM
+RUNWARE_API_KEY=          # Image + video
+ELEVENLABS_API_KEY=       # Music + SFX
 CARTESIA_API_KEY=         # Text-to-speech
-```
-
-Optional (asset storage -- required when using real providers above):
-
-```
-BLOB_READ_WRITE_TOKEN=    # Vercel Blob token for storing generated assets
-NEXT_PUBLIC_BLOB_URL=     # Vercel Blob store public URL
+BLOB_READ_WRITE_TOKEN=    # Vercel Blob (asset storage)
+NEXT_PUBLIC_BLOB_URL=     # Vercel Blob public URL
 ```
 
 4. Run the database migrations:
@@ -108,71 +103,36 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 | Storage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (generated asset storage)                         |
 | Icons     | [Lucide](https://lucide.dev)                                                                                 |
 
-## Project Structure
+## Project structure
 
 ```
-openslop/
-|-- app/                    # Next.js App Router pages and layouts
-|   |-- api/
-|   |   |-- render/         # Remotion video rendering endpoint
-|   |   |-- v1/             # REST API (image, llm, music, sfx, tts, video)
-|   |   |-- validate-code/  # Access code validation
-|   |-- auth/               # OAuth callback handler
-|   |-- components/         # App-specific React components
-|   |   |-- canvas/         # Slate-based editor canvas (drag-and-drop, elements, plugins)
-|   |   |-- video/          # Video player, preview, and render controls
-|   |-- login/              # Login page
-|   |-- signup/             # Signup page
-|   |-- page.tsx            # Home / editor
-|   |-- layout.tsx          # Root layout
-|-- components/ui/          # shadcn/ui primitives
-|-- lib/                    # Shared libraries
-|   |-- api/                # Route handler helpers, logger, response utils, blob storage
-|   |-- clients/            # HTTP client for the OpenSlop API
-|   |-- components/         # Shared UI components (Waveform, etc.)
-|   |-- config/             # Global connector configuration (React context)
-|   |-- connectors/         # Connector abstraction per media type + plugins
-|   |-- gateway/            # Gateway clients for provider APIs
-|   |-- generation/         # Generation queue and job orchestration
-|   |-- providers/          # Provider implementations (Anthropic, ElevenLabs, Cartesia, Runware, etc.)
-|   |-- script/             # Script context provider
-|   |-- supabase/           # Supabase client helpers (browser, server, middleware)
-|   |-- user/               # User context provider
-|   |-- video/              # Remotion video composition and scene layout
-|   |-- utils.ts            # General utilities (cn, etc.)
-|-- remotion/               # Remotion compositions and entry point
-|-- supabase/migrations/    # Database migrations
-|-- proxy.ts                # Auth session refresh + route protection
+app/             Next.js routes, API endpoints, and editor components
+  api/v1/        REST API per asset type (image, video, music, sfx, tts, llm)
+  components/    Editor UI (canvas, video preview, etc.)
+lib/
+  connectors/    Editor-facing client API per asset type
+  gateway/       HTTP clients to /api/v1/*
+  providers/     Server-side vendor adapters (Runware, ElevenLabs, …)
+  generation/    Generation queue and job orchestration
+  video/         Remotion compositions and scene layout
+  supabase/      Browser/server Supabase clients
+remotion/        Remotion entry point
+supabase/        Database migrations
 ```
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for how these layers interact.
 
 ## Scripts
 
-| Command                   | What it does                        |
-| ------------------------- | ----------------------------------- |
-| `npm run dev`             | Start the dev server                |
-| `npm run build`           | Production build                    |
-| `npm run start`           | Start the production server         |
-| `npm run lint`            | Run ESLint                          |
-| `npm run format:check`    | Check formatting (Prettier)         |
-| `npm run typecheck`       | Run TypeScript type checks          |
-| `npm run test`            | Run tests in watch mode (Vitest)    |
-| `npm run test:run`        | Run tests once                      |
-| `npm run db:push`         | Push migrations to Supabase         |
-| `npm run db:migrate`      | Run pending migrations              |
-| `npm run db:reset`        | Reset the database                  |
-| `npm run remotion:studio` | Open Remotion Studio for previewing |
-| `npm run remotion:bundle` | Bundle Remotion compositions        |
-| `npm run create-snapshot` | Create a video rendering snapshot   |
-
-## API maintainability notes
-
-- `lib/api/route-handler.ts` is the single request boundary for `/api/v1/*`
-  routes (auth, parse, model validation, error mapping).
-- `lib/api/request-schema-fields.ts` contains reusable Zod field contracts used
-  by asset routes (shared size/duration fields and strict video
-  `referenceImages` validation).
-- Keep route modules thin: compose field helpers into `bodySchema(...)` and
-  keep provider orchestration inside `createRouteHandler(...)`.
+| Command                   | What it does                |
+| ------------------------- | --------------------------- |
+| `npm run dev`             | Start the dev server        |
+| `npm run build`           | Production build            |
+| `npm run lint`            | ESLint                      |
+| `npm run typecheck`       | TypeScript check            |
+| `npm run test:run`        | Run tests once (Vitest)     |
+| `npm run db:push`         | Push migrations to Supabase |
+| `npm run remotion:studio` | Open Remotion Studio        |
 
 ## Contributing
 
