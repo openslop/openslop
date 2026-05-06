@@ -31,6 +31,8 @@ Every `app/api/v1/<type>/route.ts` is built from a shared `createRouteHandler` f
 ## Editor state
 
 - `lib/generation/queue.ts` schedules generation jobs from the editor, caches results per element, and exposes status to the UI. UI dispatches jobs; it never calls connectors directly.
+  - Public queue interface is intentionally narrow: `enqueue/enqueueAll`, `cancel/cancelAll/discard`, `restoreResult`, and read-only snapshot selectors (`getElementSnapshot`, `getResultVersion`, `isBusy`, `getActiveCount`, `getPeakActive`).
+  - Queue internals keep orchestration concerns private (timers, active controllers, pending list, and cache/history maps) so UI components consume state instead of implementation details.
 - `lib/project/store.ts` holds per-project metadata in Zustand.
 - `lib/script/` provides script context and refinement utilities.
 

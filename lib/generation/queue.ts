@@ -41,6 +41,11 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 const isActive = (status: ElementSnapshot["status"]) =>
 	status === "queued" || status === "generating";
 
+const IDLE_TIMING = {
+	status: "idle" as const,
+	seconds: 0,
+};
+
 export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
 	private pending: GenerationJob[] = [];
@@ -94,20 +99,21 @@ export class GenerationQueue {
 
 	getResultVersion = () => this._resultVersion;
 
-	isBusy = (): boolean => {
-		for (const snap of this.state.values()) {
-			if (isActive(snap.status)) return true;
+	private countMatchingSnapshots(
+		predicate: (snapshot: ElementSnapshot) => boolean,
+	): number {
+		let count = 0;
+		for (const snapshot of this.state.values()) {
+			if (predicate(snapshot)) count++;
 		}
-		return false;
-	};
+		return count;
+	}
 
-	getActiveCount = (): number => {
-		let active = 0;
-		for (const snap of this.state.values()) {
-			if (isActive(snap.status)) active++;
-		}
-		return active;
-	};
+	isBusy = (): boolean =>
+		this.countMatchingSnapshots((snapshot) => isActive(snapshot.status)) > 0;
+
+	getActiveCount = (): number =>
+		this.countMatchingSnapshots((snapshot) => isActive(snapshot.status));
 
 	getPeakActive = (): number => this._peakActive;
 
@@ -132,15 +138,22 @@ export class GenerationQueue {
 		this.pending = this.pending.filter((j) => j.elementId !== id);
 	}
 
+	private toIdleSnapshot(
+		patch: Pick<ElementSnapshot, "result" | "error"> &
+			Partial<Pick<ElementSnapshot, "resultInputs">>,
+	): Partial<ElementSnapshot> {
+		return {
+			...IDLE_TIMING,
+			...patch,
+		};
+	}
+
 	private resetToIdle(id: string) {
 		const { result, error, resultInputs } = this.getElementSnapshot(id);
 		if (result || error) {
 			this.state.set(id, {
-				status: "idle",
-				seconds: 0,
-				result,
-				error,
-				resultInputs,
+				...EMPTY_SNAPSHOT,
+				...this.toIdleSnapshot({ result, error, resultInputs }),
 			});
 		} else {
 			this.state.delete(id);
@@ -271,13 +284,14 @@ export class GenerationQueue {
 			this.history.get(job.elementId) ?? new Map<string, AssetResult>();
 		elHistory.set(key, result);
 		this.history.set(job.elementId, elHistory);
-		this.update(job.elementId, {
-			status: "idle",
-			seconds: 0,
-			result,
-			error: null,
-			resultInputs: job.inputs,
-		});
+		this.update(
+			job.elementId,
+			this.toIdleSnapshot({
+				result,
+				error: null,
+				resultInputs: job.inputs,
+			}),
+		);
 	}
 
 	private handleJobError(
@@ -287,12 +301,13 @@ export class GenerationQueue {
 	) {
 		if (controller.signal.aborted) return;
 		console.error(`Generation failed for element ${elementId}:`, err);
-		this.update(elementId, {
-			status: "idle",
-			seconds: 0,
-			result: null,
-			error: errorMessage(err),
-		});
+		this.update(
+			elementId,
+			this.toIdleSnapshot({
+				result: null,
+				error: errorMessage(err),
+			}),
+		);
 	}
 
 	private finalizeJob(elementId: string, controller: AbortController) {
