@@ -9,7 +9,7 @@ import {
 } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
-import { findNodeById, updateNodeText } from "../utils/editorOps";
+import { buildContentNodeIndex, updateNodeText } from "../utils/editorOps";
 import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
@@ -23,6 +23,11 @@ export function useScriptSync(editor: Editor): void {
 
 	useEffect(() => {
 		Editor.withoutNormalizing(editor, () => {
+			// Build an id index up front so the per-node lookup below is O(1).
+			// Inserts go to the end and don't shift existing paths, so the
+			// index stays valid for the duration of this pass.
+			const index = buildContentNodeIndex(editor);
+
 			for (const node of nodes) {
 				if (!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType)) continue;
 
@@ -30,7 +35,7 @@ export function useScriptSync(editor: Editor): void {
 				const normalized = normalize(canvasNode);
 				if (shouldSkipNode(normalized)) continue;
 
-				const entry = findNodeById(editor, node.id);
+				const entry = index.get(node.id);
 
 				if (entry) {
 					const [, path] = entry;

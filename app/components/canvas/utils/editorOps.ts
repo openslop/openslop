@@ -1,17 +1,52 @@
 import { Editor, type NodeEntry, type Path, Transforms } from "slate";
 import type { CanvasContentElement } from "../types";
-import { isContentElement } from "./guards";
+import { isContentElement, isSceneElement } from "./guards";
 
-/** Find a content element by ID. Returns [node, path] or null. */
+/**
+ * Find a content element by ID. Returns [node, path] or null.
+ *
+ * The canvas tree is a fixed two-level shape (root → scenes → content), so
+ * we scan it directly instead of paying for `Editor.nodes`' generator
+ * traversal — meaningfully cheaper when called in a tight loop (script
+ * streaming, refine ops).
+ */
 export function findNodeById(
 	editor: Editor,
 	id: string,
 ): NodeEntry<CanvasContentElement> | null {
-	const [entry] = Editor.nodes<CanvasContentElement>(editor, {
-		at: [],
-		match: (n) => isContentElement(n) && n.id === id,
-	});
-	return entry ?? null;
+	const root = editor.children;
+	for (let i = 0; i < root.length; i++) {
+		const scene = root[i];
+		if (!isSceneElement(scene)) continue;
+		const kids = scene.children;
+		for (let j = 0; j < kids.length; j++) {
+			const child = kids[j];
+			if (isContentElement(child) && child.id === id) {
+				return [child, [i, j]];
+			}
+		}
+	}
+	return null;
+}
+
+/** Build an O(1) id → entry index over all content elements in the editor. */
+export function buildContentNodeIndex(
+	editor: Editor,
+): Map<string, NodeEntry<CanvasContentElement>> {
+	const index = new Map<string, NodeEntry<CanvasContentElement>>();
+	const root = editor.children;
+	for (let i = 0; i < root.length; i++) {
+		const scene = root[i];
+		if (!isSceneElement(scene)) continue;
+		const kids = scene.children;
+		for (let j = 0; j < kids.length; j++) {
+			const child = kids[j];
+			if (isContentElement(child)) {
+				index.set(child.id, [child, [i, j]]);
+			}
+		}
+	}
+	return index;
 }
 
 /**
