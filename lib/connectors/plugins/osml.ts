@@ -63,18 +63,18 @@ const OSML_SYSTEM_PROMPT = dedent`
   - Each image description should include all relevant details about the scene (except for art style), even if this requires repeating details from previous descriptions or the story.
 
   ### Sound XML Tags
-  - Frequently break up character (including narration) dialogue to insert tags to describe ambient and transient sounds (as if prompting a sound model) that should accompany a scene. Example:
-    <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
-    <sound>Wind</sound>
-    <narration emotion="alarmed">Suddenly, they heard a tiger roar in the distance.</narration>
-    <sound">Tiger roar</sound>
+  - Frequently break up character (including narration) dialogue to insert <sound> tags (as if prompting a sound model) that should accompany a scene.
   - The descriptions within <sound> tags should be common, simple, short, clear ASMR pleasing sound descriptions like rain, wind, fire crackling, footsteps, etc.
-  - Transient sound tags should be inserted frequently within the narrative prose to describe sounds that are described by the narrator.
-  - Transient sound tags should be placed right after the narrative prose that describes the sound. Example:
+  - The optional loops attribute is an integer (default 1) that controls how many times the generated sound clip plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
+    <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
+    <sound loops="4">Wind</sound>
+    <narration emotion="alarmed">Suddenly, they heard a tiger roar in the distance.</narration>
+    <sound>Tiger roar</sound>
+  - One-shot sound tags should be placed right after the narrative prose that describes the sound. Example:
     <narration emotion="calm">Hana slowly walks into the room</narration>
     <sound>footsteps</sound>
     <narration emotion="calm">and opens the door</narration>
-    <sound">door creaks</sound>
+    <sound>door creaks</sound>
   - Sounds should be subtle, pleasing background sounds like rain, wind, fire crackling, ocean waves, forest birds, river flowing, coffee shop ambient noise, etc.
   - Sounds should NEVER be vocal (no sighing, no gasping, no moaning, no laughter, no crying, etc)
 
@@ -86,6 +86,7 @@ const OSML_SYSTEM_PROMPT = dedent`
 	- The descriptions within <music> tags should be common, simple, short, clear, and direct.
   - Music should change frequently (at least once every few scenes) to keep the reader engaged.
   - length: ${Object.values(MusicLength).join(", ")}
+  - The optional loops attribute is an integer (default 1) that controls how many times the generated music clip plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
 
 	### Metadata Title XML tag
 	- The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:

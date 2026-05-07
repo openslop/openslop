@@ -35,11 +35,11 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="happy">Red got her name from the beautiful red cloak she wore everywhere. Today, she was taking a basket of fresh vegetables to her grandmother, who lived deep in the woods.</narration>
 
-<sound type="ambient">birds chirping</sound>
+<sound loops="5">birds chirping</sound>
 
 <narration emotion="content">Red skipped along the forest path, humming a cheerful tune.</narration>
 
-<sound type="transient">footsteps on dirt path</sound>
+<sound>footsteps on dirt path</sound>
 
 <image animate="true" animation="gentle pan upward through the forest canopy" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</image>
 
@@ -51,7 +51,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="mysterious">Not far away, someone else was in the forest that morning. Wolf was gathering wild berries near the path.</narration>
 
-<sound type="ambient">rustling leaves</sound>
+<sound loops="4">rustling leaves</sound>
 
 <narration emotion="sympathetic">Now, Wolf looked scary with his big teeth and sharp claws, but he had a secret. He didn't eat meat at all! He was a vegetarian who loved berries, nuts, and vegetables.</narration>
 
@@ -69,7 +69,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They decided to walk together, two unlikely friends sharing the forest path.</narration>
 
-<sound type="ambient">forest stream burbling</sound>
+<sound loops="6">forest stream burbling</sound>
 
 <image animate="true" animation="tracking shot following them down the path" characters="Red,Wolf">Red and Wolf walk side by side along a winding forest path lined with ferns. Red gestures animatedly while talking; Wolf listens with a gentle smile. A small stream sparkles in the background. The light is dappled and warm.</image>
 
@@ -87,7 +87,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <character name="Hunter" emotion="kind">"Then walk safe. Tell her I'll bring firewood by tomorrow."</character>
 
-<sound type="transient">creaking wooden bridge</sound>
+<sound>creaking wooden bridge</sound>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 

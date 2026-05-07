@@ -1,5 +1,7 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import type { AllowedOutputFormats } from "@elevenlabs/elevenlabs-js/api";
 import type { BundleFile } from "@/lib/api/asset-bundle";
+import { type AudioFormat, audioDurationSec } from "./audio-duration";
 import { BaseProvider, type WithMetadata } from "./base";
 import { streamToBuffer } from "./stream";
 
@@ -7,7 +9,17 @@ type AudioResult = {
 	data: ArrayBuffer;
 } & WithMetadata;
 
-/** Shared base for ElevenLabs providers that emit a single MP3 audio asset. */
+export function toElevenLabsOutputFormat(
+	format: AudioFormat,
+): AllowedOutputFormats {
+	const value =
+		format.codec === "mp3"
+			? `mp3_${format.sampleRate}_${format.bitrateKbps}`
+			: `pcm_${format.sampleRate}`;
+	return value as AllowedOutputFormats;
+}
+
+/** Shared base for ElevenLabs providers that emit a single audio asset. */
 export abstract class BaseElevenLabsAudio<
 	TParams extends { durationSeconds?: number },
 > extends BaseProvider<TParams, AudioResult> {
@@ -18,11 +30,10 @@ export abstract class BaseElevenLabsAudio<
 		this.client = new ElevenLabsClient({ apiKey });
 	}
 
-	protected abstract readonly defaultDurationSeconds: number;
+	protected abstract readonly outputFormat: AudioFormat;
 
 	protected abstract requestStream(
 		params: TParams,
-		durationSeconds: number,
 	): Promise<ReadableStream<Uint8Array>>;
 
 	protected toFiles(r: AudioResult): BundleFile[] {
@@ -37,12 +48,9 @@ export abstract class BaseElevenLabsAudio<
 	}
 
 	protected async _generate(params: TParams) {
-		const durationSeconds =
-			params.durationSeconds ?? this.defaultDurationSeconds;
-		const stream = await this.requestStream(params, durationSeconds);
-		return {
-			data: await streamToBuffer(stream),
-			metadata: { durationSec: durationSeconds },
-		};
+		const stream = await this.requestStream(params);
+		const data = await streamToBuffer(stream);
+		const durationSec = audioDurationSec(this.outputFormat, data);
+		return { data, metadata: { durationSec } };
 	}
 }

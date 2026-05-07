@@ -21,6 +21,7 @@ export function resolveElements(
 			layer: LAYER_TYPES[el.type],
 			url: snapshot.result.url,
 			durationSec: snapshot.result.durationSec,
+			loops: Math.max(1, Number(el.customAttributes?.loops) || 1),
 		});
 	}
 

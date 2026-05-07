@@ -13,12 +13,13 @@ function jsonResponse(data: unknown) {
 	});
 }
 
-function mockFetchChain() {
+function mockFetchChain(metadata?: Record<string, unknown>) {
 	vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
 		jsonResponse({
 			id: TEST_ID,
 			provider: "openslop",
 			result: { audio: "output.mp3" },
+			...(metadata && { metadata }),
 		}),
 	);
 }
@@ -67,5 +68,17 @@ describe("BaseSFXConnector", () => {
 		});
 		await connector.generate({ prompt: "test" });
 		expect(order).toEqual(["transform", "before", "after"]);
+	});
+
+	it("returns the native asset durationSec from metadata (looping is a layout concern)", async () => {
+		mockFetchChain({ durationSec: 7 });
+		const connector = new OpenSlopSFX({
+			defaultModel: "test-model",
+			models: ["test-model"],
+			isDefault: true,
+			apiKey: "",
+		});
+		const result = await connector.generate({ prompt: "footsteps" });
+		expect(result.durationSec).toBe(7);
 	});
 });

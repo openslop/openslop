@@ -8,7 +8,13 @@ import {
 } from "lucide-react";
 import type { CanvasElementType, ResultKind } from "../types";
 import type { ConnectorType } from "@/lib/connectors/types";
-import { SoundType } from "@/lib/connectors/sfx/enums";
+import { TTSEmotion } from "@/lib/connectors/tts/enums";
+
+export interface AttributeSpec {
+	color: string;
+	label: string;
+	edit?: { options: readonly string[] };
+}
 
 export interface ElementConfig {
 	type: CanvasElementType;
@@ -19,8 +25,11 @@ export interface ElementConfig {
 	bgColor: string;
 	placeholder: string;
 	defaultAttributes?: Record<string, string>;
-	visibleAttributes: Record<string, string>;
+	visibleAttributes: Record<string, AttributeSpec>;
 }
+
+const LOOPS_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
+const EMOTION_OPTIONS = Object.values(TTSEmotion);
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	narration: {
@@ -32,7 +41,11 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		bgColor: "bg-slate-600",
 		placeholder: "Write the narration...",
 		visibleAttributes: {
-			emotion: "bg-pink-500",
+			emotion: {
+				color: "bg-pink-500",
+				label: "Emotion",
+				edit: { options: EMOTION_OPTIONS },
+			},
 		},
 	},
 	character: {
@@ -44,7 +57,11 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		bgColor: "bg-amber-600",
 		placeholder: "What does this character say?",
 		visibleAttributes: {
-			emotion: "bg-pink-500",
+			emotion: {
+				color: "bg-pink-500",
+				label: "Emotion",
+				edit: { options: EMOTION_OPTIONS },
+			},
 		},
 	},
 	image: {
@@ -70,7 +87,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			duration: "5",
 		},
 		visibleAttributes: {
-			duration: "bg-indigo-500",
+			duration: { color: "bg-indigo-500", label: "Duration" },
 		},
 	},
 	sound: {
@@ -83,10 +100,14 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the sound effect...",
 
 		defaultAttributes: {
-			type: SoundType.Transient,
+			loops: "1",
 		},
 		visibleAttributes: {
-			type: "bg-teal-500",
+			loops: {
+				color: "bg-teal-500",
+				label: "Loops",
+				edit: { options: LOOPS_OPTIONS },
+			},
 		},
 	},
 	music: {
@@ -97,7 +118,16 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <Music size={16} className="text-white" />,
 		bgColor: "bg-violet-600",
 		placeholder: "Describe the music...",
-		visibleAttributes: {},
+		defaultAttributes: {
+			loops: "1",
+		},
+		visibleAttributes: {
+			loops: {
+				color: "bg-violet-500",
+				label: "Loops",
+				edit: { options: LOOPS_OPTIONS },
+			},
+		},
 	},
 };
 

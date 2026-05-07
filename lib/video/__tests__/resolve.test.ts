@@ -10,10 +10,12 @@ import type { ElementSnapshot } from "@/lib/generation/queue";
 function makeElement(
 	id: string,
 	type: CanvasContentElement["type"],
+	customAttributes?: Record<string, string>,
 ): CanvasContentElement {
 	return {
 		id,
 		type,
+		...(customAttributes && { customAttributes }),
 		children: [{ id: `${id}-text`, type, text: "test" }],
 	};
 }
@@ -62,6 +64,7 @@ describe("resolveElements", () => {
 			layer: "visual",
 			url: "https://example.com/img.png",
 			durationSec: 3,
+			loops: 1,
 		});
 		expect(resolved[1]).toEqual({
 			id: "nar1",
@@ -70,6 +73,7 @@ describe("resolveElements", () => {
 			layer: "audio",
 			url: "https://example.com/nar.mp3",
 			durationSec: 8,
+			loops: 1,
 		});
 	});
 
@@ -126,6 +130,26 @@ describe("resolveElements", () => {
 			music: "audio",
 			sound: "audio",
 		});
+	});
+
+	it("reads loops from customAttributes (default 1)", () => {
+		const elements = [
+			makeElement("s1", "sound", { loops: "4" }),
+			makeElement("s2", "sound"),
+		];
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		expect(resolved[0].loops).toBe(4);
+		expect(resolved[1].loops).toBe(1);
+	});
+
+	it("clamps invalid loops attributes to at least 1", () => {
+		const elements = [
+			makeElement("s1", "sound", { loops: "0" }),
+			makeElement("s2", "sound", { loops: "not-a-number" }),
+		];
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		expect(resolved[0].loops).toBe(1);
+		expect(resolved[1].loops).toBe(1);
 	});
 
 	it("skips all elements when none have results", () => {

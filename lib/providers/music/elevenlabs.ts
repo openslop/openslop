@@ -1,19 +1,24 @@
 import type { MusicGenerateParams } from "@/lib/connectors/types";
-import { BaseElevenLabsAudio } from "../elevenlabs";
+import type { AudioFormat } from "../audio-duration";
+import { BaseElevenLabsAudio, toElevenLabsOutputFormat } from "../elevenlabs";
 
 export class ElevenLabsMusic extends BaseElevenLabsAudio<MusicGenerateParams> {
 	protected readonly blobConfig = { type: "music", provider: "elevenlabs" };
-	protected readonly defaultDurationSeconds = 30;
+	protected readonly outputFormat: AudioFormat = {
+		codec: "mp3",
+		sampleRate: 22050,
+		bitrateKbps: 32,
+	};
 
-	protected requestStream(
-		params: MusicGenerateParams,
-		durationSeconds: number,
-	) {
+	protected requestStream(params: MusicGenerateParams) {
 		return this.client.music.compose({
 			prompt: params.prompt,
-			musicLengthMs: durationSeconds * 1000,
+			musicLengthMs:
+				params.durationSeconds != null
+					? params.durationSeconds * 1000
+					: undefined,
 			modelId: (params.model as "music_v1") || "music_v1",
-			outputFormat: "mp3_22050_32",
+			outputFormat: toElevenLabsOutputFormat(this.outputFormat),
 		});
 	}
 }

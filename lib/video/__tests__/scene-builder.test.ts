@@ -36,6 +36,7 @@ function el(
 		layer: layers[overrides.type],
 		url: `https://example.com/${overrides.id}`,
 		durationSec: 0,
+		loops: 1,
 		...overrides,
 	};
 }
@@ -261,6 +262,21 @@ describe("buildVideoLayout", () => {
 			expect(seqs(layout, "music")[1].duration).toBe(20);
 		});
 
+		it("emits N consecutive copies for a looped background, trimmed to the foreground span", () => {
+			const layout = buildVideoLayout([
+				el({ id: "m1", type: "music", durationSec: 10, loops: 4 }),
+				el({ id: "img1", type: "image", durationSec: 25 }),
+			]);
+			const music = seqs(layout, "music");
+			expect(music).toHaveLength(4);
+			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
+			expect(music[1]).toMatchObject({ start: 10, duration: 10 });
+			expect(music[2]).toMatchObject({ start: 20, duration: 5 });
+			expect(music[3].start).toBe(30);
+			expect(music[3].duration).toBe(1);
+			expect(layout.totalDurationSec).toBe(25);
+		});
+
 		it("emits a clamped background sequence when no series elements exist", () => {
 			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 30 }),
@@ -307,6 +323,37 @@ describe("buildVideoLayout", () => {
 			expect(seqs(layout, "sound")[0].duration).toBe(20);
 			expect(seqs(layout, "sound")[1].start).toBe(0);
 			expect(seqs(layout, "sound")[1].duration).toBe(20);
+		});
+
+		it("emits N consecutive copies of a looped effect at the native clip duration", () => {
+			const layout = buildVideoLayout([
+				el({ id: "clip1", type: "clip", durationSec: 12 }),
+				el({ id: "s1", type: "sound", durationSec: 4, loops: 3 }),
+			]);
+			const sound = seqs(layout, "sound");
+			expect(sound).toHaveLength(3);
+			expect(sound[0].start).toBe(0);
+			expect(sound[0].duration).toBe(4);
+			expect(sound[1].start).toBe(4);
+			expect(sound[1].duration).toBe(4);
+			expect(sound[2].start).toBe(8);
+			expect(sound[2].duration).toBe(4);
+			expect(sound.every((s) => s.element?.id === "s1")).toBe(true);
+		});
+
+		it("trims looped effect copies that extend past the total duration", () => {
+			const layout = buildVideoLayout([
+				el({ id: "clip1", type: "clip", durationSec: 5 }),
+				el({ id: "s1", type: "sound", durationSec: 4, loops: 3 }),
+			]);
+			const sound = seqs(layout, "sound");
+			expect(sound).toHaveLength(3);
+			expect(sound[0].start).toBe(0);
+			expect(sound[0].duration).toBe(4);
+			expect(sound[1].start).toBe(4);
+			expect(sound[1].duration).toBe(1);
+			expect(sound[2].start).toBe(8);
+			expect(sound[2].duration).toBe(1);
 		});
 
 		it("emits a clamped effect sequence when no series elements exist", () => {

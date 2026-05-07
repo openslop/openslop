@@ -21,9 +21,16 @@ function pushSequence(
 	element: ResolvedElement,
 	start: number,
 ) {
-	(sequences[element.type] ??= []).push(
-		createSequence(element, start, element.durationSec),
-	);
+	const list = (sequences[element.type] ??= []);
+	for (let i = 0; i < element.loops; i++) {
+		list.push(
+			createSequence(
+				element,
+				start + i * element.durationSec,
+				element.durationSec,
+			),
+		);
+	}
 }
 
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {

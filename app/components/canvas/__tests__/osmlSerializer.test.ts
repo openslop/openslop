@@ -219,7 +219,7 @@ describe("OSMLSerializer.serializeWithScenes", () => {
 		const result = OSMLSerializer.serializeWithScenes([
 			wrap(
 				elWithId("narration", "n1", "first"),
-				elWithId("sound", "s1", "rain", { type: "ambient" }),
+				elWithId("sound", "s1", "rain", { loops: "3" }),
 			),
 		]);
 		const lines = result.split("\n").filter(Boolean);

@@ -52,7 +52,7 @@ describe("RefineOpParser", () => {
 	it("parses insert ops with all fields", () => {
 		const parser = new RefineOpParser();
 		const ops = parser.push(
-			'{"op":"insert","anchor_id":"x","position":"before","type":"sound","attrs":{"type":"ambient"},"text":"rain"}\n',
+			'{"op":"insert","anchor_id":"x","position":"before","type":"sound","attrs":{"loops":"3"},"text":"rain"}\n',
 		);
 		expect(ops).toEqual([
 			{
@@ -60,7 +60,7 @@ describe("RefineOpParser", () => {
 				anchor_id: "x",
 				position: "before",
 				type: "sound",
-				attrs: { type: "ambient" },
+				attrs: { loops: "3" },
 				text: "rain",
 			},
 		]);
