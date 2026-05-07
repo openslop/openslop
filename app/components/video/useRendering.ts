@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { readSSE, type SSEMessage } from "@/lib/api/sse";
+import { stringifyError } from "@/lib/errors";
 import type { VideoLayout } from "@/lib/video/types";
 
 type RenderState =
@@ -51,7 +52,7 @@ export function useRendering() {
 		} catch (err) {
 			setState({
 				status: "error",
-				message: err instanceof Error ? err.message : "Render failed",
+				message: stringifyError(err),
 			});
 		}
 	}, []);

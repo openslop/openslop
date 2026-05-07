@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Instrument_Serif } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import BackgroundGradientAnimation from "./components/BackgroundGradientAnimation";
 
@@ -51,6 +52,7 @@ export default function RootLayout({
 				<BackgroundGradientAnimation />
 
 				<div className="relative">{children}</div>
+				<Toaster theme="dark" position="bottom-center" richColors />
 			</body>
 		</html>
 	);

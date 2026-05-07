@@ -28,6 +28,9 @@ import GlassDropdown, {
 	type GlassDropdownOption,
 } from "@/app/components/GlassDropdown";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
+import { stringifyError } from "@/lib/errors";
+import { uploadImage } from "@/lib/upload/uploadImage";
+import { toast } from "sonner";
 import OrbLoader from "./OrbLoader";
 
 const LOADING_MESSAGES = [
@@ -168,18 +171,10 @@ function AttachMenu({
 		if (!file) return;
 
 		setUploading(true);
-		const formData = new FormData();
-		formData.append("file", file);
-
 		try {
-			const res = await fetch("/api/upload/image", {
-				method: "POST",
-				body: formData,
-			});
-			const data = await res.json();
-			if (res.ok && data.url) {
-				onUpload(data.url);
-			}
+			onUpload(await uploadImage(file));
+		} catch (err) {
+			toast.error(stringifyError(err));
 		} finally {
 			setUploading(false);
 			if (inputRef.current) inputRef.current.value = "";

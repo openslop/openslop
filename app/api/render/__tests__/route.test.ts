@@ -172,20 +172,26 @@ describe("POST /api/render", () => {
 		const res = await POST(makeRequest({ inputProps: {} }));
 		const events = (await collectSSE(res)) as Array<Record<string, unknown>>;
 
-		const error = events.find((e) => e.type === "error");
-		expect(error).toMatchObject({ type: "error", message: "render boom" });
+		const error = events.find((e) => e.type === "error") as {
+			type: string;
+			message: string;
+		};
+		expect(error.type).toBe("error");
+		expect(JSON.parse(error.message)).toMatchObject({ message: "render boom" });
 		expect(mockSandboxStop).toHaveBeenCalled();
 	});
 
-	it("falls back to generic message for non-Error throws", async () => {
+	it("serializes non-Error throws", async () => {
 		mockRenderMediaOnVercel.mockRejectedValue("string failure");
 
 		const { POST } = await import("../route");
 		const res = await POST(makeRequest({ inputProps: {} }));
 		const events = (await collectSSE(res)) as Array<Record<string, unknown>>;
 
-		const error = events.find((e) => e.type === "error");
-		expect(error).toMatchObject({ message: "Render failed" });
+		const error = events.find((e) => e.type === "error") as { message: string };
+		expect(JSON.parse(error.message)).toMatchObject({
+			message: expect.stringContaining("string failure"),
+		});
 	});
 
 	it("forwards createSandbox progress with development subtitle", async () => {
