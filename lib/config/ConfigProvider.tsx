@@ -68,7 +68,6 @@ type ConfigContextValue = {
 	connectorConfig: ConnectorRegistry;
 	composerMode: ComposerMode;
 	selectedTemplateId: string | null;
-	setConnectorConfig: React.Dispatch<React.SetStateAction<ConnectorRegistry>>;
 	setComposerMode: React.Dispatch<React.SetStateAction<ComposerMode>>;
 	setSelectedTemplateId: React.Dispatch<React.SetStateAction<string | null>>;
 };
@@ -83,9 +82,7 @@ export function useConfig() {
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
 	const projectId = MOCK_PROJECT_ID;
-	const [connectorConfig, setConnectorConfig] = useState<ConnectorRegistry>(
-		initialConnectorConfig,
-	);
+	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
 	const [composerMode, setComposerMode] = useState<ComposerMode>("story");
 	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
 		TEMPLATES[0]?.id ?? null,
@@ -111,7 +108,6 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 			connectorConfig: configWithPlugins,
 			composerMode,
 			selectedTemplateId,
-			setConnectorConfig,
 			setComposerMode,
 			setSelectedTemplateId,
 		}),

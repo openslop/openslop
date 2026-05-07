@@ -1,4 +1,5 @@
 import { stringifyError } from "../errors";
+import { logger } from "./logger";
 
 export type SSEMessage =
 	| { type: "phase"; phase: string; progress: number; subtitle?: string }
@@ -36,6 +37,27 @@ export function createSSEResponse(
 		.finally(() => writer.close().catch(() => {}));
 
 	return new Response(stream.readable, { headers: SSE_HEADERS });
+}
+
+export function createSSEStreamResponse<T>(
+	iter: AsyncIterable<T>,
+	label: string,
+): Response {
+	const encoder = new TextEncoder();
+	const stream = new ReadableStream({
+		async start(controller) {
+			try {
+				for await (const chunk of iter) {
+					controller.enqueue(encoder.encode(formatSSE(chunk)));
+				}
+				controller.close();
+			} catch (error) {
+				logger.error(error, `${label} stream error`);
+				controller.error(error);
+			}
+		},
+	});
+	return new Response(stream, { headers: SSE_HEADERS });
 }
 
 export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
