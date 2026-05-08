@@ -8,14 +8,14 @@ import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
 	getEditor: () => Editor | null,
-	structureKey: string,
-): VideoLayout | null {
+	layoutKey: string,
+): { layout: VideoLayout | null; playerKey: string } {
 	const resultVersion = useSyncExternalStore(
 		generationQueue.subscribe,
 		generationQueue.getResultVersion,
 	);
 
-	return useMemo(() => {
+	const layout = useMemo(() => {
 		const editor = getEditor();
 		if (!editor) return null;
 		const elements = editor.children as CanvasElement[];
@@ -25,5 +25,7 @@ export function useVideoLayout(
 		);
 		return buildVideoLayout(resolved);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [getEditor, structureKey, resultVersion]);
+	}, [getEditor, layoutKey, resultVersion]);
+
+	return { layout, playerKey: `${layoutKey}-${resultVersion}` };
 }

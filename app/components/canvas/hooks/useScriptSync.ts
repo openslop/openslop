@@ -1,25 +1,16 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Editor, Transforms } from "slate";
 import { useScript } from "@/lib/script/ScriptProvider";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import {
 	CANVAS_ELEMENT_TYPES,
 	type CanvasContentElement,
 	type CanvasElementType,
 } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
-import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
 import { findNodeById, updateNodeText } from "../utils/editorOps";
-import flow from "lodash/fp/flow";
 
 export function useScriptSync(editor: Editor): void {
 	const { nodes } = useScript();
-	const { connectorConfig } = useConfig();
-
-	const normalize = useMemo(
-		() => flow(trimWhitespace, hydrateConnectorConfig(connectorConfig)),
-		[connectorConfig],
-	);
 
 	useEffect(() => {
 		Editor.withoutNormalizing(editor, () => {
@@ -27,38 +18,23 @@ export function useScriptSync(editor: Editor): void {
 				if (!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType)) continue;
 
 				const canvasNode = node as CanvasContentElement;
-				const normalized = normalize(canvasNode);
-				if (shouldSkipNode(normalized)) continue;
+				if (OSMLSerializer.getTextContent(canvasNode).length === 0) continue;
 
-				const entry = findNodeById(editor, node.id);
+				const entry = findNodeById(editor, canvasNode.id);
 
 				if (entry) {
 					const [, path] = entry;
 					updateNodeText(
 						editor,
 						path,
-						OSMLSerializer.getTextContent(normalized),
+						OSMLSerializer.getTextContent(canvasNode),
 					);
 				} else {
-					Transforms.insertNodes(editor, normalized, {
+					Transforms.insertNodes(editor, canvasNode, {
 						at: [editor.children.length],
 					});
 				}
 			}
 		});
-	}, [nodes, editor, normalize]);
-}
-
-function trimWhitespace(node: CanvasContentElement): CanvasContentElement {
-	return {
-		...node,
-		children: node.children.map((child) => ({
-			...child,
-			text: child.text.trim(),
-		})),
-	};
-}
-
-function shouldSkipNode(node: CanvasContentElement): boolean {
-	return OSMLSerializer.getTextContent(node).length === 0;
+	}, [nodes, editor]);
 }

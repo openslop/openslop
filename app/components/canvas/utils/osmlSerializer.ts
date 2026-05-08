@@ -1,8 +1,15 @@
 import { Descendant } from "slate";
-import type { CanvasContentElement, ParsedElement } from "../types";
+import {
+	CANVAS_ELEMENT_TYPES,
+	type CanvasContentElement,
+	type CanvasElementType,
+	type ParsedElement,
+} from "../types";
+import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getContentElements, makeNodeId } from "./nodeUtils";
 import { isSceneElement } from "./guards";
 import { parseXmlTag } from "./parseXmlTag";
+import { createCanvasNode } from "./createCanvasNode";
 
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
@@ -10,6 +17,8 @@ const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
 export class OSMLSerializer {
 	private buffer = "";
 	private nodes: ParsedElement[] = [];
+
+	constructor(private connectors: ConnectorRegistry) {}
 
 	static serialize(descendants: Descendant[]): string {
 		return getContentElements(descendants)
@@ -94,13 +103,22 @@ export class OSMLSerializer {
 	}
 
 	private appendNext(type: string, attributes: Record<string, string>): void {
-		const next: ParsedElement = {
+		if (CANVAS_ELEMENT_TYPES.has(type as CanvasElementType)) {
+			const { id, ...attrs } = attributes;
+			this.nodes.push(
+				createCanvasNode(type as CanvasElementType, this.connectors, {
+					id,
+					attrs,
+				}),
+			);
+			return;
+		}
+		this.nodes.push({
 			id: makeNodeId(),
 			type,
 			customAttributes: attributes,
 			children: [{ id: makeNodeId(), type, text: "" }],
-		};
-		this.nodes.push(next);
+		});
 	}
 
 	private shouldFlushBuffer(): boolean {
