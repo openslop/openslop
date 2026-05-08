@@ -26,18 +26,19 @@ describe("ElevenLabsMusic", () => {
 		vi.clearAllMocks();
 	});
 
-	it("generates music and uploads to blob storage", async () => {
-		const audio = new Uint8Array([1, 2, 3, 4]);
+	it("omits musicLengthMs and computes duration from buffer when no duration provided", async () => {
+		// 4000 bytes at 32 kbps CBR mp3 = 1 second
+		const audio = new Uint8Array(4000);
 		mockCompose.mockResolvedValue(mockReadableStream(audio));
 
 		const provider = new ElevenLabsMusic("test-key");
 		const result = await provider.generate({ prompt: "jazz" });
 
 		expect(result.result.audio).toBe("url");
-		expect(result.metadata?.durationSec).toBe(30);
+		expect(result.metadata?.durationSec).toBe(1);
 		expect(mockCompose).toHaveBeenCalledWith({
 			prompt: "jazz",
-			musicLengthMs: 30000,
+			musicLengthMs: undefined,
 			modelId: "music_v1",
 			outputFormat: "mp3_22050_32",
 		});

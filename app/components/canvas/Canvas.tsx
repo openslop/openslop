@@ -31,6 +31,7 @@ import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
 import { AssetsSection } from "./elements/AssetsSection";
 import { getContentElements } from "./utils/nodeUtils";
+import { getLayoutKey } from "@/lib/video/layoutKey";
 import { PreviewCacheProvider } from "./PreviewCacheContext";
 import { ViewModeProvider } from "./ViewModeContext";
 
@@ -41,10 +42,10 @@ export interface CanvasHandle {
 
 export default function Canvas({
 	ref,
-	onStructureChange,
+	onLayoutKeyChange,
 }: {
 	ref?: Ref<CanvasHandle>;
-	onStructureChange?: (key: string) => void;
+	onLayoutKeyChange?: (key: string) => void;
 }) {
 	const { editor, value, setValue } = useEditorSetup();
 
@@ -65,14 +66,14 @@ export default function Canvas({
 	useMetadataSync();
 	const { generateAll } = useGenerateAll(editor);
 
-	const structureKey = contentElements.map((el) => el.id).join(",");
-	const prevKeyRef = useRef(structureKey);
+	const layoutKey = getLayoutKey(contentElements);
+	const prevKeyRef = useRef(layoutKey);
 	useEffect(() => {
-		if (structureKey !== prevKeyRef.current) {
-			prevKeyRef.current = structureKey;
-			onStructureChange?.(structureKey);
+		if (layoutKey !== prevKeyRef.current) {
+			prevKeyRef.current = layoutKey;
+			onLayoutKeyChange?.(layoutKey);
 		}
-	}, [structureKey, onStructureChange]);
+	}, [layoutKey, onLayoutKeyChange]);
 
 	useImperativeHandle(ref, () => ({ generateAll, getEditor: () => editor }), [
 		generateAll,

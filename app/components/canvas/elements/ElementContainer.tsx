@@ -1,7 +1,6 @@
 import { JSX } from "react";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { Node } from "slate";
-import type { ProviderKey } from "@/lib/connectors/types";
 import type { CanvasContentElement, SceneElement } from "../types";
 import { isSceneElement } from "../utils/guards";
 import { getElementCharacterNames } from "../utils/characters";
@@ -10,18 +9,12 @@ import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import { useViewMode } from "../ViewModeContext";
 import { OutputPreview } from "./OutputPreview";
-import { ModelSelector } from "./ModelSelector";
 import { DeleteButton } from "./DeleteButton";
 import { CompactElement } from "./CompactElement";
 import { SceneContainer } from "./SceneContainer";
 import { CharacterPill } from "./CharacterBadge";
-
-const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
-
-function formatAttributeDisplay(key: string, value: string): string {
-	const unit = ATTRIBUTE_UNITS[key];
-	return unit ? `${value}${unit}` : value;
-}
+import { AttributeBadge } from "./AttributeBadge";
+import { ModelBadge } from "./ModelBadge";
 
 interface ElementContainerProps {
 	attributes: RenderElementProps["attributes"];
@@ -35,7 +28,6 @@ export function ElementContainer({
 	element,
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
-	const { model, provider } = element.customAttributes ?? {};
 	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
 	const gen = useGenerate(element);
 
@@ -63,33 +55,21 @@ export function ElementContainer({
 						{getElementCharacterNames(element).map((name) => (
 							<CharacterPill key={`char:${name}`} name={name} />
 						))}
-						{Object.entries(config.visibleAttributes).map(([key, color]) => {
-							const value = element.customAttributes?.[key];
-							if (!value) return null;
-							return (
-								<span
-									key={key}
-									className={`${color} text-white text-[12px] px-1.5 py-0.5 rounded-full truncate max-w-[100px]`}
-									title={value}
-								>
-									{formatAttributeDisplay(key, value)}
-								</span>
-							);
-						})}
-						{model && provider && (
-							<ModelSelector
+						{Object.entries(config.visibleAttributes).map(([key, spec]) => (
+							<AttributeBadge
+								key={key}
 								element={element}
-								model={model}
-								provider={provider as ProviderKey}
+								attrKey={key}
+								spec={spec}
 							/>
-						)}
+						))}
+						<ModelBadge element={element} />
 					</div>
 					<div className="relative min-w-0">
 						{isEmpty && (
 							<div
-								contentEditable={false}
 								style={{ userSelect: "none" }}
-								className="absolute top-0 left-0 text-white/50 text-xs text-left"
+								className="absolute top-0 left-0 text-white/50 text-xs text-left pointer-events-none"
 							>
 								{config.placeholder}
 							</div>

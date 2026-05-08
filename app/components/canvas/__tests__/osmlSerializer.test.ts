@@ -6,6 +6,28 @@ import {
 	type ParsedElement,
 	type SceneElement,
 } from "../types";
+import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+
+const connectors: ConnectorRegistry = {
+	llm: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	tts: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	image: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	video: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	sfx: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+	music: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
+};
 
 function el(
 	type: CanvasContentElement["type"],
@@ -69,42 +91,44 @@ describe("OSMLSerializer.serialize", () => {
 describe("OSMLSerializer streaming", () => {
 	it("parses a single complete tag", () => {
 		const s = new OSMLSerializer();
-		s.appendChunk("<image>a sunset</image>");
+		s.appendChunk("<image>a sunset</image>", connectors);
 		const nodes = s.getNodes() as ParsedElement[];
 
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("image");
-		expect(nodes[0].children[0].text).toBe("a sunset");
+		expect(OSMLSerializer.getTextContent(nodes[0])).toContain("a sunset");
 	});
 
 	it("handles streaming chunks across tag boundaries", () => {
 		const s = new OSMLSerializer();
-		s.appendChunk("<char");
-		s.appendChunk('acter name="Al');
-		s.appendChunk('ice">Hello');
-		s.appendChunk(" world</character>");
+		s.appendChunk("<char", connectors);
+		s.appendChunk('acter name="Al', connectors);
+		s.appendChunk('ice">Hello', connectors);
+		s.appendChunk(" world</character>", connectors);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("character");
 		expect(nodes[0].customAttributes?.name).toBe("Alice");
-		expect(nodes[0].children[0].text).toBe("Hello world");
+		expect(OSMLSerializer.getTextContent(nodes[0])).toContain("Hello world");
 	});
 
 	it("flushes plain text after buffer threshold", () => {
 		const s = new OSMLSerializer();
 		// Need an initial node for text to append to
-		s.appendChunk("<narration>");
-		s.appendChunk("Some long narration text here");
+		s.appendChunk("<narration>", connectors);
+		s.appendChunk("Some long narration text here", connectors);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].children[0].text).toBe("Some long narration text here");
+		expect(OSMLSerializer.getTextContent(nodes[0])).toContain(
+			"Some long narration text here",
+		);
 	});
 
 	it("preserves raw tag name for unknown tags", () => {
 		const s = new OSMLSerializer();
-		s.appendChunk("<unknowntag>content</unknowntag>");
+		s.appendChunk("<unknowntag>content</unknowntag>", connectors);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
@@ -115,6 +139,7 @@ describe("OSMLSerializer streaming", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk(
 			"<metadata_style>Warm earth tones with watercolor style</metadata_style>",
+			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -129,6 +154,7 @@ describe("OSMLSerializer streaming", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk(
 			'<metadata_character name="Mia">Brown hair, green eyes</metadata_character>',
+			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -142,6 +168,7 @@ describe("OSMLSerializer streaming", () => {
 		const s = new OSMLSerializer();
 		s.appendChunk(
 			'<metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>',
+			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -158,10 +185,14 @@ describe("OSMLSerializer streaming", () => {
 
 	it("parses mixed canvas and metadata tags", () => {
 		const s = new OSMLSerializer();
-		s.appendChunk("<metadata_style>dark moody tones</metadata_style>");
-		s.appendChunk("<narration>Once upon a time</narration>");
+		s.appendChunk(
+			"<metadata_style>dark moody tones</metadata_style>",
+			connectors,
+		);
+		s.appendChunk("<narration>Once upon a time</narration>", connectors);
 		s.appendChunk(
 			'<metadata_character name="Bob">tall and thin</metadata_character>',
+			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -173,13 +204,46 @@ describe("OSMLSerializer streaming", () => {
 
 	it("parses attributes correctly", () => {
 		const s = new OSMLSerializer();
-		s.appendChunk('<sound effect="thunder" volume="loud">boom</sound>');
+		s.appendChunk(
+			'<sound effect="thunder" volume="loud">boom</sound>',
+			connectors,
+		);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].customAttributes).toEqual({
+		expect(nodes[0].customAttributes).toMatchObject({
 			effect: "thunder",
 			volume: "loud",
+		});
+	});
+
+	it("backfills defaultAttributes for streamed canvas elements", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk("<sound>thunder</sound>", connectors);
+		s.appendChunk("<music>epic orchestral</music>", connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes[0].customAttributes?.loops).toBe("1");
+		expect(nodes[1].customAttributes?.loops).toBe("1");
+	});
+
+	it("preserves explicit id attribute as node.id for canvas elements", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk('<sound id="abc">thunder</sound>', connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes[0].id).toBe("abc");
+		expect(nodes[0].customAttributes?.id).toBeUndefined();
+	});
+
+	it("hydrates connector model and provider on streamed canvas elements", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk("<image>a sunset</image>", connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes[0].customAttributes).toMatchObject({
+			model: "m",
+			provider: "openslop",
 		});
 	});
 });
@@ -219,7 +283,7 @@ describe("OSMLSerializer.serializeWithScenes", () => {
 		const result = OSMLSerializer.serializeWithScenes([
 			wrap(
 				elWithId("narration", "n1", "first"),
-				elWithId("sound", "s1", "rain", { type: "ambient" }),
+				elWithId("sound", "s1", "rain", { loops: "3" }),
 			),
 		]);
 		const lines = result.split("\n").filter(Boolean);

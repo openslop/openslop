@@ -21,7 +21,7 @@ vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
 			connector: "sfx",
 			outputKind: "audio",
 			label: "Sound",
-			defaultAttributes: { type: "ambient" },
+			defaultAttributes: { loops: "1" },
 			visibleAttributes: {},
 		},
 		image: {
@@ -266,7 +266,7 @@ describe("applyRefineOp — insert", () => {
 				op: "insert",
 				type: "sound",
 				text: "rain",
-				attrs: { type: "transient" },
+				attrs: { loops: "3" },
 			},
 			anchorMap,
 			connectors,
@@ -279,7 +279,7 @@ describe("applyRefineOp — insert", () => {
 		})) {
 			nodes.push(node as CanvasContentElement);
 		}
-		expect(nodes[0].customAttributes).toEqual({ type: "transient" });
+		expect(nodes[0].customAttributes).toEqual({ loops: "3" });
 	});
 });
 

@@ -1,15 +1,20 @@
 import type { SFXGenerateParams } from "@/lib/connectors/types";
-import { BaseElevenLabsAudio } from "../elevenlabs";
+import type { AudioFormat } from "../audio-duration";
+import { BaseElevenLabsAudio, toElevenLabsOutputFormat } from "../elevenlabs";
 
 export class ElevenLabsSFX extends BaseElevenLabsAudio<SFXGenerateParams> {
 	protected readonly blobConfig = { type: "sfx", provider: "elevenlabs" };
-	protected readonly defaultDurationSeconds = 5;
+	protected readonly outputFormat: AudioFormat = {
+		codec: "mp3",
+		sampleRate: 22050,
+		bitrateKbps: 32,
+	};
 
-	protected requestStream(params: SFXGenerateParams, durationSeconds: number) {
+	protected requestStream(params: SFXGenerateParams) {
 		return this.client.textToSoundEffects.convert({
 			text: params.prompt,
-			durationSeconds,
-			outputFormat: "mp3_22050_32",
+			durationSeconds: params.durationSeconds,
+			outputFormat: toElevenLabsOutputFormat(this.outputFormat),
 		});
 	}
 }

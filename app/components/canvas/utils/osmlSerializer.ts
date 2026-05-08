@@ -1,8 +1,15 @@
 import { Descendant } from "slate";
-import type { CanvasContentElement, ParsedElement } from "../types";
+import {
+	CANVAS_ELEMENT_TYPES,
+	type CanvasContentElement,
+	type CanvasElementType,
+	type ParsedElement,
+} from "../types";
+import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getContentElements, makeNodeId } from "./nodeUtils";
 import { isSceneElement } from "./guards";
 import { parseXmlTag } from "./parseXmlTag";
+import { createCanvasNode } from "./createCanvasNode";
 
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
@@ -43,16 +50,16 @@ export class OSMLSerializer {
 		return `<${tagName}${attrString}>${content}</${tagName}>\n`;
 	}
 
-	appendChunk(chunk: string): boolean {
+	appendChunk(chunk: string, connectors: ConnectorRegistry): boolean {
 		this.buffer += chunk;
-		return this.parseBuffer();
+		return this.parseBuffer(connectors);
 	}
 
 	getNodes(): ParsedElement[] {
 		return this.nodes;
 	}
 
-	private parseBuffer(): boolean {
+	private parseBuffer(connectors: ConnectorRegistry): boolean {
 		TAG_PATTERN.lastIndex = 0;
 
 		if (this.shouldFlushBuffer()) {
@@ -75,7 +82,7 @@ export class OSMLSerializer {
 			const openTag = match[1];
 			if (openTag) {
 				const { tag, ...attributes } = parseXmlTag(openTag);
-				this.appendNext(tag, attributes);
+				this.appendNext(tag, attributes, connectors);
 			}
 			lastIndex = match.index + match[0].length;
 		}
@@ -93,14 +100,27 @@ export class OSMLSerializer {
 		lastChild.text += text ?? "";
 	}
 
-	private appendNext(type: string, attributes: Record<string, string>): void {
-		const next: ParsedElement = {
+	private appendNext(
+		type: string,
+		attributes: Record<string, string>,
+		connectors: ConnectorRegistry,
+	): void {
+		if (CANVAS_ELEMENT_TYPES.has(type as CanvasElementType)) {
+			const { id, ...attrs } = attributes;
+			this.nodes.push(
+				createCanvasNode(type as CanvasElementType, connectors, {
+					id,
+					attrs,
+				}),
+			);
+			return;
+		}
+		this.nodes.push({
 			id: makeNodeId(),
 			type,
 			customAttributes: attributes,
 			children: [{ id: makeNodeId(), type, text: "" }],
-		};
-		this.nodes.push(next);
+		});
 	}
 
 	private shouldFlushBuffer(): boolean {

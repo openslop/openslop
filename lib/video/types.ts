@@ -29,6 +29,7 @@ export type ResolvedElement = {
 	layer: LayerType;
 	url: string;
 	durationSec: number;
+	loops: number;
 };
 
 export type Sequence = {

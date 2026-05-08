@@ -26,18 +26,19 @@ describe("ElevenLabsSFX", () => {
 		vi.clearAllMocks();
 	});
 
-	it("generates sfx and uploads to blob storage", async () => {
-		const audio = new Uint8Array([5, 6, 7]);
+	it("omits durationSeconds and computes duration from buffer when no duration provided", async () => {
+		// 8000 bytes at 32 kbps CBR mp3 = 2 seconds
+		const audio = new Uint8Array(8000);
 		mockConvert.mockResolvedValue(mockReadableStream(audio));
 
 		const provider = new ElevenLabsSFX("test-key");
 		const result = await provider.generate({ prompt: "boom" });
 
 		expect(result.result.audio).toBe("url");
-		expect(result.metadata?.durationSec).toBe(5);
+		expect(result.metadata?.durationSec).toBe(2);
 		expect(mockConvert).toHaveBeenCalledWith({
 			text: "boom",
-			durationSeconds: 5,
+			durationSeconds: undefined,
 			outputFormat: "mp3_22050_32",
 		});
 	});

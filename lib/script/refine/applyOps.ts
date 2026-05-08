@@ -5,8 +5,7 @@ import {
 	updateNodeText,
 } from "@/app/components/canvas/utils/editorOps";
 import { insertElement } from "@/app/components/canvas/utils/insertElement";
-import { hydrateConnectorConfig } from "@/app/components/canvas/utils/hydrateConnectorConfig";
-import { ELEMENT_CONFIGS } from "@/app/components/canvas/config/elementConfigs";
+import { createCanvasNode } from "@/app/components/canvas/utils/createCanvasNode";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { RefineOp } from "./types";
 
@@ -84,15 +83,10 @@ function applySet(
 	let [element, path] = entry;
 
 	if (op.type && op.type !== element.type) {
-		const defaults = ELEMENT_CONFIGS[op.type].defaultAttributes ?? {};
-		const hydrated = hydrateConnectorConfig(connectors)({
-			...element,
-			type: op.type,
-			customAttributes: defaults,
-		});
+		const replacement = createCanvasNode(op.type, connectors, { id: op.id });
 		Transforms.setNodes(
 			editor,
-			{ type: op.type, customAttributes: hydrated.customAttributes },
+			{ type: op.type, customAttributes: replacement.customAttributes },
 			{ at: path },
 		);
 		// Re-fetch the updated element for subsequent attr/text changes

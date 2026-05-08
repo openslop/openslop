@@ -21,9 +21,29 @@ function pushSequence(
 	element: ResolvedElement,
 	start: number,
 ) {
-	(sequences[element.type] ??= []).push(
-		createSequence(element, start, element.durationSec),
-	);
+	const list = (sequences[element.type] ??= []);
+	for (let i = 0; i < element.loops; i++) {
+		list.push(
+			createSequence(
+				element,
+				start + i * element.durationSec,
+				element.durationSec,
+			),
+		);
+	}
+}
+
+function trimSequencesAt(list: Sequence[] | undefined, cutoff: number) {
+	if (!list) return;
+	while (list.length > 0) {
+		const last = list[list.length - 1];
+		if (last.start >= cutoff) {
+			list.pop();
+			continue;
+		}
+		last.duration = Math.min(last.duration, cutoff - last.start);
+		return;
+	}
 }
 
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {
@@ -59,16 +79,7 @@ export function buildVideoLayout(
 				break;
 			}
 			case "background": {
-				const prev = sequences[element.type]?.at(-1);
-				if (prev) {
-					prev.duration = Math.min(
-						prev.duration,
-						foregroundCursor - prev.start,
-					);
-					if (prev.duration === 0) {
-						sequences[element.type]?.pop();
-					}
-				}
+				trimSequencesAt(sequences[element.type], foregroundCursor);
 				pushSequence(sequences, element, foregroundCursor);
 				break;
 			}

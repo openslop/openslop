@@ -20,7 +20,7 @@ import genStyles from "./styles/gen-button.module.css";
 function PostPromptViewInner() {
 	const { loading: scriptLoading, stopGeneration } = useScript();
 	const canvasRef = useRef<CanvasHandle>(null);
-	const [structureKey, setStructureKey] = useState("");
+	const [layoutKey, setLayoutKey] = useState("");
 	const { position, visible } = usePlayerPosition();
 
 	const getEditor = useCallback(
@@ -69,7 +69,7 @@ function PostPromptViewInner() {
 				</div>
 			</div>
 
-			<VideoLayoutProvider getEditor={getEditor} structureKey={structureKey}>
+			<VideoLayoutProvider getEditor={getEditor} layoutKey={layoutKey}>
 				{visible && isTop && <TopPlayerPanel />}
 
 				<div className="flex min-h-0 flex-1 overflow-hidden">
@@ -80,7 +80,7 @@ function PostPromptViewInner() {
 						<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 						<div className="mx-auto max-w-6xl px-4 py-4">
 							<ProjectTitle />
-							<Canvas ref={canvasRef} onStructureChange={setStructureKey} />
+							<Canvas ref={canvasRef} onLayoutKeyChange={setLayoutKey} />
 						</div>
 					</div>
 

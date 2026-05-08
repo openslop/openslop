@@ -1,6 +1,5 @@
 import dedent from "dedent";
 import { CANVAS_ELEMENT_TYPES } from "@/app/components/canvas/types";
-import { SoundType } from "../sfx/enums";
 import { MusicLength } from "../music/enums";
 import type { LLMPlugin } from "../types";
 
@@ -36,8 +35,8 @@ const REFINE_SYSTEM_PROMPT = dedent`
   - **narration**: emotion
   - **character**: name, emotion
   - **image**: animate, animation, overlays
-  - **sound**: type (${vals(SoundType)})
-  - **music**: length (${vals(MusicLength)})
+  - **sound**: loops (number, default 1)
+  - **music**: length (${vals(MusicLength)}), loops (number, default 1)
   - **clip**: duration (in seconds)
   - All non-null attributes should be strings
 

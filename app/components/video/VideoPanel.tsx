@@ -20,7 +20,7 @@ function VideoPanelBody() {
 	}
 	if (!layout?.series.length) {
 		return (
-			<div className="flex aspect-video items-center justify-center text-sm text-white/40">
+			<div className="flex aspect-video items-center justify-center px-4 text-center text-sm text-white/40">
 				Generate elements to playback
 			</div>
 		);

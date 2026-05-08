@@ -27,21 +27,20 @@ const VideoLayoutContext = createContext<VideoLayoutValue>({
 
 export function VideoLayoutProvider({
 	getEditor,
-	structureKey,
+	layoutKey,
 	children,
 }: {
 	getEditor: () => Editor | null;
-	structureKey: string;
+	layoutKey: string;
 	children: ReactNode;
 }) {
-	const layout = useVideoLayout(getEditor, structureKey);
+	const { layout, playerKey } = useVideoLayout(getEditor, layoutKey);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useSyncExternalStore(
 		generationQueue.subscribe,
 		generationQueue.isBusy,
 	);
 	const ready = prefetched && !busy;
-	const playerKey = `${structureKey}-${generationQueue.getResultVersion()}`;
 	const value = useMemo(
 		() => ({ layout, ready, playerKey }),
 		[layout, ready, playerKey],
