@@ -7,6 +7,6 @@ import type { CanvasContentElement } from "@/app/components/canvas/types";
  */
 export function getLayoutKey(elements: CanvasContentElement[]): string {
 	return elements
-		.map((el) => `${el.id}:${el.customAttributes?.loops ?? ""}`)
+		.map((el) => `${el.id}:${el.type}:${el.customAttributes?.loops ?? ""}`)
 		.join("|");
 }

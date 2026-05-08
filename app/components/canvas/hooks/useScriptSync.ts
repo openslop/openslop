@@ -5,9 +5,17 @@ import {
 	CANVAS_ELEMENT_TYPES,
 	type CanvasContentElement,
 	type CanvasElementType,
+	type ParsedElement,
 } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { findNodeById, updateNodeText } from "../utils/editorOps";
+
+function shouldSkip(node: ParsedElement): boolean {
+	return (
+		!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType) ||
+		OSMLSerializer.getTextContent(node).length === 0
+	);
+}
 
 export function useScriptSync(editor: Editor): void {
 	const { nodes } = useScript();
@@ -15,11 +23,9 @@ export function useScriptSync(editor: Editor): void {
 	useEffect(() => {
 		Editor.withoutNormalizing(editor, () => {
 			for (const node of nodes) {
-				if (!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType)) continue;
+				if (shouldSkip(node)) continue;
 
 				const canvasNode = node as CanvasContentElement;
-				if (OSMLSerializer.getTextContent(canvasNode).length === 0) continue;
-
 				const entry = findNodeById(editor, canvasNode.id);
 
 				if (entry) {

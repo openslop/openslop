@@ -62,10 +62,10 @@ export function AttributeBadge({
 				<button
 					aria-label={tooltip}
 					onMouseDown={(e) => e.preventDefault()}
-					className={`${spec.color} text-white text-[12px] px-2 py-1 rounded-full max-w-[140px] truncate inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all`}
+					className={`${spec.color} text-white text-[12px] px-2 py-1 rounded-full max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all`}
 				>
-					{labeled}
-					<ChevronDown className="w-3 h-3 text-white/80" />
+					<span className="truncate min-w-0">{labeled}</span>
+					<ChevronDown className="w-3 h-3 shrink-0 text-white/80" />
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
