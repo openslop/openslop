@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScript, useScriptText } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 
 export default function Editor() {
-	const { script, loading, submitPrompt } = useScript();
+	const { loading, submitPrompt } = useScript();
+	const script = useScriptText();
 	const { projectId } = useConfig();
 	const [prompted, setPrompted] = useState(false);
 
