@@ -16,7 +16,6 @@ import { createConnector } from "@/lib/connectors/factory";
 import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
 type ScriptContextValue = {
-	script: string;
 	nodes: ParsedElement[];
 	loading: boolean;
 	submitPrompt: (prompt: string) => Promise<void>;
@@ -24,11 +23,16 @@ type ScriptContextValue = {
 };
 
 const ScriptContext = createContext<ScriptContextValue | null>(null);
+const ScriptTextContext = createContext<string>("");
 
 export function useScript() {
 	const ctx = use(ScriptContext);
 	if (!ctx) throw new Error("useScript must be used within ScriptProvider");
 	return ctx;
+}
+
+export function useScriptText() {
+	return use(ScriptTextContext);
 }
 
 export function ScriptProvider({ children }: { children: ReactNode }) {
@@ -76,16 +80,19 @@ export function ScriptProvider({ children }: { children: ReactNode }) {
 
 	const value = useMemo<ScriptContextValue>(
 		() => ({
-			script,
 			nodes,
 			loading,
 			submitPrompt,
 			stopGeneration,
 		}),
-		[script, nodes, loading, submitPrompt, stopGeneration],
+		[nodes, loading, submitPrompt, stopGeneration],
 	);
 
 	return (
-		<ScriptContext.Provider value={value}>{children}</ScriptContext.Provider>
+		<ScriptContext.Provider value={value}>
+			<ScriptTextContext.Provider value={script}>
+				{children}
+			</ScriptTextContext.Provider>
+		</ScriptContext.Provider>
 	);
 }
