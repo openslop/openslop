@@ -18,8 +18,6 @@ export class OSMLSerializer {
 	private buffer = "";
 	private nodes: ParsedElement[] = [];
 
-	constructor(private connectors: ConnectorRegistry) {}
-
 	static serialize(descendants: Descendant[]): string {
 		return getContentElements(descendants)
 			.map(OSMLSerializer.serializeElement)
@@ -52,16 +50,16 @@ export class OSMLSerializer {
 		return `<${tagName}${attrString}>${content}</${tagName}>\n`;
 	}
 
-	appendChunk(chunk: string): boolean {
+	appendChunk(chunk: string, connectors: ConnectorRegistry): boolean {
 		this.buffer += chunk;
-		return this.parseBuffer();
+		return this.parseBuffer(connectors);
 	}
 
 	getNodes(): ParsedElement[] {
 		return this.nodes;
 	}
 
-	private parseBuffer(): boolean {
+	private parseBuffer(connectors: ConnectorRegistry): boolean {
 		TAG_PATTERN.lastIndex = 0;
 
 		if (this.shouldFlushBuffer()) {
@@ -84,7 +82,7 @@ export class OSMLSerializer {
 			const openTag = match[1];
 			if (openTag) {
 				const { tag, ...attributes } = parseXmlTag(openTag);
-				this.appendNext(tag, attributes);
+				this.appendNext(tag, attributes, connectors);
 			}
 			lastIndex = match.index + match[0].length;
 		}
@@ -102,11 +100,15 @@ export class OSMLSerializer {
 		lastChild.text += text ?? "";
 	}
 
-	private appendNext(type: string, attributes: Record<string, string>): void {
+	private appendNext(
+		type: string,
+		attributes: Record<string, string>,
+		connectors: ConnectorRegistry,
+	): void {
 		if (CANVAS_ELEMENT_TYPES.has(type as CanvasElementType)) {
 			const { id, ...attrs } = attributes;
 			this.nodes.push(
-				createCanvasNode(type as CanvasElementType, this.connectors, {
+				createCanvasNode(type as CanvasElementType, connectors, {
 					id,
 					attrs,
 				}),
