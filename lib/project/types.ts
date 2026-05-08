@@ -13,6 +13,17 @@ export const MetadataVoiceSchema = z.object({
 	description: optionalString,
 });
 
+export const voiceSearchParamsSchema = z.object({
+	query: optionalString,
+	gender: genderSchema,
+	age: optionalString,
+	pitch: optionalString,
+	accent: optionalString,
+	description: optionalString,
+	name: optionalString,
+	language: optionalString,
+});
+
 export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 
 export type MetadataCharacter = MetadataVoice & {

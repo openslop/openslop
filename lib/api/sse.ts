@@ -32,9 +32,17 @@ export function createSSEResponse(
 			send({
 				type: "error",
 				message: stringifyError(err),
-			}).catch(() => {}),
+			}).catch((sendErr) =>
+				logger.warn({ err: sendErr }, "SSE: failed to deliver error frame"),
+			),
 		)
-		.finally(() => writer.close().catch(() => {}));
+		.finally(() =>
+			writer
+				.close()
+				.catch((closeErr) =>
+					logger.warn({ err: closeErr }, "SSE: writer close failed"),
+				),
+		);
 
 	return new Response(stream.readable, { headers: SSE_HEADERS });
 }
@@ -78,8 +86,8 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 				if (!part.startsWith("data: ")) continue;
 				try {
 					yield JSON.parse(part.slice(6)) as T;
-				} catch {
-					// skip malformed SSE events
+				} catch (err) {
+					logger.warn({ err }, "SSE: skipping malformed event");
 				}
 			}
 		}
