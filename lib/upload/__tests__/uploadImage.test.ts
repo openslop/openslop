@@ -35,6 +35,28 @@ describe("uploadImage", () => {
 		);
 	});
 
+	it("throws if success payload is missing url", async () => {
+		fetchMock.mockResolvedValue({
+			ok: true,
+			status: 200,
+			json: async () => ({ ok: true }),
+		});
+		await expect(uploadImage(file)).rejects.toThrow(
+			"Upload endpoint returned invalid payload",
+		);
+	});
+
+	it("throws if success payload url is empty", async () => {
+		fetchMock.mockResolvedValue({
+			ok: true,
+			status: 200,
+			json: async () => ({ url: "" }),
+		});
+		await expect(uploadImage(file)).rejects.toThrow(
+			"Upload endpoint returned invalid payload",
+		);
+	});
+
 	it("propagates network failures", async () => {
 		fetchMock.mockRejectedValue(new TypeError("network down"));
 		await expect(uploadImage(file)).rejects.toThrow("network down");
