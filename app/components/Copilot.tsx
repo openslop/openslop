@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	type ReactNode,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
-} from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
 	CornerDownLeft,
@@ -17,7 +11,6 @@ import {
 	Square,
 	X,
 } from "lucide-react";
-import type { ComposerMode } from "@/lib/config/ConfigProvider";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -27,7 +20,9 @@ import {
 import GlassDropdown, {
 	type GlassDropdownOption,
 } from "@/app/components/GlassDropdown";
+import { useShallow } from "zustand/react/shallow";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
+import { copilotStore, useCopilotStore, type Mode } from "@/lib/copilot/store";
 import { stringifyError } from "@/lib/errors";
 import { uploadImage } from "@/lib/upload/uploadImage";
 import { toast } from "sonner";
@@ -44,7 +39,7 @@ const LOADING_MESSAGES = [
 	"Adding a pinch of movie magic…",
 ];
 
-const MODE_OPTIONS: GlassDropdownOption<ComposerMode>[] = [
+const MODE_OPTIONS: GlassDropdownOption<Mode>[] = [
 	{ value: "story", label: "Describe a story" },
 	{ value: "script", label: "Paste in a script" },
 	{ value: "template", label: "Use a template" },
@@ -55,21 +50,12 @@ const TEMPLATE_OPTIONS: GlassDropdownOption<string>[] = TEMPLATES.map((t) => ({
 	label: t.name,
 }));
 
-export interface CopilotHandle {
-	fill: (prompt: string, images: string[]) => void;
-}
-
 interface CopilotProps {
-	onSubmit: (value: string, referenceImages: string[]) => void;
+	onSubmit: (value: string) => void;
 	onStop?: () => void;
 	multiline?: boolean;
 	placeholder?: ReactNode;
 	loading?: boolean;
-	composerMode?: ComposerMode;
-	onModeChange?: (mode: ComposerMode) => void;
-	selectedTemplateId?: string | null;
-	onTemplateChange?: (id: string) => void;
-	ref?: React.Ref<CopilotHandle>;
 }
 
 function ActionButton({
@@ -226,13 +212,7 @@ function AttachMenu({
 	);
 }
 
-function TemplatePill({
-	templateId,
-	onRemove,
-}: {
-	templateId: string;
-	onRemove: () => void;
-}) {
+function TemplatePill({ templateId }: { templateId: string }) {
 	const template = getTemplateById(templateId);
 	if (!template) return null;
 
@@ -244,7 +224,7 @@ function TemplatePill({
 			<button
 				type="button"
 				aria-label="Remove template"
-				onClick={onRemove}
+				onClick={() => copilotStore.getState().setMode("story")}
 				className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-black/20"
 			>
 				<X className="h-3 w-3" />
@@ -260,42 +240,27 @@ export default function Copilot({
 	multiline,
 	placeholder,
 	loading,
-	composerMode,
-	onModeChange,
-	selectedTemplateId,
-	onTemplateChange,
-	ref,
 }: CopilotProps) {
-	const [value, setValue] = useState("");
-	const [referenceImages, setReferenceImages] = useState<string[]>([]);
+	const [value, setValue] = useCopilotStore(
+		useShallow((s) => [s.value, s.setValue]),
+	);
+	const [referenceImages, setReferenceImages] = useCopilotStore(
+		useShallow((s) => [s.referenceImages, s.setReferenceImages]),
+	);
+	const [mode, setMode] = useCopilotStore(
+		useShallow((s) => [s.mode, s.setMode]),
+	);
+	const selectedTemplateId = useCopilotStore((s) => s.selectedTemplateId);
+	const selectTemplate = useCopilotStore((s) => s.selectTemplate);
+
 	const [uploading, setUploading] = useState(false);
-	const showPill =
-		composerMode === "template" &&
-		selectedTemplateId !== null &&
-		selectedTemplateId !== undefined;
-
-	useImperativeHandle(ref, () => ({
-		fill(prompt: string, images: string[]) {
-			setValue(prompt);
-			setReferenceImages(images);
-		},
-	}));
-
+	const showPill = mode === "template" && selectedTemplateId;
 	const hasText = value.trim().length > 0;
 
 	const handleSubmit = () => {
 		if (!hasText) return;
-		onSubmit(value, referenceImages);
-		setValue("");
-		setReferenceImages([]);
-	};
-
-	const handleUpload = (url: string) => {
-		setReferenceImages((prev) => [...prev, url]);
-	};
-
-	const removeImage = (index: number) => {
-		setReferenceImages((prev) => prev.filter((_, i) => i !== index));
+		onSubmit(value);
+		copilotStore.getState().reset();
 	};
 
 	const placeholderOverlay =
@@ -313,19 +278,18 @@ export default function Copilot({
 								<ImageThumbnail
 									key={url}
 									url={url}
-									onRemove={() => removeImage(i)}
+									onRemove={() =>
+										setReferenceImages(
+											referenceImages.filter((_, j) => j !== i),
+										)
+									}
 								/>
 							))}
 							{uploading && <UploadingSkeleton />}
 						</div>
 					)}
 					<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-						{showPill && selectedTemplateId && onModeChange && (
-							<TemplatePill
-								templateId={selectedTemplateId}
-								onRemove={() => onModeChange("story")}
-							/>
-						)}
+						{showPill && <TemplatePill templateId={selectedTemplateId} />}
 						<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
 							<textarea
 								rows={2}
@@ -350,35 +314,32 @@ export default function Copilot({
 					<div className="flex items-center justify-between pt-2">
 						<div className="flex items-center gap-2">
 							<AttachMenu
-								onUpload={handleUpload}
+								onUpload={(url) =>
+									setReferenceImages([...referenceImages, url])
+								}
 								uploading={uploading}
 								setUploading={setUploading}
 							/>
-							{onModeChange && composerMode && (
+							<GlassDropdown
+								value={mode}
+								onChange={setMode}
+								options={MODE_OPTIONS}
+								ariaLabel="Composer mode"
+								side="bottom"
+							/>
+							{mode === "template" && selectedTemplateId && (
 								<GlassDropdown
-									value={composerMode}
-									onChange={onModeChange}
-									options={MODE_OPTIONS}
-									ariaLabel="Composer mode"
+									value={selectedTemplateId}
+									onChange={selectTemplate}
+									options={TEMPLATE_OPTIONS}
+									ariaLabel="Select template"
 									side="bottom"
+									className="relative grain overflow-hidden"
+									style={{
+										backgroundColor: getTemplateById(selectedTemplateId)?.color,
+									}}
 								/>
 							)}
-							{composerMode === "template" &&
-								onTemplateChange &&
-								selectedTemplateId && (
-									<GlassDropdown
-										value={selectedTemplateId}
-										onChange={onTemplateChange}
-										options={TEMPLATE_OPTIONS}
-										ariaLabel="Select template"
-										side="bottom"
-										className="relative grain overflow-hidden"
-										style={{
-											backgroundColor:
-												getTemplateById(selectedTemplateId)?.color,
-										}}
-									/>
-								)}
 						</div>
 						<ActionButton
 							label="Submit"

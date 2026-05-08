@@ -34,7 +34,7 @@ describe("createTemplateModePlugin", () => {
 		});
 
 		it("returns params unchanged when templateId is null", () => {
-			const { beforeGenerate } = createTemplateModePlugin(null);
+			const { beforeGenerate } = createTemplateModePlugin(undefined);
 			const params = { prompt: "hi", systemPrompt: "keep me" };
 			expect(beforeGenerate?.(params)).toBe(params);
 		});
@@ -72,7 +72,7 @@ describe("createTemplateModePlugin", () => {
 		});
 
 		it("returns prompt unchanged when templateId is null", async () => {
-			const { transformPrompt } = createTemplateModePlugin(null);
+			const { transformPrompt } = createTemplateModePlugin(undefined);
 			const result = await transformPrompt?.("anything", fakeCtx);
 			expect(result).toBe("anything");
 		});

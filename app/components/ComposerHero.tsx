@@ -1,10 +1,13 @@
 "use client";
 
-import { useRef } from "react";
-import type { ComposerMode } from "@/lib/config/ConfigProvider";
-import Copilot, { type CopilotHandle } from "./Copilot";
+import { useScript } from "@/lib/script/ScriptProvider";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import { getProjectStore } from "@/lib/project/store";
+import { copilotStore, useCopilotStore } from "@/lib/copilot/store";
+import { getTemplateById } from "@/lib/templates/templates";
+import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
-import InspirationSection from "./InspirationSection";
+import TemplateGallery from "./TemplateGallery";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
@@ -18,24 +21,25 @@ there was a small glowing garden hidden on the moon.
 
 And in that garden… lived a little rabbit named Lumi…`;
 
-export default function ComposerHero({
-	composerMode,
-	onModeChange,
-	selectedTemplateId,
-	onTemplateChange,
-	loading,
-	onSubmit,
-	onStop,
-}: {
-	composerMode: ComposerMode;
-	onModeChange: (mode: ComposerMode) => void;
-	selectedTemplateId: string | null;
-	onTemplateChange: (id: string) => void;
-	loading: boolean;
-	onSubmit: (value: string, referenceImages: string[]) => void;
-	onStop: () => void;
-}) {
-	const copilotRef = useRef<CopilotHandle>(null);
+export default function ComposerHero() {
+	const { loading, submitPrompt, stopGeneration } = useScript();
+	const { projectId } = useConfig();
+	const mode = useCopilotStore((s) => s.mode);
+
+	const handleSubmit = (value: string) => {
+		const { referenceImages, selectedTemplateId } = copilotStore.getState();
+		const store = getProjectStore(projectId).getState();
+		store.setReferenceImages(referenceImages);
+		if (mode === "template" && selectedTemplateId) {
+			const template = getTemplateById(selectedTemplateId);
+			store.updateMetadata({
+				characters: template?.characters,
+				narration: template?.narration,
+			});
+		}
+		copilotStore.getState().markSubmitted();
+		submitPrompt(value);
+	};
 
 	return (
 		<div className="flex w-full max-w-2xl flex-col items-center px-4">
@@ -44,17 +48,12 @@ export default function ComposerHero({
 			</h1>
 
 			<Copilot
-				ref={copilotRef}
-				onSubmit={onSubmit}
-				onStop={onStop}
+				onSubmit={handleSubmit}
+				onStop={stopGeneration}
 				multiline
 				loading={loading}
-				composerMode={composerMode}
-				onModeChange={onModeChange}
-				selectedTemplateId={selectedTemplateId}
-				onTemplateChange={onTemplateChange}
 				placeholder={
-					composerMode === "script" ? (
+					mode === "script" ? (
 						INPUT_SCRIPT_PLACEHOLDER
 					) : (
 						<AnimatedPlaceholder active />
@@ -62,15 +61,11 @@ export default function ComposerHero({
 				}
 			/>
 
-			<InspirationSection
-				onSelect={(prompt, images, templateId) => {
-					if (templateId) {
-						onModeChange("template");
-						onTemplateChange(templateId);
-					} else {
-						onModeChange("story");
-					}
-					copilotRef.current?.fill(prompt, images);
+			<TemplateGallery
+				onSelect={(templateId, examplePrompt) => {
+					const store = copilotStore.getState();
+					store.selectTemplate(templateId);
+					store.setValue(examplePrompt);
 				}}
 			/>
 		</div>

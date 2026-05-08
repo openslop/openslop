@@ -1,25 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useScript, useScriptText } from "@/lib/script/ScriptProvider";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore } from "@/lib/project/store";
+import { useCopilotStore } from "@/lib/copilot/store";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 
 export default function Editor() {
-	const { loading, submitPrompt } = useScript();
+	const { loading } = useScript();
 	const script = useScriptText();
-	const { projectId } = useConfig();
-	const [prompted, setPrompted] = useState(false);
+	const submitted = useCopilotStore((s) => s.submitted);
 
 	const hasScript = script.length > 0 || loading;
-
-	const handleSubmit = (value: string, referenceImages: string[]) => {
-		getProjectStore(projectId).getState().setReferenceImages(referenceImages);
-		setPrompted(true);
-		submitPrompt(value);
-	};
 
 	return (
 		<div
@@ -27,11 +18,7 @@ export default function Editor() {
 				hasScript ? "" : "pt-[22vh]"
 			}`}
 		>
-			{prompted ? (
-				<PostPromptView />
-			) : (
-				<PrePromptView onSubmit={handleSubmit} />
-			)}
+			{submitted ? <PostPromptView /> : <PrePromptView />}
 		</div>
 	);
 }

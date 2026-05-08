@@ -22,14 +22,19 @@ import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/plugins/template-mode";
-import { TEMPLATES } from "../templates/templates";
+import { useCopilotStore, type Mode } from "@/lib/copilot/store";
 import { withRegistry } from "./connectorUtils";
 
-export type ComposerMode = "story" | "script" | "template";
+interface ModeContext {
+	templateId?: string;
+}
 
-const MODE_PLUGINS: Record<"story" | "script", LLMPlugin> = {
-	story: storyModePlugin,
-	script: scriptModePlugin,
+type ModePluginFactory = (ctx: ModeContext) => LLMPlugin;
+
+const MODE_PLUGINS: Record<Mode, ModePluginFactory> = {
+	story: () => storyModePlugin,
+	script: () => scriptModePlugin,
+	template: ({ templateId }) => createTemplateModePlugin(templateId),
 };
 
 export type ConnectorRegistry = Record<
@@ -66,10 +71,6 @@ const MOCK_PROJECT_ID = "00000000-0000-4000-8000-000000000001";
 type ConfigContextValue = {
 	projectId: string;
 	connectorConfig: ConnectorRegistry;
-	composerMode: ComposerMode;
-	selectedTemplateId: string | null;
-	setComposerMode: React.Dispatch<React.SetStateAction<ComposerMode>>;
-	setSelectedTemplateId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -83,35 +84,27 @@ export function useConfig() {
 export function ConfigProvider({ children }: { children: ReactNode }) {
 	const projectId = MOCK_PROJECT_ID;
 	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
-	const [composerMode, setComposerMode] = useState<ComposerMode>("story");
-	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-		TEMPLATES[0]?.id ?? null,
+	const mode = useCopilotStore((s) => s.mode);
+	const selectedTemplateId = useCopilotStore((s) => s.selectedTemplateId);
+
+	const configWithPlugins = useMemo<ConnectorRegistry>(
+		() =>
+			withRegistry(connectorConfig)
+				.appendPlugins(
+					"llm",
+					MODE_PLUGINS[mode]({ templateId: selectedTemplateId }),
+				)
+				.appendPlugins("image", ...buildImagePlugins(projectId))
+				.appendPlugins("video", createReferenceImagesPlugin(projectId))
+				.appendPlugins("tts", createMetadataVoicePlugin(projectId))
+				.appendPlugins("tts", createVoiceSearchPlugin())
+				.build(),
+		[connectorConfig, mode, selectedTemplateId, projectId],
 	);
 
-	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
-		const modePlugin =
-			composerMode === "template"
-				? createTemplateModePlugin(selectedTemplateId)
-				: MODE_PLUGINS[composerMode];
-		return withRegistry(connectorConfig)
-			.appendPlugins("llm", modePlugin)
-			.appendPlugins("image", ...buildImagePlugins(projectId))
-			.appendPlugins("video", createReferenceImagesPlugin(projectId))
-			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
-			.appendPlugins("tts", createVoiceSearchPlugin())
-			.build();
-	}, [connectorConfig, composerMode, selectedTemplateId, projectId]);
-
 	const value = useMemo<ConfigContextValue>(
-		() => ({
-			projectId,
-			connectorConfig: configWithPlugins,
-			composerMode,
-			selectedTemplateId,
-			setComposerMode,
-			setSelectedTemplateId,
-		}),
-		[projectId, configWithPlugins, composerMode, selectedTemplateId],
+		() => ({ projectId, connectorConfig: configWithPlugins }),
+		[projectId, configWithPlugins],
 	);
 
 	return (

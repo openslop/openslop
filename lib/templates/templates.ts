@@ -1,4 +1,12 @@
 import dedent from "dedent";
+import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
+
+export interface TemplateShowcase {
+	image: string;
+	title: string;
+	description: string;
+	examplePrompt: string;
+}
 
 export interface Template {
 	id: string;
@@ -7,6 +15,10 @@ export interface Template {
 	color: string;
 	exampleText: string;
 	systemPrompt: string;
+	referenceImages: string[];
+	characters: Record<string, MetadataCharacter>;
+	narration?: MetadataVoice;
+	showcase?: TemplateShowcase;
 }
 
 export const TEMPLATES: Template[] = [
@@ -15,6 +27,27 @@ export const TEMPLATES: Template[] = [
 		name: "POV Life",
 		pillText: "POV: Your life at every stage as a",
 		color: "#F59E0B",
+		referenceImages: [
+			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-2",
+			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-3",
+		],
+		characters: {
+			Protagonist: {
+				description: "American male, neutral accent",
+				appearance:
+					"male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
+				avatarUrl:
+					"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-4",
+			},
+		},
+		showcase: {
+			image:
+				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-1",
+			title: "POV Your Life as A...",
+			description:
+				"Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
+			examplePrompt: "tech CEO",
+		},
 		systemPrompt: dedent`
 		# Important
 		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list
@@ -25,16 +58,16 @@ export const TEMPLATES: Template[] = [
 
 				#Music: Soft, dreamy, optimistic lo-fi piano with twinkling synths, hopeful and childlike
 
-				#Image: The Protagonist at 11 years old lying on his bedroom floor watching YouTube videos on a phone about young app founders who got rich, posters on the wall behind him
+				#Image: The Protagonist, a young kid, lying on his bedroom floor watching YouTube videos on a phone about young app founders who got rich, posters on the wall behind him
 				#Narration: You're 11. You watch YouTube videos about people who made apps and got rich.
 
-				#Image: The Protagonist at 11 years old daydreaming with a smile, imagining stacks of money and a sports car floating above his head in cartoon thought bubbles
+				#Image: The Protagonist, a young kid, daydreaming with a smile, imagining stacks of money and a sports car floating above his head in cartoon thought bubbles
 				#Narration: You think you can do that too. You can't. Not yet.
 
-				#Image: The Protagonist at 12 years old hunched over a clunky laptop in his small messy bedroom, late at night, glow of the screen on his face, free coding website open
+				#Image: The Protagonist, a young kid, hunched over a clunky laptop in his small messy bedroom, late at night, glow of the screen on his face, free coding website open
 				#Narration: You teach yourself to code from a free website. The first thing you build is a calculator. It barely works.
 
-				#Image: The Protagonist at 12 years old in the kitchen showing his mom the calculator app on his laptop, mom smiling warmly while drying a dish
+				#Image: The Protagonist, a young kid, in the kitchen showing his mom the calculator app on his laptop, mom smiling warmly while drying a dish
 				#Narration: You show your mom. She says it's amazing. You know it isn't. You feel like a wizard anyway.
 
 
@@ -219,6 +252,20 @@ export const TEMPLATES: Template[] = [
 		name: "Sleep Story",
 		pillText: "A sleep story about",
 		color: "#6366F1",
+		referenceImages: [
+			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-1",
+			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-3",
+			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-4",
+		],
+		characters: {},
+		showcase: {
+			image:
+				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-1",
+			title: "Get Sleepy with...",
+			description:
+				"Long-form, slow, soothing narration designed to lull listeners to sleep",
+			examplePrompt: "a cat who wanders around gardens at night",
+		},
 		systemPrompt: dedent`
 		# Important
 		- The art style is: Hand-painted watercolor/gouache, Ghibli-storybook style. Loose ink lines, moody nocturnal palette (midnight blue, slate, teal, brick accents), moonlight and drifting particles, layered foliage. Painterly, quiet, dreamlike. 
@@ -269,6 +316,8 @@ export const TEMPLATES: Template[] = [
 		name: "Kids Animated",
 		pillText: "A kids animated story about",
 		color: "#10B981",
+		referenceImages: [],
+		characters: {},
 		exampleText: "TODO",
 		systemPrompt: dedent`TODO`,
 	},
@@ -277,6 +326,8 @@ export const TEMPLATES: Template[] = [
 		name: "Psychology",
 		pillText: "Psychology of",
 		color: "#EC4899",
+		referenceImages: [],
+		characters: {},
 		exampleText: "TODO",
 		systemPrompt: dedent`TODO`,
 	},
