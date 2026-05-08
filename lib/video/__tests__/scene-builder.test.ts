@@ -277,6 +277,21 @@ describe("buildVideoLayout", () => {
 			expect(layout.totalDurationSec).toBe(25);
 		});
 
+		it("drops looped background copies that fall after a replacement background", () => {
+			const layout = buildVideoLayout([
+				el({ id: "m1", type: "music", durationSec: 10, loops: 4 }),
+				el({ id: "img1", type: "image", durationSec: 15 }),
+				el({ id: "m2", type: "music", durationSec: 20 }),
+				el({ id: "img2", type: "image", durationSec: 10 }),
+			]);
+			const music = seqs(layout, "music");
+			expect(music).toHaveLength(3);
+			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
+			expect(music[1]).toMatchObject({ start: 10, duration: 5 });
+			expect(music[2]).toMatchObject({ start: 15, duration: 10 });
+			expect(layout.totalDurationSec).toBe(25);
+		});
+
 		it("emits a clamped background sequence when no series elements exist", () => {
 			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 30 }),

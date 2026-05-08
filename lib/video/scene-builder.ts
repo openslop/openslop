@@ -33,6 +33,19 @@ function pushSequence(
 	}
 }
 
+function trimSequencesAt(list: Sequence[] | undefined, cutoff: number) {
+	if (!list) return;
+	while (list.length > 0) {
+		const last = list[list.length - 1];
+		if (last.start >= cutoff) {
+			list.pop();
+			continue;
+		}
+		last.duration = Math.min(last.duration, cutoff - last.start);
+		return;
+	}
+}
+
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {
 	return current ? Math.max(cursor, current.start + current.duration) : cursor;
 }
@@ -66,16 +79,7 @@ export function buildVideoLayout(
 				break;
 			}
 			case "background": {
-				const prev = sequences[element.type]?.at(-1);
-				if (prev) {
-					prev.duration = Math.min(
-						prev.duration,
-						foregroundCursor - prev.start,
-					);
-					if (prev.duration === 0) {
-						sequences[element.type]?.pop();
-					}
-				}
+				trimSequencesAt(sequences[element.type], foregroundCursor);
 				pushSequence(sequences, element, foregroundCursor);
 				break;
 			}
