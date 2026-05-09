@@ -51,7 +51,8 @@ export const TEMPLATES: Template[] = [
 		systemPrompt: dedent`
 		# Important
 		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list
-		- The art style is: 2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients`,
+		- The art style is: 2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients
+		- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story`,
 		exampleText: dedent`
 				#Image: A title card with a black background and white Arial text that says "Level 1: The Kid with the Idea"
 				#Narration: Level 1: The Kid with the Idea

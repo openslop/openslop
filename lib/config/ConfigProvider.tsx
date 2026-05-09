@@ -29,7 +29,8 @@ import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/plugins/template-mode";
-import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
+import { TEMPLATES } from "@/lib/templates/templates";
+import * as template from "@/lib/templates/applyTemplate";
 import { getProjectStore } from "@/lib/project/store";
 import { withRegistry } from "./connectorUtils";
 
@@ -105,16 +106,9 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
 	const applyTemplate = useCallback(
 		(templateId: string) => {
-			const template = getTemplateById(templateId);
-			if (!template) return;
 			setModeState("template");
 			setSelectedTemplateId(templateId);
-			const project = getProjectStore(projectId).getState();
-			project.setReferenceImages(template.referenceImages);
-			project.updateMetadata({
-				characters: template.characters,
-				narration: template.narration,
-			});
+			template.applyTemplate(projectId, templateId);
 		},
 		[projectId],
 	);
@@ -123,11 +117,12 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		(next: Mode) => {
 			if (next === "template" && selectedTemplateId) {
 				applyTemplate(selectedTemplateId);
-			} else {
-				setModeState(next);
+				return;
 			}
+			getProjectStore(projectId).getState().reset();
+			setModeState(next);
 		},
-		[selectedTemplateId, applyTemplate],
+		[projectId, selectedTemplateId, applyTemplate],
 	);
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
