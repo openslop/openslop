@@ -1,5 +1,5 @@
-import type { CanvasElement } from "@/app/components/canvas/types";
-import { getContentElements } from "@/app/components/canvas/utils/nodeUtils";
+import type { CanvasElement } from "@/lib/canvas/types";
+import { getContentElements } from "@/lib/canvas/scenes";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import type { ResolvedElement } from "./types";
 import { ELEMENT_ROLES, LAYER_TYPES } from "./types";

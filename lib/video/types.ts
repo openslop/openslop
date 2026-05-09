@@ -1,4 +1,4 @@
-import type { CanvasElementType } from "@/app/components/canvas/types";
+import type { CanvasElementType } from "@/lib/canvas/types";
 
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
