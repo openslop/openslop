@@ -98,7 +98,7 @@ export function useConfig() {
 export function ConfigProvider({ children }: { children: ReactNode }) {
 	const projectId = MOCK_PROJECT_ID;
 	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
-	const [mode, setMode] = useState<Mode>("story");
+	const [mode, setModeState] = useState<Mode>("story");
 	const [selectedTemplateId, setSelectedTemplateId] = useState<
 		string | undefined
 	>(TEMPLATES[0]?.id);
@@ -107,7 +107,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 		(templateId: string) => {
 			const template = getTemplateById(templateId);
 			if (!template) return;
-			setMode("template");
+			setModeState("template");
 			setSelectedTemplateId(templateId);
 			const project = getProjectStore(projectId).getState();
 			project.setReferenceImages(template.referenceImages);
@@ -117,6 +117,17 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 			});
 		},
 		[projectId],
+	);
+
+	const setMode = useCallback(
+		(next: Mode) => {
+			if (next === "template" && selectedTemplateId) {
+				applyTemplate(selectedTemplateId);
+			} else {
+				setModeState(next);
+			}
+		},
+		[selectedTemplateId, applyTemplate],
 	);
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
@@ -141,7 +152,14 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 			selectedTemplateId,
 			applyTemplate,
 		}),
-		[projectId, configWithPlugins, mode, selectedTemplateId, applyTemplate],
+		[
+			projectId,
+			configWithPlugins,
+			mode,
+			setMode,
+			selectedTemplateId,
+			applyTemplate,
+		],
 	);
 
 	return (
