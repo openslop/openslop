@@ -6,8 +6,8 @@ export class ElevenLabsSFX extends BaseElevenLabsAudio<SFXGenerateParams> {
 	protected readonly blobConfig = { type: "sfx", provider: "elevenlabs" };
 	protected readonly outputFormat: AudioFormat = {
 		codec: "mp3",
-		sampleRate: 22050,
-		bitrateKbps: 32,
+		sampleRate: 44100,
+		bitrateKbps: 128,
 	};
 
 	protected requestStream(params: SFXGenerateParams) {

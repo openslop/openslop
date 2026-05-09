@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef } from "react";
-import type { ComposerMode } from "@/lib/config/ConfigProvider";
-import Copilot, { type CopilotHandle } from "./Copilot";
+import { useState } from "react";
+import { useScript } from "@/lib/script/ScriptProvider";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
-import InspirationSection from "./InspirationSection";
+import TemplateGallery from "./TemplateGallery";
 
 const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
 Soft glowing stars twinkle quietly across a deep blue sky.
@@ -18,24 +19,10 @@ there was a small glowing garden hidden on the moon.
 
 And in that garden… lived a little rabbit named Lumi…`;
 
-export default function ComposerHero({
-	composerMode,
-	onModeChange,
-	selectedTemplateId,
-	onTemplateChange,
-	loading,
-	onSubmit,
-	onStop,
-}: {
-	composerMode: ComposerMode;
-	onModeChange: (mode: ComposerMode) => void;
-	selectedTemplateId: string | null;
-	onTemplateChange: (id: string) => void;
-	loading: boolean;
-	onSubmit: (value: string, referenceImages: string[]) => void;
-	onStop: () => void;
-}) {
-	const copilotRef = useRef<CopilotHandle>(null);
+export default function ComposerHero() {
+	const { loading, submitPrompt, stopGeneration } = useScript();
+	const { mode, applyTemplate } = useConfig();
+	const [value, setValue] = useState("");
 
 	return (
 		<div className="flex w-full max-w-2xl flex-col items-center px-4">
@@ -44,17 +31,17 @@ export default function ComposerHero({
 			</h1>
 
 			<Copilot
-				ref={copilotRef}
-				onSubmit={onSubmit}
-				onStop={onStop}
+				value={value}
+				onValueChange={setValue}
+				onSubmit={() => {
+					submitPrompt(value);
+					setValue("");
+				}}
+				onStop={stopGeneration}
 				multiline
 				loading={loading}
-				composerMode={composerMode}
-				onModeChange={onModeChange}
-				selectedTemplateId={selectedTemplateId}
-				onTemplateChange={onTemplateChange}
 				placeholder={
-					composerMode === "script" ? (
+					mode === "script" ? (
 						INPUT_SCRIPT_PLACEHOLDER
 					) : (
 						<AnimatedPlaceholder active />
@@ -62,15 +49,10 @@ export default function ComposerHero({
 				}
 			/>
 
-			<InspirationSection
-				onSelect={(prompt, images, templateId) => {
-					if (templateId) {
-						onModeChange("template");
-						onTemplateChange(templateId);
-					} else {
-						onModeChange("story");
-					}
-					copilotRef.current?.fill(prompt, images);
+			<TemplateGallery
+				onSelect={(templateId, examplePrompt) => {
+					applyTemplate(templateId);
+					setValue(examplePrompt);
 				}}
 			/>
 		</div>

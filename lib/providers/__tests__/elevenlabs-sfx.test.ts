@@ -27,8 +27,8 @@ describe("ElevenLabsSFX", () => {
 	});
 
 	it("omits durationSeconds and computes duration from buffer when no duration provided", async () => {
-		// 8000 bytes at 32 kbps CBR mp3 = 2 seconds
-		const audio = new Uint8Array(8000);
+		// 32000 bytes at 128 kbps CBR mp3 = 2 seconds
+		const audio = new Uint8Array(32000);
 		mockConvert.mockResolvedValue(mockReadableStream(audio));
 
 		const provider = new ElevenLabsSFX("test-key");
@@ -39,7 +39,7 @@ describe("ElevenLabsSFX", () => {
 		expect(mockConvert).toHaveBeenCalledWith({
 			text: "boom",
 			durationSeconds: undefined,
-			outputFormat: "mp3_22050_32",
+			outputFormat: "mp3_44100_128",
 		});
 	});
 

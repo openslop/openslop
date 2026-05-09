@@ -9,9 +9,15 @@ export type ProjectContext = {
 	referenceImages: string[];
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setReferenceImages: (urls: string[]) => void;
+	reset: () => void;
 };
 
 export type ProjectStore = StoreApi<ProjectContext>;
+
+const initialState = {
+	metadata: { title: "", style: "", narration: {}, characters: {} } as Metadata,
+	referenceImages: [] as string[],
+};
 
 const stores = new Map<string, ProjectStore>();
 
@@ -20,8 +26,7 @@ export function getProjectStore(projectId: string): ProjectStore {
 	if (!store) {
 		store = createStore<ProjectContext>()(
 			immer((set) => ({
-				metadata: { title: "", style: "", narration: {}, characters: {} },
-				referenceImages: [],
+				...structuredClone(initialState),
 				updateMetadata: (partial) =>
 					set((state) => {
 						merge(state.metadata, partial);
@@ -29,6 +34,10 @@ export function getProjectStore(projectId: string): ProjectStore {
 				setReferenceImages: (urls) =>
 					set((state) => {
 						state.referenceImages = urls;
+					}),
+				reset: () =>
+					set((state) => {
+						Object.assign(state, structuredClone(initialState));
 					}),
 			})),
 		);

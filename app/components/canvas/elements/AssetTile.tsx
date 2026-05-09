@@ -1,9 +1,10 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { Hourglass, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { generationQueue } from "@/lib/generation/queue";
+import { GenerationIndicator } from "./GenerationIndicator";
 
 export function AssetTile({
 	name,
@@ -43,13 +44,17 @@ export function AssetTile({
 						aria-hidden
 					/>
 				)}
-				<div className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/40 text-white/80">
-					{status === "queued" ? (
-						<Hourglass className="h-2.5 w-2.5 animate-pulse" />
-					) : (
+				{status === "idle" ? (
+					<div className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/40 text-white/80">
 						<Icon className="h-2.5 w-2.5" />
-					)}
-				</div>
+					</div>
+				) : (
+					<GenerationIndicator
+						status={status}
+						size="sm"
+						className="absolute right-1 top-1"
+					/>
+				)}
 			</div>
 			{name && (
 				<span className="truncate text-[10px] text-white/70" title={name}>

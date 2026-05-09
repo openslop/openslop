@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	type ReactNode,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
-} from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
 	CornerDownLeft,
@@ -17,7 +11,6 @@ import {
 	Square,
 	X,
 } from "lucide-react";
-import type { ComposerMode } from "@/lib/config/ConfigProvider";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -28,6 +21,9 @@ import GlassDropdown, {
 	type GlassDropdownOption,
 } from "@/app/components/GlassDropdown";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
+import { useConfig, type Mode } from "@/lib/config/ConfigProvider";
+import { useProject } from "@/lib/project/useProject";
+import { getProjectStore } from "@/lib/project/store";
 import { stringifyError } from "@/lib/errors";
 import { uploadImage } from "@/lib/upload/uploadImage";
 import { toast } from "sonner";
@@ -44,7 +40,7 @@ const LOADING_MESSAGES = [
 	"Adding a pinch of movie magic…",
 ];
 
-const MODE_OPTIONS: GlassDropdownOption<ComposerMode>[] = [
+const MODE_OPTIONS: GlassDropdownOption<Mode>[] = [
 	{ value: "story", label: "Describe a story" },
 	{ value: "script", label: "Paste in a script" },
 	{ value: "template", label: "Use a template" },
@@ -55,21 +51,14 @@ const TEMPLATE_OPTIONS: GlassDropdownOption<string>[] = TEMPLATES.map((t) => ({
 	label: t.name,
 }));
 
-export interface CopilotHandle {
-	fill: (prompt: string, images: string[]) => void;
-}
-
 interface CopilotProps {
-	onSubmit: (value: string, referenceImages: string[]) => void;
+	value: string;
+	onValueChange: (value: string) => void;
+	onSubmit: () => void;
 	onStop?: () => void;
 	multiline?: boolean;
 	placeholder?: ReactNode;
 	loading?: boolean;
-	composerMode?: ComposerMode;
-	onModeChange?: (mode: ComposerMode) => void;
-	selectedTemplateId?: string | null;
-	onTemplateChange?: (id: string) => void;
-	ref?: React.Ref<CopilotHandle>;
 }
 
 function ActionButton({
@@ -255,47 +244,28 @@ function TemplatePill({
 }
 
 export default function Copilot({
+	value,
+	onValueChange,
 	onSubmit,
 	onStop,
 	multiline,
 	placeholder,
 	loading,
-	composerMode,
-	onModeChange,
-	selectedTemplateId,
-	onTemplateChange,
-	ref,
 }: CopilotProps) {
-	const [value, setValue] = useState("");
-	const [referenceImages, setReferenceImages] = useState<string[]>([]);
+	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
+		useConfig();
+	const referenceImages = useProject((s) => s.referenceImages);
+
+	const setReferenceImages = (urls: string[]) =>
+		getProjectStore(projectId).getState().setReferenceImages(urls);
+
 	const [uploading, setUploading] = useState(false);
-	const showPill =
-		composerMode === "template" &&
-		selectedTemplateId !== null &&
-		selectedTemplateId !== undefined;
-
-	useImperativeHandle(ref, () => ({
-		fill(prompt: string, images: string[]) {
-			setValue(prompt);
-			setReferenceImages(images);
-		},
-	}));
-
+	const showPill = mode === "template" && selectedTemplateId !== undefined;
 	const hasText = value.trim().length > 0;
 
 	const handleSubmit = () => {
 		if (!hasText) return;
-		onSubmit(value, referenceImages);
-		setValue("");
-		setReferenceImages([]);
-	};
-
-	const handleUpload = (url: string) => {
-		setReferenceImages((prev) => [...prev, url]);
-	};
-
-	const removeImage = (index: number) => {
-		setReferenceImages((prev) => prev.filter((_, i) => i !== index));
+		onSubmit();
 	};
 
 	const placeholderOverlay =
@@ -313,17 +283,21 @@ export default function Copilot({
 								<ImageThumbnail
 									key={url}
 									url={url}
-									onRemove={() => removeImage(i)}
+									onRemove={() =>
+										setReferenceImages(
+											referenceImages.filter((_, j) => j !== i),
+										)
+									}
 								/>
 							))}
 							{uploading && <UploadingSkeleton />}
 						</div>
 					)}
 					<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-						{showPill && selectedTemplateId && onModeChange && (
+						{showPill && (
 							<TemplatePill
 								templateId={selectedTemplateId}
-								onRemove={() => onModeChange("story")}
+								onRemove={() => setMode("story")}
 							/>
 						)}
 						<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
@@ -331,7 +305,7 @@ export default function Copilot({
 								rows={2}
 								aria-label="Enter your prompt"
 								value={value}
-								onChange={(e) => setValue(e.target.value)}
+								onChange={(e) => onValueChange(e.target.value)}
 								onKeyDown={(e) => {
 									if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
 										handleSubmit();
@@ -350,35 +324,32 @@ export default function Copilot({
 					<div className="flex items-center justify-between pt-2">
 						<div className="flex items-center gap-2">
 							<AttachMenu
-								onUpload={handleUpload}
+								onUpload={(url) =>
+									setReferenceImages([...referenceImages, url])
+								}
 								uploading={uploading}
 								setUploading={setUploading}
 							/>
-							{onModeChange && composerMode && (
+							<GlassDropdown
+								value={mode}
+								onChange={setMode}
+								options={MODE_OPTIONS}
+								ariaLabel="Composer mode"
+								side="bottom"
+							/>
+							{mode === "template" && selectedTemplateId && (
 								<GlassDropdown
-									value={composerMode}
-									onChange={onModeChange}
-									options={MODE_OPTIONS}
-									ariaLabel="Composer mode"
+									value={selectedTemplateId}
+									onChange={applyTemplate}
+									options={TEMPLATE_OPTIONS}
+									ariaLabel="Select template"
 									side="bottom"
+									className="relative grain overflow-hidden"
+									style={{
+										backgroundColor: getTemplateById(selectedTemplateId)?.color,
+									}}
 								/>
 							)}
-							{composerMode === "template" &&
-								onTemplateChange &&
-								selectedTemplateId && (
-									<GlassDropdown
-										value={selectedTemplateId}
-										onChange={onTemplateChange}
-										options={TEMPLATE_OPTIONS}
-										ariaLabel="Select template"
-										side="bottom"
-										className="relative grain overflow-hidden"
-										style={{
-											backgroundColor:
-												getTemplateById(selectedTemplateId)?.color,
-										}}
-									/>
-								)}
 						</div>
 						<ActionButton
 							label="Submit"
@@ -409,7 +380,7 @@ export default function Copilot({
 									type="text"
 									aria-label="Describe your video"
 									value={value}
-									onChange={(e) => setValue(e.target.value)}
+									onChange={(e) => onValueChange(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 									placeholder={placeholderText}
 									className="font-body w-full bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"

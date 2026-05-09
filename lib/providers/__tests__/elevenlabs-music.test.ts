@@ -27,8 +27,8 @@ describe("ElevenLabsMusic", () => {
 	});
 
 	it("omits musicLengthMs and computes duration from buffer when no duration provided", async () => {
-		// 4000 bytes at 32 kbps CBR mp3 = 1 second
-		const audio = new Uint8Array(4000);
+		// 16000 bytes at 128 kbps CBR mp3 = 1 second
+		const audio = new Uint8Array(16000);
 		mockCompose.mockResolvedValue(mockReadableStream(audio));
 
 		const provider = new ElevenLabsMusic("test-key");
@@ -40,7 +40,7 @@ describe("ElevenLabsMusic", () => {
 			prompt: "jazz",
 			musicLengthMs: undefined,
 			modelId: "music_v1",
-			outputFormat: "mp3_22050_32",
+			outputFormat: "mp3_44100_128",
 		});
 	});
 

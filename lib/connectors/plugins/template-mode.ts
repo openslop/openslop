@@ -7,7 +7,9 @@ import type {
 } from "../types";
 import { getTemplateById } from "@/lib/templates/templates";
 
-export function createTemplateModePlugin(templateId: string | null): LLMPlugin {
+export function createTemplateModePlugin(
+	templateId: string | undefined,
+): LLMPlugin {
 	const template = templateId ? getTemplateById(templateId) : undefined;
 
 	return {

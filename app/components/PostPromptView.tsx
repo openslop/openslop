@@ -21,6 +21,7 @@ function PostPromptViewInner() {
 	const { loading: scriptLoading, stopGeneration } = useScript();
 	const canvasRef = useRef<CanvasHandle>(null);
 	const [layoutKey, setLayoutKey] = useState("");
+	const [refineValue, setRefineValue] = useState("");
 	const { position, visible } = usePlayerPosition();
 
 	const getEditor = useCallback(
@@ -49,7 +50,12 @@ function PostPromptViewInner() {
 				<div className="flex w-full items-stretch justify-center gap-3">
 					<div className="min-w-0 flex-1 max-w-2xl">
 						<Copilot
-							onSubmit={refineScript}
+							value={refineValue}
+							onValueChange={setRefineValue}
+							onSubmit={() => {
+								refineScript(refineValue);
+								setRefineValue("");
+							}}
 							onStop={stop}
 							multiline={false}
 							loading={loading}

@@ -44,6 +44,27 @@ describe("project store updateMetadata", () => {
 		});
 	});
 
+	it("reset returns the store to initial state", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store.getState().updateMetadata({
+			title: "My Project",
+			style: "cinematic",
+			narration: { gender: "masculine" },
+			characters: { Alice: { appearance: "A girl" } },
+		});
+		store.getState().setReferenceImages(["https://img/ref.png"]);
+
+		store.getState().reset();
+
+		expect(store.getState().metadata).toEqual({
+			title: "",
+			style: "",
+			narration: {},
+			characters: {},
+		});
+		expect(store.getState().referenceImages).toEqual([]);
+	});
+
 	it("adds new characters without removing existing ones", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().updateMetadata({

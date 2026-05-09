@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, use, useMemo, useState, type ReactNode } from "react";
+import {
+	createContext,
+	use,
+	useCallback,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
 import type {
 	ConnectorConfig,
 	ConnectorPlugin,
@@ -22,14 +29,23 @@ import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/plugins/template-mode";
-import { TEMPLATES } from "../templates/templates";
+import { TEMPLATES } from "@/lib/templates/templates";
+import * as template from "@/lib/templates/applyTemplate";
+import { getProjectStore } from "@/lib/project/store";
 import { withRegistry } from "./connectorUtils";
 
-export type ComposerMode = "story" | "script" | "template";
+export type Mode = "story" | "script" | "template";
 
-const MODE_PLUGINS: Record<"story" | "script", LLMPlugin> = {
-	story: storyModePlugin,
-	script: scriptModePlugin,
+interface ModeContext {
+	templateId?: string;
+}
+
+type ModePluginFactory = (ctx: ModeContext) => LLMPlugin;
+
+const MODE_PLUGIN_FACTORIES: Record<Mode, ModePluginFactory> = {
+	story: () => storyModePlugin,
+	script: () => scriptModePlugin,
+	template: ({ templateId }) => createTemplateModePlugin(templateId),
 };
 
 export type ConnectorRegistry = Record<
@@ -66,10 +82,10 @@ const MOCK_PROJECT_ID = "00000000-0000-4000-8000-000000000001";
 type ConfigContextValue = {
 	projectId: string;
 	connectorConfig: ConnectorRegistry;
-	composerMode: ComposerMode;
-	selectedTemplateId: string | null;
-	setComposerMode: React.Dispatch<React.SetStateAction<ComposerMode>>;
-	setSelectedTemplateId: React.Dispatch<React.SetStateAction<string | null>>;
+	mode: Mode;
+	setMode: (mode: Mode) => void;
+	selectedTemplateId: string | undefined;
+	applyTemplate: (templateId: string) => void;
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -83,16 +99,36 @@ export function useConfig() {
 export function ConfigProvider({ children }: { children: ReactNode }) {
 	const projectId = MOCK_PROJECT_ID;
 	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
-	const [composerMode, setComposerMode] = useState<ComposerMode>("story");
-	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-		TEMPLATES[0]?.id ?? null,
+	const [mode, setModeState] = useState<Mode>("story");
+	const [selectedTemplateId, setSelectedTemplateId] = useState<
+		string | undefined
+	>(TEMPLATES[0]?.id);
+
+	const applyTemplate = useCallback(
+		(templateId: string) => {
+			setModeState("template");
+			setSelectedTemplateId(templateId);
+			template.applyTemplate(projectId, templateId);
+		},
+		[projectId],
+	);
+
+	const setMode = useCallback(
+		(next: Mode) => {
+			if (next === "template" && selectedTemplateId) {
+				applyTemplate(selectedTemplateId);
+				return;
+			}
+			getProjectStore(projectId).getState().reset();
+			setModeState(next);
+		},
+		[projectId, selectedTemplateId, applyTemplate],
 	);
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
-		const modePlugin =
-			composerMode === "template"
-				? createTemplateModePlugin(selectedTemplateId)
-				: MODE_PLUGINS[composerMode];
+		const modePlugin = MODE_PLUGIN_FACTORIES[mode]({
+			templateId: selectedTemplateId,
+		});
 		return withRegistry(connectorConfig)
 			.appendPlugins("llm", modePlugin)
 			.appendPlugins("image", ...buildImagePlugins(projectId))
@@ -100,18 +136,25 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
 			.appendPlugins("tts", createVoiceSearchPlugin())
 			.build();
-	}, [connectorConfig, composerMode, selectedTemplateId, projectId]);
+	}, [connectorConfig, mode, selectedTemplateId, projectId]);
 
 	const value = useMemo<ConfigContextValue>(
 		() => ({
 			projectId,
 			connectorConfig: configWithPlugins,
-			composerMode,
+			mode,
+			setMode,
 			selectedTemplateId,
-			setComposerMode,
-			setSelectedTemplateId,
+			applyTemplate,
 		}),
-		[projectId, configWithPlugins, composerMode, selectedTemplateId],
+		[
+			projectId,
+			configWithPlugins,
+			mode,
+			setMode,
+			selectedTemplateId,
+			applyTemplate,
+		],
 	);
 
 	return (
