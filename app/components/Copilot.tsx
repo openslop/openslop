@@ -20,9 +20,10 @@ import {
 import GlassDropdown, {
 	type GlassDropdownOption,
 } from "@/app/components/GlassDropdown";
-import { useShallow } from "zustand/react/shallow";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
-import { copilotStore, useCopilotStore, type Mode } from "@/lib/copilot/store";
+import { useConfig, type Mode } from "@/lib/config/ConfigProvider";
+import { useProject } from "@/lib/project/useProject";
+import { getProjectStore } from "@/lib/project/store";
 import { stringifyError } from "@/lib/errors";
 import { uploadImage } from "@/lib/upload/uploadImage";
 import { toast } from "sonner";
@@ -51,7 +52,9 @@ const TEMPLATE_OPTIONS: GlassDropdownOption<string>[] = TEMPLATES.map((t) => ({
 }));
 
 interface CopilotProps {
-	onSubmit: (value: string) => void;
+	value: string;
+	onValueChange: (value: string) => void;
+	onSubmit: () => void;
 	onStop?: () => void;
 	multiline?: boolean;
 	placeholder?: ReactNode;
@@ -212,7 +215,13 @@ function AttachMenu({
 	);
 }
 
-function TemplatePill({ templateId }: { templateId: string }) {
+function TemplatePill({
+	templateId,
+	onRemove,
+}: {
+	templateId: string;
+	onRemove: () => void;
+}) {
 	const template = getTemplateById(templateId);
 	if (!template) return null;
 
@@ -224,7 +233,7 @@ function TemplatePill({ templateId }: { templateId: string }) {
 			<button
 				type="button"
 				aria-label="Remove template"
-				onClick={() => copilotStore.getState().setMode("story")}
+				onClick={onRemove}
 				className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-black/20"
 			>
 				<X className="h-3 w-3" />
@@ -235,32 +244,28 @@ function TemplatePill({ templateId }: { templateId: string }) {
 }
 
 export default function Copilot({
+	value,
+	onValueChange,
 	onSubmit,
 	onStop,
 	multiline,
 	placeholder,
 	loading,
 }: CopilotProps) {
-	const [value, setValue] = useCopilotStore(
-		useShallow((s) => [s.value, s.setValue]),
-	);
-	const [referenceImages, setReferenceImages] = useCopilotStore(
-		useShallow((s) => [s.referenceImages, s.setReferenceImages]),
-	);
-	const [mode, setMode] = useCopilotStore(
-		useShallow((s) => [s.mode, s.setMode]),
-	);
-	const selectedTemplateId = useCopilotStore((s) => s.selectedTemplateId);
-	const selectTemplate = useCopilotStore((s) => s.selectTemplate);
+	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
+		useConfig();
+	const referenceImages = useProject((s) => s.referenceImages);
+
+	const setReferenceImages = (urls: string[]) =>
+		getProjectStore(projectId).getState().setReferenceImages(urls);
 
 	const [uploading, setUploading] = useState(false);
-	const showPill = mode === "template" && selectedTemplateId;
+	const showPill = mode === "template" && selectedTemplateId !== undefined;
 	const hasText = value.trim().length > 0;
 
 	const handleSubmit = () => {
 		if (!hasText) return;
-		onSubmit(value);
-		copilotStore.getState().reset();
+		onSubmit();
 	};
 
 	const placeholderOverlay =
@@ -289,13 +294,18 @@ export default function Copilot({
 						</div>
 					)}
 					<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-						{showPill && <TemplatePill templateId={selectedTemplateId} />}
+						{showPill && (
+							<TemplatePill
+								templateId={selectedTemplateId}
+								onRemove={() => setMode("story")}
+							/>
+						)}
 						<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
 							<textarea
 								rows={2}
 								aria-label="Enter your prompt"
 								value={value}
-								onChange={(e) => setValue(e.target.value)}
+								onChange={(e) => onValueChange(e.target.value)}
 								onKeyDown={(e) => {
 									if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
 										handleSubmit();
@@ -330,7 +340,7 @@ export default function Copilot({
 							{mode === "template" && selectedTemplateId && (
 								<GlassDropdown
 									value={selectedTemplateId}
-									onChange={selectTemplate}
+									onChange={applyTemplate}
 									options={TEMPLATE_OPTIONS}
 									ariaLabel="Select template"
 									side="bottom"
@@ -370,7 +380,7 @@ export default function Copilot({
 									type="text"
 									aria-label="Describe your video"
 									value={value}
-									onChange={(e) => setValue(e.target.value)}
+									onChange={(e) => onValueChange(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 									placeholder={placeholderText}
 									className="font-body w-full bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"

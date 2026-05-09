@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, use, useMemo, useState, type ReactNode } from "react";
+import {
+	createContext,
+	use,
+	useCallback,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
 import type {
 	ConnectorConfig,
 	ConnectorPlugin,
@@ -22,8 +29,11 @@ import { scriptModePlugin } from "../connectors/plugins/script-mode";
 import { osmlPlugin } from "../connectors/plugins/osml";
 import { storyModePlugin } from "../connectors/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/plugins/template-mode";
-import { useCopilotStore, type Mode } from "@/lib/copilot/store";
+import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
+import { getProjectStore } from "@/lib/project/store";
 import { withRegistry } from "./connectorUtils";
+
+export type Mode = "story" | "script" | "template";
 
 interface ModeContext {
 	templateId?: string;
@@ -31,7 +41,7 @@ interface ModeContext {
 
 type ModePluginFactory = (ctx: ModeContext) => LLMPlugin;
 
-const MODE_PLUGINS: Record<Mode, ModePluginFactory> = {
+const MODE_PLUGIN_FACTORIES: Record<Mode, ModePluginFactory> = {
 	story: () => storyModePlugin,
 	script: () => scriptModePlugin,
 	template: ({ templateId }) => createTemplateModePlugin(templateId),
@@ -71,6 +81,10 @@ const MOCK_PROJECT_ID = "00000000-0000-4000-8000-000000000001";
 type ConfigContextValue = {
 	projectId: string;
 	connectorConfig: ConnectorRegistry;
+	mode: Mode;
+	setMode: (mode: Mode) => void;
+	selectedTemplateId: string | undefined;
+	applyTemplate: (templateId: string) => void;
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -84,27 +98,50 @@ export function useConfig() {
 export function ConfigProvider({ children }: { children: ReactNode }) {
 	const projectId = MOCK_PROJECT_ID;
 	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
-	const mode = useCopilotStore((s) => s.mode);
-	const selectedTemplateId = useCopilotStore((s) => s.selectedTemplateId);
+	const [mode, setMode] = useState<Mode>("story");
+	const [selectedTemplateId, setSelectedTemplateId] = useState<
+		string | undefined
+	>(TEMPLATES[0]?.id);
 
-	const configWithPlugins = useMemo<ConnectorRegistry>(
-		() =>
-			withRegistry(connectorConfig)
-				.appendPlugins(
-					"llm",
-					MODE_PLUGINS[mode]({ templateId: selectedTemplateId }),
-				)
-				.appendPlugins("image", ...buildImagePlugins(projectId))
-				.appendPlugins("video", createReferenceImagesPlugin(projectId))
-				.appendPlugins("tts", createMetadataVoicePlugin(projectId))
-				.appendPlugins("tts", createVoiceSearchPlugin())
-				.build(),
-		[connectorConfig, mode, selectedTemplateId, projectId],
+	const applyTemplate = useCallback(
+		(templateId: string) => {
+			const template = getTemplateById(templateId);
+			if (!template) return;
+			setMode("template");
+			setSelectedTemplateId(templateId);
+			const project = getProjectStore(projectId).getState();
+			project.setReferenceImages(template.referenceImages);
+			project.updateMetadata({
+				characters: template.characters,
+				narration: template.narration,
+			});
+		},
+		[projectId],
 	);
 
+	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
+		const modePlugin = MODE_PLUGIN_FACTORIES[mode]({
+			templateId: selectedTemplateId,
+		});
+		return withRegistry(connectorConfig)
+			.appendPlugins("llm", modePlugin)
+			.appendPlugins("image", ...buildImagePlugins(projectId))
+			.appendPlugins("video", createReferenceImagesPlugin(projectId))
+			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
+			.appendPlugins("tts", createVoiceSearchPlugin())
+			.build();
+	}, [connectorConfig, mode, selectedTemplateId, projectId]);
+
 	const value = useMemo<ConfigContextValue>(
-		() => ({ projectId, connectorConfig: configWithPlugins }),
-		[projectId, configWithPlugins],
+		() => ({
+			projectId,
+			connectorConfig: configWithPlugins,
+			mode,
+			setMode,
+			selectedTemplateId,
+			applyTemplate,
+		}),
+		[projectId, configWithPlugins, mode, selectedTemplateId, applyTemplate],
 	);
 
 	return (

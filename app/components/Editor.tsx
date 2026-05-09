@@ -1,15 +1,12 @@
 "use client";
 
 import { useScript, useScriptText } from "@/lib/script/ScriptProvider";
-import { useCopilotStore } from "@/lib/copilot/store";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 
 export default function Editor() {
 	const { loading } = useScript();
 	const script = useScriptText();
-	const submitted = useCopilotStore((s) => s.submitted);
-
 	const hasScript = script.length > 0 || loading;
 
 	return (
@@ -18,7 +15,7 @@ export default function Editor() {
 				hasScript ? "" : "pt-[22vh]"
 			}`}
 		>
-			{submitted ? <PostPromptView /> : <PrePromptView />}
+			{hasScript ? <PostPromptView /> : <PrePromptView />}
 		</div>
 	);
 }

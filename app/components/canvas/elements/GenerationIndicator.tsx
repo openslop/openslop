@@ -65,19 +65,6 @@ export function GenerationIndicator({
 		className,
 	);
 
-	if (!onClick) {
-		return (
-			<div
-				className={baseWrapper}
-				role="status"
-				aria-label={label}
-				title={label}
-			>
-				{iconEl}
-			</div>
-		);
-	}
-
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
@@ -88,7 +75,7 @@ export function GenerationIndicator({
 						baseWrapper,
 						"transition-[opacity,background-color] disabled:cursor-not-allowed",
 					)}
-					disabled={active}
+					disabled={active || !onClick}
 					onClick={onClick}
 				>
 					{iconEl}

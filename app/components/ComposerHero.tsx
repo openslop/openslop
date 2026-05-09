@@ -1,10 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore } from "@/lib/project/store";
-import { copilotStore, useCopilotStore } from "@/lib/copilot/store";
-import { getTemplateById } from "@/lib/templates/templates";
 import Copilot from "./Copilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import TemplateGallery from "./TemplateGallery";
@@ -23,23 +21,8 @@ And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
 	const { loading, submitPrompt, stopGeneration } = useScript();
-	const { projectId } = useConfig();
-	const mode = useCopilotStore((s) => s.mode);
-
-	const handleSubmit = (value: string) => {
-		const { referenceImages, selectedTemplateId } = copilotStore.getState();
-		const store = getProjectStore(projectId).getState();
-		store.setReferenceImages(referenceImages);
-		if (mode === "template" && selectedTemplateId) {
-			const template = getTemplateById(selectedTemplateId);
-			store.updateMetadata({
-				characters: template?.characters,
-				narration: template?.narration,
-			});
-		}
-		copilotStore.getState().markSubmitted();
-		submitPrompt(value);
-	};
+	const { mode, applyTemplate } = useConfig();
+	const [value, setValue] = useState("");
 
 	return (
 		<div className="flex w-full max-w-2xl flex-col items-center px-4">
@@ -48,7 +31,12 @@ export default function ComposerHero() {
 			</h1>
 
 			<Copilot
-				onSubmit={handleSubmit}
+				value={value}
+				onValueChange={setValue}
+				onSubmit={() => {
+					submitPrompt(value);
+					setValue("");
+				}}
 				onStop={stopGeneration}
 				multiline
 				loading={loading}
@@ -63,9 +51,8 @@ export default function ComposerHero() {
 
 			<TemplateGallery
 				onSelect={(templateId, examplePrompt) => {
-					const store = copilotStore.getState();
-					store.selectTemplate(templateId);
-					store.setValue(examplePrompt);
+					applyTemplate(templateId);
+					setValue(examplePrompt);
 				}}
 			/>
 		</div>
