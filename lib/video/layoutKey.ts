@@ -1,4 +1,4 @@
-import type { CanvasContentElement } from "@/app/components/canvas/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 
 /**
  * Stable key over every element field that resolveElements/buildVideoLayout

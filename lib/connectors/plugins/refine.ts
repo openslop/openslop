@@ -1,5 +1,5 @@
 import dedent from "dedent";
-import { CANVAS_ELEMENT_TYPES } from "@/app/components/canvas/types";
+import { CANVAS_ELEMENT_TYPES } from "@/lib/canvas/types";
 import { MusicLength } from "../music/enums";
 import type { LLMPlugin } from "../types";
 

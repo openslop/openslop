@@ -9,7 +9,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
-import type { ParsedElement } from "@/app/components/canvas/types";
+import type { ParsedElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
