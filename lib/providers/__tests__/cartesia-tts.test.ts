@@ -247,6 +247,17 @@ describe("CartesiaTTS", () => {
 			expect(mockEmbedMany).not.toHaveBeenCalled();
 		});
 
+		it("returns early without embedding when semantic query exists but no voices match", async () => {
+			mockVoicesList.mockResolvedValue({ data: [] });
+
+			const provider = new CartesiaTTS("test-key");
+			const voices = await provider.search({ description: "warm narrator" });
+
+			expect(voices).toEqual([]);
+			expect(mockEmbed).not.toHaveBeenCalled();
+			expect(mockEmbedMany).not.toHaveBeenCalled();
+		});
+
 		it("falls back to unranked results when embedding throws", async () => {
 			mockVoicesList.mockResolvedValue({
 				data: [

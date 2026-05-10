@@ -23,6 +23,8 @@ export async function rankBySimilarity(
 	voices: VoiceInfo[],
 	queryText: string,
 ): Promise<VoiceInfo[]> {
+	if (voices.length === 0) return [];
+
 	const model = openai.embedding(EMBEDDING_MODEL);
 	const [queryResult, voiceResult] = await Promise.all([
 		embed({ model, value: queryText }),
