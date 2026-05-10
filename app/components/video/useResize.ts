@@ -2,13 +2,80 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+export type ResizeAxis = "vertical" | "horizontal";
+
+export function clampResize(
+	axis: ResizeAxis,
+	startPos: number,
+	currentPos: number,
+	startSize: number,
+	minSize: number,
+	maxSize: number,
+): number {
+	const delta =
+		axis === "vertical" ? currentPos - startPos : startPos - currentPos;
+	return Math.max(minSize, Math.min(startSize + delta, maxSize));
+}
+
+type ResizeListenerHost = {
+	addEventListener: (type: string, listener: (ev: MouseEvent) => void) => void;
+	removeEventListener: (
+		type: string,
+		listener: (ev: MouseEvent) => void,
+	) => void;
+};
+
+export function attachResizeListeners(
+	host: ResizeListenerHost,
+	options: {
+		axis: ResizeAxis;
+		startPos: number;
+		startSize: number;
+		minSize: number;
+		maxSize: number;
+		onResize: (size: number) => void;
+		onEnd: () => void;
+	},
+): () => void {
+	const onMove = (ev: MouseEvent) => {
+		const pos = options.axis === "vertical" ? ev.clientY : ev.clientX;
+		options.onResize(
+			clampResize(
+				options.axis,
+				options.startPos,
+				pos,
+				options.startSize,
+				options.minSize,
+				options.maxSize,
+			),
+		);
+	};
+
+	let cleaned = false;
+	const cleanup = () => {
+		if (cleaned) return;
+		cleaned = true;
+		host.removeEventListener("mousemove", onMove);
+		host.removeEventListener("mouseup", onUp);
+	};
+
+	const onUp = () => {
+		options.onEnd();
+		cleanup();
+	};
+
+	host.addEventListener("mousemove", onMove);
+	host.addEventListener("mouseup", onUp);
+	return cleanup;
+}
+
 export function useResize({
 	axis,
 	defaultSize,
 	minSize,
 	maxSize,
 }: {
-	axis: "vertical" | "horizontal";
+	axis: ResizeAxis;
 	defaultSize: number;
 	minSize: number;
 	maxSize: number;
@@ -20,27 +87,30 @@ export function useResize({
 		sizeRef.current = size;
 	}, [size]);
 
+	const cleanupRef = useRef<(() => void) | null>(null);
+
+	useEffect(
+		() => () => {
+			cleanupRef.current?.();
+			cleanupRef.current = null;
+		},
+		[],
+	);
+
 	const handleMouseDown = useCallback(
 		(e: React.MouseEvent) => {
 			e.preventDefault();
-			const start = axis === "vertical" ? e.clientY : e.clientX;
-			const startSize = sizeRef.current;
+			cleanupRef.current?.();
 			setResizing(true);
-
-			const onMove = (ev: MouseEvent) => {
-				const pos = axis === "vertical" ? ev.clientY : ev.clientX;
-				const delta = axis === "vertical" ? pos - start : start - pos;
-				setSize(Math.max(minSize, Math.min(startSize + delta, maxSize)));
-			};
-
-			const onUp = () => {
-				setResizing(false);
-				document.removeEventListener("mousemove", onMove);
-				document.removeEventListener("mouseup", onUp);
-			};
-
-			document.addEventListener("mousemove", onMove);
-			document.addEventListener("mouseup", onUp);
+			cleanupRef.current = attachResizeListeners(document, {
+				axis,
+				startPos: axis === "vertical" ? e.clientY : e.clientX,
+				startSize: sizeRef.current,
+				minSize,
+				maxSize,
+				onResize: setSize,
+				onEnd: () => setResizing(false),
+			});
 		},
 		[axis, minSize, maxSize],
 	);
