@@ -4,6 +4,7 @@ import type { CanvasElement } from "@/app/components/canvas/types";
 import { generationQueue } from "@/lib/generation/queue";
 import { resolveElements } from "@/lib/video/resolve";
 import { buildVideoLayout } from "@/lib/video/scene-builder";
+import { useTransitionType } from "@/lib/video/useTransitionType";
 import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
@@ -14,6 +15,7 @@ export function useVideoLayout(
 		generationQueue.subscribe,
 		generationQueue.getResultVersion,
 	);
+	const transitionType = useTransitionType();
 
 	const layout = useMemo(() => {
 		const editor = getEditor();
@@ -23,9 +25,9 @@ export function useVideoLayout(
 			elements,
 			generationQueue.getElementSnapshot,
 		);
-		return buildVideoLayout(resolved);
+		return buildVideoLayout(resolved, { transitionType });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [getEditor, layoutKey, resultVersion]);
+	}, [getEditor, layoutKey, resultVersion, transitionType]);
 
 	return { layout, playerKey: `${layoutKey}-${resultVersion}` };
 }

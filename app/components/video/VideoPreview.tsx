@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { VideoLayout } from "@/lib/video/types";
+import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import styles from "./VideoPlayer.module.css";
 
 const fullWidthStyle = { width: "100%" };
@@ -37,7 +38,9 @@ const RemotionPlayer = dynamic(
 export function VideoPreview({ layout }: { layout: VideoLayout }) {
 	return (
 		<div className={styles.player}>
-			<RemotionPlayer layout={layout} />
+			<ToastErrorBoundary label="Player">
+				<RemotionPlayer layout={layout} />
+			</ToastErrorBoundary>
 		</div>
 	);
 }
