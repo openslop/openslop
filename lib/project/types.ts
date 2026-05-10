@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TTS_GENDERS } from "@/lib/connectors/tts/enums";
+import type { TransitionType } from "@/lib/video/transitions";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
 
@@ -31,11 +32,16 @@ export type MetadataCharacter = MetadataVoice & {
 	avatarUrl?: string;
 };
 
+export type VideoSettings = {
+	transitionType?: TransitionType;
+};
+
 export type Metadata = {
 	title: string;
 	style: string;
 	narration: MetadataVoice;
 	characters: Record<string, MetadataCharacter>;
+	videoSettings?: VideoSettings;
 };
 
 export type DeepPartial<T> = T extends object

@@ -5,6 +5,15 @@ import type {
 	VideoLayout,
 } from "./types";
 import { DEFAULT_CONFIG } from "./types";
+import {
+	DEFAULT_TRANSITION,
+	TRANSITION_DURATION_SEC,
+	type TransitionType,
+} from "./transitions";
+
+export type BuildLayoutOptions = Partial<VideoConfig> & {
+	transitionType?: TransitionType;
+};
 
 const MIN_DURATION_SEC = 1;
 
@@ -62,9 +71,10 @@ function getForegroundCursor(current: Sequence | undefined, cursor: number) {
  */
 export function buildVideoLayout(
 	elements: ResolvedElement[],
-	config?: Partial<VideoConfig>,
+	options?: BuildLayoutOptions,
 ): VideoLayout {
-	const cfg = { ...DEFAULT_CONFIG, ...config };
+	const cfg = { ...DEFAULT_CONFIG, ...options };
+	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
 	const series: Sequence[] = [];
 	const sequences: Record<string, Sequence[]> = {};
 	let cursor = 0;
@@ -89,6 +99,12 @@ export function buildVideoLayout(
 					current.duration = Math.max(current.duration, element.durationSec);
 				} else {
 					cursor = foregroundCursor;
+					if (series.length > 0) {
+						// TransitionSeries.Sequence overlap the previous
+						// ones by TRANSITION_DURATION_SEC. Bake that into the cursor so every
+						// subsequent overlay/background/effect lands on the rendered timeline.
+						cursor -= TRANSITION_DURATION_SEC;
+					}
 					series.push(createSequence(element, cursor, element.durationSec));
 				}
 				break;
@@ -127,5 +143,7 @@ export function buildVideoLayout(
 		sequences,
 		totalDurationSec,
 		totalFrames: Math.max(2, Math.ceil(totalDurationSec * cfg.fps)),
+		transitionType,
+		transitionDurationSec: TRANSITION_DURATION_SEC,
 	};
 }

@@ -1,17 +1,21 @@
-import React, { useMemo } from "react";
+import React, { Fragment, useMemo } from "react";
 import {
 	AbsoluteFill,
 	Html5Audio,
 	Img,
+	interpolate,
 	OffthreadVideo,
 	Sequence,
-	Series,
+	useVideoConfig,
 } from "remotion";
+import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type {
 	VideoLayout,
 	Sequence as SeqType,
 	ResolvedElement,
 } from "@/lib/video/types";
+import { AUDIO_FADE_SEC, getPresentation } from "@/lib/video/transitions";
+
 const coverStyle: React.CSSProperties = {
 	width: "100%",
 	height: "100%",
@@ -24,11 +28,38 @@ function toFrames(sec: number, fps: number): number {
 	return Math.round(sec * fps);
 }
 
+function fadeVolume(durationInFrames: number, fadeFrames: number) {
+	// Cap so the fade-in and fade-out windows don't overlap — interpolate()
+	// requires a monotonically increasing input range and throws otherwise.
+	const f = Math.min(fadeFrames, Math.floor(durationInFrames / 2));
+	return (frame: number) =>
+		interpolate(
+			frame,
+			[0, f, durationInFrames - f, durationInFrames],
+			[0, 1, 1, 0],
+			{ extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+		);
+}
+
+function AudioSequence({ element }: { element: ResolvedElement }) {
+	const { durationInFrames, fps } = useVideoConfig();
+	const fade = element.role === "background";
+	return (
+		<Html5Audio
+			src={element.url}
+			pauseWhenBuffering
+			volume={
+				fade ? fadeVolume(durationInFrames, toFrames(AUDIO_FADE_SEC, fps)) : 1
+			}
+		/>
+	);
+}
+
 function SequenceContent({ element }: { element: ResolvedElement }) {
 	switch (element.layer) {
 		case "visual":
 			return element.type === "image" ? (
-				<Img src={element.url} style={coverStyle} pauseWhenLoading />
+				<Img src={element.url} style={coverStyle} />
 			) : (
 				<OffthreadVideo
 					src={element.url}
@@ -37,7 +68,7 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 				/>
 			);
 		case "audio":
-			return <Html5Audio src={element.url} pauseWhenBuffering />;
+			return <AudioSequence element={element} />;
 		default:
 			return null;
 	}
@@ -54,21 +85,36 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 	series,
 	sequences,
 	fps,
+	width,
+	height,
+	transitionType,
+	transitionDurationSec,
 }) => {
 	const sequenceEntries = useMemo(() => Object.entries(sequences), [sequences]);
+	const transitionFrames = toFrames(transitionDurationSec, fps);
 
 	return (
 		<AbsoluteFill style={blackBg}>
-			<Series>
+			<TransitionSeries>
 				{series.map((seq, i) => (
-					<Series.Sequence
-						key={seq.element?.id ?? `empty-${i}`}
-						durationInFrames={toFrames(seq.duration, fps)}
-					>
-						<SeriesEntry seq={seq} />
-					</Series.Sequence>
+					<Fragment key={seq.element?.id ?? `empty-${i}`}>
+						{i > 0 && (
+							<TransitionSeries.Transition
+								presentation={getPresentation(transitionType, {
+									width,
+									height,
+								})}
+								timing={linearTiming({ durationInFrames: transitionFrames })}
+							/>
+						)}
+						<TransitionSeries.Sequence
+							durationInFrames={toFrames(seq.duration, fps)}
+						>
+							<SeriesEntry seq={seq} />
+						</TransitionSeries.Sequence>
+					</Fragment>
 				))}
-			</Series>
+			</TransitionSeries>
 
 			{sequenceEntries.map(([type, seqs]) =>
 				seqs?.map((seq, i) =>
@@ -77,7 +123,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 							key={`${type}-${seq.element.id}-${i}`}
 							from={toFrames(seq.start, fps)}
 							durationInFrames={toFrames(seq.duration, fps)}
-							layout="none"
+							premountFor={fps}
 						>
 							<SequenceContent element={seq.element} />
 						</Sequence>

@@ -39,6 +39,13 @@ function PostPromptViewInner() {
 	const loading = scriptLoading || refineLoading;
 	const busy = loading || generating;
 	const stop = scriptLoading ? stopGeneration : stopRefine;
+	const generateLabel = scriptLoading
+		? "Writing…"
+		: refineLoading
+			? "Refining…"
+			: generating
+				? "Generating…"
+				: "Generate";
 
 	const isTop = position === "top";
 
@@ -66,11 +73,11 @@ function PostPromptViewInner() {
 						type="button"
 						onClick={() => canvasRef.current?.generateAll()}
 						className={`${genStyles.btn} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
-						aria-label="Generate"
+						aria-label={generateLabel}
 						disabled={busy}
 					>
 						<Sparkles className={genStyles.svg} aria-hidden="true" />
-						<span>Generate</span>
+						<span>{generateLabel}</span>
 					</button>
 				</div>
 			</div>

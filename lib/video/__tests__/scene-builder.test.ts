@@ -70,8 +70,21 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[0].start).toBe(0);
-			expect(layout.series[1].start).toBe(5);
-			expect(layout.totalDurationSec).toBe(8);
+			// Each foreground past the first overlaps the previous by one
+			// TRANSITION_DURATION_SEC (0.4s) to match what <TransitionSeries> renders.
+			expect(layout.series[1].start).toBe(4.6);
+			expect(layout.totalDurationSec).toBe(7.6);
+		});
+
+		it("places overlays on the rendered timeline so they align with transitioned visuals", () => {
+			const layout = buildVideoLayout([
+				el({ id: "img1", type: "image", durationSec: 5 }),
+				el({ id: "img2", type: "image", durationSec: 3 }),
+				el({ id: "n1", type: "narration", durationSec: 2 }),
+			]);
+			expect(layout.series[1].start).toBe(4.6);
+			expect(seqs(layout, "narration")[0].start).toBe(4.6);
+			expect(layout.totalDurationSec).toBe(7.6);
 		});
 
 		it("clamps a foreground shorter than the minimum duration", () => {
@@ -161,7 +174,7 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].start).toBe(9);
+			expect(layout.series[1].start).toBe(8.6);
 			expect(layout.series[1].duration).toBe(6);
 		});
 
@@ -173,7 +186,7 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].start).toBe(30);
+			expect(layout.series[1].start).toBe(29.6);
 			expect(layout.series[1].duration).toBe(6);
 		});
 
@@ -236,12 +249,13 @@ describe("buildVideoLayout", () => {
 				el({ id: "c2", type: "character", durationSec: 5 }),
 				el({ id: "img1", type: "image", durationSec: 6 }),
 			]);
-			expect(layout.totalDurationSec).toBe(16);
+			expect(layout.totalDurationSec).toBe(15.6);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "music")[1].start).toBe(10);
-			expect(seqs(layout, "music")[1].duration).toBe(6);
+			// m2 trimmed to the rendered total (15.6) since img1 is overlapped by 0.4s.
+			expect(seqs(layout, "music")[1].duration).toBe(5.6);
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
@@ -254,12 +268,13 @@ describe("buildVideoLayout", () => {
 				el({ id: "m5", type: "music", durationSec: 50 }),
 				el({ id: "clip1", type: "clip", durationSec: 20 }),
 			]);
-			expect(layout.totalDurationSec).toBe(30);
+			expect(layout.totalDurationSec).toBe(29.6);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "music")[1].start).toBe(10);
-			expect(seqs(layout, "music")[1].duration).toBe(20);
+			// m5 trimmed to the rendered total (29.6) since clip1 is overlapped by 0.4s.
+			expect(seqs(layout, "music")[1].duration).toBe(19.6);
 		});
 
 		it("emits N consecutive copies for a looped background, trimmed to the foreground span", () => {
@@ -288,8 +303,10 @@ describe("buildVideoLayout", () => {
 			expect(music).toHaveLength(3);
 			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
 			expect(music[1]).toMatchObject({ start: 10, duration: 5 });
-			expect(music[2]).toMatchObject({ start: 15, duration: 10 });
-			expect(layout.totalDurationSec).toBe(25);
+			// m2 trimmed to the rendered total (24.6) since img2 is overlapped by 0.4s.
+			expect(music[2].start).toBe(15);
+			expect(music[2].duration).toBeCloseTo(9.6);
+			expect(layout.totalDurationSec).toBe(24.6);
 		});
 
 		it("emits a clamped background sequence when no series elements exist", () => {
@@ -422,7 +439,7 @@ describe("buildVideoLayout", () => {
 			expect(layout.series[0].duration).toBe(5);
 			expect(layout.series[1].element?.id).toBe("clip1");
 			expect(layout.series[1].duration).toBe(6);
-			expect(layout.totalDurationSec).toBe(11);
+			expect(layout.totalDurationSec).toBe(10.6);
 
 			expect(seqs(layout, "music")).toHaveLength(1);
 			expect(seqs(layout, "narration")).toHaveLength(2);

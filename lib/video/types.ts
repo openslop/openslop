@@ -1,4 +1,5 @@
 import type { CanvasElementType } from "@/lib/canvas/types";
+import type { TransitionType } from "./transitions";
 
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
@@ -46,6 +47,8 @@ export type VideoLayout = {
 	height: number;
 	totalDurationSec: number;
 	totalFrames: number;
+	transitionType: TransitionType;
+	transitionDurationSec: number;
 };
 
 export const COMPOSITION_ID = "VideoComposition";

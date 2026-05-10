@@ -18,37 +18,37 @@ describe("getLayoutKey", () => {
 	it("returns the same key for identical element lists", () => {
 		const a = [el("s1", { loops: "2" }), el("s2")];
 		const b = [el("s1", { loops: "2" }), el("s2")];
-		expect(getLayoutKey(a)).toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).toBe(getLayoutKey(b, "none"));
 	});
 
 	it("changes when elements are reordered", () => {
 		const a = [el("s1"), el("s2")];
 		const b = [el("s2"), el("s1")];
-		expect(getLayoutKey(a)).not.toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).not.toBe(getLayoutKey(b, "none"));
 	});
 
 	it("changes when an element is added", () => {
 		const a = [el("s1")];
 		const b = [el("s1"), el("s2")];
-		expect(getLayoutKey(a)).not.toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).not.toBe(getLayoutKey(b, "none"));
 	});
 
 	it("changes when an element is removed", () => {
 		const a = [el("s1"), el("s2")];
 		const b = [el("s1")];
-		expect(getLayoutKey(a)).not.toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).not.toBe(getLayoutKey(b, "none"));
 	});
 
 	it("changes when loops changes on any element", () => {
 		const a = [el("s1", { loops: "1" })];
 		const b = [el("s1", { loops: "4" })];
-		expect(getLayoutKey(a)).not.toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).not.toBe(getLayoutKey(b, "none"));
 	});
 
 	it("is stable across unrelated attribute changes", () => {
 		const a = [el("s1", { emotion: "happy" })];
 		const b = [el("s1", { emotion: "sad" })];
-		expect(getLayoutKey(a)).toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).toBe(getLayoutKey(b, "none"));
 	});
 
 	it("is stable across text edits (text is not in the element body)", () => {
@@ -61,6 +61,11 @@ describe("getLayoutKey", () => {
 				children: [{ id: "s1-t", type: "sound", text: "rain" }],
 			},
 		];
-		expect(getLayoutKey(a)).toBe(getLayoutKey(b));
+		expect(getLayoutKey(a, "none")).toBe(getLayoutKey(b, "none"));
+	});
+
+	it("changes when transition type changes", () => {
+		const els = [el("s1")];
+		expect(getLayoutKey(els, "none")).not.toBe(getLayoutKey(els, "fade"));
 	});
 });

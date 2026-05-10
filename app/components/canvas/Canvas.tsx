@@ -32,6 +32,7 @@ import { renderCanvasElement } from "./elements/ElementContainer";
 import { AssetsSection } from "./elements/AssetsSection";
 import { getContentElements } from "./utils/nodeUtils";
 import { getLayoutKey } from "@/lib/video/layoutKey";
+import { useTransitionType } from "@/lib/video/useTransitionType";
 import { PreviewCacheProvider } from "./PreviewCacheContext";
 import { ViewModeProvider } from "./ViewModeContext";
 
@@ -50,6 +51,7 @@ export default function Canvas({
 	const { editor, value, setValue } = useEditorSetup();
 
 	const contentElements = useMemo(() => getContentElements(value), [value]);
+	const transitionType = useTransitionType();
 
 	const {
 		activeId,
@@ -66,7 +68,7 @@ export default function Canvas({
 	useMetadataSync();
 	const { generateAll } = useGenerateAll(editor);
 
-	const layoutKey = getLayoutKey(contentElements);
+	const layoutKey = getLayoutKey(contentElements, transitionType);
 	const prevKeyRef = useRef(layoutKey);
 	useEffect(() => {
 		if (layoutKey !== prevKeyRef.current) {
