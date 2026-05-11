@@ -68,7 +68,10 @@ export default function Canvas({
 	useMetadataSync();
 	const { generateAll } = useGenerateAll(editor);
 
-	const layoutKey = getLayoutKey(contentElements, transitionType);
+	const layoutKey = useMemo(
+		() => getLayoutKey(contentElements, transitionType),
+		[contentElements, transitionType],
+	);
 	const prevKeyRef = useRef(layoutKey);
 	useEffect(() => {
 		if (layoutKey !== prevKeyRef.current) {
