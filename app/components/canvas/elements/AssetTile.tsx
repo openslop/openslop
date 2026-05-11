@@ -1,9 +1,8 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { type LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { generationQueue } from "@/lib/generation/queue";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { GenerationIndicator } from "./GenerationIndicator";
 
 export function AssetTile({
@@ -17,10 +16,8 @@ export function AssetTile({
 	Icon: LucideIcon;
 	elementId?: string;
 }) {
-	const status = useSyncExternalStore(
-		generationQueue.subscribe,
-		() => generationQueue.getElementSnapshot(elementId).status,
-		() => "idle" as const,
+	const status = useQueueSelector(
+		(q) => q.getElementSnapshot(elementId).status,
 	);
 	const initial = name?.trim().charAt(0).toUpperCase();
 	return (

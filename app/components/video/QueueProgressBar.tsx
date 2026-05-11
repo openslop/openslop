@@ -1,21 +1,12 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { generationQueue } from "@/lib/generation/queue";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { PlayerShimmer } from "./PlayerShimmer";
 import styles from "./QueueProgressBar.module.css";
 
 export function QueueProgressBar() {
-	const active = useSyncExternalStore(
-		generationQueue.subscribe,
-		generationQueue.getActiveCount,
-		() => 0,
-	);
-	const peak = useSyncExternalStore(
-		generationQueue.subscribe,
-		generationQueue.getPeakActive,
-		() => 0,
-	);
+	const active = useQueueSelector((q) => q.getActiveCount());
+	const peak = useQueueSelector((q) => q.getPeakActive());
 	const done = peak - active;
 	const pct = peak === 0 ? 0 : (done / peak) * 100;
 

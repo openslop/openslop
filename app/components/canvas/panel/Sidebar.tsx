@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PanelLeft } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, PanelLeft } from "lucide-react";
 import UserProfile from "@/app/components/UserProfile";
 import PlayerPositionPanel from "./PlayerPositionPanel";
 import TransitionPanel from "./TransitionPanel";
@@ -39,6 +40,13 @@ export default function Sidebar() {
 
 					{open && (
 						<div className="mt-10 px-2 flex flex-col gap-4">
+							<Link
+								href="/"
+								className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
+							>
+								<ArrowLeft size={16} strokeWidth={1.5} />
+								Back to My Slop
+							</Link>
 							<PlayerPositionPanel />
 							<TransitionPanel />
 							<ViewModePanel />

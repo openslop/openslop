@@ -52,6 +52,7 @@ describe("GenerationQueue", () => {
 				result: null,
 				error: null,
 				resultInputs: null,
+				connectorType: null,
 			});
 		});
 	});
@@ -293,6 +294,7 @@ describe("GenerationQueue", () => {
 				result: null,
 				error: null,
 				resultInputs: null,
+				connectorType: null,
 			});
 		});
 
@@ -428,6 +430,90 @@ describe("GenerationQueue", () => {
 			);
 
 			generationQueue.discard("t1");
+		});
+	});
+
+	describe("snapshot", () => {
+		const idleEntry = {
+			status: "idle" as const,
+			seconds: 0,
+			result: { url: "u", durationSec: 2 },
+			error: null,
+			resultInputs: { prompt: "p", attributes: {} },
+			connectorType: "image" as const,
+		};
+
+		it("dumps every entry verbatim", async () => {
+			generateMock.mockResolvedValue(idleEntry.result);
+			generationQueue.enqueue(
+				makeJob("s1", { inputs: idleEntry.resultInputs }),
+			);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(generationQueue.snapshot()).toEqual({ s1: idleEntry });
+		});
+
+		it("includes errored entries", () => {
+			generationQueue.setError("s2", "boom");
+			expect(generationQueue.snapshot()).toEqual({
+				s2: {
+					status: "idle",
+					seconds: 0,
+					result: null,
+					error: "boom",
+					resultInputs: null,
+					connectorType: null,
+				},
+			});
+		});
+	});
+
+	describe("initialState", () => {
+		const idleEntry = {
+			status: "idle" as const,
+			seconds: 0,
+			result: { url: "u", durationSec: 2 },
+			error: null,
+			resultInputs: { prompt: "p", attributes: {} },
+			connectorType: "image" as const,
+		};
+
+		it("populates entries from the constructor", () => {
+			const q = new GenerationQueue({
+				batchSize: 3,
+				initialState: { h1: idleEntry },
+			});
+			expect(q.getElementSnapshot("h1")).toEqual(idleEntry);
+		});
+
+		it("normalizes stale 'generating' status back to idle", () => {
+			const q = new GenerationQueue({
+				batchSize: 3,
+				initialState: {
+					h2: { ...idleEntry, status: "generating", seconds: 42 },
+				},
+			});
+			const snap = q.getElementSnapshot("h2");
+			expect(snap.status).toBe("idle");
+			expect(snap.seconds).toBe(0);
+		});
+
+		it("makes isStaleResult correct after rehydration", async () => {
+			const { isStaleResult } = await import("../generationInputs");
+			const q = new GenerationQueue({
+				batchSize: 3,
+				initialState: { h3: idleEntry },
+			});
+
+			expect(
+				isStaleResult(q.getElementSnapshot("h3"), idleEntry.resultInputs),
+			).toBe(false);
+			expect(
+				isStaleResult(q.getElementSnapshot("h3"), {
+					prompt: "different",
+					attributes: {},
+				}),
+			).toBe(true);
 		});
 	});
 });

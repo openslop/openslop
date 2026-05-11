@@ -14,6 +14,9 @@ import { createCanvasNode } from "./createCanvasNode";
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
 
+export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;
+const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
+
 export class OSMLSerializer {
 	private buffer = "";
 	private nodes: ParsedElement[] = [];
@@ -31,7 +34,7 @@ export class OSMLSerializer {
 		for (const node of descendants) {
 			if (isSceneElement(node)) {
 				sceneNum++;
-				osml += `\n--- Scene ${sceneNum} ---\n`;
+				osml += sceneMarker(sceneNum);
 				for (const child of node.children) {
 					osml += OSMLSerializer.serializeElement(child);
 				}

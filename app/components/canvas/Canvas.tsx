@@ -20,6 +20,10 @@ import { useEditorSetup } from "./hooks/useEditorSetup";
 import { useScriptSync } from "./hooks/useScriptSync";
 import { useMetadataSync } from "./hooks/useMetadataSync";
 import { useGenerateAll } from "./hooks/useGenerateAll";
+import { useAutosave } from "./hooks/useAutosave";
+import { useProjectRehydrate } from "./hooks/useProjectRehydrate";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import { useScriptText } from "@/lib/script/ScriptProvider";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import type { CanvasContentElement } from "./types";
@@ -63,6 +67,11 @@ export default function Canvas({
 		handleDragEnd,
 		handleDragCancel,
 	} = useDragAndDrop(editor, value);
+
+	const { projectId } = useConfig();
+	const initialScript = useScriptText();
+	useProjectRehydrate(editor, initialScript);
+	useAutosave(projectId, value);
 
 	useScriptSync(editor);
 	useMetadataSync();

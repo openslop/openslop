@@ -3,14 +3,11 @@ import path from "path";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import { ConfigProvider } from "@/lib/config/ConfigProvider";
-import { ScriptProvider } from "@/lib/script/ScriptProvider";
-import { UserProvider } from "@/lib/user/UserProvider";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import Editor from "./components/Editor";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
 import GradientButton from "./components/GradientButton";
+import ProjectsList from "./components/projects/ProjectsList";
+import { UserProvider } from "@/lib/user/UserProvider";
 
 const icons = fs
 	.readdirSync(path.join(process.cwd(), "public/icons"))
@@ -24,16 +21,14 @@ export default async function Home() {
 	} = await supabase.auth.getUser();
 
 	if (user) {
+		const { data: projects } = await supabase
+			.from("projects")
+			.select("id, name, thumbnail_url, updated_at")
+			.order("updated_at", { ascending: false });
 		return (
-			<TooltipProvider>
-				<ConfigProvider>
-					<ScriptProvider>
-						<UserProvider user={user}>
-							<Editor />
-						</UserProvider>
-					</ScriptProvider>
-				</ConfigProvider>
-			</TooltipProvider>
+			<UserProvider user={user}>
+				<ProjectsList initialProjects={projects ?? []} />
+			</UserProvider>
 		);
 	}
 
