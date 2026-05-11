@@ -15,6 +15,7 @@ import type {
 	ResolvedElement,
 } from "@/lib/video/types";
 import { AUDIO_FADE_SEC, getPresentation } from "@/lib/video/transitions";
+import { fadeRamp } from "@/lib/video/fadeRamp";
 
 const coverStyle: React.CSSProperties = {
 	width: "100%",
@@ -29,16 +30,13 @@ function toFrames(sec: number, fps: number): number {
 }
 
 function fadeVolume(durationInFrames: number, fadeFrames: number) {
-	// Cap so the fade-in and fade-out windows don't overlap — interpolate()
-	// requires a monotonically increasing input range and throws otherwise.
-	const f = Math.min(fadeFrames, Math.floor(durationInFrames / 2));
+	const ramp = fadeRamp(durationInFrames, fadeFrames);
+	if (!ramp) return () => 1;
 	return (frame: number) =>
-		interpolate(
-			frame,
-			[0, f, durationInFrames - f, durationInFrames],
-			[0, 1, 1, 0],
-			{ extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-		);
+		interpolate(frame, ramp.input, ramp.output, {
+			extrapolateLeft: "clamp",
+			extrapolateRight: "clamp",
+		});
 }
 
 function AudioSequence({ element }: { element: ResolvedElement }) {

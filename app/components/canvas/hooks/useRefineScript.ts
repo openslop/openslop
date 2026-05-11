@@ -44,8 +44,10 @@ export function useRefineScript(getEditor: () => Editor | null) {
 						applyRefineOp(editor, op, anchorMap, connectorConfig);
 					}
 				}
-				for (const op of parser.flush()) {
-					applyRefineOp(editor, op, anchorMap, connectorConfig);
+				if (!controller.signal.aborted) {
+					for (const op of parser.flush()) {
+						applyRefineOp(editor, op, anchorMap, connectorConfig);
+					}
 				}
 			} finally {
 				if (abortRef.current === controller) {
