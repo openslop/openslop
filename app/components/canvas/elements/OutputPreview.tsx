@@ -191,6 +191,44 @@ export function useStaticRotations() {
 	return rotations;
 }
 
+function PlaceholderBallsLoader({ generating }: { generating: boolean }) {
+	const staticRotations = useStaticRotations();
+	return (
+		<div className={loaderStyles.containerLoader} aria-hidden="true">
+			<PlaceholderBalls
+				generating={generating}
+				staticRotations={staticRotations}
+			/>
+		</div>
+	);
+}
+
+function PlaceholderOverlay({
+	status,
+	seconds,
+	error,
+	onGenerate,
+	onDiscard,
+	cancelClassName,
+}: PlaceholderProps & { cancelClassName?: string }) {
+	return (
+		<>
+			{error && <ErrorMessage message={error} />}
+			<div className="absolute top-2 left-2 z-10">
+				<GenerationIndicator
+					status={status}
+					seconds={seconds}
+					idleLabel="Generate"
+					onClick={onGenerate}
+				/>
+			</div>
+			{status !== "idle" && (
+				<CancelButton onClick={onDiscard} className={cancelClassName} />
+			)}
+		</>
+	);
+}
+
 function ErrorMessage({ message }: { message: string }) {
 	return (
 		<div className="absolute inset-2 z-20 flex items-center justify-center pointer-events-none">
@@ -254,16 +292,7 @@ type PlaceholderProps = GenerationState & {
 	onDiscard: () => void;
 };
 
-function AudioPlaceholder({
-	status,
-	seconds,
-	error,
-	onGenerate,
-	onDiscard,
-}: PlaceholderProps) {
-	const staticRotations = useStaticRotations();
-	const active = status !== "idle";
-
+function AudioPlaceholder(props: PlaceholderProps) {
 	const [mask] = useState(() => {
 		const bars = Array.from(
 			{ length: AUDIO_BAR_COUNT },
@@ -285,62 +314,23 @@ function AudioPlaceholder({
 					}}
 				>
 					<div className="absolute inset-0 bg-white/20" />
-					<div className={loaderStyles.containerLoader}>
-						<PlaceholderBalls
-							generating={status === "generating"}
-							staticRotations={staticRotations}
-						/>
-					</div>
+					<PlaceholderBallsLoader generating={props.status === "generating"} />
 				</div>
 			</div>
 			<div className="absolute inset-0 grain grain-light border rounded-lg bg-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]" />
-			{error && <ErrorMessage message={error} />}
-			<div className="absolute top-2 left-2 z-10">
-				<GenerationIndicator
-					status={status}
-					seconds={seconds}
-					idleLabel="Generate"
-					onClick={onGenerate}
-				/>
-			</div>
-			{active && (
-				<CancelButton
-					onClick={onDiscard}
-					className="top-1/2 -translate-y-1/2"
-				/>
-			)}
+			<PlaceholderOverlay
+				{...props}
+				cancelClassName="top-1/2 -translate-y-1/2"
+			/>
 		</div>
 	);
 }
 
-function MediaPlaceholder({
-	status,
-	seconds,
-	error,
-	onGenerate,
-	onDiscard,
-}: PlaceholderProps) {
-	const staticRotations = useStaticRotations();
-	const active = status !== "idle";
-
+function MediaPlaceholder(props: PlaceholderProps) {
 	return (
 		<div className="group grain grain-light relative w-full aspect-video rounded-lg overflow-hidden border flex items-center justify-center backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
-			{error && <ErrorMessage message={error} />}
-			<div className="absolute top-2 left-2 z-10">
-				<GenerationIndicator
-					status={status}
-					seconds={seconds}
-					idleLabel="Generate"
-					onClick={onGenerate}
-				/>
-			</div>
-			{active && <CancelButton onClick={onDiscard} />}
-			<div className={loaderStyles.containerLoader} aria-hidden="true">
-				<PlaceholderBalls
-					generating={status === "generating"}
-					staticRotations={staticRotations}
-				/>
-			</div>
+			<PlaceholderOverlay {...props} />
+			<PlaceholderBallsLoader generating={props.status === "generating"} />
 		</div>
 	);
 }
