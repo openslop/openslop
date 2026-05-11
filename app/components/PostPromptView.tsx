@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import Copilot from "./Copilot";
+import InlineCopilot from "./copilot/InlineCopilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { ProjectTitle } from "./canvas/ProjectTitle";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
@@ -53,7 +53,7 @@ function PostPromptViewInner() {
 			>
 				<div className="flex w-full items-stretch justify-center gap-3">
 					<div className="min-w-0 flex-1 max-w-2xl">
-						<Copilot
+						<InlineCopilot
 							value={refineValue}
 							onValueChange={setRefineValue}
 							onSubmit={() => {
@@ -61,7 +61,6 @@ function PostPromptViewInner() {
 								setRefineValue("");
 							}}
 							onStop={stop}
-							multiline={false}
 							loading={loading}
 							placeholder="Refine your script…"
 						/>

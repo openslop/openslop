@@ -6,7 +6,6 @@ import { isSceneElement } from "../utils/guards";
 import { getElementCharacterNames } from "../utils/characters";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
-import { useGenerate } from "../hooks/useGenerate";
 import { useViewMode } from "../ViewModeContext";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
@@ -29,7 +28,6 @@ export function ElementContainer({
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
 	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
-	const gen = useGenerate(element);
 
 	return (
 		<div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
@@ -102,18 +100,7 @@ export function ElementContainer({
 				className="flex-1 min-w-0 flex items-center select-none"
 				contentEditable={false}
 			>
-				<OutputPreview
-					type={element.type}
-					characterName={element.customAttributes?.name}
-					generating={gen.generating}
-					queued={gen.queued}
-					seconds={gen.seconds}
-					result={gen.result}
-					error={gen.error}
-					stale={gen.stale}
-					onGenerate={gen.generate}
-					onDiscard={gen.discard}
-				/>
+				<OutputPreview element={element} />
 			</div>
 		</div>
 	);

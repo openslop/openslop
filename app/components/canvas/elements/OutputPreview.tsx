@@ -9,10 +9,10 @@ import { AudioPlayer } from "./AudioPlayer";
 import { CharacterBadge } from "./CharacterBadge";
 import { MediaWithSkeleton } from "./MediaWithSkeleton";
 import { GenerationIndicator } from "./GenerationIndicator";
-import type { CanvasElementType } from "../types";
-import type { AssetResult } from "@/lib/connectors/types";
+import type { CanvasContentElement, CanvasElementType } from "../types";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { useGenerate } from "../hooks/useGenerate";
 import loaderStyles from "./OutputPreview.module.css";
 
 interface PlaceholderBall {
@@ -274,16 +274,7 @@ function AudioResult({
 }
 
 interface OutputPreviewProps {
-	type: CanvasElementType;
-	characterName?: string;
-	generating: boolean;
-	queued: boolean;
-	seconds: number;
-	result: AssetResult | null;
-	error: string | null;
-	stale: boolean;
-	onGenerate: () => void;
-	onDiscard: () => void;
+	element: CanvasContentElement;
 }
 
 type PlaceholderProps = GenerationState & {
@@ -388,19 +379,19 @@ const WAVE_COLORS: Record<CanvasElementType, string> = {
 	clip: "rgb(129, 140, 248)",
 };
 
-export function OutputPreview({
-	type,
-	characterName,
-	generating,
-	queued,
-	seconds,
-	result,
-	error,
-	stale,
-	onGenerate,
-	onDiscard,
-}: OutputPreviewProps) {
+export function OutputPreview({ element }: OutputPreviewProps) {
+	const type = element.type;
 	const { outputKind } = ELEMENT_CONFIGS[type];
+	const {
+		generating,
+		queued,
+		seconds,
+		result,
+		error,
+		stale,
+		generate,
+		discard,
+	} = useGenerate(element);
 	const status = deriveStatus(generating, queued);
 
 	if (outputKind === "audio") {
@@ -409,11 +400,11 @@ export function OutputPreview({
 				<AudioResult
 					type={type}
 					src={result.url}
-					characterName={characterName}
+					characterName={element.customAttributes?.name}
 					status={status}
 					seconds={seconds}
 					stale={stale}
-					onRegenerate={onGenerate}
+					onRegenerate={generate}
 				/>
 			);
 		}
@@ -422,8 +413,8 @@ export function OutputPreview({
 				status={status}
 				seconds={seconds}
 				error={error}
-				onGenerate={onGenerate}
-				onDiscard={onDiscard}
+				onGenerate={generate}
+				onDiscard={discard}
 			/>
 		);
 	}
@@ -438,7 +429,7 @@ export function OutputPreview({
 				status={status}
 				seconds={seconds}
 				stale={stale}
-				onRegenerate={onGenerate}
+				onRegenerate={generate}
 			/>
 		);
 	}
@@ -448,8 +439,8 @@ export function OutputPreview({
 			status={status}
 			seconds={seconds}
 			error={error}
-			onGenerate={onGenerate}
-			onDiscard={onDiscard}
+			onGenerate={generate}
+			onDiscard={discard}
 		/>
 	);
 }
