@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
-import { generationQueue } from "@/lib/generation/queue";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import Copilot from "./Copilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { ProjectTitle } from "./canvas/ProjectTitle";
@@ -32,10 +32,7 @@ function PostPromptViewInner() {
 	const { refineScript, refineLoading, stopRefine } =
 		useRefineScript(getEditor);
 
-	const generating = useSyncExternalStore(
-		generationQueue.subscribe,
-		generationQueue.isBusy,
-	);
+	const generating = useQueueSelector((q) => q.isBusy());
 	const loading = scriptLoading || refineLoading;
 	const busy = loading || generating;
 	const stop = scriptLoading ? stopGeneration : stopRefine;

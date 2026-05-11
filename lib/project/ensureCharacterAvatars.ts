@@ -1,13 +1,14 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/plugins/imageChain";
-import { generationQueue, type GenerationJob } from "@/lib/generation/queue";
+import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
 export const characterAvatarElementId = (name: string) =>
 	`character-avatar:${name}`;
 
 export function ensureCharacterAvatars(
+	queue: GenerationQueue,
 	projectId: string,
 	registry: ConnectorRegistry,
 ): void {
@@ -29,5 +30,5 @@ export function ensureCharacterAvatars(
 			inputs: { prompt: name, attributes: { kind: "avatar" } },
 		}));
 
-	generationQueue.enqueueAll(jobs);
+	queue.enqueueAll(jobs);
 }

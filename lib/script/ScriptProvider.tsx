@@ -35,9 +35,15 @@ export function useScriptText() {
 	return use(ScriptTextContext);
 }
 
-export function ScriptProvider({ children }: { children: ReactNode }) {
+export function ScriptProvider({
+	initialScript = "",
+	children,
+}: {
+	initialScript?: string;
+	children: ReactNode;
+}) {
 	const { connectorConfig } = useConfig();
-	const [script, setScript] = useState("");
+	const [script, setScript] = useState(initialScript);
 	const [loading, setLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
 	const { nodes, appendChunk } = useOSMLSerializer();

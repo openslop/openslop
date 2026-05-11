@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GenerationJob } from "@/lib/generation/queue";
-import { generationQueue } from "@/lib/generation/queue";
+import { GenerationQueue, type GenerationJob } from "@/lib/generation/queue";
 import { clearProjectStore, getProjectStore } from "../store";
 import {
 	characterAvatarElementId,
@@ -35,13 +34,13 @@ const registry = {
 };
 
 describe("ensureCharacterAvatars", () => {
+	let queue: GenerationQueue;
 	let enqueueSpy: ReturnType<typeof vi.spyOn>;
 
 	beforeEach(() => {
 		clearProjectStore(PROJECT_ID);
-		enqueueSpy = vi
-			.spyOn(generationQueue, "enqueueAll")
-			.mockImplementation(() => {});
+		queue = new GenerationQueue({ batchSize: 3 });
+		enqueueSpy = vi.spyOn(queue, "enqueueAll").mockImplementation(() => {});
 	});
 
 	const lastJobs = (): GenerationJob[] =>
@@ -57,7 +56,7 @@ describe("ensureCharacterAvatars", () => {
 				},
 			});
 
-		ensureCharacterAvatars(PROJECT_ID, registry);
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
 		expect(enqueueSpy).toHaveBeenCalledOnce();
 		const jobs = lastJobs();
@@ -76,7 +75,7 @@ describe("ensureCharacterAvatars", () => {
 			.getState()
 			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
 
-		ensureCharacterAvatars(PROJECT_ID, registry);
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
 		const [job] = lastJobs();
 		expect(job.config.plugins?.map((p) => p.name)).toEqual([
@@ -97,7 +96,7 @@ describe("ensureCharacterAvatars", () => {
 				},
 			});
 
-		ensureCharacterAvatars(PROJECT_ID, registry);
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
 		expect(lastJobs()).toEqual([]);
 	});
@@ -107,7 +106,7 @@ describe("ensureCharacterAvatars", () => {
 			.getState()
 			.updateMetadata({ characters: { Empty: { appearance: "" } } });
 
-		ensureCharacterAvatars(PROJECT_ID, registry);
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
 		expect(lastJobs()).toEqual([]);
 	});

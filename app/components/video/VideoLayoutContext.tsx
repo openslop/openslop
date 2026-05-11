@@ -1,14 +1,8 @@
 "use client";
 
-import {
-	createContext,
-	use,
-	useMemo,
-	useSyncExternalStore,
-	type ReactNode,
-} from "react";
+import { createContext, use, useMemo, type ReactNode } from "react";
 import type { Editor } from "slate";
-import { generationQueue } from "@/lib/generation/queue";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import type { VideoLayout } from "@/lib/video/types";
 import { useAssetPrefetch } from "./useAssetPrefetch";
 import { useVideoLayout } from "./useVideoLayout";
@@ -36,10 +30,7 @@ export function VideoLayoutProvider({
 }) {
 	const { layout, playerKey } = useVideoLayout(getEditor, layoutKey);
 	const prefetched = useAssetPrefetch(layout);
-	const busy = useSyncExternalStore(
-		generationQueue.subscribe,
-		generationQueue.isBusy,
-	);
+	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
 	const value = useMemo(
 		() => ({ layout, ready, playerKey }),

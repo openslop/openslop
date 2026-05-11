@@ -1,6 +1,6 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { ensureCharacterAvatars } from "@/lib/project/ensureCharacterAvatars";
-import { generationQueue, type GenerationJob } from "./queue";
+import type { GenerationJob, GenerationQueue } from "./queue";
 
 /**
  * Single entry point for dispatching generation jobs from the editor.
@@ -10,9 +10,10 @@ import { generationQueue, type GenerationJob } from "./queue";
  * them.
  */
 export function scheduleGeneration(
+	queue: GenerationQueue,
 	jobs: GenerationJob | GenerationJob[],
 	{ projectId, registry }: { projectId: string; registry: ConnectorRegistry },
 ): void {
-	ensureCharacterAvatars(projectId, registry);
-	generationQueue.enqueueAll(Array.isArray(jobs) ? jobs : [jobs]);
+	ensureCharacterAvatars(queue, projectId, registry);
+	queue.enqueueAll(Array.isArray(jobs) ? jobs : [jobs]);
 }

@@ -60,19 +60,12 @@ vi.mock("react", () => ({
 const enqueueAllSpy = vi.fn();
 const getElementSnapshotSpy = vi.fn();
 
-vi.mock("@/lib/generation/queue", async () => {
-	const actual = await vi.importActual<
-		typeof import("@/lib/generation/generationInputs")
-	>("@/lib/generation/generationInputs");
-	const queue = {
+vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
+	useGenerationQueue: () => ({
 		enqueueAll: (...args: unknown[]) => enqueueAllSpy(...args),
 		getElementSnapshot: (...args: unknown[]) => getElementSnapshotSpy(...args),
-		before() {
-			return this;
-		},
-	};
-	return { generationQueue: queue, isStaleResult: actual.isStaleResult };
-});
+	}),
+}));
 
 vi.mock("@/lib/project/ensureCharacterAvatars", () => ({
 	ensureCharacterAvatars: vi.fn(),

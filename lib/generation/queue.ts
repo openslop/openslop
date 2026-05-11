@@ -18,6 +18,7 @@ export type ElementSnapshot = {
 	result: AssetResult | null;
 	error: string | null;
 	resultInputs: GenerationInputs | null;
+	connectorType: ConnectorType | null;
 };
 
 export type GenerationJob = {
@@ -36,6 +37,7 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	result: null,
 	error: null,
 	resultInputs: null,
+	connectorType: null,
 };
 
 const isActive = (status: ElementSnapshot["status"]) =>
@@ -53,8 +55,17 @@ export class GenerationQueue {
 	private _resultVersion = 0;
 	private _peakActive = 0;
 
-	constructor({ batchSize }: { batchSize: number }) {
+	constructor({
+		batchSize,
+		initialState = {},
+	}: {
+		batchSize: number;
+		initialState?: Record<string, ElementSnapshot>;
+	}) {
 		this.batchSize = batchSize;
+		for (const [id, snap] of Object.entries(initialState)) {
+			this.state.set(id, { ...snap, status: "idle", seconds: 0 });
+		}
 	}
 
 	private ensureTickTimer() {
@@ -111,6 +122,14 @@ export class GenerationQueue {
 
 	getPeakActive = (): number => this._peakActive;
 
+	snapshot(): Record<string, ElementSnapshot> {
+		return Object.fromEntries(this.state);
+	}
+
+	values(): IterableIterator<ElementSnapshot> {
+		return this.state.values();
+	}
+
 	private isInQueue(id: string): boolean {
 		const s = this.state.get(id)?.status;
 		return s !== undefined && isActive(s);
@@ -133,7 +152,8 @@ export class GenerationQueue {
 	}
 
 	private resetToIdle(id: string) {
-		const { result, error, resultInputs } = this.getElementSnapshot(id);
+		const { result, error, resultInputs, connectorType } =
+			this.getElementSnapshot(id);
 		if (result || error) {
 			this.state.set(id, {
 				status: "idle",
@@ -141,6 +161,7 @@ export class GenerationQueue {
 				result,
 				error,
 				resultInputs,
+				connectorType,
 			});
 		} else {
 			this.state.delete(id);
@@ -155,7 +176,11 @@ export class GenerationQueue {
 		let added = false;
 		for (const job of jobs) {
 			if (this.isInQueue(job.elementId)) continue;
-			this.update(job.elementId, { status: "queued", seconds: 0 });
+			this.update(job.elementId, {
+				status: "queued",
+				seconds: 0,
+				connectorType: job.connectorType,
+			});
 			this.pending.push(job);
 			added = true;
 		}
@@ -304,4 +329,4 @@ export class GenerationQueue {
 	}
 }
 
-export const generationQueue = new GenerationQueue({ batchSize: 3 });
+export const DEFAULT_BATCH_SIZE = 3;

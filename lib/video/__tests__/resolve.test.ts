@@ -35,6 +35,7 @@ function makeSnapshot(
 		result: { url: "https://example.com/asset.mp3", durationSec: 5 },
 		error: null,
 		resultInputs: null,
+		connectorType: null,
 		...overrides,
 	};
 }
