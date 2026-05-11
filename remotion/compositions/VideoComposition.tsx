@@ -92,6 +92,10 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 }) => {
 	const sequenceEntries = useMemo(() => Object.entries(sequences), [sequences]);
 	const transitionFrames = toFrames(transitionDurationSec, fps);
+	const presentation = useMemo(
+		() => getPresentation(transitionType, { width, height }),
+		[transitionType, width, height],
+	);
 
 	return (
 		<AbsoluteFill style={blackBg}>
@@ -100,10 +104,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 					<Fragment key={seq.element?.id ?? `empty-${i}`}>
 						{i > 0 && (
 							<TransitionSeries.Transition
-								presentation={getPresentation(transitionType, {
-									width,
-									height,
-								})}
+								presentation={presentation}
 								timing={linearTiming({ durationInFrames: transitionFrames })}
 							/>
 						)}
