@@ -165,7 +165,7 @@ describe("POST /api/render", () => {
 		expect(unknownPhase).toBeUndefined();
 	});
 
-	it("emits an error event and stops sandbox when render fails", async () => {
+	it("emits a generic error event and stops sandbox when render fails", async () => {
 		mockRenderMediaOnVercel.mockRejectedValue(new Error("render boom"));
 
 		const { POST } = await import("../route");
@@ -177,11 +177,12 @@ describe("POST /api/render", () => {
 			message: string;
 		};
 		expect(error.type).toBe("error");
-		expect(JSON.parse(error.message)).toMatchObject({ message: "render boom" });
+		expect(error.message).toBe("Render failed");
+		expect(error.message).not.toContain("render boom");
 		expect(mockSandboxStop).toHaveBeenCalled();
 	});
 
-	it("serializes non-Error throws", async () => {
+	it("does not leak non-Error throws to clients", async () => {
 		mockRenderMediaOnVercel.mockRejectedValue("string failure");
 
 		const { POST } = await import("../route");
@@ -189,9 +190,8 @@ describe("POST /api/render", () => {
 		const events = (await collectSSE(res)) as Array<Record<string, unknown>>;
 
 		const error = events.find((e) => e.type === "error") as { message: string };
-		expect(JSON.parse(error.message)).toMatchObject({
-			message: expect.stringContaining("string failure"),
-		});
+		expect(error.message).toBe("Render failed");
+		expect(error.message).not.toContain("string failure");
 	});
 
 	it("forwards createSandbox progress with development subtitle", async () => {

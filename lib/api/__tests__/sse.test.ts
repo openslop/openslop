@@ -63,22 +63,22 @@ describe("createSSEResponse", () => {
 		expect(chunks.length).toBeGreaterThan(0);
 	});
 
-	it("emits an error event and closes when handler rejects with an Error", async () => {
+	it("emits a generic error event and closes when handler rejects with an Error", async () => {
 		const response = createSSEResponse(async () => {
 			throw new Error("boom");
 		});
 		const text = await response.text();
 		expect(text).toContain('"type":"error"');
-		expect(text).toContain("boom");
+		expect(text).not.toContain("boom");
 	});
 
-	it("emits the stringified message when handler rejects with a non-Error", async () => {
+	it("does not leak non-Error throws to clients", async () => {
 		const response = createSSEResponse(async () => {
 			throw "string failure";
 		});
 		const text = await response.text();
 		expect(text).toContain('"type":"error"');
-		expect(text).toContain("string failure");
+		expect(text).not.toContain("string failure");
 	});
 });
 

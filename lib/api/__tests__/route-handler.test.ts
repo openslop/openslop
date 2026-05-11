@@ -149,7 +149,7 @@ describe("createRouteHandler", () => {
 		);
 	});
 
-	it("returns 500 with the error message when handle throws an Error", async () => {
+	it("returns a generic 500 when handle throws an Error", async () => {
 		const handler = makeHandler({
 			handle: async () => {
 				throw new Error("boom");
@@ -158,11 +158,11 @@ describe("createRouteHandler", () => {
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toContain("TestRoute failed: ");
-		expect(json.error).toContain("boom");
+		expect(json.error).toBe("TestRoute failed");
+		expect(json.error).not.toContain("boom");
 	});
 
-	it("stringifies non-Error throws", async () => {
+	it("does not leak non-Error throws to clients", async () => {
 		const handler = makeHandler({
 			handle: async () => {
 				throw "raw string failure";
@@ -171,7 +171,7 @@ describe("createRouteHandler", () => {
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toContain("TestRoute failed: ");
-		expect(json.error).toContain("raw string failure");
+		expect(json.error).toBe("TestRoute failed");
+		expect(json.error).not.toContain("raw string failure");
 	});
 });

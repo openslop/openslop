@@ -1,4 +1,3 @@
-import { stringifyError } from "../errors";
 import { logger } from "./logger";
 
 export type SSEMessage =
@@ -28,14 +27,15 @@ export function createSSEResponse(
 	};
 
 	handler(send)
-		.catch((err) =>
-			send({
+		.catch((err) => {
+			logger.error({ err }, "SSE handler failed");
+			return send({
 				type: "error",
-				message: stringifyError(err),
+				message: "Request failed",
 			}).catch((sendErr) =>
 				logger.warn({ err: sendErr }, "SSE: failed to deliver error frame"),
-			),
-		)
+			);
+		})
 		.finally(() =>
 			writer
 				.close()

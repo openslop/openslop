@@ -8,7 +8,6 @@ import { getUser } from "@/lib/api/auth";
 import { logger } from "@/lib/api/logger";
 import { unauthorized } from "@/lib/api/response";
 import { createSSEResponse, type SSEMessage } from "@/lib/api/sse";
-import { stringifyError } from "@/lib/errors";
 import { COMPOSITION_ID } from "@/lib/video/types";
 import { bundleRemotionProject } from "./helpers";
 import { restoreSnapshot } from "./restore-snapshot";
@@ -111,7 +110,7 @@ export async function POST(req: Request) {
 			logger.error(err, "render: failed");
 			await send({
 				type: "error",
-				message: stringifyError(err),
+				message: "Render failed",
 			});
 		}
 	});
