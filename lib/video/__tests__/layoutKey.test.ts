@@ -45,6 +45,12 @@ describe("getLayoutKey", () => {
 		expect(getLayoutKey(a, "none")).not.toBe(getLayoutKey(b, "none"));
 	});
 
+	it("changes when volume changes on any element", () => {
+		const a = [el("s1", { volume: "10" })];
+		const b = [el("s1", { volume: "3" })];
+		expect(getLayoutKey(a, "none")).not.toBe(getLayoutKey(b, "none"));
+	});
+
 	it("is stable across unrelated attribute changes", () => {
 		const a = [el("s1", { emotion: "happy" })];
 		const b = [el("s1", { emotion: "sad" })];

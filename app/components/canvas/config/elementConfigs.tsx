@@ -29,7 +29,26 @@ export interface ElementConfig {
 }
 
 const LOOPS_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
+const VOLUME_OPTIONS = [
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"10",
+] as const;
 const EMOTION_OPTIONS = Object.values(TTSEmotion);
+
+const volumeSpec = (color: string): AttributeSpec => ({
+	color,
+	label: "Volume",
+	edit: { options: VOLUME_OPTIONS },
+});
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	narration: {
@@ -40,12 +59,16 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <BookOpen size={16} className="text-white" />,
 		bgColor: "bg-slate-600",
 		placeholder: "Write the narration...",
+		defaultAttributes: {
+			volume: "10",
+		},
 		visibleAttributes: {
 			emotion: {
 				color: "bg-pink-500",
 				label: "Emotion",
 				edit: { options: EMOTION_OPTIONS },
 			},
+			volume: volumeSpec("bg-slate-500"),
 		},
 	},
 	character: {
@@ -56,12 +79,16 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <User size={16} className="text-white" />,
 		bgColor: "bg-amber-600",
 		placeholder: "What does this character say?",
+		defaultAttributes: {
+			volume: "10",
+		},
 		visibleAttributes: {
 			emotion: {
 				color: "bg-pink-500",
 				label: "Emotion",
 				edit: { options: EMOTION_OPTIONS },
 			},
+			volume: volumeSpec("bg-amber-500"),
 		},
 	},
 	image: {
@@ -101,6 +128,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 
 		defaultAttributes: {
 			loops: "1",
+			volume: "10",
 		},
 		visibleAttributes: {
 			loops: {
@@ -108,6 +136,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 				label: "Loops",
 				edit: { options: LOOPS_OPTIONS },
 			},
+			volume: volumeSpec("bg-emerald-500"),
 		},
 	},
 	music: {
@@ -120,6 +149,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the music...",
 		defaultAttributes: {
 			loops: "1",
+			volume: "10",
 		},
 		visibleAttributes: {
 			loops: {
@@ -127,6 +157,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 				label: "Loops",
 				edit: { options: LOOPS_OPTIONS },
 			},
+			volume: volumeSpec("bg-violet-500"),
 		},
 	},
 };

@@ -31,6 +31,7 @@ export type ResolvedElement = {
 	url: string;
 	durationSec: number;
 	loops: number;
+	volume: number;
 };
 
 export type Sequence = {

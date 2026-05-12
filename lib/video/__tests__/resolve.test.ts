@@ -66,6 +66,7 @@ describe("resolveElements", () => {
 			url: "https://example.com/img.png",
 			durationSec: 3,
 			loops: 1,
+			volume: 10,
 		});
 		expect(resolved[1]).toEqual({
 			id: "nar1",
@@ -75,6 +76,7 @@ describe("resolveElements", () => {
 			url: "https://example.com/nar.mp3",
 			durationSec: 8,
 			loops: 1,
+			volume: 10,
 		});
 	});
 
@@ -151,6 +153,30 @@ describe("resolveElements", () => {
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].loops).toBe(1);
 		expect(resolved[1].loops).toBe(1);
+	});
+
+	it("reads volume from customAttributes (default 10)", () => {
+		const elements = [
+			makeElement("s1", "music", { volume: "3" }),
+			makeElement("s2", "music", { volume: "0" }),
+			makeElement("s3", "music"),
+		];
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		expect(resolved[0].volume).toBe(3);
+		expect(resolved[1].volume).toBe(0);
+		expect(resolved[2].volume).toBe(10);
+	});
+
+	it("clamps volume to 0-10 and falls back on invalid values", () => {
+		const elements = [
+			makeElement("s1", "music", { volume: "-2" }),
+			makeElement("s2", "music", { volume: "42" }),
+			makeElement("s3", "music", { volume: "not-a-number" }),
+		];
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		expect(resolved[0].volume).toBe(0);
+		expect(resolved[1].volume).toBe(10);
+		expect(resolved[2].volume).toBe(10);
 	});
 
 	it("skips all elements when none have results", () => {
