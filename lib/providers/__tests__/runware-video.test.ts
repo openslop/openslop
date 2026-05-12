@@ -48,7 +48,10 @@ describe("RunwareVideo", () => {
 				duration: 5,
 				outputType: "URL",
 				deliveryMethod: "async",
-				inputImage: undefined,
+				inputs: {
+					frameImages: undefined,
+				},
+				audio: false,
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
