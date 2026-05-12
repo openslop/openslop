@@ -2,12 +2,20 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
-import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import {
+	useGenerationQueue,
+	useQueueSelector,
+} from "@/lib/generation/GenerationQueueProvider";
 import InlineCopilot from "./copilot/InlineCopilot";
 import Canvas, { type CanvasHandle } from "./canvas/Canvas";
 import { ProjectTitle } from "./canvas/ProjectTitle";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
-import { Sparkles } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import {
 	PlayerPositionProvider,
@@ -32,10 +40,12 @@ function PostPromptViewInner() {
 	const { refineScript, refineLoading, stopRefine } =
 		useRefineScript(getEditor);
 
+	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
 	const loading = scriptLoading || refineLoading;
 	const busy = loading || generating;
 	const stop = scriptLoading ? stopGeneration : stopRefine;
+	const canCancel = generating && !loading;
 	const generateLabel = scriptLoading
 		? "Writing…"
 		: refineLoading
@@ -68,13 +78,28 @@ function PostPromptViewInner() {
 					<button
 						type="button"
 						onClick={() => canvasRef.current?.generateAll()}
-						className={`${genStyles.btn} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
+						className={`${genStyles.btn} ${generating ? genStyles.generating : ""} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
 						aria-label={generateLabel}
 						disabled={busy}
 					>
 						<Sparkles className={genStyles.svg} aria-hidden="true" />
 						<span>{generateLabel}</span>
 					</button>
+					{canCancel && (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									onClick={() => queue.cancelAll()}
+									aria-label="Cancel generation"
+									className="grain grain-light relative flex h-7 w-7 shrink-0 items-center justify-center self-center overflow-hidden rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20"
+								>
+									<X className="h-3 w-3" aria-hidden="true" />
+								</button>
+							</TooltipTrigger>
+							<TooltipContent>Cancel generation</TooltipContent>
+						</Tooltip>
+					)}
 				</div>
 			</div>
 
