@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import Copilot from "./Copilot";
+import ComposerCopilot from "./copilot/ComposerCopilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import TemplateGallery from "./TemplateGallery";
 
@@ -20,7 +20,7 @@ there was a small glowing garden hidden on the moon.
 And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
-	const { loading, submitPrompt, stopGeneration } = useScript();
+	const { submitPrompt } = useScript();
 	const { mode, applyTemplate } = useConfig();
 	const [value, setValue] = useState("");
 
@@ -30,16 +30,13 @@ export default function ComposerHero() {
 				Describe your video
 			</h1>
 
-			<Copilot
+			<ComposerCopilot
 				value={value}
 				onValueChange={setValue}
 				onSubmit={() => {
 					submitPrompt(value);
 					setValue("");
 				}}
-				onStop={stopGeneration}
-				multiline
-				loading={loading}
 				placeholder={
 					mode === "script" ? (
 						INPUT_SCRIPT_PLACEHOLDER
