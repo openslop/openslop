@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { X as XIcon, AlertCircle } from "lucide-react";
 import {
 	Tooltip,
@@ -379,7 +379,7 @@ const WAVE_COLORS: Record<CanvasElementType, string> = {
 	clip: "rgb(129, 140, 248)",
 };
 
-export function OutputPreview({ element }: OutputPreviewProps) {
+function OutputPreviewComponent({ element }: OutputPreviewProps) {
 	const type = element.type;
 	const { outputKind } = ELEMENT_CONFIGS[type];
 	const {
@@ -444,3 +444,5 @@ export function OutputPreview({ element }: OutputPreviewProps) {
 		/>
 	);
 }
+
+export const OutputPreview = memo(OutputPreviewComponent);

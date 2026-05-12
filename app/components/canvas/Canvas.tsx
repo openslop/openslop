@@ -122,6 +122,9 @@ export default function Canvas({
 	}, []);
 
 	const activeElement = useMemo(() => {
+		if (!activeId) {
+			return null;
+		}
 		const [entry] = Editor.nodes(editor, {
 			at: [],
 			match: (n) => Element.isElement(n) && n.id === activeId,
