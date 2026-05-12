@@ -37,6 +37,7 @@ function el(
 		url: `https://example.com/${overrides.id}`,
 		durationSec: 0,
 		loops: 1,
+		volume: 10,
 		...overrides,
 	};
 }

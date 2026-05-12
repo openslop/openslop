@@ -3,7 +3,6 @@ import {
 	AbsoluteFill,
 	Html5Audio,
 	Img,
-	interpolate,
 	OffthreadVideo,
 	Sequence,
 	useVideoConfig,
@@ -15,7 +14,7 @@ import type {
 	ResolvedElement,
 } from "@/lib/video/types";
 import { AUDIO_FADE_SEC, getPresentation } from "@/lib/video/transitions";
-import { fadeRamp } from "@/lib/video/fadeRamp";
+import { audioVolume } from "@/lib/video/audioVolume";
 
 const coverStyle: React.CSSProperties = {
 	width: "100%",
@@ -29,26 +28,16 @@ function toFrames(sec: number, fps: number): number {
 	return Math.round(sec * fps);
 }
 
-function fadeVolume(durationInFrames: number, fadeFrames: number) {
-	const ramp = fadeRamp(durationInFrames, fadeFrames);
-	if (!ramp) return () => 1;
-	return (frame: number) =>
-		interpolate(frame, ramp.input, ramp.output, {
-			extrapolateLeft: "clamp",
-			extrapolateRight: "clamp",
-		});
-}
-
 function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
-	const fade = element.role === "background";
+	const gain = element.volume / 10;
+	const hasFadeEnvelope = element.role === "background";
+	const fadeFrames = hasFadeEnvelope ? toFrames(AUDIO_FADE_SEC, fps) : 0;
 	return (
 		<Html5Audio
 			src={element.url}
 			pauseWhenBuffering
-			volume={
-				fade ? fadeVolume(durationInFrames, toFrames(AUDIO_FADE_SEC, fps)) : 1
-			}
+			volume={audioVolume(gain, durationInFrames, fadeFrames)}
 		/>
 	);
 }

@@ -14,6 +14,11 @@ export function resolveElements(
 		const snapshot = getSnapshot(el.id);
 		if (!snapshot.result) continue;
 
+		const rawVolume = Number(el.customAttributes?.volume);
+		const volume = Number.isFinite(rawVolume)
+			? Math.max(0, Math.min(10, rawVolume))
+			: 10;
+
 		resolved.push({
 			id: el.id,
 			type: el.type,
@@ -22,6 +27,7 @@ export function resolveElements(
 			url: snapshot.result.url,
 			durationSec: snapshot.result.durationSec,
 			loops: Math.max(1, Number(el.customAttributes?.loops) || 1),
+			volume,
 		});
 	}
 

@@ -12,7 +12,10 @@ export function getLayoutKey(
 	transitionType: TransitionType,
 ): string {
 	const elementsKey = elements
-		.map((el) => `${el.id}:${el.type}:${el.customAttributes?.loops ?? ""}`)
+		.map(
+			(el) =>
+				`${el.id}:${el.type}:${el.customAttributes?.loops ?? ""}:${el.customAttributes?.volume ?? ""}`,
+		)
 		.join("|");
 	return `${transitionType}|${elementsKey}`;
 }
