@@ -32,7 +32,7 @@ export class RunwareVideo extends BaseVideoProvider {
 				positivePrompt: params.prompt,
 				model: params.model || "bytedance:2@2",
 				width: params.width || 864,
-				height: params.height || 486,
+				height: params.height || 480,
 				duration: params.duration || 5,
 				outputType: "URL",
 				deliveryMethod: "async",
@@ -41,6 +41,7 @@ export class RunwareVideo extends BaseVideoProvider {
 						? [params.referenceImages?.[0]]
 						: undefined,
 				},
+				audio: false,
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;
