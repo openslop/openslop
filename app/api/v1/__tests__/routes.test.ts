@@ -253,6 +253,36 @@ describe("API routes", () => {
 			expect(res.status).toBe(400);
 		});
 
+		it("coerces string duration/width/height into numbers", async () => {
+			const { POST } = await import("@/app/api/v1/video/route");
+			mockVideoGenerate.mockResolvedValue({
+				id: "vid-coerce",
+				provider: "runware",
+				result: {},
+			});
+
+			const res = await POST(
+				makeRequest("/api/v1/video", {
+					prompt: "sunset",
+					duration: "5",
+					width: "1280",
+					height: "720",
+				}),
+			);
+			expect(res.status).toBe(200);
+			expect(mockVideoGenerate).toHaveBeenCalledWith(
+				expect.objectContaining({ duration: 5, width: 1280, height: 720 }),
+			);
+		});
+
+		it("returns 400 for non-numeric duration string", async () => {
+			const { POST } = await import("@/app/api/v1/video/route");
+			const res = await POST(
+				makeRequest("/api/v1/video", { prompt: "x", duration: "abc" }),
+			);
+			expect(res.status).toBe(400);
+		});
+
 		it("returns 500 on provider error", async () => {
 			const { POST } = await import("@/app/api/v1/video/route");
 			mockVideoGenerate.mockRejectedValue(new Error("fail"));

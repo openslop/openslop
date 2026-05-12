@@ -43,17 +43,20 @@ describe("RunwareVideo", () => {
 			expect(mockVideoInference).toHaveBeenCalledWith({
 				positivePrompt: "a sunset",
 				model: "bytedance:2@2",
-				width: 512,
-				height: 512,
+				width: 864,
+				height: 480,
 				duration: 5,
 				outputType: "URL",
 				deliveryMethod: "async",
-				inputImage: undefined,
+				inputs: {
+					frameImages: undefined,
+				},
+				audio: false,
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
-		it("passes referenceImages[0] as inputImage", async () => {
+		it("passes referenceImages[0] via inputs.frameImages", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-2",
 				status: "processing",
@@ -67,7 +70,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					inputImage: "data:image/png;base64,abc123",
+					inputs: { frameImages: ["data:image/png;base64,abc123"] },
 				}),
 			);
 		});

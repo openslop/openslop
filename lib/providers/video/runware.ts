@@ -31,12 +31,17 @@ export class RunwareVideo extends BaseVideoProvider {
 			const result = await runware.videoInference({
 				positivePrompt: params.prompt,
 				model: params.model || "bytedance:2@2",
-				width: params.width || 512,
-				height: params.height || 512,
+				width: params.width || 864,
+				height: params.height || 480,
 				duration: params.duration || 5,
 				outputType: "URL",
 				deliveryMethod: "async",
-				inputImage: params.referenceImages?.[0],
+				inputs: {
+					frameImages: params.referenceImages?.length
+						? [params.referenceImages?.[0]]
+						: undefined,
+				},
+				audio: false,
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;

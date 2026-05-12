@@ -1,8 +1,14 @@
 import { z } from "zod";
 
+const optionalCoercedNumber = z
+	.union([z.number(), z.string()])
+	.transform((v) => (typeof v === "string" ? Number(v) : v))
+	.refine((v) => Number.isFinite(v), { message: "must be a finite number" })
+	.optional();
+
 export const optionalImageDimensions = {
-	width: z.number().optional(),
-	height: z.number().optional(),
+	width: optionalCoercedNumber,
+	height: optionalCoercedNumber,
 } as const;
 
 export const optionalDurationSeconds = {
@@ -10,7 +16,7 @@ export const optionalDurationSeconds = {
 } as const;
 
 export const optionalVideoDuration = {
-	duration: z.number().optional(),
+	duration: optionalCoercedNumber,
 } as const;
 
 export const referenceImageUrlOrDataUri = z
