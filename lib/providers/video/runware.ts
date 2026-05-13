@@ -30,18 +30,16 @@ export class RunwareVideo extends BaseVideoProvider {
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({
 				positivePrompt: params.prompt,
-				model: params.model || "bytedance:2@2",
-				width: params.width || 864,
-				height: params.height || 480,
+				model: params.model || "bytedance:seedance@2.0-fast",
+				width: params.width || 1280,
+				height: params.height || 720,
 				duration: params.duration || 5,
 				outputType: "URL",
 				deliveryMethod: "async",
 				inputs: {
-					frameImages: params.referenceImages?.length
-						? [params.referenceImages?.[0]]
-						: undefined,
+					frameImages: params.frameImages,
+					referenceImages: params.referenceImages,
 				},
-				audio: false,
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;

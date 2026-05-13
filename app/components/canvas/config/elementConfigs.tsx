@@ -112,9 +112,11 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 
 		defaultAttributes: {
 			duration: "5",
+			volume: "10",
 		},
 		visibleAttributes: {
 			duration: { color: "bg-indigo-500", label: "Duration" },
+			volume: volumeSpec("bg-indigo-500"),
 		},
 	},
 	sound: {

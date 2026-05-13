@@ -159,6 +159,7 @@ export interface TTSConnector extends Connector {
 
 export type VideoGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
+	frameImages?: string[];
 	duration?: number;
 	width?: number;
 	height?: number;
