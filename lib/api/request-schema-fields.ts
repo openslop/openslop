@@ -35,6 +35,10 @@ export const optionalReferenceImages = {
 	referenceImages: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 
+export const optionalFrameImages = {
+	frameImages: z.array(referenceImageUrlOrDataUri).optional(),
+} as const;
+
 export const requiredVoiceId = z
 	.string({ error: "voiceId is required" })
 	.min(1, {

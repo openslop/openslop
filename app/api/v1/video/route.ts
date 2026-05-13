@@ -1,5 +1,6 @@
 import { getVideoProvider } from "@/lib/api/providers";
 import {
+	optionalFrameImages,
 	optionalImageDimensions,
 	optionalReferenceImages,
 	optionalVideoDuration,
@@ -9,6 +10,7 @@ import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 
 const schema = bodySchema(VIDEO_MODELS, {
 	...optionalReferenceImages,
+	...optionalFrameImages,
 	...optionalVideoDuration,
 	...optionalImageDimensions,
 });

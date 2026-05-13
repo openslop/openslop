@@ -42,21 +42,21 @@ describe("RunwareVideo", () => {
 			});
 			expect(mockVideoInference).toHaveBeenCalledWith({
 				positivePrompt: "a sunset",
-				model: "bytedance:2@2",
-				width: 864,
-				height: 480,
+				model: "bytedance:seedance@2.0-fast",
+				width: 1280,
+				height: 720,
 				duration: 5,
 				outputType: "URL",
 				deliveryMethod: "async",
 				inputs: {
 					frameImages: undefined,
+					referenceImages: undefined,
 				},
-				audio: false,
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
-		it("passes referenceImages[0] via inputs.frameImages", async () => {
+		it("passes referenceImages and frameImages through separately", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-2",
 				status: "processing",
@@ -65,12 +65,16 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			await provider.submit({
 				prompt: "animate this",
-				referenceImages: ["data:image/png;base64,abc123"],
+				referenceImages: ["data:image/png;base64,ref"],
+				frameImages: ["data:image/png;base64,frame"],
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					inputs: { frameImages: ["data:image/png;base64,abc123"] },
+					inputs: {
+						frameImages: ["data:image/png;base64,frame"],
+						referenceImages: ["data:image/png;base64,ref"],
+					},
 				}),
 			);
 		});

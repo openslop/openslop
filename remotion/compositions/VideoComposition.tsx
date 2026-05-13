@@ -50,6 +50,7 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 					src={element.url}
 					style={coverStyle}
 					pauseWhenBuffering
+					volume={element.volume / 10}
 				/>
 			);
 		case "audio":

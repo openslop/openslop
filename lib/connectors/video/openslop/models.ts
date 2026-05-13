@@ -1,3 +1,3 @@
 export const VIDEO_MODELS = {
-	"Slop Video v1": "bytedance:2@2",
+	"Slop Video v1": "bytedance:seedance@2.0-fast",
 } as const;

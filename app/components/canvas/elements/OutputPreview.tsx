@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { X as XIcon, AlertCircle } from "lucide-react";
+import { X as XIcon, AlertCircle, Check, Copy } from "lucide-react";
 import {
 	Tooltip,
 	TooltipTrigger,
@@ -230,13 +230,31 @@ function PlaceholderOverlay({
 }
 
 function ErrorMessage({ message }: { message: string }) {
+	const [copied, setCopied] = useState(false);
+	const handleCopy = async () => {
+		await navigator.clipboard.writeText(message);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 1500);
+	};
 	return (
-		<div className="absolute inset-2 z-20 flex items-center justify-center pointer-events-none">
-			<div className="pointer-events-auto flex max-h-full min-w-0 max-w-full items-start gap-1.5 overflow-x-hidden overflow-y-auto rounded-lg bg-red-700 px-3 py-1.5 shadow-md">
+		<div className="absolute inset-x-2 top-12 bottom-2 z-20 flex items-start justify-center pointer-events-none">
+			<div className="pointer-events-auto flex max-h-full min-w-0 max-w-[85%] items-start gap-1.5 overflow-x-hidden overflow-y-auto rounded-lg bg-red-700 px-3 py-1.5 shadow-md">
 				<AlertCircle className="mt-px h-3.5 w-3.5 shrink-0 text-white" />
 				<p className="min-w-0 whitespace-pre-wrap break-words text-xs leading-snug text-white">
 					{message}
 				</p>
+				<button
+					type="button"
+					onClick={handleCopy}
+					aria-label={copied ? "Copied" : "Copy error message"}
+					className="mt-px shrink-0 rounded text-white/80 transition-colors hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60"
+				>
+					{copied ? (
+						<Check className="h-3.5 w-3.5" />
+					) : (
+						<Copy className="h-3.5 w-3.5" />
+					)}
+				</button>
 			</div>
 		</div>
 	);
