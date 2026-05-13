@@ -33,13 +33,11 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	const gain = element.volume / 10;
 	const hasFadeEnvelope = element.role === "background";
 	const fadeFrames = hasFadeEnvelope ? toFrames(AUDIO_FADE_SEC, fps) : 0;
-	return (
-		<Html5Audio
-			src={element.url}
-			pauseWhenBuffering
-			volume={audioVolume(gain, durationInFrames, fadeFrames)}
-		/>
+	const volume = useMemo(
+		() => audioVolume(gain, durationInFrames, fadeFrames),
+		[gain, durationInFrames, fadeFrames],
 	);
+	return <Html5Audio src={element.url} pauseWhenBuffering volume={volume} />;
 }
 
 function SequenceContent({ element }: { element: ResolvedElement }) {
@@ -79,6 +77,10 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 }) => {
 	const sequenceEntries = useMemo(() => Object.entries(sequences), [sequences]);
 	const transitionFrames = toFrames(transitionDurationSec, fps);
+	const transitionTiming = useMemo(
+		() => linearTiming({ durationInFrames: transitionFrames }),
+		[transitionFrames],
+	);
 	const presentation = useMemo(
 		() => getPresentation(transitionType, { width, height }),
 		[transitionType, width, height],
@@ -92,7 +94,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						{i > 0 && (
 							<TransitionSeries.Transition
 								presentation={presentation}
-								timing={linearTiming({ durationInFrames: transitionFrames })}
+								timing={transitionTiming}
 							/>
 						)}
 						<TransitionSeries.Sequence

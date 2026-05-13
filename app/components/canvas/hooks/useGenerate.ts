@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { isStaleResult } from "@/lib/generation/queue";
 import {
@@ -14,8 +14,7 @@ export function useGenerate(element: CanvasContentElement) {
 	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
-
-	const currentInputs = getGenerationInputs(element);
+	const currentInputs = useMemo(() => getGenerationInputs(element), [element]);
 	const stale = isStaleResult(snapshot, currentInputs);
 
 	useEffect(() => {
