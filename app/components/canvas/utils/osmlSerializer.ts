@@ -100,6 +100,7 @@ export class OSMLSerializer {
 			return;
 		}
 		const lastChild = current.children[current.children.length - 1];
+		if (!lastChild) return;
 		lastChild.text += text ?? "";
 	}
 

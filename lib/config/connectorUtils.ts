@@ -17,7 +17,10 @@ export function getDefaultConnector(
 			return { provider: provider as ProviderKey, config };
 		}
 	}
-	const [provider, config] = Object.entries(providers)[0];
+	const first = Object.entries(providers)[0];
+	if (!first)
+		throw new Error(`No providers configured for connector type "${type}"`);
+	const [provider, config] = first;
 	return { provider: provider as ProviderKey, config };
 }
 
