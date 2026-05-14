@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Editor, Transforms } from "slate";
+import { Editor, type Path, Transforms } from "slate";
 import { useScript } from "@/lib/script/ScriptProvider";
 import {
 	CANVAS_ELEMENT_TYPES,
@@ -8,7 +8,8 @@ import {
 	type ParsedElement,
 } from "../types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
-import { findNodeById, updateNodeText } from "../utils/editorOps";
+import { isContentElement } from "../utils/guards";
+import { updateNodeText } from "../utils/editorOps";
 
 function shouldSkip(node: ParsedElement): boolean {
 	return (
@@ -22,14 +23,21 @@ export function useScriptSync(editor: Editor): void {
 
 	useEffect(() => {
 		Editor.withoutNormalizing(editor, () => {
+			const pathById = new Map<string, Path>();
+			for (const [node, path] of Editor.nodes<CanvasContentElement>(editor, {
+				at: [],
+				match: isContentElement,
+			})) {
+				pathById.set(node.id, path);
+			}
+
 			for (const node of nodes) {
 				if (shouldSkip(node)) continue;
 
 				const canvasNode = node as CanvasContentElement;
-				const entry = findNodeById(editor, canvasNode.id);
+				const path = pathById.get(canvasNode.id);
 
-				if (entry) {
-					const [, path] = entry;
+				if (path) {
 					updateNodeText(
 						editor,
 						path,
