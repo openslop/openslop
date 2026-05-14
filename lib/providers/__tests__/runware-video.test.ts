@@ -95,6 +95,24 @@ describe("RunwareVideo", () => {
 			expect(result.url).toBe("https://v.mp4");
 		});
 
+		it("throws when videoInference returns no result", async () => {
+			mockVideoInference.mockResolvedValue(undefined);
+			const provider = new RunwareVideo("test-key");
+			await expect(provider.submit({ prompt: "x" })).rejects.toThrow(
+				"Runware returned no video result",
+			);
+			expect(mockDisconnect).toHaveBeenCalled();
+		});
+
+		it("throws when videoInference returns an empty array", async () => {
+			mockVideoInference.mockResolvedValue([]);
+			const provider = new RunwareVideo("test-key");
+			await expect(provider.submit({ prompt: "x" })).rejects.toThrow(
+				"Runware returned no video result",
+			);
+			expect(mockDisconnect).toHaveBeenCalled();
+		});
+
 		it("disconnects on error", async () => {
 			mockVideoInference.mockRejectedValue(new Error("fail"));
 

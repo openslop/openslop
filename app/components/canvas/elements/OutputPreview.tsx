@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { X as XIcon, AlertCircle, Check, Copy } from "lucide-react";
 import {
 	Tooltip,
@@ -231,10 +231,22 @@ function PlaceholderOverlay({
 
 function ErrorMessage({ message }: { message: string }) {
 	const [copied, setCopied] = useState(false);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(() => {
+		return () => {
+			if (timerRef.current) clearTimeout(timerRef.current);
+		};
+	}, []);
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(message);
+		try {
+			await navigator.clipboard.writeText(message);
+		} catch (err) {
+			console.error("Failed to copy error to clipboard:", err);
+			return;
+		}
 		setCopied(true);
-		setTimeout(() => setCopied(false), 1500);
+		if (timerRef.current) clearTimeout(timerRef.current);
+		timerRef.current = setTimeout(() => setCopied(false), 1500);
 	};
 	return (
 		<div className="absolute inset-x-2 top-12 bottom-2 z-20 flex items-start justify-center pointer-events-none">
