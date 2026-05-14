@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useScript } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import BackToMySlopLink from "./BackToMySlopLink";
 import ComposerCopilot from "./copilot/ComposerCopilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import TemplateGallery from "./TemplateGallery";
@@ -26,6 +27,7 @@ export default function ComposerHero() {
 
 	return (
 		<div className="flex w-full max-w-2xl flex-col items-center px-4">
+			<BackToMySlopLink className="mb-4 self-start" />
 			<h1 className="font-title text-center text-[clamp(48px,12vw,85px)] tracking-[-0.04em] leading-[0.95em] text-white/90 text-wrap-balance mb-6">
 				Describe your video
 			</h1>

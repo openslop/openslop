@@ -40,6 +40,13 @@ export const TEMPLATES: Template[] = [
 					"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-4",
 			},
 		},
+		narration: {
+			gender: "masculine",
+			age: "adult",
+			pitch: "neutral",
+			accent: "american",
+			description: "wise",
+		},
 		showcase: {
 			image:
 				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-1",
@@ -52,23 +59,24 @@ export const TEMPLATES: Template[] = [
 		# Important
 		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list
 		- The art style is: 2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients
-		- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story`,
+		- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story
+		- Never mention any specific character ages in the image descriptions, just generic ones like young man instead of 11 year old boy`,
 		exampleText: dedent`
 				#Image: A title card with a black background and white Arial text that says "Level 1: The Kid with the Idea"
 				#Narration: Level 1: The Kid with the Idea
 
 				#Music: Soft, dreamy, optimistic lo-fi piano with twinkling synths, hopeful and childlike
 
-				#Image: The Protagonist, a young kid, lying on his bedroom floor watching YouTube videos on a phone about young app founders who got rich, posters on the wall behind him
+				#Image: The Protagonist, a young man, lying on his bedroom floor watching YouTube videos on a phone about young app founders who got rich, posters on the wall behind him
 				#Narration: You're 11. You watch YouTube videos about people who made apps and got rich.
 
-				#Image: The Protagonist, a young kid, daydreaming with a smile, imagining stacks of money and a sports car floating above his head in cartoon thought bubbles
+				#Image: The Protagonist, a young man, daydreaming with a smile, imagining stacks of money and a sports car floating above his head in cartoon thought bubbles
 				#Narration: You think you can do that too. You can't. Not yet.
 
-				#Image: The Protagonist, a young kid, hunched over a clunky laptop in his small messy bedroom, late at night, glow of the screen on his face, free coding website open
+				#Image: The Protagonist, a young man, hunched over a clunky laptop in his small messy bedroom, late at night, glow of the screen on his face, free coding website open
 				#Narration: You teach yourself to code from a free website. The first thing you build is a calculator. It barely works.
 
-				#Image: The Protagonist, a young kid, in the kitchen showing his mom the calculator app on his laptop, mom smiling warmly while drying a dish
+				#Image: The Protagonist, a young man, in the kitchen showing his mom the calculator app on his laptop, mom smiling warmly while drying a dish
 				#Narration: You show your mom. She says it's amazing. You know it isn't. You feel like a wizard anyway.
 
 
@@ -78,7 +86,7 @@ export const TEMPLATES: Template[] = [
 
 				#Music: Restless indie rock with a driving acoustic guitar, slightly anxious but full of momentum
 
-				#Image: The Protagonist at 19 years old, sitting on a dorm room bed with a laptop, an empty lecture hall visible through the window across the courtyard
+				#Image: The Protagonist, a young adult, sitting on a dorm room bed with a laptop, an empty lecture hall visible through the window across the courtyard
 				#Narration: You're 19. You're supposed to be in class. You're not.
 
 				#Image: The Protagonist and two college friends sitting on the floor of a messy dorm room around a half-eaten pizza box, papers and laptops everywhere, talking excitedly
@@ -119,7 +127,7 @@ export const TEMPLATES: Template[] = [
 				#Image: A small bank account screen on a phone showing a modest seed funding deposit, the Protagonist's hand holding it
 				#Narration: You raise a little money. Enough for one person who isn't you.
 
-				#Image: The Protagonist, age 21, shaking hands across a small desk with Sam, a slightly older engineer with glasses and a beard, in a tiny bare office
+				#Image: The Protagonist, a young adult, shaking hands across a small desk with Sam, a slightly older engineer with glasses and a beard, in a tiny bare office
 				#Narration: You hire an engineer named Sam. Sam is 28. You are 21.
 
 				#Image: The Protagonist at his desk looking thoughtful, Sam standing nearby holding a notebook, both staring at a whiteboard covered in question marks
@@ -239,13 +247,13 @@ export const TEMPLATES: Template[] = [
 				#Image: The Protagonist in casual clothes walking a golden retriever through a sunlit neighborhood park
 				#Narration: You take six months off. You walk your dog twice a day. You learn to cook one good meal.
 
-				#Image: The Protagonist sitting across from a 22-year-old woman in a cozy coffee shop, both leaning over a napkin with a sketch on it
+				#Image: The Protagonist sitting across from a young adult woman in a cozy coffee shop, both leaning over a napkin with a sketch on it
 				#Narration: Then the itch comes back. You meet a kid in a coffee shop with an idea on a napkin. She's 22. She's scared and electric.
 
-				#Image: The Protagonist's hand sliding a personal check across the coffee shop table to the young founder, who looks shocked
+				#Image: The Protagonist's hand sliding a personal check across the coffee shop table to the young adult founder, who looks shocked
 				#Narration: You write her a check. You tell her she has no idea what she's signing up for.
 
-				#Image: A close-up of the young founder's hopeful face, eyes shining, the Protagonist slightly out of focus in the background watching her with a knowing smile
+				#Image: A close-up of the young adult founder's hopeful face, eyes shining, the Protagonist slightly out of focus in the background watching her with a knowing smile
 				#Narration: She doesn't believe you. You didn't believe it either. The cycle keeps going. It always does.`,
 	},
 	{

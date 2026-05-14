@@ -237,8 +237,8 @@ function ErrorMessage({ message }: { message: string }) {
 		setTimeout(() => setCopied(false), 1500);
 	};
 	return (
-		<div className="absolute inset-x-2 top-12 bottom-2 z-20 flex items-start justify-center pointer-events-none">
-			<div className="pointer-events-auto flex max-h-full min-w-0 max-w-[85%] items-start gap-1.5 overflow-x-hidden overflow-y-auto rounded-lg bg-red-700 px-3 py-1.5 shadow-md">
+		<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-12 py-2">
+			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-red-700 px-3 py-1.5 shadow-md">
 				<AlertCircle className="mt-px h-3.5 w-3.5 shrink-0 text-white" />
 				<p className="min-w-0 whitespace-pre-wrap break-words text-xs leading-snug text-white">
 					{message}

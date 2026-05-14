@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
@@ -28,11 +28,7 @@ export default function ProjectEditor({
 	initialGeneration: Record<string, ElementSnapshot>;
 	user: User;
 }): ReactNode {
-	const hydratedRef = useRef<true | null>(null);
-	if (hydratedRef.current == null) {
-		hydratedRef.current = true;
-		applyStoreSnapshot(getProjectStore(projectId), initialStore);
-	}
+	applyStoreSnapshot(getProjectStore(projectId), initialStore);
 
 	return (
 		<TooltipProvider>

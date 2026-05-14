@@ -60,7 +60,7 @@ describe("applyTemplate", () => {
 
 		applyTemplate(PROJECT_ID, "pov-life");
 		expect(getProjectStore(PROJECT_ID).getState().metadata.narration).toEqual(
-			{},
+			getTemplateById("pov-life")?.narration ?? {},
 		);
 	});
 });

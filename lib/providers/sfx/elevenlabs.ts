@@ -1,5 +1,7 @@
+import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
 import type { AudioFormat } from "../audio-duration";
+import { audioBundleCache, pineconeCache } from "../cache";
 import { BaseElevenLabsAudio, toElevenLabsOutputFormat } from "../elevenlabs";
 
 export class ElevenLabsSFX extends BaseElevenLabsAudio<SFXGenerateParams> {
@@ -18,3 +20,12 @@ export class ElevenLabsSFX extends BaseElevenLabsAudio<SFXGenerateParams> {
 		});
 	}
 }
+
+ElevenLabsSFX.prototype.generate = pineconeCache<
+	[SFXGenerateParams],
+	BundleResponse
+>(ElevenLabsSFX.prototype.generate, {
+	index: process.env.PINECONE_SFX_INDEX || "sfx",
+	serialize: (p) => p.prompt,
+	...audioBundleCache,
+});

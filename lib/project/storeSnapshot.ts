@@ -20,8 +20,10 @@ export function applyStoreSnapshot(
 	store: ProjectStore,
 	snapshot: Partial<ProjectStoreSnapshot> | null | undefined,
 ): void {
-	if (!snapshot) return;
-	const { updateMetadata, setReferenceImages } = store.getState();
-	if (snapshot.metadata) updateMetadata(snapshot.metadata);
-	if (snapshot.referenceImages) setReferenceImages(snapshot.referenceImages);
+	const state = store.getState();
+	if (state.hydrated) return;
+	if (snapshot?.metadata) state.updateMetadata(snapshot.metadata);
+	if (snapshot?.referenceImages)
+		state.setReferenceImages(snapshot.referenceImages);
+	state.markHydrated();
 }

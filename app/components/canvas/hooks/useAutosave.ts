@@ -34,6 +34,10 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 
 	const save = useCallback(async () => {
 		const store = getProjectStore(projectId);
+		if (!store.getState().hydrated) {
+			console.error("Autosave aborted: store not hydrated", { projectId });
+			return;
+		}
 		const snapshot = extractStoreSnapshot(store);
 		const script = OSMLSerializer.serializeWithScenes(valueRef.current);
 		try {

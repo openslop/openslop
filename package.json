@@ -36,6 +36,7 @@
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
 		"@elevenlabs/elevenlabs-js": "^2.38.1",
+		"@pinecone-database/pinecone": "^7.2.0",
 		"@remotion/cli": "^4.0.459",
 		"@remotion/player": "^4.0.459",
 		"@remotion/preload": "^4.0.459",
