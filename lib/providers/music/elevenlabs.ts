@@ -1,5 +1,11 @@
+import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import type { AudioFormat } from "../audio-duration";
+import {
+	audioBundleCache,
+	pineconeCache,
+	rankByNearestDuration,
+} from "../cache";
 import { BaseElevenLabsAudio, toElevenLabsOutputFormat } from "../elevenlabs";
 
 export class ElevenLabsMusic extends BaseElevenLabsAudio<MusicGenerateParams> {
@@ -22,3 +28,13 @@ export class ElevenLabsMusic extends BaseElevenLabsAudio<MusicGenerateParams> {
 		});
 	}
 }
+
+ElevenLabsMusic.prototype.generate = pineconeCache<
+	[MusicGenerateParams],
+	BundleResponse
+>(ElevenLabsMusic.prototype.generate, {
+	index: process.env.PINECONE_MUSIC_INDEX ?? "music",
+	serialize: (p) => p.prompt,
+	rank: rankByNearestDuration,
+	...audioBundleCache("music"),
+});

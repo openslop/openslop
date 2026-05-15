@@ -1,6 +1,6 @@
-import { embed, embedMany, cosineSimilarity } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { cosineSimilarity } from "ai";
 import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
+import { embedText, embedTexts } from "../embed";
 
 const SEMANTIC_FIELDS = [
 	"query",
@@ -9,8 +9,6 @@ const SEMANTIC_FIELDS = [
 	"pitch",
 	"age",
 ] as const satisfies ReadonlyArray<keyof VoiceSearchParams>;
-
-const EMBEDDING_MODEL = "text-embedding-3-small";
 
 export function buildQueryText(params: VoiceSearchParams): string {
 	return SEMANTIC_FIELDS.map((k) => params[k])
@@ -25,17 +23,13 @@ export async function rankBySimilarity(
 ): Promise<VoiceInfo[]> {
 	if (voices.length === 0) return [];
 
-	const model = openai.embedding(EMBEDDING_MODEL);
-	const [queryResult, voiceResult] = await Promise.all([
-		embed({ model, value: queryText }),
-		embedMany({ model, values: voices.map((v) => v.description) }),
+	const [query, voiceVecs] = await Promise.all([
+		embedText(queryText),
+		embedTexts(voices.map((v) => v.description)),
 	]);
 
 	const scores = new Map(
-		voices.map((v, i) => [
-			v.id,
-			cosineSimilarity(queryResult.embedding, voiceResult.embeddings[i]),
-		]),
+		voices.map((v, i) => [v.id, cosineSimilarity(query, voiceVecs[i])]),
 	);
 	return [...voices].sort(
 		(a, b) => (scores.get(b.id) ?? -Infinity) - (scores.get(a.id) ?? -Infinity),

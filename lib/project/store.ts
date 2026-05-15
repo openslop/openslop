@@ -5,16 +5,19 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import type { DeepPartial, Metadata } from "./types";
 
 export type ProjectContext = {
+	hydrated: boolean;
 	metadata: Metadata;
 	referenceImages: string[];
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setReferenceImages: (urls: string[]) => void;
+	markHydrated: () => void;
 	reset: () => void;
 };
 
 export type ProjectStore = StoreApi<ProjectContext>;
 
 const initialState = {
+	hydrated: false,
 	metadata: { title: "", style: "", narration: {}, characters: {} } as Metadata,
 	referenceImages: [] as string[],
 };
@@ -35,9 +38,14 @@ export function getProjectStore(projectId: string): ProjectStore {
 					set((state) => {
 						state.referenceImages = urls;
 					}),
+				markHydrated: () =>
+					set((state) => {
+						state.hydrated = true;
+					}),
 				reset: () =>
 					set((state) => {
-						Object.assign(state, structuredClone(initialState));
+						state.metadata = structuredClone(initialState.metadata);
+						state.referenceImages = [];
 					}),
 			})),
 		);
