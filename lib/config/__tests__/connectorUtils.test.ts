@@ -58,6 +58,13 @@ describe("getDefaultConnector", () => {
 		expect(result.config.defaultModel).toBe("m1");
 	});
 
+	it("throws when no providers are configured for the type", () => {
+		const registry = makeRegistry({});
+		expect(() => getDefaultConnector(registry, "image")).toThrow(
+			/No providers configured/,
+		);
+	});
+
 	it("returns the first default when multiple are marked default", () => {
 		const registry = makeRegistry({
 			first: makeConfig({ isDefault: true, defaultModel: "x" }),

@@ -43,6 +43,7 @@ export class RunwareVideo extends BaseVideoProvider {
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;
+			if (!video) throw new Error("Runware video inference returned no result");
 			return toVideoJob(video);
 		});
 	}
