@@ -91,7 +91,7 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 				expect.objectContaining({
 					values: [0.1, 0.2],
 					metadata: expect.objectContaining({
-						url: "url",
+						url: "/assets/music/elevenlabs/test/url", // resolved via AssetBundle
 						description: "jazz",
 					}),
 				}),

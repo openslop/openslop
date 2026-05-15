@@ -32,5 +32,5 @@ ElevenLabsSFX.prototype.generate = pineconeCache<
 	index: process.env.PINECONE_SFX_INDEX || "sfx",
 	serialize: (p) => p.prompt,
 	rank: rankByNearestDuration,
-	...audioBundleCache,
+	...audioBundleCache("sfx"),
 });

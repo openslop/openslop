@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Pinecone } from "@pinecone-database/pinecone";
-import type { BundleResponse } from "@/lib/api/asset-bundle";
+import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import { embedText } from "./embed";
 
 type Metadata = Record<string, string | number | boolean>;
@@ -101,21 +101,28 @@ export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
 	});
 };
 
-/** Reusable strategy for any method returning an audio BundleResponse. */
-export const audioBundleCache = {
+/**
+ * Reusable strategy for any method returning an audio BundleResponse. Stores
+ * the *resolved* absolute URL so cache hits round-trip through
+ * `AssetBundle.resolve` without reconstructing a bogus path.
+ */
+export const audioBundleCache = (type: string) => ({
 	toMetadata: (r: BundleResponse, description: string): Metadata => ({
-		url: r.result.audio,
+		url: AssetBundle.fromResponse(type, r).resolve("audio"),
 		duration: Number(r.metadata?.durationSec ?? 0),
 		description,
 	}),
-	fromMetadata: (m: Metadata): BundleResponse => ({
-		id: String(m.url || m.audioUrl),
-		provider: "pinecone-cache",
-		result: { audio: String(m.url || m.audioUrl) },
-		metadata: {
-			durationSec: Number(m.duration),
-			cached: true,
-			description: String(m.description),
-		},
-	}),
-};
+	fromMetadata: (m: Metadata): BundleResponse => {
+		const url = String(m.url || m.audioUrl);
+		return {
+			id: url,
+			provider: "pinecone-cache",
+			result: { audio: url },
+			metadata: {
+				durationSec: Number(m.duration),
+				cached: true,
+				description: String(m.description),
+			},
+		};
+	},
+});

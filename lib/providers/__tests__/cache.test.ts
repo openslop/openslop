@@ -398,9 +398,10 @@ describe("rankByNearestDuration", () => {
 });
 
 describe("audioBundleCache", () => {
-	it("round-trips a BundleResponse through metadata", async () => {
+	it("round-trips a BundleResponse with an absolute URL through metadata", async () => {
 		const { audioBundleCache } = await loadCache();
-		const m = audioBundleCache.toMetadata(
+		const cache = audioBundleCache("music");
+		const m = cache.toMetadata(
 			{
 				id: "abc",
 				provider: "elevenlabs",
@@ -409,13 +410,14 @@ describe("audioBundleCache", () => {
 			},
 			"happy piano",
 		);
+		// Absolute URL passes through AssetBundle.resolve unchanged.
 		expect(m).toEqual({
 			url: "https://blob/audio.mp3",
 			duration: 12.5,
 			description: "happy piano",
 		});
 
-		const restored = audioBundleCache.fromMetadata(m);
+		const restored = cache.fromMetadata(m);
 		expect(restored.result.audio).toBe("https://blob/audio.mp3");
 		expect(restored.metadata).toMatchObject({
 			durationSec: 12.5,
@@ -425,9 +427,50 @@ describe("audioBundleCache", () => {
 		expect(restored.provider).toBe("pinecone-cache");
 	});
 
+	it("resolves the filename to an absolute URL when r.result.audio is a relative filename", async () => {
+		const { audioBundleCache } = await loadCache();
+		const { AssetBundle } = await import("@/lib/api/asset-bundle");
+		const m = audioBundleCache("music").toMetadata(
+			{
+				id: "abc123",
+				provider: "elevenlabs",
+				result: { audio: "output.mp3" },
+				metadata: { durationSec: 30 },
+			},
+			"jazz",
+		);
+		const expected = `${AssetBundle.baseUrl}/assets/music/elevenlabs/abc123/output.mp3`;
+		expect(m.url).toBe(expected);
+	});
+
+	it("threads the type into the resolved URL", async () => {
+		const { audioBundleCache } = await loadCache();
+		const m = audioBundleCache("sfx").toMetadata(
+			{
+				id: "id",
+				provider: "elevenlabs",
+				result: { audio: "out.mp3" },
+				metadata: { durationSec: 1 },
+			},
+			"crash",
+		);
+		expect(m.url).toContain("/assets/sfx/elevenlabs/id/out.mp3");
+	});
+
+	it("fromMetadata reads pre-existing audioUrl field for backwards compatibility", async () => {
+		const { audioBundleCache } = await loadCache();
+		const restored = audioBundleCache("music").fromMetadata({
+			audioUrl: "https://legacy/audio.mp3",
+			duration: 5,
+			description: "old record",
+		});
+		expect(restored.result.audio).toBe("https://legacy/audio.mp3");
+		expect(restored.id).toBe("https://legacy/audio.mp3");
+	});
+
 	it("defaults duration to 0 when metadata missing", async () => {
 		const { audioBundleCache } = await loadCache();
-		const m = audioBundleCache.toMetadata(
+		const m = audioBundleCache("music").toMetadata(
 			{ id: "x", provider: "p", result: { audio: "u" } },
 			"desc",
 		);

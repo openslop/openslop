@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 
 export const AssetBundle = {
+	baseUrl: "",
 	upload: vi.fn(
 		(
 			_type: string,
@@ -14,4 +15,14 @@ export const AssetBundle = {
 			metadata,
 		}),
 	),
+	fromResponse: (
+		type: string,
+		response: { id: string; provider: string; result: Record<string, string> },
+	) => ({
+		resolve: (key: string) => {
+			const value = response.result[key];
+			if (/^https?:\/\//.test(value)) return value;
+			return `/assets/${type}/${response.provider}/${response.id}/${value}`;
+		},
+	}),
 };
