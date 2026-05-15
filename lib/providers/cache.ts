@@ -5,7 +5,10 @@ import { embedText } from "./embed";
 
 type Metadata = Record<string, string | number | boolean>;
 
+export type CacheMatch = { score?: number; metadata?: Metadata };
+
 const DEFAULT_THRESHOLD = 0.8;
+const RANKED_TOP_K = 5;
 const defaultSerialize = (...args: unknown[]): string => JSON.stringify(args);
 
 export type PineconeCacheOptions<Args extends unknown[], Result> = {
@@ -15,6 +18,12 @@ export type PineconeCacheOptions<Args extends unknown[], Result> = {
 	threshold?: number;
 	serialize?: (...args: Args) => string;
 	namespace?: string;
+	/**
+	 * Best-effort tiebreaker over the threshold-eligible candidates. When set,
+	 * Pinecone is queried for several neighbors and `rank` picks the winner.
+	 * Return `undefined` to force a miss.
+	 */
+	rank?: (candidates: CacheMatch[], ...args: Args) => CacheMatch | undefined;
 };
 
 /**
@@ -33,6 +42,8 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 	const threshold = opts.threshold ?? DEFAULT_THRESHOLD;
 	const serialize = opts.serialize ?? defaultSerialize;
 
+	const topK = opts.rank ? RANKED_TOP_K : 1;
+
 	return async function (this: This, ...args: Args): Promise<Result> {
 		const description = serialize(...args);
 		let vector: number[] | undefined;
@@ -40,12 +51,14 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 			vector = await embedText(description);
 			const { matches } = await index.query({
 				vector,
-				topK: 1,
+				topK,
 				includeMetadata: true,
 			});
-			const hit = matches?.[0];
-			if ((hit?.score ?? 0) >= threshold)
-				return opts.fromMetadata(hit.metadata as Metadata);
+			const eligible: CacheMatch[] = (matches ?? [])
+				.filter((m) => (m.score ?? 0) >= threshold)
+				.map((m) => ({ score: m.score, metadata: m.metadata as Metadata }));
+			const hit = opts.rank ? opts.rank(eligible, ...args) : eligible[0];
+			if (hit?.metadata) return opts.fromMetadata(hit.metadata as Metadata);
 		} catch (err) {
 			console.error("[pinecone-cache] read failed; falling through", err);
 		}
@@ -69,6 +82,24 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 		return result;
 	};
 }
+
+/**
+ * Picks the candidate whose stored `duration` is closest to `params.durationSeconds`.
+ * If the caller didn't specify a duration, falls back to the top similarity match.
+ */
+export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
+	candidates: CacheMatch[],
+	params: P,
+): CacheMatch | undefined => {
+	if (candidates.length === 0) return undefined;
+	const target = params.durationSeconds;
+	if (target == null) return candidates[0];
+	return candidates.reduce((best, c) => {
+		const bd = Math.abs(Number(best.metadata?.duration ?? 0) - target);
+		const cd = Math.abs(Number(c.metadata?.duration ?? 0) - target);
+		return cd < bd ? c : best;
+	});
+};
 
 /** Reusable strategy for any method returning an audio BundleResponse. */
 export const audioBundleCache = {

@@ -279,6 +279,122 @@ describe("pineconeCache", () => {
 		expect(mockIndex).toHaveBeenCalledWith("i");
 		expect(mockNamespace).toHaveBeenCalledWith("tenant-a");
 	});
+
+	it("fetches multiple candidates and forwards them to rank", async () => {
+		const { pineconeCache } = await loadCache();
+		const candidateA = { score: 0.95, metadata: { value: "a" } };
+		const candidateB = { score: 0.92, metadata: { value: "b" } };
+		mockQuery.mockResolvedValue({ matches: [candidateA, candidateB] });
+
+		const rank = vi.fn().mockReturnValue(candidateB);
+		const wrapped = pineconeCache<[string], string>(
+			vi.fn().mockResolvedValue("fresh"),
+			{
+				index: "i",
+				toMetadata: () => ({}),
+				fromMetadata: (m) => String(m.value),
+				serialize: (s) => s,
+				rank,
+			},
+		);
+
+		expect(await wrapped("q")).toBe("b");
+		expect(mockQuery).toHaveBeenCalledWith(
+			expect.objectContaining({ topK: 5 }),
+		);
+		expect(rank).toHaveBeenCalledWith([candidateA, candidateB], "q");
+	});
+
+	it("rank receives only candidates above threshold", async () => {
+		const { pineconeCache } = await loadCache();
+		mockQuery.mockResolvedValue({
+			matches: [
+				{ score: 0.95, metadata: { v: "good" } },
+				{ score: 0.5, metadata: { v: "bad" } },
+			],
+		});
+
+		const rank = vi.fn((cs) => cs[0]);
+		const wrapped = pineconeCache<[string], string>(
+			vi.fn().mockResolvedValue("fresh"),
+			{
+				index: "i",
+				threshold: 0.9,
+				toMetadata: () => ({}),
+				fromMetadata: (m) => String(m.v),
+				serialize: (s) => s,
+				rank,
+			},
+		);
+
+		await wrapped("q");
+		expect(rank.mock.calls[0][0]).toHaveLength(1);
+		expect(rank.mock.calls[0][0][0].metadata).toEqual({ v: "good" });
+	});
+
+	it("rank returning undefined forces a miss", async () => {
+		const { pineconeCache } = await loadCache();
+		mockQuery.mockResolvedValue({
+			matches: [{ score: 0.99, metadata: { v: "cached" } }],
+		});
+		mockUpsert.mockResolvedValue(undefined);
+
+		const inner = vi.fn().mockResolvedValue("fresh");
+		const wrapped = pineconeCache<[string], string>(inner, {
+			index: "i",
+			toMetadata: () => ({}),
+			fromMetadata: () => "cached",
+			serialize: (s) => s,
+			rank: () => undefined,
+		});
+
+		expect(await wrapped("q")).toBe("fresh");
+		expect(inner).toHaveBeenCalled();
+	});
+});
+
+describe("rankByNearestDuration", () => {
+	it("picks the candidate closest to the requested duration", async () => {
+		const { rankByNearestDuration } = await loadCache();
+		const picked = rankByNearestDuration(
+			[
+				{ score: 0.95, metadata: { duration: 5 } },
+				{ score: 0.94, metadata: { duration: 28 } },
+				{ score: 0.93, metadata: { duration: 60 } },
+			],
+			{ durationSeconds: 30 },
+		);
+		expect(picked?.metadata?.duration).toBe(28);
+	});
+
+	it("falls back to the top similarity match when no target duration", async () => {
+		const { rankByNearestDuration } = await loadCache();
+		const picked = rankByNearestDuration(
+			[
+				{ score: 0.95, metadata: { duration: 5 } },
+				{ score: 0.94, metadata: { duration: 60 } },
+			],
+			{},
+		);
+		expect(picked?.metadata?.duration).toBe(5);
+	});
+
+	it("returns undefined for an empty candidate list", async () => {
+		const { rankByNearestDuration } = await loadCache();
+		expect(rankByNearestDuration([], { durationSeconds: 30 })).toBeUndefined();
+	});
+
+	it("treats missing duration metadata as 0", async () => {
+		const { rankByNearestDuration } = await loadCache();
+		const picked = rankByNearestDuration(
+			[
+				{ score: 0.95, metadata: {} },
+				{ score: 0.94, metadata: { duration: 30 } },
+			],
+			{ durationSeconds: 28 },
+		);
+		expect(picked?.metadata?.duration).toBe(30);
+	});
 });
 
 describe("audioBundleCache", () => {
