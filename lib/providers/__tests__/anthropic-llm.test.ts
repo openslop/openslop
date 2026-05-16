@@ -34,7 +34,7 @@ describe("AnthropicLLM", () => {
 			});
 			expect(mockCreate).toHaveBeenCalledWith({
 				model: "claude-sonnet-4-5-20250929",
-				max_tokens: 4096,
+				max_tokens: 8192,
 				temperature: undefined,
 				system: undefined,
 				messages: [{ role: "user", content: "hi" }],

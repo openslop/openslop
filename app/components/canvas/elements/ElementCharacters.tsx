@@ -4,7 +4,11 @@ import { useSlateStatic } from "slate-react";
 import type { CanvasContentElement } from "../types";
 import { getElementCharacterNames } from "../utils/characters";
 import { CharacterPill } from "./CharacterBadge";
-import { CharactersPicker, removeCharacter } from "./CharactersPicker";
+import {
+	CharacterSwitcher,
+	CharactersPicker,
+	removeCharacter,
+} from "./CharactersPicker";
 
 export function ElementCharacters({
 	element,
@@ -12,6 +16,9 @@ export function ElementCharacters({
 	element: CanvasContentElement;
 }) {
 	const editor = useSlateStatic();
+	if (element.type === "character")
+		return <CharacterSwitcher element={element} />;
+	if (element.type !== "image") return null;
 	const characters = getElementCharacterNames(element);
 	return (
 		<>
@@ -22,7 +29,7 @@ export function ElementCharacters({
 					onRemove={() => removeCharacter(editor, element, name)}
 				/>
 			))}
-			{characters.length > 0 && <CharactersPicker element={element} />}
+			<CharactersPicker element={element} />
 		</>
 	);
 }

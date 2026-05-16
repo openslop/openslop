@@ -62,8 +62,8 @@ export function CharacterPill({
 	const avatarUrl = useCharacterAvatarUrl(name);
 	return (
 		<div
-			className={`group/pill relative inline-flex items-center shrink-0 max-w-[140px] rounded-full bg-white/10 ${
-				name ? "gap-1.5 pr-2" : ""
+			className={`group/pill relative inline-flex items-center shrink-0 max-w-[140px] rounded-full bg-white/10 ring-1 ring-inset ring-white/20 ${
+				name ? "gap-1.5 pr-2 py-px" : ""
 			}`}
 		>
 			<CharacterAvatar name={name} avatarUrl={avatarUrl} />

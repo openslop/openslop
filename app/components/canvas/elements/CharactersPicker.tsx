@@ -14,6 +14,13 @@ import { useProjectStore } from "@/lib/project/store";
 import type { CanvasContentElement } from "../types";
 import { getElementCharacterNames } from "../utils/characters";
 import { setNodeAttrs } from "../utils/editorOps";
+import { CharacterPill } from "./CharacterBadge";
+
+function useProjectCharacterNames(): string[] {
+	const { projectId } = useConfig();
+	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
+	return Object.keys(characters);
+}
 
 function writeCharacters(
 	editor: Editor,
@@ -49,17 +56,58 @@ export function removeCharacter(
 	);
 }
 
+function setCharacterName(
+	editor: Editor,
+	element: CanvasContentElement,
+	name: string,
+): void {
+	const path = ReactEditor.findPath(editor, element);
+	setNodeAttrs(editor, path, element, { name });
+}
+
+/** Dropdown listing the project's characters with checkmarks for selected ones. */
+function ProjectCharactersMenu({
+	selected,
+	onSelect,
+}: {
+	selected: Set<string>;
+	onSelect: (name: string) => void;
+}) {
+	const names = useProjectCharacterNames();
+	return (
+		<DropdownMenuContent
+			align="start"
+			className="min-w-32 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+		>
+			{names.map((name) => (
+				<DropdownMenuItem
+					key={name}
+					onClick={() => onSelect(name)}
+					onSelect={(e) => e.preventDefault()}
+					className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+				>
+					<span className="w-3.5 shrink-0 flex items-center justify-center">
+						{selected.has(name) && (
+							<Check className="w-3 h-3 text-white" aria-hidden="true" />
+						)}
+					</span>
+					{name}
+				</DropdownMenuItem>
+			))}
+		</DropdownMenuContent>
+	);
+}
+
+/** Multi-select add picker (image elements: many characters per element). */
 export function CharactersPicker({
 	element,
 }: {
 	element: CanvasContentElement;
 }) {
 	const editor = useSlateStatic();
-	const { projectId } = useConfig();
-	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
-	const names = Object.keys(characters);
-	const selected = new Set(getElementCharacterNames(element));
+	const names = useProjectCharacterNames();
 	const disabled = names.length === 0;
+	const selected = new Set(getElementCharacterNames(element));
 
 	return (
 		<DropdownMenu modal={false}>
@@ -75,26 +123,43 @@ export function CharactersPicker({
 					<span>Character</span>
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				align="start"
-				className="min-w-32 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
-			>
-				{names.map((name) => (
-					<DropdownMenuItem
-						key={name}
-						onClick={() => toggleCharacter(editor, element, name)}
-						onSelect={(e) => e.preventDefault()}
-						className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
-					>
-						<span className="w-3.5 shrink-0 flex items-center justify-center">
-							{selected.has(name) && (
-								<Check className="w-3 h-3 text-white" aria-hidden="true" />
-							)}
-						</span>
-						{name}
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
+			<ProjectCharactersMenu
+				selected={selected}
+				onSelect={(name) => toggleCharacter(editor, element, name)}
+			/>
+		</DropdownMenu>
+	);
+}
+
+/** Single-select switcher (character elements: exactly one character per element). */
+export function CharacterSwitcher({
+	element,
+}: {
+	element: CanvasContentElement;
+}) {
+	const editor = useSlateStatic();
+	const names = useProjectCharacterNames();
+	const currentName = element.customAttributes?.name;
+
+	if (names.length === 0) return <CharacterPill name={currentName} />;
+
+	return (
+		<DropdownMenu modal={false}>
+			<DropdownMenuTrigger asChild>
+				<button
+					type="button"
+					aria-label="Change character"
+					title="Change character"
+					onMouseDown={(e) => e.preventDefault()}
+					className="inline-flex items-center cursor-pointer rounded-full hover:ring-1 hover:ring-white/30 transition-shadow"
+				>
+					<CharacterPill name={currentName} />
+				</button>
+			</DropdownMenuTrigger>
+			<ProjectCharactersMenu
+				selected={new Set(currentName ? [currentName] : [])}
+				onSelect={(name) => setCharacterName(editor, element, name)}
+			/>
 		</DropdownMenu>
 	);
 }
