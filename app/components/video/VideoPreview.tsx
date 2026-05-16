@@ -26,6 +26,7 @@ const RemotionPlayer = dynamic(
 					style={fullWidthStyle}
 					controls
 					acknowledgeRemotionLicense
+					numberOfSharedAudioTags={10}
 				/>
 			);
 		}

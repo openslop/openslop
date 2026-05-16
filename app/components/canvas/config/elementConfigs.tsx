@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { CanvasElementType, ResultKind } from "../types";
 import type { ConnectorType } from "@/lib/connectors/types";
-import { TTSEmotion } from "@/lib/connectors/tts/enums";
+import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 
 export interface AttributeSpec {
 	color: string;
@@ -50,6 +50,12 @@ const volumeSpec = (color: string): AttributeSpec => ({
 	edit: { options: VOLUME_OPTIONS },
 });
 
+const speedSpec = (color: string): AttributeSpec => ({
+	color,
+	label: "Speed",
+	edit: { options: TTS_SPEEDS },
+});
+
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	narration: {
 		type: "narration",
@@ -61,6 +67,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Write the narration...",
 		defaultAttributes: {
 			volume: "10",
+			speed: "medium",
 		},
 		visibleAttributes: {
 			emotion: {
@@ -68,6 +75,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 				label: "Emotion",
 				edit: { options: EMOTION_OPTIONS },
 			},
+			speed: speedSpec("bg-slate-500"),
 			volume: volumeSpec("bg-slate-500"),
 		},
 	},
@@ -81,6 +89,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "What does this character say?",
 		defaultAttributes: {
 			volume: "10",
+			speed: "medium",
 		},
 		visibleAttributes: {
 			emotion: {
@@ -88,7 +97,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 				label: "Emotion",
 				edit: { options: EMOTION_OPTIONS },
 			},
-			volume: volumeSpec("bg-amber-500"),
+			speed: speedSpec("bg-amber-600"),
+			volume: volumeSpec("bg-amber-600"),
 		},
 	},
 	image: {
@@ -112,7 +122,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 
 		defaultAttributes: {
 			duration: "5",
-			volume: "10",
+			volume: "5",
 		},
 		visibleAttributes: {
 			duration: { color: "bg-indigo-500", label: "Duration" },
@@ -130,7 +140,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 
 		defaultAttributes: {
 			loops: "1",
-			volume: "10",
+			volume: "5",
 		},
 		visibleAttributes: {
 			loops: {
@@ -151,7 +161,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the music...",
 		defaultAttributes: {
 			loops: "1",
-			volume: "10",
+			volume: "5",
 		},
 		visibleAttributes: {
 			loops: {

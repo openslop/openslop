@@ -40,13 +40,14 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 		}
 		const snapshot = extractStoreSnapshot(store);
 		const script = OSMLSerializer.serializeWithScenes(valueRef.current);
+		const generation = queue.snapshot();
 		try {
 			await saveProject(projectId, {
 				name: deriveProjectName(snapshot.metadata),
 				script,
 				store: snapshot,
-				generation: queue.snapshot(),
-				thumbnail_url: pickThumbnailUrl(queue.values()),
+				generation,
+				thumbnail_url: pickThumbnailUrl(Object.entries(generation)),
 			});
 			toast("Saved", TOAST_OPTIONS);
 		} catch (err) {

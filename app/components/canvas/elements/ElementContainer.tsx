@@ -3,7 +3,6 @@ import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { Node } from "slate";
 import type { CanvasContentElement, SceneElement } from "../types";
 import { isSceneElement } from "../utils/guards";
-import { getElementCharacterNames } from "../utils/characters";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useViewMode } from "../ViewModeContext";
@@ -11,7 +10,7 @@ import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
 import { CompactElement } from "./CompactElement";
 import { SceneContainer } from "./SceneContainer";
-import { CharacterPill } from "./CharacterBadge";
+import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ModelBadge } from "./ModelBadge";
 
@@ -50,9 +49,7 @@ export function ElementContainer({
 							{config.icon}
 							<span className="text-xs">{config.label}</span>
 						</div>
-						{getElementCharacterNames(element).map((name) => (
-							<CharacterPill key={`char:${name}`} name={name} />
-						))}
+						<ElementCharacters element={element} />
 						{Object.entries(config.visibleAttributes).map(([key, spec]) => (
 							<AttributeBadge
 								key={key}
