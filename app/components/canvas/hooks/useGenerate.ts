@@ -23,7 +23,7 @@ export function useGenerate(element: CanvasContentElement) {
 	}, [queue, element.id, currentInputs, stale]);
 
 	const generate = useCallback(() => {
-		const job = buildGenerationJob(element, connectorConfig);
+		const job = buildGenerationJob(element, connectorConfig, projectId);
 		if (!job) {
 			queue.setError(element.id, "Enter a prompt first");
 			return;

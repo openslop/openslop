@@ -2,25 +2,55 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { BaseAssetConnector } from "../asset-base";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { AssetGateway, JobPoll } from "@/lib/gateway/base";
 import type { ConnectorConfig, ConnectorType } from "../types";
 
 type TestParams = { prompt: string };
 type TestResult = { url: string; durationSec: number };
 
+function makeGateway(
+	generateImpl: (params: TestParams) => Promise<BundleResponse>,
+): AssetGateway<TestParams> {
+	const generate = vi.fn(async (params: TestParams) => {
+		// Eagerly run the underlying op so errors surface and results cache.
+		const result = await generateImpl(params);
+		return {
+			jobId: result.id || "job",
+			status: "pending" as const,
+			_result: result,
+		};
+	});
+	return {
+		generate: async (params) => {
+			const r = await generate(params);
+			return { jobId: r.jobId, status: r.status };
+		},
+		poll: async (): Promise<JobPoll> => {
+			const r = await generate.mock.results[0]!.value;
+			return {
+				jobId: r.jobId,
+				status: "completed",
+				result: r._result as BundleResponse,
+				error: null,
+			};
+		},
+	};
+}
+
 class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	readonly type: ConnectorType = "image";
 	readonly assetKey = "image";
 
-	protected gateway: {
-		generate(params: TestParams): Promise<BundleResponse>;
-	};
+	protected gateway: AssetGateway<TestParams>;
 
 	constructor(
 		config: ConnectorConfig,
 		generateFn?: (params: TestParams) => Promise<BundleResponse>,
 	) {
 		super(config);
-		this.gateway = { generate: generateFn ?? vi.fn() };
+		this.gateway = makeGateway(
+			generateFn ?? (async () => ({ id: "x", provider: "mock", result: {} })),
+		);
 	}
 }
 
@@ -91,7 +121,7 @@ describe("BaseAssetConnector", () => {
 	});
 
 	describe("_generate (via generate)", () => {
-		it("calls gateway.generate and resolves the bundle", async () => {
+		it("submits then polls the gateway and resolves the bundle", async () => {
 			const response: BundleResponse = {
 				id: "abc",
 				provider: "mock",

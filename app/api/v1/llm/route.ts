@@ -15,9 +15,9 @@ const schema = bodySchema(LLM_MODELS, {
 
 export const POST = createRouteHandler({
 	schema,
-	getProvider: getLLMProvider,
 	label: "LLM generation",
-	handle: async (provider, body) => {
+	handle: async ({ body }) => {
+		const provider = getLLMProvider();
 		const { stream, ...genParams } = body;
 		if (stream) {
 			return createSSEStreamResponse(provider.stream(genParams), "LLM");

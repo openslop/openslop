@@ -28,7 +28,7 @@ export function ensureCharacterAvatars(
 				plugins: buildCharacterAvatarPlugins(projectId, name),
 			},
 			prompt: "",
-			extraParams: {},
+			extraParams: { projectId },
 			inputs: { prompt: name, attributes: { kind: "avatar" } },
 		}));
 

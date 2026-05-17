@@ -5,6 +5,7 @@ import { OpenSlopSFX } from "../sfx/openslop";
 import { OpenSlopImage } from "../image/openslop";
 import { OpenSlopTTS } from "../tts/openslop";
 import { OpenSlopVideo } from "../video/openslop";
+import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 
 const config = {
 	defaultModel: "test-model",
@@ -22,11 +23,9 @@ function jsonResponse(data: unknown, status = 200) {
 
 const TEST_ID = "test-id";
 
-function mockAssetFetch(type: string, result: Record<string, string>) {
+function mockAsset(type: string, result: Record<string, string>) {
 	const bundleUrl = `/assets/${type}/openslop/${TEST_ID}`;
-	vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-		jsonResponse({ id: TEST_ID, provider: "openslop", result }),
-	);
+	mockGatewaySuccess({ id: TEST_ID, provider: "openslop", result });
 	return bundleUrl;
 }
 
@@ -78,48 +77,44 @@ describe("OpenSlop connectors (via gateways)", () => {
 	});
 
 	it("Music: generate returns AssetResult with url", async () => {
-		const bundleUrl = mockAssetFetch("music", { audio: "output.mp3" });
-
-		const c = new OpenSlopMusic(config);
-		const result = await c.generate({ prompt: "jazz" });
-
+		const bundleUrl = mockAsset("music", { audio: "output.mp3" });
+		const result = await new OpenSlopMusic(config).generate({ prompt: "jazz" });
 		expect(result.url).toBe(`${bundleUrl}/output.mp3`);
 	});
 
 	it("SFX: generate returns AssetResult with url", async () => {
-		const bundleUrl = mockAssetFetch("sfx", { audio: "output.mp3" });
-
-		const c = new OpenSlopSFX(config);
-		const result = await c.generate({ prompt: "boom" });
-
+		const bundleUrl = mockAsset("sfx", { audio: "output.mp3" });
+		const result = await new OpenSlopSFX(config).generate({ prompt: "boom" });
 		expect(result.url).toBe(`${bundleUrl}/output.mp3`);
 	});
 
 	it("Image: generate returns AssetResult with url", async () => {
-		const bundleUrl = mockAssetFetch("image", { image: "output.png" });
-
-		const c = new OpenSlopImage(config);
-		const result = await c.generate({ prompt: "mountain" });
-
+		const bundleUrl = mockAsset("image", { image: "output.png" });
+		const result = await new OpenSlopImage(config).generate({
+			prompt: "mountain",
+		});
 		expect(result.url).toBe(`${bundleUrl}/output.png`);
 	});
 
 	it("TTS: generate returns TTSResult with url", async () => {
 		const bundleUrl = `/assets/tts/openslop/${TEST_ID}`;
-		vi.spyOn(globalThis, "fetch")
-			.mockResolvedValueOnce(
-				jsonResponse({
+		mockGatewaySequence([
+			{ submitStatus: "pending" },
+			{
+				pollStatus: "completed",
+				result: {
 					id: TEST_ID,
 					provider: "openslop",
 					result: { audio: "output.wav", timestamps: "timestamps.json" },
-				}),
-			)
-			.mockResolvedValueOnce(
-				jsonResponse([{ text: "hello", start: 0, end: 0.5 }]),
-			);
+				},
+			},
+			{ payload: [{ text: "hello", start: 0, end: 0.5 }] },
+		]);
 
-		const c = new OpenSlopTTS(config);
-		const result = await c.generate({ prompt: "hello", voiceId: "v1" });
+		const result = await new OpenSlopTTS(config).generate({
+			prompt: "hello",
+			voiceId: "v1",
+		});
 
 		expect(result.url).toBe(`${bundleUrl}/output.wav`);
 		expect(result.textTimestamps).toHaveLength(1);
@@ -141,13 +136,10 @@ describe("OpenSlop connectors (via gateways)", () => {
 	});
 
 	it("Video: generate returns AssetResult with url", async () => {
-		mockAssetFetch("video", {
-			video: "https://cdn.example.com/v.mp4",
+		mockAsset("video", { video: "https://cdn.example.com/v.mp4" });
+		const result = await new OpenSlopVideo(config).generate({
+			prompt: "sunset",
 		});
-
-		const c = new OpenSlopVideo(config);
-		const result = await c.generate({ prompt: "sunset" });
-
 		expect(result.url).toBe("https://cdn.example.com/v.mp4");
 	});
 });

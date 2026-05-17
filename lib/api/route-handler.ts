@@ -1,51 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
-import { stringifyError } from "../errors";
-import { getUser } from "./auth";
-import { badRequest, serverError, unauthorized } from "./response";
-import { logger } from "./logger";
+import type { ConnectorType } from "@/lib/connectors/types";
+import { withAuth } from "./with-auth";
+import { getJobHandler, rowView } from "./job-handlers";
+import { createJob, enqueueJob, getJob } from "./jobs";
+import { parseBody } from "./parse";
+import { badRequest } from "./response";
 
-type RouteOptions<
-	TSchema extends z.ZodType,
-	TProvider extends {
-		generate: (params: z.infer<TSchema>) => Promise<unknown>;
-	},
-> = {
+export function createRouteHandler<TSchema extends z.ZodType>(opts: {
 	schema: TSchema;
-	getProvider: () => TProvider;
 	label: string;
-	handle?: (provider: TProvider, body: z.infer<TSchema>) => Promise<Response>;
-};
-
-export function createRouteHandler<
-	TSchema extends z.ZodType,
-	TProvider extends {
-		generate: (params: z.infer<TSchema>) => Promise<unknown>;
-	},
->(options: RouteOptions<TSchema, TProvider>) {
-	const handle =
-		options.handle ??
-		(async (provider, body) =>
-			NextResponse.json(await provider.generate(body)));
-
-	return async function POST(request: NextRequest) {
-		try {
-			const user = await getUser();
-			if (!user) return unauthorized();
-
-			const parsed = options.schema.safeParse(await request.json());
-			if (!parsed.success) {
-				const message =
-					parsed.error.issues[0]?.message ?? "Invalid request body";
-				logger.warn(`${options.label}: ${message}`);
-				return badRequest(message);
-			}
-			return await handle(options.getProvider(), parsed.data);
-		} catch (error) {
-			logger.error(error, `${options.label} failed`);
-			return serverError(`${options.label} failed: ${stringifyError(error)}`);
-		}
-	};
+	handle: (ctx: {
+		user: User;
+		body: z.infer<TSchema>;
+		request: NextRequest;
+	}) => Promise<Response>;
+}) {
+	return async (request: NextRequest) =>
+		withAuth(opts.label, async (user) => {
+			const parsed = await parseBody(request, opts.schema, opts.label);
+			if (!parsed.ok) return parsed.response;
+			return opts.handle({ user, body: parsed.data, request });
+		});
 }
 
 export function modelField(models: Record<string, string>) {
@@ -59,6 +36,44 @@ export function modelField(models: Record<string, string>) {
 		.transform((v) => (v === undefined ? undefined : models[v]));
 }
 
+type AssetBody = { projectId?: string } & Record<string, unknown>;
+
+export function createAssetRouteHandlers<
+	TSchema extends z.ZodType<AssetBody>,
+>(opts: { connectorType: ConnectorType; schema: TSchema; label: string }) {
+	const POST = createRouteHandler({
+		schema: opts.schema,
+		label: opts.label,
+		handle: async ({ user, body }) => {
+			const { projectId, ...request } = body;
+			const job = await createJob({
+				userId: user.id,
+				projectId,
+				connectorType: opts.connectorType,
+				request,
+			});
+			await enqueueJob(job.id, opts.connectorType);
+			return NextResponse.json({ jobId: job.id, status: "pending" });
+		},
+	});
+	return { POST };
+}
+
+export async function pollJob(
+	_request: NextRequest,
+	context: { params: Promise<{ jobId: string }> },
+) {
+	return withAuth("Job poll", async (user) => {
+		const { jobId } = await context.params;
+		if (!jobId) return badRequest("jobId is required");
+		const job = await getJob(jobId, user.id);
+		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
+		const view =
+			(await getJobHandler(job.connector_type)?.poll?.(job)) ?? rowView(job);
+		return NextResponse.json(view);
+	});
+}
+
 export function bodySchema<TShape extends z.ZodRawShape>(
 	models: Record<string, string>,
 	shape: TShape,
@@ -69,6 +84,7 @@ export function bodySchema<TShape extends z.ZodRawShape>(
 				message: "prompt is required",
 			}),
 			model: modelField(models),
+			projectId: z.uuid().optional(),
 			...shape,
 		},
 		"Request body must be a JSON object",

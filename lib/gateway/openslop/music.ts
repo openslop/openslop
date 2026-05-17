@@ -1,12 +1,6 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
-import { OpenSlopGatewayClient } from "./base";
+import { OpenSlopAssetGateway } from "./base";
 
-export class OpenSlopMusicGateway extends OpenSlopGatewayClient<
-	MusicGenerateParams,
-	BundleResponse
-> {
-	async generate(params: MusicGenerateParams): Promise<BundleResponse> {
-		return this.client.post<BundleResponse>("/api/v1/music", params);
-	}
+export class OpenSlopMusicGateway extends OpenSlopAssetGateway<MusicGenerateParams> {
+	protected readonly path = "music";
 }

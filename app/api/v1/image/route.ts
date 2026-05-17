@@ -1,10 +1,9 @@
 import { z } from "zod";
-import { getImageProvider } from "@/lib/api/providers";
 import {
 	optionalImageDimensions,
 	optionalReferenceImages,
 } from "@/lib/api/request-schema-fields";
-import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
+import { bodySchema, createAssetRouteHandlers } from "@/lib/api/route-handler";
 import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 
 const schema = bodySchema(IMAGE_MODELS, {
@@ -13,8 +12,8 @@ const schema = bodySchema(IMAGE_MODELS, {
 	...optionalReferenceImages,
 });
 
-export const POST = createRouteHandler({
+export const { POST } = createAssetRouteHandlers({
+	connectorType: "image",
 	schema,
-	getProvider: getImageProvider,
 	label: "Image generation",
 });

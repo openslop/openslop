@@ -1,3 +1,11 @@
 {
-	"buildCommand": "turbo run build create-snapshot"
+	"buildCommand": "turbo run build create-snapshot",
+	"functions": {
+		"app/api/queues/asset-generate/route.ts": {
+			"maxDuration": 800,
+			"experimentalTriggers": [
+				{ "type": "queue/v2beta", "topic": "asset-generate" }
+			]
+		}
+	}
 }
