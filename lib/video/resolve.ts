@@ -3,6 +3,7 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import type { ResolvedElement } from "./types";
 import { ELEMENT_ROLES, LAYER_TYPES } from "./types";
+import { getLoops, getVolume } from "./elementAttributes";
 
 export function resolveElements(
 	elements: CanvasElement[],
@@ -14,11 +15,6 @@ export function resolveElements(
 		const snapshot = getSnapshot(el.id);
 		if (!snapshot.result) continue;
 
-		const rawVolume = Number(el.customAttributes?.volume);
-		const volume = Number.isFinite(rawVolume)
-			? Math.max(0, Math.min(10, rawVolume))
-			: 10;
-
 		resolved.push({
 			id: el.id,
 			type: el.type,
@@ -26,8 +22,8 @@ export function resolveElements(
 			layer: LAYER_TYPES[el.type],
 			url: snapshot.result.url,
 			durationSec: snapshot.result.durationSec,
-			loops: Math.max(1, Number(el.customAttributes?.loops) || 1),
-			volume,
+			loops: getLoops(el),
+			volume: getVolume(el),
 		});
 	}
 
