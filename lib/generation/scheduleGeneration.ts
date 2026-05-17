@@ -15,11 +15,5 @@ export function scheduleGeneration(
 	{ projectId, registry }: { projectId: string; registry: ConnectorRegistry },
 ): void {
 	ensureCharacterAvatars(queue, projectId, registry);
-	const list = Array.isArray(jobs) ? jobs : [jobs];
-	queue.enqueueAll(
-		list.map((job) => ({
-			...job,
-			extraParams: { ...job.extraParams, projectId },
-		})),
-	);
+	queue.enqueueAll(Array.isArray(jobs) ? jobs : [jobs]);
 }

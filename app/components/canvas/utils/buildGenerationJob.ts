@@ -9,6 +9,8 @@ import { getGenerationInputs } from "./getGenerationInputs";
 export function buildGenerationJob(
 	element: CanvasContentElement,
 	connectorConfig: ConnectorRegistry,
+	projectId: string,
+	overrides: Partial<GenerationJob> = {},
 ): GenerationJob | null {
 	const inputs = getGenerationInputs(element);
 	if (!inputs.prompt) return null;
@@ -32,7 +34,8 @@ export function buildGenerationJob(
 		provider,
 		config,
 		prompt: inputs.prompt,
-		extraParams: attributes,
+		extraParams: { ...attributes, projectId },
 		inputs,
+		...overrides,
 	};
 }

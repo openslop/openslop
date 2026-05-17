@@ -1,23 +1,25 @@
 import { handleCallback } from "@vercel/queue";
-import { logger } from "@/lib/api/logger";
+import { getJobHandler } from "@/lib/api/job-handlers";
 import type { AssetQueueMessage } from "@/lib/api/jobs";
 import { loadJobForProcessing, updateJob } from "@/lib/api/jobs";
-import { runAssetJob } from "@/lib/api/providers";
+import { logger } from "@/lib/api/logger";
 import { stringifyError } from "@/lib/errors";
 
 export const POST = handleCallback<AssetQueueMessage>(
 	async ({ jobId, connectorType }) => {
 		const job = await loadJobForProcessing(jobId);
-		// Vercel Queues may redeliver; skip terminal states so we never re-run a finished job.
+		// Skip terminal-state redeliveries.
 		if (job.status === "completed" || job.status === "failed") return;
 
+		const handler = getJobHandler(connectorType);
+		if (!handler) {
+			throw new Error(`No job handler registered for ${connectorType}`);
+		}
+
 		await updateJob(jobId, { status: "processing" });
-		let result;
+		let outcome;
 		try {
-			result = await runAssetJob(connectorType, job.request, {
-				providerJobId: job.provider_job_id,
-				onProviderJob: (id) => updateJob(jobId, { providerJobId: id }),
-			});
+			outcome = await handler.process(job);
 		} catch (error) {
 			logger.error(error, `Job ${jobId} failed`);
 			await updateJob(jobId, {
@@ -26,9 +28,13 @@ export const POST = handleCallback<AssetQueueMessage>(
 			});
 			throw error;
 		}
-		// Throwing here (transient db failure) lets the queue redeliver; the
-		// job is still `processing`, so the next attempt re-enters runAssetJob,
-		// which resumes polling via provider_job_id for video.
-		await updateJob(jobId, { status: "completed", result });
+		// Persistence below is outside the catch — a transient db failure here
+		// lets the queue redeliver from `processing` instead of locking the row
+		// to `failed` and losing the result.
+		if (outcome.kind === "completed") {
+			await updateJob(jobId, { status: "completed", result: outcome.result });
+		} else {
+			await updateJob(jobId, { metadata: outcome.metadata });
+		}
 	},
 );

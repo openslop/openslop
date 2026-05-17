@@ -5,12 +5,17 @@ const mockLLMGenerate = vi.fn();
 const mockLLMStream = vi.fn();
 const mockTTSSearch = vi.fn();
 
+const noopProvider = () => ({ generate: vi.fn(), poll: vi.fn() });
 vi.mock("@/lib/api/providers", () => ({
 	getLLMProvider: () => ({
 		generate: mockLLMGenerate,
 		stream: mockLLMStream,
 	}),
-	getTTSProvider: () => ({ search: mockTTSSearch }),
+	getTTSProvider: () => ({ search: mockTTSSearch, generate: vi.fn() }),
+	getImageProvider: noopProvider,
+	getMusicProvider: noopProvider,
+	getSFXProvider: noopProvider,
+	getVideoProvider: noopProvider,
 }));
 
 const mockCreateJob = vi.fn();

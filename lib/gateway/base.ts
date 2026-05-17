@@ -6,6 +6,8 @@ export abstract class GatewayClient<TParams = unknown, TResult = unknown> {
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
+export type JobSubmission = { jobId: string; status: JobStatus };
+
 export type JobPoll = {
 	jobId: string;
 	status: JobStatus;
@@ -13,7 +15,9 @@ export type JobPoll = {
 	error: string | null;
 };
 
-export interface AssetGateway<TParams> {
-	generate(params: TParams): Promise<{ jobId: string; status: JobStatus }>;
-	poll(jobId: string): Promise<JobPoll>;
+export abstract class AssetGateway<TParams> extends GatewayClient<
+	TParams,
+	JobSubmission
+> {
+	abstract poll(jobId: string): Promise<JobPoll>;
 }

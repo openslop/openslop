@@ -99,17 +99,16 @@ describe("OpenSlop connectors (via gateways)", () => {
 	it("TTS: generate returns TTSResult with url", async () => {
 		const bundleUrl = `/assets/tts/openslop/${TEST_ID}`;
 		mockGatewaySequence([
-			{ kind: "submit" },
+			{ submitStatus: "pending" },
 			{
-				kind: "poll",
-				status: "completed",
+				pollStatus: "completed",
 				result: {
 					id: TEST_ID,
 					provider: "openslop",
 					result: { audio: "output.wav", timestamps: "timestamps.json" },
 				},
 			},
-			{ kind: "fetch", payload: [{ text: "hello", start: 0, end: 0.5 }] },
+			{ payload: [{ text: "hello", start: 0, end: 0.5 }] },
 		]);
 
 		const result = await new OpenSlopTTS(config).generate({

@@ -9,19 +9,25 @@ function jsonResponse(data: unknown) {
 	});
 }
 
-export type GatewayStep =
-	| { kind: "submit"; status?: JobStatus }
-	| { kind: "poll"; status: JobStatus; result?: BundleResponse; error?: string }
-	| { kind: "fetch"; payload: unknown };
+// One declarative step in a mocked gateway exchange. Use `submitStatus` for
+// the POST submission response, `pollStatus`+`result`/`error` for the poll
+// response, or `payload` for any other raw json (e.g. AssetBundle.fetchJson).
+export type GatewayStep = {
+	submitStatus?: JobStatus;
+	pollStatus?: JobStatus;
+	result?: BundleResponse;
+	error?: string;
+	payload?: unknown;
+};
 
 function stepToResponse(step: GatewayStep, jobId: string): Response {
-	if (step.kind === "submit") {
-		return jsonResponse({ jobId, status: step.status ?? "pending" });
+	if (step.submitStatus !== undefined) {
+		return jsonResponse({ jobId, status: step.submitStatus });
 	}
-	if (step.kind === "poll") {
+	if (step.pollStatus !== undefined) {
 		return jsonResponse({
 			jobId,
-			status: step.status,
+			status: step.pollStatus,
 			result: step.result ?? null,
 			error: step.error ?? null,
 		} satisfies JobPoll);
@@ -46,8 +52,8 @@ export function mockGatewaySuccess(
 ): MockInstance {
 	return mockGatewaySequence(
 		[
-			{ kind: "submit" },
-			{ kind: "poll", status: "completed", result: response },
+			{ submitStatus: "pending" },
+			{ pollStatus: "completed", result: response },
 		],
 		jobId,
 	);

@@ -1,4 +1,6 @@
 import { send } from "@vercel/queue";
+import isUndefined from "lodash/isUndefined";
+import omitBy from "lodash/omitBy";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { ConnectorType } from "@/lib/connectors/types";
 import type { JobStatus } from "@/lib/gateway/base";
@@ -15,7 +17,7 @@ export type JobRow = {
 	status: JobStatus;
 	request: Record<string, unknown>;
 	result: BundleResponse | null;
-	provider_job_id: string | null;
+	metadata: Record<string, unknown>;
 	error: string | null;
 	created_at: string;
 	updated_at: string;
@@ -81,21 +83,13 @@ export async function updateJob(
 		status?: JobStatus;
 		result?: BundleResponse;
 		error?: string;
-		providerJobId?: string;
+		metadata?: Record<string, unknown>;
 	},
 ): Promise<void> {
+	const update = omitBy(patch, isUndefined);
+	if (Object.keys(update).length === 0) return;
 	const supabase = createServiceClient();
-	const { error } = await supabase
-		.from("jobs")
-		.update({
-			...(patch.status !== undefined && { status: patch.status }),
-			...(patch.result !== undefined && { result: patch.result }),
-			...(patch.error !== undefined && { error: patch.error }),
-			...(patch.providerJobId !== undefined && {
-				provider_job_id: patch.providerJobId,
-			}),
-		})
-		.eq("id", jobId);
+	const { error } = await supabase.from("jobs").update(update).eq("id", jobId);
 	if (error) throw new Error(`Failed to update job: ${error.message}`);
 }
 

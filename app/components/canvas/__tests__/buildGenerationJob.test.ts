@@ -4,6 +4,8 @@ import type { CanvasContentElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 
+const PROJECT_ID = "00000000-0000-4000-8000-000000000000";
+
 const registry: ConnectorRegistry = {
 	llm: {
 		openslop: {
@@ -70,20 +72,20 @@ describe("buildGenerationJob", () => {
 		const el = makeElement("narration", "Hello world", {
 			emotion: "happy",
 		});
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 
 		expect(job).toMatchObject({
 			elementId: "el-1",
 			connectorType: "tts",
 			provider: "openslop",
 			prompt: "Hello world",
-			extraParams: { emotion: "happy" },
+			extraParams: { emotion: "happy", projectId: PROJECT_ID },
 		});
 	});
 
 	it("builds a job for an image element", () => {
 		const el = makeElement("image", "A sunset over the ocean");
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 
 		expect(job).toEqual({
 			elementId: "el-1",
@@ -91,14 +93,14 @@ describe("buildGenerationJob", () => {
 			provider: "openslop",
 			config: expect.objectContaining({ defaultModel: "Slop Image v1" }),
 			prompt: "A sunset over the ocean",
-			extraParams: {},
+			extraParams: { projectId: PROJECT_ID },
 			inputs: { prompt: "A sunset over the ocean", attributes: {} },
 		});
 	});
 
 	it("builds a job for a clip element with duration param", () => {
 		const el = makeElement("clip", "A car chase", { duration: "10" });
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 
 		expect(job).toEqual({
 			elementId: "el-1",
@@ -106,19 +108,19 @@ describe("buildGenerationJob", () => {
 			provider: "openslop",
 			config: expect.objectContaining({ defaultModel: "Slop Video v1" }),
 			prompt: "A car chase",
-			extraParams: { duration: "10" },
+			extraParams: { duration: "10", projectId: PROJECT_ID },
 			inputs: { prompt: "A car chase", attributes: { duration: "10" } },
 		});
 	});
 
 	it("returns null when prompt is empty", () => {
 		const el = makeElement("narration", "");
-		expect(buildGenerationJob(el, registry)).toBeNull();
+		expect(buildGenerationJob(el, registry, PROJECT_ID)).toBeNull();
 	});
 
 	it("returns null when prompt is only whitespace", () => {
 		const el = makeElement("narration", "   ");
-		expect(buildGenerationJob(el, registry)).toBeNull();
+		expect(buildGenerationJob(el, registry, PROJECT_ID)).toBeNull();
 	});
 
 	it("returns null when prompt is only zero-width space", () => {
@@ -127,30 +129,30 @@ describe("buildGenerationJob", () => {
 			type: "narration",
 			children: [{ id: "t0", type: "narration", text: ZERO_WIDTH_SPACE }],
 		};
-		expect(buildGenerationJob(el, registry)).toBeNull();
+		expect(buildGenerationJob(el, registry, PROJECT_ID)).toBeNull();
 	});
 
 	it("strips zero-width space from prompt", () => {
 		const el = makeElement("narration", `${ZERO_WIDTH_SPACE}Hello`);
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.prompt).toBe("Hello");
 	});
 
 	it("overrides defaultModel when model attribute is set", () => {
 		const el = makeElement("image", "A dog", { model: "Custom Model v2" });
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.config.defaultModel).toBe("Custom Model v2");
 	});
 
 	it("uses provider attribute when set", () => {
 		const el = makeElement("image", "A cat", { provider: "openslop" });
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.provider).toBe("openslop");
 	});
 
 	it("defaults provider to openslop when not set", () => {
 		const el = makeElement("image", "A bird");
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.provider).toBe("openslop");
 	});
 
@@ -159,18 +161,19 @@ describe("buildGenerationJob", () => {
 			name: "Lyra",
 			emotion: "excited",
 		});
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.extraParams).toEqual({
 			name: "Lyra",
 			emotion: "excited",
+			projectId: PROJECT_ID,
 		});
 	});
 
 	it("builds a job for a music element with no generateParams", () => {
 		const el = makeElement("music", "Epic orchestral music");
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.connectorType).toBe("music");
-		expect(job?.extraParams).toEqual({});
+		expect(job?.extraParams).toEqual({ projectId: PROJECT_ID });
 	});
 
 	it("handles element with no customAttributes", () => {
@@ -179,7 +182,7 @@ describe("buildGenerationJob", () => {
 			type: "image",
 			children: [{ id: "t0", type: "image", text: "A forest" }],
 		};
-		const job = buildGenerationJob(el, registry);
+		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.provider).toBe("openslop");
 		expect(job?.prompt).toBe("A forest");
 	});

@@ -38,11 +38,10 @@ describe("BaseVideoConnector", () => {
 
 	it("polls while job is still pending then resolves on completion", async () => {
 		mockGatewaySequence([
-			{ kind: "submit" },
-			{ kind: "poll", status: "processing" },
+			{ submitStatus: "pending" },
+			{ pollStatus: "processing" },
 			{
-				kind: "poll",
-				status: "completed",
+				pollStatus: "completed",
 				result: {
 					id: TEST_ID,
 					provider: "openslop",
@@ -62,8 +61,8 @@ describe("BaseVideoConnector", () => {
 
 	it("throws when the job fails", async () => {
 		mockGatewaySequence([
-			{ kind: "submit" },
-			{ kind: "poll", status: "failed", error: "GPU unavailable" },
+			{ submitStatus: "pending" },
+			{ pollStatus: "failed", error: "GPU unavailable" },
 		]);
 
 		await expect(

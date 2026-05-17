@@ -16,17 +16,16 @@ const config = {
 
 function mockSuccess() {
 	mockGatewaySequence([
-		{ kind: "submit" },
+		{ submitStatus: "pending" },
 		{
-			kind: "poll",
-			status: "completed",
+			pollStatus: "completed",
 			result: {
 				id: TEST_ID,
 				provider: "openslop",
 				result: { audio: "output.wav", timestamps: "timestamps.json" },
 			},
 		},
-		{ kind: "fetch", payload: [{ text: "hello", start: 0, end: 0.5 }] },
+		{ payload: [{ text: "hello", start: 0, end: 0.5 }] },
 	]);
 }
 

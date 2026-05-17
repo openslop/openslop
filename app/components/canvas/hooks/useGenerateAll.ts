@@ -18,7 +18,7 @@ export function useGenerateAll(editor: Editor) {
 				const snap = queue.getElementSnapshot(el.id);
 				return !snap.result || isStaleResult(snap, getGenerationInputs(el));
 			})
-			.map((el) => buildGenerationJob(el, connectorConfig))
+			.map((el) => buildGenerationJob(el, connectorConfig, projectId))
 			.filter((job): job is NonNullable<typeof job> => job !== null);
 		scheduleGeneration(queue, jobs, { projectId, registry: connectorConfig });
 	}, [queue, editor, connectorConfig, projectId]);
