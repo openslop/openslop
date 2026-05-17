@@ -37,14 +37,21 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 		() => audioVolume(gain, durationInFrames, fadeFrames),
 		[gain, durationInFrames, fadeFrames],
 	);
-	return <Html5Audio src={element.url} pauseWhenBuffering volume={volume} />;
+	return (
+		<Html5Audio
+			src={element.url}
+			crossOrigin="anonymous"
+			pauseWhenBuffering
+			volume={volume}
+		/>
+	);
 }
 
 function SequenceContent({ element }: { element: ResolvedElement }) {
 	switch (element.layer) {
 		case "visual":
 			return element.type === "image" ? (
-				<Img src={element.url} style={coverStyle} />
+				<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
 			) : (
 				<OffthreadVideo
 					src={element.url}

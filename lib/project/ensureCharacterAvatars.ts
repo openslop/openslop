@@ -4,8 +4,10 @@ import { buildCharacterAvatarPlugins } from "@/lib/connectors/plugins/imageChain
 import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
+export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
+
 export const characterAvatarElementId = (name: string) =>
-	`character-avatar:${name}`;
+	`${CHARACTER_AVATAR_ID_PREFIX}${name}`;
 
 export function ensureCharacterAvatars(
 	queue: GenerationQueue,

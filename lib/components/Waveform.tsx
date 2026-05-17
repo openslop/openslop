@@ -183,7 +183,7 @@ export function Waveform({
 
 		let cancelled = false;
 		const ac = new AudioContext();
-		fetch(src)
+		fetch(src, { mode: "cors" })
 			.then((r) => r.arrayBuffer())
 			.then((buf) => ac.decodeAudioData(buf))
 			.then((ab) => {
@@ -271,6 +271,7 @@ export function Waveform({
 			<audio
 				ref={audioRef}
 				src={src}
+				crossOrigin="anonymous"
 				preload="metadata"
 				hidden
 				onTimeUpdate={() => {

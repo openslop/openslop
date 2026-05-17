@@ -41,6 +41,7 @@ describe("ElevenLabsMusic", () => {
 			musicLengthMs: undefined,
 			modelId: "music_v1",
 			outputFormat: "mp3_44100_128",
+			forceInstrumental: true,
 		});
 	});
 

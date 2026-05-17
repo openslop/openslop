@@ -329,4 +329,4 @@ export class GenerationQueue {
 	}
 }
 
-export const DEFAULT_BATCH_SIZE = 3;
+export const DEFAULT_BATCH_SIZE = 2;

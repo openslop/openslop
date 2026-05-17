@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "lucide-react";
+import { User, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
@@ -52,16 +52,33 @@ export function CharacterBadge({ name }: { name?: string }) {
 	);
 }
 
-export function CharacterPill({ name }: { name?: string }) {
+export function CharacterPill({
+	name,
+	onRemove,
+}: {
+	name?: string;
+	onRemove?: () => void;
+}) {
 	const avatarUrl = useCharacterAvatarUrl(name);
 	return (
 		<div
-			className={`inline-flex items-center shrink-0 max-w-[140px] rounded-full bg-white/10 ${
-				name ? "gap-1.5 pr-2" : ""
+			className={`group/pill relative inline-flex items-center shrink-0 max-w-[140px] rounded-full bg-white/10 ring-1 ring-inset ring-white/20 ${
+				name ? "gap-1.5 pr-2 py-px" : ""
 			}`}
 		>
 			<CharacterAvatar name={name} avatarUrl={avatarUrl} />
 			{name && <CharacterName name={name} />}
+			{onRemove && (
+				<button
+					type="button"
+					aria-label={`Remove ${name}`}
+					onMouseDown={(e) => e.preventDefault()}
+					onClick={onRemove}
+					className="absolute -top-1 -right-1 rounded-full bg-black/60 ring-1 ring-white/20 p-0.5 opacity-0 group-hover/pill:opacity-100 transition-opacity cursor-pointer hover:bg-black/80"
+				>
+					<X className="w-2.5 h-2.5 text-white" />
+				</button>
+			)}
 		</div>
 	);
 }

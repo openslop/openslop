@@ -1,6 +1,6 @@
 import type { GatewayClient } from "@/lib/gateway/base";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { TTSGender } from "./tts/enums";
+import type { TTSGender, TTSSpeed } from "./tts/enums";
 
 export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
 
@@ -123,7 +123,7 @@ export type TTSGenerateParams = ConnectorGenerateParams & {
 	name?: string;
 	query?: string;
 	language?: string;
-	speed?: number | string;
+	speed?: TTSSpeed;
 	volume?: number;
 	format?: string;
 };

@@ -11,6 +11,9 @@ export type TTSAge = (typeof TTS_AGES)[number];
 export const TTS_PITCHES = ["high", "medium", "low"] as const;
 export type TTSPitch = (typeof TTS_PITCHES)[number];
 
+export const TTS_SPEEDS = ["slow", "medium", "fast"] as const;
+export type TTSSpeed = (typeof TTS_SPEEDS)[number];
+
 export const TTS_ACCENTS = [
 	"american",
 	"british",

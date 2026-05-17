@@ -5,7 +5,7 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import type { TTSGender } from "@/lib/connectors/tts/enums";
+import type { TTSGender, TTSSpeed } from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
@@ -20,6 +20,12 @@ type RawTTSResult = {
 const SAMPLE_RATE = 44100;
 const NUM_CHANNELS = 1;
 const ENCODING = "pcm_f32le";
+
+const CARTESIA_SPEED: Record<TTSSpeed, number> = {
+	slow: 0.6,
+	medium: 1.0,
+	fast: 1.5,
+};
 
 const PCM_WAV_PARAMS: Record<
 	string,
@@ -142,9 +148,9 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 					sample_rate: SAMPLE_RATE,
 				},
 				add_timestamps: true,
-				...(params.speed !== undefined && {
-					speed: params.speed as "slow" | "normal" | "fast",
-				}),
+				generation_config: {
+					speed: CARTESIA_SPEED[params.speed ?? "medium"],
+				},
 			};
 			for await (const response of ws.generate(req)) {
 				if (response.type === "chunk" && response.audio) {

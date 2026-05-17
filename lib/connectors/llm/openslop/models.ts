@@ -1,3 +1,3 @@
 export const LLM_MODELS = {
-	"Slop LLM v1": "claude-sonnet-4-5-20250929",
+	"Slop LLM v1": "claude-opus-4-7",
 } as const;

@@ -57,17 +57,18 @@ export const TEMPLATES: Template[] = [
 		},
 		systemPrompt: dedent`
 		# Important
-		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list
+		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images where appropriate
 		- The art style is: 2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients
 		- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story
-		- Never mention any specific character ages in the image descriptions, just generic ones like young man instead of 11 year old boy`,
+		- The Protagonist is always male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots
+		- Never mention any specific ages in the image descriptions, just generic ones like young man`,
 		exampleText: dedent`
 				#Image: A title card with a black background and white Arial text that says "Level 1: The Kid with the Idea"
 				#Narration: Level 1: The Kid with the Idea
 
 				#Music: Soft, dreamy, optimistic lo-fi piano with twinkling synths, hopeful and childlike
 
-				#Image: The Protagonist, a young man, lying on his bedroom floor watching YouTube videos on a phone about young app founders who got rich, posters on the wall behind him
+				#Image: The young Protagonist watching YouTube videos on a phone about young app founders who got rich, posters on the wall behind him
 				#Narration: You're 11. You watch YouTube videos about people who made apps and got rich.
 
 				#Image: The Protagonist, a young man, daydreaming with a smile, imagining stacks of money and a sports car floating above his head in cartoon thought bubbles

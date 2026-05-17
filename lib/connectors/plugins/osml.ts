@@ -34,8 +34,8 @@ const OSML_SYSTEM_PROMPT = dedent`
   ### Character Dialogue XML Tags
   - Each character's entire dialogue is wrapped in character XML tags with required attributes being name and emotion. Example:
     <narration emotion="neutral">Lyra steps forward. </narration>
-    <character name="Lyra" emotion="excited">"Truce?"</character>
-  - Frequently use nonverbalisms to exaggerate the emotion. Example: <character name="Mia" emotion="happy">"[laughter] That's the way I want it!"</character>.
+    <character name="Lyra" emotion="excited">Truce?</character>
+  - Frequently use nonverbalisms to exaggerate the emotion. Example: <character name="Mia" emotion="happy">[laughter] That's the way I want it!</character>.
   - Allowed list of nonverbalisms: [laughter]. Do not use any other nonverbalisms.
   - Occasionally insert ellipsis (...) to indicate a pause or a break in the dialogue, or use exclamations (!) to indicate a strong emotion or action.
 	- The only supported attribute for character tags is emotion

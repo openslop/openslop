@@ -29,7 +29,7 @@ export class AnthropicLLM extends BaseProvider<
 	private buildRequest(params: LLMGenerateParams) {
 		return {
 			model: params.model || "claude-sonnet-4-5-20250929",
-			max_tokens: params.maxTokens || 4096,
+			max_tokens: params.maxTokens || 8192,
 			temperature: params.temperature,
 			system: params.systemPrompt || undefined,
 			messages: [{ role: "user" as const, content: params.prompt }],

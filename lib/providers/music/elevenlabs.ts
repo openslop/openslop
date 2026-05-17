@@ -25,6 +25,7 @@ export class ElevenLabsMusic extends BaseElevenLabsAudio<MusicGenerateParams> {
 					: undefined,
 			modelId: (params.model as "music_v1") || "music_v1",
 			outputFormat: toElevenLabsOutputFormat(this.outputFormat),
+			forceInstrumental: true,
 		});
 	}
 }
