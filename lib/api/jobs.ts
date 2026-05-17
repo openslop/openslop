@@ -10,6 +10,7 @@ export const ASSET_QUEUE_TOPIC = "asset-generate";
 export type JobRow = {
 	id: string;
 	user_id: string;
+	project_id: string | null;
 	connector_type: ConnectorType;
 	status: JobStatus;
 	request: Record<string, unknown>;
@@ -26,6 +27,7 @@ export type AssetQueueMessage = {
 
 export async function createJob(input: {
 	userId: string;
+	projectId?: string | null;
 	connectorType: ConnectorType;
 	request: Record<string, unknown>;
 }): Promise<{ id: string }> {
@@ -34,6 +36,7 @@ export async function createJob(input: {
 		.from("jobs")
 		.insert({
 			user_id: input.userId,
+			project_id: input.projectId ?? null,
 			connector_type: input.connectorType,
 			request: input.request,
 		})

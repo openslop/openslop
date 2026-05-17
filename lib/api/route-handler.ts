@@ -88,10 +88,16 @@ export function createAssetRouteHandlers<TSchema extends z.ZodType>(opts: {
 			const parsed = await parseBody(request, opts.schema, opts.label);
 			if (!parsed.ok) return parsed.response;
 
+			// projectId is metadata for observability, not a generation param;
+			// peel it off so providers never see it in the request body.
+			const { projectId, ...providerRequest } = parsed.data as {
+				projectId?: string;
+			} & Record<string, unknown>;
 			const job = await createJob({
 				userId: user.id,
+				projectId,
 				connectorType: opts.connectorType,
-				request: parsed.data as Record<string, unknown>,
+				request: providerRequest,
 			});
 			await enqueueJob(job.id, opts.connectorType);
 			return NextResponse.json({ jobId: job.id, status: "pending" });
@@ -130,6 +136,7 @@ export function bodySchema<TShape extends z.ZodRawShape>(
 				message: "prompt is required",
 			}),
 			model: modelField(models),
+			projectId: z.uuid().optional(),
 			...shape,
 		},
 		"Request body must be a JSON object",

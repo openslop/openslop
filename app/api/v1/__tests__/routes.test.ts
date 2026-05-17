@@ -60,10 +60,34 @@ describe("API routes", () => {
 			expect(json).toEqual({ jobId: "job-abc", status: "pending" });
 			expect(mockCreateJob).toHaveBeenCalledWith({
 				userId: "user-1",
+				projectId: undefined,
 				connectorType: "image",
 				request: expect.objectContaining({ prompt: "cat" }),
 			});
 			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "image");
+		});
+
+		it("persists projectId and strips it from the provider request", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			const pid = "00000000-0000-4000-8000-000000000000";
+			const res = await POST(
+				makeRequest("/api/v1/image", { prompt: "cat", projectId: pid }),
+			);
+			expect(res.status).toBe(200);
+			const [[args]] = mockCreateJob.mock.calls;
+			expect(args.projectId).toBe(pid);
+			expect(args.request).not.toHaveProperty("projectId");
+		});
+
+		it("returns 400 for invalid projectId", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(
+				makeRequest("/api/v1/image", {
+					prompt: "cat",
+					projectId: "not-a-uuid",
+				}),
+			);
+			expect(res.status).toBe(400);
 		});
 
 		it("returns 401 when the user is not authenticated", async () => {
