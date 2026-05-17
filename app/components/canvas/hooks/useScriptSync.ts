@@ -21,20 +21,19 @@ export function useScriptSync(editor: Editor): void {
 	const { nodes } = useScript();
 
 	useEffect(() => {
+		// `nodes` is capped at MAX_NODES_TO_SYNC (3) by useOSMLSerializer,
+		// so per-id lookups here are bounded — no need to prebuild a map.
 		Editor.withoutNormalizing(editor, () => {
 			for (const node of nodes) {
 				if (shouldSkip(node)) continue;
 
 				const canvasNode = node as CanvasContentElement;
+				const nextText = OSMLSerializer.getTextContent(canvasNode);
 				const entry = findNodeById(editor, canvasNode.id);
 
 				if (entry) {
 					const [, path] = entry;
-					updateNodeText(
-						editor,
-						path,
-						OSMLSerializer.getTextContent(canvasNode),
-					);
+					updateNodeText(editor, path, nextText);
 				} else {
 					Transforms.insertNodes(editor, canvasNode, {
 						at: [editor.children.length],

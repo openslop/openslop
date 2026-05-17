@@ -83,7 +83,6 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 	transitionType,
 	transitionDurationSec,
 }) => {
-	const sequenceEntries = useMemo(() => Object.entries(sequences), [sequences]);
 	const transitionFrames = toFrames(transitionDurationSec, fps);
 	const transitionTiming = useMemo(
 		() => linearTiming({ durationInFrames: transitionFrames }),
@@ -93,29 +92,29 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 		() => getPresentation(transitionType, { width, height }),
 		[transitionType, width, height],
 	);
-
-	return (
-		<AbsoluteFill style={blackBg}>
-			<TransitionSeries>
-				{series.map((seq, i) => (
-					<Fragment key={seq.element?.id ?? `empty-${i}`}>
-						{i > 0 && (
-							<TransitionSeries.Transition
-								presentation={presentation}
-								timing={transitionTiming}
-							/>
-						)}
-						<TransitionSeries.Sequence
-							durationInFrames={toFrames(seq.duration, fps)}
-						>
-							<SeriesEntry seq={seq} />
-						</TransitionSeries.Sequence>
-					</Fragment>
-				))}
-			</TransitionSeries>
-
-			{sequenceEntries.map(([type, seqs]) =>
-				seqs?.map((seq, i) =>
+	const transitionSeriesNodes = useMemo(
+		() =>
+			series.map((seq, i) => (
+				<Fragment key={seq.element?.id ?? `empty-${i}`}>
+					{i > 0 && (
+						<TransitionSeries.Transition
+							presentation={presentation}
+							timing={transitionTiming}
+						/>
+					)}
+					<TransitionSeries.Sequence
+						durationInFrames={toFrames(seq.duration, fps)}
+					>
+						<SeriesEntry seq={seq} />
+					</TransitionSeries.Sequence>
+				</Fragment>
+			)),
+		[fps, presentation, series, transitionTiming],
+	);
+	const layeredSequenceNodes = useMemo(
+		() =>
+			Object.entries(sequences).flatMap(([type, seqs]) =>
+				(seqs ?? []).map((seq, i) =>
 					seq.element ? (
 						<Sequence
 							key={`${type}-${seq.element.id}-${i}`}
@@ -127,7 +126,14 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						</Sequence>
 					) : null,
 				),
-			)}
+			),
+		[fps, sequences],
+	);
+
+	return (
+		<AbsoluteFill style={blackBg}>
+			<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
+			{layeredSequenceNodes}
 		</AbsoluteFill>
 	);
 };
