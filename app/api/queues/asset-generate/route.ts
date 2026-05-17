@@ -12,9 +12,12 @@ export const POST = handleCallback<AssetQueueMessage>(
 		if (job.status === "completed" || job.status === "failed") return;
 
 		await updateJob(jobId, { status: "processing" });
+		let result;
 		try {
-			const result = await runAssetJob(connectorType, job.request);
-			await updateJob(jobId, { status: "completed", result });
+			result = await runAssetJob(connectorType, job.request, {
+				providerJobId: job.provider_job_id,
+				onProviderJob: (id) => updateJob(jobId, { providerJobId: id }),
+			});
 		} catch (error) {
 			logger.error(error, `Job ${jobId} failed`);
 			await updateJob(jobId, {
@@ -23,5 +26,9 @@ export const POST = handleCallback<AssetQueueMessage>(
 			});
 			throw error;
 		}
+		// Throwing here (transient db failure) lets the queue redeliver; the
+		// job is still `processing`, so the next attempt re-enters runAssetJob,
+		// which resumes polling via provider_job_id for video.
+		await updateJob(jobId, { status: "completed", result });
 	},
 );

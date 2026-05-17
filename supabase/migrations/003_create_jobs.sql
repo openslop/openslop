@@ -7,6 +7,9 @@ create table if not exists jobs (
   status text not null default 'pending' check (status in ('pending','processing','completed','failed')),
   request jsonb not null,
   result jsonb,
+  -- Upstream provider's job id (e.g. Runware taskUUID). Set after submit so a
+  -- queue redelivery resumes polling the in-flight job instead of resubmitting.
+  provider_job_id text,
   error text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

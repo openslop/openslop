@@ -15,6 +15,7 @@ export type JobRow = {
 	status: JobStatus;
 	request: Record<string, unknown>;
 	result: BundleResponse | null;
+	provider_job_id: string | null;
 	error: string | null;
 	created_at: string;
 	updated_at: string;
@@ -76,15 +77,23 @@ export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
 
 export async function updateJob(
 	jobId: string,
-	patch: { status: JobStatus; result?: BundleResponse; error?: string },
+	patch: {
+		status?: JobStatus;
+		result?: BundleResponse;
+		error?: string;
+		providerJobId?: string;
+	},
 ): Promise<void> {
 	const supabase = createServiceClient();
 	const { error } = await supabase
 		.from("jobs")
 		.update({
-			status: patch.status,
+			...(patch.status !== undefined && { status: patch.status }),
 			...(patch.result !== undefined && { result: patch.result }),
 			...(patch.error !== undefined && { error: patch.error }),
+			...(patch.providerJobId !== undefined && {
+				provider_job_id: patch.providerJobId,
+			}),
 		})
 		.eq("id", jobId);
 	if (error) throw new Error(`Failed to update job: ${error.message}`);

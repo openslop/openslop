@@ -91,22 +91,15 @@ export function getAssetProvider(type: ConnectorType): AssetProvider {
 	}
 }
 
-// Runs a provider to completion, hiding the fact that video providers expose a
-// submit/poll split while every other type completes synchronously.
-export async function runAssetJob(
-	type: ConnectorType,
-	params: Record<string, unknown>,
-): Promise<BundleResponse> {
-	const provider = getAssetProvider(type);
-	const initial = await provider.generate(params);
-	if (type !== "video" || initial.result?.video) return initial;
-
-	const providerJobId = initial.metadata?.jobId as string | undefined;
-	if (!providerJobId || !provider.poll) {
-		throw new Error("Video provider returned no jobId for async generation");
+async function pollVideoToCompletion(
+	provider: AssetProvider,
+	providerJobId: string,
+): Promise<VideoProviderResponse> {
+	if (!provider.poll) {
+		throw new Error("Video provider missing poll");
 	}
 	const poll = provider.poll.bind(provider);
-	const completed: VideoProviderResponse = await awaitCompletion(
+	const completed = await awaitCompletion(
 		(id) => poll(id),
 		providerJobId,
 		(r) => !!r.result?.video || r.metadata?.status === "failed",
@@ -115,4 +108,33 @@ export async function runAssetJob(
 		throw new Error(completed.metadata.error ?? "Video generation failed");
 	}
 	return completed;
+}
+
+// Runs a provider to completion, hiding the fact that video providers expose a
+// submit/poll split while every other type completes synchronously. If a
+// `providerJobId` is supplied (queue retry path), skips submission and resumes
+// polling the in-flight job.
+export async function runAssetJob(
+	type: ConnectorType,
+	params: Record<string, unknown>,
+	options: {
+		providerJobId?: string | null;
+		onProviderJob?: (jobId: string) => Promise<void>;
+	} = {},
+): Promise<BundleResponse> {
+	const provider = getAssetProvider(type);
+
+	if (type === "video" && options.providerJobId) {
+		return pollVideoToCompletion(provider, options.providerJobId);
+	}
+
+	const initial = await provider.generate(params);
+	if (type !== "video" || initial.result?.video) return initial;
+
+	const providerJobId = initial.metadata?.jobId as string | undefined;
+	if (!providerJobId) {
+		throw new Error("Video provider returned no jobId for async generation");
+	}
+	await options.onProviderJob?.(providerJobId);
+	return pollVideoToCompletion(provider, providerJobId);
 }
