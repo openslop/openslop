@@ -8,7 +8,6 @@ import { stringifyError } from "@/lib/errors";
 export const POST = handleCallback<AssetQueueMessage>(
 	async ({ jobId, connectorType }) => {
 		const job = await loadJobForProcessing(jobId);
-		// Skip terminal-state redeliveries.
 		if (job.status === "completed" || job.status === "failed") return;
 
 		const handler = getJobHandler(connectorType);
@@ -28,9 +27,7 @@ export const POST = handleCallback<AssetQueueMessage>(
 			});
 			throw error;
 		}
-		// Persistence below is outside the catch — a transient db failure here
-		// lets the queue redeliver from `processing` instead of locking the row
-		// to `failed` and losing the result.
+
 		if (outcome.kind === "completed") {
 			await updateJob(jobId, { status: "completed", result: outcome.result });
 		} else {

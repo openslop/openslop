@@ -20,7 +20,6 @@ export type ProcessOutcome =
 	| { kind: "completed"; result: BundleResponse }
 	| { kind: "pending"; metadata: Record<string, unknown> };
 
-// A JobRow narrowed to a handler's declared request and metadata shapes.
 export type TypedJobRow<TReq, TMeta> = Omit<JobRow, "request" | "metadata"> & {
 	request: TReq;
 	metadata: TMeta;
@@ -30,12 +29,7 @@ export interface JobHandler<
 	TReq = Record<string, unknown>,
 	TMeta = Record<string, unknown>,
 > {
-	// Queue consumer. Sync providers return `completed`; async providers
-	// (video) submit and return `pending`, leaving the row in `processing`
-	// until `poll()` resolves it.
 	process(job: TypedJobRow<TReq, TMeta>): Promise<ProcessOutcome>;
-	// GET /api/v1/{type}/[jobId]. Default reads the DB row.
-	// Override when terminal state lives upstream (video → provider.poll).
 	poll?(job: TypedJobRow<TReq, TMeta>): Promise<JobPoll>;
 }
 

@@ -21,8 +21,6 @@ type RouteHandlerOptions<TSchema extends z.ZodType | undefined, TParams> = {
 	}) => Promise<Response>;
 };
 
-// Single route primitive: auth + (optional) body parse + dispatch. Works for
-// POST routes with a body schema and GET routes with dynamic params alike.
 export function createRouteHandler<
 	TSchema extends z.ZodType | undefined = undefined,
 	TParams extends Record<string, string> = Record<string, string>,
@@ -56,19 +54,16 @@ export function modelField(models: Record<string, string>) {
 		.transform((v) => (v === undefined ? undefined : models[v]));
 }
 
-export function createAssetRouteHandlers<TSchema extends z.ZodType>(opts: {
-	connectorType: ConnectorType;
-	schema: TSchema;
-	label: string;
-}) {
+type AssetBody = { projectId?: string } & Record<string, unknown>;
+
+export function createAssetRouteHandlers<
+	TSchema extends z.ZodType<AssetBody>,
+>(opts: { connectorType: ConnectorType; schema: TSchema; label: string }) {
 	const POST = createRouteHandler({
 		schema: opts.schema,
 		label: opts.label,
 		handle: async ({ user, body }) => {
-			// projectId is observability metadata, not a generation param.
-			const { projectId, ...request } = body as {
-				projectId?: string;
-			} & Record<string, unknown>;
+			const { projectId, ...request } = body;
 			const job = await createJob({
 				userId: user.id,
 				projectId,
