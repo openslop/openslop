@@ -3,47 +3,25 @@ import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { withAuth } from "./with-auth";
-import { getJobHandler } from "./job-handlers";
+import { getJobHandler, rowView } from "./job-handlers";
 import { createJob, enqueueJob, getJob } from "./jobs";
 import { parseBody } from "./parse";
 import { badRequest } from "./response";
 
-type RouteContext<TParams> = { params: Promise<TParams> };
-
-type InferBody<TSchema> = TSchema extends z.ZodType
-	? z.infer<TSchema>
-	: undefined;
-
-type RouteHandlerOptions<TSchema extends z.ZodType | undefined, TParams> = {
-	schema?: TSchema;
+export function createRouteHandler<TSchema extends z.ZodType>(opts: {
+	schema: TSchema;
 	label: string;
 	handle: (ctx: {
 		user: User;
-		body: InferBody<TSchema>;
-		params: TParams;
+		body: z.infer<TSchema>;
 		request: NextRequest;
 	}) => Promise<Response>;
-};
-
-export function createRouteHandler<
-	TSchema extends z.ZodType | undefined = undefined,
-	TParams extends Record<string, string> = Record<string, string>,
->(opts: RouteHandlerOptions<TSchema, TParams>) {
-	return async (request: NextRequest, context?: RouteContext<TParams>) =>
+}) {
+	return async (request: NextRequest) =>
 		withAuth(opts.label, async (user) => {
-			const params = ((await context?.params) ?? {}) as TParams;
-			let body: unknown = undefined;
-			if (opts.schema) {
-				const parsed = await parseBody(request, opts.schema, opts.label);
-				if (!parsed.ok) return parsed.response;
-				body = parsed.data;
-			}
-			return opts.handle({
-				user,
-				body: body as InferBody<TSchema>,
-				params,
-				request,
-			});
+			const parsed = await parseBody(request, opts.schema, opts.label);
+			if (!parsed.ok) return parsed.response;
+			return opts.handle({ user, body: parsed.data, request });
 		});
 }
 
@@ -81,21 +59,20 @@ export function createAssetRouteHandlers<
 	return { POST };
 }
 
-export const pollJob = createRouteHandler<undefined, { jobId: string }>({
-	label: "Job poll",
-	handle: async ({ user, params }) => {
-		if (!params.jobId) return badRequest("jobId is required");
-		const job = await getJob(params.jobId, user.id);
+export async function pollJob(
+	_request: NextRequest,
+	context: { params: Promise<{ jobId: string }> },
+) {
+	return withAuth("Job poll", async (user) => {
+		const { jobId } = await context.params;
+		if (!jobId) return badRequest("jobId is required");
+		const job = await getJob(jobId, user.id);
 		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
-		const view = (await getJobHandler(job.connector_type)?.poll?.(job)) ?? {
-			jobId: job.id,
-			status: job.status,
-			result: job.result,
-			error: job.error,
-		};
+		const view =
+			(await getJobHandler(job.connector_type)?.poll?.(job)) ?? rowView(job);
 		return NextResponse.json(view);
-	},
-});
+	});
+}
 
 export function bodySchema<TShape extends z.ZodRawShape>(
 	models: Record<string, string>,
