@@ -48,20 +48,6 @@ export function rowView(job: JobRow): JobPoll {
 	};
 }
 
-// Erases a handler's per-type request/metadata shapes so the registry can hold
-// all handlers under one union. The only place in this layer that casts.
-function erase<TReq, TMeta>(h: JobHandler<TReq, TMeta>): JobHandler {
-	return {
-		process: (job) => h.process(job as TypedJobRow<TReq, TMeta>),
-		poll:
-			h.poll &&
-			((job) =>
-				(h.poll as NonNullable<typeof h.poll>)(
-					job as TypedJobRow<TReq, TMeta>,
-				)),
-	};
-}
-
 function assetHandler<TReq extends Record<string, unknown>>(
 	provider: () => { generate(p: TReq): Promise<BundleResponse> },
 ): JobHandler<TReq> {
@@ -74,11 +60,11 @@ function assetHandler<TReq extends Record<string, unknown>>(
 }
 
 const HANDLERS: Partial<Record<ConnectorType, JobHandler>> = {
-	image: erase(assetHandler<ImageGenerateParams>(getImageProvider)),
-	music: erase(assetHandler<MusicGenerateParams>(getMusicProvider)),
-	sfx: erase(assetHandler<SFXGenerateParams>(getSFXProvider)),
-	tts: erase(assetHandler<TTSGenerateParams>(getTTSProvider)),
-	video: erase(videoHandler),
+	image: assetHandler<ImageGenerateParams>(getImageProvider),
+	music: assetHandler<MusicGenerateParams>(getMusicProvider),
+	sfx: assetHandler<SFXGenerateParams>(getSFXProvider),
+	tts: assetHandler<TTSGenerateParams>(getTTSProvider),
+	video: videoHandler,
 };
 
 export function getJobHandler(type: ConnectorType): JobHandler | undefined {
