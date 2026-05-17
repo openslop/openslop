@@ -10,12 +10,16 @@ import { badRequest } from "./response";
 
 type RouteContext<TParams> = { params: Promise<TParams> };
 
+type InferBody<TSchema> = TSchema extends z.ZodType
+	? z.infer<TSchema>
+	: undefined;
+
 type RouteHandlerOptions<TSchema extends z.ZodType | undefined, TParams> = {
 	schema?: TSchema;
 	label: string;
 	handle: (ctx: {
 		user: User;
-		body: TSchema extends z.ZodType ? z.infer<TSchema> : undefined;
+		body: InferBody<TSchema>;
 		params: TParams;
 		request: NextRequest;
 	}) => Promise<Response>;
@@ -36,7 +40,7 @@ export function createRouteHandler<
 			}
 			return opts.handle({
 				user,
-				body: body as TSchema extends z.ZodType ? z.infer<TSchema> : undefined,
+				body: body as InferBody<TSchema>,
 				params,
 				request,
 			});
