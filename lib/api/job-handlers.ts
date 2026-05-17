@@ -1,84 +1,45 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type {
 	ConnectorType,
-	VideoGenerateParams,
+	ImageGenerateParams,
+	MusicGenerateParams,
+	SFXGenerateParams,
+	TTSGenerateParams,
 } from "@/lib/connectors/types";
-import type { JobPoll, JobStatus } from "@/lib/gateway/base";
-import type { VideoProviderResponse } from "@/lib/providers/video/base";
+import type { JobPoll } from "@/lib/gateway/base";
+import { videoHandler } from "./handlers/video";
 import type { JobRow } from "./jobs";
-import { updateJob } from "./jobs";
 import {
 	getImageProvider,
 	getMusicProvider,
 	getSFXProvider,
 	getTTSProvider,
-	getVideoProvider,
 } from "./providers";
 
 export type ProcessOutcome =
 	| { kind: "completed"; result: BundleResponse }
 	| { kind: "pending"; metadata: Record<string, unknown> };
 
-export interface JobHandler {
+// A JobRow narrowed to a handler's declared request and metadata shapes.
+export type TypedJobRow<TReq, TMeta> = Omit<JobRow, "request" | "metadata"> & {
+	request: TReq;
+	metadata: TMeta;
+};
+
+export interface JobHandler<
+	TReq = Record<string, unknown>,
+	TMeta = Record<string, unknown>,
+> {
 	// Queue consumer. Sync providers return `completed`; async providers
 	// (video) submit and return `pending`, leaving the row in `processing`
 	// until `poll()` resolves it.
-	process(job: JobRow): Promise<ProcessOutcome>;
+	process(job: TypedJobRow<TReq, TMeta>): Promise<ProcessOutcome>;
 	// GET /api/v1/{type}/[jobId]. Default reads the DB row.
 	// Override when terminal state lives upstream (video → provider.poll).
-	poll?(job: JobRow): Promise<JobPoll>;
+	poll?(job: TypedJobRow<TReq, TMeta>): Promise<JobPoll>;
 }
 
-type SyncProvider = {
-	generate(params: Record<string, unknown>): Promise<BundleResponse>;
-};
-
-function assetHandler(provider: () => SyncProvider): JobHandler {
-	return {
-		process: async (job) => ({
-			kind: "completed",
-			result: await provider().generate(job.request),
-		}),
-	};
-}
-
-const videoHandler: JobHandler = {
-	process: async (job) => {
-		const params = job.request as unknown as VideoGenerateParams;
-		const submitted = await getVideoProvider().generate(params);
-		const providerJobId = submitted.metadata?.jobId;
-		if (!providerJobId) {
-			throw new Error("Video provider returned no jobId for async generation");
-		}
-		return { kind: "pending", metadata: { providerJobId } };
-	},
-	poll: async (job): Promise<JobPoll> => {
-		const providerJobId = (job.metadata as { providerJobId?: string })
-			?.providerJobId;
-		if (!providerJobId) return rowView(job);
-
-		const upstream = await getVideoProvider().poll(providerJobId);
-		const status = mapVideoStatus(upstream);
-		if (status === "completed") {
-			await updateJob(job.id, { status, result: upstream });
-			return { jobId: job.id, status, result: upstream, error: null };
-		}
-		if (status === "failed") {
-			const error = upstream.metadata?.error ?? "Video generation failed";
-			await updateJob(job.id, { status, error });
-			return { jobId: job.id, status, result: null, error };
-		}
-		return { jobId: job.id, status, result: null, error: null };
-	},
-};
-
-function mapVideoStatus(upstream: VideoProviderResponse): JobStatus {
-	if (upstream.result?.video) return "completed";
-	if (upstream.metadata?.status === "failed") return "failed";
-	return "processing";
-}
-
-function rowView(job: JobRow): JobPoll {
+export function rowView(job: JobRow): JobPoll {
 	return {
 		jobId: job.id,
 		status: job.status,
@@ -87,12 +48,37 @@ function rowView(job: JobRow): JobPoll {
 	};
 }
 
+// Erases a handler's per-type request/metadata shapes so the registry can hold
+// all handlers under one union. The only place in this layer that casts.
+function erase<TReq, TMeta>(h: JobHandler<TReq, TMeta>): JobHandler {
+	return {
+		process: (job) => h.process(job as TypedJobRow<TReq, TMeta>),
+		poll:
+			h.poll &&
+			((job) =>
+				(h.poll as NonNullable<typeof h.poll>)(
+					job as TypedJobRow<TReq, TMeta>,
+				)),
+	};
+}
+
+function assetHandler<TReq extends Record<string, unknown>>(
+	provider: () => { generate(p: TReq): Promise<BundleResponse> },
+): JobHandler<TReq> {
+	return {
+		process: async (job) => ({
+			kind: "completed",
+			result: await provider().generate(job.request),
+		}),
+	};
+}
+
 const HANDLERS: Partial<Record<ConnectorType, JobHandler>> = {
-	image: assetHandler(getImageProvider),
-	music: assetHandler(getMusicProvider),
-	sfx: assetHandler(getSFXProvider),
-	tts: assetHandler(getTTSProvider),
-	video: videoHandler,
+	image: erase(assetHandler<ImageGenerateParams>(getImageProvider)),
+	music: erase(assetHandler<MusicGenerateParams>(getMusicProvider)),
+	sfx: erase(assetHandler<SFXGenerateParams>(getSFXProvider)),
+	tts: erase(assetHandler<TTSGenerateParams>(getTTSProvider)),
+	video: erase(videoHandler),
 };
 
 export function getJobHandler(type: ConnectorType): JobHandler | undefined {
