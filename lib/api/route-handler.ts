@@ -1,9 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import type { ConnectorType } from "@/lib/connectors/types";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
+import { createJob, enqueueJob, getJob } from "./jobs";
 import { badRequest, serverError, unauthorized } from "./response";
 import { logger } from "./logger";
+
+type ParseResult<T> = { ok: true; data: T } | { ok: false; response: Response };
+
+async function parseBody<TSchema extends z.ZodType>(
+	request: NextRequest,
+	schema: TSchema,
+	label: string,
+): Promise<ParseResult<z.infer<TSchema>>> {
+	const parsed = schema.safeParse(await request.json());
+	if (parsed.success) return { ok: true, data: parsed.data };
+	const message = parsed.error.issues[0]?.message ?? "Invalid request body";
+	logger.warn(`${label}: ${message}`);
+	return { ok: false, response: badRequest(message) };
+}
+
+async function withAuth(
+	label: string,
+	run: (user: { id: string }) => Promise<Response>,
+): Promise<Response> {
+	try {
+		const user = await getUser();
+		if (!user) return unauthorized();
+		return await run(user);
+	} catch (error) {
+		logger.error(error, `${label} failed`);
+		return serverError(`${label} failed: ${stringifyError(error)}`);
+	}
+}
 
 type RouteOptions<
 	TSchema extends z.ZodType,
@@ -29,22 +59,11 @@ export function createRouteHandler<
 			NextResponse.json(await provider.generate(body)));
 
 	return async function POST(request: NextRequest) {
-		try {
-			const user = await getUser();
-			if (!user) return unauthorized();
-
-			const parsed = options.schema.safeParse(await request.json());
-			if (!parsed.success) {
-				const message =
-					parsed.error.issues[0]?.message ?? "Invalid request body";
-				logger.warn(`${options.label}: ${message}`);
-				return badRequest(message);
-			}
-			return await handle(options.getProvider(), parsed.data);
-		} catch (error) {
-			logger.error(error, `${options.label} failed`);
-			return serverError(`${options.label} failed: ${stringifyError(error)}`);
-		}
+		return withAuth(options.label, async () => {
+			const parsed = await parseBody(request, options.schema, options.label);
+			if (!parsed.ok) return parsed.response;
+			return handle(options.getProvider(), parsed.data);
+		});
 	};
 }
 
@@ -57,6 +76,48 @@ export function modelField(models: Record<string, string>) {
 			message: `Invalid model. Supported: ${names.join(", ")}`,
 		})
 		.transform((v) => (v === undefined ? undefined : models[v]));
+}
+
+export function createAssetRouteHandlers<TSchema extends z.ZodType>(opts: {
+	connectorType: ConnectorType;
+	schema: TSchema;
+	label: string;
+}) {
+	const POST = async (request: NextRequest) =>
+		withAuth(opts.label, async (user) => {
+			const parsed = await parseBody(request, opts.schema, opts.label);
+			if (!parsed.ok) return parsed.response;
+
+			const job = await createJob({
+				userId: user.id,
+				connectorType: opts.connectorType,
+				request: parsed.data as Record<string, unknown>,
+			});
+			await enqueueJob(job.id, opts.connectorType);
+			return NextResponse.json({ jobId: job.id, status: "pending" });
+		});
+
+	return { POST };
+}
+
+export async function pollJob(
+	_request: NextRequest,
+	context: { params: Promise<{ jobId: string }> },
+) {
+	return withAuth("Job poll", async (user) => {
+		const { jobId } = await context.params;
+		if (!jobId) return badRequest("jobId is required");
+
+		const job = await getJob(jobId, user.id);
+		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+		return NextResponse.json({
+			jobId: job.id,
+			status: job.status,
+			result: job.result,
+			error: job.error,
+		});
+	});
 }
 
 export function bodySchema<TShape extends z.ZodRawShape>(

@@ -2,30 +2,32 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopTTS } from "../tts/openslop";
 import { createVoiceSearchPlugin } from "../plugins/voice-search";
 import type { ConnectorPlugin } from "../types";
+import { mockGatewaySequence } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
-const BUNDLE_URL = `/assets/tts/openslop/${TEST_ID}`;
-const AUDIO_URL = `${BUNDLE_URL}/output.wav`;
+const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
 
-function jsonResponse(data: unknown) {
-	return new Response(JSON.stringify(data), {
-		status: 200,
-		headers: { "content-type": "application/json" },
-	});
-}
+const config = {
+	defaultModel: "test-model",
+	models: ["test-model"],
+	isDefault: true,
+	apiKey: "",
+};
 
-function mockFetchChain() {
-	vi.spyOn(globalThis, "fetch")
-		.mockResolvedValueOnce(
-			jsonResponse({
+function mockSuccess() {
+	mockGatewaySequence([
+		{ kind: "submit" },
+		{
+			kind: "poll",
+			status: "completed",
+			result: {
 				id: TEST_ID,
 				provider: "openslop",
 				result: { audio: "output.wav", timestamps: "timestamps.json" },
-			}),
-		)
-		.mockResolvedValueOnce(
-			jsonResponse([{ text: "hello", start: 0, end: 0.5 }]),
-		);
+			},
+		},
+		{ kind: "fetch", payload: [{ text: "hello", start: 0, end: 0.5 }] },
+	]);
 }
 
 describe("BaseTTSConnector", () => {
@@ -34,14 +36,8 @@ describe("BaseTTSConnector", () => {
 	});
 
 	it("generates TTS via provider with voiceId", async () => {
-		mockFetchChain();
-		const connector = new OpenSlopTTS({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
-		});
-		const result = await connector.generate({
+		mockSuccess();
+		const result = await new OpenSlopTTS(config).generate({
 			prompt: "hello",
 			voiceId: "default",
 		});
@@ -50,12 +46,9 @@ describe("BaseTTSConnector", () => {
 	});
 
 	it("resolves voice via voice-search plugin when no voiceId", async () => {
-		mockFetchChain();
+		mockSuccess();
 		const connector = new OpenSlopTTS({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
+			...config,
 			plugins: [createVoiceSearchPlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([
@@ -82,10 +75,7 @@ describe("BaseTTSConnector", () => {
 
 	it("throws when no matching voice found via voice-search plugin", async () => {
 		const connector = new OpenSlopTTS({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
+			...config,
 			plugins: [createVoiceSearchPlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([]);
@@ -96,34 +86,23 @@ describe("BaseTTSConnector", () => {
 	});
 
 	it("runs transformPrompt on prompt field", async () => {
-		mockFetchChain();
+		mockSuccess();
 		const plugin: ConnectorPlugin = {
 			name: "transform",
 			transformPrompt: (p) => p.toUpperCase(),
 		};
-		const connector = new OpenSlopTTS({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
+		const result = await new OpenSlopTTS({
+			...config,
 			plugins: [plugin],
-		});
-		const result = await connector.generate({
-			prompt: "hello",
-			voiceId: "default",
-		});
+		}).generate({ prompt: "hello", voiceId: "default" });
 		expect(result.url).toBe(AUDIO_URL);
 	});
 
 	it("runs onError plugin on failure", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("tts failed"));
 		const errors: string[] = [];
-
 		const connector = new OpenSlopTTS({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
+			...config,
 			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});
 

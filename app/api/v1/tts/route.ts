@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { getTTSProvider } from "@/lib/api/providers";
 import { requiredVoiceId } from "@/lib/api/request-schema-fields";
-import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
-import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
+import { bodySchema, createAssetRouteHandlers } from "@/lib/api/route-handler";
 import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
+import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 
 const schema = bodySchema(TTS_MODELS, {
 	voiceId: requiredVoiceId,
@@ -12,8 +11,8 @@ const schema = bodySchema(TTS_MODELS, {
 	format: z.string().optional(),
 });
 
-export const POST = createRouteHandler({
+export const { POST } = createAssetRouteHandlers({
+	connectorType: "tts",
 	schema,
-	getProvider: getTTSProvider,
 	label: "TTS generation",
 });

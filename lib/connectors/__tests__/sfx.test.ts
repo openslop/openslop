@@ -1,27 +1,25 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopSFX } from "../sfx/openslop";
 import type { ConnectorPlugin } from "../types";
+import { mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
-const BUNDLE_URL = `/assets/sfx/openslop/${TEST_ID}`;
-const AUDIO_URL = `${BUNDLE_URL}/output.mp3`;
+const AUDIO_URL = `/assets/sfx/openslop/${TEST_ID}/output.mp3`;
 
-function jsonResponse(data: unknown) {
-	return new Response(JSON.stringify(data), {
-		status: 200,
-		headers: { "content-type": "application/json" },
+const config = {
+	defaultModel: "test-model",
+	models: ["test-model"],
+	isDefault: true,
+	apiKey: "",
+};
+
+function mockSuccess(metadata?: Record<string, unknown>) {
+	mockGatewaySuccess({
+		id: TEST_ID,
+		provider: "openslop",
+		result: { audio: "output.mp3" },
+		...(metadata && { metadata }),
 	});
-}
-
-function mockFetchChain(metadata?: Record<string, unknown>) {
-	vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-		jsonResponse({
-			id: TEST_ID,
-			provider: "openslop",
-			result: { audio: "output.mp3" },
-			...(metadata && { metadata }),
-		}),
-	);
 }
 
 describe("BaseSFXConnector", () => {
@@ -30,19 +28,15 @@ describe("BaseSFXConnector", () => {
 	});
 
 	it("generates audio via provider", async () => {
-		mockFetchChain();
-		const connector = new OpenSlopSFX({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
+		mockSuccess();
+		const result = await new OpenSlopSFX(config).generate({
+			prompt: "explosion",
 		});
-		const result = await connector.generate({ prompt: "explosion" });
 		expect(result.url).toBe(AUDIO_URL);
 	});
 
 	it("runs plugins in order", async () => {
-		mockFetchChain();
+		mockSuccess();
 		const order: string[] = [];
 		const plugin: ConnectorPlugin = {
 			name: "tracker",
@@ -59,26 +53,17 @@ describe("BaseSFXConnector", () => {
 				return r;
 			},
 		};
-		const connector = new OpenSlopSFX({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
-			plugins: [plugin],
+		await new OpenSlopSFX({ ...config, plugins: [plugin] }).generate({
+			prompt: "test",
 		});
-		await connector.generate({ prompt: "test" });
 		expect(order).toEqual(["transform", "before", "after"]);
 	});
 
 	it("returns the native asset durationSec from metadata (looping is a layout concern)", async () => {
-		mockFetchChain({ durationSec: 7 });
-		const connector = new OpenSlopSFX({
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-			apiKey: "",
+		mockSuccess({ durationSec: 7 });
+		const result = await new OpenSlopSFX(config).generate({
+			prompt: "footsteps",
 		});
-		const result = await connector.generate({ prompt: "footsteps" });
 		expect(result.durationSec).toBe(7);
 	});
 });

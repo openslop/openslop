@@ -10,6 +10,10 @@ import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
 import { MockLLM } from "@/lib/providers/llm/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import { MockTTS } from "@/lib/providers/tts/mock";
+import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { ConnectorType } from "@/lib/connectors/types";
+import type { VideoProviderResponse } from "@/lib/providers/video/base";
+import { awaitCompletion } from "@/lib/providers/poll";
 
 const cache = new Map<string, unknown>();
 
@@ -64,3 +68,51 @@ export const getTTSProvider = defineProvider(
 	CartesiaTTS,
 	MockTTS,
 );
+
+export type AssetProvider = {
+	generate(params: Record<string, unknown>): Promise<BundleResponse>;
+	poll?(jobId: string): Promise<VideoProviderResponse>;
+};
+
+export function getAssetProvider(type: ConnectorType): AssetProvider {
+	switch (type) {
+		case "image":
+			return getImageProvider() as AssetProvider;
+		case "music":
+			return getMusicProvider() as AssetProvider;
+		case "sfx":
+			return getSFXProvider() as AssetProvider;
+		case "tts":
+			return getTTSProvider() as AssetProvider;
+		case "video":
+			return getVideoProvider() as AssetProvider;
+		default:
+			throw new Error(`Unsupported asset connector type: ${type}`);
+	}
+}
+
+// Runs a provider to completion, hiding the fact that video providers expose a
+// submit/poll split while every other type completes synchronously.
+export async function runAssetJob(
+	type: ConnectorType,
+	params: Record<string, unknown>,
+): Promise<BundleResponse> {
+	const provider = getAssetProvider(type);
+	const initial = await provider.generate(params);
+	if (type !== "video" || initial.result?.video) return initial;
+
+	const providerJobId = initial.metadata?.jobId as string | undefined;
+	if (!providerJobId || !provider.poll) {
+		throw new Error("Video provider returned no jobId for async generation");
+	}
+	const poll = provider.poll.bind(provider);
+	const completed: VideoProviderResponse = await awaitCompletion(
+		(id) => poll(id),
+		providerJobId,
+		(r) => !!r.result?.video || r.metadata?.status === "failed",
+	);
+	if (completed.metadata?.status === "failed") {
+		throw new Error(completed.metadata.error ?? "Video generation failed");
+	}
+	return completed;
+}

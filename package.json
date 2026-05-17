@@ -48,6 +48,7 @@
 		"@supabase/supabase-js": "^2.98.0",
 		"@vercel/blob": "^2.3.2",
 		"@vercel/functions": "^3.4.3",
+		"@vercel/queue": "^0.1.7",
 		"@vercel/sandbox": "^1.9.0",
 		"ai": "^6.0.170",
 		"clsx": "^2.1.1",

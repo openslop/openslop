@@ -1,18 +1,12 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type {
 	TTSGenerateParams,
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { OpenSlopGatewayClient } from "./base";
+import { OpenSlopAssetGateway } from "./base";
 
-export class OpenSlopTTSGateway extends OpenSlopGatewayClient<
-	TTSGenerateParams,
-	BundleResponse
-> {
-	async generate(params: TTSGenerateParams): Promise<BundleResponse> {
-		return this.client.post<BundleResponse>("/api/v1/tts", params);
-	}
+export class OpenSlopTTSGateway extends OpenSlopAssetGateway<TTSGenerateParams> {
+	protected readonly path = "tts";
 
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
 		const result = await this.client.get<{ voices: VoiceInfo[] }>(
