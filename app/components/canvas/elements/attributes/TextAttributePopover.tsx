@@ -68,8 +68,10 @@ export function TextAttributePopover({
 				className={`${color} text-white text-[12px] px-2 py-1 rounded-full max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all`}
 			>
 				<span className="truncate min-w-0">
-					<span className="opacity-70 mr-1">{label}</span>
-					{value}
+					<span className={value ? "opacity-70 mr-1" : "opacity-90"}>
+						{label}
+					</span>
+					{value ? value : <span className="opacity-50 ml-1">— add</span>}
 				</span>
 				<ChevronDown className="w-3 h-3 shrink-0 text-white/80" />
 			</button>

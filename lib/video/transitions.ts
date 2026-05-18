@@ -24,6 +24,9 @@ export type TransitionType = (typeof TRANSITION_TYPES)[number];
 export const DEFAULT_TRANSITION: TransitionType = "none";
 export const TRANSITION_DURATION_SEC = 0.4;
 export const AUDIO_FADE_SEC = 2;
+// Lead time to mount foreground video before it's visible so it decodes ahead
+// of the transition and doesn't stall the Player (which would stutter audio).
+export const VIDEO_PREMOUNT_SEC = 2;
 
 type Dimensions = { width: number; height: number };
 
