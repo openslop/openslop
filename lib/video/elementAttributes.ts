@@ -5,17 +5,6 @@ import {
 	type MotionEffect,
 } from "./motionEffects";
 
-/**
- * Single boundary for reading layout-affecting element `customAttributes`.
- *
- * These values are stored as raw strings on the element but consumed as typed,
- * clamped numbers by `resolveElements`, while `getLayoutKey` must include the
- * same fields so memoized layouts invalidate when they change. Keeping both the
- * coercion rules and the field list here is the only place to change when a new
- * layout-affecting attribute is added — the resolver and the memo key can no
- * longer drift apart.
- */
-
 /** Raw attribute keys that, when changed, require a layout recompute. */
 export const LAYOUT_ATTRIBUTE_KEYS = ["loops", "volume", "motion"] as const;
 

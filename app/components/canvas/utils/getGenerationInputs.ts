@@ -1,15 +1,14 @@
 import omit from "lodash/omit";
 import type { GenerationInputs } from "@/lib/generation/queue";
+import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
 import type { CanvasContentElement } from "../types";
 import { getPromptText } from "./getPromptText";
-
-const NON_GENERATION_ATTRIBUTES = ["loops", "volume", "motion"] as const;
 
 export function getGenerationInputs(
 	element: CanvasContentElement,
 ): GenerationInputs {
 	return {
 		prompt: getPromptText(element),
-		attributes: omit(element.customAttributes ?? {}, NON_GENERATION_ATTRIBUTES),
+		attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
 	};
 }
