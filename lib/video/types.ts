@@ -1,4 +1,5 @@
 import type { CanvasElementType } from "@/lib/canvas/types";
+import type { MotionEffect } from "./motionEffects";
 import type { TransitionType } from "./transitions";
 
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
@@ -32,6 +33,7 @@ export type ResolvedElement = {
 	durationSec: number;
 	loops: number;
 	volume: number;
+	motion: MotionEffect;
 };
 
 export type Sequence = {

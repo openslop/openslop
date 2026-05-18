@@ -19,19 +19,19 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
-<image animate="true" animation="slow pan across the village to the forest path">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</image>
+<image animate="true" animation="slow pan across the village to the forest path" motion="kenBurnsOut">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</image>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
 <narration emotion="cheerful">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</narration>
 
-<image animate="true" animation="warm dolly in toward the kitchen window" characters="Red,Mother">Inside a sunlit kitchen with copper pots hanging on the wall, Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her Mother (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). Mother gently places a wicker basket of fresh vegetables in Red's hands.</image>
+<image animate="true" animation="warm dolly in toward the kitchen window" motion="pushIn" characters="Red,Mother">Inside a sunlit kitchen with copper pots hanging on the wall, Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her Mother (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). Mother gently places a wicker basket of fresh vegetables in Red's hands.</image>
 
 <character name="Mother" emotion="gentle">"Take these straight to Granny, sweetheart. And please don't dawdle along the way."</character>
 
 <character name="Red" emotion="excited">"I won't, Mama! I'll be back before sundown!"</character>
 
-<image animate="true" animation="slow zoom in on Red at her cottage door" characters="Red">Red stands at her cottage door holding a wicker basket filled with fresh vegetables including carrots, lettuce, and tomatoes. She smiles warmly. Morning sunlight streams through nearby trees.</image>
+<image motion="tiltDown" characters="Red">Red stands at her cottage door holding a wicker basket filled with fresh vegetables including carrots, lettuce, and tomatoes. She smiles warmly. Morning sunlight streams through nearby trees.</image>
 
 <narration emotion="happy">Red got her name from the beautiful red cloak she wore everywhere. Today, she was taking a basket of fresh vegetables to her grandmother, who lived deep in the woods.</narration>
 
@@ -41,13 +41,13 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound>footsteps on dirt path</sound>
 
-<image animate="true" animation="gentle pan upward through the forest canopy" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</image>
+<image animate="true" animation="gentle pan upward through the forest canopy" motion="tiltUp" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</image>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
 <character name="Owl" emotion="calm">"A child enters the forest today. The wind tells me she will not walk alone."</character>
 
-<image animate="true" animation="gentle pan through the berry bushes" characters="Wolf">A different part of the forest with thick berry bushes full of ripe red berries. Wolf (a large gray wolf with kind amber eyes, soft fur, wearing a worn brown vest) carefully picks berries and places them in a wicker basket. Dappled sunlight filters through the forest canopy above.</image>
+<clip duration="4" motion="handheldDrift" characters="Wolf">A different part of the forest with thick berry bushes full of ripe red berries. Wolf (a large gray wolf with kind amber eyes, soft fur, wearing a worn brown vest) carefully picks berries and places them in a wicker basket. Dappled sunlight filters through the forest canopy above.</clip>
 
 <narration emotion="mysterious">Not far away, someone else was in the forest that morning. Wolf was gathering wild berries near the path.</narration>
 
@@ -71,7 +71,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound loops="6">forest stream burbling</sound>
 
-<image animate="true" animation="tracking shot following them down the path" characters="Red,Wolf">Red and Wolf walk side by side along a winding forest path lined with ferns. Red gestures animatedly while talking; Wolf listens with a gentle smile. A small stream sparkles in the background. The light is dappled and warm.</image>
+<clip duration="5" motion="panRight" characters="Red,Wolf">Red and Wolf walk side by side along a winding forest path lined with ferns. Red gestures animatedly while talking; Wolf listens with a gentle smile. A small stream sparkles in the background. The light is dappled and warm.</clip>
 
 <music length="short">Light, twinkling music with playful pizzicato strings</music>
 
@@ -79,7 +79,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <character name="Red" emotion="proud">"She tells the best stories! And she knits the warmest mittens. And she always has cookies."</character>
 
-<image animate="true" animation="wide reveal as they round a bend" characters="Red,Wolf,Hunter">A clearing where the forest path meets a sturdy bridge over a stream. Hunter (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at Red and Wolf as they approach. His sturdy brown boots crunch on the gravel.</image>
+<image animate="true" animation="wide reveal as they round a bend" motion="panLeft" characters="Red,Wolf,Hunter">A clearing where the forest path meets a sturdy bridge over a stream. Hunter (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at Red and Wolf as they approach. His sturdy brown boots crunch on the gravel.</image>
 
 <character name="Hunter" emotion="hearty">"Well now! Little Red and her woodland friend! You two heading to the old oak cottage?"</character>
 
@@ -91,7 +91,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<image animate="true" animation="slow push-in toward the cottage door" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</image>
+<image animate="true" animation="slow push-in toward the cottage door" motion="kenBurnsIn" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</image>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;

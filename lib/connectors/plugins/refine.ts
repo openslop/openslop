@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { CANVAS_ELEMENT_TYPES } from "@/lib/canvas/types";
+import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 import { MusicLength } from "../music/enums";
 import type { LLMPlugin } from "../types";
 
@@ -34,10 +35,10 @@ const REFINE_SYSTEM_PROMPT = dedent`
   ## Common attributes by type
   - **narration**: emotion
   - **character**: name, emotion
-  - **image**: animate, animation, overlays
+  - **image**: animate, animation, overlays, motion (${MOTION_EFFECTS.join(" | ")})
   - **sound**: loops (number, default 1)
   - **music**: length (${vals(MusicLength)}), loops (number, default 1)
-  - **clip**: duration (in seconds)
+  - **clip**: duration (in seconds), volume (0-10), motion (${MOTION_EFFECTS.join(" | ")})
   - All non-null attributes should be strings
 
   ## Rules

@@ -3,6 +3,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
 	getLoops,
+	getMotion,
 	getVolume,
 	layoutAttributeSignature,
 } from "../elementAttributes";
@@ -45,17 +46,37 @@ describe("getLoops", () => {
 	});
 });
 
+describe("getMotion", () => {
+	it("defaults to 'none' when missing or invalid", () => {
+		expect(getMotion(el())).toBe("none");
+		expect(getMotion(el({ motion: "not-an-effect" }))).toBe("none");
+		expect(getMotion(el({ motion: "" }))).toBe("none");
+	});
+
+	it("passes through known effects", () => {
+		expect(getMotion(el({ motion: "kenBurnsIn" }))).toBe("kenBurnsIn");
+		expect(getMotion(el({ motion: "shake" }))).toBe("shake");
+	});
+
+	it("is included in LAYOUT_ATTRIBUTE_KEYS so changes invalidate layout memos", () => {
+		expect(LAYOUT_ATTRIBUTE_KEYS).toContain("motion");
+	});
+});
+
 describe("layoutAttributeSignature", () => {
 	it("joins raw layout attribute values in LAYOUT_ATTRIBUTE_KEYS order", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual(["loops", "volume"]);
-		expect(layoutAttributeSignature(el({ loops: "2", volume: "5" }))).toBe(
-			"2:5",
-		);
+		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual(["loops", "volume", "motion"]);
+		expect(
+			layoutAttributeSignature(
+				el({ loops: "2", volume: "5", motion: "kenBurnsIn" }),
+			),
+		).toBe("2:5:kenBurnsIn");
 	});
 
 	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
-		expect(layoutAttributeSignature(el())).toBe(":");
-		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:");
-		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe(":10");
+		expect(layoutAttributeSignature(el())).toBe("::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe(":10:");
+		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe("::shake");
 	});
 });
