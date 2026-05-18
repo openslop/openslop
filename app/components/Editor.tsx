@@ -1,11 +1,11 @@
 "use client";
 
-import { useScript, useScriptText } from "@/lib/script/ScriptProvider";
+import { useScriptControl, useScriptText } from "@/lib/script/ScriptProvider";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 
 export default function Editor() {
-	const { loading } = useScript();
+	const { loading } = useScriptControl();
 	const script = useScriptText();
 	const hasScript = script.length > 0 || loading;
 

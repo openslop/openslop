@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScriptControl } from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -26,7 +26,7 @@ import editorStyles from "./Editor.module.css";
 import genStyles from "./styles/gen-button.module.css";
 
 function PostPromptViewInner() {
-	const { loading: scriptLoading, stopGeneration } = useScript();
+	const { loading: scriptLoading, stopGeneration } = useScriptControl();
 	const canvasRef = useRef<CanvasHandle>(null);
 	const [layoutKey, setLayoutKey] = useState("");
 	const [refineValue, setRefineValue] = useState("");

@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore, useProjectStore } from "@/lib/project/store";
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScriptControl } from "@/lib/script/ScriptProvider";
 
 export function ProjectTitle() {
 	const { projectId } = useConfig();
 	const title = useProjectStore(projectId, (s) => s.metadata.title);
-	const { loading } = useScript();
+	const { loading } = useScriptControl();
 	const [editing, setEditing] = useState(false);
 	const [draft, setDraft] = useState("");
 

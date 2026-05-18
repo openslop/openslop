@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import type { DeepPartial, Metadata } from "@/lib/project/types";
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScriptNodes } from "@/lib/script/ScriptProvider";
 import { METADATA_TAG_CONFIGS } from "../config/metadataTags";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 
 export function useMetadataSync(): void {
-	const { nodes } = useScript();
+	const nodes = useScriptNodes();
 	const { projectId } = useConfig();
 
 	useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
 import ComposerCopilot from "./copilot/ComposerCopilot";
@@ -21,7 +21,7 @@ there was a small glowing garden hidden on the moon.
 And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
-	const { submitPrompt } = useScript();
+	const { submitPrompt } = useScriptControl();
 	const { mode, applyTemplate } = useConfig();
 	const [value, setValue] = useState("");
 
