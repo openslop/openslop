@@ -9,6 +9,7 @@ import {
 import type { CanvasElementType, ResultKind } from "../types";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
+import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 
 export interface AttributeSpec {
 	color: string;
@@ -54,6 +55,12 @@ const speedSpec = (color: string): AttributeSpec => ({
 	color,
 	label: "Speed",
 	edit: { options: TTS_SPEEDS },
+});
+
+const motionSpec = (color: string): AttributeSpec => ({
+	color,
+	label: "Motion",
+	edit: { options: MOTION_EFFECTS },
 });
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
@@ -109,7 +116,12 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		icon: <ImageIcon size={16} className="text-white" />,
 		bgColor: "bg-cyan-600",
 		placeholder: "Describe the image...",
-		visibleAttributes: {},
+		defaultAttributes: {
+			motion: "none",
+		},
+		visibleAttributes: {
+			motion: motionSpec("bg-cyan-500"),
+		},
 	},
 	clip: {
 		type: "clip",
@@ -123,10 +135,12 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		defaultAttributes: {
 			duration: "5",
 			volume: "5",
+			motion: "none",
 		},
 		visibleAttributes: {
 			duration: { color: "bg-indigo-500", label: "Duration" },
 			volume: volumeSpec("bg-indigo-500"),
+			motion: motionSpec("bg-indigo-500"),
 		},
 	},
 	sound: {

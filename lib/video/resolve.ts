@@ -3,7 +3,7 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import type { ResolvedElement } from "./types";
 import { ELEMENT_ROLES, LAYER_TYPES } from "./types";
-import { getLoops, getVolume } from "./elementAttributes";
+import { getLoops, getMotion, getVolume } from "./elementAttributes";
 
 export function resolveElements(
 	elements: CanvasElement[],
@@ -24,6 +24,7 @@ export function resolveElements(
 			durationSec: snapshot.result.durationSec,
 			loops: getLoops(el),
 			volume: getVolume(el),
+			motion: getMotion(el),
 		});
 	}
 

@@ -15,6 +15,7 @@ function el(url: string): ResolvedElement {
 		durationSec: 1,
 		loops: 1,
 		volume: 1,
+		motion: "none",
 	};
 }
 

@@ -1,4 +1,9 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	DEFAULT_MOTION,
+	isMotionEffect,
+	type MotionEffect,
+} from "./motionEffects";
 
 /**
  * Single boundary for reading layout-affecting element `customAttributes`.
@@ -12,7 +17,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
  */
 
 /** Raw attribute keys that, when changed, require a layout recompute. */
-export const LAYOUT_ATTRIBUTE_KEYS = ["loops", "volume"] as const;
+export const LAYOUT_ATTRIBUTE_KEYS = ["loops", "volume", "motion"] as const;
 
 const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
@@ -29,6 +34,12 @@ export function getVolume(element: CanvasContentElement): number {
 /** Loop count coerced to an integer of at least 1, defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
 	return Math.max(1, Number(element.customAttributes?.loops) || 1);
+}
+
+/** Motion effect validated against the known set, defaulting to "none". */
+export function getMotion(element: CanvasContentElement): MotionEffect {
+	const raw = element.customAttributes?.motion;
+	return isMotionEffect(raw) ? raw : DEFAULT_MOTION;
 }
 
 /**

@@ -38,6 +38,7 @@ function el(
 		durationSec: 0,
 		loops: 1,
 		volume: 10,
+		motion: "none",
 		...overrides,
 	};
 }

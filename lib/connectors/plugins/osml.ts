@@ -1,4 +1,5 @@
 import dedent from "dedent";
+import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 import { EffectType } from "../image/enums";
 import { MusicLength } from "../music/enums";
 import {
@@ -48,6 +49,8 @@ const OSML_SYSTEM_PROMPT = dedent`
 		<image animate="true" animation="slow zoom out revealing the full landscape">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - animate: Include a required animate attribute that is either "true" or "false". This controls whether the image is animated or static.
   - animation: If animate is "true", include an animation attribute that describes the motion/camera movement for the video. The animation description should be simple, focused, and relaxing.
+  - motion: Optional camera-motion effect applied for the element's full duration. Use sparingly — at most one per scene, and prefer omitting when the image already carries the energy. Example: <image motion="kenBurnsIn">...</image>
+  - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
 	- characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
 		<image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
   - After the metadata tags, open the story with an <image> tag that describes the image for the opening scene.

@@ -3,7 +3,7 @@ import type { GenerationInputs } from "@/lib/generation/queue";
 import type { CanvasContentElement } from "../types";
 import { getPromptText } from "./getPromptText";
 
-const NON_GENERATION_ATTRIBUTES = ["loops", "volume"] as const;
+const NON_GENERATION_ATTRIBUTES = ["loops", "volume", "motion"] as const;
 
 export function getGenerationInputs(
 	element: CanvasContentElement,

@@ -15,6 +15,7 @@ import type {
 } from "@/lib/video/types";
 import { AUDIO_FADE_SEC, getPresentation } from "@/lib/video/transitions";
 import { audioVolume } from "@/lib/video/audioVolume";
+import { MotionLayer } from "../components/MotionLayer";
 
 const coverStyle: React.CSSProperties = {
 	width: "100%",
@@ -50,15 +51,19 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 function SequenceContent({ element }: { element: ResolvedElement }) {
 	switch (element.layer) {
 		case "visual":
-			return element.type === "image" ? (
-				<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
-			) : (
-				<OffthreadVideo
-					src={element.url}
-					style={coverStyle}
-					pauseWhenBuffering
-					volume={element.volume / 10}
-				/>
+			return (
+				<MotionLayer effect={element.motion}>
+					{element.type === "image" ? (
+						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
+					) : (
+						<OffthreadVideo
+							src={element.url}
+							style={coverStyle}
+							pauseWhenBuffering
+							volume={element.volume / 10}
+						/>
+					)}
+				</MotionLayer>
 			);
 		case "audio":
 			return <AudioSequence element={element} />;

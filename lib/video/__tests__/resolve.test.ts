@@ -67,6 +67,7 @@ describe("resolveElements", () => {
 			durationSec: 3,
 			loops: 1,
 			volume: 10,
+			motion: "none",
 		});
 		expect(resolved[1]).toEqual({
 			id: "nar1",
@@ -77,6 +78,7 @@ describe("resolveElements", () => {
 			durationSec: 8,
 			loops: 1,
 			volume: 10,
+			motion: "none",
 		});
 	});
 
