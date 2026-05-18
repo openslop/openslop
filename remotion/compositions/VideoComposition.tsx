@@ -48,11 +48,20 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 }
 
-function SequenceContent({ element }: { element: ResolvedElement }) {
+function SequenceContent({
+	element,
+	durationInFrames,
+}: {
+	element: ResolvedElement;
+	durationInFrames: number;
+}) {
 	switch (element.layer) {
 		case "visual":
 			return (
-				<MotionLayer effect={element.motion}>
+				<MotionLayer
+					effect={element.motion}
+					durationInFrames={durationInFrames}
+				>
 					{element.type === "image" ? (
 						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
 					) : (
@@ -72,11 +81,22 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 	}
 }
 
-function SeriesEntry({ seq }: { seq: SeqType }) {
+function SeriesEntry({
+	seq,
+	durationInFrames,
+}: {
+	seq: SeqType;
+	durationInFrames: number;
+}) {
 	if (!seq.element) {
 		return <AbsoluteFill style={blackBg} />;
 	}
-	return <SequenceContent element={seq.element} />;
+	return (
+		<SequenceContent
+			element={seq.element}
+			durationInFrames={durationInFrames}
+		/>
+	);
 }
 
 export const VideoComposition: React.FC<VideoLayout> = ({
@@ -99,38 +119,44 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 	);
 	const transitionSeriesNodes = useMemo(
 		() =>
-			series.map((seq, i) => (
-				<Fragment key={seq.element?.id ?? `empty-${i}`}>
-					{i > 0 && (
-						<TransitionSeries.Transition
-							presentation={presentation}
-							timing={transitionTiming}
-						/>
-					)}
-					<TransitionSeries.Sequence
-						durationInFrames={toFrames(seq.duration, fps)}
-					>
-						<SeriesEntry seq={seq} />
-					</TransitionSeries.Sequence>
-				</Fragment>
-			)),
+			series.map((seq, i) => {
+				const seqFrames = toFrames(seq.duration, fps);
+				return (
+					<Fragment key={seq.element?.id ?? `empty-${i}`}>
+						{i > 0 && (
+							<TransitionSeries.Transition
+								presentation={presentation}
+								timing={transitionTiming}
+							/>
+						)}
+						<TransitionSeries.Sequence durationInFrames={seqFrames}>
+							<SeriesEntry seq={seq} durationInFrames={seqFrames} />
+						</TransitionSeries.Sequence>
+					</Fragment>
+				);
+			}),
 		[fps, presentation, series, transitionTiming],
 	);
 	const layeredSequenceNodes = useMemo(
 		() =>
 			Object.entries(sequences).flatMap(([type, seqs]) =>
-				(seqs ?? []).map((seq, i) =>
-					seq.element ? (
+				(seqs ?? []).map((seq, i) => {
+					if (!seq.element) return null;
+					const seqFrames = toFrames(seq.duration, fps);
+					return (
 						<Sequence
 							key={`${type}-${seq.element.id}-${i}`}
 							from={toFrames(seq.start, fps)}
-							durationInFrames={toFrames(seq.duration, fps)}
+							durationInFrames={seqFrames}
 							premountFor={fps}
 						>
-							<SequenceContent element={seq.element} />
+							<SequenceContent
+								element={seq.element}
+								durationInFrames={seqFrames}
+							/>
 						</Sequence>
-					) : null,
-				),
+					);
+				}),
 			),
 		[fps, sequences],
 	);
