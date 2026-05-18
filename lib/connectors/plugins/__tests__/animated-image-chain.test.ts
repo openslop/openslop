@@ -62,7 +62,7 @@ describe("createVideoChainPlugin", () => {
 		});
 	});
 
-	it("passes the still result through untouched when no videoPrompt is set", async () => {
+	it("throws when videoPrompt is missing so the still URL never leaks into video rendering", async () => {
 		generateMock.mockReset();
 		const plugin = createVideoChainPlugin(registry);
 		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
@@ -73,9 +73,10 @@ describe("createVideoChainPlugin", () => {
 			url: "https://example.com/still.png",
 			durationSec: 0,
 		} satisfies AssetResult;
-		const result = (await plugin.afterGenerate?.(still, ctx)) as AssetResult;
 
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			/videoPrompt/,
+		);
 		expect(generateMock).not.toHaveBeenCalled();
-		expect(result).toBe(still);
 	});
 });

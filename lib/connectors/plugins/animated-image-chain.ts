@@ -26,7 +26,11 @@ export function createVideoChainPlugin(
 		},
 		async afterGenerate(result, ctx) {
 			const videoPrompt = ctx?.data?.[STASH_KEY] as string | undefined;
-			if (!videoPrompt) return result;
+			if (!videoPrompt) {
+				throw new Error(
+					"animated_image element is missing required videoPrompt attribute",
+				);
+			}
 			const { provider, config } = getDefaultConnector(registry, "video");
 			const video = createConnector(
 				"video",

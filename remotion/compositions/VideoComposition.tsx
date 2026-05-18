@@ -59,7 +59,6 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 						<OffthreadVideo
 							src={element.url}
 							style={coverStyle}
-							pauseWhenBuffering
 							volume={element.volume / 10}
 						/>
 					)}
