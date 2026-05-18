@@ -3,6 +3,7 @@ import {
 	User,
 	Image as ImageIcon,
 	Film,
+	Sparkles,
 	Volume2,
 	Music,
 } from "lucide-react";
@@ -11,10 +12,14 @@ import type { ConnectorType } from "@/lib/connectors/types";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 
+export type AttributeEdit =
+	| { kind: "enum"; options: readonly string[] }
+	| { kind: "text"; placeholder?: string; rows?: number };
+
 export interface AttributeSpec {
 	color: string;
 	label: string;
-	edit?: { options: readonly string[] };
+	edit?: AttributeEdit;
 }
 
 export interface ElementConfig {
@@ -48,19 +53,29 @@ const EMOTION_OPTIONS = Object.values(TTSEmotion);
 const volumeSpec = (color: string): AttributeSpec => ({
 	color,
 	label: "Volume",
-	edit: { options: VOLUME_OPTIONS },
+	edit: { kind: "enum", options: VOLUME_OPTIONS },
 });
 
 const speedSpec = (color: string): AttributeSpec => ({
 	color,
 	label: "Speed",
-	edit: { options: TTS_SPEEDS },
+	edit: { kind: "enum", options: TTS_SPEEDS },
 });
 
 const motionSpec = (color: string): AttributeSpec => ({
 	color,
 	label: "Motion",
-	edit: { options: MOTION_EFFECTS },
+	edit: { kind: "enum", options: MOTION_EFFECTS },
+});
+
+const videoPromptSpec = (color: string): AttributeSpec => ({
+	color,
+	label: "Video prompt",
+	edit: {
+		kind: "text",
+		placeholder: "Describe the camera or subject motion…",
+		rows: 3,
+	},
 });
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
@@ -80,7 +95,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			emotion: {
 				color: "bg-pink-500",
 				label: "Emotion",
-				edit: { options: EMOTION_OPTIONS },
+				edit: { kind: "enum", options: EMOTION_OPTIONS },
 			},
 			speed: speedSpec("bg-slate-500"),
 			volume: volumeSpec("bg-slate-500"),
@@ -102,7 +117,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			emotion: {
 				color: "bg-pink-500",
 				label: "Emotion",
-				edit: { options: EMOTION_OPTIONS },
+				edit: { kind: "enum", options: EMOTION_OPTIONS },
 			},
 			speed: speedSpec("bg-amber-600"),
 			volume: volumeSpec("bg-amber-600"),
@@ -121,6 +136,23 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		},
 		visibleAttributes: {
 			motion: motionSpec("bg-cyan-500"),
+		},
+	},
+	animated_image: {
+		type: "animated_image",
+		connector: "animated_image",
+		outputKind: "video",
+		label: "Animated image",
+		icon: <Sparkles size={16} className="text-white" />,
+		bgColor: "bg-fuchsia-600",
+		placeholder: "Describe the still image...",
+		defaultAttributes: {
+			motion: "none",
+			videoPrompt: "slow cinematic pan",
+		},
+		visibleAttributes: {
+			videoPrompt: videoPromptSpec("bg-fuchsia-500"),
+			motion: motionSpec("bg-fuchsia-500"),
 		},
 	},
 	clip: {
@@ -160,7 +192,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			loops: {
 				color: "bg-teal-500",
 				label: "Loops",
-				edit: { options: LOOPS_OPTIONS },
+				edit: { kind: "enum", options: LOOPS_OPTIONS },
 			},
 			volume: volumeSpec("bg-emerald-500"),
 		},
@@ -181,7 +213,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			loops: {
 				color: "bg-violet-500",
 				label: "Loops",
-				edit: { options: LOOPS_OPTIONS },
+				edit: { kind: "enum", options: LOOPS_OPTIONS },
 			},
 			volume: volumeSpec("bg-violet-500"),
 		},

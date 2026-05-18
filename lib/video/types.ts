@@ -6,6 +6,7 @@ export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
 export const ELEMENT_ROLES: Record<CanvasElementType, ElementRole> = {
 	image: "foreground",
+	animated_image: "foreground",
 	clip: "foreground",
 	narration: "overlay",
 	character: "overlay",
@@ -17,6 +18,7 @@ export type LayerType = "audio" | "visual";
 
 export const LAYER_TYPES: Record<CanvasElementType, LayerType> = {
 	image: "visual",
+	animated_image: "visual",
 	clip: "visual",
 	narration: "audio",
 	character: "audio",

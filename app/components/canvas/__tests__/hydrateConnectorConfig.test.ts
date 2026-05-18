@@ -28,6 +28,14 @@ const connectors: ConnectorRegistry = {
 			apiKey: "",
 		},
 	},
+	animated_image: {
+		openslop: {
+			defaultModel: "img-v1",
+			models: ["img-v1"],
+			isDefault: true,
+			apiKey: "",
+		},
+	},
 	video: {
 		openslop: {
 			defaultModel: "vid-v1",

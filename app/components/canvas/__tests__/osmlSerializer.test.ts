@@ -18,6 +18,9 @@ const connectors: ConnectorRegistry = {
 	image: {
 		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
 	},
+	animated_image: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
 	video: {
 		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
 	},
@@ -234,6 +237,20 @@ describe("OSMLSerializer streaming", () => {
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes[0].id).toBe("abc");
 		expect(nodes[0].customAttributes?.id).toBeUndefined();
+	});
+
+	it("parses <animated_image> with a videoPrompt attribute", () => {
+		const s = new OSMLSerializer();
+		s.appendChunk(
+			'<animated_image videoPrompt="slow zoom in">a dark forest</animated_image>',
+			connectors,
+		);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(nodes[0].type).toBe("animated_image");
+		expect(nodes[0].customAttributes?.videoPrompt).toBe("slow zoom in");
+		expect(OSMLSerializer.getTextContent(nodes[0])).toContain("a dark forest");
 	});
 
 	it("hydrates connector model and provider on streamed canvas elements", () => {

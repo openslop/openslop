@@ -16,6 +16,13 @@ const registry = {
 			isDefault: true,
 		},
 	},
+	animated_image: {
+		openslop: {
+			defaultModel: "test-model",
+			models: ["test-model"],
+			isDefault: true,
+		},
+	},
 	llm: {
 		openslop: { defaultModel: "m", models: ["m"], isDefault: true },
 	},

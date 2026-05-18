@@ -9,6 +9,7 @@ import {
 import type { CanvasContentElement } from "../types";
 import type { AttributeSpec } from "../config/elementConfigs";
 import { setNodeAttrs } from "../utils/editorOps";
+import { TextAttributePopover } from "./attributes/TextAttributePopover";
 
 const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
 
@@ -48,6 +49,21 @@ export function AttributeBadge({
 			<span className={`${spec.color} ${PILL}`} title={tooltip}>
 				{labeled}
 			</span>
+		);
+	}
+
+	if (spec.edit.kind === "text") {
+		return (
+			<TextAttributePopover
+				element={element}
+				attrKey={attrKey}
+				value={value}
+				label={spec.label}
+				color={spec.color}
+				tooltip={tooltip}
+				placeholder={spec.edit.placeholder}
+				rows={spec.edit.rows}
+			/>
 		);
 	}
 

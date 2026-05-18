@@ -17,7 +17,7 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 		return {
 			color: "bg-white/15",
 			label: "Model",
-			edit: { options },
+			edit: { kind: "enum", options },
 		};
 	}, [connector, connectorConfig, model, provider]);
 

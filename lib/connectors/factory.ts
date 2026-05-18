@@ -1,5 +1,7 @@
 import type { BaseImageConnector } from "./image/connector";
 import { OpenSlopImage } from "./image/openslop";
+import type { BaseAnimatedImageConnector } from "./animated_image/connector";
+import { OpenSlopAnimatedImage } from "./animated_image/openslop";
 import { OpenSlopLLM } from "./llm/openslop";
 import type { BaseMusicConnector } from "./music/connector";
 import { OpenSlopMusic } from "./music/openslop";
@@ -22,6 +24,7 @@ type ConnectorTypeMap = {
 	music: BaseMusicConnector;
 	sfx: BaseSFXConnector;
 	image: BaseImageConnector;
+	animated_image: BaseAnimatedImageConnector;
 	tts: TTSConnector;
 	video: BaseVideoConnector;
 };
@@ -34,6 +37,7 @@ const PROVIDERS: Record<
 	music: { openslop: OpenSlopMusic },
 	sfx: { openslop: OpenSlopSFX },
 	image: { openslop: OpenSlopImage },
+	animated_image: { openslop: OpenSlopAnimatedImage },
 	tts: { openslop: OpenSlopTTS },
 	video: { openslop: OpenSlopVideo },
 };

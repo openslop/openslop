@@ -107,6 +107,7 @@ describe("resolveElements", () => {
 	it("assigns correct roles and layers for all element types", () => {
 		const types: CanvasContentElement["type"][] = [
 			"image",
+			"animated_image",
 			"clip",
 			"narration",
 			"character",
@@ -119,6 +120,7 @@ describe("resolveElements", () => {
 		const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
 		expect(roleMap).toEqual({
 			image: "foreground",
+			animated_image: "foreground",
 			clip: "foreground",
 			narration: "overlay",
 			character: "overlay",
@@ -129,6 +131,7 @@ describe("resolveElements", () => {
 		const layerMap = Object.fromEntries(resolved.map((r) => [r.type, r.layer]));
 		expect(layerMap).toEqual({
 			image: "visual",
+			animated_image: "visual",
 			clip: "visual",
 			narration: "audio",
 			character: "audio",

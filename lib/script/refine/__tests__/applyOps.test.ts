@@ -75,6 +75,9 @@ const connectors: ConnectorRegistry = {
 	image: {
 		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
 	},
+	animated_image: {
+		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
+	},
 	video: {
 		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
 	},

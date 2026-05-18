@@ -24,6 +24,7 @@ export function deriveStatus(
 export const BORDER_COLORS: Record<CanvasElementType, string> = {
 	character: "border-amber-500/30",
 	image: "border-cyan-500/30",
+	animated_image: "border-fuchsia-500/30",
 	clip: "border-indigo-500/30",
 	narration: "border-white/20",
 	music: "border-violet-500/30",
@@ -36,5 +37,6 @@ export const WAVE_COLORS: Record<CanvasElementType, string> = {
 	music: "rgb(167, 139, 250)",
 	sound: "rgb(52, 211, 153)",
 	image: "rgb(34, 211, 238)",
+	animated_image: "rgb(232, 121, 249)",
 	clip: "rgb(129, 140, 248)",
 };

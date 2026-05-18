@@ -9,6 +9,7 @@ import {
 	MediaPreview,
 	MediaPlaceholder,
 } from "./preview/results";
+import { AnimatedImagePreview } from "./preview/AnimatedImagePreview";
 
 function OutputPreviewComponent({
 	element,
@@ -55,12 +56,27 @@ function OutputPreviewComponent({
 	}
 
 	if (result) {
+		const borderColor = BORDER_COLORS[type] ?? "border-white/20";
+		if (type === "animated_image" && result.previewUrl) {
+			return (
+				<AnimatedImagePreview
+					key={result.url}
+					url={result.url}
+					previewUrl={result.previewUrl}
+					borderColor={borderColor}
+					status={status}
+					seconds={seconds}
+					stale={stale}
+					onRegenerate={generate}
+				/>
+			);
+		}
 		return (
 			<MediaPreview
 				key={result.url}
 				url={result.url}
 				outputKind={outputKind}
-				borderColor={BORDER_COLORS[type] ?? "border-white/20"}
+				borderColor={borderColor}
 				status={status}
 				seconds={seconds}
 				stale={stale}

@@ -15,6 +15,7 @@ const connectors: ConnectorRegistry = {
 	llm: connector,
 	tts: connector,
 	image: connector,
+	animated_image: connector,
 	video: connector,
 	sfx: connector,
 	music: connector,

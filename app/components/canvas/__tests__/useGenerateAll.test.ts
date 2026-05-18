@@ -26,6 +26,13 @@ const registry: ConnectorRegistry = {
 			isDefault: true,
 		},
 	},
+	animated_image: {
+		openslop: {
+			defaultModel: "m",
+			models: ["m"],
+			isDefault: true,
+		},
+	},
 	video: {
 		openslop: {
 			defaultModel: "m",
