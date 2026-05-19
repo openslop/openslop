@@ -49,6 +49,7 @@ const VOLUME_OPTIONS = [
 	"10",
 ] as const;
 const EMOTION_OPTIONS = Object.values(TTSEmotion);
+const CAPTIONS_OPTIONS = ["on", "off"] as const;
 
 const volumeSpec = (color: string): AttributeSpec => ({
 	color,
@@ -66,6 +67,12 @@ const motionSpec = (color: string): AttributeSpec => ({
 	color,
 	label: "Motion",
 	edit: { kind: "enum", options: MOTION_EFFECTS },
+});
+
+const captionsSpec = (color: string): AttributeSpec => ({
+	color,
+	label: "Captions",
+	edit: { kind: "enum", options: CAPTIONS_OPTIONS },
 });
 
 const videoPromptSpec = (color: string): AttributeSpec => ({
@@ -90,6 +97,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		defaultAttributes: {
 			volume: "10",
 			speed: "medium",
+			captions: "on",
 		},
 		visibleAttributes: {
 			emotion: {
@@ -99,6 +107,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			},
 			speed: speedSpec("bg-slate-500"),
 			volume: volumeSpec("bg-slate-500"),
+			captions: captionsSpec("bg-slate-500"),
 		},
 	},
 	character: {
@@ -112,6 +121,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		defaultAttributes: {
 			volume: "10",
 			speed: "medium",
+			captions: "on",
 		},
 		visibleAttributes: {
 			emotion: {
@@ -121,6 +131,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			},
 			speed: speedSpec("bg-amber-600"),
 			volume: volumeSpec("bg-amber-600"),
+			captions: captionsSpec("bg-amber-600"),
 		},
 	},
 	image: {

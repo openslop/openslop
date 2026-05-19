@@ -60,6 +60,7 @@ export type AssetResult = {
 	url: string;
 	durationSec: number;
 	previewUrl?: string;
+	textTimestamps?: TextTimestamp[];
 };
 
 export interface Connector {
