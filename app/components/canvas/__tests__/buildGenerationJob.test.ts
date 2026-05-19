@@ -28,6 +28,13 @@ const registry: ConnectorRegistry = {
 			isDefault: true,
 		},
 	},
+	animated_image: {
+		openslop: {
+			defaultModel: "Slop Image v1",
+			models: ["Slop Image v1"],
+			isDefault: true,
+		},
+	},
 	video: {
 		openslop: {
 			defaultModel: "Slop Video v1",

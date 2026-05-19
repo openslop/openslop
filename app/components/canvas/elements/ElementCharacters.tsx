@@ -18,7 +18,8 @@ export function ElementCharacters({
 	const editor = useSlateStatic();
 	if (element.type === "character")
 		return <CharacterSwitcher element={element} />;
-	if (element.type !== "image") return null;
+	if (element.type !== "image" && element.type !== "animated_image")
+		return null;
 	const characters = getElementCharacterNames(element);
 	return (
 		<>

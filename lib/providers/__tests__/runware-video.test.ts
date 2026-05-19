@@ -52,6 +52,9 @@ describe("RunwareVideo", () => {
 					frameImages: undefined,
 					referenceImages: undefined,
 				},
+				settings: {
+					audio: false,
+				},
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});

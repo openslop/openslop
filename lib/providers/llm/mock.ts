@@ -19,13 +19,13 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
-<image animate="true" animation="slow pan across the village to the forest path" motion="kenBurnsOut">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</image>
+<animated_image videoPrompt="slow pan across the village to the forest path" motion="kenBurnsOut">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</animated_image>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
 <narration emotion="cheerful">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</narration>
 
-<image animate="true" animation="warm dolly in toward the kitchen window" motion="pushIn" characters="Red,Mother">Inside a sunlit kitchen with copper pots hanging on the wall, Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her Mother (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). Mother gently places a wicker basket of fresh vegetables in Red's hands.</image>
+<image motion="pushIn" characters="Red,Mother">Inside a sunlit kitchen with copper pots hanging on the wall, Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her Mother (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). Mother gently places a wicker basket of fresh vegetables in Red's hands.</image>
 
 <character name="Mother" emotion="gentle">"Take these straight to Granny, sweetheart. And please don't dawdle along the way."</character>
 
@@ -41,7 +41,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound>footsteps on dirt path</sound>
 
-<image animate="true" animation="gentle pan upward through the forest canopy" motion="tiltUp" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</image>
+<animated_image videoPrompt="gentle pan upward through the forest canopy" motion="tiltUp" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</animated_image>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
@@ -59,7 +59,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="calm">Wolf's mother had a terrible cold, and he wanted to bring her something special.</narration>
 
-<image animate="true" animation="warm camera dolly as the two meet on the path" characters="Red,Wolf">Red and Wolf meet face to face on a sunlit forest path. Red holds her vegetable basket; Wolf holds his berry basket. Both look surprised but unafraid. A shaft of golden light falls between them. Wildflowers grow along the path.</image>
+<image characters="Red,Wolf">Red and Wolf meet face to face on a sunlit forest path. Red holds her vegetable basket; Wolf holds his berry basket. Both look surprised but unafraid. A shaft of golden light falls between them. Wildflowers grow along the path.</image>
 
 <character name="Red" emotion="curious">"Oh! Hello, Mr. Wolf. Are those berries for someone special?"</character>
 
@@ -79,7 +79,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <character name="Red" emotion="proud">"She tells the best stories! And she knits the warmest mittens. And she always has cookies."</character>
 
-<image animate="true" animation="wide reveal as they round a bend" motion="panLeft" characters="Red,Wolf,Hunter">A clearing where the forest path meets a sturdy bridge over a stream. Hunter (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at Red and Wolf as they approach. His sturdy brown boots crunch on the gravel.</image>
+<image motion="panLeft" characters="Red,Wolf,Hunter">A clearing where the forest path meets a sturdy bridge over a stream. Hunter (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at Red and Wolf as they approach. His sturdy brown boots crunch on the gravel.</image>
 
 <character name="Hunter" emotion="hearty">"Well now! Little Red and her woodland friend! You two heading to the old oak cottage?"</character>
 
@@ -91,7 +91,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<image animate="true" animation="slow push-in toward the cottage door" motion="kenBurnsIn" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</image>
+<animated_image videoPrompt="slow push-in toward the cottage door" motion="kenBurnsIn" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</animated_image>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;
@@ -126,7 +126,7 @@ const MOCK_REFINEMENTS: RefinementFactory[] = [
 	() =>
 		[
 			`{"op":"insert","position":"before","type":"narration","text":"Long ago, in a land of endless forests..."}`,
-			`{"op":"insert","position":"before","type":"image","attrs":{"animate":"true"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
+			`{"op":"insert","position":"before","type":"animated_image","attrs":{"videoPrompt":"slow aerial drift over the canopy"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
 		].join("\n"),
 
 	// Multiple set ops on different elements (tests independent edits)

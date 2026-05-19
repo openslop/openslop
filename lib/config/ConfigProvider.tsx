@@ -22,6 +22,7 @@ import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 import { buildImagePlugins } from "../connectors/plugins/imageChain";
+import { buildAnimatedImagePlugins } from "../connectors/plugins/animated-image-chain";
 import { createMetadataVoicePlugin } from "../connectors/plugins/metadata-voice";
 import { createReferenceImagesPlugin } from "../connectors/plugins/reference-images";
 import { createVoiceSearchPlugin } from "../connectors/plugins/voice-search";
@@ -71,6 +72,7 @@ const initialConnectorConfig: ConnectorRegistry = {
 	llm: openslopConfig("Slop LLM v1", LLM_MODELS, [osmlPlugin]),
 	tts: openslopConfig("Slop TTS v1", TTS_MODELS),
 	image: openslopConfig("Slop Image v1", IMAGE_MODELS),
+	animated_image: openslopConfig("Slop Image v1", IMAGE_MODELS),
 	video: openslopConfig("Slop Video v1", VIDEO_MODELS),
 	sfx: openslopConfig("Slop SFX v1", SFX_MODELS),
 	music: openslopConfig("Slop Music v1", MUSIC_MODELS),
@@ -131,12 +133,18 @@ export function ConfigProvider({
 		const modePlugin = MODE_PLUGIN_FACTORIES[mode]({
 			templateId: selectedTemplateId,
 		});
-		return withRegistry(connectorConfig)
+		const base = withRegistry(connectorConfig)
 			.appendPlugins("llm", modePlugin)
 			.appendPlugins("image", ...buildImagePlugins(projectId))
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))
 			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
 			.appendPlugins("tts", createVoiceSearchPlugin())
+			.build();
+		return withRegistry(base)
+			.appendPlugins(
+				"animated_image",
+				...buildAnimatedImagePlugins(projectId, base),
+			)
 			.build();
 	}, [connectorConfig, mode, selectedTemplateId, projectId]);
 

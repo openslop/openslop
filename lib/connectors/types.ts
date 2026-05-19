@@ -2,7 +2,14 @@ import type { GatewayClient } from "@/lib/gateway/base";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { TTSGender, TTSSpeed } from "./tts/enums";
 
-export type ConnectorType = "llm" | "music" | "sfx" | "image" | "tts" | "video";
+export type ConnectorType =
+	| "llm"
+	| "music"
+	| "sfx"
+	| "image"
+	| "animated_image"
+	| "tts"
+	| "video";
 
 export type ProviderKey = "openslop";
 
@@ -11,6 +18,7 @@ export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 export interface PluginContext<TParams = unknown, TResult = unknown> {
 	gateway?: GatewayClient<TParams, TResult>;
 	searchVoices?: VoiceSearchFn;
+	data?: Record<string, unknown>;
 }
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
@@ -48,7 +56,11 @@ export type ConnectorGenerateParams = {
 	model?: string;
 };
 
-export type AssetResult = { url: string; durationSec: number };
+export type AssetResult = {
+	url: string;
+	durationSec: number;
+	previewUrl?: string;
+};
 
 export interface Connector {
 	readonly type: ConnectorType;
@@ -103,6 +115,10 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	width?: number;
 	height?: number;
 	referenceImages?: string[];
+};
+
+export type AnimatedImageGenerateParams = ImageGenerateParams & {
+	videoPrompt?: string;
 };
 
 // TTS types

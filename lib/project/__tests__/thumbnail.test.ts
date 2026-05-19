@@ -8,12 +8,15 @@ const entry = (
 	id: string,
 	connectorType: ConnectorType | null,
 	url: string | null,
+	previewUrl?: string,
 ): [string, ElementSnapshot] => [
 	id,
 	{
 		status: "idle",
 		seconds: 0,
-		result: url ? { url, durationSec: 0 } : null,
+		result: url
+			? { url, durationSec: 0, ...(previewUrl && { previewUrl }) }
+			: null,
 		error: null,
 		resultInputs: null,
 		connectorType,
@@ -57,5 +60,20 @@ describe("pickThumbnailUrl", () => {
 				entry("scene-1", "image", "scene.png"),
 			]),
 		).toBe("scene.png");
+	});
+
+	it("accepts animated_image and prefers previewUrl over the video url", () => {
+		expect(
+			pickThumbnailUrl([
+				entry("1", "tts", "n.mp3"),
+				entry("2", "animated_image", "video.mp4", "still.png"),
+			]),
+		).toBe("still.png");
+	});
+
+	it("falls back to animated_image url when no previewUrl is present", () => {
+		expect(pickThumbnailUrl([entry("1", "animated_image", "video.mp4")])).toBe(
+			"video.mp4",
+		);
 	});
 });

@@ -6,8 +6,12 @@ export function pickThumbnailUrl(
 ): string | null {
 	for (const [id, snap] of entries) {
 		if (id.startsWith(CHARACTER_AVATAR_ID_PREFIX)) continue;
-		if (snap.connectorType !== "image") continue;
-		const url = snap.result?.url;
+		if (
+			snap.connectorType !== "image" &&
+			snap.connectorType !== "animated_image"
+		)
+			continue;
+		const url = snap.result?.previewUrl ?? snap.result?.url;
 		if (url) return url;
 	}
 	return null;

@@ -40,6 +40,9 @@ export class RunwareVideo extends BaseVideoProvider {
 					frameImages: params.frameImages,
 					referenceImages: params.referenceImages,
 				},
+				settings: {
+					audio: false,
+				},
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;

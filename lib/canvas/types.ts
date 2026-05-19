@@ -7,6 +7,7 @@ export type CanvasElementType =
 	| "narration"
 	| "character"
 	| "image"
+	| "animated_image"
 	| "clip"
 	| "sound"
 	| "music";
@@ -15,6 +16,7 @@ export const CANVAS_ELEMENT_TYPES = new Set<CanvasElementType>([
 	"narration",
 	"character",
 	"image",
+	"animated_image",
 	"clip",
 	"sound",
 	"music",
@@ -24,6 +26,7 @@ export const SCENE_TYPE = "scene" as const;
 
 export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set([
 	"image",
+	"animated_image",
 	"clip",
 ]);
 

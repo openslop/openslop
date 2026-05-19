@@ -13,7 +13,11 @@ import type {
 	Sequence as SeqType,
 	ResolvedElement,
 } from "@/lib/video/types";
-import { AUDIO_FADE_SEC, getPresentation } from "@/lib/video/transitions";
+import {
+	AUDIO_FADE_SEC,
+	VIDEO_PREMOUNT_SEC,
+	getPresentation,
+} from "@/lib/video/transitions";
 import { audioVolume } from "@/lib/video/audioVolume";
 import { MotionLayer } from "../components/MotionLayer";
 
@@ -42,8 +46,8 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 		<Html5Audio
 			src={element.url}
 			crossOrigin="anonymous"
-			pauseWhenBuffering
 			volume={volume}
+			pauseWhenBuffering
 		/>
 	);
 }
@@ -59,8 +63,8 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 						<OffthreadVideo
 							src={element.url}
 							style={coverStyle}
-							pauseWhenBuffering
 							volume={element.volume / 10}
+							pauseWhenBuffering
 						/>
 					)}
 				</MotionLayer>
@@ -109,6 +113,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 					)}
 					<TransitionSeries.Sequence
 						durationInFrames={toFrames(seq.duration, fps)}
+						premountFor={toFrames(VIDEO_PREMOUNT_SEC, fps)}
 					>
 						<SeriesEntry seq={seq} />
 					</TransitionSeries.Sequence>

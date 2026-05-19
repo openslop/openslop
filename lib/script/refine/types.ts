@@ -1,12 +1,12 @@
 import { z } from "zod";
+import {
+	CANVAS_ELEMENT_TYPES,
+	type CanvasElementType,
+} from "@/lib/canvas/types";
 
-const canvasElementType = z.enum([
-	"narration",
-	"character",
-	"image",
-	"clip",
-	"sound",
-	"music",
+const canvasElementType = z.enum([...CANVAS_ELEMENT_TYPES] as [
+	CanvasElementType,
+	...CanvasElementType[],
 ]);
 
 const insertOp = z.object({

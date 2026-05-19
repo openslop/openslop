@@ -45,10 +45,8 @@ const OSML_SYSTEM_PROMPT = dedent`
 	- For both character and narration tags, the emotion attribute should be appropriately set to one of the following: ${Object.values(TTSEmotion).join(", ")}.
 
   ### Image XML Tags
-  - Each scene should include an image XML tag that describes the current scene with required attributes: animate, animation. Example:
-		<image animate="true" animation="slow zoom out revealing the full landscape">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
-  - animate: Include a required animate attribute that is either "true" or "false". This controls whether the image is animated or static.
-  - animation: If animate is "true", include an animation attribute that describes the motion/camera movement for the video. The animation description should be simple, focused, and relaxing.
+  - Each scene should include an image XML tag that describes the current scene. Example:
+		<image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - motion: Optional camera-motion effect applied for the element's full duration. Use sparingly — at most one per scene, and prefer omitting when the image already carries the energy. Example: <image motion="kenBurnsIn">...</image>
   - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
 	- characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
@@ -60,10 +58,19 @@ const OSML_SYSTEM_PROMPT = dedent`
   - Overlays should be a comma-separated list containing any of the following: ${Object.values(
 		EffectType,
 	).join(", ")}
-  - Image descriptions should describe the characters (along with their gender, age, ethnicity, species, hair color, eye color, skin tone, clothing, and physical appearances), the time of day, the background, the weather (if outdoors), and objects in detail.
-  - Each <image> description must be written as a fully standalone prompt, as if the generative image model has absolutely no knowledge of the story, characters, prior images, or previous prompts.
-  - The first time a character is mentioned in each image tag description, describe the character next to their name. Example: "Kirito, a black haired Japanese boy with brown eyes and a white shirt..."
-  - Each image description should include all relevant details about the scene (except for art style), even if this requires repeating details from previous descriptions or the story.
+  - Image descriptions should describe the time of day, the background, the weather (if outdoors), and objects in detail.
+  - Each <image> description must be written as a standalone prompt, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
+	- Reference characters by their names in the image description, no need to redescribe their appearance
+  - Each image description should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous descriptions or the story.
+
+  ### Animated Image XML Tags
+  - An <animated_image> tag is an <image> tag whose still frame is then animated by an image-to-video model. Use it for hero moments, establishing shots, or emotional beats that benefit from subtle motion. The tag body describes the still frame in the same way as an <image>; the videoPrompt attribute describes the camera/subject motion. Example:
+		<animated_image videoPrompt="slow zoom out revealing the full landscape" motion="kenBurnsIn" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
+  - videoPrompt: required. A short, focused, relaxing description of the motion or camera movement (e.g. "slow cinematic pan", "gentle dolly in", "warm zoom on the character's face"). Keep it simple — one camera move per shot.
+  - motion: optional. Same enum as for <image>. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
+  - characters: optional. Same as for <image> — a comma-separated list of exact story character names appearing in the frame. Example: <animated_image videoPrompt="..." characters="Red,Granny">Red hands the basket to Granny at the cottage door.</animated_image>
+  - All <image> description rules apply unchanged: write a prompt that describes the time of day, background, weather, and objects in detail. Repeat any details necessary even if they appeared in earlier prompts.
+  - Use <animated_image> sparingly — mostly at intro shots and hero moments. Default to <image> for typical scenes; image-to-video generation is significantly slower and more expensive.
 
   ### Sound XML Tags
   - Frequently break up character (including narration) dialogue to insert <sound> tags (as if prompting a sound model) that should accompany a scene.
