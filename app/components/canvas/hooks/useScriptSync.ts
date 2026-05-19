@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Editor, Transforms } from "slate";
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScriptNodes } from "@/lib/script/ScriptProvider";
 import {
 	CANVAS_ELEMENT_TYPES,
 	type CanvasContentElement,
@@ -18,7 +18,7 @@ function shouldSkip(node: ParsedElement): boolean {
 }
 
 export function useScriptSync(editor: Editor): void {
-	const { nodes } = useScript();
+	const nodes = useScriptNodes();
 
 	useEffect(() => {
 		// `nodes` is capped at MAX_NODES_TO_SYNC (3) by useOSMLSerializer,

@@ -15,19 +15,29 @@ import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
-type ScriptContextValue = {
-	nodes: ParsedElement[];
+type ScriptControl = {
 	loading: boolean;
 	submitPrompt: (prompt: string) => Promise<void>;
 	stopGeneration: () => void;
 };
 
-const ScriptContext = createContext<ScriptContextValue | null>(null);
+// `nodes` is rebuilt on every streamed token, so it lives in its own context
+// to keep low-frequency controls from re-rendering the editor shell per token.
+const ScriptNodesContext = createContext<ParsedElement[] | null>(null);
+const ScriptControlContext = createContext<ScriptControl | null>(null);
 const ScriptTextContext = createContext<string>("");
 
-export function useScript() {
-	const ctx = use(ScriptContext);
-	if (!ctx) throw new Error("useScript must be used within ScriptProvider");
+export function useScriptNodes() {
+	const ctx = use(ScriptNodesContext);
+	if (!ctx)
+		throw new Error("useScriptNodes must be used within ScriptProvider");
+	return ctx;
+}
+
+export function useScriptControl() {
+	const ctx = use(ScriptControlContext);
+	if (!ctx)
+		throw new Error("useScriptControl must be used within ScriptProvider");
 	return ctx;
 }
 
@@ -84,21 +94,18 @@ export function ScriptProvider({
 		[llmProvider, llmConfig, appendChunk],
 	);
 
-	const value = useMemo<ScriptContextValue>(
-		() => ({
-			nodes,
-			loading,
-			submitPrompt,
-			stopGeneration,
-		}),
-		[nodes, loading, submitPrompt, stopGeneration],
+	const control = useMemo<ScriptControl>(
+		() => ({ loading, submitPrompt, stopGeneration }),
+		[loading, submitPrompt, stopGeneration],
 	);
 
 	return (
-		<ScriptContext.Provider value={value}>
-			<ScriptTextContext.Provider value={script}>
-				{children}
-			</ScriptTextContext.Provider>
-		</ScriptContext.Provider>
+		<ScriptControlContext.Provider value={control}>
+			<ScriptNodesContext.Provider value={nodes}>
+				<ScriptTextContext.Provider value={script}>
+					{children}
+				</ScriptTextContext.Provider>
+			</ScriptNodesContext.Provider>
+		</ScriptControlContext.Provider>
 	);
 }

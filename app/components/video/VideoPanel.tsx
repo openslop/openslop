@@ -1,6 +1,6 @@
 "use client";
 
-import { useScript } from "@/lib/script/ScriptProvider";
+import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useLayout } from "./VideoLayoutContext";
 import { VideoPreview } from "./VideoPreview";
 import { RenderControls } from "./RenderControls";
@@ -9,7 +9,7 @@ import { PlayerShimmer } from "./PlayerShimmer";
 
 function VideoPanelBody() {
 	const { layout, ready, playerKey } = useLayout();
-	const { loading: scriptLoading } = useScript();
+	const { loading: scriptLoading } = useScriptControl();
 
 	if (scriptLoading) {
 		return (
@@ -31,7 +31,7 @@ function VideoPanelBody() {
 
 export function VideoPanel() {
 	const { layout, ready } = useLayout();
-	const { loading: scriptLoading } = useScript();
+	const { loading: scriptLoading } = useScriptControl();
 	const showControls = !scriptLoading && !!layout?.series.length && ready;
 
 	return (
