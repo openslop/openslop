@@ -6,7 +6,12 @@ import {
 } from "./motionEffects";
 
 /** Raw attribute keys that, when changed, require a layout recompute. */
-export const LAYOUT_ATTRIBUTE_KEYS = ["loops", "volume", "motion"] as const;
+export const LAYOUT_ATTRIBUTE_KEYS = [
+	"loops",
+	"volume",
+	"motion",
+	"captions",
+] as const;
 
 const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
@@ -29,6 +34,10 @@ export function getLoops(element: CanvasContentElement): number {
 export function getMotion(element: CanvasContentElement): MotionEffect {
 	const raw = element.customAttributes?.motion;
 	return isMotionEffect(raw) ? raw : DEFAULT_MOTION;
+}
+
+export function areCaptionsEnabled(element: CanvasContentElement): boolean {
+	return element.customAttributes?.captions !== "off";
 }
 
 /**

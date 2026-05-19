@@ -19,6 +19,7 @@ import {
 	getPresentation,
 } from "@/lib/video/transitions";
 import { audioVolume } from "@/lib/video/audioVolume";
+import { Captions } from "../components/Captions";
 import { MotionLayer } from "../components/MotionLayer";
 
 const coverStyle: React.CSSProperties = {
@@ -43,12 +44,17 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 		[gain, durationInFrames, fadeFrames],
 	);
 	return (
-		<Html5Audio
-			src={element.url}
-			crossOrigin="anonymous"
-			volume={volume}
-			pauseWhenBuffering
-		/>
+		<>
+			<Html5Audio
+				src={element.url}
+				crossOrigin="anonymous"
+				volume={volume}
+				pauseWhenBuffering
+			/>
+			{element.captionTimestamps && (
+				<Captions timestamps={element.captionTimestamps} />
+			)}
+		</>
 	);
 }
 

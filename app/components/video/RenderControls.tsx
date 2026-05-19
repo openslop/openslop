@@ -16,7 +16,7 @@ function formatBytes(bytes: number): string {
 }
 
 const pillClass =
-	"flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]";
+	"flex items-center gap-2 rounded-lg border border-white/10 bg-card/90 px-3 py-2 backdrop-blur-xl shadow-md shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]";
 
 export function RenderControls({ layout }: { layout: VideoLayout }) {
 	const { state, render, reset } = useRendering();
@@ -29,7 +29,7 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 						type="button"
 						onClick={() => render(layout)}
 						aria-label="Export Video"
-						className="relative grain rounded-lg bg-[#1f1528]/60 p-2 text-violet-300 opacity-0 transition-[opacity,filter] hover:brightness-[1.3] group-hover:opacity-100"
+						className="relative grain rounded-lg bg-[#1f1528]/90 p-2 text-violet-300 opacity-0 shadow-md shadow-black/25 transition-[opacity,filter] hover:brightness-[1.3] group-hover:opacity-100"
 					>
 						<Download size={16} />
 					</button>
@@ -45,7 +45,7 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 				<Loader2 size={14} className="animate-spin text-white/60" />
 				<div className="flex flex-col gap-1">
 					<span className="text-xs text-white/80">{state.phase}</span>
-					<div className="h-1 w-32 overflow-hidden rounded-full bg-white/10">
+					<div className="h-1 w-32 overflow-hidden rounded-full bg-white/15">
 						<div
 							className="h-full rounded-full bg-violet-500 transition-all"
 							style={{ width: `${state.progress * 100}%` }}

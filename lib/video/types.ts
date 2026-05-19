@@ -1,4 +1,5 @@
 import type { CanvasElementType } from "@/lib/canvas/types";
+import type { TextTimestamp } from "@/lib/connectors/types";
 import type { MotionEffect } from "./motionEffects";
 import type { TransitionType } from "./transitions";
 
@@ -36,6 +37,7 @@ export type ResolvedElement = {
 	loops: number;
 	volume: number;
 	motion: MotionEffect;
+	captionTimestamps?: TextTimestamp[];
 };
 
 export type Sequence = {
