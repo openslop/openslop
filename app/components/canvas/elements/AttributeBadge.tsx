@@ -43,7 +43,7 @@ export function AttributeBadge({
 			{formatValue(attrKey, value)}
 		</>
 	);
-	const tooltip = value ? `${spec.label}: ${value}` : spec.label;
+	const tooltip = `${spec.label}: ${value || ""}`;
 
 	if (!spec.edit) {
 		return (

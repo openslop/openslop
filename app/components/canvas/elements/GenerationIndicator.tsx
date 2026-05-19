@@ -24,9 +24,10 @@ const ICON_ANIMATION: Record<Status, string> = {
 };
 
 const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
-	sm: { wrapper: "h-4 w-4 bg-black/40", icon: "h-2.5 w-2.5" },
+	sm: { wrapper: "h-4 w-4 bg-black/55", icon: "h-2.5 w-2.5" },
 	md: {
-		wrapper: "h-7 w-7 bg-white/10 hover:bg-white/20 grain grain-light",
+		wrapper:
+			"h-7 w-7 bg-black/55 hover:bg-black/70 backdrop-blur-xl grain grain-light ring-1 ring-inset ring-white/10",
 		icon: "h-3 w-3",
 	},
 };

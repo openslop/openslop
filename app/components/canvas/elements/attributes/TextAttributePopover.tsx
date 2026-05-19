@@ -64,7 +64,14 @@ export function TextAttributePopover({
 				type="button"
 				aria-label={tooltip}
 				title={tooltip}
-				onClick={() => (open ? setOpen(false) : openPopover())}
+				onClick={() => {
+					if (open) {
+						commit(draft);
+						setOpen(false);
+					} else {
+						openPopover();
+					}
+				}}
 				className={`${color} text-white text-[12px] px-2 py-1 rounded-full max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all`}
 			>
 				<span className="truncate min-w-0">

@@ -21,7 +21,7 @@ export function AnimatedImagePreview({
 	stale,
 	onRegenerate,
 }: AnimatedImagePreviewProps) {
-	const [mode, setMode] = useState<"animated" | "still">("animated");
+	const [mode, setMode] = useState<"animated" | "still">("still");
 	const isAnimated = mode === "animated";
 
 	return (
@@ -36,7 +36,7 @@ export function AnimatedImagePreview({
 				stale={stale}
 				onRegenerate={onRegenerate}
 			/>
-			<div className="absolute top-2 right-2 z-10 flex items-center rounded-full border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/20 p-0.5">
+			<div className="absolute top-2 right-2 z-10 flex items-center rounded-full border border-white/10 bg-black/55 backdrop-blur-xl shadow-md shadow-black/40 p-0.5">
 				<ToggleButton
 					active={isAnimated}
 					label="Video"
