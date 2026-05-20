@@ -21,7 +21,7 @@ export function AnimatedImagePreview({
 	stale,
 	onRegenerate,
 }: AnimatedImagePreviewProps) {
-	const [mode, setMode] = useState<"animated" | "still">("still");
+	const [mode, setMode] = useState<"animated" | "still">("animated");
 	const isAnimated = mode === "animated";
 
 	return (
