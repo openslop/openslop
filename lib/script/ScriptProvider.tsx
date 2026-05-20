@@ -25,7 +25,12 @@ type ScriptControl = {
 // to keep low-frequency controls from re-rendering the editor shell per token.
 const ScriptNodesContext = createContext<ParsedElement[] | null>(null);
 const ScriptControlContext = createContext<ScriptControl | null>(null);
-const ScriptTextContext = createContext<string>("");
+// The live script string changes per streamed token, but nothing renders it:
+// the shell only needs a stable "has any content" boolean, and the editor only
+// needs the initial script once for rehydration. Exposing those instead of the
+// raw string keeps the whole editor tree off the per-token render path.
+const ScriptHasContentContext = createContext(false);
+const ScriptInitialContext = createContext<string>("");
 
 export function useScriptNodes() {
 	const ctx = use(ScriptNodesContext);
@@ -41,8 +46,12 @@ export function useScriptControl() {
 	return ctx;
 }
 
-export function useScriptText() {
-	return use(ScriptTextContext);
+export function useScriptHasContent() {
+	return use(ScriptHasContentContext);
+}
+
+export function useScriptInitial() {
+	return use(ScriptInitialContext);
 }
 
 export function ScriptProvider({
@@ -53,7 +62,7 @@ export function ScriptProvider({
 	children: ReactNode;
 }) {
 	const { connectorConfig } = useConfig();
-	const [script, setScript] = useState(initialScript);
+	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const [loading, setLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
 	const { nodes, appendChunk } = useOSMLSerializer();
@@ -75,13 +84,14 @@ export function ScriptProvider({
 			const controller = new AbortController();
 			abortRef.current = controller;
 
-			setScript("");
+			setHasContent(false);
 			setLoading(true);
 			try {
 				const connector = createConnector("llm", llmProvider, llmConfig);
 				for await (const chunk of connector.stream({ prompt })) {
 					if (controller.signal.aborted) break;
-					setScript((prev) => prev + chunk.text);
+					if (!chunk.text) continue;
+					setHasContent(true);
 					appendChunk(chunk.text);
 				}
 			} finally {
@@ -102,9 +112,11 @@ export function ScriptProvider({
 	return (
 		<ScriptControlContext.Provider value={control}>
 			<ScriptNodesContext.Provider value={nodes}>
-				<ScriptTextContext.Provider value={script}>
-					{children}
-				</ScriptTextContext.Provider>
+				<ScriptInitialContext.Provider value={initialScript}>
+					<ScriptHasContentContext.Provider value={hasContent}>
+						{children}
+					</ScriptHasContentContext.Provider>
+				</ScriptInitialContext.Provider>
 			</ScriptNodesContext.Provider>
 		</ScriptControlContext.Provider>
 	);
