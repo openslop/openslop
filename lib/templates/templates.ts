@@ -358,7 +358,7 @@ export const TEMPLATES: Template[] = [
 		systemPrompt: dedent`
 			# Important
 			- The main character is always called Ethan, and the Ethan must always be present in the character list of images where relevant
-			- The art style is: Flat 2D cartoon, Family Guy-style: bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. YouTube explainer-cartoon aesthetic. Plain white background.
+			- The art style is: Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.
 			- Do not generate character metadata for Ethan, but do use him like a regular character in the story
 			- Ethan is a man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers`,
 		exampleText: dedent`
