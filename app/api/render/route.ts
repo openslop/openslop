@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 			const sandbox = process.env.VERCEL
 				? await restoreSnapshot()
 				: await createSandbox({
-						timeoutInMilliseconds: 15 * 60 * 1000,
+						timeoutInMilliseconds: 120 * 60 * 1000,
 						onProgress: async ({ progress, message }) => {
 							await send({
 								type: "phase",
