@@ -25,9 +25,13 @@ export function getVolume(element: CanvasContentElement): number {
 		: DEFAULT_VOLUME;
 }
 
-/** Loop count coerced to an integer of at least 1, defaulting to 1. */
+const LOOPS_MAX = 1000;
+
+/** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
-	return Math.max(1, Number(element.customAttributes?.loops) || 1);
+	const raw = Number(element.customAttributes?.loops);
+	if (!Number.isFinite(raw)) return 1;
+	return Math.max(1, Math.min(LOOPS_MAX, Math.floor(raw)));
 }
 
 /** Motion effect validated against the known set, defaulting to "none". */

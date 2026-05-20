@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X as XIcon, AlertCircle, Check, Copy } from "lucide-react";
 import {
 	Tooltip,
@@ -92,10 +92,23 @@ export function ResultOverlay({
 
 function ErrorMessage({ message }: { message: string }) {
 	const [copied, setCopied] = useState(false);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(
+		() => () => {
+			if (timerRef.current) clearTimeout(timerRef.current);
+		},
+		[],
+	);
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(message);
+		try {
+			await navigator.clipboard.writeText(message);
+		} catch (e) {
+			console.error("Failed to copy error message:", e);
+			return;
+		}
 		setCopied(true);
-		setTimeout(() => setCopied(false), 1500);
+		if (timerRef.current) clearTimeout(timerRef.current);
+		timerRef.current = setTimeout(() => setCopied(false), 1500);
 	};
 	return (
 		<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-12 py-2">
