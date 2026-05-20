@@ -20,7 +20,7 @@ describe("AnthropicLLM", () => {
 		it("returns text and usage with defaults", async () => {
 			mockCreate.mockResolvedValue({
 				content: [{ type: "text", text: "Hello world" }],
-				model: "claude-sonnet-4-5-20250929",
+				model: "claude-opus-4-7",
 				usage: { input_tokens: 10, output_tokens: 5 },
 			});
 
@@ -29,11 +29,11 @@ describe("AnthropicLLM", () => {
 
 			expect(result).toEqual({
 				text: "Hello world",
-				model: "claude-sonnet-4-5-20250929",
+				model: "claude-opus-4-7",
 				usage: { inputTokens: 10, outputTokens: 5 },
 			});
 			expect(mockCreate).toHaveBeenCalledWith({
-				model: "claude-sonnet-4-5-20250929",
+				model: "claude-opus-4-7",
 				max_tokens: 8192,
 				temperature: undefined,
 				system: undefined,

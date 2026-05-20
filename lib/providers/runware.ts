@@ -12,10 +12,6 @@ export async function withRunware<T>(
 	});
 	try {
 		return await fn(runware);
-	} catch (e) {
-		throw e instanceof Error
-			? e
-			: new Error(typeof e === "string" ? e : JSON.stringify(e));
 	} finally {
 		runware.disconnect?.();
 	}
