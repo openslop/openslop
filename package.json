@@ -97,6 +97,12 @@
 	},
 	"overrides": {
 		"postcss": "^8.5.10",
-		"fast-uri": "^3.1.2"
+		"fast-uri": "^3.1.2",
+		"@ts-morph/common": {
+			"brace-expansion": "^5.0.6"
+		},
+		"@typescript-eslint/typescript-estree": {
+			"brace-expansion": "^5.0.6"
+		}
 	}
 }
