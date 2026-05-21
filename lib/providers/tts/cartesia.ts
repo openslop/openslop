@@ -162,7 +162,8 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				}
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
-					for (let i = 0; i < words.length; i++) {
+					const count = Math.min(words.length, start.length, end.length);
+					for (let i = 0; i < count; i++) {
 						textTimestamps.push({
 							text: words[i],
 							start: start[i],

@@ -38,6 +38,16 @@ describe("POST /api/validate-code", () => {
 		expect((await res.json()).error).toContain("Invalid code format");
 	});
 
+	it("returns 400 (not 500) when the body is malformed JSON", async () => {
+		const req = new NextRequest(
+			new URL("/api/validate-code", "http://localhost:3000"),
+			{ method: "POST", body: "{not json" },
+		);
+		const res = await POST(req);
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toContain("Invalid code format");
+	});
+
 	it("returns 400 when code is not a string", async () => {
 		const res = await POST(makeRequest({ code: 123456 }));
 		expect(res.status).toBe(400);

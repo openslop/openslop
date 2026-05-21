@@ -29,7 +29,10 @@ export async function rankBySimilarity(
 	]);
 
 	const scores = new Map(
-		voices.map((v, i) => [v.id, cosineSimilarity(query, voiceVecs[i])]),
+		voices.map((v, i) => {
+			const vec = voiceVecs[i];
+			return [v.id, vec ? cosineSimilarity(query, vec) : -Infinity] as const;
+		}),
 	);
 	return [...voices].sort(
 		(a, b) => (scores.get(b.id) ?? -Infinity) - (scores.get(a.id) ?? -Infinity),

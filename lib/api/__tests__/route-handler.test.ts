@@ -49,6 +49,20 @@ describe("createRouteHandler", () => {
 		expect(handle).not.toHaveBeenCalled();
 	});
 
+	it("returns 400 (not 500) when the body is malformed JSON", async () => {
+		const handle = vi.fn(async () => NextResponse.json({}));
+		const handler = makeHandler(handle);
+		const req = new NextRequest("http://localhost/api/test", {
+			method: "POST",
+			body: "{not valid json",
+			headers: { "Content-Type": "application/json" },
+		});
+		const res = await handler(req);
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toBe("Request body must be valid JSON");
+		expect(handle).not.toHaveBeenCalled();
+	});
+
 	it("returns 400 when prompt is missing", async () => {
 		const handler = makeHandler();
 		const res = await handler(makeRequest({}));

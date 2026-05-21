@@ -12,7 +12,17 @@ export async function parseBody<TSchema extends z.ZodType>(
 	schema: TSchema,
 	label: string,
 ): Promise<ParseResult<z.infer<TSchema>>> {
-	const parsed = schema.safeParse(await request.json());
+	let raw: unknown;
+	try {
+		raw = await request.json();
+	} catch {
+		logger.warn(`${label}: malformed JSON body`);
+		return {
+			ok: false,
+			response: badRequest("Request body must be valid JSON"),
+		};
+	}
+	const parsed = schema.safeParse(raw);
 	if (parsed.success) return { ok: true, data: parsed.data };
 	const message = parsed.error.issues[0]?.message ?? "Invalid request body";
 	logger.warn(`${label}: ${message}`);

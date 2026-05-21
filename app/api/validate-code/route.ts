@@ -8,8 +8,16 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-	const body = await request.json();
-	const { code } = body;
+	let body: unknown;
+	try {
+		body = await request.json();
+	} catch {
+		return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
+	}
+	const code =
+		body && typeof body === "object" && "code" in body
+			? (body as { code: unknown }).code
+			: undefined;
 
 	if (!code || typeof code !== "string" || code.length !== 6) {
 		return NextResponse.json({ error: "Invalid code format" }, { status: 400 });

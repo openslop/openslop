@@ -73,6 +73,35 @@ describe("CartesiaTTS", () => {
 			expect(mockClose).toHaveBeenCalled();
 		});
 
+		it("ignores trailing timestamps when arrays are mismatched lengths", async () => {
+			const responses = [
+				{
+					type: "timestamps",
+					word_timestamps: {
+						words: ["a", "b", "c"],
+						start: [0, 1],
+						end: [0.5, 1.5],
+					},
+				},
+				{ type: "done", done: true },
+			];
+			mockGenerate.mockReturnValue({
+				[Symbol.asyncIterator]: async function* () {
+					for (const r of responses) yield r;
+				},
+			});
+
+			const provider = new CartesiaTTS("test-key");
+			const result = await provider.generate({
+				prompt: "a b c",
+				voiceId: "v1",
+			});
+
+			// Only the two fully-defined timestamps survive, so durationSec is the
+			// finite end of the last paired timestamp (1.5) + 1, not NaN.
+			expect(result.metadata?.durationSec).toBe(2.5);
+		});
+
 		it("passes custom model", async () => {
 			mockGenerate.mockReturnValue({
 				[Symbol.asyncIterator]: async function* () {
@@ -289,6 +318,37 @@ describe("CartesiaTTS", () => {
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ description: "anything" });
+
+			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
+		});
+
+		it("ranks voices last when their embedding vector is missing", async () => {
+			mockVoicesList.mockResolvedValue({
+				data: [
+					{
+						id: "v1",
+						name: "A",
+						language: "en",
+						gender: "feminine",
+						description: "first",
+						preview_file_url: null,
+					},
+					{
+						id: "v2",
+						name: "B",
+						language: "en",
+						gender: "feminine",
+						description: "second",
+						preview_file_url: null,
+					},
+				],
+			});
+			mockEmbed.mockResolvedValue({ embedding: [1, 0] });
+			// Embedder returns fewer vectors than voices: v2 has no vector.
+			mockEmbedMany.mockResolvedValue({ embeddings: [[1, 0]] });
+
+			const provider = new CartesiaTTS("test-key");
+			const voices = await provider.search({ description: "warm" });
 
 			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
 		});
