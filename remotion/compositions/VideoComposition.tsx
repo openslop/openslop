@@ -15,6 +15,7 @@ import type {
 } from "@/lib/video/types";
 import {
 	AUDIO_FADE_SEC,
+	TRANSITION_DURATION_SEC,
 	VIDEO_PREMOUNT_SEC,
 	getPresentation,
 } from "@/lib/video/transitions";
@@ -52,7 +53,14 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 				pauseWhenBuffering
 			/>
 			{element.captionTimestamps && (
-				<Captions timestamps={element.captionTimestamps} />
+				<Sequence
+					durationInFrames={Math.max(
+						1,
+						durationInFrames - toFrames(TRANSITION_DURATION_SEC, fps),
+					)}
+				>
+					<Captions timestamps={element.captionTimestamps} />
+				</Sequence>
 			)}
 		</>
 	);

@@ -44,25 +44,32 @@ const text: React.CSSProperties = {
 	whiteSpace: "nowrap",
 };
 
-function computeChunkStarts(
+function buildCaptionData(
 	timestamps: readonly TextTimestamp[],
 	maxChars: number,
-): number[] {
-	const starts: number[] = [];
-	if (timestamps.length === 0) return starts;
-	starts.push(0);
-	let len = timestamps[0].text.length;
+): { startTimes: number[]; visibleByWordIndex: string[] } {
+	const startTimes = timestamps.map((ts) => ts.start);
+	const visibleByWordIndex: string[] = [];
+	if (timestamps.length === 0) return { startTimes, visibleByWordIndex };
+
+	let currentLine = timestamps[0].text;
+	let currentLineLen = currentLine.length;
+	visibleByWordIndex.push(currentLine);
+
 	for (let i = 1; i < timestamps.length; i++) {
-		const wordLen = timestamps[i].text.length;
-		const next = len + 1 + wordLen;
-		if (next > maxChars) {
-			starts.push(i);
-			len = wordLen;
+		const word = timestamps[i].text;
+		const nextLen = currentLineLen + 1 + word.length;
+		if (nextLen > maxChars) {
+			currentLine = word;
+			currentLineLen = word.length;
 		} else {
-			len = next;
+			currentLine = `${currentLine} ${word}`;
+			currentLineLen = nextLen;
 		}
+		visibleByWordIndex.push(currentLine);
 	}
-	return starts;
+
+	return { startTimes, visibleByWordIndex };
 }
 
 export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
@@ -76,26 +83,18 @@ export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
 		),
 	);
 
-	const startTimes = useMemo(
-		() => timestamps.map((ts) => ts.start),
-		[timestamps],
-	);
-	const starts = useMemo(
-		() => computeChunkStarts(timestamps, maxChars),
+	const { startTimes, visibleByWordIndex } = useMemo(
+		() => buildCaptionData(timestamps, maxChars),
 		[timestamps, maxChars],
 	);
 
-	if (starts.length === 0) return null;
+	if (visibleByWordIndex.length === 0) return null;
 
 	const seconds = frame / fps;
 	const wordIndex = sortedLastIndex(startTimes, seconds) - 1;
 	if (wordIndex < 0) return null;
 
-	const chunkStart = starts[sortedLastIndex(starts, wordIndex) - 1];
-	const visible = timestamps
-		.slice(chunkStart, wordIndex + 1)
-		.map((ts) => ts.text)
-		.join(" ");
+	const visible = visibleByWordIndex[wordIndex];
 
 	return (
 		<AbsoluteFill style={container}>
