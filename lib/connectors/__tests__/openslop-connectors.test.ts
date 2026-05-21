@@ -79,13 +79,13 @@ describe("OpenSlop connectors (via gateways)", () => {
 	it("Music: generate returns AssetResult with url", async () => {
 		const bundleUrl = mockAsset("music", { audio: "output.mp3" });
 		const result = await new OpenSlopMusic(config).generate({ prompt: "jazz" });
-		expect(result.url).toBe(`${bundleUrl}/output.mp3`);
+		expect(result.audioUrl).toBe(`${bundleUrl}/output.mp3`);
 	});
 
 	it("SFX: generate returns AssetResult with url", async () => {
 		const bundleUrl = mockAsset("sfx", { audio: "output.mp3" });
 		const result = await new OpenSlopSFX(config).generate({ prompt: "boom" });
-		expect(result.url).toBe(`${bundleUrl}/output.mp3`);
+		expect(result.audioUrl).toBe(`${bundleUrl}/output.mp3`);
 	});
 
 	it("Image: generate returns AssetResult with url", async () => {
@@ -93,7 +93,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 		const result = await new OpenSlopImage(config).generate({
 			prompt: "mountain",
 		});
-		expect(result.url).toBe(`${bundleUrl}/output.png`);
+		expect(result.imageUrl).toBe(`${bundleUrl}/output.png`);
 	});
 
 	it("TTS: generate returns TTSResult with url", async () => {
@@ -116,7 +116,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 			voiceId: "v1",
 		});
 
-		expect(result.url).toBe(`${bundleUrl}/output.wav`);
+		expect(result.audioUrl).toBe(`${bundleUrl}/output.wav`);
 		expect(result.textTimestamps).toHaveLength(1);
 		expect(result.textTimestamps[0].text).toBe("hello");
 	});
@@ -140,6 +140,6 @@ describe("OpenSlop connectors (via gateways)", () => {
 		const result = await new OpenSlopVideo(config).generate({
 			prompt: "sunset",
 		});
-		expect(result.url).toBe("https://cdn.example.com/v.mp4");
+		expect(result.videoUrl).toBe("https://cdn.example.com/v.mp4");
 	});
 });

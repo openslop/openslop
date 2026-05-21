@@ -31,6 +31,11 @@ export function createVideoChainPlugin(
 					"animated_image element is missing required videoPrompt attribute",
 				);
 			}
+			if (!result.imageUrl) {
+				throw new Error(
+					"animated_image chain expected an imageUrl from the still-image generation",
+				);
+			}
 			const { provider, config } = getDefaultConnector(registry, "video");
 			const video = createConnector(
 				"video",
@@ -39,12 +44,12 @@ export function createVideoChainPlugin(
 			);
 			const videoResult = await video.generate({
 				prompt: videoPrompt,
-				frameImages: [result.url],
+				frameImages: [result.imageUrl],
 			});
 			return {
-				url: videoResult.url,
+				imageUrl: result.imageUrl,
+				videoUrl: videoResult.videoUrl,
 				durationSec: videoResult.durationSec,
-				previewUrl: result.url,
 			};
 		},
 	};

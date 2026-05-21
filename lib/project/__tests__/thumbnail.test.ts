@@ -7,16 +7,21 @@ import { pickThumbnailUrl } from "../thumbnail";
 const entry = (
 	id: string,
 	connectorType: ConnectorType | null,
-	url: string | null,
-	previewUrl?: string,
+	imageUrl: string | null,
+	videoUrl?: string,
 ): [string, ElementSnapshot] => [
 	id,
 	{
 		status: "idle",
 		seconds: 0,
-		result: url
-			? { url, durationSec: 0, ...(previewUrl && { previewUrl }) }
-			: null,
+		result:
+			imageUrl || videoUrl
+				? {
+						durationSec: 0,
+						...(imageUrl && { imageUrl }),
+						...(videoUrl && { videoUrl }),
+					}
+				: null,
 		error: null,
 		resultInputs: null,
 		connectorType,
@@ -62,18 +67,18 @@ describe("pickThumbnailUrl", () => {
 		).toBe("scene.png");
 	});
 
-	it("accepts animated_image and prefers previewUrl over the video url", () => {
+	it("uses the still imageUrl for animated_image entries", () => {
 		expect(
 			pickThumbnailUrl([
 				entry("1", "tts", "n.mp3"),
-				entry("2", "animated_image", "video.mp4", "still.png"),
+				entry("2", "animated_image", "still.png", "video.mp4"),
 			]),
 		).toBe("still.png");
 	});
 
-	it("falls back to animated_image url when no previewUrl is present", () => {
-		expect(pickThumbnailUrl([entry("1", "animated_image", "video.mp4")])).toBe(
-			"video.mp4",
-		);
+	it("returns null for animated_image with only a videoUrl", () => {
+		expect(
+			pickThumbnailUrl([entry("1", "animated_image", null, "video.mp4")]),
+		).toBeNull();
 	});
 });

@@ -3,17 +3,28 @@ import type { AssetGateway } from "@/lib/gateway/base";
 import { awaitCompletion } from "@/lib/providers/poll";
 import { BaseConnector } from "./base";
 
+export type AssetKey = "image" | "audio" | "video";
+
+const ASSET_KEY_TO_URL_FIELD: Record<
+	AssetKey,
+	"imageUrl" | "audioUrl" | "videoUrl"
+> = {
+	image: "imageUrl",
+	audio: "audioUrl",
+	video: "videoUrl",
+};
+
 export abstract class BaseAssetConnector<
 	TParams extends { prompt: string },
 	TResult,
 > extends BaseConnector<TParams, TResult> {
-	abstract readonly assetKey: string;
+	abstract readonly assetKey: AssetKey;
 
 	protected abstract gateway: AssetGateway<TParams>;
 
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {
-			url: bundle.resolve(this.assetKey),
+			[ASSET_KEY_TO_URL_FIELD[this.assetKey]]: bundle.resolve(this.assetKey),
 			durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
 		} as TResult;
 	}

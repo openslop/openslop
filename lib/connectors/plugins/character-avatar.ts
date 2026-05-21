@@ -18,8 +18,11 @@ export function createCharacterAvatarPlugin(
 			].join(". ");
 		},
 		afterGenerate(result) {
+			if (!result.imageUrl) {
+				throw new Error("character-avatar plugin expected an imageUrl result");
+			}
 			store().updateMetadata({
-				characters: { [name]: { avatarUrl: result.url } },
+				characters: { [name]: { avatarUrl: result.imageUrl } },
 			});
 			return result;
 		},

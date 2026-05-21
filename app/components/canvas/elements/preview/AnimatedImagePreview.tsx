@@ -1,49 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { MediaPreview } from "./results";
-import type { GenerationState } from "./status";
+import { MediaPreview, MediaPlaceholder } from "./results";
+import type { PlaceholderProps } from "./status";
 
-type AnimatedImagePreviewProps = GenerationState & {
-	url: string;
-	previewUrl: string;
+type AnimatedImagePreviewProps = PlaceholderProps & {
+	imageUrl?: string;
+	videoUrl?: string;
 	borderColor: string;
 	stale: boolean;
 	onRegenerate: () => void;
 };
 
 export function AnimatedImagePreview({
-	url,
-	previewUrl,
+	imageUrl,
+	videoUrl,
 	borderColor,
 	status,
 	seconds,
 	stale,
+	error,
 	onRegenerate,
+	onGenerate,
+	onDiscard,
 }: AnimatedImagePreviewProps) {
 	const [mode, setMode] = useState<"animated" | "still">("animated");
-	const isAnimated = mode === "animated";
+	const url = mode === "animated" ? videoUrl : imageUrl;
 
 	return (
 		<div className="relative w-full">
-			<MediaPreview
-				key={mode}
-				url={isAnimated ? url : previewUrl}
-				outputKind={isAnimated ? "video" : "image"}
-				borderColor={borderColor}
-				status={status}
-				seconds={seconds}
-				stale={stale}
-				onRegenerate={onRegenerate}
-			/>
+			{url ? (
+				<MediaPreview
+					key={url}
+					url={url}
+					outputKind={mode === "animated" ? "video" : "image"}
+					borderColor={borderColor}
+					status={status}
+					seconds={seconds}
+					stale={stale}
+					onRegenerate={onRegenerate}
+				/>
+			) : (
+				<MediaPlaceholder
+					status={status}
+					seconds={seconds}
+					error={error}
+					onGenerate={onGenerate}
+					onDiscard={onDiscard}
+				/>
+			)}
 			<div className="absolute top-2 right-2 z-10 flex items-center rounded-full border border-white/10 bg-black/55 backdrop-blur-xl shadow-md shadow-black/40 p-0.5">
 				<ToggleButton
-					active={isAnimated}
+					active={mode === "animated"}
 					label="Video"
 					onClick={() => setMode("animated")}
 				/>
 				<ToggleButton
-					active={!isAnimated}
+					active={mode === "still"}
 					label="Still"
 					onClick={() => setMode("still")}
 				/>

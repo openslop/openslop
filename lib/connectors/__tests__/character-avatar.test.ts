@@ -27,7 +27,10 @@ describe("character-avatar plugin", () => {
 			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
 
 		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice");
-		plugin.afterGenerate?.({ url: "https://img/alice.png", durationSec: 0 });
+		plugin.afterGenerate?.({
+			imageUrl: "https://img/alice.png",
+			durationSec: 0,
+		});
 
 		expect(store.getState().metadata.characters["Alice"].avatarUrl).toBe(
 			"https://img/alice.png",

@@ -32,7 +32,7 @@ describe("BaseSFXConnector", () => {
 		const result = await new OpenSlopSFX(config).generate({
 			prompt: "explosion",
 		});
-		expect(result.url).toBe(AUDIO_URL);
+		expect(result.audioUrl).toBe(AUDIO_URL);
 	});
 
 	it("runs plugins in order", async () => {
