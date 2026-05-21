@@ -25,7 +25,7 @@ describe("generateForElement", () => {
 
 	it("creates connector and calls generate with correct params", async () => {
 		const expected: AssetResult = {
-			url: "https://example.com/img.png",
+			imageUrl: "https://example.com/img.png",
 			durationSec: 0,
 		};
 		mockGenerate.mockResolvedValue(expected);
@@ -48,7 +48,7 @@ describe("generateForElement", () => {
 	});
 
 	it("passes default model from config", async () => {
-		mockGenerate.mockResolvedValue({ url: "x", durationSec: 0 });
+		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 0 });
 
 		await generateForElement("music", "openslop", config, "jazz beat", {});
 
@@ -59,7 +59,7 @@ describe("generateForElement", () => {
 	});
 
 	it("merges extra params into generate call", async () => {
-		mockGenerate.mockResolvedValue({ url: "x", durationSec: 5 });
+		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 5 });
 
 		await generateForElement("tts", "openslop", config, "hello world", {
 			voiceId: "voice-1",

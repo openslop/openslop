@@ -11,7 +11,7 @@ export function pickThumbnailUrl(
 			snap.connectorType !== "animated_image"
 		)
 			continue;
-		const url = snap.result?.previewUrl ?? snap.result?.url;
+		const url = snap.result?.imageUrl;
 		if (url) return url;
 	}
 	return null;

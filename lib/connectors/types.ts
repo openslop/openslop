@@ -57,9 +57,10 @@ export type ConnectorGenerateParams = {
 };
 
 export type AssetResult = {
-	url: string;
 	durationSec: number;
-	previewUrl?: string;
+	imageUrl?: string;
+	audioUrl?: string;
+	videoUrl?: string;
 	textTimestamps?: TextTimestamp[];
 };
 

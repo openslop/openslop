@@ -3,6 +3,7 @@ import type { CanvasContentElement } from "../types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import { deriveStatus, BORDER_COLORS } from "./preview/status";
+import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	AudioResult,
 	AudioPlaceholder,
@@ -31,11 +32,11 @@ function OutputPreviewComponent({
 	const status = deriveStatus(generating, queued);
 
 	if (outputKind === "audio") {
-		if (result) {
+		if (result?.audioUrl) {
 			return (
 				<AudioResult
 					type={type}
-					src={result.url}
+					src={result.audioUrl}
 					characterName={element.customAttributes?.name}
 					status={status}
 					seconds={seconds}
@@ -55,26 +56,31 @@ function OutputPreviewComponent({
 		);
 	}
 
-	if (result) {
-		const borderColor = BORDER_COLORS[type] ?? "border-white/20";
-		if (type === "animated_image" && result.previewUrl) {
-			return (
-				<AnimatedImagePreview
-					key={result.url}
-					url={result.url}
-					previewUrl={result.previewUrl}
-					borderColor={borderColor}
-					status={status}
-					seconds={seconds}
-					stale={stale}
-					onRegenerate={generate}
-				/>
-			);
-		}
+	const borderColor = BORDER_COLORS[type] ?? "border-white/20";
+
+	if (type === "animated_image") {
+		return (
+			<AnimatedImagePreview
+				imageUrl={result?.imageUrl}
+				videoUrl={result?.videoUrl}
+				borderColor={borderColor}
+				status={status}
+				seconds={seconds}
+				stale={stale}
+				error={error}
+				onRegenerate={generate}
+				onGenerate={generate}
+				onDiscard={discard}
+			/>
+		);
+	}
+
+	const url = getPrimaryUrl(result, outputKind);
+	if (url) {
 		return (
 			<MediaPreview
-				key={result.url}
-				url={result.url}
+				key={url}
+				url={url}
 				outputKind={outputKind}
 				borderColor={borderColor}
 				status={status}

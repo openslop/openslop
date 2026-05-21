@@ -36,13 +36,13 @@ describe("BaseMusicConnector", () => {
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "rock song" });
-		expect(result).toEqual({ url: AUDIO_URL, durationSec: 0 });
+		expect(result).toEqual({ audioUrl: AUDIO_URL, durationSec: 0 });
 	});
 
 	it("runs afterGenerate plugin", async () => {
 		mockSuccess();
 		const replacement: AssetResult = {
-			url: "https://example.com/replaced.mp3",
+			audioUrl: "https://example.com/replaced.mp3",
 			durationSec: 0,
 		};
 		const plugin: ConnectorPlugin = {
@@ -53,7 +53,7 @@ describe("BaseMusicConnector", () => {
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "test" });
-		expect(result.url).toBe("https://example.com/replaced.mp3");
+		expect(result.audioUrl).toBe("https://example.com/replaced.mp3");
 	});
 
 	it("runs onError plugin on failure", async () => {

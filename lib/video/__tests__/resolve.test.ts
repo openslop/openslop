@@ -32,7 +32,12 @@ function makeSnapshot(
 	return {
 		status: "idle",
 		seconds: 0,
-		result: { url: "https://example.com/asset.mp3", durationSec: 5 },
+		result: {
+			imageUrl: "https://example.com/asset.png",
+			audioUrl: "https://example.com/asset.mp3",
+			videoUrl: "https://example.com/asset.mp4",
+			durationSec: 5,
+		},
 		error: null,
 		resultInputs: null,
 		connectorType: null,
@@ -48,10 +53,10 @@ describe("resolveElements", () => {
 		];
 		const snapshots: Record<string, ElementSnapshot> = {
 			img1: makeSnapshot({
-				result: { url: "https://example.com/img.png", durationSec: 3 },
+				result: { imageUrl: "https://example.com/img.png", durationSec: 3 },
 			}),
 			nar1: makeSnapshot({
-				result: { url: "https://example.com/nar.mp3", durationSec: 8 },
+				result: { audioUrl: "https://example.com/nar.mp3", durationSec: 8 },
 			}),
 		};
 
@@ -89,7 +94,7 @@ describe("resolveElements", () => {
 		];
 		const snapshots: Record<string, ElementSnapshot> = {
 			img1: makeSnapshot({
-				result: { url: "https://example.com/img.png", durationSec: 3 },
+				result: { imageUrl: "https://example.com/img.png", durationSec: 3 },
 			}),
 			nar1: makeSnapshot({ status: "idle", result: null }),
 		};

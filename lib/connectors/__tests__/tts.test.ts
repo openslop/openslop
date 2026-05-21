@@ -40,7 +40,7 @@ describe("BaseTTSConnector", () => {
 			prompt: "hello",
 			voiceId: "default",
 		});
-		expect(result.url).toBe(AUDIO_URL);
+		expect(result.audioUrl).toBe(AUDIO_URL);
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
@@ -69,7 +69,7 @@ describe("BaseTTSConnector", () => {
 			description: undefined,
 			language: "en",
 		});
-		expect(result.url).toBe(AUDIO_URL);
+		expect(result.audioUrl).toBe(AUDIO_URL);
 	});
 
 	it("throws when no matching voice found via voice-search plugin", async () => {
@@ -94,7 +94,7 @@ describe("BaseTTSConnector", () => {
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "hello", voiceId: "default" });
-		expect(result.url).toBe(AUDIO_URL);
+		expect(result.audioUrl).toBe(AUDIO_URL);
 	});
 
 	it("runs onError plugin on failure", async () => {

@@ -32,7 +32,7 @@ describe("BaseVideoConnector", () => {
 		const result = await new OpenSlopVideo(config).generate({
 			prompt: "a sunset",
 		});
-		expect(result.url).toBe(VIDEO_URL);
+		expect(result.videoUrl).toBe(VIDEO_URL);
 		expect(result.durationSec).toBe(5);
 	});
 
@@ -54,7 +54,7 @@ describe("BaseVideoConnector", () => {
 		const result = await new OpenSlopVideo(config).generate({
 			prompt: "a sunset",
 		});
-		expect(result.url).toBe(VIDEO_URL);
+		expect(result.videoUrl).toBe(VIDEO_URL);
 		expect(result.durationSec).toBe(5);
 		expect(fetch).toHaveBeenCalledTimes(3);
 	});

@@ -32,13 +32,13 @@ describe("BaseImageConnector", () => {
 		const result = await new OpenSlopImage(config).generate({
 			prompt: "a cat",
 		});
-		expect(result.url).toBe(IMAGE_URL);
+		expect(result.imageUrl).toBe(IMAGE_URL);
 	});
 
 	it("runs afterGenerate plugin", async () => {
 		mockSuccess();
 		const replacement: AssetResult = {
-			url: "https://example.com/replaced.png",
+			imageUrl: "https://example.com/replaced.png",
 			durationSec: 0,
 		};
 		const plugin: ConnectorPlugin = {
@@ -49,6 +49,6 @@ describe("BaseImageConnector", () => {
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "test" });
-		expect(result.url).toBe("https://example.com/replaced.png");
+		expect(result.imageUrl).toBe("https://example.com/replaced.png");
 	});
 });

@@ -30,7 +30,7 @@ describe("createVideoChainPlugin", () => {
 	it("stashes videoPrompt and animates the still via the video connector", async () => {
 		generateMock.mockReset();
 		generateMock.mockResolvedValue({
-			url: "https://example.com/video.mp4",
+			videoUrl: "https://example.com/video.mp4",
 			durationSec: 5,
 		});
 
@@ -46,7 +46,7 @@ describe("createVideoChainPlugin", () => {
 		expect(ctx.data?.videoPrompt).toBe("slow zoom in");
 
 		const still = {
-			url: "https://example.com/still.png",
+			imageUrl: "https://example.com/still.png",
 			durationSec: 0,
 		} satisfies AssetResult;
 		const result = (await plugin.afterGenerate?.(still, ctx)) as AssetResult;
@@ -56,9 +56,9 @@ describe("createVideoChainPlugin", () => {
 			frameImages: ["https://example.com/still.png"],
 		});
 		expect(result).toEqual({
-			url: "https://example.com/video.mp4",
+			imageUrl: "https://example.com/still.png",
+			videoUrl: "https://example.com/video.mp4",
 			durationSec: 5,
-			previewUrl: "https://example.com/still.png",
 		});
 	});
 
@@ -70,7 +70,7 @@ describe("createVideoChainPlugin", () => {
 		await plugin.beforeGenerate?.({ prompt: "a dark forest" }, ctx);
 
 		const still = {
-			url: "https://example.com/still.png",
+			imageUrl: "https://example.com/still.png",
 			durationSec: 0,
 		} satisfies AssetResult;
 

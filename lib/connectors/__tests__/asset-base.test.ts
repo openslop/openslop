@@ -6,7 +6,7 @@ import type { AssetGateway, JobPoll } from "@/lib/gateway/base";
 import type { ConnectorConfig, ConnectorType } from "../types";
 
 type TestParams = { prompt: string };
-type TestResult = { url: string; durationSec: number };
+type TestResult = { imageUrl?: string; durationSec: number };
 
 function makeGateway(
 	generateImpl: (params: TestParams) => Promise<BundleResponse>,
@@ -81,7 +81,8 @@ describe("BaseAssetConnector", () => {
 
 			const result = await connector.resolveBundle(bundle);
 			expect(result).toEqual({
-				url: "https://blob.example.com/assets/image/runware/abc/output.png",
+				imageUrl:
+					"https://blob.example.com/assets/image/runware/abc/output.png",
 				durationSec: 10,
 			});
 		});
@@ -134,7 +135,7 @@ describe("BaseAssetConnector", () => {
 			const result = await connector.generate({ prompt: "test" });
 
 			expect(generateFn).toHaveBeenCalledWith({ prompt: "test" });
-			expect(result.url).toBe(
+			expect(result.imageUrl).toBe(
 				"https://blob.example.com/assets/image/mock/abc/output.png",
 			);
 			expect(result.durationSec).toBe(5);
@@ -159,7 +160,7 @@ describe("BaseAssetConnector", () => {
 			const connector = new TestAssetConnector(config, generateFn);
 
 			const result = await connector.generate({ prompt: "test" });
-			expect(result.url).toBe("https://cdn.example.com/image.webp");
+			expect(result.imageUrl).toBe("https://cdn.example.com/image.webp");
 			expect(result.durationSec).toBe(0);
 		});
 	});
