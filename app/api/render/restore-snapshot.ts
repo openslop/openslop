@@ -25,7 +25,7 @@ export async function restoreSnapshot() {
 	}
 
 	return Sandbox.create({
-		resources: { vcpus: 32 },
+		resources: { vcpus: 8 },
 		source: { type: "snapshot", snapshotId: cache.snapshotId },
 		timeout: SANDBOX_TIMEOUT_MS,
 	});
