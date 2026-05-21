@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const maxDuration = 800;
+
 import {
 	addBundleToSandbox,
 	createSandbox,
@@ -75,6 +78,7 @@ export async function POST(req: Request) {
 				}
 
 				const { sandboxFilePath, contentType } = await renderMediaOnVercel({
+					concurrency: "50%",
 					sandbox,
 					compositionId: COMPOSITION_ID,
 					inputProps: payload.inputProps as Record<string, unknown>,
