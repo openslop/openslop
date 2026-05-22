@@ -210,10 +210,6 @@ export function Waveform({
 	}, [loading, draw]);
 
 	useEffect(() => {
-		draw();
-	}, [draw]);
-
-	useEffect(() => {
 		const c = canvasRef.current;
 		if (!c) return;
 		const ro = new ResizeObserver(() => drawRef.current());

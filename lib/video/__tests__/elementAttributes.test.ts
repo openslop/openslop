@@ -44,6 +44,25 @@ describe("getLoops", () => {
 	it("reads valid loop counts", () => {
 		expect(getLoops(el({ loops: "4" }))).toBe(4);
 	});
+
+	it("floors fractional loop counts to an integer", () => {
+		expect(getLoops(el({ loops: "4.7" }))).toBe(4);
+		expect(getLoops(el({ loops: "1.999" }))).toBe(1);
+	});
+
+	it("rejects Infinity and NaN, defaulting to 1", () => {
+		expect(getLoops(el({ loops: "Infinity" }))).toBe(1);
+		expect(getLoops(el({ loops: "-Infinity" }))).toBe(1);
+		expect(getLoops(el({ loops: "NaN" }))).toBe(1);
+	});
+
+	it("clamps absurdly large loop counts to a sane maximum", () => {
+		expect(getLoops(el({ loops: "999999999" }))).toBe(1000);
+	});
+
+	it("clamps negative loop counts to 1", () => {
+		expect(getLoops(el({ loops: "-5" }))).toBe(1);
+	});
 });
 
 describe("getMotion", () => {
