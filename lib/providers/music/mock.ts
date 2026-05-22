@@ -1,8 +1,8 @@
 import type { MusicGenerateParams } from "@/lib/connectors/types";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
 
-const BLOB_BASE =
-	"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/music/mock";
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/music/mock`;
 
 export class MockMusic extends MockProvider<MusicGenerateParams> {
 	protected readonly delayMs = 2000;

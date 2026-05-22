@@ -1,8 +1,8 @@
 import type { SFXGenerateParams } from "@/lib/connectors/types";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
 
-const BLOB_BASE =
-	"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/sfx/mock";
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/sfx/mock`;
 
 export class MockSFX extends MockProvider<SFXGenerateParams> {
 	protected readonly variants = [

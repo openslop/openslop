@@ -1,5 +1,9 @@
 import dedent from "dedent";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
+
+const templateAsset = (name: string) =>
+	`${BLOB_BASE_URL}/assets/upload/template/${name}`;
 
 export interface TemplateShowcase {
 	image: string;
@@ -28,16 +32,15 @@ export const TEMPLATES: Template[] = [
 		pillText: "POV: Your life at every stage as a",
 		color: "#F59E0B",
 		referenceImages: [
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-2",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-3",
+			templateAsset("pov-life-stages-2"),
+			templateAsset("pov-life-stages-3"),
 		],
 		characters: {
 			Protagonist: {
 				description: "American male, neutral accent",
 				appearance:
 					"male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
-				avatarUrl:
-					"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-4",
+				avatarUrl: templateAsset("pov-life-stages-4"),
 			},
 		},
 		narration: {
@@ -48,8 +51,7 @@ export const TEMPLATES: Template[] = [
 			description: "wise",
 		},
 		showcase: {
-			image:
-				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/pov-life-stages-1",
+			image: templateAsset("pov-life-stages-1"),
 			title: "POV Your Life as A...",
 			description:
 				"Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
@@ -263,14 +265,13 @@ export const TEMPLATES: Template[] = [
 		pillText: "A sleep story about",
 		color: "#6366F1",
 		referenceImages: [
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-1",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-3",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-4",
+			templateAsset("sleep-story-1"),
+			templateAsset("sleep-story-3"),
+			templateAsset("sleep-story-4"),
 		],
 		characters: {},
 		showcase: {
-			image:
-				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/sleep-story-1",
+			image: templateAsset("sleep-story-1"),
 			title: "Get Sleepy with...",
 			description:
 				"Long-form, slow, soothing narration designed to lull listeners to sleep",
@@ -327,17 +328,16 @@ export const TEMPLATES: Template[] = [
 		pillText: "Finance tips for...",
 		color: "#3B82F6",
 		referenceImages: [
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/finance-tips-2",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/finance-tips-3",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/finance-tips-4",
+			templateAsset("finance-tips-2"),
+			templateAsset("finance-tips-3"),
+			templateAsset("finance-tips-4"),
 		],
 		characters: {
 			Ethan: {
 				description: "American male, neutral accent",
 				appearance:
 					"man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers",
-				avatarUrl:
-					"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/finance-tips-1",
+				avatarUrl: templateAsset("finance-tips-1"),
 			},
 		},
 		narration: {
@@ -348,8 +348,7 @@ export const TEMPLATES: Template[] = [
 			description: "wise",
 		},
 		showcase: {
-			image:
-				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/finance-tips-4",
+			image: templateAsset("finance-tips-4"),
 			title: "Finance tips",
 			description: "Long-form, stories to teach personal finance lessons",
 			examplePrompt:

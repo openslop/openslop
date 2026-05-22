@@ -1,8 +1,8 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
 
-const BLOB_BASE =
-	"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/image/mock";
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/image/mock`;
 
 export class MockImage extends MockProvider<ImageGenerateParams> {
 	protected readonly delayMs = 2000;
