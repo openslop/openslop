@@ -19,5 +19,6 @@ export function buildCharacterAvatarPlugins(
 	return [
 		createCharacterAvatarPlugin(projectId, characterName),
 		createArtStylePlugin(projectId),
+		createReferenceImagesPlugin(projectId),
 	];
 }

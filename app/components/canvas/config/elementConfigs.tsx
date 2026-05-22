@@ -197,7 +197,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 
 		defaultAttributes: {
 			loops: "1",
-			volume: "5",
+			volume: "2",
 		},
 		visibleAttributes: {
 			loops: {
@@ -218,7 +218,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the music...",
 		defaultAttributes: {
 			loops: "1",
-			volume: "5",
+			volume: "2",
 		},
 		visibleAttributes: {
 			loops: {
