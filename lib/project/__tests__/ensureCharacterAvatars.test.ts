@@ -77,7 +77,7 @@ describe("ensureCharacterAvatars", () => {
 		}
 	});
 
-	it("composes per-job plugins as [character-avatar, art-style]", () => {
+	it("composes per-job plugins as [character-avatar, art-style, reference-images]", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
@@ -88,6 +88,7 @@ describe("ensureCharacterAvatars", () => {
 		expect(job.config.plugins?.map((p) => p.name)).toEqual([
 			"character-avatar",
 			"art-style",
+			"reference-images",
 		]);
 	});
 

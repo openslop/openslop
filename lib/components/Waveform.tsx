@@ -37,6 +37,12 @@ export interface WaveformHandle {
 
 const PEAK_COUNT = 200;
 
+let sharedAudioCtx: AudioContext | null = null;
+const getAudioCtx = () => {
+	if (!sharedAudioCtx) sharedAudioCtx = new AudioContext();
+	return sharedAudioCtx;
+};
+
 /** Extract normalized peak amplitudes (0–1) from raw audio samples. */
 export function extractPeaks(data: Float32Array, count: number): number[] {
 	const step = Math.floor(data.length / count);
@@ -182,10 +188,9 @@ export function Waveform({
 		peaksRef.current = [];
 
 		let cancelled = false;
-		const ac = new AudioContext();
 		fetch(src, { mode: "cors" })
 			.then((r) => r.arrayBuffer())
-			.then((buf) => ac.decodeAudioData(buf))
+			.then((buf) => getAudioCtx().decodeAudioData(buf))
 			.then((ab) => {
 				if (cancelled) return;
 				const peaks = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
@@ -200,7 +205,6 @@ export function Waveform({
 			});
 		return () => {
 			cancelled = true;
-			ac.close();
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- onReady/peaksCache are stable refs, not direct deps
 	}, [src]);

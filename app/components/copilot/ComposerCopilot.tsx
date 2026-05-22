@@ -76,25 +76,31 @@ function UploadingSkeleton() {
 function AttachMenu({
 	onUpload,
 	uploading,
-	setUploading,
+	setUploadingCount,
 }: {
-	onUpload: (url: string) => void;
+	onUpload: (urls: string[]) => void;
 	uploading: boolean;
-	setUploading: (v: boolean) => void;
+	setUploadingCount: (n: number) => void;
 }) {
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+		const files = Array.from(e.target.files ?? []);
+		if (files.length === 0) return;
 
-		setUploading(true);
+		setUploadingCount(files.length);
 		try {
-			onUpload(await uploadImage(file));
-		} catch (err) {
-			toast.error(stringifyError(err));
+			const results = await Promise.allSettled(files.map(uploadImage));
+			const urls: string[] = [];
+			const errors: string[] = [];
+			for (const r of results) {
+				if (r.status === "fulfilled") urls.push(r.value);
+				else errors.push(stringifyError(r.reason));
+			}
+			if (urls.length > 0) onUpload(urls);
+			for (const msg of errors) toast.error(msg);
 		} finally {
-			setUploading(false);
+			setUploadingCount(0);
 			if (inputRef.current) inputRef.current.value = "";
 		}
 	};
@@ -105,6 +111,7 @@ function AttachMenu({
 				ref={inputRef}
 				type="file"
 				accept="image/*"
+				multiple
 				className="hidden"
 				onChange={handleFileChange}
 			/>
@@ -136,7 +143,7 @@ function AttachMenu({
 							className="mr-1.5 h-3.5 text-white w-3.5"
 							strokeWidth={1.5}
 						/>
-						Upload Image
+						Upload Reference Images
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
@@ -192,7 +199,8 @@ export default function ComposerCopilot({
 	const setReferenceImages = (urls: string[]) =>
 		getProjectStore(projectId).getState().setReferenceImages(urls);
 
-	const [uploading, setUploading] = useState(false);
+	const [uploadingCount, setUploadingCount] = useState(0);
+	const uploading = uploadingCount > 0;
 	const showPill = mode === "template" && selectedTemplateId !== undefined;
 	const hasText = value.trim().length > 0;
 
@@ -219,7 +227,9 @@ export default function ComposerCopilot({
 								}
 							/>
 						))}
-						{uploading && <UploadingSkeleton />}
+						{Array.from({ length: uploadingCount }).map((_, i) => (
+							<UploadingSkeleton key={i} />
+						))}
 					</div>
 				)}
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
@@ -253,9 +263,11 @@ export default function ComposerCopilot({
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex items-center gap-2">
 						<AttachMenu
-							onUpload={(url) => setReferenceImages([...referenceImages, url])}
+							onUpload={(urls) =>
+								setReferenceImages([...referenceImages, ...urls])
+							}
 							uploading={uploading}
-							setUploading={setUploading}
+							setUploadingCount={setUploadingCount}
 						/>
 						<GlassDropdown
 							value={mode}
