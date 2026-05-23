@@ -4,7 +4,7 @@ import type {
 	LLMGenerateResult,
 	LLMPlugin,
 	PluginContext,
-} from "../types";
+} from "@/lib/connectors/types";
 
 export const storyModePlugin: LLMPlugin = {
 	name: "storyMode",

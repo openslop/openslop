@@ -21,15 +21,16 @@ import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
-import { buildImagePlugins } from "../connectors/plugins/imageChain";
-import { buildAnimatedImagePlugins } from "../connectors/plugins/animated-image-chain";
-import { createMetadataVoicePlugin } from "../connectors/plugins/metadata-voice";
-import { createReferenceImagesPlugin } from "../connectors/plugins/reference-images";
-import { createVoiceSearchPlugin } from "../connectors/plugins/voice-search";
-import { scriptModePlugin } from "../connectors/plugins/script-mode";
-import { osmlPlugin } from "../connectors/plugins/osml";
-import { storyModePlugin } from "../connectors/plugins/story-mode";
-import { createTemplateModePlugin } from "../connectors/plugins/template-mode";
+import { buildImagePlugins } from "../connectors/image/plugins/imageChain";
+import { buildAnimatedImagePlugins } from "../connectors/animated_image/plugins/animated-image-chain";
+import { createMetadataVoicePlugin } from "../connectors/tts/plugins/metadata-voice";
+import { createReferenceImagesPlugin } from "../connectors/image/plugins/reference-images";
+import { createVoiceSearchPlugin } from "../connectors/tts/plugins/voice-search";
+import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
+import { osmlPlugin } from "../connectors/llm/plugins/osml";
+import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
+import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
+import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { TEMPLATES } from "@/lib/templates/templates";
 import * as template from "@/lib/templates/applyTemplate";
 import { getProjectStore } from "@/lib/project/store";
@@ -134,7 +135,7 @@ export function ConfigProvider({
 			templateId: selectedTemplateId,
 		});
 		const base = withRegistry(connectorConfig)
-			.appendPlugins("llm", modePlugin)
+			.appendPlugins("llm", modePlugin, createReferenceStylePlugin(projectId))
 			.appendPlugins("image", ...buildImagePlugins(projectId))
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))
 			.appendPlugins("tts", createMetadataVoicePlugin(projectId))

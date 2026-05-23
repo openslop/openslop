@@ -1,6 +1,6 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import { buildCharacterAvatarPlugins } from "@/lib/connectors/plugins/imageChain";
+import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
 import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 

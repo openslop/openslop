@@ -79,6 +79,7 @@ export type LLMGenerateParams = ConnectorGenerateParams & {
 	thinkingLevel?: string;
 	maxTokens?: number;
 	temperature?: number;
+	referenceImages?: string[];
 };
 
 export type LLMGenerateResult = {

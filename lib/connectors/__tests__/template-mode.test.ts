@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createTemplateModePlugin } from "../plugins/template-mode";
+import { createTemplateModePlugin } from "@/lib/connectors/llm/plugins/template-mode";
 import { TEMPLATES } from "@/lib/templates/templates";
 
 const pickTemplate = (predicate: (id: string) => boolean) => {

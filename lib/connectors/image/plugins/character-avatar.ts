@@ -1,4 +1,4 @@
-import type { AssetResult, ConnectorPlugin } from "../types";
+import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import { getProjectStore } from "@/lib/project/store";
 
 export function createCharacterAvatarPlugin(

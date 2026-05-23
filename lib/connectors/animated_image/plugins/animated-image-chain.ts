@@ -1,13 +1,13 @@
 import set from "lodash/fp/set";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import { createConnector } from "../factory";
+import { createConnector } from "@/lib/connectors/factory";
+import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
 	ConnectorPlugin,
-} from "../types";
-import { buildImagePlugins } from "./imageChain";
+} from "@/lib/connectors/types";
 
 const STASH_KEY = "videoPrompt";
 

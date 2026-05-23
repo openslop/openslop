@@ -3,7 +3,7 @@ import type { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
-import { createRefinePlugin } from "@/lib/connectors/plugins/refine";
+import { createRefinePlugin } from "@/lib/connectors/llm/plugins/refine";
 import { RefineOpParser } from "@/lib/script/refine/parseOps";
 import { applyRefineOp } from "@/lib/script/refine/applyOps";
 import { OSMLSerializer } from "../utils/osmlSerializer";

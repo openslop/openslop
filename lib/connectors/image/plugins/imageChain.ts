@@ -1,4 +1,4 @@
-import type { ConnectorPlugin } from "../types";
+import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { createArtStylePlugin } from "./art-style";
 import { createCharacterAvatarPlugin } from "./character-avatar";
 import { createCharacterReferencesPlugin } from "./character-references";

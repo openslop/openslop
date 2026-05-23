@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { OpenSlopTTS } from "../tts/openslop";
-import { createVoiceSearchPlugin } from "../plugins/voice-search";
+import { createVoiceSearchPlugin } from "@/lib/connectors/tts/plugins/voice-search";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
 

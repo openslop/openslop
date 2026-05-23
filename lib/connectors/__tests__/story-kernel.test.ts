@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GatewayClient } from "@/lib/gateway/base";
-import { storyModePlugin } from "../plugins/story-mode";
+import { storyModePlugin } from "@/lib/connectors/llm/plugins/story-mode";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,

@@ -1,8 +1,8 @@
 import dedent from "dedent";
 import { CANVAS_ELEMENT_TYPES } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
-import { MusicLength } from "../music/enums";
-import type { LLMPlugin } from "../types";
+import { MusicLength } from "@/lib/connectors/music/enums";
+import type { LLMPlugin } from "@/lib/connectors/types";
 
 const ELEMENT_TYPES = [...CANVAS_ELEMENT_TYPES].join(", ");
 const vals = (e: Record<string, string>) => Object.values(e).join(", ");

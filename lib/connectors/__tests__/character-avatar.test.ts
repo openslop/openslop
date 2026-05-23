@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createCharacterAvatarPlugin } from "../plugins/character-avatar";
+import { createCharacterAvatarPlugin } from "@/lib/connectors/image/plugins/character-avatar";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 
 const PROJECT_ID = "character-avatar-test";

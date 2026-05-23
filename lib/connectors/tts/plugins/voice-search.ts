@@ -1,5 +1,8 @@
 import omit from "lodash/omit";
-import type { ConnectorPlugin, TTSGenerateParams } from "../types";
+import type {
+	ConnectorPlugin,
+	TTSGenerateParams,
+} from "@/lib/connectors/types";
 
 const VOICE_DESCRIPTOR_KEYS = [
 	"gender",

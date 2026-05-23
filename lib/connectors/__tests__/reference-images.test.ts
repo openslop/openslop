@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createReferenceImagesPlugin } from "../plugins/reference-images";
+import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 
 const projectId = "reference-images-test-project";

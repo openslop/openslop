@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createMetadataVoicePlugin } from "../plugins/metadata-voice";
+import { createMetadataVoicePlugin } from "@/lib/connectors/tts/plugins/metadata-voice";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 
 const projectId = "metadata-voice-test-project";

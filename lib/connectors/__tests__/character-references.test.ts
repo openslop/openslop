@@ -3,7 +3,7 @@ import type { ConnectorPlugin } from "../types";
 import {
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
-} from "../plugins/character-references";
+} from "@/lib/connectors/image/plugins/character-references";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 
 const PROJECT_ID = "test-char-refs";
