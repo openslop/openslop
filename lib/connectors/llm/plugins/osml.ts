@@ -6,6 +6,7 @@ import {
 	TTS_ACCENTS,
 	TTS_AGES,
 	TTS_GENDERS,
+	TTS_LANGUAGES,
 	TTS_PITCHES,
 	TTSEmotion,
 } from "@/lib/connectors/tts/enums";
@@ -109,12 +110,12 @@ const OSML_SYSTEM_PROMPT = dedent`
 
 	### Metadata Narration XML tags
 	- Right after the metadata_style tag, emit a single, empty metadata_narration tag that describes the narrator voice. Example:
-		 <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>
+		 <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise" language="en"></metadata_narration>
 	- The attributes should be from the metadata Character/Narration attributes section
 
   ### Metadata Character XML tags
 	- Right after the metadata_narration tag, emit short <metadata_character>...</metadata_character> tags that describe each character's visual appearance (excluding the narrator) from the story in detail as if prompting an image model. Example:
-		<metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="wise">A girl around ten years old with warm brown skin, dark curly hair falling
+		<metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="wise" language="en">A girl around ten years old with warm brown skin, dark curly hair falling
 		just past her shoulders, bright hazel eyes, a small gap between her front
 		teeth. Wearing a mustard-yellow cardigan over a white tee, rolled-up denim
 		overalls, scuffed red sneakers, a canvas satchel slung across one shoulder.
@@ -128,6 +129,7 @@ const OSML_SYSTEM_PROMPT = dedent`
   - pitch: ${TTS_PITCHES.join(", ")}.
   - accent: ${TTS_ACCENTS.join(", ")}.
   - description: A simple descriptor of the voice. Examples: Charming, Confident, Approachable, Friendly, Energetic, Casual, Mature, Warm, Clear, Upbeat, Deep, Soft, etc.
+  - language: ISO 639-1 code of the spoken language. Allowed values: ${TTS_LANGUAGES.join(", ")}. Default to "en" when unspecified.
 
   ### General XML Tag Rules
   - NEVER nest XML tags within other XML tags.

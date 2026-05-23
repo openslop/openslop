@@ -5,7 +5,11 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import type { TTSGender, TTSSpeed } from "@/lib/connectors/tts/enums";
+import {
+	TTS_GENDERS,
+	type TTSGender,
+	type TTSSpeed,
+} from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
@@ -123,7 +127,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				id: voice.id,
 				name: voice.name,
 				language: voice.language,
-				gender: voice.gender ?? undefined,
+				gender: TTS_GENDERS.find((g) => g === voice.gender),
 				description: voice.description,
 				previewUrl: voice.preview_file_url ?? undefined,
 			}))
