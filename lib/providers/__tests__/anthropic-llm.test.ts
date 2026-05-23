@@ -97,6 +97,61 @@ describe("AnthropicLLM", () => {
 			]);
 		});
 
+		it("converts base64 data URI reference images into base64 source blocks", async () => {
+			mockCreate.mockResolvedValue({
+				content: [{ type: "text", text: "ok" }],
+				model: "claude-opus-4-7",
+				usage: { input_tokens: 1, output_tokens: 1 },
+			});
+
+			const provider = new AnthropicLLM("test-key");
+			await provider.generate({
+				prompt: "describe",
+				referenceImages: [
+					"data:image/png;base64,iVBORw0KGgo=",
+					"https://a/2.jpg",
+				],
+			});
+
+			expect(mockCreate.mock.calls[0][0].messages[0].content).toEqual([
+				{
+					type: "image",
+					source: {
+						type: "base64",
+						media_type: "image/png",
+						data: "iVBORw0KGgo=",
+					},
+				},
+				{
+					type: "image",
+					source: { type: "url", url: "https://a/2.jpg" },
+				},
+				{ type: "text", text: "describe" },
+			]);
+		});
+
+		it("rejects reference images that are neither URLs nor base64 data URIs", async () => {
+			const provider = new AnthropicLLM("test-key");
+			await expect(
+				provider.generate({
+					prompt: "describe",
+					referenceImages: ["ftp://nope/img.png"],
+				}),
+			).rejects.toThrow(/must be an http\(s\) URL or a base64 data URI/);
+			expect(mockCreate).not.toHaveBeenCalled();
+		});
+
+		it("rejects data URIs with unsupported media types", async () => {
+			const provider = new AnthropicLLM("test-key");
+			await expect(
+				provider.generate({
+					prompt: "describe",
+					referenceImages: ["data:image/svg+xml;base64,PHN2Zy8+"],
+				}),
+			).rejects.toThrow(/media type "image\/svg\+xml" is not supported/);
+			expect(mockCreate).not.toHaveBeenCalled();
+		});
+
 		it("concatenates multiple text blocks", async () => {
 			mockCreate.mockResolvedValue({
 				content: [
