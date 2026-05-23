@@ -1,4 +1,4 @@
-import type { ConnectorPlugin } from "../types";
+import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getProjectStore } from "@/lib/project/store";
 
 export type ParamsWithReferenceImages = {

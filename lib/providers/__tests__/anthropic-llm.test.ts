@@ -37,7 +37,7 @@ describe("AnthropicLLM", () => {
 				max_tokens: 8192,
 				temperature: undefined,
 				system: undefined,
-				messages: [{ role: "user", content: "hi" }],
+				messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],
 			});
 		});
 
@@ -62,8 +62,39 @@ describe("AnthropicLLM", () => {
 				max_tokens: 100,
 				temperature: 0.5,
 				system: "You are helpful",
-				messages: [{ role: "user", content: "test" }],
+				messages: [{ role: "user", content: [{ type: "text", text: "test" }] }],
 			});
+		});
+
+		it("includes reference images as url blocks before the text", async () => {
+			mockCreate.mockResolvedValue({
+				content: [{ type: "text", text: "ok" }],
+				model: "claude-opus-4-7",
+				usage: { input_tokens: 1, output_tokens: 1 },
+			});
+
+			const provider = new AnthropicLLM("test-key");
+			await provider.generate({
+				prompt: "describe",
+				referenceImages: ["https://a/1.jpg", "https://a/2.jpg"],
+			});
+
+			expect(mockCreate.mock.calls[0][0].messages).toEqual([
+				{
+					role: "user",
+					content: [
+						{
+							type: "image",
+							source: { type: "url", url: "https://a/1.jpg" },
+						},
+						{
+							type: "image",
+							source: { type: "url", url: "https://a/2.jpg" },
+						},
+						{ type: "text", text: "describe" },
+					],
+				},
+			]);
 		});
 
 		it("concatenates multiple text blocks", async () => {

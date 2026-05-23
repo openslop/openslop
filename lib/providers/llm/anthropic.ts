@@ -27,12 +27,23 @@ export class AnthropicLLM extends BaseProvider<
 	}
 
 	private buildRequest(params: LLMGenerateParams) {
+		const images = params.referenceImages ?? [];
+		const content: Anthropic.ContentBlockParam[] = [
+			...images.map(
+				(url) =>
+					({
+						type: "image" as const,
+						source: { type: "url" as const, url },
+					}) satisfies Anthropic.ImageBlockParam,
+			),
+			{ type: "text" as const, text: params.prompt },
+		];
 		return {
 			model: params.model || "claude-opus-4-7",
 			max_tokens: params.maxTokens || 8192,
 			temperature: params.temperature,
 			system: params.systemPrompt || undefined,
-			messages: [{ role: "user" as const, content: params.prompt }],
+			messages: [{ role: "user" as const, content }],
 		};
 	}
 

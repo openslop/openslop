@@ -153,8 +153,38 @@ function extractIds(prompt: string): string[] {
 	return [...prompt.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
 }
 
+const MOCK_STYLE =
+	"Warm, painterly storybook illustration with soft watercolor washes, gentle outlines, and golden hour lighting; whimsical and nostalgic.";
+
+const MOCK_OUTLINE = `Premise: In a village at the edge of an enchanted forest, a cheerful girl named Red sets out to deliver vegetables to her ailing grandmother and unexpectedly befriends a gentle, vegetarian wolf gathering berries for his own sick mother.
+
+Characters: Red (curious, kind); Wolf (gentle, misunderstood); Mother and Granny (warm anchors of home); Hunter (a watchful protector); Owl (the forest's quiet conscience).
+
+Themes: Looking past appearances; small acts of care; the forest as a shared home.
+
+Conflict: Red has been warned not to dawdle, and Wolf's frightening exterior collides with her mother's caution — both must decide whether to trust what they see.
+
+Twists: The "big bad wolf" is the kindest soul in the forest; Owl has been silently steering their meeting all along.
+
+Resolution: Red and Wolf arrive together at Granny's cottage, share their baskets, and the village learns that friendship can grow in the most unlikely places.`;
+
 function isRefineRequest(params: LLMGenerateParams): boolean {
 	return params.prompt.includes("## Refinement Request");
+}
+
+function isStyleRequest(params: LLMGenerateParams): boolean {
+	return /describe the visual art style/i.test(params.prompt);
+}
+
+function isOutlineRequest(params: LLMGenerateParams): boolean {
+	return params.prompt.startsWith("Briefly outline an engaging story");
+}
+
+function mockResponse(params: LLMGenerateParams): string {
+	if (isStyleRequest(params)) return MOCK_STYLE;
+	if (isOutlineRequest(params)) return MOCK_OUTLINE;
+	if (isRefineRequest(params)) return buildRefineResponse(params);
+	return MOCK_SCRIPT;
 }
 
 function buildRefineResponse(params: LLMGenerateParams): string {
@@ -185,11 +215,8 @@ export class MockLLM extends BaseProvider<
 	protected async _generate(
 		params: LLMGenerateParams,
 	): Promise<LLMGenerateResult> {
-		const text = isRefineRequest(params)
-			? buildRefineResponse(params)
-			: MOCK_SCRIPT;
 		return {
-			text,
+			text: mockResponse(params),
 			model: "mock",
 			usage: { inputTokens: 0, outputTokens: 0 },
 		};
@@ -199,9 +226,7 @@ export class MockLLM extends BaseProvider<
 		params: LLMGenerateParams,
 	): AsyncGenerator<{ text: string; done: boolean }> {
 		await delay(500);
-		const text = isRefineRequest(params)
-			? buildRefineResponse(params)
-			: MOCK_SCRIPT;
+		const text = mockResponse(params);
 		let i = 0;
 		while (i < text.length) {
 			const size = 1 + Math.floor(Math.random() * 12);

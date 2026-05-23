@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { osmlPlugin } from "../plugins/osml";
+import { osmlPlugin } from "@/lib/connectors/llm/plugins/osml";
 
 const { beforeGenerate } = osmlPlugin;
 if (!beforeGenerate) throw new Error("osmlPlugin.beforeGenerate is required");

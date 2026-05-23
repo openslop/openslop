@@ -1,6 +1,9 @@
 import { getProjectStore } from "@/lib/project/store";
 import { MetadataVoiceSchema } from "@/lib/project/types";
-import type { ConnectorPlugin, TTSGenerateParams } from "../types";
+import type {
+	ConnectorPlugin,
+	TTSGenerateParams,
+} from "@/lib/connectors/types";
 
 export function createMetadataVoicePlugin(
 	projectId: string,

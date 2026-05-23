@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const generateMock = vi.fn();
 
-vi.mock("../../factory", () => ({
+vi.mock("@/lib/connectors/factory", () => ({
 	createConnector: () => ({ generate: generateMock }),
 }));
 
@@ -11,7 +11,7 @@ import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
 	PluginContext,
-} from "../../types";
+} from "@/lib/connectors/types";
 import { createVideoChainPlugin } from "../animated-image-chain";
 
 const registry: ConnectorRegistry = {

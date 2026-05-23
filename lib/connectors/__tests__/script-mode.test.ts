@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scriptModePlugin } from "../plugins/script-mode";
+import { scriptModePlugin } from "@/lib/connectors/llm/plugins/script-mode";
 
 const { beforeGenerate } = scriptModePlugin;
 if (!beforeGenerate)

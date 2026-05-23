@@ -1,5 +1,5 @@
 import dedent from "dedent";
-import type { LLMPlugin } from "../types";
+import type { LLMPlugin } from "@/lib/connectors/types";
 
 const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
   You are a script-to-XML converter.

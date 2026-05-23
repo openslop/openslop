@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createArtStylePlugin } from "../plugins/art-style";
+import { createArtStylePlugin } from "@/lib/connectors/image/plugins/art-style";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 
 const projectId = "art-style-test-project";

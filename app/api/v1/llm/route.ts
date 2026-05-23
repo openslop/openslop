@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getLLMProvider } from "@/lib/api/providers";
 import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
+import { optionalReferenceImages } from "@/lib/api/request-schema-fields";
 import { createSSEStreamResponse } from "@/lib/api/sse";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 
@@ -10,6 +11,7 @@ const schema = bodySchema(LLM_MODELS, {
 	thinkingLevel: z.string().optional(),
 	maxTokens: z.number().optional(),
 	temperature: z.number().optional(),
+	...optionalReferenceImages,
 	stream: z.boolean().optional(),
 });
 

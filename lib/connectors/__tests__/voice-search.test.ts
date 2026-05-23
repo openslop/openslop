@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createVoiceSearchPlugin } from "../plugins/voice-search";
+import { createVoiceSearchPlugin } from "@/lib/connectors/tts/plugins/voice-search";
 import type { PluginContext, VoiceInfo } from "../types";
 
 function ctxWith(voices: VoiceInfo[]): {

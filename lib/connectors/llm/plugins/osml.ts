@@ -1,15 +1,15 @@
 import dedent from "dedent";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
-import { EffectType } from "../image/enums";
-import { MusicLength } from "../music/enums";
+import { EffectType } from "@/lib/connectors/image/enums";
+import { MusicLength } from "@/lib/connectors/music/enums";
 import {
 	TTS_ACCENTS,
 	TTS_AGES,
 	TTS_GENDERS,
 	TTS_PITCHES,
 	TTSEmotion,
-} from "../tts/enums";
-import type { LLMPlugin } from "../types";
+} from "@/lib/connectors/tts/enums";
+import type { LLMPlugin } from "@/lib/connectors/types";
 
 const OSML_SYSTEM_PROMPT = dedent`
 	The story script must be written in a special XML format that strictly follows these rules: 
