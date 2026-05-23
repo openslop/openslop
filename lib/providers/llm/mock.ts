@@ -9,15 +9,15 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
 
-<metadata_narration gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind"></metadata_narration>
+<metadata_narration gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind" language="en"></metadata_narration>
 
-<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright, cheerful, youthful">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</metadata_character>
+<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright, cheerful, youthful" language="en">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</metadata_character>
 
-<metadata_character name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" description="gentle, soft-spoken, kind">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</metadata_character>
+<metadata_character name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" description="gentle, soft-spoken, kind" language="en">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</metadata_character>
 
-<metadata_character name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</metadata_character>
+<metadata_character name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</metadata_character>
 
-<metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
+<metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
 <animated_image videoPrompt="slow pan across the village to the forest path" motion="kenBurnsOut">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</animated_image>
 

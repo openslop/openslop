@@ -2,7 +2,7 @@
  * TTS attribute enums
  * These enums are used for text-to-speech (TTS) generation
  */
-export const TTS_GENDERS = ["masculine", "feminine", "gender_neutral"] as const;
+export const TTS_GENDERS = ["masculine", "feminine"] as const;
 export type TTSGender = (typeof TTS_GENDERS)[number];
 
 export const TTS_AGES = ["child", "adult"] as const;
@@ -13,6 +13,52 @@ export type TTSPitch = (typeof TTS_PITCHES)[number];
 
 export const TTS_SPEEDS = ["slow", "medium", "fast"] as const;
 export type TTSSpeed = (typeof TTS_SPEEDS)[number];
+
+export const TTS_LANGUAGES = [
+	"en",
+	"fr",
+	"de",
+	"es",
+	"pt",
+	"zh",
+	"ja",
+	"hi",
+	"it",
+	"ko",
+	"nl",
+	"pl",
+	"ru",
+	"sv",
+	"tr",
+	"tl",
+	"bg",
+	"ro",
+	"ar",
+	"cs",
+	"el",
+	"fi",
+	"hr",
+	"ms",
+	"sk",
+	"da",
+	"ta",
+	"uk",
+	"hu",
+	"no",
+	"vi",
+	"bn",
+	"th",
+	"he",
+	"ka",
+	"id",
+	"te",
+	"gu",
+	"kn",
+	"ml",
+	"mr",
+	"pa",
+] as const;
+export type TTSLanguage = (typeof TTS_LANGUAGES)[number];
 
 export const TTS_ACCENTS = [
 	"american",
