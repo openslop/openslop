@@ -1,11 +1,6 @@
 import { stringifyError } from "../errors";
 import { logger } from "./logger";
 
-export type SSEMessage =
-	| { type: "phase"; phase: string; progress: number; subtitle?: string }
-	| { type: "done"; url: string; size: number }
-	| { type: "error"; message: string };
-
 export function formatSSE(data: unknown): string {
 	return `data: ${JSON.stringify(data)}\n\n`;
 }

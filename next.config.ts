@@ -27,9 +27,6 @@ const nextConfig: NextConfig = {
 			"lodash",
 		],
 	},
-	outputFileTracingIncludes: {
-		"/api/render": ["./.remotion/**/*"],
-	},
 	async headers() {
 		return [{ source: "/:path*", headers: SECURITY_HEADERS }];
 	},
