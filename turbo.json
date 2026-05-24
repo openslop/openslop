@@ -1,16 +1,11 @@
 {
 	"tasks": {
-		"bundle": {
-			"outputs": [".remotion/**"]
-		},
 		"build": {
-			"dependsOn": ["bundle"],
 			"outputs": [".next/**", "!.next/cache/**"],
 			"env": ["BLOB_READ_WRITE_TOKEN"]
 		},
-		"create-snapshot": {
-			"dependsOn": ["bundle"],
-			"env": ["BLOB_READ_WRITE_TOKEN"]
+		"deploy:remotion-site": {
+			"env": ["REMOTION_AWS_ACCESS_KEY_ID", "REMOTION_AWS_SECRET_ACCESS_KEY"]
 		}
 	},
 	"dangerouslyDisablePackageManagerCheck": true

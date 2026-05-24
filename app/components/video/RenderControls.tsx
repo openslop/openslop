@@ -39,12 +39,21 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 		);
 	}
 
+	if (state.status === "invoking") {
+		return (
+			<div className={pillClass}>
+				<Loader2 size={14} className="animate-spin text-white/60" />
+				<span className="text-xs text-white/80">Starting...</span>
+			</div>
+		);
+	}
+
 	if (state.status === "rendering") {
 		return (
 			<div className={pillClass}>
 				<Loader2 size={14} className="animate-spin text-white/60" />
 				<div className="flex flex-col gap-1">
-					<span className="text-xs text-white/80">{state.phase}</span>
+					<span className="text-xs text-white/80">Rendering...</span>
 					<div className="h-1 w-32 overflow-hidden rounded-full bg-white/15">
 						<div
 							className="h-full rounded-full bg-violet-500 transition-all"

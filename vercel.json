@@ -1,5 +1,5 @@
 {
-	"buildCommand": "turbo run build create-snapshot",
+	"buildCommand": "turbo run build deploy:remotion-site",
 	"functions": {
 		"app/api/queues/asset-generate/route.ts": {
 			"maxDuration": 800,
