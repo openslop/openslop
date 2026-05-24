@@ -9,9 +9,9 @@ import { parseBody } from "@/lib/api/parse";
 import { unauthorized } from "@/lib/api/response";
 import {
 	DISK,
+	getSiteName,
 	RAM,
 	REGION,
-	SITE_NAME,
 	TIMEOUT,
 } from "@/lib/video/lambda-config";
 import { COMPOSITION_ID } from "@/lib/video/types";
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 	const { renderId, bucketName } = await renderMediaOnLambda({
 		codec: "h264",
 		region: REGION,
-		serveUrl: SITE_NAME,
+		serveUrl: getSiteName(),
 		functionName: speculateFunctionName({
 			diskSizeInMb: DISK,
 			memorySizeInMb: RAM,
