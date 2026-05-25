@@ -44,10 +44,19 @@ export async function POST(req: NextRequest) {
 		});
 	}
 	if (progress.done) {
+		if (
+			!progress.outputFile ||
+			typeof progress.outputSizeInBytes !== "number"
+		) {
+			return NextResponse.json<ProgressResponse>({
+				type: "error",
+				message: "Render completed without output metadata",
+			});
+		}
 		return NextResponse.json<ProgressResponse>({
 			type: "done",
-			url: progress.outputFile as string,
-			size: progress.outputSizeInBytes as number,
+			url: progress.outputFile,
+			size: progress.outputSizeInBytes,
 		});
 	}
 	return NextResponse.json<ProgressResponse>({
