@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getUser } from "@/lib/api/auth";
 import { parseBody } from "@/lib/api/parse";
-import { unauthorized } from "@/lib/api/response";
+import { serverError, unauthorized } from "@/lib/api/response";
 import { DISK, RAM, REGION, TIMEOUT } from "@/lib/video/lambda-config";
 
 const ProgressRequest = z.object({
@@ -44,10 +44,14 @@ export async function POST(req: NextRequest) {
 		});
 	}
 	if (progress.done) {
+		const { outputFile, outputSizeInBytes } = progress;
+		if (!outputFile || outputSizeInBytes == null) {
+			return serverError("Render finished without an output file");
+		}
 		return NextResponse.json<ProgressResponse>({
 			type: "done",
-			url: progress.outputFile as string,
-			size: progress.outputSizeInBytes as number,
+			url: outputFile,
+			size: outputSizeInBytes,
 		});
 	}
 	return NextResponse.json<ProgressResponse>({
