@@ -42,16 +42,26 @@ export abstract class BaseConnector<
 		return runBeforeGenerate(this.plugins, { ...params, prompt }, ctx);
 	}
 
+	/**
+	 * Notifies onError plugins and rethrows. Subclasses use this to share the
+	 * try/catch pattern across `generate` and any other operations (e.g. `stream`).
+	 */
+	protected async reportError(
+		ctx: PluginContext<TParams, TResult>,
+		error: unknown,
+	): Promise<never> {
+		await runOnError(this.plugins, stringifyError(error), ctx);
+		throw error;
+	}
+
 	async generate(params: TParams): Promise<TResult> {
 		const ctx = this.pluginContext();
 		try {
 			const prepared = await this.prepareParams(params, ctx);
-			let result = await this._generate(prepared);
-			result = await runAfterGenerate(this.plugins, result, ctx);
-			return result;
+			const result = await this._generate(prepared);
+			return runAfterGenerate(this.plugins, result, ctx);
 		} catch (error) {
-			await runOnError(this.plugins, stringifyError(error), ctx);
-			throw error;
+			return this.reportError(ctx, error);
 		}
 	}
 

@@ -1,7 +1,5 @@
 import type { GatewayClient } from "@/lib/gateway/base";
-import { stringifyError } from "@/lib/errors";
 import { BaseConnector } from "../base";
-import { runOnError } from "../plugins";
 import type {
 	ConnectorConfig,
 	LLMConnector,
@@ -41,8 +39,7 @@ export abstract class BaseLLMConnector<
 			const prepared = await this.prepareParams(params, ctx);
 			yield* this._stream(prepared);
 		} catch (error) {
-			await runOnError(this.plugins, stringifyError(error), ctx);
-			throw error;
+			await this.reportError(ctx, error);
 		}
 	}
 
