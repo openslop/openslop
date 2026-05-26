@@ -79,4 +79,32 @@ describe("project store updateMetadata", () => {
 			"Bob",
 		]);
 	});
+
+	it("setCharacter fully replaces a character (clearing previous keys)", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store.getState().updateMetadata({
+			characters: {
+				Alice: { appearance: "A girl", voiceId: "voice-1", accent: "british" },
+			},
+		});
+		store
+			.getState()
+			.setCharacter("Alice", { appearance: "Updated", accent: "american" });
+
+		expect(store.getState().metadata.characters["Alice"]).toEqual({
+			appearance: "Updated",
+			accent: "american",
+		});
+	});
+
+	it("removeCharacter deletes the entry", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store.getState().setCharacter("Alice", { appearance: "A girl" });
+		store.getState().setCharacter("Bob", { appearance: "A boy" });
+		store.getState().removeCharacter("Alice");
+
+		expect(store.getState().metadata.characters).toEqual({
+			Bob: { appearance: "A boy" },
+		});
+	});
 });

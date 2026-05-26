@@ -1,6 +1,6 @@
 "use client";
 
-import { type LucideIcon } from "lucide-react";
+import { Pencil, type LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { GenerationIndicator } from "./GenerationIndicator";
@@ -10,18 +10,20 @@ export function AssetTile({
 	previewUrl,
 	Icon,
 	elementId,
+	onEdit,
 }: {
 	name?: string;
 	previewUrl?: string;
 	Icon: LucideIcon;
 	elementId?: string;
+	onEdit?: () => void;
 }) {
 	const status = useQueueSelector(
 		(q) => q.getElementSnapshot(elementId).status,
 	);
 	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
-		<div className="flex w-16 flex-col gap-1 sm:w-20">
+		<div className="group/tile flex w-16 flex-col gap-1 sm:w-20">
 			<div className="relative aspect-square overflow-hidden rounded-md border border-white/10">
 				<Avatar className="size-full rounded-md bg-white/5">
 					{previewUrl && (
@@ -51,6 +53,16 @@ export function AssetTile({
 						size="sm"
 						className="absolute right-1 top-1"
 					/>
+				)}
+				{onEdit && status !== "generating" && (
+					<button
+						type="button"
+						onClick={onEdit}
+						aria-label={`Edit ${name ?? "asset"}`}
+						className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+					>
+						<Pencil className="h-3.5 w-3.5" />
+					</button>
 				)}
 			</div>
 			{name && (

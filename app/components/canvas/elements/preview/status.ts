@@ -12,15 +12,6 @@ export type PlaceholderProps = GenerationState & {
 	onDiscard: () => void;
 };
 
-export function deriveStatus(
-	generating: boolean,
-	queued: boolean,
-): ElementSnapshot["status"] {
-	if (queued) return "queued";
-	if (generating) return "generating";
-	return "idle";
-}
-
 export const BORDER_COLORS: Record<CanvasElementType, string> = {
 	character: "border-amber-500/30",
 	image: "border-cyan-500/30",

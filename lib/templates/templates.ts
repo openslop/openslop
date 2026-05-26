@@ -43,7 +43,7 @@ export const TEMPLATES: Template[] = [
 		narration: {
 			gender: "masculine",
 			age: "adult",
-			pitch: "neutral",
+			pitch: "medium",
 			accent: "american",
 			description: "wise",
 		},
@@ -343,7 +343,7 @@ export const TEMPLATES: Template[] = [
 		narration: {
 			gender: "masculine",
 			age: "adult",
-			pitch: "neutral",
+			pitch: "medium",
 			accent: "american",
 			description: "wise",
 		},

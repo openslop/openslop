@@ -2,6 +2,7 @@ import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import type { GenerationJob } from "@/lib/generation/queue";
+import { getProjectStore } from "@/lib/project/store";
 import type { CanvasContentElement } from "../types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { getGenerationInputs } from "./getGenerationInputs";
@@ -12,7 +13,8 @@ export function buildGenerationJob(
 	projectId: string,
 	overrides: Partial<GenerationJob> = {},
 ): GenerationJob | null {
-	const inputs = getGenerationInputs(element);
+	const { metadata } = getProjectStore(projectId).getState();
+	const inputs = getGenerationInputs(element, metadata);
 	if (!inputs.prompt) return null;
 
 	const elementConfig = ELEMENT_CONFIGS[element.type];

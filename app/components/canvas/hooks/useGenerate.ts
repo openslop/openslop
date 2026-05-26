@@ -6,6 +6,7 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
+import { useProjectStore } from "@/lib/project/store";
 import type { CanvasContentElement } from "../types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
 import { getGenerationInputs } from "../utils/getGenerationInputs";
@@ -14,7 +15,11 @@ export function useGenerate(element: CanvasContentElement) {
 	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
-	const currentInputs = useMemo(() => getGenerationInputs(element), [element]);
+	const metadata = useProjectStore(projectId, (s) => s.metadata);
+	const currentInputs = useMemo(
+		() => getGenerationInputs(element, metadata),
+		[element, metadata],
+	);
 	const stale = isStaleResult(snapshot, currentInputs);
 
 	useEffect(() => {
@@ -36,8 +41,7 @@ export function useGenerate(element: CanvasContentElement) {
 	}, [queue, element.id]);
 
 	return {
-		generating: snapshot.status === "generating",
-		queued: snapshot.status === "queued",
+		status: snapshot.status,
 		seconds: snapshot.seconds,
 		result: snapshot.result,
 		error: snapshot.error,

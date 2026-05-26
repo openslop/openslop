@@ -1,22 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Palette, User } from "lucide-react";
+import { Palette, Plus, User } from "lucide-react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { AssetTile } from "./AssetTile";
+import { CharacterEditModal } from "./character/CharacterEditModal";
+import { NewCharacterDialog } from "./character/NewCharacterDialog";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 
 export function AssetsSection() {
 	const { projectId } = useConfig();
+	const hydrated = useProjectStore(projectId, (s) => s.hydrated);
 	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
 	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
 	const [collapsed, setCollapsed] = useState(false);
+	const [editingName, setEditingName] = useState<string | undefined>();
+	const [creating, setCreating] = useState(false);
 
-	if (Object.keys(characters).length === 0 && referenceImages.length === 0) {
-		return null;
-	}
+	if (!hydrated) return null;
 
 	return (
 		<section className="group/collapsible mb-4 select-none" aria-label="Assets">
@@ -28,6 +31,17 @@ export function AssetsSection() {
 			/>
 			{!collapsed && (
 				<div className="flex flex-wrap gap-2">
+					<button
+						type="button"
+						onClick={() => setCreating(true)}
+						aria-label="Add character"
+						className="flex w-16 flex-col gap-1 sm:w-20"
+					>
+						<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/15 bg-white/[0.02] text-white/50 transition-colors hover:border-white/30 hover:bg-white/[0.05] hover:text-white/80">
+							<Plus className="h-4 w-4" />
+						</div>
+						<span className="truncate text-[10px] text-white/40">New</span>
+					</button>
 					{Object.entries(characters).map(([name, ch]) => (
 						<AssetTile
 							key={`character:${name}`}
@@ -35,6 +49,7 @@ export function AssetsSection() {
 							previewUrl={ch.avatarUrl}
 							Icon={User}
 							elementId={characterAvatarElementId(name)}
+							onEdit={() => setEditingName(name)}
 						/>
 					))}
 					{referenceImages.map((url, i) => (
@@ -47,6 +62,19 @@ export function AssetsSection() {
 					))}
 				</div>
 			)}
+			<NewCharacterDialog
+				open={creating}
+				onOpenChange={setCreating}
+				onCreated={(name) => {
+					setCreating(false);
+					setEditingName(name);
+				}}
+			/>
+			<CharacterEditModal
+				open={editingName !== undefined}
+				onOpenChange={(open) => !open && setEditingName(undefined)}
+				name={editingName}
+			/>
 		</section>
 	);
 }

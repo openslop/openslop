@@ -166,6 +166,7 @@ export type VoiceSearchParams = {
 	description?: string;
 	name?: string;
 	language?: string;
+	limit?: number;
 };
 
 export interface TTSConnector extends Connector {
