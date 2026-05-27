@@ -2,6 +2,7 @@ import type { Metadata } from "@/lib/project/types";
 import type { CanvasContentElement, CanvasElementType } from "../types";
 import { characterAvatarsContributor } from "./contributors/characterAvatars";
 import { characterVoiceIdContributor } from "./contributors/characterVoiceId";
+import { narratorVoiceIdContributor } from "./contributors/narratorVoiceId";
 
 export type AttributeContributor = {
 	name: string;
@@ -15,4 +16,5 @@ export type AttributeContributor = {
 export const INPUT_CONTRIBUTORS: AttributeContributor[] = [
 	characterAvatarsContributor,
 	characterVoiceIdContributor,
+	narratorVoiceIdContributor,
 ];

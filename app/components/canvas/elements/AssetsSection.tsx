@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Palette, Plus, User } from "lucide-react";
+import { Mic, Palette, Plus, User } from "lucide-react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { AssetTile } from "./AssetTile";
 import { CharacterEditModal } from "./character/CharacterEditModal";
+import { NarratorEditModal } from "./character/NarratorEditModal";
 import { NewCharacterDialog } from "./character/NewCharacterDialog";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 
@@ -17,6 +18,7 @@ export function AssetsSection() {
 	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
 	const [collapsed, setCollapsed] = useState(false);
 	const [editingName, setEditingName] = useState<string | undefined>();
+	const [editingNarrator, setEditingNarrator] = useState(false);
 	const [creating, setCreating] = useState(false);
 
 	if (!hydrated) return null;
@@ -31,6 +33,12 @@ export function AssetsSection() {
 			/>
 			{!collapsed && (
 				<div className="flex flex-wrap gap-2">
+					<AssetTile
+						name="Narrator"
+						Icon={Mic}
+						fallback="icon"
+						onEdit={() => setEditingNarrator(true)}
+					/>
 					<button
 						type="button"
 						onClick={() => setCreating(true)}
@@ -74,6 +82,10 @@ export function AssetsSection() {
 				open={editingName !== undefined}
 				onOpenChange={(open) => !open && setEditingName(undefined)}
 				name={editingName}
+			/>
+			<NarratorEditModal
+				open={editingNarrator}
+				onOpenChange={setEditingNarrator}
 			/>
 		</section>
 	);

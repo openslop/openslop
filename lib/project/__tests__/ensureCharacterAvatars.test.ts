@@ -121,12 +121,16 @@ describe("ensureCharacterAvatars", () => {
 	});
 
 	it("buildCharacterAvatarJob produces a job for any character (used for regenerate)", () => {
+		getProjectStore(PROJECT_ID)
+			.getState()
+			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
+
 		const job = buildCharacterAvatarJob(PROJECT_ID, "Alice", registry);
 		expect(job.elementId).toBe(characterAvatarElementId("Alice"));
 		expect(job.connectorType).toBe("image");
 		expect(job.inputs).toEqual({
 			prompt: "Alice",
-			attributes: { kind: "avatar" },
+			attributes: { kind: "avatar", appearance: "A girl" },
 		});
 		expect(job.config.plugins?.map((p) => p.name)).toEqual([
 			"character-avatar",

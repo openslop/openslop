@@ -4,13 +4,16 @@ import type {
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
 
+// Search inputs consumed when resolving a voice. `name` is intentionally
+// excluded — it's the identifier of the character target that downstream
+// plugins (voice-hydrate) need to write the resolved voiceId back to the
+// correct slot in metadata.
 const VOICE_DESCRIPTOR_KEYS = [
 	"gender",
 	"age",
 	"pitch",
 	"accent",
 	"description",
-	"name",
 	"query",
 	"language",
 ] as const;

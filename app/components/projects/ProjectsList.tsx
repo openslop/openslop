@@ -1,30 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { createProject, deleteProject } from "@/lib/project/api";
 import type { ProjectRow } from "@/lib/project/api";
+import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import UserProfile from "@/app/components/UserProfile";
-
-function ProjectThumbnail({ src, alt }: { src: string; alt: string }) {
-	const [loaded, setLoaded] = useState(false);
-	return (
-		<>
-			<Image
-				src={src}
-				alt={alt}
-				fill
-				sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
-				className="object-cover"
-				onLoad={() => setLoaded(true)}
-			/>
-			{!loaded && <div className="absolute inset-0 shimmer-surface" />}
-		</>
-	);
-}
 
 function relativeTime(iso: string): string {
 	const diff = Date.now() - new Date(iso).getTime();
@@ -108,9 +91,12 @@ export default function ProjectsList({
 								>
 									<div className="relative aspect-video bg-white/[0.04]">
 										{project.thumbnail_url ? (
-											<ProjectThumbnail
+											<ImageWithShimmer
 												src={project.thumbnail_url}
 												alt={project.name}
+												fill
+												sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
+												className="object-cover"
 											/>
 										) : (
 											<div className="absolute inset-0 flex items-center justify-center text-white/30 text-xs">

@@ -64,7 +64,7 @@ describe("getGenerationInputs", () => {
 			metadata,
 		);
 		expect(attributes.characterAvatars).toBe(
-			"Alice:https://a/img.png,Bob:https://b/img.png",
+			"https://a/img.png,https://b/img.png",
 		);
 	});
 

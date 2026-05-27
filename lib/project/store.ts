@@ -2,7 +2,12 @@ import merge from "lodash/merge";
 import { useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import type { DeepPartial, Metadata, MetadataCharacter } from "./types";
+import type {
+	DeepPartial,
+	Metadata,
+	MetadataCharacter,
+	MetadataVoice,
+} from "./types";
 
 export type ProjectContext = {
 	hydrated: boolean;
@@ -11,6 +16,7 @@ export type ProjectContext = {
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setCharacter: (name: string, character: MetadataCharacter) => void;
 	removeCharacter: (name: string) => void;
+	setNarration: (narration: MetadataVoice) => void;
 	setReferenceImages: (urls: string[]) => void;
 	markHydrated: () => void;
 	reset: () => void;
@@ -43,6 +49,10 @@ export function getProjectStore(projectId: string): ProjectStore {
 				removeCharacter: (name) =>
 					set((state) => {
 						delete state.metadata.characters[name];
+					}),
+				setNarration: (narration) =>
+					set((state) => {
+						state.metadata.narration = narration;
 					}),
 				setReferenceImages: (urls) =>
 					set((state) => {

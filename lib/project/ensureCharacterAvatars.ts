@@ -1,7 +1,11 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
-import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
+import type {
+	GenerationInputs,
+	GenerationJob,
+	GenerationQueue,
+} from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
 export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
@@ -9,12 +13,22 @@ export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
 export const characterAvatarElementId = (name: string) =>
 	`${CHARACTER_AVATAR_ID_PREFIX}${name}`;
 
+export function characterAvatarInputs(
+	name: string,
+	appearance: string,
+): GenerationInputs {
+	return { prompt: name, attributes: { kind: "avatar", appearance } };
+}
+
 export function buildCharacterAvatarJob(
 	projectId: string,
 	name: string,
 	registry: ConnectorRegistry,
 ): GenerationJob {
 	const { provider, config } = getDefaultConnector(registry, "image");
+	const appearance =
+		getProjectStore(projectId).getState().metadata.characters[name]
+			?.appearance ?? "";
 	return {
 		elementId: characterAvatarElementId(name),
 		connectorType: "image",
@@ -25,7 +39,7 @@ export function buildCharacterAvatarJob(
 		},
 		prompt: "",
 		extraParams: { projectId },
-		inputs: { prompt: name, attributes: { kind: "avatar" } },
+		inputs: characterAvatarInputs(name, appearance),
 	};
 }
 

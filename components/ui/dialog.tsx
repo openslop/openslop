@@ -12,6 +12,27 @@ function Dialog({
 	return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/**
+ * Dialog that only mounts its children while open. Use when the body
+ * subscribes to expensive state (store, queue) so the subscriptions are
+ * torn down on close.
+ */
+function MountedDialog({
+	open,
+	onOpenChange,
+	children,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	children: React.ReactNode;
+}) {
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			{open && children}
+		</Dialog>
+	);
+}
+
 function DialogTrigger({
 	...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -60,7 +81,7 @@ function DialogContent({
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				className={cn(
-					"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-white/10 bg-white/5 p-5 text-white shadow-md shadow-black/40 backdrop-blur-xl outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+					"fixed left-[50%] top-[50%] z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 text-white shadow-md shadow-black/40 backdrop-blur-xl outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:w-full",
 					className,
 				)}
 				{...props}
@@ -68,7 +89,7 @@ function DialogContent({
 				{children}
 				{showCloseButton && (
 					<DialogPrimitive.Close
-						className="absolute right-3 top-3 rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+						className="absolute right-3 top-3 z-10 rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30"
 						aria-label="Close"
 					>
 						<X className="h-4 w-4" />
@@ -130,6 +151,7 @@ function DialogDescription({
 
 export {
 	Dialog,
+	MountedDialog,
 	DialogTrigger,
 	DialogPortal,
 	DialogClose,
