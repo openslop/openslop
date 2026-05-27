@@ -15,6 +15,7 @@ export interface Template {
 	color: string;
 	exampleText: string;
 	systemPrompt: string;
+	artStyle?: string;
 	referenceImages: string[];
 	characters: Record<string, MetadataCharacter>;
 	narration?: MetadataVoice;
@@ -55,10 +56,10 @@ export const TEMPLATES: Template[] = [
 				"Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
 			examplePrompt: "tech CEO",
 		},
+		artStyle: dedent`2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients`,
 		systemPrompt: dedent`
 		# Important
 		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images where appropriate
-		- The art style is: 2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients
 		- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story
 		- The Protagonist is always male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots
 		- Never mention any specific ages in the image descriptions, just generic ones like young man`,
@@ -276,10 +277,8 @@ export const TEMPLATES: Template[] = [
 				"Long-form, slow, soothing narration designed to lull listeners to sleep",
 			examplePrompt: "a cat who wanders around gardens at night",
 		},
-		systemPrompt: dedent`
-		# Important
-		- The art style is: Hand-painted watercolor/gouache, Ghibli-storybook style. Loose ink lines, moody nocturnal palette (midnight blue, slate, teal, brick accents), moonlight and drifting particles, layered foliage. Painterly, quiet, dreamlike. 
-		`,
+		artStyle: dedent`Hand-painted watercolor/gouache, Ghibli-storybook style. Loose ink lines, moody nocturnal palette (midnight blue, slate, teal, brick accents), moonlight and drifting particles, layered foliage. Painterly, quiet, dreamlike.`,
+		systemPrompt: "",
 		exampleText: dedent`#Music: Soft welcoming ambient pad in C major, slow warm analog synth swells, distant felted piano notes spaced far apart, very low binaural pink noise underneath, no percussion, evokes the moment of pulling a duvet up to your chin. 50 BPM. Loopable for ~3 minutes.
 			#Image: A cozy bedroom at night seen from shouldlow angle, soft amber lamplight on a nightstand, a book turned face-down on a folded quilt, a window with deep indigo sky and a sliver of moon, dreamy painterly style with soft brush textures, warm muted palette of cream, ochre, navy, and dusky rose, cinematic depth of field
 			#Narration: Welcome to Get Sleepy, where we listen, we relax, and we get sleepy. My name is Thomas, and I'm your host.
@@ -355,10 +354,10 @@ export const TEMPLATES: Template[] = [
 			examplePrompt:
 				"Subscriptions, bank fees, impulse buys, unused gym memberships - the money leaks most people ignore",
 		},
+		artStyle: dedent`Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.`,
 		systemPrompt: dedent`
 			# Important
 			- The main character is always called Ethan, and the Ethan must always be present in the character list of images where relevant
-			- The art style is: Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.
 			- Do not generate character metadata for Ethan, but do use him like a regular character in the story
 			- Ethan is a man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers`,
 		exampleText: dedent`
@@ -543,9 +542,10 @@ export const TEMPLATES: Template[] = [
 		narration: {
 			gender: "masculine",
 			age: "adult",
-			pitch: "neutral",
+			pitch: "medium",
 			accent: "american",
-			description: "casual",
+			description: "Friendly young adult male",
+			voiceId: "86e30c1d-714b-4074-a1f2-1cb6b552fb49",
 		},
 		showcase: {
 			image:
@@ -768,11 +768,9 @@ export const TEMPLATES: Template[] = [
 #Music [somber outro]
 #Image [a memorial statue of Andres Escobar with flowers piled at the base]
 #Narration: And that's the wild, sad story of how a soccer game ended a man's life.`,
+		artStyle: dedent`Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style`,
 		systemPrompt: dedent`
 You write short narrative scripts in the style of viral YouTube true-story/crime videos. Pastiche these conventions precisely:
-
-# ART STYLE
-Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style
 
 # OPENING HOOK
 Open with a single punchy sentence that previews the wildest part of the story. Examples: "Imagine getting so mad over [X] that you murder someone." / "So this guy is about to [win/lose] [absurd thing] and then he's going to jail." / "So this man's obsession with [random thing] is about to go very wrong."
