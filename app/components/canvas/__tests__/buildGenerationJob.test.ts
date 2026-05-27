@@ -86,7 +86,10 @@ describe("buildGenerationJob", () => {
 			connectorType: "tts",
 			provider: "openslop",
 			prompt: "Hello world",
-			extraParams: { emotion: "happy", projectId: PROJECT_ID },
+		});
+		expect(job?.resolve().extraParams).toEqual({
+			emotion: "happy",
+			projectId: PROJECT_ID,
 		});
 	});
 
@@ -94,14 +97,16 @@ describe("buildGenerationJob", () => {
 		const el = makeElement("image", "A sunset over the ocean");
 		const job = buildGenerationJob(el, registry, PROJECT_ID);
 
-		expect(job).toEqual({
+		expect(job).toMatchObject({
 			elementId: "el-1",
 			connectorType: "image",
 			provider: "openslop",
 			config: expect.objectContaining({ defaultModel: "Slop Image v1" }),
 			prompt: "A sunset over the ocean",
-			extraParams: { projectId: PROJECT_ID },
+		});
+		expect(job?.resolve()).toEqual({
 			inputs: { prompt: "A sunset over the ocean", attributes: {} },
+			extraParams: { projectId: PROJECT_ID },
 		});
 	});
 
@@ -109,14 +114,16 @@ describe("buildGenerationJob", () => {
 		const el = makeElement("clip", "A car chase", { duration: "10" });
 		const job = buildGenerationJob(el, registry, PROJECT_ID);
 
-		expect(job).toEqual({
+		expect(job).toMatchObject({
 			elementId: "el-1",
 			connectorType: "video",
 			provider: "openslop",
 			config: expect.objectContaining({ defaultModel: "Slop Video v1" }),
 			prompt: "A car chase",
-			extraParams: { duration: "10", projectId: PROJECT_ID },
+		});
+		expect(job?.resolve()).toEqual({
 			inputs: { prompt: "A car chase", attributes: { duration: "10" } },
+			extraParams: { duration: "10", projectId: PROJECT_ID },
 		});
 	});
 
@@ -169,7 +176,7 @@ describe("buildGenerationJob", () => {
 			emotion: "excited",
 		});
 		const job = buildGenerationJob(el, registry, PROJECT_ID);
-		expect(job?.extraParams).toEqual({
+		expect(job?.resolve().extraParams).toEqual({
 			name: "Lyra",
 			emotion: "excited",
 			projectId: PROJECT_ID,
@@ -180,7 +187,7 @@ describe("buildGenerationJob", () => {
 		const el = makeElement("music", "Epic orchestral music");
 		const job = buildGenerationJob(el, registry, PROJECT_ID);
 		expect(job?.connectorType).toBe("music");
-		expect(job?.extraParams).toEqual({ projectId: PROJECT_ID });
+		expect(job?.resolve().extraParams).toEqual({ projectId: PROJECT_ID });
 	});
 
 	it("handles element with no customAttributes", () => {

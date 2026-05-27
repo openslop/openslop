@@ -27,8 +27,10 @@ export type GenerationJob = {
 	provider: ProviderKey;
 	config: ConnectorConfig;
 	prompt: string;
-	extraParams: Record<string, unknown>;
-	inputs: GenerationInputs;
+	resolve: () => {
+		inputs: GenerationInputs;
+		extraParams: Record<string, unknown>;
+	};
 };
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
@@ -268,14 +270,15 @@ export class GenerationQueue {
 		this.notify();
 		this.startElapsedTimer(elementId);
 
+		const { inputs, extraParams } = job.resolve();
 		generateForElement(
 			job.connectorType,
 			job.provider,
 			job.config,
 			job.prompt,
-			job.extraParams,
+			extraParams,
 		)
-			.then((result) => this.handleJobSuccess(job, result, controller))
+			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
 			.catch((err) => this.handleJobError(elementId, err, controller))
 			.finally(() => this.finalizeJob(elementId, controller));
 	}
@@ -287,11 +290,12 @@ export class GenerationQueue {
 
 	private handleJobSuccess(
 		job: GenerationJob,
+		inputs: GenerationInputs,
 		result: AssetResult,
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		const key = serializeInputs(job.inputs);
+		const key = serializeInputs(inputs);
 		const elHistory =
 			this.history.get(job.elementId) ?? new Map<string, AssetResult>();
 		elHistory.set(key, result);
@@ -301,7 +305,7 @@ export class GenerationQueue {
 			seconds: 0,
 			result,
 			error: null,
-			resultInputs: job.inputs,
+			resultInputs: inputs,
 		});
 	}
 

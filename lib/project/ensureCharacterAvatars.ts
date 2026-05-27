@@ -1,13 +1,24 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
-import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
+import type {
+	GenerationInputs,
+	GenerationJob,
+	GenerationQueue,
+} from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
 export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
 
 export const characterAvatarElementId = (name: string) =>
 	`${CHARACTER_AVATAR_ID_PREFIX}${name}`;
+
+export function characterAvatarInputs(
+	name: string,
+	appearance: string,
+): GenerationInputs {
+	return { prompt: name, attributes: { kind: "avatar", appearance } };
+}
 
 export function buildCharacterAvatarJob(
 	projectId: string,
@@ -24,8 +35,15 @@ export function buildCharacterAvatarJob(
 			plugins: buildCharacterAvatarPlugins(projectId, name),
 		},
 		prompt: "",
-		extraParams: { projectId },
-		inputs: { prompt: name, attributes: { kind: "avatar" } },
+		resolve: () => {
+			const appearance =
+				getProjectStore(projectId).getState().metadata.characters[name]
+					?.appearance ?? "";
+			return {
+				inputs: characterAvatarInputs(name, appearance),
+				extraParams: { projectId },
+			};
+		},
 	};
 }
 

@@ -4,6 +4,7 @@ import type {
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
 import { MockProvider } from "../mock-base";
+import { fetchAllowedVoicePreview } from "./voicePreview";
 
 const BLOB_BASE =
 	"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/tts/mock";
@@ -161,9 +162,6 @@ export class MockTTS extends MockProvider<TTSGenerateParams> {
 	}
 
 	async fetchVoicePreview(url: string): Promise<Response> {
-		if (new URL(url).hostname !== PREVIEW_HOST) {
-			throw new Error(`Voice preview host not allowed: ${url}`);
-		}
-		return fetch(url);
+		return fetchAllowedVoicePreview(url, PREVIEW_HOST);
 	}
 }

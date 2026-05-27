@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import {
-	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
+	MountedDialog,
 } from "@/components/ui/dialog";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
@@ -22,9 +22,9 @@ export function NewCharacterDialog({
 	onCreated: (name: string) => void;
 }) {
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			{open && <NewCharacterDialogBody onCreated={onCreated} />}
-		</Dialog>
+		<MountedDialog open={open} onOpenChange={onOpenChange}>
+			<NewCharacterDialogBody onCreated={onCreated} />
+		</MountedDialog>
 	);
 }
 

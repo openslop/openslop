@@ -13,6 +13,7 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
+import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
 import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
 
@@ -78,12 +79,8 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 	}
 
 	async fetchVoicePreview(url: string): Promise<Response> {
-		if (new URL(url).hostname !== PREVIEW_HOST) {
-			throw new Error(`Voice preview host not allowed: ${url}`);
-		}
-		return fetch(url, {
+		return fetchAllowedVoicePreview(url, PREVIEW_HOST, {
 			headers: { Authorization: `Bearer ${this.apiKey}` },
-			redirect: "manual",
 		});
 	}
 

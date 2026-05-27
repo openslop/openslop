@@ -6,6 +6,7 @@ import { getProjectStore } from "@/lib/project/store";
 import type { CanvasContentElement } from "../types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { getGenerationInputs } from "./getGenerationInputs";
+import { getPromptText } from "./getPromptText";
 
 export function buildGenerationJob(
 	element: CanvasContentElement,
@@ -13,21 +14,19 @@ export function buildGenerationJob(
 	projectId: string,
 	overrides: Partial<GenerationJob> = {},
 ): GenerationJob | null {
-	const { metadata } = getProjectStore(projectId).getState();
-	const inputs = getGenerationInputs(element, metadata);
-	if (!inputs.prompt) return null;
+	const prompt = getPromptText(element);
+	if (!prompt) return null;
 
-	const elementConfig = ELEMENT_CONFIGS[element.type];
-	const connectorType = elementConfig.connector;
-	const { attributes } = inputs;
-	const provider = (attributes.provider as ProviderKey) ?? "openslop";
+	const customAttributes = element.customAttributes ?? {};
+	const connectorType = ELEMENT_CONFIGS[element.type].connector;
+	const provider = (customAttributes.provider as ProviderKey) ?? "openslop";
 	const { config: baseConfig } = getDefaultConnector(
 		connectorConfig,
 		connectorType,
 	);
 	const config = {
 		...baseConfig,
-		...(attributes.model && { defaultModel: attributes.model }),
+		...(customAttributes.model && { defaultModel: customAttributes.model }),
 	};
 
 	return {
@@ -35,9 +34,12 @@ export function buildGenerationJob(
 		connectorType,
 		provider,
 		config,
-		prompt: inputs.prompt,
-		extraParams: { ...attributes, projectId },
-		inputs,
+		prompt,
+		resolve: () => {
+			const { metadata } = getProjectStore(projectId).getState();
+			const inputs = getGenerationInputs(element, metadata);
+			return { inputs, extraParams: { ...inputs.attributes, projectId } };
+		},
 		...overrides,
 	};
 }

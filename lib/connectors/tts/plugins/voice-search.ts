@@ -10,7 +10,6 @@ const VOICE_DESCRIPTOR_KEYS = [
 	"pitch",
 	"accent",
 	"description",
-	"name",
 	"query",
 	"language",
 ] as const;

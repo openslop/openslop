@@ -50,7 +50,7 @@ describe("getGenerationInputs", () => {
 		expect(attributes).toEqual({ model: "Slop Video v1" });
 	});
 
-	it("adds characterAvatars on image elements via contributor", () => {
+	it("adds characterAvatars on image elements from metadata", () => {
 		const metadata: Metadata = {
 			...emptyMetadata,
 			characters: {
@@ -64,11 +64,11 @@ describe("getGenerationInputs", () => {
 			metadata,
 		);
 		expect(attributes.characterAvatars).toBe(
-			"Alice:https://a/img.png,Bob:https://b/img.png",
+			"https://a/img.png,https://b/img.png",
 		);
 	});
 
-	it("adds voiceId on character elements via contributor", () => {
+	it("adds voiceId on character elements from metadata", () => {
 		const metadata: Metadata = {
 			...emptyMetadata,
 			characters: {
@@ -82,7 +82,7 @@ describe("getGenerationInputs", () => {
 		expect(attributes.voiceId).toBe("voice-1");
 	});
 
-	it("skips contributors whose appliesTo excludes the type", () => {
+	it("does not derive metadata attributes for element types without a resolver", () => {
 		const metadata: Metadata = {
 			...emptyMetadata,
 			characters: {

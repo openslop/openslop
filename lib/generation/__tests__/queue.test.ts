@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { ConnectorConfig } from "@/lib/connectors/types";
+import type { GenerationInputs } from "../generationInputs";
 import { GenerationQueue, type GenerationJob } from "../queue";
 
 type GenerateFn = (...args: unknown[]) => Promise<unknown>;
@@ -9,24 +10,30 @@ vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
-function makeJob(
-	id: string,
-	overrides?: Partial<GenerationJob>,
-): GenerationJob {
+type JobOverrides = Partial<Omit<GenerationJob, "resolve">> & {
+	inputs?: GenerationInputs;
+	extraParams?: Record<string, unknown>;
+};
+
+function makeJob(id: string, overrides: JobOverrides = {}): GenerationJob {
 	const config: ConnectorConfig = {
 		defaultModel: "test-model",
 		models: ["test-model"],
 		isDefault: true,
 	};
+	const {
+		inputs = { prompt: "test prompt", attributes: {} },
+		extraParams = {},
+		...rest
+	} = overrides;
 	return {
 		elementId: id,
 		connectorType: "image",
 		provider: "openslop",
 		config,
 		prompt: "test prompt",
-		extraParams: {},
-		inputs: { prompt: "test prompt", attributes: {} },
-		...overrides,
+		resolve: () => ({ inputs, extraParams }),
+		...rest,
 	};
 }
 
