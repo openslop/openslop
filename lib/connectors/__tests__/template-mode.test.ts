@@ -12,11 +12,13 @@ const realTemplate = pickTemplate((id) => id === "pov-life");
 
 describe("createTemplateModePlugin", () => {
 	describe("beforeGenerate", () => {
-		it("prepends template systemPrompt when none provided", () => {
+		it("prepends template preamble and systemPrompt when none provided", () => {
 			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
 			const result = beforeGenerate?.({ prompt: "hi" });
 			const sys = (result as { systemPrompt: string }).systemPrompt;
-			expect(sys).toBe(realTemplate.systemPrompt);
+			expect(sys).toContain(realTemplate.systemPrompt);
+			expect(sys).toContain(realTemplate.style);
+			expect(sys).toContain("# Art Style");
 		});
 
 		it("prepends template systemPrompt before existing systemPrompt", () => {

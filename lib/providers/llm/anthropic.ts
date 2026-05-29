@@ -39,7 +39,7 @@ export class AnthropicLLM extends BaseProvider<
 			{ type: "text" as const, text: params.prompt },
 		];
 		return {
-			model: params.model || "claude-opus-4-7",
+			model: params.model || "claude-opus-4-8",
 			max_tokens: params.maxTokens || 8192,
 			temperature: params.temperature,
 			system: params.systemPrompt || undefined,

@@ -8,6 +8,7 @@ import {
 	TTS_GENDERS,
 	TTS_LANGUAGES,
 	TTS_PITCHES,
+	TTS_SPEEDS,
 	TTSEmotion,
 } from "@/lib/connectors/tts/enums";
 import type { LLMPlugin } from "@/lib/connectors/types";
@@ -44,6 +45,7 @@ const OSML_SYSTEM_PROMPT = dedent`
 
 	### Narration and Character XML Tags
 	- For both character and narration tags, the emotion attribute should be appropriately set to one of the following: ${Object.values(TTSEmotion).join(", ")}.
+	- For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
 	- The optional captions attribute is "on" or "off" (default "on") and controls whether on-screen subtitle text is overlaid during the element's audio.
 
   ### Image XML Tags
