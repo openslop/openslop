@@ -4,7 +4,7 @@ import {
 	SCENE_TYPE,
 	type CanvasContentElement,
 	type SceneElement,
-} from "@/app/components/canvas/types";
+} from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 
 function makeElement(

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
-import type { CanvasElement, CanvasElementType } from "../types";
+import type { CanvasElement, CanvasElementType } from "@/lib/canvas/types";
 import styles from "../styles/sortable.module.css";
 import { SortableActions, type InsertOption } from "./SortableActions";
 

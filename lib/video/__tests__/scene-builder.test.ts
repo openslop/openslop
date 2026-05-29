@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildVideoLayout } from "../scene-builder";
 import type { ResolvedElement, Sequence, VideoLayout } from "../types";
-import type { CanvasElementType } from "@/app/components/canvas/types";
+import type { CanvasElementType } from "@/lib/canvas/types";
 
 function seqs(layout: VideoLayout, type: CanvasElementType): Sequence[] {
 	const s = layout.sequences[type];

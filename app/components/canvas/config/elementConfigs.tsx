@@ -7,7 +7,7 @@ import {
 	Volume2,
 	Music,
 } from "lucide-react";
-import type { CanvasElementType, ResultKind } from "../types";
+import type { CanvasElementType, ResultKind } from "@/lib/canvas/types";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";

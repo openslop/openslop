@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
+import type {
+	CanvasContentElement,
+	CanvasElementType,
+} from "@/lib/canvas/types";
 import type { Metadata } from "@/lib/project/types";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
-import type { CanvasContentElement, CanvasElementType } from "../../types";
 import { getGenerationInputs } from "../getGenerationInputs";
 
 const emptyMetadata: Metadata = {
@@ -50,7 +53,7 @@ describe("getGenerationInputs", () => {
 		expect(attributes).toEqual({ model: "Slop Video v1" });
 	});
 
-	it("adds characterAvatars on image elements from metadata", () => {
+	it("merges characterAvatars from metadata for image elements", () => {
 		const metadata: Metadata = {
 			...emptyMetadata,
 			characters: {
@@ -68,12 +71,10 @@ describe("getGenerationInputs", () => {
 		);
 	});
 
-	it("adds voiceId on character elements from metadata", () => {
+	it("merges voiceId from metadata for character elements", () => {
 		const metadata: Metadata = {
 			...emptyMetadata,
-			characters: {
-				Alice: { appearance: "tall", voiceId: "voice-1" },
-			},
+			characters: { Alice: { appearance: "tall", voiceId: "voice-1" } },
 		};
 		const { attributes } = getGenerationInputs(
 			element({ name: "Alice" }, "character"),
@@ -82,12 +83,10 @@ describe("getGenerationInputs", () => {
 		expect(attributes.voiceId).toBe("voice-1");
 	});
 
-	it("does not derive metadata attributes for element types without a resolver", () => {
+	it("does not merge metadata for element types without a resolver", () => {
 		const metadata: Metadata = {
 			...emptyMetadata,
-			characters: {
-				Alice: { appearance: "tall", voiceId: "voice-1" },
-			},
+			characters: { Alice: { appearance: "tall", voiceId: "voice-1" } },
 		};
 		const { attributes } = getGenerationInputs(
 			element({ name: "Alice" }, "clip"),

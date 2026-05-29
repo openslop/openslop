@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import type { GenerationInputs } from "../generationInputs";
 import { GenerationQueue, type GenerationJob } from "../queue";
@@ -10,10 +11,19 @@ vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
-type JobOverrides = Partial<Omit<GenerationJob, "resolve">> & {
-	inputs?: GenerationInputs;
-	extraParams?: Record<string, unknown>;
-};
+function makeElement(
+	id: string,
+	inputs: GenerationInputs,
+): CanvasContentElement {
+	return {
+		id,
+		type: "image",
+		customAttributes: inputs.attributes,
+		children: [{ id: `${id}-t`, type: "image", text: inputs.prompt }],
+	};
+}
+
+type JobOverrides = Partial<GenerationJob> & { inputs?: GenerationInputs };
 
 function makeJob(id: string, overrides: JobOverrides = {}): GenerationJob {
 	const config: ConnectorConfig = {
@@ -21,18 +31,15 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationJob {
 		models: ["test-model"],
 		isDefault: true,
 	};
-	const {
-		inputs = { prompt: "test prompt", attributes: {} },
-		extraParams = {},
-		...rest
-	} = overrides;
+	const { inputs = { prompt: "test prompt", attributes: {} }, ...rest } =
+		overrides;
 	return {
 		elementId: id,
 		connectorType: "image",
 		provider: "openslop",
 		config,
-		prompt: "test prompt",
-		resolve: () => ({ inputs, extraParams }),
+		projectId: "test-project",
+		element: makeElement(id, inputs),
 		...rest,
 	};
 }
@@ -342,9 +349,7 @@ describe("GenerationQueue", () => {
 			const result = { url: "https://example.com/asset.png", durationSec: 0 };
 			generateMock.mockResolvedValue(result);
 			const inputs = { prompt: "p", attributes: { a: "1", b: "2" } };
-			generationQueue.enqueue(
-				makeJob("rr1", { inputs, prompt: inputs.prompt }),
-			);
+			generationQueue.enqueue(makeJob("rr1", { inputs }));
 			await vi.runAllTimersAsync();
 
 			// Simulate the result drifting by setting an error first
@@ -506,7 +511,7 @@ describe("GenerationQueue", () => {
 		});
 
 		it("makes isStaleResult correct after rehydration", async () => {
-			const { isStaleResult } = await import("../generationInputs");
+			const { isStaleResult } = await import("../queue");
 			const q = new GenerationQueue({
 				batchSize: 3,
 				initialState: { h3: idleEntry },

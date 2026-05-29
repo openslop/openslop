@@ -8,7 +8,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import type { CanvasContentElement } from "../../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { setNodeAttrs } from "../../utils/editorOps";
 
 interface TextAttributePopoverProps {

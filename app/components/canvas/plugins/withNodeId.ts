@@ -1,5 +1,5 @@
 import { ReactEditor } from "slate-react";
-import type { CanvasEditor } from "../types";
+import type { CanvasEditor } from "@/lib/canvas/types";
 import { assignIdRecursively, makeNodeId, stripIds } from "../utils/nodeUtils";
 
 export const withNodeId = (editor: ReactEditor): CanvasEditor => {

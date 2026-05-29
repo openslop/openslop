@@ -10,7 +10,7 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { Descendant, Editor, Element, Path, Transforms } from "slate";
-import { isSceneElement } from "../utils/guards";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import type { DragTransfer } from "./DragTransferContext";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {

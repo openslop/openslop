@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS, type AttributeSpec } from "../config/elementConfigs";
 import { AttributeBadge } from "./AttributeBadge";
 

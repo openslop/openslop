@@ -1,4 +1,7 @@
-import type { CanvasContentElement, CanvasElementType } from "../types";
+import type {
+	CanvasContentElement,
+	CanvasElementType,
+} from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { ZERO_WIDTH_SPACE } from "../config/constants";

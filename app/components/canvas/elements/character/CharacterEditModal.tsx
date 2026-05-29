@@ -15,11 +15,12 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
+import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { isStaleResult } from "@/lib/generation/queue";
 import {
 	buildCharacterAvatarJob,
+	characterAvatarElement,
 	characterAvatarElementId,
-	characterAvatarInputs,
 } from "@/lib/project/ensureCharacterAvatars";
 import { useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
@@ -58,10 +59,8 @@ function CharacterEditDialogBody({
 }) {
 	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
-	const character = useProjectStore(
-		projectId,
-		(s) => s.metadata.characters[name],
-	);
+	const metadata = useProjectStore(projectId, (s) => s.metadata);
+	const character = metadata.characters[name];
 	const setCharacter = useProjectStore(projectId, (s) => s.setCharacter);
 	const removeCharacter = useProjectStore(projectId, (s) => s.removeCharacter);
 
@@ -82,7 +81,10 @@ function CharacterEditDialogBody({
 
 	const isStale = isStaleResult(
 		avatarSnapshot,
-		characterAvatarInputs(name, character.appearance),
+		getGenerationInputs(
+			characterAvatarElement(name, character.appearance),
+			metadata,
+		),
 	);
 
 	const handleDelete = () => {

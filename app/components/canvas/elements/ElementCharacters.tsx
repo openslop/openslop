@@ -1,7 +1,7 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getElementCharacterNames } from "../utils/characters";
 import { CharacterPill } from "./CharacterBadge";
 import {

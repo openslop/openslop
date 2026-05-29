@@ -1,5 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { ConnectorConfig, AssetResult } from "@/lib/connectors/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
+import type {
+	AssetResult,
+	ConnectorConfig,
+	ConnectorType,
+} from "@/lib/connectors/types";
+import type { GenerationInputs } from "../generationInputs";
+import type { GenerationJob } from "../queue";
 
 const mockGenerate = vi.fn<() => Promise<AssetResult>>();
 
@@ -18,6 +25,27 @@ const config: ConnectorConfig = {
 	isDefault: true,
 };
 
+function makeJob(connectorType: ConnectorType): GenerationJob {
+	const element: CanvasContentElement = {
+		id: "el-1",
+		type: "image",
+		children: [{ id: "t", type: "image", text: "" }],
+	};
+	return {
+		elementId: "el-1",
+		connectorType,
+		provider: "openslop",
+		config,
+		projectId: "test-project",
+		element,
+	};
+}
+
+const inputs = (
+	prompt: string,
+	attributes: Record<string, string> = {},
+): GenerationInputs => ({ prompt, attributes });
+
 describe("generateForElement", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -31,18 +59,15 @@ describe("generateForElement", () => {
 		mockGenerate.mockResolvedValue(expected);
 
 		const result = await generateForElement(
-			"image",
-			"openslop",
-			config,
-			"a sunset",
-			{ width: 1024 },
+			makeJob("image"),
+			inputs("a sunset", { width: "1024" }),
 		);
 
 		expect(createConnector).toHaveBeenCalledWith("image", "openslop", config);
 		expect(mockGenerate).toHaveBeenCalledWith({
 			prompt: "a sunset",
 			model: "test-model",
-			width: 1024,
+			width: "1024",
 		});
 		expect(result).toEqual(expected);
 	});
@@ -50,7 +75,7 @@ describe("generateForElement", () => {
 	it("passes default model from config", async () => {
 		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 0 });
 
-		await generateForElement("music", "openslop", config, "jazz beat", {});
+		await generateForElement(makeJob("music"), inputs("jazz beat"));
 
 		expect(mockGenerate).toHaveBeenCalledWith({
 			prompt: "jazz beat",
@@ -58,13 +83,13 @@ describe("generateForElement", () => {
 		});
 	});
 
-	it("merges extra params into generate call", async () => {
+	it("merges attributes into generate call", async () => {
 		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 5 });
 
-		await generateForElement("tts", "openslop", config, "hello world", {
-			voiceId: "voice-1",
-			speed: "fast",
-		});
+		await generateForElement(
+			makeJob("tts"),
+			inputs("hello world", { voiceId: "voice-1", speed: "fast" }),
+		);
 
 		expect(mockGenerate).toHaveBeenCalledWith({
 			prompt: "hello world",
@@ -78,7 +103,7 @@ describe("generateForElement", () => {
 		mockGenerate.mockRejectedValue(new Error("generation failed"));
 
 		await expect(
-			generateForElement("image", "openslop", config, "test", {}),
+			generateForElement(makeJob("image"), inputs("test")),
 		).rejects.toThrow("generation failed");
 	});
 });

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
-import type { ResultKind } from "../types";
+import type { ResultKind } from "@/lib/canvas/types";
 
 interface MediaWithSkeletonProps {
 	outputKind: ResultKind;

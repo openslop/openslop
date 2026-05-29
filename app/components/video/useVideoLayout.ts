@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { Editor } from "slate";
-import type { CanvasElement } from "@/app/components/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import {
 	useGenerationQueue,
 	useQueueSelector,

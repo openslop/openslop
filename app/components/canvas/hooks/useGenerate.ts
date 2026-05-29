@@ -5,11 +5,11 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
+import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
 import { useProjectStore } from "@/lib/project/store";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { buildGenerationJob } from "../utils/buildGenerationJob";
-import { getGenerationInputs } from "../utils/getGenerationInputs";
 
 export function useGenerate(element: CanvasContentElement) {
 	const { projectId, connectorConfig } = useConfig();
@@ -28,13 +28,13 @@ export function useGenerate(element: CanvasContentElement) {
 	}, [queue, element.id, currentInputs, stale]);
 
 	const generate = useCallback(() => {
-		const job = buildGenerationJob(element, connectorConfig, projectId);
-		if (!job) {
+		if (!currentInputs.prompt) {
 			queue.setError(element.id, "Enter a prompt first");
 			return;
 		}
-		scheduleGeneration(queue, job, { projectId, registry: connectorConfig });
-	}, [queue, element, connectorConfig, projectId]);
+		const job = buildGenerationJob(element, connectorConfig, projectId);
+		scheduleGeneration(queue, [job], { projectId, registry: connectorConfig });
+	}, [queue, element, currentInputs.prompt, connectorConfig, projectId]);
 
 	const discard = useCallback(() => {
 		queue.discard(element.id);

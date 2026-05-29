@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getElementCharacterNames } from "../utils/characters";
 import { setNodeAttrs } from "../utils/editorOps";
 import { CharacterPill } from "./CharacterBadge";

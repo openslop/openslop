@@ -1,4 +1,4 @@
-import type { CanvasEditor } from "../types";
+import type { CanvasEditor } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { insertElement } from "../utils/insertElement";
 

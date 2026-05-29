@@ -1,10 +1,7 @@
 import { Transforms, Path, Node } from "slate";
-import { CanvasEditor, SceneElement, SCENE_TYPE } from "../types";
-import {
-	isContentElement,
-	isForeground,
-	isSceneElement,
-} from "../utils/guards";
+import { CanvasEditor, SceneElement, SCENE_TYPE } from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
+import { isContentElement, isForeground } from "../utils/guards";
 import { makeNodeId } from "../utils/nodeUtils";
 
 export const withScenes = (editor: CanvasEditor): CanvasEditor => {

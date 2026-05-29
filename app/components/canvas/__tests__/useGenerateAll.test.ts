@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant } from "slate";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { GenerationJob } from "@/lib/generation/queue";
-import type { CanvasContentElement, SceneElement } from "../types";
+import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
 const registry: ConnectorRegistry = {
 	llm: {

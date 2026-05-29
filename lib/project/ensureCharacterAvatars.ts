@@ -1,11 +1,8 @@
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
-import type {
-	GenerationInputs,
-	GenerationJob,
-	GenerationQueue,
-} from "@/lib/generation/queue";
+import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
 export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
@@ -13,11 +10,17 @@ export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
 export const characterAvatarElementId = (name: string) =>
 	`${CHARACTER_AVATAR_ID_PREFIX}${name}`;
 
-export function characterAvatarInputs(
+export function characterAvatarElement(
 	name: string,
 	appearance: string,
-): GenerationInputs {
-	return { prompt: name, attributes: { kind: "avatar", appearance } };
+): CanvasContentElement {
+	const id = characterAvatarElementId(name);
+	return {
+		id,
+		type: "image",
+		customAttributes: { kind: "avatar", appearance },
+		children: [{ id: `${id}-t`, type: "image", text: name }],
+	};
 }
 
 export function buildCharacterAvatarJob(
@@ -26,6 +29,9 @@ export function buildCharacterAvatarJob(
 	registry: ConnectorRegistry,
 ): GenerationJob {
 	const { provider, config } = getDefaultConnector(registry, "image");
+	const appearance =
+		getProjectStore(projectId).getState().metadata.characters[name]
+			?.appearance ?? "";
 	return {
 		elementId: characterAvatarElementId(name),
 		connectorType: "image",
@@ -34,16 +40,8 @@ export function buildCharacterAvatarJob(
 			...config,
 			plugins: buildCharacterAvatarPlugins(projectId, name),
 		},
-		prompt: "",
-		resolve: () => {
-			const appearance =
-				getProjectStore(projectId).getState().metadata.characters[name]
-					?.appearance ?? "";
-			return {
-				inputs: characterAvatarInputs(name, appearance),
-				extraParams: { projectId },
-			};
-		},
+		projectId,
+		element: characterAvatarElement(name, appearance),
 	};
 }
 

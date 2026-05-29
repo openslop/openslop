@@ -1,5 +1,5 @@
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import type { CanvasElementType } from "../../types";
+import type { CanvasElementType } from "@/lib/canvas/types";
 
 export type GenerationState = {
 	status: ElementSnapshot["status"];

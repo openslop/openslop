@@ -128,9 +128,17 @@ describe("ensureCharacterAvatars", () => {
 		const job = buildCharacterAvatarJob(PROJECT_ID, "Alice", registry);
 		expect(job.elementId).toBe(characterAvatarElementId("Alice"));
 		expect(job.connectorType).toBe("image");
-		expect(job.resolve().inputs).toEqual({
-			prompt: "Alice",
-			attributes: { kind: "avatar", appearance: "A girl" },
+		expect(job.element).toEqual({
+			id: characterAvatarElementId("Alice"),
+			type: "image",
+			customAttributes: { kind: "avatar", appearance: "A girl" },
+			children: [
+				{
+					id: `${characterAvatarElementId("Alice")}-t`,
+					type: "image",
+					text: "Alice",
+				},
+			],
 		});
 		expect(job.config.plugins?.map((p) => p.name)).toEqual([
 			"character-avatar",

@@ -1,6 +1,6 @@
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 
 export function CompactElement({

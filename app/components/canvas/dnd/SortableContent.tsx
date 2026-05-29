@@ -6,7 +6,7 @@ import type {
 	CanvasContentElement,
 	CanvasElementType,
 	SceneElement,
-} from "../types";
+} from "@/lib/canvas/types";
 import { ELEMENT_LIST } from "../config/elementConfigs";
 import { insertElement } from "../utils/insertElement";
 import { useViewMode } from "../ViewModeContext";

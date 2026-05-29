@@ -1,5 +1,5 @@
 import { memo } from "react";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import { BORDER_COLORS } from "./preview/status";

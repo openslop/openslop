@@ -23,10 +23,7 @@ export function VoiceSection({
 		<section className="flex flex-col gap-2 rounded-lg border border-white/10 p-3">
 			<div className="flex flex-col gap-0.5">
 				<FieldLabel>Voice</FieldLabel>
-				<p className="text-[11px] text-white/40">
-					These fields filter the voice list. The next generation picks the top
-					match unless you select one below.
-				</p>
+				<p className="text-[11px] text-white/40">Filter the voice list</p>
 			</div>
 			<VoiceMetadataGrid voice={voice} onChange={onChange} />
 			<MetadataVoicePicker voice={voice} onChange={onChange} />
