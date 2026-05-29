@@ -5,6 +5,41 @@ import type {
 } from "@/lib/connectors/types";
 import { BaseProvider } from "../base";
 
+const SUPPORTED_IMAGE_MEDIA_TYPES = [
+	"image/jpeg",
+	"image/png",
+	"image/gif",
+	"image/webp",
+] as const;
+
+type SupportedImageMediaType = (typeof SUPPORTED_IMAGE_MEDIA_TYPES)[number];
+
+function isSupportedMediaType(value: string): value is SupportedImageMediaType {
+	return (SUPPORTED_IMAGE_MEDIA_TYPES as readonly string[]).includes(value);
+}
+
+function toImageBlock(image: string): Anthropic.ImageBlockParam {
+	if (/^https?:\/\//i.test(image)) {
+		return { type: "image", source: { type: "url", url: image } };
+	}
+	const match = /^data:([a-z]+\/[a-z0-9+.-]+);base64,(.+)$/i.exec(image);
+	if (!match) {
+		throw new Error(
+			"Anthropic reference image must be an http(s) URL or a base64 data URI",
+		);
+	}
+	const mediaType = match[1].toLowerCase();
+	if (!isSupportedMediaType(mediaType)) {
+		throw new Error(
+			`Anthropic reference image media type "${mediaType}" is not supported; expected one of ${SUPPORTED_IMAGE_MEDIA_TYPES.join(", ")}`,
+		);
+	}
+	return {
+		type: "image",
+		source: { type: "base64", media_type: mediaType, data: match[2] },
+	};
+}
+
 export class AnthropicLLM extends BaseProvider<
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -29,13 +64,7 @@ export class AnthropicLLM extends BaseProvider<
 	private buildRequest(params: LLMGenerateParams) {
 		const images = params.referenceImages ?? [];
 		const content: Anthropic.ContentBlockParam[] = [
-			...images.map(
-				(url) =>
-					({
-						type: "image" as const,
-						source: { type: "url" as const, url },
-					}) satisfies Anthropic.ImageBlockParam,
-			),
+			...images.map(toImageBlock),
 			{ type: "text" as const, text: params.prompt },
 		];
 		return {
