@@ -1,9 +1,9 @@
 import type { VideoJob, VideoProviderResponse } from "./base";
 import { BaseVideoProvider } from "./base";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { pickRandom } from "../mock-utils";
 
-const BLOB_BASE =
-	"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/video/mock";
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/video/mock`;
 
 const MOCK_VARIANTS = [
 	{ url: `${BLOB_BASE}/1/output.mp4`, durationSec: 174 },

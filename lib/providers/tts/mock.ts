@@ -3,11 +3,11 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 
-const BLOB_BASE =
-	"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/tts/mock";
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 
 const PREVIEW_HOST = new URL(BLOB_BASE).hostname;
 
