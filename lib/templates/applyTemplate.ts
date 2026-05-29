@@ -8,6 +8,7 @@ export function applyTemplate(projectId: string, templateId: string) {
 	project.reset();
 	project.setReferenceImages(template.referenceImages);
 	project.updateMetadata({
+		style: template.style,
 		characters: template.characters,
 		narration: template.narration,
 	});

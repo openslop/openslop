@@ -5,23 +5,85 @@ import type {
 	LLMPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
-import { getTemplateById } from "@/lib/templates/templates";
+import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
+import { getTemplateById, type Template } from "@/lib/templates/templates";
+import { compact } from "lodash";
+
+const VOICE_FIELDS: (keyof MetadataVoice)[] = [
+	"gender",
+	"age",
+	"pitch",
+	"accent",
+	"language",
+	"description",
+];
+
+function renderVoice(voice: MetadataVoice): string {
+	const lines = VOICE_FIELDS.flatMap((field) => {
+		const value = voice[field];
+		return value ? [`- ${field}: ${value}`] : [];
+	});
+	return lines.join("\n");
+}
+
+function renderCharacter(name: string, character: MetadataCharacter): string {
+	const voiceLines = renderVoice(character);
+	const appearanceLine = character.appearance
+		? `- appearance: ${character.appearance}`
+		: "";
+	const body = [voiceLines, appearanceLine].filter(Boolean).join("\n");
+	return `## ${name}
+	
+	${body}`;
+}
+
+function buildPreamble(template: Template): string {
+	const sections: string[] = [];
+
+	if (template.style) {
+		sections.push(`# Art Style\n${template.style}`);
+	}
+
+	if (template.narration) {
+		const voice = renderVoice(template.narration);
+		if (voice)
+			sections.push(dedent`# Narration Voice
+			
+			${voice}`);
+	}
+
+	const characterEntries = Object.entries(template.characters ?? {});
+	if (characterEntries.length > 0) {
+		const blocks = characterEntries.map(([name, character]) =>
+			renderCharacter(name, character),
+		);
+		sections.push(dedent`# Characters
+
+			Include the following characters (and others if needed):
+			
+			${blocks.join("\n\n")}`);
+	}
+
+	return sections.join("\n\n");
+}
 
 export function createTemplateModePlugin(
 	templateId: string | undefined,
 ): LLMPlugin {
 	const template = templateId ? getTemplateById(templateId) : undefined;
+	const preamble = template ? buildPreamble(template) : "";
 
 	return {
 		name: "templateMode",
 		beforeGenerate(params) {
-			if (!template?.systemPrompt) return params;
-			return {
-				...params,
-				systemPrompt: params.systemPrompt
-					? `${template.systemPrompt}\n\n${params.systemPrompt}`
-					: template.systemPrompt,
-			};
+			if (!template) return params;
+			const segments = compact([
+				preamble,
+				template.systemPrompt,
+				params.systemPrompt,
+			]);
+			if (segments.length === 0) return params;
+			return { ...params, systemPrompt: segments.join("\n\n") };
 		},
 		async transformPrompt(
 			prompt: string,
