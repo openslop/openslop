@@ -1,5 +1,5 @@
-import type { CanvasEditor } from "../types";
-import { isSceneElement } from "../utils/guards";
+import type { CanvasEditor } from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
 
 export const withFlatPaste = (editor: CanvasEditor): CanvasEditor => {
 	const { insertFragment } = editor;

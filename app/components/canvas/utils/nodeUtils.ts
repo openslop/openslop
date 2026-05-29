@@ -1,8 +1,6 @@
 import { Element, Node } from "slate";
 import { nanoid } from "nanoid";
 
-export { getContentElements } from "@/lib/canvas/scenes";
-
 export const makeNodeId = () => nanoid(16);
 
 export const stripIds = (node: Node): Node => {

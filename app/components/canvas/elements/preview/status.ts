@@ -1,5 +1,5 @@
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import type { CanvasElementType } from "../../types";
+import type { CanvasElementType } from "@/lib/canvas/types";
 
 export type GenerationState = {
 	status: ElementSnapshot["status"];
@@ -11,15 +11,6 @@ export type PlaceholderProps = GenerationState & {
 	onGenerate: () => void;
 	onDiscard: () => void;
 };
-
-export function deriveStatus(
-	generating: boolean,
-	queued: boolean,
-): ElementSnapshot["status"] {
-	if (queued) return "queued";
-	if (generating) return "generating";
-	return "idle";
-}
 
 export const BORDER_COLORS: Record<CanvasElementType, string> = {
 	character: "border-amber-500/30",

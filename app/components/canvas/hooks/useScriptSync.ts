@@ -6,7 +6,7 @@ import {
 	type CanvasContentElement,
 	type CanvasElementType,
 	type ParsedElement,
-} from "../types";
+} from "@/lib/canvas/types";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 import { findNodeById, updateNodeText } from "../utils/editorOps";
 

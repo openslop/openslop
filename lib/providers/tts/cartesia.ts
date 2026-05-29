@@ -13,6 +13,7 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
+import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
 import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
 
@@ -64,13 +65,23 @@ function wrapPcmInWav(pcm: Buffer): Buffer {
 	return Buffer.concat([header, pcm]);
 }
 
+const PREVIEW_HOST = "files.cartesia.ai";
+
 export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
 	private client: Cartesia;
+	private apiKey: string;
 
 	constructor(apiKey: string) {
 		super();
+		this.apiKey = apiKey;
 		this.client = new Cartesia({ apiKey });
+	}
+
+	async fetchVoicePreview(url: string): Promise<Response> {
+		return fetchAllowedVoicePreview(url, PREVIEW_HOST, {
+			headers: { Authorization: `Bearer ${this.apiKey}` },
+		});
 	}
 
 	protected toFiles(r: RawTTSResult): BundleFile[] {
@@ -90,37 +101,35 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 		];
 	}
 
-	async search(
-		params: VoiceSearchParams & { limit?: number },
-	): Promise<VoiceInfo[]> {
+	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
 		const { age, gender, limit, language } = params;
-		let results = await this.searchOnce(age, gender, limit, language);
+		let results = await this.searchOnce(age, gender, language);
 		if (results.length === 0 && age) {
-			results = await this.searchOnce(undefined, gender, limit, language);
+			results = await this.searchOnce(undefined, gender, language);
 		}
 		const queryText = buildQueryText(params);
-		if (!queryText) return results;
-		try {
-			return await rankBySimilarity(results, queryText);
-		} catch (err) {
-			logger.warn(
-				{ err },
-				"Voice similarity ranking failed; returning unranked results",
-			);
-			return results;
-		}
+		const ranked = queryText
+			? await rankBySimilarity(results, queryText).catch((err) => {
+					logger.warn(
+						{ err },
+						"Voice similarity ranking failed; returning unranked results",
+					);
+					return results;
+				})
+			: results;
+		return limit ? ranked.slice(0, limit) : ranked;
 	}
 
 	private async searchOnce(
 		query?: string,
 		gender?: TTSGender,
-		limit?: number,
 		language?: string,
 	): Promise<VoiceInfo[]> {
 		const page = await this.client.voices.list({
 			q: query,
 			gender,
-			limit: limit || 100,
+			limit: 100,
+			expand: ["preview_file_url"],
 		});
 		return page.data
 			.map((voice) => ({
@@ -129,7 +138,9 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				language: voice.language,
 				gender: TTS_GENDERS.find((g) => g === voice.gender),
 				description: voice.description,
-				previewUrl: voice.preview_file_url ?? undefined,
+				previewUrl: voice.preview_file_url
+					? `/api/v1/tts/voices/preview?url=${encodeURIComponent(voice.preview_file_url)}`
+					: undefined,
 			}))
 			.filter((voice) => !language || voice.language === language);
 	}

@@ -1,3 +1,6 @@
+import isEqual from "lodash/isEqual";
+import isNil from "lodash/isNil";
+import type { CanvasContentElement } from "../canvas/types";
 import type {
 	AssetResult,
 	ConnectorConfig,
@@ -5,12 +8,10 @@ import type {
 	ProviderKey,
 } from "../connectors/types";
 import { errorMessage } from "../errors";
+import { getProjectStore } from "../project/store";
 import { generateForElement } from "./generateForElement";
-import { serializeInputs } from "./generationInputs";
-import type { GenerationInputs } from "./generationInputs";
-
-export type { GenerationInputs } from "./generationInputs";
-export { isStaleResult } from "./generationInputs";
+import { getGenerationInputs } from "./getGenerationInputs";
+import { serializeInputs, type GenerationInputs } from "./generationInputs";
 
 export type ElementSnapshot = {
 	status: "idle" | "queued" | "generating";
@@ -21,14 +22,23 @@ export type ElementSnapshot = {
 	connectorType: ConnectorType | null;
 };
 
+export function isStaleResult(
+	snapshot: ElementSnapshot,
+	currentInputs: GenerationInputs,
+): boolean {
+	return (
+		isNil(snapshot.resultInputs) ||
+		!isEqual(currentInputs, snapshot.resultInputs)
+	);
+}
+
 export type GenerationJob = {
 	elementId: string;
 	connectorType: ConnectorType;
 	provider: ProviderKey;
 	config: ConnectorConfig;
-	prompt: string;
-	extraParams: Record<string, unknown>;
-	inputs: GenerationInputs;
+	projectId: string;
+	element: CanvasContentElement;
 };
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
@@ -268,14 +278,10 @@ export class GenerationQueue {
 		this.notify();
 		this.startElapsedTimer(elementId);
 
-		generateForElement(
-			job.connectorType,
-			job.provider,
-			job.config,
-			job.prompt,
-			job.extraParams,
-		)
-			.then((result) => this.handleJobSuccess(job, result, controller))
+		const { metadata } = getProjectStore(job.projectId).getState();
+		const inputs = getGenerationInputs(job.element, metadata);
+		generateForElement(job, inputs)
+			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
 			.catch((err) => this.handleJobError(elementId, err, controller))
 			.finally(() => this.finalizeJob(elementId, controller));
 	}
@@ -287,11 +293,12 @@ export class GenerationQueue {
 
 	private handleJobSuccess(
 		job: GenerationJob,
+		inputs: GenerationInputs,
 		result: AssetResult,
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		const key = serializeInputs(job.inputs);
+		const key = serializeInputs(inputs);
 		const elHistory =
 			this.history.get(job.elementId) ?? new Map<string, AssetResult>();
 		elHistory.set(key, result);
@@ -301,7 +308,7 @@ export class GenerationQueue {
 			seconds: 0,
 			result,
 			error: null,
-			resultInputs: job.inputs,
+			resultInputs: inputs,
 		});
 	}
 

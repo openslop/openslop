@@ -4,10 +4,10 @@ import {
 	type CanvasContentElement,
 	type CanvasElementType,
 	type ParsedElement,
-} from "../types";
+} from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { getContentElements, makeNodeId } from "./nodeUtils";
-import { isSceneElement } from "./guards";
+import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import { createCanvasNode } from "./createCanvasNode";
 

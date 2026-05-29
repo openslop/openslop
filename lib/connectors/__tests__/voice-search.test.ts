@@ -60,7 +60,7 @@ describe("createVoiceSearchPlugin", () => {
 		});
 	});
 
-	it("assigns first voice's id and strips descriptor/lookup fields", async () => {
+	it("assigns first voice's id, strips descriptors, and preserves name", async () => {
 		const { ctx } = ctxWith([
 			{ id: "v-1", name: "First", description: "" },
 			{ id: "v-2", name: "Second", description: "" },
@@ -84,6 +84,7 @@ describe("createVoiceSearchPlugin", () => {
 		expect(result).toEqual({
 			prompt: "hi",
 			model: "test-model",
+			name: "Red",
 			voiceId: "v-1",
 		});
 	});

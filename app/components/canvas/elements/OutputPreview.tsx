@@ -1,8 +1,8 @@
 import { memo } from "react";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
-import { deriveStatus, BORDER_COLORS } from "./preview/status";
+import { BORDER_COLORS } from "./preview/status";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	AudioResult,
@@ -19,17 +19,8 @@ function OutputPreviewComponent({
 }) {
 	const type = element.type;
 	const { outputKind } = ELEMENT_CONFIGS[type];
-	const {
-		generating,
-		queued,
-		seconds,
-		result,
-		error,
-		stale,
-		generate,
-		discard,
-	} = useGenerate(element);
-	const status = deriveStatus(generating, queued);
+	const { status, seconds, result, error, stale, generate, discard } =
+		useGenerate(element);
 
 	if (outputKind === "audio") {
 		if (result?.audioUrl) {

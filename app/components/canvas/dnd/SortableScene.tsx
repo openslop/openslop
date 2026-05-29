@@ -1,5 +1,5 @@
 import { RenderElementProps } from "slate-react";
-import type { SceneElement } from "../types";
+import type { SceneElement } from "@/lib/canvas/types";
 import { SortableItem } from "./SortableItem";
 
 export function SortableScene({

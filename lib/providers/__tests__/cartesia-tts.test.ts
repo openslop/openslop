@@ -143,7 +143,7 @@ describe("CartesiaTTS", () => {
 					language: "en",
 					gender: "feminine",
 					description: "A warm voice",
-					previewUrl: "https://preview.mp3",
+					previewUrl: `/api/v1/tts/voices/preview?url=${encodeURIComponent("https://preview.mp3")}`,
 				},
 				{
 					id: "v2",
@@ -158,10 +158,11 @@ describe("CartesiaTTS", () => {
 				q: "adult",
 				gender: undefined,
 				limit: 100,
+				expand: ["preview_file_url"],
 			});
 		});
 
-		it("passes gender filter", async () => {
+		it("passes gender filter and always fetches a full page from upstream", async () => {
 			mockVoicesList.mockResolvedValue({ data: [] });
 
 			const provider = new CartesiaTTS("test-key");
@@ -170,8 +171,27 @@ describe("CartesiaTTS", () => {
 			expect(mockVoicesList).toHaveBeenCalledWith({
 				q: undefined,
 				gender: "masculine",
-				limit: 5,
+				limit: 100,
+				expand: ["preview_file_url"],
 			});
+		});
+
+		it("applies limit after upstream + ranking", async () => {
+			mockVoicesList.mockResolvedValue({
+				data: Array.from({ length: 10 }, (_, i) => ({
+					id: `v${i}`,
+					name: `Voice ${i}`,
+					language: "en",
+					gender: "feminine",
+					description: "voice",
+					preview_file_url: null,
+				})),
+			});
+
+			const provider = new CartesiaTTS("test-key");
+			const result = await provider.search({ limit: 3 });
+
+			expect(result).toHaveLength(3);
 		});
 
 		it("re-ranks voices by description similarity when semantic descriptors provided", async () => {

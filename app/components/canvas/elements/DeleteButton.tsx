@@ -5,7 +5,7 @@ import {
 	TooltipTrigger,
 	TooltipContent,
 } from "@/components/ui/tooltip";
-import type { CanvasElement } from "../types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import styles from "./DeleteButton.module.css";
 
 export function DeleteButton({ element }: { element: CanvasElement }) {

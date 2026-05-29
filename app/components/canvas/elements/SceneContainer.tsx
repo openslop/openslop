@@ -4,7 +4,7 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { SceneElement } from "../types";
+import type { SceneElement } from "@/lib/canvas/types";
 import { isForeground } from "../utils/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
 import { useSceneIndex } from "../hooks/useSceneIndex";

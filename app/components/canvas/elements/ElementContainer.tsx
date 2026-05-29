@@ -1,8 +1,8 @@
 import { JSX } from "react";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement, SceneElement } from "../types";
-import { isSceneElement } from "../utils/guards";
+import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useViewMode } from "../ViewModeContext";

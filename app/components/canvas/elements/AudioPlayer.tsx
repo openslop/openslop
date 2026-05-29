@@ -36,9 +36,9 @@ export function AudioPlayer({
 					<button
 						type="button"
 						aria-label={playing ? "Pause" : "Play"}
-						className="shrink-0 relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-colors overflow-hidden"
 						onClick={() => waveformRef.current?.toggle()}
 						disabled={duration === 0}
+						className="shrink-0 relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-colors overflow-hidden disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/10"
 					>
 						{playing ? (
 							<Pause className="w-3 h-3 text-white" />

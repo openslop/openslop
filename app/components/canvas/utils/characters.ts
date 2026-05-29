@@ -1,4 +1,4 @@
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 
 const CHARACTER_NAME_EXTRACTORS: Record<string, (value: string) => string[]> = {
 	name: (v) => [v.trim()],

@@ -15,7 +15,12 @@ export function createMetadataVoicePlugin(
 				getProjectStore(projectId).getState().metadata;
 			const voice = params.name ? characters[params.name] : narration;
 			if (!voice) return params;
-			return { ...params, ...MetadataVoiceSchema.parse(voice) };
+			const { resolvedVoiceId, ...fields } = MetadataVoiceSchema.parse(voice);
+			return {
+				...params,
+				...fields,
+				voiceId: fields.voiceId ?? resolvedVoiceId,
+			};
 		},
 	};
 }

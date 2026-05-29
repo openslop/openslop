@@ -6,7 +6,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { CanvasContentElement } from "../types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { AttributeSpec } from "../config/elementConfigs";
 import { setNodeAttrs } from "../utils/editorOps";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";

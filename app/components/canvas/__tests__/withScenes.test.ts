@@ -3,8 +3,12 @@ import { createEditor, Editor, Element, Transforms } from "slate";
 import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withNodeId } from "../plugins/withNodeId";
-import { CanvasContentElement, SceneElement, SCENE_TYPE } from "../types";
-import { isSceneElement } from "../utils/guards";
+import {
+	CanvasContentElement,
+	SceneElement,
+	SCENE_TYPE,
+} from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
 
 function makeEditor() {
 	return withNodeId(withScenes(withReact(createEditor())));

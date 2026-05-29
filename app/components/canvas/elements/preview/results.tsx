@@ -3,7 +3,7 @@ import { AudioPlayer } from "../AudioPlayer";
 import { CharacterBadge } from "../CharacterBadge";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
-import type { CanvasElementType } from "../../types";
+import type { CanvasElementType } from "@/lib/canvas/types";
 import type { GenerationState, PlaceholderProps } from "./status";
 import { WAVE_COLORS } from "./status";
 import { PlaceholderBallsLoader } from "./placeholderBalls";

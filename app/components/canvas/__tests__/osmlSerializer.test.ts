@@ -5,7 +5,7 @@ import {
 	type CanvasContentElement,
 	type ParsedElement,
 	type SceneElement,
-} from "../types";
+} from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 
 const connectors: ConnectorRegistry = {

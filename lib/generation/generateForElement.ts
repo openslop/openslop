@@ -1,22 +1,20 @@
 import { createConnector } from "@/lib/connectors/factory";
-import type {
-	AssetResult,
-	ConnectorConfig,
-	ConnectorType,
-	ProviderKey,
-} from "@/lib/connectors/types";
+import type { AssetResult } from "@/lib/connectors/types";
+import type { GenerationInputs } from "./generationInputs";
+import type { GenerationJob } from "./queue";
 
 export async function generateForElement(
-	connectorType: ConnectorType,
-	provider: ProviderKey,
-	config: ConnectorConfig,
-	prompt: string,
-	extraParams: Record<string, unknown>,
+	job: GenerationJob,
+	inputs: GenerationInputs,
 ): Promise<AssetResult> {
-	const connector = createConnector(connectorType, provider, config);
+	const connector = createConnector(
+		job.connectorType,
+		job.provider,
+		job.config,
+	);
 	return connector.generate({
-		prompt,
-		model: config.defaultModel,
-		...extraParams,
+		prompt: inputs.prompt,
+		model: job.config.defaultModel,
+		...inputs.attributes,
 	}) as Promise<AssetResult>;
 }

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { CanvasContentElement, CanvasElementType } from "../../types";
+import type {
+	CanvasContentElement,
+	CanvasElementType,
+} from "@/lib/canvas/types";
 import { getElementCharacterNames } from "../characters";
 
 function makeElement(

@@ -9,8 +9,8 @@ import {
 	SceneElement,
 	SCENE_TYPE,
 	CanvasEditor,
-} from "../types";
-import { isSceneElement } from "../utils/guards";
+} from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
 
 function content(
 	type: CanvasContentElement["type"],

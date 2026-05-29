@@ -4,9 +4,7 @@ import {
 	FOREGROUND_TYPES,
 	type CanvasContentElement,
 	type CanvasElementType,
-} from "../types";
-
-export { isSceneElement } from "@/lib/canvas/scenes";
+} from "@/lib/canvas/types";
 
 export const isContentElement = (n: unknown): n is CanvasContentElement =>
 	Element.isElement(n) && CANVAS_ELEMENT_TYPES.has(n.type as CanvasElementType);

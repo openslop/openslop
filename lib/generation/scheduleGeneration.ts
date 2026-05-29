@@ -11,9 +11,9 @@ import type { GenerationJob, GenerationQueue } from "./queue";
  */
 export function scheduleGeneration(
 	queue: GenerationQueue,
-	jobs: GenerationJob | GenerationJob[],
+	jobs: GenerationJob[],
 	{ projectId, registry }: { projectId: string; registry: ConnectorRegistry },
 ): void {
 	ensureCharacterAvatars(queue, projectId, registry);
-	queue.enqueueAll(Array.isArray(jobs) ? jobs : [jobs]);
+	queue.enqueueAll(jobs);
 }

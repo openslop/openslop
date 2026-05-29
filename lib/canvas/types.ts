@@ -59,3 +59,11 @@ export type ParsedElement = {
 	customAttributes?: Record<string, string>;
 	children: { id: string; type: string; text: string }[];
 };
+
+declare module "slate" {
+	interface CustomTypes {
+		Editor: CanvasEditor;
+		Element: CanvasElement;
+		Text: CanvasText;
+	}
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CanvasContentElement } from "@/app/components/canvas/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getLayoutKey } from "../layoutKey";
 
 function el(

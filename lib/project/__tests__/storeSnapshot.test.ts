@@ -26,9 +26,11 @@ describe("storeSnapshot", () => {
 		const sourceId = newProjectId();
 		const targetId = newProjectId();
 		const src = getProjectStore(sourceId);
-		src
-			.getState()
-			.updateMetadata({ title: "T", style: "noir", narration: { age: "30" } });
+		src.getState().updateMetadata({
+			title: "T",
+			style: "noir",
+			narration: { age: "adult" },
+		});
 		src.getState().setReferenceImages(["x", "y"]);
 
 		const snap = extractStoreSnapshot(src);
@@ -38,7 +40,7 @@ describe("storeSnapshot", () => {
 		const after = dest.getState();
 		expect(after.metadata.title).toBe("T");
 		expect(after.metadata.style).toBe("noir");
-		expect(after.metadata.narration.age).toBe("30");
+		expect(after.metadata.narration.age).toBe("adult");
 		expect(after.referenceImages).toEqual(["x", "y"]);
 
 		clearProjectStore(sourceId);

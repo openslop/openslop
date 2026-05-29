@@ -36,4 +36,20 @@ describe("character-avatar plugin", () => {
 			"https://img/alice.png",
 		);
 	});
+
+	it("does not resurrect a character that was removed mid-flight", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store
+			.getState()
+			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
+
+		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice");
+		store.getState().removeCharacter("Alice");
+		plugin.afterGenerate?.({
+			imageUrl: "https://img/alice.png",
+			durationSec: 0,
+		});
+
+		expect(store.getState().metadata.characters["Alice"]).toBeUndefined();
+	});
 });

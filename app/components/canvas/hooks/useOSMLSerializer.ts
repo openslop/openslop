@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import type { ParsedElement } from "../types";
+import type { ParsedElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 

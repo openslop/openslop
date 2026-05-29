@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor, Element } from "slate";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import type {
-	CanvasContentElement,
-	SceneElement,
-} from "@/app/components/canvas/types";
+import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
 vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
 	ELEMENT_CONFIGS: {

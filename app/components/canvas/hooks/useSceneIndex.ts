@@ -1,5 +1,5 @@
 import { useSlateStatic } from "slate-react";
-import { isSceneElement } from "../utils/guards";
+import { isSceneElement } from "@/lib/canvas/scenes";
 
 export function useSceneIndex(sceneId: string): number {
 	const editor = useSlateStatic();

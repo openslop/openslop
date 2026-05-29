@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GenerationQueue, type GenerationJob } from "@/lib/generation/queue";
 import { clearProjectStore, getProjectStore } from "../store";
 import {
+	buildCharacterAvatarJob,
 	characterAvatarElementId,
 	ensureCharacterAvatars,
 } from "../ensureCharacterAvatars";
@@ -117,5 +118,32 @@ describe("ensureCharacterAvatars", () => {
 		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
 		expect(lastJobs()).toEqual([]);
+	});
+
+	it("buildCharacterAvatarJob produces a job for any character (used for regenerate)", () => {
+		getProjectStore(PROJECT_ID)
+			.getState()
+			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
+
+		const job = buildCharacterAvatarJob(PROJECT_ID, "Alice", registry);
+		expect(job.elementId).toBe(characterAvatarElementId("Alice"));
+		expect(job.connectorType).toBe("image");
+		expect(job.element).toEqual({
+			id: characterAvatarElementId("Alice"),
+			type: "image",
+			customAttributes: { kind: "avatar", appearance: "A girl" },
+			children: [
+				{
+					id: `${characterAvatarElementId("Alice")}-t`,
+					type: "image",
+					text: "Alice",
+				},
+			],
+		});
+		expect(job.config.plugins?.map((p) => p.name)).toEqual([
+			"character-avatar",
+			"art-style",
+			"reference-images",
+		]);
 	});
 });

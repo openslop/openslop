@@ -25,6 +25,7 @@ import { buildImagePlugins } from "../connectors/image/plugins/imageChain";
 import { buildAnimatedImagePlugins } from "../connectors/animated_image/plugins/animated-image-chain";
 import { createMetadataVoicePlugin } from "../connectors/tts/plugins/metadata-voice";
 import { createReferenceImagesPlugin } from "../connectors/image/plugins/reference-images";
+import { createVoiceHydratePlugin } from "../connectors/tts/plugins/voice-hydrate";
 import { createVoiceSearchPlugin } from "../connectors/tts/plugins/voice-search";
 import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
 import { osmlPlugin } from "../connectors/llm/plugins/osml";
@@ -140,6 +141,7 @@ export function ConfigProvider({
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))
 			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
 			.appendPlugins("tts", createVoiceSearchPlugin())
+			.appendPlugins("tts", createVoiceHydratePlugin(projectId))
 			.build();
 		return withRegistry(base)
 			.appendPlugins(
