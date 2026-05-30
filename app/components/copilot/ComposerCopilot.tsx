@@ -5,7 +5,7 @@ import {
 	CornerDownLeft,
 	ImagePlus,
 	Loader2,
-	Palette,
+	Mic,
 	Plus,
 	User,
 	X,
@@ -19,16 +19,15 @@ import {
 import GlassDropdown, {
 	type GlassDropdownOption,
 } from "@/app/components/GlassDropdown";
-import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
 import { CharacterEditModal } from "@/app/components/canvas/elements/character/CharacterEditModal";
+import { NarratorEditModal } from "@/app/components/canvas/elements/character/NarratorEditModal";
 import { NewCharacterDialog } from "@/app/components/canvas/elements/character/NewCharacterDialog";
-import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
 import { useConfig, type Mode } from "@/lib/config/ConfigProvider";
-import { useProject } from "@/lib/project/useProject";
 import { getProjectStore } from "@/lib/project/store";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
+import { ComposerAssets } from "./ComposerAssets";
 
 const MODE_OPTIONS: GlassDropdownOption<Mode>[] = [
 	{ value: "story", label: "Describe a story" },
@@ -45,10 +44,12 @@ function AttachMenu({
 	openPicker,
 	uploading,
 	onCreateCharacter,
+	onSelectNarrator,
 }: {
 	openPicker: () => void;
 	uploading: boolean;
 	onCreateCharacter: () => void;
+	onSelectNarrator: () => void;
 }) {
 	return (
 		<DropdownMenu modal={false}>
@@ -87,6 +88,13 @@ function AttachMenu({
 				>
 					<User className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
 					Create character
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={onSelectNarrator}
+					className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+				>
+					<Mic className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
+					Select narrator voice
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -136,24 +144,19 @@ export default function ComposerCopilot({
 }: ComposerCopilotProps) {
 	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
 		useConfig();
-	const referenceImages = useProject((s) => s.referenceImages);
-	const characters = useProject((s) => s.metadata.characters);
 	const [creatingCharacter, setCreatingCharacter] = useState(false);
 	const [editingCharacterName, setEditingCharacterName] = useState<
 		string | undefined
 	>();
-
-	const setReferenceImages = (urls: string[]) =>
-		getProjectStore(projectId).getState().setReferenceImages(urls);
+	const [editingNarrator, setEditingNarrator] = useState(false);
 
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({
 			multiple: true,
-			onUpload: (urls) =>
-				setReferenceImages([
-					...getProjectStore(projectId).getState().referenceImages,
-					...urls,
-				]),
+			onUpload: (urls) => {
+				const store = getProjectStore(projectId).getState();
+				store.setReferenceImages([...store.referenceImages, ...urls]);
+			},
 		});
 	const showPill = mode === "template" && selectedTemplateId !== undefined;
 	const hasText = value.trim().length > 0;
@@ -170,39 +173,11 @@ export default function ComposerCopilot({
 	return (
 		<div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_40px_rgba(55,30,100,0.5)]">
 			<div className="px-4 py-3">
-				{(Object.keys(characters).length > 0 ||
-					referenceImages.length > 0 ||
-					uploading) && (
-					<div className="flex flex-wrap gap-2 pb-2">
-						{Object.entries(characters).map(([name, ch]) => (
-							<AssetTile
-								key={`character:${name}`}
-								name={name}
-								previewUrl={ch.avatarUrl}
-								Icon={User}
-								elementId={characterAvatarElementId(name)}
-								onEdit={() => setEditingCharacterName(name)}
-							/>
-						))}
-						{referenceImages.map((url, i) => (
-							<AssetTile
-								key={`ref:${url}`}
-								name={`Reference ${i + 1}`}
-								previewUrl={url}
-								Icon={Palette}
-								onRemove={() =>
-									setReferenceImages(referenceImages.filter((_, j) => j !== i))
-								}
-							/>
-						))}
-						{Array.from({ length: uploadingCount }).map((_, i) => (
-							<div
-								key={i}
-								className="aspect-square w-16 shrink-0 rounded-md shimmer-surface sm:w-20"
-							/>
-						))}
-					</div>
-				)}
+				<ComposerAssets
+					uploadingCount={uploadingCount}
+					onEditCharacter={setEditingCharacterName}
+					onEditNarrator={() => setEditingNarrator(true)}
+				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{showPill && (
 						<TemplatePill
@@ -238,6 +213,7 @@ export default function ComposerCopilot({
 							openPicker={openPicker}
 							uploading={uploading}
 							onCreateCharacter={() => setCreatingCharacter(true)}
+							onSelectNarrator={() => setEditingNarrator(true)}
 						/>
 						<GlassDropdown
 							value={mode}
@@ -288,6 +264,10 @@ export default function ComposerCopilot({
 				open={editingCharacterName !== undefined}
 				onOpenChange={(open) => !open && setEditingCharacterName(undefined)}
 				name={editingCharacterName}
+			/>
+			<NarratorEditModal
+				open={editingNarrator}
+				onOpenChange={setEditingNarrator}
 			/>
 		</div>
 	);

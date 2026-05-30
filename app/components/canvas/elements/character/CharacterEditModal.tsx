@@ -79,10 +79,9 @@ function CharacterEditDialogBody({
 
 	const { openPicker, uploading, inputElement } = useImageUpload({
 		onUpload: ([url]) => {
-			if (url && character) {
-				queue.discard(avatarElementId);
-				setCharacter(name, { ...character, avatarUrl: url });
-			}
+			if (!url) return;
+			queue.discard(avatarElementId);
+			setCharacter(name, { ...character, avatarUrl: url });
 		},
 	});
 
