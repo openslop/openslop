@@ -34,12 +34,12 @@ import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mod
 import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { TEMPLATES } from "@/lib/templates/templates";
 import * as template from "@/lib/templates/applyTemplate";
-import { getProjectStore } from "@/lib/project/store";
 import { withRegistry } from "./connectorUtils";
 
 export type Mode = "story" | "script" | "template";
 
 interface ModeContext {
+	projectId: string;
 	templateId?: string;
 }
 
@@ -48,7 +48,8 @@ type ModePluginFactory = (ctx: ModeContext) => LLMPlugin;
 const MODE_PLUGIN_FACTORIES: Record<Mode, ModePluginFactory> = {
 	story: () => storyModePlugin,
 	script: () => scriptModePlugin,
-	template: ({ templateId }) => createTemplateModePlugin(templateId),
+	template: ({ projectId, templateId }) =>
+		createTemplateModePlugin(projectId, templateId),
 };
 
 export type ConnectorRegistry = Record<
@@ -105,34 +106,22 @@ export function ConfigProvider({
 	children: ReactNode;
 }) {
 	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
-	const [mode, setModeState] = useState<Mode>("story");
+	const [mode, setMode] = useState<Mode>("story");
 	const [selectedTemplateId, setSelectedTemplateId] = useState<
 		string | undefined
 	>(TEMPLATES[0]?.id);
 
 	const applyTemplate = useCallback(
 		(templateId: string) => {
-			setModeState("template");
 			setSelectedTemplateId(templateId);
 			template.applyTemplate(projectId, templateId);
 		},
 		[projectId],
 	);
 
-	const setMode = useCallback(
-		(next: Mode) => {
-			if (next === "template" && selectedTemplateId) {
-				applyTemplate(selectedTemplateId);
-				return;
-			}
-			getProjectStore(projectId).getState().reset();
-			setModeState(next);
-		},
-		[projectId, selectedTemplateId, applyTemplate],
-	);
-
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
 		const modePlugin = MODE_PLUGIN_FACTORIES[mode]({
+			projectId,
 			templateId: selectedTemplateId,
 		});
 		const base = withRegistry(connectorConfig)

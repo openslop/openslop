@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, type LucideIcon } from "lucide-react";
+import { Pencil, X, type LucideIcon } from "lucide-react";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
@@ -11,6 +11,7 @@ export function AssetTile({
 	Icon,
 	elementId,
 	onEdit,
+	onRemove,
 	fallback = "initial",
 }: {
 	name?: string;
@@ -18,6 +19,7 @@ export function AssetTile({
 	Icon: LucideIcon;
 	elementId?: string;
 	onEdit?: () => void;
+	onRemove?: () => void;
 	fallback?: "initial" | "icon";
 }) {
 	const status = useQueueSelector(
@@ -69,6 +71,16 @@ export function AssetTile({
 						className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
 					>
 						<Pencil className="h-3.5 w-3.5" />
+					</button>
+				)}
+				{onRemove && status !== "generating" && (
+					<button
+						type="button"
+						onClick={onRemove}
+						aria-label={`Remove ${name ?? "asset"}`}
+						className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+					>
+						<X className="h-3.5 w-3.5" />
 					</button>
 				)}
 			</div>

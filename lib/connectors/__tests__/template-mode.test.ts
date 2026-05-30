@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createTemplateModePlugin } from "@/lib/connectors/llm/plugins/template-mode";
+import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 import { TEMPLATES } from "@/lib/templates/templates";
 
 const pickTemplate = (predicate: (id: string) => boolean) => {
@@ -10,10 +11,32 @@ const pickTemplate = (predicate: (id: string) => boolean) => {
 
 const realTemplate = pickTemplate((id) => id === "pov-life");
 
+let projectId: string;
+
+const seedStore = () => {
+	getProjectStore(projectId).getState().updateMetadata({
+		style: realTemplate.style,
+		narration: realTemplate.narration,
+		characters: realTemplate.characters,
+	});
+};
+
+beforeEach(() => {
+	projectId = crypto.randomUUID();
+});
+
+afterEach(() => {
+	clearProjectStore(projectId);
+});
+
 describe("createTemplateModePlugin", () => {
 	describe("beforeGenerate", () => {
 		it("prepends template preamble and systemPrompt when none provided", () => {
-			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
+			seedStore();
+			const { beforeGenerate } = createTemplateModePlugin(
+				projectId,
+				realTemplate.id,
+			);
 			const result = beforeGenerate?.({ prompt: "hi" });
 			const sys = (result as { systemPrompt: string }).systemPrompt;
 			expect(sys).toContain(realTemplate.systemPrompt);
@@ -22,7 +45,11 @@ describe("createTemplateModePlugin", () => {
 		});
 
 		it("prepends template systemPrompt before existing systemPrompt", () => {
-			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
+			seedStore();
+			const { beforeGenerate } = createTemplateModePlugin(
+				projectId,
+				realTemplate.id,
+			);
 			const result = beforeGenerate?.({
 				prompt: "hi",
 				systemPrompt: "user instructions",
@@ -36,19 +63,26 @@ describe("createTemplateModePlugin", () => {
 		});
 
 		it("returns params unchanged when templateId is null", () => {
-			const { beforeGenerate } = createTemplateModePlugin(undefined);
+			const { beforeGenerate } = createTemplateModePlugin(projectId, undefined);
 			const params = { prompt: "hi", systemPrompt: "keep me" };
 			expect(beforeGenerate?.(params)).toBe(params);
 		});
 
 		it("returns params unchanged when templateId is unknown", () => {
-			const { beforeGenerate } = createTemplateModePlugin("does-not-exist");
+			const { beforeGenerate } = createTemplateModePlugin(
+				projectId,
+				"does-not-exist",
+			);
 			const params = { prompt: "hi" };
 			expect(beforeGenerate?.(params)).toBe(params);
 		});
 
 		it("preserves other params", () => {
-			const { beforeGenerate } = createTemplateModePlugin(realTemplate.id);
+			seedStore();
+			const { beforeGenerate } = createTemplateModePlugin(
+				projectId,
+				realTemplate.id,
+			);
 			const result = beforeGenerate?.({
 				prompt: "hello",
 				model: "claude",
@@ -66,7 +100,10 @@ describe("createTemplateModePlugin", () => {
 		>[1];
 
 		it("wraps user prompt with the template's example", async () => {
-			const { transformPrompt } = createTemplateModePlugin(realTemplate.id);
+			const { transformPrompt } = createTemplateModePlugin(
+				projectId,
+				realTemplate.id,
+			);
 			const result = await transformPrompt?.("a tech CEO", fakeCtx);
 			expect(result).toContain("a tech CEO");
 			expect(result).toContain("Pastiche this story format");
@@ -74,19 +111,28 @@ describe("createTemplateModePlugin", () => {
 		});
 
 		it("returns prompt unchanged when templateId is null", async () => {
-			const { transformPrompt } = createTemplateModePlugin(undefined);
+			const { transformPrompt } = createTemplateModePlugin(
+				projectId,
+				undefined,
+			);
 			const result = await transformPrompt?.("anything", fakeCtx);
 			expect(result).toBe("anything");
 		});
 
 		it("returns prompt unchanged when templateId is unknown", async () => {
-			const { transformPrompt } = createTemplateModePlugin("does-not-exist");
+			const { transformPrompt } = createTemplateModePlugin(
+				projectId,
+				"does-not-exist",
+			);
 			const result = await transformPrompt?.("anything", fakeCtx);
 			expect(result).toBe("anything");
 		});
 
 		it("throws when gateway context is missing for a real template", async () => {
-			const { transformPrompt } = createTemplateModePlugin(realTemplate.id);
+			const { transformPrompt } = createTemplateModePlugin(
+				projectId,
+				realTemplate.id,
+			);
 			await expect(transformPrompt?.("x")).rejects.toThrow(/gateway context/i);
 		});
 	});

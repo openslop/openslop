@@ -16,6 +16,10 @@ export function AssetsSection() {
 	const hydrated = useProjectStore(projectId, (s) => s.hydrated);
 	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
 	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
+	const setReferenceImages = useProjectStore(
+		projectId,
+		(s) => s.setReferenceImages,
+	);
 	const [collapsed, setCollapsed] = useState(false);
 	const [editingName, setEditingName] = useState<string | undefined>();
 	const [editingNarrator, setEditingNarrator] = useState(false);
@@ -66,6 +70,9 @@ export function AssetsSection() {
 							name={`Reference ${i + 1}`}
 							previewUrl={url}
 							Icon={Palette}
+							onRemove={() =>
+								setReferenceImages(referenceImages.filter((_, j) => j !== i))
+							}
 						/>
 					))}
 				</div>
