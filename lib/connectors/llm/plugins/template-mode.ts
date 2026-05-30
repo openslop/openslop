@@ -5,8 +5,13 @@ import type {
 	LLMPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
-import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
-import { getTemplateById, type Template } from "@/lib/templates/templates";
+import { getProjectStore } from "@/lib/project/store";
+import type {
+	Metadata,
+	MetadataCharacter,
+	MetadataVoice,
+} from "@/lib/project/types";
+import { getTemplateById } from "@/lib/templates/templates";
 import { compact } from "lodash";
 
 const VOICE_FIELDS: (keyof MetadataVoice)[] = [
@@ -37,22 +42,22 @@ function renderCharacter(name: string, character: MetadataCharacter): string {
 	${body}`;
 }
 
-function buildPreamble(template: Template): string {
+function buildPreamble(metadata: Metadata): string {
 	const sections: string[] = [];
 
-	if (template.style) {
-		sections.push(`# Art Style\n${template.style}`);
+	if (metadata.style) {
+		sections.push(`# Art Style\n${metadata.style}`);
 	}
 
-	if (template.narration) {
-		const voice = renderVoice(template.narration);
+	if (metadata.narration) {
+		const voice = renderVoice(metadata.narration);
 		if (voice)
 			sections.push(dedent`# Narration Voice
-			
+
 			${voice}`);
 	}
 
-	const characterEntries = Object.entries(template.characters ?? {});
+	const characterEntries = Object.entries(metadata.characters ?? {});
 	if (characterEntries.length > 0) {
 		const blocks = characterEntries.map(([name, character]) =>
 			renderCharacter(name, character),
@@ -60,7 +65,7 @@ function buildPreamble(template: Template): string {
 		sections.push(dedent`# Characters
 
 			Include the following characters (and others if needed):
-			
+
 			${blocks.join("\n\n")}`);
 	}
 
@@ -68,17 +73,18 @@ function buildPreamble(template: Template): string {
 }
 
 export function createTemplateModePlugin(
+	projectId: string,
 	templateId: string | undefined,
 ): LLMPlugin {
 	const template = templateId ? getTemplateById(templateId) : undefined;
-	const preamble = template ? buildPreamble(template) : "";
 
 	return {
 		name: "templateMode",
 		beforeGenerate(params) {
 			if (!template) return params;
+			const metadata = getProjectStore(projectId).getState().metadata;
 			const segments = compact([
-				preamble,
+				buildPreamble(metadata),
 				template.systemPrompt,
 				params.systemPrompt,
 			]);

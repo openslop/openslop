@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import {
 	DialogContent,
 	DialogDescription,
@@ -10,6 +10,11 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import {
 	useGenerationQueue,
@@ -24,6 +29,7 @@ import {
 } from "@/lib/project/ensureCharacterAvatars";
 import { useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
+import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { MediaPlaceholder, MediaPreview } from "../preview/results";
 import { TextAreaField } from "./fields";
 import { VoiceSection } from "./VoiceMetadataFields";
@@ -71,6 +77,15 @@ function CharacterEditDialogBody({
 		q.getElementSnapshot(avatarElementId),
 	);
 
+	const { openPicker, uploading, inputElement } = useImageUpload({
+		onUpload: ([url]) => {
+			if (url && character) {
+				queue.discard(avatarElementId);
+				setCharacter(name, { ...character, avatarUrl: url });
+			}
+		},
+	});
+
 	if (!character) return null;
 
 	const update = (partial: Partial<MetadataCharacter>) =>
@@ -79,13 +94,15 @@ function CharacterEditDialogBody({
 	const regenerateAvatar = () =>
 		queue.enqueue(buildCharacterAvatarJob(projectId, name, connectorConfig));
 
-	const isStale = isStaleResult(
-		avatarSnapshot,
-		getGenerationInputs(
-			characterAvatarElement(name, character.appearance),
-			metadata,
-		),
-	);
+	const isStale =
+		!!avatarSnapshot.result &&
+		isStaleResult(
+			avatarSnapshot,
+			getGenerationInputs(
+				characterAvatarElement(name, character.appearance),
+				metadata,
+			),
+		);
 
 	const handleDelete = () => {
 		if (!confirmDelete) {
@@ -115,26 +132,47 @@ function CharacterEditDialogBody({
 						onChange={(appearance) => update({ appearance })}
 						placeholder="Describe the character's look"
 					/>
-					{character.avatarUrl ? (
-						<MediaPreview
-							key={character.avatarUrl}
-							url={character.avatarUrl}
-							outputKind="image"
-							borderColor="border-white/20"
-							status={avatarSnapshot.status}
-							seconds={avatarSnapshot.seconds}
-							stale={isStale}
-							onRegenerate={regenerateAvatar}
-						/>
-					) : (
-						<MediaPlaceholder
-							status={avatarSnapshot.status}
-							seconds={avatarSnapshot.seconds}
-							error={avatarSnapshot.error}
-							onGenerate={regenerateAvatar}
-							onDiscard={() => queue.discard(avatarElementId)}
-						/>
-					)}
+					<div className="relative">
+						{character.avatarUrl ? (
+							<MediaPreview
+								key={character.avatarUrl}
+								url={character.avatarUrl}
+								outputKind="image"
+								borderColor="border-white/20"
+								status={avatarSnapshot.status}
+								seconds={avatarSnapshot.seconds}
+								stale={isStale}
+								onRegenerate={regenerateAvatar}
+							/>
+						) : (
+							<MediaPlaceholder
+								status={avatarSnapshot.status}
+								seconds={avatarSnapshot.seconds}
+								error={avatarSnapshot.error}
+								onGenerate={regenerateAvatar}
+								onDiscard={() => queue.discard(avatarElementId)}
+							/>
+						)}
+						{inputElement}
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									onClick={openPicker}
+									disabled={uploading}
+									aria-label="Upload image"
+									className="grain grain-light absolute left-2 top-11 z-10 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-black/55 ring-1 ring-inset ring-white/10 backdrop-blur-xl transition-colors hover:bg-black/70 disabled:opacity-60"
+								>
+									{uploading ? (
+										<Loader2 className="h-3 w-3 animate-spin text-white" />
+									) : (
+										<ImagePlus className="h-3 w-3 text-white" />
+									)}
+								</button>
+							</TooltipTrigger>
+							<TooltipContent>Upload image</TooltipContent>
+						</Tooltip>
+					</div>
 				</div>
 				<VoiceSection voice={character} onChange={update} />
 			</div>
