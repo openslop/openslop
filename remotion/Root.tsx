@@ -11,6 +11,7 @@ import {
 const defaultProps: VideoLayout = {
 	series: [],
 	sequences: {},
+	sequenceByElementId: new Map(),
 	fps: DEFAULT_CONFIG.fps,
 	width: DEFAULT_CONFIG.width,
 	height: DEFAULT_CONFIG.height,

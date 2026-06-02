@@ -49,6 +49,7 @@ export type Sequence = {
 export type VideoLayout = {
 	series: Sequence[];
 	sequences: Partial<Record<CanvasElementType, Sequence[]>>;
+	sequenceByElementId: Map<string, Sequence>;
 	fps: number;
 	width: number;
 	height: number;

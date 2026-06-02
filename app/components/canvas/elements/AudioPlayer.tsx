@@ -8,13 +8,8 @@ import {
 	TooltipContent,
 } from "@/components/ui/tooltip";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
+import { formatTime } from "@/lib/video/timestamps";
 import { usePreviewCache } from "../PreviewCacheContext";
-
-function formatTime(seconds: number) {
-	const m = Math.floor(seconds / 60);
-	const s = Math.floor(seconds % 60);
-	return `${m}:${s.toString().padStart(2, "0")}`;
-}
 
 export function AudioPlayer({
 	src,

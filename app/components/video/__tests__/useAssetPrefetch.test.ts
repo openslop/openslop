@@ -27,6 +27,7 @@ function layout(partial: Partial<VideoLayout>): VideoLayout {
 	return {
 		series: [],
 		sequences: {},
+		sequenceByElementId: new Map(),
 		fps: 30,
 		width: 1920,
 		height: 1080,
