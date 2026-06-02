@@ -5,6 +5,7 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { SceneElement } from "@/lib/canvas/types";
+import { useLayout } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "../utils/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
 import { useSceneIndex } from "../hooks/useSceneIndex";
@@ -12,6 +13,7 @@ import { useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 import { DeleteButton } from "./DeleteButton";
 import { ForegroundPreview } from "./ForegroundPreview";
+import { SceneTimestamp } from "./SceneTimestamp";
 
 const COLLAPSED_MAX_VISIBLE = 3;
 
@@ -57,9 +59,18 @@ function SceneHeader({
 	onToggle: () => void;
 	element: SceneElement;
 }) {
+	const { layout } = useLayout();
+	const foreground = element.children.find(isForeground);
+	const seq = foreground && layout?.sequenceByElementId.get(foreground.id);
+	const label = (
+		<>
+			Scene {sceneIndex}
+			{seq && <SceneTimestamp start={seq.start} duration={seq.duration} />}
+		</>
+	);
 	return (
 		<CollapsibleHeader
-			label={`Scene ${sceneIndex}`}
+			label={label}
 			collapsed={collapsed}
 			onToggle={onToggle}
 			ariaLabel={collapsed ? "Expand scene" : "Collapse scene"}
