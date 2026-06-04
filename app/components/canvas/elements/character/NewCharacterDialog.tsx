@@ -10,6 +10,7 @@ import {
 	MountedDialog,
 } from "@/components/ui/dialog";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStore } from "@/lib/project/store";
 
 export function NewCharacterDialog({
@@ -38,15 +39,15 @@ function NewCharacterDialogBody({
 	const setCharacter = useProjectStore(projectId, (s) => s.setCharacter);
 	const [name, setName] = useState("");
 
-	const trimmed = name.trim();
-	const collision = !!trimmed && !!characters[trimmed];
-	const canSubmit = !!trimmed && !collision;
+	const normalized = normalizeCharacterName(name);
+	const collision = !!normalized && !!characters[normalized];
+	const canSubmit = !!normalized && !collision;
 
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();
 		if (!canSubmit) return;
-		setCharacter(trimmed, { appearance: "" });
-		onCreated(trimmed);
+		setCharacter(normalized, { appearance: "" });
+		onCreated(normalized);
 	};
 
 	return (
@@ -71,7 +72,7 @@ function NewCharacterDialogBody({
 
 				{collision && (
 					<span className="text-[11px] text-rose-400" role="alert">
-						A character named &quot;{trimmed}&quot; already exists.
+						A character named &quot;{normalized}&quot; already exists.
 					</span>
 				)}
 

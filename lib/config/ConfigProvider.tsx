@@ -31,12 +31,13 @@ import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
 import { osmlPlugin } from "../connectors/llm/plugins/osml";
 import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
+import { createProjectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
 import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { TEMPLATES } from "@/lib/templates/templates";
 import * as template from "@/lib/templates/applyTemplate";
 import { withRegistry } from "./connectorUtils";
 
-export type Mode = "story" | "script" | "template";
+import type { Mode } from "@/lib/project/types";
 
 interface ModeContext {
 	projectId: string;
@@ -48,8 +49,7 @@ type ModePluginFactory = (ctx: ModeContext) => LLMPlugin;
 const MODE_PLUGIN_FACTORIES: Record<Mode, ModePluginFactory> = {
 	story: () => storyModePlugin,
 	script: () => scriptModePlugin,
-	template: ({ projectId, templateId }) =>
-		createTemplateModePlugin(projectId, templateId),
+	template: ({ templateId }) => createTemplateModePlugin(templateId),
 };
 
 export type ConnectorRegistry = Record<
@@ -125,7 +125,12 @@ export function ConfigProvider({
 			templateId: selectedTemplateId,
 		});
 		const base = withRegistry(connectorConfig)
-			.appendPlugins("llm", modePlugin, createReferenceStylePlugin(projectId))
+			.appendPlugins(
+				"llm",
+				createProjectMetadataPlugin(projectId),
+				modePlugin,
+				createReferenceStylePlugin(projectId),
+			)
 			.appendPlugins("image", ...buildImagePlugins(projectId))
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))
 			.appendPlugins("tts", createMetadataVoicePlugin(projectId))

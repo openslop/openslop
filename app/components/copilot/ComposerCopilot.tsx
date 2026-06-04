@@ -23,8 +23,9 @@ import { CharacterEditModal } from "@/app/components/canvas/elements/character/C
 import { NarratorEditModal } from "@/app/components/canvas/elements/character/NarratorEditModal";
 import { NewCharacterDialog } from "@/app/components/canvas/elements/character/NewCharacterDialog";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
-import { useConfig, type Mode } from "@/lib/config/ConfigProvider";
+import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
+import type { Mode } from "@/lib/project/types";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
