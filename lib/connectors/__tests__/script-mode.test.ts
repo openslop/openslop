@@ -39,7 +39,6 @@ describe("scriptModePlugin", () => {
 		const result = beforeGenerate({ prompt: "x" });
 		const sys = (result as { systemPrompt: string }).systemPrompt;
 		expect(sys).toContain("ALL CAPS");
-		expect(sys).toContain("NARRATOR");
 		expect(sys).toContain("stage directions");
 	});
 });

@@ -34,7 +34,7 @@ describe("AnthropicLLM", () => {
 			});
 			expect(mockCreate).toHaveBeenCalledWith({
 				model: "claude-opus-4-8",
-				max_tokens: 8192,
+				max_tokens: 32768,
 				temperature: undefined,
 				system: undefined,
 				messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],

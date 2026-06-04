@@ -13,6 +13,7 @@ import type { ParsedElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
+import { getProjectStore } from "@/lib/project/store";
 import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
 
 type ScriptControl = {
@@ -61,7 +62,7 @@ export function ScriptProvider({
 	initialScript?: string;
 	children: ReactNode;
 }) {
-	const { connectorConfig } = useConfig();
+	const { connectorConfig, projectId, mode } = useConfig();
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const [loading, setLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
@@ -86,6 +87,9 @@ export function ScriptProvider({
 
 			setHasContent(false);
 			setLoading(true);
+			getProjectStore(projectId)
+				.getState()
+				.updateMetadata({ lastMode: mode, lastPrompt: prompt });
 			try {
 				const connector = createConnector("llm", llmProvider, llmConfig);
 				for await (const chunk of connector.stream({ prompt })) {
@@ -101,7 +105,7 @@ export function ScriptProvider({
 				}
 			}
 		},
-		[llmProvider, llmConfig, appendChunk],
+		[llmProvider, llmConfig, appendChunk, projectId, mode],
 	);
 
 	const control = useMemo<ScriptControl>(
