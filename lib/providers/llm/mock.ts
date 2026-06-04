@@ -156,6 +156,9 @@ function extractIds(prompt: string): string[] {
 const MOCK_STYLE =
 	"Warm, painterly storybook illustration with soft watercolor washes, gentle outlines, and golden hour lighting; whimsical and nostalgic.";
 
+const MOCK_CHARACTER_APPEARANCE =
+	"A cheerful young person with warm brown skin, dark curly hair, bright expressive eyes, wearing a simple colorful outfit; soft painterly storybook style.";
+
 const MOCK_OUTLINE = `Premise: In a village at the edge of an enchanted forest, a cheerful girl named Red sets out to deliver vegetables to her ailing grandmother and unexpectedly befriends a gentle, vegetarian wolf gathering berries for his own sick mother.
 
 Characters: Red (curious, kind); Wolf (gentle, misunderstood); Mother and Granny (warm anchors of home); Hunter (a watchful protector); Owl (the forest's quiet conscience).
@@ -176,12 +179,17 @@ function isStyleRequest(params: LLMGenerateParams): boolean {
 	return /describe the visual art style/i.test(params.prompt);
 }
 
+function isCharacterAppearanceRequest(params: LLMGenerateParams): boolean {
+	return /describe the visual appearance of the character/i.test(params.prompt);
+}
+
 function isOutlineRequest(params: LLMGenerateParams): boolean {
 	return params.prompt.startsWith("Briefly outline an engaging story");
 }
 
 function mockResponse(params: LLMGenerateParams): string {
 	if (isStyleRequest(params)) return MOCK_STYLE;
+	if (isCharacterAppearanceRequest(params)) return MOCK_CHARACTER_APPEARANCE;
 	if (isOutlineRequest(params)) return MOCK_OUTLINE;
 	if (isRefineRequest(params)) return buildRefineResponse(params);
 	return MOCK_SCRIPT;

@@ -33,6 +33,7 @@ import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
 import { createProjectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
 import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
+import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
 import { TEMPLATES } from "@/lib/templates/templates";
 import * as template from "@/lib/templates/applyTemplate";
 import { withRegistry } from "./connectorUtils";
@@ -130,6 +131,7 @@ export function ConfigProvider({
 				createProjectMetadataPlugin(projectId),
 				modePlugin,
 				createReferenceStylePlugin(projectId),
+				createCharacterAvatarStylePlugin(projectId),
 			)
 			.appendPlugins("image", ...buildImagePlugins(projectId))
 			.appendPlugins("video", createReferenceImagesPlugin(projectId))

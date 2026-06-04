@@ -44,6 +44,7 @@ export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 export type MetadataCharacter = MetadataVoice & {
 	appearance: string;
 	avatarUrl?: string;
+	avatarUploaded?: boolean;
 };
 
 export type VideoSettings = {

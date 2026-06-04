@@ -81,7 +81,11 @@ function CharacterEditDialogBody({
 		onUpload: ([url]) => {
 			if (!url) return;
 			queue.discard(avatarElementId);
-			setCharacter(name, { ...character, avatarUrl: url });
+			setCharacter(name, {
+				...character,
+				avatarUrl: url,
+				avatarUploaded: true,
+			});
 		},
 	});
 
@@ -90,10 +94,15 @@ function CharacterEditDialogBody({
 	const update = (partial: Partial<MetadataCharacter>) =>
 		setCharacter(name, { ...character, ...partial });
 
-	const regenerateAvatar = () =>
+	const regenerateAvatar = () => {
+		if (character.avatarUploaded) {
+			setCharacter(name, { ...character, avatarUploaded: false });
+		}
 		queue.enqueue(buildCharacterAvatarJob(projectId, name, connectorConfig));
+	};
 
 	const isStale =
+		!character.avatarUploaded &&
 		!!avatarSnapshot.result &&
 		isStaleResult(
 			avatarSnapshot,
