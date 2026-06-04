@@ -38,7 +38,6 @@ import * as template from "@/lib/templates/applyTemplate";
 import { withRegistry } from "./connectorUtils";
 
 import type { Mode } from "@/lib/project/types";
-export type { Mode };
 
 interface ModeContext {
 	projectId: string;
