@@ -37,7 +37,8 @@ import { TEMPLATES } from "@/lib/templates/templates";
 import * as template from "@/lib/templates/applyTemplate";
 import { withRegistry } from "./connectorUtils";
 
-export type Mode = "story" | "script" | "template";
+import type { Mode } from "@/lib/project/types";
+export type { Mode };
 
 interface ModeContext {
 	projectId: string;

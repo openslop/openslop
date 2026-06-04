@@ -50,13 +50,15 @@ export type VideoSettings = {
 	transitionType?: TransitionType;
 };
 
+export type Mode = "story" | "script" | "template";
+
 export type Metadata = {
 	title: string;
 	style: string;
 	narration: MetadataVoice;
 	characters: Record<string, MetadataCharacter>;
 	videoSettings?: VideoSettings;
-	lastMode?: "story" | "script" | "template";
+	lastMode?: Mode;
 	lastPrompt?: string;
 };
 
