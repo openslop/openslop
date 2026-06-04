@@ -22,6 +22,7 @@ export function createReferenceStylePlugin(projectId: string): LLMPlugin {
 			const { text: style } = await ctx.gateway.generate({
 				prompt: dedent`Vividly and concisely describe the visual art style of the attached reference image(s) in 1–2 concise sentences. Include ultra specific detail on character art style and overall art style.`,
 				referenceImages,
+				maxTokens: 4096,
 			});
 			return dedent`Art style reference: ${style}
 

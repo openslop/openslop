@@ -64,7 +64,7 @@ const OSML_SYSTEM_PROMPT = dedent`
 	).join(", ")}
   - Image descriptions should describe the time of day, the background, the weather (if outdoors), and objects in detail.
   - Each <image> description must be written as a standalone prompt, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
-	- Reference characters by their names in the image description, no need to redescribe their appearance
+	- Reference characters by their names in the image description, NEVER describe their appearance in the image description
   - Each image description should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous descriptions or the story.
 
   ### Animated Image XML Tags

@@ -27,9 +27,10 @@ function renderVoice(voice: MetadataVoice): string {
 
 function renderCharacter(name: string, character: MetadataCharacter): string {
 	const voiceLines = renderVoice(character);
-	const appearanceLine = character.appearance
-		? `- appearance: ${character.appearance}`
-		: "";
+	const appearanceLine =
+		character.appearance && !character.avatarUploaded
+			? `- appearance: ${character.appearance}`
+			: "";
 	const body = [voiceLines, appearanceLine].filter(Boolean).join("\n");
 	return `## ${name}\n\n${body}`;
 }
