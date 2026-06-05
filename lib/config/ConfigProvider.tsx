@@ -89,6 +89,7 @@ type ConfigContextValue = {
 	setMode: (mode: Mode) => void;
 	selectedTemplateId: string | undefined;
 	applyTemplate: (templateId: string) => void;
+	clearTemplate: () => void;
 };
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -119,6 +120,11 @@ export function ConfigProvider({
 		},
 		[projectId],
 	);
+
+	const clearTemplate = useCallback(() => {
+		template.clearTemplate(projectId);
+		setMode("story");
+	}, [projectId]);
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
 		const modePlugin = MODE_PLUGIN_FACTORIES[mode]({
@@ -155,6 +161,7 @@ export function ConfigProvider({
 			setMode,
 			selectedTemplateId,
 			applyTemplate,
+			clearTemplate,
 		}),
 		[
 			projectId,
@@ -163,6 +170,7 @@ export function ConfigProvider({
 			setMode,
 			selectedTemplateId,
 			applyTemplate,
+			clearTemplate,
 		],
 	);
 

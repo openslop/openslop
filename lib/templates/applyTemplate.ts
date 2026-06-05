@@ -13,3 +13,7 @@ export function applyTemplate(projectId: string, templateId: string) {
 		narration: template.narration,
 	});
 }
+
+export function clearTemplate(projectId: string) {
+	getProjectStore(projectId).getState().reset();
+}

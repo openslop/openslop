@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { applyTemplate } from "@/lib/templates/applyTemplate";
+import { applyTemplate, clearTemplate } from "@/lib/templates/applyTemplate";
 import { getTemplateById } from "@/lib/templates/templates";
 import { clearProjectStore, getProjectStore } from "../store";
 
@@ -51,6 +51,20 @@ describe("applyTemplate", () => {
 		expect(getProjectStore(PROJECT_ID).getState().referenceImages).toEqual(
 			getTemplateById("sleep-story")?.referenceImages,
 		);
+	});
+
+	it("clearTemplate wipes template-seeded reference images, characters and narration", () => {
+		applyTemplate(PROJECT_ID, "pov-life");
+		const seeded = getProjectStore(PROJECT_ID).getState();
+		expect(seeded.referenceImages.length).toBeGreaterThan(0);
+		expect(Object.keys(seeded.metadata.characters).length).toBeGreaterThan(0);
+
+		clearTemplate(PROJECT_ID);
+		const cleared = getProjectStore(PROJECT_ID).getState();
+		expect(cleared.referenceImages).toEqual([]);
+		expect(cleared.metadata.characters).toEqual({});
+		expect(cleared.metadata.narration).toEqual({});
+		expect(cleared.metadata.style).toBe("");
 	});
 
 	it("wipes user-set narration before applying", () => {

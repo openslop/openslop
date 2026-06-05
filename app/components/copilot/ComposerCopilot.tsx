@@ -143,8 +143,14 @@ export default function ComposerCopilot({
 	onSubmit,
 	placeholder,
 }: ComposerCopilotProps) {
-	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
-		useConfig();
+	const {
+		projectId,
+		mode,
+		setMode,
+		selectedTemplateId,
+		applyTemplate,
+		clearTemplate,
+	} = useConfig();
 	const [creatingCharacter, setCreatingCharacter] = useState(false);
 	const [editingCharacterName, setEditingCharacterName] = useState<
 		string | undefined
@@ -183,7 +189,7 @@ export default function ComposerCopilot({
 					{showPill && (
 						<TemplatePill
 							templateId={selectedTemplateId}
-							onRemove={() => setMode("story")}
+							onRemove={clearTemplate}
 						/>
 					)}
 					<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
