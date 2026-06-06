@@ -5,6 +5,8 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { SceneElement } from "@/lib/canvas/types";
+import { useActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
+import { findSceneSequence } from "@/app/components/video/useSceneSegments";
 import { useLayout } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "../utils/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
@@ -13,9 +15,15 @@ import { useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 import { DeleteButton } from "./DeleteButton";
 import { ForegroundPreview } from "./ForegroundPreview";
+import { PlayFromHereButton } from "./PlayFromHereButton";
 import { SceneTimestamp } from "./SceneTimestamp";
 
 const COLLAPSED_MAX_VISIBLE = 3;
+
+const ACTIVE_SCENE_CLASS =
+	"ring-2 ring-violet-300 bg-violet-400/45 shadow-[0_0_0_6px_rgba(196,181,253,0.22),0_0_52px_-2px_rgba(196,181,253,0.7)]";
+const SCENE_FRAME_CLASS =
+	"rounded-lg transition-[box-shadow,background-color] duration-200";
 
 interface SceneProps {
 	attributes: RenderElementProps["attributes"];
@@ -38,6 +46,7 @@ function useSceneState(element: SceneElement) {
 	return {
 		childIds,
 		sceneIndex: useSceneIndex(element.id),
+		isActive: useActiveSceneId() === element.id,
 		dropPadding: {
 			paddingBottom:
 				isDropTarget && transfer.atIndex >= childIds.length
@@ -60,8 +69,7 @@ function SceneHeader({
 	element: SceneElement;
 }) {
 	const { layout } = useLayout();
-	const foreground = element.children.find(isForeground);
-	const seq = foreground && layout?.sequenceByElementId.get(foreground.id);
+	const seq = findSceneSequence(element, layout);
 	const label = (
 		<>
 			Scene {sceneIndex}
@@ -74,13 +82,18 @@ function SceneHeader({
 			collapsed={collapsed}
 			onToggle={onToggle}
 			ariaLabel={collapsed ? "Expand scene" : "Collapse scene"}
-			rightSlot={<DeleteButton element={element} />}
+			rightSlot={
+				<div className="flex items-center gap-1">
+					<PlayFromHereButton scene={element} />
+					<DeleteButton element={element} />
+				</div>
+			}
 		/>
 	);
 }
 
 function CollapsedScene({ attributes, element, children }: SceneProps) {
-	const { sceneIndex, dropPadding } = useSceneState(element);
+	const { sceneIndex, isActive, dropPadding } = useSceneState(element);
 	const { toggle } = useViewMode();
 
 	const foregroundElement = useMemo(
@@ -94,7 +107,8 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 	return (
 		<div
 			{...attributes}
-			className="group/collapsible relative h-32"
+			data-scene-id={element.id}
+			className={`group/collapsible relative h-32 ${SCENE_FRAME_CLASS}${isActive ? ` ${ACTIVE_SCENE_CLASS}` : ""}`}
 			style={dropPadding}
 		>
 			<div className="flex flex-col h-full pr-[calc(8rem+0.75rem)]">
@@ -134,11 +148,17 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 }
 
 function ExpandedScene({ attributes, element, children }: SceneProps) {
-	const { childIds, sceneIndex, dropPadding } = useSceneState(element);
+	const { childIds, sceneIndex, isActive, dropPadding } =
+		useSceneState(element);
 	const { toggle } = useViewMode();
 
 	return (
-		<div {...attributes} className="group/collapsible" style={dropPadding}>
+		<div
+			{...attributes}
+			data-scene-id={element.id}
+			className={`group/collapsible ${SCENE_FRAME_CLASS}${isActive ? ` ${ACTIVE_SCENE_CLASS}` : ""}`}
+			style={dropPadding}
+		>
 			<SceneHeader
 				sceneIndex={sceneIndex}
 				collapsed={false}

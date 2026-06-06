@@ -263,3 +263,18 @@ html {
 .grain.grain-light::after {
 	opacity: 0.3;
 }
+
+@keyframes flashFade {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	20% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.6);
+	}
+}

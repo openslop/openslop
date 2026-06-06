@@ -21,6 +21,9 @@ import {
 	PlayerPositionProvider,
 	usePlayerPosition,
 } from "./video/PlayerPositionContext";
+import { ActiveSceneProvider } from "./scene-selection/ActiveSceneContext";
+import { AutoScrollProvider } from "./scene-selection/AutoScrollContext";
+import { PlayerControlProvider } from "./video/PlayerControlContext";
 import { VideoLayoutProvider } from "./video/VideoLayoutContext";
 import editorStyles from "./Editor.module.css";
 import genStyles from "./styles/gen-button.module.css";
@@ -104,22 +107,28 @@ function PostPromptViewInner() {
 			</div>
 
 			<VideoLayoutProvider getEditor={getEditor} layoutKey={layoutKey}>
-				{visible && isTop && <TopPlayerPanel />}
+				<PlayerControlProvider>
+					<ActiveSceneProvider>
+						<AutoScrollProvider>
+							{visible && isTop && <TopPlayerPanel />}
 
-				<div className="flex min-h-0 flex-1 overflow-hidden">
-					<div
-						className="flex-1 overflow-y-auto"
-						style={{ scrollbarGutter: "stable" }}
-					>
-						<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-						<div className="mx-auto max-w-6xl px-4 py-4">
-							<ProjectTitle />
-							<Canvas ref={canvasRef} onLayoutKeyChange={setLayoutKey} />
-						</div>
-					</div>
+							<div className="flex min-h-0 flex-1 overflow-hidden">
+								<div
+									className="flex-1 overflow-y-auto"
+									style={{ scrollbarGutter: "stable" }}
+								>
+									<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+									<div className="mx-auto max-w-6xl px-4 py-4">
+										<ProjectTitle />
+										<Canvas ref={canvasRef} onLayoutKeyChange={setLayoutKey} />
+									</div>
+								</div>
 
-					{visible && !isTop && <SidePlayerPanel />}
-				</div>
+								{visible && !isTop && <SidePlayerPanel />}
+							</div>
+						</AutoScrollProvider>
+					</ActiveSceneProvider>
+				</PlayerControlProvider>
 			</VideoLayoutProvider>
 		</div>
 	);
