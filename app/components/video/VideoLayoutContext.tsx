@@ -1,10 +1,10 @@
 "use client";
 
 import { createContext, use, useMemo, type ReactNode } from "react";
-import type { Editor } from "slate";
 import type { SceneElement } from "@/lib/canvas/types";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import type { VideoLayout } from "@/lib/video/types";
+import { useCanvasEditor } from "../canvas/CanvasEditorContext";
 import { useAssetPrefetch } from "./useAssetPrefetch";
 import { useVideoLayout } from "./useVideoLayout";
 
@@ -22,16 +22,9 @@ const VideoLayoutContext = createContext<VideoLayoutValue>({
 	scenes: [],
 });
 
-export function VideoLayoutProvider({
-	getEditor,
-	layoutKey,
-	children,
-}: {
-	getEditor: () => Editor | null;
-	layoutKey: string;
-	children: ReactNode;
-}) {
-	const { layout, playerKey, scenes } = useVideoLayout(getEditor, layoutKey);
+export function VideoLayoutProvider({ children }: { children: ReactNode }) {
+	const { editor, layoutKey } = useCanvasEditor();
+	const { layout, playerKey, scenes } = useVideoLayout(editor, layoutKey);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;

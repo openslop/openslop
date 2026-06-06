@@ -1,14 +1,18 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import InlineCopilot from "./copilot/InlineCopilot";
-import Canvas, { type CanvasHandle } from "./canvas/Canvas";
+import Canvas from "./canvas/Canvas";
 import { ProjectTitle } from "./canvas/ProjectTitle";
+import {
+	CanvasEditorProvider,
+	useCanvasEditor,
+} from "./canvas/CanvasEditorContext";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
 import { Sparkles, X } from "lucide-react";
 import {
@@ -30,18 +34,11 @@ import genStyles from "./styles/gen-button.module.css";
 
 function PostPromptViewInner() {
 	const { loading: scriptLoading, stopGeneration } = useScriptControl();
-	const canvasRef = useRef<CanvasHandle>(null);
-	const [layoutKey, setLayoutKey] = useState("");
+	const { editor, generateAll } = useCanvasEditor();
 	const [refineValue, setRefineValue] = useState("");
 	const { position, visible } = usePlayerPosition();
 
-	const getEditor = useCallback(
-		() => canvasRef.current?.getEditor() ?? null,
-		[],
-	);
-
-	const { refineScript, refineLoading, stopRefine } =
-		useRefineScript(getEditor);
+	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
 
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
@@ -80,7 +77,7 @@ function PostPromptViewInner() {
 					</div>
 					<button
 						type="button"
-						onClick={() => canvasRef.current?.generateAll()}
+						onClick={generateAll}
 						className={`${genStyles.btn} ${generating ? genStyles.generating : ""} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
 						aria-label={generateLabel}
 						disabled={busy}
@@ -106,7 +103,7 @@ function PostPromptViewInner() {
 				</div>
 			</div>
 
-			<VideoLayoutProvider getEditor={getEditor} layoutKey={layoutKey}>
+			<VideoLayoutProvider>
 				<PlayerControlProvider>
 					<ActiveSceneProvider>
 						<AutoScrollProvider>
@@ -120,7 +117,7 @@ function PostPromptViewInner() {
 									<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 									<div className="mx-auto max-w-6xl px-4 py-4">
 										<ProjectTitle />
-										<Canvas ref={canvasRef} onLayoutKeyChange={setLayoutKey} />
+										<Canvas />
 									</div>
 								</div>
 
@@ -137,7 +134,9 @@ function PostPromptViewInner() {
 export default function PostPromptView() {
 	return (
 		<PlayerPositionProvider>
-			<PostPromptViewInner />
+			<CanvasEditorProvider>
+				<PostPromptViewInner />
+			</CanvasEditorProvider>
 		</PlayerPositionProvider>
 	);
 }

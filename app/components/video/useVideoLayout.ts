@@ -13,7 +13,7 @@ import { useTransitionType } from "@/lib/video/useTransitionType";
 import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
-	getEditor: () => Editor | null,
+	editor: Editor,
 	layoutKey: string,
 ): {
 	layout: VideoLayout | null;
@@ -26,8 +26,6 @@ export function useVideoLayout(
 	const aspectRatio = useAspectRatio();
 
 	const { layout, scenes } = useMemo(() => {
-		const editor = getEditor();
-		if (!editor) return { layout: null, scenes: [] as SceneElement[] };
 		const elements = editor.children as CanvasElement[];
 		const resolved = resolveElements(elements, queue.getElementSnapshot);
 		return {
@@ -35,7 +33,7 @@ export function useVideoLayout(
 			scenes: elements.filter(isSceneElement),
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [getEditor, layoutKey, resultVersion, transitionType, aspectRatio, queue]);
+	}, [editor, layoutKey, resultVersion, transitionType, aspectRatio, queue]);
 
 	return { layout, playerKey: `${layoutKey}-${resultVersion}`, scenes };
 }
