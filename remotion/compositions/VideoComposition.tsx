@@ -46,12 +46,7 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 	return (
 		<>
-			<Html5Audio
-				src={element.url}
-				crossOrigin="anonymous"
-				volume={volume}
-				pauseWhenBuffering
-			/>
+			<Html5Audio src={element.url} crossOrigin="anonymous" volume={volume} />
 			{element.captionTimestamps && (
 				<Sequence
 					durationInFrames={Math.max(
@@ -78,7 +73,6 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 							src={element.url}
 							style={coverStyle}
 							volume={element.volume / 10}
-							pauseWhenBuffering
 						/>
 					)}
 				</MotionLayer>

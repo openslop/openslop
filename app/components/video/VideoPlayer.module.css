@@ -1,51 +1,37 @@
-/* Round the player to match glass container */
-.player :global(.__remotion-player) {
-	border-radius: 0.5rem !important;
+.player {
+	border-radius: 0.5rem;
 	overflow: hidden;
 }
 
-/* Seek bar background — subtler than default white/25 */
-.player :global(div[style*="rgba(255, 255, 255, 0.25)"]) {
-	background-color: rgba(255, 255, 255, 0.1) !important;
+.player :global(.__remotion-player) {
+	border-radius: 0.5rem;
+	overflow: hidden;
 }
 
-/* Seek bar fill — violet instead of white */
-.player :global(div[style*="rgba(255, 255, 255, 1)"]) {
-	background-color: rgb(139, 92, 246) !important;
-}
-
-/* Seek bar knob — violet with glow */
-.player :global(div[style*="border-radius: 6px"]) {
-	background-color: rgb(139, 92, 246) !important;
-	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5) !important;
-}
-
-/* Volume slider — violet accent */
-.player :global(input[type="range"]) {
+.volume {
+	width: 4.5rem;
+	height: 0.25rem;
+	cursor: pointer;
+	appearance: none;
+	background: rgba(255, 255, 255, 0.15);
+	border-radius: 9999px;
 	accent-color: rgb(139, 92, 246);
 }
 
-.player :global(input[type="range"])::-webkit-slider-thumb {
-	background-color: rgb(139, 92, 246) !important;
-	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5) !important;
+.volume::-webkit-slider-thumb {
+	appearance: none;
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: 9999px;
+	background-color: rgb(139, 92, 246);
+	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
 }
 
-.player :global(input[type="range"])::-moz-range-thumb {
-	background-color: rgb(139, 92, 246) !important;
-	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5) !important;
-}
-
-/* Control buttons — subtle hover */
-.player :global(button) {
-	border-radius: 4px;
-	transition: background-color 0.15s;
-}
-
-.player :global(button:hover) {
-	background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Time label — slightly muted */
-.player :global(div[style*="font-family: sans-serif"]) {
-	opacity: 0.7;
+.volume::-moz-range-thumb {
+	width: 0.625rem;
+	height: 0.625rem;
+	border: 0;
+	border-radius: 9999px;
+	background-color: rgb(139, 92, 246);
+	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
 }

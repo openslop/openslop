@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PanelLeft } from "lucide-react";
 import UserProfile from "@/app/components/UserProfile";
 import BackToMySlopLink from "@/app/components/BackToMySlopLink";
+import AutoScrollPanel from "./AutoScrollPanel";
 import PlayerPositionPanel from "./PlayerPositionPanel";
 import TransitionPanel from "./TransitionPanel";
 import ViewModePanel from "./ViewModePanel";
@@ -42,6 +43,7 @@ export default function Sidebar() {
 						<div className="mt-10 px-2 flex flex-col gap-4">
 							<BackToMySlopLink />
 							<PlayerPositionPanel />
+							<AutoScrollPanel />
 							<TransitionPanel />
 							<ViewModePanel />
 						</div>

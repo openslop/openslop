@@ -2,6 +2,7 @@
 
 import { createContext, use, useMemo, type ReactNode } from "react";
 import type { Editor } from "slate";
+import type { SceneElement } from "@/lib/canvas/types";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import type { VideoLayout } from "@/lib/video/types";
 import { useAssetPrefetch } from "./useAssetPrefetch";
@@ -11,12 +12,14 @@ type VideoLayoutValue = {
 	layout: VideoLayout | null;
 	ready: boolean;
 	playerKey: string;
+	scenes: SceneElement[];
 };
 
 const VideoLayoutContext = createContext<VideoLayoutValue>({
 	layout: null,
 	ready: false,
 	playerKey: "",
+	scenes: [],
 });
 
 export function VideoLayoutProvider({
@@ -28,13 +31,13 @@ export function VideoLayoutProvider({
 	layoutKey: string;
 	children: ReactNode;
 }) {
-	const { layout, playerKey } = useVideoLayout(getEditor, layoutKey);
+	const { layout, playerKey, scenes } = useVideoLayout(getEditor, layoutKey);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
 	const value = useMemo(
-		() => ({ layout, ready, playerKey }),
-		[layout, ready, playerKey],
+		() => ({ layout, ready, playerKey, scenes }),
+		[layout, ready, playerKey, scenes],
 	);
 	return <VideoLayoutContext value={value}>{children}</VideoLayoutContext>;
 }
