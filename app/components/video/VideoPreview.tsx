@@ -6,6 +6,7 @@ import { useEffect, useState, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import { ActiveSceneSync } from "./ActiveSceneSync";
+import { ActiveSegmentProvider } from "./ActiveSegmentContext";
 import { usePlayerControl } from "./PlayerControlContext";
 import { PlayerControls } from "./PlayerControls";
 import { PlayPauseFlash } from "./PlayPauseFlash";
@@ -85,13 +86,19 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />
-			<ActiveSceneSync player={player} layout={layout} segments={segments} />
-			<PlayerControls
+			<ActiveSegmentProvider
 				player={player}
 				layout={layout}
 				segments={segments}
-				visible={visible}
-			/>
+			>
+				<ActiveSceneSync player={player} segments={segments} />
+				<PlayerControls
+					player={player}
+					layout={layout}
+					segments={segments}
+					visible={visible}
+				/>
+			</ActiveSegmentProvider>
 		</div>
 	);
 }

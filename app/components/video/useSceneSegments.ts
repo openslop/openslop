@@ -28,12 +28,17 @@ export function findSegmentIndexAt(
 	segments: SceneSegment[],
 	timeSec: number,
 ): number {
-	if (segments.length === 0) return -1;
-	for (let i = 0; i < segments.length; i++) {
-		const seg = segments[i];
-		if (timeSec < seg.start + seg.duration) return i;
+	const n = segments.length;
+	if (n === 0) return -1;
+	let lo = 0;
+	let hi = n - 1;
+	while (lo < hi) {
+		const mid = (lo + hi) >>> 1;
+		const seg = segments[mid];
+		if (timeSec < seg.start + seg.duration) hi = mid;
+		else lo = mid + 1;
 	}
-	return segments.length - 1;
+	return lo;
 }
 
 export function useSceneSegments(): SceneSegment[] {
