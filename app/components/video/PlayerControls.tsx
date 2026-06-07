@@ -6,6 +6,7 @@ import type { VideoLayout } from "@/lib/video/types";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { formatTime } from "@/lib/video/timestamps";
 import {
+	PLAYER_FRAME_EVENTS,
 	usePlayerMuted,
 	usePlayerPlaying,
 	usePlayerValue,
@@ -102,7 +103,7 @@ function TimeDisplay({
 }) {
 	const seconds = usePlayerValue(
 		player,
-		["frameupdate"],
+		PLAYER_FRAME_EVENTS,
 		(p) => Math.floor(p.getCurrentFrame() / layout.fps),
 		0,
 	);
@@ -124,7 +125,7 @@ function ScenePill({
 }) {
 	const activeIndex = usePlayerValue(
 		player,
-		["frameupdate"],
+		PLAYER_FRAME_EVENTS,
 		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps),
 		-1,
 	);
