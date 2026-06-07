@@ -22,6 +22,23 @@ vi.mock("../config/elementConfigs", () => ({
 	},
 }));
 
+vi.mock("@/lib/canvas/elementMetadata", () => ({
+	ELEMENT_METADATA: {
+		image: {
+			type: "image",
+			connector: "image",
+			outputKind: "image",
+			defaultAttributes: undefined,
+		},
+		narration: {
+			type: "narration",
+			connector: "tts",
+			outputKind: "audio",
+			defaultAttributes: { emotion: "neutral" },
+		},
+	},
+}));
+
 vi.mock("../utils/hydrateConnectorConfig", () => ({
 	hydrateConnectorConfig: () => (node: Record<string, unknown>) => ({
 		...node,

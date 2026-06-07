@@ -3,7 +3,7 @@ import type {
 	CanvasElementType,
 } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { ELEMENT_METADATA } from "@/lib/canvas/elementMetadata";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { makeNodeId } from "./nodeUtils";
 import { hydrateConnectorConfig } from "./hydrateConnectorConfig";
@@ -19,7 +19,7 @@ export function createCanvasNode(
 	connectors: ConnectorRegistry,
 	opts: Opts = {},
 ): CanvasContentElement {
-	const config = ELEMENT_CONFIGS[type];
+	const config = ELEMENT_METADATA[type];
 	const node: CanvasContentElement = {
 		id: opts.id ?? makeNodeId(),
 		type,

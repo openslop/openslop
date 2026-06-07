@@ -56,6 +56,47 @@ vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
 	},
 }));
 
+vi.mock("@/lib/canvas/elementMetadata", () => ({
+	ELEMENT_METADATA: {
+		narration: {
+			type: "narration",
+			connector: "tts",
+			outputKind: "audio",
+			defaultAttributes: { emotion: "neutral" },
+		},
+		sound: {
+			type: "sound",
+			connector: "sfx",
+			outputKind: "audio",
+			defaultAttributes: { loops: "1" },
+		},
+		image: {
+			type: "image",
+			connector: "image",
+			outputKind: "image",
+			defaultAttributes: undefined,
+		},
+		character: {
+			type: "character",
+			connector: "tts",
+			outputKind: "audio",
+			defaultAttributes: { emotion: "neutral" },
+		},
+		music: {
+			type: "music",
+			connector: "music",
+			outputKind: "audio",
+			defaultAttributes: undefined,
+		},
+		clip: {
+			type: "clip",
+			connector: "video",
+			outputKind: "video",
+			defaultAttributes: undefined,
+		},
+	},
+}));
+
 vi.mock("@/app/components/canvas/utils/hydrateConnectorConfig", () => ({
 	hydrateConnectorConfig: () => (node: Record<string, unknown>) => node,
 }));
