@@ -68,7 +68,7 @@ export type VideoConfig = {
 };
 
 export const DEFAULT_CONFIG: VideoConfig = {
-	fps: 30,
+	fps: 24,
 	width: 1920,
 	height: 1080,
 };

@@ -8,6 +8,7 @@ interface MediaWithSkeletonProps {
 	src: string;
 	alt: string;
 	videoInteractive?: boolean;
+	objectFit?: "cover" | "contain";
 }
 
 export function MediaWithSkeleton({
@@ -15,8 +16,10 @@ export function MediaWithSkeleton({
 	src,
 	alt,
 	videoInteractive = false,
+	objectFit = "cover",
 }: MediaWithSkeletonProps) {
 	const [videoLoaded, setVideoLoaded] = useState(false);
+	const fitClass = objectFit === "contain" ? "object-contain" : "object-cover";
 
 	if (outputKind === "image") {
 		return (
@@ -24,7 +27,7 @@ export function MediaWithSkeleton({
 				src={src}
 				alt={alt}
 				fill
-				className="object-cover"
+				className={fitClass}
 				unoptimized
 			/>
 		);
@@ -34,11 +37,7 @@ export function MediaWithSkeleton({
 			<video
 				src={src}
 				controls={videoInteractive}
-				className={
-					videoInteractive
-						? "w-full h-full object-cover"
-						: "w-full h-full object-cover pointer-events-none"
-				}
+				className={`w-full h-full ${fitClass} ${videoInteractive ? "" : "pointer-events-none"}`}
 				onLoadedData={() => setVideoLoaded(true)}
 			/>
 			{!videoLoaded && (

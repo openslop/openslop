@@ -18,6 +18,7 @@ export default function GlassDropdown<T extends string>({
 	onChange,
 	options,
 	ariaLabel,
+	triggerIcon,
 	side = "bottom",
 	align = "start",
 	className,
@@ -27,6 +28,7 @@ export default function GlassDropdown<T extends string>({
 	onChange: (value: T) => void;
 	options: GlassDropdownOption<T>[];
 	ariaLabel?: string;
+	triggerIcon?: ReactNode;
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
 	className?: string;
@@ -42,7 +44,7 @@ export default function GlassDropdown<T extends string>({
 					style={style}
 					className={`inline-flex items-center gap-1 bg-white/15 text-white text-[12px] px-2 py-0.5 rounded-full hover:bg-white/25 transition-colors ${className ?? ""}`}
 				>
-					{selected?.icon}
+					{triggerIcon ?? selected?.icon}
 					{selected?.label}
 					<ChevronDown className="w-2.5 h-2.5 text-white/70" />
 				</button>

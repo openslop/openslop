@@ -7,6 +7,7 @@ import {
 	Loader2,
 	Mic,
 	Plus,
+	Proportions,
 	User,
 	X,
 } from "lucide-react";
@@ -26,6 +27,8 @@ import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import type { Mode } from "@/lib/project/types";
+import type { AspectRatio } from "@/lib/video/aspectRatio";
+import { useAspectRatio } from "@/lib/video/useAspectRatio";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
@@ -34,6 +37,11 @@ const MODE_OPTIONS: GlassDropdownOption<Mode>[] = [
 	{ value: "story", label: "Describe a story" },
 	{ value: "script", label: "Paste in a script" },
 	{ value: "template", label: "Use a template" },
+];
+
+const ASPECT_RATIO_OPTIONS: GlassDropdownOption<AspectRatio>[] = [
+	{ value: "16:9", label: "16:9" },
+	{ value: "9:16", label: "9:16" },
 ];
 
 const TEMPLATE_OPTIONS: GlassDropdownOption<string>[] = TEMPLATES.map((t) => ({
@@ -145,6 +153,7 @@ export default function ComposerCopilot({
 }: ComposerCopilotProps) {
 	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
 		useConfig();
+	const aspectRatio = useAspectRatio();
 	const [creatingCharacter, setCreatingCharacter] = useState(false);
 	const [editingCharacterName, setEditingCharacterName] = useState<
 		string | undefined
@@ -226,6 +235,20 @@ export default function ComposerCopilot({
 							}}
 							options={MODE_OPTIONS}
 							ariaLabel="Composer mode"
+							side="bottom"
+						/>
+						<GlassDropdown
+							value={aspectRatio}
+							onChange={(next: AspectRatio) => {
+								getProjectStore(projectId)
+									.getState()
+									.updateMetadata({ videoSettings: { aspectRatio: next } });
+							}}
+							options={ASPECT_RATIO_OPTIONS}
+							ariaLabel="Aspect ratio"
+							triggerIcon={
+								<Proportions className="mr-1 h-3 w-3" strokeWidth={2} />
+							}
 							side="bottom"
 						/>
 						{mode === "template" && selectedTemplateId && (

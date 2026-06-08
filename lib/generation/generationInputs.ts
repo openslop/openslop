@@ -1,6 +1,6 @@
 export type GenerationInputs = {
 	prompt: string;
-	attributes: Record<string, string>;
+	attributes: Record<string, string | number>;
 };
 
 export function serializeInputs(inputs: GenerationInputs): string {

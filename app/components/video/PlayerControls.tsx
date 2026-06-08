@@ -49,7 +49,7 @@ export function PlayerControls({
 
 	return (
 		<div
-			className={`absolute inset-x-0 bottom-0 z-10 flex flex-col gap-1.5 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 pb-2 pt-8 text-sm text-white transition-opacity duration-200 ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+			className={`@container absolute inset-x-0 bottom-0 z-10 flex flex-col gap-1.5 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 pb-2 pt-8 text-sm text-white transition-opacity duration-200 ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`}
 		>
 			<SegmentedSeekBar player={player} layout={layout} segments={segments} />
 			<div className="flex items-center gap-2">
@@ -61,7 +61,9 @@ export function PlayerControls({
 					)}
 				</IconButton>
 				<TimeDisplay player={player} layout={layout} />
-				<ScenePill player={player} layout={layout} segments={segments} />
+				<div className="hidden @[280px]:contents">
+					<ScenePill player={player} layout={layout} segments={segments} />
+				</div>
 				<div className="flex-1" />
 				<div className="flex shrink-0 items-center gap-1.5">
 					<IconButton
@@ -82,7 +84,7 @@ export function PlayerControls({
 						value={muted ? 0 : volume}
 						onChange={(e) => onVolumeChange(Number(e.target.value))}
 						aria-label="Volume"
-						className={styles.volume}
+						className={`hidden @[240px]:block ${styles.volume}`}
 					/>
 				</div>
 				<IconButton onClick={onFullscreen} ariaLabel="Fullscreen">

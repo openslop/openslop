@@ -17,8 +17,10 @@ function makeElement(
 ): CanvasContentElement {
 	return {
 		id,
-		type: "image",
-		customAttributes: inputs.attributes,
+		type: "sound",
+		customAttributes: Object.fromEntries(
+			Object.entries(inputs.attributes).map(([k, v]) => [k, String(v)]),
+		),
 		children: [{ id: `${id}-t`, type: "image", text: inputs.prompt }],
 	};
 }

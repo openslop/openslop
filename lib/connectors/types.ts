@@ -122,6 +122,8 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 
 export type AnimatedImageGenerateParams = ImageGenerateParams & {
 	videoPrompt?: string;
+	videoWidth?: number;
+	videoHeight?: number;
 };
 
 // TTS types
