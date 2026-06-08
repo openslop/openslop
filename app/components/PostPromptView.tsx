@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { useMemo, useState } from "react";
+import {
+	useScriptControl,
+	useScriptInitial,
+} from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import { getContentElements } from "@/lib/canvas/scenes";
+import { getLayoutKey } from "@/lib/video/layoutKey";
+import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import { useTransitionType } from "@/lib/video/useTransitionType";
 import InlineCopilot from "./copilot/InlineCopilot";
 import Canvas from "./canvas/Canvas";
 import { ProjectTitle } from "./canvas/ProjectTitle";
-import {
-	CanvasEditorProvider,
-	useCanvasEditor,
-} from "./canvas/CanvasEditorContext";
+import { useEditorSetup } from "./canvas/hooks/useEditorSetup";
+import { useAutosave } from "./canvas/hooks/useAutosave";
+import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
+import { useMetadataSync } from "./canvas/hooks/useMetadataSync";
+import { useProjectRehydrate } from "./canvas/hooks/useProjectRehydrate";
+import { useScriptSync } from "./canvas/hooks/useScriptSync";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
 import { Sparkles, X } from "lucide-react";
 import {
@@ -34,10 +44,24 @@ import genStyles from "./styles/gen-button.module.css";
 
 function PostPromptViewInner() {
 	const { loading: scriptLoading, stopGeneration } = useScriptControl();
-	const { editor, generateAll } = useCanvasEditor();
+	const { editor, value, setValue } = useEditorSetup();
+	const { projectId } = useConfig();
+	const initialScript = useScriptInitial();
+	useProjectRehydrate(editor, initialScript);
+	useAutosave(projectId, value);
+	useScriptSync(editor);
+	useMetadataSync();
+	const { generateAll } = useGenerateAll(editor);
+
+	const transitionType = useTransitionType();
+	const aspectRatio = useAspectRatio();
+	const layoutKey = useMemo(
+		() => getLayoutKey(getContentElements(value), transitionType),
+		[value, transitionType],
+	);
+
 	const [refineValue, setRefineValue] = useState("");
 	const { position, visible } = usePlayerPosition();
-
 	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
 
 	const queue = useGenerationQueue();
@@ -103,7 +127,12 @@ function PostPromptViewInner() {
 				</div>
 			</div>
 
-			<VideoLayoutProvider>
+			<VideoLayoutProvider
+				editor={editor}
+				layoutKey={layoutKey}
+				transitionType={transitionType}
+				aspectRatio={aspectRatio}
+			>
 				<PlayerControlProvider>
 					<ActiveSceneProvider>
 						<AutoScrollProvider>
@@ -117,7 +146,7 @@ function PostPromptViewInner() {
 									<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 									<div className="mx-auto max-w-6xl px-4 py-4">
 										<ProjectTitle />
-										<Canvas />
+										<Canvas editor={editor} value={value} setValue={setValue} />
 									</div>
 								</div>
 
@@ -134,9 +163,7 @@ function PostPromptViewInner() {
 export default function PostPromptView() {
 	return (
 		<PlayerPositionProvider>
-			<CanvasEditorProvider>
-				<PostPromptViewInner />
-			</CanvasEditorProvider>
+			<PostPromptViewInner />
 		</PlayerPositionProvider>
 	);
 }

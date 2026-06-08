@@ -20,11 +20,16 @@ import { renderCanvasElement } from "./elements/ElementContainer";
 import { AssetsSection } from "./elements/AssetsSection";
 import { PreviewCacheProvider } from "./PreviewCacheContext";
 import { ViewModeProvider } from "./ViewModeContext";
-import { useCanvasEditor } from "./CanvasEditorContext";
 
-export default function Canvas() {
-	const { editor, value, setValue } = useCanvasEditor();
-
+export default function Canvas({
+	editor,
+	value,
+	setValue,
+}: {
+	editor: Editor;
+	value: Descendant[];
+	setValue: (v: Descendant[]) => void;
+}) {
 	const {
 		activeId,
 		sceneItems,
@@ -67,7 +72,9 @@ export default function Canvas() {
 	}, []);
 
 	const activeElement = useMemo(() => {
-		if (!activeId) return null;
+		if (!activeId) {
+			return null;
+		}
 		const [entry] = Editor.nodes(editor, {
 			at: [],
 			match: (n) => Element.isElement(n) && n.id === activeId,

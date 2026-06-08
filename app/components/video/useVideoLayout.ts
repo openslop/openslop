@@ -8,13 +8,15 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { resolveElements } from "@/lib/video/resolve";
 import { buildVideoLayout } from "@/lib/video/scene-builder";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
-import { useTransitionType } from "@/lib/video/useTransitionType";
+import type { AspectRatio } from "@/lib/video/aspectRatio";
+import type { TransitionType } from "@/lib/video/transitions";
 import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
 	editor: Editor,
 	layoutKey: string,
+	transitionType: TransitionType,
+	aspectRatio: AspectRatio,
 ): {
 	layout: VideoLayout | null;
 	playerKey: string;
@@ -22,8 +24,6 @@ export function useVideoLayout(
 } {
 	const queue = useGenerationQueue();
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
-	const transitionType = useTransitionType();
-	const aspectRatio = useAspectRatio();
 
 	const { layout, scenes } = useMemo(() => {
 		const elements = editor.children as CanvasElement[];
