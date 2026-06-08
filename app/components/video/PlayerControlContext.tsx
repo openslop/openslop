@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, useMemo, type ReactNode } from "react";
+import { createContext, use, useState, type ReactNode } from "react";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { createPlayQueue, type PlayQueue } from "./playQueue";
 
@@ -11,8 +11,8 @@ const Ctx = createContext<PlayQueue>({
 
 export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	const { showPlayer } = usePlayerPosition();
-	const value = useMemo(() => createPlayQueue(showPlayer), [showPlayer]);
-	return <Ctx value={value}>{children}</Ctx>;
+	const [queue] = useState(() => createPlayQueue(showPlayer));
+	return <Ctx value={queue}>{children}</Ctx>;
 }
 
 export function usePlayerControl() {

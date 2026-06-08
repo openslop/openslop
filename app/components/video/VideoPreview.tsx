@@ -2,7 +2,7 @@
 
 import type { PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
-import { useEffect, useState, type PointerEvent, type Ref } from "react";
+import { useEffect, useState, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import { ActiveSceneSync } from "./ActiveSceneSync";
@@ -69,32 +69,20 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 		player.toggle();
 		setFlash((f) => ({ key: (f?.key ?? 0) + 1, playing: willPlay }));
 	};
-	const handlePointerLeave = (e: PointerEvent<HTMLDivElement>) => {
-		if (e.pointerType !== "mouse") return;
-		leave();
-	};
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-		if (e.key !== " " && e.key !== "Enter") return;
-		e.preventDefault();
-		toggleAndFlash();
-	};
 	return (
 		<div
-			className={`relative ${styles.player}`}
+			className={`relative h-full w-full ${styles.player}`}
 			onPointerMove={ping}
 			onPointerDown={ping}
 			onFocus={ping}
-			onPointerLeave={handlePointerLeave}
+			onPointerLeave={leave}
 		>
 			<ToastErrorBoundary label="Player">
 				<RemotionPlayer layout={layout} playerRef={setPlayer} />
 			</ToastErrorBoundary>
-			<button
-				type="button"
-				aria-label="Play or pause"
+			<div
+				className="absolute inset-0 cursor-pointer"
 				onClick={toggleAndFlash}
-				onKeyDown={handleKeyDown}
-				className="absolute inset-0 cursor-pointer bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
 			/>
 			<PlayPauseFlash flash={flash} />
 			<ActiveSceneSync player={player} layout={layout} segments={segments} />

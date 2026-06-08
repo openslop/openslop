@@ -14,6 +14,12 @@ export function createPlayQueue(showPlayer: () => void): PlayQueue {
 	let pendingFrame: number | null = null;
 	return {
 		registerPlayer(p) {
+			if (!p && pendingFrame != null) {
+				console.warn(
+					`[playQueue] dropping pending frame ${pendingFrame}: player unregistered before it could play`,
+				);
+				pendingFrame = null;
+			}
 			player = p;
 			if (p && pendingFrame != null) {
 				const frame = pendingFrame;

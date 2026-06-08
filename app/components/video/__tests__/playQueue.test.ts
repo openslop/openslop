@@ -55,6 +55,24 @@ describe("createPlayQueue", () => {
 		expect(next.play).not.toHaveBeenCalled();
 	});
 
+	it("warns and drops the pending frame when the player unregisters before it plays", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const queue = createPlayQueue(vi.fn());
+		queue.playFromFrame(55);
+
+		queue.registerPlayer(null);
+
+		expect(warn).toHaveBeenCalledOnce();
+		expect(warn.mock.calls[0]?.[0]).toContain("55");
+
+		const player = makePlayer();
+		queue.registerPlayer(player);
+		expect(player.seekTo).not.toHaveBeenCalled();
+		expect(player.play).not.toHaveBeenCalled();
+
+		warn.mockRestore();
+	});
+
 	it("uses the latest pending frame when playFromFrame is called multiple times before mount", () => {
 		const queue = createPlayQueue(vi.fn());
 		queue.playFromFrame(10);
