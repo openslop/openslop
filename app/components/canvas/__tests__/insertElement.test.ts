@@ -1,37 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
-vi.mock("../config/elementConfigs", () => ({
-	ELEMENT_CONFIGS: {
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			label: "Image",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
-		},
-		narration: {
-			type: "narration",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Narration",
-			defaultAttributes: { emotion: "neutral" },
-			visibleAttributes: {},
-		},
-	},
-}));
-
 vi.mock("@/lib/canvas/elementMetadata", () => ({
 	ELEMENT_METADATA: {
 		image: {
-			type: "image",
 			connector: "image",
 			outputKind: "image",
-			defaultAttributes: undefined,
 		},
 		narration: {
-			type: "narration",
 			connector: "tts",
 			outputKind: "audio",
 			defaultAttributes: { emotion: "neutral" },

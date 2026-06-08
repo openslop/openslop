@@ -3,97 +3,26 @@ import { createEditor, Editor, Element } from "slate";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
-vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
-	ELEMENT_CONFIGS: {
-		narration: {
-			type: "narration",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Narration",
-			defaultAttributes: { emotion: "neutral" },
-			visibleAttributes: {},
-		},
-		sound: {
-			type: "sound",
-			connector: "sfx",
-			outputKind: "audio",
-			label: "Sound",
-			defaultAttributes: { loops: "1" },
-			visibleAttributes: {},
-		},
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			label: "Image",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
-		},
-		character: {
-			type: "character",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Character",
-			defaultAttributes: { emotion: "neutral" },
-			visibleAttributes: {},
-		},
-		music: {
-			type: "music",
-			connector: "music",
-			outputKind: "audio",
-			label: "Music",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
-		},
-		clip: {
-			type: "clip",
-			connector: "video",
-			outputKind: "video",
-			label: "Clip",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
-		},
-	},
-}));
-
 vi.mock("@/lib/canvas/elementMetadata", () => ({
 	ELEMENT_METADATA: {
 		narration: {
-			type: "narration",
 			connector: "tts",
 			outputKind: "audio",
 			defaultAttributes: { emotion: "neutral" },
 		},
 		sound: {
-			type: "sound",
 			connector: "sfx",
 			outputKind: "audio",
 			defaultAttributes: { loops: "1" },
 		},
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			defaultAttributes: undefined,
-		},
+		image: { connector: "image", outputKind: "image" },
 		character: {
-			type: "character",
 			connector: "tts",
 			outputKind: "audio",
 			defaultAttributes: { emotion: "neutral" },
 		},
-		music: {
-			type: "music",
-			connector: "music",
-			outputKind: "audio",
-			defaultAttributes: undefined,
-		},
-		clip: {
-			type: "clip",
-			connector: "video",
-			outputKind: "video",
-			defaultAttributes: undefined,
-		},
+		music: { connector: "music", outputKind: "audio" },
+		clip: { connector: "video", outputKind: "video" },
 	},
 }));
 

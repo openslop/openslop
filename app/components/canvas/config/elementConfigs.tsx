@@ -7,11 +7,9 @@ import {
 	Volume2,
 	Music,
 } from "lucide-react";
-import type { CanvasElementType } from "@/lib/canvas/types";
-import {
-	ELEMENT_METADATA,
-	type ElementMetadata,
-} from "@/lib/canvas/elementMetadata";
+import type { CanvasElementType, ResultKind } from "@/lib/canvas/types";
+import type { ConnectorType } from "@/lib/connectors/types";
+import { ELEMENT_METADATA } from "@/lib/canvas/elementMetadata";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 
@@ -25,11 +23,15 @@ export interface AttributeSpec {
 	edit?: AttributeEdit;
 }
 
-export interface ElementConfig extends ElementMetadata {
+export interface ElementConfig {
+	type: CanvasElementType;
+	connector: ConnectorType;
+	outputKind: ResultKind;
 	label: string;
 	icon: React.ReactNode;
 	bgColor: string;
 	placeholder: string;
+	defaultAttributes?: Record<string, string>;
 	visibleAttributes: Record<string, AttributeSpec>;
 }
 
@@ -90,10 +92,10 @@ const emotionSpec: AttributeSpec = {
 	edit: { kind: "enum", options: EMOTION_OPTIONS },
 };
 
-type UIConfig = Omit<ElementConfig, keyof ElementMetadata>;
-
-const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
+export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	narration: {
+		type: "narration",
+		...ELEMENT_METADATA.narration,
 		label: "Narration",
 		icon: <BookOpen size={16} className="text-white" />,
 		bgColor: "bg-slate-600",
@@ -106,6 +108,8 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 	character: {
+		type: "character",
+		...ELEMENT_METADATA.character,
 		label: "Character",
 		icon: <User size={16} className="text-white" />,
 		bgColor: "bg-amber-600",
@@ -118,6 +122,8 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 	image: {
+		type: "image",
+		...ELEMENT_METADATA.image,
 		label: "Image",
 		icon: <ImageIcon size={16} className="text-white" />,
 		bgColor: "bg-cyan-600",
@@ -127,6 +133,8 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 	animated_image: {
+		type: "animated_image",
+		...ELEMENT_METADATA.animated_image,
 		label: "Animated image",
 		icon: <Sparkles size={16} className="text-white" />,
 		bgColor: "bg-fuchsia-600",
@@ -137,6 +145,8 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 	clip: {
+		type: "clip",
+		...ELEMENT_METADATA.clip,
 		label: "Clip",
 		icon: <Film size={16} className="text-white" />,
 		bgColor: "bg-indigo-600",
@@ -148,6 +158,8 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 	sound: {
+		type: "sound",
+		...ELEMENT_METADATA.sound,
 		label: "Sound",
 		icon: <Volume2 size={16} className="text-white" />,
 		bgColor: "bg-emerald-600",
@@ -162,6 +174,8 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 	music: {
+		type: "music",
+		...ELEMENT_METADATA.music,
 		label: "Music",
 		icon: <Music size={16} className="text-white" />,
 		bgColor: "bg-violet-600",
@@ -176,13 +190,5 @@ const UI_CONFIG: Record<CanvasElementType, UIConfig> = {
 		},
 	},
 };
-
-export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> =
-	Object.fromEntries(
-		(Object.keys(UI_CONFIG) as CanvasElementType[]).map((type) => [
-			type,
-			{ ...ELEMENT_METADATA[type], ...UI_CONFIG[type] },
-		]),
-	) as Record<CanvasElementType, ElementConfig>;
 
 export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

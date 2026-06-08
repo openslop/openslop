@@ -1,31 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("../../config/elementConfigs", () => ({
-	ELEMENT_CONFIGS: {
+vi.mock("@/lib/canvas/elementMetadata", () => ({
+	ELEMENT_METADATA: {
 		sound: {
-			type: "sound",
 			connector: "sfx",
 			outputKind: "audio",
-			label: "Sound",
 			defaultAttributes: { loops: "1" },
-			visibleAttributes: {},
 		},
-		narration: {
-			type: "narration",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Narration",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
-		},
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			label: "Image",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
-		},
+		narration: { connector: "tts", outputKind: "audio" },
+		image: { connector: "image", outputKind: "image" },
 	},
 }));
 
