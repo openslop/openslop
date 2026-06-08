@@ -5,21 +5,17 @@ import { useEffect } from "react";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
-import { useActiveSegmentIndex } from "./ActiveSegmentContext";
 import { usePlayerPlaying } from "./usePlayerState";
 import type { SceneSegment } from "./useSceneSegments";
 
-export function ActiveSceneSync({
-	player,
-	segments,
-}: {
-	player: PlayerRef | null;
-	segments: SceneSegment[];
-}) {
+export function useActiveSceneSync(
+	player: PlayerRef | null,
+	segments: SceneSegment[],
+	activeIndex: number,
+) {
 	const setActiveSceneId = useSetActiveSceneId();
 	const { enabled: autoScrollEnabled } = useAutoScroll();
 	const playing = usePlayerPlaying(player);
-	const activeIndex = useActiveSegmentIndex();
 	const activeId =
 		activeIndex >= 0 ? (segments[activeIndex]?.sceneId ?? null) : null;
 
@@ -32,6 +28,4 @@ export function ActiveSceneSync({
 	}, [activeId, autoScrollEnabled, playing]);
 
 	useEffect(() => () => setActiveSceneId(null), [setActiveSceneId]);
-
-	return null;
 }

@@ -5,13 +5,13 @@ import dynamic from "next/dynamic";
 import { useEffect, useState, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
-import { ActiveSceneSync } from "./ActiveSceneSync";
-import { ActiveSegmentProvider } from "./ActiveSegmentContext";
 import { usePlayerControl } from "./PlayerControlContext";
 import { PlayerControls } from "./PlayerControls";
 import { PlayPauseFlash } from "./PlayPauseFlash";
+import { useActiveSceneSync } from "./useActiveSceneSync";
 import { useControlsVisibility } from "./useControlsVisibility";
-import { useSceneSegments } from "./useSceneSegments";
+import { usePlayerValue } from "./usePlayerState";
+import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
@@ -56,6 +56,13 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const { visible, ping, leave } = useControlsVisibility();
 	const segments = useSceneSegments();
+	const activeIndex = usePlayerValue(
+		player,
+		["frameupdate"],
+		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps),
+		-1,
+	);
+	useActiveSceneSync(player, segments, activeIndex);
 	const { registerPlayer } = usePlayerControl();
 	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
 		null,
@@ -86,19 +93,13 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />
-			<ActiveSegmentProvider
+			<PlayerControls
 				player={player}
 				layout={layout}
 				segments={segments}
-			>
-				<ActiveSceneSync player={player} segments={segments} />
-				<PlayerControls
-					player={player}
-					layout={layout}
-					segments={segments}
-					visible={visible}
-				/>
-			</ActiveSegmentProvider>
+				activeIndex={activeIndex}
+				visible={visible}
+			/>
 		</div>
 	);
 }

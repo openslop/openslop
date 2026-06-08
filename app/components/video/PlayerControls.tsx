@@ -5,7 +5,6 @@ import { Maximize, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import type { VideoLayout } from "@/lib/video/types";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { formatTime } from "@/lib/video/timestamps";
-import { useActiveSegmentIndex } from "./ActiveSegmentContext";
 import {
 	usePlayerMuted,
 	usePlayerPlaying,
@@ -20,11 +19,13 @@ export function PlayerControls({
 	player,
 	layout,
 	segments,
+	activeIndex,
 	visible,
 }: {
 	player: PlayerRef | null;
 	layout: VideoLayout;
 	segments: SceneSegment[];
+	activeIndex: number;
 	visible: boolean;
 }) {
 	const playing = usePlayerPlaying(player);
@@ -62,7 +63,9 @@ export function PlayerControls({
 					)}
 				</IconButton>
 				<TimeDisplay player={player} layout={layout} />
-				<ScenePill segments={segments} />
+				<div className="hidden @[280px]:contents">
+					<ScenePill segments={segments} activeIndex={activeIndex} />
+				</div>
 				<div className="flex-1" />
 				<div className="flex shrink-0 items-center gap-1.5">
 					<IconButton
@@ -114,8 +117,13 @@ function TimeDisplay({
 	);
 }
 
-function ScenePill({ segments }: { segments: SceneSegment[] }) {
-	const activeIndex = useActiveSegmentIndex();
+function ScenePill({
+	segments,
+	activeIndex,
+}: {
+	segments: SceneSegment[];
+	activeIndex: number;
+}) {
 	const active = segments[activeIndex];
 	if (!active) return null;
 	return (
