@@ -18,6 +18,7 @@ import { DragOverlayContent } from "./dnd/DragOverlay";
 import Sidebar from "./panel/Sidebar";
 import { renderCanvasElement } from "./elements/ElementContainer";
 import { AssetsSection } from "./elements/AssetsSection";
+import { affectsDocument } from "./utils/slateChange";
 import { PreviewCacheProvider } from "./PreviewCacheContext";
 import { ViewModeProvider } from "./ViewModeContext";
 
@@ -82,6 +83,15 @@ export default function Canvas({
 		return entry?.[0] as Descendant;
 	}, [editor, activeId]);
 
+	const handleSlateChange = useCallback(
+		(nextValue: Descendant[]) => {
+			if (affectsDocument(editor.operations)) {
+				setValue(nextValue);
+			}
+		},
+		[editor, setValue],
+	);
+
 	return (
 		<ViewModeProvider sceneIds={sceneItems}>
 			<PreviewCacheProvider>
@@ -96,7 +106,11 @@ export default function Canvas({
 					>
 						<Sidebar />
 
-						<Slate editor={editor} initialValue={value} onChange={setValue}>
+						<Slate
+							editor={editor}
+							initialValue={value}
+							onChange={handleSlateChange}
+						>
 							<AssetsSection />
 							<SortableContext
 								items={sceneItems}
