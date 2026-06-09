@@ -1,17 +1,29 @@
 import type { ConnectorPlugin, PluginContext } from "./types";
 
+type ReducibleHook = "beforeGenerate" | "afterGenerate" | "transformPrompt";
+
+async function reducePlugins<T>(
+	plugins: ConnectorPlugin[],
+	hook: ReducibleHook,
+	value: T,
+	ctx?: PluginContext,
+): Promise<T> {
+	let current = value;
+	for (const plugin of plugins) {
+		const fn = plugin[hook] as
+			| ((v: unknown, c?: PluginContext) => unknown)
+			| undefined;
+		if (fn) current = (await fn.call(plugin, current, ctx)) as T;
+	}
+	return current;
+}
+
 export async function runBeforeGenerate<T>(
 	plugins: ConnectorPlugin[],
 	params: T,
 	ctx?: PluginContext,
 ): Promise<T> {
-	let result = params;
-	for (const plugin of plugins) {
-		if (plugin.beforeGenerate) {
-			result = (await plugin.beforeGenerate(result, ctx)) as T;
-		}
-	}
-	return result;
+	return reducePlugins(plugins, "beforeGenerate", params, ctx);
 }
 
 export async function runAfterGenerate<T>(
@@ -19,13 +31,7 @@ export async function runAfterGenerate<T>(
 	result: T,
 	ctx?: PluginContext,
 ): Promise<T> {
-	let current = result;
-	for (const plugin of plugins) {
-		if (plugin.afterGenerate) {
-			current = (await plugin.afterGenerate(current, ctx)) as T;
-		}
-	}
-	return current;
+	return reducePlugins(plugins, "afterGenerate", result, ctx);
 }
 
 export async function runTransformPrompt(
@@ -33,13 +39,7 @@ export async function runTransformPrompt(
 	prompt: string,
 	ctx?: PluginContext,
 ): Promise<string> {
-	let current = prompt;
-	for (const plugin of plugins) {
-		if (plugin.transformPrompt) {
-			current = await plugin.transformPrompt(current, ctx);
-		}
-	}
-	return current;
+	return reducePlugins(plugins, "transformPrompt", prompt, ctx);
 }
 
 export async function runOnError(
@@ -48,8 +48,6 @@ export async function runOnError(
 	ctx?: PluginContext,
 ): Promise<void> {
 	for (const plugin of plugins) {
-		if (plugin.onError) {
-			await plugin.onError(error, ctx);
-		}
+		await plugin.onError?.(error, ctx);
 	}
 }

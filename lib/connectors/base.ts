@@ -42,17 +42,34 @@ export abstract class BaseConnector<
 		return runBeforeGenerate(this.plugins, { ...params, prompt }, ctx);
 	}
 
-	async generate(params: TParams): Promise<TResult> {
+	protected async reportError(
+		error: unknown,
+		ctx: PluginContext<TParams, TResult>,
+	): Promise<void> {
+		await runOnError(this.plugins, stringifyError(error), ctx);
+	}
+
+	protected async withPlugins<T>(
+		params: TParams,
+		body: (
+			prepared: TParams,
+			ctx: PluginContext<TParams, TResult>,
+		) => Promise<T>,
+	): Promise<T> {
 		const ctx = this.pluginContext();
 		try {
-			const prepared = await this.prepareParams(params, ctx);
-			let result = await this._generate(prepared);
-			result = await runAfterGenerate(this.plugins, result, ctx);
-			return result;
+			return await body(await this.prepareParams(params, ctx), ctx);
 		} catch (error) {
-			await runOnError(this.plugins, stringifyError(error), ctx);
+			await this.reportError(error, ctx);
 			throw error;
 		}
+	}
+
+	async generate(params: TParams): Promise<TResult> {
+		return this.withPlugins(params, async (prepared, ctx) => {
+			const result = await this._generate(prepared);
+			return runAfterGenerate(this.plugins, result, ctx);
+		});
 	}
 
 	protected abstract _generate(params: TParams): Promise<TResult>;

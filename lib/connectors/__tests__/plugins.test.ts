@@ -54,6 +54,35 @@ describe("plugins", () => {
 		expect(result).toBe("[prefix] hello [suffix]");
 	});
 
+	it("preserves plugin method context", async () => {
+		const plugin: ConnectorPlugin = {
+			name: "named",
+			beforeGenerate(this: ConnectorPlugin, p) {
+				return { ...(p as object), beforePlugin: this.name };
+			},
+			afterGenerate(this: ConnectorPlugin, result) {
+				return { ...(result as object), afterPlugin: this.name };
+			},
+			transformPrompt(this: ConnectorPlugin, prompt) {
+				return `${this.name}:${prompt}`;
+			},
+			onError(this: ConnectorPlugin, error) {
+				throw new Error(`${this.name}:${error}`);
+			},
+		};
+
+		await expect(runBeforeGenerate([plugin], {})).resolves.toMatchObject({
+			beforePlugin: "named",
+		});
+		await expect(runAfterGenerate([plugin], {})).resolves.toMatchObject({
+			afterPlugin: "named",
+		});
+		await expect(runTransformPrompt([plugin], "prompt")).resolves.toBe(
+			"named:prompt",
+		);
+		await expect(runOnError([plugin], "fail")).rejects.toThrow("named:fail");
+	});
+
 	it("runs onError for all plugins", async () => {
 		const errors: string[] = [];
 		const plugins: ConnectorPlugin[] = [
