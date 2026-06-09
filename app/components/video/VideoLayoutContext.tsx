@@ -4,6 +4,8 @@ import { createContext, use, useMemo, type ReactNode } from "react";
 import type { Editor } from "slate";
 import type { SceneElement } from "@/lib/canvas/types";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import type { AspectRatio } from "@/lib/video/aspectRatio";
+import type { TransitionType } from "@/lib/video/transitions";
 import type { VideoLayout } from "@/lib/video/types";
 import { useAssetPrefetch } from "./useAssetPrefetch";
 import { useVideoLayout } from "./useVideoLayout";
@@ -23,15 +25,24 @@ const VideoLayoutContext = createContext<VideoLayoutValue>({
 });
 
 export function VideoLayoutProvider({
-	getEditor,
+	editor,
 	layoutKey,
+	transitionType,
+	aspectRatio,
 	children,
 }: {
-	getEditor: () => Editor | null;
+	editor: Editor;
 	layoutKey: string;
+	transitionType: TransitionType;
+	aspectRatio: AspectRatio;
 	children: ReactNode;
 }) {
-	const { layout, playerKey, scenes } = useVideoLayout(getEditor, layoutKey);
+	const { layout, playerKey, scenes } = useVideoLayout(
+		editor,
+		layoutKey,
+		transitionType,
+		aspectRatio,
+	);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;

@@ -8,13 +8,15 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { resolveElements } from "@/lib/video/resolve";
 import { buildVideoLayout } from "@/lib/video/scene-builder";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
-import { useTransitionType } from "@/lib/video/useTransitionType";
+import type { AspectRatio } from "@/lib/video/aspectRatio";
+import type { TransitionType } from "@/lib/video/transitions";
 import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
-	getEditor: () => Editor | null,
+	editor: Editor,
 	layoutKey: string,
+	transitionType: TransitionType,
+	aspectRatio: AspectRatio,
 ): {
 	layout: VideoLayout | null;
 	playerKey: string;
@@ -22,12 +24,8 @@ export function useVideoLayout(
 } {
 	const queue = useGenerationQueue();
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
-	const transitionType = useTransitionType();
-	const aspectRatio = useAspectRatio();
 
 	const { layout, scenes } = useMemo(() => {
-		const editor = getEditor();
-		if (!editor) return { layout: null, scenes: [] as SceneElement[] };
 		const elements = editor.children as CanvasElement[];
 		const resolved = resolveElements(elements, queue.getElementSnapshot);
 		return {
@@ -35,7 +33,7 @@ export function useVideoLayout(
 			scenes: elements.filter(isSceneElement),
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [getEditor, layoutKey, resultVersion, transitionType, aspectRatio, queue]);
+	}, [editor, layoutKey, resultVersion, transitionType, aspectRatio, queue]);
 
 	return { layout, playerKey: `${layoutKey}-${resultVersion}`, scenes };
 }

@@ -8,7 +8,7 @@ import { RefineOpParser } from "@/lib/script/refine/parseOps";
 import { applyRefineOp } from "@/lib/script/refine/applyOps";
 import { OSMLSerializer } from "../utils/osmlSerializer";
 
-export function useRefineScript(getEditor: () => Editor | null) {
+export function useRefineScript(editor: Editor) {
 	const { connectorConfig } = useConfig();
 	const [refineLoading, setRefineLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
@@ -20,9 +20,6 @@ export function useRefineScript(getEditor: () => Editor | null) {
 
 	const refineScript = useCallback(
 		async (prompt: string) => {
-			const editor = getEditor();
-			if (!editor) return;
-
 			abortRef.current?.abort();
 			const controller = new AbortController();
 			abortRef.current = controller;
@@ -56,7 +53,7 @@ export function useRefineScript(getEditor: () => Editor | null) {
 				}
 			}
 		},
-		[getEditor, llmProvider, llmConfig, connectorConfig],
+		[editor, llmProvider, llmConfig, connectorConfig],
 	);
 
 	const stopRefine = useCallback(() => {
