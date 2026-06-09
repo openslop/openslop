@@ -38,12 +38,18 @@ describe("createVideoChainPlugin", () => {
 		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
 
 		const cleaned = (await plugin.beforeGenerate?.(
-			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			{
+				prompt: "a dark forest",
+				videoPrompt: "slow zoom in",
+				videoWidth: 1280,
+				videoHeight: 720,
+			},
 			ctx,
 		)) as AnimatedImageGenerateParams;
 
 		expect(cleaned).not.toHaveProperty("videoPrompt");
-		expect(ctx.data?.videoPrompt).toBe("slow zoom in");
+		expect(cleaned).not.toHaveProperty("videoWidth");
+		expect(cleaned).not.toHaveProperty("videoHeight");
 
 		const still = {
 			imageUrl: "https://example.com/still.png",
@@ -54,6 +60,8 @@ describe("createVideoChainPlugin", () => {
 		expect(generateMock).toHaveBeenCalledWith({
 			prompt: "slow zoom in",
 			frameImages: ["https://example.com/still.png"],
+			width: 1280,
+			height: 720,
 		});
 		expect(result).toEqual({
 			imageUrl: "https://example.com/still.png",

@@ -6,6 +6,7 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
+import type { AspectRatio } from "@/lib/video/aspectRatio";
 import type { TransitionType } from "@/lib/video/transitions";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
@@ -49,6 +50,7 @@ export type MetadataCharacter = MetadataVoice & {
 
 export type VideoSettings = {
 	transitionType?: TransitionType;
+	aspectRatio?: AspectRatio;
 };
 
 export type Mode = "story" | "script" | "template";

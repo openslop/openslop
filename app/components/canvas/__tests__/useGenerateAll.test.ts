@@ -135,7 +135,10 @@ describe("useGenerateAll", () => {
 			seconds: 0,
 			result: id === "a" ? { url: "https://example.com/img.png" } : null,
 			error: null,
-			resultInputs: id === "a" ? { prompt: "sunset", attributes: {} } : null,
+			resultInputs:
+				id === "a"
+					? { prompt: "sunset", attributes: { width: 2560, height: 1440 } }
+					: null,
 		}));
 
 		const { useGenerateAll } = await import("../hooks/useGenerateAll");
@@ -221,9 +224,9 @@ describe("useGenerateAll", () => {
 		getElementSnapshotSpy.mockImplementation((id: string) => {
 			const inputs: Record<
 				string,
-				{ prompt: string; attributes: Record<string, string> }
+				{ prompt: string; attributes: Record<string, string | number> }
 			> = {
-				a: { prompt: "sunset", attributes: {} },
+				a: { prompt: "sunset", attributes: { width: 2560, height: 1440 } },
 				b: { prompt: "hello", attributes: {} },
 			};
 			return {

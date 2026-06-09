@@ -9,7 +9,13 @@ import type {
 	ConnectorPlugin,
 } from "@/lib/connectors/types";
 
-const STASH_KEY = "videoPrompt";
+const STASH_KEY = "videoChain";
+
+type Stashed = {
+	videoPrompt: string;
+	videoWidth?: number;
+	videoHeight?: number;
+};
 
 export function createVideoChainPlugin(
 	registry: ConnectorRegistry,
@@ -17,16 +23,20 @@ export function createVideoChainPlugin(
 	return {
 		name: "video-chain",
 		beforeGenerate(params, ctx) {
-			const { videoPrompt, ...rest } = params;
+			const { videoPrompt, videoWidth, videoHeight, ...rest } = params;
 			if (videoPrompt && ctx) {
 				ctx.data ??= {};
-				ctx.data[STASH_KEY] = videoPrompt;
+				ctx.data[STASH_KEY] = {
+					videoPrompt,
+					videoWidth,
+					videoHeight,
+				} satisfies Stashed;
 			}
 			return rest as AnimatedImageGenerateParams;
 		},
 		async afterGenerate(result, ctx) {
-			const videoPrompt = ctx?.data?.[STASH_KEY] as string | undefined;
-			if (!videoPrompt) {
+			const stashed = ctx?.data?.[STASH_KEY] as Stashed | undefined;
+			if (!stashed?.videoPrompt) {
 				throw new Error(
 					"animated_image element is missing required videoPrompt attribute",
 				);
@@ -43,8 +53,10 @@ export function createVideoChainPlugin(
 				set("plugins", [], config),
 			);
 			const videoResult = await video.generate({
-				prompt: videoPrompt,
+				prompt: stashed.videoPrompt,
 				frameImages: [result.imageUrl],
+				width: stashed.videoWidth,
+				height: stashed.videoHeight,
 			});
 			return {
 				imageUrl: result.imageUrl,

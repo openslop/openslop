@@ -36,6 +36,8 @@ describe("getGenerationInputs", () => {
 			model: "Slop Video v1",
 			duration: "5",
 			provider: "openslop",
+			width: 1280,
+			height: 720,
 		});
 	});
 
@@ -50,7 +52,11 @@ describe("getGenerationInputs", () => {
 		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
 			expect(attributes).not.toHaveProperty(key);
 		}
-		expect(attributes).toEqual({ model: "Slop Video v1" });
+		expect(attributes).toEqual({
+			model: "Slop Video v1",
+			width: 1280,
+			height: 720,
+		});
 	});
 
 	it("merges characterAvatars from metadata for image elements", () => {
@@ -89,7 +95,7 @@ describe("getGenerationInputs", () => {
 			characters: { Alice: { appearance: "tall", voiceId: "voice-1" } },
 		};
 		const { attributes } = getGenerationInputs(
-			element({ name: "Alice" }, "clip"),
+			element({ name: "Alice" }, "music"),
 			metadata,
 		);
 		expect(attributes).not.toHaveProperty("voiceId");

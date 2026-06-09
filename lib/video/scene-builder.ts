@@ -5,6 +5,7 @@ import type {
 	VideoLayout,
 } from "./types";
 import { DEFAULT_CONFIG } from "./types";
+import { type AspectRatio, ASPECT_RATIO_DIMENSIONS } from "./aspectRatio";
 import {
 	DEFAULT_TRANSITION,
 	TRANSITION_DURATION_SEC,
@@ -13,6 +14,7 @@ import {
 
 export type BuildLayoutOptions = Partial<VideoConfig> & {
 	transitionType?: TransitionType;
+	aspectRatio?: AspectRatio;
 };
 
 const MIN_DURATION_SEC = 1;
@@ -73,7 +75,10 @@ export function buildVideoLayout(
 	elements: ResolvedElement[],
 	options?: BuildLayoutOptions,
 ): VideoLayout {
-	const cfg = { ...DEFAULT_CONFIG, ...options };
+	const aspectDims = options?.aspectRatio
+		? ASPECT_RATIO_DIMENSIONS[options.aspectRatio].output
+		: undefined;
+	const cfg = { ...DEFAULT_CONFIG, ...aspectDims, ...options };
 	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
 	const series: Sequence[] = [];
 	const sequences: Record<string, Sequence[]> = {};

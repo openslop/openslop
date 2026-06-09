@@ -165,6 +165,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				add_timestamps: true,
 				generation_config: {
 					speed: CARTESIA_SPEED[params.speed ?? "medium"],
+					volume: params.volume ?? 2.0,
 				},
 			};
 			for await (const response of ws.generate(req)) {

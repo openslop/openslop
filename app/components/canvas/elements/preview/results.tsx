@@ -108,6 +108,7 @@ export function MediaPreview({
 				src={url}
 				alt="Generated"
 				videoInteractive
+				objectFit="contain"
 			/>
 			<ResultOverlay
 				status={status}

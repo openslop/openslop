@@ -13,7 +13,7 @@ import { useControlsVisibility } from "./useControlsVisibility";
 import { useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
-const fullWidthStyle = { width: "100%" };
+const fullSizeStyle = { width: "100%", height: "100%" };
 
 const RemotionPlayer = dynamic(
 	async () => {
@@ -38,7 +38,7 @@ const RemotionPlayer = dynamic(
 					fps={layout.fps}
 					compositionWidth={layout.width}
 					compositionHeight={layout.height}
-					style={fullWidthStyle}
+					style={fullSizeStyle}
 					clickToPlay={false}
 					acknowledgeRemotionLicense
 					numberOfSharedAudioTags={10}
@@ -71,7 +71,7 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 	};
 	return (
 		<div
-			className={`relative ${styles.player}`}
+			className={`relative h-full w-full ${styles.player}`}
 			onPointerMove={ping}
 			onPointerDown={ping}
 			onFocus={ping}

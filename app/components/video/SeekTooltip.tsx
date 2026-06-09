@@ -37,7 +37,7 @@ export function SeekTooltip({
 						<img
 							src={thumbnail.url}
 							alt=""
-							className="h-full w-full object-cover"
+							className="h-full w-full object-contain"
 						/>
 					) : (
 						<video
@@ -45,7 +45,7 @@ export function SeekTooltip({
 							preload="metadata"
 							muted
 							playsInline
-							className="h-full w-full object-cover"
+							className="h-full w-full object-contain"
 						/>
 					)
 				) : null}
