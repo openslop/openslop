@@ -26,7 +26,7 @@ export function AudioResult({
 	onRegenerate: () => void;
 }) {
 	return (
-		<div className="group relative w-full min-h-16 rounded-lg overflow-hidden border border-white/10 bg-white/[0.03] flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5">
+		<div className="group relative w-full min-h-16 rounded-lg overflow-hidden border border-glass-border bg-white/[0.03] flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5">
 			{type === "character" && <CharacterBadge name={characterName} />}
 			<GenerationIndicator
 				status={status}

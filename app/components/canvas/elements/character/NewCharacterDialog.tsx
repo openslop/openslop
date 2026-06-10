@@ -67,7 +67,7 @@ function NewCharacterDialogBody({
 					onChange={(e) => setName(e.target.value)}
 					placeholder="Character name"
 					aria-label="Character name"
-					className="w-full rounded-md border border-white/10 bg-white/5 px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30"
+					className="w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30"
 				/>
 
 				{collision && (

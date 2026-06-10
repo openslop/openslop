@@ -77,7 +77,7 @@ function ProjectCharactersMenu({
 	return (
 		<DropdownMenuContent
 			align="start"
-			className="min-w-32 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+			className="min-w-32 max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
 		>
 			{names.map((name) => (
 				<DropdownMenuItem

@@ -43,7 +43,7 @@ export function SortableActions<K extends string>({
 					<DropdownMenuContent
 						side="bottom"
 						align="start"
-						className="w-40 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-1"
+						className="w-40 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-1"
 					>
 						{options.map((option) => (
 							<DropdownMenuItem

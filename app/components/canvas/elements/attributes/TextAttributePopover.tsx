@@ -82,7 +82,7 @@ export function TextAttributePopover({
 				onEscapeKeyDown={() => {
 					cancelRef.current = true;
 				}}
-				className="w-72 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-1.5"
+				className="w-72 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-1.5"
 			>
 				<textarea
 					autoFocus
@@ -96,7 +96,7 @@ export function TextAttributePopover({
 							setOpen(false);
 						}
 					}}
-					className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30"
+					className="w-full resize-none rounded-lg border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30"
 				/>
 				<div className="mt-1 px-1 text-[10px] text-white/40">
 					⌘↵ to save · esc to cancel

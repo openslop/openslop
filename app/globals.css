@@ -46,6 +46,29 @@
 	--radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* openslop design tokens — see DESIGN.md. Non-inline so the raw CSS vars are
+   available everywhere (module CSS, arbitrary values) and utilities are generated
+   (bg-glass-fill, border-glass-border, text-media-character, shadow-glow, ...). */
+@theme {
+	--color-canvas: #0a0a0a;
+	--color-accent-violet: #8b5cf6;
+	--color-accent-violet-soft: #a78bfa;
+	--color-glass-fill: rgba(255, 255, 255, 0.05);
+	--color-glass-border: rgba(255, 255, 255, 0.1);
+
+	/* Media-type palette — every storyboard element type reads at a glance. */
+	--color-media-character: #fbbf24;
+	--color-media-image: #22d3ee;
+	--color-media-animated: #e879f9;
+	--color-media-clip: #818cf8;
+	--color-media-music: #a78bfa;
+	--color-media-sound: #34d399;
+	--color-media-narration: #9ca3af;
+
+	/* The earned violet glow. Used rarely, only on the live/primary action. */
+	--shadow-glow: 0 0 40px rgba(55, 30, 100, 0.55);
+}
+
 @keyframes moveHorizontal {
 	0% {
 		transform: translateX(-20%) translateY(-10%);
@@ -141,9 +164,9 @@ html {
 	color-scheme: dark;
 }
 
-/* Reusable font-family utility for Google Sans Flex */
+/* Display utility — consolidated onto Satoshi (Google Sans Flex dropped per DESIGN.md). */
 .font-display {
-	font-family: "Google Sans Flex", sans-serif;
+	font-family: "Satoshi", sans-serif;
 }
 
 .font-title {

@@ -6,7 +6,7 @@ import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContex
 export default function AutoScrollPanel() {
 	const { enabled, setEnabled } = useAutoScroll();
 	const activeClass =
-		"relative grain bg-[#2d2040]/60 border border-violet-500/30 text-violet-300";
+		"relative grain bg-[#2d2040]/60 border border-accent-violet/30 text-violet-300";
 	return (
 		<div className="flex flex-col gap-2">
 			<h2 className="text-xs font-semibold uppercase tracking-wider text-white/50">

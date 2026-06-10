@@ -192,7 +192,7 @@ function CharacterEditDialogBody({
 					className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] transition-colors ${
 						confirmDelete
 							? "border-rose-500/60 bg-rose-500/20 text-rose-200 hover:bg-rose-500/30"
-							: "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+							: "border-glass-border bg-glass-fill text-white/70 hover:bg-white/10"
 					}`}
 				>
 					<Trash2 className="h-3 w-3" />

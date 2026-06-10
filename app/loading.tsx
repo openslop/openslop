@@ -15,7 +15,7 @@ export default function Loading() {
 					{Array.from({ length: 6 }).map((_, i) => (
 						<div
 							key={i}
-							className="rounded-xl border border-white/10 overflow-hidden"
+							className="rounded-xl border border-glass-border overflow-hidden"
 						>
 							<Skeleton className="aspect-video rounded-none" />
 							<div className="p-4 space-y-2">

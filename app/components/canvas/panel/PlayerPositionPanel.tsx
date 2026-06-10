@@ -20,7 +20,7 @@ export default function PlayerPositionPanel() {
 		usePlayerPosition();
 
 	const activeClass =
-		"relative grain bg-[#2d2040]/60 border border-violet-500/30 text-violet-300";
+		"relative grain bg-[#2d2040]/60 border border-accent-violet/30 text-violet-300";
 
 	return (
 		<div className="flex flex-col gap-2">

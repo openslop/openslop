@@ -79,7 +79,7 @@ function AttachMenu({
 			<DropdownMenuContent
 				side="bottom"
 				align="start"
-				className="min-w-36 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+				className="min-w-36 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
 			>
 				<DropdownMenuItem
 					onClick={openPicker}
@@ -181,7 +181,7 @@ export default function ComposerCopilot({
 		typeof placeholder === "string" ? placeholder : undefined;
 
 	return (
-		<div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_40px_rgba(55,30,100,0.5)]">
+		<div className="w-full rounded-xl border border-accent-violet/30 bg-glass-fill backdrop-blur-xl transition-shadow focus-within:shadow-glow">
 			<div className="px-4 py-3">
 				<ComposerAssets
 					uploadingCount={uploadingCount}

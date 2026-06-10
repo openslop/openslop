@@ -25,7 +25,7 @@ export default function Sidebar() {
 				}`}
 			>
 				<div
-					className={`absolute inset-0 bg-white/5 backdrop-blur-xl shadow-[2px_0_50px_rgba(0,0,0,0.25)] border-r border-white/10 transition-opacity duration-300 motion-reduce:transition-none ${
+					className={`absolute inset-0 bg-glass-fill backdrop-blur-xl shadow-[2px_0_50px_rgba(0,0,0,0.25)] border-r border-glass-border transition-opacity duration-300 motion-reduce:transition-none ${
 						open ? "opacity-100" : "opacity-0"
 					}`}
 				/>

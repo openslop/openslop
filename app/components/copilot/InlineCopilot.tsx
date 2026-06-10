@@ -63,7 +63,7 @@ export default function InlineCopilot({
 		typeof placeholder === "string" ? placeholder : undefined;
 
 	return (
-		<div className="w-full rounded-xl border border-violet-500/30 bg-white/5 shadow-[0_0_40px_rgba(55,30,100,0.5)]">
+		<div className="w-full rounded-xl border border-accent-violet/30 bg-glass-fill backdrop-blur-xl transition-shadow focus-within:shadow-glow">
 			<div className="relative flex items-center px-4 py-3">
 				{loading ? (
 					<OrbLoader />

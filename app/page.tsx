@@ -37,7 +37,7 @@ export default async function Home() {
 			heading="Welcome to the OpenSlop Beta"
 			subtitle="OpenSlop is your free, open-source video creator that brings together all your favorite AI tools, helping you get more done with less effort."
 			extra={
-				<div className="w-full flex items-center justify-center gap-3 sm:gap-5 rounded-full border border-white/10 bg-white/5 px-4 sm:px-6 py-2.5 sm:py-3">
+				<div className="w-full flex items-center justify-center gap-3 sm:gap-5 rounded-full border border-glass-border bg-glass-fill px-4 sm:px-6 py-2.5 sm:py-3">
 					{icons.map((icon) => (
 						<Image
 							key={icon}

@@ -44,7 +44,7 @@ export default function TemplateGallery({
 						onClick={() =>
 							onSelect(template.id, template.showcase.examplePrompt)
 						}
-						className="group flex w-full flex-row overflow-hidden rounded-xl border border-white/10 bg-white/5 text-left transition-all hover:border-violet-500/30 hover:shadow-[0_0_20px_rgba(55,30,100,0.3)] sm:w-[calc(50%-0.375rem)]"
+						className="group flex w-full flex-row overflow-hidden rounded-xl border border-glass-border bg-glass-fill text-left transition-all hover:border-accent-violet/30 hover:shadow-[0_0_20px_rgba(55,30,100,0.3)] sm:w-[calc(50%-0.375rem)]"
 					>
 						<CardImage
 							src={template.showcase.image}

@@ -30,7 +30,7 @@ export function AssetTile({
 		fallback === "icon" || !initial ? <Icon className="h-4 w-4" /> : initial;
 	return (
 		<div className="group/tile flex w-16 flex-col gap-1 sm:w-20">
-			<div className="relative aspect-square overflow-hidden rounded-md border border-white/10 bg-white/5">
+			<div className="relative aspect-square overflow-hidden rounded-md border border-glass-border bg-glass-fill">
 				{previewUrl ? (
 					<ImageWithShimmer
 						key={previewUrl}

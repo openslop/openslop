@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const FIELD_CLS =
-	"w-full rounded-md border border-white/10 bg-white/5 px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30";
+	"w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (
@@ -98,7 +98,7 @@ export function EnumField<T extends string>({
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					align="start"
-					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto rounded-xl border border-white/10 bg-white/5 p-0.5 shadow-md shadow-black/40 backdrop-blur-xl"
+					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto rounded-xl border border-glass-border bg-glass-fill p-0.5 shadow-md shadow-black/40 backdrop-blur-xl"
 				>
 					<EnumOption
 						selected={value === undefined}
