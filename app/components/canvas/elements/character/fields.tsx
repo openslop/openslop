@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const FIELD_CLS =
-	"w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30";
+	"w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-accent-violet/50";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (

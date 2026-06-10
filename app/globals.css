@@ -53,6 +53,7 @@
 	--color-canvas: #0a0a0a;
 	--color-accent-violet: #8b5cf6;
 	--color-accent-violet-soft: #a78bfa;
+	--color-glow-violet: rgba(55, 30, 100, 0.55);
 	--color-glass-fill: rgba(255, 255, 255, 0.05);
 	--color-glass-border: rgba(255, 255, 255, 0.1);
 
@@ -66,7 +67,7 @@
 	--color-media-narration: #9ca3af;
 
 	/* The earned violet glow. Used rarely, only on the live/primary action. */
-	--shadow-glow: 0 0 40px rgba(55, 30, 100, 0.55);
+	--shadow-glow: 0 0 40px var(--color-glow-violet);
 }
 
 @keyframes moveHorizontal {
