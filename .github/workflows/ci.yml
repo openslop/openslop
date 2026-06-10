@@ -39,7 +39,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Tests
-        run: npm run test:run
+        run: npm run test:run -- --coverage
 
       - name: Bundle size report
         run: |
