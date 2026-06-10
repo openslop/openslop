@@ -136,10 +136,6 @@ export class GenerationQueue {
 		return Object.fromEntries(this.state);
 	}
 
-	values(): IterableIterator<ElementSnapshot> {
-		return this.state.values();
-	}
-
 	private isInQueue(id: string): boolean {
 		const s = this.state.get(id)?.status;
 		return s !== undefined && isActive(s);

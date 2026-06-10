@@ -9,11 +9,6 @@ export type ProjectRow = {
 	updated_at: string;
 };
 
-export type ProjectDetail = ProjectRow & {
-	script: string;
-	store: ProjectStoreSnapshot;
-};
-
 export type SaveProjectInput = {
 	name: string;
 	script: string;
@@ -21,16 +16,6 @@ export type SaveProjectInput = {
 	generation: Record<string, ElementSnapshot>;
 	thumbnail_url: string | null;
 };
-
-export async function listProjects(): Promise<ProjectRow[]> {
-	const supabase = createClient();
-	const { data, error } = await supabase
-		.from("projects")
-		.select("id, name, thumbnail_url, updated_at")
-		.order("updated_at", { ascending: false });
-	if (error) throw error;
-	return data ?? [];
-}
 
 export async function createProject(): Promise<ProjectRow> {
 	const supabase = createClient();

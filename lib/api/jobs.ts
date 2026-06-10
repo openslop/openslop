@@ -7,7 +7,7 @@ import type { JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
-export const ASSET_QUEUE_TOPIC = "asset-generate";
+const ASSET_QUEUE_TOPIC = "asset-generate";
 
 export type JobRow = {
 	id: string;
