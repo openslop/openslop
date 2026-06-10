@@ -10,7 +10,7 @@ import { PlayerControls } from "./PlayerControls";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { useActiveSceneSync } from "./useActiveSceneSync";
 import { useControlsVisibility } from "./useControlsVisibility";
-import { usePlayerValue } from "./usePlayerState";
+import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
@@ -58,7 +58,7 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 	const segments = useSceneSegments();
 	const activeIndex = usePlayerValue(
 		player,
-		["frameupdate"],
+		FRAME_EVENTS,
 		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps),
 		-1,
 	);
