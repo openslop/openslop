@@ -12,18 +12,20 @@ import {
 	usePlayerVolume,
 } from "./usePlayerState";
 import { SegmentedSeekBar } from "./SegmentedSeekBar";
-import { findSegmentIndexAt, type SceneSegment } from "./useSceneSegments";
+import type { SceneSegment } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
 export function PlayerControls({
 	player,
 	layout,
 	segments,
+	activeIndex,
 	visible,
 }: {
 	player: PlayerRef | null;
 	layout: VideoLayout;
 	segments: SceneSegment[];
+	activeIndex: number;
 	visible: boolean;
 }) {
 	const playing = usePlayerPlaying(player);
@@ -62,7 +64,7 @@ export function PlayerControls({
 				</IconButton>
 				<TimeDisplay player={player} layout={layout} />
 				<div className="hidden @[280px]:contents">
-					<ScenePill player={player} layout={layout} segments={segments} />
+					<ScenePill segments={segments} activeIndex={activeIndex} />
 				</div>
 				<div className="flex-1" />
 				<div className="flex shrink-0 items-center gap-1.5">
@@ -116,20 +118,12 @@ function TimeDisplay({
 }
 
 function ScenePill({
-	player,
-	layout,
 	segments,
+	activeIndex,
 }: {
-	player: PlayerRef | null;
-	layout: VideoLayout;
 	segments: SceneSegment[];
+	activeIndex: number;
 }) {
-	const activeIndex = usePlayerValue(
-		player,
-		["frameupdate"],
-		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps),
-		-1,
-	);
 	const active = segments[activeIndex];
 	if (!active) return null;
 	return (
