@@ -1,39 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-	GenerationQueue,
-	type ElementSnapshot,
-	type GenerationJob,
-} from "@/lib/generation/queue";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
+import { GenerationQueue, type GenerationJob } from "@/lib/generation/queue";
 import { clearProjectStore, getProjectStore } from "../store";
 import {
 	buildCharacterAvatarJob,
-	characterAvatarElement,
 	characterAvatarElementId,
 	ensureCharacterAvatars,
 } from "../ensureCharacterAvatars";
-
-// A queue pre-seeded with an avatar snapshot whose result was produced by
-// `seededAppearance` — mimics a project loaded with an already-generated avatar.
-function warmQueue(name: string, seededAppearance: string): GenerationQueue {
-	const metadata = getProjectStore(PROJECT_ID).getState().metadata;
-	const resultInputs = getGenerationInputs(
-		characterAvatarElement(name, seededAppearance),
-		metadata,
-	);
-	const snapshot: ElementSnapshot = {
-		status: "idle",
-		seconds: 0,
-		result: null,
-		error: null,
-		resultInputs,
-		connectorType: "image",
-	};
-	return new GenerationQueue({
-		batchSize: 3,
-		initialState: { [characterAvatarElementId(name)]: snapshot },
-	});
-}
 
 const PROJECT_ID = "test-project";
 
@@ -121,7 +93,7 @@ describe("ensureCharacterAvatars", () => {
 		]);
 	});
 
-	it("skips characters that already have an avatarUrl", () => {
+	it("skips a legacy avatar (has avatarUrl but no recorded source appearance)", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
@@ -148,7 +120,7 @@ describe("ensureCharacterAvatars", () => {
 		expect(lastJobs()).toEqual([]);
 	});
 
-	it("skips an avatar whose appearance is unchanged (warm snapshot, not stale)", () => {
+	it("skips an avatar whose appearance matches its recorded source", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
@@ -156,18 +128,17 @@ describe("ensureCharacterAvatars", () => {
 					Alice: {
 						appearance: "A girl in red",
 						avatarUrl: "https://existing.com/alice.png",
+						avatarSourceAppearance: "A girl in red",
 					},
 				},
 			});
-		const warm = warmQueue("Alice", "A girl in red");
-		const spy = vi.spyOn(warm, "enqueueAll").mockImplementation(() => {});
 
-		ensureCharacterAvatars(warm, PROJECT_ID, registry);
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
-		expect(spy.mock.calls.at(-1)?.[0]).toEqual([]);
+		expect(lastJobs()).toEqual([]);
 	});
 
-	it("regenerates an avatar whose appearance changed since it was generated", () => {
+	it("regenerates an avatar whose appearance changed from its recorded source (survives reload)", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
@@ -175,17 +146,14 @@ describe("ensureCharacterAvatars", () => {
 					Alice: {
 						appearance: "A girl in blue, now with short hair",
 						avatarUrl: "https://existing.com/alice.png",
+						avatarSourceAppearance: "A girl in red",
 					},
 				},
 			});
-		// The seeded snapshot was produced by the OLD appearance.
-		const warm = warmQueue("Alice", "A girl in red");
-		const spy = vi.spyOn(warm, "enqueueAll").mockImplementation(() => {});
 
-		ensureCharacterAvatars(warm, PROJECT_ID, registry);
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
 
-		const jobs = spy.mock.calls.at(-1)?.[0] as GenerationJob[];
-		expect(jobs.map((j) => j.elementId)).toEqual([
+		expect(lastJobs().map((j) => j.elementId)).toEqual([
 			characterAvatarElementId("Alice"),
 		]);
 	});

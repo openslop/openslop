@@ -24,7 +24,11 @@ export function createCharacterAvatarPlugin(
 			const state = store();
 			const existing = state.metadata.characters[name];
 			if (!existing) return result;
-			state.setCharacter(name, { ...existing, avatarUrl: result.imageUrl });
+			state.setCharacter(name, {
+				...existing,
+				avatarUrl: result.imageUrl,
+				avatarSourceAppearance: existing.appearance,
+			});
 			return result;
 		},
 	};

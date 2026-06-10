@@ -2,12 +2,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
-import {
-	isStaleResult,
-	type GenerationJob,
-	type GenerationQueue,
-} from "@/lib/generation/queue";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
+import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";
 
 export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
@@ -57,20 +52,16 @@ export function ensureCharacterAvatars(
 ): void {
 	const { metadata } = getProjectStore(projectId).getState();
 	const jobs: GenerationJob[] = Object.entries(metadata.characters)
-		.filter(([name, ch]) => {
+		.filter(([, ch]) => {
 			if (!ch.appearance) return false;
 			if (!ch.avatarUrl) return true; // never generated → generate
-			// Regenerate when the appearance that produced the avatar changed.
-			// Guard the cold case: if the queue has no memory of the inputs that
-			// produced this avatar (no resultInputs), keep the existing one rather
-			// than blindly respending credits.
-			const snapshot = queue.getElementSnapshot(characterAvatarElementId(name));
-			if (!snapshot.resultInputs) return false;
-			const inputs = getGenerationInputs(
-				characterAvatarElement(name, ch.appearance),
-				metadata,
-			);
-			return isStaleResult(snapshot, inputs);
+			// Regenerate when the appearance that produced the avatar changed. The
+			// source appearance is persisted in metadata, so this works across
+			// reloads (unlike the in-memory queue, which is empty after a load).
+			// Legacy avatars with no recorded source are left alone — don't re-spend
+			// credits on an avatar we can't prove is stale.
+			if (ch.avatarSourceAppearance === undefined) return false;
+			return ch.appearance !== ch.avatarSourceAppearance;
 		})
 		.map(([name]) => buildCharacterAvatarJob(projectId, name, registry));
 	queue.enqueueAll(jobs);
