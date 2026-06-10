@@ -11,3 +11,13 @@ export function serverError(message: string) {
 export function unauthorized() {
 	return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
+
+export function forbidden() {
+	return NextResponse.json(
+		{
+			error: `Forbidden, your API access has been revoked.
+		Please contact hi@openslop.ai or post on our Discord server for help.`,
+		},
+		{ status: 403 },
+	);
+}

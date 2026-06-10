@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUser } from "@/lib/api/auth";
-import { logger } from "@/lib/api/logger";
 import { getTTSProvider } from "@/lib/api/providers";
-import { badRequest, serverError, unauthorized } from "@/lib/api/response";
+import { badRequest } from "@/lib/api/response";
+import { withAuth } from "@/lib/api/with-auth";
 
 export async function GET(request: NextRequest) {
-	try {
-		const user = await getUser();
-		if (!user) return unauthorized();
-
+	return withAuth("Voice preview fetch", async () => {
 		const url = request.nextUrl.searchParams.get("url");
 		if (!url) return badRequest("Missing url");
 
@@ -27,8 +23,5 @@ export async function GET(request: NextRequest) {
 				"Cache-Control": "public, max-age=3600",
 			},
 		});
-	} catch (error) {
-		logger.error(error, "Voice preview fetch failed");
-		return serverError("Voice preview fetch failed");
-	}
+	});
 }

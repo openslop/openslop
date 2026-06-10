@@ -2,7 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
 import { logger } from "./logger";
-import { serverError, unauthorized } from "./response";
+import { forbidden, serverError, unauthorized } from "./response";
 
 // Wraps a route handler with auth + a uniform error envelope. The handler only
 // runs for authenticated users; thrown errors are logged and returned as 500.
@@ -13,6 +13,7 @@ export async function withAuth(
 	try {
 		const user = await getUser();
 		if (!user) return unauthorized();
+		if (!user.app_metadata?.api_access) return forbidden();
 		return await run(user);
 	} catch (error) {
 		logger.error(error, `${label} failed`);

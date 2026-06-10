@@ -3,6 +3,8 @@ import { Geist, Instrument_Serif } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import BackgroundGradientAnimation from "./components/BackgroundGradientAnimation";
+import { GlobalErrorToaster } from "./components/GlobalErrorToaster";
+import { ToastErrorBoundary } from "./components/ToastErrorBoundary";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -51,7 +53,10 @@ export default function RootLayout({
 			>
 				<BackgroundGradientAnimation />
 
-				<div className="relative">{children}</div>
+				<div className="relative">
+					<ToastErrorBoundary>{children}</ToastErrorBoundary>
+				</div>
+				<GlobalErrorToaster />
 				<Toaster theme="dark" position="bottom-center" richColors />
 			</body>
 		</html>
