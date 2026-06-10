@@ -2,7 +2,12 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
-import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
+import {
+	isStaleResult,
+	type GenerationJob,
+	type GenerationQueue,
+} from "@/lib/generation/queue";
+import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { getProjectStore } from "./store";
 
 export const CHARACTER_AVATAR_ID_PREFIX = "character-avatar:";
@@ -50,9 +55,23 @@ export function ensureCharacterAvatars(
 	projectId: string,
 	registry: ConnectorRegistry,
 ): void {
-	const { characters } = getProjectStore(projectId).getState().metadata;
-	const jobs: GenerationJob[] = Object.entries(characters)
-		.filter(([, ch]) => !ch.avatarUrl && ch.appearance)
+	const { metadata } = getProjectStore(projectId).getState();
+	const jobs: GenerationJob[] = Object.entries(metadata.characters)
+		.filter(([name, ch]) => {
+			if (!ch.appearance) return false;
+			if (!ch.avatarUrl) return true; // never generated → generate
+			// Regenerate when the appearance that produced the avatar changed.
+			// Guard the cold case: if the queue has no memory of the inputs that
+			// produced this avatar (no resultInputs), keep the existing one rather
+			// than blindly respending credits.
+			const snapshot = queue.getElementSnapshot(characterAvatarElementId(name));
+			if (!snapshot.resultInputs) return false;
+			const inputs = getGenerationInputs(
+				characterAvatarElement(name, ch.appearance),
+				metadata,
+			);
+			return isStaleResult(snapshot, inputs);
+		})
 		.map(([name]) => buildCharacterAvatarJob(projectId, name, registry));
 	queue.enqueueAll(jobs);
 }
