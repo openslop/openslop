@@ -1,34 +1,22 @@
 "use client";
 
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useState,
-	type ReactNode,
-} from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
 export type PlayerPosition = "top" | "right";
 
 const NARROW_BREAKPOINT = 1066;
 const NARROW_QUERY = `(max-width: ${NARROW_BREAKPOINT}px)`;
 
-const PlayerPositionContext = createContext<{
+const [PlayerPositionContext, usePlayerPosition] = createRequiredContext<{
 	position: PlayerPosition;
 	visible: boolean;
 	setPosition: (position: PlayerPosition) => void;
 	setVisible: (visible: boolean) => void;
 	showPlayer: () => void;
 	narrowViewport: boolean;
-}>({
-	position: "top",
-	visible: false,
-	setPosition: () => {},
-	setVisible: () => {},
-	showPlayer: () => {},
-	narrowViewport: false,
-});
+}>("PlayerPositionContext");
+export { usePlayerPosition };
 
 export function PlayerPositionProvider({ children }: { children: ReactNode }) {
 	const [position, setPosition] = useState<PlayerPosition>("right");
@@ -64,8 +52,4 @@ export function PlayerPositionProvider({ children }: { children: ReactNode }) {
 			{children}
 		</PlayerPositionContext>
 	);
-}
-
-export function usePlayerPosition() {
-	return useContext(PlayerPositionContext);
 }

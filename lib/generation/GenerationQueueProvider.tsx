@@ -1,30 +1,21 @@
 "use client";
 
 import {
-	createContext,
-	use,
 	useEffect,
 	useState,
 	useSyncExternalStore,
 	type ReactNode,
 } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import {
 	DEFAULT_BATCH_SIZE,
 	GenerationQueue,
 	type ElementSnapshot,
 } from "./queue";
 
-const GenerationQueueContext = createContext<GenerationQueue | null>(null);
-
-export function useGenerationQueue(): GenerationQueue {
-	const queue = use(GenerationQueueContext);
-	if (!queue) {
-		throw new Error(
-			"useGenerationQueue must be used within a GenerationQueueProvider",
-		);
-	}
-	return queue;
-}
+const [GenerationQueueContext, useGenerationQueue] =
+	createRequiredContext<GenerationQueue>("GenerationQueueContext");
+export { useGenerationQueue };
 
 export function useQueueSelector<T>(
 	selector: (queue: GenerationQueue) => T,
@@ -53,8 +44,6 @@ export function GenerationQueueProvider({
 	);
 	useEffect(() => () => queue.cancelAll(), [queue]);
 	return (
-		<GenerationQueueContext.Provider value={queue}>
-			{children}
-		</GenerationQueueContext.Provider>
+		<GenerationQueueContext value={queue}>{children}</GenerationQueueContext>
 	);
 }
