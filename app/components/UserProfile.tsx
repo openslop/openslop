@@ -10,14 +10,25 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSyncExternalStore } from "react";
 import { LogOut, Moon, Sparkles } from "lucide-react";
 import { useBackgroundTheme } from "@/lib/theme/backgroundTheme";
+
+const emptySubscribe = () => () => {};
 
 export default function UserProfile() {
 	const router = useRouter();
 	const user = useUser();
 	const bgTheme = useBackgroundTheme((s) => s.theme);
 	const toggleBgTheme = useBackgroundTheme((s) => s.toggle);
+	// Render the default (dark) through SSR + the first hydration pass to avoid a
+	// mismatch when a persisted preference differs from the server default.
+	const hydrated = useSyncExternalStore(
+		emptySubscribe,
+		() => true,
+		() => false,
+	);
+	const isDark = !hydrated || bgTheme === "dark";
 	const email = user.email ?? "";
 	const avatarUrl: string | undefined = user.user_metadata?.avatar_url;
 	const name: string | undefined = user.user_metadata?.full_name;
@@ -67,12 +78,12 @@ export default function UserProfile() {
 							}}
 							className="cursor-pointer rounded-3xl py-2 my-1 text-white/70 hover:text-white focus:text-white focus:bg-white/10"
 						>
-							{bgTheme === "dark" ? (
+							{isDark ? (
 								<Moon className="mr-2 h-4 w-4" />
 							) : (
 								<Sparkles className="mr-2 h-4 w-4" />
 							)}
-							Background: {bgTheme === "dark" ? "Dark" : "Purple"}
+							Background: {isDark ? "Dark" : "Purple"}
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={handleLogout}

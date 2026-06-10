@@ -11,7 +11,11 @@ function useCursorFollow() {
 	useEffect(() => {
 		const el = ref.current;
 		if (!el) return;
-		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			// Center the glow instead of leaving it parked in the top-left corner.
+			el.style.transform = "translate(calc(50vw - 50%), calc(50vh - 50%))";
+			return;
+		}
 
 		let curX = window.innerWidth / 2;
 		let curY = window.innerHeight / 3;
