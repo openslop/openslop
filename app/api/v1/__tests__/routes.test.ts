@@ -180,6 +180,17 @@ describe("API routes", () => {
 			);
 			expect(res.status).toBe(200);
 		});
+
+		it("returns 400 for blank dimension strings", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(
+				makeRequest("/api/v1/image", { prompt: "cat", width: "   " }),
+			);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("must be a finite number");
+			expect(mockCreateJob).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("POST /api/v1/video", () => {
@@ -281,6 +292,17 @@ describe("API routes", () => {
 				makeRequest("/api/v1/video", { prompt: "x", duration: "abc" }),
 			);
 			expect(res.status).toBe(400);
+		});
+
+		it("returns 400 for blank duration strings", async () => {
+			const { POST } = await import("@/app/api/v1/video/route");
+			const res = await POST(
+				makeRequest("/api/v1/video", { prompt: "x", duration: "" }),
+			);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("must be a finite number");
+			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
 		it("returns 500 when createJob fails", async () => {

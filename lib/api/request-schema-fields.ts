@@ -2,7 +2,9 @@ import { z } from "zod";
 
 const optionalCoercedNumber = z
 	.union([z.number(), z.string()])
-	.transform((v) => (typeof v === "string" ? Number(v) : v))
+	.transform((v) =>
+		typeof v === "string" && v.trim() === "" ? NaN : Number(v),
+	)
 	.refine((v) => Number.isFinite(v), { message: "must be a finite number" })
 	.optional();
 
