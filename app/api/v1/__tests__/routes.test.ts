@@ -50,7 +50,10 @@ function makeRequest(
 describe("API routes", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockGetUser.mockResolvedValue({ id: "user-1" });
+		mockGetUser.mockResolvedValue({
+			id: "user-1",
+			app_metadata: { api_access: true },
+		});
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
 		mockEnqueueJob.mockResolvedValue(undefined);
 	});

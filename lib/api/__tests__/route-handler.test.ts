@@ -12,7 +12,10 @@ vi.mock("../auth", () => ({
 }));
 
 beforeEach(() => {
-	mockGetUser.mockResolvedValue({ id: "user-1" });
+	mockGetUser.mockResolvedValue({
+		id: "user-1",
+		app_metadata: { api_access: true },
+	});
 });
 
 function makeRequest(body: unknown) {
@@ -102,7 +105,7 @@ describe("createRouteHandler", () => {
 
 		expect(handle).toHaveBeenCalledWith(
 			expect.objectContaining({
-				user: { id: "user-1" },
+				user: expect.objectContaining({ id: "user-1" }),
 				body: expect.objectContaining({ prompt: "hello", model: "slug-a" }),
 			}),
 		);
