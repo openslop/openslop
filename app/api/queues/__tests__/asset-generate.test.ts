@@ -49,6 +49,7 @@ describe("asset-generate queue worker", () => {
 
 		await process(message);
 
+		expect(mockGetJobHandler).not.toHaveBeenCalled();
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 	});
 

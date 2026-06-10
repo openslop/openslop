@@ -55,6 +55,7 @@ describe("POST /api/render/progress", () => {
 
 		const res = await POST(makeRequest(validBody));
 
+		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			type: "error",
 			message: "lambda exploded",
@@ -69,6 +70,7 @@ describe("POST /api/render/progress", () => {
 
 		const res = await POST(makeRequest(validBody));
 
+		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			type: "error",
 			message: "Render failed",
@@ -85,6 +87,7 @@ describe("POST /api/render/progress", () => {
 
 		const res = await POST(makeRequest(validBody));
 
+		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			type: "done",
 			url: "https://bucket/video.mp4",
@@ -101,6 +104,7 @@ describe("POST /api/render/progress", () => {
 
 		const res = await POST(makeRequest(validBody));
 
+		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ type: "progress", progress: 0.42 });
 	});
 });
