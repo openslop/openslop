@@ -11,6 +11,21 @@ vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
+vi.mock("../getGenerationInputs", async (importOriginal) => {
+	const actual =
+		await importOriginal<typeof import("../getGenerationInputs")>();
+	return {
+		getGenerationInputs: (
+			...args: Parameters<typeof actual.getGenerationInputs>
+		) =>
+			getInputsMock
+				? getInputsMock(...args)
+				: actual.getGenerationInputs(...args),
+	};
+});
+
+let getInputsMock: ((...args: unknown[]) => GenerationInputs) | null = null;
+
 function makeElement(
 	id: string,
 	inputs: GenerationInputs,
@@ -52,6 +67,7 @@ describe("GenerationQueue", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		generateMock = vi.fn();
+		getInputsMock = null;
 		generationQueue = new GenerationQueue({ batchSize: 3 });
 	});
 
@@ -213,6 +229,60 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("err2").error).toBe(
 				"string error",
 			);
+		});
+
+		it("fails loudly when input computation throws synchronously", () => {
+			const consoleError = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+			getInputsMock = () => {
+				throw new Error("bad inputs");
+			};
+
+			generationQueue.enqueue(makeJob("sync-err"));
+
+			const snap = generationQueue.getElementSnapshot("sync-err");
+			expect(snap.status).toBe("idle");
+			expect(snap.result).toBeNull();
+			expect(snap.error).toBe("bad inputs");
+			expect(generateMock).not.toHaveBeenCalled();
+
+			consoleError.mockRestore();
+		});
+
+		it("releases the batch slot so queued jobs proceed when inputs throw", () => {
+			const consoleError = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+			generateMock.mockReturnValue(new Promise(() => {}));
+			// First job's input computation throws; the rest are valid.
+			getInputsMock = (element: unknown) => {
+				if ((element as { id: string }).id === "leak1") {
+					throw new Error("bad inputs");
+				}
+				return { prompt: "ok", attributes: {} };
+			};
+
+			generationQueue.enqueueAll([
+				makeJob("leak1"),
+				makeJob("leak2"),
+				makeJob("leak3"),
+				makeJob("leak4"),
+			]);
+
+			// leak1 failed synchronously, freeing its slot, so leak4 promotes
+			// instead of being stuck behind a leaked controller.
+			expect(generationQueue.getElementSnapshot("leak1").error).toBe(
+				"bad inputs",
+			);
+			expect(generationQueue.getElementSnapshot("leak4").status).toBe(
+				"generating",
+			);
+
+			generationQueue.discard("leak2");
+			generationQueue.discard("leak3");
+			generationQueue.discard("leak4");
+			consoleError.mockRestore();
 		});
 	});
 

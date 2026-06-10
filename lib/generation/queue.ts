@@ -278,8 +278,16 @@ export class GenerationQueue {
 		this.notify();
 		this.startElapsedTimer(elementId);
 
-		const { metadata } = getProjectStore(job.projectId).getState();
-		const inputs = getGenerationInputs(job.element, metadata);
+		let inputs: GenerationInputs;
+		try {
+			const { metadata } = getProjectStore(job.projectId).getState();
+			inputs = getGenerationInputs(job.element, metadata);
+		} catch (err) {
+			this.handleJobError(elementId, err, controller);
+			this.finalizeJob(elementId, controller);
+			return;
+		}
+
 		generateForElement(job, inputs)
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
 			.catch((err) => this.handleJobError(elementId, err, controller))
