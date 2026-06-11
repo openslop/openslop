@@ -46,12 +46,12 @@ function useCursorFollow() {
 export default function BackgroundGradientAnimation() {
 	const glowRef = useCursorFollow();
 	return (
-		<div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#0a0a0a]">
+		<div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-canvas">
 			<div
 				className="absolute inset-0"
 				style={{
 					backgroundImage:
-						"radial-gradient(900px 520px at 82% -8%, rgba(139,92,246,0.12), transparent 60%), radial-gradient(760px 520px at -8% 108%, rgba(55,30,100,0.22), transparent 60%)",
+						"radial-gradient(900px 520px at 82% -8%, color-mix(in srgb, var(--color-accent-violet) 12%, transparent), transparent 60%), radial-gradient(760px 520px at -8% 108%, color-mix(in srgb, var(--color-glow-violet) 22%, transparent), transparent 60%)",
 				}}
 			/>
 			<div
@@ -60,7 +60,7 @@ export default function BackgroundGradientAnimation() {
 				style={{
 					willChange: "transform",
 					background:
-						"radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 60%)",
+						"radial-gradient(circle, color-mix(in srgb, var(--color-accent-violet) 10%, transparent) 0%, transparent 60%)",
 				}}
 			/>
 			<div

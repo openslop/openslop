@@ -53,7 +53,7 @@
 	--color-canvas: #0a0a0a;
 	--color-accent-violet: #8b5cf6;
 	--color-accent-violet-soft: #a78bfa;
-	--color-glow-violet: rgba(55, 30, 100, 0.55);
+	--color-glow-violet: #371e64;
 	--color-panel-violet: #2d2040;
 	--color-glass-fill: rgba(255, 255, 255, 0.05);
 	--color-glass-border: rgba(255, 255, 255, 0.1);
@@ -68,7 +68,8 @@
 	--color-media-narration: #9ca3af;
 
 	/* The earned violet glow. Used rarely, only on the live/primary action. */
-	--shadow-glow: 0 0 40px var(--color-glow-violet);
+	--shadow-glow: 0 0 40px
+		color-mix(in srgb, var(--color-glow-violet) 55%, transparent);
 }
 
 @keyframes fadeInUp {
