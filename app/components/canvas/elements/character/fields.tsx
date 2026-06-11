@@ -51,16 +51,21 @@ export function TextAreaField({
 	onChange,
 	placeholder,
 	rows = 4,
+	action,
 }: {
 	label: string;
 	value: string;
 	onChange: (value: string) => void;
 	placeholder?: string;
 	rows?: number;
+	action?: ReactNode;
 }) {
 	return (
 		<label className="flex flex-col gap-1">
-			<FieldLabel>{label}</FieldLabel>
+			<div className="flex items-center justify-between gap-2">
+				<FieldLabel>{label}</FieldLabel>
+				{action}
+			</div>
 			<textarea
 				rows={rows}
 				value={value}

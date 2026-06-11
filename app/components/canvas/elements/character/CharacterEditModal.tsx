@@ -114,6 +114,19 @@ function CharacterEditDialogBody({
 			),
 		);
 
+	// The appearance the current avatar was generated from lives in the queue's
+	// resultInputs (the same record staleness compares against). Offer it as a
+	// cheap "discard my appearance draft" whenever the appearance has diverged
+	// from it. Reverting only discards the draft — if the art style or reference
+	// images also changed, the avatar stays stale afterwards.
+	const sourceAppearance = avatarSnapshot.resultInputs?.attributes?.appearance;
+	const revertTo =
+		isStale &&
+		typeof sourceAppearance === "string" &&
+		sourceAppearance !== character.appearance
+			? sourceAppearance
+			: undefined;
+
 	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
 
 	const interceptClose = (e: { preventDefault(): void }) => {
@@ -163,6 +176,18 @@ function CharacterEditDialogBody({
 						value={character.appearance}
 						onChange={(appearance) => update({ appearance })}
 						placeholder="Describe the character's look"
+						action={
+							revertTo !== undefined ? (
+								<button
+									type="button"
+									onClick={() => update({ appearance: revertTo })}
+									title="Restore the appearance the avatar was generated from"
+									className="text-[11px] text-white/50 underline-offset-2 transition-colors hover:text-white hover:underline"
+								>
+									Revert
+								</button>
+							) : undefined
+						}
 					/>
 					<div className="relative">
 						{character.avatarUrl ? (
