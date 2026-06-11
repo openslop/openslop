@@ -1,14 +1,8 @@
 "use client";
 
 import type { PlayerRef } from "@remotion/player";
-import {
-	createContext,
-	use,
-	useCallback,
-	useMemo,
-	useRef,
-	type ReactNode,
-} from "react";
+import { useCallback, useMemo, useRef, type ReactNode } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 
 type PlayerControl = {
@@ -16,10 +10,10 @@ type PlayerControl = {
 	playFromFrame: (frame: number) => void;
 };
 
-const Ctx = createContext<PlayerControl>({
-	registerPlayer: () => {},
-	playFromFrame: () => {},
-});
+const [Ctx, usePlayerControl] = createRequiredContext<PlayerControl>(
+	"PlayerControlContext",
+);
+export { usePlayerControl };
 
 export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	const playerRef = useRef<PlayerRef | null>(null);
@@ -44,8 +38,4 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	);
 
 	return <Ctx value={value}>{children}</Ctx>;
-}
-
-export function usePlayerControl() {
-	return use(Ctx);
 }

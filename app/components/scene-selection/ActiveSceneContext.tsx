@@ -1,9 +1,15 @@
 "use client";
 
-import { createContext, use, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
-const ValueContext = createContext<string | null>(null);
-const SetterContext = createContext<(id: string | null) => void>(() => {});
+const [ValueContext, useActiveSceneId] = createRequiredContext<string | null>(
+	"ActiveSceneValueContext",
+);
+const [SetterContext, useSetActiveSceneId] = createRequiredContext<
+	(id: string | null) => void
+>("ActiveSceneSetterContext");
+export { useActiveSceneId, useSetActiveSceneId };
 
 export function ActiveSceneProvider({ children }: { children: ReactNode }) {
 	const [id, setId] = useState<string | null>(null);
@@ -12,12 +18,4 @@ export function ActiveSceneProvider({ children }: { children: ReactNode }) {
 			<ValueContext value={id}>{children}</ValueContext>
 		</SetterContext>
 	);
-}
-
-export function useActiveSceneId() {
-	return use(ValueContext);
-}
-
-export function useSetActiveSceneId() {
-	return use(SetterContext);
 }

@@ -1,15 +1,14 @@
 "use client";
 
 import {
-	createContext,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useRef,
 	useState,
 	type ReactNode,
 } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
 type ViewModeValue = {
 	isCollapsed: (sceneId: string) => boolean;
@@ -19,13 +18,9 @@ type ViewModeValue = {
 	collapseAll: () => void;
 };
 
-const ViewModeContext = createContext<ViewModeValue>({
-	isCollapsed: () => false,
-	hasCollapsed: false,
-	toggle: () => {},
-	expandAll: () => {},
-	collapseAll: () => {},
-});
+const [ViewModeContext, useViewMode] =
+	createRequiredContext<ViewModeValue>("ViewModeContext");
+export { useViewMode };
 
 export function ViewModeProvider({
 	sceneIds,
@@ -73,8 +68,4 @@ export function ViewModeProvider({
 	);
 
 	return <ViewModeContext value={value}>{children}</ViewModeContext>;
-}
-
-export function useViewMode() {
-	return useContext(ViewModeContext);
 }
