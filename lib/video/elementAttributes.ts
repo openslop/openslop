@@ -17,9 +17,13 @@ const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
 const DEFAULT_VOLUME = VOLUME_MAX;
 
+function parseNumericAttribute(value: string | undefined): number {
+	return value === undefined || value.trim() === "" ? NaN : Number(value);
+}
+
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
+	const raw = parseNumericAttribute(element.customAttributes?.volume);
 	return Number.isFinite(raw)
 		? Math.max(VOLUME_MIN, Math.min(VOLUME_MAX, raw))
 		: DEFAULT_VOLUME;
@@ -29,7 +33,7 @@ const LOOPS_MAX = 1000;
 
 /** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.loops);
+	const raw = parseNumericAttribute(element.customAttributes?.loops);
 	if (!Number.isFinite(raw)) return 1;
 	return Math.max(1, Math.min(LOOPS_MAX, Math.floor(raw)));
 }
