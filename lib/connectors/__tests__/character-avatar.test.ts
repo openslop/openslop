@@ -14,7 +14,11 @@ describe("character-avatar plugin", () => {
 				characters: { Alice: { appearance: "A young girl with red hair" } },
 			});
 
-		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice");
+		const plugin = createCharacterAvatarPlugin(
+			PROJECT_ID,
+			"Alice",
+			"A young girl with red hair",
+		);
 		expect(plugin.transformPrompt?.("ignored")).toBe(
 			'Character portrait of Alice. A young girl with red hair. A small rectangular nameplate at the bottom of the frame reads "Alice" in clean sans-serif lettering. White background',
 		);
@@ -26,7 +30,7 @@ describe("character-avatar plugin", () => {
 			.getState()
 			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
 
-		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice");
+		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice", "A girl");
 		plugin.afterGenerate?.({
 			imageUrl: "https://img/alice.png",
 			durationSec: 0,
@@ -37,13 +41,35 @@ describe("character-avatar plugin", () => {
 		);
 	});
 
+	it("records the appearance snapshot it generated from, not the live value", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store
+			.getState()
+			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
+
+		// Plugin was built from the "A girl" snapshot; the user edits appearance
+		// while the job is in flight.
+		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice", "A girl");
+		store.getState().setCharacter("Alice", { appearance: "A boy" });
+		plugin.afterGenerate?.({
+			imageUrl: "https://img/alice.png",
+			durationSec: 0,
+		});
+
+		// The recorded source is the snapshot, so the now-divergent live appearance
+		// correctly reads as stale and will auto-regenerate.
+		expect(
+			store.getState().metadata.characters["Alice"].avatarSourceAppearance,
+		).toBe("A girl");
+	});
+
 	it("does not resurrect a character that was removed mid-flight", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store
 			.getState()
 			.updateMetadata({ characters: { Alice: { appearance: "A girl" } } });
 
-		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice");
+		const plugin = createCharacterAvatarPlugin(PROJECT_ID, "Alice", "A girl");
 		store.getState().removeCharacter("Alice");
 		plugin.afterGenerate?.({
 			imageUrl: "https://img/alice.png",

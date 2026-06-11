@@ -15,7 +15,7 @@ describe("buildCharacterAvatarPlugins", () => {
 				"https://img/style-b.png",
 			]);
 
-		const plugins = buildCharacterAvatarPlugins(PROJECT_ID, "Alice");
+		const plugins = buildCharacterAvatarPlugins(PROJECT_ID, "Alice", "A girl");
 		const refPlugin = plugins.find((p) => p.name === "reference-images");
 		expect(refPlugin).toBeDefined();
 

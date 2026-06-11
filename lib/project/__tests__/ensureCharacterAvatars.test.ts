@@ -158,6 +158,25 @@ describe("ensureCharacterAvatars", () => {
 		]);
 	});
 
+	it("never auto-regenerates a user-uploaded avatar, even when appearance changed", () => {
+		getProjectStore(PROJECT_ID)
+			.getState()
+			.updateMetadata({
+				characters: {
+					Alice: {
+						appearance: "A girl in blue",
+						avatarUrl: "https://upload.com/alice.png",
+						avatarUploaded: true,
+						avatarSourceAppearance: "A girl in red",
+					},
+				},
+			});
+
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
+
+		expect(lastJobs()).toEqual([]);
+	});
+
 	it("buildCharacterAvatarJob produces a job for any character (used for regenerate)", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()

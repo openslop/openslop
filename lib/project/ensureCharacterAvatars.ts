@@ -38,7 +38,7 @@ export function buildCharacterAvatarJob(
 		provider,
 		config: {
 			...config,
-			plugins: buildCharacterAvatarPlugins(projectId, name),
+			plugins: buildCharacterAvatarPlugins(projectId, name, appearance),
 		},
 		projectId,
 		element: characterAvatarElement(name, appearance),
@@ -54,12 +54,11 @@ export function ensureCharacterAvatars(
 	const jobs: GenerationJob[] = Object.entries(metadata.characters)
 		.filter(([, ch]) => {
 			if (!ch.appearance) return false;
+			if (ch.avatarUploaded) return false; // user-owned upload — never auto-regen
 			if (!ch.avatarUrl) return true; // never generated → generate
-			// Regenerate when the appearance that produced the avatar changed. The
-			// source appearance is persisted in metadata, so this works across
-			// reloads (unlike the in-memory queue, which is empty after a load).
-			// Legacy avatars with no recorded source are left alone — don't re-spend
-			// credits on an avatar we can't prove is stale.
+			// Regenerate only when the appearance that produced the avatar changed.
+			// Legacy avatars with no recorded source are left alone until a manual
+			// regenerate stamps the source, after which they rejoin this happy path.
 			if (ch.avatarSourceAppearance === undefined) return false;
 			return ch.appearance !== ch.avatarSourceAppearance;
 		})
