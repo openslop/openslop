@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { embed, embedMany } from "ai";
 
-export const embedModel = openai.embedding("text-embedding-3-small");
+const embedModel = openai.embedding("text-embedding-3-small");
 
 const providerOptions = { openai: { dimensions: 512 } };
 

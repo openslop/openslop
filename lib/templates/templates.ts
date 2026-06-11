@@ -836,7 +836,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 	},
 ];
 
-export const TEMPLATE_MAP = new Map(TEMPLATES.map((t) => [t.id, t]));
+const TEMPLATE_MAP = new Map(TEMPLATES.map((t) => [t.id, t]));
 
 export function getTemplateById(id: string): Template | undefined {
 	return TEMPLATE_MAP.get(id);

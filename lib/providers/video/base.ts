@@ -21,11 +21,6 @@ export type VideoProviderResponse = BundleResponse & {
 	metadata?: VideoJobMetadata;
 };
 
-export interface VideoProvider {
-	generate(params: VideoGenerateParams): Promise<VideoProviderResponse>;
-	poll(jobId: string): Promise<VideoProviderResponse>;
-}
-
 export abstract class BaseVideoProvider extends BaseProvider<
 	VideoGenerateParams,
 	VideoJob,

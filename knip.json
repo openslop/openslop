@@ -1,0 +1,19 @@
+{
+	"$schema": "https://unpkg.com/knip@latest/schema.json",
+	"entry": [
+		"remotion/index.ts",
+		"remotion/Root.tsx",
+		"remotion.config.ts",
+		"scripts/**"
+	],
+	"ignore": ["components/ui/**"],
+	"ignoreIssues": {
+		"lib/connectors/**": ["exports", "types"],
+		"lib/gateway/**": ["exports", "types"]
+	},
+	"ignoreExportsUsedInFile": true,
+	"ignoreDependencies": ["turbo"],
+	"rules": {
+		"types": "warn"
+	}
+}

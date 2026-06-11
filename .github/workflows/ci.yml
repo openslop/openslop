@@ -32,6 +32,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Dead code check
+        run: npm run knip
+
       - name: Build
         run: npm run build
         env:

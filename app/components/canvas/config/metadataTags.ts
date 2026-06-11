@@ -39,6 +39,3 @@ export const METADATA_TAG_CONFIGS: Record<string, MetadataTagConfig> = {
 		},
 	},
 };
-
-export type MetadataTagType = keyof typeof METADATA_TAG_CONFIGS;
-export const METADATA_TAG_TYPES = new Set(Object.keys(METADATA_TAG_CONFIGS));
