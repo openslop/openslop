@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { ImagePlus, Loader2, Trash2, X } from "lucide-react";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
 	DialogContent,
 	DialogDescription,
@@ -21,6 +29,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
+import { isActive } from "@/lib/generation/queue";
 import {
 	buildCharacterAvatarJob,
 	characterAvatarElementId,
@@ -72,7 +81,6 @@ function CharacterEditDialogBody({
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [closeConfirm, setCloseConfirm] = useState(false);
-	const [leftStale, setLeftStale] = useState(false);
 
 	const avatarElementId = characterAvatarElementId(name);
 	const avatarSnapshot = useQueueSelector((q) =>
@@ -104,16 +112,15 @@ function CharacterEditDialogBody({
 	};
 
 	// Stale = the generated avatar no longer matches its inputs. Durable across
-	// reloads (persisted signature), and suppressed while a regeneration is in
-	// flight.
+	// reloads (persisted signature), and suppressed while a regeneration is
+	// queued or in flight (not just the generating instant).
 	const isStale =
-		avatarSnapshot.status !== "generating" &&
+		!isActive(avatarSnapshot.status) &&
 		isAvatarStale(character, metadata.style, referenceImages);
 
 	// While stale, intercept user-initiated closes (escape, outside-click, the X)
-	// to offer a regenerate before leaving. "Leave stale" opts out for this turn.
-	const blockClose = isStale && !leftStale;
-	const requestClose = () => (blockClose ? setCloseConfirm(true) : onClose());
+	// to offer a regenerate before leaving.
+	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
 
 	const handleDelete = () => {
 		if (!confirmDelete) {
@@ -127,18 +134,19 @@ function CharacterEditDialogBody({
 
 	return (
 		<DialogContent
-			className="relative max-w-2xl"
+			className="max-w-2xl"
 			showCloseButton={false}
 			onEscapeKeyDown={(e) => {
-				// First press while stale: hold and ask. Once the prompt is up, a
-				// second press is the escape hatch — let it close.
-				if (blockClose && !closeConfirm) {
+				// While stale, hold the close and raise the confirm instead. Once
+				// it's up, the nested AlertDialog owns Escape (its Cancel = keep
+				// editing), so this guard no longer fires.
+				if (isStale && !closeConfirm) {
 					e.preventDefault();
 					setCloseConfirm(true);
 				}
 			}}
 			onInteractOutside={(e) => {
-				if (blockClose && !closeConfirm) {
+				if (isStale && !closeConfirm) {
 					e.preventDefault();
 					setCloseConfirm(true);
 				}
@@ -156,14 +164,14 @@ function CharacterEditDialogBody({
 				<DialogTitle>{name}</DialogTitle>
 				<DialogDescription>
 					Edits save automatically. Regenerate the avatar after changing the
-					appearance.
+					appearance, art style, or reference images.
 				</DialogDescription>
 			</DialogHeader>
 
 			{isStale && (
 				<div className="flex shrink-0 items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
 					<span className="text-[12px] text-amber-100/90">
-						This avatar no longer matches the appearance.
+						This avatar is out of date.
 					</span>
 					<button
 						type="button"
@@ -243,58 +251,36 @@ function CharacterEditDialogBody({
 				</button>
 			</DialogFooter>
 
-			{closeConfirm &&
-				typeof document !== "undefined" &&
-				createPortal(
-					<div
-						className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-						onClick={() => setCloseConfirm(false)}
-					>
-						<div
-							className="w-full max-w-sm rounded-xl border border-white/10 bg-[#141414] p-4 shadow-xl"
-							onClick={(e) => e.stopPropagation()}
+			<AlertDialog open={closeConfirm} onOpenChange={setCloseConfirm}>
+				<AlertDialogContent>
+					<AlertDialogTitle>Avatar is out of date</AlertDialogTitle>
+					<AlertDialogDescription>
+						{name}&apos;s avatar no longer matches its current inputs
+						(appearance, art style, or reference images). Your edits are already
+						saved.
+					</AlertDialogDescription>
+					<AlertDialogFooter>
+						<AlertDialogCancel className="rounded-md px-2.5 py-1 text-[12px] text-white/60 transition-colors hover:text-white">
+							Keep editing
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={onClose}
+							className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] text-white/70 transition-colors hover:bg-white/10"
 						>
-							<p className="text-sm font-medium text-white/90">
-								Regenerate avatar before leaving?
-							</p>
-							<p className="mt-1 text-[12px] text-white/50">
-								The appearance changed, so {name}&apos;s avatar is out of date.
-								Your edits are already saved. Press Escape again to leave
-								anyway.
-							</p>
-							<div className="mt-4 flex items-center justify-end gap-2">
-								<button
-									type="button"
-									onClick={() => setCloseConfirm(false)}
-									className="rounded-md px-2.5 py-1 text-[12px] text-white/60 transition-colors hover:text-white"
-								>
-									Keep editing
-								</button>
-								<button
-									type="button"
-									onClick={() => {
-										setLeftStale(true);
-										onClose();
-									}}
-									className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] text-white/70 transition-colors hover:bg-white/10"
-								>
-									Leave stale
-								</button>
-								<button
-									type="button"
-									onClick={() => {
-										regenerateAvatar();
-										onClose();
-									}}
-									className="rounded-md bg-accent-violet px-3 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
-								>
-									Regenerate
-								</button>
-							</div>
-						</div>
-					</div>,
-					document.body,
-				)}
+							Leave stale
+						</AlertDialogAction>
+						<AlertDialogAction
+							onClick={() => {
+								regenerateAvatar();
+								onClose();
+							}}
+							className="rounded-md bg-accent-violet px-3 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
+						>
+							Regenerate
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</DialogContent>
 	);
 }

@@ -50,7 +50,7 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	connectorType: null,
 };
 
-const isActive = (status: ElementSnapshot["status"]) =>
+export const isActive = (status: ElementSnapshot["status"]) =>
 	status === "queued" || status === "generating";
 
 export class GenerationQueue {
