@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import {
 	DialogContent,
@@ -129,13 +130,15 @@ function CharacterEditDialogBody({
 			className="relative max-w-2xl"
 			showCloseButton={false}
 			onEscapeKeyDown={(e) => {
-				if (blockClose) {
+				// First press while stale: hold and ask. Once the prompt is up, a
+				// second press is the escape hatch — let it close.
+				if (blockClose && !closeConfirm) {
 					e.preventDefault();
 					setCloseConfirm(true);
 				}
 			}}
 			onInteractOutside={(e) => {
-				if (blockClose) {
+				if (blockClose && !closeConfirm) {
 					e.preventDefault();
 					setCloseConfirm(true);
 				}
@@ -240,48 +243,58 @@ function CharacterEditDialogBody({
 				</button>
 			</DialogFooter>
 
-			{closeConfirm && (
-				<div className="absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-black/60 p-4 backdrop-blur-sm">
-					<div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#141414] p-4 shadow-xl">
-						<p className="text-sm font-medium text-white/90">
-							Regenerate avatar before leaving?
-						</p>
-						<p className="mt-1 text-[12px] text-white/50">
-							The appearance changed, so {name}&apos;s avatar is out of date.
-							Your edits are already saved.
-						</p>
-						<div className="mt-4 flex items-center justify-end gap-2">
-							<button
-								type="button"
-								onClick={() => setCloseConfirm(false)}
-								className="rounded-md px-2.5 py-1 text-[12px] text-white/60 transition-colors hover:text-white"
-							>
-								Keep editing
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									setLeftStale(true);
-									onClose();
-								}}
-								className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] text-white/70 transition-colors hover:bg-white/10"
-							>
-								Leave stale
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									regenerateAvatar();
-									onClose();
-								}}
-								className="rounded-md bg-accent-violet px-3 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
-							>
-								Regenerate
-							</button>
+			{closeConfirm &&
+				typeof document !== "undefined" &&
+				createPortal(
+					<div
+						className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+						onClick={() => setCloseConfirm(false)}
+					>
+						<div
+							className="w-full max-w-sm rounded-xl border border-white/10 bg-[#141414] p-4 shadow-xl"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<p className="text-sm font-medium text-white/90">
+								Regenerate avatar before leaving?
+							</p>
+							<p className="mt-1 text-[12px] text-white/50">
+								The appearance changed, so {name}&apos;s avatar is out of date.
+								Your edits are already saved. Press Escape again to leave
+								anyway.
+							</p>
+							<div className="mt-4 flex items-center justify-end gap-2">
+								<button
+									type="button"
+									onClick={() => setCloseConfirm(false)}
+									className="rounded-md px-2.5 py-1 text-[12px] text-white/60 transition-colors hover:text-white"
+								>
+									Keep editing
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setLeftStale(true);
+										onClose();
+									}}
+									className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] text-white/70 transition-colors hover:bg-white/10"
+								>
+									Leave stale
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										regenerateAvatar();
+										onClose();
+									}}
+									className="rounded-md bg-accent-violet px-3 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
+								>
+									Regenerate
+								</button>
+							</div>
 						</div>
-					</div>
-				</div>
-			)}
+					</div>,
+					document.body,
+				)}
 		</DialogContent>
 	);
 }
