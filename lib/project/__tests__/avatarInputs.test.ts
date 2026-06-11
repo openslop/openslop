@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { MetadataCharacter } from "../types";
-import { avatarInputsSignature, isAvatarStale } from "../avatarInputs";
+import {
+	avatarInputsSignature,
+	backfillAvatarSignatures,
+	isAvatarStale,
+} from "../avatarInputs";
 
 const character = (over: Partial<MetadataCharacter>): MetadataCharacter => ({
 	appearance: "A girl in red",
@@ -71,5 +75,41 @@ describe("isAvatarStale", () => {
 	it("is not stale when there is no avatar yet", () => {
 		const ch = character({ avatarUrl: undefined });
 		expect(isAvatarStale(ch, "anime", [])).toBe(false);
+	});
+});
+
+describe("backfillAvatarSignatures", () => {
+	it("stamps a baseline only for generated avatars missing a signature", () => {
+		const stamped = backfillAvatarSignatures(
+			{
+				Legacy: { appearance: "A girl in red", avatarUrl: "u" },
+				Signed: {
+					appearance: "x",
+					avatarUrl: "u",
+					avatarInputsSignature: "keep",
+				},
+				Uploaded: { appearance: "y", avatarUrl: "u", avatarUploaded: true },
+				NoAvatar: { appearance: "z" },
+				NoAppearance: { appearance: "", avatarUrl: "u" },
+			},
+			"anime",
+			["ref-a"],
+		);
+
+		expect(Object.keys(stamped)).toEqual(["Legacy"]);
+		expect(stamped["Legacy"]).toBe(
+			avatarInputsSignature("A girl in red", "anime", ["ref-a"]),
+		);
+	});
+
+	it("returns nothing to stamp when every avatar is already covered", () => {
+		const stamped = backfillAvatarSignatures(
+			{
+				Signed: { appearance: "x", avatarUrl: "u", avatarInputsSignature: "s" },
+			},
+			undefined,
+			[],
+		);
+		expect(stamped).toEqual({});
 	});
 });

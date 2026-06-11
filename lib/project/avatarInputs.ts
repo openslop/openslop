@@ -41,3 +41,34 @@ export function isAvatarStale(
 		avatarInputsSignature(character.appearance, style, referenceImages)
 	);
 }
+
+/**
+ * Baseline signatures to stamp on avatars generated before signatures existed,
+ * so staleness detection works for them without a manual regenerate. Treats a
+ * loaded avatar as in sync with its current inputs (true unless it was edited
+ * in an older session and never regenerated, which self-heals on the next
+ * edit/regen). Returns name → signature only for avatars that need one;
+ * signed, uploaded, and avatar-less characters are skipped. Idempotent.
+ */
+export function backfillAvatarSignatures(
+	characters: Record<string, MetadataCharacter>,
+	style: string | undefined,
+	referenceImages: readonly string[],
+): Record<string, string> {
+	const stamped: Record<string, string> = {};
+	for (const [name, ch] of Object.entries(characters)) {
+		if (
+			ch.avatarUrl &&
+			!ch.avatarUploaded &&
+			ch.avatarInputsSignature === undefined &&
+			ch.appearance
+		) {
+			stamped[name] = avatarInputsSignature(
+				ch.appearance,
+				style,
+				referenceImages,
+			);
+		}
+	}
+	return stamped;
+}
