@@ -6,6 +6,7 @@ import type { VideoLayout } from "@/lib/video/types";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { formatTime } from "@/lib/video/timestamps";
 import {
+	FRAME_EVENTS,
 	usePlayerMuted,
 	usePlayerPlaying,
 	usePlayerValue,
@@ -106,7 +107,7 @@ function TimeDisplay({
 }) {
 	const seconds = usePlayerValue(
 		player,
-		["frameupdate"],
+		FRAME_EVENTS,
 		(p) => Math.floor(p.getCurrentFrame() / layout.fps),
 		0,
 	);
