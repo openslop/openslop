@@ -11,7 +11,6 @@ const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
 
   ### Miscellaneous Rules
   - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.
-  - Convert any words in ALL CAPS to regular case.
   - Never add dialogue or narrative text to the story that is not in the original script.
 `;
 

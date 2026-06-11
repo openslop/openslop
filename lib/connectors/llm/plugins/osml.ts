@@ -17,7 +17,7 @@ const OSML_SYSTEM_PROMPT = dedent`
 	The story script must be written in a special XML format that strictly follows these rules: 
 
   ## **General Guidelines**
-  - For text within narration and character tags, never write any words in ALL CAPS.
+  - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
   - Descriptions in image tags are opaque to the reader, so the narrative prose should include some details that are only in the image tags.
 
   ## **XML Tagging**

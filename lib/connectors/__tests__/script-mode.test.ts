@@ -38,7 +38,6 @@ describe("scriptModePlugin", () => {
 	it("includes key instructions in system prompt", () => {
 		const result = beforeGenerate({ prompt: "x" });
 		const sys = (result as { systemPrompt: string }).systemPrompt;
-		expect(sys).toContain("ALL CAPS");
 		expect(sys).toContain("stage directions");
 	});
 });
