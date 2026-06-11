@@ -24,8 +24,6 @@ interface ElementContainerProps {
 	children: React.ReactNode;
 }
 
-// Per-kind diff styling for a refine preview: a soft row tint plus a header
-// badge. One lookup keeps the row tint, badge, and strikethrough in sync.
 const CHANGE_STYLES: Record<
 	RefineChangeKind,
 	{ tint: string; label: string; badgeCls: string }
@@ -54,8 +52,6 @@ export function ElementContainer({
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
 	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
-	// Diff marker from the current refine preview: tints the row and adds a header
-	// badge so it's clear which rows the agent added, edited, or removed.
 	const change = useRefineChanges()[element.id];
 	const changeStyle = change ? CHANGE_STYLES[change] : undefined;
 

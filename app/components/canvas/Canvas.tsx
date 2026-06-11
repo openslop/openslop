@@ -116,7 +116,7 @@ export default function Canvas({
 									placeholder="Start typing your story…"
 									renderElement={renderElement}
 									onKeyDown={handleKeyDown}
-									className="font-body rounded-sm text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-accent-violet/50"
+									className="font-body rounded-sm text-sm leading-relaxed outline-none"
 								/>
 							</SortableContext>
 							<DragOverlay>

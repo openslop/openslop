@@ -35,9 +35,6 @@ export type RefineTurn = {
 	ops: RefineOp[];
 };
 
-// Execute the removals held back from a preview, deleting the struck-through
-// nodes for real. Shared by Apply and by the auto-commit when a new refine
-// starts on top of an unresolved preview.
 function commitRemovals(
 	editor: CanvasEditor,
 	removeOps: RefineOp[],
@@ -69,9 +66,6 @@ export function useRefineScript(editor: CanvasEditor) {
 	const [changes, setChanges] = useState<RefineChanges>({});
 	const abortRef = useRef<AbortController | null>(null);
 	const idRef = useRef(0);
-	// The active preview: the ids of nodes it added, snapshots of the nodes it
-	// modified (so Discard restores them), and the removals held back from the
-	// preview — executed only on Apply.
 	const pendingRef = useRef<{
 		turnId: number;
 		addedIds: string[];
@@ -97,10 +91,6 @@ export function useRefineScript(editor: CanvasEditor) {
 			abortRef.current = controller;
 			setRefineLoading(true);
 
-			// Auto-apply any unresolved preview so a new refine commits the user's
-			// reviewed edits rather than silently discarding them. The preview's
-			// inserts/edits are already in the doc; execute its held-back removals
-			// so the next refine builds on the committed result.
 			if (pendingRef.current) {
 				commitRemovals(editor, pendingRef.current.removeOps, connectorConfig);
 				patchTurn(pendingRef.current.turnId, { status: "applied" });
@@ -150,17 +140,12 @@ export function useRefineScript(editor: CanvasEditor) {
 				return;
 			}
 
-			// Apply inserts/edits as a live preview, but HOLD BACK removals so the
-			// user can still see (and approve) what is being deleted. Removed nodes
-			// stay in the doc, marked "removed"; they are deleted only on Apply.
 			const removeOps = ops.filter((op) => op.op === "remove");
 			const previewOps = ops.filter((op) => op.op !== "remove");
 
 			const beforeIds = new Set(
 				getContentElements(editor.children).map((el) => el.id),
 			);
-			// Snapshot the nodes the set-ops will modify, before they change, so
-			// Discard can restore them.
 			const modified: ModifiedSnapshot[] = [];
 			for (const op of ops) {
 				if (op.op !== "set") continue;
@@ -187,8 +172,6 @@ export function useRefineScript(editor: CanvasEditor) {
 		[editor, llmProvider, llmConfig, connectorConfig, patchTurn],
 	);
 
-	// Apply = keep the previewed edits, execute the held-back removals, and clear
-	// the highlight (normalize into the standard UI).
 	const applyTurn = useCallback(
 		(id: number) => {
 			const pending = pendingRef.current;
@@ -201,8 +184,6 @@ export function useRefineScript(editor: CanvasEditor) {
 		[editor, connectorConfig, patchTurn],
 	);
 
-	// Discard = surgically revert only the agent's own nodes, leaving any manual
-	// edits the user made to other nodes during the preview intact.
 	const discardTurn = useCallback(
 		(id: number) => {
 			const pending = pendingRef.current;

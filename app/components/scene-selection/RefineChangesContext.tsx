@@ -6,11 +6,10 @@ export type RefineChangeKind = "added" | "modified" | "removed";
 export type RefineChanges = Record<string, RefineChangeKind>;
 
 /**
- * Per-element diff markers from the most recent applied refine: which content
- * nodes were added or modified, so the editor can highlight exactly what
- * changed (like a diff gutter). Set by useRefineScript on apply, cleared on the
- * next refine or undo. Removed nodes are gone from the doc, so they aren't
- * marked here — the refine summary reports their count.
+ * Per-element diff markers for the current pending refine preview: which content
+ * nodes the agent added, modified, or removed (added/modified are tinted,
+ * removed is struck through and held in place until Apply). Set when the
+ * preview's ops land, cleared on apply, discard, or the next refine.
  */
 export const RefineChangesContext = createContext<RefineChanges>({});
 

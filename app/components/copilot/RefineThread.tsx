@@ -27,7 +27,6 @@ function TurnCard({
 	onApply: (id: number) => void;
 	onDiscard: (id: number) => void;
 }) {
-	// Preview is live in the editor (highlighted). Apply keeps it; Discard reverts.
 	if (turn.status === "pending") {
 		return (
 			<div className="flex items-center gap-3 rounded-xl border border-glass-border bg-glass-fill px-3 py-2 backdrop-blur-xl">
