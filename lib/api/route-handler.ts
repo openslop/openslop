@@ -2,28 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { ConnectorType } from "@/lib/connectors/types";
-import { withAuth } from "./with-auth";
+import { withApiAccess, withSession } from "./with-auth";
 import { getJobHandler, rowView } from "./job-handlers";
 import { createJob, enqueueJob, getJob } from "./jobs";
 import { parseBody } from "./parse";
 import { badRequest } from "./response";
 
-export function createRouteHandler<TSchema extends z.ZodType>(opts: {
-	schema: TSchema;
-	label: string;
-	handle: (ctx: {
-		user: User;
-		body: z.infer<TSchema>;
-		request: NextRequest;
-	}) => Promise<Response>;
-}) {
-	return async (request: NextRequest) =>
-		withAuth(opts.label, async (user) => {
-			const parsed = await parseBody(request, opts.schema, opts.label);
-			if (!parsed.ok) return parsed.response;
-			return opts.handle({ user, body: parsed.data, request });
-		});
+function jsonRouteHandler(authTier: typeof withApiAccess) {
+	return function createHandler<TSchema extends z.ZodType>(opts: {
+		schema: TSchema;
+		label: string;
+		handle: (ctx: {
+			user: User;
+			body: z.infer<TSchema>;
+			request: NextRequest;
+		}) => Promise<Response>;
+	}) {
+		return async (request: NextRequest) =>
+			authTier(opts.label, async (user) => {
+				const parsed = await parseBody(request, opts.schema, opts.label);
+				if (!parsed.ok) return parsed.response;
+				return opts.handle({ user, body: parsed.data, request });
+			});
+	};
 }
+
+export const createApiRouteHandler = jsonRouteHandler(withApiAccess);
+export const createSessionRouteHandler = jsonRouteHandler(withSession);
 
 export function modelField(models: Record<string, string>) {
 	const names = Object.keys(models);
@@ -41,7 +46,7 @@ type AssetBody = { projectId?: string } & Record<string, unknown>;
 export function createAssetRouteHandlers<
 	TSchema extends z.ZodType<AssetBody>,
 >(opts: { connectorType: ConnectorType; schema: TSchema; label: string }) {
-	const POST = createRouteHandler({
+	const POST = createApiRouteHandler({
 		schema: opts.schema,
 		label: opts.label,
 		handle: async ({ user, body }) => {
@@ -63,7 +68,7 @@ export async function pollJob(
 	_request: NextRequest,
 	context: { params: Promise<{ jobId: string }> },
 ) {
-	return withAuth("Job poll", async (user) => {
+	return withApiAccess("Job poll", async (user) => {
 		const { jobId } = await context.params;
 		if (!jobId) return badRequest("jobId is required");
 		const job = await getJob(jobId, user.id);

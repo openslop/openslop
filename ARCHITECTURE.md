@@ -34,7 +34,7 @@ The generation pipeline is split so providers and asset types can be swapped ind
 
 ## API routes
 
-Every `app/api/v1/<type>/route.ts` is built from a shared `createRouteHandler` factory that handles auth, parsing, model validation, and error mapping. Reusable Zod field schemas live in `lib/api/request-schema-fields.ts`. If a provider's API key isn't set, the route falls back to a mock provider.
+Every `app/api/v1/<type>/route.ts` is built from a shared `createApiRouteHandler` factory that handles auth, parsing, model validation, and error mapping. Internal app routes use the session-tier variants from the same module (see Auth). Reusable Zod field schemas live in `lib/api/request-schema-fields.ts`. If a provider's API key isn't set, the route falls back to a mock provider.
 
 ## Editor state
 
@@ -57,7 +57,9 @@ Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, ser
 ## Auth
 
 - `proxy.ts` (Next.js 16's renamed middleware, keep this name) refreshes the Supabase session on each request.
-- `/api/v1/*` is same-origin only and authenticates via the Supabase session cookie.
+- API routes have two auth tiers, both defined in `lib/api/with-auth.ts`:
+  - `withApiAccess` (`/api/v1/*`): same-origin Supabase session cookie plus the `api_access` grant in `app_metadata` (403 without it).
+  - `withSession` (`/api/render*`, `/api/upload/*`): any signed-in user.
 
 ## Adding a new asset type
 

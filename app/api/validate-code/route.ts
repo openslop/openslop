@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { parseBody } from "@/lib/api/parse";
 import { createClient } from "@/lib/supabase/server";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -7,18 +9,24 @@ const ERROR_MESSAGES: Record<string, string> = {
 	expired: "This code has expired",
 };
 
-export async function POST(request: NextRequest) {
-	const body = await request.json();
-	const { code } = body;
+const INVALID_FORMAT = "Invalid code format";
+const ValidateCodeRequest = z.object(
+	{
+		code: z
+			.string({ error: INVALID_FORMAT })
+			.length(6, { message: INVALID_FORMAT }),
+	},
+	INVALID_FORMAT,
+);
 
-	if (!code || typeof code !== "string" || code.length !== 6) {
-		return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
-	}
+export async function POST(request: NextRequest) {
+	const parsed = await parseBody(request, ValidateCodeRequest, "validate-code");
+	if (!parsed.ok) return parsed.response;
 
 	const supabase = await createClient();
 
 	const { data, error } = await supabase.rpc("validate_access_code", {
-		p_code: code.toUpperCase(),
+		p_code: parsed.data.code.toUpperCase(),
 	});
 
 	if (error || typeof data !== "string") {
