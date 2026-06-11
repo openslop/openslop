@@ -38,8 +38,6 @@ describe("scriptModePlugin", () => {
 	it("includes key instructions in system prompt", () => {
 		const result = beforeGenerate({ prompt: "x" });
 		const sys = (result as { systemPrompt: string }).systemPrompt;
-		// The all-caps rule now lives solely in the OSML prompt (always present in
-		// script mode), so it is no longer duplicated here.
 		expect(sys).toContain("stage directions");
 	});
 });

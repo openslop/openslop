@@ -15,4 +15,11 @@ describe("osmlPlugin", () => {
 		const result = beforeGenerate({ prompt: "hello", systemPrompt: "custom" });
 		expect((result as { systemPrompt: string }).systemPrompt).toBe("custom");
 	});
+
+	it("pins the no-all-caps TTS rule (single source for script and story modes)", () => {
+		const result = beforeGenerate({ prompt: "hello" });
+		expect((result as { systemPrompt: string }).systemPrompt).toContain(
+			"ALL CAPS",
+		);
+	});
 });
