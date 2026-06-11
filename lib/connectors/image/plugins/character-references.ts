@@ -1,3 +1,4 @@
+import { parseCharacterNames } from "@/lib/canvas/characterNames";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getProjectStore } from "@/lib/project/store";
 
@@ -14,9 +15,8 @@ export function createCharacterReferencesPlugin(
 
 			const { characters: chars } =
 				getProjectStore(projectId).getState().metadata;
-			const referenceImages = characters
-				.split(",")
-				.map((name) => chars[name.trim()]?.avatarUrl)
+			const referenceImages = parseCharacterNames(characters)
+				.map((name) => chars[name]?.avatarUrl)
 				.filter(Boolean);
 
 			return {

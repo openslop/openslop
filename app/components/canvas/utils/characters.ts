@@ -1,12 +1,9 @@
+import { parseCharacterNames } from "@/lib/canvas/characterNames";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 const CHARACTER_NAME_EXTRACTORS: Record<string, (value: string) => string[]> = {
 	name: (v) => [v.trim()],
-	characters: (v) =>
-		v
-			.split(",")
-			.map((s) => s.trim())
-			.filter(Boolean),
+	characters: parseCharacterNames,
 };
 
 export function getElementCharacterNames(
