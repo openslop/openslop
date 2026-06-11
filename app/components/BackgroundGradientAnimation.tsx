@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef } from "react";
 import { useBackgroundTheme } from "@/lib/theme/backgroundTheme";
-
-const emptySubscribe = () => () => {};
+import { useHydrated } from "@/lib/hooks/useHydrated";
 
 // Shared cursor-follow: smoothly translates an element toward the pointer.
 function useCursorFollow() {
@@ -150,13 +149,8 @@ function PurpleBackground() {
 export default function BackgroundGradientAnimation() {
 	const theme = useBackgroundTheme((s) => s.theme);
 	// Render the default (dark) during SSR and the first hydration pass to avoid
-	// a mismatch, then honor the persisted preference. useSyncExternalStore
-	// returns the server snapshot (false) until hydration completes.
-	const hydrated = useSyncExternalStore(
-		emptySubscribe,
-		() => true,
-		() => false,
-	);
+	// a mismatch, then honor the persisted preference.
+	const hydrated = useHydrated();
 
 	return hydrated && theme === "purple" ? (
 		<PurpleBackground />

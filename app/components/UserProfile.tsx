@@ -10,11 +10,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSyncExternalStore } from "react";
 import { LogOut, Moon, Sparkles } from "lucide-react";
 import { useBackgroundTheme } from "@/lib/theme/backgroundTheme";
-
-const emptySubscribe = () => () => {};
+import { useHydrated } from "@/lib/hooks/useHydrated";
 
 export default function UserProfile() {
 	const router = useRouter();
@@ -23,12 +21,7 @@ export default function UserProfile() {
 	const toggleBgTheme = useBackgroundTheme((s) => s.toggle);
 	// Render the default (dark) through SSR + the first hydration pass to avoid a
 	// mismatch when a persisted preference differs from the server default.
-	const hydrated = useSyncExternalStore(
-		emptySubscribe,
-		() => true,
-		() => false,
-	);
-	const isDark = !hydrated || bgTheme === "dark";
+	const isDark = !useHydrated() || bgTheme === "dark";
 	const email = user.email ?? "";
 	const avatarUrl: string | undefined = user.user_metadata?.avatar_url;
 	const name: string | undefined = user.user_metadata?.full_name;

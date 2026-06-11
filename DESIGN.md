@@ -34,7 +34,8 @@
 - **Glow:** `--color-glow-violet` / `--shadow-glow` — rare earned highlight (e.g. the live Generate state), never ambient.
 - **Text:** white at `0.80` body, `0.40` muted, `0.30` placeholder.
 - **Media-type palette (signature — every element type reads at a glance):** `--color-media-character`, `--color-media-image`, `--color-media-animated`, `--color-media-clip`, `--color-media-music`, `--color-media-sound`, `--color-media-narration`. Use as small tags/borders on storyboard scene rows. Keep disciplined so it reads, not confetti.
-- **Dark mode:** Dark is the only mode. The stock light `:root` palette in `globals.css` is unreachable (html forces `#0a0a0a`); remove it or commit to dark-only.
+- **Dark mode:** The dark studio is the default and the identity. The stock light `:root` palette in `globals.css` is unreachable (html forces `#0a0a0a`); remove it or commit to dark-only.
+- **Background escape hatch:** A purple gradient background is the one sanctioned departure — an explicit, persisted opt-in via the profile toggle, off by default. It themes only the page background, never the disciplined studio UI on top of it. If we decide the dark studio is absolute, this is the toggle to sunset; until then it's grandfathered in as a user preference.
 
 ## Spacing
 
