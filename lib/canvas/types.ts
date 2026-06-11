@@ -1,5 +1,6 @@
 import type { BaseEditor } from "slate";
 import type { ReactEditor } from "slate-react";
+import type { HistoryEditor } from "slate-history";
 
 export type ResultKind = "image" | "video" | "audio";
 
@@ -30,7 +31,9 @@ export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set([
 	"clip",
 ]);
 
-export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };
+export type CanvasEditor = BaseEditor &
+	ReactEditor &
+	HistoryEditor & { id?: string };
 
 export type CanvasContentElement = {
 	id: string;

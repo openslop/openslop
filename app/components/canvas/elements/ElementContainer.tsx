@@ -3,6 +3,10 @@ import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { Node } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
+import {
+	type RefineChangeKind,
+	useRefineChanges,
+} from "@/app/components/scene-selection/RefineChangesContext";
 import { ZERO_WIDTH_SPACE } from "../config/constants";
 import { ELEMENT_CONFIGS } from "../config/elementConfigs";
 import { useViewMode } from "../ViewModeContext";
@@ -20,6 +24,29 @@ interface ElementContainerProps {
 	children: React.ReactNode;
 }
 
+// Per-kind diff styling for a refine preview: a soft row tint plus a header
+// badge. One lookup keeps the row tint, badge, and strikethrough in sync.
+const CHANGE_STYLES: Record<
+	RefineChangeKind,
+	{ tint: string; label: string; badgeCls: string }
+> = {
+	added: {
+		tint: "bg-emerald-400/25",
+		label: "New",
+		badgeCls: "bg-emerald-500/30 text-emerald-50",
+	},
+	modified: {
+		tint: "bg-amber-400/25",
+		label: "Edited",
+		badgeCls: "bg-amber-500/30 text-amber-50",
+	},
+	removed: {
+		tint: "bg-red-400/25",
+		label: "Removed",
+		badgeCls: "bg-red-500/30 text-red-50",
+	},
+};
+
 export function ElementContainer({
 	attributes,
 	children,
@@ -27,9 +54,16 @@ export function ElementContainer({
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
 	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
+	// Diff marker from the current refine preview: tints the row and adds a header
+	// badge so it's clear which rows the agent added, edited, or removed.
+	const change = useRefineChanges()[element.id];
+	const changeStyle = change ? CHANGE_STYLES[change] : undefined;
 
 	return (
-		<div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
+		<div
+			className={`-mx-2 mb-1.5 flex items-stretch rounded-xl px-2 py-1 transition-colors animate-fadeInUp ${changeStyle?.tint ?? ""}`}
+			{...attributes}
+		>
 			{/* Left: element card */}
 			<div
 				className={`group/card grain rounded-lg ${config.bgColor} p-2 shadow-md relative overflow-hidden flex-1 min-w-0`}
@@ -49,6 +83,13 @@ export function ElementContainer({
 							{config.icon}
 							<span className="text-xs">{config.label}</span>
 						</div>
+						{changeStyle && (
+							<span
+								className={`rounded-full px-1.5 text-[9px] font-semibold leading-4 ${changeStyle.badgeCls}`}
+							>
+								{changeStyle.label}
+							</span>
+						)}
 						<ElementCharacters element={element} />
 						{Object.entries(config.visibleAttributes).map(([key, spec]) => (
 							<AttributeBadge
@@ -60,16 +101,18 @@ export function ElementContainer({
 						))}
 						<ModelBadge element={element} />
 					</div>
-					<div className="relative min-w-0">
+					<div className="relative min-w-0 rounded-md bg-black/20 px-2 py-1.5">
 						{isEmpty && (
 							<div
 								style={{ userSelect: "none" }}
-								className="absolute top-0 left-0 text-white/50 text-xs text-left pointer-events-none"
+								className="absolute top-1.5 left-2 text-white/50 text-xs text-left pointer-events-none"
 							>
 								{config.placeholder}
 							</div>
 						)}
-						<div className="text-white/90 text-xs leading-relaxed overflow-hidden transition-[max-height,opacity] duration-200 text-left">
+						<div
+							className={`text-white/90 text-xs leading-relaxed overflow-hidden transition-[max-height,opacity] duration-200 text-left ${change === "removed" ? "line-through opacity-60" : ""}`}
+						>
 							{children}
 						</div>
 					</div>

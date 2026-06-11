@@ -52,7 +52,7 @@ export function SortableItem({
 	return (
 		<div {...attributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
-				className={styles.sortable}
+				className={`${styles.sortable} rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-accent-violet/60`}
 				{...sortableAttributes}
 				ref={setNodeRef}
 				style={{

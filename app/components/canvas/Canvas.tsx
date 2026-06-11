@@ -10,7 +10,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { CanvasContentElement, CanvasEditor } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
@@ -26,7 +26,7 @@ export default function Canvas({
 	value,
 	setValue,
 }: {
-	editor: Editor;
+	editor: CanvasEditor;
 	value: Descendant[];
 	setValue: (v: Descendant[]) => void;
 }) {
@@ -46,6 +46,16 @@ export default function Canvas({
 			if (event.shiftKey && event.key === "Enter") {
 				event.preventDefault();
 				editor.insertText("\n");
+				return;
+			}
+			const mod = event.metaKey || event.ctrlKey;
+			if (mod && event.key.toLowerCase() === "z") {
+				event.preventDefault();
+				if (event.shiftKey) editor.redo();
+				else editor.undo();
+			} else if (event.ctrlKey && event.key.toLowerCase() === "y") {
+				event.preventDefault();
+				editor.redo();
 			}
 		},
 		[editor],
@@ -106,7 +116,7 @@ export default function Canvas({
 									placeholder="Start typing your story…"
 									renderElement={renderElement}
 									onKeyDown={handleKeyDown}
-									className="font-body text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									className="font-body rounded-sm text-sm leading-relaxed outline-none focus-visible:ring-2 focus-visible:ring-accent-violet/50"
 								/>
 							</SortableContext>
 							<DragOverlay>
