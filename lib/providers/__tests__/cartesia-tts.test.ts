@@ -1,11 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/api/asset-bundle");
+vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }));
 
 const mockClose = vi.fn();
 const mockGenerate = vi.fn();
 const mockConnect = vi.fn();
-const mockVoicesList = vi.fn();
+const mockGet = vi.fn();
 const mockEmbed = vi.fn();
 const mockEmbedMany = vi.fn();
 
@@ -18,7 +19,7 @@ vi.mock("@cartesia/cartesia-js", () => ({
 				close: mockClose,
 			}),
 		};
-		voices = { list: mockVoicesList };
+		get = mockGet;
 	},
 }));
 
@@ -33,7 +34,137 @@ vi.mock("@ai-sdk/openai", () => ({
 	openai: { embedding: () => ({}) },
 }));
 
-import { CartesiaTTS } from "../tts/cartesia";
+import type Cartesia from "@cartesia/cartesia-js";
+import { CartesiaTTS, collectVoices } from "../tts/cartesia";
+
+const makeVoices = (count: number, offset = 0) =>
+	Array.from({ length: count }, (_, i) => ({
+		id: `v${offset + i}`,
+		name: `Voice ${offset + i}`,
+		language: "en",
+		gender: "feminine",
+		description: "voice",
+		preview_file_url: null,
+	}));
+
+function makePage(data: object[], more = false) {
+	return { data, has_more: more, next_page: more ? "cursor" : null };
+}
+
+const stubClient = { get: mockGet } as unknown as Cartesia;
+
+describe("collectVoices", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("returns a single short page when has_more is false", async () => {
+		mockGet.mockResolvedValue(makePage(makeVoices(30)));
+
+		const voices = await collectVoices(stubClient, {}, 250);
+
+		expect(voices).toHaveLength(30);
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
+
+	it("paginates past 100 using next_page cursor", async () => {
+		mockGet
+			.mockResolvedValueOnce({
+				data: makeVoices(100),
+				has_more: true,
+				next_page: "cur1",
+			})
+			.mockResolvedValueOnce({
+				data: makeVoices(100, 100),
+				has_more: true,
+				next_page: "cur2",
+			})
+			.mockResolvedValueOnce({
+				data: makeVoices(50, 200),
+				has_more: false,
+				next_page: null,
+			});
+
+		const voices = await collectVoices(stubClient, {}, 250);
+
+		expect(voices).toHaveLength(250);
+		expect(voices[0].id).toBe("v0");
+		expect(voices[249].id).toBe("v249");
+		expect(mockGet).toHaveBeenCalledTimes(3);
+		expect(mockGet).toHaveBeenNthCalledWith(
+			2,
+			"/voices",
+			expect.objectContaining({
+				query: expect.objectContaining({ starting_after: "cur1" }),
+			}),
+		);
+		expect(mockGet).toHaveBeenNthCalledWith(
+			3,
+			"/voices",
+			expect.objectContaining({
+				query: expect.objectContaining({ starting_after: "cur2" }),
+			}),
+		);
+	});
+
+	it("stops at the limit even when has_more is true", async () => {
+		mockGet.mockResolvedValue({
+			data: makeVoices(100),
+			has_more: true,
+			next_page: "cur1",
+		});
+
+		const voices = await collectVoices(stubClient, {}, 100);
+
+		expect(voices).toHaveLength(100);
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
+
+	it("stops when has_more becomes false mid-pagination", async () => {
+		mockGet
+			.mockResolvedValueOnce({
+				data: makeVoices(100),
+				has_more: true,
+				next_page: "cur1",
+			})
+			.mockResolvedValueOnce({
+				data: makeVoices(40, 100),
+				has_more: false,
+				next_page: null,
+			});
+
+		const voices = await collectVoices(stubClient, {}, 250);
+
+		expect(voices).toHaveLength(140);
+		expect(mockGet).toHaveBeenCalledTimes(2);
+	});
+
+	it("passes filter params through on every page request", async () => {
+		mockGet
+			.mockResolvedValueOnce({
+				data: makeVoices(100),
+				has_more: true,
+				next_page: "cur1",
+			})
+			.mockResolvedValueOnce({
+				data: makeVoices(10, 100),
+				has_more: false,
+				next_page: null,
+			});
+
+		const params = {
+			q: "warm",
+			gender: "feminine" as const,
+			language: "en",
+			expand: ["preview_file_url" as const],
+		};
+		await collectVoices(stubClient, params, 250);
+
+		for (const [, options] of mockGet.mock.calls) {
+			expect(options.query).toMatchObject(params);
+		}
+	});
+});
 
 describe("CartesiaTTS", () => {
 	beforeEach(() => {
@@ -109,8 +240,8 @@ describe("CartesiaTTS", () => {
 
 	describe("search", () => {
 		it("returns mapped voice info", async () => {
-			mockVoicesList.mockResolvedValue({
-				data: [
+			mockGet.mockResolvedValue(
+				makePage([
 					{
 						id: "v1",
 						name: "English Voice",
@@ -127,14 +258,11 @@ describe("CartesiaTTS", () => {
 						description: "Neutral",
 						preview_file_url: null,
 					},
-				],
-			});
+				]),
+			);
 
 			const provider = new CartesiaTTS("test-key");
-			const voices = await provider.search({
-				age: "adult",
-				language: "en",
-			});
+			const voices = await provider.search({ language: "en" });
 
 			expect(voices).toEqual([
 				{
@@ -154,39 +282,37 @@ describe("CartesiaTTS", () => {
 					previewUrl: undefined,
 				},
 			]);
-			expect(mockVoicesList).toHaveBeenCalledWith({
-				q: "adult",
-				gender: undefined,
-				limit: 100,
-				expand: ["preview_file_url"],
-			});
+			expect(mockGet).toHaveBeenCalledWith(
+				"/voices",
+				expect.objectContaining({
+					query: expect.objectContaining({
+						limit: 100,
+						expand: ["preview_file_url"],
+					}),
+				}),
+			);
 		});
 
 		it("passes gender filter and always fetches a full page from upstream", async () => {
-			mockVoicesList.mockResolvedValue({ data: [] });
+			mockGet.mockResolvedValue(makePage([]));
 
 			const provider = new CartesiaTTS("test-key");
 			await provider.search({ gender: "masculine", limit: 5 });
 
-			expect(mockVoicesList).toHaveBeenCalledWith({
-				q: undefined,
-				gender: "masculine",
-				limit: 100,
-				expand: ["preview_file_url"],
-			});
+			expect(mockGet).toHaveBeenCalledWith(
+				"/voices",
+				expect.objectContaining({
+					query: expect.objectContaining({
+						gender: "masculine",
+						limit: 100,
+						expand: ["preview_file_url"],
+					}),
+				}),
+			);
 		});
 
 		it("applies limit after upstream + ranking", async () => {
-			mockVoicesList.mockResolvedValue({
-				data: Array.from({ length: 10 }, (_, i) => ({
-					id: `v${i}`,
-					name: `Voice ${i}`,
-					language: "en",
-					gender: "feminine",
-					description: "voice",
-					preview_file_url: null,
-				})),
-			});
+			mockGet.mockResolvedValue(makePage(makeVoices(10)));
 
 			const provider = new CartesiaTTS("test-key");
 			const result = await provider.search({ limit: 3 });
@@ -194,9 +320,29 @@ describe("CartesiaTTS", () => {
 			expect(result).toHaveLength(3);
 		});
 
+		it("aggregates voices across multiple pages", async () => {
+			mockGet
+				.mockResolvedValueOnce({
+					data: makeVoices(100),
+					has_more: true,
+					next_page: "cur1",
+				})
+				.mockResolvedValueOnce({
+					data: makeVoices(50, 100),
+					has_more: false,
+					next_page: null,
+				});
+
+			const provider = new CartesiaTTS("test-key");
+			const voices = await provider.search({});
+
+			expect(voices).toHaveLength(150);
+			expect(mockGet).toHaveBeenCalledTimes(2);
+		});
+
 		it("re-ranks voices by description similarity when semantic descriptors provided", async () => {
-			mockVoicesList.mockResolvedValue({
-				data: [
+			mockGet.mockResolvedValue(
+				makePage([
 					{
 						id: "v1",
 						name: "Cold",
@@ -213,15 +359,13 @@ describe("CartesiaTTS", () => {
 						description: "warm british narrator",
 						preview_file_url: null,
 					},
-				],
-			});
-			mockEmbed.mockResolvedValue({ embedding: [1, 0] });
-			mockEmbedMany.mockResolvedValue({
-				embeddings: [
-					[0, 1],
-					[1, 0],
-				],
-			});
+				]),
+			);
+			// call order: query, "Cold: cold robotic voice", "Warm: warm british narrator"
+			mockEmbed
+				.mockResolvedValueOnce({ embedding: [1, 0] })
+				.mockResolvedValueOnce({ embedding: [0, 1] })
+				.mockResolvedValueOnce({ embedding: [1, 0] });
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ description: "warm british" });
@@ -230,16 +374,11 @@ describe("CartesiaTTS", () => {
 			expect(mockEmbed).toHaveBeenCalledWith(
 				expect.objectContaining({ value: "warm british" }),
 			);
-			expect(mockEmbedMany).toHaveBeenCalledWith(
-				expect.objectContaining({
-					values: ["cold robotic voice", "warm british narrator"],
-				}),
-			);
 		});
 
 		it("skips embedding when no semantic descriptors provided", async () => {
-			mockVoicesList.mockResolvedValue({
-				data: [
+			mockGet.mockResolvedValue(
+				makePage([
 					{
 						id: "v1",
 						name: "A",
@@ -256,8 +395,8 @@ describe("CartesiaTTS", () => {
 						description: "second",
 						preview_file_url: null,
 					},
-				],
-			});
+				]),
+			);
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ gender: "masculine" });
@@ -268,7 +407,7 @@ describe("CartesiaTTS", () => {
 		});
 
 		it("returns early without embedding when semantic query exists but no voices match", async () => {
-			mockVoicesList.mockResolvedValue({ data: [] });
+			mockGet.mockResolvedValue(makePage([]));
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ description: "warm narrator" });
@@ -279,8 +418,8 @@ describe("CartesiaTTS", () => {
 		});
 
 		it("falls back to unranked results when embedding throws", async () => {
-			mockVoicesList.mockResolvedValue({
-				data: [
+			mockGet.mockResolvedValue(
+				makePage([
 					{
 						id: "v1",
 						name: "A",
@@ -297,8 +436,8 @@ describe("CartesiaTTS", () => {
 						description: "second",
 						preview_file_url: null,
 					},
-				],
-			});
+				]),
+			);
 			mockEmbed.mockRejectedValue(new Error("missing api key"));
 			mockEmbedMany.mockResolvedValue({
 				embeddings: [
@@ -313,41 +452,18 @@ describe("CartesiaTTS", () => {
 			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
 		});
 
-		it("filters voices by language", async () => {
-			mockVoicesList.mockResolvedValue({
-				data: [
-					{
-						id: "v1",
-						name: "English Voice",
-						language: "en",
-						gender: "feminine",
-						description: "English",
-						preview_file_url: null,
-					},
-					{
-						id: "v2",
-						name: "French Voice",
-						language: "fr",
-						gender: "masculine",
-						description: "French",
-						preview_file_url: null,
-					},
-					{
-						id: "v3",
-						name: "Another English",
-						language: "en",
-						gender: "masculine",
-						description: "Also English",
-						preview_file_url: null,
-					},
-				],
-			});
+		it("passes language filter to the API", async () => {
+			mockGet.mockResolvedValue(makePage(makeVoices(5)));
 
 			const provider = new CartesiaTTS("test-key");
-			const voices = await provider.search({ language: "en" });
+			await provider.search({ language: "en" });
 
-			expect(voices).toHaveLength(2);
-			expect(voices.map((v) => v.id)).toEqual(["v1", "v3"]);
+			expect(mockGet).toHaveBeenCalledWith(
+				"/voices",
+				expect.objectContaining({
+					query: expect.objectContaining({ language: "en" }),
+				}),
+			);
 		});
 	});
 });
