@@ -12,6 +12,7 @@
 		"db:reset": "supabase db reset",
 		"test": "vitest",
 		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
 		"typecheck": "tsc --noEmit",
 		"format:check": "prettier --check .",
 		"remotion:studio": "remotion studio",

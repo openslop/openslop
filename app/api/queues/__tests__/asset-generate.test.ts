@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { AssetQueueMessage } from "@/lib/api/jobs";
 
 vi.mock("@vercel/queue", () => ({
 	handleCallback: (fn: unknown) => fn,
@@ -22,12 +23,12 @@ vi.mock("@/lib/api/logger", () => ({
 }));
 
 const { POST } = await import("@/app/api/queues/asset-generate/route");
-const process = POST as unknown as (message: {
-	jobId: string;
-	connectorType: string;
-}) => Promise<void>;
+// The @vercel/queue mock makes handleCallback return the raw callback
+const processMessage = POST as unknown as (
+	message: AssetQueueMessage,
+) => Promise<void>;
 
-const message = { jobId: "job-1", connectorType: "image" };
+const message: AssetQueueMessage = { jobId: "job-1", connectorType: "image" };
 
 describe("asset-generate queue worker", () => {
 	beforeEach(() => {
@@ -38,7 +39,7 @@ describe("asset-generate queue worker", () => {
 	it("skips jobs that already completed", async () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "completed" });
 
-		await process(message);
+		await processMessage(message);
 
 		expect(mockGetJobHandler).not.toHaveBeenCalled();
 		expect(mockUpdateJob).not.toHaveBeenCalled();
@@ -47,7 +48,7 @@ describe("asset-generate queue worker", () => {
 	it("skips jobs that already failed", async () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "failed" });
 
-		await process(message);
+		await processMessage(message);
 
 		expect(mockGetJobHandler).not.toHaveBeenCalled();
 		expect(mockUpdateJob).not.toHaveBeenCalled();
@@ -57,7 +58,7 @@ describe("asset-generate queue worker", () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "pending" });
 		mockGetJobHandler.mockReturnValue(undefined);
 
-		await expect(process(message)).rejects.toThrow(
+		await expect(processMessage(message)).rejects.toThrow(
 			"No job handler registered for image",
 		);
 		expect(mockUpdateJob).not.toHaveBeenCalled();
@@ -73,7 +74,7 @@ describe("asset-generate queue worker", () => {
 		};
 		mockGetJobHandler.mockReturnValue(handler);
 
-		await process(message);
+		await processMessage(message);
 
 		expect(handler.process).toHaveBeenCalledWith(job);
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(1, "job-1", {
@@ -93,7 +94,7 @@ describe("asset-generate queue worker", () => {
 				.mockResolvedValue({ kind: "pending", metadata: { poll: "token" } }),
 		});
 
-		await process(message);
+		await processMessage(message);
 
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			metadata: { poll: "token" },
@@ -106,7 +107,7 @@ describe("asset-generate queue worker", () => {
 			process: vi.fn().mockRejectedValue(new Error("provider down")),
 		});
 
-		await expect(process(message)).rejects.toThrow("provider down");
+		await expect(processMessage(message)).rejects.toThrow("provider down");
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "failed",
 			error: expect.stringContaining("provider down"),
