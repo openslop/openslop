@@ -27,8 +27,9 @@ export function isStaleResult(
 	currentInputs: GenerationInputs,
 ): boolean {
 	return (
-		isNil(snapshot.resultInputs) ||
-		!isEqual(currentInputs, snapshot.resultInputs)
+		!isActive(snapshot.status) &&
+		(isNil(snapshot.resultInputs) ||
+			!isEqual(currentInputs, snapshot.resultInputs))
 	);
 }
 
