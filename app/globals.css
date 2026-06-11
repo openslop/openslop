@@ -71,37 +71,6 @@
 	--shadow-glow: 0 0 40px var(--color-glow-violet);
 }
 
-@keyframes moveHorizontal {
-	0% {
-		transform: translateX(-20%) translateY(-10%);
-	}
-	50% {
-		transform: translateX(20%) translateY(-5%);
-	}
-	100% {
-		transform: translateX(-20%) translateY(-10%);
-	}
-}
-
-@keyframes moveVertical {
-	0% {
-		transform: translateY(-25%);
-	}
-	50% {
-		transform: translateY(25%);
-	}
-	100% {
-		transform: translateY(-25%);
-	}
-}
-
-.animate-first {
-	animation: moveVertical 25s ease infinite;
-}
-.animate-fourth {
-	animation: moveHorizontal 20s ease infinite;
-}
-
 @keyframes fadeInUp {
 	from {
 		opacity: 0;
@@ -153,8 +122,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.animate-first,
-	.animate-fourth,
 	.animate-fadeInUp,
 	.shimmer-surface {
 		animation: none;
