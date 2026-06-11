@@ -13,6 +13,7 @@
 		"test": "vitest",
 		"test:run": "vitest run",
 		"typecheck": "tsc --noEmit",
+		"knip": "knip",
 		"format:check": "prettier --check .",
 		"remotion:studio": "remotion studio",
 		"deploy:remotion-function": "bun scripts/deploy-remotion-function.ts",

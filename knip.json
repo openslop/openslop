@@ -1,14 +1,16 @@
 {
 	"$schema": "https://unpkg.com/knip@latest/schema.json",
 	"entry": [
-		"app/**/{page,layout,route,error,not-found,loading}.tsx",
-		"app/**/route.ts",
 		"remotion/index.ts",
 		"remotion/Root.tsx",
 		"remotion.config.ts",
 		"scripts/**"
 	],
-	"ignore": ["components/ui/**", "lib/connectors/**", "lib/gateway/**"],
+	"ignore": ["components/ui/**"],
+	"ignoreIssues": {
+		"lib/connectors/**": ["exports", "types"],
+		"lib/gateway/**": ["exports", "types"]
+	},
 	"ignoreExportsUsedInFile": true,
 	"ignoreDependencies": ["turbo"],
 	"rules": {
