@@ -19,8 +19,6 @@ export default function UserProfile() {
 	const user = useUser();
 	const bgTheme = useBackgroundTheme((s) => s.theme);
 	const toggleBgTheme = useBackgroundTheme((s) => s.toggle);
-	// Render the default (dark) through SSR + the first hydration pass to avoid a
-	// mismatch when a persisted preference differs from the server default.
 	const isDark = !useHydrated() || bgTheme === "dark";
 	const email = user.email ?? "";
 	const avatarUrl: string | undefined = user.user_metadata?.avatar_url;

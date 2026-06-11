@@ -148,8 +148,6 @@ function PurpleBackground() {
 
 export default function BackgroundGradientAnimation() {
 	const theme = useBackgroundTheme((s) => s.theme);
-	// Render the default (dark) during SSR and the first hydration pass to avoid
-	// a mismatch, then honor the persisted preference.
 	const hydrated = useHydrated();
 
 	return hydrated && theme === "purple" ? (
