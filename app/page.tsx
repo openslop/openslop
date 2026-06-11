@@ -62,7 +62,7 @@ export default async function Home() {
 				</>
 			}
 		>
-			<p className="text-white/70 text-sm font-medium font-display">
+			<p className="text-white/70 text-sm font-medium font-body">
 				Have an access code?
 			</p>
 

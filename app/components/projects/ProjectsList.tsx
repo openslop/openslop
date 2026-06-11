@@ -62,7 +62,7 @@ export default function ProjectsList({
 			<div className="max-w-5xl mx-auto px-6 pt-20 pb-16">
 				<header className="flex items-end justify-between mb-10">
 					<div>
-						<h1 className="font-display text-4xl tracking-tight">My Slop</h1>
+						<h1 className="font-body text-4xl tracking-tight">My Slop</h1>
 						<p className="text-white/60 text-sm mt-1">
 							{projects.length === 0
 								? "No projects yet — start your first slop."

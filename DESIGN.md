@@ -25,13 +25,15 @@
 
 ## Color
 
+> Token values are canonical in `app/globals.css` (the `@theme` block). This section is the usage rules — when and where each color is allowed — not a second source for the literal values. If a value changes, change it in `@theme`; this doc names tokens, not hex.
+
 - **Approach:** Restrained. One accent + neutrals; color is rare and meaningful.
-- **Canvas:** `#0a0a0a` (near-black).
-- **Surfaces (glass):** fill `rgba(255,255,255,0.05)`, border `rgba(255,255,255,0.10)`, `backdrop-blur`.
-- **Accent (violet):** `#8b5cf6` (primary), `#a78bfa` (soft) — active Generate, focus rings, playhead, primary action only.
-- **Glow:** `#371e64` / `rgba(55,30,100,0.55)` — rare earned highlight (e.g. the live Generate state), never ambient.
-- **Text:** `rgba(255,255,255,0.80)` body, `0.40` muted, `0.30` placeholder.
-- **Media-type palette (signature — every element type reads at a glance):** character `#fbbf24`, image `#22d3ee`, animated `#e879f9`, clip `#818cf8`, music `#a78bfa`, sound `#34d399`, narration `#9ca3af`. Use as small tags/borders on storyboard scene rows. Keep disciplined so it reads, not confetti.
+- **Canvas:** `--color-canvas` (near-black).
+- **Surfaces (glass):** `--color-glass-fill`, `--color-glass-border`, `backdrop-blur`.
+- **Accent (violet):** `--color-accent-violet` (primary), `--color-accent-violet-soft` (soft) — active Generate, focus rings, playhead, primary action only.
+- **Glow:** `--color-glow-violet` / `--shadow-glow` — rare earned highlight (e.g. the live Generate state), never ambient.
+- **Text:** white at `0.80` body, `0.40` muted, `0.30` placeholder.
+- **Media-type palette (signature — every element type reads at a glance):** `--color-media-character`, `--color-media-image`, `--color-media-animated`, `--color-media-clip`, `--color-media-music`, `--color-media-sound`, `--color-media-narration`. Use as small tags/borders on storyboard scene rows. Keep disciplined so it reads, not confetti.
 - **Dark mode:** Dark is the only mode. The stock light `:root` palette in `globals.css` is unreachable (html forces `#0a0a0a`); remove it or commit to dark-only.
 
 ## Spacing

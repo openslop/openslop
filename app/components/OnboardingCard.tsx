@@ -33,7 +33,7 @@ export default function OnboardingCard({
 				{icon ?? <OpenSlopLogo className="w-14 h-auto text-white" />}
 
 				{/* Heading */}
-				<h1 className="text-2xl sm:text-3xl font-light text-white text-center font-display text-wrap-balance">
+				<h1 className="text-2xl sm:text-3xl font-light text-white text-center font-body text-wrap-balance">
 					{heading}
 				</h1>
 
@@ -41,16 +41,14 @@ export default function OnboardingCard({
 				{extra}
 
 				{/* Subtitle */}
-				<p className="text-white/50 text-center text-xs sm:text-sm font-light leading-relaxed font-display">
+				<p className="text-white/50 text-center text-xs sm:text-sm font-light leading-relaxed font-body">
 					{subtitle}
 				</p>
 
 				{children}
 
 				{/* Footer */}
-				<p className="text-white/40 text-xs sm:text-sm font-display">
-					{footer}
-				</p>
+				<p className="text-white/40 text-xs sm:text-sm font-body">{footer}</p>
 			</div>
 		</div>
 	);

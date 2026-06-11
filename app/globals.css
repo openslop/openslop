@@ -54,6 +54,7 @@
 	--color-accent-violet: #8b5cf6;
 	--color-accent-violet-soft: #a78bfa;
 	--color-glow-violet: rgba(55, 30, 100, 0.55);
+	--color-panel-violet: #2d2040;
 	--color-glass-fill: rgba(255, 255, 255, 0.05);
 	--color-glass-border: rgba(255, 255, 255, 0.1);
 
@@ -163,11 +164,6 @@
 html {
 	background-color: #0a0a0a;
 	color-scheme: dark;
-}
-
-/* Display utility — consolidated onto Satoshi (Google Sans Flex dropped per DESIGN.md). */
-.font-display {
-	font-family: "Satoshi", sans-serif;
 }
 
 .font-title {
