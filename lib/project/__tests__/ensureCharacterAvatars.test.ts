@@ -94,7 +94,7 @@ describe("ensureCharacterAvatars", () => {
 		]);
 	});
 
-	it("skips a legacy avatar (has avatarUrl but no recorded source appearance)", () => {
+	it("skips a character that already has an avatarUrl", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
@@ -121,90 +121,20 @@ describe("ensureCharacterAvatars", () => {
 		expect(lastJobs()).toEqual([]);
 	});
 
-	it("skips an avatar whose inputs match its recorded signature", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.updateMetadata({
-				characters: {
-					Alice: {
-						appearance: "A girl in red",
-						avatarUrl: "https://existing.com/alice.png",
-						avatarInputsSignature: avatarInputsSignature(
-							"A girl in red",
-							undefined,
-							[],
-						),
-					},
-				},
-			});
-
-		ensureCharacterAvatars(queue, PROJECT_ID, registry);
-
-		expect(lastJobs()).toEqual([]);
-	});
-
-	it("regenerates an avatar whose appearance changed from its recorded signature (survives reload)", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.updateMetadata({
-				characters: {
-					Alice: {
-						appearance: "A girl in blue, now with short hair",
-						avatarUrl: "https://existing.com/alice.png",
-						avatarInputsSignature: avatarInputsSignature(
-							"A girl in red",
-							undefined,
-							[],
-						),
-					},
-				},
-			});
-
-		ensureCharacterAvatars(queue, PROJECT_ID, registry);
-
-		expect(lastJobs().map((j) => j.elementId)).toEqual([
-			characterAvatarElementId("Alice"),
-		]);
-	});
-
-	it("regenerates an avatar when the project art style changed (not just appearance)", () => {
+	it("does not auto-regenerate when inputs change; only backfills missing avatars", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
 				style: "watercolor",
 				characters: {
+					// Appearance and art style both differ from the recorded signature,
+					// but the avatar exists, so it is left alone. Regeneration is manual.
 					Alice: {
-						appearance: "A girl in red",
+						appearance: "A girl in blue",
 						avatarUrl: "https://existing.com/alice.png",
-						// Signature captured under the old "anime" style.
 						avatarInputsSignature: avatarInputsSignature(
 							"A girl in red",
 							"anime",
-							[],
-						),
-					},
-				},
-			});
-
-		ensureCharacterAvatars(queue, PROJECT_ID, registry);
-
-		expect(lastJobs().map((j) => j.elementId)).toEqual([
-			characterAvatarElementId("Alice"),
-		]);
-	});
-
-	it("never auto-regenerates a user-uploaded avatar, even when appearance changed", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.updateMetadata({
-				characters: {
-					Alice: {
-						appearance: "A girl in blue",
-						avatarUrl: "https://upload.com/alice.png",
-						avatarUploaded: true,
-						avatarInputsSignature: avatarInputsSignature(
-							"A girl in red",
-							undefined,
 							[],
 						),
 					},

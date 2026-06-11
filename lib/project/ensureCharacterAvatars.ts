@@ -60,23 +60,13 @@ export function ensureCharacterAvatars(
 	projectId: string,
 	registry: ConnectorRegistry,
 ): void {
-	const { metadata, referenceImages } = getProjectStore(projectId).getState();
+	// Backfill avatars for characters that don't have one yet. Avatars are never
+	// auto-regenerated on an input change — that's a deliberate credit decision.
+	// Staleness is surfaced in the character editor (see isAvatarStale) and the
+	// user pulls the trigger to regenerate.
+	const { metadata } = getProjectStore(projectId).getState();
 	const jobs: GenerationJob[] = Object.entries(metadata.characters)
-		.filter(([, ch]) => {
-			if (!ch.appearance) return false;
-			if (ch.avatarUploaded) return false; // user-owned upload — never auto-regen
-			if (!ch.avatarUrl) return true; // never generated → generate
-			// Regenerate when any input that drives avatar generation changed
-			// (appearance, art style, or reference images), compared via the
-			// persisted signature so it survives reloads. Legacy avatars with no
-			// recorded signature are left alone until a manual regenerate stamps
-			// one, after which they rejoin this happy path.
-			if (ch.avatarInputsSignature === undefined) return false;
-			return (
-				ch.avatarInputsSignature !==
-				avatarInputsSignature(ch.appearance, metadata.style, referenceImages)
-			);
-		})
+		.filter(([, ch]) => !ch.avatarUrl && ch.appearance)
 		.map(([name]) => buildCharacterAvatarJob(projectId, name, registry));
 	queue.enqueueAll(jobs);
 }

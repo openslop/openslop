@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import {
 	DialogContent,
 	DialogDescription,
@@ -20,13 +20,11 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
-import { isStaleResult } from "@/lib/generation/queue";
 import {
 	buildCharacterAvatarJob,
-	characterAvatarElement,
 	characterAvatarElementId,
 } from "@/lib/project/ensureCharacterAvatars";
+import { isAvatarStale } from "@/lib/project/avatarInputs";
 import { useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
@@ -66,11 +64,14 @@ function CharacterEditDialogBody({
 	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
 	const metadata = useProjectStore(projectId, (s) => s.metadata);
+	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
 	const character = metadata.characters[name];
 	const setCharacter = useProjectStore(projectId, (s) => s.setCharacter);
 	const removeCharacter = useProjectStore(projectId, (s) => s.removeCharacter);
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [closeConfirm, setCloseConfirm] = useState(false);
+	const [leftStale, setLeftStale] = useState(false);
 
 	const avatarElementId = characterAvatarElementId(name);
 	const avatarSnapshot = useQueueSelector((q) =>
@@ -101,16 +102,17 @@ function CharacterEditDialogBody({
 		queue.enqueue(buildCharacterAvatarJob(projectId, name, connectorConfig));
 	};
 
+	// Stale = the generated avatar no longer matches its inputs. Durable across
+	// reloads (persisted signature), and suppressed while a regeneration is in
+	// flight.
 	const isStale =
-		!character.avatarUploaded &&
-		!!avatarSnapshot.result &&
-		isStaleResult(
-			avatarSnapshot,
-			getGenerationInputs(
-				characterAvatarElement(name, character.appearance),
-				metadata,
-			),
-		);
+		avatarSnapshot.status !== "generating" &&
+		isAvatarStale(character, metadata.style, referenceImages);
+
+	// While stale, intercept user-initiated closes (escape, outside-click, the X)
+	// to offer a regenerate before leaving. "Leave stale" opts out for this turn.
+	const blockClose = isStale && !leftStale;
+	const requestClose = () => (blockClose ? setCloseConfirm(true) : onClose());
 
 	const handleDelete = () => {
 		if (!confirmDelete) {
@@ -123,7 +125,30 @@ function CharacterEditDialogBody({
 	};
 
 	return (
-		<DialogContent className="max-w-2xl">
+		<DialogContent
+			className="relative max-w-2xl"
+			showCloseButton={false}
+			onEscapeKeyDown={(e) => {
+				if (blockClose) {
+					e.preventDefault();
+					setCloseConfirm(true);
+				}
+			}}
+			onInteractOutside={(e) => {
+				if (blockClose) {
+					e.preventDefault();
+					setCloseConfirm(true);
+				}
+			}}
+		>
+			<button
+				type="button"
+				onClick={requestClose}
+				aria-label="Close"
+				className="absolute right-3 top-3 z-10 rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-accent-violet/50"
+			>
+				<X className="h-4 w-4" />
+			</button>
 			<DialogHeader className="shrink-0">
 				<DialogTitle>{name}</DialogTitle>
 				<DialogDescription>
@@ -131,6 +156,21 @@ function CharacterEditDialogBody({
 					appearance.
 				</DialogDescription>
 			</DialogHeader>
+
+			{isStale && (
+				<div className="flex shrink-0 items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+					<span className="text-[12px] text-amber-100/90">
+						This avatar no longer matches the appearance.
+					</span>
+					<button
+						type="button"
+						onClick={regenerateAvatar}
+						className="shrink-0 rounded-md bg-accent-violet px-2.5 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
+					>
+						Regenerate
+					</button>
+				</div>
+			)}
 
 			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
 				<div className="grid gap-4 sm:grid-cols-2">
@@ -199,6 +239,49 @@ function CharacterEditDialogBody({
 					{confirmDelete ? "Confirm delete" : "Delete"}
 				</button>
 			</DialogFooter>
+
+			{closeConfirm && (
+				<div className="absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-black/60 p-4 backdrop-blur-sm">
+					<div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#141414] p-4 shadow-xl">
+						<p className="text-sm font-medium text-white/90">
+							Regenerate avatar before leaving?
+						</p>
+						<p className="mt-1 text-[12px] text-white/50">
+							The appearance changed, so {name}&apos;s avatar is out of date.
+							Your edits are already saved.
+						</p>
+						<div className="mt-4 flex items-center justify-end gap-2">
+							<button
+								type="button"
+								onClick={() => setCloseConfirm(false)}
+								className="rounded-md px-2.5 py-1 text-[12px] text-white/60 transition-colors hover:text-white"
+							>
+								Keep editing
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									setLeftStale(true);
+									onClose();
+								}}
+								className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] text-white/70 transition-colors hover:bg-white/10"
+							>
+								Leave stale
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									regenerateAvatar();
+									onClose();
+								}}
+								className="rounded-md bg-accent-violet px-3 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
+							>
+								Regenerate
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</DialogContent>
 	);
 }
