@@ -5,6 +5,7 @@ export function createCharacterAvatarPlugin(
 	projectId: string,
 	name: string,
 	appearance: string,
+	inputsSignature: string,
 ): ConnectorPlugin<{ prompt: string }, AssetResult> {
 	const store = () => getProjectStore(projectId).getState();
 	return {
@@ -24,13 +25,13 @@ export function createCharacterAvatarPlugin(
 			const state = store();
 			const existing = state.metadata.characters[name];
 			if (!existing) return result;
-			// Record the appearance this image was actually generated from (the
-			// snapshot the job carried), not the live value — which may have been
-			// edited mid-flight — so the recorded source is always honest.
+			// Record the signature of the inputs this image was actually generated
+			// from (the snapshot the job carried), not the live values which may
+			// have been edited mid-flight, so the recorded source is always honest.
 			state.setCharacter(name, {
 				...existing,
 				avatarUrl: result.imageUrl,
-				avatarSourceAppearance: appearance,
+				avatarInputsSignature: inputsSignature,
 			});
 			return result;
 		},

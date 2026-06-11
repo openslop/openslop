@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GenerationQueue, type GenerationJob } from "@/lib/generation/queue";
+import { avatarInputsSignature } from "../avatarInputs";
 import { clearProjectStore, getProjectStore } from "../store";
 import {
 	buildCharacterAvatarJob,
@@ -120,7 +121,7 @@ describe("ensureCharacterAvatars", () => {
 		expect(lastJobs()).toEqual([]);
 	});
 
-	it("skips an avatar whose appearance matches its recorded source", () => {
+	it("skips an avatar whose inputs match its recorded signature", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
@@ -128,7 +129,11 @@ describe("ensureCharacterAvatars", () => {
 					Alice: {
 						appearance: "A girl in red",
 						avatarUrl: "https://existing.com/alice.png",
-						avatarSourceAppearance: "A girl in red",
+						avatarInputsSignature: avatarInputsSignature(
+							"A girl in red",
+							undefined,
+							[],
+						),
 					},
 				},
 			});
@@ -138,7 +143,7 @@ describe("ensureCharacterAvatars", () => {
 		expect(lastJobs()).toEqual([]);
 	});
 
-	it("regenerates an avatar whose appearance changed from its recorded source (survives reload)", () => {
+	it("regenerates an avatar whose appearance changed from its recorded signature (survives reload)", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.updateMetadata({
@@ -146,7 +151,37 @@ describe("ensureCharacterAvatars", () => {
 					Alice: {
 						appearance: "A girl in blue, now with short hair",
 						avatarUrl: "https://existing.com/alice.png",
-						avatarSourceAppearance: "A girl in red",
+						avatarInputsSignature: avatarInputsSignature(
+							"A girl in red",
+							undefined,
+							[],
+						),
+					},
+				},
+			});
+
+		ensureCharacterAvatars(queue, PROJECT_ID, registry);
+
+		expect(lastJobs().map((j) => j.elementId)).toEqual([
+			characterAvatarElementId("Alice"),
+		]);
+	});
+
+	it("regenerates an avatar when the project art style changed (not just appearance)", () => {
+		getProjectStore(PROJECT_ID)
+			.getState()
+			.updateMetadata({
+				style: "watercolor",
+				characters: {
+					Alice: {
+						appearance: "A girl in red",
+						avatarUrl: "https://existing.com/alice.png",
+						// Signature captured under the old "anime" style.
+						avatarInputsSignature: avatarInputsSignature(
+							"A girl in red",
+							"anime",
+							[],
+						),
 					},
 				},
 			});
@@ -167,7 +202,11 @@ describe("ensureCharacterAvatars", () => {
 						appearance: "A girl in blue",
 						avatarUrl: "https://upload.com/alice.png",
 						avatarUploaded: true,
-						avatarSourceAppearance: "A girl in red",
+						avatarInputsSignature: avatarInputsSignature(
+							"A girl in red",
+							undefined,
+							[],
+						),
 					},
 				},
 			});

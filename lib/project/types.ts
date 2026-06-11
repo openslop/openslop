@@ -46,9 +46,10 @@ export type MetadataCharacter = MetadataVoice & {
 	appearance: string;
 	avatarUrl?: string;
 	avatarUploaded?: boolean;
-	// The appearance the current avatarUrl was generated from. Used to detect a
-	// stale avatar across reloads (the in-memory generation queue is empty then).
-	avatarSourceAppearance?: string;
+	// Signature of the inputs the current avatarUrl was generated from (see
+	// avatarInputsSignature). Used to detect a stale avatar across reloads, when
+	// the in-memory generation queue is empty.
+	avatarInputsSignature?: string;
 };
 
 export type VideoSettings = {

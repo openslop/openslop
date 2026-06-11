@@ -16,9 +16,15 @@ export function buildCharacterAvatarPlugins(
 	projectId: string,
 	characterName: string,
 	appearance: string,
+	inputsSignature: string,
 ): ConnectorPlugin[] {
 	return [
-		createCharacterAvatarPlugin(projectId, characterName, appearance),
+		createCharacterAvatarPlugin(
+			projectId,
+			characterName,
+			appearance,
+			inputsSignature,
+		),
 		createArtStylePlugin(projectId),
 		createReferenceImagesPlugin(projectId),
 	];
