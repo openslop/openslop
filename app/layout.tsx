@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Instrument_Serif } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import BackgroundGradientAnimation from "./components/BackgroundGradientAnimation";
 import { GlobalErrorToaster } from "./components/GlobalErrorToaster";
 import { ToastErrorBoundary } from "./components/ToastErrorBoundary";
 
@@ -51,8 +50,6 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${instrumentSerif.variable} antialiased bg-[#0a0a0a]`}
 			>
-				<BackgroundGradientAnimation />
-
 				<div className="relative">
 					<ToastErrorBoundary>{children}</ToastErrorBoundary>
 				</div>
