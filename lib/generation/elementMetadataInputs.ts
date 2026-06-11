@@ -1,4 +1,5 @@
 import { compact } from "lodash";
+import { parseCharacterNames } from "@/lib/canvas/characterNames";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -18,11 +19,7 @@ const NONE: Record<string, string | number> = {};
 
 const characterAvatars: MetadataAttributes = (element, metadata) => {
 	const urls = compact(
-		compact(
-			(element.customAttributes?.characters ?? "")
-				.split(",")
-				.map((s) => s.trim()),
-		)
+		parseCharacterNames(element.customAttributes?.characters)
 			.sort()
 			.map((name) => metadata.characters[name]?.avatarUrl),
 	);
