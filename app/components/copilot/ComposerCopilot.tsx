@@ -61,9 +61,9 @@ function AttachMenu({
 	onSelectNarrator: () => void;
 }) {
 	const items = [
-		{ icon: ImagePlus, label: "Upload Reference Images", onClick: openPicker },
-		{ icon: User, label: "Create character", onClick: onCreateCharacter },
-		{ icon: Mic, label: "Select narrator voice", onClick: onSelectNarrator },
+		{ icon: ImagePlus, label: "Upload reference images", onSelect: openPicker },
+		{ icon: User, label: "Create character", onSelect: onCreateCharacter },
+		{ icon: Mic, label: "Select narrator voice", onSelect: onSelectNarrator },
 	];
 
 	return (
@@ -87,10 +87,10 @@ function AttachMenu({
 				align="start"
 				className="min-w-36 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
 			>
-				{items.map(({ icon: Icon, label, onClick }) => (
+				{items.map(({ icon: Icon, label, onSelect }) => (
 					<DropdownMenuItem
 						key={label}
-						onClick={onClick}
+						onSelect={onSelect}
 						className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
 					>
 						<Icon className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
