@@ -7,8 +7,8 @@ import {
 	type CanvasElementType,
 	type ParsedElement,
 } from "@/lib/canvas/types";
-import { OSMLSerializer } from "../utils/osmlSerializer";
-import { findNodeById, updateNodeText } from "../utils/editorOps";
+import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { findNodeById, updateNodeText } from "@/lib/canvas/editorOps";
 
 function shouldSkip(node: ParsedElement): boolean {
 	return (

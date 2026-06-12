@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("../../config/elementConfigs", () => ({
+vi.mock("../elementConfigs", () => ({
 	ELEMENT_CONFIGS: {
 		sound: {
 			type: "sound",

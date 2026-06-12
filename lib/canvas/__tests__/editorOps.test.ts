@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, Editor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { findNodeById, updateNodeText, setNodeAttrs } from "../utils/editorOps";
+import { findNodeById, updateNodeText, setNodeAttrs } from "../editorOps";
 
 function content(
 	type: CanvasContentElement["type"],

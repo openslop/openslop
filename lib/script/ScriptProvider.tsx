@@ -14,7 +14,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import { getProjectStore } from "@/lib/project/store";
-import { useOSMLSerializer } from "@/app/components/canvas/hooks/useOSMLSerializer";
+import { useOSMLSerializer } from "@/lib/canvas/useOSMLSerializer";
 
 type ScriptControl = {
 	loading: boolean;

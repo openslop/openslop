@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isForeground } from "@/app/components/canvas/utils/guards";
+import { isForeground } from "@/lib/canvas/guards";
 import type { SceneElement } from "@/lib/canvas/types";
 import type { Sequence, VideoLayout } from "@/lib/video/types";
 import type { SeekThumbnail } from "./SeekTooltip";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Element } from "slate";
-import { makeNodeId, assignIdRecursively, stripIds } from "../utils/nodeUtils";
+import { makeNodeId, assignIdRecursively, stripIds } from "../nodeUtils";
 
 describe("makeNodeId", () => {
 	it("returns a 16-character string", () => {

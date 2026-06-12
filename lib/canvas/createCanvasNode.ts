@@ -3,8 +3,8 @@ import type {
 	CanvasElementType,
 } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
-import { ZERO_WIDTH_SPACE } from "../config/constants";
+import { ELEMENT_CONFIGS } from "./elementConfigs";
+import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";
 import { hydrateConnectorConfig } from "./hydrateConnectorConfig";
 

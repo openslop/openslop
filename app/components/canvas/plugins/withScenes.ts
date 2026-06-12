@@ -1,8 +1,8 @@
 import { Transforms, Path, Node } from "slate";
 import { CanvasEditor, SceneElement, SCENE_TYPE } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
-import { isContentElement, isForeground } from "../utils/guards";
-import { makeNodeId } from "../utils/nodeUtils";
+import { isContentElement, isForeground } from "@/lib/canvas/guards";
+import { makeNodeId } from "@/lib/canvas/nodeUtils";
 
 export const withScenes = (editor: CanvasEditor): CanvasEditor => {
 	const { normalizeNode } = editor;

@@ -3,7 +3,7 @@ import { createEditor, Editor, Element } from "slate";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
-vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
+vi.mock("@/lib/canvas/elementConfigs", () => ({
 	ELEMENT_CONFIGS: {
 		narration: {
 			type: "narration",
@@ -56,7 +56,7 @@ vi.mock("@/app/components/canvas/config/elementConfigs", () => ({
 	},
 }));
 
-vi.mock("@/app/components/canvas/utils/hydrateConnectorConfig", () => ({
+vi.mock("@/lib/canvas/hydrateConnectorConfig", () => ({
 	hydrateConnectorConfig: () => (node: Record<string, unknown>) => node,
 }));
 

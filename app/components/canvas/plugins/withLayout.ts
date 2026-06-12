@@ -1,6 +1,6 @@
 import type { CanvasEditor } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { insertElement } from "../utils/insertElement";
+import { insertElement } from "@/lib/canvas/insertElement";
 
 export const withLayout =
 	(connectorConfig: ConnectorRegistry) =>

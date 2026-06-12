@@ -3,9 +3,9 @@ import {
 	findNodeById,
 	setNodeAttrs,
 	updateNodeText,
-} from "@/app/components/canvas/utils/editorOps";
-import { insertElement } from "@/app/components/canvas/utils/insertElement";
-import { createCanvasNode } from "@/app/components/canvas/utils/createCanvasNode";
+} from "@/lib/canvas/editorOps";
+import { insertElement } from "@/lib/canvas/insertElement";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { RefineOp } from "./types";
 

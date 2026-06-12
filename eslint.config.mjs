@@ -16,6 +16,24 @@ const eslintConfig = defineConfig([
 		".remotion/**",
 	]),
 	{
+		// lib/ is the domain layer: it must never import from app/ (the UI layer)
+		files: ["lib/**/*.{ts,tsx}"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					patterns: [
+						{
+							group: ["@/app/**", "**/app/**"],
+							message:
+								"lib/ must not import from app/. Move shared domain logic into lib/.",
+						},
+					],
+				},
+			],
+		},
+	},
+	{
 		rules: {
 			// External fonts (Fontshare, Google Sans Flex) can't use next/font
 			"@next/next/no-page-custom-font": "off",
