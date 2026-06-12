@@ -10,19 +10,19 @@ A 10k-foot view of how OpenSlop fits together.
 
 ### 1 · Submit prompt
 
-The prompt/copilot UI hands the prompt to `ScriptProvider`, which calls the LLM connector through the gateway. `POST /api/v1/llm` streams the response back over SSE; the OSML stream parser turns the streamed tags into elements and inserts them into the SlateJS canvas live (scenes containing narration, image, clip, sound, music, and character elements).
+The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams OSML back over SSE; the parser inserts elements into the SlateJS canvas as they arrive.
 
 ### 2 · Generate
 
-**Generate All** collects every element whose inputs changed (stale detection) and schedules jobs on the client `GenerationQueue` — bounded concurrency (`DEFAULT_BATCH_SIZE` in `lib/generation/queue.ts`, currently 2), with a result cache keyed by inputs so unchanged elements restore instead of regenerating. Each job flows through the per-type connector (+ plugins) and the gateway to `POST /api/v1/{asset}`, which inserts a `pending` row in the `jobs` table and enqueues to the Vercel Queue (`asset-generate` topic). Queue workers process jobs concurrently: call the provider for the element type, upload the result files plus a `manifest.json` to Vercel Blob, and mark the job `completed` with the result. Music and sfx generations first check a Pinecone vector-similarity cache (other types may adopt it later). The client polls `GET /api/v1/{type}/{jobId}` until the asset URL comes back and the element preview updates.
+Stale elements are queued client-side (bounded by `DEFAULT_BATCH_SIZE`, results cached by inputs) and submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. Workers call the provider, upload results to Vercel Blob, and mark the job complete; the client polls until the asset URL lands in the element preview. Music and sfx check a Pinecone similarity cache first.
 
 ### 3 · Save / restore
 
-The project store (metadata, characters, reference images) and the generation queue's element snapshots are persisted into the `projects` row as JSONB, alongside the canvas script (OSML) as text. On load, the same snapshots rehydrate the store, canvas, and queue — generated results survive reloads and builds.
+Project state — script, store, and generation snapshots — persists into the `projects` row and rehydrates on load, so generated results survive reloads.
 
 ### 4 · Render
 
-**Export Video** calls `POST /api/render`, which fans the composition out across Remotion Lambdas (`renderMediaOnLambda`); chunks render in parallel and the final `video.mp4` lands in S3. The client polls `POST /api/render/progress` for progress and the output URL. Compositions live in `remotion/` and `lib/video/`; the Player is loaded client-side only.
+`POST /api/render` fans the composition out across Remotion Lambdas; chunks render in parallel into an MP4 in S3 while the client polls for progress. Compositions live in `remotion/` and `lib/video/`; the Player is loaded client-side only.
 
 ## Three layers
 
@@ -52,7 +52,7 @@ Supabase Postgres with RLS (users only read their own rows; queue workers use th
 | `projects`   | One row per project — `script` (text) plus `store` and `generation` snapshots (JSONB) |
 | `jobs`       | Async generation jobs — `pending → processing → completed \| failed`                  |
 
-Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/` next to a `manifest.json`, served as public CDN URLs consumed directly by `<img>`, `<audio>`, and `<video>`.
+Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, served as public CDN URLs.
 
 ## Auth
 
