@@ -1,14 +1,16 @@
 "use client";
 
-import { Check, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Editor } from "slate";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	GlassDropdownContent,
+	GlassDropdownItem,
+} from "@/app/components/GlassDropdown";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 import type { CanvasContentElement } from "@/lib/canvas/types";
@@ -75,26 +77,23 @@ function ProjectCharactersMenu({
 }) {
 	const names = useProjectCharacterNames();
 	return (
-		<DropdownMenuContent
+		<GlassDropdownContent
 			align="start"
-			className="min-w-32 max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+			className="min-w-32 max-h-64 overflow-y-auto"
 		>
 			{names.map((name) => (
-				<DropdownMenuItem
+				<GlassDropdownItem
 					key={name}
-					onClick={() => onSelect(name)}
-					onSelect={(e) => e.preventDefault()}
-					className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+					selected={selected.has(name)}
+					onSelect={(e) => {
+						e.preventDefault();
+						onSelect(name);
+					}}
 				>
-					<span className="w-3.5 shrink-0 flex items-center justify-center">
-						{selected.has(name) && (
-							<Check className="w-3 h-3 text-white" aria-hidden="true" />
-						)}
-					</span>
 					{name}
-				</DropdownMenuItem>
+				</GlassDropdownItem>
 			))}
-		</DropdownMenuContent>
+		</GlassDropdownContent>
 	);
 }
 

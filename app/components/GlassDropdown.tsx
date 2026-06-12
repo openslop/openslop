@@ -6,6 +6,53 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+/** Glass-chrome dropdown surface; pass sizing/z-index/scroll classes per use. */
+export function GlassDropdownContent({
+	className,
+	...props
+}: React.ComponentProps<typeof DropdownMenuContent>) {
+	return (
+		<DropdownMenuContent
+			className={cn(
+				"rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5",
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
+
+/**
+ * Menu item for glass dropdowns. Passing `selected` (even false) reserves a
+ * leading check column so option labels stay aligned across the menu.
+ */
+export function GlassDropdownItem({
+	selected,
+	className,
+	children,
+	...props
+}: React.ComponentProps<typeof DropdownMenuItem> & { selected?: boolean }) {
+	return (
+		<DropdownMenuItem
+			className={cn(
+				"cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10",
+				className,
+			)}
+			{...props}
+		>
+			{selected !== undefined && (
+				<span className="w-3.5 shrink-0 flex items-center justify-center">
+					{selected && (
+						<Check className="w-3 h-3 text-white" aria-hidden="true" />
+					)}
+				</span>
+			)}
+			{children}
+		</DropdownMenuItem>
+	);
+}
 
 export interface GlassDropdownOption<T extends string> {
 	value: T;
@@ -49,27 +96,18 @@ export default function GlassDropdown<T extends string>({
 					<ChevronDown className="w-2.5 h-2.5 text-white/70" />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side={side}
-				align={align}
-				className="min-w-32 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
-			>
+			<GlassDropdownContent side={side} align={align} className="min-w-32">
 				{options.map((option) => (
-					<DropdownMenuItem
+					<GlassDropdownItem
 						key={option.value}
-						onClick={() => onChange(option.value)}
-						className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+						selected={option.value === value}
+						onSelect={() => onChange(option.value)}
 					>
-						<span className="w-3.5 shrink-0 flex items-center justify-center">
-							{option.value === value && (
-								<Check className="w-3 h-3 text-white" aria-hidden="true" />
-							)}
-						</span>
 						{option.icon}
 						{option.label}
-					</DropdownMenuItem>
+					</GlassDropdownItem>
 				))}
-			</DropdownMenuContent>
+			</GlassDropdownContent>
 		</DropdownMenu>
 	);
 }

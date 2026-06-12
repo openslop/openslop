@@ -13,11 +13,11 @@ import {
 } from "lucide-react";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import GlassDropdown, {
+	GlassDropdownContent,
+	GlassDropdownItem,
 	type GlassDropdownOption,
 } from "@/app/components/GlassDropdown";
 import { CharacterEditModal } from "@/app/components/canvas/elements/character/CharacterEditModal";
@@ -82,22 +82,18 @@ function AttachMenu({
 					)}
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side="bottom"
-				align="start"
-				className="min-w-36 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
-			>
+			<GlassDropdownContent side="bottom" align="start" className="min-w-36">
 				{items.map(({ icon: Icon, label, onSelect }) => (
-					<DropdownMenuItem
+					<GlassDropdownItem
 						key={label}
 						onSelect={onSelect}
-						className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+						className="rounded-lg py-1.5"
 					>
 						<Icon className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
 						{label}
-					</DropdownMenuItem>
+					</GlassDropdownItem>
 				))}
-			</DropdownMenuContent>
+			</GlassDropdownContent>
 		</DropdownMenu>
 	);
 }

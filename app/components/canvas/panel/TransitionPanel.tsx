@@ -1,12 +1,14 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	GlassDropdownContent,
+	GlassDropdownItem,
+} from "@/app/components/GlassDropdown";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
@@ -50,25 +52,21 @@ export default function TransitionPanel() {
 						/>
 					</button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent
+				<GlassDropdownContent
 					align="start"
-					className="z-[90] min-w-[--radix-dropdown-menu-trigger-width] max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+					className="z-[90] min-w-[--radix-dropdown-menu-trigger-width] max-h-64 overflow-y-auto"
 				>
 					{TRANSITION_TYPES.map((value) => (
-						<DropdownMenuItem
+						<GlassDropdownItem
 							key={value}
-							onClick={() => setTransitionType(value)}
-							className="cursor-pointer rounded-md px-2 py-1 text-xs text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+							selected={value === transitionType}
+							onSelect={() => setTransitionType(value)}
+							className="rounded-md text-xs"
 						>
-							<span className="w-3.5 shrink-0 flex items-center justify-center">
-								{value === transitionType && (
-									<Check className="w-3 h-3 text-white" aria-hidden="true" />
-								)}
-							</span>
 							{LABELS[value]}
-						</DropdownMenuItem>
+						</GlassDropdownItem>
 					))}
-				</DropdownMenuContent>
+				</GlassDropdownContent>
 			</DropdownMenu>
 		</div>
 	);

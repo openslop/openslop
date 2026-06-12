@@ -2,10 +2,12 @@ import { GripVertical, Plus } from "lucide-react";
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	GlassDropdownContent,
+	GlassDropdownItem,
+} from "@/app/components/GlassDropdown";
 
 export interface InsertOption<K extends string = string> {
 	key: K;
@@ -40,16 +42,16 @@ export function SortableActions<K extends string>({
 							<Plus size={24} />
 						</button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent
+					<GlassDropdownContent
 						side="bottom"
 						align="start"
-						className="w-40 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-1"
+						className="w-40 p-1"
 					>
 						{options.map((option) => (
-							<DropdownMenuItem
+							<GlassDropdownItem
 								key={option.key}
-								onClick={() => onInsert(option.key)}
-								className="cursor-pointer rounded-lg py-2 text-white/70 hover:bg-white/10 hover:text-white focus:text-white focus:bg-white/10"
+								onSelect={() => onInsert(option.key)}
+								className="rounded-lg py-2 text-sm hover:bg-white/10"
 							>
 								<span
 									className={`${option.bgColor} inline-flex items-center justify-center rounded p-1 mr-1`}
@@ -57,9 +59,9 @@ export function SortableActions<K extends string>({
 									{option.icon}
 								</span>
 								{option.label}
-							</DropdownMenuItem>
+							</GlassDropdownItem>
 						))}
-					</DropdownMenuContent>
+					</GlassDropdownContent>
 				</DropdownMenu>
 			)}
 			<button

@@ -1,11 +1,13 @@
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	GlassDropdownContent,
+	GlassDropdownItem,
+} from "@/app/components/GlassDropdown";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { AttributeSpec } from "../config/elementConfigs";
 import { setNodeAttrs } from "../utils/editorOps";
@@ -85,25 +87,20 @@ export function AttributeBadge({
 					<ChevronDown className="w-3 h-3 shrink-0 text-white/80" />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
+			<GlassDropdownContent
 				align="start"
-				className="min-w-24 max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+				className="min-w-24 max-h-64 overflow-y-auto"
 			>
 				{spec.edit.options.map((opt) => (
-					<DropdownMenuItem
+					<GlassDropdownItem
 						key={opt}
-						onClick={() => handleSelect(opt)}
-						className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+						selected={opt === value}
+						onSelect={() => handleSelect(opt)}
 					>
-						<span className="w-3.5 shrink-0 flex items-center justify-center">
-							{opt === value && (
-								<Check className="w-3 h-3 text-white" aria-hidden="true" />
-							)}
-						</span>
 						{formatValue(attrKey, opt)}
-					</DropdownMenuItem>
+					</GlassDropdownItem>
 				))}
-			</DropdownMenuContent>
+			</GlassDropdownContent>
 		</DropdownMenu>
 	);
 }

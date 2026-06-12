@@ -1,13 +1,15 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
 	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	GlassDropdownContent,
+	GlassDropdownItem,
+} from "@/app/components/GlassDropdown";
 
 export const FIELD_CLS =
 	"w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-accent-violet/50";
@@ -72,6 +74,8 @@ export function TextAreaField({
 	);
 }
 
+const ENUM_OPTION_CLS = "gap-1.5 rounded-md text-[12px]";
+
 export function EnumField<T extends string>({
 	label,
 	options,
@@ -96,49 +100,29 @@ export function EnumField<T extends string>({
 					</span>
 					<ChevronDown className="h-3 w-3 shrink-0 text-white/60" />
 				</DropdownMenuTrigger>
-				<DropdownMenuContent
+				<GlassDropdownContent
 					align="start"
-					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto rounded-xl border border-glass-border bg-glass-fill p-0.5 shadow-md shadow-black/40 backdrop-blur-xl"
+					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto shadow-black/40"
 				>
-					<EnumOption
+					<GlassDropdownItem
 						selected={value === undefined}
 						onSelect={() => onChange(undefined)}
+						className={ENUM_OPTION_CLS}
 					>
 						<span className="text-white/50">—</span>
-					</EnumOption>
+					</GlassDropdownItem>
 					{options.map((option) => (
-						<EnumOption
+						<GlassDropdownItem
 							key={option}
 							selected={option === value}
 							onSelect={() => onChange(option)}
+							className={ENUM_OPTION_CLS}
 						>
 							{option}
-						</EnumOption>
+						</GlassDropdownItem>
 					))}
-				</DropdownMenuContent>
+				</GlassDropdownContent>
 			</DropdownMenu>
 		</div>
-	);
-}
-
-function EnumOption({
-	selected,
-	onSelect,
-	children,
-}: {
-	selected: boolean;
-	onSelect: () => void;
-	children: ReactNode;
-}) {
-	return (
-		<DropdownMenuItem
-			onClick={onSelect}
-			className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-white/70 hover:text-white focus:bg-white/10 focus:text-white"
-		>
-			<span className="flex w-3.5 shrink-0 items-center justify-center">
-				{selected && <Check className="h-3 w-3 text-white" aria-hidden />}
-			</span>
-			{children}
-		</DropdownMenuItem>
 	);
 }
