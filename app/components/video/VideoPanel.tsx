@@ -35,7 +35,7 @@ export function VideoPanel() {
 	const showControls = !scriptLoading && !!layout?.series.length && ready;
 
 	return (
-		<div className="group relative h-full w-full overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
+		<div className="group relative h-full w-full overflow-hidden rounded-lg border border-glass-border bg-glass-fill shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
 			<div className="grain grain-light absolute inset-0" aria-hidden="true" />
 			<div className="relative z-[2] h-full w-full">
 				<VideoPanelBody />

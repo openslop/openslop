@@ -11,7 +11,7 @@
 	transition:
 		border-color 0.15s,
 		box-shadow 0.15s;
-	font-family: "Google Sans Flex", sans-serif;
+	font-family: "Satoshi", sans-serif;
 }
 
 .input::placeholder {

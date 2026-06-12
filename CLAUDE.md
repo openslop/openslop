@@ -28,3 +28,7 @@
 
 - `next/dynamic` with `ssr: false` is a **Client Component API only**. Never use it in Server Components. If you need to lazy-load a client-only component from a Server Component, create a thin Client Component wrapper that does the dynamic import, then use that wrapper in the Server Component.
 - `proxy.ts` is the correct file name (Next.js 16 migrated from `middleware.ts` to `proxy.ts`). Do NOT rename it.
+
+## Design System
+
+Always read `DESIGN.md` before making any visual or UI decisions. Font choices, colors, spacing, the disciplined-violet rule, and the media-type palette are defined there. Do not deviate without explicit user approval. Flag any UI code that doesn't match `DESIGN.md`.

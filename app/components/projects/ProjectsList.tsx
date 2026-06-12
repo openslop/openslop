@@ -62,7 +62,7 @@ export default function ProjectsList({
 			<div className="max-w-5xl mx-auto px-6 pt-20 pb-16">
 				<header className="flex items-end justify-between mb-10">
 					<div>
-						<h1 className="font-display text-4xl tracking-tight">My Slop</h1>
+						<h1 className="font-body text-4xl tracking-tight">My Slop</h1>
 						<p className="text-white/60 text-sm mt-1">
 							{projects.length === 0
 								? "No projects yet — start your first slop."
@@ -83,7 +83,7 @@ export default function ProjectsList({
 				<ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 					{projects.map((project) => (
 						<li key={project.id}>
-							<div className="group relative rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors overflow-hidden">
+							<div className="group relative rounded-xl border border-glass-border bg-white/[0.03] hover:bg-white/[0.06] transition-colors overflow-hidden">
 								<button
 									type="button"
 									onClick={() => router.push(`/projects/${project.id}`)}

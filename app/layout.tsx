@@ -43,10 +43,6 @@ export default function RootLayout({
 					href="https://api.fontshare.com/v2/css?f[]=sentient@400&f[]=satoshi@400,500,700&display=swap"
 					rel="stylesheet"
 				/>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap"
-					rel="stylesheet"
-				/>
 			</head>
 			<body
 				className={`${geistSans.variable} ${instrumentSerif.variable} antialiased bg-[#0a0a0a]`}

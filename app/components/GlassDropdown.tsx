@@ -52,7 +52,7 @@ export default function GlassDropdown<T extends string>({
 			<DropdownMenuContent
 				side={side}
 				align={align}
-				className="min-w-32 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+				className="min-w-32 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
 			>
 				{options.map((option) => (
 					<DropdownMenuItem

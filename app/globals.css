@@ -46,35 +46,30 @@
 	--radius-4xl: calc(var(--radius) + 16px);
 }
 
-@keyframes moveHorizontal {
-	0% {
-		transform: translateX(-20%) translateY(-10%);
-	}
-	50% {
-		transform: translateX(20%) translateY(-5%);
-	}
-	100% {
-		transform: translateX(-20%) translateY(-10%);
-	}
-}
+/* openslop design tokens — see DESIGN.md. Non-inline so the raw CSS vars are
+   available everywhere (module CSS, arbitrary values) and utilities are generated
+   (bg-glass-fill, border-glass-border, text-media-character, shadow-glow, ...). */
+@theme {
+	--color-canvas: #0a0a0a;
+	--color-accent-violet: #8b5cf6;
+	--color-accent-violet-soft: #a78bfa;
+	--color-glow-violet: #371e64;
+	--color-panel-violet: #2d2040;
+	--color-glass-fill: rgba(255, 255, 255, 0.05);
+	--color-glass-border: rgba(255, 255, 255, 0.1);
 
-@keyframes moveVertical {
-	0% {
-		transform: translateY(-25%);
-	}
-	50% {
-		transform: translateY(25%);
-	}
-	100% {
-		transform: translateY(-25%);
-	}
-}
+	/* Media-type palette — every storyboard element type reads at a glance. */
+	--color-media-character: #fbbf24;
+	--color-media-image: #22d3ee;
+	--color-media-animated: #e879f9;
+	--color-media-clip: #818cf8;
+	--color-media-music: #a78bfa;
+	--color-media-sound: #34d399;
+	--color-media-narration: #9ca3af;
 
-.animate-first {
-	animation: moveVertical 25s ease infinite;
-}
-.animate-fourth {
-	animation: moveHorizontal 20s ease infinite;
+	/* The earned violet glow. Used rarely, only on the live/primary action. */
+	--shadow-glow: 0 0 40px
+		color-mix(in srgb, var(--color-glow-violet) 55%, transparent);
 }
 
 @keyframes fadeInUp {
@@ -128,8 +123,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.animate-first,
-	.animate-fourth,
 	.animate-fadeInUp,
 	.shimmer-surface {
 		animation: none;
@@ -139,11 +132,6 @@
 html {
 	background-color: #0a0a0a;
 	color-scheme: dark;
-}
-
-/* Reusable font-family utility for Google Sans Flex */
-.font-display {
-	font-family: "Google Sans Flex", sans-serif;
 }
 
 .font-title {

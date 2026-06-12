@@ -41,7 +41,7 @@ export default function TransitionPanel() {
 					<button
 						type="button"
 						aria-label={`Transition: ${LABELS[transitionType]}`}
-						className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm text-white/70 hover:text-white bg-white/5 hover:bg-white/10 ring-1 ring-inset ring-white/10 hover:ring-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+						className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm text-white/70 hover:text-white bg-glass-fill hover:bg-white/10 ring-1 ring-inset ring-white/10 hover:ring-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 					>
 						<span className="truncate">{LABELS[transitionType]}</span>
 						<ChevronDown
@@ -52,7 +52,7 @@ export default function TransitionPanel() {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					align="start"
-					className="z-[90] min-w-[--radix-dropdown-menu-trigger-width] max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+					className="z-[90] min-w-[--radix-dropdown-menu-trigger-width] max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
 				>
 					{TRANSITION_TYPES.map((value) => (
 						<DropdownMenuItem

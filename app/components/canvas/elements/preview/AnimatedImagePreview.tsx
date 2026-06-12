@@ -49,7 +49,7 @@ export function AnimatedImagePreview({
 					onDiscard={onDiscard}
 				/>
 			)}
-			<div className="absolute top-2 right-2 z-10 flex items-center rounded-full border border-white/10 bg-black/55 backdrop-blur-xl shadow-md shadow-black/40 p-0.5">
+			<div className="absolute top-2 right-2 z-10 flex items-center rounded-full border border-glass-border bg-black/55 backdrop-blur-xl shadow-md shadow-black/40 p-0.5">
 				<ToggleButton
 					active={mode === "animated"}
 					label="Video"

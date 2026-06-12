@@ -16,7 +16,7 @@ function formatBytes(bytes: number): string {
 }
 
 const pillClass =
-	"flex items-center gap-2 rounded-lg border border-white/10 bg-card/90 px-3 py-2 backdrop-blur-xl shadow-md shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]";
+	"flex items-center gap-2 rounded-lg border border-glass-border bg-card/90 px-3 py-2 backdrop-blur-xl shadow-md shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]";
 
 export function RenderControls({ layout }: { layout: VideoLayout }) {
 	const { state, render, reset } = useRendering();
