@@ -6,6 +6,8 @@ import {
 	TooltipContent,
 } from "@/components/ui/tooltip";
 import { GenerationIndicator } from "../GenerationIndicator";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import type { GenerationInputs } from "@/lib/generation/generationInputs";
 import type { GenerationState, PlaceholderProps } from "./status";
 
 function OverlayButton({
@@ -54,13 +56,13 @@ function CancelButton({
 	);
 }
 
-export function StaleIndicator({ onClick }: { onClick: () => void }) {
+function StaleBadge({ onClick }: { onClick: () => void }) {
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<button
 					type="button"
-					className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-full bg-amber-500/80 px-2 py-1 text-[10px] font-medium text-white transition-opacity hover:bg-amber-500"
+					className="flex items-center gap-1 rounded-full bg-amber-500/80 px-2 py-1 text-[10px] font-medium text-white transition-opacity hover:bg-amber-500"
 					onClick={onClick}
 				>
 					<AlertCircle className="w-3 h-3" />
@@ -69,6 +71,49 @@ export function StaleIndicator({ onClick }: { onClick: () => void }) {
 			</TooltipTrigger>
 			<TooltipContent>Prompt changed — click to regenerate</TooltipContent>
 		</Tooltip>
+	);
+}
+
+export function StaleIndicator({ onClick }: { onClick: () => void }) {
+	return (
+		<div className="absolute bottom-2 right-2 z-10">
+			<StaleBadge onClick={onClick} />
+		</div>
+	);
+}
+
+export function StaleControls({
+	elementId,
+	onRegenerate,
+	onRevert,
+}: {
+	elementId: string;
+	onRegenerate: () => void;
+	onRevert?: (resultInputs: GenerationInputs) => void;
+}) {
+	const resultInputs = useQueueSelector(
+		(q) => q.getElementSnapshot(elementId).resultInputs,
+	);
+	return (
+		<div className="absolute bottom-2 right-2 z-10 flex items-center gap-1.5">
+			{onRevert && resultInputs && (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							type="button"
+							onClick={() => onRevert(resultInputs)}
+							className="rounded-full bg-black/55 px-2 py-1 text-[10px] font-medium text-white/80 ring-1 ring-inset ring-white/10 backdrop-blur-xl transition-colors hover:bg-black/70 hover:text-white"
+						>
+							Revert
+						</button>
+					</TooltipTrigger>
+					<TooltipContent>
+						Discard edits — restore what this was generated from
+					</TooltipContent>
+				</Tooltip>
+			)}
+			<StaleBadge onClick={onRegenerate} />
+		</div>
 	);
 }
 

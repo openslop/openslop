@@ -168,6 +168,7 @@ function CharacterEditDialogBody({
 						{character.avatarUrl ? (
 							<MediaPreview
 								key={character.avatarUrl}
+								elementId={avatarElementId}
 								url={character.avatarUrl}
 								outputKind="image"
 								borderColor="border-white/20"
@@ -175,6 +176,9 @@ function CharacterEditDialogBody({
 								seconds={avatarSnapshot.seconds}
 								stale={isStale}
 								onRegenerate={regenerateAvatar}
+								onRevert={({ attributes }) =>
+									update({ appearance: String(attributes.appearance) })
+								}
 							/>
 						) : (
 							<MediaPlaceholder
