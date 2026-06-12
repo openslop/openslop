@@ -17,6 +17,8 @@
 - Never use non-null assertions (!). Use type guards, default values, or validated helpers instead
 - Fail loudly: never catch-and-log errors on critical paths to "keep things going" — propagate the error or surface it explicitly
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is
+- Keep concerns separated. Favor small, composable, reusable components over feature-packed ones.
+- Understand the root problem behind each change, then solve that whole class of problem with a clean abstraction rather than special-casing the instance.
 
 ## Package manager
 
