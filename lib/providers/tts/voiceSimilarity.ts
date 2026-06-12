@@ -1,7 +1,6 @@
 import { cosineSimilarity } from "ai";
-import pMap from "p-map";
 import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
-import { embedText } from "../embed";
+import { embedText, embedTexts } from "../embed";
 
 const SEMANTIC_FIELDS = [
 	"query",
@@ -26,9 +25,7 @@ export async function rankBySimilarity(
 
 	const [query, voiceVecs] = await Promise.all([
 		embedText(queryText),
-		pMap(voices, (v) => embedText(`${v.name}: ${v.description}`), {
-			concurrency: 10,
-		}),
+		embedTexts(voices.map((v) => v.description)),
 	]);
 
 	const scores = new Map(

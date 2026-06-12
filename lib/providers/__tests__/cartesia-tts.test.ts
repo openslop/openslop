@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/api/asset-bundle");
-vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }));
 
 const mockClose = vi.fn();
 const mockGenerate = vi.fn();
@@ -361,11 +360,13 @@ describe("CartesiaTTS", () => {
 					},
 				]),
 			);
-			// call order: query, "Cold: cold robotic voice", "Warm: warm british narrator"
-			mockEmbed
-				.mockResolvedValueOnce({ embedding: [1, 0] })
-				.mockResolvedValueOnce({ embedding: [0, 1] })
-				.mockResolvedValueOnce({ embedding: [1, 0] });
+			mockEmbed.mockResolvedValue({ embedding: [1, 0] });
+			mockEmbedMany.mockResolvedValue({
+				embeddings: [
+					[0, 1],
+					[1, 0],
+				],
+			});
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ description: "warm british" });
@@ -373,6 +374,11 @@ describe("CartesiaTTS", () => {
 			expect(voices.map((v) => v.id)).toEqual(["v2", "v1"]);
 			expect(mockEmbed).toHaveBeenCalledWith(
 				expect.objectContaining({ value: "warm british" }),
+			);
+			expect(mockEmbedMany).toHaveBeenCalledWith(
+				expect.objectContaining({
+					values: ["cold robotic voice", "warm british narrator"],
+				}),
 			);
 		});
 
