@@ -5,6 +5,7 @@ import { MediaPreview, MediaPlaceholder } from "./results";
 import type { PlaceholderProps } from "./status";
 
 type AnimatedImagePreviewProps = PlaceholderProps & {
+	elementId: string;
 	imageUrl?: string;
 	videoUrl?: string;
 	borderColor: string;
@@ -13,6 +14,7 @@ type AnimatedImagePreviewProps = PlaceholderProps & {
 };
 
 export function AnimatedImagePreview({
+	elementId,
 	imageUrl,
 	videoUrl,
 	borderColor,
@@ -32,6 +34,7 @@ export function AnimatedImagePreview({
 			{url ? (
 				<MediaPreview
 					key={url}
+					elementId={elementId}
 					url={url}
 					outputKind={mode === "animated" ? "video" : "image"}
 					borderColor={borderColor}

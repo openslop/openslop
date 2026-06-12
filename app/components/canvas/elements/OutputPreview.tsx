@@ -52,6 +52,7 @@ function OutputPreviewComponent({
 	if (type === "animated_image") {
 		return (
 			<AnimatedImagePreview
+				elementId={element.id}
 				imageUrl={result?.imageUrl}
 				videoUrl={result?.videoUrl}
 				borderColor={borderColor}
@@ -71,6 +72,7 @@ function OutputPreviewComponent({
 		return (
 			<MediaPreview
 				key={url}
+				elementId={element.id}
 				url={url}
 				outputKind={outputKind}
 				borderColor={borderColor}

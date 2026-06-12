@@ -8,7 +8,13 @@ import type { GenerationState, PlaceholderProps } from "./status";
 import { WAVE_COLORS } from "./status";
 import { PlaceholderBallsLoader } from "./placeholderBalls";
 import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
-import { PlaceholderOverlay, ResultOverlay, StaleIndicator } from "./overlays";
+import {
+	PlaceholderOverlay,
+	ResultOverlay,
+	StaleControls,
+	StaleIndicator,
+} from "./overlays";
+import type { GenerationInputs } from "@/lib/generation/generationInputs";
 
 export function AudioResult({
 	type,
@@ -91,13 +97,17 @@ export function MediaPreview({
 	status,
 	seconds,
 	stale,
+	elementId,
 	onRegenerate,
+	onRevert,
 }: GenerationState & {
 	url: string;
 	outputKind: "image" | "video";
 	borderColor: string;
 	stale: boolean;
+	elementId: string;
 	onRegenerate: () => void;
+	onRevert?: (resultInputs: GenerationInputs) => void;
 }) {
 	return (
 		<div
@@ -115,7 +125,13 @@ export function MediaPreview({
 				seconds={seconds}
 				onRegenerate={onRegenerate}
 			/>
-			{stale && <StaleIndicator onClick={onRegenerate} />}
+			{stale && (
+				<StaleControls
+					elementId={elementId}
+					onRegenerate={onRegenerate}
+					onRevert={onRevert}
+				/>
+			)}
 		</div>
 	);
 }
