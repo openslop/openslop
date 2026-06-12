@@ -31,6 +31,7 @@ export default function SignupPage() {
 				type="text"
 				name="fullName"
 				autoComplete="name"
+				aria-label="Full name"
 				placeholder="Full Name"
 				value={fullName}
 				onChange={(e) => setFullName(e.target.value)}

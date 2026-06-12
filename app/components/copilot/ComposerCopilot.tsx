@@ -60,6 +60,12 @@ function AttachMenu({
 	onCreateCharacter: () => void;
 	onSelectNarrator: () => void;
 }) {
+	const items = [
+		{ icon: ImagePlus, label: "Upload Reference Images", onClick: openPicker },
+		{ icon: User, label: "Create character", onClick: onCreateCharacter },
+		{ icon: Mic, label: "Select narrator voice", onClick: onSelectNarrator },
+	];
+
 	return (
 		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger asChild>
@@ -81,30 +87,16 @@ function AttachMenu({
 				align="start"
 				className="min-w-36 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
 			>
-				<DropdownMenuItem
-					onClick={openPicker}
-					className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
-				>
-					<ImagePlus
-						className="mr-1.5 h-3.5 text-white w-3.5"
-						strokeWidth={1.5}
-					/>
-					Upload Reference Images
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={onCreateCharacter}
-					className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
-				>
-					<User className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
-					Create character
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={onSelectNarrator}
-					className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
-				>
-					<Mic className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
-					Select narrator voice
-				</DropdownMenuItem>
+				{items.map(({ icon: Icon, label, onClick }) => (
+					<DropdownMenuItem
+						key={label}
+						onClick={onClick}
+						className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+					>
+						<Icon className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
+						{label}
+					</DropdownMenuItem>
+				))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
