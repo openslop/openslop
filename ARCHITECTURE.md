@@ -2,26 +2,34 @@
 
 A 10k-foot view of how OpenSlop fits together.
 
-## Request flow
+![OpenSlop system architecture](./docs/architecture.svg)
 
-```
-Browser (React, Slate, Remotion)
-    ↓ fetch /api/v1/<type>
-Next.js route (app/api/v1/*)
-    ↓
-Provider (vendor adapter)
-    ↓ uploads to Vercel Blob
-Response → browser
-```
+> To edit the diagram, open [`docs/architecture.excalidraw`](./docs/architecture.excalidraw) at [excalidraw.com](https://excalidraw.com) (or the VS Code Excalidraw extension), then re-export the SVG to `docs/architecture.svg`.
 
-The browser drives Remotion for preview and persists project state via Supabase.
+## Flows
+
+### 1 · Submit prompt
+
+The prompt/copilot UI hands the prompt to `ScriptProvider`, which calls the LLM connector through the gateway. `POST /api/v1/llm` streams the response back over SSE; the OSML stream parser turns the streamed tags into elements and inserts them into the SlateJS canvas live (scenes containing narration, image, clip, sound, music, and character elements).
+
+### 2 · Generate
+
+**Generate All** collects every element whose inputs changed (stale detection) and schedules jobs on the client `GenerationQueue` — max 2 concurrent slots, with a result cache keyed by inputs so unchanged elements restore instead of regenerating. Each job flows through the per-type connector (+ plugins) and the gateway to `POST /api/v1/{asset}`, which inserts a `pending` row in the `jobs` table and enqueues to the Vercel Queue (`asset-generate` topic). Queue workers process jobs concurrently: call the provider for the element type, upload the result files plus a `manifest.json` to Vercel Blob, and mark the job `completed` with the result. Music and sfx generations first check a Pinecone vector-similarity cache (other types may adopt it later). The client polls `GET /api/v1/{type}/{jobId}` until the asset URL comes back and the element preview updates.
+
+### 3 · Save / restore
+
+The project store (metadata, characters, reference images), the canvas script (OSML), and the generation queue's element snapshots are persisted into the `projects` row as JSONB. On load, the same snapshots rehydrate the store, canvas, and queue — generated results survive reloads and builds.
+
+### 4 · Render
+
+**Export Video** calls `POST /api/render`, which fans the composition out across Remotion Lambdas (`renderMediaOnLambda`); chunks render in parallel and the final `video.mp4` lands in S3. The client polls `POST /api/render/progress` for progress and the output URL. Compositions live in `remotion/` and `lib/video/`; the Player is loaded client-side only.
 
 ## Three layers
 
 The generation pipeline is split so providers and asset types can be swapped independently:
 
 - **Connectors** (`lib/connectors/`) — what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`.
-- **Gateways** (`lib/gateway/`) — thin HTTP clients between connectors and our own `/api/v1/*` routes. The seam that lets connectors run against either the live API or a mock.
+- **Gateways** (`lib/gateway/`) — thin HTTP clients between connectors and our own `/api/v1/*` routes. The seam that lets connectors run against either the live API or a mock. Today there's the **OpenSlop gateway**; a **BYOK gateway** will slot in beside it so users can hit providers directly with their own API keys.
 - **Providers** (`lib/providers/`) — server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response.
 
 ## API routes
@@ -34,14 +42,22 @@ Every `app/api/v1/<type>/route.ts` is built from a shared `createRouteHandler` f
 - `lib/project/store.ts` holds per-project metadata in Zustand.
 - `lib/script/` provides script context and refinement utilities.
 
+## Data
+
+Supabase Postgres with RLS (users only read their own rows; queue workers use the service role):
+
+| Table        | Purpose                                                                     |
+| ------------ | --------------------------------------------------------------------------- |
+| `auth.users` | Supabase auth users                                                         |
+| `projects`   | One row per project — `script`, `store`, and `generation` snapshots (JSONB) |
+| `jobs`       | Async generation jobs — `pending → processing → completed \| failed`        |
+
+Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/` next to a `manifest.json`, served as public CDN URLs consumed directly by `<img>`, `<audio>`, and `<video>`.
+
 ## Auth
 
 - `proxy.ts` (Next.js 16's renamed middleware — keep this name) refreshes the Supabase session on each request.
 - `/api/v1/*` is same-origin only and authenticates via the Supabase session cookie.
-
-## Video rendering
-
-Compositions live in `remotion/` and `lib/video/`. `app/api/render/route.ts` drives Remotion's render pipeline. The Player is loaded client-side only.
 
 ## Adding a new asset type
 
