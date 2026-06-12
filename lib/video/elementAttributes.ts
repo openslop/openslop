@@ -19,7 +19,8 @@ const DEFAULT_VOLUME = VOLUME_MAX;
 
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
+	const value = element.customAttributes?.volume;
+	const raw = value?.trim() ? Number(value) : DEFAULT_VOLUME;
 	return Number.isFinite(raw)
 		? Math.max(VOLUME_MIN, Math.min(VOLUME_MAX, raw))
 		: DEFAULT_VOLUME;

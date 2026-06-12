@@ -18,8 +18,10 @@ function el(customAttributes?: Record<string, string>): CanvasContentElement {
 }
 
 describe("getVolume", () => {
-	it("defaults to 10 when missing or non-numeric", () => {
+	it("defaults to 10 when missing, blank, or non-numeric", () => {
 		expect(getVolume(el())).toBe(10);
+		expect(getVolume(el({ volume: "" }))).toBe(10);
+		expect(getVolume(el({ volume: "   " }))).toBe(10);
 		expect(getVolume(el({ volume: "not-a-number" }))).toBe(10);
 	});
 
