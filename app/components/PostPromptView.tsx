@@ -42,6 +42,31 @@ import { VideoLayoutProvider } from "./video/VideoLayoutContext";
 import editorStyles from "./Editor.module.css";
 import genStyles from "./styles/gen-button.module.css";
 
+function RefineComposer({
+	onSubmit,
+	onStop,
+	loading,
+}: {
+	onSubmit: (prompt: string) => void;
+	onStop: () => void;
+	loading: boolean;
+}) {
+	const [value, setValue] = useState("");
+	return (
+		<InlineCopilot
+			value={value}
+			onValueChange={setValue}
+			onSubmit={() => {
+				onSubmit(value);
+				setValue("");
+			}}
+			onStop={onStop}
+			loading={loading}
+			placeholder="Refine your script…"
+		/>
+	);
+}
+
 function PostPromptViewInner() {
 	const { loading: scriptLoading, stopGeneration } = useScriptControl();
 	const { editor, value, setValue } = useEditorSetup();
@@ -60,7 +85,6 @@ function PostPromptViewInner() {
 		[value, transitionType],
 	);
 
-	const [refineValue, setRefineValue] = useState("");
 	const { position, visible } = usePlayerPosition();
 	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
 
@@ -87,16 +111,10 @@ function PostPromptViewInner() {
 			>
 				<div className="flex w-full items-stretch justify-center gap-3">
 					<div className="min-w-0 flex-1 max-w-2xl">
-						<InlineCopilot
-							value={refineValue}
-							onValueChange={setRefineValue}
-							onSubmit={() => {
-								refineScript(refineValue);
-								setRefineValue("");
-							}}
+						<RefineComposer
+							onSubmit={refineScript}
 							onStop={stop}
 							loading={loading}
-							placeholder="Refine your script…"
 						/>
 					</div>
 					<button
