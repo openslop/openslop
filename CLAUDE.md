@@ -16,12 +16,7 @@
   - `/vercel-react-best-practices`
 - Never use non-null assertions (!). Use type guards, default values, or validated helpers instead
 - Fail loudly: never catch-and-log errors on critical paths to "keep things going" — propagate the error or surface it explicitly
-- Don't wrap one-line utility calls in hooks (e.g. call `insertElement` directly, no `useInsertElement`)
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is
-
-## Architecture
-
-- The layered class hierarchies in `lib/connectors` and `lib/gateway` are intentional: multiple providers per type are planned. Do not flatten them, even though only one provider exists today.
 
 ## Package manager
 
