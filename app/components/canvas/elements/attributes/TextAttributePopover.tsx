@@ -88,6 +88,7 @@ export function TextAttributePopover({
 					autoFocus
 					rows={rows}
 					value={draft}
+					aria-label={label}
 					placeholder={placeholder}
 					onChange={(e) => setDraft(e.target.value)}
 					onKeyDown={(e) => {

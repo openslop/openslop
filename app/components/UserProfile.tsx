@@ -34,6 +34,7 @@ export default function UserProfile() {
 					<button
 						type="button"
 						suppressHydrationWarning
+						aria-label="Account menu"
 						className="relative z-[91] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
 						<Avatar className="h-9 w-9 cursor-pointer">

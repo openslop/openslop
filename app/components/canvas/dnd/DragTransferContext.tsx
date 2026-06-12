@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, use } from "react";
 
 export type DragTransfer = {
 	itemId: string;
@@ -10,5 +10,5 @@ export type DragTransfer = {
 export const DragTransferContext = createContext<DragTransfer>(null);
 
 export function useDragTransfer(): DragTransfer {
-	return useContext(DragTransferContext);
+	return use(DragTransferContext);
 }

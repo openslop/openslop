@@ -79,6 +79,7 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 				<button
 					type="button"
 					onClick={reset}
+					aria-label="Dismiss"
 					className="rounded-md p-1 text-white/40 hover:text-white/80"
 				>
 					<X size={14} />

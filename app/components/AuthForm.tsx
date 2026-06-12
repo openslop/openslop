@@ -90,6 +90,7 @@ export default function AuthForm({
 					type="email"
 					name="email"
 					autoComplete="email"
+					aria-label="Email"
 					placeholder="Email"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
