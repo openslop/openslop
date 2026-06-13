@@ -8,18 +8,7 @@ import { createProject, deleteProject } from "@/lib/project/api";
 import type { ProjectRow } from "@/lib/project/api";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import UserProfile from "@/app/components/UserProfile";
-
-function relativeTime(iso: string): string {
-	const diff = Date.now() - new Date(iso).getTime();
-	const minutes = Math.floor(diff / 60_000);
-	if (minutes < 1) return "just now";
-	if (minutes < 60) return `${minutes}m ago`;
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours}h ago`;
-	const days = Math.floor(hours / 24);
-	if (days < 30) return `${days}d ago`;
-	return new Date(iso).toLocaleDateString();
-}
+import { RelativeTime } from "./RelativeTime";
 
 export default function ProjectsList({
 	initialProjects,
@@ -109,7 +98,7 @@ export default function ProjectsList({
 											{project.name}
 										</div>
 										<div className="text-xs text-white/50 mt-0.5">
-											Edited {relativeTime(project.updated_at)}
+											Edited <RelativeTime iso={project.updated_at} />
 										</div>
 									</div>
 								</button>
