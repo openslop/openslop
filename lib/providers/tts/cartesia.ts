@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import Cartesia from "@cartesia/cartesia-js";
 import type {
 	TextTimestamp,
@@ -104,6 +105,13 @@ export async function collectVoices(
 	return voices;
 }
 
+const collectVoicesCached = unstable_cache(
+	(apiKey: string, params: VoiceQueryParams, limit: number): Promise<Voice[]> =>
+		collectVoices(new Cartesia({ apiKey }), params, limit),
+	["cartesia-voices"],
+	{ revalidate: 3600 },
+);
+
 export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
 	private client: Cartesia;
@@ -158,8 +166,8 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 		gender?: TTSGender,
 		language?: string,
 	): Promise<VoiceInfo[]> {
-		const voices = await collectVoices(
-			this.client,
+		const voices = await collectVoicesCached(
+			this.apiKey,
 			{ gender, language, expand: ["preview_file_url"] },
 			MAX_VOICES,
 		);

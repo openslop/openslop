@@ -2,6 +2,20 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/api/asset-bundle");
 
+const { mockCacheStore } = vi.hoisted(() => ({
+	mockCacheStore: new Map<string, unknown>(),
+}));
+
+vi.mock("next/cache", () => ({
+	unstable_cache:
+		(fn: (...a: unknown[]) => unknown, keyParts: unknown[] = []) =>
+		async (...args: unknown[]) => {
+			const key = JSON.stringify([keyParts, args]);
+			if (!mockCacheStore.has(key)) mockCacheStore.set(key, await fn(...args));
+			return mockCacheStore.get(key);
+		},
+}));
+
 const mockClose = vi.fn();
 const mockGenerate = vi.fn();
 const mockConnect = vi.fn();
@@ -168,6 +182,7 @@ describe("collectVoices", () => {
 describe("CartesiaTTS", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockCacheStore.clear();
 	});
 
 	describe("generate", () => {
@@ -336,6 +351,26 @@ describe("CartesiaTTS", () => {
 			const voices = await provider.search({});
 
 			expect(voices).toHaveLength(150);
+			expect(mockGet).toHaveBeenCalledTimes(2);
+		});
+
+		it("serves a repeat search with identical params from cache", async () => {
+			mockGet.mockResolvedValue(makePage(makeVoices(10)));
+			const provider = new CartesiaTTS("test-key");
+
+			await provider.search({ gender: "feminine", language: "en" });
+			await provider.search({ gender: "feminine", language: "en" });
+
+			expect(mockGet).toHaveBeenCalledTimes(1);
+		});
+
+		it("does not reuse cache across different params", async () => {
+			mockGet.mockResolvedValue(makePage(makeVoices(10)));
+			const provider = new CartesiaTTS("test-key");
+
+			await provider.search({ gender: "feminine" });
+			await provider.search({ gender: "masculine" });
+
 			expect(mockGet).toHaveBeenCalledTimes(2);
 		});
 
