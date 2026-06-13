@@ -135,3 +135,5 @@ export enum TTSEmotion {
 	Contemplative = "contemplative",
 	Determined = "determined",
 }
+
+export const TTS_EMOTIONS = Object.values(TTSEmotion) as TTSEmotion[];
