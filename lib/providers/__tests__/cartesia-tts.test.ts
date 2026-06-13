@@ -412,8 +412,32 @@ describe("CartesiaTTS", () => {
 			);
 			expect(mockEmbedMany).toHaveBeenCalledWith(
 				expect.objectContaining({
-					values: ["cold robotic voice", "warm british narrator"],
+					values: ["Cold cold robotic voice", "Warm warm british narrator"],
 				}),
+			);
+		});
+
+		it("embeds a non-empty string when a voice description is empty", async () => {
+			mockGet.mockResolvedValue(
+				makePage([
+					{
+						id: "v1",
+						name: "Nameless",
+						language: "en",
+						gender: "feminine",
+						description: "",
+						preview_file_url: null,
+					},
+				]),
+			);
+			mockEmbed.mockResolvedValue({ embedding: [1, 0] });
+			mockEmbedMany.mockResolvedValue({ embeddings: [[1, 0]] });
+
+			const provider = new CartesiaTTS("test-key");
+			await provider.search({ description: "warm" });
+
+			expect(mockEmbedMany).toHaveBeenCalledWith(
+				expect.objectContaining({ values: ["Nameless "] }),
 			);
 		});
 
