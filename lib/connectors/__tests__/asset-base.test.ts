@@ -119,6 +119,44 @@ describe("BaseAssetConnector", () => {
 			const result = await connector.resolveBundle(bundle);
 			expect(result.durationSec).toBe(0);
 		});
+
+		it("parses numeric duration metadata strings", async () => {
+			const connector = new TestAssetConnector(config);
+			const bundle = new AssetBundle(
+				"https://blob.example.com/assets/image/mock/xyz",
+				{
+					version: 1,
+					type: "image",
+					createdAt: "",
+					result: { image: "output.jpg" },
+					metadata: { durationSec: "2.5" },
+				},
+			);
+
+			const result = await connector.resolveBundle(bundle);
+			expect(result.durationSec).toBe(2.5);
+		});
+
+		it.each(["", "   ", "not-a-number", -1, null, false, [], {}])(
+			"throws when durationSec metadata is invalid: %s",
+			async (durationSec) => {
+				const connector = new TestAssetConnector(config);
+				const bundle = new AssetBundle(
+					"https://blob.example.com/assets/image/mock/xyz",
+					{
+						version: 1,
+						type: "image",
+						createdAt: "",
+						result: { image: "output.jpg" },
+						metadata: { durationSec },
+					},
+				);
+
+				await expect(connector.resolveBundle(bundle)).rejects.toThrow(
+					"Asset bundle durationSec metadata must be a finite number",
+				);
+			},
+		);
 	});
 
 	describe("_generate (via generate)", () => {

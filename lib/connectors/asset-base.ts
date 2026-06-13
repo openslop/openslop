@@ -14,6 +14,27 @@ const ASSET_KEY_TO_URL_FIELD: Record<
 	video: "videoUrl",
 };
 
+function parseDurationSec(value: unknown): number {
+	if (value === undefined) return 0;
+	if (typeof value !== "number" && typeof value !== "string") {
+		throw new Error(
+			"Asset bundle durationSec metadata must be a finite number",
+		);
+	}
+	if (typeof value === "string" && value.trim() === "") {
+		throw new Error(
+			"Asset bundle durationSec metadata must be a finite number",
+		);
+	}
+	const durationSec = Number(value);
+	if (!Number.isFinite(durationSec) || durationSec < 0) {
+		throw new Error(
+			"Asset bundle durationSec metadata must be a finite number",
+		);
+	}
+	return durationSec;
+}
+
 export abstract class BaseAssetConnector<
 	TParams extends { prompt: string },
 	TResult,
@@ -25,7 +46,7 @@ export abstract class BaseAssetConnector<
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {
 			[ASSET_KEY_TO_URL_FIELD[this.assetKey]]: bundle.resolve(this.assetKey),
-			durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
+			durationSec: parseDurationSec(bundle.manifest.metadata?.durationSec),
 		} as TResult;
 	}
 
