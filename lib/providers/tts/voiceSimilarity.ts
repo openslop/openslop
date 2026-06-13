@@ -25,7 +25,7 @@ export async function rankBySimilarity(
 
 	const [query, voiceVecs] = await Promise.all([
 		embedText(queryText),
-		embedTexts(voices.map((v) => v.description)),
+		embedTexts(voices.map((v) => `${v.name} ${v.description ?? ""}`)),
 	]);
 
 	const scores = new Map(

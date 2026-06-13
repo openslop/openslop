@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import Cartesia from "@cartesia/cartesia-js";
 import type {
 	TextTimestamp,
@@ -16,6 +17,10 @@ import { BaseProvider, type WithMetadata } from "../base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
 import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
+import type {
+	Voice,
+	VoiceListParams,
+} from "@cartesia/cartesia-js/resources/voices.mjs";
 
 type RawTTSResult = {
 	data: string;
@@ -66,6 +71,46 @@ function wrapPcmInWav(pcm: Buffer): Buffer {
 }
 
 const PREVIEW_HOST = "files.cartesia.ai";
+const PAGE_SIZE = 100;
+const MAX_VOICES = 1000;
+
+type VoiceListPage = {
+	data: Voice[];
+	has_more: boolean;
+	next_page: string | null;
+};
+
+type VoiceQueryParams = Omit<
+	VoiceListParams,
+	"limit" | "starting_after" | "ending_before"
+> & {
+	language?: string;
+};
+
+export async function collectVoices(
+	client: Cartesia,
+	params: VoiceQueryParams,
+	limit: number,
+): Promise<Voice[]> {
+	const voices: Voice[] = [];
+	let cursor: string | undefined;
+	while (voices.length < limit) {
+		const page = await client.get<VoiceListPage>("/voices", {
+			query: { ...params, limit: PAGE_SIZE, starting_after: cursor },
+		});
+		voices.push(...page.data);
+		if (!page.has_more || !page.next_page) break;
+		cursor = page.next_page;
+	}
+	return voices;
+}
+
+const collectVoicesCached = unstable_cache(
+	(apiKey: string, params: VoiceQueryParams, limit: number): Promise<Voice[]> =>
+		collectVoices(new Cartesia({ apiKey }), params, limit),
+	["cartesia-voices"],
+	{ revalidate: 3600 },
+);
 
 export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
@@ -102,11 +147,8 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 	}
 
 	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const { age, gender, limit, language } = params;
-		let results = await this.searchOnce(age, gender, language);
-		if (results.length === 0 && age) {
-			results = await this.searchOnce(undefined, gender, language);
-		}
+		const { gender, limit, language } = params;
+		const results = await this._search(gender, language);
 		const queryText = buildQueryText(params);
 		const ranked = queryText
 			? await rankBySimilarity(results, queryText).catch((err) => {
@@ -117,32 +159,28 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 					return results;
 				})
 			: results;
-		return limit ? ranked.slice(0, limit) : ranked;
+		return ranked.slice(0, limit || ranked.length);
 	}
 
-	private async searchOnce(
-		query?: string,
+	private async _search(
 		gender?: TTSGender,
 		language?: string,
 	): Promise<VoiceInfo[]> {
-		const page = await this.client.voices.list({
-			q: query,
-			gender,
-			limit: 100,
-			expand: ["preview_file_url"],
-		});
-		return page.data
-			.map((voice) => ({
-				id: voice.id,
-				name: voice.name,
-				language: voice.language,
-				gender: TTS_GENDERS.find((g) => g === voice.gender),
-				description: voice.description,
-				previewUrl: voice.preview_file_url
-					? `/api/v1/tts/voices/preview?url=${encodeURIComponent(voice.preview_file_url)}`
-					: undefined,
-			}))
-			.filter((voice) => !language || voice.language === language);
+		const voices = await collectVoicesCached(
+			this.apiKey,
+			{ gender, language, expand: ["preview_file_url"] },
+			MAX_VOICES,
+		);
+		return voices.map((voice) => ({
+			id: voice.id,
+			name: voice.name,
+			language: voice.language,
+			gender: TTS_GENDERS.find((g) => g === voice.gender),
+			description: voice.description,
+			previewUrl: voice.preview_file_url
+				? `/api/v1/tts/voices/preview?url=${encodeURIComponent(voice.preview_file_url)}`
+				: undefined,
+		}));
 	}
 
 	protected async _generate(params: TTSGenerateParams) {
