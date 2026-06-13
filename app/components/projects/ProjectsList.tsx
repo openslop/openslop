@@ -8,7 +8,7 @@ import { createProject, deleteProject } from "@/lib/project/api";
 import type { ProjectRow } from "@/lib/project/api";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import UserProfile from "@/app/components/UserProfile";
-import { RelativeTime } from "./RelativeTime";
+import { relativeTime } from "@/lib/project/relativeTime";
 
 export default function ProjectsList({
 	initialProjects,
@@ -98,7 +98,10 @@ export default function ProjectsList({
 											{project.name}
 										</div>
 										<div className="text-xs text-white/50 mt-0.5">
-											Edited <RelativeTime iso={project.updated_at} />
+											Edited{" "}
+											<span suppressHydrationWarning>
+												{relativeTime(project.updated_at)}
+											</span>
 										</div>
 									</div>
 								</button>
