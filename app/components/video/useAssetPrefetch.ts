@@ -52,6 +52,10 @@ export function reconcilePrefetch(
 	return added;
 }
 
+export async function awaitPrefetch(handles: PrefetchHandle[]): Promise<void> {
+	await Promise.allSettled(handles.map((h) => h.waitUntilDone()));
+}
+
 export function useAssetPrefetch(layout: VideoLayout | null): boolean {
 	const activeRef = useRef(new Map<string, PrefetchHandle>());
 	const [ready, setReady] = useState(false);
@@ -67,7 +71,7 @@ export function useAssetPrefetch(layout: VideoLayout | null): boolean {
 				if (reconcilePrefetch(collectUrls(layout), active, prefetch)) {
 					setReady(false);
 				}
-				await Promise.all([...active.values()].map((h) => h.waitUntilDone()));
+				await awaitPrefetch([...active.values()]);
 				if (!cancelled) setReady(true);
 			})
 			.catch((err) => {

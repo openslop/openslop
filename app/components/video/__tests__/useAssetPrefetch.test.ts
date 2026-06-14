@@ -1,9 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
 import type { prefetch as PrefetchFn } from "remotion";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
-import { collectUrls, reconcilePrefetch } from "../useAssetPrefetch";
+import {
+	awaitPrefetch,
+	collectUrls,
+	reconcilePrefetch,
+} from "../useAssetPrefetch";
 
 type PrefetchHandle = ReturnType<typeof PrefetchFn>;
+
+function handleRejecting(): PrefetchHandle {
+	return {
+		free: vi.fn(),
+		waitUntilDone: () => Promise.reject(new Error("HTTP error, status = 404")),
+	} as unknown as PrefetchHandle;
+}
 
 function el(url: string): ResolvedElement {
 	return {
@@ -120,5 +131,49 @@ describe("reconcilePrefetch", () => {
 		expect(active.has("old")).toBe(false);
 		expect(active.has("new")).toBe(true);
 		expect(added).toBe(true);
+	});
+});
+
+describe("awaitPrefetch", () => {
+	it("resolves once all handles are done", async () => {
+		await expect(
+			awaitPrefetch([fakeHandle(), fakeHandle()]),
+		).resolves.toBeUndefined();
+	});
+
+	it("does not reject when a single asset fails to prefetch", async () => {
+		// A 404/CORS/network failure on one asset must not short-circuit the wait
+		// on the others (Promise.all would reject and reveal the player early).
+		await expect(
+			awaitPrefetch([fakeHandle(), handleRejecting(), fakeHandle()]),
+		).resolves.toBeUndefined();
+	});
+
+	it("waits for every handle to settle before resolving", async () => {
+		const order: string[] = [];
+		const slow = {
+			free: vi.fn(),
+			waitUntilDone: () =>
+				new Promise((res) =>
+					queueMicrotask(() => {
+						order.push("slow");
+						res("done");
+					}),
+				),
+		} as unknown as PrefetchHandle;
+		const failing = {
+			free: vi.fn(),
+			waitUntilDone: () => {
+				order.push("fail");
+				return Promise.reject(new Error("boom"));
+			},
+		} as unknown as PrefetchHandle;
+
+		await awaitPrefetch([failing, slow]);
+		expect(order).toEqual(["fail", "slow"]);
+	});
+
+	it("resolves immediately for an empty handle list", async () => {
+		await expect(awaitPrefetch([])).resolves.toBeUndefined();
 	});
 });
