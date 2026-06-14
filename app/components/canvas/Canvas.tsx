@@ -80,7 +80,7 @@ export default function Canvas({
 	}, [editor, activeId]);
 
 	return (
-		<DragTransferContext.Provider value={dragTransfer}>
+		<DragTransferContext value={dragTransfer}>
 			<DndContext
 				sensors={sensors}
 				collisionDetection={pointerWithin}
@@ -107,6 +107,6 @@ export default function Canvas({
 					</DragOverlay>
 				</Slate>
 			</DndContext>
-		</DragTransferContext.Provider>
+		</DragTransferContext>
 	);
 }
