@@ -1,13 +1,7 @@
 "use client";
 
-import {
-	createContext,
-	use,
-	useCallback,
-	useMemo,
-	useState,
-	type ReactNode,
-} from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import type {
 	ConnectorConfig,
 	ConnectorPlugin,
@@ -91,13 +85,9 @@ type ConfigContextValue = {
 	applyTemplate: (templateId: string) => void;
 };
 
-const ConfigContext = createContext<ConfigContextValue | null>(null);
-
-export function useConfig() {
-	const ctx = use(ConfigContext);
-	if (!ctx) throw new Error("useConfig must be used within ConfigProvider");
-	return ctx;
-}
+const [ConfigContext, useConfig] =
+	createRequiredContext<ConfigContextValue>("ConfigProvider");
+export { useConfig };
 
 export function ConfigProvider({
 	projectId,
@@ -166,7 +156,5 @@ export function ConfigProvider({
 		],
 	);
 
-	return (
-		<ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
-	);
+	return <ConfigContext value={value}>{children}</ConfigContext>;
 }

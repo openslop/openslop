@@ -1,15 +1,11 @@
 "use client";
 
-import { createContext, use, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
-const UserContext = createContext<User | null>(null);
-
-export function useUser() {
-	const ctx = use(UserContext);
-	if (!ctx) throw new Error("useUser must be used within UserProvider");
-	return ctx;
-}
+const [UserContext, useUser] = createRequiredContext<User>("UserProvider");
+export { useUser };
 
 export function UserProvider({
 	user,
@@ -18,5 +14,5 @@ export function UserProvider({
 	user: User;
 	children: ReactNode;
 }) {
-	return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+	return <UserContext value={user}>{children}</UserContext>;
 }
