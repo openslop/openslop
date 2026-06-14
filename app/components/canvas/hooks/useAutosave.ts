@@ -3,7 +3,7 @@ import type { Descendant } from "slate";
 import { toast } from "sonner";
 import debounce from "lodash/debounce";
 import PQueue from "p-queue";
-import { OSMLSerializer } from "../utils/osmlSerializer";
+import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
 import { getProjectStore } from "@/lib/project/store";
 import { extractStoreSnapshot } from "@/lib/project/storeSnapshot";
 import { deriveProjectName } from "@/lib/project/projectName";

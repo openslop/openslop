@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { OSMLSerializer } from "@/app/components/canvas/utils/osmlSerializer";
+import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import {
 	SCENE_TYPE,

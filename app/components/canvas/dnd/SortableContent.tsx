@@ -7,8 +7,8 @@ import type {
 	CanvasElementType,
 	SceneElement,
 } from "@/lib/canvas/types";
-import { ELEMENT_LIST } from "../config/elementConfigs";
-import { insertElement } from "../utils/insertElement";
+import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
+import { insertElement } from "@/lib/canvas/insertElement";
 import { useViewMode } from "../ViewModeContext";
 import { SortableItem } from "./SortableItem";
 import { useDragTransfer } from "./DragTransferContext";

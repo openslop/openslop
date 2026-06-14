@@ -4,7 +4,7 @@ import { getProjectStore } from "@/lib/project/store";
 import type { DeepPartial, Metadata } from "@/lib/project/types";
 import { useScriptNodes } from "@/lib/script/ScriptProvider";
 import { METADATA_TAG_CONFIGS } from "../config/metadataTags";
-import { OSMLSerializer } from "../utils/osmlSerializer";
+import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
 
 export function useMetadataSync(): void {
 	const nodes = useScriptNodes();

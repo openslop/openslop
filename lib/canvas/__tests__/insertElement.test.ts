@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
-vi.mock("../config/elementConfigs", () => ({
+vi.mock("../elementConfigs", () => ({
 	ELEMENT_CONFIGS: {
 		image: {
 			type: "image",
@@ -22,7 +22,7 @@ vi.mock("../config/elementConfigs", () => ({
 	},
 }));
 
-vi.mock("../utils/hydrateConnectorConfig", () => ({
+vi.mock("../hydrateConnectorConfig", () => ({
 	hydrateConnectorConfig: () => (node: Record<string, unknown>) => ({
 		...node,
 		customAttributes: {
@@ -33,7 +33,7 @@ vi.mock("../utils/hydrateConnectorConfig", () => ({
 	}),
 }));
 
-import { insertElement } from "../utils/insertElement";
+import { insertElement } from "../insertElement";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 
 const connectors: ConnectorRegistry = {

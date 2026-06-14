@@ -6,9 +6,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { setNodeAttrs } from "@/lib/canvas/editorOps";
+import type { AttributeSpec } from "@/lib/canvas/elementConfigs";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import type { AttributeSpec } from "../config/elementConfigs";
-import { setNodeAttrs } from "../utils/editorOps";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 
 const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };

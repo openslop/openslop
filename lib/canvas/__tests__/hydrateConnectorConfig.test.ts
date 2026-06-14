@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hydrateConnectorConfig } from "../utils/hydrateConnectorConfig";
+import { hydrateConnectorConfig } from "../hydrateConnectorConfig";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 

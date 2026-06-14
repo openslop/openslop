@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseXmlTag } from "../utils/parseXmlTag";
+import { parseXmlTag } from "../parseXmlTag";
 
 describe("parseXmlTag", () => {
 	it("parses a tag name only", () => {

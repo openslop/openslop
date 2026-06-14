@@ -1,7 +1,7 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { ELEMENT_CONFIGS } from "./elementConfigs";
 
 export function hydrateConnectorConfig(registry: ConnectorRegistry) {
 	return (node: CanvasContentElement): CanvasContentElement => {

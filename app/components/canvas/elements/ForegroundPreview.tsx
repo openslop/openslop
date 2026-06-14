@@ -1,5 +1,5 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import { PlaceholderBallsLoader } from "./preview/placeholderBalls";
 import { StaleIndicator } from "./preview/overlays";

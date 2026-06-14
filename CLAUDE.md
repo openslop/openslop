@@ -18,6 +18,7 @@
 - Fail loudly: never catch-and-log errors on critical paths to "keep things going" — propagate the error or surface it explicitly
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is
 - Keep concerns separated. Favor small, composable, reusable components over feature-packed ones.
+- `lib/` is the domain layer and must never import from `app/` (enforced by ESLint `no-restricted-imports`). Logic needed by both layers belongs in `lib/`.
 - Understand the root problem behind each change, then solve that whole class of problem with a clean abstraction rather than special-casing the instance.
 
 ## Package manager

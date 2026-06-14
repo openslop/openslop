@@ -2,7 +2,7 @@ import type { CanvasElement } from "@/lib/canvas/types";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import { ELEMENT_CONFIGS } from "@/app/components/canvas/config/elementConfigs";
+import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import type { ResolvedElement } from "./types";
 import { ELEMENT_ROLES, LAYER_TYPES } from "./types";
 import {

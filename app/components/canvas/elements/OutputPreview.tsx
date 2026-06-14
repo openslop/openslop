@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "../config/elementConfigs";
+import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
 import { BORDER_COLORS } from "./preview/status";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";

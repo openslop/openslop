@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { OSMLSerializer } from "../utils/osmlSerializer";
+import { OSMLSerializer } from "../osmlSerializer";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,

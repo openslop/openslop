@@ -8,7 +8,7 @@ import type { SceneElement } from "@/lib/canvas/types";
 import { useActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { findSceneSequence } from "@/app/components/video/useSceneSegments";
 import { useLayout } from "@/app/components/video/VideoLayoutContext";
-import { isForeground } from "../utils/guards";
+import { isForeground } from "@/lib/canvas/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
 import { useSceneIndex } from "../hooks/useSceneIndex";
 import { useViewMode } from "../ViewModeContext";

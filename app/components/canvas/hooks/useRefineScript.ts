@@ -6,7 +6,7 @@ import { createConnector } from "@/lib/connectors/factory";
 import { createRefinePlugin } from "@/lib/connectors/llm/plugins/refine";
 import { RefineOpParser } from "@/lib/script/refine/parseOps";
 import { applyRefineOp } from "@/lib/script/refine/applyOps";
-import { OSMLSerializer } from "../utils/osmlSerializer";
+import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
 
 export function useRefineScript(editor: Editor) {
 	const { connectorConfig } = useConfig();
