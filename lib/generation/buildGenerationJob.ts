@@ -1,9 +1,9 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import type { GenerationJob } from "@/lib/generation/queue";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import type { GenerationJob } from "./queue";
 
 export function buildGenerationJob(
 	element: CanvasContentElement,
