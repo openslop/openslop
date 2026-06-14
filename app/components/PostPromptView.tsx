@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { Editor } from "slate";
 import {
 	useScriptControl,
 	useScriptInitial,
@@ -43,32 +44,44 @@ import editorStyles from "./Editor.module.css";
 import genStyles from "./styles/gen-button.module.css";
 
 function RefineComposer({
-	onSubmit,
-	onStop,
+	editor,
 	loading,
+	onStop,
 }: {
-	onSubmit: (prompt: string) => void;
-	onStop: () => void;
+	editor: Editor;
 	loading: boolean;
+	onStop: () => void;
 }) {
 	const [value, setValue] = useState("");
+	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
 	return (
 		<InlineCopilot
 			value={value}
 			onValueChange={setValue}
 			onSubmit={() => {
-				onSubmit(value);
+				refineScript(value);
 				setValue("");
 			}}
-			onStop={onStop}
-			loading={loading}
+			onStop={refineLoading ? stopRefine : onStop}
+			loading={loading || refineLoading}
 			placeholder="Refine your script…"
 		/>
 	);
 }
 
+function getGenerateLabel(loading: boolean, generating: boolean): string {
+	switch (true) {
+		case loading:
+			return "Writing…";
+		case generating:
+			return "Generating…";
+		default:
+			return "Generate";
+	}
+}
+
 function PostPromptViewInner() {
-	const { loading: scriptLoading, stopGeneration } = useScriptControl();
+	const { loading, stopGeneration } = useScriptControl();
 	const { editor, value, setValue } = useEditorSetup();
 	const { projectId } = useConfig();
 	const initialScript = useScriptInitial();
@@ -86,21 +99,11 @@ function PostPromptViewInner() {
 	);
 
 	const { position, visible } = usePlayerPosition();
-	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
 
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
-	const loading = scriptLoading || refineLoading;
 	const busy = loading || generating;
-	const stop = scriptLoading ? stopGeneration : stopRefine;
-	const canCancel = generating && !loading;
-	const generateLabel = scriptLoading
-		? "Writing…"
-		: refineLoading
-			? "Refining…"
-			: generating
-				? "Generating…"
-				: "Generate";
+	const generateLabel = getGenerateLabel(loading, generating);
 
 	const isTop = position === "top";
 
@@ -112,9 +115,9 @@ function PostPromptViewInner() {
 				<div className="flex w-full items-stretch justify-center gap-3">
 					<div className="min-w-0 flex-1 max-w-2xl">
 						<RefineComposer
-							onSubmit={refineScript}
-							onStop={stop}
+							editor={editor}
 							loading={loading}
+							onStop={stopGeneration}
 						/>
 					</div>
 					<button
@@ -127,7 +130,7 @@ function PostPromptViewInner() {
 						<Sparkles className={genStyles.svg} aria-hidden="true" />
 						<span>{generateLabel}</span>
 					</button>
-					{canCancel && (
+					{generating && (
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<button
