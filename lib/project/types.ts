@@ -17,23 +17,21 @@ export const ageSchema = z.enum(TTS_AGES).optional().catch(undefined);
 export const pitchSchema = z.enum(TTS_PITCHES).optional().catch(undefined);
 export const accentSchema = z.enum(TTS_ACCENTS).optional().catch(undefined);
 
-const voiceTraits = {
+const voiceTraitsSchema = z.object({
 	gender: genderSchema,
 	age: ageSchema,
 	pitch: pitchSchema,
 	accent: accentSchema,
 	description: optionalString,
 	language: languageSchema,
-};
+});
 
-export const MetadataVoiceSchema = z.object({
-	...voiceTraits,
+export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	voiceId: optionalString,
 	resolvedVoiceId: optionalString,
 });
 
-export const voiceSearchParamsSchema = z.object({
-	...voiceTraits,
+export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 	query: optionalString,
 	name: optionalString,
 	limit: z.coerce.number().int().positive().optional().catch(undefined),
