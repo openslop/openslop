@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getLLMProvider } from "@/lib/api/providers";
-import { bodySchema, createRouteHandler } from "@/lib/api/route-handler";
+import { bodySchema, createApiRouteHandler } from "@/lib/api/route-handler";
 import { optionalReferenceImages } from "@/lib/api/request-schema-fields";
 import { createSSEStreamResponse } from "@/lib/api/sse";
 import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
@@ -15,7 +15,7 @@ const schema = bodySchema(LLM_MODELS, {
 	stream: z.boolean().optional(),
 });
 
-export const POST = createRouteHandler({
+export const POST = createApiRouteHandler({
 	schema,
 	label: "LLM generation",
 	handle: async ({ body }) => {

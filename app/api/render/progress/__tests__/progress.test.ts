@@ -95,6 +95,20 @@ describe("POST /api/render/progress", () => {
 		});
 	});
 
+	it("returns 500 when done without an output file", async () => {
+		mockGetRenderProgress.mockResolvedValue({
+			fatalErrorEncountered: false,
+			done: true,
+			outputFile: null,
+			outputSizeInBytes: null,
+		});
+
+		const res = await POST(makeRequest(validBody));
+
+		expect(res.status).toBe(500);
+		expect((await res.json()).error).toContain("output file");
+	});
+
 	it("reports in-flight progress otherwise", async () => {
 		mockGetRenderProgress.mockResolvedValue({
 			fatalErrorEncountered: false,

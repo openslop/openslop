@@ -1,6 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
-import { bodySchema, createRouteHandler } from "../route-handler";
+import {
+	bodySchema,
+	createApiRouteHandler,
+	createSessionRouteHandler,
+} from "../route-handler";
 
 vi.mock("../logger", () => ({
 	logger: { warn: vi.fn(), error: vi.fn() },
@@ -30,9 +34,9 @@ const models = { "model-a": "slug-a", "model-b": "slug-b" };
 const schema = bodySchema(models, {});
 
 function makeHandler(
-	handle?: Parameters<typeof createRouteHandler>[0]["handle"],
+	handle?: Parameters<typeof createApiRouteHandler>[0]["handle"],
 ) {
-	return createRouteHandler({
+	return createApiRouteHandler({
 		schema,
 		label: "TestRoute",
 		handle:
@@ -42,13 +46,22 @@ function makeHandler(
 	});
 }
 
-describe("createRouteHandler", () => {
+describe("createApiRouteHandler", () => {
 	it("returns 401 when the user is not authenticated", async () => {
 		mockGetUser.mockResolvedValue(null);
 		const handle = vi.fn(async () => NextResponse.json({}));
 		const handler = makeHandler(handle);
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(401);
+		expect(handle).not.toHaveBeenCalled();
+	});
+
+	it("returns 403 when the user lacks api_access", async () => {
+		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
+		const handle = vi.fn(async () => NextResponse.json({}));
+		const handler = makeHandler(handle);
+		const res = await handler(makeRequest({ prompt: "hello" }));
+		expect(res.status).toBe(403);
 		expect(handle).not.toHaveBeenCalled();
 	});
 
@@ -138,5 +151,33 @@ describe("createRouteHandler", () => {
 		const json = await res.json();
 		expect(json.error).toContain("TestRoute failed: ");
 		expect(json.error).toContain("raw string failure");
+	});
+});
+
+describe("createSessionRouteHandler", () => {
+	function makeUserHandler() {
+		return createSessionRouteHandler({
+			schema,
+			label: "TestUserRoute",
+			handle: async ({ body }) => NextResponse.json({ prompt: body.prompt }),
+		});
+	}
+
+	it("returns 401 when the user is not authenticated", async () => {
+		mockGetUser.mockResolvedValue(null);
+		const res = await makeUserHandler()(makeRequest({ prompt: "hello" }));
+		expect(res.status).toBe(401);
+	});
+
+	it("allows signed-in users without api_access", async () => {
+		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
+		const res = await makeUserHandler()(makeRequest({ prompt: "hello" }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ prompt: "hello" });
+	});
+
+	it("returns 400 for an invalid body", async () => {
+		const res = await makeUserHandler()(makeRequest({}));
+		expect(res.status).toBe(400);
 	});
 });

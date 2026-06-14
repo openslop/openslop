@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTTSProvider } from "@/lib/api/providers";
 import { badRequest } from "@/lib/api/response";
-import { withAuth } from "@/lib/api/with-auth";
+import { withApiAccess } from "@/lib/api/with-auth";
 
 export async function GET(request: NextRequest) {
-	return withAuth("Voice preview fetch", async () => {
+	return withApiAccess("Voice preview fetch", async () => {
 		const url = request.nextUrl.searchParams.get("url");
 		if (!url) return badRequest("Missing url");
 

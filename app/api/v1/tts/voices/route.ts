@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTTSProvider } from "@/lib/api/providers";
-import { withAuth } from "@/lib/api/with-auth";
+import { withApiAccess } from "@/lib/api/with-auth";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 
 export async function GET(request: NextRequest) {
-	return withAuth("Voice search", async () => {
+	return withApiAccess("Voice search", async () => {
 		const params = voiceSearchParamsSchema.parse(
 			Object.fromEntries(request.nextUrl.searchParams),
 		);
