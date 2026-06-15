@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { Editor } from "slate";
 import {
 	useScriptControl,
@@ -52,16 +52,10 @@ function RefineComposer({
 	loading: boolean;
 	onStop: () => void;
 }) {
-	const [value, setValue] = useState("");
 	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
 	return (
 		<InlineCopilot
-			value={value}
-			onValueChange={setValue}
-			onSubmit={() => {
-				refineScript(value);
-				setValue("");
-			}}
+			onSubmit={refineScript}
 			onStop={refineLoading ? stopRefine : onStop}
 			loading={loading || refineLoading}
 			placeholder="Refine your script…"

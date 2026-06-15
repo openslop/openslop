@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { CornerDownLeft, Sparkles, Square } from "lucide-react";
 import OrbLoader from "../OrbLoader";
 import { ActionButton } from "./ActionButton";
+import { CopilotShell, splitPlaceholder } from "./CopilotShell";
 
 const LOADING_MESSAGES = [
 	"Brewing creativity…",
@@ -36,34 +37,32 @@ function LoadingText() {
 }
 
 interface InlineCopilotProps {
-	value: string;
-	onValueChange: (value: string) => void;
-	onSubmit: () => void;
+	onSubmit: (prompt: string) => void;
 	onStop?: () => void;
 	placeholder?: ReactNode;
 	loading?: boolean;
 }
 
 export default function InlineCopilot({
-	value,
-	onValueChange,
 	onSubmit,
 	onStop,
 	placeholder,
 	loading,
 }: InlineCopilotProps) {
+	const [value, setValue] = useState("");
 	const hasText = value.trim().length > 0;
 	const handleSubmit = () => {
-		if (hasText) onSubmit();
+		if (!hasText) return;
+
+		onSubmit(value);
+		setValue("");
 	};
 
-	const placeholderOverlay =
-		typeof placeholder !== "string" ? placeholder : undefined;
-	const placeholderText =
-		typeof placeholder === "string" ? placeholder : undefined;
+	const { text: placeholderText, overlay: placeholderOverlay } =
+		splitPlaceholder(placeholder);
 
 	return (
-		<div className="w-full rounded-xl border border-accent-violet/30 bg-glass-fill backdrop-blur-xl transition-shadow focus-within:shadow-glow">
+		<CopilotShell>
 			<div className="relative flex items-center px-4 py-3">
 				{loading ? (
 					<OrbLoader />
@@ -84,7 +83,7 @@ export default function InlineCopilot({
 								type="text"
 								aria-label="Describe your video"
 								value={value}
-								onChange={(e) => onValueChange(e.target.value)}
+								onChange={(e) => setValue(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 								placeholder={placeholderText}
 								className="font-body w-full bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"
@@ -107,6 +106,6 @@ export default function InlineCopilot({
 					/>
 				)}
 			</div>
-		</div>
+		</CopilotShell>
 	);
 }

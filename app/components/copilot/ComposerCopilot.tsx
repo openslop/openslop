@@ -32,6 +32,7 @@ import { useAspectRatio } from "@/lib/video/useAspectRatio";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
+import { CopilotShell, splitPlaceholder } from "./CopilotShell";
 
 const MODE_OPTIONS: GlassDropdownOption<Mode>[] = [
 	{ value: "story", label: "Describe a story" },
@@ -167,13 +168,11 @@ export default function ComposerCopilot({
 		if (hasText) onSubmit();
 	};
 
-	const placeholderOverlay =
-		typeof placeholder !== "string" ? placeholder : undefined;
-	const placeholderText =
-		typeof placeholder === "string" ? placeholder : undefined;
+	const { text: placeholderText, overlay: placeholderOverlay } =
+		splitPlaceholder(placeholder);
 
 	return (
-		<div className="w-full rounded-xl border border-accent-violet/30 bg-glass-fill backdrop-blur-xl transition-shadow focus-within:shadow-glow">
+		<CopilotShell>
 			<div className="px-4 py-3">
 				<ComposerAssets
 					uploadingCount={uploadingCount}
@@ -285,6 +284,6 @@ export default function ComposerCopilot({
 				open={editingNarrator}
 				onOpenChange={setEditingNarrator}
 			/>
-		</div>
+		</CopilotShell>
 	);
 }
