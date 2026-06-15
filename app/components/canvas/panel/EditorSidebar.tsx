@@ -60,7 +60,7 @@ function RailItem({
 	const body = (
 		<>
 			<Icon className="h-5 w-5" />
-			<span className="leading-tight">{label}</span>
+			<span className="hidden leading-tight lg:block">{label}</span>
 		</>
 	);
 	return href ? (
@@ -68,7 +68,12 @@ function RailItem({
 			{body}
 		</Link>
 	) : (
-		<button type="button" onClick={onClick} className={className}>
+		<button
+			type="button"
+			onClick={onClick}
+			className={className}
+			aria-label={label}
+		>
 			{body}
 		</button>
 	);
@@ -85,7 +90,7 @@ export function EditorSidebar() {
 
 	return (
 		<div className="flex shrink-0">
-			<nav className="flex w-[72px] shrink-0 flex-col items-center gap-1 pt-4 pr-0.5 pl-1">
+			<nav className="flex w-14 shrink-0 flex-col items-center gap-1 pt-16 pr-0.5 pl-1 lg:w-[72px] lg:pt-4">
 				<RailItem icon={Home} label="Home" href="/" />
 				<div className="my-1.5 h-px w-8 bg-border" />
 				{(Object.keys(PANELS) as PanelKey[]).map((key) => {
