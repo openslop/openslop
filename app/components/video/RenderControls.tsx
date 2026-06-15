@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Loader2, X } from "lucide-react";
+import { Download, Loader2, X } from "@/components/ui/icon";
 import {
 	Tooltip,
 	TooltipTrigger,
@@ -16,7 +16,7 @@ function formatBytes(bytes: number): string {
 }
 
 const pillClass =
-	"flex items-center gap-2 rounded-lg border border-glass-border bg-card/90 px-3 py-2 backdrop-blur-xl shadow-md shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]";
+	"flex items-center gap-2 rounded-lg border border-border bg-card/90 px-3 py-2 shadow-md shadow-black/20";
 
 export function RenderControls({ layout }: { layout: VideoLayout }) {
 	const { state, render, reset } = useRendering();
@@ -29,7 +29,7 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 						type="button"
 						onClick={() => render(layout)}
 						aria-label="Export Video"
-						className="relative grain rounded-lg bg-[#1f1528]/90 p-2 text-violet-300 opacity-0 shadow-md shadow-black/25 transition-[opacity,filter] hover:brightness-[1.3] group-hover:opacity-100"
+						className="relative rounded-lg bg-secondary p-2 text-accent opacity-0 shadow-md shadow-black/25 transition-[opacity,filter] hover:brightness-[1.3] group-hover:opacity-100"
 					>
 						<Download size={16} />
 					</button>
@@ -42,8 +42,8 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 	if (state.status === "invoking") {
 		return (
 			<div className={pillClass}>
-				<Loader2 size={14} className="animate-spin text-white/60" />
-				<span className="text-xs text-white/80">Starting...</span>
+				<Loader2 size={14} className="animate-spin text-muted-foreground" />
+				<span className="text-xs text-foreground">Starting...</span>
 			</div>
 		);
 	}
@@ -51,12 +51,12 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 	if (state.status === "rendering") {
 		return (
 			<div className={pillClass}>
-				<Loader2 size={14} className="animate-spin text-white/60" />
+				<Loader2 size={14} className="animate-spin text-muted-foreground" />
 				<div className="flex flex-col gap-1">
-					<span className="text-xs text-white/80">Rendering...</span>
-					<div className="h-1 w-32 overflow-hidden rounded-full bg-white/15">
+					<span className="text-xs text-foreground">Rendering...</span>
+					<div className="h-1 w-32 overflow-hidden rounded-full bg-muted">
 						<div
-							className="h-full rounded-full bg-violet-500 transition-all"
+							className="h-full rounded-full bg-accent transition-all"
 							style={{ width: `${state.progress * 100}%` }}
 						/>
 					</div>
@@ -71,7 +71,7 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 				<a
 					href={state.url}
 					download
-					className="relative grain flex items-center gap-1.5 rounded-md bg-[#1f1528]/60 px-3 py-1.5 text-xs font-medium text-violet-300 transition-[filter] hover:brightness-[1.3]"
+					className="relative flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-accent transition-[filter] hover:brightness-[1.3]"
 				>
 					<Download size={14} />
 					{formatBytes(state.size)}
@@ -80,7 +80,7 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 					type="button"
 					onClick={reset}
 					aria-label="Dismiss"
-					className="rounded-md p-1 text-white/40 hover:text-white/80"
+					className="rounded-md p-1 text-muted-foreground hover:text-foreground"
 				>
 					<X size={14} />
 				</button>
@@ -90,11 +90,11 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 
 	return (
 		<div className={pillClass}>
-			<span className="text-xs text-red-400">{state.message}</span>
+			<span className="text-xs text-destructive">{state.message}</span>
 			<button
 				type="button"
 				onClick={reset}
-				className="text-xs text-white/60 underline hover:text-white/80"
+				className="text-xs text-muted-foreground underline hover:text-foreground"
 			>
 				Dismiss
 			</button>

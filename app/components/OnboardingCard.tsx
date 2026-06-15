@@ -1,4 +1,5 @@
 import OpenSlopLogo from "./OpenSlopLogo";
+import { Card } from "@/components/ui/card";
 
 interface OnboardingCardProps {
 	heading: string;
@@ -18,38 +19,34 @@ export default function OnboardingCard({
 	extra,
 }: OnboardingCardProps) {
 	return (
-		<div className="flex min-h-screen items-center justify-center px-3 sm:px-4 py-8">
-			{/* Top-left branding */}
+		<div className="grain relative flex min-h-screen items-center justify-center px-3 py-8 sm:px-4">
 			<span
-				className="absolute top-6 left-6 text-2xl tracking-tight text-white"
-				style={{ fontFamily: "Sentient, serif" }}
+				className="absolute top-6 left-6 text-2xl tracking-tight text-foreground"
+				style={{ fontFamily: "var(--font-sentient), serif" }}
 			>
 				OpenSlop
 			</span>
 
-			{/* Outer glass card */}
-			<div className="w-full max-w-lg rounded-[2rem] sm:rounded-[2rem] bg-black/30 backdrop-blur-xl shadow-[0_8px_40px_rgba(120,60,220,0.15),0_2px_12px_rgba(0,0,0,0.3)] p-5 sm:p-8 flex flex-col items-center gap-4 sm:gap-6">
-				{/* Icon or Logo */}
-				{icon ?? <OpenSlopLogo className="w-14 h-auto text-white" />}
+			<Card
+				glow
+				className="w-full max-w-lg items-center gap-4 rounded-3xl p-5 sm:gap-6 sm:p-8"
+			>
+				{icon ?? <OpenSlopLogo className="h-auto w-14 text-foreground" />}
 
-				{/* Heading */}
-				<h1 className="text-2xl sm:text-3xl font-light text-white text-center font-body text-wrap-balance">
+				<h1 className="text-center text-2xl font-light text-balance text-foreground sm:text-3xl">
 					{heading}
 				</h1>
 
-				{/* Extra content (e.g. logo pill) */}
 				{extra}
 
-				{/* Subtitle */}
-				<p className="text-white/50 text-center text-xs sm:text-sm font-light leading-relaxed font-body">
+				<p className="text-center text-xs leading-relaxed font-light text-muted-foreground sm:text-sm">
 					{subtitle}
 				</p>
 
 				{children}
 
-				{/* Footer */}
-				<p className="text-white/40 text-xs sm:text-sm font-body">{footer}</p>
-			</div>
+				<p className="text-xs text-muted-foreground sm:text-sm">{footer}</p>
+			</Card>
 		</div>
 	);
 }

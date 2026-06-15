@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ImagePlus, Loader2, Trash2, X } from "lucide-react";
+import { ImagePlus, Loader2, Trash2, X } from "@/components/ui/icon";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import {
 	DialogContent,
 	DialogDescription,
@@ -30,6 +32,7 @@ import {
 import { useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaPlaceholder, MediaPreview } from "../preview/results";
 import { TextAreaField } from "./fields";
 import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
@@ -114,6 +117,11 @@ function CharacterEditDialogBody({
 			),
 		);
 
+	const generating = avatarSnapshot.status !== "idle";
+	const hasAppearance = Boolean(character.appearance?.trim());
+	const generateDisabled = generating || !hasAppearance;
+	const revertAppearance = avatarSnapshot.resultInputs?.attributes.appearance;
+
 	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
 
 	const interceptClose = (e: { preventDefault(): void }) => {
@@ -144,7 +152,7 @@ function CharacterEditDialogBody({
 				type="button"
 				onClick={requestClose}
 				aria-label="Close"
-				className="absolute right-3 top-3 z-10 rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-accent-violet/50"
+				className="absolute right-3 top-3 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
 			>
 				<X className="h-4 w-4" />
 			</button>
@@ -158,53 +166,68 @@ function CharacterEditDialogBody({
 
 			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
 				<div className="grid gap-4 sm:grid-cols-2">
-					<TextAreaField
-						label="Appearance"
-						value={character.appearance}
-						onChange={(appearance) => update({ appearance })}
-						placeholder="Describe the character's look"
-					/>
+					<div className="flex flex-col gap-2">
+						<TextAreaField
+							className="min-h-0 flex-1"
+							label="Appearance"
+							value={character.appearance}
+							onChange={(appearance) => update({ appearance })}
+							placeholder="Describe the character's look"
+						/>
+						<div className="flex items-center justify-end gap-2">
+							{isStale && revertAppearance != null && (
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										update({ appearance: String(revertAppearance) })
+									}
+								>
+									Revert
+								</Button>
+							)}
+							{isStale && <StaleIndicator />}
+							<GenerateButton
+								label="Generate"
+								disabled={generateDisabled}
+								onGenerate={regenerateAvatar}
+							/>
+						</div>
+					</div>
 					<div className="relative">
 						{character.avatarUrl ? (
 							<MediaPreview
 								key={character.avatarUrl}
-								elementId={avatarElementId}
 								url={character.avatarUrl}
 								outputKind="image"
-								borderColor="border-white/20"
+								borderColor="border-border"
 								status={avatarSnapshot.status}
 								seconds={avatarSnapshot.seconds}
-								stale={isStale}
-								onRegenerate={regenerateAvatar}
-								onRevert={({ attributes }) =>
-									update({ appearance: String(attributes.appearance) })
-								}
 							/>
 						) : (
 							<MediaPlaceholder
 								status={avatarSnapshot.status}
 								seconds={avatarSnapshot.seconds}
 								error={avatarSnapshot.error}
-								onGenerate={regenerateAvatar}
 								onDiscard={() => queue.discard(avatarElementId)}
 							/>
 						)}
 						{inputElement}
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<button
-									type="button"
+								<IconButton
+									ariaLabel="Upload image"
 									onClick={openPicker}
 									disabled={uploading}
-									aria-label="Upload image"
-									className="grain grain-light absolute left-2 top-11 z-10 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-black/55 ring-1 ring-inset ring-white/10 backdrop-blur-xl transition-colors hover:bg-black/70 disabled:opacity-60"
+									className="absolute left-2 top-2 z-10 rounded-full bg-card shadow-sm ring-1 ring-border"
 								>
 									{uploading ? (
-										<Loader2 className="h-3 w-3 animate-spin text-white" />
+										<Loader2 className="h-3.5 w-3.5 animate-spin" />
 									) : (
-										<ImagePlus className="h-3 w-3 text-white" />
+										<ImagePlus className="h-3.5 w-3.5" />
 									)}
-								</button>
+								</IconButton>
 							</TooltipTrigger>
 							<TooltipContent>Upload image</TooltipContent>
 						</Tooltip>
@@ -220,7 +243,7 @@ function CharacterEditDialogBody({
 					className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] transition-colors ${
 						confirmDelete
 							? "border-rose-500/60 bg-rose-500/20 text-rose-200 hover:bg-rose-500/30"
-							: "border-glass-border bg-glass-fill text-white/70 hover:bg-white/10"
+							: "border-border bg-card text-muted-foreground hover:bg-muted"
 					}`}
 				>
 					<Trash2 className="h-3 w-3" />

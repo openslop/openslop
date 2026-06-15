@@ -6,10 +6,8 @@ import { useEffect, useState, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import { usePlayerControl } from "./PlayerControlContext";
-import { PlayerControls } from "./PlayerControls";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { useActiveSceneSync } from "./useActiveSceneSync";
-import { useControlsVisibility } from "./useControlsVisibility";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
@@ -54,7 +52,6 @@ const RemotionPlayer = dynamic(
 
 export function VideoPreview({ layout }: { layout: VideoLayout }) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
-	const { visible, ping, leave } = useControlsVisibility();
 	const segments = useSceneSegments();
 	const activeIndex = usePlayerValue(
 		player,
@@ -78,13 +75,7 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 		setFlash((f) => ({ key: (f?.key ?? 0) + 1, playing: willPlay }));
 	};
 	return (
-		<div
-			className={`relative h-full w-full ${styles.player}`}
-			onPointerMove={ping}
-			onPointerDown={ping}
-			onFocus={ping}
-			onPointerLeave={leave}
-		>
+		<div className={`relative h-full w-full ${styles.player}`}>
 			<ToastErrorBoundary label="Player">
 				<RemotionPlayer layout={layout} playerRef={setPlayer} />
 			</ToastErrorBoundary>
@@ -93,13 +84,6 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />
-			<PlayerControls
-				player={player}
-				layout={layout}
-				segments={segments}
-				activeIndex={activeIndex}
-				visible={visible}
-			/>
 		</div>
 	);
 }

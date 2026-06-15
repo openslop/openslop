@@ -11,32 +11,42 @@ export function ResizeHandle({
 	resizing,
 	onMouseDown,
 }: ResizeHandleProps) {
-	const isVertical = axis === "vertical";
+	// A "vertical" axis resizes top/bottom panels, so the handle itself is a
+	// horizontal line (shadow on its bottom); "horizontal" is a vertical line
+	// (shadow on its right).
+	const isHorizontalLine = axis === "vertical";
 
 	return (
 		<div
 			onMouseDown={onMouseDown}
 			className={`group relative flex shrink-0 items-center justify-center ${
-				isVertical
+				isHorizontalLine
 					? "h-2 w-full cursor-row-resize"
 					: "h-full w-4 cursor-col-resize"
 			} ${resizing ? "select-none" : ""}`}
 		>
 			<div
-				className={`absolute rounded-full transition-colors ${
-					isVertical ? "h-0.5 w-full" : "h-full w-0.5"
-				} ${resizing ? "bg-white/40" : "bg-white/10 group-hover:bg-white/25"}`}
+				className={`flex ${isHorizontalLine ? "h-0.5 w-full flex-col" : "h-full w-0.5"}`}
 				style={{
 					maskImage: `linear-gradient(${
-						isVertical ? "to right" : "to bottom"
+						isHorizontalLine ? "to right" : "to bottom"
+					}, transparent, black 20%, black 80%, transparent)`,
+					WebkitMaskImage: `linear-gradient(${
+						isHorizontalLine ? "to right" : "to bottom"
 					}, transparent, black 20%, black 80%, transparent)`,
 				}}
-			/>
-			<div
-				className={`relative rounded-full transition-colors ${
-					isVertical ? "h-1 w-6" : "h-6 w-1"
-				} ${resizing ? "bg-white/50" : "bg-white/30 group-hover:bg-white/50"}`}
-			/>
+			>
+				<div
+					className={`bg-resizer transition-colors group-hover:bg-resizer-hover ${
+						isHorizontalLine ? "h-px w-full" : "h-full w-px"
+					}`}
+				/>
+				<div
+					className={`bg-resizer-shadow ${
+						isHorizontalLine ? "h-px w-full" : "h-full w-px"
+					}`}
+				/>
+			</div>
 		</div>
 	);
 }

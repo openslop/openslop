@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "@/components/ui/icon";
 import { toast } from "sonner";
 import { createProject, deleteProject } from "@/lib/project/api";
 import type { ProjectRow } from "@/lib/project/api";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import UserProfile from "@/app/components/UserProfile";
+import { Button } from "@/components/ui/button";
 import { relativeTime } from "@/lib/project/relativeTime";
 
 export default function ProjectsList({
@@ -44,76 +45,80 @@ export default function ProjectsList({
 	};
 
 	return (
-		<div className="min-h-screen text-white">
-			<div className="fixed left-4 top-4 z-[100]">
+		<div className="relative min-h-screen bg-background text-foreground">
+			<div
+				aria-hidden
+				className="dot-grid-bg pointer-events-none absolute inset-0 z-0"
+			/>
+			<div className="fixed top-4 left-4 z-[100]">
 				<UserProfile />
 			</div>
-			<div className="max-w-5xl mx-auto px-6 pt-20 pb-16">
-				<header className="flex items-end justify-between mb-10">
+			<div className="relative z-10 mx-auto max-w-7xl px-6 pt-20 pb-16">
+				<header className="mb-10 flex items-end justify-between">
 					<div>
-						<h1 className="font-body text-4xl tracking-tight">My Slop</h1>
-						<p className="text-white/60 text-sm mt-1">
+						<h1 className="text-4xl font-semibold tracking-tight">My Slop</h1>
+						<p className="mt-1 text-sm text-muted-foreground">
 							{projects.length === 0
 								? "No projects yet — start your first slop."
 								: `${projects.length} project${projects.length === 1 ? "" : "s"}`}
 						</p>
 					</div>
-					<button
-						type="button"
-						onClick={handleCreate}
-						disabled={pending}
-						className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-colors"
-					>
-						<Plus size={16} strokeWidth={2} />
+					<Button type="button" onClick={handleCreate} disabled={pending}>
+						<Plus size={16} strokeWidth={1.5} />
 						New slop
-					</button>
+					</Button>
 				</header>
 
-				<ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
 					{projects.map((project) => (
-						<li key={project.id}>
-							<div className="group relative rounded-xl border border-glass-border bg-white/[0.03] hover:bg-white/[0.06] transition-colors overflow-hidden">
+						<li key={project.id} className="group">
+							<div className="relative">
 								<button
 									type="button"
 									onClick={() => router.push(`/projects/${project.id}`)}
-									className="block w-full text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+									aria-label={`Open ${project.name}`}
+									className="block w-full overflow-hidden rounded-lg bg-muted focus-ring"
 								>
-									<div className="relative aspect-video bg-white/[0.04]">
+									<div className="relative aspect-square">
 										{project.thumbnail_url ? (
 											<ImageWithShimmer
 												src={project.thumbnail_url}
 												alt={project.name}
 												fill
-												sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
-												className="object-cover"
+												sizes="(min-width: 1280px) 200px, (min-width: 768px) 25vw, 50vw"
+												className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
 											/>
 										) : (
-											<div className="absolute inset-0 flex items-center justify-center text-white/30 text-xs">
+											<div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
 												No preview
 											</div>
 										)}
-									</div>
-									<div className="p-4">
-										<div className="text-sm font-medium truncate">
-											{project.name}
-										</div>
-										<div className="text-xs text-white/50 mt-0.5">
-											Edited{" "}
-											<span suppressHydrationWarning>
-												{relativeTime(project.updated_at)}
-											</span>
-										</div>
 									</div>
 								</button>
 								<button
 									type="button"
 									onClick={() => handleDelete(project.id)}
 									aria-label={`Delete ${project.name}`}
-									className="absolute top-2 right-2 p-1.5 rounded-md bg-black/40 text-white/70 hover:text-white hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
+									className="absolute top-2 right-2 rounded-md border border-border bg-popover p-1.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted hover:text-foreground"
 								>
 									<Trash2 size={14} strokeWidth={1.5} />
 								</button>
 							</div>
+							<button
+								type="button"
+								onClick={() => router.push(`/projects/${project.id}`)}
+								className="mt-2 block w-full text-left"
+							>
+								<div className="truncate text-sm font-semibold text-foreground">
+									{project.name}
+								</div>
+								<div
+									className="mt-0.5 truncate text-xs text-muted-foreground"
+									suppressHydrationWarning
+								>
+									Edited {relativeTime(project.updated_at)}
+								</div>
+							</button>
 						</li>
 					))}
 				</ul>

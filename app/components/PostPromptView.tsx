@@ -11,12 +11,15 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getContentElements } from "@/lib/canvas/scenes";
+import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
 import { getLayoutKey } from "@/lib/video/layoutKey";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
 import { useTransitionType } from "@/lib/video/useTransitionType";
 import InlineCopilot from "./copilot/InlineCopilot";
+import UserProfile from "./UserProfile";
 import Canvas from "./canvas/Canvas";
+import { EditorSidebar } from "./canvas/panel/EditorSidebar";
+import { ViewModeProvider } from "./canvas/ViewModeContext";
 import { ProjectTitle } from "./canvas/ProjectTitle";
 import { useEditorSetup } from "./canvas/hooks/useEditorSetup";
 import { useAutosave } from "./canvas/hooks/useAutosave";
@@ -25,13 +28,14 @@ import { useMetadataSync } from "./canvas/hooks/useMetadataSync";
 import { useProjectRehydrate } from "./canvas/hooks/useProjectRehydrate";
 import { useScriptSync } from "./canvas/hooks/useScriptSync";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X } from "@/components/ui/icon";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
+import { BottomTransportBar } from "./video/BottomTransportBar";
 import {
 	PlayerPositionProvider,
 	usePlayerPosition,
@@ -41,7 +45,8 @@ import { AutoScrollProvider } from "./scene-selection/AutoScrollContext";
 import { PlayerControlProvider } from "./video/PlayerControlContext";
 import { VideoLayoutProvider } from "./video/VideoLayoutContext";
 import editorStyles from "./Editor.module.css";
-import genStyles from "./styles/gen-button.module.css";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 function RefineComposer({
 	editor,
@@ -76,7 +81,7 @@ function getGenerateLabel(loading: boolean, generating: boolean): string {
 		case generating:
 			return "Generating…";
 		default:
-			return "Generate";
+			return "Generate All";
 	}
 }
 
@@ -99,6 +104,10 @@ function PostPromptViewInner() {
 	);
 
 	const { position, visible } = usePlayerPosition();
+	const sceneIds = useMemo(
+		() => value.filter(isSceneElement).map((scene) => scene.id),
+		[value],
+	);
 
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
@@ -108,43 +117,57 @@ function PostPromptViewInner() {
 	const isTop = position === "top";
 
 	return (
-		<div className="flex h-screen w-full flex-col overflow-hidden">
+		<div className="relative flex h-screen w-full flex-col overflow-hidden">
+			<div
+				aria-hidden
+				className="dot-grid-bg pointer-events-none fixed inset-0 -z-10"
+			/>
+			<div className="fixed top-4 left-4 z-[100]">
+				<UserProfile />
+			</div>
 			<div
 				className={`z-40 flex w-full shrink-0 flex-col items-center gap-3 px-4 py-3 pb-2 pl-16 ${editorStyles.copilotEnter}`}
 			>
-				<div className="flex w-full items-stretch justify-center gap-3">
-					<div className="min-w-0 flex-1 max-w-2xl">
+				<div className="flex w-full items-start gap-3">
+					<div className="hidden flex-1 sm:block" aria-hidden />
+					<div className="min-w-0 max-w-2xl flex-1">
 						<RefineComposer
 							editor={editor}
 							loading={loading}
 							onStop={stopGeneration}
 						/>
 					</div>
-					<button
-						type="button"
-						onClick={generateAll}
-						className={`${genStyles.btn} ${generating ? genStyles.generating : ""} shrink-0 transition-opacity ${busy ? "" : "opacity-80 hover:opacity-100"}`}
-						aria-label={generateLabel}
-						disabled={busy}
-					>
-						<Sparkles className={genStyles.svg} aria-hidden="true" />
-						<span>{generateLabel}</span>
-					</button>
-					{generating && (
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<button
-									type="button"
-									onClick={() => queue.cancelAll()}
-									aria-label="Cancel generation"
-									className="grain grain-light relative flex h-7 w-7 shrink-0 items-center justify-center self-center overflow-hidden rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20"
-								>
-									<X className="h-3 w-3" aria-hidden="true" />
-								</button>
-							</TooltipTrigger>
-							<TooltipContent>Cancel generation</TooltipContent>
-						</Tooltip>
-					)}
+					<div className="flex flex-1 items-start justify-end gap-2 max-sm:flex-none">
+						<Button
+							type="button"
+							onClick={generateAll}
+							className="h-11 shrink-0 px-4 sm:px-5"
+							aria-label={generateLabel}
+							disabled={busy}
+						>
+							{busy ? (
+								<Spinner className="text-primary-foreground" />
+							) : (
+								<Sparkles aria-hidden="true" />
+							)}
+							<span className="hidden sm:inline">{generateLabel}</span>
+						</Button>
+						{generating && (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<button
+										type="button"
+										onClick={() => queue.cancelAll()}
+										aria-label="Cancel generation"
+										className="relative flex h-7 w-7 shrink-0 items-center justify-center self-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+									>
+										<X className="h-3 w-3" aria-hidden="true" />
+									</button>
+								</TooltipTrigger>
+								<TooltipContent>Cancel generation</TooltipContent>
+							</Tooltip>
+						)}
+					</div>
 				</div>
 			</div>
 
@@ -157,22 +180,36 @@ function PostPromptViewInner() {
 				<PlayerControlProvider>
 					<ActiveSceneProvider>
 						<AutoScrollProvider>
-							{visible && isTop && <TopPlayerPanel />}
+							<ViewModeProvider sceneIds={sceneIds}>
+								<div className="flex min-h-0 flex-1 overflow-hidden">
+									<EditorSidebar />
+									<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
+										<div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
+											{visible && isTop && <TopPlayerPanel />}
 
-							<div className="flex min-h-0 flex-1 overflow-hidden">
-								<div
-									className="flex-1 overflow-y-auto"
-									style={{ scrollbarGutter: "stable" }}
-								>
-									<div className="pointer-events-none sticky top-0 z-10 -mb-8 h-8 backdrop-blur-sm [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-									<div className="mx-auto max-w-6xl px-4 py-4">
-										<ProjectTitle />
-										<Canvas editor={editor} value={value} setValue={setValue} />
+											<div className="flex min-h-0 flex-1 overflow-hidden">
+												<div
+													className="flex-1 overflow-y-auto"
+													style={{ scrollbarGutter: "stable" }}
+												>
+													<div className="mx-auto max-w-6xl px-4 py-4">
+														<ProjectTitle />
+														<Canvas
+															editor={editor}
+															value={value}
+															setValue={setValue}
+														/>
+													</div>
+												</div>
+
+												{visible && !isTop && <SidePlayerPanel />}
+											</div>
+
+											<BottomTransportBar />
+										</div>
 									</div>
 								</div>
-
-								{visible && !isTop && <SidePlayerPanel />}
-							</div>
+							</ViewModeProvider>
 						</AutoScrollProvider>
 					</ActiveSceneProvider>
 				</PlayerControlProvider>

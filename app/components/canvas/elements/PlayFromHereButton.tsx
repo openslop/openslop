@@ -1,6 +1,7 @@
 "use client";
 
-import { Play } from "lucide-react";
+import { Play } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import {
 	Tooltip,
 	TooltipContent,
@@ -10,7 +11,6 @@ import { usePlayerControl } from "@/app/components/video/PlayerControlContext";
 import { findSceneSequence } from "@/app/components/video/useSceneSegments";
 import { useLayout } from "@/app/components/video/VideoLayoutContext";
 import type { SceneElement } from "@/lib/canvas/types";
-import styles from "./PlayFromHereButton.module.css";
 
 export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 	const { layout } = useLayout();
@@ -21,18 +21,16 @@ export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
-				<button
-					type="button"
-					aria-label="Play from here"
+				<IconButton
+					ariaLabel="Play from here"
 					disabled={disabled}
 					onMouseDown={(e) => e.preventDefault()}
 					onClick={() => {
 						if (startFrame != null) playFromFrame(startFrame);
 					}}
-					className={styles.button}
 				>
-					<Play className={styles.icon} />
-				</button>
+					<Play className="h-4 w-4" />
+				</IconButton>
 			</TooltipTrigger>
 			<TooltipContent>
 				{disabled ? "Generate scene to play" : "Play from here"}

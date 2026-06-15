@@ -1,12 +1,13 @@
 import {
-	BookOpen,
+	Voice,
+	Motion,
+	Music,
 	User,
 	Image as ImageIcon,
-	Film,
-	Sparkles,
-	Volume2,
-	Music,
-} from "lucide-react";
+	Video,
+	Waveform,
+	type LucideIcon,
+} from "@/components/ui/icon";
 import type { CanvasElementType, ResultKind } from "@/lib/canvas/types";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
@@ -19,6 +20,8 @@ export type AttributeEdit =
 export interface AttributeSpec {
 	color: string;
 	label: string;
+	/** When set, the badge shows this icon in place of the text label. */
+	icon?: LucideIcon;
 	edit?: AttributeEdit;
 }
 
@@ -28,7 +31,8 @@ export interface ElementConfig {
 	outputKind: ResultKind;
 	label: string;
 	icon: React.ReactNode;
-	bgColor: string;
+	/** Tint for the square type-icon container, keyed to the media-type color. */
+	iconBgClass: string;
 	placeholder: string;
 	defaultAttributes?: Record<string, string>;
 	visibleAttributes: Record<string, AttributeSpec>;
@@ -91,8 +95,10 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "tts",
 		outputKind: "audio",
 		label: "Narration",
-		icon: <BookOpen size={16} className="text-white" />,
-		bgColor: "bg-slate-600",
+		icon: (
+			<Voice size={16} strokeWidth={1.5} className="text-media-narration" />
+		),
+		iconBgClass: "bg-media-narration/15",
 		placeholder: "Write the narration...",
 		defaultAttributes: {
 			volume: "10",
@@ -115,8 +121,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "tts",
 		outputKind: "audio",
 		label: "Character",
-		icon: <User size={16} className="text-white" />,
-		bgColor: "bg-amber-600",
+		icon: <User size={16} strokeWidth={1.5} className="text-media-character" />,
+		iconBgClass: "bg-media-character/15",
 		placeholder: "What does this character say?",
 		defaultAttributes: {
 			volume: "10",
@@ -139,8 +145,10 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "image",
 		outputKind: "image",
 		label: "Image",
-		icon: <ImageIcon size={16} className="text-white" />,
-		bgColor: "bg-cyan-600",
+		icon: (
+			<ImageIcon size={16} strokeWidth={1.5} className="text-media-image" />
+		),
+		iconBgClass: "bg-media-image/15",
 		placeholder: "Describe the image...",
 		defaultAttributes: {
 			motion: "none",
@@ -154,8 +162,10 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "animated_image",
 		outputKind: "video",
 		label: "Animated image",
-		icon: <Sparkles size={16} className="text-white" />,
-		bgColor: "bg-fuchsia-600",
+		icon: (
+			<Motion size={16} strokeWidth={1.5} className="text-media-animated" />
+		),
+		iconBgClass: "bg-media-animated/15",
 		placeholder: "Describe the still image...",
 		defaultAttributes: {
 			motion: "none",
@@ -171,8 +181,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "video",
 		outputKind: "video",
 		label: "Clip",
-		icon: <Film size={16} className="text-white" />,
-		bgColor: "bg-indigo-600",
+		icon: <Video size={16} strokeWidth={1.5} className="text-media-clip" />,
+		iconBgClass: "bg-media-clip/15",
 		placeholder: "Describe the video clip...",
 
 		defaultAttributes: {
@@ -191,8 +201,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "sfx",
 		outputKind: "audio",
 		label: "Sound",
-		icon: <Volume2 size={16} className="text-white" />,
-		bgColor: "bg-emerald-600",
+		icon: <Waveform size={16} strokeWidth={1.5} className="text-media-sound" />,
+		iconBgClass: "bg-media-sound/15",
 		placeholder: "Describe the sound effect...",
 
 		defaultAttributes: {
@@ -213,8 +223,8 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "music",
 		outputKind: "audio",
 		label: "Music",
-		icon: <Music size={16} className="text-white" />,
-		bgColor: "bg-violet-600",
+		icon: <Music size={16} strokeWidth={1.5} className="text-media-music" />,
+		iconBgClass: "bg-media-music/15",
 		placeholder: "Describe the music...",
 		defaultAttributes: {
 			loops: "1",

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "@/components/ui/icon";
 import type { ReactNode } from "react";
 
 export function CollapsibleHeader({
@@ -19,13 +19,13 @@ export function CollapsibleHeader({
 	const Icon = collapsed ? ChevronRight : ChevronDown;
 	return (
 		<div
-			className="flex items-center gap-1 select-none text-[10px] text-white/40 font-medium mb-2 h-5"
+			className="flex items-center gap-1 select-none text-[10px] text-muted-foreground font-medium mb-2 h-5"
 			contentEditable={false}
 		>
 			<button
 				type="button"
 				onClick={onToggle}
-				className="opacity-0 group-hover/collapsible:opacity-100 transition-opacity duration-200 p-0.5 -ml-1 rounded hover:bg-white/10"
+				className="opacity-0 group-hover/collapsible:opacity-100 transition-opacity duration-200 p-0.5 -ml-1 rounded hover:bg-muted"
 				aria-label={ariaLabel}
 			>
 				<Icon size={12} />

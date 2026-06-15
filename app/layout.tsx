@@ -1,21 +1,43 @@
 import type { Metadata } from "next";
-import { Geist, Instrument_Serif } from "next/font/google";
-import { Toaster } from "sonner";
+import localFont from "next/font/local";
+import { IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
-import BackgroundGradientAnimation from "./components/BackgroundGradientAnimation";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { AppToaster } from "./components/AppToaster";
 import { GlobalErrorToaster } from "./components/GlobalErrorToaster";
 import { ToastErrorBoundary } from "./components/ToastErrorBoundary";
 
-const geistSans = Geist({
-	variable: "--font-geist-sans",
+const sloptastic = localFont({
+	src: "../public/fonts/Sloptastic.woff2",
+	variable: "--font-sloptastic",
+	weight: "100 900",
+	display: "swap",
+});
+
+const sentient = localFont({
+	src: "../public/fonts/Sentient.woff2",
+	variable: "--font-sentient",
+	weight: "400",
+	display: "swap",
+});
+
+const inter = localFont({
+	src: "../public/fonts/InterVariable.woff2",
+	variable: "--font-inter",
+	weight: "100 900",
+	display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+	variable: "--font-ibm-plex-mono",
 	subsets: ["latin"],
+	weight: ["400", "500", "600"],
 });
 
 const instrumentSerif = Instrument_Serif({
 	variable: "--font-instrument-serif",
 	subsets: ["latin"],
 	weight: "400",
-	preload: false,
 });
 
 export const metadata: Metadata = {
@@ -29,31 +51,25 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" className="dark bg-[#0a0a0a]">
+		<html lang="en" suppressHydrationWarning>
 			<head>
-				<meta name="theme-color" content="#0a0a0a" />
-				<link rel="preconnect" href="https://api.fontshare.com" />
-				<link rel="preconnect" href="https://fonts.googleapis.com" />
-				<link
-					rel="preconnect"
-					href="https://fonts.gstatic.com"
-					crossOrigin="anonymous"
-				/>
-				<link
-					href="https://api.fontshare.com/v2/css?f[]=sentient@400&f[]=satoshi@400,500,700&display=swap"
-					rel="stylesheet"
-				/>
+				<meta name="theme-color" content="#fdfcfc" />
 			</head>
 			<body
-				className={`${geistSans.variable} ${instrumentSerif.variable} antialiased bg-[#0a0a0a]`}
+				className={`${sloptastic.variable} ${sentient.variable} ${inter.variable} ${ibmPlexMono.variable} ${instrumentSerif.variable} antialiased`}
 			>
-				<BackgroundGradientAnimation />
-
-				<div className="relative">
-					<ToastErrorBoundary>{children}</ToastErrorBoundary>
-				</div>
-				<GlobalErrorToaster />
-				<Toaster theme="dark" position="bottom-center" richColors />
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="light"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<div className="relative">
+						<ToastErrorBoundary>{children}</ToastErrorBoundary>
+					</div>
+					<GlobalErrorToaster />
+					<AppToaster />
+				</ThemeProvider>
 			</body>
 		</html>
 	);

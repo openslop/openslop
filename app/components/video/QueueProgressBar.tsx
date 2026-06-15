@@ -14,7 +14,7 @@ export function QueueProgressBar() {
 		<PlayerShimmer>
 			<div className="flex w-2/3 max-w-md flex-col items-center gap-2">
 				<div
-					className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+					className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
 					role="progressbar"
 					aria-valuemin={0}
 					aria-valuemax={peak || 1}
@@ -23,7 +23,7 @@ export function QueueProgressBar() {
 				>
 					<div className={styles.fill} style={{ width: `${pct}%` }} />
 				</div>
-				<div className="text-xs text-white/60 tabular-nums">
+				<div className="text-xs text-muted-foreground tabular-nums">
 					{peak === 0 ? "Preparing…" : `${done} of ${peak} generated`}
 				</div>
 			</div>

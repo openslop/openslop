@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, Palette, User } from "lucide-react";
+import { Mic, Palette, User } from "@/components/ui/icon";
 import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { useConfig } from "@/lib/config/ConfigProvider";

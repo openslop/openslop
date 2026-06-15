@@ -7,31 +7,3 @@
 	border-radius: 0.5rem;
 	overflow: hidden;
 }
-
-.volume {
-	width: 4.5rem;
-	height: 0.25rem;
-	cursor: pointer;
-	appearance: none;
-	background: rgba(255, 255, 255, 0.15);
-	border-radius: 9999px;
-	accent-color: rgb(139, 92, 246);
-}
-
-.volume::-webkit-slider-thumb {
-	appearance: none;
-	width: 0.625rem;
-	height: 0.625rem;
-	border-radius: 9999px;
-	background-color: rgb(139, 92, 246);
-	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
-}
-
-.volume::-moz-range-thumb {
-	width: 0.625rem;
-	height: 0.625rem;
-	border: 0;
-	border-radius: 9999px;
-	background-color: rgb(139, 92, 246);
-	box-shadow: 0 0 4px rgba(139, 92, 246, 0.5);
-}

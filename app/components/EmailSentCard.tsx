@@ -1,11 +1,11 @@
 "use client";
 
 import OnboardingCard from "./OnboardingCard";
-import GradientButton from "./GradientButton";
+import { Button } from "@/components/ui/button";
 
 const EnvelopeIcon = (
 	<svg
-		className="w-14 h-14 text-white"
+		className="h-14 w-14 text-foreground"
 		fill="none"
 		viewBox="0 0 24 24"
 		strokeWidth={1}
@@ -47,16 +47,22 @@ export default function EmailSentCard({
 				<button
 					type="button"
 					onClick={onEditEmail}
-					className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
+					className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
 				>
 					Edit my email address
 				</button>
 			}
 		>
-			<GradientButton type="button" onClick={onResend} disabled={loading}>
-				{loading ? "Sending\u2026" : (resendLabel ?? "Send another login link")}
-			</GradientButton>
-			{error && <p className="text-red-400 text-sm text-center">{error}</p>}
+			<Button
+				type="button"
+				variant="accent"
+				onClick={onResend}
+				disabled={loading}
+				className="h-11 w-full"
+			>
+				{loading ? "Sending…" : (resendLabel ?? "Send another login link")}
+			</Button>
+			{error && <p className="text-center text-sm text-destructive">{error}</p>}
 		</OnboardingCard>
 	);
 }

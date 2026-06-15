@@ -1,4 +1,9 @@
-import { Hourglass, Loader2, Wand2, type LucideIcon } from "lucide-react";
+import {
+	Hourglass,
+	Loader2,
+	Wand2,
+	type LucideIcon,
+} from "@/components/ui/icon";
 import {
 	Tooltip,
 	TooltipTrigger,
@@ -27,7 +32,7 @@ const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
 	sm: { wrapper: "h-4 w-4 bg-black/55", icon: "h-2.5 w-2.5" },
 	md: {
 		wrapper:
-			"h-7 w-7 bg-black/55 hover:bg-black/70 backdrop-blur-xl grain grain-light ring-1 ring-inset ring-white/10",
+			"h-7 w-7 bg-black/55 hover:bg-black/70 grain ring-1 ring-inset ring-border",
 		icon: "h-3 w-3",
 	},
 };
@@ -58,10 +63,12 @@ export function GenerationIndicator({
 	const label = statusLabel(status, seconds, idleLabel);
 	const active = status !== "idle";
 	const iconEl = (
-		<Icon className={cn(sizes.icon, "text-white", ICON_ANIMATION[status])} />
+		<Icon
+			className={cn(sizes.icon, "text-foreground", ICON_ANIMATION[status])}
+		/>
 	);
 	const baseWrapper = cn(
-		"relative flex items-center justify-center rounded-full overflow-hidden text-white/80",
+		"relative flex items-center justify-center rounded-full overflow-hidden text-foreground",
 		sizes.wrapper,
 		className,
 	);

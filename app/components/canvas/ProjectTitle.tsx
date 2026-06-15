@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore, useProjectStore } from "@/lib/project/store";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
@@ -47,7 +47,7 @@ export function ProjectTitle() {
 					if (e.key === "Enter") commit();
 					else if (e.key === "Escape") setEditing(false);
 				}}
-				className="mb-3 w-full bg-transparent text-2xl font-semibold text-white/90 outline-none"
+				className="mb-3 w-full bg-transparent text-2xl font-semibold text-foreground outline-none"
 				aria-label="Project title"
 			/>
 		);
@@ -55,11 +55,11 @@ export function ProjectTitle() {
 
 	return (
 		<div className="group mb-3 flex items-center gap-2">
-			<h1 className="text-2xl font-semibold text-white/90">{title}</h1>
+			<h1 className="text-2xl font-semibold text-foreground">{title}</h1>
 			<button
 				type="button"
 				onClick={startEditing}
-				className="rounded p-1 text-white/40 opacity-0 transition-opacity hover:bg-white/10 hover:text-white/80 group-hover:opacity-100"
+				className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
 				aria-label="Edit title"
 			>
 				<Pencil className="h-3.5 w-3.5" />

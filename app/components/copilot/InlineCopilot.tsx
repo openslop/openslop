@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
-import { CornerDownLeft, Sparkles, Square } from "lucide-react";
+import { CornerDownLeft, Square, Wand2 } from "@/components/ui/icon";
 import OrbLoader from "../OrbLoader";
 import { ActionButton } from "./ActionButton";
 
@@ -29,7 +29,7 @@ function LoadingText() {
 	}, []);
 
 	return (
-		<span className="font-body pointer-events-none block select-none truncate text-sm text-white/40 shimmer">
+		<span className=" pointer-events-none block select-none truncate text-sm text-muted-foreground shimmer">
 			{LOADING_MESSAGES[index]}
 		</span>
 	);
@@ -63,12 +63,12 @@ export default function InlineCopilot({
 		typeof placeholder === "string" ? placeholder : undefined;
 
 	return (
-		<div className="w-full rounded-xl border border-accent-violet/30 bg-glass-fill backdrop-blur-xl transition-shadow focus-within:shadow-glow">
-			<div className="relative flex items-center px-4 py-3">
+		<div className="grain relative w-full overflow-hidden rounded-xl bg-element-card shadow-elevation-3">
+			<div className="relative z-10 flex items-center px-4 py-3">
 				{loading ? (
 					<OrbLoader />
 				) : (
-					<Sparkles className="mr-3 h-5 w-5 shrink-0 text-violet-400/60" />
+					<Wand2 className="mr-3 h-5 w-5 shrink-0 text-muted-foreground" />
 				)}
 				<div className="relative min-w-0 flex-1">
 					{loading ? (
@@ -76,7 +76,7 @@ export default function InlineCopilot({
 					) : (
 						<>
 							{!hasText && placeholderOverlay && (
-								<div className="font-body pointer-events-none absolute inset-0 flex items-center overflow-hidden text-sm">
+								<div className=" pointer-events-none absolute inset-0 flex items-center overflow-hidden text-sm">
 									{placeholderOverlay}
 								</div>
 							)}
@@ -87,7 +87,7 @@ export default function InlineCopilot({
 								onChange={(e) => onValueChange(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 								placeholder={placeholderText}
-								className="font-body w-full bg-transparent text-sm text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"
+								className=" w-full bg-transparent text-sm text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 							/>
 						</>
 					)}

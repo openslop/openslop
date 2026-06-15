@@ -17,19 +17,19 @@ export function CompactElement({
 
 	return (
 		<div
-			className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 animate-fadeInUp"
+			className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 animate-fadeInUp"
 			contentEditable={false}
 			{...attributes}
 		>
 			<span
-				className={`flex items-center gap-1 rounded-full ${config.bgColor} px-1.5 py-0.5 text-white`}
+				className="flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5"
 				contentEditable={false}
 			>
 				{config.icon}
 			</span>
 			{text && (
 				<span
-					className="truncate text-xs text-white/60 max-w-[800px]"
+					className="max-w-[800px] truncate text-xs text-muted-foreground"
 					contentEditable={false}
 				>
 					{text}

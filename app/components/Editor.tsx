@@ -15,7 +15,7 @@ export default function Editor() {
 	return (
 		<PreviewCacheProvider>
 			<div
-				className={`flex min-h-screen flex-col items-center text-white transition-[padding] duration-700 ease-out ${
+				className={`flex min-h-screen flex-col items-center transition-[padding] duration-700 ease-out ${
 					hasScript ? "" : "pt-[22vh]"
 				}`}
 			>

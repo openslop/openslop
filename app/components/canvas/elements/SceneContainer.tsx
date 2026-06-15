@@ -5,7 +5,6 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { SceneElement } from "@/lib/canvas/types";
-import { useActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { findSceneSequence } from "@/app/components/video/useSceneSegments";
 import { useLayout } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
@@ -20,11 +19,8 @@ import { SceneTimestamp } from "./SceneTimestamp";
 
 const COLLAPSED_MAX_VISIBLE = 3;
 
-const ACTIVE_SCENE_CLASS =
-	"ring-2 ring-violet-300 bg-violet-400/45 shadow-[0_0_0_6px_rgba(196,181,253,0.22),0_0_52px_-2px_rgba(196,181,253,0.7)]";
 const SCENE_FRAME_CLASS =
-	"rounded-lg transition-[box-shadow,background-color] duration-200";
-
+	"px-3 py-2 transition-[box-shadow,background-color] duration-200";
 interface SceneProps {
 	attributes: RenderElementProps["attributes"];
 	element: SceneElement;
@@ -46,7 +42,6 @@ function useSceneState(element: SceneElement) {
 	return {
 		childIds,
 		sceneIndex: useSceneIndex(element.id),
-		isActive: useActiveSceneId() === element.id,
 		dropPadding: {
 			paddingBottom:
 				isDropTarget && transfer.atIndex >= childIds.length
@@ -93,7 +88,7 @@ function SceneHeader({
 }
 
 function CollapsedScene({ attributes, element, children }: SceneProps) {
-	const { sceneIndex, isActive, dropPadding } = useSceneState(element);
+	const { sceneIndex, dropPadding } = useSceneState(element);
 	const { toggle } = useViewMode();
 
 	const foregroundElement = useMemo(
@@ -108,10 +103,10 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 		<div
 			{...attributes}
 			data-scene-id={element.id}
-			className={`group/collapsible relative h-32 ${SCENE_FRAME_CLASS}${isActive ? ` ${ACTIVE_SCENE_CLASS}` : ""}`}
+			className={`group/collapsible relative h-32 ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
-			<div className="flex flex-col h-full pr-[calc(8rem+0.75rem)]">
+			<div className="relative z-[1] flex flex-col h-full pr-[calc(8rem+0.75rem)]">
 				<SceneHeader
 					sceneIndex={sceneIndex}
 					collapsed
@@ -128,7 +123,7 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 				</div>
 				{overflowCount > 0 && (
 					<span
-						className="text-[10px] text-white/30 pl-1 select-none shrink-0 text-left"
+						className="text-[10px] text-muted-foreground pl-1 select-none shrink-0 text-left"
 						contentEditable={false}
 					>
 						+{overflowCount} more
@@ -148,26 +143,30 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 }
 
 function ExpandedScene({ attributes, element, children }: SceneProps) {
-	const { childIds, sceneIndex, isActive, dropPadding } =
-		useSceneState(element);
+	const { childIds, sceneIndex, dropPadding } = useSceneState(element);
 	const { toggle } = useViewMode();
 
 	return (
 		<div
 			{...attributes}
 			data-scene-id={element.id}
-			className={`group/collapsible ${SCENE_FRAME_CLASS}${isActive ? ` ${ACTIVE_SCENE_CLASS}` : ""}`}
+			className={`group/collapsible ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
-			<SceneHeader
-				sceneIndex={sceneIndex}
-				collapsed={false}
-				onToggle={() => toggle(element.id)}
-				element={element}
-			/>
-			<SortableContext items={childIds} strategy={verticalListSortingStrategy}>
-				{children}
-			</SortableContext>
+			<div className="relative z-[1]">
+				<SceneHeader
+					sceneIndex={sceneIndex}
+					collapsed={false}
+					onToggle={() => toggle(element.id)}
+					element={element}
+				/>
+				<SortableContext
+					items={childIds}
+					strategy={verticalListSortingStrategy}
+				>
+					{children}
+				</SortableContext>
+			</div>
 		</div>
 	);
 }

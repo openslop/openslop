@@ -4,10 +4,10 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import OnboardingCard from "./OnboardingCard";
 import EmailSentCard from "./EmailSentCard";
-import GradientButton from "./GradientButton";
 import OrDivider from "./OrDivider";
 import GoogleOAuthButton from "./GoogleOAuthButton";
-import authStyles from "@/app/styles/auth.module.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AuthFormProps {
 	heading: string;
@@ -84,9 +84,9 @@ export default function AuthForm({
 
 	return (
 		<OnboardingCard heading={heading} subtitle={subtitle} footer={footer}>
-			<form onSubmit={handleMagicLink} className="w-full flex flex-col gap-3">
+			<form onSubmit={handleMagicLink} className="flex w-full flex-col gap-3">
 				{children}
-				<input
+				<Input
 					type="email"
 					name="email"
 					autoComplete="email"
@@ -94,16 +94,21 @@ export default function AuthForm({
 					placeholder="Email"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
-					className={authStyles.input}
+					className="h-11 rounded-xl"
 					required
 				/>
-				<GradientButton type="submit" disabled={loading} className="mt-1">
-					{loading ? "Sending\u2026" : submitLabel}
-				</GradientButton>
+				<Button
+					type="submit"
+					variant="accent"
+					disabled={loading}
+					className="mt-1 h-11 w-full"
+				>
+					{loading ? "Sending…" : submitLabel}
+				</Button>
 			</form>
 
 			{error && (
-				<p aria-live="polite" className="text-red-400 text-sm text-center">
+				<p aria-live="polite" className="text-center text-sm text-destructive">
 					{error}
 				</p>
 			)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, UserPlus } from "lucide-react";
+import { Check, UserPlus } from "@/components/ui/icon";
 import { Editor } from "slate";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import {
@@ -9,6 +9,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { setNodeAttrs } from "@/lib/canvas/editorOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -75,20 +80,17 @@ function ProjectCharactersMenu({
 }) {
 	const names = useProjectCharacterNames();
 	return (
-		<DropdownMenuContent
-			align="start"
-			className="min-w-32 max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
-		>
+		<DropdownMenuContent align="start" className="max-h-64 min-w-32">
 			{names.map((name) => (
 				<DropdownMenuItem
 					key={name}
 					onClick={() => onSelect(name)}
 					onSelect={(e) => e.preventDefault()}
-					className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+					className="cursor-pointer py-1 text-[11px] text-muted-foreground"
 				>
 					<span className="w-3.5 shrink-0 flex items-center justify-center">
 						{selected.has(name) && (
-							<Check className="w-3 h-3 text-white" aria-hidden="true" />
+							<Check className="w-3 h-3 text-foreground" aria-hidden="true" />
 						)}
 					</span>
 					{name}
@@ -108,21 +110,25 @@ export function CharactersPicker({
 	const names = useProjectCharacterNames();
 	const disabled = names.length === 0;
 	const selected = new Set(getElementCharacterNames(element));
+	const label = disabled ? "No characters in project" : "Add character";
 
 	return (
 		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild disabled={disabled}>
-				<button
-					aria-label={disabled ? "No characters in project" : "Add character"}
-					title={disabled ? "No characters in project" : "Add character"}
-					onMouseDown={(e) => e.preventDefault()}
-					disabled={disabled}
-					className="bg-cyan-500 text-white text-[12px] px-2 py-1 rounded-full inline-flex items-center gap-1 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					<UserPlus className="w-3 h-3" />
-					<span>Character</span>
-				</button>
-			</DropdownMenuTrigger>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<DropdownMenuTrigger asChild disabled={disabled}>
+						<button
+							aria-label={label}
+							onMouseDown={(e) => e.preventDefault()}
+							disabled={disabled}
+							className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							<UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
+						</button>
+					</DropdownMenuTrigger>
+				</TooltipTrigger>
+				<TooltipContent>{label}</TooltipContent>
+			</Tooltip>
 			<ProjectCharactersMenu
 				selected={selected}
 				onSelect={(name) => toggleCharacter(editor, element, name)}
@@ -151,7 +157,7 @@ export function CharacterSwitcher({
 					aria-label="Change character"
 					title="Change character"
 					onMouseDown={(e) => e.preventDefault()}
-					className="inline-flex items-center cursor-pointer rounded-full hover:ring-1 hover:ring-white/30 transition-shadow"
+					className="inline-flex cursor-pointer items-center rounded-md"
 				>
 					<CharacterPill name={currentName} />
 				</button>

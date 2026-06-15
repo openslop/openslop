@@ -1,4 +1,4 @@
-import { GripVertical, Plus } from "lucide-react";
+import { GripVertical, Plus } from "@/components/ui/icon";
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import {
 	DropdownMenu,
@@ -11,7 +11,7 @@ export interface InsertOption<K extends string = string> {
 	key: K;
 	label: string;
 	icon: React.ReactNode;
-	bgColor: string;
+	iconBgClass: string;
 }
 
 interface SortableActionsProps<K extends string> {
@@ -34,8 +34,8 @@ export function SortableActions<K extends string>({
 					<DropdownMenuTrigger asChild>
 						<button
 							aria-label="Insert item"
-							className="inline-flex items-center rounded-md p-0.5 text-white/40
-              hover:text-white/80 hover:bg-white/10 transition-[color,background-color] duration-200"
+							className="inline-flex items-center rounded-md p-0.5 text-muted-foreground
+              hover:text-foreground hover:bg-muted transition-[color,background-color] duration-200"
 						>
 							<Plus size={24} />
 						</button>
@@ -43,16 +43,16 @@ export function SortableActions<K extends string>({
 					<DropdownMenuContent
 						side="bottom"
 						align="start"
-						className="w-40 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-1"
+						className="w-40 rounded-xl border border-border bg-card shadow-md shadow-black/8 p-1"
 					>
 						{options.map((option) => (
 							<DropdownMenuItem
 								key={option.key}
 								onClick={() => onInsert(option.key)}
-								className="cursor-pointer rounded-lg py-2 text-white/70 hover:bg-white/10 hover:text-white focus:text-white focus:bg-white/10"
+								className="cursor-pointer rounded-lg py-2 text-muted-foreground hover:bg-muted hover:text-foreground focus:text-foreground focus:bg-muted"
 							>
 								<span
-									className={`${option.bgColor} inline-flex items-center justify-center rounded p-1 mr-1`}
+									className={`${option.iconBgClass} mr-1 inline-flex size-7 items-center justify-center rounded-lg`}
 								>
 									{option.icon}
 								</span>
@@ -64,8 +64,8 @@ export function SortableActions<K extends string>({
 			)}
 			<button
 				aria-label="Drag to reorder"
-				className="inline-flex items-center rounded-md p-0.5 text-white/40
-        hover:text-white/80 hover:bg-white/10 transition-[color,background-color] duration-200
+				className="inline-flex items-center rounded-md p-0.5 text-muted-foreground
+        hover:text-foreground hover:bg-muted transition-[color,background-color] duration-200
         cursor-grab active:cursor-grabbing"
 				{...listeners}
 			>

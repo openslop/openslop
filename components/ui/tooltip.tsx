@@ -48,7 +48,6 @@ function TooltipContent({
 				{...props}
 			>
 				{children}
-				<TooltipPrimitive.Arrow className="fill-primary" />
 			</TooltipPrimitive.Content>
 		</TooltipPrimitive.Portal>
 	);

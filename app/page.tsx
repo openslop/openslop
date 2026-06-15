@@ -5,8 +5,8 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import OnboardingCard from "./components/OnboardingCard";
 import AccessCodeInput from "./components/AccessCodeInput";
-import GradientButton from "./components/GradientButton";
 import ProjectsList from "./components/projects/ProjectsList";
+import { Button } from "@/components/ui/button";
 import { UserProvider } from "@/lib/user/UserProvider";
 
 const icons = fs
@@ -37,7 +37,7 @@ export default async function Home() {
 			heading="Welcome to the OpenSlop Beta"
 			subtitle="OpenSlop is your free, open-source video creator that brings together all your favorite AI tools, helping you get more done with less effort."
 			extra={
-				<div className="w-full flex items-center justify-center gap-3 sm:gap-5 rounded-full border border-glass-border bg-glass-fill px-4 sm:px-6 py-2.5 sm:py-3">
+				<div className="flex w-full items-center justify-center gap-3 rounded-full border border-border bg-secondary px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3">
 					{icons.map((icon) => (
 						<Image
 							key={icon}
@@ -55,22 +55,22 @@ export default async function Home() {
 					Already have an account?{" "}
 					<Link
 						href="/login"
-						className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
+						className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
 					>
 						Login
 					</Link>
 				</>
 			}
 		>
-			<p className="text-white/70 text-sm font-medium font-body">
+			<p className="text-sm font-medium text-muted-foreground">
 				Have an access code?
 			</p>
 
 			<AccessCodeInput />
 
-			<GradientButton type="button" className="mt-2">
+			<Button type="button" variant="accent" className="mt-2 h-11 w-full">
 				Get Started
-			</GradientButton>
+			</Button>
 		</OnboardingCard>
 	);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { User, X } from "lucide-react";
+import { User, X } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
@@ -15,13 +15,15 @@ function useCharacterAvatarUrl(name?: string) {
 function CharacterAvatar({
 	name,
 	avatarUrl,
+	className,
 }: {
 	name?: string;
 	avatarUrl?: string;
+	className?: string;
 }) {
 	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
-		<Avatar size="sm">
+		<Avatar size="sm" className={className}>
 			{avatarUrl && (
 				<AvatarImage
 					src={avatarUrl}
@@ -29,8 +31,8 @@ function CharacterAvatar({
 					className="object-cover object-center"
 				/>
 			)}
-			<AvatarFallback className="bg-white/15 text-white">
-				{initial || <User className="w-3 h-3" aria-hidden="true" />}
+			<AvatarFallback>
+				{initial || <User className="h-3 w-3" aria-hidden="true" />}
 			</AvatarFallback>
 		</Avatar>
 	);
@@ -38,7 +40,7 @@ function CharacterAvatar({
 
 function CharacterName({ name }: { name: string }) {
 	return (
-		<span className="truncate text-xs font-medium text-white/80">{name}</span>
+		<span className="truncate text-xs font-medium text-foreground">{name}</span>
 	);
 }
 
@@ -62,11 +64,15 @@ export function CharacterPill({
 	const avatarUrl = useCharacterAvatarUrl(name);
 	return (
 		<div
-			className={`group/pill relative inline-flex items-center shrink-0 max-w-[140px] rounded-full bg-white/10 ring-1 ring-inset ring-white/20 ${
-				name ? "gap-1.5 pr-2 py-px" : ""
+			className={`group/pill relative inline-flex max-w-[140px] shrink-0 items-center rounded-md transition-colors hover:bg-button-hover ${
+				name ? "gap-1.5 py-0.5 pl-1 pr-2" : "p-0.5"
 			}`}
 		>
-			<CharacterAvatar name={name} avatarUrl={avatarUrl} />
+			<CharacterAvatar
+				name={name}
+				avatarUrl={avatarUrl}
+				className="rounded-md"
+			/>
 			{name && <CharacterName name={name} />}
 			{onRemove && (
 				<button
@@ -74,9 +80,9 @@ export function CharacterPill({
 					aria-label={`Remove ${name}`}
 					onMouseDown={(e) => e.preventDefault()}
 					onClick={onRemove}
-					className="absolute -top-1 -right-1 rounded-full bg-black/60 ring-1 ring-white/20 p-0.5 opacity-0 group-hover/pill:opacity-100 transition-opacity cursor-pointer hover:bg-black/80"
+					className="absolute -top-1 -right-1 flex cursor-pointer items-center justify-center rounded-full border border-border bg-popover p-0.5 opacity-0 transition-opacity group-hover/pill:opacity-100 hover:bg-muted"
 				>
-					<X className="w-2.5 h-2.5 text-white" />
+					<X className="h-2.5 w-2.5 text-foreground" />
 				</button>
 			)}
 		</div>
