@@ -118,6 +118,7 @@ export function CharactersPicker({
 				<TooltipTrigger asChild>
 					<DropdownMenuTrigger asChild disabled={disabled}>
 						<button
+							type="button"
 							aria-label={label}
 							onMouseDown={(e) => e.preventDefault()}
 							disabled={disabled}

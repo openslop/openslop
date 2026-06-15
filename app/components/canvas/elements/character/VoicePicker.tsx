@@ -21,11 +21,16 @@ function PreviewPlayButton({ src }: { src: string }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [playing, setPlaying] = useState(false);
 
+	// Pause when the previewed voice changes
+	useEffect(() => {
+		audioRef.current?.pause();
+	}, [src]);
+
 	const toggle = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		const audio = audioRef.current;
 		if (!audio) return;
-		if (audio.paused) audio.play();
+		if (audio.paused) void audio.play().catch(() => setPlaying(false));
 		else audio.pause();
 	};
 
