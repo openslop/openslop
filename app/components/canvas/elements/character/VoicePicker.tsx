@@ -1,16 +1,64 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, Pause, Play } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import type { VoiceInfo } from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
-import { AudioPlayer } from "../AudioPlayer";
 import type { MetadataVoice } from "@/lib/project/types";
 import { FieldLabel } from "./fields";
+
+function PreviewPlayButton({ src }: { src: string }) {
+	const audioRef = useRef<HTMLAudioElement>(null);
+	const [playing, setPlaying] = useState(false);
+
+	// Pause when the previewed voice changes
+	useEffect(() => {
+		audioRef.current?.pause();
+	}, [src]);
+
+	const toggle = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		const audio = audioRef.current;
+		if (!audio) return;
+		if (audio.paused) void audio.play().catch(() => setPlaying(false));
+		else audio.pause();
+	};
+
+	return (
+		<>
+			<audio
+				ref={audioRef}
+				src={src}
+				preload="none"
+				onPlay={() => setPlaying(true)}
+				onPause={() => setPlaying(false)}
+				onEnded={() => setPlaying(false)}
+			/>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<IconButton ariaLabel={playing ? "Pause" : "Play"} onClick={toggle}>
+						{playing ? (
+							<Pause className="h-4 w-4" />
+						) : (
+							<Play className="h-4 w-4" />
+						)}
+					</IconButton>
+				</TooltipTrigger>
+				<TooltipContent>{playing ? "Pause" : "Play"}</TooltipContent>
+			</Tooltip>
+		</>
+	);
+}
 
 const DEBOUNCE_MS = 300;
 const SKELETON_ROWS = 5;
@@ -63,16 +111,13 @@ export function VoicePicker({
 		<div className="flex min-w-0 flex-col gap-1.5">
 			<FieldLabel>Voices</FieldLabel>
 			{error && <span className="text-[11px] text-rose-400">{error}</span>}
-			<div className="flex h-64 min-w-0 flex-col gap-1.5 overflow-y-auto rounded-lg border border-glass-border bg-black/20 p-1.5">
+			<div className="flex h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{loading &&
 					Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-						<Skeleton
-							key={`skel-${i}`}
-							className="h-16 shrink-0 rounded-md border border-white/5 bg-white/[0.03]"
-						/>
+						<Skeleton key={`skel-${i}`} className="h-12 shrink-0 rounded-md" />
 					))}
 				{!loading && voices.length === 0 && !error && (
-					<span className="px-2 py-3 text-center text-[11px] text-white/40">
+					<span className="px-2 py-3 text-center text-[11px] text-muted-foreground">
 						No voices match these filters.
 					</span>
 				)}
@@ -82,42 +127,46 @@ export function VoicePicker({
 						return (
 							<div
 								key={voice.id}
-								className={`flex min-w-0 flex-col gap-1 rounded-md border px-2 py-1.5 transition-colors ${
-									selected
-										? "border-white/40 bg-white/10"
-										: "border-white/5 bg-white/[0.03]"
+								role="button"
+								tabIndex={0}
+								onClick={() => onSelect(voice)}
+								onKeyDown={(e) => {
+									if (e.target !== e.currentTarget) return;
+									if (e.key === "Enter" || e.key === " ") {
+										e.preventDefault();
+										onSelect(voice);
+									}
+								}}
+								className={`flex min-w-0 cursor-pointer flex-col gap-1 rounded-md px-2 py-1 transition-colors ${
+									selected ? "bg-muted" : "hover:bg-voice-hover"
 								}`}
 							>
-								<button
-									type="button"
-									onClick={() => onSelect(voice)}
-									className="flex min-w-0 items-center gap-1.5 text-left"
-								>
-									<span className="min-w-0 flex-1 truncate text-[12px] font-medium text-white">
+								<div className="flex min-w-0 items-center gap-1.5">
+									<span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
 										{voice.name}
 									</span>
 									{voice.language && (
-										<span className="shrink-0 rounded bg-white/10 px-1 py-px text-[9px] uppercase text-white/60">
+										<span className="shrink-0 rounded border border-border px-1 py-px text-[9px] uppercase text-muted-foreground">
 											{voice.language}
 										</span>
 									)}
 									{voice.gender && (
-										<span className="shrink-0 rounded bg-white/10 px-1 py-px text-[9px] uppercase text-white/60">
+										<span className="shrink-0 rounded border border-border px-1 py-px text-[9px] uppercase text-muted-foreground">
 											{voice.gender}
 										</span>
 									)}
 									{selected && (
-										<Check className="h-3 w-3 shrink-0 text-white/80" />
+										<Check className="h-3 w-3 shrink-0 text-accent" />
 									)}
-								</button>
-								{voice.description && (
-									<span className="block truncate text-[10px] text-white/50">
-										{voice.description}
-									</span>
-								)}
-								{voice.previewUrl && (
-									<div className="flex min-w-0 items-center gap-2">
-										<AudioPlayer src={voice.previewUrl} />
+								</div>
+								{(voice.description || voice.previewUrl) && (
+									<div className="flex min-w-0 items-center justify-between gap-2">
+										<span className="min-w-0 flex-1 truncate text-[10px] leading-tight text-muted-foreground">
+											{voice.description}
+										</span>
+										{voice.previewUrl && (
+											<PreviewPlayButton src={voice.previewUrl} />
+										)}
 									</div>
 								)}
 							</div>

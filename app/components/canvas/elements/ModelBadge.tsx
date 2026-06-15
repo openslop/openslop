@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Codesandbox } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
 import type { CanvasContentElement } from "@/lib/canvas/types";
@@ -18,8 +19,9 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 		const options =
 			connectorConfig[connector]?.[provider as ProviderKey]?.models ?? [];
 		return {
-			color: "bg-white/15",
+			color: "bg-secondary",
 			label: "Model",
+			icon: Codesandbox,
 			edit: { kind: "enum", options },
 		};
 	}, [connector, connectorConfig, model, provider]);

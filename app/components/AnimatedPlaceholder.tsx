@@ -74,7 +74,7 @@ export default function AnimatedPlaceholder({ active }: { active: boolean }) {
 	return (
 		<span
 			aria-hidden="true"
-			className="pointer-events-none block w-full select-none text-white/30"
+			className="pointer-events-none block w-full select-none text-muted-foreground"
 		>
 			Create {display}
 		</span>

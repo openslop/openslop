@@ -10,7 +10,7 @@ import {
 	Proportions,
 	User,
 	X,
-} from "lucide-react";
+} from "@/components/ui/icon";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -73,7 +73,7 @@ function AttachMenu({
 					type="button"
 					aria-label="Attach"
 					disabled={uploading}
-					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white/70 disabled:pointer-events-none"
+					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-muted-foreground disabled:pointer-events-none"
 				>
 					{uploading ? (
 						<Loader2 className="h-4 w-4 animate-spin" />
@@ -85,15 +85,18 @@ function AttachMenu({
 			<DropdownMenuContent
 				side="bottom"
 				align="start"
-				className="min-w-36 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
+				className="min-w-36 rounded-xl border border-border bg-card shadow-md shadow-black/8 p-0.5"
 			>
 				{items.map(({ icon: Icon, label, onSelect }) => (
 					<DropdownMenuItem
 						key={label}
 						onSelect={onSelect}
-						className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+						className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted"
 					>
-						<Icon className="mr-1.5 h-3.5 text-white w-3.5" strokeWidth={1.5} />
+						<Icon
+							className="mr-1.5 h-3.5 text-foreground w-3.5"
+							strokeWidth={1.5}
+						/>
 						{label}
 					</DropdownMenuItem>
 				))}
@@ -114,7 +117,7 @@ function TemplatePill({
 
 	return (
 		<span
-			className="font-body relative grain inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 text-sm leading-5 text-white/80 whitespace-nowrap sm:mt-px sm:self-auto"
+			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 text-sm leading-5 text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
 			<button
@@ -173,7 +176,7 @@ export default function ComposerCopilot({
 		typeof placeholder === "string" ? placeholder : undefined;
 
 	return (
-		<div className="w-full rounded-xl border border-accent-violet/30 bg-glass-fill backdrop-blur-xl transition-shadow focus-within:shadow-glow">
+		<div className="w-full rounded-xl border border-accent/30 bg-card transition-shadow focus-within:shadow-elevation-5">
 			<div className="px-4 py-3">
 				<ComposerAssets
 					uploadingCount={uploadingCount}
@@ -199,10 +202,10 @@ export default function ComposerCopilot({
 							}}
 							placeholder={placeholderText}
 							style={{ fieldSizing: "content" }}
-							className="font-body w-full resize-none bg-transparent text-sm leading-5 text-white/80 caret-violet-400 placeholder:text-white/30 outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30 focus-visible:rounded-sm"
+							className=" w-full resize-none bg-transparent text-sm leading-5 text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !showPill && placeholderOverlay && (
-							<div className="font-body pointer-events-none overflow-hidden text-sm">
+							<div className=" pointer-events-none overflow-hidden text-sm">
 								{placeholderOverlay}
 							</div>
 						)}
@@ -253,7 +256,7 @@ export default function ComposerCopilot({
 								options={TEMPLATE_OPTIONS}
 								ariaLabel="Select template"
 								side="bottom"
-								className="relative grain overflow-hidden"
+								className="relative overflow-hidden"
 								style={{
 									backgroundColor: getTemplateById(selectedTemplateId)?.color,
 								}}

@@ -67,7 +67,7 @@ function NewCharacterDialogBody({
 					onChange={(e) => setName(e.target.value)}
 					placeholder="Character name"
 					aria-label="Character name"
-					className="w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-accent-violet/50"
+					className="w-full rounded-md border border-border bg-card px-2 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
 				/>
 
 				{collision && (
@@ -80,7 +80,7 @@ function NewCharacterDialogBody({
 					<button
 						type="submit"
 						disabled={!canSubmit}
-						className="rounded-md border border-white/20 bg-white/15 px-3 py-1 text-[12px] font-medium text-white hover:bg-white/25 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/15"
+						className="rounded-md border border-border bg-muted px-3 py-1 text-[12px] font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-muted"
 					>
 						Create
 					</button>

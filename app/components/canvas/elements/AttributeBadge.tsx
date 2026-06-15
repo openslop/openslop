@@ -1,4 +1,4 @@
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "@/components/ui/icon";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import {
 	DropdownMenu,
@@ -19,27 +19,39 @@ function formatValue(key: string, value: string): string {
 }
 
 const PILL =
-	"text-white text-[12px] px-1.5 py-0.5 rounded-full max-w-[140px] truncate";
+	"bg-secondary text-secondary-foreground text-[12px] px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
 
 interface AttributeBadgeProps {
 	element: CanvasContentElement;
 	attrKey: string;
 	spec: AttributeSpec;
+	hideLabel?: boolean;
 }
 
 export function AttributeBadge({
 	element,
 	attrKey,
 	spec,
+	hideLabel = false,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
 	const value = element.customAttributes?.[attrKey] ?? "";
 	const isTextEdit = spec.edit?.kind === "text";
 	if (!value && !isTextEdit) return null;
 
-	const labeled = (
+	const SpecIcon = spec.icon;
+	const labeled = hideLabel ? (
+		formatValue(attrKey, value)
+	) : (
 		<>
-			<span className="opacity-70 mr-1">{spec.label}</span>
+			{SpecIcon ? (
+				<SpecIcon
+					className="mr-1 inline-block h-3 w-3 shrink-0 align-middle opacity-70"
+					aria-hidden="true"
+				/>
+			) : (
+				<span className="opacity-70 mr-1">{spec.label}</span>
+			)}
 			{formatValue(attrKey, value)}
 		</>
 	);
@@ -47,7 +59,7 @@ export function AttributeBadge({
 
 	if (!spec.edit) {
 		return (
-			<span className={`${spec.color} ${PILL}`} title={tooltip}>
+			<span className={PILL} title={tooltip}>
 				{labeled}
 			</span>
 		);
@@ -64,6 +76,7 @@ export function AttributeBadge({
 				tooltip={tooltip}
 				placeholder={spec.edit.placeholder}
 				rows={spec.edit.rows}
+				hideLabel={hideLabel}
 			/>
 		);
 	}
@@ -79,25 +92,22 @@ export function AttributeBadge({
 				<button
 					aria-label={tooltip}
 					onMouseDown={(e) => e.preventDefault()}
-					className={`${spec.color} text-white text-[12px] px-2 py-1 rounded-full max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all`}
+					className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
 				>
-					<span className="truncate min-w-0">{labeled}</span>
-					<ChevronDown className="w-3 h-3 shrink-0 text-white/80" />
+					<span className="min-w-0 truncate">{labeled}</span>
+					<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
 				</button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				align="start"
-				className="min-w-24 max-h-64 overflow-y-auto rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-0.5"
-			>
+			<DropdownMenuContent align="start" className="max-h-64 min-w-24">
 				{spec.edit.options.map((opt) => (
 					<DropdownMenuItem
 						key={opt}
 						onClick={() => handleSelect(opt)}
-						className="cursor-pointer rounded-full px-2 py-1 text-[11px] text-white/70 hover:text-white focus:text-white focus:bg-white/10"
+						className="cursor-pointer py-1 text-[11px]"
 					>
-						<span className="w-3.5 shrink-0 flex items-center justify-center">
+						<span className="flex w-3.5 shrink-0 items-center justify-center">
 							{opt === value && (
-								<Check className="w-3 h-3 text-white" aria-hidden="true" />
+								<Check className="h-3 w-3 text-accent" aria-hidden="true" />
 							)}
 						</span>
 						{formatValue(attrKey, opt)}

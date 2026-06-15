@@ -17,7 +17,7 @@ const TOAST_OPTIONS = {
 	id: TOAST_ID,
 	position: "bottom-right" as const,
 	className:
-		"!bg-white/5 !border !border-white/10 !text-white/60 !text-xs !shadow-none !rounded-md !py-1.5 !px-2.5 !min-h-0 !w-auto",
+		"!bg-muted !border !border-border !text-muted-foreground !text-xs !shadow-none !rounded-md !py-1.5 !px-2.5 !min-h-0 !w-auto",
 	unstyled: false,
 	duration: 1500,
 };

@@ -8,18 +8,17 @@ export type GenerationState = {
 
 export type PlaceholderProps = GenerationState & {
 	error: string | null;
-	onGenerate: () => void;
 	onDiscard: () => void;
 };
 
 export const BORDER_COLORS: Record<CanvasElementType, string> = {
-	character: "border-amber-500/30",
-	image: "border-cyan-500/30",
-	animated_image: "border-fuchsia-500/30",
-	clip: "border-indigo-500/30",
-	narration: "border-white/20",
-	music: "border-violet-500/30",
-	sound: "border-emerald-500/30",
+	character: "border-media-character/30",
+	image: "border-border",
+	animated_image: "border-border",
+	clip: "border-border",
+	narration: "border-border",
+	music: "border-media-music/30",
+	sound: "border-media-sound/30",
 };
 
 export const WAVE_COLORS: Record<CanvasElementType, string> = {

@@ -19,8 +19,7 @@ function OutputPreviewComponent({
 }) {
 	const type = element.type;
 	const { outputKind } = ELEMENT_CONFIGS[type];
-	const { status, seconds, result, error, stale, generate, discard } =
-		useGenerate(element);
+	const { status, seconds, result, error, discard } = useGenerate(element);
 
 	if (outputKind === "audio") {
 		if (result?.audioUrl) {
@@ -31,8 +30,6 @@ function OutputPreviewComponent({
 					characterName={element.customAttributes?.name}
 					status={status}
 					seconds={seconds}
-					stale={stale}
-					onRegenerate={generate}
 				/>
 			);
 		}
@@ -41,27 +38,22 @@ function OutputPreviewComponent({
 				status={status}
 				seconds={seconds}
 				error={error}
-				onGenerate={generate}
 				onDiscard={discard}
 			/>
 		);
 	}
 
-	const borderColor = BORDER_COLORS[type] ?? "border-white/20";
+	const borderColor = BORDER_COLORS[type] ?? "border-border";
 
 	if (type === "animated_image") {
 		return (
 			<AnimatedImagePreview
-				elementId={element.id}
 				imageUrl={result?.imageUrl}
 				videoUrl={result?.videoUrl}
 				borderColor={borderColor}
 				status={status}
 				seconds={seconds}
-				stale={stale}
 				error={error}
-				onRegenerate={generate}
-				onGenerate={generate}
 				onDiscard={discard}
 			/>
 		);
@@ -72,14 +64,11 @@ function OutputPreviewComponent({
 		return (
 			<MediaPreview
 				key={url}
-				elementId={element.id}
 				url={url}
 				outputKind={outputKind}
 				borderColor={borderColor}
 				status={status}
 				seconds={seconds}
-				stale={stale}
-				onRegenerate={generate}
 			/>
 		);
 	}
@@ -89,7 +78,6 @@ function OutputPreviewComponent({
 			status={status}
 			seconds={seconds}
 			error={error}
-			onGenerate={generate}
 			onDiscard={discard}
 		/>
 	);

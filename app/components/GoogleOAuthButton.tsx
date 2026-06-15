@@ -1,4 +1,5 @@
 import GoogleIcon from "./GoogleIcon";
+import { Button } from "@/components/ui/button";
 
 interface GoogleOAuthButtonProps {
 	onClick: () => void;
@@ -10,13 +11,14 @@ export default function GoogleOAuthButton({
 	children,
 }: GoogleOAuthButtonProps) {
 	return (
-		<button
+		<Button
 			type="button"
+			variant="outline"
 			onClick={onClick}
-			className="relative grain grain-12 w-full flex items-center justify-center gap-2.5 py-2.5 rounded-2xl bg-[#1e1e1e]/60 text-white text-sm font-medium font-body transition-[filter,transform] hover:brightness-[1.3] active:scale-[0.98]"
+			className="h-11 w-full gap-2.5"
 		>
 			<GoogleIcon />
 			{children ?? "Continue with Google"}
-		</button>
+		</Button>
 	);
 }

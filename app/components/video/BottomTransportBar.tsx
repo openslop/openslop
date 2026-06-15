@@ -1,0 +1,133 @@
+"use client";
+
+import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { usePlayerControl } from "./PlayerControlContext";
+import { usePlayerPosition } from "./PlayerPositionContext";
+import { useLayout } from "./VideoLayoutContext";
+import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
+import {
+	FRAME_EVENTS,
+	usePlayerPlaying,
+	usePlayerValue,
+} from "./usePlayerState";
+import { SegmentedSeekBar } from "./SegmentedSeekBar";
+import {
+	FullscreenButton,
+	ScenePill,
+	TimeDisplay,
+	VolumeControl,
+} from "./PlayerControls";
+
+function TooltipButton({
+	label,
+	onClick,
+	ariaLabel,
+	children,
+}: {
+	label: string;
+	onClick: () => void;
+	ariaLabel: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<IconButton onClick={onClick} ariaLabel={ariaLabel}>
+					{children}
+				</IconButton>
+			</TooltipTrigger>
+			<TooltipContent>{label}</TooltipContent>
+		</Tooltip>
+	);
+}
+
+export function BottomTransportBar() {
+	const { player } = usePlayerControl();
+	const { showPlayer } = usePlayerPosition();
+	const { layout } = useLayout();
+	const segments = useSceneSegments();
+	const playing = usePlayerPlaying(player);
+	const activeIndex = usePlayerValue(
+		player,
+		FRAME_EVENTS,
+		(p) =>
+			layout
+				? findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps)
+				: -1,
+		-1,
+	);
+
+	const ready = Boolean(player && layout && segments.length > 0);
+
+	const seekToAdjacentScene = (dir: -1 | 1) => {
+		if (!player || !layout || segments.length === 0) return;
+		const current = findSegmentIndexAt(
+			segments,
+			player.getCurrentFrame() / layout.fps,
+		);
+		const target = segments[current + dir];
+		if (target) player.seekTo(Math.ceil(target.start * layout.fps));
+	};
+
+	return (
+		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-sm text-foreground">
+			{ready && layout ? (
+				<SegmentedSeekBar player={player} layout={layout} segments={segments} />
+			) : (
+				<div className="h-3 w-full" aria-hidden />
+			)}
+			<div className="flex items-center gap-2">
+				<div className="flex flex-1 items-center gap-2">
+					{ready && layout && <TimeDisplay player={player} layout={layout} />}
+					{ready && (
+						<div className="hidden @[520px]:contents">
+							<ScenePill segments={segments} activeIndex={activeIndex} />
+						</div>
+					)}
+				</div>
+
+				<div className="flex items-center gap-1">
+					<TooltipButton
+						label="Previous scene"
+						ariaLabel="Previous scene"
+						onClick={() => seekToAdjacentScene(-1)}
+					>
+						<ChevronsLeft className="h-4 w-4" />
+					</TooltipButton>
+					<TooltipButton
+						label={playing ? "Pause" : "Play"}
+						ariaLabel={playing ? "Pause" : "Play"}
+						onClick={() => {
+							showPlayer();
+							player?.toggle();
+						}}
+					>
+						{playing ? (
+							<Pause className="h-4 w-4" />
+						) : (
+							<Play className="h-4 w-4" />
+						)}
+					</TooltipButton>
+					<TooltipButton
+						label="Next scene"
+						ariaLabel="Next scene"
+						onClick={() => seekToAdjacentScene(1)}
+					>
+						<ChevronsRight className="h-4 w-4" />
+					</TooltipButton>
+				</div>
+
+				<div className="flex flex-1 items-center justify-end gap-1.5">
+					<VolumeControl player={player} />
+					<FullscreenButton player={player} />
+				</div>
+			</div>
+		</div>
+	);
+}

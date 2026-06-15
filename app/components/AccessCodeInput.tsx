@@ -116,20 +116,23 @@ export default function AccessCodeInput() {
 						aria-label={`Code character ${i + 1}`}
 						spellCheck={false}
 						autoComplete="off"
-						className="w-9 h-11 sm:w-11 sm:h-13 text-center text-base sm:text-lg font-semibold rounded-md sm:rounded-lg border border-white/20 bg-white/10 text-white outline-none focus-visible:border-purple-400 focus-visible:ring-2 focus-visible:ring-purple-400/30 transition-[border-color,box-shadow,opacity] disabled:opacity-50 placeholder:text-white/30"
+						className="h-11 w-9 rounded-md border border-border bg-input text-center text-base font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-lg"
 						autoFocus={i === 0}
 					/>
 				))}
 			</div>
 			{error && (
-				<p aria-live="polite" className="text-red-500 text-sm text-center mt-3">
+				<p
+					aria-live="polite"
+					className="mt-3 text-center text-sm text-destructive"
+				>
 					{error}
 				</p>
 			)}
 			{loading && (
 				<p
 					aria-live="polite"
-					className="text-zinc-400 text-sm text-center mt-3"
+					className="mt-3 text-center text-sm text-muted-foreground"
 				>
 					Validating&hellip;
 				</p>

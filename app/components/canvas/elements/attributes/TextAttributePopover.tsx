@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/components/ui/icon";
 import { useCallback, useRef, useState } from "react";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import {
@@ -20,6 +20,7 @@ interface TextAttributePopoverProps {
 	tooltip: string;
 	placeholder?: string;
 	rows?: number;
+	hideLabel?: boolean;
 }
 
 export function TextAttributePopover({
@@ -31,6 +32,7 @@ export function TextAttributePopover({
 	tooltip,
 	placeholder,
 	rows = 3,
+	hideLabel = false,
 }: TextAttributePopoverProps) {
 	const editor = useSlateStatic();
 	const [open, setOpen] = useState(false);
@@ -65,15 +67,17 @@ export function TextAttributePopover({
 					type="button"
 					aria-label={tooltip}
 					title={tooltip}
-					className={`${color} text-white text-[12px] px-2 py-1 rounded-full max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-white/20 hover:ring-white/50 hover:brightness-110 transition-all`}
+					className={`${color} text-foreground text-[12px] px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:ring-border hover:brightness-110 transition-all`}
 				>
 					<span className="truncate min-w-0">
-						<span className={value ? "opacity-70 mr-1" : "opacity-90"}>
-							{label}
-						</span>
-						{value ? value : <span className="opacity-50 ml-1">— add</span>}
+						{!hideLabel && (
+							<span className={value ? "opacity-70 mr-1" : "opacity-90"}>
+								{label}
+							</span>
+						)}
+						{value ? value : <span className="opacity-50">— add</span>}
 					</span>
-					<ChevronDown className="w-3 h-3 shrink-0 text-white/80" />
+					<ChevronDown className="w-3 h-3 shrink-0 text-foreground" />
 				</button>
 			</PopoverTrigger>
 			<PopoverContent
@@ -82,7 +86,7 @@ export function TextAttributePopover({
 				onEscapeKeyDown={() => {
 					cancelRef.current = true;
 				}}
-				className="w-72 rounded-xl border border-glass-border bg-glass-fill backdrop-blur-xl shadow-md shadow-black/8 p-1.5"
+				className="w-72 p-1.5"
 			>
 				<textarea
 					autoFocus
@@ -97,9 +101,9 @@ export function TextAttributePopover({
 							setOpen(false);
 						}
 					}}
-					className="w-full resize-none rounded-lg border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-accent-violet/50"
+					className="w-full resize-none rounded-lg border border-border bg-card px-2 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
 				/>
-				<div className="mt-1 px-1 text-[10px] text-white/40">
+				<div className="mt-1 px-1 text-[10px] text-muted-foreground">
 					⌘↵ to save · esc to cancel
 				</div>
 			</PopoverContent>

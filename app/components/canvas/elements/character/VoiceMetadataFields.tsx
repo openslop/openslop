@@ -20,10 +20,12 @@ export function VoiceSection({
 	onChange: (partial: Partial<MetadataVoice>) => void;
 }) {
 	return (
-		<section className="flex flex-col gap-2 rounded-lg border border-glass-border p-3">
+		<section className="flex flex-col gap-2 rounded-lg border border-border p-3">
 			<div className="flex flex-col gap-0.5">
 				<FieldLabel>Voice</FieldLabel>
-				<p className="text-[11px] text-white/40">Filter the voice list</p>
+				<p className="text-[11px] text-muted-foreground">
+					Filter the voice list
+				</p>
 			</div>
 			<VoiceMetadataGrid voice={voice} onChange={onChange} />
 			<MetadataVoicePicker voice={voice} onChange={onChange} />

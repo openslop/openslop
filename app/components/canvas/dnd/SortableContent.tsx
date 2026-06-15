@@ -19,7 +19,7 @@ const INSERT_OPTIONS: InsertOption<CanvasElementType>[] = ELEMENT_LIST.map(
 		key: c.type,
 		label: c.label,
 		icon: c.icon,
-		bgColor: c.bgColor,
+		iconBgClass: c.iconBgClass,
 	}),
 );
 

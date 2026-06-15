@@ -14,13 +14,13 @@ function VideoPanelBody() {
 	if (scriptLoading) {
 		return (
 			<PlayerShimmer>
-				<div className="text-xs text-white/60">Writing script…</div>
+				<div className="text-xs text-muted-foreground">Writing script…</div>
 			</PlayerShimmer>
 		);
 	}
 	if (!layout?.series.length) {
 		return (
-			<div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-white/40">
+			<div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
 				Generate elements to playback
 			</div>
 		);
@@ -35,8 +35,8 @@ export function VideoPanel() {
 	const showControls = !scriptLoading && !!layout?.series.length && ready;
 
 	return (
-		<div className="group relative h-full w-full overflow-hidden rounded-lg border border-glass-border bg-glass-fill shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
-			<div className="grain grain-light absolute inset-0" aria-hidden="true" />
+		<div className="group relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
+			<div className=" absolute inset-0" aria-hidden="true" />
 			<div className="relative z-[2] h-full w-full">
 				<VideoPanelBody />
 			</div>

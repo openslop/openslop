@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import AuthForm from "../components/AuthForm";
-import authStyles from "@/app/styles/auth.module.css";
+import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
 	const [fullName, setFullName] = useState("");
@@ -20,14 +20,14 @@ export default function SignupPage() {
 					Already have an account?{" "}
 					<Link
 						href="/login"
-						className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
+						className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
 					>
 						Login
 					</Link>
 				</>
 			}
 		>
-			<input
+			<Input
 				type="text"
 				name="fullName"
 				autoComplete="name"
@@ -35,7 +35,7 @@ export default function SignupPage() {
 				placeholder="Full Name"
 				value={fullName}
 				onChange={(e) => setFullName(e.target.value)}
-				className={authStyles.input}
+				className="h-11 rounded-xl"
 				required
 			/>
 		</AuthForm>

@@ -1,4 +1,4 @@
-import { GripVertical, Plus } from "lucide-react";
+import { GripVertical, Plus } from "@/components/ui/icon";
 import { useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
@@ -18,13 +18,13 @@ export function DragOverlayContent({ element }: { element: Descendant }) {
 				<div className={styles.actions}>
 					<button
 						aria-label="Add element"
-						className="inline-flex items-center rounded-md p-0.5 text-white/80"
+						className="inline-flex items-center rounded-md p-0.5 text-foreground"
 					>
 						<Plus size={24} />
 					</button>
 					<button
 						aria-label="Drag handle"
-						className="inline-flex items-center rounded-md p-0.5 text-white/80"
+						className="inline-flex items-center rounded-md p-0.5 text-foreground"
 					>
 						<GripVertical size={24} />
 					</button>

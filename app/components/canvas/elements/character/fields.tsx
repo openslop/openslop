@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "@/components/ui/icon";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const FIELD_CLS =
-	"w-full rounded-md border border-glass-border bg-glass-fill px-2 py-1.5 text-[12px] text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-accent-violet/50";
+	"w-full rounded-md border border-border bg-card px-2 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (
-		<span className="text-[11px] uppercase tracking-wide text-white/50">
+		<span className="text-[11px] uppercase tracking-wide text-muted-foreground">
 			{children}
 		</span>
 	);
@@ -51,15 +51,17 @@ export function TextAreaField({
 	onChange,
 	placeholder,
 	rows = 4,
+	className = "",
 }: {
 	label: string;
 	value: string;
 	onChange: (value: string) => void;
 	placeholder?: string;
 	rows?: number;
+	className?: string;
 }) {
 	return (
-		<label className="flex flex-col gap-1">
+		<label className={`flex flex-col gap-1 ${className}`}>
 			<FieldLabel>{label}</FieldLabel>
 			<textarea
 				rows={rows}
@@ -91,20 +93,20 @@ export function EnumField<T extends string>({
 					aria-label={label}
 					className={`${FIELD_CLS} flex items-center justify-between text-left`}
 				>
-					<span className={value ? "text-white" : "text-white/30"}>
+					<span className={value ? "text-foreground" : "text-muted-foreground"}>
 						{value ?? "—"}
 					</span>
-					<ChevronDown className="h-3 w-3 shrink-0 text-white/60" />
+					<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					align="start"
-					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto rounded-xl border border-glass-border bg-glass-fill p-0.5 shadow-md shadow-black/40 backdrop-blur-xl"
+					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto rounded-xl border border-border bg-card p-0.5 shadow-md shadow-black/40"
 				>
 					<EnumOption
 						selected={value === undefined}
 						onSelect={() => onChange(undefined)}
 					>
-						<span className="text-white/50">—</span>
+						<span className="text-muted-foreground">—</span>
 					</EnumOption>
 					{options.map((option) => (
 						<EnumOption
@@ -133,10 +135,10 @@ function EnumOption({
 	return (
 		<DropdownMenuItem
 			onClick={onSelect}
-			className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-white/70 hover:text-white focus:bg-white/10 focus:text-white"
+			className="flex cursor-pointer items-center gap-1.5 py-1 text-[12px] text-muted-foreground"
 		>
 			<span className="flex w-3.5 shrink-0 items-center justify-center">
-				{selected && <Check className="h-3 w-3 text-white" aria-hidden />}
+				{selected && <Check className="h-3 w-3 text-foreground" aria-hidden />}
 			</span>
 			{children}
 		</DropdownMenuItem>

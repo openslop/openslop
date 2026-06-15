@@ -32,18 +32,18 @@ export function StaleAvatarCloseDialog({
 					Your edits are already saved.
 				</AlertDialogDescription>
 				<AlertDialogFooter>
-					<AlertDialogCancel className="rounded-md px-2.5 py-1 text-[12px] text-white/60 transition-colors hover:text-white">
+					<AlertDialogCancel className="rounded-md px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground">
 						Keep editing
 					</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={onLeaveStale}
-						className="rounded-md border border-white/10 px-2.5 py-1 text-[12px] text-white/70 transition-colors hover:bg-white/10"
+						className="rounded-md border border-border px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted"
 					>
 						Leave stale
 					</AlertDialogAction>
 					<AlertDialogAction
 						onClick={onRegenerate}
-						className="rounded-md bg-accent-violet px-3 py-1 text-[12px] font-medium text-white shadow-glow transition hover:brightness-110"
+						className="rounded-md bg-accent px-3 py-1 text-[12px] font-medium text-foreground shadow-elevation-5 transition hover:brightness-110"
 					>
 						Regenerate
 					</AlertDialogAction>

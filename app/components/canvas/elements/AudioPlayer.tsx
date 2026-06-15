@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import {
 	Tooltip,
 	TooltipTrigger,
@@ -13,7 +14,7 @@ import { usePreviewCache } from "../PreviewCacheContext";
 
 export function AudioPlayer({
 	src,
-	waveColor = "rgba(255, 255, 255, 0.3)",
+	waveColor = "rgba(135, 113, 120, 0.55)",
 }: {
 	src: string;
 	waveColor?: string;
@@ -28,19 +29,17 @@ export function AudioPlayer({
 		<>
 			<Tooltip>
 				<TooltipTrigger asChild>
-					<button
-						type="button"
-						aria-label={playing ? "Pause" : "Play"}
+					<IconButton
+						ariaLabel={playing ? "Pause" : "Play"}
 						onClick={() => waveformRef.current?.toggle()}
 						disabled={duration === 0}
-						className="shrink-0 relative w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 grain grain-light flex items-center justify-center transition-colors overflow-hidden disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/10"
 					>
 						{playing ? (
-							<Pause className="w-3 h-3 text-white" />
+							<Pause className="h-4 w-4" />
 						) : (
-							<Play className="w-3 h-3 text-white ml-0.5" />
+							<Play className="h-4 w-4" />
 						)}
-					</button>
+					</IconButton>
 				</TooltipTrigger>
 				<TooltipContent>{playing ? "Pause" : "Play"}</TooltipContent>
 			</Tooltip>
@@ -58,7 +57,7 @@ export function AudioPlayer({
 				}}
 				onFinish={() => setPlaying(false)}
 			/>
-			<span className="shrink-0 ml-auto text-[10px] tabular-nums text-white/50">
+			<span className="shrink-0 ml-auto text-[10px] tabular-nums text-muted-foreground">
 				{formatTime(currentTime)}/{formatTime(duration)}
 			</span>
 		</>

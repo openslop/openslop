@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mic, Palette, Plus, User } from "lucide-react";
+import { Mic, Palette, Plus, User } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
@@ -49,10 +49,12 @@ export function AssetsSection() {
 						aria-label="Add character"
 						className="flex w-16 flex-col gap-1 sm:w-20"
 					>
-						<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-white/15 bg-white/[0.02] text-white/50 transition-colors hover:border-white/30 hover:bg-white/[0.05] hover:text-white/80">
+						<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-border bg-muted text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground">
 							<Plus className="h-4 w-4" />
 						</div>
-						<span className="truncate text-[10px] text-white/40">New</span>
+						<span className="truncate text-[10px] text-muted-foreground">
+							New
+						</span>
 					</button>
 					{Object.entries(characters).map(([name, ch]) => (
 						<AssetTile

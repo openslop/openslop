@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { X } from "lucide-react";
+import { X } from "@/components/ui/icon";
 
 import { cn } from "@/lib/utils";
 
@@ -59,7 +59,7 @@ function DialogOverlay({
 		<DialogPrimitive.Overlay
 			data-slot="dialog-overlay"
 			className={cn(
-				"fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+				"fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
 				className,
 			)}
 			{...props}
@@ -81,15 +81,23 @@ function DialogContent({
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				className={cn(
-					"fixed left-[50%] top-[50%] z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 text-white shadow-md shadow-black/40 backdrop-blur-xl outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:w-full",
+					"grain fixed left-[50%] top-[50%] z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-3xl border border-border bg-popover p-6 text-popover-foreground shadow-elevation-10 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:w-full",
 					className,
 				)}
 				{...props}
 			>
-				{children}
+				<div
+					aria-hidden
+					className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40"
+					style={{
+						backgroundImage:
+							"radial-gradient(60% 100% at 50% 0%, var(--glow), transparent 70%)",
+					}}
+				/>
+				<div className="relative z-[2] flex flex-col gap-4">{children}</div>
 				{showCloseButton && (
 					<DialogPrimitive.Close
-						className="absolute right-3 top-3 z-10 rounded-md p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+						className="absolute right-4 top-4 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-ring"
 						aria-label="Close"
 					>
 						<X className="h-4 w-4" />
@@ -115,7 +123,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 		<div
 			data-slot="dialog-footer"
 			className={cn(
-				"flex flex-col-reverse gap-2 border-t border-white/10 pt-3 sm:flex-row sm:justify-end",
+				"flex flex-col-reverse gap-2 border-t border-border pt-3 sm:flex-row sm:justify-end",
 				className,
 			)}
 			{...props}
@@ -130,7 +138,7 @@ function DialogTitle({
 	return (
 		<DialogPrimitive.Title
 			data-slot="dialog-title"
-			className={cn("text-sm font-semibold text-white", className)}
+			className={cn("text-sm font-semibold text-foreground", className)}
 			{...props}
 		/>
 	);
@@ -143,7 +151,7 @@ function DialogDescription({
 	return (
 		<DialogPrimitive.Description
 			data-slot="dialog-description"
-			className={cn("text-xs text-white/60", className)}
+			className={cn("text-xs text-muted-foreground", className)}
 			{...props}
 		/>
 	);

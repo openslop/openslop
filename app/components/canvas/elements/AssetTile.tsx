@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, X, type LucideIcon } from "lucide-react";
+import { Pencil, X, type LucideIcon } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
@@ -27,10 +27,10 @@ export function AssetTile({
 	);
 	const initial = name?.trim().charAt(0).toUpperCase();
 	const fallbackContent =
-		fallback === "icon" || !initial ? <Icon className="h-4 w-4" /> : initial;
+		fallback === "icon" || !initial ? <Icon className="h-5 w-5" /> : initial;
 	return (
 		<div className="group/tile flex w-16 flex-col gap-1 sm:w-20">
-			<div className="relative aspect-square overflow-hidden rounded-md border border-glass-border bg-glass-fill">
+			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
 				{previewUrl ? (
 					<ImageWithShimmer
 						key={previewUrl}
@@ -41,7 +41,7 @@ export function AssetTile({
 						className="object-cover"
 					/>
 				) : (
-					<div className="flex size-full items-center justify-center text-base text-white/60">
+					<div className="flex size-full items-center justify-center text-base text-muted-foreground">
 						{fallbackContent}
 					</div>
 				)}
@@ -59,8 +59,8 @@ export function AssetTile({
 					/>
 				)}
 				{status === "idle" && previewUrl && (
-					<div className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/40 text-white/80">
-						<Icon className="h-2.5 w-2.5" />
+					<div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-card text-foreground shadow-sm ring-1 ring-border">
+						<Icon className="h-3 w-3" />
 					</div>
 				)}
 				{onEdit && status !== "generating" && (
@@ -68,7 +68,7 @@ export function AssetTile({
 						type="button"
 						onClick={onEdit}
 						aria-label={`Edit ${name ?? "asset"}`}
-						className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+						className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
 					>
 						<Pencil className="h-3.5 w-3.5" />
 					</button>
@@ -78,14 +78,17 @@ export function AssetTile({
 						type="button"
 						onClick={onRemove}
 						aria-label={`Remove ${name ?? "asset"}`}
-						className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+						className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
 					>
 						<X className="h-3.5 w-3.5" />
 					</button>
 				)}
 			</div>
 			{name && (
-				<span className="truncate text-[10px] text-white/70" title={name}>
+				<span
+					className="truncate text-[10px] text-muted-foreground"
+					title={name}
+				>
 					{name}
 				</span>
 			)}

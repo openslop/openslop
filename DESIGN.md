@@ -1,71 +1,43 @@
-# Design System — openslop
+# OpenSlop Design System
 
-## Product Context
+OpenSlop is an AI creative media studio: a focused editor plus auth, onboarding, and a projects gallery. This document is the source of truth for visual decisions. Read it before any UI work. Flag any code that deviates.
 
-- **What this is:** An AI faceless-video generator. Users describe or paste a script, openslop builds a storyboard of scenes (image, narration, character dialogue, music, sound), and renders a finished video.
-- **Who it's for:** Creators producing faceless video at volume who want control over the result and to feel in charge of the process.
-- **Space/industry:** AI video tooling. Peers: Runway, Sora, Luma (pro/dark camp); Pika, Captions (consumer/playful camp). openslop belongs in the pro camp.
-- **Project type:** Web app (editor) + auth/marketing surfaces.
-- **Memorable thing:** "A serious creative studio." Every decision below serves this.
+## Aesthetic
 
-## Aesthetic Direction
+Clean, warm, and quiet. The tool is a bright focused workspace; the gallery is a dark immersive showcase. Surfaces carry the weight; color marks what is live or actionable.
 
-- **Direction:** Dark glassmorphism — "a creative studio at night."
-- **Decoration level:** Intentional. Film-grain texture, restrained glow, shimmer loaders. Not flat, not maximalist.
-- **Mood:** Premium, calm, confident. Pro tooling, not a toy.
-- **Core rule (the discipline):** Near-black + glass + grain carry the weight. Violet marks only what is **alive or actionable** (active Generate, focus rings, playhead, the one primary action). The purple glow is a rare earned moment, never an ambient wash. This is what separates "serious studio" from "generic AI-purple wrapper."
+Tokens live in `app/globals.css` (raw palette ramps + semantic tokens, light and dark), exposed to Tailwind via `@theme inline`.
 
-## Typography
+## Theme
 
-- **Display/Titles:** Instrument Serif (weight 400) — `.font-title`. Used sparingly for titles only, so it stays special and never turns precious. A serif title is the deliberate departure from the category's neutral grotesks.
-- **Body/UI:** Satoshi — `.font-body`. All narration, dialogue, labels, controls.
-- **Data/Timestamps:** a monospace (JetBrains Mono or Geist Mono) with tabular-nums for scene times and durations.
-- **Cleanup owed:** today four families float (Geist, Satoshi, Instrument Serif, Google Sans Flex). Consolidate to the three above. Drop "Google Sans Flex"; reduce Geist to mono-or-remove.
-- **Loading:** Instrument Serif via Google Fonts; Satoshi via Fontshare; mono via Google Fonts. Self-host for production.
+Global light + dark via `next-themes` (`attribute="class"`, default light, no system). Editor surfaces read light; the projects gallery reads dark. Both are themeable; a `ThemeToggle` lives in shared chrome. The palette ramps flip in `.dark`, so semantic tokens that reference them adapt automatically.
 
 ## Color
 
-> Token values are canonical in `app/globals.css` (the `@theme` block). This section is the usage rules — when and where each color is allowed — not a second source for the literal values. If a value changes, change it in `@theme`; this doc names tokens, not hex.
+- **Neutrals:** warm, red-tinted greys. `grey-900 #26171d` (light foreground) through `grey-0 #fff`.
+- **Surfaces:** `--background` (`#fdfcfc` light / `#150e11` dark), `--surface-recessed` (panels), `--card` / `--surface-elevated` (raised). Borders are hairline (`--border`, an alpha grey).
+- **Accent — blurple** (`#6b6bcf`, focus `#a3a3ee`): focus rings, selection, links, send, and `accent` CTAs only. Disciplined, never an ambient wash.
+- **State:** `--destructive` (red), `--success` (green), `--caution` (amber).
+- **Media-type tints** (`--media-character/image/clip/animated/music/sound/narration`): used as the element-card icon color so each storyboard type reads at a glance. Brighter in dark, deeper in light.
 
-- **Approach:** Restrained. One accent + neutrals; color is rare and meaningful.
-- **Canvas:** `--color-canvas` (near-black).
-- **Surfaces (glass):** `--color-glass-fill`, `--color-glass-border`, `backdrop-blur`.
-- **Accent (violet):** `--color-accent-violet` (primary), `--color-accent-violet-soft` (soft) — active Generate, focus rings, playhead, primary action only.
-- **Glow:** `--color-glow-violet` / `--shadow-glow` — rare earned highlight (e.g. the live Generate state), never ambient.
-- **Text:** white at `0.80` body, `0.40` muted, `0.30` placeholder.
-- **Media-type palette (signature — every element type reads at a glance):** `--color-media-character`, `--color-media-image`, `--color-media-animated`, `--color-media-clip`, `--color-media-music`, `--color-media-sound`, `--color-media-narration`. Use as small tags/borders on storyboard scene rows. Keep disciplined so it reads, not confetti.
-- **Dark mode:** Dark is the only mode. The stock light `:root` palette in `globals.css` is unreachable (html forces `#0a0a0a`); remove it or commit to dark-only.
+Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-card`, `text-muted-foreground`, `bg-accent`, `ring-ring`), never raw hexes or `*-white/N` literals.
 
-## Spacing
+## Typography
 
-- **Base unit:** 4px (Tailwind default).
-- **Density:** Compact-to-comfortable. The editor runs dense (`text-[11px]`, tight gaps); reading surfaces (narration) get more room.
-- **Scale:** 2xs(2) xs(4) sm(8) md(16) lg(24) xl(32) 2xl(48) 3xl(64).
+One clean grotesque for UI and body: **Inter** (`--font-sans`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Inter 600 with tight tracking; `.font-body` = Inter 400.
 
-## Layout
+## Spacing, radius, elevation
 
-- **Approach:** Hybrid. Editor/canvas is grid-disciplined; composer and player are focal surfaces.
-- **Editor shell:** top "Refine your script" copilot bar + violet Generate to its right; vertical scrollable storyboard of scene rows; player panel docked (top or side).
-- **Max content width:** ~1100px for the storyboard column.
-- **Border radius:** `--radius: 0.625rem` (10px) base; scale to 4xl. Panels `rounded-xl`; pills `rounded-full`.
+4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, modals `rounded-3xl`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow.
 
 ## Motion
 
-- **Approach:** Intentional. Entrance `fadeInUp` (0.3s ease-out), shimmer loaders, OrbLoader for generation. `prefers-reduced-motion` already honored — keep it.
-- **Easing:** enter(ease-out) exit(ease-in) move(ease-in-out).
-- **Duration:** micro(50-100ms) short(150-250ms) medium(250-400ms) long(400-700ms).
+Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`; durations `--duration-faster` (150ms) / `--duration-fast` (350ms). `fadeInUp` for entrances, `shimmer` for skeletons. `prefers-reduced-motion` is honored.
 
-## Implementation Notes (sharpen backlog)
+## Texture
 
-These are the gaps between the shipped look and a real system. None block; all reduce drift.
+One opt-in treatment: subtle film grain (`.grain`, theme-tuned `--grain-opacity`) plus an optional soft blurple radial (`<Glow/>`). Tasteful and quiet. Allowed on landing/auth, the gallery, empty states, and editor chrome. No grain on dense element cards. No glass. No rainbow backdrops.
 
-1. Tokenize the accent + glass: add `--accent-violet`, `--glow-violet`, `--glass-fill`, `--glass-border` instead of hardcoding `violet-500/30`, `bg-white/5`, `shadow-[0_0_40px_rgba(55,30,100,0.5)]` per component.
-2. Tokenize the media-type palette so storyboard surfaces (and the new conversational refine thread) reference tokens, not literals from `status.ts`.
-3. Resolve the four-font sprawl (see Typography).
-4. Remove the dead light `:root` palette.
+## Components
 
-## Decisions Log
-
-| Date       | Decision                         | Rationale                                                                                                                                 |
-| ---------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-09 | Initial design system documented | Codified the existing dark-glass-violet look via /design-consultation; sharpened per "serious creative studio" + disciplined-violet rule. |
+Idiomatic, shadcn-consistent primitives in `components/ui/` built with `class-variance-authority`, tokens only. Buttons: `default` (near-black inverse, for in-tool actions), `accent` (blurple, for hero/auth CTAs), plus `secondary`/`outline`/`ghost`/`icon`/`destructive`. Icons: `lucide-react`, thin (`strokeWidth` ≈1.5).

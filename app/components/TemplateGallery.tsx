@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/components/ui/icon";
 import {
 	TEMPLATES,
 	type Template,
@@ -35,7 +35,7 @@ export default function TemplateGallery({
 
 	return (
 		<div className="mt-6 w-full">
-			<p className="font-body mb-3 text-xs text-white/40">Need inspiration?</p>
+			<p className="mb-3 text-xs text-muted-foreground">Need inspiration?</p>
 			<div className="flex flex-wrap justify-center gap-3">
 				{showcased.map((template) => (
 					<button
@@ -44,7 +44,7 @@ export default function TemplateGallery({
 						onClick={() =>
 							onSelect(template.id, template.showcase.examplePrompt)
 						}
-						className="group flex w-full flex-row overflow-hidden rounded-xl border border-glass-border bg-glass-fill text-left transition-all hover:border-accent-violet/30 hover:shadow-glow sm:w-[calc(50%-0.375rem)]"
+						className="group flex w-full flex-row overflow-hidden rounded-xl border border-border bg-card text-left transition-all hover:border-accent/40 hover:shadow-elevation-5 sm:w-[calc(50%-0.375rem)]"
 					>
 						<CardImage
 							src={template.showcase.image}
@@ -52,16 +52,16 @@ export default function TemplateGallery({
 						/>
 						<div className="flex min-w-0 flex-1 flex-col justify-center p-3">
 							<span className="flex items-center gap-1">
-								<span className="font-body truncate text-sm font-semibold text-white/90">
+								<span className="truncate text-sm font-semibold text-foreground">
 									{template.showcase.title}
 								</span>
-								<ChevronRight className="h-3.5 w-3.5 shrink-0 text-white/40 transition-transform group-hover:translate-x-0.5" />
+								<ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
 							</span>
-							<span className="font-body mt-1 line-clamp-2 text-xs text-white/40">
+							<span className="mt-1 line-clamp-2 text-xs text-muted-foreground">
 								{template.showcase.description}
 							</span>
 							<span
-								className="relative grain mt-1.5 inline-block self-start overflow-hidden rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white/90"
+								className="relative mt-1.5 inline-block self-start overflow-hidden rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
 								style={{ backgroundColor: template.color }}
 							>
 								{template.name}

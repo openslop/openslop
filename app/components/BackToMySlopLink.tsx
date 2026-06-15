@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@/components/ui/icon";
 
 export default function BackToMySlopLink({
 	className = "",
@@ -9,7 +9,7 @@ export default function BackToMySlopLink({
 	return (
 		<Link
 			href="/"
-			className={`inline-flex items-center gap-2 text-sm text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${className}`}
+			className={`inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-ring ${className}`}
 		>
 			<ArrowLeft size={16} strokeWidth={1.5} aria-hidden="true" />
 			Back to My Slop
