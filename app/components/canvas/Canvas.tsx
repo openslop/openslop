@@ -50,6 +50,15 @@ export default function Canvas({
 		[editor],
 	);
 
+	const handleChange = useCallback(
+		(next: Descendant[]) => {
+			if (editor.operations.some((op) => op.type !== "set_selection")) {
+				setValue(next);
+			}
+		},
+		[editor, setValue],
+	);
+
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
 		if (isSceneElement(element)) {
@@ -94,7 +103,7 @@ export default function Canvas({
 				>
 					<Sidebar />
 
-					<Slate editor={editor} initialValue={value} onChange={setValue}>
+					<Slate editor={editor} initialValue={value} onChange={handleChange}>
 						<AssetsSection />
 						<SortableContext
 							items={sceneItems}
