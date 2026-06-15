@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	type CSSProperties,
 	type MouseEvent,
 	type Ref,
 	useCallback,
@@ -11,15 +12,11 @@ import {
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
 
 export interface WaveformProps {
 	src: string;
 	peaksCache?: Map<string, number[]>;
-	barWidth?: number;
-	barGap?: number;
-	barRadius?: number;
-	waveColor?: string;
-	progressColor?: string;
 	className?: string;
 	onReady?: () => void;
 	onPlay?: () => void;
@@ -36,6 +33,14 @@ export interface WaveformHandle {
 }
 
 const PEAK_COUNT = 200;
+const MIN_BAR_HEIGHT = 6;
+
+const MASK_STYLE: CSSProperties = {
+	maskSize: "100% 100%",
+	WebkitMaskSize: "100% 100%",
+	maskRepeat: "no-repeat",
+	WebkitMaskRepeat: "no-repeat",
+};
 
 let sharedAudioCtx: AudioContext | null = null;
 const getAudioCtx = () => {
@@ -62,70 +67,11 @@ export function extractPeaks(data: Float32Array, count: number): number[] {
 	return max > 0 ? peaks.map((p) => p / max) : peaks;
 }
 
-export interface BarStyle {
-	barWidth: number;
-	barGap: number;
-	barRadius: number;
-	waveColor: string;
-	progressColor: string;
-}
-
-/** Draw rounded-bar waveform with progress coloring onto a canvas. */
-export function drawBars(
-	ctx: CanvasRenderingContext2D,
-	cssW: number,
-	cssH: number,
-	peaks: number[],
-	progress: number,
-	style: BarStyle,
-) {
-	ctx.clearRect(0, 0, cssW, cssH);
-	if (peaks.length === 0 || cssW === 0) return;
-	const { barWidth, barGap, barRadius, waveColor, progressColor } = style;
-	const total = barWidth + barGap;
-	const n = Math.floor(cssW / total);
-	if (n === 0) return;
-
-	const renderBars = (color: string) => {
-		ctx.fillStyle = color;
-		ctx.beginPath();
-		for (let i = 0; i < n; i++) {
-			const x = i * total;
-			const peak = peaks[Math.floor((i * peaks.length) / n)];
-			const bh = Math.max(2, peak * (cssH - 2));
-			const y = (cssH - bh) / 2;
-			ctx.roundRect(
-				x,
-				y,
-				barWidth,
-				bh,
-				Math.min(barRadius, barWidth / 2, bh / 2),
-			);
-		}
-		ctx.fill();
-	};
-
-	renderBars(waveColor);
-
-	const px = progress * cssW;
-	if (px > 0) {
-		ctx.save();
-		ctx.beginPath();
-		ctx.rect(0, 0, px, cssH);
-		ctx.clip();
-		renderBars(progressColor);
-		ctx.restore();
-	}
-}
+const clamp01 = (p: number) => Math.max(0, Math.min(1, p));
 
 export function Waveform({
 	src,
 	peaksCache,
-	barWidth = 3,
-	barGap = 3,
-	barRadius = 4,
-	waveColor = "rgba(255, 255, 255, 0.3)",
-	progressColor = "rgba(255, 255, 255, 0.85)",
 	className,
 	ref,
 	onReady,
@@ -134,8 +80,9 @@ export function Waveform({
 	onTimeUpdate,
 	onFinish,
 }: WaveformProps & { ref?: Ref<WaveformHandle> }) {
-	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const audioRef = useRef<HTMLAudioElement>(null);
+	const barsRef = useRef<HTMLDivElement>(null);
+	const progressRef = useRef<HTMLDivElement>(null);
 	const peaksRef = useRef<number[]>([]);
 	const [loadedSrc, setLoadedSrc] = useState<string | null>(() =>
 		peaksCache?.has(src) ? src : null,
@@ -149,40 +96,35 @@ export function Waveform({
 		setLoadedSrc(src);
 	}
 
-	const draw = useCallback(() => {
-		const c = canvasRef.current;
-		const a = audioRef.current;
-		if (!c) return;
-		const dpr = window.devicePixelRatio || 1;
-		const { width: cssW, height: cssH } = c.getBoundingClientRect();
-		const w = Math.round(cssW * dpr);
-		const h = Math.round(cssH * dpr);
-		if (c.width !== w || c.height !== h) {
-			c.width = w;
-			c.height = h;
-		}
-		const ctx = c.getContext("2d");
-		if (!ctx) return;
-		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-		const p = a?.duration ? a.currentTime / a.duration : 0;
-		drawBars(ctx, cssW, cssH, peaksRef.current, p, {
-			barWidth,
-			barGap,
-			barRadius,
-			waveColor,
-			progressColor,
-		});
-	}, [barWidth, barGap, barRadius, waveColor, progressColor]);
+	const setProgress = useCallback((progress: number) => {
+		const el = progressRef.current;
+		if (el)
+			el.style.clipPath = `inset(0 ${(1 - clamp01(progress)) * 100}% 0 0)`;
+	}, []);
 
-	const drawRef = useRef(draw);
-	useEffect(() => {
-		drawRef.current = draw;
-	}, [draw]);
+	const paint = useCallback(() => {
+		const peaks = peaksRef.current;
+		if (!peaks.length) return;
+		const bars = Array.from({ length: AUDIO_BAR_COUNT }, (_, i) =>
+			Math.max(
+				MIN_BAR_HEIGHT,
+				peaks[Math.floor((i * peaks.length) / AUDIO_BAR_COUNT)] * 100,
+			),
+		);
+		const mask = buildSoundwaveMask(bars);
+		for (const el of [barsRef.current, progressRef.current]) {
+			if (!el) continue;
+			el.style.setProperty("mask-image", mask);
+			el.style.setProperty("-webkit-mask-image", mask);
+		}
+		setProgress(0);
+	}, [setProgress]);
 
 	useEffect(() => {
 		const cached = peaksCache?.get(src);
 		if (cached) {
 			peaksRef.current = cached;
+			paint();
 			onReady?.();
 			return;
 		}
@@ -197,6 +139,7 @@ export function Waveform({
 				const peaks = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
 				peaksCache?.set(src, peaks);
 				peaksRef.current = peaks;
+				paint();
 				setLoadedSrc(src);
 				onReady?.();
 			})
@@ -209,18 +152,6 @@ export function Waveform({
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- onReady/peaksCache are stable refs, not direct deps
 	}, [src]);
-
-	useEffect(() => {
-		if (!loading) draw();
-	}, [loading, draw]);
-
-	useEffect(() => {
-		const c = canvasRef.current;
-		if (!c) return;
-		const ro = new ResizeObserver(() => drawRef.current());
-		ro.observe(c);
-		return () => ro.disconnect();
-	}, []);
 
 	useImperativeHandle(
 		ref,
@@ -241,29 +172,38 @@ export function Waveform({
 			seek(progress: number) {
 				const a = audioRef.current;
 				if (a?.duration) {
-					a.currentTime = Math.max(0, Math.min(1, progress)) * a.duration;
-					drawRef.current();
+					a.currentTime = clamp01(progress) * a.duration;
+					setProgress(progress);
 				}
 			},
 		}),
-		[],
+		[setProgress],
 	);
 
-	const handleClick = (e: MouseEvent<HTMLCanvasElement>) => {
+	const handleClick = (e: MouseEvent<HTMLDivElement>) => {
 		const a = audioRef.current;
 		if (!a?.duration) return;
 		const rect = e.currentTarget.getBoundingClientRect();
-		a.currentTime = ((e.clientX - rect.left) / rect.width) * a.duration;
-		drawRef.current();
+		const progress = (e.clientX - rect.left) / rect.width;
+		a.currentTime = clamp01(progress) * a.duration;
+		setProgress(progress);
 	};
 
 	return (
 		<>
-			<div className={cn("relative", className)}>
-				<canvas
-					ref={canvasRef}
-					onClick={handleClick}
-					className="block size-full cursor-pointer"
+			<div
+				className={cn("relative cursor-pointer", className)}
+				onClick={handleClick}
+			>
+				<div
+					ref={barsRef}
+					className="absolute inset-0 bg-muted-foreground"
+					style={MASK_STYLE}
+				/>
+				<div
+					ref={progressRef}
+					className="absolute inset-0 bg-foreground"
+					style={{ ...MASK_STYLE, clipPath: "inset(0 100% 0 0)" }}
 				/>
 				{loading && (
 					<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
@@ -276,9 +216,10 @@ export function Waveform({
 				preload="metadata"
 				hidden
 				onTimeUpdate={() => {
-					drawRef.current();
 					const a = audioRef.current;
-					if (a) onTimeUpdate?.(a.currentTime, a.duration || 0);
+					if (!a) return;
+					setProgress(a.duration ? a.currentTime / a.duration : 0);
+					onTimeUpdate?.(a.currentTime, a.duration || 0);
 				}}
 				onLoadedMetadata={() => {
 					const a = audioRef.current;

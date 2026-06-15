@@ -2,7 +2,6 @@ import { memo } from "react";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useGenerate } from "../hooks/useGenerate";
-import { BORDER_COLORS } from "./preview/status";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	AudioResult,
@@ -24,12 +23,7 @@ function OutputPreviewComponent({
 	if (outputKind === "audio") {
 		if (result?.audioUrl) {
 			return (
-				<AudioResult
-					type={type}
-					src={result.audioUrl}
-					status={status}
-					seconds={seconds}
-				/>
+				<AudioResult src={result.audioUrl} status={status} seconds={seconds} />
 			);
 		}
 		return (
@@ -42,14 +36,11 @@ function OutputPreviewComponent({
 		);
 	}
 
-	const borderColor = BORDER_COLORS[type] ?? "border-border";
-
 	if (type === "animated_image") {
 		return (
 			<AnimatedImagePreview
 				imageUrl={result?.imageUrl}
 				videoUrl={result?.videoUrl}
-				borderColor={borderColor}
 				status={status}
 				seconds={seconds}
 				error={error}
@@ -65,7 +56,6 @@ function OutputPreviewComponent({
 				key={url}
 				url={url}
 				outputKind={outputKind}
-				borderColor={borderColor}
 				status={status}
 				seconds={seconds}
 			/>
