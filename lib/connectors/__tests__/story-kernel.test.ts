@@ -43,4 +43,26 @@ describe("storyModePlugin", () => {
 			"story mode plugin requires gateway context",
 		);
 	});
+
+	describe("beforeGenerate", () => {
+		const { beforeGenerate } = storyModePlugin;
+		if (!beforeGenerate)
+			throw new Error("storyModePlugin.beforeGenerate is required");
+
+		it("does not leak the literal string 'undefined' when no upstream systemPrompt is set", async () => {
+			const result = await beforeGenerate({ prompt: "a knight" });
+			expect(result.systemPrompt).toBeDefined();
+			expect(result.systemPrompt).not.toContain("undefined");
+			expect(result.systemPrompt).toContain("Storywriting guidelines");
+		});
+
+		it("appends an upstream systemPrompt after the storytelling guidelines", async () => {
+			const result = await beforeGenerate({
+				prompt: "a knight",
+				systemPrompt: "PROJECT METADATA PREAMBLE",
+			});
+			expect(result.systemPrompt).toContain("Storywriting guidelines");
+			expect(result.systemPrompt).toContain("PROJECT METADATA PREAMBLE");
+		});
+	});
 });

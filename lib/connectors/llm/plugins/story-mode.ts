@@ -6,18 +6,20 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 
+const STORY_MODE_SYSTEM_PROMPT = dedent`You are a highly engaging storyteller who expertly narrates video stories.
+
+	Storywriting guidelines:
+	- The story must be mostly told through character dialogue and action.
+	- When introducing a character, the narration should mention who they are and what they are doing in the scene.`;
+
 export const storyModePlugin: LLMPlugin = {
 	name: "storyMode",
 	beforeGenerate(params) {
 		return {
 			...params,
-			systemPrompt: dedent`You are a highly engaging storyteller who expertly narrates video stories.
-			
-			Storywriting guidelines:
-			- The story must be mostly told through character dialogue and action.
-			- When introducing a character, the narration should mention who they are and what they are doing in the scene.
-	
-			${params.systemPrompt}`,
+			systemPrompt: params.systemPrompt
+				? `${STORY_MODE_SYSTEM_PROMPT}\n\n${params.systemPrompt}`
+				: STORY_MODE_SYSTEM_PROMPT,
 		};
 	},
 	async transformPrompt(
