@@ -192,7 +192,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 			const audioChunks: Buffer[] = [];
 			const textTimestamps: TextTimestamp[] = [];
 			const req: GenerationRequest = {
-				model_id: params.model || "sonic-3",
+				model_id: params.model || "sonic-3.5",
 				transcript: params.prompt,
 				voice: { mode: "id", id: params.voiceId },
 				output_format: {
