@@ -27,7 +27,6 @@ function OutputPreviewComponent({
 				<AudioResult
 					type={type}
 					src={result.audioUrl}
-					characterName={element.customAttributes?.name}
 					status={status}
 					seconds={seconds}
 				/>

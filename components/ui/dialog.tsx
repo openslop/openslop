@@ -94,7 +94,9 @@ function DialogContent({
 							"radial-gradient(60% 100% at 50% 0%, var(--glow), transparent 70%)",
 					}}
 				/>
-				<div className="relative z-[2] flex flex-col gap-4">{children}</div>
+				<div className="relative z-[2] flex min-h-0 flex-1 flex-col gap-4">
+					{children}
+				</div>
 				{showCloseButton && (
 					<DialogPrimitive.Close
 						className="absolute right-4 top-4 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-ring"

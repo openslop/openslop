@@ -90,7 +90,7 @@ export function EditorSidebar() {
 
 	return (
 		<div className="flex shrink-0">
-			<nav className="flex w-14 shrink-0 flex-col items-center gap-1 pt-16 pr-0.5 pl-1 lg:w-[72px] lg:pt-4">
+			<nav className="flex w-14 shrink-0 flex-col items-center gap-1 pt-16 pr-0.5 mr-2 pl-1 lg:w-[72px] lg:pt-4">
 				<RailItem icon={Home} label="Home" href="/" />
 				<div className="my-1.5 h-px w-8 bg-border" />
 				{(Object.keys(PANELS) as PanelKey[]).map((key) => {
@@ -109,7 +109,7 @@ export function EditorSidebar() {
 			</nav>
 
 			{current && HeaderIcon && Panel && (
-				<div className="flex w-60 shrink-0 flex-col gap-3 overflow-y-auto px-2 pt-4 pb-3 text-panel-fg">
+				<div className="flex w-60 shrink-0 flex-col gap-3 overflow-y-auto pr-2 pt-4 pb-3 text-panel-fg">
 					<div className="flex items-center gap-2 px-1">
 						<HeaderIcon className="h-5 w-5 text-panel-label" />
 						<h2 className="text-sm font-semibold text-panel-label">

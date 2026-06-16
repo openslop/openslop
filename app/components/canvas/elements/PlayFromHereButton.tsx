@@ -23,6 +23,7 @@ export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 			<TooltipTrigger asChild>
 				<IconButton
 					ariaLabel="Play from here"
+					className="bg-muted"
 					disabled={disabled}
 					onMouseDown={(e) => e.preventDefault()}
 					onClick={() => {

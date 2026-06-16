@@ -111,7 +111,7 @@ export function VoicePicker({
 		<div className="flex min-w-0 flex-col gap-1.5">
 			<FieldLabel>Voices</FieldLabel>
 			{error && <span className="text-[11px] text-rose-400">{error}</span>}
-			<div className="flex h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
+			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{loading &&
 					Array.from({ length: SKELETON_ROWS }).map((_, i) => (
 						<Skeleton key={`skel-${i}`} className="h-12 shrink-0 rounded-md" />

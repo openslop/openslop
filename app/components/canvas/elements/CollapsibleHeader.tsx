@@ -25,7 +25,7 @@ export function CollapsibleHeader({
 			<button
 				type="button"
 				onClick={onToggle}
-				className="opacity-0 group-hover/collapsible:opacity-100 transition-opacity duration-200 p-0.5 -ml-1 rounded hover:bg-muted"
+				className="inline-flex items-center justify-center opacity-0 group-hover/collapsible:opacity-100 transition-opacity duration-200 p-1 ml-1 rounded hover:bg-button-hover"
 				aria-label={ariaLabel}
 			>
 				<Icon size={12} />

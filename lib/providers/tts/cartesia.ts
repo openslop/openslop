@@ -30,6 +30,7 @@ type RawTTSResult = {
 const SAMPLE_RATE = 44100;
 const NUM_CHANNELS = 1;
 const ENCODING = "pcm_f32le";
+const CARTESIA_VOLUME = 1.5;
 
 const CARTESIA_SPEED: Record<TTSSpeed, number> = {
 	slow: 0.6,
@@ -203,7 +204,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				add_timestamps: true,
 				generation_config: {
 					speed: CARTESIA_SPEED[params.speed ?? "medium"],
-					volume: params.volume ?? 1.5,
+					volume: CARTESIA_VOLUME,
 				},
 			};
 			for await (const response of ws.generate(req)) {

@@ -20,7 +20,7 @@ import { SceneTimestamp } from "./SceneTimestamp";
 const COLLAPSED_MAX_VISIBLE = 3;
 
 const SCENE_FRAME_CLASS =
-	"px-3 py-2 transition-[box-shadow,background-color] duration-200";
+	"pr-3 py-2 transition-[box-shadow,background-color] duration-200";
 interface SceneProps {
 	attributes: RenderElementProps["attributes"];
 	element: SceneElement;
@@ -106,13 +106,17 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 			className={`group/collapsible relative h-32 ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
-			<div className="relative z-[1] flex flex-col h-full pr-[calc(8rem+0.75rem)]">
-				<SceneHeader
-					sceneIndex={sceneIndex}
-					collapsed
-					onToggle={() => toggle(element.id)}
-					element={element}
-				/>
+			<div className="relative z-[1] flex flex-col h-full">
+				{/* Pull the header back over the drag-handle gutter so it lines up
+				    with the expanded header instead of shifting right. */}
+				<div className="-ml-[34px]">
+					<SceneHeader
+						sceneIndex={sceneIndex}
+						collapsed
+						onToggle={() => toggle(element.id)}
+						element={element}
+					/>
+				</div>
 				<div className="flex flex-col gap-0.5 flex-1 min-h-0 overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none">
 					{childArray.slice(0, COLLAPSED_MAX_VISIBLE)}
 					{overflowCount > 0 && (
