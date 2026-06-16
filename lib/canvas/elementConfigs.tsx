@@ -101,6 +101,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		iconBgClass: "bg-media-narration/15",
 		placeholder: "Write the narration...",
 		defaultAttributes: {
+			emotion: "neutral",
 			volume: "10",
 			speed: "medium",
 			captions: "on",
@@ -125,6 +126,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		iconBgClass: "bg-media-character/15",
 		placeholder: "What does this character say?",
 		defaultAttributes: {
+			emotion: "neutral",
 			volume: "10",
 			speed: "medium",
 			captions: "on",

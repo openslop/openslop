@@ -5,7 +5,7 @@ import {
 	type MotionEffect,
 } from "./motionEffects";
 
-/** Raw attribute keys that, when changed, require a layout recompute. */
+/** Raw attribute keys that, when changed, require a layout recompute but are omitted from generation inputs */
 export const LAYOUT_ATTRIBUTE_KEYS = [
 	"loops",
 	"volume",
