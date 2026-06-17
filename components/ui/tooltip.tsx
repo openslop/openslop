@@ -53,4 +53,31 @@ function TooltipContent({
 	);
 }
 
-export { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent };
+/**
+ * Convenience wrapper for the common case: a single trigger element with a
+ * plain text label. Use the primitives directly when the content or trigger
+ * needs customization.
+ */
+function SimpleTooltip({
+	label,
+	children,
+	...props
+}: Omit<React.ComponentProps<typeof TooltipPrimitive.Root>, "children"> & {
+	label: React.ReactNode;
+	children: React.ReactNode;
+}) {
+	return (
+		<Tooltip {...props}>
+			<TooltipTrigger asChild>{children}</TooltipTrigger>
+			<TooltipContent>{label}</TooltipContent>
+		</Tooltip>
+	);
+}
+
+export {
+	TooltipProvider,
+	Tooltip,
+	TooltipTrigger,
+	TooltipContent,
+	SimpleTooltip,
+};

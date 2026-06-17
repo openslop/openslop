@@ -19,11 +19,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
 import type { ElementConfig } from "@/lib/canvas/elementConfigs";
 
@@ -38,21 +34,18 @@ function ElementSettings({
 	if (entries.length === 0) return null;
 	return (
 		<Popover>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<PopoverTrigger asChild>
-						<button
-							type="button"
-							aria-label="Settings"
-							onMouseDown={(e) => e.preventDefault()}
-							className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
-						>
-							<SlidersHorizontal size={14} strokeWidth={1.5} />
-						</button>
-					</PopoverTrigger>
-				</TooltipTrigger>
-				<TooltipContent>Settings</TooltipContent>
-			</Tooltip>
+			<SimpleTooltip label="Settings">
+				<PopoverTrigger asChild>
+					<button
+						type="button"
+						aria-label="Settings"
+						onMouseDown={(e) => e.preventDefault()}
+						className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+					>
+						<SlidersHorizontal size={14} strokeWidth={1.5} />
+					</button>
+				</PopoverTrigger>
+			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64">
 				<div className="mb-2 text-xs font-semibold text-muted-foreground">
 					Settings

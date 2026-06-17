@@ -1,11 +1,7 @@
 "use client";
 
 import { Download, Loader2, X } from "@/components/ui/icon";
-import {
-	Tooltip,
-	TooltipTrigger,
-	TooltipContent,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import type { VideoLayout } from "@/lib/video/types";
 import { useRendering } from "./useRendering";
 
@@ -23,19 +19,16 @@ export function RenderControls({ layout }: { layout: VideoLayout }) {
 
 	if (state.status === "idle") {
 		return (
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<button
-						type="button"
-						onClick={() => render(layout)}
-						aria-label="Export Video"
-						className="relative rounded-lg bg-secondary p-2 text-accent opacity-0 shadow-md shadow-black/25 transition-[opacity,filter] hover:brightness-[1.3] group-hover:opacity-100"
-					>
-						<Download size={16} />
-					</button>
-				</TooltipTrigger>
-				<TooltipContent>Export Video</TooltipContent>
-			</Tooltip>
+			<SimpleTooltip label="Export Video">
+				<button
+					type="button"
+					onClick={() => render(layout)}
+					aria-label="Export Video"
+					className="relative rounded-lg bg-secondary p-2 text-accent opacity-0 shadow-md shadow-black/25 transition-[opacity,filter] hover:brightness-[1.3] group-hover:opacity-100"
+				>
+					<Download size={16} />
+				</button>
+			</SimpleTooltip>
 		);
 	}
 
