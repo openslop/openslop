@@ -1,4 +1,4 @@
-import { createContext, use } from "react";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
 export type DragTransfer = {
 	itemId: string;
@@ -7,8 +7,6 @@ export type DragTransfer = {
 	atIndex: number;
 } | null;
 
-export const DragTransferContext = createContext<DragTransfer>(null);
-
-export function useDragTransfer(): DragTransfer {
-	return use(DragTransferContext);
-}
+const [DragTransferContext, useDragTransfer] =
+	createRequiredContext<DragTransfer>("DragTransferContext");
+export { DragTransferContext, useDragTransfer };

@@ -10,6 +10,7 @@ import {
 	type ReactNode,
 } from "react";
 import type { ParsedElement } from "@/lib/canvas/types";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
@@ -24,28 +25,17 @@ type ScriptControl = {
 
 // `nodes` is rebuilt on every streamed token, so it lives in its own context
 // to keep low-frequency controls from re-rendering the editor shell per token.
-const ScriptNodesContext = createContext<ParsedElement[] | null>(null);
-const ScriptControlContext = createContext<ScriptControl | null>(null);
+const [ScriptNodesContext, useScriptNodes] =
+	createRequiredContext<ParsedElement[]>("ScriptNodesContext");
+const [ScriptControlContext, useScriptControl] =
+	createRequiredContext<ScriptControl>("ScriptControlContext");
+export { useScriptNodes, useScriptControl };
 // The live script string changes per streamed token, but nothing renders it:
 // the shell only needs a stable "has any content" boolean, and the editor only
 // needs the initial script once for rehydration. Exposing those instead of the
 // raw string keeps the whole editor tree off the per-token render path.
 const ScriptHasContentContext = createContext(false);
 const ScriptInitialContext = createContext<string>("");
-
-export function useScriptNodes() {
-	const ctx = use(ScriptNodesContext);
-	if (!ctx)
-		throw new Error("useScriptNodes must be used within ScriptProvider");
-	return ctx;
-}
-
-export function useScriptControl() {
-	const ctx = use(ScriptControlContext);
-	if (!ctx)
-		throw new Error("useScriptControl must be used within ScriptProvider");
-	return ctx;
-}
 
 export function useScriptHasContent() {
 	return use(ScriptHasContentContext);
@@ -114,14 +104,14 @@ export function ScriptProvider({
 	);
 
 	return (
-		<ScriptControlContext.Provider value={control}>
-			<ScriptNodesContext.Provider value={nodes}>
-				<ScriptInitialContext.Provider value={initialScript}>
-					<ScriptHasContentContext.Provider value={hasContent}>
+		<ScriptControlContext value={control}>
+			<ScriptNodesContext value={nodes}>
+				<ScriptInitialContext value={initialScript}>
+					<ScriptHasContentContext value={hasContent}>
 						{children}
-					</ScriptHasContentContext.Provider>
-				</ScriptInitialContext.Provider>
-			</ScriptNodesContext.Provider>
-		</ScriptControlContext.Provider>
+					</ScriptHasContentContext>
+				</ScriptInitialContext>
+			</ScriptNodesContext>
+		</ScriptControlContext>
 	);
 }
