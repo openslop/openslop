@@ -9,7 +9,7 @@ import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
 import { useProjectStore } from "@/lib/project/store";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { buildGenerationJob } from "../utils/buildGenerationJob";
+import { buildGenerationJob } from "@/lib/generation/buildGenerationJob";
 
 export function useGenerate(element: CanvasContentElement) {
 	const { projectId, connectorConfig } = useConfig();

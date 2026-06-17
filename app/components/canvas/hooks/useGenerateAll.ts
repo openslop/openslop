@@ -7,7 +7,7 @@ import { isStaleResult } from "@/lib/generation/queue";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
 import { getProjectStore } from "@/lib/project/store";
-import { buildGenerationJob } from "../utils/buildGenerationJob";
+import { buildGenerationJob } from "@/lib/generation/buildGenerationJob";
 
 export function useGenerateAll(editor: Editor) {
 	const { projectId, connectorConfig } = useConfig();

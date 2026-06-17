@@ -14,11 +14,11 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getElementCharacterNames } from "@/lib/canvas/characterNames";
 import { setNodeAttrs } from "@/lib/canvas/editorOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
-import { getElementCharacterNames } from "../utils/characters";
 import { CharacterPill } from "./CharacterPill";
 
 function useProjectCharacterNames(): string[] {

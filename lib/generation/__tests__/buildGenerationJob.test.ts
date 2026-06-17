@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { buildGenerationJob } from "../utils/buildGenerationJob";
+import { buildGenerationJob } from "../buildGenerationJob";
 
 const PROJECT_ID = "00000000-0000-4000-8000-000000000000";
 
