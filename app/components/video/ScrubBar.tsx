@@ -100,8 +100,13 @@ export function ScrubBar({
 		onHoverChange?.(null);
 	};
 
+	const starts = new Array<number>(segs.length);
+	for (let i = 0, acc = 0; i < segs.length; i++) {
+		starts[i] = acc;
+		acc += segs[i].basis;
+	}
 	const fills = segs.map((seg, i) => {
-		const start = segs.slice(0, i).reduce((sum, s) => sum + s.basis, 0);
+		const start = starts[i];
 		const at = (r: number) => clamp((r - start) / seg.basis, 0, 1);
 		return {
 			seg,
