@@ -83,6 +83,17 @@ describe("getElementCharacterNames", () => {
 		).toEqual(["Alice", "Red", "Granny"]);
 	});
 
+	it("deduplicates repeated names while preserving first occurrence order", () => {
+		expect(
+			getElementCharacterNames(
+				makeElement("image", {
+					name: "Alice",
+					characters: "Alice, Red, Alice, Granny, Red",
+				}),
+			),
+		).toEqual(["Alice", "Red", "Granny"]);
+	});
+
 	it("ignores element type — extracts from any element with the attributes", () => {
 		expect(
 			getElementCharacterNames(makeElement("narration", { characters: "Bob" })),

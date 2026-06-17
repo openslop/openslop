@@ -1,3 +1,4 @@
+import uniq from "lodash/uniq";
 import type { CanvasContentElement } from "./types";
 
 /**
@@ -22,8 +23,10 @@ export function getElementCharacterNames(
 ): string[] {
 	const attrs = element.customAttributes;
 	if (!attrs) return [];
-	return Object.entries(CHARACTER_NAME_EXTRACTORS).flatMap(([key, extract]) => {
-		const value = attrs[key];
-		return value ? extract(value).filter(Boolean) : [];
-	});
+	return uniq(
+		Object.entries(CHARACTER_NAME_EXTRACTORS).flatMap(([key, extract]) => {
+			const value = attrs[key];
+			return value ? extract(value).filter(Boolean) : [];
+		}),
+	);
 }
