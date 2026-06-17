@@ -20,13 +20,13 @@ export function DragOverlayContent({ element }: { element: Descendant }) {
 						aria-label="Add element"
 						className="inline-flex items-center rounded-md p-0.5 text-foreground"
 					>
-						<Plus size={24} />
+						<Plus size={18} />
 					</button>
 					<button
 						aria-label="Drag handle"
 						className="inline-flex items-center rounded-md p-0.5 text-foreground"
 					>
-						<GripVertical size={24} />
+						<GripVertical size={22} />
 					</button>
 				</div>
 				<Editable

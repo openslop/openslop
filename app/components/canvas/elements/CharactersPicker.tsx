@@ -19,7 +19,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 import { getElementCharacterNames } from "../utils/characters";
-import { CharacterPill } from "./CharacterBadge";
+import { CharacterPill } from "./CharacterPill";
 
 function useProjectCharacterNames(): string[] {
 	const { projectId } = useConfig();

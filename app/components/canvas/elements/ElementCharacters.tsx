@@ -3,7 +3,7 @@
 import { useSlateStatic } from "slate-react";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getElementCharacterNames } from "../utils/characters";
-import { CharacterPill } from "./CharacterBadge";
+import { CharacterPill } from "./CharacterPill";
 import {
 	CharacterSwitcher,
 	CharactersPicker,

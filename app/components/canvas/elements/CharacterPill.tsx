@@ -44,16 +44,6 @@ function CharacterName({ name }: { name: string }) {
 	);
 }
 
-export function CharacterBadge({ name }: { name?: string }) {
-	const avatarUrl = useCharacterAvatarUrl(name);
-	return (
-		<div className="flex items-center gap-2 shrink-0 min-w-0 max-w-[140px]">
-			<CharacterAvatar name={name} avatarUrl={avatarUrl} />
-			{name && <CharacterName name={name} />}
-		</div>
-	);
-}
-
 export function CharacterPill({
 	name,
 	onRemove,

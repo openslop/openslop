@@ -140,13 +140,14 @@ function PostPromptViewInner() {
 					<div className="flex flex-1 items-start justify-end gap-2 max-sm:flex-none">
 						<Button
 							type="button"
+							variant="generate"
 							onClick={generateAll}
 							className="h-11 shrink-0 px-4 sm:px-5"
 							aria-label={generateLabel}
 							disabled={busy}
 						>
 							{busy ? (
-								<Spinner className="text-primary-foreground" />
+								<Spinner className="text-current" />
 							) : (
 								<Sparkles aria-hidden="true" />
 							)}

@@ -17,12 +17,12 @@ export function CompactElement({
 
 	return (
 		<div
-			className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 animate-fadeInUp"
+			className="inline-flex items-center gap-1 rounded-md py-0.5 animate-fadeInUp"
 			contentEditable={false}
 			{...attributes}
 		>
 			<span
-				className="flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5"
+				className="flex items-center gap-1 rounded-md bg-muted px-1 py-0.5"
 				contentEditable={false}
 			>
 				{config.icon}

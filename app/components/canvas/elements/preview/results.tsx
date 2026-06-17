@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { AudioPlayer } from "../AudioPlayer";
-import { CharacterBadge } from "../CharacterBadge";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
 import type { CanvasElementType } from "@/lib/canvas/types";
@@ -13,17 +12,14 @@ import { PlaceholderOverlay, ResultOverlay } from "./overlays";
 export function AudioResult({
 	type,
 	src,
-	characterName,
 	status,
 	seconds,
 }: GenerationState & {
 	type: CanvasElementType;
 	src: string;
-	characterName?: string;
 }) {
 	return (
 		<div className="group relative w-full min-h-16 rounded-lg overflow-hidden border border-border bg-element-card flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5">
-			{type === "character" && <CharacterBadge name={characterName} />}
 			{status !== "idle" && (
 				<GenerationIndicator
 					status={status}

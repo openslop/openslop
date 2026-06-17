@@ -37,7 +37,7 @@ export function SortableActions<K extends string>({
 							className="inline-flex items-center rounded-md p-0.5 text-muted-foreground
               hover:text-foreground hover:bg-muted transition-[color,background-color] duration-200"
 						>
-							<Plus size={24} />
+							<Plus size={18} />
 						</button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
@@ -69,7 +69,7 @@ export function SortableActions<K extends string>({
         cursor-grab active:cursor-grabbing"
 				{...listeners}
 			>
-				<GripVertical size={24} />
+				<GripVertical size={22} />
 			</button>
 		</>
 	);
