@@ -84,7 +84,6 @@ export enum TTSEmotion {
 	Amazed = "amazed",
 	Surprised = "surprised",
 	Flirtatious = "flirtatious",
-	Joking = "joking/comedic",
 	Curious = "curious",
 	Content = "content",
 	Peaceful = "peaceful",
