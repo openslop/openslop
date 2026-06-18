@@ -44,6 +44,15 @@ jobs:
       - name: Tests
         run: npm run test:coverage
 
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke tests
+        run: npm run test:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
       - name: Bundle size report
         run: |
           echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
