@@ -4,11 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
@@ -44,18 +40,15 @@ function PreviewPlayButton({ src }: { src: string }) {
 				onPause={() => setPlaying(false)}
 				onEnded={() => setPlaying(false)}
 			/>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<IconButton ariaLabel={playing ? "Pause" : "Play"} onClick={toggle}>
-						{playing ? (
-							<Pause className="h-4 w-4" />
-						) : (
-							<Play className="h-4 w-4" />
-						)}
-					</IconButton>
-				</TooltipTrigger>
-				<TooltipContent>{playing ? "Pause" : "Play"}</TooltipContent>
-			</Tooltip>
+			<SimpleTooltip label={playing ? "Pause" : "Play"}>
+				<IconButton ariaLabel={playing ? "Pause" : "Play"} onClick={toggle}>
+					{playing ? (
+						<Pause className="h-4 w-4" />
+					) : (
+						<Play className="h-4 w-4" />
+					)}
+				</IconButton>
+			</SimpleTooltip>
 		</>
 	);
 }

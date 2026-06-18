@@ -4,11 +4,7 @@ import {
 	Wand2,
 	type LucideIcon,
 } from "@/components/ui/icon";
-import {
-	Tooltip,
-	TooltipTrigger,
-	TooltipContent,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 
@@ -74,22 +70,19 @@ export function GenerationIndicator({
 	);
 
 	return (
-		<Tooltip>
-			<TooltipTrigger asChild>
-				<button
-					type="button"
-					aria-label={label}
-					className={cn(
-						baseWrapper,
-						"transition-[opacity,background-color] disabled:cursor-not-allowed",
-					)}
-					disabled={active || !onClick}
-					onClick={onClick}
-				>
-					{iconEl}
-				</button>
-			</TooltipTrigger>
-			<TooltipContent>{label}</TooltipContent>
-		</Tooltip>
+		<SimpleTooltip label={label}>
+			<button
+				type="button"
+				aria-label={label}
+				className={cn(
+					baseWrapper,
+					"transition-[opacity,background-color] disabled:cursor-not-allowed",
+				)}
+				disabled={active || !onClick}
+				onClick={onClick}
+			>
+				{iconEl}
+			</button>
+		</SimpleTooltip>
 	);
 }

@@ -2,11 +2,7 @@
 
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
@@ -36,14 +32,11 @@ function TooltipButton({
 	children: React.ReactNode;
 }) {
 	return (
-		<Tooltip>
-			<TooltipTrigger asChild>
-				<IconButton onClick={onClick} ariaLabel={ariaLabel}>
-					{children}
-				</IconButton>
-			</TooltipTrigger>
-			<TooltipContent>{label}</TooltipContent>
-		</Tooltip>
+		<SimpleTooltip label={label}>
+			<IconButton onClick={onClick} ariaLabel={ariaLabel}>
+				{children}
+			</IconButton>
+		</SimpleTooltip>
 	);
 }
 

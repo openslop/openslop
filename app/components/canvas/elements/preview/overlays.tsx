@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
-import {
-	Tooltip,
-	TooltipTrigger,
-	TooltipContent,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { GenerationIndicator } from "../GenerationIndicator";
 import type { GenerationState, PlaceholderProps } from "./status";
 
@@ -20,19 +16,16 @@ function OverlayButton({
 	children: React.ReactNode;
 }) {
 	return (
-		<Tooltip>
-			<TooltipTrigger asChild>
-				<button
-					type="button"
-					aria-label={label}
-					className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-muted hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
-					onClick={onClick}
-				>
-					{children}
-				</button>
-			</TooltipTrigger>
-			<TooltipContent>{label}</TooltipContent>
-		</Tooltip>
+		<SimpleTooltip label={label}>
+			<button
+				type="button"
+				aria-label={label}
+				className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-muted hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+				onClick={onClick}
+			>
+				{children}
+			</button>
+		</SimpleTooltip>
 	);
 }
 

@@ -9,11 +9,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
 import { setNodeAttrs } from "@/lib/canvas/editorOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
@@ -114,22 +110,19 @@ export function CharactersPicker({
 
 	return (
 		<DropdownMenu modal={false}>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<DropdownMenuTrigger asChild disabled={disabled}>
-						<button
-							type="button"
-							aria-label={label}
-							onMouseDown={(e) => e.preventDefault()}
-							disabled={disabled}
-							className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							<UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
-						</button>
-					</DropdownMenuTrigger>
-				</TooltipTrigger>
-				<TooltipContent>{label}</TooltipContent>
-			</Tooltip>
+			<SimpleTooltip label={label}>
+				<DropdownMenuTrigger asChild disabled={disabled}>
+					<button
+						type="button"
+						aria-label={label}
+						onMouseDown={(e) => e.preventDefault()}
+						disabled={disabled}
+						className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						<UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
+					</button>
+				</DropdownMenuTrigger>
+			</SimpleTooltip>
 			<ProjectCharactersMenu
 				selected={selected}
 				onSelect={(name) => toggleCharacter(editor, element, name)}
