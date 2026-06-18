@@ -1,19 +1,18 @@
 import { useEffect, useRef } from "react";
 import { Editor, Transforms } from "slate";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { HistoryEditor } from "slate-history";
+import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { deserializeWithScenes } from "@/lib/project/serialize";
 
-export function useProjectRehydrate(editor: Editor, script: string): void {
-	const { connectorConfig } = useConfig();
-	const ranRef = useRef(false);
+export function rehydrateProjectEditor(
+	editor: Editor,
+	script: string,
+	connectorConfig: ConnectorRegistry,
+): void {
+	const scenes = deserializeWithScenes(script, connectorConfig);
+	if (scenes.length === 0) return;
 
-	useEffect(() => {
-		if (ranRef.current) return;
-		ranRef.current = true;
-
-		const scenes = deserializeWithScenes(script, connectorConfig);
-		if (scenes.length === 0) return;
-
+	const replaceChildren = () => {
 		Editor.withoutNormalizing(editor, () => {
 			while (editor.children.length > 0) {
 				Transforms.removeNodes(editor, { at: [0] });
@@ -23,5 +22,24 @@ export function useProjectRehydrate(editor: Editor, script: string): void {
 			});
 		});
 		Editor.normalize(editor, { force: true });
+	};
+
+	if (HistoryEditor.isHistoryEditor(editor)) {
+		HistoryEditor.withoutSaving(editor, replaceChildren);
+		return;
+	}
+
+	replaceChildren();
+}
+
+export function useProjectRehydrate(editor: Editor, script: string): void {
+	const { connectorConfig } = useConfig();
+	const ranRef = useRef(false);
+
+	useEffect(() => {
+		if (ranRef.current) return;
+		ranRef.current = true;
+
+		rehydrateProjectEditor(editor, script, connectorConfig);
 	}, [editor, script, connectorConfig]);
 }
