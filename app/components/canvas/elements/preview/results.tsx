@@ -2,20 +2,19 @@ import { useState } from "react";
 import { AudioPlayer } from "../AudioPlayer";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
-import type { CanvasElementType } from "@/lib/canvas/types";
 import type { GenerationState, PlaceholderProps } from "./status";
-import { WAVE_COLORS } from "./status";
 import { PlaceholderBallsLoader } from "./placeholderBalls";
-import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
+import {
+	AUDIO_BAR_COUNT,
+	buildSoundwaveMask,
+} from "@/lib/components/soundwave";
 import { PlaceholderOverlay, ResultOverlay } from "./overlays";
 
 export function AudioResult({
-	type,
 	src,
 	status,
 	seconds,
 }: GenerationState & {
-	type: CanvasElementType;
 	src: string;
 }) {
 	return (
@@ -27,7 +26,7 @@ export function AudioResult({
 					className="shrink-0"
 				/>
 			)}
-			<AudioPlayer key={src} src={src} waveColor={WAVE_COLORS[type]} />
+			<AudioPlayer key={src} src={src} />
 		</div>
 	);
 }
@@ -76,18 +75,14 @@ export function MediaPlaceholder(props: PlaceholderProps) {
 export function MediaPreview({
 	url,
 	outputKind,
-	borderColor,
 	status,
 	seconds,
 }: GenerationState & {
 	url: string;
 	outputKind: "image" | "video";
-	borderColor: string;
 }) {
 	return (
-		<div
-			className={`group relative w-full aspect-video rounded-lg overflow-hidden border ${borderColor}`}
-		>
+		<div className="group relative w-full aspect-video rounded-lg overflow-hidden border border-border">
 			<MediaWithSkeleton
 				outputKind={outputKind}
 				src={url}

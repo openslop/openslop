@@ -12,13 +12,7 @@ import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
 import { formatTime } from "@/lib/video/timestamps";
 import { usePreviewCache } from "../PreviewCacheContext";
 
-export function AudioPlayer({
-	src,
-	waveColor = "rgba(135, 113, 120, 0.55)",
-}: {
-	src: string;
-	waveColor?: string;
-}) {
+export function AudioPlayer({ src }: { src: string }) {
 	const waveformRef = useRef<WaveformHandle>(null);
 	const peaksCache = usePreviewCache();
 	const [playing, setPlaying] = useState(false);
@@ -47,7 +41,6 @@ export function AudioPlayer({
 				ref={waveformRef}
 				src={src}
 				peaksCache={peaksCache}
-				waveColor={waveColor}
 				className="flex-1 basis-[160px] min-w-0 h-10"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}

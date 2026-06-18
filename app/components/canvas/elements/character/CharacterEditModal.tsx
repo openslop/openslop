@@ -201,7 +201,6 @@ function CharacterEditDialogBody({
 								key={character.avatarUrl}
 								url={character.avatarUrl}
 								outputKind="image"
-								borderColor="border-border"
 								status={avatarSnapshot.status}
 								seconds={avatarSnapshot.seconds}
 							/>

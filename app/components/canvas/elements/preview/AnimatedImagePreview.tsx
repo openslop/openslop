@@ -9,13 +9,11 @@ import type { PlaceholderProps } from "./status";
 type AnimatedImagePreviewProps = PlaceholderProps & {
 	imageUrl?: string;
 	videoUrl?: string;
-	borderColor: string;
 };
 
 export function AnimatedImagePreview({
 	imageUrl,
 	videoUrl,
-	borderColor,
 	status,
 	seconds,
 	error,
@@ -31,7 +29,6 @@ export function AnimatedImagePreview({
 					key={url}
 					url={url}
 					outputKind={mode === "animated" ? "video" : "image"}
-					borderColor={borderColor}
 					status={status}
 					seconds={seconds}
 				/>
