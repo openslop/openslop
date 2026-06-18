@@ -6,7 +6,7 @@ import type { VideoLayout } from "@/lib/video/types";
 import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
 import { findSegmentIndexAt, type SceneSegment } from "./useSceneSegments";
-import { ScrubBar, type ScrubHover, type ScrubSegment } from "./ScrubBar";
+import { ScrubBar, type ScrubHover } from "./ScrubBar";
 
 const clamp = (n: number, min: number, max: number) =>
 	Math.max(min, Math.min(max, n));
@@ -49,7 +49,7 @@ export function SegmentedSeekBar({
 
 	if (segments.length === 0) return null;
 
-	const scrubSegments: ScrubSegment[] = segments.map((seg) => ({
+	const scrubSegments = segments.map((seg) => ({
 		id: seg.sceneId,
 		basis: seg.duration / totalDurationSec,
 	}));
