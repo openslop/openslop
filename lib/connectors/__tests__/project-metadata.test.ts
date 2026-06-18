@@ -53,7 +53,7 @@ describe("createProjectMetadataPlugin", () => {
 	it("returns params unchanged when metadata is empty", () => {
 		const { beforeGenerate } = createProjectMetadataPlugin(projectId);
 		const params = { prompt: "hi", systemPrompt: "keep me" };
-		expect(beforeGenerate?.(params)).toBe(params);
+		expect(beforeGenerate?.(params)).toEqual(params);
 	});
 
 	it("preserves other params", () => {

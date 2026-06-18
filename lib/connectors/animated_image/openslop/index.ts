@@ -3,10 +3,7 @@ import type { ConnectorConfig } from "@/lib/connectors/types";
 import { BaseAnimatedImageConnector } from "../connector";
 
 export class OpenSlopAnimatedImage extends BaseAnimatedImageConnector {
-	protected gateway: OpenSlopImageGateway;
-
 	constructor(config: ConnectorConfig) {
-		super(config);
-		this.gateway = new OpenSlopImageGateway(config.baseUrl);
+		super(new OpenSlopImageGateway(config.baseUrl), config);
 	}
 }

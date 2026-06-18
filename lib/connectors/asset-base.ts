@@ -2,6 +2,7 @@ import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { AssetGateway } from "@/lib/gateway/base";
 import { awaitCompletion } from "@/lib/providers/poll";
 import { BaseConnector } from "./base";
+import type { ConnectorConfig } from "./types";
 
 export type AssetKey = "image" | "audio" | "video";
 
@@ -17,10 +18,16 @@ const ASSET_KEY_TO_URL_FIELD: Record<
 export abstract class BaseAssetConnector<
 	TParams extends { prompt: string },
 	TResult,
+	TGateway extends AssetGateway<TParams> = AssetGateway<TParams>,
 > extends BaseConnector<TParams, TResult> {
 	abstract readonly assetKey: AssetKey;
 
-	protected abstract gateway: AssetGateway<TParams>;
+	constructor(
+		protected gateway: TGateway,
+		config: ConnectorConfig,
+	) {
+		super(config);
+	}
 
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {

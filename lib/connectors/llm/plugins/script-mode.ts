@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import type { LLMPlugin } from "@/lib/connectors/types";
+import { prependSystemPrompt } from "./system-prompt";
 
 const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
   You are a script-to-XML converter.
@@ -17,11 +18,6 @@ const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
 export const scriptModePlugin: LLMPlugin = {
 	name: "scriptMode",
 	beforeGenerate(params) {
-		return {
-			...params,
-			systemPrompt: params.systemPrompt
-				? `${SCRIPT_MODE_SYSTEM_PROMPT}\n\n${params.systemPrompt}`
-				: SCRIPT_MODE_SYSTEM_PROMPT,
-		};
+		return prependSystemPrompt(params, SCRIPT_MODE_SYSTEM_PROMPT);
 	},
 };

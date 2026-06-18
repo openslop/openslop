@@ -5,6 +5,7 @@ import type {
 	LLMPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
+import { prependSystemPrompt } from "./system-prompt";
 
 const STORY_MODE_SYSTEM_PROMPT = dedent`You are a highly engaging storyteller who expertly narrates video stories.
 
@@ -15,12 +16,7 @@ const STORY_MODE_SYSTEM_PROMPT = dedent`You are a highly engaging storyteller wh
 export const storyModePlugin: LLMPlugin = {
 	name: "storyMode",
 	beforeGenerate(params) {
-		return {
-			...params,
-			systemPrompt: params.systemPrompt
-				? `${STORY_MODE_SYSTEM_PROMPT}\n\n${params.systemPrompt}`
-				: STORY_MODE_SYSTEM_PROMPT,
-		};
+		return prependSystemPrompt(params, STORY_MODE_SYSTEM_PROMPT);
 	},
 	async transformPrompt(
 		prompt: string,

@@ -41,15 +41,15 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	readonly type: ConnectorType = "image";
 	readonly assetKey = "image";
 
-	protected gateway: AssetGateway<TestParams>;
-
 	constructor(
 		config: ConnectorConfig,
 		generateFn?: (params: TestParams) => Promise<BundleResponse>,
 	) {
-		super(config);
-		this.gateway = makeGateway(
-			generateFn ?? (async () => ({ id: "x", provider: "mock", result: {} })),
+		super(
+			makeGateway(
+				generateFn ?? (async () => ({ id: "x", provider: "mock", result: {} })),
+			),
+			config,
 		);
 	}
 }
