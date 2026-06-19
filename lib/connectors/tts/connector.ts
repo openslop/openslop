@@ -1,3 +1,4 @@
+import type { AssetGateway } from "@/lib/gateway/base";
 import { BaseAssetConnector } from "../asset-base";
 import type {
 	PluginContext,
@@ -8,8 +9,11 @@ import type {
 	VoiceSearchParams,
 } from "../types";
 
-export abstract class BaseTTSConnector
-	extends BaseAssetConnector<TTSGenerateParams, TTSResult>
+export abstract class BaseTTSConnector<
+	TGateway extends AssetGateway<TTSGenerateParams> =
+		AssetGateway<TTSGenerateParams>,
+>
+	extends BaseAssetConnector<TTSGenerateParams, TTSResult, TGateway>
 	implements TTSConnector
 {
 	readonly type = "tts" as const;

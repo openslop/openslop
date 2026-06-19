@@ -9,12 +9,9 @@ import type {
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
 
-export class OpenSlopTTS extends BaseTTSConnector {
-	protected gateway: OpenSlopTTSGateway;
-
+export class OpenSlopTTS extends BaseTTSConnector<OpenSlopTTSGateway> {
 	constructor(config: ConnectorConfig) {
-		super(config);
-		this.gateway = new OpenSlopTTSGateway(config.baseUrl);
+		super(new OpenSlopTTSGateway(config.baseUrl), config);
 	}
 
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {

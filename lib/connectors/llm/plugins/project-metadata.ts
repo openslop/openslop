@@ -6,7 +6,7 @@ import type {
 	MetadataCharacter,
 	MetadataVoice,
 } from "@/lib/project/types";
-import { compact } from "lodash";
+import { prependSystemPrompt } from "./system-prompt";
 
 const VOICE_FIELDS: (keyof MetadataVoice)[] = [
 	"gender",
@@ -79,12 +79,7 @@ export function createProjectMetadataPlugin(projectId: string): LLMPlugin {
 		name: "projectMetadata",
 		beforeGenerate(params) {
 			const metadata = getProjectStore(projectId).getState().metadata;
-			const preamble = buildPreamble(metadata);
-			if (!preamble) return params;
-			return {
-				...params,
-				systemPrompt: compact([preamble, params.systemPrompt]).join("\n\n"),
-			};
+			return prependSystemPrompt(params, buildPreamble(metadata));
 		},
 	};
 }

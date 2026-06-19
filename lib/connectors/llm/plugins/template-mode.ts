@@ -6,7 +6,7 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 import { getTemplateById } from "@/lib/templates/templates";
-import { compact } from "lodash";
+import { prependSystemPrompt } from "./system-prompt";
 
 export function createTemplateModePlugin(
 	templateId: string | undefined,
@@ -17,9 +17,7 @@ export function createTemplateModePlugin(
 		name: "templateMode",
 		beforeGenerate(params) {
 			if (!template) return params;
-			const segments = compact([template.systemPrompt, params.systemPrompt]);
-			if (segments.length === 0) return params;
-			return { ...params, systemPrompt: segments.join("\n\n") };
+			return prependSystemPrompt(params, template.systemPrompt);
 		},
 		async transformPrompt(
 			prompt: string,
