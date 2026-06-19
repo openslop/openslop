@@ -12,11 +12,7 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import {
 	useGenerationQueue,
@@ -213,23 +209,20 @@ function CharacterEditDialogBody({
 							/>
 						)}
 						{inputElement}
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<IconButton
-									ariaLabel="Upload image"
-									onClick={openPicker}
-									disabled={uploading}
-									className="absolute left-2 top-2 z-10 rounded-full bg-card shadow-sm ring-1 ring-border"
-								>
-									{uploading ? (
-										<Loader2 className="h-3.5 w-3.5 animate-spin" />
-									) : (
-										<ImagePlus className="h-3.5 w-3.5" />
-									)}
-								</IconButton>
-							</TooltipTrigger>
-							<TooltipContent>Upload image</TooltipContent>
-						</Tooltip>
+						<SimpleTooltip label="Upload image">
+							<IconButton
+								ariaLabel="Upload image"
+								onClick={openPicker}
+								disabled={uploading}
+								className="absolute left-2 top-2 z-10 rounded-full bg-card shadow-sm ring-1 ring-border"
+							>
+								{uploading ? (
+									<Loader2 className="h-3.5 w-3.5 animate-spin" />
+								) : (
+									<ImagePlus className="h-3.5 w-3.5" />
+								)}
+							</IconButton>
+						</SimpleTooltip>
 					</div>
 				</div>
 				<VoiceSection voice={character} onChange={update} />

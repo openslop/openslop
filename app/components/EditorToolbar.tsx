@@ -5,11 +5,7 @@ import type { Editor } from "slate";
 import { Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
@@ -90,19 +86,16 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
 						<span className="hidden sm:inline">{generateLabel}</span>
 					</Button>
 					{generating && (
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<button
-									type="button"
-									onClick={() => queue.cancelAll()}
-									aria-label="Cancel generation"
-									className="relative flex h-7 w-7 shrink-0 items-center justify-center self-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
-								>
-									<X className="h-3 w-3" aria-hidden="true" />
-								</button>
-							</TooltipTrigger>
-							<TooltipContent>Cancel generation</TooltipContent>
-						</Tooltip>
+						<SimpleTooltip label="Cancel generation">
+							<button
+								type="button"
+								onClick={() => queue.cancelAll()}
+								aria-label="Cancel generation"
+								className="relative flex h-7 w-7 shrink-0 items-center justify-center self-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+							>
+								<X className="h-3 w-3" aria-hidden="true" />
+							</button>
+						</SimpleTooltip>
 					)}
 				</div>
 			</div>
