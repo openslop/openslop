@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = process.env.PLAYWRIGHT_PORT ?? "3000";
+const PORT = process.env.PORT ?? process.env.PLAYWRIGHT_PORT ?? "3000";
 const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -15,11 +15,10 @@ export default defineConfig({
 	},
 	projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 	webServer: {
-		command: process.env.CI
-			? `npm run start -- -p ${PORT}`
-			: `npm run dev -- -p ${PORT}`,
+		command: process.env.CI ? "npm run start" : "npm run dev",
 		url: baseURL,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000,
+		env: { PORT },
 	},
 });
