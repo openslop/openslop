@@ -2,6 +2,7 @@
 
 import { type ReactNode, useState } from "react";
 import {
+	ChevronDown,
 	CornerDownLeft,
 	ImagePlus,
 	Loader2,
@@ -11,15 +12,9 @@ import {
 	User,
 	X,
 } from "@/components/ui/icon";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import GlassDropdown, {
-	type GlassDropdownOption,
-} from "@/app/components/GlassDropdown";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
+import { SelectMenu, type SelectMenuOption } from "@/components/ui/select-menu";
+import { cn } from "@/lib/utils";
 import { CharacterEditModal } from "@/app/components/canvas/elements/character/CharacterEditModal";
 import { NarratorEditModal } from "@/app/components/canvas/elements/character/NarratorEditModal";
 import { NewCharacterDialog } from "@/app/components/canvas/elements/character/NewCharacterDialog";
@@ -33,21 +28,48 @@ import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 
-const MODE_OPTIONS: GlassDropdownOption<Mode>[] = [
+const MODE_OPTIONS: SelectMenuOption<Mode>[] = [
 	{ value: "story", label: "Describe a story" },
 	{ value: "script", label: "Paste in a script" },
 	{ value: "template", label: "Use a template" },
 ];
 
-const ASPECT_RATIO_OPTIONS: GlassDropdownOption<AspectRatio>[] = [
+const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
 	{ value: "9:16", label: "9:16" },
 ];
 
-const TEMPLATE_OPTIONS: GlassDropdownOption<string>[] = TEMPLATES.map((t) => ({
+const TEMPLATE_OPTIONS: SelectMenuOption<string>[] = TEMPLATES.map((t) => ({
 	value: t.id,
 	label: t.name,
 }));
+
+function PillTrigger({
+	icon,
+	label,
+	className,
+	ref,
+	...props
+}: React.ComponentProps<"button"> & {
+	icon?: ReactNode;
+	label: ReactNode;
+}) {
+	return (
+		<button
+			ref={ref}
+			type="button"
+			className={cn(
+				"inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[12px] text-foreground transition-colors hover:bg-button-hover",
+				className,
+			)}
+			{...props}
+		>
+			{icon}
+			{label}
+			<ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
+		</button>
+	);
+}
 
 function AttachMenu({
 	openPicker,
@@ -60,48 +82,47 @@ function AttachMenu({
 	onCreateCharacter: () => void;
 	onSelectNarrator: () => void;
 }) {
-	const items = [
-		{ icon: ImagePlus, label: "Upload reference images", onSelect: openPicker },
-		{ icon: User, label: "Create character", onSelect: onCreateCharacter },
-		{ icon: Mic, label: "Select narrator voice", onSelect: onSelectNarrator },
+	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
+	const items: ActionMenuItem[] = [
+		{
+			key: "upload",
+			label: "Upload reference images",
+			icon: <ImagePlus className={iconClass} strokeWidth={1.5} />,
+			onSelect: openPicker,
+		},
+		{
+			key: "character",
+			label: "Create character",
+			icon: <User className={iconClass} strokeWidth={1.5} />,
+			onSelect: onCreateCharacter,
+		},
+		{
+			key: "narrator",
+			label: "Select narrator voice",
+			icon: <Mic className={iconClass} strokeWidth={1.5} />,
+			onSelect: onSelectNarrator,
+		},
 	];
 
 	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>
-				<button
-					type="button"
-					aria-label="Attach"
-					disabled={uploading}
-					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-muted-foreground disabled:pointer-events-none"
-				>
-					{uploading ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
-					) : (
-						<Plus className="h-4 w-4" />
-					)}
-				</button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side="bottom"
-				align="start"
-				className="min-w-36 rounded-xl border border-border bg-card shadow-md shadow-black/8 p-0.5"
+		<ActionMenu
+			items={items}
+			contentClassName="min-w-36 p-0.5"
+			itemClassName="rounded-lg text-[11px] text-muted-foreground"
+		>
+			<button
+				type="button"
+				aria-label="Attach"
+				disabled={uploading}
+				className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none"
 			>
-				{items.map(({ icon: Icon, label, onSelect }) => (
-					<DropdownMenuItem
-						key={label}
-						onSelect={onSelect}
-						className="cursor-pointer rounded-lg px-2 py-1.5 text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted"
-					>
-						<Icon
-							className="mr-1.5 h-3.5 text-foreground w-3.5"
-							strokeWidth={1.5}
-						/>
-						{label}
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
+				{uploading ? (
+					<Loader2 className="h-4 w-4 animate-spin" />
+				) : (
+					<Plus className="h-4 w-4" />
+				)}
+			</button>
+		</ActionMenu>
 	);
 }
 
@@ -220,7 +241,7 @@ export default function ComposerCopilot({
 							onCreateCharacter={() => setCreatingCharacter(true)}
 							onSelectNarrator={() => setEditingNarrator(true)}
 						/>
-						<GlassDropdown
+						<SelectMenu
 							value={mode}
 							onChange={(mode: Mode) => {
 								setMode(mode);
@@ -229,10 +250,13 @@ export default function ComposerCopilot({
 								}
 							}}
 							options={MODE_OPTIONS}
-							ariaLabel="Composer mode"
-							side="bottom"
-						/>
-						<GlassDropdown
+						>
+							<PillTrigger
+								aria-label="Composer mode"
+								label={MODE_OPTIONS.find((o) => o.value === mode)?.label}
+							/>
+						</SelectMenu>
+						<SelectMenu
 							value={aspectRatio}
 							onChange={(next: AspectRatio) => {
 								getProjectStore(projectId)
@@ -240,27 +264,31 @@ export default function ComposerCopilot({
 									.updateMetadata({ videoSettings: { aspectRatio: next } });
 							}}
 							options={ASPECT_RATIO_OPTIONS}
-							ariaLabel="Aspect ratio"
-							triggerIcon={
-								<Proportions className="mr-1 h-3 w-3" strokeWidth={2} />
-							}
-							side="bottom"
-						/>
+						>
+							<PillTrigger
+								aria-label="Aspect ratio"
+								icon={<Proportions className="mr-1 h-3 w-3" strokeWidth={2} />}
+								label={aspectRatio}
+							/>
+						</SelectMenu>
 						{mode === "template" && selectedTemplateId && (
-							<GlassDropdown
+							<SelectMenu
 								value={selectedTemplateId}
 								onChange={(templateId: string) => {
 									setMode("template");
 									applyTemplate(templateId);
 								}}
 								options={TEMPLATE_OPTIONS}
-								ariaLabel="Select template"
-								side="bottom"
-								className="relative overflow-hidden"
-								style={{
-									backgroundColor: getTemplateById(selectedTemplateId)?.color,
-								}}
-							/>
+							>
+								<PillTrigger
+									aria-label="Select template"
+									className="relative overflow-hidden"
+									style={{
+										backgroundColor: getTemplateById(selectedTemplateId)?.color,
+									}}
+									label={getTemplateById(selectedTemplateId)?.name}
+								/>
+							</SelectMenu>
 						)}
 					</div>
 					<ActionButton
