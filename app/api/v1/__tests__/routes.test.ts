@@ -465,7 +465,7 @@ describe("API routes", () => {
 			]);
 
 			const req = makeRequest(
-				"/api/v1/tts/voices?query=english",
+				"/api/v1/tts/voices?query=english&limit=1",
 				undefined,
 				"GET",
 			);
@@ -475,6 +475,20 @@ describe("API routes", () => {
 			expect(res.status).toBe(200);
 			expect(json.voices).toHaveLength(1);
 			expect(json.voices[0].name).toBe("Voice 1");
+			expect(mockTTSSearch).toHaveBeenCalledWith(
+				expect.objectContaining({ query: "english", limit: 1 }),
+			);
+		});
+
+		it("returns 400 for invalid voice search parameters", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+			const res = await GET(
+				makeRequest("/api/v1/tts/voices?limit=abc", undefined, "GET"),
+			);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("limit");
+			expect(mockTTSSearch).not.toHaveBeenCalled();
 		});
 
 		it("returns 500 on error", async () => {

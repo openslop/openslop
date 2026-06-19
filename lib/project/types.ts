@@ -10,6 +10,12 @@ import type { AspectRatio } from "@/lib/video/aspectRatio";
 import type { TransitionType } from "@/lib/video/transitions";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
+const voiceSearchString = z.string().min(1).optional();
+const voiceSearchLimitSchema = z
+	.string()
+	.regex(/^[1-9]\d*$/, "limit must be a positive integer")
+	.transform(Number)
+	.optional();
 
 export const genderSchema = z.enum(TTS_GENDERS).optional().catch(undefined);
 export const languageSchema = z.enum(TTS_LANGUAGES).optional().catch(undefined);
@@ -31,10 +37,19 @@ export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	resolvedVoiceId: optionalString,
 });
 
-export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
-	query: optionalString,
-	name: optionalString,
-	limit: z.coerce.number().int().positive().optional().catch(undefined),
+const voiceSearchTraitsSchema = z.object({
+	gender: z.enum(TTS_GENDERS).optional(),
+	age: z.enum(TTS_AGES).optional(),
+	pitch: z.enum(TTS_PITCHES).optional(),
+	accent: z.enum(TTS_ACCENTS).optional(),
+	description: voiceSearchString,
+	language: z.enum(TTS_LANGUAGES).optional(),
+});
+
+export const voiceSearchRequestSchema = voiceSearchTraitsSchema.extend({
+	query: voiceSearchString,
+	name: voiceSearchString,
+	limit: voiceSearchLimitSchema,
 });
 
 export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
