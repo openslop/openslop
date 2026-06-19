@@ -44,17 +44,6 @@ jobs:
       - name: Tests
         run: npm run test:coverage
 
-      - name: Resolve Playwright version
-        id: playwright-version
-        run: echo "version=$(npm ls @playwright/test --json | jq -r '.dependencies["@playwright/test"].version')" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
