@@ -6,7 +6,7 @@ export async function withRunware<T>(
 ): Promise<T> {
 	const runware = new Runware({
 		apiKey,
-		timeoutDuration: 180_000,
+		timeoutDuration: 600_000,
 		shouldReconnect: true,
 		globalMaxRetries: 3,
 	});
