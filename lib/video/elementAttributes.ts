@@ -1,4 +1,5 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { clamp } from "@/lib/utils";
 import {
 	DEFAULT_MOTION,
 	isMotionEffect,
@@ -21,7 +22,7 @@ const DEFAULT_VOLUME = VOLUME_MAX;
 export function getVolume(element: CanvasContentElement): number {
 	const raw = Number(element.customAttributes?.volume);
 	return Number.isFinite(raw)
-		? Math.max(VOLUME_MIN, Math.min(VOLUME_MAX, raw))
+		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
 		: DEFAULT_VOLUME;
 }
 
@@ -31,7 +32,7 @@ const LOOPS_MAX = 1000;
 export function getLoops(element: CanvasContentElement): number {
 	const raw = Number(element.customAttributes?.loops);
 	if (!Number.isFinite(raw)) return 1;
-	return Math.max(1, Math.min(LOOPS_MAX, Math.floor(raw)));
+	return clamp(Math.floor(raw), 1, LOOPS_MAX);
 }
 
 /** Motion effect validated against the known set, defaulting to "none". */

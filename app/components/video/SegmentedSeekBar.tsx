@@ -2,14 +2,12 @@
 
 import type { PlayerRef } from "@remotion/player";
 import { useEffect, useRef, useState } from "react";
+import { clamp } from "@/lib/utils";
 import type { VideoLayout } from "@/lib/video/types";
 import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
 import { findSegmentIndexAt, type SceneSegment } from "./useSceneSegments";
 import { ScrubBar, type ScrubHover } from "./ScrubBar";
-
-const clamp = (n: number, min: number, max: number) =>
-	Math.max(min, Math.min(max, n));
 
 const HOVER_SETTLE_MS = 80;
 
