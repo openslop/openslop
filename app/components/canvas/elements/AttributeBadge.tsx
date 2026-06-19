@@ -1,11 +1,6 @@
-import { Check, ChevronDown } from "@/components/ui/icon";
+import { ChevronDown } from "@/components/ui/icon";
 import { ReactEditor, useSlateStatic } from "slate-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { SelectMenu } from "@/components/ui/select-menu";
 import { setNodeAttrs } from "@/lib/canvas/editorOps";
 import type { AttributeSpec } from "@/lib/canvas/elementConfigs";
 import type { CanvasContentElement } from "@/lib/canvas/types";
@@ -87,33 +82,23 @@ export function AttributeBadge({
 	};
 
 	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>
-				<button
-					aria-label={tooltip}
-					onMouseDown={(e) => e.preventDefault()}
-					className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
-				>
-					<span className="min-w-0 truncate">{labeled}</span>
-					<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
-				</button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="start" className="max-h-64 min-w-24">
-				{spec.edit.options.map((opt) => (
-					<DropdownMenuItem
-						key={opt}
-						onClick={() => handleSelect(opt)}
-						className="cursor-pointer py-1 text-[11px]"
-					>
-						<span className="flex w-3.5 shrink-0 items-center justify-center">
-							{opt === value && (
-								<Check className="h-3 w-3 text-accent" aria-hidden="true" />
-							)}
-						</span>
-						{formatValue(attrKey, opt)}
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<SelectMenu
+			value={value}
+			onChange={handleSelect}
+			options={spec.edit.options.map((opt) => ({
+				value: opt,
+				label: formatValue(attrKey, opt),
+			}))}
+			contentClassName="max-h-64 min-w-24"
+		>
+			<button
+				aria-label={tooltip}
+				onMouseDown={(e) => e.preventDefault()}
+				className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+			>
+				<span className="min-w-0 truncate">{labeled}</span>
+				<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
+			</button>
+		</SelectMenu>
 	);
 }
