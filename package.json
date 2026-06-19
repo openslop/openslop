@@ -12,6 +12,7 @@
 		"db:reset": "supabase db reset",
 		"test": "vitest",
 		"test:run": "vitest run",
+		"test:e2e": "playwright test",
 		"test:coverage": "vitest run --coverage",
 		"typecheck": "tsc --noEmit",
 		"knip": "knip",
@@ -75,6 +76,7 @@
 	},
 	"devDependencies": {
 		"@next/bundle-analyzer": "^16.2.4",
+		"@playwright/test": "^1.61.0",
 		"@tailwindcss/postcss": "^4",
 		"@types/bun": "^1.3.11",
 		"@types/lodash": "^4.17.24",
