@@ -11,7 +11,7 @@ import {
 	useState,
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { clamp, cn } from "@/lib/utils";
 import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
 
 export interface WaveformProps {
@@ -67,8 +67,6 @@ export function extractPeaks(data: Float32Array, count: number): number[] {
 	return max > 0 ? peaks.map((p) => p / max) : peaks;
 }
 
-const clamp01 = (p: number) => Math.max(0, Math.min(1, p));
-
 export function Waveform({
 	src,
 	peaksCache,
@@ -99,7 +97,7 @@ export function Waveform({
 	const setProgress = useCallback((progress: number) => {
 		const el = progressRef.current;
 		if (el)
-			el.style.clipPath = `inset(0 ${(1 - clamp01(progress)) * 100}% 0 0)`;
+			el.style.clipPath = `inset(0 ${(1 - clamp(progress, 0, 1)) * 100}% 0 0)`;
 	}, []);
 
 	const paint = useCallback(() => {
@@ -172,7 +170,7 @@ export function Waveform({
 			seek(progress: number) {
 				const a = audioRef.current;
 				if (a?.duration) {
-					a.currentTime = clamp01(progress) * a.duration;
+					a.currentTime = clamp(progress, 0, 1) * a.duration;
 					setProgress(progress);
 				}
 			},
@@ -185,7 +183,7 @@ export function Waveform({
 		if (!a?.duration) return;
 		const rect = e.currentTarget.getBoundingClientRect();
 		const progress = (e.clientX - rect.left) / rect.width;
-		a.currentTime = clamp01(progress) * a.duration;
+		a.currentTime = clamp(progress, 0, 1) * a.duration;
 		setProgress(progress);
 	};
 

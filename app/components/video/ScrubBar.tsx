@@ -1,10 +1,7 @@
 "use client";
 
 import { type PointerEvent, type ReactNode, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-
-const clamp = (n: number, min: number, max: number) =>
-	Math.max(min, Math.min(max, n));
+import { clamp, cn } from "@/lib/utils";
 
 /** A slice of a segmented track; `basis` is its fraction (0–1) of the whole. */
 export interface ScrubSegment {

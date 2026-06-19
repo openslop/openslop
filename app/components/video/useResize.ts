@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { clamp } from "@/lib/utils";
 
 export type ResizeAxis = "vertical" | "horizontal";
 
@@ -14,7 +15,7 @@ export function clampResize(
 ): number {
 	const delta =
 		axis === "vertical" ? currentPos - startPos : startPos - currentPos;
-	return Math.max(minSize, Math.min(startSize + delta, maxSize));
+	return clamp(startSize + delta, minSize, maxSize);
 }
 
 type ResizeListenerHost = {

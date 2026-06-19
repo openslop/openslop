@@ -1,13 +1,11 @@
 "use client";
 
+import { clamp } from "@/lib/utils";
 import { formatTime } from "@/lib/video/timestamps";
 
 export type SeekThumbnail = { url: string; kind: "image" | "video" };
 
 const TOOLTIP_WIDTH = 160;
-
-const clamp = (n: number, min: number, max: number) =>
-	Math.max(min, Math.min(max, n));
 
 export function SeekTooltip({
 	x,
