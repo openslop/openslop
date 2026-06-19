@@ -48,6 +48,7 @@ vi.mock("@ai-sdk/openai", () => ({
 }));
 
 import type Cartesia from "@cartesia/cartesia-js";
+import { TTSEmotion } from "@/lib/connectors/tts/enums";
 import { CartesiaTTS, collectVoices } from "../tts/cartesia";
 
 const makeVoices = (count: number, offset = 0) =>
@@ -234,6 +235,27 @@ describe("CartesiaTTS", () => {
 
 			expect(mockGenerate).toHaveBeenCalledWith(
 				expect.objectContaining({ model_id: "sonic-4" }),
+			);
+		});
+
+		it("forwards emotion controls to Cartesia", async () => {
+			mockGenerate.mockReturnValue({
+				[Symbol.asyncIterator]: async function* () {
+					yield { type: "done", done: true };
+				},
+			});
+
+			const provider = new CartesiaTTS("test-key");
+			await provider.generate({
+				prompt: "test",
+				voiceId: "v1",
+				emotion: TTSEmotion.Excited,
+			});
+
+			expect(mockGenerate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					generation_config: expect.objectContaining({ emotion: "excited" }),
+				}),
 			);
 		});
 

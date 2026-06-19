@@ -205,6 +205,7 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 				generation_config: {
 					speed: CARTESIA_SPEED[params.speed ?? "medium"],
 					volume: CARTESIA_VOLUME,
+					emotion: params.emotion || "neutral",
 				},
 			};
 			for await (const response of ws.generate(req)) {

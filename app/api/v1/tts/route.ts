@@ -8,6 +8,7 @@ const schema = bodySchema(TTS_MODELS, {
 	voiceId: requiredVoiceId,
 	speed: z.enum(TTS_SPEEDS).optional(),
 	volume: z.number().optional(),
+	emotion: z.string().optional(),
 	format: z.string().optional(),
 });
 
