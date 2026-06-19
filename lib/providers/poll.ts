@@ -3,7 +3,7 @@ export async function awaitCompletion<T>(
 	jobId: string,
 	isDone: (result: T) => boolean,
 	intervalMs = 1000,
-	timeoutMs = 300_000,
+	timeoutMs = 600_000,
 ): Promise<T> {
 	const deadline = Date.now() + timeoutMs;
 	while (Date.now() < deadline) {
