@@ -2,8 +2,6 @@
 
 import type { ReactNode } from "react";
 import type { Editor } from "slate";
-import type { AspectRatio } from "@/lib/video/aspectRatio";
-import type { TransitionType } from "@/lib/video/transitions";
 import { VideoLayoutProvider } from "../video/VideoLayoutContext";
 import { PlayerControlProvider } from "../video/PlayerControlContext";
 import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
@@ -18,25 +16,16 @@ import { ViewModeProvider } from "./ViewModeContext";
 export function CanvasProviders({
 	editor,
 	layoutKey,
-	transitionType,
-	aspectRatio,
 	sceneIds,
 	children,
 }: {
 	editor: Editor;
 	layoutKey: string;
-	transitionType: TransitionType;
-	aspectRatio: AspectRatio;
 	sceneIds: string[];
 	children: ReactNode;
 }) {
 	return (
-		<VideoLayoutProvider
-			editor={editor}
-			layoutKey={layoutKey}
-			transitionType={transitionType}
-			aspectRatio={aspectRatio}
-		>
+		<VideoLayoutProvider editor={editor} layoutKey={layoutKey}>
 			<PlayerControlProvider>
 				<ActiveSceneProvider>
 					<AutoScrollProvider>

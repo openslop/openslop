@@ -5,7 +5,6 @@ import { useScriptInitial } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
 import { getLayoutKey } from "@/lib/video/layoutKey";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
 import { useTransitionType } from "@/lib/video/useTransitionType";
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
@@ -35,7 +34,6 @@ function PostPromptViewInner() {
 	useMetadataSync();
 
 	const transitionType = useTransitionType();
-	const aspectRatio = useAspectRatio();
 	const layoutKey = useMemo(
 		() => getLayoutKey(getContentElements(value), transitionType),
 		[value, transitionType],
@@ -62,8 +60,6 @@ function PostPromptViewInner() {
 			<CanvasProviders
 				editor={editor}
 				layoutKey={layoutKey}
-				transitionType={transitionType}
-				aspectRatio={aspectRatio}
 				sceneIds={sceneIds}
 			>
 				<div className="flex min-h-0 flex-1 overflow-hidden">
