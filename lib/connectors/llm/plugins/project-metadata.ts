@@ -6,6 +6,7 @@ import type {
 	MetadataCharacter,
 	MetadataVoice,
 } from "@/lib/project/types";
+import { isGeneratedCharacter } from "./character-avatars";
 import { prependSystemPrompt } from "./system-prompt";
 
 const VOICE_FIELDS: (keyof MetadataVoice)[] = [
@@ -28,7 +29,7 @@ function renderVoice(voice: MetadataVoice): string {
 function renderCharacter(name: string, character: MetadataCharacter): string {
 	const voiceLines = renderVoice(character);
 	const appearanceLine =
-		character.appearance && !character.avatarUploaded
+		character.appearance && isGeneratedCharacter(character)
 			? `- appearance: ${character.appearance}`
 			: "";
 	const body = [voiceLines, appearanceLine].filter(Boolean).join("\n");

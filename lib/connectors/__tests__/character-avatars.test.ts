@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	isGeneratedCharacter,
 	listCharacterAvatars,
 	listUploadedCharacterAvatarUrls,
 } from "@/lib/connectors/llm/plugins/character-avatars";
@@ -51,5 +52,12 @@ describe("character avatar plugin helpers", () => {
 		expect(listUploadedCharacterAvatarUrls(characters)).toEqual([
 			"https://example.com/uploaded.png",
 		]);
+	});
+
+	it("treats only uploaded characters as non-generated", () => {
+		expect(isGeneratedCharacter(characters.Uploaded)).toBe(false);
+		expect(isGeneratedCharacter(characters.Generated)).toBe(true);
+		expect(isGeneratedCharacter(characters.LegacyGenerated)).toBe(true);
+		expect(isGeneratedCharacter(characters.MissingAvatar)).toBe(true);
 	});
 });

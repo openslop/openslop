@@ -9,6 +9,10 @@ export type CharacterAvatarReference = {
 	source: CharacterAvatarSource;
 };
 
+export function isGeneratedCharacter(character: MetadataCharacter): boolean {
+	return !character.avatarUploaded;
+}
+
 export function listCharacterAvatars(
 	characters: Record<string, MetadataCharacter>,
 ): CharacterAvatarReference[] {
@@ -19,7 +23,7 @@ export function listCharacterAvatars(
 				name,
 				character,
 				url: character.avatarUrl,
-				source: character.avatarUploaded ? "uploaded" : "generated",
+				source: isGeneratedCharacter(character) ? "generated" : "uploaded",
 			},
 		];
 	});
@@ -28,7 +32,9 @@ export function listCharacterAvatars(
 export function listUploadedCharacterAvatarUrls(
 	characters: Record<string, MetadataCharacter>,
 ): string[] {
-	return listCharacterAvatars(characters).flatMap((avatar) =>
-		avatar.source === "uploaded" ? [avatar.url] : [],
+	return Object.values(characters).flatMap((character) =>
+		character.avatarUrl && !isGeneratedCharacter(character)
+			? [character.avatarUrl]
+			: [],
 	);
 }
