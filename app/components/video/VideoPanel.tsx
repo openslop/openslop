@@ -3,7 +3,6 @@
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useLayout } from "./VideoLayoutContext";
 import { VideoPreview } from "./VideoPreview";
-import { RenderControls } from "./RenderControls";
 import { QueueProgressBar } from "./QueueProgressBar";
 import { PlayerShimmer } from "./PlayerShimmer";
 
@@ -30,21 +29,11 @@ function VideoPanelBody() {
 }
 
 export function VideoPanel() {
-	const { layout, ready } = useLayout();
-	const { loading: scriptLoading } = useScriptControl();
-	const showControls = !scriptLoading && !!layout?.series.length && ready;
-
 	return (
-		<div className="group relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
-			<div className=" absolute inset-0" aria-hidden="true" />
+		<div className="relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
 			<div className="relative z-[2] h-full w-full">
 				<VideoPanelBody />
 			</div>
-			{showControls && (
-				<div className="absolute right-3 top-3 z-10">
-					<RenderControls layout={layout} />
-				</div>
-			)}
 		</div>
 	);
 }
