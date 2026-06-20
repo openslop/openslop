@@ -15,7 +15,7 @@ export function createCharacterAvatarStylePlugin(projectId: string): LLMPlugin {
 			ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
 		) {
 			const characters =
-				getProjectStore(projectId).getState().metadata.characters ?? {};
+				getProjectStore(projectId).getState().metadata.characters;
 			const withAvatar = Object.entries(characters).flatMap(([name, c]) =>
 				c.avatarUrl ? [{ name, character: c, url: c.avatarUrl }] : [],
 			);
