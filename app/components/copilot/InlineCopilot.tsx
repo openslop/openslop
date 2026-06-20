@@ -87,7 +87,7 @@ export default function InlineCopilot({
 								onChange={(e) => onValueChange(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 								placeholder={placeholderText}
-								className=" w-full bg-transparent font-body text-xs text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+								className=" w-full bg-transparent font-body text-label text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 							/>
 						</>
 					)}

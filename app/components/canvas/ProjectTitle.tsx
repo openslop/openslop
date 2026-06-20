@@ -47,7 +47,7 @@ export function ProjectTitle() {
 					if (e.key === "Enter") commit();
 					else if (e.key === "Escape") setEditing(false);
 				}}
-				className="mb-3 w-full bg-transparent font-body text-2xl font-semibold text-foreground outline-none"
+				className="mb-3 w-full bg-transparent font-body text-heading font-semibold text-foreground outline-none"
 				aria-label="Project title"
 			/>
 		);
@@ -55,7 +55,7 @@ export function ProjectTitle() {
 
 	return (
 		<div className="group mb-3 flex items-center gap-2">
-			<h1 className="font-body text-2xl font-semibold text-foreground">
+			<h1 className="font-body text-heading font-semibold text-foreground">
 				{title}
 			</h1>
 			<button

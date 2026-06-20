@@ -24,7 +24,7 @@ Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-ca
 
 ## Typography
 
-One clean grotesque for UI and body: **Inter** (`--font-sans`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Inter 600 with tight tracking; `.font-body` = Inter 400.
+UI and titles use **Sloptastic** (`--font-sans`, `.font-title`), a clean grotesque; long-form body text uses **Inter** (`--font-body`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Two display faces for marketing surfaces only: **Instrument Serif** (`--font-serif`, hero headlines) and **Sentient** (`--font-sentient`, the onboarding wordmark). Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Sloptastic 575 with tight tracking; `.font-body` = Inter 425.
 
 The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes only (leading inherits; pair with `leading-*` / `font-medium` where a tighter line or heavier weight is wanted) — rather than hand-picking raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries.
 
