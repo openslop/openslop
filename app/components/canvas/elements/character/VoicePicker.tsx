@@ -55,7 +55,7 @@ function PreviewPlayButton({ src }: { src: string }) {
 
 const DEBOUNCE_MS = 300;
 const SKELETON_ROWS = 5;
-const VOICE_LIMIT = 10;
+const VOICE_LIMIT = 50;
 
 export function VoicePicker({
 	filters,
@@ -135,7 +135,7 @@ export function VoicePicker({
 								}`}
 							>
 								<div className="flex min-w-0 items-center gap-1.5">
-									<span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+									<span className="min-w-0 flex-1 truncate text-label text-foreground">
 										{voice.name}
 									</span>
 									{voice.language && (
@@ -154,7 +154,7 @@ export function VoicePicker({
 								</div>
 								{(voice.description || voice.previewUrl) && (
 									<div className="flex min-w-0 items-center justify-between gap-2">
-										<span className="min-w-0 flex-1 truncate text-badge leading-tight text-muted-foreground">
+										<span className="min-w-0 flex-1 truncate text-label text-muted-foreground">
 											{voice.description}
 										</span>
 										{voice.previewUrl && (
