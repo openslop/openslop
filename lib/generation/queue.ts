@@ -13,8 +13,10 @@ import { generateForElement } from "./generateForElement";
 import { getGenerationInputs } from "./getGenerationInputs";
 import { serializeInputs, type GenerationInputs } from "./generationInputs";
 
+export type GenerationStatus = "idle" | "queued" | "generating";
+
 export type ElementSnapshot = {
-	status: "idle" | "queued" | "generating";
+	status: GenerationStatus;
 	seconds: number;
 	result: AssetResult | null;
 	error: string | null;

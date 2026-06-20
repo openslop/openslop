@@ -61,7 +61,7 @@ export default function TemplateGallery({
 								{template.showcase.description}
 							</span>
 							<span
-								className="relative mt-1.5 inline-block self-start overflow-hidden rounded-full px-1.5 py-0.5 text-[10px] font-medium text-white"
+								className="relative mt-1.5 inline-block self-start overflow-hidden rounded-full px-1.5 py-0.5 text-badge font-medium text-white"
 								style={{ backgroundColor: template.color }}
 							>
 								{template.name}

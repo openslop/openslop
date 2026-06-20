@@ -47,7 +47,7 @@ export function LayoutPanel() {
 							onPositionChange(value as PlayerPositionValue)
 						}
 					>
-						<SelectTrigger aria-label="Player position" className="h-8 text-xs">
+						<SelectTrigger size="sm" aria-label="Player position">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>

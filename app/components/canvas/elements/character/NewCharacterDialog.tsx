@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { normalizeCharacterName } from "@/lib/project/characterName";
+import { FIELD_CLS } from "./fields";
 import { useProjectStore } from "@/lib/project/store";
 
 export function NewCharacterDialog({
@@ -67,11 +68,11 @@ function NewCharacterDialogBody({
 					onChange={(e) => setName(e.target.value)}
 					placeholder="Character name"
 					aria-label="Character name"
-					className="w-full rounded-md border border-border bg-card px-2 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
+					className={FIELD_CLS}
 				/>
 
 				{collision && (
-					<span className="text-[11px] text-rose-400" role="alert">
+					<span className="text-label-xs text-rose-400" role="alert">
 						A character named &quot;{normalized}&quot; already exists.
 					</span>
 				)}
@@ -80,7 +81,7 @@ function NewCharacterDialogBody({
 					<button
 						type="submit"
 						disabled={!canSubmit}
-						className="rounded-md border border-border bg-muted px-3 py-1 text-[12px] font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-muted"
+						className="rounded-md border border-border bg-muted px-3 py-1 text-label font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-muted"
 					>
 						Create
 					</button>

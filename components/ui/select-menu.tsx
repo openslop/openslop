@@ -45,7 +45,7 @@ export function SelectMenu<T extends string>({
 					<DropdownMenuItem
 						key={option.value}
 						onSelect={() => onChange(option.value)}
-						className="cursor-pointer py-1 text-[11px] text-muted-foreground"
+						className="cursor-pointer py-1 text-label text-muted-foreground"
 					>
 						<span className="flex w-3.5 shrink-0 items-center justify-center">
 							{option.value === value && (

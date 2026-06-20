@@ -67,7 +67,7 @@ export function TextAttributePopover({
 					type="button"
 					aria-label={tooltip}
 					title={tooltip}
-					className={`${color} text-foreground text-[12px] px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:ring-border hover:brightness-110 transition-all`}
+					className={`${color} text-foreground text-label px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:ring-border hover:brightness-110 transition-all`}
 				>
 					<span className="truncate min-w-0">
 						{!hideLabel && (
@@ -101,9 +101,9 @@ export function TextAttributePopover({
 							setOpen(false);
 						}
 					}}
-					className="w-full resize-none rounded-lg border border-border bg-card px-2 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
+					className="w-full resize-none rounded-lg border border-border bg-card px-2 py-1.5 font-body text-label text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
 				/>
-				<div className="mt-1 px-1 text-[10px] text-muted-foreground">
+				<div className="mt-1 px-1 text-badge text-muted-foreground">
 					⌘↵ to save · esc to cancel
 				</div>
 			</PopoverContent>

@@ -14,7 +14,7 @@ function formatValue(key: string, value: string): string {
 }
 
 const PILL =
-	"bg-secondary text-secondary-foreground text-[12px] px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
+	"bg-secondary text-secondary-foreground text-label px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
 
 interface AttributeBadgeProps {
 	element: CanvasContentElement;
@@ -94,7 +94,7 @@ export function AttributeBadge({
 			<button
 				aria-label={tooltip}
 				onMouseDown={(e) => e.preventDefault()}
-				className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+				className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
 			>
 				<span className="min-w-0 truncate">{labeled}</span>
 				<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />

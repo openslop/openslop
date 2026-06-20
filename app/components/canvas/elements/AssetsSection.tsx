@@ -52,7 +52,7 @@ export function AssetsSection() {
 						<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-border bg-muted text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground">
 							<Plus className="h-4 w-4" />
 						</div>
-						<span className="truncate text-[10px] text-muted-foreground">
+						<span className="truncate text-badge text-muted-foreground">
 							New
 						</span>
 					</button>

@@ -28,14 +28,18 @@ function SelectValue(
 
 function SelectTrigger({
 	className,
+	size = "default",
 	children,
 	...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
+	size?: "sm" | "default";
+}) {
 	return (
 		<SelectPrimitive.Trigger
 			data-slot="select-trigger"
+			data-size={size}
 			className={cn(
-				"flex h-9 w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 text-sm whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+				"flex w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=default]:text-sm data-[size=sm]:h-8 data-[size=sm]:text-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
 				className,
 			)}
 			{...props}
@@ -105,7 +109,7 @@ function SelectItem({
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			className={cn(
-				"relative flex w-full cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-sm outline-none select-none focus:bg-button-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+				"relative flex w-full cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-label outline-none select-none focus:bg-button-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
 				className,
 			)}
 			{...props}

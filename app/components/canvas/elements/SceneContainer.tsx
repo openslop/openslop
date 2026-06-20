@@ -127,7 +127,7 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 				</div>
 				{overflowCount > 0 && (
 					<span
-						className="text-[10px] text-muted-foreground pl-1 select-none shrink-0 text-left"
+						className="text-badge text-muted-foreground pl-1 select-none shrink-0 text-left"
 						contentEditable={false}
 					>
 						+{overflowCount} more

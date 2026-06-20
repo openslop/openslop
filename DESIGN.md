@@ -26,6 +26,8 @@ Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-ca
 
 One clean grotesque for UI and body: **Inter** (`--font-sans`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Inter 600 with tight tracking; `.font-body` = Inter 400.
 
+The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes only (leading inherits; pair with `leading-*` / `font-medium` where a tighter line or heavier weight is wanted) — rather than hand-picking raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries.
+
 ## Spacing, radius, elevation
 
 4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, overlays (modals, popovers, dropdowns, selects) and form controls (inputs, textareas, select triggers) `rounded-md`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow — popovers and menus sit at `shadow-elevation-3`.
@@ -41,3 +43,5 @@ One opt-in treatment: subtle film grain (`.grain`, theme-tuned `--grain-opacity`
 ## Components
 
 Idiomatic, shadcn-consistent primitives in `components/ui/` built with `class-variance-authority`, tokens only. Buttons: `default` (near-black inverse, for in-tool actions), `accent` (blurple, for hero/auth CTAs), plus `secondary`/`outline`/`ghost`/`icon`/`destructive`. Icons: `lucide-react`, thin (`strokeWidth` ≈1.5).
+
+Button **dimensions** come from the `size` prop (`sm`/`default`/`lg`/`icon`) defined in `buttonVariants` — never hand-size a button with `h-*`/`px-*`/`text-*` in `className`. Add a named `size` to the variant if you need a new one.

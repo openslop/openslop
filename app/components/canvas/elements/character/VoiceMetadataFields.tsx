@@ -23,7 +23,7 @@ export function VoiceSection({
 		<section className="flex flex-col gap-2 rounded-lg border border-border p-3">
 			<div className="flex flex-col gap-0.5">
 				<FieldLabel>Voice</FieldLabel>
-				<p className="text-[11px] text-muted-foreground">
+				<p className="text-label-xs text-muted-foreground">
 					Filter the voice list
 				</p>
 			</div>

@@ -59,9 +59,9 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
 
 	return (
 		<div
-			className={`z-40 flex w-full shrink-0 flex-col items-center gap-3 px-4 py-3 pb-2 pl-16 ${editorStyles.copilotEnter}`}
+			className={`z-40 flex w-full shrink-0 flex-col items-center gap-3 px-4 py-1.5 pl-16 ${editorStyles.copilotEnter}`}
 		>
-			<div className="flex w-full items-start gap-3">
+			<div className="flex w-full items-center gap-3">
 				<div className="hidden flex-1 sm:block" aria-hidden />
 				<div className="min-w-0 max-w-2xl flex-1">
 					<RefineComposer
@@ -70,12 +70,13 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
 						onStop={stopGeneration}
 					/>
 				</div>
-				<div className="flex flex-1 items-start justify-end gap-2 max-sm:flex-none">
+				<div className="flex flex-1 items-center justify-end gap-2 max-sm:flex-none">
 					<Button
 						type="button"
 						variant="generate"
+						size="sm"
 						onClick={generateAll}
-						className="h-11 shrink-0 px-4 sm:px-5"
+						className="shrink-0 sm:px-4"
 						aria-label={generateLabel}
 						disabled={busy}
 					>

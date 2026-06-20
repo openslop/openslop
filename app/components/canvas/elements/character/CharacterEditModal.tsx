@@ -185,7 +185,8 @@ function CharacterEditDialogBody({
 							)}
 							{isStale && <StaleIndicator />}
 							<GenerateButton
-								label="Generate"
+								status={avatarSnapshot.status}
+								hasResult={Boolean(character.avatarUrl)}
 								disabled={generateDisabled}
 								onGenerate={regenerateAvatar}
 							/>
@@ -232,7 +233,7 @@ function CharacterEditDialogBody({
 				<button
 					type="button"
 					onClick={handleDelete}
-					className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] transition-colors ${
+					className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-label transition-colors ${
 						confirmDelete
 							? "border-rose-500/60 bg-rose-500/20 text-rose-200 hover:bg-rose-500/30"
 							: "border-border bg-card text-muted-foreground hover:bg-muted"
