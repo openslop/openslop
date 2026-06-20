@@ -67,10 +67,11 @@ export type VideoConfig = {
 	height: number;
 };
 
+export const BASE_WIDTH = 1920;
 export const BASE_HEIGHT = 1080;
 
 export const DEFAULT_CONFIG: VideoConfig = {
 	fps: 24,
-	width: 1920,
+	width: BASE_WIDTH,
 	height: BASE_HEIGHT,
 };

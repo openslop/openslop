@@ -65,6 +65,12 @@ export function RenderProvider({ children }: { children: ReactNode }) {
 		});
 	}, [state, open]);
 
+	useEffect(() => {
+		return () => {
+			toast.dismiss(TOAST_ID);
+		};
+	}, []);
+
 	const value = useMemo(
 		() => ({ state, render, reset, open, setOpen }),
 		[state, render, reset, open],

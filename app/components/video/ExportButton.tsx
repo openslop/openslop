@@ -21,20 +21,20 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
-import { RESOLUTIONS, scaleForHeight } from "@/lib/video/resolutions";
+import { RESOLUTIONS, scaleForWidth } from "@/lib/video/resolutions";
 import { formatDuration } from "@/lib/video/timestamps";
-import { BASE_HEIGHT } from "@/lib/video/types";
+import { BASE_WIDTH } from "@/lib/video/types";
 import { useRender } from "./RenderProvider";
 import { useLayout } from "./VideoLayoutContext";
 
 const triggerClass =
-	"h-11 shrink-0 border-[#D697C0] bg-[#F1E1EA] px-4 text-[#772A4D] hover:bg-[#E6CADA] sm:px-5 dark:border-[#9D4968] dark:bg-[#4E2238] dark:text-[#E5B6D1] dark:hover:bg-[#6F3653]";
+	"h-11 shrink-0 border-tertiary/50 bg-tertiary/10 px-4 text-tertiary hover:bg-tertiary/20 sm:px-5";
 
 export function ExportButton() {
 	const { layout, ready } = useLayout();
 	const { loading } = useScriptControl();
 	const { state, render, reset, open, setOpen } = useRender();
-	const [height, setHeight] = useState(BASE_HEIGHT);
+	const [width, setWidth] = useState(BASE_WIDTH);
 
 	const disabled = loading || !layout?.series.length || !ready;
 	const isRendering = state.status === "rendering";
@@ -131,8 +131,8 @@ export function ExportButton() {
 						<div className="flex items-center justify-between gap-3">
 							<span className="text-sm">Resolution</span>
 							<Select
-								value={String(height)}
-								onValueChange={(value) => setHeight(Number(value))}
+								value={String(width)}
+								onValueChange={(value) => setWidth(Number(value))}
 							>
 								<SelectTrigger>
 									<SelectValue />
@@ -140,8 +140,8 @@ export function ExportButton() {
 								<SelectContent>
 									{RESOLUTIONS.map((resolution) => (
 										<SelectItem
-											key={resolution.height}
-											value={String(resolution.height)}
+											key={resolution.width}
+											value={String(resolution.width)}
 										>
 											{resolution.label}
 										</SelectItem>
@@ -156,8 +156,8 @@ export function ExportButton() {
 						<Button
 							type="button"
 							variant="generate"
-							onClick={() => layout && render(layout, scaleForHeight(height))}
-							disabled={!layout}
+							onClick={() => layout && render(layout, scaleForWidth(width))}
+							disabled={disabled}
 							className="w-full"
 						>
 							<Download aria-hidden="true" />

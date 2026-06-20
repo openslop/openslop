@@ -9,7 +9,7 @@ import { useGenerate } from "../hooks/useGenerate";
 export function StaleIndicator() {
 	return (
 		<SimpleTooltip label="Prompt changed — regenerate to update">
-			<span className="inline-flex items-center gap-1 rounded-full border border-stale/50 bg-stale/10 px-2 py-0.5 text-[11px] font-medium text-stale">
+			<span className="inline-flex items-center gap-1 rounded-full border border-tertiary/50 bg-tertiary/10 px-2 py-0.5 text-[11px] font-medium text-tertiary">
 				<AlertCircle className="h-3 w-3" />
 				Stale
 			</span>
