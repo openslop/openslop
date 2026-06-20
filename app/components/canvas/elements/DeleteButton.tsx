@@ -1,6 +1,6 @@
-import { Transforms } from "slate";
-import { ReactEditor, useSlateStatic } from "slate-react";
+import { useSlateStatic } from "slate-react";
 import { DeleteButton as DeleteIconButton } from "@/components/ui/delete-button";
+import { removeElement } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasElement } from "@/lib/canvas/types";
 
 export function DeleteButton({ element }: { element: CanvasElement }) {
@@ -11,8 +11,7 @@ export function DeleteButton({ element }: { element: CanvasElement }) {
 			ariaLabel="Delete element"
 			onMouseDown={(e) => {
 				e.preventDefault();
-				const path = ReactEditor.findPath(editor, element);
-				Transforms.removeNodes(editor, { at: path });
+				removeElement(editor, element);
 			}}
 		/>
 	);

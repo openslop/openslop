@@ -2,7 +2,7 @@
 
 import { Check, UserPlus } from "@/components/ui/icon";
 import { Editor } from "slate";
-import { ReactEditor, useSlateStatic } from "slate-react";
+import { useSlateStatic } from "slate-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
-import { setNodeAttrs } from "@/lib/canvas/editorOps";
+import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
@@ -28,9 +28,8 @@ function writeCharacters(
 	element: CanvasContentElement,
 	names: string[],
 ): void {
-	const path = ReactEditor.findPath(editor, element);
 	const joined = names.join(", ");
-	setNodeAttrs(editor, path, element, { characters: joined || null });
+	updateElementAttrs(editor, element, { characters: joined || null });
 }
 
 export function toggleCharacter(
@@ -62,8 +61,7 @@ function setCharacterName(
 	element: CanvasContentElement,
 	name: string,
 ): void {
-	const path = ReactEditor.findPath(editor, element);
-	setNodeAttrs(editor, path, element, { name });
+	updateElementAttrs(editor, element, { name });
 }
 
 /** Dropdown listing the project's characters with checkmarks for selected ones. */

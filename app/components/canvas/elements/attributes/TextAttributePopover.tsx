@@ -2,14 +2,14 @@
 
 import { ChevronDown } from "@/components/ui/icon";
 import { useCallback, useRef, useState } from "react";
-import { ReactEditor, useSlateStatic } from "slate-react";
+import { useSlateStatic } from "slate-react";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { setNodeAttrs } from "@/lib/canvas/editorOps";
+import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 
 interface TextAttributePopoverProps {
 	element: CanvasContentElement;
@@ -42,8 +42,7 @@ export function TextAttributePopover({
 	const commit = useCallback(
 		(next: string) => {
 			if (next === value) return;
-			const path = ReactEditor.findPath(editor, element);
-			setNodeAttrs(editor, path, element, { [attrKey]: next });
+			updateElementAttrs(editor, element, { [attrKey]: next });
 		},
 		[editor, element, attrKey, value],
 	);

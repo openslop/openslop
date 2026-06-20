@@ -1,7 +1,7 @@
 import { ChevronDown } from "@/components/ui/icon";
-import { ReactEditor, useSlateStatic } from "slate-react";
+import { useSlateStatic } from "slate-react";
 import { SelectMenu } from "@/components/ui/select-menu";
-import { setNodeAttrs } from "@/lib/canvas/editorOps";
+import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/canvas/elementConfigs";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
@@ -77,8 +77,7 @@ export function AttributeBadge({
 	}
 
 	const handleSelect = (next: string) => {
-		const path = ReactEditor.findPath(editor, element);
-		setNodeAttrs(editor, path, element, { [attrKey]: next });
+		updateElementAttrs(editor, element, { [attrKey]: next });
 	};
 
 	return (
