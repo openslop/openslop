@@ -19,10 +19,8 @@ export function createReferenceStylePlugin(projectId: string): LLMPlugin {
 				getProjectStore(projectId).getState();
 			const styleReferenceImages = compact([
 				...referenceImages,
-				...Object.values(metadata.characters).flatMap((character) =>
-					character.avatarUploaded && character.avatarUrl
-						? [character.avatarUrl]
-						: [],
+				...Object.values(metadata.characters).map((character) =>
+					character.avatarUploaded ? character.avatarUrl : undefined,
 				),
 			]);
 			if (styleReferenceImages.length === 0) return prompt;
