@@ -22,7 +22,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { RESOLUTIONS, scaleForWidth } from "@/lib/video/resolutions";
-import { formatDuration } from "@/lib/video/timestamps";
 import { BASE_WIDTH } from "@/lib/video/types";
 import { useRender } from "./RenderProvider";
 import { useLayout } from "./VideoLayoutContext";
@@ -102,14 +101,6 @@ export function ExportButton() {
 								{formatBytes(state.size)}
 							</span>
 						</div>
-						{layout && (
-							<div className="flex items-center justify-between text-xs">
-								<span className="text-muted-foreground">Duration</span>
-								<span className="font-mono tabular-nums">
-									{formatDuration(layout.totalDurationSec)}
-								</span>
-							</div>
-						)}
 						<Button asChild variant="generate" className="h-11 w-full">
 							<a href={state.url} download>
 								<Download aria-hidden="true" />
