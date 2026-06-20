@@ -331,7 +331,9 @@
 	--text-badge-xs: 0.5625rem; /* 9px — uppercase micro tags */
 	--text-badge: 0.625rem; /* 10px — badges, tags, micro labels */
 	--text-label-xs: 0.6875rem; /* 11px — small labels */
+	--text-label-xs--line-height: 1rem; /* 16px — dense control leading */
 	--text-label: 0.75rem; /* 12px — labels, dense controls */
+	--text-label--line-height: 1rem; /* 16px — dense control leading */
 	--text-body: 0.875rem; /* 14px — default body & UI text */
 	--text-body-lg: 1rem; /* 16px — emphasized body */
 	--text-heading-sm: 1.125rem; /* 18px */
