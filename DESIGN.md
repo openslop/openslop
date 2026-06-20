@@ -28,6 +28,8 @@ One clean grotesque for UI and body: **Inter** (`--font-sans`). **IBM Plex Mono*
 
 The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes only (leading inherits; pair with `leading-*` / `font-medium` where a tighter line or heavier weight is wanted) — rather than hand-picking raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries.
 
+In a dense row, a primary label and its secondary description share one size and weight (e.g. both `text-label`), differentiated by color alone — `text-foreground` for the label, `text-muted-foreground` for the description. Don't shrink or bold the label to set it apart.
+
 ## Spacing, radius, elevation
 
 4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, overlays (modals, popovers, dropdowns, selects) and form controls (inputs, textareas, select triggers) `rounded-md`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow — popovers and menus sit at `shadow-elevation-3`.
