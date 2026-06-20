@@ -31,12 +31,6 @@ export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	resolvedVoiceId: optionalString,
 });
 
-export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
-	query: optionalString,
-	name: optionalString,
-	limit: z.coerce.number().int().positive().optional().catch(undefined),
-});
-
 export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 
 export type MetadataCharacter = MetadataVoice & {

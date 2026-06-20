@@ -477,6 +477,40 @@ describe("API routes", () => {
 			expect(json.voices[0].name).toBe("Voice 1");
 		});
 
+		it("returns 400 for malformed filters before calling the provider", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+
+			const req = makeRequest(
+				"/api/v1/tts/voices?gender=robot&limit=abc",
+				undefined,
+				"GET",
+			);
+			const res = await GET(req);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain(
+				"Invalid voice search parameters",
+			);
+			expect(mockTTSSearch).not.toHaveBeenCalled();
+		});
+
+		it("returns 400 for blank limit filters before calling the provider", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+
+			const req = makeRequest(
+				"/api/v1/tts/voices?limit=%20%20%20",
+				undefined,
+				"GET",
+			);
+			const res = await GET(req);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain(
+				"Invalid voice search parameters",
+			);
+			expect(mockTTSSearch).not.toHaveBeenCalled();
+		});
+
 		it("returns 500 on error", async () => {
 			const { GET } = await import("@/app/api/v1/tts/voices/route");
 			mockTTSSearch.mockRejectedValue(new Error("api down"));
