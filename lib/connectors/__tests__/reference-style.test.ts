@@ -55,6 +55,69 @@ describe("createReferenceStylePlugin", () => {
 		expect(result).toContain("a knight and a dragon");
 	});
 
+	it("combines reference images with uploaded avatars but excludes generated ones", async () => {
+		const projectId = "p4";
+		const referenceImage = "https://example.com/reference.jpg";
+		const uploadedAvatar = "https://example.com/uploaded-avatar.jpg";
+		const generatedAvatar = "https://example.com/generated-avatar.jpg";
+		const { gateway, transformPrompt, ctx } = setup(projectId, [
+			referenceImage,
+		]);
+		const store = getProjectStore(projectId);
+		store.getState().setCharacter("Mira", {
+			appearance: "blue hair",
+			avatarUrl: uploadedAvatar,
+			avatarUploaded: true,
+		});
+		store.getState().setCharacter("Generated", {
+			appearance: "green hair",
+			avatarUrl: generatedAvatar,
+			avatarUploaded: false,
+		});
+
+		const result = await transformPrompt("a knight and a dragon", ctx);
+
+		expect(gateway.generate).toHaveBeenCalledOnce();
+		expect(gateway.generate.mock.calls[0][0].referenceImages).toEqual([
+			referenceImage,
+			uploadedAvatar,
+		]);
+		expect(result).toMatch(
+			/^Art style reference: Soft watercolor, pastel palette, dreamy lighting\./,
+		);
+	});
+
+	it("uses uploaded character avatars as style references when no reference images are present", async () => {
+		const projectId = "p5";
+		const avatar = "https://example.com/avatar.jpg";
+		const { gateway, transformPrompt, ctx } = setup(projectId, []);
+		getProjectStore(projectId).getState().setCharacter("Mira", {
+			appearance: "blue hair",
+			avatarUrl: avatar,
+			avatarUploaded: true,
+		});
+
+		await transformPrompt("a knight and a dragon", ctx);
+
+		expect(gateway.generate).toHaveBeenCalledOnce();
+		expect(gateway.generate.mock.calls[0][0].referenceImages).toEqual([avatar]);
+	});
+
+	it("ignores generated avatars to avoid circular style references", async () => {
+		const projectId = "p6";
+		const { gateway, transformPrompt, ctx } = setup(projectId, []);
+		getProjectStore(projectId).getState().setCharacter("Generated", {
+			appearance: "green hair",
+			avatarUrl: "https://example.com/generated-avatar.jpg",
+			avatarUploaded: false,
+		});
+
+		const result = await transformPrompt("a knight and a dragon", ctx);
+
+		expect(result).toBe("a knight and a dragon");
+		expect(gateway.generate).not.toHaveBeenCalled();
+	});
+
 	it("throws when no gateway is provided", async () => {
 		const { transformPrompt } = setup("p3", ["https://example.com/a.jpg"]);
 		await expect(transformPrompt("hi")).rejects.toThrow(
