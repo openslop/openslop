@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { getProjectStore } from "@/lib/project/store";
+import { listCharacterAvatars } from "./character-avatars";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -16,15 +17,12 @@ export function createCharacterAvatarStylePlugin(projectId: string): LLMPlugin {
 		) {
 			const characters =
 				getProjectStore(projectId).getState().metadata.characters;
-			const withAvatar = Object.entries(characters).flatMap(([name, c]) =>
-				c.avatarUrl ? [{ name, character: c, url: c.avatarUrl }] : [],
-			);
+			const withAvatar = listCharacterAvatars(characters);
 			if (withAvatar.length === 0) return prompt;
 
 			const described = await Promise.all(
-				withAvatar.map(async ({ name, character, url }) => {
-					// Reuse appearance text from generated avatars
-					if (!character.avatarUploaded && character.appearance.trim())
+				withAvatar.map(async ({ name, character, source, url }) => {
+					if (source === "generated" && character.appearance.trim())
 						return `- ${name}: ${character.appearance.trim()}`;
 
 					if (!ctx?.gateway)

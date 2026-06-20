@@ -1,6 +1,7 @@
 import dedent from "dedent";
 import compact from "lodash/compact";
 import { getProjectStore } from "@/lib/project/store";
+import { listUploadedCharacterAvatarUrls } from "./character-avatars";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -19,9 +20,7 @@ export function createReferenceStylePlugin(projectId: string): LLMPlugin {
 				getProjectStore(projectId).getState();
 			const styleReferenceImages = compact([
 				...referenceImages,
-				...Object.values(metadata.characters).map((character) =>
-					character.avatarUploaded ? character.avatarUrl : undefined,
-				),
+				...listUploadedCharacterAvatarUrls(metadata.characters),
 			]);
 			if (styleReferenceImages.length === 0) return prompt;
 			if (!ctx?.gateway)

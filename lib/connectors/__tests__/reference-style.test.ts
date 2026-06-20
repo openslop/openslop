@@ -55,6 +55,15 @@ describe("createReferenceStylePlugin", () => {
 		expect(result).toContain("a knight and a dragon");
 	});
 
+	it("filters empty reference image slots before deciding whether to call the gateway", async () => {
+		const { gateway, transformPrompt, ctx } = setup("p-empty", [""]);
+
+		const result = await transformPrompt("a knight and a dragon", ctx);
+
+		expect(result).toBe("a knight and a dragon");
+		expect(gateway.generate).not.toHaveBeenCalled();
+	});
+
 	it("combines reference images with uploaded avatars but excludes generated ones", async () => {
 		const projectId = "p4";
 		const referenceImage = "https://example.com/reference.jpg";
