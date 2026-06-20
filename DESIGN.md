@@ -28,7 +28,7 @@ One clean grotesque for UI and body: **Inter** (`--font-sans`). **IBM Plex Mono*
 
 ## Spacing, radius, elevation
 
-4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, modals `rounded-3xl`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow.
+4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, overlays (modals, popovers, dropdowns, selects) and form controls (inputs, textareas, select triggers) `rounded-md`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow — popovers and menus sit at `shadow-elevation-3`.
 
 ## Motion
 

@@ -46,7 +46,7 @@ function ElementSettings({
 					</button>
 				</PopoverTrigger>
 			</SimpleTooltip>
-			<PopoverContent align="start" className="w-64">
+			<PopoverContent align="start" className="w-64 border border-border">
 				<div className="mb-2 text-xs font-semibold text-muted-foreground">
 					Settings
 				</div>
