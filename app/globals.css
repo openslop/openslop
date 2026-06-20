@@ -209,7 +209,7 @@
 	/* Surface overrides (warm near-blacks) */
 	--background: #140e11;
 	--surface-recessed: #140e11;
-	--surface-elevated: #372f32;
+	--surface-elevated: #41393c;
 	--card: #251e21;
 	--popover: #251e21;
 	--button-hover: #372f32;
@@ -327,6 +327,18 @@
 	--font-mono: var(--font-ibm-plex-mono);
 	--font-serif: var(--font-instrument-serif), serif;
 
+	/* Semantic type scale (DESIGN.md typography) */
+	--text-badge-xs: 0.5625rem; /* 9px — uppercase micro tags */
+	--text-badge: 0.625rem; /* 10px — badges, tags, micro labels */
+	--text-label-xs: 0.6875rem; /* 11px — small labels */
+	--text-label: 0.75rem; /* 12px — labels, dense controls */
+	--text-body: 0.875rem; /* 14px — default body & UI text */
+	--text-body-lg: 1rem; /* 16px — emphasized body */
+	--text-heading-sm: 1.125rem; /* 18px */
+	--text-heading: 1.5rem; /* 24px */
+	--text-heading-lg: 2.25rem; /* 36px */
+	--text-display: 3rem; /* 48px */
+
 	--shadow-elevation-1: var(--elevation-1);
 	--shadow-elevation-3: var(--elevation-3);
 	--shadow-elevation-5: var(--elevation-5);
@@ -351,7 +363,7 @@
 	}
 	body {
 		@apply bg-background text-foreground;
-		font-family: var(--font-sans);
+		font-family: var(--font-sloptastic), ui-sans-serif, system-ui, sans-serif;
 		letter-spacing: -0.006em;
 	}
 	button {
@@ -365,14 +377,14 @@
 }
 
 .font-title {
-	font-family: var(--font-sans);
+	font-family: var(--font-sloptastic), ui-sans-serif, system-ui, sans-serif;
 	font-weight: 575;
 	letter-spacing: -0.02em;
 	line-height: 1.2;
 }
 
 .font-body {
-	font-family: var(--font-body);
+	font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 	font-weight: 425;
 	letter-spacing: -0.011em;
 	line-height: 1.5;

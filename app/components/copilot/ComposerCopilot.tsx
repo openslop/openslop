@@ -59,7 +59,7 @@ function PillTrigger({
 			ref={ref}
 			type="button"
 			className={cn(
-				"inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[12px] text-foreground transition-colors hover:bg-button-hover",
+				"inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-label text-foreground transition-colors hover:bg-button-hover",
 				className,
 			)}
 			{...props}
@@ -108,7 +108,7 @@ function AttachMenu({
 		<ActionMenu
 			items={items}
 			contentClassName="min-w-36 p-0.5"
-			itemClassName="rounded-lg text-[11px] text-muted-foreground"
+			itemClassName="rounded-lg text-label-xs text-muted-foreground"
 		>
 			<button
 				type="button"
@@ -138,7 +138,7 @@ function TemplatePill({
 
 	return (
 		<span
-			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 text-sm leading-5 text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
+			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-sm leading-5 text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
 			<button
@@ -223,7 +223,7 @@ export default function ComposerCopilot({
 							}}
 							placeholder={placeholderText}
 							style={{ fieldSizing: "content" }}
-							className=" w-full resize-none bg-transparent text-sm leading-5 text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+							className=" w-full resize-none bg-transparent font-body text-sm leading-5 text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !showPill && placeholderOverlay && (
 							<div className=" pointer-events-none overflow-hidden text-sm">

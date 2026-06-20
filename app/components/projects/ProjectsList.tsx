@@ -53,9 +53,7 @@ export default function ProjectsList({
 					aria-hidden
 					className="dot-grid-bg pointer-events-none absolute inset-0 z-0"
 				/>
-				<div className="fixed top-4 left-4 z-[100]">
-					<UserProfile />
-				</div>
+				<UserProfile />
 				<div className="relative z-10 mx-auto max-w-7xl px-6 pt-20 pb-16">
 					<header className="mb-10 flex items-end justify-between">
 						<div>

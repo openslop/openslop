@@ -1,15 +1,17 @@
 "use client";
 
-import { AlertCircle, Sparkles } from "@/components/ui/icon";
+import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { cn } from "@/lib/utils";
+import type { GenerationStatus } from "@/lib/generation/queue";
 import { useGenerate } from "../hooks/useGenerate";
 
 export function StaleIndicator() {
 	return (
 		<SimpleTooltip label="Prompt changed — regenerate to update">
-			<span className="inline-flex items-center gap-1 rounded-full border border-tertiary/50 bg-tertiary/10 px-2 py-0.5 text-[11px] font-medium text-tertiary">
+			<span className="inline-flex items-center gap-1 rounded-full border border-tertiary/50 bg-tertiary/10 px-2 py-0.5 text-label-xs font-medium text-tertiary">
 				<AlertCircle className="h-3 w-3" />
 				Stale
 			</span>
@@ -17,33 +19,44 @@ export function StaleIndicator() {
 	);
 }
 
+function generateLabel(status: GenerationStatus, hasResult: boolean) {
+	if (status === "generating") return "Generating…";
+	if (status === "queued") return "Queued";
+	return hasResult ? "Regenerate" : "Generate";
+}
+
 export function GenerateButton({
-	label,
+	status,
+	hasResult,
 	disabled,
 	onGenerate,
 }: {
-	label: string;
+	status: GenerationStatus;
+	hasResult: boolean;
 	disabled: boolean;
 	onGenerate: () => void;
 }) {
+	const label = generateLabel(status, hasResult);
 	return (
-		<SimpleTooltip label={label}>
-			<button
-				type="button"
-				aria-label={label}
-				disabled={disabled}
-				onMouseDown={(e) => e.preventDefault()}
-				onClick={onGenerate}
-				className={cn(
-					"inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors enabled:hover:bg-generate-hover disabled:cursor-not-allowed",
-					disabled
-						? "bg-generate-disabled text-generate-disabled-foreground"
-						: "bg-generate text-generate-foreground",
-				)}
-			>
-				<Sparkles className="h-3.5 w-3.5" strokeWidth={1.5} />
-			</button>
-		</SimpleTooltip>
+		<Button
+			type="button"
+			variant="generate"
+			size="sm"
+			className="shrink-0"
+			disabled={disabled}
+			onMouseDown={(e) => e.preventDefault()}
+			onClick={onGenerate}
+			aria-label={label}
+		>
+			{status === "generating" ? (
+				<Spinner className="text-current" />
+			) : status === "queued" ? (
+				<Hourglass aria-hidden="true" />
+			) : (
+				<Sparkles aria-hidden="true" />
+			)}
+			{label}
+		</Button>
 	);
 }
 
@@ -58,7 +71,8 @@ export function ElementGenerateButton({
 		<div className="flex items-center gap-2">
 			{stale && hasResult && <StaleIndicator />}
 			<GenerateButton
-				label="Generate"
+				status={status}
+				hasResult={hasResult}
 				disabled={!hasPrompt || status !== "idle"}
 				onGenerate={generate}
 			/>

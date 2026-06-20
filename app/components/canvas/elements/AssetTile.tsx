@@ -86,7 +86,7 @@ export function AssetTile({
 			</div>
 			{name && (
 				<span
-					className="truncate text-[10px] text-muted-foreground"
+					className="truncate text-badge text-muted-foreground"
 					title={name}
 				>
 					{name}

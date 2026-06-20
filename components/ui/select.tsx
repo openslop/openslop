@@ -28,14 +28,18 @@ function SelectValue(
 
 function SelectTrigger({
 	className,
+	size = "default",
 	children,
 	...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
+	size?: "sm" | "default";
+}) {
 	return (
 		<SelectPrimitive.Trigger
 			data-slot="select-trigger"
+			data-size={size}
 			className={cn(
-				"flex h-9 w-fit items-center justify-between gap-2 rounded-lg border border-border bg-input px-3 py-2 text-sm whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+				"flex w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=default]:text-sm data-[size=sm]:h-8 data-[size=sm]:text-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
 				className,
 			)}
 			{...props}
@@ -60,7 +64,7 @@ function SelectContent({
 				data-slot="select-content"
 				position={position}
 				className={cn(
-					"relative z-50 max-h-(--radix-select-content-available-height) min-w-32 overflow-y-auto overflow-x-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-elevation-5 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+					"relative z-50 max-h-(--radix-select-content-available-height) min-w-32 overflow-y-auto overflow-x-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-elevation-3 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
 					position === "popper" &&
 						"data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
 					className,
@@ -105,7 +109,7 @@ function SelectItem({
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			className={cn(
-				"relative flex w-full cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-sm outline-none select-none focus:bg-button-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+				"relative flex w-full cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-label outline-none select-none focus:bg-button-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
 				className,
 			)}
 			{...props}

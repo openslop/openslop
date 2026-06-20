@@ -82,7 +82,7 @@ function ProjectCharactersMenu({
 					key={name}
 					onClick={() => onSelect(name)}
 					onSelect={(e) => e.preventDefault()}
-					className="cursor-pointer py-1 text-[11px] text-muted-foreground"
+					className="cursor-pointer py-1 text-label text-muted-foreground"
 				>
 					<span className="w-3.5 shrink-0 flex items-center justify-center">
 						{selected.has(name) && (

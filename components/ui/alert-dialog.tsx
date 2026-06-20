@@ -37,7 +37,7 @@ function AlertDialogContent({
 			<AlertDialogPrimitive.Content
 				data-slot="alert-dialog-content"
 				className={cn(
-					"fixed left-[50%] top-[50%] z-[60] flex w-[calc(100vw-2rem)] max-w-sm translate-x-[-50%] translate-y-[-50%] flex-col gap-1 rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-elevation-10 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+					"fixed left-[50%] top-[50%] z-[60] flex w-[calc(100vw-2rem)] max-w-sm translate-x-[-50%] translate-y-[-50%] flex-col gap-1 rounded-md border border-border bg-popover p-5 text-popover-foreground shadow-elevation-10 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
 					className,
 				)}
 				{...props}
@@ -66,7 +66,7 @@ function AlertDialogDescription({
 	return (
 		<AlertDialogPrimitive.Description
 			data-slot="alert-dialog-description"
-			className={cn("text-[12px] text-muted-foreground", className)}
+			className={cn("text-label text-muted-foreground", className)}
 			{...props}
 		/>
 	);

@@ -52,7 +52,7 @@ function RailItem({
 	onClick?: () => void;
 }) {
 	const className = cn(
-		"flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center text-[11px] font-medium transition-colors",
+		"flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center text-label-xs font-medium transition-colors",
 		selected
 			? "bg-secondary font-semibold text-panel-label"
 			: "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
@@ -90,9 +90,9 @@ export function EditorSidebar() {
 
 	return (
 		<div className="flex shrink-0">
-			<nav className="flex w-14 shrink-0 flex-col items-center gap-1 pt-16 pr-0.5 mr-2 pl-1 lg:w-[72px] lg:pt-4">
+			<nav className="flex w-14 shrink-0 flex-col items-center gap-1 pt-16 mr-2 pl-1 lg:w-[72px] lg:pt-4">
 				<RailItem icon={Home} label="Home" href="/" />
-				<div className="my-1.5 h-px w-8 bg-border" />
+				<div className="my-1 h-px w-full bg-border" />
 				{(Object.keys(PANELS) as PanelKey[]).map((key) => {
 					const { label, icon, iconActive } = PANELS[key];
 					const selected = active === key;

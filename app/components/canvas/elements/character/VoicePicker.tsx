@@ -55,7 +55,7 @@ function PreviewPlayButton({ src }: { src: string }) {
 
 const DEBOUNCE_MS = 300;
 const SKELETON_ROWS = 5;
-const VOICE_LIMIT = 10;
+const VOICE_LIMIT = 50;
 
 export function VoicePicker({
 	filters,
@@ -103,14 +103,14 @@ export function VoicePicker({
 	return (
 		<div className="flex min-w-0 flex-col gap-1.5">
 			<FieldLabel>Voices</FieldLabel>
-			{error && <span className="text-[11px] text-rose-400">{error}</span>}
+			{error && <span className="text-label-xs text-rose-400">{error}</span>}
 			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{loading &&
 					Array.from({ length: SKELETON_ROWS }).map((_, i) => (
 						<Skeleton key={`skel-${i}`} className="h-12 shrink-0 rounded-md" />
 					))}
 				{!loading && voices.length === 0 && !error && (
-					<span className="px-2 py-3 text-center text-[11px] text-muted-foreground">
+					<span className="px-2 py-3 text-center text-label-xs text-muted-foreground">
 						No voices match these filters.
 					</span>
 				)}
@@ -135,16 +135,16 @@ export function VoicePicker({
 								}`}
 							>
 								<div className="flex min-w-0 items-center gap-1.5">
-									<span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+									<span className="min-w-0 flex-1 truncate text-label text-foreground">
 										{voice.name}
 									</span>
 									{voice.language && (
-										<span className="shrink-0 rounded border border-border px-1 py-px text-[9px] uppercase text-muted-foreground">
+										<span className="shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground">
 											{voice.language}
 										</span>
 									)}
 									{voice.gender && (
-										<span className="shrink-0 rounded border border-border px-1 py-px text-[9px] uppercase text-muted-foreground">
+										<span className="shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground">
 											{voice.gender}
 										</span>
 									)}
@@ -154,7 +154,7 @@ export function VoicePicker({
 								</div>
 								{(voice.description || voice.previewUrl) && (
 									<div className="flex min-w-0 items-center justify-between gap-2">
-										<span className="min-w-0 flex-1 truncate text-[10px] leading-tight text-muted-foreground">
+										<span className="min-w-0 flex-1 truncate text-label text-muted-foreground">
 											{voice.description}
 										</span>
 										{voice.previewUrl && (

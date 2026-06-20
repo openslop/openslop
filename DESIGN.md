@@ -24,11 +24,15 @@ Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-ca
 
 ## Typography
 
-One clean grotesque for UI and body: **Inter** (`--font-sans`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Inter 600 with tight tracking; `.font-body` = Inter 400.
+UI and titles use **Sloptastic** (`--font-sans`, `.font-title`), a clean grotesque; long-form body text uses **Inter** (`--font-body`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Two display faces for marketing surfaces only: **Instrument Serif** (`--font-serif`, hero headlines) and **Sentient** (`--font-sentient`, the onboarding wordmark). Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Sloptastic 575 with tight tracking; `.font-body` = Inter 425.
+
+The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes only (leading inherits; pair with `leading-*` / `font-medium` where a tighter line or heavier weight is wanted) — rather than hand-picking raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries.
+
+In a dense row, a primary label and its secondary description share one size and weight (e.g. both `text-label`), differentiated by color alone — `text-foreground` for the label, `text-muted-foreground` for the description. Don't shrink or bold the label to set it apart.
 
 ## Spacing, radius, elevation
 
-4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, modals `rounded-3xl`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow.
+4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, overlays (modals, popovers, dropdowns, selects) and form controls (inputs, textareas, select triggers) `rounded-md`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow — popovers and menus sit at `shadow-elevation-3`.
 
 ## Motion
 
@@ -41,3 +45,5 @@ One opt-in treatment: subtle film grain (`.grain`, theme-tuned `--grain-opacity`
 ## Components
 
 Idiomatic, shadcn-consistent primitives in `components/ui/` built with `class-variance-authority`, tokens only. Buttons: `default` (near-black inverse, for in-tool actions), `accent` (blurple, for hero/auth CTAs), plus `secondary`/`outline`/`ghost`/`icon`/`destructive`. Icons: `lucide-react`, thin (`strokeWidth` ≈1.5).
+
+Button **dimensions** come from the `size` prop (`sm`/`default`/`lg`/`icon`) defined in `buttonVariants` — never hand-size a button with `h-*`/`px-*`/`text-*` in `className`. Add a named `size` to the variant if you need a new one.

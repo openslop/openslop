@@ -19,7 +19,7 @@ export function CollapsibleHeader({
 	const Icon = collapsed ? ChevronRight : ChevronDown;
 	return (
 		<div
-			className="flex items-center gap-1 select-none text-[10px] text-muted-foreground font-medium mb-2 h-5"
+			className="flex items-center gap-1 select-none text-badge text-muted-foreground font-medium mb-2 h-5"
 			contentEditable={false}
 		>
 			<button

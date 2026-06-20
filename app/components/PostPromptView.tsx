@@ -52,9 +52,7 @@ function PostPromptViewInner() {
 				aria-hidden
 				className="dot-grid-bg pointer-events-none fixed inset-0 -z-10"
 			/>
-			<div className="fixed top-4 left-4 z-[100]">
-				<UserProfile />
-			</div>
+			<UserProfile />
 
 			<CanvasProviders
 				editor={editor}

@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const FIELD_CLS =
-	"w-full rounded-md border border-border bg-card px-2 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50";
+	"w-full rounded-md border border-border bg-card px-2 py-1.5 font-body text-label text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (
-		<span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+		<span className="text-label-xs uppercase tracking-wide text-muted-foreground">
 			{children}
 		</span>
 	);
@@ -135,7 +135,7 @@ function EnumOption({
 	return (
 		<DropdownMenuItem
 			onClick={onSelect}
-			className="flex cursor-pointer items-center gap-1.5 py-1 text-[12px] text-muted-foreground"
+			className="flex cursor-pointer items-center gap-1.5 py-1 text-label text-muted-foreground"
 		>
 			<span className="flex w-3.5 shrink-0 items-center justify-center">
 				{selected && <Check className="h-3 w-3 text-foreground" aria-hidden />}

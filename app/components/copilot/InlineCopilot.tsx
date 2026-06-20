@@ -29,7 +29,7 @@ function LoadingText() {
 	}, []);
 
 	return (
-		<span className=" pointer-events-none block select-none truncate text-sm text-muted-foreground shimmer">
+		<span className=" pointer-events-none block select-none truncate text-xs text-muted-foreground shimmer">
 			{LOADING_MESSAGES[index]}
 		</span>
 	);
@@ -64,19 +64,19 @@ export default function InlineCopilot({
 
 	return (
 		<div className="grain relative w-full overflow-hidden rounded-xl bg-element-card shadow-elevation-3">
-			<div className="relative z-10 flex items-center px-4 py-3">
+			<div className="relative z-10 flex items-center px-3 py-2">
 				{loading ? (
 					<OrbLoader />
 				) : (
-					<Wand2 className="mr-3 h-5 w-5 shrink-0 text-muted-foreground" />
+					<Wand2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
 				)}
-				<div className="relative min-w-0 flex-1">
+				<div className="relative flex min-w-0 flex-1 items-center">
 					{loading ? (
 						<LoadingText />
 					) : (
 						<>
 							{!hasText && placeholderOverlay && (
-								<div className=" pointer-events-none absolute inset-0 flex items-center overflow-hidden text-sm">
+								<div className=" pointer-events-none absolute inset-0 flex items-center overflow-hidden text-xs">
 									{placeholderOverlay}
 								</div>
 							)}
@@ -87,7 +87,7 @@ export default function InlineCopilot({
 								onChange={(e) => onValueChange(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 								placeholder={placeholderText}
-								className=" w-full bg-transparent text-sm text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+								className=" w-full bg-transparent font-body text-label text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 							/>
 						</>
 					)}

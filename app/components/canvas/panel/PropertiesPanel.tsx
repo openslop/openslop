@@ -39,7 +39,7 @@ export function PropertiesPanel() {
 					value={transitionType}
 					onValueChange={(value) => setTransitionType(value as TransitionType)}
 				>
-					<SelectTrigger aria-label="Transition" className="h-8 text-xs">
+					<SelectTrigger size="sm" aria-label="Transition">
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
