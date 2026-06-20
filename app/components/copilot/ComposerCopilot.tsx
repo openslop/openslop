@@ -138,7 +138,7 @@ function TemplatePill({
 
 	return (
 		<span
-			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 text-sm leading-5 text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
+			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-sm leading-5 text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
 			<button
