@@ -27,12 +27,11 @@ export function createCharacterAvatarStylePlugin(projectId: string): LLMPlugin {
 					if (!character.avatarUploaded && character.appearance.trim())
 						return `- ${name}: ${character.appearance.trim()}`;
 
-					const gateway = ctx?.gateway;
-					if (!gateway)
+					if (!ctx?.gateway)
 						throw new Error(
 							"character-avatar-style plugin requires gateway context",
 						);
-					const { text } = await gateway.generate({
+					const { text } = await ctx.gateway.generate({
 						prompt: dedent`Concisely describe the visual appearance of the character in the attached reference image in a short sentence. Focus on gender, ethnicity, face, hair, body type, art style, and any distinctive features. Do not describe the background.`,
 						referenceImages: [url],
 						maxTokens: 4096,
