@@ -51,6 +51,11 @@ describe("buildVideoLayout", () => {
 			expect(layout.totalDurationSec).toBe(0);
 			expect(layout.totalFrames).toBe(2);
 		});
+
+		it("defaults to smooth fade transitions", () => {
+			const layout = buildVideoLayout([]);
+			expect(layout.transitionType).toBe("fade");
+		});
 	});
 
 	describe("foreground elements (image, clip)", () => {

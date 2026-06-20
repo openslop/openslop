@@ -56,7 +56,7 @@ const OSML_SYSTEM_PROMPT = dedent`
 	- characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
 		<image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
   - After the metadata tags, open the story with an <image> tag that describes the image for the opening scene.
-  - Frequently change the image at least every 2 narrative lines.
+  - Change the image for every narrative line by default.
   - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
   - For example, if there is rain in the image, add the rain overlay. If there is smoke, add the smoke overlay. If there is lightning, add the lightning overlay. If there are multiple effects, add all of them.
   - Overlays should be a comma-separated list containing any of the following: ${Object.values(

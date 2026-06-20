@@ -22,4 +22,11 @@ describe("osmlPlugin", () => {
 			"ALL CAPS",
 		);
 	});
+
+	it("asks for image changes on every narrative line by default", () => {
+		const result = beforeGenerate({ prompt: "hello" });
+		expect((result as { systemPrompt: string }).systemPrompt).toContain(
+			"Change the image for every narrative line",
+		);
+	});
 });
