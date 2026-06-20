@@ -14,6 +14,7 @@ import {
 import InlineCopilot from "./copilot/InlineCopilot";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
 import { useRefineScript } from "./canvas/hooks/useRefineScript";
+import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
 
 function RefineComposer({
@@ -85,6 +86,7 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
 						)}
 						<span className="hidden sm:inline">{generateLabel}</span>
 					</Button>
+					<ExportButton />
 					{generating && (
 						<SimpleTooltip label="Cancel generation">
 							<button

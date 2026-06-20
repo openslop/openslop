@@ -34,13 +34,13 @@ async function postJSON<T>(url: string, body: unknown): Promise<T> {
 export function useRendering() {
 	const [state, setState] = useState<RenderState>({ status: "idle" });
 
-	const render = useCallback(async (layout: VideoLayout) => {
+	const render = useCallback(async (layout: VideoLayout, scale?: number) => {
 		setState({ status: "invoking" });
 		try {
 			const { renderId, bucketName } = await postJSON<{
 				renderId: string;
 				bucketName: string;
-			}>("/api/render", { inputProps: layout });
+			}>("/api/render", { inputProps: layout, scale });
 
 			setState({ status: "rendering", renderId, bucketName, progress: 0 });
 

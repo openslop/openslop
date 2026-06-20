@@ -55,13 +55,13 @@ function PostPromptViewInner() {
 			<div className="fixed top-4 left-4 z-[100]">
 				<UserProfile />
 			</div>
-			<EditorToolbar editor={editor} />
 
 			<CanvasProviders
 				editor={editor}
 				layoutKey={layoutKey}
 				sceneIds={sceneIds}
 			>
+				<EditorToolbar editor={editor} />
 				<div className="flex min-h-0 flex-1 overflow-hidden">
 					<EditorSidebar />
 					<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">

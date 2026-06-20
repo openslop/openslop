@@ -16,6 +16,7 @@ import { COMPOSITION_ID } from "@/lib/video/types";
 
 const RenderRequest = z.object({
 	inputProps: z.record(z.string(), z.unknown()),
+	scale: z.number().positive().optional(),
 });
 
 export const POST = createSessionRouteHandler({
@@ -33,6 +34,7 @@ export const POST = createSessionRouteHandler({
 			}),
 			composition: COMPOSITION_ID,
 			inputProps: body.inputProps,
+			scale: body.scale,
 			downloadBehavior: { type: "download", fileName: "video.mp4" },
 		});
 

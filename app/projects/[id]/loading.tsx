@@ -50,12 +50,13 @@ export default function Loading() {
 				<Skeleton className="h-9 w-9 rounded-full" />
 			</div>
 
-			{/* Refine bar + generate button */}
+			{/* Refine bar + generate and export buttons */}
 			<div className="z-40 flex w-full shrink-0 items-start gap-3 px-4 py-3 pb-2 pl-16">
 				<div className="hidden flex-1 sm:block" aria-hidden />
 				<Skeleton className="h-12 min-w-0 max-w-2xl flex-1 rounded-xl" />
-				<div className="flex flex-1 justify-end">
+				<div className="flex flex-1 justify-end gap-2">
 					<Skeleton className="h-11 w-36 rounded-xl" />
+					<Skeleton className="h-11 w-28 rounded-xl" />
 				</div>
 			</div>
 

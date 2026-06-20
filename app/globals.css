@@ -115,7 +115,7 @@
 	--generate-hover: #4f4046;
 	--generate-disabled: #c9c5c9;
 	--generate-disabled-foreground: var(--grey-500);
-	--stale: #a64d78;
+	--tertiary: #a64d78;
 	--accent: var(--blurple-500);
 	--accent-foreground: #fff;
 	--accent-soft: var(--blurple-500-a);
@@ -237,7 +237,7 @@
 	--generate-hover: #a09c9e;
 	--generate-disabled: #403a3e;
 	--generate-disabled-foreground: var(--grey-500);
-	--stale: #d99bb8;
+	--tertiary: #d99bb8;
 	--accent-foreground: #fff;
 	--destructive-foreground: #fff;
 
@@ -300,7 +300,7 @@
 	--color-generate-hover: var(--generate-hover);
 	--color-generate-disabled: var(--generate-disabled);
 	--color-generate-disabled-foreground: var(--generate-disabled-foreground);
-	--color-stale: var(--stale);
+	--color-tertiary: var(--tertiary);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-accent-soft: var(--accent-soft);
