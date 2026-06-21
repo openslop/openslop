@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Download, X } from "@/components/ui/icon";
+import { CloseButton } from "@/components/ui/close-button";
+import { Download } from "@/components/ui/icon";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
@@ -65,14 +66,11 @@ export function ExportDoneToast({
 					Download
 				</a>
 			</Button>
-			<button
-				type="button"
+			<CloseButton
 				onClick={() => toast.dismiss(toastId)}
-				aria-label="Close"
-				className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-			>
-				<X size={14} />
-			</button>
+				size={14}
+				className="shrink-0"
+			/>
 		</div>
 	);
 }
