@@ -18,12 +18,16 @@ const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
 const DEFAULT_VOLUME = VOLUME_MAX;
 
+function parseFiniteNumber(value: string | undefined): number | undefined {
+	if (value == null || value.trim() === "") return undefined;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
-	return Number.isFinite(raw)
-		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
-		: DEFAULT_VOLUME;
+	const raw = parseFiniteNumber(element.customAttributes?.volume);
+	return raw == null ? DEFAULT_VOLUME : clamp(raw, VOLUME_MIN, VOLUME_MAX);
 }
 
 const LOOPS_MAX = 1000;
