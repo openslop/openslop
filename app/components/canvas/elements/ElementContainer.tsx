@@ -87,7 +87,7 @@ export function ElementContainer({
 	return (
 		<div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
 			{/* Left: element card */}
-			<div className="group/card relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
+			<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
 				<div
 					className="absolute top-2 right-2 z-20 opacity-0 pointer-events-none group-hover/card:opacity-100 group-hover/card:pointer-events-auto transition-opacity duration-200"
 					contentEditable={false}
@@ -100,9 +100,12 @@ export function ElementContainer({
 						contentEditable={false}
 					>
 						<span
-							className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${config.iconBgClass}`}
+							className={`flex h-7 shrink-0 items-center gap-1.5 rounded-lg px-1.5 ${config.iconBgClass} ${config.colorClass}`}
 						>
 							{config.icon}
+							<span className="hidden font-sans text-label-xs @sm:inline">
+								{config.label}
+							</span>
 						</span>
 						<ElementCharacters element={element} />
 						<ModelBadge element={element} />
