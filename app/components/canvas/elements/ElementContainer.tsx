@@ -100,7 +100,7 @@ export function ElementContainer({
 						contentEditable={false}
 					>
 						<span
-							className={`flex h-7 shrink-0 items-center gap-1.5 rounded-lg px-1.5 ${config.iconBgClass} ${config.colorClass}`}
+							className={`flex h-7 w-7 @sm:w-auto shrink-0 items-center justify-center @sm:justify-start gap-1.5 rounded-lg @sm:px-1.5 ${config.iconBgClass} ${config.colorClass}`}
 						>
 							{config.icon}
 							<span className="hidden font-sans text-label-xs @sm:inline">

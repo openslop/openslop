@@ -97,9 +97,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "tts",
 		outputKind: "audio",
 		label: "Narration",
-		icon: (
-			<Voice size={16} strokeWidth={1.5} className="text-media-narration" />
-		),
+		icon: <Voice size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-narration/15",
 		colorClass: "text-media-narration",
 		placeholder: "Write the narration...",
@@ -125,7 +123,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "tts",
 		outputKind: "audio",
 		label: "Character",
-		icon: <User size={16} strokeWidth={1.5} className="text-media-character" />,
+		icon: <User size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-character/15",
 		colorClass: "text-media-character",
 		placeholder: "What does this character say?",
@@ -151,9 +149,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "image",
 		outputKind: "image",
 		label: "Image",
-		icon: (
-			<ImageIcon size={16} strokeWidth={1.5} className="text-media-image" />
-		),
+		icon: <ImageIcon size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-image/15",
 		colorClass: "text-media-image",
 		placeholder: "Describe the image...",
@@ -169,9 +165,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "animated_image",
 		outputKind: "video",
 		label: "Animated image",
-		icon: (
-			<Motion size={16} strokeWidth={1.5} className="text-media-animated" />
-		),
+		icon: <Motion size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-animated/15",
 		colorClass: "text-media-animated",
 		placeholder: "Describe the still image...",
@@ -189,7 +183,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "video",
 		outputKind: "video",
 		label: "Clip",
-		icon: <Video size={16} strokeWidth={1.5} className="text-media-clip" />,
+		icon: <Video size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-clip/15",
 		colorClass: "text-media-clip",
 		placeholder: "Describe the video clip...",
@@ -210,7 +204,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "sfx",
 		outputKind: "audio",
 		label: "Sound",
-		icon: <Waveform size={16} strokeWidth={1.5} className="text-media-sound" />,
+		icon: <Waveform size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-sound/15",
 		colorClass: "text-media-sound",
 		placeholder: "Describe the sound effect...",
@@ -233,7 +227,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		connector: "music",
 		outputKind: "audio",
 		label: "Music",
-		icon: <Music size={16} strokeWidth={1.5} className="text-media-music" />,
+		icon: <Music size={16} strokeWidth={1.5} />,
 		iconBgClass: "bg-media-music/15",
 		colorClass: "text-media-music",
 		placeholder: "Describe the music...",
