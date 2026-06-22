@@ -1,7 +1,7 @@
 "use client";
 
 import type { PlayerRef } from "@remotion/player";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clamp } from "@/lib/utils";
 import type { VideoLayout } from "@/lib/video/types";
 import { usePlayerFrame } from "./usePlayerState";
@@ -45,28 +45,35 @@ export function SegmentedSeekBar({
 		[],
 	);
 
+	const scrubSegments = useMemo(
+		() =>
+			segments.map((seg) => ({
+				id: seg.sceneId,
+				basis: seg.duration / totalDurationSec,
+			})),
+		[segments, totalDurationSec],
+	);
+
+	const onHoverChange = useCallback(
+		(h: ScrubHover | null) => {
+			setHover(h);
+			if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+			if (!h) {
+				setHoverIndex(null);
+				setSettledIndex(null);
+				return;
+			}
+			const index = findSegmentIndexAt(segments, h.ratio * totalDurationSec);
+			setHoverIndex(index);
+			settleTimerRef.current = setTimeout(
+				() => setSettledIndex(index),
+				HOVER_SETTLE_MS,
+			);
+		},
+		[segments, totalDurationSec],
+	);
+
 	if (segments.length === 0) return null;
-
-	const scrubSegments = segments.map((seg) => ({
-		id: seg.sceneId,
-		basis: seg.duration / totalDurationSec,
-	}));
-
-	const onHoverChange = (h: ScrubHover | null) => {
-		setHover(h);
-		if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-		if (!h) {
-			setHoverIndex(null);
-			setSettledIndex(null);
-			return;
-		}
-		const index = findSegmentIndexAt(segments, h.ratio * totalDurationSec);
-		setHoverIndex(index);
-		settleTimerRef.current = setTimeout(
-			() => setSettledIndex(index),
-			HOVER_SETTLE_MS,
-		);
-	};
 
 	const hoverSegment = hoverIndex != null ? segments[hoverIndex] : null;
 	const thumbnailSegment =

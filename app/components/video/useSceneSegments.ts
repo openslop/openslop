@@ -29,11 +29,15 @@ export function findSegmentIndexAt(
 	timeSec: number,
 ): number {
 	if (segments.length === 0) return -1;
-	for (let i = 0; i < segments.length; i++) {
-		const seg = segments[i];
-		if (timeSec < seg.start + seg.duration) return i;
+	let lo = 0;
+	let hi = segments.length - 1;
+	while (lo < hi) {
+		const mid = Math.floor((lo + hi) / 2);
+		const seg = segments[mid];
+		if (timeSec < seg.start + seg.duration) hi = mid;
+		else lo = mid + 1;
 	}
-	return segments.length - 1;
+	return lo;
 }
 
 export function useSceneSegments(): SceneSegment[] {
