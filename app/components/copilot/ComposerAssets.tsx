@@ -13,6 +13,10 @@ interface ComposerAssetsProps {
 	onEditNarrator: () => void;
 }
 
+export function removeComposerCharacter(projectId: string, name: string) {
+	getProjectStore(projectId).getState().removeCharacter(name);
+}
+
 export function ComposerAssets({
 	uploadingCount,
 	onEditCharacter,
@@ -30,6 +34,8 @@ export function ComposerAssets({
 		getProjectStore(projectId)
 			.getState()
 			.setReferenceImages(referenceImages.filter((_, j) => j !== index));
+	const removeCharacter = (name: string) =>
+		removeComposerCharacter(projectId, name);
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
@@ -49,6 +55,7 @@ export function ComposerAssets({
 					Icon={User}
 					elementId={characterAvatarElementId(name)}
 					onEdit={() => onEditCharacter(name)}
+					onRemove={() => removeCharacter(name)}
 				/>
 			))}
 			{referenceImages.map((url, i) => (

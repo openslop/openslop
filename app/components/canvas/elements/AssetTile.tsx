@@ -28,6 +28,8 @@ export function AssetTile({
 	const initial = name?.trim().charAt(0).toUpperCase();
 	const fallbackContent =
 		fallback === "icon" || !initial ? <Icon className="h-5 w-5" /> : initial;
+	const showActions = status !== "generating";
+	const showFullRemove = onRemove && !onEdit;
 	return (
 		<div className="group/tile flex w-16 flex-col gap-1 sm:w-20">
 			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
@@ -63,7 +65,7 @@ export function AssetTile({
 						<Icon className="h-3 w-3" />
 					</div>
 				)}
-				{onEdit && status !== "generating" && (
+				{onEdit && showActions && (
 					<button
 						type="button"
 						onClick={onEdit}
@@ -73,7 +75,7 @@ export function AssetTile({
 						<Pencil className="h-3.5 w-3.5" />
 					</button>
 				)}
-				{onRemove && status !== "generating" && (
+				{showFullRemove && showActions && (
 					<button
 						type="button"
 						onClick={onRemove}
@@ -81,6 +83,16 @@ export function AssetTile({
 						className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
 					>
 						<X className="h-3.5 w-3.5" />
+					</button>
+				)}
+				{onRemove && onEdit && showActions && (
+					<button
+						type="button"
+						onClick={onRemove}
+						aria-label={`Remove ${name ?? "asset"}`}
+						className="absolute right-1 top-1 z-10 flex size-5 items-center justify-center rounded-md bg-card text-foreground opacity-0 shadow-sm ring-1 ring-border transition-opacity hover:bg-button-hover group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+					>
+						<X className="h-3 w-3" />
 					</button>
 				)}
 			</div>
