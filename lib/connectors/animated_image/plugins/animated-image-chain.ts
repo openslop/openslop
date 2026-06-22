@@ -15,6 +15,7 @@ type Stashed = {
 	videoPrompt: string;
 	videoWidth?: number;
 	videoHeight?: number;
+	duration?: number;
 };
 
 export function createVideoChainPlugin(
@@ -23,13 +24,15 @@ export function createVideoChainPlugin(
 	return {
 		name: "video-chain",
 		beforeGenerate(params, ctx) {
-			const { videoPrompt, videoWidth, videoHeight, ...rest } = params;
+			const { videoPrompt, videoWidth, videoHeight, duration, ...rest } =
+				params;
 			if (videoPrompt && ctx) {
 				ctx.data ??= {};
 				ctx.data[STASH_KEY] = {
 					videoPrompt,
 					videoWidth,
 					videoHeight,
+					duration,
 				} satisfies Stashed;
 			}
 			return rest as AnimatedImageGenerateParams;
@@ -57,6 +60,7 @@ export function createVideoChainPlugin(
 				frameImages: [result.imageUrl],
 				width: stashed.videoWidth,
 				height: stashed.videoHeight,
+				duration: stashed.duration,
 			});
 			return {
 				imageUrl: result.imageUrl,
