@@ -12,7 +12,8 @@ import { CompactElement } from "./CompactElement";
 import { SceneContainer } from "./SceneContainer";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
-import { ElementGenerateButton } from "./GenerateButton";
+import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
+import { AnimateButton } from "./AnimateButton";
 import { ModelBadge } from "./ModelBadge";
 import {
 	Popover,
@@ -122,9 +123,11 @@ export function ElementContainer({
 						</div>
 					</div>
 					<div
-						className="mt-2 flex justify-end select-none"
+						className="mt-2 flex items-center justify-end gap-2 select-none"
 						contentEditable={false}
 					>
+						<ElementStaleIndicator element={element} />
+						<AnimateButton element={element} />
 						<ElementGenerateButton element={element} />
 					</div>
 				</div>

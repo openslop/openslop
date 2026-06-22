@@ -8,6 +8,7 @@ import { RenderProvider } from "../video/RenderProvider";
 import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
+import { RefineProvider } from "./RefineProvider";
 
 /**
  * Composes the editor's canvas-scoped providers (render, video layout, player
@@ -32,7 +33,7 @@ export function CanvasProviders({
 					<ActiveSceneProvider>
 						<AutoScrollProvider>
 							<ViewModeProvider sceneIds={sceneIds}>
-								{children}
+								<RefineProvider editor={editor}>{children}</RefineProvider>
 							</ViewModeProvider>
 						</AutoScrollProvider>
 					</ActiveSceneProvider>

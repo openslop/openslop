@@ -22,8 +22,8 @@ const snapshot = (
 const result = { url: "x", durationSec: 0 };
 
 describe("isStaleResult", () => {
-	it("is true when no result has been produced yet", () => {
-		expect(isStaleResult(snapshot(), inputs("anything"))).toBe(true);
+	it("is false when no result has been produced yet", () => {
+		expect(isStaleResult(snapshot(), inputs("anything"))).toBe(false);
 	});
 
 	it("is true when resultInputs is null even if a result exists", () => {

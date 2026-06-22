@@ -13,21 +13,19 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import InlineCopilot from "./copilot/InlineCopilot";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
-import { useRefineScript } from "./canvas/hooks/useRefineScript";
+import { useRefine } from "./canvas/RefineProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
 
 function RefineComposer({
-	editor,
 	loading,
 	onStop,
 }: {
-	editor: Editor;
 	loading: boolean;
 	onStop: () => void;
 }) {
 	const [value, setValue] = useState("");
-	const { refineScript, refineLoading, stopRefine } = useRefineScript(editor);
+	const { refineScript, refineLoading, stopRefine } = useRefine();
 	return (
 		<InlineCopilot
 			value={value}
@@ -64,11 +62,7 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
 			<div className="flex w-full items-center gap-3">
 				<div className="hidden flex-1 sm:block" aria-hidden />
 				<div className="min-w-0 max-w-2xl flex-1">
-					<RefineComposer
-						editor={editor}
-						loading={loading}
-						onStop={stopGeneration}
-					/>
+					<RefineComposer loading={loading} onStop={stopGeneration} />
 				</div>
 				<div className="flex flex-1 items-center justify-end gap-2 max-sm:flex-none">
 					<Button

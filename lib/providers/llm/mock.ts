@@ -2,6 +2,7 @@ import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
+import { matchAnimateImagePrompt } from "@/lib/script/refine/animatePrompt";
 import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
 
@@ -196,6 +197,10 @@ function mockResponse(params: LLMGenerateParams): string {
 }
 
 function buildRefineResponse(params: LLMGenerateParams): string {
+	const animateId = matchAnimateImagePrompt(params.prompt);
+	if (animateId) {
+		return `{"op":"set","id":"${animateId}","type":"animated_image","attrs":{"videoPrompt":"slow cinematic push-in with gentle parallax","motion":"kenBurnsIn"}}`;
+	}
 	const ids = extractIds(params.prompt);
 	const factory = pickRandom(MOCK_REFINEMENTS);
 	return factory(ids);
