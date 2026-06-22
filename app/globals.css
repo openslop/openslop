@@ -9,7 +9,7 @@
 	@apply outline-none focus-visible:ring-2 focus-visible:ring-ring;
 }
 
-/* Raw palette ramps (warm, Descript-derived). Ramps flip in .dark so semantic
+/* Raw palette ramps. Ramps flip in .dark so semantic
    tokens that reference them adapt automatically. */
 :root {
 	--grey-0: #fff;
@@ -79,11 +79,11 @@
 	--foreground: var(--grey-900);
 	--foreground-secondary: var(--grey-600);
 	--surface-recessed: #f3f1f0;
-	--surface-elevated: #fff;
+	--surface-elevated: #fdfcfc;
 	--card: #fff;
 	--card-foreground: var(--grey-900);
 	--popover: #fff;
-	--popover-foreground: var(--grey-900);
+	--popover-foreground: var(--grey-800);
 	--primary: var(--grey-900);
 	--primary-foreground: var(--grey-0);
 	--secondary: var(--grey-50);
@@ -417,7 +417,7 @@
 	opacity: var(--grain-bg-opacity);
 }
 
-/* Canvas/gallery background — a repeating "+" dot grid (Descript-style). A 6px
+/* Canvas/gallery background — a repeating "+" dot grid. A 6px
    SVG tile painted as a background-image (behind content, no content clipping),
    with a theme-flipped cross color via the .dark override. */
 .dot-grid-bg {

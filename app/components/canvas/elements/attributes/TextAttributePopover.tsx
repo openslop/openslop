@@ -102,9 +102,7 @@ export function TextAttributePopover({
 					}}
 					className="w-full resize-none rounded-lg border border-border bg-card px-2 py-1.5 font-body text-label text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
 				/>
-				<div className="mt-1 px-1 text-badge text-muted-foreground">
-					⌘↵ to save · esc to cancel
-				</div>
+				<div className="mt-1 px-1 text-badge">⌘↵ to save · esc to cancel</div>
 			</PopoverContent>
 		</Popover>
 	);

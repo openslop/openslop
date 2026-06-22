@@ -59,7 +59,7 @@ export function ExportButton() {
 				align="end"
 				side="top"
 				sideOffset={8}
-				className="w-80 p-3 font-medium bg-surface-elevated"
+				className="w-80 p-3 font-medium"
 			>
 				<div className="flex items-center justify-between">
 					<span className="text-xs font-semibold">Export</span>
@@ -67,7 +67,7 @@ export function ExportButton() {
 						type="button"
 						onClick={() => setOpen(false)}
 						aria-label="Close"
-						className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+						className="rounded-md p-1 transition-colors hover:bg-muted hover:text-foreground"
 					>
 						<X size={16} />
 					</button>
@@ -97,7 +97,7 @@ export function ExportButton() {
 				{state.status === "done" && (
 					<div className="flex animate-in flex-col gap-3 fade-in">
 						<div className="flex items-center justify-between text-xs">
-							<span className="text-muted-foreground">Size</span>
+							<span>Size</span>
 							<span className="font-mono tabular-nums">
 								{formatBytes(state.size)}
 							</span>
@@ -111,7 +111,7 @@ export function ExportButton() {
 						<button
 							type="button"
 							onClick={reset}
-							className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+							className="text-xs transition-colors hover:text-foreground"
 						>
 							Export again
 						</button>

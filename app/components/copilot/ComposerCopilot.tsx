@@ -108,7 +108,7 @@ function AttachMenu({
 		<ActionMenu
 			items={items}
 			contentClassName="min-w-36 p-0.5"
-			itemClassName="rounded-lg text-label-xs text-muted-foreground"
+			itemClassName="rounded-lg text-label-xs"
 		>
 			<button
 				type="button"
@@ -250,6 +250,7 @@ export default function ComposerCopilot({
 								}
 							}}
 							options={MODE_OPTIONS}
+							itemClassName="rounded-lg text-label-xs"
 						>
 							<PillTrigger
 								aria-label="Composer mode"
@@ -264,6 +265,7 @@ export default function ComposerCopilot({
 									.updateMetadata({ videoSettings: { aspectRatio: next } });
 							}}
 							options={ASPECT_RATIO_OPTIONS}
+							itemClassName="rounded-lg text-label-xs"
 						>
 							<PillTrigger
 								aria-label="Aspect ratio"
@@ -279,6 +281,7 @@ export default function ComposerCopilot({
 									applyTemplate(templateId);
 								}}
 								options={TEMPLATE_OPTIONS}
+								itemClassName="rounded-lg text-label-xs"
 							>
 								<PillTrigger
 									aria-label="Select template"

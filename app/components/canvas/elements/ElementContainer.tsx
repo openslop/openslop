@@ -47,15 +47,11 @@ function ElementSettings({
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
-				<div className="mb-2 text-xs font-semibold text-muted-foreground">
-					Settings
-				</div>
+				<div className="mb-2 text-xs font-semibold">Settings</div>
 				<div className="flex flex-col gap-2">
 					{entries.map(([key, spec]) => (
 						<div key={key} className="flex items-center justify-between gap-3">
-							<span className="shrink-0 text-xs text-muted-foreground">
-								{spec.label}
-							</span>
+							<span className="shrink-0 text-xs">{spec.label}</span>
 							<AttributeBadge
 								element={element}
 								attrKey={key}
