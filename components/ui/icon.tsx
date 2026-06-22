@@ -80,6 +80,7 @@ export const ImagePlus = icon("add-image");
 export const Layout = icon("layout");
 export const Loader2 = icon("spinner");
 export const LogOut = icon("log-out");
+export const MagicVideo = icon("magic-video");
 export const Maximize = icon("maximize");
 export const Mic = icon("mic");
 export const Motion = icon("motion");

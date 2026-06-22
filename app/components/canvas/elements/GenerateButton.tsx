@@ -19,6 +19,16 @@ export function StaleIndicator() {
 	);
 }
 
+export function ElementStaleIndicator({
+	element,
+}: {
+	element: CanvasContentElement;
+}) {
+	const { stale } = useGenerate(element);
+	if (!stale) return null;
+	return <StaleIndicator />;
+}
+
 function generateLabel(status: GenerationStatus, hasResult: boolean) {
 	if (status === "generating") return "Generating…";
 	if (status === "queued") return "Queued";
@@ -47,6 +57,7 @@ export function GenerateButton({
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={onGenerate}
 			aria-label={label}
+			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
 		>
 			{status === "generating" ? (
 				<Spinner className="text-current" />
@@ -65,17 +76,13 @@ export function ElementGenerateButton({
 }: {
 	element: CanvasContentElement;
 }) {
-	const { hasPrompt, hasResult, stale, status, generate } =
-		useGenerate(element);
+	const { hasPrompt, hasResult, status, generate } = useGenerate(element);
 	return (
-		<div className="flex items-center gap-2">
-			{stale && hasResult && <StaleIndicator />}
-			<GenerateButton
-				status={status}
-				hasResult={hasResult}
-				disabled={!hasPrompt || status !== "idle"}
-				onGenerate={generate}
-			/>
-		</div>
+		<GenerateButton
+			status={status}
+			hasResult={hasResult}
+			disabled={!hasPrompt || status !== "idle"}
+			onGenerate={generate}
+		/>
 	);
 }

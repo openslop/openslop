@@ -104,7 +104,6 @@ function CharacterEditDialogBody({
 
 	const isStale =
 		!character.avatarUploaded &&
-		!!avatarSnapshot.result &&
 		isStaleResult(
 			avatarSnapshot,
 			getGenerationInputs(

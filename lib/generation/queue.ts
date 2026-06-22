@@ -28,11 +28,8 @@ export function isStaleResult(
 	snapshot: ElementSnapshot,
 	currentInputs: GenerationInputs,
 ): boolean {
-	return (
-		!isActive(snapshot.status) &&
-		(isNil(snapshot.resultInputs) ||
-			!isEqual(currentInputs, snapshot.resultInputs))
-	);
+	if (isNil(snapshot.result)) return false;
+	return !isEqual(currentInputs, snapshot.resultInputs);
 }
 
 export type GenerationJob = {
