@@ -465,7 +465,7 @@ describe("API routes", () => {
 			]);
 
 			const req = makeRequest(
-				"/api/v1/tts/voices?query=english",
+				"/api/v1/tts/voices?query=english&limit=5",
 				undefined,
 				"GET",
 			);
@@ -475,6 +475,47 @@ describe("API routes", () => {
 			expect(res.status).toBe(200);
 			expect(json.voices).toHaveLength(1);
 			expect(json.voices[0].name).toBe("Voice 1");
+			expect(mockTTSSearch).toHaveBeenCalledWith({
+				query: "english",
+				limit: 5,
+			});
+		});
+
+		it("returns 400 for blank voice search limit", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+
+			const req = makeRequest("/api/v1/tts/voices?limit=+", undefined, "GET");
+			const res = await GET(req);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("must be a finite number");
+			expect(mockTTSSearch).not.toHaveBeenCalled();
+		});
+
+		it("returns 400 for malformed voice search limit", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+
+			const req = makeRequest(
+				"/api/v1/tts/voices?limit=not-a-number",
+				undefined,
+				"GET",
+			);
+			const res = await GET(req);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("must be a finite number");
+			expect(mockTTSSearch).not.toHaveBeenCalled();
+		});
+
+		it("returns 400 for non-positive voice search limit", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+
+			const req = makeRequest("/api/v1/tts/voices?limit=0", undefined, "GET");
+			const res = await GET(req);
+
+			expect(res.status).toBe(400);
+			expect((await res.json()).error).toContain("must be positive");
+			expect(mockTTSSearch).not.toHaveBeenCalled();
 		});
 
 		it("returns 500 on error", async () => {
