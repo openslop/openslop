@@ -1,5 +1,5 @@
 import dedent from "dedent";
-import { CANVAS_ELEMENT_TYPES } from "@/lib/canvas/types";
+import { CANVAS_ELEMENT_TYPES, DURATION_OPTIONS } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import type { LLMPlugin } from "@/lib/connectors/types";
@@ -36,10 +36,10 @@ const REFINE_SYSTEM_PROMPT = dedent`
   - **narration**: emotion, captions (on | off)
   - **character**: name, emotion, captions (on | off)
   - **image**: overlays, motion (${MOTION_EFFECTS.join(" | ")})
-  - **animated_image**: videoPrompt (camera/subject motion description), overlays, motion (${MOTION_EFFECTS.join(" | ")})
+  - **animated_image**: videoPrompt (camera/subject motion description), duration (${DURATION_OPTIONS.join(" | ")}), overlays, motion (${MOTION_EFFECTS.join(" | ")})
   - **sound**: loops (number, default 1)
   - **music**: length (${vals(MusicLength)}), loops (number, default 1)
-  - **clip**: duration (in seconds), volume (0-10), motion (${MOTION_EFFECTS.join(" | ")})
+  - **clip**: duration (${DURATION_OPTIONS.join(" | ")}), volume (0-10), motion (${MOTION_EFFECTS.join(" | ")})
   - All non-null attributes should be strings
 
   ## Rules

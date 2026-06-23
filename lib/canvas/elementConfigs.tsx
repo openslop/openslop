@@ -8,7 +8,11 @@ import {
 	Waveform,
 	type LucideIcon,
 } from "@/components/ui/icon";
-import type { CanvasElementType, ResultKind } from "@/lib/canvas/types";
+import {
+	DURATION_OPTIONS,
+	type CanvasElementType,
+	type ResultKind,
+} from "@/lib/canvas/types";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
@@ -56,7 +60,6 @@ const VOLUME_OPTIONS = [
 ] as const;
 const EMOTION_OPTIONS = Object.values(TTSEmotion);
 const CAPTIONS_OPTIONS = ["on", "off"] as const;
-const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) => String(i + 4));
 
 const volumeSpec = (color: string): AttributeSpec => ({
 	color,
