@@ -43,6 +43,7 @@ describe("createVideoChainPlugin", () => {
 				videoPrompt: "slow zoom in",
 				videoWidth: 1280,
 				videoHeight: 720,
+				duration: 8,
 			},
 			ctx,
 		)) as AnimatedImageGenerateParams;
@@ -50,6 +51,7 @@ describe("createVideoChainPlugin", () => {
 		expect(cleaned).not.toHaveProperty("videoPrompt");
 		expect(cleaned).not.toHaveProperty("videoWidth");
 		expect(cleaned).not.toHaveProperty("videoHeight");
+		expect(cleaned).not.toHaveProperty("duration");
 
 		const still = {
 			imageUrl: "https://example.com/still.png",
@@ -62,6 +64,7 @@ describe("createVideoChainPlugin", () => {
 			frameImages: ["https://example.com/still.png"],
 			width: 1280,
 			height: 720,
+			duration: 8,
 		});
 		expect(result).toEqual({
 			imageUrl: "https://example.com/still.png",

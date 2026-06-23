@@ -56,6 +56,7 @@ const VOLUME_OPTIONS = [
 ] as const;
 const EMOTION_OPTIONS = Object.values(TTSEmotion);
 const CAPTIONS_OPTIONS = ["on", "off"] as const;
+const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) => String(i + 4));
 
 const volumeSpec = (color: string): AttributeSpec => ({
 	color,
@@ -73,6 +74,12 @@ const motionSpec = (color: string): AttributeSpec => ({
 	color,
 	label: "Motion",
 	edit: { kind: "enum", options: MOTION_EFFECTS },
+});
+
+const durationSpec = (color: string): AttributeSpec => ({
+	color,
+	label: "Duration",
+	edit: { kind: "enum", options: DURATION_OPTIONS },
 });
 
 const captionsSpec = (color: string): AttributeSpec => ({
@@ -172,9 +179,11 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		defaultAttributes: {
 			motion: "none",
 			videoPrompt: "slow cinematic pan",
+			duration: "5",
 		},
 		visibleAttributes: {
 			videoPrompt: videoPromptSpec("bg-fuchsia-500"),
+			duration: durationSpec("bg-fuchsia-500"),
 			motion: motionSpec("bg-fuchsia-500"),
 		},
 	},
@@ -194,7 +203,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			motion: "none",
 		},
 		visibleAttributes: {
-			duration: { color: "bg-indigo-500", label: "Duration" },
+			duration: durationSpec("bg-indigo-500"),
 			volume: volumeSpec("bg-indigo-500"),
 			motion: motionSpec("bg-indigo-500"),
 		},
