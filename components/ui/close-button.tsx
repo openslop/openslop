@@ -3,11 +3,14 @@ import { X } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 export function CloseButton({
+	size = 16,
 	className,
+	ref,
 	...props
-}: React.ComponentProps<"button">) {
+}: React.ComponentProps<"button"> & { size?: number }) {
 	return (
 		<button
+			ref={ref}
 			type="button"
 			aria-label="Close"
 			className={cn(
@@ -16,7 +19,7 @@ export function CloseButton({
 			)}
 			{...props}
 		>
-			<X size={16} />
+			<X size={size} />
 		</button>
 	);
 }

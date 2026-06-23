@@ -229,9 +229,10 @@ function CharacterEditDialogBody({
 			<DialogFooter className="shrink-0">
 				<Button
 					type="button"
-					variant="destructive"
+					variant={confirmDelete ? "destructive" : "outline"}
 					size="sm"
 					onClick={handleDelete}
+					className={confirmDelete ? undefined : "text-muted-foreground"}
 				>
 					<Trash2 strokeWidth={1.5} />
 					{confirmDelete ? "Confirm delete" : "Delete"}

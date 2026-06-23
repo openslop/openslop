@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { X } from "@/components/ui/icon";
+import { CloseButton } from "@/components/ui/close-button";
 
 import { cn } from "@/lib/utils";
 
@@ -98,11 +98,8 @@ function DialogContent({
 					{children}
 				</div>
 				{showCloseButton && (
-					<DialogPrimitive.Close
-						className="absolute right-4 top-4 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-ring"
-						aria-label="Close"
-					>
-						<X className="h-4 w-4" />
+					<DialogPrimitive.Close asChild>
+						<CloseButton className="absolute right-4 top-4 z-10" />
 					</DialogPrimitive.Close>
 				)}
 			</DialogPrimitive.Content>
