@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ImagePlus, Loader2, Trash2, X } from "@/components/ui/icon";
+import { ImagePlus, Loader2, Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import { CloseButton } from "@/components/ui/close-button";
 import { IconButton } from "@/components/ui/icon-button";
 import {
 	DialogContent,
@@ -144,14 +145,10 @@ function CharacterEditDialogBody({
 			onEscapeKeyDown={interceptClose}
 			onInteractOutside={interceptClose}
 		>
-			<button
-				type="button"
+			<CloseButton
 				onClick={requestClose}
-				aria-label="Close"
-				className="absolute right-3 top-3 z-10 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
-			>
-				<X className="h-4 w-4" />
-			</button>
+				className="absolute right-3 top-3 z-10"
+			/>
 			<DialogHeader className="shrink-0">
 				<DialogTitle>{name}</DialogTitle>
 				<DialogDescription>
@@ -230,18 +227,15 @@ function CharacterEditDialogBody({
 			</div>
 
 			<DialogFooter className="shrink-0">
-				<button
+				<Button
 					type="button"
+					variant="destructive"
+					size="sm"
 					onClick={handleDelete}
-					className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-label transition-colors ${
-						confirmDelete
-							? "border-rose-500/60 bg-rose-500/20 text-rose-200 hover:bg-rose-500/30"
-							: "border-border bg-card text-muted-foreground hover:bg-muted"
-					}`}
 				>
-					<Trash2 className="h-3 w-3" />
+					<Trash2 strokeWidth={1.5} />
 					{confirmDelete ? "Confirm delete" : "Delete"}
-				</button>
+				</Button>
 			</DialogFooter>
 
 			<StaleAvatarCloseDialog
