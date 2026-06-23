@@ -22,6 +22,10 @@ export const CANVAS_ELEMENT_TYPES = new Set<CanvasElementType>([
 	"music",
 ]);
 
+export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
+	String(i + 4),
+);
+
 export const SCENE_TYPE = "scene" as const;
 
 export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set([
