@@ -7,6 +7,7 @@ export interface InsertOption<K extends string = string> {
 	label: string;
 	icon: React.ReactNode;
 	iconBgClass: string;
+	colorClass: string;
 }
 
 interface SortableActionsProps<K extends string> {
@@ -31,7 +32,7 @@ export function SortableActions<K extends string>({
 						label: option.label,
 						icon: (
 							<span
-								className={`${option.iconBgClass} mr-1 inline-flex size-7 items-center justify-center rounded-lg`}
+								className={`${option.iconBgClass} ${option.colorClass} mr-1 inline-flex size-6 items-center justify-center rounded-md`}
 							>
 								{option.icon}
 							</span>
@@ -39,7 +40,7 @@ export function SortableActions<K extends string>({
 						onSelect: () => onInsert(option.key),
 					}))}
 					contentClassName="w-40"
-					itemClassName="rounded-lg py-2 text-muted-foreground"
+					itemClassName="rounded-lg py-1"
 					onOpenChange={onMenuOpenChange}
 				>
 					<button

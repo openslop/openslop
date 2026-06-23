@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, X } from "@/components/ui/icon";
+import { Download } from "@/components/ui/icon";
+import { CloseButton } from "@/components/ui/close-button";
 import {
 	Popover,
 	PopoverAnchor,
@@ -63,14 +64,7 @@ export function ExportButton() {
 			>
 				<div className="flex items-center justify-between">
 					<span className="text-xs font-semibold">Export</span>
-					<button
-						type="button"
-						onClick={() => setOpen(false)}
-						aria-label="Close"
-						className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-					>
-						<X size={16} />
-					</button>
+					<CloseButton onClick={() => setOpen(false)} />
 				</div>
 				<Separator className="-mx-3 my-2 data-[orientation=horizontal]:w-[calc(100%+1.5rem)]" />
 
@@ -97,7 +91,7 @@ export function ExportButton() {
 				{state.status === "done" && (
 					<div className="flex animate-in flex-col gap-3 fade-in">
 						<div className="flex items-center justify-between text-xs">
-							<span className="text-muted-foreground">Size</span>
+							<span>Size</span>
 							<span className="font-mono tabular-nums">
 								{formatBytes(state.size)}
 							</span>
@@ -111,7 +105,7 @@ export function ExportButton() {
 						<button
 							type="button"
 							onClick={reset}
-							className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+							className="text-xs transition-colors hover:text-foreground"
 						>
 							Export again
 						</button>

@@ -22,7 +22,7 @@ export function CompactElement({
 			{...attributes}
 		>
 			<span
-				className="flex items-center gap-1 rounded-md bg-muted px-1 py-0.5"
+				className={`flex items-center gap-1 rounded-md bg-muted px-1 py-0.5 ${config.colorClass}`}
 				contentEditable={false}
 			>
 				{config.icon}

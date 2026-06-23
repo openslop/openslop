@@ -24,6 +24,7 @@ export function SelectMenu<T extends string>({
 	side = "bottom",
 	align = "start",
 	contentClassName,
+	itemClassName,
 }: {
 	value: T;
 	onChange: (value: T) => void;
@@ -32,6 +33,7 @@ export function SelectMenu<T extends string>({
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
 	contentClassName?: string;
+	itemClassName?: string;
 }) {
 	return (
 		<DropdownMenu modal={false}>
@@ -45,7 +47,7 @@ export function SelectMenu<T extends string>({
 					<DropdownMenuItem
 						key={option.value}
 						onSelect={() => onChange(option.value)}
-						className="cursor-pointer py-1 text-label text-muted-foreground"
+						className={cn("cursor-pointer py-1 text-label", itemClassName)}
 					>
 						<span className="flex w-3.5 shrink-0 items-center justify-center">
 							{option.value === value && (

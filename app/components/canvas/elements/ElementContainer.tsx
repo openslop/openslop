@@ -48,15 +48,11 @@ function ElementSettings({
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
-				<div className="mb-2 text-xs font-semibold text-muted-foreground">
-					Settings
-				</div>
+				<div className="mb-2 text-xs font-semibold">Settings</div>
 				<div className="flex flex-col gap-2">
 					{entries.map(([key, spec]) => (
 						<div key={key} className="flex items-center justify-between gap-3">
-							<span className="shrink-0 text-xs text-muted-foreground">
-								{spec.label}
-							</span>
+							<span className="shrink-0 text-xs">{spec.label}</span>
 							<AttributeBadge
 								element={element}
 								attrKey={key}
@@ -88,7 +84,7 @@ export function ElementContainer({
 	return (
 		<div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
 			{/* Left: element card */}
-			<div className="group/card relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
+			<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
 				<div
 					className="absolute top-2 right-2 z-20 opacity-0 pointer-events-none group-hover/card:opacity-100 group-hover/card:pointer-events-auto transition-opacity duration-200"
 					contentEditable={false}
@@ -101,9 +97,12 @@ export function ElementContainer({
 						contentEditable={false}
 					>
 						<span
-							className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${config.iconBgClass}`}
+							className={`flex h-6 w-6 @sm:w-auto shrink-0 items-center justify-center @sm:justify-start gap-1.5 rounded-md @sm:px-2 ${config.iconBgClass} ${config.colorClass}`}
 						>
 							{config.icon}
+							<span className="hidden font-body text-label-xs @sm:inline">
+								{config.label}
+							</span>
 						</span>
 						<ElementCharacters element={element} />
 						<ModelBadge element={element} />

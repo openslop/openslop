@@ -15,7 +15,7 @@ Global light + dark via `next-themes` (`attribute="class"`, default light, no sy
 ## Color
 
 - **Neutrals:** warm, red-tinted greys. `grey-900 #26171d` (light foreground) through `grey-0 #fff`.
-- **Surfaces:** `--background` (`#fdfcfc` light / `#150e11` dark), `--surface-recessed` (panels), `--card` / `--surface-elevated` (raised). Borders are hairline (`--border`, an alpha grey).
+- **Surfaces:** `--background` (`#f3f1f0` light / `#140e11` dark), `--surface-recessed` (panels), `--card` / `--surface-elevated` (raised, `#fdfcfc` light; popovers and select menus sit here, with `--surface-hover` for hovered controls on them). Borders are hairline (`--border`, an alpha grey).
 - **Accent — blurple** (`#6b6bcf`, focus `#a3a3ee`): focus rings, selection, links, send, and `accent` CTAs only. Disciplined, never an ambient wash.
 - **State:** `--destructive` (red), `--success` (green), `--caution` (amber).
 - **Media-type tints** (`--media-character/image/clip/animated/music/sound/narration`): used as the element-card icon color so each storyboard type reads at a glance. Brighter in dark, deeper in light.
@@ -24,7 +24,7 @@ Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-ca
 
 ## Typography
 
-UI and titles use **Sloptastic** (`--font-sans`, `.font-title`), a clean grotesque; long-form body text uses **Inter** (`--font-body`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Two display faces for marketing surfaces only: **Instrument Serif** (`--font-serif`, hero headlines) and **Sentient** (`--font-sentient`, the onboarding wordmark). Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Sloptastic 575 with tight tracking; `.font-body` = Inter 425.
+UI and titles use **Sloptastic** (`--font-sans`, `.font-title`), a clean grotesque; body text and form controls — inputs, textareas, selects, and dropdown menus — use **Inter** (`--font-body`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Two display faces for marketing surfaces only: **Instrument Serif** (`--font-serif`, hero headlines) and **Sentient** (`--font-sentient`, the onboarding wordmark). Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Sloptastic 575 with tight tracking; `.font-body` = Inter 425.
 
 The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes (the `text-label-xs` / `text-label` dense-control tiers carry a 16px line-height; the `text-body`+ tiers inherit leading — pair with `leading-*` / `font-medium` where a different line or heavier weight is wanted) — rather than hand-picking raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries.
 
