@@ -1,4 +1,5 @@
 import dedent from "dedent";
+import { DURATION_OPTIONS } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
@@ -71,6 +72,7 @@ const OSML_SYSTEM_PROMPT = dedent`
   - An <animated_image> tag is an <image> tag whose still frame is then animated by an image-to-video model. Use it for hero moments, establishing shots, or emotional beats that benefit from subtle motion. The tag body describes the still frame in the same way as an <image>; the videoPrompt attribute describes the camera/subject motion. Example:
 		<animated_image videoPrompt="slow zoom out revealing the full landscape" motion="kenBurnsIn" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
   - videoPrompt: required. A short, focused, relaxing description of the motion or camera movement (e.g. "slow cinematic pan", "gentle dolly in", "warm zoom on the character's face"). Keep it simple — one camera move per shot.
+  - duration: optional. The length of the animated clip in seconds (default 5). Allowed values: ${DURATION_OPTIONS.join(", ")}.
   - motion: optional. Same enum as for <image>. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
   - characters: optional. Same as for <image> — a comma-separated list of exact story character names appearing in the frame. Example: <animated_image videoPrompt="..." characters="Red,Granny">Red hands the basket to Granny at the cottage door.</animated_image>
   - All <image> description rules apply unchanged: write a prompt that describes the time of day, background, weather, and objects in detail. Repeat any details necessary even if they appeared in earlier prompts.
