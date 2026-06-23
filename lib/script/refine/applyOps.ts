@@ -6,6 +6,7 @@ import {
 } from "@/lib/canvas/editorOps";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { preservedAttributes } from "@/lib/canvas/preservedAttributes";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { RefineOp } from "./types";
 
@@ -83,7 +84,10 @@ function applySet(
 	let [element, path] = entry;
 
 	if (op.type && op.type !== element.type) {
-		const replacement = createCanvasNode(op.type, connectors, { id: op.id });
+		const replacement = createCanvasNode(op.type, connectors, {
+			id: op.id,
+			attrs: preservedAttributes(element, op.type),
+		});
 		Transforms.setNodes(
 			editor,
 			{ type: op.type, customAttributes: replacement.customAttributes },

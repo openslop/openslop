@@ -29,6 +29,14 @@ vi.mock("@/lib/canvas/elementConfigs", () => ({
 			defaultAttributes: undefined,
 			visibleAttributes: {},
 		},
+		animated_image: {
+			type: "animated_image",
+			connector: "animated_image",
+			outputKind: "video",
+			label: "Animated image",
+			defaultAttributes: { duration: "5" },
+			visibleAttributes: {},
+		},
 		character: {
 			type: "character",
 			connector: "tts",
@@ -119,6 +127,14 @@ function getContentIds(editor: Editor): string[] {
 		ids.push((node as CanvasContentElement).id);
 	}
 	return ids;
+}
+
+function getNode(editor: Editor, id: string): CanvasContentElement {
+	const [node] = Editor.nodes(editor, {
+		at: [],
+		match: (n) => Element.isElement(n) && n.id === id,
+	});
+	return node[0] as CanvasContentElement;
 }
 
 const ZWSP = "\u200B";
@@ -337,11 +353,7 @@ describe("applyRefineOp — set", () => {
 			connectors,
 		);
 
-		const [node] = Editor.nodes(editor, {
-			at: [],
-			match: (n) => Element.isElement(n) && n.id === "n1",
-		});
-		const el = node[0] as CanvasContentElement;
+		const el = getNode(editor, "n1");
 		expect(el.customAttributes).toEqual({
 			name: "Lyra",
 			emotion: "excited",
@@ -365,11 +377,7 @@ describe("applyRefineOp — set", () => {
 			connectors,
 		);
 
-		const [node] = Editor.nodes(editor, {
-			at: [],
-			match: (n) => Element.isElement(n) && n.id === "n1",
-		});
-		const el = node[0] as CanvasContentElement;
+		const el = getNode(editor, "n1");
 		expect(el.customAttributes).toEqual({ name: "Lyra" });
 	});
 
@@ -390,11 +398,7 @@ describe("applyRefineOp — set", () => {
 			connectors,
 		);
 
-		const [node] = Editor.nodes(editor, {
-			at: [],
-			match: (n) => Element.isElement(n) && n.id === "n1",
-		});
-		const el = node[0] as CanvasContentElement;
+		const el = getNode(editor, "n1");
 		expect(el.customAttributes).toEqual({ name: "Alice", emotion: "happy" });
 		expect(el.children.map((c) => c.text).join("")).toBe("Hello!");
 	});
@@ -410,6 +414,39 @@ describe("applyRefineOp — set", () => {
 		);
 
 		expect(getContentTexts(editor)).toEqual(["hello"]);
+	});
+
+	it("preserves shared attributes across a type change, dropping stale ones", () => {
+		const editor = makeEditor([
+			scene([
+				content("image", "n1", "a red riding hood", {
+					characters: "Red,Granny",
+					url: "https://example.com/old.png",
+					motion: "none",
+				}),
+			]),
+		]);
+
+		applyRefineOp(
+			editor,
+			{
+				op: "set",
+				id: "n1",
+				type: "animated_image",
+				attrs: { videoPrompt: "slow push-in", motion: "kenBurnsIn" },
+			},
+			{},
+			connectors,
+		);
+
+		const el = getNode(editor, "n1");
+		expect(el.type).toBe("animated_image");
+		expect(el.customAttributes).toEqual({
+			characters: "Red,Granny",
+			duration: "5",
+			videoPrompt: "slow push-in",
+			motion: "kenBurnsIn",
+		});
 	});
 });
 
