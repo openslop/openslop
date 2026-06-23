@@ -80,6 +80,7 @@
 	--foreground-secondary: var(--grey-600);
 	--surface-recessed: #f3f1f0;
 	--surface-elevated: #fdfcfc;
+	--surface-hover: #edeced;
 	--card: #fff;
 	--card-foreground: var(--grey-900);
 	--popover: #fff;
@@ -210,6 +211,7 @@
 	--background: #140e11;
 	--surface-recessed: #140e11;
 	--surface-elevated: #41393c;
+	--surface-hover: #4d4448;
 	--card: #251e21;
 	--popover: #251e21;
 	--button-hover: #372f32;
@@ -268,6 +270,7 @@
 	--color-foreground-secondary: var(--foreground-secondary);
 	--color-surface-recessed: var(--surface-recessed);
 	--color-surface-elevated: var(--surface-elevated);
+	--color-surface-hover: var(--surface-hover);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 	--color-popover: var(--popover);

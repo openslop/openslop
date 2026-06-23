@@ -67,7 +67,7 @@ export function ExportButton() {
 						type="button"
 						onClick={() => setOpen(false)}
 						aria-label="Close"
-						className="rounded-md p-1 transition-colors hover:bg-muted hover:text-foreground"
+						className="inline-flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover hover:text-foreground"
 					>
 						<X size={16} />
 					</button>

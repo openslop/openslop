@@ -59,7 +59,7 @@ function PillTrigger({
 			ref={ref}
 			type="button"
 			className={cn(
-				"inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-label text-foreground transition-colors hover:bg-button-hover",
+				"inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover",
 				className,
 			)}
 			{...props}
@@ -226,7 +226,7 @@ export default function ComposerCopilot({
 							className=" w-full resize-none bg-transparent font-body text-sm leading-5 text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !showPill && placeholderOverlay && (
-							<div className=" pointer-events-none overflow-hidden text-sm">
+							<div className="pointer-events-none overflow-hidden font-body text-sm">
 								{placeholderOverlay}
 							</div>
 						)}
