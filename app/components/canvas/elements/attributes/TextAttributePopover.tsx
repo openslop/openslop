@@ -16,7 +16,6 @@ interface TextAttributePopoverProps {
 	attrKey: string;
 	value: string;
 	label: string;
-	color: string;
 	tooltip: string;
 	placeholder?: string;
 	rows?: number;
@@ -28,7 +27,6 @@ export function TextAttributePopover({
 	attrKey,
 	value,
 	label,
-	color,
 	tooltip,
 	placeholder,
 	rows = 3,
@@ -66,7 +64,7 @@ export function TextAttributePopover({
 					type="button"
 					aria-label={tooltip}
 					title={tooltip}
-					className={`${color} text-foreground text-label px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:ring-border hover:brightness-110 transition-all`}
+					className="bg-secondary text-secondary-foreground text-label px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:bg-button-hover hover:text-foreground transition-colors"
 				>
 					<span className="truncate min-w-0">
 						{!hideLabel && (

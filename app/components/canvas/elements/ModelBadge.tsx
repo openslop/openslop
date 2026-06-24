@@ -19,7 +19,6 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 		const options =
 			connectorConfig[connector]?.[provider as ProviderKey]?.models ?? [];
 		return {
-			color: "bg-secondary",
 			label: "Model",
 			icon: Codesandbox,
 			edit: { kind: "enum", options },

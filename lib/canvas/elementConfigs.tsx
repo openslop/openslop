@@ -22,7 +22,6 @@ export type AttributeEdit =
 	| { kind: "text"; placeholder?: string; rows?: number };
 
 export interface AttributeSpec {
-	color: string;
 	label: string;
 	/** When set, the badge shows this icon in place of the text label. */
 	icon?: LucideIcon;
@@ -61,45 +60,39 @@ const VOLUME_OPTIONS = [
 const EMOTION_OPTIONS = Object.values(TTSEmotion);
 const CAPTIONS_OPTIONS = ["on", "off"] as const;
 
-const volumeSpec = (color: string): AttributeSpec => ({
-	color,
+const volumeSpec: AttributeSpec = {
 	label: "Volume",
 	edit: { kind: "enum", options: VOLUME_OPTIONS },
-});
+};
 
-const speedSpec = (color: string): AttributeSpec => ({
-	color,
+const speedSpec: AttributeSpec = {
 	label: "Speed",
 	edit: { kind: "enum", options: TTS_SPEEDS },
-});
+};
 
-const motionSpec = (color: string): AttributeSpec => ({
-	color,
+const motionSpec: AttributeSpec = {
 	label: "Motion",
 	edit: { kind: "enum", options: MOTION_EFFECTS },
-});
+};
 
-const durationSpec = (color: string): AttributeSpec => ({
-	color,
+const durationSpec: AttributeSpec = {
 	label: "Duration",
 	edit: { kind: "enum", options: DURATION_OPTIONS },
-});
+};
 
-const captionsSpec = (color: string): AttributeSpec => ({
-	color,
+const captionsSpec: AttributeSpec = {
 	label: "Captions",
 	edit: { kind: "enum", options: CAPTIONS_OPTIONS },
-});
+};
 
-const videoPromptSpec = (color: string): AttributeSpec => ({
-	color,
+const videoPromptSpec: AttributeSpec = {
 	label: "Video prompt",
 	edit: {
 		kind: "text",
 		placeholder: "Describe the camera or subject motion…",
 		rows: 3,
 	},
-});
+};
 
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	narration: {
@@ -119,13 +112,12 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		},
 		visibleAttributes: {
 			emotion: {
-				color: "bg-pink-500",
 				label: "Emotion",
 				edit: { kind: "enum", options: EMOTION_OPTIONS },
 			},
-			speed: speedSpec("bg-slate-500"),
-			volume: volumeSpec("bg-slate-500"),
-			captions: captionsSpec("bg-slate-500"),
+			speed: speedSpec,
+			volume: volumeSpec,
+			captions: captionsSpec,
 		},
 	},
 	character: {
@@ -145,13 +137,12 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		},
 		visibleAttributes: {
 			emotion: {
-				color: "bg-pink-500",
 				label: "Emotion",
 				edit: { kind: "enum", options: EMOTION_OPTIONS },
 			},
-			speed: speedSpec("bg-amber-600"),
-			volume: volumeSpec("bg-amber-600"),
-			captions: captionsSpec("bg-amber-600"),
+			speed: speedSpec,
+			volume: volumeSpec,
+			captions: captionsSpec,
 		},
 	},
 	image: {
@@ -167,7 +158,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			motion: "none",
 		},
 		visibleAttributes: {
-			motion: motionSpec("bg-cyan-500"),
+			motion: motionSpec,
 		},
 	},
 	animated_image: {
@@ -185,9 +176,9 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			duration: "5",
 		},
 		visibleAttributes: {
-			videoPrompt: videoPromptSpec("bg-fuchsia-500"),
-			duration: durationSpec("bg-fuchsia-500"),
-			motion: motionSpec("bg-fuchsia-500"),
+			videoPrompt: videoPromptSpec,
+			duration: durationSpec,
+			motion: motionSpec,
 		},
 	},
 	clip: {
@@ -206,9 +197,9 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			motion: "none",
 		},
 		visibleAttributes: {
-			duration: durationSpec("bg-indigo-500"),
-			volume: volumeSpec("bg-indigo-500"),
-			motion: motionSpec("bg-indigo-500"),
+			duration: durationSpec,
+			volume: volumeSpec,
+			motion: motionSpec,
 		},
 	},
 	sound: {
@@ -227,11 +218,10 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		},
 		visibleAttributes: {
 			loops: {
-				color: "bg-teal-500",
 				label: "Loops",
 				edit: { kind: "enum", options: LOOPS_OPTIONS },
 			},
-			volume: volumeSpec("bg-emerald-500"),
+			volume: volumeSpec,
 		},
 	},
 	music: {
@@ -249,11 +239,10 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		},
 		visibleAttributes: {
 			loops: {
-				color: "bg-violet-500",
 				label: "Loops",
 				edit: { kind: "enum", options: LOOPS_OPTIONS },
 			},
-			volume: volumeSpec("bg-violet-500"),
+			volume: volumeSpec,
 		},
 	},
 };

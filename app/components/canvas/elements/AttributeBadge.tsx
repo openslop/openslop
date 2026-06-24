@@ -67,7 +67,6 @@ export function AttributeBadge({
 				attrKey={attrKey}
 				value={value}
 				label={spec.label}
-				color={spec.color}
 				tooltip={tooltip}
 				placeholder={spec.edit.placeholder}
 				rows={spec.edit.rows}
