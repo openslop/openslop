@@ -9,7 +9,7 @@ import { usePlayerControl } from "./PlayerControlContext";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { useActiveSceneSync } from "./useActiveSceneSync";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
-import { rememberPlayerFrame, restorePlayerFrame } from "./playerFrameRestore";
+import { usePreservedPlayhead } from "./usePreservedPlayhead";
 import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
@@ -74,15 +74,7 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 		registerPlayer(player);
 		return () => registerPlayer(null);
 	}, [player, registerPlayer]);
-	useEffect(() => {
-		if (!player) return;
-
-		restorePlayerFrame(player, restoreFrameRef, layout.totalFrames);
-
-		return () => {
-			rememberPlayerFrame(player, restoreFrameRef);
-		};
-	}, [layout.totalFrames, player, restoreFrameRef]);
+	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
 	const toggleAndFlash = () => {
 		if (!player) return;
 		const willPlay = !player.isPlaying();
