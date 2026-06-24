@@ -85,6 +85,16 @@ const captionsSpec: AttributeSpec = {
 	edit: { kind: "enum", options: CAPTIONS_OPTIONS },
 };
 
+const emotionSpec: AttributeSpec = {
+	label: "Emotion",
+	edit: { kind: "enum", options: EMOTION_OPTIONS },
+};
+
+const loopsSpec: AttributeSpec = {
+	label: "Loops",
+	edit: { kind: "enum", options: LOOPS_OPTIONS },
+};
+
 const videoPromptSpec: AttributeSpec = {
 	label: "Video prompt",
 	edit: {
@@ -111,10 +121,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			captions: "on",
 		},
 		visibleAttributes: {
-			emotion: {
-				label: "Emotion",
-				edit: { kind: "enum", options: EMOTION_OPTIONS },
-			},
+			emotion: emotionSpec,
 			speed: speedSpec,
 			volume: volumeSpec,
 			captions: captionsSpec,
@@ -136,10 +143,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			captions: "on",
 		},
 		visibleAttributes: {
-			emotion: {
-				label: "Emotion",
-				edit: { kind: "enum", options: EMOTION_OPTIONS },
-			},
+			emotion: emotionSpec,
 			speed: speedSpec,
 			volume: volumeSpec,
 			captions: captionsSpec,
@@ -217,10 +221,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			volume: "2",
 		},
 		visibleAttributes: {
-			loops: {
-				label: "Loops",
-				edit: { kind: "enum", options: LOOPS_OPTIONS },
-			},
+			loops: loopsSpec,
 			volume: volumeSpec,
 		},
 	},
@@ -238,10 +239,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 			volume: "2",
 		},
 		visibleAttributes: {
-			loops: {
-				label: "Loops",
-				edit: { kind: "enum", options: LOOPS_OPTIONS },
-			},
+			loops: loopsSpec,
 			volume: volumeSpec,
 		},
 	},
