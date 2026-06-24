@@ -2,13 +2,14 @@
 
 import type { PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
-import { useEffect, useState, type Ref } from "react";
+import { useEffect, useState, type MutableRefObject, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import { usePlayerControl } from "./PlayerControlContext";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { useActiveSceneSync } from "./useActiveSceneSync";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
+import { usePreservedPlayhead } from "./usePreservedPlayhead";
 import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
@@ -50,7 +51,12 @@ const RemotionPlayer = dynamic(
 	{ ssr: false },
 );
 
-export function VideoPreview({ layout }: { layout: VideoLayout }) {
+type VideoPreviewProps = {
+	layout: VideoLayout;
+	restoreFrameRef: MutableRefObject<number | null>;
+};
+
+export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const segments = useSceneSegments();
 	const activeIndex = usePlayerValue(
@@ -68,6 +74,7 @@ export function VideoPreview({ layout }: { layout: VideoLayout }) {
 		registerPlayer(player);
 		return () => registerPlayer(null);
 	}, [player, registerPlayer]);
+	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
 	const toggleAndFlash = () => {
 		if (!player) return;
 		const willPlay = !player.isPlaying();

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useLayout } from "./VideoLayoutContext";
 import { VideoPreview } from "./VideoPreview";
@@ -9,6 +10,7 @@ import { PlayerShimmer } from "./PlayerShimmer";
 function VideoPanelBody() {
 	const { layout, ready, playerKey } = useLayout();
 	const { loading: scriptLoading } = useScriptControl();
+	const restoreFrameRef = useRef<number | null>(null);
 
 	if (scriptLoading) {
 		return (
@@ -25,7 +27,13 @@ function VideoPanelBody() {
 		);
 	}
 	if (!ready) return <QueueProgressBar />;
-	return <VideoPreview key={playerKey} layout={layout} />;
+	return (
+		<VideoPreview
+			key={playerKey}
+			layout={layout}
+			restoreFrameRef={restoreFrameRef}
+		/>
+	);
 }
 
 export function VideoPanel() {
