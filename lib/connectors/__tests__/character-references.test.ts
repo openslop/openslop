@@ -48,7 +48,7 @@ describe("character-references plugin", () => {
 		});
 
 		expect(result).toEqual({
-			prompt: "Red meets Granny",
+			prompt: "Red meets Granny. No nameplates",
 			referenceImages: ["https://img/red.png", "https://img/granny.png"],
 		});
 	});
@@ -85,7 +85,7 @@ describe("character-references plugin", () => {
 		});
 
 		expect(result).toEqual({
-			prompt: "Hello",
+			prompt: "Hello. No nameplates",
 			referenceImages: ["https://img/alice.png", "https://img/bob.png"],
 		});
 	});
@@ -102,7 +102,7 @@ describe("character-references plugin", () => {
 		});
 
 		expect(result).toEqual({
-			prompt: "Hello",
+			prompt: "Hello. No nameplates",
 			referenceImages: ["https://img/alice.png"],
 		});
 	});
@@ -118,7 +118,7 @@ describe("character-references plugin", () => {
 		});
 
 		expect(result).toEqual({
-			prompt: "Hello",
+			prompt: "Hello. No nameplates",
 			referenceImages: ["https://img/alice.png"],
 		});
 	});

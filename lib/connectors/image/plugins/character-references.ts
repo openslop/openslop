@@ -19,9 +19,12 @@ export function createCharacterReferencesPlugin(
 				.map((name) => chars[name]?.avatarUrl)
 				.filter(Boolean);
 
+			if (referenceImages.length === 0) return rest;
+
 			return {
 				...rest,
-				...(referenceImages.length > 0 && { referenceImages }),
+				prompt: `${rest.prompt}. No nameplates`,
+				referenceImages,
 			};
 		},
 	};
