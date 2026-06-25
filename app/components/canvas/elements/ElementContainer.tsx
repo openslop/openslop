@@ -93,7 +93,7 @@ export function ElementContainer({
 				</div>
 				<div className="relative z-10 min-w-0">
 					<div
-						className="flex items-center gap-1.5 mb-2 flex-wrap select-none"
+						className="flex items-center gap-1.5 mb-2 pr-9 flex-wrap select-none"
 						contentEditable={false}
 					>
 						<span
