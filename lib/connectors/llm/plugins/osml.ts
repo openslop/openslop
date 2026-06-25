@@ -79,19 +79,18 @@ const OSML_SYSTEM_PROMPT = dedent`
   - Use <animated_image> sparingly — mostly at intro shots and hero moments. Default to <image> for typical scenes; image-to-video generation is significantly slower and more expensive.
 
   ### Sound XML Tags
-  - Frequently break up character (including narration) dialogue to insert <sound> tags (as if prompting a sound model) that should accompany a scene.
+  - Frequently insert <sound> tags (as if prompting a sound model) that should accompany a scene before the relevant dialogue (character or narration).
   - The descriptions within <sound> tags should be common, simple, short, clear ASMR pleasing sound descriptions like rain, wind, fire crackling, footsteps, etc.
   - The optional loops attribute is an integer (default 1) that controls how many times the generated sound clip plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
-    <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
     <sound loops="4">Wind</sound>
-    <narration emotion="alarmed">Suddenly, they heard a tiger roar in the distance.</narration>
+    <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
     <sound>Tiger roar</sound>
-  - One-shot sound tags should be placed right after the narrative prose that describes the sound. Example:
-    <narration emotion="calm">Hana slowly walks into the room</narration>
+    <narration emotion="alarmed">Suddenly, they heard a tiger roar in the distance.</narration>
+  - One-shot sound tags should be placed right before the narrative prose that describes the sound. Example:
     <sound>footsteps</sound>
-    <narration emotion="calm">and opens the door</narration>
+    <narration emotion="calm">Hana slowly walks into the room</narration>
     <sound>door creaks</sound>
-  - Sounds should be subtle, pleasing background sounds like rain, wind, fire crackling, ocean waves, forest birds, river flowing, coffee shop ambient noise, etc.
+    <narration emotion="calm">and opens the door</narration>
   - Sounds should NEVER be vocal (no sighing, no gasping, no moaning, no laughter, no crying, etc)
 
   ### Music XML Tags
