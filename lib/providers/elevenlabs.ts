@@ -9,6 +9,12 @@ type AudioResult = {
 	data: ArrayBuffer;
 } & WithMetadata;
 
+export const ELEVENLABS_AUDIO_FORMAT: AudioFormat = {
+	codec: "mp3",
+	sampleRate: 44100,
+	bitrateKbps: 128,
+};
+
 export function toElevenLabsOutputFormat(
 	format: AudioFormat,
 ): AllowedOutputFormats {

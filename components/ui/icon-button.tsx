@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export const IconButton = React.forwardRef<
@@ -19,5 +20,20 @@ export const IconButton = React.forwardRef<
 		>
 			{children}
 		</button>
+	);
+});
+
+/** An {@link IconButton} wrapped in a tooltip. `ariaLabel` defaults to `label`. */
+export const TooltipIconButton = React.forwardRef<
+	HTMLButtonElement,
+	Omit<React.ComponentProps<typeof IconButton>, "ariaLabel"> & {
+		label: string;
+		ariaLabel?: string;
+	}
+>(function TooltipIconButton({ label, ariaLabel, ...props }, ref) {
+	return (
+		<SimpleTooltip label={label}>
+			<IconButton ref={ref} ariaLabel={ariaLabel ?? label} {...props} />
+		</SimpleTooltip>
 	);
 });

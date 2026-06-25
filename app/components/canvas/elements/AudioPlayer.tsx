@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Play, Pause } from "@/components/ui/icon";
-import { IconButton } from "@/components/ui/icon-button";
-import { SimpleTooltip } from "@/components/ui/tooltip";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
 import { formatTime } from "@/lib/video/timestamps";
 import { usePreviewCache } from "../PreviewCacheContext";
@@ -17,19 +16,13 @@ export function AudioPlayer({ src }: { src: string }) {
 
 	return (
 		<>
-			<SimpleTooltip label={playing ? "Pause" : "Play"}>
-				<IconButton
-					ariaLabel={playing ? "Pause" : "Play"}
-					onClick={() => waveformRef.current?.toggle()}
-					disabled={duration === 0}
-				>
-					{playing ? (
-						<Pause className="h-4 w-4" />
-					) : (
-						<Play className="h-4 w-4" />
-					)}
-				</IconButton>
-			</SimpleTooltip>
+			<TooltipIconButton
+				label={playing ? "Pause" : "Play"}
+				onClick={() => waveformRef.current?.toggle()}
+				disabled={duration === 0}
+			>
+				{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+			</TooltipIconButton>
 			<Waveform
 				ref={waveformRef}
 				src={src}

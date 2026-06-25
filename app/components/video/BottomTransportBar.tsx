@@ -1,8 +1,7 @@
 "use client";
 
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
-import { IconButton } from "@/components/ui/icon-button";
-import { SimpleTooltip } from "@/components/ui/tooltip";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
@@ -19,26 +18,6 @@ import {
 	TimeDisplay,
 	VolumeControl,
 } from "./PlayerControls";
-
-function TooltipButton({
-	label,
-	onClick,
-	ariaLabel,
-	children,
-}: {
-	label: string;
-	onClick: () => void;
-	ariaLabel: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<SimpleTooltip label={label}>
-			<IconButton onClick={onClick} ariaLabel={ariaLabel}>
-				{children}
-			</IconButton>
-		</SimpleTooltip>
-	);
-}
 
 export function BottomTransportBar() {
 	const { player } = usePlayerControl();
@@ -86,16 +65,14 @@ export function BottomTransportBar() {
 				</div>
 
 				<div className="flex items-center gap-1">
-					<TooltipButton
+					<TooltipIconButton
 						label="Previous scene"
-						ariaLabel="Previous scene"
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft className="h-4 w-4" />
-					</TooltipButton>
-					<TooltipButton
+					</TooltipIconButton>
+					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
-						ariaLabel={playing ? "Pause" : "Play"}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
@@ -106,14 +83,13 @@ export function BottomTransportBar() {
 						) : (
 							<Play className="h-4 w-4" />
 						)}
-					</TooltipButton>
-					<TooltipButton
+					</TooltipIconButton>
+					<TooltipIconButton
 						label="Next scene"
-						ariaLabel="Next scene"
 						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight className="h-4 w-4" />
-					</TooltipButton>
+					</TooltipIconButton>
 				</div>
 
 				<div className="flex flex-1 items-center justify-end gap-1.5">
