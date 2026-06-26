@@ -18,20 +18,29 @@ const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
 const DEFAULT_VOLUME = VOLUME_MAX;
 
+/**
+ * Parse a persisted string attribute into a finite number, returning
+ * `undefined` for blank/whitespace/missing values so callers can apply their
+ * own default.  Avoids `Number("")` / `Number("   ")` coercing to 0.
+ */
+function parseFiniteNumber(value: string | undefined): number | undefined {
+	if (value == null || value.trim() === "") return undefined;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
-	return Number.isFinite(raw)
-		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
-		: DEFAULT_VOLUME;
+	const raw = parseFiniteNumber(element.customAttributes?.volume);
+	return raw == null ? DEFAULT_VOLUME : clamp(raw, VOLUME_MIN, VOLUME_MAX);
 }
 
 const LOOPS_MAX = 1000;
 
 /** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.loops);
-	if (!Number.isFinite(raw)) return 1;
+	const raw = parseFiniteNumber(element.customAttributes?.loops);
+	if (raw == null) return 1;
 	return clamp(Math.floor(raw), 1, LOOPS_MAX);
 }
 

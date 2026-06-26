@@ -24,7 +24,7 @@ export function createCharacterAvatarStylePlugin(projectId: string): LLMPlugin {
 			const described = await Promise.all(
 				withAvatar.map(async ({ name, character, url }) => {
 					// Reuse appearance text from generated avatars
-					if (!character.avatarUploaded && character.appearance.trim())
+					if (!character.avatarUploaded && character.appearance?.trim())
 						return `- ${name}: ${character.appearance.trim()}`;
 
 					if (!ctx?.gateway)

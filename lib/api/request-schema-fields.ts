@@ -5,7 +5,9 @@ const optionalCoercedNumber = z
 	.transform((v) =>
 		typeof v === "string" && v.trim() === "" ? NaN : Number(v),
 	)
-	.refine((v) => Number.isFinite(v), { message: "must be a finite number" })
+	.refine((v) => Number.isFinite(v) && v > 0, {
+		message: "must be a positive number",
+	})
 	.optional();
 
 export const optionalImageDimensions = {
@@ -14,7 +16,7 @@ export const optionalImageDimensions = {
 } as const;
 
 export const optionalDurationSeconds = {
-	durationSeconds: z.number().optional(),
+	durationSeconds: z.number().positive().optional(),
 } as const;
 
 export const optionalVideoDuration = {
