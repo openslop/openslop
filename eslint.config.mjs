@@ -42,6 +42,7 @@ const eslintConfig = defineConfig([
 				"warn",
 				{ argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
 			],
+			"@typescript-eslint/no-non-null-assertion": "error",
 		},
 	},
 ]);

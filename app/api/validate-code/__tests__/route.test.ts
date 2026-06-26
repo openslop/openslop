@@ -80,15 +80,15 @@ describe("POST /api/validate-code", () => {
 		expect((await res.json()).error).toContain("expired");
 	});
 
-	it("returns 401 when RPC errors out", async () => {
+	it("surfaces a 500 when the RPC errors out", async () => {
 		mockRpc.mockResolvedValue({
 			data: null,
 			error: { message: "rpc failure" },
 		});
 
 		const res = await POST(makeRequest({ code: "ABC123" }));
-		expect(res.status).toBe(401);
-		expect((await res.json()).error).toBe("Invalid access code");
+		expect(res.status).toBe(500);
+		expect((await res.json()).error).toContain("validate-code failed");
 	});
 
 	it("succeeds for valid code", async () => {

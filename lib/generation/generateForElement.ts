@@ -16,5 +16,5 @@ export async function generateForElement(
 		prompt: inputs.prompt,
 		model: job.config.defaultModel,
 		...inputs.attributes,
-	}) as Promise<AssetResult>;
+	});
 }

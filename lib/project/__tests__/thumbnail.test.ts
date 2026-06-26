@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { ConnectorType } from "@/lib/connectors/types";
+import type { AssetConnectorType } from "@/lib/connectors/types";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import { characterAvatarElementId } from "../ensureCharacterAvatars";
 import { pickThumbnailUrl } from "../thumbnail";
 
 const entry = (
 	id: string,
-	connectorType: ConnectorType | null,
+	connectorType: AssetConnectorType | null,
 	imageUrl: string | null,
 	videoUrl?: string,
 ): [string, ElementSnapshot] => [

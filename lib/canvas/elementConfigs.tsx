@@ -13,7 +13,7 @@ import {
 	type CanvasElementType,
 	type ResultKind,
 } from "@/lib/canvas/types";
-import type { ConnectorType } from "@/lib/connectors/types";
+import type { AssetConnectorType } from "@/lib/connectors/types";
 import { TTSEmotion, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 
@@ -30,7 +30,7 @@ export interface AttributeSpec {
 
 export interface ElementConfig {
 	type: CanvasElementType;
-	connector: ConnectorType;
+	connector: AssetConnectorType;
 	outputKind: ResultKind;
 	label: string;
 	icon: React.ReactNode;

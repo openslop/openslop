@@ -6,12 +6,12 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
-import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
 import {
-	FRAME_EVENTS,
-	usePlayerPlaying,
-	usePlayerValue,
-} from "./usePlayerState";
+	findSegmentIndexAt,
+	useActiveSegmentIndex,
+	useSceneSegments,
+} from "./useSceneSegments";
+import { usePlayerPlaying } from "./usePlayerState";
 import { SegmentedSeekBar } from "./SegmentedSeekBar";
 import {
 	FullscreenButton,
@@ -46,15 +46,7 @@ export function BottomTransportBar() {
 	const { layout } = useLayout();
 	const segments = useSceneSegments();
 	const playing = usePlayerPlaying(player);
-	const activeIndex = usePlayerValue(
-		player,
-		FRAME_EVENTS,
-		(p) =>
-			layout
-				? findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps)
-				: -1,
-		-1,
-	);
+	const activeIndex = useActiveSegmentIndex(player, segments, layout?.fps);
 
 	const ready = Boolean(player && layout && segments.length > 0);
 

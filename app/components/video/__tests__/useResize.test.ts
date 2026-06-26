@@ -24,8 +24,12 @@ function createHost() {
 	return {
 		listeners,
 		addEventListener(type: string, listener: (ev: MouseEvent) => void) {
-			if (!listeners.has(type)) listeners.set(type, new Set());
-			listeners.get(type)!.add(listener);
+			let set = listeners.get(type);
+			if (!set) {
+				set = new Set();
+				listeners.set(type, set);
+			}
+			set.add(listener);
 		},
 		removeEventListener(type: string, listener: (ev: MouseEvent) => void) {
 			listeners.get(type)?.delete(listener);

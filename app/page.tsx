@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
-import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import OnboardingCard from "./components/OnboardingCard";
+import { AuthFooterLink } from "./components/AuthFooterLink";
 import AccessCodeInput from "./components/AccessCodeInput";
 import ProjectsList from "./components/projects/ProjectsList";
 import { Button } from "@/components/ui/button";
@@ -51,15 +51,11 @@ export default async function Home() {
 				</div>
 			}
 			footer={
-				<>
-					Already have an account?{" "}
-					<Link
-						href="/login"
-						className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
-					>
-						Login
-					</Link>
-				</>
+				<AuthFooterLink
+					prompt="Already have an account?"
+					href="/login"
+					label="Login"
+				/>
 			}
 		>
 			<p className="text-sm font-medium text-muted-foreground">

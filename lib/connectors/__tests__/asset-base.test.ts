@@ -26,7 +26,9 @@ function makeGateway(
 			return { jobId: r.jobId, status: r.status };
 		},
 		poll: async (): Promise<JobPoll> => {
-			const r = await generate.mock.results[0]!.value;
+			const firstCall = generate.mock.results[0];
+			if (!firstCall) throw new Error("generate was not called");
+			const r = await firstCall.value;
 			return {
 				jobId: r.jobId,
 				status: "completed",

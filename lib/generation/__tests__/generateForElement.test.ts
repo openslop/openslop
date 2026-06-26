@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
+	AssetConnectorType,
 	AssetResult,
 	ConnectorConfig,
-	ConnectorType,
 } from "@/lib/connectors/types";
 import type { GenerationInputs } from "../generationInputs";
 import type { GenerationJob } from "../queue";
@@ -25,7 +25,7 @@ const config: ConnectorConfig = {
 	isDefault: true,
 };
 
-function makeJob(connectorType: ConnectorType): GenerationJob {
+function makeJob(connectorType: AssetConnectorType): GenerationJob {
 	const element: CanvasContentElement = {
 		id: "el-1",
 		type: "image",

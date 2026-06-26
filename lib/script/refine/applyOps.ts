@@ -74,6 +74,29 @@ function applyRemove(
 	Transforms.removeNodes(editor, { at: entry[1] });
 }
 
+type NodeEntry = NonNullable<ReturnType<typeof findNodeById>>;
+type SetType = NonNullable<Extract<RefineOp, { op: "set" }>["type"]>;
+
+function replaceNodeType(
+	editor: Editor,
+	id: string,
+	entry: NodeEntry,
+	type: SetType,
+	connectors: ConnectorRegistry,
+): NodeEntry | null {
+	const [element, path] = entry;
+	const replacement = createCanvasNode(type, connectors, {
+		id,
+		attrs: preservedAttributes(element, type),
+	});
+	Transforms.setNodes(
+		editor,
+		{ type, customAttributes: replacement.customAttributes },
+		{ at: path },
+	);
+	return findNodeById(editor, id);
+}
+
 function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
@@ -81,23 +104,13 @@ function applySet(
 ): void {
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return;
-	let [element, path] = entry;
 
-	if (op.type && op.type !== element.type) {
-		const replacement = createCanvasNode(op.type, connectors, {
-			id: op.id,
-			attrs: preservedAttributes(element, op.type),
-		});
-		Transforms.setNodes(
-			editor,
-			{ type: op.type, customAttributes: replacement.customAttributes },
-			{ at: path },
-		);
-		// Re-fetch the updated element for subsequent attr/text changes
-		const updated = findNodeById(editor, op.id);
-		if (!updated) return;
-		[element, path] = updated;
-	}
+	const target =
+		op.type && op.type !== entry[0].type
+			? replaceNodeType(editor, op.id, entry, op.type, connectors)
+			: entry;
+	if (!target) return;
+	const [element, path] = target;
 
 	if (op.attrs) {
 		setNodeAttrs(editor, path, element, op.attrs);

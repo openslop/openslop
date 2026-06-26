@@ -2,9 +2,9 @@ import isEqual from "lodash/isEqual";
 import isNil from "lodash/isNil";
 import type { CanvasContentElement } from "../canvas/types";
 import type {
+	AssetConnectorType,
 	AssetResult,
 	ConnectorConfig,
-	ConnectorType,
 	ProviderKey,
 } from "../connectors/types";
 import { errorMessage } from "../errors";
@@ -21,7 +21,7 @@ export type ElementSnapshot = {
 	result: AssetResult | null;
 	error: string | null;
 	resultInputs: GenerationInputs | null;
-	connectorType: ConnectorType | null;
+	connectorType: AssetConnectorType | null;
 };
 
 export function isStaleResult(
@@ -34,7 +34,7 @@ export function isStaleResult(
 
 export type GenerationJob = {
 	elementId: string;
-	connectorType: ConnectorType;
+	connectorType: AssetConnectorType;
 	provider: ProviderKey;
 	config: ConnectorConfig;
 	projectId: string;

@@ -11,6 +11,8 @@ export type ConnectorType =
 	| "tts"
 	| "video";
 
+export type AssetConnectorType = Exclude<ConnectorType, "llm">;
+
 export type ProviderKey = "openslop";
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
