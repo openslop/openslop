@@ -6,9 +6,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { AssetTile } from "./AssetTile";
-import { CharacterEditModal } from "./character/CharacterEditModal";
-import { NarratorEditModal } from "./character/NarratorEditModal";
-import { NewCharacterDialog } from "./character/NewCharacterDialog";
+import { useAssetEditDialogs } from "./character/useAssetEditDialogs";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 
 export function AssetsSection() {
@@ -16,14 +14,13 @@ export function AssetsSection() {
 	const hydrated = useProjectStore(projectId, (s) => s.hydrated);
 	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
 	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
-	const setReferenceImages = useProjectStore(
+	const removeReferenceImage = useProjectStore(
 		projectId,
-		(s) => s.setReferenceImages,
+		(s) => s.removeReferenceImage,
 	);
 	const [collapsed, setCollapsed] = useState(false);
-	const [editingName, setEditingName] = useState<string | undefined>();
-	const [editingNarrator, setEditingNarrator] = useState(false);
-	const [creating, setCreating] = useState(false);
+	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
+		useAssetEditDialogs();
 
 	if (!hydrated) return null;
 
@@ -41,11 +38,11 @@ export function AssetsSection() {
 						name="Narrator"
 						Icon={Mic}
 						fallback="icon"
-						onEdit={() => setEditingNarrator(true)}
+						onEdit={openNarrator}
 					/>
 					<button
 						type="button"
-						onClick={() => setCreating(true)}
+						onClick={openCreateCharacter}
 						aria-label="Add character"
 						className="flex w-16 flex-col gap-1 sm:w-20"
 					>
@@ -63,7 +60,7 @@ export function AssetsSection() {
 							previewUrl={ch.avatarUrl}
 							Icon={User}
 							elementId={characterAvatarElementId(name)}
-							onEdit={() => setEditingName(name)}
+							onEdit={() => editCharacter(name)}
 						/>
 					))}
 					{referenceImages.map((url, i) => (
@@ -72,30 +69,12 @@ export function AssetsSection() {
 							name={`Reference ${i + 1}`}
 							previewUrl={url}
 							Icon={Palette}
-							onRemove={() =>
-								setReferenceImages(referenceImages.filter((_, j) => j !== i))
-							}
+							onRemove={() => removeReferenceImage(i)}
 						/>
 					))}
 				</div>
 			)}
-			<NewCharacterDialog
-				open={creating}
-				onOpenChange={setCreating}
-				onCreated={(name) => {
-					setCreating(false);
-					setEditingName(name);
-				}}
-			/>
-			<CharacterEditModal
-				open={editingName !== undefined}
-				onOpenChange={(open) => !open && setEditingName(undefined)}
-				name={editingName}
-			/>
-			<NarratorEditModal
-				open={editingNarrator}
-				onOpenChange={setEditingNarrator}
-			/>
+			{dialogs}
 		</section>
 	);
 }
