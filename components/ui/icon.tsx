@@ -97,6 +97,7 @@ export const SlidersAlt = icon("sliders-alt");
 export const SlidersAltFill = icon("sliders-alt-fill");
 export const Sparkles = icon("magic");
 export const Square = icon("square");
+export const SquareFilled = icon("square-filled");
 export const Trash2 = icon("trash");
 export const User = icon("user");
 export const UserPlus = icon("user-plus");
