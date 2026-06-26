@@ -28,7 +28,7 @@ export default function ProjectEditor({
 	initialGeneration: Record<string, ElementSnapshot>;
 	user: User;
 }): ReactNode {
-	// Hydrate once per mount, before children render
+	// Hydrate the store once, before children render and without re-running each render.
 	useState(() => applyStoreSnapshot(getProjectStore(projectId), initialStore));
 
 	return (
