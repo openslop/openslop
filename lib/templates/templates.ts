@@ -1238,24 +1238,6 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 
 #Narration: What's different is quieter than that. And it makes you wonder. What are you really building? And who is it for?`,
 	},
-	{
-		id: "kids-animated",
-		name: "Kids Animated",
-		pillText: "A kids animated story about",
-		color: "#10B981",
-		referenceImages: [],
-		exampleText: "TODO",
-		systemPrompt: dedent`TODO`,
-	},
-	{
-		id: "psychology-of",
-		name: "Psychology",
-		pillText: "Psychology of",
-		color: "#EC4899",
-		referenceImages: [],
-		exampleText: "TODO",
-		systemPrompt: dedent`TODO`,
-	},
 ];
 
 const TEMPLATE_MAP = new Map(TEMPLATES.map((t) => [t.id, t]));
