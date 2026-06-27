@@ -82,7 +82,7 @@ function ErrorMessage({ message }: { message: string }) {
 		<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-12 py-2">
 			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-destructive px-3 py-1.5 shadow-md">
 				<AlertCircle className="mt-px h-3.5 w-3.5 shrink-0 text-destructive-foreground" />
-				<p className="min-w-0 whitespace-pre-wrap break-words text-xs leading-snug text-destructive-foreground">
+				<p className="min-w-0 whitespace-pre-wrap break-words text-label leading-snug text-destructive-foreground">
 					{message}
 				</p>
 				<button

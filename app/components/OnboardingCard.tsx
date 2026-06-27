@@ -20,10 +20,7 @@ export default function OnboardingCard({
 }: OnboardingCardProps) {
 	return (
 		<div className="grain relative flex min-h-screen items-center justify-center px-3 py-8 sm:px-4">
-			<span
-				className="absolute top-6 left-6 text-2xl tracking-tight text-foreground"
-				style={{ fontFamily: "var(--font-sentient), serif" }}
-			>
+			<span className="font-sentient absolute top-6 left-6 text-heading tracking-tight text-foreground">
 				OpenSlop
 			</span>
 
@@ -33,19 +30,21 @@ export default function OnboardingCard({
 			>
 				{icon ?? <OpenSlopLogo className="h-auto w-14 text-foreground" />}
 
-				<h1 className="text-center text-2xl font-light text-balance text-foreground sm:text-3xl">
+				<h1 className="text-center text-heading font-light text-balance text-foreground sm:text-3xl">
 					{heading}
 				</h1>
 
 				{extra}
 
-				<p className="text-center text-xs leading-relaxed font-light text-muted-foreground sm:text-sm">
+				<p className="text-center text-label leading-relaxed font-light text-muted-foreground sm:text-body">
 					{subtitle}
 				</p>
 
 				{children}
 
-				<p className="text-xs text-muted-foreground sm:text-sm">{footer}</p>
+				<p className="text-label text-muted-foreground sm:text-body">
+					{footer}
+				</p>
 			</Card>
 		</div>
 	);

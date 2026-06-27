@@ -57,8 +57,10 @@ export default function ProjectsList({
 				<div className="relative z-10 mx-auto max-w-7xl px-6 pt-20 pb-16">
 					<header className="mb-10 flex items-end justify-between">
 						<div>
-							<h1 className="text-4xl font-semibold tracking-tight">My Slop</h1>
-							<p className="mt-1 text-sm text-muted-foreground">
+							<h1 className="text-heading-lg font-semibold tracking-tight">
+								My Slop
+							</h1>
+							<p className="mt-1 text-body text-muted-foreground">
 								{projects.length === 0
 									? "No projects yet — start your first slop."
 									: `${projects.length} project${projects.length === 1 ? "" : "s"}`}
@@ -90,7 +92,7 @@ export default function ProjectsList({
 													className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
 												/>
 											) : (
-												<div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
+												<div className="absolute inset-0 flex items-center justify-center text-label text-muted-foreground">
 													No preview
 												</div>
 											)}
@@ -108,11 +110,11 @@ export default function ProjectsList({
 									onClick={() => router.push(`/projects/${project.id}`)}
 									className="mt-2 block w-full text-left"
 								>
-									<div className="truncate text-sm font-semibold text-foreground">
+									<div className="truncate text-body font-semibold text-foreground">
 										{project.name}
 									</div>
 									<div
-										className="mt-0.5 truncate text-xs text-muted-foreground"
+										className="mt-0.5 truncate text-label text-muted-foreground"
 										suppressHydrationWarning
 									>
 										Edited {relativeTime(project.updated_at)}

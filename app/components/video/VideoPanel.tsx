@@ -15,13 +15,13 @@ function VideoPanelBody() {
 	if (scriptLoading) {
 		return (
 			<PlayerShimmer>
-				<div className="text-xs text-muted-foreground">Writing script…</div>
+				<div className="text-label text-muted-foreground">Writing script…</div>
 			</PlayerShimmer>
 		);
 	}
 	if (!layout?.series.length) {
 		return (
-			<div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
+			<div className="flex h-full w-full items-center justify-center px-4 text-center text-body text-muted-foreground">
 				Generate elements to playback
 			</div>
 		);

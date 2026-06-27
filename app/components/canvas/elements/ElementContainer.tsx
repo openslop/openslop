@@ -48,11 +48,11 @@ function ElementSettings({
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
-				<div className="mb-2 text-xs font-semibold">Settings</div>
+				<div className="mb-2 text-label font-semibold">Settings</div>
 				<div className="flex flex-col gap-2">
 					{entries.map(([key, spec]) => (
 						<div key={key} className="flex items-center justify-between gap-3">
-							<span className="shrink-0 text-xs">{spec.label}</span>
+							<span className="shrink-0 text-label">{spec.label}</span>
 							<AttributeBadge
 								element={element}
 								attrKey={key}
@@ -111,12 +111,12 @@ export function ElementContainer({
 						{isEmpty && (
 							<div
 								style={{ userSelect: "none" }}
-								className="pointer-events-none absolute top-2.5 left-3 text-left text-xs text-muted-foreground"
+								className="pointer-events-none absolute top-2.5 left-3 text-left text-label text-muted-foreground"
 							>
 								{config.placeholder}
 							</div>
 						)}
-						<div className="overflow-hidden text-left text-xs leading-relaxed text-foreground transition-[max-height,opacity] duration-200">
+						<div className="overflow-hidden text-left text-label leading-relaxed text-foreground transition-[max-height,opacity] duration-200">
 							{children}
 						</div>
 					</div>

@@ -12,7 +12,7 @@ const cardClass =
 	"flex w-[320px] items-center gap-3 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-elevation-5";
 
 const viewButtonClass =
-	"shrink-0 rounded-md px-2 py-1 text-xs font-medium text-accent transition-colors hover:bg-button-hover";
+	"shrink-0 rounded-md px-2 py-1 text-label font-medium text-accent transition-colors hover:bg-button-hover";
 
 export function ExportProgressToast({
 	progress,
@@ -25,7 +25,7 @@ export function ExportProgressToast({
 		<div className={cardClass}>
 			<Spinner className="text-muted-foreground" />
 			<div className="flex min-w-0 flex-1 flex-col gap-1.5">
-				<span className="text-xs font-medium">Exporting video…</span>
+				<span className="text-label font-medium">Exporting video…</span>
 				<Progress value={progress * 100} />
 			</div>
 			<button type="button" onClick={onView} className={viewButtonClass}>
@@ -52,11 +52,11 @@ export function ExportDoneToast({
 				<button
 					type="button"
 					onClick={onView}
-					className="text-left text-xs font-medium hover:underline"
+					className="text-left text-label font-medium hover:underline"
 				>
 					Export ready
 				</button>
-				<span className="text-xs text-muted-foreground">
+				<span className="text-label text-muted-foreground">
 					{formatBytes(size)}
 				</span>
 			</div>

@@ -12,7 +12,7 @@ export function PlayPauseFlash({
 		<div className="pointer-events-none absolute inset-0 grid place-items-center">
 			<span
 				key={flash.key}
-				className="grid h-20 w-20 place-items-center rounded-full bg-black/55 text-foreground animate-[flashFade_500ms_ease-out_forwards]"
+				className="grid h-20 w-20 place-items-center rounded-full bg-on-media/55 text-foreground animate-[flashFade_500ms_ease-out_forwards]"
 			>
 				{flash.playing ? (
 					<Play className="h-7 w-7 fill-current" />

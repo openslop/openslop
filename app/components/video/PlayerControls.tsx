@@ -29,7 +29,7 @@ export function TimeDisplay({
 		0,
 	);
 	return (
-		<span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+		<span className="shrink-0 font-mono text-label tabular-nums text-muted-foreground">
 			<span className="text-foreground">{formatTime(seconds)}</span> /{" "}
 			{formatTime(layout.totalDurationSec)}
 		</span>
@@ -50,7 +50,7 @@ export function ScenePill({
 			type="button"
 			onClick={() => scrollToScene(active.sceneId)}
 			aria-label={`Scroll to ${active.label}`}
-			className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground ring-1 ring-inset ring-border transition-colors hover:bg-button-hover"
+			className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-label font-medium text-foreground ring-1 ring-inset ring-border transition-colors hover:bg-button-hover"
 		>
 			{active.label}
 		</button>

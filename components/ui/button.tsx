@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,background-color,border-color,box-shadow,filter] focus-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-body font-medium transition-[color,background-color,border-color,box-shadow,filter] focus-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
 	{
 		variants: {
 			variant: {
@@ -25,9 +25,9 @@ const buttonVariants = cva(
 				link: "text-accent underline-offset-4 hover:underline",
 			},
 			size: {
-				sm: "h-8 rounded-md px-3 text-xs",
+				sm: "h-8 rounded-md px-3 text-label",
 				default: "h-9 px-4",
-				lg: "h-11 px-6 text-base",
+				lg: "h-11 px-6 text-body-lg",
 				icon: "size-9",
 			},
 		},

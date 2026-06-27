@@ -58,7 +58,7 @@ export default async function Home() {
 				/>
 			}
 		>
-			<p className="text-sm font-medium text-muted-foreground">
+			<p className="text-body font-medium text-muted-foreground">
 				Have an access code?
 			</p>
 

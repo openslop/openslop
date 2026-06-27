@@ -28,7 +28,7 @@ export function SeekTooltip({
 			className="pointer-events-none absolute bottom-full z-50 mb-2 -translate-x-1/2"
 			style={{ left, width: TOOLTIP_WIDTH }}
 		>
-			<div className="aspect-video w-full overflow-hidden rounded-md bg-black/80 ring-1 ring-border">
+			<div className="aspect-video w-full overflow-hidden rounded-md bg-on-media/80 ring-1 ring-border">
 				{thumbnail ? (
 					thumbnail.kind === "image" ? (
 						// eslint-disable-next-line @next/next/no-img-element
@@ -48,9 +48,9 @@ export function SeekTooltip({
 					)
 				) : null}
 			</div>
-			<div className="mt-1 flex items-center justify-between gap-2 rounded-md bg-black/80 px-2 py-1 text-xs text-white shadow-sm">
+			<div className="mt-1 flex items-center justify-between gap-2 rounded-md bg-on-media/80 px-2 py-1 text-label text-on-media-foreground shadow-sm">
 				<span className="tabular-nums">{formatTime(timeSec)}</span>
-				<span className="truncate text-white/70">{label}</span>
+				<span className="truncate text-on-media-foreground/70">{label}</span>
 			</div>
 		</div>
 	);

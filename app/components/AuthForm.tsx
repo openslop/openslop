@@ -108,7 +108,10 @@ export default function AuthForm({
 			</form>
 
 			{error && (
-				<p aria-live="polite" className="text-center text-sm text-destructive">
+				<p
+					aria-live="polite"
+					className="text-center text-body text-destructive"
+				>
 					{error}
 				</p>
 			)}

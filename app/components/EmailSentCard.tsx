@@ -62,7 +62,9 @@ export default function EmailSentCard({
 			>
 				{loading ? "Sending…" : (resendLabel ?? "Send another login link")}
 			</Button>
-			{error && <p className="text-center text-sm text-destructive">{error}</p>}
+			{error && (
+				<p className="text-center text-body text-destructive">{error}</p>
+			)}
 		</OnboardingCard>
 	);
 }
