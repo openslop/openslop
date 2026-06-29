@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
-import { CornerDownLeft, Square, Wand2 } from "@/components/ui/icon";
+import { CornerDownLeft, SquareFilled, Wand2 } from "@/components/ui/icon";
 import OrbLoader from "../OrbLoader";
 import { ActionButton } from "./ActionButton";
 
@@ -95,7 +95,7 @@ export default function InlineCopilot({
 				{loading ? (
 					<ActionButton
 						label="Stop generation"
-						icon={<Square className="h-3 w-3 fill-current" />}
+						icon={<SquareFilled className="h-3 w-3" />}
 						onClick={() => onStop?.()}
 					/>
 				) : (
