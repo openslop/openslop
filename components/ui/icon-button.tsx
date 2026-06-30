@@ -24,16 +24,17 @@ export const IconButton = React.forwardRef<
 });
 
 /** An {@link IconButton} wrapped in a tooltip. `ariaLabel` defaults to `label`. */
-export const TooltipIconButton = React.forwardRef<
-	HTMLButtonElement,
-	Omit<React.ComponentProps<typeof IconButton>, "ariaLabel"> & {
-		label: string;
-		ariaLabel?: string;
-	}
->(function TooltipIconButton({ label, ariaLabel, ...props }, ref) {
+export function TooltipIconButton({
+	label,
+	ariaLabel,
+	...props
+}: Omit<React.ComponentProps<typeof IconButton>, "ariaLabel"> & {
+	label: string;
+	ariaLabel?: string;
+}) {
 	return (
 		<SimpleTooltip label={label}>
-			<IconButton ref={ref} ariaLabel={ariaLabel ?? label} {...props} />
+			<IconButton ariaLabel={ariaLabel ?? label} {...props} />
 		</SimpleTooltip>
 	);
-});
+}
