@@ -10,7 +10,10 @@ export function DeleteButton({
 	return (
 		<TooltipIconButton
 			label="Delete"
-			className={cn("bg-muted hover:text-destructive", className)}
+			className={cn(
+				"text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20",
+				className,
+			)}
 			{...props}
 		>
 			<Trash2 className="h-4 w-4" strokeWidth={1.5} />
