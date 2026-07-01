@@ -85,28 +85,27 @@ export function ElementContainer({
 		<div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
 			{/* Left: element card */}
 			<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
-				<div
-					className="absolute top-2 right-2 z-20 opacity-0 pointer-events-none group-hover/card:opacity-100 group-hover/card:pointer-events-auto transition-opacity duration-200"
-					contentEditable={false}
-				>
-					<DeleteButton element={element} />
-				</div>
 				<div className="relative z-10 min-w-0">
 					<div
-						className="flex items-center gap-1.5 mb-2 flex-wrap select-none"
+						className="mb-2 flex items-start gap-1.5 select-none"
 						contentEditable={false}
 					>
-						<span
-							className={`flex h-6 w-6 @sm:w-auto shrink-0 items-center justify-center @sm:justify-start gap-1.5 rounded-md @sm:px-2 ${config.iconBgClass} ${config.colorClass}`}
-						>
-							{config.icon}
-							<span className="hidden font-body text-label-xs @sm:inline">
-								{config.label}
+						<div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+							<span
+								className={`flex h-6 w-6 @sm:w-auto shrink-0 items-center justify-center @sm:justify-start gap-1.5 rounded-md @sm:px-2 ${config.iconBgClass} ${config.colorClass}`}
+							>
+								{config.icon}
+								<span className="hidden font-body text-label-xs @sm:inline">
+									{config.label}
+								</span>
 							</span>
-						</span>
-						<ElementCharacters element={element} />
-						<ModelBadge element={element} />
-						<ElementSettings element={element} config={config} />
+							<ElementCharacters element={element} />
+							<ModelBadge element={element} />
+							<ElementSettings element={element} config={config} />
+						</div>
+						<div className="shrink-0 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
+							<DeleteButton element={element} />
+						</div>
 					</div>
 					<div className="relative min-w-0 rounded-xl border border-transparent bg-element-input px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30">
 						{isEmpty && (
