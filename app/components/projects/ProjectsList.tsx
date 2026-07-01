@@ -100,6 +100,7 @@ export default function ProjectsList({
 										<DeleteButton
 											ariaLabel={`Delete ${project.name}`}
 											onClick={() => handleDelete(project.id)}
+											className="bg-card shadow-sm ring-1 ring-border"
 										/>
 									</div>
 								</div>
