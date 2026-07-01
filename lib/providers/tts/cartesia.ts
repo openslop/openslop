@@ -30,7 +30,7 @@ type RawTTSResult = {
 const SAMPLE_RATE = 44100;
 const NUM_CHANNELS = 1;
 const ENCODING = "pcm_f32le";
-const CARTESIA_VOLUME = 1.5;
+const CARTESIA_VOLUME = 1.0;
 
 const CARTESIA_SPEED: Record<TTSSpeed, number> = {
 	slow: 0.6,
