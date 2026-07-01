@@ -5,6 +5,27 @@ import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
 
+function OverlayButton({
+	icon: Icon,
+	label,
+	onClick,
+}: {
+	icon: LucideIcon;
+	label: string;
+	onClick: () => void;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			aria-label={label}
+			className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+		>
+			<Icon className="h-3.5 w-3.5" />
+		</button>
+	);
+}
+
 export function AssetTile({
 	name,
 	previewUrl,
@@ -64,24 +85,18 @@ export function AssetTile({
 					</div>
 				)}
 				{onEdit && status !== "generating" && (
-					<button
-						type="button"
+					<OverlayButton
+						icon={Pencil}
+						label={`Edit ${name ?? "asset"}`}
 						onClick={onEdit}
-						aria-label={`Edit ${name ?? "asset"}`}
-						className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
-					>
-						<Pencil className="h-3.5 w-3.5" />
-					</button>
+					/>
 				)}
 				{onRemove && status !== "generating" && (
-					<button
-						type="button"
+					<OverlayButton
+						icon={X}
+						label={`Remove ${name ?? "asset"}`}
 						onClick={onRemove}
-						aria-label={`Remove ${name ?? "asset"}`}
-						className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
-					>
-						<X className="h-3.5 w-3.5" />
-					</button>
+					/>
 				)}
 			</div>
 			{name && (

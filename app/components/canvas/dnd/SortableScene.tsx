@@ -10,12 +10,10 @@ export function SortableScene({
 	attributes,
 	element,
 	children,
-	renderElement,
 }: {
 	attributes: RenderElementProps["attributes"];
 	element: SceneElement;
 	children: React.ReactNode;
-	renderElement: (props: RenderElementProps) => React.ReactNode;
 }) {
 	const isActive = useActiveSceneId() === element.id;
 	const { isCollapsed } = useViewMode();
@@ -27,7 +25,6 @@ export function SortableScene({
 			wrapperClassName={`border-t border-border pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? ACTIVE_SCENE_CLASS : ""}`}
 			attributes={attributes}
 			element={element}
-			renderElement={renderElement}
 		>
 			{children}
 		</SortableItem>

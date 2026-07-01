@@ -5,6 +5,7 @@ import { RenderElementProps } from "slate-react";
 import type { CanvasElement, CanvasElementType } from "@/lib/canvas/types";
 import styles from "../styles/sortable.module.css";
 import { SortableActions, type InsertOption } from "./SortableActions";
+import { renderCanvasElement } from "../elements/ElementContainer";
 
 interface SortableItemProps {
 	sceneId: string;
@@ -17,7 +18,6 @@ interface SortableItemProps {
 	attributes: RenderElementProps["attributes"];
 	element: CanvasElement;
 	children: React.ReactNode;
-	renderElement: (props: RenderElementProps) => React.ReactNode;
 }
 
 export function SortableItem({
@@ -31,7 +31,6 @@ export function SortableItem({
 	attributes,
 	element,
 	children,
-	renderElement,
 }: SortableItemProps) {
 	const {
 		listeners,
@@ -78,7 +77,7 @@ export function SortableItem({
 							/>
 						</div>
 					)}
-					<div>{renderElement({ attributes, children, element })}</div>
+					<div>{renderCanvasElement({ attributes, children, element })}</div>
 				</div>
 			</div>
 		</div>

@@ -28,12 +28,10 @@ export function SortableContent({
 	attributes,
 	element,
 	children,
-	renderElement,
 }: {
 	attributes: RenderElementProps["attributes"];
 	element: CanvasContentElement;
 	children: React.ReactNode;
-	renderElement: (props: RenderElementProps) => React.ReactNode;
 }) {
 	const editor = useSlateStatic();
 	const { connectorConfig } = useConfig();
@@ -75,7 +73,6 @@ export function SortableContent({
 			disabled={collapsed}
 			attributes={attributes}
 			element={element}
-			renderElement={renderElement}
 		>
 			{children}
 		</SortableItem>

@@ -15,7 +15,6 @@ import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
-import { renderCanvasElement } from "./elements/ElementContainer";
 import { AssetsSection } from "./elements/AssetsSection";
 
 export default function Canvas({
@@ -51,20 +50,10 @@ export default function Canvas({
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
 		if (isSceneElement(element)) {
-			return (
-				<SortableScene
-					{...props}
-					element={element}
-					renderElement={renderCanvasElement}
-				/>
-			);
+			return <SortableScene {...props} element={element} />;
 		}
 		return (
-			<SortableContent
-				{...props}
-				element={element as CanvasContentElement}
-				renderElement={renderCanvasElement}
-			/>
+			<SortableContent {...props} element={element as CanvasContentElement} />
 		);
 	}, []);
 
