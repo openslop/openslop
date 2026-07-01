@@ -1,8 +1,7 @@
 "use client";
 
 import { Play } from "@/components/ui/icon";
-import { IconButton } from "@/components/ui/icon-button";
-import { SimpleTooltip } from "@/components/ui/tooltip";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { usePlayerControl } from "@/app/components/video/PlayerControlContext";
 import { findSceneSequence } from "@/app/components/video/useSceneSegments";
 import { useLayout } from "@/app/components/video/VideoLayoutContext";
@@ -15,20 +14,17 @@ export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 	const startFrame = seq && layout ? Math.round(seq.start * layout.fps) : null;
 	const disabled = startFrame == null;
 	return (
-		<SimpleTooltip
+		<TooltipIconButton
 			label={disabled ? "Generate scene to play" : "Play from here"}
+			ariaLabel="Play from here"
+			className="bg-muted"
+			disabled={disabled}
+			onMouseDown={(e) => e.preventDefault()}
+			onClick={() => {
+				if (startFrame != null) playFromFrame(startFrame);
+			}}
 		>
-			<IconButton
-				ariaLabel="Play from here"
-				className="bg-muted"
-				disabled={disabled}
-				onMouseDown={(e) => e.preventDefault()}
-				onClick={() => {
-					if (startFrame != null) playFromFrame(startFrame);
-				}}
-			>
-				<Play className="h-4 w-4" />
-			</IconButton>
-		</SimpleTooltip>
+			<Play className="h-4 w-4" />
+		</TooltipIconButton>
 	);
 }

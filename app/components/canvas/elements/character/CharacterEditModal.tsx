@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ImagePlus, Loader2, Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
-import { IconButton } from "@/components/ui/icon-button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import {
 	DialogContent,
 	DialogDescription,
@@ -13,7 +13,6 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import {
 	useGenerationQueue,
@@ -206,20 +205,18 @@ function CharacterEditDialogBody({
 							/>
 						)}
 						{inputElement}
-						<SimpleTooltip label="Upload image">
-							<IconButton
-								ariaLabel="Upload image"
-								onClick={openPicker}
-								disabled={uploading}
-								className="absolute left-2 top-2 z-10 rounded-full bg-card shadow-sm ring-1 ring-border"
-							>
-								{uploading ? (
-									<Loader2 className="h-3.5 w-3.5 animate-spin" />
-								) : (
-									<ImagePlus className="h-3.5 w-3.5" />
-								)}
-							</IconButton>
-						</SimpleTooltip>
+						<TooltipIconButton
+							label="Upload image"
+							onClick={openPicker}
+							disabled={uploading}
+							className="absolute left-2 top-2 z-10 rounded-full bg-card shadow-sm ring-1 ring-border"
+						>
+							{uploading ? (
+								<Loader2 className="h-3.5 w-3.5 animate-spin" />
+							) : (
+								<ImagePlus className="h-3.5 w-3.5" />
+							)}
+						</TooltipIconButton>
 					</div>
 				</div>
 				<VoiceSection voice={character} onChange={update} />

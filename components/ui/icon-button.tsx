@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export const IconButton = React.forwardRef<
@@ -21,3 +22,19 @@ export const IconButton = React.forwardRef<
 		</button>
 	);
 });
+
+/** An {@link IconButton} wrapped in a tooltip. `ariaLabel` defaults to `label`. */
+export function TooltipIconButton({
+	label,
+	ariaLabel,
+	...props
+}: Omit<React.ComponentProps<typeof IconButton>, "ariaLabel"> & {
+	label: string;
+	ariaLabel?: string;
+}) {
+	return (
+		<SimpleTooltip label={label}>
+			<IconButton ariaLabel={ariaLabel ?? label} {...props} />
+		</SimpleTooltip>
+	);
+}
