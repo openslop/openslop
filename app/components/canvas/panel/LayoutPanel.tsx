@@ -51,17 +51,17 @@ export function LayoutPanel() {
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="top" className="text-xs">
+							<SelectItem value="top" className="text-label">
 								Top
 							</SelectItem>
 							<SelectItem
 								value="right"
 								disabled={narrowViewport}
-								className="text-xs"
+								className="text-label"
 							>
 								Right
 							</SelectItem>
-							<SelectItem value="hidden" className="text-xs">
+							<SelectItem value="hidden" className="text-label">
 								Hidden
 							</SelectItem>
 						</SelectContent>

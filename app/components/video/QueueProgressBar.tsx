@@ -23,7 +23,7 @@ export function QueueProgressBar() {
 				>
 					<div className={styles.fill} style={{ width: `${pct}%` }} />
 				</div>
-				<div className="font-body text-xs text-muted-foreground tabular-nums">
+				<div className="font-body text-label text-muted-foreground tabular-nums">
 					{peak === 0 ? "Preparing…" : `${done} of ${peak} generated`}
 				</div>
 			</div>

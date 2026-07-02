@@ -136,14 +136,14 @@ function TemplatePill({
 
 	return (
 		<span
-			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-sm leading-5 text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
+			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
 			<button
 				type="button"
 				aria-label="Remove template"
 				onClick={onRemove}
-				className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-black/20"
+				className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-on-media/20"
 			>
 				<X className="h-3 w-3" />
 			</button>
@@ -218,10 +218,10 @@ export default function ComposerCopilot({
 							}}
 							placeholder={placeholderText}
 							style={{ fieldSizing: "content" }}
-							className=" w-full resize-none bg-transparent font-body text-sm leading-5 text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+							className=" w-full resize-none bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !showPill && placeholderOverlay && (
-							<div className="pointer-events-none overflow-hidden font-body text-sm">
+							<div className="pointer-events-none overflow-hidden font-body text-body">
 								{placeholderOverlay}
 							</div>
 						)}

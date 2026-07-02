@@ -14,29 +14,30 @@ Global light + dark via `next-themes` (`attribute="class"`, default light, no sy
 
 ## Color
 
-- **Neutrals:** warm, red-tinted greys. `grey-900 #26171d` (light foreground) through `grey-0 #fff`.
-- **Surfaces:** `--background` (`#f3f1f0` light / `#140e11` dark), `--surface-recessed` (panels), `--card` / `--surface-elevated` (raised, `#fdfcfc` light; popovers and select menus sit here, with `--surface-hover` for hovered controls on them). Borders are hairline (`--border`, an alpha grey).
-- **Accent — blurple** (`#6b6bcf`, focus `#a3a3ee`): focus rings, selection, links, send, and `accent` CTAs only. Disciplined, never an ambient wash.
+- **Neutrals:** warm, red-tinted greys (`--grey-900` foreground through `--grey-0`).
+- **Surfaces:** `--background`, `--surface-recessed` (panels), `--card` / `--surface-elevated` (raised; popovers and select menus sit here, with `--surface-hover` for hovered controls on them). Borders are hairline (`--border`).
+- **Accent — blurple** (`--accent`, `--ring`): focus rings, selection, links, send, and `accent` CTAs only. Disciplined, never an ambient wash.
 - **State:** `--destructive` (red), `--success` (green), `--caution` (amber).
 - **Media-type tints** (`--media-character/image/clip/animated/music/sound/narration`): used as the element-card icon color so each storyboard type reads at a glance. Brighter in dark, deeper in light.
+- **Scrims** (`--overlay`, `--on-media`, `--on-media-foreground`): theme-independent dark washes. `bg-overlay` for modal/dialog scrims; `bg-on-media/55…80` for chrome floating over media or video (`--on-media` is solid black, so the opacity modifier sets the strength), paired with `text-on-media-foreground`.
 
-Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-card`, `text-muted-foreground`, `bg-accent`, `ring-ring`), never raw hexes or `*-white/N` literals.
+Use semantic tokens (`bg-background`, `text-foreground`, `border-border`, `bg-card`, `text-muted-foreground`, `bg-accent`, `ring-ring`), never raw hexes, `bg-black/N`, or `*-white/N` literals — reach for the scrim tokens above for dark washes over media.
 
 ## Typography
 
-UI and titles use **Sloptastic** (`--font-sans`, `.font-title`), a clean grotesque; body text and form controls — inputs, textareas, selects, and dropdown menus — use **Inter** (`--font-body`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Two display faces for marketing surfaces only: **Instrument Serif** (`--font-serif`, hero headlines) and **Sentient** (`--font-sentient`, the onboarding wordmark). Scales are as follows: label 11–12px, body 14–16px, headings 18/24/36/48px. `.font-title` = Sloptastic 575 with tight tracking; `.font-body` = Inter 425.
+UI and titles use **Sloptastic** (`--font-sans`, `.font-title`), a clean grotesque; body text and form controls — inputs, textareas, selects, and dropdown menus — use **Inter** (`--font-body`). **IBM Plex Mono** (`--font-mono`) for timecodes and durations. Two display faces for marketing surfaces only: **Instrument Serif** (`--font-serif`, hero headlines) and **Sentient** (`--font-sentient`, the onboarding wordmark). `.font-title` is Sloptastic with tight tracking; `.font-body` is Inter.
 
-The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes (the `text-label-xs` / `text-label` dense-control tiers carry a 16px line-height; the `text-body`+ tiers inherit leading — pair with `leading-*` / `font-medium` where a different line or heavier weight is wanted) — rather than hand-picking raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries.
+The scale lives as `@theme` tokens in `app/globals.css`: use the `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` utilities — named font-sizes that each bake in a matching line-height, so a bare token (e.g. `text-body`) needs no `leading-*`. Add `leading-*` only to deliberately override the baked leading, and `font-medium` for a heavier weight. Don't hand-pick raw `text-xs` / `text-sm` or `text-[Npx]` arbitraries. Caveat: `.font-body` / `.font-title` are declared unlayered, so their `line-height: 1.5` / `1.2` beats the token's baked leading on any surface that pairs them (form controls, buttons, titles) — those surfaces take their leading from the font class, not the size token, and need an explicit `leading-*` to change it.
 
 In a dense row, a primary label and its secondary description share one size and weight (e.g. both `text-label`), differentiated by color alone — `text-foreground` for the label, `text-muted-foreground` for the description. Don't shrink or bold the label to set it apart.
 
 ## Spacing, radius, elevation
 
-4px base spacing. Radius via `--radius` (`0.625rem`); cards `rounded-xl`, overlays (modals, popovers, dropdowns, selects) and form controls (inputs, textareas, select triggers) `rounded-md`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow — popovers and menus sit at `shadow-elevation-3`.
+4px base spacing. Radius via `--radius`; cards `rounded-xl`, overlays (modals, popovers, dropdowns, selects) and form controls (inputs, textareas, select triggers) `rounded-md`, pills `rounded-full`. Depth comes from token elevations `shadow-elevation-1/3/5/10`, not glow — popovers and menus sit at `shadow-elevation-3`.
 
 ## Motion
 
-Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`; durations `--duration-faster` (150ms) / `--duration-fast` (350ms). `fadeInUp` for entrances, `shimmer` for skeletons. `prefers-reduced-motion` is honored.
+Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`; durations `--duration-faster` / `--duration-fast`. `fadeInUp` for entrances, `shimmer` for skeletons. `prefers-reduced-motion` is honored.
 
 ## Texture
 

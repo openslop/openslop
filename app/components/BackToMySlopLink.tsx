@@ -9,7 +9,7 @@ export default function BackToMySlopLink({
 	return (
 		<Link
 			href="/"
-			className={`inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-ring ${className}`}
+			className={`inline-flex items-center gap-2 text-body text-muted-foreground transition-colors hover:text-foreground focus-ring ${className}`}
 		>
 			<ArrowLeft size={16} strokeWidth={1.5} aria-hidden="true" />
 			Back to My Slop

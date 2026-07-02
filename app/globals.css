@@ -130,6 +130,11 @@
 	--input: var(--grey-30-a);
 	--ring: var(--blurple-500);
 
+	/* Scrims (theme-independent dark wash; alpha applied via opacity modifier) */
+	--overlay: rgba(0, 0, 0, 0.5); /* modal/dialog scrim */
+	--on-media: #000; /* chrome floating over media; use /55, /70, /80 */
+	--on-media-foreground: #fff;
+
 	/* Media-type tints (element-icon color by type) */
 	--media-character: #d97706;
 	--media-image: #0891b2;
@@ -316,6 +321,9 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-overlay: var(--overlay);
+	--color-on-media: var(--on-media);
+	--color-on-media-foreground: var(--on-media-foreground);
 
 	--color-media-character: var(--media-character);
 	--color-media-image: var(--media-image);
@@ -338,11 +346,17 @@
 	--text-label: 0.75rem; /* 12px — labels, dense controls */
 	--text-label--line-height: 1rem; /* 16px — dense control leading */
 	--text-body: 0.875rem; /* 14px — default body & UI text */
+	--text-body--line-height: 1.25rem; /* 20px */
 	--text-body-lg: 1rem; /* 16px — emphasized body */
+	--text-body-lg--line-height: 1.5rem; /* 24px */
 	--text-heading-sm: 1.125rem; /* 18px */
+	--text-heading-sm--line-height: 1.75rem; /* 28px */
 	--text-heading: 1.5rem; /* 24px */
+	--text-heading--line-height: 2rem; /* 32px */
 	--text-heading-lg: 2.25rem; /* 36px */
+	--text-heading-lg--line-height: 2.5rem; /* 40px */
 	--text-display: 3rem; /* 48px */
+	--text-display--line-height: 1; /* leading-none */
 
 	--shadow-elevation-1: var(--elevation-1);
 	--shadow-elevation-3: var(--elevation-3);
@@ -393,6 +407,10 @@
 	font-weight: 425;
 	letter-spacing: -0.011em;
 	line-height: 1.5;
+}
+
+.font-sentient {
+	font-family: var(--font-sentient), serif;
 }
 
 /* Subtle film-grain overlay — add .grain to any positioned element */

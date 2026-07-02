@@ -29,7 +29,7 @@ export function CompactElement({
 			</span>
 			{text && (
 				<span
-					className="max-w-[800px] truncate text-xs text-muted-foreground"
+					className="max-w-[800px] truncate text-label text-muted-foreground"
 					contentEditable={false}
 				>
 					{text}

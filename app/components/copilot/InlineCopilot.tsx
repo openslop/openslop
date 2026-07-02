@@ -29,7 +29,7 @@ function LoadingText() {
 	}, []);
 
 	return (
-		<span className=" pointer-events-none block select-none truncate text-xs text-muted-foreground shimmer">
+		<span className=" pointer-events-none block select-none truncate text-label text-muted-foreground shimmer">
 			{LOADING_MESSAGES[index]}
 		</span>
 	);
@@ -76,7 +76,7 @@ export default function InlineCopilot({
 					) : (
 						<>
 							{!hasText && placeholderOverlay && (
-								<div className=" pointer-events-none absolute inset-0 flex items-center overflow-hidden text-xs">
+								<div className=" pointer-events-none absolute inset-0 flex items-center overflow-hidden text-label">
 									{placeholderOverlay}
 								</div>
 							)}

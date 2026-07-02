@@ -35,7 +35,7 @@ export default function TemplateGallery({
 
 	return (
 		<div className="mt-6 w-full">
-			<p className="mb-3 text-xs text-muted-foreground">Need inspiration?</p>
+			<p className="mb-3 text-label text-muted-foreground">Need inspiration?</p>
 			<div className="flex flex-wrap justify-center gap-3">
 				{showcased.map((template) => (
 					<button
@@ -52,16 +52,16 @@ export default function TemplateGallery({
 						/>
 						<div className="flex min-w-0 flex-1 flex-col justify-center p-3">
 							<span className="flex items-center gap-1">
-								<span className="truncate text-sm font-semibold text-foreground">
+								<span className="truncate text-body font-semibold text-foreground">
 									{template.showcase.title}
 								</span>
 								<ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
 							</span>
-							<span className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+							<span className="mt-1 line-clamp-2 text-label text-muted-foreground">
 								{template.showcase.description}
 							</span>
 							<span
-								className="relative mt-1.5 inline-block self-start overflow-hidden rounded-full px-1.5 py-0.5 text-badge font-medium text-white"
+								className="relative mt-1.5 inline-block self-start overflow-hidden rounded-full px-1.5 py-0.5 text-badge font-medium text-on-media-foreground"
 								style={{ backgroundColor: template.color }}
 							>
 								{template.name}

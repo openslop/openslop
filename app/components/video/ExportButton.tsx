@@ -63,14 +63,14 @@ export function ExportButton() {
 				className="w-80 p-3 font-medium"
 			>
 				<div className="flex items-center justify-between">
-					<span className="text-xs font-semibold">Export</span>
+					<span className="text-label font-semibold">Export</span>
 					<CloseButton onClick={() => setOpen(false)} />
 				</div>
 				<Separator className="-mx-3 my-2 data-[orientation=horizontal]:w-[calc(100%+1.5rem)]" />
 
 				{(state.status === "invoking" || state.status === "rendering") && (
 					<div className="animate-fadeInUp flex flex-col gap-2">
-						<div className="flex items-center justify-between text-xs font-medium">
+						<div className="flex items-center justify-between text-label font-medium">
 							<span className="flex items-center gap-2">
 								<Spinner className="size-3.5" />
 								{isRendering ? "Rendering…" : "Starting…"}
@@ -90,7 +90,7 @@ export function ExportButton() {
 
 				{state.status === "done" && (
 					<div className="flex animate-in flex-col gap-3 fade-in">
-						<div className="flex items-center justify-between text-xs">
+						<div className="flex items-center justify-between text-label">
 							<span>Size</span>
 							<span className="font-mono tabular-nums">
 								{formatBytes(state.size)}
@@ -105,7 +105,7 @@ export function ExportButton() {
 						<button
 							type="button"
 							onClick={reset}
-							className="text-xs transition-colors hover:text-foreground"
+							className="text-label transition-colors hover:text-foreground"
 						>
 							Export again
 						</button>
@@ -115,7 +115,7 @@ export function ExportButton() {
 				{(state.status === "idle" || state.status === "error") && (
 					<>
 						<div className="flex items-center justify-between gap-3">
-							<span className="text-xs">Resolution</span>
+							<span className="text-label">Resolution</span>
 							<Select
 								value={String(width)}
 								onValueChange={(value) => setWidth(Number(value))}
@@ -128,7 +128,7 @@ export function ExportButton() {
 										<SelectItem
 											key={resolution.width}
 											value={String(resolution.width)}
-											className="text-xs"
+											className="text-label"
 										>
 											{resolution.label}
 										</SelectItem>
@@ -137,7 +137,9 @@ export function ExportButton() {
 							</Select>
 						</div>
 						{state.status === "error" && (
-							<p className="mt-3 text-xs text-destructive">{state.message}</p>
+							<p className="mt-3 text-label text-destructive">
+								{state.message}
+							</p>
 						)}
 						<Separator className="-mx-3 my-2 data-[orientation=horizontal]:w-[calc(100%+1.5rem)]" />
 						<Button

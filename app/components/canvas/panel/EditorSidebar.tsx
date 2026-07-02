@@ -112,7 +112,7 @@ export function EditorSidebar() {
 				<div className="flex w-60 shrink-0 flex-col gap-3 overflow-y-auto pr-2 pt-4 pb-3 text-panel-fg">
 					<div className="flex items-center gap-2 px-1">
 						<HeaderIcon className="h-5 w-5 text-panel-label" />
-						<h2 className="text-sm font-semibold text-panel-label">
+						<h2 className="text-body font-semibold text-panel-label">
 							{current.label}
 						</h2>
 					</div>

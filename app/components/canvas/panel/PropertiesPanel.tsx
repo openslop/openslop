@@ -44,7 +44,7 @@ export function PropertiesPanel() {
 					</SelectTrigger>
 					<SelectContent>
 						{TRANSITION_TYPES.map((value) => (
-							<SelectItem key={value} value={value} className="text-xs">
+							<SelectItem key={value} value={value} className="text-label">
 								{LABELS[value]}
 							</SelectItem>
 						))}

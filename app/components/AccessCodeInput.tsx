@@ -116,7 +116,7 @@ export default function AccessCodeInput() {
 						aria-label={`Code character ${i + 1}`}
 						spellCheck={false}
 						autoComplete="off"
-						className="h-11 w-9 rounded-md border border-border bg-input text-center text-base font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-lg"
+						className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
 						autoFocus={i === 0}
 					/>
 				))}
@@ -124,7 +124,7 @@ export default function AccessCodeInput() {
 			{error && (
 				<p
 					aria-live="polite"
-					className="mt-3 text-center text-sm text-destructive"
+					className="mt-3 text-center text-body text-destructive"
 				>
 					{error}
 				</p>
@@ -132,7 +132,7 @@ export default function AccessCodeInput() {
 			{loading && (
 				<p
 					aria-live="polite"
-					className="mt-3 text-center text-sm text-muted-foreground"
+					className="mt-3 text-center text-body text-muted-foreground"
 				>
 					Validating&hellip;
 				</p>

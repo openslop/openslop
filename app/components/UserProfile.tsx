@@ -51,7 +51,7 @@ export default function UserProfile() {
 					>
 						<Avatar className="h-9 w-9 cursor-pointer">
 							{avatarUrl && <AvatarImage src={avatarUrl} alt={email} />}
-							<AvatarFallback className="text-xs">{initials}</AvatarFallback>
+							<AvatarFallback className="text-label">{initials}</AvatarFallback>
 						</Avatar>
 					</button>
 				</DropdownMenuTrigger>
@@ -63,7 +63,7 @@ export default function UserProfile() {
 					className="z-[90] w-56 origin-center rounded-2xl p-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-105 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-105"
 				>
 					<div className="flex h-[52px] items-center gap-3 pr-4 pl-12">
-						<span className="truncate pl-1 text-sm font-medium text-foreground">
+						<span className="truncate pl-1 text-body font-medium text-foreground">
 							{name || email.split("@")[0]}
 						</span>
 					</div>
@@ -74,7 +74,7 @@ export default function UserProfile() {
 								Appearance
 							</DropdownMenuSubTrigger>
 							<DropdownMenuSubContent className="rounded-xl">
-								<DropdownMenuLabel className="text-xs text-muted-foreground">
+								<DropdownMenuLabel className="text-label text-muted-foreground">
 									Mode
 								</DropdownMenuLabel>
 								{THEME_MODES.map((m) => (

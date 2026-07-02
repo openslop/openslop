@@ -40,7 +40,7 @@ export function BottomTransportBar() {
 	};
 
 	return (
-		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-sm text-foreground">
+		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
 			{ready && layout ? (
 				<SegmentedSeekBar player={player} layout={layout} segments={segments} />
 			) : (

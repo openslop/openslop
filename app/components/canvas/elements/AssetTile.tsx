@@ -62,7 +62,7 @@ export function AssetTile({
 						className="object-cover"
 					/>
 				) : (
-					<div className="flex size-full items-center justify-center text-base text-muted-foreground">
+					<div className="flex size-full items-center justify-center text-body-lg text-muted-foreground">
 						{fallbackContent}
 					</div>
 				)}
