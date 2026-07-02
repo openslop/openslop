@@ -3,7 +3,9 @@
 import { Mic, Palette, User } from "@/components/ui/icon";
 import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
+import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
+import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
 
 interface ComposerAssetsProps {
@@ -17,20 +19,15 @@ export function ComposerAssets({
 	onEditCharacter,
 	onEditNarrator,
 }: ComposerAssetsProps) {
+	const { projectId } = useConfig();
 	const queue = useGenerationQueue();
 	const referenceImages = useProject((s) => s.referenceImages);
 	const characters = useProject((s) => s.metadata.characters);
 	const narration = useProject((s) => s.metadata.narration);
 	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
-	const removeCharacterFromStore = useProject((s) => s.removeCharacter);
 
 	const hasNarration = Object.keys(narration).length > 0;
 	const characterEntries = Object.entries(characters);
-
-	const removeCharacter = (name: string) => {
-		queue.discard(characterAvatarElementId(name));
-		removeCharacterFromStore(name);
-	};
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
@@ -50,7 +47,7 @@ export function ComposerAssets({
 					Icon={User}
 					elementId={characterAvatarElementId(name)}
 					onEdit={() => onEditCharacter(name)}
-					onRemove={() => removeCharacter(name)}
+					onRemove={() => deleteCharacter(projectId, queue, name)}
 				/>
 			))}
 			{referenceImages.map((url, i) => (

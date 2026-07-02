@@ -19,7 +19,7 @@ function OverlayButton({
 			type="button"
 			onClick={onClick}
 			aria-label={label}
-			className="flex flex-1 items-center justify-center bg-background/70 text-foreground focus:outline-none"
+			className="focus-ring flex flex-1 items-center justify-center bg-background/70 text-foreground transition-colors hover:bg-background/90 focus-visible:ring-inset"
 		>
 			<Icon className="h-3.5 w-3.5" />
 		</button>
