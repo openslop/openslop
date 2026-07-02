@@ -14,7 +14,7 @@ Follow @CONVENTIONS.md, the canonical coding style for this repo.
 ## Project structure
 
 - Use the `@/*` path alias for imports that traverse 2+ directory levels (e.g. `@/lib/connectors/types`); keep single-level relative imports (`../`) as-is.
-- `lib/` is the domain layer and must never import from `app/` (enforced by ESLint `no-restricted-imports`). Logic needed by both layers belongs in `lib/`.
+- For the `lib/` → `app/` dependency direction and other architecture rules, see @CONVENTIONS.md.
 
 ## Package manager
 

@@ -24,6 +24,7 @@ export default async function ProjectPage({
 
 	return (
 		<ProjectEditor
+			key={project.id}
 			projectId={project.id}
 			initialScript={project.script ?? ""}
 			initialStore={project.store}
