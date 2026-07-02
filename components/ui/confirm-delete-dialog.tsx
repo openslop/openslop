@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -26,11 +27,23 @@ export function ConfirmDeleteDialog({
 	actionLabel: string;
 	onConfirm: () => void;
 }) {
+	// Radix keeps the dialog mounted through its exit animation; latch the
+	// content so it doesn't flash cleared values after the caller resets state.
+	const [latched, setLatched] = useState({ title, description, actionLabel });
+	if (
+		open &&
+		(latched.title !== title ||
+			latched.description !== description ||
+			latched.actionLabel !== actionLabel)
+	) {
+		setLatched({ title, description, actionLabel });
+	}
+
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent>
-				<AlertDialogTitle>{title}</AlertDialogTitle>
-				<AlertDialogDescription>{description}</AlertDialogDescription>
+				<AlertDialogTitle>{latched.title}</AlertDialogTitle>
+				<AlertDialogDescription>{latched.description}</AlertDialogDescription>
 				<AlertDialogFooter>
 					<AlertDialogCancel className="rounded-md px-2.5 py-1 text-label text-muted-foreground transition-colors hover:text-foreground">
 						Cancel
@@ -39,7 +52,7 @@ export function ConfirmDeleteDialog({
 						onClick={onConfirm}
 						className="rounded-md bg-destructive px-3 py-1 text-label font-medium text-destructive-foreground shadow-elevation-5 transition hover:brightness-110"
 					>
-						{actionLabel}
+						{latched.actionLabel}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
