@@ -19,7 +19,7 @@ function OverlayButton({
 			type="button"
 			onClick={onClick}
 			aria-label={label}
-			className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+			className="flex flex-1 items-center justify-center bg-background/70 text-foreground focus:outline-none"
 		>
 			<Icon className="h-3.5 w-3.5" />
 		</button>
@@ -84,19 +84,23 @@ export function AssetTile({
 						<Icon className="h-3 w-3" />
 					</div>
 				)}
-				{onEdit && status !== "generating" && (
-					<OverlayButton
-						icon={Pencil}
-						label={`Edit ${name ?? "asset"}`}
-						onClick={onEdit}
-					/>
-				)}
-				{onRemove && status !== "generating" && (
-					<OverlayButton
-						icon={X}
-						label={`Remove ${name ?? "asset"}`}
-						onClick={onRemove}
-					/>
+				{(onEdit || onRemove) && status !== "generating" && (
+					<div className="absolute inset-0 flex opacity-0 transition-opacity focus-within:opacity-100 group-hover/tile:opacity-100">
+						{onEdit && (
+							<OverlayButton
+								icon={Pencil}
+								label={`Edit ${name ?? "asset"}`}
+								onClick={onEdit}
+							/>
+						)}
+						{onRemove && (
+							<OverlayButton
+								icon={X}
+								label={`Remove ${name ?? "asset"}`}
+								onClick={onRemove}
+							/>
+						)}
+					</div>
 				)}
 			</div>
 			{name && (
