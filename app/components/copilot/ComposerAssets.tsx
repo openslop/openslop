@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Mic, Palette, User } from "@/components/ui/icon";
 import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
-import { DeleteCharacterDialog } from "@/app/components/canvas/elements/character/DeleteCharacterDialog";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
@@ -75,12 +75,15 @@ export function ComposerAssets({
 					className="aspect-square w-16 shrink-0 rounded-md shimmer-surface sm:w-20"
 				/>
 			))}
-			<DeleteCharacterDialog
-				name={deletingName}
+			<ConfirmDeleteDialog
+				open={deletingName !== undefined}
 				onOpenChange={(open) => {
 					if (!open) setDeletingName(undefined);
 				}}
-				onDelete={confirmDelete}
+				title={`Delete ${deletingName}?`}
+				description="This permanently removes the character and its avatar. It can't be undone."
+				actionLabel="Delete character"
+				onConfirm={confirmDelete}
 			/>
 		</div>
 	);

@@ -10,32 +10,36 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-export function DeleteCharacterDialog({
-	name,
+/** Confirmation gate for deletions the app cannot undo. */
+export function ConfirmDeleteDialog({
+	open,
 	onOpenChange,
-	onDelete,
+	title,
+	description,
+	actionLabel,
+	onConfirm,
 }: {
-	name?: string;
+	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onDelete: () => void;
+	title: string;
+	description: string;
+	actionLabel: string;
+	onConfirm: () => void;
 }) {
 	return (
-		<AlertDialog open={name !== undefined} onOpenChange={onOpenChange}>
+		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent>
-				<AlertDialogTitle>Delete {name}?</AlertDialogTitle>
-				<AlertDialogDescription>
-					This permanently removes the character and its avatar. It can&apos;t
-					be undone.
-				</AlertDialogDescription>
+				<AlertDialogTitle>{title}</AlertDialogTitle>
+				<AlertDialogDescription>{description}</AlertDialogDescription>
 				<AlertDialogFooter>
 					<AlertDialogCancel className="rounded-md px-2.5 py-1 text-label text-muted-foreground transition-colors hover:text-foreground">
 						Cancel
 					</AlertDialogCancel>
 					<AlertDialogAction
-						onClick={onDelete}
+						onClick={onConfirm}
 						className="rounded-md bg-destructive px-3 py-1 text-label font-medium text-destructive-foreground shadow-elevation-5 transition hover:brightness-110"
 					>
-						Delete character
+						{actionLabel}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
