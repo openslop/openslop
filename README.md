@@ -1,41 +1,47 @@
-<div align="center">
+<h1 align="center">OpenSlop</h1>
 
-# OpenSlop
+<p align="center"><b>Free, open-source AI video creator.</b></p>
 
-**Free, open-source AI video creator.**
+<p align="center">
+  <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="Status: private beta"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="License: Apache-2.0"></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white" alt="React 19"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript 5"></a>
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white" alt="Supabase"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4"></a>
+  <a href="https://discord.gg/zeP5482ced"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord"></a>
+</p>
 
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
-[![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/zeP5482ced)
+<p align="center">
+  <a href="https://openslop.ai"><b>openslop.ai</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://app.openslop.ai">app.openslop.ai</a>
+</p>
 
-<br />
-
-<img src="./assets/openslop-demo.gif" alt="OpenSlop - your free AI video creator" width="100%">
-
-</div>
+<p align="center">
+  <img src="./assets/openslop-demo.gif" alt="OpenSlop - your free AI video creator" width="100%">
+</p>
 
 ---
 
-OpenSlop connects all your favorite AI tools into one workflow and helps you create consistent, engaging video content in minutes. No more jumping between ten tabs.
+> **Private beta.** Invite-only right now.
+> [Hop on the waitlist at openslop.ai](https://openslop.ai) to get in.
 
-Open-source and free forever.
+## Overview
 
-**Website:** [openslop.ai](https://openslop.ai) | **App:** [app.openslop.ai](https://app.openslop.ai)
+OpenSlop wires all your favorite AI tools into one workflow so you can make good-looking video in minutes, no more jumping between ten tabs. You bring your AI accounts, OpenSlop brings the workflow. That's it.
 
-## What is this?
+Open-source, free forever.
 
-OpenSlop is a video creation tool for people who want to make AI-generated content that actually looks good. You bring your AI accounts, OpenSlop brings the workflow.
+## Key capabilities
 
-- Connects to multiple AI providers in one place
-- Gives you a real editing workflow, not just a prompt box
-- Runs in your browser, no install needed
+- Talk to a bunch of AI providers in one place
+- A real editing workflow, not just a prompt box
+- Runs in your browser, nothing to install
 - Built by engineers from Meta, Google, Stripe, and Dropbox
 
-## Getting Started
+## Getting started
 
 ### Prerequisites
 
@@ -91,7 +97,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 
-## Tech Stack
+## Tech stack
 
 | Layer     | Tech                                                                                                         |
 | --------- | ------------------------------------------------------------------------------------------------------------ |
@@ -136,16 +142,19 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for how these layers interact.
 
 ## Contributing
 
-Contributions welcome. Fork the repo, make your changes, open a PR.
+Contributions welcome. Fork it, make your changes, run the checks, open a PR.
 
-- Read [`CLAUDE.md`](CLAUDE.md) for the project's coding conventions.
-- Read [`ARCHITECTURE.md`](ARCHITECTURE.md) for an end-to-end tour of how
-  connectors, gateways, providers, and the generation queue fit together —
-  helpful before adding a new asset type or swapping a provider.
+Read these first:
+
+- [`CONVENTIONS.md`](CONVENTIONS.md) is the coding style. The codebase is rigid and opinionated on purpose, so match what's there.
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) shows how connectors, gateways, providers and the generation queue fit together.
+- [`AGENTS.md`](AGENTS.md) has the workflow and tooling notes for AI coding agents
 
 ## Community
 
-[![Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/zeP5482ced)
+<p align="center">
+  <a href="https://discord.gg/zeP5482ced"><img src="https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=flat&logo=discord&logoColor=white" alt="Join our Discord community"></a>
+</p>
 
 Questions, ideas, or just want to hang out? [Join our Discord](https://discord.gg/zeP5482ced) or [email us](mailto:hi@openslop.ai).
 
