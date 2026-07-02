@@ -1,9 +1,10 @@
 "use client";
 
-import { User, X } from "@/components/ui/icon";
+import { User } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStore } from "@/lib/project/store";
+import { RemoveCrossButton } from "./RemoveCrossButton";
 
 function useCharacterAvatarUrl(name?: string) {
 	const { projectId } = useConfig();
@@ -65,15 +66,11 @@ export function CharacterPill({
 			/>
 			{name && <CharacterName name={name} />}
 			{onRemove && (
-				<button
-					type="button"
-					aria-label={`Remove ${name}`}
-					onMouseDown={(e) => e.preventDefault()}
+				<RemoveCrossButton
+					label={`Remove ${name}`}
 					onClick={onRemove}
-					className="absolute -top-1 -right-1 flex cursor-pointer items-center justify-center rounded-full border border-border bg-popover p-0.5 opacity-0 transition-opacity group-hover/pill:opacity-100 hover:bg-muted"
-				>
-					<X className="h-2.5 w-2.5 text-foreground" />
-				</button>
+					className="opacity-0 group-hover/pill:opacity-100"
+				/>
 			)}
 		</div>
 	);

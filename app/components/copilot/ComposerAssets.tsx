@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Mic, Palette, User } from "@/components/ui/icon";
 import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
+import { DeleteCharacterDialog } from "@/app/components/canvas/elements/character/DeleteCharacterDialog";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
@@ -26,8 +28,15 @@ export function ComposerAssets({
 	const narration = useProject((s) => s.metadata.narration);
 	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
 
+	const [deletingName, setDeletingName] = useState<string>();
+
 	const hasNarration = Object.keys(narration).length > 0;
 	const characterEntries = Object.entries(characters);
+
+	const confirmDelete = () => {
+		if (deletingName) deleteCharacter(projectId, queue, deletingName);
+		setDeletingName(undefined);
+	};
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
@@ -47,7 +56,8 @@ export function ComposerAssets({
 					Icon={User}
 					elementId={characterAvatarElementId(name)}
 					onEdit={() => onEditCharacter(name)}
-					onRemove={() => deleteCharacter(projectId, queue, name)}
+					onRemove={() => setDeletingName(name)}
+					removeAffordance="corner"
 				/>
 			))}
 			{referenceImages.map((url, i) => (
@@ -65,6 +75,13 @@ export function ComposerAssets({
 					className="aspect-square w-16 shrink-0 rounded-md shimmer-surface sm:w-20"
 				/>
 			))}
+			<DeleteCharacterDialog
+				name={deletingName}
+				onOpenChange={(open) => {
+					if (!open) setDeletingName(undefined);
+				}}
+				onDelete={confirmDelete}
+			/>
 		</div>
 	);
 }
