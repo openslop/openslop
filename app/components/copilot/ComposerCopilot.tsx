@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 import {
 	ChevronDown,
 	CornerDownLeft,
@@ -15,9 +15,7 @@ import {
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
 import { SelectMenu, type SelectMenuOption } from "@/components/ui/select-menu";
 import { cn } from "@/lib/utils";
-import { CharacterEditModal } from "@/app/components/canvas/elements/character/CharacterEditModal";
-import { NarratorEditModal } from "@/app/components/canvas/elements/character/NarratorEditModal";
-import { NewCharacterDialog } from "@/app/components/canvas/elements/character/NewCharacterDialog";
+import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
 import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
@@ -170,11 +168,8 @@ export default function ComposerCopilot({
 	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
 		useConfig();
 	const aspectRatio = useAspectRatio();
-	const [creatingCharacter, setCreatingCharacter] = useState(false);
-	const [editingCharacterName, setEditingCharacterName] = useState<
-		string | undefined
-	>();
-	const [editingNarrator, setEditingNarrator] = useState(false);
+	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
+		useAssetEditDialogs();
 
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({
@@ -201,8 +196,8 @@ export default function ComposerCopilot({
 			<div className="px-4 py-3">
 				<ComposerAssets
 					uploadingCount={uploadingCount}
-					onEditCharacter={setEditingCharacterName}
-					onEditNarrator={() => setEditingNarrator(true)}
+					onEditCharacter={editCharacter}
+					onEditNarrator={openNarrator}
 				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{showPill && (
@@ -238,8 +233,8 @@ export default function ComposerCopilot({
 						<AttachMenu
 							openPicker={openPicker}
 							uploading={uploading}
-							onCreateCharacter={() => setCreatingCharacter(true)}
-							onSelectNarrator={() => setEditingNarrator(true)}
+							onCreateCharacter={openCreateCharacter}
+							onSelectNarrator={openNarrator}
 						/>
 						<SelectMenu
 							value={mode}
@@ -302,23 +297,7 @@ export default function ComposerCopilot({
 					/>
 				</div>
 			</div>
-			<NewCharacterDialog
-				open={creatingCharacter}
-				onOpenChange={setCreatingCharacter}
-				onCreated={(name) => {
-					setCreatingCharacter(false);
-					setEditingCharacterName(name);
-				}}
-			/>
-			<CharacterEditModal
-				open={editingCharacterName !== undefined}
-				onOpenChange={(open) => !open && setEditingCharacterName(undefined)}
-				name={editingCharacterName}
-			/>
-			<NarratorEditModal
-				open={editingNarrator}
-				onOpenChange={setEditingNarrator}
-			/>
+			{dialogs}
 		</div>
 	);
 }

@@ -3,9 +3,7 @@
 import { Mic, Palette, User } from "@/components/ui/icon";
 import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProject } from "@/lib/project/useProject";
-import { getProjectStore } from "@/lib/project/store";
 
 interface ComposerAssetsProps {
 	uploadingCount: number;
@@ -18,18 +16,13 @@ export function ComposerAssets({
 	onEditCharacter,
 	onEditNarrator,
 }: ComposerAssetsProps) {
-	const { projectId } = useConfig();
 	const referenceImages = useProject((s) => s.referenceImages);
 	const characters = useProject((s) => s.metadata.characters);
 	const narration = useProject((s) => s.metadata.narration);
+	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
 
 	const hasNarration = Object.keys(narration).length > 0;
 	const characterEntries = Object.entries(characters);
-
-	const removeReferenceImage = (index: number) =>
-		getProjectStore(projectId)
-			.getState()
-			.setReferenceImages(referenceImages.filter((_, j) => j !== index));
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">

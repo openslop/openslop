@@ -18,6 +18,7 @@ export type ProjectContext = {
 	removeCharacter: (name: string) => void;
 	setNarration: (narration: MetadataVoice) => void;
 	setReferenceImages: (urls: string[]) => void;
+	removeReferenceImage: (index: number) => void;
 	markHydrated: () => void;
 	reset: () => void;
 };
@@ -57,6 +58,10 @@ export function getProjectStore(projectId: string): ProjectStore {
 				setReferenceImages: (urls) =>
 					set((state) => {
 						state.referenceImages = urls;
+					}),
+				removeReferenceImage: (index) =>
+					set((state) => {
+						state.referenceImages.splice(index, 1);
 					}),
 				markHydrated: () =>
 					set((state) => {

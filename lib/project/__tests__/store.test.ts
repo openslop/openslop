@@ -97,6 +97,14 @@ describe("project store updateMetadata", () => {
 		});
 	});
 
+	it("removeReferenceImage drops only the image at the given index", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store.getState().setReferenceImages(["a.png", "b.png", "c.png"]);
+		store.getState().removeReferenceImage(1);
+
+		expect(store.getState().referenceImages).toEqual(["a.png", "c.png"]);
+	});
+
 	it("removeCharacter deletes the entry", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().setCharacter("Alice", { appearance: "A girl" });
