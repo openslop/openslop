@@ -8,9 +8,8 @@ import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import { usePlayerControl } from "./PlayerControlContext";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { useActiveSceneSync } from "./useActiveSceneSync";
-import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 import { usePreservedPlayhead } from "./usePreservedPlayhead";
-import { findSegmentIndexAt, useSceneSegments } from "./useSceneSegments";
+import { useActiveSegmentIndex, useSceneSegments } from "./useSceneSegments";
 import styles from "./VideoPlayer.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
@@ -59,12 +58,7 @@ type VideoPreviewProps = {
 export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const segments = useSceneSegments();
-	const activeIndex = usePlayerValue(
-		player,
-		FRAME_EVENTS,
-		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / layout.fps),
-		-1,
-	);
+	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
 	useActiveSceneSync(player, segments, activeIndex);
 	const { registerPlayer } = usePlayerControl();
 	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(

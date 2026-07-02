@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import AuthForm from "../components/AuthForm";
+import { AuthFooterLink } from "../components/AuthFooterLink";
 import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
@@ -16,15 +16,11 @@ export default function SignupPage() {
 			sentKind="sign-up"
 			otpData={{ full_name: fullName }}
 			footer={
-				<>
-					Already have an account?{" "}
-					<Link
-						href="/login"
-						className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
-					>
-						Login
-					</Link>
-				</>
+				<AuthFooterLink
+					prompt="Already have an account?"
+					href="/login"
+					label="Login"
+				/>
 			}
 		>
 			<Input

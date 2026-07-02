@@ -1,9 +1,11 @@
+import type { PlayerRef } from "@remotion/player";
 import { useMemo } from "react";
 import { isForeground } from "@/lib/canvas/guards";
 import type { SceneElement } from "@/lib/canvas/types";
 import type { Sequence, VideoLayout } from "@/lib/video/types";
 import type { SeekThumbnail } from "./SeekTooltip";
 import { useLayout } from "./VideoLayoutContext";
+import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 
 export type SceneSegment = {
 	sceneId: string;
@@ -34,6 +36,19 @@ export function findSegmentIndexAt(
 		if (timeSec < seg.start + seg.duration) return i;
 	}
 	return segments.length - 1;
+}
+
+export function useActiveSegmentIndex(
+	player: PlayerRef | null,
+	segments: SceneSegment[],
+	fps: number | undefined,
+): number {
+	return usePlayerValue(
+		player,
+		FRAME_EVENTS,
+		(p) => (fps ? findSegmentIndexAt(segments, p.getCurrentFrame() / fps) : -1),
+		-1,
+	);
 }
 
 export function useSceneSegments(): SceneSegment[] {

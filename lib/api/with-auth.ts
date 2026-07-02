@@ -6,23 +6,33 @@ import { forbidden, serverError, unauthorized } from "./response";
 
 type RouteBody = (user: User) => Promise<Response>;
 
-// Wraps a route handler with auth + a uniform error envelope. The handler only
-// runs for authorized users; thrown errors are logged and returned as 500.
+// Uniform error envelope: thrown errors are logged and returned as 500.
+async function runGuarded(
+	label: string,
+	run: () => Promise<Response>,
+): Promise<Response> {
+	try {
+		return await run();
+	} catch (error) {
+		logger.error(error, `${label} failed`);
+		return serverError(`${label} failed: ${stringifyError(error)}`);
+	}
+}
+
+// Wraps a route handler with auth + the error envelope. The handler only runs
+// for authorized users.
 async function guard(
 	label: string,
 	run: RouteBody,
 	authorize: (user: User) => Response | null = () => null,
 ): Promise<Response> {
-	try {
+	return runGuarded(label, async () => {
 		const user = await getUser();
 		if (!user) return unauthorized();
 		const denied = authorize(user);
 		if (denied) return denied;
-		return await run(user);
-	} catch (error) {
-		logger.error(error, `${label} failed`);
-		return serverError(`${label} failed: ${stringifyError(error)}`);
-	}
+		return run(user);
+	});
 }
 
 export const withApiAccess = (label: string, run: RouteBody) =>
@@ -31,3 +41,7 @@ export const withApiAccess = (label: string, run: RouteBody) =>
 	);
 
 export const withSession = (label: string, run: RouteBody) => guard(label, run);
+
+// Public routes: no auth, but still get the uniform error envelope.
+export const withPublic = (label: string, run: () => Promise<Response>) =>
+	runGuarded(label, run);

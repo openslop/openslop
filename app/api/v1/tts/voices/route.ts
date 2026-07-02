@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseSearchParams } from "@/lib/api/parse";
 import { getTTSProvider } from "@/lib/api/providers";
 import { withApiAccess } from "@/lib/api/with-auth";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 
 export async function GET(request: NextRequest) {
 	return withApiAccess("Voice search", async () => {
-		const params = voiceSearchParamsSchema.parse(
-			Object.fromEntries(request.nextUrl.searchParams),
+		const parsed = parseSearchParams(
+			request,
+			voiceSearchParamsSchema,
+			"Voice search",
 		);
-		const voices = await getTTSProvider().search(params);
+		if (!parsed.ok) return parsed.response;
+		const voices = await getTTSProvider().search(parsed.data);
 		return NextResponse.json({ voices });
 	});
 }

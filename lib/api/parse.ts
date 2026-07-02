@@ -25,3 +25,17 @@ export async function parseBody<TSchema extends z.ZodType>(
 	logger.warn(`${label}: ${message}`);
 	return { ok: false, response: badRequest(message) };
 }
+
+export function parseSearchParams<TSchema extends z.ZodType>(
+	request: NextRequest,
+	schema: TSchema,
+	label: string,
+): ParseResult<z.infer<TSchema>> {
+	const parsed = schema.safeParse(
+		Object.fromEntries(request.nextUrl.searchParams),
+	);
+	if (parsed.success) return { ok: true, data: parsed.data };
+	const message = parsed.error.issues[0]?.message ?? "Invalid query parameters";
+	logger.warn(`${label}: ${message}`);
+	return { ok: false, response: badRequest(message) };
+}

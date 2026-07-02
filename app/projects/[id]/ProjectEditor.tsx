@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
@@ -28,7 +28,8 @@ export default function ProjectEditor({
 	initialGeneration: Record<string, ElementSnapshot>;
 	user: User;
 }): ReactNode {
-	applyStoreSnapshot(getProjectStore(projectId), initialStore);
+	// Hydrate once per mount, before children render
+	useState(() => applyStoreSnapshot(getProjectStore(projectId), initialStore));
 
 	return (
 		<TooltipProvider>
