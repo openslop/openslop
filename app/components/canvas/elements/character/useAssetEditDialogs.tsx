@@ -6,9 +6,8 @@ import { NarratorEditModal } from "./NarratorEditModal";
 import { NewCharacterDialog } from "./NewCharacterDialog";
 
 /**
- * Owns the create-character / edit-character / edit-narrator dialog flow shared
- * by the editor's assets panel and the composer. Returns imperative openers plus
- * the rendered dialogs (mirrors the `useImageUpload` → `inputElement` pattern).
+ * Returns rendered dialogs as JSX (mirrors the `useImageUpload` → `inputElement`
+ * pattern) plus imperative openers.
  */
 export function useAssetEditDialogs() {
 	const [creating, setCreating] = useState(false);
@@ -39,7 +38,7 @@ export function useAssetEditDialogs() {
 
 	return {
 		openCreateCharacter: () => setCreating(true),
-		editCharacter: setEditingName,
+		editCharacter: (name: string) => setEditingName(name),
 		openNarrator: () => setEditingNarrator(true),
 		dialogs,
 	};
