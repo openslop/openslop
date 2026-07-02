@@ -11,7 +11,7 @@ export function DeleteButton({
 		<TooltipIconButton
 			label="Delete"
 			className={cn(
-				"text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20",
+				"bg-muted text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20",
 				className,
 			)}
 			{...props}
