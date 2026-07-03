@@ -9,6 +9,7 @@ import type { ProjectRow } from "@/lib/project/api";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import UserProfile from "@/app/components/UserProfile";
 import { Button } from "@/components/ui/button";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { DeleteButton } from "@/components/ui/delete-button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { relativeTime } from "@/lib/project/relativeTime";
@@ -19,6 +20,7 @@ export default function ProjectsList({
 	initialProjects: ProjectRow[];
 }) {
 	const [projects, setProjects] = useState(initialProjects);
+	const [deleting, setDeleting] = useState<ProjectRow>();
 	const [pending, startTransition] = useTransition();
 	const router = useRouter();
 
@@ -101,7 +103,7 @@ export default function ProjectsList({
 									<div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
 										<DeleteButton
 											ariaLabel={`Delete ${project.name}`}
-											onClick={() => handleDelete(project.id)}
+											onClick={() => setDeleting(project)}
 										/>
 									</div>
 								</div>
@@ -125,6 +127,19 @@ export default function ProjectsList({
 					</ul>
 				</div>
 			</div>
+			<ConfirmDeleteDialog
+				open={deleting !== undefined}
+				onOpenChange={(open) => {
+					if (!open) setDeleting(undefined);
+				}}
+				title={`Delete ${deleting?.name}?`}
+				description="This permanently deletes the project and everything generated in it. It can't be undone."
+				actionLabel="Delete project"
+				onConfirm={() => {
+					if (deleting) handleDelete(deleting.id);
+					setDeleting(undefined);
+				}}
+			/>
 		</TooltipProvider>
 	);
 }

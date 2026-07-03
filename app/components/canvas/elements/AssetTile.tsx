@@ -4,6 +4,7 @@ import { Pencil, X, type LucideIcon } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
+import { RemoveCrossButton } from "./RemoveCrossButton";
 
 function OverlayButton({
 	icon: Icon,
@@ -19,7 +20,7 @@ function OverlayButton({
 			type="button"
 			onClick={onClick}
 			aria-label={label}
-			className="absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/tile:opacity-100 focus:opacity-100 focus:outline-none"
+			className="focus-ring absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition group-hover/tile:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
 		>
 			<Icon className="h-3.5 w-3.5" />
 		</button>
@@ -33,6 +34,7 @@ export function AssetTile({
 	elementId,
 	onEdit,
 	onRemove,
+	removeAffordance = "overlay",
 	fallback = "initial",
 }: {
 	name?: string;
@@ -41,6 +43,8 @@ export function AssetTile({
 	elementId?: string;
 	onEdit?: () => void;
 	onRemove?: () => void;
+	/** "corner" pins a pill-style cross outside the tile so it can coexist with the edit overlay. */
+	removeAffordance?: "overlay" | "corner";
 	fallback?: "initial" | "icon";
 }) {
 	const status = useQueueSelector(
@@ -50,7 +54,7 @@ export function AssetTile({
 	const fallbackContent =
 		fallback === "icon" || !initial ? <Icon className="h-5 w-5" /> : initial;
 	return (
-		<div className="group/tile flex w-16 flex-col gap-1 sm:w-20">
+		<div className="group/tile relative flex w-16 flex-col gap-1 sm:w-20">
 			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
 				{previewUrl ? (
 					<ImageWithShimmer
@@ -91,14 +95,23 @@ export function AssetTile({
 						onClick={onEdit}
 					/>
 				)}
-				{onRemove && status !== "generating" && (
-					<OverlayButton
-						icon={X}
-						label={`Remove ${name ?? "asset"}`}
-						onClick={onRemove}
-					/>
-				)}
+				{onRemove &&
+					removeAffordance === "overlay" &&
+					status !== "generating" && (
+						<OverlayButton
+							icon={X}
+							label={`Remove ${name ?? "asset"}`}
+							onClick={onRemove}
+						/>
+					)}
 			</div>
+			{onRemove && removeAffordance === "corner" && status !== "generating" && (
+				<RemoveCrossButton
+					label={`Remove ${name ?? "asset"}`}
+					onClick={onRemove}
+					className="z-10 opacity-0 group-hover/tile:opacity-100"
+				/>
+			)}
 			{name && (
 				<span
 					className="truncate text-badge text-muted-foreground"

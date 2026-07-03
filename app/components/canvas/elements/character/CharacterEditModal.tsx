@@ -25,6 +25,7 @@ import {
 	characterAvatarElement,
 	characterAvatarElementId,
 } from "@/lib/project/ensureCharacterAvatars";
+import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
@@ -68,7 +69,6 @@ function CharacterEditDialogBody({
 	const metadata = useProjectStore(projectId, (s) => s.metadata);
 	const character = metadata.characters[name];
 	const setCharacter = useProjectStore(projectId, (s) => s.setCharacter);
-	const removeCharacter = useProjectStore(projectId, (s) => s.removeCharacter);
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [closeConfirm, setCloseConfirm] = useState(false);
@@ -131,8 +131,7 @@ function CharacterEditDialogBody({
 			setConfirmDelete(true);
 			return;
 		}
-		queue.discard(avatarElementId);
-		removeCharacter(name);
+		deleteCharacter(projectId, queue, name);
 		onClose();
 	};
 
