@@ -33,6 +33,14 @@ export class AttributeSchema {
 		return new AttributeSchema(defs);
 	}
 
+	/** Layer `overrides` on top of `base` (same-key defs in overrides win, new keys append). */
+	static merge(
+		base: AttributeSchema,
+		overrides: AttributeSchema,
+	): AttributeSchema {
+		return overrides.extend(base);
+	}
+
 	/** Layer this schema's defs on top of `base`'s (same-key defs override, new keys append). */
 	extend(base: AttributeSchema): AttributeSchema {
 		return AttributeSchema.from(mergeDefs(base.defs, this.defs));
@@ -42,7 +50,10 @@ export class AttributeSchema {
 		return AttributeSchema.from(mergeDefs(this.defs, [def]));
 	}
 
-	override(key: string, partial: Partial<AttributeDef>): AttributeSchema {
+	override(
+		key: string,
+		partial: Partial<Omit<AttributeDef, "key">>,
+	): AttributeSchema {
 		return AttributeSchema.from(
 			this.defs.map((def) => (def.key === key ? { ...def, ...partial } : def)),
 		);

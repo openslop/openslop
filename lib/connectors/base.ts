@@ -21,7 +21,11 @@ export abstract class BaseConnector<
 	abstract readonly type: ConnectorType;
 	protected plugins: ConnectorPlugin[];
 
-	/** Attribute schema for this connector type/model. Types with no element-settings UI (e.g. llm) inherit this empty default. */
+	/**
+	 * Attribute schema for this connector type/model. Types with no element-settings
+	 * UI (e.g. llm) inherit this empty default. For per-model sets, override on the
+	 * provider subclass and branch on `model` (e.g. `OpenSlopTTS.attributesFor`).
+	 */
 	static attributesFor(_model?: string): AttributeSchema {
 		return AttributeSchema.from([]);
 	}

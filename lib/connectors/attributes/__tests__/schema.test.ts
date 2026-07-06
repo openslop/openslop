@@ -35,17 +35,17 @@ describe("AttributeSchema", () => {
 		});
 	});
 
-	it("extend layers this schema's defs on top of a base, overriding same keys and appending new ones", () => {
+	it("merge layers overrides on top of a base, overriding same keys and appending new ones", () => {
 		const base = AttributeSchema.from([
 			{ key: "volume", label: "Volume", default: "5" },
 			{ key: "motion", label: "Motion", default: "none" },
 		]);
-		const modelOverrides = AttributeSchema.from([
+		const overrides = AttributeSchema.from([
 			{ key: "volume", label: "Volume", default: "8" },
 			{ key: "seed", label: "Seed", default: "0" },
 		]);
 
-		const merged = modelOverrides.extend(base);
+		const merged = AttributeSchema.merge(base, overrides);
 
 		expect(merged.keys).toEqual(["volume", "motion", "seed"]);
 		expect(merged.defaultAttributes).toEqual({
@@ -53,6 +53,19 @@ describe("AttributeSchema", () => {
 			motion: "none",
 			seed: "0",
 		});
+	});
+
+	it("extend is equivalent to merge with reversed argument order", () => {
+		const base = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+		]);
+		const overrides = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "8" },
+		]);
+
+		expect(overrides.extend(base).defaultAttributes).toEqual(
+			AttributeSchema.merge(base, overrides).defaultAttributes,
+		);
 	});
 
 	it("add appends a new def, or replaces an existing one with the same key", () => {

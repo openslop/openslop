@@ -28,13 +28,13 @@ export function createCanvasNode(
 	const schema = resolveAttributeSchema(
 		config.connector,
 		provider,
-		connectorConfig.defaultModel,
+		connectorConfig?.defaultModel,
 	);
 	const customAttributes: Record<string, string> = {
 		...schema.defaultAttributes,
 		...opts.attrs,
 	};
-	if (connectorConfig.defaultModel) {
+	if (connectorConfig?.defaultModel) {
 		customAttributes.model = connectorConfig.defaultModel;
 		customAttributes.provider = provider;
 	}
