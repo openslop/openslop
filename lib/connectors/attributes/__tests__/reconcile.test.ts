@@ -1,0 +1,65 @@
+import { describe, expect, it } from "vitest";
+import { AttributeSchema } from "../schema";
+import { reconcileAttributes } from "../reconcile";
+
+describe("reconcileAttributes", () => {
+	it("drops keys the new schema no longer has", () => {
+		const oldSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+			{ key: "motion", label: "Motion", default: "none" },
+		]);
+		const newSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+		]);
+
+		const delta = reconcileAttributes(oldSchema, newSchema, {
+			volume: "8",
+			motion: "kenBurnsIn",
+		});
+
+		expect(delta).toEqual({ motion: null });
+	});
+
+	it("fills defaults for keys the new schema gained that aren't already set", () => {
+		const oldSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+		]);
+		const newSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+			{ key: "seed", label: "Seed", default: "0" },
+		]);
+
+		const delta = reconcileAttributes(oldSchema, newSchema, { volume: "8" });
+
+		expect(delta).toEqual({ seed: "0" });
+	});
+
+	it("does not overwrite an already-set value for a key the new schema keeps", () => {
+		const oldSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+		]);
+		const newSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "9" },
+		]);
+
+		const delta = reconcileAttributes(oldSchema, newSchema, { volume: "3" });
+
+		expect(delta).toEqual({});
+	});
+
+	it("never touches attrs outside both schemas (e.g. model/provider metadata)", () => {
+		const oldSchema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+		]);
+		const newSchema = AttributeSchema.from([]);
+
+		const delta = reconcileAttributes(oldSchema, newSchema, {
+			volume: "8",
+			model: "next-model",
+			provider: "openslop",
+			characters: "Red,Granny",
+		});
+
+		expect(delta).toEqual({ volume: null });
+	});
+});

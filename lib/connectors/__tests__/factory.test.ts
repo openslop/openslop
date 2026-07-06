@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createConnector } from "../factory";
+import { createConnector, resolveAttributeSchema } from "../factory";
 import type { ConnectorType } from "../types";
 
 const stubConfig = {
@@ -34,5 +34,38 @@ describe("createConnector", () => {
 			const connector = createConnector(type, "openslop", stubConfig);
 			expect(connector.type).toBe(type);
 		}
+	});
+});
+
+describe("resolveAttributeSchema", () => {
+	it("resolves the connector type's base schema, keyed by connector type not element type", () => {
+		// narration and character both resolve through "tts" and get the same schema.
+		expect(resolveAttributeSchema("tts", "openslop").keys).toEqual([
+			"emotion",
+			"speed",
+			"volume",
+			"captions",
+		]);
+	});
+
+	it("resolves distinct schemas for image vs animated_image despite sharing runtime type", () => {
+		expect(resolveAttributeSchema("image", "openslop").keys).toEqual([
+			"motion",
+		]);
+		expect(resolveAttributeSchema("animated_image", "openslop").keys).toEqual([
+			"videoPrompt",
+			"duration",
+			"motion",
+		]);
+	});
+
+	it("llm has no element-settings attributes, inherited empty from the base connector", () => {
+		expect(resolveAttributeSchema("llm", "openslop").keys).toEqual([]);
+	});
+
+	it("throws for unknown provider", () => {
+		expect(() => resolveAttributeSchema("tts", "nonexistent" as never)).toThrow(
+			'Unknown provider "nonexistent" for type "tts"',
+		);
 	});
 });

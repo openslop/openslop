@@ -10,6 +10,7 @@ import { OpenSlopSFX } from "./sfx/openslop";
 import { OpenSlopTTS } from "./tts/openslop";
 import type { BaseVideoConnector } from "./video/connector";
 import { OpenSlopVideo } from "./video/openslop";
+import type { AttributeSchema } from "./attributes/schema";
 import type {
 	ConnectorConfig,
 	ConnectorType,
@@ -51,4 +52,16 @@ export function createConnector<T extends ConnectorType>(
 	if (!Ctor)
 		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
 	return new Ctor(config) as ConnectorTypeMap[T];
+}
+
+/** Resolve the attribute schema for a (connectorType, provider, model), via the same class hierarchy `createConnector` instantiates. */
+export function resolveAttributeSchema(
+	type: ConnectorType,
+	provider: ProviderKey,
+	model?: string,
+): AttributeSchema {
+	const Ctor = PROVIDERS[type][provider];
+	if (!Ctor)
+		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
+	return Ctor.attributesFor(model);
 }

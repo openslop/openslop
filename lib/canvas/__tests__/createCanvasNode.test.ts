@@ -7,36 +7,38 @@ vi.mock("../elementConfigs", () => ({
 			connector: "sfx",
 			outputKind: "audio",
 			label: "Sound",
-			defaultAttributes: { loops: "1" },
-			visibleAttributes: {},
 		},
 		narration: {
 			type: "narration",
 			connector: "tts",
 			outputKind: "audio",
 			label: "Narration",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
 		},
 		image: {
 			type: "image",
 			connector: "image",
 			outputKind: "image",
 			label: "Image",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
 		},
 	},
 }));
 
-vi.mock("../hydrateConnectorConfig", () => ({
-	hydrateConnectorConfig: () => (node: Record<string, unknown>) => ({
-		...node,
-		customAttributes: {
-			...(node.customAttributes as Record<string, string> | undefined),
-			model: "test-model",
-			provider: "openslop",
+vi.mock("@/lib/config/connectorUtils", () => ({
+	getDefaultConnector: () => ({
+		provider: "openslop",
+		config: {
+			defaultModel: "test-model",
+			models: ["test-model"],
+			isDefault: true,
 		},
+	}),
+}));
+
+vi.mock("@/lib/connectors/factory", () => ({
+	resolveAttributeSchema: (type: string) => ({
+		defaultAttributes: type === "sfx" ? { loops: "1" } : {},
+		visibleAttributes: {},
+		keys: [],
 	}),
 }));
 
@@ -99,5 +101,21 @@ describe("createCanvasNode", () => {
 	it("defaults text child to empty string", () => {
 		const node = createCanvasNode("narration", connectors);
 		expect(node.children[1].text).toBe("");
+	});
+});
+
+describe("createCanvasNode — no default model configured", () => {
+	it("still applies schema defaults but skips stamping model/provider", async () => {
+		vi.resetModules();
+		vi.doMock("@/lib/config/connectorUtils", () => ({
+			getDefaultConnector: () => ({
+				provider: "openslop",
+				config: { defaultModel: "", models: [], isDefault: true },
+			}),
+		}));
+		const { createCanvasNode: createCanvasNodeNoModel } =
+			await import("../createCanvasNode");
+		const node = createCanvasNodeNoModel("sound", connectors);
+		expect(node.customAttributes).toEqual({ loops: "1" });
 	});
 });

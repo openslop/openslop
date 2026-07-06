@@ -2,11 +2,11 @@ import { useMemo } from "react";
 import { Codesandbox } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
+import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
+import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import {
-	ELEMENT_CONFIGS,
-	type AttributeSpec,
-} from "@/lib/canvas/elementConfigs";
+import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { AttributeBadge } from "./AttributeBadge";
 
 export function ModelBadge({ element }: { element: CanvasContentElement }) {
@@ -26,5 +26,31 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	}, [connector, connectorConfig, model, provider]);
 
 	if (!spec) return null;
-	return <AttributeBadge element={element} attrKey="model" spec={spec} />;
+
+	const reconcileForModel = (next: string) => {
+		const oldSchema = resolveAttributeSchema(
+			connector,
+			provider as ProviderKey,
+			model,
+		);
+		const newSchema = resolveAttributeSchema(
+			connector,
+			provider as ProviderKey,
+			next,
+		);
+		return reconcileAttributes(
+			oldSchema,
+			newSchema,
+			element.customAttributes ?? {},
+		);
+	};
+
+	return (
+		<AttributeBadge
+			element={element}
+			attrKey="model"
+			spec={spec}
+			onSelect={reconcileForModel}
+		/>
+	);
 }

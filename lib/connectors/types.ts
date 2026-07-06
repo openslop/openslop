@@ -1,5 +1,6 @@
 import type { GatewayClient } from "@/lib/gateway/base";
 import type { WithMetadata } from "@/lib/providers/base";
+import type { AttributeSchema } from "./attributes/schema";
 import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
 
 export type ConnectorType =
@@ -192,6 +193,7 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 
 export type LLMPlugin = ConnectorPlugin<LLMGenerateParams, LLMGenerateResult>;
 
-export type ProviderConstructor<T extends Connector = Connector> = new (
-	config: ConnectorConfig,
-) => T;
+export interface ProviderConstructor<T extends Connector = Connector> {
+	new (config: ConnectorConfig): T;
+	attributesFor(model?: string): AttributeSchema;
+}
