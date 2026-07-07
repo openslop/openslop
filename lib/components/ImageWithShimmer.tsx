@@ -22,22 +22,37 @@ export function ImageWithShimmer({
 	fill,
 	className,
 	src,
+	loader,
+	quality,
+	preload,
+	priority,
+	placeholder,
+	blurDataURL,
+	overrideSrc,
+	onLoadingComplete,
+	layout,
+	objectFit,
+	objectPosition,
+	lazyBoundary,
+	lazyRoot,
 	...props
 }: ImageProps) {
 	const [loaded, setLoaded] = useState(false);
+	const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
+		onLoad?.(event);
+		setLoaded(true);
+	};
 
 	if (unoptimized) {
 		return (
 			<>
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
+					{...props}
 					src={typeof src === "string" ? src : undefined}
 					alt={alt}
 					className={cn(fill && "absolute inset-0 h-full w-full", className)}
-					onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
-						onLoad?.(event);
-						setLoaded(true);
-					}}
+					onLoad={handleLoad}
 				/>
 				{!loaded && (
 					<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
@@ -54,10 +69,20 @@ export function ImageWithShimmer({
 				fill={fill}
 				className={className}
 				alt={alt}
-				onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
-					onLoad?.(event);
-					setLoaded(true);
-				}}
+				loader={loader}
+				quality={quality}
+				preload={preload}
+				priority={priority}
+				placeholder={placeholder}
+				blurDataURL={blurDataURL}
+				overrideSrc={overrideSrc}
+				onLoadingComplete={onLoadingComplete}
+				layout={layout}
+				objectFit={objectFit}
+				objectPosition={objectPosition}
+				lazyBoundary={lazyBoundary}
+				lazyRoot={lazyRoot}
+				onLoad={handleLoad}
 			/>
 			{!loaded && (
 				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
