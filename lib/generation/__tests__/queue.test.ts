@@ -441,6 +441,42 @@ describe("GenerationQueue", () => {
 
 			generationQueue.discard("sm5");
 		});
+
+		it("cancels an in-flight generation job so it can't clobber the manual result later", async () => {
+			let resolveGenerate: (value: unknown) => void = () => {};
+			generateMock.mockReturnValue(
+				new Promise((resolve) => {
+					resolveGenerate = resolve;
+				}),
+			);
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.enqueue(makeJob("sm6", { inputs }));
+			expect(generationQueue.getElementSnapshot("sm6").status).toBe(
+				"generating",
+			);
+
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			generationQueue.setManualResult("sm6", uploaded, inputs);
+			expect(generationQueue.getElementSnapshot("sm6").result).toEqual(
+				uploaded,
+			);
+
+			// The generation job that was in flight when setManualResult ran
+			// resolves afterwards — it must not overwrite the manual result.
+			resolveGenerate({
+				url: "https://example.com/generated.png",
+				durationSec: 0,
+			});
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("sm6").result).toEqual(
+				uploaded,
+			);
+
+			generationQueue.discard("sm6");
+		});
 	});
 
 	describe("restoreResult", () => {

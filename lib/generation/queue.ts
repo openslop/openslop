@@ -236,6 +236,7 @@ export class GenerationQueue {
 		result: AssetResult,
 		inputs: GenerationInputs,
 	): void {
+		this.cancel(elementId);
 		const key = serializeInputs(inputs);
 		const elHistory =
 			this.history.get(elementId) ?? new Map<string, AssetResult>();
