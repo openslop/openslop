@@ -24,7 +24,7 @@ export abstract class BaseConnector<
 	/**
 	 * Attribute schema for this connector type/model. Types with no element-settings
 	 * UI (e.g. llm) inherit this empty default. For per-model sets, override on the
-	 * provider subclass and branch on `model` (e.g. `OpenSlopTTS.attributesFor`).
+	 * provider subclass and branch on `model`.
 	 */
 	static attributesFor(_model?: string): AttributeSchema {
 		return AttributeSchema.from([]);
