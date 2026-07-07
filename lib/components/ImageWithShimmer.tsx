@@ -1,9 +1,28 @@
 "use client";
 
 import { useState, type SyntheticEvent } from "react";
+import omit from "lodash/omit";
 import Image, { type ImageProps } from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+// Props next/image understands but a plain <img> doesn't — stripped before
+// spreading onto <img> in the unoptimized path below.
+const NEXT_ONLY_IMAGE_PROPS = [
+	"loader",
+	"quality",
+	"preload",
+	"priority",
+	"placeholder",
+	"blurDataURL",
+	"overrideSrc",
+	"onLoadingComplete",
+	"layout",
+	"objectFit",
+	"objectPosition",
+	"lazyBoundary",
+	"lazyRoot",
+] as const;
 
 /**
  * `next/image` with a shimmer overlay that hides once the image loads.
@@ -22,19 +41,6 @@ export function ImageWithShimmer({
 	fill,
 	className,
 	src,
-	loader,
-	quality,
-	preload,
-	priority,
-	placeholder,
-	blurDataURL,
-	overrideSrc,
-	onLoadingComplete,
-	layout,
-	objectFit,
-	objectPosition,
-	lazyBoundary,
-	lazyRoot,
 	...props
 }: ImageProps) {
 	const [loaded, setLoaded] = useState(false);
@@ -48,10 +54,13 @@ export function ImageWithShimmer({
 			<>
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
-					{...props}
+					{...omit(props, NEXT_ONLY_IMAGE_PROPS)}
 					src={typeof src === "string" ? src : undefined}
 					alt={alt}
 					className={cn(fill && "absolute inset-0 h-full w-full", className)}
+					ref={(img) => {
+						if (img?.complete) setLoaded(true);
+					}}
 					onLoad={handleLoad}
 				/>
 				{!loaded && (
@@ -69,19 +78,6 @@ export function ImageWithShimmer({
 				fill={fill}
 				className={className}
 				alt={alt}
-				loader={loader}
-				quality={quality}
-				preload={preload}
-				priority={priority}
-				placeholder={placeholder}
-				blurDataURL={blurDataURL}
-				overrideSrc={overrideSrc}
-				onLoadingComplete={onLoadingComplete}
-				layout={layout}
-				objectFit={objectFit}
-				objectPosition={objectPosition}
-				lazyBoundary={lazyBoundary}
-				lazyRoot={lazyRoot}
 				onLoad={handleLoad}
 			/>
 			{!loaded && (
