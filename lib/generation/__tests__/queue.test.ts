@@ -346,6 +346,103 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("setManualResult", () => {
+		it("sets result, clears error, and moves status to idle", () => {
+			const result = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.setManualResult("sm1", result, inputs);
+
+			const snap = generationQueue.getElementSnapshot("sm1");
+			expect(snap.status).toBe("idle");
+			expect(snap.result).toEqual(result);
+			expect(snap.error).toBeNull();
+			expect(snap.resultInputs).toEqual(inputs);
+
+			generationQueue.discard("sm1");
+		});
+
+		it("overwrites an existing generated result", async () => {
+			const generated = {
+				url: "https://example.com/generated.png",
+				durationSec: 0,
+			};
+			generateMock.mockResolvedValue(generated);
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.enqueue(makeJob("sm2", { inputs }));
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
+				generated,
+			);
+
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			generationQueue.setManualResult("sm2", uploaded, inputs);
+			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
+				uploaded,
+			);
+
+			generationQueue.discard("sm2");
+		});
+
+		it("overwrites an existing error", () => {
+			generationQueue.setError("sm3", "something went wrong");
+			expect(generationQueue.getElementSnapshot("sm3").error).toBe(
+				"something went wrong",
+			);
+
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			generationQueue.setManualResult("sm3", uploaded, {
+				prompt: "p",
+				attributes: {},
+			});
+			const snap = generationQueue.getElementSnapshot("sm3");
+			expect(snap.error).toBeNull();
+			expect(snap.result).toEqual(uploaded);
+
+			generationQueue.discard("sm3");
+		});
+
+		it("populates history so a later restoreResult recovers it", () => {
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.setManualResult("sm4", uploaded, inputs);
+			generationQueue.setError("sm4", "prompt changed");
+			expect(generationQueue.getElementSnapshot("sm4").result).toBeNull();
+
+			const restored = generationQueue.restoreResult("sm4", inputs);
+			expect(restored).toBe(true);
+			expect(generationQueue.getElementSnapshot("sm4").result).toEqual(
+				uploaded,
+			);
+
+			generationQueue.discard("sm4");
+		});
+
+		it("notifies subscribers", () => {
+			const listener = vi.fn();
+			generationQueue.subscribe(listener);
+			generationQueue.setManualResult(
+				"sm5",
+				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
+				{ prompt: "p", attributes: {} },
+			);
+			expect(listener).toHaveBeenCalled();
+
+			generationQueue.discard("sm5");
+		});
+	});
+
 	describe("restoreResult", () => {
 		it("restores cached result for the same inputs", async () => {
 			const result = { url: "https://example.com/asset.png", durationSec: 0 };

@@ -14,6 +14,7 @@ import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
 import { AnimateButton } from "./AnimateButton";
+import { UploadImageButton } from "./UploadImageButton";
 import { ModelBadge } from "./ModelBadge";
 import {
 	Popover,
@@ -125,6 +126,7 @@ export function ElementContainer({
 						contentEditable={false}
 					>
 						<ElementStaleIndicator element={element} />
+						<UploadImageButton element={element} />
 						<AnimateButton element={element} />
 						<ElementGenerateButton element={element} />
 					</div>

@@ -231,6 +231,26 @@ export class GenerationQueue {
 		this.notify();
 	}
 
+	setManualResult(
+		elementId: string,
+		result: AssetResult,
+		inputs: GenerationInputs,
+	): void {
+		const key = serializeInputs(inputs);
+		const elHistory =
+			this.history.get(elementId) ?? new Map<string, AssetResult>();
+		elHistory.set(key, result);
+		this.history.set(elementId, elHistory);
+		this.update(elementId, {
+			status: "idle",
+			seconds: 0,
+			result,
+			error: null,
+			resultInputs: inputs,
+		});
+		this.notify();
+	}
+
 	restoreResult(elementId: string, inputs: GenerationInputs): boolean {
 		const key = serializeInputs(inputs);
 		const cached = this.history.get(elementId)?.get(key);
