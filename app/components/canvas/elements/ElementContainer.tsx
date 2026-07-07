@@ -38,9 +38,15 @@ function ElementSettings({
 	const { connectorConfig } = useConfig();
 	const { model, provider } = element.customAttributes ?? {};
 	const fallback = getDefaultConnector(connectorConfig, config.connector);
+	// A persisted provider that's since been renamed/removed from the registry
+	// must not reach resolveAttributeSchema, which throws for unknown providers.
+	const resolvedProvider =
+		provider && provider in connectorConfig[config.connector]
+			? (provider as ProviderKey)
+			: fallback.provider;
 	const schema = resolveAttributeSchema(
 		config.connector,
-		(provider as ProviderKey) ?? fallback.provider,
+		resolvedProvider,
 		model ?? fallback.config.defaultModel,
 	);
 	const entries = Object.entries(schema.visibleAttributes);
