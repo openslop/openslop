@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useCallback, useState, type SyntheticEvent } from "react";
 import omit from "lodash/omit";
 import Image, { type ImageProps } from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,6 +48,13 @@ export function ImageWithShimmer({
 		onLoad?.(event);
 		setLoaded(true);
 	};
+	// next/image's own <img> does the same complete-on-mount check — a cached
+	// image's `load` event may never fire, which would otherwise leave the
+	// shimmer stuck on top forever. useCallback keeps the ref identity stable
+	// so React doesn't detach/reattach it on every render.
+	const checkAlreadyLoaded = useCallback((img: HTMLImageElement | null) => {
+		if (img?.complete) setLoaded(true);
+	}, []);
 
 	if (unoptimized) {
 		return (
@@ -58,9 +65,7 @@ export function ImageWithShimmer({
 					src={typeof src === "string" ? src : undefined}
 					alt={alt}
 					className={cn(fill && "absolute inset-0 h-full w-full", className)}
-					ref={(img) => {
-						if (img?.complete) setLoaded(true);
-					}}
+					ref={checkAlreadyLoaded}
 					onLoad={handleLoad}
 				/>
 				{!loaded && (
