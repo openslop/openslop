@@ -22,7 +22,7 @@ interface AttributeBadgeProps {
 	spec: AttributeSpec;
 	hideLabel?: boolean;
 	/** Extra attrs to merge alongside the new value (e.g. schema reconciliation on model change). */
-	onSelect?: (next: string) => Record<string, string | null>;
+	deriveExtraAttrs?: (next: string) => Record<string, string | null>;
 }
 
 export function AttributeBadge({
@@ -30,7 +30,7 @@ export function AttributeBadge({
 	attrKey,
 	spec,
 	hideLabel = false,
-	onSelect,
+	deriveExtraAttrs,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
 	const value = element.customAttributes?.[attrKey] ?? "";
@@ -81,7 +81,7 @@ export function AttributeBadge({
 	const handleSelect = (next: string) => {
 		updateElementAttrs(editor, element, {
 			[attrKey]: next,
-			...onSelect?.(next),
+			...deriveExtraAttrs?.(next),
 		});
 	};
 

@@ -27,6 +27,13 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 
 	if (!spec) return null;
 
+	// NOTE: every connector's attributesFor currently ignores `model`, so
+	// oldSchema/newSchema are always identical for a given (connector, provider)
+	// and this reconciliation is a no-op today — it's the seam for when
+	// per-model attribute sets land, not yet exercised. It also only diffs key
+	// presence, not enum-value validity (e.g. a value valid on the old model
+	// but not the new one survives the switch); worth revisiting once per-model
+	// schemas actually differ.
 	const reconcileForModel = (next: string) => {
 		const oldSchema = resolveAttributeSchema(
 			connector,
@@ -50,7 +57,7 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 			element={element}
 			attrKey="model"
 			spec={spec}
-			onSelect={reconcileForModel}
+			deriveExtraAttrs={reconcileForModel}
 		/>
 	);
 }
