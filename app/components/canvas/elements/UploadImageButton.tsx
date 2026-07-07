@@ -36,8 +36,6 @@ export function UploadImageButton({
 		},
 	});
 
-	if (element.type !== "image") return null;
-
 	const busy = status === "generating" || status === "queued";
 
 	return (
