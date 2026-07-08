@@ -38,6 +38,7 @@ export function AnimatedImagePreview({
 					seconds={seconds}
 					error={error}
 					onDiscard={onDiscard}
+					cancelClassName="top-10"
 				/>
 			)}
 			<MediaToggle

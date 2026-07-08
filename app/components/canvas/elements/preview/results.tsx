@@ -63,7 +63,9 @@ export function AudioPlaceholder(props: PlaceholderProps) {
 	);
 }
 
-export function MediaPlaceholder(props: PlaceholderProps) {
+export function MediaPlaceholder(
+	props: PlaceholderProps & { cancelClassName?: string },
+) {
 	return (
 		<div className="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border">
 			<PlaceholderOverlay {...props} />

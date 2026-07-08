@@ -39,7 +39,7 @@ export default function Canvas({
 
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent<HTMLDivElement>) => {
-			if (event.shiftKey && event.key === "Enter") {
+			if (event.key === "Enter") {
 				event.preventDefault();
 				editor.insertText("\n");
 			}
