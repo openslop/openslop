@@ -32,6 +32,7 @@ describe("storeSnapshot", () => {
 			narration: { age: "adult" },
 		});
 		src.getState().setReferenceImages(["x", "y"]);
+		src.getState().setTemplateReferenceImages(["y"]);
 
 		const snap = extractStoreSnapshot(src);
 		const dest = getProjectStore(targetId);
@@ -42,9 +43,29 @@ describe("storeSnapshot", () => {
 		expect(after.metadata.style).toBe("noir");
 		expect(after.metadata.narration.age).toBe("adult");
 		expect(after.referenceImages).toEqual(["x", "y"]);
+		expect(after.templateReferenceImages).toEqual(["y"]);
 
 		clearProjectStore(sourceId);
 		clearProjectStore(targetId);
+	});
+
+	it("survives an autosave/reload round trip without leaking template images into future switches", () => {
+		const id = newProjectId();
+		const store = getProjectStore(id);
+		store.getState().setReferenceImages(["user.png", "template-a.png"]);
+		store.getState().setTemplateReferenceImages(["template-a.png"]);
+
+		const snap = extractStoreSnapshot(store);
+		clearProjectStore(id);
+
+		const reloaded = getProjectStore(id);
+		applyStoreSnapshot(reloaded, snap);
+
+		expect(reloaded.getState().templateReferenceImages).toEqual([
+			"template-a.png",
+		]);
+
+		clearProjectStore(id);
 	});
 
 	it("no-ops on null snapshot", () => {

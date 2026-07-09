@@ -4,15 +4,18 @@ import type { Metadata } from "./types";
 export type ProjectStoreSnapshot = {
 	metadata: Metadata;
 	referenceImages: string[];
+	templateReferenceImages: string[];
 };
 
 export function extractStoreSnapshot(
 	store: ProjectStore,
 ): ProjectStoreSnapshot {
-	const { metadata, referenceImages } = store.getState();
+	const { metadata, referenceImages, templateReferenceImages } =
+		store.getState();
 	return {
 		metadata: structuredClone(metadata),
 		referenceImages: [...referenceImages],
+		templateReferenceImages: [...templateReferenceImages],
 	};
 }
 
@@ -25,5 +28,7 @@ export function applyStoreSnapshot(
 	if (snapshot?.metadata) state.updateMetadata(snapshot.metadata);
 	if (snapshot?.referenceImages)
 		state.setReferenceImages(snapshot.referenceImages);
+	if (snapshot?.templateReferenceImages)
+		state.setTemplateReferenceImages(snapshot.templateReferenceImages);
 	state.markHydrated();
 }
