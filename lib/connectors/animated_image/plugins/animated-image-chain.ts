@@ -3,6 +3,7 @@ import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
+import { stringifyError } from "@/lib/errors";
 import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
@@ -17,6 +18,43 @@ type Stashed = {
 	videoHeight?: number;
 	duration?: number;
 };
+
+const STILL_IMAGE_FAILED_MESSAGE =
+	"Couldn't animate: the source image failed to generate. Try regenerating the image.";
+
+// Marks a video-provider failure as belonging to the still-image frame we
+// handed it, rather than an unrelated video-generation failure (rate limit,
+// auth, model outage, ...) that shouldn't be misattributed to the image step.
+const FRAME_IMAGE_FAILURE_MARKERS = [
+	"frameimages",
+	"invaliduploadfailed",
+	"invalidvalueuploadfailed",
+];
+
+function isFrameImageFailure(err: unknown): boolean {
+	const text = stringifyError(err).toLowerCase();
+	return FRAME_IMAGE_FAILURE_MARKERS.some((marker) => text.includes(marker));
+}
+
+function withRawDetail(message: string, err: unknown): Error {
+	return new Error(`${message}\n\nRaw error: ${stringifyError(err)}`);
+}
+
+/** HEAD-check that the still image is actually fetchable before handing it to the video provider as a frame. */
+async function assertStillImageIsUsable(imageUrl: string): Promise<void> {
+	let response: Response;
+	try {
+		response = await fetch(imageUrl, { method: "HEAD" });
+	} catch (err) {
+		throw withRawDetail(STILL_IMAGE_FAILED_MESSAGE, err);
+	}
+	if (!response.ok) {
+		throw withRawDetail(
+			STILL_IMAGE_FAILED_MESSAGE,
+			new Error(`still image URL responded with status ${response.status}`),
+		);
+	}
+}
 
 export function createVideoChainPlugin(
 	registry: ConnectorRegistry,
@@ -49,19 +87,29 @@ export function createVideoChainPlugin(
 					"animated_image chain expected an imageUrl from the still-image generation",
 				);
 			}
+			await assertStillImageIsUsable(result.imageUrl);
+
 			const { provider, config } = getDefaultConnector(registry, "video");
 			const video = createConnector(
 				"video",
 				provider,
 				set("plugins", [], config),
 			);
-			const videoResult = await video.generate({
-				prompt: stashed.videoPrompt,
-				frameImages: [result.imageUrl],
-				width: stashed.videoWidth,
-				height: stashed.videoHeight,
-				duration: stashed.duration,
-			});
+			let videoResult;
+			try {
+				videoResult = await video.generate({
+					prompt: stashed.videoPrompt,
+					frameImages: [result.imageUrl],
+					width: stashed.videoWidth,
+					height: stashed.videoHeight,
+					duration: stashed.duration,
+				});
+			} catch (err) {
+				if (isFrameImageFailure(err)) {
+					throw withRawDetail(STILL_IMAGE_FAILED_MESSAGE, err);
+				}
+				throw err;
+			}
 			return {
 				imageUrl: result.imageUrl,
 				videoUrl: videoResult.videoUrl,

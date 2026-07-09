@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const generateMock = vi.fn();
 
@@ -26,7 +26,19 @@ const registry: ConnectorRegistry = {
 	music: { openslop: { defaultModel: "m", models: ["m"], isDefault: true } },
 };
 
+const fetchMock = vi.fn();
+
 describe("createVideoChainPlugin", () => {
+	beforeEach(() => {
+		fetchMock.mockReset();
+		fetchMock.mockResolvedValue({ ok: true, status: 200 });
+		vi.stubGlobal("fetch", fetchMock);
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
 	it("stashes videoPrompt and animates the still via the video connector", async () => {
 		generateMock.mockReset();
 		generateMock.mockResolvedValue({
@@ -59,6 +71,10 @@ describe("createVideoChainPlugin", () => {
 		} satisfies AssetResult;
 		const result = (await plugin.afterGenerate?.(still, ctx)) as AssetResult;
 
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://example.com/still.png",
+			expect.objectContaining({ method: "HEAD" }),
+		);
 		expect(generateMock).toHaveBeenCalledWith({
 			prompt: "slow zoom in",
 			frameImages: ["https://example.com/still.png"],
@@ -71,6 +87,102 @@ describe("createVideoChainPlugin", () => {
 			videoUrl: "https://example.com/video.mp4",
 			durationSec: 5,
 		});
+	});
+
+	it("aborts before calling the video connector when the still image isn't fetchable", async () => {
+		generateMock.mockReset();
+		fetchMock.mockResolvedValue({ ok: false, status: 404 });
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			/Couldn't animate: the source image failed to generate/,
+		);
+		expect(generateMock).not.toHaveBeenCalled();
+	});
+
+	it("aborts when the still image URL is unreachable (network error)", async () => {
+		generateMock.mockReset();
+		fetchMock.mockRejectedValue(new Error("fetch failed"));
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			/Couldn't animate: the source image failed to generate/,
+		);
+		expect(generateMock).not.toHaveBeenCalled();
+	});
+
+	it("translates a frameImages provider error into a human-readable message, keeping the raw detail", async () => {
+		generateMock.mockReset();
+		generateMock.mockRejectedValue({
+			error: {
+				code: "invalidValueUploadFailed",
+				message: "Processing parameter 'inputs.frameImages' failed.",
+				parameter: "inputs.frameImages",
+				taskUUID: "abc-123",
+			},
+		});
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			/Couldn't animate: the source image failed to generate/,
+		);
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			/invalidValueUploadFailed/,
+		);
+	});
+
+	it("does not rewrite an unrelated video-provider error", async () => {
+		generateMock.mockReset();
+		generateMock.mockRejectedValue(new Error("Runware: rate limit exceeded"));
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			"Runware: rate limit exceeded",
+		);
 	});
 
 	it("throws when videoPrompt is missing so the still URL never leaks into video rendering", async () => {
