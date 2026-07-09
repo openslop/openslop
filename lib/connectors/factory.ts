@@ -43,6 +43,14 @@ const PROVIDERS: Record<
 	video: { openslop: OpenSlopVideo },
 };
 
+/** Whether `provider` has a registered constructor for `type` — the same map `createConnector`/`resolveAttributeSchema` key off. */
+export function isKnownProvider(
+	type: ConnectorType,
+	provider: string,
+): provider is ProviderKey {
+	return provider in PROVIDERS[type];
+}
+
 export function createConnector<T extends ConnectorType>(
 	type: T,
 	provider: ProviderKey,

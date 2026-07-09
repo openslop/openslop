@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createConnector, resolveAttributeSchema } from "../factory";
+import {
+	createConnector,
+	isKnownProvider,
+	resolveAttributeSchema,
+} from "../factory";
 import type { ConnectorType } from "../types";
 
 const stubConfig = {
@@ -67,5 +71,15 @@ describe("resolveAttributeSchema", () => {
 		expect(() => resolveAttributeSchema("tts", "nonexistent" as never)).toThrow(
 			'Unknown provider "nonexistent" for type "tts"',
 		);
+	});
+});
+
+describe("isKnownProvider", () => {
+	it("is true for a registered provider", () => {
+		expect(isKnownProvider("tts", "openslop")).toBe(true);
+	});
+
+	it("is false for a provider with no registered constructor", () => {
+		expect(isKnownProvider("tts", "nonexistent")).toBe(false);
 	});
 });

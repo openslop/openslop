@@ -7,8 +7,10 @@ import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import type { ProviderKey } from "@/lib/connectors/types";
-import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import {
+	isKnownProvider,
+	resolveAttributeSchema,
+} from "@/lib/connectors/factory";
 import { useViewMode } from "../ViewModeContext";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
@@ -40,9 +42,11 @@ function ElementSettings({
 	const fallback = getDefaultConnector(connectorConfig, config.connector);
 	// A persisted provider that's since been renamed/removed from the registry
 	// must not reach resolveAttributeSchema, which throws for unknown providers.
+	// Guard against the factory's own provider map, not connectorConfig — they're
+	// independently maintained and can drift.
 	const resolvedProvider =
-		provider && provider in connectorConfig[config.connector]
-			? (provider as ProviderKey)
+		provider && isKnownProvider(config.connector, provider)
+			? provider
 			: fallback.provider;
 	const schema = resolveAttributeSchema(
 		config.connector,
