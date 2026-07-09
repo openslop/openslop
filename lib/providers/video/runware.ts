@@ -4,6 +4,15 @@ import type { VideoJob, VideoJobStatus } from "./base";
 import { BaseVideoProvider } from "./base";
 import { withRunware } from "../runware";
 
+/** Runware's SDK rejects task-level failures with a structured {error}/{errors} payload (see IError in @runware/sdk-js); connection-level failures (WebSocket disconnects, timeouts) reject with a plain Error instead. */
+function isApiError(err: unknown): boolean {
+	return (
+		typeof err === "object" &&
+		err !== null &&
+		("error" in err || "errors" in err)
+	);
+}
+
 function toVideoJob(video: {
 	taskUUID: string;
 	status: string;
@@ -15,7 +24,7 @@ function toVideoJob(video: {
 		metadata: {
 			jobId: video.taskUUID,
 			status: video.status as VideoJobStatus,
-			...(video.error !== undefined && {
+			...(video.error != null && {
 				error:
 					typeof video.error === "string"
 						? video.error
@@ -82,10 +91,13 @@ export class RunwareVideo extends BaseVideoProvider {
 			try {
 				results = await runware.getResponse({ taskUUID: jobId });
 			} catch (err) {
-				// A rejected status query (as opposed to a resolved item reporting
-				// its own failure below) still carries the provider's error detail —
-				// surface it as a failed job instead of letting the raw rejection
-				// propagate uncaught out of poll().
+				// A rejected status query can mean two different things: the task
+				// itself failed (Runware rejects with a structured {error} / {errors}
+				// payload — same shape as IError elsewhere in the SDK), or the query
+				// itself couldn't complete (WebSocket disconnect, connection timeout,
+				// ...). Only the former is a permanent job failure; the latter must
+				// propagate so the poll loop retries instead of giving up.
+				if (!isApiError(err)) throw err;
 				return {
 					metadata: { jobId, status: "failed", error: stringifyError(err) },
 				};

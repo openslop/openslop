@@ -217,5 +217,32 @@ describe("RunwareVideo", () => {
 			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
+
+		it("rethrows a transient connection error instead of treating it as a permanent failure", async () => {
+			mockGetResponse.mockRejectedValue(new Error("WebSocket disconnected"));
+
+			const provider = new RunwareVideo("test-key");
+			await expect(provider.poll("job-1")).rejects.toThrow(
+				"WebSocket disconnected",
+			);
+			expect(mockDisconnect).toHaveBeenCalled();
+		});
+
+		it("does not report a null error field as a failure", async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "completed",
+					videoURL: "https://result.mp4",
+					error: null,
+				},
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.result.video).toBe("https://result.mp4");
+			expect(result.metadata?.error).toBeUndefined();
+		});
 	});
 });
