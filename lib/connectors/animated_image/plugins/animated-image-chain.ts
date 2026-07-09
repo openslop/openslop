@@ -25,35 +25,11 @@ const STILL_IMAGE_FAILED_MESSAGE =
 // Marks a video-provider failure as belonging to the still-image frame we
 // handed it, rather than an unrelated video-generation failure (rate limit,
 // auth, model outage, ...) that shouldn't be misattributed to the image step.
-const FRAME_IMAGE_FAILURE_MARKERS = [
-	"frameimages",
-	"invaliduploadfailed",
-	"invalidvalueuploadfailed",
-];
+const FRAME_IMAGE_FAILURE_MARKERS = ["frameimages", "invalidvalueuploadfailed"];
 
 function isFrameImageFailure(err: unknown): boolean {
 	const text = stringifyError(err).toLowerCase();
 	return FRAME_IMAGE_FAILURE_MARKERS.some((marker) => text.includes(marker));
-}
-
-function withRawDetail(message: string, err: unknown): Error {
-	return new Error(`${message}\n\nRaw error: ${stringifyError(err)}`);
-}
-
-/** HEAD-check that the still image is actually fetchable before handing it to the video provider as a frame. */
-async function assertStillImageIsUsable(imageUrl: string): Promise<void> {
-	let response: Response;
-	try {
-		response = await fetch(imageUrl, { method: "HEAD" });
-	} catch (err) {
-		throw withRawDetail(STILL_IMAGE_FAILED_MESSAGE, err);
-	}
-	if (!response.ok) {
-		throw withRawDetail(
-			STILL_IMAGE_FAILED_MESSAGE,
-			new Error(`still image URL responded with status ${response.status}`),
-		);
-	}
 }
 
 export function createVideoChainPlugin(
@@ -87,7 +63,6 @@ export function createVideoChainPlugin(
 					"animated_image chain expected an imageUrl from the still-image generation",
 				);
 			}
-			await assertStillImageIsUsable(result.imageUrl);
 
 			const { provider, config } = getDefaultConnector(registry, "video");
 			const video = createConnector(
@@ -106,7 +81,10 @@ export function createVideoChainPlugin(
 				});
 			} catch (err) {
 				if (isFrameImageFailure(err)) {
-					throw withRawDetail(STILL_IMAGE_FAILED_MESSAGE, err);
+					// Raw provider detail is kept on `cause` (surfaced in server/console
+					// logs via handleJobError's console.error) rather than appended to
+					// the user-facing message, which the red banner renders verbatim.
+					throw new Error(STILL_IMAGE_FAILED_MESSAGE, { cause: err });
 				}
 				throw err;
 			}

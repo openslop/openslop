@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const generateMock = vi.fn();
 
@@ -26,19 +26,7 @@ const registry: ConnectorRegistry = {
 	music: { openslop: { defaultModel: "m", models: ["m"], isDefault: true } },
 };
 
-const fetchMock = vi.fn();
-
 describe("createVideoChainPlugin", () => {
-	beforeEach(() => {
-		fetchMock.mockReset();
-		fetchMock.mockResolvedValue({ ok: true, status: 200 });
-		vi.stubGlobal("fetch", fetchMock);
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
 	it("stashes videoPrompt and animates the still via the video connector", async () => {
 		generateMock.mockReset();
 		generateMock.mockResolvedValue({
@@ -71,10 +59,6 @@ describe("createVideoChainPlugin", () => {
 		} satisfies AssetResult;
 		const result = (await plugin.afterGenerate?.(still, ctx)) as AssetResult;
 
-		expect(fetchMock).toHaveBeenCalledWith(
-			"https://example.com/still.png",
-			expect.objectContaining({ method: "HEAD" }),
-		);
 		expect(generateMock).toHaveBeenCalledWith({
 			prompt: "slow zoom in",
 			frameImages: ["https://example.com/still.png"],
@@ -89,60 +73,17 @@ describe("createVideoChainPlugin", () => {
 		});
 	});
 
-	it("aborts before calling the video connector when the still image isn't fetchable", async () => {
+	it("translates a frameImages provider error into a human-readable message, keeping the raw detail as cause", async () => {
 		generateMock.mockReset();
-		fetchMock.mockResolvedValue({ ok: false, status: 404 });
-
-		const plugin = createVideoChainPlugin(registry);
-		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
-		await plugin.beforeGenerate?.(
-			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
-			ctx,
-		);
-
-		const still = {
-			imageUrl: "https://example.com/still.png",
-			durationSec: 0,
-		} satisfies AssetResult;
-
-		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
-			/Couldn't animate: the source image failed to generate/,
-		);
-		expect(generateMock).not.toHaveBeenCalled();
-	});
-
-	it("aborts when the still image URL is unreachable (network error)", async () => {
-		generateMock.mockReset();
-		fetchMock.mockRejectedValue(new Error("fetch failed"));
-
-		const plugin = createVideoChainPlugin(registry);
-		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
-		await plugin.beforeGenerate?.(
-			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
-			ctx,
-		);
-
-		const still = {
-			imageUrl: "https://example.com/still.png",
-			durationSec: 0,
-		} satisfies AssetResult;
-
-		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
-			/Couldn't animate: the source image failed to generate/,
-		);
-		expect(generateMock).not.toHaveBeenCalled();
-	});
-
-	it("translates a frameImages provider error into a human-readable message, keeping the raw detail", async () => {
-		generateMock.mockReset();
-		generateMock.mockRejectedValue({
+		const providerError = {
 			error: {
 				code: "invalidValueUploadFailed",
 				message: "Processing parameter 'inputs.frameImages' failed.",
 				parameter: "inputs.frameImages",
 				taskUUID: "abc-123",
 			},
-		});
+		};
+		generateMock.mockRejectedValue(providerError);
 
 		const plugin = createVideoChainPlugin(registry);
 		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
@@ -157,11 +98,18 @@ describe("createVideoChainPlugin", () => {
 		} satisfies AssetResult;
 
 		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
-			/Couldn't animate: the source image failed to generate/,
+			"Couldn't animate: the source image failed to generate. Try regenerating the image.",
 		);
-		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
-			/invalidValueUploadFailed/,
-		);
+
+		try {
+			await plugin.afterGenerate?.(still, ctx);
+			expect.unreachable();
+		} catch (err) {
+			expect((err as Error).cause).toEqual(providerError);
+			// The raw provider detail must not leak into the user-facing message —
+			// the UI renders it verbatim.
+			expect((err as Error).message).not.toContain("invalidValueUploadFailed");
+		}
 	});
 
 	it("does not rewrite an unrelated video-provider error", async () => {

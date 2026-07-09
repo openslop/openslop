@@ -180,5 +180,42 @@ describe("RunwareVideo", () => {
 			await expect(provider.poll("missing")).rejects.toThrow("Job not found");
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
+
+		it("surfaces the provider's error detail when a resolved item reports failure", async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "failed",
+					error: {
+						code: "invalidValueUploadFailed",
+						message: "Processing parameter 'inputs.frameImages' failed.",
+						parameter: "inputs.frameImages",
+					},
+				},
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.metadata?.status).toBe("failed");
+			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
+		});
+
+		it("surfaces the provider's error detail when the status query itself rejects", async () => {
+			mockGetResponse.mockRejectedValue({
+				error: {
+					code: "invalidValueUploadFailed",
+					message: "Processing parameter 'inputs.frameImages' failed.",
+					parameter: "inputs.frameImages",
+				},
+			});
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.metadata?.status).toBe("failed");
+			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
+			expect(mockDisconnect).toHaveBeenCalled();
+		});
 	});
 });
