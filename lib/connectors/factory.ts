@@ -48,7 +48,7 @@ export function isKnownProvider(
 	type: ConnectorType,
 	provider: string,
 ): provider is ProviderKey {
-	return provider in PROVIDERS[type];
+	return Object.hasOwn(PROVIDERS[type], provider);
 }
 
 export function createConnector<T extends ConnectorType>(
