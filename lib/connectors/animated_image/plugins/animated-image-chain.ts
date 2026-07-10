@@ -3,7 +3,6 @@ import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
-import { stringifyError } from "@/lib/errors";
 import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
@@ -20,16 +19,29 @@ type Stashed = {
 };
 
 const STILL_IMAGE_FAILED_MESSAGE =
-	"Couldn't animate: the source image failed to generate. Try regenerating the image.";
+	"Couldn't animate: the video provider couldn't use the still image. Try regenerating the image.";
+
+/** Shape of a failed Runware task response — see IErrorResponse in @runware/sdk-js. */
+type RunwareApiError = {
+	error?: {
+		code?: string;
+		parameter?: string;
+	};
+};
 
 // Marks a video-provider failure as belonging to the still-image frame we
 // handed it, rather than an unrelated video-generation failure (rate limit,
 // auth, model outage, ...) that shouldn't be misattributed to the image step.
-const FRAME_IMAGE_FAILURE_MARKERS = ["frameimages", "invalidvalueuploadfailed"];
-
+// Matches Runware's structured error.code/error.parameter directly rather
+// than string-matching the serialized error, which is sturdier against
+// unrelated fields that happen to mention "frameImages" in passing.
 function isFrameImageFailure(err: unknown): boolean {
-	const text = stringifyError(err).toLowerCase();
-	return FRAME_IMAGE_FAILURE_MARKERS.some((marker) => text.includes(marker));
+	if (typeof err !== "object" || err === null) return false;
+	const apiError = (err as RunwareApiError).error;
+	return (
+		apiError?.parameter === "inputs.frameImages" ||
+		apiError?.code === "invalidValueUploadFailed"
+	);
 }
 
 export function createVideoChainPlugin(

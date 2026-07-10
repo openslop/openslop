@@ -98,7 +98,7 @@ describe("createVideoChainPlugin", () => {
 		} satisfies AssetResult;
 
 		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
-			"Couldn't animate: the source image failed to generate. Try regenerating the image.",
+			"Couldn't animate: the video provider couldn't use the still image. Try regenerating the image.",
 		);
 
 		try {
@@ -110,6 +110,60 @@ describe("createVideoChainPlugin", () => {
 			// the UI renders it verbatim.
 			expect((err as Error).message).not.toContain("invalidValueUploadFailed");
 		}
+	});
+
+	it("translates on a matching error.parameter alone, regardless of error.code", async () => {
+		generateMock.mockReset();
+		generateMock.mockRejectedValue({
+			error: {
+				code: "someOtherCode",
+				message: "Something about the frame went wrong.",
+				parameter: "inputs.frameImages",
+			},
+		});
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			"Couldn't animate: the video provider couldn't use the still image. Try regenerating the image.",
+		);
+	});
+
+	it("translates on a matching error.code alone, regardless of error.parameter", async () => {
+		generateMock.mockReset();
+		generateMock.mockRejectedValue({
+			error: {
+				code: "invalidValueUploadFailed",
+				message: "Upload failed for an unrelated parameter.",
+				parameter: "inputs.someOtherField",
+			},
+		});
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
+			"Couldn't animate: the video provider couldn't use the still image. Try regenerating the image.",
+		);
 	});
 
 	it("does not rewrite an unrelated video-provider error", async () => {
@@ -130,6 +184,37 @@ describe("createVideoChainPlugin", () => {
 
 		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toThrow(
 			"Runware: rate limit exceeded",
+		);
+	});
+
+	it("does not rewrite an error that merely mentions frameImages in passing (structured code/parameter only)", async () => {
+		generateMock.mockReset();
+		// An unrelated error whose free-text message happens to mention
+		// "frameImages" should NOT be misclassified as a frame-image failure —
+		// only a matching structured error.code/error.parameter counts.
+		const unrelatedError = {
+			error: {
+				code: "rateLimitExceeded",
+				message: "Too many requests for task with inputs.frameImages set.",
+				parameter: "apiKey",
+			},
+		};
+		generateMock.mockRejectedValue(unrelatedError);
+
+		const plugin = createVideoChainPlugin(registry);
+		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
+		await plugin.beforeGenerate?.(
+			{ prompt: "a dark forest", videoPrompt: "slow zoom in" },
+			ctx,
+		);
+
+		const still = {
+			imageUrl: "https://example.com/still.png",
+			durationSec: 0,
+		} satisfies AssetResult;
+
+		await expect(plugin.afterGenerate?.(still, ctx)).rejects.toBe(
+			unrelatedError,
 		);
 	});
 
