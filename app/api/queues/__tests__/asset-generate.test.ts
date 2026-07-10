@@ -103,14 +103,34 @@ describe("asset-generate queue worker", () => {
 
 	it("marks the job failed and rethrows when the handler errors", async () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "pending" });
+		const thrown = new Error("provider down");
 		mockGetJobHandler.mockReturnValue({
-			process: vi.fn().mockRejectedValue(new Error("provider down")),
+			process: vi.fn().mockRejectedValue(thrown),
 		});
 
 		await expect(processMessage(message)).rejects.toThrow("provider down");
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "failed",
 			error: expect.stringContaining("provider down"),
+			metadata: { errorDetail: thrown },
+		});
+	});
+
+	it("persists the raw structured error as metadata.errorDetail, merging existing metadata", async () => {
+		mockLoadJobForProcessing.mockResolvedValue({
+			status: "pending",
+			metadata: { providerJobId: "p1" },
+		});
+		const thrown = { error: { code: "invalidValueUploadFailed" } };
+		mockGetJobHandler.mockReturnValue({
+			process: vi.fn().mockRejectedValue(thrown),
+		});
+
+		await expect(processMessage(message)).rejects.toBe(thrown);
+		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
+			status: "failed",
+			error: expect.stringContaining("invalidValueUploadFailed"),
+			metadata: { providerJobId: "p1", errorDetail: thrown },
 		});
 	});
 });

@@ -70,6 +70,21 @@ describe("BaseVideoConnector", () => {
 		).rejects.toThrow("GPU unavailable");
 	});
 
+	it("carries the poll's errorDetail as the thrown error's cause, across the HTTP round trip", async () => {
+		const errorDetail = { error: { code: "invalidValueUploadFailed" } };
+		mockGatewaySequence([
+			{ submitStatus: "pending" },
+			{ pollStatus: "failed", error: "Upload failed", errorDetail },
+		]);
+
+		try {
+			await new OpenSlopVideo(config).generate({ prompt: "test" });
+			expect.unreachable();
+		} catch (err) {
+			expect((err as Error).cause).toEqual(errorDetail);
+		}
+	});
+
 	it("runs plugins in order", async () => {
 		mockSuccess();
 		const order: string[] = [];

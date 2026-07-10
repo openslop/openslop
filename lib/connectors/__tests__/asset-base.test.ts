@@ -39,6 +39,13 @@ function makeGateway(
 	};
 }
 
+function makeFailingGateway(poll: JobPoll): AssetGateway<TestParams> {
+	return {
+		generate: async () => ({ jobId: "job", status: "pending" }),
+		poll: async () => poll,
+	};
+}
+
 class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	readonly type: ConnectorType = "image";
 	readonly assetKey = "image";
@@ -53,6 +60,15 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 			),
 			config,
 		);
+	}
+}
+
+class GatewayAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
+	readonly type: ConnectorType = "video";
+	readonly assetKey = "video";
+
+	constructor(config: ConnectorConfig, gateway: AssetGateway<TestParams>) {
+		super(gateway, config);
 	}
 }
 
@@ -150,6 +166,47 @@ describe("BaseAssetConnector", () => {
 			await expect(connector.generate({ prompt: "test" })).rejects.toThrow(
 				"gateway failed",
 			);
+		});
+
+		it("throws with the poll's errorDetail as cause when the job fails", async () => {
+			const errorDetail = { error: { code: "invalidValueUploadFailed" } };
+			const connector = new GatewayAssetConnector(
+				config,
+				makeFailingGateway({
+					jobId: "job",
+					status: "failed",
+					result: null,
+					error: "Processing failed",
+					errorDetail,
+				}),
+			);
+
+			try {
+				await connector.generate({ prompt: "test" });
+				expect.unreachable();
+			} catch (err) {
+				expect((err as Error).message).toBe("Processing failed");
+				expect((err as Error).cause).toBe(errorDetail);
+			}
+		});
+
+		it("has an undefined cause when the poll result carries no errorDetail", async () => {
+			const connector = new GatewayAssetConnector(
+				config,
+				makeFailingGateway({
+					jobId: "job",
+					status: "failed",
+					result: null,
+					error: "Processing failed",
+				}),
+			);
+
+			try {
+				await connector.generate({ prompt: "test" });
+				expect.unreachable();
+			} catch (err) {
+				expect((err as Error).cause).toBeUndefined();
+			}
 		});
 
 		it("handles external urls in bundle response", async () => {

@@ -29,8 +29,19 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		}
 		if (status === "failed") {
 			const error = upstream.metadata?.error ?? "Video generation failed";
-			await updateJob(job.id, { status, error });
-			return { jobId: job.id, status, result: null, error };
+			const errorDetail = upstream.metadata?.errorDetail;
+			await updateJob(job.id, {
+				status,
+				error,
+				// Merge (not replace) so providerJobId survives; persist errorDetail
+				// so a later rowView re-fetch of this failed job still carries it.
+				// `!= null` so an explicit null (possible across the JSON boundary)
+				// isn't persisted as a useless errorDetail: null.
+				...(errorDetail != null && {
+					metadata: { ...job.metadata, errorDetail },
+				}),
+			});
+			return { jobId: job.id, status, result: null, error, errorDetail };
 		}
 		return { jobId: job.id, status, result: null, error: null };
 	},

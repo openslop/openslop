@@ -21,26 +21,22 @@ type Stashed = {
 const STILL_IMAGE_FAILED_MESSAGE =
 	"Couldn't animate: the video provider couldn't use the still image. Try regenerating the image.";
 
-/** Shape of a failed Runware task response — see IErrorResponse in @runware/sdk-js. */
-type RunwareApiError = {
-	error?: {
-		code?: string;
-		parameter?: string;
-	};
-};
+type RunwareErrorFields = { code?: string; parameter?: string };
 
-// Marks a video-provider failure as belonging to the still-image frame we
-// handed it, rather than an unrelated video-generation failure (rate limit,
-// auth, model outage, ...) that shouldn't be misattributed to the image step.
-// Matches Runware's structured error.code/error.parameter directly rather
-// than string-matching the serialized error, which is sturdier against
-// unrelated fields that happen to mention "frameImages" in passing.
+// A frame-image failure reaches us as asset-base.ts's job-status throw, which
+// carries the provider's raw error as `cause` (other failures — timeout, no
+// result, network — have no cause and fall through to a rethrow). Runware
+// shapes the payload as {error: {code, parameter, ...}} on a rejected poll, or
+// {code, parameter, ...} directly on a resolved-but-failed task — check both.
 function isFrameImageFailure(err: unknown): boolean {
-	if (typeof err !== "object" || err === null) return false;
-	const apiError = (err as RunwareApiError).error;
+	if (!(err instanceof Error)) return false;
+	const cause = err.cause;
+	if (typeof cause !== "object" || cause === null) return false;
+	const raw = cause as { error?: RunwareErrorFields } & RunwareErrorFields;
+	const apiError = raw.error ?? raw;
 	return (
-		apiError?.parameter === "inputs.frameImages" ||
-		apiError?.code === "invalidValueUploadFailed"
+		apiError.parameter === "inputs.frameImages" ||
+		apiError.code === "invalidValueUploadFailed"
 	);
 }
 

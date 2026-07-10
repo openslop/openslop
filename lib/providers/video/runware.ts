@@ -29,6 +29,7 @@ function toVideoJob(video: {
 					typeof video.error === "string"
 						? video.error
 						: stringifyError(video.error),
+				errorDetail: video.error,
 			}),
 		},
 	};
@@ -99,7 +100,12 @@ export class RunwareVideo extends BaseVideoProvider {
 				// propagate so the poll loop retries instead of giving up.
 				if (!isApiError(err)) throw err;
 				return {
-					metadata: { jobId, status: "failed", error: stringifyError(err) },
+					metadata: {
+						jobId,
+						status: "failed",
+						error: stringifyError(err),
+						errorDetail: err,
+					},
 				};
 			}
 

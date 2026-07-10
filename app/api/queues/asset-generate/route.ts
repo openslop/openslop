@@ -24,6 +24,10 @@ export const POST = handleCallback<AssetQueueMessage>(
 			await updateJob(jobId, {
 				status: "failed",
 				error: stringifyError(error),
+				// Keep the raw error alongside the stringified message so rowView can
+				// surface structured detail (e.g. Runware's {error:{code,parameter}})
+				// for a job that failed at submit, before any live provider poll.
+				metadata: { ...job.metadata, errorDetail: error },
 			});
 			throw error;
 		}

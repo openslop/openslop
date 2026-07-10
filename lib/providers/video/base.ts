@@ -10,6 +10,8 @@ export type VideoJobMetadata = {
 	durationSec?: number;
 	status?: VideoJobStatus;
 	error?: string;
+	/** Raw provider error payload behind `error`'s message, for callers that need to classify the failure. */
+	errorDetail?: unknown;
 };
 
 export type VideoJob = {

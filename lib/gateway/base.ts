@@ -13,6 +13,8 @@ export type JobPoll = {
 	status: JobStatus;
 	result: BundleResponse | null;
 	error: string | null;
+	/** Raw provider error payload behind `error`'s message, if the provider captured one. */
+	errorDetail?: unknown;
 };
 
 export abstract class AssetGateway<TParams> extends GatewayClient<

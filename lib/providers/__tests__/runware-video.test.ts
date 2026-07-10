@@ -182,16 +182,13 @@ describe("RunwareVideo", () => {
 		});
 
 		it("surfaces the provider's error detail when a resolved item reports failure", async () => {
+			const errorDetail = {
+				code: "invalidValueUploadFailed",
+				message: "Processing parameter 'inputs.frameImages' failed.",
+				parameter: "inputs.frameImages",
+			};
 			mockGetResponse.mockResolvedValue([
-				{
-					taskUUID: "job-1",
-					status: "failed",
-					error: {
-						code: "invalidValueUploadFailed",
-						message: "Processing parameter 'inputs.frameImages' failed.",
-						parameter: "inputs.frameImages",
-					},
-				},
+				{ taskUUID: "job-1", status: "failed", error: errorDetail },
 			]);
 
 			const provider = new RunwareVideo("test-key");
@@ -199,22 +196,25 @@ describe("RunwareVideo", () => {
 
 			expect(result.metadata?.status).toBe("failed");
 			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
+			expect(result.metadata?.errorDetail).toEqual(errorDetail);
 		});
 
 		it("surfaces the provider's error detail when the status query itself rejects", async () => {
-			mockGetResponse.mockRejectedValue({
+			const rejection = {
 				error: {
 					code: "invalidValueUploadFailed",
 					message: "Processing parameter 'inputs.frameImages' failed.",
 					parameter: "inputs.frameImages",
 				},
-			});
+			};
+			mockGetResponse.mockRejectedValue(rejection);
 
 			const provider = new RunwareVideo("test-key");
 			const result = await provider.poll("job-1");
 
 			expect(result.metadata?.status).toBe("failed");
 			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
+			expect(result.metadata?.errorDetail).toEqual(rejection);
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 

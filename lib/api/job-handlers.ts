@@ -39,6 +39,10 @@ export function rowView(job: JobRow): JobPoll {
 		status: job.status,
 		result: job.result,
 		error: job.error,
+		// Surfaced from persisted metadata so a job that failed before a live
+		// provider poll (e.g. a submit-time rejection) still carries the raw
+		// error for classification — matches videoHandler.poll's live path.
+		errorDetail: job.metadata?.errorDetail,
 	};
 }
 

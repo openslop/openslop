@@ -44,7 +44,9 @@ export abstract class BaseAssetConnector<
 			(p) => p.status === "completed" || p.status === "failed",
 		);
 		if (completed.status === "failed") {
-			throw new Error(completed.error ?? "Generation failed");
+			throw new Error(completed.error ?? "Generation failed", {
+				cause: completed.errorDetail,
+			});
 		}
 		if (!completed.result) {
 			throw new Error("Generation completed without a result");
