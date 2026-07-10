@@ -39,6 +39,9 @@ export default function Canvas({
 
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent<HTMLDivElement>) => {
+			// IME composition (CJK, etc.) also commits via Enter — don't hijack
+			// that keydown into a newline, or it clobbers the composition.
+			if (event.nativeEvent.isComposing || event.keyCode === 229) return;
 			if (
 				event.key === "Enter" &&
 				!event.ctrlKey &&
