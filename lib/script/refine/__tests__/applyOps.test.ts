@@ -10,62 +10,69 @@ vi.mock("@/lib/canvas/elementConfigs", () => ({
 			connector: "tts",
 			outputKind: "audio",
 			label: "Narration",
-			defaultAttributes: { emotion: "neutral" },
-			visibleAttributes: {},
 		},
 		sound: {
 			type: "sound",
 			connector: "sfx",
 			outputKind: "audio",
 			label: "Sound",
-			defaultAttributes: { loops: "1" },
-			visibleAttributes: {},
 		},
 		image: {
 			type: "image",
 			connector: "image",
 			outputKind: "image",
 			label: "Image",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
 		},
 		animated_image: {
 			type: "animated_image",
 			connector: "animated_image",
 			outputKind: "video",
 			label: "Animated image",
-			defaultAttributes: { duration: "5" },
-			visibleAttributes: {},
 		},
 		character: {
 			type: "character",
 			connector: "tts",
 			outputKind: "audio",
 			label: "Character",
-			defaultAttributes: { emotion: "neutral" },
-			visibleAttributes: {},
 		},
 		music: {
 			type: "music",
 			connector: "music",
 			outputKind: "audio",
 			label: "Music",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
 		},
 		clip: {
 			type: "clip",
 			connector: "video",
 			outputKind: "video",
 			label: "Clip",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
 		},
 	},
 }));
 
-vi.mock("@/lib/canvas/hydrateConnectorConfig", () => ({
-	hydrateConnectorConfig: () => (node: Record<string, unknown>) => node,
+// No connector model/provider stamped here — these tests exercise refine-op
+// mechanics (insert/remove/set/anchor tracking), not attribute-schema
+// resolution, which has its own tests under lib/connectors/attributes/.
+vi.mock("@/lib/config/connectorUtils", () => ({
+	getDefaultConnector: () => ({
+		provider: "openslop",
+		config: { defaultModel: undefined, models: [], isDefault: true },
+	}),
+}));
+
+vi.mock("@/lib/connectors/factory", () => ({
+	resolveAttributeSchema: (type: string) => ({
+		defaultAttributes:
+			type === "sfx"
+				? { loops: "1" }
+				: type === "tts"
+					? { emotion: "neutral" }
+					: type === "animated_image"
+						? { duration: "5" }
+						: {},
+		visibleAttributes: {},
+		keys: [],
+	}),
 }));
 
 import { applyRefineOp } from "../applyOps";

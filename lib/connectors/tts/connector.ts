@@ -1,5 +1,7 @@
 import type { AssetGateway } from "@/lib/gateway/base";
 import { BaseAssetConnector } from "../asset-base";
+import type { AttributeSchema } from "../attributes/schema";
+import { TTS_ATTRIBUTES } from "./attributes";
 import type {
 	PluginContext,
 	TTSConnector,
@@ -18,6 +20,10 @@ export abstract class BaseTTSConnector<
 {
 	readonly type = "tts" as const;
 	readonly assetKey = "audio" as const;
+
+	static attributesFor(_model?: string): AttributeSchema {
+		return TTS_ATTRIBUTES;
+	}
 
 	abstract searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 

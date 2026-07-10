@@ -5,6 +5,12 @@ import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import { getDefaultConnector } from "@/lib/config/connectorUtils";
+import {
+	isKnownProvider,
+	resolveAttributeSchema,
+} from "@/lib/connectors/factory";
 import { useViewMode } from "../ViewModeContext";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
@@ -31,7 +37,23 @@ function ElementSettings({
 	element: CanvasContentElement;
 	config: ElementConfig;
 }) {
-	const entries = Object.entries(config.visibleAttributes);
+	const { connectorConfig } = useConfig();
+	const { model, provider } = element.customAttributes ?? {};
+	const fallback = getDefaultConnector(connectorConfig, config.connector);
+	// A persisted provider that's since been renamed/removed from the registry
+	// must not reach resolveAttributeSchema, which throws for unknown providers.
+	// Guard against the factory's own provider map, not connectorConfig — they're
+	// independently maintained and can drift.
+	const resolvedProvider =
+		provider && isKnownProvider(config.connector, provider)
+			? provider
+			: fallback.provider;
+	const schema = resolveAttributeSchema(
+		config.connector,
+		resolvedProvider,
+		model ?? fallback.config.defaultModel,
+	);
+	const entries = Object.entries(schema.visibleAttributes);
 	if (entries.length === 0) return null;
 	return (
 		<Popover>

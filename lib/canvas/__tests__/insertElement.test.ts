@@ -8,28 +8,32 @@ vi.mock("../elementConfigs", () => ({
 			connector: "image",
 			outputKind: "image",
 			label: "Image",
-			defaultAttributes: undefined,
-			visibleAttributes: {},
 		},
 		narration: {
 			type: "narration",
 			connector: "tts",
 			outputKind: "audio",
 			label: "Narration",
-			defaultAttributes: { emotion: "neutral" },
-			visibleAttributes: {},
 		},
 	},
 }));
 
-vi.mock("../hydrateConnectorConfig", () => ({
-	hydrateConnectorConfig: () => (node: Record<string, unknown>) => ({
-		...node,
-		customAttributes: {
-			...(node.customAttributes as Record<string, string> | undefined),
-			model: "test-model",
-			provider: "openslop",
+vi.mock("@/lib/config/connectorUtils", () => ({
+	getDefaultConnector: () => ({
+		provider: "openslop",
+		config: {
+			defaultModel: "test-model",
+			models: ["test-model"],
+			isDefault: true,
 		},
+	}),
+}));
+
+vi.mock("@/lib/connectors/factory", () => ({
+	resolveAttributeSchema: (type: string) => ({
+		defaultAttributes: type === "tts" ? { emotion: "neutral" } : {},
+		visibleAttributes: {},
+		keys: [],
 	}),
 }));
 

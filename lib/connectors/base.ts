@@ -1,3 +1,4 @@
+import { AttributeSchema } from "./attributes/schema";
 import { stringifyError } from "../errors";
 import {
 	runAfterGenerate,
@@ -19,6 +20,15 @@ export abstract class BaseConnector<
 > implements Connector {
 	abstract readonly type: ConnectorType;
 	protected plugins: ConnectorPlugin[];
+
+	/**
+	 * Attribute schema for this connector type/model. Types with no element-settings
+	 * UI (e.g. llm) inherit this empty default. For per-model sets, override on the
+	 * provider subclass and branch on `model`.
+	 */
+	static attributesFor(_model?: string): AttributeSchema {
+		return AttributeSchema.from([]);
+	}
 
 	constructor(config: ConnectorConfig) {
 		this.plugins = config.plugins ?? [];
