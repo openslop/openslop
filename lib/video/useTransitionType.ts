@@ -1,5 +1,5 @@
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { getProjectStore, useProjectStore } from "@/lib/project/store";
 import { DEFAULT_TRANSITION, type TransitionType } from "./transitions";
 
 export function useTransitionType(): TransitionType {
@@ -8,4 +8,13 @@ export function useTransitionType(): TransitionType {
 		projectId,
 		(s) => s.metadata.videoSettings?.transitionType ?? DEFAULT_TRANSITION,
 	);
+}
+
+export function setTransitionType(
+	projectId: string,
+	transitionType: TransitionType,
+) {
+	getProjectStore(projectId)
+		.getState()
+		.updateMetadata({ videoSettings: { transitionType } });
 }

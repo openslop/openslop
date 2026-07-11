@@ -8,9 +8,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore } from "@/lib/project/store";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
-import { useTransitionType } from "@/lib/video/useTransitionType";
+import {
+	setTransitionType,
+	useTransitionType,
+} from "@/lib/video/useTransitionType";
 import { PanelCard, PanelField } from "./PanelCard";
 
 const LABELS: Record<TransitionType, string> = {
@@ -27,17 +29,14 @@ export function PropertiesPanel() {
 	const { projectId } = useConfig();
 	const transitionType = useTransitionType();
 
-	const setTransitionType = (value: TransitionType) =>
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({ videoSettings: { transitionType: value } });
-
 	return (
 		<PanelCard title="Transition">
 			<PanelField label="Transition">
 				<Select
 					value={transitionType}
-					onValueChange={(value) => setTransitionType(value as TransitionType)}
+					onValueChange={(value) =>
+						setTransitionType(projectId, value as TransitionType)
+					}
 				>
 					<SelectTrigger size="sm" aria-label="Transition">
 						<SelectValue />

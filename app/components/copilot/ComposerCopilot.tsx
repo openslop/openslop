@@ -21,7 +21,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import { setAspectRatio, useAspectRatio } from "@/lib/video/useAspectRatio";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
@@ -254,11 +254,7 @@ export default function ComposerCopilot({
 						</SelectMenu>
 						<SelectMenu
 							value={aspectRatio}
-							onChange={(next: AspectRatio) => {
-								getProjectStore(projectId)
-									.getState()
-									.updateMetadata({ videoSettings: { aspectRatio: next } });
-							}}
+							onChange={(next: AspectRatio) => setAspectRatio(projectId, next)}
 							options={ASPECT_RATIO_OPTIONS}
 							itemClassName="rounded-lg text-label-xs"
 						>

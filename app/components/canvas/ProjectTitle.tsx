@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Pencil } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore, useProjectStore } from "@/lib/project/store";
+import { setProjectTitle } from "@/lib/project/projectName";
+import { useProjectStore } from "@/lib/project/store";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 
 export function ProjectTitle() {
@@ -25,7 +26,7 @@ export function ProjectTitle() {
 	const commit = () => {
 		const next = draft.trim();
 		if (next && next !== title) {
-			getProjectStore(projectId).getState().updateMetadata({ title: next });
+			setProjectTitle(projectId, next);
 		}
 		setEditing(false);
 	};

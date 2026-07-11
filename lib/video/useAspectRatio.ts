@@ -1,5 +1,5 @@
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { getProjectStore, useProjectStore } from "@/lib/project/store";
 import { type AspectRatio, DEFAULT_ASPECT_RATIO } from "./aspectRatio";
 
 export function useAspectRatio(): AspectRatio {
@@ -8,4 +8,10 @@ export function useAspectRatio(): AspectRatio {
 		projectId,
 		(s) => s.metadata.videoSettings?.aspectRatio ?? DEFAULT_ASPECT_RATIO,
 	);
+}
+
+export function setAspectRatio(projectId: string, aspectRatio: AspectRatio) {
+	getProjectStore(projectId)
+		.getState()
+		.updateMetadata({ videoSettings: { aspectRatio } });
 }
