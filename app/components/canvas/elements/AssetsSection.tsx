@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Mic, Palette, Plus, User } from "@/components/ui/icon";
+import { Loader2, Mic, Palette, Plus, User } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { getProjectStore, useProjectStore } from "@/lib/project/store";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
+import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { AssetTile } from "./AssetTile";
 import { useAssetEditDialogs } from "./character/useAssetEditDialogs";
 import { CollapsibleHeader } from "./CollapsibleHeader";
@@ -21,6 +22,14 @@ export function AssetsSection() {
 	const [collapsed, setCollapsed] = useState(false);
 	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
 		useAssetEditDialogs();
+
+	const { openPicker, uploading, inputElement } = useImageUpload({
+		multiple: true,
+		onUpload: (urls) => {
+			const store = getProjectStore(projectId).getState();
+			store.setReferenceImages([...store.referenceImages, ...urls]);
+		},
+	});
 
 	if (!hydrated) return null;
 
@@ -72,6 +81,25 @@ export function AssetsSection() {
 							onRemove={() => removeReferenceImage(i)}
 						/>
 					))}
+					<button
+						type="button"
+						onClick={openPicker}
+						aria-label="Upload reference images"
+						disabled={uploading}
+						className="flex w-16 flex-col gap-1 sm:w-20"
+					>
+						<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-border bg-muted text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground">
+							{uploading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								<Plus className="h-4 w-4" />
+							)}
+						</div>
+						<span className="truncate text-badge text-muted-foreground">
+							Upload
+						</span>
+					</button>
+					{inputElement}
 				</div>
 			)}
 			{dialogs}
