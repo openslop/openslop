@@ -1,3 +1,4 @@
+import { isTemplateAsset } from "@/lib/templates/templates";
 import type { ProjectStore } from "./store";
 import type { Metadata } from "./types";
 
@@ -28,7 +29,14 @@ export function applyStoreSnapshot(
 	if (snapshot?.metadata) state.updateMetadata(snapshot.metadata);
 	if (snapshot?.referenceImages)
 		state.setReferenceImages(snapshot.referenceImages);
-	if (snapshot?.templateReferenceImages)
+	if (snapshot?.templateReferenceImages) {
 		state.setTemplateReferenceImages(snapshot.templateReferenceImages);
+	} else if (snapshot?.referenceImages) {
+		// Old snapshots predate this field — recover it by URL so the next
+		// template switch doesn't treat template images as user uploads.
+		state.setTemplateReferenceImages(
+			snapshot.referenceImages.filter(isTemplateAsset),
+		);
+	}
 	state.markHydrated();
 }

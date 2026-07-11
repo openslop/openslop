@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { getProjectStore, clearProjectStore } from "../store";
 import { applyStoreSnapshot, extractStoreSnapshot } from "../storeSnapshot";
 
@@ -65,6 +66,33 @@ describe("storeSnapshot", () => {
 			"template-a.png",
 		]);
 
+		clearProjectStore(id);
+	});
+
+	it("backfills templateReferenceImages for snapshots saved before the field existed", () => {
+		const id = newProjectId();
+		const store = getProjectStore(id);
+		const templateImage = `${BLOB_BASE_URL}/assets/upload/template/tpl-1`;
+
+		applyStoreSnapshot(store, {
+			referenceImages: ["user.png", templateImage],
+		});
+
+		expect(store.getState().templateReferenceImages).toEqual([templateImage]);
+		clearProjectStore(id);
+	});
+
+	it("respects an explicit empty templateReferenceImages instead of backfilling", () => {
+		const id = newProjectId();
+		const store = getProjectStore(id);
+		const templateImage = `${BLOB_BASE_URL}/assets/upload/template/tpl-1`;
+
+		applyStoreSnapshot(store, {
+			referenceImages: [templateImage],
+			templateReferenceImages: [],
+		});
+
+		expect(store.getState().templateReferenceImages).toEqual([]);
 		clearProjectStore(id);
 	});
 

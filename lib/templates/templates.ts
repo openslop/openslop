@@ -2,8 +2,12 @@ import dedent from "dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
 
-const templateAsset = (name: string) =>
-	`${BLOB_BASE_URL}/assets/upload/template/${name}`;
+const TEMPLATE_ASSET_PREFIX = `${BLOB_BASE_URL}/assets/upload/template/`;
+
+const templateAsset = (name: string) => `${TEMPLATE_ASSET_PREFIX}${name}`;
+
+export const isTemplateAsset = (url: string) =>
+	url.startsWith(TEMPLATE_ASSET_PREFIX);
 
 export interface TemplateShowcase {
 	image: string;
@@ -543,10 +547,10 @@ export const TEMPLATES: Template[] = [
 		style:
 			"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style",
 		referenceImages: [
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-1",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-2",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-3",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-4",
+			templateAsset("true-crime-1"),
+			templateAsset("true-crime-2"),
+			templateAsset("true-crime-3"),
+			templateAsset("true-crime-4"),
 		],
 		narration: {
 			gender: "masculine",
