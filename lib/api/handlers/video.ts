@@ -1,3 +1,4 @@
+import { serializeError } from "serialize-error";
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { JobPoll, JobStatus } from "@/lib/gateway/base";
 import type { VideoProviderResponse } from "@/lib/providers/video/base";
@@ -29,14 +30,16 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		}
 		if (status === "failed") {
 			const error = upstream.metadata?.error ?? "Video generation failed";
-			const errorDetail = upstream.metadata?.errorDetail;
+			const rawDetail = upstream.metadata?.errorDetail;
+			// Circular-safe, same guard as the submit path in the queue worker —
+			// this value is JSON.stringified into jsonb and the HTTP response.
+			const errorDetail =
+				rawDetail != null ? serializeError(rawDetail) : undefined;
 			await updateJob(job.id, {
 				status,
 				error,
 				// Merge (not replace) so providerJobId survives; persist errorDetail
 				// so a later rowView re-fetch of this failed job still carries it.
-				// `!= null` so an explicit null (possible across the JSON boundary)
-				// isn't persisted as a useless errorDetail: null.
 				...(errorDetail != null && {
 					metadata: { ...job.metadata, errorDetail },
 				}),

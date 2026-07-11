@@ -57,7 +57,28 @@ describe("videoHandler.poll", () => {
 
 		expect(result?.status).toBe("failed");
 		expect(result?.error).toBe("Upload failed");
-		expect(result?.errorDetail).toBe(errorDetail);
+		// toEqual, not toBe: errorDetail is re-serialized (circular-safe) on the way through.
+		expect(result?.errorDetail).toEqual(errorDetail);
+	});
+
+	it("serializes a circular errorDetail so persisting it can't throw", async () => {
+		const errorDetail: Record<string, unknown> = { error: { code: "boom" } };
+		errorDetail.self = errorDetail;
+		mockPoll.mockResolvedValue({
+			id: "",
+			provider: "runware",
+			result: {},
+			metadata: { status: "failed", error: "Upload failed", errorDetail },
+		});
+
+		const result = await videoHandler.poll?.(makeJob("provider-job-1"));
+
+		// supabase-js JSON.stringifies metadata on write (and the JobPoll result
+		// goes through the HTTP response) — a circular errorDetail would throw.
+		const persisted = mockUpdateJob.mock.calls[0][1].metadata.errorDetail;
+		expect(() => JSON.stringify(persisted)).not.toThrow();
+		expect(persisted.error.code).toBe("boom");
+		expect(() => JSON.stringify(result?.errorDetail)).not.toThrow();
 	});
 
 	it("persists errorDetail into merged metadata (preserving providerJobId) for a later rowView", async () => {
