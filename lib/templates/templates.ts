@@ -563,8 +563,7 @@ export const TEMPLATES: Template[] = [
 			description: "Friendly young adult male",
 		},
 		showcase: {
-			image:
-				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-5",
+			image: templateAsset("true-crime-5"),
 			title: "True Crime",
 			description:
 				"Long-form, wild true crime stories told like a buddy spilling the craziest thing he ever heard",
