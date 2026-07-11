@@ -82,6 +82,20 @@ describe("storeSnapshot", () => {
 		clearProjectStore(id);
 	});
 
+	it("backfills template URLs saved under a different blob base URL", () => {
+		const id = newProjectId();
+		const store = getProjectStore(id);
+		const templateImage =
+			"https://old-bucket.example.com/assets/upload/template/tpl-1";
+
+		applyStoreSnapshot(store, {
+			referenceImages: ["user.png", templateImage],
+		});
+
+		expect(store.getState().templateReferenceImages).toEqual([templateImage]);
+		clearProjectStore(id);
+	});
+
 	it("respects an explicit empty templateReferenceImages instead of backfilling", () => {
 		const id = newProjectId();
 		const store = getProjectStore(id);

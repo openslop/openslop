@@ -2,12 +2,15 @@ import dedent from "dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
 
-const TEMPLATE_ASSET_PREFIX = `${BLOB_BASE_URL}/assets/upload/template/`;
+const TEMPLATE_ASSET_PATH = "/assets/upload/template/";
 
-const templateAsset = (name: string) => `${TEMPLATE_ASSET_PREFIX}${name}`;
+const templateAsset = (name: string) =>
+	`${BLOB_BASE_URL}${TEMPLATE_ASSET_PATH}${name}`;
 
+// Path-segment match, not full-prefix: BLOB_BASE_URL is env-overridable, and
+// old snapshots may hold template URLs saved under a different base.
 export const isTemplateAsset = (url: string) =>
-	url.startsWith(TEMPLATE_ASSET_PREFIX);
+	url.includes(TEMPLATE_ASSET_PATH);
 
 export interface TemplateShowcase {
 	image: string;
