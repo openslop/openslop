@@ -1,4 +1,5 @@
 import { handleCallback } from "@vercel/queue";
+import { serializeError } from "serialize-error";
 import { getJobHandler } from "@/lib/api/job-handlers";
 import type { AssetQueueMessage } from "@/lib/api/jobs";
 import { loadJobForProcessing, updateJob } from "@/lib/api/jobs";
@@ -26,10 +27,9 @@ export const POST = handleCallback<AssetQueueMessage>(
 				// A human message: job.error surfaces verbatim in the failure banner
 				// via rowView, so it must never be a JSON/stack dump.
 				error: humanErrorMessage(error, "Generation failed"),
-				// The raw error rides alongside so rowView can surface structured
-				// detail (e.g. Runware's {error:{code,parameter}}) for a job that
-				// failed at submit, before any live provider poll.
-				metadata: { ...job.metadata, errorDetail: error },
+				// Structured detail for rowView (e.g. Runware's {error:{code,parameter}}),
+				// serialized circular-safe so this updateJob can't itself throw mid-catch.
+				metadata: { ...job.metadata, errorDetail: serializeError(error) },
 			});
 			throw error;
 		}

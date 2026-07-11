@@ -114,7 +114,12 @@ describe("asset-generate queue worker", () => {
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "failed",
 			error: "provider down",
-			metadata: { errorDetail: thrown },
+			metadata: {
+				errorDetail: expect.objectContaining({
+					name: "Error",
+					message: "provider down",
+				}),
+			},
 		});
 	});
 
@@ -139,6 +144,22 @@ describe("asset-generate queue worker", () => {
 			error: "Processing parameter 'inputs.frameImages' failed.",
 			metadata: { providerJobId: "p1", errorDetail: thrown },
 		});
+	});
+
+	it("serializes a circular error so persisting it can't throw", async () => {
+		mockLoadJobForProcessing.mockResolvedValue({ status: "pending" });
+		const thrown: Record<string, unknown> = { error: { code: "boom" } };
+		thrown.self = thrown;
+		mockGetJobHandler.mockReturnValue({
+			process: vi.fn().mockRejectedValue(thrown),
+		});
+
+		await expect(processMessage(message)).rejects.toBe(thrown);
+		const persisted = mockUpdateJob.mock.calls[1][1].metadata.errorDetail;
+		// supabase-js JSON.stringifies metadata on write — a circular errorDetail
+		// would make the failure-path updateJob itself throw.
+		expect(() => JSON.stringify(persisted)).not.toThrow();
+		expect(persisted.error.code).toBe("boom");
 	});
 
 	it("falls back to a generic human message when the thrown error has no readable message", async () => {
