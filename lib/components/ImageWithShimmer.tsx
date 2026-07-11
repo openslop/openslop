@@ -43,18 +43,22 @@ export function ImageWithShimmer({
 	src,
 	...props
 }: ImageProps) {
-	const [loaded, setLoaded] = useState(false);
+	// Track which src loaded (not a boolean) so the shimmer comes back when
+	// `src` swaps in place — callers render this without a `key`.
+	const [loadedSrc, setLoadedSrc] = useState<ImageProps["src"] | null>(null);
+	const loaded = loadedSrc === src;
 	const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
 		onLoad?.(event);
-		setLoaded(true);
+		setLoadedSrc(src);
 	};
-	// next/image's own <img> does the same complete-on-mount check — a cached
-	// image's `load` event may never fire, which would otherwise leave the
-	// shimmer stuck on top forever. useCallback keeps the ref identity stable
-	// so React doesn't detach/reattach it on every render.
-	const checkAlreadyLoaded = useCallback((img: HTMLImageElement | null) => {
-		if (img?.complete) setLoaded(true);
-	}, []);
+	// A cached image may never fire `load` (next/image does this same check).
+	// Keyed on `src` so a swap re-runs the check against the new image.
+	const checkAlreadyLoaded = useCallback(
+		(img: HTMLImageElement | null) => {
+			if (img?.complete) setLoadedSrc(src);
+		},
+		[src],
+	);
 
 	if (unoptimized) {
 		return (
