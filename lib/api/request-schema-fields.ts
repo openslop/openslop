@@ -37,6 +37,17 @@ export const optionalReferenceImages = {
 	referenceImages: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 
+/**
+ * LLM sampling controls, bounded to the ranges the underlying providers accept
+ * so an out-of-range client value is a 400 at the boundary rather than a
+ * provider-side 400 re-surfaced as a 500. `temperature` is constrained to
+ * [0, 1]; `maxTokens` must be a positive integer.
+ */
+export const optionalLlmSampling = {
+	maxTokens: z.number().int().positive().optional(),
+	temperature: z.number().min(0).max(1).optional(),
+} as const;
+
 export const optionalFrameImages = {
 	frameImages: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;

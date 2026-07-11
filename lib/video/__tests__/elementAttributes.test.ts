@@ -23,6 +23,11 @@ describe("getVolume", () => {
 		expect(getVolume(el({ volume: "not-a-number" }))).toBe(10);
 	});
 
+	it("defaults to 10 for empty or whitespace volume instead of muting", () => {
+		expect(getVolume(el({ volume: "" }))).toBe(10);
+		expect(getVolume(el({ volume: "   " }))).toBe(10);
+	});
+
 	it("passes through valid values including 0", () => {
 		expect(getVolume(el({ volume: "0" }))).toBe(0);
 		expect(getVolume(el({ volume: "3" }))).toBe(3);
