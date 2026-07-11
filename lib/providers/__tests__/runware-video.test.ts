@@ -181,7 +181,7 @@ describe("RunwareVideo", () => {
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
-		it("surfaces the provider's error detail when a resolved item reports failure", async () => {
+		it("surfaces a human message on error and the full payload on errorDetail (resolved item)", async () => {
 			const errorDetail = {
 				code: "invalidValueUploadFailed",
 				message: "Processing parameter 'inputs.frameImages' failed.",
@@ -195,11 +195,15 @@ describe("RunwareVideo", () => {
 			const result = await provider.poll("job-1");
 
 			expect(result.metadata?.status).toBe("failed");
-			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
+			// error is the human message (renders in the banner), NOT a JSON dump.
+			expect(result.metadata?.error).toBe(
+				"Processing parameter 'inputs.frameImages' failed.",
+			);
+			expect(result.metadata?.error).not.toContain("{");
 			expect(result.metadata?.errorDetail).toEqual(errorDetail);
 		});
 
-		it("surfaces the provider's error detail when the status query itself rejects", async () => {
+		it("surfaces a human message on error and the full payload on errorDetail (rejected query, wrapped shape)", async () => {
 			const rejection = {
 				error: {
 					code: "invalidValueUploadFailed",
@@ -213,9 +217,25 @@ describe("RunwareVideo", () => {
 			const result = await provider.poll("job-1");
 
 			expect(result.metadata?.status).toBe("failed");
-			expect(result.metadata?.error).toContain("invalidValueUploadFailed");
+			// Pulled from the nested error.message, not a stringify of the wrapper.
+			expect(result.metadata?.error).toBe(
+				"Processing parameter 'inputs.frameImages' failed.",
+			);
+			expect(result.metadata?.error).not.toContain("{");
 			expect(result.metadata?.errorDetail).toEqual(rejection);
 			expect(mockDisconnect).toHaveBeenCalled();
+		});
+
+		it("falls back to a generic message when the failure has no readable message", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "failed", error: { code: "weird" } },
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.metadata?.error).toBe("Video generation failed");
+			expect(result.metadata?.errorDetail).toEqual({ code: "weird" });
 		});
 
 		it("rethrows a transient connection error instead of treating it as a permanent failure", async () => {
