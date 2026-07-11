@@ -1,4 +1,5 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
+import { humanErrorMessage } from "@/lib/errors";
 import type { VideoJob, VideoJobStatus } from "./base";
 import { BaseVideoProvider } from "./base";
 import { withRunware } from "../runware";
@@ -12,21 +13,9 @@ function isApiError(err: unknown): boolean {
 	);
 }
 
-/**
- * A human-readable message for `metadata.error`, which renders verbatim in the
- * failure banner — so it must never be a raw JSON dump. The full structured
- * payload is preserved separately on `errorDetail` for classification. Handles
- * both Runware shapes: an unwrapped IErrorResponse (`{message}`, resolved-but-
- * failed item) and a wrapped rejection (`{error: {message}}`, rejected poll).
- */
+/** Human message for `metadata.error` (renders verbatim in the failure banner); the full payload stays on `errorDetail` for classification. */
 function humanVideoError(raw: unknown): string {
-	if (typeof raw === "string") return raw;
-	if (raw !== null && typeof raw === "object") {
-		const obj = raw as { message?: unknown; error?: { message?: unknown } };
-		if (typeof obj.message === "string") return obj.message;
-		if (typeof obj.error?.message === "string") return obj.error.message;
-	}
-	return "Video generation failed";
+	return humanErrorMessage(raw, "Video generation failed");
 }
 
 function toVideoJob(video: {

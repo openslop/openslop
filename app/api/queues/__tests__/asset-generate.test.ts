@@ -109,9 +109,11 @@ describe("asset-generate queue worker", () => {
 		});
 
 		await expect(processMessage(message)).rejects.toThrow("provider down");
+		// error is the human message (renders in the failure banner), not a
+		// serialized Error with a stack trace.
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "failed",
-			error: expect.stringContaining("provider down"),
+			error: "provider down",
 			metadata: { errorDetail: thrown },
 		});
 	});
@@ -121,7 +123,12 @@ describe("asset-generate queue worker", () => {
 			status: "pending",
 			metadata: { providerJobId: "p1" },
 		});
-		const thrown = { error: { code: "invalidValueUploadFailed" } };
+		const thrown = {
+			error: {
+				code: "invalidValueUploadFailed",
+				message: "Processing parameter 'inputs.frameImages' failed.",
+			},
+		};
 		mockGetJobHandler.mockReturnValue({
 			process: vi.fn().mockRejectedValue(thrown),
 		});
@@ -129,8 +136,23 @@ describe("asset-generate queue worker", () => {
 		await expect(processMessage(message)).rejects.toBe(thrown);
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "failed",
-			error: expect.stringContaining("invalidValueUploadFailed"),
+			error: "Processing parameter 'inputs.frameImages' failed.",
 			metadata: { providerJobId: "p1", errorDetail: thrown },
+		});
+	});
+
+	it("falls back to a generic human message when the thrown error has no readable message", async () => {
+		mockLoadJobForProcessing.mockResolvedValue({ status: "pending" });
+		const thrown = { error: { code: "weird" } };
+		mockGetJobHandler.mockReturnValue({
+			process: vi.fn().mockRejectedValue(thrown),
+		});
+
+		await expect(processMessage(message)).rejects.toBe(thrown);
+		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
+			status: "failed",
+			error: "Generation failed",
+			metadata: { errorDetail: thrown },
 		});
 	});
 });

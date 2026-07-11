@@ -3,7 +3,7 @@ import { getJobHandler } from "@/lib/api/job-handlers";
 import type { AssetQueueMessage } from "@/lib/api/jobs";
 import { loadJobForProcessing, updateJob } from "@/lib/api/jobs";
 import { logger } from "@/lib/api/logger";
-import { stringifyError } from "@/lib/errors";
+import { humanErrorMessage } from "@/lib/errors";
 
 export const POST = handleCallback<AssetQueueMessage>(
 	async ({ jobId, connectorType }) => {
@@ -23,10 +23,12 @@ export const POST = handleCallback<AssetQueueMessage>(
 			logger.error(error, `Job ${jobId} failed`);
 			await updateJob(jobId, {
 				status: "failed",
-				error: stringifyError(error),
-				// Keep the raw error alongside the stringified message so rowView can
-				// surface structured detail (e.g. Runware's {error:{code,parameter}})
-				// for a job that failed at submit, before any live provider poll.
+				// A human message: job.error surfaces verbatim in the failure banner
+				// via rowView, so it must never be a JSON/stack dump.
+				error: humanErrorMessage(error, "Generation failed"),
+				// The raw error rides alongside so rowView can surface structured
+				// detail (e.g. Runware's {error:{code,parameter}}) for a job that
+				// failed at submit, before any live provider poll.
 				metadata: { ...job.metadata, errorDetail: error },
 			});
 			throw error;

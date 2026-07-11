@@ -26,14 +26,18 @@ type RunwareErrorFields = { code?: string; parameter?: string };
 // A frame-image failure reaches us as asset-base.ts's job-status throw, which
 // carries the provider's raw error as `cause` (other failures — timeout, no
 // result, network — have no cause and fall through to a rethrow). Runware
-// shapes the payload as {error: {code, parameter, ...}} on a rejected poll, or
-// {code, parameter, ...} directly on a resolved-but-failed task — check both.
+// shapes the payload as {error: {code, parameter, ...}} on a rejected poll,
+// {code, parameter, ...} directly on a resolved-but-failed task, or an
+// {errors: [...]} batch — check all three, mirroring the provider's isApiError.
 function isFrameImageFailure(err: unknown): boolean {
 	if (!(err instanceof Error)) return false;
 	const cause = err.cause;
 	if (typeof cause !== "object" || cause === null) return false;
-	const raw = cause as { error?: RunwareErrorFields } & RunwareErrorFields;
-	const apiError = raw.error ?? raw;
+	const raw = cause as {
+		error?: RunwareErrorFields;
+		errors?: RunwareErrorFields[];
+	} & RunwareErrorFields;
+	const apiError = raw.error ?? raw.errors?.[0] ?? raw;
 	return (
 		apiError.parameter === "inputs.frameImages" ||
 		apiError.code === "invalidValueUploadFailed"

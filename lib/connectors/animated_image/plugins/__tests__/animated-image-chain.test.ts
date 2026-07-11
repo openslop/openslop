@@ -143,6 +143,17 @@ describe("createVideoChainPlugin", () => {
 		).rejects.toThrow(FRIENDLY_MESSAGE);
 	});
 
+	it("translates an {errors: [...]} batch payload, mirroring the provider's isApiError", async () => {
+		const cause = {
+			errors: [
+				{ code: "invalidValueUploadFailed", parameter: "inputs.frameImages" },
+			],
+		};
+		await expect(
+			runChain(providerFailure("Upload failed", cause)),
+		).rejects.toThrow(FRIENDLY_MESSAGE);
+	});
+
 	it("does not rewrite an unrelated video-provider error", async () => {
 		const rejection = providerFailure("Runware: rate limit exceeded", {
 			code: "rateLimitExceeded",
