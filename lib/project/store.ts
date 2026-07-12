@@ -13,13 +13,11 @@ export type ProjectContext = {
 	hydrated: boolean;
 	metadata: Metadata;
 	referenceImages: string[];
-	templateReferenceImages: string[];
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setCharacter: (name: string, character: MetadataCharacter) => void;
 	removeCharacter: (name: string) => void;
 	setNarration: (narration: MetadataVoice) => void;
 	setReferenceImages: (urls: string[]) => void;
-	setTemplateReferenceImages: (urls: string[]) => void;
 	removeReferenceImage: (index: number) => void;
 	markHydrated: () => void;
 	reset: () => void;
@@ -31,7 +29,6 @@ const initialState = {
 	hydrated: false,
 	metadata: { title: "", style: "", narration: {}, characters: {} } as Metadata,
 	referenceImages: [] as string[],
-	templateReferenceImages: [] as string[],
 };
 
 const stores = new Map<string, ProjectStore>();
@@ -62,10 +59,6 @@ export function getProjectStore(projectId: string): ProjectStore {
 					set((state) => {
 						state.referenceImages = urls;
 					}),
-				setTemplateReferenceImages: (urls) =>
-					set((state) => {
-						state.templateReferenceImages = urls;
-					}),
 				removeReferenceImage: (index) =>
 					set((state) => {
 						state.referenceImages.splice(index, 1);
@@ -78,7 +71,6 @@ export function getProjectStore(projectId: string): ProjectStore {
 					set((state) => {
 						state.metadata = structuredClone(initialState.metadata);
 						state.referenceImages = [];
-						state.templateReferenceImages = [];
 					}),
 			})),
 		);

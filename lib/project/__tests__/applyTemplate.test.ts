@@ -42,33 +42,15 @@ describe("applyTemplate", () => {
 		expect(metadata.style).toBe(getTemplateById("pov-life")?.style);
 	});
 
-	it("preserves user-uploaded reference images when applying a template", () => {
+	it("wipes reference images set outside the template before applying", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
 			.setReferenceImages(["user://a.png", "user://b.png"]);
 
 		applyTemplate(PROJECT_ID, "sleep-story");
-		expect(getProjectStore(PROJECT_ID).getState().referenceImages).toEqual([
-			"user://a.png",
-			"user://b.png",
-			...(getTemplateById("sleep-story")?.referenceImages ?? []),
-		]);
-	});
-
-	it("drops the previous template's own images on switch but keeps user uploads", () => {
-		applyTemplate(PROJECT_ID, "pov-life");
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.setReferenceImages([
-				...getProjectStore(PROJECT_ID).getState().referenceImages,
-				"user://mine.png",
-			]);
-
-		applyTemplate(PROJECT_ID, "sleep-story");
-		expect(getProjectStore(PROJECT_ID).getState().referenceImages).toEqual([
-			"user://mine.png",
-			...(getTemplateById("sleep-story")?.referenceImages ?? []),
-		]);
+		expect(getProjectStore(PROJECT_ID).getState().referenceImages).toEqual(
+			getTemplateById("sleep-story")?.referenceImages,
+		);
 	});
 
 	it("wipes user-set narration before applying", () => {
