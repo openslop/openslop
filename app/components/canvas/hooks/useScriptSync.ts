@@ -21,7 +21,7 @@ export function useScriptSync(editor: Editor): void {
 	const nodes = useScriptNodes();
 
 	useEffect(() => {
-		// `nodes` is capped at MAX_NODES_TO_SYNC (3) by useOSMLSerializer,
+		// `nodes` is capped at MAX_NODES_TO_SYNC (3) by useOSMLStreamParser,
 		// so per-id lookups here are bounded — no need to prebuild a map.
 		Editor.withoutNormalizing(editor, () => {
 			for (const node of nodes) {

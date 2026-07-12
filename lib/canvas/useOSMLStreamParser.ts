@@ -5,18 +5,18 @@ import { OSMLStreamParser } from "./osmlStreamParser";
 
 const MAX_NODES_TO_SYNC = 3;
 
-export function useOSMLSerializer() {
+export function useOSMLStreamParser() {
 	const { connectorConfig } = useConfig();
-	const serializerRef = useRef(new OSMLStreamParser());
+	const parserRef = useRef(new OSMLStreamParser());
 	const [nodes, setNodes] = useState<ParsedElement[]>([]);
 
 	const appendChunk = useCallback(
 		(chunk: string) => {
-			const updated = serializerRef.current.appendChunk(chunk, connectorConfig);
+			const updated = parserRef.current.appendChunk(chunk, connectorConfig);
 			if (updated) {
 				setNodes(
 					structuredClone(
-						serializerRef.current.getNodes().slice(-1 * MAX_NODES_TO_SYNC),
+						parserRef.current.getNodes().slice(-1 * MAX_NODES_TO_SYNC),
 					),
 				);
 			}

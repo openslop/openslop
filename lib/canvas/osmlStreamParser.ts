@@ -102,10 +102,10 @@ export class OSMLStreamParser {
 	}
 }
 
+// TODO store and rehydrate element-scoped connector snapshot too
 /**
  * One-shot parse of a complete OSML string into canvas nodes.
  */
-// TODO store and rehydrate element-scoped connector snapshot too
 export function parseOSML(
 	osml: string,
 	connectors: ConnectorRegistry,
