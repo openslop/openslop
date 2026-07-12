@@ -12,13 +12,11 @@ import { cn } from "@/lib/utils";
 export interface IconProps extends ComponentPropsWithoutRef<"span"> {
 	/** Pixel size (number) or any CSS length. Defaults to 16. */
 	size?: number | string;
-	/** Accepted for lucide call-site compatibility; ignored (icons are filled). */
+	/** Accepted for legacy call-site compatibility; ignored (icons are filled). */
 	strokeWidth?: number;
 }
 
 export type IconComponent = (props: IconProps) => React.ReactElement;
-/** Compatibility alias for former `lucide-react` `LucideIcon` type usage. */
-export type LucideIcon = IconComponent;
 
 function icon(name: string): IconComponent {
 	const Component = ({

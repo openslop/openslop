@@ -5,7 +5,7 @@ import { useState } from "react";
 import {
 	Home,
 	Layout,
-	type LucideIcon,
+	type IconComponent,
 	SlidersAlt,
 	SlidersAltFill,
 } from "@/components/ui/icon";
@@ -19,8 +19,8 @@ const PANELS: Record<
 	PanelKey,
 	{
 		label: string;
-		icon: LucideIcon;
-		iconActive: LucideIcon;
+		icon: IconComponent;
+		iconActive: IconComponent;
 		Panel: () => React.ReactNode;
 	}
 > = {
@@ -45,7 +45,7 @@ function RailItem({
 	href,
 	onClick,
 }: {
-	icon: LucideIcon;
+	icon: IconComponent;
 	label: string;
 	selected?: boolean;
 	href?: string;
