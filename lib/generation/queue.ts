@@ -231,12 +231,14 @@ export class GenerationQueue {
 		this.notify();
 	}
 
-	setManualResult(
+	// Store a result regardless of where it came from — a finished job or a
+	// caller handing one in (e.g. an upload). Callers racing an in-flight job
+	// should cancel() first.
+	commitResult(
 		elementId: string,
 		result: AssetResult,
 		inputs: GenerationInputs,
 	): void {
-		this.cancel(elementId);
 		const key = serializeInputs(inputs);
 		const elHistory =
 			this.history.get(elementId) ?? new Map<string, AssetResult>();
@@ -315,18 +317,7 @@ export class GenerationQueue {
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		const key = serializeInputs(inputs);
-		const elHistory =
-			this.history.get(job.elementId) ?? new Map<string, AssetResult>();
-		elHistory.set(key, result);
-		this.history.set(job.elementId, elHistory);
-		this.update(job.elementId, {
-			status: "idle",
-			seconds: 0,
-			result,
-			error: null,
-			resultInputs: inputs,
-		});
+		this.commitResult(job.elementId, result, inputs);
 	}
 
 	private handleJobError(

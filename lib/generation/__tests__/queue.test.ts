@@ -346,14 +346,14 @@ describe("GenerationQueue", () => {
 		});
 	});
 
-	describe("setManualResult", () => {
+	describe("commitResult", () => {
 		it("sets result, clears error, and moves status to idle", () => {
 			const result = {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
 			const inputs = { prompt: "p", attributes: {} };
-			generationQueue.setManualResult("sm1", result, inputs);
+			generationQueue.commitResult("sm1", result, inputs);
 
 			const snap = generationQueue.getElementSnapshot("sm1");
 			expect(snap.status).toBe("idle");
@@ -381,7 +381,7 @@ describe("GenerationQueue", () => {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
-			generationQueue.setManualResult("sm2", uploaded, inputs);
+			generationQueue.commitResult("sm2", uploaded, inputs);
 			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
 				uploaded,
 			);
@@ -399,7 +399,7 @@ describe("GenerationQueue", () => {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
-			generationQueue.setManualResult("sm3", uploaded, {
+			generationQueue.commitResult("sm3", uploaded, {
 				prompt: "p",
 				attributes: {},
 			});
@@ -416,7 +416,7 @@ describe("GenerationQueue", () => {
 				durationSec: 0,
 			};
 			const inputs = { prompt: "p", attributes: {} };
-			generationQueue.setManualResult("sm4", uploaded, inputs);
+			generationQueue.commitResult("sm4", uploaded, inputs);
 			generationQueue.setError("sm4", "prompt changed");
 			expect(generationQueue.getElementSnapshot("sm4").result).toBeNull();
 
@@ -432,7 +432,7 @@ describe("GenerationQueue", () => {
 		it("notifies subscribers", () => {
 			const listener = vi.fn();
 			generationQueue.subscribe(listener);
-			generationQueue.setManualResult(
+			generationQueue.commitResult(
 				"sm5",
 				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
 				{ prompt: "p", attributes: {} },
@@ -442,7 +442,7 @@ describe("GenerationQueue", () => {
 			generationQueue.discard("sm5");
 		});
 
-		it("cancels an in-flight generation job so it can't clobber the manual result later", async () => {
+		it("does not let a cancelled in-flight job clobber a result committed after it", async () => {
 			let resolveGenerate: (value: unknown) => void = () => {};
 			generateMock.mockReturnValue(
 				new Promise((resolve) => {
@@ -455,17 +455,19 @@ describe("GenerationQueue", () => {
 				"generating",
 			);
 
+			// The caller contract for uploads: cancel the in-flight job, then commit.
 			const uploaded = {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
-			generationQueue.setManualResult("sm6", uploaded, inputs);
+			generationQueue.cancel("sm6");
+			generationQueue.commitResult("sm6", uploaded, inputs);
 			expect(generationQueue.getElementSnapshot("sm6").result).toEqual(
 				uploaded,
 			);
 
-			// The generation job that was in flight when setManualResult ran
-			// resolves afterwards — it must not overwrite the manual result.
+			// The cancelled job resolves afterwards — it must not overwrite the
+			// committed result.
 			resolveGenerate({
 				url: "https://example.com/generated.png",
 				durationSec: 0,
