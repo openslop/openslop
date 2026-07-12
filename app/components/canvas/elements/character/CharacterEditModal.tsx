@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ImagePlus, Loader2, Trash2 } from "@/components/ui/icon";
+import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
-import { TooltipIconButton } from "@/components/ui/icon-button";
 import {
 	DialogContent,
 	DialogDescription,
@@ -28,7 +27,7 @@ import {
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
-import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaPlaceholder, MediaPreview } from "../preview/results";
 import { TextAreaField } from "./fields";
@@ -77,18 +76,6 @@ function CharacterEditDialogBody({
 	const avatarSnapshot = useQueueSelector((q) =>
 		q.getElementSnapshot(avatarElementId),
 	);
-
-	const { openPicker, uploading, inputElement } = useImageUpload({
-		onUpload: ([url]) => {
-			if (!url) return;
-			queue.discard(avatarElementId);
-			setCharacter(name, {
-				...character,
-				avatarUrl: url,
-				avatarUploaded: true,
-			});
-		},
-	});
 
 	if (!character) return null;
 
@@ -203,19 +190,18 @@ function CharacterEditDialogBody({
 								onDiscard={() => queue.discard(avatarElementId)}
 							/>
 						)}
-						{inputElement}
-						<TooltipIconButton
-							label="Upload image"
-							onClick={openPicker}
-							disabled={uploading}
+						<UploadImageButton
+							variant="icon"
 							className="absolute left-2 top-2 z-10 rounded-full bg-card shadow-sm ring-1 ring-border"
-						>
-							{uploading ? (
-								<Loader2 className="h-3.5 w-3.5 animate-spin" />
-							) : (
-								<ImagePlus className="h-3.5 w-3.5" />
-							)}
-						</TooltipIconButton>
+							onUpload={(url) => {
+								queue.discard(avatarElementId);
+								setCharacter(name, {
+									...character,
+									avatarUrl: url,
+									avatarUploaded: true,
+								});
+							}}
+						/>
 					</div>
 				</div>
 				<VoiceSection voice={character} onChange={update} />

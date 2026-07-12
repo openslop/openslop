@@ -1,7 +1,5 @@
 "use client";
 
-import { ImagePlus } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import {
 	useGenerationQueue,
@@ -9,10 +7,10 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { useProjectStore } from "@/lib/project/store";
-import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
-export function UploadImageButton({
+export function ElementUploadButton({
 	element,
 }: {
 	element: CanvasContentElement;
@@ -23,39 +21,21 @@ export function UploadImageButton({
 		(q) => q.getElementSnapshot(element.id).status,
 	);
 	const metadata = useProjectStore(projectId, (s) => s.metadata);
-
-	const { openPicker, uploading, inputElement } = useImageUpload({
-		onUpload: ([url]) => {
-			if (!url) return;
-			const inputs = getGenerationInputs(element, metadata);
-			queue.setManualResult(
-				element.id,
-				{ imageUrl: url, durationSec: 0 },
-				inputs,
-			);
-		},
-	});
-
 	const busy = status === "generating" || status === "queued";
 
 	return (
-		<>
-			{inputElement}
-			<Button
-				type="button"
-				variant="ghost"
-				size="sm"
-				tooltip="Upload your own image"
-				className="shrink-0"
-				disabled={uploading || busy}
-				onMouseDown={(e) => e.preventDefault()}
-				onClick={openPicker}
-			>
-				<ImagePlus aria-hidden="true" />
-				<span className="hidden sm:inline">
-					{uploading ? "Uploading…" : "Upload"}
-				</span>
-			</Button>
-		</>
+		<UploadImageButton
+			className="shrink-0"
+			disabled={busy}
+			onUpload={(url) => {
+				// Kill any in-flight generation so a late result can't clobber the upload.
+				queue.cancel(element.id);
+				queue.commitResult(
+					element.id,
+					{ imageUrl: url, durationSec: 0 },
+					getGenerationInputs(element, metadata),
+				);
+			}}
+		/>
 	);
 }
