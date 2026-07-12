@@ -16,6 +16,7 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
+import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareImage } from "../image/runware";
 
 describe("RunwareImage", () => {
@@ -38,10 +39,34 @@ describe("RunwareImage", () => {
 			width: 2848,
 			height: 1600,
 			outputType: "base64Data",
+			outputFormat: "PNG",
 			numberResults: 1,
 			referenceImages: undefined,
 		});
 		expect(mockDisconnect).toHaveBeenCalled();
+	});
+
+	it("requests PNG output so bytes match the png filename and mime type", async () => {
+		mockImageInference.mockResolvedValue([{ imageBase64Data: "abc123" }]);
+
+		const provider = new RunwareImage("test-key");
+		await provider.generate({ prompt: "a cat" });
+
+		// Runware defaults to JPG when outputFormat is omitted, but the bundle
+		// labels the asset image/png. The request must pin PNG so the persisted
+		// bytes actually match the declared filename and content type.
+		expect(mockImageInference).toHaveBeenCalledWith(
+			expect.objectContaining({ outputFormat: "PNG" }),
+		);
+
+		const files = vi.mocked(AssetBundle.upload).mock.calls[0][2];
+		expect(files).toEqual([
+			expect.objectContaining({
+				key: "image",
+				filename: "output.png",
+				contentType: "image/png",
+			}),
+		]);
 	});
 
 	it("passes custom dimensions and model", async () => {
