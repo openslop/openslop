@@ -11,6 +11,7 @@ import {
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { shouldInsertNewlineOnEnter } from "@/lib/canvas/keyboardGuards";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
@@ -39,18 +40,9 @@ export default function Canvas({
 
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent<HTMLDivElement>) => {
-			// IME composition (CJK, etc.) also commits via Enter — don't hijack
-			// that keydown into a newline, or it clobbers the composition.
-			if (event.nativeEvent.isComposing || event.keyCode === 229) return;
-			if (
-				event.key === "Enter" &&
-				!event.ctrlKey &&
-				!event.metaKey &&
-				!event.altKey
-			) {
-				event.preventDefault();
-				editor.insertText("\n");
-			}
+			if (!shouldInsertNewlineOnEnter(event)) return;
+			event.preventDefault();
+			editor.insertText("\n");
 		},
 		[editor],
 	);
