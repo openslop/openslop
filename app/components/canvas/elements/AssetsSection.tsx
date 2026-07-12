@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Mic, Palette, Plus, User } from "@/components/ui/icon";
+import { ImagePlus, Mic, Palette, User, UserPlus } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { getProjectStore, useProjectStore } from "@/lib/project/store";
 import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
+import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { AddAssetTile } from "./AddAssetTile";
 import { AssetTile } from "./AssetTile";
 import { useAssetEditDialogs } from "./character/useAssetEditDialogs";
 import { CollapsibleHeader } from "./CollapsibleHeader";
@@ -21,6 +23,14 @@ export function AssetsSection() {
 	const [collapsed, setCollapsed] = useState(false);
 	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
 		useAssetEditDialogs();
+
+	const { openPicker, uploading, inputElement } = useImageUpload({
+		multiple: true,
+		onUpload: (urls) => {
+			const store = getProjectStore(projectId).getState();
+			store.setReferenceImages([...store.referenceImages, ...urls]);
+		},
+	});
 
 	if (!hydrated) return null;
 
@@ -40,19 +50,6 @@ export function AssetsSection() {
 						fallback="icon"
 						onEdit={openNarrator}
 					/>
-					<button
-						type="button"
-						onClick={openCreateCharacter}
-						aria-label="Add character"
-						className="flex w-16 flex-col gap-1 sm:w-20"
-					>
-						<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-border bg-muted text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground">
-							<Plus className="h-4 w-4" />
-						</div>
-						<span className="truncate text-badge text-muted-foreground">
-							New
-						</span>
-					</button>
 					{Object.entries(characters).map(([name, ch]) => (
 						<AssetTile
 							key={`character:${name}`}
@@ -63,6 +60,12 @@ export function AssetsSection() {
 							onEdit={() => editCharacter(name)}
 						/>
 					))}
+					<AddAssetTile
+						label="Character"
+						ariaLabel="Add character"
+						Icon={UserPlus}
+						onClick={openCreateCharacter}
+					/>
 					{referenceImages.map((url, i) => (
 						<AssetTile
 							key={`style:${url}`}
@@ -72,6 +75,15 @@ export function AssetsSection() {
 							onRemove={() => removeReferenceImage(i)}
 						/>
 					))}
+					<AddAssetTile
+						label="Reference"
+						ariaLabel="Add reference image"
+						Icon={ImagePlus}
+						onClick={openPicker}
+						disabled={uploading}
+						busy={uploading}
+					/>
+					{inputElement}
 				</div>
 			)}
 			{dialogs}
