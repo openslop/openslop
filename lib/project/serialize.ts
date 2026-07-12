@@ -1,9 +1,7 @@
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { SCENE_TYPE } from "@/lib/canvas/types";
-import {
-	OSMLSerializer,
-	SCENE_MARKER_PATTERN,
-} from "@/lib/canvas/osmlSerializer";
+import { SCENE_MARKER_PATTERN } from "@/lib/canvas/osmlSerializer";
+import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { makeNodeId } from "@/lib/canvas/nodeUtils";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 
@@ -19,15 +17,9 @@ export function deserializeWithScenes(
 	osml: string,
 	connectors: ConnectorRegistry,
 ): SceneElement[] {
-	return splitScenes(osml).map((sceneOsml) => {
-		const serializer = new OSMLSerializer();
-
-		// TODO store and rehydrate element-scoped connector snapshot too
-		serializer.appendChunk(`${sceneOsml}\n`, connectors);
-		return {
-			id: makeNodeId(),
-			type: SCENE_TYPE,
-			children: serializer.getNodes() as CanvasContentElement[],
-		};
-	});
+	return splitScenes(osml).map((sceneOsml) => ({
+		id: makeNodeId(),
+		type: SCENE_TYPE,
+		children: parseOSML(sceneOsml, connectors) as CanvasContentElement[],
+	}));
 }

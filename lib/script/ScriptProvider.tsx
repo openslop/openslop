@@ -15,7 +15,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
 import { getProjectStore } from "@/lib/project/store";
-import { useOSMLSerializer } from "@/lib/canvas/useOSMLSerializer";
+import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
 
 type ScriptControl = {
 	loading: boolean;
@@ -56,7 +56,7 @@ export function ScriptProvider({
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const [loading, setLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
-	const { nodes, appendChunk } = useOSMLSerializer();
+	const { nodes, appendChunk } = useOSMLStreamParser();
 
 	const stopGeneration = useCallback(() => {
 		abortRef.current?.abort();

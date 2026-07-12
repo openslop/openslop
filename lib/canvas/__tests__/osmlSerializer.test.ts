@@ -1,36 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { OSMLSerializer } from "../osmlSerializer";
+import {
+	getElementText,
+	serializeOSML,
+	serializeOSMLWithScenes,
+} from "../osmlSerializer";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
-	type ParsedElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-
-const connectors: ConnectorRegistry = {
-	llm: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	tts: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	image: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	animated_image: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	video: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	sfx: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	music: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-};
 
 function el(
 	type: CanvasContentElement["type"],
@@ -51,21 +29,19 @@ const wrap = (...children: CanvasContentElement[]): SceneElement => ({
 	children,
 });
 
-describe("OSMLSerializer.serialize", () => {
+describe("serializeOSML", () => {
 	it("serializes narration with id", () => {
-		const result = OSMLSerializer.serialize([
-			wrap(el("narration", "Hello world")),
-		]);
+		const result = serializeOSML([wrap(el("narration", "Hello world"))]);
 		expect(result).toBe('<narration id="e1">Hello world</narration>');
 	});
 
 	it("serializes tagged elements with id", () => {
-		const result = OSMLSerializer.serialize([wrap(el("image", "a sunset"))]);
+		const result = serializeOSML([wrap(el("image", "a sunset"))]);
 		expect(result).toBe('<image id="e1">a sunset</image>');
 	});
 
 	it("includes attributes after id in the tag", () => {
-		const result = OSMLSerializer.serialize([
+		const result = serializeOSML([
 			wrap(el("character", "Hi there", { name: "Lyra", emotion: "excited" })),
 		]);
 		expect(result).toBe(
@@ -74,7 +50,7 @@ describe("OSMLSerializer.serialize", () => {
 	});
 
 	it("flattens scene hierarchy when serializing", () => {
-		const result = OSMLSerializer.serialize([
+		const result = serializeOSML([
 			wrap(el("narration", "Once upon a time")),
 			wrap(el("character", "Hello!", { name: "Bob" }), el("image", "forest")),
 		]);
@@ -84,184 +60,8 @@ describe("OSMLSerializer.serialize", () => {
 	});
 
 	it("handles empty attributes", () => {
-		const result = OSMLSerializer.serialize([
-			wrap(el("music", "epic orchestral")),
-		]);
+		const result = serializeOSML([wrap(el("music", "epic orchestral"))]);
 		expect(result).toBe('<music id="e1">epic orchestral</music>');
-	});
-});
-
-describe("OSMLSerializer streaming", () => {
-	it("parses a single complete tag", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk("<image>a sunset</image>", connectors);
-		const nodes = s.getNodes() as ParsedElement[];
-
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("image");
-		expect(OSMLSerializer.getTextContent(nodes[0])).toContain("a sunset");
-	});
-
-	it("handles streaming chunks across tag boundaries", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk("<char", connectors);
-		s.appendChunk('acter name="Al', connectors);
-		s.appendChunk('ice">Hello', connectors);
-		s.appendChunk(" world</character>", connectors);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("character");
-		expect(nodes[0].customAttributes?.name).toBe("Alice");
-		expect(OSMLSerializer.getTextContent(nodes[0])).toContain("Hello world");
-	});
-
-	it("flushes plain text after buffer threshold", () => {
-		const s = new OSMLSerializer();
-		// Need an initial node for text to append to
-		s.appendChunk("<narration>", connectors);
-		s.appendChunk("Some long narration text here", connectors);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(OSMLSerializer.getTextContent(nodes[0])).toContain(
-			"Some long narration text here",
-		);
-	});
-
-	it("preserves raw tag name for unknown tags", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk("<unknowntag>content</unknowntag>", connectors);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("unknowntag");
-	});
-
-	it("parses metadata_style metadata tag", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk(
-			"<metadata_style>Warm earth tones with watercolor style</metadata_style>",
-			connectors,
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("metadata_style");
-		expect(nodes[0].children[0].text).toBe(
-			"Warm earth tones with watercolor style",
-		);
-	});
-
-	it("parses metadata_character metadata tag with name attribute", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk(
-			'<metadata_character name="Mia">Brown hair, green eyes</metadata_character>',
-			connectors,
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("metadata_character");
-		expect(nodes[0].customAttributes?.name).toBe("Mia");
-		expect(nodes[0].children[0].text).toBe("Brown hair, green eyes");
-	});
-
-	it("parses metadata_narration with voice attributes", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk(
-			'<metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>',
-			connectors,
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("metadata_narration");
-		expect(nodes[0].customAttributes).toEqual({
-			gender: "masculine",
-			age: "adult",
-			pitch: "low",
-			accent: "british",
-			description: "wise",
-		});
-	});
-
-	it("parses mixed canvas and metadata tags", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk(
-			"<metadata_style>dark moody tones</metadata_style>",
-			connectors,
-		);
-		s.appendChunk("<narration>Once upon a time</narration>", connectors);
-		s.appendChunk(
-			'<metadata_character name="Bob">tall and thin</metadata_character>',
-			connectors,
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(3);
-		expect(nodes[0].type).toBe("metadata_style");
-		expect(nodes[1].type).toBe("narration");
-		expect(nodes[2].type).toBe("metadata_character");
-	});
-
-	it("parses attributes correctly", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk(
-			'<sound effect="thunder" volume="loud">boom</sound>',
-			connectors,
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].customAttributes).toMatchObject({
-			effect: "thunder",
-			volume: "loud",
-		});
-	});
-
-	it("backfills defaultAttributes for streamed canvas elements", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk("<sound>thunder</sound>", connectors);
-		s.appendChunk("<music>epic orchestral</music>", connectors);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes[0].customAttributes?.loops).toBe("1");
-		expect(nodes[1].customAttributes?.loops).toBe("1");
-	});
-
-	it("preserves explicit id attribute as node.id for canvas elements", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk('<sound id="abc">thunder</sound>', connectors);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes[0].id).toBe("abc");
-		expect(nodes[0].customAttributes?.id).toBeUndefined();
-	});
-
-	it("parses <animated_image> with a videoPrompt attribute", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk(
-			'<animated_image videoPrompt="slow zoom in">a dark forest</animated_image>',
-			connectors,
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("animated_image");
-		expect(nodes[0].customAttributes?.videoPrompt).toBe("slow zoom in");
-		expect(OSMLSerializer.getTextContent(nodes[0])).toContain("a dark forest");
-	});
-
-	it("hydrates connector model and provider on streamed canvas elements", () => {
-		const s = new OSMLSerializer();
-		s.appendChunk("<image>a sunset</image>", connectors);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes[0].customAttributes).toMatchObject({
-			model: "m",
-			provider: "openslop",
-		});
 	});
 });
 
@@ -279,9 +79,9 @@ function elWithId(
 	};
 }
 
-describe("OSMLSerializer.serializeWithScenes", () => {
+describe("serializeOSMLWithScenes", () => {
 	it("includes scene headers with numbers", () => {
-		const result = OSMLSerializer.serializeWithScenes([
+		const result = serializeOSMLWithScenes([
 			wrap(elWithId("narration", "n1", "Hello")),
 			wrap(elWithId("image", "img1", "sunset")),
 		]);
@@ -290,14 +90,14 @@ describe("OSMLSerializer.serializeWithScenes", () => {
 	});
 
 	it("serializes elements with ids inside scenes", () => {
-		const result = OSMLSerializer.serializeWithScenes([
+		const result = serializeOSMLWithScenes([
 			wrap(elWithId("narration", "n1", "Hello")),
 		]);
 		expect(result).toContain('<narration id="n1">Hello</narration>');
 	});
 
 	it("groups elements under their scene", () => {
-		const result = OSMLSerializer.serializeWithScenes([
+		const result = serializeOSMLWithScenes([
 			wrap(
 				elWithId("narration", "n1", "first"),
 				elWithId("sound", "s1", "rain", { loops: "3" }),
@@ -310,8 +110,8 @@ describe("OSMLSerializer.serializeWithScenes", () => {
 	});
 
 	it("ignores non-scene top-level nodes", () => {
-		// serializeWithScenes only walks scene elements
-		const result = OSMLSerializer.serializeWithScenes([
+		// serializeOSMLWithScenes only walks scene elements
+		const result = serializeOSMLWithScenes([
 			wrap(elWithId("narration", "n1", "hello")),
 		]);
 		expect(result).toContain("Scene 1");
@@ -319,7 +119,7 @@ describe("OSMLSerializer.serializeWithScenes", () => {
 	});
 });
 
-describe("OSMLSerializer.getTextContent", () => {
+describe("getElementText", () => {
 	it("extracts joined text from children", () => {
 		const element: CanvasContentElement = {
 			id: "e1",
@@ -329,6 +129,6 @@ describe("OSMLSerializer.getTextContent", () => {
 				{ id: "t2", type: "narration", text: "world" },
 			],
 		};
-		expect(OSMLSerializer.getTextContent(element)).toBe("Hello world");
+		expect(getElementText(element)).toBe("Hello world");
 	});
 });

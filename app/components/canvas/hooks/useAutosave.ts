@@ -3,7 +3,7 @@ import type { Descendant } from "slate";
 import { toast } from "sonner";
 import debounce from "lodash/debounce";
 import PQueue from "p-queue";
-import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getProjectStore } from "@/lib/project/store";
 import { extractStoreSnapshot } from "@/lib/project/storeSnapshot";
 import { deriveProjectName } from "@/lib/project/projectName";
@@ -39,7 +39,7 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 			return;
 		}
 		const snapshot = extractStoreSnapshot(store);
-		const script = OSMLSerializer.serializeWithScenes(valueRef.current);
+		const script = serializeOSMLWithScenes(valueRef.current);
 		const generation = queue.snapshot();
 		try {
 			await saveProject(projectId, {
