@@ -1,7 +1,7 @@
 import { createEditor } from "slate";
 import { withHistory } from "slate-history";
 import { describe, expect, it } from "vitest";
-import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { rehydrateProjectEditor } from "./useProjectRehydrate";
@@ -35,7 +35,7 @@ const scene: SceneElement = {
 describe("rehydrateProjectEditor", () => {
 	it("does not save project load operations to undo history", () => {
 		const editor = withHistory(createEditor());
-		const osml = OSMLSerializer.serializeWithScenes([scene]);
+		const osml = serializeOSMLWithScenes([scene]);
 
 		rehydrateProjectEditor(editor, osml, connectors);
 

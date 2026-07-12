@@ -6,7 +6,7 @@ import { createConnector } from "@/lib/connectors/factory";
 import { createRefinePlugin } from "@/lib/connectors/llm/plugins/refine";
 import { RefineOpParser } from "@/lib/script/refine/parseOps";
 import { applyRefineOp } from "@/lib/script/refine/applyOps";
-import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 
 export function useRefineScript(editor: Editor) {
 	const { connectorConfig } = useConfig();
@@ -25,7 +25,7 @@ export function useRefineScript(editor: Editor) {
 			abortRef.current = controller;
 			setRefineLoading(true);
 
-			const osml = OSMLSerializer.serializeWithScenes(editor.children);
+			const osml = serializeOSMLWithScenes(editor.children);
 			const connector = createConnector("llm", llmProvider, {
 				...llmConfig,
 				plugins: [createRefinePlugin(osml)],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import {
 	SCENE_TYPE,
@@ -67,7 +67,7 @@ describe("deserializeWithScenes", () => {
 			makeScene([makeEl("clip", "", { url: "https://cdn/b.mp4" })]),
 		];
 
-		const osml = OSMLSerializer.serializeWithScenes(original);
+		const osml = serializeOSMLWithScenes(original);
 		const scenes = deserializeWithScenes(osml, connectors);
 
 		expect(scenes).toHaveLength(2);

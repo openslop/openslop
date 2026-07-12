@@ -7,13 +7,13 @@ import {
 	type CanvasElementType,
 	type ParsedElement,
 } from "@/lib/canvas/types";
-import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { getElementText } from "@/lib/canvas/osmlSerializer";
 import { findNodeById, updateNodeText } from "@/lib/canvas/editorOps";
 
 function shouldSkip(node: ParsedElement): boolean {
 	return (
 		!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType) ||
-		OSMLSerializer.getTextContent(node).length === 0
+		getElementText(node).length === 0
 	);
 }
 
@@ -28,7 +28,7 @@ export function useScriptSync(editor: Editor): void {
 				if (shouldSkip(node)) continue;
 
 				const canvasNode = node as CanvasContentElement;
-				const nextText = OSMLSerializer.getTextContent(canvasNode);
+				const nextText = getElementText(canvasNode);
 				const entry = findNodeById(editor, canvasNode.id);
 
 				if (entry) {

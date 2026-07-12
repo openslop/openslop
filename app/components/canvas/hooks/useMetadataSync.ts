@@ -4,7 +4,7 @@ import { getProjectStore } from "@/lib/project/store";
 import type { DeepPartial, Metadata } from "@/lib/project/types";
 import { useScriptNodes } from "@/lib/script/ScriptProvider";
 import { METADATA_TAG_CONFIGS } from "../config/metadataTags";
-import { OSMLSerializer } from "@/lib/canvas/osmlSerializer";
+import { getElementText } from "@/lib/canvas/osmlSerializer";
 
 export function useMetadataSync(): void {
 	const nodes = useScriptNodes();
@@ -18,7 +18,7 @@ export function useMetadataSync(): void {
 			config.apply(
 				partial,
 				node.customAttributes ?? {},
-				OSMLSerializer.getTextContent(node).trim(),
+				getElementText(node).trim(),
 			);
 		}
 		getProjectStore(projectId).getState().updateMetadata(partial);
