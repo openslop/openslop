@@ -16,7 +16,7 @@ export function DeleteButton({
 			)}
 			{...props}
 		>
-			<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+			<Trash2 className="h-4 w-4" />
 		</TooltipIconButton>
 	);
 }

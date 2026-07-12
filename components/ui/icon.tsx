@@ -12,20 +12,12 @@ import { cn } from "@/lib/utils";
 export interface IconProps extends ComponentPropsWithoutRef<"span"> {
 	/** Pixel size (number) or any CSS length. Defaults to 16. */
 	size?: number | string;
-	/** Accepted for legacy call-site compatibility; ignored (icons are filled). */
-	strokeWidth?: number;
 }
 
 export type IconComponent = (props: IconProps) => React.ReactElement;
 
 function icon(name: string): IconComponent {
-	const Component = ({
-		size = 16,
-		className,
-		style,
-		strokeWidth: _strokeWidth,
-		...props
-	}: IconProps) => (
+	const Component = ({ size = 16, className, style, ...props }: IconProps) => (
 		<span
 			aria-hidden="true"
 			className={cn("icon", className)}

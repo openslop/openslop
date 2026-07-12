@@ -101,7 +101,7 @@ export default function InlineCopilot({
 				) : (
 					<ActionButton
 						label="Submit prompt"
-						icon={<CornerDownLeft className="h-4 w-4" strokeWidth={2.5} />}
+						icon={<CornerDownLeft className="h-4 w-4" />}
 						onClick={handleSubmit}
 						disabled={!hasText}
 					/>
