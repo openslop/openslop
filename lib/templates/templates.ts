@@ -2,10 +2,8 @@ import dedent from "dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
 
-const TEMPLATE_ASSET_PATH = "/assets/upload/template/";
-
 const templateAsset = (name: string) =>
-	`${BLOB_BASE_URL}${TEMPLATE_ASSET_PATH}${name}`;
+	`${BLOB_BASE_URL}/assets/upload/template/${name}`;
 
 export interface TemplateShowcase {
 	image: string;
