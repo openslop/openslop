@@ -45,13 +45,23 @@ describe("asset-generate queue worker", () => {
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 	});
 
-	it("skips jobs that already failed", async () => {
-		mockLoadJobForProcessing.mockResolvedValue({ status: "failed" });
+	it("reprocesses a failed job so queue redelivery can retry it", async () => {
+		const job = { status: "failed", id: "job-1" };
+		mockLoadJobForProcessing.mockResolvedValue(job);
+		const handler = {
+			process: vi
+				.fn()
+				.mockResolvedValue({ kind: "completed", result: { url: "u" } }),
+		};
+		mockGetJobHandler.mockReturnValue(handler);
 
 		await processMessage(message);
 
-		expect(mockGetJobHandler).not.toHaveBeenCalled();
-		expect(mockUpdateJob).not.toHaveBeenCalled();
+		expect(handler.process).toHaveBeenCalledWith(job);
+		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
+			status: "completed",
+			result: { url: "u" },
+		});
 	});
 
 	it("throws when no handler is registered for the connector type", async () => {

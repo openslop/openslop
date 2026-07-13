@@ -8,7 +8,9 @@ import { stringifyError } from "@/lib/errors";
 export const POST = handleCallback<AssetQueueMessage>(
 	async ({ jobId, connectorType }) => {
 		const job = await loadJobForProcessing(jobId);
-		if (job.status === "completed" || job.status === "failed") return;
+		// Only `completed` is final. A `failed` job is redelivered by the queue
+		// after the rethrow below, so it must stay eligible for reprocessing.
+		if (job.status === "completed") return;
 
 		const handler = getJobHandler(connectorType);
 		if (!handler) {

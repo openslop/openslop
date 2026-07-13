@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { ConnectorType } from "@/lib/connectors/types";
+import { isTerminal } from "@/lib/gateway/base";
 import { withApiAccess, withSession } from "./with-auth";
 import { getJobHandler, rowView } from "./job-handlers";
 import { createJob, enqueueJob, getJob } from "./jobs";
@@ -73,6 +74,7 @@ export async function pollJob(
 		if (!jobId) return badRequest("jobId is required");
 		const job = await getJob(jobId, user.id);
 		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
+		if (isTerminal(job.status)) return NextResponse.json(rowView(job));
 		const view =
 			(await getJobHandler(job.connector_type)?.poll?.(job)) ?? rowView(job);
 		return NextResponse.json(view);

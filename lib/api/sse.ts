@@ -87,6 +87,12 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 			}
 		}
 	} finally {
+		// A consumer that breaks out early leaves the upstream body open. Cancel
+		// failures are logged, never rethrown: this runs in `finally`, so throwing
+		// here would mask the error that ended the stream.
+		await reader
+			.cancel()
+			.catch((err) => logger.warn({ err }, "SSE: reader cancel failed"));
 		reader.releaseLock();
 	}
 }

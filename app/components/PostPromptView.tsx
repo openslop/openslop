@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useScriptInitial } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import { getLayoutKey } from "@/lib/video/layoutKey";
 import { useTransitionType } from "@/lib/video/useTransitionType";
 import UserProfile from "./UserProfile";
@@ -35,7 +35,7 @@ function PostPromptViewInner() {
 
 	const transitionType = useTransitionType();
 	const layoutKey = useMemo(
-		() => getLayoutKey(getContentElements(value), transitionType),
+		() => getLayoutKey(value, transitionType),
 		[value, transitionType],
 	);
 	const sceneIds = useMemo(

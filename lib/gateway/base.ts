@@ -6,6 +6,10 @@ export abstract class GatewayClient<TParams = unknown, TResult = unknown> {
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
+/** A terminal job has a settled result; it must never be re-processed or re-polled upstream. */
+export const isTerminal = (status: JobStatus): boolean =>
+	status === "completed" || status === "failed";
+
 export type JobSubmission = { jobId: string; status: JobStatus };
 
 export type JobPoll = {

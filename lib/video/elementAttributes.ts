@@ -18,21 +18,34 @@ const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
 const DEFAULT_VOLUME = VOLUME_MAX;
 
+/**
+ * A blank attribute means "unset", not zero — `Number("")` is a finite 0, which
+ * would silently mute audio or read as a zero loop count.
+ */
+function numericAttribute(
+	element: CanvasContentElement,
+	key: string,
+): number | undefined {
+	const raw = element.customAttributes?.[key]?.trim();
+	if (!raw) return undefined;
+	const value = Number(raw);
+	return Number.isFinite(value) ? value : undefined;
+}
+
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
-	return Number.isFinite(raw)
-		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
-		: DEFAULT_VOLUME;
+	const raw = numericAttribute(element, "volume");
+	return raw === undefined
+		? DEFAULT_VOLUME
+		: clamp(raw, VOLUME_MIN, VOLUME_MAX);
 }
 
 const LOOPS_MAX = 1000;
 
 /** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.loops);
-	if (!Number.isFinite(raw)) return 1;
-	return clamp(Math.floor(raw), 1, LOOPS_MAX);
+	const raw = numericAttribute(element, "loops");
+	return raw === undefined ? 1 : clamp(Math.floor(raw), 1, LOOPS_MAX);
 }
 
 /** Motion effect validated against the known set, defaulting to "none". */

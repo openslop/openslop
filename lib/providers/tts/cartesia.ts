@@ -101,6 +101,8 @@ export async function collectVoices(
 		});
 		voices.push(...page.data);
 		if (!page.has_more || !page.next_page) break;
+		// An empty page or a cursor that doesn't advance would page forever.
+		if (page.data.length === 0 || page.next_page === cursor) break;
 		cursor = page.next_page;
 	}
 	return voices;
