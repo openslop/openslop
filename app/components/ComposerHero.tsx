@@ -39,12 +39,9 @@ export default function ComposerHero() {
 					submitPrompt(value);
 					setValue("");
 				}}
-				placeholder={
-					mode === "script" ? (
-						INPUT_SCRIPT_PLACEHOLDER
-					) : (
-						<AnimatedPlaceholder active />
-					)
+				placeholder={mode === "script" ? INPUT_SCRIPT_PLACEHOLDER : undefined}
+				placeholderOverlay={
+					mode === "script" ? undefined : <AnimatedPlaceholder active />
 				}
 			/>
 
