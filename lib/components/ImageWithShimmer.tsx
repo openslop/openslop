@@ -1,93 +1,23 @@
 "use client";
 
-import { useCallback, useState, type SyntheticEvent } from "react";
-import omit from "lodash/omit";
+import { useState, type SyntheticEvent } from "react";
 import Image, { type ImageProps } from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-
-// Props next/image understands but a plain <img> doesn't — stripped before
-// spreading onto <img> in the unoptimized path below.
-const NEXT_ONLY_IMAGE_PROPS = [
-	"loader",
-	"quality",
-	"preload",
-	"priority",
-	"placeholder",
-	"blurDataURL",
-	"overrideSrc",
-	"onLoadingComplete",
-	"layout",
-	"objectFit",
-	"objectPosition",
-	"lazyBoundary",
-	"lazyRoot",
-] as const;
 
 /**
  * `next/image` with a shimmer overlay that hides once the image loads.
- *
- * When `unoptimized` is set, we skip `next/image` entirely and render a plain
- * `<img>`: `next/image` calls `img.decode()` on every load to avoid flicker,
- * which can throw a (harmless, already-swallowed) `EncodingError` in some
- * browsers for `fill`-positioned images — `unoptimized` means we're not using
- * Next's image pipeline anyway, so there's nothing to gain from routing
- * through it.
  */
-export function ImageWithShimmer({
-	alt,
-	onLoad,
-	unoptimized,
-	fill,
-	className,
-	src,
-	...props
-}: ImageProps) {
-	// Track which src loaded (not a boolean) so the shimmer comes back when
-	// `src` swaps in place — callers render this without a `key`.
-	const [loadedSrc, setLoadedSrc] = useState<ImageProps["src"] | null>(null);
-	const loaded = loadedSrc === src;
-	const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
-		onLoad?.(event);
-		setLoadedSrc(src);
-	};
-	// A cached image may never fire `load` (next/image does this same check).
-	// Keyed on `src` so a swap re-runs the check against the new image.
-	const checkAlreadyLoaded = useCallback(
-		(img: HTMLImageElement | null) => {
-			if (img?.complete) setLoadedSrc(src);
-		},
-		[src],
-	);
-
-	if (unoptimized) {
-		return (
-			<>
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					{...omit(props, NEXT_ONLY_IMAGE_PROPS)}
-					src={typeof src === "string" ? src : undefined}
-					alt={alt}
-					className={cn(fill && "absolute inset-0 h-full w-full", className)}
-					ref={checkAlreadyLoaded}
-					onLoad={handleLoad}
-				/>
-				{!loaded && (
-					<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-				)}
-			</>
-		);
-	}
-
+export function ImageWithShimmer({ alt, onLoad, ...props }: ImageProps) {
+	const [loaded, setLoaded] = useState(false);
 	return (
 		<>
 			<Image
 				{...props}
-				src={src}
-				fill={fill}
-				className={className}
 				alt={alt}
-				onLoad={handleLoad}
+				onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
+					onLoad?.(event);
+					setLoaded(true);
+				}}
 			/>
 			{!loaded && (
 				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
