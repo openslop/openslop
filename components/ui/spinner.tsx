@@ -9,6 +9,7 @@ function Spinner({
 	return (
 		<Loader2
 			role="status"
+			aria-hidden={false}
 			aria-label="Loading"
 			className={cn("size-4 animate-spin text-muted-foreground", className)}
 			{...props}
