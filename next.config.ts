@@ -1,4 +1,15 @@
 import type { NextConfig } from "next";
+import { BLOB_BASE_URL } from "./lib/blob";
+
+// Must track the same blob URLs lib/blob.ts + lib/api/asset-bundle.ts read —
+// an unlisted hostname 404s in an optimized <Image> (e.g. ProjectsList).
+const blobHostnames = Array.from(
+	new Set(
+		[process.env.NEXT_PUBLIC_BLOB_URL, BLOB_BASE_URL]
+			.filter((url): url is string => Boolean(url))
+			.map((url) => new URL(url).hostname),
+	),
+);
 
 const SECURITY_HEADERS = [
 	{ key: "X-Content-Type-Options", value: "nosniff" },
@@ -13,7 +24,10 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [
-			{ hostname: "mqzeech9ugknls54.public.blob.vercel-storage.com" },
+			...blobHostnames.map((hostname) => ({
+				protocol: "https" as const,
+				hostname,
+			})),
 			{ hostname: "picsum.photos" },
 		],
 	},
