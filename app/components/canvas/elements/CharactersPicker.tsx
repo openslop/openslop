@@ -13,13 +13,11 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import { CharacterPill } from "./CharacterPill";
 
 function useProjectCharacterNames(): string[] {
-	const { projectId } = useConfig();
-	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
+	const characters = useProject((s) => s.metadata.characters);
 	return Object.keys(characters);
 }
 

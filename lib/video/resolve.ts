@@ -1,10 +1,8 @@
-import type { CanvasElement } from "@/lib/canvas/types";
+import { ELEMENT_TYPES, type CanvasElement } from "@/lib/canvas/types";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import type { ResolvedElement } from "./types";
-import { ELEMENT_ROLES, LAYER_TYPES } from "./types";
 import {
 	areCaptionsEnabled,
 	getLoops,
@@ -22,10 +20,8 @@ export function resolveElements(
 		const snapshot = getSnapshot(el.id);
 		if (!snapshot.result) continue;
 
-		const url = getPrimaryUrl(
-			snapshot.result,
-			ELEMENT_CONFIGS[el.type].outputKind,
-		);
+		const spec = ELEMENT_TYPES[el.type];
+		const url = getPrimaryUrl(snapshot.result, spec.outputKind);
 		if (!url) continue;
 
 		const timestamps = snapshot.result.textTimestamps;
@@ -35,8 +31,8 @@ export function resolveElements(
 		resolved.push({
 			id: el.id,
 			type: el.type,
-			role: ELEMENT_ROLES[el.type],
-			layer: LAYER_TYPES[el.type],
+			role: spec.role,
+			layer: spec.layer,
 			url,
 			durationSec: snapshot.result.durationSec,
 			loops: getLoops(el),

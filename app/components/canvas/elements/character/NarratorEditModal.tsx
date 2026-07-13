@@ -7,8 +7,7 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import type { MetadataVoice } from "@/lib/project/types";
 import { VoiceSection } from "./VoiceMetadataFields";
 
@@ -27,9 +26,8 @@ export function NarratorEditModal({
 }
 
 function NarratorEditDialogBody() {
-	const { projectId } = useConfig();
-	const narration = useProjectStore(projectId, (s) => s.metadata.narration);
-	const setNarration = useProjectStore(projectId, (s) => s.setNarration);
+	const narration = useProject((s) => s.metadata.narration);
+	const setNarration = useProject((s) => s.setNarration);
 
 	const update = (partial: Partial<MetadataVoice>) =>
 		setNarration({ ...narration, ...partial });

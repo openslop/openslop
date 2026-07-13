@@ -1,38 +1,89 @@
 import type { BaseEditor } from "slate";
 import type { ReactEditor } from "slate-react";
+import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
 
-export type CanvasElementType =
-	| "narration"
-	| "character"
-	| "image"
-	| "animated_image"
-	| "clip"
-	| "sound"
-	| "music";
+/** How an element behaves on the rendered timeline. */
+export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
-export const CANVAS_ELEMENT_TYPES = new Set<CanvasElementType>([
-	"narration",
-	"character",
-	"image",
-	"animated_image",
-	"clip",
-	"sound",
-	"music",
-]);
+export type LayerType = "audio" | "visual";
+
+/** The presentation-free facts about an element type. Its look lives in `elementConfigs`. */
+export type ElementTypeSpec = {
+	connector: AssetConnectorType;
+	outputKind: ResultKind;
+	role: ElementRole;
+	layer: LayerType;
+};
+
+/**
+ * The one home for element types. The `CanvasElementType` union, the type-guard
+ * sets, the timeline roles, and the editor's config map all derive from here, so
+ * adding a type is one entry rather than four lists that must agree.
+ */
+export const ELEMENT_TYPES = {
+	narration: {
+		connector: "tts",
+		outputKind: "audio",
+		role: "overlay",
+		layer: "audio",
+	},
+	character: {
+		connector: "tts",
+		outputKind: "audio",
+		role: "overlay",
+		layer: "audio",
+	},
+	image: {
+		connector: "image",
+		outputKind: "image",
+		role: "foreground",
+		layer: "visual",
+	},
+	animated_image: {
+		connector: "animated_image",
+		outputKind: "video",
+		role: "foreground",
+		layer: "visual",
+	},
+	clip: {
+		connector: "video",
+		outputKind: "video",
+		role: "foreground",
+		layer: "visual",
+	},
+	sound: {
+		connector: "sfx",
+		outputKind: "audio",
+		role: "effect",
+		layer: "audio",
+	},
+	music: {
+		connector: "music",
+		outputKind: "audio",
+		role: "background",
+		layer: "audio",
+	},
+} as const satisfies Record<string, ElementTypeSpec>;
+
+export type CanvasElementType = keyof typeof ELEMENT_TYPES;
+
+const ALL_ELEMENT_TYPES = Object.keys(ELEMENT_TYPES) as CanvasElementType[];
+
+export const CANVAS_ELEMENT_TYPES: ReadonlySet<CanvasElementType> = new Set(
+	ALL_ELEMENT_TYPES,
+);
+
+export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set(
+	ALL_ELEMENT_TYPES.filter((type) => ELEMENT_TYPES[type].role === "foreground"),
+);
 
 export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 	String(i + 4),
 );
 
 export const SCENE_TYPE = "scene" as const;
-
-export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set([
-	"image",
-	"animated_image",
-	"clip",
-]);
 
 export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };
 

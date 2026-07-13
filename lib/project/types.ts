@@ -58,8 +58,6 @@ export type Metadata = {
 	narration: MetadataVoice;
 	characters: Record<string, MetadataCharacter>;
 	videoSettings?: VideoSettings;
-	lastMode?: Mode;
-	lastPrompt?: string;
 };
 
 export type DeepPartial<T> = T extends object

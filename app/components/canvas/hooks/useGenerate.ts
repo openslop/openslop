@@ -7,7 +7,7 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
-import { useProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { buildGenerationJob } from "@/lib/generation/buildGenerationJob";
 
@@ -15,7 +15,7 @@ export function useGenerate(element: CanvasContentElement) {
 	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
-	const metadata = useProjectStore(projectId, (s) => s.metadata);
+	const metadata = useProject((s) => s.metadata);
 	const currentInputs = useMemo(
 		() => getGenerationInputs(element, metadata),
 		[element, metadata],

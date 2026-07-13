@@ -1,8 +1,7 @@
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import type { GenerationJob } from "./queue";
 
 export function buildGenerationJob(
@@ -11,7 +10,7 @@ export function buildGenerationJob(
 	projectId: string,
 ): GenerationJob {
 	const customAttributes = element.customAttributes ?? {};
-	const connectorType = ELEMENT_CONFIGS[element.type].connector;
+	const connectorType = ELEMENT_TYPES[element.type].connector;
 	const provider = (customAttributes.provider as ProviderKey) ?? "openslop";
 	const { config } = getDefaultConnector(connectorConfig, connectorType);
 

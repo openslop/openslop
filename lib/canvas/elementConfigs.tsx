@@ -7,13 +7,14 @@ import {
 	Video,
 	Waveform,
 } from "@/components/ui/icon";
-import type { CanvasElementType, ResultKind } from "@/lib/canvas/types";
-import type { AssetConnectorType } from "@/lib/connectors/types";
+import {
+	ELEMENT_TYPES,
+	type CanvasElementType,
+	type ElementTypeSpec,
+} from "@/lib/canvas/types";
 
-export interface ElementConfig {
+export interface ElementConfig extends ElementTypeSpec {
 	type: CanvasElementType;
-	connector: AssetConnectorType;
-	outputKind: ResultKind;
 	label: string;
 	icon: React.ReactNode;
 	/** Tint for the square type-icon container, keyed to the media-type color. */
@@ -26,8 +27,7 @@ export interface ElementConfig {
 export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	narration: {
 		type: "narration",
-		connector: "tts",
-		outputKind: "audio",
+		...ELEMENT_TYPES.narration,
 		label: "Narration",
 		icon: <Voice size={16} />,
 		iconBgClass: "bg-media-narration/15",
@@ -36,8 +36,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	},
 	character: {
 		type: "character",
-		connector: "tts",
-		outputKind: "audio",
+		...ELEMENT_TYPES.character,
 		label: "Character",
 		icon: <User size={16} />,
 		iconBgClass: "bg-media-character/15",
@@ -46,8 +45,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	},
 	image: {
 		type: "image",
-		connector: "image",
-		outputKind: "image",
+		...ELEMENT_TYPES.image,
 		label: "Image",
 		icon: <ImageIcon size={16} />,
 		iconBgClass: "bg-media-image/15",
@@ -56,8 +54,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	},
 	animated_image: {
 		type: "animated_image",
-		connector: "animated_image",
-		outputKind: "video",
+		...ELEMENT_TYPES.animated_image,
 		label: "Animated image",
 		icon: <Motion size={16} />,
 		iconBgClass: "bg-media-animated/15",
@@ -66,8 +63,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	},
 	clip: {
 		type: "clip",
-		connector: "video",
-		outputKind: "video",
+		...ELEMENT_TYPES.clip,
 		label: "Clip",
 		icon: <Video size={16} />,
 		iconBgClass: "bg-media-clip/15",
@@ -76,8 +72,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	},
 	sound: {
 		type: "sound",
-		connector: "sfx",
-		outputKind: "audio",
+		...ELEMENT_TYPES.sound,
 		label: "Sound",
 		icon: <Waveform size={16} />,
 		iconBgClass: "bg-media-sound/15",
@@ -86,8 +81,7 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 	},
 	music: {
 		type: "music",
-		connector: "music",
-		outputKind: "audio",
+		...ELEMENT_TYPES.music,
 		label: "Music",
 		icon: <Music size={16} />,
 		iconBgClass: "bg-media-music/15",

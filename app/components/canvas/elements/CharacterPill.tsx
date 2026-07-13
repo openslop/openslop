@@ -2,13 +2,11 @@
 
 import { User } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { useProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import { RemoveCrossButton } from "./RemoveCrossButton";
 
 function useCharacterAvatarUrl(name?: string) {
-	const { projectId } = useConfig();
-	return useProjectStore(projectId, (state) =>
+	return useProject((state) =>
 		name ? state.metadata.characters[name]?.avatarUrl : undefined,
 	);
 }
