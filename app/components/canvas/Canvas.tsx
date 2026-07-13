@@ -40,6 +40,10 @@ export default function Canvas({
 
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent<HTMLDivElement>) => {
+			// Keydowns on non-editable chrome (Cancel button, insert menu, etc.)
+			// bubble up here too — don't hijack their Enter activation.
+			if ((event.target as HTMLElement).closest('[contenteditable="false"]'))
+				return;
 			if (!shouldInsertNewlineOnEnter(event)) return;
 			event.preventDefault();
 			editor.insertText("\n");
