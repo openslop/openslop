@@ -8,6 +8,7 @@ import {
 import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
 import { useProjectStore } from "@/lib/project/store";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
+import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 export function ElementUploadButton({
@@ -34,6 +35,7 @@ export function ElementUploadButton({
 					element.id,
 					{ imageUrl: url, durationSec: 0 },
 					getGenerationInputs(element, metadata),
+					ELEMENT_CONFIGS[element.type].connector,
 				);
 			}}
 		/>

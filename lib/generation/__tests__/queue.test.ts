@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorConfig } from "@/lib/connectors/types";
+import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../generationInputs";
 import { GenerationQueue, type GenerationJob } from "../queue";
 
@@ -214,6 +215,20 @@ describe("GenerationQueue", () => {
 				"string error",
 			);
 		});
+
+		it("notifies subscribers when a job fails", async () => {
+			generateMock.mockRejectedValue(new Error("boom"));
+			generationQueue.enqueue(makeJob("err3"));
+			const listener = vi.fn();
+			generationQueue.subscribe(listener);
+
+			await vi.runAllTimersAsync();
+
+			// handleJobError owns the failure notify (finalizeJob no longer
+			// notifies), so the error must still reach subscribers.
+			expect(listener).toHaveBeenCalled();
+			expect(generationQueue.getElementSnapshot("err3").error).toBe("boom");
+		});
 	});
 
 	describe("cancel", () => {
@@ -347,21 +362,42 @@ describe("GenerationQueue", () => {
 	});
 
 	describe("commitResult", () => {
-		it("sets result, clears error, and moves status to idle", () => {
+		it("sets result, connectorType, clears error, and moves status to idle", () => {
 			const result = {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
 			const inputs = { prompt: "p", attributes: {} };
-			generationQueue.commitResult("sm1", result, inputs);
+			generationQueue.commitResult("sm1", result, inputs, "image");
 
 			const snap = generationQueue.getElementSnapshot("sm1");
 			expect(snap.status).toBe("idle");
 			expect(snap.result).toEqual(result);
 			expect(snap.error).toBeNull();
 			expect(snap.resultInputs).toEqual(inputs);
+			// Without this, pickThumbnailUrl skips the upload and the project card
+			// stays blank (no job ran to set connectorType).
+			expect(snap.connectorType).toBe("image");
 
 			generationQueue.discard("sm1");
+		});
+
+		it("makes an uploaded-only image project's thumbnail resolve via pickThumbnailUrl", () => {
+			// The exact repro: new project, drop an image element, upload without
+			// ever hitting generate — pickThumbnailUrl must still find the image.
+			generationQueue.commitResult(
+				"scene-1",
+				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
+				{ prompt: "", attributes: {} },
+				"image",
+			);
+
+			const thumbnail = pickThumbnailUrl(
+				Object.entries(generationQueue.snapshot()),
+			);
+			expect(thumbnail).toBe("https://example.com/upload.png");
+
+			generationQueue.discard("scene-1");
 		});
 
 		it("overwrites an existing generated result", async () => {
@@ -381,7 +417,7 @@ describe("GenerationQueue", () => {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
-			generationQueue.commitResult("sm2", uploaded, inputs);
+			generationQueue.commitResult("sm2", uploaded, inputs, "image");
 			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
 				uploaded,
 			);
@@ -399,10 +435,15 @@ describe("GenerationQueue", () => {
 				imageUrl: "https://example.com/upload.png",
 				durationSec: 0,
 			};
-			generationQueue.commitResult("sm3", uploaded, {
-				prompt: "p",
-				attributes: {},
-			});
+			generationQueue.commitResult(
+				"sm3",
+				uploaded,
+				{
+					prompt: "p",
+					attributes: {},
+				},
+				"image",
+			);
 			const snap = generationQueue.getElementSnapshot("sm3");
 			expect(snap.error).toBeNull();
 			expect(snap.result).toEqual(uploaded);
@@ -416,7 +457,7 @@ describe("GenerationQueue", () => {
 				durationSec: 0,
 			};
 			const inputs = { prompt: "p", attributes: {} };
-			generationQueue.commitResult("sm4", uploaded, inputs);
+			generationQueue.commitResult("sm4", uploaded, inputs, "image");
 			generationQueue.setError("sm4", "prompt changed");
 			expect(generationQueue.getElementSnapshot("sm4").result).toBeNull();
 
@@ -436,6 +477,7 @@ describe("GenerationQueue", () => {
 				"sm5",
 				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
 				{ prompt: "p", attributes: {} },
+				"image",
 			);
 			expect(listener).toHaveBeenCalled();
 
@@ -461,7 +503,7 @@ describe("GenerationQueue", () => {
 				durationSec: 0,
 			};
 			generationQueue.cancel("sm6");
-			generationQueue.commitResult("sm6", uploaded, inputs);
+			generationQueue.commitResult("sm6", uploaded, inputs, "image");
 			expect(generationQueue.getElementSnapshot("sm6").result).toEqual(
 				uploaded,
 			);

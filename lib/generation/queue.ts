@@ -231,13 +231,12 @@ export class GenerationQueue {
 		this.notify();
 	}
 
-	// Store a result regardless of where it came from — a finished job or a
-	// caller handing one in (e.g. an upload). Callers racing an in-flight job
-	// should cancel() first.
+	// Cancel() any in-flight job first (or it can clobber this), and pass connectorType.
 	commitResult(
 		elementId: string,
 		result: AssetResult,
 		inputs: GenerationInputs,
+		connectorType: AssetConnectorType,
 	): void {
 		const key = serializeInputs(inputs);
 		const elHistory =
@@ -250,6 +249,7 @@ export class GenerationQueue {
 			result,
 			error: null,
 			resultInputs: inputs,
+			connectorType,
 		});
 		this.notify();
 	}
@@ -317,7 +317,7 @@ export class GenerationQueue {
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		this.commitResult(job.elementId, result, inputs);
+		this.commitResult(job.elementId, result, inputs, job.connectorType);
 	}
 
 	private handleJobError(
@@ -333,13 +333,15 @@ export class GenerationQueue {
 			result: null,
 			error: errorMessage(err),
 		});
+		this.notify();
 	}
 
+	// Both terminal handlers notify (commitResult on success, handleJobError on
+	// failure), so this only does queue bookkeeping.
 	private finalizeJob(elementId: string, controller: AbortController) {
 		if (controller.signal.aborted) return;
 		this.stopTimer(elementId);
 		this.controllers.delete(elementId);
-		this.notify();
 		this.processQueue();
 	}
 }
