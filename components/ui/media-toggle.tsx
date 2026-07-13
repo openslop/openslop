@@ -1,13 +1,13 @@
 "use client";
 
-import type { LucideIcon } from "@/components/ui/icon";
+import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface MediaToggleOption<T extends string> {
 	value: T;
 	label: string;
-	icon: LucideIcon;
+	icon: IconComponent;
 }
 
 /**

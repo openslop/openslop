@@ -1,4 +1,4 @@
-import type { LucideIcon } from "@/components/ui/icon";
+import type { IconComponent } from "@/components/ui/icon";
 
 export type AttributeEdit =
 	| { kind: "enum"; options: readonly string[] }
@@ -7,7 +7,7 @@ export type AttributeEdit =
 export interface AttributeSpec {
 	label: string;
 	/** When set, the badge shows this icon in place of the text label. */
-	icon?: LucideIcon;
+	icon?: IconComponent;
 	edit?: AttributeEdit;
 }
 

@@ -69,7 +69,7 @@ export default function ProjectsList({
 							</p>
 						</div>
 						<Button type="button" onClick={handleCreate} disabled={pending}>
-							<Plus size={16} strokeWidth={1.5} />
+							<Plus size={16} />
 							New slop
 						</Button>
 					</header>

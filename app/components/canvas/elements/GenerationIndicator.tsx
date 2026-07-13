@@ -2,7 +2,7 @@ import {
 	Hourglass,
 	Loader2,
 	Wand2,
-	type LucideIcon,
+	type IconComponent,
 } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ type Status = ElementSnapshot["status"];
 
 type Size = "sm" | "md";
 
-const ICONS: Record<Status, LucideIcon> = {
+const ICONS: Record<Status, IconComponent> = {
 	idle: Wand2,
 	queued: Hourglass,
 	generating: Loader2,

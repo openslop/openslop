@@ -65,7 +65,7 @@ function ElementSettings({
 						onMouseDown={(e) => e.preventDefault()}
 						className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
 					>
-						<SlidersHorizontal size={14} strokeWidth={1.5} />
+						<SlidersHorizontal size={14} />
 					</button>
 				</PopoverTrigger>
 			</SimpleTooltip>

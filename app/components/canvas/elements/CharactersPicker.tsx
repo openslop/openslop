@@ -117,7 +117,7 @@ export function CharactersPicker({
 						disabled={disabled}
 						className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
+						<UserPlus className="h-3.5 w-3.5" />
 					</button>
 				</DropdownMenuTrigger>
 			</SimpleTooltip>

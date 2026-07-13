@@ -85,19 +85,19 @@ function AttachMenu({
 		{
 			key: "upload",
 			label: "Upload reference images",
-			icon: <ImagePlus className={iconClass} strokeWidth={1.5} />,
+			icon: <ImagePlus className={iconClass} />,
 			onSelect: openPicker,
 		},
 		{
 			key: "character",
 			label: "Create character",
-			icon: <User className={iconClass} strokeWidth={1.5} />,
+			icon: <User className={iconClass} />,
 			onSelect: onCreateCharacter,
 		},
 		{
 			key: "narrator",
 			label: "Select narrator voice",
-			icon: <Mic className={iconClass} strokeWidth={1.5} />,
+			icon: <Mic className={iconClass} />,
 			onSelect: onSelectNarrator,
 		},
 	];
@@ -264,7 +264,7 @@ export default function ComposerCopilot({
 						>
 							<PillTrigger
 								aria-label="Aspect ratio"
-								icon={<Proportions className="mr-1 h-3 w-3" strokeWidth={2} />}
+								icon={<Proportions className="mr-1 h-3 w-3" />}
 								label={aspectRatio}
 							/>
 						</SelectMenu>
@@ -291,7 +291,7 @@ export default function ComposerCopilot({
 					</div>
 					<ActionButton
 						label="Submit"
-						icon={<CornerDownLeft className="h-4 w-4" strokeWidth={2.5} />}
+						icon={<CornerDownLeft className="h-4 w-4" />}
 						onClick={handleSubmit}
 						disabled={!hasText}
 					/>

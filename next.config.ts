@@ -19,7 +19,6 @@ const nextConfig: NextConfig = {
 	},
 	experimental: {
 		optimizePackageImports: [
-			"lucide-react",
 			"radix-ui",
 			"@dnd-kit/core",
 			"@dnd-kit/sortable",

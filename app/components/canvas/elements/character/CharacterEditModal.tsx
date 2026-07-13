@@ -229,7 +229,7 @@ function CharacterEditDialogBody({
 					onClick={handleDelete}
 					className={confirmDelete ? undefined : "text-muted-foreground"}
 				>
-					<Trash2 strokeWidth={1.5} />
+					<Trash2 />
 					{confirmDelete ? "Confirm delete" : "Delete"}
 				</Button>
 			</DialogFooter>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, type LucideIcon } from "@/components/ui/icon";
+import { Loader2, type IconComponent } from "@/components/ui/icon";
 
 /** Dashed "add" tile matching {@link AssetTile}'s footprint within the assets grid. */
 export function AddAssetTile({
@@ -13,7 +13,7 @@ export function AddAssetTile({
 }: {
 	label: string;
 	ariaLabel: string;
-	Icon: LucideIcon;
+	Icon: IconComponent;
 	onClick: () => void;
 	disabled?: boolean;
 	/** Swaps the icon for a spinner. */

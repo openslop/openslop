@@ -45,6 +45,6 @@ One opt-in treatment: subtle film grain (`.grain`, theme-tuned `--grain-opacity`
 
 ## Components
 
-Idiomatic, shadcn-consistent primitives in `components/ui/` built with `class-variance-authority`, tokens only. Buttons: `default` (near-black inverse, for in-tool actions), `accent` (blurple, for hero/auth CTAs), plus `secondary`/`outline`/`ghost`/`icon`/`destructive`. Icons: `lucide-react`, thin (`strokeWidth` ≈1.5).
+Idiomatic, shadcn-consistent primitives in `components/ui/` built with `class-variance-authority`, tokens only. Buttons: `default` (near-black inverse, for in-tool actions), `accent` (blurple, for hero/auth CTAs), plus `secondary`/`outline`/`ghost`/`icon`/`destructive`. Icons: masked SVG token set (`icons.css`), filled.
 
 Button **dimensions** come from the `size` prop (`sm`/`default`/`lg`/`icon`) defined in `buttonVariants` — never hand-size a button with `h-*`/`px-*`/`text-*` in `className`. Add a named `size` to the variant if you need a new one.

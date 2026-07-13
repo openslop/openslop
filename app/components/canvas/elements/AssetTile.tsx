@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, X, type LucideIcon } from "@/components/ui/icon";
+import { Pencil, X, type IconComponent } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
@@ -11,7 +11,7 @@ function OverlayButton({
 	label,
 	onClick,
 }: {
-	icon: LucideIcon;
+	icon: IconComponent;
 	label: string;
 	onClick: () => void;
 }) {
@@ -39,7 +39,7 @@ export function AssetTile({
 }: {
 	name?: string;
 	previewUrl?: string;
-	Icon: LucideIcon;
+	Icon: IconComponent;
 	elementId?: string;
 	onEdit?: () => void;
 	onRemove?: () => void;
