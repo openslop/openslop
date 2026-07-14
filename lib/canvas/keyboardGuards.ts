@@ -4,12 +4,13 @@ export type EnterKeyEvent = {
 	metaKey: boolean;
 	altKey: boolean;
 	keyCode: number;
-	nativeEvent: { isComposing?: boolean };
+	nativeEvent: { isComposing: boolean };
 	target: EventTarget;
 };
 
 export function shouldInsertNewlineOnEnter(event: EnterKeyEvent): boolean {
-	// IME (CJK) commits with Enter; keyCode 229 covers browsers without isComposing.
+	// IME (CJK) commits with Enter; keyCode 229 catches browsers that don't set
+	// isComposing reliably.
 	if (event.nativeEvent.isComposing || event.keyCode === 229) return false;
 	if (event.key !== "Enter" || event.ctrlKey || event.metaKey || event.altKey)
 		return false;
