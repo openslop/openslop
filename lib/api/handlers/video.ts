@@ -6,7 +6,7 @@ import { rowView } from "../job-handlers";
 import { updateJob } from "../jobs";
 import { getVideoProvider } from "../providers";
 
-type VideoMetadata = { providerJobId?: string };
+type VideoMetadata = { providerJobId?: string; durationSec?: number };
 
 export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 	process: async (job) => {
@@ -15,13 +15,21 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		if (!providerJobId) {
 			throw new Error("Video provider returned no jobId for async generation");
 		}
-		return { kind: "pending", metadata: { providerJobId } };
+		return {
+			kind: "pending",
+			metadata: { providerJobId, durationSec: submitted.metadata?.durationSec },
+		};
 	},
 	poll: async (job): Promise<JobPoll> => {
-		const providerJobId = job.metadata.providerJobId;
+		// A finished job is immutable: re-polling upstream would re-upload the
+		// bundle under a fresh id, or 404 once the provider drops the task.
+		if (job.status === "completed" || job.status === "failed")
+			return rowView(job);
+
+		const { providerJobId, durationSec } = job.metadata;
 		if (!providerJobId) return rowView(job);
 
-		const upstream = await getVideoProvider().poll(providerJobId);
+		const upstream = await getVideoProvider().poll(providerJobId, durationSec);
 		const status = mapVideoStatus(upstream);
 		if (status === "completed") {
 			await updateJob(job.id, { status, result: upstream });

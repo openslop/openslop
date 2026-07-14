@@ -18,7 +18,10 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
+import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareVideo } from "../video/runware";
+
+const mockUpload = vi.mocked(AssetBundle.upload);
 
 describe("RunwareVideo", () => {
 	beforeEach(() => {
@@ -139,9 +142,55 @@ describe("RunwareVideo", () => {
 
 			expect(result.metadata?.durationSec).toBe(10);
 		});
+
+		it("does not upload a bundle for a job that has no video yet", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-1",
+				status: "processing",
+			});
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.generate({ prompt: "a sunset" });
+
+			expect(mockUpload).not.toHaveBeenCalled();
+			expect(result.id).toBe("");
+			expect(result.result).toEqual({});
+		});
 	});
 
 	describe("poll", () => {
+		it("stores the submitted duration on the completed bundle", async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "completed",
+					videoURL: "https://result.mp4",
+				},
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1", 8);
+
+			expect(result.metadata?.durationSec).toBe(8);
+			expect(mockUpload).toHaveBeenCalledWith(
+				"video",
+				"runware",
+				[{ key: "video", url: "https://result.mp4" }],
+				expect.objectContaining({ durationSec: 8 }),
+			);
+		});
+
+		it("does not upload a bundle while the job is still running", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "processing" },
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			await provider.poll("job-1", 8);
+
+			expect(mockUpload).not.toHaveBeenCalled();
+		});
+
 		it("returns BundleResponse when job is completed", async () => {
 			mockGetResponse.mockResolvedValue([
 				{

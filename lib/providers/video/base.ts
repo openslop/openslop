@@ -30,10 +30,8 @@ export abstract class BaseVideoProvider extends BaseProvider<
 		return r.url ? [{ key: "video", url: r.url }] : [];
 	}
 
-	protected abstract _poll(jobId: string): Promise<VideoJob>;
-
-	async poll(jobId: string): Promise<VideoProviderResponse> {
-		const result = await this._poll(jobId);
+	/** A job with no video yet (submitted or still running) has nothing to upload. */
+	protected async store(result: VideoJob): Promise<VideoProviderResponse> {
 		if (this.toFiles(result).length === 0) {
 			return {
 				id: "",
@@ -42,6 +40,27 @@ export abstract class BaseVideoProvider extends BaseProvider<
 				metadata: result.metadata,
 			};
 		}
-		return this.store(result);
+		return super.store(result);
+	}
+
+	protected abstract _poll(jobId: string): Promise<VideoJob>;
+
+	/**
+	 * `durationSec` carries the duration requested at submit time: providers do not
+	 * echo it back on poll, and the rendered timeline sizes the clip from it.
+	 */
+	async poll(
+		jobId: string,
+		durationSec?: number,
+	): Promise<VideoProviderResponse> {
+		const result = await this._poll(jobId);
+		return this.store({
+			...result,
+			metadata: {
+				jobId,
+				...result.metadata,
+				durationSec: result.metadata?.durationSec ?? durationSec,
+			},
+		});
 	}
 }

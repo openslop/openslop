@@ -15,12 +15,11 @@ export class MockVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "mock" };
 
 	protected async store(result: VideoJob): Promise<VideoProviderResponse> {
+		if (!result.url) return super.store(result);
 		return {
 			id: result.metadata?.jobId ?? "",
 			provider: this.blobConfig.provider,
-			result: {
-				video: result.url ?? "",
-			},
+			result: { video: result.url },
 			metadata: result.metadata,
 		};
 	}
