@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { ImagePlus, Mic, Palette, User, UserPlus } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore, useProjectStore } from "@/lib/project/store";
@@ -11,7 +11,7 @@ import { AssetTile } from "./AssetTile";
 import { useAssetEditDialogs } from "./character/useAssetEditDialogs";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 
-export function AssetsSection() {
+function AssetsSectionComponent() {
 	const { projectId } = useConfig();
 	const hydrated = useProjectStore(projectId, (s) => s.hydrated);
 	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
@@ -90,3 +90,5 @@ export function AssetsSection() {
 		</section>
 	);
 }
+
+export const AssetsSection = memo(AssetsSectionComponent);
