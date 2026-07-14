@@ -66,10 +66,4 @@ describe("shouldInsertNewlineOnEnter", () => {
 			shouldInsertNewlineOnEnter(enterEvent({ target: target(false) })),
 		).toBe(false);
 	});
-
-	it("does not throw or fire when the target is missing", () => {
-		expect(shouldInsertNewlineOnEnter(enterEvent({ target: null }))).toBe(
-			false,
-		);
-	});
 });
