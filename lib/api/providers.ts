@@ -11,55 +11,51 @@ import { MockLLM } from "@/lib/providers/llm/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import { MockTTS } from "@/lib/providers/tts/mock";
 
-const cache = new Map<string, unknown>();
-
+/**
+ * Lazily builds the real provider when its API key is configured, else the
+ * mock, and memoizes it for the life of the process.
+ */
 function defineProvider<R, M>(
-	key: string,
 	envVar: string,
 	RealCtor: new (apiKey: string) => R,
 	MockCtor: new () => M,
 ): () => R | M {
+	let instance: R | M | undefined;
 	return () => {
-		if (!cache.has(key)) {
+		if (instance === undefined) {
 			const apiKey = process.env[envVar];
-			cache.set(key, apiKey ? new RealCtor(apiKey) : new MockCtor());
+			instance = apiKey ? new RealCtor(apiKey) : new MockCtor();
 		}
-		return cache.get(key) as R | M;
+		return instance;
 	};
 }
 
 export const getImageProvider = defineProvider(
-	"image",
 	"RUNWARE_API_KEY",
 	RunwareImage,
 	MockImage,
 );
 export const getVideoProvider = defineProvider(
-	"video",
 	"RUNWARE_API_KEY",
 	RunwareVideo,
 	MockVideo,
 );
 export const getMusicProvider = defineProvider(
-	"music",
 	"ELEVENLABS_API_KEY",
 	ElevenLabsMusic,
 	MockMusic,
 );
 export const getSFXProvider = defineProvider(
-	"sfx",
 	"ELEVENLABS_API_KEY",
 	ElevenLabsSFX,
 	MockSFX,
 );
 export const getLLMProvider = defineProvider(
-	"llm",
 	"ANTHROPIC_API_KEY",
 	AnthropicLLM,
 	MockLLM,
 );
 export const getTTSProvider = defineProvider(
-	"tts",
 	"CARTESIA_API_KEY",
 	CartesiaTTS,
 	MockTTS,

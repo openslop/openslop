@@ -10,14 +10,8 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { PanelSelect } from "@/components/ui/panel-select";
 import { Progress } from "@/components/ui/progress";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
@@ -116,25 +110,15 @@ export function ExportButton() {
 					<>
 						<div className="flex items-center justify-between gap-3">
 							<span className="text-label">Resolution</span>
-							<Select
+							<PanelSelect
 								value={String(width)}
-								onValueChange={(value) => setWidth(Number(value))}
-							>
-								<SelectTrigger size="sm">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{RESOLUTIONS.map((resolution) => (
-										<SelectItem
-											key={resolution.width}
-											value={String(resolution.width)}
-											className="text-label"
-										>
-											{resolution.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+								options={RESOLUTIONS.map((resolution) => ({
+									value: String(resolution.width),
+									label: resolution.label,
+								}))}
+								onChange={(value) => setWidth(Number(value))}
+								ariaLabel="Resolution"
+							/>
 						</div>
 						{state.status === "error" && (
 							<p className="mt-3 text-label text-destructive">
