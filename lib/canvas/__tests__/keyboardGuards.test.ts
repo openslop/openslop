@@ -4,6 +4,9 @@ import {
 	type EnterKeyEvent,
 } from "../keyboardGuards";
 
+const target = (isContentEditable: boolean) =>
+	({ isContentEditable }) as unknown as EventTarget;
+
 const enterEvent = (overrides: Partial<EnterKeyEvent> = {}): EnterKeyEvent => ({
 	key: "Enter",
 	ctrlKey: false,
@@ -11,6 +14,7 @@ const enterEvent = (overrides: Partial<EnterKeyEvent> = {}): EnterKeyEvent => ({
 	altKey: false,
 	keyCode: 13,
 	nativeEvent: { isComposing: false },
+	target: target(true),
 	...overrides,
 });
 
@@ -55,5 +59,17 @@ describe("shouldInsertNewlineOnEnter", () => {
 				enterEvent({ keyCode: 229, nativeEvent: { isComposing: false } }),
 			),
 		).toBe(false);
+	});
+
+	it("does not hijack Enter bubbling up from non-editable chrome (button, menu)", () => {
+		expect(
+			shouldInsertNewlineOnEnter(enterEvent({ target: target(false) })),
+		).toBe(false);
+	});
+
+	it("does not throw or fire when the target is missing", () => {
+		expect(shouldInsertNewlineOnEnter(enterEvent({ target: null }))).toBe(
+			false,
+		);
 	});
 });
