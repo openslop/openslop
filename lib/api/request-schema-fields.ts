@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseImageSource } from "./imageSource";
 
 const optionalCoercedNumber = z
 	.union([z.number(), z.string()])
@@ -23,15 +24,9 @@ export const optionalVideoDuration = {
 
 export const referenceImageUrlOrDataUri = z
 	.string()
-	.refine(
-		(value) =>
-			/^data:[a-z]+\/[a-z+.-]+;base64,/i.test(value) ||
-			/^https?:\/\//i.test(value),
-		{
-			message:
-				"Each referenceImages entry must be a data URI or an HTTP(S) URL",
-		},
-	);
+	.refine((value) => parseImageSource(value) !== null, {
+		message: "Each referenceImages entry must be a data URI or an HTTP(S) URL",
+	});
 
 export const optionalReferenceImages = {
 	referenceImages: z.array(referenceImageUrlOrDataUri).optional(),

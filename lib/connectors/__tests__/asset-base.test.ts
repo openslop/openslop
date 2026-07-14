@@ -166,4 +166,43 @@ describe("BaseAssetConnector", () => {
 			expect(result.durationSec).toBe(0);
 		});
 	});
+
+	describe("bundleType", () => {
+		const response: BundleResponse = {
+			id: "abc",
+			provider: "mock",
+			result: { image: "output.png" },
+		};
+
+		it("stores under the connector type by default", async () => {
+			const connector = new TestAssetConnector(
+				config,
+				vi.fn().mockResolvedValue(response),
+			);
+
+			const result = await connector.generate({ prompt: "test" });
+			expect(result.imageUrl).toBe(
+				"https://blob.example.com/assets/image/mock/abc/output.png",
+			);
+		});
+
+		it("stores under the overridden namespace when a connector reuses another type's route", async () => {
+			class ReroutedConnector extends TestAssetConnector {
+				readonly type: ConnectorType = "animated_image";
+
+				protected override get bundleType(): string {
+					return "image";
+				}
+			}
+			const connector = new ReroutedConnector(
+				config,
+				vi.fn().mockResolvedValue(response),
+			);
+
+			expect(connector.type).toBe("animated_image");
+			expect((await connector.generate({ prompt: "test" })).imageUrl).toBe(
+				"https://blob.example.com/assets/image/mock/abc/output.png",
+			);
+		});
+	});
 });

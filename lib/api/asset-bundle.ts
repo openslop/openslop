@@ -76,19 +76,6 @@ export class AssetBundle {
 		});
 	}
 
-	static async fromId(
-		type: string,
-		provider: string,
-		id: string,
-	): Promise<AssetBundle> {
-		const url = AssetBundle.buildUrl(type, provider, id);
-		const manifest = await fetchJson<AssetManifest>(
-			`${url}/manifest.json`,
-			`Failed to fetch manifest for ${type}/${provider}/${id}`,
-		);
-		return new AssetBundle(url, manifest);
-	}
-
 	static async upload(
 		type: string,
 		provider: string,
