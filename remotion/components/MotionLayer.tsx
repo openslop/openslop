@@ -1,19 +1,22 @@
 import type { ReactNode } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { type MotionEffect, motionTransform } from "@/lib/video/motionEffects";
+import {
+	type ActiveMotionEffect,
+	type MotionEffect,
+	motionTransform,
+} from "@/lib/video/motionEffects";
 
 const clip: React.CSSProperties = { overflow: "hidden" };
 
-export function MotionLayer({
+function AnimatedMotionLayer({
 	effect,
 	children,
 }: {
-	effect: MotionEffect;
+	effect: ActiveMotionEffect;
 	children: ReactNode;
 }) {
 	const frame = useCurrentFrame();
 	const { durationInFrames, width, height } = useVideoConfig();
-	if (effect === "none") return <>{children}</>;
 	const aspectRatio = Math.max(width, height) / Math.min(width, height);
 	const transform = motionTransform(
 		effect,
@@ -34,4 +37,15 @@ export function MotionLayer({
 			</AbsoluteFill>
 		</AbsoluteFill>
 	);
+}
+
+export function MotionLayer({
+	effect,
+	children,
+}: {
+	effect: MotionEffect;
+	children: ReactNode;
+}) {
+	if (effect === "none") return <>{children}</>;
+	return <AnimatedMotionLayer effect={effect}>{children}</AnimatedMotionLayer>;
 }

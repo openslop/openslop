@@ -1,6 +1,12 @@
 "use client";
 
-import { type PointerEvent, type ReactNode, useRef, useState } from "react";
+import {
+	type PointerEvent,
+	type ReactNode,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { clamp, cn } from "@/lib/utils";
 
 /** A slice of a segmented track; `basis` is its fraction (0–1) of the whole. */
@@ -59,6 +65,23 @@ export function ScrubBar({
 	const continuous = !segments;
 	const segs = segments ?? SINGLE;
 
+	const rootClass = useMemo(
+		() => cn("group relative flex h-5 cursor-pointer items-center", className),
+		[className],
+	);
+	const trackClass = useMemo(
+		() => cn("flex h-1 w-full", continuous ? "gap-0" : "gap-[2px]"),
+		[continuous],
+	);
+	const segmentClass = useMemo(
+		() =>
+			cn(
+				"relative h-full overflow-hidden bg-scrub-track",
+				continuous && "rounded-full",
+			),
+		[continuous],
+	);
+
 	const hoverFrom = (e: PointerEvent<HTMLDivElement>): ScrubHover | null => {
 		const rect = trackRef.current?.getBoundingClientRect();
 		if (!rect) return null;
@@ -116,10 +139,7 @@ export function ScrubBar({
 		<div
 			ref={trackRef}
 			aria-label={ariaLabel}
-			className={cn(
-				"group relative flex h-5 cursor-pointer items-center",
-				className,
-			)}
+			className={rootClass}
 			style={{ touchAction: "none" }}
 			onPointerDown={onPointerDown}
 			onPointerMove={onPointerMove}
@@ -127,16 +147,11 @@ export function ScrubBar({
 			onPointerCancel={endDrag}
 			onPointerLeave={onPointerLeave}
 		>
-			<div
-				className={cn("flex h-1 w-full", continuous ? "gap-0" : "gap-[2px]")}
-			>
+			<div className={trackClass}>
 				{fills.map(({ seg, fill, hover }) => (
 					<div
 						key={seg.id}
-						className={cn(
-							"relative h-full overflow-hidden bg-scrub-track",
-							continuous && "rounded-full",
-						)}
+						className={segmentClass}
 						style={{ flexBasis: `${seg.basis * 100}%` }}
 					>
 						<div
