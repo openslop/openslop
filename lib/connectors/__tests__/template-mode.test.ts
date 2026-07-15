@@ -82,10 +82,5 @@ describe("createTemplateModePlugin", () => {
 			const result = await transformPrompt?.("anything", fakeCtx);
 			expect(result).toBe("anything");
 		});
-
-		it("throws when gateway context is missing for a real template", async () => {
-			const { transformPrompt } = createTemplateModePlugin(realTemplate.id);
-			await expect(transformPrompt?.("x")).rejects.toThrow(/gateway context/i);
-		});
 	});
 });

@@ -21,12 +21,9 @@ export function createTemplateModePlugin(
 		},
 		async transformPrompt(
 			prompt: string,
-			ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
+			_ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
 		) {
 			if (!template) return prompt;
-
-			if (!ctx?.gateway)
-				throw new Error("template mode plugin requires gateway context");
 
 			return dedent`Pastiche this story format (with tone, language, pacing, imagery, plot techniques, story beats, structure, etc.) and reframe it to be about ${prompt}.
 

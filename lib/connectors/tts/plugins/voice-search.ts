@@ -1,4 +1,5 @@
 import omit from "lodash/omit";
+import { requireSearchVoices } from "@/lib/connectors/plugins";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
@@ -19,12 +20,8 @@ export function createVoiceSearchPlugin(): ConnectorPlugin<TTSGenerateParams> {
 		name: "voice-search",
 		async beforeGenerate(params, ctx) {
 			if (params.voiceId) return params;
-			if (!ctx?.searchVoices) {
-				throw new Error(
-					"voice-search plugin requires searchVoices in PluginContext",
-				);
-			}
-			const voices = await ctx.searchVoices({
+			const searchVoices = requireSearchVoices(ctx, "voice-search");
+			const voices = await searchVoices({
 				query: params.query,
 				gender: params.gender,
 				age: params.age,
