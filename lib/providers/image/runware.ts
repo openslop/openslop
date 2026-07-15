@@ -39,6 +39,7 @@ export class RunwareImage extends BaseProvider<
 				width: params.width || 2848,
 				height: params.height || 1600,
 				outputType: "base64Data",
+				outputFormat: "PNG",
 				numberResults: 1,
 				referenceImages: params.referenceImages,
 			});

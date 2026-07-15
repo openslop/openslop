@@ -38,6 +38,7 @@ describe("RunwareImage", () => {
 			width: 2848,
 			height: 1600,
 			outputType: "base64Data",
+			outputFormat: "PNG",
 			numberResults: 1,
 			referenceImages: undefined,
 		});
