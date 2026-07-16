@@ -9,10 +9,9 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { FIELD_CLS } from "./fields";
-import { useProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 
 export function NewCharacterDialog({
 	open,
@@ -35,9 +34,8 @@ function NewCharacterDialogBody({
 }: {
 	onCreated: (name: string) => void;
 }) {
-	const { projectId } = useConfig();
-	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
-	const setCharacter = useProjectStore(projectId, (s) => s.setCharacter);
+	const characters = useProject((s) => s.metadata.characters);
+	const setCharacter = useProject((s) => s.setCharacter);
 	const [name, setName] = useState("");
 
 	const normalized = normalizeCharacterName(name);

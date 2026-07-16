@@ -1,5 +1,4 @@
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { useGenerate } from "../hooks/useGenerate";
 import { PlaceholderBallsLoader } from "./preview/placeholderBalls";
 import { MediaWithSkeleton } from "./MediaWithSkeleton";
@@ -11,7 +10,7 @@ export function ForegroundPreview({
 	element: CanvasContentElement;
 }) {
 	const { result, status } = useGenerate(element);
-	const { outputKind } = ELEMENT_CONFIGS[element.type];
+	const { outputKind } = ELEMENT_TYPES[element.type];
 	const url = getPrimaryUrl(result, outputKind);
 
 	if (!url) {

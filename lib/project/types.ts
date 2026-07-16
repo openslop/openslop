@@ -58,6 +58,7 @@ export type Metadata = {
 	narration: MetadataVoice;
 	characters: Record<string, MetadataCharacter>;
 	videoSettings?: VideoSettings;
+	/** Persisted for server-side observability of prompt activity; not read in-app. */
 	lastMode?: Mode;
 	lastPrompt?: string;
 };

@@ -1,23 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
-vi.mock("../elementConfigs", () => ({
-	ELEMENT_CONFIGS: {
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			label: "Image",
-		},
-		narration: {
-			type: "narration",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Narration",
-		},
-	},
-}));
-
 vi.mock("@/lib/config/connectorUtils", () => ({
 	getDefaultConnector: () => ({
 		provider: "openslop",

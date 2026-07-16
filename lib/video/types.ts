@@ -1,31 +1,11 @@
-import type { CanvasElementType } from "@/lib/canvas/types";
+import type {
+	CanvasElementType,
+	ElementRole,
+	LayerType,
+} from "@/lib/canvas/types";
 import type { TextTimestamp } from "@/lib/connectors/types";
 import type { MotionEffect } from "./motionEffects";
 import type { TransitionType } from "./transitions";
-
-export type ElementRole = "foreground" | "background" | "overlay" | "effect";
-
-export const ELEMENT_ROLES: Record<CanvasElementType, ElementRole> = {
-	image: "foreground",
-	animated_image: "foreground",
-	clip: "foreground",
-	narration: "overlay",
-	character: "overlay",
-	music: "background",
-	sound: "effect",
-};
-
-export type LayerType = "audio" | "visual";
-
-export const LAYER_TYPES: Record<CanvasElementType, LayerType> = {
-	image: "visual",
-	animated_image: "visual",
-	clip: "visual",
-	narration: "audio",
-	character: "audio",
-	music: "audio",
-	sound: "audio",
-};
 
 export type ResolvedElement = {
 	id: string;

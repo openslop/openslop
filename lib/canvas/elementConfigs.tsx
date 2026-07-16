@@ -7,13 +7,14 @@ import {
 	Video,
 	Waveform,
 } from "@/components/ui/icon";
-import type { CanvasElementType, ResultKind } from "@/lib/canvas/types";
-import type { AssetConnectorType } from "@/lib/connectors/types";
+import {
+	ELEMENT_TYPES,
+	type CanvasElementType,
+	type ElementTypeSpec,
+} from "@/lib/canvas/types";
 
-export interface ElementConfig {
+export interface ElementConfig extends ElementTypeSpec {
 	type: CanvasElementType;
-	connector: AssetConnectorType;
-	outputKind: ResultKind;
 	label: string;
 	icon: React.ReactNode;
 	/** Tint for the square type-icon container, keyed to the media-type color. */
@@ -23,11 +24,10 @@ export interface ElementConfig {
 	placeholder: string;
 }
 
-export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
+type ElementPresentation = Omit<ElementConfig, keyof ElementTypeSpec | "type">;
+
+const PRESENTATION: Record<CanvasElementType, ElementPresentation> = {
 	narration: {
-		type: "narration",
-		connector: "tts",
-		outputKind: "audio",
 		label: "Narration",
 		icon: <Voice size={16} />,
 		iconBgClass: "bg-media-narration/15",
@@ -35,9 +35,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Write the narration...",
 	},
 	character: {
-		type: "character",
-		connector: "tts",
-		outputKind: "audio",
 		label: "Character",
 		icon: <User size={16} />,
 		iconBgClass: "bg-media-character/15",
@@ -45,9 +42,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "What does this character say?",
 	},
 	image: {
-		type: "image",
-		connector: "image",
-		outputKind: "image",
 		label: "Image",
 		icon: <ImageIcon size={16} />,
 		iconBgClass: "bg-media-image/15",
@@ -55,9 +49,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the image...",
 	},
 	animated_image: {
-		type: "animated_image",
-		connector: "animated_image",
-		outputKind: "video",
 		label: "Animated image",
 		icon: <Motion size={16} />,
 		iconBgClass: "bg-media-animated/15",
@@ -65,9 +56,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the still image...",
 	},
 	clip: {
-		type: "clip",
-		connector: "video",
-		outputKind: "video",
 		label: "Clip",
 		icon: <Video size={16} />,
 		iconBgClass: "bg-media-clip/15",
@@ -75,9 +63,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the video clip...",
 	},
 	sound: {
-		type: "sound",
-		connector: "sfx",
-		outputKind: "audio",
 		label: "Sound",
 		icon: <Waveform size={16} />,
 		iconBgClass: "bg-media-sound/15",
@@ -85,9 +70,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the sound effect...",
 	},
 	music: {
-		type: "music",
-		connector: "music",
-		outputKind: "audio",
 		label: "Music",
 		icon: <Music size={16} />,
 		iconBgClass: "bg-media-music/15",
@@ -95,5 +77,12 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the music...",
 	},
 };
+
+export const ELEMENT_CONFIGS = Object.fromEntries(
+	(Object.keys(ELEMENT_TYPES) as CanvasElementType[]).map((type) => [
+		type,
+		{ type, ...ELEMENT_TYPES[type], ...PRESENTATION[type] },
+	]),
+) as Record<CanvasElementType, ElementConfig>;
 
 export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

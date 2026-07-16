@@ -1,11 +1,11 @@
-import type {
-	CanvasContentElement,
-	CanvasElementType,
+import {
+	ELEMENT_TYPES,
+	type CanvasContentElement,
+	type CanvasElementType,
 } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import { ELEMENT_CONFIGS } from "./elementConfigs";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";
 
@@ -20,13 +20,13 @@ export function createCanvasNode(
 	connectors: ConnectorRegistry,
 	opts: Opts = {},
 ): CanvasContentElement {
-	const config = ELEMENT_CONFIGS[type];
+	const { connector } = ELEMENT_TYPES[type];
 	const { provider, config: connectorConfig } = getDefaultConnector(
 		connectors,
-		config.connector,
+		connector,
 	);
 	const schema = resolveAttributeSchema(
-		config.connector,
+		connector,
 		provider,
 		connectorConfig?.defaultModel,
 	);
