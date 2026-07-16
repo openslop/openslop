@@ -160,9 +160,7 @@ interface ComposerCopilotProps {
 	value: string;
 	onValueChange: (value: string) => void;
 	onSubmit: () => void;
-	/** Native textarea placeholder, shown by the browser whenever the field is empty. */
 	placeholder?: string;
-	/** Rendered over the textarea, and only while it is empty and no template pill is shown. */
 	placeholderOverlay?: ReactNode;
 }
 

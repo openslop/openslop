@@ -37,6 +37,8 @@ function icon(name: string): IconComponent {
 
 export const AlertCircle = icon("alert");
 export const ArrowLeft = icon("arrow-left");
+export const BookOpen = icon("book-open");
+export const Film = icon("film");
 export const Music = icon("music");
 export const Proportions = icon("aspect-ratio");
 export const Check = icon("check");
@@ -54,6 +56,7 @@ export const Copy = icon("copy");
 export const CornerDownLeft = icon("corner-down-left");
 export const Crosshair = icon("crosshair");
 export const Download = icon("download");
+export const EyeOff = icon("eye-off");
 export const GripVertical = icon("grabber");
 export const Home = icon("home");
 export const Hourglass = icon("hour-glass");
@@ -67,6 +70,9 @@ export const Maximize = icon("maximize");
 export const Mic = icon("mic");
 export const Motion = icon("motion");
 export const Palette = icon("theme-swatches");
+export const PanelLeft = icon("sidebar-left");
+export const PanelRight = icon("sidebar-right");
+export const PanelTop = icon("layout-alt-3");
 export const Pause = icon("pause");
 export const Pencil = icon("pencil");
 export const Play = icon("play");

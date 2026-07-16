@@ -21,7 +21,7 @@ const ERASING_MS = 25;
 const PAUSE_AFTER_TYPE_MS = 2000;
 const PAUSE_AFTER_ERASE_MS = 300;
 
-export default function AnimatedPlaceholder({ active }: { active: boolean }) {
+export default function AnimatedPlaceholder() {
 	const [display, setDisplay] = useState("");
 	const indexRef = useRef(0);
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,8 +34,6 @@ export default function AnimatedPlaceholder({ active }: { active: boolean }) {
 	}, []);
 
 	useEffect(() => {
-		if (!active) return;
-
 		let count = 0;
 		let text = SUGGESTIONS[indexRef.current];
 
@@ -69,7 +67,7 @@ export default function AnimatedPlaceholder({ active }: { active: boolean }) {
 		timerRef.current = setTimeout(tick, TYPING_MS);
 
 		return clear;
-	}, [active, clear]);
+	}, [clear]);
 
 	return (
 		<span

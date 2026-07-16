@@ -41,7 +41,7 @@ export default function ComposerHero() {
 				}}
 				placeholder={mode === "script" ? INPUT_SCRIPT_PLACEHOLDER : undefined}
 				placeholderOverlay={
-					mode === "script" ? undefined : <AnimatedPlaceholder active />
+					mode === "script" ? undefined : <AnimatedPlaceholder />
 				}
 			/>
 
