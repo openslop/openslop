@@ -3,53 +3,6 @@ import { createEditor, Editor, Element } from "slate";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
-vi.mock("@/lib/canvas/elementConfigs", () => ({
-	ELEMENT_CONFIGS: {
-		narration: {
-			type: "narration",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Narration",
-		},
-		sound: {
-			type: "sound",
-			connector: "sfx",
-			outputKind: "audio",
-			label: "Sound",
-		},
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			label: "Image",
-		},
-		animated_image: {
-			type: "animated_image",
-			connector: "animated_image",
-			outputKind: "video",
-			label: "Animated image",
-		},
-		character: {
-			type: "character",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Character",
-		},
-		music: {
-			type: "music",
-			connector: "music",
-			outputKind: "audio",
-			label: "Music",
-		},
-		clip: {
-			type: "clip",
-			connector: "video",
-			outputKind: "video",
-			label: "Clip",
-		},
-	},
-}));
-
 // No connector model/provider stamped here — these tests exercise refine-op
 // mechanics (insert/remove/set/anchor tracking), not attribute-schema
 // resolution, which has its own tests under lib/connectors/attributes/.

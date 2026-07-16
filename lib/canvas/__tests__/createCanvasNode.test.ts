@@ -1,28 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("../elementConfigs", () => ({
-	ELEMENT_CONFIGS: {
-		sound: {
-			type: "sound",
-			connector: "sfx",
-			outputKind: "audio",
-			label: "Sound",
-		},
-		narration: {
-			type: "narration",
-			connector: "tts",
-			outputKind: "audio",
-			label: "Narration",
-		},
-		image: {
-			type: "image",
-			connector: "image",
-			outputKind: "image",
-			label: "Image",
-		},
-	},
-}));
-
 vi.mock("@/lib/config/connectorUtils", () => ({
 	getDefaultConnector: () => ({
 		provider: "openslop",

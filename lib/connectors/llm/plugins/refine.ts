@@ -4,7 +4,7 @@ import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import type { LLMPlugin } from "@/lib/connectors/types";
 
-const ELEMENT_TYPES = [...CANVAS_ELEMENT_TYPES].join(", ");
+const ELEMENT_TYPE_LIST = [...CANVAS_ELEMENT_TYPES].join(", ");
 const vals = (e: Record<string, string>) => Object.values(e).join(", ");
 
 const REFINE_SYSTEM_PROMPT = dedent`
@@ -30,7 +30,7 @@ const REFINE_SYSTEM_PROMPT = dedent`
   {"op":"set","id":"<element-id>","type":"<new-type>","attrs":{"key":"value","remove_key":null},"text":"<full-replacement-text>"}
 
   ## Element types
-  ${ELEMENT_TYPES}
+  ${ELEMENT_TYPE_LIST}
 
   ## Common attributes by type
   - **narration**: emotion, captions (on | off)

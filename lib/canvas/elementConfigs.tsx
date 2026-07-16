@@ -24,10 +24,10 @@ export interface ElementConfig extends ElementTypeSpec {
 	placeholder: string;
 }
 
-export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
+type ElementPresentation = Omit<ElementConfig, keyof ElementTypeSpec | "type">;
+
+const PRESENTATION: Record<CanvasElementType, ElementPresentation> = {
 	narration: {
-		type: "narration",
-		...ELEMENT_TYPES.narration,
 		label: "Narration",
 		icon: <Voice size={16} />,
 		iconBgClass: "bg-media-narration/15",
@@ -35,8 +35,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Write the narration...",
 	},
 	character: {
-		type: "character",
-		...ELEMENT_TYPES.character,
 		label: "Character",
 		icon: <User size={16} />,
 		iconBgClass: "bg-media-character/15",
@@ -44,8 +42,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "What does this character say?",
 	},
 	image: {
-		type: "image",
-		...ELEMENT_TYPES.image,
 		label: "Image",
 		icon: <ImageIcon size={16} />,
 		iconBgClass: "bg-media-image/15",
@@ -53,8 +49,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the image...",
 	},
 	animated_image: {
-		type: "animated_image",
-		...ELEMENT_TYPES.animated_image,
 		label: "Animated image",
 		icon: <Motion size={16} />,
 		iconBgClass: "bg-media-animated/15",
@@ -62,8 +56,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the still image...",
 	},
 	clip: {
-		type: "clip",
-		...ELEMENT_TYPES.clip,
 		label: "Clip",
 		icon: <Video size={16} />,
 		iconBgClass: "bg-media-clip/15",
@@ -71,8 +63,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the video clip...",
 	},
 	sound: {
-		type: "sound",
-		...ELEMENT_TYPES.sound,
 		label: "Sound",
 		icon: <Waveform size={16} />,
 		iconBgClass: "bg-media-sound/15",
@@ -80,8 +70,6 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the sound effect...",
 	},
 	music: {
-		type: "music",
-		...ELEMENT_TYPES.music,
 		label: "Music",
 		icon: <Music size={16} />,
 		iconBgClass: "bg-media-music/15",
@@ -89,5 +77,12 @@ export const ELEMENT_CONFIGS: Record<CanvasElementType, ElementConfig> = {
 		placeholder: "Describe the music...",
 	},
 };
+
+export const ELEMENT_CONFIGS = Object.fromEntries(
+	(Object.keys(ELEMENT_TYPES) as CanvasElementType[]).map((type) => [
+		type,
+		{ type, ...ELEMENT_TYPES[type], ...PRESENTATION[type] },
+	]),
+) as Record<CanvasElementType, ElementConfig>;
 
 export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

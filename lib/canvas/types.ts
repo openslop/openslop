@@ -17,11 +17,6 @@ export type ElementTypeSpec = {
 	layer: LayerType;
 };
 
-/**
- * The one home for element types. The `CanvasElementType` union, the type-guard
- * sets, the timeline roles, and the editor's config map all derive from here, so
- * adding a type is one entry rather than four lists that must agree.
- */
 export const ELEMENT_TYPES = {
 	narration: {
 		connector: "tts",

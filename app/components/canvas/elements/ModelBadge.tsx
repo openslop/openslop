@@ -5,14 +5,13 @@ import type { ProviderKey } from "@/lib/connectors/types";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "./AttributeBadge";
 
 export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	const { connectorConfig } = useConfig();
 	const { model, provider } = element.customAttributes ?? {};
-	const connector = ELEMENT_CONFIGS[element.type].connector;
+	const connector = ELEMENT_TYPES[element.type].connector;
 
 	const spec = useMemo<AttributeSpec | null>(() => {
 		if (!model || !provider) return null;

@@ -1,6 +1,5 @@
 import { memo } from "react";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { useGenerate } from "../hooks/useGenerate";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
@@ -17,7 +16,7 @@ function OutputPreviewComponent({
 	element: CanvasContentElement;
 }) {
 	const type = element.type;
-	const { outputKind } = ELEMENT_CONFIGS[type];
+	const { outputKind } = ELEMENT_TYPES[type];
 	const { status, seconds, result, error, discard } = useGenerate(element);
 
 	if (outputKind === "audio") {
