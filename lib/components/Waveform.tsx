@@ -18,7 +18,6 @@ export interface WaveformProps {
 	src: string;
 	peaksCache?: Map<string, number[]>;
 	className?: string;
-	onReady?: () => void;
 	onPlay?: () => void;
 	onPause?: () => void;
 	onTimeUpdate?: (time: number, duration: number) => void;
@@ -72,7 +71,6 @@ export function Waveform({
 	peaksCache,
 	className,
 	ref,
-	onReady,
 	onPlay,
 	onPause,
 	onTimeUpdate,
@@ -123,7 +121,6 @@ export function Waveform({
 		if (cached) {
 			peaksRef.current = cached;
 			paint();
-			onReady?.();
 			return;
 		}
 		peaksRef.current = [];
@@ -139,7 +136,6 @@ export function Waveform({
 				peaksRef.current = peaks;
 				paint();
 				setLoadedSrc(src);
-				onReady?.();
 			})
 			.catch((e) => {
 				console.error("Failed to decode audio:", e);
@@ -148,7 +144,7 @@ export function Waveform({
 		return () => {
 			cancelled = true;
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- onReady/peaksCache are stable refs, not direct deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- peaksCache is a stable ref, not a direct dep
 	}, [src]);
 
 	useImperativeHandle(

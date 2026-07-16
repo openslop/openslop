@@ -26,11 +26,15 @@ import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 
-const MODE_OPTIONS: SelectMenuOption<Mode>[] = [
-	{ value: "story", label: "Describe a story" },
-	{ value: "script", label: "Paste in a script" },
-	{ value: "template", label: "Use a template" },
-];
+const MODE_LABELS: Record<Mode, string> = {
+	story: "Describe a story",
+	script: "Paste in a script",
+	template: "Use a template",
+};
+
+const MODE_OPTIONS: SelectMenuOption<Mode>[] = (
+	Object.keys(MODE_LABELS) as Mode[]
+).map((value) => ({ value, label: MODE_LABELS[value] }));
 
 const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
@@ -156,7 +160,8 @@ interface ComposerCopilotProps {
 	value: string;
 	onValueChange: (value: string) => void;
 	onSubmit: () => void;
-	placeholder?: ReactNode;
+	placeholder?: string;
+	placeholderOverlay?: ReactNode;
 }
 
 export default function ComposerCopilot({
@@ -164,6 +169,7 @@ export default function ComposerCopilot({
 	onValueChange,
 	onSubmit,
 	placeholder,
+	placeholderOverlay,
 }: ComposerCopilotProps) {
 	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
 		useConfig();
@@ -181,15 +187,13 @@ export default function ComposerCopilot({
 		});
 	const showPill = mode === "template" && selectedTemplateId !== undefined;
 	const hasText = value.trim().length > 0;
+	const selectedTemplate = selectedTemplateId
+		? getTemplateById(selectedTemplateId)
+		: undefined;
 
 	const handleSubmit = () => {
 		if (hasText) onSubmit();
 	};
-
-	const placeholderOverlay =
-		typeof placeholder !== "string" ? placeholder : undefined;
-	const placeholderText =
-		typeof placeholder === "string" ? placeholder : undefined;
 
 	return (
 		<div className="w-full rounded-xl border border-accent/30 bg-card transition-shadow focus-within:shadow-elevation-5">
@@ -216,7 +220,7 @@ export default function ComposerCopilot({
 								if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
 									handleSubmit();
 							}}
-							placeholder={placeholderText}
+							placeholder={placeholder}
 							style={{ fieldSizing: "content" }}
 							className=" w-full resize-none bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
@@ -249,7 +253,7 @@ export default function ComposerCopilot({
 						>
 							<PillTrigger
 								aria-label="Composer mode"
-								label={MODE_OPTIONS.find((o) => o.value === mode)?.label}
+								label={MODE_LABELS[mode]}
 							/>
 						</SelectMenu>
 						<SelectMenu
@@ -281,10 +285,8 @@ export default function ComposerCopilot({
 								<PillTrigger
 									aria-label="Select template"
 									className="relative overflow-hidden"
-									style={{
-										backgroundColor: getTemplateById(selectedTemplateId)?.color,
-									}}
-									label={getTemplateById(selectedTemplateId)?.name}
+									style={{ backgroundColor: selectedTemplate?.color }}
+									label={selectedTemplate?.name}
 								/>
 							</SelectMenu>
 						)}
