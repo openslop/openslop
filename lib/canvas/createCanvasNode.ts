@@ -44,7 +44,12 @@ export function createCanvasNode(
 		customAttributes,
 		children: [
 			{ id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
-			{ id: makeNodeId(), type, text: (opts.text ?? "").trim() },
+			{
+				id: makeNodeId(),
+				type,
+				// Strip ZWSPs that older serializer versions leaked into saved text.
+				text: (opts.text ?? "").replaceAll(ZERO_WIDTH_SPACE, "").trim(),
+			},
 		],
 	};
 }

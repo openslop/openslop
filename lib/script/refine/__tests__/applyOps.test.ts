@@ -217,6 +217,46 @@ describe("applyRefineOp — insert", () => {
 		expect(texts).toEqual(["first", "A", "B", "C"]);
 	});
 
+	it("stacks consecutive before-inserts at the same anchor in stream order", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const anchorMap: Record<string, string> = {};
+
+		for (const text of ["A", "B", "C"]) {
+			applyRefineOp(
+				editor,
+				{
+					op: "insert",
+					anchor_id: "n1",
+					position: "before",
+					type: "sound",
+					text,
+				},
+				anchorMap,
+				connectors,
+			);
+		}
+
+		const texts = getContentTexts(editor);
+		expect(texts).toEqual(["A", "B", "C", "first"]);
+	});
+
+	it("stacks consecutive no-anchor prepends in stream order", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const anchorMap: Record<string, string> = {};
+
+		for (const text of ["A", "B"]) {
+			applyRefineOp(
+				editor,
+				{ op: "insert", position: "before", type: "sound", text },
+				anchorMap,
+				connectors,
+			);
+		}
+
+		const texts = getContentTexts(editor);
+		expect(texts).toEqual(["A", "B", "first"]);
+	});
+
 	it("falls back to append when anchor_id not found", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 		const anchorMap: Record<string, string> = {};

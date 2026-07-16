@@ -35,6 +35,21 @@ describe("serializeOSML", () => {
 		expect(result).toBe('<narration id="e1">Hello world</narration>');
 	});
 
+	it("strips zero-width space caret artifacts from editor nodes", () => {
+		// Real editor nodes carry a leading ZWSP leaf (see createCanvasNode);
+		// serializing it would grow the text by one ZWSP per save/load cycle.
+		const element: CanvasContentElement = {
+			id: "e1",
+			type: "narration",
+			children: [
+				{ id: "z1", type: "narration", text: "​" },
+				{ id: "t1", type: "narration", text: "​Hello" },
+			],
+		};
+		const result = serializeOSML([wrap(element)]);
+		expect(result).toBe('<narration id="e1">Hello</narration>');
+	});
+
 	it("serializes tagged elements with id", () => {
 		const result = serializeOSML([wrap(el("image", "a sunset"))]);
 		expect(result).toBe('<image id="e1">a sunset</image>');

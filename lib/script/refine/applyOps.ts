@@ -31,21 +31,35 @@ export function applyRefineOp(
 	});
 }
 
+// Chains consecutive no-anchor prepends so they land in stream order.
+const PREPEND_ANCHOR = "";
+
+// "after" inserts chain the anchorMap to the last inserted id. "before"
+// inserts stack naturally by targeting the anchor's current path, so
+// chaining them would reverse stream order.
 function resolveInsertPath(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
 ): Path {
-	if (!op.anchor_id) {
-		return op.position === "before" ? [0, 0] : [editor.children.length];
+	if (op.position === "before") {
+		if (op.anchor_id) {
+			const entry = findNodeById(editor, op.anchor_id);
+			return entry ? entry[1] : [editor.children.length];
+		}
+		const lastPrepended = anchorMap[PREPEND_ANCHOR];
+		const entry = lastPrepended ? findNodeById(editor, lastPrepended) : null;
+		return entry ? Path.next(entry[1]) : [0, 0];
 	}
+
+	if (!op.anchor_id) return [editor.children.length];
 
 	const resolvedId = anchorMap[op.anchor_id] ?? op.anchor_id;
 	const entry =
 		findNodeById(editor, resolvedId) ?? findNodeById(editor, op.anchor_id);
 	if (!entry) return [editor.children.length];
 
-	return op.position === "before" ? entry[1] : Path.next(entry[1]);
+	return Path.next(entry[1]);
 }
 
 function applyInsert(
@@ -60,7 +74,9 @@ function applyInsert(
 		text: op.text,
 	});
 
-	if (op.anchor_id) {
+	if (op.position === "before") {
+		if (!op.anchor_id) anchorMap[PREPEND_ANCHOR] = id;
+	} else if (op.anchor_id) {
 		anchorMap[op.anchor_id] = id;
 	}
 }

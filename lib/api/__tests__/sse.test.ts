@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatSSE, createSSEResponse, readSSE } from "../sse";
+import {
+	formatSSE,
+	createSSEResponse,
+	createSSEStreamResponse,
+	readSSE,
+} from "../sse";
 
 function makeSSEStream(chunks: string[]): ReadableStream {
 	const encoder = new TextEncoder();
@@ -159,5 +164,87 @@ describe("readSSE", () => {
 		}
 		// If the lock had not been released, getReader() would throw.
 		expect(() => stream.getReader()).not.toThrow();
+	});
+
+	it("cancels the underlying stream when the consumer breaks early", async () => {
+		let cancelled = false;
+		const encoder = new TextEncoder();
+		const stream = new ReadableStream({
+			start(controller) {
+				controller.enqueue(encoder.encode('data: {"a":1}\n\n'));
+				controller.enqueue(encoder.encode('data: {"b":2}\n\n'));
+			},
+			cancel() {
+				cancelled = true;
+			},
+		});
+
+		for await (const event of readSSE(stream)) {
+			expect(event).toEqual({ a: 1 });
+			break;
+		}
+
+		expect(cancelled).toBe(true);
+	});
+
+	it("throws when the stream carries an error frame", async () => {
+		const stream = makeSSEStream([
+			'data: {"text":"partial"}\n\n',
+			'data: {"type":"error","message":"provider overloaded"}\n\n',
+		]);
+		const results: unknown[] = [];
+
+		await expect(async () => {
+			for await (const event of readSSE(stream)) {
+				results.push(event);
+			}
+		}).rejects.toThrow("provider overloaded");
+		expect(results).toEqual([{ text: "partial" }]);
+	});
+});
+
+describe("createSSEStreamResponse", () => {
+	it("streams chunks from the iterable and closes", async () => {
+		async function* iter() {
+			yield { text: "a" };
+			yield { text: "b", done: true };
+		}
+
+		const response = createSSEStreamResponse(iter(), "test");
+		const text = await response.text();
+		expect(text).toBe(
+			'data: {"text":"a"}\n\ndata: {"text":"b","done":true}\n\n',
+		);
+	});
+
+	it("delivers an in-band error frame when the iterable throws mid-stream", async () => {
+		async function* iter() {
+			yield { text: "partial" };
+			throw new Error("provider exploded");
+		}
+
+		const response = createSSEStreamResponse(iter(), "test");
+		const text = await response.text();
+		expect(text).toContain('"text":"partial"');
+		expect(text).toContain('"type":"error"');
+		expect(text).toContain("provider exploded");
+	});
+
+	it("round-trips a mid-stream error through readSSE as a thrown Error", async () => {
+		async function* iter() {
+			yield { text: "partial" };
+			throw new Error("rate limited");
+		}
+
+		const response = createSSEStreamResponse(iter(), "test");
+		if (!response.body) throw new Error("expected response body");
+
+		const results: unknown[] = [];
+		await expect(async () => {
+			for await (const event of readSSE(response.body as ReadableStream)) {
+				results.push(event);
+			}
+		}).rejects.toThrow("rate limited");
+		expect(results).toEqual([{ text: "partial" }]);
 	});
 });

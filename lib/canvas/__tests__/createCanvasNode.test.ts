@@ -79,6 +79,13 @@ describe("createCanvasNode", () => {
 		const node = createCanvasNode("narration", connectors);
 		expect(node.children[1].text).toBe("");
 	});
+
+	it("strips zero-width spaces leaked into saved text by older serializers", () => {
+		const node = createCanvasNode("narration", connectors, {
+			text: `${ZWSP}${ZWSP}hello`,
+		});
+		expect(node.children[1].text).toBe("hello");
+	});
 });
 
 describe("createCanvasNode — no default model configured", () => {

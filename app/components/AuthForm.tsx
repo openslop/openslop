@@ -60,12 +60,14 @@ export default function AuthForm({
 	};
 
 	const handleGoogleAuth = async () => {
-		await supabase.auth.signInWithOAuth({
+		setError("");
+		const { error } = await supabase.auth.signInWithOAuth({
 			provider: "google",
 			options: {
 				redirectTo: `${window.location.origin}/auth/callback`,
 			},
 		});
+		if (error) setError(error.message);
 	};
 
 	if (sent) {

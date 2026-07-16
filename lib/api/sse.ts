@@ -1,5 +1,16 @@
-import { stringifyError } from "../errors";
+import { errorMessage, stringifyError } from "../errors";
 import { logger } from "./logger";
+
+type SSEErrorFrame = { type: "error"; message: string };
+
+function isErrorFrame(event: unknown): event is SSEErrorFrame {
+	return (
+		typeof event === "object" &&
+		event !== null &&
+		(event as SSEErrorFrame).type === "error" &&
+		typeof (event as SSEErrorFrame).message === "string"
+	);
+}
 
 export function formatSSE(data: unknown): string {
 	return `data: ${JSON.stringify(data)}\n\n`;
@@ -56,7 +67,18 @@ export function createSSEStreamResponse<T>(
 				controller.close();
 			} catch (error) {
 				logger.error(error, `${label} stream error`);
-				controller.error(error);
+				// The response already streams with status 200, so the failure is
+				// surfaced as an in-band error frame that readSSE rethrows.
+				try {
+					controller.enqueue(
+						encoder.encode(
+							formatSSE({ type: "error", message: errorMessage(error) }),
+						),
+					);
+					controller.close();
+				} catch {
+					// Client already cancelled the stream; nothing left to deliver.
+				}
 			}
 		},
 	});
@@ -79,14 +101,22 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 
 			for (const part of parts) {
 				if (!part.startsWith("data: ")) continue;
+				let event: unknown;
 				try {
-					yield JSON.parse(part.slice(6)) as T;
+					event = JSON.parse(part.slice(6));
 				} catch (err) {
 					logger.warn({ err }, "SSE: skipping malformed event");
+					continue;
 				}
+				if (isErrorFrame(event)) throw new Error(event.message);
+				yield event as T;
 			}
 		}
 	} finally {
+		// Cancel (not just release) so abandoning the stream mid-read aborts
+		// the upstream request. cancel() may echo an error already propagating
+		// from read(), hence the catch.
+		await reader.cancel().catch(() => undefined);
 		reader.releaseLock();
 	}
 }
