@@ -6,7 +6,6 @@
 		"remotion.config.ts",
 		"scripts/**"
 	],
-	"ignore": ["components/ui/**"],
 	"ignoreIssues": {
 		"lib/connectors/**": ["exports", "types"],
 		"lib/gateway/**": ["exports", "types"]

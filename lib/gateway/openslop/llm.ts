@@ -4,12 +4,20 @@ import type {
 	LLMStreamChunk,
 } from "@/lib/connectors/types";
 import { readSSE } from "@/lib/api/sse";
-import { OpenSlopGatewayClient } from "./base";
+import { OpenSlopClient } from "@/lib/clients/openslop";
+import { GatewayClient } from "../base";
 
-export class OpenSlopLLMGateway extends OpenSlopGatewayClient<
+export class OpenSlopLLMGateway extends GatewayClient<
 	LLMGenerateParams,
 	LLMGenerateResult
 > {
+	private client: OpenSlopClient;
+
+	constructor(baseUrl?: string) {
+		super();
+		this.client = new OpenSlopClient(baseUrl);
+	}
+
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
 		return this.client.post("/api/v1/llm", params);
 	}

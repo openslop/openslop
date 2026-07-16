@@ -1,18 +1,6 @@
 import { OpenSlopClient } from "@/lib/clients/openslop";
-import { AssetGateway, GatewayClient } from "../base";
+import { AssetGateway } from "../base";
 import type { JobPoll, JobSubmission } from "../base";
-
-export abstract class OpenSlopGatewayClient<
-	TParams = unknown,
-	TResult = unknown,
-> extends GatewayClient<TParams, TResult> {
-	protected client: OpenSlopClient;
-
-	constructor(baseUrl?: string) {
-		super();
-		this.client = new OpenSlopClient(baseUrl);
-	}
-}
 
 export abstract class OpenSlopAssetGateway<
 	TParams,
