@@ -77,8 +77,6 @@ const MAX_VOICES = 1000;
 
 type VoiceListPage = {
 	data: Voice[];
-	has_more: boolean;
-	next_page: string | null;
 };
 
 type VoiceQueryParams = Omit<
@@ -100,8 +98,9 @@ export async function collectVoices(
 			query: { ...params, limit: PAGE_SIZE, starting_after: cursor },
 		});
 		voices.push(...page.data);
-		if (!page.has_more || !page.next_page) break;
-		cursor = page.next_page;
+		if (page.data.length < PAGE_SIZE) break;
+		cursor = page.data[page.data.length - 1]?.id;
+		if (!cursor) break;
 	}
 	return voices;
 }

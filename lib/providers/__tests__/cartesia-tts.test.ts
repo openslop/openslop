@@ -61,8 +61,8 @@ const makeVoices = (count: number, offset = 0) =>
 		preview_file_url: null,
 	}));
 
-function makePage(data: object[], more = false) {
-	return { data, has_more: more, next_page: more ? "cursor" : null };
+function makePage(data: object[]) {
+	return { data };
 }
 
 const stubClient = { get: mockGet } as unknown as Cartesia;
@@ -72,7 +72,7 @@ describe("collectVoices", () => {
 		vi.clearAllMocks();
 	});
 
-	it("returns a single short page when has_more is false", async () => {
+	it("returns a single short page and stops", async () => {
 		mockGet.mockResolvedValue(makePage(makeVoices(30)));
 
 		const voices = await collectVoices(stubClient, {}, 250);
@@ -81,23 +81,11 @@ describe("collectVoices", () => {
 		expect(mockGet).toHaveBeenCalledTimes(1);
 	});
 
-	it("paginates past 100 using next_page cursor", async () => {
+	it("paginates past 100 using the last voice id as the cursor", async () => {
 		mockGet
-			.mockResolvedValueOnce({
-				data: makeVoices(100),
-				has_more: true,
-				next_page: "cur1",
-			})
-			.mockResolvedValueOnce({
-				data: makeVoices(100, 100),
-				has_more: true,
-				next_page: "cur2",
-			})
-			.mockResolvedValueOnce({
-				data: makeVoices(50, 200),
-				has_more: false,
-				next_page: null,
-			});
+			.mockResolvedValueOnce(makePage(makeVoices(100)))
+			.mockResolvedValueOnce(makePage(makeVoices(100, 100)))
+			.mockResolvedValueOnce(makePage(makeVoices(50, 200)));
 
 		const voices = await collectVoices(stubClient, {}, 250);
 
@@ -109,24 +97,20 @@ describe("collectVoices", () => {
 			2,
 			"/voices",
 			expect.objectContaining({
-				query: expect.objectContaining({ starting_after: "cur1" }),
+				query: expect.objectContaining({ starting_after: "v99" }),
 			}),
 		);
 		expect(mockGet).toHaveBeenNthCalledWith(
 			3,
 			"/voices",
 			expect.objectContaining({
-				query: expect.objectContaining({ starting_after: "cur2" }),
+				query: expect.objectContaining({ starting_after: "v199" }),
 			}),
 		);
 	});
 
-	it("stops at the limit even when has_more is true", async () => {
-		mockGet.mockResolvedValue({
-			data: makeVoices(100),
-			has_more: true,
-			next_page: "cur1",
-		});
+	it("stops at the limit even when a full page comes back", async () => {
+		mockGet.mockResolvedValue(makePage(makeVoices(100)));
 
 		const voices = await collectVoices(stubClient, {}, 100);
 
@@ -134,18 +118,10 @@ describe("collectVoices", () => {
 		expect(mockGet).toHaveBeenCalledTimes(1);
 	});
 
-	it("stops when has_more becomes false mid-pagination", async () => {
+	it("stops on the first short page mid-pagination", async () => {
 		mockGet
-			.mockResolvedValueOnce({
-				data: makeVoices(100),
-				has_more: true,
-				next_page: "cur1",
-			})
-			.mockResolvedValueOnce({
-				data: makeVoices(40, 100),
-				has_more: false,
-				next_page: null,
-			});
+			.mockResolvedValueOnce(makePage(makeVoices(100)))
+			.mockResolvedValueOnce(makePage(makeVoices(40, 100)));
 
 		const voices = await collectVoices(stubClient, {}, 250);
 
@@ -155,16 +131,8 @@ describe("collectVoices", () => {
 
 	it("passes filter params through on every page request", async () => {
 		mockGet
-			.mockResolvedValueOnce({
-				data: makeVoices(100),
-				has_more: true,
-				next_page: "cur1",
-			})
-			.mockResolvedValueOnce({
-				data: makeVoices(10, 100),
-				has_more: false,
-				next_page: null,
-			});
+			.mockResolvedValueOnce(makePage(makeVoices(100)))
+			.mockResolvedValueOnce(makePage(makeVoices(10, 100)));
 
 		const params = {
 			q: "warm",
@@ -358,16 +326,8 @@ describe("CartesiaTTS", () => {
 
 		it("aggregates voices across multiple pages", async () => {
 			mockGet
-				.mockResolvedValueOnce({
-					data: makeVoices(100),
-					has_more: true,
-					next_page: "cur1",
-				})
-				.mockResolvedValueOnce({
-					data: makeVoices(50, 100),
-					has_more: false,
-					next_page: null,
-				});
+				.mockResolvedValueOnce(makePage(makeVoices(100)))
+				.mockResolvedValueOnce(makePage(makeVoices(50, 100)));
 
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({});
