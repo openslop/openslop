@@ -543,10 +543,10 @@ export const TEMPLATES: Template[] = [
 		style:
 			"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style",
 		referenceImages: [
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-1",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-2",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-3",
-			"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-4",
+			templateAsset("true-crime-1"),
+			templateAsset("true-crime-2"),
+			templateAsset("true-crime-3"),
+			templateAsset("true-crime-4"),
 		],
 		narration: {
 			gender: "masculine",
@@ -556,8 +556,7 @@ export const TEMPLATES: Template[] = [
 			description: "Friendly young adult male",
 		},
 		showcase: {
-			image:
-				"https://mqzeech9ugknls54.public.blob.vercel-storage.com/assets/upload/template/true-crime-5",
+			image: templateAsset("true-crime-5"),
 			title: "True Crime",
 			description:
 				"Long-form, wild true crime stories told like a buddy spilling the craziest thing he ever heard",
