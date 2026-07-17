@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { formatDuration, formatTime, formatTimeRange } from "../timestamps";
+import {
+	formatRangeDuration,
+	formatTime,
+	formatTimeRange,
+} from "../timestamps";
 
 describe("formatTime", () => {
 	it("formats seconds as m:ss", () => {
@@ -25,14 +29,25 @@ describe("formatTimeRange", () => {
 	});
 });
 
-describe("formatDuration", () => {
-	it("rounds to integer seconds", () => {
-		expect(formatDuration(14)).toBe("14s");
-		expect(formatDuration(6.7)).toBe("7s");
-		expect(formatDuration(6.3)).toBe("6s");
+describe("formatRangeDuration", () => {
+	it("equals the length of the floored start–end range", () => {
+		expect(formatRangeDuration(0, 14)).toBe("14s");
+		expect(formatRangeDuration(60, 65)).toBe("65s");
+	});
+
+	// Regression for #426: the badge must match the range, not round(duration).
+	it("stays consistent with the range on non-integer input", () => {
+		// round(duration) would show 13s while the range reads 0:00–0:12.
+		expect(formatTimeRange(0, 12.6)).toBe("0:00–0:12");
+		expect(formatRangeDuration(0, 12.6)).toBe("12s");
+
+		// Independent flooring of both endpoints: range reads 0:05–0:09 (4s),
+		// while round(duration) would show 3s.
+		expect(formatTimeRange(5.6, 3.4)).toBe("0:05–0:09");
+		expect(formatRangeDuration(5.6, 3.4)).toBe("4s");
 	});
 
 	it("clamps negatives to zero", () => {
-		expect(formatDuration(-1)).toBe("0s");
+		expect(formatRangeDuration(-1, 0)).toBe("0s");
 	});
 });
