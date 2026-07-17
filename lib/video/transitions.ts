@@ -32,25 +32,25 @@ type Dimensions = { width: number; height: number };
 
 // Each presentation has its own prop type — TransitionPresentation is invariant
 // in its generic, so we widen with `any` at the boundary.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Presentation = TransitionPresentation<any>;
+
+const PRESENTATIONS: Record<
+	TransitionType,
+	(dims: Dimensions) => Presentation
+> = {
+	none: () => none(),
+	fade: () => fade(),
+	slide: () => slide(),
+	wipe: () => wipe(),
+	flip: () => flip(),
+	clockWipe: ({ width, height }) => clockWipe({ width, height }),
+	iris: ({ width, height }) => iris({ width, height }),
+};
+
 export function getPresentation(
 	name: TransitionType,
-	{ width, height }: Dimensions,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): TransitionPresentation<any> {
-	switch (name) {
-		case "none":
-			return none();
-		case "fade":
-			return fade();
-		case "slide":
-			return slide();
-		case "wipe":
-			return wipe();
-		case "flip":
-			return flip();
-		case "clockWipe":
-			return clockWipe({ width, height });
-		case "iris":
-			return iris({ width, height });
-	}
+	dims: Dimensions,
+): Presentation {
+	return PRESENTATIONS[name](dims);
 }
