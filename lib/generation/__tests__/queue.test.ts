@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorConfig } from "@/lib/connectors/types";
+import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../generationInputs";
 import { GenerationQueue, type GenerationJob } from "../queue";
 
@@ -214,6 +215,20 @@ describe("GenerationQueue", () => {
 				"string error",
 			);
 		});
+
+		it("notifies subscribers when a job fails", async () => {
+			generateMock.mockRejectedValue(new Error("boom"));
+			generationQueue.enqueue(makeJob("err3"));
+			const listener = vi.fn();
+			generationQueue.subscribe(listener);
+
+			await vi.runAllTimersAsync();
+
+			// handleJobError owns the failure notify (finalizeJob no longer
+			// notifies), so the error must still reach subscribers.
+			expect(listener).toHaveBeenCalled();
+			expect(generationQueue.getElementSnapshot("err3").error).toBe("boom");
+		});
 	});
 
 	describe("cancel", () => {
@@ -343,6 +358,168 @@ describe("GenerationQueue", () => {
 			expect(snap.result).toBeNull();
 
 			generationQueue.discard("se1");
+		});
+	});
+
+	describe("commitResult", () => {
+		it("sets result, connectorType, clears error, and moves status to idle", () => {
+			const result = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.commitResult("sm1", result, inputs, "image");
+
+			const snap = generationQueue.getElementSnapshot("sm1");
+			expect(snap.status).toBe("idle");
+			expect(snap.result).toEqual(result);
+			expect(snap.error).toBeNull();
+			expect(snap.resultInputs).toEqual(inputs);
+			// Without this, pickThumbnailUrl skips the upload and the project card
+			// stays blank (no job ran to set connectorType).
+			expect(snap.connectorType).toBe("image");
+
+			generationQueue.discard("sm1");
+		});
+
+		it("makes an uploaded-only image project's thumbnail resolve via pickThumbnailUrl", () => {
+			// The exact repro: new project, drop an image element, upload without
+			// ever hitting generate — pickThumbnailUrl must still find the image.
+			generationQueue.commitResult(
+				"scene-1",
+				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
+				{ prompt: "", attributes: {} },
+				"image",
+			);
+
+			const thumbnail = pickThumbnailUrl(
+				Object.entries(generationQueue.snapshot()),
+			);
+			expect(thumbnail).toBe("https://example.com/upload.png");
+
+			generationQueue.discard("scene-1");
+		});
+
+		it("overwrites an existing generated result", async () => {
+			const generated = {
+				url: "https://example.com/generated.png",
+				durationSec: 0,
+			};
+			generateMock.mockResolvedValue(generated);
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.enqueue(makeJob("sm2", { inputs }));
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
+				generated,
+			);
+
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			generationQueue.commitResult("sm2", uploaded, inputs, "image");
+			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
+				uploaded,
+			);
+
+			generationQueue.discard("sm2");
+		});
+
+		it("overwrites an existing error", () => {
+			generationQueue.setError("sm3", "something went wrong");
+			expect(generationQueue.getElementSnapshot("sm3").error).toBe(
+				"something went wrong",
+			);
+
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			generationQueue.commitResult(
+				"sm3",
+				uploaded,
+				{
+					prompt: "p",
+					attributes: {},
+				},
+				"image",
+			);
+			const snap = generationQueue.getElementSnapshot("sm3");
+			expect(snap.error).toBeNull();
+			expect(snap.result).toEqual(uploaded);
+
+			generationQueue.discard("sm3");
+		});
+
+		it("populates history so a later restoreResult recovers it", () => {
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.commitResult("sm4", uploaded, inputs, "image");
+			generationQueue.setError("sm4", "prompt changed");
+			expect(generationQueue.getElementSnapshot("sm4").result).toBeNull();
+
+			const restored = generationQueue.restoreResult("sm4", inputs);
+			expect(restored).toBe(true);
+			expect(generationQueue.getElementSnapshot("sm4").result).toEqual(
+				uploaded,
+			);
+
+			generationQueue.discard("sm4");
+		});
+
+		it("notifies subscribers", () => {
+			const listener = vi.fn();
+			generationQueue.subscribe(listener);
+			generationQueue.commitResult(
+				"sm5",
+				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
+				{ prompt: "p", attributes: {} },
+				"image",
+			);
+			expect(listener).toHaveBeenCalled();
+
+			generationQueue.discard("sm5");
+		});
+
+		it("does not let a cancelled in-flight job clobber a result committed after it", async () => {
+			let resolveGenerate: (value: unknown) => void = () => {};
+			generateMock.mockReturnValue(
+				new Promise((resolve) => {
+					resolveGenerate = resolve;
+				}),
+			);
+			const inputs = { prompt: "p", attributes: {} };
+			generationQueue.enqueue(makeJob("sm6", { inputs }));
+			expect(generationQueue.getElementSnapshot("sm6").status).toBe(
+				"generating",
+			);
+
+			// The caller contract for uploads: cancel the in-flight job, then commit.
+			const uploaded = {
+				imageUrl: "https://example.com/upload.png",
+				durationSec: 0,
+			};
+			generationQueue.cancel("sm6");
+			generationQueue.commitResult("sm6", uploaded, inputs, "image");
+			expect(generationQueue.getElementSnapshot("sm6").result).toEqual(
+				uploaded,
+			);
+
+			// The cancelled job resolves afterwards — it must not overwrite the
+			// committed result.
+			resolveGenerate({
+				url: "https://example.com/generated.png",
+				durationSec: 0,
+			});
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("sm6").result).toEqual(
+				uploaded,
+			);
+
+			generationQueue.discard("sm6");
 		});
 	});
 

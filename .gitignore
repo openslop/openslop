@@ -62,6 +62,7 @@ public/assets/
 .claude/settings.local.json
 .claude/memory/
 .claude/plans/
+.claude/launch.json
 .gstack/
 
 .env*.local

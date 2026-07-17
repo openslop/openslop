@@ -231,6 +231,29 @@ export class GenerationQueue {
 		this.notify();
 	}
 
+	// Cancel() any in-flight job first (or it can clobber this), and pass connectorType.
+	commitResult(
+		elementId: string,
+		result: AssetResult,
+		inputs: GenerationInputs,
+		connectorType: AssetConnectorType,
+	): void {
+		const key = serializeInputs(inputs);
+		const elHistory =
+			this.history.get(elementId) ?? new Map<string, AssetResult>();
+		elHistory.set(key, result);
+		this.history.set(elementId, elHistory);
+		this.update(elementId, {
+			status: "idle",
+			seconds: 0,
+			result,
+			error: null,
+			resultInputs: inputs,
+			connectorType,
+		});
+		this.notify();
+	}
+
 	restoreResult(elementId: string, inputs: GenerationInputs): boolean {
 		const key = serializeInputs(inputs);
 		const cached = this.history.get(elementId)?.get(key);
@@ -294,18 +317,7 @@ export class GenerationQueue {
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		const key = serializeInputs(inputs);
-		const elHistory =
-			this.history.get(job.elementId) ?? new Map<string, AssetResult>();
-		elHistory.set(key, result);
-		this.history.set(job.elementId, elHistory);
-		this.update(job.elementId, {
-			status: "idle",
-			seconds: 0,
-			result,
-			error: null,
-			resultInputs: inputs,
-		});
+		this.commitResult(job.elementId, result, inputs, job.connectorType);
 	}
 
 	private handleJobError(
@@ -321,13 +333,15 @@ export class GenerationQueue {
 			result: null,
 			error: errorMessage(err),
 		});
+		this.notify();
 	}
 
+	// Both terminal handlers notify (commitResult on success, handleJobError on
+	// failure), so this only does queue bookkeeping.
 	private finalizeJob(elementId: string, controller: AbortController) {
 		if (controller.signal.aborted) return;
 		this.stopTimer(elementId);
 		this.controllers.delete(elementId);
-		this.notify();
 		this.processQueue();
 	}
 }
