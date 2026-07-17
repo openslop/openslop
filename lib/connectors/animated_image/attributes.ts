@@ -12,6 +12,6 @@ export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
 		},
 		default: "slow cinematic pan",
 	},
-	durationDef("5"),
+	durationDef("10"),
 	motionDef("none"),
 ]);
