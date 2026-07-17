@@ -21,10 +21,11 @@ export default async function Home() {
 	} = await supabase.auth.getUser();
 
 	if (user) {
-		const { data: projects } = await supabase
+		const { data: projects, error } = await supabase
 			.from("projects")
 			.select("id, name, thumbnail_url, updated_at")
 			.order("updated_at", { ascending: false });
+		if (error) throw error;
 		return (
 			<UserProvider user={user}>
 				<ProjectsList initialProjects={projects ?? []} />
