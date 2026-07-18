@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import {
 	DragEndEvent,
 	DragOverEvent,
@@ -12,6 +12,7 @@ import {
 import { Descendant, Editor, Element, Path, Transforms } from "slate";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import type { DragTransfer } from "./DragTransferContext";
+import { useSortableIds } from "./useSortableIds";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
@@ -19,9 +20,8 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
-	const sceneItems = useMemo<string[]>(
-		() => value.filter(isSceneElement).map((s) => s.id),
-		[value],
+	const sceneItems = useSortableIds(
+		value.filter(isSceneElement).map((s) => s.id),
 	);
 
 	const handleDragStart = useCallback((event: DragStartEvent) => {

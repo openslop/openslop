@@ -9,6 +9,7 @@ import { findSceneSequence } from "@/app/components/video/useSceneSegments";
 import { useLayout } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
+import { useSortableIds } from "../dnd/useSortableIds";
 import { useSceneIndex } from "../hooks/useSceneIndex";
 import { useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
@@ -28,10 +29,7 @@ interface SceneProps {
 }
 
 function useSceneState(element: SceneElement) {
-	const childIds = useMemo(
-		() => element.children.map((c) => c.id),
-		[element.children],
-	);
+	const childIds = useSortableIds(element.children.map((c) => c.id));
 
 	const transfer = useDragTransfer();
 	const isDropTarget =
