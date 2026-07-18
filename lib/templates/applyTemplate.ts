@@ -1,9 +1,8 @@
 import { getProjectStore } from "@/lib/project/store";
-import { getTemplateById } from "./templates";
+import { getTemplate } from "./templates";
 
 export function applyTemplate(projectId: string, templateId: string) {
-	const template = getTemplateById(templateId);
-	if (!template) return;
+	const template = getTemplate(templateId);
 	const project = getProjectStore(projectId).getState();
 	project.reset();
 	project.setReferenceImages(template.referenceImages);

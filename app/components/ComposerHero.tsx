@@ -22,7 +22,7 @@ And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
 	const { submitPrompt } = useScriptControl();
-	const { mode, applyTemplate, setMode } = useConfig();
+	const { mode, selectTemplate } = useConfig();
 	const [value, setValue] = useState("");
 
 	return (
@@ -47,8 +47,7 @@ export default function ComposerHero() {
 
 			<TemplateGallery
 				onSelect={(templateId, examplePrompt) => {
-					applyTemplate(templateId);
-					setMode("template");
+					selectTemplate(templateId);
 					setValue(examplePrompt);
 				}}
 			/>
