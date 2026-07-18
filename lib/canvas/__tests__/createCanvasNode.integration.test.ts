@@ -100,7 +100,7 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 		const node = createCanvasNode("animated_image", connectors);
 		expect(node.customAttributes).toMatchObject({
 			videoPrompt: "slow cinematic pan",
-			duration: "5",
+			duration: "10",
 			motion: "none",
 			model: "anim-model",
 			provider: "openslop",
