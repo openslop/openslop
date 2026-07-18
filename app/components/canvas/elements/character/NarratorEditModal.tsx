@@ -1,8 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
 	DialogContent,
 	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	MountedDialog,
@@ -20,12 +22,12 @@ export function NarratorEditModal({
 }) {
 	return (
 		<MountedDialog open={open} onOpenChange={onOpenChange}>
-			<NarratorEditDialogBody />
+			<NarratorEditDialogBody onClose={() => onOpenChange(false)} />
 		</MountedDialog>
 	);
 }
 
-function NarratorEditDialogBody() {
+function NarratorEditDialogBody({ onClose }: { onClose: () => void }) {
 	const narration = useProject((s) => s.metadata.narration);
 	const setNarration = useProject((s) => s.setNarration);
 
@@ -42,6 +44,12 @@ function NarratorEditDialogBody() {
 			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
 				<VoiceSection voice={narration} onChange={update} />
 			</div>
+
+			<DialogFooter className="shrink-0">
+				<Button type="button" size="sm" onClick={onClose}>
+					Done
+				</Button>
+			</DialogFooter>
 		</DialogContent>
 	);
 }
