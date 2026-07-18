@@ -71,7 +71,11 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 
 	const schedule = useCallback(() => debouncedRef.current?.(), []);
 
+	// The editor mounts empty and is filled a render later by rehydration, so
+	// "skip the first change" has to mean the first *content*, not the first
+	// effect run — otherwise loading a project saves it straight back.
 	useEffect(() => {
+		if (value.length === 0) return;
 		if (skipNextRef.current) {
 			skipNextRef.current = false;
 			return;

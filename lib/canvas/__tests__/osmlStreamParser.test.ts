@@ -198,6 +198,29 @@ describe("OSMLStreamParser", () => {
 			provider: "openslop",
 		});
 	});
+	it("drops prior nodes on reset so a second stream starts empty", () => {
+		const s = new OSMLStreamParser();
+		s.appendChunk("<narration>a rabbit named Lumi</narration>", connectors);
+		s.reset();
+		s.appendChunk("<narration>a dog named Rex</narration>", connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(getElementText(nodes[0])).toContain("a dog named Rex");
+		expect(getElementText(nodes[0])).not.toContain("Lumi");
+	});
+
+	it("drops a partial tag on reset instead of fusing it into the next stream", () => {
+		const s = new OSMLStreamParser();
+		s.appendChunk("<narration>the end<imag", connectors);
+		s.reset();
+		s.appendChunk("<narration>a fresh start</narration>", connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(nodes[0].type).toBe("narration");
+		expect(getElementText(nodes[0])).toContain("a fresh start");
+	});
 });
 
 describe("parseOSML", () => {

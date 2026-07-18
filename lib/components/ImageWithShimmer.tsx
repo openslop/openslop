@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * `next/image` with a shimmer overlay that hides once the image loads.
  */
 export function ImageWithShimmer({ alt, onLoad, ...props }: ImageProps) {
-	const [loaded, setLoaded] = useState(false);
+	const [loadedSrc, setLoadedSrc] = useState<ImageProps["src"] | null>(null);
 	return (
 		<>
 			<Image
@@ -16,10 +16,10 @@ export function ImageWithShimmer({ alt, onLoad, ...props }: ImageProps) {
 				alt={alt}
 				onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
 					onLoad?.(event);
-					setLoaded(true);
+					setLoadedSrc(props.src);
 				}}
 			/>
-			{!loaded && (
+			{loadedSrc !== props.src && (
 				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
 			)}
 		</>

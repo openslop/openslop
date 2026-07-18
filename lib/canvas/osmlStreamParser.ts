@@ -29,6 +29,12 @@ export class OSMLStreamParser {
 		return this.nodes;
 	}
 
+	/** Drops accumulated nodes and any partial tag so the next stream starts clean. */
+	reset(): void {
+		this.buffer = "";
+		this.nodes = [];
+	}
+
 	private parseBuffer(connectors: ConnectorRegistry): boolean {
 		TAG_PATTERN.lastIndex = 0;
 

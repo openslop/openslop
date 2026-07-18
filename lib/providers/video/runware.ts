@@ -3,16 +3,31 @@ import type { VideoJob, VideoJobStatus } from "./base";
 import { BaseVideoProvider } from "./base";
 import { withRunware } from "../runware";
 
-function toVideoJob(video: {
+type RunwareVideoResult = {
 	taskUUID: string;
 	status: string;
 	videoURL?: string;
-}): VideoJob {
+	errorMessage?: string;
+};
+
+// Runware reports terminal states as "success"/"error"; anything else is a
+// state the task can still move out of, so it maps to "processing".
+const TERMINAL_STATUS: Record<string, VideoJobStatus> = {
+	success: "completed",
+	error: "failed",
+};
+
+function toVideoJob(video: RunwareVideoResult): VideoJob {
+	const status = TERMINAL_STATUS[video.status] ?? "processing";
 	return {
 		url: video.videoURL,
 		metadata: {
 			jobId: video.taskUUID,
-			status: video.status as VideoJobStatus,
+			status,
+			...(status === "failed" && {
+				error:
+					video.errorMessage ?? `Runware video task failed: ${video.taskUUID}`,
+			}),
 		},
 	};
 }
@@ -65,11 +80,9 @@ export class RunwareVideo extends BaseVideoProvider {
 
 	protected async _poll(jobId: string): Promise<VideoJob> {
 		return withRunware(this.apiKey, async (runware) => {
-			const results = await runware.getResponse<{
-				taskUUID: string;
-				status: string;
-				videoURL?: string;
-			}>({ taskUUID: jobId });
+			const results = await runware.getResponse<RunwareVideoResult>({
+				taskUUID: jobId,
+			});
 
 			const video = results?.[0];
 			if (!video) throw new Error("Job not found");

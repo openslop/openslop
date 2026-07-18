@@ -24,5 +24,10 @@ export function useOSMLStreamParser() {
 		[connectorConfig],
 	);
 
-	return { nodes, appendChunk };
+	const reset = useCallback(() => {
+		parserRef.current.reset();
+		setNodes([]);
+	}, []);
+
+	return { nodes, appendChunk, reset };
 }

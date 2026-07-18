@@ -13,6 +13,41 @@ import { Descendant, Editor, Element, Path, Transforms } from "slate";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import type { DragTransfer } from "./DragTransferContext";
 
+/**
+ * Resolves the cross-scene transfer a drag is currently proposing, or `null`
+ * when there is none. Every caller assigns the result unconditionally: bailing
+ * out early would leave the previous target's insert gap wedged open once the
+ * pointer moves off it.
+ */
+export function resolveDragTransfer(
+	editor: Editor,
+	event: DragOverEvent,
+): DragTransfer {
+	const { active, over } = event;
+	if (!over?.id || active.id === over.id) return null;
+	if (active.data.current?.type === "scene") return null;
+
+	const fromSceneId = active.data.current?.sceneId;
+	const toSceneId = over.data.current?.sceneId;
+	if (!fromSceneId || !toSceneId || fromSceneId === toSceneId) return null;
+
+	const [overEntry] = Editor.nodes(editor, {
+		at: [],
+		match: (n) => Element.isElement(n) && n.id === over.id,
+	});
+	if (!overEntry) return null;
+
+	const [overNode, overPath] = overEntry;
+	return {
+		itemId: active.id as string,
+		fromSceneId,
+		toSceneId,
+		atIndex: isSceneElement(overNode)
+			? overNode.children.length
+			: overPath[overPath.length - 1],
+	};
+}
+
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
 	const [dragTransfer, setDragTransfer] = useState<DragTransfer>(null);
@@ -29,38 +64,8 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 	}, []);
 
 	const handleDragOver = useCallback(
-		(event: DragOverEvent) => {
-			const { active, over } = event;
-			if (!over?.id || active.id === over.id) return;
-			if (active.data.current?.type === "scene") return;
-
-			const fromSceneId = active.data.current?.sceneId;
-			const toSceneId = over.data.current?.sceneId;
-
-			if (!fromSceneId || !toSceneId) return;
-
-			if (fromSceneId === toSceneId) {
-				setDragTransfer(null);
-				return;
-			}
-
-			const [overEntry] = Editor.nodes(editor, {
-				at: [],
-				match: (n) => Element.isElement(n) && n.id === over.id,
-			});
-			if (!overEntry) return;
-
-			const [overNode, overPath] = overEntry;
-			const atIndex = isSceneElement(overNode)
-				? overNode.children.length
-				: overPath[overPath.length - 1];
-			setDragTransfer({
-				itemId: active.id as string,
-				fromSceneId,
-				toSceneId,
-				atIndex,
-			});
-		},
+		(event: DragOverEvent) =>
+			setDragTransfer(resolveDragTransfer(editor, event)),
 		[editor],
 	);
 

@@ -30,7 +30,14 @@ export async function updateSession(request: NextRequest) {
 	} = await supabase.auth.getUser();
 
 	if (user && AUTH_ROUTES.includes(request.nextUrl.pathname)) {
-		return NextResponse.redirect(new URL("/", request.url));
+		const redirect = NextResponse.redirect(new URL("/", request.url));
+		// getUser() may have rotated the session onto supabaseResponse. A fresh
+		// redirect response would drop those Set-Cookie headers, leaving the
+		// browser holding a refresh token Supabase has already consumed.
+		for (const cookie of supabaseResponse.cookies.getAll()) {
+			redirect.cookies.set(cookie);
+		}
+		return redirect;
 	}
 
 	return supabaseResponse;

@@ -9,7 +9,9 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
+import { toast } from "sonner";
 import type { ParsedElement } from "@/lib/canvas/types";
+import { errorMessage } from "@/lib/errors";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
@@ -56,7 +58,7 @@ export function ScriptProvider({
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const [loading, setLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
-	const { nodes, appendChunk } = useOSMLStreamParser();
+	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 
 	const stopGeneration = useCallback(() => {
 		abortRef.current?.abort();
@@ -75,6 +77,7 @@ export function ScriptProvider({
 			const controller = new AbortController();
 			abortRef.current = controller;
 
+			reset();
 			setHasContent(false);
 			setLoading(true);
 			getProjectStore(projectId)
@@ -88,6 +91,8 @@ export function ScriptProvider({
 					setHasContent(true);
 					appendChunk(chunk.text);
 				}
+			} catch (error) {
+				toast.error(`Script generation failed: ${errorMessage(error)}`);
 			} finally {
 				if (abortRef.current === controller) {
 					abortRef.current = null;
@@ -95,7 +100,7 @@ export function ScriptProvider({
 				}
 			}
 		},
-		[llmProvider, llmConfig, appendChunk, projectId, mode],
+		[llmProvider, llmConfig, appendChunk, reset, projectId, mode],
 	);
 
 	const control = useMemo<ScriptControl>(

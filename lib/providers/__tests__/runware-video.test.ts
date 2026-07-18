@@ -173,6 +173,60 @@ describe("RunwareVideo", () => {
 			expect(result.result).toEqual({});
 		});
 
+		it('maps Runware\'s "error" status to failed so the job stops polling', async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "error",
+					errorMessage: "content filter rejected the prompt",
+				},
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.metadata?.status).toBe("failed");
+			expect(result.metadata?.error).toBe("content filter rejected the prompt");
+		});
+
+		it("falls back to a task-scoped message when a failure carries none", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-9", status: "error" },
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-9");
+
+			expect(result.metadata?.error).toBe("Runware video task failed: job-9");
+		});
+
+		it('maps Runware\'s "success" status to completed', async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "success",
+					videoURL: "https://result.mp4",
+				},
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.result.video).toBe("https://result.mp4");
+		});
+
+		it("treats an unrecognized status as still processing", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "queued-upstream" },
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1");
+
+			expect(result.metadata?.status).toBe("processing");
+			expect(result.metadata?.error).toBeUndefined();
+		});
+
 		it("throws when job not found", async () => {
 			mockGetResponse.mockResolvedValue([]);
 
