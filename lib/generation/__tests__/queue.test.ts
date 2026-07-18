@@ -755,6 +755,40 @@ describe("GenerationQueue", () => {
 			generationQueue.cancelAll();
 		});
 
+		it("drops a failed item from the total so the run can still finish", async () => {
+			let rejectA: (error: Error) => void = () => {};
+			let resolveB: (value: { url: string }) => void = () => {};
+			generateMock
+				.mockReturnValueOnce(
+					new Promise<{ url: string }>((_resolve, reject) => {
+						rejectA = reject;
+					}),
+				)
+				.mockReturnValueOnce(
+					new Promise<{ url: string }>((resolve) => {
+						resolveB = resolve;
+					}),
+				)
+				.mockReturnValue(pending());
+
+			generationQueue.enqueueAll([makeJob("a"), makeJob("b"), makeJob("c")]);
+			rejectA(new Error("boom"));
+			await vi.advanceTimersByTimeAsync(0);
+
+			// The failure will never complete, so it leaves the run rather than
+			// stranding the bar below 100% for everything that follows.
+			expect(generationQueue.getTotalCount()).toBe(2);
+			expect(generationQueue.getCompletedCount()).toBe(0);
+
+			resolveB({ url: "b" });
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(generationQueue.getTotalCount()).toBe(2);
+			expect(generationQueue.getCompletedCount()).toBe(1);
+
+			generationQueue.cancelAll();
+		});
+
 		it("keeps earlier completions counted when items are added mid-run", async () => {
 			let resolveA: (v: { url: string }) => void = () => {};
 			let resolveB: (v: { url: string }) => void = () => {};

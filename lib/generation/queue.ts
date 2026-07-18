@@ -347,6 +347,11 @@ export class GenerationQueue {
 	) {
 		if (controller.signal.aborted) return;
 		console.error(`Generation failed for element ${elementId}:`, err);
+		// A failed job will never complete, so it leaves the run the same way a
+		// cancelled one does. Leaving it in the denominator would strand the bar
+		// below 100% for the rest of the run. A cancelled job already left in
+		// cancel(), hence the aborted check above: it cannot be counted twice.
+		this._batchTotal--;
 		this.update(elementId, {
 			status: "idle",
 			seconds: 0,
