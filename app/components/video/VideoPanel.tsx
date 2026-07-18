@@ -19,7 +19,7 @@ function VideoPanelBody() {
 			</PlayerShimmer>
 		);
 	}
-	if (!layout?.series.length) {
+	if (!layout.series.length) {
 		return (
 			<div className="flex h-full w-full items-center justify-center px-4 text-center text-body text-muted-foreground">
 				Generate elements to playback

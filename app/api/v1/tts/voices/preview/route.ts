@@ -1,21 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import { parseSearchParams } from "@/lib/api/parse";
 import { getTTSProvider } from "@/lib/api/providers";
-import { withApiAccess } from "@/lib/api/with-auth";
+import { createApiQueryRouteHandler } from "@/lib/api/route-handler";
 
 const previewParamsSchema = z.object({ url: z.string().url() });
 
-export async function GET(request: NextRequest) {
-	return withApiAccess("Voice preview fetch", async () => {
-		const parsed = parseSearchParams(
-			request,
-			previewParamsSchema,
-			"Voice preview fetch",
-		);
-		if (!parsed.ok) return parsed.response;
-
-		const upstream = await getTTSProvider().fetchVoicePreview(parsed.data.url);
+export const GET = createApiQueryRouteHandler({
+	schema: previewParamsSchema,
+	label: "Voice preview fetch",
+	handle: async ({ query }) => {
+		const upstream = await getTTSProvider().fetchVoicePreview(query.url);
 		if (!upstream.ok) {
 			return new NextResponse(null, { status: upstream.status });
 		}
@@ -30,5 +24,5 @@ export async function GET(request: NextRequest) {
 				"Cache-Control": "public, max-age=3600",
 			},
 		});
-	});
-}
+	},
+});

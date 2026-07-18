@@ -10,7 +10,6 @@ type AudioResult = {
 } & WithMetadata;
 
 export const ELEVENLABS_AUDIO_FORMAT: AudioFormat = {
-	codec: "mp3",
 	sampleRate: 44100,
 	bitrateKbps: 128,
 };
@@ -18,11 +17,7 @@ export const ELEVENLABS_AUDIO_FORMAT: AudioFormat = {
 export function toElevenLabsOutputFormat(
 	format: AudioFormat,
 ): AllowedOutputFormats {
-	const value =
-		format.codec === "mp3"
-			? `mp3_${format.sampleRate}_${format.bitrateKbps}`
-			: `pcm_${format.sampleRate}`;
-	return value as AllowedOutputFormats;
+	return `mp3_${format.sampleRate}_${format.bitrateKbps}` as AllowedOutputFormats;
 }
 
 /** Shared base for ElevenLabs providers that emit a single audio asset. */

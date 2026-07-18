@@ -11,7 +11,7 @@ export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 	const { layout } = useLayout();
 	const { playFromFrame } = usePlayerControl();
 	const seq = findSceneSequence(scene, layout);
-	const startFrame = seq && layout ? Math.round(seq.start * layout.fps) : null;
+	const startFrame = seq ? Math.round(seq.start * layout.fps) : null;
 	const disabled = startFrame == null;
 	return (
 		<TooltipIconButton

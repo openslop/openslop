@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import { parseBody } from "@/lib/api/parse";
-import { withPublic } from "@/lib/api/with-auth";
+import { createPublicRouteHandler } from "@/lib/api/route-handler";
 import { createClient } from "@/lib/supabase/server";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -20,18 +19,13 @@ const ValidateCodeRequest = z.object(
 	INVALID_FORMAT,
 );
 
-export async function POST(request: NextRequest) {
-	return withPublic("validate-code", async () => {
-		const parsed = await parseBody(
-			request,
-			ValidateCodeRequest,
-			"validate-code",
-		);
-		if (!parsed.ok) return parsed.response;
-
+export const POST = createPublicRouteHandler({
+	schema: ValidateCodeRequest,
+	label: "validate-code",
+	handle: async ({ body }) => {
 		const supabase = await createClient();
 		const { data, error } = await supabase.rpc("validate_access_code", {
-			p_code: parsed.data.code.toUpperCase(),
+			p_code: body.code.toUpperCase(),
 		});
 
 		if (error) throw error;
@@ -46,5 +40,5 @@ export async function POST(request: NextRequest) {
 		}
 
 		return NextResponse.json({ redirect: "/signup" });
-	});
-}
+	},
+});

@@ -16,7 +16,7 @@ export function useVideoLayout(
 	editor: Editor,
 	layoutKey: string,
 ): {
-	layout: VideoLayout | null;
+	layout: VideoLayout;
 	playerKey: string;
 	scenes: SceneElement[];
 } {
