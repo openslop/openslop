@@ -212,10 +212,15 @@ function CharacterEditDialogBody({
 					variant={confirmDelete ? "destructive" : "outline"}
 					size="sm"
 					onClick={handleDelete}
-					className={confirmDelete ? undefined : "text-muted-foreground"}
+					className={
+						confirmDelete ? "sm:mr-auto" : "text-muted-foreground sm:mr-auto"
+					}
 				>
 					<Trash2 />
 					{confirmDelete ? "Confirm delete" : "Delete"}
+				</Button>
+				<Button type="button" size="sm" onClick={requestClose}>
+					Done
 				</Button>
 			</DialogFooter>
 
