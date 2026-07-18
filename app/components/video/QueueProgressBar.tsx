@@ -5,10 +5,9 @@ import { PlayerShimmer } from "./PlayerShimmer";
 import styles from "./QueueProgressBar.module.css";
 
 export function QueueProgressBar() {
-	const active = useQueueSelector((q) => q.getActiveCount());
-	const peak = useQueueSelector((q) => q.getPeakActive());
-	const done = peak - active;
-	const pct = peak === 0 ? 0 : (done / peak) * 100;
+	const total = useQueueSelector((q) => q.getTotalCount());
+	const done = useQueueSelector((q) => q.getCompletedCount());
+	const pct = total === 0 ? 0 : (done / total) * 100;
 
 	return (
 		<PlayerShimmer>
@@ -17,14 +16,14 @@ export function QueueProgressBar() {
 					className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
 					role="progressbar"
 					aria-valuemin={0}
-					aria-valuemax={peak || 1}
+					aria-valuemax={total || 1}
 					aria-valuenow={done}
 					aria-label="Generation progress"
 				>
 					<div className={styles.fill} style={{ width: `${pct}%` }} />
 				</div>
 				<div className="font-body text-label text-muted-foreground tabular-nums">
-					{peak === 0 ? "Preparing…" : `${done} of ${peak} generated`}
+					{total === 0 ? "Preparing…" : `${done} of ${total} generated`}
 				</div>
 			</div>
 		</PlayerShimmer>
