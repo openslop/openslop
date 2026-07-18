@@ -12,7 +12,6 @@ export function updateElementAttrs(
 	setNodeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
 }
 
-/** Remove a live element from the canvas. */
 export function removeElement(editor: Editor, element: CanvasElement): void {
 	Transforms.removeNodes(editor, { at: ReactEditor.findPath(editor, element) });
 }
