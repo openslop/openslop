@@ -63,12 +63,9 @@ export class GenerationQueue {
 	private history = new Map<string, Map<string, AssetResult>>();
 	private readonly batchSize: number;
 	private _resultVersion = 0;
-	// Real cumulative counters for the current run, rather than reconstructing
-	// them from the concurrently-active count: membership changes (cancel or
-	// discard, and adding items mid-run) have to move these honestly. Both
-	// reset once the queue drains.
-	private _batchTotal = 0;
-	private _batchCompleted = 0;
+	// Ids taking part in the current run. Anything that will never finish leaves,
+	// so what remains is either still working or done.
+	private run = new Set<string>();
 
 	constructor({
 		batchSize,
@@ -135,9 +132,15 @@ export class GenerationQueue {
 		return active;
 	};
 
-	getTotalCount = (): number => this._batchTotal;
+	getTotalCount = (): number => this.run.size;
 
-	getCompletedCount = (): number => this._batchCompleted;
+	getCompletedCount = (): number => {
+		let done = 0;
+		for (const id of this.run) {
+			if (!isActive(this.getElementSnapshot(id).status)) done++;
+		}
+		return done;
+	};
 
 	snapshot(): Record<string, ElementSnapshot> {
 		return Object.fromEntries(this.state);
@@ -195,12 +198,10 @@ export class GenerationQueue {
 				connectorType: job.connectorType,
 			});
 			this.pending.push(job);
+			this.run.add(job.elementId);
 			added++;
 		}
 		if (added > 0) {
-			// Only the newly-enqueued items grow the run; jobs already in the
-			// queue were counted when they were first enqueued.
-			this._batchTotal += added;
 			this.notify();
 			this.processQueue();
 		}
@@ -210,9 +211,7 @@ export class GenerationQueue {
 		if (!this.isInQueue(elementId)) return;
 		this.abortJob(elementId);
 		this.resetToIdle(elementId);
-		// The item will never finish, so it leaves the run entirely instead of
-		// being left in the denominator or counted as generated.
-		this._batchTotal--;
+		this.run.delete(elementId);
 		this.notify();
 		this.processQueue();
 	}
@@ -235,7 +234,7 @@ export class GenerationQueue {
 		if (hadEntry) this.abortJob(elementId);
 		if (this.state.get(elementId)?.result) this._resultVersion++;
 		this.state.delete(elementId);
-		if (hadEntry) this._batchTotal--;
+		this.run.delete(elementId);
 		this.notify();
 		if (hadEntry) this.processQueue();
 	}
@@ -284,8 +283,7 @@ export class GenerationQueue {
 	private notify() {
 		// The run is over once nothing is active, so the next one starts clean.
 		if (this.getActiveCount() === 0) {
-			this._batchTotal = 0;
-			this._batchCompleted = 0;
+			this.run.clear();
 		}
 		for (const listener of this.listeners) {
 			listener();
@@ -334,9 +332,6 @@ export class GenerationQueue {
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		// Counted here rather than in commitResult, which is also called
-		// directly for results that never went through the queue.
-		this._batchCompleted++;
 		this.commitResult(job.elementId, result, inputs, job.connectorType);
 	}
 
@@ -347,11 +342,7 @@ export class GenerationQueue {
 	) {
 		if (controller.signal.aborted) return;
 		console.error(`Generation failed for element ${elementId}:`, err);
-		// A failed job will never complete, so it leaves the run the same way a
-		// cancelled one does. Leaving it in the denominator would strand the bar
-		// below 100% for the rest of the run. A cancelled job already left in
-		// cancel(), hence the aborted check above: it cannot be counted twice.
-		this._batchTotal--;
+		this.run.delete(elementId);
 		this.update(elementId, {
 			status: "idle",
 			seconds: 0,
