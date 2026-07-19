@@ -64,4 +64,8 @@ describe("startPlaybackAt", () => {
 		expect(() => startPlaybackAt(player, 0)).not.toThrow();
 		expect(player.play).toHaveBeenCalledOnce();
 	});
+
+	it("no-ops when the player has not mounted", () => {
+		expect(() => startPlaybackAt(null, 120)).not.toThrow();
+	});
 });
