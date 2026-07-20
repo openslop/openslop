@@ -113,7 +113,7 @@ export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
  */
 export const audioBundleCache = (type: string) => ({
 	toMetadata: (r: BundleResponse, description: string): Metadata => ({
-		url: AssetBundle.fromResponse(type, r).resolve("audio"),
+		url: AssetBundle.fromResponse(r).resolve("audio"),
 		duration: Number(r.metadata?.durationSec ?? 0),
 		description,
 	}),
@@ -122,6 +122,7 @@ export const audioBundleCache = (type: string) => ({
 		if (typeof url !== "string" || url === "") return undefined;
 		return {
 			id: url,
+			type,
 			provider: "pinecone-cache",
 			result: { audio: url },
 			metadata: {

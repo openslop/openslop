@@ -16,6 +16,7 @@ const config = {
 function mockSuccess(metadata?: Record<string, unknown>) {
 	mockGatewaySuccess({
 		id: TEST_ID,
+		type: "sfx",
 		provider: "openslop",
 		result: { audio: "output.mp3" },
 		...(metadata && { metadata }),

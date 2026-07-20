@@ -2,7 +2,7 @@ import type { BundleResponse } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "./base";
 import { pickRandom } from "./mock-utils";
 
-type MockVariant = Omit<BundleResponse, "provider">;
+type MockVariant = Omit<BundleResponse, "provider" | "type">;
 
 export abstract class MockProvider<TParams> extends BaseProvider<
 	TParams,
@@ -27,6 +27,10 @@ export abstract class MockProvider<TParams> extends BaseProvider<
 				setTimeout(r, this.delayMs + Math.random() * this.delayMs),
 			);
 		}
-		return { ...pickRandom(this.variants), provider: this.blobConfig.provider };
+		return {
+			...pickRandom(this.variants),
+			type: this.blobConfig.type,
+			provider: this.blobConfig.provider,
+		};
 	}
 }

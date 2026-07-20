@@ -16,6 +16,7 @@ const config = {
 function mockSuccess() {
 	mockGatewaySuccess({
 		id: TEST_ID,
+		type: "video",
 		provider: "openslop",
 		result: { video: VIDEO_URL },
 		metadata: { durationSec: 5 },
@@ -44,6 +45,7 @@ describe("BaseVideoConnector", () => {
 				pollStatus: "completed",
 				result: {
 					id: TEST_ID,
+					type: "video",
 					provider: "openslop",
 					result: { video: VIDEO_URL },
 					metadata: { durationSec: 5 },

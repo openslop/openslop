@@ -17,6 +17,7 @@ const config = {
 function mockSuccess() {
 	mockGatewaySuccess({
 		id: TEST_ID,
+		type: "image",
 		provider: "openslop",
 		result: { image: "output.png" },
 	});

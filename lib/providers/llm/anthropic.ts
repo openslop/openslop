@@ -3,6 +3,7 @@ import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
+import { parseImageSource } from "@/lib/api/imageSource";
 import { BaseProvider } from "../base";
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [
@@ -19,24 +20,27 @@ function isSupportedMediaType(value: string): value is SupportedImageMediaType {
 }
 
 function toImageBlock(image: string): Anthropic.ImageBlockParam {
-	if (/^https?:\/\//i.test(image)) {
-		return { type: "image", source: { type: "url", url: image } };
-	}
-	const match = /^data:([a-z]+\/[a-z0-9+.-]+);base64,(.+)$/i.exec(image);
-	if (!match) {
+	const source = parseImageSource(image);
+	if (!source) {
 		throw new Error(
 			"Anthropic reference image must be an http(s) URL or a base64 data URI",
 		);
 	}
-	const mediaType = match[1].toLowerCase();
-	if (!isSupportedMediaType(mediaType)) {
+	if (source.kind === "url") {
+		return { type: "image", source: { type: "url", url: source.url } };
+	}
+	if (!isSupportedMediaType(source.mediaType)) {
 		throw new Error(
-			`Anthropic reference image media type "${mediaType}" is not supported; expected one of ${SUPPORTED_IMAGE_MEDIA_TYPES.join(", ")}`,
+			`Anthropic reference image media type "${source.mediaType}" is not supported; expected one of ${SUPPORTED_IMAGE_MEDIA_TYPES.join(", ")}`,
 		);
 	}
 	return {
 		type: "image",
-		source: { type: "base64", media_type: mediaType, data: match[2] },
+		source: {
+			type: "base64",
+			media_type: source.mediaType,
+			data: source.data,
+		},
 	};
 }
 

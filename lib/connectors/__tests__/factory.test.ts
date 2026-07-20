@@ -25,12 +25,13 @@ describe("createConnector", () => {
 		).toThrow('Unknown provider "nonexistent" for type "llm"');
 	});
 
-	it("creates all connector types", () => {
+	it("creates all connector types, each reporting the type it was registered under", () => {
 		const types: ConnectorType[] = [
 			"llm",
 			"music",
 			"sfx",
 			"image",
+			"animated_image",
 			"tts",
 			"video",
 		];
@@ -52,7 +53,7 @@ describe("resolveAttributeSchema", () => {
 		]);
 	});
 
-	it("resolves distinct schemas for image vs animated_image despite sharing runtime type", () => {
+	it("resolves distinct schemas for image vs animated_image", () => {
 		expect(resolveAttributeSchema("image", "openslop").keys).toEqual([
 			"motion",
 		]);
