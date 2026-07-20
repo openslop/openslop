@@ -27,7 +27,7 @@ export function BottomTransportBar() {
 	const playing = usePlayerPlaying(player);
 	const activeIndex = useActiveSegmentIndex(player, segments, layout?.fps);
 
-	const ready = Boolean(player && layout && segments.length > 0);
+	const ready = player !== null && layout != null && segments.length > 0;
 
 	const seekToAdjacentScene = (dir: -1 | 1) => {
 		if (!player || !layout || segments.length === 0) return;
@@ -41,14 +41,14 @@ export function BottomTransportBar() {
 
 	return (
 		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
-			{ready && layout ? (
+			{ready ? (
 				<SegmentedSeekBar player={player} layout={layout} segments={segments} />
 			) : (
 				<div className="h-3 w-full" aria-hidden />
 			)}
 			<div className="flex items-center gap-2">
 				<div className="flex flex-1 items-center gap-2">
-					{ready && layout && <TimeDisplay player={player} layout={layout} />}
+					{ready && <TimeDisplay player={player} layout={layout} />}
 					{ready && (
 						<div className="hidden @[520px]:contents">
 							<ScenePill segments={segments} activeIndex={activeIndex} />
@@ -85,8 +85,8 @@ export function BottomTransportBar() {
 				</div>
 
 				<div className="flex flex-1 items-center justify-end gap-1.5">
-					<VolumeControl player={player} />
-					<FullscreenButton player={player} />
+					<VolumeControl />
+					<FullscreenButton />
 				</div>
 			</div>
 		</div>

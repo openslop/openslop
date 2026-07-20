@@ -16,6 +16,12 @@ export interface SelectMenuOption<T extends string> {
 	icon?: ReactNode;
 }
 
+/**
+ * Picker hung off a trigger you supply as `children`, with menu semantics.
+ * Use where the trigger is part of the surface (a badge, a toolbar button).
+ *
+ * For a standalone form field that renders its own trigger, use `SelectField`.
+ */
 export function SelectMenu<T extends string>({
 	value,
 	onChange,

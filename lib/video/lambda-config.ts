@@ -1,9 +1,17 @@
-import type { AwsRegion } from "@remotion/lambda/client";
+import { type AwsRegion, speculateFunctionName } from "@remotion/lambda/client";
 
 export const REGION: AwsRegion = "us-east-1";
 export const RAM = 3008;
 export const DISK = 10240;
 export const TIMEOUT = 240;
+
+export function getFunctionName(): string {
+	return speculateFunctionName({
+		diskSizeInMb: DISK,
+		memorySizeInMb: RAM,
+		timeoutInSeconds: TIMEOUT,
+	});
+}
 
 export function getSiteName(): string {
 	if (process.env.VERCEL_ENV === "production") return "openslop";

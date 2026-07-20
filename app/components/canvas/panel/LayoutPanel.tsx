@@ -8,12 +8,9 @@ import {
 } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+	SelectField,
+	type SelectFieldOption,
+} from "@/components/ui/select-field";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { usePlayerPosition } from "@/app/components/video/PlayerPositionContext";
 import { useViewMode } from "../ViewModeContext";
@@ -37,35 +34,22 @@ export function LayoutPanel() {
 		setVisible(true);
 	};
 
+	const positionOptions: SelectFieldOption<PlayerPositionValue>[] = [
+		{ value: "top", label: "Top" },
+		{ value: "right", label: "Right", disabled: narrowViewport },
+		{ value: "hidden", label: "Hidden" },
+	];
+
 	return (
 		<>
 			<PanelCard title="View">
 				<PanelField label="Player position">
-					<Select
+					<SelectField
 						value={positionValue}
-						onValueChange={(value) =>
-							onPositionChange(value as PlayerPositionValue)
-						}
-					>
-						<SelectTrigger size="sm" aria-label="Player position">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="top" className="text-label">
-								Top
-							</SelectItem>
-							<SelectItem
-								value="right"
-								disabled={narrowViewport}
-								className="text-label"
-							>
-								Right
-							</SelectItem>
-							<SelectItem value="hidden" className="text-label">
-								Hidden
-							</SelectItem>
-						</SelectContent>
-					</Select>
+						options={positionOptions}
+						onChange={onPositionChange}
+						ariaLabel="Player position"
+					/>
 				</PanelField>
 				<PanelField label="Scenes">
 					<MediaToggle

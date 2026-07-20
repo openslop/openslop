@@ -1,3 +1,4 @@
+import type { CanvasElementType } from "@/lib/canvas/types";
 import type {
 	ResolvedElement,
 	Sequence,
@@ -27,8 +28,10 @@ function createSequence(
 	return { element, start, duration: Math.max(duration, MIN_DURATION_SEC) };
 }
 
+type SequenceMap = Partial<Record<CanvasElementType, Sequence[]>>;
+
 function pushSequence(
-	sequences: Record<string, Sequence[]>,
+	sequences: SequenceMap,
 	element: ResolvedElement,
 	start: number,
 ) {
@@ -81,7 +84,7 @@ export function buildVideoLayout(
 	const cfg = { ...DEFAULT_CONFIG, ...aspectDims, ...options };
 	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
 	const series: Sequence[] = [];
-	const sequences: Record<string, Sequence[]> = {};
+	const sequences: SequenceMap = {};
 	let cursor = 0;
 
 	for (const element of elements) {

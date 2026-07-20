@@ -6,6 +6,7 @@ import type { VideoLayout } from "@/lib/video/types";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { IconButton } from "@/components/ui/icon-button";
 import { formatTime } from "@/lib/video/timestamps";
+import { usePlayerControl } from "./PlayerControlContext";
 import {
 	FRAME_EVENTS,
 	usePlayerMuted,
@@ -57,7 +58,8 @@ export function ScenePill({
 	);
 }
 
-export function VolumeControl({ player }: { player: PlayerRef | null }) {
+export function VolumeControl() {
+	const { player } = usePlayerControl();
 	const volume = usePlayerVolume(player);
 	const muted = usePlayerMuted(player);
 
@@ -93,7 +95,8 @@ export function VolumeControl({ player }: { player: PlayerRef | null }) {
 	);
 }
 
-export function FullscreenButton({ player }: { player: PlayerRef | null }) {
+export function FullscreenButton() {
+	const { player } = usePlayerControl();
 	const onFullscreen = () => {
 		if (!player) return;
 		if (player.isFullscreen()) player.exitFullscreen();

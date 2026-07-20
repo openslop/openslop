@@ -3,10 +3,13 @@ import * as React from "react";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export const IconButton = React.forwardRef<
-	HTMLButtonElement,
-	React.ComponentProps<"button"> & { ariaLabel: string }
->(function IconButton({ ariaLabel, className, children, ...props }, ref) {
+export function IconButton({
+	ariaLabel,
+	className,
+	children,
+	ref,
+	...props
+}: React.ComponentProps<"button"> & { ariaLabel: string }) {
 	return (
 		<button
 			ref={ref}
@@ -21,7 +24,7 @@ export const IconButton = React.forwardRef<
 			{children}
 		</button>
 	);
-});
+}
 
 /** An {@link IconButton} wrapped in a tooltip. `ariaLabel` defaults to `label`. */
 export function TooltipIconButton({
