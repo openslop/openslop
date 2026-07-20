@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/user/UserProvider";
@@ -23,7 +24,7 @@ const THEME_MODES = [
 	{ value: "system", label: "System" },
 ];
 
-export default function UserProfile() {
+function UserProfile() {
 	const router = useRouter();
 	const { theme, setTheme } = useTheme();
 	const user = useUser();
@@ -104,3 +105,5 @@ export default function UserProfile() {
 		</div>
 	);
 }
+
+export default memo(UserProfile);

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { usePlayerControl } from "./PlayerControlContext";
@@ -19,7 +20,7 @@ import {
 	VolumeControl,
 } from "./PlayerControls";
 
-export function BottomTransportBar() {
+function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPosition();
 	const { layout } = useLayout();
@@ -92,3 +93,5 @@ export function BottomTransportBar() {
 		</div>
 	);
 }
+
+export const BottomTransportBar = memo(BottomTransportBarComponent);
