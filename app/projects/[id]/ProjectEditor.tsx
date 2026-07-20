@@ -9,7 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { getProjectStore } from "@/lib/project/store";
 import {
 	applyStoreSnapshot,
-	type ProjectStoreSnapshot,
+	parseStoreSnapshot,
 } from "@/lib/project/storeSnapshot";
 import type { ElementSnapshot } from "@/lib/generation/queue";
 import { GenerationQueueProvider } from "@/lib/generation/GenerationQueueProvider";
@@ -24,12 +24,17 @@ export default function ProjectEditor({
 }: {
 	projectId: string;
 	initialScript: string;
-	initialStore: Partial<ProjectStoreSnapshot>;
+	initialStore: unknown;
 	initialGeneration: Record<string, ElementSnapshot>;
 	user: User;
 }): ReactNode {
 	// Hydrate the store once, before children render and without re-running each render.
-	useState(() => applyStoreSnapshot(getProjectStore(projectId), initialStore));
+	useState(() =>
+		applyStoreSnapshot(
+			getProjectStore(projectId),
+			parseStoreSnapshot(initialStore),
+		),
+	);
 
 	return (
 		<TooltipProvider>

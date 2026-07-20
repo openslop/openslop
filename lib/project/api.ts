@@ -43,15 +43,6 @@ export async function saveProject(
 	input: SaveProjectInput,
 ): Promise<void> {
 	const supabase = createClient();
-	const { error } = await supabase
-		.from("projects")
-		.update({
-			name: input.name,
-			script: input.script,
-			store: input.store,
-			generation: input.generation,
-			thumbnail_url: input.thumbnail_url,
-		})
-		.eq("id", id);
+	const { error } = await supabase.from("projects").update(input).eq("id", id);
 	if (error) throw error;
 }

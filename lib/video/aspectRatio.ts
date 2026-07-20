@@ -1,4 +1,6 @@
-export type AspectRatio = "16:9" | "9:16";
+export const ASPECT_RATIOS = ["16:9", "9:16"] as const;
+
+export type AspectRatio = (typeof ASPECT_RATIOS)[number];
 
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 

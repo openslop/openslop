@@ -20,7 +20,8 @@ export default async function ProjectPage({
 		.eq("id", id)
 		.maybeSingle();
 
-	if (error || !project) notFound();
+	if (error) throw error;
+	if (!project) notFound();
 
 	return (
 		<ProjectEditor

@@ -39,18 +39,22 @@ export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 
 export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 
-export type MetadataCharacter = MetadataVoice & {
-	appearance: string;
-	avatarUrl?: string;
-	avatarUploaded?: boolean;
-};
+export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
+	appearance: z.string(),
+	avatarUrl: optionalString,
+	avatarUploaded: z.boolean().optional().catch(undefined),
+});
+
+export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
 
 export type VideoSettings = {
 	transitionType?: TransitionType;
 	aspectRatio?: AspectRatio;
 };
 
-export type Mode = "story" | "script" | "template";
+export const MODES = ["story", "script", "template"] as const;
+
+export type Mode = (typeof MODES)[number];
 
 export type Metadata = {
 	title: string;
