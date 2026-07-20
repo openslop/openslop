@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import {
-	PanelSelect,
-	type PanelSelectOption,
-} from "@/components/ui/panel-select";
+	SelectField,
+	type SelectFieldOption,
+} from "@/components/ui/select-field";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { usePlayerPosition } from "@/app/components/video/PlayerPositionContext";
 import { useViewMode } from "../ViewModeContext";
@@ -34,7 +34,7 @@ export function LayoutPanel() {
 		setVisible(true);
 	};
 
-	const positionOptions: PanelSelectOption<PlayerPositionValue>[] = [
+	const positionOptions: SelectFieldOption<PlayerPositionValue>[] = [
 		{ value: "top", label: "Top" },
 		{ value: "right", label: "Right", disabled: narrowViewport },
 		{ value: "hidden", label: "Hidden" },
@@ -44,7 +44,7 @@ export function LayoutPanel() {
 		<>
 			<PanelCard title="View">
 				<PanelField label="Player position">
-					<PanelSelect
+					<SelectField
 						value={positionValue}
 						options={positionOptions}
 						onChange={onPositionChange}

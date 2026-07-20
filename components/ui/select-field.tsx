@@ -9,36 +9,33 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
-export interface PanelSelectOption<T extends string> {
+export interface SelectFieldOption<T extends string> {
 	value: T;
 	label: ReactNode;
 	disabled?: boolean;
 }
 
 /**
- * Options-driven `Select` for panel rows. Generic over the option union so the
- * selected value round-trips as `T` instead of a bare `string` the caller has
- * to cast back.
+ * Form field for picking a value: renders its own labelled trigger, with
+ * listbox semantics. Use in panel rows and dialogs.
+ *
+ * For a picker hung off a trigger you supply yourself (a badge, a toolbar
+ * button), use `SelectMenu` — it takes `children` as the trigger and has menu
+ * semantics.
  */
-export function PanelSelect<T extends string>({
+export function SelectField<T extends string>({
 	value,
 	options,
 	onChange,
 	ariaLabel,
 }: {
 	value: T;
-	options: readonly PanelSelectOption<T>[];
+	options: readonly SelectFieldOption<T>[];
 	onChange: (value: T) => void;
 	ariaLabel: string;
 }) {
 	return (
-		<Select
-			value={value}
-			onValueChange={(next) => {
-				const selected = options.find((option) => option.value === next);
-				if (selected) onChange(selected.value);
-			}}
-		>
+		<Select value={value} onValueChange={(next) => onChange(next as T)}>
 			<SelectTrigger size="sm" aria-label={ariaLabel}>
 				<SelectValue />
 			</SelectTrigger>

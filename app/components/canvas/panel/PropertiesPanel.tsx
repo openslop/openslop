@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelSelect } from "@/components/ui/panel-select";
+import { SelectField } from "@/components/ui/select-field";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
@@ -34,7 +34,7 @@ export function PropertiesPanel() {
 	return (
 		<PanelCard title="Transition">
 			<PanelField label="Transition">
-				<PanelSelect
+				<SelectField
 					value={transitionType}
 					options={OPTIONS}
 					onChange={setTransitionType}

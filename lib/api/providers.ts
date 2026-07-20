@@ -11,10 +11,6 @@ import { MockLLM } from "@/lib/providers/llm/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import { MockTTS } from "@/lib/providers/tts/mock";
 
-/**
- * Lazily builds the real provider when its API key is configured, else the
- * mock, and memoizes it for the life of the process.
- */
 function defineProvider<R, M>(
 	envVar: string,
 	RealCtor: new (apiKey: string) => R,

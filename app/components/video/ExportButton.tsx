@@ -10,7 +10,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { PanelSelect } from "@/components/ui/panel-select";
+import { SelectField } from "@/components/ui/select-field";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
@@ -23,6 +23,11 @@ import { useLayout } from "./VideoLayoutContext";
 
 const triggerClass =
 	"shrink-0 border-tertiary/50 bg-tertiary/10 text-tertiary hover:bg-tertiary/20 sm:px-4";
+
+const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
+	value: String(resolution.width),
+	label: resolution.label,
+}));
 
 export function ExportButton() {
 	const { layout, ready } = useLayout();
@@ -110,12 +115,9 @@ export function ExportButton() {
 					<>
 						<div className="flex items-center justify-between gap-3">
 							<span className="text-label">Resolution</span>
-							<PanelSelect
+							<SelectField
 								value={String(width)}
-								options={RESOLUTIONS.map((resolution) => ({
-									value: String(resolution.width),
-									label: resolution.label,
-								}))}
+								options={RESOLUTION_OPTIONS}
 								onChange={(value) => setWidth(Number(value))}
 								ariaLabel="Resolution"
 							/>
