@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import sortedLastIndex from "lodash/sortedLastIndex";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { TextTimestamp } from "@/lib/connectors/types";
@@ -72,6 +72,30 @@ function buildCaptionData(
 	return { startTimes, visibleByWordIndex };
 }
 
+// The word under the playhead changes a few times a second, but the parent
+// re-renders on every frame. Memoized so the 9-layer text shadow is only
+// reconciled at word boundaries.
+const CaptionLine = memo(function CaptionLine({
+	line,
+	fontSizePx,
+}: {
+	line: string;
+	fontSizePx: number;
+}) {
+	return (
+		<AbsoluteFill style={container}>
+			<div
+				style={{
+					width: `${MAX_LINE_WIDTH_RATIO * 100}%`,
+					fontSize: fontSizePx,
+				}}
+			>
+				<span style={text}>{line}</span>
+			</div>
+		</AbsoluteFill>
+	);
+});
+
 export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
 	const frame = useCurrentFrame();
 	const { fps, width, height } = useVideoConfig();
@@ -96,16 +120,5 @@ export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
 
 	const visible = visibleByWordIndex[wordIndex];
 
-	return (
-		<AbsoluteFill style={container}>
-			<div
-				style={{
-					width: `${MAX_LINE_WIDTH_RATIO * 100}%`,
-					fontSize: fontSizePx,
-				}}
-			>
-				<span style={text}>{visible}</span>
-			</div>
-		</AbsoluteFill>
-	);
+	return <CaptionLine line={visible} fontSizePx={fontSizePx} />;
 }

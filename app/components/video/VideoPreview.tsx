@@ -53,6 +53,43 @@ const RemotionPlayer = dynamic(
 	{ ssr: false },
 );
 
+// Both of these track the playhead, so they stay siblings of the player rather
+// than hooks inside it: @remotion/player is not memoized, and a re-render of it
+// lands on the frame a transition is animating and the next asset is decoding.
+function ActiveSceneTracker({
+	player,
+	fps,
+}: {
+	player: PlayerRef | null;
+	fps: number;
+}) {
+	const segments = useSceneSegments();
+	const activeIndex = useActiveSegmentIndex(player, segments, fps);
+	useActiveSceneSync(player, segments, activeIndex);
+	return null;
+}
+
+function ClickToPlayOverlay({ player }: { player: PlayerRef | null }) {
+	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
+		null,
+	);
+	const toggleAndFlash = () => {
+		if (!player) return;
+		const willPlay = !player.isPlaying();
+		player.toggle();
+		setFlash((f) => ({ key: (f?.key ?? 0) + 1, playing: willPlay }));
+	};
+	return (
+		<>
+			<div
+				className="absolute inset-0 cursor-pointer"
+				onClick={toggleAndFlash}
+			/>
+			<PlayPauseFlash flash={flash} />
+		</>
+	);
+}
+
 type VideoPreviewProps = {
 	layout: VideoLayout;
 	restoreFrameRef: MutableRefObject<number | null>;
@@ -61,13 +98,7 @@ type VideoPreviewProps = {
 export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
-	const segments = useSceneSegments();
-	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
-	useActiveSceneSync(player, segments, activeIndex);
 	const { registerPlayer } = usePlayerControl();
-	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
-		null,
-	);
 	useEffect(() => {
 		registerPlayer(player);
 		return () => registerPlayer(null);
@@ -80,12 +111,6 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 		player.addEventListener("fullscreenchange", handler);
 		return () => player.removeEventListener("fullscreenchange", handler);
 	}, [player]);
-	const toggleAndFlash = () => {
-		if (!player) return;
-		const willPlay = !player.isPlaying();
-		player.toggle();
-		setFlash((f) => ({ key: (f?.key ?? 0) + 1, playing: willPlay }));
-	};
 	return (
 		<div className={`relative h-full w-full ${styles.player}`}>
 			<ToastErrorBoundary label="Player">
@@ -95,11 +120,8 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 					controls={isFullscreen}
 				/>
 			</ToastErrorBoundary>
-			<div
-				className="absolute inset-0 cursor-pointer"
-				onClick={toggleAndFlash}
-			/>
-			<PlayPauseFlash flash={flash} />
+			<ActiveSceneTracker player={player} fps={layout.fps} />
+			<ClickToPlayOverlay player={player} />
 		</div>
 	);
 }
