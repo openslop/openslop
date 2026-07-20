@@ -37,6 +37,7 @@ export abstract class BaseVideoProvider extends BaseProvider<
 		if (this.toFiles(result).length === 0) {
 			return {
 				id: "",
+				type: this.blobConfig.type,
 				provider: this.blobConfig.provider,
 				result: {},
 				metadata: result.metadata,

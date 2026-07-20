@@ -36,6 +36,11 @@ describe("parseImageSource", () => {
 		});
 	});
 
+	it("rejects data uris that are not an image type", () => {
+		expect(parseImageSource("data:text/html;base64,AAAA")).toBeNull();
+		expect(parseImageSource("data:application/pdf;base64,AAAA")).toBeNull();
+	});
+
 	it("rejects anything that is neither shape", () => {
 		expect(parseImageSource("")).toBeNull();
 		expect(parseImageSource("ftp://example.com/a.png")).toBeNull();

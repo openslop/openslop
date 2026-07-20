@@ -16,6 +16,7 @@ const config = {
 function mockSuccess() {
 	mockGatewaySuccess({
 		id: TEST_ID,
+		type: "music",
 		provider: "openslop",
 		result: { audio: "output.mp3" },
 	});

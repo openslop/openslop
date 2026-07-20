@@ -424,6 +424,7 @@ describe("audioBundleCache", () => {
 		const m = cache.toMetadata(
 			{
 				id: "abc",
+				type: "music",
 				provider: "elevenlabs",
 				result: { audio: "https://blob/audio.mp3" },
 				metadata: { durationSec: 12.5 },
@@ -453,6 +454,7 @@ describe("audioBundleCache", () => {
 		const m = audioBundleCache("music").toMetadata(
 			{
 				id: "abc123",
+				type: "music",
 				provider: "elevenlabs",
 				result: { audio: "output.mp3" },
 				metadata: { durationSec: 30 },
@@ -463,11 +465,12 @@ describe("audioBundleCache", () => {
 		expect(m.url).toBe(expected);
 	});
 
-	it("threads the type into the resolved URL", async () => {
+	it("resolves under the namespace the response was written to", async () => {
 		const { audioBundleCache } = await loadCache();
 		const m = audioBundleCache("sfx").toMetadata(
 			{
 				id: "id",
+				type: "sfx",
 				provider: "elevenlabs",
 				result: { audio: "out.mp3" },
 				metadata: { durationSec: 1 },
@@ -500,7 +503,7 @@ describe("audioBundleCache", () => {
 	it("defaults duration to 0 when metadata missing", async () => {
 		const { audioBundleCache } = await loadCache();
 		const m = audioBundleCache("music").toMetadata(
-			{ id: "x", provider: "p", result: { audio: "u" } },
+			{ id: "x", type: "music", provider: "p", result: { audio: "u" } },
 			"desc",
 		);
 		expect(m.duration).toBe(0);

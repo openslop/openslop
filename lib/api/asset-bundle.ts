@@ -36,6 +36,7 @@ function isUploadFile(file: BundleFile): file is BundleFileUpload {
 
 export type BundleResponse = {
 	id: string;
+	type: string;
 	provider: string;
 	result: Record<string, string>;
 	metadata?: Record<string, unknown>;
@@ -65,11 +66,15 @@ export class AssetBundle {
 		return `${base}/assets/${type}/${provider}/${id}`;
 	}
 
-	static fromResponse(type: string, response: BundleResponse): AssetBundle {
-		const url = AssetBundle.buildUrl(type, response.provider, response.id);
+	static fromResponse(response: BundleResponse): AssetBundle {
+		const url = AssetBundle.buildUrl(
+			response.type,
+			response.provider,
+			response.id,
+		);
 		return new AssetBundle(url, {
 			version: 1,
-			type,
+			type: response.type,
 			createdAt: "",
 			result: response.result,
 			metadata: response.metadata,
@@ -115,6 +120,6 @@ export class AssetBundle {
 			addRandomSuffix: false,
 		});
 
-		return { id, provider, result, metadata };
+		return { id, type, provider, result, metadata };
 	}
 }

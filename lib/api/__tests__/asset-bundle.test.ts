@@ -68,10 +68,11 @@ describe("AssetBundle", () => {
 		it("creates bundle from a BundleResponse", () => {
 			const response: BundleResponse = {
 				id: "abc",
+				type: "image",
 				provider: "runware",
 				result: { image: "output.png" },
 			};
-			const bundle = AssetBundle.fromResponse("image", response);
+			const bundle = AssetBundle.fromResponse(response);
 			expect(bundle.resolve("image")).toBe(
 				"https://blob.example.com/assets/image/runware/abc/output.png",
 			);

@@ -13,11 +13,6 @@ export abstract class BaseAssetConnector<
 > extends BaseConnector<TParams, TResult> {
 	abstract readonly assetKey: ResultKind;
 
-	/** Blob namespace assets are stored under. Equal to `type` unless the connector reuses another type's route. */
-	protected get bundleType(): string {
-		return this.type;
-	}
-
 	constructor(
 		protected gateway: TGateway,
 		config: ConnectorConfig,
@@ -45,8 +40,6 @@ export abstract class BaseAssetConnector<
 		if (!completed.result) {
 			throw new Error("Generation completed without a result");
 		}
-		return this.resolveBundle(
-			AssetBundle.fromResponse(this.bundleType, completed.result),
-		);
+		return this.resolveBundle(AssetBundle.fromResponse(completed.result));
 	}
 }
