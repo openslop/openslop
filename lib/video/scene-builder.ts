@@ -19,6 +19,7 @@ export type BuildLayoutOptions = Partial<VideoConfig> & {
 };
 
 const MIN_DURATION_SEC = 1;
+const FRAME_EPSILON = 1e-6;
 
 function createSequence(
 	element: ResolvedElement | null,
@@ -83,6 +84,11 @@ export function buildVideoLayout(
 		: undefined;
 	const cfg = { ...DEFAULT_CONFIG, ...aspectDims, ...options };
 	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
+	// TransitionSeries lays transitions down in whole frames, so the overlap has
+	// to sit on the frame grid too. Subtracting the raw seconds would drift the
+	// absolutely-positioned layers a fraction of a frame per scene boundary.
+	const transitionDurationSec =
+		Math.round(TRANSITION_DURATION_SEC * cfg.fps) / cfg.fps;
 	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;
@@ -109,9 +115,9 @@ export function buildVideoLayout(
 					cursor = foregroundCursor;
 					if (series.length > 0) {
 						// TransitionSeries.Sequence overlap the previous
-						// ones by TRANSITION_DURATION_SEC. Bake that into the cursor so every
+						// ones by transitionDurationSec. Bake that into the cursor so every
 						// subsequent overlay/background/effect lands on the rendered timeline.
-						cursor -= TRANSITION_DURATION_SEC;
+						cursor -= transitionDurationSec;
 					}
 					series.push(createSequence(element, cursor, element.durationSec));
 				}
@@ -156,8 +162,14 @@ export function buildVideoLayout(
 		sequences,
 		sequenceByElementId,
 		totalDurationSec,
-		totalFrames: Math.max(2, Math.ceil(totalDurationSec * cfg.fps)),
+		// Nudge before rounding up: accumulated overlap subtraction leaves the
+		// total a few ULPs above a whole frame, which would ceil into a trailing
+		// black frame the renderer has no content for.
+		totalFrames: Math.max(
+			2,
+			Math.ceil(totalDurationSec * cfg.fps - FRAME_EPSILON),
+		),
 		transitionType,
-		transitionDurationSec: TRANSITION_DURATION_SEC,
+		transitionDurationSec,
 	};
 }

@@ -18,6 +18,10 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		return { kind: "pending", metadata: { providerJobId } };
 	},
 	poll: async (job): Promise<JobPoll> => {
+		if (job.status === "completed" || job.status === "failed") {
+			return rowView(job);
+		}
+
 		const providerJobId = job.metadata.providerJobId;
 		if (!providerJobId) return rowView(job);
 
