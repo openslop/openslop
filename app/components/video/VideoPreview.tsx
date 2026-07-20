@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlayerRef } from "@remotion/player";
+import type { CallbackListener, PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
 import { useEffect, useState, type MutableRefObject, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
@@ -74,10 +74,12 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	}, [player, registerPlayer]);
 	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
 	useEffect(() => {
-		const handler = () => setIsFullscreen(!!document.fullscreenElement);
-		document.addEventListener("fullscreenchange", handler);
-		return () => document.removeEventListener("fullscreenchange", handler);
-	}, []);
+		if (!player) return;
+		const handler: CallbackListener<"fullscreenchange"> = (e) =>
+			setIsFullscreen(e.detail.isFullscreen);
+		player.addEventListener("fullscreenchange", handler);
+		return () => player.removeEventListener("fullscreenchange", handler);
+	}, [player]);
 	const toggleAndFlash = () => {
 		if (!player) return;
 		const willPlay = !player.isPlaying();
