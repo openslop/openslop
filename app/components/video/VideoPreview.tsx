@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlayerRef } from "@remotion/player";
+import type { CallbackListener, PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
 import { useEffect, useState, type MutableRefObject, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
@@ -24,9 +24,11 @@ const RemotionPlayer = dynamic(
 		function RemotionPlayerInner({
 			layout,
 			playerRef,
+			controls,
 		}: {
 			layout: VideoLayout;
 			playerRef: Ref<PlayerRef>;
+			controls: boolean;
 		}) {
 			return (
 				<Player
@@ -39,6 +41,7 @@ const RemotionPlayer = dynamic(
 					compositionHeight={layout.height}
 					style={fullSizeStyle}
 					clickToPlay={false}
+					controls={controls}
 					acknowledgeRemotionLicense
 					numberOfSharedAudioTags={10}
 				/>
@@ -57,6 +60,7 @@ type VideoPreviewProps = {
 
 export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
+	const [isFullscreen, setIsFullscreen] = useState(false);
 	const segments = useSceneSegments();
 	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
 	useActiveSceneSync(player, segments, activeIndex);
@@ -69,6 +73,13 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 		return () => registerPlayer(null);
 	}, [player, registerPlayer]);
 	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
+	useEffect(() => {
+		if (!player) return;
+		const handler: CallbackListener<"fullscreenchange"> = (e) =>
+			setIsFullscreen(e.detail.isFullscreen);
+		player.addEventListener("fullscreenchange", handler);
+		return () => player.removeEventListener("fullscreenchange", handler);
+	}, [player]);
 	const toggleAndFlash = () => {
 		if (!player) return;
 		const willPlay = !player.isPlaying();
@@ -78,7 +89,11 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	return (
 		<div className={`relative h-full w-full ${styles.player}`}>
 			<ToastErrorBoundary label="Player">
-				<RemotionPlayer layout={layout} playerRef={setPlayer} />
+				<RemotionPlayer
+					layout={layout}
+					playerRef={setPlayer}
+					controls={isFullscreen}
+				/>
 			</ToastErrorBoundary>
 			<div
 				className="absolute inset-0 cursor-pointer"
