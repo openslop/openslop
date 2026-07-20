@@ -4,9 +4,8 @@ import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { GenerationStatus } from "@/lib/generation/queue";
-import { useGenerate } from "../hooks/useGenerate";
+import { useElementGeneration } from "./ElementGenerationContext";
 
 export function StaleIndicator() {
 	return (
@@ -19,12 +18,8 @@ export function StaleIndicator() {
 	);
 }
 
-export function ElementStaleIndicator({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
-	const { stale } = useGenerate(element);
+export function ElementStaleIndicator() {
+	const { stale } = useElementGeneration();
 	if (!stale) return null;
 	return <StaleIndicator />;
 }
@@ -71,12 +66,8 @@ export function GenerateButton({
 	);
 }
 
-export function ElementGenerateButton({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
-	const { hasPrompt, hasResult, status, generate } = useGenerate(element);
+export function ElementGenerateButton() {
+	const { hasPrompt, hasResult, status, generate } = useElementGeneration();
 	return (
 		<GenerateButton
 			status={status}

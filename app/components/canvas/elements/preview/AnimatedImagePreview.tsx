@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Image as ImageIcon, Video } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
-import { MediaPreview, MediaPlaceholder } from "./results";
+import { MediaResult } from "./results";
 import type { PlaceholderProps } from "./status";
 
 type AnimatedImagePreviewProps = PlaceholderProps & {
@@ -14,33 +14,18 @@ type AnimatedImagePreviewProps = PlaceholderProps & {
 export function AnimatedImagePreview({
 	imageUrl,
 	videoUrl,
-	status,
-	seconds,
-	error,
-	onDiscard,
+	...state
 }: AnimatedImagePreviewProps) {
 	const [mode, setMode] = useState<"animated" | "still">("animated");
-	const url = mode === "animated" ? videoUrl : imageUrl;
 
 	return (
 		<div className="relative w-full">
-			{url ? (
-				<MediaPreview
-					key={url}
-					url={url}
-					outputKind={mode === "animated" ? "video" : "image"}
-					status={status}
-					seconds={seconds}
-				/>
-			) : (
-				<MediaPlaceholder
-					status={status}
-					seconds={seconds}
-					error={error}
-					onDiscard={onDiscard}
-					cancelClassName="top-10"
-				/>
-			)}
+			<MediaResult
+				{...state}
+				url={mode === "animated" ? videoUrl : imageUrl}
+				outputKind={mode === "animated" ? "video" : "image"}
+				cancelClassName="top-10"
+			/>
 			<MediaToggle
 				className="absolute top-2 right-2 z-10 shadow-sm"
 				value={mode}

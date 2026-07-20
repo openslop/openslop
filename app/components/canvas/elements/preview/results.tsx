@@ -74,6 +74,30 @@ export function MediaPlaceholder(
 	);
 }
 
+export function MediaResult({
+	url,
+	outputKind,
+	cancelClassName,
+	...state
+}: PlaceholderProps & {
+	url: string | undefined;
+	outputKind: "image" | "video";
+	cancelClassName?: string;
+}) {
+	if (!url) {
+		return <MediaPlaceholder {...state} cancelClassName={cancelClassName} />;
+	}
+	return (
+		<MediaPreview
+			key={url}
+			url={url}
+			outputKind={outputKind}
+			status={state.status}
+			seconds={state.seconds}
+		/>
+	);
+}
+
 export function MediaPreview({
 	url,
 	outputKind,

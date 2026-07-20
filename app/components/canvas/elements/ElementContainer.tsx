@@ -19,6 +19,7 @@ import { SceneContainer } from "./SceneContainer";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
+import { ElementGenerationProvider } from "./ElementGenerationContext";
 import { AnimateButton } from "./AnimateButton";
 import { ElementUploadButton } from "./ElementUploadButton";
 import { ModelBadge } from "./ModelBadge";
@@ -105,75 +106,80 @@ export function ElementContainer({
 	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
 
 	return (
-		<div className="flex items-stretch mb-1.5 animate-fadeInUp" {...attributes}>
-			{/* Left: element card */}
-			<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
-				<div className="relative z-10 min-w-0">
-					<div
-						className="mb-2 flex items-start gap-1.5 select-none"
-						contentEditable={false}
-					>
-						<div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-							<span
-								className={`flex h-6 w-6 @sm:w-auto shrink-0 items-center justify-center @sm:justify-start gap-1.5 rounded-md @sm:px-2 ${config.iconBgClass} ${config.colorClass}`}
-							>
-								{config.icon}
-								<span className="hidden font-body text-label-xs @sm:inline">
-									{config.label}
+		<ElementGenerationProvider element={element}>
+			<div
+				className="flex items-stretch mb-1.5 animate-fadeInUp"
+				{...attributes}
+			>
+				{/* Left: element card */}
+				<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
+					<div className="relative z-10 min-w-0">
+						<div
+							className="mb-2 flex items-start gap-1.5 select-none"
+							contentEditable={false}
+						>
+							<div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+								<span
+									className={`flex h-6 w-6 @sm:w-auto shrink-0 items-center justify-center @sm:justify-start gap-1.5 rounded-md @sm:px-2 ${config.iconBgClass} ${config.colorClass}`}
+								>
+									{config.icon}
+									<span className="hidden font-body text-label-xs @sm:inline">
+										{config.label}
+									</span>
 								</span>
-							</span>
-							<ElementCharacters element={element} />
-							<ModelBadge element={element} />
-							<ElementSettings element={element} config={config} />
-						</div>
-						<div className="shrink-0 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
-							<DeleteButton element={element} />
-						</div>
-					</div>
-					<div className="relative min-w-0 rounded-xl border border-transparent bg-element-input px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30">
-						{isEmpty && (
-							<div
-								style={{ userSelect: "none" }}
-								className="pointer-events-none absolute top-2.5 left-3 text-left text-label text-muted-foreground"
-							>
-								{config.placeholder}
+								<ElementCharacters element={element} />
+								<ModelBadge element={element} />
+								<ElementSettings element={element} config={config} />
 							</div>
-						)}
-						<div className="overflow-hidden text-left text-label leading-relaxed text-foreground transition-[max-height,opacity] duration-200">
-							{children}
+							<div className="shrink-0 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
+								<DeleteButton element={element} />
+							</div>
 						</div>
-					</div>
-					<div
-						className="mt-2 flex items-center justify-end gap-2 select-none"
-						contentEditable={false}
-					>
-						<ElementStaleIndicator element={element} />
-						{element.type === "image" && (
-							<ElementUploadButton element={element} />
-						)}
-						<AnimateButton element={element} />
-						<ElementGenerateButton element={element} />
+						<div className="relative min-w-0 rounded-xl border border-transparent bg-element-input px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30">
+							{isEmpty && (
+								<div
+									style={{ userSelect: "none" }}
+									className="pointer-events-none absolute top-2.5 left-3 text-left text-label text-muted-foreground"
+								>
+									{config.placeholder}
+								</div>
+							)}
+							<div className="overflow-hidden text-left text-label leading-relaxed text-foreground transition-[max-height,opacity] duration-200">
+								{children}
+							</div>
+						</div>
+						<div
+							className="mt-2 flex items-center justify-end gap-2 select-none"
+							contentEditable={false}
+						>
+							<ElementStaleIndicator />
+							{element.type === "image" && (
+								<ElementUploadButton element={element} />
+							)}
+							<AnimateButton element={element} />
+							<ElementGenerateButton />
+						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* Center divider */}
-			<div
-				className="flex shrink-0 items-stretch px-3 select-none sm:px-4"
-				contentEditable={false}
-				aria-hidden="true"
-			>
-				<div className="w-px self-stretch bg-border" />
-			</div>
+				{/* Center divider */}
+				<div
+					className="flex shrink-0 items-stretch px-3 select-none sm:px-4"
+					contentEditable={false}
+					aria-hidden="true"
+				>
+					<div className="w-px self-stretch bg-border" />
+				</div>
 
-			{/* Right: preview */}
-			<div
-				className="flex-1 min-w-0 flex items-center select-none"
-				contentEditable={false}
-			>
-				<OutputPreview element={element} />
+				{/* Right: preview */}
+				<div
+					className="flex-1 min-w-0 flex items-center select-none"
+					contentEditable={false}
+				>
+					<OutputPreview element={element} />
+				</div>
 			</div>
-		</div>
+		</ElementGenerationProvider>
 	);
 }
 
