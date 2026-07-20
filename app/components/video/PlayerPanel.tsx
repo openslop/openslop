@@ -35,15 +35,13 @@ function FitToAspectRatio({
 }
 
 function TopPlayerPanelComponent() {
-	const maxSize =
-		typeof window !== "undefined" ? window.innerHeight * 0.6 : 500;
 	const aspectRatio = useAspectRatio();
 
 	const { size, handleMouseDown, resizing } = useResize({
 		axis: "vertical",
 		defaultSize: TOP_DEFAULT,
 		minSize: 150,
-		maxSize,
+		maxViewportFraction: 0.6,
 	});
 
 	return (
@@ -63,14 +61,13 @@ function TopPlayerPanelComponent() {
 }
 
 function SidePlayerPanelComponent() {
-	const maxSize = typeof window !== "undefined" ? window.innerWidth * 0.5 : 600;
 	const aspectRatio = useAspectRatio();
 
 	const { size, handleMouseDown, resizing } = useResize({
 		axis: "horizontal",
 		defaultSize: SIDE_DEFAULT,
 		minSize: 250,
-		maxSize,
+		maxViewportFraction: 0.5,
 	});
 
 	return (
