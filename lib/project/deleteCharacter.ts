@@ -2,7 +2,6 @@ import type { GenerationQueue } from "@/lib/generation/queue";
 import { characterAvatarElementId } from "./ensureCharacterAvatars";
 import { getProjectStore } from "./store";
 
-/** Remove a character and discard its pending avatar generation. */
 export function deleteCharacter(
 	projectId: string,
 	queue: GenerationQueue,

@@ -127,7 +127,10 @@ export function Waveform({
 
 		let cancelled = false;
 		fetch(src, { mode: "cors" })
-			.then((r) => r.arrayBuffer())
+			.then((r) => {
+				if (!r.ok) throw new Error(`Failed to fetch audio: ${r.status}`);
+				return r.arrayBuffer();
+			})
 			.then((buf) => getAudioCtx().decodeAudioData(buf))
 			.then((ab) => {
 				if (cancelled) return;

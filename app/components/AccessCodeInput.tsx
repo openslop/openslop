@@ -13,6 +13,12 @@ export default function AccessCodeInput() {
 	const [loading, setLoading] = useState(false);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+	const resetWithError = useCallback((message: string) => {
+		setError(message);
+		setValues(EMPTY_CODE());
+		inputRefs.current[0]?.focus();
+	}, []);
+
 	const submitCode = useCallback(
 		async (code: string) => {
 			setLoading(true);
@@ -27,19 +33,15 @@ export default function AccessCodeInput() {
 				if (res.ok && data.redirect) {
 					router.push(data.redirect);
 				} else {
-					setError(data.error || "Invalid access code");
-					setValues(EMPTY_CODE());
-					inputRefs.current[0]?.focus();
+					resetWithError(data.error || "Invalid access code");
 				}
 			} catch {
-				setError("Something went wrong. Please try again.");
-				setValues(EMPTY_CODE());
-				inputRefs.current[0]?.focus();
+				resetWithError("Something went wrong. Please try again.");
 			} finally {
 				setLoading(false);
 			}
 		},
-		[router],
+		[router, resetWithError],
 	);
 
 	const handleChange = (index: number, value: string) => {
@@ -82,10 +84,7 @@ export default function AccessCodeInput() {
 
 		if (!pasted) return;
 
-		const next = EMPTY_CODE();
-		for (let i = 0; i < pasted.length; i++) {
-			next[i] = pasted[i];
-		}
+		const next = EMPTY_CODE().map((_, i) => pasted[i] ?? "");
 		setValues(next);
 		setError("");
 
