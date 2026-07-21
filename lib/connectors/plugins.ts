@@ -1,5 +1,5 @@
 import type { GatewayClient } from "@/lib/gateway/base";
-import type { ConnectorPlugin, PluginContext, VoiceSearchFn } from "./types";
+import type { ConnectorPlugin, PluginContext } from "./types";
 
 /** Assert the plugin was given a gateway, returning the narrowed dependency. */
 export function requireGateway<P, R>(
@@ -9,16 +9,6 @@ export function requireGateway<P, R>(
 	if (!ctx?.gateway)
 		throw new Error(`${plugin} plugin requires gateway context`);
 	return ctx.gateway;
-}
-
-/** Assert the plugin was given a voice-search function, returning the narrowed dependency. */
-export function requireSearchVoices(
-	ctx: PluginContext | undefined,
-	plugin: string,
-): VoiceSearchFn {
-	if (!ctx?.searchVoices)
-		throw new Error(`${plugin} plugin requires searchVoices context`);
-	return ctx.searchVoices;
 }
 
 export async function runBeforeGenerate<T>(

@@ -6,10 +6,7 @@ import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 
-const ATTRIBUTE_UNITS: Record<string, string> = { duration: "s" };
-
-function formatValue(key: string, value: string): string {
-	const unit = ATTRIBUTE_UNITS[key];
+function formatValue(value: string, unit?: string): string {
 	return unit ? `${value}${unit}` : value;
 }
 
@@ -39,7 +36,7 @@ export function AttributeBadge({
 
 	const SpecIcon = spec.icon;
 	const labeled = hideLabel ? (
-		formatValue(attrKey, value)
+		formatValue(value, spec.unit)
 	) : (
 		<>
 			{SpecIcon ? (
@@ -50,7 +47,7 @@ export function AttributeBadge({
 			) : (
 				<span className="opacity-70 mr-1">{spec.label}</span>
 			)}
-			{formatValue(attrKey, value)}
+			{formatValue(value, spec.unit)}
 		</>
 	);
 	const tooltip = `${spec.label}: ${value || ""}`;
@@ -91,7 +88,7 @@ export function AttributeBadge({
 			onChange={handleSelect}
 			options={spec.edit.options.map((opt) => ({
 				value: opt,
-				label: formatValue(attrKey, opt),
+				label: formatValue(opt, spec.unit),
 			}))}
 			contentClassName="max-h-64 min-w-24"
 		>
