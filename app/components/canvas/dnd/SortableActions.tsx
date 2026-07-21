@@ -25,7 +25,7 @@ export function SortableActions<K extends string>({
 }: SortableActionsProps<K>) {
 	return (
 		<>
-			{options?.length && onInsert && (
+			{onInsert && options && options.length > 0 && (
 				<ActionMenu
 					items={options.map((option) => ({
 						key: option.key,

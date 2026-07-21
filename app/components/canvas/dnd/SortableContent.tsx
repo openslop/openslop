@@ -68,8 +68,8 @@ export function SortableContent({
 			sceneId={sceneId}
 			sortableType="content"
 			wrapperStyle={wrapperStyle}
-			insertOptions={collapsed ? undefined : INSERT_OPTIONS}
-			onInsert={collapsed ? undefined : handleInsert}
+			insertOptions={INSERT_OPTIONS}
+			onInsert={handleInsert}
 			disabled={collapsed}
 			attributes={attributes}
 			element={element}

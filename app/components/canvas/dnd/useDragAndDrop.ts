@@ -9,7 +9,9 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { Descendant, Editor, Element, Path, Transforms } from "slate";
+import { Descendant, Editor } from "slate";
+import { moveDraggedElement } from "@/lib/canvas/dragOps";
+import { findElementById } from "@/lib/canvas/editorOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import type { DragTransfer } from "./DragTransferContext";
 
@@ -44,10 +46,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 				return;
 			}
 
-			const [overEntry] = Editor.nodes(editor, {
-				at: [],
-				match: (n) => Element.isElement(n) && n.id === over.id,
-			});
+			const overEntry = findElementById(editor, String(over.id));
 			if (!overEntry) return;
 
 			const [overNode, overPath] = overEntry;
@@ -72,38 +71,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 
 			if (!over?.id || active.id === over.id) return;
 
-			const [activeEntry] = Editor.nodes(editor, {
-				at: [],
-				match: (n) => Element.isElement(n) && n.id === active.id,
-			});
-			const [overEntry] = Editor.nodes(editor, {
-				at: [],
-				match: (n) => Element.isElement(n) && n.id === over.id,
-			});
-			if (!activeEntry || !overEntry) return;
-
-			const [activeNode, activePath] = activeEntry;
-			const [overNode, overPath] = overEntry;
-
-			if (isSceneElement(activeNode)) {
-				const targetPath = isSceneElement(overNode)
-					? overPath
-					: Path.parent(overPath);
-				if (!Path.equals(activePath, targetPath)) {
-					Transforms.moveNodes(editor, { at: activePath, to: targetPath });
-				}
-				return;
-			}
-
-			if (isSceneElement(overNode)) {
-				Transforms.moveNodes(editor, {
-					at: activePath,
-					to: [...overPath, overNode.children.length],
-				});
-				return;
-			}
-
-			Transforms.moveNodes(editor, { at: activePath, to: overPath });
+			moveDraggedElement(editor, String(active.id), String(over.id));
 		},
 		[editor],
 	);

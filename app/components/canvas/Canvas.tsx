@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, KeyboardEvent } from "react";
-import { Descendant, Editor, Element } from "slate";
+import { Descendant, Editor } from "slate";
 import { Slate, Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
@@ -11,6 +11,7 @@ import {
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { findElementById } from "@/lib/canvas/editorOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
@@ -57,16 +58,13 @@ export default function Canvas({
 		);
 	}, []);
 
-	const activeElement = useMemo(() => {
-		if (!activeId) {
-			return null;
-		}
-		const [entry] = Editor.nodes(editor, {
-			at: [],
-			match: (n) => Element.isElement(n) && n.id === activeId,
-		});
-		return entry?.[0] as Descendant;
-	}, [editor, activeId]);
+	const activeElement = useMemo(
+		() =>
+			activeId
+				? (findElementById(editor, String(activeId))?.[0] ?? null)
+				: null,
+		[editor, activeId],
+	);
 
 	return (
 		<DragTransferContext value={dragTransfer}>
