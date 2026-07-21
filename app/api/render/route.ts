@@ -1,18 +1,13 @@
 import { renderMediaOnLambda } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
 import {
 	getFunctionName,
 	getSiteName,
 	REGION,
 } from "@/lib/video/lambda-config";
+import { RenderRequest, type RenderHandle } from "@/lib/video/render-api";
 import { COMPOSITION_ID } from "@/lib/video/types";
-
-const RenderRequest = z.object({
-	inputProps: z.record(z.string(), z.unknown()),
-	scale: z.number().positive().optional(),
-});
 
 export const POST = createSessionRouteHandler({
 	schema: RenderRequest,
@@ -29,6 +24,6 @@ export const POST = createSessionRouteHandler({
 			downloadBehavior: { type: "download", fileName: "video.mp4" },
 		});
 
-		return NextResponse.json({ renderId, bucketName });
+		return NextResponse.json<RenderHandle>({ renderId, bucketName });
 	},
 });

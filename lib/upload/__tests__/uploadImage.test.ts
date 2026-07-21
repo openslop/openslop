@@ -24,15 +24,24 @@ describe("uploadImage", () => {
 		await expect(uploadImage(file)).resolves.toBe("https://blob/x.png");
 	});
 
-	it("throws status and body when response is not ok", async () => {
+	it("throws the route's error message when the response is not ok", async () => {
 		fetchMock.mockResolvedValue({
 			ok: false,
 			status: 400,
-			text: async () => "File must be under 10 MB",
+			statusText: "Bad Request",
+			json: async () => ({ error: "File must be under 10 MB" }),
 		});
-		await expect(uploadImage(file)).rejects.toThrow(
-			"400 File must be under 10 MB",
-		);
+		await expect(uploadImage(file)).rejects.toThrow("File must be under 10 MB");
+	});
+
+	it("falls back to the status line when the body has no error", async () => {
+		fetchMock.mockResolvedValue({
+			ok: false,
+			status: 502,
+			statusText: "Bad Gateway",
+			json: async () => ({}),
+		});
+		await expect(uploadImage(file)).rejects.toThrow("502 Bad Gateway");
 	});
 
 	it("propagates network failures", async () => {
