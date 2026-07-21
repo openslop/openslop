@@ -15,6 +15,8 @@ const SUPPORTED_IMAGE_MEDIA_TYPES = [
 
 type SupportedImageMediaType = (typeof SUPPORTED_IMAGE_MEDIA_TYPES)[number];
 
+const NON_STREAMING_TIMEOUT_MS = 10 * 60 * 1000;
+
 function isSupportedMediaType(value: string): value is SupportedImageMediaType {
 	return (SUPPORTED_IMAGE_MEDIA_TYPES as readonly string[]).includes(value);
 }
@@ -54,7 +56,10 @@ export class AnthropicLLM extends BaseProvider<
 
 	constructor(apiKey: string) {
 		super();
-		this.client = new Anthropic({ apiKey });
+		// Without an explicit timeout the SDK derives one from `max_tokens` for
+		// non-streaming calls and throws outright above ~21k tokens, which our
+		// default exceeds. Opt in to its 10-minute ceiling instead.
+		this.client = new Anthropic({ apiKey, timeout: NON_STREAMING_TIMEOUT_MS });
 	}
 
 	protected toFiles() {

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, Transforms, Element, Editor } from "slate";
 import { withReact } from "slate-react";
+import { HistoryEditor, withHistory } from "slate-history";
 import { withNodeId } from "../plugins/withNodeId";
+import type { CanvasEditor } from "@/lib/canvas/types";
 
 function makeEditor() {
 	const editor = withNodeId(withReact(createEditor()));
@@ -59,6 +61,34 @@ describe("withNodeId", () => {
 			expect(first.id).toBeDefined();
 			expect(second.id).toBeDefined();
 			expect(first.id).not.toBe(second.id);
+		});
+	});
+
+	describe("undo of a merge", () => {
+		it("restores the merged-away element's original ID", () => {
+			const editor = withNodeId(
+				withReact(withHistory(createEditor())),
+			) as CanvasEditor & HistoryEditor;
+			editor.children = [
+				{
+					id: "a",
+					type: "narration",
+					children: [{ id: "at", type: "narration", text: "first" }],
+				},
+				{
+					id: "b",
+					type: "image",
+					customAttributes: { url: "https://cdn/b.png" },
+					children: [{ id: "bt", type: "image", text: "second" }],
+				},
+			] as unknown as Element[];
+
+			// Backspace at the start of "b" merges it into "a".
+			Transforms.select(editor, { path: [1, 0], offset: 0 });
+			editor.deleteBackward("character");
+			HistoryEditor.undo(editor);
+
+			expect(editor.children.map((n) => (n as Element).id)).toEqual(["a", "b"]);
 		});
 	});
 

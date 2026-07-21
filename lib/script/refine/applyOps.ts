@@ -31,6 +31,13 @@ export function applyRefineOp(
 	});
 }
 
+// Consecutive inserts stack in stream order, so each one lands just after the
+// one before it. The cursor is per side of the anchor: an "after" insert must
+// not shift where a later "before" insert on the same anchor goes, or the
+// element ends up on the wrong side of it.
+const stackKey = (op: Extract<RefineOp, { op: "insert" }>) =>
+	`${op.position ?? "after"}:${op.anchor_id}`;
+
 function resolveInsertPath(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
@@ -40,9 +47,11 @@ function resolveInsertPath(
 		return op.position === "before" ? [0, 0] : [editor.children.length];
 	}
 
-	const resolvedId = anchorMap[op.anchor_id] ?? op.anchor_id;
-	const entry =
-		findNodeById(editor, resolvedId) ?? findNodeById(editor, op.anchor_id);
+	const stackedId = anchorMap[stackKey(op)];
+	const stacked = stackedId ? findNodeById(editor, stackedId) : null;
+	if (stacked) return Path.next(stacked[1]);
+
+	const entry = findNodeById(editor, op.anchor_id);
 	if (!entry) return [editor.children.length];
 
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
@@ -61,7 +70,7 @@ function applyInsert(
 	});
 
 	if (op.anchor_id) {
-		anchorMap[op.anchor_id] = id;
+		anchorMap[stackKey(op)] = id;
 	}
 }
 

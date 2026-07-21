@@ -2,10 +2,14 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const mockCreate = vi.fn();
 const mockStream = vi.fn();
+const mockConstruct = vi.fn();
 
 vi.mock("@anthropic-ai/sdk", () => ({
 	default: class {
 		messages = { create: mockCreate, stream: mockStream };
+		constructor(options: unknown) {
+			mockConstruct(options);
+		}
 	},
 }));
 
@@ -150,6 +154,45 @@ describe("AnthropicLLM", () => {
 				}),
 			).rejects.toThrow(/media type "image\/svg\+xml" is not supported/);
 			expect(mockCreate).not.toHaveBeenCalled();
+		});
+
+		// The SDK refuses non-streaming calls whose max_tokens implies a >10min
+		// completion unless the client sets an explicit timeout, and it throws
+		// locally before any request. Replay our real client options and request
+		// body through the real SDK so raising max_tokens (or dropping the
+		// timeout) fails here rather than 500ing every non-streaming call.
+		it("builds a non-streaming request the real SDK will actually send", async () => {
+			mockCreate.mockResolvedValue({
+				content: [{ type: "text", text: "ok" }],
+				model: "claude-opus-4-8",
+				usage: { input_tokens: 1, output_tokens: 1 },
+			});
+			await new AnthropicLLM("test-key").generate({ prompt: "hi" });
+
+			const { default: RealAnthropic } =
+				await vi.importActual<typeof import("@anthropic-ai/sdk")>(
+					"@anthropic-ai/sdk",
+				);
+			const fetch = vi.fn(
+				async () =>
+					new Response(
+						JSON.stringify({
+							content: [{ type: "text", text: "ok" }],
+							model: "claude-opus-4-8",
+							usage: { input_tokens: 1, output_tokens: 1 },
+						}),
+						{ headers: { "content-type": "application/json" } },
+					),
+			);
+			const client = new RealAnthropic({
+				...mockConstruct.mock.calls[0][0],
+				fetch,
+			});
+
+			await expect(
+				client.messages.create(mockCreate.mock.calls[0][0]),
+			).resolves.toBeDefined();
+			expect(fetch).toHaveBeenCalled();
 		});
 
 		it("concatenates multiple text blocks", async () => {

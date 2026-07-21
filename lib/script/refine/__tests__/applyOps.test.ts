@@ -217,6 +217,59 @@ describe("applyRefineOp — insert", () => {
 		expect(texts).toEqual(["first", "A", "B", "C"]);
 	});
 
+	it("stacks consecutive before-inserts at the same anchor in order", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const anchorMap: Record<string, string> = {};
+
+		for (const text of ["A", "B", "C"]) {
+			applyRefineOp(
+				editor,
+				{
+					op: "insert",
+					anchor_id: "n1",
+					position: "before",
+					type: "sound",
+					text,
+				},
+				anchorMap,
+				connectors,
+			);
+		}
+
+		const texts = getContentTexts(editor);
+		expect(texts).toEqual(["A", "B", "C", "first"]);
+	});
+
+	it("keeps each side of an anchor independent when mixing before and after", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const anchorMap: Record<string, string> = {};
+
+		const ops = [
+			{ position: "before", text: "before-1" },
+			{ position: "after", text: "after-1" },
+			{ position: "before", text: "before-2" },
+			{ position: "after", text: "after-2" },
+		] as const;
+
+		for (const { position, text } of ops) {
+			applyRefineOp(
+				editor,
+				{ op: "insert", anchor_id: "n1", position, type: "sound", text },
+				anchorMap,
+				connectors,
+			);
+		}
+
+		const texts = getContentTexts(editor);
+		expect(texts).toEqual([
+			"before-1",
+			"before-2",
+			"first",
+			"after-1",
+			"after-2",
+		]);
+	});
+
 	it("falls back to append when anchor_id not found", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 		const anchorMap: Record<string, string> = {};
@@ -552,8 +605,8 @@ describe("applyRefineOp — mixed operations", () => {
 			anchorMap,
 			connectors,
 		);
-		// Remove the inserted node — anchorMap["n1"] is now stale
-		const insertedId = anchorMap["n1"];
+		// Remove the inserted node — the "after n1" cursor is now stale
+		const insertedId = anchorMap["after:n1"];
 		applyRefineOp(
 			editor,
 			{ op: "remove", id: insertedId },
@@ -582,7 +635,7 @@ describe("applyRefineOp — mixed operations", () => {
 			anchorMap,
 			connectors,
 		);
-		const staleId = anchorMap["n1"];
+		const staleId = anchorMap["after:n1"];
 		applyRefineOp(editor, { op: "remove", id: staleId }, anchorMap, connectors);
 		// After fallback, the stale mapping should be cleared
 		applyRefineOp(
