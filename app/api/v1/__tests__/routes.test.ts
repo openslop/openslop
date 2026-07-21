@@ -47,6 +47,51 @@ function makeRequest(
 	});
 }
 
+type RoutePost = (req: NextRequest) => Promise<Response>;
+
+// Every asset route that accepts `referenceImages` shares the same field
+// contract (see optionalReferenceImages), so its validation coverage is
+// identical. Register the suite once per route instead of duplicating it.
+function referenceImagesSuite(
+	routePath: string,
+	loadPost: () => Promise<{ POST: RoutePost }>,
+) {
+	const post = (body: Record<string, unknown>) =>
+		loadPost().then(({ POST }) =>
+			POST(makeRequest(routePath, { prompt: "a", ...body })),
+		);
+
+	it("accepts requests without referenceImages", async () => {
+		expect((await post({})).status).toBe(200);
+	});
+
+	it("returns 400 for non-array referenceImages", async () => {
+		const res = await post({ referenceImages: "not-an-array" });
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toContain("expected array");
+	});
+
+	it("returns 400 for invalid referenceImages entry", async () => {
+		const res = await post({ referenceImages: ["not-a-data-uri"] });
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toContain("data URI or an HTTP");
+	});
+
+	it("accepts valid referenceImages data URIs", async () => {
+		const res = await post({
+			referenceImages: ["data:image/png;base64,iVBORw0KGgo"],
+		});
+		expect(res.status).toBe(200);
+	});
+
+	it("accepts valid referenceImages URLs", async () => {
+		const res = await post({
+			referenceImages: ["https://example.com/image.png"],
+		});
+		expect(res.status).toBe(200);
+	});
+}
+
 describe("API routes", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -129,57 +174,10 @@ describe("API routes", () => {
 			expect(res.status).toBe(500);
 		});
 
-		it("accepts requests without referenceImages", async () => {
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
-			expect(res.status).toBe(200);
-		});
-
-		it("returns 400 for non-array referenceImages", async () => {
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(
-				makeRequest("/api/v1/image", {
-					prompt: "cat",
-					referenceImages: "not-an-array",
-				}),
-			);
-			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("expected array");
-		});
-
-		it("returns 400 for invalid referenceImages entry", async () => {
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(
-				makeRequest("/api/v1/image", {
-					prompt: "cat",
-					referenceImages: ["not-a-data-uri"],
-				}),
-			);
-			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("data URI or an HTTP");
-		});
-
-		it("accepts valid referenceImages data URIs", async () => {
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(
-				makeRequest("/api/v1/image", {
-					prompt: "cat",
-					referenceImages: ["data:image/png;base64,iVBORw0KGgo"],
-				}),
-			);
-			expect(res.status).toBe(200);
-		});
-
-		it("accepts valid referenceImages URLs", async () => {
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(
-				makeRequest("/api/v1/image", {
-					prompt: "cat",
-					referenceImages: ["https://example.com/image.png"],
-				}),
-			);
-			expect(res.status).toBe(200);
-		});
+		referenceImagesSuite(
+			"/api/v1/image",
+			() => import("@/app/api/v1/image/route"),
+		);
 
 		it("returns 400 for blank dimension strings", async () => {
 			const { POST } = await import("@/app/api/v1/image/route");
@@ -204,59 +202,10 @@ describe("API routes", () => {
 			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "video");
 		});
 
-		it("accepts requests without referenceImages", async () => {
-			const { POST } = await import("@/app/api/v1/video/route");
-			const res = await POST(
-				makeRequest("/api/v1/video", { prompt: "sunset" }),
-			);
-			expect(res.status).toBe(200);
-		});
-
-		it("returns 400 for non-array referenceImages", async () => {
-			const { POST } = await import("@/app/api/v1/video/route");
-			const res = await POST(
-				makeRequest("/api/v1/video", {
-					prompt: "test",
-					referenceImages: "not-an-array",
-				}),
-			);
-			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("expected array");
-		});
-
-		it("returns 400 for invalid referenceImages entry", async () => {
-			const { POST } = await import("@/app/api/v1/video/route");
-			const res = await POST(
-				makeRequest("/api/v1/video", {
-					prompt: "test",
-					referenceImages: ["not-a-data-uri"],
-				}),
-			);
-			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("data URI or an HTTP");
-		});
-
-		it("accepts valid referenceImages data URIs", async () => {
-			const { POST } = await import("@/app/api/v1/video/route");
-			const res = await POST(
-				makeRequest("/api/v1/video", {
-					prompt: "animate",
-					referenceImages: ["data:image/png;base64,iVBORw0KGgo"],
-				}),
-			);
-			expect(res.status).toBe(200);
-		});
-
-		it("accepts valid referenceImages URLs", async () => {
-			const { POST } = await import("@/app/api/v1/video/route");
-			const res = await POST(
-				makeRequest("/api/v1/video", {
-					prompt: "animate",
-					referenceImages: ["https://example.com/image.png"],
-				}),
-			);
-			expect(res.status).toBe(200);
-		});
+		referenceImagesSuite(
+			"/api/v1/video",
+			() => import("@/app/api/v1/video/route"),
+		);
 
 		it("returns 400 for missing prompt", async () => {
 			const { POST } = await import("@/app/api/v1/video/route");
