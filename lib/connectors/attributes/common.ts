@@ -35,6 +35,7 @@ export const motionDef = (defaultValue: string): AttributeDef => ({
 export const durationDef = (defaultValue: string): AttributeDef => ({
 	key: "duration",
 	label: "Duration",
+	unit: "s",
 	edit: { kind: "enum", options: DURATION_OPTIONS },
 	default: defaultValue,
 });

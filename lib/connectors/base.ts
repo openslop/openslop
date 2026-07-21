@@ -34,12 +34,6 @@ export abstract class BaseConnector<
 		this.plugins = config.plugins ?? [];
 	}
 
-	async init(): Promise<void> {}
-	async validate(): Promise<boolean> {
-		return true;
-	}
-	async destroy(): Promise<void> {}
-
 	protected pluginContext(): PluginContext<TParams, TResult> {
 		return {};
 	}

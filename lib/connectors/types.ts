@@ -51,7 +51,6 @@ export interface ConnectorConfig {
 	apiKey?: string;
 	baseUrl?: string;
 	plugins?: ConnectorPlugin[];
-	options?: Record<string, unknown>;
 }
 
 export type ConnectorGenerateParams = {
@@ -70,9 +69,6 @@ export type AssetResult = {
 export interface Connector {
 	readonly type: ConnectorType;
 	generate(params: ConnectorGenerateParams): Promise<unknown>;
-	init(): Promise<void>;
-	validate(): Promise<boolean>;
-	destroy(): Promise<void>;
 }
 
 // LLM types

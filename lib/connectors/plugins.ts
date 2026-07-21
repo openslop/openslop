@@ -1,4 +1,15 @@
+import type { GatewayClient } from "@/lib/gateway/base";
 import type { ConnectorPlugin, PluginContext } from "./types";
+
+/** Assert the plugin was given a gateway, returning the narrowed dependency. */
+export function requireGateway<P, R>(
+	ctx: PluginContext<P, R> | undefined,
+	plugin: string,
+): GatewayClient<P, R> {
+	if (!ctx?.gateway)
+		throw new Error(`${plugin} plugin requires gateway context`);
+	return ctx.gateway;
+}
 
 export async function runBeforeGenerate<T>(
 	plugins: ConnectorPlugin[],
