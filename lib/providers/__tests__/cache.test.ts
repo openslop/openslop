@@ -138,7 +138,6 @@ describe("pineconeCache", () => {
 		const { pineconeCache } = await loadCache();
 		mockQuery.mockRejectedValue(new Error("pinecone down"));
 		mockUpsert.mockResolvedValue(undefined);
-		const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 		const inner = vi.fn().mockResolvedValue("fresh");
 		const wrapped = pineconeCache<[string], string>(inner, {
@@ -151,13 +150,8 @@ describe("pineconeCache", () => {
 		const result = await wrapped("q");
 		expect(result).toBe("fresh");
 		expect(inner).toHaveBeenCalledWith("q");
-		expect(errSpy).toHaveBeenCalledWith(
-			"[pinecone-cache] read failed; falling through",
-			expect.any(Error),
-		);
 		// vector embedded successfully, so write is still attempted
 		expect(mockUpsert).toHaveBeenCalled();
-		errSpy.mockRestore();
 	});
 
 	it("swallows index-not-found errors and falls through", async () => {
@@ -168,7 +162,6 @@ describe("pineconeCache", () => {
 			}),
 		);
 		mockUpsert.mockRejectedValue(new Error("index missing"));
-		const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 		const inner = vi.fn().mockResolvedValue("fresh");
 		const wrapped = pineconeCache<[string], string>(inner, {
@@ -181,13 +174,11 @@ describe("pineconeCache", () => {
 		const result = await wrapped("q");
 		expect(result).toBe("fresh");
 		expect(inner).toHaveBeenCalled();
-		errSpy.mockRestore();
 	});
 
 	it("swallows embed errors and skips write entirely", async () => {
 		const { pineconeCache } = await loadCache();
 		mockEmbed.mockRejectedValue(new Error("openai down"));
-		const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 		const inner = vi.fn().mockResolvedValue("fresh");
 		const wrapped = pineconeCache<[string], string>(inner, {
@@ -202,14 +193,12 @@ describe("pineconeCache", () => {
 		expect(inner).toHaveBeenCalled();
 		expect(mockQuery).not.toHaveBeenCalled();
 		expect(mockUpsert).not.toHaveBeenCalled();
-		errSpy.mockRestore();
 	});
 
 	it("logs but does not throw on write failure", async () => {
 		const { pineconeCache } = await loadCache();
 		mockQuery.mockResolvedValue({ matches: [] });
 		mockUpsert.mockRejectedValue(new Error("upsert failed"));
-		const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 		const inner = vi.fn().mockResolvedValue("fresh");
 		const wrapped = pineconeCache<[string], string>(inner, {
@@ -221,11 +210,7 @@ describe("pineconeCache", () => {
 
 		const result = await wrapped("q");
 		expect(result).toBe("fresh");
-		expect(errSpy).toHaveBeenCalledWith(
-			"[pinecone-cache] write failed",
-			expect.any(Error),
-		);
-		errSpy.mockRestore();
+		expect(mockUpsert).toHaveBeenCalled();
 	});
 
 	it("default threshold is 0.8", async () => {

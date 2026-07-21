@@ -71,7 +71,6 @@ export default function AuthForm({
 	if (sent) {
 		return (
 			<EmailSentCard
-				email={email}
 				subtitle={`We sent a ${sentKind} link to ${email}`}
 				resendLabel={`Send another ${sentKind} link`}
 				loading={loading}

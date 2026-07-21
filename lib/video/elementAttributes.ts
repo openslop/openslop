@@ -18,6 +18,11 @@ const VOLUME_MIN = 0;
 const VOLUME_MAX = 10;
 const DEFAULT_VOLUME = VOLUME_MAX;
 
+/** Converts the 0–10 authoring scale to the 0–1 gain players expect. */
+export function volumeToGain(volume: number): number {
+	return volume / VOLUME_MAX;
+}
+
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
 	const raw = Number(element.customAttributes?.volume);

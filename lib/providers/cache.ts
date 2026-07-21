@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
+import { logger } from "@/lib/api/logger";
 import { embedText } from "./embed";
 
 type Metadata = Record<string, string | number | boolean>;
@@ -64,7 +65,7 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 				if (cached !== undefined) return cached;
 			}
 		} catch (err) {
-			console.error("[pinecone-cache] read failed; falling through", err);
+			logger.error(err, "[pinecone-cache] read failed; falling through");
 		}
 
 		const result = await method.call(this, ...args);
@@ -80,7 +81,7 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 					],
 				});
 			} catch (err) {
-				console.error("[pinecone-cache] write failed", err);
+				logger.error(err, "[pinecone-cache] write failed");
 			}
 		}
 		return result;

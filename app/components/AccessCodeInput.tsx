@@ -35,7 +35,8 @@ export default function AccessCodeInput() {
 				} else {
 					resetWithError(data.error || "Invalid access code");
 				}
-			} catch {
+			} catch (err) {
+				console.error("Access code validation failed", err);
 				resetWithError("Something went wrong. Please try again.");
 			} finally {
 				setLoading(false);
