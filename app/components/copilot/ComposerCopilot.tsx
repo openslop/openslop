@@ -22,7 +22,7 @@ import {
 	type Template,
 } from "@/lib/templates/templates";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
@@ -172,20 +172,15 @@ export default function ComposerCopilot({
 	placeholder,
 	placeholderOverlay,
 }: ComposerCopilotProps) {
-	const { projectId, mode, setMode, selectedTemplateId, selectTemplate } =
-		useConfig();
+	const { mode, setMode, selectedTemplateId, selectTemplate } = useConfig();
 	const aspectRatio = useAspectRatio();
+	const updateMetadata = useProject((s) => s.updateMetadata);
+	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
 		useAssetEditDialogs();
 
 	const { openPicker, uploading, uploadingCount, inputElement } =
-		useImageUpload({
-			multiple: true,
-			onUpload: (urls) => {
-				const store = getProjectStore(projectId).getState();
-				store.setReferenceImages([...store.referenceImages, ...urls]);
-			},
-		});
+		useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const isTemplateMode = mode === "template";
 	const hasText = value.trim().length > 0;
 	const selectedTemplate = getTemplate(selectedTemplateId);
@@ -256,11 +251,9 @@ export default function ComposerCopilot({
 						</SelectMenu>
 						<SelectMenu
 							value={aspectRatio}
-							onChange={(next: AspectRatio) => {
-								getProjectStore(projectId)
-									.getState()
-									.updateMetadata({ videoSettings: { aspectRatio: next } });
-							}}
+							onChange={(next: AspectRatio) =>
+								updateMetadata({ videoSettings: { aspectRatio: next } })
+							}
 							options={ASPECT_RATIO_OPTIONS}
 							itemClassName="rounded-lg text-label-xs"
 						>

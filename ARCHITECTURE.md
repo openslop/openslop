@@ -39,7 +39,7 @@ Every route that takes a JSON body or search params is built from a factory in `
 ## Editor state
 
 - `lib/generation/queue.ts` schedules generation jobs from the editor, caches results per element, and exposes status to the UI. UI dispatches jobs; it never calls connectors directly.
-- `lib/project/store.ts` holds per-project metadata in Zustand.
+- `lib/project/store.ts` holds per-project metadata in Zustand. Every mutation rule lives in a store action; components reach the store through `useProject(selector)` rather than `getProjectStore(projectId)`, which is reserved for non-React callers (connector plugins, queue workers).
 - `lib/script/` provides script context and refinement utilities.
 
 ## Data

@@ -1,8 +1,7 @@
 "use client";
 
 import { SelectField } from "@/components/ui/select-field";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
 import { useTransitionType } from "@/lib/video/useTransitionType";
 import { PanelCard, PanelField } from "./PanelCard";
@@ -23,13 +22,11 @@ const OPTIONS = TRANSITION_TYPES.map((value) => ({
 }));
 
 export function PropertiesPanel() {
-	const { projectId } = useConfig();
 	const transitionType = useTransitionType();
+	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	const setTransitionType = (value: TransitionType) =>
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({ videoSettings: { transitionType: value } });
+		updateMetadata({ videoSettings: { transitionType: value } });
 
 	return (
 		<PanelCard title="Transition">

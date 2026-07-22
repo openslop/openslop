@@ -14,7 +14,7 @@ import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
 import { createConnector } from "@/lib/connectors/factory";
-import { getProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
 
 type ScriptControl = {
@@ -52,7 +52,8 @@ export function ScriptProvider({
 	initialScript?: string;
 	children: ReactNode;
 }) {
-	const { connectorConfig, projectId, mode } = useConfig();
+	const { connectorConfig, mode } = useConfig();
+	const updateMetadata = useProject((s) => s.updateMetadata);
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const [loading, setLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
@@ -77,9 +78,7 @@ export function ScriptProvider({
 
 			setHasContent(false);
 			setLoading(true);
-			getProjectStore(projectId)
-				.getState()
-				.updateMetadata({ lastMode: mode, lastPrompt: prompt });
+			updateMetadata({ lastMode: mode, lastPrompt: prompt });
 			try {
 				const connector = createConnector("llm", llmProvider, llmConfig);
 				for await (const chunk of connector.stream({ prompt })) {
@@ -95,7 +94,7 @@ export function ScriptProvider({
 				}
 			}
 		},
-		[llmProvider, llmConfig, appendChunk, projectId, mode],
+		[llmProvider, llmConfig, appendChunk, updateMetadata, mode],
 	);
 
 	const control = useMemo<ScriptControl>(

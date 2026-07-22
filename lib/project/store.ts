@@ -15,9 +15,11 @@ export type ProjectContext = {
 	referenceImages: string[];
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setCharacter: (name: string, character: MetadataCharacter) => void;
+	updateCharacter: (name: string, partial: Partial<MetadataCharacter>) => void;
 	removeCharacter: (name: string) => void;
 	setNarration: (narration: MetadataVoice) => void;
 	setReferenceImages: (urls: string[]) => void;
+	addReferenceImages: (urls: string[]) => void;
 	removeReferenceImage: (index: number) => void;
 	markHydrated: () => void;
 	reset: () => void;
@@ -47,6 +49,13 @@ export function getProjectStore(projectId: string): ProjectStore {
 					set((state) => {
 						state.metadata.characters[name] = character;
 					}),
+				updateCharacter: (name, partial) =>
+					set((state) => {
+						const character = state.metadata.characters[name];
+						if (!character)
+							throw new Error(`Cannot update unknown character "${name}"`);
+						Object.assign(character, partial);
+					}),
 				removeCharacter: (name) =>
 					set((state) => {
 						delete state.metadata.characters[name];
@@ -58,6 +67,10 @@ export function getProjectStore(projectId: string): ProjectStore {
 				setReferenceImages: (urls) =>
 					set((state) => {
 						state.referenceImages = urls;
+					}),
+				addReferenceImages: (urls) =>
+					set((state) => {
+						state.referenceImages.push(...urls);
 					}),
 				removeReferenceImage: (index) =>
 					set((state) => {
