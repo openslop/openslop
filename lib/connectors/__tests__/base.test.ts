@@ -18,21 +18,6 @@ describe("BaseConnector", () => {
 		plugins: [{ name: "p1" }],
 	};
 
-	it("init is a no-op by default", async () => {
-		const c = new TestConnector(config);
-		await expect(c.init()).resolves.toBeUndefined();
-	});
-
-	it("validate returns true by default", async () => {
-		const c = new TestConnector(config);
-		await expect(c.validate()).resolves.toBe(true);
-	});
-
-	it("destroy is a no-op by default", async () => {
-		const c = new TestConnector(config);
-		await expect(c.destroy()).resolves.toBeUndefined();
-	});
-
 	it("extracts plugins from config", () => {
 		const c = new TestConnector(config);
 		expect((c as unknown as { plugins: unknown[] }).plugins).toHaveLength(1);

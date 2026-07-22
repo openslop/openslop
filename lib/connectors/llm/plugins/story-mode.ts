@@ -5,6 +5,7 @@ import type {
 	LLMPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
+import { requireGateway } from "@/lib/connectors/plugins";
 import { prependSystemPrompt } from "./system-prompt";
 
 const STORY_MODE_SYSTEM_PROMPT = dedent`You are a highly engaging storyteller who expertly narrates video stories.
@@ -22,9 +23,8 @@ export const storyModePlugin: LLMPlugin = {
 		prompt: string,
 		ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
 	) {
-		if (!ctx?.gateway)
-			throw new Error("story mode plugin requires gateway context");
-		const { text: outline } = await ctx.gateway.generate({
+		const gateway = requireGateway(ctx, "story-mode");
+		const { text: outline } = await gateway.generate({
 			prompt: dedent`Briefly outline an engaging story with a high-concept premise, characters, themes, conflict, twists, and a resolution. The story should be about the following: ${prompt}. Do not write anything else, just the outline.`,
 			maxTokens: 8192,
 		});

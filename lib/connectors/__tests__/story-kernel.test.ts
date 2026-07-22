@@ -40,7 +40,7 @@ describe("storyModePlugin", () => {
 
 	it("throws when no context is provided", async () => {
 		await expect(transformPrompt("test")).rejects.toThrow(
-			"story mode plugin requires gateway context",
+			"story-mode plugin requires gateway context",
 		);
 	});
 

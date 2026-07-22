@@ -4,6 +4,7 @@ import type { PlayerRef } from "@remotion/player";
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
+import { startPlaybackAt } from "./startPlaybackAt";
 
 type PlayerControl = {
 	player: PlayerRef | null;
@@ -29,8 +30,7 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	const playFromFrame = useCallback(
 		(frame: number) => {
 			showPlayer();
-			playerRef.current?.seekTo(frame);
-			playerRef.current?.play();
+			startPlaybackAt(playerRef.current, frame);
 		},
 		[showPlayer],
 	);

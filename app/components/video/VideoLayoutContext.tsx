@@ -10,7 +10,7 @@ import { useAssetPrefetch } from "./useAssetPrefetch";
 import { useVideoLayout } from "./useVideoLayout";
 
 type VideoLayoutValue = {
-	layout: VideoLayout | null;
+	layout: VideoLayout;
 	ready: boolean;
 	playerKey: string;
 	scenes: SceneElement[];

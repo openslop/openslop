@@ -1,36 +1,16 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
-import { BaseProvider } from "./base";
-import { pickRandom } from "./mock-utils";
+import { mockDelay, pickRandom } from "./mock-utils";
 
 type MockVariant = Omit<BundleResponse, "provider" | "type">;
 
-export abstract class MockProvider<TParams> extends BaseProvider<
-	TParams,
-	BundleResponse,
-	BundleResponse
-> {
+// Mocks serve canned bundles and never upload anything, so they deliberately do
+// not extend BaseProvider — there is no toFiles/store half to inherit.
+export abstract class MockProvider<TParams> {
 	protected abstract readonly variants: MockVariant[];
 	protected readonly delayMs: number = 0;
-	protected readonly blobConfig = { type: "mock", provider: "mock" };
 
-	protected toFiles() {
-		return [];
-	}
-
-	protected async store(result: BundleResponse) {
-		return result;
-	}
-
-	protected async _generate(): Promise<BundleResponse> {
-		if (this.delayMs > 0) {
-			await new Promise((r) =>
-				setTimeout(r, this.delayMs + Math.random() * this.delayMs),
-			);
-		}
-		return {
-			...pickRandom(this.variants),
-			type: this.blobConfig.type,
-			provider: this.blobConfig.provider,
-		};
+	async generate(_params: TParams): Promise<BundleResponse> {
+		await mockDelay(this.delayMs);
+		return { ...pickRandom(this.variants), type: "mock", provider: "mock" };
 	}
 }

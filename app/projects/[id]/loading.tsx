@@ -1,9 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/**
- * Editor placeholder that mirrors the real canvas
- */
-
 const SCENES = [3, 2, 4];
 
 function RailItemSkeleton() {

@@ -34,7 +34,7 @@ The generation pipeline is split so providers and asset types can be swapped ind
 
 ## API routes
 
-Every `app/api/v1/<type>/route.ts` is built from a shared `createApiRouteHandler` factory that handles auth, parsing, model validation, and error mapping. Internal app routes use the session-tier variants from the same module (see Auth). Reusable Zod field schemas live in `lib/api/request-schema-fields.ts`. If a provider's API key isn't set, the route falls back to a mock provider.
+Every route that takes a JSON body or search params is built from a factory in `lib/api/route-handler.ts` that handles auth, parsing, model validation, and error mapping. The factories vary along two axes, auth tier and parse source: `createApiRouteHandler` (api-access, JSON body), `createSessionRouteHandler` (session, JSON body), `createApiQueryRouteHandler` (api-access, search params), and `createPublicRouteHandler` (no auth, JSON body). Three routes fall outside that shape: `api/upload/image` parses multipart form data under `withSession`, `api/queues/asset-generate` is a `@vercel/queue` callback, and `auth/callback` is an OAuth redirect. Reusable Zod field schemas live in `lib/api/request-schema-fields.ts`. If a provider's API key isn't set, the route falls back to a mock provider.
 
 ## Editor state
 

@@ -8,16 +8,9 @@ import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
 import { findSegmentIndexAt, type SceneSegment } from "./useSceneSegments";
 import { ScrubBar, type ScrubHover } from "./ScrubBar";
+import { silenceMediaIn } from "./silenceMedia";
 
 const HOVER_SETTLE_MS = 80;
-
-/** Pause any in-frame media so a scrub doesn't leak audio while paused. */
-function silenceMediaIn(node: HTMLElement | null) {
-	if (!node) return;
-	for (const el of node.querySelectorAll("audio, video")) {
-		if (el instanceof HTMLMediaElement && !el.paused) el.pause();
-	}
-}
 
 export function SegmentedSeekBar({
 	player,

@@ -3,7 +3,6 @@ import type {
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { matchAnimateImagePrompt } from "@/lib/script/refine/animatePrompt";
-import { BaseProvider } from "../base";
 import { pickRandom } from "../mock-utils";
 
 const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
@@ -210,24 +209,8 @@ function delay(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export class MockLLM extends BaseProvider<
-	LLMGenerateParams,
-	LLMGenerateResult,
-	LLMGenerateResult
-> {
-	protected readonly blobConfig = { type: "llm", provider: "mock" };
-
-	protected toFiles() {
-		return [];
-	}
-
-	protected async store(result: LLMGenerateResult) {
-		return result;
-	}
-
-	protected async _generate(
-		params: LLMGenerateParams,
-	): Promise<LLMGenerateResult> {
+export class MockLLM {
+	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
 		return {
 			text: mockResponse(params),
 			model: "mock",

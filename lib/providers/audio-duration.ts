@@ -1,7 +1,5 @@
-export type AudioCodec = "mp3" | "pcm";
-
+// Constant-bitrate audio only: audioDurationSec assumes a fixed bitrate.
 export type AudioFormat = {
-	codec: AudioCodec;
 	sampleRate: number;
 	bitrateKbps: number;
 };

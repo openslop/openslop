@@ -8,6 +8,8 @@ export interface AttributeSpec {
 	label: string;
 	/** When set, the badge shows this icon in place of the text label. */
 	icon?: IconComponent;
+	/** Unit suffix appended to the displayed value (e.g. `"s"` for seconds). */
+	unit?: string;
 	edit?: AttributeEdit;
 }
 
@@ -32,7 +34,12 @@ export class AttributeSchema {
 	get visibleAttributes(): Record<string, AttributeSpec> {
 		const out: Record<string, AttributeSpec> = {};
 		for (const def of this.defs) {
-			out[def.key] = { label: def.label, icon: def.icon, edit: def.edit };
+			out[def.key] = {
+				label: def.label,
+				icon: def.icon,
+				unit: def.unit,
+				edit: def.edit,
+			};
 		}
 		return out;
 	}

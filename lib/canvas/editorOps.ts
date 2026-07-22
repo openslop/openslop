@@ -2,7 +2,6 @@ import { Editor, type NodeEntry, type Path, Transforms } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { isContentElement } from "./guards";
 
-/** Find a content element by ID. Returns [node, path] or null. */
 export function findNodeById(
 	editor: Editor,
 	id: string,

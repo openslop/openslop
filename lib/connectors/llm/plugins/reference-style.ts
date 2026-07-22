@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import compact from "lodash/compact";
+import { requireGateway } from "@/lib/connectors/plugins";
 import { getProjectStore } from "@/lib/project/store";
 import type {
 	LLMGenerateParams,
@@ -24,9 +25,8 @@ export function createReferenceStylePlugin(projectId: string): LLMPlugin {
 				),
 			]);
 			if (styleReferenceImages.length === 0) return prompt;
-			if (!ctx?.gateway)
-				throw new Error("reference-style plugin requires gateway context");
-			const { text: style } = await ctx.gateway.generate({
+			const gateway = requireGateway(ctx, "reference-style");
+			const { text: style } = await gateway.generate({
 				prompt: dedent`Vividly and concisely describe the visual art style of the attached reference image(s) in 1–2 concise sentences. Include ultra specific detail on character art style and overall art style.`,
 				referenceImages: styleReferenceImages,
 				maxTokens: 4096,

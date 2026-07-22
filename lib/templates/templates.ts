@@ -1468,6 +1468,19 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 
 const TEMPLATE_MAP = new Map(TEMPLATES.map((t) => [t.id, t]));
 
+/** Optional lookup for ids from outside the app (persisted state, plugin params). */
 export function getTemplateById(id: string): Template | undefined {
 	return TEMPLATE_MAP.get(id);
 }
+
+/** Lookup for ids sourced from `TEMPLATES`, where a miss is a programming error. */
+export function getTemplate(id: string): Template {
+	const template = TEMPLATE_MAP.get(id);
+	if (!template) throw new Error(`Unknown template id "${id}"`);
+	return template;
+}
+
+const [firstTemplate] = TEMPLATES;
+if (!firstTemplate) throw new Error("TEMPLATES must not be empty");
+
+export const DEFAULT_TEMPLATE_ID = firstTemplate.id;
