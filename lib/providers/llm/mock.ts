@@ -19,7 +19,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
-<animated_image videoPrompt="slow pan across the village to the forest path" motion="kenBurnsOut">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</animated_image>
+<animated_image videoPrompt="slow pan across the village to the forest path">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</animated_image>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
@@ -41,7 +41,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound>footsteps on dirt path</sound>
 
-<animated_image videoPrompt="gentle pan upward through the forest canopy" motion="tiltUp" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</animated_image>
+<animated_image videoPrompt="gentle pan upward through the forest canopy" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</animated_image>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
@@ -91,7 +91,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<animated_image videoPrompt="slow push-in toward the cottage door" motion="kenBurnsIn" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</animated_image>
+<animated_image videoPrompt="slow push-in toward the cottage door" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</animated_image>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;
@@ -198,7 +198,7 @@ function mockResponse(params: LLMGenerateParams): string {
 function buildRefineResponse(params: LLMGenerateParams): string {
 	const animateId = matchAnimateImagePrompt(params.prompt);
 	if (animateId) {
-		return `{"op":"set","id":"${animateId}","type":"animated_image","attrs":{"videoPrompt":"slow cinematic push-in with gentle parallax","motion":"kenBurnsIn"}}`;
+		return `{"op":"set","id":"${animateId}","type":"animated_image","attrs":{"videoPrompt":"slow cinematic push-in with gentle parallax"}}`;
 	}
 	const ids = extractIds(params.prompt);
 	const factory = pickRandom(MOCK_REFINEMENTS);

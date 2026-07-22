@@ -52,7 +52,7 @@ const OSML_SYSTEM_PROMPT = dedent`
   ### Image XML Tags
   - Each scene should include an image XML tag that describes the current scene. Example:
 		<image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
-  - motion: Optional camera-motion effect applied for the element's full duration. Use sparingly — at most one per scene, and prefer omitting when the image already carries the energy. Example: <image motion="kenBurnsIn">...</image>
+  - motion: Camera-motion effect applied for the element's full duration. Almost always set one — a still image with no motion reads as a flat, lifeless slide. Use at most one per scene. Example: <image motion="kenBurnsIn">...</image>
   - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
 	- characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
 		<image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
@@ -70,10 +70,10 @@ const OSML_SYSTEM_PROMPT = dedent`
 
   ### Animated Image XML Tags
   - An <animated_image> tag is an <image> tag whose still frame is then animated by an image-to-video model. Use it for hero moments, establishing shots, or emotional beats that benefit from subtle motion. The tag body describes the still frame in the same way as an <image>; the videoPrompt attribute describes the camera/subject motion. Example:
-		<animated_image videoPrompt="slow zoom out revealing the full landscape" motion="kenBurnsIn" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
+		<animated_image videoPrompt="slow zoom out revealing the full landscape" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
   - videoPrompt: required. A short, focused, relaxing description of the motion or camera movement (e.g. "slow cinematic pan", "gentle dolly in", "warm zoom on the character's face"). Keep it simple — one camera move per shot.
   - duration: optional. The length of the animated clip in seconds (default 5). Allowed values: ${DURATION_OPTIONS.join(", ")}.
-  - motion: optional. Same enum as for <image>. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
+  - motion: normally set to "none". Only set a motion effect when the videoPrompt describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
   - characters: optional. Same as for <image> — a comma-separated list of exact story character names appearing in the frame. Example: <animated_image videoPrompt="..." characters="Red,Granny">Red hands the basket to Granny at the cottage door.</animated_image>
   - All <image> description rules apply unchanged: write a prompt that describes the time of day, background, weather, and objects in detail. Repeat any details necessary even if they appeared in earlier prompts.
   - Use <animated_image> sparingly — mostly at intro shots and hero moments. Default to <image> for typical scenes; image-to-video generation is significantly slower and more expensive.

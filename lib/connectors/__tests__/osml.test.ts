@@ -22,4 +22,12 @@ describe("osmlPlugin", () => {
 			"ALL CAPS",
 		);
 	});
+
+	it("deters motion on animated_image, which competes with the videoPrompt animation", () => {
+		const { systemPrompt } = beforeGenerate({ prompt: "hello" }) as {
+			systemPrompt: string;
+		};
+		expect(systemPrompt).toMatch(/motion: normally set to "none"/);
+		expect(systemPrompt).not.toMatch(/<animated_image[^>]*\smotion=/);
+	});
 });
