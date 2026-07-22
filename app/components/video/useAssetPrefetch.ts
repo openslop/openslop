@@ -56,12 +56,11 @@ export async function awaitPrefetch(handles: PrefetchHandle[]): Promise<void> {
 	await Promise.allSettled(handles.map((h) => h.waitUntilDone()));
 }
 
-export function useAssetPrefetch(layout: VideoLayout | null): boolean {
+export function useAssetPrefetch(layout: VideoLayout): boolean {
 	const activeRef = useRef(new Map<string, PrefetchHandle>());
 	const [ready, setReady] = useState(false);
 
 	useEffect(() => {
-		if (!layout) return;
 		let cancelled = false;
 
 		loadPrefetch()

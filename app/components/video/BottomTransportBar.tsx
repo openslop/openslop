@@ -26,12 +26,12 @@ function BottomTransportBarComponent() {
 	const { layout } = useLayout();
 	const segments = useSceneSegments();
 	const playing = usePlayerPlaying(player);
-	const activeIndex = useActiveSegmentIndex(player, segments, layout?.fps);
+	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
 
-	const ready = player !== null && layout != null && segments.length > 0;
+	const ready = player !== null && segments.length > 0;
 
 	const seekToAdjacentScene = (dir: -1 | 1) => {
-		if (!player || !layout || segments.length === 0) return;
+		if (!player || segments.length === 0) return;
 		const current = findSegmentIndexAt(
 			segments,
 			player.getCurrentFrame() / layout.fps,

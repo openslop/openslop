@@ -35,7 +35,7 @@ export function ExportButton() {
 	const { state, render, reset, open, setOpen } = useRender();
 	const [width, setWidth] = useState(BASE_WIDTH);
 
-	const disabled = loading || !layout?.series.length || !ready;
+	const disabled = loading || !layout.series.length || !ready;
 	const isRendering = state.status === "rendering";
 
 	return (
@@ -132,7 +132,7 @@ export function ExportButton() {
 							type="button"
 							variant="generate"
 							size="sm"
-							onClick={() => layout && render(layout, scaleForWidth(width))}
+							onClick={() => render(layout, scaleForWidth(width))}
 							disabled={disabled}
 							className="w-full"
 						>

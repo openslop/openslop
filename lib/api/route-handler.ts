@@ -2,13 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { ConnectorType } from "@/lib/connectors/types";
-import { withApiAccess, withSession } from "./with-auth";
+import { withApiAccess, withPublic, withSession } from "./with-auth";
 import { getJobHandler, rowView } from "./job-handlers";
 import { createJob, enqueueJob, getJob } from "./jobs";
-import { parseBody } from "./parse";
+import { parseBody, parseSearchParams, type ParseResult } from "./parse";
 import { badRequest } from "./response";
 
-function jsonRouteHandler(authTier: typeof withApiAccess) {
+type AuthTier = typeof withApiAccess;
+
+async function withParsed<TData>(
+	parsing: ParseResult<TData> | Promise<ParseResult<TData>>,
+	handle: (data: TData) => Promise<Response>,
+): Promise<Response> {
+	const parsed = await parsing;
+	return parsed.ok ? handle(parsed.data) : parsed.response;
+}
+
+function jsonRouteHandler(authTier: AuthTier) {
 	return function createHandler<TSchema extends z.ZodType>(opts: {
 		schema: TSchema;
 		label: string;
@@ -19,16 +29,53 @@ function jsonRouteHandler(authTier: typeof withApiAccess) {
 		}) => Promise<Response>;
 	}) {
 		return async (request: NextRequest) =>
-			authTier(opts.label, async (user) => {
-				const parsed = await parseBody(request, opts.schema, opts.label);
-				if (!parsed.ok) return parsed.response;
-				return opts.handle({ user, body: parsed.data, request });
-			});
+			authTier(opts.label, (user) =>
+				withParsed(parseBody(request, opts.schema, opts.label), (body) =>
+					opts.handle({ user, body, request }),
+				),
+			);
+	};
+}
+
+function queryRouteHandler(authTier: AuthTier) {
+	return function createHandler<TSchema extends z.ZodType>(opts: {
+		schema: TSchema;
+		label: string;
+		handle: (ctx: {
+			user: User;
+			query: z.infer<TSchema>;
+			request: NextRequest;
+		}) => Promise<Response>;
+	}) {
+		return async (request: NextRequest) =>
+			authTier(opts.label, (user) =>
+				withParsed(
+					parseSearchParams(request, opts.schema, opts.label),
+					(query) => opts.handle({ user, query, request }),
+				),
+			);
 	};
 }
 
 export const createApiRouteHandler = jsonRouteHandler(withApiAccess);
 export const createSessionRouteHandler = jsonRouteHandler(withSession);
+export const createApiQueryRouteHandler = queryRouteHandler(withApiAccess);
+
+export function createPublicRouteHandler<TSchema extends z.ZodType>(opts: {
+	schema: TSchema;
+	label: string;
+	handle: (ctx: {
+		body: z.infer<TSchema>;
+		request: NextRequest;
+	}) => Promise<Response>;
+}) {
+	return async (request: NextRequest) =>
+		withPublic(opts.label, () =>
+			withParsed(parseBody(request, opts.schema, opts.label), (body) =>
+				opts.handle({ body, request }),
+			),
+		);
+}
 
 export function modelField(models: Record<string, string>) {
 	const names = Object.keys(models);

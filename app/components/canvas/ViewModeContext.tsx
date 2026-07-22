@@ -1,13 +1,9 @@
 "use client";
 
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-	type ReactNode,
-} from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import type { Editor } from "slate";
+import type { CanvasElement } from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
 type ViewModeValue = {
@@ -23,20 +19,15 @@ const [ViewModeContext, useViewMode] =
 export { useViewMode };
 
 export function ViewModeProvider({
-	sceneIds,
+	editor,
 	children,
 }: {
-	sceneIds: string[];
+	editor: Editor;
 	children: ReactNode;
 }) {
 	const [collapsedScenes, setCollapsedScenes] = useState<Set<string>>(
 		() => new Set(),
 	);
-
-	const sceneIdsRef = useRef(sceneIds);
-	useEffect(() => {
-		sceneIdsRef.current = sceneIds;
-	}, [sceneIds]);
 
 	const isCollapsed = useCallback(
 		(sceneId: string) => collapsedScenes.has(sceneId),
@@ -57,8 +48,9 @@ export function ViewModeProvider({
 	}, []);
 
 	const collapseAll = useCallback(() => {
-		setCollapsedScenes(new Set(sceneIdsRef.current));
-	}, []);
+		const scenes = (editor.children as CanvasElement[]).filter(isSceneElement);
+		setCollapsedScenes(new Set(scenes.map((scene) => scene.id)));
+	}, [editor]);
 
 	const hasCollapsed = collapsedScenes.size > 0;
 

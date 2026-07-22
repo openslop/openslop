@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useScriptInitial } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { getContentElements } from "@/lib/canvas/scenes";
 import { getLayoutKey } from "@/lib/video/layoutKey";
 import { useTransitionType } from "@/lib/video/useTransitionType";
 import UserProfile from "./UserProfile";
@@ -38,11 +38,6 @@ function PostPromptViewInner() {
 		() => getLayoutKey(getContentElements(value), transitionType),
 		[value, transitionType],
 	);
-	const sceneIds = useMemo(
-		() => value.filter(isSceneElement).map((scene) => scene.id),
-		[value],
-	);
-
 	const { position, visible } = usePlayerPosition();
 	const isTop = position === "top";
 
@@ -54,11 +49,7 @@ function PostPromptViewInner() {
 			/>
 			<UserProfile />
 
-			<CanvasProviders
-				editor={editor}
-				layoutKey={layoutKey}
-				sceneIds={sceneIds}
-			>
+			<CanvasProviders editor={editor} layoutKey={layoutKey}>
 				<EditorToolbar editor={editor} />
 				<div className="flex min-h-0 flex-1 overflow-hidden">
 					<EditorSidebar />

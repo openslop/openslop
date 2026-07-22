@@ -18,9 +18,8 @@ export type SceneSegment = {
 
 export function findSceneSequence(
 	scene: SceneElement,
-	layout: VideoLayout | null,
+	layout: VideoLayout,
 ): Sequence | undefined {
-	if (!layout) return undefined;
 	const fg = scene.children.find(isForeground);
 	if (!fg) return undefined;
 	return layout.sequenceByElementId.get(fg.id);
@@ -41,12 +40,12 @@ export function findSegmentIndexAt(
 export function useActiveSegmentIndex(
 	player: PlayerRef | null,
 	segments: SceneSegment[],
-	fps: number | undefined,
+	fps: number,
 ): number {
 	return usePlayerValue(
 		player,
 		FRAME_EVENTS,
-		(p) => (fps ? findSegmentIndexAt(segments, p.getCurrentFrame() / fps) : -1),
+		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / fps),
 		-1,
 	);
 }
@@ -54,7 +53,6 @@ export function useActiveSegmentIndex(
 export function useSceneSegments(): SceneSegment[] {
 	const { layout, scenes } = useLayout();
 	return useMemo<SceneSegment[]>(() => {
-		if (!layout) return [];
 		const out: SceneSegment[] = [];
 		for (let i = 0; i < scenes.length; i++) {
 			const scene = scenes[i];

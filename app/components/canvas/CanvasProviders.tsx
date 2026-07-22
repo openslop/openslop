@@ -18,12 +18,10 @@ import { RefineProvider } from "./RefineProvider";
 export function CanvasProviders({
 	editor,
 	layoutKey,
-	sceneIds,
 	children,
 }: {
 	editor: Editor;
 	layoutKey: string;
-	sceneIds: string[];
 	children: ReactNode;
 }) {
 	return (
@@ -32,7 +30,7 @@ export function CanvasProviders({
 				<PlayerControlProvider>
 					<ActiveSceneProvider>
 						<AutoScrollProvider>
-							<ViewModeProvider sceneIds={sceneIds}>
+							<ViewModeProvider editor={editor}>
 								<RefineProvider editor={editor}>{children}</RefineProvider>
 							</ViewModeProvider>
 						</AutoScrollProvider>

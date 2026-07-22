@@ -1,18 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { parseSearchParams } from "@/lib/api/parse";
+import { NextResponse } from "next/server";
 import { getTTSProvider } from "@/lib/api/providers";
-import { withApiAccess } from "@/lib/api/with-auth";
+import { createApiQueryRouteHandler } from "@/lib/api/route-handler";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 
-export async function GET(request: NextRequest) {
-	return withApiAccess("Voice search", async () => {
-		const parsed = parseSearchParams(
-			request,
-			voiceSearchParamsSchema,
-			"Voice search",
-		);
-		if (!parsed.ok) return parsed.response;
-		const voices = await getTTSProvider().search(parsed.data);
+export const GET = createApiQueryRouteHandler({
+	schema: voiceSearchParamsSchema,
+	label: "Voice search",
+	handle: async ({ query }) => {
+		const voices = await getTTSProvider().search(query);
 		return NextResponse.json({ voices });
-	});
-}
+	},
+});

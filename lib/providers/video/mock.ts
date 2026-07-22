@@ -1,7 +1,7 @@
 import type { VideoJob, VideoProviderResponse } from "./base";
 import { BaseVideoProvider } from "./base";
 import { BLOB_BASE_URL } from "@/lib/blob";
-import { pickRandom } from "../mock-utils";
+import { mockDelay, pickRandom } from "../mock-utils";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/video/mock`;
 
@@ -27,7 +27,7 @@ export class MockVideo extends BaseVideoProvider {
 	}
 
 	protected async _generate(): Promise<VideoJob> {
-		await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
+		await mockDelay(2000);
 		return {
 			metadata: { jobId: "mock-job", status: "processing", durationSec: 5 },
 		};
