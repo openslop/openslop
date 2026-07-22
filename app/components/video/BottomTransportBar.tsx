@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { toFrames, toSeconds } from "@/lib/video/frames";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
@@ -34,10 +35,10 @@ function BottomTransportBarComponent() {
 		if (!player || segments.length === 0) return;
 		const current = findSegmentIndexAt(
 			segments,
-			player.getCurrentFrame() / layout.fps,
+			toSeconds(player.getCurrentFrame(), layout.fps),
 		);
 		const target = segments[current + dir];
-		if (target) player.seekTo(Math.ceil(target.start * layout.fps));
+		if (target) player.seekTo(toFrames(target.start, layout.fps));
 	};
 
 	return (

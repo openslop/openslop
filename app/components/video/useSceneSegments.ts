@@ -2,6 +2,7 @@ import type { PlayerRef } from "@remotion/player";
 import { useMemo } from "react";
 import { isForeground } from "@/lib/canvas/guards";
 import type { SceneElement } from "@/lib/canvas/types";
+import { toSeconds } from "@/lib/video/frames";
 import type { Sequence, VideoLayout } from "@/lib/video/types";
 import type { SeekThumbnail } from "./SeekTooltip";
 import { useLayout } from "./VideoLayoutContext";
@@ -45,7 +46,7 @@ export function useActiveSegmentIndex(
 	return usePlayerValue(
 		player,
 		FRAME_EVENTS,
-		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / fps),
+		(p) => findSegmentIndexAt(segments, toSeconds(p.getCurrentFrame(), fps)),
 		-1,
 	);
 }

@@ -25,7 +25,7 @@ import {
 	characterAvatarElementId,
 } from "@/lib/project/ensureCharacterAvatars";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
-import { useProjectStore } from "@/lib/project/store";
+import { getProjectStore, useProjectStore } from "@/lib/project/store";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
@@ -194,8 +194,11 @@ function CharacterEditDialogBody({
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
 								queue.discard(avatarElementId);
-								setCharacter(name, {
-									...character,
+								const store = getProjectStore(projectId).getState();
+								const current = store.metadata.characters[name];
+								if (!current) return;
+								store.setCharacter(name, {
+									...current,
 									avatarUrl: url,
 									avatarUploaded: true,
 								});

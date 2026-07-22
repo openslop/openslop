@@ -13,6 +13,7 @@ import type {
 	Sequence as SeqType,
 	ResolvedElement,
 } from "@/lib/video/types";
+import { toFrames } from "@/lib/video/frames";
 import {
 	AUDIO_FADE_SEC,
 	TRANSITION_DURATION_SEC,
@@ -30,10 +31,6 @@ const coverStyle: React.CSSProperties = {
 };
 
 const blackBg: React.CSSProperties = { backgroundColor: "black" };
-
-function toFrames(sec: number, fps: number): number {
-	return Math.round(sec * fps);
-}
 
 function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();

@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { toFrames } from "../frames";
 import { buildVideoLayout } from "../scene-builder";
 import type { ResolvedElement, Sequence, VideoLayout } from "../types";
 import type { CanvasElementType } from "@/lib/canvas/types";
+
+// The rendered transition overlap: TRANSITION_DURATION_SEC (0.4s) snapped to the
+// 24fps frame grid, which is what <TransitionSeries> actually lays down.
+const OVERLAP = 10 / 24;
 
 function seqs(layout: VideoLayout, type: CanvasElementType): Sequence[] {
 	const s = layout.sequences[type];
@@ -72,10 +77,10 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[0].start).toBe(0);
-			// Each foreground past the first overlaps the previous by one
-			// TRANSITION_DURATION_SEC (0.4s) to match what <TransitionSeries> renders.
-			expect(layout.series[1].start).toBe(4.6);
-			expect(layout.totalDurationSec).toBe(7.6);
+			// Each foreground past the first overlaps the previous by one rendered
+			// transition to match what <TransitionSeries> renders.
+			expect(layout.series[1].start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(layout.totalDurationSec).toBeCloseTo(8 - OVERLAP, 5);
 		});
 
 		it("places overlays on the rendered timeline so they align with transitioned visuals", () => {
@@ -84,9 +89,9 @@ describe("buildVideoLayout", () => {
 				el({ id: "img2", type: "image", durationSec: 3 }),
 				el({ id: "n1", type: "narration", durationSec: 2 }),
 			]);
-			expect(layout.series[1].start).toBe(4.6);
-			expect(seqs(layout, "narration")[0].start).toBe(4.6);
-			expect(layout.totalDurationSec).toBe(7.6);
+			expect(layout.series[1].start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(seqs(layout, "narration")[0].start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(layout.totalDurationSec).toBeCloseTo(8 - OVERLAP, 5);
 		});
 
 		it("clamps a foreground shorter than the minimum duration", () => {
@@ -176,7 +181,7 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].start).toBe(8.6);
+			expect(layout.series[1].start).toBeCloseTo(9 - OVERLAP, 5);
 			expect(layout.series[1].duration).toBe(6);
 		});
 
@@ -188,7 +193,7 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].start).toBe(29.6);
+			expect(layout.series[1].start).toBeCloseTo(30 - OVERLAP, 5);
 			expect(layout.series[1].duration).toBe(6);
 		});
 
@@ -251,13 +256,13 @@ describe("buildVideoLayout", () => {
 				el({ id: "c2", type: "character", durationSec: 5 }),
 				el({ id: "img1", type: "image", durationSec: 6 }),
 			]);
-			expect(layout.totalDurationSec).toBe(15.6);
+			expect(layout.totalDurationSec).toBeCloseTo(16 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "music")[1].start).toBe(10);
-			// m2 trimmed to the rendered total (15.6) since img1 is overlapped by 0.4s.
-			expect(seqs(layout, "music")[1].duration).toBe(5.6);
+			// m2 trimmed to the rendered total since img1 is overlapped by one transition.
+			expect(seqs(layout, "music")[1].duration).toBeCloseTo(6 - OVERLAP, 5);
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
@@ -270,13 +275,13 @@ describe("buildVideoLayout", () => {
 				el({ id: "m5", type: "music", durationSec: 50 }),
 				el({ id: "clip1", type: "clip", durationSec: 20 }),
 			]);
-			expect(layout.totalDurationSec).toBe(29.6);
+			expect(layout.totalDurationSec).toBeCloseTo(30 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "music")[1].start).toBe(10);
-			// m5 trimmed to the rendered total (29.6) since clip1 is overlapped by 0.4s.
-			expect(seqs(layout, "music")[1].duration).toBe(19.6);
+			// m5 trimmed to the rendered total since clip1 is overlapped by one transition.
+			expect(seqs(layout, "music")[1].duration).toBeCloseTo(20 - OVERLAP, 5);
 		});
 
 		it("emits N consecutive copies for a looped background, trimmed to the foreground span", () => {
@@ -305,10 +310,10 @@ describe("buildVideoLayout", () => {
 			expect(music).toHaveLength(3);
 			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
 			expect(music[1]).toMatchObject({ start: 10, duration: 5 });
-			// m2 trimmed to the rendered total (24.6) since img2 is overlapped by 0.4s.
+			// m2 trimmed to the rendered total since img2 is overlapped by one transition.
 			expect(music[2].start).toBe(15);
-			expect(music[2].duration).toBeCloseTo(9.6);
-			expect(layout.totalDurationSec).toBe(24.6);
+			expect(music[2].duration).toBeCloseTo(10 - OVERLAP, 5);
+			expect(layout.totalDurationSec).toBeCloseTo(25 - OVERLAP, 5);
 		});
 
 		it("emits a clamped background sequence when no series elements exist", () => {
@@ -440,8 +445,8 @@ describe("buildVideoLayout", () => {
 			expect(layout.series[0].element?.id).toBe("img1");
 			expect(layout.series[0].duration).toBe(5);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].duration).toBe(6);
-			expect(layout.totalDurationSec).toBe(10.6);
+			expect(layout.series[1].duration).toBeCloseTo(6, 5);
+			expect(layout.totalDurationSec).toBeCloseTo(11 - OVERLAP, 5);
 
 			expect(seqs(layout, "music")).toHaveLength(1);
 			expect(seqs(layout, "narration")).toHaveLength(2);
@@ -464,6 +469,50 @@ describe("buildVideoLayout", () => {
 			);
 			expect(layout.width).toBe(1280);
 			expect(layout.height).toBe(720);
+		});
+	});
+
+	// <TransitionSeries> positions scenes implicitly (durations minus whole-frame
+	// overlaps) while narration/music are positioned absolutely from layout.start.
+	// Both must land on the same frame, or audio drifts further behind the visuals
+	// with every scene boundary.
+	describe("frame alignment with the rendered timeline", () => {
+		it.each([24, 30, 25])(
+			"keeps absolute layer starts on the TransitionSeries grid at %ifps",
+			(fps) => {
+				const elements = Array.from({ length: 10 }, (_, i) => [
+					el({ id: `img${i}`, type: "image", durationSec: 5 }),
+					el({ id: `n${i}`, type: "narration", durationSec: 4 }),
+				]).flat();
+				const layout = buildVideoLayout(elements, { fps });
+				const overlap = toFrames(layout.transitionDurationSec, fps);
+
+				let renderedStart = 0;
+				layout.series.forEach((scene, i) => {
+					if (i > 0) renderedStart -= overlap;
+					expect(toFrames(scene.start, fps)).toBe(renderedStart);
+					expect(toFrames(seqs(layout, "narration")[i].start, fps)).toBe(
+						renderedStart,
+					);
+					renderedStart += toFrames(scene.duration, fps);
+				});
+			},
+		);
+
+		it("ends the composition exactly where TransitionSeries runs out of content", () => {
+			const fps = 24;
+			const elements = Array.from({ length: 10 }, (_, i) =>
+				el({ id: `img${i}`, type: "image", durationSec: 5 }),
+			);
+			const layout = buildVideoLayout(elements, { fps });
+			const overlap = toFrames(layout.transitionDurationSec, fps);
+
+			const rendered = layout.series.reduce(
+				(total, scene, i) =>
+					total + toFrames(scene.duration, fps) - (i > 0 ? overlap : 0),
+				0,
+			);
+			expect(layout.totalFrames).toBe(rendered);
 		});
 	});
 });

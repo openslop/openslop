@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import sortedLastIndex from "lodash/sortedLastIndex";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { TextTimestamp } from "@/lib/connectors/types";
+import { toSeconds } from "@/lib/video/frames";
 
 const MAX_LINE_WIDTH_RATIO = 0.8;
 const FONT_SIZE_RATIO = 0.065;
@@ -90,7 +91,7 @@ export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
 
 	if (visibleByWordIndex.length === 0) return null;
 
-	const seconds = frame / fps;
+	const seconds = toSeconds(frame, fps);
 	const wordIndex = sortedLastIndex(startTimes, seconds) - 1;
 	if (wordIndex < 0) return null;
 
