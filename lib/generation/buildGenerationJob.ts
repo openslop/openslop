@@ -1,6 +1,6 @@
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { ProviderKey } from "@/lib/connectors/types";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
+import { getDefaultConnector } from "@/lib/connectors/registry";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import type { GenerationJob } from "./queue";
 

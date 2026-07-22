@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
-vi.mock("@/lib/config/connectorUtils", () => ({
+vi.mock("@/lib/connectors/registry", () => ({
 	getDefaultConnector: () => ({
 		provider: "openslop",
 		config: {
@@ -21,7 +21,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { insertElement } from "../insertElement";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
 const connectors: ConnectorRegistry = {
 	llm: {

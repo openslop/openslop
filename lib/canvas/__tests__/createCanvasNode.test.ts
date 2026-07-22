@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/config/connectorUtils", () => ({
+vi.mock("@/lib/connectors/registry", () => ({
 	getDefaultConnector: () => ({
 		provider: "openslop",
 		config: {
@@ -20,7 +20,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { createCanvasNode } from "../createCanvasNode";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
 const ZWSP = "​";
 
@@ -84,7 +84,7 @@ describe("createCanvasNode", () => {
 describe("createCanvasNode — no default model configured", () => {
 	it("still applies schema defaults but skips stamping model/provider", async () => {
 		vi.resetModules();
-		vi.doMock("@/lib/config/connectorUtils", () => ({
+		vi.doMock("@/lib/connectors/registry", () => ({
 			getDefaultConnector: () => ({
 				provider: "openslop",
 				config: { defaultModel: "", models: [], isDefault: true },

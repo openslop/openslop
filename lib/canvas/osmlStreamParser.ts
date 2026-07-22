@@ -3,7 +3,7 @@ import {
 	type CanvasElementType,
 	type ParsedElement,
 } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import { createCanvasNode } from "./createCanvasNode";

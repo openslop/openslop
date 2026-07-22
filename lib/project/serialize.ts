@@ -3,7 +3,7 @@ import { SCENE_TYPE } from "@/lib/canvas/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/osmlSerializer";
 import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { makeNodeId } from "@/lib/canvas/nodeUtils";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
 export function splitScenes(osml: string): string[] {
 	if (!osml.trim()) return [];

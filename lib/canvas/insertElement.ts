@@ -1,6 +1,6 @@
 import { Editor, Path, Transforms } from "slate";
 import type { CanvasElementType } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { createCanvasNode } from "./createCanvasNode";
 
 export function insertElement(

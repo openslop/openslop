@@ -1,6 +1,6 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { getDefaultConnector } from "@/lib/connectors/registry";
 import { buildCharacterAvatarPlugins } from "@/lib/connectors/image/plugins/imageChain";
 import type { GenerationJob, GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "./store";

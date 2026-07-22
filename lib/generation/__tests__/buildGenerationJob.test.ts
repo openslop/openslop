@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { buildGenerationJob } from "../buildGenerationJob";
 

@@ -1,7 +1,7 @@
-import set from "lodash/fp/set";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import { createConnector } from "@/lib/connectors/factory";
+import {
+	createDefaultConnector,
+	type ConnectorRegistry,
+} from "@/lib/connectors/registry";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import type {
 	AnimatedImageGenerateParams,
@@ -49,12 +49,7 @@ export function createVideoChainPlugin(
 					"animated_image chain expected an imageUrl from the still-image generation",
 				);
 			}
-			const { provider, config } = getDefaultConnector(registry, "video");
-			const video = createConnector(
-				"video",
-				provider,
-				set("plugins", [], config),
-			);
+			const video = createDefaultConnector(registry, "video", []);
 			const videoResult = await video.generate({
 				prompt: stashed.videoPrompt,
 				frameImages: [result.imageUrl],
