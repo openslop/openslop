@@ -63,9 +63,6 @@ export class GenerationQueue {
 	private history = new Map<string, Map<string, AssetResult>>();
 	private readonly batchSize: number;
 	private _resultVersion = 0;
-	// Ids taking part in the current run. Anything that will never finish leaves,
-	// so what remains is either still working or done.
-	private run = new Set<string>();
 
 	constructor({
 		batchSize,
@@ -124,23 +121,18 @@ export class GenerationQueue {
 		return false;
 	};
 
-	getActiveCount = (): number => {
-		let active = 0;
+	private count(predicate: (snap: ElementSnapshot) => boolean): number {
+		let n = 0;
 		for (const snap of this.state.values()) {
-			if (isActive(snap.status)) active++;
+			if (predicate(snap)) n++;
 		}
-		return active;
-	};
+		return n;
+	}
 
-	getTotalCount = (): number => this.run.size;
+	getActiveCount = (): number => this.count((s) => isActive(s.status));
 
-	getCompletedCount = (): number => {
-		let done = 0;
-		for (const id of this.run) {
-			if (!isActive(this.getElementSnapshot(id).status)) done++;
-		}
-		return done;
-	};
+	getGeneratedCount = (): number =>
+		this.count((s) => !isActive(s.status) && s.result != null);
 
 	snapshot(): Record<string, ElementSnapshot> {
 		return Object.fromEntries(this.state);
@@ -189,7 +181,7 @@ export class GenerationQueue {
 	}
 
 	enqueueAll(jobs: GenerationJob[]) {
-		let added = 0;
+		let added = false;
 		for (const job of jobs) {
 			if (this.isInQueue(job.elementId)) continue;
 			this.update(job.elementId, {
@@ -198,10 +190,9 @@ export class GenerationQueue {
 				connectorType: job.connectorType,
 			});
 			this.pending.push(job);
-			this.run.add(job.elementId);
-			added++;
+			added = true;
 		}
-		if (added > 0) {
+		if (added) {
 			this.notify();
 			this.processQueue();
 		}
@@ -211,7 +202,6 @@ export class GenerationQueue {
 		if (!this.isInQueue(elementId)) return;
 		this.abortJob(elementId);
 		this.resetToIdle(elementId);
-		this.run.delete(elementId);
 		this.notify();
 		this.processQueue();
 	}
@@ -234,7 +224,6 @@ export class GenerationQueue {
 		if (hadEntry) this.abortJob(elementId);
 		if (this.state.get(elementId)?.result) this._resultVersion++;
 		this.state.delete(elementId);
-		this.run.delete(elementId);
 		this.notify();
 		if (hadEntry) this.processQueue();
 	}
@@ -281,10 +270,6 @@ export class GenerationQueue {
 	}
 
 	private notify() {
-		// The run is over once nothing is active, so the next one starts clean.
-		if (this.getActiveCount() === 0) {
-			this.run.clear();
-		}
 		for (const listener of this.listeners) {
 			listener();
 		}
@@ -342,7 +327,6 @@ export class GenerationQueue {
 	) {
 		if (controller.signal.aborted) return;
 		console.error(`Generation failed for element ${elementId}:`, err);
-		this.run.delete(elementId);
 		this.update(elementId, {
 			status: "idle",
 			seconds: 0,

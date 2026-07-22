@@ -5,8 +5,9 @@ import { PlayerShimmer } from "./PlayerShimmer";
 import styles from "./QueueProgressBar.module.css";
 
 export function QueueProgressBar() {
-	const total = useQueueSelector((q) => q.getTotalCount());
-	const done = useQueueSelector((q) => q.getCompletedCount());
+	const active = useQueueSelector((q) => q.getActiveCount());
+	const done = useQueueSelector((q) => q.getGeneratedCount());
+	const total = active + done;
 	const pct = total === 0 ? 0 : (done / total) * 100;
 
 	return (

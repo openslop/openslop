@@ -714,12 +714,17 @@ describe("GenerationQueue", () => {
 	describe("progress counters", () => {
 		const pending = () => new Promise<{ url: string }>(() => {});
 
-		it("counts every newly enqueued item in the total", () => {
+		// The progress bar composes total as active + generated, so these assert on
+		// the two derived counters the queue exposes.
+		const total = () =>
+			generationQueue.getActiveCount() + generationQueue.getGeneratedCount();
+
+		it("counts every newly enqueued item as active", () => {
 			generateMock.mockReturnValue(pending());
 			generationQueue.enqueueAll([makeJob("a"), makeJob("b"), makeJob("c")]);
 
-			expect(generationQueue.getTotalCount()).toBe(3);
-			expect(generationQueue.getCompletedCount()).toBe(0);
+			expect(total()).toBe(3);
+			expect(generationQueue.getGeneratedCount()).toBe(0);
 
 			generationQueue.cancelAll();
 		});
@@ -729,7 +734,7 @@ describe("GenerationQueue", () => {
 			generationQueue.enqueueAll([makeJob("a"), makeJob("b")]);
 			generationQueue.enqueueAll([makeJob("a"), makeJob("c")]);
 
-			expect(generationQueue.getTotalCount()).toBe(3);
+			expect(total()).toBe(3);
 
 			generationQueue.cancelAll();
 		});
@@ -739,8 +744,8 @@ describe("GenerationQueue", () => {
 			generationQueue.enqueueAll([makeJob("a"), makeJob("b"), makeJob("c")]);
 			generationQueue.cancel("b");
 
-			expect(generationQueue.getTotalCount()).toBe(2);
-			expect(generationQueue.getCompletedCount()).toBe(0);
+			expect(total()).toBe(2);
+			expect(generationQueue.getGeneratedCount()).toBe(0);
 
 			generationQueue.cancelAll();
 		});
@@ -750,7 +755,7 @@ describe("GenerationQueue", () => {
 			generationQueue.enqueueAll([makeJob("a"), makeJob("b"), makeJob("c")]);
 			generationQueue.discard("b");
 
-			expect(generationQueue.getTotalCount()).toBe(2);
+			expect(total()).toBe(2);
 
 			generationQueue.cancelAll();
 		});
@@ -775,16 +780,16 @@ describe("GenerationQueue", () => {
 			rejectA(new Error("boom"));
 			await vi.advanceTimersByTimeAsync(0);
 
-			// The failure will never complete, so it leaves the run rather than
-			// stranding the bar below 100% for everything that follows.
-			expect(generationQueue.getTotalCount()).toBe(2);
-			expect(generationQueue.getCompletedCount()).toBe(0);
+			// The failure has no result and is no longer active, so it drops out of
+			// both counters rather than stranding the bar below 100%.
+			expect(total()).toBe(2);
+			expect(generationQueue.getGeneratedCount()).toBe(0);
 
 			resolveB({ url: "b" });
 			await vi.advanceTimersByTimeAsync(0);
 
-			expect(generationQueue.getTotalCount()).toBe(2);
-			expect(generationQueue.getCompletedCount()).toBe(1);
+			expect(total()).toBe(2);
+			expect(generationQueue.getGeneratedCount()).toBe(1);
 
 			generationQueue.cancelAll();
 		});
@@ -810,34 +815,45 @@ describe("GenerationQueue", () => {
 			resolveB({ url: "b" });
 			await vi.advanceTimersByTimeAsync(0);
 
-			expect(generationQueue.getCompletedCount()).toBe(2);
-			expect(generationQueue.getTotalCount()).toBe(3);
+			expect(generationQueue.getGeneratedCount()).toBe(2);
+			expect(total()).toBe(3);
 
 			// Adding work mid-run grows the denominator without losing the two
 			// already-finished items.
 			generationQueue.enqueueAll([makeJob("d"), makeJob("e"), makeJob("f")]);
 
-			expect(generationQueue.getCompletedCount()).toBe(2);
-			expect(generationQueue.getTotalCount()).toBe(6);
+			expect(generationQueue.getGeneratedCount()).toBe(2);
+			expect(total()).toBe(6);
 
 			generationQueue.cancelAll();
 		});
 
-		it("resets both counters once the queue drains", async () => {
+		it("keeps a completed item counted after the queue drains, and later work grows the total", async () => {
 			let resolveA: (v: { url: string }) => void = () => {};
-			generateMock.mockReturnValueOnce(
-				new Promise<{ url: string }>((r) => {
-					resolveA = r;
-				}),
-			);
+			generateMock
+				.mockReturnValueOnce(
+					new Promise<{ url: string }>((r) => {
+						resolveA = r;
+					}),
+				)
+				.mockReturnValue(pending());
 
 			generationQueue.enqueueAll([makeJob("a")]);
 			resolveA({ url: "a" });
 			await vi.advanceTimersByTimeAsync(0);
 
+			// Nothing resets on drain: the finished item stays counted as generated.
 			expect(generationQueue.getActiveCount()).toBe(0);
-			expect(generationQueue.getTotalCount()).toBe(0);
-			expect(generationQueue.getCompletedCount()).toBe(0);
+			expect(generationQueue.getGeneratedCount()).toBe(1);
+			expect(total()).toBe(1);
+
+			// A fresh job joins the still-counted completion instead of replacing it.
+			generationQueue.enqueueAll([makeJob("b")]);
+
+			expect(generationQueue.getGeneratedCount()).toBe(1);
+			expect(total()).toBe(2);
+
+			generationQueue.cancelAll();
 		});
 	});
 });
