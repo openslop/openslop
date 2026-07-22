@@ -6,8 +6,8 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
-import type { AspectRatio } from "@/lib/video/aspectRatio";
-import type { TransitionType } from "@/lib/video/transitions";
+import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
+import { TRANSITION_TYPES } from "@/lib/video/transitions";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
 
@@ -47,25 +47,27 @@ export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 
 export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
 
-export type VideoSettings = {
-	transitionType?: TransitionType;
-	aspectRatio?: AspectRatio;
-};
+const VideoSettingsSchema = z.object({
+	transitionType: z.enum(TRANSITION_TYPES).optional(),
+	aspectRatio: z.enum(ASPECT_RATIOS).optional(),
+});
 
 export const MODES = ["story", "script", "template"] as const;
 
 export type Mode = (typeof MODES)[number];
 
-export type Metadata = {
-	title: string;
-	style: string;
-	narration: MetadataVoice;
-	characters: Record<string, MetadataCharacter>;
-	videoSettings?: VideoSettings;
+export const MetadataSchema = z.object({
+	title: z.string().default(""),
+	style: z.string().default(""),
+	narration: MetadataVoiceSchema.default({}),
+	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
+	videoSettings: VideoSettingsSchema.optional(),
 	/** Persisted for server-side observability of prompt activity; not read in-app. */
-	lastMode?: Mode;
-	lastPrompt?: string;
-};
+	lastMode: z.enum(MODES).optional(),
+	lastPrompt: z.string().optional(),
+});
+
+export type Metadata = z.infer<typeof MetadataSchema>;
 
 export type DeepPartial<T> = T extends object
 	? { [K in keyof T]?: DeepPartial<T[K]> }
