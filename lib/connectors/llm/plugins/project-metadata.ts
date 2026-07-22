@@ -39,7 +39,7 @@ function buildPreamble(metadata: Metadata): string {
 	const sections: string[] = [];
 
 	if (metadata.style) {
-		sections.push(`
+		sections.push(dedent`
 			# Art Style
 
 			Below is the exact art style description for the story. Do not change it.

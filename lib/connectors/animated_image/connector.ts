@@ -7,7 +7,7 @@ export abstract class BaseAnimatedImageConnector extends BaseAssetConnector<
 	AnimatedImageGenerateParams,
 	AssetResult
 > {
-	readonly type = "image" as const;
+	readonly type = "animated_image" as const;
 	readonly assetKey = "image" as const;
 
 	static attributesFor(_model?: string): AttributeSchema {

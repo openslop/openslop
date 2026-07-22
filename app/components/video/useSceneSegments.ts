@@ -40,12 +40,12 @@ export function findSegmentIndexAt(
 export function useActiveSegmentIndex(
 	player: PlayerRef | null,
 	segments: SceneSegment[],
-	fps: number | undefined,
+	fps: number,
 ): number {
 	return usePlayerValue(
 		player,
 		FRAME_EVENTS,
-		(p) => (fps ? findSegmentIndexAt(segments, p.getCurrentFrame() / fps) : -1),
+		(p) => findSegmentIndexAt(segments, p.getCurrentFrame() / fps),
 		-1,
 	);
 }

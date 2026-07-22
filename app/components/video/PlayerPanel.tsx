@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { getAspectRatioValue } from "@/lib/video/aspectRatio";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
 import { ResizeHandle } from "./ResizeHandle";
@@ -34,16 +34,14 @@ function FitToAspectRatio({
 	);
 }
 
-export function TopPlayerPanel() {
-	const maxSize =
-		typeof window !== "undefined" ? window.innerHeight * 0.6 : 500;
+function TopPlayerPanelComponent() {
 	const aspectRatio = useAspectRatio();
 
 	const { size, handleMouseDown, resizing } = useResize({
 		axis: "vertical",
 		defaultSize: TOP_DEFAULT,
 		minSize: 150,
-		maxSize,
+		maxViewportFraction: 0.6,
 	});
 
 	return (
@@ -62,15 +60,14 @@ export function TopPlayerPanel() {
 	);
 }
 
-export function SidePlayerPanel() {
-	const maxSize = typeof window !== "undefined" ? window.innerWidth * 0.5 : 600;
+function SidePlayerPanelComponent() {
 	const aspectRatio = useAspectRatio();
 
 	const { size, handleMouseDown, resizing } = useResize({
 		axis: "horizontal",
 		defaultSize: SIDE_DEFAULT,
 		minSize: 250,
-		maxSize,
+		maxViewportFraction: 0.5,
 	});
 
 	return (
@@ -88,3 +85,6 @@ export function SidePlayerPanel() {
 		</div>
 	);
 }
+
+export const TopPlayerPanel = memo(TopPlayerPanelComponent);
+export const SidePlayerPanel = memo(SidePlayerPanelComponent);

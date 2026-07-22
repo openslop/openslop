@@ -1,16 +1,11 @@
-import {
-	renderMediaOnLambda,
-	speculateFunctionName,
-} from "@remotion/lambda/client";
+import { renderMediaOnLambda } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
 import {
-	DISK,
+	getFunctionName,
 	getSiteName,
-	RAM,
 	REGION,
-	TIMEOUT,
 } from "@/lib/video/lambda-config";
 import { COMPOSITION_ID } from "@/lib/video/types";
 
@@ -27,11 +22,7 @@ export const POST = createSessionRouteHandler({
 			codec: "h264",
 			region: REGION,
 			serveUrl: getSiteName(),
-			functionName: speculateFunctionName({
-				diskSizeInMb: DISK,
-				memorySizeInMb: RAM,
-				timeoutInSeconds: TIMEOUT,
-			}),
+			functionName: getFunctionName(),
 			composition: COMPOSITION_ID,
 			inputProps: body.inputProps,
 			scale: body.scale,

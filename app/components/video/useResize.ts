@@ -74,12 +74,12 @@ export function useResize({
 	axis,
 	defaultSize,
 	minSize,
-	maxSize,
+	maxViewportFraction,
 }: {
 	axis: ResizeAxis;
 	defaultSize: number;
 	minSize: number;
-	maxSize: number;
+	maxViewportFraction: number;
 }) {
 	const [size, setSize] = useState(defaultSize);
 	const [resizing, setResizing] = useState(false);
@@ -103,17 +103,19 @@ export function useResize({
 			e.preventDefault();
 			cleanupRef.current?.();
 			setResizing(true);
+			const viewport =
+				axis === "vertical" ? window.innerHeight : window.innerWidth;
 			cleanupRef.current = attachResizeListeners(document, {
 				axis,
 				startPos: axis === "vertical" ? e.clientY : e.clientX,
 				startSize: sizeRef.current,
 				minSize,
-				maxSize,
+				maxSize: viewport * maxViewportFraction,
 				onResize: setSize,
 				onEnd: () => setResizing(false),
 			});
 		},
-		[axis, minSize, maxSize],
+		[axis, minSize, maxViewportFraction],
 	);
 
 	return { size, handleMouseDown, resizing };

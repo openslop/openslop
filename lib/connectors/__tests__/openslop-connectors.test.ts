@@ -25,7 +25,7 @@ const TEST_ID = "test-id";
 
 function mockAsset(type: string, result: Record<string, string>) {
 	const bundleUrl = `/assets/${type}/openslop/${TEST_ID}`;
-	mockGatewaySuccess({ id: TEST_ID, provider: "openslop", result });
+	mockGatewaySuccess({ id: TEST_ID, type, provider: "openslop", result });
 	return bundleUrl;
 }
 
@@ -104,6 +104,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 				pollStatus: "completed",
 				result: {
 					id: TEST_ID,
+					type: "tts",
 					provider: "openslop",
 					result: { audio: "output.wav", timestamps: "timestamps.json" },
 				},

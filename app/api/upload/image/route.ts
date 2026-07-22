@@ -3,7 +3,7 @@ import { AssetBundle } from "@/lib/api/asset-bundle";
 import { badRequest } from "@/lib/api/response";
 import { withSession } from "@/lib/api/with-auth";
 
-const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_SIZE = 10 * 1024 * 1024;
 
 function sanitizeFilename(name: string): string {
 	const base = name.split(/[\\/]/).pop() ?? "";

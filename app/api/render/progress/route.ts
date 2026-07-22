@@ -1,11 +1,8 @@
-import {
-	getRenderProgress,
-	speculateFunctionName,
-} from "@remotion/lambda/client";
+import { getRenderProgress } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
-import { DISK, RAM, REGION, TIMEOUT } from "@/lib/video/lambda-config";
+import { getFunctionName, REGION } from "@/lib/video/lambda-config";
 
 const ProgressRequest = z.object({
 	renderId: z.string(),
@@ -24,11 +21,7 @@ export const POST = createSessionRouteHandler({
 		const progress = await getRenderProgress({
 			renderId: body.renderId,
 			bucketName: body.bucketName,
-			functionName: speculateFunctionName({
-				diskSizeInMb: DISK,
-				memorySizeInMb: RAM,
-				timeoutInSeconds: TIMEOUT,
-			}),
+			functionName: getFunctionName(),
 			region: REGION,
 		});
 

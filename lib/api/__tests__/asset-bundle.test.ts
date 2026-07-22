@@ -68,10 +68,11 @@ describe("AssetBundle", () => {
 		it("creates bundle from a BundleResponse", () => {
 			const response: BundleResponse = {
 				id: "abc",
+				type: "image",
 				provider: "runware",
 				result: { image: "output.png" },
 			};
-			const bundle = AssetBundle.fromResponse("image", response);
+			const bundle = AssetBundle.fromResponse(response);
 			expect(bundle.resolve("image")).toBe(
 				"https://blob.example.com/assets/image/runware/abc/output.png",
 			);
@@ -139,58 +140,6 @@ describe("AssetBundle", () => {
 			await expect(bundle.fetchJson("timestamps")).rejects.toThrow(
 				/timestamps.*404.*Not Found/,
 			);
-
-			vi.unstubAllGlobals();
-		});
-	});
-
-	describe("fromId", () => {
-		beforeEach(() => {
-			AssetBundle.baseUrl = "https://blob.example.com";
-		});
-
-		it("fetches manifest and creates bundle", async () => {
-			const manifest = {
-				version: 1,
-				type: "image",
-				createdAt: "2024-01-01",
-				result: { image: "output.png" },
-			};
-			vi.stubGlobal(
-				"fetch",
-				vi.fn().mockResolvedValue({
-					ok: true,
-					status: 200,
-					statusText: "OK",
-					json: () => Promise.resolve(manifest),
-				}),
-			);
-
-			const bundle = await AssetBundle.fromId("image", "runware", "abc");
-			expect(bundle.manifest).toEqual(manifest);
-			expect(bundle.resolve("image")).toBe(
-				"https://blob.example.com/assets/image/runware/abc/output.png",
-			);
-			expect(fetch).toHaveBeenCalledWith(
-				"https://blob.example.com/assets/image/runware/abc/manifest.json",
-			);
-
-			vi.unstubAllGlobals();
-		});
-
-		it("throws when manifest fetch fails", async () => {
-			vi.stubGlobal(
-				"fetch",
-				vi.fn().mockResolvedValue({
-					ok: false,
-					status: 500,
-					statusText: "Server Error",
-				}),
-			);
-
-			await expect(
-				AssetBundle.fromId("image", "runware", "missing"),
-			).rejects.toThrow(/image\/runware\/missing.*500/);
 
 			vi.unstubAllGlobals();
 		});

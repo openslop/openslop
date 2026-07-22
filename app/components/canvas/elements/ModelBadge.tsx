@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { Codesandbox } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import type { ProviderKey } from "@/lib/connectors/types";
-import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import {
+	isKnownProvider,
+	resolveAttributeSchema,
+} from "@/lib/connectors/factory";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
-import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "./AttributeBadge";
 
@@ -13,18 +14,23 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	const { model, provider } = element.customAttributes ?? {};
 	const connector = ELEMENT_TYPES[element.type].connector;
 
-	const spec = useMemo<AttributeSpec | null>(() => {
-		if (!model || !provider) return null;
-		const options =
-			connectorConfig[connector]?.[provider as ProviderKey]?.models ?? [];
+	const resolved = useMemo(() => {
+		if (!model || !provider || !isKnownProvider(connector, provider)) {
+			return null;
+		}
+		const options = connectorConfig[connector]?.[provider]?.models ?? [];
 		return {
-			label: "Model",
-			icon: Codesandbox,
-			edit: { kind: "enum", options },
+			model,
+			provider,
+			spec: {
+				label: "Model",
+				icon: Codesandbox,
+				edit: { kind: "enum", options },
+			} as const,
 		};
 	}, [connector, connectorConfig, model, provider]);
 
-	if (!spec) return null;
+	if (!resolved) return null;
 
 	// NOTE: every connector's attributesFor currently ignores `model`, so
 	// oldSchema/newSchema are always identical for a given (connector, provider)
@@ -33,29 +39,18 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	// presence, not enum-value validity (e.g. a value valid on the old model
 	// but not the new one survives the switch); worth revisiting once per-model
 	// schemas actually differ.
-	const reconcileForModel = (next: string) => {
-		const oldSchema = resolveAttributeSchema(
-			connector,
-			provider as ProviderKey,
-			model,
-		);
-		const newSchema = resolveAttributeSchema(
-			connector,
-			provider as ProviderKey,
-			next,
-		);
-		return reconcileAttributes(
-			oldSchema,
-			newSchema,
+	const reconcileForModel = (next: string) =>
+		reconcileAttributes(
+			resolveAttributeSchema(connector, resolved.provider, resolved.model),
+			resolveAttributeSchema(connector, resolved.provider, next),
 			element.customAttributes ?? {},
 		);
-	};
 
 	return (
 		<AttributeBadge
 			element={element}
 			attrKey="model"
-			spec={spec}
+			spec={resolved.spec}
 			deriveExtraAttrs={reconcileForModel}
 		/>
 	);

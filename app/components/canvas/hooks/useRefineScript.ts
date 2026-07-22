@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/config/connectorUtils";
@@ -62,5 +62,8 @@ export function useRefineScript(editor: Editor) {
 		setRefineLoading(false);
 	}, []);
 
-	return { refineScript, refineLoading, stopRefine };
+	return useMemo(
+		() => ({ refineScript, refineLoading, stopRefine }),
+		[refineScript, refineLoading, stopRefine],
+	);
 }

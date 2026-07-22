@@ -49,7 +49,13 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	) {
 		super(
 			makeGateway(
-				generateFn ?? (async () => ({ id: "x", provider: "mock", result: {} })),
+				generateFn ??
+					(async () => ({
+						id: "x",
+						type: "image",
+						provider: "mock",
+						result: {},
+					})),
 			),
 			config,
 		);
@@ -127,6 +133,7 @@ describe("BaseAssetConnector", () => {
 		it("submits then polls the gateway and resolves the bundle", async () => {
 			const response: BundleResponse = {
 				id: "abc",
+				type: "image",
 				provider: "mock",
 				result: { image: "output.png" },
 				metadata: { durationSec: 5 },
@@ -155,6 +162,7 @@ describe("BaseAssetConnector", () => {
 		it("handles external urls in bundle response", async () => {
 			const response: BundleResponse = {
 				id: "xyz",
+				type: "image",
 				provider: "runware",
 				result: { image: "https://cdn.example.com/image.webp" },
 			};
@@ -164,6 +172,28 @@ describe("BaseAssetConnector", () => {
 			const result = await connector.generate({ prompt: "test" });
 			expect(result.imageUrl).toBe("https://cdn.example.com/image.webp");
 			expect(result.durationSec).toBe(0);
+		});
+	});
+
+	describe("storage namespace", () => {
+		it("resolves from the namespace the provider wrote, not the connector type", async () => {
+			class ReroutedConnector extends TestAssetConnector {
+				readonly type: ConnectorType = "animated_image";
+			}
+			const connector = new ReroutedConnector(
+				config,
+				vi.fn().mockResolvedValue({
+					id: "abc",
+					type: "image",
+					provider: "mock",
+					result: { image: "output.png" },
+				}),
+			);
+
+			expect(connector.type).toBe("animated_image");
+			expect((await connector.generate({ prompt: "test" })).imageUrl).toBe(
+				"https://blob.example.com/assets/image/mock/abc/output.png",
+			);
 		});
 	});
 });

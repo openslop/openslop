@@ -1,7 +1,3 @@
-/**
- * TTS attribute enums
- * These enums are used for text-to-speech (TTS) generation
- */
 export const TTS_GENDERS = ["masculine", "feminine"] as const;
 export type TTSGender = (typeof TTS_GENDERS)[number];
 

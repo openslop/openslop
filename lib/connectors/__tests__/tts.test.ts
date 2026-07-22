@@ -21,6 +21,7 @@ function mockSuccess() {
 			pollStatus: "completed",
 			result: {
 				id: TEST_ID,
+				type: "tts",
 				provider: "openslop",
 				result: { audio: "output.wav", timestamps: "timestamps.json" },
 			},

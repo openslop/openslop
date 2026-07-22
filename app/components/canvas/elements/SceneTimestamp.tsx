@@ -1,4 +1,4 @@
-import { formatDuration, formatTimeRange } from "@/lib/video/timestamps";
+import { formatRangeDuration, formatTimeRange } from "@/lib/video/timestamps";
 
 export function SceneTimestamp({
 	start,
@@ -13,7 +13,7 @@ export function SceneTimestamp({
 				{formatTimeRange(start, duration)}
 			</span>
 			<span className="rounded bg-muted px-1.5 py-px text-muted-foreground">
-				{formatDuration(duration)}
+				{formatRangeDuration(start, duration)}
 			</span>
 		</span>
 	);

@@ -1,26 +1,17 @@
 import { AssetBundle } from "@/lib/api/asset-bundle";
+import type { ResultKind } from "@/lib/canvas/types";
 import type { AssetGateway } from "@/lib/gateway/base";
 import { awaitCompletion } from "@/lib/providers/poll";
+import { assetUrlField } from "./assetUrl";
 import { BaseConnector } from "./base";
 import type { ConnectorConfig } from "./types";
-
-export type AssetKey = "image" | "audio" | "video";
-
-const ASSET_KEY_TO_URL_FIELD: Record<
-	AssetKey,
-	"imageUrl" | "audioUrl" | "videoUrl"
-> = {
-	image: "imageUrl",
-	audio: "audioUrl",
-	video: "videoUrl",
-};
 
 export abstract class BaseAssetConnector<
 	TParams extends { prompt: string },
 	TResult,
 	TGateway extends AssetGateway<TParams> = AssetGateway<TParams>,
 > extends BaseConnector<TParams, TResult> {
-	abstract readonly assetKey: AssetKey;
+	abstract readonly assetKey: ResultKind;
 
 	constructor(
 		protected gateway: TGateway,
@@ -31,7 +22,7 @@ export abstract class BaseAssetConnector<
 
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {
-			[ASSET_KEY_TO_URL_FIELD[this.assetKey]]: bundle.resolve(this.assetKey),
+			[assetUrlField(this.assetKey)]: bundle.resolve(this.assetKey),
 			durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
 		} as TResult;
 	}
@@ -49,8 +40,6 @@ export abstract class BaseAssetConnector<
 		if (!completed.result) {
 			throw new Error("Generation completed without a result");
 		}
-		return this.resolveBundle(
-			AssetBundle.fromResponse(this.type, completed.result),
-		);
+		return this.resolveBundle(AssetBundle.fromResponse(completed.result));
 	}
 }

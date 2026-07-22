@@ -33,7 +33,7 @@ ElevenLabsMusic.prototype.generate = pineconeCache<
 	[MusicGenerateParams],
 	BundleResponse
 >(ElevenLabsMusic.prototype.generate, {
-	index: process.env.PINECONE_MUSIC_INDEX ?? "music",
+	index: process.env.PINECONE_MUSIC_INDEX || "music",
 	serialize: (p) => p.prompt,
 	rank: rankByNearestDuration,
 	...audioBundleCache("music"),

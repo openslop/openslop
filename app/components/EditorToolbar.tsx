@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import type { Editor } from "slate";
 import { Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ function getGenerateLabel(loading: boolean, generating: boolean): string {
 	return "Generate All";
 }
 
-export function EditorToolbar({ editor }: { editor: Editor }) {
+function EditorToolbarComponent({ editor }: { editor: Editor }) {
 	const { loading, stopGeneration } = useScriptControl();
 	const { generateAll } = useGenerateAll(editor);
 	const queue = useGenerationQueue();
@@ -99,3 +99,5 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
 		</div>
 	);
 }
+
+export const EditorToolbar = memo(EditorToolbarComponent);

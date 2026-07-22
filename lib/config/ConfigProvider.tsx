@@ -28,23 +28,16 @@ import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mod
 import { createProjectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
 import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
-import { TEMPLATES } from "@/lib/templates/templates";
-import * as template from "@/lib/templates/applyTemplate";
+import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
+import { applyTemplate as applyTemplateToProject } from "@/lib/templates/applyTemplate";
 import { withRegistry } from "./connectorUtils";
 
 import type { Mode } from "@/lib/project/types";
 
-interface ModeContext {
-	projectId: string;
-	templateId?: string;
-}
-
-type ModePluginFactory = (ctx: ModeContext) => LLMPlugin;
-
-const MODE_PLUGIN_FACTORIES: Record<Mode, ModePluginFactory> = {
+const MODE_PLUGIN_FACTORIES: Record<Mode, (templateId: string) => LLMPlugin> = {
 	story: () => storyModePlugin,
 	script: () => scriptModePlugin,
-	template: ({ templateId }) => createTemplateModePlugin(templateId),
+	template: (templateId) => createTemplateModePlugin(templateId),
 };
 
 export type ConnectorRegistry = Record<
@@ -81,8 +74,8 @@ type ConfigContextValue = {
 	connectorConfig: ConnectorRegistry;
 	mode: Mode;
 	setMode: (mode: Mode) => void;
-	selectedTemplateId: string | undefined;
-	applyTemplate: (templateId: string) => void;
+	selectedTemplateId: string;
+	selectTemplate: (templateId: string) => void;
 };
 
 const [ConfigContext, useConfig] =
@@ -96,26 +89,22 @@ export function ConfigProvider({
 	projectId: string;
 	children: ReactNode;
 }) {
-	const [connectorConfig] = useState<ConnectorRegistry>(initialConnectorConfig);
 	const [mode, setMode] = useState<Mode>("story");
-	const [selectedTemplateId, setSelectedTemplateId] = useState<
-		string | undefined
-	>(TEMPLATES[0]?.id);
+	const [selectedTemplateId, setSelectedTemplateId] =
+		useState<string>(DEFAULT_TEMPLATE_ID);
 
-	const applyTemplate = useCallback(
+	const selectTemplate = useCallback(
 		(templateId: string) => {
 			setSelectedTemplateId(templateId);
-			template.applyTemplate(projectId, templateId);
+			applyTemplateToProject(projectId, templateId);
+			setMode("template");
 		},
 		[projectId],
 	);
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
-		const modePlugin = MODE_PLUGIN_FACTORIES[mode]({
-			projectId,
-			templateId: selectedTemplateId,
-		});
-		const base = withRegistry(connectorConfig)
+		const modePlugin = MODE_PLUGIN_FACTORIES[mode](selectedTemplateId);
+		const base = withRegistry(initialConnectorConfig)
 			.appendPlugins(
 				"llm",
 				createProjectMetadataPlugin(projectId),
@@ -135,7 +124,7 @@ export function ConfigProvider({
 				...buildAnimatedImagePlugins(projectId, base),
 			)
 			.build();
-	}, [connectorConfig, mode, selectedTemplateId, projectId]);
+	}, [mode, selectedTemplateId, projectId]);
 
 	const value = useMemo<ConfigContextValue>(
 		() => ({
@@ -144,7 +133,7 @@ export function ConfigProvider({
 			mode,
 			setMode,
 			selectedTemplateId,
-			applyTemplate,
+			selectTemplate,
 		}),
 		[
 			projectId,
@@ -152,7 +141,7 @@ export function ConfigProvider({
 			mode,
 			setMode,
 			selectedTemplateId,
-			applyTemplate,
+			selectTemplate,
 		],
 	);
 

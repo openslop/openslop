@@ -67,6 +67,26 @@ describe("pineconeCache", () => {
 		expect(mockEmbed).toHaveBeenCalledWith("hello");
 	});
 
+	it("falls through when fromMetadata cannot rehydrate the matched row", async () => {
+		const { pineconeCache } = await loadCache();
+		mockQuery.mockResolvedValue({
+			matches: [{ score: 0.95, metadata: { duration: 5 } }],
+		});
+		mockUpsert.mockResolvedValue(undefined);
+
+		const inner = vi.fn().mockResolvedValue("fresh");
+		const wrapped = pineconeCache<[string], string>(inner, {
+			index: "i",
+			threshold: 0.9,
+			serialize: (s) => s,
+			toMetadata: () => ({}),
+			fromMetadata: () => undefined,
+		});
+
+		expect(await wrapped("hello")).toBe("fresh");
+		expect(inner).toHaveBeenCalledWith("hello");
+	});
+
 	it("falls through on score below threshold and upserts result", async () => {
 		const { pineconeCache } = await loadCache();
 		mockQuery.mockResolvedValue({
@@ -404,6 +424,7 @@ describe("audioBundleCache", () => {
 		const m = cache.toMetadata(
 			{
 				id: "abc",
+				type: "music",
 				provider: "elevenlabs",
 				result: { audio: "https://blob/audio.mp3" },
 				metadata: { durationSec: 12.5 },
@@ -418,13 +439,13 @@ describe("audioBundleCache", () => {
 		});
 
 		const restored = cache.fromMetadata(m);
-		expect(restored.result.audio).toBe("https://blob/audio.mp3");
-		expect(restored.metadata).toMatchObject({
+		expect(restored?.result.audio).toBe("https://blob/audio.mp3");
+		expect(restored?.metadata).toMatchObject({
 			durationSec: 12.5,
 			cached: true,
 			description: "happy piano",
 		});
-		expect(restored.provider).toBe("pinecone-cache");
+		expect(restored?.provider).toBe("pinecone-cache");
 	});
 
 	it("resolves the filename to an absolute URL when r.result.audio is a relative filename", async () => {
@@ -433,6 +454,7 @@ describe("audioBundleCache", () => {
 		const m = audioBundleCache("music").toMetadata(
 			{
 				id: "abc123",
+				type: "music",
 				provider: "elevenlabs",
 				result: { audio: "output.mp3" },
 				metadata: { durationSec: 30 },
@@ -443,11 +465,12 @@ describe("audioBundleCache", () => {
 		expect(m.url).toBe(expected);
 	});
 
-	it("threads the type into the resolved URL", async () => {
+	it("resolves under the namespace the response was written to", async () => {
 		const { audioBundleCache } = await loadCache();
 		const m = audioBundleCache("sfx").toMetadata(
 			{
 				id: "id",
+				type: "sfx",
 				provider: "elevenlabs",
 				result: { audio: "out.mp3" },
 				metadata: { durationSec: 1 },
@@ -464,14 +487,23 @@ describe("audioBundleCache", () => {
 			duration: 5,
 			description: "old record",
 		});
-		expect(restored.result.audio).toBe("https://legacy/audio.mp3");
-		expect(restored.id).toBe("https://legacy/audio.mp3");
+		expect(restored?.result.audio).toBe("https://legacy/audio.mp3");
+		expect(restored?.id).toBe("https://legacy/audio.mp3");
+	});
+
+	it("fromMetadata forces a miss when the row carries no URL", async () => {
+		const { audioBundleCache } = await loadCache();
+		const cache = audioBundleCache("music");
+		expect(cache.fromMetadata({ duration: 5, description: "no url" })).toBe(
+			undefined,
+		);
+		expect(cache.fromMetadata({ url: "", duration: 5 })).toBe(undefined);
 	});
 
 	it("defaults duration to 0 when metadata missing", async () => {
 		const { audioBundleCache } = await loadCache();
 		const m = audioBundleCache("music").toMetadata(
-			{ id: "x", provider: "p", result: { audio: "u" } },
+			{ id: "x", type: "music", provider: "p", result: { audio: "u" } },
 			"desc",
 		);
 		expect(m.duration).toBe(0);

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { SelectField } from "@/components/ui/select-field";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
@@ -23,6 +17,11 @@ const LABELS: Record<TransitionType, string> = {
 	iris: "Iris",
 };
 
+const OPTIONS = TRANSITION_TYPES.map((value) => ({
+	value,
+	label: LABELS[value],
+}));
+
 export function PropertiesPanel() {
 	const { projectId } = useConfig();
 	const transitionType = useTransitionType();
@@ -35,21 +34,12 @@ export function PropertiesPanel() {
 	return (
 		<PanelCard title="Transition">
 			<PanelField label="Transition">
-				<Select
+				<SelectField
 					value={transitionType}
-					onValueChange={(value) => setTransitionType(value as TransitionType)}
-				>
-					<SelectTrigger size="sm" aria-label="Transition">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{TRANSITION_TYPES.map((value) => (
-							<SelectItem key={value} value={value} className="text-label">
-								{LABELS[value]}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+					options={OPTIONS}
+					onChange={setTransitionType}
+					ariaLabel="Transition"
+				/>
 			</PanelField>
 		</PanelCard>
 	);

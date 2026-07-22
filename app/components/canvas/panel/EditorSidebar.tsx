@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
 	Home,
 	Layout,
@@ -79,7 +79,7 @@ function RailItem({
 	);
 }
 
-export function EditorSidebar() {
+function EditorSidebarComponent() {
 	const [active, setActive] = useState<PanelKey | null>(null);
 	const toggle = (key: PanelKey) =>
 		setActive((prev) => (prev === key ? null : key));
@@ -122,3 +122,5 @@ export function EditorSidebar() {
 		</div>
 	);
 }
+
+export const EditorSidebar = memo(EditorSidebarComponent);

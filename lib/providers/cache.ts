@@ -11,10 +11,11 @@ const DEFAULT_THRESHOLD = 0.8;
 const RANKED_TOP_K = 5;
 const defaultSerialize = (...args: unknown[]): string => JSON.stringify(args);
 
-export type PineconeCacheOptions<Args extends unknown[], Result> = {
+type PineconeCacheOptions<Args extends unknown[], Result> = {
 	index: string;
 	toMetadata: (result: Result, description: string) => Metadata;
-	fromMetadata: (metadata: Metadata) => Result;
+	/** Return `undefined` when the stored row can't be rehydrated, forcing a miss. */
+	fromMetadata: (metadata: Metadata) => Result | undefined;
 	threshold?: number;
 	serialize?: (...args: Args) => string;
 	namespace?: string;
@@ -58,7 +59,10 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 				.filter((m) => (m.score ?? 0) >= threshold)
 				.map((m) => ({ score: m.score, metadata: m.metadata as Metadata }));
 			const hit = opts.rank ? opts.rank(eligible, ...args) : eligible[0];
-			if (hit?.metadata) return opts.fromMetadata(hit.metadata as Metadata);
+			if (hit?.metadata) {
+				const cached = opts.fromMetadata(hit.metadata);
+				if (cached !== undefined) return cached;
+			}
 		} catch (err) {
 			console.error("[pinecone-cache] read failed; falling through", err);
 		}
@@ -104,18 +108,21 @@ export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
 /**
  * Reusable strategy for any method returning an audio BundleResponse. Stores
  * the *resolved* absolute URL so cache hits round-trip through
- * `AssetBundle.resolve` without reconstructing a bogus path.
+ * `AssetBundle.resolve` without reconstructing a bogus path. `audioUrl` is the
+ * legacy key for rows written before the rename.
  */
 export const audioBundleCache = (type: string) => ({
 	toMetadata: (r: BundleResponse, description: string): Metadata => ({
-		url: AssetBundle.fromResponse(type, r).resolve("audio"),
+		url: AssetBundle.fromResponse(r).resolve("audio"),
 		duration: Number(r.metadata?.durationSec ?? 0),
 		description,
 	}),
-	fromMetadata: (m: Metadata): BundleResponse => {
-		const url = String(m.url || m.audioUrl);
+	fromMetadata: (m: Metadata): BundleResponse | undefined => {
+		const url = m.url || m.audioUrl;
+		if (typeof url !== "string" || url === "") return undefined;
 		return {
 			id: url,
+			type,
 			provider: "pinecone-cache",
 			result: { audio: url },
 			metadata: {
