@@ -33,16 +33,11 @@ describe("createTemplateModePlugin", () => {
 			);
 		});
 
-		it("returns params unchanged when templateId is null", () => {
-			const { beforeGenerate } = createTemplateModePlugin(undefined);
-			const params = { prompt: "hi", systemPrompt: "keep me" };
-			expect(beforeGenerate?.(params)).toBe(params);
-		});
-
-		it("returns params unchanged when templateId is unknown", () => {
+		it("throws when templateId is unknown", () => {
 			const { beforeGenerate } = createTemplateModePlugin("does-not-exist");
-			const params = { prompt: "hi" };
-			expect(beforeGenerate?.(params)).toBe(params);
+			expect(() => beforeGenerate?.({ prompt: "hi" })).toThrow(
+				'Unknown template id "does-not-exist"',
+			);
 		});
 
 		it("preserves other params", () => {
@@ -71,16 +66,11 @@ describe("createTemplateModePlugin", () => {
 			expect(result).toContain(realTemplate.exampleText.slice(0, 64));
 		});
 
-		it("returns prompt unchanged when templateId is null", async () => {
-			const { transformPrompt } = createTemplateModePlugin(undefined);
-			const result = await transformPrompt?.("anything", fakeCtx);
-			expect(result).toBe("anything");
-		});
-
-		it("returns prompt unchanged when templateId is unknown", async () => {
+		it("rejects when templateId is unknown", async () => {
 			const { transformPrompt } = createTemplateModePlugin("does-not-exist");
-			const result = await transformPrompt?.("anything", fakeCtx);
-			expect(result).toBe("anything");
+			await expect(transformPrompt?.("anything", fakeCtx)).rejects.toThrow(
+				'Unknown template id "does-not-exist"',
+			);
 		});
 	});
 });
