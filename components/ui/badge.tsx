@@ -13,6 +13,7 @@ const badgeVariants = cva(
 				outline: "border-border text-foreground",
 				accent: "border-transparent bg-accent text-accent-foreground",
 				success: "border-transparent bg-success text-success-foreground",
+				caution: "border-transparent bg-caution text-caution-foreground",
 				destructive:
 					"border-transparent bg-destructive text-destructive-foreground",
 				new: "border-transparent bg-accent-soft text-accent",

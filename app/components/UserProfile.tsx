@@ -1,11 +1,12 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/user/UserProvider";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -16,7 +17,10 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, Contrast, LogOut } from "@/components/ui/icon";
+import { Check, Contrast, LogOut, User } from "@/components/ui/icon";
+import ImpersonateDialog from "./ImpersonateDialog";
+
+const IS_DEV = process.env.NODE_ENV !== "production";
 
 const THEME_MODES = [
 	{ value: "light", label: "Light" },
@@ -27,6 +31,7 @@ const THEME_MODES = [
 function UserProfile() {
 	const router = useRouter();
 	const { theme, setTheme } = useTheme();
+	const [impersonateOpen, setImpersonateOpen] = useState(false);
 	const user = useUser();
 	const email = user.email ?? "";
 	const avatarUrl: string | undefined = user.user_metadata?.avatar_url;
@@ -92,6 +97,18 @@ function UserProfile() {
 								))}
 							</DropdownMenuSubContent>
 						</DropdownMenuSub>
+						{IS_DEV && (
+							<DropdownMenuItem
+								onClick={() => setImpersonateOpen(true)}
+								className="my-1 cursor-pointer rounded-xl py-2"
+							>
+								<User className="mr-2 h-4 w-4" />
+								Impersonate user
+								<Badge variant="caution" className="ml-auto">
+									Dev
+								</Badge>
+							</DropdownMenuItem>
+						)}
 						<DropdownMenuItem
 							onClick={handleLogout}
 							className="my-1 cursor-pointer rounded-xl py-2"
@@ -102,6 +119,12 @@ function UserProfile() {
 					</div>
 				</DropdownMenuContent>
 			</DropdownMenu>
+			{IS_DEV && (
+				<ImpersonateDialog
+					open={impersonateOpen}
+					onOpenChange={setImpersonateOpen}
+				/>
+			)}
 		</div>
 	);
 }

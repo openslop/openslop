@@ -5,11 +5,12 @@ Follow @CONVENTIONS.md, the canonical coding style for this repo.
 ## Workflow
 
 - After each change, run the checks from `.github/workflows/ci.yml` (lint, format, typecheck, tests) and fix all failures.
-- After completing code changes, run the following to review against best practices:
+- After each round of code changes, run the following to review against best practices:
   - `/simplify`
   - `/vercel-composition-patterns`
   - `/web-design-guidelines`
   - `/vercel-react-best-practices`
+  - Check against @CONVENTIONS.md
 
 ## Project structure
 
