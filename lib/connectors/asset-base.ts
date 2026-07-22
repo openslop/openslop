@@ -1,6 +1,6 @@
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { ResultKind } from "@/lib/canvas/types";
-import type { AssetGateway } from "@/lib/gateway/base";
+import { type AssetGateway, isTerminal } from "@/lib/gateway/base";
 import { awaitCompletion } from "@/lib/providers/poll";
 import { assetUrlField } from "./assetUrl";
 import { BaseConnector } from "./base";
@@ -32,7 +32,7 @@ export abstract class BaseAssetConnector<
 		const completed = await awaitCompletion(
 			(id) => this.gateway.poll(id),
 			jobId,
-			(p) => p.status === "completed" || p.status === "failed",
+			(p) => isTerminal(p.status),
 		);
 		if (completed.status === "failed") {
 			throw new Error(completed.error ?? "Generation failed");

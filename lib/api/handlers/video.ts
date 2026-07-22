@@ -1,5 +1,5 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
-import type { JobPoll, JobStatus } from "@/lib/gateway/base";
+import { isTerminal, type JobPoll, type JobStatus } from "@/lib/gateway/base";
 import type { VideoProviderResponse } from "@/lib/providers/video/base";
 import type { JobHandler } from "../job-handlers";
 import { rowView } from "../job-handlers";
@@ -18,9 +18,7 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		return { kind: "pending", metadata: { providerJobId } };
 	},
 	poll: async (job): Promise<JobPoll> => {
-		if (job.status === "completed" || job.status === "failed") {
-			return rowView(job);
-		}
+		if (isTerminal(job.status)) return rowView(job);
 
 		const providerJobId = job.metadata.providerJobId;
 		if (!providerJobId) return rowView(job);

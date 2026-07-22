@@ -1,18 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { VideoGenerateParams } from "@/lib/connectors/types";
-import type { TypedJobRow } from "../../job-handlers";
+import type { TypedJobRow } from "@/lib/api/job-handlers";
 import { videoHandler } from "../video";
 
 const generate = vi.fn();
 const poll = vi.fn();
 const updateJob = vi.fn();
 
-vi.mock("../../providers", async (importOriginal) => ({
-	...(await importOriginal<typeof import("../../providers")>()),
+vi.mock("@/lib/api/providers", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/api/providers")>()),
 	getVideoProvider: () => ({ generate, poll }),
 }));
-vi.mock("../../jobs", () => ({
+vi.mock("@/lib/api/jobs", () => ({
 	updateJob: (...args: unknown[]) => updateJob(...args),
 }));
 

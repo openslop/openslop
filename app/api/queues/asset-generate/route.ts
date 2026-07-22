@@ -4,11 +4,12 @@ import type { AssetQueueMessage } from "@/lib/api/jobs";
 import { loadJobForProcessing, updateJob } from "@/lib/api/jobs";
 import { logger } from "@/lib/api/logger";
 import { stringifyError } from "@/lib/errors";
+import { isTerminal } from "@/lib/gateway/base";
 
 export const POST = handleCallback<AssetQueueMessage>(
 	async ({ jobId, connectorType }) => {
 		const job = await loadJobForProcessing(jobId);
-		if (job.status === "completed" || job.status === "failed") return;
+		if (isTerminal(job.status)) return;
 
 		const handler = getJobHandler(connectorType);
 		if (!handler) {

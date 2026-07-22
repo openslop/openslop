@@ -6,6 +6,11 @@ export abstract class GatewayClient<TParams = unknown, TResult = unknown> {
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
+/** A job in a terminal state will never change again, so stop polling it. */
+export function isTerminal(status: JobStatus): boolean {
+	return status === "completed" || status === "failed";
+}
+
 export type JobSubmission = { jobId: string; status: JobStatus };
 
 export type JobPoll = {
