@@ -16,7 +16,11 @@ import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
 import { SelectMenu, type SelectMenuOption } from "@/components/ui/select-menu";
 import { cn } from "@/lib/utils";
 import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
-import { TEMPLATES, getTemplateById } from "@/lib/templates/templates";
+import {
+	TEMPLATES,
+	getTemplate,
+	type Template,
+} from "@/lib/templates/templates";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getProjectStore } from "@/lib/project/store";
 import type { Mode } from "@/lib/project/types";
@@ -129,15 +133,12 @@ function AttachMenu({
 }
 
 function TemplatePill({
-	templateId,
+	template,
 	onRemove,
 }: {
-	templateId: string;
+	template: Template;
 	onRemove: () => void;
 }) {
-	const template = getTemplateById(templateId);
-	if (!template) return null;
-
 	return (
 		<span
 			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
@@ -171,7 +172,7 @@ export default function ComposerCopilot({
 	placeholder,
 	placeholderOverlay,
 }: ComposerCopilotProps) {
-	const { projectId, mode, setMode, selectedTemplateId, applyTemplate } =
+	const { projectId, mode, setMode, selectedTemplateId, selectTemplate } =
 		useConfig();
 	const aspectRatio = useAspectRatio();
 	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
@@ -185,11 +186,9 @@ export default function ComposerCopilot({
 				store.setReferenceImages([...store.referenceImages, ...urls]);
 			},
 		});
-	const showPill = mode === "template" && selectedTemplateId !== undefined;
+	const isTemplateMode = mode === "template";
 	const hasText = value.trim().length > 0;
-	const selectedTemplate = selectedTemplateId
-		? getTemplateById(selectedTemplateId)
-		: undefined;
+	const selectedTemplate = getTemplate(selectedTemplateId);
 
 	const handleSubmit = () => {
 		if (hasText) onSubmit();
@@ -204,9 +203,9 @@ export default function ComposerCopilot({
 					onEditNarrator={openNarrator}
 				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-					{showPill && (
+					{isTemplateMode && (
 						<TemplatePill
-							templateId={selectedTemplateId}
+							template={selectedTemplate}
 							onRemove={() => setMode("story")}
 						/>
 					)}
@@ -224,7 +223,7 @@ export default function ComposerCopilot({
 							style={{ fieldSizing: "content" }}
 							className=" w-full resize-none bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
-						{!hasText && !showPill && placeholderOverlay && (
+						{!hasText && !isTemplateMode && placeholderOverlay && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">
 								{placeholderOverlay}
 							</div>
@@ -242,12 +241,11 @@ export default function ComposerCopilot({
 						/>
 						<SelectMenu
 							value={mode}
-							onChange={(mode: Mode) => {
-								setMode(mode);
-								if (mode === "template" && selectedTemplateId) {
-									applyTemplate(selectedTemplateId);
-								}
-							}}
+							onChange={(next: Mode) =>
+								next === "template"
+									? selectTemplate(selectedTemplateId)
+									: setMode(next)
+							}
 							options={MODE_OPTIONS}
 							itemClassName="rounded-lg text-label-xs"
 						>
@@ -272,21 +270,18 @@ export default function ComposerCopilot({
 								label={aspectRatio}
 							/>
 						</SelectMenu>
-						{mode === "template" && selectedTemplateId && (
+						{isTemplateMode && (
 							<SelectMenu
 								value={selectedTemplateId}
-								onChange={(templateId: string) => {
-									setMode("template");
-									applyTemplate(templateId);
-								}}
+								onChange={selectTemplate}
 								options={TEMPLATE_OPTIONS}
 								itemClassName="rounded-lg text-label-xs"
 							>
 								<PillTrigger
 									aria-label="Select template"
 									className="relative overflow-hidden"
-									style={{ backgroundColor: selectedTemplate?.color }}
-									label={selectedTemplate?.name}
+									style={{ backgroundColor: selectedTemplate.color }}
+									label={selectedTemplate.name}
 								/>
 							</SelectMenu>
 						)}

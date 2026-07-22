@@ -53,6 +53,12 @@ describe("applyTemplate", () => {
 		);
 	});
 
+	it("throws on an unknown template id instead of silently no-opping", () => {
+		expect(() => applyTemplate(PROJECT_ID, "does-not-exist")).toThrow(
+			/Unknown template id/,
+		);
+	});
+
 	it("wipes user-set narration before applying", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
