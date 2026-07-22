@@ -5,6 +5,7 @@ import { Maximize, Volume2, VolumeX } from "@/components/ui/icon";
 import type { VideoLayout } from "@/lib/video/types";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { IconButton } from "@/components/ui/icon-button";
+import { toSeconds } from "@/lib/video/frames";
 import { formatTime } from "@/lib/video/timestamps";
 import { usePlayerControl } from "./PlayerControlContext";
 import {
@@ -26,7 +27,7 @@ export function TimeDisplay({
 	const seconds = usePlayerValue(
 		player,
 		FRAME_EVENTS,
-		(p) => Math.floor(p.getCurrentFrame() / layout.fps),
+		(p) => Math.floor(toSeconds(p.getCurrentFrame(), layout.fps)),
 		0,
 	);
 	return (

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { toFrames } from "../frames";
 import { buildVideoLayout } from "../scene-builder";
 import type { ResolvedElement, Sequence, VideoLayout } from "../types";
 import type { CanvasElementType } from "@/lib/canvas/types";
@@ -476,8 +477,6 @@ describe("buildVideoLayout", () => {
 	// Both must land on the same frame, or audio drifts further behind the visuals
 	// with every scene boundary.
 	describe("frame alignment with the rendered timeline", () => {
-		const toFrames = (sec: number, fps: number) => Math.round(sec * fps);
-
 		it.each([24, 30, 25])(
 			"keeps absolute layer starts on the TransitionSeries grid at %ifps",
 			(fps) => {
