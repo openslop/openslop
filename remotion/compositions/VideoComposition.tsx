@@ -17,8 +17,8 @@ import {
 	AUDIO_FADE_SEC,
 	TRANSITION_DURATION_SEC,
 	VIDEO_PREMOUNT_SEC,
-	getPresentation,
 } from "@/lib/video/transitions";
+import { getPresentation } from "@/lib/video/transitionPresentations";
 import { audioVolume } from "@/lib/video/audioVolume";
 import { Captions } from "../components/Captions";
 import { MotionLayer } from "../components/MotionLayer";
