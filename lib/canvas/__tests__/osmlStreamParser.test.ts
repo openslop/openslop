@@ -64,13 +64,23 @@ describe("OSMLStreamParser", () => {
 		expect(getElementText(nodes[0])).toContain("Some long narration text here");
 	});
 
-	it("preserves raw tag name for unknown tags", () => {
+	it("keeps tags outside the OSML vocabulary as element text", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<unknowntag>content</unknowntag>", connectors);
+		s.appendChunk("<narration>He said <sigh> quietly</narration>", connectors);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("unknowntag");
+		expect(nodes[0].type).toBe("narration");
+		expect(getElementText(nodes[0])).toContain("He said <sigh> quietly");
+	});
+
+	it("keeps an unmatched closing tag outside the vocabulary as text", () => {
+		const s = new OSMLStreamParser();
+		s.appendChunk("<narration>a </b> b</narration>", connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(nodes).toHaveLength(1);
+		expect(getElementText(nodes[0])).toContain("a </b> b");
 	});
 
 	it("parses metadata_style metadata tag", () => {

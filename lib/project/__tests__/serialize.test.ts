@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { Node } from "slate";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
 import {
 	SCENE_TYPE,
@@ -86,5 +89,52 @@ describe("deserializeWithScenes", () => {
 		const secondClip = scenes[1].children[0];
 		expect(secondClip.type).toBe("clip");
 		expect(secondClip.customAttributes?.url).toBe("https://cdn/b.mp4");
+	});
+});
+
+describe("save/reload round trip on real editor nodes", () => {
+	const editorScene = (...children: CanvasContentElement[]): SceneElement => ({
+		id: "scene-id",
+		type: SCENE_TYPE,
+		children,
+	});
+
+	const reload = (scenes: SceneElement[]) =>
+		deserializeWithScenes(serializeOSMLWithScenes(scenes), connectors);
+
+	it("keeps element text stable across repeated save/reload cycles", () => {
+		let scenes = [
+			editorScene(
+				createCanvasNode("narration", connectors, { id: "n1", text: "Hello" }),
+			),
+		];
+
+		for (let i = 0; i < 3; i++) scenes = reload(scenes);
+
+		expect(Node.string(scenes[0].children[0])).toBe(`${ZERO_WIDTH_SPACE}Hello`);
+	});
+
+	it("keeps an empty element empty so its placeholder still renders", () => {
+		const scenes = reload([
+			editorScene(createCanvasNode("image", connectors, { id: "i1" })),
+		]);
+
+		expect(Node.string(scenes[0].children[0])).toBe(ZERO_WIDTH_SPACE);
+	});
+
+	it("keeps angle-bracketed prose inside the element that owns it", () => {
+		const scenes = reload([
+			editorScene(
+				createCanvasNode("narration", connectors, {
+					id: "n1",
+					text: "He said <sigh> quietly",
+				}),
+			),
+		]);
+
+		expect(scenes[0].children).toHaveLength(1);
+		expect(Node.string(scenes[0].children[0])).toContain(
+			"He said <sigh> quietly",
+		);
 	});
 });

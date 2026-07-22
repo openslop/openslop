@@ -1,6 +1,7 @@
 import { Descendant } from "slate";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
 import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { ZERO_WIDTH_SPACE } from "./constants";
 
 export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;
 const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
@@ -14,7 +15,10 @@ function serializeElement(element: CanvasContentElement): string {
 	const attrString = Object.entries({ id: element.id, ...attributes })
 		.map(([key, value]) => ` ${key}="${value}"`)
 		.join("");
-	return `<${element.type}${attrString}>${getElementText(element)}</${element.type}>\n`;
+	// The zero-width space is an editor-only caret anchor. It must not cross into
+	// OSML, or every save/reload cycle stacks another one onto the element text.
+	const body = getElementText(element).replaceAll(ZERO_WIDTH_SPACE, "");
+	return `<${element.type}${attrString}>${body}</${element.type}>\n`;
 }
 
 export function serializeOSML(descendants: Descendant[]): string {

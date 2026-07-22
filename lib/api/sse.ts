@@ -87,6 +87,11 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 			}
 		}
 	} finally {
+		// Releasing the lock alone leaves the body open, so a consumer that breaks
+		// out of the loop (Stop) never tears down the upstream request.
+		await reader
+			.cancel()
+			.catch((err) => logger.warn({ err }, "SSE: reader cancel failed"));
 		reader.releaseLock();
 	}
 }

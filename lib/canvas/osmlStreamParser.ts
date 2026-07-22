@@ -10,6 +10,15 @@ import { createCanvasNode } from "./createCanvasNode";
 
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
+const METADATA_TAG_PREFIX = "metadata_";
+
+/** OSML has a closed vocabulary. Anything else angle-bracketed is prose. */
+function isOSMLTag(tag: string): boolean {
+	return (
+		CANVAS_ELEMENT_TYPES.has(tag as CanvasElementType) ||
+		tag.startsWith(METADATA_TAG_PREFIX)
+	);
+}
 
 /**
  * Incrementally turns a stream of OSML text chunks into canvas nodes. Feed
@@ -43,18 +52,27 @@ export class OSMLStreamParser {
 		let updated = false;
 
 		while ((match = TAG_PATTERN.exec(this.buffer)) !== null) {
+			const [raw, openTag, closeTag] = match;
 			const text = this.buffer.slice(lastIndex, match.index);
+			lastIndex = match.index + raw.length;
+
 			if (text.trim()) {
 				this.updateCurrent(text);
 				updated = true;
 			}
 
-			const openTag = match[1];
 			if (openTag) {
 				const { tag, ...attributes } = parseXmlTag(openTag);
-				this.appendNext(tag, attributes, connectors);
+				if (isOSMLTag(tag)) {
+					this.appendNext(tag, attributes, connectors);
+					continue;
+				}
+			} else if (isOSMLTag(closeTag.trim())) {
+				continue;
 			}
-			lastIndex = match.index + match[0].length;
+
+			this.updateCurrent(raw);
+			updated = true;
 		}
 
 		this.buffer = this.buffer.slice(lastIndex);

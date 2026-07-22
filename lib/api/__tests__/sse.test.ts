@@ -160,4 +160,24 @@ describe("readSSE", () => {
 		// If the lock had not been released, getReader() would throw.
 		expect(() => stream.getReader()).not.toThrow();
 	});
+
+	it("cancels a still-open source when the consumer breaks early", async () => {
+		const encoder = new TextEncoder();
+		let cancelled = false;
+		const stream = new ReadableStream({
+			start(controller) {
+				controller.enqueue(encoder.encode('data: {"a":1}\n\n'));
+			},
+			cancel() {
+				cancelled = true;
+			},
+		});
+
+		for await (const event of readSSE(stream)) {
+			expect(event).toEqual({ a: 1 });
+			break;
+		}
+
+		expect(cancelled).toBe(true);
+	});
 });
