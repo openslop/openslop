@@ -11,8 +11,12 @@ export function buildGenerationJob(
 ): GenerationJob {
 	const customAttributes = element.customAttributes ?? {};
 	const connectorType = ELEMENT_TYPES[element.type].connector;
-	const provider = (customAttributes.provider as ProviderKey) ?? "openslop";
-	const { config } = getDefaultConnector(connectorConfig, connectorType);
+	const { provider: defaultProvider, config } = getDefaultConnector(
+		connectorConfig,
+		connectorType,
+	);
+	const provider =
+		(customAttributes.provider as ProviderKey) ?? defaultProvider;
 
 	return {
 		elementId: element.id,

@@ -20,9 +20,8 @@ const EnvelopeIcon = (
 );
 
 interface EmailSentCardProps {
-	email: string;
-	subtitle?: string;
-	resendLabel?: string;
+	subtitle: string;
+	resendLabel: string;
 	loading: boolean;
 	error: string;
 	onResend: () => void;
@@ -30,7 +29,6 @@ interface EmailSentCardProps {
 }
 
 export default function EmailSentCard({
-	email,
 	subtitle,
 	resendLabel,
 	loading,
@@ -41,7 +39,7 @@ export default function EmailSentCard({
 	return (
 		<OnboardingCard
 			heading="Email sent!"
-			subtitle={subtitle ?? `We sent a login link to ${email}`}
+			subtitle={subtitle}
 			icon={EnvelopeIcon}
 			footer={
 				<button
@@ -60,7 +58,7 @@ export default function EmailSentCard({
 				disabled={loading}
 				className="h-11 w-full"
 			>
-				{loading ? "Sending…" : (resendLabel ?? "Send another login link")}
+				{loading ? "Sending…" : resendLabel}
 			</Button>
 			{error && (
 				<p className="text-center text-body text-destructive">{error}</p>

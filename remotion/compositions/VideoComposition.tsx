@@ -21,6 +21,8 @@ import {
 } from "@/lib/video/transitions";
 import { getPresentation } from "@/lib/video/transitionPresentations";
 import { audioVolume } from "@/lib/video/audioVolume";
+import { volumeToGain } from "@/lib/video/elementAttributes";
+import { ELEMENT_TYPES } from "@/lib/canvas/types";
 import { Captions } from "../components/Captions";
 import { MotionLayer } from "../components/MotionLayer";
 
@@ -34,7 +36,7 @@ const blackBg: React.CSSProperties = { backgroundColor: "black" };
 
 function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
-	const gain = element.volume / 10;
+	const gain = volumeToGain(element.volume);
 	const hasFadeEnvelope = element.role === "background";
 	const fadeFrames = hasFadeEnvelope ? toFrames(AUDIO_FADE_SEC, fps) : 0;
 	const volume = useMemo(
@@ -63,13 +65,13 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 		case "visual":
 			return (
 				<MotionLayer effect={element.motion}>
-					{element.type === "image" ? (
+					{ELEMENT_TYPES[element.type].outputKind === "image" ? (
 						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
 					) : (
 						<OffthreadVideo
 							src={element.url}
 							style={coverStyle}
-							volume={element.volume / 10}
+							volume={volumeToGain(element.volume)}
 						/>
 					)}
 				</MotionLayer>
