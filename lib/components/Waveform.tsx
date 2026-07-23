@@ -83,8 +83,8 @@ export function Waveform({
 	const [loadedSrc, setLoadedSrc] = useState<string | null>(() =>
 		peaksCache?.has(src) ? src : null,
 	);
-	const [metadataReadyFor, setMetadataReadyFor] = useState<string | null>(null);
-	const loading = loadedSrc !== src || metadataReadyFor !== src;
+	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
+	const loading = loadedSrc !== src || audioSettledFor !== src;
 
 	// Adjust state during render when src changes to a cached value
 	// (React-supported pattern for deriving state from props)
@@ -222,10 +222,11 @@ export function Waveform({
 					const a = audioRef.current;
 					if (!a) return;
 					if (Number.isFinite(a.duration) && a.duration > 0) {
-						setMetadataReadyFor(src);
+						setAudioSettledFor(src);
 					}
 					onTimeUpdate?.(0, a.duration || 0);
 				}}
+				onError={() => setAudioSettledFor(src)}
 				onPlay={onPlay}
 				onPause={onPause}
 				onEnded={onFinish}

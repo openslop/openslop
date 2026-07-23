@@ -5,10 +5,17 @@ import Image, { type ImageProps } from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * `next/image` with a shimmer overlay that hides once the image loads.
+ * `next/image` with a shimmer overlay that hides once the image resolves.
+ * Clears on error too, so a broken/expired URL falls back to the image's
+ * own error state instead of shimmering forever.
  */
-export function ImageWithShimmer({ alt, onLoad, ...props }: ImageProps) {
-	const [loaded, setLoaded] = useState(false);
+export function ImageWithShimmer({
+	alt,
+	onLoad,
+	onError,
+	...props
+}: ImageProps) {
+	const [settled, setSettled] = useState(false);
 	return (
 		<>
 			<Image
@@ -16,10 +23,14 @@ export function ImageWithShimmer({ alt, onLoad, ...props }: ImageProps) {
 				alt={alt}
 				onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
 					onLoad?.(event);
-					setLoaded(true);
+					setSettled(true);
+				}}
+				onError={(event: SyntheticEvent<HTMLImageElement>) => {
+					onError?.(event);
+					setSettled(true);
 				}}
 			/>
-			{!loaded && (
+			{!settled && (
 				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
 			)}
 		</>
