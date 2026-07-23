@@ -97,6 +97,39 @@ describe("project store updateMetadata", () => {
 		});
 	});
 
+	it("updateCharacter merges into the existing entry", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store
+			.getState()
+			.setCharacter("Alice", { appearance: "A girl", accent: "british" });
+		store.getState().updateCharacter("Alice", { avatarUrl: "a.png" });
+
+		expect(store.getState().metadata.characters["Alice"]).toEqual({
+			appearance: "A girl",
+			accent: "british",
+			avatarUrl: "a.png",
+		});
+	});
+
+	it("updateCharacter throws for an unknown character", () => {
+		const store = getProjectStore(PROJECT_ID);
+		expect(() =>
+			store.getState().updateCharacter("Nobody", { avatarUrl: "a.png" }),
+		).toThrow(/Nobody/);
+	});
+
+	it("addReferenceImages appends to the existing images", () => {
+		const store = getProjectStore(PROJECT_ID);
+		store.getState().setReferenceImages(["a.png"]);
+		store.getState().addReferenceImages(["b.png", "c.png"]);
+
+		expect(store.getState().referenceImages).toEqual([
+			"a.png",
+			"b.png",
+			"c.png",
+		]);
+	});
+
 	it("removeReferenceImage drops only the image at the given index", () => {
 		const store = getProjectStore(PROJECT_ID);
 		store.getState().setReferenceImages(["a.png", "b.png", "c.png"]);

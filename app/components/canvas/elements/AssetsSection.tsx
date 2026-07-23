@@ -1,35 +1,28 @@
 "use client";
 
 import { memo, useState } from "react";
-import { ImagePlus, Mic, Palette, User, UserPlus } from "@/components/ui/icon";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore, useProjectStore } from "@/lib/project/store";
-import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
+import { ImagePlus, UserPlus } from "@/components/ui/icon";
+import { useProject } from "@/lib/project/useProject";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { AddAssetTile } from "./AddAssetTile";
-import { AssetTile } from "./AssetTile";
+import {
+	CharacterAssetTiles,
+	NarratorAssetTile,
+	ReferenceAssetTiles,
+} from "./AssetTiles";
 import { useAssetEditDialogs } from "./character/useAssetEditDialogs";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 
 function AssetsSectionComponent() {
-	const { projectId } = useConfig();
-	const hydrated = useProjectStore(projectId, (s) => s.hydrated);
-	const characters = useProjectStore(projectId, (s) => s.metadata.characters);
-	const referenceImages = useProjectStore(projectId, (s) => s.referenceImages);
-	const removeReferenceImage = useProjectStore(
-		projectId,
-		(s) => s.removeReferenceImage,
-	);
+	const hydrated = useProject((s) => s.hydrated);
+	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [collapsed, setCollapsed] = useState(false);
 	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
 		useAssetEditDialogs();
 
 	const { openPicker, uploading, inputElement } = useImageUpload({
 		multiple: true,
-		onUpload: (urls) => {
-			const store = getProjectStore(projectId).getState();
-			store.setReferenceImages([...store.referenceImages, ...urls]);
-		},
+		onUpload: addReferenceImages,
 	});
 
 	if (!hydrated) return null;
@@ -44,37 +37,15 @@ function AssetsSectionComponent() {
 			/>
 			{!collapsed && (
 				<div className="flex flex-wrap gap-2">
-					<AssetTile
-						name="Narrator"
-						Icon={Mic}
-						fallback="icon"
-						onEdit={openNarrator}
-					/>
-					{Object.entries(characters).map(([name, ch]) => (
-						<AssetTile
-							key={`character:${name}`}
-							name={name}
-							previewUrl={ch.avatarUrl}
-							Icon={User}
-							elementId={characterAvatarElementId(name)}
-							onEdit={() => editCharacter(name)}
-						/>
-					))}
+					<NarratorAssetTile onEdit={openNarrator} />
+					<CharacterAssetTiles onEdit={editCharacter} />
 					<AddAssetTile
 						label="Character"
 						ariaLabel="Add character"
 						Icon={UserPlus}
 						onClick={openCreateCharacter}
 					/>
-					{referenceImages.map((url, i) => (
-						<AssetTile
-							key={`style:${url}`}
-							name={`Reference ${i + 1}`}
-							previewUrl={url}
-							Icon={Palette}
-							onRemove={() => removeReferenceImage(i)}
-						/>
-					))}
+					<ReferenceAssetTiles />
 					<AddAssetTile
 						label="Reference"
 						ariaLabel="Add reference image"

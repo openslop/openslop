@@ -25,7 +25,7 @@ import {
 	characterAvatarElementId,
 } from "@/lib/project/ensureCharacterAvatars";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
-import { getProjectStore, useProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
@@ -65,9 +65,9 @@ function CharacterEditDialogBody({
 }) {
 	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
-	const metadata = useProjectStore(projectId, (s) => s.metadata);
+	const metadata = useProject((s) => s.metadata);
 	const character = metadata.characters[name];
-	const setCharacter = useProjectStore(projectId, (s) => s.setCharacter);
+	const updateCharacter = useProject((s) => s.updateCharacter);
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [closeConfirm, setCloseConfirm] = useState(false);
@@ -80,12 +80,10 @@ function CharacterEditDialogBody({
 	if (!character) return null;
 
 	const update = (partial: Partial<MetadataCharacter>) =>
-		setCharacter(name, { ...character, ...partial });
+		updateCharacter(name, partial);
 
 	const regenerateAvatar = () => {
-		if (character.avatarUploaded) {
-			setCharacter(name, { ...character, avatarUploaded: false });
-		}
+		if (character.avatarUploaded) update({ avatarUploaded: false });
 		queue.enqueue(buildCharacterAvatarJob(projectId, name, connectorConfig));
 	};
 
@@ -194,14 +192,7 @@ function CharacterEditDialogBody({
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
 								queue.discard(avatarElementId);
-								const store = getProjectStore(projectId).getState();
-								const current = store.metadata.characters[name];
-								if (!current) return;
-								store.setCharacter(name, {
-									...current,
-									avatarUrl: url,
-									avatarUploaded: true,
-								});
+								update({ avatarUrl: url, avatarUploaded: true });
 							}}
 						/>
 					</div>

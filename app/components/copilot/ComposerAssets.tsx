@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Mic, Palette, User } from "@/components/ui/icon";
-import { AssetTile } from "@/app/components/canvas/elements/AssetTile";
+import {
+	CharacterAssetTiles,
+	NarratorAssetTile,
+	ReferenceAssetTiles,
+} from "@/app/components/canvas/elements/AssetTiles";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
@@ -23,15 +25,11 @@ export function ComposerAssets({
 }: ComposerAssetsProps) {
 	const { projectId } = useConfig();
 	const queue = useGenerationQueue();
-	const referenceImages = useProject((s) => s.referenceImages);
-	const characters = useProject((s) => s.metadata.characters);
 	const narration = useProject((s) => s.metadata.narration);
-	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
 
 	const [deletingName, setDeletingName] = useState<string>();
 
 	const hasNarration = Object.keys(narration).length > 0;
-	const characterEntries = Object.entries(characters);
 
 	const confirmDelete = () => {
 		if (deletingName) deleteCharacter(projectId, queue, deletingName);
@@ -40,35 +38,12 @@ export function ComposerAssets({
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
-			{hasNarration && (
-				<AssetTile
-					name="Narrator"
-					Icon={Mic}
-					fallback="icon"
-					onEdit={onEditNarrator}
-				/>
-			)}
-			{characterEntries.map(([name, ch]) => (
-				<AssetTile
-					key={`character:${name}`}
-					name={name}
-					previewUrl={ch.avatarUrl}
-					Icon={User}
-					elementId={characterAvatarElementId(name)}
-					onEdit={() => onEditCharacter(name)}
-					onRemove={() => setDeletingName(name)}
-					removeAffordance="corner"
-				/>
-			))}
-			{referenceImages.map((url, i) => (
-				<AssetTile
-					key={`ref:${url}`}
-					name={`Reference ${i + 1}`}
-					previewUrl={url}
-					Icon={Palette}
-					onRemove={() => removeReferenceImage(i)}
-				/>
-			))}
+			{hasNarration && <NarratorAssetTile onEdit={onEditNarrator} />}
+			<CharacterAssetTiles
+				onEdit={onEditCharacter}
+				onRemove={setDeletingName}
+			/>
+			<ReferenceAssetTiles />
 			{Array.from({ length: uploadingCount }).map((_, i) => (
 				<div
 					key={i}

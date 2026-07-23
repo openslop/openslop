@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { getProjectStore } from "@/lib/project/store";
+import { useProject } from "@/lib/project/useProject";
 import type { DeepPartial, Metadata } from "@/lib/project/types";
 import { useScriptNodes } from "@/lib/script/ScriptProvider";
 import { METADATA_TAG_CONFIGS } from "../config/metadataTags";
@@ -8,7 +7,7 @@ import { getElementText } from "@/lib/canvas/osmlSerializer";
 
 export function useMetadataSync(): void {
 	const nodes = useScriptNodes();
-	const { projectId } = useConfig();
+	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	useEffect(() => {
 		const partial: DeepPartial<Metadata> = {};
@@ -21,6 +20,6 @@ export function useMetadataSync(): void {
 				getElementText(node).trim(),
 			);
 		}
-		getProjectStore(projectId).getState().updateMetadata(partial);
-	}, [nodes, projectId]);
+		updateMetadata(partial);
+	}, [nodes, updateMetadata]);
 }
