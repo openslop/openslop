@@ -1,6 +1,18 @@
-import { Editor, type NodeEntry, type Path, Transforms } from "slate";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import { Editor, Element, type NodeEntry, type Path, Transforms } from "slate";
+import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import { isContentElement } from "./guards";
+
+/** Any canvas element by id — scenes included. Use {@link findNodeById} when only content will do. */
+export function findElementById(
+	editor: Editor,
+	id: string,
+): NodeEntry<CanvasElement> | null {
+	const [entry] = Editor.nodes<CanvasElement>(editor, {
+		at: [],
+		match: (n) => Element.isElement(n) && n.id === id,
+	});
+	return entry ?? null;
+}
 
 export function findNodeById(
 	editor: Editor,

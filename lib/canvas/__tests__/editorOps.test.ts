@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, Editor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { findNodeById, updateNodeText, setNodeAttrs } from "../editorOps";
+import {
+	findElementById,
+	findNodeById,
+	updateNodeText,
+	setNodeAttrs,
+} from "../editorOps";
 
 function content(
 	type: CanvasContentElement["type"],
@@ -47,6 +52,33 @@ describe("findNodeById", () => {
 	it("does not match scene elements", () => {
 		const editor = makeEditor([scene([content("narration", "n1")], "s1")]);
 		expect(findNodeById(editor, "s1")).toBeNull();
+	});
+});
+
+describe("findElementById", () => {
+	it("finds a content element by id", () => {
+		const editor = makeEditor([
+			scene([content("narration", "n1"), content("image", "img1")]),
+		]);
+		expect(findElementById(editor, "img1")?.[1]).toEqual([0, 1]);
+	});
+
+	it("finds a scene by id", () => {
+		const editor = makeEditor([
+			scene([content("narration", "n1")], "s1"),
+			scene([content("image", "img1")], "s2"),
+		]);
+		expect(findElementById(editor, "s2")?.[1]).toEqual([1]);
+	});
+
+	it("does not match text leaves", () => {
+		const editor = makeEditor([scene([content("narration", "n1")])]);
+		expect(findElementById(editor, "n1-t")).toBeNull();
+	});
+
+	it("returns null for nonexistent id", () => {
+		const editor = makeEditor([scene([content("narration", "n1")])]);
+		expect(findElementById(editor, "nope")).toBeNull();
 	});
 });
 
