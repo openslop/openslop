@@ -5,7 +5,7 @@ import type { Editor } from "slate";
 import { Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { SimpleTooltip } from "@/components/ui/tooltip";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
@@ -83,16 +83,13 @@ function EditorToolbarComponent({ editor }: { editor: Editor }) {
 					</Button>
 					<ExportButton />
 					{generating && (
-						<SimpleTooltip label="Cancel generation">
-							<button
-								type="button"
-								onClick={() => queue.cancelAll()}
-								aria-label="Cancel generation"
-								className="relative flex h-7 w-7 shrink-0 items-center justify-center self-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
-							>
-								<X className="h-3 w-3" aria-hidden="true" />
-							</button>
-						</SimpleTooltip>
+						<TooltipIconButton
+							label="Cancel generation"
+							className="self-center bg-muted text-muted-foreground hover:text-foreground"
+							onClick={() => queue.cancelAll()}
+						>
+							<X className="h-3 w-3" aria-hidden="true" />
+						</TooltipIconButton>
 					)}
 				</div>
 			</div>
