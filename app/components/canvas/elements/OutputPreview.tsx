@@ -1,14 +1,9 @@
 import { memo } from "react";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
-import { useGenerate } from "../hooks/useGenerate";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import {
-	AudioResult,
-	AudioPlaceholder,
-	MediaPreview,
-	MediaPlaceholder,
-} from "./preview/results";
+import { AudioResult, AudioPlaceholder, MediaResult } from "./preview/results";
 import { AnimatedImagePreview } from "./preview/AnimatedImagePreview";
+import { useElementGeneration } from "./ElementGenerationContext";
 
 function OutputPreviewComponent({
 	element,
@@ -17,7 +12,8 @@ function OutputPreviewComponent({
 }) {
 	const type = element.type;
 	const { outputKind } = ELEMENT_TYPES[type];
-	const { status, seconds, result, error, discard } = useGenerate(element);
+	const { status, seconds, result, error, discard } = useElementGeneration();
+	const state = { status, seconds, error, onDiscard: discard };
 
 	if (outputKind === "audio") {
 		if (result?.audioUrl) {
@@ -25,48 +21,24 @@ function OutputPreviewComponent({
 				<AudioResult src={result.audioUrl} status={status} seconds={seconds} />
 			);
 		}
-		return (
-			<AudioPlaceholder
-				status={status}
-				seconds={seconds}
-				error={error}
-				onDiscard={discard}
-			/>
-		);
+		return <AudioPlaceholder {...state} />;
 	}
 
 	if (type === "animated_image") {
 		return (
 			<AnimatedImagePreview
+				{...state}
 				imageUrl={result?.imageUrl}
 				videoUrl={result?.videoUrl}
-				status={status}
-				seconds={seconds}
-				error={error}
-				onDiscard={discard}
-			/>
-		);
-	}
-
-	const url = getPrimaryUrl(result, outputKind);
-	if (url) {
-		return (
-			<MediaPreview
-				key={url}
-				url={url}
-				outputKind={outputKind}
-				status={status}
-				seconds={seconds}
 			/>
 		);
 	}
 
 	return (
-		<MediaPlaceholder
-			status={status}
-			seconds={seconds}
-			error={error}
-			onDiscard={discard}
+		<MediaResult
+			{...state}
+			url={getPrimaryUrl(result, outputKind)}
+			outputKind={outputKind}
 		/>
 	);
 }

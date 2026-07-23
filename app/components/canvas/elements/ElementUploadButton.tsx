@@ -1,27 +1,18 @@
 "use client";
 
-import { useConfig } from "@/lib/config/ConfigProvider";
-import {
-	useGenerationQueue,
-	useQueueSelector,
-} from "@/lib/generation/GenerationQueueProvider";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
-import { useProjectStore } from "@/lib/project/store";
+import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { useElementGeneration } from "./ElementGenerationContext";
 
 export function ElementUploadButton({
 	element,
 }: {
 	element: CanvasContentElement;
 }) {
-	const { projectId } = useConfig();
 	const queue = useGenerationQueue();
-	const status = useQueueSelector(
-		(q) => q.getElementSnapshot(element.id).status,
-	);
-	const metadata = useProjectStore(projectId, (s) => s.metadata);
+	const { status, inputs } = useElementGeneration();
 	const busy = status === "generating" || status === "queued";
 
 	return (
@@ -34,7 +25,7 @@ export function ElementUploadButton({
 				queue.commitResult(
 					element.id,
 					{ imageUrl: url, durationSec: 0 },
-					getGenerationInputs(element, metadata),
+					inputs,
 					ELEMENT_CONFIGS[element.type].connector,
 				);
 			}}

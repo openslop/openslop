@@ -46,6 +46,7 @@ export function useGenerate(element: CanvasContentElement) {
 		result: snapshot.result,
 		error: snapshot.error,
 		stale,
+		inputs: currentInputs,
 		hasPrompt: Boolean(currentInputs.prompt),
 		hasResult: Boolean(snapshot.result),
 		generate,

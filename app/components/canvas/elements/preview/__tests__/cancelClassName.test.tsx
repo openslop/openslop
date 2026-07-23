@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatedImagePreview } from "../AnimatedImagePreview";
-import { MediaPlaceholder } from "../results";
+import { MediaResult } from "../results";
 
 const withTooltip = (node: React.ReactNode) =>
 	renderToStaticMarkup(<TooltipProvider>{node}</TooltipProvider>);
@@ -15,10 +15,12 @@ const cancelButtonClass = (html: string) => {
 	return match[1];
 };
 
-describe("MediaPlaceholder cancelClassName forwarding", () => {
+describe("MediaResult cancelClassName forwarding", () => {
 	it("defaults to top-2 when cancelClassName is unset", () => {
 		const html = withTooltip(
-			<MediaPlaceholder
+			<MediaResult
+				url={undefined}
+				outputKind="image"
 				status="generating"
 				seconds={1}
 				error={null}
@@ -30,7 +32,9 @@ describe("MediaPlaceholder cancelClassName forwarding", () => {
 
 	it("forwards cancelClassName through to the cancel button", () => {
 		const html = withTooltip(
-			<MediaPlaceholder
+			<MediaResult
+				url={undefined}
+				outputKind="image"
 				status="generating"
 				seconds={1}
 				error={null}
@@ -39,6 +43,21 @@ describe("MediaPlaceholder cancelClassName forwarding", () => {
 			/>,
 		);
 		expect(cancelButtonClass(html)).toContain("top-10");
+	});
+
+	it("renders the media instead of the placeholder once a url arrives", () => {
+		const html = withTooltip(
+			<MediaResult
+				url="https://cdn.example.com/a.png"
+				outputKind="image"
+				status="idle"
+				seconds={0}
+				error={null}
+				onDiscard={() => {}}
+			/>,
+		);
+		expect(html).not.toContain('aria-label="Cancel generation"');
+		expect(html).toContain("https://cdn.example.com/a.png");
 	});
 });
 
