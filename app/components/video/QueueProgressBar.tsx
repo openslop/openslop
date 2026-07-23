@@ -8,7 +8,12 @@ export function QueueProgressBar() {
 	const active = useQueueSelector((q) => q.getActiveCount());
 	const done = useQueueSelector((q) => q.getGeneratedCount());
 	const total = active + done;
-	const pct = total === 0 ? 0 : (done / total) * 100;
+	// A reloaded project seeds its finished results back into the queue, so `done`
+	// is already > 0 before anything runs. Only report progress while something is
+	// actually generating — otherwise reopening a generated project flashes
+	// "N of N generated" at 100% during the prefetch window.
+	const generating = active > 0;
+	const pct = generating ? (done / total) * 100 : 0;
 
 	return (
 		<PlayerShimmer>
@@ -18,13 +23,13 @@ export function QueueProgressBar() {
 					role="progressbar"
 					aria-valuemin={0}
 					aria-valuemax={total || 1}
-					aria-valuenow={done}
+					aria-valuenow={generating ? done : 0}
 					aria-label="Generation progress"
 				>
 					<div className={styles.fill} style={{ width: `${pct}%` }} />
 				</div>
 				<div className="font-body text-label text-muted-foreground tabular-nums">
-					{total === 0 ? "Preparing…" : `${done} of ${total} generated`}
+					{generating ? `${done} of ${total} generated` : "Preparing…"}
 				</div>
 			</div>
 		</PlayerShimmer>
