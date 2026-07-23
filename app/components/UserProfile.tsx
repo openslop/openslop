@@ -2,7 +2,7 @@
 
 import { memo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { signOut } from "@/lib/auth/session";
 import { useUser } from "@/lib/user/UserProvider";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,8 +38,7 @@ function UserProfile() {
 	const name: string | undefined = user.user_metadata?.full_name;
 
 	const handleLogout = async () => {
-		const supabase = createClient();
-		await supabase.auth.signOut();
+		await signOut();
 		router.refresh();
 	};
 

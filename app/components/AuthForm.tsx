@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { sendMagicLink, signInWithGoogle } from "@/lib/auth/session";
 import OnboardingCard from "./OnboardingCard";
 import EmailSentCard from "./EmailSentCard";
 import OrDivider from "./OrDivider";
@@ -35,37 +35,23 @@ export default function AuthForm({
 	const [sent, setSent] = useState(false);
 	const [error, setError] = useState("");
 
-	const supabase = createClient();
-
 	const handleMagicLink = async (e?: React.FormEvent) => {
 		e?.preventDefault();
 		setLoading(true);
 		setError("");
 
-		const { error } = await supabase.auth.signInWithOtp({
+		const { error } = await sendMagicLink({
 			email,
-			options: {
-				emailRedirectTo: `${window.location.origin}/auth/callback`,
-				...(shouldCreateUser === false && { shouldCreateUser: false }),
-				...(otpData && { data: otpData }),
-			},
+			shouldCreateUser,
+			data: otpData,
 		});
 
 		if (error) {
-			setError(error.message);
+			setError(error);
 		} else {
 			setSent(true);
 		}
 		setLoading(false);
-	};
-
-	const handleGoogleAuth = async () => {
-		await supabase.auth.signInWithOAuth({
-			provider: "google",
-			options: {
-				redirectTo: `${window.location.origin}/auth/callback`,
-			},
-		});
 	};
 
 	if (sent) {
@@ -116,7 +102,7 @@ export default function AuthForm({
 			)}
 
 			<OrDivider />
-			<GoogleOAuthButton onClick={handleGoogleAuth} />
+			<GoogleOAuthButton onClick={signInWithGoogle} />
 		</OnboardingCard>
 	);
 }
