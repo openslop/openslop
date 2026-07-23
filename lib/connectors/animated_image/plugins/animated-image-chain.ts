@@ -1,3 +1,4 @@
+import omit from "lodash/omit";
 import {
 	createDefaultConnector,
 	type ConnectorRegistry,
@@ -8,6 +9,7 @@ import type {
 	AssetResult,
 	ConnectorPlugin,
 } from "@/lib/connectors/types";
+import { VIDEO_ONLY_KEYS } from "../connector";
 
 const STASH_KEY = "videoChain";
 
@@ -24,8 +26,7 @@ export function createVideoChainPlugin(
 	return {
 		name: "video-chain",
 		beforeGenerate(params, ctx) {
-			const { videoPrompt, videoWidth, videoHeight, duration, ...rest } =
-				params;
+			const { videoPrompt, videoWidth, videoHeight, duration } = params;
 			if (videoPrompt && ctx) {
 				ctx.data ??= {};
 				ctx.data[STASH_KEY] = {
@@ -35,7 +36,7 @@ export function createVideoChainPlugin(
 					duration,
 				} satisfies Stashed;
 			}
-			return rest as AnimatedImageGenerateParams;
+			return omit(params, VIDEO_ONLY_KEYS) as AnimatedImageGenerateParams;
 		},
 		async afterGenerate(result, ctx) {
 			const stashed = ctx?.data?.[STASH_KEY] as Stashed | undefined;

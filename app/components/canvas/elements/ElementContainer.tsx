@@ -153,7 +153,8 @@ export function ElementContainer({
 							contentEditable={false}
 						>
 							<ElementStaleIndicator />
-							{element.type === "image" && (
+							{(element.type === "image" ||
+								element.type === "animated_image") && (
 								<ElementUploadButton element={element} />
 							)}
 							<AnimateButton element={element} />

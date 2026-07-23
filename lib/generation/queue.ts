@@ -290,6 +290,7 @@ export class GenerationQueue {
 
 	private runJob(job: GenerationJob) {
 		const { elementId } = job;
+		const prior = this.getElementSnapshot(elementId);
 		const controller = new AbortController();
 		this.controllers.set(elementId, controller);
 
@@ -299,7 +300,7 @@ export class GenerationQueue {
 
 		const { metadata } = getProjectStore(job.projectId).getState();
 		const inputs = getGenerationInputs(job.element, metadata);
-		generateForElement(job, inputs)
+		generateForElement(job, inputs, prior)
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
 			.catch((err) => this.handleJobError(elementId, err, controller))
 			.finally(() => this.finalizeJob(elementId, controller));

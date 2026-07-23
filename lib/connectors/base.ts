@@ -12,6 +12,7 @@ import type {
 	ConnectorPlugin,
 	ConnectorType,
 	PluginContext,
+	PriorGeneration,
 } from "./types";
 
 export abstract class BaseConnector<
@@ -46,7 +47,7 @@ export abstract class BaseConnector<
 		return runBeforeGenerate(this.plugins, { ...params, prompt }, ctx);
 	}
 
-	async generate(params: TParams): Promise<TResult> {
+	async generate(params: TParams, _prior?: PriorGeneration): Promise<TResult> {
 		const ctx = this.pluginContext();
 		try {
 			const prepared = await this.prepareParams(params, ctx);

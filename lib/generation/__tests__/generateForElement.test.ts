@@ -64,11 +64,14 @@ describe("generateForElement", () => {
 		);
 
 		expect(createConnector).toHaveBeenCalledWith("image", "openslop", config);
-		expect(mockGenerate).toHaveBeenCalledWith({
-			prompt: "a sunset",
-			model: "test-model",
-			width: "1024",
-		});
+		expect(mockGenerate).toHaveBeenCalledWith(
+			{
+				prompt: "a sunset",
+				model: "test-model",
+				width: "1024",
+			},
+			undefined,
+		);
 		expect(result).toEqual(expected);
 	});
 
@@ -77,10 +80,13 @@ describe("generateForElement", () => {
 
 		await generateForElement(makeJob("music"), inputs("jazz beat"));
 
-		expect(mockGenerate).toHaveBeenCalledWith({
-			prompt: "jazz beat",
-			model: "test-model",
-		});
+		expect(mockGenerate).toHaveBeenCalledWith(
+			{
+				prompt: "jazz beat",
+				model: "test-model",
+			},
+			undefined,
+		);
 	});
 
 	it("merges attributes into generate call", async () => {
@@ -91,12 +97,38 @@ describe("generateForElement", () => {
 			inputs("hello world", { voiceId: "voice-1", speed: "fast" }),
 		);
 
-		expect(mockGenerate).toHaveBeenCalledWith({
-			prompt: "hello world",
-			model: "test-model",
-			voiceId: "voice-1",
-			speed: "fast",
-		});
+		expect(mockGenerate).toHaveBeenCalledWith(
+			{
+				prompt: "hello world",
+				model: "test-model",
+				voiceId: "voice-1",
+				speed: "fast",
+			},
+			undefined,
+		);
+	});
+
+	it("forwards the prior snapshot to the connector", async () => {
+		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
+		const prior = {
+			status: "idle" as const,
+			seconds: 0,
+			result: {
+				imageUrl: "https://example.com/prior.png",
+				durationSec: 0,
+			},
+			error: null,
+			resultInputs: inputs("a sunset", { videoPrompt: "zoom" }),
+			connectorType: "animated_image" as const,
+		};
+
+		await generateForElement(
+			makeJob("animated_image"),
+			inputs("a sunset", { videoPrompt: "pan" }),
+			prior,
+		);
+
+		expect(mockGenerate).toHaveBeenCalledWith(expect.anything(), prior);
 	});
 
 	it("propagates errors from connector.generate", async () => {

@@ -18,6 +18,15 @@ export type ProviderKey = "openslop";
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
+/** The element's last committed generation (a structural subset of the queue snapshot). */
+export interface PriorGeneration {
+	result: AssetResult | null;
+	resultInputs: {
+		prompt: string;
+		attributes: Record<string, string | number>;
+	} | null;
+}
+
 export interface PluginContext<TParams = unknown, TResult = unknown> {
 	gateway?: GatewayClient<TParams, TResult>;
 	searchVoices?: VoiceSearchFn;
@@ -124,6 +133,8 @@ export type AnimatedImageGenerateParams = ImageGenerateParams & {
 	videoWidth?: number;
 	videoHeight?: number;
 	duration?: number;
+	/** When set, skip still-image generation and animate this frame directly. */
+	reuseImageUrl?: string;
 };
 
 // TTS types
