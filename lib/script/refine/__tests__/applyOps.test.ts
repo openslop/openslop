@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor, Element } from "slate";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
 // No connector model/provider stamped here — these tests exercise refine-op
 // mechanics (insert/remove/set/anchor tracking), not attribute-schema
 // resolution, which has its own tests under lib/connectors/attributes/.
-vi.mock("@/lib/config/connectorUtils", () => ({
+vi.mock("@/lib/connectors/registry", () => ({
 	getDefaultConnector: () => ({
 		provider: "openslop",
 		config: { defaultModel: undefined, models: [], isDefault: true },

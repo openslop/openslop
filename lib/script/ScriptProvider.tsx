@@ -12,7 +12,7 @@ import {
 import type { ParsedElement } from "@/lib/canvas/types";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
+import { getDefaultConnector } from "@/lib/connectors/registry";
 import { createConnector } from "@/lib/connectors/factory";
 import { useProject } from "@/lib/project/useProject";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";

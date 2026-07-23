@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Editor, Transforms } from "slate";
 import { HistoryEditor } from "slate-history";
-import { useConfig, type ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import { useConfig } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { deserializeWithScenes } from "@/lib/project/serialize";
 
 export function rehydrateProjectEditor(

@@ -6,7 +6,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 	createConnector: () => ({ generate: generateMock }),
 }));
 
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AnimatedImageGenerateParams,
 	AssetResult,

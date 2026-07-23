@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
-import { createConnector } from "@/lib/connectors/factory";
+import { createDefaultConnector } from "@/lib/connectors/registry";
 import { createRefinePlugin } from "@/lib/connectors/llm/plugins/refine";
 import { RefineOpParser } from "@/lib/script/refine/parseOps";
 import { applyRefineOp } from "@/lib/script/refine/applyOps";
@@ -13,11 +12,6 @@ export function useRefineScript(editor: Editor) {
 	const [refineLoading, setRefineLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
 
-	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
-		connectorConfig,
-		"llm",
-	);
-
 	const refineScript = useCallback(
 		async (prompt: string) => {
 			abortRef.current?.abort();
@@ -26,10 +20,9 @@ export function useRefineScript(editor: Editor) {
 			setRefineLoading(true);
 
 			const osml = serializeOSMLWithScenes(editor.children);
-			const connector = createConnector("llm", llmProvider, {
-				...llmConfig,
-				plugins: [createRefinePlugin(osml)],
-			});
+			const connector = createDefaultConnector(connectorConfig, "llm", [
+				createRefinePlugin(osml),
+			]);
 
 			const parser = new RefineOpParser();
 			const anchorMap: Record<string, string> = {};
@@ -53,7 +46,7 @@ export function useRefineScript(editor: Editor) {
 				}
 			}
 		},
-		[editor, llmProvider, llmConfig, connectorConfig],
+		[editor, connectorConfig],
 	);
 
 	const stopRefine = useCallback(() => {

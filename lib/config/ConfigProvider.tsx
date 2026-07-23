@@ -2,19 +2,12 @@
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import type {
-	ConnectorConfig,
-	ConnectorPlugin,
-	ConnectorType,
-	LLMPlugin,
-	ProviderKey,
-} from "@/lib/connectors/types";
-import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
-import { IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
-import { TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
-import { VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
-import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
-import { MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
+import {
+	DEFAULT_CONNECTOR_REGISTRY,
+	withRegistry,
+	type ConnectorRegistry,
+} from "@/lib/connectors/registry";
+import type { LLMPlugin } from "@/lib/connectors/types";
 import { buildImagePlugins } from "../connectors/image/plugins/imageChain";
 import { buildAnimatedImagePlugins } from "../connectors/animated_image/plugins/animated-image-chain";
 import { createMetadataVoicePlugin } from "../connectors/tts/plugins/metadata-voice";
@@ -22,7 +15,6 @@ import { createReferenceImagesPlugin } from "../connectors/image/plugins/referen
 import { createVoiceHydratePlugin } from "../connectors/tts/plugins/voice-hydrate";
 import { createVoiceSearchPlugin } from "../connectors/tts/plugins/voice-search";
 import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
-import { osmlPlugin } from "../connectors/llm/plugins/osml";
 import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
 import { createProjectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
@@ -30,7 +22,6 @@ import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-
 import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
 import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
 import { applyTemplate as applyTemplateToProject } from "@/lib/templates/applyTemplate";
-import { withRegistry } from "./connectorUtils";
 
 import type { Mode } from "@/lib/project/types";
 
@@ -38,35 +29,6 @@ const MODE_PLUGIN_FACTORIES: Record<Mode, (templateId: string) => LLMPlugin> = {
 	story: () => storyModePlugin,
 	script: () => scriptModePlugin,
 	template: (templateId) => createTemplateModePlugin(templateId),
-};
-
-export type ConnectorRegistry = Record<
-	ConnectorType,
-	Record<ProviderKey, ConnectorConfig>
->;
-
-const openslopConfig = (
-	defaultModel: string,
-	models: Record<string, unknown>,
-	plugins?: ConnectorPlugin[],
-): Record<ProviderKey, ConnectorConfig> => ({
-	openslop: {
-		defaultModel,
-		models: Object.keys(models),
-		isDefault: true,
-		apiKey: "",
-		...(plugins && { plugins }),
-	},
-});
-
-const initialConnectorConfig: ConnectorRegistry = {
-	llm: openslopConfig("Slop LLM v1", LLM_MODELS, [osmlPlugin]),
-	tts: openslopConfig("Slop TTS v1", TTS_MODELS),
-	image: openslopConfig("Slop Image v1", IMAGE_MODELS),
-	animated_image: openslopConfig("Slop Image v1", IMAGE_MODELS),
-	video: openslopConfig("Slop Video v1", VIDEO_MODELS),
-	sfx: openslopConfig("Slop SFX v1", SFX_MODELS),
-	music: openslopConfig("Slop Music v1", MUSIC_MODELS),
 };
 
 type ConfigContextValue = {
@@ -104,7 +66,7 @@ export function ConfigProvider({
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
 		const modePlugin = MODE_PLUGIN_FACTORIES[mode](selectedTemplateId);
-		const base = withRegistry(initialConnectorConfig)
+		const base = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 			.appendPlugins(
 				"llm",
 				createProjectMetadataPlugin(projectId),

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ConnectorConfig, ConnectorPlugin } from "@/lib/connectors/types";
-import type { ConnectorRegistry } from "../ConfigProvider";
-import { getDefaultConnector, withRegistry } from "../connectorUtils";
+import {
+	getDefaultConnector,
+	withRegistry,
+	type ConnectorRegistry,
+} from "../registry";
 
 function makeConfig(overrides?: Partial<ConnectorConfig>): ConnectorConfig {
 	return {

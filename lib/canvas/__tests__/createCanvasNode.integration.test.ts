@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "../createCanvasNode";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
 const connectors: ConnectorRegistry = {
 	llm: {

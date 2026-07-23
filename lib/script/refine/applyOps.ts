@@ -7,7 +7,7 @@ import {
 import { insertElement } from "@/lib/canvas/insertElement";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { preservedAttributes } from "@/lib/canvas/preservedAttributes";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { RefineOp } from "./types";
 
 export function applyRefineOp(

@@ -1,4 +1,4 @@
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { ensureCharacterAvatars } from "@/lib/project/ensureCharacterAvatars";
 import type { GenerationJob, GenerationQueue } from "./queue";
 

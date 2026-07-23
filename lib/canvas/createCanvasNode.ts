@@ -3,8 +3,8 @@ import {
 	type CanvasContentElement,
 	type CanvasElementType,
 } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { getDefaultConnector } from "@/lib/connectors/registry";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";

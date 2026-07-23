@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
 import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/config/ConfigProvider";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
 const connectors: ConnectorRegistry = {
 	llm: {

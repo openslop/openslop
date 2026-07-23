@@ -6,7 +6,7 @@ import { isSceneElement } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/config/connectorUtils";
+import { getDefaultConnector } from "@/lib/connectors/registry";
 import {
 	isKnownProvider,
 	resolveAttributeSchema,
