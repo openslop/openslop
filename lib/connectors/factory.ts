@@ -51,15 +51,22 @@ export function isKnownProvider(
 	return Object.hasOwn(PROVIDERS[type], provider);
 }
 
+function providerCtor(
+	type: ConnectorType,
+	provider: ProviderKey,
+): ProviderConstructor {
+	const Ctor = PROVIDERS[type][provider];
+	if (!Ctor)
+		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
+	return Ctor;
+}
+
 export function createConnector<T extends ConnectorType>(
 	type: T,
 	provider: ProviderKey,
 	config: ConnectorConfig,
 ): ConnectorTypeMap[T] {
-	const Ctor = PROVIDERS[type][provider];
-	if (!Ctor)
-		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
-	return new Ctor(config) as ConnectorTypeMap[T];
+	return new (providerCtor(type, provider))(config) as ConnectorTypeMap[T];
 }
 
 /** Resolve the attribute schema for a (connectorType, provider, model), via the same class hierarchy `createConnector` instantiates. */
@@ -68,8 +75,5 @@ export function resolveAttributeSchema(
 	provider: ProviderKey,
 	model?: string,
 ): AttributeSchema {
-	const Ctor = PROVIDERS[type][provider];
-	if (!Ctor)
-		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
-	return Ctor.attributesFor(model);
+	return providerCtor(type, provider).attributesFor(model);
 }
