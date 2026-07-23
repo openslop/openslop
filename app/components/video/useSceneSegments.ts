@@ -1,11 +1,9 @@
 import type { PlayerRef } from "@remotion/player";
-import { useMemo } from "react";
 import { isForeground } from "@/lib/canvas/guards";
 import type { SceneElement } from "@/lib/canvas/types";
 import { toSeconds } from "@/lib/video/frames";
 import type { Sequence, VideoLayout } from "@/lib/video/types";
 import type { SeekThumbnail } from "./SeekTooltip";
-import { useLayout } from "./VideoLayoutContext";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 
 export type SceneSegment = {
@@ -51,33 +49,36 @@ export function useActiveSegmentIndex(
 	);
 }
 
-export function useSceneSegments(): SceneSegment[] {
-	const { layout, scenes } = useLayout();
-	return useMemo<SceneSegment[]>(() => {
-		const out: SceneSegment[] = [];
-		for (let i = 0; i < scenes.length; i++) {
-			const scene = scenes[i];
-			const seq = findSceneSequence(scene, layout);
-			if (!seq) continue;
-			const prev = out[out.length - 1];
-			if (prev) {
-				prev.duration = Math.max(
-					0,
-					prev.duration - layout.transitionDurationSec,
-				);
-			}
-			const el = seq.element;
-			out.push({
-				sceneId: scene.id,
-				sceneIndex: i + 1,
-				start: seq.start,
-				duration: seq.duration,
-				label: `Scene ${i + 1}`,
-				thumbnail: el
-					? { url: el.url, kind: el.type === "image" ? "image" : "video" }
-					: null,
-			});
+/**
+ * Derives the seek-bar scene segments from the layout. Consecutive scenes
+ * overlap by `transitionDurationSec`, so each segment's duration is trimmed by
+ * that overlap to keep the timeline contiguous. Owned by `VideoLayoutContext`
+ * so it is computed once for all consumers.
+ */
+export function buildSceneSegments(
+	scenes: SceneElement[],
+	layout: VideoLayout,
+): SceneSegment[] {
+	const out: SceneSegment[] = [];
+	for (let i = 0; i < scenes.length; i++) {
+		const scene = scenes[i];
+		const seq = findSceneSequence(scene, layout);
+		if (!seq) continue;
+		const prev = out[out.length - 1];
+		if (prev) {
+			prev.duration = Math.max(0, prev.duration - layout.transitionDurationSec);
 		}
-		return out;
-	}, [scenes, layout]);
+		const el = seq.element;
+		out.push({
+			sceneId: scene.id,
+			sceneIndex: i + 1,
+			start: seq.start,
+			duration: seq.duration,
+			label: `Scene ${i + 1}`,
+			thumbnail: el
+				? { url: el.url, kind: el.type === "image" ? "image" : "video" }
+				: null,
+		});
+	}
+	return out;
 }

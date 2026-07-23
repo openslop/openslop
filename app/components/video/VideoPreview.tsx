@@ -9,7 +9,8 @@ import { usePlayerControl } from "./PlayerControlContext";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { useActiveSceneSync } from "./useActiveSceneSync";
 import { usePreservedPlayhead } from "./usePreservedPlayhead";
-import { useActiveSegmentIndex, useSceneSegments } from "./useSceneSegments";
+import { useActiveSegmentIndex } from "./useSceneSegments";
+import { useLayout } from "./VideoLayoutContext";
 import styles from "./VideoPlayer.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
@@ -61,7 +62,7 @@ type VideoPreviewProps = {
 export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
-	const segments = useSceneSegments();
+	const { segments } = useLayout();
 	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
 	useActiveSceneSync(player, segments, activeIndex);
 	const { registerPlayer } = usePlayerControl();

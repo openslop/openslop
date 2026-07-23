@@ -2,18 +2,18 @@
 
 import { useMemo, type ReactNode } from "react";
 import type { Editor } from "slate";
-import type { SceneElement } from "@/lib/canvas/types";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import type { VideoLayout } from "@/lib/video/types";
 import { useAssetPrefetch } from "./useAssetPrefetch";
+import { buildSceneSegments, type SceneSegment } from "./useSceneSegments";
 import { useVideoLayout } from "./useVideoLayout";
 
 type VideoLayoutValue = {
 	layout: VideoLayout;
 	ready: boolean;
 	playerKey: string;
-	scenes: SceneElement[];
+	segments: SceneSegment[];
 };
 
 const [VideoLayoutContext, useLayout] =
@@ -33,9 +33,13 @@ export function VideoLayoutProvider({
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
+	const segments = useMemo(
+		() => buildSceneSegments(scenes, layout),
+		[scenes, layout],
+	);
 	const value = useMemo(
-		() => ({ layout, ready, playerKey, scenes }),
-		[layout, ready, playerKey, scenes],
+		() => ({ layout, ready, playerKey, segments }),
+		[layout, ready, playerKey, segments],
 	);
 	return <VideoLayoutContext value={value}>{children}</VideoLayoutContext>;
 }

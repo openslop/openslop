@@ -7,11 +7,7 @@ import { toFrames, toSeconds } from "@/lib/video/frames";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
-import {
-	findSegmentIndexAt,
-	useActiveSegmentIndex,
-	useSceneSegments,
-} from "./useSceneSegments";
+import { findSegmentIndexAt, useActiveSegmentIndex } from "./useSceneSegments";
 import { usePlayerPlaying } from "./usePlayerState";
 import { SegmentedSeekBar } from "./SegmentedSeekBar";
 import {
@@ -24,8 +20,7 @@ import {
 function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPosition();
-	const { layout } = useLayout();
-	const segments = useSceneSegments();
+	const { layout, segments } = useLayout();
 	const playing = usePlayerPlaying(player);
 	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
 

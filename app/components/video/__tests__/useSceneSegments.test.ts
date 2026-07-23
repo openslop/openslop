@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { findSegmentIndexAt, type SceneSegment } from "../useSceneSegments";
+import type { SceneElement } from "@/lib/canvas/types";
+import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
+import {
+	buildSceneSegments,
+	findSegmentIndexAt,
+	type SceneSegment,
+} from "../useSceneSegments";
 
 const seg = (
 	sceneId: string,
@@ -51,5 +57,106 @@ describe("findSegmentIndexAt", () => {
 		expect(findSegmentIndexAt(one, 0)).toBe(0);
 		expect(findSegmentIndexAt(one, 5)).toBe(0);
 		expect(findSegmentIndexAt(one, 100)).toBe(0);
+	});
+});
+
+const resolved = (url: string): ResolvedElement => ({
+	id: `${url}-el`,
+	type: "image",
+	role: "foreground",
+	layer: "visual",
+	url,
+	durationSec: 0,
+	loops: 1,
+	volume: 10,
+	motion: "none",
+});
+
+const sequence = (
+	start: number,
+	duration: number,
+	element: ResolvedElement | null,
+): Sequence => ({ element, start, duration });
+
+const scene = (id: string, foregroundId: string | null): SceneElement => ({
+	id,
+	type: "scene",
+	children: foregroundId
+		? [
+				{
+					id: foregroundId,
+					type: "image",
+					children: [{ id: `${foregroundId}-t`, type: "image", text: "" }],
+				},
+			]
+		: [],
+});
+
+const layout = (
+	entries: Record<string, Sequence>,
+	transitionDurationSec = 0,
+): VideoLayout => ({
+	series: [],
+	sequences: {},
+	sequenceByElementId: new Map(Object.entries(entries)),
+	fps: 24,
+	width: 1920,
+	height: 1080,
+	totalDurationSec: 0,
+	totalFrames: 0,
+	transitionType: "none",
+	transitionDurationSec,
+});
+
+describe("buildSceneSegments", () => {
+	it("returns an empty array when there are no scenes", () => {
+		expect(buildSceneSegments([], layout({}))).toEqual([]);
+	});
+
+	it("maps each scene's foreground sequence to a segment", () => {
+		const segments = buildSceneSegments(
+			[scene("s1", "fg1")],
+			layout({ fg1: sequence(0, 2, resolved("a.png")) }),
+		);
+		expect(segments).toEqual([
+			{
+				sceneId: "s1",
+				sceneIndex: 1,
+				start: 0,
+				duration: 2,
+				label: "Scene 1",
+				thumbnail: { url: "a.png", kind: "image" },
+			},
+		]);
+	});
+
+	it("trims the previous segment by the transition overlap", () => {
+		const segments = buildSceneSegments(
+			[scene("s1", "fg1"), scene("s2", "fg2")],
+			layout(
+				{
+					fg1: sequence(0, 2, resolved("a.png")),
+					fg2: sequence(2, 3, resolved("b.png")),
+				},
+				0.5,
+			),
+		);
+		expect(segments.map((s) => s.duration)).toEqual([1.5, 3]);
+	});
+
+	it("skips scenes with no foreground or no resolved sequence", () => {
+		const segments = buildSceneSegments(
+			[scene("s1", null), scene("s2", "missing"), scene("s3", "fg3")],
+			layout({ fg3: sequence(0, 4, resolved("c.png")) }),
+		);
+		expect(segments.map((s) => s.sceneId)).toEqual(["s3"]);
+	});
+
+	it("emits a null thumbnail when the sequence has no element", () => {
+		const [segment] = buildSceneSegments(
+			[scene("s1", "fg1")],
+			layout({ fg1: sequence(0, 2, null) }),
+		);
+		expect(segment.thumbnail).toBeNull();
 	});
 });
