@@ -63,7 +63,6 @@ export class GenerationQueue {
 	private history = new Map<string, Map<string, AssetResult>>();
 	private readonly batchSize: number;
 	private _resultVersion = 0;
-	private _peakActive = 0;
 
 	constructor({
 		batchSize,
@@ -122,15 +121,18 @@ export class GenerationQueue {
 		return false;
 	};
 
-	getActiveCount = (): number => {
-		let active = 0;
+	private count(predicate: (snap: ElementSnapshot) => boolean): number {
+		let n = 0;
 		for (const snap of this.state.values()) {
-			if (isActive(snap.status)) active++;
+			if (predicate(snap)) n++;
 		}
-		return active;
-	};
+		return n;
+	}
 
-	getPeakActive = (): number => this._peakActive;
+	getActiveCount = (): number => this.count((s) => isActive(s.status));
+
+	getGeneratedCount = (): number =>
+		this.count((s) => !isActive(s.status) && s.result != null);
 
 	snapshot(): Record<string, ElementSnapshot> {
 		return Object.fromEntries(this.state);
@@ -268,8 +270,6 @@ export class GenerationQueue {
 	}
 
 	private notify() {
-		const active = this.getActiveCount();
-		this._peakActive = active === 0 ? 0 : Math.max(this._peakActive, active);
 		for (const listener of this.listeners) {
 			listener();
 		}

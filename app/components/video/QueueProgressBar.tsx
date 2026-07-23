@@ -6,9 +6,14 @@ import styles from "./QueueProgressBar.module.css";
 
 export function QueueProgressBar() {
 	const active = useQueueSelector((q) => q.getActiveCount());
-	const peak = useQueueSelector((q) => q.getPeakActive());
-	const done = peak - active;
-	const pct = peak === 0 ? 0 : (done / peak) * 100;
+	const done = useQueueSelector((q) => q.getGeneratedCount());
+	const total = active + done;
+	// A reloaded project seeds its finished results back into the queue, so `done`
+	// is already > 0 before anything runs. Only report progress while something is
+	// actually generating — otherwise reopening a generated project flashes
+	// "N of N generated" at 100% during the prefetch window.
+	const generating = active > 0;
+	const pct = generating ? (done / total) * 100 : 0;
 
 	return (
 		<PlayerShimmer>
@@ -17,14 +22,14 @@ export function QueueProgressBar() {
 					className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
 					role="progressbar"
 					aria-valuemin={0}
-					aria-valuemax={peak || 1}
-					aria-valuenow={done}
+					aria-valuemax={total || 1}
+					aria-valuenow={generating ? done : 0}
 					aria-label="Generation progress"
 				>
 					<div className={styles.fill} style={{ width: `${pct}%` }} />
 				</div>
 				<div className="font-body text-label text-muted-foreground tabular-nums">
-					{peak === 0 ? "Preparing…" : `${done} of ${peak} generated`}
+					{generating ? `${done} of ${total} generated` : "Preparing…"}
 				</div>
 			</div>
 		</PlayerShimmer>
