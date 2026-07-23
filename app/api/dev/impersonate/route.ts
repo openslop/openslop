@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { parseSearchParams } from "@/lib/api/parse";
+import { badRequest } from "@/lib/api/response";
 import { withPublic } from "@/lib/api/with-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -23,18 +24,26 @@ export async function GET(request: NextRequest) {
 		);
 		if (!parsed.ok) return parsed.response;
 
+		// `recovery` targets an existing user and errors when the email is
+		// unknown; `magiclink` would silently create a junk account instead.
 		const { data, error } = await createServiceClient().auth.admin.generateLink(
 			{
-				type: "magiclink",
+				type: "recovery",
 				email: parsed.data.email,
 			},
 		);
-		if (error) throw error;
+		if (error) {
+			if (error.status && error.status < 500)
+				return badRequest(
+					`Cannot impersonate ${parsed.data.email}: ${error.message}`,
+				);
+			throw error;
+		}
 
 		const supabase = await createClient();
 		const { error: verifyError } = await supabase.auth.verifyOtp({
 			token_hash: data.properties.hashed_token,
-			type: "magiclink",
+			type: "recovery",
 		});
 		if (verifyError) throw verifyError;
 
