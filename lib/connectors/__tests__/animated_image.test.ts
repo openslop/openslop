@@ -42,7 +42,7 @@ describe("BaseAnimatedImageConnector still reuse", () => {
 	it("reuses the prior still and skips the gateway when still inputs are unchanged", async () => {
 		const fetch = vi.spyOn(globalThis, "fetch");
 		const result = await new OpenSlopAnimatedImage(config).generate(
-			{ prompt: "a dark forest", videoPrompt: "slow pan" },
+			{ prompt: "a dark forest", model: "test-model", videoPrompt: "slow pan" },
 			priorStill("https://example.com/prior.png", "a dark forest"),
 		);
 		expect(result).toEqual({
@@ -55,8 +55,28 @@ describe("BaseAnimatedImageConnector still reuse", () => {
 	it("regenerates the still when a still input changed", async () => {
 		const fetch = mockStill();
 		const result = await new OpenSlopAnimatedImage(config).generate(
-			{ prompt: "a bright meadow", videoPrompt: "slow pan" },
+			{
+				prompt: "a bright meadow",
+				model: "test-model",
+				videoPrompt: "slow pan",
+			},
 			priorStill("https://example.com/prior.png", "a dark forest"),
+		);
+		expect(result.imageUrl).toBe(STILL_URL);
+		expect(fetch).toHaveBeenCalled();
+	});
+
+	it("regenerates the still when the model changed", async () => {
+		const fetch = mockStill();
+		const result = await new OpenSlopAnimatedImage(config).generate(
+			{ prompt: "a dark forest", model: "test-model", videoPrompt: "slow pan" },
+			{
+				result: { imageUrl: "https://example.com/prior.png", durationSec: 0 },
+				resultInputs: {
+					prompt: "a dark forest",
+					attributes: { model: "old-model" },
+				},
+			},
 		);
 		expect(result.imageUrl).toBe(STILL_URL);
 		expect(fetch).toHaveBeenCalled();

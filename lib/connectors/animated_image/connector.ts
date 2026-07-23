@@ -17,9 +17,9 @@ export const VIDEO_ONLY_KEYS = [
 	"duration",
 ] as const;
 
-// The still is a pure function of the non-video params, and never the model.
+// The still is a pure function of the non-video params.
 const stillParams = (params: Record<string, unknown>) =>
-	omit(params, [...VIDEO_ONLY_KEYS, "model"]);
+	omit(params, VIDEO_ONLY_KEYS);
 
 function reusableStill(
 	params: AnimatedImageGenerateParams,
@@ -28,7 +28,10 @@ function reusableStill(
 	const imageUrl = prior?.result?.imageUrl;
 	const inputs = prior?.resultInputs;
 	if (!imageUrl || !inputs) return undefined;
+	// The prior inherits the request's base model; a per-element model override
+	// in its own attributes still wins, so a model change invalidates the still.
 	const priorStill = stillParams({
+		model: params.model,
 		prompt: inputs.prompt,
 		...inputs.attributes,
 	});
