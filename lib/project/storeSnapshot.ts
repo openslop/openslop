@@ -1,10 +1,13 @@
+import { z } from "zod";
 import type { ProjectStore } from "./store";
-import type { Metadata } from "./types";
+import { MetadataSchema } from "./types";
 
-export type ProjectStoreSnapshot = {
-	metadata: Metadata;
-	referenceImages: string[];
-};
+const ProjectStoreSnapshotSchema = z.object({
+	metadata: z.preprocess((value) => value ?? {}, MetadataSchema),
+	referenceImages: z.array(z.string()).default([]),
+});
+
+export type ProjectStoreSnapshot = z.infer<typeof ProjectStoreSnapshotSchema>;
 
 export function extractStoreSnapshot(
 	store: ProjectStore,
@@ -16,14 +19,21 @@ export function extractStoreSnapshot(
 	};
 }
 
+/**
+ * The `store` column is untyped JSON. Parse it into a complete snapshot once
+ * here so callers can trust the types; a structurally wrong row throws.
+ */
+export function parseStoreSnapshot(raw: unknown): ProjectStoreSnapshot {
+	return ProjectStoreSnapshotSchema.parse(raw ?? {});
+}
+
 export function applyStoreSnapshot(
 	store: ProjectStore,
-	snapshot: Partial<ProjectStoreSnapshot> | null | undefined,
+	snapshot: ProjectStoreSnapshot,
 ): void {
 	const state = store.getState();
 	if (state.hydrated) return;
-	if (snapshot?.metadata) state.updateMetadata(snapshot.metadata);
-	if (snapshot?.referenceImages)
-		state.setReferenceImages(snapshot.referenceImages);
+	state.updateMetadata(snapshot.metadata);
+	state.setReferenceImages(snapshot.referenceImages);
 	state.markHydrated();
 }

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { getProjectStore, clearProjectStore } from "../store";
-import { applyStoreSnapshot, extractStoreSnapshot } from "../storeSnapshot";
+import {
+	applyStoreSnapshot,
+	extractStoreSnapshot,
+	parseStoreSnapshot,
+} from "../storeSnapshot";
 
 const newProjectId = () =>
 	`p-${Math.random().toString(36).slice(2)}-${Date.now()}`;
@@ -47,12 +51,51 @@ describe("storeSnapshot", () => {
 		clearProjectStore(targetId);
 	});
 
-	it("no-ops on null snapshot", () => {
+	it("no-ops on an empty parsed snapshot", () => {
 		const id = newProjectId();
 		const store = getProjectStore(id);
 		const before = JSON.stringify(extractStoreSnapshot(store));
-		applyStoreSnapshot(store, null);
+		applyStoreSnapshot(store, parseStoreSnapshot(null));
 		expect(JSON.stringify(extractStoreSnapshot(store))).toBe(before);
 		clearProjectStore(id);
+	});
+});
+
+describe("parseStoreSnapshot", () => {
+	it("fills defaults for absent and partial rows", () => {
+		expect(parseStoreSnapshot(null)).toEqual({
+			metadata: { title: "", style: "", narration: {}, characters: {} },
+			referenceImages: [],
+		});
+		expect(parseStoreSnapshot({ metadata: { title: "T" } }).metadata).toEqual({
+			title: "T",
+			style: "",
+			narration: {},
+			characters: {},
+		});
+	});
+
+	it("keeps a full snapshot intact", () => {
+		const snapshot = {
+			metadata: {
+				title: "T",
+				style: "noir",
+				narration: { age: "adult" as const },
+				characters: {
+					Ada: { appearance: "tall", gender: "feminine" as const },
+				},
+				videoSettings: {
+					aspectRatio: "9:16" as const,
+					transitionType: "fade" as const,
+				},
+			},
+			referenceImages: ["a.png"],
+		};
+		expect(parseStoreSnapshot(snapshot)).toEqual(snapshot);
+	});
+
+	it("throws on a structurally invalid row", () => {
+		expect(() => parseStoreSnapshot({ metadata: { title: 42 } })).toThrow();
+		expect(() => parseStoreSnapshot({ referenceImages: "a.png" })).toThrow();
 	});
 });
