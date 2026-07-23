@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { stringifyError } from "@/lib/errors";
+import { errorMessage } from "@/lib/errors";
 import { uploadImage } from "@/lib/upload/uploadImage";
 
 export function useImageUpload({
@@ -24,7 +24,7 @@ export function useImageUpload({
 			const urls: string[] = [];
 			for (const r of results) {
 				if (r.status === "fulfilled") urls.push(r.value);
-				else toast.error(stringifyError(r.reason));
+				else toast.error(errorMessage(r.reason));
 			}
 			if (urls.length > 0) onUpload(urls);
 		} finally {
