@@ -70,7 +70,7 @@ function NewCharacterDialogBody({
 				/>
 
 				{collision && (
-					<span className="text-label-xs text-rose-400" role="alert">
+					<span className="text-label-xs text-destructive" role="alert">
 						A character named &quot;{normalized}&quot; already exists.
 					</span>
 				)}

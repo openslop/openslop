@@ -95,7 +95,7 @@ export function VoicePicker({
 	return (
 		<div className="flex min-w-0 flex-col gap-1.5">
 			<FieldLabel>Voices</FieldLabel>
-			{error && <span className="text-label-xs text-rose-400">{error}</span>}
+			{error && <span className="text-label-xs text-destructive">{error}</span>}
 			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{loading &&
 					Array.from({ length: SKELETON_ROWS }).map((_, i) => (
