@@ -171,28 +171,31 @@ Twists: The "big bad wolf" is the kindest soul in the forest; Owl has been silen
 
 Resolution: Red and Wolf arrive together at Granny's cottage, share their baskets, and the village learns that friendship can grow in the most unlikely places.`;
 
-function isRefineRequest(params: LLMGenerateParams): boolean {
-	return params.prompt.includes("## Refinement Request");
-}
-
-function isStyleRequest(params: LLMGenerateParams): boolean {
-	return /describe the visual art style/i.test(params.prompt);
-}
-
-function isCharacterAppearanceRequest(params: LLMGenerateParams): boolean {
-	return /describe the visual appearance of the character/i.test(params.prompt);
-}
-
-function isOutlineRequest(params: LLMGenerateParams): boolean {
-	return params.prompt.startsWith("Briefly outline an engaging story");
-}
+const MOCK_RESPONSES: {
+	matches: (prompt: string) => boolean;
+	respond: (params: LLMGenerateParams) => string;
+}[] = [
+	{
+		matches: (p) => /describe the visual art style/i.test(p),
+		respond: () => MOCK_STYLE,
+	},
+	{
+		matches: (p) => /describe the visual appearance of the character/i.test(p),
+		respond: () => MOCK_CHARACTER_APPEARANCE,
+	},
+	{
+		matches: (p) => p.startsWith("Briefly outline an engaging story"),
+		respond: () => MOCK_OUTLINE,
+	},
+	{
+		matches: (p) => p.includes("## Refinement Request"),
+		respond: (params) => buildRefineResponse(params),
+	},
+];
 
 function mockResponse(params: LLMGenerateParams): string {
-	if (isStyleRequest(params)) return MOCK_STYLE;
-	if (isCharacterAppearanceRequest(params)) return MOCK_CHARACTER_APPEARANCE;
-	if (isOutlineRequest(params)) return MOCK_OUTLINE;
-	if (isRefineRequest(params)) return buildRefineResponse(params);
-	return MOCK_SCRIPT;
+	const match = MOCK_RESPONSES.find((m) => m.matches(params.prompt));
+	return match ? match.respond(params) : MOCK_SCRIPT;
 }
 
 function buildRefineResponse(params: LLMGenerateParams): string {
