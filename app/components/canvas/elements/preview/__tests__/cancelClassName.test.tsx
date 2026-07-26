@@ -61,6 +61,12 @@ describe("MediaResult cancelClassName forwarding", () => {
 	});
 });
 
+const mediaToggleClass = (html: string) => {
+	const match = html.match(/class="([^"]*bg-media-toggle-bg[^"]*)"/);
+	if (!match) throw new Error("media toggle not found in rendered markup");
+	return match[1];
+};
+
 describe("AnimatedImagePreview", () => {
 	it("positions the cancel button below the still/video toggle while generating", () => {
 		const html = withTooltip(
@@ -74,5 +80,19 @@ describe("AnimatedImagePreview", () => {
 		const className = cancelButtonClass(html);
 		expect(className).toContain("top-10");
 		expect(className).not.toContain("top-2");
+	});
+
+	it("stacks the still/video toggle above the error overlay so it stays clickable", () => {
+		const html = withTooltip(
+			<AnimatedImagePreview
+				status="idle"
+				seconds={0}
+				error="generation failed"
+				onDiscard={() => {}}
+			/>,
+		);
+		// Error overlay renders at z-20; the toggle must sit above it.
+		expect(html).toContain("z-20");
+		expect(mediaToggleClass(html)).toContain("z-30");
 	});
 });

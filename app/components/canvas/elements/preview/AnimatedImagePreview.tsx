@@ -27,7 +27,7 @@ export function AnimatedImagePreview({
 				cancelClassName="top-10"
 			/>
 			<MediaToggle
-				className="absolute top-2 right-2 z-10 shadow-sm"
+				className="absolute top-2 right-2 z-30 shadow-sm"
 				value={mode}
 				onChange={setMode}
 				options={[
