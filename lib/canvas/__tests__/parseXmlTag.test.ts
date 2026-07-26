@@ -23,4 +23,24 @@ describe("parseXmlTag", () => {
 		expect(Object.keys(result)).toEqual(["tag"]);
 		expect(result.tag).toBe("music");
 	});
+
+	it("preserves whitespace runs and newlines inside a value", () => {
+		expect(parseXmlTag('image style="oil  paint\nand ink"')).toEqual({
+			tag: "image",
+			style: "oil  paint\nand ink",
+		});
+	});
+
+	it("decodes escaped entities in values", () => {
+		expect(
+			parseXmlTag('image style="&quot;noir&quot; &lt;b&gt; &amp; grit"'),
+		).toEqual({ tag: "image", style: '"noir" <b> & grit' });
+	});
+
+	it("leaves unknown entity-shaped text alone", () => {
+		expect(parseXmlTag('image style="AT&T &frac12;"')).toEqual({
+			tag: "image",
+			style: "AT&T &frac12;",
+		});
+	});
 });

@@ -1,13 +1,17 @@
-export function parseXmlTag(tagString: string): Record<string, string> {
-	const [rawTag, ...rest] = tagString.trim().split(/\s+/);
-	const tag = rawTag.replace(/\/$/, "");
-	const attributesString = rest.join(" ");
-	const attributes: Record<string, string> = { tag };
-	const regex = /(\w+)="([^"]*)"/g;
-	let match: RegExpExecArray | null;
+import { unescapeXmlAttribute } from "./xmlAttributes";
 
-	while ((match = regex.exec(attributesString)) !== null) {
-		attributes[match[1]] = match[2];
+const ATTRIBUTE_PATTERN = /(\w+)="([^"]*)"/g;
+
+export function parseXmlTag(tagString: string): Record<string, string> {
+	const trimmed = tagString.trim();
+	const [rawTag] = trimmed.split(/\s+/);
+	const tag = rawTag.replace(/\/$/, "");
+	const attributes: Record<string, string> = { tag };
+
+	for (const [, key, value] of trimmed
+		.slice(rawTag.length)
+		.matchAll(ATTRIBUTE_PATTERN)) {
+		attributes[key] = unescapeXmlAttribute(value);
 	}
 
 	return attributes;

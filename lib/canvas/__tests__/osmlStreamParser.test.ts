@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
-import { getElementText } from "../osmlSerializer";
-import type { ParsedElement } from "@/lib/canvas/types";
+import { getElementText, serializeOSML } from "../osmlSerializer";
+import {
+	SCENE_TYPE,
+	type CanvasContentElement,
+	type ParsedElement,
+	type SceneElement,
+} from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
 const connectors: ConnectorRegistry = {
@@ -209,5 +214,48 @@ describe("parseOSML", () => {
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("narration");
 		expect(getElementText(nodes[0])).toContain("Once upon a time");
+	});
+});
+
+describe("serialize/parse round-trip", () => {
+	const roundTrip = (attrs: Record<string, string>) => {
+		const element: CanvasContentElement = {
+			id: "e1",
+			type: "image",
+			customAttributes: attrs,
+			children: [{ id: "t1", type: "image", text: "a sunset" }],
+		};
+		const scene: SceneElement = {
+			id: "s1",
+			type: SCENE_TYPE,
+			children: [element],
+		};
+		const [parsed] = parseOSML(serializeOSML([scene]), connectors);
+		return parsed.customAttributes ?? {};
+	};
+
+	it("preserves quotes in an attribute value", () => {
+		expect(roundTrip({ style: 'a "noir" look' })).toMatchObject({
+			style: 'a "noir" look',
+		});
+	});
+
+	it("preserves angle brackets in an attribute value", () => {
+		expect(roundTrip({ style: "a <sunset> vibe" })).toMatchObject({
+			style: "a <sunset> vibe",
+		});
+	});
+
+	it("preserves ampersands in an attribute value", () => {
+		expect(roundTrip({ characters: "Tom & Jerry" })).toMatchObject({
+			characters: "Tom & Jerry",
+		});
+	});
+
+	it("keeps later attributes intact after a quoted value", () => {
+		expect(roundTrip({ style: 'say "hi"', characters: "Lyra" })).toMatchObject({
+			style: 'say "hi"',
+			characters: "Lyra",
+		});
 	});
 });
