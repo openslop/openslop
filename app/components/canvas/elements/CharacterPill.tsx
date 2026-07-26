@@ -55,8 +55,8 @@ export function CharacterPill({
 	const avatarUrl = useCharacterAvatarUrl(name);
 	return (
 		<div
-			className={`group/pill relative inline-flex max-w-[140px] shrink-0 items-center rounded-md transition-colors hover:bg-button-hover ${
-				name ? "gap-1.5 py-0.5 pl-1 pr-2" : "p-0.5"
+			className={`group/pill relative inline-flex h-6 max-w-[140px] shrink-0 items-center rounded-md transition-colors hover:bg-button-hover ${
+				name ? "gap-1.5 pl-1 pr-2" : "px-0.5"
 			}`}
 		>
 			<CharacterAvatar
