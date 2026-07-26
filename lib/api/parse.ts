@@ -35,6 +35,21 @@ export async function parseBody<TSchema extends z.ZodType>(
 	return toResult(schema, body, label, "Invalid request body");
 }
 
+export async function parseFormData<TSchema extends z.ZodType>(
+	request: NextRequest,
+	schema: TSchema,
+	label: string,
+): Promise<ParseResult<z.infer<TSchema>>> {
+	let form: FormData;
+	try {
+		form = await request.formData();
+	} catch {
+		logger.warn(`${label}: malformed form data`);
+		return { ok: false, response: badRequest("Invalid form data") };
+	}
+	return toResult(schema, Object.fromEntries(form), label, "Invalid form data");
+}
+
 export function parseSearchParams<TSchema extends z.ZodType>(
 	request: NextRequest,
 	schema: TSchema,

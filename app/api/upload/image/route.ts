@@ -1,9 +1,15 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { AssetBundle } from "@/lib/api/asset-bundle";
-import { badRequest } from "@/lib/api/response";
-import { withSession } from "@/lib/api/with-auth";
+import { imageFile } from "@/lib/api/request-schema-fields";
+import { createSessionFormRouteHandler } from "@/lib/api/route-handler";
 
 const MAX_SIZE = 10 * 1024 * 1024;
+
+const UploadImageForm = z.object(
+	{ file: imageFile(MAX_SIZE) },
+	{ error: "No file provided" },
+);
 
 function sanitizeFilename(name: string): string {
 	const base = name.split(/[\\/]/).pop() ?? "";
@@ -11,22 +17,10 @@ function sanitizeFilename(name: string): string {
 	return cleaned.slice(0, 200) || "upload";
 }
 
-export function POST(request: NextRequest) {
-	return withSession("upload/image", async () => {
-		let formData: FormData;
-		try {
-			formData = await request.formData();
-		} catch {
-			return badRequest("Invalid form data");
-		}
-		const file = formData.get("file");
-
-		if (!(file instanceof File)) return badRequest("No file provided");
-		if (!file.type.startsWith("image/")) {
-			return badRequest("File must be an image");
-		}
-		if (file.size > MAX_SIZE) return badRequest("File must be under 10 MB");
-
+export const POST = createSessionFormRouteHandler({
+	schema: UploadImageForm,
+	label: "upload/image",
+	handle: async ({ input: { file } }) => {
 		const filename = sanitizeFilename(file.name);
 		const buffer = Buffer.from(await file.arrayBuffer());
 		const response = await AssetBundle.upload("upload", "user", [
@@ -40,5 +34,5 @@ export function POST(request: NextRequest) {
 
 		const url = `${AssetBundle.buildUrl("upload", "user", response.id)}/${encodeURIComponent(filename)}`;
 		return NextResponse.json({ url });
-	});
-}
+	},
+});

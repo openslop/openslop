@@ -36,6 +36,16 @@ export const optionalFrameImages = {
 	frameImages: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 
+export const imageFile = (maxBytes: number) =>
+	z
+		.instanceof(File, { error: "No file provided" })
+		.refine((file) => file.type.startsWith("image/"), {
+			message: "File must be an image",
+		})
+		.refine((file) => file.size <= maxBytes, {
+			message: `File must be under ${maxBytes / 1024 / 1024} MB`,
+		});
+
 export const requiredVoiceId = z
 	.string({ error: "voiceId is required" })
 	.min(1, {
