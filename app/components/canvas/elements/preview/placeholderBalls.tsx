@@ -72,11 +72,13 @@ export function PlaceholderBallsLoader({
 }) {
 	const staticRotations = useStaticRotations();
 	return (
-		<div className={loaderStyles.containerLoader} aria-hidden="true">
-			<PlaceholderBalls
-				generating={generating}
-				staticRotations={staticRotations}
-			/>
+		<div className={loaderStyles.clip} aria-hidden="true">
+			<div className={loaderStyles.containerLoader}>
+				<PlaceholderBalls
+					generating={generating}
+					staticRotations={staticRotations}
+				/>
+			</div>
 		</div>
 	);
 }

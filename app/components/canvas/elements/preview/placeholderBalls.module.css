@@ -1,3 +1,13 @@
+/* Every ungenerated element card paints 11 blurred, blend-composited orbs, so a
+   fresh script pays for hundreds of them at once. Skipping the ones outside the
+   viewport keeps that cost proportional to what is actually on screen. The clip
+   box matches the card's own overflow clip, so nothing renders differently. */
+.clip {
+	position: absolute;
+	inset: 0;
+	content-visibility: auto;
+}
+
 .containerLoader {
 	--size: 400px;
 	width: var(--size);
