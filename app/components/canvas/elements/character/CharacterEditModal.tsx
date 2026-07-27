@@ -17,8 +17,8 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
-import { isStaleResult } from "@/lib/generation/queue";
+import { getGenerationInputs } from "@/lib/generation/inputs";
+import { isGenerationActive, isStaleResult } from "@/lib/generation/queue";
 import {
 	buildCharacterAvatarJob,
 	characterAvatarElement,
@@ -97,7 +97,7 @@ function CharacterEditDialogBody({
 			),
 		);
 
-	const generating = avatarSnapshot.status !== "idle";
+	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
 	const generateDisabled = generating || !hasAppearance;
 	const revertAppearance = avatarSnapshot.resultInputs?.attributes.appearance;

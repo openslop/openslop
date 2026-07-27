@@ -60,19 +60,14 @@ type VideoPreviewProps = {
 };
 
 export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
-	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { segments } = useLayout();
+	const { player, registerPlayer } = usePlayerControl();
 	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
 	useActiveSceneSync(player, segments, activeIndex);
-	const { registerPlayer } = usePlayerControl();
 	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
 		null,
 	);
-	useEffect(() => {
-		registerPlayer(player);
-		return () => registerPlayer(null);
-	}, [player, registerPlayer]);
 	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
 	useEffect(() => {
 		if (!player) return;
@@ -92,7 +87,7 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 			<ToastErrorBoundary label="Player">
 				<RemotionPlayer
 					layout={layout}
-					playerRef={setPlayer}
+					playerRef={registerPlayer}
 					controls={isFullscreen}
 				/>
 			</ToastErrorBoundary>

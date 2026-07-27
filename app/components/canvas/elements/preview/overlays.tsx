@@ -1,54 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { isGenerationActive } from "@/lib/generation/queue";
 import { GenerationIndicator } from "../GenerationIndicator";
 import type { GenerationState, PlaceholderProps } from "./status";
 
-function OverlayButton({
-	onClick,
-	label,
-	className = "top-2",
-	children,
-}: {
-	onClick: () => void;
-	label: string;
-	className?: string;
-	children: React.ReactNode;
-}) {
+/**
+ * Vertical offset is inherited from `--cancel-offset`, so a placeholder whose
+ * top-right corner is already occupied moves the button by setting that token
+ * on its own container instead of threading a class down the preview tree.
+ */
+function CancelButton({ onClick }: { onClick: () => void }) {
 	return (
-		<SimpleTooltip label={label}>
+		<SimpleTooltip label="Cancel generation">
 			<button
 				type="button"
-				aria-label={label}
-				className={`absolute right-2 z-10 w-6 h-6 rounded-full bg-muted hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity ${className}`}
+				aria-label="Cancel generation"
+				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 w-6 h-6 rounded-full bg-muted hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
 				onClick={onClick}
 			>
-				{children}
+				<XIcon className="w-3 h-3 text-foreground" />
 			</button>
 		</SimpleTooltip>
 	);
 }
 
-function CancelButton({
-	onClick,
-	className = "top-2",
-}: {
-	onClick: () => void;
-	className?: string;
-}) {
-	return (
-		<OverlayButton
-			onClick={onClick}
-			label="Cancel generation"
-			className={className}
-		>
-			<XIcon className="w-3 h-3 text-foreground" />
-		</OverlayButton>
-	);
-}
-
 export function ResultOverlay({ status, seconds }: GenerationState) {
-	if (status === "idle") return null;
+	if (!isGenerationActive(status)) return null;
 	return (
 		<GenerationIndicator
 			status={status}
@@ -107,17 +85,16 @@ export function PlaceholderOverlay({
 	seconds,
 	error,
 	onDiscard,
-	cancelClassName,
-}: PlaceholderProps & { cancelClassName?: string }) {
+}: PlaceholderProps) {
 	return (
 		<>
 			{error && <ErrorMessage message={error} />}
-			{status !== "idle" && (
+			{isGenerationActive(status) && (
 				<>
 					<div className="absolute top-2 left-2 z-10">
 						<GenerationIndicator status={status} seconds={seconds} />
 					</div>
-					<CancelButton onClick={onDiscard} className={cancelClassName} />
+					<CancelButton onClick={onDiscard} />
 				</>
 			)}
 		</>

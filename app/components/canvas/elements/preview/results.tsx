@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
+import { isGenerationActive } from "@/lib/generation/queue";
 import { AudioPlayer } from "../AudioPlayer";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
@@ -19,7 +20,7 @@ export function AudioResult({
 }) {
 	return (
 		<div className="group relative w-full min-h-16 rounded-lg overflow-hidden border border-border bg-element-card flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5">
-			{status !== "idle" && (
+			{isGenerationActive(status) && (
 				<GenerationIndicator
 					status={status}
 					seconds={seconds}
@@ -41,7 +42,10 @@ export function AudioPlaceholder(props: PlaceholderProps) {
 	});
 
 	return (
-		<div className="group relative h-16 w-full overflow-hidden rounded-lg border border-border bg-muted">
+		<div
+			className="group relative h-16 w-full overflow-hidden rounded-lg border border-border bg-muted"
+			style={{ "--cancel-offset": "calc(50% - 0.75rem)" } as CSSProperties}
+		>
 			<div className="absolute inset-0 blur-[6px]" aria-hidden="true">
 				<div
 					className="absolute inset-0"
@@ -55,17 +59,12 @@ export function AudioPlaceholder(props: PlaceholderProps) {
 					<PlaceholderBallsLoader generating={props.status === "generating"} />
 				</div>
 			</div>
-			<PlaceholderOverlay
-				{...props}
-				cancelClassName="top-1/2 -translate-y-1/2"
-			/>
+			<PlaceholderOverlay {...props} />
 		</div>
 	);
 }
 
-export function MediaPlaceholder(
-	props: PlaceholderProps & { cancelClassName?: string },
-) {
+export function MediaPlaceholder(props: PlaceholderProps) {
 	return (
 		<div className="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border">
 			<PlaceholderOverlay {...props} />
@@ -77,15 +76,13 @@ export function MediaPlaceholder(
 export function MediaResult({
 	url,
 	outputKind,
-	cancelClassName,
 	...state
 }: PlaceholderProps & {
 	url: string | undefined;
 	outputKind: "image" | "video";
-	cancelClassName?: string;
 }) {
 	if (!url) {
-		return <MediaPlaceholder {...state} cancelClassName={cancelClassName} />;
+		return <MediaPlaceholder {...state} />;
 	}
 	return (
 		<MediaPreview

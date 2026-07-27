@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatedImagePreview } from "../AnimatedImagePreview";
-import { MediaResult } from "../results";
+import { AudioPlaceholder, MediaResult } from "../results";
 
 const withTooltip = (node: React.ReactNode) =>
 	renderToStaticMarkup(<TooltipProvider>{node}</TooltipProvider>);
 
-// The GenerationIndicator sibling also carries a "top-2" class, so scope
+// The GenerationIndicator sibling also carries a "top-*" class, so scope
 // the assertion to the cancel button itself rather than the whole markup.
 const cancelButtonClass = (html: string) => {
 	const match = html.match(/aria-label="Cancel generation" class="([^"]*)"/);
@@ -15,49 +15,46 @@ const cancelButtonClass = (html: string) => {
 	return match[1];
 };
 
-describe("MediaResult cancelClassName forwarding", () => {
-	it("defaults to top-2 when cancelClassName is unset", () => {
-		const html = withTooltip(
-			<MediaResult
-				url={undefined}
-				outputKind="image"
-				status="generating"
-				seconds={1}
-				error={null}
-				onDiscard={() => {}}
-			/>,
-		);
-		expect(cancelButtonClass(html)).toContain("top-2");
-	});
+const generating = {
+	status: "generating",
+	seconds: 1,
+	error: null,
+	onDiscard: () => {},
+} as const;
 
-	it("forwards cancelClassName through to the cancel button", () => {
+describe("cancel button offset", () => {
+	it("reads its vertical offset from --cancel-offset", () => {
 		const html = withTooltip(
-			<MediaResult
-				url={undefined}
-				outputKind="image"
-				status="generating"
-				seconds={1}
-				error={null}
-				onDiscard={() => {}}
-				cancelClassName="top-10"
-			/>,
+			<MediaResult {...generating} url={undefined} outputKind="image" />,
 		);
-		expect(cancelButtonClass(html)).toContain("top-10");
+		expect(cancelButtonClass(html)).toContain(
+			"top-[var(--cancel-offset,0.5rem)]",
+		);
 	});
 
 	it("renders the media instead of the placeholder once a url arrives", () => {
 		const html = withTooltip(
 			<MediaResult
-				url="https://cdn.example.com/a.png"
-				outputKind="image"
 				status="idle"
 				seconds={0}
 				error={null}
 				onDiscard={() => {}}
+				url="https://cdn.example.com/a.png"
+				outputKind="image"
 			/>,
 		);
 		expect(html).not.toContain('aria-label="Cancel generation"');
 		expect(html).toContain("https://cdn.example.com/a.png");
+	});
+
+	it("is pushed below the still/video toggle by AnimatedImagePreview", () => {
+		const html = withTooltip(<AnimatedImagePreview {...generating} />);
+		expect(html).toContain("--cancel-offset:2.5rem");
+	});
+
+	it("is centred in the audio placeholder's shorter track", () => {
+		const html = withTooltip(<AudioPlaceholder {...generating} />);
+		expect(html).toContain("--cancel-offset:calc(50% - 0.75rem)");
 	});
 });
 
@@ -68,20 +65,6 @@ const mediaToggleClass = (html: string) => {
 };
 
 describe("AnimatedImagePreview", () => {
-	it("positions the cancel button below the still/video toggle while generating", () => {
-		const html = withTooltip(
-			<AnimatedImagePreview
-				status="generating"
-				seconds={1}
-				error={null}
-				onDiscard={() => {}}
-			/>,
-		);
-		const className = cancelButtonClass(html);
-		expect(className).toContain("top-10");
-		expect(className).not.toContain("top-2");
-	});
-
 	it("stacks the still/video toggle above the error overlay so it stays clickable", () => {
 		const html = withTooltip(
 			<AnimatedImagePreview

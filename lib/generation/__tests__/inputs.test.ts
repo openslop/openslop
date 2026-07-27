@@ -5,7 +5,7 @@ import type {
 } from "@/lib/canvas/types";
 import type { Metadata } from "@/lib/project/types";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
-import { getGenerationInputs } from "../getGenerationInputs";
+import { getGenerationInputs } from "../inputs";
 
 const emptyMetadata: Metadata = {
 	title: "",

@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import { pickThumbnailUrl } from "@/lib/project/thumbnail";
-import type { GenerationInputs } from "../generationInputs";
+import type { GenerationInputs } from "../inputs";
 import { GenerationQueue, type GenerationJob } from "../queue";
 
 type GenerateFn = (...args: unknown[]) => Promise<unknown>;

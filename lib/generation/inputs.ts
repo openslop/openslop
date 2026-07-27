@@ -1,5 +1,8 @@
 import { compact } from "lodash";
+import omit from "lodash/omit";
+import { Node } from "slate";
 import { parseCharacterNames } from "@/lib/canvas/characterNames";
+import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -9,6 +12,12 @@ import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
 } from "@/lib/video/aspectRatio";
+import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
+
+export type GenerationInputs = {
+	prompt: string;
+	attributes: Record<string, string | number>;
+};
 
 type MetadataAttributes = (
 	element: CanvasContentElement,
@@ -61,7 +70,7 @@ const combine =
 	(element, metadata) =>
 		Object.assign({}, ...fns.map((fn) => fn(element, metadata)));
 
-export const ELEMENT_METADATA_INPUTS: Partial<
+const ELEMENT_METADATA_INPUTS: Partial<
 	Record<CanvasElementType, MetadataAttributes>
 > = {
 	image: combine(imageDims, characterAvatars),
@@ -70,3 +79,29 @@ export const ELEMENT_METADATA_INPUTS: Partial<
 	character: characterVoiceId,
 	narration: narratorVoiceId,
 };
+
+export function getPromptText(element: CanvasContentElement): string {
+	return Node.string(element).replaceAll(ZERO_WIDTH_SPACE, "").trim();
+}
+
+export function getGenerationInputs(
+	element: CanvasContentElement,
+	metadata: Metadata,
+): GenerationInputs {
+	return {
+		prompt: getPromptText(element),
+		attributes: {
+			...omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
+			...ELEMENT_METADATA_INPUTS[element.type]?.(element, metadata),
+		},
+	};
+}
+
+export function serializeInputs(inputs: GenerationInputs): string {
+	return JSON.stringify({
+		prompt: inputs.prompt,
+		attributes: Object.fromEntries(
+			Object.entries(inputs.attributes).sort(([a], [b]) => a.localeCompare(b)),
+		),
+	});
+}

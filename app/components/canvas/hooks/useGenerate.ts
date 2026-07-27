@@ -5,7 +5,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
+import { getGenerationInputs } from "@/lib/generation/inputs";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
 import { useProject } from "@/lib/project/useProject";
 import type { CanvasContentElement } from "@/lib/canvas/types";

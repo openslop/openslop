@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getContentElements } from "@/lib/canvas/scenes";
-import { getGenerationInputs } from "@/lib/generation/getGenerationInputs";
+import { getGenerationInputs } from "@/lib/generation/inputs";
 import { isStaleResult } from "@/lib/generation/queue";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
