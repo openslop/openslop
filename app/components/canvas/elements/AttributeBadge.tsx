@@ -30,9 +30,10 @@ export function AttributeBadge({
 	deriveExtraAttrs,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
-	const value = element.customAttributes?.[attrKey] ?? "";
-	const isTextEdit = spec.edit?.kind === "text";
-	if (!value && !isTextEdit) return null;
+	// An absent optional is a legal state, so fall back to the schema default
+	// rather than unmounting the only control that could set the value again.
+	const value = element.customAttributes?.[attrKey] ?? spec.default ?? "";
+	if (!value && !spec.edit) return null;
 
 	const SpecIcon = spec.icon;
 	const labeled = hideLabel ? (
