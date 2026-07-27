@@ -8,8 +8,8 @@ const previewParamsSchema = z.object({ url: z.string().url() });
 export const GET = createApiQueryRouteHandler({
 	schema: previewParamsSchema,
 	label: "Voice preview fetch",
-	handle: async ({ query }) => {
-		const upstream = await getTTSProvider().fetchVoicePreview(query.url);
+	handle: async ({ input }) => {
+		const upstream = await getTTSProvider().fetchVoicePreview(input.url);
 		if (!upstream.ok) {
 			return new NextResponse(null, { status: upstream.status });
 		}

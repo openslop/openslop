@@ -12,15 +12,15 @@ import { COMPOSITION_ID } from "@/lib/video/types";
 export const POST = createSessionRouteHandler({
 	schema: RenderRequest,
 	label: "render",
-	handle: async ({ body }) => {
+	handle: async ({ input }) => {
 		const { renderId, bucketName } = await renderMediaOnLambda({
 			codec: "h264",
 			region: REGION,
 			serveUrl: getSiteName(),
 			functionName: getFunctionName(),
 			composition: COMPOSITION_ID,
-			inputProps: body.inputProps,
-			scale: body.scale,
+			inputProps: input.inputProps,
+			scale: input.scale,
 			downloadBehavior: { type: "download", fileName: "video.mp4" },
 		});
 

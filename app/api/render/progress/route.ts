@@ -10,10 +10,10 @@ import {
 export const POST = createSessionRouteHandler({
 	schema: RenderHandleRequest,
 	label: "render/progress",
-	handle: async ({ body }) => {
+	handle: async ({ input }) => {
 		const progress = await getRenderProgress({
-			renderId: body.renderId,
-			bucketName: body.bucketName,
+			renderId: input.renderId,
+			bucketName: input.bucketName,
 			functionName: getFunctionName(),
 			region: REGION,
 		});

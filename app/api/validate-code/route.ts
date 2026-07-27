@@ -22,10 +22,10 @@ const ValidateCodeRequest = z.object(
 export const POST = createPublicRouteHandler({
 	schema: ValidateCodeRequest,
 	label: "validate-code",
-	handle: async ({ body }) => {
+	handle: async ({ input }) => {
 		const supabase = await createClient();
 		const { data, error } = await supabase.rpc("validate_access_code", {
-			p_code: body.code.toUpperCase(),
+			p_code: input.code.toUpperCase(),
 		});
 
 		if (error) throw error;

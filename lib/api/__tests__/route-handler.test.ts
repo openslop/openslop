@@ -1,8 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { imageFile } from "../request-schema-fields";
 import {
 	bodySchema,
 	createApiRouteHandler,
+	createSessionFormRouteHandler,
 	createSessionRouteHandler,
 } from "../route-handler";
 
@@ -41,8 +44,8 @@ function makeHandler(
 		label: "TestRoute",
 		handle:
 			handle ??
-			(async ({ body }) =>
-				NextResponse.json({ ok: true, prompt: body.prompt })),
+			(async ({ input }) =>
+				NextResponse.json({ ok: true, prompt: input.prompt })),
 	});
 }
 
@@ -119,7 +122,7 @@ describe("createApiRouteHandler", () => {
 		expect(handle).toHaveBeenCalledWith(
 			expect.objectContaining({
 				user: expect.objectContaining({ id: "user-1" }),
-				body: expect.objectContaining({ prompt: "hello", model: "slug-a" }),
+				input: expect.objectContaining({ prompt: "hello", model: "slug-a" }),
 			}),
 		);
 	});
@@ -159,7 +162,7 @@ describe("createSessionRouteHandler", () => {
 		return createSessionRouteHandler({
 			schema,
 			label: "TestUserRoute",
-			handle: async ({ body }) => NextResponse.json({ prompt: body.prompt }),
+			handle: async ({ input }) => NextResponse.json({ prompt: input.prompt }),
 		});
 	}
 
@@ -179,5 +182,57 @@ describe("createSessionRouteHandler", () => {
 	it("returns 400 for an invalid body", async () => {
 		const res = await makeUserHandler()(makeRequest({}));
 		expect(res.status).toBe(400);
+	});
+});
+
+describe("createSessionFormRouteHandler", () => {
+	const MAX_BYTES = 8;
+	const handler = createSessionFormRouteHandler({
+		schema: z.object({ file: imageFile(MAX_BYTES) }, { error: "No file" }),
+		label: "TestFormRoute",
+		handle: async ({ input }) => NextResponse.json({ name: input.file.name }),
+	});
+
+	function makeFormRequest(entries: Record<string, string | File>) {
+		const form = new FormData();
+		for (const [key, value] of Object.entries(entries)) form.append(key, value);
+		return new NextRequest("http://localhost/api/test", {
+			method: "POST",
+			body: form,
+		});
+	}
+
+	const imageOfSize = (bytes: number) =>
+		new File([new Uint8Array(bytes)], "cat.png", { type: "image/png" });
+
+	it("passes the validated file to handle", async () => {
+		const res = await handler(makeFormRequest({ file: imageOfSize(4) }));
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({ name: "cat.png" });
+	});
+
+	it("returns 400 when the file field is missing", async () => {
+		const res = await handler(makeFormRequest({ other: "x" }));
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toBe("No file provided");
+	});
+
+	it("returns 400 for a non-image file", async () => {
+		const notes = new File(["hi"], "notes.txt", { type: "text/plain" });
+		const res = await handler(makeFormRequest({ file: notes }));
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toBe("File must be an image");
+	});
+
+	it("returns 400 when the file exceeds the size limit", async () => {
+		const res = await handler(makeFormRequest({ file: imageOfSize(64) }));
+		expect(res.status).toBe(400);
+		expect((await res.json()).error).toContain("File must be under");
+	});
+
+	it("returns 401 when the user is not authenticated", async () => {
+		mockGetUser.mockResolvedValue(null);
+		const res = await handler(makeFormRequest({ file: imageOfSize(4) }));
+		expect(res.status).toBe(401);
 	});
 });
