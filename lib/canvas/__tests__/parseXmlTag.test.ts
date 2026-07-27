@@ -3,24 +3,24 @@ import { parseXmlTag } from "../parseXmlTag";
 
 describe("parseXmlTag", () => {
 	it("parses a tag name only", () => {
-		expect(parseXmlTag("image")).toEqual({ tag: "image" });
+		expect(parseXmlTag("image")).toEqual({ tag: "image", attributes: {} });
 	});
 
 	it("parses a tag with attributes", () => {
 		expect(parseXmlTag('character name="Lyra" gender="feminine"')).toEqual({
 			tag: "character",
-			name: "Lyra",
-			gender: "feminine",
+			attributes: { name: "Lyra", gender: "feminine" },
 		});
 	});
 
 	it("strips trailing slash from self-closing tags", () => {
-		expect(parseXmlTag("image/")).toEqual({ tag: "image" });
+		expect(parseXmlTag("image/")).toEqual({ tag: "image", attributes: {} });
 	});
 
-	it("returns just { tag } when there are no attributes", () => {
-		const result = parseXmlTag("music");
-		expect(Object.keys(result)).toEqual(["tag"]);
-		expect(result.tag).toBe("music");
+	it("keeps a `tag` attribute separate from the tag name", () => {
+		expect(parseXmlTag('image tag="hero"')).toEqual({
+			tag: "image",
+			attributes: { tag: "hero" },
+		});
 	});
 });

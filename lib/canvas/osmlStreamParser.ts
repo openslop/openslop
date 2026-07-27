@@ -51,7 +51,7 @@ export class OSMLStreamParser {
 
 			const openTag = match[1];
 			if (openTag) {
-				const { tag, ...attributes } = parseXmlTag(openTag);
+				const { tag, attributes } = parseXmlTag(openTag);
 				this.appendNext(tag, attributes, connectors);
 			}
 			lastIndex = match.index + match[0].length;
@@ -61,14 +61,12 @@ export class OSMLStreamParser {
 		return updated;
 	}
 
-	private updateCurrent(text: string | undefined): void {
+	private updateCurrent(text: string): void {
 		const current = this.nodes[this.nodes.length - 1];
-		if (!current) {
-			return;
-		}
+		if (!current) return;
 		const lastChild = current.children[current.children.length - 1];
 		if (!lastChild) return;
-		lastChild.text += text ?? "";
+		lastChild.text += text;
 	}
 
 	private appendNext(
