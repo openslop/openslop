@@ -13,6 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { clamp, cn } from "@/lib/utils";
 import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
+import { useNearViewport } from "./useNearViewport";
 
 export interface WaveformProps {
 	src: string;
@@ -77,6 +78,7 @@ export function Waveform({
 	onFinish,
 }: WaveformProps & { ref?: Ref<WaveformHandle> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
+	const trackRef = useRef<HTMLDivElement>(null);
 	const barsRef = useRef<HTMLDivElement>(null);
 	const progressRef = useRef<HTMLDivElement>(null);
 	const peaksRef = useRef<number[]>([]);
@@ -84,6 +86,9 @@ export function Waveform({
 		peaksCache?.has(src) ? src : null,
 	);
 	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
+	// Peak extraction downloads and PCM-decodes the whole clip, so it waits until
+	// the track is nearly on screen rather than running for every card on mount.
+	const near = useNearViewport(trackRef);
 	const loading = loadedSrc !== src || audioSettledFor !== src;
 
 	// Adjust state during render when src changes to a cached value
@@ -124,6 +129,7 @@ export function Waveform({
 			return;
 		}
 		peaksRef.current = [];
+		if (!near) return;
 
 		let cancelled = false;
 		fetch(src, { mode: "cors" })
@@ -148,7 +154,7 @@ export function Waveform({
 			cancelled = true;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- peaksCache is a stable ref, not a direct dep
-	}, [src]);
+	}, [src, near]);
 
 	useImperativeHandle(
 		ref,
@@ -189,6 +195,7 @@ export function Waveform({
 	return (
 		<>
 			<div
+				ref={trackRef}
 				className={cn("relative cursor-pointer", className)}
 				onClick={handleClick}
 			>
