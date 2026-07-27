@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "@/components/ui/icon";
+import { impersonateUser } from "@/lib/auth/impersonate";
 import { errorMessage } from "@/lib/errors";
 
 export default function ImpersonateDialog({
@@ -40,15 +41,9 @@ function ImpersonateDialogBody() {
 		setError("");
 
 		try {
-			const response = await fetch(
-				`/api/dev/impersonate?email=${encodeURIComponent(email)}`,
-			);
-			if (response.ok) {
-				window.location.assign("/");
-				return;
-			}
-			const body = await response.json();
-			setError(body.error ?? `Impersonation failed (${response.status})`);
+			await impersonateUser(email);
+			window.location.assign("/");
+			return;
 		} catch (cause) {
 			setError(errorMessage(cause));
 		}
