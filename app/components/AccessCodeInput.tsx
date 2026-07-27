@@ -2,6 +2,8 @@
 
 import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { apiJson } from "@/lib/clients/http";
+import { errorMessage } from "@/lib/errors";
 
 const CODE_LENGTH = 6;
 const EMPTY_CODE = () => Array<string>(CODE_LENGTH).fill("");
@@ -24,20 +26,14 @@ export default function AccessCodeInput() {
 			setLoading(true);
 			setError("");
 			try {
-				const res = await fetch("/api/validate-code", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ code }),
-				});
-				const data = await res.json();
-				if (res.ok && data.redirect) {
-					router.push(data.redirect);
-				} else {
-					resetWithError(data.error || "Invalid access code");
-				}
+				const { redirect } = await apiJson<{ redirect: string }>(
+					"/api/validate-code",
+					{ method: "POST", body: { code } },
+				);
+				router.push(redirect);
 			} catch (err) {
 				console.error("Access code validation failed", err);
-				resetWithError("Something went wrong. Please try again.");
+				resetWithError(errorMessage(err));
 			} finally {
 				setLoading(false);
 			}
