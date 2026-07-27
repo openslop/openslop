@@ -63,19 +63,25 @@ export const createSessionFormRouteHandler = routeHandler(
 	parseFormData,
 );
 
-export function createPublicRouteHandler<TSchema extends z.ZodType>(
-	opts: RouteOptions<
-		TSchema,
-		{ input: z.infer<TSchema>; request: NextRequest }
-	>,
-) {
-	return async (request: NextRequest) =>
-		withPublic(opts.label, () =>
-			withParsed(parseBody(request, opts.schema, opts.label), (input) =>
-				opts.handle({ input, request }),
-			),
-		);
+function publicRouteHandler(parse: ParseSource) {
+	return function createHandler<TSchema extends z.ZodType>(
+		opts: RouteOptions<
+			TSchema,
+			{ input: z.infer<TSchema>; request: NextRequest }
+		>,
+	) {
+		return async (request: NextRequest) =>
+			withPublic(opts.label, () =>
+				withParsed(parse(request, opts.schema, opts.label), (input) =>
+					opts.handle({ input, request }),
+				),
+			);
+	};
 }
+
+export const createPublicRouteHandler = publicRouteHandler(parseBody);
+export const createPublicQueryRouteHandler =
+	publicRouteHandler(parseSearchParams);
 
 export function modelField(models: Record<string, string>) {
 	const names = Object.keys(models);

@@ -1,36 +1,23 @@
-import { useMemo } from "react";
 import { Codesandbox } from "@/components/ui/icon";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import {
-	isKnownProvider,
-	resolveAttributeSchema,
-} from "@/lib/connectors/factory";
+import { resolveElementConnector } from "@/lib/canvas/elementConnector";
+import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
-import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "./AttributeBadge";
 
 export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	const { connectorConfig } = useConfig();
-	const { model, provider } = element.customAttributes ?? {};
-	const connector = ELEMENT_TYPES[element.type].connector;
+	const { type, provider, model, config } = resolveElementConnector(
+		element,
+		connectorConfig,
+	);
 
-	const resolved = useMemo(() => {
-		if (!model || !provider || !isKnownProvider(connector, provider)) {
-			return null;
-		}
-		const options = connectorConfig[connector]?.[provider]?.models ?? [];
-		return {
-			model,
-			provider,
-			spec: {
-				label: "Model",
-				icon: Codesandbox,
-				edit: { kind: "enum", options },
-			} as const,
-		};
-	}, [connector, connectorConfig, model, provider]);
-
-	if (!resolved) return null;
+	const spec = {
+		label: "Model",
+		icon: Codesandbox,
+		edit: { kind: "enum", options: config.models },
+	} as const;
 
 	// NOTE: every connector's attributesFor currently ignores `model`, so
 	// oldSchema/newSchema are always identical for a given (connector, provider)
@@ -41,8 +28,8 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	// schemas actually differ.
 	const reconcileForModel = (next: string) =>
 		reconcileAttributes(
-			resolveAttributeSchema(connector, resolved.provider, resolved.model),
-			resolveAttributeSchema(connector, resolved.provider, next),
+			resolveAttributeSchema(type, provider, model),
+			resolveAttributeSchema(type, provider, next),
 			element.customAttributes ?? {},
 		);
 
@@ -50,7 +37,7 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 		<AttributeBadge
 			element={element}
 			attrKey="model"
-			spec={resolved.spec}
+			spec={spec}
 			deriveExtraAttrs={reconcileForModel}
 		/>
 	);

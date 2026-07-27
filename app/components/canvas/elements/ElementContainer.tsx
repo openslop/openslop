@@ -6,11 +6,7 @@ import { isSceneElement } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/connectors/registry";
-import {
-	isKnownProvider,
-	resolveAttributeSchema,
-} from "@/lib/connectors/factory";
+import { resolveElementSchema } from "@/lib/canvas/elementConnector";
 import { useViewMode } from "../ViewModeContext";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
@@ -30,31 +26,10 @@ import {
 } from "@/components/ui/popover";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
-import type { ElementConfig } from "@/lib/canvas/elementConfigs";
 
-function ElementSettings({
-	element,
-	config,
-}: {
-	element: CanvasContentElement;
-	config: ElementConfig;
-}) {
+function ElementSettings({ element }: { element: CanvasContentElement }) {
 	const { connectorConfig } = useConfig();
-	const { model, provider } = element.customAttributes ?? {};
-	const fallback = getDefaultConnector(connectorConfig, config.connector);
-	// A persisted provider that's since been renamed/removed from the registry
-	// must not reach resolveAttributeSchema, which throws for unknown providers.
-	// Guard against the factory's own provider map, not connectorConfig — they're
-	// independently maintained and can drift.
-	const resolvedProvider =
-		provider && isKnownProvider(config.connector, provider)
-			? provider
-			: fallback.provider;
-	const schema = resolveAttributeSchema(
-		config.connector,
-		resolvedProvider,
-		model ?? fallback.config.defaultModel,
-	);
+	const schema = resolveElementSchema(element, connectorConfig);
 	const entries = Object.entries(schema.visibleAttributes);
 	if (entries.length === 0) return null;
 	return (
@@ -129,7 +104,7 @@ export function ElementContainer({
 								</span>
 								<ElementCharacters element={element} />
 								<ModelBadge element={element} />
-								<ElementSettings element={element} config={config} />
+								<ElementSettings element={element} />
 							</div>
 							<div className="shrink-0 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
 								<DeleteButton element={element} />
