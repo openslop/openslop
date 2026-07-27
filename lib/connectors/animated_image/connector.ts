@@ -1,25 +1,13 @@
 import isEqual from "lodash/isEqual";
-import omit from "lodash/omit";
 import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
 import { ANIMATED_IMAGE_ATTRIBUTES } from "./attributes";
+import { stillParamsFor } from "./params";
 import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
 	PriorGeneration,
 } from "../types";
-
-/** Params that drive only the video step; the still image is independent of them. */
-export const VIDEO_ONLY_KEYS = [
-	"videoPrompt",
-	"videoWidth",
-	"videoHeight",
-	"duration",
-] as const;
-
-// The still is a pure function of the non-video params.
-const stillParams = (params: Record<string, unknown>) =>
-	omit(params, VIDEO_ONLY_KEYS);
 
 function reusableStill(
 	params: AnimatedImageGenerateParams,
@@ -30,12 +18,14 @@ function reusableStill(
 	if (!imageUrl || !inputs) return undefined;
 	// The prior inherits the request's base model; a per-element model override
 	// in its own attributes still wins, so a model change invalidates the still.
-	const priorStill = stillParams({
+	const priorStill = stillParamsFor(params.model, {
 		model: params.model,
 		prompt: inputs.prompt,
 		...inputs.attributes,
 	});
-	return isEqual(stillParams(params), priorStill) ? imageUrl : undefined;
+	return isEqual(stillParamsFor(params.model, params), priorStill)
+		? imageUrl
+		: undefined;
 }
 
 export abstract class BaseAnimatedImageConnector extends BaseAssetConnector<

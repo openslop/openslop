@@ -1,4 +1,3 @@
-import omit from "lodash/omit";
 import {
 	createDefaultConnector,
 	type ConnectorRegistry,
@@ -9,16 +8,9 @@ import type {
 	AssetResult,
 	ConnectorPlugin,
 } from "@/lib/connectors/types";
-import { VIDEO_ONLY_KEYS } from "../connector";
+import { stillParamsFor, videoParamsFor, type VideoParams } from "../params";
 
 const STASH_KEY = "videoChain";
-
-type Stashed = {
-	videoPrompt: string;
-	videoWidth?: number;
-	videoHeight?: number;
-	duration?: number;
-};
 
 export function createVideoChainPlugin(
 	registry: ConnectorRegistry,
@@ -26,20 +18,15 @@ export function createVideoChainPlugin(
 	return {
 		name: "video-chain",
 		beforeGenerate(params, ctx) {
-			const { videoPrompt, videoWidth, videoHeight, duration } = params;
-			if (videoPrompt && ctx) {
+			const video = videoParamsFor(params.model, params);
+			if (video.videoPrompt && ctx) {
 				ctx.data ??= {};
-				ctx.data[STASH_KEY] = {
-					videoPrompt,
-					videoWidth,
-					videoHeight,
-					duration,
-				} satisfies Stashed;
+				ctx.data[STASH_KEY] = video;
 			}
-			return omit(params, VIDEO_ONLY_KEYS) as AnimatedImageGenerateParams;
+			return stillParamsFor(params.model, params);
 		},
 		async afterGenerate(result, ctx) {
-			const stashed = ctx?.data?.[STASH_KEY] as Stashed | undefined;
+			const stashed = ctx?.data?.[STASH_KEY] as VideoParams | undefined;
 			if (!stashed?.videoPrompt) {
 				throw new Error(
 					"animated_image element is missing required videoPrompt attribute",
