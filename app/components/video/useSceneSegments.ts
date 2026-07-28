@@ -1,8 +1,8 @@
 import type { PlayerRef } from "@remotion/player";
 import { isForeground } from "@/lib/canvas/guards";
-import type { SceneElement } from "@/lib/canvas/types";
+import { ELEMENT_TYPES, type SceneElement } from "@/lib/canvas/types";
 import { toSeconds } from "@/lib/video/frames";
-import type { Sequence, VideoLayout } from "@/lib/video/types";
+import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
 import type { SeekThumbnail } from "./SeekTooltip";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 
@@ -49,6 +49,13 @@ export function useActiveSegmentIndex(
 	);
 }
 
+function toThumbnail(element: ResolvedElement | null): SeekThumbnail | null {
+	if (!element) return null;
+	const { outputKind } = ELEMENT_TYPES[element.type];
+	if (outputKind === "audio") return null;
+	return { url: element.url, kind: outputKind };
+}
+
 /**
  * Derives the seek-bar scene segments from the layout. Consecutive scenes
  * overlap by `transitionDurationSec`, so each segment's duration is trimmed by
@@ -68,16 +75,13 @@ export function buildSceneSegments(
 		if (prev) {
 			prev.duration = Math.max(0, prev.duration - layout.transitionDurationSec);
 		}
-		const el = seq.element;
 		out.push({
 			sceneId: scene.id,
 			sceneIndex: i + 1,
 			start: seq.start,
 			duration: seq.duration,
 			label: `Scene ${i + 1}`,
-			thumbnail: el
-				? { url: el.url, kind: el.type === "image" ? "image" : "video" }
-				: null,
+			thumbnail: toThumbnail(seq.element),
 		});
 	}
 	return out;
