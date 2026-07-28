@@ -1,8 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { extractPeaks } from "../Waveform";
-import { buildSoundwaveMask } from "../soundwave";
-
-/* ---------- extractPeaks ---------- */
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { extractPeaks, loadPeaks } from "../peaks";
 
 describe("extractPeaks", () => {
 	it("extracts correct number of peaks", () => {
@@ -58,30 +55,44 @@ describe("extractPeaks", () => {
 	});
 });
 
-/* ---------- buildSoundwaveMask ---------- */
-
-describe("buildSoundwaveMask", () => {
-	it("emits one rect per bar", () => {
-		const mask = decodeURIComponent(buildSoundwaveMask([10, 20, 30]));
-		expect(mask.match(/<rect/g)).toHaveLength(3);
+describe("loadPeaks", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
 	});
 
-	it("spreads bars evenly across the 0–100 viewBox", () => {
-		const mask = decodeURIComponent(buildSoundwaveMask([50, 50, 50, 50]));
-		// barW = 100 / 4 = 25, gap = 7.5 → first x = 3.75, second = 28.75
-		expect(mask).toContain('x="3.75"');
-		expect(mask).toContain('x="28.75"');
+	it("decodes the fetched audio into normalized peaks", async () => {
+		const samples = new Float32Array(400).fill(0.5);
+		samples[0] = 1;
+		vi.stubGlobal(
+			"AudioContext",
+			class {
+				async decodeAudioData() {
+					return { getChannelData: () => samples };
+				}
+			},
+		);
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => ({
+				ok: true,
+				arrayBuffer: async () => new ArrayBuffer(8),
+			})),
+		);
+
+		const peaks = await loadPeaks("https://example.com/audio.mp3");
+
+		expect(peaks).toHaveLength(200);
+		expect(Math.max(...peaks)).toBe(1);
 	});
 
-	it("vertically centers each bar by its height", () => {
-		const mask = decodeURIComponent(buildSoundwaveMask([40]));
-		// y = (100 - 40) / 2 = 30
-		expect(mask).toContain('y="30"');
-		expect(mask).toContain('height="40"');
-	});
+	it("throws when the audio cannot be fetched", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => ({ ok: false, status: 404 })),
+		);
 
-	it("produces a data URL mask", () => {
-		const mask = buildSoundwaveMask([10]);
-		expect(mask.startsWith('url("data:image/svg+xml,')).toBe(true);
+		await expect(loadPeaks("https://example.com/missing.mp3")).rejects.toThrow(
+			"Failed to fetch audio: 404",
+		);
 	});
 });
