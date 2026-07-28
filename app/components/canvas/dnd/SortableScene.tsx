@@ -22,7 +22,8 @@ export function SortableScene({
 			sceneId={element.id}
 			sortableType="scene"
 			disabled={!isCollapsed(element.id)}
-			wrapperClassName={`border-t border-border pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? ACTIVE_SCENE_CLASS : ""}`}
+			wrapperClassName={`border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? "border-transparent" : "border-border"}`}
+			contentClassName={isActive ? ACTIVE_SCENE_CLASS : undefined}
 			attributes={attributes}
 			element={element}
 		>
