@@ -90,7 +90,7 @@ function CharacterEditDialogBody({
 		queue.enqueueGraph([avatarNode]);
 	};
 
-	const isStale = !character.avatarUploaded && isNodeStale(avatarNode, queue);
+	const isStale = isNodeStale(avatarNode, queue);
 
 	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());

@@ -41,6 +41,7 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 		inputs: { prompt: id, attributes: {} },
 		dependsOn,
 		buildJob: () => job,
+		pinned: false,
 	};
 }
 
@@ -133,6 +134,27 @@ describe("dependency ordering", () => {
 		await vi.runAllTimersAsync();
 
 		expect(startedIds()).toEqual(["image"]);
+	});
+
+	it("keeps a dependent's existing result when a dependency fails", async () => {
+		generateMock.mockImplementation((job) =>
+			(job as GenerationJob).elementId === "avatar:Alice"
+				? Promise.reject(new Error("avatar boom"))
+				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
+		);
+		vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const image = node("image", [node("avatar:Alice")]);
+		queue.commitResult(image, { imageUrl: "existing.png", durationSec: 0 });
+		queue.enqueueGraph([node("avatar:Alice")]);
+		await vi.runAllTimersAsync();
+		queue.enqueueGraph([image]);
+		await vi.runAllTimersAsync();
+
+		// The image never ran, so the URL it already held is still good.
+		const snapshot = queue.getElementSnapshot("image");
+		expect(snapshot.result?.imageUrl).toBe("existing.png");
+		expect(snapshot.error).toMatch(/avatar:Alice/);
 	});
 
 	it("surfaces an error on dependents when a dependency fails", async () => {

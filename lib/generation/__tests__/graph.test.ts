@@ -45,6 +45,7 @@ function node(
 		inputs: { prompt: id, attributes },
 		dependsOn,
 		buildJob: () => job,
+		pinned: false,
 	};
 }
 
@@ -121,6 +122,25 @@ describe("isNodeStale", () => {
 		// Changing refs makes the avatar stale, which makes the image stale too.
 		expect(needsGeneration(avatar("b.png"), queue)).toBe(true);
 		expect(isNodeStale(image("b.png"), queue)).toBe(true);
+	});
+
+	it("never marks a pinned node stale, however far its inputs drift", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		const uploaded = (style: string) => ({
+			...node("avatar", [sourceNode("project:artStyle", { style })]),
+			pinned: true,
+		});
+		commit(queue, uploaded("noir"), "uploaded.png");
+
+		expect(isNodeStale(uploaded("watercolor"), queue)).toBe(false);
+		expect(needsGeneration(uploaded("watercolor"), queue)).toBe(false);
+	});
+
+	it("still generates a pinned node that has no result yet", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		expect(needsGeneration({ ...node("avatar"), pinned: true }, queue)).toBe(
+			true,
+		);
 	});
 
 	it("never marks a source node stale", () => {

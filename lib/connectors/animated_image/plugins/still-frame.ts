@@ -46,7 +46,9 @@ export function createStillFramePlugin(): ConnectorPlugin<
 	return {
 		name: "still-frame",
 		dependencies: (element, ctx: GraphContext) => [
-			ctx.resolve(stillElement(element), "image", buildImagePlugins()),
+			ctx.resolve(stillElement(element), "image", {
+				plugins: buildImagePlugins(),
+			}),
 		],
 		beforeGenerate(
 			params,

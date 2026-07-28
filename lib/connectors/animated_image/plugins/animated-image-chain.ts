@@ -7,7 +7,7 @@ import type {
 	AssetResult,
 	ConnectorPlugin,
 } from "@/lib/connectors/types";
-import { createDimensionsPlugin } from "../../plugins/dimensions";
+import { createDimensionsPlugin } from "@/lib/connectors/plugins/dimensions";
 import { createStillFramePlugin } from "./still-frame";
 
 const STASH_KEY = "videoChain";

@@ -329,10 +329,10 @@ export class GenerationQueue {
 		this.pending = [];
 		for (const node of blocked) {
 			const missing = this.blockingDependency(node);
+			// The node never ran, so whatever result it already held is still valid.
 			this.update(node.id, {
 				status: "idle",
 				seconds: 0,
-				result: null,
 				error: `Dependency "${missing?.id ?? "unknown"}" failed to generate`,
 			});
 		}

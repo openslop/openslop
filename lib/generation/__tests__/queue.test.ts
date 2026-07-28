@@ -64,6 +64,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 		inputs: { prompt: inputs.prompt, attributes: inputs.attributes },
 		dependsOn,
 		buildJob: () => job,
+		pinned: false,
 	};
 }
 
