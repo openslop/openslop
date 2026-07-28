@@ -1,11 +1,11 @@
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import { CHARACTER_AVATAR_ID_PREFIX } from "./ensureCharacterAvatars";
+import { isDerivedNodeId } from "@/lib/generation/graph";
 
 export function pickThumbnailUrl(
 	entries: Iterable<[string, ElementSnapshot]>,
 ): string | null {
 	for (const [id, snap] of entries) {
-		if (id.startsWith(CHARACTER_AVATAR_ID_PREFIX)) continue;
+		if (isDerivedNodeId(id)) continue;
 		if (
 			snap.connectorType !== "image" &&
 			snap.connectorType !== "animated_image"

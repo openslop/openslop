@@ -2,12 +2,13 @@
 
 import { User } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useProject } from "@/lib/project/useProject";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { RemoveCrossButton } from "./RemoveCrossButton";
 
 function useCharacterAvatarUrl(name?: string) {
-	return useProject((state) =>
-		name ? state.metadata.characters[name]?.avatarUrl : undefined,
+	return useQueueSelector((queue) =>
+		name ? characterAvatarUrl(queue, name) : undefined,
 	);
 }
 

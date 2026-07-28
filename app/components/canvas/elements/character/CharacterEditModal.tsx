@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
@@ -17,13 +17,11 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { getGenerationInputs } from "@/lib/generation/inputs";
-import { isGenerationActive, isStaleResult } from "@/lib/generation/queue";
-import {
-	buildCharacterAvatarJob,
-	characterAvatarElement,
-	characterAvatarElementId,
-} from "@/lib/project/ensureCharacterAvatars";
+import { isNodeStale } from "@/lib/generation/graph";
+import { isGenerationActive } from "@/lib/generation/queue";
+import { characterAvatarGraph } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { characterAvatarElementId } from "@/lib/project/characterAvatar";
+import { useGraphContext } from "@/lib/generation/useGraphContext";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
 import type { MetadataCharacter } from "@/lib/project/types";
@@ -63,10 +61,10 @@ function CharacterEditDialogBody({
 	name: string;
 	onClose: () => void;
 }) {
-	const { projectId, connectorConfig } = useConfig();
+	const { projectId } = useConfig();
 	const queue = useGenerationQueue();
-	const metadata = useProject((s) => s.metadata);
-	const character = metadata.characters[name];
+	const ctx = useGraphContext();
+	const character = useProject((s) => s.metadata.characters[name]);
 	const updateCharacter = useProject((s) => s.updateCharacter);
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
@@ -76,6 +74,11 @@ function CharacterEditDialogBody({
 	const avatarSnapshot = useQueueSelector((q) =>
 		q.getElementSnapshot(avatarElementId),
 	);
+	const avatarUrl = avatarSnapshot.result?.imageUrl;
+	const avatarNode = useMemo(
+		() => characterAvatarGraph(name, ctx),
+		[name, ctx],
+	);
 
 	if (!character) return null;
 
@@ -84,18 +87,10 @@ function CharacterEditDialogBody({
 
 	const regenerateAvatar = () => {
 		if (character.avatarUploaded) update({ avatarUploaded: false });
-		queue.enqueue(buildCharacterAvatarJob(projectId, name, connectorConfig));
+		queue.enqueueGraph([avatarNode]);
 	};
 
-	const isStale =
-		!character.avatarUploaded &&
-		isStaleResult(
-			avatarSnapshot,
-			getGenerationInputs(
-				characterAvatarElement(name, character.appearance),
-				metadata,
-			),
-		);
+	const isStale = !character.avatarUploaded && isNodeStale(avatarNode, queue);
 
 	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
@@ -165,17 +160,17 @@ function CharacterEditDialogBody({
 							{isStale && <StaleIndicator />}
 							<GenerateButton
 								status={avatarSnapshot.status}
-								hasResult={Boolean(character.avatarUrl)}
+								hasResult={Boolean(avatarUrl)}
 								disabled={generateDisabled}
 								onGenerate={regenerateAvatar}
 							/>
 						</div>
 					</div>
 					<div className="relative">
-						{character.avatarUrl ? (
+						{avatarUrl ? (
 							<MediaPreview
-								key={character.avatarUrl}
-								url={character.avatarUrl}
+								key={avatarUrl}
+								url={avatarUrl}
 								outputKind="image"
 								status={avatarSnapshot.status}
 								seconds={avatarSnapshot.seconds}
@@ -191,8 +186,11 @@ function CharacterEditDialogBody({
 						<UploadImageButton
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
-								queue.discard(avatarElementId);
-								update({ avatarUrl: url, avatarUploaded: true });
+								queue.commitResult(avatarNode, {
+									imageUrl: url,
+									durationSec: 0,
+								});
+								update({ avatarUploaded: true });
 							}}
 						/>
 					</div>

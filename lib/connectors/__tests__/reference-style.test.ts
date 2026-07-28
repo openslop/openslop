@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { GatewayClient } from "@/lib/gateway/base";
 import { createReferenceStylePlugin } from "@/lib/connectors/llm/plugins/reference-style";
+import { stubAvatarResults } from "./_node-results";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 import type {
 	LLMGenerateParams,
@@ -20,11 +21,18 @@ class MockLLMGateway extends GatewayClient<
 	);
 }
 
-function setup(projectId: string, referenceImages: string[]) {
+function setup(
+	projectId: string,
+	referenceImages: string[],
+	avatars: Record<string, string> = {},
+) {
 	clearProjectStore(projectId);
 	getProjectStore(projectId).getState().setReferenceImages(referenceImages);
 	const gateway = new MockLLMGateway();
-	const plugin = createReferenceStylePlugin(projectId);
+	const plugin = createReferenceStylePlugin(
+		projectId,
+		stubAvatarResults(avatars),
+	);
 	if (!plugin.transformPrompt)
 		throw new Error("reference-style plugin must define transformPrompt");
 	const ctx: PluginContext<LLMGenerateParams, LLMGenerateResult> = { gateway };
@@ -60,18 +68,17 @@ describe("createReferenceStylePlugin", () => {
 		const referenceImage = "https://example.com/reference.jpg";
 		const uploadedAvatar = "https://example.com/uploaded-avatar.jpg";
 		const generatedAvatar = "https://example.com/generated-avatar.jpg";
-		const { gateway, transformPrompt, ctx } = setup(projectId, [
-			referenceImage,
-		]);
+		const { gateway, transformPrompt, ctx } = setup(
+			projectId,
+			[referenceImage],
+			{ Mira: uploadedAvatar, Generated: generatedAvatar },
+		);
 		const store = getProjectStore(projectId);
-		store.getState().setCharacter("Mira", {
-			appearance: "blue hair",
-			avatarUrl: uploadedAvatar,
-			avatarUploaded: true,
-		});
+		store
+			.getState()
+			.setCharacter("Mira", { appearance: "blue hair", avatarUploaded: true });
 		store.getState().setCharacter("Generated", {
 			appearance: "green hair",
-			avatarUrl: generatedAvatar,
 			avatarUploaded: false,
 		});
 
@@ -90,12 +97,12 @@ describe("createReferenceStylePlugin", () => {
 	it("uses uploaded character avatars as style references when no reference images are present", async () => {
 		const projectId = "p5";
 		const avatar = "https://example.com/avatar.jpg";
-		const { gateway, transformPrompt, ctx } = setup(projectId, []);
-		getProjectStore(projectId).getState().setCharacter("Mira", {
-			appearance: "blue hair",
-			avatarUrl: avatar,
-			avatarUploaded: true,
+		const { gateway, transformPrompt, ctx } = setup(projectId, [], {
+			Mira: avatar,
 		});
+		getProjectStore(projectId)
+			.getState()
+			.setCharacter("Mira", { appearance: "blue hair", avatarUploaded: true });
 
 		await transformPrompt("a knight and a dragon", ctx);
 
@@ -105,10 +112,11 @@ describe("createReferenceStylePlugin", () => {
 
 	it("ignores generated avatars to avoid circular style references", async () => {
 		const projectId = "p6";
-		const { gateway, transformPrompt, ctx } = setup(projectId, []);
+		const { gateway, transformPrompt, ctx } = setup(projectId, [], {
+			Generated: "https://example.com/generated-avatar.jpg",
+		});
 		getProjectStore(projectId).getState().setCharacter("Generated", {
 			appearance: "green hair",
-			avatarUrl: "https://example.com/generated-avatar.jpg",
 			avatarUploaded: false,
 		});
 

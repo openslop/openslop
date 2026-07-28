@@ -7,6 +7,8 @@ const ASSET_KIND_URL_FIELD = {
 	video: "videoUrl",
 } as const satisfies Record<ResultKind, keyof AssetResult>;
 
+export const ASSET_URL_FIELDS = Object.values(ASSET_KIND_URL_FIELD);
+
 export function assetUrlField(kind: ResultKind) {
 	return ASSET_KIND_URL_FIELD[kind];
 }

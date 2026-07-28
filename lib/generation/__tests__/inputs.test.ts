@@ -1,104 +1,42 @@
 import { describe, expect, it } from "vitest";
-import type {
-	CanvasContentElement,
-	CanvasElementType,
-} from "@/lib/canvas/types";
-import type { Metadata } from "@/lib/project/types";
-import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
-import { getGenerationInputs } from "../inputs";
+import { serializeInputs, type GenerationInputs } from "../inputs";
 
-const emptyMetadata: Metadata = {
-	title: "",
-	style: "",
-	narration: {},
-	characters: {},
-};
+const inputs = (
+	prompt: string,
+	attributes: Record<string, string> = {},
+	dependencies: Record<string, string> = {},
+): GenerationInputs => ({ prompt, attributes, dependencies });
 
-const element = (
-	customAttributes: Record<string, string>,
-	type: CanvasElementType = "clip",
-	text = "a dragon flying",
-): CanvasContentElement => ({
-	id: "el-1",
-	type,
-	customAttributes,
-	children: [{ id: "t-1", type, text }],
-});
-
-describe("getGenerationInputs", () => {
-	it("keeps generation-affecting attributes", () => {
-		const { prompt, attributes } = getGenerationInputs(
-			element({ model: "Slop Video v1", duration: "5", provider: "openslop" }),
-			emptyMetadata,
-		);
-		expect(prompt).toBe("a dragon flying");
-		expect(attributes).toEqual({
-			model: "Slop Video v1",
-			duration: "5",
-			provider: "openslop",
-			width: 1280,
-			height: 720,
-		});
-	});
-
-	it("strips exactly the centralized LAYOUT_ATTRIBUTE_KEYS contract", () => {
-		const layoutOnly = Object.fromEntries(
-			LAYOUT_ATTRIBUTE_KEYS.map((k) => [k, "1"]),
-		);
-		const { attributes } = getGenerationInputs(
-			element({ ...layoutOnly, model: "Slop Video v1" }),
-			emptyMetadata,
-		);
-		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
-			expect(attributes).not.toHaveProperty(key);
-		}
-		expect(attributes).toEqual({
-			model: "Slop Video v1",
-			width: 1280,
-			height: 720,
-		});
-	});
-
-	it("merges characterAvatars from metadata for image elements", () => {
-		const metadata: Metadata = {
-			...emptyMetadata,
-			characters: {
-				Alice: { appearance: "tall", avatarUrl: "https://a/img.png" },
-				Bob: { appearance: "short", avatarUrl: "https://b/img.png" },
-				Eve: { appearance: "missing" },
-			},
-		};
-		const { attributes } = getGenerationInputs(
-			element({ characters: "Bob, Alice, Eve" }, "image"),
-			metadata,
-		);
-		expect(attributes.characterAvatars).toBe(
-			"https://a/img.png,https://b/img.png",
+describe("serializeInputs", () => {
+	it("produces a stable string for identical inputs", () => {
+		expect(serializeInputs(inputs("hello", { a: "1" }))).toBe(
+			serializeInputs(inputs("hello", { a: "1" })),
 		);
 	});
 
-	it("merges voiceId from metadata for character elements", () => {
-		const metadata: Metadata = {
-			...emptyMetadata,
-			characters: { Alice: { appearance: "tall", voiceId: "voice-1" } },
-		};
-		const { attributes } = getGenerationInputs(
-			element({ name: "Alice" }, "character"),
-			metadata,
+	it("produces different strings when prompts differ", () => {
+		expect(serializeInputs(inputs("hello"))).not.toBe(
+			serializeInputs(inputs("goodbye")),
 		);
-		expect(attributes.voiceId).toBe("voice-1");
 	});
 
-	it("does not merge metadata for element types without a resolver", () => {
-		const metadata: Metadata = {
-			...emptyMetadata,
-			characters: { Alice: { appearance: "tall", voiceId: "voice-1" } },
-		};
-		const { attributes } = getGenerationInputs(
-			element({ name: "Alice" }, "music"),
-			metadata,
+	it("produces different strings when attributes differ", () => {
+		expect(serializeInputs(inputs("hello", { a: "1" }))).not.toBe(
+			serializeInputs(inputs("hello", { a: "2" })),
 		);
-		expect(attributes).not.toHaveProperty("voiceId");
-		expect(attributes).not.toHaveProperty("characterAvatars");
+	});
+
+	it("produces different strings when a dependency resolved differently", () => {
+		expect(serializeInputs(inputs("hello", {}, { dep: "url-a" }))).not.toBe(
+			serializeInputs(inputs("hello", {}, { dep: "url-b" })),
+		);
+	});
+
+	it("is stable regardless of key insertion order", () => {
+		expect(
+			serializeInputs(inputs("p", { a: "1", b: "2" }, { x: "1", y: "2" })),
+		).toBe(
+			serializeInputs(inputs("p", { b: "2", a: "1" }, { y: "2", x: "1" })),
+		);
 	});
 });

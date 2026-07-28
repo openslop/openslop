@@ -1,18 +1,22 @@
-import { getProjectStore } from "@/lib/project/store";
+import { requireState } from "@/lib/connectors/plugins";
+import { voiceNode } from "@/lib/generation/sourceNodes";
 import { MetadataVoiceSchema } from "@/lib/project/types";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
 
-export function createMetadataVoicePlugin(
-	projectId: string,
-): ConnectorPlugin<TTSGenerateParams> {
+export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "metadata-voice",
-		beforeGenerate(params) {
-			const { narration, characters } =
-				getProjectStore(projectId).getState().metadata;
+		dependencies: (element, ctx) => [
+			voiceNode(ctx.state, element.customAttributes?.name),
+		],
+		beforeGenerate(params, ctx) {
+			const { narration, characters } = requireState(
+				ctx,
+				"metadata-voice",
+			).metadata;
 			const voice = params.name ? characters[params.name] : narration;
 			if (!voice) return params;
 			const { resolvedVoiceId, ...fields } = MetadataVoiceSchema.parse(voice);

@@ -1,5 +1,3 @@
-import isEqual from "lodash/isEqual";
-import isNil from "lodash/isNil";
 import type { CanvasContentElement } from "../canvas/types";
 import type {
 	AssetConnectorType,
@@ -8,13 +6,18 @@ import type {
 	ProviderKey,
 } from "../connectors/types";
 import { errorMessage } from "../errors";
-import { getProjectStore } from "../project/store";
 import { generateForElement } from "./generateForElement";
+import { serializeInputs, type GenerationInputs } from "./inputs";
+import type { ProjectState } from "./sourceNodes";
 import {
-	getGenerationInputs,
-	serializeInputs,
-	type GenerationInputs,
-} from "./inputs";
+	flattenGraph,
+	isSourceNode,
+	needsGeneration,
+	nodeInputs,
+	requireJob,
+	type GenerationNode,
+	type NodeId,
+} from "./graph";
 
 export type GenerationStatus = "idle" | "queued" | "generating";
 
@@ -27,14 +30,6 @@ export type ElementSnapshot = {
 	connectorType: AssetConnectorType | null;
 };
 
-export function isStaleResult(
-	snapshot: ElementSnapshot,
-	currentInputs: GenerationInputs,
-): boolean {
-	if (isNil(snapshot.result)) return false;
-	return !isEqual(currentInputs, snapshot.resultInputs);
-}
-
 export type GenerationJob = {
 	elementId: string;
 	connectorType: AssetConnectorType;
@@ -42,6 +37,8 @@ export type GenerationJob = {
 	config: ConnectorConfig;
 	projectId: string;
 	element: CanvasContentElement;
+	/** The project state this job's inputs were resolved against. */
+	state: ProjectState;
 };
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
@@ -59,7 +56,7 @@ export const isGenerationActive = (status: GenerationStatus) =>
 
 export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
-	private pending: GenerationJob[] = [];
+	private pending: GenerationNode[] = [];
 	private controllers = new Map<string, AbortController>();
 	private jobStarts = new Map<string, number>();
 	private tickTimer: ReturnType<typeof setInterval> | null = null;
@@ -161,7 +158,7 @@ export class GenerationQueue {
 		this.controllers.get(id)?.abort();
 		this.controllers.delete(id);
 		this.stopTimer(id);
-		this.pending = this.pending.filter((j) => j.elementId !== id);
+		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
 	private resetToIdle(id: string) {
@@ -181,20 +178,22 @@ export class GenerationQueue {
 		}
 	}
 
-	enqueue(job: GenerationJob) {
-		this.enqueueAll([job]);
-	}
-
-	enqueueAll(jobs: GenerationJob[]) {
+	/**
+	 * Queue `roots` along with every dependency that is missing or stale. Roots
+	 * are always queued: asking to generate something means regenerating it.
+	 */
+	enqueueGraph(roots: GenerationNode[]) {
+		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
-		for (const job of jobs) {
-			if (this.isInQueue(job.elementId)) continue;
-			this.update(job.elementId, {
+		for (const node of flattenGraph(roots)) {
+			if (isSourceNode(node) || this.isInQueue(node.id)) continue;
+			if (!rootIds.has(node.id) && !needsGeneration(node, this)) continue;
+			this.update(node.id, {
 				status: "queued",
 				seconds: 0,
-				connectorType: job.connectorType,
+				connectorType: requireJob(node).connectorType,
 			});
-			this.pending.push(job);
+			this.pending.push(node);
 			added = true;
 		}
 		if (added) {
@@ -238,8 +237,22 @@ export class GenerationQueue {
 		this.notify();
 	}
 
-	// Cancel() any in-flight job first (or it can clobber this), and pass connectorType.
-	commitResult(
+	/**
+	 * Commit `result` for `node`, against the inputs the node currently resolves
+	 * to so dependents see it as fresh. Aborts any in-flight job for the node
+	 * first, which would otherwise land later and clobber this.
+	 */
+	commitResult(node: GenerationNode, result: AssetResult): void {
+		this.cancel(node.id);
+		this.commit(
+			node.id,
+			result,
+			nodeInputs(node, this),
+			requireJob(node).connectorType,
+		);
+	}
+
+	private commit(
 		elementId: string,
 		result: AssetResult,
 		inputs: GenerationInputs,
@@ -285,17 +298,58 @@ export class GenerationQueue {
 		this.maybeStopTickTimer();
 	}
 
-	private processQueue() {
-		while (this.controllers.size < this.batchSize && this.pending.length > 0) {
-			const job = this.pending.shift();
-			if (!job) break;
-			this.runJob(job);
-		}
+	/** The dependency holding `node` back, if any: it gates until it settles. */
+	private blockingDependency(node: GenerationNode) {
+		return node.dependsOn.find(
+			(dep) =>
+				!isSourceNode(dep) &&
+				(this.isInQueue(dep.id) || !this.getElementSnapshot(dep.id).result),
+		);
 	}
 
-	private runJob(job: GenerationJob) {
+	private processQueue() {
+		while (this.controllers.size < this.batchSize) {
+			const index = this.pending.findIndex(
+				(node) => !this.blockingDependency(node),
+			);
+			if (index === -1) break;
+			const [node] = this.pending.splice(index, 1);
+			if (node) this.runJob(node);
+		}
+		this.failBlocked();
+	}
+
+	/**
+	 * Nothing running and nothing runnable means every remaining job is waiting on
+	 * a dependency that will never arrive, so surface it instead of hanging.
+	 */
+	private failBlocked() {
+		if (this.controllers.size > 0 || this.pending.length === 0) return;
+		const blocked = this.pending;
+		this.pending = [];
+		for (const node of blocked) {
+			const missing = this.blockingDependency(node);
+			this.update(node.id, {
+				status: "idle",
+				seconds: 0,
+				result: null,
+				error: `Dependency "${missing?.id ?? "unknown"}" failed to generate`,
+			});
+		}
+		this.notify();
+	}
+
+	private dependencyResults(node: GenerationNode): Record<NodeId, AssetResult> {
+		const entries = node.dependsOn.flatMap((dep) => {
+			const { result } = this.getElementSnapshot(dep.id);
+			return result ? [[dep.id, result] as const] : [];
+		});
+		return Object.fromEntries(entries);
+	}
+
+	private runJob(node: GenerationNode) {
+		const job = requireJob(node);
 		const { elementId } = job;
-		const prior = this.getElementSnapshot(elementId);
 		const controller = new AbortController();
 		this.controllers.set(elementId, controller);
 
@@ -303,9 +357,8 @@ export class GenerationQueue {
 		this.notify();
 		this.startElapsedTimer(elementId);
 
-		const { metadata } = getProjectStore(job.projectId).getState();
-		const inputs = getGenerationInputs(job.element, metadata);
-		generateForElement(job, inputs, prior)
+		const inputs = nodeInputs(node, this);
+		generateForElement(job, inputs, this.dependencyResults(node))
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
 			.catch((err) => this.handleJobError(elementId, err, controller))
 			.finally(() => this.finalizeJob(elementId, controller));
@@ -323,7 +376,7 @@ export class GenerationQueue {
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		this.commitResult(job.elementId, result, inputs, job.connectorType);
+		this.commit(job.elementId, result, inputs, job.connectorType);
 	}
 
 	private handleJobError(

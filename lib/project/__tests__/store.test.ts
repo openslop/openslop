@@ -35,12 +35,12 @@ describe("project store updateMetadata", () => {
 			characters: { Alice: { appearance: "A girl" } },
 		});
 		store.getState().updateMetadata({
-			characters: { Alice: { avatarUrl: "https://img/alice.png" } },
+			characters: { Alice: { avatarUploaded: true } },
 		});
 
 		expect(store.getState().metadata.characters["Alice"]).toEqual({
 			appearance: "A girl",
-			avatarUrl: "https://img/alice.png",
+			avatarUploaded: true,
 		});
 	});
 
@@ -102,19 +102,19 @@ describe("project store updateMetadata", () => {
 		store
 			.getState()
 			.setCharacter("Alice", { appearance: "A girl", accent: "british" });
-		store.getState().updateCharacter("Alice", { avatarUrl: "a.png" });
+		store.getState().updateCharacter("Alice", { avatarUploaded: true });
 
 		expect(store.getState().metadata.characters["Alice"]).toEqual({
 			appearance: "A girl",
 			accent: "british",
-			avatarUrl: "a.png",
+			avatarUploaded: true,
 		});
 	});
 
 	it("updateCharacter throws for an unknown character", () => {
 		const store = getProjectStore(PROJECT_ID);
 		expect(() =>
-			store.getState().updateCharacter("Nobody", { avatarUrl: "a.png" }),
+			store.getState().updateCharacter("Nobody", { avatarUploaded: true }),
 		).toThrow(/Nobody/);
 	});
 

@@ -1,7 +1,11 @@
 "use client";
 
 import { Mic, Palette, User } from "@/components/ui/icon";
-import { characterAvatarElementId } from "@/lib/project/ensureCharacterAvatars";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import {
+	characterAvatarElementId,
+	characterAvatarUrl,
+} from "@/lib/project/characterAvatar";
 import { useProject } from "@/lib/project/useProject";
 import { AssetTile } from "./AssetTile";
 
@@ -19,18 +23,40 @@ export function CharacterAssetTiles({
 	onRemove?: (name: string) => void;
 }) {
 	const characters = useProject((s) => s.metadata.characters);
-	return Object.entries(characters).map(([name, character]) => (
-		<AssetTile
+	return Object.keys(characters).map((name) => (
+		<CharacterAssetTile
 			key={`character:${name}`}
 			name={name}
-			previewUrl={character.avatarUrl}
-			Icon={User}
-			elementId={characterAvatarElementId(name)}
 			onEdit={() => onEdit(name)}
 			onRemove={onRemove && (() => onRemove(name))}
-			removeAffordance="corner"
 		/>
 	));
+}
+
+function CharacterAssetTile({
+	name,
+	onEdit,
+	onRemove,
+}: {
+	name: string;
+	onEdit: () => void;
+	onRemove?: () => void;
+}) {
+	const elementId = characterAvatarElementId(name);
+	const previewUrl = useQueueSelector((queue) =>
+		characterAvatarUrl(queue, name),
+	);
+	return (
+		<AssetTile
+			name={name}
+			previewUrl={previewUrl}
+			Icon={User}
+			elementId={elementId}
+			onEdit={onEdit}
+			onRemove={onRemove}
+			removeAffordance="corner"
+		/>
+	);
 }
 
 export function ReferenceAssetTiles() {

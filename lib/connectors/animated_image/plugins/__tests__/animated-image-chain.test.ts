@@ -27,7 +27,7 @@ const registry: ConnectorRegistry = {
 };
 
 describe("createVideoChainPlugin", () => {
-	it("stashes videoPrompt and animates the still via the video connector", async () => {
+	it("animates the still the dependency produced via the video connector", async () => {
 		generateMock.mockReset();
 		generateMock.mockResolvedValue({
 			videoUrl: "https://example.com/video.mp4",
@@ -37,21 +37,16 @@ describe("createVideoChainPlugin", () => {
 		const plugin = createVideoChainPlugin(registry);
 		const ctx: PluginContext<AnimatedImageGenerateParams, AssetResult> = {};
 
-		const cleaned = (await plugin.beforeGenerate?.(
+		await plugin.beforeGenerate?.(
 			{
 				prompt: "a dark forest",
 				videoPrompt: "slow zoom in",
-				videoWidth: 1280,
-				videoHeight: 720,
+				width: 1280,
+				height: 720,
 				duration: 8,
 			},
 			ctx,
-		)) as AnimatedImageGenerateParams;
-
-		expect(cleaned).not.toHaveProperty("videoPrompt");
-		expect(cleaned).not.toHaveProperty("videoWidth");
-		expect(cleaned).not.toHaveProperty("videoHeight");
-		expect(cleaned).not.toHaveProperty("duration");
+		);
 
 		const still = {
 			imageUrl: "https://example.com/still.png",

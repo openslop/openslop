@@ -1,7 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import type { GenerationJob } from "@/lib/generation/queue";
+import { GenerationQueue } from "@/lib/generation/queue";
+import type { GenerationNode } from "@/lib/generation/graph";
+import { resolveGraph } from "@/lib/generation/resolveGraph";
+import { projectState } from "@/lib/generation/sourceNodes";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
 const registry: ConnectorRegistry = {
@@ -64,18 +67,10 @@ vi.mock("react", () => ({
 	useCallback: <T>(fn: T) => fn,
 }));
 
-const enqueueAllSpy = vi.fn();
-const getElementSnapshotSpy = vi.fn();
+let queue: GenerationQueue;
 
 vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
-	useGenerationQueue: () => ({
-		enqueueAll: (...args: unknown[]) => enqueueAllSpy(...args),
-		getElementSnapshot: (...args: unknown[]) => getElementSnapshotSpy(...args),
-	}),
-}));
-
-vi.mock("@/lib/project/ensureCharacterAvatars", () => ({
-	ensureCharacterAvatars: vi.fn(),
+	useGenerationQueue: () => queue,
 }));
 
 function makeElement(
@@ -96,212 +91,108 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 	return { id: "scene-1", type: "scene", children: elements };
 }
 
+/** Commit a result for `element` as if it had just been generated. */
+function commitCurrent(element: CanvasContentElement) {
+	const node = resolveGraph(element, {
+		projectId: "test-project",
+		registry,
+		state: projectState("test-project"),
+	});
+	queue.commitResult(node, {
+		imageUrl: "https://example.com/asset.png",
+		durationSec: 0,
+	});
+}
+
+const { useGenerateAll } = await import("../hooks/useGenerateAll");
+
+function useGenerateAllFor(elements: CanvasContentElement[]) {
+	const children: Descendant[] = [wrapInScene(elements)];
+	const editor = { children } as unknown as Parameters<
+		typeof useGenerateAll
+	>[0];
+	useGenerateAll(editor).generateAll();
+	return enqueuedIds();
+}
+
+const enqueuedIds = (): string[] =>
+	(enqueueGraphSpy.mock.calls[0]?.[0] as GenerationNode[] | undefined)?.map(
+		(node) => node.id,
+	) ?? [];
+
+let enqueueGraphSpy: ReturnType<typeof vi.spyOn>;
+
 beforeEach(() => {
 	vi.clearAllMocks();
-	getElementSnapshotSpy.mockReturnValue({
-		status: "idle",
-		seconds: 0,
-		result: null,
-		error: null,
-		resultInputs: null,
-	});
+	queue = new GenerationQueue({ batchSize: 3 });
+	enqueueGraphSpy = vi
+		.spyOn(queue, "enqueueGraph")
+		.mockImplementation(() => {});
 });
 
 describe("useGenerateAll", () => {
-	it("enqueues jobs for all elements without results", async () => {
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "image", "sunset"),
-				makeElement("b", "narration", "hello"),
-			]),
-		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
-
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		expect(enqueueAllSpy).toHaveBeenCalledOnce();
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(2);
-		expect(jobs.map((j) => j.elementId)).toEqual(["a", "b"]);
+	it("enqueues every element without a result", async () => {
+		const ids = useGenerateAllFor([
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "narration", "hello"),
+		]);
+		expect(ids).toEqual(["a", "b"]);
 	});
 
 	it("skips elements that already have a current result", async () => {
-		getElementSnapshotSpy.mockImplementation((id: string) => ({
-			status: "idle",
-			seconds: 0,
-			result: id === "a" ? { url: "https://example.com/img.png" } : null,
-			error: null,
-			resultInputs:
-				id === "a"
-					? { prompt: "sunset", attributes: { width: 2560, height: 1440 } }
-					: null,
-		}));
+		const a = makeElement("a", "image", "sunset");
+		commitCurrent(a);
 
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "image", "sunset"),
-				makeElement("b", "narration", "hello"),
-			]),
-		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
-
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(1);
-		expect(jobs[0].elementId).toBe("b");
+		const ids = useGenerateAllFor([a, makeElement("b", "narration", "hello")]);
+		expect(ids).toEqual(["b"]);
 	});
 
-	it("re-generates elements with stale prompt", async () => {
-		getElementSnapshotSpy.mockImplementation((id: string) => ({
-			status: "idle",
-			seconds: 0,
-			result: id === "a" ? { url: "https://example.com/img.png" } : null,
-			error: null,
-			resultInputs:
-				id === "a" ? { prompt: "old prompt", attributes: {} } : null,
-		}));
+	it("re-generates an element whose prompt drifted", async () => {
+		commitCurrent(makeElement("a", "image", "old prompt"));
 
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "image", "new prompt"),
-				makeElement("b", "narration", "hello"),
-			]),
-		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
-
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(2);
-		expect(jobs.map((j) => j.elementId)).toEqual(["a", "b"]);
+		const ids = useGenerateAllFor([
+			makeElement("a", "image", "new prompt"),
+			makeElement("b", "narration", "hello"),
+		]);
+		expect(ids).toEqual(["a", "b"]);
 	});
 
-	it("re-generates elements with stale attributes", async () => {
-		getElementSnapshotSpy.mockImplementation((id: string) => ({
-			status: "idle",
-			seconds: 0,
-			result: id === "a" ? { url: "https://example.com/img.png" } : null,
-			error: null,
-			resultInputs:
-				id === "a"
-					? { prompt: "hello", attributes: { emotion: "calm" } }
-					: null,
-		}));
+	it("re-generates an element whose attributes drifted", async () => {
+		commitCurrent(makeElement("a", "narration", "hello", { emotion: "calm" }));
 
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "narration", "hello", { emotion: "happy" }),
-				makeElement("b", "image", "sunset"),
-			]),
-		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
-
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(2);
-		expect(jobs.map((j) => j.elementId)).toEqual(["a", "b"]);
+		const ids = useGenerateAllFor([
+			makeElement("a", "narration", "hello", { emotion: "happy" }),
+			makeElement("b", "image", "sunset"),
+		]);
+		expect(ids).toEqual(["a", "b"]);
 	});
 
-	it("enqueues nothing when all elements have current results", async () => {
-		getElementSnapshotSpy.mockImplementation((id: string) => {
-			const inputs: Record<
-				string,
-				{ prompt: string; attributes: Record<string, string | number> }
-			> = {
-				a: { prompt: "sunset", attributes: { width: 2560, height: 1440 } },
-				b: { prompt: "hello", attributes: {} },
-			};
-			return {
-				status: "idle",
-				seconds: 0,
-				result: { url: "https://example.com/asset.png" },
-				error: null,
-				resultInputs: inputs[id],
-			};
-		});
-
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "image", "sunset"),
-				makeElement("b", "narration", "hello"),
-			]),
+	it("enqueues nothing when every element is current", async () => {
+		const elements = [
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "narration", "hello"),
 		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
+		elements.forEach(commitCurrent);
 
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(0);
+		expect(useGenerateAllFor(elements)).toEqual([]);
 	});
 
-	it("does not include an uploaded image (no prompt) in Generate All", async () => {
-		getElementSnapshotSpy.mockImplementation((id: string) => ({
-			status: "idle",
-			seconds: 0,
-			result:
-				id === "a" ? { imageUrl: "https://example.com/upload.png" } : null,
-			error: null,
-			resultInputs: id === "a" ? { prompt: "", attributes: {} } : null,
-		}));
+	it("does not include an uploaded image, which has no prompt", async () => {
+		const uploaded = makeElement("a", "image", "");
+		commitCurrent(uploaded);
 
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "image", ""),
-				makeElement("b", "narration", "hello"),
-			]),
-		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
-
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(1);
-		expect(jobs[0].elementId).toBe("b");
+		const ids = useGenerateAllFor([
+			uploaded,
+			makeElement("b", "narration", "hello"),
+		]);
+		expect(ids).toEqual(["b"]);
 	});
 
-	it("skips elements with empty prompts", async () => {
-		const { useGenerateAll } = await import("../hooks/useGenerateAll");
-		const children: Descendant[] = [
-			wrapInScene([
-				makeElement("a", "image", "sunset"),
-				makeElement("b", "narration", "   "),
-			]),
-		];
-		const editor = { children } as unknown as Parameters<
-			typeof useGenerateAll
-		>[0];
-
-		const { generateAll } = useGenerateAll(editor);
-		generateAll();
-
-		const jobs: GenerationJob[] = enqueueAllSpy.mock.calls[0][0];
-		expect(jobs).toHaveLength(1);
-		expect(jobs[0].elementId).toBe("a");
+	it("skips elements with blank prompts", async () => {
+		const ids = useGenerateAllFor([
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "narration", "   "),
+		]);
+		expect(ids).toEqual(["a"]);
 	});
 });

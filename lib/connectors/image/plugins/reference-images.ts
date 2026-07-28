@@ -1,24 +1,21 @@
+import { requireState } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { getProjectStore } from "@/lib/project/store";
+import { referenceImagesNode } from "@/lib/generation/sourceNodes";
 
 export type ParamsWithReferenceImages = {
 	prompt: string;
 	referenceImages?: string[];
 };
 
-export function createReferenceImagesPlugin(
-	projectId: string,
-): ConnectorPlugin<ParamsWithReferenceImages> {
+export function createReferenceImagesPlugin(): ConnectorPlugin<ParamsWithReferenceImages> {
 	return {
 		name: "reference-images",
-		beforeGenerate(params) {
+		dependencies: (_, ctx) => [referenceImagesNode(ctx.state)],
+		beforeGenerate(params, ctx) {
 			const { referenceImages: existing = [], ...rest } = params;
-			const storeImages = getProjectStore(projectId).getState().referenceImages;
-			if (storeImages.length === 0 && existing.length === 0) return params;
-			return {
-				...rest,
-				referenceImages: [...existing, ...storeImages],
-			};
+			const stateImages = requireState(ctx, "reference-images").referenceImages;
+			if (stateImages.length === 0 && existing.length === 0) return params;
+			return { ...rest, referenceImages: [...existing, ...stateImages] };
 		},
 	};
 }

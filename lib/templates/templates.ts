@@ -22,6 +22,8 @@ export interface Template {
 	style?: string;
 	referenceImages: string[];
 	characters?: Record<string, MetadataCharacter>;
+	/** Prebuilt avatars, seeded as the character avatar nodes' results. */
+	characterAvatars?: Record<string, string>;
 	narration?: MetadataVoice;
 	showcase?: TemplateShowcase;
 }
@@ -43,9 +45,9 @@ export const TEMPLATES: Template[] = [
 				description: "American male, neutral accent",
 				appearance:
 					"male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
-				avatarUrl: templateAsset("pov-life-stages-4"),
 			},
 		},
+		characterAvatars: { Protagonist: templateAsset("pov-life-stages-4") },
 		narration: {
 			gender: "masculine",
 			age: "adult",
@@ -347,9 +349,9 @@ export const TEMPLATES: Template[] = [
 				description: "American male, neutral accent",
 				appearance:
 					"man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers",
-				avatarUrl: templateAsset("finance-tips-1"),
 			},
 		},
+		characterAvatars: { Ethan: templateAsset("finance-tips-1") },
 		narration: {
 			gender: "masculine",
 			age: "adult",
@@ -833,8 +835,10 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 				description: "Young American man",
 				appearance:
 					"A young everyman with a smooth, rounded egg-shaped head, pale skin, no nose, small black dot eyes, thick straight dark eyebrows, and a faint neutral mouth. He wears a navy baseball cap (worn forward or backward) and casual everyday clothing—hoodies, button-up shirts, or jackets in muted tones.",
-				avatarUrl: templateAsset("pov-financial-lifestyle-5"),
 			},
+		},
+		characterAvatars: {
+			Protagonist: templateAsset("pov-financial-lifestyle-5"),
 		},
 		narration: {
 			gender: "masculine",

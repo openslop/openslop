@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { GatewayClient } from "@/lib/gateway/base";
 import { createCharacterAvatarStylePlugin } from "@/lib/connectors/llm/plugins/character-avatar-style";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { stubAvatarResults } from "./_node-results";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -20,10 +21,13 @@ class MockLLMGateway extends GatewayClient<
 	);
 }
 
-function setup(projectId: string) {
+function setup(projectId: string, avatars: Record<string, string> = {}) {
 	clearProjectStore(projectId);
 	const gateway = new MockLLMGateway();
-	const plugin = createCharacterAvatarStylePlugin(projectId);
+	const plugin = createCharacterAvatarStylePlugin(
+		projectId,
+		stubAvatarResults(avatars),
+	);
 	if (!plugin.transformPrompt)
 		throw new Error(
 			"character-avatar-style plugin must define transformPrompt",
@@ -46,12 +50,12 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("describes uploaded avatars from the image", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c2");
-		getProjectStore("c2").getState().setCharacter("Mira", {
-			appearance: "",
-			avatarUrl: "https://example.com/mira.png",
-			avatarUploaded: true,
+		const { gateway, transformPrompt, ctx } = setup("c2", {
+			Mira: "https://example.com/mira.png",
 		});
+		getProjectStore("c2")
+			.getState()
+			.setCharacter("Mira", { appearance: "", avatarUploaded: true });
 
 		const result = await transformPrompt("write a scene", ctx);
 
@@ -66,10 +70,11 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("reuses the appearance text for generated avatars without calling the gateway", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c3");
+		const { gateway, transformPrompt, ctx } = setup("c3", {
+			Mira: "https://example.com/generated.png",
+		});
 		getProjectStore("c3").getState().setCharacter("Mira", {
 			appearance: "a tall woman with green hair",
-			avatarUrl: "https://example.com/generated.png",
 			avatarUploaded: false,
 		});
 
@@ -80,18 +85,16 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("preserves both generated and uploaded character appearances", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c4");
+		const { gateway, transformPrompt, ctx } = setup("c4", {
+			Generated: "https://example.com/generated.png",
+			Uploaded: "https://example.com/uploaded.png",
+		});
 		const store = getProjectStore("c4").getState();
 		store.setCharacter("Generated", {
 			appearance: "a tall woman with green hair",
-			avatarUrl: "https://example.com/generated.png",
 			avatarUploaded: false,
 		});
-		store.setCharacter("Uploaded", {
-			appearance: "",
-			avatarUrl: "https://example.com/uploaded.png",
-			avatarUploaded: true,
-		});
+		store.setCharacter("Uploaded", { appearance: "", avatarUploaded: true });
 
 		const result = await transformPrompt("write a scene", ctx);
 
@@ -103,12 +106,12 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("throws when an uploaded avatar needs description but no gateway is provided", async () => {
-		const { transformPrompt } = setup("c5");
-		getProjectStore("c5").getState().setCharacter("Mira", {
-			appearance: "",
-			avatarUrl: "https://example.com/mira.png",
-			avatarUploaded: true,
+		const { transformPrompt } = setup("c5", {
+			Mira: "https://example.com/mira.png",
 		});
+		getProjectStore("c5")
+			.getState()
+			.setCharacter("Mira", { appearance: "", avatarUploaded: true });
 
 		await expect(transformPrompt("write a scene")).rejects.toThrow(
 			"character-avatar-style plugin requires gateway context",

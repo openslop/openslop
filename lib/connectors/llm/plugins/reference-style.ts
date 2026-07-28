@@ -1,6 +1,8 @@
 import dedent from "dedent";
 import compact from "lodash/compact";
 import { requireGateway } from "@/lib/connectors/plugins";
+import type { NodeResults } from "@/lib/generation/graph";
+import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { getProjectStore } from "@/lib/project/store";
 import type {
 	LLMGenerateParams,
@@ -9,7 +11,10 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 
-export function createReferenceStylePlugin(projectId: string): LLMPlugin {
+export function createReferenceStylePlugin(
+	projectId: string,
+	results: NodeResults,
+): LLMPlugin {
 	return {
 		name: "reference-style",
 		async transformPrompt(
@@ -20,8 +25,10 @@ export function createReferenceStylePlugin(projectId: string): LLMPlugin {
 				getProjectStore(projectId).getState();
 			const styleReferenceImages = compact([
 				...referenceImages,
-				...Object.values(metadata.characters).map((character) =>
-					character.avatarUploaded ? character.avatarUrl : undefined,
+				...Object.entries(metadata.characters).map(([name, character]) =>
+					character.avatarUploaded
+						? characterAvatarUrl(results, name)
+						: undefined,
 				),
 			]);
 			if (styleReferenceImages.length === 0) return prompt;

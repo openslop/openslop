@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import { characterAvatarElementId } from "../ensureCharacterAvatars";
+import { characterAvatarElementId } from "../characterAvatar";
 import { pickThumbnailUrl } from "../thumbnail";
 
 const entry = (

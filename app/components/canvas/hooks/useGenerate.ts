@@ -1,53 +1,45 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { isStaleResult } from "@/lib/generation/queue";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { getGenerationInputs } from "@/lib/generation/inputs";
-import { scheduleGeneration } from "@/lib/generation/scheduleGeneration";
-import { useProject } from "@/lib/project/useProject";
+import { isNodeStale, nodeInputs } from "@/lib/generation/graph";
+import { resolveGraph } from "@/lib/generation/resolveGraph";
+import { useGraphContext } from "@/lib/generation/useGraphContext";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { buildGenerationJob } from "@/lib/generation/buildGenerationJob";
 
 export function useGenerate(element: CanvasContentElement) {
-	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
+	const ctx = useGraphContext();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
-	const metadata = useProject((s) => s.metadata);
-	const currentInputs = useMemo(
-		() => getGenerationInputs(element, metadata),
-		[element, metadata],
-	);
-	const stale = isStaleResult(snapshot, currentInputs);
+	const node = useMemo(() => resolveGraph(element, ctx), [element, ctx]);
+	const stale = useQueueSelector((q) => isNodeStale(node, q));
 
 	useEffect(() => {
 		if (!stale) return;
-		queue.restoreResult(element.id, currentInputs);
-	}, [queue, element.id, currentInputs, stale]);
+		queue.restoreResult(element.id, nodeInputs(node, queue));
+	}, [queue, element.id, node, stale]);
 
 	const generate = useCallback(() => {
-		if (!currentInputs.prompt) {
+		if (!node.inputs.prompt) {
 			queue.setError(element.id, "Enter a prompt first");
 			return;
 		}
-		const job = buildGenerationJob(element, connectorConfig, projectId);
-		scheduleGeneration(queue, [job], { projectId, registry: connectorConfig });
-	}, [queue, element, currentInputs.prompt, connectorConfig, projectId]);
+		queue.enqueueGraph([node]);
+	}, [queue, element.id, node]);
 
 	const discard = useCallback(() => {
 		queue.discard(element.id);
 	}, [queue, element.id]);
 
 	return {
+		node,
 		status: snapshot.status,
 		seconds: snapshot.seconds,
 		result: snapshot.result,
 		error: snapshot.error,
 		stale,
-		inputs: currentInputs,
-		hasPrompt: Boolean(currentInputs.prompt),
+		hasPrompt: Boolean(node.inputs.prompt),
 		hasResult: Boolean(snapshot.result),
 		generate,
 		discard,

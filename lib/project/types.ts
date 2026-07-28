@@ -41,7 +41,7 @@ export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 
 export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 	appearance: z.string(),
-	avatarUrl: optionalString,
+	/** Whether the avatar node's result came from an upload rather than generation. */
 	avatarUploaded: z.boolean().optional().catch(undefined),
 });
 
