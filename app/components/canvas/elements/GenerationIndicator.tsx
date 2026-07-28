@@ -6,7 +6,10 @@ import {
 } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import {
+	isGenerationActive,
+	type ElementSnapshot,
+} from "@/lib/generation/queue";
 
 type Status = ElementSnapshot["status"];
 
@@ -57,7 +60,7 @@ export function GenerationIndicator({
 	const Icon = ICONS[status];
 	const sizes = SIZE_CLASSES[size];
 	const label = statusLabel(status, seconds, idleLabel);
-	const active = status !== "idle";
+	const active = isGenerationActive(status);
 	const iconEl = (
 		<Icon
 			className={cn(sizes.icon, "text-foreground", ICON_ANIMATION[status])}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Image as ImageIcon, Video } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { MediaResult } from "./results";
@@ -19,12 +19,14 @@ export function AnimatedImagePreview({
 	const [mode, setMode] = useState<"animated" | "still">("animated");
 
 	return (
-		<div className="relative w-full">
+		<div
+			className="relative w-full"
+			style={{ "--cancel-offset": "2.5rem" } as CSSProperties}
+		>
 			<MediaResult
 				{...state}
 				url={mode === "animated" ? videoUrl : imageUrl}
 				outputKind={mode === "animated" ? "video" : "image"}
-				cancelClassName="top-10"
 			/>
 			<MediaToggle
 				className="absolute top-2 right-2 z-30 shadow-sm"

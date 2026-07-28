@@ -4,7 +4,10 @@ import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import type { GenerationStatus } from "@/lib/generation/queue";
+import {
+	isGenerationActive,
+	type GenerationStatus,
+} from "@/lib/generation/queue";
 import { useElementGeneration } from "./ElementGenerationContext";
 
 export function StaleIndicator() {
@@ -72,7 +75,7 @@ export function ElementGenerateButton() {
 		<GenerateButton
 			status={status}
 			hasResult={hasResult}
-			disabled={!hasPrompt || status !== "idle"}
+			disabled={!hasPrompt || isGenerationActive(status)}
 			onGenerate={generate}
 		/>
 	);

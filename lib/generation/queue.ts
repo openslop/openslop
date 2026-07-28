@@ -10,8 +10,11 @@ import type {
 import { errorMessage } from "../errors";
 import { getProjectStore } from "../project/store";
 import { generateForElement } from "./generateForElement";
-import { getGenerationInputs } from "./getGenerationInputs";
-import { serializeInputs, type GenerationInputs } from "./generationInputs";
+import {
+	getGenerationInputs,
+	serializeInputs,
+	type GenerationInputs,
+} from "./inputs";
 
 export type GenerationStatus = "idle" | "queued" | "generating";
 
@@ -50,7 +53,8 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	connectorType: null,
 };
 
-const isActive = (status: ElementSnapshot["status"]) =>
+/** A generation is active from the moment it is queued until it settles. */
+export const isGenerationActive = (status: GenerationStatus) =>
 	status === "queued" || status === "generating";
 
 export class GenerationQueue {
@@ -116,7 +120,7 @@ export class GenerationQueue {
 
 	isBusy = (): boolean => {
 		for (const snap of this.state.values()) {
-			if (isActive(snap.status)) return true;
+			if (isGenerationActive(snap.status)) return true;
 		}
 		return false;
 	};
@@ -129,10 +133,11 @@ export class GenerationQueue {
 		return n;
 	}
 
-	getActiveCount = (): number => this.count((s) => isActive(s.status));
+	getActiveCount = (): number =>
+		this.count((s) => isGenerationActive(s.status));
 
 	getGeneratedCount = (): number =>
-		this.count((s) => !isActive(s.status) && s.result != null);
+		this.count((s) => !isGenerationActive(s.status) && s.result != null);
 
 	snapshot(): Record<string, ElementSnapshot> {
 		return Object.fromEntries(this.state);
@@ -140,7 +145,7 @@ export class GenerationQueue {
 
 	private isInQueue(id: string): boolean {
 		const s = this.state.get(id)?.status;
-		return s !== undefined && isActive(s);
+		return s !== undefined && isGenerationActive(s);
 	}
 
 	private update(id: string, patch: Partial<ElementSnapshot>) {

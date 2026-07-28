@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { serializeInputs, type GenerationInputs } from "../generationInputs";
+import { serializeInputs, type GenerationInputs } from "../inputs";
 import { isStaleResult, type ElementSnapshot } from "../queue";
 
 const inputs = (

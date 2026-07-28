@@ -2,6 +2,7 @@
 
 import { Pencil, X, type IconComponent } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import { isGenerationActive } from "@/lib/generation/queue";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
 import { RemoveCrossButton } from "./RemoveCrossButton";
@@ -76,14 +77,14 @@ export function AssetTile({
 						aria-hidden
 					/>
 				)}
-				{status !== "idle" && (
+				{isGenerationActive(status) && (
 					<GenerationIndicator
 						status={status}
 						size="sm"
 						className="absolute right-1 top-1"
 					/>
 				)}
-				{status === "idle" && previewUrl && (
+				{!isGenerationActive(status) && previewUrl && (
 					<div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-card text-foreground shadow-sm ring-1 ring-border">
 						<Icon className="h-3 w-3" />
 					</div>
