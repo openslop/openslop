@@ -6,7 +6,10 @@ import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 
+const UNSET = "—";
+
 function formatValue(value: string, unit?: string): string {
+	if (!value) return UNSET;
 	return unit ? `${value}${unit}` : value;
 }
 
@@ -31,8 +34,7 @@ export function AttributeBadge({
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
 	const value = element.customAttributes?.[attrKey] ?? "";
-	const isTextEdit = spec.edit?.kind === "text";
-	if (!value && !isTextEdit) return null;
+	if (!value && !spec.edit) return null;
 
 	const SpecIcon = spec.icon;
 	const labeled = hideLabel ? (
@@ -50,7 +52,7 @@ export function AttributeBadge({
 			{formatValue(value, spec.unit)}
 		</>
 	);
-	const tooltip = `${spec.label}: ${value || ""}`;
+	const tooltip = `${spec.label}: ${value || UNSET}`;
 
 	if (!spec.edit) {
 		return (

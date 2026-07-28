@@ -15,6 +15,7 @@ export interface AttributeSpec {
 
 export interface AttributeDef extends AttributeSpec {
 	key: string;
+	/** Value seeded into `customAttributes` when the element is created. */
 	default?: string;
 }
 
