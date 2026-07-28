@@ -1,8 +1,13 @@
-export function parseXmlTag(tagString: string): Record<string, string> {
+/** An OSML open tag split into its name and its attributes. */
+export type XmlTag = {
+	tag: string;
+	attributes: Record<string, string>;
+};
+
+export function parseXmlTag(tagString: string): XmlTag {
 	const [rawTag, ...rest] = tagString.trim().split(/\s+/);
-	const tag = rawTag.replace(/\/$/, "");
 	const attributesString = rest.join(" ");
-	const attributes: Record<string, string> = { tag };
+	const attributes: Record<string, string> = {};
 	const regex = /(\w+)="([^"]*)"/g;
 	let match: RegExpExecArray | null;
 
@@ -10,5 +15,5 @@ export function parseXmlTag(tagString: string): Record<string, string> {
 		attributes[match[1]] = match[2];
 	}
 
-	return attributes;
+	return { tag: rawTag.replace(/\/$/, ""), attributes };
 }
