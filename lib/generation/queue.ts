@@ -28,6 +28,8 @@ export type ElementSnapshot = {
 	error: string | null;
 	resultInputs: GenerationInputs | null;
 	connectorType: AssetConnectorType | null;
+	/** The result was supplied rather than generated, so it is never regenerated. */
+	pinned: boolean;
 };
 
 export type GenerationJob = {
@@ -48,6 +50,7 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	error: null,
 	resultInputs: null,
 	connectorType: null,
+	pinned: false,
 };
 
 /** A generation is active from the moment it is queued until it settles. */
@@ -162,7 +165,7 @@ export class GenerationQueue {
 	}
 
 	private resetToIdle(id: string) {
-		const { result, error, resultInputs, connectorType } =
+		const { result, error, resultInputs, connectorType, pinned } =
 			this.getElementSnapshot(id);
 		if (result || error) {
 			this.state.set(id, {
@@ -172,6 +175,7 @@ export class GenerationQueue {
 				error,
 				resultInputs,
 				connectorType,
+				pinned,
 			});
 		} else {
 			this.state.delete(id);
@@ -238,17 +242,25 @@ export class GenerationQueue {
 	}
 
 	/**
-	 * Commit `result` for `node`, against the inputs the node currently resolves
-	 * to so dependents see it as fresh. Aborts any in-flight job for the node
+	 * Commit a result for `node` from outside the queue. Aborts any in-flight job
 	 * first, which would otherwise land later and clobber this.
+	 *
+	 * Pass `pinned` for a result the user supplied rather than asked us to make,
+	 * such as an upload or a template's prebuilt asset: project state drifting
+	 * underneath it must never let Generate All overwrite it.
 	 */
-	commitResult(node: GenerationNode, result: AssetResult): void {
+	commitResult(
+		node: GenerationNode,
+		result: AssetResult,
+		{ pinned = false }: { pinned?: boolean } = {},
+	): void {
 		this.cancel(node.id);
 		this.commit(
 			node.id,
 			result,
 			nodeInputs(node, this),
 			requireJob(node).connectorType,
+			pinned,
 		);
 	}
 
@@ -257,6 +269,7 @@ export class GenerationQueue {
 		result: AssetResult,
 		inputs: GenerationInputs,
 		connectorType: AssetConnectorType,
+		pinned = false,
 	): void {
 		const key = serializeInputs(inputs);
 		const elHistory =
@@ -270,6 +283,7 @@ export class GenerationQueue {
 			error: null,
 			resultInputs: inputs,
 			connectorType,
+			pinned,
 		});
 		this.notify();
 	}

@@ -186,10 +186,11 @@ function CharacterEditDialogBody({
 						<UploadImageButton
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
-								queue.commitResult(avatarNode, {
-									imageUrl: url,
-									durationSec: 0,
-								});
+								queue.commitResult(
+									avatarNode,
+									{ imageUrl: url, durationSec: 0 },
+									{ pinned: true },
+								);
 								update({ avatarUploaded: true });
 							}}
 						/>

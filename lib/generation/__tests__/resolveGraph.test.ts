@@ -12,7 +12,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
-import { flattenGraph, isNodeStale } from "../graph";
+import { flattenGraph, isNodeStale, needsGeneration } from "../graph";
 import { GenerationQueue } from "../queue";
 import { projectState } from "../sourceNodes";
 import { resolveGraph } from "../resolveGraph";
@@ -177,6 +177,37 @@ describe("resolveGraph", () => {
 
 		commit(still, "uploaded.png");
 		expect(isNodeStale(anim, queue)).toBe(true);
+	});
+
+	// An upload replaces a generated result with the user's own image. Project
+	// state drifting underneath it must not let Generate All overwrite it.
+	it("keeps an uploaded image fresh when the art style later changes", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		const img = element("img", "image");
+
+		queue.commitResult(
+			resolve(img),
+			{ imageUrl: "uploaded.png", durationSec: 0 },
+			{ pinned: true },
+		);
+		expect(needsGeneration(resolve(img), queue)).toBe(false);
+
+		getProjectStore(PROJECT_ID).getState().updateMetadata({ style: "noir" });
+		expect(needsGeneration(resolve(img), queue)).toBe(false);
+	});
+
+	it("regenerates a generated image when the art style changes", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		const img = element("img", "image");
+
+		queue.commitResult(resolve(img), {
+			imageUrl: "generated.png",
+			durationSec: 0,
+		});
+		expect(needsGeneration(resolve(img), queue)).toBe(false);
+
+		getProjectStore(PROJECT_ID).getState().updateMetadata({ style: "noir" });
+		expect(needsGeneration(resolve(img), queue)).toBe(true);
 	});
 
 	it("visits a dependency shared by the element and its avatar only once", () => {

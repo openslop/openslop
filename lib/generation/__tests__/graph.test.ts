@@ -45,7 +45,6 @@ function node(
 		inputs: { prompt: id, attributes },
 		dependsOn,
 		buildJob: () => job,
-		pinned: false,
 	};
 }
 
@@ -124,13 +123,17 @@ describe("isNodeStale", () => {
 		expect(isNodeStale(image("b.png"), queue)).toBe(true);
 	});
 
-	it("never marks a pinned node stale, however far its inputs drift", () => {
+	// commitResult is the "the queue did not generate this" path: uploads and
+	// template seeds. It pins, so project state drifting cannot overwrite them.
+	it("never marks a committed upload stale, however far its inputs drift", () => {
 		const queue = new GenerationQueue({ batchSize: 1 });
-		const uploaded = (style: string) => ({
-			...node("avatar", [sourceNode("project:artStyle", { style })]),
-			pinned: true,
-		});
-		commit(queue, uploaded("noir"), "uploaded.png");
+		const uploaded = (style: string) =>
+			node("el", [sourceNode("project:artStyle", { style })]);
+		queue.commitResult(
+			uploaded("noir"),
+			{ imageUrl: "uploaded.png", durationSec: 0 },
+			{ pinned: true },
+		);
 
 		expect(isNodeStale(uploaded("watercolor"), queue)).toBe(false);
 		expect(needsGeneration(uploaded("watercolor"), queue)).toBe(false);
@@ -138,9 +141,8 @@ describe("isNodeStale", () => {
 
 	it("still generates a pinned node that has no result yet", () => {
 		const queue = new GenerationQueue({ batchSize: 1 });
-		expect(needsGeneration({ ...node("avatar"), pinned: true }, queue)).toBe(
-			true,
-		);
+		queue.discard("el");
+		expect(needsGeneration(node("el"), queue)).toBe(true);
 	});
 
 	it("never marks a source node stale", () => {

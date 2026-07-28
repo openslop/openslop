@@ -9,6 +9,7 @@ const EMPTY: ElementSnapshot = {
 	error: null,
 	resultInputs: null,
 	connectorType: null,
+	pinned: false,
 };
 
 /** Stands in for the queue when a plugin only reads committed avatar results. */

@@ -30,6 +30,6 @@ export function applyTemplate(
 			registry,
 			state: projectState(projectId),
 		});
-		queue.commitResult(node, { imageUrl, durationSec: 0 });
+		queue.commitResult(node, { imageUrl, durationSec: 0 }, { pinned: true });
 	}
 }

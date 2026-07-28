@@ -28,14 +28,11 @@ export type GenerationNode = {
 	inputs: NodeInputs;
 	dependsOn: GenerationNode[];
 	buildJob: (() => GenerationJob) | null;
-	/** A user-supplied result, never regenerated even once its inputs drift. */
-	pinned: boolean;
 };
 
 export type ResolveOptions = {
 	/** Replaces the registry chain for nodes that are not plain elements. */
 	plugins?: ConnectorPlugin[];
-	pinned?: boolean;
 };
 
 /** Everything needed to build a graph, minus the graph being built. */
@@ -88,7 +85,6 @@ export function sourceNode(
 		inputs: { prompt: "", attributes },
 		dependsOn: [],
 		buildJob: null,
-		pinned: false,
 	};
 }
 
@@ -137,7 +133,8 @@ export function needsGeneration(
 	if (isSourceNode(node)) return false;
 	const snapshot = results.getElementSnapshot(node.id);
 	if (!snapshot.result) return true;
-	if (node.pinned) return false;
+	// The user supplied this result; drifting project state must not replace it.
+	if (snapshot.pinned) return false;
 	return (
 		node.dependsOn.some((dep) => needsGeneration(dep, results)) ||
 		!isEqual(nodeInputs(node, results), snapshot.resultInputs)

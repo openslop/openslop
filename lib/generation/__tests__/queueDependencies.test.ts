@@ -41,7 +41,6 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 		inputs: { prompt: id, attributes: {} },
 		dependsOn,
 		buildJob: () => job,
-		pinned: false,
 	};
 }
 

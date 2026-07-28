@@ -64,7 +64,6 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 		inputs: { prompt: inputs.prompt, attributes: inputs.attributes },
 		dependsOn,
 		buildJob: () => job,
-		pinned: false,
 	};
 }
 
@@ -91,6 +90,7 @@ describe("GenerationQueue", () => {
 				error: null,
 				resultInputs: null,
 				connectorType: null,
+				pinned: false,
 			});
 		});
 	});
@@ -351,6 +351,7 @@ describe("GenerationQueue", () => {
 				error: null,
 				resultInputs: null,
 				connectorType: null,
+				pinned: false,
 			});
 		});
 
@@ -662,6 +663,7 @@ describe("GenerationQueue", () => {
 			error: null,
 			resultInputs: { prompt: "p", attributes: {}, dependencies: {} },
 			connectorType: "image" as const,
+			pinned: false,
 		};
 
 		it("dumps every entry verbatim", async () => {
@@ -684,6 +686,7 @@ describe("GenerationQueue", () => {
 					error: "boom",
 					resultInputs: null,
 					connectorType: null,
+					pinned: false,
 				},
 			});
 		});
@@ -697,6 +700,7 @@ describe("GenerationQueue", () => {
 			error: null,
 			resultInputs: { prompt: "p", attributes: {}, dependencies: {} },
 			connectorType: "image" as const,
+			pinned: false,
 		};
 
 		it("populates entries from the constructor", () => {

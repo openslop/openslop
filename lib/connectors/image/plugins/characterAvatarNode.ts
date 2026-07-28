@@ -20,25 +20,13 @@ export function buildCharacterAvatarPlugins(name: string): ConnectorPlugin[] {
 	];
 }
 
-/**
- * An uploaded avatar is the user's own image, so its node is pinned: nothing
- * about the project makes it stale and Generate All never regenerates over it.
- * The edit modal clears `avatarUploaded` when you ask for a fresh one.
- */
-const avatarOptions = (name: string, ctx: GraphResolveContext) => ({
-	plugins: buildCharacterAvatarPlugins(name),
-	pinned: ctx.state.metadata.characters[name]?.avatarUploaded === true,
-});
-
 export function characterAvatarNode(
 	name: string,
 	ctx: GraphContext,
 ): GenerationNode {
-	return ctx.resolve(
-		characterAvatarElement(ctx.state, name),
-		"image",
-		avatarOptions(name, ctx),
-	);
+	return ctx.resolve(characterAvatarElement(ctx.state, name), "image", {
+		plugins: buildCharacterAvatarPlugins(name),
+	});
 }
 
 /** An avatar as a graph root, for generating one on its own. */
@@ -46,9 +34,7 @@ export function characterAvatarGraph(
 	name: string,
 	ctx: GraphResolveContext,
 ): GenerationNode {
-	return resolveGraph(
-		characterAvatarElement(ctx.state, name),
-		ctx,
-		avatarOptions(name, ctx),
-	);
+	return resolveGraph(characterAvatarElement(ctx.state, name), ctx, {
+		plugins: buildCharacterAvatarPlugins(name),
+	});
 }

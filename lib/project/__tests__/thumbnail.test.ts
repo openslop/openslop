@@ -25,6 +25,7 @@ const entry = (
 		error: null,
 		resultInputs: null,
 		connectorType,
+		pinned: false,
 	},
 ];
 

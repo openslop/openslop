@@ -45,7 +45,6 @@ function buildNode(
 			(plugin) => plugin.dependencies?.(element, ctx) ?? [],
 		),
 		buildJob: () => job,
-		pinned: options?.pinned ?? false,
 	};
 }
 
