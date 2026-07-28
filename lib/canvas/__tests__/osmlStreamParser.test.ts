@@ -64,6 +64,15 @@ describe("OSMLStreamParser", () => {
 		expect(getElementText(nodes[0])).toContain("Some long narration text here");
 	});
 
+	it("decodes an entity split across chunk boundaries", () => {
+		const s = new OSMLStreamParser();
+		s.appendChunk("<narration>Rock &a", connectors);
+		s.appendChunk("mp; Roll forever</narration>", connectors);
+
+		const nodes = s.getNodes() as ParsedElement[];
+		expect(getElementText(nodes[0])).toContain("Rock & Roll forever");
+	});
+
 	it("preserves raw tag name for unknown tags", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk("<unknowntag>content</unknowntag>", connectors);

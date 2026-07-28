@@ -17,6 +17,15 @@ describe("parseXmlTag", () => {
 		expect(parseXmlTag("image/")).toEqual({ tag: "image", attributes: {} });
 	});
 
+	it("decodes escaped characters in attribute values", () => {
+		expect(
+			parseXmlTag('image prompt="a 24&quot; monitor &amp; a &lt;box&gt;"'),
+		).toEqual({
+			tag: "image",
+			attributes: { prompt: 'a 24" monitor & a <box>' },
+		});
+	});
+
 	it("keeps a `tag` attribute separate from the tag name", () => {
 		expect(parseXmlTag('image tag="hero"')).toEqual({
 			tag: "image",
