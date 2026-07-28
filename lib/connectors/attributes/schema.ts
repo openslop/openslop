@@ -11,12 +11,12 @@ export interface AttributeSpec {
 	/** Unit suffix appended to the displayed value (e.g. `"s"` for seconds). */
 	unit?: string;
 	edit?: AttributeEdit;
-	/** Value seeded at creation and shown by the editor whenever the key is absent. */
-	default?: string;
 }
 
 export interface AttributeDef extends AttributeSpec {
 	key: string;
+	/** Value seeded into `customAttributes` when the element is created. */
+	default?: string;
 }
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
@@ -40,7 +40,6 @@ export class AttributeSchema {
 				icon: def.icon,
 				unit: def.unit,
 				edit: def.edit,
-				default: def.default,
 			};
 		}
 		return out;

@@ -6,7 +6,10 @@ import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 
+const UNSET = "—";
+
 function formatValue(value: string, unit?: string): string {
+	if (!value) return UNSET;
 	return unit ? `${value}${unit}` : value;
 }
 
@@ -30,9 +33,7 @@ export function AttributeBadge({
 	deriveExtraAttrs,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
-	// An absent optional is a legal state, so fall back to the schema default
-	// rather than unmounting the only control that could set the value again.
-	const value = element.customAttributes?.[attrKey] ?? spec.default ?? "";
+	const value = element.customAttributes?.[attrKey] ?? "";
 	if (!value && !spec.edit) return null;
 
 	const SpecIcon = spec.icon;
@@ -51,7 +52,7 @@ export function AttributeBadge({
 			{formatValue(value, spec.unit)}
 		</>
 	);
-	const tooltip = `${spec.label}: ${value || ""}`;
+	const tooltip = `${spec.label}: ${value || UNSET}`;
 
 	if (!spec.edit) {
 		return (

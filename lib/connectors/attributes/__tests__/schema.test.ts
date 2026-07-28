@@ -20,7 +20,6 @@ describe("AttributeSchema", () => {
 
 		expect(Object.keys(schema.visibleAttributes)).toEqual(["loops", "volume"]);
 		expect(schema.defaultAttributes).toEqual({ loops: "1", volume: "2" });
-		expect(schema.visibleAttributes.loops?.default).toBe("1");
 	});
 
 	it("omits defs with no default from defaultAttributes", () => {

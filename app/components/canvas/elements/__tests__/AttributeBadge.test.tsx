@@ -19,39 +19,54 @@ const elementWith = (
 const motionSpec: AttributeSpec = {
 	label: "Motion",
 	edit: { kind: "enum", options: ["none", "zoom_in"] },
-	default: "none",
 };
 
-function render(element: CanvasContentElement, spec: AttributeSpec) {
+function render(
+	element: CanvasContentElement,
+	spec: AttributeSpec,
+	attrKey = "motion",
+) {
 	const editor = withReact(createEditor());
 	return renderToStaticMarkup(
 		<Slate editor={editor} initialValue={[element as never]}>
 			<Editable />
-			<AttributeBadge element={element} attrKey="motion" spec={spec} />
+			<AttributeBadge element={element} attrKey={attrKey} spec={spec} />
 		</Slate>,
 	);
 }
 
 const control = (html: string) =>
-	html.match(/aria-label="Motion: ([^"]*)"/)?.[1];
+	html.match(/aria-label="[^:]+: ([^"]*)"/)?.[1];
 
 describe("AttributeBadge", () => {
-	it("shows the schema default when the attribute key is absent", () => {
-		expect(control(render(elementWith({}), motionSpec))).toBe("none");
+	it("stays editable when the attribute key is absent", () => {
+		const html = render(elementWith({}), motionSpec);
+		expect(html).toContain("aria-label");
+		expect(control(html)).toBe("—");
 	});
 
-	it("shows the element's own value over the default", () => {
+	it("shows the element's own value", () => {
 		expect(
 			control(render(elementWith({ motion: "zoom_in" }), motionSpec)),
 		).toBe("zoom_in");
 	});
 
-	it("keeps an enum editable when it has neither a value nor a default", () => {
-		const { default: _default, ...noDefault } = motionSpec;
-		expect(control(render(elementWith({}), noDefault))).toBe("");
+	it("never presents a value the element does not have", () => {
+		expect(render(elementWith({}), motionSpec)).not.toContain("none");
 	});
 
-	it("renders nothing with no value, no default and no edit affordance", () => {
+	it("omits the unit suffix when there is no value", () => {
+		const durationSpec: AttributeSpec = {
+			label: "Duration",
+			unit: "s",
+			edit: { kind: "enum", options: ["5", "10"] },
+		};
+		const html = render(elementWith({}), durationSpec, "duration");
+		expect(control(html)).toBe("—");
+		expect(html).not.toContain(">s<");
+	});
+
+	it("renders nothing with no value and no edit affordance", () => {
 		expect(render(elementWith({}), { label: "Motion" })).not.toContain(
 			"Motion",
 		);
