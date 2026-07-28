@@ -1,7 +1,6 @@
+import { resolveElementConnector } from "@/lib/canvas/elementConnector";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import type { ProviderKey } from "@/lib/connectors/types";
-import { getDefaultConnector } from "@/lib/connectors/registry";
-import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import type { GenerationJob } from "./queue";
 
 export function buildGenerationJob(
@@ -9,18 +8,14 @@ export function buildGenerationJob(
 	connectorConfig: ConnectorRegistry,
 	projectId: string,
 ): GenerationJob {
-	const customAttributes = element.customAttributes ?? {};
-	const connectorType = ELEMENT_TYPES[element.type].connector;
-	const { provider: defaultProvider, config } = getDefaultConnector(
+	const { type, provider, config } = resolveElementConnector(
+		element,
 		connectorConfig,
-		connectorType,
 	);
-	const provider =
-		(customAttributes.provider as ProviderKey) ?? defaultProvider;
 
 	return {
 		elementId: element.id,
-		connectorType,
+		connectorType: type,
 		provider,
 		config,
 		projectId,
