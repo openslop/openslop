@@ -48,7 +48,9 @@ describe("cancel button offset", () => {
 	});
 
 	it("is pushed below the still/video toggle by AnimatedImagePreview", () => {
-		const html = withTooltip(<AnimatedImagePreview {...generating} />);
+		const html = withTooltip(
+			<AnimatedImagePreview {...generating} result={null} />,
+		);
 		expect(html).toContain("--cancel-offset:2.5rem");
 	});
 
@@ -72,6 +74,7 @@ describe("AnimatedImagePreview", () => {
 				seconds={0}
 				error="generation failed"
 				onDiscard={() => {}}
+				result={null}
 			/>,
 		);
 		// Error overlay renders at z-20; the toggle must sit above it.

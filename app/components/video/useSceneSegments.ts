@@ -15,13 +15,27 @@ export type SceneSegment = {
 	thumbnail: SeekThumbnail | null;
 };
 
+export type SequenceIndex = ReadonlyMap<string, Sequence>;
+
+/**
+ * Lookup index from foreground element id to its scene sequence. Client-only:
+ * the render payload carries the ordered `series`, not this projection of it.
+ */
+export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
+	const index = new Map<string, Sequence>();
+	for (const seq of series) {
+		if (seq.element) index.set(seq.element.id, seq);
+	}
+	return index;
+}
+
 export function findSceneSequence(
 	scene: SceneElement,
-	layout: VideoLayout,
+	index: SequenceIndex,
 ): Sequence | undefined {
 	const fg = scene.children.find(isForeground);
 	if (!fg) return undefined;
-	return layout.sequenceByElementId.get(fg.id);
+	return index.get(fg.id);
 }
 
 export function findSegmentIndexAt(
@@ -65,11 +79,12 @@ function toThumbnail(element: ResolvedElement | null): SeekThumbnail | null {
 export function buildSceneSegments(
 	scenes: SceneElement[],
 	layout: VideoLayout,
+	index: SequenceIndex,
 ): SceneSegment[] {
 	const out: SceneSegment[] = [];
 	for (let i = 0; i < scenes.length; i++) {
 		const scene = scenes[i];
-		const seq = findSceneSequence(scene, layout);
+		const seq = findSceneSequence(scene, index);
 		if (!seq) continue;
 		const prev = out[out.length - 1];
 		if (prev) {

@@ -7,19 +7,16 @@ import { stillFrameUrl } from "@/lib/connectors/animated_image/plugins/still-fra
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { useElementGeneration } from "../ElementGenerationContext";
 import { MediaResult } from "./results";
-import type { PlaceholderProps } from "./status";
-
-type AnimatedImagePreviewProps = PlaceholderProps & {
-	stillUrl?: string;
-	videoUrl?: string;
-};
+import type { ElementPreviewProps } from "./status";
 
 export function AnimatedImagePreview({
-	stillUrl,
-	videoUrl,
+	result,
 	...state
-}: AnimatedImagePreviewProps) {
+}: ElementPreviewProps) {
+	const { node } = useElementGeneration();
+	const stillUrl = useQueueSelector((queue) => stillFrameUrl(node, queue));
 	const [mode, setMode] = useState<"animated" | "still">("animated");
+	const animated = mode === "animated";
 
 	return (
 		<div
@@ -28,8 +25,8 @@ export function AnimatedImagePreview({
 		>
 			<MediaResult
 				{...state}
-				url={mode === "animated" ? videoUrl : stillUrl}
-				outputKind={mode === "animated" ? "video" : "image"}
+				url={animated ? result?.videoUrl : stillUrl}
+				outputKind={animated ? "video" : "image"}
 			/>
 			<MediaToggle
 				className="absolute top-2 right-2 z-30 shadow-sm"
@@ -41,18 +38,5 @@ export function AnimatedImagePreview({
 				]}
 			/>
 		</div>
-	);
-}
-
-export function AnimatedImageOutput(state: PlaceholderProps) {
-	const { node, result } = useElementGeneration();
-	const stillUrl = useQueueSelector((queue) => stillFrameUrl(node, queue));
-
-	return (
-		<AnimatedImagePreview
-			{...state}
-			stillUrl={stillUrl}
-			videoUrl={result?.videoUrl}
-		/>
 	);
 }
