@@ -216,7 +216,7 @@ export default function ComposerCopilot({
 							}}
 							placeholder={placeholder}
 							style={{ fieldSizing: "content" }}
-							className=" w-full resize-none bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+							className=" max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !isTemplateMode && placeholderOverlay && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">
