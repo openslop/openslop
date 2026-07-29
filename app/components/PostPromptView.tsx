@@ -1,22 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import { useScriptInitial } from "@/lib/script/ScriptProvider";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { getContentElements } from "@/lib/canvas/scenes";
-import { getLayoutKey } from "@/lib/video/layoutKey";
-import { useTransitionType } from "@/lib/video/useTransitionType";
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
 import Canvas from "./canvas/Canvas";
 import { CanvasProviders } from "./canvas/CanvasProviders";
 import { EditorSidebar } from "./canvas/panel/EditorSidebar";
 import { ProjectTitle } from "./canvas/ProjectTitle";
-import { useEditorSetup } from "./canvas/hooks/useEditorSetup";
-import { useAutosave } from "./canvas/hooks/useAutosave";
-import { useMetadataSync } from "./canvas/hooks/useMetadataSync";
-import { useProjectRehydrate } from "./canvas/hooks/useProjectRehydrate";
-import { useScriptSync } from "./canvas/hooks/useScriptSync";
+import { useEditorSession } from "./canvas/hooks/useEditorSession";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import { BottomTransportBar } from "./video/BottomTransportBar";
 import {
@@ -25,19 +15,7 @@ import {
 } from "./video/PlayerPositionContext";
 
 function PostPromptViewInner() {
-	const { editor, value, setValue } = useEditorSetup();
-	const { projectId } = useConfig();
-	const initialScript = useScriptInitial();
-	useProjectRehydrate(editor, initialScript);
-	useAutosave(projectId, value);
-	useScriptSync(editor);
-	useMetadataSync();
-
-	const transitionType = useTransitionType();
-	const layoutKey = useMemo(
-		() => getLayoutKey(getContentElements(value), transitionType),
-		[value, transitionType],
-	);
+	const { editor, value, setValue, layoutKey } = useEditorSession();
 	const { position, visible } = usePlayerPosition();
 	const isTop = position === "top";
 

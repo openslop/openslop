@@ -12,6 +12,7 @@ import {
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { clamp, cn } from "@/lib/utils";
+import { loadPeaks } from "./peaks";
 import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
 
 export interface WaveformProps {
@@ -31,7 +32,6 @@ export interface WaveformHandle {
 	seek(progress: number): void;
 }
 
-const PEAK_COUNT = 200;
 const MIN_BAR_HEIGHT = 6;
 
 const MASK_STYLE: CSSProperties = {
@@ -40,31 +40,6 @@ const MASK_STYLE: CSSProperties = {
 	maskRepeat: "no-repeat",
 	WebkitMaskRepeat: "no-repeat",
 };
-
-let sharedAudioCtx: AudioContext | null = null;
-const getAudioCtx = () => {
-	if (!sharedAudioCtx) sharedAudioCtx = new AudioContext();
-	return sharedAudioCtx;
-};
-
-/** Extract normalized peak amplitudes (0–1) from raw audio samples. */
-export function extractPeaks(data: Float32Array, count: number): number[] {
-	const step = Math.floor(data.length / count);
-	if (step === 0) return [];
-	const peaks: number[] = [];
-	let max = 0;
-	for (let i = 0; i < count; i++) {
-		let peak = 0;
-		const offset = i * step;
-		for (let j = 0; j < step; j++) {
-			const v = Math.abs(data[offset + j]);
-			if (v > peak) peak = v;
-		}
-		peaks.push(peak);
-		if (peak > max) max = peak;
-	}
-	return max > 0 ? peaks.map((p) => p / max) : peaks;
-}
 
 export function Waveform({
 	src,
@@ -126,22 +101,15 @@ export function Waveform({
 		peaksRef.current = [];
 
 		let cancelled = false;
-		fetch(src, { mode: "cors" })
-			.then((r) => {
-				if (!r.ok) throw new Error(`Failed to fetch audio: ${r.status}`);
-				return r.arrayBuffer();
-			})
-			.then((buf) => getAudioCtx().decodeAudioData(buf))
-			.then((ab) => {
+		loadPeaks(src)
+			.then((peaks) => {
 				if (cancelled) return;
-				const peaks = extractPeaks(ab.getChannelData(0), PEAK_COUNT);
 				peaksCache?.set(src, peaks);
 				peaksRef.current = peaks;
 				paint();
-				setLoadedSrc(src);
 			})
-			.catch((e) => {
-				console.error("Failed to decode audio:", e);
+			.catch((e) => console.error("Failed to decode audio:", e))
+			.finally(() => {
 				if (!cancelled) setLoadedSrc(src);
 			});
 		return () => {
