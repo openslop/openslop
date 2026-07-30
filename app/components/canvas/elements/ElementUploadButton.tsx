@@ -9,8 +9,7 @@ import { useElementGeneration } from "./ElementGenerationContext";
 export function ElementUploadButton() {
 	const queue = useGenerationQueue();
 	const { node, status } = useElementGeneration();
-	// An animated image animates its still, so an upload replaces the still and
-	// leaves the animation stale rather than overwriting the rendered video.
+	// An upload replaces the still, leaving the animation stale to re-render.
 	const target = stillDependency(node) ?? node;
 
 	return (

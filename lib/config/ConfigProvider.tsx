@@ -60,7 +60,7 @@ export function ConfigProvider({
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
 		const modePlugin = MODE_PLUGIN_FACTORIES[mode](selectedTemplateId);
-		const base = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
+		return withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 			.appendPlugins(
 				"llm",
 				createProjectMetadataPlugin(projectId),
@@ -77,9 +77,7 @@ export function ConfigProvider({
 			.appendPlugins("tts", createMetadataVoicePlugin())
 			.appendPlugins("tts", createVoiceSearchPlugin())
 			.appendPlugins("tts", createVoiceHydratePlugin(projectId))
-			.build();
-		return withRegistry(base)
-			.appendPlugins("animated_image", ...buildAnimatedImagePlugins(base))
+			.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
 			.build();
 	}, [mode, selectedTemplateId, projectId, queue]);
 

@@ -15,7 +15,6 @@ export function buildCharacterAvatarPlugins(name: string): ConnectorPlugin[] {
 	];
 }
 
-/** Generate a character's avatar. */
 export const forCharacterAvatar =
 	(name: string): NodeSpec =>
 	(state) => ({

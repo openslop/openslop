@@ -179,10 +179,7 @@ export class GenerationQueue {
 		}
 	}
 
-	/**
-	 * Queue `roots` along with every dependency that is missing or stale. Roots
-	 * are always queued: asking to generate something means regenerating it.
-	 */
+	/** Roots are always queued: asking to generate something means regenerating it. */
 	enqueueGraph(roots: GenerationNode[]) {
 		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
@@ -239,12 +236,9 @@ export class GenerationQueue {
 	}
 
 	/**
-	 * Commit a result for `node` from outside the queue. Aborts any in-flight job
-	 * first, which would otherwise land later and clobber this.
-	 *
-	 * Pass `pinned` for a result the user supplied rather than asked us to make,
-	 * such as an upload or a template's prebuilt asset: project state drifting
-	 * underneath it must never let Generate All overwrite it.
+	 * Aborts any in-flight job first, which would otherwise land later and clobber
+	 * this. Pass `pinned` for a result the user supplied rather than asked us to
+	 * make, so drifting project state cannot let Generate All overwrite it.
 	 */
 	commitResult(
 		node: GenerationNode,
@@ -330,10 +324,7 @@ export class GenerationQueue {
 		this.failBlocked();
 	}
 
-	/**
-	 * Nothing running and nothing runnable means every remaining job is waiting on
-	 * a dependency that will never arrive, so surface it instead of hanging.
-	 */
+	/** Nothing running and nothing runnable means a dependency never arrived. */
 	private failBlocked() {
 		if (this.controllers.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;

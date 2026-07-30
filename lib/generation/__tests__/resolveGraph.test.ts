@@ -30,7 +30,7 @@ function buildRegistry(): ConnectorRegistry {
 		.appendPlugins("video", createDimensionsPlugin("video"))
 		.build();
 	return withRegistry(base)
-		.appendPlugins("animated_image", ...buildAnimatedImagePlugins(base))
+		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
 		.build();
 }
 
@@ -59,6 +59,23 @@ beforeEach(() => {
 });
 
 describe("resolveGraph", () => {
+	// The builder is memoized across renders, so its per-graph dedupe cache must
+	// not outlive one call or an edited element keeps resolving to its old node.
+	it("rebuilds a node when its element changed", () => {
+		const buildNode = nodeBuilder(buildRegistry(), projectState(PROJECT_ID));
+		const withText = (text: string) => ({
+			...element("img", "image"),
+			children: [{ id: "img-t", type: "image" as const, text }],
+		});
+
+		expect(buildNode(forElement(withText("first"))).inputs.prompt).toBe(
+			"first",
+		);
+		expect(buildNode(forElement(withText("second"))).inputs.prompt).toBe(
+			"second",
+		);
+	});
+
 	it("depends on the project state an image reads", () => {
 		expect(idsOf(element("img", "image"))).toEqual([
 			"project:artStyle",

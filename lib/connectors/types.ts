@@ -42,9 +42,8 @@ export type GenerationContext = Pick<
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
 	/**
-	 * Nodes this plugin reads when it runs. Declaring them here is what makes the
-	 * read participate in ordering and staleness, so a plugin that reaches into
-	 * project state without declaring it will go stale-blind.
+	 * What this plugin reads. Declaring it is what makes the read participate in
+	 * ordering and staleness; reading anything undeclared goes stale-blind.
 	 */
 	dependencies?(element: CanvasContentElement): NodeSpec[];
 	beforeGenerate?(
@@ -140,11 +139,9 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 };
 
-export type AnimatedImageGenerateParams = ImageGenerateParams & {
+/** A video generation whose conditioning frame comes from the element's still. */
+export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	videoPrompt?: string;
-	duration?: number;
-	/** The still frame to animate, supplied by the element's `:still` dependency. */
-	frameImages?: string[];
 };
 
 // TTS types

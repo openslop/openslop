@@ -3,8 +3,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { isNodeStale, nodeInputs } from "@/lib/generation/graph";
-import { forElement } from "@/lib/generation/graph";
+import { forElement, isNodeStale, nodeInputs } from "@/lib/generation/graph";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 

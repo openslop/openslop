@@ -14,9 +14,9 @@ import type { ElementSnapshot, GenerationJob } from "./queue";
 export type NodeId = string;
 
 /**
- * A unit of generation and its edges. `buildJob` is null for source nodes, which
- * stand for project state (reference images, art style) that is read rather than
- * generated: they are always resolved, and their identity is their own inputs.
+ * A unit of generation and its edges. `buildJob` is null for a source node,
+ * which stands for project state that is read rather than generated; its
+ * identity is its own inputs.
  */
 export type GenerationNode = {
 	id: NodeId;
@@ -32,9 +32,8 @@ export type ElementNode = {
 };
 
 /**
- * Declares which node to build, without saying how. Callers and plugins name a
- * spec; only the builder knows the registry, the state, and what a node is made
- * of. Source-node specs return their node directly, having nothing to build.
+ * Declares which node to build without saying how; only the builder knows the
+ * registry and the state. A source-node spec returns its node directly.
  */
 export type NodeSpec = (state: ProjectState) => ElementNode | GenerationNode;
 
@@ -43,7 +42,6 @@ export const isElementNode = (
 	value: ElementNode | GenerationNode,
 ): value is ElementNode => "element" in value;
 
-/** The node for an authored canvas element. */
 export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
 	() => ({ element });
@@ -58,10 +56,8 @@ export const isSourceNode = (node: GenerationNode) => node.buildJob === null;
 const DERIVED_PREFIX = "~";
 
 /**
- * Ids for nodes the graph derives rather than the user authoring, such as
- * character avatars and the stills behind animated images. The prefix is what
- * keeps them from ever colliding with an element id, and what element-facing UI
- * filters on.
+ * Ids for nodes the graph derives rather than the user authoring. The prefix is
+ * what keeps them from colliding with an element id, and what UI filters on.
  */
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
@@ -114,10 +110,6 @@ export function nodeInputs(
 	};
 }
 
-/**
- * A node needs generating when it has no result, its own inputs drifted, or
- * anything it depends on needs generating. Source nodes are always resolved.
- */
 export function needsGeneration(
 	node: GenerationNode,
 	results: NodeResults,
@@ -133,7 +125,6 @@ export function needsGeneration(
 	);
 }
 
-/** Stale is "needs generating despite already having a result". */
 export const isNodeStale = (
 	node: GenerationNode,
 	results: NodeResults,

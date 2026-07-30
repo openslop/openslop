@@ -13,16 +13,18 @@ import {
 	type NodeSpec,
 } from "@/lib/generation/graph";
 
-/** Attributes that drive only the animation; the still frame ignores them. */
-const VIDEO_ONLY_KEYS = ["videoPrompt", "duration"] as const;
+/**
+ * Attributes that drive only the animation. `model` is among them: it names a
+ * video model, which the still's image generation cannot use.
+ */
+const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "model"] as const;
 
 export const stillElementId = (elementId: string) =>
 	derivedNodeId("still", elementId);
 
 /**
- * The frame an animated image animates. It is a node of its own, so it is
- * regenerated only when the still's own inputs change, and replacing it (by
- * regenerating or uploading) makes the animation stale.
+ * The frame an animated image animates. Being a node of its own is what makes it
+ * regenerate only on its own inputs, and makes replacing it stale the animation.
  */
 export function stillElement(
 	element: CanvasContentElement,
@@ -35,7 +37,6 @@ export function stillElement(
 	};
 }
 
-/** Generate the still frame an animated image animates. */
 export const forStillOf =
 	(element: CanvasContentElement): NodeSpec =>
 	() => ({ element: stillElement(element), plugins: buildImagePlugins() });
@@ -44,6 +45,13 @@ export const forStillOf =
 export const stillDependency = (node: GenerationNode) =>
 	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
 
+const stillFrame = (
+	ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,
+): string | undefined =>
+	ctx?.elementId
+		? ctx.dependencies?.[stillElementId(ctx.elementId)]?.imageUrl
+		: undefined;
+
 export function createStillFramePlugin(): ConnectorPlugin<
 	AnimatedImageGenerateParams,
 	AssetResult
@@ -51,19 +59,25 @@ export function createStillFramePlugin(): ConnectorPlugin<
 	return {
 		name: "still-frame",
 		dependencies: (element) => [forStillOf(element)],
-		beforeGenerate(
-			params,
-			ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,
-		) {
-			const imageUrl = ctx?.elementId
-				? ctx.dependencies?.[stillElementId(ctx.elementId)]?.imageUrl
-				: undefined;
+		beforeGenerate(params, ctx) {
+			const { videoPrompt, ...rest } = params;
+			if (!videoPrompt) {
+				throw new Error(
+					"animated_image element is missing required videoPrompt attribute",
+				);
+			}
+			const imageUrl = stillFrame(ctx);
 			if (!imageUrl) {
 				throw new Error(
 					"animated_image expected a still frame from its dependency",
 				);
 			}
-			return { ...params, frameImages: [imageUrl] };
+			// The element's own text prompts the still, not the animation.
+			return { ...rest, prompt: videoPrompt, frameImages: [imageUrl] };
 		},
+		afterGenerate: (result, ctx) => ({
+			...result,
+			imageUrl: stillFrame(ctx),
+		}),
 	};
 }

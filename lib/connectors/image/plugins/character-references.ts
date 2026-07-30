@@ -6,10 +6,7 @@ import { forCharacterAvatar } from "./characterAvatarNode";
 
 export type ParamsWithCharacters = { prompt: string; characters?: string };
 
-/**
- * Feeds the referenced characters' avatars in as reference images. The avatars
- * arrive as dependency results, so this never races the jobs that produce them.
- */
+/** Avatars arrive as dependency results, so this never races the jobs making them. */
 export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCharacters> {
 	return {
 		name: "character-references",

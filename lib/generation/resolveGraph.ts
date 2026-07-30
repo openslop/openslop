@@ -27,55 +27,59 @@ export function nodeBuilder(
 	registry: ConnectorRegistry,
 	state: ProjectState,
 ): NodeBuilder {
-	const resolved = new Map<string, GenerationNode>();
-	const resolving = new Set<string>();
+	return (spec) => {
+		// Scoped to one call: it dedupes nodes shared within a single graph and
+		// detects cycles. Held across calls it would serve a stale node back once
+		// its element changed, since element content is not part of `state`.
+		const resolved = new Map<string, GenerationNode>();
+		const resolving = new Set<string>();
 
-	const build = ({
-		element,
-		plugins: override,
-	}: ElementNode): GenerationNode => {
-		const { id } = element;
-		const existing = resolved.get(id);
-		if (existing) return existing;
-		if (resolving.has(id))
-			throw new Error(`Cyclic generation dependency at "${id}"`);
-		resolving.add(id);
+		const build = ({ element, plugins: override }: ElementNode) => {
+			const { id } = element;
+			const existing = resolved.get(id);
+			if (existing) return existing;
+			if (resolving.has(id))
+				throw new Error(`Cyclic generation dependency at "${id}"`);
+			resolving.add(id);
 
-		const connectorType = ELEMENT_TYPES[element.type].connector;
-		// Derived nodes (avatars, stills) are not authored elements, so they take
-		// the registry default rather than resolving a provider pinned on one.
-		const { provider, config } = override
-			? getDefaultConnector(registry, connectorType)
-			: resolveElementConnector(element, registry);
-		const plugins = override ?? config.plugins ?? [];
-		const job = {
-			elementId: id,
-			connectorType,
-			provider,
-			config: { ...config, plugins },
-			state,
+			const connectorType = ELEMENT_TYPES[element.type].connector;
+			// A derived node is not an authored element, so no provider is pinned on it.
+			const { provider, config } = override
+				? getDefaultConnector(registry, connectorType)
+				: resolveElementConnector(element, registry);
+			const plugins = override ?? config.plugins ?? [];
+			const job = {
+				elementId: id,
+				connectorType,
+				provider,
+				config: { ...config, plugins },
+				state,
+			};
+			const node: GenerationNode = {
+				id,
+				inputs: {
+					prompt: getPromptText(element),
+					attributes: omit(
+						element.customAttributes ?? {},
+						LAYOUT_ATTRIBUTE_KEYS,
+					),
+				},
+				dependsOn: plugins.flatMap(
+					(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
+				),
+				buildJob: () => job,
+			};
+
+			resolving.delete(id);
+			resolved.set(id, node);
+			return node;
 		};
-		const node: GenerationNode = {
-			id,
-			inputs: {
-				prompt: getPromptText(element),
-				attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
-			},
-			dependsOn: plugins.flatMap(
-				(plugin) => plugin.dependencies?.(element).map(buildNode) ?? [],
-			),
-			buildJob: () => job,
+
+		const resolve = (dep: NodeSpec): GenerationNode => {
+			const declared = dep(state);
+			return isElementNode(declared) ? build(declared) : declared;
 		};
 
-		resolving.delete(id);
-		resolved.set(id, node);
-		return node;
+		return resolve(spec);
 	};
-
-	const buildNode: NodeBuilder = (spec) => {
-		const declared = spec(state);
-		return isElementNode(declared) ? build(declared) : declared;
-	};
-
-	return buildNode;
 }

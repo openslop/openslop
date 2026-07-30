@@ -39,7 +39,7 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	llm: openslopConfig("Slop LLM v1", LLM_MODELS, [osmlPlugin]),
 	tts: openslopConfig("Slop TTS v1", TTS_MODELS),
 	image: openslopConfig("Slop Image v1", IMAGE_MODELS),
-	animated_image: openslopConfig("Slop Image v1", IMAGE_MODELS),
+	animated_image: openslopConfig("Slop Video v1", VIDEO_MODELS),
 	video: openslopConfig("Slop Video v1", VIDEO_MODELS),
 	sfx: openslopConfig("Slop SFX v1", SFX_MODELS),
 	music: openslopConfig("Slop Music v1", MUSIC_MODELS),
