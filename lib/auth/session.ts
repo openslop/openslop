@@ -28,12 +28,14 @@ export async function sendMagicLink({
 }
 
 export async function signInWithGoogle(): Promise<void> {
-	await createClient().auth.signInWithOAuth({
+	const { error } = await createClient().auth.signInWithOAuth({
 		provider: "google",
 		options: { redirectTo: callbackUrl() },
 	});
+	if (error) throw error;
 }
 
 export async function signOut(): Promise<void> {
-	await createClient().auth.signOut();
+	const { error } = await createClient().auth.signOut();
+	if (error) throw error;
 }
