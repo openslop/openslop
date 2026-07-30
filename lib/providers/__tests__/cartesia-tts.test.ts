@@ -49,7 +49,18 @@ vi.mock("@ai-sdk/openai", () => ({
 
 import type Cartesia from "@cartesia/cartesia-js";
 import { TTSEmotion } from "@/lib/connectors/tts/enums";
-import { CartesiaTTS, collectVoices } from "../tts/cartesia";
+import { CartesiaTTS, collectVoices, pcmDurationSec } from "../tts/cartesia";
+
+/** pcm_f32le @ 44.1kHz mono: 4 bytes per sample. */
+const PCM_BYTES_PER_SEC = 44100 * 4;
+const pcmChunk = (seconds: number) =>
+	Buffer.alloc(seconds * PCM_BYTES_PER_SEC, 1);
+
+const streamOf = (responses: object[]) => ({
+	[Symbol.asyncIterator]: async function* () {
+		for (const r of responses) yield r;
+	},
+});
 
 const makeVoices = (count: number, offset = 0) =>
 	Array.from({ length: count }, (_, i) => ({
@@ -180,6 +191,14 @@ describe("collectVoices", () => {
 	});
 });
 
+describe("pcmDurationSec", () => {
+	it("converts raw pcm_f32le byte length to seconds", () => {
+		expect(pcmDurationSec(PCM_BYTES_PER_SEC)).toBe(1);
+		expect(pcmDurationSec(PCM_BYTES_PER_SEC / 2)).toBe(0.5);
+		expect(pcmDurationSec(0)).toBe(0);
+	});
+});
+
 describe("CartesiaTTS", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -219,12 +238,65 @@ describe("CartesiaTTS", () => {
 			expect(mockClose).toHaveBeenCalled();
 		});
 
-		it("passes custom model", async () => {
-			mockGenerate.mockReturnValue({
-				[Symbol.asyncIterator]: async function* () {
-					yield { type: "done", done: true };
-				},
+		it("reports duration from the audio length, not the last word timestamp", async () => {
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: pcmChunk(2) },
+					{
+						type: "timestamps",
+						word_timestamps: {
+							words: ["hello"],
+							start: [0.0],
+							end: [0.4],
+						},
+					},
+					{ type: "done", done: true },
+				]),
+			);
+
+			const provider = new CartesiaTTS("test-key");
+			const result = await provider.generate({
+				prompt: "hello",
+				voiceId: "voice-1",
 			});
+
+			expect(result.metadata?.durationSec).toBe(3);
+		});
+
+		it("reports duration even when the model returns no timestamps", async () => {
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: pcmChunk(3) },
+					{ type: "done", done: true },
+				]),
+			);
+
+			const provider = new CartesiaTTS("test-key");
+			const result = await provider.generate({
+				prompt: "hello",
+				voiceId: "voice-1",
+			});
+
+			expect(result.metadata?.durationSec).toBe(4);
+		});
+
+		it("throws when the stream yields no audio", async () => {
+			mockGenerate.mockReturnValue(streamOf([{ type: "done", done: true }]));
+
+			const provider = new CartesiaTTS("test-key");
+			await expect(
+				provider.generate({ prompt: "hello", voiceId: "voice-1" }),
+			).rejects.toThrow("Cartesia returned no audio for voice voice-1");
+			expect(mockClose).toHaveBeenCalled();
+		});
+
+		it("passes custom model", async () => {
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: pcmChunk(1) },
+					{ type: "done", done: true },
+				]),
+			);
 
 			const provider = new CartesiaTTS("test-key");
 			await provider.generate({
@@ -239,11 +311,12 @@ describe("CartesiaTTS", () => {
 		});
 
 		it("forwards emotion controls to Cartesia", async () => {
-			mockGenerate.mockReturnValue({
-				[Symbol.asyncIterator]: async function* () {
-					yield { type: "done", done: true };
-				},
-			});
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: pcmChunk(1) },
+					{ type: "done", done: true },
+				]),
+			);
 
 			const provider = new CartesiaTTS("test-key");
 			await provider.generate({

@@ -15,5 +15,5 @@ export function fetchAllowedVoicePreview(
 	if (new URL(url).origin !== allowedOrigin) {
 		throw new Error(`Voice preview origin not allowed: ${url}`);
 	}
-	return fetch(url, { redirect: "manual", ...init });
+	return fetch(url, { ...init, redirect: "manual" });
 }
