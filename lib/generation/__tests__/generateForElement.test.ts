@@ -1,6 +1,5 @@
 import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
 	AssetConnectorType,
 	AssetResult,
@@ -32,19 +31,12 @@ const config: ConnectorConfig = {
 };
 
 function makeJob(connectorType: AssetConnectorType): GenerationJob {
-	const element: CanvasContentElement = {
-		id: "el-1",
-		type: "image",
-		children: [{ id: "t", type: "image", text: "" }],
-	};
 	return {
 		elementId: "el-1",
 		connectorType,
 		provider: "openslop",
 		config,
-		projectId: "test-project",
 		state: EMPTY_STATE,
-		element,
 	};
 }
 

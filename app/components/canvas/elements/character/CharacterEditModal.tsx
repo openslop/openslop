@@ -19,9 +19,9 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { isNodeStale } from "@/lib/generation/graph";
 import { isGenerationActive } from "@/lib/generation/queue";
-import { characterAvatarGraph } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
-import { useGraphContext } from "@/lib/generation/useGraphContext";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
 import type { MetadataCharacter } from "@/lib/project/types";
@@ -63,7 +63,7 @@ function CharacterEditDialogBody({
 }) {
 	const { projectId } = useConfig();
 	const queue = useGenerationQueue();
-	const ctx = useGraphContext();
+	const buildNode = useNodeBuilder();
 	const character = useProject((s) => s.metadata.characters[name]);
 	const updateCharacter = useProject((s) => s.updateCharacter);
 
@@ -76,8 +76,8 @@ function CharacterEditDialogBody({
 	);
 	const avatarUrl = avatarSnapshot.result?.imageUrl;
 	const avatarNode = useMemo(
-		() => characterAvatarGraph(name, ctx),
-		[name, ctx],
+		() => buildNode(forCharacterAvatar(name)),
+		[buildNode, name],
 	);
 
 	if (!character) return null;

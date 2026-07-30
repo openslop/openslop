@@ -1,6 +1,6 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { GatewayClient } from "@/lib/gateway/base";
-import type { GenerationNode, GraphContext } from "@/lib/generation/graph";
+import type { NodeSpec } from "@/lib/generation/graph";
 import type { ProjectState } from "@/lib/generation/sourceNodes";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { AttributeSchema } from "./attributes/schema";
@@ -46,10 +46,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * read participate in ordering and staleness, so a plugin that reaches into
 	 * project state without declaring it will go stale-blind.
 	 */
-	dependencies?(
-		element: CanvasContentElement,
-		ctx: GraphContext,
-	): GenerationNode[];
+	dependencies?(element: CanvasContentElement): NodeSpec[];
 	beforeGenerate?(
 		params: TParams,
 		ctx?: PluginContext<TParams, TResult>,

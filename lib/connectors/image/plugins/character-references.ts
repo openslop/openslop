@@ -2,7 +2,7 @@ import compact from "lodash/compact";
 import { parseCharacterNames } from "@/lib/canvas/characterNames";
 import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
-import { characterAvatarNode } from "./characterAvatarNode";
+import { forCharacterAvatar } from "./characterAvatarNode";
 
 export type ParamsWithCharacters = { prompt: string; characters?: string };
 
@@ -13,9 +13,9 @@ export type ParamsWithCharacters = { prompt: string; characters?: string };
 export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCharacters> {
 	return {
 		name: "character-references",
-		dependencies: (element, ctx) =>
-			parseCharacterNames(element.customAttributes?.characters).map((name) =>
-				characterAvatarNode(name, ctx),
+		dependencies: (element) =>
+			parseCharacterNames(element.customAttributes?.characters).map(
+				forCharacterAvatar,
 			),
 		beforeGenerate(params, ctx?: PluginContext<ParamsWithCharacters>) {
 			const { characters, ...rest } = params;

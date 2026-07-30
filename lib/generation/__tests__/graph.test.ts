@@ -32,13 +32,7 @@ function node(
 		connectorType: "image",
 		provider: "openslop",
 		config,
-		projectId: "p",
 		state: EMPTY_STATE,
-		element: {
-			id,
-			type: "image",
-			children: [{ id: `${id}-t`, type: "image", text: id }],
-		},
 	};
 	return {
 		id,

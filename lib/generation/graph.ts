@@ -2,12 +2,7 @@ import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import type {
-	AssetConnectorType,
-	AssetResult,
-	ConnectorPlugin,
-} from "@/lib/connectors/types";
+import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { ProjectState } from "./sourceNodes";
 import {
 	serializeNodeInputs,
@@ -30,31 +25,28 @@ export type GenerationNode = {
 	buildJob: (() => GenerationJob) | null;
 };
 
-export type ResolveOptions = {
-	/** Replaces the registry chain for nodes that are not plain elements. */
+/** A node still to be built. `plugins` replaces the registry chain. */
+export type ElementNode = {
+	element: CanvasContentElement;
 	plugins?: ConnectorPlugin[];
 };
 
-/** Everything needed to build a graph, minus the graph being built. */
-export type GraphResolveContext = {
-	projectId: string;
-	registry: ConnectorRegistry;
-	state: ProjectState;
-};
-
 /**
- * Passed to `ConnectorPlugin.dependencies`. `resolve` builds a dependency node
- * and its own edges, so a plugin declares what it reads without knowing how the
- * rest of the graph is assembled. `plugins` overrides the registry chain for
- * nodes that are not plain elements, such as character avatars.
+ * Declares which node to build, without saying how. Callers and plugins name a
+ * spec; only the builder knows the registry, the state, and what a node is made
+ * of. Source-node specs return their node directly, having nothing to build.
  */
-export type GraphContext = GraphResolveContext & {
-	resolve: (
-		element: CanvasContentElement,
-		connectorType: AssetConnectorType,
-		options?: ResolveOptions,
-	) => GenerationNode;
-};
+export type NodeSpec = (state: ProjectState) => ElementNode | GenerationNode;
+
+/** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
+export const isElementNode = (
+	value: ElementNode | GenerationNode,
+): value is ElementNode => "element" in value;
+
+/** The node for an authored canvas element. */
+export const forElement =
+	(element: CanvasContentElement): NodeSpec =>
+	() => ({ element });
 
 /** Read surface `GenerationQueue` satisfies; keeps the graph free of the queue. */
 export type NodeResults = {

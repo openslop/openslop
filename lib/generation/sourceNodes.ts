@@ -4,7 +4,7 @@ import {
 	ASPECT_RATIO_DIMENSIONS,
 	resolveAspectRatio,
 } from "@/lib/video/aspectRatio";
-import { sourceNode, type GenerationNode } from "./graph";
+import { sourceNode, type NodeSpec } from "./graph";
 
 /** The project state generation reads, passed explicitly so the graph stays pure. */
 export type ProjectState = {
@@ -21,29 +21,28 @@ export const projectState = (projectId: string): ProjectState => {
  * Leaves of the graph. A plugin that declares one inherits staleness on every
  * change to it, which is what keeps reads from drifting out of the inputs.
  */
-export const referenceImagesNode = (state: ProjectState): GenerationNode =>
+export const forReferenceImages: NodeSpec = (state) =>
 	sourceNode("project:referenceImages", {
 		urls: state.referenceImages.join(","),
 	});
 
-export const artStyleNode = (state: ProjectState): GenerationNode =>
+export const forArtStyle: NodeSpec = (state) =>
 	sourceNode("project:artStyle", { style: state.metadata.style.trim() });
 
-export const aspectRatioNode = (state: ProjectState): GenerationNode =>
+export const forAspectRatio: NodeSpec = (state) =>
 	sourceNode("project:aspectRatio", {
 		aspectRatio: resolveAspectRatio(state.metadata),
 	});
 
-export const voiceNode = (
-	state: ProjectState,
-	characterName?: string,
-): GenerationNode => {
-	const { narration, characters } = state.metadata;
-	const voice = characterName ? characters[characterName] : narration;
-	return sourceNode(`project:voice:${characterName ?? "narrator"}`, {
-		voiceId: voice?.voiceId ?? "",
-	});
-};
+export const forVoice =
+	(characterName?: string): NodeSpec =>
+	(state) => {
+		const { narration, characters } = state.metadata;
+		const voice = characterName ? characters[characterName] : narration;
+		return sourceNode(`project:voice:${characterName ?? "narrator"}`, {
+			voiceId: voice?.voiceId ?? "",
+		});
+	};
 
 export const aspectDimensions = (state: ProjectState) =>
 	ASPECT_RATIO_DIMENSIONS[resolveAspectRatio(state.metadata)];

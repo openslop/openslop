@@ -1,6 +1,5 @@
 import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../inputs";
@@ -18,20 +17,6 @@ let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
 vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
-
-function makeElement(
-	id: string,
-	inputs: GenerationInputs,
-): CanvasContentElement {
-	return {
-		id,
-		type: "sound",
-		customAttributes: Object.fromEntries(
-			Object.entries(inputs.attributes).map(([k, v]) => [k, String(v)]),
-		),
-		children: [{ id: `${id}-t`, type: "image", text: inputs.prompt }],
-	};
-}
 
 type JobOverrides = Partial<GenerationJob> & {
 	inputs?: GenerationInputs;
@@ -54,9 +39,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 		connectorType: "image",
 		provider: "openslop",
 		config,
-		projectId: "test-project",
 		state: EMPTY_STATE,
-		element: makeElement(id, inputs),
 		...rest,
 	};
 	return {

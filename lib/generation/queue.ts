@@ -1,4 +1,3 @@
-import type { CanvasContentElement } from "../canvas/types";
 import type {
 	AssetConnectorType,
 	AssetResult,
@@ -37,8 +36,6 @@ export type GenerationJob = {
 	connectorType: AssetConnectorType;
 	provider: ProviderKey;
 	config: ConnectorConfig;
-	projectId: string;
-	element: CanvasContentElement;
 	/** The project state this job's inputs were resolved against. */
 	state: ProjectState;
 };

@@ -2,8 +2,8 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
-import type { GenerationNode } from "@/lib/generation/graph";
-import { resolveGraph } from "@/lib/generation/resolveGraph";
+import { forElement, type GenerationNode } from "@/lib/generation/graph";
+import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { projectState } from "@/lib/generation/sourceNodes";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 
@@ -59,10 +59,6 @@ const registry: ConnectorRegistry = {
 	},
 };
 
-vi.mock("@/lib/config/ConfigProvider", () => ({
-	useConfig: () => ({ projectId: "test-project", connectorConfig: registry }),
-}));
-
 vi.mock("react", () => ({
 	useCallback: <T>(fn: T) => fn,
 }));
@@ -71,6 +67,14 @@ let queue: GenerationQueue;
 
 vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 	useGenerationQueue: () => queue,
+}));
+
+// The hook under test is about which elements get queued, so bind a real
+// resolver rather than standing up the config and project providers.
+const resolve = () => nodeBuilder(registry, projectState("test-project"));
+
+vi.mock("@/lib/generation/useNodeBuilder", () => ({
+	useNodeBuilder: () => resolve(),
 }));
 
 function makeElement(
@@ -93,11 +97,10 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	const node = resolveGraph(element, {
-		projectId: "test-project",
+	const node = nodeBuilder(
 		registry,
-		state: projectState("test-project"),
-	});
+		projectState("test-project"),
+	)(forElement(element));
 	queue.commitResult(node, {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,

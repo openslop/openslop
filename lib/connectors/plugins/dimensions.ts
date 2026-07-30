@@ -1,8 +1,5 @@
 import { requireState } from "@/lib/connectors/plugins";
-import {
-	aspectDimensions,
-	aspectRatioNode,
-} from "@/lib/generation/sourceNodes";
+import { aspectDimensions, forAspectRatio } from "@/lib/generation/sourceNodes";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 
 type Dimensioned = { prompt: string; width?: number; height?: number };
@@ -13,7 +10,7 @@ export function createDimensionsPlugin(
 ): ConnectorPlugin<Dimensioned> {
 	return {
 		name: "dimensions",
-		dependencies: (_, ctx) => [aspectRatioNode(ctx.state)],
+		dependencies: () => [forAspectRatio],
 		beforeGenerate(params, ctx) {
 			const state = requireState(ctx, "dimensions");
 			return { ...params, ...aspectDimensions(state)[kind] };

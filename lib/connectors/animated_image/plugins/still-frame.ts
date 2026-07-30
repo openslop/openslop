@@ -1,3 +1,4 @@
+import omit from "lodash/omit";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
 	AnimatedImageGenerateParams,
@@ -9,12 +10,11 @@ import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import {
 	derivedNodeId,
 	type GenerationNode,
-	type GraphContext,
+	type NodeSpec,
 } from "@/lib/generation/graph";
-import omit from "lodash/omit";
 
 /** Attributes that drive only the animation; the still frame ignores them. */
-const VIDEO_ONLY_KEYS = ["videoPrompt", "duration"];
+const VIDEO_ONLY_KEYS = ["videoPrompt", "duration"] as const;
 
 export const stillElementId = (elementId: string) =>
 	derivedNodeId("still", elementId);
@@ -35,6 +35,11 @@ export function stillElement(
 	};
 }
 
+/** Generate the still frame an animated image animates. */
+export const forStillOf =
+	(element: CanvasContentElement): NodeSpec =>
+	() => ({ element: stillElement(element), plugins: buildImagePlugins() });
+
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>
 	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
@@ -45,11 +50,7 @@ export function createStillFramePlugin(): ConnectorPlugin<
 > {
 	return {
 		name: "still-frame",
-		dependencies: (element, ctx: GraphContext) => [
-			ctx.resolve(stillElement(element), "image", {
-				plugins: buildImagePlugins(),
-			}),
-		],
+		dependencies: (element) => [forStillOf(element)],
 		beforeGenerate(
 			params,
 			ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,

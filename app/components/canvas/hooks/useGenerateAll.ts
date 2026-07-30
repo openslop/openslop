@@ -1,27 +1,20 @@
 import { useCallback } from "react";
 import { Editor } from "slate";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { needsGeneration } from "@/lib/generation/graph";
-import { resolveGraph } from "@/lib/generation/resolveGraph";
-import { projectState } from "@/lib/generation/sourceNodes";
+import { forElement, needsGeneration } from "@/lib/generation/graph";
+import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 
 export function useGenerateAll(editor: Editor) {
-	const { projectId, connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
+	const buildNode = useNodeBuilder();
 
 	const generateAll = useCallback(() => {
-		const ctx = {
-			projectId,
-			registry: connectorConfig,
-			state: projectState(projectId),
-		};
 		const roots = getContentElements(editor.children)
-			.map((el) => resolveGraph(el, ctx))
+			.map((el) => buildNode(forElement(el)))
 			.filter((node) => node.inputs.prompt && needsGeneration(node, queue));
 		queue.enqueueGraph(roots);
-	}, [queue, editor, connectorConfig, projectId]);
+	}, [queue, editor, buildNode]);
 
 	return { generateAll };
 }

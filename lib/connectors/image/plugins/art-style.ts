@@ -1,11 +1,11 @@
 import { requireState } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { artStyleNode } from "@/lib/generation/sourceNodes";
+import { forArtStyle } from "@/lib/generation/sourceNodes";
 
 export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {
 	return {
 		name: "art-style",
-		dependencies: (_, ctx) => [artStyleNode(ctx.state)],
+		dependencies: () => [forArtStyle],
 		transformPrompt(prompt, ctx) {
 			const style = requireState(ctx, "art-style").metadata.style.trim();
 			if (!style) return prompt;

@@ -1,6 +1,6 @@
 import { requireState } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { referenceImagesNode } from "@/lib/generation/sourceNodes";
+import { forReferenceImages } from "@/lib/generation/sourceNodes";
 
 export type ParamsWithReferenceImages = {
 	prompt: string;
@@ -10,7 +10,7 @@ export type ParamsWithReferenceImages = {
 export function createReferenceImagesPlugin(): ConnectorPlugin<ParamsWithReferenceImages> {
 	return {
 		name: "reference-images",
-		dependencies: (_, ctx) => [referenceImagesNode(ctx.state)],
+		dependencies: () => [forReferenceImages],
 		beforeGenerate(params, ctx) {
 			const { referenceImages: existing = [], ...rest } = params;
 			const stateImages = requireState(ctx, "reference-images").referenceImages;

@@ -4,15 +4,18 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { isNodeStale, nodeInputs } from "@/lib/generation/graph";
-import { resolveGraph } from "@/lib/generation/resolveGraph";
-import { useGraphContext } from "@/lib/generation/useGraphContext";
+import { forElement } from "@/lib/generation/graph";
+import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 export function useGenerate(element: CanvasContentElement) {
 	const queue = useGenerationQueue();
-	const ctx = useGraphContext();
+	const buildNode = useNodeBuilder();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
-	const node = useMemo(() => resolveGraph(element, ctx), [element, ctx]);
+	const node = useMemo(
+		() => buildNode(forElement(element)),
+		[buildNode, element],
+	);
 	const stale = useQueueSelector((q) => isNodeStale(node, q));
 
 	useEffect(() => {

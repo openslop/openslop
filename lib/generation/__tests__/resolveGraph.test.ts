@@ -12,10 +12,15 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
-import { flattenGraph, isNodeStale, needsGeneration } from "../graph";
+import {
+	flattenGraph,
+	forElement,
+	isNodeStale,
+	needsGeneration,
+} from "../graph";
 import { GenerationQueue } from "../queue";
 import { projectState } from "../sourceNodes";
-import { resolveGraph } from "../resolveGraph";
+import { nodeBuilder } from "../resolveGraph";
 
 const PROJECT_ID = "resolve-graph-test";
 
@@ -41,11 +46,7 @@ const element = (
 });
 
 const resolve = (el: CanvasContentElement) =>
-	resolveGraph(el, {
-		projectId: PROJECT_ID,
-		registry: buildRegistry(),
-		state: projectState(PROJECT_ID),
-	});
+	nodeBuilder(buildRegistry(), projectState(PROJECT_ID))(forElement(el));
 
 const idsOf = (el: CanvasContentElement) =>
 	flattenGraph([resolve(el)]).map((node) => node.id);
