@@ -3,8 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import { Image as ImageIcon, Video } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { stillDependency } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { stillFrameUrl } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { useElementGeneration } from "../ElementGenerationContext";
 import { MediaResult } from "./results";
@@ -45,19 +44,9 @@ export function AnimatedImagePreview({
 	);
 }
 
-/**
- * An animated image shows the frame the element currently has, which an upload
- * replaces immediately. Its own result carries the frame it was rendered from,
- * so reading that instead would show the previous still until it re-renders.
- */
 export function AnimatedImageOutput(state: PlaceholderProps) {
 	const { node, result } = useElementGeneration();
-	const stillUrl = useQueueSelector((queue) => {
-		const still = stillDependency(node);
-		return still
-			? getPrimaryUrl(queue.getElementSnapshot(still.id).result, "image")
-			: undefined;
-	});
+	const stillUrl = useQueueSelector((queue) => stillFrameUrl(node, queue));
 
 	return (
 		<AnimatedImagePreview

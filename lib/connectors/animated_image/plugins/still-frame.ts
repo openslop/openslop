@@ -7,9 +7,11 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
+import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	derivedNodeId,
 	type GenerationNode,
+	type NodeResults,
 	type NodeSpec,
 } from "@/lib/generation/graph";
 
@@ -44,6 +46,18 @@ export const forStillOf =
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>
 	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
+
+/**
+ * The frame the element currently has, which an upload replaces immediately. The
+ * animation's own result carries the frame it was rendered from, so reading that
+ * instead would show the previous still until it re-renders.
+ */
+export const stillFrameUrl = (node: GenerationNode, results: NodeResults) => {
+	const still = stillDependency(node);
+	return still
+		? getPrimaryUrl(results.getElementSnapshot(still.id).result, "image")
+		: undefined;
+};
 
 const stillFrame = (
 	ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,

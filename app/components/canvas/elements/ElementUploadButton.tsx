@@ -17,11 +17,7 @@ export function ElementUploadButton() {
 			className="shrink-0"
 			disabled={isGenerationActive(status)}
 			onUpload={(url) =>
-				queue.commitResult(
-					target,
-					{ imageUrl: url, durationSec: 0 },
-					{ pinned: true },
-				)
+				queue.commitResult(target, { imageUrl: url, durationSec: 0 })
 			}
 		/>
 	);
