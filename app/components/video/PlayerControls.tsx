@@ -14,7 +14,7 @@ import {
 	usePlayerValue,
 	usePlayerVolume,
 } from "./usePlayerState";
-import type { SceneSegment } from "./useSceneSegments";
+import { useActiveSegmentIndex, type SceneSegment } from "./useSceneSegments";
 import { ScrubBar } from "./ScrubBar";
 
 export function TimeDisplay({
@@ -39,12 +39,15 @@ export function TimeDisplay({
 }
 
 export function ScenePill({
+	player,
 	segments,
-	activeIndex,
+	fps,
 }: {
+	player: PlayerRef | null;
 	segments: SceneSegment[];
-	activeIndex: number;
+	fps: number;
 }) {
+	const activeIndex = useActiveSegmentIndex(player, segments, fps);
 	const active = segments[activeIndex];
 	if (!active) return null;
 	return (
