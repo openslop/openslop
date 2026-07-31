@@ -57,6 +57,7 @@ export const isGenerationActive = (status: GenerationStatus) =>
 export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
 	private pending: GenerationNode[] = [];
+	private running = new Map<NodeId, GenerationNode>();
 	private controllers = new Map<string, AbortController>();
 	private jobStarts = new Map<string, number>();
 	private tickTimer: ReturnType<typeof setInterval> | null = null;
@@ -157,8 +158,30 @@ export class GenerationQueue {
 	private abortJob(id: string) {
 		this.controllers.get(id)?.abort();
 		this.controllers.delete(id);
+		this.running.delete(id);
 		this.stopTimer(id);
 		this.pending = this.pending.filter((node) => node.id !== id);
+	}
+
+	private queued(): GenerationNode[] {
+		return [...this.pending, ...this.running.values()];
+	}
+
+	/**
+	 * Abort the dependencies `node` alone was waiting on. Without this, cancelling
+	 * a blocked node leaves its still or avatar generating and landing a result
+	 * for an element the user cancelled. Shared dependencies keep running for
+	 * whoever else is still waiting.
+	 */
+	private abortExclusiveDeps(node: GenerationNode) {
+		const others = this.queued().filter((other) => other.id !== node.id);
+		for (const dep of node.dependsOn) {
+			if (isSourceNode(dep) || !this.isInQueue(dep.id)) continue;
+			const shared = others.some((other) =>
+				other.dependsOn.some((d) => d.id === dep.id),
+			);
+			if (!shared) this.cancel(dep.id);
+		}
 	}
 
 	private resetToIdle(id: string) {
@@ -202,7 +225,9 @@ export class GenerationQueue {
 
 	cancel(elementId: string) {
 		if (!this.isInQueue(elementId)) return;
+		const node = this.queued().find((n) => n.id === elementId);
 		this.abortJob(elementId);
+		if (node) this.abortExclusiveDeps(node);
 		this.resetToIdle(elementId);
 		this.notify();
 		this.processQueue();
@@ -214,6 +239,7 @@ export class GenerationQueue {
 			this.stopTimer(id);
 		}
 		this.controllers.clear();
+		this.running.clear();
 		this.pending = [];
 		for (const id of this.state.keys()) {
 			this.resetToIdle(id);
@@ -223,7 +249,11 @@ export class GenerationQueue {
 
 	discard(elementId: string) {
 		const hadEntry = this.isInQueue(elementId);
+		const node = hadEntry
+			? this.queued().find((n) => n.id === elementId)
+			: undefined;
 		if (hadEntry) this.abortJob(elementId);
+		if (node) this.abortExclusiveDeps(node);
 		if (this.state.get(elementId)?.result) this._resultVersion++;
 		this.state.delete(elementId);
 		this.notify();
@@ -354,6 +384,7 @@ export class GenerationQueue {
 		const { elementId } = job;
 		const controller = new AbortController();
 		this.controllers.set(elementId, controller);
+		this.running.set(elementId, node);
 
 		this.update(elementId, { status: "generating", seconds: 0 });
 		this.notify();
@@ -403,6 +434,7 @@ export class GenerationQueue {
 		if (controller.signal.aborted) return;
 		this.stopTimer(elementId);
 		this.controllers.delete(elementId);
+		this.running.delete(elementId);
 		this.processQueue();
 	}
 }
