@@ -147,10 +147,10 @@ describe("dependency ordering", () => {
 		// The image never ran, so the URL it already held is still good.
 		const snapshot = queue.getElementSnapshot("image");
 		expect(snapshot.result?.imageUrl).toBe("existing.png");
-		expect(snapshot.error).toMatch(/avatar:Alice/);
+		expect(snapshot.status).toBe("idle");
 	});
 
-	it("surfaces an error on dependents when a dependency fails", async () => {
+	it("releases a dependent that can never run instead of leaving it queued", async () => {
 		generateMock.mockImplementation((job) =>
 			(job as GenerationJob).elementId === "avatar:Alice"
 				? Promise.reject(new Error("avatar boom"))
@@ -161,9 +161,9 @@ describe("dependency ordering", () => {
 		queue.enqueueGraph([node("image", [node("avatar:Alice")])]);
 		await vi.runAllTimersAsync();
 
-		const snapshot = queue.getElementSnapshot("image");
-		expect(snapshot.status).toBe("idle");
-		expect(snapshot.error).toMatch(/avatar:Alice/);
+		// The failure is reported on the avatar; the image simply stops waiting.
+		expect(queue.getElementSnapshot("image").status).toBe("idle");
+		expect(queue.getElementSnapshot("avatar:Alice").error).toMatch(/boom/);
 		expect(queue.isBusy()).toBe(false);
 	});
 });

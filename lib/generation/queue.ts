@@ -321,23 +321,19 @@ export class GenerationQueue {
 			const [node] = this.pending.splice(index, 1);
 			if (node) this.runJob(node);
 		}
-		this.failBlocked();
+		this.releaseBlocked();
 	}
 
-	/** Nothing running and nothing runnable means a dependency never arrived. */
-	private failBlocked() {
+	/**
+	 * Nothing running and nothing runnable means a dependency never arrived, so
+	 * release what is left rather than leaving it queued forever. The failure is
+	 * already reported on the node that actually failed.
+	 */
+	private releaseBlocked() {
 		if (this.controllers.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
-		for (const node of blocked) {
-			const missing = this.blockingDependency(node);
-			// The node never ran, so whatever result it already held is still valid.
-			this.update(node.id, {
-				status: "idle",
-				seconds: 0,
-				error: `Dependency "${missing?.id ?? "unknown"}" failed to generate`,
-			});
-		}
+		for (const node of blocked) this.resetToIdle(node.id);
 		this.notify();
 	}
 
