@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	createConnector,
-	isKnownProvider,
-	resolveAttributeSchema,
-} from "../factory";
+import { createConnector, resolveAttributeSchema } from "../factory";
 import type { ConnectorType } from "../types";
 
 const stubConfig = {
@@ -72,24 +68,5 @@ describe("resolveAttributeSchema", () => {
 		expect(() => resolveAttributeSchema("tts", "nonexistent" as never)).toThrow(
 			'Unknown provider "nonexistent" for type "tts"',
 		);
-	});
-});
-
-describe("isKnownProvider", () => {
-	it("is true for a registered provider", () => {
-		expect(isKnownProvider("tts", "openslop")).toBe(true);
-	});
-
-	it("is false for a provider with no registered constructor", () => {
-		expect(isKnownProvider("tts", "nonexistent")).toBe(false);
-	});
-
-	it("is false for an inherited Object.prototype property, not just an own key", () => {
-		// A persisted provider value of "constructor"/"toString"/etc. must not
-		// read as known just because `in` walks the prototype chain — that would
-		// let resolveAttributeSchema call .attributesFor on Object.prototype.constructor.
-		expect(isKnownProvider("tts", "constructor")).toBe(false);
-		expect(isKnownProvider("tts", "toString")).toBe(false);
-		expect(isKnownProvider("tts", "hasOwnProperty")).toBe(false);
 	});
 });

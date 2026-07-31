@@ -1,5 +1,6 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { DEFAULT_PROVIDER } from "@/lib/connectors/registry";
 import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
 import type { ProjectState } from "@/lib/generation/sourceNodes";
 
@@ -23,7 +24,11 @@ export function characterAvatarElement(
 	return {
 		id,
 		type: "image",
-		customAttributes: { kind: "avatar", appearance },
+		customAttributes: {
+			kind: "avatar",
+			appearance,
+			provider: DEFAULT_PROVIDER,
+		},
 		children: [{ id: `${id}-t`, type: "image", text: name }],
 	};
 }

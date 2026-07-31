@@ -87,7 +87,7 @@ describe("stillFrameUrl", () => {
 	const animated = {
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		customAttributes: { videoPrompt: "slow pan" },
+		customAttributes: { provider: "openslop", videoPrompt: "slow pan" },
 		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
 	};
 
@@ -134,7 +134,7 @@ describe("uploaded still lifetime", () => {
 	const animated = (text: string, videoPrompt: string) => ({
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		customAttributes: { videoPrompt },
+		customAttributes: { provider: "openslop", videoPrompt },
 		children: [{ id: "t", type: "animated_image" as const, text }],
 	});
 

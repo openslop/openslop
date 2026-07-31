@@ -1,12 +1,6 @@
 import type { AttributeSchema } from "@/lib/connectors/attributes/schema";
-import {
-	isKnownProvider,
-	resolveAttributeSchema,
-} from "@/lib/connectors/factory";
-import {
-	getDefaultConnector,
-	type ConnectorRegistry,
-} from "@/lib/connectors/registry";
+import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AssetConnectorType,
 	ConnectorConfig,
@@ -22,34 +16,25 @@ export type ElementConnector = {
 };
 
 /**
- * Which connector, provider and model an element generates with.
- *
- * An element pins its provider in `customAttributes` when it is created, so a
- * provider that has since been renamed, unregistered, or dropped from the
- * registry falls back to the registry default instead of reaching
- * `createConnector`/`resolveAttributeSchema`, which throw on unknown providers.
+ * Which connector, provider and model an element generates with. `createCanvasNode`
+ * stamps the provider from the registry after any incoming attributes, so every
+ * authored element carries one the registry knows.
  */
 export function resolveElementConnector(
 	element: CanvasContentElement,
 	registry: ConnectorRegistry,
 ): ElementConnector {
 	const type = ELEMENT_TYPES[element.type].connector;
-	const { provider: pinned, model } = element.customAttributes ?? {};
-
-	if (pinned && isKnownProvider(type, pinned)) {
-		const config = registry[type][pinned];
-		if (config) {
-			return {
-				type,
-				provider: pinned,
-				model: model ?? config.defaultModel,
-				config,
-			};
-		}
-	}
-
-	const { provider, config } = getDefaultConnector(registry, type);
-	return { type, provider, model: model ?? config.defaultModel, config };
+	const { provider, model } = element.customAttributes ?? {};
+	if (!provider)
+		throw new Error(`Element "${element.id}" was created without a provider`);
+	const config = registry[type][provider as ProviderKey];
+	return {
+		type,
+		provider: provider as ProviderKey,
+		model: model ?? config.defaultModel,
+		config,
+	};
 }
 
 export function resolveElementSchema(

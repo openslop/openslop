@@ -86,7 +86,7 @@ function makeElement(
 	return {
 		id,
 		type,
-		customAttributes: attrs,
+		customAttributes: { provider: "openslop", ...attrs },
 		children: [{ id: `${id}-t`, type, text }],
 	};
 }

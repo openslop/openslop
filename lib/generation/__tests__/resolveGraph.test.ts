@@ -41,7 +41,7 @@ const element = (
 ): CanvasContentElement => ({
 	id,
 	type,
-	customAttributes,
+	customAttributes: { provider: "openslop", ...customAttributes },
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
@@ -163,7 +163,12 @@ describe("resolveGraph", () => {
 		const still = anim.dependsOn.find(
 			(node) => node.id === stillElementId("anim"),
 		);
-		expect(still?.inputs.attributes).toEqual({ format: "png" });
+		// The still generates an image, so it takes the image provider rather than
+		// the video one the element pins.
+		expect(still?.inputs.attributes).toEqual({
+			format: "png",
+			provider: "openslop",
+		});
 		expect(anim.inputs.attributes).toMatchObject({
 			videoPrompt: "slow pan",
 			duration: "8",
@@ -198,7 +203,10 @@ describe("resolveGraph", () => {
 		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
 			expect(node.inputs.attributes).not.toHaveProperty(key);
 		}
-		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
+		expect(node.inputs.attributes).toEqual({
+			model: "Slop Video v1",
+			provider: "openslop",
+		});
 	});
 
 	it("sizes a clip from the project aspect ratio via its dependency", () => {

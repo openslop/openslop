@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import set from "lodash/fp/set";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
+import { createCanvasNode } from "../createCanvasNode";
 import {
 	resolveElementConnector,
 	resolveElementSchema,
@@ -11,7 +11,12 @@ function element(
 	type: CanvasContentElement["type"],
 	customAttributes?: Record<string, string>,
 ): CanvasContentElement {
-	return { id: "n1", type, customAttributes, children: [] };
+	return {
+		id: "n1",
+		type,
+		customAttributes: { provider: "openslop", ...customAttributes },
+		children: [],
+	};
 }
 
 const registry = DEFAULT_CONNECTOR_REGISTRY;
@@ -52,30 +57,28 @@ describe("resolveElementConnector", () => {
 		expect(provider).toBe("openslop");
 		expect(config).toBe(imageDefaults);
 	});
+});
 
-	it("falls back to the default when the pinned provider is unregistered", () => {
-		const { provider, config } = resolveElementConnector(
-			element("image", { provider: "retired-vendor" }),
-			registry,
-		);
-		expect(provider).toBe("openslop");
-		expect(config).toBe(imageDefaults);
-	});
+// resolveElementConnector trusts the pin, so the guarantee that a pin is always
+// a registry provider has to hold where elements are made.
+describe("createCanvasNode", () => {
+	it("overwrites an incoming provider with the registry's own", () => {
+		const node = createCanvasNode("image", registry, {
+			attrs: { provider: "retired-vendor" },
+		});
 
-	it("falls back to the default when the pinned provider is missing from the registry", () => {
-		const withoutImageProviders = set("image", {}, registry);
-		const { provider } = resolveElementConnector(
-			element("image", { provider: "openslop" }),
-			set("image.other", imageDefaults, withoutImageProviders),
-		);
-		expect(provider).toBe("other");
+		expect(node.customAttributes?.provider).toBe("openslop");
+		expect(resolveElementConnector(node, registry).config).toBe(imageDefaults);
 	});
 });
 
 describe("resolveElementSchema", () => {
-	it("resolves the schema through the fallback provider for unknown pins", () => {
-		expect(
-			resolveElementSchema(element("image", { provider: "gone" }), registry),
-		).toEqual(resolveElementSchema(element("image"), registry));
+	it("resolves the schema for an element with no pin", () => {
+		expect(resolveElementSchema(element("image"), registry)).toEqual(
+			resolveElementSchema(
+				element("image", { provider: "openslop" }),
+				registry,
+			),
+		);
 	});
 });

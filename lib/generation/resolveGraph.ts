@@ -1,10 +1,7 @@
 import omit from "lodash/omit";
 import { resolveElementConnector } from "@/lib/canvas/elementConnector";
-import { ELEMENT_TYPES } from "@/lib/canvas/types";
-import {
-	getDefaultConnector,
-	type ConnectorRegistry,
-} from "@/lib/connectors/registry";
+import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
 import { getPromptText } from "./inputs";
 import {
@@ -13,10 +10,26 @@ import {
 	type GenerationNode,
 	type NodeSpec,
 } from "./graph";
+import type { GenerationJob } from "./queue";
 import type { ProjectState } from "./sourceNodes";
 
 /** Builds the node a spec names, along with every node it depends on. */
 export type NodeBuilder = (spec: NodeSpec) => GenerationNode;
+
+/** What the element itself contributes, once its dependencies are resolved. */
+const toNode = (
+	element: CanvasContentElement,
+	job: GenerationJob,
+	dependsOn: GenerationNode[],
+): GenerationNode => ({
+	id: element.id,
+	inputs: {
+		prompt: getPromptText(element),
+		attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
+	},
+	dependsOn,
+	buildJob: () => job,
+});
 
 /**
  * Bind a builder to the registry and project state its nodes resolve against.
@@ -42,33 +55,25 @@ export function nodeBuilder(
 				throw new Error(`Cyclic generation dependency at "${id}"`);
 			resolving.add(id);
 
-			const connectorType = ELEMENT_TYPES[element.type].connector;
-			// A derived node is not an authored element, so no provider is pinned on it.
-			const { provider, config } = override
-				? getDefaultConnector(registry, connectorType)
-				: resolveElementConnector(element, registry);
-			const plugins = override ?? config.plugins ?? [];
-			const job = {
-				elementId: id,
-				connectorType,
+			const {
+				type: connectorType,
 				provider,
-				config: { ...config, plugins },
-				state,
-			};
-			const node: GenerationNode = {
-				id,
-				inputs: {
-					prompt: getPromptText(element),
-					attributes: omit(
-						element.customAttributes ?? {},
-						LAYOUT_ATTRIBUTE_KEYS,
-					),
+				config,
+			} = resolveElementConnector(element, registry);
+			const plugins = override ?? config.plugins ?? [];
+			const node = toNode(
+				element,
+				{
+					elementId: id,
+					connectorType,
+					provider,
+					config: { ...config, plugins },
+					state,
 				},
-				dependsOn: plugins.flatMap(
+				plugins.flatMap(
 					(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 				),
-				buildJob: () => job,
-			};
+			);
 
 			resolving.delete(id);
 			resolved.set(id, node);

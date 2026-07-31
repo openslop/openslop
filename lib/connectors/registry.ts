@@ -34,6 +34,13 @@ const openslopConfig = (
 	},
 });
 
+/**
+ * The provider derived nodes generate with. Authored elements pin their own at
+ * creation; avatars and stills have no settings UI yet, so they take this until
+ * they do.
+ */
+export const DEFAULT_PROVIDER: ProviderKey = "openslop";
+
 /** Plugin-free baseline; project-scoped plugin chains are layered on by `ConfigProvider`. */
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	llm: openslopConfig("Slop LLM v1", LLM_MODELS, [osmlPlugin]),

@@ -7,6 +7,7 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
+import { DEFAULT_PROVIDER } from "@/lib/connectors/registry";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	derivedNodeId,
@@ -35,7 +36,11 @@ export function stillElement(
 		...element,
 		id: stillElementId(element.id),
 		type: "image",
-		customAttributes: omit(element.customAttributes ?? {}, VIDEO_ONLY_KEYS),
+		customAttributes: {
+			...omit(element.customAttributes ?? {}, VIDEO_ONLY_KEYS),
+			// The element's own provider generates the video, not the still.
+			provider: DEFAULT_PROVIDER,
+		},
 	};
 }
 
