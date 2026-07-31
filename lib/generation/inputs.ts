@@ -18,13 +18,6 @@ const sortedEntries = (record: Record<string, string | number>) =>
 		Object.entries(record).sort(([a], [b]) => a.localeCompare(b)),
 	);
 
-export function serializeNodeInputs(inputs: NodeInputs): string {
-	return JSON.stringify({
-		prompt: inputs.prompt,
-		attributes: sortedEntries(inputs.attributes),
-	});
-}
-
 export function serializeInputs(inputs: GenerationInputs): string {
 	return JSON.stringify({
 		prompt: inputs.prompt,

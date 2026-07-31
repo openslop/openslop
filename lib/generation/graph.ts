@@ -5,11 +5,11 @@ import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { ProjectState } from "./sourceNodes";
 import {
-	serializeNodeInputs,
+	serializeInputs,
 	type GenerationInputs,
 	type NodeInputs,
 } from "./inputs";
-import type { ElementSnapshot, GenerationJob } from "./queue";
+import type { GenerationJob, GenerationQueue } from "./queue";
 
 export type NodeId = string;
 
@@ -46,10 +46,8 @@ export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
 	() => ({ element });
 
-/** Read surface `GenerationQueue` satisfies; keeps the graph free of the queue. */
-export type NodeResults = {
-	getElementSnapshot(id: NodeId): ElementSnapshot;
-};
+/** The queue narrowed to the half that only reads, for callers that only read. */
+export type NodeResults = Pick<GenerationQueue, "getElementSnapshot">;
 
 export const isSourceNode = (node: GenerationNode) => node.buildJob === null;
 
@@ -94,7 +92,7 @@ export function nodeIdentity(
 	results: NodeResults,
 ): string {
 	return isSourceNode(node)
-		? serializeNodeInputs(node.inputs)
+		? serializeInputs(nodeInputs(node, results))
 		: resultIdentity(results.getElementSnapshot(node.id).result);
 }
 

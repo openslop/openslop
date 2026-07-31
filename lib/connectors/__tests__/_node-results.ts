@@ -22,5 +22,7 @@ export function stubAvatarResults(
 			{ ...EMPTY, result: { imageUrl, durationSec: 0 } },
 		]),
 	);
-	return { getElementSnapshot: (id) => byId.get(id) ?? EMPTY };
+	return {
+		getElementSnapshot: (id) => (id ? byId.get(id) : undefined) ?? EMPTY,
+	};
 }

@@ -60,6 +60,7 @@ describe("nodeInputs", () => {
 			"project:refs": JSON.stringify({
 				prompt: "",
 				attributes: { urls: "a.png" },
+				dependencies: {},
 			}),
 		});
 	});

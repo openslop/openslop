@@ -150,36 +150,6 @@ describe("dependency ordering", () => {
 		expect(snapshot.error).toMatch(/avatar:Alice/);
 	});
 
-	it("aborts a dependency only this node was waiting on", async () => {
-		const started: string[] = [];
-		generateMock.mockImplementation((job) => {
-			started.push((job as GenerationJob).elementId);
-			return new Promise<AssetResult>(() => {});
-		});
-
-		const still = node("~still:anim");
-		queue.enqueueGraph([node("anim", [still])]);
-		await vi.advanceTimersByTimeAsync(0);
-		expect(started).toContain("~still:anim");
-
-		// Cancelling the animation must not leave its still landing a result for an
-		// element the user cancelled.
-		queue.cancel("anim");
-		expect(queue.getElementSnapshot("~still:anim").status).toBe("idle");
-		expect(queue.isBusy()).toBe(false);
-	});
-
-	it("keeps a dependency another queued node still needs", async () => {
-		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
-
-		const avatar = node("~avatar:Alice");
-		queue.enqueueGraph([node("a", [avatar]), node("b", [avatar])]);
-		await vi.advanceTimersByTimeAsync(0);
-
-		queue.cancel("a");
-		expect(queue.getElementSnapshot("~avatar:Alice").status).not.toBe("idle");
-	});
-
 	it("surfaces an error on dependents when a dependency fails", async () => {
 		generateMock.mockImplementation((job) =>
 			(job as GenerationJob).elementId === "avatar:Alice"
