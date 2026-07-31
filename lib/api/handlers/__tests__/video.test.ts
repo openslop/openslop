@@ -16,7 +16,10 @@ vi.mock("@/lib/api/jobs", () => ({
 	updateJob: (...args: unknown[]) => updateJob(...args),
 }));
 
-type VideoJobRow = TypedJobRow<VideoGenerateParams, { providerJobId?: string }>;
+type VideoJobRow = TypedJobRow<
+	VideoGenerateParams,
+	{ providerJobId?: string; durationSec?: number }
+>;
 
 const bundle = { id: "bundle-1" } as unknown as BundleResponse;
 
@@ -29,7 +32,7 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 		status: "processing",
 		request: { prompt: "a cat" } as VideoGenerateParams,
 		result: null,
-		metadata: { providerJobId: "upstream-1" },
+		metadata: { providerJobId: "upstream-1", durationSec: 10 },
 		error: null,
 		created_at: "2026-01-01T00:00:00Z",
 		updated_at: "2026-01-01T00:00:00Z",
@@ -40,20 +43,30 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 describe("videoHandler.process", () => {
 	beforeEach(() => vi.clearAllMocks());
 
-	it("returns the provider job id as pending metadata", async () => {
-		generate.mockResolvedValue({ metadata: { jobId: "upstream-9" } });
+	it("records the provider job id and the submitted clip length", async () => {
+		generate.mockResolvedValue({
+			metadata: { jobId: "upstream-9", durationSec: 8 },
+		});
 
 		await expect(videoHandler.process(job())).resolves.toEqual({
 			kind: "pending",
-			metadata: { providerJobId: "upstream-9" },
+			metadata: { providerJobId: "upstream-9", durationSec: 8 },
 		});
 	});
 
 	it("throws when the provider returns no job id", async () => {
-		generate.mockResolvedValue({ metadata: {} });
+		generate.mockResolvedValue({ metadata: { durationSec: 8 } });
 
 		await expect(videoHandler.process(job())).rejects.toThrow(
 			"Video provider returned no jobId",
+		);
+	});
+
+	it("throws when the provider returns no clip length", async () => {
+		generate.mockResolvedValue({ metadata: { jobId: "upstream-9" } });
+
+		await expect(videoHandler.process(job())).rejects.toThrow(
+			"Video provider returned no durationSec",
 		);
 	});
 });
@@ -102,15 +115,49 @@ describe("videoHandler.poll", () => {
 	it("persists the bundle once upstream reports a video", async () => {
 		poll.mockResolvedValue({ ...bundle, result: { video: "v.mp4" } });
 
+		const expected = {
+			...bundle,
+			result: { video: "v.mp4" },
+			metadata: { jobId: "upstream-1", durationSec: 10 },
+		};
 		await expect(videoHandler.poll?.(job())).resolves.toEqual({
 			jobId: "job-1",
 			status: "completed",
-			result: { ...bundle, result: { video: "v.mp4" } },
+			result: expected,
 			error: null,
 		});
 		expect(updateJob).toHaveBeenCalledWith("job-1", {
 			status: "completed",
-			result: { ...bundle, result: { video: "v.mp4" } },
+			result: expected,
+		});
+	});
+
+	it("keeps the clip length the provider measured over the submitted one", async () => {
+		poll.mockResolvedValue({
+			...bundle,
+			result: { video: "v.mp4" },
+			metadata: { jobId: "upstream-1", status: "completed", durationSec: 174 },
+		});
+
+		const result = await videoHandler.poll?.(job());
+
+		expect(result?.result?.metadata).toEqual({
+			jobId: "upstream-1",
+			status: "completed",
+			durationSec: 174,
+		});
+	});
+
+	it("leaves the clip length unset for rows recorded without one", async () => {
+		poll.mockResolvedValue({ ...bundle, result: { video: "v.mp4" } });
+
+		const result = await videoHandler.poll?.(
+			job({ metadata: { providerJobId: "upstream-1" } }),
+		);
+
+		expect(result?.result?.metadata).toEqual({
+			jobId: "upstream-1",
+			durationSec: undefined,
 		});
 	});
 

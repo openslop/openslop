@@ -6,16 +6,26 @@ import { rowView } from "../job-handlers";
 import { updateJob } from "../jobs";
 import { getVideoProvider } from "../providers";
 
-type VideoMetadata = { providerJobId?: string };
+type VideoMetadata = { providerJobId?: string; durationSec?: number };
 
 export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 	process: async (job) => {
-		const submitted = await getVideoProvider().generate(job.request);
-		const providerJobId = submitted.metadata?.jobId;
-		if (!providerJobId) {
+		const { metadata } = await getVideoProvider().generate(job.request);
+		if (!metadata?.jobId) {
 			throw new Error("Video provider returned no jobId for async generation");
 		}
-		return { kind: "pending", metadata: { providerJobId } };
+		if (metadata.durationSec === undefined) {
+			throw new Error(
+				"Video provider returned no durationSec for async generation",
+			);
+		}
+		return {
+			kind: "pending",
+			metadata: {
+				providerJobId: metadata.jobId,
+				durationSec: metadata.durationSec,
+			},
+		};
 	},
 	poll: async (job): Promise<JobPoll> => {
 		if (isTerminal(job.status)) return rowView(job);
@@ -26,8 +36,9 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		const upstream = await getVideoProvider().poll(providerJobId);
 		const status = mapVideoStatus(upstream);
 		if (status === "completed") {
-			await updateJob(job.id, { status, result: upstream });
-			return { jobId: job.id, status, result: upstream, error: null };
+			const result = withDuration(upstream, providerJobId, job.metadata);
+			await updateJob(job.id, { status, result });
+			return { jobId: job.id, status, result, error: null };
 		}
 		if (status === "failed") {
 			const error = upstream.metadata?.error ?? "Video generation failed";
@@ -37,6 +48,26 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		return { jobId: job.id, status, result: null, error: null };
 	},
 };
+
+/**
+ * An async poll only tells us the video's URL, so the clip length is the one
+ * recorded when the job was submitted. Without it the bundle reaches the
+ * timeline with `durationSec` 0 and the clip is laid out with no duration.
+ */
+function withDuration(
+	upstream: VideoProviderResponse,
+	providerJobId: string,
+	stored: VideoMetadata,
+): VideoProviderResponse {
+	return {
+		...upstream,
+		metadata: {
+			jobId: providerJobId,
+			...upstream.metadata,
+			durationSec: upstream.metadata?.durationSec ?? stored.durationSec,
+		},
+	};
+}
 
 function mapVideoStatus(upstream: VideoProviderResponse): JobStatus {
 	if (upstream.result?.video) return "completed";
