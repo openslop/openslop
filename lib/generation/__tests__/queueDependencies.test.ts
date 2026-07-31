@@ -81,6 +81,29 @@ describe("dependency ordering", () => {
 		expect(startedIds()).toContain("image");
 	});
 
+	it("queues a dependency two levels down", () => {
+		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
+
+		// enqueueGraph walks the graph itself, so a node reached only through
+		// another dependency still gets queued.
+		const avatar = node("~avatar:Alice");
+		const still = node("~still:anim", [avatar]);
+		queue.enqueueGraph([node("anim", [still])]);
+
+		expect(queue.getElementSnapshot("~avatar:Alice").status).not.toBe("idle");
+		expect(queue.getElementSnapshot("~still:anim").status).not.toBe("idle");
+		expect(queue.getElementSnapshot("anim").status).toBe("queued");
+	});
+
+	it("visits a dependency shared by two roots once", () => {
+		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
+
+		const avatar = node("~avatar:Alice");
+		queue.enqueueGraph([node("a", [avatar]), node("b", [avatar])]);
+
+		expect(queue.getActiveCount()).toBe(3);
+	});
+
 	it("passes resolved dependency results to the dependent's job", async () => {
 		generateMock.mockImplementation((job) =>
 			Promise.resolve({
