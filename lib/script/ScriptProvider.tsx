@@ -5,7 +5,6 @@ import {
 	use,
 	useCallback,
 	useMemo,
-	useRef,
 	useState,
 	type ReactNode,
 } from "react";
@@ -16,6 +15,7 @@ import { getDefaultConnector } from "@/lib/connectors/registry";
 import { createConnector } from "@/lib/connectors/factory";
 import { useProject } from "@/lib/project/useProject";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
+import { useStreamRun } from "./useStreamRun";
 
 type ScriptControl = {
 	loading: boolean;
@@ -55,15 +55,8 @@ export function ScriptProvider({
 	const { connectorConfig, mode } = useConfig();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
-	const [loading, setLoading] = useState(false);
-	const abortRef = useRef<AbortController | null>(null);
 	const { nodes, appendChunk } = useOSMLStreamParser();
-
-	const stopGeneration = useCallback(() => {
-		abortRef.current?.abort();
-		abortRef.current = null;
-		setLoading(false);
-	}, []);
+	const { loading, run, stop: stopGeneration } = useStreamRun();
 
 	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
 		connectorConfig,
@@ -72,29 +65,16 @@ export function ScriptProvider({
 
 	const submitPrompt = useCallback(
 		async (prompt: string) => {
-			abortRef.current?.abort();
-			const controller = new AbortController();
-			abortRef.current = controller;
-
 			setHasContent(false);
-			setLoading(true);
 			updateMetadata({ lastMode: mode, lastPrompt: prompt });
-			try {
-				const connector = createConnector("llm", llmProvider, llmConfig);
-				for await (const chunk of connector.stream({ prompt })) {
-					if (controller.signal.aborted) break;
-					if (!chunk.text) continue;
-					setHasContent(true);
-					appendChunk(chunk.text);
-				}
-			} finally {
-				if (abortRef.current === controller) {
-					abortRef.current = null;
-					setLoading(false);
-				}
-			}
+			const connector = createConnector("llm", llmProvider, llmConfig);
+			await run(connector.stream({ prompt }), (chunk) => {
+				if (!chunk.text) return;
+				setHasContent(true);
+				appendChunk(chunk.text);
+			});
 		},
-		[llmProvider, llmConfig, appendChunk, updateMetadata, mode],
+		[llmProvider, llmConfig, appendChunk, updateMetadata, mode, run],
 	);
 
 	const control = useMemo<ScriptControl>(
