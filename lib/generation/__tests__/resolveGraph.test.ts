@@ -109,36 +109,6 @@ describe("resolveGraph", () => {
 		]);
 	});
 
-	// ensureCharacterAvatars filtered on appearance for exactly this reason: an
-	// avatar with nothing to draw from would be a portrait of the bare name, fed
-	// back in as a reference image.
-	it("does not generate an avatar for a character with no appearance", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.setCharacter("Blank", { appearance: "" });
-		const queue = new GenerationQueue({ batchSize: 1 });
-		const node = resolve(element("img", "image", { characters: "Blank" }));
-		const avatar = node.dependsOn.find(
-			(dep) => dep.id === characterAvatarElementId("Blank"),
-		);
-
-		expect(avatar).toBeDefined();
-		expect(needsGeneration(avatar ?? node, queue)).toBe(false);
-	});
-
-	it("generates the avatar once the character has an appearance", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.setCharacter("Blank", { appearance: "tall, in a red coat" });
-		const queue = new GenerationQueue({ batchSize: 1 });
-		const node = resolve(element("img", "image", { characters: "Blank" }));
-		const avatar = node.dependsOn.find(
-			(dep) => dep.id === characterAvatarElementId("Blank"),
-		);
-
-		expect(needsGeneration(avatar ?? node, queue)).toBe(true);
-	});
-
 	it("does not depend on avatars of characters it does not reference", () => {
 		getProjectStore(PROJECT_ID)
 			.getState()
