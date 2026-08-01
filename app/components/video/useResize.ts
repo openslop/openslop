@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type CSSProperties,
+} from "react";
 import { clamp } from "@/lib/utils";
 
 export type ResizeAxis = "vertical" | "horizontal";
@@ -70,6 +77,13 @@ export function attachResizeListeners(
 	return cleanup;
 }
 
+const SIZE_PROPERTY = { vertical: "height", horizontal: "width" } as const;
+
+/**
+ * Drags write the panel dimension straight to the DOM node. Holding it in React
+ * state would re-render the panel — and everything it wraps — on every
+ * mousemove, which for the player panel means the whole Remotion composition.
+ */
 export function useResize({
 	axis,
 	defaultSize,
@@ -81,14 +95,10 @@ export function useResize({
 	minSize: number;
 	maxViewportFraction: number;
 }) {
-	const [size, setSize] = useState(defaultSize);
+	const panelRef = useRef<HTMLDivElement>(null);
 	const [resizing, setResizing] = useState(false);
-	const sizeRef = useRef(size);
-	useEffect(() => {
-		sizeRef.current = size;
-	}, [size]);
-
 	const cleanupRef = useRef<(() => void) | null>(null);
+	const property = SIZE_PROPERTY[axis];
 
 	useEffect(
 		() => () => {
@@ -100,23 +110,33 @@ export function useResize({
 
 	const handleMouseDown = useCallback(
 		(e: React.MouseEvent) => {
+			const panel = panelRef.current;
+			if (!panel) throw new Error("Resize started before the panel mounted");
 			e.preventDefault();
 			cleanupRef.current?.();
 			setResizing(true);
-			const viewport =
-				axis === "vertical" ? window.innerHeight : window.innerWidth;
+			const vertical = axis === "vertical";
+			const viewport = vertical ? window.innerHeight : window.innerWidth;
+			const rect = panel.getBoundingClientRect();
 			cleanupRef.current = attachResizeListeners(document, {
 				axis,
-				startPos: axis === "vertical" ? e.clientY : e.clientX,
-				startSize: sizeRef.current,
+				startPos: vertical ? e.clientY : e.clientX,
+				startSize: vertical ? rect.height : rect.width,
 				minSize,
 				maxSize: viewport * maxViewportFraction,
-				onResize: setSize,
+				onResize: (size) => {
+					panel.style[property] = `${size}px`;
+				},
 				onEnd: () => setResizing(false),
 			});
 		},
-		[axis, minSize, maxViewportFraction],
+		[axis, minSize, maxViewportFraction, property],
 	);
 
-	return { size, handleMouseDown, resizing };
+	const style = useMemo<CSSProperties>(
+		() => ({ [property]: defaultSize }),
+		[property, defaultSize],
+	);
+
+	return { panelRef, style, handleMouseDown, resizing };
 }
