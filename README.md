@@ -107,7 +107,7 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 | Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | Video     | [Remotion 4](https://remotion.dev) (composition, rendering, player)                                          |
 | Storage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (generated asset storage)                         |
-| Icons     | [Lucide](https://lucide.dev)                                                                                 |
+| Icons     | In-house masked-SVG set (`components/ui/icon.tsx` + `icons.css`), no icon dependency                         |
 
 ## Project structure
 
@@ -120,9 +120,12 @@ lib/
   gateway/       HTTP clients to /api/v1/*
   providers/     Server-side vendor adapters (Runware, ElevenLabs, …)
   generation/    Generation queue and job orchestration
-  video/         Remotion compositions and scene layout
+  canvas/        Slate document model: element types, guards, OSML parse/serialize
+  script/        Script context and refinement
+  project/       Per-project Zustand store, autosave, persistence
+  video/         Scene layout and render client
   supabase/      Browser/server Supabase clients
-remotion/        Remotion entry point
+remotion/        Remotion entry point and compositions
 supabase/        Database migrations
 ```
 
