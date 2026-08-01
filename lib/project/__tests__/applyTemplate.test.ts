@@ -3,6 +3,9 @@ import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { applyTemplate } from "@/lib/templates/applyTemplate";
 import { getTemplateById } from "@/lib/templates/templates";
+import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { needsGeneration } from "@/lib/generation/graph";
+import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { characterAvatarElementId } from "../characterAvatar";
 import { clearProjectStore, getProjectStore } from "../store";
 
@@ -77,6 +80,20 @@ describe("applyTemplate", () => {
 		expect(getProjectStore(PROJECT_ID).getState().metadata.narration).toEqual(
 			getTemplateById("pov-life")?.narration ?? {},
 		);
+	});
+
+	// The avatar resolves against the template's own style and characters, so
+	// seeding before the metadata lands would record the previous project's
+	// inputs and the avatar would be stale on arrival.
+	it("seeds a prebuilt avatar that is not stale on arrival", () => {
+		apply("pov-life");
+		const name = "Protagonist";
+		const node = nodeBuilder(
+			DEFAULT_CONNECTOR_REGISTRY,
+			getProjectStore(PROJECT_ID).getState(),
+		)(forCharacterAvatar(name));
+
+		expect(needsGeneration(node, queue)).toBe(false);
 	});
 
 	it("seeds prebuilt template avatars as the avatar node's result", () => {
