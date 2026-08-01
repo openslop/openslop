@@ -9,10 +9,14 @@ import type {
 	MetadataVoice,
 } from "./types";
 
-export type ProjectContext = {
+/** What a project holds. Generation reads this; only the UI calls the setters. */
+export type ProjectData = {
 	hydrated: boolean;
 	metadata: Metadata;
 	referenceImages: string[];
+};
+
+export type ProjectContext = ProjectData & {
 	updateMetadata: (partial: DeepPartial<Metadata>) => void;
 	setCharacter: (name: string, character: MetadataCharacter) => void;
 	updateCharacter: (name: string, partial: Partial<MetadataCharacter>) => void;

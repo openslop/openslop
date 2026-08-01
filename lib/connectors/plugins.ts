@@ -1,5 +1,5 @@
 import type { GatewayClient } from "@/lib/gateway/base";
-import type { ProjectState } from "@/lib/generation/sourceNodes";
+import type { ProjectData } from "@/lib/project/store";
 import type { ConnectorPlugin, PluginContext } from "./types";
 
 /** Assert the plugin was given a gateway, returning the narrowed dependency. */
@@ -16,7 +16,7 @@ export function requireGateway<P, R>(
 export function requireState<P, R>(
 	ctx: PluginContext<P, R> | undefined,
 	plugin: string,
-): ProjectState {
+): ProjectData {
 	if (!ctx?.state) throw new Error(`${plugin} plugin requires project state`);
 	return ctx.state;
 }

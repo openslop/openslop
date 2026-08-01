@@ -34,11 +34,7 @@ const openslopConfig = (
 	},
 });
 
-/**
- * The provider derived nodes generate with. Authored elements pin their own at
- * creation; avatars and stills have no settings UI yet, so they take this until
- * they do.
- */
+/** Derived nodes have no settings UI to pin a provider, so they take this one. */
 export const DEFAULT_PROVIDER: ProviderKey = "openslop";
 
 /** Plugin-free baseline; project-scoped plugin chains are layered on by `ConfigProvider`. */

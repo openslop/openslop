@@ -3,7 +3,7 @@ import isEqual from "lodash/isEqual";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
-import type { ProjectState } from "./sourceNodes";
+import type { ProjectData } from "@/lib/project/store";
 import {
 	serializeInputs,
 	type GenerationInputs,
@@ -35,7 +35,7 @@ export type ElementNode = {
  * Declares which node to build without saying how; only the builder knows the
  * registry and the state. A source-node spec returns its node directly.
  */
-export type NodeSpec = (state: ProjectState) => ElementNode | GenerationNode;
+export type NodeSpec = (state: ProjectData) => ElementNode | GenerationNode;
 
 /** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
 export const isElementNode = (
@@ -53,14 +53,9 @@ export const isSourceNode = (node: GenerationNode) => node.buildJob === null;
 
 const DERIVED_PREFIX = "~";
 
-/**
- * Ids for nodes the graph derives rather than the user authoring. The prefix is
- * what keeps them from colliding with an element id, and what UI filters on.
- */
+/** Ids for nodes the graph derives; the prefix keeps them off element ids. */
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
-
-export const isDerivedNodeId = (id: NodeId) => id.startsWith(DERIVED_PREFIX);
 
 export function sourceNode(
 	id: NodeId,

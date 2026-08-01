@@ -7,7 +7,7 @@ import type {
 import { errorMessage } from "../errors";
 import { generateForElement } from "./generateForElement";
 import { serializeInputs, type GenerationInputs } from "./inputs";
-import type { ProjectState } from "./sourceNodes";
+import type { ProjectData } from "@/lib/project/store";
 import {
 	flattenGraph,
 	isSourceNode,
@@ -37,7 +37,7 @@ export type GenerationJob = {
 	provider: ProviderKey;
 	config: ConnectorConfig;
 	/** The project state this job's inputs were resolved against. */
-	state: ProjectState;
+	state: ProjectData;
 };
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {

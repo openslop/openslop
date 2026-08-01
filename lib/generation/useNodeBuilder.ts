@@ -5,13 +5,12 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProject } from "@/lib/project/useProject";
 import { nodeBuilder, type NodeBuilder } from "./resolveGraph";
 
-/** A builder bound to this project, rebuilt when the state it reads changes. */
+/** Rebuilt on any store write, so reading something new costs only a source node. */
 export function useNodeBuilder(): NodeBuilder {
 	const { connectorConfig } = useConfig();
-	const metadata = useProject((s) => s.metadata);
-	const referenceImages = useProject((s) => s.referenceImages);
+	const state = useProject((store) => store);
 	return useMemo(
-		() => nodeBuilder(connectorConfig, { metadata, referenceImages }),
-		[connectorConfig, metadata, referenceImages],
+		() => nodeBuilder(connectorConfig, state),
+		[connectorConfig, state],
 	);
 }

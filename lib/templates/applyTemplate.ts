@@ -1,7 +1,6 @@
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import { projectState } from "@/lib/generation/sourceNodes";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { getProjectStore } from "@/lib/project/store";
 import { getTemplate } from "./templates";
@@ -23,7 +22,10 @@ export function applyTemplate(
 	});
 
 	// Seeded against the avatar's own inputs so a prebuilt avatar starts fresh.
-	const buildNode = nodeBuilder(registry, projectState(projectId));
+	const buildNode = nodeBuilder(
+		registry,
+		getProjectStore(projectId).getState(),
+	);
 	for (const [name, imageUrl] of Object.entries(
 		template.characterAvatars ?? {},
 	)) {

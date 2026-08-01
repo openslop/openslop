@@ -1,7 +1,7 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { GatewayClient } from "@/lib/gateway/base";
 import type { NodeSpec } from "@/lib/generation/graph";
-import type { ProjectState } from "@/lib/generation/sourceNodes";
+import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { AttributeSchema } from "./attributes/schema";
 import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
@@ -30,7 +30,7 @@ export interface PluginContext<TParams = unknown, TResult = unknown> {
 	/** Outputs of that node's dependencies, keyed by node id. */
 	dependencies?: Record<string, AssetResult>;
 	/** The project state the node's inputs were resolved against. */
-	state?: ProjectState;
+	state?: ProjectData;
 }
 
 /** The parts of a plugin context the caller supplies per generation. */

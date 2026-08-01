@@ -20,6 +20,7 @@ import { generateForElement } from "../generateForElement";
 import { createConnector } from "@/lib/connectors/factory";
 
 const EMPTY_STATE = {
+	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

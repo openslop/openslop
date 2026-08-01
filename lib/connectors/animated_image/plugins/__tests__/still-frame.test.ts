@@ -83,7 +83,11 @@ describe("stillFrameUrl", () => {
 		.appendPlugins("image", ...buildImagePlugins())
 		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
 		.build();
-	const state = { metadata: MetadataSchema.parse({}), referenceImages: [] };
+	const state = {
+		hydrated: true,
+		metadata: MetadataSchema.parse({}),
+		referenceImages: [],
+	};
 	const animated = {
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
@@ -129,7 +133,11 @@ describe("uploaded still lifetime", () => {
 		.appendPlugins("image", ...buildImagePlugins())
 		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
 		.build();
-	const state = { metadata: MetadataSchema.parse({}), referenceImages: [] };
+	const state = {
+		hydrated: true,
+		metadata: MetadataSchema.parse({}),
+		referenceImages: [],
+	};
 
 	const animated = (text: string, videoPrompt: string) => ({
 		id: ELEMENT_ID,

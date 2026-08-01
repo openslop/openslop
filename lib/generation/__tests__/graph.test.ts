@@ -12,6 +12,7 @@ import {
 import { GenerationQueue, type GenerationJob } from "../queue";
 
 const EMPTY_STATE = {
+	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

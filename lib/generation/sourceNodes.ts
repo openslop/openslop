@@ -1,21 +1,9 @@
-import type { Metadata } from "@/lib/project/types";
-import { getProjectStore } from "@/lib/project/store";
+import type { ProjectData } from "@/lib/project/store";
 import {
 	ASPECT_RATIO_DIMENSIONS,
 	resolveAspectRatio,
 } from "@/lib/video/aspectRatio";
 import { sourceNode, type NodeSpec } from "./graph";
-
-/** The project state generation reads, passed explicitly so the graph stays pure. */
-export type ProjectState = {
-	metadata: Metadata;
-	referenceImages: string[];
-};
-
-export const projectState = (projectId: string): ProjectState => {
-	const { metadata, referenceImages } = getProjectStore(projectId).getState();
-	return { metadata, referenceImages };
-};
 
 /**
  * Leaves of the graph. A plugin that declares one inherits staleness on every
@@ -44,5 +32,5 @@ export const forVoice =
 		});
 	};
 
-export const aspectDimensions = (state: ProjectState) =>
+export const aspectDimensions = (state: ProjectData) =>
 	ASPECT_RATIO_DIMENSIONS[resolveAspectRatio(state.metadata)];

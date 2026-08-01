@@ -15,7 +15,7 @@ import {
 	type NodeSpec,
 } from "./graph";
 import type { GenerationJob } from "./queue";
-import type { ProjectState } from "./sourceNodes";
+import type { ProjectData } from "@/lib/project/store";
 
 /** Builds the node a spec names, along with every node it depends on. */
 export type NodeBuilder = (spec: NodeSpec) => GenerationNode;
@@ -25,7 +25,7 @@ const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	state: ProjectState,
+	state: ProjectData,
 	dependsOn: GenerationNode[],
 ): GenerationNode => {
 	const job: GenerationJob = {
@@ -47,13 +47,12 @@ const toNode = (
 };
 
 /**
- * Bind a builder to the registry and project state its nodes resolve against.
- * Edges come from the plugin chain each node runs, so the same declaration
- * drives what a job reads, what it waits for, and what makes it stale.
+ * Edges come from the plugin chain each node runs, so one declaration drives
+ * what a job reads, what it waits for, and what makes it stale.
  */
 export function nodeBuilder(
 	registry: ConnectorRegistry,
-	state: ProjectState,
+	state: ProjectData,
 ): NodeBuilder {
 	return (spec) => {
 		// Scoped to one call: it dedupes nodes shared within a single graph and

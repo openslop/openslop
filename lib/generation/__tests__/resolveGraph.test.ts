@@ -19,7 +19,6 @@ import {
 	needsGeneration,
 } from "../graph";
 import { GenerationQueue } from "../queue";
-import { projectState } from "../sourceNodes";
 import { nodeBuilder } from "../resolveGraph";
 
 const PROJECT_ID = "resolve-graph-test";
@@ -46,7 +45,10 @@ const element = (
 });
 
 const resolve = (el: CanvasContentElement) =>
-	nodeBuilder(buildRegistry(), projectState(PROJECT_ID))(forElement(el));
+	nodeBuilder(
+		buildRegistry(),
+		getProjectStore(PROJECT_ID).getState(),
+	)(forElement(el));
 
 const idsOf = (el: CanvasContentElement) =>
 	flattenGraph([resolve(el)]).map((node) => node.id);
@@ -62,7 +64,10 @@ describe("resolveGraph", () => {
 	// The builder is memoized across renders, so its per-graph dedupe cache must
 	// not outlive one call or an edited element keeps resolving to its old node.
 	it("rebuilds a node when its element changed", () => {
-		const buildNode = nodeBuilder(buildRegistry(), projectState(PROJECT_ID));
+		const buildNode = nodeBuilder(
+			buildRegistry(),
+			getProjectStore(PROJECT_ID).getState(),
+		);
 		const withText = (text: string) => ({
 			...element("img", "image"),
 			children: [{ id: "img-t", type: "image" as const, text }],
