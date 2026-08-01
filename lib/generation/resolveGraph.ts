@@ -1,7 +1,11 @@
 import omit from "lodash/omit";
-import { resolveElementConnector } from "@/lib/canvas/elementConnector";
+import {
+	resolveElementConnector,
+	type ElementConnector,
+} from "@/lib/canvas/elementConnector";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
 import { getPromptText } from "./inputs";
 import {
@@ -16,20 +20,31 @@ import type { ProjectState } from "./sourceNodes";
 /** Builds the node a spec names, along with every node it depends on. */
 export type NodeBuilder = (spec: NodeSpec) => GenerationNode;
 
-/** What the element itself contributes, once its dependencies are resolved. */
+/** The node an element becomes, and the job that generates it. */
 const toNode = (
 	element: CanvasContentElement,
-	job: GenerationJob,
+	connector: ElementConnector,
+	plugins: ConnectorPlugin[],
+	state: ProjectState,
 	dependsOn: GenerationNode[],
-): GenerationNode => ({
-	id: element.id,
-	inputs: {
-		prompt: getPromptText(element),
-		attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
-	},
-	dependsOn,
-	buildJob: () => job,
-});
+): GenerationNode => {
+	const job: GenerationJob = {
+		elementId: element.id,
+		connectorType: connector.type,
+		provider: connector.provider,
+		config: { ...connector.config, plugins },
+		state,
+	};
+	return {
+		id: element.id,
+		inputs: {
+			prompt: getPromptText(element),
+			attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
+		},
+		dependsOn,
+		buildJob: () => job,
+	};
+};
 
 /**
  * Bind a builder to the registry and project state its nodes resolve against.
@@ -55,25 +70,12 @@ export function nodeBuilder(
 				throw new Error(`Cyclic generation dependency at "${id}"`);
 			resolving.add(id);
 
-			const {
-				type: connectorType,
-				provider,
-				config,
-			} = resolveElementConnector(element, registry);
-			const plugins = override ?? config.plugins ?? [];
-			const node = toNode(
-				element,
-				{
-					elementId: id,
-					connectorType,
-					provider,
-					config: { ...config, plugins },
-					state,
-				},
-				plugins.flatMap(
-					(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
-				),
+			const connector = resolveElementConnector(element, registry);
+			const plugins = override ?? connector.config.plugins ?? [];
+			const dependsOn = plugins.flatMap(
+				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
+			const node = toNode(element, connector, plugins, state, dependsOn);
 
 			resolving.delete(id);
 			resolved.set(id, node);
