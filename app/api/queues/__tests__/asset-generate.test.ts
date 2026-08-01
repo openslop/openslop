@@ -54,14 +54,34 @@ describe("asset-generate queue worker", () => {
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 	});
 
-	it("throws when no handler is registered for the connector type", async () => {
+	it("marks the job failed and rethrows when no handler is registered", async () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "pending" });
 		mockGetJobHandler.mockReturnValue(undefined);
 
 		await expect(processMessage(message)).rejects.toThrow(
 			"No job handler registered for image",
 		);
-		expect(mockUpdateJob).not.toHaveBeenCalled();
+		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
+			status: "failed",
+			error: expect.stringContaining("No job handler registered for image"),
+		});
+	});
+
+	it("marks the job failed when writing the completed result throws", async () => {
+		mockLoadJobForProcessing.mockResolvedValue({ status: "pending" });
+		mockGetJobHandler.mockReturnValue({
+			process: vi.fn().mockResolvedValue({ kind: "completed", result: {} }),
+		});
+		mockUpdateJob
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(new Error("db unreachable"))
+			.mockResolvedValueOnce(undefined);
+
+		await expect(processMessage(message)).rejects.toThrow("db unreachable");
+		expect(mockUpdateJob).toHaveBeenNthCalledWith(3, "job-1", {
+			status: "failed",
+			error: expect.stringContaining("db unreachable"),
+		});
 	});
 
 	it("marks the job processing then completed with the handler result", async () => {

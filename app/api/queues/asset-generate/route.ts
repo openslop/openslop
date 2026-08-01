@@ -11,15 +11,22 @@ export const POST = handleCallback<AssetQueueMessage>(
 		const job = await loadJobForProcessing(jobId);
 		if (isTerminal(job.status)) return;
 
-		const handler = getJobHandler(connectorType);
-		if (!handler) {
-			throw new Error(`No job handler registered for ${connectorType}`);
-		}
-
 		await updateJob(jobId, { status: "processing" });
-		let outcome;
+
+		// Every failure past this point has to land on the row: the client only
+		// ever learns the outcome by polling it, so a job left `processing`
+		// after the queue exhausts its retries is polled forever.
 		try {
-			outcome = await handler.process(job);
+			const handler = getJobHandler(connectorType);
+			if (!handler) {
+				throw new Error(`No job handler registered for ${connectorType}`);
+			}
+			const outcome = await handler.process(job);
+			if (outcome.kind === "completed") {
+				await updateJob(jobId, { status: "completed", result: outcome.result });
+			} else {
+				await updateJob(jobId, { metadata: outcome.metadata });
+			}
 		} catch (error) {
 			logger.error(error, `Job ${jobId} failed`);
 			await updateJob(jobId, {
@@ -27,12 +34,6 @@ export const POST = handleCallback<AssetQueueMessage>(
 				error: stringifyError(error),
 			});
 			throw error;
-		}
-
-		if (outcome.kind === "completed") {
-			await updateJob(jobId, { status: "completed", result: outcome.result });
-		} else {
-			await updateJob(jobId, { metadata: outcome.metadata });
 		}
 	},
 );

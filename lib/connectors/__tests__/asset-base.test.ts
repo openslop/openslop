@@ -127,6 +127,42 @@ describe("BaseAssetConnector", () => {
 			const result = await connector.resolveBundle(bundle);
 			expect(result.durationSec).toBe(0);
 		});
+
+		it("defaults duration to 0 when durationSec is not a finite number", async () => {
+			const connector = new TestAssetConnector(config);
+			for (const durationSec of ["", "abc", null, {}, Number.NaN, Infinity]) {
+				const bundle = new AssetBundle(
+					"https://blob.example.com/assets/image/mock/xyz",
+					{
+						version: 1,
+						type: "image",
+						createdAt: "",
+						result: { image: "output.jpg" },
+						metadata: { durationSec },
+					},
+				);
+
+				const result = await connector.resolveBundle(bundle);
+				expect(result.durationSec).toBe(0);
+			}
+		});
+
+		it("parses a numeric string duration", async () => {
+			const connector = new TestAssetConnector(config);
+			const bundle = new AssetBundle(
+				"https://blob.example.com/assets/image/mock/xyz",
+				{
+					version: 1,
+					type: "image",
+					createdAt: "",
+					result: { image: "output.jpg" },
+					metadata: { durationSec: "7.5" },
+				},
+			);
+
+			const result = await connector.resolveBundle(bundle);
+			expect(result.durationSec).toBe(7.5);
+		});
 	});
 
 	describe("_generate (via generate)", () => {

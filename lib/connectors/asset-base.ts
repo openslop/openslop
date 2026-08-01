@@ -6,6 +6,17 @@ import { assetUrlField } from "./assetUrl";
 import { BaseConnector } from "./base";
 import type { ConnectorConfig } from "./types";
 
+/**
+ * Bundle metadata is untyped JSON, so anything at all can sit on `durationSec`.
+ * A non-numeric value must not become `NaN` here: this is the boundary where it
+ * turns into `AssetResult.durationSec`, and the layout builder propagates a NaN
+ * duration through every start/length it derives from it.
+ */
+function finiteSeconds(value: unknown): number {
+	const seconds = Number(value);
+	return Number.isFinite(seconds) ? seconds : 0;
+}
+
 export abstract class BaseAssetConnector<
 	TParams extends { prompt: string },
 	TResult,
@@ -23,7 +34,7 @@ export abstract class BaseAssetConnector<
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {
 			[assetUrlField(this.assetKey)]: bundle.resolve(this.assetKey),
-			durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
+			durationSec: finiteSeconds(bundle.manifest.metadata?.durationSec),
 		} as TResult;
 	}
 
