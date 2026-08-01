@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { toast } from "sonner";
-import { stringifyError } from "@/lib/errors";
+import { toastError } from "@/lib/toastError";
 
 export function GlobalErrorToaster() {
 	useEffect(() => {
 		const onRejection = (e: PromiseRejectionEvent) => {
-			toast.error(stringifyError(e.reason));
+			toastError(e.reason);
 		};
 		const onError = (e: ErrorEvent) => {
-			toast.error(stringifyError(e.error ?? e.message));
+			toastError(e.error ?? e.message);
 		};
 		window.addEventListener("unhandledrejection", onRejection);
 		window.addEventListener("error", onError);

@@ -1,8 +1,7 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
-import { toast } from "sonner";
-import { stringifyError } from "@/lib/errors";
+import { toastError } from "@/lib/toastError";
 
 type Props = { children: ReactNode; label?: string };
 type State = { hasError: boolean };
@@ -20,8 +19,7 @@ export class ToastErrorBoundary extends Component<Props, State> {
 	}
 
 	componentDidCatch(error: unknown) {
-		const prefix = this.props.label ? `${this.props.label}: ` : "";
-		toast.error(`${prefix}${stringifyError(error)}`);
+		toastError(error, this.props.label);
 	}
 
 	render() {

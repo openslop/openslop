@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { toast } from "sonner";
-import { errorMessage } from "@/lib/errors";
+import { toastError } from "@/lib/toastError";
 import { uploadImage } from "@/lib/upload/uploadImage";
 
 export function useImageUpload({
@@ -24,7 +23,7 @@ export function useImageUpload({
 			const urls: string[] = [];
 			for (const r of results) {
 				if (r.status === "fulfilled") urls.push(r.value);
-				else toast.error(errorMessage(r.reason));
+				else toastError(r.reason);
 			}
 			if (urls.length > 0) onUpload(urls);
 		} finally {
