@@ -15,6 +15,7 @@ interface SortableItemProps {
 	insertOptions?: InsertOption<CanvasElementType>[];
 	onInsert?: (type: CanvasElementType) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 	attributes: RenderElementProps["attributes"];
 	element: CanvasElement;
 	children: React.ReactNode;
@@ -28,6 +29,7 @@ export function SortableItem({
 	insertOptions,
 	onInsert,
 	disabled,
+	readOnly,
 	attributes,
 	element,
 	children,
@@ -77,7 +79,9 @@ export function SortableItem({
 							/>
 						</div>
 					)}
-					<div>{renderCanvasElement({ attributes, children, element })}</div>
+					<div contentEditable={readOnly ? false : undefined}>
+						{renderCanvasElement({ attributes, children, element })}
+					</div>
 				</div>
 			</div>
 		</div>
