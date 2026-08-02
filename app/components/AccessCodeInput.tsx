@@ -4,20 +4,25 @@ import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
-
-const CODE_LENGTH = 6;
-const EMPTY_CODE = () => Array<string>(CODE_LENGTH).fill("");
+import {
+	type CodeEntry,
+	emptyAccessCode,
+	eraseBefore,
+	isComplete,
+	pasteCode,
+	typeChar,
+} from "@/lib/auth/accessCode";
 
 export default function AccessCodeInput() {
 	const router = useRouter();
-	const [values, setValues] = useState<string[]>(EMPTY_CODE);
+	const [values, setValues] = useState<string[]>(emptyAccessCode);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 	const resetWithError = useCallback((message: string) => {
 		setError(message);
-		setValues(EMPTY_CODE());
+		setValues(emptyAccessCode());
 		inputRefs.current[0]?.focus();
 	}, []);
 
@@ -41,55 +46,36 @@ export default function AccessCodeInput() {
 		[router, resetWithError],
 	);
 
+	const apply = (entry: CodeEntry | null) => {
+		if (!entry) return;
+		setValues(entry.values);
+		if (entry.focusIndex !== null) {
+			inputRefs.current[entry.focusIndex]?.focus();
+		}
+		if (isComplete(entry.values)) submitCode(entry.values.join(""));
+	};
+
 	const handleChange = (index: number, value: string) => {
-		const char = value.slice(-1).toUpperCase();
-		if (char && !/^[A-Z0-9]$/.test(char)) return;
-
-		const next = [...values];
-		next[index] = char;
-		setValues(next);
+		const entry = typeChar(values, index, value);
+		if (!entry) return;
 		setError("");
-
-		if (char && index < CODE_LENGTH - 1) {
-			inputRefs.current[index + 1]?.focus();
-		}
-
-		if (char && next.every((v) => v !== "")) {
-			submitCode(next.join(""));
-		}
+		apply(entry);
 	};
 
 	const handleKeyDown = (
 		index: number,
 		e: React.KeyboardEvent<HTMLInputElement>,
 	) => {
-		if (e.key === "Backspace" && !values[index] && index > 0) {
-			const next = [...values];
-			next[index - 1] = "";
-			setValues(next);
-			inputRefs.current[index - 1]?.focus();
-		}
+		if (e.key !== "Backspace") return;
+		apply(eraseBefore(values, index));
 	};
 
 	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
 		e.preventDefault();
-		const pasted = e.clipboardData
-			.getData("text")
-			.toUpperCase()
-			.replace(/[^A-Z0-9]/g, "")
-			.slice(0, CODE_LENGTH);
-
-		if (!pasted) return;
-
-		const next = EMPTY_CODE().map((_, i) => pasted[i] ?? "");
-		setValues(next);
+		const entry = pasteCode(e.clipboardData.getData("text"));
+		if (!entry) return;
 		setError("");
-
-		if (pasted.length === CODE_LENGTH) {
-			submitCode(next.join(""));
-		} else {
-			inputRefs.current[pasted.length]?.focus();
-		}
+		apply(entry);
 	};
 
 	return (
