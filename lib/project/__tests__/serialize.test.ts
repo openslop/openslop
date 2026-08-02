@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import {
+	getElementText,
+	serializeOSMLWithScenes,
+} from "@/lib/canvas/osmlSerializer";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import {
 	SCENE_TYPE,
@@ -56,6 +59,27 @@ describe("splitScenes", () => {
 describe("deserializeWithScenes", () => {
 	it("returns [] for empty input", () => {
 		expect(deserializeWithScenes("", connectors)).toEqual([]);
+	});
+
+	it("round-trips quotes and angle brackets in attributes and text", () => {
+		const original = [
+			makeScene([
+				makeEl("image", "5 < 10 & 20 > 15", {
+					prompt: 'a 24" monitor & a <box>',
+				}),
+			]),
+		];
+
+		const scenes = deserializeWithScenes(
+			serializeOSMLWithScenes(original),
+			connectors,
+		);
+
+		const image = scenes[0].children[0];
+		expect(image.type).toBe("image");
+		expect(image.id).toBe("image-id");
+		expect(image.customAttributes?.prompt).toBe('a 24" monitor & a <box>');
+		expect(getElementText(image)).toContain("5 < 10 & 20 > 15");
 	});
 
 	it("round-trips with serializeWithScenes preserving customAttributes.url", () => {

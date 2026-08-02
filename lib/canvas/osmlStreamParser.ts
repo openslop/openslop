@@ -7,9 +7,13 @@ import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import { createCanvasNode } from "./createCanvasNode";
+import { unescapeXml } from "./xmlEscape";
 
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
+// A chunk can end mid-entity ("&am"); flushing it would decode the two halves
+// separately and lose the character.
+const PARTIAL_ENTITY = /&[a-z]*$/i;
 
 /**
  * Incrementally turns a stream of OSML text chunks into canvas nodes. Feed
@@ -66,7 +70,7 @@ export class OSMLStreamParser {
 		if (!current) return;
 		const lastChild = current.children[current.children.length - 1];
 		if (!lastChild) return;
-		lastChild.text += text;
+		lastChild.text += unescapeXml(text);
 	}
 
 	private appendNext(
@@ -95,6 +99,7 @@ export class OSMLStreamParser {
 		return (
 			!this.buffer.includes("<") &&
 			!this.buffer.includes(">") &&
+			!PARTIAL_ENTITY.test(this.buffer) &&
 			this.buffer.length >= MIN_BUFFER_LENGTH
 		);
 	}

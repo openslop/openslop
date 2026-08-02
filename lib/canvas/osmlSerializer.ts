@@ -1,6 +1,7 @@
 import { Descendant } from "slate";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
 import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { escapeXml } from "./xmlEscape";
 
 export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;
 const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
@@ -12,9 +13,9 @@ export function getElementText(element: ParsedElement): string {
 function serializeElement(element: CanvasContentElement): string {
 	const attributes = element.customAttributes ?? {};
 	const attrString = Object.entries({ id: element.id, ...attributes })
-		.map(([key, value]) => ` ${key}="${value}"`)
+		.map(([key, value]) => ` ${key}="${escapeXml(value)}"`)
 		.join("");
-	return `<${element.type}${attrString}>${getElementText(element)}</${element.type}>\n`;
+	return `<${element.type}${attrString}>${escapeXml(getElementText(element))}</${element.type}>\n`;
 }
 
 export function serializeOSML(descendants: Descendant[]): string {

@@ -1,3 +1,5 @@
+import { unescapeXml } from "./xmlEscape";
+
 /** An OSML open tag split into its name and its attributes. */
 export type XmlTag = {
 	tag: string;
@@ -12,7 +14,7 @@ export function parseXmlTag(tagString: string): XmlTag {
 	let match: RegExpExecArray | null;
 
 	while ((match = regex.exec(attributesString)) !== null) {
-		attributes[match[1]] = match[2];
+		attributes[match[1]] = unescapeXml(match[2]);
 	}
 
 	return { tag: rawTag.replace(/\/$/, ""), attributes };
