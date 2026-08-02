@@ -173,6 +173,34 @@ describe("GenerationQueue", () => {
 			generationQueue.discard("m2");
 		});
 
+		it("clears a previous failure so a retry does not show a stale error", async () => {
+			generateMock.mockRejectedValueOnce(new Error("generation failed"));
+			generationQueue.enqueueGraph([makeJob("retry1")]);
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("retry1").error).toBe(
+				"generation failed",
+			);
+
+			generateMock.mockReturnValueOnce(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("retry1")]);
+
+			const snap = generationQueue.getElementSnapshot("retry1");
+			expect(snap.status).toBe("generating");
+			expect(snap.error).toBeNull();
+
+			generationQueue.discard("retry1");
+		});
+
+		it("clears an error set outside the queue when the element is queued", () => {
+			generationQueue.setError("retry2", "Enter a prompt first");
+			generateMock.mockReturnValueOnce(new Promise(() => {}));
+
+			generationQueue.enqueueGraph([makeJob("retry2")]);
+			expect(generationQueue.getElementSnapshot("retry2").error).toBeNull();
+
+			generationQueue.discard("retry2");
+		});
+
 		it("does not notify if no new jobs were added", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph([makeJob("existing")]);

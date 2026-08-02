@@ -189,6 +189,7 @@ export class GenerationQueue {
 			this.update(node.id, {
 				status: "queued",
 				seconds: 0,
+				error: null,
 				connectorType: requireJob(node).connectorType,
 			});
 			this.pending.push(node);
@@ -237,15 +238,17 @@ export class GenerationQueue {
 
 	/**
 	 * Aborts any in-flight job first, which would otherwise land later and clobber
-	 * this. Pass `pinned` for a result the user supplied rather than asked us to
-	 * make, so drifting project state cannot let Generate All overwrite it.
+	 * this. The queue only resumes once the result is committed, so dependents
+	 * waiting on this node see it arrive rather than being released as blocked.
+	 * Pass `pinned` for a result the user supplied rather than asked us to make,
+	 * so drifting project state cannot let Generate All overwrite it.
 	 */
 	commitResult(
 		node: GenerationNode,
 		result: AssetResult,
 		{ pinned = false }: { pinned?: boolean } = {},
 	): void {
-		this.cancel(node.id);
+		this.abortJob(node.id);
 		this.commit(
 			node.id,
 			result,
@@ -253,6 +256,7 @@ export class GenerationQueue {
 			requireJob(node).connectorType,
 			pinned,
 		);
+		this.processQueue();
 	}
 
 	private commit(

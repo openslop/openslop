@@ -221,6 +221,26 @@ describe("dependency ordering", () => {
 		expect(queue.getElementSnapshot("a").error).toMatch(/root boom/);
 	});
 
+	it("runs a waiting dependent against a result committed over its running dependency", async () => {
+		const pending = new Promise<AssetResult>(() => {});
+		generateMock.mockImplementation((job) =>
+			(job as GenerationJob).elementId === "avatar:Alice"
+				? pending
+				: Promise.resolve({ videoUrl: "x.mp4", durationSec: 5 }),
+		);
+
+		const avatar = node("avatar:Alice");
+		queue.enqueueGraph([node("image", [avatar])]);
+		expect(queue.getElementSnapshot("image").status).toBe("queued");
+
+		// An upload lands while the dependency is still generating.
+		queue.commitResult(avatar, { imageUrl: "uploaded.png", durationSec: 0 });
+		await vi.runAllTimersAsync();
+
+		expect(startedIds()).toContain("image");
+		expect(queue.getElementSnapshot("image").result?.videoUrl).toBe("x.mp4");
+	});
+
 	it("leaves no error on a dependent released for a reason other than failure", async () => {
 		generateMock.mockResolvedValue({ imageUrl: "x.png", durationSec: 0 });
 
