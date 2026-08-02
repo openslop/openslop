@@ -89,7 +89,7 @@ export function AssetTile({
 						<Icon className="h-3 w-3" />
 					</div>
 				)}
-				{onEdit && status !== "generating" && (
+				{onEdit && (
 					<OverlayButton
 						icon={Pencil}
 						label={`Edit ${name ?? "asset"}`}
