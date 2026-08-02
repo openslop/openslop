@@ -12,6 +12,7 @@ interface SortableItemProps {
 	sortableType: "scene" | "content";
 	wrapperClassName?: string;
 	wrapperStyle?: React.CSSProperties;
+	contentClassName?: string;
 	insertOptions?: InsertOption<CanvasElementType>[];
 	onInsert?: (type: CanvasElementType) => void;
 	disabled?: boolean;
@@ -26,6 +27,7 @@ export function SortableItem({
 	sortableType,
 	wrapperClassName,
 	wrapperStyle,
+	contentClassName,
 	insertOptions,
 	onInsert,
 	disabled,
@@ -53,7 +55,11 @@ export function SortableItem({
 	return (
 		<div {...attributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
-				className={styles.sortable}
+				className={
+					contentClassName
+						? `${styles.sortable} ${contentClassName}`
+						: styles.sortable
+				}
 				{...sortableAttributes}
 				ref={setNodeRef}
 				style={{

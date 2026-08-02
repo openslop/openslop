@@ -449,15 +449,13 @@
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 12 12'%3E%3Cpath fill='%23f1eaed' fill-opacity='0.08' d='M3 2h2v1H3v2H2V3H0V2h2V0h1z'/%3E%3C/svg%3E");
 }
 
-/* Active (currently playing) scene */
+/* Active (currently playing) scene. Painted on the scene's content box, not on
+   the wrapper that carries inter-scene spacing, so highlighting never moves the
+   scene. */
 .scene-active {
 	position: relative;
 	isolation: isolate;
 	overflow: hidden;
-	border-width: 0;
-	/* The wrapper carries inter-scene padding on every scene but the first
-	   (first:pt-0); zero it so the active card's box is identical for all. */
-	padding-top: 0;
 	border-radius: var(--radius);
 	background-color: var(--scene-active-border);
 	box-shadow:
