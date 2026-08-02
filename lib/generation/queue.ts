@@ -324,16 +324,28 @@ export class GenerationQueue {
 		this.releaseBlocked();
 	}
 
+	/** The failure that kept `node` waiting, following the chain of blocked dependencies. */
+	private blockedByError(node: GenerationNode): string | null {
+		const dep = this.blockingDependency(node);
+		if (!dep) return null;
+		return this.getElementSnapshot(dep.id).error ?? this.blockedByError(dep);
+	}
+
 	/**
 	 * Nothing running and nothing runnable means a dependency never arrived, so
-	 * release what is left rather than leaving it queued forever. The failure is
-	 * already reported on the node that actually failed.
+	 * release what is left rather than leaving it queued forever. A dependency
+	 * that failed is reported on the dependent too: a derived node has no card of
+	 * its own, so its error would otherwise never reach anyone.
 	 */
 	private releaseBlocked() {
 		if (this.controllers.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
-		for (const node of blocked) this.resetToIdle(node.id);
+		for (const node of blocked) {
+			const error = this.blockedByError(node);
+			this.resetToIdle(node.id);
+			if (error) this.update(node.id, { error });
+		}
 		this.notify();
 	}
 

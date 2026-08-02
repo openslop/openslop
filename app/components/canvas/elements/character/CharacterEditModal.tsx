@@ -174,6 +174,7 @@ function CharacterEditDialogBody({
 								outputKind="image"
 								status={avatarSnapshot.status}
 								seconds={avatarSnapshot.seconds}
+								error={avatarSnapshot.error}
 							/>
 						) : (
 							<MediaPlaceholder

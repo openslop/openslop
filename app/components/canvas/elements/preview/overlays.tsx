@@ -36,7 +36,7 @@ export function ResultOverlay({ status, seconds }: GenerationState) {
 	);
 }
 
-function ErrorMessage({ message }: { message: string }) {
+export function ErrorMessage({ message }: { message: string }) {
 	const [copied, setCopied] = useState(false);
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	useEffect(

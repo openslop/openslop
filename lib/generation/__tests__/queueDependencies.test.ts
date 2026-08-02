@@ -172,6 +172,7 @@ describe("dependency ordering", () => {
 		const snapshot = queue.getElementSnapshot("image");
 		expect(snapshot.result?.imageUrl).toBe("existing.png");
 		expect(snapshot.status).toBe("idle");
+		expect(snapshot.error).toMatch(/boom/);
 	});
 
 	it("releases a dependent that can never run instead of leaving it queued", async () => {
@@ -185,9 +186,47 @@ describe("dependency ordering", () => {
 		queue.enqueueGraph([node("image", [node("avatar:Alice")])]);
 		await vi.runAllTimersAsync();
 
-		// The failure is reported on the avatar; the image simply stops waiting.
 		expect(queue.getElementSnapshot("image").status).toBe("idle");
 		expect(queue.getElementSnapshot("avatar:Alice").error).toMatch(/boom/);
 		expect(queue.isBusy()).toBe(false);
+	});
+
+	it("reports a failed dependency on the dependent that was waiting on it", async () => {
+		generateMock.mockImplementation((job) =>
+			(job as GenerationJob).elementId === "~still:image"
+				? Promise.reject(new Error("still boom"))
+				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
+		);
+		vi.spyOn(console, "error").mockImplementation(() => {});
+
+		queue.enqueueGraph([node("image", [node("~still:image")])]);
+		await vi.runAllTimersAsync();
+
+		// A derived node has no card, so its failure has to surface on the element.
+		expect(queue.getElementSnapshot("image").error).toMatch(/still boom/);
+	});
+
+	it("carries a failure across a chain of blocked dependencies", async () => {
+		generateMock.mockImplementation((job) =>
+			(job as GenerationJob).elementId === "c"
+				? Promise.reject(new Error("root boom"))
+				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
+		);
+		vi.spyOn(console, "error").mockImplementation(() => {});
+
+		queue.enqueueGraph([node("a", [node("b", [node("c")])])]);
+		await vi.runAllTimersAsync();
+
+		expect(queue.getElementSnapshot("b").error).toMatch(/root boom/);
+		expect(queue.getElementSnapshot("a").error).toMatch(/root boom/);
+	});
+
+	it("leaves no error on a dependent released for a reason other than failure", async () => {
+		generateMock.mockResolvedValue({ imageUrl: "x.png", durationSec: 0 });
+
+		queue.enqueueGraph([node("image", [node("avatar:Alice")])]);
+		await vi.runAllTimersAsync();
+
+		expect(queue.getElementSnapshot("image").error).toBeNull();
 	});
 });
