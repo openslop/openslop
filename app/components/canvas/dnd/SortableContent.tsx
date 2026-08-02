@@ -71,6 +71,7 @@ export function SortableContent({
 			insertOptions={INSERT_OPTIONS}
 			onInsert={handleInsert}
 			disabled={collapsed}
+			readOnly={collapsed}
 			attributes={attributes}
 			element={element}
 		>
