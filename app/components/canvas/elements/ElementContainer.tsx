@@ -15,7 +15,10 @@ import { SceneContainer } from "./SceneContainer";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
-import { ElementGenerationProvider } from "./ElementGenerationContext";
+import {
+	ElementGenerationProvider,
+	useElementGeneration,
+} from "./ElementGenerationContext";
 import { AnimateButton } from "./AnimateButton";
 import { ElementUploadButton } from "./ElementUploadButton";
 import { ModelBadge } from "./ModelBadge";
@@ -27,7 +30,8 @@ import {
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
 
-function ElementSettings({ element }: { element: CanvasContentElement }) {
+function ElementSettings() {
+	const { element } = useElementGeneration();
 	const { connectorConfig } = useConfig();
 	const schema = resolveElementSchema(element, connectorConfig);
 	const entries = Object.entries(schema.visibleAttributes);
@@ -102,9 +106,9 @@ export function ElementContainer({
 										{config.label}
 									</span>
 								</span>
-								<ElementCharacters element={element} />
-								<ModelBadge element={element} />
-								<ElementSettings element={element} />
+								<ElementCharacters />
+								<ModelBadge />
+								<ElementSettings />
 							</div>
 							<div className="shrink-0 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
 								<DeleteButton element={element} />
@@ -130,7 +134,7 @@ export function ElementContainer({
 							<ElementStaleIndicator />
 							{(element.type === "image" ||
 								element.type === "animated_image") && <ElementUploadButton />}
-							<AnimateButton element={element} />
+							<AnimateButton />
 							<ElementGenerateButton />
 						</div>
 					</div>

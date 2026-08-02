@@ -3,10 +3,11 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { resolveElementConnector } from "@/lib/canvas/elementConnector";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "./AttributeBadge";
+import { useElementGeneration } from "./ElementGenerationContext";
 
-export function ModelBadge({ element }: { element: CanvasContentElement }) {
+export function ModelBadge() {
+	const { element } = useElementGeneration();
 	const { connectorConfig } = useConfig();
 	const { type, provider, model, config } = resolveElementConnector(
 		element,

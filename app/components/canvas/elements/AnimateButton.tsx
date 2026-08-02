@@ -3,10 +3,11 @@
 import { MagicVideo } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { animateImagePrompt } from "@/lib/script/refine/animatePrompt";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useRefine } from "../RefineProvider";
+import { useElementGeneration } from "./ElementGenerationContext";
 
-export function AnimateButton({ element }: { element: CanvasContentElement }) {
+export function AnimateButton() {
+	const { element } = useElementGeneration();
 	const { refineScript, refineLoading } = useRefine();
 
 	if (element.type !== "image") return null;

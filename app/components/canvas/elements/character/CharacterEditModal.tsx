@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
@@ -13,15 +13,7 @@ import {
 	MountedDialog,
 } from "@/components/ui/dialog";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import {
-	useGenerationQueue,
-	useQueueSelector,
-} from "@/lib/generation/GenerationQueueProvider";
-import { isNodeStale } from "@/lib/generation/graph";
-import { isGenerationActive } from "@/lib/generation/queue";
-import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
-import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
-import { characterAvatarElementId } from "@/lib/project/characterAvatar";
+import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
 import type { MetadataCharacter } from "@/lib/project/types";
@@ -30,6 +22,7 @@ import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaPlaceholder, MediaPreview } from "../preview/results";
 import { TextAreaField } from "./fields";
 import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
+import { useAvatarGeneration } from "./useAvatarGeneration";
 import { VoiceSection } from "./VoiceMetadataFields";
 
 export function CharacterEditModal({
@@ -63,44 +56,22 @@ function CharacterEditDialogBody({
 }) {
 	const { projectId } = useConfig();
 	const queue = useGenerationQueue();
-	const buildNode = useNodeBuilder();
 	const character = useProject((s) => s.metadata.characters[name]);
 	const updateCharacter = useProject((s) => s.updateCharacter);
+	const avatar = useAvatarGeneration(name);
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [closeConfirm, setCloseConfirm] = useState(false);
-
-	const avatarElementId = characterAvatarElementId(name);
-	const avatarSnapshot = useQueueSelector((q) =>
-		q.getElementSnapshot(avatarElementId),
-	);
-	const avatarUrl = avatarSnapshot.result?.imageUrl;
-	const avatarNode = useMemo(
-		() => buildNode(forCharacterAvatar(name)),
-		[buildNode, name],
-	);
 
 	if (!character) return null;
 
 	const update = (partial: Partial<MetadataCharacter>) =>
 		updateCharacter(name, partial);
 
-	const regenerateAvatar = () => {
-		if (character.avatarUploaded) update({ avatarUploaded: false });
-		queue.enqueueGraph([avatarNode]);
-	};
-
-	const isStale = isNodeStale(avatarNode, queue);
-
-	const generating = isGenerationActive(avatarSnapshot.status);
-	const hasAppearance = Boolean(character.appearance?.trim());
-	const generateDisabled = generating || !hasAppearance;
-	const revertAppearance = avatarSnapshot.resultInputs?.attributes.appearance;
-
-	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
+	const requestClose = () => (avatar.stale ? setCloseConfirm(true) : onClose());
 
 	const interceptClose = (e: { preventDefault(): void }) => {
-		if (isStale && !closeConfirm) {
+		if (avatar.stale && !closeConfirm) {
 			e.preventDefault();
 			setCloseConfirm(true);
 		}
@@ -145,55 +116,48 @@ function CharacterEditDialogBody({
 							placeholder="Describe the character's look"
 						/>
 						<div className="flex items-center justify-end gap-2">
-							{isStale && revertAppearance != null && (
+							{avatar.stale && avatar.generatedAppearance != null && (
 								<Button
 									type="button"
 									variant="outline"
 									size="sm"
 									onClick={() =>
-										update({ appearance: String(revertAppearance) })
+										update({ appearance: String(avatar.generatedAppearance) })
 									}
 								>
 									Revert
 								</Button>
 							)}
-							{isStale && <StaleIndicator />}
+							{avatar.stale && <StaleIndicator />}
 							<GenerateButton
-								status={avatarSnapshot.status}
-								hasResult={Boolean(avatarUrl)}
-								disabled={generateDisabled}
-								onGenerate={regenerateAvatar}
+								status={avatar.status}
+								hasResult={Boolean(avatar.url)}
+								disabled={avatar.generating || !character.appearance.trim()}
+								onGenerate={avatar.regenerate}
 							/>
 						</div>
 					</div>
 					<div className="relative">
-						{avatarUrl ? (
+						{avatar.url ? (
 							<MediaPreview
-								key={avatarUrl}
-								url={avatarUrl}
+								key={avatar.url}
+								url={avatar.url}
 								outputKind="image"
-								status={avatarSnapshot.status}
-								seconds={avatarSnapshot.seconds}
-								error={avatarSnapshot.error}
+								status={avatar.status}
+								seconds={avatar.seconds}
+								error={avatar.error}
 							/>
 						) : (
 							<MediaPlaceholder
-								status={avatarSnapshot.status}
-								seconds={avatarSnapshot.seconds}
-								error={avatarSnapshot.error}
-								onDiscard={() => queue.discard(avatarElementId)}
+								status={avatar.status}
+								seconds={avatar.seconds}
+								error={avatar.error}
+								onDiscard={avatar.discard}
 							/>
 						)}
 						<UploadImageButton
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
-							onUpload={(url) => {
-								queue.commitResult(
-									avatarNode,
-									{ imageUrl: url, durationSec: 0 },
-									{ pinned: true },
-								);
-								update({ avatarUploaded: true });
-							}}
+							onUpload={avatar.commitUpload}
 						/>
 					</div>
 				</div>
@@ -224,7 +188,7 @@ function CharacterEditDialogBody({
 				characterName={name}
 				onLeaveStale={onClose}
 				onRegenerate={() => {
-					regenerateAvatar();
+					avatar.regenerate();
 					onClose();
 				}}
 			/>

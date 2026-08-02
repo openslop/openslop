@@ -2,19 +2,16 @@
 
 import { useSlateStatic } from "slate-react";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import { CharacterPill } from "./CharacterPill";
 import {
 	CharacterSwitcher,
 	CharactersPicker,
 	removeCharacter,
 } from "./CharactersPicker";
+import { useElementGeneration } from "./ElementGenerationContext";
 
-export function ElementCharacters({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function ElementCharacters() {
+	const { element } = useElementGeneration();
 	const editor = useSlateStatic();
 	if (element.type === "character")
 		return <CharacterSwitcher element={element} />;
