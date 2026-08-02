@@ -3,16 +3,19 @@
 import { useState, type CSSProperties } from "react";
 import { Image as ImageIcon, Video } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
+import { stillFrameUrl } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
+import { useElementGeneration } from "../ElementGenerationContext";
 import { MediaResult } from "./results";
 import type { PlaceholderProps } from "./status";
 
 type AnimatedImagePreviewProps = PlaceholderProps & {
-	imageUrl?: string;
+	stillUrl?: string;
 	videoUrl?: string;
 };
 
 export function AnimatedImagePreview({
-	imageUrl,
+	stillUrl,
 	videoUrl,
 	...state
 }: AnimatedImagePreviewProps) {
@@ -25,7 +28,7 @@ export function AnimatedImagePreview({
 		>
 			<MediaResult
 				{...state}
-				url={mode === "animated" ? videoUrl : imageUrl}
+				url={mode === "animated" ? videoUrl : stillUrl}
 				outputKind={mode === "animated" ? "video" : "image"}
 			/>
 			<MediaToggle
@@ -38,5 +41,18 @@ export function AnimatedImagePreview({
 				]}
 			/>
 		</div>
+	);
+}
+
+export function AnimatedImageOutput(state: PlaceholderProps) {
+	const { node, result } = useElementGeneration();
+	const stillUrl = useQueueSelector((queue) => stillFrameUrl(node, queue));
+
+	return (
+		<AnimatedImagePreview
+			{...state}
+			stillUrl={stillUrl}
+			videoUrl={result?.videoUrl}
+		/>
 	);
 }

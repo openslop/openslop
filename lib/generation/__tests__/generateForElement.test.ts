@@ -1,5 +1,5 @@
+import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
 	AssetConnectorType,
 	AssetResult,
@@ -19,6 +19,12 @@ vi.mock("@/lib/connectors/factory", () => ({
 import { generateForElement } from "../generateForElement";
 import { createConnector } from "@/lib/connectors/factory";
 
+const EMPTY_STATE = {
+	hydrated: true,
+	metadata: MetadataSchema.parse({}),
+	referenceImages: [],
+};
+
 const config: ConnectorConfig = {
 	defaultModel: "test-model",
 	models: ["test-model"],
@@ -26,25 +32,19 @@ const config: ConnectorConfig = {
 };
 
 function makeJob(connectorType: AssetConnectorType): GenerationJob {
-	const element: CanvasContentElement = {
-		id: "el-1",
-		type: "image",
-		children: [{ id: "t", type: "image", text: "" }],
-	};
 	return {
 		elementId: "el-1",
 		connectorType,
 		provider: "openslop",
 		config,
-		projectId: "test-project",
-		element,
+		state: EMPTY_STATE,
 	};
 }
 
 const inputs = (
 	prompt: string,
 	attributes: Record<string, string> = {},
-): GenerationInputs => ({ prompt, attributes });
+): GenerationInputs => ({ prompt, attributes, dependencies: {} });
 
 describe("generateForElement", () => {
 	beforeEach(() => {
@@ -61,6 +61,7 @@ describe("generateForElement", () => {
 		const result = await generateForElement(
 			makeJob("image"),
 			inputs("a sunset", { width: "1024" }),
+			{},
 		);
 
 		expect(createConnector).toHaveBeenCalledWith("image", "openslop", config);
@@ -70,7 +71,7 @@ describe("generateForElement", () => {
 				model: "test-model",
 				width: "1024",
 			},
-			undefined,
+			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
 		expect(result).toEqual(expected);
 	});
@@ -78,14 +79,14 @@ describe("generateForElement", () => {
 	it("passes default model from config", async () => {
 		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 0 });
 
-		await generateForElement(makeJob("music"), inputs("jazz beat"));
+		await generateForElement(makeJob("music"), inputs("jazz beat"), {});
 
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{
 				prompt: "jazz beat",
 				model: "test-model",
 			},
-			undefined,
+			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
 	});
 
@@ -95,6 +96,7 @@ describe("generateForElement", () => {
 		await generateForElement(
 			makeJob("tts"),
 			inputs("hello world", { voiceId: "voice-1", speed: "fast" }),
+			{},
 		);
 
 		expect(mockGenerate).toHaveBeenCalledWith(
@@ -104,38 +106,37 @@ describe("generateForElement", () => {
 				voiceId: "voice-1",
 				speed: "fast",
 			},
-			undefined,
+			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
 	});
 
-	it("forwards the prior snapshot to the connector", async () => {
+	it("forwards dependency results to the connector", async () => {
 		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
-		const prior = {
-			status: "idle" as const,
-			seconds: 0,
-			result: {
-				imageUrl: "https://example.com/prior.png",
+		const dependencies = {
+			"el-1:still": {
+				imageUrl: "https://example.com/still.png",
 				durationSec: 0,
 			},
-			error: null,
-			resultInputs: inputs("a sunset", { videoPrompt: "zoom" }),
-			connectorType: "animated_image" as const,
 		};
 
 		await generateForElement(
 			makeJob("animated_image"),
 			inputs("a sunset", { videoPrompt: "pan" }),
-			prior,
+			dependencies,
 		);
 
-		expect(mockGenerate).toHaveBeenCalledWith(expect.anything(), prior);
+		expect(mockGenerate).toHaveBeenCalledWith(expect.anything(), {
+			elementId: "el-1",
+			dependencies,
+			state: EMPTY_STATE,
+		});
 	});
 
 	it("propagates errors from connector.generate", async () => {
 		mockGenerate.mockRejectedValue(new Error("generation failed"));
 
 		await expect(
-			generateForElement(makeJob("image"), inputs("test")),
+			generateForElement(makeJob("image"), inputs("test"), {}),
 		).rejects.toThrow("generation failed");
 	});
 });

@@ -8,6 +8,7 @@ import type {
 	VoiceInfo,
 } from "@/lib/connectors/types";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { stateCtx } from "./_state-ctx";
 
 const projectId = "voice-hydrate-test-project";
 
@@ -16,7 +17,10 @@ afterEach(() => {
 });
 
 function ctxWith(voices: VoiceInfo[]): PluginContext<TTSGenerateParams> {
-	return { searchVoices: vi.fn(async () => voices) };
+	return {
+		searchVoices: vi.fn(async () => voices),
+		...stateCtx(projectId),
+	};
 }
 
 async function runPipeline(
@@ -24,7 +28,7 @@ async function runPipeline(
 	ctx: PluginContext<TTSGenerateParams>,
 ): Promise<TTSGenerateParams> {
 	const plugins = [
-		createMetadataVoicePlugin(projectId),
+		createMetadataVoicePlugin(),
 		createVoiceSearchPlugin(),
 		createVoiceHydratePlugin(projectId),
 	];

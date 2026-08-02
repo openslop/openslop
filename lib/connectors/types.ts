@@ -1,4 +1,7 @@
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { GatewayClient } from "@/lib/gateway/base";
+import type { NodeSpec } from "@/lib/generation/graph";
+import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { AttributeSchema } from "./attributes/schema";
 import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
@@ -18,23 +21,31 @@ export type ProviderKey = "openslop";
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
-/** The element's last committed generation (a structural subset of the queue snapshot). */
-export interface PriorGeneration {
-	result: AssetResult | null;
-	resultInputs: {
-		prompt: string;
-		attributes: Record<string, string | number>;
-	} | null;
-}
-
 export interface PluginContext<TParams = unknown, TResult = unknown> {
 	gateway?: GatewayClient<TParams, TResult>;
 	searchVoices?: VoiceSearchFn;
 	data?: Record<string, unknown>;
+	/** Id of the node being generated. */
+	elementId?: string;
+	/** Outputs of that node's dependencies, keyed by node id. */
+	dependencies?: Record<string, AssetResult>;
+	/** The project state the node's inputs were resolved against. */
+	state?: ProjectData;
 }
+
+/** The parts of a plugin context the caller supplies per generation. */
+export type GenerationContext = Pick<
+	PluginContext,
+	"elementId" | "dependencies" | "state"
+>;
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
+	/**
+	 * What this plugin reads. Declaring it is what makes the read participate in
+	 * ordering and staleness; reading anything undeclared goes stale-blind.
+	 */
+	dependencies?(element: CanvasContentElement): NodeSpec[];
 	beforeGenerate?(
 		params: TParams,
 		ctx?: PluginContext<TParams, TResult>,
@@ -128,13 +139,9 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 };
 
-export type AnimatedImageGenerateParams = ImageGenerateParams & {
+/** A video generation whose conditioning frame comes from the element's still. */
+export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	videoPrompt?: string;
-	videoWidth?: number;
-	videoHeight?: number;
-	duration?: number;
-	/** When set, skip still-image generation and animate this frame directly. */
-	reuseImageUrl?: string;
 };
 
 // TTS types

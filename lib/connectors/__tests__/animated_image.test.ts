@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ANIMATED_IMAGE_ATTRIBUTES } from "../animated_image/attributes";
 import { OpenSlopAnimatedImage } from "../animated_image/openslop";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
-const TEST_ID = "test-id";
-const STILL_URL = `/assets/image/openslop/${TEST_ID}/output.png`;
+const VIDEO_URL = "https://cdn.example.com/v.mp4";
 
 const config = {
 	defaultModel: "test-model",
@@ -12,73 +12,34 @@ const config = {
 	apiKey: "",
 };
 
-describe("BaseAnimatedImageConnector still reuse", () => {
+describe("BaseAnimatedImageConnector", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 	});
 
-	const mockStill = () =>
-		mockGatewaySuccess({
-			id: TEST_ID,
-			type: "image",
+	// The animation is a video generation, so the connector resolves a video
+	// bundle itself rather than chaining a second connector.
+	it("generates the animation through its own video gateway", async () => {
+		const fetch = mockGatewaySuccess({
+			id: "test-id",
+			type: "video",
 			provider: "openslop",
-			result: { image: "output.png" },
+			result: { video: VIDEO_URL },
+			metadata: { durationSec: 5 },
 		});
 
-	const priorStill = (imageUrl: string, prompt: string) => ({
-		result: { imageUrl, durationSec: 0 },
-		resultInputs: { prompt, attributes: { videoPrompt: "slow zoom" } },
-	});
-
-	it("generates the still via the gateway when there is no prior", async () => {
-		const fetch = mockStill();
 		const result = await new OpenSlopAnimatedImage(config).generate({
-			prompt: "a dark forest",
+			prompt: "slow zoom in",
+			frameImages: ["https://example.com/still.png"],
 		});
-		expect(result.imageUrl).toBe(STILL_URL);
+
+		expect(result).toEqual({ videoUrl: VIDEO_URL, durationSec: 5 });
 		expect(fetch).toHaveBeenCalled();
 	});
 
-	it("reuses the prior still and skips the gateway when still inputs are unchanged", async () => {
-		const fetch = vi.spyOn(globalThis, "fetch");
-		const result = await new OpenSlopAnimatedImage(config).generate(
-			{ prompt: "a dark forest", model: "test-model", videoPrompt: "slow pan" },
-			priorStill("https://example.com/prior.png", "a dark forest"),
+	it("keeps its own attribute schema rather than the video one", () => {
+		expect(OpenSlopAnimatedImage.attributesFor()).toBe(
+			ANIMATED_IMAGE_ATTRIBUTES,
 		);
-		expect(result).toEqual({
-			imageUrl: "https://example.com/prior.png",
-			durationSec: 0,
-		});
-		expect(fetch).not.toHaveBeenCalled();
-	});
-
-	it("regenerates the still when a still input changed", async () => {
-		const fetch = mockStill();
-		const result = await new OpenSlopAnimatedImage(config).generate(
-			{
-				prompt: "a bright meadow",
-				model: "test-model",
-				videoPrompt: "slow pan",
-			},
-			priorStill("https://example.com/prior.png", "a dark forest"),
-		);
-		expect(result.imageUrl).toBe(STILL_URL);
-		expect(fetch).toHaveBeenCalled();
-	});
-
-	it("regenerates the still when the model changed", async () => {
-		const fetch = mockStill();
-		const result = await new OpenSlopAnimatedImage(config).generate(
-			{ prompt: "a dark forest", model: "test-model", videoPrompt: "slow pan" },
-			{
-				result: { imageUrl: "https://example.com/prior.png", durationSec: 0 },
-				resultInputs: {
-					prompt: "a dark forest",
-					attributes: { model: "old-model" },
-				},
-			},
-		);
-		expect(result.imageUrl).toBe(STILL_URL);
-		expect(fetch).toHaveBeenCalled();
 	});
 });

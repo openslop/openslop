@@ -12,6 +12,7 @@ import { buildImagePlugins } from "../connectors/image/plugins/imageChain";
 import { buildAnimatedImagePlugins } from "../connectors/animated_image/plugins/animated-image-chain";
 import { createMetadataVoicePlugin } from "../connectors/tts/plugins/metadata-voice";
 import { createReferenceImagesPlugin } from "../connectors/image/plugins/reference-images";
+import { createDimensionsPlugin } from "../connectors/plugins/dimensions";
 import { createVoiceHydratePlugin } from "../connectors/tts/plugins/voice-hydrate";
 import { createVoiceSearchPlugin } from "../connectors/tts/plugins/voice-search";
 import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
@@ -22,6 +23,7 @@ import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-
 import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
 import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
 import { applyTemplate as applyTemplateToProject } from "@/lib/templates/applyTemplate";
+import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 
 import type { Mode } from "@/lib/project/types";
 
@@ -51,42 +53,42 @@ export function ConfigProvider({
 	projectId: string;
 	children: ReactNode;
 }) {
+	const queue = useGenerationQueue();
 	const [mode, setMode] = useState<Mode>("story");
 	const [selectedTemplateId, setSelectedTemplateId] =
 		useState<string>(DEFAULT_TEMPLATE_ID);
 
-	const selectTemplate = useCallback(
-		(templateId: string) => {
-			setSelectedTemplateId(templateId);
-			applyTemplateToProject(projectId, templateId);
-			setMode("template");
-		},
-		[projectId],
-	);
-
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
 		const modePlugin = MODE_PLUGIN_FACTORIES[mode](selectedTemplateId);
-		const base = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
+		return withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 			.appendPlugins(
 				"llm",
 				createProjectMetadataPlugin(projectId),
 				modePlugin,
-				createReferenceStylePlugin(projectId),
-				createCharacterAvatarStylePlugin(projectId),
+				createReferenceStylePlugin(projectId, queue),
+				createCharacterAvatarStylePlugin(projectId, queue),
 			)
-			.appendPlugins("image", ...buildImagePlugins(projectId))
-			.appendPlugins("video", createReferenceImagesPlugin(projectId))
-			.appendPlugins("tts", createMetadataVoicePlugin(projectId))
+			.appendPlugins("image", ...buildImagePlugins())
+			.appendPlugins(
+				"video",
+				createReferenceImagesPlugin(),
+				createDimensionsPlugin("video"),
+			)
+			.appendPlugins("tts", createMetadataVoicePlugin())
 			.appendPlugins("tts", createVoiceSearchPlugin())
 			.appendPlugins("tts", createVoiceHydratePlugin(projectId))
+			.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
 			.build();
-		return withRegistry(base)
-			.appendPlugins(
-				"animated_image",
-				...buildAnimatedImagePlugins(projectId, base),
-			)
-			.build();
-	}, [mode, selectedTemplateId, projectId]);
+	}, [mode, selectedTemplateId, projectId, queue]);
+
+	const selectTemplate = useCallback(
+		(templateId: string) => {
+			setSelectedTemplateId(templateId);
+			applyTemplateToProject(projectId, templateId, queue, configWithPlugins);
+			setMode("template");
+		},
+		[projectId, queue, configWithPlugins],
+	);
 
 	const value = useMemo<ConfigContextValue>(
 		() => ({

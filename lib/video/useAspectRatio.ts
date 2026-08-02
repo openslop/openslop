@@ -1,8 +1,6 @@
 import { useProject } from "@/lib/project/useProject";
-import { type AspectRatio, DEFAULT_ASPECT_RATIO } from "./aspectRatio";
+import { resolveAspectRatio, type AspectRatio } from "./aspectRatio";
 
 export function useAspectRatio(): AspectRatio {
-	return useProject(
-		(s) => s.metadata.videoSettings?.aspectRatio ?? DEFAULT_ASPECT_RATIO,
-	);
+	return useProject((s) => resolveAspectRatio(s.metadata));
 }

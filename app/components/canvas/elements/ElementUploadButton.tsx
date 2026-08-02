@@ -2,33 +2,23 @@
 
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/queue";
+import { stillDependency } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useElementGeneration } from "./ElementGenerationContext";
 
-export function ElementUploadButton({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function ElementUploadButton() {
 	const queue = useGenerationQueue();
-	const { status, inputs } = useElementGeneration();
+	const { node, status } = useElementGeneration();
+	// An upload replaces the still, leaving the animation stale to re-render.
+	const target = stillDependency(node) ?? node;
 
 	return (
 		<UploadImageButton
 			className="shrink-0"
 			disabled={isGenerationActive(status)}
-			onUpload={(url) => {
-				// Kill any in-flight generation so a late result can't clobber the upload.
-				queue.cancel(element.id);
-				queue.commitResult(
-					element.id,
-					{ imageUrl: url, durationSec: 0 },
-					inputs,
-					ELEMENT_CONFIGS[element.type].connector,
-				);
-			}}
+			onUpload={(url) =>
+				queue.commitResult(target, { imageUrl: url, durationSec: 0 })
+			}
 		/>
 	);
 }

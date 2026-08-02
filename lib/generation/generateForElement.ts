@@ -1,12 +1,13 @@
 import { createConnector } from "@/lib/connectors/factory";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "./inputs";
-import type { ElementSnapshot, GenerationJob } from "./queue";
+import type { NodeId } from "./graph";
+import type { GenerationJob } from "./queue";
 
 export async function generateForElement(
 	job: GenerationJob,
 	inputs: GenerationInputs,
-	prior?: ElementSnapshot,
+	dependencies: Record<NodeId, AssetResult>,
 ): Promise<AssetResult> {
 	const connector = createConnector(
 		job.connectorType,
@@ -19,6 +20,6 @@ export async function generateForElement(
 			model: job.config.defaultModel,
 			...inputs.attributes,
 		},
-		prior,
+		{ elementId: job.elementId, dependencies, state: job.state },
 	);
 }

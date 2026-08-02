@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { buildCharacterAvatarPlugins } from "../imageChain";
+import { buildCharacterAvatarPlugins } from "../characterAvatarNode";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { stateCtx } from "@/lib/connectors/__tests__/_state-ctx";
 
 const PROJECT_ID = "image-chain-test";
 
@@ -15,11 +16,16 @@ describe("buildCharacterAvatarPlugins", () => {
 				"https://img/style-b.png",
 			]);
 
-		const plugins = buildCharacterAvatarPlugins(PROJECT_ID, "Alice");
-		const refPlugin = plugins.find((p) => p.name === "reference-images");
+		const plugins = buildCharacterAvatarPlugins("Alice");
+		const refPlugin = plugins.find(
+			(plugin) => plugin.name === "reference-images",
+		);
 		expect(refPlugin).toBeDefined();
 
-		const out = refPlugin?.beforeGenerate?.({ prompt: "ignored" }, {});
+		const out = refPlugin?.beforeGenerate?.(
+			{ prompt: "ignored" },
+			stateCtx(PROJECT_ID),
+		);
 		expect(out).toEqual({
 			prompt: "ignored",
 			referenceImages: ["https://img/style-a.png", "https://img/style-b.png"],

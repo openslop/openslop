@@ -2,7 +2,7 @@ import { memo } from "react";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { AudioResult, AudioPlaceholder, MediaResult } from "./preview/results";
-import { AnimatedImagePreview } from "./preview/AnimatedImagePreview";
+import { AnimatedImageOutput } from "./preview/AnimatedImagePreview";
 import { useElementGeneration } from "./ElementGenerationContext";
 
 function OutputPreviewComponent({
@@ -25,13 +25,7 @@ function OutputPreviewComponent({
 	}
 
 	if (type === "animated_image") {
-		return (
-			<AnimatedImagePreview
-				{...state}
-				imageUrl={result?.imageUrl}
-				videoUrl={result?.videoUrl}
-			/>
-		);
+		return <AnimatedImageOutput {...state} />;
 	}
 
 	return (

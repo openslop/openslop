@@ -21,9 +21,15 @@ Commit all current changes and open a GitHub pull request.
 
 ### 2. Squash existing commits (if any)
 
-- Run `git log --oneline master..HEAD` to check for existing commits on the branch.
-- If there are commits ahead of master, soft-reset them so all changes become unstaged:
-  - `git reset --soft master`
+- Run `git fetch origin` first. Squash against `origin/master`, not the local
+  `master` ref, which is often stale. Resetting onto a stale base silently pulls
+  other people's commits into yours.
+- Run `git log --oneline origin/master..HEAD` to check for existing commits on the branch.
+- If there are commits ahead, note the current HEAD sha, then soft-reset so all
+  changes become staged: `git reset --soft origin/master`
+- Confirm nothing was lost before continuing: `git diff --cached <that sha>` should
+  be empty (or show only your uncommitted work). The reset is recoverable via
+  `git reflog` if it is not.
 - This ensures everything (previous commits + uncommitted work) goes into a single commit.
 
 ### 3. Stage and commit
@@ -34,25 +40,36 @@ Commit all current changes and open a GitHub pull request.
 
 #### Commit message rules
 
-Follow the spirit of https://www.chiark.greenend.org.uk/~sgtatham/quasiblog/commit-messages/ but keep it casual and brief:
+Follow the spirit of https://www.chiark.greenend.org.uk/~sgtatham/quasiblog/commit-messages/.
 
-- **Subject line**: short, imperative, lowercase, no period. Describe the *what* in ~50 chars. Make it distinguishable from other commits.
-- **Body** (optional, only if non-obvious): 1-3 short lines explaining *why*, not *what*. Use sentence fragments, imperfect grammar is fine. Skip if the subject says it all.
+- **Subject line**: `<type>: <subject>`. Imperative, lowercase after the prefix, no
+  period, ~50-72 chars. Make it distinguishable from other commits.
+  - Types in use here: `feat`, `fix`, `refactor`, `perf`, `chore`, `docs`. No scopes.
+  - The subject doubles as the PR title. GitHub appends `(#NNN)` on squash-merge, so
+    never write a PR number yourself.
+- **Body**: skip it only when the subject genuinely says it all. Otherwise explain
+  *why*, in full sentences. For anything non-trivial that means naming what was
+  wrong before and what the change makes true instead. Several paragraphs is
+  normal and matches the repo's history. Do not pad a trivial change to reach it.
 - Mention what changed from the user's perspective first, implementation details second.
-- If there are known side effects or things the change does NOT do, mention briefly.
-- No emoji, no conventional-commits prefixes (feat:, fix:, etc.), no ticket IDs unless the user mentions one.
-- Plain text, no markdown.
+- If there are known side effects or things the change does NOT do, say so briefly.
+- Reference an issue with a `Closes #NNN` line when the change resolves one.
+- No emoji, plain text, no markdown.
 
 Example good messages:
 ```
-Add openslop provider for tts and music
-
-Wires up the openslop client to call our own public api
-for tts and music connectors. sfx still stubbed.
+fix: keep enum attribute editors visible when the key is absent
 ```
 
 ```
-fix video polling returning wrong status
+refactor: stop smuggling the tag name into OSML attributes
+
+parseXmlTag returned one flat Record where the element type shared a
+namespace with the parsed attributes, so callers had to know to pull
+`tag` back out, and an OSML tag carrying a literal `tag="..."` attribute
+would silently become that element type instead.
+
+Return `{ tag, attributes }` so the two can't collide.
 ```
 
 - Commit using a HEREDOC to preserve formatting:

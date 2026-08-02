@@ -32,6 +32,7 @@ function makeSnapshot(
 	return {
 		status: "idle",
 		seconds: 0,
+		pinned: false,
 		result: {
 			imageUrl: "https://example.com/asset.png",
 			audioUrl: "https://example.com/asset.mp3",

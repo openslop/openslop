@@ -1,5 +1,5 @@
 import type { GenerationQueue } from "@/lib/generation/queue";
-import { characterAvatarElementId } from "./ensureCharacterAvatars";
+import { characterAvatarElementId } from "./characterAvatar";
 import { getProjectStore } from "./store";
 
 export function deleteCharacter(

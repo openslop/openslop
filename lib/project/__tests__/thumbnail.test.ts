@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 import type { ElementSnapshot } from "@/lib/generation/queue";
-import { characterAvatarElementId } from "../ensureCharacterAvatars";
+import { stillElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { characterAvatarElementId } from "../characterAvatar";
 import { pickThumbnailUrl } from "../thumbnail";
 
 const entry = (
@@ -25,6 +26,7 @@ const entry = (
 		error: null,
 		resultInputs: null,
 		connectorType,
+		pinned: false,
 	},
 ];
 
@@ -65,6 +67,15 @@ describe("pickThumbnailUrl", () => {
 				entry("scene-1", "image", "scene.png"),
 			]),
 		).toBe("scene.png");
+	});
+
+	// A still node is a real frame of the scene, unlike a character portrait.
+	it("allows the still behind an animated image", () => {
+		expect(
+			pickThumbnailUrl([
+				entry(stillElementId("scene-1"), "image", "still.png"),
+			]),
+		).toBe("still.png");
 	});
 
 	it("uses the still imageUrl for animated_image entries", () => {

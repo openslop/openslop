@@ -38,15 +38,15 @@ export default function ProjectEditor({
 
 	return (
 		<TooltipProvider>
-			<ConfigProvider projectId={projectId}>
-				<ScriptProvider initialScript={initialScript}>
-					<UserProvider user={user}>
-						<GenerationQueueProvider initialState={initialGeneration}>
+			<GenerationQueueProvider initialState={initialGeneration}>
+				<ConfigProvider projectId={projectId}>
+					<ScriptProvider initialScript={initialScript}>
+						<UserProvider user={user}>
 							<Editor />
-						</GenerationQueueProvider>
-					</UserProvider>
-				</ScriptProvider>
-			</ConfigProvider>
+						</UserProvider>
+					</ScriptProvider>
+				</ConfigProvider>
+			</GenerationQueueProvider>
 		</TooltipProvider>
 	);
 }

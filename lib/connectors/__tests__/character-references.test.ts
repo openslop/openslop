@@ -1,45 +1,52 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ConnectorPlugin } from "../types";
+import type { AssetResult, ConnectorPlugin } from "../types";
 import {
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 
-const PROJECT_ID = "test-char-refs";
-
-function setupCharacters(
-	characters: Record<string, { appearance: string; avatarUrl: string }>,
-) {
-	const store = getProjectStore(PROJECT_ID);
-	store.getState().updateMetadata({ characters });
-}
-
-function runBeforeGenerate(
-	plugin: ConnectorPlugin<ParamsWithCharacters>,
-	params: ParamsWithCharacters,
-) {
-	if (!plugin.beforeGenerate) {
-		throw new Error(`Plugin "${plugin.name}" has no beforeGenerate hook`);
-	}
-	return plugin.beforeGenerate(params);
+/** Avatars reach the plugin as dependency results, keyed by avatar node id. */
+function avatarResults(
+	avatars: Record<string, string>,
+): Record<string, AssetResult> {
+	return Object.fromEntries(
+		Object.entries(avatars)
+			.filter(([, url]) => url)
+			.map(([name, url]) => [
+				characterAvatarElementId(name),
+				{ imageUrl: url, durationSec: 0 },
+			]),
+	);
 }
 
 describe("character-references plugin", () => {
 	let plugin: ConnectorPlugin<ParamsWithCharacters>;
+	let dependencies: Record<string, AssetResult>;
+
+	const setupCharacters = (avatars: Record<string, string>) => {
+		dependencies = avatarResults(avatars);
+	};
+
+	function runBeforeGenerate(
+		p: ConnectorPlugin<ParamsWithCharacters>,
+		params: ParamsWithCharacters,
+	) {
+		if (!p.beforeGenerate) {
+			throw new Error(`Plugin "${p.name}" has no beforeGenerate hook`);
+		}
+		return p.beforeGenerate(params, { dependencies });
+	}
 
 	beforeEach(() => {
-		clearProjectStore(PROJECT_ID);
-		plugin = createCharacterReferencesPlugin(PROJECT_ID);
+		dependencies = {};
+		plugin = createCharacterReferencesPlugin();
 	});
 
 	it("resolves character names to avatar URLs", () => {
 		setupCharacters({
-			Red: { appearance: "A girl in red", avatarUrl: "https://img/red.png" },
-			Granny: {
-				appearance: "An old woman",
-				avatarUrl: "https://img/granny.png",
-			},
+			Red: "https://img/red.png",
+			Granny: "https://img/granny.png",
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -55,7 +62,7 @@ describe("character-references plugin", () => {
 
 	it("strips characters from params when no avatars found", () => {
 		setupCharacters({
-			Wolf: { appearance: "A big wolf", avatarUrl: "" },
+			Wolf: "",
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -75,8 +82,8 @@ describe("character-references plugin", () => {
 
 	it("handles whitespace in character CSV", () => {
 		setupCharacters({
-			Alice: { appearance: "A girl", avatarUrl: "https://img/alice.png" },
-			Bob: { appearance: "A boy", avatarUrl: "https://img/bob.png" },
+			Alice: "https://img/alice.png",
+			Bob: "https://img/bob.png",
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -92,8 +99,8 @@ describe("character-references plugin", () => {
 
 	it("filters out characters without avatars", () => {
 		setupCharacters({
-			Alice: { appearance: "A girl", avatarUrl: "https://img/alice.png" },
-			Bob: { appearance: "A boy", avatarUrl: "" },
+			Alice: "https://img/alice.png",
+			Bob: "",
 		});
 
 		const result = runBeforeGenerate(plugin, {
@@ -109,7 +116,7 @@ describe("character-references plugin", () => {
 
 	it("filters out unknown character names", () => {
 		setupCharacters({
-			Alice: { appearance: "A girl", avatarUrl: "https://img/alice.png" },
+			Alice: "https://img/alice.png",
 		});
 
 		const result = runBeforeGenerate(plugin, {
