@@ -3,11 +3,7 @@ import { isGenerationActive } from "@/lib/generation/queue";
 import { AudioPlayer } from "../AudioPlayer";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
-import type {
-	ElementPreviewProps,
-	GenerationState,
-	PlaceholderProps,
-} from "./status";
+import type { GenerationState, PlaceholderProps } from "./status";
 import { PlaceholderBallsLoader } from "./placeholderBalls";
 import {
 	AUDIO_BAR_COUNT,
@@ -15,7 +11,7 @@ import {
 } from "@/lib/components/soundwave";
 import { ErrorMessage, PlaceholderOverlay, ResultOverlay } from "./overlays";
 
-function AudioResult({
+export function AudioResult({
 	src,
 	status,
 	seconds,
@@ -33,17 +29,6 @@ function AudioResult({
 			)}
 			<AudioPlayer key={src} src={src} />
 		</div>
-	);
-}
-
-export function AudioPreview({ result, ...state }: ElementPreviewProps) {
-	if (!result?.audioUrl) return <AudioPlaceholder {...state} />;
-	return (
-		<AudioResult
-			src={result.audioUrl}
-			status={state.status}
-			seconds={state.seconds}
-		/>
 	);
 }
 

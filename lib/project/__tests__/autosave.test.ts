@@ -26,6 +26,7 @@ const imageSnapshot = (imageUrl: string): ElementSnapshot => ({
 	error: null,
 	resultInputs: null,
 	connectorType: "image",
+	pinned: false,
 });
 
 const snapshot = (title: string): ProjectStoreSnapshot => ({
