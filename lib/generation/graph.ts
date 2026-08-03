@@ -9,7 +9,7 @@ import {
 	type GenerationInputs,
 	type NodeInputs,
 } from "./inputs";
-import type { GenerationJob, GenerationQueue } from "./queue";
+import type { ElementSnapshot, GenerationJob, GenerationQueue } from "./queue";
 
 export type NodeId = string;
 
@@ -137,4 +137,21 @@ export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
 	};
 	for (const root of roots) visit(root);
 	return ordered;
+}
+
+/**
+ * The snapshot of the work `node` owns. A dependency running on its behalf is
+ * the node's own progress, so a card whose element expands into several nodes
+ * never reads as queued while its subtree is already generating.
+ */
+export function nodeProgress(
+	node: GenerationNode,
+	results: NodeResults,
+): ElementSnapshot {
+	const own = results.getElementSnapshot(node.id);
+	if (node.dependsOn.length === 0) return own;
+	const subtree = flattenGraph([node])
+		.filter((dep) => !isSourceNode(dep))
+		.map((dep) => results.getElementSnapshot(dep.id));
+	return subtree.find((snap) => snap.status === "generating") ?? own;
 }

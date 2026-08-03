@@ -1,15 +1,20 @@
 import { MetadataSchema } from "@/lib/project/types";
-import { describe, expect, it } from "vitest";
-import type { ConnectorConfig } from "@/lib/connectors/types";
+import { describe, expect, it, vi } from "vitest";
+import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
 import {
 	flattenGraph,
 	isNodeStale,
 	needsGeneration,
 	nodeInputs,
+	nodeProgress,
 	sourceNode,
 	type GenerationNode,
 } from "../graph";
 import { GenerationQueue, type GenerationJob } from "../queue";
+
+vi.mock("../generateForElement", () => ({
+	generateForElement: () => new Promise<AssetResult>(() => {}),
+}));
 
 const EMPTY_STATE = {
 	hydrated: true,
@@ -146,6 +151,42 @@ describe("isNodeStale", () => {
 		expect(isNodeStale(sourceNode("project:refs", { urls: "a" }), queue)).toBe(
 			false,
 		);
+	});
+});
+
+describe("nodeProgress", () => {
+	// An animated image is a still node feeding an animation node: the animation
+	// stays queued for the whole time the still is generating.
+	const stillGraph = () => {
+		const still = node("~still:animation");
+		return { still, animation: node("animation", [still]) };
+	};
+
+	it("reports a dependency's generation as the dependent's own", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		const { still, animation } = stillGraph();
+		queue.enqueueGraph([animation]);
+
+		expect(queue.getElementSnapshot(still.id).status).toBe("generating");
+		expect(queue.getElementSnapshot(animation.id).status).toBe("queued");
+		expect(nodeProgress(animation, queue).status).toBe("generating");
+	});
+
+	it("stays queued while nothing in the subtree is running", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		const { animation } = stillGraph();
+		const image = node("image");
+		queue.enqueueGraph([animation, image]);
+
+		expect(nodeProgress(image, queue).status).toBe("queued");
+	});
+
+	it("leaves a single-node element on its own snapshot", () => {
+		const queue = new GenerationQueue({ batchSize: 1 });
+		const image = node("image");
+		queue.enqueueGraph([image]);
+
+		expect(nodeProgress(image, queue)).toBe(queue.getElementSnapshot(image.id));
 	});
 });
 
