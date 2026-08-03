@@ -156,16 +156,10 @@ export function buildVideoLayout(
 		}
 	}
 
-	const sequenceByElementId = new Map<string, Sequence>();
-	for (const seq of series) {
-		if (seq.element) sequenceByElementId.set(seq.element.id, seq);
-	}
-
 	return {
 		...cfg,
 		series,
 		sequences,
-		sequenceByElementId,
 		totalDurationSec,
 		totalFrames: Math.max(
 			2,

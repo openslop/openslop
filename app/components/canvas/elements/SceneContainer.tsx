@@ -5,8 +5,7 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { SceneElement } from "@/lib/canvas/types";
-import { findSceneSequence } from "@/app/components/video/useSceneSegments";
-import { useLayout } from "@/app/components/video/VideoLayoutContext";
+import { useSceneSequence } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
 import { useSceneIndex } from "../hooks/useSceneIndex";
@@ -63,8 +62,7 @@ function SceneHeader({
 	onToggle: () => void;
 	element: SceneElement;
 }) {
-	const { layout } = useLayout();
-	const seq = findSceneSequence(element, layout);
+	const seq = useSceneSequence(element);
 	const label = (
 		<>
 			Scene {sceneIndex}

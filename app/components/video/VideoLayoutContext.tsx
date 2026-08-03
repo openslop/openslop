@@ -4,9 +4,16 @@ import { useMemo, type ReactNode } from "react";
 import type { Editor } from "slate";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import type { VideoLayout } from "@/lib/video/types";
+import type { SceneElement } from "@/lib/canvas/types";
+import type { Sequence, VideoLayout } from "@/lib/video/types";
 import { useAssetPrefetch } from "./useAssetPrefetch";
-import { buildSceneSegments, type SceneSegment } from "./useSceneSegments";
+import {
+	buildSceneSegments,
+	buildSequenceIndex,
+	findSceneSequence,
+	type SceneSegment,
+	type SequenceIndex,
+} from "./useSceneSegments";
 import { useVideoLayout } from "./useVideoLayout";
 
 type VideoLayoutValue = {
@@ -14,6 +21,7 @@ type VideoLayoutValue = {
 	ready: boolean;
 	playerKey: string;
 	segments: SceneSegment[];
+	sequenceByElementId: SequenceIndex;
 };
 
 const [VideoLayoutContext, useLayout] =
@@ -33,13 +41,23 @@ export function VideoLayoutProvider({
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
+	const sequenceByElementId = useMemo(
+		() => buildSequenceIndex(layout.series),
+		[layout.series],
+	);
 	const segments = useMemo(
-		() => buildSceneSegments(scenes, layout),
-		[scenes, layout],
+		() => buildSceneSegments(scenes, layout, sequenceByElementId),
+		[scenes, layout, sequenceByElementId],
 	);
 	const value = useMemo(
-		() => ({ layout, ready, playerKey, segments }),
-		[layout, ready, playerKey, segments],
+		() => ({ layout, ready, playerKey, segments, sequenceByElementId }),
+		[layout, ready, playerKey, segments, sequenceByElementId],
 	);
 	return <VideoLayoutContext value={value}>{children}</VideoLayoutContext>;
+}
+
+/** The rendered sequence a scene's foreground element occupies, if it has one. */
+export function useSceneSequence(scene: SceneElement): Sequence | undefined {
+	const { sequenceByElementId } = useLayout();
+	return findSceneSequence(scene, sequenceByElementId);
 }

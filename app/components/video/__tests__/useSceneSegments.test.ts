@@ -3,6 +3,7 @@ import type { SceneElement } from "@/lib/canvas/types";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
 import {
 	buildSceneSegments,
+	buildSequenceIndex,
 	findSegmentIndexAt,
 	type SceneSegment,
 } from "../useSceneSegments";
@@ -92,13 +93,9 @@ const scene = (id: string, foregroundId: string | null): SceneElement => ({
 		: [],
 });
 
-const layout = (
-	entries: Record<string, Sequence>,
-	transitionDurationSec = 0,
-): VideoLayout => ({
+const layout = (transitionDurationSec = 0): VideoLayout => ({
 	series: [],
 	sequences: {},
-	sequenceByElementId: new Map(Object.entries(entries)),
 	fps: 24,
 	width: 1920,
 	height: 1080,
@@ -108,16 +105,35 @@ const layout = (
 	transitionDurationSec,
 });
 
+const segmentsOf = (
+	scenes: SceneElement[],
+	entries: Record<string, Sequence>,
+	transitionDurationSec = 0,
+) =>
+	buildSceneSegments(
+		scenes,
+		layout(transitionDurationSec),
+		new Map(Object.entries(entries)),
+	);
+
+describe("buildSequenceIndex", () => {
+	it("keys sequences by their element id and skips placeholders", () => {
+		const withElement = sequence(0, 2, resolved("a.png"));
+		const index = buildSequenceIndex([withElement, sequence(2, 1, null)]);
+		expect(index.size).toBe(1);
+		expect(index.get("a.png-el")).toBe(withElement);
+	});
+});
+
 describe("buildSceneSegments", () => {
 	it("returns an empty array when there are no scenes", () => {
-		expect(buildSceneSegments([], layout({}))).toEqual([]);
+		expect(segmentsOf([], {})).toEqual([]);
 	});
 
 	it("maps each scene's foreground sequence to a segment", () => {
-		const segments = buildSceneSegments(
-			[scene("s1", "fg1")],
-			layout({ fg1: sequence(0, 2, resolved("a.png")) }),
-		);
+		const segments = segmentsOf([scene("s1", "fg1")], {
+			fg1: sequence(0, 2, resolved("a.png")),
+		});
 		expect(segments).toEqual([
 			{
 				sceneId: "s1",
@@ -131,32 +147,29 @@ describe("buildSceneSegments", () => {
 	});
 
 	it("trims the previous segment by the transition overlap", () => {
-		const segments = buildSceneSegments(
+		const segments = segmentsOf(
 			[scene("s1", "fg1"), scene("s2", "fg2")],
-			layout(
-				{
-					fg1: sequence(0, 2, resolved("a.png")),
-					fg2: sequence(2, 3, resolved("b.png")),
-				},
-				0.5,
-			),
+			{
+				fg1: sequence(0, 2, resolved("a.png")),
+				fg2: sequence(2, 3, resolved("b.png")),
+			},
+			0.5,
 		);
 		expect(segments.map((s) => s.duration)).toEqual([1.5, 3]);
 	});
 
 	it("skips scenes with no foreground or no resolved sequence", () => {
-		const segments = buildSceneSegments(
+		const segments = segmentsOf(
 			[scene("s1", null), scene("s2", "missing"), scene("s3", "fg3")],
-			layout({ fg3: sequence(0, 4, resolved("c.png")) }),
+			{ fg3: sequence(0, 4, resolved("c.png")) },
 		);
 		expect(segments.map((s) => s.sceneId)).toEqual(["s3"]);
 	});
 
 	it("emits a null thumbnail when the sequence has no element", () => {
-		const [segment] = buildSceneSegments(
-			[scene("s1", "fg1")],
-			layout({ fg1: sequence(0, 2, null) }),
-		);
+		const [segment] = segmentsOf([scene("s1", "fg1")], {
+			fg1: sequence(0, 2, null),
+		});
 		expect(segment.thumbnail).toBeNull();
 	});
 });

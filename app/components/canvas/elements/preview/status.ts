@@ -9,3 +9,8 @@ export type PlaceholderProps = GenerationState & {
 	error: string | null;
 	onDiscard: () => void;
 };
+
+/** The uniform contract every entry in `ELEMENT_PREVIEWS` renders against. */
+export type ElementPreviewProps = PlaceholderProps & {
+	result: ElementSnapshot["result"];
+};

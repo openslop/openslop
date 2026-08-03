@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AnimatedImagePreview } from "../AnimatedImagePreview";
+import { AnimatedImageMedia } from "../AnimatedImagePreview";
 import { AudioPlaceholder, MediaResult } from "../results";
 
 const withTooltip = (node: React.ReactNode) =>
@@ -47,8 +47,8 @@ describe("cancel button offset", () => {
 		expect(html).toContain("https://cdn.example.com/a.png");
 	});
 
-	it("is pushed below the still/video toggle by AnimatedImagePreview", () => {
-		const html = withTooltip(<AnimatedImagePreview {...generating} />);
+	it("is pushed below the still/video toggle by AnimatedImageMedia", () => {
+		const html = withTooltip(<AnimatedImageMedia {...generating} />);
 		expect(html).toContain("--cancel-offset:2.5rem");
 	});
 
@@ -64,10 +64,10 @@ const mediaToggleClass = (html: string) => {
 	return match[1];
 };
 
-describe("AnimatedImagePreview", () => {
+describe("AnimatedImageMedia", () => {
 	it("stacks the still/video toggle above the error overlay so it stays clickable", () => {
 		const html = withTooltip(
-			<AnimatedImagePreview
+			<AnimatedImageMedia
 				status="idle"
 				seconds={0}
 				error="generation failed"

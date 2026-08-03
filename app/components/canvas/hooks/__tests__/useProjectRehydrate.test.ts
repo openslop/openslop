@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import { rehydrateProjectEditor } from "./useProjectRehydrate";
+import { rehydrateProjectEditor } from "../useProjectRehydrate";
 
 const connector = {
 	openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
