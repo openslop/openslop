@@ -54,6 +54,8 @@ const connectors: ConnectorRegistry = {
 	},
 };
 
+const ZWSP = "\u200B";
+
 function content(
 	type: CanvasContentElement["type"],
 	id: string,
@@ -64,7 +66,10 @@ function content(
 		id,
 		type,
 		...(customAttributes && { customAttributes }),
-		children: [{ id: `${id}-t`, type, text }],
+		children: [
+			{ id: `${id}-m`, type, text: ZWSP },
+			{ id: `${id}-t`, type, text },
+		],
 	};
 }
 
@@ -96,8 +101,6 @@ function getNode(editor: Editor, id: string): CanvasContentElement {
 	});
 	return node[0] as CanvasContentElement;
 }
-
-const ZWSP = "\u200B";
 
 function getContentTexts(editor: Editor): string[] {
 	const texts: string[] = [];
@@ -360,7 +363,17 @@ describe("applyRefineOp — set", () => {
 
 		const el = getNode(editor, "n1");
 		expect(el.customAttributes).toEqual({ name: "Alice", emotion: "happy" });
-		expect(el.children.map((c) => c.text).join("")).toBe("Hello!");
+		expect(el.children.map((c) => c.text).join("")).toBe(`${ZWSP}Hello!`);
+	});
+
+	it("keeps the caret marker when text is replaced or cleared", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "old")])]);
+
+		applyRefineOp(editor, { op: "set", id: "n1", text: "new" }, {}, connectors);
+		expect(Editor.string(editor, [0, 0])).toBe(`${ZWSP}new`);
+
+		applyRefineOp(editor, { op: "set", id: "n1", text: "" }, {}, connectors);
+		expect(Editor.string(editor, [0, 0])).toBe(ZWSP);
 	});
 
 	it("silently skips when id not found", () => {

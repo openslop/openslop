@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { Node } from "slate";
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import {
+	getElementBodyText,
 	getElementText,
 	serializeOSML,
 	serializeOSMLWithScenes,
 } from "../osmlSerializer";
+import { ZERO_WIDTH_SPACE } from "../constants";
+import { createCanvasNode } from "../createCanvasNode";
+import { parseOSML } from "../osmlStreamParser";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
@@ -130,5 +136,68 @@ describe("getElementText", () => {
 			],
 		};
 		expect(getElementText(element)).toBe("Hello world");
+	});
+});
+
+describe("getElementBodyText", () => {
+	const marked = (...texts: string[]): CanvasContentElement => ({
+		id: "e1",
+		type: "narration",
+		children: texts.map((text, i) => ({
+			id: `t${i}`,
+			type: "narration",
+			text,
+		})),
+	});
+
+	it("drops the caret marker leaf", () => {
+		expect(getElementBodyText(marked(ZERO_WIDTH_SPACE, "Hello world"))).toBe(
+			"Hello world",
+		);
+	});
+
+	it("repairs text that already accumulated markers", () => {
+		expect(
+			getElementBodyText(
+				marked(ZERO_WIDTH_SPACE, `${ZERO_WIDTH_SPACE}${ZERO_WIDTH_SPACE}Hello`),
+			),
+		).toBe("Hello");
+	});
+
+	it("keeps a marker-only element empty rather than blank-looking", () => {
+		expect(getElementBodyText(marked(ZERO_WIDTH_SPACE))).toBe("");
+	});
+});
+
+describe("serialize round trip", () => {
+	const reload = (scene: SceneElement): SceneElement =>
+		wrap(
+			...(parseOSML(
+				serializeOSML([scene]),
+				DEFAULT_CONNECTOR_REGISTRY,
+			) as CanvasContentElement[]),
+		);
+
+	it("does not grow the script each time it is saved and reloaded", () => {
+		let scene = wrap(
+			createCanvasNode("narration", DEFAULT_CONNECTOR_REGISTRY, {
+				id: "e1",
+				text: "hello",
+			}),
+		);
+		const first = serializeOSML([scene]);
+
+		for (let i = 0; i < 3; i++) scene = reload(scene);
+
+		expect(serializeOSML([scene])).toBe(first);
+	});
+
+	it("keeps a reloaded empty element recognisably empty", () => {
+		const scene = reload(
+			wrap(
+				createCanvasNode("narration", DEFAULT_CONNECTOR_REGISTRY, { id: "e1" }),
+			),
+		);
+		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
 });

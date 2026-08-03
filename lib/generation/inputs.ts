@@ -1,5 +1,5 @@
 import { Node } from "slate";
-import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
+import { withoutCaretMarker } from "@/lib/canvas/constants";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 /** What the user authored on the element. Project state arrives via dependencies. */
@@ -27,5 +27,5 @@ export function serializeInputs(inputs: GenerationInputs): string {
 }
 
 export function getPromptText(element: CanvasContentElement): string {
-	return Node.string(element).replaceAll(ZERO_WIDTH_SPACE, "").trim();
+	return withoutCaretMarker(Node.string(element)).trim();
 }
