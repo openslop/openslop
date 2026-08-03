@@ -21,9 +21,17 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
+	// Every keystroke hands Slate's editor a fresh `value`, and dnd-kit rebuilds
+	// its sortable context whenever `items` changes identity, re-rendering every
+	// card in the document. Keying on the ids themselves holds the list steady
+	// until scenes are actually added, removed or reordered.
+	const sceneIdKey = value
+		.filter(isSceneElement)
+		.map((s) => s.id)
+		.join("\n");
 	const sceneItems = useMemo<string[]>(
-		() => value.filter(isSceneElement).map((s) => s.id),
-		[value],
+		() => (sceneIdKey === "" ? [] : sceneIdKey.split("\n")),
+		[sceneIdKey],
 	);
 
 	const handleDragStart = useCallback((event: DragStartEvent) => {
