@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { createEditor, type Editor } from "slate";
 import type { CanvasElement, SceneElement } from "../types";
-import { sceneIndexOf } from "../scenes";
+import { parentSceneId, sceneIndexOf } from "../scenes";
 
 const scene = (id: string): SceneElement => ({
 	id,
@@ -33,5 +34,29 @@ describe("sceneIndexOf", () => {
 		const nodes = [text("t1"), scene("a"), text("t2"), scene("b")];
 		expect(sceneIndexOf(nodes, "a")).toBe(1);
 		expect(sceneIndexOf(nodes, "b")).toBe(2);
+	});
+});
+
+describe("parentSceneId", () => {
+	const editorWith = (children: CanvasElement[]): Editor => {
+		const editor = createEditor();
+		editor.children = children;
+		return editor;
+	};
+
+	it("returns the id of the scene holding the node", () => {
+		const editor = editorWith([
+			scene("s1"),
+			{
+				...scene("s2"),
+				children: [{ id: "n1", type: "narration" as const, children: [] }],
+			},
+		]);
+		expect(parentSceneId(editor, [1, 0])).toBe("s2");
+	});
+
+	it("throws when the parent is not a scene", () => {
+		const editor = editorWith([scene("s1")]);
+		expect(() => parentSceneId(editor, [0])).toThrow(/not inside a scene/);
 	});
 });

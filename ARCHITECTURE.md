@@ -14,7 +14,7 @@ The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams O
 
 ### 2. Generate
 
-Stale elements are queued client-side (bounded by `DEFAULT_BATCH_SIZE`, results cached by inputs) and submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. Workers call the provider, upload results to Vercel Blob, and mark the job complete. The client polls until the asset URL arrives and the preview updates. Music and sfx check a Pinecone similarity cache first.
+Generate resolves the element into a dependency graph (see [Generation graph](#generation-graph)) and queues the stale nodes client-side, dependencies first, `DEFAULT_BATCH_SIZE` at a time. Each job is submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. Workers call the provider, upload results to Vercel Blob, and mark the job complete. The client polls until the asset URL arrives and the preview updates. Music and sfx check a Pinecone similarity cache first.
 
 ### 3. Save / restore
 
@@ -36,9 +36,23 @@ The generation pipeline is split so providers and asset types can be swapped ind
 
 Every route that takes request data is built from a factory in `lib/api/route-handler.ts` that handles auth, parsing, model validation, and error mapping. One `routeHandler(authTier, parseSource)` builder produces them all, so the factories vary only along those two axes: `createApiRouteHandler` (api-access, JSON body), `createSessionRouteHandler` (session, JSON body), `createApiQueryRouteHandler` (api-access, search params), `createSessionFormRouteHandler` (session, multipart form), `createPublicRouteHandler` (no auth, JSON body), and `createPublicQueryRouteHandler` (no auth, search params). Every handler receives the parsed, validated payload as `input`, whatever the source. Two routes fall outside that shape: `api/queues/asset-generate` is a `@vercel/queue` callback and `auth/callback` is an OAuth redirect. Reusable Zod field schemas live in `lib/api/request-schema-fields.ts`. If a provider's API key isn't set, the route falls back to a mock provider.
 
+## Generation graph
+
+A generation is a small dependency graph, not a lone job. `lib/generation/graph.ts` defines it:
+
+- A **node** is one unit of generation, keyed by element id, holding `inputs` (the authored prompt plus non-layout attributes) and `dependsOn` edges.
+- A **source node** stands for project state that is read rather than generated: art style, reference images, aspect ratio, a character's voice (`sourceNodes.ts`). It has no job, and its identity is its own inputs.
+- Edges come from the plugin chain. A connector plugin declares `dependencies(element)`, so one declaration drives what a job reads, what it waits for, and what makes it stale.
+
+`resolveGraph.ts` turns a `NodeSpec` such as `forElement(element)` into the built node and everything under it, resolving each element's connector and deduping nodes shared within the call. `useNodeBuilder` supplies the connector registry and a project-state snapshot, and rebuilds on any store write.
+
+Staleness falls out of the graph: a node needs generating when it has no result, when a dependency does, or when its current inputs differ from the inputs its result was made from. One element (`useGenerate`) and Generate All (`useGenerateAll`) run the same check. A result the user supplied is `pinned` and never regenerated.
+
+`queue.ts` runs the graph. It flattens roots dependencies-first, skips nodes that are already fresh, and owns per-element status, elapsed time, abort controllers, and a result history keyed by serialized inputs, so undoing an edit restores the earlier result instead of regenerating it.
+
 ## Editor state
 
-- `lib/generation/queue.ts` schedules generation jobs from the editor, caches results per element, and exposes status to the UI. UI dispatches jobs; it never calls connectors directly.
+- `lib/generation/` decides what to generate and runs it, as above. The UI dispatches nodes; it never calls connectors directly.
 - `lib/project/store.ts` holds per-project metadata in Zustand. Every mutation rule lives in a store action. Components subscribe to reactive state through `useProject(selector)`; `getProjectStore(projectId)` is the escape hatch for imperative access that a render-time selector can't express — non-React callers (connector plugins, queue workers), plus hooks doing one-shot init, `.subscribe`, or reads outside render (`ProjectEditor`, `useAutosave`, `useGenerateAll`).
 - `lib/canvas/elementConnector.ts` answers "which connector, provider and model does this element use?" for both the UI and the queue. An element pins its provider when created, so this is also where a pin that no longer resolves falls back to the registry default.
 - `lib/script/` provides script context and refinement utilities.
