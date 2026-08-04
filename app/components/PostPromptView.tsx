@@ -2,7 +2,7 @@
 
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
-import Canvas from "./canvas/Canvas";
+import { CanvasSession } from "./canvas/CanvasSession";
 import { CanvasProviders } from "./canvas/CanvasProviders";
 import { EditorSidebar } from "./canvas/panel/EditorSidebar";
 import { ProjectTitle } from "./canvas/ProjectTitle";
@@ -15,7 +15,7 @@ import {
 } from "./video/PlayerPositionContext";
 
 function PostPromptViewInner() {
-	const { editor, value, setValue, layoutKey } = useEditorSession();
+	const { editor, layoutKey } = useEditorSession();
 	const { position, visible } = usePlayerPosition();
 	const isTop = position === "top";
 
@@ -42,7 +42,7 @@ function PostPromptViewInner() {
 								>
 									<div className="mx-auto max-w-6xl px-4 py-4">
 										<ProjectTitle />
-										<Canvas editor={editor} value={value} setValue={setValue} />
+										<CanvasSession editor={editor} />
 									</div>
 								</div>
 

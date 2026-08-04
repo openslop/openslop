@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createEditor, Descendant } from "slate";
+import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { withHistory } from "slate-history";
 import flow from "lodash/flow";
@@ -8,10 +8,12 @@ import { withNodeId } from "../plugins/withNodeId";
 import { withLayout } from "../plugins/withLayout";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
+import {
+	withDocumentSignal,
+	type SignallingEditor,
+} from "../plugins/withDocumentSignal";
 
-const initialValue: Descendant[] = [];
-
-export function useEditorSetup() {
+export function useEditorSetup(): SignallingEditor {
 	const { connectorConfig } = useConfig();
 
 	const [editor] = useState(() =>
@@ -22,10 +24,9 @@ export function useEditorSetup() {
 			withScenes,
 			withFlatPaste,
 			withNodeId,
+			withDocumentSignal,
 		)(createEditor()),
 	);
 
-	const [value, setValue] = useState<Descendant[]>(initialValue);
-
-	return { editor, value, setValue };
+	return editor;
 }
