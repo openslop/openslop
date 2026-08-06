@@ -1,7 +1,7 @@
 "use client";
 
 import type { PlayerRef } from "@remotion/player";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { clamp } from "@/lib/utils";
 import type { VideoLayout } from "@/lib/video/types";
 import { usePlayerFrame } from "./usePlayerState";
@@ -38,12 +38,16 @@ export function SegmentedSeekBar({
 		[],
 	);
 
-	if (segments.length === 0) return null;
+	const scrubSegments = useMemo(
+		() =>
+			segments.map((seg) => ({
+				id: seg.sceneId,
+				basis: seg.duration / totalDurationSec,
+			})),
+		[segments, totalDurationSec],
+	);
 
-	const scrubSegments = segments.map((seg) => ({
-		id: seg.sceneId,
-		basis: seg.duration / totalDurationSec,
-	}));
+	if (segments.length === 0) return null;
 
 	const onHoverChange = (h: ScrubHover | null) => {
 		setHover(h);
