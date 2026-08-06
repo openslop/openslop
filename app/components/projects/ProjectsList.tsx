@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "@/components/ui/icon";
-import { toast } from "sonner";
+import { toastError } from "@/lib/toastError";
 import { createProject, deleteProject } from "@/lib/project/api";
 import type { ProjectRow } from "@/lib/project/api";
 import UserProfile from "@/app/components/UserProfile";
@@ -28,8 +28,7 @@ export default function ProjectsList({
 				const project = await createProject();
 				router.push(`/projects/${project.id}`);
 			} catch (err) {
-				console.error(err);
-				toast.error("Could not create project");
+				toastError(err, "Could not create project");
 			}
 		});
 	};
@@ -40,8 +39,7 @@ export default function ProjectsList({
 		try {
 			await deleteProject(id);
 		} catch (err) {
-			console.error(err);
-			toast.error("Could not delete project");
+			toastError(err, "Could not delete project");
 			setProjects(previous);
 		}
 	};
