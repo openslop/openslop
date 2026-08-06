@@ -87,6 +87,12 @@ describe("signInWithGoogle", () => {
 			options: { redirectTo: CALLBACK },
 		});
 	});
+
+	it("throws when the provider redirect fails", async () => {
+		signInWithOAuth.mockResolvedValue({ error: new Error("oauth down") });
+
+		await expect(signInWithGoogle()).rejects.toThrow("oauth down");
+	});
 });
 
 describe("signOut", () => {
@@ -94,5 +100,11 @@ describe("signOut", () => {
 		await signOut();
 
 		expect(signOutFn).toHaveBeenCalledTimes(1);
+	});
+
+	it("throws when the session cannot be cleared", async () => {
+		signOutFn.mockResolvedValue({ error: new Error("network") });
+
+		await expect(signOut()).rejects.toThrow("network");
 	});
 });

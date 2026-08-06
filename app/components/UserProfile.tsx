@@ -2,7 +2,9 @@
 
 import { memo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { signOut } from "@/lib/auth/session";
+import { errorMessage } from "@/lib/errors";
 import { useUser } from "@/lib/user/UserProvider";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,7 +40,12 @@ function UserProfile() {
 	const name: string | undefined = user.user_metadata?.full_name;
 
 	const handleLogout = async () => {
-		await signOut();
+		try {
+			await signOut();
+		} catch (cause) {
+			toast.error(errorMessage(cause));
+			return;
+		}
 		router.refresh();
 	};
 

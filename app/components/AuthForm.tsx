@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { sendMagicLink, signInWithGoogle } from "@/lib/auth/session";
+import { errorMessage } from "@/lib/errors";
 import OnboardingCard from "./OnboardingCard";
 import EmailSentCard from "./EmailSentCard";
 import OrDivider from "./OrDivider";
@@ -54,6 +55,15 @@ export default function AuthForm({
 		setLoading(false);
 	};
 
+	const handleGoogle = async () => {
+		setError("");
+		try {
+			await signInWithGoogle();
+		} catch (cause) {
+			setError(errorMessage(cause));
+		}
+	};
+
 	if (sent) {
 		return (
 			<EmailSentCard
@@ -102,7 +112,7 @@ export default function AuthForm({
 			)}
 
 			<OrDivider />
-			<GoogleOAuthButton onClick={signInWithGoogle} />
+			<GoogleOAuthButton onClick={handleGoogle} />
 		</OnboardingCard>
 	);
 }
