@@ -10,7 +10,6 @@ import {
 } from "@dnd-kit/sortable";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import { findElementById } from "@/lib/canvas/editorOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
@@ -53,9 +52,7 @@ export default function Canvas({
 		if (isSceneElement(element)) {
 			return <SortableScene {...props} element={element} />;
 		}
-		return (
-			<SortableContent {...props} element={element as CanvasContentElement} />
-		);
+		return <SortableContent {...props} element={element} />;
 	}, []);
 
 	const activeElement = useMemo(
