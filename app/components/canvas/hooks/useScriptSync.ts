@@ -1,21 +1,9 @@
 import { useEffect } from "react";
 import { Editor, Transforms } from "slate";
 import { useScriptNodes } from "@/lib/script/ScriptProvider";
-import {
-	CANVAS_ELEMENT_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
-	type ParsedElement,
-} from "@/lib/canvas/types";
-import { getElementText } from "@/lib/canvas/osmlSerializer";
 import { findNodeById, updateNodeText } from "@/lib/canvas/editorOps";
-
-function shouldSkip(node: ParsedElement): boolean {
-	return (
-		!CANVAS_ELEMENT_TYPES.has(node.type as CanvasElementType) ||
-		getElementText(node).length === 0
-	);
-}
+import { isParsedContentElement } from "@/lib/canvas/guards";
+import { getElementText } from "@/lib/canvas/osmlSerializer";
 
 export function useScriptSync(editor: Editor): void {
 	const nodes = useScriptNodes();
@@ -25,17 +13,17 @@ export function useScriptSync(editor: Editor): void {
 		// so per-id lookups here are bounded — no need to prebuild a map.
 		Editor.withoutNormalizing(editor, () => {
 			for (const node of nodes) {
-				if (shouldSkip(node)) continue;
+				if (!isParsedContentElement(node)) continue;
 
-				const canvasNode = node as CanvasContentElement;
-				const nextText = getElementText(canvasNode);
-				const entry = findNodeById(editor, canvasNode.id);
+				const nextText = getElementText(node);
+				if (!nextText) continue;
 
+				const entry = findNodeById(editor, node.id);
 				if (entry) {
 					const [, path] = entry;
 					updateNodeText(editor, path, nextText);
 				} else {
-					Transforms.insertNodes(editor, canvasNode, {
+					Transforms.insertNodes(editor, node, {
 						at: [editor.children.length],
 					});
 				}
