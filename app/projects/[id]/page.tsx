@@ -9,17 +9,23 @@ export default async function ProjectPage({
 }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
+	// Both calls are round trips to Supabase and neither needs the other's
+	// result: row access is enforced by RLS, not by the user read.
+	const [
+		{
+			data: { user },
+		},
+		{ data: project, error },
+	] = await Promise.all([
+		supabase.auth.getUser(),
+		supabase
+			.from("projects")
+			.select("id, script, store, generation")
+			.eq("id", id)
+			.maybeSingle(),
+	]);
+
 	if (!user) redirect("/");
-
-	const { data: project, error } = await supabase
-		.from("projects")
-		.select("id, script, store, generation")
-		.eq("id", id)
-		.maybeSingle();
-
 	if (error) throw error;
 	if (!project) notFound();
 
