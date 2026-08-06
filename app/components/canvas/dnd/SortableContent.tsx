@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
-import { Node, Path } from "slate";
+import { Path } from "slate";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
-	SceneElement,
 } from "@/lib/canvas/types";
+import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { useViewMode } from "../ViewModeContext";
@@ -39,7 +39,7 @@ export function SortableContent({
 	const { isCollapsed } = useViewMode();
 
 	const path = ReactEditor.findPath(editor, element);
-	const sceneId = (Node.parent(editor, path) as SceneElement).id;
+	const sceneId = parentSceneId(editor, path);
 	const collapsed = isCollapsed(sceneId);
 
 	const insertGap =
