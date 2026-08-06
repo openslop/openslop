@@ -5,11 +5,10 @@ import dynamic from "next/dynamic";
 import { useEffect, useState, type MutableRefObject, type Ref } from "react";
 import type { VideoLayout } from "@/lib/video/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
+import { ActiveSceneSync } from "./ActiveSceneSync";
 import { usePlayerControl } from "./PlayerControlContext";
 import { PlayPauseFlash } from "./PlayPauseFlash";
-import { useActiveSceneSync } from "./useActiveSceneSync";
 import { usePreservedPlayhead } from "./usePreservedPlayhead";
-import { useActiveSegmentIndex } from "./useSceneSegments";
 import { useLayout } from "./VideoLayoutContext";
 import styles from "./VideoPlayer.module.css";
 
@@ -63,8 +62,6 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { segments } = useLayout();
 	const { player, registerPlayer } = usePlayerControl();
-	const activeIndex = useActiveSegmentIndex(player, segments, layout.fps);
-	useActiveSceneSync(player, segments, activeIndex);
 	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
 		null,
 	);
@@ -96,6 +93,7 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />
+			<ActiveSceneSync player={player} segments={segments} fps={layout.fps} />
 		</div>
 	);
 }

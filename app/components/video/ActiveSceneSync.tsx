@@ -6,16 +6,26 @@ import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveScen
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { usePlayerPlaying } from "./usePlayerState";
-import type { SceneSegment } from "./useSceneSegments";
+import { useActiveSegmentIndex, type SceneSegment } from "./useSceneSegments";
 
-export function useActiveSceneSync(
-	player: PlayerRef | null,
-	segments: SceneSegment[],
-	activeIndex: number,
-) {
+/**
+ * Renders nothing. It owns the frame subscription that tracks the playing
+ * scene, so crossing a scene boundary re-renders this leaf instead of the
+ * Remotion player it sits beside.
+ */
+export function ActiveSceneSync({
+	player,
+	segments,
+	fps,
+}: {
+	player: PlayerRef | null;
+	segments: SceneSegment[];
+	fps: number;
+}) {
 	const setActiveSceneId = useSetActiveSceneId();
 	const { enabled: autoScrollEnabled } = useAutoScroll();
 	const playing = usePlayerPlaying(player);
+	const activeIndex = useActiveSegmentIndex(player, segments, fps);
 	const activeId =
 		activeIndex >= 0 ? (segments[activeIndex]?.sceneId ?? null) : null;
 
@@ -28,4 +38,6 @@ export function useActiveSceneSync(
 	}, [activeId, autoScrollEnabled, playing]);
 
 	useEffect(() => () => setActiveSceneId(null), [setActiveSceneId]);
+
+	return null;
 }
