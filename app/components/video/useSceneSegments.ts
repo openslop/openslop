@@ -1,7 +1,7 @@
 import type { PlayerRef } from "@remotion/player";
 import { isForeground } from "@/lib/canvas/guards";
 import { ELEMENT_TYPES, type SceneElement } from "@/lib/canvas/types";
-import { toSeconds } from "@/lib/video/frames";
+import { toFrames } from "@/lib/video/frames";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
 import type { SeekThumbnail } from "./SeekTooltip";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
@@ -38,14 +38,23 @@ export function findSceneSequence(
 	return index.get(fg.id);
 }
 
-export function findSegmentIndexAt(
+/**
+ * Frame space, not seconds: the player only ever addresses whole frames, and
+ * `toFrames` rounds. Segment starts are arbitrary reals, so comparing a rounded
+ * playhead against an unrounded boundary reports the previous segment whenever
+ * the seek rounded down — which is what stuck the scene skip buttons. Rounding
+ * both sides the same way makes a seek to `toFrames(seg.start, fps)` land in
+ * `seg` by construction.
+ */
+export function findSegmentIndexAtFrame(
 	segments: SceneSegment[],
-	timeSec: number,
+	frame: number,
+	fps: number,
 ): number {
 	if (segments.length === 0) return -1;
 	for (let i = 0; i < segments.length; i++) {
 		const seg = segments[i];
-		if (timeSec < seg.start + seg.duration) return i;
+		if (frame < toFrames(seg.start + seg.duration, fps)) return i;
 	}
 	return segments.length - 1;
 }
@@ -58,7 +67,7 @@ export function useActiveSegmentIndex(
 	return usePlayerValue(
 		player,
 		FRAME_EVENTS,
-		(p) => findSegmentIndexAt(segments, toSeconds(p.getCurrentFrame(), fps)),
+		(p) => findSegmentIndexAtFrame(segments, p.getCurrentFrame(), fps),
 		-1,
 	);
 }

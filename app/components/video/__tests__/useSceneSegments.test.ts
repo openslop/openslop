@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { SceneElement } from "@/lib/canvas/types";
+import { toFrames } from "@/lib/video/frames";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
 import {
 	buildSceneSegments,
 	buildSequenceIndex,
-	findSegmentIndexAt,
+	findSegmentIndexAtFrame,
 	type SceneSegment,
 } from "../useSceneSegments";
 
@@ -27,38 +28,73 @@ const segments: SceneSegment[] = [
 	seg("c", 5, 1),
 ];
 
-describe("findSegmentIndexAt", () => {
+const FPS = 24;
+
+/** Starts on `frame` but a hair after it, so `toFrames` rounds back down. */
+const unalignedStart = (frame: number, fps: number) => (frame + 0.2) / fps;
+
+describe("findSegmentIndexAtFrame", () => {
 	it("returns -1 when there are no segments", () => {
-		expect(findSegmentIndexAt([], 0)).toBe(-1);
-		expect(findSegmentIndexAt([], 10)).toBe(-1);
+		expect(findSegmentIndexAtFrame([], 0, FPS)).toBe(-1);
+		expect(findSegmentIndexAtFrame([], 240, FPS)).toBe(-1);
 	});
 
-	it("returns the first segment for time before any end", () => {
-		expect(findSegmentIndexAt(segments, 0)).toBe(0);
-		expect(findSegmentIndexAt(segments, 1.9)).toBe(0);
+	it("returns the first segment for frames before any end", () => {
+		expect(findSegmentIndexAtFrame(segments, 0, FPS)).toBe(0);
+		expect(findSegmentIndexAtFrame(segments, 47, FPS)).toBe(0);
 	});
 
 	it("crosses to the next segment exactly at the previous boundary", () => {
-		expect(findSegmentIndexAt(segments, 2)).toBe(1);
-		expect(findSegmentIndexAt(segments, 5)).toBe(2);
+		expect(findSegmentIndexAtFrame(segments, 48, FPS)).toBe(1);
+		expect(findSegmentIndexAtFrame(segments, 120, FPS)).toBe(2);
 	});
 
-	it("returns the last segment for time at or beyond the total duration", () => {
-		expect(findSegmentIndexAt(segments, 5.999)).toBe(2);
-		expect(findSegmentIndexAt(segments, 6)).toBe(2);
-		expect(findSegmentIndexAt(segments, 999)).toBe(2);
+	it("returns the last segment at or beyond the total duration", () => {
+		expect(findSegmentIndexAtFrame(segments, 143, FPS)).toBe(2);
+		expect(findSegmentIndexAtFrame(segments, 144, FPS)).toBe(2);
+		expect(findSegmentIndexAtFrame(segments, 9999, FPS)).toBe(2);
 	});
 
-	it("clamps negative times to the first segment", () => {
-		expect(findSegmentIndexAt(segments, -1)).toBe(0);
+	it("clamps negative frames to the first segment", () => {
+		expect(findSegmentIndexAtFrame(segments, -1, FPS)).toBe(0);
 	});
 
 	it("handles a single segment", () => {
 		const one = [seg("only", 0, 10)];
-		expect(findSegmentIndexAt(one, 0)).toBe(0);
-		expect(findSegmentIndexAt(one, 5)).toBe(0);
-		expect(findSegmentIndexAt(one, 100)).toBe(0);
+		expect(findSegmentIndexAtFrame(one, 0, FPS)).toBe(0);
+		expect(findSegmentIndexAtFrame(one, 120, FPS)).toBe(0);
+		expect(findSegmentIndexAtFrame(one, 9999, FPS)).toBe(0);
 	});
+
+	it.each([24, 25, 30])(
+		"resolves a start that rounds down to its own segment at %ifps",
+		(fps) => {
+			const start = unalignedStart(151, fps);
+			const unaligned = [seg("a", 0, start), seg("b", start, 2)];
+			const frame = toFrames(start, fps);
+			expect(frame).toBe(151);
+			expect(findSegmentIndexAtFrame(unaligned, frame, fps)).toBe(1);
+		},
+	);
+
+	it.each([24, 25, 30])(
+		"steps one segment per seek across unaligned starts at %ifps",
+		(fps) => {
+			const starts = [0, ...[151, 307, 461].map((f) => unalignedStart(f, fps))];
+			const unaligned = starts.map((start, i) =>
+				seg(`s${i}`, start, (starts[i + 1] ?? starts[i] + 2) - start),
+			);
+			let index = 0;
+			for (let step = 1; step < unaligned.length; step++) {
+				index = findSegmentIndexAtFrame(
+					unaligned,
+					toFrames(unaligned[index + 1].start, fps),
+					fps,
+				);
+				expect(index).toBe(step);
+			}
+		},
+	);
 });
 
 const resolved = (url: string): ResolvedElement => ({
