@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
 import { MetadataSchema } from "@/lib/project/types";
-import { isNodeStale, type GenerationNode } from "../graph";
-import { GenerationQueue, type GenerationJob } from "../queue";
+import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
+import { GenerationQueue } from "../queue";
 
 const EMPTY_STATE = {
 	hydrated: true,
@@ -35,7 +35,7 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 		id,
 		inputs: { prompt: id, attributes: {} },
 		dependsOn,
-		buildJob: () => job,
+		job,
 	};
 }
 

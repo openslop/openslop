@@ -7,9 +7,10 @@ import {
 	needsGeneration,
 	nodeInputs,
 	sourceNode,
+	type GenerationJob,
 	type GenerationNode,
 } from "../graph";
-import { GenerationQueue, type GenerationJob } from "../queue";
+import { GenerationQueue } from "../queue";
 
 const EMPTY_STATE = {
 	hydrated: true,
@@ -39,7 +40,7 @@ function node(
 		id,
 		inputs: { prompt: id, attributes },
 		dependsOn,
-		buildJob: () => job,
+		job,
 	};
 }
 

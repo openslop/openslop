@@ -2,28 +2,46 @@ import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
-import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
+import type {
+	AssetConnectorType,
+	AssetResult,
+	ConnectorConfig,
+	ConnectorPlugin,
+	ProviderKey,
+} from "@/lib/connectors/types";
 import type { ProjectData } from "@/lib/project/store";
 import {
 	serializeInputs,
 	type GenerationInputs,
 	type NodeInputs,
 } from "./inputs";
-import type { GenerationJob, GenerationQueue } from "./queue";
 
 export type NodeId = string;
 
-/**
- * A unit of generation and its edges. `buildJob` is null for a source node,
- * which stands for project state that is read rather than generated; its
- * identity is its own inputs.
- */
-export type GenerationNode = {
+/** Everything the queue needs to run one node. */
+export type GenerationJob = {
+	elementId: string;
+	connectorType: AssetConnectorType;
+	provider: ProviderKey;
+	config: ConnectorConfig;
+	/** The project state this job's inputs were resolved against. */
+	state: ProjectData;
+};
+
+type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
 	dependsOn: GenerationNode[];
-	buildJob: (() => GenerationJob) | null;
 };
+
+/** Project state that is read rather than generated; its identity is its inputs. */
+export type SourceNode = NodeBase & { job: null };
+
+/** A unit of generation: something the queue can run. */
+export type JobNode = NodeBase & { job: GenerationJob };
+
+/** A node and its edges. */
+export type GenerationNode = SourceNode | JobNode;
 
 /** A node still to be built. `plugins` replaces the registry chain. */
 export type ElementNode = {
@@ -46,10 +64,21 @@ export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
 	() => ({ element });
 
-/** The queue narrowed to the half that only reads, for callers that only read. */
-export type NodeResults = Pick<GenerationQueue, "getElementSnapshot">;
+/** What the graph reads back about a node the queue has settled. */
+export type NodeResult = {
+	result: AssetResult | null;
+	resultInputs: GenerationInputs | null;
+	/** The result was supplied rather than generated, so it is never regenerated. */
+	pinned: boolean;
+};
 
-export const isSourceNode = (node: GenerationNode) => node.buildJob === null;
+/** The read half of the queue, declared here so the graph depends on nothing. */
+export type NodeResults = {
+	getElementSnapshot(id?: string): NodeResult;
+};
+
+export const isSourceNode = (node: GenerationNode): node is SourceNode =>
+	node.job === null;
 
 const DERIVED_PREFIX = "~";
 
@@ -60,20 +89,13 @@ export const derivedNodeId = (kind: string, key: string): NodeId =>
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,
-): GenerationNode {
+): SourceNode {
 	return {
 		id,
 		inputs: { prompt: "", attributes },
 		dependsOn: [],
-		buildJob: null,
+		job: null,
 	};
-}
-
-/** A source node stands for state that is read, so asking it to generate is a bug. */
-export function requireJob(node: GenerationNode): GenerationJob {
-	if (!node.buildJob)
-		throw new Error(`Source node "${node.id}" cannot be generated`);
-	return node.buildJob();
 }
 
 /** What a dependent records about a dependency's output. */

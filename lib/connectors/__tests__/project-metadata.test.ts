@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createProjectMetadataPlugin } from "@/lib/connectors/llm/plugins/project-metadata";
+import { projectMetadataPlugin } from "@/lib/connectors/llm/plugins/project-metadata";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { stateCtx } from "./_state-ctx";
 import { TEMPLATES } from "@/lib/templates/templates";
 
 const template = TEMPLATES.find((t) => t.id === "pov-life");
@@ -24,11 +25,11 @@ afterEach(() => {
 	clearProjectStore(projectId);
 });
 
-describe("createProjectMetadataPlugin", () => {
+describe("projectMetadataPlugin", () => {
 	it("injects style, narration, and characters into systemPrompt", () => {
 		seedStore();
-		const { beforeGenerate } = createProjectMetadataPlugin(projectId);
-		const result = beforeGenerate?.({ prompt: "hi" });
+		const { beforeGenerate } = projectMetadataPlugin;
+		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(projectId));
 		const sys = (result as { systemPrompt: string }).systemPrompt;
 		expect(sys).toContain("# Art Style");
 		expect(sys).toContain(template.style);
@@ -38,11 +39,11 @@ describe("createProjectMetadataPlugin", () => {
 
 	it("prepends preamble before existing systemPrompt", () => {
 		seedStore();
-		const { beforeGenerate } = createProjectMetadataPlugin(projectId);
-		const result = beforeGenerate?.({
-			prompt: "hi",
-			systemPrompt: "user instructions",
-		});
+		const { beforeGenerate } = projectMetadataPlugin;
+		const result = beforeGenerate?.(
+			{ prompt: "hi", systemPrompt: "user instructions" },
+			stateCtx(projectId),
+		);
 		const sys = (result as { systemPrompt: string }).systemPrompt;
 		expect(sys).toContain("user instructions");
 		expect(sys.indexOf("# Art Style")).toBeLessThan(
@@ -51,18 +52,18 @@ describe("createProjectMetadataPlugin", () => {
 	});
 
 	it("returns params unchanged when metadata is empty", () => {
-		const { beforeGenerate } = createProjectMetadataPlugin(projectId);
+		const { beforeGenerate } = projectMetadataPlugin;
 		const params = { prompt: "hi", systemPrompt: "keep me" };
-		expect(beforeGenerate?.(params)).toEqual(params);
+		expect(beforeGenerate?.(params, stateCtx(projectId))).toEqual(params);
 	});
 
 	it("preserves other params", () => {
 		seedStore();
-		const { beforeGenerate } = createProjectMetadataPlugin(projectId);
-		const result = beforeGenerate?.({
-			prompt: "hello",
-			model: "claude",
-		}) as Record<string, unknown>;
+		const { beforeGenerate } = projectMetadataPlugin;
+		const result = beforeGenerate?.(
+			{ prompt: "hello", model: "claude" },
+			stateCtx(projectId),
+		) as Record<string, unknown>;
 		expect(result.prompt).toBe("hello");
 		expect(result.model).toBe("claude");
 	});
