@@ -48,10 +48,21 @@ const PCM_WAV_PARAMS: Record<
 	pcm_alaw: { audioFormat: 6, bitsPerSample: 8 },
 };
 
+const { audioFormat: AUDIO_FORMAT, bitsPerSample: BITS_PER_SAMPLE } =
+	PCM_WAV_PARAMS[ENCODING];
+const BLOCK_ALIGN = NUM_CHANNELS * (BITS_PER_SAMPLE / 8);
+const BYTE_RATE = SAMPLE_RATE * BLOCK_ALIGN;
+
+/**
+ * Duration of the raw PCM Cartesia streamed back. Word timestamps can't stand in
+ * for it: they stop at the last word, and are absent entirely when the model
+ * emits no timestamp frames.
+ */
+export function pcmDurationSec(byteLength: number): number {
+	return byteLength / BYTE_RATE;
+}
+
 function wrapPcmInWav(pcm: Buffer): Buffer {
-	const { audioFormat, bitsPerSample } = PCM_WAV_PARAMS[ENCODING];
-	const byteRate = SAMPLE_RATE * NUM_CHANNELS * (bitsPerSample / 8);
-	const blockAlign = NUM_CHANNELS * (bitsPerSample / 8);
 	const header = Buffer.alloc(44);
 
 	header.write("RIFF", 0);
@@ -59,12 +70,12 @@ function wrapPcmInWav(pcm: Buffer): Buffer {
 	header.write("WAVE", 8);
 	header.write("fmt ", 12);
 	header.writeUInt32LE(16, 16);
-	header.writeUInt16LE(audioFormat, 20);
+	header.writeUInt16LE(AUDIO_FORMAT, 20);
 	header.writeUInt16LE(NUM_CHANNELS, 22);
 	header.writeUInt32LE(SAMPLE_RATE, 24);
-	header.writeUInt32LE(byteRate, 28);
-	header.writeUInt16LE(blockAlign, 32);
-	header.writeUInt16LE(bitsPerSample, 34);
+	header.writeUInt32LE(BYTE_RATE, 28);
+	header.writeUInt16LE(BLOCK_ALIGN, 32);
+	header.writeUInt16LE(BITS_PER_SAMPLE, 34);
 	header.write("data", 36);
 	header.writeUInt32LE(pcm.length, 40);
 
@@ -229,12 +240,18 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 			}
 
 			const combined = Buffer.concat(audioChunks);
+			if (combined.length === 0) {
+				throw new Error(
+					`Cartesia returned no audio for voice ${params.voiceId}`,
+				);
+			}
 
-			const lastTs = textTimestamps[textTimestamps.length - 1];
 			return {
 				data: wrapPcmInWav(combined).toString("base64"),
 				textTimestamps,
-				metadata: lastTs ? { durationSec: lastTs.end + 1 } : undefined,
+				// We add an extra second for brief pauses between audio segments
+				// to make it sound more natural
+				metadata: { durationSec: pcmDurationSec(combined.length) + 1 },
 			};
 		} finally {
 			ws.close();
