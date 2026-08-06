@@ -17,14 +17,9 @@ import { useRefine } from "./canvas/RefineProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
 
-function RefineComposer({
-	loading,
-	onStop,
-}: {
-	loading: boolean;
-	onStop: () => void;
-}) {
+function RefineComposer() {
 	const [value, setValue] = useState("");
+	const { loading, stopGeneration } = useScriptControl();
 	const { refineScript, refineLoading, stopRefine } = useRefine();
 	return (
 		<InlineCopilot
@@ -34,7 +29,7 @@ function RefineComposer({
 				refineScript(value);
 				setValue("");
 			}}
-			onStop={refineLoading ? stopRefine : onStop}
+			onStop={refineLoading ? stopRefine : stopGeneration}
 			loading={loading || refineLoading}
 			placeholder="Refine your script…"
 		/>
@@ -48,7 +43,7 @@ function getGenerateLabel(loading: boolean, generating: boolean): string {
 }
 
 function EditorToolbarComponent({ editor }: { editor: Editor }) {
-	const { loading, stopGeneration } = useScriptControl();
+	const { loading } = useScriptControl();
 	const { generateAll } = useGenerateAll(editor);
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
@@ -62,7 +57,7 @@ function EditorToolbarComponent({ editor }: { editor: Editor }) {
 			<div className="flex w-full items-center gap-3">
 				<div className="hidden flex-1 sm:block" aria-hidden />
 				<div className="min-w-0 max-w-2xl flex-1">
-					<RefineComposer loading={loading} onStop={stopGeneration} />
+					<RefineComposer />
 				</div>
 				<div className="flex flex-1 items-center justify-end gap-2 max-sm:flex-none">
 					<Button
