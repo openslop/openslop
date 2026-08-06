@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, Editor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
+import { ZERO_WIDTH_SPACE } from "../constants";
 import {
 	findElementById,
 	findNodeById,
@@ -8,6 +9,7 @@ import {
 	setNodeAttrs,
 } from "../editorOps";
 
+/** Mirrors `createCanvasNode`: a caret marker leaf, then the body. */
 function content(
 	type: CanvasContentElement["type"],
 	id: string,
@@ -18,7 +20,10 @@ function content(
 		id,
 		type,
 		...(customAttributes && { customAttributes }),
-		children: [{ id: `${id}-t`, type, text }],
+		children: [
+			{ id: `${id}-m`, type, text: ZERO_WIDTH_SPACE },
+			{ id: `${id}-t`, type, text },
+		],
 	};
 }
 
@@ -93,7 +98,9 @@ describe("updateNodeText", () => {
 	it("appends diff when new text is a prefix extension", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hel")])]);
 		updateNodeText(editor, [0, 0], "hello world");
-		expect(Editor.string(editor, [0, 0])).toBe("hello world");
+		expect(Editor.string(editor, [0, 0])).toBe(
+			`${ZERO_WIDTH_SPACE}hello world`,
+		);
 	});
 
 	it("replaces full text when not a prefix extension", () => {
@@ -101,7 +108,33 @@ describe("updateNodeText", () => {
 			scene([content("narration", "n1", "old text")]),
 		]);
 		updateNodeText(editor, [0, 0], "new text");
-		expect(Editor.string(editor, [0, 0])).toBe("new text");
+		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}new text`);
+	});
+
+	it("no-ops when the caller re-sends text that carries the marker", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const before = JSON.stringify(editor.children);
+		updateNodeText(editor, [0, 0], `${ZERO_WIDTH_SPACE}hello`);
+		expect(JSON.stringify(editor.children)).toBe(before);
+	});
+
+	it("leaves the marker in place when the text is cleared", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		updateNodeText(editor, [0, 0], "");
+		expect(Editor.string(editor, [0, 0])).toBe(ZERO_WIDTH_SPACE);
+	});
+
+	it("restores the marker on an element that lost it", () => {
+		const stripped: CanvasContentElement = {
+			id: "n1",
+			type: "narration",
+			children: [{ id: "n1-t", type: "narration", text: "hello" }],
+		};
+		const editor = makeEditor([scene([stripped])]);
+		updateNodeText(editor, [0, 0], "hello there");
+		expect(Editor.string(editor, [0, 0])).toBe(
+			`${ZERO_WIDTH_SPACE}hello there`,
+		);
 	});
 });
 

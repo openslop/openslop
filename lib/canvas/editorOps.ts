@@ -1,5 +1,6 @@
 import { Editor, Element, type NodeEntry, type Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
+import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { isContentElement } from "./guards";
 
 /** Any canvas element by id — scenes included. Use {@link findNodeById} when only content will do. */
@@ -29,6 +30,10 @@ export function findNodeById(
  * Diff-based text update: compares current text to newText and applies minimal
  * Transforms. If newText is a prefix extension, appends the diff. Otherwise,
  * replaces the full text range.
+ *
+ * Takes body text: the deletion-guard marker is owned here, not by callers. The
+ * full-range replace below spans the marker leaf, so writing raw text would drop
+ * the guard and leave a cleared element looking non-empty.
  */
 export function updateNodeText(
 	editor: Editor,
@@ -36,19 +41,18 @@ export function updateNodeText(
 	newText: string,
 ): void {
 	const currentText = Editor.string(editor, path);
-	if (currentText === newText) return;
+	const nextText = ZERO_WIDTH_SPACE + withoutCaretMarker(newText);
+	if (currentText === nextText) return;
 
-	if (newText.startsWith(currentText)) {
-		const diff = newText.substring(currentText.length);
-		if (diff) {
-			Transforms.insertText(editor, diff, {
-				at: Editor.end(editor, path),
-			});
-		}
-	} else {
-		const range = Editor.range(editor, path);
-		Transforms.insertText(editor, newText, { at: range });
+	if (nextText.startsWith(currentText)) {
+		Transforms.insertText(editor, nextText.slice(currentText.length), {
+			at: Editor.end(editor, path),
+		});
+		return;
 	}
+	Transforms.insertText(editor, nextText, {
+		at: Editor.range(editor, path),
+	});
 }
 
 /**
