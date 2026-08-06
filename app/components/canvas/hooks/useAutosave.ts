@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { Descendant } from "slate";
 import { toast } from "sonner";
+import { toastError } from "@/lib/toastError";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { createAutosaver } from "@/lib/project/autosave";
 import { getProjectStore } from "@/lib/project/store";
@@ -25,8 +26,11 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 				projectId,
 				getGeneration: () => queue.snapshot(),
 				onSaved: () => toast("Saved", TOAST_OPTIONS),
-				onError: () =>
-					toast.error("Save failed", { ...TOAST_OPTIONS, duration: 4000 }),
+				onError: (err) =>
+					toastError(err, "Save failed", {
+						...TOAST_OPTIONS,
+						duration: 4000,
+					}),
 			}),
 		[projectId, queue],
 	);
