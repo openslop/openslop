@@ -31,9 +31,9 @@ export function findNodeById(
  * Transforms. If newText is a prefix extension, appends the diff. Otherwise,
  * replaces the full text range.
  *
- * An element's text always opens with the caret marker, so it is re-attached
- * here rather than asked of callers — writing raw text would strand the caret
- * and leave a cleared element looking non-empty.
+ * Takes body text: the deletion-guard marker is owned here, not by callers. The
+ * full-range replace below spans the marker leaf, so writing raw text would drop
+ * the guard and leave a cleared element looking non-empty.
  */
 export function updateNodeText(
 	editor: Editor,

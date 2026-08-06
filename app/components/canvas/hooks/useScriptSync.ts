@@ -3,7 +3,7 @@ import { Editor, Transforms } from "slate";
 import { useScriptNodes } from "@/lib/script/ScriptProvider";
 import { findNodeById, updateNodeText } from "@/lib/canvas/editorOps";
 import { isParsedContentElement } from "@/lib/canvas/guards";
-import { getElementText } from "@/lib/canvas/osmlSerializer";
+import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 
 export function useScriptSync(editor: Editor): void {
 	const nodes = useScriptNodes();
@@ -15,7 +15,7 @@ export function useScriptSync(editor: Editor): void {
 			for (const node of nodes) {
 				if (!isParsedContentElement(node)) continue;
 
-				const nextText = getElementText(node);
+				const nextText = getElementBodyText(node);
 				if (!nextText) continue;
 
 				const entry = findNodeById(editor, node.id);
