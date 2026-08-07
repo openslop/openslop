@@ -6,14 +6,10 @@ import { videoHandler } from "../video";
 
 const generate = vi.fn();
 const poll = vi.fn();
-const updateJob = vi.fn();
 
 vi.mock("@/lib/api/providers", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@/lib/api/providers")>()),
 	getVideoProvider: () => ({ generate, poll }),
-}));
-vi.mock("@/lib/api/jobs", () => ({
-	updateJob: (...args: unknown[]) => updateJob(...args),
 }));
 
 type VideoJobRow = TypedJobRow<VideoGenerateParams, { providerJobId?: string }>;
@@ -38,109 +34,63 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 }
 
 describe("videoHandler.process", () => {
-	beforeEach(() => vi.clearAllMocks());
+	beforeEach(() => {
+		vi.clearAllMocks();
+		poll.mockResolvedValue({ result: {}, metadata: { status: "processing" } });
+	});
 
-	it("returns the provider job id as pending metadata", async () => {
+	it("submits upstream without polling a job it just created", async () => {
 		generate.mockResolvedValue({ metadata: { jobId: "upstream-9" } });
 
-		await expect(videoHandler.process(job())).resolves.toEqual({
+		await expect(videoHandler.process(job({ metadata: {} }))).resolves.toEqual({
 			kind: "pending",
 			metadata: { providerJobId: "upstream-9" },
 		});
+		expect(generate).toHaveBeenCalledWith({ prompt: "a cat" });
+		expect(poll).not.toHaveBeenCalled();
+	});
+
+	it("advances the recorded upstream job without resubmitting", async () => {
+		await expect(videoHandler.process(job())).resolves.toEqual({
+			kind: "pending",
+			metadata: { providerJobId: "upstream-1" },
+		});
+		expect(generate).not.toHaveBeenCalled();
+		expect(poll).toHaveBeenCalledWith("upstream-1");
 	});
 
 	it("throws when the provider returns no job id", async () => {
 		generate.mockResolvedValue({ metadata: {} });
 
-		await expect(videoHandler.process(job())).rejects.toThrow(
+		await expect(videoHandler.process(job({ metadata: {} }))).rejects.toThrow(
 			"Video provider returned no jobId",
 		);
 	});
-});
 
-describe("videoHandler.poll", () => {
-	beforeEach(() => vi.clearAllMocks());
+	it("completes with the re-hosted bundle once upstream reports a video", async () => {
+		const completed = { ...bundle, result: { video: "output.mp4" } };
+		poll.mockResolvedValue(completed);
 
-	it("returns the stored row for completed jobs without re-polling upstream", async () => {
-		const row = job({ status: "completed", result: bundle });
-
-		await expect(videoHandler.poll?.(row)).resolves.toEqual({
-			jobId: "job-1",
-			status: "completed",
-			result: bundle,
-			error: null,
-		});
-		expect(poll).not.toHaveBeenCalled();
-		expect(updateJob).not.toHaveBeenCalled();
-	});
-
-	it("returns the stored row for failed jobs without re-polling upstream", async () => {
-		const row = job({ status: "failed", error: "upstream exploded" });
-
-		await expect(videoHandler.poll?.(row)).resolves.toEqual({
-			jobId: "job-1",
-			status: "failed",
-			result: null,
-			error: "upstream exploded",
-		});
-		expect(poll).not.toHaveBeenCalled();
-		expect(updateJob).not.toHaveBeenCalled();
-	});
-
-	it("returns the stored row when no provider job id was recorded", async () => {
-		const row = job({ metadata: {} });
-
-		await expect(videoHandler.poll?.(row)).resolves.toEqual({
-			jobId: "job-1",
-			status: "processing",
-			result: null,
-			error: null,
-		});
-		expect(poll).not.toHaveBeenCalled();
-	});
-
-	it("persists the bundle once upstream reports a video", async () => {
-		poll.mockResolvedValue({ ...bundle, result: { video: "v.mp4" } });
-
-		await expect(videoHandler.poll?.(job())).resolves.toEqual({
-			jobId: "job-1",
-			status: "completed",
-			result: { ...bundle, result: { video: "v.mp4" } },
-			error: null,
-		});
-		expect(updateJob).toHaveBeenCalledWith("job-1", {
-			status: "completed",
-			result: { ...bundle, result: { video: "v.mp4" } },
+		await expect(videoHandler.process(job())).resolves.toEqual({
+			kind: "completed",
+			result: completed,
 		});
 	});
 
-	it("persists the upstream error message on failure", async () => {
+	it("throws the upstream error message on failure", async () => {
 		poll.mockResolvedValue({
 			result: {},
 			metadata: { status: "failed", error: "content policy" },
 		});
 
-		await expect(videoHandler.poll?.(job())).resolves.toEqual({
-			jobId: "job-1",
-			status: "failed",
-			result: null,
-			error: "content policy",
-		});
-		expect(updateJob).toHaveBeenCalledWith("job-1", {
-			status: "failed",
-			error: "content policy",
-		});
+		await expect(videoHandler.process(job())).rejects.toThrow("content policy");
 	});
 
-	it("stays processing without writing when upstream is still working", async () => {
-		poll.mockResolvedValue({ result: {}, metadata: { status: "processing" } });
+	it("throws a fallback message when upstream fails without one", async () => {
+		poll.mockResolvedValue({ result: {}, metadata: { status: "failed" } });
 
-		await expect(videoHandler.poll?.(job())).resolves.toEqual({
-			jobId: "job-1",
-			status: "processing",
-			result: null,
-			error: null,
-		});
-		expect(updateJob).not.toHaveBeenCalled();
+		await expect(videoHandler.process(job())).rejects.toThrow(
+			"Video generation failed",
+		);
 	});
 });

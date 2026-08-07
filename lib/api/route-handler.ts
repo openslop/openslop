@@ -3,7 +3,7 @@ import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { withApiAccess, withPublic, withSession } from "./with-auth";
-import { getJobHandler, rowView } from "./job-handlers";
+import type { JobPoll } from "@/lib/gateway/base";
 import { createJob, enqueueJob, getJob } from "./jobs";
 import {
 	parseBody,
@@ -126,8 +126,12 @@ export async function pollJob(
 		if (!jobId) return badRequest("jobId is required");
 		const job = await getJob(jobId, user.id);
 		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
-		const view =
-			(await getJobHandler(job.connector_type)?.poll?.(job)) ?? rowView(job);
+		const view: JobPoll = {
+			jobId: job.id,
+			status: job.status,
+			result: job.result,
+			error: job.error,
+		};
 		return NextResponse.json(view);
 	});
 }

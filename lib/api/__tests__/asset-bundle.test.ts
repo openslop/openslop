@@ -177,14 +177,56 @@ describe("AssetBundle", () => {
 			expect(putMock).toHaveBeenCalledTimes(2);
 		});
 
-		it("stores external urls directly in result without uploading", async () => {
+		it("re-hosts remote files by streaming them into our own blob", async () => {
+			const body = new ReadableStream();
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue({ ok: true, body, status: 200 }),
+			);
+
 			const result = await AssetBundle.upload("video", "runware", [
-				{ key: "video", url: "https://cdn.example.com/video.mp4" },
+				{
+					key: "video",
+					filename: "output.mp4",
+					contentType: "video/mp4",
+					url: "https://cdn.example.com/video.mp4",
+				},
 			]);
 
-			expect(result.result.video).toBe("https://cdn.example.com/video.mp4");
-			// Only manifest upload, no file upload for external urls
-			expect(putMock).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledWith("https://cdn.example.com/video.mp4");
+			expect(result.result.video).toBe("output.mp4");
+			expect(putMock).toHaveBeenCalledWith(
+				expect.stringMatching(/^assets\/video\/runware\/.+\/output\.mp4$/),
+				body,
+				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
+			);
+
+			vi.unstubAllGlobals();
+		});
+
+		it("throws when a remote file's source url is already dead", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue({
+					ok: false,
+					status: 404,
+					statusText: "Not Found",
+					body: null,
+				}),
+			);
+
+			await expect(
+				AssetBundle.upload("video", "runware", [
+					{
+						key: "video",
+						filename: "output.mp4",
+						contentType: "video/mp4",
+						url: "https://cdn.example.com/gone.mp4",
+					},
+				]),
+			).rejects.toThrow(/video.*404.*Not Found/);
+
+			vi.unstubAllGlobals();
 		});
 	});
 });

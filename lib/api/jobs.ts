@@ -96,7 +96,8 @@ export async function updateJob(
 export async function enqueueJob(
 	jobId: string,
 	connectorType: ConnectorType,
+	options?: { delaySeconds: number },
 ): Promise<void> {
 	const message: AssetQueueMessage = { jobId, connectorType };
-	await send(ASSET_QUEUE_TOPIC, message);
+	await send(ASSET_QUEUE_TOPIC, message, options);
 }

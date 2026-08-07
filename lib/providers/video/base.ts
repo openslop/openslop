@@ -27,7 +27,16 @@ export abstract class BaseVideoProvider extends BaseProvider<
 	VideoProviderResponse
 > {
 	protected toFiles(r: VideoJob): BundleFile[] {
-		return r.url ? [{ key: "video", url: r.url }] : [];
+		return r.url
+			? [
+					{
+						key: "video",
+						filename: "output.mp4",
+						contentType: "video/mp4",
+						url: r.url,
+					},
+				]
+			: [];
 	}
 
 	protected abstract _poll(jobId: string): Promise<VideoJob>;
