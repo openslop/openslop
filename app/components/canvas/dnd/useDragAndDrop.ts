@@ -15,15 +15,26 @@ import { findElementById } from "@/lib/canvas/editorOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import type { DragTransfer } from "./DragTransferContext";
 
+const SCENE_ID_SEPARATOR = ",";
+
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
 	const [dragTransfer, setDragTransfer] = useState<DragTransfer>(null);
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
+	/**
+	 * Keying on `value` gives `SortableContext` a new `items` identity per
+	 * keystroke, and context updates bypass Slate's memoization: every
+	 * `useSortable` consumer re-renders. Key on the ids instead.
+	 */
+	const sceneIdKey = value
+		.filter(isSceneElement)
+		.map((s) => s.id)
+		.join(SCENE_ID_SEPARATOR);
 	const sceneItems = useMemo<string[]>(
-		() => value.filter(isSceneElement).map((s) => s.id),
-		[value],
+		() => sceneIdKey.split(SCENE_ID_SEPARATOR).filter(Boolean),
+		[sceneIdKey],
 	);
 
 	const handleDragStart = useCallback((event: DragStartEvent) => {
