@@ -1,17 +1,15 @@
+import type { SyntheticEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { startPlaybackAt, type PlaybackTarget } from "../startPlaybackAt";
 
 function makePlayer(containerNode: HTMLElement | null = null) {
 	const calls: string[] = [];
 	const player: PlaybackTarget = {
-		pause: vi.fn(() => {
-			calls.push("pause");
+		play: vi.fn(() => {
+			calls.push("play");
 		}),
 		seekTo: vi.fn((frame: number) => {
 			calls.push(`seekTo:${frame}`);
-		}),
-		play: vi.fn(() => {
-			calls.push("play");
 		}),
 		getContainerNode: vi.fn(() => {
 			calls.push("getContainerNode");
@@ -22,14 +20,16 @@ function makePlayer(containerNode: HTMLElement | null = null) {
 }
 
 describe("startPlaybackAt", () => {
-	// Regression for #425: firing seekTo + play in one tick without pausing let
-	// the shared audio tags run while the frame driver stayed frozen.
-	it("pauses and seeks before playing", () => {
+	// Regression for #425. The player has to be playing when the seek lands, so
+	// that Remotion owns the pause/seek/replay and defers the replay past the
+	// buffering its own seek triggers. Playing after the seek instead leaves the
+	// shared audio tags running against a parked frame driver.
+	it("plays before seeking, so the seek resumes rather than starts playback", () => {
 		const { player, calls } = makePlayer();
 
 		startPlaybackAt(player, 120);
 
-		expect(calls).toEqual(["pause", "seekTo:120", "getContainerNode", "play"]);
+		expect(calls).toEqual(["play", "seekTo:120", "getContainerNode"]);
 	});
 
 	it("seeks to the requested frame", () => {
@@ -40,22 +40,25 @@ describe("startPlaybackAt", () => {
 		expect(player.seekTo).toHaveBeenCalledWith(42);
 	});
 
-	it("never plays before seeking", () => {
-		const { player, calls } = makePlayer();
+	// Remotion only warms the shared audio tag pool for autoplay when play() is
+	// given the event, so the originating click has to reach it.
+	it("forwards the originating event to play", () => {
+		const { player } = makePlayer();
+		const event = {} as SyntheticEvent;
 
-		startPlaybackAt(player, 7);
+		startPlaybackAt(player, 7, event);
 
-		expect(calls.indexOf("play")).toBeGreaterThan(calls.indexOf("seekTo:7"));
+		expect(player.play).toHaveBeenCalledWith(event);
 	});
 
-	it("silences stray media between the seek and the play", () => {
+	it("silences stray media only once the seek has landed", () => {
 		const { player, calls } = makePlayer();
 
 		startPlaybackAt(player, 3);
 
-		const silenced = calls.indexOf("getContainerNode");
-		expect(silenced).toBeGreaterThan(calls.indexOf("seekTo:3"));
-		expect(silenced).toBeLessThan(calls.indexOf("play"));
+		expect(calls.indexOf("getContainerNode")).toBeGreaterThan(
+			calls.indexOf("seekTo:3"),
+		);
 	});
 
 	it("tolerates a player with no container node yet", () => {

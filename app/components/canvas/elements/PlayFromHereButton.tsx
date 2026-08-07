@@ -23,8 +23,8 @@ export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 			className="bg-muted"
 			disabled={disabled}
 			onMouseDown={(e) => e.preventDefault()}
-			onClick={() => {
-				if (startFrame != null) playFromFrame(startFrame);
+			onClick={(e) => {
+				if (startFrame != null) playFromFrame(startFrame, e);
 			}}
 		>
 			<Play className="h-4 w-4" />
