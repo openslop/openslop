@@ -18,7 +18,7 @@ import { createVoiceSearchPlugin } from "../connectors/tts/plugins/voice-search"
 import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
 import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
-import { createProjectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
+import { projectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
 import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
 import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
@@ -63,10 +63,10 @@ export function ConfigProvider({
 		return withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 			.appendPlugins(
 				"llm",
-				createProjectMetadataPlugin(projectId),
+				projectMetadataPlugin,
 				modePlugin,
-				createReferenceStylePlugin(projectId, queue),
-				createCharacterAvatarStylePlugin(projectId, queue),
+				createReferenceStylePlugin(queue),
+				createCharacterAvatarStylePlugin(queue),
 			)
 			.appendPlugins("image", ...buildImagePlugins())
 			.appendPlugins(

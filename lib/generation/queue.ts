@@ -1,20 +1,15 @@
-import type {
-	AssetConnectorType,
-	AssetResult,
-	ConnectorConfig,
-	ProviderKey,
-} from "../connectors/types";
+import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
 import { generateForElement } from "./generateForElement";
 import { serializeInputs, type GenerationInputs } from "./inputs";
-import type { ProjectData } from "@/lib/project/store";
 import {
 	flattenGraph,
 	isSourceNode,
 	needsGeneration,
 	nodeInputs,
-	requireJob,
+	type GenerationJob,
 	type GenerationNode,
+	type JobNode,
 	type NodeId,
 } from "./graph";
 
@@ -29,15 +24,6 @@ export type ElementSnapshot = {
 	connectorType: AssetConnectorType | null;
 	/** The result was supplied rather than generated, so it is never regenerated. */
 	pinned: boolean;
-};
-
-export type GenerationJob = {
-	elementId: string;
-	connectorType: AssetConnectorType;
-	provider: ProviderKey;
-	config: ConnectorConfig;
-	/** The project state this job's inputs were resolved against. */
-	state: ProjectData;
 };
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
@@ -56,7 +42,7 @@ export const isGenerationActive = (status: GenerationStatus) =>
 
 export class GenerationQueue {
 	private state = new Map<string, ElementSnapshot>();
-	private pending: GenerationNode[] = [];
+	private pending: JobNode[] = [];
 	private controllers = new Map<string, AbortController>();
 	private jobStarts = new Map<string, number>();
 	private tickTimer: ReturnType<typeof setInterval> | null = null;
@@ -189,7 +175,7 @@ export class GenerationQueue {
 			this.update(node.id, {
 				status: "queued",
 				seconds: 0,
-				connectorType: requireJob(node).connectorType,
+				connectorType: node.job.connectorType,
 			});
 			this.pending.push(node);
 			added = true;
@@ -245,12 +231,14 @@ export class GenerationQueue {
 		result: AssetResult,
 		{ pinned = false }: { pinned?: boolean } = {},
 	): void {
+		if (isSourceNode(node))
+			throw new Error(`Source node "${node.id}" cannot hold a result`);
 		this.cancel(node.id);
 		this.commit(
 			node.id,
 			result,
 			nodeInputs(node, this),
-			requireJob(node).connectorType,
+			node.job.connectorType,
 			pinned,
 		);
 	}
@@ -357,8 +345,8 @@ export class GenerationQueue {
 		return Object.fromEntries(entries);
 	}
 
-	private runJob(node: GenerationNode) {
-		const job = requireJob(node);
+	private runJob(node: JobNode) {
+		const { job } = node;
 		const { elementId } = job;
 		const controller = new AbortController();
 		this.controllers.set(elementId, controller);

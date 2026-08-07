@@ -6,7 +6,7 @@ import type {
 	ConnectorConfig,
 } from "@/lib/connectors/types";
 import type { GenerationInputs } from "../inputs";
-import type { GenerationJob } from "../queue";
+import type { GenerationJob } from "../graph";
 
 const mockGenerate = vi.fn<() => Promise<AssetResult>>();
 

@@ -12,9 +12,9 @@ import {
 	isElementNode,
 	type ElementNode,
 	type GenerationNode,
+	type JobNode,
 	type NodeSpec,
 } from "./graph";
-import type { GenerationJob } from "./queue";
 import type { ProjectData } from "@/lib/project/store";
 
 /** Builds the node a spec names, along with every node it depends on. */
@@ -27,24 +27,21 @@ const toNode = (
 	plugins: ConnectorPlugin[],
 	state: ProjectData,
 	dependsOn: GenerationNode[],
-): GenerationNode => {
-	const job: GenerationJob = {
+): JobNode => ({
+	id: element.id,
+	inputs: {
+		prompt: getPromptText(element),
+		attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
+	},
+	dependsOn,
+	job: {
 		elementId: element.id,
 		connectorType: connector.type,
 		provider: connector.provider,
 		config: { ...connector.config, plugins },
 		state,
-	};
-	return {
-		id: element.id,
-		inputs: {
-			prompt: getPromptText(element),
-			attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
-		},
-		dependsOn,
-		buildJob: () => job,
-	};
-};
+	},
+});
 
 /**
  * Edges come from the plugin chain each node runs, so one declaration drives
@@ -58,7 +55,7 @@ export function nodeBuilder(
 		// Scoped to one call: it dedupes nodes shared within a single graph and
 		// detects cycles. Held across calls it would serve a stale node back once
 		// its element changed, since element content is not part of `state`.
-		const resolved = new Map<string, GenerationNode>();
+		const resolved = new Map<string, JobNode>();
 		const resolving = new Set<string>();
 
 		const build = ({ element, plugins: override }: ElementNode) => {

@@ -3,6 +3,7 @@ import { GatewayClient } from "@/lib/gateway/base";
 import { createCharacterAvatarStylePlugin } from "@/lib/connectors/llm/plugins/character-avatar-style";
 import { clearProjectStore, getProjectStore } from "@/lib/project/store";
 import { stubAvatarResults } from "./_node-results";
+import { stateCtx } from "./_state-ctx";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -24,15 +25,17 @@ class MockLLMGateway extends GatewayClient<
 function setup(projectId: string, avatars: Record<string, string> = {}) {
 	clearProjectStore(projectId);
 	const gateway = new MockLLMGateway();
-	const plugin = createCharacterAvatarStylePlugin(
-		projectId,
-		stubAvatarResults(avatars),
-	);
+	const plugin = createCharacterAvatarStylePlugin(stubAvatarResults(avatars));
 	if (!plugin.transformPrompt)
 		throw new Error(
 			"character-avatar-style plugin must define transformPrompt",
 		);
-	const ctx: PluginContext<LLMGenerateParams, LLMGenerateResult> = { gateway };
+	// Built per call: tests seed the store after setup, and the plugin reads the
+	// state its caller hands it.
+	const ctx = (): PluginContext<LLMGenerateParams, LLMGenerateResult> => ({
+		gateway,
+		...stateCtx(projectId),
+	});
 	return { gateway, transformPrompt: plugin.transformPrompt, ctx };
 }
 
@@ -43,7 +46,7 @@ describe("createCharacterAvatarStylePlugin", () => {
 			.getState()
 			.setCharacter("Mira", { appearance: "blue hair" });
 
-		const result = await transformPrompt("write a scene", ctx);
+		const result = await transformPrompt("write a scene", ctx());
 
 		expect(result).toBe("write a scene");
 		expect(gateway.generate).not.toHaveBeenCalled();
@@ -57,7 +60,7 @@ describe("createCharacterAvatarStylePlugin", () => {
 			.getState()
 			.setCharacter("Mira", { appearance: "", avatarUploaded: true });
 
-		const result = await transformPrompt("write a scene", ctx);
+		const result = await transformPrompt("write a scene", ctx());
 
 		expect(gateway.generate).toHaveBeenCalledOnce();
 		expect(gateway.generate.mock.calls[0][0].referenceImages).toEqual([
@@ -78,7 +81,7 @@ describe("createCharacterAvatarStylePlugin", () => {
 			avatarUploaded: false,
 		});
 
-		const result = await transformPrompt("write a scene", ctx);
+		const result = await transformPrompt("write a scene", ctx());
 
 		expect(gateway.generate).not.toHaveBeenCalled();
 		expect(result).toContain("- Mira: a tall woman with green hair");
@@ -96,7 +99,7 @@ describe("createCharacterAvatarStylePlugin", () => {
 		});
 		store.setCharacter("Uploaded", { appearance: "", avatarUploaded: true });
 
-		const result = await transformPrompt("write a scene", ctx);
+		const result = await transformPrompt("write a scene", ctx());
 
 		expect(gateway.generate).toHaveBeenCalledOnce();
 		expect(result).toContain("- Generated: a tall woman with green hair");
@@ -113,8 +116,8 @@ describe("createCharacterAvatarStylePlugin", () => {
 			.getState()
 			.setCharacter("Mira", { appearance: "", avatarUploaded: true });
 
-		await expect(transformPrompt("write a scene")).rejects.toThrow(
-			"character-avatar-style plugin requires gateway context",
-		);
+		await expect(
+			transformPrompt("write a scene", stateCtx("c5")),
+		).rejects.toThrow("character-avatar-style plugin requires gateway context");
 	});
 });

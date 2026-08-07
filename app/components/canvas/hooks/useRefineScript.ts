@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { getProjectStore } from "@/lib/project/store";
 import { createDefaultConnector } from "@/lib/connectors/registry";
 import { createRefinePlugin } from "@/lib/connectors/llm/plugins/refine";
 import { RefineOpParser } from "@/lib/script/refine/parseOps";
@@ -9,7 +10,7 @@ import { useStreamRun } from "@/lib/script/useStreamRun";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 
 export function useRefineScript(editor: Editor) {
-	const { connectorConfig } = useConfig();
+	const { projectId, connectorConfig } = useConfig();
 	const { loading: refineLoading, run, stop: stopRefine } = useStreamRun();
 
 	const refineScript = useCallback(
@@ -28,12 +29,15 @@ export function useRefineScript(editor: Editor) {
 			};
 
 			await run(
-				connector.stream({ prompt }),
+				connector.stream(
+					{ prompt },
+					{ state: getProjectStore(projectId).getState() },
+				),
 				(chunk) => apply(parser.push(chunk.text)),
 				() => apply(parser.flush()),
 			);
 		},
-		[editor, connectorConfig, run],
+		[editor, projectId, connectorConfig, run],
 	);
 
 	return useMemo(

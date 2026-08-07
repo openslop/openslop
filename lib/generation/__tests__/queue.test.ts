@@ -3,8 +3,8 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../inputs";
-import type { GenerationNode } from "../graph";
-import { GenerationQueue, type GenerationJob } from "../queue";
+import type { GenerationJob, GenerationNode } from "../graph";
+import { GenerationQueue } from "../queue";
 
 const EMPTY_STATE = {
 	hydrated: true,
@@ -47,7 +47,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 		id,
 		inputs: { prompt: inputs.prompt, attributes: inputs.attributes },
 		dependsOn,
-		buildJob: () => job,
+		job,
 	};
 }
 

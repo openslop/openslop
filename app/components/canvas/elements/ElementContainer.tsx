@@ -1,8 +1,8 @@
 import { JSX } from "react";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import type { CanvasContentElement } from "@/lib/canvas/types";
+import { isSceneElement, parentSceneId } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -165,7 +165,7 @@ function ContentElement(
 
 	if (hasCollapsed) {
 		const path = ReactEditor.findPath(editor, props.element);
-		const sceneId = (Node.parent(editor, path) as SceneElement).id;
+		const sceneId = parentSceneId(editor, path);
 		if (isCollapsed(sceneId)) {
 			return (
 				<CompactElement attributes={props.attributes} element={props.element}>

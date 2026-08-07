@@ -1,6 +1,6 @@
 import dedent from "dedent";
+import { requireState } from "@/lib/connectors/plugins";
 import type { LLMPlugin } from "@/lib/connectors/types";
-import { getProjectStore } from "@/lib/project/store";
 import type {
 	Metadata,
 	MetadataCharacter,
@@ -74,12 +74,10 @@ function buildPreamble(metadata: Metadata): string {
 	return sections.join("\n\n");
 }
 
-export function createProjectMetadataPlugin(projectId: string): LLMPlugin {
-	return {
-		name: "projectMetadata",
-		beforeGenerate(params) {
-			const metadata = getProjectStore(projectId).getState().metadata;
-			return prependSystemPrompt(params, buildPreamble(metadata));
-		},
-	};
-}
+export const projectMetadataPlugin: LLMPlugin = {
+	name: "projectMetadata",
+	beforeGenerate(params, ctx) {
+		const { metadata } = requireState(ctx, "projectMetadata");
+		return prependSystemPrompt(params, buildPreamble(metadata));
+	},
+};

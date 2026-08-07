@@ -1,8 +1,7 @@
 import dedent from "dedent";
-import { requireGateway } from "@/lib/connectors/plugins";
+import { requireGateway, requireState } from "@/lib/connectors/plugins";
 import type { NodeResults } from "@/lib/generation/graph";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
-import { getProjectStore } from "@/lib/project/store";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -11,7 +10,6 @@ import type {
 } from "@/lib/connectors/types";
 
 export function createCharacterAvatarStylePlugin(
-	projectId: string,
 	results: NodeResults,
 ): LLMPlugin {
 	return {
@@ -20,8 +18,10 @@ export function createCharacterAvatarStylePlugin(
 			prompt: string,
 			ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
 		) {
-			const characters =
-				getProjectStore(projectId).getState().metadata.characters;
+			const { characters } = requireState(
+				ctx,
+				"character-avatar-style",
+			).metadata;
 			const withAvatar = Object.entries(characters).flatMap(([name, c]) => {
 				const url = characterAvatarUrl(results, name);
 				return url ? [{ name, character: c, url }] : [];
