@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
@@ -21,7 +22,7 @@ there was a small glowing garden hidden on the moon.
 And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
-	const { submitPrompt } = useScriptControl();
+	const { submitPrompt, startBlank } = useScriptControl();
 	const { mode, selectTemplate } = useConfig();
 	const [value, setValue] = useState("");
 
@@ -44,6 +45,15 @@ export default function ComposerHero() {
 					mode === "script" ? undefined : <AnimatedPlaceholder />
 				}
 			/>
+
+			<Button
+				variant="ghost"
+				size="sm"
+				className="mt-3 text-muted-foreground"
+				onClick={startBlank}
+			>
+				Skip to a blank canvas
+			</Button>
 
 			<TemplateGallery
 				onSelect={(templateId, examplePrompt) => {

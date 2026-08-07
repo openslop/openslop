@@ -9,7 +9,7 @@ import {
 	type CanvasContentElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
-import { deserializeWithScenes, splitScenes } from "../serialize";
+import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
 
 const connector = {
 	openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
@@ -59,6 +59,14 @@ describe("splitScenes", () => {
 describe("deserializeWithScenes", () => {
 	it("returns [] for empty input", () => {
 		expect(deserializeWithScenes("", connectors)).toEqual([]);
+	});
+
+	it("turns BLANK_SCRIPT into one scene holding one empty narration", () => {
+		const scenes = deserializeWithScenes(BLANK_SCRIPT, connectors);
+
+		expect(scenes).toHaveLength(1);
+		expect(scenes[0].children).toHaveLength(1);
+		expect(scenes[0].children[0].type).toBe("narration");
 	});
 
 	it("round-trips quotes and angle brackets in attributes and text", () => {
