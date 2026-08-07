@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Path } from "slate";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -10,9 +10,10 @@ import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { useViewMode } from "../ViewModeContext";
+import { renderCanvasElement } from "../elements/ElementContainer";
 import { SortableItem } from "./SortableItem";
 import { useDragTransfer } from "./DragTransferContext";
-import type { InsertOption } from "./SortableActions";
+import { InsertMenu, type InsertOption } from "./SortableActions";
 
 const INSERT_OPTIONS: InsertOption<CanvasElementType>[] = ELEMENT_LIST.map(
 	(c) => ({
@@ -33,6 +34,7 @@ export function SortableContent({
 	element: CanvasContentElement;
 	children: React.ReactNode;
 }) {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const editor = useSlateStatic();
 	const { connectorConfig } = useConfig();
 	const transfer = useDragTransfer();
@@ -68,14 +70,20 @@ export function SortableContent({
 			sceneId={sceneId}
 			sortableType="content"
 			wrapperStyle={wrapperStyle}
-			insertOptions={INSERT_OPTIONS}
-			onInsert={handleInsert}
+			insertMenu={
+				<InsertMenu
+					options={INSERT_OPTIONS}
+					onInsert={handleInsert}
+					onOpenChange={setIsMenuOpen}
+				/>
+			}
+			menuOpen={isMenuOpen}
 			disabled={collapsed}
 			readOnly={collapsed}
 			attributes={attributes}
 			element={element}
 		>
-			{children}
+			{renderCanvasElement({ attributes, children, element })}
 		</SortableItem>
 	);
 }

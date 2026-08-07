@@ -23,11 +23,8 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
-	/**
-	 * Keying on `value` gives `SortableContext` a new `items` identity per
-	 * keystroke, and context updates bypass Slate's memoization: every
-	 * `useSortable` consumer re-renders. Key on the ids instead.
-	 */
+	// Keying on `value` gives SortableContext a new `items` identity per
+	// keystroke, re-rendering every useSortable consumer. Key on the ids.
 	const sceneIdKey = value
 		.filter(isSceneElement)
 		.map((s) => s.id)

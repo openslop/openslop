@@ -1,20 +1,20 @@
-import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
-import type { CanvasElement, CanvasElementType } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import styles from "../styles/sortable.module.css";
-import { SortableActions, type InsertOption } from "./SortableActions";
-import { renderCanvasElement } from "../elements/ElementContainer";
+import { DragHandle } from "./SortableActions";
 
+// Drag start re-renders every sortable, so `children` and `insertMenu` are
+// built by the caller: constructing them here rebuilds N card subtrees.
 interface SortableItemProps {
 	sceneId: string;
 	sortableType: "scene" | "content";
 	wrapperClassName?: string;
 	wrapperStyle?: React.CSSProperties;
 	contentClassName?: string;
-	insertOptions?: InsertOption<CanvasElementType>[];
-	onInsert?: (type: CanvasElementType) => void;
+	insertMenu?: React.ReactNode;
+	menuOpen?: boolean;
 	disabled?: boolean;
 	readOnly?: boolean;
 	attributes: RenderElementProps["attributes"];
@@ -28,8 +28,8 @@ export function SortableItem({
 	wrapperClassName,
 	wrapperStyle,
 	contentClassName,
-	insertOptions,
-	onInsert,
+	insertMenu,
+	menuOpen,
 	disabled,
 	readOnly,
 	attributes,
@@ -50,8 +50,6 @@ export function SortableItem({
 		disabled,
 	});
 
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
-
 	return (
 		<div {...attributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
@@ -70,24 +68,18 @@ export function SortableItem({
 				}}
 			>
 				<div
-					className={`${styles.hoverTarget} align-middle${isMenuOpen ? ` ${styles.menuOpen}` : ""}`}
+					className={`${styles.hoverTarget} align-middle${menuOpen ? ` ${styles.menuOpen}` : ""}`}
 				>
 					{!disabled && (
 						<div
 							className={`self-center ${styles.actions}`}
 							contentEditable={false}
 						>
-							<SortableActions
-								options={insertOptions}
-								onInsert={onInsert}
-								listeners={listeners}
-								onMenuOpenChange={setIsMenuOpen}
-							/>
+							{insertMenu}
+							<DragHandle listeners={listeners} />
 						</div>
 					)}
-					<div contentEditable={readOnly ? false : undefined}>
-						{renderCanvasElement({ attributes, children, element })}
-					</div>
+					<div contentEditable={readOnly ? false : undefined}>{children}</div>
 				</div>
 			</div>
 		</div>

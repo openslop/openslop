@@ -3,11 +3,8 @@
 	z-index: 0;
 }
 
-/*
- * Offscreen scenes used to pay style recalc and paint on every pointer move of
- * a drag. `auto` caches each scene's real height once rendered, so the
- * scrollbar settles after first paint.
- */
+/* Skips style recalc and paint for offscreen scenes during a drag. `auto`
+   caches each scene's real height, so the scrollbar settles after first paint. */
 .scene {
 	content-visibility: auto;
 	contain-intrinsic-size: auto 600px;
