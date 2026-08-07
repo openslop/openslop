@@ -1,4 +1,4 @@
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { isCharacterAvatarId } from "./characterAvatar";
 
 export function pickThumbnailUrl(

@@ -1,6 +1,6 @@
 import type { NodeResults } from "@/lib/generation/graph";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 const EMPTY: ElementSnapshot = {
 	status: "idle",

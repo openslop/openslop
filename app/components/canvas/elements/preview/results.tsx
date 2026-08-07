@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { isGenerationActive } from "@/lib/generation/queue";
+import { isGenerationActive } from "@/lib/generation/snapshots";
 import { AudioPlayer } from "../AudioPlayer";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";

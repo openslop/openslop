@@ -5,7 +5,7 @@ import {
 	type CanvasContentElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 function makeElement(
 	id: string,

@@ -18,7 +18,7 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { isNodeStale } from "@/lib/generation/graph";
-import { isGenerationActive } from "@/lib/generation/queue";
+import { isGenerationActive } from "@/lib/generation/snapshots";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
