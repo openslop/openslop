@@ -9,8 +9,7 @@ export default async function ProjectPage({
 }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	// Both calls are round trips to Supabase and neither needs the other's
-	// result: row access is enforced by RLS, not by the user read.
+	// Safe to run concurrently: row access is enforced by RLS, not by this user read.
 	const [
 		{
 			data: { user },
