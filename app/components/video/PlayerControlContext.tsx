@@ -13,6 +13,8 @@ import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { startPlaybackAt } from "./startPlaybackAt";
 
+type PlaybackRequest = { frame: number; event?: SyntheticEvent };
+
 type PlayerControl = {
 	player: PlayerRef | null;
 	registerPlayer: (player: PlayerRef | null) => void;
@@ -29,22 +31,22 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	// only copy of the handle — nothing downstream mirrors it.
 	const [player, setPlayer] = useState<PlayerRef | null>(null);
 	const { showPlayer } = usePlayerPosition();
-	// `showPlayer()` only schedules the mount, so a play requested while the
+	// `showPlayer()` only schedules the mount, so a request made while the
 	// player is hidden has nothing to run against until the ref arrives.
-	const pendingFrameRef = useRef<number | null>(null);
+	const pendingRef = useRef<PlaybackRequest | null>(null);
 
 	const registerPlayer = useCallback((next: PlayerRef | null) => {
 		setPlayer(next);
-		const frame = pendingFrameRef.current;
-		pendingFrameRef.current = null;
-		if (next && frame != null) startPlaybackAt(next, frame);
+		const pending = pendingRef.current;
+		pendingRef.current = null;
+		if (next && pending) startPlaybackAt(next, pending.frame, pending.event);
 	}, []);
 
 	const playFromFrame = useCallback(
 		(frame: number, event?: SyntheticEvent) => {
 			showPlayer();
 			if (player) startPlaybackAt(player, frame, event);
-			else pendingFrameRef.current = frame;
+			else pendingRef.current = { frame, event };
 		},
 		[showPlayer, player],
 	);

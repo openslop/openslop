@@ -8,23 +8,19 @@ export type PlaybackTarget = Pick<
 >;
 
 /**
- * Start playback at a frame by seeking while the player is already playing.
+ * Seeking mid-playback is what defers the resume: the Player pauses, seeks, and
+ * replays from an effect once the new frame has committed. Playing after the
+ * seek instead runs the shared audio tags against a frame driver still parked
+ * on the seek's buffering block (#425).
  *
- * The play cannot follow the seek in the same tick: Remotion parks its frame
- * driver while any media element holds a buffering block, but `play()` starts
- * the shared audio tags directly, so audio runs against a frozen picture
- * (#425). Seeking while playing hands that ordering to the Player, which
- * pauses, seeks, and replays from an effect once the new frame has committed.
- *
- * The originating click has to reach `play()`: Remotion only warms the shared
- * audio tag pool for autoplay when it is passed one.
+ * `play()` needs the originating event: Remotion only warms the shared audio
+ * tags for autoplay when it gets one.
  */
 export function startPlaybackAt(
-	player: PlaybackTarget | null,
+	player: PlaybackTarget,
 	frame: number,
 	event?: SyntheticEvent,
 ) {
-	if (!player) return;
 	player.play(event);
 	player.seekTo(frame);
 	silenceMediaIn(player.getContainerNode());
