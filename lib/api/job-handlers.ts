@@ -6,7 +6,6 @@ import type {
 	SFXGenerateParams,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
-import type { JobPoll } from "@/lib/gateway/base";
 import { videoHandler } from "./handlers/video";
 import type { JobRow } from "./jobs";
 import {
@@ -30,16 +29,6 @@ export interface JobHandler<
 	TMeta = Record<string, unknown>,
 > {
 	process(job: TypedJobRow<TReq, TMeta>): Promise<ProcessOutcome>;
-	poll?(job: TypedJobRow<TReq, TMeta>): Promise<JobPoll>;
-}
-
-export function rowView(job: JobRow): JobPoll {
-	return {
-		jobId: job.id,
-		status: job.status,
-		result: job.result,
-		error: job.error,
-	};
 }
 
 function assetHandler<TReq extends Record<string, unknown>>(

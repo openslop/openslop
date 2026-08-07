@@ -1,10 +1,15 @@
 import { nanoid } from "nanoid";
 
-async function fetchJson<T>(url: string, label: string): Promise<T> {
+async function fetchOk(url: string, label: string): Promise<Response> {
 	const res = await fetch(url);
 	if (!res.ok) {
 		throw new Error(`${label} (${res.status} ${res.statusText})`);
 	}
+	return res;
+}
+
+async function fetchJson<T>(url: string, label: string): Promise<T> {
+	const res = await fetchOk(url, label);
 	return res.json() as Promise<T>;
 }
 
@@ -16,22 +21,33 @@ export type AssetManifest = {
 	metadata?: Record<string, unknown>;
 };
 
-export type BundleFileUpload = {
+type BundleFileBase = {
 	key: string;
 	filename: string;
-	data: Buffer | ArrayBuffer | string;
 	contentType: string;
 };
 
-export type BundleFileExternal = {
-	key: string;
+export type BundleFileData = BundleFileBase & {
+	data: Buffer | ArrayBuffer | string;
+};
+
+/** Bytes that live at someone else's URL. Re-hosted, never referenced. */
+export type BundleFileRemote = BundleFileBase & {
 	url: string;
 };
 
-export type BundleFile = BundleFileUpload | BundleFileExternal;
+export type BundleFile = BundleFileData | BundleFileRemote;
 
-function isUploadFile(file: BundleFile): file is BundleFileUpload {
-	return "data" in file;
+type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
+
+/** Remote sources stream in at an unknown size, so they upload in chunks. */
+async function sourceOf(
+	file: BundleFile,
+): Promise<{ body: PutBody; multipart: boolean }> {
+	if ("data" in file) return { body: file.data, multipart: false };
+	const res = await fetchOk(file.url, `Failed to fetch "${file.key}"`);
+	if (!res.body) throw new Error(`Empty response body for "${file.key}"`);
+	return { body: res.body, multipart: true };
 }
 
 export type BundleResponse = {
@@ -92,18 +108,20 @@ export class AssetBundle {
 		const basePath = `assets/${type}/${provider}/${id}`;
 
 		await Promise.all(
-			files.filter(isUploadFile).map((file) =>
-				put(`${basePath}/${file.filename}`, file.data, {
+			files.map(async (file) => {
+				const { body, multipart } = await sourceOf(file);
+				return put(`${basePath}/${file.filename}`, body, {
 					access: "public",
 					contentType: file.contentType,
 					addRandomSuffix: false,
-				}),
-			),
+					multipart,
+				});
+			}),
 		);
 
 		const result: Record<string, string> = {};
 		for (const file of files) {
-			result[file.key] = isUploadFile(file) ? file.filename : file.url;
+			result[file.key] = file.filename;
 		}
 
 		const manifest: AssetManifest = {

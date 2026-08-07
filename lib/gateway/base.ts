@@ -6,6 +6,12 @@ export abstract class GatewayClient<TParams = unknown, TResult = unknown> {
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
+/**
+ * How long an asset job may run before both sides give up: the queue worker
+ * stops redelivering it, and the client stops polling for it.
+ */
+export const JOB_TIMEOUT_MS = 15 * 60_000;
+
 /** A job in a terminal state will never change again, so stop polling it. */
 export function isTerminal(status: JobStatus): boolean {
 	return status === "completed" || status === "failed";
