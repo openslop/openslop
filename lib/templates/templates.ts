@@ -1245,7 +1245,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		id: "celebrity-death",
 		name: "Celebrity Death",
 		pillText: "Death of every",
-		color: "#F59E0B",
+		color: "#C7BFB2",
 		style:
 			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
 		referenceImages: [
@@ -1467,6 +1467,243 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 #Narration: On October 19th, 2014, he was pronounced dead due to cervical spinal cord injury and resulting systemic complications.
 #Animated Image: grid of framed footballer portraits on an off-white background, thick black borders with soft drop shadows, names below each in a hand-drawn marker font. Diego Maradona in Argentina stripes, Diogo Jota in a red shirt, Pelé in Brazil's cream-and-green collar, José Antonio Reyes in red, Emiliano Sala in Nantes yellow, Gary Speed in a dark suit and tie, Suleiman al-Obeid in blue with number 10, Peter Biaksangzuala in blue-and-yellow. Below the grid, a doodled red subscribe button with a hand-drawn cursor arrow hovering over it, and a small speech bubble hand-lettered "Which story next?" (Video prompt: the portraits appearing one by one, the cursor clicking the subscribe button, the speech bubble popping in)
 #Narration: If you like this video, don't forget to subscribe and tell me which story you want next. Thanks for watching and see you in the next one.`,
+	},
+	{
+		id: "stick-explainer",
+		name: "Stick Explainer",
+		pillText: "Stickman explainer about",
+		color: "#AA8AB1",
+		style:
+			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+		referenceImages: [
+			templateAsset("stick-explainer-1"),
+			templateAsset("stick-explainer-2"),
+			templateAsset("stick-explainer-3"),
+		],
+		narration: {
+			language: "en",
+			gender: "masculine",
+			age: "adult",
+			accent: "american",
+			description: "Steady, enunciating, confident young male for narrations",
+		},
+		showcase: {
+			image: templateAsset("stick-explainer-3"),
+			title: "Stickman explainer about...",
+			description: "Stickman explainer about a certain topic",
+			examplePrompt: "AI slop",
+		},
+		systemPrompt: dedent`# Important
+		- Write the script as if writing a Stickman-style explainer video about the video topic in the user prompt
+		- Use animated images for every image
+		`,
+		exampleText: dedent`#Animated Image: A chunky cartoon phone held up by a chibi YouTuber in a hoodie. A giant soup ladle pokes out through the phone screen and dumps a lumpy gray-green stew into a pig trough on the floor — and the trough itself is shaped like a red play button. The YouTuber pinches their nose with their free hand. A fat button on the phone reads "CREATE" with a sparkle on it. (Video prompt: ladle scooping and dumping, trough filling, YouTuber's cheeks puffing out).
+
+#Narration: There is now an AI slop generator built into the YouTube Create app, allowing YouTubers to generate AI slop for YouTube, on YouTube.
+
+#Animated Image: A wobbling gray-green blob with a sparkle on it stands on a small stage, being pelted from both sides with tomatoes. Left crowd: chibi viewers holding popcorn. Right crowd: chibi creators holding cameras and microphones. Both crowds are throwing. A scoreboard above the stage reads "LIKES 3" and "DISLIKES 9,000,000". (Video prompt: tomatoes flying in from both sides, blob flinching, dislike counter spinning upward).
+
+#Narration: This is despite the fact that AI generated media is almost universally despised by viewers and creators alike.
+
+#Animated Image: A laptop with an old-fashioned hand-crank meat grinder bolted to the top of the screen. The chibi host — round head, small glasses, gray t-shirt — is dropping two of his own cartoon characters into the hopper, one in a yellow shirt and one in purple, both waving their little arms in alarm. A sticky note on the laptop reads "make them argue about AI". (Video prompt: characters dropping into the hopper, crank turning, ominous grinding).
+
+#Narration: I gave the app two of my characters and asked it to make a video of them arguing about whether AI is good for humanity.
+
+#Animated Image: The two characters come out the other side badly wrong. The yellow one has seven fingers on a raised hand and a mouth that has slid onto its cheek; the purple one's face is melting off its head like warm ice cream while it gestures confidently. Their shirts have swapped colors halfway down. Subtitles across the bottom read "AI IS DANGERUOS" in wobbly misspelled letters. (Video prompt: faces melting and re-forming, extra fingers sprouting, subtitles glitching mid-word).
+
+#Narration: AI is dangerous and will be the end of us. Nonsense, it is the evolution of humanity. But the risks — the benefits are limitless. Maybe you're right. Okay, cool.
+
+#Animated Image: The host slumped low in a desk chair, mouth a flat line, giving a single slow thumbs-down at the laptop. On the desk beside him, an hourglass labeled "JOB SECURITY" with only a few grains left in the top bulb, and a torn-off calendar page. (Video prompt: sand trickling through the hourglass, host blinking once, very slowly).
+
+#Narration: That was absolutely terrible, and my job is safe for another few months.
+
+#Animated Image: A browser window crammed edge to edge with fat colorful buttons, every single one stamped with a sparkle. The actual video player has been squeezed down to a postage-stamp rectangle in the bottom corner. A tiny chibi user leans in and squints at it through a magnifying glass. Buttons are spilling out of the window frame and piling up on the floor. (Video prompt: new sparkle buttons popping in and shoving the video smaller, buttons overflowing onto the floor).
+
+#Narration: Still, YouTube is overflowing with AI features that nobody asked for.
+
+#Animated Image: A tall vending machine labeled "INSPIRATION". A chibi creator feeds their old videos into a coin slot on the side; out of the dispensing tray at the bottom tumble identical thumbnails — the same crude shocked open-mouthed face with a red arrow and a red circle, over and over. The tray is already overflowing and the creator is knee-deep in duplicates. (Video prompt: videos going in, identical thumbnails tumbling out and piling up around the creator's legs).
+
+#Narration: The inspiration tab, for example, automatically generates new video ideas and thumbnails based on your previous content.
+
+#Animated Image: A factory conveyor belt with three stations: a sparkle-covered machine, then a chibi creator sitting at a keyboard typing prompts, then an "UPLOAD" chute. A giant hand reaches down from the top of the frame and plucks the creator out like a Jenga block, dropping them into a bin marked "MIDDLEMEN". The two machines slide together to close the gap and the belt keeps running without missing a beat. (Video prompt: hand plucking the creator out, machines sliding together, belt speeding up).
+
+#Narration: It seems inevitable that YouTube will eventually cut out the middleman and just generate these videos themselves, without having a human creator write the prompts.
+
+#Animated Image: A red play-button box wearing an apron, cutting a big round cake with a knife. It hands the larger slice, marked "55%", across the frame to a chibi creator, who is immediately spending it — the slice becomes a tripod, a light and a microphone in a small arrow-loop that circles back to a fresh cake. The play button keeps the smaller slice on its own plate. (Video prompt: knife slicing, the 55% slice sliding over, the loop of gear-to-cake spinning around).
+
+#Narration: YouTube currently gives 55% of the ad revenue earned by long-form videos back to creators, which encourages and funds the production of new content.
+
+#Animated Image: The same cake, but the creator's chair is empty with a dotted outline where they used to be. The play-button box is eating the entire cake in one enormous bite, cheeks bulging. Behind it, a long low server building with a chimney; a small fork of cake is being shoveled into a furnace door labeled "GPUs", and an electricity meter on the wall is spinning so fast it's a blur. (Video prompt: play button swallowing the whole cake, meter dial spinning into a blur, furnace flaring).
+
+#Narration: Replacing human creators with an internal AI slop generator would allow YouTube to keep 100% of that revenue, minus the cost of running the slop generator in a data center.
+
+#Animated Image: A chibi viewer sits at a dinner table wearing a bib, cutlery in both fists, delighted. A waiter — the red play-button box in a little bow tie — serves a sequence of plates that get worse from left to right: a proper burger, then a burger with a sparkle stuck in it, then a plain bowl of gray-green mush. The viewer's happy expression never changes. (Video prompt: plates being swapped in one after another, each worse, the viewer beaming identically at every one).
+
+#Narration: If they can get viewers comfortable consuming AI slop, they can eventually make the jump to generating it themselves and keep 100% of the platform's ad revenue.
+
+#Animated Image: A chibi executive in a boxy navy suit at a whiteboard, pointing with a marker at an equation drawn in three parts: a small doodle of a human creator, a minus sign, then a fat green arrow going up and a bag of money. Four more suits sit at the table nodding in perfect unison, eyes closed. (Video prompt: the equation being written stroke by stroke, all four heads nodding in sync).
+
+#Narration: On the surface, this seems to make rational business sense.
+
+#Animated Image: A gray dystopian street under a flat overcast sky. Enormous screens on every building play the same gray-green blob. Rows of identical chibi figures in matching jumpsuits stare upward with blank flat-line mouths. In the center of the square stands a monument shaped like a red play button — and a thick black crack is running up its plinth. One small figure sits on the curb with a sketchpad, drawing, ignored. (Video prompt: screens flickering in unison, the crack creeping up the plinth, the sketching figure looking up).
+
+#Narration: However, I believe that not only is YouTube's decision to embrace AI dystopian and morally wrong, it could completely destroy them as a business.
+
+#Animated Image: Three chibi viewers on a couch, bowls in hand, licking them completely clean. One has a gray-green mustache of slop across their face and is holding the bowl out for seconds with enormous pleading eyes. Beside the couch, a crossed-out drawing of a viewer looking nauseated, with a big red X over it. The host stands in the corner of the frame with a hand over his face. (Video prompt: bowls being licked clean, one held out for seconds, host's shoulders sagging).
+
+#Narration: Not because people will get sick of watching AI slop. In fact, I think YouTube will probably have the opposite problem.
+
+#Animated Image: The red play-button box lounges on a wooden throne in a lopsided gold crown, one leg over the armrest. At the foot of the throne, three small rival boxes attempt a coup and fail: one with a music note has a bent sword, one with a black X is charging at the wrong wall, and one with a blue f has its head stuck in a bucket. (Video prompt: rivals charging in and comically failing, the king not even looking up).
+
+#Narration: Right now, YouTube is the undisputed king of user-generated long-form video, despite the best efforts of TikTok, X and Facebook to dethrone them.
+
+#Animated Image: A packed stadium seen from above, every seat filled with tiny chibi heads, a banner across the stands reading "2 BILLION". A dump truck labeled "20 MILLION A DAY" has backed up to the edge of the pitch and is tipping a landslide of video rectangles onto the field. The crowd is applauding. (Video prompt: truck bed tilting, videos avalanching onto the pitch, crowd heads bouncing).
+
+#Narration: YouTube has over 2 billion logged-in monthly users, and over 20 million videos are uploaded to the platform every day.
+
+#Animated Image: A playground roundabout. Chibi creators with cameras stand around the outside pushing it; chibi viewers with phones sit on it riding. A thick arrow loops from the pushers to the riders and back again. Sitting dead center on the roundabout's hub, the red play-button box has its eyes closed and its arms folded, doing absolutely nothing. (Video prompt: the roundabout spinning faster and faster, the play button dozing at the hub).
+
+#Narration: If you're a creator making long-form videos, you put them on YouTube because that's where all the viewers are. And if you're a viewer, you watch stuff on YouTube because that's where all the creators are.
+
+#Animated Image: A brand-new empty theater with a fresh "OPENING NIGHT" banner. A single hopeful chibi creator performs on stage to rows of completely empty seats, with a tumbleweed rolling through the aisle. Outside the glass doors, a crowd of viewers glances in, shrugs, and walks past toward a glow off-frame. (Video prompt: tumbleweed rolling, the performer's spotlight shrinking, the crowd outside walking past).
+
+#Narration: It's almost impossible for a new platform to break into this market, because they need viewers to attract creators, and they need creators to attract viewers.
+
+#Animated Image: A warm banquet hall crammed with food. Inside, the play-button king sits at a groaning table surrounded by chibi creators and viewers all eating happily. Outside the window, three scrawny rival boxes press their faces to the glass holding empty bowls, ribs showing through their cardboard sides. A brass plaque over the door reads "COMPETITIVE ADVANTAGE". (Video prompt: steam rising off the feast, rival faces sliding slowly down the glass).
+
+#Narration: YouTube already has both, allowing them to starve out any new competition. In my opinion, this is YouTube's primary competitive advantage.
+
+#Animated Image: A phone screen showing a grid of nine thumbnails: eight are featureless gray-green blobs with sparkles, one is a small human face looking nervous. A "90%" is scrawled across the blobs in red marker. Off to the right, a chibi grifter in wraparound sunglasses shovels more blobs into the grid with a spade, whistling. (Video prompt: the feed scrolling, the last human thumbnail getting shoveled over).
+
+#Narration: Now imagine a future where 90% of the content you watch on YouTube is AI slop generated by the platform itself, or by low-effort grifters.
+
+#Animated Image: Two identical bowls of gray-green mush sitting side by side on a counter, each with a price card. The left card reads "+ 6 ADS". The right card reads "NO ADS, HAS FRIENDS" and has a little heart and a chat bubble drawn on it. A chibi viewer strolls toward the right bowl with their hands in their pockets, whistling, not agonizing about it in the slightest. (Video prompt: viewer glancing left, glancing right, walking right without breaking stride).
+
+#Narration: If another app came along offering the same slop but with fewer ads or better social features, why not make the switch? What keeps users on YouTube in the age of slop?
+
+#Animated Image: The play-button king stands at a control panel, one finger still resting on a big red button labeled "REPLACE THE CREATORS", looking pleased with himself. Directly behind him is a second, much larger button labeled "REPLACE YOUTUBE" — and an enormous hand is descending from off-frame toward it. A single sweat drop appears on the king's face. (Video prompt: the giant hand lowering slowly, the king's smile freezing, sweat drop swelling).
+
+#Narration: If human creators can be replaced, YouTube can be replaced.
+
+#Animated Image: A white box with a swirl on it stands on a wobbly stepladder behind the throne, reaching up with both arms to lift the crown off the sleeping king's head. In its other hand it holds a phone showing an endless vertical feed of blobs, thumb mid-swipe. (Video prompt: the ladder wobbling, fingertips almost touching the crown, thumb swiping the feed).
+
+#Narration: OpenAI has already shown their willingness to take on YouTube and TikTok with their app Sora, which lets users generate AI slop and scroll through the slop that other people have generated.
+
+#Animated Image: A freeze-frame with the host stepping into his own drawing, holding a big hand-lettered card reading "SCRATCH THAT" over the previous scene. Behind the card: the ladder has collapsed, the swirl box is yanking its own power cord out of the wall, and a small headstone reads "SORA". A receipt unspools from a cash register and trails right out of the frame. (Video prompt: the card being slammed down, the plug popping out, the receipt unspooling endlessly).
+
+#Narration: Wait, no — scratch that. While I was editing this video, OpenAI announced that they're actually shutting down Sora, presumably because it was a massively unprofitable waste of computing power.
+
+#Animated Image: A small graveside gathering. A row of chibi tech-company boxes in black ties stand around the "SORA" headstone, heads bowed, each writing in a tiny notepad. Every visible notepad page reads the same thing: "TRY AGAIN, BUT BIGGER". (Video prompt: heads bowing, pens scribbling in unison, one box already looking up hungrily).
+
+#Narration: Hopefully, other AI companies will learn a lesson from that. But it won't just be AI giants coming for YouTube's throne.
+
+#Animated Image: A cookie factory with a bolted-on new wing covered in sparkles. A chibi executive shovels bundles of cash into a hopper labeled "$40 MILLION"; out the other end comes a small TV set playing an advert in which a gray-green blob lovingly holds a round sandwich cookie. Below the TV, an accountant sits on a stool quietly crying into a ledger. (Video prompt: cash being shoveled in, the TV advert playing on loop, the accountant's tears pooling).
+
+#Narration: Oreo's parent company, Mondelez International, has already spent over $40 million developing their own AI video generator, which they plan to use to pump out slop TV advertisements.
+
+#Animated Image: An open-plan office where all the employees are chibi candy: a gumdrop in a tiny headset, a lollipop with a face leaning back in an ergonomic chair, a candy cane pointing at a monitor. Every screen shows a rendering progress bar and a gray-green blob. A wall poster reads "SYNERGY". (Video prompt: progress bars filling, the gumdrop nodding at its screen, lollipop spinning in its chair).
+
+#Narration: Even candy companies can now build their own AI slop generators.
+
+#Animated Image: A downhill slope built from descending price tags, each one crossed out and rewritten smaller than the last. Careening down it toward the play-button castle at the bottom is a swarm of tiny startup go-karts, each flying a little flag — "BETTER FEED", "BETTER SLOP", "FEWER ADS" — and each one gaining. (Video prompt: price tags dropping away, go-karts accelerating down the slope, flags flapping).
+
+#Narration: As video generation models get cheaper and more efficient, smaller and smaller startups will be able to make a play for YouTube's market share, competing to offer the best features, the best recommendations, and the best slop.
+
+#Animated Image: The play-button king sits cheerfully on a thick tree branch, sawing through it on the trunk side of himself with a handsaw. With his other hand he leans down to hand a pamphlet reading "SLOP IS FINE!" to a chibi viewer standing below, who is reading it and nodding. Sawdust puffs; the branch has begun to bend. (Video prompt: saw working back and forth, sawdust puffing, the branch bowing).
+
+#Narration: By teaching their viewers that watching slop is okay and creators don't need to be human, YouTube is destroying their own competitive advantage.
+
+#Animated Image: The castle drawbridge is down and the moat is a dry cracked ditch. A parade of rival boxes strolls straight in wheeling suitcases, one of them checking a map. On the battlements the play-button king waves a tiny white handkerchief. In the bottom corner, the host gives a sarcastic double thumbs-up straight at the viewer. (Video prompt: rivals filing across the dry moat, king's handkerchief fluttering, host's eyebrow raising).
+
+#Narration: Without the protective factor of their massive pool of human creators, YouTube is going to face meaningful competition for the first time in decades. Good luck with that.
+
+#Animated Image: A huge empty stadium, every seat vacant, confetti drifting down anyway. Alone at center field, the play-button king holds up a pie chart that is one solid green circle marked "100%", grinning at nobody. A single crow sits on the goalpost. A "100%" balloon tied to his wrist is quietly deflating. (Video prompt: confetti falling into empty seats, balloon shrinking, crow taking off).
+
+#Narration: And sure, in a slop-based future, they will get to keep 100% of their ad revenue — but only if there's anyone left watching.
+
+#Animated Image: A wide gray-green sea of mush, drawn with thick wobbly ridges instead of waves. A chibi creator sits in a little rowboat holding a camera in one hand and a fishing rod labeled "VIEWS" in the other; the hook dangles above the surface with nothing on it. Bobbing all around the boat to the horizon are thousands of identical blobs. (Video prompt: mush slowly heaving, boat rocking, empty hook swinging).
+
+#Narration: AI content generation is obviously terrible for human YouTubers, who will have to compete for views with an ocean of slop.
+
+#Animated Image: The same mush sea, wider. A corporate tower with a red play button on its roof is sunk in it up to the third floor and tilting. Four chibi executives stand on the roof in their boxy suits, briefcases in hand, still holding a meeting — one of them is pointing at a flipchart showing a green arrow going up. (Video prompt: the tower settling deeper and tilting, the flipchart arrow still climbing).
+
+#Narration: But in the long term, it's also potentially catastrophic for YouTube, the company.
+
+#Animated Image: A gilded picture frame containing an alternate universe. Inside it: the play-button king in a beret, respectfully handing a paintbrush to a chibi human artist on a pedestal, while a torch-and-pitchfork mob chases a gray-green blob out of town in the background. A banner over the scene reads "MADE BY HUMANS". Everything inside the frame is warm and sunlit. (Video prompt: the framed scene glowing, mob chasing the blob off the edge of the frame).
+
+#Narration: One obvious solution to all this would be for YouTube to viciously suppress AI content on their platform, inflame the existing slop hatred among viewers, and encourage them to celebrate human-made art instead.
+
+#Animated Image: The host has fallen off his chair laughing, legs in the air, one hand slapping the floor, "HA HA HA" scrawled beside him. Behind him, the gilded frame from the previous shot is being crumpled into a ball and dropped into a wastebasket. Second beat: the host, upright, perfectly still, dead-eyed, staring straight ahead. (Video prompt: host convulsing with laughter, the frame crumpling into the bin, hard cut to the deadpan stare).
+
+#Narration: Ha ha ha. Yeah, they're not going to do that.
+
+#Animated Image: A boardroom where the whiteboard is already covered in every drawing from this video — the sinking tower, the dry moat, the empty stadium — all sketched out and dated. The chibi executives are variously yawning, checking a watch, and eating a sandwich. One has this exact video open on a laptop, playing at 2x speed, and isn't looking at it. (Video prompt: the whiteboard drawings appearing one by one while nobody reacts, one executive yawning enormously).
+
+#Narration: Nothing I've said in this video is new information to the higher-ups at YouTube.
+
+#Animated Image: A chibi viewer tipped back in a chair with a giant funnel in their mouth, gray-green mush glugging down it. The funnel is being held by the play-button box, whose expression is apologetic and pained, eyes darting sideways — because a much larger hand from off-frame is clamped around its arm, forcing it to keep pouring. (Video prompt: mush glugging down the funnel, the play button wincing, the big hand tightening its grip).
+
+#Narration: The reason that they will continue to force AI slop down our throats, even though it could eventually destroy their business, is that they have no choice.
+
+#Animated Image: A giant white blob figure with a large "G" on its front pushes a stroller down the street. Strapped into the stroller is the red play-button box, kicking its stick legs in protest. The G-parent holds a sparkle-covered rattle in its other hand and is shaking it enthusiastically at the child. (Video prompt: stroller rolling forward, play button kicking, rattle shaking).
+
+#Narration: YouTube is owned by Google, and Google is one of the leading developers of generative AI.
+
+#Animated Image: A huge wall chart with a green line climbing steeply — and the climbing section is visibly held up from beneath by a single wooden prop with a sparkle painted on it, planted on a stack of server boxes. The prop is bowing under the weight and has one small crack in it. To the side, a chibi investor stares up at the line with dollar signs where its eyes should be, ignoring the prop entirely. (Video prompt: the line climbing higher, the prop bowing and creaking, the crack widening slightly).
+
+#Narration: AI slop may one day kill YouTube, but it's also propping up Google's stock price, and forms a key part of their overall growth strategy.
+
+#Animated Image: A family dinner table. The giant "G" parent looms at one end, arm outstretched, pointing sternly down at a plate of gray-green mush. At the other end, the little play-button box sits on a booster seat, pushing the plate away with both hands and holding up a crayon drawing of chibi humans painting, singing and filming. The parent is not looking at the drawing. (Video prompt: the plate being pushed away and firmly pushed back, the drawing held higher and ignored).
+
+#Narration: Google is heavily reliant on AI, so they can't have one of their own subsidiaries rejecting it and fighting for a future where human culture stays human.
+
+#Animated Image: On the courthouse steps, a chibi figure in a stars-and-stripes top hat performs the Heimlich maneuver on the enormous "G" blob, which is doubled over and coughing up a round blue-and-green browser icon that arcs across the frame. Standing directly beside them, completely unnoticed, the play-button box whistles at the sky with a crown half-stuffed into its pocket. (Video prompt: the Heimlich thrust, the browser icon popping out and bouncing away, the play button whistling).
+
+#Narration: The US government previously tried to force Google to spit out Chrome, but it seems to me that YouTube is the far more obvious antitrust case.
+
+#Animated Image: Two crowned figures handcuffed together at the wrist and facing opposite directions, straining to walk away from each other. One is a magnifying glass over a search bar; the other is the red play-button box. Between them, an enormous hand-lettered question mark. A tiny lawyer chibi at their feet shrugs with both palms up. (Video prompt: both figures straining outward, cuffs going taut, question mark growing).
+
+#Narration: These are massive, unrelated businesses with opposing commercial interests. Why does the search monopoly own the video sharing monopoly? Who knows?
+
+#Animated Image: An enormous thin-skinned bubble with a sparkle floating inside it, drifting toward a needle mounted on the wall. Crouched behind a corner just out of the bubble's sight, the play-button king waits with a broom in one hand and a "WE ALWAYS HATED SLOP" sign in the other, already tucked under his arm and ready to deploy. (Video prompt: bubble drifting toward the needle, the king peeking around the corner, sign edging out).
+
+#Narration: Maybe YouTube will start suppressing slop once the AI bubble pops.
+
+#Animated Image: The play-button box thrashing in dark blue water while a swarm of small startup piranhas — little colored boxes with fins and one angry eye each — strip it from every direction. Bits of the crown are already floating away. One tiny piranha has a napkin tucked into its fin. (Video prompt: piranhas darting in from all sides, water churning, crown fragments drifting up).
+
+#Narration: Or maybe they'll be eaten alive by smaller startups once slop becomes widely accepted.
+
+#Animated Image: An auction house. A chibi podcaster stands on the block holding a microphone, looking extremely comfortable about it. Rival platform boxes raise numbered paddles with increasingly absurd figures scrawled on them. At the back of the room, the play-button king turns his wallet upside down and one moth flies out. (Video prompt: paddles shooting up one after another, gavel hammering, moth fluttering out of the wallet).
+
+#Narration: Maybe we'll see a repeat of the podcast and streamer bidding wars, with top human talent being poached away from YouTube.
+
+#Animated Image: A boxy robot with a flat screen for a face, displaying an enormous shocked open mouth. It flings handfuls of cash into a roaring crowd — but the cash is drawn as gray-green blobs, and the crowd is loving it anyway, hearts floating over their heads. Off in the bottom corner, a real chibi creator sits alone on a stool with a "100% HUMAN" badge and no audience at all. (Video prompt: the robot's screen cycling through shocked faces, blob-cash raining, the lone creator's stool sliding out of frame).
+
+#Narration: Or maybe AI Mr Beast will be so compelling that these platforms will drop human creators altogether.
+
+#Animated Image: A chibi figure in a dark purple cape stands on the toppled wooden throne, planting a flag reading "NO SLOP" and handing out free tickets to a cheering crowd below with the other hand. The crown rolls away across the floor and comes to rest in a puddle. One tidy little ad banner floats politely off to the side. (Video prompt: throne toppling, flag planting, tickets sailing into the crowd, crown rolling into the puddle).
+
+#Narration: Maybe Nebula will ban AI content from their platform, launch an ad-supported free tier, and overthrow the tyrant king.
+
+#Animated Image: The host stands sheepishly rubbing the back of his head next to an enormous corporate poster in cheery bubble lettering: "BRING BIG IDEAS TO LIFE" and "FUEL IMAGINATION", with a winged yellow lightbulb rising off the ground. One bottom corner of the poster has peeled away, revealing gray-green mush oozing out from behind it. The host has not noticed. (Video prompt: the winged lightbulb flapping upward, the poster corner peeling further, mush oozing out).
+
+#Narration: Or maybe I'm entirely wrong, and AI will help YouTubers bring big ideas to life and fuel imagination, as YouTube seems to believe.
+
+#Animated Image: Two bottles on a plain shelf under a hand-lettered "?" — on the left, a bloated milk carton with green stink lines rising off it and a fly hovering nearby wearing a tiny gas mask; on the right, a dark wine bottle with a neat label and a small gold medal hanging from its neck. Below the shelf, an empty comment box with a blinking cursor. (Video prompt: stink lines wafting, the fly adjusting its mask, cursor blinking).
+
+#Narration: If you're watching this video in 5 years, comment below whether it aged like milk or wine.
+
+#Animated Image: A tiny island in the middle of the gray-green mush sea, just big enough for one chibi creator, their tripod and their camera. Sleeves rolled up, jaw set, they hammer a flag into the ground reading "HUMAN MADE". The mush is already lapping over their shoes. (Video prompt: mush rising up their ankles, flag going in with three firm hammer strikes, creator not budging).
+
+#Narration: And if you're a YouTuber making real human content — good luck. You're going to need it.
+
+#Animated Image: The host waving with one hand. On his left, a chibi guest illustrator holds an oversized marker like a staff, with a small star doodle spinning beside their head and an arrow pointing at them. On his right, a row of chibi supporters wearing comically enormous hats — and the biggest hat has two blinking eyes and a small antenna, looking around the room by itself. (Video prompt: the marker being raised, hats popping onto heads one by one, the big hat blinking and glancing around).
+
+#Narration: Thank you to Star for guest illustrating this video, and thank you to my backers on Patreon, especially those in the big sentient hat tier, for supporting the channel.
+
+#Animated Image: The host waving both arms overhead, eyes curved into happy arcs, standing on a plain flat ground line with a small scribbled sun behind him. His marker cap and a closed sketchbook sit on the ground beside his feet. (Video prompt: host waving, then a whiteboard eraser sweeping across from one side and wiping the whole drawing away).
+
+#Narration: I'm Siliconversations. Thanks for watching. See you all next time. Bye for now.`,
 	},
 ];
 

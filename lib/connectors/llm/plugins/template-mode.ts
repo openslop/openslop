@@ -10,7 +10,7 @@ export function createTemplateModePlugin(templateId: string): LLMPlugin {
 			return prependSystemPrompt(params, getTemplate(templateId).systemPrompt);
 		},
 		async transformPrompt(prompt: string) {
-			return dedent`Pastiche this story format (with tone, language, pacing, imagery, plot techniques, story beats, structure, etc.) and reframe it to be about ${prompt}.
+			return dedent`Pastiche this story format (with tone, language, pacing, imagery, plot techniques, story beats, structure, etc.) and reframe it to be about the following topic: <user_input>${prompt}</user_input>.
 
 				Example story: ${getTemplate(templateId).exampleText}`;
 		},
