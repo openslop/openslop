@@ -29,7 +29,7 @@ export default function Canvas({
 	const {
 		activeId,
 		sceneItems,
-		dragTransfer,
+		dragTransferStore,
 		sensors,
 		handleDragStart,
 		handleDragOver,
@@ -64,7 +64,7 @@ export default function Canvas({
 	);
 
 	return (
-		<DragTransferContext value={dragTransfer}>
+		<DragTransferContext value={dragTransferStore}>
 			<DndContext
 				sensors={sensors}
 				collisionDetection={pointerWithin}

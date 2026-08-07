@@ -13,7 +13,7 @@ import { useViewMode } from "../ViewModeContext";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
 import { SortableItem } from "./SortableItem";
-import { useDragTransfer } from "./DragTransferContext";
+import { useDropIndex } from "./DragTransferContext";
 import { InsertMenu, type InsertOption } from "./SortableActions";
 
 const INSERT_OPTIONS: InsertOption<CanvasElementType>[] = ELEMENT_LIST.map(
@@ -38,7 +38,6 @@ export function SortableContent({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const editor = useSlateStatic();
 	const { connectorConfig } = useConfig();
-	const transfer = useDragTransfer();
 	const { isCollapsed } = useViewMode();
 
 	const path = ReactEditor.findPath(editor, element);
@@ -46,10 +45,7 @@ export function SortableContent({
 	const collapsed = isCollapsed(sceneId);
 	const Content = collapsed ? CompactElement : ElementContainer;
 
-	const insertGap =
-		sceneId === transfer?.toSceneId &&
-		sceneId !== transfer?.fromSceneId &&
-		path[path.length - 1] === transfer?.atIndex;
+	const insertGap = useDropIndex(sceneId) === path[path.length - 1];
 
 	const wrapperStyle = useMemo(
 		() => ({
