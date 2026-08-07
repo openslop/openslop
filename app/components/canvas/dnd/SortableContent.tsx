@@ -10,7 +10,8 @@ import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { useViewMode } from "../ViewModeContext";
-import { renderCanvasElement } from "../elements/ElementContainer";
+import { CompactElement } from "../elements/CompactElement";
+import { ElementContainer } from "../elements/ElementContainer";
 import { SortableItem } from "./SortableItem";
 import { useDragTransfer } from "./DragTransferContext";
 import { InsertMenu, type InsertOption } from "./SortableActions";
@@ -43,6 +44,7 @@ export function SortableContent({
 	const path = ReactEditor.findPath(editor, element);
 	const sceneId = parentSceneId(editor, path);
 	const collapsed = isCollapsed(sceneId);
+	const Content = collapsed ? CompactElement : ElementContainer;
 
 	const insertGap =
 		sceneId === transfer?.toSceneId &&
@@ -83,7 +85,9 @@ export function SortableContent({
 			attributes={attributes}
 			element={element}
 		>
-			{renderCanvasElement({ attributes, children, element })}
+			<Content attributes={attributes} element={element}>
+				{children}
+			</Content>
 		</SortableItem>
 	);
 }

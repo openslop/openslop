@@ -1,15 +1,52 @@
 import { GripVertical, Plus } from "@/components/ui/icon";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { createEditor, Descendant } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
-import { renderCanvasElement } from "../elements/ElementContainer";
+import { Editable, RenderElementProps, Slate, withReact } from "slate-react";
+import type { CanvasElement } from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
+import { CompactElement } from "../elements/CompactElement";
+import { ElementContainer } from "../elements/ElementContainer";
+import { SceneContainer } from "../elements/SceneContainer";
+import { useSceneIndex } from "../hooks/useSceneIndex";
+import { useViewMode } from "../ViewModeContext";
 import styles from "../styles/sortable.module.css";
 
-export function DragOverlayContent({ element }: { element: Descendant }) {
+/**
+ * Previews the dragged node in a scratch editor holding only that node. What a
+ * node would otherwise read off its own document (scene number, collapsed
+ * state) is resolved against the real canvas, which this renders inside of.
+ */
+export function DragOverlayContent({ element }: { element: CanvasElement }) {
 	const editor = useMemo(() => withReact(createEditor()), []);
 	const value = useMemo<Descendant[]>(
 		() => [structuredClone(element)],
 		[element],
+	);
+
+	const sceneIndex = useSceneIndex(element.id);
+	const { isCollapsed } = useViewMode();
+	const collapsed = isSceneElement(element) && isCollapsed(element.id);
+
+	const renderElement = useCallback(
+		({ attributes, children, element: node }: RenderElementProps) => {
+			if (isSceneElement(node))
+				return (
+					<SceneContainer
+						attributes={attributes}
+						element={node}
+						sceneIndex={sceneIndex}
+					>
+						{children}
+					</SceneContainer>
+				);
+			const Content = collapsed ? CompactElement : ElementContainer;
+			return (
+				<Content attributes={attributes} element={node}>
+					{children}
+				</Content>
+			);
+		},
+		[collapsed, sceneIndex],
 	);
 
 	return (
@@ -31,7 +68,7 @@ export function DragOverlayContent({ element }: { element: Descendant }) {
 				</div>
 				<Editable
 					readOnly={true}
-					renderElement={renderCanvasElement}
+					renderElement={renderElement}
 					className="text-xl leading-relaxed text-center break-all"
 				/>
 			</Slate>
