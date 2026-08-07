@@ -5,6 +5,9 @@ import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { makeNodeId } from "@/lib/canvas/nodeUtils";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 
+/** The document a project starts from when there is no generated script. */
+export const BLANK_SCRIPT = "<narration></narration>";
+
 export function splitScenes(osml: string): string[] {
 	if (!osml.trim()) return [];
 	return osml

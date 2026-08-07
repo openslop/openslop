@@ -15,12 +15,14 @@ import { getDefaultConnector } from "@/lib/connectors/registry";
 import { createConnector } from "@/lib/connectors/factory";
 import { useProject } from "@/lib/project/useProject";
 import { getProjectStore } from "@/lib/project/store";
+import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
 import { useStreamRun } from "./useStreamRun";
 
 type ScriptControl = {
 	loading: boolean;
 	submitPrompt: (prompt: string) => Promise<void>;
+	startBlank: () => void;
 	stopGeneration: () => void;
 };
 
@@ -55,6 +57,7 @@ export function ScriptProvider({
 }) {
 	const { projectId, connectorConfig, mode } = useConfig();
 	const updateMetadata = useProject((s) => s.updateMetadata);
+	const [script, setScript] = useState(initialScript);
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const { nodes, appendChunk } = useOSMLStreamParser();
 	const { loading, run, stop: stopGeneration } = useStreamRun();
@@ -79,15 +82,20 @@ export function ScriptProvider({
 		[projectId, llmProvider, llmConfig, appendChunk, updateMetadata, mode, run],
 	);
 
+	const startBlank = useCallback(() => {
+		setScript(BLANK_SCRIPT);
+		setHasContent(true);
+	}, []);
+
 	const control = useMemo<ScriptControl>(
-		() => ({ loading, submitPrompt, stopGeneration }),
-		[loading, submitPrompt, stopGeneration],
+		() => ({ loading, submitPrompt, startBlank, stopGeneration }),
+		[loading, submitPrompt, startBlank, stopGeneration],
 	);
 
 	return (
 		<ScriptControlContext value={control}>
 			<ScriptNodesContext value={nodes}>
-				<ScriptInitialContext value={initialScript}>
+				<ScriptInitialContext value={script}>
 					<ScriptHasContentContext value={hasContent}>
 						{children}
 					</ScriptHasContentContext>
