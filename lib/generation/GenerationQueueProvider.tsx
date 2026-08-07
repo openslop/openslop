@@ -7,11 +7,8 @@ import {
 	type ReactNode,
 } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import {
-	DEFAULT_BATCH_SIZE,
-	GenerationQueue,
-	type ElementSnapshot,
-} from "./queue";
+import { DEFAULT_BATCH_SIZE, GenerationQueue } from "./queue";
+import type { ElementSnapshot } from "./snapshots";
 
 const [GenerationQueueContext, useGenerationQueue] =
 	createRequiredContext<GenerationQueue>("GenerationQueueContext");

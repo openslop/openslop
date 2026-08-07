@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
 	isGenerationActive,
 	type ElementSnapshot,
-} from "@/lib/generation/queue";
+} from "@/lib/generation/snapshots";
 
 type Status = ElementSnapshot["status"];
 

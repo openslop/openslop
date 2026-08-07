@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import {
 	isGenerationActive,
 	type GenerationStatus,
-} from "@/lib/generation/queue";
+} from "@/lib/generation/snapshots";
 import { useElementGeneration } from "./ElementGenerationContext";
 
 export function StaleIndicator() {

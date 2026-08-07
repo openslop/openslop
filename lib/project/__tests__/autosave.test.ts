@@ -7,7 +7,7 @@ import {
 	type Mock,
 	vi,
 } from "vitest";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import {
 	AUTOSAVE_DEBOUNCE_MS,
 	buildProjectSave,

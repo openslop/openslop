@@ -2,7 +2,7 @@
 
 import { Pencil, X, type IconComponent } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import { isGenerationActive } from "@/lib/generation/queue";
+import { isGenerationActive } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
 import { RemoveCrossButton } from "./RemoveCrossButton";

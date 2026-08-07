@@ -48,7 +48,10 @@ A generation is a small dependency graph, not a lone job. `lib/generation/graph.
 
 Staleness falls out of the graph: a node needs generating when it has no result, when a dependency does, or when its current inputs differ from the inputs its result was made from. One element (`useGenerate`) and Generate All (`useGenerateAll`) run the same check. A result the user supplied is `pinned` and never regenerated.
 
-`queue.ts` runs the graph. It flattens roots dependencies-first, skips nodes that are already fresh, and owns per-element status, elapsed time, abort controllers, and a result history keyed by serialized inputs, so undoing an edit restores the earlier result instead of regenerating it.
+`queue.ts` runs the graph. It flattens roots dependencies-first, skips nodes that are already fresh, and holds only what is in flight: the pending nodes, the abort controllers, and the batch limit. Everything that outlives a run lives beside it:
+
+- `snapshots.ts` is the per-element record (status, elapsed seconds, result, error, the inputs that result was made from) plus a result history keyed by serialized inputs, so undoing an edit restores the earlier result instead of regenerating it. It is also the subscription observers read through; mutators leave notifying to the caller so a batch of edits lands as one update.
+- `elapsedTicker.ts` counts whole seconds for running jobs and keeps its interval alive only while something is running.
 
 ## Editor state
 

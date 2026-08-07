@@ -11,7 +11,7 @@ import {
 	applyStoreSnapshot,
 	parseStoreSnapshot,
 } from "@/lib/project/storeSnapshot";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { GenerationQueueProvider } from "@/lib/generation/GenerationQueueProvider";
 import Editor from "@/app/components/Editor";
 

@@ -1,6 +1,6 @@
 import debounce from "lodash/debounce";
 import PQueue from "p-queue";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { saveProject, type SaveProjectInput } from "./api";
 import { deriveProjectName } from "./projectName";
 import { getProjectStore } from "./store";

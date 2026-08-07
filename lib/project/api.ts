@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ProjectStoreSnapshot } from "./storeSnapshot";
 
 export type ProjectRow = {

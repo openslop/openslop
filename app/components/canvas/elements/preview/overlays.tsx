@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { isGenerationActive } from "@/lib/generation/queue";
+import { isGenerationActive } from "@/lib/generation/snapshots";
 import { GenerationIndicator } from "../GenerationIndicator";
 import type { GenerationState, PlaceholderProps } from "./status";
 

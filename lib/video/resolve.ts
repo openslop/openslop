@@ -1,7 +1,7 @@
 import { ELEMENT_TYPES, type CanvasElement } from "@/lib/canvas/types";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import type { ElementSnapshot } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ResolvedElement } from "./types";
 import {
 	areCaptionsEnabled,
