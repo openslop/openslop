@@ -49,7 +49,7 @@ const commit = (queue: GenerationQueue, target: GenerationNode, url: string) =>
 
 describe("nodeInputs", () => {
 	it("records what each dependency resolved to", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const avatar = node("avatar");
 		const image = node("image", [
 			avatar,
@@ -70,12 +70,12 @@ describe("nodeInputs", () => {
 
 describe("isNodeStale", () => {
 	it("is false for a node with no result yet", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		expect(isNodeStale(node("a"), queue)).toBe(false);
 	});
 
 	it("is false right after a result is committed", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const avatar = node("avatar");
 		const image = node("image", [avatar]);
 		commit(queue, avatar, "avatar.png");
@@ -85,7 +85,7 @@ describe("isNodeStale", () => {
 	});
 
 	it("is true once a dependency resolves to a different output", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const avatar = node("avatar");
 		const image = node("image", [avatar]);
 		commit(queue, avatar, "avatar.png");
@@ -96,7 +96,7 @@ describe("isNodeStale", () => {
 	});
 
 	it("is true when a source node's inputs change, without regenerating anything", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const withRefs = (urls: string) =>
 			node("image", [sourceNode("project:refs", { urls })]);
 		commit(queue, withRefs("a.png"), "image.png");
@@ -106,7 +106,7 @@ describe("isNodeStale", () => {
 	});
 
 	it("propagates through a dependency that itself needs regenerating", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const refs = (urls: string) => sourceNode("project:refs", { urls });
 		const avatar = (urls: string) => node("avatar", [refs(urls)]);
 		const image = (urls: string) => node("image", [avatar(urls)]);
@@ -123,7 +123,7 @@ describe("isNodeStale", () => {
 	// commitResult is the "the queue did not generate this" path: uploads and
 	// template seeds. It pins, so project state drifting cannot overwrite them.
 	it("never marks a committed upload stale, however far its inputs drift", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const uploaded = (style: string) =>
 			node("el", [sourceNode("project:artStyle", { style })]);
 		queue.commitResult(
@@ -137,13 +137,13 @@ describe("isNodeStale", () => {
 	});
 
 	it("still generates a pinned node that has no result yet", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		queue.discard("el");
 		expect(needsGeneration(node("el"), queue)).toBe(true);
 	});
 
 	it("never marks a source node stale", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		expect(isNodeStale(sourceNode("project:refs", { urls: "a" }), queue)).toBe(
 			false,
 		);

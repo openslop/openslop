@@ -14,7 +14,7 @@ The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams O
 
 ### 2. Generate
 
-Generate resolves the element into a dependency graph (see [Generation graph](#generation-graph)) and queues the stale nodes client-side, dependencies first, `DEFAULT_BATCH_SIZE` at a time. Each job is submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. Workers call the provider, upload results to Vercel Blob, and mark the job complete. The client polls until the asset URL arrives and the preview updates. Music and sfx check a Pinecone similarity cache first.
+Generate resolves the element into a dependency graph (see [Generation graph](#generation-graph)) and queues the stale nodes client-side, dependencies first and up to a per-media-type concurrency limit at a time. Each job is submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. Workers call the provider, upload results to Vercel Blob, and mark the job complete. The client polls until the asset URL arrives and the preview updates. Music and sfx check a Pinecone similarity cache first.
 
 ### 3. Save / restore
 
@@ -48,10 +48,11 @@ A generation is a small dependency graph, not a lone job. `lib/generation/graph.
 
 Staleness falls out of the graph: a node needs generating when it has no result, when a dependency does, or when its current inputs differ from the inputs its result was made from. One element (`useGenerate`) and Generate All (`useGenerateAll`) run the same check. A result the user supplied is `pinned` and never regenerated.
 
-`queue.ts` runs the graph. It flattens roots dependencies-first, skips nodes that are already fresh, and holds only what is in flight: the pending nodes, the abort controllers, and the batch limit. Everything that outlives a run lives beside it:
+`queue.ts` runs the graph. It flattens roots dependencies-first, skips nodes that are already fresh, and holds only what is in flight: the pending nodes and the jobs currently running, each with its abort controller. Everything that outlives a run lives beside it:
 
 - `snapshots.ts` is the per-element record (status, elapsed seconds, result, error, the inputs that result was made from) plus a result history keyed by serialized inputs, so undoing an edit restores the earlier result instead of regenerating it. It is also the subscription observers read through; mutators leave notifying to the caller so a batch of edits lands as one update.
 - `elapsedTicker.ts` counts whole seconds for running jobs and keeps its interval alive only while something is running.
+- `concurrency.ts` is how many jobs of each media type may run at once, so a pair of slow videos never stalls the sound effects behind them. The limits are hardcoded until BYOK makes them a user setting.
 
 ## Editor state
 

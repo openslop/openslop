@@ -7,7 +7,7 @@ import {
 	type ReactNode,
 } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import { DEFAULT_BATCH_SIZE, GenerationQueue } from "./queue";
+import { GenerationQueue } from "./queue";
 import type { ElementSnapshot } from "./snapshots";
 
 const [GenerationQueueContext, useGenerationQueue] =
@@ -32,13 +32,7 @@ export function GenerationQueueProvider({
 	initialState: Record<string, ElementSnapshot>;
 	children: ReactNode;
 }) {
-	const [queue] = useState(
-		() =>
-			new GenerationQueue({
-				batchSize: DEFAULT_BATCH_SIZE,
-				initialState,
-			}),
-	);
+	const [queue] = useState(() => new GenerationQueue({ initialState }));
 	useEffect(() => () => queue.cancelAll(), [queue]);
 	return (
 		<GenerationQueueContext value={queue}>{children}</GenerationQueueContext>

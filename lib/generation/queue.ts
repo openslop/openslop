@@ -1,5 +1,9 @@
-import type { AssetResult } from "../connectors/types";
+import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
+import {
+	resolveConcurrencyLimits,
+	type ConcurrencyLimits,
+} from "./concurrency";
 import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
 import type { GenerationInputs } from "./inputs";
@@ -15,12 +19,15 @@ import {
 	type NodeId,
 } from "./graph";
 
-export const DEFAULT_BATCH_SIZE = 2;
+type ActiveJob = {
+	controller: AbortController;
+	connectorType: AssetConnectorType;
+};
 
 /**
- * Runs generation nodes, at most `batchSize` at a time and never before their
- * dependencies have settled. All per-element state lives in the snapshot store;
- * the queue owns only what is in flight.
+ * Runs generation nodes, at most `limits[connectorType]` of each media type at a
+ * time and never before their dependencies have settled. All per-element state
+ * lives in the snapshot store; the queue owns only what is in flight.
  */
 export class GenerationQueue {
 	private readonly snapshots: SnapshotStore;
@@ -28,17 +35,17 @@ export class GenerationQueue {
 		this.onTick(elapsed),
 	);
 	private pending: JobNode[] = [];
-	private controllers = new Map<string, AbortController>();
-	private readonly batchSize: number;
+	private active = new Map<string, ActiveJob>();
+	private readonly limits: ConcurrencyLimits;
 
 	constructor({
-		batchSize,
+		limits,
 		initialState,
 	}: {
-		batchSize: number;
+		limits?: Partial<ConcurrencyLimits>;
 		initialState?: Record<string, ElementSnapshot>;
-	}) {
-		this.batchSize = batchSize;
+	} = {}) {
+		this.limits = resolveConcurrencyLimits(limits);
 		this.snapshots = new SnapshotStore(initialState);
 	}
 
@@ -91,11 +98,11 @@ export class GenerationQueue {
 	}
 
 	cancelAll() {
-		for (const [id, controller] of this.controllers) {
+		for (const [id, { controller }] of this.active) {
 			controller.abort();
 			this.ticker.stop(id);
 		}
-		this.controllers.clear();
+		this.active.clear();
 		this.pending = [];
 		for (const id of this.snapshots.ids()) {
 			this.snapshots.resetToIdle(id);
@@ -156,8 +163,8 @@ export class GenerationQueue {
 	}
 
 	private abortJob(id: string) {
-		this.controllers.get(id)?.abort();
-		this.controllers.delete(id);
+		this.active.get(id)?.controller.abort();
+		this.active.delete(id);
 		this.ticker.stop(id);
 		this.pending = this.pending.filter((node) => node.id !== id);
 	}
@@ -171,10 +178,19 @@ export class GenerationQueue {
 		);
 	}
 
+	private hasCapacity(connectorType: AssetConnectorType) {
+		const running = [...this.active.values()].filter(
+			(job) => job.connectorType === connectorType,
+		).length;
+		return running < this.limits[connectorType];
+	}
+
 	private processQueue() {
-		while (this.controllers.size < this.batchSize) {
+		for (;;) {
 			const index = this.pending.findIndex(
-				(node) => !this.blockingDependency(node),
+				(node) =>
+					this.hasCapacity(node.job.connectorType) &&
+					!this.blockingDependency(node),
 			);
 			if (index === -1) break;
 			const [node] = this.pending.splice(index, 1);
@@ -197,7 +213,7 @@ export class GenerationQueue {
 	 * its own, so its error would otherwise never reach anyone.
 	 */
 	private releaseBlocked() {
-		if (this.controllers.size > 0 || this.pending.length === 0) return;
+		if (this.active.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
 		for (const node of blocked) {
@@ -220,7 +236,10 @@ export class GenerationQueue {
 		const { job } = node;
 		const { elementId } = job;
 		const controller = new AbortController();
-		this.controllers.set(elementId, controller);
+		this.active.set(elementId, {
+			controller,
+			connectorType: job.connectorType,
+		});
 
 		this.snapshots.update(elementId, { status: "generating", seconds: 0 });
 		this.snapshots.notify();
@@ -264,7 +283,7 @@ export class GenerationQueue {
 	private finalizeJob(elementId: string, controller: AbortController) {
 		if (controller.signal.aborted) return;
 		this.ticker.stop(elementId);
-		this.controllers.delete(elementId);
+		this.active.delete(elementId);
 		this.processQueue();
 	}
 }
