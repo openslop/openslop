@@ -7,7 +7,7 @@ import {
 import type { SceneElement } from "@/lib/canvas/types";
 import { useSceneSequence } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
-import { useDragTransfer } from "../dnd/DragTransferContext";
+import { useDropIndex } from "../dnd/DragTransferContext";
 import { useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 import { DeleteButton } from "./DeleteButton";
@@ -33,19 +33,13 @@ function useSceneState(element: SceneElement) {
 		[element.children],
 	);
 
-	const transfer = useDragTransfer();
-	const isDropTarget =
-		transfer &&
-		element.id === transfer.toSceneId &&
-		element.id !== transfer.fromSceneId;
+	const dropIndex = useDropIndex(element.id);
 
 	return {
 		childIds,
 		dropPadding: {
 			paddingBottom:
-				isDropTarget && transfer.atIndex >= childIds.length
-					? "3rem"
-					: undefined,
+				dropIndex !== null && dropIndex >= childIds.length ? "3rem" : undefined,
 			transition: "padding-bottom 200ms ease",
 		} as React.CSSProperties,
 	};

@@ -13,13 +13,13 @@ import { Descendant, Editor } from "slate";
 import { moveDraggedElement } from "@/lib/canvas/dragOps";
 import { findElementById } from "@/lib/canvas/editorOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
-import type { DragTransfer } from "./DragTransferContext";
+import { createDragTransferStore } from "./DragTransferContext";
 
 const SCENE_ID_SEPARATOR = ",";
 
 export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-	const [dragTransfer, setDragTransfer] = useState<DragTransfer>(null);
+	const [dragTransferStore] = useState(createDragTransferStore);
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
@@ -50,7 +50,7 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 			if (!fromSceneId || !toSceneId) return;
 
 			if (fromSceneId === toSceneId) {
-				setDragTransfer(null);
+				dragTransferStore.set(null);
 				return;
 			}
 
@@ -61,38 +61,38 @@ export function useDragAndDrop(editor: Editor, value: Descendant[]) {
 			const atIndex = isSceneElement(overNode)
 				? overNode.children.length
 				: overPath[overPath.length - 1];
-			setDragTransfer({
+			dragTransferStore.set({
 				itemId: active.id as string,
 				fromSceneId,
 				toSceneId,
 				atIndex,
 			});
 		},
-		[editor],
+		[dragTransferStore, editor],
 	);
 
 	const handleDragEnd = useCallback(
 		(event: DragEndEvent) => {
 			const { active, over } = event;
 			setActiveId(null);
-			setDragTransfer(null);
+			dragTransferStore.set(null);
 
 			if (!over?.id || active.id === over.id) return;
 
 			moveDraggedElement(editor, String(active.id), String(over.id));
 		},
-		[editor],
+		[dragTransferStore, editor],
 	);
 
 	const handleDragCancel = useCallback(() => {
 		setActiveId(null);
-		setDragTransfer(null);
-	}, []);
+		dragTransferStore.set(null);
+	}, [dragTransferStore]);
 
 	return {
 		activeId,
 		sceneItems,
-		dragTransfer,
+		dragTransferStore,
 		sensors,
 		handleDragStart,
 		handleDragOver,
