@@ -19,7 +19,7 @@ const apply = (templateId: string) =>
 describe("applyTemplate", () => {
 	beforeEach(() => {
 		clearProjectStore(PROJECT_ID);
-		queue = new GenerationQueue({ batchSize: 1 });
+		queue = new GenerationQueue();
 	});
 
 	it("does not leak characters from a previous template", () => {

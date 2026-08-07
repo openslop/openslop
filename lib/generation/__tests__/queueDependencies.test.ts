@@ -45,7 +45,7 @@ beforeEach(() => {
 	vi.useFakeTimers();
 	generateMock = vi.fn();
 	// The batch size from the issue's repro: two avatars can fill it.
-	queue = new GenerationQueue({ batchSize: 2 });
+	queue = new GenerationQueue({ limits: { image: 2 } });
 });
 
 afterEach(() => vi.useRealTimers());

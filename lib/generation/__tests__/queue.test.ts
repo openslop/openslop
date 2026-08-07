@@ -57,7 +57,7 @@ describe("GenerationQueue", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		generateMock = vi.fn();
-		generationQueue = new GenerationQueue({ batchSize: 3 });
+		generationQueue = new GenerationQueue({ limits: { image: 3 } });
 	});
 
 	afterEach(() => {
@@ -139,6 +139,25 @@ describe("GenerationQueue", () => {
 			generationQueue.discard("b2");
 			generationQueue.discard("b3");
 			generationQueue.discard("b4");
+		});
+
+		it("limits each connector type independently", () => {
+			generateMock.mockReturnValue(new Promise(() => {}));
+			const queue = new GenerationQueue({ limits: { image: 1, tts: 2 } });
+
+			queue.enqueueGraph([
+				makeJob("i1"),
+				makeJob("i2"),
+				makeJob("t1", { connectorType: "tts" }),
+				makeJob("t2", { connectorType: "tts" }),
+			]);
+
+			expect(queue.getElementSnapshot("i1").status).toBe("generating");
+			expect(queue.getElementSnapshot("i2").status).toBe("queued");
+			expect(queue.getElementSnapshot("t1").status).toBe("generating");
+			expect(queue.getElementSnapshot("t2").status).toBe("generating");
+
+			queue.cancelAll();
 		});
 
 		it("does not re-enqueue an element already in the queue", () => {
@@ -689,7 +708,6 @@ describe("GenerationQueue", () => {
 
 		it("populates entries from the constructor", () => {
 			const q = new GenerationQueue({
-				batchSize: 3,
 				initialState: { h1: idleEntry },
 			});
 			expect(q.getElementSnapshot("h1")).toEqual(idleEntry);
@@ -697,7 +715,6 @@ describe("GenerationQueue", () => {
 
 		it("normalizes stale 'generating' status back to idle", () => {
 			const q = new GenerationQueue({
-				batchSize: 3,
 				initialState: {
 					h2: { ...idleEntry, status: "generating", seconds: 42 },
 				},
@@ -710,7 +727,6 @@ describe("GenerationQueue", () => {
 		it("keeps staleness correct after rehydration", async () => {
 			const { isNodeStale } = await import("../graph");
 			const q = new GenerationQueue({
-				batchSize: 3,
 				initialState: { h3: idleEntry },
 			});
 

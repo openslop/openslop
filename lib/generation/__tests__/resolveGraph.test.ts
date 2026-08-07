@@ -198,7 +198,7 @@ describe("resolveGraph", () => {
 		);
 		if (!still) throw new Error("expected a still dependency");
 
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const commit = (node: typeof anim, url: string) =>
 			queue.commitResult(node, { imageUrl: url, durationSec: 0 });
 
@@ -213,7 +213,7 @@ describe("resolveGraph", () => {
 	// An upload replaces a generated result with the user's own image. Project
 	// state drifting underneath it must not let Generate All overwrite it.
 	it("regenerates a generated image when the art style changes", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const img = element("img", "image");
 
 		queue.commitResult(resolve(img), {

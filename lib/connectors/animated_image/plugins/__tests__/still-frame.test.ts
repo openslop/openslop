@@ -98,7 +98,7 @@ describe("stillFrameUrl", () => {
 	// Regression: the preview used to read the animation's own result, so an
 	// uploaded still stayed invisible until the animation re-rendered.
 	it("reads the still node rather than the animation's own result", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const node = nodeBuilder(registry, state)(forElement(animated));
 		const still = node.dependsOn.find(
 			(dep) => dep.id === stillElementId(ELEMENT_ID),
@@ -122,7 +122,7 @@ describe("stillFrameUrl", () => {
 	});
 
 	it("has no still frame before one exists", () => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const node = nodeBuilder(registry, state)(forElement(animated));
 		expect(stillFrameUrl(node, queue)).toBeUndefined();
 	});
@@ -148,7 +148,7 @@ describe("uploaded still lifetime", () => {
 
 	/** Upload a still, then read back both nodes against a possibly-edited element. */
 	const afterUpload = (text: string, videoPrompt: string) => {
-		const queue = new GenerationQueue({ batchSize: 1 });
+		const queue = new GenerationQueue();
 		const build = nodeBuilder(registry, state);
 		const original = build(forElement(animated("a forest", "slow pan")));
 		const still = original.dependsOn.find(

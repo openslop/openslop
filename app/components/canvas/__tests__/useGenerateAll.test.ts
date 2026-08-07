@@ -128,7 +128,7 @@ let enqueueGraphSpy: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	queue = new GenerationQueue({ batchSize: 3 });
+	queue = new GenerationQueue();
 	enqueueGraphSpy = vi
 		.spyOn(queue, "enqueueGraph")
 		.mockImplementation(() => {});
