@@ -1,15 +1,34 @@
-import type { SyntheticEvent } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { startPlaybackAt, type PlaybackTarget } from "../startPlaybackAt";
+
+let frameCallbacks: FrameRequestCallback[] = [];
+
+beforeEach(() => {
+	frameCallbacks = [];
+	vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) =>
+		frameCallbacks.push(cb),
+	);
+});
+
+afterEach(() => vi.unstubAllGlobals());
+
+function nextFrame() {
+	const due = frameCallbacks;
+	frameCallbacks = [];
+	for (const cb of due) cb(0);
+}
 
 function makePlayer(containerNode: HTMLDivElement | null = null) {
 	const calls: string[] = [];
 	const player: PlaybackTarget = {
-		play: vi.fn(() => {
-			calls.push("play");
+		pause: vi.fn(() => {
+			calls.push("pause");
 		}),
 		seekTo: vi.fn((frame: number) => {
 			calls.push(`seekTo:${frame}`);
+		}),
+		play: vi.fn(() => {
+			calls.push("play");
 		}),
 		getContainerNode: vi.fn(() => {
 			calls.push("getContainerNode");
@@ -20,29 +39,25 @@ function makePlayer(containerNode: HTMLDivElement | null = null) {
 }
 
 describe("startPlaybackAt", () => {
-	// Regression for #425: playing after the seek leaves the shared audio tags
-	// running against a parked frame driver.
-	it("plays before seeking, so the seek resumes rather than starts playback", () => {
+	// Regression for #425: playing in the same tick as the seek runs the shared
+	// audio tags against a frame driver parked on the seek's buffering block.
+	it("holds the play back until the frame after the seek", () => {
 		const { player, calls } = makePlayer();
 
 		startPlaybackAt(player, 120);
 
-		expect(calls).toEqual(["play", "seekTo:120", "getContainerNode"]);
-	});
+		expect(calls).toEqual(["pause", "seekTo:120", "getContainerNode"]);
 
-	it("forwards the originating event to play", () => {
-		const { player } = makePlayer();
-		const event = {} as SyntheticEvent;
+		nextFrame();
 
-		startPlaybackAt(player, 7, event);
-
-		expect(player.play).toHaveBeenCalledWith(event);
+		expect(calls).toEqual(["pause", "seekTo:120", "getContainerNode", "play"]);
 	});
 
 	it("tolerates a player with no container node yet", () => {
 		const { player } = makePlayer(null);
 
 		expect(() => startPlaybackAt(player, 0)).not.toThrow();
+		nextFrame();
 		expect(player.play).toHaveBeenCalledOnce();
 	});
 });
