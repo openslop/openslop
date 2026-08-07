@@ -6,11 +6,16 @@ export type PlaybackTarget = Pick<
 	"pause" | "seekTo" | "play" | "getContainerNode"
 >;
 
-export function startPlaybackAt(player: PlaybackTarget | null, frame: number) {
-	// Pause before seeking, or the shared audio tags keep running on their own
-	// media clock from the old position.
-	player?.pause();
-	player?.seekTo(frame);
-	silenceMediaIn(player?.getContainerNode() ?? null);
-	player?.play();
+/**
+ * The play has to land a whole frame after the seek. In the same tick the
+ * Player parks its frame driver on the seek's buffering block while `play()`
+ * starts the shared audio tags anyway, so audio runs against a frozen picture
+ * (#425); a `setTimeout` fires too early and freezes the same way. `pause()`
+ * keeps `seekTo` off its own pause-and-resume path, which also stalls.
+ */
+export function startPlaybackAt(player: PlaybackTarget, frame: number) {
+	player.pause();
+	player.seekTo(frame);
+	silenceMediaIn(player.getContainerNode());
+	requestAnimationFrame(() => player.play());
 }

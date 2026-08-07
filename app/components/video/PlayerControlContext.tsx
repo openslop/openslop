@@ -26,7 +26,7 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	const playFromFrame = useCallback(
 		(frame: number) => {
 			showPlayer();
-			startPlaybackAt(player, frame);
+			if (player) startPlaybackAt(player, frame);
 		},
 		[showPlayer, player],
 	);
