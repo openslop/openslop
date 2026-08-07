@@ -7,14 +7,11 @@ export type PlaybackTarget = Pick<
 >;
 
 /**
- * Playing in the same tick as the seek freezes the picture (#425): the seek
- * makes the media elements buffer, the Player parks its frame driver while any
- * buffering block is held, and `play()` starts the shared audio tags directly,
- * so audio runs on against a still frame. One frame of separation lets the seek
- * commit first, which is what makes the scrub bar's play-on-pointerup work.
- *
- * `pause()` is load-bearing when the player is already playing: it stops
- * `seekTo` taking its own pause-and-resume path, which freezes the same way.
+ * The play has to land a whole frame after the seek. In the same tick the
+ * Player parks its frame driver on the seek's buffering block while `play()`
+ * starts the shared audio tags anyway, so audio runs against a frozen picture
+ * (#425); a `setTimeout` fires too early and freezes the same way. `pause()`
+ * keeps `seekTo` off its own pause-and-resume path, which also stalls.
  */
 export function startPlaybackAt(player: PlaybackTarget, frame: number) {
 	player.pause();

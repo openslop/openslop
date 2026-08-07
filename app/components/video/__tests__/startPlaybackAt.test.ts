@@ -39,8 +39,7 @@ function makePlayer(containerNode: HTMLDivElement | null = null) {
 }
 
 describe("startPlaybackAt", () => {
-	// Regression for #425: playing in the same tick as the seek runs the shared
-	// audio tags against a frame driver parked on the seek's buffering block.
+	// Regression for #425: playing in the seek's tick freezes the frame driver.
 	it("holds the play back until the frame after the seek", () => {
 		const { player, calls } = makePlayer();
 
