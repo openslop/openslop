@@ -102,7 +102,7 @@ describe("GenerationQueue", () => {
 	});
 
 	describe("enqueue", () => {
-		it("sets element status to generating when under batch limit", () => {
+		it("sets element status to generating when under the concurrency limit", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph([makeJob("e1")]);
 
@@ -112,10 +112,10 @@ describe("GenerationQueue", () => {
 			generationQueue.discard("e1");
 		});
 
-		it("sets element status to queued when at batch limit", () => {
+		it("sets element status to queued when at the concurrency limit", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 
-			// Fill up the batch (size 3)
+			// Fill the image limit (3)
 			generationQueue.enqueueGraph([
 				makeJob("b1"),
 				makeJob("b2"),
