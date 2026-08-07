@@ -8,7 +8,6 @@ import type { SceneElement } from "@/lib/canvas/types";
 import { useSceneSequence } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
 import { useDragTransfer } from "../dnd/DragTransferContext";
-import { useSceneIndex } from "../hooks/useSceneIndex";
 import { useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 import { DeleteButton } from "./DeleteButton";
@@ -23,6 +22,8 @@ const SCENE_FRAME_CLASS =
 interface SceneProps {
 	attributes: RenderElementProps["attributes"];
 	element: SceneElement;
+	/** 1-based position in the document, resolved by whoever mounts the scene. */
+	sceneIndex: number;
 	children: React.ReactNode;
 }
 
@@ -40,7 +41,6 @@ function useSceneState(element: SceneElement) {
 
 	return {
 		childIds,
-		sceneIndex: useSceneIndex(element.id),
 		dropPadding: {
 			paddingBottom:
 				isDropTarget && transfer.atIndex >= childIds.length
@@ -85,8 +85,13 @@ function SceneHeader({
 	);
 }
 
-function CollapsedScene({ attributes, element, children }: SceneProps) {
-	const { sceneIndex, dropPadding } = useSceneState(element);
+function CollapsedScene({
+	attributes,
+	element,
+	sceneIndex,
+	children,
+}: SceneProps) {
+	const { dropPadding } = useSceneState(element);
 	const { toggle } = useViewMode();
 
 	const foregroundElement = useMemo(
@@ -144,8 +149,13 @@ function CollapsedScene({ attributes, element, children }: SceneProps) {
 	);
 }
 
-function ExpandedScene({ attributes, element, children }: SceneProps) {
-	const { childIds, sceneIndex, dropPadding } = useSceneState(element);
+function ExpandedScene({
+	attributes,
+	element,
+	sceneIndex,
+	children,
+}: SceneProps) {
+	const { childIds, dropPadding } = useSceneState(element);
 	const { toggle } = useViewMode();
 
 	return (

@@ -1,17 +1,12 @@
-import { JSX } from "react";
-import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
+import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { isSceneElement, parentSceneId } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { resolveElementSchema } from "@/lib/canvas/elementConnector";
-import { useViewMode } from "../ViewModeContext";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
-import { CompactElement } from "./CompactElement";
-import { SceneContainer } from "./SceneContainer";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
@@ -156,34 +151,3 @@ export function ElementContainer({
 		</ElementGenerationProvider>
 	);
 }
-
-function ContentElement(
-	props: RenderElementProps & { element: CanvasContentElement },
-) {
-	const editor = useSlateStatic();
-	const { isCollapsed, hasCollapsed } = useViewMode();
-
-	if (hasCollapsed) {
-		const path = ReactEditor.findPath(editor, props.element);
-		const sceneId = parentSceneId(editor, path);
-		if (isCollapsed(sceneId)) {
-			return (
-				<CompactElement attributes={props.attributes} element={props.element}>
-					{props.children}
-				</CompactElement>
-			);
-		}
-	}
-	return <ElementContainer {...props} element={props.element} />;
-}
-
-export const renderCanvasElement = (props: RenderElementProps): JSX.Element => {
-	if (isSceneElement(props.element)) {
-		return (
-			<SceneContainer attributes={props.attributes} element={props.element}>
-				{props.children}
-			</SceneContainer>
-		);
-	}
-	return <ContentElement {...props} element={props.element} />;
-};

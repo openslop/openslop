@@ -3,7 +3,8 @@ import type { SceneElement } from "@/lib/canvas/types";
 import { useActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { useViewMode } from "../ViewModeContext";
 import styles from "../styles/sortable.module.css";
-import { renderCanvasElement } from "../elements/ElementContainer";
+import { SceneContainer } from "../elements/SceneContainer";
+import { useSceneIndex } from "../hooks/useSceneIndex";
 import { SortableItem } from "./SortableItem";
 
 const ACTIVE_SCENE_CLASS = "scene-active bg-element-card";
@@ -19,6 +20,7 @@ export function SortableScene({
 }) {
 	const isActive = useActiveSceneId() === element.id;
 	const { isCollapsed } = useViewMode();
+	const sceneIndex = useSceneIndex(element.id);
 	return (
 		<SortableItem
 			sceneId={element.id}
@@ -29,7 +31,13 @@ export function SortableScene({
 			attributes={attributes}
 			element={element}
 		>
-			{renderCanvasElement({ attributes, children, element })}
+			<SceneContainer
+				attributes={attributes}
+				element={element}
+				sceneIndex={sceneIndex}
+			>
+				{children}
+			</SceneContainer>
 		</SortableItem>
 	);
 }
