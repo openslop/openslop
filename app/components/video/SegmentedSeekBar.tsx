@@ -6,7 +6,7 @@ import { clamp } from "@/lib/utils";
 import type { VideoLayout } from "@/lib/video/types";
 import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
-import { findSegmentIndexAt, type SceneSegment } from "./useSceneSegments";
+import { findSegmentIndexAtFrame, type SceneSegment } from "./useSceneSegments";
 import { ScrubBar, type ScrubHover } from "./ScrubBar";
 import { silenceMediaIn } from "./silenceMedia";
 
@@ -22,6 +22,7 @@ export function SegmentedSeekBar({
 	segments: SceneSegment[];
 }) {
 	const { totalDurationSec, totalFrames } = layout;
+	const toScrubFrame = (ratio: number) => Math.round(ratio * (totalFrames - 1));
 	const frame = usePlayerFrame(player);
 	const progress = clamp(frame / Math.max(1, totalFrames - 1), 0, 1);
 
@@ -57,7 +58,11 @@ export function SegmentedSeekBar({
 			setSettledIndex(null);
 			return;
 		}
-		const index = findSegmentIndexAt(segments, h.ratio * totalDurationSec);
+		const index = findSegmentIndexAtFrame(
+			segments,
+			toScrubFrame(h.ratio),
+			layout.fps,
+		);
 		setHoverIndex(index);
 		settleTimerRef.current = setTimeout(
 			() => setSettledIndex(index),
@@ -77,7 +82,7 @@ export function SegmentedSeekBar({
 			segments={scrubSegments}
 			onScrub={(ratio) => {
 				if (!player) return;
-				player.seekTo(Math.round(ratio * (totalFrames - 1)));
+				player.seekTo(toScrubFrame(ratio));
 				if (wasPlayingRef.current) silenceMediaIn(player.getContainerNode());
 			}}
 			onScrubStart={() => {

@@ -3,11 +3,11 @@
 import { memo } from "react";
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { toFrames, toSeconds } from "@/lib/video/frames";
+import { toFrames } from "@/lib/video/frames";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
-import { findSegmentIndexAt } from "./useSceneSegments";
+import { findSegmentIndexAtFrame } from "./useSceneSegments";
 import { usePlayerPlaying } from "./usePlayerState";
 import { SegmentedSeekBar } from "./SegmentedSeekBar";
 import {
@@ -27,9 +27,10 @@ function BottomTransportBarComponent() {
 
 	const seekToAdjacentScene = (dir: -1 | 1) => {
 		if (!player || segments.length === 0) return;
-		const current = findSegmentIndexAt(
+		const current = findSegmentIndexAtFrame(
 			segments,
-			toSeconds(player.getCurrentFrame(), layout.fps),
+			player.getCurrentFrame(),
+			layout.fps,
 		);
 		const target = segments[current + dir];
 		if (target) player.seekTo(toFrames(target.start, layout.fps));
