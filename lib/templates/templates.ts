@@ -20,7 +20,6 @@ export interface Template {
 	color: string;
 	exampleText: string;
 	systemPrompt: string;
-	/** Kept in step with the spoken word count of `exampleText`. */
 	length: VideoLength;
 	style?: string;
 	referenceImages: string[];

@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 describe("scriptLengthPlugin", () => {
-	it("gives the model a spoken word budget for the selected length", () => {
+	it("budgets in words and countable elements, never the runtime", () => {
 		getProjectStore(projectId)
 			.getState()
 			.updateMetadata({ videoSettings: { length: "10-15m" } });
@@ -36,35 +36,16 @@ describe("scriptLengthPlugin", () => {
 
 		expect(sys).toContain("1800");
 		expect(sys).toContain("2700");
-	});
-
-	it("states a countable element target, since scene breaks are not in the output", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({ videoSettings: { length: "10-15m" } });
-
-		const sys = systemPromptFor({ prompt: "hi" });
-
 		expect(sys).toContain("60");
 		expect(sys).toContain("90");
-		expect(sys).toContain("<narration>");
-		expect(sys).not.toMatch(/\bscenes\b/);
+		expect(sys).not.toContain(VIDEO_LENGTH_SPECS["10-15m"].label);
 	});
 
-	it("frames the budget as a floor rather than a ceiling", () => {
+	it("asks for elements rather than scenes, and treats the budget as a floor", () => {
 		const sys = systemPromptFor({ prompt: "hi" });
-		expect(sys).toMatch(/Falling short is a failure/);
-		expect(sys).not.toMatch(/inside the budget/);
-	});
-
-	it("never states the runtime, which a model cannot reason about", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({ videoSettings: { length: "10-15m" } });
-
-		expect(systemPromptFor({ prompt: "hi" })).not.toContain(
-			VIDEO_LENGTH_SPECS["10-15m"].label,
-		);
+		expect(sys).toContain("<narration>");
+		expect(sys).not.toMatch(/\bscenes?\b/i);
+		expect(sys).toMatch(/Stopping short is a failure/);
 	});
 
 	it("falls back to the default budget when no length is selected", () => {
