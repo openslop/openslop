@@ -18,6 +18,7 @@ export function applyTemplate(
 		style: template.style,
 		characters: template.characters,
 		narration: template.narration,
+		videoSettings: { length: template.length },
 	});
 
 	for (const [name, imageUrl] of Object.entries(

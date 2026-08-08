@@ -1,6 +1,7 @@
 import dedent from "dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
+import type { VideoLength } from "@/lib/video/videoLength";
 
 const templateAsset = (name: string) =>
 	`${BLOB_BASE_URL}/assets/upload/template/${name}`;
@@ -19,6 +20,7 @@ export interface Template {
 	color: string;
 	exampleText: string;
 	systemPrompt: string;
+	length: VideoLength;
 	style?: string;
 	referenceImages: string[];
 	characters?: Record<string, MetadataCharacter>;
@@ -31,6 +33,7 @@ export interface Template {
 export const TEMPLATES: Template[] = [
 	{
 		id: "pov-life",
+		length: "5-10m",
 		name: "POV Life",
 		pillText: "POV: Your life at every stage as a",
 		color: "#F59E0B",
@@ -264,6 +267,7 @@ export const TEMPLATES: Template[] = [
 	},
 	{
 		id: "sleep-story",
+		length: "5-10m",
 		name: "Sleep Story",
 		pillText: "A sleep story about",
 		color: "#6366F1",
@@ -334,6 +338,7 @@ export const TEMPLATES: Template[] = [
 	},
 	{
 		id: "finance-tips",
+		length: "5-10m",
 		name: "Finance Tips",
 		pillText: "Finance tips for...",
 		color: "#3B82F6",
@@ -539,6 +544,7 @@ export const TEMPLATES: Template[] = [
 	},
 	{
 		id: "true-crime",
+		length: "5-10m",
 		name: "True Crime",
 		pillText: "A true crime story about",
 		color: "#8A0000",
@@ -819,6 +825,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 	},
 	{
 		id: "pov-financial-lifestyle",
+		length: "10-15m",
 		name: "POV Financial Lifestyle",
 		pillText: "POV: You're a",
 		color: "#059669",
@@ -1243,6 +1250,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 	},
 	{
 		id: "celebrity-death",
+		length: "10-15m",
 		name: "Celebrity Death",
 		pillText: "Death of every",
 		color: "#C7BFB2",
@@ -1470,6 +1478,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 	},
 	{
 		id: "stick-explainer",
+		length: "5-10m",
 		name: "Stick Explainer",
 		pillText: "Stickman explainer about",
 		color: "#AA8AB1",

@@ -19,6 +19,7 @@ import { scriptModePlugin } from "../connectors/llm/plugins/script-mode";
 import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
 import { projectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
+import { scriptLengthPlugin } from "@/lib/connectors/llm/plugins/script-length";
 import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
 import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
@@ -27,11 +28,15 @@ import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 
 import type { Mode } from "@/lib/project/types";
 
-const MODE_PLUGIN_FACTORIES: Record<Mode, (templateId: string) => LLMPlugin> = {
-	story: () => storyModePlugin,
-	script: () => scriptModePlugin,
-	template: (templateId) => createTemplateModePlugin(templateId),
-};
+const MODE_PLUGIN_FACTORIES: Record<Mode, (templateId: string) => LLMPlugin[]> =
+	{
+		story: () => [storyModePlugin, scriptLengthPlugin],
+		script: () => [scriptModePlugin],
+		template: (templateId) => [
+			createTemplateModePlugin(templateId),
+			scriptLengthPlugin,
+		],
+	};
 
 type ConfigContextValue = {
 	projectId: string;
@@ -59,12 +64,12 @@ export function ConfigProvider({
 		useState<string>(DEFAULT_TEMPLATE_ID);
 
 	const configWithPlugins = useMemo<ConnectorRegistry>(() => {
-		const modePlugin = MODE_PLUGIN_FACTORIES[mode](selectedTemplateId);
+		const modePlugins = MODE_PLUGIN_FACTORIES[mode](selectedTemplateId);
 		return withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 			.appendPlugins(
 				"llm",
 				projectMetadataPlugin,
-				modePlugin,
+				...modePlugins,
 				createReferenceStylePlugin(queue),
 				createCharacterAvatarStylePlugin(queue),
 			)

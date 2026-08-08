@@ -7,6 +7,7 @@ import {
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
 import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
+import { VIDEO_LENGTHS } from "@/lib/video/videoLength";
 import { TRANSITION_TYPES } from "@/lib/video/transitions";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
@@ -50,6 +51,7 @@ export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
 const VideoSettingsSchema = z.object({
 	transitionType: z.enum(TRANSITION_TYPES).optional(),
 	aspectRatio: z.enum(ASPECT_RATIOS).optional(),
+	length: z.enum(VIDEO_LENGTHS).optional(),
 });
 
 export const MODES = ["story", "script", "template"] as const;
