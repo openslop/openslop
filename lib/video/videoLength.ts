@@ -16,7 +16,7 @@ const NARRATION_WORDS_PER_MINUTE = 180;
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
 
-const WORDS_PER_SPOKEN_ELEMENT = 30;
+const WORDS_PER_SPOKEN_ELEMENT = 22;
 
 type VideoLengthSpec = {
 	label: string;

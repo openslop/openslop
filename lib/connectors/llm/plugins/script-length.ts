@@ -16,12 +16,12 @@ export const scriptLengthPlugin: LLMPlugin = {
 			dedent`
 				# Length
 
-				Write ${minWords} to ${maxWords} words of speech, spread over roughly
-				${minElements} to ${maxElements} <narration> and <character> elements. Only
+				Write ${minWords} to ${maxWords} words of dialogue, spread over roughly
+				${minElements} to ${maxElements} <narration> and/or <character> elements. Only
 				spoken words count; descriptions and attributes do not.
 
-				Track the count as you write. Stopping short is a failure, not a tighter
-				edit: cover more of the story rather than lengthening any one line.`,
+				Track both counts as you write. Stopping short is a failure, not a tighter
+				edit: cover more of the story rather than shortening any one line.`,
 		);
 	},
 };

@@ -36,8 +36,8 @@ describe("VIDEO_LENGTH_SPECS", () => {
 
 	it("splits the budget into countable elements of a natural line length", () => {
 		expect(VIDEO_LENGTH_SPECS["10-15m"]).toMatchObject({
-			minElements: 60,
-			maxElements: 90,
+			minElements: 82,
+			maxElements: 123,
 		});
 	});
 

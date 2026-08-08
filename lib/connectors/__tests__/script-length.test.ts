@@ -36,8 +36,8 @@ describe("scriptLengthPlugin", () => {
 
 		expect(sys).toContain("1800");
 		expect(sys).toContain("2700");
-		expect(sys).toContain("60");
-		expect(sys).toContain("90");
+		expect(sys).toContain("82");
+		expect(sys).toContain("123");
 		expect(sys).not.toContain(VIDEO_LENGTH_SPECS["10-15m"].label);
 	});
 
