@@ -1,26 +1,37 @@
 import dedent from "dedent";
 import { requireState } from "@/lib/connectors/plugins";
 import type { LLMPlugin } from "@/lib/connectors/types";
-import { resolveVideoLengthSpec } from "@/lib/video/videoLength";
+import {
+	WORDS_PER_SPOKEN_ELEMENT,
+	resolveVideoLengthSpec,
+} from "@/lib/video/videoLength";
 import { prependSystemPrompt } from "./system-prompt";
 
 export const scriptLengthPlugin: LLMPlugin = {
 	name: "scriptLength",
 	beforeGenerate(params, ctx) {
 		const { metadata } = requireState(ctx, "scriptLength");
-		const { minWords, maxWords } = resolveVideoLengthSpec(metadata);
+		const { minWords, maxWords, minElements, maxElements } =
+			resolveVideoLengthSpec(metadata);
 
 		return prependSystemPrompt(
 			params,
 			dedent`
 				# Length
 
-				Write between ${minWords} and ${maxWords} words of spoken narration and
-				dialogue in total. Scene descriptions, visual directions, and attributes do
-				not count toward that budget.
+				Write ${minElements} to ${maxElements} <narration> and <character> elements,
+				each carrying about ${WORDS_PER_SPOKEN_ELEMENT} words of speech, for a total
+				of ${minWords} to ${maxWords} spoken words. Give each one its own <image> or
+				<animated_image>, so expect ${minElements} to ${maxElements} of those too.
 
-				Pace the story to reach a complete ending inside the budget instead of
-				trailing off or padding, and add or remove scenes as needed to hit it.`,
+				Count the elements as you write and keep going until you reach ${minElements}.
+				Falling short is a failure, not a tighter edit: cover more of the story, break
+				beats into smaller moments, and give each its own shot. Do not pad a line past
+				about ${WORDS_PER_SPOKEN_ELEMENT} words to get there, and do not stop early
+				once the story feels complete.
+
+				Only spoken words count. Image descriptions, video prompts, and attributes do
+				not.`,
 		);
 	},
 };

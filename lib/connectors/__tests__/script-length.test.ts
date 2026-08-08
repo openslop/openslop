@@ -38,6 +38,25 @@ describe("scriptLengthPlugin", () => {
 		expect(sys).toContain("2700");
 	});
 
+	it("states a countable element target, since scene breaks are not in the output", () => {
+		getProjectStore(projectId)
+			.getState()
+			.updateMetadata({ videoSettings: { length: "10-15m" } });
+
+		const sys = systemPromptFor({ prompt: "hi" });
+
+		expect(sys).toContain("60");
+		expect(sys).toContain("90");
+		expect(sys).toContain("<narration>");
+		expect(sys).not.toMatch(/\bscenes\b/);
+	});
+
+	it("frames the budget as a floor rather than a ceiling", () => {
+		const sys = systemPromptFor({ prompt: "hi" });
+		expect(sys).toMatch(/Falling short is a failure/);
+		expect(sys).not.toMatch(/inside the budget/);
+	});
+
 	it("never states the runtime, which a model cannot reason about", () => {
 		getProjectStore(projectId)
 			.getState()

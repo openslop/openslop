@@ -21,25 +21,40 @@ const NARRATION_WORDS_PER_MINUTE = 180;
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
 
+/**
+ * Observed natural length of one spoken line. Length comes from more lines rather
+ * than longer ones: stretching a line leaves its image on screen too long.
+ */
+export const WORDS_PER_SPOKEN_ELEMENT = 30;
+
 type VideoLengthSpec = {
 	label: string;
 	minWords: number;
 	maxWords: number;
+	minElements: number;
+	maxElements: number;
 };
 
 const spec = (
 	label: string,
 	minSec: number,
 	maxSec: number,
-): VideoLengthSpec => ({
-	label,
-	minWords: wordsForSeconds(minSec),
-	maxWords: wordsForSeconds(maxSec),
-});
+): VideoLengthSpec => {
+	const minWords = wordsForSeconds(minSec);
+	const maxWords = wordsForSeconds(maxSec);
+	return {
+		label,
+		minWords,
+		maxWords,
+		minElements: Math.round(minWords / WORDS_PER_SPOKEN_ELEMENT),
+		maxElements: Math.round(maxWords / WORDS_PER_SPOKEN_ELEMENT),
+	};
+};
 
 /**
- * A model cannot feel duration but can count words, so `label` is for the UI and
- * only the word budget is ever shown to a model.
+ * A model cannot feel duration, and scene breaks are added on serialization so it
+ * cannot count those either. It can count the tags it types, so `label` is for the
+ * UI and only word and element counts are ever shown to a model.
  */
 export const VIDEO_LENGTH_SPECS = {
 	"under-30s": spec("Under 30 sec", 15, 30),
