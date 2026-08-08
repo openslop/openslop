@@ -14,7 +14,9 @@ The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams O
 
 ### 2. Generate
 
-Generate resolves the element into a dependency graph (see [Generation graph](#generation-graph)) and queues the stale nodes client-side, dependencies first and up to a per-media-type concurrency limit at a time. Each job is submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. Workers call the provider, upload results to Vercel Blob, and mark the job complete. The client polls until the asset URL arrives and the preview updates. Music and sfx check a Pinecone similarity cache first.
+Generate resolves the element into a dependency graph (see [Generation graph](#generation-graph)) and queues the stale nodes client-side, dependencies first and up to a per-media-type concurrency limit at a time. Each job is submitted to `POST /api/v1/{asset}`, which records a `jobs` row and enqueues to the Vercel Queue. The client polls until the asset URL arrives and the preview updates. Music and sfx check a Pinecone similarity cache first.
+
+Each delivery runs `lib/api/process-job.ts`, which hands the job to the `JobHandler` registered for its type (`lib/api/job-handlers.ts`) and gets back `completed` or `pending`. Image, tts, music and sfx complete on the first delivery. Video is slow enough to outlive one invocation, so its handler submits to the provider, records the provider's job id on the row, and reports `pending`; the job then redelivers itself every 5s to poll, and fails once it outlives `JOB_TIMEOUT_MS`. Results upload to Vercel Blob. Bytes a provider only exposes at its own URL are streamed across rather than linked, so every asset we serve is our own.
 
 ### 3. Save / restore
 
