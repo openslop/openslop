@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import {
 	ChevronDown,
 	CornerDownLeft,
+	Hourglass,
 	ImagePlus,
 	Loader2,
 	Mic,
@@ -26,6 +27,12 @@ import { useProject } from "@/lib/project/useProject";
 import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import {
+	VIDEO_LENGTHS,
+	VIDEO_LENGTH_SPECS,
+	type VideoLength,
+} from "@/lib/video/videoLength";
+import { useVideoLength } from "@/lib/video/useVideoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
@@ -44,6 +51,10 @@ const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
 	{ value: "9:16", label: "9:16" },
 ];
+
+const VIDEO_LENGTH_OPTIONS: SelectMenuOption<VideoLength>[] = VIDEO_LENGTHS.map(
+	(value) => ({ value, label: VIDEO_LENGTH_SPECS[value].label }),
+);
 
 const TEMPLATE_OPTIONS: SelectMenuOption<string>[] = TEMPLATES.map((t) => ({
 	value: t.id,
@@ -65,7 +76,7 @@ function PillTrigger({
 			ref={ref}
 			type="button"
 			className={cn(
-				"inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover",
+				"focus-ring inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover",
 				className,
 			)}
 			{...props}
@@ -174,6 +185,7 @@ export default function ComposerCopilot({
 }: ComposerCopilotProps) {
 	const { mode, setMode, selectedTemplateId, selectTemplate } = useConfig();
 	const aspectRatio = useAspectRatio();
+	const videoLength = useVideoLength();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
@@ -182,6 +194,7 @@ export default function ComposerCopilot({
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const isTemplateMode = mode === "template";
+	const isScriptMode = mode === "script";
 	const hasText = value.trim().length > 0;
 	const selectedTemplate = getTemplate(selectedTemplateId);
 
@@ -245,7 +258,7 @@ export default function ComposerCopilot({
 							itemClassName="rounded-lg text-label-xs"
 						>
 							<PillTrigger
-								aria-label="Composer mode"
+								aria-label={`Composer mode: ${MODE_LABELS[mode]}`}
 								label={MODE_LABELS[mode]}
 							/>
 						</SelectMenu>
@@ -258,11 +271,27 @@ export default function ComposerCopilot({
 							itemClassName="rounded-lg text-label-xs"
 						>
 							<PillTrigger
-								aria-label="Aspect ratio"
+								aria-label={`Aspect ratio: ${aspectRatio}`}
 								icon={<Proportions className="mr-1 h-3 w-3" />}
 								label={aspectRatio}
 							/>
 						</SelectMenu>
+						{!isScriptMode && (
+							<SelectMenu
+								value={videoLength}
+								onChange={(next: VideoLength) =>
+									updateMetadata({ videoSettings: { length: next } })
+								}
+								options={VIDEO_LENGTH_OPTIONS}
+								itemClassName="rounded-lg text-label-xs"
+							>
+								<PillTrigger
+									aria-label={`Video length: ${VIDEO_LENGTH_SPECS[videoLength].label}`}
+									icon={<Hourglass className="mr-1 h-3 w-3" />}
+									label={VIDEO_LENGTH_SPECS[videoLength].label}
+								/>
+							</SelectMenu>
+						)}
 						{isTemplateMode && (
 							<SelectMenu
 								value={selectedTemplateId}
@@ -271,7 +300,7 @@ export default function ComposerCopilot({
 								itemClassName="rounded-lg text-label-xs"
 							>
 								<PillTrigger
-									aria-label="Select template"
+									aria-label={`Template: ${selectedTemplate.name}`}
 									className="relative overflow-hidden"
 									style={{ backgroundColor: selectedTemplate.color }}
 									label={selectedTemplate.name}
