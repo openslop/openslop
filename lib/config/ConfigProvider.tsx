@@ -25,6 +25,7 @@ import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/char
 import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
 import { applyTemplate as applyTemplateToProject } from "@/lib/templates/applyTemplate";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 
 import type { Mode } from "@/lib/project/types";
 
@@ -59,6 +60,7 @@ export function ConfigProvider({
 	children: ReactNode;
 }) {
 	const queue = useGenerationQueue();
+	const store = useProjectStoreHandle();
 	const [mode, setMode] = useState<Mode>("story");
 	const [selectedTemplateId, setSelectedTemplateId] =
 		useState<string>(DEFAULT_TEMPLATE_ID);
@@ -81,18 +83,18 @@ export function ConfigProvider({
 			)
 			.appendPlugins("tts", createMetadataVoicePlugin())
 			.appendPlugins("tts", createVoiceSearchPlugin())
-			.appendPlugins("tts", createVoiceHydratePlugin(projectId))
+			.appendPlugins("tts", createVoiceHydratePlugin(store))
 			.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
 			.build();
-	}, [mode, selectedTemplateId, projectId, queue]);
+	}, [mode, selectedTemplateId, store, queue]);
 
 	const selectTemplate = useCallback(
 		(templateId: string) => {
 			setSelectedTemplateId(templateId);
-			applyTemplateToProject(projectId, templateId, queue, configWithPlugins);
+			applyTemplateToProject(store, templateId, queue, configWithPlugins);
 			setMode("template");
 		},
-		[projectId, queue, configWithPlugins],
+		[store, queue, configWithPlugins],
 	);
 
 	const value = useMemo<ConfigContextValue>(

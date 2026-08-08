@@ -10,7 +10,7 @@ import {
 } from "@/lib/connectors/registry";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
 import {
 	flattenGraph,
@@ -21,7 +21,7 @@ import {
 import { GenerationQueue } from "../queue";
 import { nodeBuilder } from "../resolveGraph";
 
-const PROJECT_ID = "resolve-graph-test";
+let store: ProjectStore;
 
 function buildRegistry(): ConnectorRegistry {
 	const base = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
@@ -45,17 +45,14 @@ const element = (
 });
 
 const resolve = (el: CanvasContentElement) =>
-	nodeBuilder(
-		buildRegistry(),
-		getProjectStore(PROJECT_ID).getState(),
-	)(forElement(el));
+	nodeBuilder(buildRegistry(), store.getState())(forElement(el));
 
 const idsOf = (el: CanvasContentElement) =>
 	flattenGraph([resolve(el)]).map((node) => node.id);
 
 beforeEach(() => {
-	clearProjectStore(PROJECT_ID);
-	getProjectStore(PROJECT_ID)
+	store = createProjectStore();
+	store
 		.getState()
 		.updateMetadata({ characters: { Alice: { appearance: "red hair" } } });
 });
@@ -64,10 +61,7 @@ describe("resolveGraph", () => {
 	// The builder is memoized across renders, so its per-graph dedupe cache must
 	// not outlive one call or an edited element keeps resolving to its old node.
 	it("rebuilds a node when its element changed", () => {
-		const buildNode = nodeBuilder(
-			buildRegistry(),
-			getProjectStore(PROJECT_ID).getState(),
-		);
+		const buildNode = nodeBuilder(buildRegistry(), store.getState());
 		const withText = (text: string) => ({
 			...element("img", "image"),
 			children: [{ id: "img-t", type: "image" as const, text }],
@@ -110,9 +104,7 @@ describe("resolveGraph", () => {
 	});
 
 	it("does not depend on avatars of characters it does not reference", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.setCharacter("Bob", { appearance: "tall" });
+		store.getState().setCharacter("Bob", { appearance: "tall" });
 		const ids = idsOf(element("img", "image", { characters: "Alice" }));
 		expect(ids).not.toContain(characterAvatarElementId("Bob"));
 	});
@@ -222,7 +214,7 @@ describe("resolveGraph", () => {
 		});
 		expect(needsGeneration(resolve(img), queue)).toBe(false);
 
-		getProjectStore(PROJECT_ID).getState().updateMetadata({ style: "noir" });
+		store.getState().updateMetadata({ style: "noir" });
 		expect(needsGeneration(resolve(img), queue)).toBe(true);
 	});
 

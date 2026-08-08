@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { toastError } from "@/lib/toastError";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { createAutosaver } from "@/lib/project/autosave";
-import { getProjectStore } from "@/lib/project/store";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 
 const TOAST_OPTIONS = {
@@ -18,12 +18,14 @@ const TOAST_OPTIONS = {
 
 export function useAutosave(projectId: string, value: Descendant[]): void {
 	const queue = useGenerationQueue();
+	const store = useProjectStoreHandle();
 	const skipNextRef = useRef(true);
 
 	const autosaver = useMemo(
 		() =>
 			createAutosaver({
 				projectId,
+				store,
 				getGeneration: () => queue.snapshot(),
 				onSaved: () => toast("Saved", TOAST_OPTIONS),
 				onError: (err) =>
@@ -32,7 +34,7 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 						duration: 4000,
 					}),
 			}),
-		[projectId, queue],
+		[projectId, store, queue],
 	);
 
 	useEffect(() => () => autosaver.flush(), [autosaver]);
@@ -46,10 +48,7 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 		autosaver.schedule();
 	}, [value, autosaver]);
 
-	useEffect(
-		() => getProjectStore(projectId).subscribe(autosaver.schedule),
-		[projectId, autosaver],
-	);
+	useEffect(() => store.subscribe(autosaver.schedule), [store, autosaver]);
 
 	useEffect(() => {
 		let lastVersion = queue.getResultVersion();

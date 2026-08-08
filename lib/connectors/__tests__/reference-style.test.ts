@@ -3,7 +3,7 @@ import { GatewayClient } from "@/lib/gateway/base";
 import { createReferenceStylePlugin } from "@/lib/connectors/llm/plugins/reference-style";
 import { stubAvatarResults } from "./_node-results";
 import { stateCtx } from "./_state-ctx";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore } from "@/lib/project/store";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -23,12 +23,11 @@ class MockLLMGateway extends GatewayClient<
 }
 
 function setup(
-	projectId: string,
 	referenceImages: string[],
 	avatars: Record<string, string> = {},
 ) {
-	clearProjectStore(projectId);
-	getProjectStore(projectId).getState().setReferenceImages(referenceImages);
+	const store = createProjectStore();
+	store.getState().setReferenceImages(referenceImages);
 	const gateway = new MockLLMGateway();
 	const plugin = createReferenceStylePlugin(stubAvatarResults(avatars));
 	if (!plugin.transformPrompt)
@@ -37,14 +36,14 @@ function setup(
 	// state its caller hands it.
 	const ctx = (): PluginContext<LLMGenerateParams, LLMGenerateResult> => ({
 		gateway,
-		...stateCtx(projectId),
+		...stateCtx(store),
 	});
-	return { gateway, transformPrompt: plugin.transformPrompt, ctx };
+	return { store, gateway, transformPrompt: plugin.transformPrompt, ctx };
 }
 
 describe("createReferenceStylePlugin", () => {
 	it("returns the prompt unchanged and skips gateway when no images are present", async () => {
-		const { gateway, transformPrompt, ctx } = setup("p1", []);
+		const { gateway, transformPrompt, ctx } = setup([]);
 		const result = await transformPrompt("a knight and a dragon", ctx());
 		expect(result).toBe("a knight and a dragon");
 		expect(gateway.generate).not.toHaveBeenCalled();
@@ -52,7 +51,7 @@ describe("createReferenceStylePlugin", () => {
 
 	it("calls the gateway with the reference images and prepends the style description", async () => {
 		const images = ["https://example.com/a.jpg", "https://example.com/b.jpg"];
-		const { gateway, transformPrompt, ctx } = setup("p2", images);
+		const { gateway, transformPrompt, ctx } = setup(images);
 
 		const result = await transformPrompt("a knight and a dragon", ctx());
 
@@ -67,16 +66,13 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("combines reference images with uploaded avatars but excludes generated ones", async () => {
-		const projectId = "p4";
 		const referenceImage = "https://example.com/reference.jpg";
 		const uploadedAvatar = "https://example.com/uploaded-avatar.jpg";
 		const generatedAvatar = "https://example.com/generated-avatar.jpg";
-		const { gateway, transformPrompt, ctx } = setup(
-			projectId,
-			[referenceImage],
-			{ Mira: uploadedAvatar, Generated: generatedAvatar },
-		);
-		const store = getProjectStore(projectId);
+		const { store, gateway, transformPrompt, ctx } = setup([referenceImage], {
+			Mira: uploadedAvatar,
+			Generated: generatedAvatar,
+		});
 		store
 			.getState()
 			.setCharacter("Mira", { appearance: "blue hair", avatarUploaded: true });
@@ -98,12 +94,11 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("uses uploaded character avatars as style references when no reference images are present", async () => {
-		const projectId = "p5";
 		const avatar = "https://example.com/avatar.jpg";
-		const { gateway, transformPrompt, ctx } = setup(projectId, [], {
+		const { store, gateway, transformPrompt, ctx } = setup([], {
 			Mira: avatar,
 		});
-		getProjectStore(projectId)
+		store
 			.getState()
 			.setCharacter("Mira", { appearance: "blue hair", avatarUploaded: true });
 
@@ -114,11 +109,10 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("ignores generated avatars to avoid circular style references", async () => {
-		const projectId = "p6";
-		const { gateway, transformPrompt, ctx } = setup(projectId, [], {
+		const { store, gateway, transformPrompt, ctx } = setup([], {
 			Generated: "https://example.com/generated-avatar.jpg",
 		});
-		getProjectStore(projectId).getState().setCharacter("Generated", {
+		store.getState().setCharacter("Generated", {
 			appearance: "green hair",
 			avatarUploaded: false,
 		});
@@ -130,8 +124,8 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("throws when no gateway is provided", async () => {
-		const { transformPrompt } = setup("p3", ["https://example.com/a.jpg"]);
-		await expect(transformPrompt("hi", stateCtx("p3"))).rejects.toThrow(
+		const { store, transformPrompt } = setup(["https://example.com/a.jpg"]);
+		await expect(transformPrompt("hi", stateCtx(store))).rejects.toThrow(
 			"reference-style plugin requires gateway context",
 		);
 	});

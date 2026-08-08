@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { GatewayClient } from "@/lib/gateway/base";
 import { createCharacterAvatarStylePlugin } from "@/lib/connectors/llm/plugins/character-avatar-style";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore } from "@/lib/project/store";
 import { stubAvatarResults } from "./_node-results";
 import { stateCtx } from "./_state-ctx";
 import type {
@@ -22,8 +22,8 @@ class MockLLMGateway extends GatewayClient<
 	);
 }
 
-function setup(projectId: string, avatars: Record<string, string> = {}) {
-	clearProjectStore(projectId);
+function setup(avatars: Record<string, string> = {}) {
+	const store = createProjectStore();
 	const gateway = new MockLLMGateway();
 	const plugin = createCharacterAvatarStylePlugin(stubAvatarResults(avatars));
 	if (!plugin.transformPrompt)
@@ -34,17 +34,15 @@ function setup(projectId: string, avatars: Record<string, string> = {}) {
 	// state its caller hands it.
 	const ctx = (): PluginContext<LLMGenerateParams, LLMGenerateResult> => ({
 		gateway,
-		...stateCtx(projectId),
+		...stateCtx(store),
 	});
-	return { gateway, transformPrompt: plugin.transformPrompt, ctx };
+	return { store, gateway, transformPrompt: plugin.transformPrompt, ctx };
 }
 
 describe("createCharacterAvatarStylePlugin", () => {
 	it("returns the prompt unchanged when no character has an avatar", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c1");
-		getProjectStore("c1")
-			.getState()
-			.setCharacter("Mira", { appearance: "blue hair" });
+		const { store, gateway, transformPrompt, ctx } = setup();
+		store.getState().setCharacter("Mira", { appearance: "blue hair" });
 
 		const result = await transformPrompt("write a scene", ctx());
 
@@ -53,10 +51,10 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("describes uploaded avatars from the image", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c2", {
+		const { store, gateway, transformPrompt, ctx } = setup({
 			Mira: "https://example.com/mira.png",
 		});
-		getProjectStore("c2")
+		store
 			.getState()
 			.setCharacter("Mira", { appearance: "", avatarUploaded: true });
 
@@ -73,10 +71,10 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("reuses the appearance text for generated avatars without calling the gateway", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c3", {
+		const { store, gateway, transformPrompt, ctx } = setup({
 			Mira: "https://example.com/generated.png",
 		});
-		getProjectStore("c3").getState().setCharacter("Mira", {
+		store.getState().setCharacter("Mira", {
 			appearance: "a tall woman with green hair",
 			avatarUploaded: false,
 		});
@@ -88,16 +86,16 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("preserves both generated and uploaded character appearances", async () => {
-		const { gateway, transformPrompt, ctx } = setup("c4", {
+		const { store, gateway, transformPrompt, ctx } = setup({
 			Generated: "https://example.com/generated.png",
 			Uploaded: "https://example.com/uploaded.png",
 		});
-		const store = getProjectStore("c4").getState();
-		store.setCharacter("Generated", {
+		const state = store.getState();
+		state.setCharacter("Generated", {
 			appearance: "a tall woman with green hair",
 			avatarUploaded: false,
 		});
-		store.setCharacter("Uploaded", { appearance: "", avatarUploaded: true });
+		state.setCharacter("Uploaded", { appearance: "", avatarUploaded: true });
 
 		const result = await transformPrompt("write a scene", ctx());
 
@@ -109,15 +107,15 @@ describe("createCharacterAvatarStylePlugin", () => {
 	});
 
 	it("throws when an uploaded avatar needs description but no gateway is provided", async () => {
-		const { transformPrompt } = setup("c5", {
+		const { store, transformPrompt } = setup({
 			Mira: "https://example.com/mira.png",
 		});
-		getProjectStore("c5")
+		store
 			.getState()
 			.setCharacter("Mira", { appearance: "", avatarUploaded: true });
 
 		await expect(
-			transformPrompt("write a scene", stateCtx("c5")),
+			transformPrompt("write a scene", stateCtx(store)),
 		).rejects.toThrow("character-avatar-style plugin requires gateway context");
 	});
 });

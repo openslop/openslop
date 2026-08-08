@@ -1,13 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { clearProjectStore, getProjectStore } from "../store";
-
-const PROJECT_ID = "store-test";
+import { describe, expect, it } from "vitest";
+import { createProjectStore } from "../store";
 
 describe("project store updateMetadata", () => {
-	beforeEach(() => clearProjectStore(PROJECT_ID));
-
 	it("sets style without touching characters or narration", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().updateMetadata({ style: "cinematic" });
 
 		expect(store.getState().metadata).toEqual({
@@ -19,7 +15,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("deep-merges narration so prior voice attributes are preserved", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().updateMetadata({ narration: { gender: "masculine" } });
 		store.getState().updateMetadata({ narration: { accent: "british" } });
 
@@ -30,7 +26,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("preserves sibling character properties across updates", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().updateMetadata({
 			characters: { Alice: { appearance: "A girl" } },
 		});
@@ -45,7 +41,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("reset returns the store to initial state", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().updateMetadata({
 			title: "My Project",
 			style: "cinematic",
@@ -66,7 +62,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("adds new characters without removing existing ones", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().updateMetadata({
 			characters: { Alice: { appearance: "A girl" } },
 		});
@@ -81,7 +77,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("setCharacter fully replaces a character (clearing previous keys)", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().updateMetadata({
 			characters: {
 				Alice: { appearance: "A girl", voiceId: "voice-1", accent: "british" },
@@ -98,7 +94,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("updateCharacter merges into the existing entry", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store
 			.getState()
 			.setCharacter("Alice", { appearance: "A girl", accent: "british" });
@@ -112,14 +108,14 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("updateCharacter throws for an unknown character", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		expect(() =>
 			store.getState().updateCharacter("Nobody", { avatarUploaded: true }),
 		).toThrow(/Nobody/);
 	});
 
 	it("addReferenceImages appends to the existing images", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().setReferenceImages(["a.png"]);
 		store.getState().addReferenceImages(["b.png", "c.png"]);
 
@@ -131,7 +127,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("removeReferenceImage drops only the image at the given index", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().setReferenceImages(["a.png", "b.png", "c.png"]);
 		store.getState().removeReferenceImage(1);
 
@@ -139,7 +135,7 @@ describe("project store updateMetadata", () => {
 	});
 
 	it("removeCharacter deletes the entry", () => {
-		const store = getProjectStore(PROJECT_ID);
+		const store = createProjectStore();
 		store.getState().setCharacter("Alice", { appearance: "A girl" });
 		store.getState().setCharacter("Bob", { appearance: "A boy" });
 		store.getState().removeCharacter("Alice");

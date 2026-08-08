@@ -1,4 +1,4 @@
-import { getProjectStore } from "@/lib/project/store";
+import { createProjectStore } from "@/lib/project/store";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
@@ -71,8 +71,9 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 
 // The hook under test is about which elements get queued, so bind a real
 // resolver rather than standing up the config and project providers.
-const resolve = () =>
-	nodeBuilder(registry, getProjectStore("test-project").getState());
+const store = createProjectStore();
+
+const resolve = () => nodeBuilder(registry, store.getState());
 
 vi.mock("@/lib/generation/useNodeBuilder", () => ({
 	useNodeBuilder: () => resolve(),
@@ -98,10 +99,7 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	const node = nodeBuilder(
-		registry,
-		getProjectStore("test-project").getState(),
-	)(forElement(element));
+	const node = nodeBuilder(registry, store.getState())(forElement(element));
 	queue.commitResult(node, {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,

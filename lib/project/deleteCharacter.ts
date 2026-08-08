@@ -1,12 +1,12 @@
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { characterAvatarElementId } from "./characterAvatar";
-import { getProjectStore } from "./store";
+import type { ProjectStore } from "./store";
 
 export function deleteCharacter(
-	projectId: string,
+	store: ProjectStore,
 	queue: GenerationQueue,
 	name: string,
 ) {
 	queue.discard(characterAvatarElementId(name));
-	getProjectStore(projectId).getState().removeCharacter(name);
+	store.getState().removeCharacter(name);
 }

@@ -1,12 +1,12 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
 
-const projectId = "reference-images-test-project";
+let store: ProjectStore;
 
-afterEach(() => {
-	clearProjectStore(projectId);
+beforeEach(() => {
+	store = createProjectStore();
 });
 
 describe("createReferenceImagesPlugin", () => {
@@ -17,24 +17,22 @@ describe("createReferenceImagesPlugin", () => {
 	it("returns params unchanged when store and params are empty", () => {
 		const { beforeGenerate } = createReferenceImagesPlugin();
 		const params = { prompt: "a cat" };
-		expect(beforeGenerate?.(params, stateCtx(projectId))).toBe(params);
+		expect(beforeGenerate?.(params, stateCtx(store))).toBe(params);
 	});
 
 	it("uses store images when params has none", () => {
-		getProjectStore(projectId)
+		store
 			.getState()
 			.setReferenceImages(["https://img/a.png", "https://img/b.png"]);
 		const { beforeGenerate } = createReferenceImagesPlugin();
-		expect(beforeGenerate?.({ prompt: "a cat" }, stateCtx(projectId))).toEqual({
+		expect(beforeGenerate?.({ prompt: "a cat" }, stateCtx(store))).toEqual({
 			prompt: "a cat",
 			referenceImages: ["https://img/a.png", "https://img/b.png"],
 		});
 	});
 
 	it("appends store images to existing referenceImages", () => {
-		getProjectStore(projectId)
-			.getState()
-			.setReferenceImages(["https://img/store.png"]);
+		store.getState().setReferenceImages(["https://img/store.png"]);
 		const { beforeGenerate } = createReferenceImagesPlugin();
 		expect(
 			beforeGenerate?.(
@@ -42,7 +40,7 @@ describe("createReferenceImagesPlugin", () => {
 					prompt: "a cat",
 					referenceImages: ["https://img/existing.png"],
 				},
-				stateCtx(projectId),
+				stateCtx(store),
 			),
 		).toEqual({
 			prompt: "a cat",
@@ -58,7 +56,7 @@ describe("createReferenceImagesPlugin", () => {
 					prompt: "a cat",
 					referenceImages: ["https://img/existing.png"],
 				},
-				stateCtx(projectId),
+				stateCtx(store),
 			),
 		).toEqual({
 			prompt: "a cat",
