@@ -12,11 +12,10 @@ export type VideoLength = (typeof VIDEO_LENGTHS)[number];
 export const DEFAULT_VIDEO_LENGTH: VideoLength = "3-5m";
 
 /**
- * Effective rate of the finished audio at medium narration speed, including the
- * pause the TTS provider inserts between lines. Extrapolated from a slow-speed
- * script measured at 125 wpm end-to-end; retune once a medium one is measured.
+ * Deliberately above the measured rate of ~150. Models undershoot a word budget,
+ * so overstating it lands the runtime closer to the target.
  */
-const NARRATION_WORDS_PER_MINUTE = 150;
+const NARRATION_WORDS_PER_MINUTE = 180;
 
 /** Rounded to the nearest ten so the model reads a budget, not a false precision. */
 const wordsForSeconds = (sec: number): number =>

@@ -34,8 +34,8 @@ describe("scriptLengthPlugin", () => {
 
 		const sys = systemPromptFor({ prompt: "hi" });
 
-		expect(sys).toContain("1500");
-		expect(sys).toContain("2250");
+		expect(sys).toContain("1800");
+		expect(sys).toContain("2700");
 	});
 
 	it("never states the runtime, which a model cannot reason about", () => {

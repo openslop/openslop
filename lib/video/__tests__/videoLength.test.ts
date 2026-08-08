@@ -23,14 +23,14 @@ describe("resolveVideoLength", () => {
 });
 
 describe("VIDEO_LENGTH_SPECS", () => {
-	it("translates each runtime into a spoken word budget at 150 wpm", () => {
+	it("translates each runtime into a spoken word budget at 180 wpm", () => {
 		expect(VIDEO_LENGTH_SPECS["under-30s"]).toMatchObject({
-			minWords: 40,
-			maxWords: 80,
+			minWords: 50,
+			maxWords: 90,
 		});
 		expect(VIDEO_LENGTH_SPECS["10-15m"]).toMatchObject({
-			minWords: 1500,
-			maxWords: 2250,
+			minWords: 1800,
+			maxWords: 2700,
 		});
 	});
 
