@@ -16,31 +16,21 @@ const NARRATION_WORDS_PER_MINUTE = 180;
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
 
-const WORDS_PER_SPOKEN_ELEMENT = 22;
-
 type VideoLengthSpec = {
 	label: string;
 	minWords: number;
 	maxWords: number;
-	minElements: number;
-	maxElements: number;
 };
 
 const spec = (
 	label: string,
 	minSec: number,
 	maxSec: number,
-): VideoLengthSpec => {
-	const minWords = wordsForSeconds(minSec);
-	const maxWords = wordsForSeconds(maxSec);
-	return {
-		label,
-		minWords,
-		maxWords,
-		minElements: Math.round(minWords / WORDS_PER_SPOKEN_ELEMENT),
-		maxElements: Math.round(maxWords / WORDS_PER_SPOKEN_ELEMENT),
-	};
-};
+): VideoLengthSpec => ({
+	label,
+	minWords: wordsForSeconds(minSec),
+	maxWords: wordsForSeconds(maxSec),
+});
 
 export const VIDEO_LENGTH_SPECS = {
 	"under-30s": spec("Under 30 sec", 15, 30),

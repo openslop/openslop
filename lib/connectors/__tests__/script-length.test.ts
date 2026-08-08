@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 describe("scriptLengthPlugin", () => {
-	it("budgets in words and countable elements, never the runtime", () => {
+	it("budgets in words, never the runtime", () => {
 		getProjectStore(projectId)
 			.getState()
 			.updateMetadata({ videoSettings: { length: "10-15m" } });
@@ -36,16 +36,7 @@ describe("scriptLengthPlugin", () => {
 
 		expect(sys).toContain("1800");
 		expect(sys).toContain("2700");
-		expect(sys).toContain("82");
-		expect(sys).toContain("123");
 		expect(sys).not.toContain(VIDEO_LENGTH_SPECS["10-15m"].label);
-	});
-
-	it("asks for elements rather than scenes, and treats the budget as a floor", () => {
-		const sys = systemPromptFor({ prompt: "hi" });
-		expect(sys).toContain("<narration>");
-		expect(sys).not.toMatch(/\bscenes?\b/i);
-		expect(sys).toMatch(/Stopping short is a failure/);
 	});
 
 	it("falls back to the default budget when no length is selected", () => {

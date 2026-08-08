@@ -34,21 +34,11 @@ describe("VIDEO_LENGTH_SPECS", () => {
 		});
 	});
 
-	it("splits the budget into countable elements of a natural line length", () => {
-		expect(VIDEO_LENGTH_SPECS["10-15m"]).toMatchObject({
-			minElements: 82,
-			maxElements: 123,
-		});
-	});
-
 	it("gives every length an ascending budget", () => {
 		for (const length of VIDEO_LENGTHS) {
-			const { minWords, maxWords, minElements, maxElements, label } =
-				VIDEO_LENGTH_SPECS[length];
+			const { minWords, maxWords, label } = VIDEO_LENGTH_SPECS[length];
 			expect(label).not.toBe("");
 			expect(minWords).toBeLessThan(maxWords);
-			expect(minElements).toBeLessThan(maxElements);
-			expect(minElements).toBeGreaterThan(0);
 		}
 	});
 
