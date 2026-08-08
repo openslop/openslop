@@ -42,6 +42,9 @@ interface ScrubBarProps {
 	children?: ReactNode;
 }
 
+/** Height of the interactive track; callers reserve this to avoid layout shift. */
+export const SCRUB_BAR_HEIGHT = "h-5";
+
 const SINGLE: ScrubSegment[] = [{ id: "_", basis: 1 }];
 
 /**
@@ -168,7 +171,8 @@ export function ScrubBar({
 			ref={trackRef}
 			aria-label={ariaLabel}
 			className={cn(
-				"group relative flex h-5 cursor-pointer items-center",
+				"group relative flex cursor-pointer items-center",
+				SCRUB_BAR_HEIGHT,
 				className,
 			)}
 			style={
