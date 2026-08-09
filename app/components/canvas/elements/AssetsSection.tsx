@@ -1,29 +1,28 @@
 "use client";
 
 import { memo, useState } from "react";
-import { ImagePlus, UserPlus } from "@/components/ui/icon";
+import { UserPlus } from "@/components/ui/icon";
 import { useProject } from "@/lib/project/useProject";
-import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { AddAssetTile } from "./AddAssetTile";
 import {
+	ArtStyleAssetTile,
 	CharacterAssetTiles,
 	NarratorAssetTile,
-	ReferenceAssetTiles,
 } from "./AssetTiles";
 import { useAssetEditDialogs } from "./character/useAssetEditDialogs";
 import { CollapsibleHeader } from "./CollapsibleHeader";
+import { ReferenceImages } from "./ReferenceImages";
 
 function AssetsSectionComponent() {
 	const hydrated = useProject((s) => s.hydrated);
-	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [collapsed, setCollapsed] = useState(false);
-	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
-		useAssetEditDialogs();
-
-	const { openPicker, uploading, inputElement } = useImageUpload({
-		multiple: true,
-		onUpload: addReferenceImages,
-	});
+	const {
+		openCreateCharacter,
+		editCharacter,
+		openNarrator,
+		openArtStyle,
+		dialogs,
+	} = useAssetEditDialogs();
 
 	if (!hydrated) return null;
 
@@ -37,6 +36,7 @@ function AssetsSectionComponent() {
 			/>
 			{!collapsed && (
 				<div className="flex flex-wrap gap-2">
+					<ArtStyleAssetTile onEdit={openArtStyle} />
 					<NarratorAssetTile onEdit={openNarrator} />
 					<CharacterAssetTiles onEdit={editCharacter} />
 					<AddAssetTile
@@ -45,16 +45,7 @@ function AssetsSectionComponent() {
 						Icon={UserPlus}
 						onClick={openCreateCharacter}
 					/>
-					<ReferenceAssetTiles />
-					<AddAssetTile
-						label="Reference"
-						ariaLabel="Add reference image"
-						Icon={ImagePlus}
-						onClick={openPicker}
-						disabled={uploading}
-						busy={uploading}
-					/>
-					{inputElement}
+					<ReferenceImages />
 				</div>
 			)}
 			{dialogs}

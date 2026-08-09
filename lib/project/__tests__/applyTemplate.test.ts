@@ -53,7 +53,9 @@ describe("applyTemplate", () => {
 
 		const { metadata } = getProjectStore(PROJECT_ID).getState();
 		expect(metadata.title).toBe("");
-		expect(metadata.style).toBe(getTemplateById("pov-life")?.style);
+		expect(metadata.style).toBe(
+			getTemplateById("pov-life")?.style?.description,
+		);
 	});
 
 	it("wipes reference images set outside the template before applying", () => {

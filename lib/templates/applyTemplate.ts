@@ -15,7 +15,7 @@ export function applyTemplate(
 	project.reset();
 	project.setReferenceImages(template.referenceImages);
 	project.updateMetadata({
-		style: template.style,
+		style: template.style?.description,
 		characters: template.characters,
 		narration: template.narration,
 		videoSettings: { length: template.length },
