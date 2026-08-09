@@ -3,6 +3,7 @@ import { CANVAS_ELEMENT_TYPES, DURATION_OPTIONS } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import type { LLMPlugin } from "@/lib/connectors/types";
+import { osmlLanguagePrompt } from "./osml";
 
 const ELEMENT_TYPE_LIST = [...CANVAS_ELEMENT_TYPES].join(", ");
 const vals = (e: Record<string, string>) => Object.values(e).join(", ");
@@ -52,6 +53,10 @@ const REFINE_SYSTEM_PROMPT = dedent`
   - Emit all operations for a given location consecutively before moving to the next location.
   - Minimize the number of operations. Only output what is necessary to fulfill the request.
   - Preserve existing element IDs — reference them, do not invent new ones.
+
+${osmlLanguagePrompt(
+	"the same language as the script you are editing, even when the refinement request is written in another language",
+)}
 `;
 
 export function createRefinePlugin(osml: string): LLMPlugin {

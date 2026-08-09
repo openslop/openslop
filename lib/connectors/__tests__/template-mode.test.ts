@@ -66,6 +66,13 @@ describe("createTemplateModePlugin", () => {
 			expect(result).toContain(realTemplate.exampleText.slice(0, 64));
 		});
 
+		it("pastiches the example's form without inheriting its language", async () => {
+			const { transformPrompt } = createTemplateModePlugin(realTemplate.id);
+			const result = await transformPrompt?.("un PDG de la tech", fakeCtx);
+			expect(result).toContain("language of the user_input");
+			expect(result).not.toContain("tone, language, pacing");
+		});
+
 		it("rejects when templateId is unknown", async () => {
 			const { transformPrompt } = createTemplateModePlugin("does-not-exist");
 			await expect(transformPrompt?.("anything", fakeCtx)).rejects.toThrow(

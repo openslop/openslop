@@ -25,9 +25,9 @@ export const storyModePlugin: LLMPlugin = {
 	) {
 		const gateway = requireGateway(ctx, "story-mode");
 		const { text: outline } = await gateway.generate({
-			prompt: dedent`Outline an engaging story with a high-concept premise, characters, themes, conflict, twists, and a resolution. The story should be about the following: ${prompt}. Do not write anything else, just the outline.`,
+			prompt: dedent`Outline an engaging story with a high-concept premise, characters, themes, conflict, twists, and a resolution. The story should be about the following: ${prompt}. Write the outline in the same language as that input. Do not write anything else, just the outline.`,
 			maxTokens: 8192,
 		});
-		return dedent`Write a complete, engaging, and simple story for a 5th-grade reading level about the following: ${outline}`;
+		return dedent`Write a complete, engaging, and simple story for a 5th-grade reading level, in the same language as the following outline: ${outline}`;
 	},
 };

@@ -23,6 +23,23 @@ describe("osmlPlugin", () => {
 		);
 	});
 
+	it("writes spoken text in the user's language while pinning descriptions to English", () => {
+		const { systemPrompt } = beforeGenerate({ prompt: "hello" }) as {
+			systemPrompt: string;
+		};
+		expect(systemPrompt).toContain(
+			"the same language the user wrote their input in",
+		);
+		expect(systemPrompt).toMatch(/descriptions in English/);
+	});
+
+	it("derives the voice language attribute from the script rather than defaulting to English", () => {
+		const { systemPrompt } = beforeGenerate({ prompt: "hello" }) as {
+			systemPrompt: string;
+		};
+		expect(systemPrompt).not.toContain('Default to "en"');
+	});
+
 	it("deters motion on animated_image, which competes with the videoPrompt animation", () => {
 		const { systemPrompt } = beforeGenerate({ prompt: "hello" }) as {
 			systemPrompt: string;
