@@ -15,9 +15,9 @@ import {
 	getTTSProvider,
 } from "./providers";
 
-export type ProcessOutcome =
+export type ProcessOutcome<TMeta = Record<string, unknown>> =
 	| { kind: "completed"; result: BundleResponse }
-	| { kind: "pending"; metadata: Record<string, unknown> };
+	| { kind: "pending"; metadata: TMeta };
 
 export type TypedJobRow<TReq, TMeta> = Omit<JobRow, "request" | "metadata"> & {
 	request: TReq;
@@ -28,7 +28,7 @@ export interface JobHandler<
 	TReq = Record<string, unknown>,
 	TMeta = Record<string, unknown>,
 > {
-	process(job: TypedJobRow<TReq, TMeta>): Promise<ProcessOutcome>;
+	process(job: TypedJobRow<TReq, TMeta>): Promise<ProcessOutcome<TMeta>>;
 }
 
 function assetHandler<TReq extends Record<string, unknown>>(
