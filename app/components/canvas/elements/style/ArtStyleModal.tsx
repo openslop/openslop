@@ -103,11 +103,11 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 						tooltip={
 							hasReferences
 								? undefined
-								: "Use reference images for art style description: upload some first"
+								: "Use reference images and character avatars for art style description: upload some first"
 						}
 					>
 						{deriving && <Spinner className="text-current" />}
-						Use reference images for art style description
+						Use references
 					</Button>
 					<textarea
 						id={DESCRIPTION_ID}
