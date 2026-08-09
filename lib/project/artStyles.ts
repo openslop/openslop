@@ -49,7 +49,7 @@ export const ART_STYLE_PRESETS: ArtStyle[] = [
 		thumbnail: styleAsset("pencil-sketch"),
 		description:
 			"Graphite pencil sketch, loose hatching and cross-hatching, smudged shading, visible construction lines, off-white sketchbook paper, monochrome",
-	}, // custom ones below TODO remove
+	},
 	{
 		thumbnail: styleAsset("documentary"),
 		description:

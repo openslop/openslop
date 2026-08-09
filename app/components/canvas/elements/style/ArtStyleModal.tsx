@@ -45,6 +45,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 	const queue = useGenerationQueue();
 	const style = useProject((s) => s.metadata.style);
 	const updateMetadata = useProject((s) => s.updateMetadata);
+	const setStyle = (next: string) => updateMetadata({ style: next });
 
 	const [deriving, setDeriving] = useState(false);
 
@@ -61,7 +62,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 				getProjectStore(projectId).getState(),
 				queue,
 			);
-			if (derived) updateMetadata({ style: derived });
+			if (derived) setStyle(derived);
 		} finally {
 			setDeriving(false);
 		}
@@ -82,7 +83,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 					<TextAreaField
 						label="Description"
 						value={style}
-						onChange={(next) => updateMetadata({ style: next })}
+						onChange={setStyle}
 						placeholder="Describe the look of every image, or paste a full image prompt"
 						rows={5}
 					/>
@@ -104,10 +105,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 					</Button>
 				</div>
 
-				<ArtStylePresets
-					value={style}
-					onSelect={(next) => updateMetadata({ style: next })}
-				/>
+				<ArtStylePresets value={style} onSelect={setStyle} />
 			</div>
 
 			<DialogFooter className="shrink-0">

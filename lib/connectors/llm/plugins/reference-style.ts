@@ -6,13 +6,12 @@ import { getProjectStore } from "@/lib/project/store";
 import type { LLMPlugin } from "@/lib/connectors/types";
 
 /**
- * Describes the reference images for projects whose art style the user never
- * set, so the script is written to a style rather than to nothing.
+ * Fills an unset art style in from the project's references.
  *
- * The derived style is also prepended, not just stored: `projectMetadata`
- * injects from the state snapshot the run started with, which cannot hold a
- * style written mid-run. Writing in the transform phase, which completes
- * before any `beforeGenerate`, keeps the two from injecting it twice.
+ * The derived style is prepended as well as stored: `projectMetadata` injects
+ * from the state snapshot the run started with, which cannot hold a style
+ * written mid-run. Writing in the transform phase, which completes before any
+ * `beforeGenerate`, keeps the two from injecting it twice.
  */
 export function createReferenceStylePlugin(
 	projectId: string,
