@@ -1,3 +1,23 @@
+/**
+ * Shortens from the middle, for text whose head and tail both identify it: an
+ * art style opens with its medium and closes with its palette, so cutting the
+ * end would drop half of what tells two styles apart.
+ */
+export function truncateMiddle(text: string, maxLength: number): string {
+	if (text.length <= maxLength) return text;
+	const kept = maxLength - 1;
+	const headLength = Math.ceil(kept / 2);
+	const head = text.slice(0, headLength);
+	const tail = text.slice(text.length - (kept - headLength));
+	// Both sides fall back to the raw cut, so unbroken text still shortens.
+	const headBreak = head.lastIndexOf(" ");
+	const tailBreak = tail.indexOf(" ");
+	return [
+		(headBreak > 0 ? head.slice(0, headBreak) : head).trimEnd(),
+		tailBreak >= 0 ? tail.slice(tailBreak) : tail,
+	].join("…");
+}
+
 export function formatBytes(bytes: number): string {
 	if (bytes < 1024) return `${bytes} B`;
 	const kb = bytes / 1024;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { collectMetadata } from "../osmlMetadata";
+import { MetadataSchema } from "@/lib/project/types";
+import { collectMetadata, collectWritableMetadata } from "../osmlMetadata";
 import type { ParsedElement } from "../types";
 
 const node = (
@@ -121,6 +122,34 @@ describe("collectMetadata", () => {
 			style: "watercolor",
 			narration: { gender: "feminine" },
 			characters: { Red: { appearance: "a red cloak" } },
+		});
+	});
+});
+
+describe("collectWritableMetadata", () => {
+	const stored = (style: string) => MetadataSchema.parse({ style });
+	const script = [
+		node("metadata_title", {}, "Little Red"),
+		node("metadata_style", {}, "watercolor"),
+	];
+
+	it("fills in an art style when the project has none", () => {
+		expect(collectWritableMetadata(script, stored(""))).toEqual({
+			title: "Little Red",
+			style: "watercolor",
+		});
+	});
+
+	it("keeps a stored art style while still applying the rest", () => {
+		expect(
+			collectWritableMetadata(script, stored("Oil painting --ar 16:9")),
+		).toEqual({ title: "Little Red" });
+	});
+
+	it("treats a whitespace-only stored style as none", () => {
+		expect(collectWritableMetadata(script, stored("   "))).toEqual({
+			title: "Little Red",
+			style: "watercolor",
 		});
 	});
 });

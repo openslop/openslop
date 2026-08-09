@@ -20,7 +20,6 @@ import { storyModePlugin } from "../connectors/llm/plugins/story-mode";
 import { createTemplateModePlugin } from "../connectors/llm/plugins/template-mode";
 import { projectMetadataPlugin } from "../connectors/llm/plugins/project-metadata";
 import { scriptLengthPlugin } from "@/lib/connectors/llm/plugins/script-length";
-import { createReferenceStylePlugin } from "../connectors/llm/plugins/reference-style";
 import { createCharacterAvatarStylePlugin } from "../connectors/llm/plugins/character-avatar-style";
 import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/templates";
 import { applyTemplate as applyTemplateToProject } from "@/lib/templates/applyTemplate";
@@ -70,7 +69,6 @@ export function ConfigProvider({
 				"llm",
 				projectMetadataPlugin,
 				...modePlugins,
-				createReferenceStylePlugin(queue),
 				createCharacterAvatarStylePlugin(queue),
 			)
 			.appendPlugins("image", ...buildImagePlugins())

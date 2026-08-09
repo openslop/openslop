@@ -8,6 +8,7 @@ import {
 	ImagePlus,
 	Loader2,
 	Mic,
+	Palette,
 	Plus,
 	Proportions,
 	User,
@@ -93,11 +94,13 @@ function AttachMenu({
 	uploading,
 	onCreateCharacter,
 	onSelectNarrator,
+	onSetArtStyle,
 }: {
 	openPicker: () => void;
 	uploading: boolean;
 	onCreateCharacter: () => void;
 	onSelectNarrator: () => void;
+	onSetArtStyle: () => void;
 }) {
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
@@ -118,6 +121,12 @@ function AttachMenu({
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
 			onSelect: onSelectNarrator,
+		},
+		{
+			key: "art-style",
+			label: "Set art style",
+			icon: <Palette className={iconClass} />,
+			onSelect: onSetArtStyle,
 		},
 	];
 
@@ -188,8 +197,13 @@ export default function ComposerCopilot({
 	const videoLength = useVideoLength();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
-	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
-		useAssetEditDialogs();
+	const {
+		openCreateCharacter,
+		editCharacter,
+		openNarrator,
+		openArtStyle,
+		dialogs,
+	} = useAssetEditDialogs();
 
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
@@ -209,6 +223,7 @@ export default function ComposerCopilot({
 					uploadingCount={uploadingCount}
 					onEditCharacter={editCharacter}
 					onEditNarrator={openNarrator}
+					onEditArtStyle={openArtStyle}
 				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{isTemplateMode && (
@@ -246,6 +261,7 @@ export default function ComposerCopilot({
 							uploading={uploading}
 							onCreateCharacter={openCreateCharacter}
 							onSelectNarrator={openNarrator}
+							onSetArtStyle={openArtStyle}
 						/>
 						<SelectMenu
 							value={mode}

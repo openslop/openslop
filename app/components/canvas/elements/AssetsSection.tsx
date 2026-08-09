@@ -6,6 +6,7 @@ import { useProject } from "@/lib/project/useProject";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { AddAssetTile } from "./AddAssetTile";
 import {
+	ArtStyleAssetTile,
 	CharacterAssetTiles,
 	NarratorAssetTile,
 	ReferenceAssetTiles,
@@ -17,8 +18,13 @@ function AssetsSectionComponent() {
 	const hydrated = useProject((s) => s.hydrated);
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [collapsed, setCollapsed] = useState(false);
-	const { openCreateCharacter, editCharacter, openNarrator, dialogs } =
-		useAssetEditDialogs();
+	const {
+		openCreateCharacter,
+		editCharacter,
+		openNarrator,
+		openArtStyle,
+		dialogs,
+	} = useAssetEditDialogs();
 
 	const { openPicker, uploading, inputElement } = useImageUpload({
 		multiple: true,
@@ -37,6 +43,7 @@ function AssetsSectionComponent() {
 			/>
 			{!collapsed && (
 				<div className="flex flex-wrap gap-2">
+					<ArtStyleAssetTile onEdit={openArtStyle} />
 					<NarratorAssetTile onEdit={openNarrator} />
 					<CharacterAssetTiles onEdit={editCharacter} />
 					<AddAssetTile
