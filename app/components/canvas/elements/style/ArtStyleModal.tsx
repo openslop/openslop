@@ -96,12 +96,12 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 						onClick={deriveFromReferences}
 						tooltip={
 							hasReferences
-								? "From references: describe the reference images"
-								: "From references: add reference images first"
+								? "Use my reference images: write their style here"
+								: "Use my reference images: upload some first"
 						}
 					>
 						{deriving && <Spinner className="text-current" />}
-						From references
+						Use my reference images
 					</Button>
 				</div>
 
