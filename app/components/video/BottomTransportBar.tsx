@@ -3,12 +3,14 @@
 import { memo } from "react";
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/video/frames";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
 import { findSegmentIndexAtFrame } from "./useSceneSegments";
 import { usePlayerPlaying } from "./usePlayerState";
+import { SCRUB_BAR_HEIGHT } from "./ScrubBar";
 import { SegmentedSeekBar } from "./SegmentedSeekBar";
 import {
 	FullscreenButton,
@@ -38,11 +40,15 @@ function BottomTransportBarComponent() {
 
 	return (
 		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
-			{ready ? (
-				<SegmentedSeekBar player={player} layout={layout} segments={segments} />
-			) : (
-				<div className="h-3 w-full" aria-hidden />
-			)}
+			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
+				{ready && (
+					<SegmentedSeekBar
+						player={player}
+						layout={layout}
+						segments={segments}
+					/>
+				)}
+			</div>
 			<div className="flex items-center gap-2">
 				<div className="flex flex-1 items-center gap-2">
 					{ready && <TimeDisplay player={player} layout={layout} />}
