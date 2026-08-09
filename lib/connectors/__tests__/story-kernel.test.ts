@@ -11,11 +11,22 @@ class MockLLMGateway extends GatewayClient<
 	LLMGenerateParams,
 	LLMGenerateResult
 > {
-	async generate(): Promise<LLMGenerateResult> {
+	async generate(_params: LLMGenerateParams): Promise<LLMGenerateResult> {
 		return {
 			text: "A brave knight rescues a dragon who turns out to be friendly.",
 			model: "test",
 		};
+	}
+}
+
+class RecordingLLMGateway extends MockLLMGateway {
+	readonly prompts: string[] = [];
+
+	override async generate(
+		params: LLMGenerateParams,
+	): Promise<LLMGenerateResult> {
+		this.prompts.push(params.prompt);
+		return super.generate(params);
 	}
 }
 
@@ -36,6 +47,16 @@ describe("storyModePlugin", () => {
 			"A brave knight rescues a dragon who turns out to be friendly.",
 		);
 		expect(result).toContain("5th-grade reading level");
+	});
+
+	it("carries the input language across the outline hop, the only place it can survive", async () => {
+		const gateway = new RecordingLLMGateway();
+		const result = await transformPrompt("un chevalier et un dragon", {
+			gateway,
+		});
+
+		expect(gateway.prompts.at(0)).toContain("same language as that input");
+		expect(result).toContain("same language as the following outline");
 	});
 
 	it("throws when no context is provided", async () => {

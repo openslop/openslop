@@ -14,12 +14,24 @@ import {
 } from "@/lib/connectors/tts/enums";
 import type { LLMPlugin } from "@/lib/connectors/types";
 
+export function osmlLanguagePrompt(spokenLanguage: string): string {
+	return dedent`
+		## **Language**
+		- Write all narration text and character dialogue in ${spokenLanguage}.
+		- Always write image, animated_image (including videoPrompt), sound, and music descriptions in English, whatever language the spoken text is in.`;
+}
+
 const OSML_SYSTEM_PROMPT = dedent`
-	The story script must be written in a special XML format that strictly follows these rules: 
+	The story script must be written in a special XML format that strictly follows these rules:
 
   ## **General Guidelines**
   - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
   - Descriptions in image tags are opaque to the reader, so the narrative prose should include some details that are only in the image tags.
+
+${osmlLanguagePrompt(
+	"the same language the user wrote their input in, ignoring the language of any example, reference, or instruction text",
+)}
+- Write the metadata_title in that same language, and the metadata_style description in English.
 
   ## **XML Tagging**
 
@@ -132,7 +144,7 @@ const OSML_SYSTEM_PROMPT = dedent`
   - pitch: ${TTS_PITCHES.join(", ")}.
   - accent: ${TTS_ACCENTS.join(", ")}.
   - description: A simple descriptor of the voice. Examples: Charming, Confident, Approachable, Friendly, Energetic, Casual, Mature, Warm, Clear, Upbeat, Deep, Soft, etc.
-  - language: ISO 639-1 code of the spoken language. Allowed values: ${TTS_LANGUAGES.join(", ")}. Default to "en" when unspecified.
+  - language: ISO 639-1 code of the language the narration and dialogue are written in, per the Language rules above. Allowed values: ${TTS_LANGUAGES.join(", ")}.
 
   ### General XML Tag Rules
   - NEVER nest XML tags within other XML tags.
