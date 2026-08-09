@@ -80,6 +80,30 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 			</DialogHeader>
 
 			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
+				<section aria-label="Reference images" className="flex flex-col gap-2">
+					<div className="flex items-center justify-between gap-2">
+						<FieldLabel>Reference images</FieldLabel>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							disabled={!hasReferences || deriving}
+							onClick={deriveFromReferences}
+							tooltip={
+								hasReferences
+									? "Use my reference images: write their style below"
+									: "Use my reference images: upload some first"
+							}
+						>
+							{deriving && <Spinner className="text-current" />}
+							Use my reference images
+						</Button>
+					</div>
+					<div className="flex flex-wrap gap-2">
+						<ReferenceImages />
+					</div>
+				</section>
+
 				<TextAreaField
 					label="Description"
 					value={style}
@@ -87,29 +111,6 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 					placeholder="Describe the look of every image, or paste a full image prompt"
 					rows={5}
 				/>
-
-				<section aria-label="Reference images" className="flex flex-col gap-2">
-					<FieldLabel>Reference images</FieldLabel>
-					<div className="flex flex-wrap gap-2">
-						<ReferenceImages />
-					</div>
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						className="self-start"
-						disabled={!hasReferences || deriving}
-						onClick={deriveFromReferences}
-						tooltip={
-							hasReferences
-								? "Use my reference images: write their style here"
-								: "Use my reference images: upload some first"
-						}
-					>
-						{deriving && <Spinner className="text-current" />}
-						Use my reference images
-					</Button>
-				</section>
 
 				<ArtStylePresets value={style} onSelect={setStyle} />
 			</div>
