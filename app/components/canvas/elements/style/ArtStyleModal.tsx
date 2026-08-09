@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import dedent from "dedent";
 import { Button } from "@/components/ui/button";
 import {
 	DialogContent,
@@ -18,13 +17,14 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { createDefaultConnector } from "@/lib/connectors/registry";
-import { artStyleReferences } from "@/lib/project/artStyleReferences";
+import {
+	artStyleReferences,
+	deriveArtStyle,
+} from "@/lib/project/deriveArtStyle";
 import { getProjectStore } from "@/lib/project/store";
 import { useProject } from "@/lib/project/useProject";
 import { TextAreaField } from "../character/fields";
 import { ArtStylePresets } from "./ArtStylePresets";
-
-const DERIVE_PROMPT = dedent`Vividly and concisely describe the visual art style of the attached reference image(s) in 1–2 concise sentences. Include ultra specific detail on character art style and overall art style.`;
 
 export function ArtStyleModal({
 	open,
@@ -56,16 +56,11 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 	const deriveFromReferences = async () => {
 		setDeriving(true);
 		try {
-			const connector = createDefaultConnector(connectorConfig, "llm", []);
-			const { text } = await connector.generate({
-				prompt: DERIVE_PROMPT,
-				referenceImages: artStyleReferences(
-					getProjectStore(projectId).getState(),
-					queue,
-				),
-				maxTokens: 4096,
-			});
-			const derived = text.trim();
+			const derived = await deriveArtStyle(
+				createDefaultConnector(connectorConfig, "llm", []),
+				getProjectStore(projectId).getState(),
+				queue,
+			);
 			if (derived) updateMetadata({ style: derived });
 		} finally {
 			setDeriving(false);
