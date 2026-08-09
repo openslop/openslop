@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+	ArtStyleAssetTile,
 	CharacterAssetTiles,
 	NarratorAssetTile,
 	ReferenceAssetTiles,
@@ -16,16 +17,19 @@ interface ComposerAssetsProps {
 	uploadingCount: number;
 	onEditCharacter: (name: string) => void;
 	onEditNarrator: () => void;
+	onEditArtStyle: () => void;
 }
 
 export function ComposerAssets({
 	uploadingCount,
 	onEditCharacter,
 	onEditNarrator,
+	onEditArtStyle,
 }: ComposerAssetsProps) {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const narration = useProject((s) => s.metadata.narration);
+	const hasArtStyle = useProject((s) => Boolean(s.metadata.style.trim()));
 
 	const [deletingName, setDeletingName] = useState<string>();
 
@@ -38,6 +42,7 @@ export function ComposerAssets({
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
+			{hasArtStyle && <ArtStyleAssetTile onEdit={onEditArtStyle} />}
 			{hasNarration && <NarratorAssetTile onEdit={onEditNarrator} />}
 			<CharacterAssetTiles
 				onEdit={onEditCharacter}

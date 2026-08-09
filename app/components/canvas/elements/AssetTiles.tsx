@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, Palette, User } from "@/components/ui/icon";
+import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import {
 	characterAvatarElementId,
@@ -12,6 +12,17 @@ import { AssetTile } from "./AssetTile";
 export function NarratorAssetTile({ onEdit }: { onEdit: () => void }) {
 	return (
 		<AssetTile name="Narrator" Icon={Mic} fallback="icon" onEdit={onEdit} />
+	);
+}
+
+export function ArtStyleAssetTile({ onEdit }: { onEdit: () => void }) {
+	return (
+		<AssetTile
+			name="Art style"
+			Icon={Palette}
+			fallback="icon"
+			onEdit={onEdit}
+		/>
 	);
 }
 
@@ -67,7 +78,7 @@ export function ReferenceAssetTiles() {
 			key={`reference:${url}`}
 			name={`Reference ${index + 1}`}
 			previewUrl={url}
-			Icon={Palette}
+			Icon={Image}
 			onRemove={() => removeReferenceImage(index)}
 		/>
 	));

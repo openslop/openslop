@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
+import type { ArtStyle } from "@/lib/project/artStyles";
 import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
 import type { VideoLength } from "@/lib/video/videoLength";
 
@@ -21,7 +22,7 @@ export interface Template {
 	exampleText: string;
 	systemPrompt: string;
 	length: VideoLength;
-	style?: string;
+	style?: ArtStyle;
 	referenceImages: string[];
 	characters?: Record<string, MetadataCharacter>;
 	/** Prebuilt avatars, seeded as the character avatar nodes' results. */
@@ -37,8 +38,10 @@ export const TEMPLATES: Template[] = [
 		name: "POV Life",
 		pillText: "POV: Your life at every stage as a",
 		color: "#F59E0B",
-		style:
-			"2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients",
+		style: {
+			description:
+				"2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients",
+		},
 		referenceImages: [
 			templateAsset("pov-life-stages-2"),
 			templateAsset("pov-life-stages-3"),
@@ -342,8 +345,10 @@ export const TEMPLATES: Template[] = [
 		name: "Finance Tips",
 		pillText: "Finance tips for...",
 		color: "#3B82F6",
-		style:
-			"Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.",
+		style: {
+			description:
+				"Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.",
+		},
 		referenceImages: [
 			templateAsset("finance-tips-2"),
 			templateAsset("finance-tips-3"),
@@ -548,8 +553,10 @@ export const TEMPLATES: Template[] = [
 		name: "True Crime",
 		pillText: "A true crime story about",
 		color: "#8A0000",
-		style:
-			"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style",
+		style: {
+			description:
+				"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style",
+		},
 		referenceImages: [
 			templateAsset("true-crime-1"),
 			templateAsset("true-crime-2"),
@@ -829,8 +836,10 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		name: "POV Financial Lifestyle",
 		pillText: "POV: You're a",
 		color: "#059669",
-		style:
-			"Flat 2D vector cartoon illustration in a modern animated web-comic style. Bold, clean black outlines of even weight. Smooth cel-shaded coloring with soft gradient lighting, gentle ambient glow, and warm cozy color palettes. Slightly muted, desaturated tones with warm highlights. The Protagonist has rounded, soft proportions and a friendly approachable look, rendered against richly illustrated environments. Clean, polished, professional digital cartoon aesthetic reminiscent of explainer-video and meme-style animation.",
+		style: {
+			description:
+				"Flat 2D vector cartoon illustration in a modern animated web-comic style. Bold, clean black outlines of even weight. Smooth cel-shaded coloring with soft gradient lighting, gentle ambient glow, and warm cozy color palettes. Slightly muted, desaturated tones with warm highlights. The Protagonist has rounded, soft proportions and a friendly approachable look, rendered against richly illustrated environments. Clean, polished, professional digital cartoon aesthetic reminiscent of explainer-video and meme-style animation.",
+		},
 		referenceImages: [
 			templateAsset("pov-financial-lifestyle-1"),
 			templateAsset("pov-financial-lifestyle-2"),
@@ -1254,8 +1263,10 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		name: "Celebrity Death",
 		pillText: "Death of every",
 		color: "#C7BFB2",
-		style:
-			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+		style: {
+			description:
+				"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+		},
 		referenceImages: [
 			templateAsset("celebrity-death-1"),
 			templateAsset("celebrity-death-2"),
@@ -1482,8 +1493,10 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		name: "Stick Explainer",
 		pillText: "Stickman explainer about",
 		color: "#AA8AB1",
-		style:
-			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+		style: {
+			description:
+				"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+		},
 		referenceImages: [
 			templateAsset("stick-explainer-1"),
 			templateAsset("stick-explainer-2"),

@@ -11,7 +11,7 @@ let store: ProjectStore;
 
 const seedStore = () => {
 	store.getState().updateMetadata({
-		style: template.style,
+		style: template.style?.description,
 		narration: template.narration,
 		characters: template.characters,
 	});
@@ -28,7 +28,7 @@ describe("projectMetadataPlugin", () => {
 		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(store));
 		const sys = (result as { systemPrompt: string }).systemPrompt;
 		expect(sys).toContain("# Art Style");
-		expect(sys).toContain(template.style);
+		expect(sys).toContain(template.style?.description);
 		expect(sys).toContain("# Narration Voice");
 		expect(sys).toContain("# Characters");
 	});

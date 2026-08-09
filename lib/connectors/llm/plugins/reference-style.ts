@@ -1,41 +1,36 @@
 import dedent from "dedent";
-import compact from "lodash/compact";
 import { requireGateway, requireState } from "@/lib/connectors/plugins";
 import type { NodeResults } from "@/lib/generation/graph";
-import { characterAvatarUrl } from "@/lib/project/characterAvatar";
-import type {
-	LLMGenerateParams,
-	LLMGenerateResult,
-	LLMPlugin,
-	PluginContext,
-} from "@/lib/connectors/types";
+import { deriveArtStyle } from "@/lib/project/deriveArtStyle";
+import type { ProjectStore } from "@/lib/project/store";
+import type { LLMPlugin } from "@/lib/connectors/types";
 
-export function createReferenceStylePlugin(results: NodeResults): LLMPlugin {
+/**
+ * Fills an unset art style in from the project's references.
+ *
+ * The derived style is prepended as well as stored: `projectMetadata` injects
+ * from the state snapshot the run started with, which cannot hold a style
+ * written mid-run. Writing in the transform phase, which completes before any
+ * `beforeGenerate`, keeps the two from injecting it twice.
+ */
+export function createReferenceStylePlugin(
+	store: ProjectStore,
+	results: NodeResults,
+): LLMPlugin {
 	return {
 		name: "reference-style",
-		async transformPrompt(
-			prompt: string,
-			ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
-		) {
-			const { metadata, referenceImages } = requireState(
-				ctx,
-				"reference-style",
+		async transformPrompt(prompt, ctx) {
+			const state = requireState(ctx, "reference-style");
+			if (state.metadata.style.trim()) return prompt;
+
+			const style = await deriveArtStyle(
+				requireGateway(ctx, "reference-style"),
+				state,
+				results,
 			);
-			const styleReferenceImages = compact([
-				...referenceImages,
-				...Object.entries(metadata.characters).map(([name, character]) =>
-					character.avatarUploaded
-						? characterAvatarUrl(results, name)
-						: undefined,
-				),
-			]);
-			if (styleReferenceImages.length === 0) return prompt;
-			const gateway = requireGateway(ctx, "reference-style");
-			const { text: style } = await gateway.generate({
-				prompt: dedent`Vividly and concisely describe the visual art style of the attached reference image(s) in 1–2 concise sentences. Include ultra specific detail on character art style and overall art style.`,
-				referenceImages: styleReferenceImages,
-				maxTokens: 4096,
-			});
+			if (!style) return prompt;
+
+			store.getState().updateMetadata({ style });
 			return dedent`Art style reference: ${style}
 
 			${prompt}`;

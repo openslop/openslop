@@ -72,7 +72,7 @@ export function ConfigProvider({
 				"llm",
 				projectMetadataPlugin,
 				...modePlugins,
-				createReferenceStylePlugin(queue),
+				createReferenceStylePlugin(store, queue),
 				createCharacterAvatarStylePlugin(queue),
 			)
 			.appendPlugins("image", ...buildImagePlugins())
