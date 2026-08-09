@@ -23,9 +23,11 @@ import {
 } from "@/lib/project/deriveArtStyle";
 import { getProjectStore } from "@/lib/project/store";
 import { useProject } from "@/lib/project/useProject";
-import { FieldLabel, TextAreaField } from "../character/fields";
+import { FIELD_CLS, FieldLabel } from "../character/fields";
 import { ReferenceImages } from "../ReferenceImages";
 import { ArtStylePresets } from "./ArtStylePresets";
+
+const DESCRIPTION_ID = "art-style-description";
 
 export function ArtStyleModal({
 	open,
@@ -81,36 +83,41 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 
 			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
 				<section aria-label="Reference images" className="flex flex-col gap-2">
-					<div className="flex items-center justify-between gap-2">
-						<FieldLabel>Reference images</FieldLabel>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							disabled={!hasReferences || deriving}
-							onClick={deriveFromReferences}
-							tooltip={
-								hasReferences
-									? "Use my reference images: write their style below"
-									: "Use my reference images: upload some first"
-							}
-						>
-							{deriving && <Spinner className="text-current" />}
-							Use my reference images
-						</Button>
-					</div>
+					<FieldLabel>Reference images</FieldLabel>
 					<div className="flex flex-wrap gap-2">
 						<ReferenceImages />
 					</div>
 				</section>
 
-				<TextAreaField
-					label="Description"
-					value={style}
-					onChange={setStyle}
-					placeholder="Describe the look of every image, or paste a full image prompt"
-					rows={5}
-				/>
+				<div className="flex flex-col gap-2">
+					<label htmlFor={DESCRIPTION_ID}>
+						<FieldLabel>Art Style Description</FieldLabel>
+					</label>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="self-start"
+						disabled={!hasReferences || deriving}
+						onClick={deriveFromReferences}
+						tooltip={
+							hasReferences
+								? undefined
+								: "Use reference images for art style description: upload some first"
+						}
+					>
+						{deriving && <Spinner className="text-current" />}
+						Use reference images for art style description
+					</Button>
+					<textarea
+						id={DESCRIPTION_ID}
+						rows={5}
+						value={style}
+						onChange={(e) => setStyle(e.target.value)}
+						placeholder="Describe the look of every image, or paste a full image prompt"
+						className={`${FIELD_CLS} resize-none`}
+					/>
+				</div>
 
 				<ArtStylePresets value={style} onSelect={setStyle} />
 			</div>
