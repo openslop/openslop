@@ -142,7 +142,7 @@ describe("RunwareVideo", () => {
 	});
 
 	describe("poll", () => {
-		it("returns BundleResponse when job is completed", async () => {
+		it("returns the stored asset when the job is completed", async () => {
 			mockGetResponse.mockResolvedValue([
 				{
 					taskUUID: "job-1",
@@ -154,11 +154,14 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			const result = await provider.poll("job-1");
 
-			expect(result.result.video).toBe("https://result.mp4");
+			expect(result).toMatchObject({
+				kind: "ready",
+				asset: { result: { video: "https://result.mp4" } },
+			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
-		it("returns empty BundleResponse when job is pending", async () => {
+		it("reports pending with the upstream status while the job runs", async () => {
 			mockGetResponse.mockResolvedValue([
 				{
 					taskUUID: "job-1",
@@ -169,8 +172,10 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			const result = await provider.poll("job-1");
 
-			expect(result.id).toBe("");
-			expect(result.result).toEqual({});
+			expect(result).toEqual({
+				kind: "pending",
+				metadata: { jobId: "job-1", status: "processing" },
+			});
 		});
 
 		it("throws when job not found", async () => {

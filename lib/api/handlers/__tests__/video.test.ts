@@ -36,7 +36,10 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 describe("videoHandler.process", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		poll.mockResolvedValue({ result: {}, metadata: { status: "processing" } });
+		poll.mockResolvedValue({
+			kind: "pending",
+			metadata: { status: "processing" },
+		});
 	});
 
 	it("submits upstream without polling a job it just created", async () => {
@@ -68,18 +71,18 @@ describe("videoHandler.process", () => {
 	});
 
 	it("completes with the re-hosted bundle once upstream reports a video", async () => {
-		const completed = { ...bundle, result: { video: "output.mp4" } };
-		poll.mockResolvedValue(completed);
+		const asset = { ...bundle, result: { video: "output.mp4" } };
+		poll.mockResolvedValue({ kind: "ready", asset });
 
 		await expect(videoHandler.process(job())).resolves.toEqual({
 			kind: "completed",
-			result: completed,
+			result: asset,
 		});
 	});
 
 	it("throws the upstream error message on failure", async () => {
 		poll.mockResolvedValue({
-			result: {},
+			kind: "pending",
 			metadata: { status: "failed", error: "content policy" },
 		});
 
@@ -87,7 +90,7 @@ describe("videoHandler.process", () => {
 	});
 
 	it("throws a fallback message when upstream fails without one", async () => {
-		poll.mockResolvedValue({ result: {}, metadata: { status: "failed" } });
+		poll.mockResolvedValue({ kind: "pending", metadata: { status: "failed" } });
 
 		await expect(videoHandler.process(job())).rejects.toThrow(
 			"Video generation failed",

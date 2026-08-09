@@ -78,8 +78,7 @@ export class AssetBundle {
 	}
 
 	static buildUrl(type: string, provider: string, id: string): string {
-		const base = AssetBundle.baseUrl || "";
-		return `${base}/assets/${type}/${provider}/${id}`;
+		return `${AssetBundle.baseUrl}/assets/${type}/${provider}/${id}`;
 	}
 
 	static fromResponse(response: BundleResponse): AssetBundle {

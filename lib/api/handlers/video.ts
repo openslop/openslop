@@ -22,8 +22,8 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 		}
 
 		const upstream = await provider.poll(providerJobId);
-		if (upstream.result.video) {
-			return { kind: "completed", result: upstream };
+		if (upstream.kind === "ready") {
+			return { kind: "completed", result: upstream.asset };
 		}
 		if (upstream.metadata?.status === "failed") {
 			throw new Error(upstream.metadata.error ?? "Video generation failed");

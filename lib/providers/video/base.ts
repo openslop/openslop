@@ -21,6 +21,11 @@ export type VideoProviderResponse = BundleResponse & {
 	metadata?: VideoJobMetadata;
 };
 
+/** A provider that is still working has no asset to hand back yet. */
+export type VideoPoll =
+	| { kind: "pending"; metadata?: VideoJobMetadata }
+	| { kind: "ready"; asset: VideoProviderResponse };
+
 export abstract class BaseVideoProvider extends BaseProvider<
 	VideoGenerateParams,
 	VideoJob,
@@ -41,17 +46,11 @@ export abstract class BaseVideoProvider extends BaseProvider<
 
 	protected abstract _poll(jobId: string): Promise<VideoJob>;
 
-	async poll(jobId: string): Promise<VideoProviderResponse> {
+	async poll(jobId: string): Promise<VideoPoll> {
 		const result = await this._poll(jobId);
 		if (this.toFiles(result).length === 0) {
-			return {
-				id: "",
-				type: this.blobConfig.type,
-				provider: this.blobConfig.provider,
-				result: {},
-				metadata: result.metadata,
-			};
+			return { kind: "pending", metadata: result.metadata };
 		}
-		return this.store(result);
+		return { kind: "ready", asset: await this.store(result) };
 	}
 }
