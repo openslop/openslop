@@ -7,8 +7,11 @@ import {
 	needsGeneration,
 	nodeInputs,
 	sourceNode,
+	subtreeProgress,
 	type GenerationJob,
 	type GenerationNode,
+	type NodeResult,
+	type NodeResults,
 } from "../graph";
 import { GenerationQueue } from "../queue";
 
@@ -161,5 +164,63 @@ describe("flattenGraph", () => {
 			"left",
 			"right",
 		]);
+	});
+});
+
+describe("subtreeProgress", () => {
+	const IDLE: NodeResult = {
+		status: "idle",
+		seconds: 0,
+		result: null,
+		resultInputs: null,
+		pinned: false,
+	};
+
+	const results = (byId: Record<string, Partial<NodeResult>>): NodeResults => ({
+		getElementSnapshot: (id) => ({ ...IDLE, ...(id ? byId[id] : undefined) }),
+	});
+
+	it("reports a still frame's progress on the animation that depends on it", () => {
+		const still = node("~still:clip");
+		const clip = node("clip", [still]);
+		const progress = subtreeProgress(
+			clip,
+			results({
+				"~still:clip": { status: "generating", seconds: 12 },
+				clip: { status: "queued" },
+			}),
+		);
+
+		expect(progress.status).toBe("generating");
+		expect(progress.seconds).toBe(12);
+	});
+
+	it("stays queued while the whole subtree waits on a slot", () => {
+		const still = node("~still:clip");
+		const clip = node("clip", [still]);
+		const queued = { status: "queued" } as const;
+
+		expect(
+			subtreeProgress(clip, results({ "~still:clip": queued, clip: queued }))
+				.status,
+		).toBe("queued");
+	});
+
+	it("falls back to the node's own snapshot once its dependencies settle", () => {
+		const still = node("~still:clip");
+		const clip = node("clip", [still]);
+		const progress = subtreeProgress(
+			clip,
+			results({ clip: { status: "generating", seconds: 3 } }),
+		);
+
+		expect(progress.status).toBe("generating");
+		expect(progress.seconds).toBe(3);
+	});
+
+	it("leaves a single-node element unchanged", () => {
+		expect(
+			subtreeProgress(node("image"), results({ image: { status: "queued" } })),
+		).toEqual({ ...IDLE, status: "queued" });
 	});
 });

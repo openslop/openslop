@@ -3,7 +3,12 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { forElement, isNodeStale, nodeInputs } from "@/lib/generation/graph";
+import {
+	forElement,
+	isNodeStale,
+	nodeInputs,
+	subtreeProgress,
+} from "@/lib/generation/graph";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
@@ -16,6 +21,7 @@ export function useGenerate(element: CanvasContentElement) {
 		[buildNode, element],
 	);
 	const stale = useQueueSelector((q) => isNodeStale(node, q));
+	const progress = useQueueSelector((q) => subtreeProgress(node, q));
 
 	useEffect(() => {
 		if (!stale) return;
@@ -36,8 +42,8 @@ export function useGenerate(element: CanvasContentElement) {
 
 	return {
 		node,
-		status: snapshot.status,
-		seconds: snapshot.seconds,
+		status: progress.status,
+		seconds: progress.seconds,
 		result: snapshot.result,
 		error: snapshot.error,
 		stale,

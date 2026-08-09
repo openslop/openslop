@@ -15,6 +15,7 @@ import {
 	type GenerationInputs,
 	type NodeInputs,
 } from "./inputs";
+import type { GenerationStatus } from "./snapshots";
 
 export type NodeId = string;
 
@@ -64,8 +65,10 @@ export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
 	() => ({ element });
 
-/** What the graph reads back about a node the queue has settled. */
+/** What the graph reads back about a node the queue is running or has settled. */
 export type NodeResult = {
+	status: GenerationStatus;
+	seconds: number;
 	result: AssetResult | null;
 	resultInputs: GenerationInputs | null;
 	/** The result was supplied rather than generated, so it is never regenerated. */
@@ -159,4 +162,26 @@ export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
 	};
 	for (const root of roots) visit(root);
 	return ordered;
+}
+
+/**
+ * What a node's subtree is doing, as one snapshot: whatever is running in it,
+ * else whatever is waiting, else the node's own. A node with dependencies is
+ * already working while they run, so its own status alone would read "queued"
+ * for as long as they take. Dependencies come first, so the snapshot belongs to
+ * the earliest stage still in flight.
+ */
+export function subtreeProgress(
+	node: GenerationNode,
+	results: NodeResults,
+): NodeResult {
+	const own = results.getElementSnapshot(node.id);
+	const snapshots = flattenGraph([node]).map((dep) =>
+		results.getElementSnapshot(dep.id),
+	);
+	return (
+		snapshots.find((snap) => snap.status === "generating") ??
+		snapshots.find((snap) => snap.status === "queued") ??
+		own
+	);
 }
