@@ -1,12 +1,12 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createMetadataVoicePlugin } from "@/lib/connectors/tts/plugins/metadata-voice";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
 
-const projectId = "metadata-voice-test-project";
+let store: ProjectStore;
 
-afterEach(() => {
-	clearProjectStore(projectId);
+beforeEach(() => {
+	store = createProjectStore();
 });
 
 describe("createMetadataVoicePlugin", () => {
@@ -17,17 +17,15 @@ describe("createMetadataVoicePlugin", () => {
 	it("returns params unchanged when narration metadata empty and no name", () => {
 		const { beforeGenerate } = createMetadataVoicePlugin();
 		const params = { prompt: "hello" };
-		expect(beforeGenerate?.(params, stateCtx(projectId))).toEqual(params);
+		expect(beforeGenerate?.(params, stateCtx(store))).toEqual(params);
 	});
 
 	it("merges metadata.narration voice fields when no name", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({
-				narration: { gender: "feminine", accent: "british", age: "adult" },
-			});
+		store.getState().updateMetadata({
+			narration: { gender: "feminine", accent: "british", age: "adult" },
+		});
 		const { beforeGenerate } = createMetadataVoicePlugin();
-		expect(beforeGenerate?.({ prompt: "hello" }, stateCtx(projectId))).toEqual({
+		expect(beforeGenerate?.({ prompt: "hello" }, stateCtx(store))).toEqual({
 			prompt: "hello",
 			gender: "feminine",
 			accent: "british",
@@ -36,22 +34,20 @@ describe("createMetadataVoicePlugin", () => {
 	});
 
 	it("merges metadata.characters[name] voice fields when name set", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({
-				characters: {
-					Red: {
-						appearance: "A girl in red",
-						gender: "feminine",
-						accent: "southern",
-						pitch: "high",
-						description: "raspy",
-					},
+		store.getState().updateMetadata({
+			characters: {
+				Red: {
+					appearance: "A girl in red",
+					gender: "feminine",
+					accent: "southern",
+					pitch: "high",
+					description: "raspy",
 				},
-			});
+			},
+		});
 		const { beforeGenerate } = createMetadataVoicePlugin();
 		expect(
-			beforeGenerate?.({ prompt: "hi", name: "Red" }, stateCtx(projectId)),
+			beforeGenerate?.({ prompt: "hi", name: "Red" }, stateCtx(store)),
 		).toEqual({
 			prompt: "hi",
 			name: "Red",
@@ -63,22 +59,18 @@ describe("createMetadataVoicePlugin", () => {
 	});
 
 	it("returns params unchanged when name references unknown character", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({
-				narration: { gender: "masculine" },
-			});
+		store.getState().updateMetadata({
+			narration: { gender: "masculine" },
+		});
 		const { beforeGenerate } = createMetadataVoicePlugin();
 		const params = { prompt: "hi", name: "Ghost" };
-		expect(beforeGenerate?.(params, stateCtx(projectId))).toEqual(params);
+		expect(beforeGenerate?.(params, stateCtx(store))).toEqual(params);
 	});
 
 	it("metadata wins over voice descriptors already in params", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({
-				narration: { gender: "feminine", accent: "british" },
-			});
+		store.getState().updateMetadata({
+			narration: { gender: "feminine", accent: "british" },
+		});
 		const { beforeGenerate } = createMetadataVoicePlugin();
 		expect(
 			beforeGenerate?.(
@@ -87,7 +79,7 @@ describe("createMetadataVoicePlugin", () => {
 					gender: "masculine",
 					accent: "american",
 				},
-				stateCtx(projectId),
+				stateCtx(store),
 			),
 		).toEqual({
 			prompt: "hi",
@@ -97,13 +89,11 @@ describe("createMetadataVoicePlugin", () => {
 	});
 
 	it("does not set fields that are absent in metadata", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({
-				narration: { gender: "feminine" },
-			});
+		store.getState().updateMetadata({
+			narration: { gender: "feminine" },
+		});
 		const { beforeGenerate } = createMetadataVoicePlugin();
-		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(projectId));
+		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(store));
 		expect(result).toEqual({ prompt: "hi", gender: "feminine" });
 		expect(result).not.toHaveProperty("age");
 		expect(result).not.toHaveProperty("pitch");

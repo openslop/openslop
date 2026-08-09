@@ -1,21 +1,17 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { stubAvatarResults } from "@/lib/connectors/__tests__/_node-results";
 import { artStyleReferences, deriveArtStyle } from "../deriveArtStyle";
-import { clearProjectStore, getProjectStore } from "../store";
+import { createProjectStore, type ProjectStore } from "../store";
 
-const projectId = "art-style-references-project";
-const project = () => getProjectStore(projectId).getState();
+let store: ProjectStore;
+const project = () => store.getState();
 
 beforeEach(() => {
-	clearProjectStore(projectId);
-});
-
-afterEach(() => {
-	clearProjectStore(projectId);
+	store = createProjectStore();
 });
 
 describe("artStyleReferences", () => {

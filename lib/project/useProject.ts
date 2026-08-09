@@ -1,9 +1,10 @@
 "use client";
 
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { type ProjectContext, useProjectStore } from "./store";
+import { useStore } from "zustand";
+import { useProjectStoreHandle } from "./ProjectStoreProvider";
+import type { ProjectContext } from "./store";
 
 export function useProject<T>(selector: (state: ProjectContext) => T): T {
-	const { projectId } = useConfig();
-	return useProjectStore(projectId, selector);
+	const store = useProjectStoreHandle();
+	return useStore(store, selector);
 }

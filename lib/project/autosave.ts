@@ -3,7 +3,7 @@ import PQueue from "p-queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { saveProject, type SaveProjectInput } from "./api";
 import { deriveProjectName } from "./projectName";
-import { getProjectStore } from "./store";
+import type { ProjectStore } from "./store";
 import {
 	extractStoreSnapshot,
 	type ProjectStoreSnapshot,
@@ -30,6 +30,7 @@ export function buildProjectSave(
 
 export interface AutosaverOptions {
 	projectId: string;
+	store: ProjectStore;
 	getGeneration: () => GenerationSnapshot;
 	onSaved: () => void;
 	onError: (error: unknown) => void;
@@ -53,6 +54,7 @@ export interface Autosaver {
  */
 export function createAutosaver({
 	projectId,
+	store,
 	getGeneration,
 	onSaved,
 	onError,
@@ -61,7 +63,6 @@ export function createAutosaver({
 	let getScript: (() => string) | null = null;
 
 	const save = async () => {
-		const store = getProjectStore(projectId);
 		if (!store.getState().hydrated) {
 			console.error("Autosave aborted: store not hydrated", { projectId });
 			return;

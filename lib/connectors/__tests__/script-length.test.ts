@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { scriptLengthPlugin } from "@/lib/connectors/llm/plugins/script-length";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import {
 	DEFAULT_VIDEO_LENGTH,
 	VIDEO_LENGTH_SPECS,
@@ -12,25 +12,19 @@ const { beforeGenerate } = scriptLengthPlugin;
 if (!beforeGenerate)
 	throw new Error("scriptLengthPlugin.beforeGenerate is required");
 
-let projectId: string;
+let store: ProjectStore;
 
 const systemPromptFor = (params: LLMGenerateParams): string =>
-	(beforeGenerate(params, stateCtx(projectId)) as { systemPrompt: string })
+	(beforeGenerate(params, stateCtx(store)) as { systemPrompt: string })
 		.systemPrompt;
 
 beforeEach(() => {
-	projectId = crypto.randomUUID();
-});
-
-afterEach(() => {
-	clearProjectStore(projectId);
+	store = createProjectStore();
 });
 
 describe("scriptLengthPlugin", () => {
 	it("budgets in words, never the runtime", () => {
-		getProjectStore(projectId)
-			.getState()
-			.updateMetadata({ videoSettings: { length: "10-15m" } });
+		store.getState().updateMetadata({ videoSettings: { length: "10-15m" } });
 
 		const sys = systemPromptFor({ prompt: "hi" });
 

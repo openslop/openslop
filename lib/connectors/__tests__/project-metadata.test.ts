@@ -1,16 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { projectMetadataPlugin } from "@/lib/connectors/llm/plugins/project-metadata";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
 import { TEMPLATES } from "@/lib/templates/templates";
 
 const template = TEMPLATES.find((t) => t.id === "pov-life");
 if (!template) throw new Error("expected pov-life template fixture");
 
-let projectId: string;
+let store: ProjectStore;
 
 const seedStore = () => {
-	getProjectStore(projectId).getState().updateMetadata({
+	store.getState().updateMetadata({
 		style: template.style?.description,
 		narration: template.narration,
 		characters: template.characters,
@@ -18,18 +18,14 @@ const seedStore = () => {
 };
 
 beforeEach(() => {
-	projectId = crypto.randomUUID();
-});
-
-afterEach(() => {
-	clearProjectStore(projectId);
+	store = createProjectStore();
 });
 
 describe("projectMetadataPlugin", () => {
 	it("injects style, narration, and characters into systemPrompt", () => {
 		seedStore();
 		const { beforeGenerate } = projectMetadataPlugin;
-		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(projectId));
+		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(store));
 		const sys = (result as { systemPrompt: string }).systemPrompt;
 		expect(sys).toContain("# Art Style");
 		expect(sys).toContain(template.style?.description);
@@ -42,7 +38,7 @@ describe("projectMetadataPlugin", () => {
 		const { beforeGenerate } = projectMetadataPlugin;
 		const result = beforeGenerate?.(
 			{ prompt: "hi", systemPrompt: "user instructions" },
-			stateCtx(projectId),
+			stateCtx(store),
 		);
 		const sys = (result as { systemPrompt: string }).systemPrompt;
 		expect(sys).toContain("user instructions");
@@ -54,7 +50,7 @@ describe("projectMetadataPlugin", () => {
 	it("returns params unchanged when metadata is empty", () => {
 		const { beforeGenerate } = projectMetadataPlugin;
 		const params = { prompt: "hi", systemPrompt: "keep me" };
-		expect(beforeGenerate?.(params, stateCtx(projectId))).toEqual(params);
+		expect(beforeGenerate?.(params, stateCtx(store))).toEqual(params);
 	});
 
 	it("preserves other params", () => {
@@ -62,7 +58,7 @@ describe("projectMetadataPlugin", () => {
 		const { beforeGenerate } = projectMetadataPlugin;
 		const result = beforeGenerate?.(
 			{ prompt: "hello", model: "claude" },
-			stateCtx(projectId),
+			stateCtx(store),
 		) as Record<string, unknown>;
 		expect(result.prompt).toBe("hello");
 		expect(result.model).toBe("claude");

@@ -12,7 +12,7 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -61,7 +61,7 @@ function CharacterEditDialogBody({
 	name: string;
 	onClose: () => void;
 }) {
-	const { projectId } = useConfig();
+	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const buildNode = useNodeBuilder();
 	const character = useProject((s) => s.metadata.characters[name]);
@@ -111,7 +111,7 @@ function CharacterEditDialogBody({
 			setConfirmDelete(true);
 			return;
 		}
-		deleteCharacter(projectId, queue, name);
+		deleteCharacter(store, queue, name);
 		onClose();
 	};
 

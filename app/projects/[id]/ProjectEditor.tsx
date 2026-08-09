@@ -6,7 +6,8 @@ import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
 import { UserProvider } from "@/lib/user/UserProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { getProjectStore } from "@/lib/project/store";
+import { createProjectStore } from "@/lib/project/store";
+import { ProjectStoreProvider } from "@/lib/project/ProjectStoreProvider";
 import {
 	applyStoreSnapshot,
 	parseStoreSnapshot,
@@ -28,24 +29,26 @@ export default function ProjectEditor({
 	initialGeneration: Record<string, ElementSnapshot>;
 	user: User;
 }): ReactNode {
-	// Hydrate the store once, before children render and without re-running each render.
-	useState(() =>
-		applyStoreSnapshot(
-			getProjectStore(projectId),
-			parseStoreSnapshot(initialStore),
-		),
-	);
+	// Build and hydrate the store once, before children render and without
+	// re-running each render.
+	const [store] = useState(() => {
+		const created = createProjectStore();
+		applyStoreSnapshot(created, parseStoreSnapshot(initialStore));
+		return created;
+	});
 
 	return (
 		<TooltipProvider>
 			<GenerationQueueProvider initialState={initialGeneration}>
-				<ConfigProvider projectId={projectId}>
-					<ScriptProvider initialScript={initialScript}>
-						<UserProvider user={user}>
-							<Editor />
-						</UserProvider>
-					</ScriptProvider>
-				</ConfigProvider>
+				<ProjectStoreProvider store={store}>
+					<ConfigProvider projectId={projectId}>
+						<ScriptProvider initialScript={initialScript}>
+							<UserProvider user={user}>
+								<Editor />
+							</UserProvider>
+						</ScriptProvider>
+					</ConfigProvider>
+				</ProjectStoreProvider>
 			</GenerationQueueProvider>
 		</TooltipProvider>
 	);

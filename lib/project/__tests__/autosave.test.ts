@@ -13,7 +13,7 @@ import {
 	buildProjectSave,
 	createAutosaver,
 } from "../autosave";
-import { getProjectStore } from "../store";
+import { createProjectStore, type ProjectStore } from "../store";
 import type { ProjectStoreSnapshot } from "../storeSnapshot";
 
 const saveProject = vi.hoisted(() => vi.fn());
@@ -61,12 +61,14 @@ describe("buildProjectSave", () => {
 
 describe("createAutosaver", () => {
 	let projectId: string;
+	let store: ProjectStore;
 	let onSaved: Mock<() => void>;
 	let onError: Mock<(error: unknown) => void>;
 
 	const build = () => {
 		const autosaver = createAutosaver({
 			projectId,
+			store,
 			getGeneration: () => ({}),
 			onSaved,
 			onError,
@@ -82,6 +84,7 @@ describe("createAutosaver", () => {
 		onSaved = vi.fn<() => void>();
 		onError = vi.fn<(error: unknown) => void>();
 		projectId = `p-${saveProject.mock.calls.length}-${Math.random()}`;
+		store = createProjectStore();
 	});
 
 	afterEach(() => {
@@ -90,7 +93,6 @@ describe("createAutosaver", () => {
 	});
 
 	const hydrate = () => {
-		const store = getProjectStore(projectId);
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
 		store.getState().markHydrated();
 	};
@@ -136,6 +138,7 @@ describe("createAutosaver", () => {
 		hydrate();
 		const autosaver = createAutosaver({
 			projectId,
+			store,
 			getGeneration: () => ({}),
 			onSaved,
 			onError,

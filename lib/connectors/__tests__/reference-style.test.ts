@@ -1,7 +1,7 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { GatewayClient } from "@/lib/gateway/base";
 import { createReferenceStylePlugin } from "@/lib/connectors/llm/plugins/reference-style";
-import { clearProjectStore, getProjectStore } from "@/lib/project/store";
+import { createProjectStore } from "@/lib/project/store";
 import { stubAvatarResults } from "./_node-results";
 import { stateCtx } from "./_state-ctx";
 import type {
@@ -21,15 +21,12 @@ class MockLLMGateway extends GatewayClient<
 	);
 }
 
-const projectIds: string[] = [];
-
-function setup(projectId: string, referenceImages: string[] = []) {
-	projectIds.push(projectId);
-	clearProjectStore(projectId);
-	getProjectStore(projectId).getState().setReferenceImages(referenceImages);
+function setup(referenceImages: string[] = []) {
+	const store = createProjectStore();
+	store.getState().setReferenceImages(referenceImages);
 	const gateway = new MockLLMGateway();
 	const { transformPrompt } = createReferenceStylePlugin(
-		projectId,
+		store,
 		stubAvatarResults({}),
 	);
 	if (!transformPrompt)
@@ -38,19 +35,15 @@ function setup(projectId: string, referenceImages: string[] = []) {
 	// changes as the plugin itself writes to the store.
 	const ctx = (): PluginContext<LLMGenerateParams, LLMGenerateResult> => ({
 		gateway,
-		...stateCtx(projectId),
+		...stateCtx(store),
 	});
-	const style = () => getProjectStore(projectId).getState().metadata.style;
-	return { gateway, transformPrompt, ctx, style };
+	const style = () => store.getState().metadata.style;
+	return { store, gateway, transformPrompt, ctx, style };
 }
-
-afterEach(() => {
-	for (const id of projectIds.splice(0)) clearProjectStore(id);
-});
 
 describe("createReferenceStylePlugin", () => {
 	it("stores a style derived from the references", async () => {
-		const { gateway, transformPrompt, ctx, style } = setup("p1", [
+		const { gateway, transformPrompt, ctx, style } = setup([
 			"https://example.com/a.jpg",
 		]);
 
@@ -63,7 +56,7 @@ describe("createReferenceStylePlugin", () => {
 	// projectMetadata injects from the pre-run state snapshot, which cannot hold
 	// a style written during this run, so the model would otherwise never see it.
 	it("prepends the derived style, which the run's snapshot cannot carry", async () => {
-		const { transformPrompt, ctx } = setup("p2", ["https://example.com/a.jpg"]);
+		const { transformPrompt, ctx } = setup(["https://example.com/a.jpg"]);
 
 		const result = await transformPrompt("a knight and a dragon", ctx());
 
@@ -73,12 +66,10 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("leaves a style the user set alone", async () => {
-		const { gateway, transformPrompt, ctx, style } = setup("p3", [
+		const { store, gateway, transformPrompt, ctx, style } = setup([
 			"https://example.com/a.jpg",
 		]);
-		getProjectStore("p3")
-			.getState()
-			.updateMetadata({ style: "Oil painting --ar 16:9" });
+		store.getState().updateMetadata({ style: "Oil painting --ar 16:9" });
 
 		const result = await transformPrompt("a knight and a dragon", ctx());
 
@@ -89,7 +80,7 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("skips the gateway when there are no references to read", async () => {
-		const { gateway, transformPrompt, ctx, style } = setup("p4");
+		const { gateway, transformPrompt, ctx, style } = setup();
 
 		const result = await transformPrompt("a knight and a dragon", ctx());
 
@@ -99,8 +90,8 @@ describe("createReferenceStylePlugin", () => {
 	});
 
 	it("throws when no gateway is provided", async () => {
-		const { transformPrompt } = setup("p5", ["https://example.com/a.jpg"]);
-		await expect(transformPrompt("hi", stateCtx("p5"))).rejects.toThrow(
+		const { store, transformPrompt } = setup(["https://example.com/a.jpg"]);
+		await expect(transformPrompt("hi", stateCtx(store))).rejects.toThrow(
 			"reference-style plugin requires gateway context",
 		);
 	});

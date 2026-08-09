@@ -5,7 +5,7 @@ import type { NodeSpec } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { characterAvatarElement } from "@/lib/project/characterAvatar";
-import { getProjectStore } from "@/lib/project/store";
+import type { ProjectContext } from "@/lib/project/store";
 import { createArtStylePlugin } from "./art-style";
 import { createCharacterAvatarPlugin } from "./character-avatar";
 import { createReferenceImagesPlugin } from "./reference-images";
@@ -32,13 +32,12 @@ export const forCharacterAvatar =
  * describes and does not read as stale the moment it lands.
  */
 export function seedCharacterAvatar(
-	projectId: string,
+	state: ProjectContext,
 	queue: GenerationQueue,
 	registry: ConnectorRegistry,
 	name: string,
 	imageUrl: string,
 ): void {
-	const state = getProjectStore(projectId).getState();
 	queue.commitResult(
 		nodeBuilder(registry, state)(forCharacterAvatar(name)),
 		{ imageUrl, durationSec: 0 },

@@ -21,7 +21,7 @@ import {
 	artStyleReferences,
 	deriveArtStyle,
 } from "@/lib/project/deriveArtStyle";
-import { getProjectStore } from "@/lib/project/store";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useProject } from "@/lib/project/useProject";
 import { FIELD_CLS, FieldLabel } from "../character/fields";
 import { ReferenceImages } from "../ReferenceImages";
@@ -44,8 +44,9 @@ export function ArtStyleModal({
 }
 
 function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
-	const { projectId, connectorConfig } = useConfig();
+	const { connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
+	const store = useProjectStoreHandle();
 	const style = useProject((s) => s.metadata.style);
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const setStyle = (next: string) => updateMetadata({ style: next });
@@ -53,8 +54,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 	const [deriving, setDeriving] = useState(false);
 
 	const hasReferences = useQueueSelector(
-		(q) =>
-			artStyleReferences(getProjectStore(projectId).getState(), q).length > 0,
+		(q) => artStyleReferences(store.getState(), q).length > 0,
 	);
 
 	const deriveFromReferences = async () => {
@@ -62,7 +62,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 		try {
 			const derived = await deriveArtStyle(
 				createDefaultConnector(connectorConfig, "llm", []),
-				getProjectStore(projectId).getState(),
+				store.getState(),
 				queue,
 			);
 			if (derived) setStyle(derived);

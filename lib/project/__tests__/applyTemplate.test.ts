@@ -7,51 +7,44 @@ import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvat
 import { needsGeneration } from "@/lib/generation/graph";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { characterAvatarElementId } from "../characterAvatar";
-import { clearProjectStore, getProjectStore } from "../store";
-
-const PROJECT_ID = "apply-template-test";
+import { createProjectStore, type ProjectStore } from "../store";
 
 let queue: GenerationQueue;
+let store: ProjectStore;
 
 const apply = (templateId: string) =>
-	applyTemplate(PROJECT_ID, templateId, queue, DEFAULT_CONNECTOR_REGISTRY);
+	applyTemplate(store, templateId, queue, DEFAULT_CONNECTOR_REGISTRY);
 
 describe("applyTemplate", () => {
 	beforeEach(() => {
-		clearProjectStore(PROJECT_ID);
+		store = createProjectStore();
 		queue = new GenerationQueue();
 	});
 
 	it("does not leak characters from a previous template", () => {
 		apply("pov-life");
-		expect(
-			getProjectStore(PROJECT_ID).getState().metadata.characters,
-		).toHaveProperty("Protagonist");
+		expect(store.getState().metadata.characters).toHaveProperty("Protagonist");
 
 		apply("sleep-story");
-		expect(getProjectStore(PROJECT_ID).getState().metadata.characters).toEqual(
-			{},
-		);
+		expect(store.getState().metadata.characters).toEqual({});
 	});
 
 	it("replaces reference images on switch", () => {
 		apply("pov-life");
-		expect(
-			getProjectStore(PROJECT_ID).getState().referenceImages.length,
-		).toBeGreaterThan(0);
+		expect(store.getState().referenceImages.length).toBeGreaterThan(0);
 
 		apply("sleep-story");
-		expect(getProjectStore(PROJECT_ID).getState().referenceImages).toEqual(
+		expect(store.getState().referenceImages).toEqual(
 			getTemplateById("sleep-story")?.referenceImages,
 		);
 	});
 
 	it("wipes user-edited metadata fields not set by the next template", () => {
-		const project = getProjectStore(PROJECT_ID).getState();
+		const project = store.getState();
 		project.updateMetadata({ title: "My Draft", style: "noir" });
 		apply("pov-life");
 
-		const { metadata } = getProjectStore(PROJECT_ID).getState();
+		const { metadata } = store.getState();
 		expect(metadata.title).toBe("");
 		expect(metadata.style).toBe(
 			getTemplateById("pov-life")?.style?.description,
@@ -59,12 +52,10 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes reference images set outside the template before applying", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.setReferenceImages(["user://a.png", "user://b.png"]);
+		store.getState().setReferenceImages(["user://a.png", "user://b.png"]);
 
 		apply("sleep-story");
-		expect(getProjectStore(PROJECT_ID).getState().referenceImages).toEqual(
+		expect(store.getState().referenceImages).toEqual(
 			getTemplateById("sleep-story")?.referenceImages,
 		);
 	});
@@ -74,12 +65,10 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes user-set narration before applying", () => {
-		getProjectStore(PROJECT_ID)
-			.getState()
-			.updateMetadata({ narration: { accent: "british" } });
+		store.getState().updateMetadata({ narration: { accent: "british" } });
 
 		apply("pov-life");
-		expect(getProjectStore(PROJECT_ID).getState().metadata.narration).toEqual(
+		expect(store.getState().metadata.narration).toEqual(
 			getTemplateById("pov-life")?.narration ?? {},
 		);
 	});
@@ -92,7 +81,7 @@ describe("applyTemplate", () => {
 		const name = "Protagonist";
 		const node = nodeBuilder(
 			DEFAULT_CONNECTOR_REGISTRY,
-			getProjectStore(PROJECT_ID).getState(),
+			store.getState(),
 		)(forCharacterAvatar(name));
 
 		expect(needsGeneration(node, queue)).toBe(false);

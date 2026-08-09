@@ -8,7 +8,7 @@ import {
 	ReferenceAssetTiles,
 } from "@/app/components/canvas/elements/AssetTiles";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
@@ -26,7 +26,7 @@ export function ComposerAssets({
 	onEditNarrator,
 	onEditArtStyle,
 }: ComposerAssetsProps) {
-	const { projectId } = useConfig();
+	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const narration = useProject((s) => s.metadata.narration);
 	const hasArtStyle = useProject((s) => Boolean(s.metadata.style.trim()));
@@ -36,7 +36,7 @@ export function ComposerAssets({
 	const hasNarration = Object.keys(narration).length > 0;
 
 	const confirmDelete = () => {
-		if (deletingName) deleteCharacter(projectId, queue, deletingName);
+		if (deletingName) deleteCharacter(store, queue, deletingName);
 		setDeletingName(undefined);
 	};
 

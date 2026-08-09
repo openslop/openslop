@@ -1,4 +1,4 @@
-import { getProjectStore } from "@/lib/project/store";
+import type { ProjectStore } from "@/lib/project/store";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
@@ -10,13 +10,12 @@ import type {
  * matching character (when `params.name` is set) or to narration.
  */
 export function createVoiceHydratePlugin(
-	projectId: string,
+	store: ProjectStore,
 ): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "voice-hydrate",
 		beforeGenerate(params) {
 			if (!params.voiceId) return params;
-			const store = getProjectStore(projectId);
 			const { metadata, setCharacter, updateMetadata } = store.getState();
 			if (params.name) {
 				const character = metadata.characters[params.name];

@@ -2,7 +2,7 @@ import dedent from "dedent";
 import { requireGateway, requireState } from "@/lib/connectors/plugins";
 import type { NodeResults } from "@/lib/generation/graph";
 import { deriveArtStyle } from "@/lib/project/deriveArtStyle";
-import { getProjectStore } from "@/lib/project/store";
+import type { ProjectStore } from "@/lib/project/store";
 import type { LLMPlugin } from "@/lib/connectors/types";
 
 /**
@@ -14,7 +14,7 @@ import type { LLMPlugin } from "@/lib/connectors/types";
  * `beforeGenerate`, keeps the two from injecting it twice.
  */
 export function createReferenceStylePlugin(
-	projectId: string,
+	store: ProjectStore,
 	results: NodeResults,
 ): LLMPlugin {
 	return {
@@ -30,7 +30,7 @@ export function createReferenceStylePlugin(
 			);
 			if (!style) return prompt;
 
-			getProjectStore(projectId).getState().updateMetadata({ style });
+			store.getState().updateMetadata({ style });
 			return dedent`Art style reference: ${style}
 
 			${prompt}`;

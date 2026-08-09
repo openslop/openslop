@@ -1,18 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { getProjectStore, clearProjectStore } from "../store";
+import { createProjectStore } from "../store";
 import {
 	applyStoreSnapshot,
 	extractStoreSnapshot,
 	parseStoreSnapshot,
 } from "../storeSnapshot";
 
-const newProjectId = () =>
-	`p-${Math.random().toString(36).slice(2)}-${Date.now()}`;
-
 describe("storeSnapshot", () => {
 	it("extracts a method-free snapshot", () => {
-		const id = newProjectId();
-		const store = getProjectStore(id);
+		const store = createProjectStore();
 		store.getState().updateMetadata({ title: "Hello" });
 		store.getState().setReferenceImages(["a.png"]);
 
@@ -23,13 +19,10 @@ describe("storeSnapshot", () => {
 		for (const value of Object.values(snap)) {
 			expect(typeof value).not.toBe("function");
 		}
-		clearProjectStore(id);
 	});
 
 	it("round-trips through apply", () => {
-		const sourceId = newProjectId();
-		const targetId = newProjectId();
-		const src = getProjectStore(sourceId);
+		const src = createProjectStore();
 		src.getState().updateMetadata({
 			title: "T",
 			style: "noir",
@@ -38,7 +31,7 @@ describe("storeSnapshot", () => {
 		src.getState().setReferenceImages(["x", "y"]);
 
 		const snap = extractStoreSnapshot(src);
-		const dest = getProjectStore(targetId);
+		const dest = createProjectStore();
 		applyStoreSnapshot(dest, snap);
 
 		const after = dest.getState();
@@ -46,18 +39,13 @@ describe("storeSnapshot", () => {
 		expect(after.metadata.style).toBe("noir");
 		expect(after.metadata.narration.age).toBe("adult");
 		expect(after.referenceImages).toEqual(["x", "y"]);
-
-		clearProjectStore(sourceId);
-		clearProjectStore(targetId);
 	});
 
 	it("no-ops on an empty parsed snapshot", () => {
-		const id = newProjectId();
-		const store = getProjectStore(id);
+		const store = createProjectStore();
 		const before = JSON.stringify(extractStoreSnapshot(store));
 		applyStoreSnapshot(store, parseStoreSnapshot(null));
 		expect(JSON.stringify(extractStoreSnapshot(store))).toBe(before);
-		clearProjectStore(id);
 	});
 });
 
