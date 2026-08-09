@@ -6,6 +6,7 @@ import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { truncateMiddle } from "@/lib/format";
 import { ART_STYLE_PRESETS, type ArtStyle } from "@/lib/project/artStyles";
 import { cn } from "@/lib/utils";
+import { FieldLabel } from "../character/fields";
 
 /** Three lines of the tile at `text-label`. The full text is in the field above. */
 const DESCRIPTION_LENGTH = 84;
@@ -65,16 +66,8 @@ export function ArtStylePresets({
 }) {
 	const selected = value.trim();
 	return (
-		<section
-			aria-labelledby="art-style-presets"
-			className="flex flex-col gap-2"
-		>
-			<h3
-				id="art-style-presets"
-				className="text-label-xs uppercase tracking-wide text-muted-foreground"
-			>
-				Presets
-			</h3>
+		<section aria-label="Presets" className="flex flex-col gap-2">
+			<FieldLabel>Presets</FieldLabel>
 			<ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 				{ART_STYLE_PRESETS.map((preset) => (
 					<li key={preset.description}>
