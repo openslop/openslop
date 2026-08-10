@@ -2,7 +2,9 @@ import type { IconComponent } from "@/components/ui/icon";
 
 export type AttributeEdit =
 	| { kind: "enum"; options: readonly string[] }
-	| { kind: "text"; placeholder?: string; rows?: number };
+	| { kind: "text"; placeholder?: string; rows?: number }
+	/** A list of image URLs, edited as tiles. */
+	| { kind: "images" };
 
 export interface AttributeSpec {
 	label: string;

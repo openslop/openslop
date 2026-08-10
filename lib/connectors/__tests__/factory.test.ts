@@ -51,9 +51,11 @@ describe("resolveAttributeSchema", () => {
 
 	it("resolves distinct schemas for image vs animated_image", () => {
 		expect(resolveAttributeSchema("image", "openslop").keys).toEqual([
+			"referenceImagesOverride",
 			"motion",
 		]);
 		expect(resolveAttributeSchema("animated_image", "openslop").keys).toEqual([
+			"referenceImagesOverride",
 			"videoPrompt",
 			"duration",
 			"motion",

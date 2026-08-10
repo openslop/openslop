@@ -1,15 +1,11 @@
 "use client";
 
-import { ChevronDown } from "@/components/ui/icon";
 import { useCallback, useRef, useState } from "react";
 import { useSlateStatic } from "slate-react";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent } from "@/components/ui/popover";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
+import { AttributeTrigger } from "./AttributeTrigger";
 
 interface TextAttributePopoverProps {
 	element: CanvasContentElement;
@@ -59,24 +55,14 @@ export function TextAttributePopover({
 
 	return (
 		<Popover open={open} onOpenChange={handleOpenChange}>
-			<PopoverTrigger asChild>
-				<button
-					type="button"
-					aria-label={tooltip}
-					title={tooltip}
-					className="bg-secondary text-secondary-foreground text-label px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:bg-button-hover hover:text-foreground transition-colors"
-				>
-					<span className="truncate min-w-0">
-						{!hideLabel && (
-							<span className={value ? "opacity-70 mr-1" : "opacity-90"}>
-								{label}
-							</span>
-						)}
-						{value ? value : <span className="opacity-50">— add</span>}
+			<AttributeTrigger tooltip={tooltip}>
+				{!hideLabel && (
+					<span className={value ? "opacity-70 mr-1" : "opacity-90"}>
+						{label}
 					</span>
-					<ChevronDown className="w-3 h-3 shrink-0 text-foreground" />
-				</button>
-			</PopoverTrigger>
+				)}
+				{value ? value : <span className="opacity-50">— add</span>}
+			</AttributeTrigger>
 			<PopoverContent
 				align="start"
 				sideOffset={4}
