@@ -26,6 +26,22 @@ describe("parseXmlTag", () => {
 		});
 	});
 
+	it("preserves whitespace inside an attribute value", () => {
+		expect(
+			parseXmlTag('image appearance="a tall  woman\nin a red coat"'),
+		).toEqual({
+			tag: "image",
+			attributes: { appearance: "a tall  woman\nin a red coat" },
+		});
+	});
+
+	it("parses attributes separated by a newline", () => {
+		expect(parseXmlTag('character\nname="Lyra"\ngender="feminine"')).toEqual({
+			tag: "character",
+			attributes: { name: "Lyra", gender: "feminine" },
+		});
+	});
+
 	it("keeps a `tag` attribute separate from the tag name", () => {
 		expect(parseXmlTag('image tag="hero"')).toEqual({
 			tag: "image",

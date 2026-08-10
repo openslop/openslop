@@ -80,6 +80,15 @@ describe("character-references plugin", () => {
 		expect(result).toEqual(params);
 	});
 
+	it("strips an empty characters attribute", () => {
+		const result = runBeforeGenerate(plugin, {
+			prompt: "A sunset",
+			characters: "",
+		});
+		expect(result).toEqual({ prompt: "A sunset" });
+		expect(result).not.toHaveProperty("characters");
+	});
+
 	it("handles whitespace in character CSV", () => {
 		setupCharacters({
 			Alice: "https://img/alice.png",

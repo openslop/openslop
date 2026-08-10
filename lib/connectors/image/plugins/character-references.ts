@@ -22,7 +22,7 @@ export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCha
 			),
 		beforeGenerate(params, ctx?: PluginContext<ParamsWithCharacters>) {
 			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
-			if (!characters) return params;
+			if (!characters) return rest;
 
 			const referenceImages = compact(
 				parseCharacterNames(characters).map(

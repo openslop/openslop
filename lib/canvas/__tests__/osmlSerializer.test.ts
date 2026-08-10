@@ -192,6 +192,12 @@ describe("serialize round trip", () => {
 		expect(serializeOSML([scene])).toBe(first);
 	});
 
+	it("keeps the whitespace a user typed into an attribute", () => {
+		const appearance = "a tall  woman\nin a red coat";
+		const scene = reload(wrap(el("image", "she waits", { appearance })));
+		expect(scene.children[0].customAttributes?.appearance).toBe(appearance);
+	});
+
 	it("keeps a reloaded empty element recognisably empty", () => {
 		const scene = reload(
 			wrap(

@@ -36,7 +36,9 @@ export function TextAttributePopover({
 	const commit = useCallback(
 		(next: string) => {
 			if (next === value) return;
-			updateElementAttrs(editor, element, { [attrKey]: next });
+			// Clearing the field means the element has no such attribute. Writing ""
+			// instead would persist as `attr=""` and read back as a changed input.
+			updateElementAttrs(editor, element, { [attrKey]: next || null });
 		},
 		[editor, element, attrKey, value],
 	);

@@ -7,8 +7,12 @@ export type XmlTag = {
 };
 
 export function parseXmlTag(tagString: string): XmlTag {
-	const [rawTag, ...rest] = tagString.trim().split(/\s+/);
-	const attributesString = rest.join(" ");
+	// Slice rather than split/rejoin: whitespace inside an attribute value is
+	// part of what the user typed, and collapsing it loses their line breaks.
+	const trimmed = tagString.trim();
+	const nameEnd = trimmed.search(/\s/);
+	const rawTag = nameEnd === -1 ? trimmed : trimmed.slice(0, nameEnd);
+	const attributesString = nameEnd === -1 ? "" : trimmed.slice(nameEnd);
 	const attributes: Record<string, string> = {};
 	const regex = /(\w+)="([^"]*)"/g;
 	let match: RegExpExecArray | null;
