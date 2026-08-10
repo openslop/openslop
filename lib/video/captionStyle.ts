@@ -14,6 +14,14 @@ export type CaptionFont = (typeof CAPTION_FONTS)[number];
  * Stacks rather than webfonts: the Lambda renderer only has the fonts its
  * headless Chrome ships with, so a caption font has to degrade on its own.
  */
+export const CAPTION_FONT_LABELS: Record<CaptionFont, string> = {
+	sans: "Sans",
+	condensed: "Condensed",
+	serif: "Serif",
+	mono: "Mono",
+	rounded: "Rounded",
+};
+
 export const CAPTION_FONT_STACKS: Record<CaptionFont, string> = {
 	sans: '"Helvetica Neue", Helvetica, Arial, system-ui, sans-serif',
 	condensed: '"Arial Narrow", "Liberation Sans Narrow", Impact, sans-serif',
@@ -25,16 +33,30 @@ export const CAPTION_FONT_STACKS: Record<CaptionFont, string> = {
 export const CAPTION_CASINGS = ["none", "upper", "lower"] as const;
 export type CaptionCasing = (typeof CAPTION_CASINGS)[number];
 
-export const CAPTION_POSITIONS = ["top", "middle", "bottom"] as const;
-export type CaptionPosition = (typeof CAPTION_POSITIONS)[number];
+export const CAPTION_ALIGN_X = ["left", "center", "right"] as const;
+export type CaptionAlignX = (typeof CAPTION_ALIGN_X)[number];
+
+export const CAPTION_ALIGN_Y = ["top", "middle", "bottom"] as const;
+export type CaptionAlignY = (typeof CAPTION_ALIGN_Y)[number];
+
+/** Type emphasis toggles, applied per class of word. */
+export const CAPTION_EMPHASES = ["bold", "italic", "underline"] as const;
+export type CaptionEmphasis = (typeof CAPTION_EMPHASES)[number];
 
 /** `line` shows the whole line at once; `word` builds it up word by word. */
 export const CAPTION_REVEALS = ["line", "word"] as const;
 export type CaptionReveal = (typeof CAPTION_REVEALS)[number];
 
+/** The frame height caption sizes are authored against. */
+export const CAPTION_BASE_HEIGHT = 1080;
+
+/** Type size scaled from the authoring baseline to a real frame height. */
+export const captionFontSizePx = (fontSize: number, frameHeight: number) =>
+	(fontSize * frameHeight) / CAPTION_BASE_HEIGHT;
+
 /** Slider bounds, shared by the schema and the panel controls. */
 export const CAPTION_RANGES = {
-	fontSize: { min: 3, max: 14, step: 0.5 },
+	fontSize: { min: 24, max: 160, step: 2 },
 	borderWidth: { min: 5, max: 100, step: 5 },
 	maxWordsPerLine: { min: 1, max: 10, step: 1 },
 	activeScale: { min: 100, max: 175, step: 5 },
@@ -45,6 +67,9 @@ const range = ({ min, max }: { min: number; max: number }) =>
 
 const captionTextStyleSchema = z.object({
 	fill: z.string(),
+	bold: z.boolean(),
+	italic: z.boolean(),
+	underline: z.boolean(),
 	border: z
 		.object({ width: range(CAPTION_RANGES.borderWidth), color: z.string() })
 		.nullable(),
@@ -56,14 +81,21 @@ export type CaptionTextStyle = z.infer<typeof captionTextStyleSchema>;
 
 export const CaptionStyleSchema = z.object({
 	font: z.enum(CAPTION_FONTS),
-	/** Percentage of the frame height, so captions scale with the output size. */
+	/**
+	 * Pixels at {@link CAPTION_BASE_HEIGHT}. Renderers scale it by the real frame
+	 * height, so one value covers every output resolution.
+	 */
 	fontSize: range(CAPTION_RANGES.fontSize),
 	casing: z.enum(CAPTION_CASINGS),
-	position: z.enum(CAPTION_POSITIONS),
+	alignX: z.enum(CAPTION_ALIGN_X),
+	alignY: z.enum(CAPTION_ALIGN_Y),
 	maxWordsPerLine: range(CAPTION_RANGES.maxWordsPerLine).int(),
 	reveal: z.enum(CAPTION_REVEALS),
 	base: captionTextStyleSchema,
-	/** Emphasis for the word being spoken; `scale` is a percentage of `fontSize`. */
+	/**
+	 * Emphasis for the word being spoken. `scale` is a percentage of `fontSize`,
+	 * so the active word keeps its proportion when the caption is resized.
+	 */
 	activeWord: captionTextStyleSchema.extend({
 		scale: range(CAPTION_RANGES.activeScale),
 	}),
@@ -79,18 +111,25 @@ export const DEFAULT_BORDER_WIDTH = 25;
 
 export const DEFAULT_CAPTION_STYLE: CaptionStyle = {
 	font: "sans",
-	fontSize: 6.5,
+	fontSize: 70,
 	casing: "upper",
-	position: "bottom",
+	alignX: "center",
+	alignY: "bottom",
 	maxWordsPerLine: 6,
 	reveal: "word",
 	base: {
 		fill: WHITE,
+		bold: true,
+		italic: false,
+		underline: false,
 		border: { width: DEFAULT_BORDER_WIDTH, color: BLACK },
 		background: null,
 	},
 	activeWord: {
 		fill: WHITE,
+		bold: true,
+		italic: false,
+		underline: false,
 		border: { width: DEFAULT_BORDER_WIDTH, color: BLACK },
 		background: null,
 		scale: 100,

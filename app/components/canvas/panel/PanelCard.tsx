@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Slider } from "@/components/ui/slider";
 
 /** A side-panel subsection */
 export function PanelCard({
@@ -31,47 +30,10 @@ export function PanelField({
 }) {
 	return (
 		<div className="flex items-center justify-between gap-3">
-			<span className="text-label font-medium text-panel-label">{label}</span>
-			{children}
-		</div>
-	);
-}
-
-/** A labeled numeric slider row inside a `PanelCard` */
-export function PanelSlider({
-	label,
-	value,
-	min,
-	max,
-	step,
-	onChange,
-	format = String,
-}: {
-	label: string;
-	value: number;
-	min: number;
-	max: number;
-	step: number;
-	onChange: (value: number) => void;
-	format?: (value: number) => string;
-}) {
-	return (
-		<div className="flex items-center gap-2">
 			<span className="shrink-0 text-label font-medium text-panel-label">
 				{label}
 			</span>
-			<Slider
-				className="flex-1"
-				aria-label={label}
-				value={[value]}
-				min={min}
-				max={max}
-				step={step}
-				onValueChange={([next]) => onChange(next ?? value)}
-			/>
-			<span className="w-9 shrink-0 text-right font-mono text-label-xs text-muted-foreground tabular-nums">
-				{format(value)}
-			</span>
+			{children}
 		</div>
 	);
 }

@@ -1,60 +1,59 @@
 "use client";
 
-import { Eye, EyeOff } from "@/components/ui/icon";
-import { MediaToggle } from "@/components/ui/media-toggle";
 import {
-	SelectField,
-	type SelectFieldOption,
-} from "@/components/ui/select-field";
+	AlignBottom,
+	AlignCenter,
+	AlignLeft,
+	AlignMiddle,
+	AlignRight,
+	AlignTop,
+	Eye,
+	EyeOff,
+	TextSize,
+} from "@/components/ui/icon";
+import {
+	MediaToggle,
+	type MediaToggleOption,
+} from "@/components/ui/media-toggle";
+import { NumberScrubber } from "@/components/ui/number-scrubber";
 import { useProject } from "@/lib/project/useProject";
 import {
-	CAPTION_CASINGS,
-	CAPTION_FONTS,
-	CAPTION_POSITIONS,
 	CAPTION_RANGES,
-	CAPTION_REVEALS,
+	type CaptionAlignX,
+	type CaptionAlignY,
 	type CaptionCasing,
-	type CaptionFont,
-	type CaptionPosition,
 	type CaptionReveal,
 } from "@/lib/video/captionStyle";
 import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
 import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
+import { CaptionFontField } from "./CaptionFontField";
 import { CaptionPresetGrid } from "./CaptionPresetGrid";
 import { CaptionPreview } from "./CaptionPreview";
 import { CaptionTextStyleFields } from "./CaptionTextStyleFields";
-import { PanelCard, PanelField, PanelSlider } from "./PanelCard";
+import { PanelCard, PanelField } from "./PanelCard";
 
-const options = <T extends string>(
-	values: readonly T[],
-	labels: Record<T, string>,
-): SelectFieldOption<T>[] =>
-	values.map((value) => ({ value, label: labels[value] }));
+const REVEAL_OPTIONS: MediaToggleOption<CaptionReveal>[] = [
+	{ value: "line", label: "Whole line at once", text: "Line" },
+	{ value: "word", label: "Word by word", text: "Word" },
+];
 
-const FONT_OPTIONS = options<CaptionFont>(CAPTION_FONTS, {
-	sans: "Sans",
-	condensed: "Condensed",
-	serif: "Serif",
-	mono: "Mono",
-	rounded: "Rounded",
-});
+const CASE_OPTIONS: MediaToggleOption<CaptionCasing>[] = [
+	{ value: "none", label: "Standard case", text: "Ab" },
+	{ value: "upper", label: "Uppercase", text: "AB" },
+	{ value: "lower", label: "Lowercase", text: "ag" },
+];
 
-const CASING_OPTIONS = options<CaptionCasing>(CAPTION_CASINGS, {
-	none: "As spoken",
-	upper: "UPPERCASE",
-	lower: "lowercase",
-});
+const ALIGN_X_OPTIONS: MediaToggleOption<CaptionAlignX>[] = [
+	{ value: "left", label: "Align left", icon: AlignLeft },
+	{ value: "center", label: "Align center", icon: AlignCenter },
+	{ value: "right", label: "Align right", icon: AlignRight },
+];
 
-const POSITION_OPTIONS = options<CaptionPosition>(CAPTION_POSITIONS, {
-	top: "Top",
-	middle: "Middle",
-	bottom: "Bottom",
-});
-
-const REVEAL_OPTIONS = options<CaptionReveal>(CAPTION_REVEALS, {
-	line: "Whole line",
-	word: "Word by word",
-});
+const ALIGN_Y_OPTIONS: MediaToggleOption<CaptionAlignY>[] = [
+	{ value: "top", label: "Align top", icon: AlignTop },
+	{ value: "middle", label: "Align middle", icon: AlignMiddle },
+	{ value: "bottom", label: "Align bottom", icon: AlignBottom },
+];
 
 export function CaptionsPanel() {
 	const captionsEnabled = useCaptionsEnabled();
@@ -86,51 +85,65 @@ export function CaptionsPanel() {
 					</PanelCard>
 
 					<PanelCard title="Text">
-						<PanelField label="Font">
-							<SelectField
-								value={style.font}
-								options={FONT_OPTIONS}
-								onChange={(font) => setStyle({ font })}
-								ariaLabel="Caption font"
+						<div className="flex items-center gap-2">
+							<div className="min-w-0 flex-1">
+								<CaptionFontField
+									value={style.font}
+									onChange={(font) => setStyle({ font })}
+								/>
+							</div>
+							<NumberScrubber
+								label="Text size"
+								tooltip="Text size"
+								// Sits beside the font dropdown, so it takes the taller field height.
+								className="h-8"
+								icon={TextSize}
+								value={style.fontSize}
+								suffix="px"
+								{...CAPTION_RANGES.fontSize}
+								onChange={(fontSize) => setStyle({ fontSize })}
 							/>
-						</PanelField>
+						</div>
 						<PanelField label="Case">
-							<SelectField
+							<MediaToggle
 								value={style.casing}
-								options={CASING_OPTIONS}
+								options={CASE_OPTIONS}
 								onChange={(casing) => setStyle({ casing })}
-								ariaLabel="Caption case"
-							/>
-						</PanelField>
-						<PanelField label="Position">
-							<SelectField
-								value={style.position}
-								options={POSITION_OPTIONS}
-								onChange={(position) => setStyle({ position })}
-								ariaLabel="Caption position"
 							/>
 						</PanelField>
 						<PanelField label="Reveal">
-							<SelectField
+							<MediaToggle
 								value={style.reveal}
 								options={REVEAL_OPTIONS}
 								onChange={(reveal) => setStyle({ reveal })}
-								ariaLabel="Caption reveal"
 							/>
 						</PanelField>
-						<PanelSlider
-							label="Size"
-							value={style.fontSize}
-							{...CAPTION_RANGES.fontSize}
-							format={(value) => `${value}%`}
-							onChange={(fontSize) => setStyle({ fontSize })}
-						/>
-						<PanelSlider
-							label="Words/line"
-							value={style.maxWordsPerLine}
-							{...CAPTION_RANGES.maxWordsPerLine}
-							onChange={(maxWordsPerLine) => setStyle({ maxWordsPerLine })}
-						/>
+						<PanelField label="Words per line">
+							<NumberScrubber
+								label="Words per line"
+								tooltip="Maximum words on a caption line"
+								value={style.maxWordsPerLine}
+								{...CAPTION_RANGES.maxWordsPerLine}
+								onChange={(maxWordsPerLine) => setStyle({ maxWordsPerLine })}
+							/>
+						</PanelField>
+					</PanelCard>
+
+					<PanelCard title="Placement">
+						<PanelField label="Horizontal">
+							<MediaToggle
+								value={style.alignX}
+								options={ALIGN_X_OPTIONS}
+								onChange={(alignX) => setStyle({ alignX })}
+							/>
+						</PanelField>
+						<PanelField label="Vertical">
+							<MediaToggle
+								value={style.alignY}
+								options={ALIGN_Y_OPTIONS}
+								onChange={(alignY) => setStyle({ alignY })}
+							/>
+						</PanelField>
 					</PanelCard>
 
 					<PanelCard title="Style">
@@ -145,15 +158,20 @@ export function CaptionsPanel() {
 							value={style.activeWord}
 							onChange={(activeWord) => setStyle({ activeWord })}
 						/>
-						<PanelSlider
-							label="Size"
-							value={style.activeWord.scale}
-							{...CAPTION_RANGES.activeScale}
-							format={(value) => `${value}%`}
-							onChange={(scale) =>
-								setStyle({ activeWord: { ...style.activeWord, scale } })
-							}
-						/>
+						<PanelField label="Size">
+							<NumberScrubber
+								label="Active word size"
+								tooltip="Active word size, relative to the caption"
+								className="h-8"
+								icon={TextSize}
+								value={style.activeWord.scale}
+								suffix="%"
+								{...CAPTION_RANGES.activeScale}
+								onChange={(scale) =>
+									setStyle({ activeWord: { ...style.activeWord, scale } })
+								}
+							/>
+						</PanelField>
 					</PanelCard>
 				</>
 			)}

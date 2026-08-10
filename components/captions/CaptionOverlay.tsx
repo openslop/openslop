@@ -2,16 +2,23 @@ import type { CSSProperties } from "react";
 import type { CaptionWord } from "@/lib/video/captionLayout";
 import {
 	CAPTION_FONT_STACKS,
+	type CaptionAlignX,
+	type CaptionAlignY,
 	type CaptionCasing,
-	type CaptionPosition,
 	type CaptionStyle,
 	type CaptionTextStyle,
 } from "@/lib/video/captionStyle";
 
-const ALIGN: Record<CaptionPosition, CSSProperties["alignItems"]> = {
+const ALIGN_Y: Record<CaptionAlignY, CSSProperties["alignItems"]> = {
 	top: "flex-start",
 	middle: "center",
 	bottom: "flex-end",
+};
+
+const ALIGN_X: Record<CaptionAlignX, CSSProperties["justifyContent"]> = {
+	left: "flex-start",
+	center: "center",
+	right: "flex-end",
 };
 
 const TRANSFORM: Record<CaptionCasing, CSSProperties["textTransform"]> = {
@@ -23,31 +30,33 @@ const TRANSFORM: Record<CaptionCasing, CSSProperties["textTransform"]> = {
 /** Border width is a 0-100 dial; this maps it onto a legible em range. */
 const BORDER_EM_PER_UNIT = 0.0025;
 
-// 8-direction layered shadow outline. Avoids the miter spikes that
-// -webkit-text-stroke produces at acute glyph corners, and adds a soft drop
-// shadow for legibility over busy frames.
-function outline(width: number, color: string): string {
-	const o = `${width * BORDER_EM_PER_UNIT}em`;
-	return [
-		`${o} 0 0 ${color}`,
-		`-${o} 0 0 ${color}`,
-		`0 ${o} 0 ${color}`,
-		`0 -${o} 0 ${color}`,
-		`${o} ${o} 0 ${color}`,
-		`-${o} ${o} 0 ${color}`,
-		`${o} -${o} 0 ${color}`,
-		`-${o} -${o} 0 ${color}`,
-		"0 0.08em 0.2em rgba(0, 0, 0, 0.55)",
-	].join(", ");
+// A soft drop shadow under the outline keeps captions legible over busy frames.
+const DROP_SHADOW = "0 0.08em 0.2em rgba(0, 0, 0, 0.55)";
+
+/**
+ * `paint-order` lays the stroke down before the fill, so the glyph keeps its
+ * full weight and the outline joins cleanly — unlike stacked text shadows,
+ * which show their individual copies once the text gets large.
+ */
+function outline(width: number, color: string): CSSProperties {
+	return {
+		// The stroke straddles the glyph edge and the fill covers its inner half,
+		// so doubling the width keeps the visible outline at the dialled size.
+		WebkitTextStrokeWidth: `${width * BORDER_EM_PER_UNIT * 2}em`,
+		WebkitTextStrokeColor: color,
+		paintOrder: "stroke fill",
+		textShadow: DROP_SHADOW,
+	};
 }
 
 function wordStyle(style: CaptionTextStyle, scale: number): CSSProperties {
 	return {
 		fontSize: `${scale}em`,
 		color: style.fill,
-		textShadow: style.border
-			? outline(style.border.width, style.border.color)
-			: undefined,
+		fontWeight: style.bold ? 700 : 400,
+		fontStyle: style.italic ? "italic" : "normal",
+		textDecoration: style.underline ? "underline" : "none",
+		...(style.border && outline(style.border.width, style.border.color)),
 		backgroundColor: style.background ?? undefined,
 		padding: style.background ? "0.05em 0.2em" : undefined,
 		borderRadius: style.background ? "0.12em" : undefined,
@@ -77,8 +86,8 @@ export function CaptionOverlay({
 				position: "absolute",
 				inset: 0,
 				display: "flex",
-				justifyContent: "center",
-				alignItems: ALIGN[style.position],
+				justifyContent: ALIGN_X[style.alignX],
+				alignItems: ALIGN_Y[style.alignY],
 				padding: "6% 8%",
 				pointerEvents: "none",
 				userSelect: "none",
@@ -88,15 +97,14 @@ export function CaptionOverlay({
 				style={{
 					display: "flex",
 					flexWrap: "wrap",
-					justifyContent: "center",
+					justifyContent: ALIGN_X[style.alignX],
 					alignItems: "baseline",
 					gap: "0.1em 0.28em",
 					fontFamily: CAPTION_FONT_STACKS[style.font],
-					fontWeight: 700,
 					fontSize: fontSizePx,
 					letterSpacing: "-0.01em",
 					lineHeight: 1.25,
-					textAlign: "center",
+					textAlign: style.alignX,
 					textTransform: TRANSFORM[style.casing],
 				}}
 			>
@@ -104,11 +112,12 @@ export function CaptionOverlay({
 					<span
 						// Words repeat within a line, so the position is the identity.
 						key={i}
-						style={
-							word.active
+						style={{
+							...(word.active
 								? wordStyle(style.activeWord, style.activeWord.scale / 100)
-								: wordStyle(style.base, 1)
-						}
+								: wordStyle(style.base, 1)),
+							visibility: word.hidden ? "hidden" : "visible",
+						}}
 					>
 						{word.text}
 					</span>

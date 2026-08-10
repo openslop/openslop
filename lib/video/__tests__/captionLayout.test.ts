@@ -3,6 +3,8 @@ import { activeWordIndex, captionWordsAt } from "../captionLayout";
 
 const WORDS = ["one", "two", "three", "four", "five"];
 const text = (words: { text: string }[]) => words.map((w) => w.text);
+const shown = (words: { text: string; hidden: boolean }[]) =>
+	words.filter((w) => !w.hidden).map((w) => w.text);
 const activeText = (words: { text: string; active: boolean }[]) =>
 	words.filter((w) => w.active).map((w) => w.text);
 
@@ -35,8 +37,20 @@ describe("captionWordsAt", () => {
 	});
 
 	it("builds the line up to the current word", () => {
-		expect(text(captionWordsAt(WORDS, 2, word))).toEqual(["three"]);
-		expect(text(captionWordsAt(WORDS, 3, word))).toEqual(["three", "four"]);
+		expect(shown(captionWordsAt(WORDS, 2, word))).toEqual(["three"]);
+		expect(shown(captionWordsAt(WORDS, 3, word))).toEqual(["three", "four"]);
+	});
+
+	it("keeps unspoken words in the line so it never reflows", () => {
+		expect(text(captionWordsAt(WORDS, 2, word))).toEqual(["three", "four"]);
+		expect(captionWordsAt(WORDS, 2, word).map((w) => w.hidden)).toEqual([
+			false,
+			true,
+		]);
+	});
+
+	it("shows the whole line under line reveal", () => {
+		expect(captionWordsAt(WORDS, 2, line).every((w) => !w.hidden)).toBe(true);
 	});
 
 	it("marks only the current word active", () => {

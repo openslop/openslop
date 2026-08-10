@@ -3,7 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { CaptionOverlay } from "@/components/captions/CaptionOverlay";
 import type { TextTimestamp } from "@/lib/connectors/types";
 import { activeWordIndex, captionWordsAt } from "@/lib/video/captionLayout";
-import type { CaptionStyle } from "@/lib/video/captionStyle";
+import { captionFontSizePx, type CaptionStyle } from "@/lib/video/captionStyle";
 import { toSeconds } from "@/lib/video/frames";
 
 export function Captions({
@@ -31,7 +31,7 @@ export function Captions({
 			<CaptionOverlay
 				style={style}
 				words={captionWordsAt(words, index, style)}
-				fontSizePx={(height * style.fontSize) / 100}
+				fontSizePx={captionFontSizePx(style.fontSize, height)}
 			/>
 		</AbsoluteFill>
 	);
