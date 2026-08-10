@@ -24,8 +24,9 @@ import {
 	type Template,
 } from "@/lib/templates/templates";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { MODE_SPECS } from "@/lib/config/modes";
 import { useProject } from "@/lib/project/useProject";
-import type { Mode } from "@/lib/project/types";
+import { MODES, type Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
 import {
@@ -38,15 +39,10 @@ import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 
-const MODE_LABELS: Record<Mode, string> = {
-	story: "Describe a story",
-	script: "Paste in a script",
-	template: "Use a template",
-};
-
-const MODE_OPTIONS: SelectMenuOption<Mode>[] = (
-	Object.keys(MODE_LABELS) as Mode[]
-).map((value) => ({ value, label: MODE_LABELS[value] }));
+const MODE_OPTIONS: SelectMenuOption<Mode>[] = MODES.map((value) => ({
+	value,
+	label: MODE_SPECS[value].label,
+}));
 
 const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
@@ -208,7 +204,7 @@ export default function ComposerCopilot({
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const isTemplateMode = mode === "template";
-	const isScriptMode = mode === "script";
+	const { label: modeLabel, targetsLength } = MODE_SPECS[mode];
 	const hasText = value.trim().length > 0;
 	const selectedTemplate = getTemplate(selectedTemplateId);
 
@@ -274,8 +270,8 @@ export default function ComposerCopilot({
 							itemClassName="rounded-lg text-label-xs"
 						>
 							<PillTrigger
-								aria-label={`Composer mode: ${MODE_LABELS[mode]}`}
-								label={MODE_LABELS[mode]}
+								aria-label={`Composer mode: ${modeLabel}`}
+								label={modeLabel}
 							/>
 						</SelectMenu>
 						<SelectMenu
@@ -292,7 +288,7 @@ export default function ComposerCopilot({
 								label={aspectRatio}
 							/>
 						</SelectMenu>
-						{!isScriptMode && (
+						{targetsLength && (
 							<SelectMenu
 								value={videoLength}
 								onChange={(next: VideoLength) =>

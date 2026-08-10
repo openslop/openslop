@@ -2,7 +2,10 @@
 
 import { useSlateStatic } from "slate-react";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	IMAGE_AUTHORED_TYPES,
+	type CanvasContentElement,
+} from "@/lib/canvas/types";
 import { CharacterPill } from "./CharacterPill";
 import {
 	CharacterSwitcher,
@@ -18,8 +21,7 @@ export function ElementCharacters({
 	const editor = useSlateStatic();
 	if (element.type === "character")
 		return <CharacterSwitcher element={element} />;
-	if (element.type !== "image" && element.type !== "animated_image")
-		return null;
+	if (!IMAGE_AUTHORED_TYPES.has(element.type)) return null;
 	const characters = getElementCharacterNames(element);
 	return (
 		<>

@@ -1,6 +1,9 @@
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	IMAGE_AUTHORED_TYPES,
+	type CanvasContentElement,
+} from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -123,8 +126,9 @@ export function ElementContainer({
 							contentEditable={false}
 						>
 							<ElementStaleIndicator />
-							{(element.type === "image" ||
-								element.type === "animated_image") && <ElementUploadButton />}
+							{IMAGE_AUTHORED_TYPES.has(element.type) && (
+								<ElementUploadButton />
+							)}
 							<AnimateButton element={element} />
 							<ElementGenerateButton />
 						</div>

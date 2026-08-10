@@ -74,6 +74,15 @@ export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set(
 	ALL_ELEMENT_TYPES.filter((type) => ELEMENT_TYPES[type].role === "foreground"),
 );
 
+/**
+ * Types whose asset is authored from a still image, so they carry characters and
+ * reference images, and accept an uploaded still in place of a generated one.
+ */
+export const IMAGE_AUTHORED_TYPES: ReadonlySet<CanvasElementType> = new Set([
+	"image",
+	"animated_image",
+]);
+
 export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 	String(i + 4),
 );

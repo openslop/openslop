@@ -1,15 +1,20 @@
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/referenceImages";
 import { CHARACTERS_ATTR } from "./characterNames";
-import type { CanvasContentElement, CanvasElementType } from "./types";
-
-type ElementTypeGroup = readonly CanvasElementType[];
+import {
+	IMAGE_AUTHORED_TYPES,
+	type CanvasContentElement,
+	type CanvasElementType,
+} from "./types";
 
 /**
  * A map of attribute name and the types within which it's preserved
  */
-const PRESERVED_ATTRIBUTE_TYPES: Record<string, ElementTypeGroup> = {
-	[CHARACTERS_ATTR]: ["image", "animated_image"],
-	[REFERENCE_IMAGES_ATTR]: ["image", "animated_image"],
+const PRESERVED_ATTRIBUTE_TYPES: Record<
+	string,
+	ReadonlySet<CanvasElementType>
+> = {
+	[CHARACTERS_ATTR]: IMAGE_AUTHORED_TYPES,
+	[REFERENCE_IMAGES_ATTR]: IMAGE_AUTHORED_TYPES,
 };
 
 export function preservedAttributes(
@@ -20,7 +25,7 @@ export function preservedAttributes(
 	const preserved: Record<string, string> = {};
 	for (const [attribute, types] of Object.entries(PRESERVED_ATTRIBUTE_TYPES)) {
 		const value = attrs[attribute];
-		if (value !== undefined && types.includes(targetType)) {
+		if (value !== undefined && types.has(targetType)) {
 			preserved[attribute] = value;
 		}
 	}
