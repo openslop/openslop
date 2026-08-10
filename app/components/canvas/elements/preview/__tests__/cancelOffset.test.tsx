@@ -48,7 +48,13 @@ describe("cancel button offset", () => {
 	});
 
 	it("is pushed below the still/video toggle by AnimatedImageMedia", () => {
-		const html = withTooltip(<AnimatedImageMedia {...generating} />);
+		const html = withTooltip(
+			<AnimatedImageMedia
+				onDiscard={() => {}}
+				animated={{ ...generating, url: undefined }}
+				still={{ ...generating, url: undefined }}
+			/>,
+		);
 		expect(html).toContain("--cancel-offset:2.5rem");
 	});
 
@@ -65,13 +71,19 @@ const mediaToggleClass = (html: string) => {
 };
 
 describe("AnimatedImageMedia", () => {
+	const failed = {
+		status: "idle",
+		seconds: 0,
+		error: "generation failed",
+		url: undefined,
+	} as const;
+
 	it("stacks the still/video toggle above the error overlay so it stays clickable", () => {
 		const html = withTooltip(
 			<AnimatedImageMedia
-				status="idle"
-				seconds={0}
-				error="generation failed"
 				onDiscard={() => {}}
+				animated={failed}
+				still={failed}
 			/>,
 		);
 		// Error overlay renders at z-20; the toggle must sit above it.

@@ -9,7 +9,12 @@ import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	withRegistry,
 } from "@/lib/connectors/registry";
-import { forElement, needsGeneration } from "@/lib/generation/graph";
+import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import {
+	forElement,
+	needsGeneration,
+	type GenerationNode,
+} from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { MetadataSchema } from "@/lib/project/types";
@@ -17,7 +22,7 @@ import { buildAnimatedImagePlugins } from "../animated-image-chain";
 import {
 	createStillFramePlugin,
 	stillElementId,
-	stillFrameUrl,
+	stillSnapshot,
 } from "../still-frame";
 
 const ELEMENT_ID = "anim-1";
@@ -78,7 +83,7 @@ describe("still-frame plugin", () => {
 	});
 });
 
-describe("stillFrameUrl", () => {
+describe("stillSnapshot", () => {
 	const registry = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 		.appendPlugins("image", ...buildImagePlugins())
 		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
@@ -94,6 +99,9 @@ describe("stillFrameUrl", () => {
 		customAttributes: { provider: "openslop", videoPrompt: "slow pan" },
 		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
 	};
+
+	const frameUrl = (node: GenerationNode, queue: GenerationQueue) =>
+		getPrimaryUrl(stillSnapshot(node, queue).result, "image");
 
 	// Regression: the preview used to read the animation's own result, so an
 	// uploaded still stayed invisible until the animation re-rendered.
@@ -111,20 +119,32 @@ describe("stillFrameUrl", () => {
 			videoUrl: "https://example.com/v.mp4",
 			durationSec: 5,
 		});
-		expect(stillFrameUrl(node, queue)).toBeUndefined();
+		expect(frameUrl(node, queue)).toBeUndefined();
 
 		queue.commitResult(
 			still,
 			{ imageUrl: "uploaded.png", durationSec: 0 },
 			{ pinned: true },
 		);
-		expect(stillFrameUrl(node, queue)).toBe("uploaded.png");
+		expect(frameUrl(node, queue)).toBe("uploaded.png");
 	});
 
 	it("has no still frame before one exists", () => {
 		const queue = new GenerationQueue();
 		const node = nodeBuilder(registry, state)(forElement(animated));
-		expect(stillFrameUrl(node, queue)).toBeUndefined();
+		expect(frameUrl(node, queue)).toBeUndefined();
+	});
+
+	// The card shows the still's progress while the animation is still queued.
+	it("reports the still node's own state, not the animation's", () => {
+		const queue = new GenerationQueue();
+		const node = nodeBuilder(registry, state)(forElement(animated));
+		queue.setError(stillElementId(ELEMENT_ID), "still failed");
+
+		expect(stillSnapshot(node, queue)).toBe(
+			queue.getElementSnapshot(stillElementId(ELEMENT_ID)),
+		);
+		expect(queue.getElementSnapshot(ELEMENT_ID).error).toBeNull();
 	});
 });
 
