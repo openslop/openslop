@@ -68,7 +68,6 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
-			captions: "on",
 			model: "tts-model",
 			provider: "openslop",
 		});
@@ -80,7 +79,6 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
-			captions: "on",
 			model: "tts-model",
 			provider: "openslop",
 		});

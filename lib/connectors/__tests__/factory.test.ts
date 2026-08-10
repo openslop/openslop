@@ -45,7 +45,6 @@ describe("resolveAttributeSchema", () => {
 			"emotion",
 			"speed",
 			"volume",
-			"captions",
 		]);
 	});
 

@@ -9,6 +9,7 @@ import {
 import { resolveElements } from "@/lib/video/resolve";
 import { buildVideoLayout } from "@/lib/video/scene-builder";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
 import { useTransitionType } from "@/lib/video/useTransitionType";
 import type { VideoLayout } from "@/lib/video/types";
 
@@ -24,16 +25,27 @@ export function useVideoLayout(
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
 	const transitionType = useTransitionType();
 	const aspectRatio = useAspectRatio();
+	const captionsEnabled = useCaptionsEnabled();
 
 	const { layout, scenes } = useMemo(() => {
 		const elements = editor.children as CanvasElement[];
-		const resolved = resolveElements(elements, queue.getElementSnapshot);
+		const resolved = resolveElements(elements, queue.getElementSnapshot, {
+			captionsEnabled,
+		});
 		return {
 			layout: buildVideoLayout(resolved, { transitionType, aspectRatio }),
 			scenes: elements.filter(isSceneElement),
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [editor, layoutKey, resultVersion, transitionType, aspectRatio, queue]);
+	}, [
+		editor,
+		layoutKey,
+		resultVersion,
+		transitionType,
+		aspectRatio,
+		captionsEnabled,
+		queue,
+	]);
 
 	return { layout, playerKey: `${layoutKey}-${resultVersion}`, scenes };
 }

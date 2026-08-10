@@ -84,29 +84,18 @@ describe("getMotion", () => {
 
 describe("layoutAttributeSignature", () => {
 	it("joins raw layout attribute values in LAYOUT_ATTRIBUTE_KEYS order", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual([
-			"loops",
-			"volume",
-			"motion",
-			"captions",
-		]);
+		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual(["loops", "volume", "motion"]);
 		expect(
 			layoutAttributeSignature(
-				el({
-					loops: "2",
-					volume: "5",
-					motion: "kenBurnsIn",
-					captions: "off",
-				}),
+				el({ loops: "2", volume: "5", motion: "kenBurnsIn" }),
 			),
-		).toBe("2:5:kenBurnsIn:off");
+		).toBe("2:5:kenBurnsIn");
 	});
 
 	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
-		expect(layoutAttributeSignature(el())).toBe(":::");
-		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::");
-		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe(":10::");
-		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe("::shake:");
-		expect(layoutAttributeSignature(el({ captions: "off" }))).toBe(":::off");
+		expect(layoutAttributeSignature(el())).toBe("::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe(":10:");
+		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe("::shake");
 	});
 });

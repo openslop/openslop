@@ -34,8 +34,8 @@ const REFINE_SYSTEM_PROMPT = dedent`
   ${ELEMENT_TYPE_LIST}
 
   ## Common attributes by type
-  - **narration**: emotion, captions (on | off)
-  - **character**: name, emotion, captions (on | off)
+  - **narration**: emotion
+  - **character**: name, emotion
   - **image**: overlays, motion (${MOTION_EFFECTS.join(" | ")})
   - **animated_image**: videoPrompt (camera/subject motion description), duration (${DURATION_OPTIONS.join(" | ")}), overlays, motion (${MOTION_EFFECTS.join(" | ")})
   - **sound**: loops (number, default 1)

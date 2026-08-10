@@ -45,7 +45,7 @@ ${osmlLanguagePrompt(
   - The narration element is the primary voice of the story.
   - All narrative prose should be wrapped in narration XML tags. Example:
     <narration emotion="neutral">The sun was setting in the west, casting a warm glow on the forest.</narration>
-  - Supported attributes for narration tags are emotion and captions
+  - Supported attributes for narration tags are emotion and speed
 
   ### Character Dialogue XML Tags
   - Each character's entire dialogue is wrapped in character XML tags with required attributes being name and emotion. Example:
@@ -54,12 +54,11 @@ ${osmlLanguagePrompt(
   - Frequently use nonverbalisms. Example: <character name="Mia" emotion="happy">[laughter] That's the way I want it!</character>.
   - Allowed list of nonverbalisms: [laughter]. Do not use any other nonverbalisms.
   - Occasionally insert ellipsis (...) to indicate a pause or a break in the dialogue, or use exclamations (!) to indicate a strong emotion or action.
-	- Supported attributes for character tags are name, emotion, and captions
+	- Supported attributes for character tags are name, emotion, and speed
 
 	### Narration and Character XML Tags
 	- For both character and narration tags, the emotion attribute should be appropriately set to one of the following: ${TTS_EMOTIONS.join(", ")}.
 	- For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
-	- The optional captions attribute is "on" or "off" (default "on") and controls whether on-screen subtitle text is overlaid during the element's audio.
 
   ### Image XML Tags
   - Each scene should include an image XML tag that describes the current scene. Example:

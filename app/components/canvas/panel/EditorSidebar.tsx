@@ -8,12 +8,15 @@ import {
 	type IconComponent,
 	SlidersAlt,
 	SlidersAltFill,
+	TextBox,
+	TextBoxFill,
 } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { CaptionsPanel } from "./CaptionsPanel";
 import { LayoutPanel } from "./LayoutPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
 
-type PanelKey = "layout" | "properties";
+type PanelKey = "layout" | "captions" | "properties";
 
 const PANELS: Record<
 	PanelKey,
@@ -29,6 +32,12 @@ const PANELS: Record<
 		icon: Layout,
 		iconActive: Layout,
 		Panel: LayoutPanel,
+	},
+	captions: {
+		label: "Captions",
+		icon: TextBox,
+		iconActive: TextBoxFill,
+		Panel: CaptionsPanel,
 	},
 	properties: {
 		label: "Properties",
@@ -59,7 +68,7 @@ function RailItem({
 	);
 	const body = (
 		<>
-			<Icon className="h-5 w-5" />
+			<Icon className="h-4 w-4" />
 			<span className="hidden leading-tight lg:block">{label}</span>
 		</>
 	);

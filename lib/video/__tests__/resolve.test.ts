@@ -61,7 +61,9 @@ describe("resolveElements", () => {
 			}),
 		};
 
-		const resolved = resolveElements([wrap(elements)], (id) => snapshots[id]);
+		const resolved = resolveElements([wrap(elements)], (id) => snapshots[id], {
+			captionsEnabled: true,
+		});
 
 		expect(resolved).toHaveLength(2);
 		expect(resolved[0]).toEqual({
@@ -100,13 +102,17 @@ describe("resolveElements", () => {
 			nar1: makeSnapshot({ status: "idle", result: null }),
 		};
 
-		const resolved = resolveElements([wrap(elements)], (id) => snapshots[id]);
+		const resolved = resolveElements([wrap(elements)], (id) => snapshots[id], {
+			captionsEnabled: true,
+		});
 		expect(resolved).toHaveLength(1);
 		expect(resolved[0].id).toBe("img1");
 	});
 
 	it("returns empty for no elements", () => {
-		const resolved = resolveElements([], () => makeSnapshot());
+		const resolved = resolveElements([], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
 		expect(resolved).toEqual([]);
 	});
 
@@ -121,7 +127,9 @@ describe("resolveElements", () => {
 			"sound",
 		];
 		const elements = types.map((t, i) => makeElement(`el${i}`, t));
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
 
 		const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
 		expect(roleMap).toEqual({
@@ -151,7 +159,9 @@ describe("resolveElements", () => {
 			makeElement("s1", "sound", { loops: "4" }),
 			makeElement("s2", "sound"),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
 		expect(resolved[0].loops).toBe(4);
 		expect(resolved[1].loops).toBe(1);
 	});
@@ -161,7 +171,9 @@ describe("resolveElements", () => {
 			makeElement("s1", "sound", { loops: "0" }),
 			makeElement("s2", "sound", { loops: "not-a-number" }),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
 		expect(resolved[0].loops).toBe(1);
 		expect(resolved[1].loops).toBe(1);
 	});
@@ -172,7 +184,9 @@ describe("resolveElements", () => {
 			makeElement("s2", "music", { volume: "0" }),
 			makeElement("s3", "music"),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
 		expect(resolved[0].volume).toBe(3);
 		expect(resolved[1].volume).toBe(0);
 		expect(resolved[2].volume).toBe(10);
@@ -184,7 +198,9 @@ describe("resolveElements", () => {
 			makeElement("s2", "music", { volume: "42" }),
 			makeElement("s3", "music", { volume: "not-a-number" }),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
 		expect(resolved[0].volume).toBe(0);
 		expect(resolved[1].volume).toBe(10);
 		expect(resolved[2].volume).toBe(10);
@@ -196,7 +212,37 @@ describe("resolveElements", () => {
 			makeElement("nar1", "narration"),
 		];
 		const noResult = makeSnapshot({ status: "idle", result: null });
-		const resolved = resolveElements([wrap(elements)], () => noResult);
+		const resolved = resolveElements([wrap(elements)], () => noResult, {
+			captionsEnabled: true,
+		});
 		expect(resolved).toEqual([]);
+	});
+
+	describe("captions", () => {
+		const elements = [makeElement("nar1", "narration")];
+		const withTimestamps = () =>
+			makeSnapshot({
+				result: {
+					audioUrl: "https://example.com/nar.mp3",
+					durationSec: 8,
+					textTimestamps: [{ text: "hello", start: 0, end: 1 }],
+				},
+			});
+
+		it("attaches caption timestamps when captions are enabled project-wide", () => {
+			const resolved = resolveElements([wrap(elements)], withTimestamps, {
+				captionsEnabled: true,
+			});
+			expect(resolved[0].captionTimestamps).toEqual([
+				{ text: "hello", start: 0, end: 1 },
+			]);
+		});
+
+		it("drops caption timestamps when captions are disabled project-wide", () => {
+			const resolved = resolveElements([wrap(elements)], withTimestamps, {
+				captionsEnabled: false,
+			});
+			expect(resolved[0].captionTimestamps).toBeUndefined();
+		});
 	});
 });
