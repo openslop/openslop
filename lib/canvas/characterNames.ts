@@ -1,6 +1,8 @@
 import uniq from "lodash/uniq";
 import type { CanvasContentElement } from "./types";
 
+export const CHARACTERS_ATTR = "characters";
+
 /**
  * Parse the comma-separated `characters` element attribute into trimmed,
  * non-empty character names. Single source for the format so the delimiter and
@@ -15,7 +17,7 @@ export function parseCharacterNames(value: string | undefined): string[] {
 
 const CHARACTER_NAME_EXTRACTORS: Record<string, (value: string) => string[]> = {
 	name: (v) => [v.trim()],
-	characters: parseCharacterNames,
+	[CHARACTERS_ATTR]: parseCharacterNames,
 };
 
 export function getElementCharacterNames(

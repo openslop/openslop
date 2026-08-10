@@ -1,21 +1,27 @@
 import compact from "lodash/compact";
-import { parseCharacterNames } from "@/lib/canvas/characterNames";
+import {
+	CHARACTERS_ATTR,
+	parseCharacterNames,
+} from "@/lib/canvas/characterNames";
 import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { forCharacterAvatar } from "./characterAvatarNode";
 
-export type ParamsWithCharacters = { prompt: string; characters?: string };
+export type ParamsWithCharacters = {
+	prompt: string;
+	[CHARACTERS_ATTR]?: string;
+};
 
 /** Avatars arrive as dependency results, so this never races the jobs making them. */
 export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCharacters> {
 	return {
 		name: "character-references",
 		dependencies: (element) =>
-			parseCharacterNames(element.customAttributes?.characters).map(
+			parseCharacterNames(element.customAttributes?.[CHARACTERS_ATTR]).map(
 				forCharacterAvatar,
 			),
 		beforeGenerate(params, ctx?: PluginContext<ParamsWithCharacters>) {
-			const { characters, ...rest } = params;
+			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
 			if (!characters) return params;
 
 			const referenceImages = compact(

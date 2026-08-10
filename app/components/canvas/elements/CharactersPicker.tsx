@@ -10,7 +10,10 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { getElementCharacterNames } from "@/lib/canvas/characterNames";
+import {
+	CHARACTERS_ATTR,
+	getElementCharacterNames,
+} from "@/lib/canvas/characterNames";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useProject } from "@/lib/project/useProject";
@@ -27,7 +30,7 @@ function writeCharacters(
 	names: string[],
 ): void {
 	const joined = names.join(", ");
-	updateElementAttrs(editor, element, { characters: joined || null });
+	updateElementAttrs(editor, element, { [CHARACTERS_ATTR]: joined || null });
 }
 
 export function toggleCharacter(
