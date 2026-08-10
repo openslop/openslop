@@ -3,16 +3,12 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ResolvedElement } from "./types";
-import {
-	areCaptionsEnabled,
-	getLoops,
-	getMotion,
-	getVolume,
-} from "./elementAttributes";
+import { getLoops, getMotion, getVolume } from "./elementAttributes";
 
 export function resolveElements(
 	elements: CanvasElement[],
 	getSnapshot: (id: string) => ElementSnapshot,
+	{ captionsEnabled }: { captionsEnabled: boolean },
 ): ResolvedElement[] {
 	const resolved: ResolvedElement[] = [];
 
@@ -26,7 +22,7 @@ export function resolveElements(
 
 		const timestamps = snapshot.result.textTimestamps;
 		const captionTimestamps =
-			areCaptionsEnabled(el) && timestamps?.length ? timestamps : undefined;
+			captionsEnabled && timestamps?.length ? timestamps : undefined;
 
 		resolved.push({
 			id: el.id,

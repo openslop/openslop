@@ -52,6 +52,7 @@ const VideoSettingsSchema = z.object({
 	transitionType: z.enum(TRANSITION_TYPES).optional(),
 	aspectRatio: z.enum(ASPECT_RATIOS).optional(),
 	length: z.enum(VIDEO_LENGTHS).optional(),
+	captions: z.boolean().optional(),
 });
 
 export const MODES = ["story", "script", "template"] as const;
