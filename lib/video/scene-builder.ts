@@ -7,6 +7,7 @@ import type {
 } from "./types";
 import { DEFAULT_CONFIG } from "./types";
 import { type AspectRatio, ASPECT_RATIO_DIMENSIONS } from "./aspectRatio";
+import { DEFAULT_CAPTION_STYLE, type CaptionStyle } from "./captionStyle";
 import { toFrames, toSeconds } from "./frames";
 import {
 	DEFAULT_TRANSITION,
@@ -17,6 +18,7 @@ import {
 export type BuildLayoutOptions = Partial<VideoConfig> & {
 	transitionType?: TransitionType;
 	aspectRatio?: AspectRatio;
+	captionStyle?: CaptionStyle;
 };
 
 const MIN_DURATION_SEC = 1;
@@ -167,5 +169,6 @@ export function buildVideoLayout(
 		),
 		transitionType,
 		transitionDurationSec,
+		captionStyle: options?.captionStyle ?? DEFAULT_CAPTION_STYLE,
 	};
 }

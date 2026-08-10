@@ -4,6 +4,7 @@ import type {
 	LayerType,
 } from "@/lib/canvas/types";
 import type { TextTimestamp } from "@/lib/connectors/types";
+import type { CaptionStyle } from "./captionStyle";
 import type { MotionEffect } from "./motionEffects";
 import type { TransitionType } from "./transitions";
 
@@ -36,6 +37,7 @@ export type VideoLayout = {
 	totalFrames: number;
 	transitionType: TransitionType;
 	transitionDurationSec: number;
+	captionStyle: CaptionStyle;
 };
 
 export const COMPOSITION_ID = "VideoComposition";

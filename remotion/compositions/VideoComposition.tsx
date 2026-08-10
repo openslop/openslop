@@ -13,6 +13,7 @@ import type {
 	Sequence as SeqType,
 	ResolvedElement,
 } from "@/lib/video/types";
+import type { CaptionStyle } from "@/lib/video/captionStyle";
 import { toFrames } from "@/lib/video/frames";
 import {
 	AUDIO_FADE_SEC,
@@ -34,7 +35,13 @@ const coverStyle: React.CSSProperties = {
 
 const blackBg: React.CSSProperties = { backgroundColor: "black" };
 
-function AudioSequence({ element }: { element: ResolvedElement }) {
+function AudioSequence({
+	element,
+	captionStyle,
+}: {
+	element: ResolvedElement;
+	captionStyle: CaptionStyle;
+}) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
 	const hasFadeEnvelope = element.role === "background";
@@ -53,14 +60,23 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 						durationInFrames - toFrames(TRANSITION_DURATION_SEC, fps),
 					)}
 				>
-					<Captions timestamps={element.captionTimestamps} />
+					<Captions
+						timestamps={element.captionTimestamps}
+						style={captionStyle}
+					/>
 				</Sequence>
 			)}
 		</>
 	);
 }
 
-function SequenceContent({ element }: { element: ResolvedElement }) {
+function SequenceContent({
+	element,
+	captionStyle,
+}: {
+	element: ResolvedElement;
+	captionStyle: CaptionStyle;
+}) {
 	switch (element.layer) {
 		case "visual":
 			return (
@@ -77,17 +93,23 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 				</MotionLayer>
 			);
 		case "audio":
-			return <AudioSequence element={element} />;
+			return <AudioSequence element={element} captionStyle={captionStyle} />;
 		default:
 			return null;
 	}
 }
 
-function SeriesEntry({ seq }: { seq: SeqType }) {
+function SeriesEntry({
+	seq,
+	captionStyle,
+}: {
+	seq: SeqType;
+	captionStyle: CaptionStyle;
+}) {
 	if (!seq.element) {
 		return <AbsoluteFill style={blackBg} />;
 	}
-	return <SequenceContent element={seq.element} />;
+	return <SequenceContent element={seq.element} captionStyle={captionStyle} />;
 }
 
 export const VideoComposition: React.FC<VideoLayout> = ({
@@ -98,6 +120,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 	height,
 	transitionType,
 	transitionDurationSec,
+	captionStyle,
 }) => {
 	const transitionFrames = toFrames(transitionDurationSec, fps);
 	const transitionTiming = useMemo(
@@ -122,11 +145,11 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						durationInFrames={toFrames(seq.duration, fps)}
 						premountFor={toFrames(VIDEO_PREMOUNT_SEC, fps)}
 					>
-						<SeriesEntry seq={seq} />
+						<SeriesEntry seq={seq} captionStyle={captionStyle} />
 					</TransitionSeries.Sequence>
 				</Fragment>
 			)),
-		[fps, presentation, series, transitionTiming],
+		[captionStyle, fps, presentation, series, transitionTiming],
 	);
 	const layeredSequenceNodes = useMemo(
 		() =>
@@ -139,12 +162,15 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 							durationInFrames={toFrames(seq.duration, fps)}
 							premountFor={fps}
 						>
-							<SequenceContent element={seq.element} />
+							<SequenceContent
+								element={seq.element}
+								captionStyle={captionStyle}
+							/>
 						</Sequence>
 					) : null,
 				),
 			),
-		[fps, sequences],
+		[captionStyle, fps, sequences],
 	);
 
 	return (

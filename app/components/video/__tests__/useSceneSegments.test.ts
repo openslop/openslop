@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { SceneElement } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/video/frames";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
 import {
 	buildSceneSegments,
 	buildSequenceIndex,
@@ -137,6 +138,7 @@ const layout = (transitionDurationSec = 0): VideoLayout => ({
 	height: 1080,
 	totalDurationSec: 0,
 	totalFrames: 0,
+	captionStyle: DEFAULT_CAPTION_STYLE,
 	transitionType: "none",
 	transitionDurationSec,
 });
