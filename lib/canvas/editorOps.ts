@@ -1,29 +1,57 @@
-import { Editor, Element, type NodeEntry, type Path, Transforms } from "slate";
-import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
+import {
+	Editor,
+	Node,
+	Text,
+	type NodeEntry,
+	type Path,
+	Transforms,
+} from "slate";
+import {
+	SCENE_TYPE,
+	type CanvasContentElement,
+	type CanvasElement,
+} from "@/lib/canvas/types";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
-import { isContentElement } from "./guards";
+import { isCanvasElementType } from "./guards";
+
+/**
+ * The canvas is two levels deep — scenes hold content elements, content holds
+ * text — so walking it directly yields elements in document order without
+ * `Editor.nodes` descending into every text leaf and allocating a path per
+ * visit. Id lookups sit on the streaming-sync and drag-over hot paths, where
+ * that traversal was the whole cost.
+ */
+function findCanvasElement(
+	editor: Editor,
+	match: (node: CanvasElement) => boolean,
+): NodeEntry<CanvasElement> | null {
+	for (const [index, node] of editor.children.entries()) {
+		if (Text.isText(node)) continue;
+		if (match(node)) return [node, [index]];
+		if (node.type !== SCENE_TYPE) continue;
+		for (const [childIndex, child] of node.children.entries()) {
+			if (match(child)) return [child, [index, childIndex]];
+		}
+	}
+	return null;
+}
 
 /** Any canvas element by id — scenes included. Use {@link findNodeById} when only content will do. */
 export function findElementById(
 	editor: Editor,
 	id: string,
 ): NodeEntry<CanvasElement> | null {
-	const [entry] = Editor.nodes<CanvasElement>(editor, {
-		at: [],
-		match: (n) => Element.isElement(n) && n.id === id,
-	});
-	return entry ?? null;
+	return findCanvasElement(editor, (n) => n.id === id);
 }
 
 export function findNodeById(
 	editor: Editor,
 	id: string,
 ): NodeEntry<CanvasContentElement> | null {
-	const [entry] = Editor.nodes<CanvasContentElement>(editor, {
-		at: [],
-		match: (n) => isContentElement(n) && n.id === id,
-	});
-	return entry ?? null;
+	return findCanvasElement(
+		editor,
+		(n) => n.id === id && isCanvasElementType(n.type),
+	) as NodeEntry<CanvasContentElement> | null;
 }
 
 /**
@@ -40,7 +68,7 @@ export function updateNodeText(
 	path: Path,
 	newText: string,
 ): void {
-	const currentText = Editor.string(editor, path);
+	const currentText = Node.string(Node.get(editor, path));
 	const nextText = ZERO_WIDTH_SPACE + withoutCaretMarker(newText);
 	if (currentText === nextText) return;
 

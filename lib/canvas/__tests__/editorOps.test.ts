@@ -58,6 +58,15 @@ describe("findNodeById", () => {
 		const editor = makeEditor([scene([content("narration", "n1")], "s1")]);
 		expect(findNodeById(editor, "s1")).toBeNull();
 	});
+
+	it("finds content sitting at the top level before normalization wraps it", () => {
+		const editor = createEditor();
+		editor.children = [
+			scene([content("narration", "n1")], "s1"),
+			content("image", "img1"),
+		];
+		expect(findNodeById(editor, "img1")?.[1]).toEqual([1]);
+	});
 });
 
 describe("findElementById", () => {
