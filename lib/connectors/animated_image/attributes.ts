@@ -1,7 +1,9 @@
 import { AttributeSchema } from "../attributes/schema";
 import { durationDef, motionDef } from "../attributes/common";
+import { referenceImagesDef } from "../attributes/referenceImages";
 
 export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
+	referenceImagesDef,
 	{
 		key: "videoPrompt",
 		label: "Video prompt",

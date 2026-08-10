@@ -70,16 +70,28 @@ function CharacterAssetTile({
 	);
 }
 
-export function ReferenceAssetTiles() {
-	const referenceImages = useProject((s) => s.referenceImages);
-	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
-	return referenceImages.map((url, index) => (
+export function ReferenceTiles({
+	urls,
+	onRemove,
+}: {
+	urls: string[];
+	onRemove: (index: number) => void;
+}) {
+	return urls.map((url, index) => (
 		<AssetTile
-			key={`reference:${url}`}
+			key={`reference:${index}:${url}`}
 			name={`Reference ${index + 1}`}
 			previewUrl={url}
 			Icon={Image}
-			onRemove={() => removeReferenceImage(index)}
+			onRemove={() => onRemove(index)}
 		/>
 	));
+}
+
+export function ReferenceAssetTiles() {
+	const referenceImages = useProject((s) => s.referenceImages);
+	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
+	return (
+		<ReferenceTiles urls={referenceImages} onRemove={removeReferenceImage} />
+	);
 }

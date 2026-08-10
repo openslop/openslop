@@ -4,6 +4,7 @@ import { SelectMenu } from "@/components/ui/select-menu";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 
 const UNSET = "—";
@@ -59,6 +60,17 @@ export function AttributeBadge({
 			<span className={PILL} title={tooltip}>
 				{labeled}
 			</span>
+		);
+	}
+
+	if (spec.edit.kind === "images") {
+		return (
+			<ReferenceImagesPopover
+				element={element}
+				attrKey={attrKey}
+				label={spec.label}
+				hideLabel={hideLabel}
+			/>
 		);
 	}
 

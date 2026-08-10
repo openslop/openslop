@@ -32,6 +32,21 @@ describe("preservedAttributes", () => {
 		});
 	});
 
+	it("carries a reference image override, including an empty one", () => {
+		const source = element("image", {
+			referenceImagesOverride: "https://img/a.png",
+		});
+		expect(preservedAttributes(source, "animated_image")).toEqual({
+			referenceImagesOverride: "https://img/a.png",
+		});
+		expect(
+			preservedAttributes(
+				element("image", { referenceImagesOverride: "" }),
+				"animated_image",
+			),
+		).toEqual({ referenceImagesOverride: "" });
+	});
+
 	it("returns an empty object when there are no custom attributes", () => {
 		expect(preservedAttributes(element("image"), "animated_image")).toEqual({});
 	});
