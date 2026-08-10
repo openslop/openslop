@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { CaptionWord } from "@/lib/video/captionLayout";
+import { captionFontStack } from "@/lib/video/captionFonts";
 import {
-	CAPTION_FONT_STACKS,
 	type CaptionAlignX,
 	type CaptionAlignY,
 	type CaptionCasing,
@@ -30,7 +30,6 @@ const TRANSFORM: Record<CaptionCasing, CSSProperties["textTransform"]> = {
 /** Border width is a 0-100 dial; this maps it onto a legible em range. */
 const BORDER_EM_PER_UNIT = 0.0025;
 
-// A soft drop shadow under the outline keeps captions legible over busy frames.
 const DROP_SHADOW = "0 0.08em 0.2em rgba(0, 0, 0, 0.55)";
 
 /**
@@ -40,8 +39,8 @@ const DROP_SHADOW = "0 0.08em 0.2em rgba(0, 0, 0, 0.55)";
  */
 function outline(width: number, color: string): CSSProperties {
 	return {
-		// The stroke straddles the glyph edge and the fill covers its inner half,
-		// so doubling the width keeps the visible outline at the dialled size.
+		// The fill covers the stroke's inner half, so the width is doubled to keep
+		// the visible outline at the dialled size.
 		WebkitTextStrokeWidth: `${width * BORDER_EM_PER_UNIT * 2}em`,
 		WebkitTextStrokeColor: color,
 		paintOrder: "stroke fill",
@@ -58,9 +57,14 @@ function wordStyle(style: CaptionTextStyle, scale: number): CSSProperties {
 		textDecoration: style.underline ? "underline" : "none",
 		...(style.border && outline(style.border.width, style.border.color)),
 		backgroundColor: style.background ?? undefined,
-		padding: style.background ? "0.05em 0.2em" : undefined,
-		borderRadius: style.background ? "0.12em" : undefined,
-		overflowWrap: "break-word",
+		// The padding is unconditional and carries the word spacing, so switching
+		// a background on changes only the paint and never the layout.
+		padding: "0.05em 0.11em",
+		borderRadius: "0.12em",
+		// `anywhere`, not `break-word`: only the former shrinks the span's
+		// min-content size, so a word wider than the frame wraps instead of
+		// overflowing this flex item.
+		overflowWrap: "anywhere",
 	};
 }
 
@@ -99,8 +103,8 @@ export function CaptionOverlay({
 					flexWrap: "wrap",
 					justifyContent: ALIGN_X[style.alignX],
 					alignItems: "baseline",
-					gap: "0.1em 0.28em",
-					fontFamily: CAPTION_FONT_STACKS[style.font],
+					gap: "0.1em 0.06em",
+					fontFamily: captionFontStack(style.font),
 					fontSize: fontSizePx,
 					letterSpacing: "-0.01em",
 					lineHeight: 1.25,

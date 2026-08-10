@@ -13,7 +13,6 @@ import type {
 	Sequence as SeqType,
 	ResolvedElement,
 } from "@/lib/video/types";
-import type { CaptionStyle } from "@/lib/video/captionStyle";
 import { toFrames } from "@/lib/video/frames";
 import {
 	AUDIO_FADE_SEC,
@@ -24,7 +23,8 @@ import { getPresentation } from "@/lib/video/transitionPresentations";
 import { audioVolume } from "@/lib/video/audioVolume";
 import { volumeToGain } from "@/lib/video/elementAttributes";
 import { ELEMENT_TYPES } from "@/lib/canvas/types";
-import { Captions } from "../components/Captions";
+import { CaptionStyleProvider, Captions } from "../components/Captions";
+import "../loadCaptionFonts";
 import { MotionLayer } from "../components/MotionLayer";
 
 const coverStyle: React.CSSProperties = {
@@ -35,13 +35,7 @@ const coverStyle: React.CSSProperties = {
 
 const blackBg: React.CSSProperties = { backgroundColor: "black" };
 
-function AudioSequence({
-	element,
-	captionStyle,
-}: {
-	element: ResolvedElement;
-	captionStyle: CaptionStyle;
-}) {
+function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
 	const hasFadeEnvelope = element.role === "background";
@@ -60,23 +54,14 @@ function AudioSequence({
 						durationInFrames - toFrames(TRANSITION_DURATION_SEC, fps),
 					)}
 				>
-					<Captions
-						timestamps={element.captionTimestamps}
-						style={captionStyle}
-					/>
+					<Captions timestamps={element.captionTimestamps} />
 				</Sequence>
 			)}
 		</>
 	);
 }
 
-function SequenceContent({
-	element,
-	captionStyle,
-}: {
-	element: ResolvedElement;
-	captionStyle: CaptionStyle;
-}) {
+function SequenceContent({ element }: { element: ResolvedElement }) {
 	switch (element.layer) {
 		case "visual":
 			return (
@@ -93,23 +78,17 @@ function SequenceContent({
 				</MotionLayer>
 			);
 		case "audio":
-			return <AudioSequence element={element} captionStyle={captionStyle} />;
+			return <AudioSequence element={element} />;
 		default:
 			return null;
 	}
 }
 
-function SeriesEntry({
-	seq,
-	captionStyle,
-}: {
-	seq: SeqType;
-	captionStyle: CaptionStyle;
-}) {
+function SeriesEntry({ seq }: { seq: SeqType }) {
 	if (!seq.element) {
 		return <AbsoluteFill style={blackBg} />;
 	}
-	return <SequenceContent element={seq.element} captionStyle={captionStyle} />;
+	return <SequenceContent element={seq.element} />;
 }
 
 export const VideoComposition: React.FC<VideoLayout> = ({
@@ -145,11 +124,11 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						durationInFrames={toFrames(seq.duration, fps)}
 						premountFor={toFrames(VIDEO_PREMOUNT_SEC, fps)}
 					>
-						<SeriesEntry seq={seq} captionStyle={captionStyle} />
+						<SeriesEntry seq={seq} />
 					</TransitionSeries.Sequence>
 				</Fragment>
 			)),
-		[captionStyle, fps, presentation, series, transitionTiming],
+		[fps, presentation, series, transitionTiming],
 	);
 	const layeredSequenceNodes = useMemo(
 		() =>
@@ -162,21 +141,20 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 							durationInFrames={toFrames(seq.duration, fps)}
 							premountFor={fps}
 						>
-							<SequenceContent
-								element={seq.element}
-								captionStyle={captionStyle}
-							/>
+							<SequenceContent element={seq.element} />
 						</Sequence>
 					) : null,
 				),
 			),
-		[captionStyle, fps, sequences],
+		[fps, sequences],
 	);
 
 	return (
-		<AbsoluteFill style={blackBg}>
-			<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
-			{layeredSequenceNodes}
-		</AbsoluteFill>
+		<CaptionStyleProvider value={captionStyle}>
+			<AbsoluteFill style={blackBg}>
+				<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
+				{layeredSequenceNodes}
+			</AbsoluteFill>
+		</CaptionStyleProvider>
 	);
 };

@@ -22,17 +22,26 @@ function useMeasuredWidth(): [(node: HTMLDivElement | null) => void, number] {
 	return [ref, width];
 }
 
-/** The caption at true scale inside a frame of the project's aspect ratio. */
+/**
+ * The caption at true scale inside a frame of the project's aspect ratio. It
+ * plays on hover like the preset thumbnails, so an idle panel holds still.
+ */
 export function CaptionPreview({ style }: { style: CaptionStyle }) {
 	const aspectRatio = useAspectRatio();
 	const [ref, available] = useMeasuredWidth();
+	const [playing, setPlaying] = useState(false);
 	const output = ASPECT_RATIO_DIMENSIONS[aspectRatio].output;
 	const scale = Math.min(available / output.width, MAX_HEIGHT / output.height);
 	const height = Math.round(output.height * scale);
-	const activeIndex = useCaptionCycle(CAPTION_SAMPLE_WORDS.length, true);
+	const activeIndex = useCaptionCycle(CAPTION_SAMPLE_WORDS.length, playing);
 
 	return (
-		<div ref={ref} className="flex justify-center">
+		<div
+			ref={ref}
+			onPointerEnter={() => setPlaying(true)}
+			onPointerLeave={() => setPlaying(false)}
+			className="flex justify-center"
+		>
 			<CaptionStage
 				style={style}
 				words={CAPTION_SAMPLE_WORDS}

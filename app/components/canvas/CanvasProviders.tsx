@@ -8,6 +8,7 @@ import { RenderProvider } from "../video/RenderProvider";
 import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
+import { CaptionFonts } from "./CaptionFonts";
 import { RefineProvider } from "./RefineProvider";
 
 /**
@@ -26,6 +27,7 @@ export function CanvasProviders({
 }) {
 	return (
 		<RenderProvider>
+			<CaptionFonts />
 			<VideoLayoutProvider editor={editor} layoutKey={layoutKey}>
 				<PlayerControlProvider>
 					<ActiveSceneProvider>

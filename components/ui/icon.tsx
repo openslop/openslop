@@ -64,7 +64,6 @@ export const CornerDownLeft = icon("corner-down-left");
 export const Crosshair = icon("crosshair");
 export const Download = icon("download");
 export const Eye = icon("eye");
-export const Eyedropper = icon("eyedropper");
 export const EyeOff = icon("eye-off");
 export const GripVertical = icon("grabber");
 export const Home = icon("home");

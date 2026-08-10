@@ -55,6 +55,10 @@ export function NumberScrubber({
 		"flex h-6 items-center gap-1 rounded-md bg-media-toggle-bg px-2 text-media-toggle-fg transition-colors focus-ring",
 		className,
 	);
+	// Reserving the widest value keeps the box one size, whether it is showing
+	// three digits, one, or an input.
+	const valueWidth = `${String(max).length + suffix.length}ch`;
+	const valueText = "text-right font-mono text-label-xs tabular-nums";
 
 	if (draft !== null) {
 		const commit = (next: string) => {
@@ -63,20 +67,24 @@ export function NumberScrubber({
 			setDraft(null);
 		};
 		return (
-			<input
-				autoFocus
-				aria-label={label}
-				inputMode="decimal"
-				value={draft}
-				onFocus={(event) => event.currentTarget.select()}
-				onChange={(event) => setDraft(event.target.value)}
-				onBlur={(event) => commit(event.target.value)}
-				onKeyDown={(event) => {
-					if (event.key === "Enter") commit(event.currentTarget.value);
-					if (event.key === "Escape") setDraft(null);
-				}}
-				className={cn(shell, "w-14 font-mono text-label-xs tabular-nums")}
-			/>
+			<div className={cn(shell, "ring-2 ring-ring")}>
+				{Icon && <Icon className="h-3.5 w-3.5" />}
+				<input
+					autoFocus
+					aria-label={label}
+					inputMode="decimal"
+					value={draft}
+					style={{ width: valueWidth }}
+					onFocus={(event) => event.currentTarget.select()}
+					onChange={(event) => setDraft(event.target.value)}
+					onBlur={(event) => commit(event.target.value)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter") commit(event.currentTarget.value);
+						if (event.key === "Escape") setDraft(null);
+					}}
+					className={cn(valueText, "bg-transparent outline-none")}
+				/>
+			</div>
 		);
 	}
 
@@ -135,7 +143,7 @@ export function NumberScrubber({
 				)}
 			>
 				{Icon && <Icon className="h-3.5 w-3.5" />}
-				<span className="font-mono text-label-xs tabular-nums">
+				<span className={valueText} style={{ minWidth: valueWidth }}>
 					{value}
 					{suffix}
 				</span>

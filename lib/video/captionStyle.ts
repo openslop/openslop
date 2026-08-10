@@ -1,34 +1,5 @@
 import { z } from "zod";
-
-export const CAPTION_FONTS = [
-	"sans",
-	"condensed",
-	"serif",
-	"mono",
-	"rounded",
-] as const;
-
-export type CaptionFont = (typeof CAPTION_FONTS)[number];
-
-/**
- * Stacks rather than webfonts: the Lambda renderer only has the fonts its
- * headless Chrome ships with, so a caption font has to degrade on its own.
- */
-export const CAPTION_FONT_LABELS: Record<CaptionFont, string> = {
-	sans: "Sans",
-	condensed: "Condensed",
-	serif: "Serif",
-	mono: "Mono",
-	rounded: "Rounded",
-};
-
-export const CAPTION_FONT_STACKS: Record<CaptionFont, string> = {
-	sans: '"Helvetica Neue", Helvetica, Arial, system-ui, sans-serif',
-	condensed: '"Arial Narrow", "Liberation Sans Narrow", Impact, sans-serif',
-	serif: 'Georgia, "Times New Roman", Times, serif',
-	mono: 'ui-monospace, "DejaVu Sans Mono", "Courier New", monospace',
-	rounded: '"Trebuchet MS", Verdana, system-ui, sans-serif',
-};
+import { CAPTION_FONTS, type CaptionFont } from "./captionFonts";
 
 export const CAPTION_CASINGS = ["none", "upper", "lower"] as const;
 export type CaptionCasing = (typeof CAPTION_CASINGS)[number];
@@ -80,7 +51,7 @@ const captionTextStyleSchema = z.object({
 export type CaptionTextStyle = z.infer<typeof captionTextStyleSchema>;
 
 export const CaptionStyleSchema = z.object({
-	font: z.enum(CAPTION_FONTS),
+	font: z.enum(CAPTION_FONTS as [CaptionFont, ...CaptionFont[]]),
 	/**
 	 * Pixels at {@link CAPTION_BASE_HEIGHT}. Renderers scale it by the real frame
 	 * height, so one value covers every output resolution.
@@ -110,7 +81,7 @@ const BLACK = "#000000";
 export const DEFAULT_BORDER_WIDTH = 25;
 
 export const DEFAULT_CAPTION_STYLE: CaptionStyle = {
-	font: "sans",
+	font: "montserrat",
 	fontSize: 70,
 	casing: "upper",
 	alignX: "center",

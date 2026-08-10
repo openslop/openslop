@@ -10,10 +10,10 @@ import {
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import {
 	CAPTION_FONTS,
-	CAPTION_FONT_LABELS,
-	CAPTION_FONT_STACKS,
+	captionFontLabel,
+	captionFontStack,
 	type CaptionFont,
-} from "@/lib/video/captionStyle";
+} from "@/lib/video/captionFonts";
 
 /** Full-width font picker; each row is set in the face it selects. */
 export function CaptionFontField({
@@ -26,10 +26,8 @@ export function CaptionFontField({
 	const [open, setOpen] = useState(false);
 	const [query, setQuery] = useState("");
 
-	const matches = CAPTION_FONTS.filter((font) =>
-		CAPTION_FONT_LABELS[font]
-			.toLowerCase()
-			.includes(query.trim().toLowerCase()),
+	const matches = CAPTION_FONTS.filter((font: CaptionFont) =>
+		captionFontLabel(font).toLowerCase().includes(query.trim().toLowerCase()),
 	);
 
 	return (
@@ -45,15 +43,14 @@ export function CaptionFontField({
 					aria-label="Caption font"
 					className="flex h-8 w-full items-center justify-between gap-2 rounded-md bg-input px-3 text-body text-foreground transition-colors hover:bg-surface-hover focus-ring"
 				>
-					<span style={{ fontFamily: CAPTION_FONT_STACKS[value] }}>
-						{CAPTION_FONT_LABELS[value]}
+					<span style={{ fontFamily: captionFontStack(value) }}>
+						{captionFontLabel(value)}
 					</span>
 					<ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent
 				align="start"
-				// Match the trigger so the list reads as one full-width control.
 				className="w-[var(--radix-popover-trigger-width)] min-w-0 p-1"
 			>
 				<div className="flex items-center gap-2 rounded-md bg-input px-2 focus-within:ring-2 focus-within:ring-ring">
@@ -68,7 +65,7 @@ export function CaptionFontField({
 					/>
 				</div>
 				<ul className="mt-1 max-h-56 overflow-y-auto">
-					{matches.map((font) => (
+					{matches.map((font: CaptionFont) => (
 						<li key={font}>
 							<button
 								type="button"
@@ -79,8 +76,8 @@ export function CaptionFontField({
 								aria-pressed={font === value}
 								className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-body text-foreground transition-colors hover:bg-surface-hover focus-ring"
 							>
-								<span style={{ fontFamily: CAPTION_FONT_STACKS[font] }}>
-									{CAPTION_FONT_LABELS[font]}
+								<span style={{ fontFamily: captionFontStack(font) }}>
+									{captionFontLabel(font)}
 								</span>
 								{font === value && (
 									<Check className="h-3.5 w-3.5 shrink-0 text-accent" />

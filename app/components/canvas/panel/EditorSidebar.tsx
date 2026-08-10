@@ -117,8 +117,6 @@ function EditorSidebarComponent() {
 				})}
 			</nav>
 
-			{/* The scrollbar gutter stays reserved so the panel keeps one width
-			    whether or not its content overflows. */}
 			{current && HeaderIcon && Panel && (
 				<div className="flex w-60 shrink-0 flex-col gap-3 overflow-y-auto [scrollbar-gutter:stable] pr-2 pt-4 pb-3 text-panel-fg">
 					<div className="flex items-center gap-2 px-1">

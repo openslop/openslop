@@ -26,7 +26,6 @@ div.react-colorful {
 	height: 0.625rem;
 }
 
-/* Sized to sit inside the track rather than straddle it. */
 .react-colorful .react-colorful__hue-pointer,
 .react-colorful .react-colorful__alpha-pointer {
 	width: 0.75rem;
@@ -34,5 +33,5 @@ div.react-colorful {
 }
 
 .react-colorful .react-colorful__pointer {
-	border-width: 2px;
+	border-width: 1px;
 }

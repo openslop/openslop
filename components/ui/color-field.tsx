@@ -1,43 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
 import { CloseButton } from "@/components/ui/close-button";
-import { Eyedropper } from "@/components/ui/icon";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { alphaPercent, withAlphaPercent } from "@/lib/color/hexAlpha";
 import { cn } from "@/lib/utils";
 import "./color-field.css";
 
-// Chrome-only today, so it isn't in lib.dom yet.
-declare global {
-	interface Window {
-		EyeDropper?: new () => { open: () => Promise<{ sRGBHex: string }> };
-	}
-}
-
 const CHECKERBOARD =
 	"repeating-conic-gradient(currentColor 0% 25%, transparent 0% 50%) 50% / 8px 8px";
-
-/** Opacity lives in the trailing pair of an 8-digit hex. */
-const OPAQUE = "ff";
-
-const alphaPercent = (color: string) => {
-	const pair = color.length === 9 ? color.slice(7) : OPAQUE;
-	return Math.round((Number.parseInt(pair, 16) / 255) * 100);
-};
-
-const withAlphaPercent = (color: string, percent: number) => {
-	const clamped = Math.min(100, Math.max(0, percent));
-	const pair = Math.round((clamped / 100) * 255)
-		.toString(16)
-		.padStart(2, "0");
-	return `${color.slice(0, 7)}${pair}`;
-};
 
 function Swatch({
 	color,
@@ -54,44 +31,6 @@ function Swatch({
 			)}
 			style={color ? { backgroundColor: color } : { background: CHECKERBOARD }}
 		/>
-	);
-}
-
-/** Picks a color from the screen where the browser supports it. */
-function EyedropperButton({
-	onPick,
-	onPickingChange,
-}: {
-	onPick: (color: string) => void;
-	onPickingChange: (picking: boolean) => void;
-}) {
-	const [supported] = useState(
-		() => typeof window !== "undefined" && Boolean(window.EyeDropper),
-	);
-	if (!supported) return null;
-
-	return (
-		<SimpleTooltip label="Pick a color from the screen">
-			<button
-				type="button"
-				aria-label="Pick a color from the screen"
-				onClick={async () => {
-					const eyeDropper = window.EyeDropper;
-					if (!eyeDropper) return;
-					onPickingChange(true);
-					try {
-						onPick((await new eyeDropper().open()).sRGBHex);
-					} catch {
-						// The picker was dismissed; leave the color as it was.
-					} finally {
-						onPickingChange(false);
-					}
-				}}
-				className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground focus-ring"
-			>
-				<Eyedropper className="h-4 w-4" />
-			</button>
-		</SimpleTooltip>
 	);
 }
 
@@ -115,7 +54,6 @@ export function ColorField({
 	emptyLabel?: string;
 }) {
 	const [open, setOpen] = useState(false);
-	const picking = useRef(false);
 	const color = value ?? "#ffffff";
 
 	// The picker caches its own HSVA and re-syncs only when it judges the
@@ -128,19 +66,11 @@ export function ColorField({
 	};
 
 	return (
-		<Popover
-			open={open}
-			// Picking from the screen reads as an outside click, which would
-			// otherwise tear the picker down mid-pick.
-			onOpenChange={(next) => {
-				if (!next && picking.current) return;
-				setOpen(next);
-			}}
-		>
+		<Popover open={open} onOpenChange={setOpen}>
 			<SimpleTooltip label={label}>
 				<PopoverTrigger
 					aria-label={label}
-					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full focus-ring"
+					className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-media-toggle-hover-bg focus-ring"
 				>
 					<Swatch color={value} className="h-5 w-5" />
 				</PopoverTrigger>
@@ -154,12 +84,6 @@ export function ColorField({
 				<HexAlphaColorPicker key={syncKey} color={color} onChange={onChange} />
 
 				<div className="mt-3 flex items-center gap-2">
-					<EyedropperButton
-						onPick={setExternal}
-						onPickingChange={(next) => {
-							picking.current = next;
-						}}
-					/>
 					<HexColorInput
 						color={color}
 						onChange={setExternal}
@@ -196,7 +120,7 @@ export function ColorField({
 									setOpen(false);
 								}}
 								className={cn(
-									"flex h-6 w-6 items-center justify-center rounded-full focus-ring",
+									"flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover focus-ring",
 									value === null && "ring-2 ring-accent",
 								)}
 							>
@@ -212,7 +136,7 @@ export function ColorField({
 							aria-pressed={value === swatch}
 							onClick={() => setExternal(swatch)}
 							className={cn(
-								"flex h-6 w-6 items-center justify-center rounded-full focus-ring",
+								"flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover focus-ring",
 								value === swatch && "ring-2 ring-accent",
 							)}
 						>

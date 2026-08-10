@@ -40,7 +40,7 @@ const REVEAL_OPTIONS: MediaToggleOption<CaptionReveal>[] = [
 const CASE_OPTIONS: MediaToggleOption<CaptionCasing>[] = [
 	{ value: "none", label: "Standard case", text: "Ab" },
 	{ value: "upper", label: "Uppercase", text: "AB" },
-	{ value: "lower", label: "Lowercase", text: "ag" },
+	{ value: "lower", label: "Lowercase", text: "ab" },
 ];
 
 const ALIGN_X_OPTIONS: MediaToggleOption<CaptionAlignX>[] = [
@@ -95,7 +95,6 @@ export function CaptionsPanel() {
 							<NumberScrubber
 								label="Text size"
 								tooltip="Text size"
-								// Sits beside the font dropdown, so it takes the taller field height.
 								className="h-8"
 								icon={TextSize}
 								value={style.fontSize}

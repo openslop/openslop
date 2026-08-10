@@ -1,18 +1,21 @@
 import { useMemo } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { CaptionOverlay } from "@/components/captions/CaptionOverlay";
+import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import type { TextTimestamp } from "@/lib/connectors/types";
 import { activeWordIndex, captionWordsAt } from "@/lib/video/captionLayout";
 import { captionFontSizePx, type CaptionStyle } from "@/lib/video/captionStyle";
 import { toSeconds } from "@/lib/video/frames";
 
-export function Captions({
-	timestamps,
-	style,
-}: {
-	timestamps: TextTimestamp[];
-	style: CaptionStyle;
-}) {
+// Caption styling applies to every caption in the composition, so it rides a
+// provider rather than threading through the sequence layers that never read it.
+const [CaptionStyleContext, useCaptionStyle] =
+	createRequiredContext<CaptionStyle>("CaptionStyleContext");
+
+export const CaptionStyleProvider = CaptionStyleContext.Provider;
+
+export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
+	const style = useCaptionStyle();
 	const frame = useCurrentFrame();
 	const { fps, height } = useVideoConfig();
 

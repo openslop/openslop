@@ -31,7 +31,7 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		activeWord: { ...text({ fill: "#43e97b" }), scale: 100 },
 	}),
 	preset("pop", "Pop", {
-		font: "rounded",
+		font: "poppins",
 		activeWord: { ...text({ fill: "#ffe14d" }), scale: 140 },
 	}),
 	preset("boxed", "Boxed", {
@@ -49,7 +49,7 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		activeWord: { ...text({ border: null }), scale: 110 },
 	}),
 	preset("neon", "Neon", {
-		font: "condensed",
+		font: "bebasNeue",
 		casing: "upper",
 		base: text({ italic: true, border: { width: 40, color: "#c77dff" } }),
 		activeWord: {
