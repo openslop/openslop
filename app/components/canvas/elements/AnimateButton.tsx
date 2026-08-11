@@ -23,7 +23,7 @@ export function AnimateButton({ element }: { element: CanvasContentElement }) {
 			onClick={() => refineScript(animateImagePrompt(element.id))}
 		>
 			<MagicVideo aria-hidden="true" />
-			<span className="hidden sm:inline">Animate</span>
+			<span className="hidden @sm:inline">Animate</span>
 		</Button>
 	);
 }
