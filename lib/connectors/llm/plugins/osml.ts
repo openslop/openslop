@@ -13,24 +13,21 @@ import {
 	TTS_SPEEDS,
 } from "@/lib/connectors/tts/enums";
 import type { LLMPlugin } from "@/lib/connectors/types";
+import {
+	INPUT_LANGUAGE,
+	languagePrompt,
+	spokenLanguage,
+} from "./language-prompt";
 
-export function osmlLanguagePrompt(spokenLanguage: string): string {
+function osmlSystemPrompt(language: string): string {
 	return dedent`
-		## **Language**
-		- Write all narration text and character dialogue in ${spokenLanguage}.
-		- Always write image, animated_image (including videoPrompt), sound, and music descriptions in English, whatever language the spoken text is in.`;
-}
-
-const OSML_SYSTEM_PROMPT = dedent`
 	The story script must be written in a special XML format that strictly follows these rules:
 
   ## **General Guidelines**
   - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
   - Descriptions in image tags are opaque to the reader, so the narrative prose should include some details that are only in the image tags.
 
-${osmlLanguagePrompt(
-	"the same language the user wrote their input in, ignoring the language of any example, reference, or instruction text",
-)}
+${languagePrompt(language)}
 - Write the metadata_title in that same language, and the metadata_style description in English.
 
   ## **XML Tagging**
@@ -148,13 +145,17 @@ ${osmlLanguagePrompt(
   ### General XML Tag Rules
   - NEVER nest XML tags within other XML tags.
 `;
+}
 
 export const osmlPlugin: LLMPlugin = {
 	name: "osml",
-	beforeGenerate(params) {
-		if (!params.systemPrompt) {
-			return { ...params, systemPrompt: OSML_SYSTEM_PROMPT };
-		}
-		return params;
+	beforeGenerate(params, ctx) {
+		if (params.systemPrompt) return params;
+		return {
+			...params,
+			systemPrompt: osmlSystemPrompt(
+				spokenLanguage(ctx?.state?.metadata, INPUT_LANGUAGE),
+			),
+		};
 	},
 };

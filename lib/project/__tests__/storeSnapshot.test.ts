@@ -52,12 +52,19 @@ describe("storeSnapshot", () => {
 describe("parseStoreSnapshot", () => {
 	it("fills defaults for absent and partial rows", () => {
 		expect(parseStoreSnapshot(null)).toEqual({
-			metadata: { title: "", style: "", narration: {}, characters: {} },
+			metadata: {
+				title: "",
+				style: "",
+				language: "auto",
+				narration: {},
+				characters: {},
+			},
 			referenceImages: [],
 		});
 		expect(parseStoreSnapshot({ metadata: { title: "T" } }).metadata).toEqual({
 			title: "T",
 			style: "",
+			language: "auto",
 			narration: {},
 			characters: {},
 		});
@@ -68,6 +75,7 @@ describe("parseStoreSnapshot", () => {
 			metadata: {
 				title: "T",
 				style: "noir",
+				language: "es" as const,
 				narration: { age: "adult" as const },
 				characters: {
 					Ada: { appearance: "tall", gender: "feminine" as const },

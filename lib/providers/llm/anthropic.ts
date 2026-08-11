@@ -4,6 +4,7 @@ import type {
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { parseImageSource } from "@/lib/api/imageSource";
+import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
 import { BaseProvider } from "../base";
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [
@@ -72,9 +73,12 @@ export class AnthropicLLM extends BaseProvider<
 			{ type: "text" as const, text: params.prompt },
 		];
 		return {
-			model: params.model || "claude-opus-4-8",
+			model: params.model || "claude-opus-5",
 			max_tokens: params.maxTokens || 65536,
-			temperature: params.temperature,
+			thinking: { type: "adaptive" as const },
+			output_config: {
+				effort: params.thinkingLevel || DEFAULT_THINKING_LEVEL,
+			},
 			system: params.systemPrompt || undefined,
 			messages: [{ role: "user" as const, content }],
 		};

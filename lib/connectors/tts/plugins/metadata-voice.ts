@@ -1,5 +1,6 @@
 import { requireState } from "@/lib/connectors/plugins";
 import { forVoice } from "@/lib/generation/sourceNodes";
+import { declaredLanguage } from "@/lib/project/language";
 import { MetadataVoiceSchema } from "@/lib/project/types";
 import type {
 	ConnectorPlugin,
@@ -11,7 +12,7 @@ export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> 
 		name: "metadata-voice",
 		dependencies: (element) => [forVoice(element.customAttributes?.name)],
 		beforeGenerate(params, ctx) {
-			const { narration, characters } = requireState(
+			const { narration, characters, language } = requireState(
 				ctx,
 				"metadata-voice",
 			).metadata;
@@ -21,6 +22,7 @@ export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> 
 			return {
 				...params,
 				...fields,
+				language: declaredLanguage(language) ?? fields.language,
 				voiceId: fields.voiceId ?? resolvedVoiceId,
 			};
 		},

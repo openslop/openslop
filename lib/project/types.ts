@@ -6,6 +6,7 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
+import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
 import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
 import { CaptionStyleSchema } from "@/lib/video/captionStyle";
 import { VIDEO_LENGTHS } from "@/lib/video/videoLength";
@@ -64,6 +65,10 @@ export type Mode = (typeof MODES)[number];
 export const MetadataSchema = z.object({
 	title: z.string().default(""),
 	style: z.string().default(""),
+	language: z
+		.enum(LANGUAGE_CHOICES)
+		.default(AUTO_LANGUAGE)
+		.catch(AUTO_LANGUAGE),
 	narration: MetadataVoiceSchema.default({}),
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
 	videoSettings: VideoSettingsSchema.optional(),

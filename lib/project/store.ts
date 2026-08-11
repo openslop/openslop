@@ -1,6 +1,7 @@
 import merge from "lodash/merge";
 import { immer } from "zustand/middleware/immer";
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { AUTO_LANGUAGE } from "./language";
 import type {
 	DeepPartial,
 	Metadata,
@@ -32,7 +33,13 @@ export type ProjectStore = StoreApi<ProjectContext>;
 
 const initialState = {
 	hydrated: false,
-	metadata: { title: "", style: "", narration: {}, characters: {} } as Metadata,
+	metadata: {
+		title: "",
+		style: "",
+		language: AUTO_LANGUAGE,
+		narration: {},
+		characters: {},
+	} as Metadata,
 	referenceImages: [] as string[],
 };
 

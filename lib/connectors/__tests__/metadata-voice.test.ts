@@ -88,6 +88,42 @@ describe("createMetadataVoicePlugin", () => {
 		});
 	});
 
+	it("narrates the project's language, since the script no longer declares one", () => {
+		store.getState().updateMetadata({ language: "es" });
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(beforeGenerate?.({ prompt: "hola" }, stateCtx(store))).toEqual({
+			prompt: "hola",
+			language: "es",
+		});
+	});
+
+	it("leaves the language open on auto, so voice search falls back", () => {
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		const result = beforeGenerate?.({ prompt: "hi" }, stateCtx(store));
+		expect(result).not.toHaveProperty("language", "auto");
+	});
+
+	it("prefers a pinned project language over a voice language left by an earlier script", () => {
+		store.getState().updateMetadata({
+			language: "es",
+			narration: { language: "en" },
+		});
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(beforeGenerate?.({ prompt: "hi" }, stateCtx(store))).toEqual({
+			prompt: "hi",
+			language: "es",
+		});
+	});
+
+	it("keeps the voice's own language on auto, where the project declares none", () => {
+		store.getState().updateMetadata({ narration: { language: "fr" } });
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(beforeGenerate?.({ prompt: "hi" }, stateCtx(store))).toEqual({
+			prompt: "hi",
+			language: "fr",
+		});
+	});
+
 	it("does not set fields that are absent in metadata", () => {
 		store.getState().updateMetadata({
 			narration: { gender: "feminine" },

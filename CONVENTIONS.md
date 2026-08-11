@@ -19,7 +19,7 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 - Don't reinvent. Reach for a popular, well-tested library before hand-rolling, and exhaust what our stack already does (Next.js, React, Remotion, Zustand, Supabase, Vercel, AWS) before adding a dependency. Hand-roll only when the logic is tiny and must be custom to this app.
 - Nothing leaks. No tight coupling, no hidden dependencies, no concerns bleeding across modules. Colocate logic, and give shared code one idiomatically named home. No barrel files.
 - Dependencies point one way. `lib/` is the domain layer and never imports from `app/` (the UI); shared logic lives in `lib/`. ESLint-enforced.
-- Comments are a last resort, not a habit. The code shows what it does. A comment earns its place only by capturing what the code can't: intent, invariants, tradeoffs, footguns. Don't narrate the code.
+- Comments are a last resort, not a habit. Write one only where a choice would look odd or arbitrary to a first-time reader with no context. Never comment history: what broke, what the code used to be, why an earlier attempt failed. That belongs in the commit message.
 - Test behavior, not internals. Cover the seams (pure helpers and module boundaries) so refactors stay safe.
 
 ## Frontend
