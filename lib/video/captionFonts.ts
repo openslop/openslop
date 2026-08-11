@@ -107,22 +107,26 @@ const registered = new Set<CaptionFont>();
 /**
  * Registers caption faces with the document. Callers supply the URL for a file,
  * since the editor serves `public/` at the site root while the renderer
- * resolves bundled assets itself. Registering is idempotent, so a surface can
- * ask for what it needs without knowing what another already loaded.
+ * resolves bundled assets itself. A face is remembered only once it has loaded,
+ * so asking twice costs nothing and a failed fetch is retried by the next
+ * caller rather than leaving the font missing for the session.
  */
 export function loadCaptionFonts(
 	url: (file: string) => string,
 	fonts: readonly CaptionFont[] = CAPTION_FONTS,
 ): Promise<void> {
-	const faces = fonts.flatMap((font) => {
-		if (registered.has(font)) return [];
-		registered.add(font);
-
-		const { label, files } = CAPTION_FONT_SPECS[font];
-		return files.map(async ({ file, weight }) => {
-			const face = new FontFace(label, `url(${url(file)})`, { weight });
-			document.fonts.add(await face.load());
+	const pending = fonts
+		.filter((font) => !registered.has(font))
+		.map(async (font) => {
+			const { label, files } = CAPTION_FONT_SPECS[font];
+			await Promise.all(
+				files.map(async ({ file, weight }) => {
+					const face = new FontFace(label, `url(${url(file)})`, { weight });
+					document.fonts.add(await face.load());
+				}),
+			);
+			registered.add(font);
 		});
-	});
-	return Promise.all(faces).then(() => undefined);
+
+	return Promise.all(pending).then(() => undefined);
 }

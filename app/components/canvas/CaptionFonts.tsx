@@ -6,7 +6,9 @@ import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
 import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
 
 const register = (fonts?: readonly CaptionFont[]) =>
-	loadCaptionFonts((file) => `/fonts/${file}`, fonts);
+	loadCaptionFonts((file) => `/fonts/${file}`, fonts).catch((error: unknown) =>
+		console.error("Failed to load caption fonts", error),
+	);
 
 /** The one face the project captions with, so the preview draws what it exports. */
 export function ActiveCaptionFont() {

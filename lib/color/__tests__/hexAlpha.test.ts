@@ -6,6 +6,11 @@ describe("alphaPercent", () => {
 		expect(alphaPercent("#ffffff")).toBe(100);
 	});
 
+	it("reads shorthand hex, with and without its alpha digit", () => {
+		expect(alphaPercent("#fff")).toBe(100);
+		expect(alphaPercent("#fff8")).toBe(53);
+	});
+
 	it("reads the trailing pair of an eight-digit hex", () => {
 		expect(alphaPercent("#ffffff00")).toBe(0);
 		expect(alphaPercent("#ffffff80")).toBe(50);
@@ -26,6 +31,11 @@ describe("withAlphaPercent", () => {
 	it("clamps out-of-range percentages", () => {
 		expect(withAlphaPercent("#336699", 140)).toBe("#336699ff");
 		expect(withAlphaPercent("#336699", -20)).toBe("#33669900");
+	});
+
+	it("expands shorthand hex before writing the pair", () => {
+		expect(withAlphaPercent("#fb0", 100)).toBe("#ffbb00ff");
+		expect(withAlphaPercent("#fb08", 0)).toBe("#ffbb0000");
 	});
 
 	it("keeps the color when the field holds no number", () => {
