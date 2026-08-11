@@ -34,6 +34,35 @@ function Swatch({
 	);
 }
 
+function SwatchButton({
+	color,
+	label,
+	selected,
+	onSelect,
+}: {
+	color: string | null;
+	label: string;
+	selected: boolean;
+	onSelect: () => void;
+}) {
+	return (
+		<SimpleTooltip label={label}>
+			<button
+				type="button"
+				aria-label={label}
+				aria-pressed={selected}
+				onClick={onSelect}
+				className={cn(
+					"flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover focus-ring",
+					selected && "ring-2 ring-accent",
+				)}
+			>
+				<Swatch color={color} className="h-5 w-5" />
+			</button>
+		</SimpleTooltip>
+	);
+}
+
 /**
  * Color picker in a popover: a saturation field with hue and opacity sliders,
  * hex entry, and the palette. Layers that can be switched off also offer a
@@ -56,15 +85,6 @@ export function ColorField({
 	const [open, setOpen] = useState(false);
 	const color = value ?? "#ffffff";
 
-	// The picker caches its own HSVA and re-syncs only when it judges the
-	// incoming color different, comparing parsed rgba rather than the string.
-	// Remounting on changes it did not originate keeps its pointers in step.
-	const [syncKey, setSyncKey] = useState(0);
-	const setExternal = (next: string | null) => {
-		setSyncKey((key) => key + 1);
-		onChange(next);
-	};
-
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<SimpleTooltip label={label}>
@@ -81,12 +101,12 @@ export function ColorField({
 					<CloseButton onClick={() => setOpen(false)} />
 				</div>
 
-				<HexAlphaColorPicker key={syncKey} color={color} onChange={onChange} />
+				<HexAlphaColorPicker color={color} onChange={onChange} />
 
 				<div className="mt-3 flex items-center gap-2">
 					<HexColorInput
 						color={color}
-						onChange={setExternal}
+						onChange={onChange}
 						prefixed
 						alpha
 						aria-label={`${label} hex`}
@@ -100,7 +120,7 @@ export function ColorField({
 							max={100}
 							value={alphaPercent(color)}
 							onChange={(event) =>
-								setExternal(withAlphaPercent(color, event.target.valueAsNumber))
+								onChange(withAlphaPercent(color, event.target.valueAsNumber))
 							}
 							className="w-9 bg-transparent text-right font-mono text-label-xs text-foreground tabular-nums outline-none"
 						/>
@@ -110,38 +130,24 @@ export function ColorField({
 
 				<div className="mt-3 grid grid-cols-7 gap-1.5 border-t border-border pt-3">
 					{emptyLabel && (
-						<SimpleTooltip label={emptyLabel}>
-							<button
-								type="button"
-								aria-label={emptyLabel}
-								aria-pressed={value === null}
-								onClick={() => {
-									setExternal(null);
-									setOpen(false);
-								}}
-								className={cn(
-									"flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover focus-ring",
-									value === null && "ring-2 ring-accent",
-								)}
-							>
-								<Swatch color={null} className="h-5 w-5" />
-							</button>
-						</SimpleTooltip>
+						<SwatchButton
+							color={null}
+							label={emptyLabel}
+							selected={value === null}
+							onSelect={() => {
+								onChange(null);
+								setOpen(false);
+							}}
+						/>
 					)}
 					{swatches.map((swatch) => (
-						<button
+						<SwatchButton
 							key={swatch}
-							type="button"
-							aria-label={swatch}
-							aria-pressed={value === swatch}
-							onClick={() => setExternal(swatch)}
-							className={cn(
-								"flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover focus-ring",
-								value === swatch && "ring-2 ring-accent",
-							)}
-						>
-							<Swatch color={swatch} className="h-5 w-5" />
-						</button>
+							color={swatch}
+							label={swatch}
+							selected={value === swatch}
+							onSelect={() => onChange(swatch)}
+						/>
 					))}
 				</div>
 			</PopoverContent>
