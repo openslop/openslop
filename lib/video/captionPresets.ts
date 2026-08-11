@@ -59,7 +59,7 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		maxWordsPerLine: 1,
 		alignX: "center",
 		alignY: "middle",
-		base: text({ border: { width: 0, color: "#000000" } }),
+		base: text({ border: null }),
 		activeWord: text({
 			fill: "#c77dff",
 			italic: true,

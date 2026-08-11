@@ -27,10 +27,8 @@ const TRANSFORM: Record<CaptionCasing, CSSProperties["textTransform"]> = {
 	lower: "lowercase",
 };
 
-/** Border width is a 0-100 dial; this maps it onto a legible em range. */
+/** Maps the border-width dial onto a legible em range. */
 const BORDER_EM_PER_UNIT = 0.0025;
-
-const DROP_SHADOW = "0 0.08em 0.2em rgba(0, 0, 0, 0.55)";
 
 /**
  * `paint-order` lays the stroke down before the fill, so the glyph keeps its
@@ -44,7 +42,6 @@ function outline(width: number, color: string): CSSProperties {
 		WebkitTextStrokeWidth: `${width * BORDER_EM_PER_UNIT * 2}em`,
 		WebkitTextStrokeColor: color,
 		paintOrder: "stroke fill",
-		textShadow: DROP_SHADOW,
 	};
 }
 
@@ -106,6 +103,9 @@ export function CaptionOverlay({
 					fontFamily: captionFontStack(style.font),
 					fontSize: fontSizePx,
 					letterSpacing: "-0.01em",
+					// The shadow lifts the caption off the footage whatever else is
+					// switched on, so legibility never depends on the border being set.
+					textShadow: "0 0.08em 0.2em rgba(0, 0, 0, 0.55)",
 					lineHeight: 1.25,
 					textAlign: style.alignX,
 					textTransform: TRANSFORM[style.casing],
