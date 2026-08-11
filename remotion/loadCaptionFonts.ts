@@ -1,4 +1,9 @@
-import { continueRender, delayRender, staticFile } from "remotion";
+import {
+	cancelRender,
+	continueRender,
+	delayRender,
+	staticFile,
+} from "remotion";
 import { loadCaptionFonts } from "@/lib/video/captionFonts";
 
 /**
@@ -9,7 +14,7 @@ const handle = delayRender("Loading caption fonts");
 
 loadCaptionFonts((file) => staticFile(`fonts/${file}`)).then(
 	() => continueRender(handle),
-	(error) => {
-		throw error;
-	},
+	// Throwing here would only make another rejected promise; `cancelRender`
+	// fails the render with the real error instead of stalling on the handle.
+	(error) => cancelRender(error),
 );

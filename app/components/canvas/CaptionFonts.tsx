@@ -1,15 +1,30 @@
 "use client";
 
 import { useEffect } from "react";
-import { loadCaptionFonts } from "@/lib/video/captionFonts";
+import { loadCaptionFonts, type CaptionFont } from "@/lib/video/captionFonts";
+import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
+import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
 
-/**
- * Registers the caption faces once for the editor. The renderer loads the same
- * files itself, so a caption previews with the glyphs it will export with.
- */
-export function CaptionFonts() {
+const register = (fonts?: readonly CaptionFont[]) =>
+	loadCaptionFonts((file) => `/fonts/${file}`, fonts);
+
+/** The one face the project captions with, so the preview draws what it exports. */
+export function ActiveCaptionFont() {
+	const enabled = useCaptionsEnabled();
+	const [style] = useCaptionStyle();
+	const font = enabled ? style.font : null;
+
 	useEffect(() => {
-		loadCaptionFonts((file) => `/fonts/${file}`);
+		if (font) register([font]);
+	}, [font]);
+
+	return null;
+}
+
+/** The whole library, for the picker and presets that set each row in its own face. */
+export function CaptionFontLibrary() {
+	useEffect(() => {
+		register();
 	}, []);
 
 	return null;

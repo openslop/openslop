@@ -24,7 +24,6 @@ import { audioVolume } from "@/lib/video/audioVolume";
 import { volumeToGain } from "@/lib/video/elementAttributes";
 import { ELEMENT_TYPES } from "@/lib/canvas/types";
 import { CaptionStyleProvider, Captions } from "../components/Captions";
-import "../loadCaptionFonts";
 import { MotionLayer } from "../components/MotionLayer";
 
 const coverStyle: React.CSSProperties = {

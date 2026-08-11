@@ -26,6 +26,7 @@ import {
 } from "@/lib/video/captionStyle";
 import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
 import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
+import { CaptionFontLibrary } from "../CaptionFonts";
 import { CaptionFontField } from "./CaptionFontField";
 import { CaptionPresetGrid } from "./CaptionPresetGrid";
 import { CaptionPreview } from "./CaptionPreview";
@@ -80,6 +81,8 @@ export function CaptionsPanel() {
 
 			{captionsEnabled && (
 				<>
+					<CaptionFontLibrary />
+
 					<PanelCard title="Presets">
 						<CaptionPresetGrid style={style} onSelect={setStyle} />
 					</PanelCard>
