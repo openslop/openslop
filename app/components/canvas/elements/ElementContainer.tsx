@@ -119,7 +119,7 @@ export function ElementContainer({
 							</div>
 						</div>
 						<div
-							className="mt-2 flex items-center justify-end gap-2 select-none"
+							className="mt-2 flex min-w-0 flex-wrap items-center justify-end gap-2 select-none"
 							contentEditable={false}
 						>
 							<ElementStaleIndicator />
