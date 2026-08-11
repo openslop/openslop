@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CAPTION_FONTS, type CaptionFont } from "./captionFonts";
+import { CAPTION_FONTS } from "./captionFonts";
 
 export const CAPTION_CASINGS = ["none", "upper", "lower"] as const;
 export type CaptionCasing = (typeof CAPTION_CASINGS)[number];
@@ -11,8 +11,7 @@ export const CAPTION_ALIGN_Y = ["top", "middle", "bottom"] as const;
 export type CaptionAlignY = (typeof CAPTION_ALIGN_Y)[number];
 
 /** Type emphasis toggles, applied per class of word. */
-export const CAPTION_EMPHASES = ["bold", "italic", "underline"] as const;
-export type CaptionEmphasis = (typeof CAPTION_EMPHASES)[number];
+export type CaptionEmphasis = "bold" | "italic" | "underline";
 
 /** `line` shows the whole line at once; `word` builds it up word by word. */
 export const CAPTION_REVEALS = ["line", "word"] as const;
@@ -47,11 +46,11 @@ const captionTextStyleSchema = z.object({
 	background: z.string().nullable(),
 });
 
-/** Colors for one class of word. `null` means the layer is off. */
+/** How one class of word is drawn; a `null` layer is off. */
 export type CaptionTextStyle = z.infer<typeof captionTextStyleSchema>;
 
 export const CaptionStyleSchema = z.object({
-	font: z.enum(CAPTION_FONTS as [CaptionFont, ...CaptionFont[]]),
+	font: z.enum(CAPTION_FONTS),
 	/**
 	 * Pixels at {@link CAPTION_BASE_HEIGHT}. Renderers scale it by the real frame
 	 * height, so one value covers every output resolution.

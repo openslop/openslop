@@ -100,7 +100,6 @@ export const Trash2 = icon("trash");
 export const Underline = icon("underline");
 export const User = icon("user");
 export const UserPlus = icon("user-plus");
-export const TextWrap = icon("arrow-return");
 export const Video = icon("video");
 export const Voice = icon("voice");
 export const Volume2 = icon("volume-2");

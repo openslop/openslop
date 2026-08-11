@@ -1,8 +1,8 @@
 /**
  * The caption faces, self-hosted so the editor preview and the Lambda render
  * draw with the same glyphs. Each entry names a real font family, so one
- * `font-family` value works in both once the files are loaded — the browser
- * gets them from `app/caption-fonts.css`, the renderer from
+ * `font-family` value works in both once the files are loaded — the editor
+ * registers them in `app/components/canvas/CaptionFonts.tsx`, the renderer in
  * `remotion/loadCaptionFonts.ts`.
  */
 export type CaptionFontFile = {
@@ -14,7 +14,6 @@ export type CaptionFontFile = {
 
 export type CaptionFontSpec = {
 	label: string;
-	/** Stands in while the file loads. */
 	fallback: string;
 	files: CaptionFontFile[];
 };

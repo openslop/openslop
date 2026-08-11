@@ -1,5 +1,4 @@
 import {
-	DEFAULT_BORDER_WIDTH,
 	DEFAULT_CAPTION_STYLE,
 	type CaptionStyle,
 	type CaptionTextStyle,
@@ -21,8 +20,6 @@ const text = (style: Partial<CaptionTextStyle>): CaptionTextStyle => ({
 	...DEFAULT_CAPTION_STYLE.base,
 	...style,
 });
-
-const OUTLINE = { width: DEFAULT_BORDER_WIDTH, color: "#000000" };
 
 export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 	preset("classic", "Classic", {}),
@@ -56,7 +53,7 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 			...text({
 				fill: "#c77dff",
 				italic: true,
-				border: { ...OUTLINE, width: 40 },
+				border: { width: 40, color: "#000000" },
 			}),
 			scale: 100,
 		},

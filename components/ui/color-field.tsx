@@ -92,7 +92,7 @@ export function ColorField({
 						aria-label={`${label} hex`}
 						className="h-7 w-full min-w-0 rounded-md bg-input px-2 font-mono text-label-xs text-foreground uppercase outline-none focus-ring"
 					/>
-					<label className="flex h-7 shrink-0 items-center rounded-md bg-input pr-1 pl-2">
+					<label className="flex h-7 shrink-0 items-center rounded-md bg-input pr-1 pl-2 focus-within:ring-2 focus-within:ring-ring">
 						<span className="sr-only">{label} opacity</span>
 						<input
 							type="number"

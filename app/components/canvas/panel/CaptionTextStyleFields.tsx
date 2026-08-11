@@ -58,7 +58,6 @@ export function CaptionTextStyleFields<T extends CaptionTextStyle>({
 					{border && (
 						<NumberScrubber
 							label="Border thickness"
-							tooltip="Border thickness"
 							icon={Thickness}
 							value={border.width}
 							{...CAPTION_RANGES.borderWidth}

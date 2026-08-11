@@ -94,7 +94,6 @@ export function CaptionsPanel() {
 							</div>
 							<NumberScrubber
 								label="Text size"
-								tooltip="Text size"
 								className="h-8"
 								icon={TextSize}
 								value={style.fontSize}

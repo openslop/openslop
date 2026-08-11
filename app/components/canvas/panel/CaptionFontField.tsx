@@ -26,7 +26,7 @@ export function CaptionFontField({
 	const [open, setOpen] = useState(false);
 	const [query, setQuery] = useState("");
 
-	const matches = CAPTION_FONTS.filter((font: CaptionFont) =>
+	const matches = CAPTION_FONTS.filter((font) =>
 		captionFontLabel(font).toLowerCase().includes(query.trim().toLowerCase()),
 	);
 
@@ -65,7 +65,7 @@ export function CaptionFontField({
 					/>
 				</div>
 				<ul className="mt-1 max-h-56 overflow-y-auto">
-					{matches.map((font: CaptionFont) => (
+					{matches.map((font) => (
 						<li key={font}>
 							<button
 								type="button"
