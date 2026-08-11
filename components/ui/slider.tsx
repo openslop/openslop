@@ -11,6 +11,7 @@ function Slider({
 	value,
 	min = 0,
 	max = 100,
+	"aria-label": ariaLabel,
 	...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
 	const values = React.useMemo(
@@ -31,25 +32,26 @@ function Slider({
 			min={min}
 			max={max}
 			className={cn(
-				"relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50",
+				"group relative flex w-full cursor-pointer touch-none items-center select-none data-[disabled]:cursor-default data-[disabled]:opacity-50",
 				className,
 			)}
 			{...props}
 		>
 			<SliderPrimitive.Track
 				data-slot="slider-track"
-				className="relative h-1 w-full grow overflow-hidden rounded-full bg-muted"
+				className="relative h-px w-full grow overflow-hidden rounded-full bg-scrub-track"
 			>
 				<SliderPrimitive.Range
 					data-slot="slider-range"
-					className="absolute h-full bg-accent"
+					className="absolute h-full bg-scrub-progress"
 				/>
 			</SliderPrimitive.Track>
 			{Array.from({ length: values.length }, (_, i) => (
 				<SliderPrimitive.Thumb
 					data-slot="slider-thumb"
 					key={i}
-					className="block size-3.5 shrink-0 rounded-full border border-border bg-card shadow-elevation-1 transition-colors focus-ring disabled:pointer-events-none"
+					aria-label={ariaLabel}
+					className="block size-2.5 shrink-0 cursor-ew-resize rounded-full bg-scrub-progress transition-transform group-hover:scale-125 active:scale-125 focus-ring disabled:pointer-events-none"
 				/>
 			))}
 		</SliderPrimitive.Root>

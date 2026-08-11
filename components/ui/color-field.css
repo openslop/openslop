@@ -1,0 +1,37 @@
+/*
+ * Sizes and rounding for react-colorful, so the picker matches our controls.
+ * The library injects its own stylesheet at runtime, so every rule is scoped
+ * under `.react-colorful` to outrank it.
+ */
+div.react-colorful {
+	width: 100%;
+	height: auto;
+	gap: 0.5rem;
+}
+
+.react-colorful .react-colorful__saturation {
+	height: 7rem;
+	border-radius: var(--radius-md);
+	border-bottom: none;
+}
+
+.react-colorful .react-colorful__hue,
+.react-colorful .react-colorful__alpha {
+	height: 0.75rem;
+	border-radius: calc(infinity * 1px);
+}
+
+.react-colorful .react-colorful__saturation-pointer {
+	width: 0.625rem;
+	height: 0.625rem;
+}
+
+.react-colorful .react-colorful__hue-pointer,
+.react-colorful .react-colorful__alpha-pointer {
+	width: 0.75rem;
+	height: 0.75rem;
+}
+
+.react-colorful .react-colorful__pointer {
+	border-width: 1px;
+}

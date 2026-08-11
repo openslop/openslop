@@ -3,6 +3,7 @@ import { Composition } from "remotion";
 import { VideoComposition } from "./compositions/VideoComposition";
 import type { VideoLayout } from "@/lib/video/types";
 import { COMPOSITION_ID, DEFAULT_CONFIG } from "@/lib/video/types";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
 import {
 	DEFAULT_TRANSITION,
 	TRANSITION_DURATION_SEC,
@@ -18,6 +19,7 @@ const defaultProps: VideoLayout = {
 	totalFrames: 1,
 	transitionType: DEFAULT_TRANSITION,
 	transitionDurationSec: TRANSITION_DURATION_SEC,
+	captionStyle: DEFAULT_CAPTION_STYLE,
 };
 
 export const RemotionRoot: React.FC = () => (

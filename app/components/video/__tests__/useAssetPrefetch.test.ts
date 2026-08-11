@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { prefetch as PrefetchFn } from "remotion";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
 import {
 	awaitPrefetch,
 	collectUrls,
@@ -43,6 +44,7 @@ function layout(partial: Partial<VideoLayout>): VideoLayout {
 		height: 1080,
 		totalDurationSec: 1,
 		totalFrames: 30,
+		captionStyle: DEFAULT_CAPTION_STYLE,
 		transitionType: "none",
 		transitionDurationSec: 0,
 		...partial,

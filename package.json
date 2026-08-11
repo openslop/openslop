@@ -64,6 +64,7 @@
 		"pino": "^10.3.1",
 		"radix-ui": "^1.4.3",
 		"react": "19.2.3",
+		"react-colorful": "^5.8.0",
 		"react-dom": "19.2.3",
 		"remotion": "4.0.481",
 		"serialize-error": "^13.0.1",

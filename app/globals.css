@@ -98,9 +98,10 @@
 	--scrub-track: #e2dde0;
 	--scrub-progress: #655c61;
 	--scrub-hover: #d7c7d1;
-	--media-toggle-bg: #e2dde0;
+	--media-toggle-bg: #e4dde0;
 	--media-toggle-fg: #655c61;
-	--media-toggle-active-bg: #53404a;
+	--media-toggle-hover-bg: var(--scrub-hover);
+	--media-toggle-active-bg: #583e4a;
 	--media-toggle-active-fg: #ffffff;
 	--scrollbar: #dddadb;
 	--panel-fg: var(--foreground);
@@ -226,10 +227,11 @@
 	--scrub-track: #656264;
 	--scrub-progress: #ffffff;
 	--scrub-hover: #c2c0c1;
-	--media-toggle-bg: #312c30;
+	--media-toggle-bg: #332c30;
 	--media-toggle-fg: #e2dde0;
-	--media-toggle-active-bg: #cfc7cb;
-	--media-toggle-active-fg: #45363d;
+	--media-toggle-hover-bg: var(--surface-hover);
+	--media-toggle-active-bg: #d2c6cb;
+	--media-toggle-active-fg: #583f4a;
 	--scrollbar: #3d373a;
 	--panel-fg: #e0dbde;
 	--panel-label: #f9e6f6;
@@ -295,6 +297,7 @@
 	--color-scrub-hover: var(--scrub-hover);
 	--color-media-toggle-bg: var(--media-toggle-bg);
 	--color-media-toggle-fg: var(--media-toggle-fg);
+	--color-media-toggle-hover-bg: var(--media-toggle-hover-bg);
 	--color-media-toggle-active-bg: var(--media-toggle-active-bg);
 	--color-media-toggle-active-fg: var(--media-toggle-active-fg);
 	--color-panel-fg: var(--panel-fg);
