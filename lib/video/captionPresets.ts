@@ -24,39 +24,48 @@ const text = (style: Partial<CaptionTextStyle>): CaptionTextStyle => ({
 export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 	preset("classic", "Classic", {}),
 	preset("karaoke", "Karaoke", {
+		font: "bangers",
+		fontSize: 62,
+		casing: "upper",
 		reveal: "line",
-		activeWord: { ...text({ fill: "#43e97b" }), scale: 100 },
+		activeWord: text({ fill: "#6DC7C8" }),
 	}),
 	preset("pop", "Pop", {
-		font: "poppins",
-		activeWord: { ...text({ fill: "#ffe14d" }), scale: 140 },
-	}),
-	preset("boxed", "Boxed", {
+		font: "montserrat",
+		fontSize: 40,
 		casing: "none",
 		reveal: "line",
-		base: text({ border: null, background: "#000000" }),
-		activeWord: {
-			...text({ fill: "#000000", border: null, background: "#ffe14d" }),
-			scale: 100,
-		},
+		activeWord: text({ fill: "#ffe14d", bold: true }),
+		alignX: "center",
+		alignY: "middle",
+		maxWordsPerLine: 4,
+		base: text({ bold: false }),
+	}),
+	preset("boxed", "Boxed", {
+		font: "oswald",
+		casing: "upper",
+		reveal: "line",
+		activeWord: text({ background: "#FE2953" }),
 	}),
 	preset("spotlight", "Spotlight", {
 		reveal: "line",
-		base: text({ fill: "#7d7d7d", border: null }),
-		activeWord: { ...text({ border: null }), scale: 110 },
+		alignX: "center",
+		alignY: "bottom",
 	}),
 	preset("neon", "Neon", {
 		font: "bebasNeue",
+		fontSize: 80,
 		casing: "upper",
-		base: text({ italic: true, border: { width: 40, color: "#c77dff" } }),
-		activeWord: {
-			...text({
-				fill: "#c77dff",
-				italic: true,
-				border: { width: 40, color: "#000000" },
-			}),
-			scale: 100,
-		},
+		maxWordsPerLine: 1,
+		alignX: "center",
+		alignY: "middle",
+		base: text({ border: { width: 0, color: "#000000" } }),
+		activeWord: text({
+			fill: "#c77dff",
+			italic: true,
+			bold: false,
+			border: { width: 40, color: "#000000" },
+		}),
 	}),
 ];
 

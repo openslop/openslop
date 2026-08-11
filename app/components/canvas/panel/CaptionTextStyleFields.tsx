@@ -23,12 +23,12 @@ const EMPHASIS_OPTIONS: MediaToggleOption<CaptionEmphasis>[] = [
 ];
 
 /** Type, fill, border and background rows, shared by the base and active-word cards. */
-export function CaptionTextStyleFields<T extends CaptionTextStyle>({
+export function CaptionTextStyleFields({
 	value,
 	onChange,
 }: {
-	value: T;
-	onChange: (value: T) => void;
+	value: CaptionTextStyle;
+	onChange: (value: CaptionTextStyle) => void;
 }) {
 	const { border } = value;
 

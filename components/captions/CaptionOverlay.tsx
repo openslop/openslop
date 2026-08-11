@@ -48,9 +48,8 @@ function outline(width: number, color: string): CSSProperties {
 	};
 }
 
-function wordStyle(style: CaptionTextStyle, scale: number): CSSProperties {
+function wordStyle(style: CaptionTextStyle): CSSProperties {
 	return {
-		fontSize: `${scale}em`,
 		color: style.fill,
 		fontWeight: style.bold ? 700 : 400,
 		fontStyle: style.italic ? "italic" : "normal",
@@ -117,9 +116,7 @@ export function CaptionOverlay({
 						// Words repeat within a line, so the position is the identity.
 						key={i}
 						style={{
-							...(word.active
-								? wordStyle(style.activeWord, style.activeWord.scale / 100)
-								: wordStyle(style.base, 1)),
+							...wordStyle(word.active ? style.activeWord : style.base),
 							visibility: word.hidden ? "hidden" : "visible",
 						}}
 					>

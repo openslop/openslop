@@ -29,7 +29,6 @@ export const CAPTION_RANGES = {
 	fontSize: { min: 24, max: 160, step: 2 },
 	borderWidth: { min: 5, max: 100, step: 5 },
 	maxWordsPerLine: { min: 1, max: 10, step: 1 },
-	activeScale: { min: 100, max: 175, step: 5 },
 } as const;
 
 const range = ({ min, max }: { min: number; max: number }) =>
@@ -62,13 +61,8 @@ export const CaptionStyleSchema = z.object({
 	maxWordsPerLine: range(CAPTION_RANGES.maxWordsPerLine).int(),
 	reveal: z.enum(CAPTION_REVEALS),
 	base: captionTextStyleSchema,
-	/**
-	 * Emphasis for the word being spoken. `scale` is a percentage of `fontSize`,
-	 * so the active word keeps its proportion when the caption is resized.
-	 */
-	activeWord: captionTextStyleSchema.extend({
-		scale: range(CAPTION_RANGES.activeScale),
-	}),
+	/** How the word being spoken is drawn. */
+	activeWord: captionTextStyleSchema,
 });
 
 export type CaptionStyle = z.infer<typeof CaptionStyleSchema>;
@@ -80,12 +74,12 @@ const BLACK = "#000000";
 export const DEFAULT_BORDER_WIDTH = 25;
 
 export const DEFAULT_CAPTION_STYLE: CaptionStyle = {
-	font: "montserrat",
-	fontSize: 70,
-	casing: "upper",
-	alignX: "center",
+	font: "inter",
+	fontSize: 40,
+	casing: "none",
+	alignX: "left",
 	alignY: "bottom",
-	maxWordsPerLine: 6,
+	maxWordsPerLine: 4,
 	reveal: "word",
 	base: {
 		fill: WHITE,
@@ -102,7 +96,6 @@ export const DEFAULT_CAPTION_STYLE: CaptionStyle = {
 		underline: false,
 		border: { width: DEFAULT_BORDER_WIDTH, color: BLACK },
 		background: null,
-		scale: 100,
 	},
 };
 
