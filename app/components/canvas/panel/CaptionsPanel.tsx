@@ -84,7 +84,24 @@ export function CaptionsPanel() {
 						<CaptionPresetGrid style={style} onSelect={setStyle} />
 					</PanelCard>
 
-					<PanelCard title="Text">
+					<PanelCard title="Placement">
+						<PanelField label="Horizontal">
+							<MediaToggle
+								value={style.alignX}
+								options={ALIGN_X_OPTIONS}
+								onChange={(alignX) => setStyle({ alignX })}
+							/>
+						</PanelField>
+						<PanelField label="Vertical">
+							<MediaToggle
+								value={style.alignY}
+								options={ALIGN_Y_OPTIONS}
+								onChange={(alignY) => setStyle({ alignY })}
+							/>
+						</PanelField>
+					</PanelCard>
+
+					<PanelCard title="Typography">
 						<div className="flex items-center gap-2">
 							<div className="min-w-0 flex-1">
 								<CaptionFontField
@@ -127,49 +144,18 @@ export function CaptionsPanel() {
 						</PanelField>
 					</PanelCard>
 
-					<PanelCard title="Placement">
-						<PanelField label="Horizontal">
-							<MediaToggle
-								value={style.alignX}
-								options={ALIGN_X_OPTIONS}
-								onChange={(alignX) => setStyle({ alignX })}
-							/>
-						</PanelField>
-						<PanelField label="Vertical">
-							<MediaToggle
-								value={style.alignY}
-								options={ALIGN_Y_OPTIONS}
-								onChange={(alignY) => setStyle({ alignY })}
-							/>
-						</PanelField>
-					</PanelCard>
-
-					<PanelCard title="Style">
+					<PanelCard title="Word style">
 						<CaptionTextStyleFields
 							value={style.base}
 							onChange={(base) => setStyle({ base })}
 						/>
 					</PanelCard>
 
-					<PanelCard title="Active word">
+					<PanelCard title="Active word style">
 						<CaptionTextStyleFields
 							value={style.activeWord}
 							onChange={(activeWord) => setStyle({ activeWord })}
 						/>
-						<PanelField label="Size">
-							<NumberScrubber
-								label="Active word size"
-								tooltip="Active word size, relative to the caption"
-								className="h-8"
-								icon={TextSize}
-								value={style.activeWord.scale}
-								suffix="%"
-								{...CAPTION_RANGES.activeScale}
-								onChange={(scale) =>
-									setStyle({ activeWord: { ...style.activeWord, scale } })
-								}
-							/>
-						</PanelField>
 					</PanelCard>
 				</>
 			)}
