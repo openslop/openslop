@@ -9,6 +9,8 @@ import { ProjectTitle } from "./canvas/ProjectTitle";
 import { useEditorSession } from "./canvas/hooks/useEditorSession";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
 import { BottomTransportBar } from "./video/BottomTransportBar";
+import { Storyboard } from "./video/storyboard/Storyboard";
+import { BottomViewProvider, useBottomView } from "./video/BottomViewContext";
 import {
 	PlayerPositionProvider,
 	usePlayerPosition,
@@ -17,6 +19,7 @@ import {
 function PostPromptViewInner() {
 	const { editor, value, setValue, layoutKey } = useEditorSession();
 	const { position, visible } = usePlayerPosition();
+	const { view } = useBottomView();
 	const isTop = position === "top";
 
 	return (
@@ -50,6 +53,7 @@ function PostPromptViewInner() {
 							</div>
 
 							<BottomTransportBar />
+							{view === "storyboard" && <Storyboard editor={editor} />}
 						</div>
 					</div>
 				</div>
@@ -61,7 +65,9 @@ function PostPromptViewInner() {
 export default function PostPromptView() {
 	return (
 		<PlayerPositionProvider>
-			<PostPromptViewInner />
+			<BottomViewProvider>
+				<PostPromptViewInner />
+			</BottomViewProvider>
 		</PlayerPositionProvider>
 	);
 }

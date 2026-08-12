@@ -21,6 +21,7 @@ type VideoLayoutValue = {
 	ready: boolean;
 	playerKey: string;
 	segments: SceneSegment[];
+	scenes: SceneElement[];
 	sequenceByElementId: SequenceIndex;
 };
 
@@ -50,8 +51,8 @@ export function VideoLayoutProvider({
 		[scenes, layout, sequenceByElementId],
 	);
 	const value = useMemo(
-		() => ({ layout, ready, playerKey, segments, sequenceByElementId }),
-		[layout, ready, playerKey, segments, sequenceByElementId],
+		() => ({ layout, ready, playerKey, segments, scenes, sequenceByElementId }),
+		[layout, ready, playerKey, segments, scenes, sequenceByElementId],
 	);
 	return <VideoLayoutContext value={value}>{children}</VideoLayoutContext>;
 }
