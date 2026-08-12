@@ -152,4 +152,25 @@ describe("collectWritableMetadata", () => {
 			style: "watercolor",
 		});
 	});
+
+	describe("narration language", () => {
+		const narrationScript = [
+			node("metadata_narration", { gender: "masculine", language: "es" }),
+		];
+
+		it("keeps a language the user picked for the narrator", () => {
+			const chosen = MetadataSchema.parse({
+				narration: { language: "en", voiceId: "pinned" },
+			});
+			expect(collectWritableMetadata(narrationScript, chosen)).toEqual({
+				narration: { gender: "masculine" },
+			});
+		});
+
+		it("takes the script's language when the narrator has none", () => {
+			expect(
+				collectWritableMetadata(narrationScript, MetadataSchema.parse({})),
+			).toEqual({ narration: { gender: "masculine", language: "es" } });
+		});
+	});
 });

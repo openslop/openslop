@@ -4,6 +4,7 @@ import type { NodeSpec } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { AttributeSchema } from "./attributes/schema";
+import type { ThinkingLevel } from "./llm/enums";
 import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
 
 export type ConnectorType =
@@ -95,7 +96,7 @@ export interface Connector {
 
 export type LLMGenerateParams = ConnectorGenerateParams & {
 	systemPrompt?: string;
-	thinkingLevel?: string;
+	thinkingLevel?: ThinkingLevel;
 	maxTokens?: number;
 	temperature?: number;
 	referenceImages?: string[];

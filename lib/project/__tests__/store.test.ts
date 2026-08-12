@@ -9,6 +9,7 @@ describe("project store updateMetadata", () => {
 		expect(store.getState().metadata).toEqual({
 			title: "",
 			style: "cinematic",
+			language: "auto",
 			narration: {},
 			characters: {},
 		});
@@ -55,6 +56,7 @@ describe("project store updateMetadata", () => {
 		expect(store.getState().metadata).toEqual({
 			title: "",
 			style: "",
+			language: "auto",
 			narration: {},
 			characters: {},
 		});

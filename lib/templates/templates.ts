@@ -283,7 +283,6 @@ export const TEMPLATES: Template[] = [
 			gender: "masculine",
 			accent: "british",
 			age: "child",
-			language: "en",
 			description: "Wistful, young male for emotional narrations",
 			voiceId: "4f7f1324-1853-48a6-b294-4e78e8036a83",
 		},
@@ -1274,7 +1273,6 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 			templateAsset("celebrity-death-4"),
 		],
 		narration: {
-			language: "en",
 			gender: "masculine",
 			age: "adult",
 			accent: "american",
@@ -1503,7 +1501,6 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 			templateAsset("stick-explainer-3"),
 		],
 		narration: {
-			language: "en",
 			gender: "masculine",
 			age: "adult",
 			accent: "american",

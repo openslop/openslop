@@ -96,6 +96,7 @@ export const Thickness = icon("thickness");
 export const TextSize = icon("text-size");
 export const TextBox = icon("text-box");
 export const TextBoxFill = icon("text-box-fill");
+export const Translate = icon("translate");
 export const Trash2 = icon("trash");
 export const Underline = icon("underline");
 export const User = icon("user");

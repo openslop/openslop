@@ -59,6 +59,18 @@ describe("storyModePlugin", () => {
 		expect(result).toContain("same language as the following outline");
 	});
 
+	it("pins both hops to the project's language, like the OSML prompt does", async () => {
+		const gateway = new RecordingLLMGateway();
+		const result = await transformPrompt("a knight and a dragon", {
+			gateway,
+			state: { metadata: { language: "fr" } },
+		} as never);
+
+		expect(gateway.prompts.at(0)).toContain("outline in fr (ISO 639-1)");
+		expect(result).toContain("in fr (ISO 639-1)");
+		expect(result).not.toContain("same language as the following outline");
+	});
+
 	it("throws when no context is provided", async () => {
 		await expect(transformPrompt("test")).rejects.toThrow(
 			"story-mode plugin requires gateway context",

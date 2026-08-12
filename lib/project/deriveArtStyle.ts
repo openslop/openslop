@@ -32,6 +32,7 @@ export async function deriveArtStyle(
 		prompt: DERIVE_PROMPT,
 		referenceImages,
 		maxTokens: 4096,
+		thinkingLevel: "low",
 	});
 	return text.trim();
 }

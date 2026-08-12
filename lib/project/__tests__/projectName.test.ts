@@ -5,6 +5,7 @@ import type { Metadata } from "../types";
 const base: Metadata = {
 	title: "",
 	style: "",
+	language: "auto",
 	narration: {},
 	characters: {},
 };

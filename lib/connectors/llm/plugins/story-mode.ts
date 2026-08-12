@@ -6,6 +6,7 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 import { requireGateway } from "@/lib/connectors/plugins";
+import { spokenLanguage } from "./language-prompt";
 import { prependSystemPrompt } from "./system-prompt";
 
 const STORY_MODE_SYSTEM_PROMPT = dedent`You are a highly engaging storyteller who expertly narrates video stories.
@@ -24,10 +25,11 @@ export const storyModePlugin: LLMPlugin = {
 		ctx?: PluginContext<LLMGenerateParams, LLMGenerateResult>,
 	) {
 		const gateway = requireGateway(ctx, "story-mode");
+		const { metadata } = ctx?.state ?? {};
 		const { text: outline } = await gateway.generate({
-			prompt: dedent`Outline an engaging story with a high-concept premise, characters, themes, conflict, twists, and a resolution. The story should be about the following: ${prompt}. Write the outline in the same language as that input. Do not write anything else, just the outline.`,
+			prompt: dedent`Outline an engaging story with a high-concept premise, characters, themes, conflict, twists, and a resolution. The story should be about the following: ${prompt}. Write the outline in ${spokenLanguage(metadata, "the same language as that input")}. Do not write anything else, just the outline.`,
 			maxTokens: 8192,
 		});
-		return dedent`Write a complete, engaging, and simple story for a 5th-grade reading level, in the same language as the following outline: ${outline}`;
+		return dedent`Write a complete, engaging, and simple story for a 5th-grade reading level, in ${spokenLanguage(metadata, "the same language as the following outline")}, based on the following outline: ${outline}`;
 	},
 };

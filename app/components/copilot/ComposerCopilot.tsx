@@ -11,6 +11,7 @@ import {
 	Palette,
 	Plus,
 	Proportions,
+	Translate,
 	User,
 	X,
 } from "@/components/ui/icon";
@@ -25,6 +26,12 @@ import {
 } from "@/lib/templates/templates";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProject } from "@/lib/project/useProject";
+import {
+	LANGUAGE_CHOICES,
+	languageLabel,
+	type LanguageChoice,
+} from "@/lib/project/language";
+import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import { useAspectRatio } from "@/lib/video/useAspectRatio";
@@ -56,6 +63,9 @@ const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
 const VIDEO_LENGTH_OPTIONS: SelectMenuOption<VideoLength>[] = VIDEO_LENGTHS.map(
 	(value) => ({ value, label: VIDEO_LENGTH_SPECS[value].label }),
 );
+
+const LANGUAGE_OPTIONS: SelectMenuOption<LanguageChoice>[] =
+	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
 
 const TEMPLATE_OPTIONS: SelectMenuOption<string>[] = TEMPLATES.map((t) => ({
 	value: t.id,
@@ -197,6 +207,7 @@ export default function ComposerCopilot({
 	const videoLength = useVideoLength();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
+	const [language, setLanguage] = useScriptLanguage();
 	const {
 		openCreateCharacter,
 		editCharacter,
@@ -209,6 +220,7 @@ export default function ComposerCopilot({
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const isTemplateMode = mode === "template";
 	const isScriptMode = mode === "script";
+	const languageName = languageLabel(language);
 	const hasText = value.trim().length > 0;
 	const selectedTemplate = getTemplate(selectedTemplateId);
 
@@ -290,6 +302,18 @@ export default function ComposerCopilot({
 								aria-label={`Aspect ratio: ${aspectRatio}`}
 								icon={<Proportions className="mr-1 h-3 w-3" />}
 								label={aspectRatio}
+							/>
+						</SelectMenu>
+						<SelectMenu
+							value={language}
+							onChange={setLanguage}
+							options={LANGUAGE_OPTIONS}
+							itemClassName="rounded-lg text-label-xs"
+						>
+							<PillTrigger
+								aria-label={`Language: ${languageName}`}
+								icon={<Translate className="mr-1 h-3 w-3" />}
+								label={languageName}
 							/>
 						</SelectMenu>
 						{!isScriptMode && (

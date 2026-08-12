@@ -69,8 +69,18 @@ describe("createTemplateModePlugin", () => {
 		it("pastiches the example's form without inheriting its language", async () => {
 			const { transformPrompt } = createTemplateModePlugin(realTemplate.id);
 			const result = await transformPrompt?.("un PDG de la tech", fakeCtx);
-			expect(result).toContain("language of the user_input");
+			expect(result).toContain("same language that the user_input is in");
 			expect(result).not.toContain("tone, language, pacing");
+			expect(result).not.toContain("not the language of the example");
+		});
+
+		it("pins the story to the project's language, like the OSML prompt does", async () => {
+			const { transformPrompt } = createTemplateModePlugin(realTemplate.id);
+			const result = await transformPrompt?.("a tech CEO", {
+				state: { metadata: { language: "fr" } },
+			} as never);
+			expect(result).toContain("Write the story in fr (ISO 639-1)");
+			expect(result).not.toContain("same language that the user_input is in");
 		});
 
 		it("rejects when templateId is unknown", async () => {

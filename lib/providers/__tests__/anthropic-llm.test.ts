@@ -20,7 +20,7 @@ describe("AnthropicLLM", () => {
 		it("returns text and usage with defaults", async () => {
 			mockCreate.mockResolvedValue({
 				content: [{ type: "text", text: "Hello world" }],
-				model: "claude-opus-4-8",
+				model: "claude-opus-5",
 				usage: { input_tokens: 10, output_tokens: 5 },
 			});
 
@@ -29,13 +29,14 @@ describe("AnthropicLLM", () => {
 
 			expect(result).toEqual({
 				text: "Hello world",
-				model: "claude-opus-4-8",
+				model: "claude-opus-5",
 				usage: { inputTokens: 10, outputTokens: 5 },
 			});
 			expect(mockCreate).toHaveBeenCalledWith({
-				model: "claude-opus-4-8",
+				model: "claude-opus-5",
 				max_tokens: 65536,
-				temperature: undefined,
+				thinking: { type: "adaptive" },
+				output_config: { effort: "high" },
 				system: undefined,
 				messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],
 			});
@@ -54,22 +55,36 @@ describe("AnthropicLLM", () => {
 				model: "custom",
 				systemPrompt: "You are helpful",
 				maxTokens: 100,
-				temperature: 0.5,
+				thinkingLevel: "low",
 			});
 
 			expect(mockCreate).toHaveBeenCalledWith({
 				model: "custom",
 				max_tokens: 100,
-				temperature: 0.5,
+				thinking: { type: "adaptive" },
+				output_config: { effort: "low" },
 				system: "You are helpful",
 				messages: [{ role: "user", content: [{ type: "text", text: "test" }] }],
 			});
 		});
 
+		it("drops temperature, which Claude rejects", async () => {
+			mockCreate.mockResolvedValue({
+				content: [{ type: "text", text: "ok" }],
+				model: "claude-opus-5",
+				usage: { input_tokens: 1, output_tokens: 1 },
+			});
+
+			const provider = new AnthropicLLM("test-key");
+			await provider.generate({ prompt: "hi", temperature: 0.5 });
+
+			expect(mockCreate.mock.calls[0][0]).not.toHaveProperty("temperature");
+		});
+
 		it("includes reference images as url blocks before the text", async () => {
 			mockCreate.mockResolvedValue({
 				content: [{ type: "text", text: "ok" }],
-				model: "claude-opus-4-8",
+				model: "claude-opus-5",
 				usage: { input_tokens: 1, output_tokens: 1 },
 			});
 

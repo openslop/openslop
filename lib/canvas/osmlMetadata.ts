@@ -52,20 +52,14 @@ export function collectMetadata(nodes: ParsedElement[]): DeepPartial<Metadata> {
 	return metadata;
 }
 
-type TextMetadataKey = {
-	[K in keyof Metadata]-?: Metadata[K] extends string ? K : never;
-}[keyof Metadata];
-
-/** Fields the script may fill in but never rewrite: once set, they are the user's. */
-const WRITE_ONCE: readonly TextMetadataKey[] = ["style"];
-
 export function collectWritableMetadata(
 	nodes: ParsedElement[],
 	stored: Metadata,
 ): DeepPartial<Metadata> {
 	const patch = collectMetadata(nodes);
-	for (const field of WRITE_ONCE) {
-		if (stored[field].trim()) delete patch[field];
-	}
+
+	// Once the user sets these, the LLM-generated script shouldn't overwrite them
+	if (stored.style.trim()) delete patch.style;
+	if (stored.narration.language) delete patch.narration?.language;
 	return patch;
 }
