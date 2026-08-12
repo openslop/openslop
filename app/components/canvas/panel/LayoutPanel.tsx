@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select-field";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { usePlayerPosition } from "@/app/components/video/PlayerPositionContext";
-import { useViewMode } from "../ViewModeContext";
+import { useHasCollapsed, useViewMode } from "../ViewModeContext";
 import { PanelCard, PanelField } from "./PanelCard";
 
 type PlayerPositionValue = "top" | "right" | "hidden";
@@ -21,7 +21,8 @@ type PlayerPositionValue = "top" | "right" | "hidden";
 export function LayoutPanel() {
 	const { position, visible, setPosition, setVisible, narrowViewport } =
 		usePlayerPosition();
-	const { hasCollapsed, expandAll, collapseAll } = useViewMode();
+	const { expandAll, collapseAll } = useViewMode();
+	const hasCollapsed = useHasCollapsed();
 	const { enabled, setEnabled } = useAutoScroll();
 
 	const positionValue: PlayerPositionValue = visible ? position : "hidden";

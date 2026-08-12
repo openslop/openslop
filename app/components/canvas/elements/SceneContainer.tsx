@@ -8,7 +8,7 @@ import type { SceneElement } from "@/lib/canvas/types";
 import { useSceneSequence } from "@/app/components/video/VideoLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
 import { useDropIndex } from "../dnd/DragTransferContext";
-import { useViewMode } from "../ViewModeContext";
+import { useIsCollapsed, useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 import { DeleteButton } from "./DeleteButton";
 import { ForegroundPreview } from "./ForegroundPreview";
@@ -178,8 +178,8 @@ function ExpandedScene({
 }
 
 export function SceneContainer(props: SceneProps) {
-	const { isCollapsed } = useViewMode();
-	return isCollapsed(props.element.id) ? (
+	const collapsed = useIsCollapsed(props.element.id);
+	return collapsed ? (
 		<CollapsedScene {...props} />
 	) : (
 		<ExpandedScene {...props} />
