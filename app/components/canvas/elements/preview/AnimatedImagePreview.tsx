@@ -14,7 +14,6 @@ import type {
 	PlaceholderProps,
 } from "./status";
 
-/** One side of the toggle: the node it shows and that node's own progress. */
 type ModeState = GenerationState & {
 	error: string | null;
 	url: string | undefined;
@@ -25,8 +24,6 @@ type AnimatedImageMediaProps = Pick<PlaceholderProps, "onDiscard"> & {
 	still: ModeState;
 };
 
-// The toggle picks the node, so the card never blends the two: while the still
-// renders, Still shows it generating and Video honestly reads "Queued…".
 export function AnimatedImageMedia({
 	animated,
 	still,

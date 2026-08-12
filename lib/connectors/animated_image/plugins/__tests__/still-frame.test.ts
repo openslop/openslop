@@ -135,7 +135,6 @@ describe("stillSnapshot", () => {
 		expect(frameUrl(node, queue)).toBeUndefined();
 	});
 
-	// The card shows the still's progress while the animation is still queued.
 	it("reports the still node's own state, not the animation's", () => {
 		const queue = new GenerationQueue();
 		const node = nodeBuilder(registry, state)(forElement(animated));

@@ -13,6 +13,7 @@ import {
 	type GenerationNode,
 	type NodeSpec,
 } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /**
@@ -51,20 +52,13 @@ export const forStillOf =
 export const stillDependency = (node: GenerationNode) =>
 	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
 
-/** The read half of the queue, for callers that need the still's own progress. */
-type SnapshotResults = { getElementSnapshot(id?: string): ElementSnapshot };
-
 /**
- * The still node's own state: the frame the element currently has, which an
- * upload replaces immediately, plus the status and elapsed time of the run that
- * produces it. The animation's own result carries the frame it was rendered
- * from, so reading that instead would show the previous still until it
- * re-renders, and would report the animation's progress rather than the still's.
+ * The snapshot of the still a node depends on
  */
 export const stillSnapshot = (
 	node: GenerationNode,
-	results: SnapshotResults,
-): ElementSnapshot => results.getElementSnapshot(stillDependency(node)?.id);
+	queue: GenerationQueue,
+): ElementSnapshot => queue.getElementSnapshot(stillDependency(node)?.id);
 
 const stillFrame = (
 	ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,
