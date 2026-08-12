@@ -40,12 +40,3 @@ export const VIDEO_LENGTH_SPECS = {
 	"5-10m": spec("5-10 min", 300, 600),
 	"10-15m": spec("10-15 min", 600, 900),
 } satisfies Record<VideoLength, VideoLengthSpec>;
-
-type WithVideoLength = { videoSettings?: { length?: VideoLength } };
-
-export const resolveVideoLength = (metadata: WithVideoLength): VideoLength =>
-	metadata.videoSettings?.length ?? DEFAULT_VIDEO_LENGTH;
-
-export const resolveVideoLengthSpec = (
-	metadata: WithVideoLength,
-): VideoLengthSpec => VIDEO_LENGTH_SPECS[resolveVideoLength(metadata)];

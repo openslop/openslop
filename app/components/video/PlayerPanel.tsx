@@ -2,7 +2,7 @@
 
 import { memo, type ReactNode } from "react";
 import { getAspectRatioValue } from "@/lib/video/aspectRatio";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 import { ResizeHandle } from "./ResizeHandle";
 import { useResize } from "./useResize";
 import { VideoPanel } from "./VideoPanel";
@@ -35,7 +35,7 @@ function FitToAspectRatio({
 }
 
 function TopPlayerPanelComponent() {
-	const aspectRatio = useAspectRatio();
+	const aspectRatio = useVideoSetting("aspectRatio");
 
 	const { size, handleMouseDown, resizing } = useResize({
 		axis: "vertical",
@@ -61,7 +61,7 @@ function TopPlayerPanelComponent() {
 }
 
 function SidePlayerPanelComponent() {
-	const aspectRatio = useAspectRatio();
+	const aspectRatio = useVideoSetting("aspectRatio");
 
 	const { size, handleMouseDown, resizing } = useResize({
 		axis: "horizontal",

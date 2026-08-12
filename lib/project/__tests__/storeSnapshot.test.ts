@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
+import { DEFAULT_VIDEO_LENGTH } from "@/lib/video/videoLength";
 import { createProjectStore } from "../store";
+import { MetadataSchema } from "../types";
 import {
 	applyStoreSnapshot,
 	extractStoreSnapshot,
@@ -52,42 +55,37 @@ describe("storeSnapshot", () => {
 describe("parseStoreSnapshot", () => {
 	it("fills defaults for absent and partial rows", () => {
 		expect(parseStoreSnapshot(null)).toEqual({
-			metadata: {
-				title: "",
-				style: "",
-				language: "auto",
-				narration: {},
-				characters: {},
-			},
+			metadata: MetadataSchema.parse({}),
 			referenceImages: [],
 		});
-		expect(parseStoreSnapshot({ metadata: { title: "T" } }).metadata).toEqual({
-			title: "T",
-			style: "",
-			language: "auto",
-			narration: {},
-			characters: {},
-		});
+		expect(parseStoreSnapshot({ metadata: { title: "T" } }).metadata).toEqual(
+			MetadataSchema.parse({ title: "T" }),
+		);
 	});
 
-	it("keeps a full snapshot intact", () => {
-		const snapshot = {
-			metadata: {
-				title: "T",
-				style: "noir",
-				language: "es" as const,
-				narration: { age: "adult" as const },
-				characters: {
-					Ada: { appearance: "tall", gender: "feminine" as const },
-				},
-				videoSettings: {
-					aspectRatio: "9:16" as const,
-					transitionType: "fade" as const,
-				},
+	it("keeps a stored row intact and completes its video settings", () => {
+		const metadata = {
+			title: "T",
+			style: "noir",
+			language: "es" as const,
+			narration: { age: "adult" as const },
+			characters: {
+				Ada: { appearance: "tall", gender: "feminine" as const },
 			},
-			referenceImages: ["a.png"],
+			videoSettings: {
+				aspectRatio: "9:16" as const,
+				transitionType: "fade" as const,
+			},
 		};
-		expect(parseStoreSnapshot(snapshot)).toEqual(snapshot);
+		const parsed = parseStoreSnapshot({ metadata, referenceImages: ["a.png"] });
+
+		expect(parsed).toMatchObject({ metadata, referenceImages: ["a.png"] });
+		expect(parsed.metadata.videoSettings).toEqual({
+			...metadata.videoSettings,
+			length: DEFAULT_VIDEO_LENGTH,
+			captions: true,
+			captionStyle: DEFAULT_CAPTION_STYLE,
+		});
 	});
 
 	it("throws on a structurally invalid row", () => {

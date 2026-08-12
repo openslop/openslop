@@ -4,7 +4,7 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useScriptInitial } from "@/lib/script/ScriptProvider";
 import { getLayoutKey } from "@/lib/video/layoutKey";
-import { useTransitionType } from "@/lib/video/useTransitionType";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 import { useAutosave } from "./useAutosave";
 import { useEditorSetup } from "./useEditorSetup";
 import { useMetadataSync } from "./useMetadataSync";
@@ -32,7 +32,7 @@ export function useEditorSession(): EditorSession {
 	useScriptSync(editor);
 	useMetadataSync();
 
-	const transitionType = useTransitionType();
+	const transitionType = useVideoSetting("transitionType");
 	const layoutKey = useMemo(
 		() => getLayoutKey(getContentElements(value), transitionType),
 		[value, transitionType],

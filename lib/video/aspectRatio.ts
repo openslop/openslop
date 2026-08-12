@@ -4,10 +4,6 @@ export type AspectRatio = (typeof ASPECT_RATIOS)[number];
 
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
-export const resolveAspectRatio = (metadata: {
-	videoSettings?: { aspectRatio?: AspectRatio };
-}): AspectRatio => metadata.videoSettings?.aspectRatio ?? DEFAULT_ASPECT_RATIO;
-
 export const ASPECT_RATIO_DIMENSIONS: Record<
 	AspectRatio,
 	{

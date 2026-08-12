@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/video/aspectRatio";
 import { CAPTION_SAMPLE_WORDS } from "@/lib/video/captionPresets";
 import { captionFontSizePx, type CaptionStyle } from "@/lib/video/captionStyle";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 import { CaptionStage, useCaptionCycle } from "./CaptionStage";
 
 const MAX_HEIGHT = 168;
@@ -27,7 +27,7 @@ function useMeasuredWidth(): [(node: HTMLDivElement | null) => void, number] {
  * plays on hover like the preset thumbnails, so an idle panel holds still.
  */
 export function CaptionPreview({ style }: { style: CaptionStyle }) {
-	const aspectRatio = useAspectRatio();
+	const aspectRatio = useVideoSetting("aspectRatio");
 	const [ref, available] = useMeasuredWidth();
 	const [playing, setPlaying] = useState(false);
 	const output = ASPECT_RATIO_DIMENSIONS[aspectRatio].output;

@@ -1,18 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { createProjectStore } from "../store";
+import { MetadataSchema } from "../types";
 
 describe("project store updateMetadata", () => {
 	it("sets style without touching characters or narration", () => {
 		const store = createProjectStore();
 		store.getState().updateMetadata({ style: "cinematic" });
 
-		expect(store.getState().metadata).toEqual({
-			title: "",
-			style: "cinematic",
-			language: "auto",
-			narration: {},
-			characters: {},
-		});
+		expect(store.getState().metadata).toEqual(
+			MetadataSchema.parse({ style: "cinematic" }),
+		);
 	});
 
 	it("deep-merges narration so prior voice attributes are preserved", () => {
@@ -53,13 +50,7 @@ describe("project store updateMetadata", () => {
 
 		store.getState().reset();
 
-		expect(store.getState().metadata).toEqual({
-			title: "",
-			style: "",
-			language: "auto",
-			narration: {},
-			characters: {},
-		});
+		expect(store.getState().metadata).toEqual(MetadataSchema.parse({}));
 		expect(store.getState().referenceImages).toEqual([]);
 	});
 

@@ -34,13 +34,12 @@ import {
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
 	VIDEO_LENGTH_SPECS,
 	type VideoLength,
 } from "@/lib/video/videoLength";
-import { useVideoLength } from "@/lib/video/useVideoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
@@ -203,8 +202,8 @@ export default function ComposerCopilot({
 	placeholderOverlay,
 }: ComposerCopilotProps) {
 	const { mode, setMode, selectedTemplateId, selectTemplate } = useConfig();
-	const aspectRatio = useAspectRatio();
-	const videoLength = useVideoLength();
+	const aspectRatio = useVideoSetting("aspectRatio");
+	const videoLength = useVideoSetting("length");
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();

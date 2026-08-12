@@ -1,14 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { deriveProjectName } from "../projectName";
-import type { Metadata } from "../types";
+import { MetadataSchema, type Metadata } from "../types";
 
-const base: Metadata = {
-	title: "",
-	style: "",
-	language: "auto",
-	narration: {},
-	characters: {},
-};
+const base: Metadata = MetadataSchema.parse({});
 
 describe("deriveProjectName", () => {
 	it("returns 'Untitled' for missing metadata", () => {
