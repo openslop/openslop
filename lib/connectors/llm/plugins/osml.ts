@@ -72,6 +72,7 @@ ${languagePrompt(language)}
 		EffectType,
 	).join(", ")}
   - Image descriptions should describe the time of day, the background, the weather (if outdoors), and objects in detail.
+  - Each image must depict the specific moment described by the narration and dialogue that follow it, up to the next image tag: the concrete subject, action, and expression of those lines, not just the scene's general setting. If the line names an object, a gesture, or a reaction, it belongs in the description.
   - Each <image> description must be written as a standalone prompt, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
 	- Reference characters by their names in the image description, NEVER describe their appearance in the image description
   - Each image description should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous descriptions or the story.
@@ -83,7 +84,7 @@ ${languagePrompt(language)}
   - duration: optional. The length of the animated clip in seconds (default 5). Allowed values: ${DURATION_OPTIONS.join(", ")}.
   - motion: normally set to "none". Only set a motion effect when the videoPrompt describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
   - characters: optional. Same as for <image> — a comma-separated list of exact story character names appearing in the frame. Example: <animated_image videoPrompt="..." characters="Red,Granny">Red hands the basket to Granny at the cottage door.</animated_image>
-  - All <image> description rules apply unchanged: write a prompt that describes the time of day, background, weather, and objects in detail. Repeat any details necessary even if they appeared in earlier prompts.
+  - All <image> description rules apply unchanged: depict the moment the following narration and dialogue describe, and write a prompt that describes the time of day, background, weather, and objects in detail. Repeat any details necessary even if they appeared in earlier prompts.
   - Use <animated_image> sparingly — mostly at intro shots and hero moments. Default to <image> for typical scenes; image-to-video generation is significantly slower and more expensive.
 
   ### Sound XML Tags
