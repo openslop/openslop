@@ -3,24 +3,34 @@
 import { useState, type CSSProperties } from "react";
 import { Image as ImageIcon, Video } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
-import { stillFrameUrl } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { stillSnapshot } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { useElementGeneration } from "../ElementGenerationContext";
 import { MediaResult } from "./results";
-import type { ElementPreviewProps, PlaceholderProps } from "./status";
+import type {
+	ElementPreviewProps,
+	GenerationState,
+	PlaceholderProps,
+} from "./status";
 
-type AnimatedImageMediaProps = PlaceholderProps & {
-	stillUrl?: string;
-	videoUrl?: string;
+type ModeState = GenerationState & {
+	error: string | null;
+	url: string | undefined;
+};
+
+type AnimatedImageMediaProps = Pick<PlaceholderProps, "onDiscard"> & {
+	animated: ModeState;
+	still: ModeState;
 };
 
 export function AnimatedImageMedia({
-	stillUrl,
-	videoUrl,
-	...state
+	animated,
+	still,
+	onDiscard,
 }: AnimatedImageMediaProps) {
 	const [mode, setMode] = useState<"animated" | "still">("animated");
-	const animated = mode === "animated";
+	const { url, ...state } = mode === "animated" ? animated : still;
 
 	return (
 		<div
@@ -29,8 +39,9 @@ export function AnimatedImageMedia({
 		>
 			<MediaResult
 				{...state}
-				url={animated ? videoUrl : stillUrl}
-				outputKind={animated ? "video" : "image"}
+				onDiscard={onDiscard}
+				url={url}
+				outputKind={mode === "animated" ? "video" : "image"}
 			/>
 			<MediaToggle
 				className="absolute top-2 right-2 z-30 shadow-sm"
@@ -46,17 +57,25 @@ export function AnimatedImageMedia({
 }
 
 export function AnimatedImagePreview({
+	status,
+	seconds,
+	error,
 	result,
-	...state
+	onDiscard,
 }: ElementPreviewProps) {
 	const { node } = useElementGeneration();
-	const stillUrl = useQueueSelector((queue) => stillFrameUrl(node, queue));
+	const still = useQueueSelector((queue) => stillSnapshot(node, queue));
 
 	return (
 		<AnimatedImageMedia
-			{...state}
-			stillUrl={stillUrl}
-			videoUrl={result?.videoUrl}
+			onDiscard={onDiscard}
+			animated={{ status, seconds, error, url: result?.videoUrl }}
+			still={{
+				status: still.status,
+				seconds: still.seconds,
+				error: still.error,
+				url: getPrimaryUrl(still.result, "image"),
+			}}
 		/>
 	);
 }

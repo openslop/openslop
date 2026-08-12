@@ -8,13 +8,13 @@ import type {
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import { DEFAULT_PROVIDER } from "@/lib/connectors/registry";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	derivedNodeId,
 	type GenerationNode,
-	type NodeResults,
 	type NodeSpec,
 } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /**
  * Attributes that drive only the animation. `model` is among them: it names a
@@ -53,16 +53,12 @@ export const stillDependency = (node: GenerationNode) =>
 	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
 
 /**
- * The frame the element currently has, which an upload replaces immediately. The
- * animation's own result carries the frame it was rendered from, so reading that
- * instead would show the previous still until it re-renders.
+ * The snapshot of the still a node depends on
  */
-export const stillFrameUrl = (node: GenerationNode, results: NodeResults) => {
-	const still = stillDependency(node);
-	return still
-		? getPrimaryUrl(results.getElementSnapshot(still.id).result, "image")
-		: undefined;
-};
+export const stillSnapshot = (
+	node: GenerationNode,
+	queue: GenerationQueue,
+): ElementSnapshot => queue.getElementSnapshot(stillDependency(node)?.id);
 
 const stillFrame = (
 	ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,
