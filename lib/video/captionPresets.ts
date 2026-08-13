@@ -22,7 +22,7 @@ const text = (style: Partial<CaptionTextStyle>): CaptionTextStyle => ({
 });
 
 export const CAPTION_PRESETS: readonly CaptionPreset[] = [
-	preset("classic", "Classic", {}),
+	preset("classic", "Classic", { alignX: "center" }),
 	preset("karaoke", "Karaoke", {
 		font: "bangers",
 		fontSize: 62,
