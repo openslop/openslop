@@ -1,9 +1,11 @@
 "use client";
 
 import { SelectField } from "@/components/ui/select-field";
-import { useProject } from "@/lib/project/useProject";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
-import { useVideoSetting } from "@/lib/video/useVideoSetting";
+import {
+	useUpdateVideoSettings,
+	useVideoSetting,
+} from "@/lib/video/useVideoSetting";
 import { PanelCard, PanelField } from "./PanelCard";
 
 const LABELS: Record<TransitionType, string> = {
@@ -23,10 +25,10 @@ const OPTIONS = TRANSITION_TYPES.map((value) => ({
 
 export function PropertiesPanel() {
 	const transitionType = useVideoSetting("transitionType");
-	const updateMetadata = useProject((s) => s.updateMetadata);
+	const updateVideoSettings = useUpdateVideoSettings();
 
 	const setTransitionType = (value: TransitionType) =>
-		updateMetadata({ videoSettings: { transitionType: value } });
+		updateVideoSettings({ transitionType: value });
 
 	return (
 		<PanelCard title="Transition">
