@@ -11,7 +11,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-/** Confirmation gate for deletions the app cannot undo. */
+/** Confirmation gate for destructive actions. */
 export function ConfirmDeleteDialog({
 	open,
 	onOpenChange,

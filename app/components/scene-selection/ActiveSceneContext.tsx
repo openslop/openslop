@@ -3,6 +3,8 @@
 import { useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
+export const ACTIVE_SCENE_CLASS = "scene-active bg-element-card";
+
 const [ValueContext, useActiveSceneId] = createRequiredContext<string | null>(
 	"ActiveSceneValueContext",
 );

@@ -12,6 +12,7 @@ import {
 	type SelectFieldOption,
 } from "@/components/ui/select-field";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
+import { BottomViewToggle } from "@/app/components/video/BottomViewToggle";
 import { usePlayerPosition } from "@/app/components/video/PlayerPositionContext";
 import { useViewMode } from "../ViewModeContext";
 import { PanelCard, PanelField } from "./PanelCard";
@@ -50,6 +51,9 @@ export function LayoutPanel() {
 						onChange={onPositionChange}
 						ariaLabel="Player position"
 					/>
+				</PanelField>
+				<PanelField label="Bottom panel">
+					<BottomViewToggle />
 				</PanelField>
 				<PanelField label="Scenes">
 					<MediaToggle

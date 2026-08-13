@@ -5,6 +5,7 @@ import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/video/frames";
+import { BottomViewToggle } from "./BottomViewToggle";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerPosition } from "./PlayerPositionContext";
 import { useLayout } from "./VideoLayoutContext";
@@ -90,6 +91,7 @@ function BottomTransportBarComponent() {
 				<div className="flex flex-1 items-center justify-end gap-1.5">
 					<VolumeControl />
 					<FullscreenButton />
+					<BottomViewToggle />
 				</div>
 			</div>
 		</div>
