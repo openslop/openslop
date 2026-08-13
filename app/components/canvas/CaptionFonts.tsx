@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { loadCaptionFonts, type CaptionFont } from "@/lib/video/captionFonts";
-import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
 import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 
 const register = (fonts?: readonly CaptionFont[]) =>
 	loadCaptionFonts((file) => `/fonts/${file}`, fonts).catch((error: unknown) =>
@@ -12,7 +12,7 @@ const register = (fonts?: readonly CaptionFont[]) =>
 
 /** The one face the project captions with, so the preview draws what it exports. */
 export function ActiveCaptionFont() {
-	const enabled = useCaptionsEnabled();
+	const enabled = useVideoSetting("captions");
 	const [style] = useCaptionStyle();
 	const font = enabled ? style.font : null;
 

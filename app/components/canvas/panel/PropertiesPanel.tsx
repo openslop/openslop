@@ -3,7 +3,7 @@
 import { SelectField } from "@/components/ui/select-field";
 import { useProject } from "@/lib/project/useProject";
 import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
-import { useTransitionType } from "@/lib/video/useTransitionType";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 import { PanelCard, PanelField } from "./PanelCard";
 
 const LABELS: Record<TransitionType, string> = {
@@ -22,7 +22,7 @@ const OPTIONS = TRANSITION_TYPES.map((value) => ({
 }));
 
 export function PropertiesPanel() {
-	const transitionType = useTransitionType();
+	const transitionType = useVideoSetting("transitionType");
 	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	const setTransitionType = (value: TransitionType) =>

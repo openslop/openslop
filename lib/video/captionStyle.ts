@@ -112,8 +112,3 @@ export const CAPTION_PALETTE = [
 	"#4dabf7",
 	"#43e97b",
 ] as const;
-
-export const resolveCaptionStyle = (metadata: {
-	videoSettings?: { captionStyle?: CaptionStyle };
-}): CaptionStyle =>
-	metadata.videoSettings?.captionStyle ?? DEFAULT_CAPTION_STYLE;

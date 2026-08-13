@@ -1,8 +1,5 @@
 import type { ProjectData } from "@/lib/project/store";
-import {
-	ASPECT_RATIO_DIMENSIONS,
-	resolveAspectRatio,
-} from "@/lib/video/aspectRatio";
+import { ASPECT_RATIO_DIMENSIONS } from "@/lib/video/aspectRatio";
 import { sourceNode, type NodeSpec } from "./graph";
 
 /**
@@ -19,7 +16,7 @@ export const forArtStyle: NodeSpec = (state) =>
 
 export const forAspectRatio: NodeSpec = (state) =>
 	sourceNode("project:aspectRatio", {
-		aspectRatio: resolveAspectRatio(state.metadata),
+		aspectRatio: state.metadata.videoSettings.aspectRatio,
 	});
 
 export const forVoice =
@@ -33,4 +30,4 @@ export const forVoice =
 	};
 
 export const aspectDimensions = (state: ProjectData) =>
-	ASPECT_RATIO_DIMENSIONS[resolveAspectRatio(state.metadata)];
+	ASPECT_RATIO_DIMENSIONS[state.metadata.videoSettings.aspectRatio];

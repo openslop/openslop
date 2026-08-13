@@ -7,10 +7,7 @@ import {
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
-import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
-import { CaptionStyleSchema } from "@/lib/video/captionStyle";
-import { VIDEO_LENGTHS } from "@/lib/video/videoLength";
-import { TRANSITION_TYPES } from "@/lib/video/transitions";
+import { VideoSettingsSchema } from "@/lib/video/videoSettings";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
 
@@ -50,14 +47,6 @@ export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 
 export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
 
-const VideoSettingsSchema = z.object({
-	transitionType: z.enum(TRANSITION_TYPES).optional(),
-	aspectRatio: z.enum(ASPECT_RATIOS).optional(),
-	length: z.enum(VIDEO_LENGTHS).optional(),
-	captions: z.boolean().optional(),
-	captionStyle: CaptionStyleSchema.optional().catch(undefined),
-});
-
 export const MODES = ["story", "script", "template"] as const;
 
 export type Mode = (typeof MODES)[number];
@@ -71,7 +60,7 @@ export const MetadataSchema = z.object({
 		.catch(AUTO_LANGUAGE),
 	narration: MetadataVoiceSchema.default({}),
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
-	videoSettings: VideoSettingsSchema.optional(),
+	videoSettings: VideoSettingsSchema,
 	/** Persisted for server-side observability of prompt activity; not read in-app. */
 	lastMode: z.enum(MODES).optional(),
 	lastPrompt: z.string().optional(),

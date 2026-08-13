@@ -1,12 +1,12 @@
 import merge from "lodash/merge";
 import { immer } from "zustand/middleware/immer";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { AUTO_LANGUAGE } from "./language";
-import type {
-	DeepPartial,
-	Metadata,
-	MetadataCharacter,
-	MetadataVoice,
+import {
+	MetadataSchema,
+	type DeepPartial,
+	type Metadata,
+	type MetadataCharacter,
+	type MetadataVoice,
 } from "./types";
 
 /** What a project holds. Generation reads this; only the UI calls the setters. */
@@ -33,13 +33,7 @@ export type ProjectStore = StoreApi<ProjectContext>;
 
 const initialState = {
 	hydrated: false,
-	metadata: {
-		title: "",
-		style: "",
-		language: AUTO_LANGUAGE,
-		narration: {},
-		characters: {},
-	} as Metadata,
+	metadata: MetadataSchema.parse({}),
 	referenceImages: [] as string[],
 };
 

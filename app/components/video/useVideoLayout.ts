@@ -8,10 +8,8 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { resolveElements } from "@/lib/video/resolve";
 import { buildVideoLayout } from "@/lib/video/scene-builder";
-import { useAspectRatio } from "@/lib/video/useAspectRatio";
-import { useCaptionsEnabled } from "@/lib/video/useCaptionsEnabled";
 import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
-import { useTransitionType } from "@/lib/video/useTransitionType";
+import { useVideoSetting } from "@/lib/video/useVideoSetting";
 import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(
@@ -24,9 +22,9 @@ export function useVideoLayout(
 } {
 	const queue = useGenerationQueue();
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
-	const transitionType = useTransitionType();
-	const aspectRatio = useAspectRatio();
-	const captionsEnabled = useCaptionsEnabled();
+	const transitionType = useVideoSetting("transitionType");
+	const aspectRatio = useVideoSetting("aspectRatio");
+	const captionsEnabled = useVideoSetting("captions");
 	const [captionStyle] = useCaptionStyle();
 
 	const { layout, scenes } = useMemo(() => {
