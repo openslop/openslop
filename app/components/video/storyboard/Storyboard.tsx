@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment, useMemo } from "react";
+import { Fragment, useMemo, useState } from "react";
 import type { Editor } from "slate";
 import { ReactEditor } from "slate-react";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { removeElement } from "@/app/components/canvas/utils/nodeOps";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
@@ -12,18 +13,18 @@ import { toFrames } from "@/lib/video/frames";
 import { usePlayerControl } from "../PlayerControlContext";
 import { useLayout } from "../VideoLayoutContext";
 import { SceneInsertHandle } from "./SceneInsertHandle";
-import { buildStoryboardScenes } from "./storyboardScenes";
+import {
+	buildStoryboardScenes,
+	type StoryboardScene as StoryboardSceneData,
+} from "./storyboardScenes";
 import { StoryboardScene } from "./StoryboardScene";
 
-/**
- * Read-only strip of the project's scenes in order, sharing the seek bar's
- * segments so a thumbnail seeks to exactly the frame its scene starts on.
- */
 export function Storyboard({ editor }: { editor: Editor }) {
 	const { layout, segments, scenes } = useLayout();
 	const { player } = usePlayerControl();
 	const { connectorConfig } = useConfig();
 	const setActiveSceneId = useSetActiveSceneId();
+	const [deleting, setDeleting] = useState<StoryboardSceneData | null>(null);
 
 	const items = useMemo(
 		() => buildStoryboardScenes(scenes, segments),
@@ -57,11 +58,24 @@ export function Storyboard({ editor }: { editor: Editor }) {
 							if (item.start === null) return;
 							player?.seekTo(toFrames(item.start, layout.fps));
 						}}
-						onDelete={() => removeElement(editor, item.scene)}
+						onRequestDelete={() => setDeleting(item)}
 					/>
 				</Fragment>
 			))}
 			<SceneInsertHandle onInsert={() => addSceneBefore(items.length)} />
+			<ConfirmDeleteDialog
+				open={deleting !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeleting(null);
+				}}
+				title={`Delete scene ${deleting?.sceneIndex}?`}
+				description="This removes the scene and everything in it. Undo from the canvas to bring it back."
+				actionLabel="Delete scene"
+				onConfirm={() => {
+					if (deleting) removeElement(editor, deleting.scene);
+					setDeleting(null);
+				}}
+			/>
 		</section>
 	);
 }

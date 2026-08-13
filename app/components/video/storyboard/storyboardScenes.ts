@@ -10,11 +10,7 @@ export type StoryboardScene = {
 	start: number | null;
 };
 
-/**
- * Joins every scene in the document to its rendered segment. Scenes whose
- * foreground has not generated yet have no segment, so the storyboard shows
- * them as placeholders rather than dropping them the way the seek bar does.
- */
+/** Unlike the seek bar, a scene with no segment yet is kept as a placeholder. */
 export function buildStoryboardScenes(
 	scenes: SceneElement[],
 	segments: SceneSegment[],

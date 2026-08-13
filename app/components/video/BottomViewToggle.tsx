@@ -1,6 +1,6 @@
 "use client";
 
-import { Cards, CollapseTimeline } from "@/components/ui/icon";
+import { CollapseTimeline, ExpandTimeline } from "@/components/ui/icon";
 import {
 	MediaToggle,
 	type MediaToggleOption,
@@ -8,7 +8,7 @@ import {
 import { useBottomView, type BottomView } from "./BottomViewContext";
 
 const OPTIONS: MediaToggleOption<BottomView>[] = [
-	{ value: "storyboard", label: "Storyboard view", icon: Cards },
+	{ value: "storyboard", label: "Storyboard view", icon: ExpandTimeline },
 	{ value: "hidden", label: "Hide bottom panel", icon: CollapseTimeline },
 ];
 

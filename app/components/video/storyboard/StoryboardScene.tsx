@@ -11,19 +11,19 @@ export function StoryboardScene({
 	item,
 	aspectRatio,
 	onSelect,
-	onDelete,
+	onRequestDelete,
 }: {
 	item: StoryboardSceneData;
 	aspectRatio: string;
 	onSelect: () => void;
-	onDelete: () => void;
+	onRequestDelete: () => void;
 }) {
 	const isActive = useActiveSceneId() === item.scene.id;
 
 	const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
 		if (event.key !== "Delete" && event.key !== "Backspace") return;
 		event.preventDefault();
-		onDelete();
+		onRequestDelete();
 	};
 
 	return (
@@ -35,7 +35,7 @@ export function StoryboardScene({
 				onClick={onSelect}
 				onKeyDown={handleKeyDown}
 				className={cn(
-					"rounded-lg p-1 transition-colors focus-ring",
+					"rounded-sm p-0.5 transition-colors focus-ring",
 					isActive ? ACTIVE_SCENE_CLASS : "hover:bg-surface-hover",
 				)}
 			>
