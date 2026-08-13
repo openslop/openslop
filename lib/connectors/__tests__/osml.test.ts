@@ -64,6 +64,19 @@ describe("osmlPlugin", () => {
 		expect(systemPrompt).not.toContain('Default to "en"');
 	});
 
+	it("ties each image to the moment its narration describes without dropping the standalone-prompt rule", () => {
+		const { systemPrompt } = beforeGenerate({ prompt: "hello" }) as {
+			systemPrompt: string;
+		};
+		expect(systemPrompt).toContain(
+			"depict the specific moment described by the narration and dialogue that follow it",
+		);
+		expect(systemPrompt).toContain("must be written as a standalone prompt");
+		expect(systemPrompt).toContain(
+			"Reference characters by their names in the image description",
+		);
+	});
+
 	it("deters motion on animated_image, which competes with the videoPrompt animation", () => {
 		const { systemPrompt } = beforeGenerate({ prompt: "hello" }) as {
 			systemPrompt: string;
