@@ -63,12 +63,14 @@ function BottomTransportBarComponent() {
 				<div className="flex items-center gap-1">
 					<TooltipIconButton
 						label="Previous scene"
+						disabled={!ready}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft className="h-4 w-4" />
 					</TooltipIconButton>
 					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
+						disabled={!ready}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
@@ -82,6 +84,7 @@ function BottomTransportBarComponent() {
 					</TooltipIconButton>
 					<TooltipIconButton
 						label="Next scene"
+						disabled={!ready}
 						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight className="h-4 w-4" />
