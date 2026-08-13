@@ -5,12 +5,14 @@ import {
 	ChevronsUpDown,
 	Circle,
 	Crosshair,
+	EyeOff,
+	PanelRight,
+	PanelTop,
 } from "@/components/ui/icon";
-import { MediaToggle } from "@/components/ui/media-toggle";
 import {
-	SelectField,
-	type SelectFieldOption,
-} from "@/components/ui/select-field";
+	MediaToggle,
+	type MediaToggleOption,
+} from "@/components/ui/media-toggle";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { BottomViewToggle } from "@/app/components/video/BottomViewToggle";
 import { usePlayerPosition } from "@/app/components/video/PlayerPositionContext";
@@ -35,17 +37,22 @@ export function LayoutPanel() {
 		setVisible(true);
 	};
 
-	const positionOptions: SelectFieldOption<PlayerPositionValue>[] = [
-		{ value: "top", label: "Top" },
-		{ value: "right", label: "Right", disabled: narrowViewport },
-		{ value: "hidden", label: "Hidden" },
+	const positionOptions: MediaToggleOption<PlayerPositionValue>[] = [
+		{ value: "top", label: "Top", icon: PanelTop },
+		{
+			value: "right",
+			label: "Right",
+			icon: PanelRight,
+			disabled: narrowViewport,
+		},
+		{ value: "hidden", label: "Hidden", icon: EyeOff },
 	];
 
 	return (
 		<>
 			<PanelCard title="View">
 				<PanelField label="Player position">
-					<SelectField
+					<MediaToggle
 						value={positionValue}
 						options={positionOptions}
 						onChange={onPositionChange}
