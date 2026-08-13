@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, KeyboardEvent } from "react";
-import { Descendant, Editor } from "slate";
-import { Slate, Editable, RenderElementProps } from "slate-react";
+import { Editor } from "slate";
+import { Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -17,15 +17,7 @@ import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { AssetsSection } from "./elements/AssetsSection";
 
-export default function Canvas({
-	editor,
-	value,
-	setValue,
-}: {
-	editor: Editor;
-	value: Descendant[];
-	setValue: (v: Descendant[]) => void;
-}) {
+export default function Canvas({ editor }: { editor: Editor }) {
 	const {
 		activeId,
 		sceneItems,
@@ -35,7 +27,7 @@ export default function Canvas({
 		handleDragOver,
 		handleDragEnd,
 		handleDragCancel,
-	} = useDragAndDrop(editor, value);
+	} = useDragAndDrop(editor);
 
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent<HTMLDivElement>) => {
@@ -73,23 +65,21 @@ export default function Canvas({
 				onDragEnd={handleDragEnd}
 				onDragCancel={handleDragCancel}
 			>
-				<Slate editor={editor} initialValue={value} onChange={setValue}>
-					<AssetsSection />
-					<SortableContext
-						items={sceneItems}
-						strategy={verticalListSortingStrategy}
-					>
-						<Editable
-							placeholder="Start typing your story…"
-							renderElement={renderElement}
-							onKeyDown={handleKeyDown}
-							className="font-body text-body leading-relaxed focus-ring"
-						/>
-					</SortableContext>
-					<DragOverlay>
-						{activeElement && <DragOverlayContent element={activeElement} />}
-					</DragOverlay>
-				</Slate>
+				<AssetsSection />
+				<SortableContext
+					items={sceneItems}
+					strategy={verticalListSortingStrategy}
+				>
+					<Editable
+						placeholder="Start typing your story…"
+						renderElement={renderElement}
+						onKeyDown={handleKeyDown}
+						className="font-body text-body leading-relaxed focus-ring"
+					/>
+				</SortableContext>
+				<DragOverlay>
+					{activeElement && <DragOverlayContent element={activeElement} />}
+				</DragOverlay>
 			</DndContext>
 		</DragTransferContext>
 	);
