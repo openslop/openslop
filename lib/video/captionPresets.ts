@@ -28,7 +28,9 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		fontSize: 62,
 		casing: "upper",
 		reveal: "line",
-		activeWord: text({ fill: "#6DC7C8" }),
+		alignX: "center",
+		base: text({ bold: false }),
+		activeWord: text({ fill: "#6DC7C8", bold: false }),
 	}),
 	preset("pop", "Pop", {
 		font: "montserrat",
@@ -45,6 +47,7 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		font: "oswald",
 		casing: "upper",
 		reveal: "line",
+		alignX: "center",
 		activeWord: text({ background: "#FE2953" }),
 	}),
 	preset("spotlight", "Spotlight", {
