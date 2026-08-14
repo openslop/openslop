@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
@@ -20,6 +20,7 @@ import {
 import { isNodeStale } from "@/lib/generation/graph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { useGenerationValue } from "@/lib/generation/useGenerationValue";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
@@ -75,9 +76,8 @@ function CharacterEditDialogBody({
 		q.getElementSnapshot(avatarElementId),
 	);
 	const avatarUrl = avatarSnapshot.result?.imageUrl;
-	const avatarNode = useMemo(
-		() => buildNode(forCharacterAvatar(name)),
-		[buildNode, name],
+	const isStale = useGenerationValue((q) =>
+		isNodeStale(buildNode(forCharacterAvatar(name)), q),
 	);
 
 	if (!character) return null;
@@ -87,10 +87,8 @@ function CharacterEditDialogBody({
 
 	const regenerateAvatar = () => {
 		if (character.avatarUploaded) update({ avatarUploaded: false });
-		queue.enqueueGraph([avatarNode]);
+		queue.enqueueGraph([buildNode(forCharacterAvatar(name))]);
 	};
-
-	const isStale = isNodeStale(avatarNode, queue);
 
 	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
@@ -188,7 +186,7 @@ function CharacterEditDialogBody({
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
 								queue.commitResult(
-									avatarNode,
+									buildNode(forCharacterAvatar(name)),
 									{ imageUrl: url, durationSec: 0 },
 									{ pinned: true },
 								);
