@@ -3,6 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
 import type { CanvasElement } from "@/lib/canvas/types";
 import styles from "../styles/sortable.module.css";
+import { splitTextDirection } from "../utils/textDirection";
 import { DragHandle } from "./SortableActions";
 
 // Drag start re-renders every sortable, so `children` and `insertMenu` are
@@ -50,8 +51,10 @@ export function SortableItem({
 		disabled,
 	});
 
+	const { nodeAttributes } = splitTextDirection(attributes);
+
 	return (
-		<div {...attributes} className={wrapperClassName} style={wrapperStyle}>
+		<div {...nodeAttributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
 				className={
 					contentClassName

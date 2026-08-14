@@ -42,12 +42,12 @@ function ClipHeader({
 			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
 			<SimpleTooltip
 				label={
-					<span className="block max-w-xs text-pretty">
+					<span dir="auto" className="block max-w-xs text-pretty">
 						{truncateMiddle(label, TOOLTIP_MAX_CHARS)}
 					</span>
 				}
 			>
-				<span className="truncate text-badge-xs text-foreground">
+				<span dir="auto" className="truncate text-badge-xs text-foreground">
 					{fit(label, width)}
 				</span>
 			</SimpleTooltip>
