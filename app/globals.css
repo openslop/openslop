@@ -5,6 +5,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* The negative margin gives back the room the padding makes for the bar. */
+@utility scrollbar-overlay {
+	padding-bottom: 8px;
+	margin-bottom: -8px;
+
+	&::-webkit-scrollbar-thumb {
+		background-color: color-mix(in oklab, var(--scrollbar) 65%, transparent);
+		background-clip: content-box;
+		border: 2px solid transparent;
+		border-radius: 9999px;
+	}
+}
+
+/* Two tint strengths of a clip's own colour; the ramp flips both with the theme. */
+@utility timeline-clip-surface {
+	background-color: color-mix(in oklab, currentColor 22%, var(--element-card));
+}
+
+@utility timeline-preview-surface {
+	background-color: color-mix(in oklab, currentColor 6%, var(--element-card));
+}
+
 @utility focus-ring {
 	@apply outline-none focus-visible:ring-2 focus-visible:ring-ring;
 }
@@ -104,6 +126,7 @@
 	--media-toggle-active-bg: #583e4a;
 	--media-toggle-active-fg: #ffffff;
 	--scrollbar: #dddadb;
+	--timeline-active: color-mix(in oklab, var(--grey-0) 16%, transparent);
 	--panel-fg: var(--foreground);
 	--panel-label: var(--muted-foreground);
 	--voice-hover: #ebe9ea;
@@ -292,6 +315,7 @@
 	--color-element-card: var(--element-card);
 	--color-element-input: var(--element-input);
 	--color-element-input-border-hover: var(--element-input-border-hover);
+	--color-timeline-active: var(--timeline-active);
 	--color-scrub-track: var(--scrub-track);
 	--color-scrub-progress: var(--scrub-progress);
 	--color-scrub-hover: var(--scrub-hover);
@@ -398,6 +422,29 @@
 	scrollbar-color: var(--scrollbar) transparent;
 }
 
+/* Chromium ignores ::-webkit-scrollbar sizing while scrollbar-width is set, and
+   Firefox has no ::-webkit-scrollbar, so each engine takes one branch. */
+@supports selector(::-webkit-scrollbar) {
+	* {
+		scrollbar-width: auto;
+		scrollbar-color: auto;
+	}
+}
+
+*::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar);
+	border-radius: 9999px;
+}
+
 .font-title {
 	font-family: var(--font-sloptastic), ui-sans-serif, system-ui, sans-serif;
 	font-weight: 575;
@@ -459,7 +506,7 @@
 	position: relative;
 	isolation: isolate;
 	overflow: hidden;
-	border-radius: var(--radius);
+	border-radius: calc(var(--radius) - 2px);
 	background-color: var(--scene-active-border);
 	box-shadow:
 		0 1px 18px -2px var(--scene-active-glow),

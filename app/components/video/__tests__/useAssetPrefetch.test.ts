@@ -23,6 +23,9 @@ function el(url: string): ResolvedElement {
 		type: "image",
 		role: "foreground",
 		layer: "visual",
+		sceneId: "s1",
+		sceneNumber: 1,
+		prompt: "",
 		url,
 		durationSec: 1,
 		loops: 1,
@@ -31,7 +34,7 @@ function el(url: string): ResolvedElement {
 	};
 }
 
-function seq(element: ResolvedElement | null): Sequence {
+function seq(element: ResolvedElement): Sequence {
 	return { element, start: 0, duration: 1 };
 }
 
@@ -59,10 +62,10 @@ function fakeHandle(): PrefetchHandle {
 }
 
 describe("collectUrls", () => {
-	it("collects urls from series and sequences, deduped, skipping null elements", () => {
+	it("collects urls from series and sequences, deduped", () => {
 		const urls = collectUrls(
 			layout({
-				series: [seq(el("a")), seq(null), seq(el("b"))],
+				series: [seq(el("a")), seq(el("b"))],
 				sequences: {
 					music: [seq(el("a")), seq(el("c"))],
 					sound: undefined,

@@ -44,7 +44,7 @@ export function Storyboard({ editor }: { editor: Editor }) {
 	return (
 		<section
 			aria-label="Storyboard"
-			className="flex shrink-0 items-start overflow-x-auto border-t border-border px-3 py-4"
+			className="scrollbar-overlay flex shrink-0 items-start overflow-x-auto border-t border-border px-3 py-4"
 		>
 			{items.map((item, index) => (
 				<Fragment key={item.scene.id}>

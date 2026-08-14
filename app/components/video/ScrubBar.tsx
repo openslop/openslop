@@ -37,6 +37,8 @@ interface ScrubBarProps {
 	onHoverChange?: (hover: ScrubHover | null) => void;
 	/** Segmented layout; omit for a single continuous track. */
 	segments?: ScrubSegment[];
+	/** Dims the track and takes it out of the pointer path. */
+	disabled?: boolean;
 	/** Sizing for the interactive container (width, optional height override). */
 	className?: string;
 	children?: ReactNode;
@@ -90,6 +92,7 @@ export function ScrubBar({
 	onScrubEnd,
 	onHoverChange,
 	segments,
+	disabled,
 	className,
 	children,
 }: ScrubBarProps) {
@@ -170,8 +173,10 @@ export function ScrubBar({
 		<div
 			ref={trackRef}
 			aria-label={ariaLabel}
+			aria-disabled={disabled || undefined}
 			className={cn(
-				"group relative flex cursor-pointer items-center",
+				"group relative flex items-center",
+				disabled ? "pointer-events-none opacity-50" : "cursor-pointer",
 				SCRUB_BAR_HEIGHT,
 				className,
 			)}

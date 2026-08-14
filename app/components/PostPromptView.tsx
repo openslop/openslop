@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
 import Canvas from "./canvas/Canvas";
@@ -8,9 +10,14 @@ import { EditorSidebar } from "./canvas/panel/EditorSidebar";
 import { ProjectTitle } from "./canvas/ProjectTitle";
 import { useEditorSession } from "./canvas/hooks/useEditorSession";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
-import { BottomTransportBar } from "./video/BottomTransportBar";
+import { BottomDock } from "./video/BottomDock";
 import { Storyboard } from "./video/storyboard/Storyboard";
-import { BottomViewProvider, useBottomView } from "./video/BottomViewContext";
+import { Timeline } from "./video/timeline/Timeline";
+import {
+	BottomViewProvider,
+	useBottomView,
+	type BottomView,
+} from "./video/BottomViewContext";
 import {
 	PlayerPositionProvider,
 	usePlayerPosition,
@@ -21,6 +28,12 @@ function PostPromptViewInner() {
 	const { position, visible } = usePlayerPosition();
 	const { view } = useBottomView();
 	const isTop = position === "top";
+
+	const bottomPanel: Record<BottomView, ReactNode> = {
+		timeline: <Timeline />,
+		storyboard: <Storyboard editor={editor} />,
+		hidden: null,
+	};
 
 	return (
 		<div className="relative flex h-screen w-full flex-col overflow-hidden">
@@ -52,8 +65,7 @@ function PostPromptViewInner() {
 								{visible && !isTop && <SidePlayerPanel />}
 							</div>
 
-							<BottomTransportBar />
-							{view === "storyboard" && <Storyboard editor={editor} />}
+							<BottomDock>{bottomPanel[view]}</BottomDock>
 						</div>
 					</div>
 				</div>

@@ -14,8 +14,8 @@ const scene = (id: string, childTypes: string[]): SceneElement => ({
 });
 
 const segment = (sceneId: string, start: number): SceneSegment => ({
+	id: `${sceneId}-fg`,
 	sceneId,
-	sceneIndex: 1,
 	start,
 	duration: 3,
 	label: "Scene",

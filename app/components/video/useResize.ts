@@ -5,6 +5,11 @@ import { clamp } from "@/lib/utils";
 
 export type ResizeAxis = "vertical" | "horizontal";
 
+/**
+ * `invert` is for a handle on the panel's leading edge — a bottom dock grabbed
+ * from its top grows as the pointer moves up, the opposite of a top panel
+ * grabbed from its bottom.
+ */
 export function clampResize(
 	axis: ResizeAxis,
 	startPos: number,
@@ -12,9 +17,11 @@ export function clampResize(
 	startSize: number,
 	minSize: number,
 	maxSize: number,
+	invert = false,
 ): number {
-	const delta =
+	const towardsPointer =
 		axis === "vertical" ? currentPos - startPos : startPos - currentPos;
+	const delta = invert ? -towardsPointer : towardsPointer;
 	return clamp(startSize + delta, minSize, maxSize);
 }
 
@@ -34,6 +41,7 @@ export function attachResizeListeners(
 		startSize: number;
 		minSize: number;
 		maxSize: number;
+		invert?: boolean;
 		onResize: (size: number) => void;
 		onEnd: () => void;
 	},
@@ -48,6 +56,7 @@ export function attachResizeListeners(
 				options.startSize,
 				options.minSize,
 				options.maxSize,
+				options.invert,
 			),
 		);
 	};
@@ -75,11 +84,13 @@ export function useResize({
 	defaultSize,
 	minSize,
 	maxViewportFraction,
+	invert,
 }: {
 	axis: ResizeAxis;
 	defaultSize: number;
 	minSize: number;
 	maxViewportFraction: number;
+	invert?: boolean;
 }) {
 	const [size, setSize] = useState(defaultSize);
 	const [resizing, setResizing] = useState(false);
@@ -111,11 +122,12 @@ export function useResize({
 				startSize: sizeRef.current,
 				minSize,
 				maxSize: viewport * maxViewportFraction,
+				invert,
 				onResize: setSize,
 				onEnd: () => setResizing(false),
 			});
 		},
-		[axis, minSize, maxViewportFraction],
+		[axis, minSize, maxViewportFraction, invert],
 	);
 
 	return { size, handleMouseDown, resizing };

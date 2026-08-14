@@ -15,15 +15,9 @@ const loadPrefetch = () =>
 
 export function collectUrls(layout: VideoLayout): Set<string> {
 	const urls = new Set<string>();
-	for (const seq of layout.series) {
-		if (seq.element) urls.add(seq.element.url);
-	}
-	for (const seqs of Object.values(layout.sequences)) {
-		if (seqs)
-			for (const seq of seqs) {
-				if (seq.element) urls.add(seq.element.url);
-			}
-	}
+	for (const seq of layout.series) urls.add(seq.element.url);
+	for (const seqs of Object.values(layout.sequences))
+		if (seqs) for (const seq of seqs) urls.add(seq.element.url);
 	return urls;
 }
 
