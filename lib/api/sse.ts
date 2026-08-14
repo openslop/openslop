@@ -42,22 +42,34 @@ export function createSSEResponse(
 	return new Response(stream.readable, { headers: SSE_HEADERS });
 }
 
+/**
+ * Pulls one chunk per read so a client that stops reading stops the source, and
+ * closes the source on cancel. Draining `iter` eagerly instead would keep the
+ * provider generating for a client that has already hung up, and would only
+ * notice on the enqueue that throws.
+ */
 export function createSSEStreamResponse<T>(
 	iter: AsyncIterable<T>,
 	label: string,
 ): Response {
 	const encoder = new TextEncoder();
+	const source = iter[Symbol.asyncIterator]();
 	const stream = new ReadableStream({
-		async start(controller) {
+		async pull(controller) {
 			try {
-				for await (const chunk of iter) {
-					controller.enqueue(encoder.encode(formatSSE(chunk)));
+				const { done, value } = await source.next();
+				if (done) {
+					controller.close();
+					return;
 				}
-				controller.close();
+				controller.enqueue(encoder.encode(formatSSE(value)));
 			} catch (error) {
 				logger.error(error, `${label} stream error`);
 				controller.error(error);
 			}
+		},
+		async cancel(reason) {
+			await source.return?.(reason);
 		},
 	});
 	return new Response(stream, { headers: SSE_HEADERS });
@@ -87,6 +99,10 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 			}
 		}
 	} finally {
+		// Cancel before releasing: a consumer that stops early leaves the response
+		// body unread, and only cancelling tears the connection down so the server
+		// learns to stop producing.
+		await reader.cancel();
 		reader.releaseLock();
 	}
 }

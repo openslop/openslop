@@ -215,6 +215,37 @@ describe("OpenSlop Gateway Clients", () => {
 			expect(body.stream).toBe(true);
 		});
 
+		it("cancels the response body when the caller stops consuming", async () => {
+			let cancelled = false;
+			const encoder = new TextEncoder();
+			const body = new ReadableStream({
+				start(controller) {
+					controller.enqueue(
+						encoder.encode('data: {"text":"Hel","done":false}\n\n'),
+					);
+					controller.enqueue(
+						encoder.encode('data: {"text":"lo!","done":false}\n\n'),
+					);
+				},
+				cancel() {
+					cancelled = true;
+				},
+			});
+			fetchMock.mockResolvedValue(
+				new Response(body, {
+					status: 200,
+					headers: { "content-type": "text/event-stream" },
+				}),
+			);
+
+			const gw = new OpenSlopLLMGateway("https://api.test.com");
+			for await (const _ of gw.stream({ prompt: "hi" })) {
+				break;
+			}
+
+			expect(cancelled).toBe(true);
+		});
+
 		it("throws when stream response has no body", async () => {
 			fetchMock.mockResolvedValue(
 				new Response(null, { status: 200, headers: {} }),
