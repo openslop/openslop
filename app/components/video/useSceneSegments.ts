@@ -7,11 +7,11 @@ import type { SeekThumbnail } from "./SeekTooltip";
 import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
 
 export type SceneSegment = {
+	id: string;
 	sceneId: string;
-	sceneIndex: number;
+	label: string;
 	start: number;
 	duration: number;
-	label: string;
 	thumbnail: SeekThumbnail | null;
 };
 
@@ -23,9 +23,7 @@ export type SequenceIndex = ReadonlyMap<string, Sequence>;
  */
 export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
 	const index = new Map<string, Sequence>();
-	for (const seq of series) {
-		if (seq.element) index.set(seq.element.id, seq);
-	}
+	for (const seq of series) index.set(seq.element.id, seq);
 	return index;
 }
 
@@ -72,39 +70,34 @@ export function useActiveSegmentIndex(
 	);
 }
 
-function toThumbnail(element: ResolvedElement | null): SeekThumbnail | null {
-	if (!element) return null;
+function toThumbnail(element: ResolvedElement): SeekThumbnail | null {
 	const { outputKind } = ELEMENT_TYPES[element.type];
 	if (outputKind === "audio") return null;
 	return { url: element.url, kind: outputKind };
 }
 
 /**
- * Derives the seek-bar scene segments from the layout. Consecutive scenes
- * overlap by `transitionDurationSec`, so each segment's duration is trimmed by
- * that overlap to keep the timeline contiguous. Owned by `VideoLayoutContext`
- * so it is computed once for all consumers.
+ * The seek bar's spans, one per scene. Consecutive scenes overlap by
+ * `transitionDurationSec`, so each span is trimmed by that overlap to keep the
+ * bar contiguous.
  */
-export function buildSceneSegments(
-	scenes: SceneElement[],
-	layout: VideoLayout,
-	index: SequenceIndex,
-): SceneSegment[] {
+export function buildSceneSegments(layout: VideoLayout): SceneSegment[] {
 	const out: SceneSegment[] = [];
-	for (let i = 0; i < scenes.length; i++) {
-		const scene = scenes[i];
-		const seq = findSceneSequence(scene, index);
-		if (!seq) continue;
-		const prev = out[out.length - 1];
+	for (const seq of layout.series) {
+		const prev = out.at(-1);
+		if (prev?.sceneId === seq.element.sceneId) {
+			prev.duration = seq.start + seq.duration - prev.start;
+			continue;
+		}
 		if (prev) {
 			prev.duration = Math.max(0, prev.duration - layout.transitionDurationSec);
 		}
 		out.push({
-			sceneId: scene.id,
-			sceneIndex: i + 1,
+			id: seq.element.id,
+			sceneId: seq.element.sceneId,
+			label: `Scene ${seq.element.sceneNumber}`,
 			start: seq.start,
 			duration: seq.duration,
-			label: `Scene ${i + 1}`,
 			thumbnail: toThumbnail(seq.element),
 		});
 	}

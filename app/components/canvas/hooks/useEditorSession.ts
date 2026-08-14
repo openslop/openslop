@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import type { Descendant, Editor } from "slate";
-import { getContentElements } from "@/lib/canvas/scenes";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useScriptInitial } from "@/lib/script/ScriptProvider";
 import { getLayoutKey } from "@/lib/video/layoutKey";
@@ -34,7 +33,7 @@ export function useEditorSession(): EditorSession {
 
 	const transitionType = useVideoSetting("transitionType");
 	const layoutKey = useMemo(
-		() => getLayoutKey(getContentElements(value), transitionType),
+		() => getLayoutKey(value, transitionType),
 		[value, transitionType],
 	);
 

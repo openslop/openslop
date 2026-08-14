@@ -2,6 +2,79 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SCENES = [3, 2, 4];
 
+/** Mirrors the dock's default height and the lanes a video always has. */
+const DOCK_HEIGHT = 260;
+const LANES: { height: string; clips: [start: number, width: number][] }[] = [
+	{
+		height: "h-20",
+		clips: [
+			[0, 0.34],
+			[0.35, 0.28],
+			[0.64, 0.36],
+		],
+	},
+	{
+		height: "h-16",
+		clips: [
+			[0, 0.61],
+			[0.62, 0.38],
+		],
+	},
+	{
+		height: "h-16",
+		clips: [
+			[0.06, 0.22],
+			[0.4, 0.16],
+			[0.71, 0.24],
+		],
+	},
+	{ height: "h-16", clips: [[0, 1]] },
+];
+
+function TimelineSkeleton() {
+	return (
+		<div className="flex min-h-0 flex-1 overflow-hidden">
+			<div className="flex w-10 shrink-0 flex-col border-r border-border">
+				<div className="h-7 shrink-0 border-b border-border" />
+				{LANES.map(({ height }, lane) => (
+					<div
+						key={lane}
+						className={`flex shrink-0 items-center justify-center border-b border-border/50 ${height}`}
+					>
+						<Skeleton className="size-3.5 rounded-xs" />
+					</div>
+				))}
+			</div>
+
+			<div className="flex min-w-0 flex-1 flex-col">
+				<div className="relative h-7 shrink-0">
+					{[0, 0.2, 0.4, 0.6, 0.8].map((at) => (
+						<Skeleton
+							key={at}
+							className="absolute top-3.5 h-2 w-8 -translate-y-1/2 rounded-xs"
+							style={{ left: `${at * 100}%` }}
+						/>
+					))}
+				</div>
+				{LANES.map(({ height, clips }, lane) => (
+					<div
+						key={lane}
+						className={`relative shrink-0 border-b border-border/50 ${height}`}
+					>
+						{clips.map(([start, width]) => (
+							<Skeleton
+								key={start}
+								className="absolute inset-y-0.5 h-auto rounded-md"
+								style={{ left: `${start * 100}%`, width: `${width * 100}%` }}
+							/>
+						))}
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
 function RailItemSkeleton() {
 	return (
 		<div className="flex w-full flex-col items-center gap-1 px-2 py-2.5">
@@ -94,23 +167,30 @@ export default function Loading() {
 						</div>
 					</div>
 
-					{/* Bottom transport bar */}
-					<div className="flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2">
-						<Skeleton className="h-3 w-full rounded-full" />
-						<div className="flex items-center gap-2">
-							<div className="flex flex-1 items-center">
-								<Skeleton className="h-4 w-20 rounded" />
-							</div>
-							<div className="flex items-center gap-1">
-								<Skeleton className="h-7 w-7 rounded-md" />
-								<Skeleton className="h-7 w-7 rounded-md" />
-								<Skeleton className="h-7 w-7 rounded-md" />
-							</div>
-							<div className="flex flex-1 items-center justify-end gap-1.5">
-								<Skeleton className="h-7 w-7 rounded-md" />
-								<Skeleton className="h-7 w-7 rounded-md" />
+					{/* Transport bar and the timeline below it */}
+					<div
+						className="flex shrink-0 flex-col overflow-hidden"
+						style={{ height: DOCK_HEIGHT }}
+					>
+						<div className="h-2 shrink-0" />
+						<div className="flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2">
+							<Skeleton className="h-3 w-full rounded-full" />
+							<div className="flex items-center gap-2">
+								<div className="flex flex-1 items-center">
+									<Skeleton className="h-4 w-20 rounded" />
+								</div>
+								<div className="flex items-center gap-1">
+									<Skeleton className="h-7 w-7 rounded-md" />
+									<Skeleton className="h-7 w-7 rounded-md" />
+									<Skeleton className="h-7 w-7 rounded-md" />
+								</div>
+								<div className="flex flex-1 items-center justify-end gap-1.5">
+									<Skeleton className="h-7 w-7 rounded-md" />
+									<Skeleton className="h-7 w-7 rounded-md" />
+								</div>
 							</div>
 						</div>
+						<TimelineSkeleton />
 					</div>
 				</div>
 			</div>

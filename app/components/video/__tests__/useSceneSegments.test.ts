@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { SceneElement } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/video/frames";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
@@ -9,14 +8,15 @@ import {
 	findSegmentIndexAtFrame,
 	type SceneSegment,
 } from "../useSceneSegments";
+import { blankScene } from "@/lib/video/blankScene";
 
 const seg = (
 	sceneId: string,
 	start: number,
 	duration: number,
 ): SceneSegment => ({
+	id: `${sceneId}-fg`,
 	sceneId,
-	sceneIndex: 0,
 	start,
 	duration,
 	label: sceneId,
@@ -98,11 +98,17 @@ describe("findSegmentIndexAtFrame", () => {
 	);
 });
 
-const resolved = (url: string): ResolvedElement => ({
+const resolved = (
+	url: string,
+	scene = { id: "s1", number: 1 },
+): ResolvedElement => ({
 	id: `${url}-el`,
 	type: "image",
 	role: "foreground",
 	layer: "visual",
+	sceneId: scene.id,
+	sceneNumber: scene.number,
+	prompt: "",
 	url,
 	durationSec: 0,
 	loops: 1,
@@ -113,25 +119,14 @@ const resolved = (url: string): ResolvedElement => ({
 const sequence = (
 	start: number,
 	duration: number,
-	element: ResolvedElement | null,
+	element: ResolvedElement,
 ): Sequence => ({ element, start, duration });
 
-const scene = (id: string, foregroundId: string | null): SceneElement => ({
-	id,
-	type: "scene",
-	children: foregroundId
-		? [
-				{
-					id: foregroundId,
-					type: "image",
-					children: [{ id: `${foregroundId}-t`, type: "image", text: "" }],
-				},
-			]
-		: [],
-});
-
-const layout = (transitionDurationSec = 0): VideoLayout => ({
-	series: [],
+const layout = (
+	series: Sequence[] = [],
+	transitionDurationSec = 0,
+): VideoLayout => ({
+	series,
 	sequences: {},
 	fps: 24,
 	width: 1920,
@@ -143,39 +138,30 @@ const layout = (transitionDurationSec = 0): VideoLayout => ({
 	transitionDurationSec,
 });
 
-const segmentsOf = (
-	scenes: SceneElement[],
-	entries: Record<string, Sequence>,
-	transitionDurationSec = 0,
-) =>
-	buildSceneSegments(
-		scenes,
-		layout(transitionDurationSec),
-		new Map(Object.entries(entries)),
-	);
+const segmentsOf = (series: Sequence[], transitionDurationSec = 0) =>
+	buildSceneSegments(layout(series, transitionDurationSec));
 
 describe("buildSequenceIndex", () => {
-	it("keys sequences by their element id and skips placeholders", () => {
-		const withElement = sequence(0, 2, resolved("a.png"));
-		const index = buildSequenceIndex([withElement, sequence(2, 1, null)]);
-		expect(index.size).toBe(1);
-		expect(index.get("a.png-el")).toBe(withElement);
+	it("keys sequences by their element id", () => {
+		const first = sequence(0, 2, resolved("a.png"));
+		const blank = sequence(2, 1, blankScene(resolved("a.png")));
+		const index = buildSequenceIndex([first, blank]);
+		expect(index.size).toBe(2);
+		expect(index.get("a.png-el")).toBe(first);
 	});
 });
 
 describe("buildSceneSegments", () => {
 	it("returns an empty array when there are no scenes", () => {
-		expect(segmentsOf([], {})).toEqual([]);
+		expect(segmentsOf([])).toEqual([]);
 	});
 
-	it("maps each scene's foreground sequence to a segment", () => {
-		const segments = segmentsOf([scene("s1", "fg1")], {
-			fg1: sequence(0, 2, resolved("a.png")),
-		});
+	it("maps each series entry to a segment", () => {
+		const segments = segmentsOf([sequence(0, 2, resolved("a.png"))]);
 		expect(segments).toEqual([
 			{
+				id: "a.png-el",
 				sceneId: "s1",
-				sceneIndex: 1,
 				start: 0,
 				duration: 2,
 				label: "Scene 1",
@@ -186,28 +172,40 @@ describe("buildSceneSegments", () => {
 
 	it("trims the previous segment by the transition overlap", () => {
 		const segments = segmentsOf(
-			[scene("s1", "fg1"), scene("s2", "fg2")],
-			{
-				fg1: sequence(0, 2, resolved("a.png")),
-				fg2: sequence(2, 3, resolved("b.png")),
-			},
+			[
+				sequence(0, 2, resolved("a.png")),
+				sequence(2, 3, resolved("b.png", { id: "s2", number: 2 })),
+			],
 			0.5,
 		);
 		expect(segments.map((s) => s.duration)).toEqual([1.5, 3]);
 	});
 
-	it("skips scenes with no foreground or no resolved sequence", () => {
-		const segments = segmentsOf(
-			[scene("s1", null), scene("s2", "missing"), scene("s3", "fg3")],
-			{ fg3: sequence(0, 4, resolved("c.png")) },
-		);
-		expect(segments.map((s) => s.sceneId)).toEqual(["s3"]);
+	it("labels a span with its scene's place in the document", () => {
+		const segments = segmentsOf([
+			sequence(0, 4, resolved("c.png", { id: "s2", number: 2 })),
+		]);
+		expect(segments.map((s) => [s.sceneId, s.label])).toEqual([
+			["s2", "Scene 2"],
+		]);
 	});
 
-	it("emits a null thumbnail when the sequence has no element", () => {
-		const [segment] = segmentsOf([scene("s1", "fg1")], {
-			fg1: sequence(0, 2, null),
+	it("spans every sequence of a scene that holds several", () => {
+		const segments = segmentsOf([
+			sequence(0, 2, resolved("a.png")),
+			sequence(2, 3, resolved("b.png")),
+		]);
+		expect(segments.map((s) => [s.start, s.duration])).toEqual([[0, 5]]);
+	});
+
+	it("gives a blank scene the scene of the element that opened it", () => {
+		const narration = resolved("n.mp3", { id: "s2", number: 2 });
+		const [segment] = segmentsOf([sequence(0, 2, blankScene(narration))]);
+		expect(segment).toMatchObject({
+			sceneId: "s2",
+			label: "Scene 2",
+			start: 0,
+			duration: 2,
 		});
-		expect(segment.thumbnail).toBeNull();
 	});
 });

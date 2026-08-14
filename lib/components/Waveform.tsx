@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	type CSSProperties,
 	type MouseEvent,
 	type Ref,
 	useCallback,
@@ -13,7 +12,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { clamp, cn } from "@/lib/utils";
 import { loadPeaks } from "./peaks";
-import { AUDIO_BAR_COUNT, buildSoundwaveMask } from "./soundwave";
+import {
+	AUDIO_SAMPLE_COUNT,
+	buildSoundwaveMask,
+	SOUNDWAVE_MASK_STYLE,
+	toBarHeights,
+} from "./soundwave";
 
 export interface WaveformProps {
 	src: string;
@@ -31,15 +35,6 @@ export interface WaveformHandle {
 	toggle(): void;
 	seek(progress: number): void;
 }
-
-const MIN_BAR_HEIGHT = 6;
-
-const MASK_STYLE: CSSProperties = {
-	maskSize: "100% 100%",
-	WebkitMaskSize: "100% 100%",
-	maskRepeat: "no-repeat",
-	WebkitMaskRepeat: "no-repeat",
-};
 
 export function Waveform({
 	src,
@@ -76,13 +71,7 @@ export function Waveform({
 	const paint = useCallback(() => {
 		const peaks = peaksRef.current;
 		if (!peaks.length) return;
-		const bars = Array.from({ length: AUDIO_BAR_COUNT }, (_, i) =>
-			Math.max(
-				MIN_BAR_HEIGHT,
-				peaks[Math.floor((i * peaks.length) / AUDIO_BAR_COUNT)] * 100,
-			),
-		);
-		const mask = buildSoundwaveMask(bars);
+		const mask = buildSoundwaveMask(toBarHeights(peaks, AUDIO_SAMPLE_COUNT));
 		for (const el of [barsRef.current, progressRef.current]) {
 			if (!el) continue;
 			el.style.setProperty("mask-image", mask);
@@ -163,12 +152,12 @@ export function Waveform({
 				<div
 					ref={barsRef}
 					className="absolute inset-0 bg-muted-foreground"
-					style={MASK_STYLE}
+					style={SOUNDWAVE_MASK_STYLE}
 				/>
 				<div
 					ref={progressRef}
 					className="absolute inset-0 bg-foreground"
-					style={{ ...MASK_STYLE, clipPath: "inset(0 100% 0 0)" }}
+					style={{ ...SOUNDWAVE_MASK_STYLE, clipPath: "inset(0 100% 0 0)" }}
 				/>
 				{loading && (
 					<Skeleton className="absolute inset-0 animate-none shimmer-surface" />

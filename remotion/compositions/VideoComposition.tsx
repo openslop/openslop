@@ -8,11 +8,7 @@ import {
 	useVideoConfig,
 } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
-import type {
-	VideoLayout,
-	Sequence as SeqType,
-	ResolvedElement,
-} from "@/lib/video/types";
+import type { VideoLayout, ResolvedElement } from "@/lib/video/types";
 import { toFrames } from "@/lib/video/frames";
 import {
 	AUDIO_FADE_SEC,
@@ -83,13 +79,6 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 	}
 }
 
-function SeriesEntry({ seq }: { seq: SeqType }) {
-	if (!seq.element) {
-		return <AbsoluteFill style={blackBg} />;
-	}
-	return <SequenceContent element={seq.element} />;
-}
-
 export const VideoComposition: React.FC<VideoLayout> = ({
 	series,
 	sequences,
@@ -112,7 +101,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 	const transitionSeriesNodes = useMemo(
 		() =>
 			series.map((seq, i) => (
-				<Fragment key={seq.element?.id ?? `empty-${i}`}>
+				<Fragment key={seq.element.id}>
 					{i > 0 && (
 						<TransitionSeries.Transition
 							presentation={presentation}
@@ -123,7 +112,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						durationInFrames={toFrames(seq.duration, fps)}
 						premountFor={toFrames(VIDEO_PREMOUNT_SEC, fps)}
 					>
-						<SeriesEntry seq={seq} />
+						<SequenceContent element={seq.element} />
 					</TransitionSeries.Sequence>
 				</Fragment>
 			)),
