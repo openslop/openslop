@@ -44,10 +44,7 @@ export function VideoLayoutProvider({
 		() => buildSequenceIndex(layout.series),
 		[layout.series],
 	);
-	const segments = useMemo(
-		() => buildSceneSegments(scenes, layout, sequenceByElementId),
-		[scenes, layout, sequenceByElementId],
-	);
+	const segments = useMemo(() => buildSceneSegments(layout), [layout]);
 	const value = useMemo(
 		() => ({ layout, ready, playerKey, segments, scenes, sequenceByElementId }),
 		[layout, ready, playerKey, segments, scenes, sequenceByElementId],

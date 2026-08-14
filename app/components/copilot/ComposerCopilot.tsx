@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import {
-	ChevronDown,
 	CornerDownLeft,
 	Hourglass,
 	ImagePlus,
@@ -16,8 +15,6 @@ import {
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
-import { SelectMenu, type SelectMenuOption } from "@/components/ui/select-menu";
-import { cn } from "@/lib/utils";
 import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
 import {
 	TEMPLATES,
@@ -34,7 +31,10 @@ import {
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
-import { useVideoSetting } from "@/lib/video/useVideoSetting";
+import {
+	useUpdateVideoSettings,
+	useVideoSetting,
+} from "@/lib/video/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
 	VIDEO_LENGTH_SPECS,
@@ -43,6 +43,7 @@ import {
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
+import { SettingPill, type SettingPillOption } from "./SettingPill";
 
 const MODE_LABELS: Record<Mode, string> = {
 	story: "Describe a story",
@@ -50,53 +51,28 @@ const MODE_LABELS: Record<Mode, string> = {
 	template: "Use a template",
 };
 
-const MODE_OPTIONS: SelectMenuOption<Mode>[] = (
+const MODE_OPTIONS: SettingPillOption<Mode>[] = (
 	Object.keys(MODE_LABELS) as Mode[]
 ).map((value) => ({ value, label: MODE_LABELS[value] }));
 
-const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
+const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
 	{ value: "9:16", label: "9:16" },
 ];
 
-const VIDEO_LENGTH_OPTIONS: SelectMenuOption<VideoLength>[] = VIDEO_LENGTHS.map(
-	(value) => ({ value, label: VIDEO_LENGTH_SPECS[value].label }),
-);
+const VIDEO_LENGTH_OPTIONS: SettingPillOption<VideoLength>[] =
+	VIDEO_LENGTHS.map((value) => ({
+		value,
+		label: VIDEO_LENGTH_SPECS[value].label,
+	}));
 
-const LANGUAGE_OPTIONS: SelectMenuOption<LanguageChoice>[] =
+const LANGUAGE_OPTIONS: SettingPillOption<LanguageChoice>[] =
 	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
 
-const TEMPLATE_OPTIONS: SelectMenuOption<string>[] = TEMPLATES.map((t) => ({
+const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map((t) => ({
 	value: t.id,
 	label: t.name,
 }));
-
-function PillTrigger({
-	icon,
-	label,
-	className,
-	ref,
-	...props
-}: React.ComponentProps<"button"> & {
-	icon?: ReactNode;
-	label: ReactNode;
-}) {
-	return (
-		<button
-			ref={ref}
-			type="button"
-			className={cn(
-				"focus-ring inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover",
-				className,
-			)}
-			{...props}
-		>
-			{icon}
-			{label}
-			<ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
-		</button>
-	);
-}
 
 function AttachMenu({
 	openPicker,
@@ -204,7 +180,7 @@ export default function ComposerCopilot({
 	const { mode, setMode, selectedTemplateId, selectTemplate } = useConfig();
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const videoLength = useVideoSetting("length");
-	const updateMetadata = useProject((s) => s.updateMetadata);
+	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
 	const {
@@ -219,7 +195,6 @@ export default function ComposerCopilot({
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const isTemplateMode = mode === "template";
 	const isScriptMode = mode === "script";
-	const languageName = languageLabel(language);
 	const hasText = value.trim().length > 0;
 	const selectedTemplate = getTemplate(selectedTemplateId);
 
@@ -274,77 +249,52 @@ export default function ComposerCopilot({
 							onSelectNarrator={openNarrator}
 							onSetArtStyle={openArtStyle}
 						/>
-						<SelectMenu
+						<SettingPill
+							name="Composer mode"
 							value={mode}
+							options={MODE_OPTIONS}
 							onChange={(next: Mode) =>
 								next === "template"
 									? selectTemplate(selectedTemplateId)
 									: setMode(next)
 							}
-							options={MODE_OPTIONS}
-							itemClassName="rounded-lg text-label-xs"
-						>
-							<PillTrigger
-								aria-label={`Composer mode: ${MODE_LABELS[mode]}`}
-								label={MODE_LABELS[mode]}
-							/>
-						</SelectMenu>
-						<SelectMenu
+						/>
+						<SettingPill
+							name="Aspect ratio"
+							icon={<Proportions className="mr-1 h-3 w-3" />}
 							value={aspectRatio}
-							onChange={(next: AspectRatio) =>
-								updateMetadata({ videoSettings: { aspectRatio: next } })
-							}
 							options={ASPECT_RATIO_OPTIONS}
-							itemClassName="rounded-lg text-label-xs"
-						>
-							<PillTrigger
-								aria-label={`Aspect ratio: ${aspectRatio}`}
-								icon={<Proportions className="mr-1 h-3 w-3" />}
-								label={aspectRatio}
-							/>
-						</SelectMenu>
-						<SelectMenu
+							onChange={(next: AspectRatio) =>
+								updateVideoSettings({ aspectRatio: next })
+							}
+						/>
+						<SettingPill
+							name="Language"
+							icon={<Translate className="mr-1 h-3 w-3" />}
 							value={language}
-							onChange={setLanguage}
 							options={LANGUAGE_OPTIONS}
-							itemClassName="rounded-lg text-label-xs"
-						>
-							<PillTrigger
-								aria-label={`Language: ${languageName}`}
-								icon={<Translate className="mr-1 h-3 w-3" />}
-								label={languageName}
-							/>
-						</SelectMenu>
+							onChange={setLanguage}
+						/>
 						{!isScriptMode && (
-							<SelectMenu
+							<SettingPill
+								name="Video length"
+								icon={<Hourglass className="mr-1 h-3 w-3" />}
 								value={videoLength}
-								onChange={(next: VideoLength) =>
-									updateMetadata({ videoSettings: { length: next } })
-								}
 								options={VIDEO_LENGTH_OPTIONS}
-								itemClassName="rounded-lg text-label-xs"
-							>
-								<PillTrigger
-									aria-label={`Video length: ${VIDEO_LENGTH_SPECS[videoLength].label}`}
-									icon={<Hourglass className="mr-1 h-3 w-3" />}
-									label={VIDEO_LENGTH_SPECS[videoLength].label}
-								/>
-							</SelectMenu>
+								onChange={(next: VideoLength) =>
+									updateVideoSettings({ length: next })
+								}
+							/>
 						)}
 						{isTemplateMode && (
-							<SelectMenu
+							<SettingPill
+								name="Template"
+								className="relative overflow-hidden"
+								style={{ backgroundColor: selectedTemplate.color }}
 								value={selectedTemplateId}
-								onChange={selectTemplate}
 								options={TEMPLATE_OPTIONS}
-								itemClassName="rounded-lg text-label-xs"
-							>
-								<PillTrigger
-									aria-label={`Template: ${selectedTemplate.name}`}
-									className="relative overflow-hidden"
-									style={{ backgroundColor: selectedTemplate.color }}
-									label={selectedTemplate.name}
-								/>
-							</SelectMenu>
+								onChange={selectTemplate}
+							/>
 						)}
 					</div>
 					<ActionButton

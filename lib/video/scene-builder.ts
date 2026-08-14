@@ -8,6 +8,7 @@ import type {
 import { DEFAULT_CONFIG } from "./types";
 import { type AspectRatio, ASPECT_RATIO_DIMENSIONS } from "./aspectRatio";
 import { DEFAULT_CAPTION_STYLE, type CaptionStyle } from "./captionStyle";
+import { blankScene } from "./blankScene";
 import { toFrames, toSeconds } from "./frames";
 import {
 	DEFAULT_TRANSITION,
@@ -27,7 +28,7 @@ const MIN_DURATION_SEC = 1;
 const FRAME_EPSILON = 1e-6;
 
 function createSequence(
-	element: ResolvedElement | null,
+	element: ResolvedElement,
 	start: number,
 	duration: number,
 ): Sequence {
@@ -73,8 +74,8 @@ function getForegroundCursor(current: Sequence | undefined, cursor: number) {
 /**
  * Walks the element list and assembles scenes with these rules:
  *
- *  1. Foreground → starts a new scene (or fills the current placeholder).
- *  2. Overlay    → extends the current scene's duration; creates a placeholder if none exists.
+ *  1. Foreground → starts a new scene.
+ *  2. Overlay    → extends the current scene's duration; opens a blank scene if none exists.
  *  3. Background → updates the active background layer for that element type. Exclusive (one at a time per type).
  *  4. Effect     → same as background but additive (can overlap).
  *
@@ -115,24 +116,21 @@ export function buildVideoLayout(
 				break;
 			}
 			case "foreground": {
-				if (current && !current.element) {
-					current.element = element;
-					current.duration = Math.max(current.duration, element.durationSec);
-				} else {
-					cursor = foregroundCursor;
-					if (series.length > 0) {
-						// TransitionSeries.Sequence overlap the previous
-						// ones by transitionDurationSec. Bake that into the cursor so every
-						// subsequent overlay/background/effect lands on the rendered timeline.
-						cursor -= transitionDurationSec;
-					}
-					series.push(createSequence(element, cursor, element.durationSec));
+				cursor = foregroundCursor;
+				if (series.length > 0) {
+					// TransitionSeries.Sequence overlap the previous
+					// ones by transitionDurationSec. Bake that into the cursor so every
+					// subsequent overlay/background/effect lands on the rendered timeline.
+					cursor -= transitionDurationSec;
 				}
+				series.push(createSequence(element, cursor, element.durationSec));
 				break;
 			}
 			case "overlay": {
 				if (!current) {
-					series.push(createSequence(null, cursor, element.durationSec));
+					series.push(
+						createSequence(blankScene(element), cursor, element.durationSec),
+					);
 				} else {
 					current.duration = Math.max(
 						current.duration,

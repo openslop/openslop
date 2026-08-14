@@ -17,6 +17,11 @@ describe("clampResize", () => {
 	it("clamps to maxSize", () => {
 		expect(clampResize("vertical", 0, 10_000, 100, 50, 500)).toBe(500);
 	});
+
+	it("grows against the pointer when the handle is on the leading edge", () => {
+		expect(clampResize("vertical", 500, 400, 200, 100, 600, true)).toBe(300);
+		expect(clampResize("vertical", 500, 600, 200, 100, 600, true)).toBe(100);
+	});
 });
 
 function createHost() {

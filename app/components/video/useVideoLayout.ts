@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import type { CanvasElement, SceneElement } from "@/lib/canvas/types";
-import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -30,8 +30,7 @@ export function useVideoLayout(editor: Editor): {
 	// the per-keystroke render path: they update when the rendered video would.
 	const layoutKey = useSlateSelector(
 		useCallback(
-			(e: Editor) =>
-				getLayoutKey(getContentElements(e.children), transitionType),
+			(e: Editor) => getLayoutKey(e.children, transitionType),
 			[transitionType],
 		),
 	);

@@ -8,7 +8,7 @@ import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
 import { findSegmentIndexAtFrame, type SceneSegment } from "./useSceneSegments";
 import { ScrubBar, type ScrubHover } from "./ScrubBar";
-import { silenceMediaIn } from "./silenceMedia";
+import { usePlayerScrub } from "./usePlayerScrub";
 
 const HOVER_SETTLE_MS = 80;
 
@@ -30,7 +30,7 @@ export function SegmentedSeekBar({
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 	const [settledIndex, setSettledIndex] = useState<number | null>(null);
 	const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const wasPlayingRef = useRef(false);
+	const scrub = usePlayerScrub(player);
 
 	useEffect(
 		() => () => {
@@ -42,13 +42,11 @@ export function SegmentedSeekBar({
 	const scrubSegments = useMemo(
 		() =>
 			segments.map((seg) => ({
-				id: seg.sceneId,
+				id: seg.id,
 				basis: seg.duration / totalDurationSec,
 			})),
 		[segments, totalDurationSec],
 	);
-
-	if (segments.length === 0) return null;
 
 	const onHoverChange = (h: ScrubHover | null) => {
 		setHover(h);
@@ -78,25 +76,12 @@ export function SegmentedSeekBar({
 		<ScrubBar
 			className="w-full"
 			ariaLabel="Seek"
+			disabled={!player || segments.length === 0}
 			value={progress}
-			segments={scrubSegments}
-			onScrub={(ratio) => {
-				if (!player) return;
-				player.seekTo(toScrubFrame(ratio));
-				if (wasPlayingRef.current) silenceMediaIn(player.getContainerNode());
-			}}
-			onScrubStart={() => {
-				if (!player) return;
-				wasPlayingRef.current = player.isPlaying();
-				if (wasPlayingRef.current) {
-					player.pause();
-					silenceMediaIn(player.getContainerNode());
-				}
-			}}
-			onScrubEnd={() => {
-				if (wasPlayingRef.current) player?.play();
-				wasPlayingRef.current = false;
-			}}
+			segments={scrubSegments.length > 0 ? scrubSegments : undefined}
+			onScrub={(ratio) => scrub.seekTo(toScrubFrame(ratio))}
+			onScrubStart={scrub.start}
+			onScrubEnd={scrub.end}
 			onHoverChange={onHoverChange}
 		>
 			{hover && hoverSegment ? (

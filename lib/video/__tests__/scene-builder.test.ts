@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
+import { isBlankScene } from "../blankScene";
 import { buildVideoLayout } from "../scene-builder";
 import type { ResolvedElement, Sequence, VideoLayout } from "../types";
 import type { CanvasElementType } from "@/lib/canvas/types";
@@ -39,6 +40,9 @@ function el(
 	return {
 		role: roles[overrides.type],
 		layer: layers[overrides.type],
+		sceneId: "s1",
+		sceneNumber: 1,
+		prompt: "",
 		url: `https://example.com/${overrides.id}`,
 		durationSec: 0,
 		loops: 1,
@@ -106,22 +110,22 @@ describe("buildVideoLayout", () => {
 	});
 
 	describe("overlay elements (narration, character)", () => {
-		it("creates a null-element placeholder when no foreground precedes", () => {
+		it("opens a blank scene when no foreground precedes", () => {
 			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 4 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element).toBeNull();
+			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(4);
 		});
 
-		it("collapses consecutive leading overlays into one placeholder", () => {
+		it("collapses consecutive leading overlays into one blank scene", () => {
 			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 3 }),
 				el({ id: "n2", type: "narration", durationSec: 4 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element).toBeNull();
+			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(7);
 			expect(seqs(layout, "narration")).toHaveLength(2);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
@@ -151,25 +155,17 @@ describe("buildVideoLayout", () => {
 			expect(seqs(layout, "character")[0].start).toBe(5);
 		});
 
-		it("preserves the foreground duration when the overlay is shorter", () => {
+		it("plays a foreground after the overlay that leads it", () => {
 			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "img1", type: "image", durationSec: 5 }),
 			]);
-			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element?.id).toBe("img1");
+			expect(layout.series).toHaveLength(2);
+			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(9);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
-		});
-
-		it("fills a placeholder when a foreground follows a leading overlay", () => {
-			const layout = buildVideoLayout([
-				el({ id: "n1", type: "narration", durationSec: 4 }),
-				el({ id: "img1", type: "image", durationSec: 5 }),
-			]);
-			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element?.id).toBe("img1");
-			expect(layout.series[0].duration).toBe(5);
+			expect(layout.series[1].element.id).toBe("img1");
+			expect(layout.series[1].start).toBeCloseTo(9 - OVERLAP, 5);
+			expect(layout.series[1].duration).toBe(5);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
 		});
 
@@ -197,7 +193,7 @@ describe("buildVideoLayout", () => {
 			expect(layout.series[1].duration).toBe(6);
 		});
 
-		it("extends a scene to fit both leading and trailing overlays", () => {
+		it("stretches the blank scene over the overlays that lead the video", () => {
 			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "c1", type: "character", durationSec: 3 }),
@@ -205,12 +201,14 @@ describe("buildVideoLayout", () => {
 				el({ id: "n2", type: "narration", durationSec: 2 }),
 				el({ id: "n3", type: "narration", durationSec: 3 }),
 			]);
-			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element?.id).toBe("img1");
-			expect(layout.series[0].duration).toBe(17);
+			expect(layout.series).toHaveLength(2);
+			expect(isBlankScene(layout.series[0].element)).toBe(true);
+			expect(layout.series[0].duration).toBe(12);
+			expect(layout.series[1].element.id).toBe("img1");
+			expect(layout.series[1].duration).toBeCloseTo(5, 5);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "narration")[1].start).toBe(12);
-			expect(seqs(layout, "narration")[2].start).toBe(14);
+			expect(seqs(layout, "narration")[1].start).toBeCloseTo(12 - OVERLAP, 5);
+			expect(seqs(layout, "narration")[2].start).toBeCloseTo(14 - OVERLAP, 5);
 		});
 	});
 
@@ -418,9 +416,11 @@ describe("buildVideoLayout", () => {
 				el({ id: "clip1", type: "clip", durationSec: 2 }),
 				el({ id: "m2", type: "music", durationSec: 4 }),
 			]);
-			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element?.id).toBe("clip1");
+			expect(layout.series).toHaveLength(2);
+			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(11);
+			expect(layout.series[1].element.id).toBe("clip1");
+			expect(layout.series[1].duration).toBe(2);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
 			expect(seqs(layout, "narration")[0].duration).toBe(4);
 			expect(seqs(layout, "character")[0].start).toBe(4);

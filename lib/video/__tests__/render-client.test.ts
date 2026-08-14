@@ -7,7 +7,7 @@ vi.mock("@/lib/clients/http", () => ({ apiJson: vi.fn() }));
 
 const apiJsonMock = vi.mocked(apiJson);
 
-const LAYOUT = { series: [] } as unknown as VideoLayout;
+const LAYOUT = { series: [], sequences: {} } as unknown as VideoLayout;
 const HANDLE = { renderId: "r1", bucketName: "b1" };
 
 /** Drains the generator while letting the poll delay elapse between yields. */
