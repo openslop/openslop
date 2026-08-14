@@ -5,7 +5,7 @@ import {
 	ChevronsUpDown,
 	Circle,
 	Crosshair,
-	EyeOff,
+	MonitorOff,
 	PanelRight,
 	PanelTop,
 } from "@/components/ui/icon";
@@ -45,7 +45,7 @@ export function LayoutPanel() {
 			icon: PanelRight,
 			disabled: narrowViewport,
 		},
-		{ value: "hidden", label: "Hidden", icon: EyeOff },
+		{ value: "hidden", label: "Hidden", icon: MonitorOff },
 	];
 
 	return (
