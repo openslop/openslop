@@ -1,7 +1,8 @@
-import { Editor, Element, type NodeEntry, type Path, Transforms } from "slate";
+import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { isContentElement } from "./guards";
+import { makeNodeId } from "./nodeUtils";
 
 /** Any canvas element by id — scenes included. Use {@link findNodeById} when only content will do. */
 export function findElementById(
@@ -24,6 +25,24 @@ export function findNodeById(
 		match: (n) => isContentElement(n) && n.id === id,
 	});
 	return entry ?? null;
+}
+
+/** Inserts a copy of the node at `at`, with fresh ids, right after it. Returns the copy's id. */
+export function duplicateNode(
+	editor: Editor,
+	element: CanvasContentElement,
+	at: Path,
+): string {
+	const copy: CanvasContentElement = {
+		...element,
+		id: makeNodeId(),
+		children: element.children.map((child) => ({
+			...child,
+			id: makeNodeId(),
+		})),
+	};
+	Transforms.insertNodes(editor, copy, { at: Path.next(at) });
+	return copy.id;
 }
 
 /**

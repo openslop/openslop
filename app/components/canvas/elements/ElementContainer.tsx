@@ -7,6 +7,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { resolveElementSchema } from "@/lib/canvas/elementConnector";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
+import { DuplicateButton } from "./DuplicateButton";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
@@ -101,7 +102,8 @@ export function ElementContainer({
 								<ModelBadge element={element} />
 								<ElementSettings element={element} />
 							</div>
-							<div className="shrink-0 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
+							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
+								<DuplicateButton element={element} />
 								<DeleteButton element={element} />
 							</div>
 						</div>
