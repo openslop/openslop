@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 export type MediaToggleOption<T extends string> = {
 	value: T;
 	label: string;
+	disabled?: boolean;
 } & ({ icon: IconComponent; text?: never } | { icon?: never; text: string });
 
 const pill =
@@ -16,16 +17,17 @@ const pill =
 
 // The tooltip trigger owns `data-state` on the item, so the selected look comes
 // from the caller rather than from Radix's own attribute.
-const segment = (active: boolean) =>
+const segment = (active: boolean, disabled: boolean) =>
 	cn(
 		"flex h-6 min-w-6 flex-1 basis-0 items-center justify-center rounded-sm px-1 transition-colors focus-ring",
 		active
 			? "bg-media-toggle-active-bg text-media-toggle-active-fg"
 			: "text-media-toggle-fg hover:bg-media-toggle-hover-bg",
+		disabled && "cursor-not-allowed opacity-40",
 	);
 
 function Segment<T extends string>({
-	option: { value, label, icon: Icon, text },
+	option: { value, label, icon: Icon, text, disabled = false },
 	active,
 }: {
 	option: MediaToggleOption<T>;
@@ -36,7 +38,8 @@ function Segment<T extends string>({
 			<ToggleGroupPrimitive.Item
 				value={value}
 				aria-label={label}
-				className={segment(active)}
+				disabled={disabled}
+				className={segment(active, disabled)}
 			>
 				{Icon ? (
 					<Icon className="h-3.5 w-3.5" />
@@ -57,16 +60,19 @@ export function MediaToggle<T extends string>({
 	value,
 	options,
 	onChange,
+	ariaLabel,
 	className,
 }: {
 	value: T;
 	options: MediaToggleOption<T>[];
 	onChange: (value: T) => void;
+	ariaLabel?: string;
 	className?: string;
 }) {
 	return (
 		<ToggleGroupPrimitive.Root
 			type="single"
+			aria-label={ariaLabel}
 			value={value}
 			// Radix clears the value when the active segment is pressed again; a
 			// segmented control always keeps one selected.
