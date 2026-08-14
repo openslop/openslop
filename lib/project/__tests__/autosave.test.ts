@@ -65,17 +65,15 @@ describe("createAutosaver", () => {
 	let onSaved: Mock<() => void>;
 	let onError: Mock<(error: unknown) => void>;
 
-	const build = () => {
-		const autosaver = createAutosaver({
+	const build = () =>
+		createAutosaver({
 			projectId,
 			store,
+			getScript: () => "<osml/>",
 			getGeneration: () => ({}),
 			onSaved,
 			onError,
 		});
-		autosaver.setScriptSource(() => "<osml/>");
-		return autosaver;
-	};
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -132,22 +130,6 @@ describe("createAutosaver", () => {
 
 		expect(saveProject).not.toHaveBeenCalled();
 		expect(onSaved).not.toHaveBeenCalled();
-	});
-
-	it("reports a save with no script source instead of writing an empty one", async () => {
-		hydrate();
-		const autosaver = createAutosaver({
-			projectId,
-			store,
-			getGeneration: () => ({}),
-			onSaved,
-			onError,
-		});
-		autosaver.schedule();
-		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
-
-		expect(saveProject).not.toHaveBeenCalled();
-		expect(onError).toHaveBeenCalledTimes(1);
 	});
 
 	it("reports a failed save instead of throwing", async () => {

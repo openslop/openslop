@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
-import type { Descendant } from "slate";
+import { useEffect, useMemo } from "react";
+import type { Editor } from "slate";
 import { toast } from "sonner";
 import { toastError } from "@/lib/toastError";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
@@ -16,16 +16,17 @@ const TOAST_OPTIONS = {
 	duration: 1500,
 };
 
-export function useAutosave(projectId: string, value: Descendant[]): void {
+/** Returns the callback that schedules a save for a document change. */
+export function useAutosave(projectId: string, editor: Editor): () => void {
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
-	const skipNextRef = useRef(true);
 
 	const autosaver = useMemo(
 		() =>
 			createAutosaver({
 				projectId,
 				store,
+				getScript: () => serializeOSMLWithScenes(editor.children),
 				getGeneration: () => queue.snapshot(),
 				onSaved: () => toast("Saved", TOAST_OPTIONS),
 				onError: (err) =>
@@ -34,19 +35,10 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 						duration: 4000,
 					}),
 			}),
-		[projectId, store, queue],
+		[projectId, store, queue, editor],
 	);
 
 	useEffect(() => () => autosaver.flush(), [autosaver]);
-
-	useEffect(() => {
-		autosaver.setScriptSource(() => serializeOSMLWithScenes(value));
-		if (skipNextRef.current) {
-			skipNextRef.current = false;
-			return;
-		}
-		autosaver.schedule();
-	}, [value, autosaver]);
 
 	useEffect(() => store.subscribe(autosaver.schedule), [store, autosaver]);
 
@@ -59,4 +51,6 @@ export function useAutosave(projectId: string, value: Descendant[]): void {
 			autosaver.schedule();
 		});
 	}, [queue, autosaver]);
+
+	return autosaver.schedule;
 }

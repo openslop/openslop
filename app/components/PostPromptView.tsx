@@ -24,7 +24,7 @@ import {
 } from "./video/PlayerPositionContext";
 
 function PostPromptViewInner() {
-	const { editor, value, setValue, layoutKey } = useEditorSession();
+	const { editor, onDocumentChange } = useEditorSession();
 	const { position, visible } = usePlayerPosition();
 	const { view } = useBottomView();
 	const isTop = position === "top";
@@ -43,7 +43,7 @@ function PostPromptViewInner() {
 			/>
 			<UserProfile />
 
-			<CanvasProviders editor={editor} layoutKey={layoutKey}>
+			<CanvasProviders editor={editor} onDocumentChange={onDocumentChange}>
 				<EditorToolbar editor={editor} />
 				<div className="flex min-h-0 flex-1 overflow-hidden">
 					<EditorSidebar />
@@ -58,7 +58,7 @@ function PostPromptViewInner() {
 								>
 									<div className="mx-auto max-w-6xl px-4 py-4">
 										<ProjectTitle />
-										<Canvas editor={editor} value={value} setValue={setValue} />
+										<Canvas editor={editor} />
 									</div>
 								</div>
 

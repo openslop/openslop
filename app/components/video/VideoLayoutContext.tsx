@@ -31,14 +31,12 @@ export { useLayout };
 
 export function VideoLayoutProvider({
 	editor,
-	layoutKey,
 	children,
 }: {
 	editor: Editor;
-	layoutKey: string;
 	children: ReactNode;
 }) {
-	const { layout, playerKey, scenes } = useVideoLayout(editor, layoutKey);
+	const { layout, playerKey, scenes } = useVideoLayout(editor);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
