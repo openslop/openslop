@@ -26,7 +26,13 @@ function BottomTransportBarComponent() {
 	const { layout, segments } = useLayout();
 	const playing = usePlayerPlaying(player);
 
-	const ready = player !== null && segments.length > 0;
+	// Prev/next need a live player to seek with. Play does not: hiding the
+	// player from the layout panel unmounts PlayerPanel, which calls
+	// registerPlayer(null), and play doubles as the way back -- its
+	// showPlayer() re-reveals the panel. Gating it on `player` too would
+	// disable the only escape hatch and leave the button dead forever.
+	const hasSegments = segments.length > 0;
+	const ready = player !== null && hasSegments;
 
 	const seekToAdjacentScene = (dir: -1 | 1) => {
 		if (!player || segments.length === 0) return;
@@ -70,7 +76,7 @@ function BottomTransportBarComponent() {
 					</TooltipIconButton>
 					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
-						disabled={!ready}
+						disabled={!hasSegments}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
