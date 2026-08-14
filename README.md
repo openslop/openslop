@@ -70,6 +70,7 @@ Required (auth and database):
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SECRET_KEY=your-service-role-key   # generation jobs read/write with it
 ```
 
 Without provider keys, the app falls back to mock providers. To use real ones, add any of:
