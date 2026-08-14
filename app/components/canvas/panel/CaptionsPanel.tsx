@@ -16,7 +16,6 @@ import {
 	type MediaToggleOption,
 } from "@/components/ui/media-toggle";
 import { NumberScrubber } from "@/components/ui/number-scrubber";
-import { useProject } from "@/lib/project/useProject";
 import {
 	CAPTION_RANGES,
 	type CaptionAlignX,
@@ -25,7 +24,10 @@ import {
 	type CaptionReveal,
 } from "@/lib/video/captionStyle";
 import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
-import { useVideoSetting } from "@/lib/video/useVideoSetting";
+import {
+	useUpdateVideoSettings,
+	useVideoSetting,
+} from "@/lib/video/useVideoSetting";
 import { CaptionFontLibrary } from "../CaptionFonts";
 import { CaptionFontField } from "./CaptionFontField";
 import { CaptionPresetGrid } from "./CaptionPresetGrid";
@@ -58,7 +60,7 @@ const ALIGN_Y_OPTIONS: MediaToggleOption<CaptionAlignY>[] = [
 
 export function CaptionsPanel() {
 	const captionsEnabled = useVideoSetting("captions");
-	const updateMetadata = useProject((s) => s.updateMetadata);
+	const updateVideoSettings = useUpdateVideoSettings();
 	const [style, setStyle] = useCaptionStyle();
 
 	return (
@@ -68,7 +70,7 @@ export function CaptionsPanel() {
 					<MediaToggle
 						value={captionsEnabled ? "on" : "off"}
 						onChange={(value) =>
-							updateMetadata({ videoSettings: { captions: value === "on" } })
+							updateVideoSettings({ captions: value === "on" })
 						}
 						options={[
 							{ value: "on", label: "Show captions", icon: Eye },
