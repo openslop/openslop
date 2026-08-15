@@ -1,9 +1,14 @@
 import type {
+	LanguageModelV3Prompt,
+	LanguageModelV3StreamPart,
+} from "@ai-sdk/provider";
+import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
+import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { matchAnimateImagePrompt } from "@/lib/script/refine/animatePrompt";
-import { pickRandom } from "../mock-utils";
+import type { AgentModel } from "./agentModel";
 
 const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
@@ -96,63 +101,6 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;
 
-type RefinementFactory = (ids: string[]) => string;
-
-const MOCK_REFINEMENTS: RefinementFactory[] = [
-	// Modify text on first element
-	(ids) =>
-		`{"op":"set","id":"${ids[0]}","text":"In a distant village, at the edge of an enchanted forest, there lived a brave girl named Red."}`,
-
-	// Insert multiple elements at same anchor (tests stacking)
-	(ids) =>
-		[
-			`{"op":"insert","anchor_id":"${ids[0]}","type":"sound","text":"mystical wind chimes"}`,
-			`{"op":"insert","anchor_id":"${ids[0]}","type":"sound","text":"distant thunder"}`,
-			`{"op":"insert","anchor_id":"${ids[0]}","type":"music","text":"Tense orchestral music with deep cellos and timpani"}`,
-		].join("\n"),
-
-	// Remove an element then insert at same anchor (tests stale anchor fallback)
-	(ids) =>
-		[
-			`{"op":"remove","id":"${ids[1]}"}`,
-			`{"op":"insert","anchor_id":"${ids[0]}","type":"narration","text":"The forest grew darker as she ventured deeper."}`,
-		].join("\n"),
-
-	// Change element type (tests type change + hydration)
-	(ids) =>
-		`{"op":"set","id":"${ids[0]}","type":"character","attrs":{"name":"Red","emotion":"excited"},"text":"I can see grandmother's house from here!"}`,
-
-	// Insert at top (tests position:"before" with no anchor)
-	() =>
-		[
-			`{"op":"insert","position":"before","type":"narration","text":"Long ago, in a land of endless forests..."}`,
-			`{"op":"insert","position":"before","type":"animated_image","attrs":{"videoPrompt":"slow aerial drift over the canopy"},"text":"A sweeping aerial view of an ancient forest stretching to the horizon"}`,
-		].join("\n"),
-
-	// Multiple set ops on different elements (tests independent edits)
-	(ids) =>
-		ids
-			.slice(0, 3)
-			.map(
-				(id, i) =>
-					`{"op":"set","id":"${id}","attrs":{"emotion":"${["excited", "scared", "calm"][i]}"}}`,
-			)
-			.join("\n"),
-
-	// Append multiple to end (tests no-anchor stacking)
-	() =>
-		[
-			`{"op":"insert","type":"sound","text":"wolf howling in the distance"}`,
-			`{"op":"insert","type":"narration","text":"Red paused, her heart pounding."}`,
-			`{"op":"insert","type":"sound","text":"snapping twigs"}`,
-			`{"op":"insert","type":"character","attrs":{"name":"Red","emotion":"scared"},"text":"Who's there?"}`,
-		].join("\n"),
-];
-
-function extractIds(prompt: string): string[] {
-	return [...prompt.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
-}
-
 const MOCK_STYLE =
 	"Warm, painterly storybook illustration with soft watercolor washes, gentle outlines, and golden hour lighting; whimsical and nostalgic.";
 
@@ -187,25 +135,11 @@ const MOCK_RESPONSES: {
 		matches: (p) => p.startsWith("Briefly outline an engaging story"),
 		respond: () => MOCK_OUTLINE,
 	},
-	{
-		matches: (p) => p.includes("## Refinement Request"),
-		respond: (params) => buildRefineResponse(params),
-	},
 ];
 
 function mockResponse(params: LLMGenerateParams): string {
 	const match = MOCK_RESPONSES.find((m) => m.matches(params.prompt));
 	return match ? match.respond(params) : MOCK_SCRIPT;
-}
-
-function buildRefineResponse(params: LLMGenerateParams): string {
-	const animateId = matchAnimateImagePrompt(params.prompt);
-	if (animateId) {
-		return `{"op":"set","id":"${animateId}","type":"animated_image","attrs":{"videoPrompt":"slow cinematic push-in with gentle parallax"}}`;
-	}
-	const ids = extractIds(params.prompt);
-	const factory = pickRandom(MOCK_REFINEMENTS);
-	return factory(ids);
 }
 
 function delay(ms: number) {
@@ -235,4 +169,136 @@ export class MockLLM {
 		}
 		yield { text: "", done: true };
 	}
+
+	agentModel(): AgentModel {
+		return {
+			model: mockAgentModel(),
+			modelId: "mock",
+			providerOptions: {},
+		};
+	}
+}
+
+const ELEMENT_ID = /id="([^"]+)"/;
+const EDIT_REQUEST =
+	/\b(add|remove|delete|change|edit|rewrite|shorten|lengthen|make|replace|move|swap|fix|tweak|animate|shorter|longer|warmer|colder)\b/i;
+
+function textOf(message: LanguageModelV3Prompt[number]): string {
+	if (typeof message.content === "string") return message.content;
+	return message.content
+		.map((part) => (part.type === "text" ? part.text : ""))
+		.join("");
+}
+
+function promptText(prompt: LanguageModelV3Prompt): string {
+	return prompt.map(textOf).join("\n");
+}
+
+/** What the user actually asked for, apart from the prompt around it. */
+function lastUserText(prompt: LanguageModelV3Prompt): string {
+	const user = [...prompt].reverse().find((m) => m.role === "user");
+	return user ? textOf(user) : "";
+}
+
+function parts(
+	kind: "text" | "reasoning",
+	id: string,
+	text: string,
+): LanguageModelV3StreamPart[] {
+	return [
+		{ type: `${kind}-start`, id },
+		...text
+			.split(/(?<= )/)
+			.map((delta) => ({ type: `${kind}-delta` as const, id, delta })),
+		{ type: `${kind}-end`, id },
+	] as LanguageModelV3StreamPart[];
+}
+
+/**
+ * Only edits when the message reads like a request to change something, so a
+ * plain question gets a plain answer the way a real model would give one.
+ */
+function mockCall(prompt: LanguageModelV3Prompt) {
+	const asked = lastUserText(prompt);
+	const animateId = matchAnimateImagePrompt(asked);
+	const elementId = animateId ?? ELEMENT_ID.exec(promptText(prompt))?.[1];
+
+	if (!elementId) {
+		return {
+			say: "Writing a script onto the canvas. ",
+			toolName: "write_script",
+			input: { brief: "A short mock story, written without an API key." },
+		};
+	}
+
+	if (!animateId && !EDIT_REQUEST.test(asked)) {
+		return {
+			say: "No API key is set, so I am a mock. Ask me to change the script and I will edit it.",
+		};
+	}
+
+	return {
+		say: "Rewriting an element. ",
+		toolName: "edit_script",
+		input: {
+			ops: [
+				animateId
+					? {
+							op: "set",
+							id: elementId,
+							type: "animated_image",
+							attrs: { videoPrompt: "slow cinematic push-in" },
+						}
+					: {
+							op: "set",
+							id: elementId,
+							text: "A mock edit, from the agent running without an API key.",
+						},
+			],
+		},
+	};
+}
+
+/**
+ * A language model rather than a short-circuit in the route, so the whole agent
+ * path runs unchanged without an API key.
+ */
+function mockAgentModel() {
+	return new MockLanguageModelV3({
+		doStream: async ({ prompt }) => {
+			const { say, toolName, input } = mockCall(prompt);
+			const chunks: LanguageModelV3StreamPart[] = [
+				{ type: "stream-start", warnings: [] },
+				...parts("reasoning", "r0", "Reading the canvas. "),
+				...parts("text", "t0", say),
+				...(toolName
+					? ([
+							{
+								type: "tool-call",
+								toolCallId: `mock-${toolName}`,
+								toolName,
+								input: JSON.stringify(input),
+							},
+						] as LanguageModelV3StreamPart[])
+					: []),
+				{
+					type: "finish",
+					finishReason: toolName
+						? { unified: "tool-calls", raw: "tool_use" }
+						: { unified: "stop", raw: "end_turn" },
+					usage: {
+						inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+						outputTokens: { total: 0, text: 0, reasoning: 0 },
+					},
+				},
+			];
+			return {
+				stream: simulateReadableStream({
+					chunks,
+					chunkDelayInMs: 20,
+					initialDelayInMs: 200,
+				}),
+			};
+		},
+	});
 }

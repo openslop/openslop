@@ -1,23 +1,9 @@
 import { Easing, interpolate } from "remotion";
-
-export const MOTION_EFFECTS = [
-	"none",
-	"kenBurnsIn",
-	"kenBurnsOut",
-	"pushIn",
-	"pullOut",
-	"panLeft",
-	"panRight",
-	"tiltUp",
-	"tiltDown",
-	"handheldDrift",
-	"shake",
-	"pulse",
-	"rotateSlow",
-] as const;
-
-export type MotionEffect = (typeof MOTION_EFFECTS)[number];
-export type ActiveMotionEffect = Exclude<MotionEffect, "none">;
+import {
+	MOTION_EFFECTS,
+	type ActiveMotionEffect,
+	type MotionEffect,
+} from "./motionEffectNames";
 
 export const DEFAULT_MOTION: MotionEffect = "none";
 

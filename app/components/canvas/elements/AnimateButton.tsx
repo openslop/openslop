@@ -4,10 +4,12 @@ import { MagicVideo } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { animateImagePrompt } from "@/lib/script/refine/animatePrompt";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { useRefine } from "../RefineProvider";
+import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
+import { useEditorPanel } from "../panel/EditorPanelContext";
 
 export function AnimateButton({ element }: { element: CanvasContentElement }) {
-	const { refineScript, refineLoading } = useRefine();
+	const { send, loading } = useSloppy();
+	const { setActive } = useEditorPanel();
 
 	if (element.type !== "image") return null;
 
@@ -18,9 +20,12 @@ export function AnimateButton({ element }: { element: CanvasContentElement }) {
 			size="sm"
 			tooltip="Animate this image"
 			className="shrink-0"
-			disabled={refineLoading}
+			disabled={loading}
 			onMouseDown={(e) => e.preventDefault()}
-			onClick={() => refineScript(animateImagePrompt(element.id))}
+			onClick={() => {
+				setActive("sloppy");
+				void send(animateImagePrompt(element.id));
+			}}
 		>
 			<MagicVideo aria-hidden="true" />
 			<span className="hidden @sm:inline">Animate</span>

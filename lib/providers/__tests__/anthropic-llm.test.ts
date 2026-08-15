@@ -1,28 +1,77 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import type {
+	LanguageModelV3CallOptions,
+	LanguageModelV3StreamPart,
+} from "@ai-sdk/provider";
+import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 
-const mockCreate = vi.fn();
-const mockStream = vi.fn();
+const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
 
-vi.mock("@anthropic-ai/sdk", () => ({
-	default: class {
-		messages = { create: mockCreate, stream: mockStream };
-	},
-}));
+vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
 
 import { AnthropicLLM } from "../llm/anthropic";
+
+const model = new MockLanguageModelV3({
+	modelId: "claude-opus-5",
+	// Matches what the real provider declares, so image URLs are passed through
+	// rather than downloaded and inlined.
+	supportedUrls: { "image/*": [/^https?:\/\/.*$/] },
+});
+createAnthropic.mockImplementation(() => () => model);
+
+const USAGE = {
+	inputTokens: { total: 10, noCache: 10, cacheRead: 0, cacheWrite: 0 },
+	outputTokens: { total: 5, text: 5, reasoning: 0 },
+};
+
+const calls: LanguageModelV3CallOptions[] = [];
+
+function respondWith(text: string) {
+	model.doGenerate = async (options) => {
+		calls.push(options);
+		return {
+			content: [{ type: "text" as const, text }],
+			finishReason: { unified: "stop" as const, raw: "end_turn" },
+			usage: USAGE,
+			warnings: [],
+		};
+	};
+}
+
+function streamWith(deltas: string[]) {
+	const chunks: LanguageModelV3StreamPart[] = [
+		{ type: "stream-start", warnings: [] },
+		{ type: "text-start", id: "t0" },
+		...deltas.map((delta) => ({
+			type: "text-delta" as const,
+			id: "t0",
+			delta,
+		})),
+		{ type: "text-end", id: "t0" },
+		{
+			type: "finish",
+			finishReason: { unified: "stop", raw: "end_turn" },
+			usage: USAGE,
+		},
+	];
+	model.doStream = async (options) => {
+		calls.push(options);
+		return { stream: simulateReadableStream({ chunks, chunkDelayInMs: 0 }) };
+	};
+}
+
+const lastCall = () => calls[0];
+const userContent = () => lastCall().prompt.at(-1)?.content;
 
 describe("AnthropicLLM", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		calls.length = 0;
 	});
 
 	describe("generate", () => {
 		it("returns text and usage with defaults", async () => {
-			mockCreate.mockResolvedValue({
-				content: [{ type: "text", text: "Hello world" }],
-				model: "claude-opus-5",
-				usage: { input_tokens: 10, output_tokens: 5 },
-			});
+			respondWith("Hello world");
 
 			const provider = new AnthropicLLM("test-key");
 			const result = await provider.generate({ prompt: "hi" });
@@ -32,25 +81,26 @@ describe("AnthropicLLM", () => {
 				model: "claude-opus-5",
 				usage: { inputTokens: 10, outputTokens: 5 },
 			});
-			expect(mockCreate).toHaveBeenCalledWith({
-				model: "claude-opus-5",
-				max_tokens: 65536,
-				thinking: { type: "adaptive" },
-				output_config: { effort: "high" },
-				system: undefined,
-				messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }],
+			expect(createAnthropic).toHaveBeenCalledWith({ apiKey: "test-key" });
+			expect(lastCall().maxOutputTokens).toBe(65536);
+			expect(userContent()).toEqual([{ type: "text", text: "hi" }]);
+		});
+
+		it("asks for summarized thinking, so thoughts are not empty", async () => {
+			respondWith("ok");
+
+			await new AnthropicLLM("test-key").generate({ prompt: "hi" });
+
+			expect(lastCall().providerOptions?.anthropic).toEqual({
+				thinking: { type: "adaptive", display: "summarized" },
+				effort: "high",
 			});
 		});
 
 		it("passes custom params", async () => {
-			mockCreate.mockResolvedValue({
-				content: [{ type: "text", text: "ok" }],
-				model: "custom",
-				usage: { input_tokens: 1, output_tokens: 1 },
-			});
+			respondWith("ok");
 
-			const provider = new AnthropicLLM("test-key");
-			await provider.generate({
+			await new AnthropicLLM("test-key").generate({
 				prompt: "test",
 				model: "custom",
 				systemPrompt: "You are helpful",
@@ -58,149 +108,94 @@ describe("AnthropicLLM", () => {
 				thinkingLevel: "low",
 			});
 
-			expect(mockCreate).toHaveBeenCalledWith({
-				model: "custom",
-				max_tokens: 100,
-				thinking: { type: "adaptive" },
-				output_config: { effort: "low" },
-				system: "You are helpful",
-				messages: [{ role: "user", content: [{ type: "text", text: "test" }] }],
+			expect(lastCall().maxOutputTokens).toBe(100);
+			expect(lastCall().prompt[0]).toEqual({
+				role: "system",
+				content: "You are helpful",
+			});
+			expect(lastCall().providerOptions?.anthropic).toMatchObject({
+				effort: "low",
 			});
 		});
 
 		it("drops temperature, which Claude rejects", async () => {
-			mockCreate.mockResolvedValue({
-				content: [{ type: "text", text: "ok" }],
-				model: "claude-opus-5",
-				usage: { input_tokens: 1, output_tokens: 1 },
+			respondWith("ok");
+
+			await new AnthropicLLM("test-key").generate({
+				prompt: "hi",
+				temperature: 0.5,
 			});
 
-			const provider = new AnthropicLLM("test-key");
-			await provider.generate({ prompt: "hi", temperature: 0.5 });
-
-			expect(mockCreate.mock.calls[0][0]).not.toHaveProperty("temperature");
+			expect(lastCall().temperature).toBeUndefined();
 		});
 
-		it("includes reference images as url blocks before the text", async () => {
-			mockCreate.mockResolvedValue({
-				content: [{ type: "text", text: "ok" }],
-				model: "claude-opus-5",
-				usage: { input_tokens: 1, output_tokens: 1 },
-			});
+		it("includes reference images before the text", async () => {
+			respondWith("ok");
 
-			const provider = new AnthropicLLM("test-key");
-			await provider.generate({
+			await new AnthropicLLM("test-key").generate({
 				prompt: "describe",
 				referenceImages: ["https://a/1.jpg", "https://a/2.jpg"],
 			});
 
-			expect(mockCreate.mock.calls[0][0].messages).toEqual([
+			expect(userContent()).toEqual([
 				{
-					role: "user",
-					content: [
-						{
-							type: "image",
-							source: { type: "url", url: "https://a/1.jpg" },
-						},
-						{
-							type: "image",
-							source: { type: "url", url: "https://a/2.jpg" },
-						},
-						{ type: "text", text: "describe" },
-					],
-				},
-			]);
-		});
-
-		it("converts base64 data URI reference images into base64 source blocks", async () => {
-			mockCreate.mockResolvedValue({
-				content: [{ type: "text", text: "ok" }],
-				model: "claude-opus-4-7",
-				usage: { input_tokens: 1, output_tokens: 1 },
-			});
-
-			const provider = new AnthropicLLM("test-key");
-			await provider.generate({
-				prompt: "describe",
-				referenceImages: [
-					"data:image/png;base64,iVBORw0KGgo=",
-					"https://a/2.jpg",
-				],
-			});
-
-			expect(mockCreate.mock.calls[0][0].messages[0].content).toEqual([
-				{
-					type: "image",
-					source: {
-						type: "base64",
-						media_type: "image/png",
-						data: "iVBORw0KGgo=",
-					},
+					type: "file",
+					mediaType: "image/*",
+					data: new URL("https://a/1.jpg"),
 				},
 				{
-					type: "image",
-					source: { type: "url", url: "https://a/2.jpg" },
+					type: "file",
+					mediaType: "image/*",
+					data: new URL("https://a/2.jpg"),
 				},
 				{ type: "text", text: "describe" },
 			]);
 		});
 
+		it("converts base64 data URI reference images", async () => {
+			respondWith("ok");
+
+			await new AnthropicLLM("test-key").generate({
+				prompt: "describe",
+				referenceImages: ["data:image/png;base64,iVBORw0KGgo="],
+			});
+
+			expect(userContent()).toMatchObject([
+				{ type: "file", mediaType: "image/png" },
+				{ type: "text", text: "describe" },
+			]);
+		});
+
 		it("rejects reference images that are neither URLs nor base64 data URIs", async () => {
+			respondWith("ok");
 			const provider = new AnthropicLLM("test-key");
+
 			await expect(
 				provider.generate({
 					prompt: "describe",
 					referenceImages: ["ftp://nope/img.png"],
 				}),
 			).rejects.toThrow(/must be an http\(s\) URL or a base64 data URI/);
-			expect(mockCreate).not.toHaveBeenCalled();
+			expect(calls).toHaveLength(0);
 		});
 
 		it("rejects data URIs with unsupported media types", async () => {
+			respondWith("ok");
 			const provider = new AnthropicLLM("test-key");
+
 			await expect(
 				provider.generate({
 					prompt: "describe",
 					referenceImages: ["data:image/svg+xml;base64,PHN2Zy8+"],
 				}),
 			).rejects.toThrow(/media type "image\/svg\+xml" is not supported/);
-			expect(mockCreate).not.toHaveBeenCalled();
-		});
-
-		it("concatenates multiple text blocks", async () => {
-			mockCreate.mockResolvedValue({
-				content: [
-					{ type: "text", text: "Hello " },
-					{ type: "text", text: "world" },
-				],
-				model: "test",
-				usage: { input_tokens: 1, output_tokens: 2 },
-			});
-
-			const provider = new AnthropicLLM("test-key");
-			const result = await provider.generate({ prompt: "hi" });
-			expect(result.text).toBe("Hello world");
+			expect(calls).toHaveLength(0);
 		});
 	});
 
 	describe("stream", () => {
 		it("yields text chunks and a final done event", async () => {
-			const events = [
-				{
-					type: "content_block_delta",
-					delta: { type: "text_delta", text: "Hello" },
-				},
-				{
-					type: "content_block_delta",
-					delta: { type: "text_delta", text: " world" },
-				},
-				{ type: "message_stop" },
-			];
-			mockStream.mockReturnValue({
-				[Symbol.asyncIterator]: async function* () {
-					for (const e of events) yield e;
-				},
-			});
+			streamWith(["Hello", " world"]);
 
 			const provider = new AnthropicLLM("test-key");
 			const chunks: { text: string; done: boolean }[] = [];

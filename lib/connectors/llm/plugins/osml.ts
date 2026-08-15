@@ -1,6 +1,6 @@
 import dedent from "dedent";
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
-import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
+import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import {

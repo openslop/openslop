@@ -11,7 +11,8 @@ import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
 import { ActiveCaptionFont } from "./CaptionFonts";
-import { RefineProvider } from "./RefineProvider";
+import { SloppyProvider } from "../sloppy/SloppyProvider";
+import { EditorPanelProvider } from "./panel/EditorPanelContext";
 
 const EMPTY_DOCUMENT: Descendant[] = [];
 
@@ -44,7 +45,9 @@ export function CanvasProviders({
 						<ActiveSceneProvider>
 							<AutoScrollProvider>
 								<ViewModeProvider editor={editor}>
-									<RefineProvider editor={editor}>{children}</RefineProvider>
+									<SloppyProvider editor={editor}>
+										<EditorPanelProvider>{children}</EditorPanelProvider>
+									</SloppyProvider>
 								</ViewModeProvider>
 							</AutoScrollProvider>
 						</ActiveSceneProvider>

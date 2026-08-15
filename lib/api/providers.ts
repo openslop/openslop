@@ -11,16 +11,21 @@ import { MockLLM } from "@/lib/providers/llm/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import { MockTTS } from "@/lib/providers/tts/mock";
 
+/**
+ * The one way a provider is resolved: real when its key is set, mock otherwise,
+ * built once. Factories rather than constructors, so a provider that is not a
+ * class resolves through the same mechanism as the rest.
+ */
 function defineProvider<R, M>(
 	envVar: string,
-	RealCtor: new (apiKey: string) => R,
-	MockCtor: new () => M,
+	create: (apiKey: string) => R,
+	createMock: () => M,
 ): () => R | M {
 	let instance: R | M | undefined;
 	return () => {
 		if (instance === undefined) {
 			const apiKey = process.env[envVar];
-			instance = apiKey ? new RealCtor(apiKey) : new MockCtor();
+			instance = apiKey ? create(apiKey) : createMock();
 		}
 		return instance;
 	};
@@ -28,31 +33,31 @@ function defineProvider<R, M>(
 
 export const getImageProvider = defineProvider(
 	"RUNWARE_API_KEY",
-	RunwareImage,
-	MockImage,
+	(apiKey) => new RunwareImage(apiKey),
+	() => new MockImage(),
 );
 export const getVideoProvider = defineProvider(
 	"RUNWARE_API_KEY",
-	RunwareVideo,
-	MockVideo,
+	(apiKey) => new RunwareVideo(apiKey),
+	() => new MockVideo(),
 );
 export const getMusicProvider = defineProvider(
 	"ELEVENLABS_API_KEY",
-	ElevenLabsMusic,
-	MockMusic,
+	(apiKey) => new ElevenLabsMusic(apiKey),
+	() => new MockMusic(),
 );
 export const getSFXProvider = defineProvider(
 	"ELEVENLABS_API_KEY",
-	ElevenLabsSFX,
-	MockSFX,
+	(apiKey) => new ElevenLabsSFX(apiKey),
+	() => new MockSFX(),
 );
 export const getLLMProvider = defineProvider(
 	"ANTHROPIC_API_KEY",
-	AnthropicLLM,
-	MockLLM,
+	(apiKey) => new AnthropicLLM(apiKey),
+	() => new MockLLM(),
 );
 export const getTTSProvider = defineProvider(
 	"CARTESIA_API_KEY",
-	CartesiaTTS,
-	MockTTS,
+	(apiKey) => new CartesiaTTS(apiKey),
+	() => new MockTTS(),
 );

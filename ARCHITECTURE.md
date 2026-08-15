@@ -10,7 +10,7 @@ A 10k-foot view of how OpenSlop fits together.
 
 ### 1. Submit prompt
 
-The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams OSML back over SSE. The parser inserts elements into the SlateJS canvas as they arrive.
+The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams OSML back over SSE. The parser inserts elements into the SlateJS canvas as they arrive via Sloppy (see [Sloppy](#sloppy)).
 
 ### 2. Generate
 
@@ -26,13 +26,21 @@ Project state (script, store, and generation snapshots) persists to the `project
 
 `POST /api/render` splits the composition across Remotion Lambdas. Chunks render in parallel into an MP4 in S3 while the client polls for progress. Compositions live in `remotion/` and `lib/video/`. The Player is loaded client-side only.
 
+## Sloppy
+
+Sloppy is the conversational agent in the editor's left panel, and every LLM call the user makes goes through it. Each turn is one model call: `POST /api/v1/agent` loads the transcript, composes a system prompt with the current script in it, streams reasoning, text and tool calls back over SSE, and persists the assistant turn.
+
+Tools are declared without an executor, so the SDK surfaces the call and stops. The client runs it against the Slate editor and reports the outcome to `POST /api/v1/agent/messages`, which records it without invoking the model. A turn ends at its tool call; the next user message starts the next one. The agent never writes `projects.script` or `projects.store` itself, so the client stays the single writer and autosave stays the single persistence path.
+
+Turns are stored as the model layer's own message type, so nothing is converted on the way in or out and a vendor's signed thinking blocks come back byte for byte. `lib/agent/` holds the domain (message helpers, tool registry, prompt), `lib/api/agentTurn.ts` runs the turn, and `app/components/sloppy/` is the panel, which reads everything it shows back from rows.
+
 ## Three layers
 
 The generation pipeline is split so providers and asset types can be swapped independently:
 
 - **Connectors** (`lib/connectors/`): what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`.
 - **Gateways** (`lib/gateway/`): thin HTTP clients between connectors and our `/api/v1/*` routes. This seam lets connectors run against the live API or a mock. Today there is one OpenSlop gateway. A BYOK gateway will be added so users can call providers with their own API keys.
-- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response.
+- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. LLM providers go through the Vercel AI SDK, so `lib/providers/llm/registry.ts` is the one place a vendor is named: an entry declares its capabilities, builds a `LanguageModel`, and maps vendor-specific knobs like reasoning effort.
 
 ## API routes
 
@@ -70,11 +78,13 @@ Staleness falls out of the graph: a node needs generating when it has no result,
 
 Supabase Postgres with RLS (users only read their own rows; queue workers use the service role):
 
-| Table        | Purpose                                                                              |
-| ------------ | ------------------------------------------------------------------------------------ |
-| `auth.users` | Supabase auth users                                                                  |
-| `projects`   | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
-| `jobs`       | Async generation jobs: `pending → processing → completed \| failed`                  |
+| Table           | Purpose                                                                              |
+| --------------- | ------------------------------------------------------------------------------------ |
+| `auth.users`    | Supabase auth users                                                                  |
+| `projects`      | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
+| `jobs`          | Async generation jobs: `pending → processing → completed \| failed`                  |
+| `conversations` | One Sloppy conversation per project                                                  |
+| `messages`      | Its turns: `parts` (text / reasoning / tool-call / tool-result) plus usage           |
 
 Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, served as public CDN URLs.
 

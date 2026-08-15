@@ -22,6 +22,8 @@ import { useStreamRun } from "./useStreamRun";
 type ScriptControl = {
 	loading: boolean;
 	submitPrompt: (prompt: string) => Promise<void>;
+	/** Leaves the hero for the workspace, before there is anything to show in it. */
+	enterWorkspace: () => void;
 	startBlank: () => void;
 	stopGeneration: () => void;
 };
@@ -70,7 +72,6 @@ export function ScriptProvider({
 
 	const submitPrompt = useCallback(
 		async (prompt: string) => {
-			setHasContent(false);
 			updateMetadata({ lastMode: mode, lastPrompt: prompt });
 			const connector = createConnector("llm", llmProvider, llmConfig);
 			const state = store.getState();
@@ -83,14 +84,22 @@ export function ScriptProvider({
 		[store, llmProvider, llmConfig, appendChunk, updateMetadata, mode, run],
 	);
 
+	const enterWorkspace = useCallback(() => setHasContent(true), []);
+
 	const startBlank = useCallback(() => {
 		setScript(BLANK_SCRIPT);
 		setHasContent(true);
 	}, []);
 
 	const control = useMemo<ScriptControl>(
-		() => ({ loading, submitPrompt, startBlank, stopGeneration }),
-		[loading, submitPrompt, startBlank, stopGeneration],
+		() => ({
+			loading,
+			submitPrompt,
+			enterWorkspace,
+			startBlank,
+			stopGeneration,
+		}),
+		[loading, submitPrompt, enterWorkspace, startBlank, stopGeneration],
 	);
 
 	return (

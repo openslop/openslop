@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { useSloppy } from "./sloppy/SloppyProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
 import ComposerCopilot from "./copilot/ComposerCopilot";
 import AnimatedPlaceholder from "./AnimatedPlaceholder";
@@ -22,9 +23,15 @@ there was a small glowing garden hidden on the moon.
 And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
-	const { submitPrompt, startBlank } = useScriptControl();
+	const { enterWorkspace, startBlank } = useScriptControl();
 	const { mode, selectTemplate } = useConfig();
+	const { send } = useSloppy();
 	const [value, setValue] = useState("");
+
+	const start = (brief: string) => {
+		enterWorkspace();
+		void send(brief);
+	};
 
 	return (
 		<div className="flex w-full max-w-2xl flex-col items-center px-4">
@@ -37,7 +44,7 @@ export default function ComposerHero() {
 				value={value}
 				onValueChange={setValue}
 				onSubmit={() => {
-					submitPrompt(value);
+					start(value);
 					setValue("");
 				}}
 				placeholder={mode === "script" ? INPUT_SCRIPT_PLACEHOLDER : undefined}

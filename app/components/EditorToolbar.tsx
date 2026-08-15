@@ -1,38 +1,62 @@
 "use client";
 
-import { memo, useState } from "react";
+import Link from "next/link";
+import { memo } from "react";
 import type { Editor } from "slate";
-import { Sparkles, X } from "@/components/ui/icon";
+import { Lock, Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { useProject } from "@/lib/project/useProject";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import InlineCopilot from "./copilot/InlineCopilot";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
-import { useRefine } from "./canvas/RefineProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
 
-function RefineComposer() {
-	const [value, setValue] = useState("");
-	const { loading, stopGeneration } = useScriptControl();
-	const { refineScript, refineLoading, stopRefine } = useRefine();
+/** Where this project sits: the owner's own space, then the project itself. */
+function Breadcrumbs() {
+	const title = useProject((s) => s.metadata.title);
+
 	return (
-		<InlineCopilot
-			value={value}
-			onValueChange={setValue}
-			onSubmit={() => {
-				refineScript(value);
-				setValue("");
-			}}
-			onStop={refineLoading ? stopRefine : stopGeneration}
-			loading={loading || refineLoading}
-			placeholder="Refine your script…"
-		/>
+		<nav
+			aria-label="Breadcrumb"
+			className="absolute inset-y-0 left-1/2 flex max-w-[40vw] -translate-x-1/2 items-center"
+		>
+			<ol className="flex min-w-0 items-center gap-1.5 text-label font-[475] text-foreground">
+				<li className="shrink-0">
+					<Button
+						variant="ghost"
+						size="sm"
+						asChild
+						className="h-7 gap-1.5 px-2 font-[475]"
+					>
+						<Link href="/">
+							<Lock className="size-3" aria-hidden="true" />
+							Personal
+						</Link>
+					</Button>
+				</li>
+				{title && (
+					<>
+						<li aria-hidden="true" className="shrink-0">
+							/
+						</li>
+						<li className="min-w-0">
+							<span
+								aria-current="page"
+								className="block h-7 truncate px-2 leading-7"
+							>
+								{title}
+							</span>
+						</li>
+					</>
+				)}
+			</ol>
+		</nav>
 	);
 }
 
@@ -52,14 +76,11 @@ function EditorToolbarComponent({ editor }: { editor: Editor }) {
 
 	return (
 		<div
-			className={`z-40 flex w-full shrink-0 flex-col items-center gap-3 px-4 py-1.5 pl-16 ${editorStyles.copilotEnter}`}
+			className={`relative z-40 flex w-full shrink-0 flex-col items-center gap-3 px-4 py-1.5 ${editorStyles.copilotEnter}`}
 		>
+			<Breadcrumbs />
 			<div className="flex w-full items-center gap-3">
-				<div className="hidden flex-1 sm:block" aria-hidden />
-				<div className="min-w-0 max-w-2xl flex-1">
-					<RefineComposer />
-				</div>
-				<div className="flex flex-1 items-center justify-end gap-2 max-sm:flex-none">
+				<div className="ml-auto flex shrink-0 items-center justify-end gap-2">
 					<Button
 						type="button"
 						variant="generate"
