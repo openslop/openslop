@@ -12,8 +12,8 @@ export function turnStatus(parts: AgentContentPart[]): string {
 	}
 }
 
-const LONG_THOUGHT = 600;
+const LONG_REASONING = 600;
 
-export function thoughtOpen(superseded: boolean, text: string): boolean {
-	return !superseded && text.length <= LONG_THOUGHT;
+export function reasoningOpen(superseded: boolean, text: string): boolean {
+	return !superseded && text.length <= LONG_REASONING;
 }

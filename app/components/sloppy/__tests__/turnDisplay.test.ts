@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AgentContentPart } from "@/lib/agent/types";
-import { thoughtOpen, turnStatus } from "../turnDisplay";
+import { reasoningOpen, turnStatus } from "../turnDisplay";
 
 const thought: AgentContentPart = { type: "reasoning", text: "weighing" };
 const said: AgentContentPart = { type: "text", text: "on it" };
@@ -29,16 +29,16 @@ describe("turnStatus", () => {
 	});
 });
 
-describe("thoughtOpen", () => {
+describe("reasoningOpen", () => {
 	it("opens the thought while it is the newest thing in the turn", () => {
-		expect(thoughtOpen(false, "weighing")).toBe(true);
+		expect(reasoningOpen(false, "weighing")).toBe(true);
 	});
 
 	it("shuts it once Sloppy has moved on", () => {
-		expect(thoughtOpen(true, "weighing")).toBe(false);
+		expect(reasoningOpen(true, "weighing")).toBe(false);
 	});
 
 	it("shuts a long thought even while it is the newest thing", () => {
-		expect(thoughtOpen(false, "x".repeat(601))).toBe(false);
+		expect(reasoningOpen(false, "x".repeat(601))).toBe(false);
 	});
 });
