@@ -147,6 +147,59 @@ describe("stillSnapshot", () => {
 	});
 });
 
+describe("duplicated animation", () => {
+	const registry = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
+		.appendPlugins("image", ...buildImagePlugins())
+		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
+		.build();
+	const state = {
+		hydrated: true,
+		metadata: MetadataSchema.parse({}),
+		referenceImages: [],
+	};
+	const COPY_ID = "anim-2";
+
+	const animated = (id: string) => ({
+		id,
+		type: "animated_image" as const,
+		customAttributes: { provider: "openslop", videoPrompt: "slow pan" },
+		children: [
+			{ id: `${id}-t`, type: "animated_image" as const, text: "a forest" },
+		],
+	});
+
+	const duplicated = () => {
+		const queue = new GenerationQueue();
+		const build = nodeBuilder(registry, state);
+		const source = build(forElement(animated(ELEMENT_ID)));
+		const still = source.dependsOn.find(
+			(dep) => dep.id === stillElementId(ELEMENT_ID),
+		);
+		if (!still) throw new Error("expected a still dependency");
+		queue.commitResult(still, { imageUrl: STILL_URL, durationSec: 0 });
+		queue.commitResult(source, {
+			imageUrl: STILL_URL,
+			videoUrl: "https://example.com/v.mp4",
+			durationSec: 5,
+		});
+
+		queue.duplicate(ELEMENT_ID, COPY_ID);
+		return { queue, copy: build(forElement(animated(COPY_ID))) };
+	};
+
+	it("does not need regenerating", () => {
+		const { queue, copy } = duplicated();
+		expect(needsGeneration(copy, queue)).toBe(false);
+	});
+
+	it("shows the still it was copied from", () => {
+		const { queue, copy } = duplicated();
+		expect(getPrimaryUrl(stillSnapshot(copy, queue).result, "image")).toBe(
+			STILL_URL,
+		);
+	});
+});
+
 describe("uploaded still lifetime", () => {
 	const registry = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
 		.appendPlugins("image", ...buildImagePlugins())

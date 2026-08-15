@@ -86,6 +86,12 @@ const DERIVED_PREFIX = "~";
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
 
+/** The same derived node, keyed off `to` instead of `from`. Other ids pass through. */
+export const rekeyDerivedId = (id: NodeId, from: string, to: string): NodeId =>
+	id.startsWith(DERIVED_PREFIX) && id.endsWith(`:${from}`)
+		? `${id.slice(0, -from.length)}${to}`
+		: id;
+
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,

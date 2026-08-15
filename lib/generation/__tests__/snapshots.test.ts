@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
+import { derivedNodeId } from "../graph";
 import type { GenerationInputs } from "../inputs";
 import { SnapshotStore, type ElementSnapshot } from "../snapshots";
 
@@ -125,6 +126,35 @@ describe("SnapshotStore", () => {
 			pinned: true,
 		});
 		expect(store.restore("b", inputs("a.png"))).toBe(true);
+	});
+
+	it("carries the nodes derived from the element onto the copy", () => {
+		const store = new SnapshotStore();
+		const derived = derivedNodeId("still", "a");
+		commit(store, derived, "still.png");
+		store.commit(
+			"a",
+			result("a.png"),
+			{ prompt: "a", attributes: {}, dependencies: { [derived]: "still.png" } },
+			"animated_image",
+			false,
+		);
+
+		store.copy("a", "b");
+
+		expect(store.get(derivedNodeId("still", "b")).result).toEqual(
+			result("still.png"),
+		);
+		expect(store.get("b").resultInputs?.dependencies).toEqual({
+			[derivedNodeId("still", "b")]: "still.png",
+		});
+		expect(
+			store.restore("b", {
+				prompt: "a",
+				attributes: {},
+				dependencies: { [derivedNodeId("still", "b")]: "still.png" },
+			}),
+		).toBe(true);
 	});
 
 	it("copies an in-flight element as idle, not as a second active job", () => {

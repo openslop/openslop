@@ -1,4 +1,6 @@
+import mapKeys from "lodash/mapKeys";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
+import { rekeyDerivedId } from "./graph";
 import { serializeInputs, type GenerationInputs } from "./inputs";
 
 export type GenerationStatus = "idle" | "queued" | "generating";
@@ -28,6 +30,18 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 export const isGenerationActive = (status: GenerationStatus) =>
 	status === "queued" || status === "generating";
 
+type HistoryEntry = { inputs: GenerationInputs; result: AssetResult };
+
+type Rekey = (id: string) => string;
+
+const rekeyInputs = (
+	inputs: GenerationInputs,
+	rekey: Rekey,
+): GenerationInputs => ({
+	...inputs,
+	dependencies: mapKeys(inputs.dependencies, (_, id) => rekey(id)),
+});
+
 /**
  * Per-element generation state and the results already seen for it, with a
  * subscription for observers. Knows nothing about scheduling: mutators leave
@@ -35,7 +49,7 @@ export const isGenerationActive = (status: GenerationStatus) =>
  */
 export class SnapshotStore {
 	private state = new Map<string, ElementSnapshot>();
-	private history = new Map<string, Map<string, AssetResult>>();
+	private history = new Map<string, Map<string, HistoryEntry>>();
 	private listeners = new Set<() => void>();
 	private resultVersion = 0;
 
@@ -101,13 +115,40 @@ export class SnapshotStore {
 	 * Clones one element's result and the results already seen for it onto
 	 * another id. In-flight progress is never carried over, so a copy taken
 	 * mid-generation lands idle rather than as a second active job.
+	 *
+	 * The nodes the graph derived from the element come along, rekeyed onto the
+	 * copy: they are what the copy will depend on, so leaving them behind would
+	 * land it stale and missing the parts they produced.
 	 */
 	copy(fromId: string, toId: string) {
-		const source = this.state.get(fromId);
-		if (!source) return;
-		this.update(toId, { ...source, status: "idle", seconds: 0 });
-		const sourceHistory = this.history.get(fromId);
-		if (sourceHistory) this.history.set(toId, new Map(sourceHistory));
+		const rekey: Rekey = (id) =>
+			id === fromId ? toId : rekeyDerivedId(id, fromId, toId);
+		for (const id of Array.from(this.state.keys())) {
+			const nextId = rekey(id);
+			if (nextId !== id) this.copyEntry(id, nextId, rekey);
+		}
+	}
+
+	private copyEntry(id: string, nextId: string, rekey: Rekey) {
+		const source = this.get(id);
+		this.update(nextId, {
+			...source,
+			status: "idle",
+			seconds: 0,
+			resultInputs:
+				source.resultInputs && rekeyInputs(source.resultInputs, rekey),
+		});
+		const sourceHistory = this.history.get(id);
+		if (!sourceHistory) return;
+		this.history.set(
+			nextId,
+			new Map(
+				Array.from(sourceHistory.values(), ({ inputs, result }) => {
+					const rekeyed = rekeyInputs(inputs, rekey);
+					return [serializeInputs(rekeyed), { inputs: rekeyed, result }];
+				}),
+			),
+		);
 	}
 
 	/** Drops the entry entirely; anything it held is gone. */
@@ -141,8 +182,8 @@ export class SnapshotStore {
 		connectorType: AssetConnectorType,
 		pinned: boolean,
 	) {
-		const elHistory = this.history.get(id) ?? new Map<string, AssetResult>();
-		elHistory.set(serializeInputs(inputs), result);
+		const elHistory = this.history.get(id) ?? new Map<string, HistoryEntry>();
+		elHistory.set(serializeInputs(inputs), { inputs, result });
 		this.history.set(id, elHistory);
 		this.update(id, {
 			status: "idle",
@@ -159,7 +200,11 @@ export class SnapshotStore {
 	restore(id: string, inputs: GenerationInputs): boolean {
 		const cached = this.history.get(id)?.get(serializeInputs(inputs));
 		if (!cached) return false;
-		this.update(id, { result: cached, error: null, resultInputs: inputs });
+		this.update(id, {
+			result: cached.result,
+			error: null,
+			resultInputs: inputs,
+		});
 		return true;
 	}
 }
