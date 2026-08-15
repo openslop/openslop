@@ -9,7 +9,7 @@ import {
 	type AgentContentPart,
 } from "@/lib/agent/types";
 import OrbLoader from "../OrbLoader";
-import { Disclosure, DisclosureJson } from "./Disclosure";
+import { Disclosure, DisclosureJson, DisclosureText } from "./Disclosure";
 import { toolPresentation } from "./toolPresentation";
 
 /** A turn with no duration to report reads as done rather than as still running. */
@@ -18,7 +18,6 @@ function thoughtLabel(seconds: number | null | undefined): string {
 	return seconds === null ? "Thinking…" : `Thought for ${seconds}s`;
 }
 
-/** Left open: watching Sloppy think is the point of showing the thought at all. */
 function Thought({
 	text,
 	seconds,
@@ -27,17 +26,13 @@ function Thought({
 	seconds: number | null | undefined;
 }) {
 	return (
-		<div className="flex flex-col gap-1">
-			<p className="flex items-center gap-1.5 text-label-xs text-muted-foreground">
-				<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
-				<span className={seconds === null ? "shimmer" : undefined}>
-					{thoughtLabel(seconds)}
-				</span>
-			</p>
-			<p className="whitespace-pre-wrap break-words pl-4 text-label-xs text-muted-foreground">
-				{text}
-			</p>
-		</div>
+		<Disclosure
+			icon={<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />}
+			label={thoughtLabel(seconds)}
+			pending={seconds === null}
+		>
+			<DisclosureText>{text}</DisclosureText>
+		</Disclosure>
 	);
 }
 
