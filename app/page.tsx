@@ -65,7 +65,7 @@ export default async function Home() {
 
 			<AccessCodeInput />
 
-			<Button type="button" variant="accent" className="mt-2 h-11 w-full">
+			<Button type="button" variant="accent" size="cta" className="mt-2 w-full">
 				Get Started
 			</Button>
 		</OnboardingCard>

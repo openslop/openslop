@@ -95,8 +95,9 @@ export default function AuthForm({
 				<Button
 					type="submit"
 					variant="accent"
+					size="cta"
 					disabled={loading}
-					className="mt-1 h-11 w-full"
+					className="mt-1 w-full"
 				>
 					{loading ? "Sending…" : submitLabel}
 				</Button>
