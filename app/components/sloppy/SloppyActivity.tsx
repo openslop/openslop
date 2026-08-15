@@ -18,15 +18,7 @@ function thoughtLabel(seconds: number | null | undefined): string {
 	return seconds === null ? "Thinking…" : `Thought for ${seconds}s`;
 }
 
-function Row({ icon, label }: { icon: ReactNode; label: string }) {
-	return (
-		<p className="flex items-center gap-1.5 text-label-xs text-muted-foreground">
-			{icon}
-			<span>{label}</span>
-		</p>
-	);
-}
-
+/** Left open: watching Sloppy think is the point of showing the thought at all. */
 function Thought({
 	text,
 	seconds,
@@ -36,10 +28,12 @@ function Thought({
 }) {
 	return (
 		<div className="flex flex-col gap-1">
-			<Row
-				icon={<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />}
-				label={thoughtLabel(seconds)}
-			/>
+			<p className="flex items-center gap-1.5 text-label-xs text-muted-foreground">
+				<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
+				<span className={seconds === null ? "shimmer" : undefined}>
+					{thoughtLabel(seconds)}
+				</span>
+			</p>
 			<p className="whitespace-pre-wrap break-words pl-4 text-label-xs text-muted-foreground">
 				{text}
 			</p>
@@ -47,18 +41,16 @@ function Thought({
 	);
 }
 
+/** The input is reference detail, so it stays behind a chevron. */
 function ToolCall({ toolName, input }: { toolName: string; input: unknown }) {
 	const { icon: Icon, summarize } = toolPresentation(toolName);
 	return (
-		<div className="flex flex-col gap-1">
-			<Row
-				icon={<Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
-				label={summarize(input)}
-			/>
-			<div className="pl-4">
-				<DisclosureJson value={input} />
-			</div>
-		</div>
+		<Disclosure
+			icon={<Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
+			label={summarize(input)}
+		>
+			<DisclosureJson value={input} />
+		</Disclosure>
 	);
 }
 
