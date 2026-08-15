@@ -18,7 +18,6 @@ export type AgentTool = AgentToolSpec & {
 	execute: (input: unknown, ctx: AgentToolContext) => Promise<string>;
 };
 
-/** Binds a spec to its executor, so each tool is written against its parsed input. */
 export function defineTool<TSchema extends z.ZodType>(
 	spec: AgentToolSpec<TSchema>,
 	execute: (input: z.infer<TSchema>, ctx: AgentToolContext) => Promise<string>,

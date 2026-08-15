@@ -11,6 +11,7 @@ export type SendTurnInput = {
 	message: string;
 	script: string;
 	language?: string;
+	model?: string;
 };
 
 /** Streams one assistant turn. The turn ends at a tool call; it is not resumed. */

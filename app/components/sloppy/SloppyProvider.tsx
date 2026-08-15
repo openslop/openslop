@@ -26,7 +26,6 @@ import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useStreamRun } from "@/lib/script/useStreamRun";
 import { toastError } from "@/lib/toastError";
 
-/** The turn currently streaming, in the same shape a persisted one is stored in. */
 export type LiveTurn = {
 	user: string;
 	assistant: AgentMessage;
@@ -35,7 +34,7 @@ export type LiveTurn = {
 	thoughtSeconds: number | null;
 };
 type SloppyControl = {
-	send: (message: string) => Promise<void>;
+	send: (message: string, model?: string) => Promise<void>;
 	stop: () => void;
 	loading: boolean;
 };
@@ -71,8 +70,7 @@ export function SloppyProvider({
 	const [messages, setMessages] = useState<AgentMessageRow[]>([]);
 	const [live, setLive] = useState<LiveTurn | null>(null);
 
-	// The transcript is server state; this reads it once per project and drops a
-	// response the project has already moved on from.
+	// Drops a response the project has already moved on from.
 	useEffect(() => {
 		let current = true;
 		loadAgentTranscript(projectId)
@@ -86,7 +84,7 @@ export function SloppyProvider({
 	}, [projectId]);
 
 	const send = useCallback(
-		async (message: string) => {
+		async (message: string, model?: string) => {
 			const calls: Extract<AgentStreamPart, { type: "tool-call" }>[] = [];
 			let finished = false;
 			setLive(emptyTurn(message));
@@ -104,6 +102,7 @@ export function SloppyProvider({
 						projectId,
 						message,
 						script: serializeOSMLWithScenes(editor.children),
+						model,
 						language: spokenLanguage(store.getState().metadata, ""),
 					}),
 					applyPart,

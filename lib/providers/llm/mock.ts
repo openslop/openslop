@@ -170,10 +170,10 @@ export class MockLLM {
 		yield { text: "", done: true };
 	}
 
-	agentModel(): AgentModel {
+	agentModel(model = "mock"): AgentModel {
 		return {
 			model: mockAgentModel(),
-			modelId: "mock",
+			modelId: model,
 			providerOptions: {},
 		};
 	}

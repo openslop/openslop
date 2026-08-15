@@ -7,6 +7,10 @@ import type {
 	AgentStreamPart,
 	AgentUsage,
 } from "@/lib/agent/types";
+import {
+	LLM_MODELS,
+	type LLMModelName,
+} from "@/lib/connectors/llm/openslop/models";
 import { INPUT_LANGUAGE } from "@/lib/connectors/llm/plugins/language-prompt";
 import { errorMessage } from "@/lib/errors";
 import {
@@ -39,6 +43,7 @@ export type AgentTurnRequest = {
 	/** The canvas as it stands. Composed into the prompt, never persisted. */
 	script: string;
 	language?: string;
+	model?: LLMModelName;
 };
 
 /**
@@ -60,7 +65,9 @@ export async function* runAgentTurn(
 	];
 	await appendConversationMessages(conversationId, opening);
 
-	const { model, modelId, providerOptions } = getLLMProvider().agentModel();
+	const { model, modelId, providerOptions } = getLLMProvider().agentModel(
+		request.model && LLM_MODELS[request.model],
+	);
 	const system = sloppySystemPrompt(
 		request.script,
 		request.language || INPUT_LANGUAGE,

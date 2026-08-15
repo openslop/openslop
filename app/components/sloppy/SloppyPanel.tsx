@@ -91,7 +91,6 @@ export function SloppyPanel() {
 	const messages = useSloppyMessages();
 	const endRef = useRef<HTMLDivElement>(null);
 
-	// Follow the newest turn, both while it streams and once it lands as rows.
 	useEffect(() => {
 		endRef.current?.scrollIntoView({ block: "end" });
 	}, [live, messages]);

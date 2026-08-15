@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import type { AgentMessage, AgentStreamPart } from "@/lib/agent/types";
+import type { LLMModelName } from "@/lib/connectors/llm/openslop/models";
 
 const { conversations, provider } = vi.hoisted(() => ({
 	conversations: {
@@ -40,7 +41,10 @@ const finish: LanguageModelV3StreamPart = {
 	usage: USAGE,
 };
 
-async function runTurn(chunks: LanguageModelV3StreamPart[]) {
+async function runTurn(
+	chunks: LanguageModelV3StreamPart[],
+	model?: LLMModelName,
+) {
 	provider.agentModel.mockReturnValue({
 		model: new MockLanguageModelV3({
 			doStream: async () => ({
@@ -57,6 +61,7 @@ async function runTurn(chunks: LanguageModelV3StreamPart[]) {
 		userId: "u1",
 		message: "make it shorter",
 		script: "<narration>hi</narration>",
+		model,
 	})) {
 		parts.push(part);
 	}
@@ -179,5 +184,27 @@ describe("runAgentTurn", () => {
 			type: "error",
 			message: "model unavailable",
 		});
+	});
+});
+
+describe("model selection", () => {
+	const textTurn: LanguageModelV3StreamPart[] = [
+		{ type: "stream-start", warnings: [] },
+		{ type: "text-start", id: "t0" },
+		{ type: "text-delta", id: "t0", delta: "on it" },
+		{ type: "text-end", id: "t0" },
+		finish,
+	];
+
+	it("runs the picked model, resolved to what the provider takes", async () => {
+		await runTurn(textTurn, "Slop LLM v1");
+
+		expect(provider.agentModel).toHaveBeenCalledWith("claude-opus-5");
+	});
+
+	it("leaves the provider on its own default when nothing was picked", async () => {
+		await runTurn(textTurn);
+
+		expect(provider.agentModel).toHaveBeenCalledWith(undefined);
 	});
 });

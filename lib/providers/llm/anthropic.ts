@@ -86,10 +86,10 @@ export class AnthropicLLM extends BaseProvider<
 		};
 	}
 
-	agentModel(): AgentModel {
+	agentModel(model = DEFAULT_MODEL): AgentModel {
 		return {
-			model: this.model(DEFAULT_MODEL),
-			modelId: DEFAULT_MODEL,
+			model: this.model(model),
+			modelId: model,
 			providerOptions: this.thinking(DEFAULT_THINKING_LEVEL),
 		};
 	}

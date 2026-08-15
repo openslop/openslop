@@ -24,7 +24,6 @@ export type AppendExtras = {
 	usage?: AgentUsage;
 };
 
-/** The project's conversation, or null when Sloppy has not been used on it yet. */
 export async function findConversation(
 	projectId: string,
 ): Promise<string | null> {

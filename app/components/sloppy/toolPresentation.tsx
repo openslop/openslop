@@ -5,9 +5,8 @@ import { Film, Pencil, Wand2, type IconComponent } from "@/components/ui/icon";
 type ToolPresentation = {
 	icon: IconComponent;
 	/**
-	 * What the call asks for, read off its own input. A call is summarized the
-	 * moment the model emits it, so this names the proposed change rather than
-	 * claiming it landed; the outcome below it reports what actually happened.
+	 * A call is summarized the moment the model emits it, so this names the
+	 * proposed change rather than claiming it landed.
 	 */
 	summarize: (input: unknown) => string;
 };
@@ -19,7 +18,6 @@ function opCount(input: unknown): number {
 	return Array.isArray(ops) ? ops.length : 0;
 }
 
-/** A tool the panel does not know still renders, under its own name. */
 const PRESENTATION: Record<string, ToolPresentation> = {
 	edit_script: {
 		icon: Pencil,

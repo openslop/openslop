@@ -13,7 +13,7 @@ import { Disclosure, DisclosureJson, DisclosureText } from "./Disclosure";
 import { toolPresentation } from "./toolPresentation";
 import { thoughtOpen } from "./turnDisplay";
 
-/** A turn with no duration to report reads as done rather than as still running. */
+/** No duration to report reads as done, not as still running. */
 function thoughtLabel(seconds: number | null | undefined): string {
 	if (seconds === undefined) return "Thought";
 	return seconds === null ? "Thinking…" : `Thought for ${seconds}s`;
@@ -44,7 +44,6 @@ function Thought({
 	);
 }
 
-/** The input is reference detail, so it stays behind a chevron. */
 function ToolCall({ toolName, input }: { toolName: string; input: unknown }) {
 	const { icon: Icon, summarize } = toolPresentation(toolName);
 	return (
@@ -79,7 +78,6 @@ export function WorkPart({
 }: {
 	part: AgentContentPart;
 	thoughtSeconds: number | null | undefined;
-	/** Something in the turn came after this part. */
 	superseded: boolean;
 }) {
 	switch (part.type) {
@@ -100,7 +98,6 @@ export function WorkPart({
 	}
 }
 
-/** Counts up while a turn runs, so a slow one still looks alive. */
 function useElapsed(running: boolean): number {
 	const [seconds, setSeconds] = useState(0);
 
@@ -118,9 +115,8 @@ function workLabel(seconds: number | undefined): string {
 }
 
 /**
- * Everything a turn did, under one header. Open while the work runs and shut
- * once it lands: the live block and the stored one are separate mounts, so
- * finishing collapses it without overriding a reader who closed it early.
+ * The live block and the stored one are separate mounts, so finishing a turn
+ * collapses it without overriding a reader who closed it early.
  */
 export function ActivityBlock({
 	streaming,

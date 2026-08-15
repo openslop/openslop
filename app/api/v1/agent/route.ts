@@ -10,6 +10,7 @@ import {
 	createApiRouteHandler,
 } from "@/lib/api/route-handler";
 import { createSSEStreamResponse } from "@/lib/api/sse";
+import { isLLMModelName } from "@/lib/connectors/llm/openslop/models";
 
 const turnSchema = z.object({
 	projectId: z.uuid(),
@@ -18,6 +19,7 @@ const turnSchema = z.object({
 	// holds messages only and never accumulates stale copies of the document.
 	script: z.string().default(""),
 	language: z.string().optional(),
+	model: z.string().refine(isLLMModelName).optional(),
 });
 
 export const POST = createApiRouteHandler({

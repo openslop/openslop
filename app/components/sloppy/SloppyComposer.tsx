@@ -14,17 +14,20 @@ import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
 import { useSloppy } from "./SloppyProvider";
 
-/** The model Sloppy runs on, picked the way an element picks its own. */
-function ModelPicker() {
-	const { connectorConfig } = useConfig();
-	const { config } = getDefaultConnector(connectorConfig, "llm");
-	const [model, setModel] = useState(config.defaultModel);
-
+function ModelPicker({
+	model,
+	onChange,
+	options,
+}: {
+	model: string;
+	onChange: (next: string) => void;
+	options: string[];
+}) {
 	return (
 		<SelectMenu
 			value={model}
-			onChange={setModel}
-			options={config.models.map((option) => ({
+			onChange={onChange}
+			options={options.map((option) => ({
 				value: option,
 				label: option,
 			}))}
@@ -48,14 +51,17 @@ function ModelPicker() {
 
 export function SloppyComposer() {
 	const { send, stop, loading } = useSloppy();
+	const { connectorConfig } = useConfig();
+	const { config } = getDefaultConnector(connectorConfig, "llm");
 	const [value, setValue] = useState("");
+	const [model, setModel] = useState(config.defaultModel);
 	const hasText = value.trim().length > 0;
 
 	const submit = () => {
 		if (!hasText || loading) return;
 		const message = value;
 		setValue("");
-		void send(message);
+		void send(message, model);
 	};
 
 	return (
@@ -78,7 +84,11 @@ export function SloppyComposer() {
 				className="max-h-40 w-full resize-none overflow-y-auto bg-transparent font-body text-label text-panel-fg caret-accent outline-none placeholder:text-muted-foreground focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30"
 			/>
 			<div className="flex items-center justify-between gap-2">
-				<ModelPicker />
+				<ModelPicker
+					model={model}
+					onChange={setModel}
+					options={config.models}
+				/>
 				{loading ? (
 					<ActionButton
 						label="Stop Sloppy"

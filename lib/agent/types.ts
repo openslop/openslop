@@ -24,7 +24,6 @@ export type AgentUsage = {
 	workSeconds?: number;
 };
 
-/** What produced an assistant turn, recorded so the panel can show it. */
 export type AgentRequestRecord = { system: string; model: string };
 
 export type AgentMessageRow = {
