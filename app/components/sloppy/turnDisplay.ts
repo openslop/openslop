@@ -11,6 +11,17 @@ export function turnStatus(parts: AgentContentPart[]): string {
 		case "tool-call":
 			return "Applying changes";
 		default:
-			return "Thinking";
+			return "Slopping…";
 	}
+}
+
+/** Past this the thought crowds the panel out, so it arrives shut. */
+const LONG_THOUGHT = 600;
+
+/**
+ * A thought is worth reading while it is the newest thing in the turn. Once
+ * Sloppy has moved on to a reply or an edit, it gets out of the way.
+ */
+export function thoughtOpen(superseded: boolean, text: string): boolean {
+	return !superseded && text.length <= LONG_THOUGHT;
 }

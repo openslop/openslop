@@ -5,7 +5,7 @@ import { messageParts, type AgentMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { Disclosure, DisclosureText } from "./Disclosure";
 import { ActivityBlock, WorkPart } from "./SloppyActivity";
-import { turnStatus } from "./turnStatus";
+import { turnStatus } from "./turnDisplay";
 
 export function UserMessage({ message }: { message: AgentMessage }) {
 	return (
@@ -54,6 +54,7 @@ export function AgentTurn({
 	const parts = messages.flatMap(messageParts);
 	const work = parts.filter((part) => part.type !== "text");
 	const said = parts.filter((part) => part.type === "text");
+	const newest = parts.at(-1);
 
 	return (
 		<>
@@ -78,6 +79,7 @@ export function AgentTurn({
 							key={`${idPrefix}-${index}`}
 							part={part}
 							thoughtSeconds={thoughtSeconds}
+							superseded={part !== newest}
 						/>
 					))}
 				</ActivityBlock>

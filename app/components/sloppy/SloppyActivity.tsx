@@ -11,6 +11,7 @@ import {
 import OrbLoader from "../OrbLoader";
 import { Disclosure, DisclosureJson, DisclosureText } from "./Disclosure";
 import { toolPresentation } from "./toolPresentation";
+import { thoughtOpen } from "./turnDisplay";
 
 /** A turn with no duration to report reads as done rather than as still running. */
 function thoughtLabel(seconds: number | null | undefined): string {
@@ -21,12 +22,19 @@ function thoughtLabel(seconds: number | null | undefined): string {
 function Thought({
 	text,
 	seconds,
+	superseded,
 }: {
 	text: string;
 	seconds: number | null | undefined;
+	superseded: boolean;
 }) {
+	const open = thoughtOpen(superseded, text);
 	return (
 		<Disclosure
+			// Keyed on the auto state so a thought that streams in open shuts itself
+			// once Sloppy moves on, while a reader's own toggle still sticks.
+			key={String(open)}
+			defaultOpen={open}
 			icon={<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />}
 			label={thoughtLabel(seconds)}
 			pending={seconds === null}
@@ -67,13 +75,22 @@ function ToolOutcome({ output }: { output: ToolResultPart["output"] }) {
 export function WorkPart({
 	part,
 	thoughtSeconds,
+	superseded,
 }: {
 	part: AgentContentPart;
 	thoughtSeconds: number | null | undefined;
+	/** Something in the turn came after this part. */
+	superseded: boolean;
 }) {
 	switch (part.type) {
 		case "reasoning":
-			return <Thought text={part.text} seconds={thoughtSeconds} />;
+			return (
+				<Thought
+					text={part.text}
+					seconds={thoughtSeconds}
+					superseded={superseded}
+				/>
+			);
 		case "tool-call":
 			return <ToolCall toolName={part.toolName} input={part.input} />;
 		case "tool-result":
