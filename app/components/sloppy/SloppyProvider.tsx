@@ -8,9 +8,8 @@ import {
 	reportToolResults,
 	sendAgentTurn,
 } from "@/lib/agent/client";
-import type { AssistantModelMessage } from "ai";
+import type { AssistantModelMessage, ModelMessage } from "ai";
 import type {
-	AgentMessage,
 	AgentMessageRow,
 	AgentRequestRecord,
 	AgentStreamPart,
@@ -28,7 +27,7 @@ import { toastError } from "@/lib/toastError";
 
 export type LiveTurn = {
 	user: string;
-	assistant: AgentMessage;
+	assistant: ModelMessage;
 	request: AgentRequestRecord | null;
 	/** Null until the model reports how long it thought. */
 	thoughtSeconds: number | null;
@@ -158,20 +157,20 @@ export function SloppyProvider({
 
 type AssistantParts = Exclude<AssistantModelMessage["content"], string>;
 
-const assistant = (content: AssistantParts): AgentMessage => ({
+const assistant = (content: AssistantParts): ModelMessage => ({
 	role: "assistant",
 	content,
 });
 
-const partsOf = (message: AgentMessage): AssistantParts =>
+const partsOf = (message: ModelMessage): AssistantParts =>
 	Array.isArray(message.content) ? (message.content as AssistantParts) : [];
 
 /** Grows the trailing text or reasoning part, so deltas become one part, not many. */
 function withDelta(
-	message: AgentMessage,
+	message: ModelMessage,
 	type: "text" | "reasoning",
 	text: string,
-): AgentMessage {
+): ModelMessage {
 	const content = partsOf(message);
 	const last = content.at(-1);
 	if (last?.type === type) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { BookOpen } from "@/components/ui/icon";
+import partition from "lodash/partition";
 import { Disclosure, DisclosureText } from "@/components/ui/disclosure";
 import type { Turn } from "@/lib/agent/turns";
 import { messageParts, type MessagePart } from "@/lib/agent/types";
@@ -9,7 +10,7 @@ import { Reasoning } from "./Reasoning";
 import { Task } from "./Task";
 import { Tool, ToolOutput } from "./Tool";
 import { turnStatus } from "./turnDisplay";
-import type { ModelMessage } from "ai";
+import type { ModelMessage, TextPart } from "ai";
 
 export function UserMessage({ message }: { message: ModelMessage }) {
 	return (
@@ -76,8 +77,10 @@ export function AgentTurn({
 	streaming?: boolean;
 }) {
 	const parts = turn.messages.flatMap(messageParts);
-	const steps = parts.filter((part) => part.type !== "text");
-	const said = parts.filter((part) => part.type === "text");
+	const [said, steps] = partition(
+		parts,
+		(part): part is TextPart => part.type === "text",
+	);
 	const newest = parts.at(-1);
 
 	return (
