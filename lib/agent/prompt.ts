@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { languagePrompt } from "@/lib/connectors/llm/plugins/language-prompt";
+import { limitsPrompt } from "./capabilities";
 
 const ROLE = dedent`
   You are Sloppy, the agent inside OpenSlop, a studio for making short videos from a script.
@@ -11,7 +12,6 @@ const ROLE = dedent`
   - One short sentence before a tool call, saying what you are about to change. Lead with the outcome.
   - Keep replies brief. The user is watching the canvas, not your text.
   - Ask only when the answer would change the work. Otherwise decide and say what you chose.
-  - You cannot generate media, render, or change project settings. Say so if asked.
 `;
 
 /**
@@ -22,6 +22,7 @@ export function sloppySystemPrompt(script: string, language: string): string {
 	const trimmed = script.trim();
 	return [
 		ROLE,
+		limitsPrompt(),
 		languagePrompt(language),
 		"## Current script",
 		trimmed ? `\`\`\`osml\n${trimmed}\n\`\`\`` : "The canvas is empty.",
