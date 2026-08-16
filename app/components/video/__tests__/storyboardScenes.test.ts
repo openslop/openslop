@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SceneElement } from "@/lib/canvas/types";
-import type { SceneSegment } from "../useSceneSegments";
+import type { SceneSegment } from "@/lib/video/sceneSegments";
 import { buildStoryboardScenes } from "../storyboard/storyboardScenes";
 
 const scene = (id: string, childTypes: string[]): SceneElement => ({

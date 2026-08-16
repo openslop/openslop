@@ -1,6 +1,6 @@
 import { isForeground } from "@/lib/canvas/guards";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import type { SceneSegment } from "../useSceneSegments";
+import type { SceneSegment } from "@/lib/video/sceneSegments";
 
 export type StoryboardScene = {
 	scene: SceneElement;

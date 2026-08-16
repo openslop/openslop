@@ -5,8 +5,9 @@ import { useEffect } from "react";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
+import type { SceneSegment } from "@/lib/video/sceneSegments";
 import { usePlayerPlaying } from "./usePlayerState";
-import { useActiveSegmentIndex, type SceneSegment } from "./useSceneSegments";
+import { useActiveSegmentIndex } from "./useActiveSegmentIndex";
 
 /**
  * Renders nothing. It owns the frame subscription that tracks the playing

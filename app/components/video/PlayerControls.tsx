@@ -3,6 +3,7 @@
 import type { PlayerRef } from "@remotion/player";
 import { Maximize, Volume2, VolumeX } from "@/components/ui/icon";
 import type { VideoLayout } from "@/lib/video/types";
+import type { SceneSegment } from "@/lib/video/sceneSegments";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { IconButton } from "@/components/ui/icon-button";
 import { toSeconds } from "@/lib/video/frames";
@@ -14,7 +15,7 @@ import {
 	usePlayerValue,
 	usePlayerVolume,
 } from "./usePlayerState";
-import { useActiveSegmentIndex, type SceneSegment } from "./useSceneSegments";
+import { useActiveSegmentIndex } from "./useActiveSegmentIndex";
 import { ScrubBar } from "./ScrubBar";
 
 export function TimeDisplay({

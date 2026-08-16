@@ -2,8 +2,7 @@
 
 import { clamp } from "@/lib/utils";
 import { formatTime } from "@/lib/video/timestamps";
-
-export type SeekThumbnail = { url: string; kind: "image" | "video" };
+import type { SeekThumbnail } from "@/lib/video/sceneSegments";
 
 const TOOLTIP_WIDTH = 160;
 

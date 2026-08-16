@@ -6,14 +6,14 @@ import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import type { SceneElement } from "@/lib/canvas/types";
 import type { Sequence, VideoLayout } from "@/lib/video/types";
-import { useAssetPrefetch } from "./useAssetPrefetch";
 import {
 	buildSceneSegments,
 	buildSequenceIndex,
 	findSceneSequence,
 	type SceneSegment,
 	type SequenceIndex,
-} from "./useSceneSegments";
+} from "@/lib/video/sceneSegments";
+import { useAssetPrefetch } from "./useAssetPrefetch";
 import { useVideoLayout } from "./useVideoLayout";
 
 type VideoLayoutValue = {
