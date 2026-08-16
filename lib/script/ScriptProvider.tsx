@@ -17,7 +17,6 @@ import { useProject } from "@/lib/project/useProject";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
-import { useStreamRun } from "./useStreamRun";
 
 type ScriptControl = {
 	loading: boolean;
@@ -25,7 +24,6 @@ type ScriptControl = {
 	/** Leaves the hero for the workspace, before there is anything to show in it. */
 	enterWorkspace: () => void;
 	startBlank: () => void;
-	stopGeneration: () => void;
 };
 
 // `nodes` is rebuilt on every streamed token, so it lives in its own context
@@ -63,7 +61,7 @@ export function ScriptProvider({
 	const [script, setScript] = useState(initialScript);
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const { nodes, appendChunk, reset } = useOSMLStreamParser();
-	const { loading, run, stop: stopGeneration } = useStreamRun();
+	const [loading, setLoading] = useState(false);
 
 	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
 		connectorConfig,
@@ -76,22 +74,18 @@ export function ScriptProvider({
 			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
 			const state = store.getState();
-			await run(connector.stream({ prompt }, { state }), (chunk) => {
-				if (!chunk.text) return;
-				setHasContent(true);
-				appendChunk(chunk.text);
-			});
+			setLoading(true);
+			try {
+				for await (const chunk of connector.stream({ prompt }, { state })) {
+					if (!chunk.text) continue;
+					setHasContent(true);
+					appendChunk(chunk.text);
+				}
+			} finally {
+				setLoading(false);
+			}
 		},
-		[
-			store,
-			llmProvider,
-			llmConfig,
-			appendChunk,
-			reset,
-			updateMetadata,
-			mode,
-			run,
-		],
+		[store, llmProvider, llmConfig, appendChunk, reset, updateMetadata, mode],
 	);
 
 	const enterWorkspace = useCallback(() => setHasContent(true), []);
@@ -107,9 +101,8 @@ export function ScriptProvider({
 			submitPrompt,
 			enterWorkspace,
 			startBlank,
-			stopGeneration,
 		}),
-		[loading, submitPrompt, enterWorkspace, startBlank, stopGeneration],
+		[loading, submitPrompt, enterWorkspace, startBlank],
 	);
 
 	return (

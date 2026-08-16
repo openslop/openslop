@@ -47,17 +47,27 @@ export function createSSEStreamResponse<T>(
 	label: string,
 ): Response {
 	const encoder = new TextEncoder();
+	const source = iter[Symbol.asyncIterator]();
+	// A chunk can already be in hand when the client hangs up, and writing it
+	// would fail against the closed controller and report a hangup as an error.
+	let open = true;
 	const stream = new ReadableStream({
 		async start(controller) {
 			try {
-				for await (const chunk of iter) {
-					controller.enqueue(encoder.encode(formatSSE(chunk)));
+				for (;;) {
+					const { done, value } = await source.next();
+					if (done || !open) break;
+					controller.enqueue(encoder.encode(formatSSE(value)));
 				}
-				controller.close();
+				if (open) controller.close();
 			} catch (error) {
 				logger.error(error, `${label} stream error`);
 				controller.error(error);
 			}
+		},
+		cancel: (reason) => {
+			open = false;
+			void source.return?.(reason);
 		},
 	});
 	return new Response(stream, { headers: SSE_HEADERS });

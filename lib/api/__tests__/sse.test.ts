@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatSSE, createSSEResponse, readSSE } from "../sse";
+import {
+	formatSSE,
+	createSSEResponse,
+	createSSEStreamResponse,
+	readSSE,
+} from "../sse";
 
 function makeSSEStream(chunks: string[]): ReadableStream {
 	const encoder = new TextEncoder();
@@ -159,5 +164,26 @@ describe("readSSE", () => {
 		}
 		// If the lock had not been released, getReader() would throw.
 		expect(() => stream.getReader()).not.toThrow();
+	});
+});
+
+describe("createSSEStreamResponse", () => {
+	it("ends the source when the client hangs up", async () => {
+		let ended = false;
+		async function* forever() {
+			try {
+				for (;;) yield { tick: true };
+			} finally {
+				ended = true;
+			}
+		}
+
+		const body = createSSEStreamResponse(forever(), "test").body;
+		if (!body) throw new Error("no body");
+		const reader = body.getReader();
+		await reader.read();
+		await reader.cancel();
+
+		expect(ended).toBe(true);
 	});
 });

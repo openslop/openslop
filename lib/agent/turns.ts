@@ -1,7 +1,6 @@
 import type { AgentMessageRow, AgentRequestRecord, AgentUsage } from "./types";
 import type { ModelMessage } from "ai";
 
-/** A turn as the panel reads it */
 export type Turn = {
 	id: string;
 	role: ModelMessage["role"];

@@ -66,13 +66,12 @@ export function SloppyProvider({
 	const runTool = useAgentTools(editor);
 
 	const [messages, setMessages] = useState<AgentMessageRow[] | null>(null);
-	const [loading, setLoading] = useState(false);
 	const [live, setLive] = useState<LiveTurn | null>(null);
 	const inFlight = useRef<AbortController | null>(null);
+	const loading = live !== null;
 
 	const stop = useCallback(() => inFlight.current?.abort(), []);
 
-	// Drops a response the project has already moved on from.
 	useEffect(() => {
 		let current = true;
 		loadAgentTranscript(projectId)
@@ -94,7 +93,6 @@ export function SloppyProvider({
 			const controller = new AbortController();
 			inFlight.current = controller;
 			const calls: Extract<AgentStreamPart, { type: "tool-call" }>[] = [];
-			setLoading(true);
 			setLive(emptyTurn(message));
 
 			try {
@@ -109,7 +107,6 @@ export function SloppyProvider({
 					controller.signal,
 				);
 				for await (const part of turn) {
-					// A provider error ends the turn rather than being swallowed into it.
 					if (part.type === "error") throw new Error(part.message);
 					if (part.type === "tool-call") calls.push(part);
 					setLive((live) => (live ? reduceTurn(live, part) : live));
@@ -133,7 +130,6 @@ export function SloppyProvider({
 					toastError(error, "Sloppy finished, but the transcript did not load");
 					return null;
 				});
-				setLoading(false);
 				setLive(null);
 				if (rows) setMessages(rows);
 				inFlight.current = null;

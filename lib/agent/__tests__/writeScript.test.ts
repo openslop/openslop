@@ -1,30 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { createEditor } from "slate";
-import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { writeScriptOnto } from "../tools/useAgentTools";
+import { writeScriptTool } from "../tools/writeScript";
 
-function narration(id: string, text: string): CanvasContentElement {
-	return {
-		id,
-		type: "narration",
-		children: [
-			{ id: `${id}-m`, type: "narration", text: ZERO_WIDTH_SPACE },
-			{ id: `${id}-t`, type: "narration", text },
-		],
-	};
-}
-
-describe("writeScriptOnto", () => {
+describe("writeScriptTool", () => {
 	it("clears the canvas before streaming, so the new script does not stack", async () => {
-		const editor = createEditor();
-		editor.children = [narration("n1", "the old story")];
-		let childrenWhenWriting: unknown[] = [narration("unset", "")];
+		const order: string[] = [];
 
-		await writeScriptOnto(editor, "a new story", async () => {
-			childrenWhenWriting = [...editor.children];
-		});
+		await writeScriptTool.execute(
+			{ brief: "a new story" },
+			{
+				clearScript: () => order.push("clear"),
+				editScript: () => ({ applied: 0, failures: [] }),
+				writeScript: async () => void order.push("write"),
+			},
+		);
 
-		expect(childrenWhenWriting).toEqual([]);
+		expect(order).toEqual(["clear", "write"]);
 	});
 });

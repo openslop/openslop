@@ -2,11 +2,9 @@ import type { z } from "zod";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { AgentToolSpec } from "./specs";
 
-/**
- * What a tool can do to the canvas: verbs, never the parts they are built from,
- * so a tool never learns that the canvas is a Slate editor.
- */
+/** What a tool can do to the canvas, never the parts it is built from. */
 export type AgentToolContext = {
+	clearScript: () => void;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 };
