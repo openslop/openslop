@@ -15,7 +15,11 @@ export class OpenSlopClient {
 		return apiJson<T>(`${this.baseUrl}${path}`, { params });
 	}
 
-	async postStream(path: string, body: unknown): Promise<Response> {
-		return apiFetch(`${this.baseUrl}${path}`, { method: "POST", body });
+	async postStream(
+		path: string,
+		body: unknown,
+		signal?: AbortSignal,
+	): Promise<Response> {
+		return apiFetch(`${this.baseUrl}${path}`, { method: "POST", body, signal });
 	}
 }

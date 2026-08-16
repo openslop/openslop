@@ -1,19 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { drainStream } from "./drainStream";
 
 export type StreamRun = {
 	loading: boolean;
-	/**
-	 * Aborts the run still in flight, then drains `source` into `onChunk`.
-	 * Resolves true only when the stream ended on its own, so a superseded run
-	 * can tell that it is no longer the one whose result counts.
-	 */
+	/** Aborts the run still in flight, then drains `source` into `onChunk`. */
 	run: <T>(
 		source: AsyncIterable<T>,
 		onChunk: (chunk: T) => void,
-	) => Promise<boolean>;
+	) => Promise<void>;
 	stop: () => void;
 };
 
@@ -38,7 +33,11 @@ export function useStreamRun(): StreamRun {
 		abortRef.current = controller;
 		setLoading(true);
 		try {
-			return await drainStream(source, controller.signal, onChunk);
+			for await (const chunk of source) {
+				// The connector takes no signal, so stopping is only observed here.
+				if (controller.signal.aborted) return;
+				onChunk(chunk);
+			}
 		} finally {
 			if (abortRef.current === controller) {
 				abortRef.current = null;

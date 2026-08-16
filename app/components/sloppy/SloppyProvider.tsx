@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Editor } from "slate";
 import {
@@ -20,7 +20,6 @@ import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { spokenLanguage } from "@/lib/connectors/llm/plugins/language-prompt";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useStreamRun } from "@/lib/script/useStreamRun";
 import { toastError } from "@/lib/toastError";
 
 type AssistantParts = Exclude<AssistantModelMessage["content"], string>;
@@ -65,13 +64,13 @@ export function SloppyProvider({
 	const { projectId } = useConfig();
 	const store = useProjectStoreHandle();
 	const runTool = useAgentTools(editor);
-	const { run, stop } = useStreamRun();
 
 	const [messages, setMessages] = useState<AgentMessageRow[] | null>(null);
-	// Spans the whole turn, where the stream's own flag clears before the tool
-	// calls it asked for have run.
 	const [loading, setLoading] = useState(false);
 	const [live, setLive] = useState<LiveTurn | null>(null);
+	const inFlight = useRef<AbortController | null>(null);
+
+	const stop = useCallback(() => inFlight.current?.abort(), []);
 
 	// Drops a response the project has already moved on from.
 	useEffect(() => {
@@ -91,30 +90,30 @@ export function SloppyProvider({
 
 	const send = useCallback(
 		async (message: string, model?: string) => {
+			if (inFlight.current) return;
+			const controller = new AbortController();
+			inFlight.current = controller;
 			const calls: Extract<AgentStreamPart, { type: "tool-call" }>[] = [];
 			setLoading(true);
 			setLive(emptyTurn(message));
 
-			const applyPart = (part: AgentStreamPart) => {
-				// A provider error ends the turn rather than being swallowed into it.
-				if (part.type === "error") throw new Error(part.message);
-				if (part.type === "tool-call") calls.push(part);
-				setLive((turn) => (turn ? reduceTurn(turn, part) : turn));
-			};
-
 			try {
-				const finished = await run(
-					sendAgentTurn({
+				const turn = sendAgentTurn(
+					{
 						projectId,
 						message,
 						script: serializeOSMLWithScenes(editor.children),
 						model,
 						language: spokenLanguage(store.getState().metadata, ""),
-					}),
-					applyPart,
+					},
+					controller.signal,
 				);
-
-				if (!finished) return;
+				for await (const part of turn) {
+					// A provider error ends the turn rather than being swallowed into it.
+					if (part.type === "error") throw new Error(part.message);
+					if (part.type === "tool-call") calls.push(part);
+					setLive((live) => (live ? reduceTurn(live, part) : live));
+				}
 
 				const results = await Promise.all(calls.map(runTool));
 				if (results.length > 0) {
@@ -123,7 +122,10 @@ export function SloppyProvider({
 					]);
 				}
 			} catch (error) {
-				toastError(error, "Sloppy could not finish that");
+				// Stopping tears the request down; that is the outcome asked for.
+				if (!controller.signal.aborted) {
+					toastError(error, "Sloppy could not finish that");
+				}
 			} finally {
 				// Read before either setState, so the live turn and the rows that
 				// replace it swap in one commit rather than blinking out between them.
@@ -134,9 +136,10 @@ export function SloppyProvider({
 				setLoading(false);
 				setLive(null);
 				if (rows) setMessages(rows);
+				inFlight.current = null;
 			}
 		},
-		[projectId, editor, store, run, runTool],
+		[projectId, editor, store, runTool],
 	);
 
 	const control = useMemo<SloppyControl>(

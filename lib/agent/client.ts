@@ -18,8 +18,9 @@ export type SendTurnInput = {
 /** Streams one assistant turn. The turn ends at a tool call; it is not resumed. */
 export async function* sendAgentTurn(
 	input: SendTurnInput,
+	signal?: AbortSignal,
 ): AsyncGenerator<AgentStreamPart> {
-	const res = await client.postStream(AGENT_PATH, input);
+	const res = await client.postStream(AGENT_PATH, input, signal);
 	if (!res.body) throw new Error("No response body");
 	yield* readSSE<AgentStreamPart>(res.body);
 }
