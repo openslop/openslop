@@ -21,7 +21,7 @@ import {
 
 function osmlSystemPrompt(language: string): string {
 	return dedent`
-	The story script must be written in a special XML format that strictly follows these rules:
+  The story script must be written in a special XML format that strictly follows these rules:
 
   ## **General Guidelines**
   - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
@@ -51,19 +51,19 @@ ${languagePrompt(language)}
   - Frequently use nonverbalisms. Example: <character name="Mia" emotion="happy">[laughter] That's the way I want it!</character>.
   - Allowed list of nonverbalisms: [laughter]. Do not use any other nonverbalisms.
   - Occasionally insert ellipsis (...) to indicate a pause or a break in the dialogue, or use exclamations (!) to indicate a strong emotion or action.
-	- Supported attributes for character tags are name, emotion, and speed
+  - Supported attributes for character tags are name, emotion, and speed
 
-	### Narration and Character XML Tags
-	- For both character and narration tags, the emotion attribute should be appropriately set to one of the following: ${TTS_EMOTIONS.join(", ")}.
-	- For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
+  ### Narration and Character XML Tags
+  - For both character and narration tags, the emotion attribute should be appropriately set to one of the following: ${TTS_EMOTIONS.join(", ")}.
+  - For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
 
   ### Image XML Tags
   - Each scene should include an image XML tag that describes the current scene. Example:
-		<image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
+    <image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - motion: Camera-motion effect applied for the element's full duration. Almost always set one — a still image with no motion reads as a flat, lifeless slide. Use at most one per scene. Example: <image motion="kenBurnsIn">...</image>
   - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
-	- characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
-		<image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
+  - characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
+    <image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
   - After the metadata tags, open the story with an <image> tag that describes the image for the opening scene.
   - Frequently change the image at least every 2 narrative lines.
   - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
@@ -74,12 +74,12 @@ ${languagePrompt(language)}
   - Image descriptions should describe the time of day, the background, the weather (if outdoors), and objects in detail.
   - Each image must depict the specific moment described by the narration and dialogue that follow it, up to the next image tag: the concrete subject, action, and expression of those lines, not just the scene's general setting. If the line names an object, a gesture, or a reaction, it belongs in the description.
   - Each <image> description must be written as a standalone prompt, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
-	- Reference characters by their names in the image description, NEVER describe their appearance in the image description
+  - Reference characters by their names in the image description, NEVER describe their appearance in the image description
   - Each image description should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous descriptions or the story.
 
   ### Animated Image XML Tags
   - An <animated_image> tag is an <image> tag whose still frame is then animated by an image-to-video model. Use it for hero moments, establishing shots, or emotional beats that benefit from subtle motion. The tag body describes the still frame in the same way as an <image>; the videoPrompt attribute describes the camera/subject motion. The still described in the tag body is generated first and handed to the video model as the clip's FIRST FRAME, so the two are not independent: the clip literally opens on that still. Example:
-		<animated_image videoPrompt="slow zoom out from Red and Wolf as they keep walking, revealing the full moonlit clearing around them, rain still falling" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
+    <animated_image videoPrompt="slow zoom out from Red and Wolf as they keep walking, revealing the full moonlit clearing around them, rain still falling" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
   - videoPrompt: required. A short, focused, relaxing description of the motion or camera movement (e.g. "slow cinematic pan", "gentle dolly in", "warm zoom on the character's face"). Keep it simple — one camera move per shot.
   - videoPrompt must CONTINUE FROM the still described in the tag body — same subjects, same framing, same location, same time of day, same weather — and describe only what changes over the next few seconds. Write it as the seconds that follow that exact frame, not as a new shot.
   - videoPrompt must NEVER open on a different scene, introduce a subject that is not already in the still, relocate or jump time of day, or imply a cut to another shot. If the motion you want needs a different opening image, change the tag body to describe that image instead.
@@ -106,38 +106,38 @@ ${languagePrompt(language)}
 
   ### Music XML Tags
   - As appropriate, insert tags to describe the type of music that should accompany a scene (as if prompting a text-to-music model). Example:
-		<music length="long">Soft, slow, sad piano music for a romantic breakup</music>
-		or
-		<music length="medium">Epic battle over snow-covered mountains, powerful brass, pounding timpani, fast, heroic</music>
-	- The descriptions within <music> tags should be common, simple, short, clear, and direct.
+    <music length="long">Soft, slow, sad piano music for a romantic breakup</music>
+    or
+    <music length="medium">Epic battle over snow-covered mountains, powerful brass, pounding timpani, fast, heroic</music>
+  - The descriptions within <music> tags should be common, simple, short, clear, and direct.
   - Music should change frequently (at least once every few scenes) to keep the reader engaged.
   - length: ${Object.values(MusicLength).join(", ")}
   - The optional loops attribute is an integer (default 1) that controls how many times the generated music clip plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
 
-	### Metadata Title XML tag
-	- The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:
-	<metadata_title>Little Red</metadata_title>
+  ### Metadata Title XML tag
+  - The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:
+  <metadata_title>Little Red</metadata_title>
 
-	### Metadata Style XML tag
-	- Right after the metadata_title tag, emit a single, concise <metadata_style>...</metadata_style> tag that describes the visual style of the story as if prompting an image model. Example:
-	<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
+  ### Metadata Style XML tag
+  - Right after the metadata_title tag, emit a single, concise <metadata_style>...</metadata_style> tag that describes the visual style of the story as if prompting an image model. Example:
+  <metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
 
-	### Metadata Narration XML tags
-	- Right after the metadata_style tag, emit a single, empty metadata_narration tag that describes the narrator voice. Example:
-		 <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise" language="en"></metadata_narration>
-	- The attributes should be from the metadata Character/Narration attributes section
+  ### Metadata Narration XML tags
+  - Right after the metadata_style tag, emit a single, empty metadata_narration tag that describes the narrator voice. Example:
+    <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise" language="en"></metadata_narration>
+  - The attributes should be from the metadata Character/Narration attributes section
 
   ### Metadata Character XML tags
-	- Right after the metadata_narration tag, emit short <metadata_character>...</metadata_character> tags that describe each character's visual appearance (excluding the narrator) from the story in detail as if prompting an image model. Example:
-		<metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="wise" language="en">A girl around ten years old with warm brown skin, dark curly hair falling
-		just past her shoulders, bright hazel eyes, a small gap between her front
-		teeth. Wearing a mustard-yellow cardigan over a white tee, rolled-up denim
-		overalls, scuffed red sneakers, a canvas satchel slung across one shoulder.
-		</metadata_character>
-	- name: the exact name for the character (case-sensitive) used in the story
+  - Right after the metadata_narration tag, emit short <metadata_character>...</metadata_character> tags that describe each character's visual appearance (excluding the narrator) from the story in detail as if prompting an image model. Example:
+    <metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="wise" language="en">A girl around ten years old with warm brown skin, dark curly hair falling
+    just past her shoulders, bright hazel eyes, a small gap between her front
+    teeth. Wearing a mustard-yellow cardigan over a white tee, rolled-up denim
+    overalls, scuffed red sneakers, a canvas satchel slung across one shoulder.
+    </metadata_character>
+  - name: the exact name for the character (case-sensitive) used in the story
 
-	### Metadata Character/Narration attributes
-	- For metadata_character and metadata_narration tags, always include these attributes in addition to any other they may have
+  ### Metadata Character/Narration attributes
+  - For metadata_character and metadata_narration tags, always include these attributes in addition to any other they may have
   - gender: ${TTS_GENDERS.join(", ")}.
   - age: ${TTS_AGES.join(", ")}.
   - pitch: ${TTS_PITCHES.join(", ")}.

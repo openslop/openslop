@@ -25,12 +25,14 @@ export type AppendExtras = {
 
 export async function findConversation(
 	projectId: string,
+	userId: string,
 ): Promise<string | null> {
 	const supabase = await client();
 	const { data, error } = await supabase
 		.from("conversations")
 		.select("id")
 		.eq("project_id", projectId)
+		.eq("user_id", userId)
 		.maybeSingle();
 	if (error) throw error;
 	return data?.id ?? null;
@@ -40,7 +42,7 @@ export async function findOrCreateConversation(
 	projectId: string,
 	userId: string,
 ): Promise<string> {
-	const existing = await findConversation(projectId);
+	const existing = await findConversation(projectId, userId);
 	if (existing) return existing;
 
 	const supabase = await client();
@@ -51,7 +53,7 @@ export async function findOrCreateConversation(
 		.single();
 	// Another request may have created it between the read and the write.
 	if (created.error) {
-		const retry = await findConversation(projectId);
+		const retry = await findConversation(projectId, userId);
 		if (retry) return retry;
 		throw created.error;
 	}

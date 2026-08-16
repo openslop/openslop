@@ -7,8 +7,8 @@ const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
   The user will provide some text, and you will return that text with
   annotations according to the XML format described below. Do NOT modify the script
   itself, simply conform the text to the XML format described below. If the script doesn't contain
-	any explicit narration/image/character/music/sound annotations, assume the text is all narration
-	and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a video.
+  any explicit narration/image/character/music/sound annotations, assume the text is all narration
+  and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a video.
 
   ### Miscellaneous Rules
   - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.

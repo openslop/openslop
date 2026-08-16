@@ -10,9 +10,9 @@ create table if not exists conversations (
   updated_at  timestamptz not null default now()
 );
 
--- One conversation per project.
-create unique index if not exists conversations_project_idx
-  on conversations (project_id);
+-- One conversation per project, per user.
+create unique index if not exists conversations_user_project_idx
+  on conversations (user_id, project_id);
 
 drop trigger if exists conversations_set_updated_at on conversations;
 create trigger conversations_set_updated_at

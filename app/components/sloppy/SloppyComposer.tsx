@@ -50,7 +50,7 @@ function ModelPicker({
 }
 
 export function SloppyComposer() {
-	const { send, stop, loading } = useSloppy();
+	const { send, stop, loading, streaming } = useSloppy();
 	const { connectorConfig } = useConfig();
 	const { config } = getDefaultConnector(connectorConfig, "llm");
 	const [value, setValue] = useState("");
@@ -89,7 +89,7 @@ export function SloppyComposer() {
 					onChange={setModel}
 					options={config.models}
 				/>
-				{loading ? (
+				{streaming ? (
 					<ActionButton
 						label="Stop Sloppy"
 						icon={<SquareFilled className="h-3 w-3" />}
@@ -100,7 +100,7 @@ export function SloppyComposer() {
 						label="Send to Sloppy"
 						icon={<CornerDownLeft className="h-4 w-4" />}
 						onClick={submit}
-						disabled={!hasText}
+						disabled={!hasText || loading}
 					/>
 				)}
 			</div>

@@ -35,10 +35,8 @@ export const POST = createApiRouteHandler({
 export const GET = createApiQueryRouteHandler({
 	schema: z.object({ projectId: z.uuid() }),
 	label: "Sloppy transcript",
-	handle: async ({ input }) => {
-		// Reading never creates: an editor opening a project Sloppy has not
-		// touched should not write a row.
-		const conversationId = await findConversation(input.projectId);
+	handle: async ({ user, input }) => {
+		const conversationId = await findConversation(input.projectId, user.id);
 		const messages = conversationId
 			? await listConversationMessages(conversationId)
 			: [];

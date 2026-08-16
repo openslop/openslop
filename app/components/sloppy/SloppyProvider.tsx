@@ -27,6 +27,8 @@ type SloppyControl = {
 	send: (message: string, model?: string) => Promise<void>;
 	stop: () => void;
 	loading: boolean;
+	/** Only the stream can be stopped; the tool calls it asked for run to the end. */
+	streaming: boolean;
 };
 // Split by update frequency: only the live turn changes per streamed token.
 const [SloppyMessagesContext, useSloppyMessages] = createRequiredContext<
@@ -52,6 +54,7 @@ export function SloppyProvider({
 
 	const [messages, setMessages] = useState<AgentMessageRow[] | null>(null);
 	const [live, setLive] = useState<LiveTurn | null>(null);
+	const [streaming, setStreaming] = useState(false);
 	const inFlight = useRef<AbortController | null>(null);
 	const loading = live !== null;
 
@@ -79,6 +82,7 @@ export function SloppyProvider({
 			inFlight.current = controller;
 			let turn = emptyTurn(message);
 			setLive(turn);
+			setStreaming(true);
 
 			try {
 				const stream = sendAgentTurn(
@@ -96,6 +100,7 @@ export function SloppyProvider({
 					turn = reduceTurn(turn, part);
 					setLive(turn);
 				}
+				setStreaming(false);
 
 				const results = await Promise.all(toolCallsIn(turn).map(runTool));
 				if (results.length > 0) {
@@ -109,6 +114,7 @@ export function SloppyProvider({
 					toastError(error, "Sloppy could not finish that");
 				}
 			} finally {
+				setStreaming(false);
 				// Read before either setState, so the live turn and the rows that
 				// replace it swap in one commit rather than blinking out between them.
 				const rows = await loadAgentTranscript(projectId).catch((error) => {
@@ -124,8 +130,8 @@ export function SloppyProvider({
 	);
 
 	const control = useMemo<SloppyControl>(
-		() => ({ send, stop, loading }),
-		[send, stop, loading],
+		() => ({ send, stop, loading, streaming }),
+		[send, stop, loading, streaming],
 	);
 	return (
 		<SloppyControlContext value={control}>
