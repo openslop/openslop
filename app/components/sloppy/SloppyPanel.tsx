@@ -4,9 +4,9 @@ import { memo, useEffect, useRef } from "react";
 import type { AgentMessageRow } from "@/lib/agent/types";
 import { AgentTurn, UserMessage } from "./SloppyMessage";
 import { useSloppyLive, useSloppyMessages } from "./SloppyProvider";
+import { TranscriptSkeleton } from "./TranscriptSkeleton";
 
-const EMPTY_HINT =
-	"Describe the video you want, or ask for a change to the script.";
+const EMPTY_HINT = "Ask Sloppy to change the script however you want.";
 
 type Group =
 	| { kind: "user"; id: string; row: AgentMessageRow }
@@ -47,6 +47,7 @@ function TurnGroup({ id, rows }: { id: string; rows: AgentMessageRow[] }) {
 /** Reads only the messages context, so a streaming turn never re-renders history. */
 const Transcript = memo(function Transcript() {
 	const messages = useSloppyMessages();
+	if (!messages) return <TranscriptSkeleton />;
 	return (
 		<>
 			{groupTranscript(messages).map((group) =>
@@ -82,7 +83,7 @@ function LiveTurn() {
 function EmptyHint() {
 	const messages = useSloppyMessages();
 	const live = useSloppyLive();
-	if (messages.length > 0 || live) return null;
+	if (!messages || messages.length > 0 || live) return null;
 	return <p className="px-1 text-label text-muted-foreground">{EMPTY_HINT}</p>;
 }
 
@@ -96,7 +97,11 @@ export function SloppyPanel() {
 	}, [live, messages]);
 
 	return (
-		<div aria-live="polite" className="flex flex-col gap-3">
+		<div
+			aria-live="polite"
+			aria-busy={messages === null}
+			className="flex flex-col gap-3"
+		>
 			<EmptyHint />
 			<Transcript />
 			<LiveTurn />

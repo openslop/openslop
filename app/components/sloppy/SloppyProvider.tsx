@@ -39,8 +39,11 @@ type SloppyControl = {
 	loading: boolean;
 };
 // Split by update frequency: only the live turn changes per streamed token.
-const [SloppyMessagesContext, useSloppyMessages] =
-	createRequiredContext<AgentMessageRow[]>("SloppyProvider");
+// Null until the transcript has been read, so the panel can tell a project
+// Sloppy has never touched from one whose history is still in flight.
+const [SloppyMessagesContext, useSloppyMessages] = createRequiredContext<
+	AgentMessageRow[] | null
+>("SloppyProvider");
 const [SloppyLiveContext, useSloppyLive] =
 	createRequiredContext<LiveTurn | null>("SloppyProvider");
 const [SloppyControlContext, useSloppy] =
@@ -67,7 +70,7 @@ export function SloppyProvider({
 	const { submitPrompt } = useScriptControl();
 	const { loading, run, stop } = useStreamRun();
 
-	const [messages, setMessages] = useState<AgentMessageRow[]>([]);
+	const [messages, setMessages] = useState<AgentMessageRow[] | null>(null);
 	const [live, setLive] = useState<LiveTurn | null>(null);
 
 	// Drops a response the project has already moved on from.
@@ -77,7 +80,10 @@ export function SloppyProvider({
 			.then((rows) => {
 				if (current) setMessages(rows);
 			})
-			.catch((error) => toastError(error, "Could not load Sloppy"));
+			.catch((error) => {
+				toastError(error, "Could not load Sloppy");
+				if (current) setMessages([]);
+			});
 		return () => {
 			current = false;
 		};
