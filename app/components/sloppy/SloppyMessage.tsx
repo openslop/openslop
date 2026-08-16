@@ -2,18 +2,16 @@
 
 import { BookOpen } from "@/components/ui/icon";
 import { Disclosure, DisclosureText } from "@/components/ui/disclosure";
-import {
-	messageParts,
-	type AgentContentPart,
-	type AgentMessage,
-} from "@/lib/agent/types";
+import type { Turn } from "@/lib/agent/turns";
+import { messageParts, type MessagePart } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { Reasoning } from "./Reasoning";
 import { Task } from "./Task";
 import { Tool, ToolOutput } from "./Tool";
 import { turnStatus } from "./turnDisplay";
+import type { ModelMessage } from "ai";
 
-export function UserMessage({ message }: { message: AgentMessage }) {
+export function UserMessage({ message }: { message: ModelMessage }) {
 	return (
 		<p className="ml-auto w-fit max-w-[88%] shrink-0 break-words rounded-xl rounded-br-sm bg-primary px-3 py-2 text-label text-primary-foreground">
 			{userText(message)}
@@ -21,7 +19,7 @@ export function UserMessage({ message }: { message: AgentMessage }) {
 	);
 }
 
-function userText(message: AgentMessage): string {
+function userText(message: ModelMessage): string {
 	return messageParts(message)
 		.filter((part) => part.type === "text")
 		.map((part) => part.text)
@@ -33,7 +31,7 @@ function Step({
 	reasoningSeconds,
 	superseded,
 }: {
-	part: AgentContentPart;
+	part: MessagePart;
 	reasoningSeconds: number | null | undefined;
 	superseded: boolean;
 }) {
@@ -68,48 +66,41 @@ function ReplyText({ text }: { text: string }) {
  * card below it, so the reply survives the task closing.
  */
 export function AgentTurn({
-	messages,
-	systemPrompt,
-	thoughtSeconds,
-	workSeconds,
+	turn,
+	thoughtSeconds = turn.usage?.thoughtSeconds,
 	streaming = false,
-	idPrefix,
 }: {
-	/** The assistant message and any tool results answering it. */
-	messages: AgentMessage[];
-	systemPrompt?: string;
+	turn: Turn;
 	/** Unknown on a turn recorded before thinking time was; null while still thinking. */
 	thoughtSeconds?: number | null;
-	workSeconds?: number;
 	streaming?: boolean;
-	idPrefix: string;
 }) {
-	const parts = messages.flatMap(messageParts);
+	const parts = turn.messages.flatMap(messageParts);
 	const steps = parts.filter((part) => part.type !== "text");
 	const said = parts.filter((part) => part.type === "text");
 	const newest = parts.at(-1);
 
 	return (
 		<>
-			{(streaming || systemPrompt || steps.length > 0) && (
+			{(streaming || turn.request || steps.length > 0) && (
 				<Task
 					streaming={streaming}
 					status={turnStatus(parts)}
-					seconds={workSeconds}
+					seconds={turn.usage?.workSeconds}
 				>
-					{systemPrompt && (
+					{turn.request && (
 						<Disclosure
 							icon={
 								<BookOpen className="h-3 w-3 shrink-0" aria-hidden="true" />
 							}
 							label="System prompt"
 						>
-							<DisclosureText>{systemPrompt}</DisclosureText>
+							<DisclosureText>{turn.request.system}</DisclosureText>
 						</Disclosure>
 					)}
 					{steps.map((part, index) => (
 						<Step
-							key={`${idPrefix}-${index}`}
+							key={`${turn.id}-${index}`}
 							part={part}
 							reasoningSeconds={thoughtSeconds}
 							superseded={part !== newest}
@@ -120,7 +111,7 @@ export function AgentTurn({
 			{said.length > 0 && (
 				<PanelCard>
 					{said.map((part, index) => (
-						<ReplyText key={`${idPrefix}-text-${index}`} text={part.text} />
+						<ReplyText key={`${turn.id}-text-${index}`} text={part.text} />
 					))}
 				</PanelCard>
 			)}

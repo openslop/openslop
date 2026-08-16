@@ -1,19 +1,4 @@
-import {
-	modelMessageSchema,
-	type AssistantContent,
-	type ModelMessage,
-	type ToolCallPart,
-	type ToolResultPart,
-} from "ai";
-
-/**
- * A turn, stored exactly as the model layer takes it. Nothing is converted on
- * the way in or out, so a vendor that signs its thinking blocks gets them back
- * byte for byte.
- */
-export type AgentMessage = ModelMessage;
-
-export const agentMessageSchema = modelMessageSchema;
+import type { ModelMessage, ToolCallPart, ToolResultPart } from "ai";
 
 export type AgentUsage = {
 	inputTokens: number;
@@ -28,7 +13,7 @@ export type AgentRequestRecord = { system: string; model: string };
 
 export type AgentMessageRow = {
 	id: string;
-	message: AgentMessage;
+	message: ModelMessage;
 	request: AgentRequestRecord | null;
 	usage: AgentUsage | null;
 };
@@ -46,16 +31,18 @@ export type AgentStreamPart =
 	| { type: "error"; message: string }
 	| { type: "finish"; usage: AgentUsage };
 
-export type AgentContentPart =
-	| Exclude<AssistantContent, string>[number]
-	| ToolResultPart;
+/**
+ * Every part a message can carry. The SDK types content per role rather than as
+ * one union, so this is derived from all of them and cannot miss a new part.
+ */
+export type MessagePart = Exclude<ModelMessage["content"], string>[number];
 
 /** Content is a bare string on simple turns; the panel only ever renders parts. */
-export function messageParts(message: AgentMessage): AgentContentPart[] {
+export function messageParts(message: ModelMessage): MessagePart[] {
 	if (typeof message.content === "string") {
 		return message.content ? [{ type: "text", text: message.content }] : [];
 	}
-	return message.content as AgentContentPart[];
+	return message.content;
 }
 
 export function toolResultText(output: ToolResultPart["output"]): string {
@@ -72,7 +59,7 @@ export function isToolFailure(output: ToolResultPart["output"]): boolean {
  * Tool calls with no result after them. A closed tab leaves one behind, and a
  * vendor rejects a history that contains an unanswered call.
  */
-export function pendingToolCalls(messages: AgentMessage[]): ToolCallPart[] {
+export function pendingToolCalls(messages: ModelMessage[]): ToolCallPart[] {
 	const settled = new Set<string>();
 	const calls: ToolCallPart[] = [];
 

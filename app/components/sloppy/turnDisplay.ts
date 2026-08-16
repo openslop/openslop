@@ -1,7 +1,7 @@
-import type { AgentContentPart } from "@/lib/agent/types";
+import type { MessagePart } from "@/lib/agent/types";
 
 /** A turn ends at its tool call, so a call still means work: the edit runs after. */
-export function turnStatus(parts: AgentContentPart[]): string {
+export function turnStatus(parts: MessagePart[]): string {
 	switch (parts.at(-1)?.type) {
 		case "text":
 			return "Responding";

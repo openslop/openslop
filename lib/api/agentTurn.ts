@@ -1,8 +1,13 @@
-import { stepCountIs, streamText, tool, type ToolSet } from "ai";
+import {
+	stepCountIs,
+	streamText,
+	tool,
+	type ToolSet,
+	type ModelMessage,
+} from "ai";
 import { sloppySystemPrompt } from "@/lib/agent/prompt";
 import { AGENT_TOOL_SPECS, type AgentToolSpec } from "@/lib/agent/tools/specs";
 import type {
-	AgentMessage,
 	AgentRequestRecord,
 	AgentStreamPart,
 	AgentUsage,
@@ -59,7 +64,7 @@ export async function* runAgentTurn(
 	);
 	const history = await listConversationMessages(conversationId);
 
-	const opening: AgentMessage[] = [
+	const opening: ModelMessage[] = [
 		...abandonedToolResults(history),
 		{ role: "user", content: request.message },
 	];

@@ -39,8 +39,6 @@ type SloppyControl = {
 	loading: boolean;
 };
 // Split by update frequency: only the live turn changes per streamed token.
-// Null until the transcript has been read, so the panel can tell a project
-// Sloppy has never touched from one whose history is still in flight.
 const [SloppyMessagesContext, useSloppyMessages] = createRequiredContext<
 	AgentMessageRow[] | null
 >("SloppyProvider");

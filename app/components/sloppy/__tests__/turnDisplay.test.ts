@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { AgentContentPart } from "@/lib/agent/types";
+import type { MessagePart } from "@/lib/agent/types";
 import { reasoningOpen, turnStatus } from "../turnDisplay";
 
-const thought: AgentContentPart = { type: "reasoning", text: "weighing" };
-const said: AgentContentPart = { type: "text", text: "on it" };
-const called: AgentContentPart = {
+const thought: MessagePart = { type: "reasoning", text: "weighing" };
+const said: MessagePart = { type: "text", text: "on it" };
+const called: MessagePart = {
 	type: "tool-call",
 	toolCallId: "c1",
 	toolName: "edit_script",

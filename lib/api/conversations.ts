@@ -1,13 +1,12 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import {
-	agentMessageSchema,
 	pendingToolCalls,
-	type AgentMessage,
 	type AgentMessageRow,
 	type AgentRequestRecord,
 	type AgentUsage,
 } from "@/lib/agent/types";
+import { modelMessageSchema, type ModelMessage } from "ai";
 
 /** One client per request: `createClient` re-reads cookies and rebuilds an adapter each call. */
 const client = cache(createClient);
@@ -62,7 +61,7 @@ export async function findOrCreateConversation(
 function toAgentMessageRow(row: MessageRow): AgentMessageRow {
 	return {
 		id: row.id,
-		message: agentMessageSchema.parse(row.message),
+		message: modelMessageSchema.parse(row.message),
 		request: row.request,
 		usage: row.usage,
 	};
@@ -83,7 +82,7 @@ export async function listConversationMessages(
 
 export async function appendConversationMessages(
 	conversationId: string,
-	messages: AgentMessage[],
+	messages: ModelMessage[],
 	extras: AppendExtras = {},
 ): Promise<AgentMessageRow[]> {
 	if (messages.length === 0) return [];
@@ -111,7 +110,7 @@ export async function appendConversationMessages(
  */
 export function abandonedToolResults(
 	history: AgentMessageRow[],
-): AgentMessage[] {
+): ModelMessage[] {
 	const pending = pendingToolCalls(history.map((row) => row.message));
 	if (pending.length === 0) return [];
 

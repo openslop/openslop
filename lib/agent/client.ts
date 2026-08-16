@@ -1,6 +1,7 @@
 import { OpenSlopClient } from "@/lib/clients/openslop";
 import { readSSE } from "@/lib/api/sse";
-import type { AgentMessage, AgentMessageRow, AgentStreamPart } from "./types";
+import type { AgentMessageRow, AgentStreamPart } from "./types";
+import type { ModelMessage } from "ai";
 
 const AGENT_PATH = "/api/v1/agent";
 
@@ -35,7 +36,7 @@ export async function loadAgentTranscript(
 
 export async function reportToolResults(
 	projectId: string,
-	messages: AgentMessage[],
+	messages: ModelMessage[],
 ): Promise<void> {
 	await client.post(`${AGENT_PATH}/messages`, { projectId, messages });
 }

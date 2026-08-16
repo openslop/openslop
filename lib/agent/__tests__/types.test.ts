@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { agentMessageSchema, pendingToolCalls } from "../types";
-import type { AgentMessage } from "../types";
+import { pendingToolCalls } from "../types";
+import { modelMessageSchema, type ModelMessage } from "ai";
 
-const call = (toolCallId: string): AgentMessage => ({
+const call = (toolCallId: string): ModelMessage => ({
 	role: "assistant",
 	content: [
 		{ type: "tool-call", toolCallId, toolName: "edit_script", input: {} },
 	],
 });
 
-const result = (toolCallId: string): AgentMessage => ({
+const result = (toolCallId: string): ModelMessage => ({
 	role: "tool",
 	content: [
 		{
@@ -38,14 +38,14 @@ describe("pendingToolCalls", () => {
 	});
 });
 
-describe("agentMessageSchema", () => {
+describe("modelMessageSchema", () => {
 	it("accepts a turn stored exactly as the model layer takes it", () => {
-		expect(agentMessageSchema.safeParse(result("a")).success).toBe(true);
+		expect(modelMessageSchema.safeParse(result("a")).success).toBe(true);
 	});
 
 	it("rejects a role the model layer does not know", () => {
 		expect(
-			agentMessageSchema.safeParse({ role: "agent", content: "hi" }).success,
+			modelMessageSchema.safeParse({ role: "agent", content: "hi" }).success,
 		).toBe(false);
 	});
 });

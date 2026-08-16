@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
-import type { AgentMessage, AgentStreamPart } from "@/lib/agent/types";
+import type { AgentStreamPart } from "@/lib/agent/types";
 import type { LLMModelName } from "@/lib/connectors/llm/openslop/models";
 
 const { conversations, provider } = vi.hoisted(() => ({
@@ -29,6 +29,7 @@ vi.mock("../conversations", () => conversations);
 vi.mock("../providers", () => ({ getLLMProvider: () => provider }));
 
 import { runAgentTurn } from "../agentTurn";
+import type { ModelMessage } from "ai";
 
 const USAGE = {
 	inputTokens: { total: 12, noCache: 12, cacheRead: 0, cacheWrite: 0 },
@@ -71,7 +72,7 @@ async function runTurn(
 const appended = (call: number) =>
 	conversations.appendConversationMessages.mock.calls[
 		call
-	][1] as AgentMessage[];
+	][1] as ModelMessage[];
 
 const extrasOf = (call: number) =>
 	conversations.appendConversationMessages.mock.calls[call][2];
