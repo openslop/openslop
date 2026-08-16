@@ -8,12 +8,13 @@ import {
 	reportToolResults,
 	sendAgentTurn,
 } from "@/lib/agent/client";
-import type { AssistantModelMessage } from "ai";
-import type {
-	AgentMessageRow,
-	AgentRequestRecord,
-	AgentStreamPart,
-} from "@/lib/agent/types";
+import {
+	emptyTurn,
+	reduceTurn,
+	toolCallsIn,
+	type LiveTurn,
+} from "@/lib/agent/liveTurn";
+import type { AgentMessageRow } from "@/lib/agent/types";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
@@ -22,15 +23,6 @@ import { spokenLanguage } from "@/lib/connectors/llm/plugins/language-prompt";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { toastError } from "@/lib/toastError";
 
-type AssistantParts = Exclude<AssistantModelMessage["content"], string>;
-
-export type LiveTurn = {
-	user: string;
-	parts: AssistantParts;
-	request: AgentRequestRecord | null;
-	/** Null until the model reports how long it thought. */
-	thoughtSeconds: number | null;
-};
 type SloppyControl = {
 	send: (message: string, model?: string) => Promise<void>;
 	stop: () => void;
@@ -46,13 +38,6 @@ const [SloppyControlContext, useSloppy] =
 	createRequiredContext<SloppyControl>("SloppyProvider");
 
 export { useSloppyMessages, useSloppyLive, useSloppy };
-
-const emptyTurn = (user: string): LiveTurn => ({
-	user,
-	parts: [],
-	request: null,
-	thoughtSeconds: null,
-});
 
 export function SloppyProvider({
 	editor,
@@ -92,11 +77,11 @@ export function SloppyProvider({
 			if (inFlight.current) return;
 			const controller = new AbortController();
 			inFlight.current = controller;
-			const calls: Extract<AgentStreamPart, { type: "tool-call" }>[] = [];
-			setLive(emptyTurn(message));
+			let turn = emptyTurn(message);
+			setLive(turn);
 
 			try {
-				const turn = sendAgentTurn(
+				const stream = sendAgentTurn(
 					{
 						projectId,
 						message,
@@ -106,13 +91,13 @@ export function SloppyProvider({
 					},
 					controller.signal,
 				);
-				for await (const part of turn) {
+				for await (const part of stream) {
 					if (part.type === "error") throw new Error(part.message);
-					if (part.type === "tool-call") calls.push(part);
-					setLive((live) => (live ? reduceTurn(live, part) : live));
+					turn = reduceTurn(turn, part);
+					setLive(turn);
 				}
 
-				const results = await Promise.all(calls.map(runTool));
+				const results = await Promise.all(toolCallsIn(turn).map(runTool));
 				if (results.length > 0) {
 					await reportToolResults(projectId, [
 						{ role: "tool", content: results },
@@ -149,51 +134,4 @@ export function SloppyProvider({
 			</SloppyMessagesContext>
 		</SloppyControlContext>
 	);
-}
-
-/** Grows the trailing text or reasoning part, so deltas become one part, not many. */
-function withDelta(
-	parts: AssistantParts,
-	type: "text" | "reasoning",
-	text: string,
-): AssistantParts {
-	const last = parts.at(-1);
-	if (last?.type === type) {
-		return [...parts.slice(0, -1), { ...last, text: last.text + text }];
-	}
-	return [...parts, { type, text }];
-}
-
-function reduceTurn(turn: LiveTurn, part: AgentStreamPart): LiveTurn {
-	switch (part.type) {
-		case "request":
-			return { ...turn, request: part.request };
-		case "reasoning-delta":
-			return {
-				...turn,
-				parts: withDelta(turn.parts, "reasoning", part.text),
-			};
-		case "reasoning-end":
-			return { ...turn, thoughtSeconds: part.seconds };
-		case "text-delta":
-			return {
-				...turn,
-				parts: withDelta(turn.parts, "text", part.text),
-			};
-		case "tool-call":
-			return {
-				...turn,
-				parts: [
-					...turn.parts,
-					{
-						type: "tool-call",
-						toolCallId: part.toolCallId,
-						toolName: part.toolName,
-						input: part.input,
-					},
-				],
-			};
-		default:
-			return turn;
-	}
 }
