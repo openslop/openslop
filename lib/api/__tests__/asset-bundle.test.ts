@@ -204,6 +204,40 @@ describe("AssetBundle", () => {
 			vi.unstubAllGlobals();
 		});
 
+		it("rejects two files sharing a filename rather than storing one of them", async () => {
+			await expect(
+				AssetBundle.upload("tts", "cartesia", [
+					{
+						key: "audio",
+						filename: "output.wav",
+						data: Buffer.from("a"),
+						contentType: "audio/wav",
+					},
+					{
+						key: "preview",
+						filename: "output.wav",
+						data: Buffer.from("b"),
+						contentType: "audio/wav",
+					},
+				]),
+			).rejects.toThrow(/share the filename "output\.wav"/);
+			expect(putMock).not.toHaveBeenCalled();
+		});
+
+		it("rejects a file named like the manifest the bundle writes itself", async () => {
+			await expect(
+				AssetBundle.upload("upload", "user", [
+					{
+						key: "image",
+						filename: "manifest.json",
+						data: Buffer.from("fake-image"),
+						contentType: "image/png",
+					},
+				]),
+			).rejects.toThrow(/cannot be named "manifest\.json"/);
+			expect(putMock).not.toHaveBeenCalled();
+		});
+
 		it("throws when a remote file's source url is already dead", async () => {
 			vi.stubGlobal(
 				"fetch",

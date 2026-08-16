@@ -38,6 +38,31 @@ export type BundleFileRemote = BundleFileBase & {
 
 export type BundleFile = BundleFileData | BundleFileRemote;
 
+const MANIFEST_FILENAME = "manifest.json";
+
+/**
+ * Blob storage overwrites by path, so two files sharing a name in one bundle
+ * silently become one, and the manifest points both keys at whichever upload
+ * landed last. The manifest is written to the same prefix, so its name is
+ * reserved too.
+ */
+function assertDistinctFilenames(files: BundleFile[]): void {
+	const seen = new Set<string>();
+	for (const { key, filename } of files) {
+		if (filename === MANIFEST_FILENAME) {
+			throw new Error(
+				`Bundle file "${key}" cannot be named "${MANIFEST_FILENAME}"`,
+			);
+		}
+		if (seen.has(filename)) {
+			throw new Error(
+				`Bundle files "${key}" and an earlier file share the filename "${filename}"`,
+			);
+		}
+		seen.add(filename);
+	}
+}
+
 type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
 
 /** Remote sources stream in at an unknown size, so they upload in chunks. */
@@ -102,6 +127,7 @@ export class AssetBundle {
 		files: BundleFile[],
 		metadata?: Record<string, unknown>,
 	): Promise<BundleResponse> {
+		assertDistinctFilenames(files);
 		const { put } = await import("@vercel/blob");
 		const id = nanoid();
 		const basePath = `assets/${type}/${provider}/${id}`;
@@ -131,7 +157,7 @@ export class AssetBundle {
 			metadata,
 		};
 
-		await put(`${basePath}/manifest.json`, JSON.stringify(manifest), {
+		await put(`${basePath}/${MANIFEST_FILENAME}`, JSON.stringify(manifest), {
 			access: "public",
 			contentType: "application/json",
 			addRandomSuffix: false,
