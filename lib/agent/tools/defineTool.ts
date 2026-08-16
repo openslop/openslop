@@ -1,15 +1,13 @@
 import type { z } from "zod";
-import type { Editor } from "slate";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { RefineOp } from "@/lib/script/refine/types";
 import type { AgentToolSpec } from "./specs";
 
 /**
- * What a tool is allowed to touch. Every tool runs on the client, because the
- * canvas lives in a Slate editor there and the client is the only writer.
+ * What a tool can do to the canvas: verbs, never the parts they are built from,
+ * so a tool never learns that the canvas is a Slate editor.
  */
 export type AgentToolContext = {
-	editor: Editor;
-	connectors: ConnectorRegistry;
+	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 };
 

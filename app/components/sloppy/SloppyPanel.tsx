@@ -37,7 +37,7 @@ function LiveTurn() {
 				turn={{
 					id: "live",
 					role: "assistant",
-					messages: [live.assistant],
+					messages: [{ role: "assistant", content: live.parts }],
 					request: live.request,
 					usage: null,
 				}}

@@ -19,9 +19,15 @@ function isAgentToolName(name: string): name is AgentToolName {
 	return name in AGENT_TOOLS;
 }
 
+export type AgentToolCall = {
+	toolCallId: string;
+	toolName: string;
+	input: unknown;
+};
+
 /** Runs a tool call. A failure is reported, not thrown: the model reads it next turn. */
 export async function executeToolCall(
-	call: { toolCallId: string; toolName: string; input: unknown },
+	call: AgentToolCall,
 	ctx: AgentToolContext,
 ): Promise<ToolResultPart> {
 	const base = {

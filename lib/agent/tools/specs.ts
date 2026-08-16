@@ -57,7 +57,7 @@ export const editScriptSpec = {
 			.min(1)
 			.describe("Operations to apply, in order."),
 	}),
-} satisfies AgentToolSpec;
+} as const satisfies AgentToolSpec;
 
 const WRITE_SCRIPT = dedent`
   Write a new script onto the canvas from a brief, replacing what is there. Use this to
@@ -76,7 +76,7 @@ export const writeScriptSpec = {
 			.min(1)
 			.describe("What the video is about, in a sentence or a few."),
 	}),
-} satisfies AgentToolSpec;
+} as const satisfies AgentToolSpec;
 
 export const AGENT_TOOL_SPECS = [editScriptSpec, writeScriptSpec] as const;
 

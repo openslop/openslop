@@ -6,50 +6,55 @@ async function* chunks(...values: string[]) {
 }
 
 describe("drainStream", () => {
-	it("delivers every chunk, then settles", async () => {
+	it("delivers every chunk, then reports that it finished", async () => {
 		const seen: string[] = [];
-		const onSettled = vi.fn();
 
-		await drainStream(
+		const finished = await drainStream(
 			chunks("a", "b"),
 			new AbortController().signal,
 			(chunk) => seen.push(chunk),
-			onSettled,
 		);
 
 		expect(seen).toEqual(["a", "b"]);
-		expect(onSettled).toHaveBeenCalledOnce();
+		expect(finished).toBe(true);
 	});
 
-	it("stops delivering and skips settling once aborted mid-stream", async () => {
+	it("stops delivering once aborted mid-stream", async () => {
 		const controller = new AbortController();
 		const seen: string[] = [];
-		const onSettled = vi.fn();
 
-		await drainStream(
+		const finished = await drainStream(
 			chunks("a", "b", "c"),
 			controller.signal,
 			(chunk) => {
 				seen.push(chunk);
 				controller.abort();
 			},
-			onSettled,
 		);
 
 		expect(seen).toEqual(["a"]);
-		expect(onSettled).not.toHaveBeenCalled();
+		expect(finished).toBe(false);
 	});
 
-	it("skips settling when aborted before the stream ends", async () => {
+	it("does not report finishing when aborted before the stream ends", async () => {
 		const controller = new AbortController();
 		controller.abort();
-		const onSettled = vi.fn();
 		const onChunk = vi.fn();
 
-		await drainStream(chunks("a"), controller.signal, onChunk, onSettled);
+		const finished = await drainStream(chunks("a"), controller.signal, onChunk);
 
 		expect(onChunk).not.toHaveBeenCalled();
-		expect(onSettled).not.toHaveBeenCalled();
+		expect(finished).toBe(false);
+	});
+
+	it("does not report finishing when aborted after the last chunk", async () => {
+		const controller = new AbortController();
+
+		const finished = await drainStream(chunks("a"), controller.signal, () =>
+			controller.abort(),
+		);
+
+		expect(finished).toBe(false);
 	});
 
 	it("propagates a stream failure to the caller", async () => {
@@ -57,11 +62,9 @@ describe("drainStream", () => {
 			yield "a";
 			throw new Error("upstream died");
 		}
-		const onSettled = vi.fn();
 
 		await expect(
-			drainStream(failing(), new AbortController().signal, () => {}, onSettled),
+			drainStream(failing(), new AbortController().signal, () => {}),
 		).rejects.toThrow("upstream died");
-		expect(onSettled).not.toHaveBeenCalled();
 	});
 });

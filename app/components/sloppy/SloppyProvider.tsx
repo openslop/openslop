@@ -8,26 +8,26 @@ import {
 	reportToolResults,
 	sendAgentTurn,
 } from "@/lib/agent/client";
-import type { AssistantModelMessage, ModelMessage } from "ai";
+import type { AssistantModelMessage } from "ai";
 import type {
 	AgentMessageRow,
 	AgentRequestRecord,
 	AgentStreamPart,
 } from "@/lib/agent/types";
-import { executeToolCall } from "@/lib/agent/tools/registry";
-import type { AgentToolContext } from "@/lib/agent/tools/defineTool";
+import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { spokenLanguage } from "@/lib/connectors/llm/plugins/language-prompt";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { useStreamRun } from "@/lib/script/useStreamRun";
 import { toastError } from "@/lib/toastError";
 
+type AssistantParts = Exclude<AssistantModelMessage["content"], string>;
+
 export type LiveTurn = {
 	user: string;
-	assistant: ModelMessage;
+	parts: AssistantParts;
 	request: AgentRequestRecord | null;
 	/** Null until the model reports how long it thought. */
 	thoughtSeconds: number | null;
@@ -50,7 +50,7 @@ export { useSloppyMessages, useSloppyLive, useSloppy };
 
 const emptyTurn = (user: string): LiveTurn => ({
 	user,
-	assistant: { role: "assistant", content: [] },
+	parts: [],
 	request: null,
 	thoughtSeconds: null,
 });
@@ -62,12 +62,15 @@ export function SloppyProvider({
 	editor: Editor;
 	children: ReactNode;
 }) {
-	const { projectId, connectorConfig } = useConfig();
+	const { projectId } = useConfig();
 	const store = useProjectStoreHandle();
-	const { submitPrompt } = useScriptControl();
-	const { loading, run, stop } = useStreamRun();
+	const runTool = useAgentTools(editor);
+	const { run, stop } = useStreamRun();
 
 	const [messages, setMessages] = useState<AgentMessageRow[] | null>(null);
+	// Spans the whole turn, where the stream's own flag clears before the tool
+	// calls it asked for have run.
+	const [loading, setLoading] = useState(false);
 	const [live, setLive] = useState<LiveTurn | null>(null);
 
 	// Drops a response the project has already moved on from.
@@ -89,7 +92,7 @@ export function SloppyProvider({
 	const send = useCallback(
 		async (message: string, model?: string) => {
 			const calls: Extract<AgentStreamPart, { type: "tool-call" }>[] = [];
-			let finished = false;
+			setLoading(true);
 			setLive(emptyTurn(message));
 
 			const applyPart = (part: AgentStreamPart) => {
@@ -100,7 +103,7 @@ export function SloppyProvider({
 			};
 
 			try {
-				await run(
+				const finished = await run(
 					sendAgentTurn({
 						projectId,
 						message,
@@ -109,21 +112,11 @@ export function SloppyProvider({
 						language: spokenLanguage(store.getState().metadata, ""),
 					}),
 					applyPart,
-					() => {
-						finished = true;
-					},
 				);
 
 				if (!finished) return;
 
-				const ctx: AgentToolContext = {
-					editor,
-					connectors: connectorConfig,
-					writeScript: submitPrompt,
-				};
-				const results = await Promise.all(
-					calls.map((call) => executeToolCall(call, ctx)),
-				);
+				const results = await Promise.all(calls.map(runTool));
 				if (results.length > 0) {
 					await reportToolResults(projectId, [
 						{ role: "tool", content: results },
@@ -134,12 +127,16 @@ export function SloppyProvider({
 			} finally {
 				// Read before either setState, so the live turn and the rows that
 				// replace it swap in one commit rather than blinking out between them.
-				const rows = await loadAgentTranscript(projectId).catch(() => null);
+				const rows = await loadAgentTranscript(projectId).catch((error) => {
+					toastError(error, "Sloppy finished, but the transcript did not load");
+					return null;
+				});
+				setLoading(false);
 				setLive(null);
 				if (rows) setMessages(rows);
 			}
 		},
-		[projectId, editor, store, run, connectorConfig, submitPrompt],
+		[projectId, editor, store, run, runTool],
 	);
 
 	const control = useMemo<SloppyControl>(
@@ -155,31 +152,17 @@ export function SloppyProvider({
 	);
 }
 
-type AssistantParts = Exclude<AssistantModelMessage["content"], string>;
-
-const assistant = (content: AssistantParts): ModelMessage => ({
-	role: "assistant",
-	content,
-});
-
-const partsOf = (message: ModelMessage): AssistantParts =>
-	Array.isArray(message.content) ? (message.content as AssistantParts) : [];
-
 /** Grows the trailing text or reasoning part, so deltas become one part, not many. */
 function withDelta(
-	message: ModelMessage,
+	parts: AssistantParts,
 	type: "text" | "reasoning",
 	text: string,
-): ModelMessage {
-	const content = partsOf(message);
-	const last = content.at(-1);
+): AssistantParts {
+	const last = parts.at(-1);
 	if (last?.type === type) {
-		return assistant([
-			...content.slice(0, -1),
-			{ ...last, text: last.text + text },
-		]);
+		return [...parts.slice(0, -1), { ...last, text: last.text + text }];
 	}
-	return assistant([...content, { type, text }]);
+	return [...parts, { type, text }];
 }
 
 function reduceTurn(turn: LiveTurn, part: AgentStreamPart): LiveTurn {
@@ -189,27 +172,27 @@ function reduceTurn(turn: LiveTurn, part: AgentStreamPart): LiveTurn {
 		case "reasoning-delta":
 			return {
 				...turn,
-				assistant: withDelta(turn.assistant, "reasoning", part.text),
+				parts: withDelta(turn.parts, "reasoning", part.text),
 			};
 		case "reasoning-end":
 			return { ...turn, thoughtSeconds: part.seconds };
 		case "text-delta":
 			return {
 				...turn,
-				assistant: withDelta(turn.assistant, "text", part.text),
+				parts: withDelta(turn.parts, "text", part.text),
 			};
 		case "tool-call":
 			return {
 				...turn,
-				assistant: assistant([
-					...partsOf(turn.assistant),
+				parts: [
+					...turn.parts,
 					{
 						type: "tool-call",
 						toolCallId: part.toolCallId,
 						toolName: part.toolName,
 						input: part.input,
 					},
-				]),
+				],
 			};
 		default:
 			return turn;

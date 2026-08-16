@@ -7,13 +7,13 @@ export type StreamRun = {
 	loading: boolean;
 	/**
 	 * Aborts the run still in flight, then drains `source` into `onChunk`.
-	 * `onSettled` runs only when the stream finishes without being aborted.
+	 * Resolves true only when the stream ended on its own, so a superseded run
+	 * can tell that it is no longer the one whose result counts.
 	 */
 	run: <T>(
 		source: AsyncIterable<T>,
 		onChunk: (chunk: T) => void,
-		onSettled?: () => void,
-	) => Promise<void>;
+	) => Promise<boolean>;
 	stop: () => void;
 };
 
@@ -32,23 +32,20 @@ export function useStreamRun(): StreamRun {
 		setLoading(false);
 	}, []);
 
-	const run = useCallback<StreamRun["run"]>(
-		async (source, onChunk, onSettled) => {
-			abortRef.current?.abort();
-			const controller = new AbortController();
-			abortRef.current = controller;
-			setLoading(true);
-			try {
-				await drainStream(source, controller.signal, onChunk, onSettled);
-			} finally {
-				if (abortRef.current === controller) {
-					abortRef.current = null;
-					setLoading(false);
-				}
+	const run = useCallback<StreamRun["run"]>(async (source, onChunk) => {
+		abortRef.current?.abort();
+		const controller = new AbortController();
+		abortRef.current = controller;
+		setLoading(true);
+		try {
+			return await drainStream(source, controller.signal, onChunk);
+		} finally {
+			if (abortRef.current === controller) {
+				abortRef.current = null;
+				setLoading(false);
 			}
-		},
-		[],
-	);
+		}
+	}, []);
 
 	return useMemo(() => ({ loading, run, stop }), [loading, run, stop]);
 }

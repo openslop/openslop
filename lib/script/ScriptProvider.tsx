@@ -62,7 +62,7 @@ export function ScriptProvider({
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const [script, setScript] = useState(initialScript);
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
-	const { nodes, appendChunk } = useOSMLStreamParser();
+	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 	const { loading, run, stop: stopGeneration } = useStreamRun();
 
 	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
@@ -73,6 +73,7 @@ export function ScriptProvider({
 	const submitPrompt = useCallback(
 		async (prompt: string) => {
 			updateMetadata({ lastMode: mode, lastPrompt: prompt });
+			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
 			const state = store.getState();
 			await run(connector.stream({ prompt }, { state }), (chunk) => {
@@ -81,7 +82,16 @@ export function ScriptProvider({
 				appendChunk(chunk.text);
 			});
 		},
-		[store, llmProvider, llmConfig, appendChunk, updateMetadata, mode, run],
+		[
+			store,
+			llmProvider,
+			llmConfig,
+			appendChunk,
+			reset,
+			updateMetadata,
+			mode,
+			run,
+		],
 	);
 
 	const enterWorkspace = useCallback(() => setHasContent(true), []);
