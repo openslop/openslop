@@ -18,7 +18,7 @@ const FILLS_DOCK: Record<BottomView, boolean> = {
 /** The transport bar and its panel, resized by a handle on the dock's top edge. */
 export function BottomDock({ children }: { children: ReactNode }) {
 	const { view } = useBottomView();
-	const { size, handleMouseDown, resizing } = useResize({
+	const { panelRef, style, handleMouseDown, resizing } = useResize({
 		axis: "vertical",
 		invert: true,
 		defaultSize: DEFAULT_HEIGHT,
@@ -30,8 +30,9 @@ export function BottomDock({ children }: { children: ReactNode }) {
 
 	return (
 		<div
+			ref={panelRef}
 			className="flex shrink-0 flex-col"
-			style={fills ? { height: size } : undefined}
+			style={fills ? style : undefined}
 		>
 			{fills ? (
 				<ResizeHandle

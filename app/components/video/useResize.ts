@@ -1,9 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	type CSSProperties,
+} from "react";
 import { clamp } from "@/lib/utils";
 
 export type ResizeAxis = "vertical" | "horizontal";
+
+/**
+ * The dragged size reaches the DOM as a custom property on the panel, so a drag
+ * writes one property instead of re-rendering the panel's subtree per mousemove.
+ * Nothing renders the variable, so an unrelated render can't clobber the drag.
+ */
+const SIZE_VAR = "--panel-size";
+
+export function panelSizeStyle(
+	axis: ResizeAxis,
+	defaultSize: number,
+): CSSProperties {
+	const size = `var(${SIZE_VAR}, ${defaultSize}px)`;
+	return axis === "vertical" ? { height: size } : { width: size };
+}
 
 /**
  * `invert` is for a handle on the panel's leading edge — a bottom dock grabbed
@@ -92,13 +113,8 @@ export function useResize({
 	maxViewportFraction: number;
 	invert?: boolean;
 }) {
-	const [size, setSize] = useState(defaultSize);
 	const [resizing, setResizing] = useState(false);
-	const sizeRef = useRef(size);
-	useEffect(() => {
-		sizeRef.current = size;
-	}, [size]);
-
+	const panelRef = useRef<HTMLDivElement>(null);
 	const cleanupRef = useRef<(() => void) | null>(null);
 
 	useEffect(
@@ -111,24 +127,34 @@ export function useResize({
 
 	const handleMouseDown = useCallback(
 		(e: React.MouseEvent) => {
+			const panel = panelRef.current;
+			if (!panel)
+				throw new Error("Resize handle fired before its panel mounted");
 			e.preventDefault();
 			cleanupRef.current?.();
 			setResizing(true);
-			const viewport =
-				axis === "vertical" ? window.innerHeight : window.innerWidth;
+			const vertical = axis === "vertical";
+			const rect = panel.getBoundingClientRect();
 			cleanupRef.current = attachResizeListeners(document, {
 				axis,
-				startPos: axis === "vertical" ? e.clientY : e.clientX,
-				startSize: sizeRef.current,
+				startPos: vertical ? e.clientY : e.clientX,
+				startSize: vertical ? rect.height : rect.width,
 				minSize,
-				maxSize: viewport * maxViewportFraction,
+				maxSize:
+					(vertical ? window.innerHeight : window.innerWidth) *
+					maxViewportFraction,
 				invert,
-				onResize: setSize,
+				onResize: (size) => panel.style.setProperty(SIZE_VAR, `${size}px`),
 				onEnd: () => setResizing(false),
 			});
 		},
 		[axis, minSize, maxViewportFraction, invert],
 	);
 
-	return { size, handleMouseDown, resizing };
+	return {
+		panelRef,
+		style: panelSizeStyle(axis, defaultSize),
+		handleMouseDown,
+		resizing,
+	};
 }

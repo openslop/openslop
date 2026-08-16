@@ -1,5 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
-import { attachResizeListeners, clampResize } from "../useResize";
+import {
+	attachResizeListeners,
+	clampResize,
+	panelSizeStyle,
+} from "../useResize";
+
+describe("panelSizeStyle", () => {
+	it("sizes a vertical panel by height, defaulting until a drag writes one", () => {
+		expect(panelSizeStyle("vertical", 260)).toEqual({
+			height: "var(--panel-size, 260px)",
+		});
+	});
+
+	it("sizes a horizontal panel by width", () => {
+		expect(panelSizeStyle("horizontal", 560)).toEqual({
+			width: "var(--panel-size, 560px)",
+		});
+	});
+});
 
 describe("clampResize", () => {
 	it("expands vertically when cursor moves down", () => {

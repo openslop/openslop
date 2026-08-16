@@ -37,7 +37,7 @@ function FitToAspectRatio({
 function TopPlayerPanelComponent() {
 	const aspectRatio = useVideoSetting("aspectRatio");
 
-	const { size, handleMouseDown, resizing } = useResize({
+	const { panelRef, style, handleMouseDown, resizing } = useResize({
 		axis: "vertical",
 		defaultSize: TOP_DEFAULT,
 		minSize: 150,
@@ -45,7 +45,7 @@ function TopPlayerPanelComponent() {
 	});
 
 	return (
-		<div className="shrink-0" style={{ height: size }}>
+		<div ref={panelRef} className="shrink-0" style={style}>
 			<div className="relative mx-auto h-[calc(100%-0.5rem)] max-w-6xl p-2">
 				<FitToAspectRatio ratio={getAspectRatioValue(aspectRatio)}>
 					<VideoPanel />
@@ -63,7 +63,7 @@ function TopPlayerPanelComponent() {
 function SidePlayerPanelComponent() {
 	const aspectRatio = useVideoSetting("aspectRatio");
 
-	const { size, handleMouseDown, resizing } = useResize({
+	const { panelRef, style, handleMouseDown, resizing } = useResize({
 		axis: "horizontal",
 		defaultSize: SIDE_DEFAULT,
 		minSize: 250,
@@ -71,7 +71,7 @@ function SidePlayerPanelComponent() {
 	});
 
 	return (
-		<div className="flex shrink-0" style={{ width: size }}>
+		<div ref={panelRef} className="flex shrink-0" style={style}>
 			<ResizeHandle
 				axis="horizontal"
 				resizing={resizing}
