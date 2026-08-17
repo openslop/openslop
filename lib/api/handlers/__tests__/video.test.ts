@@ -12,7 +12,10 @@ vi.mock("@/lib/api/providers", async (importOriginal) => ({
 	getVideoProvider: () => ({ generate, poll }),
 }));
 
-type VideoJobRow = TypedJobRow<VideoGenerateParams, { providerJobId?: string }>;
+type VideoJobRow = TypedJobRow<
+	VideoGenerateParams,
+	{ providerJobId?: string; durationSec?: number }
+>;
 
 const bundle = { id: "bundle-1" } as unknown as BundleResponse;
 
@@ -25,7 +28,7 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 		status: "processing",
 		request: { prompt: "a cat" } as VideoGenerateParams,
 		result: null,
-		metadata: { providerJobId: "upstream-1" },
+		metadata: { providerJobId: "upstream-1", durationSec: 8 },
 		error: null,
 		created_at: "2026-01-01T00:00:00Z",
 		updated_at: "2026-01-01T00:00:00Z",
@@ -43,11 +46,13 @@ describe("videoHandler.process", () => {
 	});
 
 	it("submits upstream without polling a job it just created", async () => {
-		generate.mockResolvedValue({ metadata: { jobId: "upstream-9" } });
+		generate.mockResolvedValue({
+			metadata: { jobId: "upstream-9", durationSec: 10 },
+		});
 
 		await expect(videoHandler.process(job({ metadata: {} }))).resolves.toEqual({
 			kind: "pending",
-			metadata: { providerJobId: "upstream-9" },
+			metadata: { providerJobId: "upstream-9", durationSec: 10 },
 		});
 		expect(generate).toHaveBeenCalledWith({ prompt: "a cat" });
 		expect(poll).not.toHaveBeenCalled();
@@ -56,17 +61,25 @@ describe("videoHandler.process", () => {
 	it("advances the recorded upstream job without resubmitting", async () => {
 		await expect(videoHandler.process(job())).resolves.toEqual({
 			kind: "pending",
-			metadata: { providerJobId: "upstream-1" },
+			metadata: { providerJobId: "upstream-1", durationSec: 8 },
 		});
 		expect(generate).not.toHaveBeenCalled();
 		expect(poll).toHaveBeenCalledWith("upstream-1");
 	});
 
 	it("throws when the provider returns no job id", async () => {
-		generate.mockResolvedValue({ metadata: {} });
+		generate.mockResolvedValue({ metadata: { durationSec: 10 } });
 
 		await expect(videoHandler.process(job({ metadata: {} }))).rejects.toThrow(
-			"Video provider returned no jobId",
+			"unusable submission",
+		);
+	});
+
+	it("throws when the provider returns no duration", async () => {
+		generate.mockResolvedValue({ metadata: { jobId: "upstream-9" } });
+
+		await expect(videoHandler.process(job({ metadata: {} }))).rejects.toThrow(
+			"unusable submission",
 		);
 	});
 
@@ -76,7 +89,29 @@ describe("videoHandler.process", () => {
 
 		await expect(videoHandler.process(job())).resolves.toEqual({
 			kind: "completed",
-			result: asset,
+			result: { ...asset, metadata: { durationSec: 8 } },
+		});
+	});
+
+	// The upstream poll is keyed by job id alone and reports no duration, so
+	// without the submission's duration the finished video lays out as one second.
+	it("stamps the submitted duration onto the finished asset", async () => {
+		poll.mockResolvedValue({
+			kind: "ready",
+			asset: {
+				...bundle,
+				result: { video: "output.mp4" },
+				metadata: { jobId: "upstream-1", status: "completed" },
+			},
+		});
+
+		const outcome = await videoHandler.process(job());
+
+		expect(outcome).toMatchObject({
+			kind: "completed",
+			result: {
+				metadata: { jobId: "upstream-1", status: "completed", durationSec: 8 },
+			},
 		});
 	});
 

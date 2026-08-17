@@ -139,6 +139,23 @@ describe("RunwareVideo", () => {
 
 			expect(result.metadata?.durationSec).toBe(10);
 		});
+
+		// The recorded duration is what the finished video is laid out with, so it
+		// has to be the duration that was actually submitted, defaults included.
+		it("records the defaulted duration when the request carries none", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-3",
+				status: "processing",
+			});
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.generate({ prompt: "test", duration: 0 });
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({ duration: 5 }),
+			);
+			expect(result.metadata?.durationSec).toBe(5);
+		});
 	});
 
 	describe("poll", () => {

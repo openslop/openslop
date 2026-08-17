@@ -3,6 +3,8 @@ import type { VideoJob, VideoJobStatus } from "./base";
 import { BaseVideoProvider } from "./base";
 import { withRunware } from "../runware";
 
+const DEFAULT_DURATION_SEC = 5;
+
 function toVideoJob(video: {
 	taskUUID: string;
 	status: string;
@@ -33,7 +35,7 @@ export class RunwareVideo extends BaseVideoProvider {
 				model: params.model || "bytedance:seedance@2.0-fast",
 				width: params.width || 1280,
 				height: params.height || 720,
-				duration: params.duration || 5,
+				duration: params.duration || DEFAULT_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
 				inputs: {
@@ -58,7 +60,7 @@ export class RunwareVideo extends BaseVideoProvider {
 			metadata: {
 				...job.metadata,
 				jobId: job.metadata?.jobId ?? "",
-				durationSec: params.duration ?? 5,
+				durationSec: params.duration || DEFAULT_DURATION_SEC,
 			},
 		};
 	}
