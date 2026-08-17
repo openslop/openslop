@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
-import type { MessagePart } from "@/lib/agent/types";
-import { reasoningOpen, turnStatus } from "../turnDisplay";
+import { reasoningOpen, turnStatus, type TurnPart } from "../turnDisplay";
 
-const thought: MessagePart = { type: "reasoning", text: "weighing" };
-const said: MessagePart = { type: "text", text: "on it" };
-const called: MessagePart = {
-	type: "tool-call",
+const thought: TurnPart = { type: "reasoning", text: "weighing" };
+const said: TurnPart = { type: "text", text: "on it" };
+const calling: TurnPart = {
+	type: "tool-edit_script",
 	toolCallId: "c1",
-	toolName: "edit_script",
+	state: "input-available",
 	input: { ops: [] },
+};
+const called: TurnPart = {
+	type: "tool-edit_script",
+	toolCallId: "c1",
+	state: "output-available",
+	input: { ops: [] },
+	output: "Applied 1 operation.",
 };
 
 describe("turnStatus", () => {
@@ -24,8 +30,12 @@ describe("turnStatus", () => {
 		expect(turnStatus([thought, said])).toBe("Responding");
 	});
 
-	it("keeps working after a tool call, which the client still has to run", () => {
-		expect(turnStatus([said, called])).toBe("Applying changes");
+	it("keeps working after a tool call, which the editor still has to run", () => {
+		expect(turnStatus([said, calling])).toBe("Applying changes");
+	});
+
+	it("goes back to slopping once the editor has answered and the model has not", () => {
+		expect(turnStatus([said, called])).toBe("Slopping…");
 	});
 });
 

@@ -190,8 +190,28 @@ function textOf(message: LanguageModelV3Prompt[number]): string {
 		.join("");
 }
 
-function promptText(prompt: LanguageModelV3Prompt): string {
-	return prompt.map(textOf).join("\n");
+function outputText(output: { type: string; value?: unknown }): string {
+	return typeof output.value === "string" ? output.value : "";
+}
+
+/** What the editor last reported back, which is what a step is a reaction to. */
+function lastToolResult(
+	prompt: LanguageModelV3Prompt,
+): { toolName: string; text: string } | null {
+	// Scoped to the turn in flight: what the one before it read described a
+	// canvas that has since been edited.
+	const asked = prompt.findLastIndex((message) => message.role === "user");
+	for (const message of prompt.slice(asked + 1).reverse()) {
+		if (message.role !== "tool" || typeof message.content === "string")
+			continue;
+		const result = [...message.content]
+			.reverse()
+			.find((part) => part.type === "tool-result");
+		if (result) {
+			return { toolName: result.toolName, text: outputText(result.output) };
+		}
+	}
+	return null;
 }
 
 /** What the user actually asked for, apart from the prompt around it. */
@@ -221,7 +241,21 @@ function parts(
 function mockCall(prompt: LanguageModelV3Prompt) {
 	const asked = lastUserText(prompt);
 	const animateId = matchAnimateImagePrompt(asked);
-	const elementId = animateId ?? ELEMENT_ID.exec(promptText(prompt))?.[1];
+	const last = lastToolResult(prompt);
+
+	// The canvas is never in the prompt, so a step that has not read it, or that
+	// just replaced it, has nothing to work from.
+	if (!animateId && (!last || last.toolName === "write_script")) {
+		return { say: "Reading the script. ", toolName: "read_script", input: {} };
+	}
+
+	if (last?.toolName === "edit_script") {
+		return {
+			say: "Done. That is as much as a mock can do without an API key.",
+		};
+	}
+
+	const elementId = animateId ?? ELEMENT_ID.exec(last?.text ?? "")?.[1];
 
 	if (!elementId) {
 		return {

@@ -1,53 +1,44 @@
-import type { ToolResultPart } from "ai";
+import type { z } from "zod";
 import { errorMessage } from "@/lib/errors";
-import type { AgentTool, AgentToolContext } from "./defineTool";
-import { editScriptTool } from "./editScript";
-import { writeScriptTool } from "./writeScript";
-import type { AgentToolName } from "./specs";
+import type { AgentToolContext } from "./context";
+import { editScript } from "./editScript";
+import { readScript } from "./readScript";
+import { writeScript } from "./writeScript";
+import { agentToolCallSchema } from "./specs";
 
-/**
- * The client half of the tool set: each spec bound to the executor that runs it
- * against the canvas. Keyed by the spec names, so a tool the model is offered
- * but nothing can run is a compile error rather than a runtime surprise.
- */
-const AGENT_TOOLS: Record<AgentToolName, AgentTool> = {
-	edit_script: editScriptTool,
-	write_script: writeScriptTool,
-};
+type AgentToolCall = z.infer<typeof agentToolCallSchema>;
 
-function isAgentToolName(name: string): name is AgentToolName {
-	return name in AGENT_TOOLS;
+/** A failure is reported, not thrown: the model reads it as the next observation. */
+export type ToolOutcome =
+	| { ok: true; output: string }
+	| { ok: false; errorText: string };
+
+function run(call: AgentToolCall, ctx: AgentToolContext): Promise<string> {
+	switch (call.toolName) {
+		case "read_script":
+			return readScript(ctx);
+		case "edit_script":
+			return editScript(call.input, ctx);
+		case "write_script":
+			return writeScript(call.input, ctx);
+	}
 }
 
-export type AgentToolCall = {
-	toolCallId: string;
-	toolName: string;
-	input: unknown;
-};
-
-/** Runs a tool call. A failure is reported, not thrown: the model reads it next turn. */
 export async function executeToolCall(
-	call: AgentToolCall,
+	call: { toolName: string; input: unknown },
 	ctx: AgentToolContext,
-): Promise<ToolResultPart> {
-	const base = {
-		type: "tool-result" as const,
-		toolCallId: call.toolCallId,
-		toolName: call.toolName,
-	};
-	const fail = (value: string): ToolResultPart => ({
-		...base,
-		output: { type: "error-text", value },
-	});
-
-	if (!isAgentToolName(call.toolName)) {
-		return fail(`Unknown tool "${call.toolName}".`);
+): Promise<ToolOutcome> {
+	const parsed = agentToolCallSchema.safeParse(call);
+	if (!parsed.success) {
+		return {
+			ok: false,
+			errorText: `${call.toolName} cannot take that input: ${parsed.error.message}`,
+		};
 	}
 
 	try {
-		const value = await AGENT_TOOLS[call.toolName].execute(call.input, ctx);
-		return { ...base, output: { type: "text", value } };
+		return { ok: true, output: await run(parsed.data, ctx) };
 	} catch (error) {
-		return fail(errorMessage(error));
+		return { ok: false, errorText: errorMessage(error) };
 	}
 }

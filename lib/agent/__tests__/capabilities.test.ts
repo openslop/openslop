@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { AGENT_LIMITS, limitsPrompt } from "../capabilities";
-import { AGENT_TOOL_SPECS } from "../tools/specs";
+import { SLOPPY_TOOLS } from "../tools/specs";
 
 describe("AGENT_LIMITS", () => {
 	it("retires a limit once the tool that supersedes it ships", () => {
-		const tools = new Set<string>(AGENT_TOOL_SPECS.map((spec) => spec.name));
+		const tools = new Set<string>(Object.keys(SLOPPY_TOOLS));
 		const stale = AGENT_LIMITS.filter((limit) => tools.has(limit.supersededBy));
 
 		expect(stale.map((limit) => limit.supersededBy)).toEqual([]);

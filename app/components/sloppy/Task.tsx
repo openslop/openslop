@@ -21,11 +21,7 @@ function workedLabel(seconds: number | undefined): string {
 	return seconds === undefined ? "Worked" : `Worked for ${seconds}s`;
 }
 
-/**
- * Every step of a turn, under one header. The live task and the stored one are
- * separate mounts, so finishing collapses it without overriding a reader who
- * closed it early.
- */
+/** Every step of a turn, under one header. */
 export function Task({
 	streaming,
 	status,
@@ -41,6 +37,8 @@ export function Task({
 
 	return (
 		<Disclosure
+			// Shuts itself when the turn ends, without overriding a reader's toggle.
+			key={String(streaming)}
 			defaultOpen={streaming}
 			pending={streaming}
 			icon={

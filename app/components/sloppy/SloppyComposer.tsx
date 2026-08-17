@@ -8,10 +8,10 @@ import {
 	SquareFilled,
 } from "@/components/ui/icon";
 import { SelectMenu } from "@/components/ui/select-menu";
-import { getDefaultConnector } from "@/lib/connectors/registry";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
+import { getDefaultConnector } from "@/lib/connectors/registry";
+import { useConfig } from "@/lib/config/ConfigProvider";
 import { useSloppy } from "./SloppyProvider";
 
 function ModelPicker({
@@ -61,7 +61,7 @@ export function SloppyComposer() {
 		if (!hasText || loading) return;
 		const message = value;
 		setValue("");
-		void send(message, model);
+		send(message, model);
 	};
 
 	return (

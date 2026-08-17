@@ -1,18 +1,17 @@
 "use client";
 
+import { isStaticToolUIPart, isTextUIPart } from "ai";
 import { BookOpen } from "@/components/ui/icon";
 import partition from "lodash/partition";
 import { Disclosure, DisclosureText } from "@/components/ui/disclosure";
-import type { Turn } from "@/lib/agent/turns";
-import { messageParts, type MessagePart } from "@/lib/agent/types";
+import type { SloppyMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { Reasoning } from "./Reasoning";
 import { Task } from "./Task";
-import { Tool, ToolOutput } from "./Tool";
-import { turnStatus } from "./turnDisplay";
-import type { ModelMessage, TextPart } from "ai";
+import { Tool } from "./Tool";
+import { turnStatus, userText, type TurnPart } from "./turnDisplay";
 
-export function UserMessage({ message }: { message: ModelMessage }) {
+export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
 		<p className="ml-auto w-fit max-w-[88%] shrink-0 break-words rounded-xl rounded-br-sm bg-primary px-3 py-2 text-label text-primary-foreground">
 			{userText(message)}
@@ -20,38 +19,26 @@ export function UserMessage({ message }: { message: ModelMessage }) {
 	);
 }
 
-function userText(message: ModelMessage): string {
-	return messageParts(message)
-		.filter((part) => part.type === "text")
-		.map((part) => part.text)
-		.join("\n");
+export function PendingTurn() {
+	return (
+		<Task streaming status={turnStatus([])} seconds={undefined}>
+			{null}
+		</Task>
+	);
 }
 
-function Step({
-	part,
-	reasoningSeconds,
-	superseded,
-}: {
-	part: MessagePart;
-	reasoningSeconds: number | null | undefined;
-	superseded: boolean;
-}) {
-	switch (part.type) {
-		case "reasoning":
-			return (
-				<Reasoning
-					text={part.text}
-					seconds={reasoningSeconds}
-					superseded={superseded}
-				/>
-			);
-		case "tool-call":
-			return <Tool toolName={part.toolName} input={part.input} />;
-		case "tool-result":
-			return <ToolOutput output={part.output} />;
-		default:
-			return null;
+function Step({ part, superseded }: { part: TurnPart; superseded: boolean }) {
+	if (part.type === "reasoning") {
+		return (
+			<Reasoning
+				text={part.text}
+				streaming={part.state === "streaming"}
+				superseded={superseded}
+			/>
+		);
 	}
+	if (isStaticToolUIPart(part)) return <Tool part={part} />;
+	return null;
 }
 
 function ReplyText({ text }: { text: string }) {
@@ -67,45 +54,38 @@ function ReplyText({ text }: { text: string }) {
  * card below it, so the reply survives the task closing.
  */
 export function AgentTurn({
-	turn,
-	thoughtSeconds = turn.usage?.thoughtSeconds,
-	streaming = false,
+	message,
+	streaming,
 }: {
-	turn: Turn;
-	/** Unknown on a turn recorded before thinking time was; null while still thinking. */
-	thoughtSeconds?: number | null;
-	streaming?: boolean;
+	message: SloppyMessage;
+	streaming: boolean;
 }) {
-	const parts = turn.messages.flatMap(messageParts);
-	const [said, steps] = partition(
-		parts,
-		(part): part is TextPart => part.type === "text",
-	);
-	const newest = parts.at(-1);
+	const [said, steps] = partition(message.parts, isTextUIPart);
+	const newest = message.parts.at(-1);
+	const { request, usage } = message.metadata ?? {};
 
 	return (
 		<>
-			{(streaming || turn.request || steps.length > 0) && (
+			{(streaming || request || steps.length > 0) && (
 				<Task
 					streaming={streaming}
-					status={turnStatus(parts)}
-					seconds={turn.usage?.workSeconds}
+					status={turnStatus(message.parts)}
+					seconds={usage?.workSeconds}
 				>
-					{turn.request && (
+					{request && (
 						<Disclosure
 							icon={
 								<BookOpen className="h-3 w-3 shrink-0" aria-hidden="true" />
 							}
 							label="System prompt"
 						>
-							<DisclosureText>{turn.request.system}</DisclosureText>
+							<DisclosureText>{request.system}</DisclosureText>
 						</Disclosure>
 					)}
 					{steps.map((part, index) => (
 						<Step
-							key={`${turn.id}-${index}`}
+							key={`${message.id}-${index}`}
 							part={part}
-							reasoningSeconds={thoughtSeconds}
 							superseded={part !== newest}
 						/>
 					))}
@@ -114,7 +94,7 @@ export function AgentTurn({
 			{said.length > 0 && (
 				<PanelCard>
 					{said.map((part, index) => (
-						<ReplyText key={`${turn.id}-text-${index}`} text={part.text} />
+						<ReplyText key={`${message.id}-text-${index}`} text={part.text} />
 					))}
 				</PanelCard>
 			)}

@@ -30,7 +30,7 @@ export default function ComposerHero() {
 
 	const start = (brief: string) => {
 		enterWorkspace();
-		void send(brief);
+		send(brief);
 	};
 
 	return (

@@ -3,11 +3,12 @@
 import { useMemo } from "react";
 import type { Editor } from "slate";
 import { clearEditor } from "@/lib/canvas/editorOps";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { applyRefineOps } from "@/lib/script/refine/applyOps";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
-import type { AgentToolContext } from "./defineTool";
-import { executeToolCall, type AgentToolCall } from "./registry";
+import type { AgentToolContext } from "./context";
+import { executeToolCall } from "./registry";
 
 export function useAgentTools(editor: Editor) {
 	const { connectorConfig } = useConfig();
@@ -15,10 +16,12 @@ export function useAgentTools(editor: Editor) {
 
 	return useMemo(() => {
 		const ctx: AgentToolContext = {
+			readScript: () => serializeOSMLWithScenes(editor.children),
 			clearScript: () => clearEditor(editor),
 			editScript: (ops) => applyRefineOps(editor, ops, connectorConfig),
 			writeScript: submitPrompt,
 		};
-		return (call: AgentToolCall) => executeToolCall(call, ctx);
+		return (call: { toolName: string; input: unknown }) =>
+			executeToolCall(call, ctx);
 	}, [editor, connectorConfig, submitPrompt]);
 }

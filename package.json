@@ -36,6 +36,7 @@
 		"@ai-sdk/anthropic": "^3.0.111",
 		"@ai-sdk/openai": "^3.0.54",
 		"@ai-sdk/provider": "^3.0.15",
+		"@ai-sdk/react": "^4.0.69",
 		"@cartesia/cartesia-js": "^3.0.0",
 		"@dnd-kit/core": "^6.3.1",
 		"@dnd-kit/sortable": "^10.0.0",

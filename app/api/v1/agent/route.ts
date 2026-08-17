@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { runAgentTurn } from "@/lib/api/agentTurn";
+import { streamAgentTurn } from "@/lib/api/agentTurn";
 import {
 	findConversation,
 	listConversationMessages,
@@ -9,15 +9,13 @@ import {
 	createApiQueryRouteHandler,
 	createApiRouteHandler,
 } from "@/lib/api/route-handler";
-import { createSSEStreamResponse } from "@/lib/api/sse";
+import { badRequest } from "@/lib/api/response";
+import { parseSloppyMessage } from "@/lib/agent/messages";
 import { isLLMModelName } from "@/lib/connectors/llm/openslop/models";
 
 const turnSchema = z.object({
 	projectId: z.uuid(),
-	message: z.string().min(1, { message: "message is required" }),
-	// The canvas as it stands. Sent per request and never persisted, so history
-	// holds messages only and never accumulates stale copies of the document.
-	script: z.string().default(""),
+	message: z.unknown(),
 	language: z.string().optional(),
 	model: z.string().refine(isLLMModelName).optional(),
 });
@@ -25,11 +23,11 @@ const turnSchema = z.object({
 export const POST = createApiRouteHandler({
 	schema: turnSchema,
 	label: "Sloppy turn",
-	handle: async ({ user, input }) =>
-		createSSEStreamResponse(
-			runAgentTurn({ ...input, userId: user.id }),
-			"Sloppy turn",
-		),
+	handle: async ({ user, input }) => {
+		const message = await parseSloppyMessage(input.message);
+		if (!message) return badRequest("message is not a Sloppy message");
+		return streamAgentTurn({ ...input, message, userId: user.id });
+	},
 });
 
 export const GET = createApiQueryRouteHandler({

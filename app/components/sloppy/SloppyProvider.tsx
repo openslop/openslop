@@ -4,19 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Editor } from "slate";
 import {
-	loadAgentTranscript,
-	reportToolResults,
-	sendAgentTurn,
-} from "@/lib/agent/client";
-import {
-	emptyTurn,
-	reduceTurn,
-	toolCallsIn,
-	type LiveTurn,
-} from "@/lib/agent/liveTurn";
-import type { AgentMessageRow } from "@/lib/agent/types";
+	DefaultChatTransport,
+	lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai";
+import { Chat, useChat } from "@ai-sdk/react";
+import { AGENT_PATH, loadAgentTranscript } from "@/lib/agent/client";
+import { hasPendingToolCall } from "@/lib/agent/messages";
+import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
-import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { spokenLanguage } from "@/lib/connectors/llm/plugins/language-prompt";
@@ -24,23 +19,70 @@ import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { toastError } from "@/lib/toastError";
 
 type SloppyControl = {
-	send: (message: string, model?: string) => Promise<void>;
+	send: (message: string, model?: string) => void;
 	stop: () => void;
+	/** The turn is not finished: streaming, or running the tools it asked for. */
 	loading: boolean;
 	/** Only the stream can be stopped; the tool calls it asked for run to the end. */
 	streaming: boolean;
 };
-// Split by update frequency: only the live turn changes per streamed token.
+
+// Split by update frequency: only the transcript changes per streamed token.
 const [SloppyMessagesContext, useSloppyMessages] = createRequiredContext<
-	AgentMessageRow[] | null
+	SloppyMessage[] | null
 >("SloppyProvider");
-const [SloppyLiveContext, useSloppyLive] =
-	createRequiredContext<LiveTurn | null>("SloppyProvider");
 const [SloppyControlContext, useSloppy] =
 	createRequiredContext<SloppyControl>("SloppyProvider");
 
-export { useSloppyMessages, useSloppyLive, useSloppy };
+export { useSloppyMessages, useSloppy };
 
+/**
+ * The chat is built once and outlives a rebound canvas, so a step looks the
+ * executor up when it runs rather than closing over the one it opened with.
+ */
+function useToolRunner(editor: Editor) {
+	const runTool = useAgentTools(editor);
+	const latest = useRef(runTool);
+	useEffect(() => {
+		latest.current = runTool;
+	}, [runTool]);
+
+	return useCallback(
+		(call: { toolName: string; input: unknown }) => latest.current(call),
+		[],
+	);
+}
+
+/**
+ * The stored transcript. Null until it is known, which is what draws the
+ * skeleton. One project per mount: the route keys the editor on its id.
+ */
+function useTranscript(projectId: string): SloppyMessage[] | null {
+	const [restored, setRestored] = useState<SloppyMessage[] | null>(null);
+
+	useEffect(() => {
+		let current = true;
+		loadAgentTranscript(projectId)
+			.then((messages) => {
+				if (current) setRestored(messages);
+			})
+			.catch((error) => {
+				toastError(error, "Could not load Sloppy");
+				if (current) setRestored([]);
+			});
+		return () => {
+			current = false;
+		};
+	}, [projectId]);
+
+	return restored;
+}
+
+/**
+ * The ReAct loop. A step ends at a tool call, the editor runs it against the
+ * canvas, and the result goes straight back as the next step, until the model
+ * answers with text instead of another call.
+ */
 export function SloppyProvider({
 	editor,
 	children,
@@ -50,93 +92,77 @@ export function SloppyProvider({
 }) {
 	const { projectId } = useConfig();
 	const store = useProjectStoreHandle();
-	const runTool = useAgentTools(editor);
+	const runTool = useToolRunner(editor);
+	const restored = useTranscript(projectId);
 
-	const [messages, setMessages] = useState<AgentMessageRow[] | null>(null);
-	const [live, setLive] = useState<LiveTurn | null>(null);
-	const [streaming, setStreaming] = useState(false);
-	const inFlight = useRef<AbortController | null>(null);
-	const loading = live !== null;
-
-	const stop = useCallback(() => inFlight.current?.abort(), []);
-
-	useEffect(() => {
-		let current = true;
-		loadAgentTranscript(projectId)
-			.then((rows) => {
-				if (current) setMessages(rows);
-			})
-			.catch((error) => {
-				toastError(error, "Could not load Sloppy");
-				if (current) setMessages([]);
-			});
-		return () => {
-			current = false;
-		};
-	}, [projectId]);
-
-	const send = useCallback(
-		async (message: string, model?: string) => {
-			if (inFlight.current) return;
-			const controller = new AbortController();
-			inFlight.current = controller;
-			let turn = emptyTurn(message);
-			setLive(turn);
-			setStreaming(true);
-
-			try {
-				const stream = sendAgentTurn(
-					{
-						projectId,
-						message,
-						script: serializeOSMLWithScenes(editor.children),
-						model,
-						language: spokenLanguage(store.getState().metadata, ""),
-					},
-					controller.signal,
+	const chat = useMemo(() => {
+		const chat: Chat<SloppyMessage> = new Chat({
+			messageMetadataSchema: sloppyMetadataSchema,
+			transport: new DefaultChatTransport<SloppyMessage>({
+				api: AGENT_PATH,
+				// Only the newest message travels; the server reads the rest of the
+				// turn from the conversation it already stores.
+				prepareSendMessagesRequest: ({ messages, body }) => ({
+					body: { ...body, projectId, message: messages.at(-1) },
+				}),
+			}),
+			sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+			onToolCall: async ({ toolCall }) => {
+				const outcome = await runTool(toolCall);
+				const call = {
+					tool: toolCall.toolName,
+					toolCallId: toolCall.toolCallId,
+				};
+				chat.addToolOutput(
+					outcome.ok
+						? { ...call, output: outcome.output }
+						: { ...call, state: "output-error", errorText: outcome.errorText },
 				);
-				for await (const part of stream) {
-					if (part.type === "error") throw new Error(part.message);
-					turn = reduceTurn(turn, part);
-					setLive(turn);
-				}
-				setStreaming(false);
+			},
+			onError: (error) => toastError(error, "Sloppy could not finish that"),
+		});
+		return chat;
+	}, [projectId, runTool]);
 
-				const results = await Promise.all(toolCallsIn(turn).map(runTool));
-				if (results.length > 0) {
-					await reportToolResults(projectId, [
-						{ role: "tool", content: results },
-					]);
-				}
-			} catch (error) {
-				// Stopping tears the request down; that is the outcome asked for.
-				if (!controller.signal.aborted) {
-					toastError(error, "Sloppy could not finish that");
-				}
-			} finally {
-				setStreaming(false);
-				// Read before either setState, so the live turn and the rows that
-				// replace it swap in one commit rather than blinking out between them.
-				const rows = await loadAgentTranscript(projectId).catch((error) => {
-					toastError(error, "Sloppy finished, but the transcript did not load");
-					return null;
-				});
-				setLive(null);
-				if (rows) setMessages(rows);
-				inFlight.current = null;
-			}
-		},
-		[projectId, editor, store, runTool],
-	);
+	// A turn is one message that grows a part at a time, so an unthrottled chat
+	// re-renders the whole panel per streamed token.
+	const { messages, sendMessage, stop, status } = useChat({
+		chat,
+		throttle: 50,
+	});
 
+	const streaming = status === "submitted" || status === "streaming";
+	const working = streaming || hasPendingToolCall(messages);
 	const control = useMemo<SloppyControl>(
-		() => ({ send, stop, loading, streaming }),
-		[send, stop, loading, streaming],
+		() => ({
+			send: (message, model) =>
+				void sendMessage(
+					{ text: message },
+					{
+						body: {
+							model,
+							language: spokenLanguage(store.getState().metadata, ""),
+						},
+					},
+				),
+			stop,
+			loading: working,
+			streaming,
+		}),
+		[sendMessage, stop, streaming, working, store],
 	);
+
+	// History sits in front of the chat's own turns rather than being written
+	// into it, so a brief sent while it was still loading keeps its place.
+	const transcript = useMemo(
+		() => (restored ? [...restored, ...messages] : null),
+		[restored, messages],
+	);
+
 	return (
 		<SloppyControlContext value={control}>
-			<SloppyMessagesContext value={messages}>
-				<SloppyLiveContext value={live}>{children}</SloppyLiveContext>
+			<SloppyMessagesContext value={transcript}>
+				{children}
 			</SloppyMessagesContext>
 		</SloppyControlContext>
 	);

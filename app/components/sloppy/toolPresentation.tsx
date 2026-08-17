@@ -1,6 +1,7 @@
 "use client";
 
-import { Film, Pencil, Wand2, type IconComponent } from "@/components/ui/icon";
+import { Eye, Film, Pencil, type IconComponent } from "@/components/ui/icon";
+import type { AgentToolName } from "@/lib/agent/tools/specs";
 
 type ToolPresentation = {
 	icon: IconComponent;
@@ -18,7 +19,12 @@ function opCount(input: unknown): number {
 	return Array.isArray(ops) ? ops.length : 0;
 }
 
-const PRESENTATION: Record<string, ToolPresentation> = {
+/** Keyed on the tool set, so a tool the model can call but nothing can name is a compile error. */
+const PRESENTATION: Record<AgentToolName, ToolPresentation> = {
+	read_script: {
+		icon: Eye,
+		summarize: () => "The script on the canvas",
+	},
 	edit_script: {
 		icon: Pencil,
 		summarize: (input) => {
@@ -34,11 +40,6 @@ const PRESENTATION: Record<string, ToolPresentation> = {
 	},
 };
 
-export function toolPresentation(toolName: string): ToolPresentation {
-	return (
-		PRESENTATION[toolName] ?? {
-			icon: Wand2,
-			summarize: () => toolName.replaceAll("_", " "),
-		}
-	);
+export function toolPresentation(toolName: AgentToolName): ToolPresentation {
+	return PRESENTATION[toolName];
 }

@@ -4,19 +4,13 @@ import { Sparkles } from "@/components/ui/icon";
 import { Disclosure, DisclosureText } from "@/components/ui/disclosure";
 import { reasoningOpen } from "./turnDisplay";
 
-/** No duration to report reads as done, not as still running. */
-function reasoningLabel(seconds: number | null | undefined): string {
-	if (seconds === undefined) return "Thought";
-	return seconds === null ? "Thinking…" : `Thought for ${seconds}s`;
-}
-
 export function Reasoning({
 	text,
-	seconds,
+	streaming,
 	superseded,
 }: {
 	text: string;
-	seconds: number | null | undefined;
+	streaming: boolean;
 	superseded: boolean;
 }) {
 	const open = reasoningOpen(superseded, text);
@@ -27,8 +21,8 @@ export function Reasoning({
 			key={String(open)}
 			defaultOpen={open}
 			icon={<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />}
-			label={reasoningLabel(seconds)}
-			pending={seconds === null}
+			label={streaming ? "Slopping…" : "Done slopping"}
+			pending={streaming}
 		>
 			<DisclosureText>{text}</DisclosureText>
 		</Disclosure>

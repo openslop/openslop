@@ -19,19 +19,23 @@ create trigger conversations_set_updated_at
   before update on conversations
   for each row execute function public.set_updated_at();
 
+-- One row per message the panel renders. A turn is a single assistant message
+-- that grows a part at a time, across as many tool steps as the loop takes, so
+-- a step rewrites the row it is extending rather than adding another.
 create table if not exists messages (
-  id                uuid primary key default gen_random_uuid(),
   conversation_id   uuid not null references conversations(id) on delete cascade,
+  -- The message's own id, which the editor and the server agree on before the
+  -- row exists: it is streamed with the message that a later step extends.
+  message_id        text not null,
+  primary key (conversation_id, message_id),
   -- Globally increasing, so ordering never depends on a client-computed value
-  -- and concurrent appends cannot collide.
+  -- and concurrent appends cannot collide. A rewrite keeps the seq it was given.
   seq               bigint generated always as identity,
-  role              text not null check (role in ('user', 'assistant', 'tool')),
-  -- The turn exactly as the model layer takes it, so a vendor that signs its
-  -- thinking blocks gets them back byte for byte.
+  role              text not null check (role in ('user', 'assistant', 'system')),
+  -- Every part of the turn, in the shape the panel renders and the SDK converts
+  -- for a vendor, so one that signs its thinking blocks gets them back byte for
+  -- byte. What the turn cost and what produced it ride on the message itself.
   message           jsonb not null,
-  -- The resolved system prompt and model that produced an assistant turn.
-  request           jsonb,
-  usage             jsonb,
   created_at        timestamptz not null default now()
 );
 
@@ -64,6 +68,21 @@ create policy "messages_insert_own" on messages
       where c.id = messages.conversation_id and c.user_id = auth.uid()
     )
   );
+-- Every step after the first rewrites its turn's row, which `on conflict do
+-- update` cannot do without an update policy of its own.
+create policy "messages_update_own" on messages
+  for update using (
+    exists (
+      select 1 from conversations c
+      where c.id = messages.conversation_id and c.user_id = auth.uid()
+    )
+  ) with check (
+    exists (
+      select 1 from conversations c
+      where c.id = messages.conversation_id and c.user_id = auth.uid()
+    )
+  );
+
 create policy "messages_delete_own" on messages
   for delete using (
     exists (

@@ -1,26 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
+import type {
+	LanguageModelV3CallOptions,
+	LanguageModelV3StreamPart,
+} from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
-import type { AgentStreamPart } from "@/lib/agent/types";
 import type { LLMModelName } from "@/lib/connectors/llm/openslop/models";
+import type { SloppyMessage } from "@/lib/agent/types";
 
 const { conversations, provider } = vi.hoisted(() => ({
 	conversations: {
 		findOrCreateConversation: vi.fn(
 			async (_projectId: string, _userId: string) => "conv-1",
 		),
-		listConversationMessages: vi.fn(async (_id: string) => []),
-		appendConversationMessages: vi.fn(
-			async (
-				_id: string,
-				_messages: unknown[],
-				_extras?: {
-					request?: { system: string; model: string };
-					usage?: unknown;
-				},
-			) => [],
+		listConversationMessages: vi.fn(
+			async (_id: string): Promise<unknown[]> => [],
 		),
-		abandonedToolResults: vi.fn(() => []),
+		saveConversationMessage: vi.fn(
+			async (_id: string, _message: unknown) => {},
+		),
 	},
 	provider: { agentModel: vi.fn() },
 }));
@@ -28,8 +25,7 @@ const { conversations, provider } = vi.hoisted(() => ({
 vi.mock("../conversations", () => conversations);
 vi.mock("../providers", () => ({ getLLMProvider: () => provider }));
 
-import { runAgentTurn } from "../agentTurn";
-import type { ModelMessage } from "ai";
+import { streamAgentTurn } from "../agentTurn";
 
 const USAGE = {
 	inputTokens: { total: 12, noCache: 12, cacheRead: 0, cacheWrite: 0 },
@@ -42,109 +38,118 @@ const finish: LanguageModelV3StreamPart = {
 	usage: USAGE,
 };
 
+const TEXT_TURN: LanguageModelV3StreamPart[] = [
+	{ type: "stream-start", warnings: [] },
+	{ type: "text-start", id: "t0" },
+	{ type: "text-delta", id: "t0", delta: "on it" },
+	{ type: "text-end", id: "t0" },
+	finish,
+];
+
+const asked = (text: string): SloppyMessage => ({
+	id: `m-user-${text}`,
+	role: "user",
+	parts: [{ type: "text", text }],
+});
+
+// The SDK frames its own stream, and closes it with a [DONE] that is not JSON.
+async function chunksOf(response: Response) {
+	const body = await response.text();
+	return body
+		.split("\n\n")
+		.flatMap((frame) => (frame.startsWith("data: ") ? [frame.slice(6)] : []))
+		.filter((data) => data !== "[DONE]")
+		.map(
+			(data) => JSON.parse(data) as { type: string } & Record<string, unknown>,
+		);
+}
+
+let calls: LanguageModelV3CallOptions[] = [];
+
 async function runTurn(
 	chunks: LanguageModelV3StreamPart[],
-	model?: LLMModelName,
+	options: {
+		message?: SloppyMessage;
+		model?: LLMModelName;
+		history?: SloppyMessage[];
+	} = {},
 ) {
+	if (options.history) {
+		conversations.listConversationMessages.mockResolvedValue(options.history);
+	}
 	provider.agentModel.mockReturnValue({
 		model: new MockLanguageModelV3({
-			doStream: async () => ({
-				stream: simulateReadableStream({ chunks, chunkDelayInMs: 0 }),
-			}),
+			doStream: async (call) => {
+				calls.push(call);
+				return {
+					stream: simulateReadableStream({ chunks, chunkDelayInMs: 0 }),
+				};
+			},
 		}),
 		modelId: "test-model",
 		providerOptions: {},
 	});
 
-	const parts: AgentStreamPart[] = [];
-	for await (const part of runAgentTurn({
+	const response = await streamAgentTurn({
 		projectId: "p1",
 		userId: "u1",
-		message: "make it shorter",
-		script: "<narration>hi</narration>",
-		model,
-	})) {
-		parts.push(part);
-	}
-	return parts;
+		message: options.message ?? asked("make it shorter"),
+		model: options.model,
+	});
+	return chunksOf(response);
 }
 
-const appended = (call: number) =>
-	conversations.appendConversationMessages.mock.calls[
-		call
-	][1] as ModelMessage[];
+const saved = (call: number) =>
+	conversations.saveConversationMessage.mock.calls[call][1] as SloppyMessage;
 
-const extrasOf = (call: number) =>
-	conversations.appendConversationMessages.mock.calls[call][2];
+beforeEach(() => {
+	vi.clearAllMocks();
+	calls = [];
+	conversations.listConversationMessages.mockResolvedValue([]);
+});
 
-describe("runAgentTurn", () => {
-	beforeEach(() => vi.clearAllMocks());
+describe("streamAgentTurn", () => {
+	it("records what came in before asking the model", async () => {
+		await runTurn(TEXT_TURN);
 
-	it("records the user's message before asking the model", async () => {
-		await runTurn([
-			{ type: "stream-start", warnings: [] },
-			{ type: "text-start", id: "t0" },
-			{ type: "text-delta", id: "t0", delta: "on it" },
-			{ type: "text-end", id: "t0" },
-			finish,
-		]);
-
-		expect(appended(0)).toEqual([{ role: "user", content: "make it shorter" }]);
+		expect(saved(0)).toMatchObject({
+			role: "user",
+			parts: [{ type: "text", text: "make it shorter" }],
+		});
 	});
 
-	it("streams thoughts and text, then finishes with usage", async () => {
-		const parts = await runTurn([
-			{ type: "stream-start", warnings: [] },
-			{ type: "reasoning-start", id: "r0" },
-			{ type: "reasoning-delta", id: "r0", delta: "weighing" },
-			{ type: "reasoning-end", id: "r0" },
-			{ type: "text-start", id: "t0" },
-			{ type: "text-delta", id: "t0", delta: "on it" },
-			{ type: "text-end", id: "t0" },
-			finish,
-		]);
+	it("streams the reply and finishes with what the turn cost", async () => {
+		const chunks = await runTurn(TEXT_TURN);
 
-		expect(parts).toMatchObject([
-			{ type: "request", request: { model: "test-model" } },
-			{ type: "reasoning-delta", text: "weighing" },
-			{ type: "reasoning-end", seconds: expect.any(Number) },
-			{ type: "text-delta", text: "on it" },
-			{ type: "finish", usage: { inputTokens: 12, outputTokens: 7 } },
-		]);
-	});
-
-	it("records the thinking time it streamed, so a stored turn keeps its label", async () => {
-		const parts = await runTurn([
-			{ type: "stream-start", warnings: [] },
-			{ type: "reasoning-start", id: "r0" },
-			{ type: "reasoning-delta", id: "r0", delta: "weighing" },
-			{ type: "reasoning-end", id: "r0" },
-			{ type: "text-start", id: "t0" },
-			{ type: "text-delta", id: "t0", delta: "on it" },
-			{ type: "text-end", id: "t0" },
-			finish,
-		]);
-
-		const [seconds] = parts.flatMap((part) =>
-			part.type === "reasoning-end" ? [part.seconds] : [],
+		expect(chunks).toContainEqual(
+			expect.objectContaining({ type: "text-delta", delta: "on it" }),
 		);
-		expect(extrasOf(1)).toMatchObject({ usage: { thoughtSeconds: seconds } });
+		expect(chunks.at(-1)).toMatchObject({
+			type: "finish",
+			messageMetadata: { usage: { inputTokens: 12, outputTokens: 7 } },
+		});
 	});
 
-	it("leaves thinking time unset when the model reports none", async () => {
-		await runTurn([
-			{ type: "stream-start", warnings: [] },
-			{ type: "text-start", id: "t0" },
-			{ type: "text-delta", id: "t0", delta: "on it" },
-			{ type: "text-end", id: "t0" },
-			finish,
-		]);
+	it("names the system prompt and model that produced the turn", async () => {
+		const chunks = await runTurn(TEXT_TURN);
 
-		expect(extrasOf(1)).toMatchObject({ usage: { thoughtSeconds: undefined } });
+		expect(chunks[0]).toMatchObject({
+			type: "start",
+			messageMetadata: { request: { model: "test-model" } },
+		});
 	});
 
-	it("surfaces a tool call and persists the turn that produced it", async () => {
-		const parts = await runTurn([
+	it("stores the assistant message the step produced", async () => {
+		await runTurn(TEXT_TURN);
+
+		expect(saved(1)).toMatchObject({
+			role: "assistant",
+			parts: [{ type: "step-start" }, { type: "text", text: "on it" }],
+		});
+	});
+
+	it("surfaces a tool call for the editor to run", async () => {
+		const chunks = await runTurn([
 			{ type: "stream-start", warnings: [] },
 			{
 				type: "tool-call",
@@ -155,56 +160,171 @@ describe("runAgentTurn", () => {
 			{ ...finish, finishReason: { unified: "tool-calls", raw: "tool_use" } },
 		]);
 
-		expect(parts).toContainEqual(
+		expect(chunks).toContainEqual(
 			expect.objectContaining({
-				type: "tool-call",
+				type: "tool-input-available",
 				toolCallId: "call-1",
 				toolName: "edit_script",
 				input: { ops: [{ op: "remove", id: "n1" }] },
 			}),
 		);
+	});
+});
 
-		expect(appended(1)[0]).toMatchObject({
-			role: "assistant",
-			content: [{ type: "tool-call", toolName: "edit_script" }],
-		});
-		const extras = extrasOf(1);
-		expect(extras?.request?.model).toBe("test-model");
-		expect(extras?.request?.system).toContain("<narration>hi</narration>");
-		expect(extras?.usage).toMatchObject({ inputTokens: 12, outputTokens: 7 });
+describe("a turn that takes more than one step", () => {
+	const reading = (toolCallId: string, output: string) =>
+		({
+			type: "tool-read_script",
+			toolCallId,
+			state: "output-available",
+			input: {},
+			output,
+		}) as const;
+
+	/** What the editor sends back: the same message, carrying no metadata of its own. */
+	const answered = (...parts: SloppyMessage["parts"]): SloppyMessage => ({
+		id: "m-agent",
+		role: "assistant",
+		parts,
 	});
 
-	it("reports a provider error as a part rather than throwing", async () => {
-		const parts = await runTurn([
-			{ type: "stream-start", warnings: [] },
-			{ type: "error", error: new Error("model unavailable") },
-			finish,
-		]);
+	/** What the server stored for the steps before this one. */
+	const recorded = (
+		metadata: SloppyMessage["metadata"],
+		...parts: SloppyMessage["parts"]
+	): SloppyMessage[] => [
+		asked("make it shorter"),
+		{ id: "m-agent", role: "assistant", metadata, parts },
+	];
 
-		expect(parts).toContainEqual({
-			type: "error",
-			message: "model unavailable",
+	const spent = {
+		usage: { inputTokens: 100, outputTokens: 50, workSeconds: 3 },
+	};
+
+	it("adds a step's cost to what the turn already spent", async () => {
+		const chunks = await runTurn(TEXT_TURN, {
+			message: answered(reading("call-1", "the script")),
+			history: recorded(spent, reading("call-1", "the script")),
 		});
+
+		expect(chunks.at(-1)).toMatchObject({
+			messageMetadata: { usage: { inputTokens: 112, outputTokens: 57 } },
+		});
+	});
+
+	it("keeps the model and system prompt the turn started on", async () => {
+		await runTurn(TEXT_TURN, {
+			message: answered(reading("call-1", "the script")),
+			history: recorded(
+				{ request: { system: "the prompt it opened with", model: "gpt-9" } },
+				reading("call-1", "the script"),
+			),
+			model: "Slop LLM v1",
+		});
+
+		expect(provider.agentModel).toHaveBeenCalledWith("gpt-9");
+		expect(calls[0].prompt[0]).toMatchObject({
+			role: "system",
+			content: "the prompt it opened with",
+		});
+	});
+
+	it("does not take what a turn cost from the editor", async () => {
+		const claimed: SloppyMessage = {
+			...answered(reading("call-1", "the script")),
+			metadata: { usage: { inputTokens: 9999, outputTokens: 9999 } },
+		};
+		const chunks = await runTurn(TEXT_TURN, {
+			message: claimed,
+			history: recorded(spent, reading("call-1", "the script")),
+		});
+
+		expect(chunks.at(-1)).toMatchObject({
+			messageMetadata: { usage: { inputTokens: 112, outputTokens: 57 } },
+		});
+	});
+
+	it("takes back a tool that replaces the canvas once the turn has used it", async () => {
+		await runTurn(TEXT_TURN, {
+			message: answered({
+				type: "tool-write_script",
+				toolCallId: "call-1",
+				state: "output-available",
+				input: { brief: "a cat on the moon" },
+				output: "Wrote a new script onto the canvas.",
+			}),
+		});
+
+		const offered = calls[0].tools?.map((tool) => tool.name);
+		expect(offered).toEqual(["read_script", "edit_script"]);
+	});
+
+	it("keeps offering a tool a turn may call again", async () => {
+		await runTurn(TEXT_TURN, {
+			message: answered(reading("call-1", "the script")),
+		});
+
+		const offered = calls[0].tools?.map((tool) => tool.name);
+		expect(offered).toContain("read_script");
+		expect(offered).toContain("write_script");
+	});
+
+	it("keeps offering the tools while the turn is within its budget", async () => {
+		await runTurn(TEXT_TURN, {
+			message: answered(reading("call-1", "the script")),
+		});
+
+		expect(calls[0].toolChoice).toEqual({ type: "auto" });
+	});
+
+	it("withdraws the tools once the turn has spent its budget", async () => {
+		await runTurn(TEXT_TURN, {
+			message: answered(
+				...Array.from({ length: 12 }, (_part, index) =>
+					reading(`call-${index}`, "the script"),
+				),
+			),
+		});
+
+		expect(calls[0].toolChoice).toEqual({ type: "none" });
+	});
+
+	it("keeps every reading the turn in flight has taken", async () => {
+		await runTurn(TEXT_TURN, {
+			message: answered(
+				{ type: "step-start" },
+				reading("call-1", "the script as it was"),
+				{ type: "step-start" },
+				reading("call-2", "the script as it stands"),
+			),
+		});
+
+		const sent = JSON.stringify(calls[0].prompt);
+		expect(sent).toContain("the script as it was");
+		expect(sent).toContain("the script as it stands");
+	});
+
+	it("drops the readings of turns that have already finished", async () => {
+		await runTurn(TEXT_TURN, {
+			message: asked("now make it longer"),
+			history: recorded(spent, reading("call-1", "a script from last turn")),
+		});
+
+		expect(JSON.stringify(calls[0].prompt)).not.toContain(
+			"a script from last turn",
+		);
 	});
 });
 
 describe("model selection", () => {
-	const textTurn: LanguageModelV3StreamPart[] = [
-		{ type: "stream-start", warnings: [] },
-		{ type: "text-start", id: "t0" },
-		{ type: "text-delta", id: "t0", delta: "on it" },
-		{ type: "text-end", id: "t0" },
-		finish,
-	];
-
 	it("runs the picked model, resolved to what the provider takes", async () => {
-		await runTurn(textTurn, "Slop LLM v1");
+		await runTurn(TEXT_TURN, { model: "Slop LLM v1" });
 
 		expect(provider.agentModel).toHaveBeenCalledWith("claude-opus-5");
 	});
 
 	it("leaves the provider on its own default when nothing was picked", async () => {
-		await runTurn(textTurn);
+		await runTurn(TEXT_TURN);
 
 		expect(provider.agentModel).toHaveBeenCalledWith(undefined);
 	});

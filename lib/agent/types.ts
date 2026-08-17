@@ -1,74 +1,29 @@
-import type { ModelMessage, ToolCallPart, ToolResultPart } from "ai";
+import { z } from "zod";
+import type { InferUITools, UIDataTypes, UIMessage } from "ai";
+import { SLOPPY_TOOLS } from "./tools/specs";
 
-export type AgentUsage = {
-	inputTokens: number;
-	outputTokens: number;
-	/** Absent on turns recorded before the model layer reported thinking time. */
-	thoughtSeconds?: number;
-	/** The model call end to end. Excludes the canvas edit, which the client runs. */
-	workSeconds?: number;
-};
+const agentUsageSchema = z.object({
+	inputTokens: z.number(),
+	outputTokens: z.number(),
+	/** Every step of the turn, end to end. Excludes the edits, which the client runs. */
+	workSeconds: z.number().optional(),
+});
+export type AgentUsage = z.infer<typeof agentUsageSchema>;
 
-export type AgentRequestRecord = { system: string; model: string };
+const agentRequestSchema = z.object({
+	system: z.string(),
+	model: z.string(),
+});
+export type AgentRequestRecord = z.infer<typeof agentRequestSchema>;
 
-export type AgentMessageRow = {
-	id: string;
-	message: ModelMessage;
-	request: AgentRequestRecord | null;
-	usage: AgentUsage | null;
-};
+/** Carried on the message, so one turn stays one row however many steps it took. */
+export const sloppyMetadataSchema = z.object({
+	request: agentRequestSchema.optional(),
+	usage: agentUsageSchema.optional(),
+});
+export type SloppyMetadata = z.infer<typeof sloppyMetadataSchema>;
 
-/**
- * The panel renders a streaming turn and the row it becomes with one component,
- * so the stream carries every fact the stored row will hold.
- */
-export type AgentStreamPart =
-	| { type: "request"; request: AgentRequestRecord }
-	| { type: "text-delta"; text: string }
-	| { type: "reasoning-delta"; text: string }
-	| { type: "reasoning-end"; seconds: number }
-	| { type: "tool-call"; toolCallId: string; toolName: string; input: unknown }
-	| { type: "error"; message: string }
-	| { type: "finish"; usage: AgentUsage };
+export type SloppyTools = InferUITools<typeof SLOPPY_TOOLS>;
 
-/**
- * Every part a message can carry. The SDK types content per role rather than as
- * one union, so this is derived from all of them and cannot miss a new part.
- */
-export type MessagePart = Exclude<ModelMessage["content"], string>[number];
-
-/** Content is a bare string on simple turns; the panel only ever renders parts. */
-export function messageParts(message: ModelMessage): MessagePart[] {
-	if (typeof message.content === "string") {
-		return message.content ? [{ type: "text", text: message.content }] : [];
-	}
-	return message.content;
-}
-
-export function toolResultText(output: ToolResultPart["output"]): string {
-	return "value" in output && typeof output.value === "string"
-		? output.value
-		: JSON.stringify(output);
-}
-
-export function isToolFailure(output: ToolResultPart["output"]): boolean {
-	return output.type.startsWith("error");
-}
-
-/**
- * Tool calls with no result after them. A closed tab leaves one behind, and a
- * vendor rejects a history that contains an unanswered call.
- */
-export function pendingToolCalls(messages: ModelMessage[]): ToolCallPart[] {
-	const settled = new Set<string>();
-	const calls: ToolCallPart[] = [];
-
-	for (const message of messages) {
-		for (const part of messageParts(message)) {
-			if (part.type === "tool-result") settled.add(part.toolCallId);
-			if (part.type === "tool-call") calls.push(part);
-		}
-	}
-
-	return calls.filter((call) => !settled.has(call.toolCallId));
-}
+/** The transcript's message, in the one shape both the panel and storage take. */
+export type SloppyMessage = UIMessage<SloppyMetadata, UIDataTypes, SloppyTools>;

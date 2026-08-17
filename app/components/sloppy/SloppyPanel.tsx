@@ -1,78 +1,91 @@
 "use client";
 
-import { memo, useEffect, useRef } from "react";
-import { foldTurns } from "@/lib/agent/turns";
-import { AgentTurn, UserMessage } from "./SloppyMessage";
-import { useSloppyLive, useSloppyMessages } from "./SloppyProvider";
+import { memo, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import type { SloppyMessage } from "@/lib/agent/types";
+import { AgentTurn, PendingTurn, UserMessage } from "./SloppyMessage";
+import { useSloppy, useSloppyMessages } from "./SloppyProvider";
 import { TranscriptSkeleton } from "./TranscriptSkeleton";
 
 const EMPTY_HINT = "Ask Sloppy to change the script however you want.";
 
-/** Reads only the messages context, so a streaming turn never re-renders history. */
-const Transcript = memo(function Transcript() {
-	const messages = useSloppyMessages();
-	if (!messages) return <TranscriptSkeleton />;
+/** A settled message never changes, so only the one being streamed re-renders. */
+const Row = memo(function Row({
+	message,
+	streaming,
+	entering,
+}: {
+	message: SloppyMessage;
+	streaming: boolean;
+	entering: boolean;
+}) {
 	return (
-		<>
-			{foldTurns(messages).map((turn) =>
-				turn.role === "user" ? (
-					<UserMessage key={turn.id} message={turn.messages[0]} />
-				) : (
-					<AgentTurn key={turn.id} turn={turn} />
-				),
+		<li className={cn("flex flex-col gap-2", entering && "animate-fadeInUp")}>
+			<span className="sr-only">
+				{message.role === "user" ? "You said" : "Sloppy said"}
+			</span>
+			{message.role === "user" ? (
+				<UserMessage message={message} />
+			) : (
+				<AgentTurn message={message} streaming={streaming} />
 			)}
-		</>
+		</li>
 	);
 });
 
-function LiveTurn() {
-	const live = useSloppyLive();
-	if (!live) return null;
+function Transcript({
+	messages,
+	working,
+}: {
+	messages: SloppyMessage[];
+	working: boolean;
+}) {
+	const [restored] = useState(messages.length);
 
-	// Only the live turn animates in: stored ones would all replay on load.
+	if (messages.length === 0) {
+		return (
+			<p className="px-1 text-label text-muted-foreground">{EMPTY_HINT}</p>
+		);
+	}
+
 	return (
-		<div className="flex animate-fadeInUp flex-col gap-2">
-			<UserMessage message={{ role: "user", content: live.user }} />
-			<AgentTurn
-				turn={{
-					id: "live",
-					role: "assistant",
-					messages: [{ role: "assistant", content: live.parts }],
-					request: live.request,
-					usage: null,
-				}}
-				thoughtSeconds={live.thoughtSeconds}
-				streaming
-			/>
-		</div>
+		<ol role="log" className="flex flex-col gap-3">
+			{messages.map((message, index) => (
+				<Row
+					key={message.id}
+					message={message}
+					streaming={working && index === messages.length - 1}
+					entering={index >= restored}
+				/>
+			))}
+			{working && messages.at(-1)?.role === "user" && (
+				<li>
+					<PendingTurn />
+				</li>
+			)}
+		</ol>
 	);
 }
 
-function EmptyHint() {
-	const messages = useSloppyMessages();
-	const live = useSloppyLive();
-	if (!messages || messages.length > 0 || live) return null;
-	return <p className="px-1 text-label text-muted-foreground">{EMPTY_HINT}</p>;
-}
-
 export function SloppyPanel() {
-	const live = useSloppyLive();
 	const messages = useSloppyMessages();
+	const { loading } = useSloppy();
 	const endRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		endRef.current?.scrollIntoView({ block: "end" });
-	}, [live, messages]);
+	}, [messages]);
 
 	return (
 		<div
-			aria-live="polite"
-			aria-busy={messages === null}
+			aria-busy={messages === null || loading}
 			className="flex flex-col gap-3"
 		>
-			<EmptyHint />
-			<Transcript />
-			<LiveTurn />
+			{messages === null ? (
+				<TranscriptSkeleton />
+			) : (
+				<Transcript messages={messages} working={loading} />
+			)}
 			<div ref={endRef} />
 		</div>
 	);
