@@ -43,6 +43,7 @@ import {
 	type VideoLength,
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { cn } from "@/lib/utils";
 import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
@@ -199,8 +200,14 @@ export default function ComposerCopilot({
 		dialogs,
 	} = useAssetEditDialogs();
 
-	const { openPicker, uploading, uploadingCount, inputElement } =
-		useImageUpload({ multiple: true, onUpload: addReferenceImages });
+	const {
+		openPicker,
+		uploading,
+		uploadingCount,
+		inputElement,
+		dropZoneProps,
+		isDraggingOver,
+	} = useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const hasText = value.trim().length > 0;
 	const pasting = intent === "script";
 	const activeTemplate = pasting ? undefined : template;
@@ -216,7 +223,13 @@ export default function ComposerCopilot({
 	};
 
 	return (
-		<div className="w-full rounded-xl border border-accent/30 bg-card transition-shadow focus-within:shadow-elevation-5">
+		<div
+			{...dropZoneProps}
+			className={cn(
+				"relative w-full rounded-xl border bg-card transition-shadow focus-within:shadow-elevation-5",
+				isDraggingOver ? "border-accent" : "border-accent/30",
+			)}
+		>
 			<div className="px-4 py-3">
 				<div className="mb-3 flex justify-center">
 					<SegmentedControl
@@ -319,6 +332,11 @@ export default function ComposerCopilot({
 					/>
 				</div>
 			</div>
+			{isDraggingOver && (
+				<div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-card/90 font-body text-body text-accent">
+					Drop images to add them as references
+				</div>
+			)}
 			{dialogs}
 		</div>
 	);
