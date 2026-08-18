@@ -200,4 +200,17 @@ describe("serialize round trip", () => {
 		);
 		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
+
+	it("preserves multi-line and multi-space attribute values", () => {
+		const videoPrompt = "slow cinematic pan\nthen  a  hard  cut";
+		const scene = reload(
+			wrap(
+				createCanvasNode("animated_image", DEFAULT_CONNECTOR_REGISTRY, {
+					id: "e1",
+					attrs: { videoPrompt },
+				}),
+			),
+		);
+		expect(scene.children[0].customAttributes?.videoPrompt).toBe(videoPrompt);
+	});
 });

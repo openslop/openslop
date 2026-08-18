@@ -32,4 +32,34 @@ describe("parseXmlTag", () => {
 			attributes: { tag: "hero" },
 		});
 	});
+
+	it("keeps runs of whitespace inside an attribute value", () => {
+		expect(parseXmlTag('image prompt="a  wide   shot"')).toEqual({
+			tag: "image",
+			attributes: { prompt: "a  wide   shot" },
+		});
+	});
+
+	it("keeps newlines inside an attribute value", () => {
+		expect(
+			parseXmlTag('animated_image videoPrompt="slow pan\nthen zoom"'),
+		).toEqual({
+			tag: "animated_image",
+			attributes: { videoPrompt: "slow pan\nthen zoom" },
+		});
+	});
+
+	it("parses a tag whose name is followed by a newline", () => {
+		expect(parseXmlTag('image\nprompt="a cat"')).toEqual({
+			tag: "image",
+			attributes: { prompt: "a cat" },
+		});
+	});
+
+	it("strips a trailing slash separated from the tag name", () => {
+		expect(parseXmlTag('image prompt="a cat" /')).toEqual({
+			tag: "image",
+			attributes: { prompt: "a cat" },
+		});
+	});
 });
