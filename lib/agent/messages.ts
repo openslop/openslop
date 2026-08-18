@@ -25,10 +25,16 @@ export function toolCallsMade(messages: SloppyMessage[]): number {
 	return (trailingAssistant(messages)?.parts ?? []).filter(isToolUIPart).length;
 }
 
-/** A call the editor has been handed and not yet answered. */
-export function hasPendingToolCall(messages: SloppyMessage[]): boolean {
+/** A call the editor has been handed and not yet answered, of any tool or of `tools`. */
+export function hasPendingToolCall(
+	messages: SloppyMessage[],
+	tools?: ReadonlySet<string>,
+): boolean {
 	return (trailingAssistant(messages)?.parts ?? []).some(
-		(part) => isToolUIPart(part) && part.state === "input-available",
+		(part) =>
+			isToolUIPart(part) &&
+			part.state === "input-available" &&
+			(!tools || tools.has(getToolName(part))),
 	);
 }
 

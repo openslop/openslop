@@ -9,10 +9,10 @@ import { PlayerShimmer } from "./PlayerShimmer";
 
 function VideoPanelBody() {
 	const { layout, ready, playerKey } = useLayout();
-	const { loading: sloppyWorking } = useSloppy();
+	const { writingScript } = useSloppy();
 	const restoreFrameRef = useRef<number | null>(null);
 
-	if (sloppyWorking) {
+	if (writingScript) {
 		return (
 			<PlayerShimmer>
 				<div className="text-label text-muted-foreground">Writing script…</div>

@@ -11,7 +11,7 @@ import { useChat } from "@ai-sdk/react";
 import { AGENT_PATH, loadAgentTranscript } from "@/lib/agent/client";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
-import type { AgentToolName } from "@/lib/agent/tools/specs";
+import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/specs";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -26,6 +26,8 @@ type SloppyControl = {
 	models: string[];
 	/** The turn is not finished: streaming, or running the tools it asked for. */
 	loading: boolean;
+	/** A call that rewrites the canvas is running, so the script is mid-change. */
+	writingScript: boolean;
 	/** Only the stream can be stopped; the tool calls it asked for run to the end. */
 	streaming: boolean;
 };
@@ -117,6 +119,7 @@ export function SloppyProvider({
 
 	const streaming = status === "submitted" || status === "streaming";
 	const working = streaming || hasPendingToolCall(messages);
+	const writingScript = hasPendingToolCall(messages, SCRIPT_TOOLS);
 	const control = useMemo<SloppyControl>(
 		() => ({
 			send: (message) => {
@@ -125,12 +128,21 @@ export function SloppyProvider({
 			},
 			stop,
 			loading: working,
+			writingScript,
 			streaming,
 			model,
 			setModel,
 			models: config.models,
 		}),
-		[sendMessage, stop, streaming, working, model, config.models],
+		[
+			sendMessage,
+			stop,
+			streaming,
+			working,
+			writingScript,
+			model,
+			config.models,
+		],
 	);
 
 	// History sits in front of the chat's own turns rather than being written

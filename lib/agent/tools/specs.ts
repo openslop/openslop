@@ -180,6 +180,12 @@ export const SNAPSHOT_TOOLS = new Set<string>([
 	"read_script" satisfies AgentToolName,
 ]);
 
+/** Calls that rewrite the canvas, so what is rendered from it is mid-change. */
+export const SCRIPT_TOOLS = new Set<string>([
+	"write_script" satisfies AgentToolName,
+	"edit_script" satisfies AgentToolName,
+]);
+
 export type ToolInput<TName extends AgentToolName> = InferUITool<
 	(typeof SLOPPY_TOOLS)[TName]
 >["input"];
