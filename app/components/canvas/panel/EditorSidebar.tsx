@@ -13,6 +13,7 @@ import {
 	TextBox,
 	TextBoxFill,
 } from "@/components/ui/icon";
+import partition from "lodash/partition";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/SloppyComposer";
 import { SloppyPanel } from "@/app/components/sloppy/SloppyPanel";
@@ -59,7 +60,10 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 	},
 };
 
-const PANEL_KEYS = Object.keys(PANELS) as PanelKey[];
+const [PINNED_KEYS, RAIL_KEYS] = partition(
+	Object.keys(PANELS) as PanelKey[],
+	(key) => PANELS[key].pinned,
+);
 
 function RailItem({
 	icon: Icon,
@@ -130,13 +134,13 @@ function EditorSidebarComponent() {
 			>
 				<RailItem icon={Home} label="Home" href="/" />
 				<div className="my-1 h-px w-full bg-border" />
-				{PANEL_KEYS.filter((key) => !PANELS[key].pinned).map((key) => (
+				{RAIL_KEYS.map((key) => (
 					<PanelRailItem key={key} panelKey={key} />
 				))}
 
 				<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
 					<div className="my-1 h-px w-full bg-border" />
-					{PANEL_KEYS.filter((key) => PANELS[key].pinned).map((key) => (
+					{PINNED_KEYS.map((key) => (
 						<PanelRailItem key={key} panelKey={key} />
 					))}
 				</div>

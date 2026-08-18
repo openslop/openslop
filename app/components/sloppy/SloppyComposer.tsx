@@ -32,9 +32,10 @@ function ModelPicker({
 			contentClassName="max-h-64 min-w-24"
 		>
 			<button
+				type="button"
 				aria-label={`Model: ${model}`}
 				onMouseDown={(event) => event.preventDefault()}
-				className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+				className="focus-ring inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
 			>
 				<Codesandbox
 					className="h-3 w-3 shrink-0 opacity-70"
