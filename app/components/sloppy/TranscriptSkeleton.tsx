@@ -2,7 +2,6 @@ import { Fragment } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PanelCard } from "../canvas/panel/PanelCard";
 
-/** Mirrors a turn's rhythm: the prompt, what Sloppy did, then what it said. */
 const TURNS: { prompt: string; reply: string[] | null }[] = [
 	{ prompt: "w-28", reply: ["w-full", "w-3/5"] },
 	{ prompt: "w-20", reply: null },

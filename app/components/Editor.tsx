@@ -9,7 +9,6 @@ import { PreviewCacheProvider } from "./canvas/PreviewCacheContext";
 import { BottomViewProvider } from "./video/BottomViewContext";
 import { PlayerPositionProvider } from "./video/PlayerPositionContext";
 
-/** Assembled above the hero/workspace switch, so Sloppy runs the first prompt too. */
 export default function Editor() {
 	const { editor, onDocumentChange } = useEditorSession();
 	const hasScript = useScriptHasContent();

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** A side-panel subsection. Untitled cards carry the same surface with no heading. */
 export function PanelCard({
 	title,
 	children,
@@ -22,7 +21,6 @@ export function PanelCard({
 	);
 }
 
-/** A labeled control row inside a `PanelCard` */
 export function PanelField({
 	label,
 	children,

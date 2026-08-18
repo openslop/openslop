@@ -17,7 +17,6 @@ import { useSloppy } from "./sloppy/SloppyProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
 
-/** Where this project sits: the owner's own space, then the project itself. */
 function Breadcrumbs() {
 	const title = useProject((s) => s.metadata.title);
 

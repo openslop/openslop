@@ -26,9 +26,7 @@ type PanelEntry = {
 	icon: IconComponent;
 	iconActive: IconComponent;
 	Panel: () => React.ReactNode;
-	/** Sits at the foot of the rail rather than in the main group. */
 	pinned?: boolean;
-	/** Pinned below the panel's scroll area rather than scrolling with it. */
 	Footer?: () => React.ReactNode;
 };
 
