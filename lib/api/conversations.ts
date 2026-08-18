@@ -63,14 +63,11 @@ export async function saveConversationMessage(
 	message: SloppyMessage,
 ): Promise<void> {
 	const supabase = await client();
-	const { error } = await supabase.from("messages").upsert(
-		{
-			conversation_id: conversationId,
-			message_id: message.id,
-			role: message.role,
-			message,
-		},
-		{ onConflict: "conversation_id,message_id" },
-	);
+	const { error } = await supabase.from("messages").upsert({
+		conversation_id: conversationId,
+		message_id: message.id,
+		role: message.role,
+		message,
+	});
 	if (error) throw error;
 }

@@ -29,7 +29,7 @@ export function Disclosure({
 				onClick={() => setOpen((prev) => !prev)}
 				aria-expanded={open}
 				aria-controls={bodyId}
-				className="flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+				className="flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-ring"
 			>
 				<Chevron className="h-3 w-3 shrink-0" aria-hidden="true" />
 				{icon}

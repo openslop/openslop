@@ -10,11 +10,6 @@ import { preservedAttributes } from "@/lib/canvas/preservedAttributes";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { RefineOp } from "./types";
 
-/**
- * Whether an op landed. A missing anchor is reported rather than silently
- * resolved to some other position: under an agent, quietly appending an element
- * the caller asked to place elsewhere is a confident wrong edit with no signal.
- */
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
 
 const OK: RefineOpResult = { ok: true };

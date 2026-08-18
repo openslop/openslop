@@ -25,11 +25,6 @@ export function toolCallsMade(messages: SloppyMessage[]): number {
 	return (trailingAssistant(messages)?.parts ?? []).filter(isToolUIPart).length;
 }
 
-export function toolsUsed(messages: SloppyMessage[]): Set<string> {
-	const parts = trailingAssistant(messages)?.parts ?? [];
-	return new Set(parts.filter(isToolUIPart).map(getToolName));
-}
-
 /** A call the editor has been handed and not yet answered. */
 export function hasPendingToolCall(messages: SloppyMessage[]): boolean {
 	return (trailingAssistant(messages)?.parts ?? []).some(

@@ -247,23 +247,7 @@ describe("a turn that takes more than one step", () => {
 		expect(finishSeconds(chunks)).toBeLessThan(9999);
 	});
 
-	it("takes back a tool that replaces the canvas once the turn has used it", async () => {
-		await runTurn(TEXT_TURN, {
-			message: answered({
-				type: "tool-write_script",
-				toolCallId: "call-1",
-				state: "output-available",
-				input: { brief: "a cat on the moon" },
-				output: "Wrote a new script onto the canvas.",
-			}),
-		});
-
-		const offered = calls[0].tools?.map((tool) => tool.name);
-		expect(offered).not.toContain("write_script");
-		expect(offered).toContain("edit_script");
-	});
-
-	it("keeps offering a tool a turn may call again", async () => {
+	it("keeps every tool on offer for the rest of the turn", async () => {
 		await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),
 		});
@@ -284,7 +268,7 @@ describe("a turn that takes more than one step", () => {
 	it("withdraws the tools once the turn has spent its budget", async () => {
 		await runTurn(TEXT_TURN, {
 			message: answered(
-				...Array.from({ length: 12 }, (_part, index) =>
+				...Array.from({ length: 30 }, (_part, index) =>
 					reading(`call-${index}`, "the script"),
 				),
 			),

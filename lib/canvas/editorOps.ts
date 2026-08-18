@@ -32,10 +32,9 @@ export function findNodeById(
  * what streams in next lands on its own rather than under what was there.
  */
 export function clearEditor(editor: Editor): void {
-	Editor.withoutNormalizing(editor, () => {
-		for (let i = editor.children.length - 1; i >= 0; i -= 1) {
-			Transforms.removeNodes(editor, { at: [i] });
-		}
+	Transforms.removeNodes(editor, {
+		at: [],
+		match: (_node, path) => path.length === 1,
 	});
 }
 

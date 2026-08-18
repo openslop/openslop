@@ -19,28 +19,31 @@ export function toolPresentation(
 ): ToolPresentation {
 	switch (part.type) {
 		case "tool-read_script":
-			return { icon: Eye, label: "Read the script" };
+			return { icon: Eye, label: "Reading the script" };
 		case "tool-edit_script": {
 			const count = part.input?.ops?.length ?? 0;
 			return {
 				icon: Pencil,
 				label:
 					count === 1
-						? "Edited the script (1 change)"
-						: `Edited the script (${count} changes)`,
+						? "Editing the script (1 change)"
+						: `Editing the script (${count} changes)`,
 			};
 		}
 		case "tool-write_script":
-			return { icon: Film, label: "Wrote a new script" };
+			return { icon: Film, label: "Writing a new script" };
 		case "tool-set_metadata":
-			return { icon: SlidersHorizontal, label: "Set the project's settings" };
+			return {
+				icon: SlidersHorizontal,
+				label: "Setting the project's settings",
+			};
 		case "tool-set_narrator":
-			return { icon: Mic, label: "Set the narrator's voice" };
+			return { icon: Mic, label: "Adjusting the narrator's voice" };
 		case "tool-set_character": {
 			const name = part.input?.name;
 			return {
 				icon: User,
-				label: name ? `Set the character ${name}` : "Set a character",
+				label: name ? `Setting the character ${name}` : "Setting a character",
 			};
 		}
 	}

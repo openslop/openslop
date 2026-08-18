@@ -1,5 +1,6 @@
 "use client";
 
+import { useId, useState } from "react";
 import type { ToolUIPart } from "ai";
 import {
 	AlertCircle,
@@ -15,6 +16,8 @@ import {
 import type { SloppyTools } from "@/lib/agent/types";
 import { toolPresentation } from "./toolPresentation";
 
+const PREVIEW_LIMIT = 240;
+
 function Outcome({
 	icon: Icon,
 	tone,
@@ -24,11 +27,33 @@ function Outcome({
 	tone: string;
 	text: string;
 }) {
+	const [expanded, setExpanded] = useState(false);
+	const bodyId = useId();
+	const clips = text.length > PREVIEW_LIMIT;
+
 	return (
-		<p className={cn("flex items-start gap-1.5 pl-4 text-label-xs", tone)}>
+		<div className={cn("flex items-start gap-1.5 pl-4 text-label-xs", tone)}>
 			<Icon className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-			<span className="line-clamp-2">{text}</span>
-		</p>
+			<div className="flex flex-col items-start gap-0.5">
+				<p
+					id={bodyId}
+					className={cn("break-words", clips && !expanded && "line-clamp-2")}
+				>
+					{text}
+				</p>
+				{clips && (
+					<button
+						type="button"
+						onClick={() => setExpanded((prev) => !prev)}
+						aria-expanded={expanded}
+						aria-controls={bodyId}
+						className="-ml-1 rounded-md px-1 py-0.5 text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-ring"
+					>
+						{expanded ? "Show less" : "Show more"}
+					</button>
+				)}
+			</div>
+		</div>
 	);
 }
 

@@ -54,9 +54,10 @@ const EDIT_SCRIPT = dedent`
 `;
 
 const WRITE_SCRIPT = dedent`
-  Write a new script onto the canvas from a brief, replacing what is there. Use this to
-  start a project, or when the user asks for a fresh start on a different idea. For any
-  change to an existing script, however large, use edit_script.
+  Write a new script onto the canvas from a brief. This clears the canvas and starts from
+  scratch. Use this to start a project, or when the user asks for a fresh
+  start on a different idea. For any change to an existing script, however large, use
+  edit_script.
 
   The brief carries what the story needs: premise, tone, characters, and the user's constraints.
 `;
@@ -178,13 +179,6 @@ export type AgentToolName = keyof typeof SLOPPY_TOOLS;
 export const SNAPSHOT_TOOLS = new Set<string>([
 	"read_script" satisfies AgentToolName,
 ]);
-
-/** Replaces the whole canvas, so a second one in a turn discards the first. */
-export const ONCE_PER_TURN = new Set<string>([
-	"write_script" satisfies AgentToolName,
-]);
-
-export const AGENT_TOOL_NAMES = Object.keys(SLOPPY_TOOLS) as AgentToolName[];
 
 export type ToolInput<TName extends AgentToolName> = InferUITool<
 	(typeof SLOPPY_TOOLS)[TName]

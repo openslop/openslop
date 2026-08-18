@@ -22,7 +22,6 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
-	// Defaults to bottom-left, where it covers the pinned Sloppy rail item.
 	devIndicators: { position: "bottom-right" },
 	images: {
 		remotePatterns: [
