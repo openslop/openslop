@@ -3,8 +3,7 @@ import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { withApiAccess, withPublic, withSession } from "./with-auth";
-import type { JobPoll } from "@/lib/gateway/base";
-import { createJob, enqueueJob, getJob } from "./jobs";
+import { createJob, enqueueJob, getJobPoll } from "./jobs";
 import {
 	parseBody,
 	parseFormData,
@@ -124,14 +123,9 @@ export async function pollJob(
 	return withApiAccess("Job poll", async (user) => {
 		const { jobId } = await context.params;
 		if (!jobId) return badRequest("jobId is required");
-		const job = await getJob(jobId, user.id);
-		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
-		const view: JobPoll = {
-			jobId: job.id,
-			status: job.status,
-			result: job.result,
-			error: job.error,
-		};
+		const view = await getJobPoll(jobId, user.id);
+		if (!view)
+			return NextResponse.json({ error: "Not found" }, { status: 404 });
 		return NextResponse.json(view);
 	});
 }

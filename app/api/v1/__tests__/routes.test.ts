@@ -20,11 +20,11 @@ vi.mock("@/lib/api/providers", () => ({
 
 const mockCreateJob = vi.fn();
 const mockEnqueueJob = vi.fn();
-const mockGetJob = vi.fn();
+const mockGetJobPoll = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
-	getJob: (...args: unknown[]) => mockGetJob(...args),
+	getJobPoll: (...args: unknown[]) => mockGetJobPoll(...args),
 }));
 
 vi.mock("@/lib/api/logger", () => ({
@@ -267,8 +267,8 @@ describe("API routes", () => {
 	describe("GET /api/v1/video/[jobId]", () => {
 		it("returns job status", async () => {
 			const { GET } = await import("@/app/api/v1/video/[jobId]/route");
-			mockGetJob.mockResolvedValue({
-				id: "j1",
+			mockGetJobPoll.mockResolvedValue({
+				jobId: "j1",
 				status: "completed",
 				result: { id: "x", provider: "p", result: { video: "v.mp4" } },
 				error: null,
@@ -285,7 +285,7 @@ describe("API routes", () => {
 
 		it("returns 404 when job is missing", async () => {
 			const { GET } = await import("@/app/api/v1/video/[jobId]/route");
-			mockGetJob.mockResolvedValue(null);
+			mockGetJobPoll.mockResolvedValue(null);
 
 			const req = makeRequest("/api/v1/video/j1", undefined, "GET");
 			const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
@@ -294,7 +294,7 @@ describe("API routes", () => {
 
 		it("returns 500 on lookup error", async () => {
 			const { GET } = await import("@/app/api/v1/video/[jobId]/route");
-			mockGetJob.mockRejectedValue(new Error("db error"));
+			mockGetJobPoll.mockRejectedValue(new Error("db error"));
 
 			const req = makeRequest("/api/v1/video/j1", undefined, "GET");
 			const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });

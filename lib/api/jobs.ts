@@ -3,7 +3,7 @@ import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { ConnectorType } from "@/lib/connectors/types";
-import type { JobStatus } from "@/lib/gateway/base";
+import type { JobPoll, JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -50,19 +50,31 @@ export async function createJob(input: {
 	return { id: data.id };
 }
 
-export async function getJob(
+/**
+ * The polled view of a job, read as the columns it serves. A job is polled once
+ * a second until it settles, and `request` holds the whole generation payload,
+ * reference images inlined as data URIs included.
+ */
+export async function getJobPoll(
 	jobId: string,
 	userId: string,
-): Promise<JobRow | null> {
+): Promise<JobPoll | null> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("jobs")
-		.select("*")
+		.select("id, status, result, error")
 		.eq("id", jobId)
 		.eq("user_id", userId)
 		.maybeSingle();
 	if (error) throw new Error(`Failed to load job: ${error.message}`);
-	return (data as JobRow) ?? null;
+	if (!data) return null;
+	const row = data as Pick<JobRow, "id" | "status" | "result" | "error">;
+	return {
+		jobId: row.id,
+		status: row.status,
+		result: row.result,
+		error: row.error,
+	};
 }
 
 export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
