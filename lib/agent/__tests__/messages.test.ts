@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-	addUsage,
-	carriedMetadata,
 	hasPendingToolCall,
 	toolCallsMade,
 	upsertMessage,
@@ -21,10 +19,7 @@ const turn = (
 ): SloppyMessage => ({
 	id: "m2",
 	role: "assistant",
-	metadata: {
-		request: { system: "you are Sloppy", model: "claude-opus-5" },
-		usage: { inputTokens: 100, outputTokens: 50, workSeconds: 3 },
-	},
+	metadata: { workSeconds: 3 },
 	parts: Array.from({ length: parts }, (_part, index) => ({
 		type: "tool-read_script",
 		toolCallId: `call-${index}`,
@@ -68,37 +63,6 @@ describe("hasPendingToolCall", () => {
 
 	it("sees none once the editor has answered", () => {
 		expect(hasPendingToolCall([asked, turn("output-available")])).toBe(false);
-	});
-});
-
-describe("carriedMetadata", () => {
-	it("reads what the turn spent and what it is running on", () => {
-		expect(carriedMetadata([asked, turn("output-available")])).toEqual({
-			request: { system: "you are Sloppy", model: "claude-opus-5" },
-			usage: { inputTokens: 100, outputTokens: 50, workSeconds: 3 },
-		});
-	});
-
-	it("is unset on a turn that has not run yet", () => {
-		expect(carriedMetadata([asked])).toBeUndefined();
-	});
-});
-
-describe("addUsage", () => {
-	it("adds a step to what the turn already spent", () => {
-		expect(
-			addUsage(
-				{ inputTokens: 100, outputTokens: 50, workSeconds: 3 },
-				{ inputTokens: 12, outputTokens: 7 },
-				2,
-			),
-		).toEqual({ inputTokens: 112, outputTokens: 57, workSeconds: 5 });
-	});
-
-	it("starts from nothing on the first step of a turn", () => {
-		expect(
-			addUsage(undefined, { inputTokens: 12, outputTokens: 7 }, 2),
-		).toEqual({ inputTokens: 12, outputTokens: 7, workSeconds: 2 });
 	});
 });
 

@@ -16,7 +16,6 @@ import { isLLMModelName } from "@/lib/connectors/llm/openslop/models";
 const turnSchema = z.object({
 	projectId: z.uuid(),
 	message: z.unknown(),
-	language: z.string().optional(),
 	model: z.string().refine(isLLMModelName).optional(),
 });
 

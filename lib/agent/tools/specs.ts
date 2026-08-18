@@ -2,6 +2,12 @@ import dedent from "dedent";
 import { tool, type InferUITool, type ToolSet } from "ai";
 import { z } from "zod";
 import { CANVAS_ELEMENT_TYPES, DURATION_OPTIONS } from "@/lib/canvas/types";
+import {
+	TTS_ACCENTS,
+	TTS_AGES,
+	TTS_GENDERS,
+	TTS_PITCHES,
+} from "@/lib/connectors/tts/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
@@ -10,7 +16,8 @@ const ELEMENT_TYPES = [...CANVAS_ELEMENT_TYPES].join(", ");
 const values = (e: Record<string, string>) => Object.values(e).join(", ");
 
 const READ_SCRIPT = dedent`
-  Read the script on the canvas. Returns it as OSML, with the \`id\` of every element.
+  Read the canvas: the project's title, art style and narrator, then its characters, then
+  the script as OSML with the \`id\` of every element.
 
   Read before your first edit, and again after anything changed the script. Ids and text
   move when a script is edited, so editing from a stale reading fails.
@@ -42,7 +49,8 @@ const EDIT_SCRIPT = dedent`
   - clip: duration (${DURATION_OPTIONS.join(" | ")}), volume (0-10), motion
 
   Send the fewest operations that do the job. Write element text in the language of the
-  surrounding script, whatever language the request is in.
+  surrounding script, whatever language the request is in. Image, animated_image
+  (including videoPrompt), sound and music descriptions are always English.
 `;
 
 const WRITE_SCRIPT = dedent`
@@ -52,6 +60,43 @@ const WRITE_SCRIPT = dedent`
 
   The brief carries what the story needs: premise, tone, characters, and the user's constraints.
 `;
+
+const SET_METADATA = dedent`
+  Set the project's title, or the art style every visual follows. Send only what changes.
+`;
+
+const SET_NARRATOR = dedent`
+  Set the voice the narrator reads in. Send only the traits that change.
+
+  A voice is described, never picked: the traits resolve to a real voice when speech
+  is generated.
+`;
+
+const SET_CHARACTER = dedent`
+  Set what a character looks like or sounds like, creating it if the name is new.
+  Reference a character by the exact \`name\` its lines use in the script.
+
+  Send only what changes. \`appearance\` is what the character's avatar is drawn from, and
+  is always English. The rest describe the voice it speaks in.
+`;
+
+/** Spread flat into a tool's input: a nested object is a shape models get wrong. */
+const VOICE_TRAITS = {
+	gender: z.enum(TTS_GENDERS).optional(),
+	age: z.enum(TTS_AGES).optional(),
+	pitch: z.enum(TTS_PITCHES).optional(),
+	accent: z.enum(TTS_ACCENTS).optional(),
+	description: z
+		.string()
+		.min(1)
+		.optional()
+		.describe("How the voice sounds, in a few words."),
+};
+
+const named = (what: string) => ({
+	message: `name at least one ${what} to change`,
+});
+const notEmpty = (input: object) => Object.keys(input).length > 0;
 
 const INPUTS = {
 	read_script: z.object({}),
@@ -66,6 +111,26 @@ const INPUTS = {
 			.string()
 			.min(1)
 			.describe("What the video is about, in a sentence or a few."),
+	}),
+	set_metadata: z
+		.object({
+			title: z.string().min(1).optional(),
+			style: z
+				.string()
+				.min(1)
+				.optional()
+				.describe("The art style every visual follows, in English."),
+		})
+		.refine(notEmpty, named("setting")),
+	set_narrator: z.object({ ...VOICE_TRAITS }).refine(notEmpty, named("trait")),
+	set_character: z.object({
+		name: z.string().min(1),
+		appearance: z
+			.string()
+			.min(1)
+			.optional()
+			.describe("What the character looks like, in English."),
+		...VOICE_TRAITS,
 	}),
 };
 
@@ -90,6 +155,21 @@ export const SLOPPY_TOOLS = {
 		inputSchema: INPUTS.write_script,
 		outputSchema: z.string(),
 	}),
+	set_metadata: tool({
+		description: SET_METADATA,
+		inputSchema: INPUTS.set_metadata,
+		outputSchema: z.string(),
+	}),
+	set_narrator: tool({
+		description: SET_NARRATOR,
+		inputSchema: INPUTS.set_narrator,
+		outputSchema: z.string(),
+	}),
+	set_character: tool({
+		description: SET_CHARACTER,
+		inputSchema: INPUTS.set_character,
+		outputSchema: z.string(),
+	}),
 } satisfies ToolSet;
 
 export type AgentToolName = keyof typeof SLOPPY_TOOLS;
@@ -110,12 +190,18 @@ export type ToolInput<TName extends AgentToolName> = InferUITool<
 	(typeof SLOPPY_TOOLS)[TName]
 >["input"];
 
+const call = <TName extends AgentToolName>(toolName: TName) =>
+	z.object({ toolName: z.literal(toolName), input: INPUTS[toolName] });
+
 /**
  * The SDK widens a tool call's name back to `string` on the way to the editor,
  * so the pair is read here and the executors get the input their tool takes.
  */
 export const agentToolCallSchema = z.discriminatedUnion("toolName", [
-	z.object({ toolName: z.literal("read_script"), input: INPUTS.read_script }),
-	z.object({ toolName: z.literal("edit_script"), input: INPUTS.edit_script }),
-	z.object({ toolName: z.literal("write_script"), input: INPUTS.write_script }),
+	call("read_script"),
+	call("edit_script"),
+	call("write_script"),
+	call("set_metadata"),
+	call("set_narrator"),
+	call("set_character"),
 ]);

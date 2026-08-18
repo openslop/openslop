@@ -1,24 +1,16 @@
 import dedent from "dedent";
 import { requireState } from "@/lib/connectors/plugins";
 import type { LLMPlugin } from "@/lib/connectors/types";
-import type {
-	Metadata,
-	MetadataCharacter,
-	MetadataVoice,
+import {
+	VOICE_TRAITS,
+	type Metadata,
+	type MetadataCharacter,
+	type MetadataVoice,
 } from "@/lib/project/types";
 import { prependSystemPrompt } from "./system-prompt";
 
-const VOICE_FIELDS: (keyof MetadataVoice)[] = [
-	"gender",
-	"age",
-	"pitch",
-	"accent",
-	"language",
-	"description",
-];
-
 function renderVoice(voice: MetadataVoice): string {
-	const lines = VOICE_FIELDS.flatMap((field) => {
+	const lines = VOICE_TRAITS.flatMap((field) => {
 		const value = voice[field];
 		return value ? [`- ${field}: ${value}`] : [];
 	});

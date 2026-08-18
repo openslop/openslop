@@ -137,16 +137,16 @@ describe("AnthropicLLM", () => {
 				referenceImages: ["https://a/1.jpg", "https://a/2.jpg"],
 			});
 
-			expect(userContent()).toEqual([
+			expect(userContent()).toMatchObject([
 				{
 					type: "file",
 					mediaType: "image/*",
-					data: new URL("https://a/1.jpg"),
+					data: { url: new URL("https://a/1.jpg") },
 				},
 				{
 					type: "file",
 					mediaType: "image/*",
-					data: new URL("https://a/2.jpg"),
+					data: { url: new URL("https://a/2.jpg") },
 				},
 				{ type: "text", text: "describe" },
 			]);

@@ -1,26 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Editor } from "slate";
 import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
-import { Chat, useChat } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
 import { AGENT_PATH, loadAgentTranscript } from "@/lib/agent/client";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
+import type { AgentToolName } from "@/lib/agent/tools/specs";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { spokenLanguage } from "@/lib/connectors/llm/plugins/language-prompt";
-import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
+import { getDefaultConnector } from "@/lib/connectors/registry";
 import { toastError } from "@/lib/toastError";
 
 type SloppyControl = {
-	send: (message: string, model?: string) => void;
+	send: (message: string) => void;
 	stop: () => void;
+	model: string;
+	setModel: (model: string) => void;
+	models: string[];
 	/** The turn is not finished: streaming, or running the tools it asked for. */
 	loading: boolean;
 	/** Only the stream can be stopped; the tool calls it asked for run to the end. */
@@ -35,23 +38,6 @@ const [SloppyControlContext, useSloppy] =
 	createRequiredContext<SloppyControl>("SloppyProvider");
 
 export { useSloppyMessages, useSloppy };
-
-/**
- * The chat is built once and outlives a rebound canvas, so a step looks the
- * executor up when it runs rather than closing over the one it opened with.
- */
-function useToolRunner(editor: Editor) {
-	const runTool = useAgentTools(editor);
-	const latest = useRef(runTool);
-	useEffect(() => {
-		latest.current = runTool;
-	}, [runTool]);
-
-	return useCallback(
-		(call: { toolName: string; input: unknown }) => latest.current(call),
-		[],
-	);
-}
 
 /**
  * The stored transcript. Null until it is known, which is what draws the
@@ -90,66 +76,61 @@ export function SloppyProvider({
 	editor: Editor;
 	children: ReactNode;
 }) {
-	const { projectId } = useConfig();
-	const store = useProjectStoreHandle();
-	const runTool = useToolRunner(editor);
+	const { projectId, connectorConfig } = useConfig();
+	const runTool = useAgentTools(editor);
 	const restored = useTranscript(projectId);
+	const { config } = getDefaultConnector(connectorConfig, "llm");
+	const [model, setModel] = useState(config.defaultModel);
+	const turnModel = useRef<string>(undefined);
 
-	const chat = useMemo(() => {
-		const chat: Chat<SloppyMessage> = new Chat({
+	const { messages, sendMessage, stop, status, addToolOutput } =
+		useChat<SloppyMessage>({
 			messageMetadataSchema: sloppyMetadataSchema,
+			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new DefaultChatTransport<SloppyMessage>({
 				api: AGENT_PATH,
-				// Only the newest message travels; the server reads the rest of the
-				// turn from the conversation it already stores.
 				prepareSendMessagesRequest: ({ messages, body }) => ({
-					body: { ...body, projectId, message: messages.at(-1) },
+					body: {
+						...body,
+						projectId,
+						message: messages.at(-1),
+						model: turnModel.current,
+					},
 				}),
 			}),
 			sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
 			onToolCall: async ({ toolCall }) => {
 				const outcome = await runTool(toolCall);
 				const call = {
-					tool: toolCall.toolName,
+					tool: toolCall.toolName as AgentToolName,
 					toolCallId: toolCall.toolCallId,
 				};
-				chat.addToolOutput(
+				addToolOutput(
 					outcome.ok
 						? { ...call, output: outcome.output }
 						: { ...call, state: "output-error", errorText: outcome.errorText },
 				);
 			},
 			onError: (error) => toastError(error, "Sloppy could not finish that"),
+			throttle: 50,
 		});
-		return chat;
-	}, [projectId, runTool]);
-
-	// A turn is one message that grows a part at a time, so an unthrottled chat
-	// re-renders the whole panel per streamed token.
-	const { messages, sendMessage, stop, status } = useChat({
-		chat,
-		throttle: 50,
-	});
 
 	const streaming = status === "submitted" || status === "streaming";
 	const working = streaming || hasPendingToolCall(messages);
 	const control = useMemo<SloppyControl>(
 		() => ({
-			send: (message, model) =>
-				void sendMessage(
-					{ text: message },
-					{
-						body: {
-							model,
-							language: spokenLanguage(store.getState().metadata, ""),
-						},
-					},
-				),
+			send: (message) => {
+				turnModel.current = model;
+				void sendMessage({ text: message });
+			},
 			stop,
 			loading: working,
 			streaming,
+			model,
+			setModel,
+			models: config.models,
 		}),
-		[sendMessage, stop, streaming, working, store],
+		[sendMessage, stop, streaming, working, model, config.models],
 	);
 
 	// History sits in front of the chat's own turns rather than being written

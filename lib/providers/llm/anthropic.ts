@@ -3,7 +3,7 @@ import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
 import {
 	generateText,
 	streamText,
-	type ImagePart,
+	type FilePart,
 	type LanguageModel,
 	type TextPart,
 } from "ai";
@@ -23,7 +23,7 @@ const SUPPORTED_IMAGE_MEDIA_TYPES = [
 	"image/webp",
 ] as const;
 
-function toImagePart(image: string): ImagePart {
+function toImagePart(image: string): FilePart {
 	const source = parseImageSource(image);
 	if (!source) {
 		throw new Error(
@@ -31,7 +31,7 @@ function toImagePart(image: string): ImagePart {
 		);
 	}
 	if (source.kind === "url") {
-		return { type: "image", image: new URL(source.url) };
+		return { type: "file", mediaType: "image/*", data: new URL(source.url) };
 	}
 	if (
 		!(SUPPORTED_IMAGE_MEDIA_TYPES as readonly string[]).includes(
@@ -42,7 +42,7 @@ function toImagePart(image: string): ImagePart {
 			`Anthropic reference image media type "${source.mediaType}" is not supported; expected one of ${SUPPORTED_IMAGE_MEDIA_TYPES.join(", ")}`,
 		);
 	}
-	return { type: "image", image: source.data, mediaType: source.mediaType };
+	return { type: "file", mediaType: source.mediaType, data: source.data };
 }
 
 const DEFAULT_MODEL = "claude-opus-5";
@@ -96,13 +96,13 @@ export class AnthropicLLM extends BaseProvider<
 
 	private buildRequest(params: LLMGenerateParams) {
 		const images = params.referenceImages ?? [];
-		const content: (ImagePart | TextPart)[] = [
+		const content: (FilePart | TextPart)[] = [
 			...images.map(toImagePart),
 			{ type: "text", text: params.prompt },
 		];
 		return {
 			model: this.model(params.model || DEFAULT_MODEL),
-			system: params.systemPrompt || undefined,
+			instructions: params.systemPrompt || undefined,
 			messages: [{ role: "user" as const, content }],
 			maxOutputTokens: params.maxTokens || DEFAULT_MAX_TOKENS,
 			providerOptions: this.thinking(

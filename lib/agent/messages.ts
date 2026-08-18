@@ -3,15 +3,9 @@ import {
 	isToolUIPart,
 	safeValidateUIMessages,
 	validateUIMessages,
-	type LanguageModelUsage,
 } from "ai";
 import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/specs";
-import {
-	sloppyMetadataSchema,
-	type AgentUsage,
-	type SloppyMessage,
-	type SloppyMetadata,
-} from "./types";
+import { sloppyMetadataSchema, type SloppyMessage } from "./types";
 
 export function upsertMessage(
 	messages: SloppyMessage[],
@@ -31,13 +25,6 @@ export function toolCallsMade(messages: SloppyMessage[]): number {
 	return (trailingAssistant(messages)?.parts ?? []).filter(isToolUIPart).length;
 }
 
-/** What the turn recorded on the steps before this one. */
-export function carriedMetadata(
-	messages: SloppyMessage[],
-): SloppyMetadata | undefined {
-	return trailingAssistant(messages)?.metadata;
-}
-
 export function toolsUsed(messages: SloppyMessage[]): Set<string> {
 	const parts = trailingAssistant(messages)?.parts ?? [];
 	return new Set(parts.filter(isToolUIPart).map(getToolName));
@@ -48,18 +35,6 @@ export function hasPendingToolCall(messages: SloppyMessage[]): boolean {
 	return (trailingAssistant(messages)?.parts ?? []).some(
 		(part) => isToolUIPart(part) && part.state === "input-available",
 	);
-}
-
-export function addUsage(
-	carried: AgentUsage | undefined,
-	step: Pick<LanguageModelUsage, "inputTokens" | "outputTokens">,
-	seconds: number,
-): AgentUsage {
-	return {
-		inputTokens: (carried?.inputTokens ?? 0) + (step.inputTokens ?? 0),
-		outputTokens: (carried?.outputTokens ?? 0) + (step.outputTokens ?? 0),
-		workSeconds: (carried?.workSeconds ?? 0) + seconds,
-	};
 }
 
 /**

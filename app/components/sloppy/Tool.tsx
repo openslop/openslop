@@ -1,6 +1,6 @@
 "use client";
 
-import { getStaticToolName, type ToolUIPart } from "ai";
+import type { ToolUIPart } from "ai";
 import {
 	AlertCircle,
 	CornerDownRight,
@@ -41,18 +41,20 @@ const Failed = ({ text }: { text: string }) => (
 );
 
 export function Tool({ part }: { part: ToolUIPart<SloppyTools> }) {
-	const { icon: Icon, summarize } = toolPresentation(getStaticToolName(part));
+	const { icon: Icon, label } = toolPresentation(part);
 	return (
 		<>
 			<Disclosure
 				icon={<Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
-				label={summarize(part.input)}
+				label={label}
 			>
 				<div className="flex flex-col gap-1.5">
 					<DisclosureJson value={part.input} />
-					{/* Clamped below, and a reading of the script comes back whole. */}
 					{part.state === "output-available" && (
 						<DisclosureText>{part.output}</DisclosureText>
+					)}
+					{part.state === "output-error" && (
+						<DisclosureText>{part.errorText}</DisclosureText>
 					)}
 				</div>
 			</Disclosure>

@@ -10,8 +10,6 @@ import {
 import { SelectMenu } from "@/components/ui/select-menu";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
-import { getDefaultConnector } from "@/lib/connectors/registry";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import { useSloppy } from "./SloppyProvider";
 
 function ModelPicker({
@@ -50,18 +48,16 @@ function ModelPicker({
 }
 
 export function SloppyComposer() {
-	const { send, stop, loading, streaming } = useSloppy();
-	const { connectorConfig } = useConfig();
-	const { config } = getDefaultConnector(connectorConfig, "llm");
+	const { send, stop, loading, streaming, model, setModel, models } =
+		useSloppy();
 	const [value, setValue] = useState("");
-	const [model, setModel] = useState(config.defaultModel);
 	const hasText = value.trim().length > 0;
 
 	const submit = () => {
 		if (!hasText || loading) return;
 		const message = value;
 		setValue("");
-		send(message, model);
+		send(message);
 	};
 
 	return (
@@ -84,11 +80,7 @@ export function SloppyComposer() {
 				className="max-h-40 w-full resize-none overflow-y-auto bg-transparent font-body text-label text-panel-fg caret-accent outline-none placeholder:text-muted-foreground focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30"
 			/>
 			<div className="flex items-center justify-between gap-2">
-				<ModelPicker
-					model={model}
-					onChange={setModel}
-					options={config.models}
-				/>
+				<ModelPicker model={model} onChange={setModel} options={models} />
 				{streaming ? (
 					<ActionButton
 						label="Stop Sloppy"

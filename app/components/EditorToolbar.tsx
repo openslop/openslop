@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useProject } from "@/lib/project/useProject";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
+import { useSloppy } from "./sloppy/SloppyProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
 
@@ -67,7 +67,7 @@ function getGenerateLabel(loading: boolean, generating: boolean): string {
 }
 
 function EditorToolbarComponent({ editor }: { editor: Editor }) {
-	const { loading } = useScriptControl();
+	const { loading } = useSloppy();
 	const { generateAll } = useGenerateAll(editor);
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());

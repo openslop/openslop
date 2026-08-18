@@ -7,6 +7,9 @@ describe("SLOPPY_TOOLS", () => {
 			"read_script",
 			"edit_script",
 			"write_script",
+			"set_metadata",
+			"set_narrator",
+			"set_character",
 		]);
 	});
 

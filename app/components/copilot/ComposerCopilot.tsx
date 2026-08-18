@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import {
+	Codesandbox,
 	CornerDownLeft,
 	Hourglass,
 	ImagePlus,
@@ -41,6 +42,7 @@ import {
 	type VideoLength,
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 import { SettingPill, type SettingPillOption } from "./SettingPill";
@@ -183,6 +185,7 @@ export default function ComposerCopilot({
 	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
+	const { model, setModel, models } = useSloppy();
 	const {
 		openCreateCharacter,
 		editCharacter,
@@ -274,6 +277,13 @@ export default function ComposerCopilot({
 							value={language}
 							options={LANGUAGE_OPTIONS}
 							onChange={setLanguage}
+						/>
+						<SettingPill
+							name="Model"
+							icon={<Codesandbox className="mr-1 h-3 w-3" />}
+							value={model}
+							options={models.map((value) => ({ value, label: value }))}
+							onChange={setModel}
 						/>
 						{!isScriptMode && (
 							<SettingPill

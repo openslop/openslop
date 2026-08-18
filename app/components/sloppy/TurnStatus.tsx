@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Sparkles } from "@/components/ui/icon";
-import { Disclosure } from "@/components/ui/disclosure";
 import OrbLoader from "../OrbLoader";
 
 function useElapsed(running: boolean): number {
@@ -21,36 +20,27 @@ function workedLabel(seconds: number | undefined): string {
 	return seconds === undefined ? "Worked" : `Worked for ${seconds}s`;
 }
 
-/** Every step of a turn, under one header. */
-export function Task({
+export function TurnStatus({
 	streaming,
 	status,
 	seconds,
-	children,
 }: {
 	streaming: boolean;
 	status: string;
 	seconds: number | undefined;
-	children: ReactNode;
 }) {
 	const elapsed = useElapsed(streaming);
 
 	return (
-		<Disclosure
-			// Shuts itself when the turn ends, without overriding a reader's toggle.
-			key={String(streaming)}
-			defaultOpen={streaming}
-			pending={streaming}
-			icon={
-				streaming ? (
-					<OrbLoader />
-				) : (
-					<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
-				)
-			}
-			label={streaming ? `${status} · ${elapsed}s` : workedLabel(seconds)}
-		>
-			<div className="flex flex-col gap-2">{children}</div>
-		</Disclosure>
+		<div className="flex items-center gap-1.5 self-start px-1 py-0.5 text-label-xs text-muted-foreground">
+			{streaming ? (
+				<OrbLoader />
+			) : (
+				<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
+			)}
+			<span className={streaming ? "shimmer" : undefined}>
+				{streaming ? `${status} · ${elapsed}s` : workedLabel(seconds)}
+			</span>
+		</div>
 	);
 }

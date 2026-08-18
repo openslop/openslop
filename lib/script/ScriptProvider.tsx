@@ -19,7 +19,6 @@ import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
 
 type ScriptControl = {
-	loading: boolean;
 	submitPrompt: (prompt: string) => Promise<void>;
 	/** Leaves the hero for the workspace, before there is anything to show in it. */
 	enterWorkspace: () => void;
@@ -61,7 +60,6 @@ export function ScriptProvider({
 	const [script, setScript] = useState(initialScript);
 	const [hasContent, setHasContent] = useState(initialScript.length > 0);
 	const { nodes, appendChunk, reset } = useOSMLStreamParser();
-	const [loading, setLoading] = useState(false);
 
 	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
 		connectorConfig,
@@ -74,15 +72,10 @@ export function ScriptProvider({
 			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
 			const state = store.getState();
-			setLoading(true);
-			try {
-				for await (const chunk of connector.stream({ prompt }, { state })) {
-					if (!chunk.text) continue;
-					setHasContent(true);
-					appendChunk(chunk.text);
-				}
-			} finally {
-				setLoading(false);
+			for await (const chunk of connector.stream({ prompt }, { state })) {
+				if (!chunk.text) continue;
+				setHasContent(true);
+				appendChunk(chunk.text);
 			}
 		},
 		[store, llmProvider, llmConfig, appendChunk, reset, updateMetadata, mode],
@@ -96,13 +89,8 @@ export function ScriptProvider({
 	}, []);
 
 	const control = useMemo<ScriptControl>(
-		() => ({
-			loading,
-			submitPrompt,
-			enterWorkspace,
-			startBlank,
-		}),
-		[loading, submitPrompt, enterWorkspace, startBlank],
+		() => ({ submitPrompt, enterWorkspace, startBlank }),
+		[submitPrompt, enterWorkspace, startBlank],
 	);
 
 	return (

@@ -1,6 +1,4 @@
 import dedent from "dedent";
-import { languagePrompt } from "@/lib/connectors/llm/plugins/language-prompt";
-import { limitsPrompt } from "./capabilities";
 
 const ROLE = dedent`
   You are Sloppy, the agent inside OpenSlop, a studio for making full-length videos from a script.
@@ -31,9 +29,16 @@ const ROLE = dedent`
 `;
 
 /**
- * The same bytes on every step of every turn, so the cacheable prefix never
- * moves. The script is read through a tool rather than composed in here.
+ * Nothing in a request tells a model that a tool it wants does not exist, so left
+ * to guess it claims work it cannot do.
  */
-export function sloppySystemPrompt(language: string): string {
-	return [ROLE, limitsPrompt(), languagePrompt(language)].join("\n\n");
-}
+const LIMITS = dedent`
+  ## Limits
+
+  You cannot generate media, or render or export the video. Say so plainly if asked,
+  and say to use Generate All, or to generate one element from its card. Never claim
+  otherwise.
+`;
+
+/** What the canvas holds is read through a tool rather than composed in here. */
+export const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");

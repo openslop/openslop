@@ -1,26 +1,38 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
 import { executeToolCall } from "../tools/registry";
+import { MetadataSchema } from "@/lib/project/types";
+
+const metadata = MetadataSchema.parse({
+	title: "Little Red",
+	style: "claymation",
+	characters: { Red: { appearance: "a girl in a red cloak", age: "child" } },
+});
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
+	readMetadata: () => metadata,
 	clearScript: () => {},
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
+	setMetadata: () => {},
+	setCharacter: (name) => ({ name, created: !(name in metadata.characters) }),
 	...over,
 });
 
 describe("executeToolCall", () => {
-	it("hands back the script as the reading the model asked for", async () => {
+	it("hands back the script and the settings around it", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
 		);
 
-		expect(outcome).toEqual({
-			ok: true,
-			output: "```osml\n<narration>hi</narration>\n```",
-		});
+		expect(outcome.ok && outcome.output).toContain("<narration>hi</narration>");
+		expect(outcome.ok && outcome.output).toContain("title: Little Red");
+		expect(outcome.ok && outcome.output).toContain("art style: claymation");
+		expect(outcome.ok && outcome.output).toContain(
+			"- Red: a girl in a red cloak (voice: child)",
+		);
 	});
 
 	it("says the canvas is empty rather than handing back nothing", async () => {
@@ -29,7 +41,7 @@ describe("executeToolCall", () => {
 			context({ readScript: () => "  " }),
 		);
 
-		expect(outcome).toEqual({ ok: true, output: "The canvas is empty." });
+		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
 	});
 
 	it("reports what an edit could not apply, so the model can fix the call", async () => {
@@ -78,5 +90,79 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok).toBe(false);
+	});
+
+	it("changes only the settings it was given", async () => {
+		const patches: unknown[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_metadata", input: { title: "Moon Cat" } },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches).toEqual([{ title: "Moon Cat" }]);
+		expect(outcome).toEqual({ ok: true, output: "Set the title." });
+	});
+
+	it("refuses a call that names no setting, rather than writing nothing", async () => {
+		const patches: unknown[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_metadata", input: {} },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches).toEqual([]);
+		expect(outcome.ok).toBe(false);
+	});
+
+	it("maps the narrator's traits onto the voice the project reads in", async () => {
+		const patches: unknown[] = [];
+		await executeToolCall(
+			{ toolName: "set_narrator", input: { age: "child" } },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches).toEqual([{ narration: { age: "child" } }]);
+	});
+
+	it("says a character is new, so the model knows its avatar is not drawn", async () => {
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_character",
+				input: { name: "Wolf", appearance: "a grey wolf" },
+			},
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("Added Wolf");
+	});
+
+	it("changes a character the project already knows", async () => {
+		const edits: unknown[] = [];
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_character",
+				input: { name: "Red", pitch: "high" },
+			},
+			context({
+				setCharacter: (name, patch) => {
+					edits.push([name, patch]);
+					return { name, created: false };
+				},
+			}),
+		);
+
+		expect(edits).toEqual([["Red", { pitch: "high" }]]);
+		expect(outcome).toEqual({ ok: true, output: "Changed Red." });
+	});
+
+	it("answers with the name the project settled on, not the one it was asked with", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "set_character", input: { name: "big bad wolf" } },
+			context({
+				setCharacter: () => ({ name: "Big Bad Wolf", created: true }),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("Added Big Bad Wolf");
 	});
 });

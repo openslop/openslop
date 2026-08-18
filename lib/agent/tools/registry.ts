@@ -3,6 +3,9 @@ import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import { editScript } from "./editScript";
 import { readScript } from "./readScript";
+import { setCharacter } from "./setCharacter";
+import { setMetadata } from "./setMetadata";
+import { setNarrator } from "./setNarrator";
 import { writeScript } from "./writeScript";
 import { agentToolCallSchema } from "./specs";
 
@@ -21,6 +24,12 @@ function run(call: AgentToolCall, ctx: AgentToolContext): Promise<string> {
 			return editScript(call.input, ctx);
 		case "write_script":
 			return writeScript(call.input, ctx);
+		case "set_metadata":
+			return setMetadata(call.input, ctx);
+		case "set_narrator":
+			return setNarrator(call.input, ctx);
+		case "set_character":
+			return setCharacter(call.input, ctx);
 	}
 }
 

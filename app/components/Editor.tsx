@@ -1,9 +1,6 @@
 "use client";
 
-import {
-	useScriptControl,
-	useScriptHasContent,
-} from "@/lib/script/ScriptProvider";
+import { useScriptHasContent } from "@/lib/script/ScriptProvider";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 import { CanvasProviders } from "./canvas/CanvasProviders";
@@ -15,8 +12,7 @@ import { PlayerPositionProvider } from "./video/PlayerPositionContext";
 /** Assembled above the hero/workspace switch, so Sloppy runs the first prompt too. */
 export default function Editor() {
 	const { editor, onDocumentChange } = useEditorSession();
-	const { loading } = useScriptControl();
-	const hasScript = useScriptHasContent() || loading;
+	const hasScript = useScriptHasContent();
 
 	return (
 		<PreviewCacheProvider>

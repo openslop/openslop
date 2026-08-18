@@ -31,6 +31,16 @@ export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	resolvedVoiceId: optionalString,
 });
 
+/** What describes a voice, as opposed to identifying one, in reading order. */
+export const VOICE_TRAITS = [
+	"gender",
+	"age",
+	"pitch",
+	"accent",
+	"language",
+	"description",
+] as const satisfies readonly (keyof z.infer<typeof voiceTraitsSchema>)[];
+
 export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 	query: optionalString,
 	name: optionalString,

@@ -34,7 +34,7 @@ describe("parseSloppyMessage", () => {
 		await expect(parseSloppyMessage({ role: "wizard" })).resolves.toBeNull();
 	});
 
-	it("refuses a call carrying input its own tool cannot take", async () => {
+	it("refuses an unanswered call carrying input its own tool cannot take", async () => {
 		const message = await parseSloppyMessage({
 			id: "m3",
 			role: "assistant",
@@ -42,9 +42,26 @@ describe("parseSloppyMessage", () => {
 				{
 					type: "tool-edit_script",
 					toolCallId: "c1",
-					state: "output-available",
+					state: "input-available",
 					input: { brief: "not ops" },
-					output: "done",
+				},
+			],
+		});
+
+		expect(message).toBeNull();
+	});
+
+	it("refuses a step claiming a tool returned something other than text", async () => {
+		const message = await parseSloppyMessage({
+			id: "m4",
+			role: "assistant",
+			parts: [
+				{
+					type: "tool-read_script",
+					toolCallId: "c1",
+					state: "output-available",
+					input: {},
+					output: { not: "a string" },
 				},
 			],
 		});
