@@ -17,6 +17,18 @@ export const characterAvatarUrl = (results: NodeResults, name: string) =>
 		"image",
 	);
 
+export type CharacterAvatarState = "none" | "generated" | "uploaded";
+
+/** The uploaded flag only means something once an avatar image exists. */
+export function characterAvatarState(
+	results: NodeResults,
+	name: string,
+	uploaded: boolean | undefined,
+): CharacterAvatarState {
+	if (!characterAvatarUrl(results, name)) return "none";
+	return uploaded ? "uploaded" : "generated";
+}
+
 /** Appearance rides in the attributes so editing it makes the avatar stale. */
 export function characterAvatarElement(
 	state: ProjectData,

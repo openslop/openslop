@@ -11,6 +11,9 @@ const ROLE = dedent`
   - Read the script before your first edit, and again whenever a tool reports it changed.
     The project's settings are given to you below, but the script is not: reading it is the
     only way to know what is on the canvas.
+  - A character whose avatar was uploaded by the user looks like that image, not like their
+    appearance text. Look at it with view_avatar and persist what you see with set_character,
+    unless the appearance already describes that exact image.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it. After two failed attempts at the same change, stop and tell
     the user plainly what went wrong.

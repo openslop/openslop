@@ -24,7 +24,7 @@ export const agentContextSchema = z.object({
 		z.object({
 			name: z.string(),
 			hasAppearance: z.boolean(),
-			hasAvatar: z.boolean(),
+			avatar: z.enum(["none", "generated", "uploaded"]),
 		}),
 	),
 	referenceImageCount: z.number().int().min(0),
@@ -40,13 +40,22 @@ function renderNarrator(narration: AgentContext["narration"]): string {
 	return traits.length > 0 ? traits.join(", ") : UNSET;
 }
 
+const AVATAR_NOTES: Record<
+	AgentContext["characters"][number]["avatar"],
+	string
+> = {
+	none: "no avatar",
+	generated: "avatar generated",
+	uploaded: "avatar uploaded by the user",
+};
+
 function renderCharacters(characters: AgentContext["characters"]): string {
 	if (characters.length === 0) return "none yet";
 	return characters
-		.map(({ name, hasAppearance, hasAvatar }) => {
+		.map(({ name, hasAppearance, avatar }) => {
 			const notes = [
 				hasAppearance ? "appearance set" : "no appearance",
-				hasAvatar ? "avatar generated" : "no avatar",
+				AVATAR_NOTES[avatar],
 			];
 			return `${name} (${notes.join(", ")})`;
 		})

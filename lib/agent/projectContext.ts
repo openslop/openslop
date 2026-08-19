@@ -2,10 +2,10 @@
 
 import { useCallback } from "react";
 import type { Editor } from "slate";
-import { getContentElements } from "@/lib/canvas/scenes";
+import { isScriptEmpty } from "@/lib/canvas/scenes";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import type { NodeResults } from "@/lib/generation/graph";
-import { characterAvatarUrl } from "@/lib/project/characterAvatar";
+import { characterAvatarState } from "@/lib/project/characterAvatar";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import type { ProjectData } from "@/lib/project/store";
 import { getTemplateById } from "@/lib/templates/templates";
@@ -32,7 +32,7 @@ function toAgentContext(
 			([name, character]) => ({
 				name,
 				hasAppearance: character.appearance.trim().length > 0,
-				hasAvatar: Boolean(characterAvatarUrl(results, name)),
+				avatar: characterAvatarState(results, name, character.avatarUploaded),
 			}),
 		),
 		referenceImageCount: state.referenceImages.length,
@@ -47,11 +47,7 @@ export function useAgentContext(editor: Editor): () => AgentContext {
 
 	return useCallback(
 		() =>
-			toAgentContext(
-				store.getState(),
-				queue,
-				getContentElements(editor.children).length === 0,
-			),
+			toAgentContext(store.getState(), queue, isScriptEmpty(editor.children)),
 		[store, queue, editor],
 	);
 }

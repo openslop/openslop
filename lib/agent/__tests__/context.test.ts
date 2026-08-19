@@ -51,14 +51,26 @@ describe("renderAgentContext", () => {
 		const rendered = renderAgentContext(
 			context({
 				characters: [
-					{ name: "Lumi", hasAppearance: true, hasAvatar: true },
-					{ name: "Mira", hasAppearance: false, hasAvatar: false },
+					{ name: "Lumi", hasAppearance: true, avatar: "generated" },
+					{ name: "Mira", hasAppearance: false, avatar: "none" },
 				],
 			}),
 		);
 
 		expect(rendered).toContain("Lumi (appearance set, avatar generated)");
 		expect(rendered).toContain("Mira (no appearance, no avatar)");
+	});
+
+	it("says when an avatar came from the user, not the appearance", () => {
+		const rendered = renderAgentContext(
+			context({
+				characters: [{ name: "Bo", hasAppearance: false, avatar: "uploaded" }],
+			}),
+		);
+
+		expect(rendered).toContain(
+			"Bo (no appearance, avatar uploaded by the user)",
+		);
 	});
 
 	it("says whether the canvas already has a script on it", () => {

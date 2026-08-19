@@ -1,4 +1,5 @@
 import { Element, Node, type Descendant, type Editor, type Path } from "slate";
+import { withoutCaretMarker } from "./constants";
 import {
 	type CanvasContentElement,
 	type SceneElement,
@@ -20,6 +21,15 @@ export const getContentElements = (
 	nodes: Descendant[],
 ): CanvasContentElement[] =>
 	nodes.flatMap((node) => (isSceneElement(node) ? node.children : []));
+
+/**
+ * Empty means nothing authored, not zero elements: normalization keeps one
+ * placeholder element on an otherwise blank canvas.
+ */
+export const isScriptEmpty = (nodes: Descendant[]): boolean =>
+	getContentElements(nodes).every(
+		(element) => withoutCaretMarker(Node.string(element)).trim() === "",
+	);
 
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
 	let count = 0;
