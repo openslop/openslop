@@ -11,7 +11,7 @@ import { SLOPPY_SYSTEM_PROMPT } from "@/lib/agent/prompt";
 import {
 	toolCallsMade,
 	upsertMessage,
-	withoutStaleReadings,
+	pruneTranscript,
 } from "@/lib/agent/messages";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/specs";
 import type { SloppyMessage } from "@/lib/agent/types";
@@ -63,7 +63,7 @@ export async function streamAgentTurn(
 	);
 
 	const modelMessages = pruneMessages({
-		messages: await convertToModelMessages(withoutStaleReadings(messages), {
+		messages: await convertToModelMessages(pruneTranscript(messages), {
 			tools: SLOPPY_TOOLS,
 			ignoreIncompleteToolCalls: true,
 		}),

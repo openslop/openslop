@@ -3,7 +3,7 @@ import {
 	hasPendingToolCall,
 	toolCallsMade,
 	upsertMessage,
-	withoutStaleReadings,
+	pruneTranscript,
 } from "../messages";
 import { SCRIPT_TOOLS, SNAPSHOT_TOOLS } from "../tools/specs";
 import type { SloppyMessage } from "../types";
@@ -73,7 +73,7 @@ describe("hasPendingToolCall", () => {
 	});
 });
 
-describe("withoutStaleReadings", () => {
+describe("pruneTranscript", () => {
 	const read = (toolCallId: string, output: string) =>
 		({
 			type: "tool-read_script",
@@ -91,6 +91,13 @@ describe("withoutStaleReadings", () => {
 		output: "Applied 1 operation.",
 	};
 
+	const thought = (text: string) =>
+		({
+			type: "reasoning",
+			text,
+			providerMetadata: { anthropic: { signature: `sig-${text}` } },
+		}) as const;
+
 	const turnWith = (id: string, ...parts: SloppyMessage["parts"]) =>
 		({ id, role: "assistant", parts }) as SloppyMessage;
 
@@ -102,13 +109,35 @@ describe("withoutStaleReadings", () => {
 			read("b", "stands"),
 		);
 
-		expect(withoutStaleReadings([asked, inFlight])).toEqual([asked, inFlight]);
+		expect(pruneTranscript([asked, inFlight])).toEqual([asked, inFlight]);
+	});
+
+	it("keeps the reasoning of the turn in flight, which is signed with its calls", () => {
+		const inFlight = turnWith("m2", thought("first"), read("a", "was"), edit);
+
+		expect(pruneTranscript([asked, inFlight])).toEqual([asked, inFlight]);
 	});
 
 	it("drops the readings of a turn that has finished", () => {
 		const finished = turnWith("m2", read("a", "was"), edit);
 
-		expect(withoutStaleReadings([asked, finished, asked])).toEqual([
+		expect(pruneTranscript([asked, finished, asked])).toEqual([
+			asked,
+			turnWith("m2", edit),
+			asked,
+		]);
+	});
+
+	it("drops the reasoning of a finished turn, whose signature the dropped reading breaks", () => {
+		const finished = turnWith(
+			"m2",
+			thought("first"),
+			read("a", "was"),
+			thought("second"),
+			edit,
+		);
+
+		expect(pruneTranscript([asked, finished, asked])).toEqual([
 			asked,
 			turnWith("m2", edit),
 			asked,
@@ -116,6 +145,6 @@ describe("withoutStaleReadings", () => {
 	});
 
 	it("leaves what the user said alone", () => {
-		expect(withoutStaleReadings([asked])).toEqual([asked]);
+		expect(pruneTranscript([asked])).toEqual([asked]);
 	});
 });

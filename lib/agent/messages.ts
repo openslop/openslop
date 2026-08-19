@@ -39,24 +39,23 @@ export function hasPendingToolCall(
 }
 
 /**
- * A reading describes a canvas that a later turn has since edited. The turn in
- * flight keeps all of its own, so its cached prefix never moves mid-loop.
+ * Remove all prior reasoning blocks and snapshots tool results
  */
-export function withoutStaleReadings(
-	messages: SloppyMessage[],
-): SloppyMessage[] {
-	const current = messages.at(-1);
-	return messages.map((message) =>
-		message === current || message.role !== "assistant"
-			? message
-			: {
-					...message,
-					parts: message.parts.filter(
-						(part) =>
-							!isToolUIPart(part) || !SNAPSHOT_TOOLS.has(getToolName(part)),
-					),
-				},
-	);
+export function pruneTranscript(messages: SloppyMessage[]): SloppyMessage[] {
+	return messages.map((message, idx) => {
+		if (idx !== messages.length - 1 && message.role === "assistant") {
+			return {
+				...message,
+				parts: message.parts.filter((part) => {
+					if (part.type === "reasoning") {
+						return false;
+					}
+					return !(isToolUIPart(part) && SNAPSHOT_TOOLS.has(getToolName(part)));
+				}),
+			};
+		}
+		return message;
+	});
 }
 
 // Optional: the message a turn opens with carries no metadata yet, and the
