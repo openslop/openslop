@@ -5,9 +5,6 @@ import { defineTool, imagePart } from "./defineTool";
 export const viewAvatar = defineTool({
 	description: dedent`
 	  Look at a character's avatar image. You receive the image itself.
-
-	  Use it to write an appearance for a character whose avatar was uploaded by the user:
-	  look, then persist what you see with set_character so every future script keeps it.
 	  What you see is gone next turn, so act on it in this one.
 	`,
 	input: z.object({
