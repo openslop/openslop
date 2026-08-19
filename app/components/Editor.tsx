@@ -1,6 +1,6 @@
 "use client";
 
-import { useScriptHasContent } from "@/lib/script/ScriptProvider";
+import { useShowWorkspace } from "@/lib/script/ScriptProvider";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
 import { CanvasProviders } from "./canvas/CanvasProviders";
@@ -11,7 +11,7 @@ import { PlayerPositionProvider } from "./video/PlayerPositionContext";
 
 export default function Editor() {
 	const { editor, onDocumentChange } = useEditorSession();
-	const hasScript = useScriptHasContent();
+	const showWorkspace = useShowWorkspace();
 
 	return (
 		<PreviewCacheProvider>
@@ -20,10 +20,10 @@ export default function Editor() {
 					<CanvasProviders editor={editor} onDocumentChange={onDocumentChange}>
 						<div
 							className={`flex min-h-screen flex-col items-center transition-[padding] duration-700 ease-out ${
-								hasScript ? "" : "pt-[22vh]"
+								showWorkspace ? "" : "pt-[22vh]"
 							}`}
 						>
-							{hasScript ? (
+							{showWorkspace ? (
 								<PostPromptView editor={editor} />
 							) : (
 								<PrePromptView />

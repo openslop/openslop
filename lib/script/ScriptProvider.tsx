@@ -25,8 +25,7 @@ import {
 
 type ScriptControl = {
 	runScript: (source: ScriptSource) => Promise<void>;
-	/** Leaves the hero for the workspace, before there is anything to show in it. */
-	enterWorkspace: () => void;
+	setShowWorkspace: (showWorkspace: boolean) => void;
 	startBlank: () => void;
 };
 
@@ -37,15 +36,13 @@ const [ScriptNodesContext, useScriptNodes] =
 const [ScriptControlContext, useScriptControl] =
 	createRequiredContext<ScriptControl>("ScriptControlContext");
 export { useScriptNodes, useScriptControl };
-// The live script string changes per streamed token, but nothing renders it:
-// the shell only needs a stable "has any content" boolean, and the editor only
-// needs the initial script once for rehydration. Exposing those instead of the
-// raw string keeps the whole editor tree off the per-token render path.
-const ScriptHasContentContext = createContext(false);
+// Nothing renders the live script string: the shell reads a stable boolean and
+// the editor rehydrates once, keeping the tree off the per-token render path.
+const ShowWorkspaceContext = createContext(false);
 const ScriptInitialContext = createContext<string>("");
 
-export function useScriptHasContent() {
-	return use(ScriptHasContentContext);
+export function useShowWorkspace() {
+	return use(ShowWorkspaceContext);
 }
 
 export function useScriptInitial() {
@@ -63,7 +60,7 @@ export function ScriptProvider({
 	const store = useProjectStoreHandle();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const [script, setScript] = useState(initialScript);
-	const [hasContent, setHasContent] = useState(initialScript.length > 0);
+	const [showWorkspace, setShowWorkspace] = useState(initialScript.length > 0);
 	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 
 	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
@@ -85,32 +82,29 @@ export function ScriptProvider({
 				systemPrompt: system,
 			})) {
 				if (!chunk.text) continue;
-				setHasContent(true);
 				appendChunk(chunk.text);
 			}
 		},
 		[store, llmProvider, llmConfig, appendChunk, reset, updateMetadata],
 	);
 
-	const enterWorkspace = useCallback(() => setHasContent(true), []);
-
 	const startBlank = useCallback(() => {
 		setScript(BLANK_SCRIPT);
-		setHasContent(true);
+		setShowWorkspace(true);
 	}, []);
 
 	const control = useMemo<ScriptControl>(
-		() => ({ runScript, enterWorkspace, startBlank }),
-		[runScript, enterWorkspace, startBlank],
+		() => ({ runScript, setShowWorkspace, startBlank }),
+		[runScript, startBlank],
 	);
 
 	return (
 		<ScriptControlContext value={control}>
 			<ScriptNodesContext value={nodes}>
 				<ScriptInitialContext value={script}>
-					<ScriptHasContentContext value={hasContent}>
+					<ShowWorkspaceContext value={showWorkspace}>
 						{children}
-					</ScriptHasContentContext>
+					</ShowWorkspaceContext>
 				</ScriptInitialContext>
 			</ScriptNodesContext>
 		</ScriptControlContext>

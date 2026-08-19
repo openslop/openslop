@@ -10,13 +10,13 @@ import ComposerCopilot from "./copilot/ComposerCopilot";
 import TemplateGallery from "./TemplateGallery";
 
 export default function ComposerHero() {
-	const { enterWorkspace, startBlank } = useScriptControl();
+	const { setShowWorkspace, startBlank } = useScriptControl();
 	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
 
 	const start = (brief: string) => {
-		enterWorkspace();
+		setShowWorkspace(true);
 		send(brief);
 	};
 
