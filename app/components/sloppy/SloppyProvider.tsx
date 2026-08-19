@@ -27,7 +27,6 @@ type SloppyControl = {
 	models: string[];
 	/** The turn is not finished: streaming, or running the tools it asked for. */
 	loading: boolean;
-	/** A call that rewrites the canvas is running, so the script is mid-change. */
 	writingScript: boolean;
 	/** Only the stream can be stopped; the tool calls it asked for run to the end. */
 	streaming: boolean;

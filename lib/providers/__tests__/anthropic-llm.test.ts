@@ -38,7 +38,7 @@ function respondWith(text: string) {
 	};
 }
 
-function streamWith(deltas: string[]) {
+function streamWith(deltas: string[], tail: LanguageModelV3StreamPart[] = []) {
 	const chunks: LanguageModelV3StreamPart[] = [
 		{ type: "stream-start", warnings: [] },
 		{ type: "text-start", id: "t0" },
@@ -48,6 +48,7 @@ function streamWith(deltas: string[]) {
 			delta,
 		})),
 		{ type: "text-end", id: "t0" },
+		...tail,
 		{
 			type: "finish",
 			finishReason: { unified: "stop", raw: "end_turn" },
@@ -208,6 +209,21 @@ describe("AnthropicLLM", () => {
 				{ text: " world", done: false },
 				{ text: "", done: true },
 			]);
+		});
+
+		it("throws on a mid-stream error instead of ending as a clean success", async () => {
+			streamWith(["Once upon"], [{ type: "error", error: "overloaded" }]);
+
+			const provider = new AnthropicLLM("test-key");
+			const read = async () => {
+				const chunks: { text: string; done: boolean }[] = [];
+				for await (const chunk of provider.stream({ prompt: "hi" })) {
+					chunks.push(chunk);
+				}
+				return chunks;
+			};
+
+			await expect(read()).rejects.toThrow("overloaded");
 		});
 	});
 });

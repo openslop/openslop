@@ -12,6 +12,7 @@ import type {
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { parseImageSource } from "@/lib/api/imageSource";
+import { stringifyError } from "@/lib/errors";
 import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
 import { BaseProvider } from "../base";
 import type { AgentModel } from "./agentModel";
@@ -123,12 +124,18 @@ export class AnthropicLLM extends BaseProvider<
 		};
 	}
 
+	// fullStream, not textStream: textStream filters error parts out, which
+	// would end a failed generation as a clean, empty success.
 	async *stream(
 		params: LLMGenerateParams,
 	): AsyncGenerator<{ text: string; done: boolean }> {
 		const result = streamText(this.buildRequest(params));
-		for await (const text of result.textStream) {
-			yield { text, done: false };
+		for await (const part of result.fullStream) {
+			if (part.type === "text-delta") yield { text: part.text, done: false };
+			if (part.type === "error")
+				throw part.error instanceof Error
+					? part.error
+					: new Error(stringifyError(part.error));
 		}
 		yield { text: "", done: true };
 	}

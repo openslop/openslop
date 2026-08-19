@@ -28,11 +28,11 @@ Project state (script, store, and generation snapshots) persists to the `project
 
 ## Sloppy
 
-Sloppy is the conversational agent in the editor's left panel, and every LLM call the user makes goes through it. Each turn is one model call: `POST /api/v1/agent` loads the transcript, composes a system prompt with the current script in it, streams reasoning, text and tool calls back over SSE, and persists the assistant turn.
+Sloppy is the conversational agent in the editor's left panel. A turn is a ReAct loop over `POST /api/v1/agent`: each request loads the transcript, appends the project's settings snapshot to the system prompt, and streams reasoning, text and tool calls back as a UI-message stream. The script itself is never in the prompt; the agent reads it through `read_script`.
 
-Tools are declared without an executor, so the SDK surfaces the call and stops. The client runs it against the Slate editor and reports the outcome to `POST /api/v1/agent/messages`, which records it without invoking the model. A turn ends at its tool call; the next user message starts the next one. The agent never writes `projects.script` or `projects.store` itself, so the client stays the single writer and autosave stays the single persistence path.
+Tools are declared without an executor, so a step stops at the call. The client runs it against the Slate editor and posts the result back to the same route, which invokes the model again, until the model answers in text or `MAX_TOOL_CALLS` withdraws the tools and forces an answer. The agent never writes `projects.script` or `projects.store` itself, so the client stays the single writer and autosave stays the single persistence path.
 
-Turns are stored as the model layer's own message type, so nothing is converted on the way in or out and a vendor's signed thinking blocks come back byte for byte. `lib/agent/` holds the domain (message helpers, tool registry, prompt), `lib/api/agentTurn.ts` runs the turn, and `app/components/sloppy/` is the panel, which reads everything it shows back from rows.
+Turns are stored as the SDK's UI message type, so the stream, the rows and the panel share one shape and nothing is converted between them. `lib/agent/` holds the domain (tool specs and executors, the context block, message helpers, prompt), `lib/api/agentTurn.ts` runs the turn, and `app/components/sloppy/` is the panel, which reads everything it shows back from rows.
 
 ## Three layers
 
@@ -40,7 +40,7 @@ The generation pipeline is split so providers and asset types can be swapped ind
 
 - **Connectors** (`lib/connectors/`): what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`.
 - **Gateways** (`lib/gateway/`): thin HTTP clients between connectors and our `/api/v1/*` routes. This seam lets connectors run against the live API or a mock. Today there is one OpenSlop gateway. A BYOK gateway will be added so users can call providers with their own API keys.
-- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. LLM providers go through the Vercel AI SDK, so `lib/providers/llm/registry.ts` is the one place a vendor is named: an entry declares its capabilities, builds a `LanguageModel`, and maps vendor-specific knobs like reasoning effort.
+- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. LLM providers go through the Vercel AI SDK; `getLLMProvider` in `lib/api/providers.ts` is the one place a vendor is chosen, and the provider's `agentModel()` builds the `LanguageModel` and maps vendor-specific knobs like reasoning effort.
 
 ## API routes
 

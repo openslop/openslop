@@ -205,6 +205,7 @@ export default function ComposerCopilot({
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
 	const hasText = value.trim().length > 0;
 	const pasting = intent === "script";
+	const activeTemplate = pasting ? undefined : template;
 
 	const handleSubmit = () => {
 		if (hasText) onSubmit();
@@ -228,8 +229,8 @@ export default function ComposerCopilot({
 					onEditArtStyle={openArtStyle}
 				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-					{template && !pasting && (
-						<TemplatePill template={template} onRemove={clearTemplate} />
+					{activeTemplate && (
+						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
 					)}
 					<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
 						<textarea
@@ -245,7 +246,7 @@ export default function ComposerCopilot({
 							style={{ fieldSizing: "content" }}
 							className=" max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
-						{!hasText && !template && !pasting && (
+						{!hasText && !activeTemplate && !pasting && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">
 								<AnimatedPlaceholder />
 							</div>
@@ -296,12 +297,12 @@ export default function ComposerCopilot({
 								}
 							/>
 						)}
-						{template && !pasting && (
+						{activeTemplate && (
 							<SettingPill
 								name="Template"
 								className="relative overflow-hidden"
-								style={{ backgroundColor: template.color }}
-								value={template.id}
+								style={{ backgroundColor: activeTemplate.color }}
+								value={activeTemplate.id}
 								options={TEMPLATE_OPTIONS}
 								onChange={applyTemplate}
 							/>
