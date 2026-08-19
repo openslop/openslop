@@ -22,6 +22,7 @@ export type ProjectContext = ProjectData & {
 	updateCharacter: (name: string, partial: Partial<MetadataCharacter>) => void;
 	removeCharacter: (name: string) => void;
 	setNarration: (narration: MetadataVoice) => void;
+	setTemplate: (templateId: string | undefined) => void;
 	setReferenceImages: (urls: string[]) => void;
 	addReferenceImages: (urls: string[]) => void;
 	removeReferenceImage: (index: number) => void;
@@ -63,6 +64,10 @@ export function createProjectStore(): ProjectStore {
 			setNarration: (narration) =>
 				set((state) => {
 					state.metadata.narration = narration;
+				}),
+			setTemplate: (templateId) =>
+				set((state) => {
+					state.metadata.templateId = templateId;
 				}),
 			setReferenceImages: (urls) =>
 				set((state) => {

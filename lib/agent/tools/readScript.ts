@@ -1,5 +1,5 @@
 import {
-	VOICE_TRAITS,
+	voiceTraitEntries,
 	type Metadata,
 	type MetadataVoice,
 } from "@/lib/project/types";
@@ -12,8 +12,8 @@ function section(heading: string, lines: string[]): string {
 }
 
 function voiceOf(voice: MetadataVoice): string {
-	const traits = VOICE_TRAITS.map((trait) => voice[trait]).filter(Boolean);
-	return traits.length > 0 ? traits.join(", ") : UNSET;
+	const values = voiceTraitEntries(voice).map(([, value]) => value);
+	return values.length > 0 ? values.join(", ") : UNSET;
 }
 
 function charactersOf(metadata: Metadata): string[] {
@@ -25,16 +25,12 @@ function charactersOf(metadata: Metadata): string[] {
 	);
 }
 
+/** Settings live in the per-request context block; this reads what it cannot carry. */
 export async function readScript(ctx: AgentToolContext): Promise<string> {
 	const metadata = ctx.readMetadata();
 	const script = ctx.readScript().trim();
 
 	return [
-		section("Project", [
-			`- title: ${metadata.title || UNSET}`,
-			`- art style: ${metadata.style || UNSET}`,
-			`- narrator voice: ${voiceOf(metadata.narration)}`,
-		]),
 		section("Characters", charactersOf(metadata)),
 		section("Script", [
 			script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",

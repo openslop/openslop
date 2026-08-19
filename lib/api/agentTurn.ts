@@ -7,7 +7,8 @@ import {
 } from "ai";
 import { nanoid } from "nanoid";
 import { stringifyError } from "@/lib/errors";
-import { SLOPPY_SYSTEM_PROMPT } from "@/lib/agent/prompt";
+import { sloppyInstructions } from "@/lib/agent/prompt";
+import type { AgentContext } from "@/lib/agent/context";
 import {
 	toolCallsMade,
 	upsertMessage,
@@ -34,6 +35,7 @@ export type AgentTurnRequest = {
 	projectId: string;
 	userId: string;
 	message: SloppyMessage;
+	context: AgentContext;
 	model?: LLMModelName;
 };
 
@@ -72,7 +74,7 @@ export async function streamAgentTurn(
 	const startedAt = Date.now();
 	const result = streamText({
 		model,
-		instructions: SLOPPY_SYSTEM_PROMPT,
+		instructions: sloppyInstructions(request.context),
 		messages: modelMessages,
 		tools: SLOPPY_TOOLS,
 		// Withdrawing the tools is what ends a runaway turn: the model has nothing

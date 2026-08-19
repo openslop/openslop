@@ -11,11 +11,13 @@ import {
 } from "@/lib/api/route-handler";
 import { badRequest } from "@/lib/api/response";
 import { parseSloppyMessage } from "@/lib/agent/messages";
+import { agentContextSchema } from "@/lib/agent/context";
 import { isLLMModelName } from "@/lib/connectors/llm/openslop/models";
 
 const turnSchema = z.object({
 	projectId: z.uuid(),
 	message: z.unknown(),
+	context: agentContextSchema,
 	model: z.string().refine(isLLMModelName).optional(),
 });
 

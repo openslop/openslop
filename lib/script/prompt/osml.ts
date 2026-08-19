@@ -12,14 +12,9 @@ import {
 	TTS_PITCHES,
 	TTS_SPEEDS,
 } from "@/lib/connectors/tts/enums";
-import type { LLMPlugin } from "@/lib/connectors/types";
-import {
-	INPUT_LANGUAGE,
-	languagePrompt,
-	spokenLanguage,
-} from "./language-prompt";
+import { languagePrompt } from "./language";
 
-function osmlSystemPrompt(language: string): string {
+export function osmlSpec(language: string): string {
 	return dedent`
   The story script must be written in a special XML format that strictly follows these rules:
 
@@ -149,16 +144,3 @@ ${languagePrompt(language)}
   - NEVER nest XML tags within other XML tags.
 `;
 }
-
-export const osmlPlugin: LLMPlugin = {
-	name: "osml",
-	beforeGenerate(params, ctx) {
-		if (params.systemPrompt) return params;
-		return {
-			...params,
-			systemPrompt: osmlSystemPrompt(
-				spokenLanguage(ctx?.state?.metadata, INPUT_LANGUAGE),
-			),
-		};
-	},
-};

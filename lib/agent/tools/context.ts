@@ -8,10 +8,19 @@ import type {
 /** What a tool can do to the canvas, never the parts it is built from. */
 export type AgentToolContext = {
 	readScript: () => string;
+	countSpokenWords: () => number;
+	referenceImages: () => string[];
+	avatarUrl: (name: string) => string | undefined;
+	/** One focused LLM call, for tools whose whole job is a generation. */
+	generateText: (
+		prompt: string,
+		options?: { maxTokens?: number },
+	) => Promise<string>;
 	readMetadata: () => Metadata;
-	clearScript: () => void;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
+	adaptScript: (script: string) => Promise<void>;
+	applyTemplate: (templateId: string) => void;
 	setMetadata: (patch: DeepPartial<Metadata>) => void;
 	setCharacter: (
 		name: string,

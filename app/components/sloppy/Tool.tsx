@@ -65,6 +65,10 @@ const Failed = ({ text }: { text: string }) => (
 	<Outcome icon={AlertCircle} tone="text-destructive" text={text} />
 );
 
+/** Structured outputs speak to the model; the transcript shows them as JSON. */
+const outputText = (output: unknown): string =>
+	typeof output === "string" ? output : JSON.stringify(output);
+
 export function Tool({ part }: { part: ToolUIPart<SloppyTools> }) {
 	const { icon: Icon, label } = toolPresentation(part);
 	return (
@@ -75,15 +79,20 @@ export function Tool({ part }: { part: ToolUIPart<SloppyTools> }) {
 			>
 				<div className="flex flex-col gap-1.5">
 					<DisclosureJson value={part.input} />
-					{part.state === "output-available" && (
-						<DisclosureText>{part.output}</DisclosureText>
-					)}
+					{part.state === "output-available" &&
+						(typeof part.output === "string" ? (
+							<DisclosureText>{part.output}</DisclosureText>
+						) : (
+							<DisclosureJson value={part.output} />
+						))}
 					{part.state === "output-error" && (
 						<DisclosureText>{part.errorText}</DisclosureText>
 					)}
 				</div>
 			</Disclosure>
-			{part.state === "output-available" && <Returned text={part.output} />}
+			{part.state === "output-available" && (
+				<Returned text={outputText(part.output)} />
+			)}
 			{part.state === "output-error" && <Failed text={part.errorText} />}
 		</>
 	);

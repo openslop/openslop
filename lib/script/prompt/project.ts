@@ -1,33 +1,28 @@
 import dedent from "dedent";
-import { requireState } from "@/lib/connectors/plugins";
-import type { LLMPlugin } from "@/lib/connectors/types";
 import {
-	VOICE_TRAITS,
+	voiceTraitEntries,
 	type Metadata,
 	type MetadataCharacter,
 	type MetadataVoice,
 } from "@/lib/project/types";
-import { prependSystemPrompt } from "./system-prompt";
+import { VIDEO_LENGTH_SPECS } from "@/lib/video/videoLength";
 
 function renderVoice(voice: MetadataVoice): string {
-	const lines = VOICE_TRAITS.flatMap((field) => {
-		const value = voice[field];
-		return value ? [`- ${field}: ${value}`] : [];
-	});
-	return lines.join("\n");
+	return voiceTraitEntries(voice)
+		.map(([trait, value]) => `- ${trait}: ${value}`)
+		.join("\n");
 }
 
 function renderCharacter(name: string, character: MetadataCharacter): string {
 	const voiceLines = renderVoice(character);
-	const appearanceLine =
-		character.appearance && !character.avatarUploaded
-			? `- appearance: ${character.appearance}`
-			: "";
+	const appearanceLine = character.appearance
+		? `- appearance: ${character.appearance}`
+		: "";
 	const body = [voiceLines, appearanceLine].filter(Boolean).join("\n");
 	return `## ${name}\n\n${body}`;
 }
 
-function buildPreamble(metadata: Metadata): string {
+export function projectPreamble(metadata: Metadata): string {
 	const sections: string[] = [];
 
 	if (metadata.style) {
@@ -66,10 +61,13 @@ function buildPreamble(metadata: Metadata): string {
 	return sections.join("\n\n");
 }
 
-export const projectMetadataPlugin: LLMPlugin = {
-	name: "projectMetadata",
-	beforeGenerate(params, ctx) {
-		const { metadata } = requireState(ctx, "projectMetadata");
-		return prependSystemPrompt(params, buildPreamble(metadata));
-	},
-};
+export function lengthSection(metadata: Metadata): string {
+	const { minWords, maxWords } =
+		VIDEO_LENGTH_SPECS[metadata.videoSettings.length];
+
+	return dedent`
+		# Length
+
+		Write ${minWords} to ${maxWords} words of dialogue. Only spoken words count;
+		descriptions and attributes do not.`;
+}

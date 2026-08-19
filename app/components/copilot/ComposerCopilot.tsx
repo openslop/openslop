@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState } from "react";
 import {
 	Codesandbox,
 	CornerDownLeft,
@@ -16,13 +16,14 @@ import {
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
-import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
 import {
-	TEMPLATES,
-	getTemplate,
-	type Template,
-} from "@/lib/templates/templates";
-import { useConfig } from "@/lib/config/ConfigProvider";
+	SegmentedControl,
+	type SegmentedControlOption,
+} from "@/components/ui/segmented-control";
+import AnimatedPlaceholder from "@/app/components/AnimatedPlaceholder";
+import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
+import { TEMPLATES, type Template } from "@/lib/templates/templates";
+import { useTemplate } from "@/lib/templates/useTemplate";
 import { useProject } from "@/lib/project/useProject";
 import {
 	LANGUAGE_CHOICES,
@@ -30,7 +31,6 @@ import {
 	type LanguageChoice,
 } from "@/lib/project/language";
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
-import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import {
 	useUpdateVideoSettings,
@@ -47,15 +47,25 @@ import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 import { SettingPill, type SettingPillOption } from "./SettingPill";
 
-const MODE_LABELS: Record<Mode, string> = {
-	story: "Describe a story",
-	script: "Paste in a script",
-	template: "Use a template",
-};
+/** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
+type ComposerIntent = "story" | "script";
 
-const MODE_OPTIONS: SettingPillOption<Mode>[] = (
-	Object.keys(MODE_LABELS) as Mode[]
-).map((value) => ({ value, label: MODE_LABELS[value] }));
+const INTENT_OPTIONS: SegmentedControlOption<ComposerIntent>[] = [
+	{ value: "story", label: "Describe a video" },
+	{ value: "script", label: "Paste a script" },
+];
+
+const SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
+Soft glowing stars twinkle quietly across a deep blue sky.
+A large silver moon glows softly above peaceful clouds.
+Gentle music begins.
+
+NARRATOR (soft, soothing voice)
+High above the quiet forests and sleepy hills…
+past the drifting clouds…
+there was a small glowing garden hidden on the moon.
+
+And in that garden… lived a little rabbit named Lumi…`;
 
 const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
@@ -168,18 +178,15 @@ interface ComposerCopilotProps {
 	value: string;
 	onValueChange: (value: string) => void;
 	onSubmit: () => void;
-	placeholder?: string;
-	placeholderOverlay?: ReactNode;
 }
 
 export default function ComposerCopilot({
 	value,
 	onValueChange,
 	onSubmit,
-	placeholder,
-	placeholderOverlay,
 }: ComposerCopilotProps) {
-	const { mode, setMode, selectedTemplateId, selectTemplate } = useConfig();
+	const [intent, setIntent] = useState<ComposerIntent>("story");
+	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const videoLength = useVideoSetting("length");
 	const updateVideoSettings = useUpdateVideoSettings();
@@ -196,10 +203,8 @@ export default function ComposerCopilot({
 
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
-	const isTemplateMode = mode === "template";
-	const isScriptMode = mode === "script";
 	const hasText = value.trim().length > 0;
-	const selectedTemplate = getTemplate(selectedTemplateId);
+	const pasting = intent === "script";
 
 	const handleSubmit = () => {
 		if (hasText) onSubmit();
@@ -208,6 +213,14 @@ export default function ComposerCopilot({
 	return (
 		<div className="w-full rounded-xl border border-accent/30 bg-card transition-shadow focus-within:shadow-elevation-5">
 			<div className="px-4 py-3">
+				<div className="mb-3 flex justify-center">
+					<SegmentedControl
+						value={intent}
+						options={INTENT_OPTIONS}
+						onChange={setIntent}
+						ariaLabel="What you are giving Sloppy"
+					/>
+				</div>
 				<ComposerAssets
 					uploadingCount={uploadingCount}
 					onEditCharacter={editCharacter}
@@ -215,29 +228,26 @@ export default function ComposerCopilot({
 					onEditArtStyle={openArtStyle}
 				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-					{isTemplateMode && (
-						<TemplatePill
-							template={selectedTemplate}
-							onRemove={() => setMode("story")}
-						/>
+					{template && !pasting && (
+						<TemplatePill template={template} onRemove={clearTemplate} />
 					)}
 					<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
 						<textarea
-							rows={2}
-							aria-label="Enter your prompt"
+							rows={pasting ? 8 : 2}
+							aria-label={pasting ? "Paste your script" : "Enter your prompt"}
 							value={value}
 							onChange={(e) => onValueChange(e.target.value)}
 							onKeyDown={(e) => {
 								if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
 									handleSubmit();
 							}}
-							placeholder={placeholder}
+							placeholder={pasting ? SCRIPT_PLACEHOLDER : undefined}
 							style={{ fieldSizing: "content" }}
 							className=" max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
-						{!hasText && !isTemplateMode && placeholderOverlay && (
+						{!hasText && !template && !pasting && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">
-								{placeholderOverlay}
+								<AnimatedPlaceholder />
 							</div>
 						)}
 					</div>
@@ -251,16 +261,6 @@ export default function ComposerCopilot({
 							onCreateCharacter={openCreateCharacter}
 							onSelectNarrator={openNarrator}
 							onSetArtStyle={openArtStyle}
-						/>
-						<SettingPill
-							name="Composer mode"
-							value={mode}
-							options={MODE_OPTIONS}
-							onChange={(next: Mode) =>
-								next === "template"
-									? selectTemplate(selectedTemplateId)
-									: setMode(next)
-							}
 						/>
 						<SettingPill
 							name="Aspect ratio"
@@ -285,7 +285,7 @@ export default function ComposerCopilot({
 							options={models.map((value) => ({ value, label: value }))}
 							onChange={setModel}
 						/>
-						{!isScriptMode && (
+						{!pasting && (
 							<SettingPill
 								name="Video length"
 								icon={<Hourglass className="mr-1 h-3 w-3" />}
@@ -296,14 +296,14 @@ export default function ComposerCopilot({
 								}
 							/>
 						)}
-						{isTemplateMode && (
+						{template && !pasting && (
 							<SettingPill
 								name="Template"
 								className="relative overflow-hidden"
-								style={{ backgroundColor: selectedTemplate.color }}
-								value={selectedTemplateId}
+								style={{ backgroundColor: template.color }}
+								value={template.id}
 								options={TEMPLATE_OPTIONS}
-								onChange={selectTemplate}
+								onChange={applyTemplate}
 							/>
 						)}
 					</div>

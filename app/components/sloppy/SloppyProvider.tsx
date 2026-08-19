@@ -13,6 +13,7 @@ import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/specs";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
+import { useAgentContext } from "@/lib/agent/projectContext";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/connectors/registry";
@@ -80,6 +81,7 @@ export function SloppyProvider({
 }) {
 	const { projectId, connectorConfig } = useConfig();
 	const runTool = useAgentTools(editor);
+	const readContext = useAgentContext(editor);
 	const restored = useTranscript(projectId);
 	const { config } = getDefaultConnector(connectorConfig, "llm");
 	const [model, setModel] = useState(config.defaultModel);
@@ -96,6 +98,7 @@ export function SloppyProvider({
 						...body,
 						projectId,
 						message: messages.at(-1),
+						context: readContext(),
 						model: turnModel.current,
 					},
 				}),

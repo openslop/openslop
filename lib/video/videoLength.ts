@@ -11,7 +11,7 @@ export type VideoLength = (typeof VIDEO_LENGTHS)[number];
 
 export const DEFAULT_VIDEO_LENGTH: VideoLength = "3-5m";
 
-const NARRATION_WORDS_PER_MINUTE = 180;
+export const NARRATION_WORDS_PER_MINUTE = 180;
 
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;

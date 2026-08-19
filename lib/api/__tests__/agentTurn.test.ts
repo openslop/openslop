@@ -25,7 +25,20 @@ const { conversations, provider } = vi.hoisted(() => ({
 vi.mock("../conversations", () => conversations);
 vi.mock("../providers", () => ({ getLLMProvider: () => provider }));
 
+import type { AgentContext } from "@/lib/agent/context";
 import { streamAgentTurn } from "../agentTurn";
+
+const AGENT_CONTEXT: AgentContext = {
+	title: "",
+	style: "",
+	language: "auto",
+	length: "3-5m",
+	aspectRatio: "16:9",
+	narration: {},
+	characters: [],
+	referenceImageCount: 0,
+	scriptIsEmpty: true,
+};
 
 const USAGE = {
 	inputTokens: { total: 12, noCache: 12, cacheRead: 0, cacheWrite: 0 },
@@ -94,6 +107,7 @@ async function runTurn(
 		projectId: "p1",
 		userId: "u1",
 		message: options.message ?? asked("make it shorter"),
+		context: AGENT_CONTEXT,
 		model: options.model,
 	});
 	return chunksOf(response);

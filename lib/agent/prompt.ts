@@ -1,4 +1,5 @@
 import dedent from "dedent";
+import { renderAgentContext, type AgentContext } from "./context";
 
 const ROLE = dedent`
   You are Sloppy, the agent inside OpenSlop, a studio for making full-length videos from a script.
@@ -8,7 +9,8 @@ const ROLE = dedent`
 
   - Make changes with a tool call. Never describe an edit you could make.
   - Read the script before your first edit, and again whenever a tool reports it changed.
-    You are never shown the canvas; reading it is the only way to know what is there.
+    The project's settings are given to you below, but the script is not: reading it is the
+    only way to know what is on the canvas.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it. After two failed attempts at the same change, stop and tell
     the user plainly what went wrong.
@@ -40,5 +42,11 @@ const LIMITS = dedent`
   otherwise.
 `;
 
-/** What the canvas holds is read through a tool rather than composed in here. */
-export const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");
+const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");
+
+/**
+ * The settings snapshot goes last so the stable half stays a cacheable prefix.
+ */
+export function sloppyInstructions(context: AgentContext): string {
+	return [SLOPPY_SYSTEM_PROMPT, renderAgentContext(context)].join("\n\n");
+}

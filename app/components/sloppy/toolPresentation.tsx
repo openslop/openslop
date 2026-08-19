@@ -4,9 +4,11 @@ import type { ToolUIPart } from "ai";
 import {
 	Eye,
 	Film,
+	Hourglass,
 	Mic,
 	Pencil,
 	SlidersHorizontal,
+	Translate,
 	User,
 	type IconComponent,
 } from "@/components/ui/icon";
@@ -32,6 +34,27 @@ export function toolPresentation(
 		}
 		case "tool-write_script":
 			return { icon: Film, label: "Writing a new script" };
+		case "tool-adapt_script":
+			return { icon: Film, label: "Putting your script on the canvas" };
+		case "tool-set_video_settings":
+			return { icon: Hourglass, label: "Adjusting the video settings" };
+		case "tool-view_reference_images":
+			return { icon: Eye, label: "Looking at the reference images" };
+		case "tool-view_avatar": {
+			const name = part.input?.name;
+			return {
+				icon: Eye,
+				label: name ? `Looking at ${name}'s avatar` : "Looking at an avatar",
+			};
+		}
+		case "tool-outline_story":
+			return { icon: Pencil, label: "Outlining the story" };
+		case "tool-count_words":
+			return { icon: Hourglass, label: "Counting the spoken words" };
+		case "tool-set_language":
+			return { icon: Translate, label: "Setting the language" };
+		case "tool-apply_template":
+			return { icon: SlidersHorizontal, label: "Adopting a template" };
 		case "tool-set_metadata":
 			return {
 				icon: SlidersHorizontal,

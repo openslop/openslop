@@ -17,9 +17,14 @@ import { useProject } from "@/lib/project/useProject";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
+import {
+	buildScriptPrompt,
+	sourceText,
+	type ScriptSource,
+} from "./prompt/build";
 
 type ScriptControl = {
-	submitPrompt: (prompt: string) => Promise<void>;
+	runScript: (source: ScriptSource) => Promise<void>;
 	/** Leaves the hero for the workspace, before there is anything to show in it. */
 	enterWorkspace: () => void;
 	startBlank: () => void;
@@ -54,7 +59,7 @@ export function ScriptProvider({
 	initialScript?: string;
 	children: ReactNode;
 }) {
-	const { connectorConfig, mode } = useConfig();
+	const { connectorConfig } = useConfig();
 	const store = useProjectStoreHandle();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const [script, setScript] = useState(initialScript);
@@ -66,19 +71,25 @@ export function ScriptProvider({
 		"llm",
 	);
 
-	const submitPrompt = useCallback(
-		async (prompt: string) => {
-			updateMetadata({ lastMode: mode, lastPrompt: prompt });
+	const runScript = useCallback(
+		async (source: ScriptSource) => {
+			updateMetadata({ lastPrompt: sourceText(source) });
 			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
-			const state = store.getState();
-			for await (const chunk of connector.stream({ prompt }, { state })) {
+			const { system, prompt } = buildScriptPrompt(
+				store.getState().metadata,
+				source,
+			);
+			for await (const chunk of connector.stream({
+				prompt,
+				systemPrompt: system,
+			})) {
 				if (!chunk.text) continue;
 				setHasContent(true);
 				appendChunk(chunk.text);
 			}
 		},
-		[store, llmProvider, llmConfig, appendChunk, reset, updateMetadata, mode],
+		[store, llmProvider, llmConfig, appendChunk, reset, updateMetadata],
 	);
 
 	const enterWorkspace = useCallback(() => setHasContent(true), []);
@@ -89,8 +100,8 @@ export function ScriptProvider({
 	}, []);
 
 	const control = useMemo<ScriptControl>(
-		() => ({ submitPrompt, enterWorkspace, startBlank }),
-		[submitPrompt, enterWorkspace, startBlank],
+		() => ({ runScript, enterWorkspace, startBlank }),
+		[runScript, enterWorkspace, startBlank],
 	);
 
 	return (

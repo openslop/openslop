@@ -1,8 +1,6 @@
 import dedent from "dedent";
-import type { LLMPlugin } from "@/lib/connectors/types";
-import { prependSystemPrompt } from "./system-prompt";
 
-const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
+export const ADAPT_GUIDELINES = dedent`
   You are a script-to-XML converter.
   The user will provide some text, and you will return that text with
   annotations according to the XML format described below. Do NOT modify the script
@@ -14,10 +12,3 @@ const SCRIPT_MODE_SYSTEM_PROMPT = dedent`
   - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.
   - Never add dialogue or narrative text to the story that is not in the original script.
 `;
-
-export const scriptModePlugin: LLMPlugin = {
-	name: "scriptMode",
-	beforeGenerate(params) {
-		return prependSystemPrompt(params, SCRIPT_MODE_SYSTEM_PROMPT);
-	},
-};

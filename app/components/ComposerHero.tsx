@@ -3,28 +3,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { useTemplate } from "@/lib/templates/useTemplate";
 import { useSloppy } from "./sloppy/SloppyProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
 import ComposerCopilot from "./copilot/ComposerCopilot";
-import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import TemplateGallery from "./TemplateGallery";
-
-const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
-Soft glowing stars twinkle quietly across a deep blue sky.
-A large silver moon glows softly above peaceful clouds.
-Gentle music begins.
-
-NARRATOR (soft, soothing voice)
-High above the quiet forests and sleepy hills…
-past the drifting clouds…
-there was a small glowing garden hidden on the moon.
-
-And in that garden… lived a little rabbit named Lumi…`;
 
 export default function ComposerHero() {
 	const { enterWorkspace, startBlank } = useScriptControl();
-	const { mode, selectTemplate } = useConfig();
+	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
 
@@ -47,10 +34,6 @@ export default function ComposerHero() {
 					start(value);
 					setValue("");
 				}}
-				placeholder={mode === "script" ? INPUT_SCRIPT_PLACEHOLDER : undefined}
-				placeholderOverlay={
-					mode === "script" ? undefined : <AnimatedPlaceholder />
-				}
 			/>
 
 			<Button
@@ -64,7 +47,7 @@ export default function ComposerHero() {
 
 			<TemplateGallery
 				onSelect={(templateId, examplePrompt) => {
-					selectTemplate(templateId);
+					applyTemplate(templateId);
 					setValue(examplePrompt);
 				}}
 			/>

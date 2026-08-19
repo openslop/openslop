@@ -21,7 +21,7 @@ export function Reasoning({
 			key={String(open)}
 			defaultOpen={open}
 			icon={<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />}
-			label={streaming ? "Slopping…" : "Done slopping"}
+			label={streaming ? "Thinking…" : "Done thinking"}
 			pending={streaming}
 		>
 			<DisclosureText>{text}</DisclosureText>

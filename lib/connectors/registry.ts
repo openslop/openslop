@@ -2,7 +2,6 @@ import set from "lodash/fp/set";
 import { createConnector } from "./factory";
 import { IMAGE_MODELS } from "./image/openslop/models";
 import { LLM_MODELS } from "./llm/openslop/models";
-import { osmlPlugin } from "./llm/plugins/osml";
 import { MUSIC_MODELS } from "./music/openslop/models";
 import { SFX_MODELS } from "./sfx/openslop/models";
 import { TTS_MODELS } from "./tts/openslop/models";
@@ -39,7 +38,7 @@ export const DEFAULT_PROVIDER: ProviderKey = "openslop";
 
 /** Plugin-free baseline; project-scoped plugin chains are layered on by `ConfigProvider`. */
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
-	llm: openslopConfig("Slop LLM v1", LLM_MODELS, [osmlPlugin]),
+	llm: openslopConfig("Slop LLM v1", LLM_MODELS),
 	tts: openslopConfig("Slop TTS v1", TTS_MODELS),
 	image: openslopConfig("Slop Image v1", IMAGE_MODELS),
 	animated_image: openslopConfig("Slop Video v1", VIDEO_MODELS),
@@ -65,21 +64,12 @@ export function getDefaultConnector(
 	return { provider: provider as ProviderKey, config };
 }
 
-/**
- * Build the registry's default connector for `type`. `plugins`, when given,
- * replaces the registered chain rather than extending it.
- */
 export function createDefaultConnector<T extends ConnectorType>(
 	registry: ConnectorRegistry,
 	type: T,
-	plugins?: ConnectorPlugin[],
 ) {
 	const { provider, config } = getDefaultConnector(registry, type);
-	return createConnector(
-		type,
-		provider,
-		plugins ? set("plugins", plugins, config) : config,
-	);
+	return createConnector(type, provider, config);
 }
 
 export function withRegistry(registry: ConnectorRegistry) {
