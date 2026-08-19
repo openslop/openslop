@@ -15,7 +15,9 @@ export function upsertMessage(
 	return index === -1 ? [...messages, message] : messages.with(index, message);
 }
 
-function trailingAssistant(messages: SloppyMessage[]): SloppyMessage | null {
+export function trailingAssistant(
+	messages: SloppyMessage[],
+): SloppyMessage | null {
 	const last = messages.at(-1);
 	return last?.role === "assistant" ? last : null;
 }

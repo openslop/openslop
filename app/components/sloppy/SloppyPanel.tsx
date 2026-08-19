@@ -2,10 +2,13 @@
 
 import { memo, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { trailingAssistant } from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
-import { AgentTurn, PendingTurn, UserMessage } from "./SloppyMessage";
+import { AgentTurn, UserMessage } from "./SloppyMessage";
 import { useSloppy, useSloppyMessages } from "./SloppyProvider";
 import { TranscriptSkeleton } from "./TranscriptSkeleton";
+import { turnStatus } from "./turnDisplay";
+import { WorkingStatus } from "./TurnStatus";
 
 const EMPTY_HINT = "Ask Sloppy to change the script however you want.";
 
@@ -58,9 +61,11 @@ function Transcript({
 					entering={index >= restored}
 				/>
 			))}
-			{working && messages.at(-1)?.role === "user" && (
+			{working && (
 				<li>
-					<PendingTurn />
+					<WorkingStatus
+						status={turnStatus(trailingAssistant(messages)?.parts ?? [])}
+					/>
 				</li>
 			)}
 		</ol>

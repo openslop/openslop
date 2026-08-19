@@ -1,12 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ToolUIPart } from "ai";
-import {
-	AlertCircle,
-	CornerDownRight,
-	type IconComponent,
-} from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import {
 	Disclosure,
@@ -16,54 +11,49 @@ import {
 import type { SloppyTools } from "@/lib/agent/types";
 import { toolPresentation } from "./toolPresentation";
 
-const PREVIEW_LIMIT = 240;
-
-function Outcome({
-	icon: Icon,
-	tone,
-	text,
-}: {
-	icon: IconComponent;
-	tone: string;
-	text: string;
-}) {
+function Outcome({ failed = false, text }: { failed?: boolean; text: string }) {
 	const [expanded, setExpanded] = useState(false);
+	const [clipped, setClipped] = useState(false);
 	const bodyId = useId();
-	const clips = text.length > PREVIEW_LIMIT;
+	const bodyRef = useRef<HTMLParagraphElement>(null);
+
+	useEffect(() => {
+		const body = bodyRef.current;
+		if (body) setClipped(body.scrollHeight > body.clientHeight);
+	}, [text]);
+
+	const clips = clipped || expanded;
 
 	return (
-		<div className={cn("flex items-start gap-1.5 pl-4 text-label-xs", tone)}>
-			<Icon className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-			<div className="flex flex-col items-start gap-0.5">
-				<p
-					id={bodyId}
-					className={cn("break-words", clips && !expanded && "line-clamp-2")}
+		<div
+			className={cn(
+				"ml-2.5 flex min-w-0 flex-col items-start gap-0.5 border-l pl-3 text-label-xs",
+				failed
+					? "border-destructive/40 text-destructive"
+					: "border-border text-muted-foreground/70",
+			)}
+		>
+			<p
+				ref={bodyRef}
+				id={bodyId}
+				className={cn("wrap-anywhere", !expanded && "line-clamp-1")}
+			>
+				{text}
+			</p>
+			{clips && (
+				<button
+					type="button"
+					onClick={() => setExpanded((prev) => !prev)}
+					aria-expanded={expanded}
+					aria-controls={bodyId}
+					className="-ml-1 rounded-md px-1 py-0.5 text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-ring"
 				>
-					{text}
-				</p>
-				{clips && (
-					<button
-						type="button"
-						onClick={() => setExpanded((prev) => !prev)}
-						aria-expanded={expanded}
-						aria-controls={bodyId}
-						className="-ml-1 rounded-md px-1 py-0.5 text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-ring"
-					>
-						{expanded ? "Show less" : "Show more"}
-					</button>
-				)}
-			</div>
+					{expanded ? "Show less" : "Show more"}
+				</button>
+			)}
 		</div>
 	);
 }
-
-const Returned = ({ text }: { text: string }) => (
-	<Outcome icon={CornerDownRight} tone="text-muted-foreground" text={text} />
-);
-
-const Failed = ({ text }: { text: string }) => (
-	<Outcome icon={AlertCircle} tone="text-destructive" text={text} />
-);
 
 /** Structured outputs speak to the model; the transcript shows them as JSON. */
 const outputText = (output: unknown): string =>
@@ -91,9 +81,11 @@ export function Tool({ part }: { part: ToolUIPart<SloppyTools> }) {
 				</div>
 			</Disclosure>
 			{part.state === "output-available" && (
-				<Returned text={outputText(part.output)} />
+				<Outcome text={outputText(part.output)} />
 			)}
-			{part.state === "output-error" && <Failed text={part.errorText} />}
+			{part.state === "output-error" && (
+				<Outcome failed text={part.errorText} />
+			)}
 		</>
 	);
 }

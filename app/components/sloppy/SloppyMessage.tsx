@@ -5,8 +5,8 @@ import type { SloppyMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { Reasoning } from "./Reasoning";
 import { Tool } from "./Tool";
-import { TurnStatus } from "./TurnStatus";
-import { turnStatus, userText, type TurnPart } from "./turnDisplay";
+import { WorkedStatus } from "./TurnStatus";
+import { userText, type TurnPart } from "./turnDisplay";
 
 export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
@@ -14,10 +14,6 @@ export function UserMessage({ message }: { message: SloppyMessage }) {
 			{userText(message)}
 		</p>
 	);
-}
-
-export function PendingTurn() {
-	return <TurnStatus streaming status={turnStatus([])} seconds={undefined} />;
 }
 
 function ReplyText({ text }: { text: string }) {
@@ -64,12 +60,8 @@ export function AgentTurn({
 					superseded={part !== newest}
 				/>
 			))}
-			{(streaming || worked) && (
-				<TurnStatus
-					streaming={streaming}
-					status={turnStatus(message.parts)}
-					seconds={message.metadata?.workSeconds}
-				/>
+			{!streaming && worked && (
+				<WorkedStatus seconds={message.metadata?.workSeconds} />
 			)}
 		</>
 	);
