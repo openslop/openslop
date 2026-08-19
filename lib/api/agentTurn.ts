@@ -14,7 +14,7 @@ import {
 	upsertMessage,
 	pruneTranscript,
 } from "@/lib/agent/messages";
-import { SLOPPY_TOOLS } from "@/lib/agent/tools/specs";
+import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
 import {
 	LLM_MODELS,

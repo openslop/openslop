@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
-import { executeToolCall } from "../tools/registry";
+import {
+	SLOPPY_TOOLS,
+	agentToolCallSchema,
+	executeToolCall,
+} from "../tools/registry";
 import { MetadataSchema } from "@/lib/project/types";
 
 const metadata = MetadataSchema.parse({
@@ -19,7 +23,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
-	applyTemplate: () => {},
 	setMetadata: () => {},
 	setCharacter: (name) => ({ name, created: !(name in metadata.characters) }),
 	...over,
@@ -191,38 +194,6 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("refuses a template over a script rather than resetting the project", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "apply_template", input: { template_id: "pov-life" } },
-			context({
-				applyTemplate: () => {
-					throw new Error("should not run");
-				},
-			}),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("resets the project");
-	});
-
-	it("adopts a template onto an empty canvas", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "apply_template", input: { template_id: "pov-life" } },
-			context({ readScript: () => "" }),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("POV Life");
-	});
-
-	it("rejects a template nothing can apply", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "apply_template", input: { template_id: "not-a-template" } },
-			context({ readScript: () => "" }),
-		);
-
-		expect(outcome.ok).toBe(false);
-	});
-
 	it("reports the count against the project's word budget", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "count_words", input: {} },
@@ -306,5 +277,69 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toBe("1. A rabbit finds a lantern.");
 		expect(prompts[0]).toContain("a rabbit on the moon");
 		expect(prompts[0]).toContain("conflict, twists, and a resolution");
+	});
+});
+
+describe("SLOPPY_TOOLS", () => {
+	it("offers the model exactly the tools the editor can run", () => {
+		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
+			"read_script",
+			"edit_script",
+			"write_script",
+			"adapt_script",
+			"set_video_settings",
+			"set_language",
+			"view_reference_images",
+			"view_avatar",
+			"outline_story",
+			"count_words",
+			"set_metadata",
+			"set_narrator",
+			"set_character",
+		]);
+	});
+
+	it("declares no executor, so a step stops at the call for the editor to run", () => {
+		for (const tool of Object.values(SLOPPY_TOOLS)) {
+			expect(tool.execute).toBeUndefined();
+		}
+	});
+});
+
+describe("agentToolCallSchema", () => {
+	it("can read a call to every tool the model is offered", () => {
+		const readable = new Set(
+			agentToolCallSchema.options.map((option) => option.shape.toolName.value),
+		);
+
+		expect([...readable].sort()).toEqual(Object.keys(SLOPPY_TOOLS).sort());
+	});
+
+	it("reads a call as the input its own tool takes", () => {
+		const parsed = agentToolCallSchema.parse({
+			toolName: "write_script",
+			input: { brief: "a rabbit on the moon" },
+		});
+
+		expect(parsed).toEqual({
+			toolName: "write_script",
+			input: { brief: "a rabbit on the moon" },
+		});
+	});
+
+	it("rejects a call carrying another tool's input", () => {
+		const parsed = agentToolCallSchema.safeParse({
+			toolName: "write_script",
+			input: { ops: [] },
+		});
+
+		expect(parsed.success).toBe(false);
+	});
+
+	it("rejects a tool nothing can run", () => {
+		expect(
+			agentToolCallSchema.safeParse({ toolName: "render_video", input: {} })
+				.success,
+		).toBe(false);
 	});
 });

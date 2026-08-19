@@ -11,7 +11,7 @@ import { useChat } from "@ai-sdk/react";
 import { AGENT_PATH, loadAgentTranscript } from "@/lib/agent/client";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
-import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/specs";
+import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
 import { useAgentContext } from "@/lib/agent/projectContext";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";

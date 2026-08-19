@@ -1,9 +1,11 @@
+import dedent from "dedent";
+import { z } from "zod";
 import {
 	voiceTraitEntries,
 	type Metadata,
 	type MetadataVoice,
 } from "@/lib/project/types";
-import type { AgentToolContext } from "./context";
+import { defineTool } from "./defineTool";
 
 const UNSET = "unset";
 
@@ -26,14 +28,25 @@ function charactersOf(metadata: Metadata): string[] {
 }
 
 /** Settings live in the per-request context block; this reads what it cannot carry. */
-export async function readScript(ctx: AgentToolContext): Promise<string> {
-	const metadata = ctx.readMetadata();
-	const script = ctx.readScript().trim();
+export const readScript = defineTool({
+	description: dedent`
+	  Read the canvas: the project's characters, then the script as OSML with the \`id\` of
+	  every element. The project's settings arrive with every request; this is the script.
 
-	return [
-		section("Characters", charactersOf(metadata)),
-		section("Script", [
-			script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",
-		]),
-	].join("\n\n");
-}
+	  Read before your first edit, and again after anything changed the script. Ids and text
+	  move when a script is edited, so editing from a stale reading fails.
+	`,
+	input: z.object({}),
+	output: z.string(),
+	execute: async (_input, ctx) => {
+		const metadata = ctx.readMetadata();
+		const script = ctx.readScript().trim();
+
+		return [
+			section("Characters", charactersOf(metadata)),
+			section("Script", [
+				script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",
+			]),
+		].join("\n\n");
+	},
+});

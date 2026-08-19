@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { InferUITools, UIDataTypes, UIMessage } from "ai";
-import { SLOPPY_TOOLS } from "./tools/specs";
+import { SLOPPY_TOOLS } from "./tools/registry";
 
 /** Carried on the message, so one turn stays one row however many steps it took. */
 export const sloppyMetadataSchema = z.object({

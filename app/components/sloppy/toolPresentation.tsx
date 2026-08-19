@@ -53,8 +53,6 @@ export function toolPresentation(
 			return { icon: Hourglass, label: "Counting the spoken words" };
 		case "tool-set_language":
 			return { icon: Translate, label: "Setting the language" };
-		case "tool-apply_template":
-			return { icon: SlidersHorizontal, label: "Adopting a template" };
 		case "tool-set_metadata":
 			return {
 				icon: SlidersHorizontal,

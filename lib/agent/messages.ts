@@ -4,7 +4,7 @@ import {
 	safeValidateUIMessages,
 	validateUIMessages,
 } from "ai";
-import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/specs";
+import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/registry";
 import { sloppyMetadataSchema, type SloppyMessage } from "./types";
 
 export function upsertMessage(

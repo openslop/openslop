@@ -5,7 +5,7 @@ import {
 	upsertMessage,
 	pruneTranscript,
 } from "../messages";
-import { SCRIPT_TOOLS, SNAPSHOT_TOOLS } from "../tools/specs";
+import { SCRIPT_TOOLS, SNAPSHOT_TOOLS } from "../tools/registry";
 import type { SloppyMessage } from "../types";
 
 const asked: SloppyMessage = {

@@ -9,7 +9,6 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { createDefaultConnector } from "@/lib/connectors/registry";
-import { applyTemplate } from "@/lib/templates/applyTemplate";
 import { applyRefineOps } from "@/lib/script/refine/applyOps";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
@@ -46,8 +45,6 @@ export function useAgentTools(editor: Editor) {
 				clearEditor(editor);
 				return runScript({ kind: "adapt", script });
 			},
-			applyTemplate: (templateId) =>
-				applyTemplate(store, templateId, queue, connectorConfig),
 			setMetadata: (patch) => store.getState().updateMetadata(patch),
 			setCharacter: (raw, patch) => {
 				const name = normalizeCharacterName(raw);

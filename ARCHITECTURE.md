@@ -32,7 +32,7 @@ Sloppy is the conversational agent in the editor's left panel. A turn is a ReAct
 
 Tools are declared without an executor, so a step stops at the call. The client runs it against the Slate editor and posts the result back to the same route, which invokes the model again, until the model answers in text or `MAX_TOOL_CALLS` withdraws the tools and forces an answer. The agent never writes `projects.script` or `projects.store` itself, so the client stays the single writer and autosave stays the single persistence path.
 
-Turns are stored as the SDK's UI message type, so the stream, the rows and the panel share one shape and nothing is converted between them. `lib/agent/` holds the domain (tool specs and executors, the context block, message helpers, prompt), `lib/api/agentTurn.ts` runs the turn, and `app/components/sloppy/` is the panel, which reads everything it shows back from rows.
+Turns are stored as the SDK's UI message type, so the stream, the rows and the panel share one shape and nothing is converted between them. `lib/agent/` holds the domain (one self-contained definition file per tool and their registry, the context block, message helpers, prompt), `lib/api/agentTurn.ts` runs the turn, and `app/components/sloppy/` is the panel, which reads everything it shows back from rows.
 
 ## Three layers
 

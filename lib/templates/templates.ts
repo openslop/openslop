@@ -1733,15 +1733,6 @@ export function getTemplateById(id: string): Template | undefined {
 	return TEMPLATE_MAP.get(id);
 }
 
-const [firstTemplateId, ...restTemplateIds] = TEMPLATES.map((t) => t.id);
-if (!firstTemplateId) throw new Error("TEMPLATES must not be empty");
-
-/** Every template id, non-empty for consumers that need at least one (z.enum). */
-export const TEMPLATE_IDS: [string, ...string[]] = [
-	firstTemplateId,
-	...restTemplateIds,
-];
-
 /** Lookup for ids sourced from `TEMPLATES`, where a miss is a programming error. */
 export function getTemplate(id: string): Template {
 	const template = TEMPLATE_MAP.get(id);
