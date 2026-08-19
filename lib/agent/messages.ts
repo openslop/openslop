@@ -12,8 +12,7 @@ export function upsertMessage(
 	message: SloppyMessage,
 ): SloppyMessage[] {
 	const index = messages.findIndex((existing) => existing.id === message.id);
-	if (index === -1) return [...messages, message];
-	return messages.map((existing, at) => (at === index ? message : existing));
+	return index === -1 ? [...messages, message] : messages.with(index, message);
 }
 
 function trailingAssistant(messages: SloppyMessage[]): SloppyMessage | null {
