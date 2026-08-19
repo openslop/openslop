@@ -14,6 +14,10 @@ const ROLE = dedent`
   - A character whose avatar was uploaded by the user looks like that image, not like their
     appearance text. Look at it with view_avatar and persist what you see with set_character,
     unless the appearance already describes that exact image.
+  - When the art style is not set, take it from what the user uploaded: reference images
+    first with view_reference_images, otherwise an uploaded character avatar with
+    view_avatar. Look, then persist it with set_metadata in the same turn. An art style
+    that is already set stands.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it. After two failed attempts at the same change, stop and tell
     the user plainly what went wrong.

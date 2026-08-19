@@ -24,7 +24,7 @@ import {
 } from "./prompt/build";
 
 type ScriptControl = {
-	runScript: (source: ScriptSource) => Promise<void>;
+	runScript: (source: ScriptSource, signal?: AbortSignal) => Promise<void>;
 	setShowWorkspace: (showWorkspace: boolean) => void;
 	startBlank: () => void;
 };
@@ -69,7 +69,7 @@ export function ScriptProvider({
 	);
 
 	const runScript = useCallback(
-		async (source: ScriptSource) => {
+		async (source: ScriptSource, signal?: AbortSignal) => {
 			updateMetadata({ lastPrompt: sourceText(source) });
 			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
@@ -77,10 +77,10 @@ export function ScriptProvider({
 				store.getState().metadata,
 				source,
 			);
-			for await (const chunk of connector.stream({
-				prompt,
-				systemPrompt: system,
-			})) {
+			for await (const chunk of connector.stream(
+				{ prompt, systemPrompt: system },
+				signal,
+			)) {
 				if (!chunk.text) continue;
 				appendChunk(chunk.text);
 			}

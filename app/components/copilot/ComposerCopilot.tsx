@@ -23,6 +23,7 @@ import {
 import AnimatedPlaceholder from "@/app/components/AnimatedPlaceholder";
 import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
+import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
 import { useProject } from "@/lib/project/useProject";
 import {
@@ -169,7 +170,7 @@ function TemplatePill({
 			>
 				<X className="h-3 w-3" />
 			</button>
-			{template.pillText}
+			{template.promptPrefix}
 		</span>
 	);
 }
@@ -177,7 +178,7 @@ function TemplatePill({
 interface ComposerCopilotProps {
 	value: string;
 	onValueChange: (value: string) => void;
-	onSubmit: () => void;
+	onSubmit: (brief: string) => void;
 }
 
 export default function ComposerCopilot({
@@ -208,7 +209,7 @@ export default function ComposerCopilot({
 	const activeTemplate = pasting ? undefined : template;
 
 	const handleSubmit = () => {
-		if (hasText) onSubmit();
+		if (hasText) onSubmit(templateBrief(activeTemplate, value));
 	};
 
 	return (

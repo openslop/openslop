@@ -116,7 +116,10 @@ export type LLMStreamChunk = {
 export interface LLMConnector extends Connector {
 	readonly type: "llm";
 	generate(params: LLMGenerateParams): Promise<LLMGenerateResult>;
-	stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk>;
+	stream(
+		params: LLMGenerateParams,
+		signal?: AbortSignal,
+	): AsyncGenerator<LLMStreamChunk>;
 }
 
 // Music types

@@ -110,6 +110,23 @@ describe("BaseLLMConnector", () => {
 		expect(order).toEqual(["transform", "before", "after"]);
 	});
 
+	it("hands the caller's abort signal to the stream request", async () => {
+		const fetchMock = vi.mocked(fetch);
+		const connector = new OpenSlopLLM({
+			defaultModel: "test-model",
+			models: ["test-model"],
+			isDefault: true,
+		});
+		const controller = new AbortController();
+
+		await connector.stream({ prompt: "test" }, controller.signal).next();
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.objectContaining({ signal: controller.signal }),
+		);
+	});
+
 	it("runs onError when transformPrompt throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new OpenSlopLLM({

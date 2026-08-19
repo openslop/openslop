@@ -28,7 +28,7 @@ type SloppyControl = {
 	/** The turn is not finished: streaming, or running the tools it asked for. */
 	loading: boolean;
 	writingScript: boolean;
-	/** Only the stream can be stopped; the tool calls it asked for run to the end. */
+	/** The turn can be stopped: it is streaming, or running a tool that can be cut off. */
 	streaming: boolean;
 };
 
@@ -85,6 +85,8 @@ export function SloppyProvider({
 	const { config } = getDefaultConnector(connectorConfig, "llm");
 	const [model, setModel] = useState(config.defaultModel);
 	const turnModel = useRef<string>(undefined);
+	// Stopping should also cancel the tool call in flight
+	const turn = useRef<AbortController>(undefined);
 
 	const { messages, sendMessage, stop, status, addToolOutput } =
 		useChat<SloppyMessage>({
@@ -102,9 +104,11 @@ export function SloppyProvider({
 					},
 				}),
 			}),
-			sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+			sendAutomaticallyWhen: (options) =>
+				!turn.current?.signal.aborted &&
+				lastAssistantMessageIsCompleteWithToolCalls(options),
 			onToolCall: async ({ toolCall }) => {
-				const outcome = await runTool(toolCall);
+				const outcome = await runTool(toolCall, turn.current?.signal);
 				const call = {
 					tool: toolCall.toolName as AgentToolName,
 					toolCallId: toolCall.toolCallId,
@@ -126,9 +130,13 @@ export function SloppyProvider({
 		() => ({
 			send: (message) => {
 				turnModel.current = model;
+				turn.current = new AbortController();
 				void sendMessage({ text: message });
 			},
-			stop,
+			stop: () => {
+				turn.current?.abort();
+				void stop();
+			},
 			loading: working,
 			writingScript,
 			streaming,

@@ -17,7 +17,8 @@ export interface TemplateShowcase {
 export interface Template {
 	id: string;
 	name: string;
-	pillText: string;
+	/** The sentence opener the pill shows and the user's brief starts with. */
+	promptPrefix: string;
 	color: string;
 	exampleText: string;
 	systemPrompt: string;
@@ -36,7 +37,7 @@ export const TEMPLATES: Template[] = [
 		id: "pov-life",
 		length: "5-10m",
 		name: "POV Life",
-		pillText: "POV: Your life at every stage as a",
+		promptPrefix: "POV: Your life at every stage as a",
 		color: "#F59E0B",
 		style: {
 			description:
@@ -272,7 +273,7 @@ export const TEMPLATES: Template[] = [
 		id: "sleep-story",
 		length: "5-10m",
 		name: "Sleep Story",
-		pillText: "A sleep story about",
+		promptPrefix: "A sleep story about",
 		color: "#6366F1",
 		referenceImages: [
 			templateAsset("sleep-story-1"),
@@ -342,7 +343,7 @@ export const TEMPLATES: Template[] = [
 		id: "finance-tips",
 		length: "5-10m",
 		name: "Finance Tips",
-		pillText: "Finance tips for...",
+		promptPrefix: "Finance tips for",
 		color: "#3B82F6",
 		style: {
 			description:
@@ -550,7 +551,7 @@ export const TEMPLATES: Template[] = [
 		id: "true-crime",
 		length: "5-10m",
 		name: "True Crime",
-		pillText: "A true crime story about",
+		promptPrefix: "A true crime story about",
 		color: "#8A0000",
 		style: {
 			description:
@@ -833,7 +834,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		id: "pov-financial-lifestyle",
 		length: "10-15m",
 		name: "POV Financial Lifestyle",
-		pillText: "POV: You're a",
+		promptPrefix: "POV: You're a",
 		color: "#059669",
 		style: {
 			description:
@@ -1260,7 +1261,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		id: "celebrity-death",
 		length: "10-15m",
 		name: "Celebrity Death",
-		pillText: "Death of every",
+		promptPrefix: "Death of every",
 		color: "#C7BFB2",
 		style: {
 			description:
@@ -1489,7 +1490,7 @@ Wrap up with the aftermath — arrest, trial, sentence, ironic twist, or grim en
 		id: "stick-explainer",
 		length: "5-10m",
 		name: "Stick Explainer",
-		pillText: "Stickman explainer about",
+		promptPrefix: "Stickman explainer about",
 		color: "#AA8AB1",
 		style: {
 			description:

@@ -35,11 +35,14 @@ export abstract class BaseLLMConnector<
 		return this.gateway.generate(params);
 	}
 
-	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
+	async *stream(
+		params: LLMGenerateParams,
+		signal?: AbortSignal,
+	): AsyncGenerator<LLMStreamChunk> {
 		const ctx = this.pluginContext();
 		try {
 			const prepared = await this.prepareParams(params, ctx);
-			yield* this._stream(prepared);
+			yield* this._stream(prepared, signal);
 		} catch (error) {
 			await runOnError(this.plugins, stringifyError(error), ctx);
 			throw error;
@@ -48,5 +51,6 @@ export abstract class BaseLLMConnector<
 
 	protected abstract _stream(
 		params: LLMGenerateParams,
+		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk>;
 }

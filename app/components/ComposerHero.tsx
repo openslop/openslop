@@ -30,8 +30,8 @@ export default function ComposerHero() {
 			<ComposerCopilot
 				value={value}
 				onValueChange={setValue}
-				onSubmit={() => {
-					start(value);
+				onSubmit={(brief) => {
+					start(brief);
 					setValue("");
 				}}
 			/>

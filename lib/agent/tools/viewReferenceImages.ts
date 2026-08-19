@@ -7,9 +7,7 @@ export const viewReferenceImages = defineTool({
 	  Look at the images the user uploaded as project references. You receive the images
 	  themselves, so use your own eyes: judge the art style, subjects, and mood directly.
 
-	  Use this before setting an art style when references exist and the style is unset,
-	  or whenever the user asks about their uploads. What you see is gone next turn, so
-	  act on it in this one (for a style: set_metadata).
+	  What you see is gone next turn, so act on it in this one.
 	`,
 	input: z.object({}),
 	output: z.object({ urls: z.array(z.string()) }),

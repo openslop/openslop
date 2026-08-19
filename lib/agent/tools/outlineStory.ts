@@ -15,7 +15,9 @@ export const outlineStory = defineTool({
 
 	  Reach for it when inventing a narrative: fiction, a fable, a character-driven piece.
 	  Skip it when the user's request is not story-shaped (a documentary, an explainer, a
-	  listicle, an ambient piece) or when they already supplied the structure.
+	  listicle, an ambient piece) or when they already supplied the structure. A template is
+	  supplied structure: when the project has one, write_script already writes to its format
+	  and example story, so go straight there.
 	`,
 	input: z.object({
 		brief: z
