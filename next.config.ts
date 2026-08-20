@@ -22,6 +22,7 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+	devIndicators: { position: "bottom-right" },
 	images: {
 		remotePatterns: [
 			...blobHostnames.map((hostname) => ({

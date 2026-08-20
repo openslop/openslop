@@ -29,6 +29,22 @@ describe("applyTemplate", () => {
 		expect(store.getState().metadata.characters).toEqual({});
 	});
 
+	it("records which template the project writes against", () => {
+		apply("pov-life");
+		expect(store.getState().metadata.templateId).toBe("pov-life");
+
+		apply("sleep-story");
+		expect(store.getState().metadata.templateId).toBe("sleep-story");
+	});
+
+	it("clears the template without disturbing what it applied", () => {
+		apply("pov-life");
+		store.getState().setTemplate(undefined);
+
+		expect(store.getState().metadata.templateId).toBeUndefined();
+		expect(store.getState().metadata.characters).toHaveProperty("Protagonist");
+	});
+
 	it("replaces reference images on switch", () => {
 		apply("pov-life");
 		expect(store.getState().referenceImages.length).toBeGreaterThan(0);

@@ -27,6 +27,17 @@ export function findNodeById(
 	return entry ?? null;
 }
 
+/**
+ * Empties the document. Normalization puts the blank first element back, so
+ * what streams in next lands on its own rather than under what was there.
+ */
+export function clearEditor(editor: Editor): void {
+	Transforms.removeNodes(editor, {
+		at: [],
+		match: (_node, path) => path.length === 1,
+	});
+}
+
 /** Inserts a copy of the node at `at`, with fresh ids, right after it. Returns the copy's id. */
 export function duplicateNode(
 	editor: Editor,

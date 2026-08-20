@@ -1,18 +1,53 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, type Editor } from "slate";
-import type { CanvasElement, SceneElement } from "../types";
-import { parentSceneId, sceneIndexOf } from "../scenes";
+import { ZERO_WIDTH_SPACE } from "../constants";
+import type {
+	CanvasContentElement,
+	CanvasElement,
+	SceneElement,
+} from "../types";
+import { isScriptEmpty, parentSceneId, sceneIndexOf } from "../scenes";
 
-const scene = (id: string): SceneElement => ({
+const scene = (
+	id: string,
+	children: CanvasContentElement[] = [],
+): SceneElement => ({
 	id,
 	type: "scene",
-	children: [],
+	children,
 });
 
-const text = (id: string): CanvasElement => ({
+const narration = (id: string, body = ""): CanvasContentElement => ({
 	id,
 	type: "narration",
-	children: [],
+	children: [
+		{ id: `${id}-marker`, type: "narration", text: ZERO_WIDTH_SPACE },
+		{ id: `${id}-body`, type: "narration", text: body },
+	],
+});
+
+describe("isScriptEmpty", () => {
+	it("treats a canvas with no scenes as empty", () => {
+		expect(isScriptEmpty([])).toBe(true);
+	});
+
+	it("treats the normalized placeholder element as empty", () => {
+		const nodes = [scene("s1", [narration("n1", "")])];
+		expect(isScriptEmpty(nodes)).toBe(true);
+	});
+
+	it("treats whitespace-only text as empty", () => {
+		const nodes = [scene("s1", [narration("n1", "  \n")])];
+		expect(isScriptEmpty(nodes)).toBe(true);
+	});
+
+	it("sees authored text anywhere on the canvas", () => {
+		const nodes = [
+			scene("s1", [narration("n1", "")]),
+			scene("s2", [narration("n2", "A story begins.")]),
+		];
+		expect(isScriptEmpty(nodes)).toBe(false);
+	});
 });
 
 describe("sceneIndexOf", () => {
@@ -31,7 +66,7 @@ describe("sceneIndexOf", () => {
 	});
 
 	it("ignores non-scene siblings when counting", () => {
-		const nodes = [text("t1"), scene("a"), text("t2"), scene("b")];
+		const nodes = [narration("t1"), scene("a"), narration("t2"), scene("b")];
 		expect(sceneIndexOf(nodes, "a")).toBe(1);
 		expect(sceneIndexOf(nodes, "b")).toBe(2);
 	});
@@ -45,13 +80,7 @@ describe("parentSceneId", () => {
 	};
 
 	it("returns the id of the scene holding the node", () => {
-		const editor = editorWith([
-			scene("s1"),
-			{
-				...scene("s2"),
-				children: [{ id: "n1", type: "narration" as const, children: [] }],
-			},
-		]);
+		const editor = editorWith([scene("s1"), scene("s2", [narration("n1")])]);
 		expect(parentSceneId(editor, [1, 0])).toBe("s2");
 	});
 

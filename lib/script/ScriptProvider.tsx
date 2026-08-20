@@ -17,13 +17,16 @@ import { useProject } from "@/lib/project/useProject";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
-import { useStreamRun } from "./useStreamRun";
+import {
+	buildScriptPrompt,
+	sourceText,
+	type ScriptSource,
+} from "./prompt/build";
 
 type ScriptControl = {
-	loading: boolean;
-	submitPrompt: (prompt: string) => Promise<void>;
+	runScript: (source: ScriptSource, signal?: AbortSignal) => Promise<void>;
+	setShowWorkspace: (showWorkspace: boolean) => void;
 	startBlank: () => void;
-	stopGeneration: () => void;
 };
 
 // `nodes` is rebuilt on every streamed token, so it lives in its own context
@@ -33,15 +36,13 @@ const [ScriptNodesContext, useScriptNodes] =
 const [ScriptControlContext, useScriptControl] =
 	createRequiredContext<ScriptControl>("ScriptControlContext");
 export { useScriptNodes, useScriptControl };
-// The live script string changes per streamed token, but nothing renders it:
-// the shell only needs a stable "has any content" boolean, and the editor only
-// needs the initial script once for rehydration. Exposing those instead of the
-// raw string keeps the whole editor tree off the per-token render path.
-const ScriptHasContentContext = createContext(false);
+// Nothing renders the live script string: the shell reads a stable boolean and
+// the editor rehydrates once, keeping the tree off the per-token render path.
+const ShowWorkspaceContext = createContext(false);
 const ScriptInitialContext = createContext<string>("");
 
-export function useScriptHasContent() {
-	return use(ScriptHasContentContext);
+export function useShowWorkspace() {
+	return use(ShowWorkspaceContext);
 }
 
 export function useScriptInitial() {
@@ -55,51 +56,55 @@ export function ScriptProvider({
 	initialScript?: string;
 	children: ReactNode;
 }) {
-	const { connectorConfig, mode } = useConfig();
+	const { connectorConfig } = useConfig();
 	const store = useProjectStoreHandle();
 	const updateMetadata = useProject((s) => s.updateMetadata);
 	const [script, setScript] = useState(initialScript);
-	const [hasContent, setHasContent] = useState(initialScript.length > 0);
-	const { nodes, appendChunk } = useOSMLStreamParser();
-	const { loading, run, stop: stopGeneration } = useStreamRun();
+	const [showWorkspace, setShowWorkspace] = useState(initialScript.length > 0);
+	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 
 	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
 		connectorConfig,
 		"llm",
 	);
 
-	const submitPrompt = useCallback(
-		async (prompt: string) => {
-			setHasContent(false);
-			updateMetadata({ lastMode: mode, lastPrompt: prompt });
+	const runScript = useCallback(
+		async (source: ScriptSource, signal?: AbortSignal) => {
+			updateMetadata({ lastPrompt: sourceText(source) });
+			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
-			const state = store.getState();
-			await run(connector.stream({ prompt }, { state }), (chunk) => {
-				if (!chunk.text) return;
-				setHasContent(true);
+			const { system, prompt } = buildScriptPrompt(
+				store.getState().metadata,
+				source,
+			);
+			for await (const chunk of connector.stream(
+				{ prompt, systemPrompt: system },
+				signal,
+			)) {
+				if (!chunk.text) continue;
 				appendChunk(chunk.text);
-			});
+			}
 		},
-		[store, llmProvider, llmConfig, appendChunk, updateMetadata, mode, run],
+		[store, llmProvider, llmConfig, appendChunk, reset, updateMetadata],
 	);
 
 	const startBlank = useCallback(() => {
 		setScript(BLANK_SCRIPT);
-		setHasContent(true);
+		setShowWorkspace(true);
 	}, []);
 
 	const control = useMemo<ScriptControl>(
-		() => ({ loading, submitPrompt, startBlank, stopGeneration }),
-		[loading, submitPrompt, startBlank, stopGeneration],
+		() => ({ runScript, setShowWorkspace, startBlank }),
+		[runScript, startBlank],
 	);
 
 	return (
 		<ScriptControlContext value={control}>
 			<ScriptNodesContext value={nodes}>
 				<ScriptInitialContext value={script}>
-					<ScriptHasContentContext value={hasContent}>
+					<ShowWorkspaceContext value={showWorkspace}>
 						{children}
-					</ScriptHasContentContext>
+					</ShowWorkspaceContext>
 				</ScriptInitialContext>
 			</ScriptNodesContext>
 		</ScriptControlContext>

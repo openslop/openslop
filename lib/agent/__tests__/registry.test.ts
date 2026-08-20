@@ -1,0 +1,360 @@
+import { describe, expect, it, vi } from "vitest";
+import type { AgentToolContext } from "../tools/context";
+import {
+	SLOPPY_TOOLS,
+	agentToolCallSchema,
+	executeToolCall,
+} from "../tools/registry";
+import { MetadataSchema } from "@/lib/project/types";
+
+const metadata = MetadataSchema.parse({
+	title: "Little Red",
+	style: "claymation",
+	videoSettings: { length: "3-5m" },
+	characters: { Red: { appearance: "a girl in a red cloak", age: "child" } },
+});
+
+const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
+	readScript: () => "<narration>hi</narration>",
+	countSpokenWords: () => 1,
+	generateText: async () => "an outline",
+	referenceImages: () => [],
+	avatarUrl: () => undefined,
+	readMetadata: () => metadata,
+	editScript: () => ({ applied: 0, failures: [] }),
+	writeScript: async () => {},
+	adaptScript: async () => {},
+	setMetadata: () => {},
+	setCharacter: (name) => ({ name, created: !(name in metadata.characters) }),
+	...over,
+});
+
+describe("executeToolCall", () => {
+	it("hands back the script and the settings around it", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_script", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("<narration>hi</narration>");
+		expect(outcome.ok && outcome.output).toContain(
+			"- Red: a girl in a red cloak (voice: child)",
+		);
+	});
+
+	it("says the canvas is empty rather than handing back nothing", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_script", input: {} },
+			context({ readScript: () => "  " }),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
+	});
+
+	it("reports what an edit could not apply, so the model can fix the call", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "edit_script", input: { ops: [{ op: "remove", id: "n1" }] } },
+			context({
+				editScript: () => ({ applied: 0, failures: ["no element n1"] }),
+			}),
+		);
+
+		expect(outcome).toMatchObject({ ok: true });
+		expect(outcome.ok && outcome.output).toContain("no element n1");
+	});
+
+	it("reports a throwing tool rather than losing the turn to it", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "write_script", input: { brief: "a new story" } },
+			context({
+				writeScript: vi.fn(async () => {
+					throw new Error("the stream died");
+				}),
+			}),
+		);
+
+		expect(outcome).toEqual({ ok: false, errorText: "the stream died" });
+	});
+
+	it("reports a call it cannot read rather than running the wrong tool", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "edit_script", input: { brief: "not ops" } },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+	});
+
+	it("changes only the settings it was given", async () => {
+		const patches: unknown[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_metadata", input: { title: "Moon Cat" } },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches).toEqual([{ title: "Moon Cat" }]);
+		expect(outcome).toEqual({ ok: true, output: "Set the title." });
+	});
+
+	it("refuses a call that names no setting, rather than writing nothing", async () => {
+		const patches: unknown[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_metadata", input: {} },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches).toEqual([]);
+		expect(outcome.ok).toBe(false);
+	});
+
+	it("maps the narrator's traits onto the voice the project reads in", async () => {
+		const patches: unknown[] = [];
+		await executeToolCall(
+			{ toolName: "set_narrator", input: { age: "child" } },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches).toEqual([{ narration: { age: "child" } }]);
+	});
+
+	it("says a character is new, so the model knows its avatar is not drawn", async () => {
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_character",
+				input: { name: "Wolf", appearance: "a grey wolf" },
+			},
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("Added Wolf");
+	});
+
+	it("changes a character the project already knows", async () => {
+		const edits: unknown[] = [];
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_character",
+				input: { name: "Red", pitch: "high" },
+			},
+			context({
+				setCharacter: (name, patch) => {
+					edits.push([name, patch]);
+					return { name, created: false };
+				},
+			}),
+		);
+
+		expect(edits).toEqual([["Red", { pitch: "high" }]]);
+		expect(outcome).toEqual({ ok: true, output: "Changed Red." });
+	});
+
+	it("answers with the name the project settled on, not the one it was asked with", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "set_character", input: { name: "big bad wolf" } },
+			context({
+				setCharacter: () => ({ name: "Big Bad Wolf", created: true }),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("Added Big Bad Wolf");
+	});
+
+	it("puts the user's own script on the canvas untouched", async () => {
+		const script = "NARRATOR\nHigh above the sleepy hills.";
+		const adapted: string[] = [];
+
+		const outcome = await executeToolCall(
+			{ toolName: "adapt_script", input: { script } },
+			context({
+				adaptScript: async (text) => {
+					adapted.push(text);
+				},
+			}),
+		);
+
+		expect(adapted).toEqual([script]);
+		expect(outcome.ok).toBe(true);
+	});
+
+	it("says a setting change does not reshape what is already on the canvas", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "set_video_settings", input: { length: "5-10m" } },
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("5-10m");
+		expect(outcome.ok && outcome.output).toContain("next script");
+	});
+
+	it("rejects a setting call that changes nothing", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "set_video_settings", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+	});
+
+	it("reports the count against the project's word budget", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "count_words", input: {} },
+			context({ countSpokenWords: () => 700 }),
+		);
+
+		// The fixture metadata targets 3-5m: 540 to 900 words.
+		expect(outcome.ok && outcome.output).toContain("700 spoken words");
+		expect(outcome.ok && outcome.output).toContain("within the target range");
+	});
+
+	it("says how far off the count is, so the model knows how much to cut or add", async () => {
+		const over = await executeToolCall(
+			{ toolName: "count_words", input: {} },
+			context({ countSpokenWords: () => 1000 }),
+		);
+		expect(over.ok && over.output).toContain("over by 100 words");
+
+		const under = await executeToolCall(
+			{ toolName: "count_words", input: {} },
+			context({ countSpokenWords: () => 500 }),
+		);
+		expect(under.ok && under.output).toContain("under by 40 words");
+	});
+
+	it("counts without a verdict when the length is auto", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "count_words", input: {} },
+			context({
+				countSpokenWords: () => 1000,
+				readMetadata: () =>
+					MetadataSchema.parse({ videoSettings: { length: "auto" } }),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("1000 spoken words");
+		expect(outcome.ok && outcome.output).not.toContain("over by");
+	});
+
+	it("hands over the reference images for the model to look at", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_reference_images", input: {} },
+			context({ referenceImages: () => ["https://example.com/a.jpg"] }),
+		);
+
+		expect(outcome.ok && outcome.output).toEqual({
+			urls: ["https://example.com/a.jpg"],
+		});
+	});
+
+	it("says there is nothing to look at rather than handing over an empty set", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_reference_images", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain("No reference images");
+	});
+
+	it("hands over a character's avatar by name", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_avatar", input: { name: "Mira" } },
+			context({ avatarUrl: () => "https://example.com/mira.png" }),
+		);
+
+		expect(outcome.ok && outcome.output).toEqual({
+			name: "Mira",
+			url: "https://example.com/mira.png",
+		});
+	});
+
+	it("says an avatar does not exist yet rather than inventing one", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_avatar", input: { name: "Mira" } },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain("no avatar image yet");
+	});
+
+	it("outlines a brief through one focused generation", async () => {
+		const prompts: string[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "outline_story", input: { brief: "a rabbit on the moon" } },
+			context({
+				generateText: async (prompt) => {
+					prompts.push(prompt);
+					return "1. A rabbit finds a lantern.";
+				},
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toBe("1. A rabbit finds a lantern.");
+		expect(prompts[0]).toContain("a rabbit on the moon");
+		expect(prompts[0]).toContain("conflict, twists, and a resolution");
+	});
+});
+
+describe("SLOPPY_TOOLS", () => {
+	it("offers the model exactly the tools the editor can run", () => {
+		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
+			"read_script",
+			"edit_script",
+			"write_script",
+			"adapt_script",
+			"set_video_settings",
+			"set_language",
+			"view_reference_images",
+			"view_avatar",
+			"outline_story",
+			"count_words",
+			"set_metadata",
+			"set_narrator",
+			"set_character",
+		]);
+	});
+
+	it("declares no executor, so a step stops at the call for the editor to run", () => {
+		for (const tool of Object.values(SLOPPY_TOOLS)) {
+			expect(tool.execute).toBeUndefined();
+		}
+	});
+});
+
+describe("agentToolCallSchema", () => {
+	it("can read a call to every tool the model is offered", () => {
+		const readable = new Set(
+			agentToolCallSchema.options.map((option) => option.shape.toolName.value),
+		);
+
+		expect([...readable].sort()).toEqual(Object.keys(SLOPPY_TOOLS).sort());
+	});
+
+	it("reads a call as the input its own tool takes", () => {
+		const parsed = agentToolCallSchema.parse({
+			toolName: "write_script",
+			input: { brief: "a rabbit on the moon" },
+		});
+
+		expect(parsed).toEqual({
+			toolName: "write_script",
+			input: { brief: "a rabbit on the moon" },
+		});
+	});
+
+	it("rejects a call carrying another tool's input", () => {
+		const parsed = agentToolCallSchema.safeParse({
+			toolName: "write_script",
+			input: { ops: [] },
+		});
+
+		expect(parsed.success).toBe(false);
+	});
+
+	it("rejects a tool nothing can run", () => {
+		expect(
+			agentToolCallSchema.safeParse({ toolName: "render_video", input: {} })
+				.success,
+		).toBe(false);
+	});
+});

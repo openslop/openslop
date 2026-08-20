@@ -115,13 +115,10 @@ export type LLMStreamChunk = {
 
 export interface LLMConnector extends Connector {
 	readonly type: "llm";
-	generate(
-		params: LLMGenerateParams,
-		context?: GenerationContext,
-	): Promise<LLMGenerateResult>;
+	generate(params: LLMGenerateParams): Promise<LLMGenerateResult>;
 	stream(
 		params: LLMGenerateParams,
-		context?: GenerationContext,
+		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk>;
 }
 
@@ -211,8 +208,6 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 	width?: number;
 	height?: number;
 };
-
-export type LLMPlugin = ConnectorPlugin<LLMGenerateParams, LLMGenerateResult>;
 
 export interface ProviderConstructor<T extends Connector = Connector> {
 	new (config: ConnectorConfig): T;

@@ -33,8 +33,10 @@
 		]
 	},
 	"dependencies": {
-		"@ai-sdk/openai": "^3.0.54",
-		"@anthropic-ai/sdk": "^0.78.0",
+		"@ai-sdk/anthropic": "^4.0.39",
+		"@ai-sdk/openai": "^4.0.42",
+		"@ai-sdk/provider": "^4.0.7",
+		"@ai-sdk/react": "^4.0.69",
 		"@cartesia/cartesia-js": "^3.0.0",
 		"@dnd-kit/core": "^6.3.1",
 		"@dnd-kit/sortable": "^10.0.0",
@@ -51,7 +53,7 @@
 		"@supabase/supabase-js": "^2.98.0",
 		"@vercel/blob": "^2.3.2",
 		"@vercel/queue": "^0.1.7",
-		"ai": "^6.0.170",
+		"ai": "^7.0.66",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"dedent": "^1.7.2",

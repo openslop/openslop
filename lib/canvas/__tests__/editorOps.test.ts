@@ -3,6 +3,7 @@ import { createEditor, Editor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
+	clearEditor,
 	duplicateNode,
 	findElementById,
 	findNodeById,
@@ -208,5 +209,19 @@ describe("setNodeAttrs", () => {
 
 		const node = editor.children[0] as SceneElement;
 		expect(node.children[0].customAttributes).toEqual({ emotion: "calm" });
+	});
+});
+
+describe("clearEditor", () => {
+	it("empties the document, so a new script does not stack under the old one", () => {
+		const editor = createEditor();
+		editor.children = [
+			content("narration", "n1", "old"),
+			content("image", "i1"),
+		];
+
+		clearEditor(editor);
+
+		expect(editor.children).toEqual([]);
 	});
 });
