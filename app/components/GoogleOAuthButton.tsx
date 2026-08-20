@@ -14,8 +14,9 @@ export default function GoogleOAuthButton({
 		<Button
 			type="button"
 			variant="outline"
+			size="cta"
 			onClick={onClick}
-			className="h-11 w-full gap-2.5"
+			className="w-full gap-2.5"
 		>
 			<GoogleIcon />
 			{children ?? "Continue with Google"}

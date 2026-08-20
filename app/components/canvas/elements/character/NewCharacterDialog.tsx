@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	DialogContent,
 	DialogDescription,
@@ -76,13 +77,14 @@ function NewCharacterDialogBody({
 				)}
 
 				<DialogFooter>
-					<button
+					<Button
 						type="submit"
+						variant="secondary"
+						size="sm"
 						disabled={!canSubmit}
-						className="rounded-md border border-border bg-muted px-3 py-1 text-label font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-muted"
 					>
 						Create
-					</button>
+					</Button>
 				</DialogFooter>
 			</form>
 		</DialogContent>

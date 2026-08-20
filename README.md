@@ -45,7 +45,7 @@ Open-source, free forever.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 18+
+- [Node.js](https://nodejs.org) 20.9+ (Next.js 16's minimum; CI runs 22)
 - A [Supabase](https://supabase.com) project (for auth and database)
 
 ### Setup
@@ -82,6 +82,7 @@ ELEVENLABS_API_KEY=       # Music + SFX
 CARTESIA_API_KEY=         # Text-to-speech
 BLOB_READ_WRITE_TOKEN=    # Vercel Blob (asset storage)
 NEXT_PUBLIC_BLOB_URL=     # Vercel Blob public URL
+PINECONE_API_KEY=         # Reuses similar past music/SFX generations; unset disables the cache
 ```
 
 4. Run the database migrations:
@@ -139,8 +140,11 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for how these layers interact.
 | `npm run dev`             | Start the dev server        |
 | `npm run build`           | Production build            |
 | `npm run lint`            | ESLint                      |
+| `npm run format:check`    | Prettier check              |
 | `npm run typecheck`       | TypeScript check            |
+| `npm run knip`            | Dead-code check             |
 | `npm run test:run`        | Run tests once (Vitest)     |
+| `npm run test:e2e`        | Smoke tests (Playwright)    |
 | `npm run db:push`         | Push migrations to Supabase |
 | `npm run remotion:studio` | Open Remotion Studio        |
 

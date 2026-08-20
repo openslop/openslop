@@ -54,9 +54,10 @@ export default function EmailSentCard({
 			<Button
 				type="button"
 				variant="accent"
+				size="cta"
 				onClick={onResend}
 				disabled={loading}
-				className="h-11 w-full"
+				className="w-full"
 			>
 				{loading ? "Sending…" : resendLabel}
 			</Button>

@@ -27,6 +27,8 @@ const buttonVariants = cva(
 			size: {
 				sm: "h-8 rounded-md px-3 text-label",
 				default: "h-9 px-4",
+				/** Auth and hero call to action; pair with `w-full`. */
+				cta: "h-11 px-4",
 				lg: "h-11 px-6 text-body-lg",
 				icon: "size-9",
 			},
