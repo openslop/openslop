@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
-import {
-	SLOPPY_TOOLS,
-	agentToolCallSchema,
-	executeToolCall,
-} from "../tools/registry";
+import { SLOPPY_TOOLS, executeToolCall } from "../tools/registry";
 import { MetadataSchema } from "@/lib/project/types";
 
 const metadata = MetadataSchema.parse({
@@ -321,40 +317,25 @@ describe("SLOPPY_TOOLS", () => {
 	});
 });
 
-describe("agentToolCallSchema", () => {
-	it("can read a call to every tool the model is offered", () => {
-		const readable = new Set(
-			agentToolCallSchema.options.map((option) => option.shape.toolName.value),
+describe("a call the editor cannot run", () => {
+	it("rejects a call carrying another tool's input", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "write_script", input: { ops: [] } },
+			context(),
 		);
 
-		expect([...readable].sort()).toEqual(Object.keys(SLOPPY_TOOLS).sort());
+		expect(outcome.ok).toBe(false);
 	});
 
-	it("reads a call as the input its own tool takes", () => {
-		const parsed = agentToolCallSchema.parse({
-			toolName: "write_script",
-			input: { brief: "a rabbit on the moon" },
+	it("rejects a tool nothing can run", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "render_video", input: {} },
+			context(),
+		);
+
+		expect(outcome).toEqual({
+			ok: false,
+			errorText: "render_video is not a tool.",
 		});
-
-		expect(parsed).toEqual({
-			toolName: "write_script",
-			input: { brief: "a rabbit on the moon" },
-		});
-	});
-
-	it("rejects a call carrying another tool's input", () => {
-		const parsed = agentToolCallSchema.safeParse({
-			toolName: "write_script",
-			input: { ops: [] },
-		});
-
-		expect(parsed.success).toBe(false);
-	});
-
-	it("rejects a tool nothing can run", () => {
-		expect(
-			agentToolCallSchema.safeParse({ toolName: "render_video", input: {} })
-				.success,
-		).toBe(false);
 	});
 });

@@ -43,10 +43,11 @@ export type ToolInput<TName extends AgentToolName> = z.output<
 	(typeof TOOLS)[TName]["input"]
 >;
 
-// The record's inferred type does not correlate a name with its executor's
-// signature, so calls go through this mapped view of the same object.
-const EXECUTORS = TOOLS as unknown as {
+// The record's inferred type does not correlate a name with its schema and
+// executor, so calls go through this mapped view of the same object.
+const DISPATCH = TOOLS as unknown as {
 	[TName in AgentToolName]: {
+		input: z.ZodType<ToolInput<TName>>;
 		execute: (
 			input: ToolInput<TName>,
 			ctx: AgentToolContext,
@@ -77,54 +78,45 @@ export const SCRIPT_TOOLS = new Set<string>([
 	"edit_script" satisfies AgentToolName,
 ]);
 
-const call = <TName extends AgentToolName>(toolName: TName) =>
-	z.object({ toolName: z.literal(toolName), input: TOOLS[toolName].input });
-
-/**
- * The SDK widens a tool call's name back to `string` on the way to the editor,
- * so the pair is read here and the executors get the input their tool takes.
- */
-export const agentToolCallSchema = z.discriminatedUnion("toolName", [
-	call("read_script"),
-	call("edit_script"),
-	call("write_script"),
-	call("adapt_script"),
-	call("set_video_settings"),
-	call("set_language"),
-	call("view_reference_images"),
-	call("view_avatar"),
-	call("outline_story"),
-	call("count_words"),
-	call("set_metadata"),
-	call("set_narrator"),
-	call("set_character"),
-]);
-
 /** A failure is reported, not thrown: the model reads it as the next observation. */
 export type ToolOutcome =
 	| { ok: true; output: AgentToolOutput }
 	| { ok: false; errorText: string };
 
-const run = <TName extends AgentToolName>(
-	call: { toolName: TName; input: ToolInput<TName> },
-	ctx: AgentToolContext,
-): Promise<ToolOutput<TName>> =>
-	EXECUTORS[call.toolName].execute(call.input, ctx);
+const isToolName = (name: string): name is AgentToolName => name in TOOLS;
 
+const run = async <TName extends AgentToolName>(
+	toolName: TName,
+	input: unknown,
+	ctx: AgentToolContext,
+): Promise<ToolOutcome> => {
+	const parsed = DISPATCH[toolName].input.safeParse(input);
+	if (!parsed.success) {
+		return {
+			ok: false,
+			errorText: `${toolName} cannot take that input: ${parsed.error.message}`,
+		};
+	}
+	return {
+		ok: true,
+		output: await DISPATCH[toolName].execute(parsed.data, ctx),
+	};
+};
+
+/**
+ * The SDK widens a tool call's name back to `string` on the way to the editor,
+ * so the name is read back against the registry and its own tool parses the input.
+ */
 export async function executeToolCall(
 	call: { toolName: string; input: unknown },
 	ctx: AgentToolContext,
 ): Promise<ToolOutcome> {
-	const parsed = agentToolCallSchema.safeParse(call);
-	if (!parsed.success) {
-		return {
-			ok: false,
-			errorText: `${call.toolName} cannot take that input: ${parsed.error.message}`,
-		};
+	if (!isToolName(call.toolName)) {
+		return { ok: false, errorText: `${call.toolName} is not a tool.` };
 	}
 
 	try {
-		return { ok: true, output: await run(parsed.data, ctx) };
+		return await run(call.toolName, call.input, ctx);
 	} catch (error) {
 		return { ok: false, errorText: errorMessage(error) };
 	}
