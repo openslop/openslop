@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
+import { scrollIntoContainer } from "@/lib/components/scrollIntoContainer";
 import { cn } from "@/lib/utils";
 import { trailingAssistant } from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
@@ -78,7 +79,7 @@ export function SloppyPanel() {
 	const endRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		endRef.current?.scrollIntoView({ block: "end" });
+		if (endRef.current) scrollIntoContainer(endRef.current, "end", "auto");
 	}, [messages]);
 
 	return (
