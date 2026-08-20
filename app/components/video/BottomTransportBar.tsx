@@ -26,11 +26,7 @@ function BottomTransportBarComponent() {
 	const { layout, segments } = useLayout();
 	const playing = usePlayerPlaying(player);
 
-	// Prev/next need a live player to seek with. Play does not: hiding the
-	// player from the layout panel unmounts PlayerPanel, which calls
-	// registerPlayer(null), and play doubles as the way back -- its
-	// showPlayer() re-reveals the panel. Gating it on `player` too would
-	// disable the only escape hatch and leave the button dead forever.
+	// Play stays out of `ready`: it re-reveals a hidden player, which unmounts.
 	const hasSegments = segments.length > 0;
 	const ready = player !== null && hasSegments;
 
