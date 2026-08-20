@@ -15,9 +15,9 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { RESOLUTIONS, scaleForWidth } from "@/lib/video/resolutions";
 import { BASE_WIDTH } from "@/lib/video/types";
+import { useSloppy } from "../sloppy/SloppyProvider";
 import { useRender } from "./RenderProvider";
 import { useLayout } from "./VideoLayoutContext";
 
@@ -31,7 +31,7 @@ const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
 
 export function ExportButton() {
 	const { layout, ready } = useLayout();
-	const { loading } = useScriptControl();
+	const { loading } = useSloppy();
 	const { state, render, reset, open, setOpen } = useRender();
 	const [width, setWidth] = useState(BASE_WIDTH);
 

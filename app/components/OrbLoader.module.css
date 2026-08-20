@@ -1,26 +1,15 @@
 .loader {
-	--color-one: #ffbf48;
-	--color-two: #be4a1d;
-	--color-three: #ffbf4780;
-	--color-four: #bf4a1d80;
-	--color-five: #ffbf4740;
 	--time-animation: 2s;
-	--size: 1;
 	width: 100px;
 	height: 100px;
 	position: relative;
-	transform: scale(var(--size));
 	animation: colorize calc(var(--time-animation) * 3) ease-in-out infinite;
 }
 
 .loader .box {
 	width: 100px;
 	height: 100px;
-	background: linear-gradient(
-		180deg,
-		var(--color-one) 30%,
-		var(--color-two) 70%
-	);
+	background: linear-gradient(180deg, var(--orb-from) 30%, var(--orb-to) 70%);
 	mask: url(#clipping);
 	-webkit-mask: url(#clipping);
 }
@@ -57,23 +46,6 @@
 .loader svg :global(#clipping) polygon:nth-child(4) {
 	transform-origin: 40% 40%;
 	animation: rotation var(--time-animation) linear infinite reverse;
-}
-
-.loader svg :global(#clipping) polygon:nth-child(5) {
-	transform-origin: 40% 40%;
-	animation: rotation var(--time-animation) linear infinite reverse;
-	animation-delay: calc(var(--time-animation) / -2);
-}
-
-.loader svg :global(#clipping) polygon:nth-child(6) {
-	transform-origin: 60% 40%;
-	animation: rotation var(--time-animation) linear infinite;
-}
-
-.loader svg :global(#clipping) polygon:nth-child(7) {
-	transform-origin: 60% 40%;
-	animation: rotation var(--time-animation) linear infinite;
-	animation-delay: calc(var(--time-animation) / -1.5);
 }
 
 @keyframes rotation {

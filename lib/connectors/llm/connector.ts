@@ -4,7 +4,6 @@ import { BaseConnector } from "../base";
 import { runOnError } from "../plugins";
 import type {
 	ConnectorConfig,
-	GenerationContext,
 	LLMConnector,
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -38,12 +37,12 @@ export abstract class BaseLLMConnector<
 
 	async *stream(
 		params: LLMGenerateParams,
-		context?: GenerationContext,
+		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		const ctx = { ...this.pluginContext(), ...context };
+		const ctx = this.pluginContext();
 		try {
 			const prepared = await this.prepareParams(params, ctx);
-			yield* this._stream(prepared);
+			yield* this._stream(prepared, signal);
 		} catch (error) {
 			await runOnError(this.plugins, stringifyError(error), ctx);
 			throw error;
@@ -52,5 +51,6 @@ export abstract class BaseLLMConnector<
 
 	protected abstract _stream(
 		params: LLMGenerateParams,
+		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk>;
 }

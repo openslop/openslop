@@ -1,14 +1,14 @@
 "use client";
 
-import { Check, UserPlus } from "@/components/ui/icon";
+import { UserPlus } from "@/components/ui/icon";
 import { Editor } from "slate";
 import { useSlateStatic } from "slate-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SelectMenuItem } from "@/components/ui/select-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import {
 	CHARACTERS_ATTR,
@@ -77,19 +77,15 @@ function ProjectCharactersMenu({
 	return (
 		<DropdownMenuContent align="start" className="max-h-64 min-w-32">
 			{names.map((name) => (
-				<DropdownMenuItem
+				<SelectMenuItem
 					key={name}
-					onClick={() => onSelect(name)}
-					onSelect={(e) => e.preventDefault()}
-					className="cursor-pointer py-1 text-label text-muted-foreground"
+					selected={selected.has(name)}
+					onSelect={() => onSelect(name)}
+					closeOnSelect={false}
+					className="text-muted-foreground"
 				>
-					<span className="w-3.5 shrink-0 flex items-center justify-center">
-						{selected.has(name) && (
-							<Check className="w-3 h-3 text-foreground" aria-hidden="true" />
-						)}
-					</span>
 					{name}
-				</DropdownMenuItem>
+				</SelectMenuItem>
 			))}
 		</DropdownMenuContent>
 	);

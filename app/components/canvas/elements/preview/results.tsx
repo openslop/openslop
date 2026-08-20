@@ -6,7 +6,7 @@ import { GenerationIndicator } from "../GenerationIndicator";
 import type { GenerationState, PlaceholderProps } from "./status";
 import { PlaceholderBallsLoader } from "./placeholderBalls";
 import {
-	AUDIO_BAR_COUNT,
+	AUDIO_SAMPLE_COUNT,
 	buildSoundwaveMask,
 } from "@/lib/components/soundwave";
 import { ErrorMessage, PlaceholderOverlay, ResultOverlay } from "./overlays";
@@ -35,7 +35,7 @@ export function AudioResult({
 export function AudioPlaceholder(props: PlaceholderProps) {
 	const [mask] = useState(() => {
 		const bars = Array.from(
-			{ length: AUDIO_BAR_COUNT },
+			{ length: AUDIO_SAMPLE_COUNT },
 			() => 20 + Math.random() * 80,
 		);
 		return buildSoundwaveMask(bars);

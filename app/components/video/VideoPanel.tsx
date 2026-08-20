@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { useSloppy } from "../sloppy/SloppyProvider";
 import { useLayout } from "./VideoLayoutContext";
 import { VideoPreview } from "./VideoPreview";
 import { QueueProgressBar } from "./QueueProgressBar";
@@ -9,10 +9,10 @@ import { PlayerShimmer } from "./PlayerShimmer";
 
 function VideoPanelBody() {
 	const { layout, ready, playerKey } = useLayout();
-	const { loading: scriptLoading } = useScriptControl();
+	const { writingScript } = useSloppy();
 	const restoreFrameRef = useRef<number | null>(null);
 
-	if (scriptLoading) {
+	if (writingScript) {
 		return (
 			<PlayerShimmer>
 				<div className="text-label text-muted-foreground">Writing script…</div>

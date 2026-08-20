@@ -61,7 +61,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 		setDeriving(true);
 		try {
 			const derived = await deriveArtStyle(
-				createDefaultConnector(connectorConfig, "llm", []),
+				createDefaultConnector(connectorConfig, "llm"),
 				store.getState(),
 				queue,
 			);

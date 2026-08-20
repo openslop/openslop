@@ -3,6 +3,8 @@ import { createEditor, Editor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
+	clearEditor,
+	duplicateNode,
 	findElementById,
 	findNodeById,
 	updateNodeText,
@@ -138,6 +140,40 @@ describe("updateNodeText", () => {
 	});
 });
 
+describe("duplicateNode", () => {
+	it("inserts the copy directly after the original", () => {
+		const editor = makeEditor([
+			scene([
+				content("narration", "n1", "hello"),
+				content("image", "img1", "a cat"),
+			]),
+		]);
+
+		const copyId = duplicateNode(
+			editor,
+			content("narration", "n1", "hello"),
+			[0, 0],
+		);
+
+		const children = (editor.children[0] as SceneElement).children;
+		expect(children.map((c) => c.id)).toEqual(["n1", copyId, "img1"]);
+		expect(Editor.string(editor, [0, 1])).toBe(Editor.string(editor, [0, 0]));
+	});
+
+	it("gives the copy and its leaves fresh ids, keeping the attributes", () => {
+		const el = content("character", "c1", "line", { name: "Lyra" });
+		const editor = makeEditor([scene([el])]);
+
+		const copyId = duplicateNode(editor, el, [0, 0]);
+
+		const copy = (editor.children[0] as SceneElement).children[1];
+		expect(copyId).not.toBe("c1");
+		expect(copy.customAttributes).toEqual({ name: "Lyra" });
+		expect(copy.children.map((leaf) => leaf.id)).not.toContain("c1-t");
+		expect(new Set(copy.children.map((leaf) => leaf.id)).size).toBe(2);
+	});
+});
+
 describe("setNodeAttrs", () => {
 	it("merges new attrs into existing", () => {
 		const el = content("character", "n1", "", { name: "Lyra" });
@@ -173,5 +209,19 @@ describe("setNodeAttrs", () => {
 
 		const node = editor.children[0] as SceneElement;
 		expect(node.children[0].customAttributes).toEqual({ emotion: "calm" });
+	});
+});
+
+describe("clearEditor", () => {
+	it("empties the document, so a new script does not stack under the old one", () => {
+		const editor = createEditor();
+		editor.children = [
+			content("narration", "n1", "old"),
+			content("image", "i1"),
+		];
+
+		clearEditor(editor);
+
+		expect(editor.children).toEqual([]);
 	});
 });

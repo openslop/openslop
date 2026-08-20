@@ -3,20 +3,27 @@ import * as React from "react";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
+const SIZES = { sm: "h-5 w-5", default: "h-7 w-7" } as const;
+
 export function IconButton({
 	ariaLabel,
+	size = "default",
 	className,
 	children,
 	ref,
 	...props
-}: React.ComponentProps<"button"> & { ariaLabel: string }) {
+}: React.ComponentProps<"button"> & {
+	ariaLabel: string;
+	size?: keyof typeof SIZES;
+}) {
 	return (
 		<button
 			ref={ref}
 			type="button"
 			aria-label={ariaLabel}
 			className={cn(
-				"flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-button-hover focus-ring disabled:pointer-events-none disabled:opacity-40",
+				"flex shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-button-hover focus-ring disabled:pointer-events-none disabled:opacity-40",
+				SIZES[size],
 				className,
 			)}
 			{...props}

@@ -5,6 +5,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* The negative margin gives back the room the padding makes for the bar. */
+@utility scrollbar-overlay {
+	padding-bottom: 8px;
+	margin-bottom: -8px;
+
+	&::-webkit-scrollbar-thumb {
+		background-color: color-mix(in oklab, var(--scrollbar) 65%, transparent);
+		background-clip: content-box;
+		border: 2px solid transparent;
+		border-radius: 9999px;
+	}
+}
+
+/* Two tint strengths of a clip's own colour; the ramp flips both with the theme. */
+@utility timeline-clip-surface {
+	background-color: color-mix(in oklab, currentColor 22%, var(--element-card));
+}
+
+@utility timeline-preview-surface {
+	background-color: color-mix(in oklab, currentColor 6%, var(--element-card));
+}
+
 @utility focus-ring {
 	@apply outline-none focus-visible:ring-2 focus-visible:ring-ring;
 }
@@ -104,19 +126,22 @@
 	--media-toggle-active-bg: #583e4a;
 	--media-toggle-active-fg: #ffffff;
 	--scrollbar: #dddadb;
+	--timeline-active: color-mix(in oklab, var(--grey-0) 16%, transparent);
 	--panel-fg: var(--foreground);
 	--panel-label: var(--muted-foreground);
 	--voice-hover: #ebe9ea;
-	--scene-active-tint: color-mix(in oklab, var(--accent) 6%, transparent);
-	--scene-active-blob: color-mix(in oklab, var(--accent) 70%, white);
-	--scene-active-border: color-mix(in oklab, var(--accent) 30%, transparent);
-	--scene-active-glow: color-mix(in oklab, var(--accent) 20%, transparent);
+	--scene-active-tint: color-mix(in oklab, var(--generate) 6%, transparent);
+	--scene-active-blob: color-mix(in oklab, var(--generate) 70%, white);
+	--scene-active-border: color-mix(in oklab, var(--generate) 30%, transparent);
+	--scene-active-glow: color-mix(in oklab, var(--generate) 20%, transparent);
 	--scene-active-shadow: color-mix(in oklab, var(--grey-900) 18%, transparent);
 	--generate: #3b2b32;
 	--generate-foreground: #ffffff;
 	--generate-hover: #4f4046;
 	--generate-disabled: #c9c5c9;
 	--generate-disabled-foreground: var(--grey-500);
+	--orb-from: #d99b1f;
+	--orb-to: #9c3813;
 	--tertiary: #a64d78;
 	--accent: var(--blurple-500);
 	--accent-foreground: #fff;
@@ -236,16 +261,18 @@
 	--panel-fg: #e0dbde;
 	--panel-label: #f9e6f6;
 	--voice-hover: #312c30;
-	--scene-active-tint: color-mix(in oklab, var(--accent) 12%, transparent);
-	--scene-active-blob: color-mix(in oklab, var(--accent) 78%, white);
-	--scene-active-border: color-mix(in oklab, var(--accent) 42%, transparent);
-	--scene-active-glow: color-mix(in oklab, var(--accent) 30%, transparent);
+	--scene-active-tint: color-mix(in oklab, var(--generate) 12%, transparent);
+	--scene-active-blob: color-mix(in oklab, var(--generate) 78%, white);
+	--scene-active-border: color-mix(in oklab, var(--generate) 42%, transparent);
+	--scene-active-glow: color-mix(in oklab, var(--generate) 30%, transparent);
 	--scene-active-shadow: rgba(0, 0, 0, 0.55);
 	--generate: #e2dde0;
 	--generate-foreground: #231e21;
 	--generate-hover: #a09c9e;
 	--generate-disabled: #403a3e;
 	--generate-disabled-foreground: var(--grey-500);
+	--orb-from: #ffbf48;
+	--orb-to: #be4a1d;
 	--tertiary: #d99bb8;
 	--accent-foreground: #fff;
 	--destructive-foreground: #fff;
@@ -292,6 +319,7 @@
 	--color-element-card: var(--element-card);
 	--color-element-input: var(--element-input);
 	--color-element-input-border-hover: var(--element-input-border-hover);
+	--color-timeline-active: var(--timeline-active);
 	--color-scrub-track: var(--scrub-track);
 	--color-scrub-progress: var(--scrub-progress);
 	--color-scrub-hover: var(--scrub-hover);
@@ -398,6 +426,29 @@
 	scrollbar-color: var(--scrollbar) transparent;
 }
 
+/* Chromium ignores ::-webkit-scrollbar sizing while scrollbar-width is set, and
+   Firefox has no ::-webkit-scrollbar, so each engine takes one branch. */
+@supports selector(::-webkit-scrollbar) {
+	* {
+		scrollbar-width: auto;
+		scrollbar-color: auto;
+	}
+}
+
+*::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar);
+	border-radius: 9999px;
+}
+
 .font-title {
 	font-family: var(--font-sloptastic), ui-sans-serif, system-ui, sans-serif;
 	font-weight: 575;
@@ -459,7 +510,7 @@
 	position: relative;
 	isolation: isolate;
 	overflow: hidden;
-	border-radius: var(--radius);
+	border-radius: calc(var(--radius) - 2px);
 	background-color: var(--scene-active-border);
 	box-shadow:
 		0 1px 18px -2px var(--scene-active-glow),

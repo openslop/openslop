@@ -1,13 +1,13 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Check, ChevronDown } from "@/components/ui/icon";
+import { ChevronDown } from "@/components/ui/icon";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SelectMenuItem } from "@/components/ui/select-menu";
 
 export const FIELD_CLS =
 	"w-full rounded-md border border-border bg-card px-2 py-1.5 font-body text-label text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50";
@@ -100,47 +100,27 @@ export function EnumField<T extends string>({
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					align="start"
-					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto rounded-xl border border-border bg-card p-0.5 shadow-md shadow-black/40"
+					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)]"
 				>
-					<EnumOption
+					<SelectMenuItem
 						selected={value === undefined}
 						onSelect={() => onChange(undefined)}
+						className="text-muted-foreground"
 					>
-						<span className="text-muted-foreground">—</span>
-					</EnumOption>
+						—
+					</SelectMenuItem>
 					{options.map((option) => (
-						<EnumOption
+						<SelectMenuItem
 							key={option}
 							selected={option === value}
 							onSelect={() => onChange(option)}
+							className="text-muted-foreground"
 						>
 							{option}
-						</EnumOption>
+						</SelectMenuItem>
 					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</div>
-	);
-}
-
-function EnumOption({
-	selected,
-	onSelect,
-	children,
-}: {
-	selected: boolean;
-	onSelect: () => void;
-	children: ReactNode;
-}) {
-	return (
-		<DropdownMenuItem
-			onClick={onSelect}
-			className="flex cursor-pointer items-center gap-1.5 py-1 text-label text-muted-foreground"
-		>
-			<span className="flex w-3.5 shrink-0 items-center justify-center">
-				{selected && <Check className="h-3 w-3 text-foreground" aria-hidden />}
-			</span>
-			{children}
-		</DropdownMenuItem>
 	);
 }

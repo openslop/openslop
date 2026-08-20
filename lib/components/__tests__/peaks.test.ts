@@ -38,14 +38,20 @@ describe("extractPeaks", () => {
 		expect(peaks).toEqual([0.5, 1.0, 0.25, 0.75]);
 	});
 
-	it("takes absolute value (negative samples become positive peaks)", () => {
+	it("is sign-agnostic (negative samples carry the same weight)", () => {
 		const data = new Float32Array([-0.8, -0.4, 0.2, 0.1]);
 		const peaks = extractPeaks(data, 2);
-		// Bucket 0: max(abs(-0.8), abs(-0.4)) = 0.8
-		// Bucket 1: max(abs(0.2), abs(0.1)) = 0.2
-		// Normalized: [1.0, 0.25]
+		// RMS: sqrt((0.64 + 0.16) / 2) and sqrt((0.04 + 0.01) / 2), normalized.
 		expect(peaks[0]).toBe(1);
-		expect(peaks[1]).toBe(0.25);
+		expect(peaks[1]).toBeCloseTo(0.25);
+	});
+
+	it("averages a bucket rather than following its loudest sample", () => {
+		const data = new Float32Array([1, 0, 0, 0, 0.6, 0.6, 0.6, 0.6]);
+		const [transient, sustained] = extractPeaks(data, 2);
+		// Peak-picking would rate the lone spike (1) above the sustained tone
+		// (0.6); by energy the sustained half is the louder of the two.
+		expect(transient).toBeLessThan(sustained);
 	});
 
 	it("handles uniform amplitude", () => {

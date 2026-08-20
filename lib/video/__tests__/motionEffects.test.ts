@@ -3,10 +3,9 @@ import {
 	coverScale,
 	DEFAULT_MOTION,
 	isMotionEffect,
-	MOTION_EFFECTS,
-	type MotionEffect,
 	motionTransform,
 } from "../motionEffects";
+import { MOTION_EFFECTS, type MotionEffect } from "../motionEffectNames";
 
 const ACTIVE: ReadonlyArray<Exclude<MotionEffect, "none">> =
 	MOTION_EFFECTS.filter((e) => e !== "none") as Exclude<MotionEffect, "none">[];

@@ -1,4 +1,5 @@
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { Descendant } from "slate";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import type { TransitionType } from "./transitions";
 import { layoutAttributeSignature } from "./elementAttributes";
 
@@ -9,11 +10,17 @@ import { layoutAttributeSignature } from "./elementAttributes";
  * the resolver stay in lockstep — add new attributes there, not here.
  */
 export function getLayoutKey(
-	elements: CanvasContentElement[],
+	nodes: Descendant[],
 	transitionType: TransitionType,
 ): string {
-	const elementsKey = elements
-		.map((el) => `${el.id}:${el.type}:${layoutAttributeSignature(el)}`)
+	const elementsKey = nodes
+		.filter(isSceneElement)
+		.flatMap((scene) =>
+			scene.children.map(
+				(el) =>
+					`${scene.id}:${el.id}:${el.type}:${layoutAttributeSignature(el)}`,
+			),
+		)
 		.join("|");
 	return `${transitionType}|${elementsKey}`;
 }

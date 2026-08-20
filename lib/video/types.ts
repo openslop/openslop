@@ -5,7 +5,7 @@ import type {
 } from "@/lib/canvas/types";
 import type { TextTimestamp } from "@/lib/connectors/types";
 import type { CaptionStyle } from "./captionStyle";
-import type { MotionEffect } from "./motionEffects";
+import type { MotionEffect } from "./motionEffectNames";
 import type { TransitionType } from "./transitions";
 
 export type ResolvedElement = {
@@ -13,6 +13,10 @@ export type ResolvedElement = {
 	type: CanvasElementType;
 	role: ElementRole;
 	layer: LayerType;
+	/** The scene that holds it, and its place in the document. */
+	sceneId: string;
+	sceneNumber: number;
+	prompt: string;
 	url: string;
 	durationSec: number;
 	loops: number;
@@ -22,7 +26,7 @@ export type ResolvedElement = {
 };
 
 export type Sequence = {
-	element: ResolvedElement | null;
+	element: ResolvedElement;
 	start: number;
 	duration: number;
 };

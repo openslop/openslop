@@ -45,13 +45,7 @@ function BottomTransportBarComponent() {
 	return (
 		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
 			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
-				{canSeek && (
-					<SegmentedSeekBar
-						player={player}
-						layout={layout}
-						segments={segments}
-					/>
-				)}
+				<SegmentedSeekBar player={player} layout={layout} segments={segments} />
 			</div>
 			<div className="flex items-center gap-2">
 				<div className="flex flex-1 items-center gap-2">

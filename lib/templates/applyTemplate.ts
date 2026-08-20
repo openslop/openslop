@@ -20,6 +20,7 @@ export function applyTemplate(
 		narration: template.narration,
 		videoSettings: { length: template.length },
 	});
+	project.setTemplate(template.id);
 
 	for (const [name, imageUrl] of Object.entries(
 		template.characterAvatars ?? {},

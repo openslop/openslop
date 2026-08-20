@@ -1,5 +1,5 @@
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
-import { MOTION_EFFECTS } from "@/lib/video/motionEffects";
+import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
 import type { AttributeDef } from "./schema";
 
 const VOLUME_OPTIONS = [

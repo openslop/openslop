@@ -28,7 +28,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 	}),
 }));
 
-import { applyRefineOp } from "../applyOps";
+import { applyRefineOp, applyRefineOps } from "../applyOps";
 
 const connectors: ConnectorRegistry = {
 	llm: {
@@ -220,19 +220,22 @@ describe("applyRefineOp — insert", () => {
 		expect(texts).toEqual(["first", "A", "B", "C"]);
 	});
 
-	it("falls back to append when anchor_id not found", () => {
+	it("reports a missing anchor instead of appending somewhere else", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
+		const result = applyRefineOp(
 			editor,
 			{ op: "insert", anchor_id: "nonexistent", type: "sound", text: "rain" },
 			anchorMap,
 			connectors,
 		);
 
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["hello", "rain"]);
+		expect(result).toEqual({
+			ok: false,
+			reason: 'insert: anchor "nonexistent" no longer exists',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
 	it("uses custom attrs from the op", () => {
@@ -614,5 +617,40 @@ describe("applyRefineOp — mixed operations", () => {
 
 		const texts = getContentTexts(editor);
 		expect(texts).toEqual(["first", "B", "C"]);
+	});
+});
+
+describe("applyRefineOps", () => {
+	it("applies a turn's ops in order and counts them", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOps(
+			editor,
+			[
+				{ op: "set", id: "n1", text: "goodbye" },
+				{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
+			],
+			connectors,
+		);
+
+		expect(result).toEqual({ applied: 2, failures: [] });
+		expect(getContentTexts(editor)).toEqual(["goodbye", "rain"]);
+	});
+
+	it("keeps going past a failed op and reports why it failed", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOps(
+			editor,
+			[
+				{ op: "set", id: "gone", text: "nope" },
+				{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
+			],
+			connectors,
+		);
+
+		expect(result.applied).toBe(1);
+		expect(result.failures).toEqual(['set: no element "gone"']);
+		expect(getContentTexts(editor)).toEqual(["hello", "rain"]);
 	});
 });

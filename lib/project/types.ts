@@ -31,6 +31,26 @@ export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	resolvedVoiceId: optionalString,
 });
 
+/** What describes a voice, as opposed to identifying one, in reading order. */
+export const VOICE_TRAITS = [
+	"gender",
+	"age",
+	"pitch",
+	"accent",
+	"language",
+	"description",
+] as const satisfies readonly (keyof z.infer<typeof voiceTraitsSchema>)[];
+
+/** The traits a voice declares, as [trait, value] pairs in reading order. */
+export function voiceTraitEntries(
+	voice: z.infer<typeof voiceTraitsSchema>,
+): [string, string][] {
+	return VOICE_TRAITS.flatMap((trait) => {
+		const value = voice[trait];
+		return value ? [[trait, value] as [string, string]] : [];
+	});
+}
+
 export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 	query: optionalString,
 	name: optionalString,
@@ -47,10 +67,6 @@ export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 
 export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
 
-export const MODES = ["story", "script", "template"] as const;
-
-export type Mode = (typeof MODES)[number];
-
 export const MetadataSchema = z.object({
 	title: z.string().default(""),
 	style: z.string().default(""),
@@ -61,8 +77,9 @@ export const MetadataSchema = z.object({
 	narration: MetadataVoiceSchema.default({}),
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
 	videoSettings: VideoSettingsSchema,
+	/** The template the project's scripts are written against, when it has one. */
+	templateId: optionalString,
 	/** Persisted for server-side observability of prompt activity; not read in-app. */
-	lastMode: z.enum(MODES).optional(),
 	lastPrompt: z.string().optional(),
 });
 

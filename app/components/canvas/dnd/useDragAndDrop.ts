@@ -9,7 +9,8 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { Descendant, Editor } from "slate";
+import { Editor } from "slate";
+import { useSlateSelector } from "slate-react";
 import { moveDraggedElement } from "@/lib/canvas/dragOps";
 import { findElementById } from "@/lib/canvas/editorOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
@@ -17,18 +18,21 @@ import { createDragTransferStore } from "./DragTransferContext";
 
 const SCENE_ID_SEPARATOR = ",";
 
-export function useDragAndDrop(editor: Editor, value: Descendant[]) {
+// Selecting the ids rather than the document keeps the canvas off the
+// per-keystroke render path: it re-renders only when the scene order changes.
+const selectSceneIdKey = (editor: Editor) =>
+	editor.children
+		.filter(isSceneElement)
+		.map((s) => s.id)
+		.join(SCENE_ID_SEPARATOR);
+
+export function useDragAndDrop(editor: Editor) {
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
 	const [dragTransferStore] = useState(createDragTransferStore);
 
 	const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
-	// Keying on `value` gives SortableContext a new `items` identity per
-	// keystroke, re-rendering every useSortable consumer. Key on the ids.
-	const sceneIdKey = value
-		.filter(isSceneElement)
-		.map((s) => s.id)
-		.join(SCENE_ID_SEPARATOR);
+	const sceneIdKey = useSlateSelector(selectSceneIdKey);
 	const sceneItems = useMemo<string[]>(
 		() => sceneIdKey.split(SCENE_ID_SEPARATOR).filter(Boolean),
 		[sceneIdKey],

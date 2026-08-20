@@ -3,28 +3,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { useTemplate } from "@/lib/templates/useTemplate";
+import { useSloppy } from "./sloppy/SloppyProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
 import ComposerCopilot from "./copilot/ComposerCopilot";
-import AnimatedPlaceholder from "./AnimatedPlaceholder";
 import TemplateGallery from "./TemplateGallery";
 
-const INPUT_SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
-Soft glowing stars twinkle quietly across a deep blue sky.
-A large silver moon glows softly above peaceful clouds.
-Gentle music begins.
-
-NARRATOR (soft, soothing voice)
-High above the quiet forests and sleepy hills…
-past the drifting clouds…
-there was a small glowing garden hidden on the moon.
-
-And in that garden… lived a little rabbit named Lumi…`;
-
 export default function ComposerHero() {
-	const { submitPrompt, startBlank } = useScriptControl();
-	const { mode, selectTemplate } = useConfig();
+	const { setShowWorkspace, startBlank } = useScriptControl();
+	const { applyTemplate } = useTemplate();
+	const { send } = useSloppy();
 	const [value, setValue] = useState("");
+
+	const start = (brief: string) => {
+		setShowWorkspace(true);
+		send(brief);
+	};
 
 	return (
 		<div className="flex w-full max-w-2xl flex-col items-center px-4">
@@ -36,14 +30,10 @@ export default function ComposerHero() {
 			<ComposerCopilot
 				value={value}
 				onValueChange={setValue}
-				onSubmit={() => {
-					submitPrompt(value);
+				onSubmit={(brief) => {
+					start(brief);
 					setValue("");
 				}}
-				placeholder={mode === "script" ? INPUT_SCRIPT_PLACEHOLDER : undefined}
-				placeholderOverlay={
-					mode === "script" ? undefined : <AnimatedPlaceholder />
-				}
 			/>
 
 			<Button
@@ -57,7 +47,7 @@ export default function ComposerHero() {
 
 			<TemplateGallery
 				onSelect={(templateId, examplePrompt) => {
-					selectTemplate(templateId);
+					applyTemplate(templateId);
 					setValue(examplePrompt);
 				}}
 			/>

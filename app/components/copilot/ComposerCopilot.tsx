@@ -1,8 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState } from "react";
 import {
-	ChevronDown,
+	Codesandbox,
 	CornerDownLeft,
 	Hourglass,
 	ImagePlus,
@@ -16,15 +16,15 @@ import {
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
-import { SelectMenu, type SelectMenuOption } from "@/components/ui/select-menu";
-import { cn } from "@/lib/utils";
-import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
 import {
-	TEMPLATES,
-	getTemplate,
-	type Template,
-} from "@/lib/templates/templates";
-import { useConfig } from "@/lib/config/ConfigProvider";
+	SegmentedControl,
+	type SegmentedControlOption,
+} from "@/components/ui/segmented-control";
+import AnimatedPlaceholder from "@/app/components/AnimatedPlaceholder";
+import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
+import { TEMPLATES, type Template } from "@/lib/templates/templates";
+import { templateBrief } from "@/lib/templates/templateBrief";
+import { useTemplate } from "@/lib/templates/useTemplate";
 import { useProject } from "@/lib/project/useProject";
 import {
 	LANGUAGE_CHOICES,
@@ -32,71 +32,57 @@ import {
 	type LanguageChoice,
 } from "@/lib/project/language";
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
-import type { Mode } from "@/lib/project/types";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
-import { useVideoSetting } from "@/lib/video/useVideoSetting";
+import {
+	useUpdateVideoSettings,
+	useVideoSetting,
+} from "@/lib/video/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
-	VIDEO_LENGTH_SPECS,
+	videoLengthLabel,
 	type VideoLength,
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
+import { SettingPill, type SettingPillOption } from "./SettingPill";
 
-const MODE_LABELS: Record<Mode, string> = {
-	story: "Describe a story",
-	script: "Paste in a script",
-	template: "Use a template",
-};
+/** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
+type ComposerIntent = "story" | "script";
 
-const MODE_OPTIONS: SelectMenuOption<Mode>[] = (
-	Object.keys(MODE_LABELS) as Mode[]
-).map((value) => ({ value, label: MODE_LABELS[value] }));
+const INTENT_OPTIONS: SegmentedControlOption<ComposerIntent>[] = [
+	{ value: "story", label: "Describe a video" },
+	{ value: "script", label: "Paste a script" },
+];
 
-const ASPECT_RATIO_OPTIONS: SelectMenuOption<AspectRatio>[] = [
+const SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
+Soft glowing stars twinkle quietly across a deep blue sky.
+A large silver moon glows softly above peaceful clouds.
+Gentle music begins.
+
+NARRATOR (soft, soothing voice)
+High above the quiet forests and sleepy hills…
+past the drifting clouds…
+there was a small glowing garden hidden on the moon.
+
+And in that garden… lived a little rabbit named Lumi…`;
+
+const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] = [
 	{ value: "16:9", label: "16:9" },
 	{ value: "9:16", label: "9:16" },
 ];
 
-const VIDEO_LENGTH_OPTIONS: SelectMenuOption<VideoLength>[] = VIDEO_LENGTHS.map(
-	(value) => ({ value, label: VIDEO_LENGTH_SPECS[value].label }),
-);
+const VIDEO_LENGTH_OPTIONS: SettingPillOption<VideoLength>[] =
+	VIDEO_LENGTHS.map((value) => ({ value, label: videoLengthLabel(value) }));
 
-const LANGUAGE_OPTIONS: SelectMenuOption<LanguageChoice>[] =
+const LANGUAGE_OPTIONS: SettingPillOption<LanguageChoice>[] =
 	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
 
-const TEMPLATE_OPTIONS: SelectMenuOption<string>[] = TEMPLATES.map((t) => ({
+const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map((t) => ({
 	value: t.id,
 	label: t.name,
 }));
-
-function PillTrigger({
-	icon,
-	label,
-	className,
-	ref,
-	...props
-}: React.ComponentProps<"button"> & {
-	icon?: ReactNode;
-	label: ReactNode;
-}) {
-	return (
-		<button
-			ref={ref}
-			type="button"
-			className={cn(
-				"focus-ring inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover",
-				className,
-			)}
-			{...props}
-		>
-			{icon}
-			{label}
-			<ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
-		</button>
-	);
-}
 
 function AttachMenu({
 	openPicker,
@@ -181,7 +167,7 @@ function TemplatePill({
 			>
 				<X className="h-3 w-3" />
 			</button>
-			{template.pillText}
+			{template.promptPrefix}
 		</span>
 	);
 }
@@ -189,24 +175,22 @@ function TemplatePill({
 interface ComposerCopilotProps {
 	value: string;
 	onValueChange: (value: string) => void;
-	onSubmit: () => void;
-	placeholder?: string;
-	placeholderOverlay?: ReactNode;
+	onSubmit: (brief: string) => void;
 }
 
 export default function ComposerCopilot({
 	value,
 	onValueChange,
 	onSubmit,
-	placeholder,
-	placeholderOverlay,
 }: ComposerCopilotProps) {
-	const { mode, setMode, selectedTemplateId, selectTemplate } = useConfig();
+	const [intent, setIntent] = useState<ComposerIntent>("story");
+	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const videoLength = useVideoSetting("length");
-	const updateMetadata = useProject((s) => s.updateMetadata);
+	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
+	const { model, setModel, models } = useSloppy();
 	const {
 		openCreateCharacter,
 		editCharacter,
@@ -217,19 +201,31 @@ export default function ComposerCopilot({
 
 	const { openPicker, uploading, uploadingCount, inputElement } =
 		useImageUpload({ multiple: true, onUpload: addReferenceImages });
-	const isTemplateMode = mode === "template";
-	const isScriptMode = mode === "script";
-	const languageName = languageLabel(language);
 	const hasText = value.trim().length > 0;
-	const selectedTemplate = getTemplate(selectedTemplateId);
+	const pasting = intent === "script";
+	const activeTemplate = pasting ? undefined : template;
+
+	/** A pasted script sets its own length, so the target goes back to auto. */
+	const chooseIntent = (next: ComposerIntent) => {
+		setIntent(next);
+		if (next === "script") updateVideoSettings({ length: "auto" });
+	};
 
 	const handleSubmit = () => {
-		if (hasText) onSubmit();
+		if (hasText) onSubmit(templateBrief(activeTemplate, value));
 	};
 
 	return (
 		<div className="w-full rounded-xl border border-accent/30 bg-card transition-shadow focus-within:shadow-elevation-5">
 			<div className="px-4 py-3">
+				<div className="mb-3 flex justify-center">
+					<SegmentedControl
+						value={intent}
+						options={INTENT_OPTIONS}
+						onChange={chooseIntent}
+						ariaLabel="What you are giving Sloppy"
+					/>
+				</div>
 				<ComposerAssets
 					uploadingCount={uploadingCount}
 					onEditCharacter={editCharacter}
@@ -237,29 +233,26 @@ export default function ComposerCopilot({
 					onEditArtStyle={openArtStyle}
 				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-					{isTemplateMode && (
-						<TemplatePill
-							template={selectedTemplate}
-							onRemove={() => setMode("story")}
-						/>
+					{activeTemplate && (
+						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
 					)}
 					<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
 						<textarea
-							rows={2}
-							aria-label="Enter your prompt"
+							rows={pasting ? 8 : 2}
+							aria-label={pasting ? "Paste your script" : "Enter your prompt"}
 							value={value}
 							onChange={(e) => onValueChange(e.target.value)}
 							onKeyDown={(e) => {
 								if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
 									handleSubmit();
 							}}
-							placeholder={placeholder}
+							placeholder={pasting ? SCRIPT_PLACEHOLDER : undefined}
 							style={{ fieldSizing: "content" }}
 							className=" max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
-						{!hasText && !isTemplateMode && placeholderOverlay && (
+						{!hasText && !activeTemplate && !pasting && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">
-								{placeholderOverlay}
+								<AnimatedPlaceholder />
 							</div>
 						)}
 					</div>
@@ -274,77 +267,48 @@ export default function ComposerCopilot({
 							onSelectNarrator={openNarrator}
 							onSetArtStyle={openArtStyle}
 						/>
-						<SelectMenu
-							value={mode}
-							onChange={(next: Mode) =>
-								next === "template"
-									? selectTemplate(selectedTemplateId)
-									: setMode(next)
-							}
-							options={MODE_OPTIONS}
-							itemClassName="rounded-lg text-label-xs"
-						>
-							<PillTrigger
-								aria-label={`Composer mode: ${MODE_LABELS[mode]}`}
-								label={MODE_LABELS[mode]}
-							/>
-						</SelectMenu>
-						<SelectMenu
+						<SettingPill
+							name="Aspect ratio"
+							icon={<Proportions className="mr-1 h-3 w-3" />}
 							value={aspectRatio}
-							onChange={(next: AspectRatio) =>
-								updateMetadata({ videoSettings: { aspectRatio: next } })
-							}
 							options={ASPECT_RATIO_OPTIONS}
-							itemClassName="rounded-lg text-label-xs"
-						>
-							<PillTrigger
-								aria-label={`Aspect ratio: ${aspectRatio}`}
-								icon={<Proportions className="mr-1 h-3 w-3" />}
-								label={aspectRatio}
-							/>
-						</SelectMenu>
-						<SelectMenu
+							onChange={(next: AspectRatio) =>
+								updateVideoSettings({ aspectRatio: next })
+							}
+						/>
+						<SettingPill
+							name="Language"
+							icon={<Translate className="mr-1 h-3 w-3" />}
 							value={language}
-							onChange={setLanguage}
 							options={LANGUAGE_OPTIONS}
-							itemClassName="rounded-lg text-label-xs"
-						>
-							<PillTrigger
-								aria-label={`Language: ${languageName}`}
-								icon={<Translate className="mr-1 h-3 w-3" />}
-								label={languageName}
-							/>
-						</SelectMenu>
-						{!isScriptMode && (
-							<SelectMenu
-								value={videoLength}
-								onChange={(next: VideoLength) =>
-									updateMetadata({ videoSettings: { length: next } })
-								}
-								options={VIDEO_LENGTH_OPTIONS}
-								itemClassName="rounded-lg text-label-xs"
-							>
-								<PillTrigger
-									aria-label={`Video length: ${VIDEO_LENGTH_SPECS[videoLength].label}`}
-									icon={<Hourglass className="mr-1 h-3 w-3" />}
-									label={VIDEO_LENGTH_SPECS[videoLength].label}
-								/>
-							</SelectMenu>
-						)}
-						{isTemplateMode && (
-							<SelectMenu
-								value={selectedTemplateId}
-								onChange={selectTemplate}
+							onChange={setLanguage}
+						/>
+						<SettingPill
+							name="Model"
+							icon={<Codesandbox className="mr-1 h-3 w-3" />}
+							value={model}
+							options={models.map((value) => ({ value, label: value }))}
+							onChange={setModel}
+						/>
+						<SettingPill
+							name="Video length"
+							icon={<Hourglass className="mr-1 h-3 w-3" />}
+							value={videoLength}
+							options={VIDEO_LENGTH_OPTIONS}
+							disabled={pasting}
+							onChange={(next: VideoLength) =>
+								updateVideoSettings({ length: next })
+							}
+						/>
+						{activeTemplate && (
+							<SettingPill
+								name="Template"
+								className="relative overflow-hidden"
+								style={{ backgroundColor: activeTemplate.color }}
+								value={activeTemplate.id}
 								options={TEMPLATE_OPTIONS}
-								itemClassName="rounded-lg text-label-xs"
-							>
-								<PillTrigger
-									aria-label={`Template: ${selectedTemplate.name}`}
-									className="relative overflow-hidden"
-									style={{ backgroundColor: selectedTemplate.color }}
-									label={selectedTemplate.name}
-								/>
-							</SelectMenu>
+								onChange={applyTemplate}
+							/>
 						)}
 					</div>
 					<ActionButton

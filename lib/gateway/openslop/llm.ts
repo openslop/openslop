@@ -14,11 +14,15 @@ export class OpenSlopLLMGateway extends OpenSlopGatewayClient<
 		return this.client.post("/api/v1/llm", params);
 	}
 
-	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
-		const res = await this.client.postStream("/api/v1/llm", {
-			...params,
-			stream: true,
-		});
+	async *stream(
+		params: LLMGenerateParams,
+		signal?: AbortSignal,
+	): AsyncGenerator<LLMStreamChunk> {
+		const res = await this.client.postStream(
+			"/api/v1/llm",
+			{ ...params, stream: true },
+			signal,
+		);
 		if (!res.body) throw new Error("No response body");
 		yield* readSSE<LLMStreamChunk>(res.body);
 	}

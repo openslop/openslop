@@ -31,17 +31,17 @@ export function buildProjectSave(
 export interface AutosaverOptions {
 	projectId: string;
 	store: ProjectStore;
+	/**
+	 * Produces the script for the next save. Called only when a save runs, so
+	 * serializing stays off the per-keystroke path.
+	 */
+	getScript: () => string;
 	getGeneration: () => GenerationSnapshot;
 	onSaved: () => void;
 	onError: (error: unknown) => void;
 }
 
 export interface Autosaver {
-	/**
-	 * How to produce the script for the next save. Called only when a save
-	 * runs, so serializing stays off the per-keystroke path.
-	 */
-	setScriptSource: (getScript: () => string) => void;
 	/** Coalesce this change with any others into one debounced save. */
 	schedule: () => void;
 	/** Run any pending save immediately. */
@@ -55,12 +55,12 @@ export interface Autosaver {
 export function createAutosaver({
 	projectId,
 	store,
+	getScript,
 	getGeneration,
 	onSaved,
 	onError,
 }: AutosaverOptions): Autosaver {
 	const queue = new PQueue({ concurrency: 1 });
-	let getScript: (() => string) | null = null;
 
 	const save = async () => {
 		if (!store.getState().hydrated) {
@@ -68,7 +68,6 @@ export function createAutosaver({
 			return;
 		}
 		try {
-			if (!getScript) throw new Error("Autosave has no script source");
 			const input = buildProjectSave(
 				extractStoreSnapshot(store),
 				getScript(),
@@ -88,9 +87,6 @@ export function createAutosaver({
 	}, AUTOSAVE_DEBOUNCE_MS);
 
 	return {
-		setScriptSource: (next) => {
-			getScript = next;
-		},
 		schedule,
 		flush: () => {
 			schedule.flush();

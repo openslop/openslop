@@ -2,6 +2,7 @@ type RequestOptions = {
 	method?: string;
 	body?: unknown;
 	params?: Record<string, string>;
+	signal?: AbortSignal;
 };
 
 /** Every internal route answers failures with `{ error }` (see `lib/api/response.ts`). */
@@ -38,9 +39,12 @@ function buildUrl(url: string, params?: Record<string, string>): string {
 /** Calls one of our own API routes, surfacing its error envelope as a thrown `Error`. */
 export async function apiFetch(
 	url: string,
-	{ method = "GET", body, params }: RequestOptions = {},
+	{ method = "GET", body, params, signal }: RequestOptions = {},
 ): Promise<Response> {
-	const res = await fetch(buildUrl(url, params), buildInit(method, body));
+	const res = await fetch(buildUrl(url, params), {
+		...buildInit(method, body),
+		signal,
+	});
 	if (!res.ok) throw new Error(await readErrorMessage(res));
 	return res;
 }

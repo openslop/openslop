@@ -13,7 +13,8 @@ export class OpenSlopLLM extends BaseLLMConnector<OpenSlopLLMGateway> {
 
 	protected async *_stream(
 		params: LLMGenerateParams,
+		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		yield* this.gateway.stream(params);
+		yield* this.gateway.stream(params, signal);
 	}
 }

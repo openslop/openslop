@@ -10,7 +10,7 @@ A 10k-foot view of how OpenSlop fits together.
 
 ### 1. Submit prompt
 
-The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams OSML back over SSE. The parser inserts elements into the SlateJS canvas as they arrive.
+The prompt goes through the LLM connector to `POST /api/v1/llm`, which streams OSML back over SSE. The parser inserts elements into the SlateJS canvas as they arrive via Sloppy (see [Sloppy](#sloppy)).
 
 ### 2. Generate
 
@@ -26,13 +26,21 @@ Project state (script, store, and generation snapshots) persists to the `project
 
 `POST /api/render` splits the composition across Remotion Lambdas. Chunks render in parallel into an MP4 in S3 while the client polls for progress. Compositions live in `remotion/` and `lib/video/`. The Player is loaded client-side only.
 
+## Sloppy
+
+Sloppy is the conversational agent in the editor's left panel. A turn is a ReAct loop over `POST /api/v1/agent`: each request loads the transcript, appends the project's settings snapshot to the system prompt, and streams reasoning, text and tool calls back as a UI-message stream. The script itself is never in the prompt; the agent reads it through `read_script`.
+
+Tools are declared without an executor, so a step stops at the call. The client runs it against the Slate editor and posts the result back to the same route, which invokes the model again, until the model answers in text or `MAX_TOOL_CALLS` withdraws the tools and forces an answer. The agent never writes `projects.script` or `projects.store` itself, so the client stays the single writer and autosave stays the single persistence path.
+
+Turns are stored as the SDK's UI message type, so the stream, the rows and the panel share one shape and nothing is converted between them. `lib/agent/` holds the domain (one self-contained definition file per tool and their registry, the context block, message helpers, prompt), `lib/api/agentTurn.ts` runs the turn, and `app/components/sloppy/` is the panel, which reads everything it shows back from rows.
+
 ## Three layers
 
 The generation pipeline is split so providers and asset types can be swapped independently:
 
 - **Connectors** (`lib/connectors/`): what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`.
 - **Gateways** (`lib/gateway/`): thin HTTP clients between connectors and our `/api/v1/*` routes. This seam lets connectors run against the live API or a mock. Today there is one OpenSlop gateway. A BYOK gateway will be added so users can call providers with their own API keys.
-- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response.
+- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. LLM providers go through the Vercel AI SDK; `getLLMProvider` in `lib/api/providers.ts` is the one place a vendor is chosen, and the provider's `agentModel()` builds the `LanguageModel` and maps vendor-specific knobs like reasoning effort.
 
 ## API routes
 
@@ -60,7 +68,7 @@ Staleness falls out of the graph: a node needs generating when it has no result,
 
 - `lib/generation/` decides what to generate and runs it, as above. The UI dispatches nodes; it never calls connectors directly.
 - `lib/project/store.ts` holds per-project metadata in Zustand. Every mutation rule lives in a store action. `ProjectEditor` creates the store and `ProjectStoreProvider` supplies it; components subscribe through `useProject(selector)`, and code that can't express itself as a render-time selector (one-shot init, `.subscribe`, reads outside render) takes the handle from `useProjectStoreHandle()`. A plugin never reaches for the store to read: it is handed the state snapshot its caller resolved inputs against, as `ctx.state`. `voice-hydrate` is the one plugin holding a store handle, because it writes.
-- `MetadataSchema` (`lib/project/types.ts`) is where a metadata default lives, not the reader. `videoSettings` in particular is total once parsed — `VideoSettingsSchema` fills every knob — so the aspect ratio, transition, length, and caption settings are read straight off the store (`useVideoSetting`) with no fallback in sight.
+- `MetadataSchema` (`lib/project/types.ts`) is where a metadata default lives, not the reader. `videoSettings` in particular is total once parsed — `VideoSettingsSchema` fills every knob — so the aspect ratio, transition, length, and caption settings are read straight off the store (`useVideoSetting`) with no fallback in sight, and written back through `useUpdateVideoSettings` rather than a hand-assembled metadata patch.
 - `lib/canvas/elementConnector.ts` answers "which connector, provider and model does this element use?" for both the UI and the queue. An element pins its provider when created, so this is also where a pin that no longer resolves falls back to the registry default.
 - `lib/script/` provides script context and refinement utilities.
 - `app/components/canvas/hooks/useEditorSession.ts` is the one place the Slate editor gets wired to a project: initial hydration, streaming script sync, metadata sync, and autosave. Views call it and render the editor; they never assemble it.
@@ -70,11 +78,13 @@ Staleness falls out of the graph: a node needs generating when it has no result,
 
 Supabase Postgres with RLS (users only read their own rows; queue workers use the service role):
 
-| Table        | Purpose                                                                              |
-| ------------ | ------------------------------------------------------------------------------------ |
-| `auth.users` | Supabase auth users                                                                  |
-| `projects`   | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
-| `jobs`       | Async generation jobs: `pending → processing → completed \| failed`                  |
+| Table           | Purpose                                                                              |
+| --------------- | ------------------------------------------------------------------------------------ |
+| `auth.users`    | Supabase auth users                                                                  |
+| `projects`      | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
+| `jobs`          | Async generation jobs: `pending → processing → completed \| failed`                  |
+| `conversations` | One Sloppy conversation per project                                                  |
+| `messages`      | Its turns: `parts` (text / reasoning / tool-call / tool-result) plus usage           |
 
 Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, served as public CDN URLs.
 

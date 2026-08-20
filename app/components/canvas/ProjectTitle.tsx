@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Pencil } from "@/components/ui/icon";
 import { useProject } from "@/lib/project/useProject";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { useSloppy } from "../sloppy/SloppyProvider";
 
 export function ProjectTitle() {
 	const title = useProject((s) => s.metadata.title);
 	const updateMetadata = useProject((s) => s.updateMetadata);
-	const { loading } = useScriptControl();
+	const { loading } = useSloppy();
 	const [editing, setEditing] = useState(false);
 	const [draft, setDraft] = useState("");
 
