@@ -15,21 +15,35 @@ export function volumeToGain(volume: number): number {
 	return volume / VOLUME_MAX;
 }
 
-/** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
-export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
-	return Number.isFinite(raw)
-		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
-		: DEFAULT_VOLUME;
+const LOOPS_MAX = 1000;
+const DEFAULT_LOOPS = 1;
+
+// A blank attribute is an unset one, the way `getMotion` reads it. Coercing the
+// raw string would make `Number("")` a deliberate 0, muting the element.
+function numericAttribute(
+	element: CanvasContentElement,
+	key: string,
+): number | undefined {
+	const raw = element.customAttributes?.[key]?.trim();
+	if (!raw) return undefined;
+	const value = Number(raw);
+	return Number.isFinite(value) ? value : undefined;
 }
 
-const LOOPS_MAX = 1000;
+/** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
+export function getVolume(element: CanvasContentElement): number {
+	const volume = numericAttribute(element, "volume");
+	return volume === undefined
+		? DEFAULT_VOLUME
+		: clamp(volume, VOLUME_MIN, VOLUME_MAX);
+}
 
 /** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.loops);
-	if (!Number.isFinite(raw)) return 1;
-	return clamp(Math.floor(raw), 1, LOOPS_MAX);
+	const loops = numericAttribute(element, "loops");
+	return loops === undefined
+		? DEFAULT_LOOPS
+		: clamp(Math.floor(loops), DEFAULT_LOOPS, LOOPS_MAX);
 }
 
 /** Motion effect validated against the known set, defaulting to "none". */

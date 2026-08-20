@@ -49,8 +49,7 @@ function ModelPicker({
 }
 
 export function SloppyComposer() {
-	const { send, stop, loading, streaming, model, setModel, models } =
-		useSloppy();
+	const { send, stop, loading, model, setModel, models } = useSloppy();
 	const [value, setValue] = useState("");
 	const hasText = value.trim().length > 0;
 
@@ -82,7 +81,7 @@ export function SloppyComposer() {
 			/>
 			<div className="flex items-center justify-between gap-2">
 				<ModelPicker model={model} onChange={setModel} options={models} />
-				{streaming ? (
+				{loading ? (
 					<ActionButton
 						label="Stop Sloppy"
 						icon={<SquareFilled className="h-3 w-3" />}
@@ -93,7 +92,7 @@ export function SloppyComposer() {
 						label="Send to Sloppy"
 						icon={<CornerDownLeft className="h-4 w-4" />}
 						onClick={submit}
-						disabled={!hasText || loading}
+						disabled={!hasText}
 					/>
 				)}
 			</div>

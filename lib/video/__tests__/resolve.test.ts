@@ -212,6 +212,18 @@ describe("resolveElements", () => {
 		expect(resolved[2].volume).toBe(10);
 	});
 
+	it("keeps a blank volume attribute audible in the rendered layout", () => {
+		const elements = [
+			makeElement("s1", "music", { volume: "" }),
+			makeElement("s2", "music", { loops: "" }),
+		];
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
+		expect(resolved[0].volume).toBe(10);
+		expect(resolved[1].loops).toBe(1);
+	});
+
 	it("skips all elements when none have results", () => {
 		const elements = [
 			makeElement("img1", "image"),

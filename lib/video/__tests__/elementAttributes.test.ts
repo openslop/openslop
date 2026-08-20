@@ -28,6 +28,11 @@ describe("getVolume", () => {
 		expect(getVolume(el({ volume: "3" }))).toBe(3);
 	});
 
+	it("reads a blank attribute as unset rather than as a deliberate mute", () => {
+		expect(getVolume(el({ volume: "" }))).toBe(10);
+		expect(getVolume(el({ volume: "  " }))).toBe(10);
+	});
+
 	it("clamps out-of-range values to [0, 10]", () => {
 		expect(getVolume(el({ volume: "-2" }))).toBe(0);
 		expect(getVolume(el({ volume: "42" }))).toBe(10);
@@ -43,6 +48,11 @@ describe("getLoops", () => {
 
 	it("reads valid loop counts", () => {
 		expect(getLoops(el({ loops: "4" }))).toBe(4);
+	});
+
+	it("reads a blank attribute as unset", () => {
+		expect(getLoops(el({ loops: "" }))).toBe(1);
+		expect(getLoops(el({ loops: "  " }))).toBe(1);
 	});
 
 	it("floors fractional loop counts to an integer", () => {
