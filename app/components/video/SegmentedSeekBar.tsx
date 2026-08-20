@@ -4,9 +4,12 @@ import type { PlayerRef } from "@remotion/player";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { clamp } from "@/lib/utils";
 import type { VideoLayout } from "@/lib/video/types";
+import {
+	findSegmentIndexAtFrame,
+	type SceneSegment,
+} from "@/lib/video/sceneSegments";
 import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
-import { findSegmentIndexAtFrame, type SceneSegment } from "./useSceneSegments";
 import { ScrubBar, type ScrubHover } from "./ScrubBar";
 import { usePlayerScrub } from "./usePlayerScrub";
 

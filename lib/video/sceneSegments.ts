@@ -1,10 +1,9 @@
-import type { PlayerRef } from "@remotion/player";
 import { isForeground } from "@/lib/canvas/guards";
 import { ELEMENT_TYPES, type SceneElement } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/video/frames";
 import type { ResolvedElement, Sequence, VideoLayout } from "@/lib/video/types";
-import type { SeekThumbnail } from "./SeekTooltip";
-import { FRAME_EVENTS, usePlayerValue } from "./usePlayerState";
+
+export type SeekThumbnail = { url: string; kind: "image" | "video" };
 
 export type SceneSegment = {
 	id: string;
@@ -55,19 +54,6 @@ export function findSegmentIndexAtFrame(
 		if (frame < toFrames(seg.start + seg.duration, fps)) return i;
 	}
 	return segments.length - 1;
-}
-
-export function useActiveSegmentIndex(
-	player: PlayerRef | null,
-	segments: SceneSegment[],
-	fps: number,
-): number {
-	return usePlayerValue(
-		player,
-		FRAME_EVENTS,
-		(p) => findSegmentIndexAtFrame(segments, p.getCurrentFrame(), fps),
-		-1,
-	);
 }
 
 function toThumbnail(element: ResolvedElement): SeekThumbnail | null {

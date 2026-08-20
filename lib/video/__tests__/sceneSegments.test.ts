@@ -7,7 +7,7 @@ import {
 	buildSequenceIndex,
 	findSegmentIndexAtFrame,
 	type SceneSegment,
-} from "../useSceneSegments";
+} from "../sceneSegments";
 import { blankScene } from "@/lib/video/blankScene";
 
 const seg = (
