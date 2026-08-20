@@ -2,29 +2,43 @@ import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { isContentElement } from "./guards";
+import { isSceneElement } from "./scenes";
 import { makeNodeId } from "./nodeUtils";
 
-/** Any canvas element by id — scenes included. Use {@link findNodeById} when only content will do. */
+/**
+ * Any canvas element by id — scenes included. Use {@link findNodeById} when only
+ * content will do.
+ *
+ * Elements only ever sit at the top level or one scene down, so this walks those
+ * two levels instead of a generic Slate traversal, which descends into every
+ * text leaf in the document before it can rule one out.
+ */
 export function findElementById(
 	editor: Editor,
 	id: string,
 ): NodeEntry<CanvasElement> | null {
-	const [entry] = Editor.nodes<CanvasElement>(editor, {
-		at: [],
-		match: (n) => Element.isElement(n) && n.id === id,
-	});
-	return entry ?? null;
+	const nodes = editor.children;
+	for (let i = 0; i < nodes.length; i++) {
+		const node = nodes[i];
+		if (!Element.isElement(node)) continue;
+		if (node.id === id) return [node, [i]];
+		if (!isSceneElement(node)) continue;
+		for (let j = 0; j < node.children.length; j++) {
+			const child = node.children[j];
+			if (child.id === id) return [child, [i, j]];
+		}
+	}
+	return null;
 }
 
 export function findNodeById(
 	editor: Editor,
 	id: string,
 ): NodeEntry<CanvasContentElement> | null {
-	const [entry] = Editor.nodes<CanvasContentElement>(editor, {
-		at: [],
-		match: (n) => isContentElement(n) && n.id === id,
-	});
-	return entry ?? null;
+	const entry = findElementById(editor, id);
+	if (!entry) return null;
+	const [node, path] = entry;
+	return isContentElement(node) ? [node, path] : null;
 }
 
 /**

@@ -33,9 +33,9 @@ function scene(children: CanvasContentElement[], id = "s1"): SceneElement {
 	return { id, type: "scene", children };
 }
 
-function makeEditor(scenes: SceneElement[]) {
+function makeEditor(nodes: (SceneElement | CanvasContentElement)[]) {
 	const editor = createEditor();
-	editor.children = scenes;
+	editor.children = nodes;
 	return editor;
 }
 
@@ -59,6 +59,15 @@ describe("findNodeById", () => {
 	it("does not match scene elements", () => {
 		const editor = makeEditor([scene([content("narration", "n1")], "s1")]);
 		expect(findNodeById(editor, "s1")).toBeNull();
+	});
+
+	// `withScenes` wraps these into a scene, so they exist only mid-normalization.
+	it("finds content sitting at the top level", () => {
+		const editor = makeEditor([
+			scene([content("narration", "n1")], "s1"),
+			content("image", "img1"),
+		]);
+		expect(findNodeById(editor, "img1")?.[1]).toEqual([1]);
 	});
 });
 
