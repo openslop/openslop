@@ -23,12 +23,13 @@ import {
 function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPosition();
-	const { layout, segments } = useLayout();
+	const { layout, ready, segments } = useLayout();
 	const playing = usePlayerPlaying(player);
 
-	// Play stays out of `ready`: it re-reveals a hidden player, which unmounts.
-	const hasSegments = segments.length > 0;
-	const ready = player !== null && hasSegments;
+	// Seeking needs a live player. Play does not: it re-reveals the hidden
+	// panel that mounts one.
+	const canPlay = ready && segments.length > 0;
+	const canSeek = canPlay && player !== null;
 
 	const seekToAdjacentScene = (dir: -1 | 1) => {
 		if (!player || segments.length === 0) return;
@@ -44,7 +45,7 @@ function BottomTransportBarComponent() {
 	return (
 		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
 			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
-				{ready && (
+				{canSeek && (
 					<SegmentedSeekBar
 						player={player}
 						layout={layout}
@@ -54,8 +55,8 @@ function BottomTransportBarComponent() {
 			</div>
 			<div className="flex items-center gap-2">
 				<div className="flex flex-1 items-center gap-2">
-					{ready && <TimeDisplay player={player} layout={layout} />}
-					{ready && (
+					{canSeek && <TimeDisplay player={player} layout={layout} />}
+					{canSeek && (
 						<div className="hidden @[520px]:contents">
 							<ScenePill player={player} segments={segments} fps={layout.fps} />
 						</div>
@@ -65,14 +66,14 @@ function BottomTransportBarComponent() {
 				<div className="flex items-center gap-1">
 					<TooltipIconButton
 						label="Previous scene"
-						disabled={!ready}
+						disabled={!canSeek}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft className="h-4 w-4" />
 					</TooltipIconButton>
 					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
-						disabled={!hasSegments}
+						disabled={!canPlay}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
@@ -86,7 +87,7 @@ function BottomTransportBarComponent() {
 					</TooltipIconButton>
 					<TooltipIconButton
 						label="Next scene"
-						disabled={!ready}
+						disabled={!canSeek}
 						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight className="h-4 w-4" />
