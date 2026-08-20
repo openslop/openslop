@@ -1,39 +1,30 @@
 "use client";
 
-import type { PlayerRef } from "@remotion/player";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { clamp } from "@/lib/utils";
-import type { VideoLayout } from "@/lib/video/types";
-import {
-	findSegmentIndexAtFrame,
-	type SceneSegment,
-} from "@/lib/video/sceneSegments";
+import { findSegmentIndexAtFrame } from "@/lib/video/sceneSegments";
+import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
 import { ScrubBar, type ScrubHover } from "./ScrubBar";
 import { usePlayerScrub } from "./usePlayerScrub";
+import { useLayout } from "./VideoLayoutContext";
 
 const HOVER_SETTLE_MS = 80;
 
-export function SegmentedSeekBar({
-	player,
-	layout,
-	segments,
-}: {
-	player: PlayerRef | null;
-	layout: VideoLayout;
-	segments: SceneSegment[];
-}) {
+export function SegmentedSeekBar() {
+	const { player } = usePlayerControl();
+	const { layout, segments } = useLayout();
 	const { totalDurationSec, totalFrames } = layout;
 	const toScrubFrame = (ratio: number) => Math.round(ratio * (totalFrames - 1));
-	const frame = usePlayerFrame(player);
+	const frame = usePlayerFrame();
 	const progress = clamp(frame / Math.max(1, totalFrames - 1), 0, 1);
 
 	const [hover, setHover] = useState<ScrubHover | null>(null);
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 	const [settledIndex, setSettledIndex] = useState<number | null>(null);
 	const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const scrub = usePlayerScrub(player);
+	const scrub = usePlayerScrub();
 
 	useEffect(
 		() => () => {

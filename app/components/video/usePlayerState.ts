@@ -1,5 +1,8 @@
+"use client";
+
 import type { PlayerRef } from "@remotion/player";
 import { useCallback, useSyncExternalStore } from "react";
+import { usePlayerControl } from "./PlayerControlContext";
 
 type PlayerEvent =
 	| "frameupdate"
@@ -14,11 +17,11 @@ const VOLUME_EVENTS: readonly PlayerEvent[] = ["volumechange"];
 const MUTE_EVENTS: readonly PlayerEvent[] = ["mutechange"];
 
 export function usePlayerValue<T>(
-	player: PlayerRef | null,
 	events: readonly PlayerEvent[],
 	read: (p: PlayerRef) => T,
 	fallback: T,
 ): T {
+	const { player } = usePlayerControl();
 	const subscribe = useCallback(
 		(notify: () => void) => {
 			if (!player) return () => {};
@@ -36,18 +39,18 @@ export function usePlayerValue<T>(
 	);
 }
 
-export function usePlayerFrame(player: PlayerRef | null) {
-	return usePlayerValue(player, FRAME_EVENTS, (p) => p.getCurrentFrame(), 0);
+export function usePlayerFrame() {
+	return usePlayerValue(FRAME_EVENTS, (p) => p.getCurrentFrame(), 0);
 }
 
-export function usePlayerPlaying(player: PlayerRef | null) {
-	return usePlayerValue(player, PLAY_EVENTS, (p) => p.isPlaying(), false);
+export function usePlayerPlaying() {
+	return usePlayerValue(PLAY_EVENTS, (p) => p.isPlaying(), false);
 }
 
-export function usePlayerVolume(player: PlayerRef | null) {
-	return usePlayerValue(player, VOLUME_EVENTS, (p) => p.getVolume(), 1);
+export function usePlayerVolume() {
+	return usePlayerValue(VOLUME_EVENTS, (p) => p.getVolume(), 1);
 }
 
-export function usePlayerMuted(player: PlayerRef | null) {
-	return usePlayerValue(player, MUTE_EVENTS, (p) => p.isMuted(), false);
+export function usePlayerMuted() {
+	return usePlayerValue(MUTE_EVENTS, (p) => p.isMuted(), false);
 }

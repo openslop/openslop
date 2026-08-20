@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import type { PlayerRef } from "@remotion/player";
 import { usePlayerFrame } from "../usePlayerState";
+import { useLayout } from "../VideoLayoutContext";
 
 /** Keeps the playhead on screen once zooming makes the timeline scrollable. */
 function useFollow(
@@ -24,16 +24,12 @@ function useFollow(
 }
 
 export function TimelinePlayhead({
-	player,
-	fps,
 	pxPerSec,
 	viewport,
 	viewportWidth,
 	leadingInset,
 	scrollable,
 }: {
-	player: PlayerRef | null;
-	fps: number;
 	pxPerSec: number;
 	viewport: RefObject<HTMLDivElement | null>;
 	viewportWidth: number;
@@ -41,8 +37,9 @@ export function TimelinePlayhead({
 	leadingInset: number;
 	scrollable: boolean;
 }) {
-	const frame = usePlayerFrame(player);
-	const x = (frame / fps) * pxPerSec;
+	const { layout } = useLayout();
+	const frame = usePlayerFrame();
+	const x = (frame / layout.fps) * pxPerSec;
 	useFollow(viewport, x, leadingInset, viewportWidth, scrollable);
 
 	return (

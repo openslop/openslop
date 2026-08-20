@@ -9,7 +9,6 @@ import { ActiveSceneSync } from "./ActiveSceneSync";
 import { usePlayerControl } from "./PlayerControlContext";
 import { PlayPauseFlash } from "./PlayPauseFlash";
 import { usePreservedPlayhead } from "./usePreservedPlayhead";
-import { useLayout } from "./VideoLayoutContext";
 import styles from "./VideoPlayer.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
@@ -60,7 +59,6 @@ type VideoPreviewProps = {
 
 export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 	const [isFullscreen, setIsFullscreen] = useState(false);
-	const { segments } = useLayout();
 	const { player, registerPlayer } = usePlayerControl();
 	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
 		null,
@@ -93,7 +91,7 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 				onClick={toggleAndFlash}
 			/>
 			<PlayPauseFlash flash={flash} />
-			<ActiveSceneSync player={player} segments={segments} fps={layout.fps} />
+			<ActiveSceneSync />
 		</div>
 	);
 }
