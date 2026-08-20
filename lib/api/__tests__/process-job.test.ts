@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AssetQueueMessage } from "@/lib/api/jobs";
 import { JOB_TIMEOUT_MS } from "@/lib/gateway/base";
 
 const mockLoadJobForProcessing = vi.fn();
@@ -23,7 +22,7 @@ vi.mock("@/lib/api/logger", () => ({
 
 const { processQueuedJob } = await import("@/lib/api/process-job");
 
-const message: AssetQueueMessage = { jobId: "job-1", connectorType: "image" };
+const JOB_ID = "job-1";
 
 function stubPendingHandler(metadata: Record<string, unknown> = {}) {
 	mockGetJobHandler.mockReturnValue({
@@ -35,6 +34,7 @@ function pendingJob(ageMs = 0) {
 	return {
 		status: "pending",
 		id: "job-1",
+		connector_type: "image",
 		created_at: new Date(Date.now() - ageMs).toISOString(),
 	};
 }
@@ -49,7 +49,7 @@ describe("processQueuedJob", () => {
 	it("skips jobs that already completed", async () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "completed" });
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockGetJobHandler).not.toHaveBeenCalled();
 		expect(mockUpdateJob).not.toHaveBeenCalled();
@@ -58,7 +58,7 @@ describe("processQueuedJob", () => {
 	it("skips jobs that already failed", async () => {
 		mockLoadJobForProcessing.mockResolvedValue({ status: "failed" });
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockGetJobHandler).not.toHaveBeenCalled();
 		expect(mockUpdateJob).not.toHaveBeenCalled();
@@ -68,7 +68,7 @@ describe("processQueuedJob", () => {
 		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
 		mockGetJobHandler.mockReturnValue(undefined);
 
-		await expect(processQueuedJob(message)).rejects.toThrow(
+		await expect(processQueuedJob(JOB_ID)).rejects.toThrow(
 			"No job handler registered for image",
 		);
 		expect(mockUpdateJob).not.toHaveBeenCalled();
@@ -84,7 +84,7 @@ describe("processQueuedJob", () => {
 		};
 		mockGetJobHandler.mockReturnValue(handler);
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(handler.process).toHaveBeenCalledWith(job);
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(1, "job-1", {
@@ -100,7 +100,7 @@ describe("processQueuedJob", () => {
 		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
 		stubPendingHandler({ poll: "token" });
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			metadata: { poll: "token" },
@@ -115,7 +115,7 @@ describe("processQueuedJob", () => {
 		});
 		stubPendingHandler({ providerJobId: "upstream-1" });
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 		expect(mockEnqueueJob).toHaveBeenCalled();
@@ -125,7 +125,7 @@ describe("processQueuedJob", () => {
 		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
 		stubPendingHandler();
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockEnqueueJob).toHaveBeenCalledWith("job-1", "image", {
 			delaySeconds: expect.any(Number),
@@ -138,7 +138,7 @@ describe("processQueuedJob", () => {
 			process: vi.fn().mockResolvedValue({ kind: "completed", result: {} }),
 		});
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockEnqueueJob).not.toHaveBeenCalled();
 	});
@@ -148,9 +148,7 @@ describe("processQueuedJob", () => {
 		stubPendingHandler();
 		mockEnqueueJob.mockRejectedValue(new Error("queue unavailable"));
 
-		await expect(processQueuedJob(message)).rejects.toThrow(
-			"queue unavailable",
-		);
+		await expect(processQueuedJob(JOB_ID)).rejects.toThrow("queue unavailable");
 		expect(mockUpdateJob).not.toHaveBeenCalledWith(
 			"job-1",
 			expect.objectContaining({ status: "failed" }),
@@ -163,7 +161,7 @@ describe("processQueuedJob", () => {
 		);
 		stubPendingHandler();
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockEnqueueJob).not.toHaveBeenCalled();
 		expect(mockUpdateJob).toHaveBeenCalledWith("job-1", {
@@ -183,7 +181,7 @@ describe("processQueuedJob", () => {
 		};
 		mockGetJobHandler.mockReturnValue(handler);
 
-		await processQueuedJob(message);
+		await processQueuedJob(JOB_ID);
 
 		expect(handler.process).toHaveBeenCalled();
 		expect(mockUpdateJob).toHaveBeenLastCalledWith("job-1", {
@@ -198,10 +196,25 @@ describe("processQueuedJob", () => {
 			process: vi.fn().mockRejectedValue(new Error("provider down")),
 		});
 
-		await expect(processQueuedJob(message)).rejects.toThrow("provider down");
+		await expect(processQueuedJob(JOB_ID)).rejects.toThrow("provider down");
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "failed",
 			error: expect.stringContaining("provider down"),
+		});
+	});
+
+	it("picks the handler from the job row's connector type", async () => {
+		mockLoadJobForProcessing.mockResolvedValue({
+			...pendingJob(),
+			connector_type: "tts",
+		});
+		stubPendingHandler();
+
+		await processQueuedJob(JOB_ID);
+
+		expect(mockGetJobHandler).toHaveBeenCalledWith("tts");
+		expect(mockEnqueueJob).toHaveBeenCalledWith("job-1", "tts", {
+			delaySeconds: expect.any(Number),
 		});
 	});
 });
