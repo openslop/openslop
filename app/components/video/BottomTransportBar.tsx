@@ -23,10 +23,13 @@ import {
 function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPosition();
-	const { layout, segments } = useLayout();
+	const { layout, ready, segments } = useLayout();
 	const playing = usePlayerPlaying(player);
 
-	const ready = player !== null && segments.length > 0;
+	// Seeking needs a live player. Play does not: it re-reveals the hidden
+	// panel that mounts one.
+	const canPlay = ready && segments.length > 0;
+	const canSeek = canPlay && player !== null;
 
 	const seekToAdjacentScene = (dir: -1 | 1) => {
 		if (!player || segments.length === 0) return;
@@ -46,8 +49,8 @@ function BottomTransportBarComponent() {
 			</div>
 			<div className="flex items-center gap-2">
 				<div className="flex flex-1 items-center gap-2">
-					{ready && <TimeDisplay player={player} layout={layout} />}
-					{ready && (
+					{canSeek && <TimeDisplay player={player} layout={layout} />}
+					{canSeek && (
 						<div className="hidden @[520px]:contents">
 							<ScenePill player={player} segments={segments} fps={layout.fps} />
 						</div>
@@ -57,12 +60,14 @@ function BottomTransportBarComponent() {
 				<div className="flex items-center gap-1">
 					<TooltipIconButton
 						label="Previous scene"
+						disabled={!canSeek}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft className="h-4 w-4" />
 					</TooltipIconButton>
 					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
+						disabled={!canPlay}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
@@ -76,6 +81,7 @@ function BottomTransportBarComponent() {
 					</TooltipIconButton>
 					<TooltipIconButton
 						label="Next scene"
+						disabled={!canSeek}
 						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight className="h-4 w-4" />
