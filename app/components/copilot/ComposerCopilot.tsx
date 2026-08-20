@@ -39,7 +39,7 @@ import {
 } from "@/lib/video/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
-	VIDEO_LENGTH_SPECS,
+	videoLengthLabel,
 	type VideoLength,
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
@@ -74,10 +74,7 @@ const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] = [
 ];
 
 const VIDEO_LENGTH_OPTIONS: SettingPillOption<VideoLength>[] =
-	VIDEO_LENGTHS.map((value) => ({
-		value,
-		label: VIDEO_LENGTH_SPECS[value].label,
-	}));
+	VIDEO_LENGTHS.map((value) => ({ value, label: videoLengthLabel(value) }));
 
 const LANGUAGE_OPTIONS: SettingPillOption<LanguageChoice>[] =
 	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
@@ -208,6 +205,12 @@ export default function ComposerCopilot({
 	const pasting = intent === "script";
 	const activeTemplate = pasting ? undefined : template;
 
+	/** A pasted script sets its own length, so the target goes back to auto. */
+	const chooseIntent = (next: ComposerIntent) => {
+		setIntent(next);
+		if (next === "script") updateVideoSettings({ length: "auto" });
+	};
+
 	const handleSubmit = () => {
 		if (hasText) onSubmit(templateBrief(activeTemplate, value));
 	};
@@ -219,7 +222,7 @@ export default function ComposerCopilot({
 					<SegmentedControl
 						value={intent}
 						options={INTENT_OPTIONS}
-						onChange={setIntent}
+						onChange={chooseIntent}
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
@@ -287,17 +290,16 @@ export default function ComposerCopilot({
 							options={models.map((value) => ({ value, label: value }))}
 							onChange={setModel}
 						/>
-						{!pasting && (
-							<SettingPill
-								name="Video length"
-								icon={<Hourglass className="mr-1 h-3 w-3" />}
-								value={videoLength}
-								options={VIDEO_LENGTH_OPTIONS}
-								onChange={(next: VideoLength) =>
-									updateVideoSettings({ length: next })
-								}
-							/>
-						)}
+						<SettingPill
+							name="Video length"
+							icon={<Hourglass className="mr-1 h-3 w-3" />}
+							value={videoLength}
+							options={VIDEO_LENGTH_OPTIONS}
+							disabled={pasting}
+							onChange={(next: VideoLength) =>
+								updateVideoSettings({ length: next })
+							}
+						/>
 						{activeTemplate && (
 							<SettingPill
 								name="Template"

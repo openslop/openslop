@@ -1,7 +1,11 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
-import { VIDEO_LENGTHS, VIDEO_LENGTH_SPECS } from "@/lib/video/videoLength";
+import {
+	VIDEO_LENGTHS,
+	VIDEO_LENGTH_SPECS,
+	VIDEO_LENGTH_TARGETS,
+} from "@/lib/video/videoLength";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";
 
@@ -13,7 +17,8 @@ export const setVideoSettings = defineTool({
 	  on the canvas. To change what is there, set the length and then edit_script.
 
 	  Lengths, with the spoken-word budget each carries:
-	${VIDEO_LENGTHS.map((l) => `  - ${l}: ${VIDEO_LENGTH_SPECS[l].minWords} to ${VIDEO_LENGTH_SPECS[l].maxWords} words`).join("\n")}
+	  - auto: no budget. The script runs as long as the material needs.
+	${VIDEO_LENGTH_TARGETS.map((l) => `  - ${l}: ${VIDEO_LENGTH_SPECS[l].minWords} to ${VIDEO_LENGTH_SPECS[l].maxWords} words`).join("\n")}
 	`,
 	input: z
 		.object({

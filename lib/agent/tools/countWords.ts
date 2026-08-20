@@ -2,7 +2,7 @@ import dedent from "dedent";
 import { z } from "zod";
 import {
 	NARRATION_WORDS_PER_MINUTE,
-	VIDEO_LENGTH_SPECS,
+	videoLengthBudget,
 } from "@/lib/video/videoLength";
 import { defineTool } from "./defineTool";
 
@@ -23,8 +23,12 @@ export const countWords = defineTool({
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const { length } = ctx.readMetadata().videoSettings;
-		const { minWords, maxWords } = VIDEO_LENGTH_SPECS[length];
+		const runtime = `${words} spoken words, about ${minutes(words)} minutes of speech.`;
 
+		const budget = videoLengthBudget(length);
+		if (!budget) return `${runtime} Target: auto, so any length is fine.`;
+
+		const { minWords, maxWords } = budget;
 		const verdict =
 			words < minWords
 				? `under by ${minWords - words} words`
@@ -32,6 +36,6 @@ export const countWords = defineTool({
 					? `over by ${words - maxWords} words`
 					: "within the target range";
 
-		return `${words} spoken words, about ${minutes(words)} minutes of speech. Target: ${length} (${minWords} to ${maxWords} words) - ${verdict}.`;
+		return `${runtime} Target: ${length} (${minWords} to ${maxWords} words) - ${verdict}.`;
 	},
 });

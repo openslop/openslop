@@ -19,7 +19,7 @@ export type AgentToolContext = {
 	readMetadata: () => Metadata;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
-	adaptScript: (script: string) => Promise<void>;
+	adaptScript: (script: string, notes?: string) => Promise<void>;
 	setMetadata: (patch: DeepPartial<Metadata>) => void;
 	setCharacter: (
 		name: string,

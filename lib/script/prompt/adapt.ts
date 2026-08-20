@@ -12,3 +12,14 @@ export const ADAPT_GUIDELINES = dedent`
   - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.
   - Never add dialogue or narrative text to the story that is not in the original script.
 `;
+
+/** Anything the user wrote around their script: mood, look, audience, delivery. */
+export const notesSection = (notes: string): string => dedent`
+  ### Notes from the user
+
+  These came alongside the script and are about it, not part of it. Let them inform what
+  you add around the script: the images, sound and music, and the style and voice
+  metadata. Never speak them, and never fold them into narration or dialogue.
+
+  ${notes}
+`;

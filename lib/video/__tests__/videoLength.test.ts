@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { VIDEO_LENGTHS, VIDEO_LENGTH_SPECS } from "../videoLength";
+import {
+	VIDEO_LENGTH_TARGETS,
+	VIDEO_LENGTH_SPECS,
+	videoLengthBudget,
+} from "../videoLength";
 
 describe("VIDEO_LENGTH_SPECS", () => {
 	it("translates each runtime into a spoken word budget at 180 wpm", () => {
@@ -14,10 +18,20 @@ describe("VIDEO_LENGTH_SPECS", () => {
 	});
 
 	it("gives every length an ascending budget", () => {
-		for (const length of VIDEO_LENGTHS) {
+		for (const length of VIDEO_LENGTH_TARGETS) {
 			const { minWords, maxWords, label } = VIDEO_LENGTH_SPECS[length];
 			expect(label).not.toBe("");
 			expect(minWords).toBeLessThan(maxWords);
 		}
+	});
+});
+
+describe("videoLengthBudget", () => {
+	it("gives auto no budget, so no reader can invent one", () => {
+		expect(videoLengthBudget("auto")).toBeUndefined();
+	});
+
+	it("gives every other length its spec", () => {
+		expect(videoLengthBudget("1-3m")).toBe(VIDEO_LENGTH_SPECS["1-3m"]);
 	});
 });

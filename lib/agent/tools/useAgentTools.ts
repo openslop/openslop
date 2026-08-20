@@ -42,9 +42,9 @@ export function useAgentTools(editor: Editor) {
 					clearEditor(editor);
 					return runScript({ kind: "brief", brief }, signal);
 				},
-				adaptScript: (script) => {
+				adaptScript: (script, notes) => {
 					clearEditor(editor);
-					return runScript({ kind: "adapt", script }, signal);
+					return runScript({ kind: "adapt", script, notes }, signal);
 				},
 				setMetadata: (patch) => store.getState().updateMetadata(patch),
 				setCharacter: (raw, patch) => {

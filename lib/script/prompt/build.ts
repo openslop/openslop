@@ -1,7 +1,7 @@
 import compact from "lodash/compact";
 import type { Metadata } from "@/lib/project/types";
 import { getTemplate } from "@/lib/templates/templates";
-import { ADAPT_GUIDELINES } from "./adapt";
+import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
 import { osmlSpec } from "./osml";
 import { lengthSection, projectPreamble } from "./project";
@@ -10,7 +10,7 @@ import { templatePrompt } from "./template";
 /** What the user gave us: an idea to write from, or text to convert as it stands. */
 export type ScriptSource =
 	| { kind: "brief"; brief: string }
-	| { kind: "adapt"; script: string };
+	| { kind: "adapt"; script: string; notes?: string };
 
 export const sourceText = (source: ScriptSource) =>
 	source.kind === "adapt" ? source.script : source.brief;
@@ -26,7 +26,13 @@ function promptParts(
 	metadata: Metadata,
 ): { guidance: string[]; instruction: string } {
 	if (source.kind === "adapt")
-		return { guidance: [ADAPT_GUIDELINES], instruction: source.script };
+		return {
+			guidance: compact([
+				ADAPT_GUIDELINES,
+				source.notes && notesSection(source.notes),
+			]),
+			instruction: source.script,
+		};
 
 	const { templateId } = metadata;
 	if (templateId)

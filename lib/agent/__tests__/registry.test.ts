@@ -10,6 +10,7 @@ import { MetadataSchema } from "@/lib/project/types";
 const metadata = MetadataSchema.parse({
 	title: "Little Red",
 	style: "claymation",
+	videoSettings: { length: "3-5m" },
 	characters: { Red: { appearance: "a girl in a red cloak", age: "child" } },
 });
 
@@ -217,6 +218,20 @@ describe("executeToolCall", () => {
 			context({ countSpokenWords: () => 500 }),
 		);
 		expect(under.ok && under.output).toContain("under by 40 words");
+	});
+
+	it("counts without a verdict when the length is auto", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "count_words", input: {} },
+			context({
+				countSpokenWords: () => 1000,
+				readMetadata: () =>
+					MetadataSchema.parse({ videoSettings: { length: "auto" } }),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("1000 spoken words");
+		expect(outcome.ok && outcome.output).not.toContain("over by");
 	});
 
 	it("hands over the reference images for the model to look at", async () => {

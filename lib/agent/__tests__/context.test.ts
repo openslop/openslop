@@ -33,6 +33,12 @@ describe("renderAgentContext", () => {
 		);
 	});
 
+	it("says auto carries no target rather than naming a budget", () => {
+		const rendered = renderAgentContext(context({ length: "auto" }));
+
+		expect(rendered).toContain("video length: auto (no target");
+	});
+
 	it("names the language rather than handing over a code", () => {
 		expect(renderAgentContext(context({ language: "es" }))).toContain(
 			"language: Spanish",

@@ -5,7 +5,7 @@ import {
 	type MetadataCharacter,
 	type MetadataVoice,
 } from "@/lib/project/types";
-import { VIDEO_LENGTH_SPECS } from "@/lib/video/videoLength";
+import { videoLengthBudget } from "@/lib/video/videoLength";
 
 function renderVoice(voice: MetadataVoice): string {
 	return voiceTraitEntries(voice)
@@ -61,9 +61,11 @@ export function projectPreamble(metadata: Metadata): string {
 	return sections.join("\n\n");
 }
 
+/** Empty on `auto`: no budget is a budget the model would otherwise invent. */
 export function lengthSection(metadata: Metadata): string {
-	const { minWords, maxWords } =
-		VIDEO_LENGTH_SPECS[metadata.videoSettings.length];
+	const budget = videoLengthBudget(metadata.videoSettings.length);
+	if (!budget) return "";
+	const { minWords, maxWords } = budget;
 
 	return dedent`
 		# Length

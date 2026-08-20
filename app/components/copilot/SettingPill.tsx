@@ -21,6 +21,7 @@ export function SettingPill<T extends string>({
 	value,
 	options,
 	onChange,
+	disabled = false,
 	className,
 	style,
 }: {
@@ -29,6 +30,8 @@ export function SettingPill<T extends string>({
 	value: T;
 	options: SettingPillOption<T>[];
 	onChange: (value: T) => void;
+	/** Pinned to `value`: shown, greyed, and not openable. */
+	disabled?: boolean;
 	className?: string;
 	style?: CSSProperties;
 }) {
@@ -45,8 +48,9 @@ export function SettingPill<T extends string>({
 			<button
 				type="button"
 				aria-label={`${name}: ${selected.label}`}
+				disabled={disabled}
 				className={cn(
-					"focus-ring inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover",
+					"focus-ring inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none disabled:opacity-50",
 					className,
 				)}
 				style={style}

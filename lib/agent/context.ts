@@ -3,7 +3,7 @@ import dedent from "dedent";
 import { languageLabel, LANGUAGE_CHOICES } from "@/lib/project/language";
 import { MetadataVoiceSchema, voiceTraitEntries } from "@/lib/project/types";
 import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
-import { VIDEO_LENGTHS, VIDEO_LENGTH_SPECS } from "@/lib/video/videoLength";
+import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/video/videoLength";
 
 const UNSET = "not set";
 
@@ -63,7 +63,10 @@ function renderCharacters(characters: AgentContext["characters"]): string {
 }
 
 export function renderAgentContext(ctx: AgentContext): string {
-	const { minWords, maxWords } = VIDEO_LENGTH_SPECS[ctx.length];
+	const budget = videoLengthBudget(ctx.length);
+	const length = budget
+		? `${ctx.length} (${budget.minWords} to ${budget.maxWords} spoken words)`
+		: "auto (no target; write to fit the material)";
 
 	return dedent`
 		# The project
@@ -74,7 +77,7 @@ export function renderAgentContext(ctx: AgentContext): string {
 		- title: ${ctx.title || UNSET}
 		- art style: ${ctx.style || UNSET}
 		- language: ${languageLabel(ctx.language)}
-		- video length: ${ctx.length} (${minWords} to ${maxWords} spoken words)
+		- video length: ${length}
 		- aspect ratio: ${ctx.aspectRatio}
 		- template: ${ctx.templateName ?? "none"}
 		- narrator voice: ${renderNarrator(ctx.narration)}
