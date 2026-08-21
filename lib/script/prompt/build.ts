@@ -12,9 +12,6 @@ export type ScriptSource =
 	| { kind: "brief"; brief: string }
 	| { kind: "adapt"; script: string; notes?: string };
 
-export const sourceText = (source: ScriptSource) =>
-	source.kind === "adapt" ? source.script : source.brief;
-
 export type ScriptPrompt = { system: string; prompt: string };
 
 /**
