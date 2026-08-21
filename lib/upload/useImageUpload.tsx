@@ -46,7 +46,7 @@ export function useImageUpload({
 		const files = multiple ? accepted : accepted.slice(0, 1);
 		if (files.length === 0) return;
 
-		setUploadingCount(files.length);
+		setUploadingCount((n) => n + files.length);
 		try {
 			const results = await Promise.allSettled(files.map(uploadImage));
 			const urls: string[] = [];
@@ -56,7 +56,7 @@ export function useImageUpload({
 			}
 			if (urls.length > 0) onUpload(urls);
 		} finally {
-			setUploadingCount(0);
+			setUploadingCount((n) => n - files.length);
 		}
 	};
 
