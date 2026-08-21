@@ -78,6 +78,8 @@ export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 	String(i + 4),
 );
 
+export const DEFAULT_DURATION = "10";
+
 export const SCENE_TYPE = "scene" as const;
 
 export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };

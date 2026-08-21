@@ -2,7 +2,8 @@ import { z } from "zod";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import { adaptScript } from "./adaptScript";
-import { countWords } from "./countWords";
+import { measureElementLengths } from "./measureElementLengths";
+import { measureTotalLength } from "./measureTotalLength";
 import { editScript } from "./editScript";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
@@ -26,7 +27,8 @@ const TOOLS = {
 	view_reference_images: viewReferenceImages,
 	view_avatar: viewAvatar,
 	outline_story: outlineStory,
-	count_words: countWords,
+	measure_total_length: measureTotalLength,
+	measure_element_lengths: measureElementLengths,
 	set_metadata: setMetadata,
 	set_narrator: setNarrator,
 	set_character: setCharacter,
@@ -94,7 +96,8 @@ export const agentToolCallSchema = z.discriminatedUnion("toolName", [
 	call("view_reference_images"),
 	call("view_avatar"),
 	call("outline_story"),
-	call("count_words"),
+	call("measure_total_length"),
+	call("measure_element_lengths"),
 	call("set_metadata"),
 	call("set_narrator"),
 	call("set_character"),

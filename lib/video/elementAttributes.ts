@@ -1,4 +1,8 @@
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	DEFAULT_DURATION,
+	DURATION_OPTIONS,
+	type CanvasContentElement,
+} from "@/lib/canvas/types";
 import { clamp } from "@/lib/utils";
 import { DEFAULT_MOTION, isMotionEffect } from "./motionEffects";
 import type { MotionEffect } from "./motionEffectNames";
@@ -14,9 +18,6 @@ const DEFAULT_VOLUME = VOLUME_MAX;
 export function volumeToGain(volume: number): number {
 	return volume / VOLUME_MAX;
 }
-
-const LOOPS_MAX = 1000;
-const DEFAULT_LOOPS = 1;
 
 // A blank attribute is an unset one, the way `getMotion` reads it. Coercing the
 // raw string would make `Number("")` a deliberate 0, muting the element.
@@ -37,6 +38,21 @@ export function getVolume(element: CanvasContentElement): number {
 		? DEFAULT_VOLUME
 		: clamp(volume, VOLUME_MIN, VOLUME_MAX);
 }
+
+const DURATIONS = DURATION_OPTIONS.map(Number);
+const DURATION_MIN = Math.min(...DURATIONS);
+const DURATION_MAX = Math.max(...DURATIONS);
+
+/** Seconds a timed visual is generated to run for, clamped to the offered options. */
+export function getDuration(element: CanvasContentElement): number {
+	const duration = numericAttribute(element, "duration");
+	return duration === undefined
+		? Number(DEFAULT_DURATION)
+		: clamp(duration, DURATION_MIN, DURATION_MAX);
+}
+
+const LOOPS_MAX = 1000;
+const DEFAULT_LOOPS = 1;
 
 /** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {

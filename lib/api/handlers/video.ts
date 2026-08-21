@@ -21,7 +21,7 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 			};
 		}
 
-		const upstream = await provider.poll(providerJobId);
+		const upstream = await provider.poll(providerJobId, job.request);
 		if (upstream.kind === "ready") {
 			return { kind: "completed", result: upstream.asset };
 		}

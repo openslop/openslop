@@ -142,6 +142,21 @@ describe("RunwareVideo", () => {
 	});
 
 	describe("poll", () => {
+		it("stamps the completed asset with the duration that was requested", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "completed", videoURL: "https://r.mp4" },
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const poll = await provider.poll("job-1", {
+				prompt: "test",
+				duration: 8,
+			});
+
+			expect(poll.kind).toBe("ready");
+			expect(poll.kind === "ready" && poll.asset.metadata?.durationSec).toBe(8);
+		});
+
 		it("returns the stored asset when the job is completed", async () => {
 			mockGetResponse.mockResolvedValue([
 				{
@@ -152,7 +167,7 @@ describe("RunwareVideo", () => {
 			]);
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.poll("job-1");
+			const result = await provider.poll("job-1", { prompt: "test" });
 
 			expect(result).toMatchObject({
 				kind: "ready",
@@ -170,7 +185,7 @@ describe("RunwareVideo", () => {
 			]);
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.poll("job-1");
+			const result = await provider.poll("job-1", { prompt: "test" });
 
 			expect(result).toEqual({
 				kind: "pending",
@@ -182,7 +197,9 @@ describe("RunwareVideo", () => {
 			mockGetResponse.mockResolvedValue([]);
 
 			const provider = new RunwareVideo("test-key");
-			await expect(provider.poll("missing")).rejects.toThrow("Job not found");
+			await expect(
+				provider.poll("missing", { prompt: "test" }),
+			).rejects.toThrow("Job not found");
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 	});

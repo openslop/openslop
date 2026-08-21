@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
+	getDuration,
 	getLoops,
 	getMotion,
 	getVolume,
@@ -36,6 +37,27 @@ describe("getVolume", () => {
 	it("clamps out-of-range values to [0, 10]", () => {
 		expect(getVolume(el({ volume: "-2" }))).toBe(0);
 		expect(getVolume(el({ volume: "42" }))).toBe(10);
+	});
+});
+
+describe("getDuration", () => {
+	it("defaults to 10 when missing or non-numeric", () => {
+		expect(getDuration(el())).toBe(10);
+		expect(getDuration(el({ duration: "not-a-number" }))).toBe(10);
+	});
+
+	it("reads a blank attribute as unset rather than as the shortest option", () => {
+		expect(getDuration(el({ duration: "" }))).toBe(10);
+		expect(getDuration(el({ duration: "  " }))).toBe(10);
+	});
+
+	it("clamps out-of-range values to the offered options", () => {
+		expect(getDuration(el({ duration: "1" }))).toBe(4);
+		expect(getDuration(el({ duration: "99" }))).toBe(15);
+	});
+
+	it("passes through offered values", () => {
+		expect(getDuration(el({ duration: "7" }))).toBe(7);
 	});
 });
 
