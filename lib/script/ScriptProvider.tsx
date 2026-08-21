@@ -59,7 +59,7 @@ export function ScriptProvider({
 	const { connectorConfig } = useConfig();
 	const store = useProjectStoreHandle();
 	const updateMetadata = useProject((s) => s.updateMetadata);
-	const [script, setScript] = useState(initialScript);
+	const [script] = useState(initialScript);
 	const [showWorkspace, setShowWorkspace] = useState(initialScript.length > 0);
 	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 
@@ -89,9 +89,10 @@ export function ScriptProvider({
 	);
 
 	const startBlank = useCallback(() => {
-		setScript(BLANK_SCRIPT);
+		updateMetadata({ title: "Untitled" });
 		setShowWorkspace(true);
-	}, []);
+		appendChunk(BLANK_SCRIPT);
+	}, [appendChunk, updateMetadata]);
 
 	const control = useMemo<ScriptControl>(
 		() => ({ runScript, setShowWorkspace, startBlank }),
