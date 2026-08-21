@@ -71,7 +71,7 @@ function offeredTool(part: ToolPart): ToolPresentation {
 		case "tool-measure_element_lengths":
 			return {
 				icon: Hourglass,
-				label: "Measuring how long each visual is shown",
+				label: "Measuring scene lengths",
 			};
 		case "tool-set_language":
 			return { icon: Translate, label: "Setting the language" };
