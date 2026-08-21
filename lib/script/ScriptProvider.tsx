@@ -73,7 +73,7 @@ export function ScriptProvider({
 			updateMetadata({ lastPrompt: sourceText(source) });
 			reset();
 			const connector = createConnector("llm", llmProvider, llmConfig);
-			const { system, prompt } = buildScriptPrompt(
+			const { system, prompt } = await buildScriptPrompt(
 				store.getState().metadata,
 				source,
 			);

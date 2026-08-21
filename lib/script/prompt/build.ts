@@ -1,6 +1,5 @@
 import compact from "lodash/compact";
 import type { Metadata } from "@/lib/project/types";
-import { getTemplate } from "@/lib/templates/templates";
 import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
 import { osmlSpec } from "./osml";
@@ -21,10 +20,10 @@ export type ScriptPrompt = { system: string; prompt: string };
  * The length budget is a story's shape, not a transcription's: adapting text the
  * user wrote must not talk the model into padding or cutting it.
  */
-function promptParts(
+async function promptParts(
 	source: ScriptSource,
 	metadata: Metadata,
-): { guidance: string[]; instruction: string } {
+): Promise<{ guidance: string[]; instruction: string }> {
 	if (source.kind === "adapt")
 		return {
 			guidance: compact([
@@ -35,24 +34,30 @@ function promptParts(
 		};
 
 	const { templateId } = metadata;
-	if (templateId)
+	if (templateId) {
+		// The example story is two orders of magnitude larger than the catalog
+		// entry, so it loads here rather than riding the editor's first paint.
+		const { getTemplatePrompt } =
+			await import("@/lib/templates/templatePrompts");
+		const { system, exampleStory } = getTemplatePrompt(templateId);
 		return {
-			guidance: [lengthSection(metadata), getTemplate(templateId).systemPrompt],
+			guidance: [lengthSection(metadata), system],
 			instruction: templatePrompt(
-				templateId,
+				exampleStory,
 				source.brief,
 				spokenLanguage(metadata, "the same language that the user_input is in"),
 			),
 		};
+	}
 
 	return { guidance: [lengthSection(metadata)], instruction: source.brief };
 }
 
-export function buildScriptPrompt(
+export async function buildScriptPrompt(
 	metadata: Metadata,
 	source: ScriptSource,
-): ScriptPrompt {
-	const { guidance, instruction } = promptParts(source, metadata);
+): Promise<ScriptPrompt> {
+	const { guidance, instruction } = await promptParts(source, metadata);
 	return {
 		system: compact([
 			...guidance,
