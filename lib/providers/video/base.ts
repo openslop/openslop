@@ -5,6 +5,9 @@ import { BaseProvider } from "../base";
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
 
+/** What a video runs for when the request names no duration, for asking and for reporting. */
+export const DEFAULT_VIDEO_DURATION_SEC = 5;
+
 export type VideoJobMetadata = {
 	jobId: string;
 	durationSec?: number;
@@ -46,11 +49,19 @@ export abstract class BaseVideoProvider extends BaseProvider<
 
 	protected abstract _poll(jobId: string): Promise<VideoJob>;
 
-	async poll(jobId: string): Promise<VideoPoll> {
+	async poll(jobId: string, request: VideoGenerateParams): Promise<VideoPoll> {
 		const result = await this._poll(jobId);
 		if (this.toFiles(result).length === 0) {
 			return { kind: "pending", metadata: result.metadata };
 		}
-		return { kind: "ready", asset: await this.store(result) };
+		const metadata = {
+			jobId,
+			...result.metadata,
+			durationSec:
+				result.metadata?.durationSec ??
+				request.duration ??
+				DEFAULT_VIDEO_DURATION_SEC,
+		};
+		return { kind: "ready", asset: await this.store({ ...result, metadata }) };
 	}
 }

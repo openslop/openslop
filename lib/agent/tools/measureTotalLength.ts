@@ -9,11 +9,12 @@ import { defineTool } from "./defineTool";
 const minutes = (words: number) =>
 	(words / NARRATION_WORDS_PER_MINUTE).toFixed(1);
 
-export const countWords = defineTool({
+export const measureTotalLength = defineTool({
 	description: dedent`
-	  Count the spoken words on the canvas (narration and dialogue only; descriptions and
-	  attributes are silent) and estimate the video's runtime against the project's target
-	  length.
+	  Measure the whole video: the spoken words on the canvas (narration and dialogue only;
+	  descriptions and attributes are silent) and the runtime they add up to, against the
+	  project's target length. For how long each visual is on screen, use
+	  measure_element_lengths instead.
 
 	  You cannot judge length by looking at a script, so run this after writing or editing
 	  whenever length matters, and edit until the count lands in the target range.

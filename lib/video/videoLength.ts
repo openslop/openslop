@@ -20,6 +20,10 @@ export const NARRATION_WORDS_PER_MINUTE = 180;
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
 
+/** How long a spoken-word count takes to say, the one rate the app estimates with. */
+export const secondsForWords = (words: number): number =>
+	(words * 60) / NARRATION_WORDS_PER_MINUTE;
+
 export type VideoLengthSpec = {
 	label: string;
 	minWords: number;
