@@ -1,3 +1,4 @@
+import type { ElementLength } from "@/lib/video/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type {
 	DeepPartial,
@@ -9,6 +10,7 @@ import type {
 export type AgentToolContext = {
 	readScript: () => string;
 	countSpokenWords: () => number;
+	measureElementLengths: () => ElementLength[];
 	referenceImages: () => string[];
 	avatarUrl: (name: string) => string | undefined;
 	/** One focused LLM call, for tools whose whole job is a generation. */

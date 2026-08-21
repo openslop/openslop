@@ -1,4 +1,5 @@
 import { AttributeSchema } from "../attributes/schema";
+import { DEFAULT_DURATION } from "@/lib/canvas/types";
 import { durationDef, motionDef } from "../attributes/common";
 import { referenceImagesDef } from "../attributes/referenceImages";
 
@@ -14,6 +15,6 @@ export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
 		},
 		default: "slow cinematic pan",
 	},
-	durationDef("10"),
+	durationDef(DEFAULT_DURATION),
 	motionDef("none"),
 ]);

@@ -1,4 +1,8 @@
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	DEFAULT_DURATION,
+	DURATION_OPTIONS,
+	type CanvasContentElement,
+} from "@/lib/canvas/types";
 import { clamp } from "@/lib/utils";
 import { DEFAULT_MOTION, isMotionEffect } from "./motionEffects";
 import type { MotionEffect } from "./motionEffectNames";
@@ -21,6 +25,17 @@ export function getVolume(element: CanvasContentElement): number {
 	return Number.isFinite(raw)
 		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
 		: DEFAULT_VOLUME;
+}
+
+const DURATIONS = DURATION_OPTIONS.map(Number);
+const DURATION_MIN = Math.min(...DURATIONS);
+const DURATION_MAX = Math.max(...DURATIONS);
+
+/** Seconds a timed visual is generated to run for, clamped to the offered options. */
+export function getDuration(element: CanvasContentElement): number {
+	const raw = Number(element.customAttributes?.duration);
+	if (!Number.isFinite(raw)) return Number(DEFAULT_DURATION);
+	return clamp(raw, DURATION_MIN, DURATION_MAX);
 }
 
 const LOOPS_MAX = 1000;

@@ -20,9 +20,18 @@ export type BuildLayoutOptions = Partial<VideoConfig> & {
 	transitionType?: TransitionType;
 	aspectRatio?: AspectRatio;
 	captionStyle?: CaptionStyle;
+	trimVisualsToDialogue?: boolean;
 };
 
-const MIN_DURATION_SEC = 1;
+/**
+ * Trimmed, a visual is on screen for the dialogue that follows it and no longer,
+ * so a generated clip's own length only decides what plays before it is cut.
+ * Untrimmed, the clip plays out in full and the dialogue can only extend it.
+ */
+export const DEFAULT_TRIM_VISUALS_TO_DIALOGUE = true;
+
+/** No sequence is ever shorter than this, however little content it holds. */
+export const MIN_DURATION_SEC = 1;
 // Durations accumulated on the frame grid land a few ULPs above a whole frame.
 // Without this slack the total ceils into a trailing frame with no content.
 const FRAME_EPSILON = 1e-6;
@@ -90,6 +99,10 @@ export function buildVideoLayout(
 		: undefined;
 	const cfg = { ...DEFAULT_CONFIG, ...aspectDims, ...options };
 	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
+	const trimVisualsToDialogue =
+		options?.trimVisualsToDialogue ?? DEFAULT_TRIM_VISUALS_TO_DIALOGUE;
+	const visualDuration = (element: ResolvedElement) =>
+		trimVisualsToDialogue ? 0 : element.durationSec;
 	// TransitionSeries lays transitions down in whole frames, so the overlap has
 	// to sit on the frame grid too. Subtracting the raw seconds would drift the
 	// absolutely-positioned layers a fraction of a frame per scene boundary.
@@ -123,7 +136,7 @@ export function buildVideoLayout(
 					// subsequent overlay/background/effect lands on the rendered timeline.
 					cursor -= transitionDurationSec;
 				}
-				series.push(createSequence(element, cursor, element.durationSec));
+				series.push(createSequence(element, cursor, visualDuration(element)));
 				break;
 			}
 			case "overlay": {

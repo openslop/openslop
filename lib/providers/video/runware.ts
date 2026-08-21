@@ -1,6 +1,6 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { VideoJob, VideoJobStatus } from "./base";
-import { BaseVideoProvider } from "./base";
+import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { withRunware } from "../runware";
 
 function toVideoJob(video: {
@@ -33,7 +33,7 @@ export class RunwareVideo extends BaseVideoProvider {
 				model: params.model || "bytedance:seedance@2.0-fast",
 				width: params.width || 1280,
 				height: params.height || 720,
-				duration: params.duration || 5,
+				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
 				inputs: {
@@ -58,7 +58,7 @@ export class RunwareVideo extends BaseVideoProvider {
 			metadata: {
 				...job.metadata,
 				jobId: job.metadata?.jobId ?? "",
-				durationSec: params.duration ?? 5,
+				durationSec: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 			},
 		};
 	}

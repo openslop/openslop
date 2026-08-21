@@ -59,7 +59,7 @@ describe("videoHandler.process", () => {
 			metadata: { providerJobId: "upstream-1" },
 		});
 		expect(generate).not.toHaveBeenCalled();
-		expect(poll).toHaveBeenCalledWith("upstream-1");
+		expect(poll).toHaveBeenCalledWith("upstream-1", { prompt: "a cat" });
 	});
 
 	it("throws when the provider returns no job id", async () => {

@@ -5,6 +5,8 @@ import type { Editor } from "slate";
 import { clearEditor } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
+import { measureElementLengths } from "@/lib/video/elementLengths";
+import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
@@ -27,6 +29,11 @@ export function useAgentTools(editor: Editor) {
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
+				measureElementLengths: () =>
+					measureElementLengths(
+						editor.children,
+						DEFAULT_TRIM_VISUALS_TO_DIALOGUE,
+					),
 				referenceImages: () => store.getState().referenceImages,
 				avatarUrl: (name) => characterAvatarUrl(queue, name),
 				generateText: async (prompt, options) => {
