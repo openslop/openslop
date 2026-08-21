@@ -183,20 +183,18 @@ describe("duplicated animation", () => {
 			durationSec: 5,
 		});
 
-		queue.duplicate(ELEMENT_ID, COPY_ID);
 		return { queue, copy: build(forElement(animated(COPY_ID))) };
 	};
 
-	it("does not need regenerating", () => {
+	it("starts empty, so Generate makes it from scratch", () => {
 		const { queue, copy } = duplicated();
-		expect(needsGeneration(copy, queue)).toBe(false);
+		expect(needsGeneration(copy, queue)).toBe(true);
+		expect(stillSnapshot(copy, queue).result).toBeNull();
 	});
 
-	it("shows the still it was copied from", () => {
-		const { queue, copy } = duplicated();
-		expect(getPrimaryUrl(stillSnapshot(copy, queue).result, "image")).toBe(
-			STILL_URL,
-		);
+	it("leaves the element it was duplicated from alone", () => {
+		const { queue } = duplicated();
+		expect(queue.getElementSnapshot(ELEMENT_ID).result).not.toBeNull();
 	});
 });
 

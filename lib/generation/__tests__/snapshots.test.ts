@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
-import { derivedNodeId } from "../graph";
 import type { GenerationInputs } from "../inputs";
 import { SnapshotStore, type ElementSnapshot } from "../snapshots";
 
@@ -108,79 +107,6 @@ describe("SnapshotStore", () => {
 		expect(store.isBusy()).toBe(true);
 		expect(store.getActiveCount()).toBe(2);
 		expect(store.getGeneratedCount()).toBe(1);
-	});
-
-	it("copies a result, its inputs and its history onto a new id", () => {
-		const store = new SnapshotStore();
-		commit(store, "a", "a.png");
-		store.update("a", { pinned: true });
-
-		store.copy("a", "b");
-
-		expect(store.get("b")).toMatchObject({
-			status: "idle",
-			seconds: 0,
-			result: result("a.png"),
-			resultInputs: inputs("a.png"),
-			connectorType: "image",
-			pinned: true,
-		});
-		expect(store.restore("b", inputs("a.png"))).toBe(true);
-	});
-
-	it("carries the nodes derived from the element onto the copy", () => {
-		const store = new SnapshotStore();
-		const derived = derivedNodeId("still", "a");
-		commit(store, derived, "still.png");
-		store.commit(
-			"a",
-			result("a.png"),
-			{ prompt: "a", attributes: {}, dependencies: { [derived]: "still.png" } },
-			"animated_image",
-			false,
-		);
-
-		store.copy("a", "b");
-
-		expect(store.get(derivedNodeId("still", "b")).result).toEqual(
-			result("still.png"),
-		);
-		expect(store.get("b").resultInputs?.dependencies).toEqual({
-			[derivedNodeId("still", "b")]: "still.png",
-		});
-		expect(
-			store.restore("b", {
-				prompt: "a",
-				attributes: {},
-				dependencies: { [derivedNodeId("still", "b")]: "still.png" },
-			}),
-		).toBe(true);
-	});
-
-	it("copies an in-flight element as idle, not as a second active job", () => {
-		const store = new SnapshotStore();
-		store.update("a", { status: "generating", seconds: 7 });
-
-		store.copy("a", "b");
-
-		expect(store.get("b")).toMatchObject({ status: "idle", seconds: 0 });
-		expect(store.getActiveCount()).toBe(1);
-	});
-
-	it("leaves a copy untouched when its source is removed", () => {
-		const store = new SnapshotStore();
-		commit(store, "a", "a.png");
-		store.copy("a", "b");
-
-		store.remove("a");
-
-		expect(store.get("b").result).toEqual(result("a.png"));
-	});
-
-	it("ignores a copy from an element it has never seen", () => {
-		const store = new SnapshotStore();
-		store.copy("nope", "b");
-		expect(store.ids()).toEqual([]);
 	});
 
 	it("notifies subscribers until they unsubscribe", () => {
