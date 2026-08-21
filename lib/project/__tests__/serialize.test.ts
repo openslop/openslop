@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	getElementBodyText,
 	getElementText,
 	serializeOSMLWithScenes,
 } from "@/lib/canvas/osmlSerializer";
@@ -54,6 +55,35 @@ describe("splitScenes", () => {
 		expect(parts[0]).toContain('<image id="a"></image>');
 		expect(parts[1]).toContain("<narration");
 	});
+
+	it("keeps a marker line that sits inside element text with its element", () => {
+		const osml = [
+			"--- Scene 1 ---",
+			'<narration id="a">before',
+			"--- Scene 2 ---",
+			"after</narration>",
+			'<image id="b"></image>',
+		].join("\n");
+
+		expect(splitScenes(osml)).toEqual([
+			'<narration id="a">before\n--- Scene 2 ---\nafter</narration>\n<image id="b"></image>',
+		]);
+	});
+
+	it("still splits on the marker that follows a multi-line element", () => {
+		const osml = [
+			"--- Scene 1 ---",
+			'<narration id="a">one',
+			"two</narration>",
+			"--- Scene 2 ---",
+			'<image id="b"></image>',
+		].join("\n");
+
+		const parts = splitScenes(osml);
+		expect(parts).toHaveLength(2);
+		expect(parts[0]).toBe('<narration id="a">one\ntwo</narration>');
+		expect(parts[1]).toBe('<image id="b"></image>');
+	});
 });
 
 describe("deserializeWithScenes", () => {
@@ -88,6 +118,24 @@ describe("deserializeWithScenes", () => {
 		expect(image.id).toBe("image-id");
 		expect(image.customAttributes?.prompt).toBe('a 24" monitor & a <box>');
 		expect(getElementText(image)).toContain("5 < 10 & 20 > 15");
+	});
+
+	it("round-trips text holding a line that reads as a scene marker", () => {
+		const original = [
+			makeScene([makeEl("narration", "before\n--- Scene 2 ---\nafter")]),
+			makeScene([makeEl("image", "a castle")]),
+		];
+
+		const scenes = deserializeWithScenes(
+			serializeOSMLWithScenes(original),
+			connectors,
+		);
+
+		expect(scenes).toHaveLength(2);
+		expect(getElementBodyText(scenes[0].children[0])).toBe(
+			"before\n--- Scene 2 ---\nafter",
+		);
+		expect(scenes[1].children[0].type).toBe("image");
 	});
 
 	it("round-trips with serializeWithScenes preserving customAttributes.url", () => {

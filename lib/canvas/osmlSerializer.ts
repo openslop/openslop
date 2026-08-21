@@ -4,7 +4,8 @@ import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
 import { withoutCaretMarker } from "./constants";
 import { escapeXml } from "./xmlEscape";
 
-export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;
+/** Matched a line at a time, so a marker inside element text can be told apart. */
+export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/;
 const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
 
 export function getElementText(element: ParsedElement): string {
