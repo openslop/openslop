@@ -3,11 +3,10 @@ import { z } from "zod";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { imageFile } from "@/lib/api/request-schema-fields";
 import { createSessionFormRouteHandler } from "@/lib/api/route-handler";
-
-const MAX_SIZE = 10 * 1024 * 1024;
+import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload/imageFiles";
 
 const UploadImageForm = z.object(
-	{ file: imageFile(MAX_SIZE) },
+	{ file: imageFile(MAX_IMAGE_UPLOAD_BYTES) },
 	{ error: "No file provided" },
 );
 

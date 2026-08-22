@@ -13,6 +13,7 @@ const metadata = MetadataSchema.parse({
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
 	countSpokenWords: () => 1,
+	measureElementLengths: () => [],
 	generateText: async () => "an outline",
 	referenceImages: () => [],
 	avatarUrl: () => undefined,
@@ -193,7 +194,7 @@ describe("executeToolCall", () => {
 
 	it("reports the count against the project's word budget", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "count_words", input: {} },
+			{ toolName: "measure_total_length", input: {} },
 			context({ countSpokenWords: () => 700 }),
 		);
 
@@ -204,13 +205,13 @@ describe("executeToolCall", () => {
 
 	it("says how far off the count is, so the model knows how much to cut or add", async () => {
 		const over = await executeToolCall(
-			{ toolName: "count_words", input: {} },
+			{ toolName: "measure_total_length", input: {} },
 			context({ countSpokenWords: () => 1000 }),
 		);
 		expect(over.ok && over.output).toContain("over by 100 words");
 
 		const under = await executeToolCall(
-			{ toolName: "count_words", input: {} },
+			{ toolName: "measure_total_length", input: {} },
 			context({ countSpokenWords: () => 500 }),
 		);
 		expect(under.ok && under.output).toContain("under by 40 words");
@@ -218,7 +219,7 @@ describe("executeToolCall", () => {
 
 	it("counts without a verdict when the length is auto", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "count_words", input: {} },
+			{ toolName: "measure_total_length", input: {} },
 			context({
 				countSpokenWords: () => 1000,
 				readMetadata: () =>
@@ -228,6 +229,50 @@ describe("executeToolCall", () => {
 
 		expect(outcome.ok && outcome.output).toContain("1000 spoken words");
 		expect(outcome.ok && outcome.output).not.toContain("over by");
+	});
+
+	it("reports what each visual is on screen for, and the dialogue holding it", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_element_lengths", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						id: "img1",
+						type: "image",
+						sceneNumber: 1,
+						seconds: 30,
+						words: 90,
+						dialogueIds: ["nar1"],
+					},
+					{
+						id: "ai1",
+						type: "animated_image",
+						sceneNumber: 2,
+						seconds: 1,
+						words: 0,
+						dialogueIds: [],
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 image img1: 30.0s, from 90 words of dialogue after it (nar1)",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 2 animated_image ai1: 1.0s, nothing after it, so it holds the minimum",
+		);
+	});
+
+	it("says the canvas has no visuals rather than reporting an empty table", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_element_lengths", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toBe(
+			"No visual elements on the canvas yet.",
+		);
 	});
 
 	it("hands over the reference images for the model to look at", async () => {
@@ -303,7 +348,8 @@ describe("SLOPPY_TOOLS", () => {
 			"view_reference_images",
 			"view_avatar",
 			"outline_story",
-			"count_words",
+			"measure_total_length",
+			"measure_element_lengths",
 			"set_metadata",
 			"set_narrator",
 			"set_character",

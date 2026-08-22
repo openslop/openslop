@@ -2,7 +2,8 @@ import { z } from "zod";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import { adaptScript } from "./adaptScript";
-import { countWords } from "./countWords";
+import { measureElementLengths } from "./measureElementLengths";
+import { measureTotalLength } from "./measureTotalLength";
 import { editScript } from "./editScript";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
@@ -26,7 +27,8 @@ const TOOLS = {
 	view_reference_images: viewReferenceImages,
 	view_avatar: viewAvatar,
 	outline_story: outlineStory,
-	count_words: countWords,
+	measure_total_length: measureTotalLength,
+	measure_element_lengths: measureElementLengths,
 	set_metadata: setMetadata,
 	set_narrator: setNarrator,
 	set_character: setCharacter,

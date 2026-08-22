@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { ELEMENT_TYPES, type CanvasElementType } from "@/lib/canvas/types";
 import { isBlankScene } from "@/lib/video/blankScene";
-import { buildVideoLayout } from "@/lib/video/scene-builder";
+import {
+	buildVideoLayout,
+	type BuildLayoutOptions,
+} from "@/lib/video/scene-builder";
 import type { ResolvedElement } from "@/lib/video/types";
 import { buildTimelineRows, packLanes } from "../timelineRows";
 
@@ -27,6 +30,10 @@ function el(
 		...overrides,
 	};
 }
+
+/** These rows are laid out from a visual's own length, which trimming makes moot. */
+const untrimmed = (elements: ResolvedElement[], options?: BuildLayoutOptions) =>
+	buildVideoLayout(elements, { trimVisualsToDialogue: false, ...options });
 
 describe("packLanes", () => {
 	const clip = (start: number, duration: number) => ({
@@ -60,16 +67,16 @@ describe("packLanes", () => {
 
 describe("buildTimelineRows", () => {
 	it("has no rows for an empty layout", () => {
-		expect(buildTimelineRows(buildVideoLayout([]))).toEqual([]);
+		expect(buildTimelineRows(untrimmed([]))).toEqual([]);
 	});
 
 	it("drops lanes that hold nothing", () => {
-		const rows = buildTimelineRows(buildVideoLayout([el("a", "image")]));
+		const rows = buildTimelineRows(untrimmed([el("a", "image")]));
 		expect(rows.map((row) => row.id)).toEqual(["foreground"]);
 	});
 
 	it("puts each role in its own lane, in stacking order", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("bgm", "music"),
 			el("img", "image"),
 			el("sfx", "sound"),
@@ -91,7 +98,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("merges narration and character into the voice lane, ordered by start", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("n1", "narration", { durationSec: 2 }),
 			el("c1", "character", { durationSec: 3 }),
 			el("n2", "narration", { durationSec: 1 }),
@@ -106,7 +113,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("expands a looped element into one clip per loop", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("bgm", "music", { durationSec: 3, loops: 3 }),
 			el("img", "image", { durationSec: 9 }),
 		]);
@@ -122,7 +129,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("trims the transition overlap so scenes abut instead of running over", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("a", "image", { durationSec: 5 }),
 			el("b", "image", { durationSec: 5 }),
 			el("c", "image", { durationSec: 5 }),
@@ -137,7 +144,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("keeps voices on one lane across a scene transition", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("n1", "narration", { durationSec: 3 }),
 			el("a", "image", { durationSec: 3 }),
 			el("n2", "narration", { durationSec: 3 }),
@@ -151,7 +158,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("drops a clip that starts after the video ends", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("img", "image", { durationSec: 5 }),
 			el("sfx", "sound", { durationSec: 4, loops: 3 }),
 		]);
@@ -165,7 +172,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("draws a clip that overruns the end only as far as the video goes", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("img", "image", { durationSec: 5 }),
 			el("sfx", "sound", { durationSec: 4, loops: 2 }),
 		]);
@@ -176,7 +183,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("splits overlapping sounds into a lane each", () => {
-		const layout = buildVideoLayout([
+		const layout = untrimmed([
 			el("img", "image", { durationSec: 10 }),
 			el("s1", "sound", { durationSec: 6 }),
 			el("s2", "sound", { durationSec: 6 }),
@@ -189,9 +196,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("opens a blank scene when an overlay leads the video", () => {
-		const rows = buildTimelineRows(
-			buildVideoLayout([el("voice", "narration")]),
-		);
+		const rows = buildTimelineRows(untrimmed([el("voice", "narration")]));
 		const visual = rows.find((row) => row.id === "foreground");
 		expect(visual?.clips).toHaveLength(1);
 		expect(isBlankScene(visual?.clips[0].element as ResolvedElement)).toBe(

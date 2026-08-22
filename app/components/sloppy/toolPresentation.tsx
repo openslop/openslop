@@ -7,18 +7,35 @@ import {
 	Hourglass,
 	Mic,
 	Pencil,
+	Robot,
 	SlidersHorizontal,
 	Translate,
 	User,
 	type IconComponent,
 } from "@/components/ui/icon";
+import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyTools } from "@/lib/agent/types";
 
 type ToolPresentation = { icon: IconComponent; label: string };
 
-export function toolPresentation(
-	part: ToolUIPart<SloppyTools>,
-): ToolPresentation {
+type ToolPart = ToolUIPart<SloppyTools>;
+
+const OFFERED: ReadonlySet<string> = new Set(
+	Object.keys(SLOPPY_TOOLS).map((name) => `tool-${name}`),
+);
+
+/** A stored transcript can hold a tool this build has renamed away, and it still has to render. */
+const pastTool = (type: string): ToolPresentation => ({
+	icon: Robot,
+	label: type.replace(/^tool-/, "").replaceAll("_", " "),
+});
+
+export function toolPresentation(part: ToolPart): ToolPresentation {
+	return OFFERED.has(part.type) ? offeredTool(part) : pastTool(part.type);
+}
+
+/** Exhaustive over the tools this build offers: a new one without a case is a type error. */
+function offeredTool(part: ToolPart): ToolPresentation {
 	switch (part.type) {
 		case "tool-read_script":
 			return { icon: Eye, label: "Reading the script" };
@@ -49,8 +66,13 @@ export function toolPresentation(
 		}
 		case "tool-outline_story":
 			return { icon: Pencil, label: "Outlining the story" };
-		case "tool-count_words":
-			return { icon: Hourglass, label: "Counting the spoken words" };
+		case "tool-measure_total_length":
+			return { icon: Hourglass, label: "Measuring the video's length" };
+		case "tool-measure_element_lengths":
+			return {
+				icon: Hourglass,
+				label: "Measuring scene lengths",
+			};
 		case "tool-set_language":
 			return { icon: Translate, label: "Setting the language" };
 		case "tool-set_metadata":

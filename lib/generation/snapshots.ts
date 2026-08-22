@@ -97,19 +97,6 @@ export class SnapshotStore {
 		this.state.set(id, { ...this.get(id), ...patch });
 	}
 
-	/**
-	 * Clones one element's result and the results already seen for it onto
-	 * another id. In-flight progress is never carried over, so a copy taken
-	 * mid-generation lands idle rather than as a second active job.
-	 */
-	copy(fromId: string, toId: string) {
-		const source = this.state.get(fromId);
-		if (!source) return;
-		this.update(toId, { ...source, status: "idle", seconds: 0 });
-		const sourceHistory = this.history.get(fromId);
-		if (sourceHistory) this.history.set(toId, new Map(sourceHistory));
-	}
-
 	/** Drops the entry entirely; anything it held is gone. */
 	remove(id: string) {
 		if (this.state.get(id)?.result) this.resultVersion++;
