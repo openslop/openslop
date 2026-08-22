@@ -27,7 +27,7 @@ import { useProject } from "@/lib/project/useProject";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
-import { MediaPlaceholder, MediaPreview } from "../preview/results";
+import { MediaResult } from "../preview/results";
 import { TextAreaField } from "./fields";
 import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
 import { VoiceSection } from "./VoiceMetadataFields";
@@ -167,23 +167,14 @@ function CharacterEditDialogBody({
 						</div>
 					</div>
 					<div className="relative">
-						{avatarUrl ? (
-							<MediaPreview
-								key={avatarUrl}
-								url={avatarUrl}
-								outputKind="image"
-								status={avatarSnapshot.status}
-								seconds={avatarSnapshot.seconds}
-								error={avatarSnapshot.error}
-							/>
-						) : (
-							<MediaPlaceholder
-								status={avatarSnapshot.status}
-								seconds={avatarSnapshot.seconds}
-								error={avatarSnapshot.error}
-								onDiscard={() => queue.discard(avatarElementId)}
-							/>
-						)}
+						<MediaResult
+							url={avatarUrl}
+							outputKind="image"
+							status={avatarSnapshot.status}
+							seconds={avatarSnapshot.seconds}
+							error={avatarSnapshot.error}
+							onDiscard={() => queue.discard(avatarElementId)}
+						/>
 						<UploadImageButton
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
