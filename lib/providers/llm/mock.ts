@@ -7,6 +7,7 @@ import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
+import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { matchAnimateImagePrompt } from "@/lib/script/refine/animatePrompt";
 import type { AgentModel } from "./agentModel";
 
@@ -104,9 +105,6 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 const MOCK_STYLE =
 	"Warm, painterly storybook illustration with soft watercolor washes, gentle outlines, and golden hour lighting; whimsical and nostalgic.";
 
-const MOCK_CHARACTER_APPEARANCE =
-	"A cheerful young person with warm brown skin, dark curly hair, bright expressive eyes, wearing a simple colorful outfit; soft painterly storybook style.";
-
 const MOCK_OUTLINE = `Premise: In a village at the edge of an enchanted forest, a cheerful girl named Red sets out to deliver vegetables to her ailing grandmother and unexpectedly befriends a gentle, vegetarian wolf gathering berries for his own sick mother.
 
 Characters: Red (curious, kind); Wolf (gentle, misunderstood); Mother and Granny (warm anchors of home); Hunter (a watchful protector); Owl (the forest's quiet conscience).
@@ -128,11 +126,7 @@ const MOCK_RESPONSES: {
 		respond: () => MOCK_STYLE,
 	},
 	{
-		matches: (p) => /describe the visual appearance of the character/i.test(p),
-		respond: () => MOCK_CHARACTER_APPEARANCE,
-	},
-	{
-		matches: (p) => p.startsWith("Briefly outline an engaging story"),
+		matches: (p) => p.startsWith(OUTLINE_INSTRUCTION),
 		respond: () => MOCK_OUTLINE,
 	},
 ];
