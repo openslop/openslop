@@ -5,11 +5,9 @@ import { Play, Pause } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
 import { formatTime } from "@/lib/video/timestamps";
-import { usePreviewCache } from "../PreviewCacheContext";
 
 export function AudioPlayer({ src }: { src: string }) {
 	const waveformRef = useRef<WaveformHandle>(null);
-	const peaksCache = usePreviewCache();
 	const [playing, setPlaying] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
@@ -26,7 +24,6 @@ export function AudioPlayer({ src }: { src: string }) {
 			<Waveform
 				ref={waveformRef}
 				src={src}
-				peaksCache={peaksCache}
 				className="flex-1 basis-[160px] min-w-0 h-10"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}

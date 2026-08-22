@@ -21,7 +21,6 @@ import {
 
 export interface WaveformProps {
 	src: string;
-	peaksCache?: Map<string, number[]>;
 	className?: string;
 	onPlay?: () => void;
 	onPause?: () => void;
@@ -38,7 +37,6 @@ export interface WaveformHandle {
 
 export function Waveform({
 	src,
-	peaksCache,
 	className,
 	ref,
 	onPlay,
@@ -50,17 +48,9 @@ export function Waveform({
 	const barsRef = useRef<HTMLDivElement>(null);
 	const progressRef = useRef<HTMLDivElement>(null);
 	const peaksRef = useRef<number[]>([]);
-	const [loadedSrc, setLoadedSrc] = useState<string | null>(() =>
-		peaksCache?.has(src) ? src : null,
-	);
+	const [peaksSettledFor, setPeaksSettledFor] = useState<string | null>(null);
 	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
-	const loading = loadedSrc !== src || audioSettledFor !== src;
-
-	// Adjust state during render when src changes to a cached value
-	// (React-supported pattern for deriving state from props)
-	if (loadedSrc !== src && peaksCache?.has(src)) {
-		setLoadedSrc(src);
-	}
+	const loading = peaksSettledFor !== src || audioSettledFor !== src;
 
 	const setProgress = useCallback((progress: number) => {
 		const el = progressRef.current;
@@ -81,31 +71,23 @@ export function Waveform({
 	}, [setProgress]);
 
 	useEffect(() => {
-		const cached = peaksCache?.get(src);
-		if (cached) {
-			peaksRef.current = cached;
-			paint();
-			return;
-		}
 		peaksRef.current = [];
 
 		let cancelled = false;
 		loadPeaks(src)
 			.then((peaks) => {
 				if (cancelled) return;
-				peaksCache?.set(src, peaks);
 				peaksRef.current = peaks;
 				paint();
 			})
 			.catch((e) => console.error("Failed to decode audio:", e))
 			.finally(() => {
-				if (!cancelled) setLoadedSrc(src);
+				if (!cancelled) setPeaksSettledFor(src);
 			});
 		return () => {
 			cancelled = true;
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- peaksCache is a stable ref, not a direct dep
-	}, [src]);
+	}, [src, paint]);
 
 	useImperativeHandle(
 		ref,

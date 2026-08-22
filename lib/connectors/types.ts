@@ -20,6 +20,9 @@ export type AssetConnectorType = Exclude<ConnectorType, "llm">;
 
 export type ProviderKey = "openslop";
 
+/** Derived nodes have no settings UI to pin a provider, so they take this one. */
+export const DEFAULT_PROVIDER: ProviderKey = "openslop";
+
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
 export interface PluginContext<TParams = unknown, TResult = unknown> {

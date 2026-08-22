@@ -13,6 +13,7 @@ import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { getDefaultConnector } from "@/lib/connectors/registry";
 import { createConnector } from "@/lib/connectors/factory";
+import { useProject } from "@/lib/project/useProject";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOSMLStreamParser } from "@/lib/canvas/useOSMLStreamParser";
@@ -53,7 +54,8 @@ export function ScriptProvider({
 }) {
 	const { connectorConfig } = useConfig();
 	const store = useProjectStoreHandle();
-	const [script, setScript] = useState(initialScript);
+	const updateMetadata = useProject((s) => s.updateMetadata);
+	const [script] = useState(initialScript);
 	const [showWorkspace, setShowWorkspace] = useState(initialScript.length > 0);
 	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 
@@ -82,9 +84,10 @@ export function ScriptProvider({
 	);
 
 	const startBlank = useCallback(() => {
-		setScript(BLANK_SCRIPT);
+		updateMetadata({ title: "Untitled" });
 		setShowWorkspace(true);
-	}, []);
+		appendChunk(BLANK_SCRIPT);
+	}, [appendChunk, updateMetadata]);
 
 	const control = useMemo<ScriptControl>(
 		() => ({ runScript, setShowWorkspace, startBlank }),

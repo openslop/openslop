@@ -2,7 +2,6 @@ import isEqual from "lodash/isEqual";
 import { stringifyError } from "@/lib/errors";
 import { isTerminal, JOB_TIMEOUT_MS } from "@/lib/gateway/base";
 import { getJobHandler } from "./job-handlers";
-import type { AssetQueueMessage } from "./jobs";
 import { enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
 import { logger } from "./logger";
 
@@ -13,13 +12,11 @@ const PENDING_RETRY_SECONDS = 5;
  * working return `pending`, and the job is redelivered to this same function
  * until it completes or outlives the deadline.
  */
-export async function processQueuedJob({
-	jobId,
-	connectorType,
-}: AssetQueueMessage): Promise<void> {
+export async function processQueuedJob(jobId: string): Promise<void> {
 	const job = await loadJobForProcessing(jobId);
 	if (isTerminal(job.status)) return;
 
+	const connectorType = job.connector_type;
 	const handler = getJobHandler(connectorType);
 	if (!handler) {
 		throw new Error(`No job handler registered for ${connectorType}`);

@@ -19,12 +19,24 @@ export function volumeToGain(volume: number): number {
 	return volume / VOLUME_MAX;
 }
 
+function clampedAttribute(
+	element: CanvasContentElement,
+	key: string,
+	{ min, max, fallback }: { min: number; max: number; fallback: number },
+): number {
+	const raw = element.customAttributes?.[key]?.trim();
+	if (!raw) return fallback;
+	const value = Number(raw);
+	return Number.isFinite(value) ? clamp(value, min, max) : fallback;
+}
+
 /** Volume coerced to a finite number clamped to [0, 10], defaulting to 10. */
 export function getVolume(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.volume);
-	return Number.isFinite(raw)
-		? clamp(raw, VOLUME_MIN, VOLUME_MAX)
-		: DEFAULT_VOLUME;
+	return clampedAttribute(element, "volume", {
+		min: VOLUME_MIN,
+		max: VOLUME_MAX,
+		fallback: DEFAULT_VOLUME,
+	});
 }
 
 const DURATIONS = DURATION_OPTIONS.map(Number);
@@ -33,18 +45,23 @@ const DURATION_MAX = Math.max(...DURATIONS);
 
 /** Seconds a timed visual is generated to run for, clamped to the offered options. */
 export function getDuration(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.duration);
-	if (!Number.isFinite(raw)) return Number(DEFAULT_DURATION);
-	return clamp(raw, DURATION_MIN, DURATION_MAX);
+	return clampedAttribute(element, "duration", {
+		min: DURATION_MIN,
+		max: DURATION_MAX,
+		fallback: Number(DEFAULT_DURATION),
+	});
 }
 
 const LOOPS_MAX = 1000;
+const DEFAULT_LOOPS = 1;
 
-/** Loop count coerced to an integer in [1, 1000], defaulting to 1. */
+/** Loop count clamped to [1, 1000], defaulting to 1. */
 export function getLoops(element: CanvasContentElement): number {
-	const raw = Number(element.customAttributes?.loops);
-	if (!Number.isFinite(raw)) return 1;
-	return clamp(Math.floor(raw), 1, LOOPS_MAX);
+	return clampedAttribute(element, "loops", {
+		min: DEFAULT_LOOPS,
+		max: LOOPS_MAX,
+		fallback: DEFAULT_LOOPS,
+	});
 }
 
 /** Motion effect validated against the known set, defaulting to "none". */

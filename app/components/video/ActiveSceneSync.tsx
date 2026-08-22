@@ -1,32 +1,24 @@
 "use client";
 
-import type { PlayerRef } from "@remotion/player";
 import { useEffect } from "react";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
-import type { SceneSegment } from "@/lib/video/sceneSegments";
 import { usePlayerPlaying } from "./usePlayerState";
 import { useActiveSegmentIndex } from "./useActiveSegmentIndex";
+import { useLayout } from "./VideoLayoutContext";
 
 /**
  * Renders nothing. It owns the frame subscription that tracks the playing
  * scene, so crossing a scene boundary re-renders this leaf instead of the
  * Remotion player it sits beside.
  */
-export function ActiveSceneSync({
-	player,
-	segments,
-	fps,
-}: {
-	player: PlayerRef | null;
-	segments: SceneSegment[];
-	fps: number;
-}) {
+export function ActiveSceneSync() {
+	const { segments } = useLayout();
 	const setActiveSceneId = useSetActiveSceneId();
 	const { enabled: autoScrollEnabled } = useAutoScroll();
-	const playing = usePlayerPlaying(player);
-	const activeIndex = useActiveSegmentIndex(player, segments, fps);
+	const playing = usePlayerPlaying();
+	const activeIndex = useActiveSegmentIndex();
 	const activeId =
 		activeIndex >= 0 ? (segments[activeIndex]?.sceneId ?? null) : null;
 

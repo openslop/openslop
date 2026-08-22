@@ -24,7 +24,7 @@ function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPosition();
 	const { layout, ready, segments } = useLayout();
-	const playing = usePlayerPlaying(player);
+	const playing = usePlayerPlaying();
 
 	// Seeking needs a live player. Play does not: it re-reveals the hidden
 	// panel that mounts one.
@@ -45,14 +45,14 @@ function BottomTransportBarComponent() {
 	return (
 		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
 			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
-				<SegmentedSeekBar player={player} layout={layout} segments={segments} />
+				<SegmentedSeekBar />
 			</div>
 			<div className="flex items-center gap-2">
 				<div className="flex flex-1 items-center gap-2">
-					{canSeek && <TimeDisplay player={player} layout={layout} />}
+					{canSeek && <TimeDisplay />}
 					{canSeek && (
 						<div className="hidden @[520px]:contents">
-							<ScenePill player={player} segments={segments} fps={layout.fps} />
+							<ScenePill />
 						</div>
 					)}
 				</div>

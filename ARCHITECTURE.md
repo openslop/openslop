@@ -38,7 +38,7 @@ Turns are stored as the SDK's UI message type, so the stream, the rows and the p
 
 The generation pipeline is split so providers and asset types can be swapped independently:
 
-- **Connectors** (`lib/connectors/`): what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`.
+- **Connectors** (`lib/connectors/`): what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`. `DEFAULT_CONNECTOR_REGISTRY` declares each type's static plugin chain; `ConfigProvider` appends only the chains that need a live project store.
 - **Gateways** (`lib/gateway/`): thin HTTP clients between connectors and our `/api/v1/*` routes. This seam lets connectors run against the live API or a mock. Today there is one OpenSlop gateway. A BYOK gateway will be added so users can call providers with their own API keys.
 - **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. LLM providers go through the Vercel AI SDK; `getLLMProvider` in `lib/api/providers.ts` is the one place a vendor is chosen, and the provider's `agentModel()` builds the `LanguageModel` and maps vendor-specific knobs like reasoning effort.
 

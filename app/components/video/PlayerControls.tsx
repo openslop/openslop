@@ -1,9 +1,6 @@
 "use client";
 
-import type { PlayerRef } from "@remotion/player";
 import { Maximize, Volume2, VolumeX } from "@/components/ui/icon";
-import type { VideoLayout } from "@/lib/video/types";
-import type { SceneSegment } from "@/lib/video/sceneSegments";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { IconButton } from "@/components/ui/icon-button";
 import { toSeconds } from "@/lib/video/frames";
@@ -16,17 +13,12 @@ import {
 	usePlayerVolume,
 } from "./usePlayerState";
 import { useActiveSegmentIndex } from "./useActiveSegmentIndex";
+import { useLayout } from "./VideoLayoutContext";
 import { ScrubBar } from "./ScrubBar";
 
-export function TimeDisplay({
-	player,
-	layout,
-}: {
-	player: PlayerRef | null;
-	layout: VideoLayout;
-}) {
+export function TimeDisplay() {
+	const { layout } = useLayout();
 	const seconds = usePlayerValue(
-		player,
 		FRAME_EVENTS,
 		(p) => Math.floor(toSeconds(p.getCurrentFrame(), layout.fps)),
 		0,
@@ -39,16 +31,9 @@ export function TimeDisplay({
 	);
 }
 
-export function ScenePill({
-	player,
-	segments,
-	fps,
-}: {
-	player: PlayerRef | null;
-	segments: SceneSegment[];
-	fps: number;
-}) {
-	const activeIndex = useActiveSegmentIndex(player, segments, fps);
+export function ScenePill() {
+	const { segments } = useLayout();
+	const activeIndex = useActiveSegmentIndex();
 	const active = segments[activeIndex];
 	if (!active) return null;
 	return (
@@ -65,8 +50,8 @@ export function ScenePill({
 
 export function VolumeControl() {
 	const { player } = usePlayerControl();
-	const volume = usePlayerVolume(player);
-	const muted = usePlayerMuted(player);
+	const volume = usePlayerVolume();
+	const muted = usePlayerMuted();
 
 	const toggleMute = () => {
 		if (!player) return;

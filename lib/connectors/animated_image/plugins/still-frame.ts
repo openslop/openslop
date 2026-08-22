@@ -1,13 +1,13 @@
 import omit from "lodash/omit";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import type {
-	AnimatedImageGenerateParams,
-	AssetResult,
-	ConnectorPlugin,
-	PluginContext,
+import {
+	DEFAULT_PROVIDER,
+	type AnimatedImageGenerateParams,
+	type AssetResult,
+	type ConnectorPlugin,
+	type PluginContext,
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
-import { DEFAULT_PROVIDER } from "@/lib/connectors/registry";
 import {
 	derivedNodeId,
 	type GenerationNode,
