@@ -106,7 +106,7 @@ describe("POST /api/render/progress", () => {
 		const res = await POST(makeRequest(validBody));
 
 		expect(res.status).toBe(500);
-		expect((await res.json()).error).toContain("output file");
+		expect((await res.json()).error).toBe("render/progress failed");
 	});
 
 	it("reports in-flight progress otherwise", async () => {

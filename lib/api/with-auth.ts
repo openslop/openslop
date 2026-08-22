@@ -1,12 +1,13 @@
 import type { User } from "@supabase/supabase-js";
-import { stringifyError } from "../errors";
 import { getUser } from "./auth";
 import { logger } from "./logger";
 import { forbidden, serverError, unauthorized } from "./response";
 
 type RouteBody = (user: User) => Promise<Response>;
 
-// Uniform error envelope: thrown errors are logged and returned as 500.
+// Uniform error envelope: thrown errors are logged in full and returned as a
+// 500 that names the route only. The serialized cause carries stack frames and
+// upstream detail, which the caller has no business reading.
 async function runGuarded(
 	label: string,
 	run: () => Promise<Response>,
@@ -15,7 +16,7 @@ async function runGuarded(
 		return await run();
 	} catch (error) {
 		logger.error(error, `${label} failed`);
-		return serverError(`${label} failed: ${stringifyError(error)}`);
+		return serverError(`${label} failed`);
 	}
 }
 

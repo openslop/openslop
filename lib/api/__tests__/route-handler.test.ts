@@ -8,6 +8,7 @@ import {
 	createSessionFormRouteHandler,
 	createSessionRouteHandler,
 } from "../route-handler";
+import { logger } from "../logger";
 
 vi.mock("../logger", () => ({
 	logger: { warn: vi.fn(), error: vi.fn() },
@@ -134,26 +135,26 @@ describe("createApiRouteHandler", () => {
 		expect(await res.json()).toEqual({ ok: true, prompt: "hello" });
 	});
 
-	it("returns 500 with the error message when handle throws an Error", async () => {
+	it("returns 500 without the error detail when handle throws an Error", async () => {
+		const cause = new Error("boom at /srv/app/lib/secret.ts");
 		const handler = makeHandler(async () => {
-			throw new Error("boom");
+			throw cause;
 		});
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toContain("TestRoute failed: ");
-		expect(json.error).toContain("boom");
+		expect(json.error).toBe("TestRoute failed");
+		expect(logger.error).toHaveBeenCalledWith(cause, "TestRoute failed");
 	});
 
-	it("stringifies non-Error throws", async () => {
+	it("returns 500 without the error detail for non-Error throws", async () => {
 		const handler = makeHandler(async () => {
 			throw "raw string failure";
 		});
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(500);
 		const json = await res.json();
-		expect(json.error).toContain("TestRoute failed: ");
-		expect(json.error).toContain("raw string failure");
+		expect(json.error).toBe("TestRoute failed");
 	});
 });
 
