@@ -1,5 +1,11 @@
 import set from "lodash/fp/set";
 import { createConnector } from "./factory";
+import { buildAnimatedImagePlugins } from "./animated_image/plugins/animated-image-chain";
+import { buildImagePlugins } from "./image/plugins/imageChain";
+import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
+import { createDimensionsPlugin } from "./plugins/dimensions";
+import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
+import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
 import { IMAGE_MODELS } from "./image/openslop/models";
 import { LLM_MODELS } from "./llm/openslop/models";
 import { MUSIC_MODELS } from "./music/openslop/models";
@@ -33,16 +39,23 @@ const openslopConfig = (
 	},
 });
 
-/** Derived nodes have no settings UI to pin a provider, so they take this one. */
-export const DEFAULT_PROVIDER: ProviderKey = "openslop";
-
-/** Plugin-free baseline; project-scoped plugin chains are layered on by `ConfigProvider`. */
+/** Static plugin chains; `ConfigProvider` layers the project-scoped ones on top. */
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	llm: openslopConfig("Slop LLM v1", LLM_MODELS),
-	tts: openslopConfig("Slop TTS v1", TTS_MODELS),
-	image: openslopConfig("Slop Image v1", IMAGE_MODELS),
-	animated_image: openslopConfig("Slop Video v1", VIDEO_MODELS),
-	video: openslopConfig("Slop Video v1", VIDEO_MODELS),
+	tts: openslopConfig("Slop TTS v1", TTS_MODELS, [
+		createMetadataVoicePlugin(),
+		createVoiceSearchPlugin(),
+	]),
+	image: openslopConfig("Slop Image v1", IMAGE_MODELS, buildImagePlugins()),
+	animated_image: openslopConfig(
+		"Slop Video v1",
+		VIDEO_MODELS,
+		buildAnimatedImagePlugins(),
+	),
+	video: openslopConfig("Slop Video v1", VIDEO_MODELS, [
+		createReferenceImagesPlugin(),
+		createDimensionsPlugin("video"),
+	]),
 	sfx: openslopConfig("Slop SFX v1", SFX_MODELS),
 	music: openslopConfig("Slop Music v1", MUSIC_MODELS),
 };

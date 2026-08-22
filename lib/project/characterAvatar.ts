@@ -1,6 +1,6 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { DEFAULT_PROVIDER } from "@/lib/connectors/registry";
+import { DEFAULT_PROVIDER } from "@/lib/connectors/types";
 import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 

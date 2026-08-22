@@ -4,11 +4,7 @@ import type {
 	AssetResult,
 	PluginContext,
 } from "@/lib/connectors/types";
-import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
-import {
-	DEFAULT_CONNECTOR_REGISTRY,
-	withRegistry,
-} from "@/lib/connectors/registry";
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	forElement,
@@ -18,7 +14,6 @@ import {
 import { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { MetadataSchema } from "@/lib/project/types";
-import { buildAnimatedImagePlugins } from "../animated-image-chain";
 import {
 	createStillFramePlugin,
 	stillElementId,
@@ -84,10 +79,7 @@ describe("still-frame plugin", () => {
 });
 
 describe("stillSnapshot", () => {
-	const registry = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
-		.appendPlugins("image", ...buildImagePlugins())
-		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
-		.build();
+	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
 		hydrated: true,
 		metadata: MetadataSchema.parse({}),
@@ -148,10 +140,7 @@ describe("stillSnapshot", () => {
 });
 
 describe("duplicated animation", () => {
-	const registry = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
-		.appendPlugins("image", ...buildImagePlugins())
-		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
-		.build();
+	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
 		hydrated: true,
 		metadata: MetadataSchema.parse({}),
@@ -199,10 +188,7 @@ describe("duplicated animation", () => {
 });
 
 describe("uploaded still lifetime", () => {
-	const registry = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
-		.appendPlugins("image", ...buildImagePlugins())
-		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
-		.build();
+	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
 		hydrated: true,
 		metadata: MetadataSchema.parse({}),
