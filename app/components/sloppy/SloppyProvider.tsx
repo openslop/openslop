@@ -25,10 +25,6 @@ type SloppyControl = {
 	model: string;
 	setModel: (model: string) => void;
 	models: string[];
-	/**
-	 * The turn is not finished: streaming, or running the tools it asked for.
-	 * A turn is stoppable for exactly as long as this is true.
-	 */
 	loading: boolean;
 	writingScript: boolean;
 };

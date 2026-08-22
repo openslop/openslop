@@ -77,9 +77,9 @@ describe("getLoops", () => {
 		expect(getLoops(el({ loops: "  " }))).toBe(1);
 	});
 
-	it("floors fractional loop counts to an integer", () => {
-		expect(getLoops(el({ loops: "4.7" }))).toBe(4);
-		expect(getLoops(el({ loops: "1.999" }))).toBe(1);
+	it("passes fractional loop counts through", () => {
+		expect(getLoops(el({ loops: "4.7" }))).toBe(4.7);
+		expect(getLoops(el({ loops: "1.999" }))).toBe(1.999);
 	});
 
 	it("rejects Infinity and NaN, defaulting to 1", () => {
