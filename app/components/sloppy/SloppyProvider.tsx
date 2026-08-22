@@ -25,11 +25,8 @@ type SloppyControl = {
 	model: string;
 	setModel: (model: string) => void;
 	models: string[];
-	/** The turn is not finished: streaming, or running the tools it asked for. */
 	loading: boolean;
 	writingScript: boolean;
-	/** The turn can be stopped: it is streaming, or running a tool that can be cut off. */
-	streaming: boolean;
 };
 
 // Split by update frequency: only the transcript changes per streamed token.
@@ -123,8 +120,10 @@ export function SloppyProvider({
 			throttle: 50,
 		});
 
-	const streaming = status === "submitted" || status === "streaming";
-	const working = streaming || hasPendingToolCall(messages);
+	const working =
+		status === "submitted" ||
+		status === "streaming" ||
+		hasPendingToolCall(messages);
 	const writingScript = hasPendingToolCall(messages, SCRIPT_TOOLS);
 	const control = useMemo<SloppyControl>(
 		() => ({
@@ -139,20 +138,11 @@ export function SloppyProvider({
 			},
 			loading: working,
 			writingScript,
-			streaming,
 			model,
 			setModel,
 			models: config.models,
 		}),
-		[
-			sendMessage,
-			stop,
-			streaming,
-			working,
-			writingScript,
-			model,
-			config.models,
-		],
+		[sendMessage, stop, working, writingScript, model, config.models],
 	);
 
 	// History sits in front of the chat's own turns rather than being written
