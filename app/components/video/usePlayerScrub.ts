@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import type { PlayerRef } from "@remotion/player";
+import { usePlayerControl } from "./PlayerControlContext";
 import { silenceMediaIn } from "./silenceMedia";
 
 /**
@@ -9,7 +9,8 @@ import { silenceMediaIn } from "./silenceMedia";
  * so a seek mid-playback leaks audio from the old position unless they are
  * silenced. Shared by every scrub surface.
  */
-export function usePlayerScrub(player: PlayerRef | null) {
+export function usePlayerScrub() {
+	const { player } = usePlayerControl();
 	const wasPlaying = useRef(false);
 
 	return useMemo(

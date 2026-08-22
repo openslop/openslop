@@ -116,7 +116,7 @@ export function Timeline() {
 			viewportWidth - GUTTER_PX - RULER_TAIL_PX,
 		);
 
-	const scrub = usePlayerScrub(player);
+	const scrub = usePlayerScrub();
 	const seek = (seconds: number) =>
 		scrub.seekTo(
 			toFrames(clamp(seconds, 0, layout.totalDurationSec), layout.fps),
@@ -223,8 +223,6 @@ export function Timeline() {
 					>
 						<TimelineHoverHead ref={hoverHead} pxPerSec={pxPerSec} />
 						<TimelinePlayhead
-							player={player}
-							fps={layout.fps}
 							pxPerSec={pxPerSec}
 							viewport={viewport}
 							viewportWidth={viewportWidth}
