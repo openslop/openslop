@@ -1,8 +1,5 @@
-import {
-	CANVAS_ELEMENT_TYPES,
-	type CanvasElementType,
-	type ParsedElement,
-} from "@/lib/canvas/types";
+import type { ParsedElement } from "@/lib/canvas/types";
+import { isCanvasElementType } from "@/lib/canvas/guards";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
@@ -78,11 +75,9 @@ export class OSMLStreamParser {
 		attributes: Record<string, string>,
 		connectors: ConnectorRegistry,
 	): void {
-		if (CANVAS_ELEMENT_TYPES.has(type as CanvasElementType)) {
+		if (isCanvasElementType(type)) {
 			const { id, ...attrs } = attributes;
-			this.nodes.push(
-				createCanvasNode(type as CanvasElementType, connectors, { id, attrs }),
-			);
+			this.nodes.push(createCanvasNode(type, connectors, { id, attrs }));
 			return;
 		}
 		// Non-canvas tags (metadata_*) pass through as generic nodes; the

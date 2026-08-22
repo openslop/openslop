@@ -1,5 +1,5 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
-import type { VideoJob, VideoJobStatus } from "./base";
+import type { VideoJob, VideoJobMetadata, VideoJobStatus } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { withRunware } from "../runware";
 
@@ -7,7 +7,7 @@ function toVideoJob(video: {
 	taskUUID: string;
 	status: string;
 	videoURL?: string;
-}): VideoJob {
+}): VideoJob & { metadata: VideoJobMetadata } {
 	return {
 		url: video.videoURL,
 		metadata: {
@@ -57,7 +57,6 @@ export class RunwareVideo extends BaseVideoProvider {
 			...job,
 			metadata: {
 				...job.metadata,
-				jobId: job.metadata?.jobId ?? "",
 				durationSec: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 			},
 		};
