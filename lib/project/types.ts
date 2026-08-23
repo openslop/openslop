@@ -79,8 +79,6 @@ export const MetadataSchema = z.object({
 	videoSettings: VideoSettingsSchema,
 	/** The template the project's scripts are written against, when it has one. */
 	templateId: optionalString,
-	/** Persisted for server-side observability of prompt activity; not read in-app. */
-	lastPrompt: z.string().optional(),
 });
 
 export type Metadata = z.infer<typeof MetadataSchema>;
