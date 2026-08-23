@@ -13,19 +13,7 @@ import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
 
-interface ComposerAssetsProps {
-	uploadingCount: number;
-	onEditCharacter: (name: string) => void;
-	onEditNarrator: () => void;
-	onEditArtStyle: () => void;
-}
-
-export function ComposerAssets({
-	uploadingCount,
-	onEditCharacter,
-	onEditNarrator,
-	onEditArtStyle,
-}: ComposerAssetsProps) {
+export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const narration = useProject((s) => s.metadata.narration);
@@ -42,12 +30,9 @@ export function ComposerAssets({
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
-			{hasArtStyle && <ArtStyleAssetTile onEdit={onEditArtStyle} />}
-			{hasNarration && <NarratorAssetTile onEdit={onEditNarrator} />}
-			<CharacterAssetTiles
-				onEdit={onEditCharacter}
-				onRemove={setDeletingName}
-			/>
+			{hasArtStyle && <ArtStyleAssetTile />}
+			{hasNarration && <NarratorAssetTile />}
+			<CharacterAssetTiles onRemove={setDeletingName} />
 			<ReferenceAssetTiles />
 			{Array.from({ length: uploadingCount }).map((_, i) => (
 				<div

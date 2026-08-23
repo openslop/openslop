@@ -118,6 +118,7 @@ app/             Next.js routes, API endpoints, and editor components
   api/v1/        REST API per asset type (image, video, music, sfx, tts, llm)
   components/    Editor UI (canvas, video preview, etc.)
 lib/
+  agent/         Sloppy: tool definitions, registry, prompt and turn context
   connectors/    Editor-facing client API per asset type
   gateway/       HTTP clients to /api/v1/*
   providers/     Server-side vendor adapters (Runware, ElevenLabs, …)
@@ -126,6 +127,8 @@ lib/
   script/        Script context and refinement
   project/       Per-project Zustand store, autosave, persistence
   video/         Scene layout and render client
+  templates/     Prompt templates offered in the composer
+  upload/        Client-side image upload
   supabase/      Browser/server Supabase clients
 remotion/        Remotion entry point and compositions
 supabase/        Database migrations

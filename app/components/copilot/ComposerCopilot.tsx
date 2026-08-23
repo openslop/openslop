@@ -21,7 +21,10 @@ import {
 	type SegmentedControlOption,
 } from "@/components/ui/segmented-control";
 import AnimatedPlaceholder from "@/app/components/AnimatedPlaceholder";
-import { useAssetEditDialogs } from "@/app/components/canvas/elements/character/useAssetEditDialogs";
+import {
+	AssetEditProvider,
+	useAssetEditors,
+} from "@/app/components/canvas/elements/character/AssetEditProvider";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
@@ -88,16 +91,11 @@ const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map((t) => ({
 function AttachMenu({
 	openPicker,
 	uploading,
-	onCreateCharacter,
-	onSelectNarrator,
-	onSetArtStyle,
 }: {
 	openPicker: () => void;
 	uploading: boolean;
-	onCreateCharacter: () => void;
-	onSelectNarrator: () => void;
-	onSetArtStyle: () => void;
 }) {
+	const { openCreateCharacter, openNarrator, openArtStyle } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -110,19 +108,19 @@ function AttachMenu({
 			key: "character",
 			label: "Create character",
 			icon: <User className={iconClass} />,
-			onSelect: onCreateCharacter,
+			onSelect: openCreateCharacter,
 		},
 		{
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: onSelectNarrator,
+			onSelect: openNarrator,
 		},
 		{
 			key: "art-style",
 			label: "Set art style",
 			icon: <Palette className={iconClass} />,
-			onSelect: onSetArtStyle,
+			onSelect: openArtStyle,
 		},
 	];
 
@@ -179,11 +177,16 @@ interface ComposerCopilotProps {
 	onSubmit: (brief: string) => void;
 }
 
-export default function ComposerCopilot({
-	value,
-	onValueChange,
-	onSubmit,
-}: ComposerCopilotProps) {
+/** The asset dialogs mount here so the composer's tiles and menu open their own. */
+export default function ComposerCopilot(props: ComposerCopilotProps) {
+	return (
+		<AssetEditProvider>
+			<Composer {...props} />
+		</AssetEditProvider>
+	);
+}
+
+function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const [intent, setIntent] = useState<ComposerIntent>("story");
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
@@ -192,13 +195,6 @@ export default function ComposerCopilot({
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
 	const { model, setModel, models } = useSloppy();
-	const {
-		openCreateCharacter,
-		editCharacter,
-		openNarrator,
-		openArtStyle,
-		dialogs,
-	} = useAssetEditDialogs();
 
 	const {
 		openPicker,
@@ -239,12 +235,7 @@ export default function ComposerCopilot({
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<ComposerAssets
-					uploadingCount={uploadingCount}
-					onEditCharacter={editCharacter}
-					onEditNarrator={openNarrator}
-					onEditArtStyle={openArtStyle}
-				/>
+				<ComposerAssets uploadingCount={uploadingCount} />
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
@@ -273,13 +264,7 @@ export default function ComposerCopilot({
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex items-center gap-2">
 						{inputElement}
-						<AttachMenu
-							openPicker={openPicker}
-							uploading={uploading}
-							onCreateCharacter={openCreateCharacter}
-							onSelectNarrator={openNarrator}
-							onSetArtStyle={openArtStyle}
-						/>
+						<AttachMenu openPicker={openPicker} uploading={uploading} />
 						<SettingPill
 							name="Aspect ratio"
 							icon={<Proportions className="mr-1 h-3 w-3" />}
@@ -337,7 +322,6 @@ export default function ComposerCopilot({
 					Drop images to add them as references
 				</div>
 			)}
-			{dialogs}
 		</div>
 	);
 }

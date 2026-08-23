@@ -1,36 +1,55 @@
 "use client";
 
-import { Image, Mic, Palette, User } from "@/components/ui/icon";
+import { Image, Mic, Palette, User, UserPlus } from "@/components/ui/icon";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import {
 	characterAvatarElementId,
 	characterAvatarUrl,
 } from "@/lib/project/characterAvatar";
 import { useProject } from "@/lib/project/useProject";
+import { AddAssetTile } from "./AddAssetTile";
 import { AssetTile } from "./AssetTile";
+import { useAssetEditors } from "./character/AssetEditProvider";
 
-export function NarratorAssetTile({ onEdit }: { onEdit: () => void }) {
+export function NarratorAssetTile() {
+	const { openNarrator } = useAssetEditors();
 	return (
-		<AssetTile name="Narrator" Icon={Mic} fallback="icon" onEdit={onEdit} />
+		<AssetTile
+			name="Narrator"
+			Icon={Mic}
+			fallback="icon"
+			onEdit={openNarrator}
+		/>
 	);
 }
 
-export function ArtStyleAssetTile({ onEdit }: { onEdit: () => void }) {
+export function ArtStyleAssetTile() {
+	const { openArtStyle } = useAssetEditors();
 	return (
 		<AssetTile
 			name="Art style"
 			Icon={Palette}
 			fallback="icon"
-			onEdit={onEdit}
+			onEdit={openArtStyle}
+		/>
+	);
+}
+
+export function AddCharacterTile() {
+	const { openCreateCharacter } = useAssetEditors();
+	return (
+		<AddAssetTile
+			label="Character"
+			ariaLabel="Add character"
+			Icon={UserPlus}
+			onClick={openCreateCharacter}
 		/>
 	);
 }
 
 export function CharacterAssetTiles({
-	onEdit,
 	onRemove,
 }: {
-	onEdit: (name: string) => void;
 	onRemove?: (name: string) => void;
 }) {
 	const characters = useProject((s) => s.metadata.characters);
@@ -38,7 +57,6 @@ export function CharacterAssetTiles({
 		<CharacterAssetTile
 			key={`character:${name}`}
 			name={name}
-			onEdit={() => onEdit(name)}
 			onRemove={onRemove && (() => onRemove(name))}
 		/>
 	));
@@ -46,13 +64,12 @@ export function CharacterAssetTiles({
 
 function CharacterAssetTile({
 	name,
-	onEdit,
 	onRemove,
 }: {
 	name: string;
-	onEdit: () => void;
 	onRemove?: () => void;
 }) {
+	const { editCharacter } = useAssetEditors();
 	const elementId = characterAvatarElementId(name);
 	const previewUrl = useQueueSelector((queue) =>
 		characterAvatarUrl(queue, name),
@@ -63,7 +80,7 @@ function CharacterAssetTile({
 			previewUrl={previewUrl}
 			Icon={User}
 			elementId={elementId}
-			onEdit={onEdit}
+			onEdit={() => editCharacter(name)}
 			onRemove={onRemove}
 			removeAffordance="corner"
 		/>
