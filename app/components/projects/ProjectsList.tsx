@@ -33,14 +33,16 @@ export default function ProjectsList({
 		});
 	};
 
-	const handleDelete = async (id: string) => {
-		const previous = projects;
-		setProjects((p) => p.filter((x) => x.id !== id));
+	// Rolling back the one card, not the whole list: a snapshot taken before the
+	// request would resurrect anything another delete removed while it was in flight.
+	const handleDelete = async (project: ProjectRow) => {
+		const index = projects.indexOf(project);
+		setProjects((p) => p.filter((x) => x.id !== project.id));
 		try {
-			await deleteProject(id);
+			await deleteProject(project.id);
 		} catch (err) {
 			toastError(err, "Could not delete project");
-			setProjects(previous);
+			setProjects((p) => p.toSpliced(index, 0, project));
 		}
 	};
 
@@ -90,7 +92,7 @@ export default function ProjectsList({
 				description="This permanently deletes the project and everything generated in it. It can't be undone."
 				actionLabel="Delete project"
 				onConfirm={() => {
-					if (deleting) handleDelete(deleting.id);
+					if (deleting) handleDelete(deleting);
 					setDeleting(undefined);
 				}}
 			/>

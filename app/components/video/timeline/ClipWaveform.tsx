@@ -21,25 +21,26 @@ type Decode =
 	| { status: "ready"; peaks: number[] }
 	| { status: "failed" };
 
+/** Keyed on the source it settled for, so a clip whose asset changed never keeps painting the old one. */
 function usePeaks(src: string): Decode {
-	const [decode, setDecode] = useState<Decode>({ status: "loading" });
+	const [settled, setSettled] = useState<{ src: string; decode: Decode }>();
 
 	useEffect(() => {
 		let cancelled = false;
 		loadPeaks(src)
 			.then((peaks) => {
-				if (!cancelled) setDecode({ status: "ready", peaks });
+				if (!cancelled) setSettled({ src, decode: { status: "ready", peaks } });
 			})
 			.catch((error) => {
 				console.error("Failed to decode audio:", error);
-				if (!cancelled) setDecode({ status: "failed" });
+				if (!cancelled) setSettled({ src, decode: { status: "failed" } });
 			});
 		return () => {
 			cancelled = true;
 		};
 	}, [src]);
 
-	return decode;
+	return settled?.src === src ? settled.decode : { status: "loading" };
 }
 
 /**
