@@ -3,6 +3,12 @@
 	z-index: 0;
 }
 
+/* Held on the canvas for the duration of a drag: the alternative is writing
+   `pointer-events` inline onto every card when one starts and again when it ends. */
+.sorting .sortable {
+	pointer-events: none;
+}
+
 /* Skips style recalc and paint for offscreen scenes during a drag. `auto`
    caches each scene's real height, so the scrollbar settles after first paint. */
 .scene {

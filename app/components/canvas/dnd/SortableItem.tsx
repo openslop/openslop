@@ -43,7 +43,6 @@ export function SortableItem({
 		transform,
 		transition,
 		isDragging,
-		isSorting,
 		attributes: sortableAttributes,
 	} = useSortable({
 		id: element.id,
@@ -52,6 +51,7 @@ export function SortableItem({
 	});
 
 	const { nodeAttributes } = splitTextDirection(attributes);
+	const displacement = CSS.Transform.toString(transform);
 
 	return (
 		<div {...nodeAttributes} className={wrapperClassName} style={wrapperStyle}>
@@ -64,9 +64,8 @@ export function SortableItem({
 				{...sortableAttributes}
 				ref={setNodeRef}
 				style={{
-					transition,
-					transform: CSS.Transform.toString(transform),
-					pointerEvents: isSorting ? "none" : undefined,
+					transform: displacement,
+					transition: displacement ? transition : undefined,
 					opacity: isDragging ? 0 : 1,
 				}}
 			>

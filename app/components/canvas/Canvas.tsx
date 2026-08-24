@@ -4,10 +4,7 @@ import { useCallback, useMemo, KeyboardEvent } from "react";
 import { Editor } from "slate";
 import { Editable, RenderElementProps } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
-import {
-	SortableContext,
-	verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SortableContext } from "@dnd-kit/sortable";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import { findElementById } from "@/lib/canvas/editorOps";
@@ -16,6 +13,8 @@ import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { AssetsSection } from "./elements/AssetsSection";
+import { displaceListedItems } from "./dnd/sortingStrategy";
+import styles from "./styles/sortable.module.css";
 
 export default function Canvas({ editor }: { editor: Editor }) {
 	const {
@@ -66,15 +65,12 @@ export default function Canvas({ editor }: { editor: Editor }) {
 				onDragCancel={handleDragCancel}
 			>
 				<AssetsSection />
-				<SortableContext
-					items={sceneItems}
-					strategy={verticalListSortingStrategy}
-				>
+				<SortableContext items={sceneItems} strategy={displaceListedItems}>
 					<Editable
 						placeholder="Start typing your story…"
 						renderElement={renderElement}
 						onKeyDown={handleKeyDown}
-						className="font-body text-body leading-relaxed focus-ring"
+						className={`font-body text-body leading-relaxed focus-ring${activeId ? ` ${styles.sorting}` : ""}`}
 					/>
 				</SortableContext>
 				<DragOverlay>
