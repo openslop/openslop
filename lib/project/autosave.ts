@@ -1,4 +1,5 @@
 import debounce from "lodash/debounce";
+import isEqual from "lodash/isEqual";
 import PQueue from "p-queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { saveProject, type SaveProjectInput } from "./api";
@@ -51,6 +52,11 @@ export interface Autosaver {
 /**
  * Debounces edits into one save at a time. The queue keeps a slow save from
  * overlapping the next one, so the last scheduled state always lands last.
+ *
+ * A save whose payload matches the last one is dropped. Hydration emits three
+ * store updates before the user touches anything, and the metadata sync writes
+ * identical content back on mount, so without this an untouched project saves
+ * itself on open and tells the user it was "Saved".
  */
 export function createAutosaver({
 	projectId,
@@ -62,18 +68,32 @@ export function createAutosaver({
 }: AutosaverOptions): Autosaver {
 	const queue = new PQueue({ concurrency: 1 });
 
+	const buildInput = (): SaveProjectInput =>
+		buildProjectSave(extractStoreSnapshot(store), getScript(), getGeneration());
+
+	/**
+	 * Payload of the last save known to be on the server. Seeded from the loaded
+	 * state so the hydration echo has something to match; ProjectEditor hydrates
+	 * the store before the editor renders, so that state is available here.
+	 *
+	 * Left null while the store is unhydrated: an unknown baseline must save
+	 * rather than skip, so the worst case is a redundant write, never a lost edit.
+	 */
+	let lastSaved: SaveProjectInput | null = store.getState().hydrated
+		? buildInput()
+		: null;
+
 	const save = async () => {
 		if (!store.getState().hydrated) {
 			console.error("Autosave aborted: store not hydrated", { projectId });
 			return;
 		}
 		try {
-			const input = buildProjectSave(
-				extractStoreSnapshot(store),
-				getScript(),
-				getGeneration(),
-			);
+			const input = buildInput();
+			// Nothing changed since the last save: skip the write and the toast.
+			if (lastSaved !== null && isEqual(input, lastSaved)) return;
 			await saveProject(projectId, input);
+			lastSaved = input;
 			onSaved();
 		} catch (err) {
 			console.error("Autosave failed", err);
