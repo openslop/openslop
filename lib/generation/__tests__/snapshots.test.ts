@@ -84,18 +84,11 @@ describe("SnapshotStore", () => {
 		expect(store.ids()).toEqual(["kept"]);
 	});
 
-	it("restores a result previously committed for the same inputs", () => {
+	it("reports each commit as the take it produced", () => {
 		const store = new SnapshotStore();
-		commit(store, "a", "a.png");
-		store.update("a", { result: null, resultInputs: null });
-
-		expect(store.restore("a", inputs("other"))).toBe(false);
-		expect(store.restore("a", inputs("a.png"))).toBe(true);
-		expect(store.get("a")).toMatchObject({
-			result: result("a.png"),
-			error: null,
-			resultInputs: inputs("a.png"),
-		});
+		expect(
+			store.commit("a", result("a.png"), inputs("a.png"), "image", false),
+		).toMatchObject({ elementId: "a", connectorType: "image", pinned: false });
 	});
 
 	it("counts active and generated elements separately", () => {

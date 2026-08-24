@@ -18,6 +18,7 @@ import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useProject } from "@/lib/project/useProject";
 import { useShallow } from "zustand/react/shallow";
+import { HeaderIconButton } from "./HeaderIconButton";
 import { CharacterPill } from "./CharacterPill";
 
 function useProjectCharacterNames(): string[] {
@@ -107,15 +108,9 @@ export function CharactersPicker({
 		<DropdownMenu modal={false}>
 			<SimpleTooltip label={label}>
 				<DropdownMenuTrigger asChild disabled={disabled}>
-					<button
-						type="button"
-						aria-label={label}
-						onMouseDown={(e) => e.preventDefault()}
-						disabled={disabled}
-						className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-					>
+					<HeaderIconButton ariaLabel={label} disabled={disabled}>
 						<UserPlus className="h-3.5 w-3.5" />
-					</button>
+					</HeaderIconButton>
 				</DropdownMenuTrigger>
 			</SimpleTooltip>
 			<ProjectCharactersMenu
@@ -134,7 +129,7 @@ export function CharacterSwitcher({
 }) {
 	const editor = useSlateStatic();
 	const names = useProjectCharacterNames();
-	const currentName = element.customAttributes?.name;
+	const currentName = element.generationAttributes?.name;
 
 	if (names.length === 0) return <CharacterPill name={currentName} />;
 
@@ -146,7 +141,7 @@ export function CharacterSwitcher({
 					aria-label="Change character"
 					title="Change character"
 					onMouseDown={(e) => e.preventDefault()}
-					className="inline-flex cursor-pointer items-center rounded-md"
+					className="inline-flex cursor-pointer items-center rounded-md focus-ring"
 				>
 					<CharacterPill name={currentName} />
 				</button>

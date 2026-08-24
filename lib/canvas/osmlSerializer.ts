@@ -2,6 +2,7 @@ import { Descendant } from "slate";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
 import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
 import { withoutCaretMarker } from "./constants";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 import { escapeXml } from "./xmlEscape";
 
 export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;
@@ -17,8 +18,10 @@ export function getElementBodyText(element: ParsedElement): string {
 }
 
 function serializeElement(element: CanvasContentElement): string {
-	const attributes = element.customAttributes ?? {};
-	const attrString = Object.entries({ id: element.id, ...attributes })
+	const attrString = Object.entries({
+		id: element.id,
+		...flatAttributes(element),
+	})
 		.map(([key, value]) => ` ${key}="${escapeXml(value)}"`)
 		.join("");
 	return `<${element.type}${attrString}>${escapeXml(getElementBodyText(element))}</${element.type}>\n`;

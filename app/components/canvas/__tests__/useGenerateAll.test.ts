@@ -6,6 +6,7 @@ import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 const registry: ConnectorRegistry = {
 	llm: {
@@ -88,7 +89,7 @@ function makeElement(
 	return {
 		id,
 		type,
-		customAttributes: { provider: "openslop", ...attrs },
+		...splitAttributes({ provider: "openslop", ...attrs }),
 		children: [{ id: `${id}-t`, type, text }],
 	};
 }

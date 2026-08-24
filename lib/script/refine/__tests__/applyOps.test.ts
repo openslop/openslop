@@ -29,6 +29,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { applyRefineOp, applyRefineOps } from "../applyOps";
+import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
 const connectors: ConnectorRegistry = {
 	llm: {
@@ -65,7 +66,7 @@ function content(
 	return {
 		id,
 		type,
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [
 			{ id: `${id}-m`, type, text: ZWSP },
 			{ id: `${id}-t`, type, text },
@@ -261,7 +262,7 @@ describe("applyRefineOp — insert", () => {
 		})) {
 			nodes.push(node as CanvasContentElement);
 		}
-		expect(nodes[0].customAttributes).toEqual({ loops: "3" });
+		expect(flatAttributes(nodes[0])).toEqual({ loops: "3" });
 	});
 });
 
@@ -320,7 +321,7 @@ describe("applyRefineOp — set", () => {
 		);
 
 		const el = getNode(editor, "n1");
-		expect(el.customAttributes).toEqual({
+		expect(flatAttributes(el)).toEqual({
 			name: "Lyra",
 			emotion: "excited",
 		});
@@ -344,7 +345,7 @@ describe("applyRefineOp — set", () => {
 		);
 
 		const el = getNode(editor, "n1");
-		expect(el.customAttributes).toEqual({ name: "Lyra" });
+		expect(flatAttributes(el)).toEqual({ name: "Lyra" });
 	});
 
 	it("applies attrs and text together", () => {
@@ -365,7 +366,7 @@ describe("applyRefineOp — set", () => {
 		);
 
 		const el = getNode(editor, "n1");
-		expect(el.customAttributes).toEqual({ name: "Alice", emotion: "happy" });
+		expect(flatAttributes(el)).toEqual({ name: "Alice", emotion: "happy" });
 		expect(el.children.map((c) => c.text).join("")).toBe(`${ZWSP}Hello!`);
 	});
 
@@ -417,7 +418,7 @@ describe("applyRefineOp — set", () => {
 
 		const el = getNode(editor, "n1");
 		expect(el.type).toBe("animated_image");
-		expect(el.customAttributes).toEqual({
+		expect(flatAttributes(el)).toEqual({
 			characters: "Red,Granny",
 			duration: "5",
 			videoPrompt: "slow push-in",

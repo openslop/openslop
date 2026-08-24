@@ -22,6 +22,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 
 import { insertElement } from "../insertElement";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const connectors: ConnectorRegistry = {
 	llm: {
@@ -91,7 +92,7 @@ describe("insertElement", () => {
 			children: Array<Record<string, unknown>>;
 		};
 		const inserted = scene.children[1];
-		const attrs = inserted.customAttributes as Record<string, string>;
+		const attrs = flatAttributes(inserted) as Record<string, string>;
 		expect(attrs.emotion).toBe("neutral");
 	});
 
@@ -105,7 +106,7 @@ describe("insertElement", () => {
 			children: Array<Record<string, unknown>>;
 		};
 		const inserted = scene.children[1];
-		const attrs = inserted.customAttributes as Record<string, string>;
+		const attrs = flatAttributes(inserted) as Record<string, string>;
 		expect(attrs.model).toBe("test-model");
 		expect(attrs.provider).toBe("openslop");
 	});
@@ -120,7 +121,7 @@ describe("insertElement", () => {
 			children: Array<Record<string, unknown>>;
 		};
 		const inserted = scene.children[1];
-		const attrs = inserted.customAttributes as Record<string, string>;
+		const attrs = flatAttributes(inserted) as Record<string, string>;
 		expect(attrs.model).toBe("test-model");
 		expect(attrs.provider).toBe("openslop");
 		expect(attrs.emotion).toBeUndefined();

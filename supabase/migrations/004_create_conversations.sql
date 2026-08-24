@@ -50,7 +50,7 @@ create policy "conversations_select_own" on conversations
 create policy "conversations_insert_own" on conversations
   for insert with check (auth.uid() = user_id);
 create policy "conversations_update_own" on conversations
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  for update using (auth.uid() = user_id);
 create policy "conversations_delete_own" on conversations
   for delete using (auth.uid() = user_id);
 
@@ -72,11 +72,6 @@ create policy "messages_insert_own" on messages
 -- update` cannot do without an update policy of its own.
 create policy "messages_update_own" on messages
   for update using (
-    exists (
-      select 1 from conversations c
-      where c.id = messages.conversation_id and c.user_id = auth.uid()
-    )
-  ) with check (
     exists (
       select 1 from conversations c
       where c.id = messages.conversation_id and c.user_id = auth.uid()

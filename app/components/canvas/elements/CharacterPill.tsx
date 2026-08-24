@@ -40,7 +40,7 @@ function CharacterAvatar({
 
 function CharacterName({ name }: { name: string }) {
 	return (
-		<span className="truncate text-label font-medium text-foreground">
+		<span className="truncate text-label-xs font-medium text-foreground">
 			{name}
 		</span>
 	);

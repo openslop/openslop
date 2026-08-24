@@ -21,6 +21,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 
 import { createCanvasNode } from "../createCanvasNode";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const ZWSP = "​";
 
@@ -29,21 +30,21 @@ const connectors = {} as ConnectorRegistry;
 describe("createCanvasNode", () => {
 	it("backfills defaultAttributes for sound (loops=1)", () => {
 		const node = createCanvasNode("sound", connectors);
-		expect(node.customAttributes?.loops).toBe("1");
+		expect(flatAttributes(node).loops).toBe("1");
 	});
 
 	it("caller-supplied attrs override defaults", () => {
 		const node = createCanvasNode("sound", connectors, {
 			attrs: { loops: "3" },
 		});
-		expect(node.customAttributes?.loops).toBe("3");
+		expect(flatAttributes(node).loops).toBe("3");
 	});
 
 	it("merges defaults under caller attrs (caller wins, defaults fill gaps)", () => {
 		const node = createCanvasNode("sound", connectors, {
 			attrs: { effect: "thunder" },
 		});
-		expect(node.customAttributes).toMatchObject({
+		expect(flatAttributes(node)).toMatchObject({
 			loops: "1",
 			effect: "thunder",
 		});
@@ -51,8 +52,8 @@ describe("createCanvasNode", () => {
 
 	it("hydrates connector model and provider", () => {
 		const node = createCanvasNode("narration", connectors);
-		expect(node.customAttributes?.model).toBe("test-model");
-		expect(node.customAttributes?.provider).toBe("openslop");
+		expect(flatAttributes(node).model).toBe("test-model");
+		expect(flatAttributes(node).provider).toBe("openslop");
 	});
 
 	it("preserves provided id", () => {
@@ -93,6 +94,6 @@ describe("createCanvasNode — no default model configured", () => {
 		const { createCanvasNode: createCanvasNodeNoModel } =
 			await import("../createCanvasNode");
 		const node = createCanvasNodeNoModel("sound", connectors);
-		expect(node.customAttributes).toEqual({ loops: "1" });
+		expect(flatAttributes(node)).toEqual({ loops: "1" });
 	});
 });

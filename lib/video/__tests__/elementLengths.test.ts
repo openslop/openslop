@@ -3,6 +3,7 @@ import type { Descendant } from "slate";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import { measureElementLengths } from "../elementLengths";
 import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "../scene-builder";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 let nextId = 0;
 const element = (
@@ -14,7 +15,7 @@ const element = (
 	return {
 		id,
 		type,
-		customAttributes,
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: `${id}-t`, type, text }],
 	};
 };

@@ -6,17 +6,40 @@ import {
 	getLoops,
 	getMotion,
 	getVolume,
+	flatAttributes,
 	layoutAttributeSignature,
+	splitAttributes,
 } from "../elementAttributes";
 
 function el(customAttributes?: Record<string, string>): CanvasContentElement {
 	return {
 		id: "e1",
 		type: "music",
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: "e1-t", type: "music", text: "" }],
 	};
 }
+
+describe("splitAttributes", () => {
+	it("sorts layout keys out of what the generator sees", () => {
+		expect(
+			splitAttributes({
+				style: "ink",
+				volume: "5",
+				motion: "pan",
+				loops: "2",
+			}),
+		).toEqual({
+			generationAttributes: { style: "ink" },
+			layoutAttributes: { volume: "5", motion: "pan", loops: "2" },
+		});
+	});
+
+	it("round-trips through flatAttributes", () => {
+		const attributes = { style: "ink", volume: "5" };
+		expect(flatAttributes(splitAttributes(attributes))).toEqual(attributes);
+	});
+});
 
 describe("getVolume", () => {
 	it("defaults to 10 when missing or non-numeric", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
@@ -21,13 +21,18 @@ import { isNodeStale } from "@/lib/generation/graph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
-import { characterAvatarElementId } from "@/lib/project/characterAvatar";
+import {
+	characterAvatarElementId,
+	characterFromAvatarInputs,
+} from "@/lib/project/characterAvatar";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
+import type { ElementVersion } from "@/lib/generation/versions";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaResult } from "../preview/results";
+import { VersionHistoryPopover } from "../VersionHistoryPopover";
 import { TextAreaField } from "./fields";
 import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
 import { VoiceSection } from "./VoiceMetadataFields";
@@ -79,6 +84,11 @@ function CharacterEditDialogBody({
 		() => buildNode(forCharacterAvatar(name)),
 		[buildNode, name],
 	);
+	const restoreAppearance = useCallback(
+		(version: ElementVersion) =>
+			updateCharacter(name, characterFromAvatarInputs(version)),
+		[updateCharacter, name],
+	);
 
 	if (!character) return null;
 
@@ -95,7 +105,6 @@ function CharacterEditDialogBody({
 	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
 	const generateDisabled = generating || !hasAppearance;
-	const revertAppearance = avatarSnapshot.resultInputs?.attributes.appearance;
 
 	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
 
@@ -145,18 +154,10 @@ function CharacterEditDialogBody({
 							placeholder="Describe the character's look"
 						/>
 						<div className="flex items-center justify-end gap-2">
-							{isStale && revertAppearance != null && (
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={() =>
-										update({ appearance: String(revertAppearance) })
-									}
-								>
-									Revert
-								</Button>
-							)}
+							<VersionHistoryPopover
+								elementId={avatarElementId}
+								onRestore={restoreAppearance}
+							/>
 							{isStale && <StaleIndicator />}
 							<GenerateButton
 								status={avatarSnapshot.status}

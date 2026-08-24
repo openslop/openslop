@@ -1,5 +1,7 @@
+import mapValues from "lodash/mapValues";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
+import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { isContentElement } from "./guards";
 import { makeNodeId } from "./nodeUtils";
@@ -38,7 +40,6 @@ export function clearEditor(editor: Editor): void {
 	});
 }
 
-/** Inserts a copy of the node at `at`, with fresh ids, right after it. Returns the copy's id. */
 export function duplicateNode(
 	editor: Editor,
 	element: CanvasContentElement,
@@ -57,10 +58,6 @@ export function duplicateNode(
 }
 
 /**
- * Diff-based text update: compares current text to newText and applies minimal
- * Transforms. If newText is a prefix extension, appends the diff. Otherwise,
- * replaces the full text range.
- *
  * Takes body text: the deletion-guard marker is owned here, not by callers. The
  * full-range replace below spans the marker leaf, so writing raw text would drop
  * the guard and leave a cleared element looking non-empty.
@@ -86,8 +83,23 @@ export function updateNodeText(
 }
 
 /**
- * Merge attrs into element's customAttributes. Keys with null values are
- * deleted from the result.
+ * Replaces what the generator sees, leaving the element's layout alone.
+ */
+export function setGenerationAttrs(
+	editor: Editor,
+	path: Path,
+	attributes: Record<string, string | number>,
+): void {
+	Transforms.setNodes(
+		editor,
+		{ generationAttributes: mapValues(attributes, String) },
+		{ at: path },
+	);
+}
+
+/**
+ * Merge attrs into the element's attributes, each landing in its own bucket.
+ * Keys with null values are deleted from the result.
  */
 export function setNodeAttrs(
 	editor: Editor,
@@ -95,7 +107,7 @@ export function setNodeAttrs(
 	element: CanvasContentElement,
 	attrs: Record<string, string | null>,
 ): void {
-	const merged = { ...element.customAttributes };
+	const merged = flatAttributes(element);
 	for (const [key, value] of Object.entries(attrs)) {
 		if (value === null) {
 			delete merged[key];
@@ -103,5 +115,5 @@ export function setNodeAttrs(
 			merged[key] = value;
 		}
 	}
-	Transforms.setNodes(editor, { customAttributes: merged }, { at: path });
+	Transforms.setNodes(editor, splitAttributes(merged), { at: path });
 }

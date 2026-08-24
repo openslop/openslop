@@ -43,7 +43,7 @@ function BottomTransportBarComponent() {
 	};
 
 	return (
-		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2 text-body text-foreground">
+		<div className="@container relative z-20 flex w-full shrink-0 flex-col gap-1.5 px-4 py-2 text-body text-foreground">
 			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
 				<SegmentedSeekBar />
 			</div>

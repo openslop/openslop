@@ -5,6 +5,7 @@ import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "./AttributeBadge";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 export function ModelBadge({ element }: { element: CanvasContentElement }) {
 	const { connectorConfig } = useConfig();
@@ -30,7 +31,7 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 		reconcileAttributes(
 			resolveAttributeSchema(type, provider, model),
 			resolveAttributeSchema(type, provider, next),
-			element.customAttributes ?? {},
+			flatAttributes(element),
 		);
 
 	return (
@@ -38,6 +39,7 @@ export function ModelBadge({ element }: { element: CanvasContentElement }) {
 			element={element}
 			attrKey="model"
 			spec={spec}
+			className="text-label-xs"
 			deriveExtraAttrs={reconcileForModel}
 		/>
 	);

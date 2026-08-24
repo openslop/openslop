@@ -10,9 +10,10 @@ import { isForeground } from "@/lib/canvas/guards";
 import { useDropIndex } from "../dnd/DragTransferContext";
 import { useViewMode } from "../ViewModeContext";
 import { CollapsibleHeader } from "./CollapsibleHeader";
-import { DeleteButton } from "./DeleteButton";
+
 import { ForegroundPreview } from "./ForegroundPreview";
 import { PlayFromHereButton } from "./PlayFromHereButton";
+import { SceneDeleteButton } from "./SceneDeleteButton";
 import { SceneTimestamp } from "./SceneTimestamp";
 
 const COLLAPSED_MAX_VISIBLE = 3;
@@ -72,7 +73,7 @@ function SceneHeader({
 			rightSlot={
 				<div className="flex items-center gap-1">
 					<PlayFromHereButton scene={element} />
-					<DeleteButton element={element} />
+					<SceneDeleteButton scene={element} />
 				</div>
 			}
 		/>

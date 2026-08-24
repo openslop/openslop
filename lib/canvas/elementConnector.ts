@@ -25,7 +25,7 @@ export function resolveElementConnector(
 	registry: ConnectorRegistry,
 ): ElementConnector {
 	const type = ELEMENT_TYPES[element.type].connector;
-	const { provider, model } = element.customAttributes ?? {};
+	const { provider, model } = element.generationAttributes ?? {};
 	if (!provider)
 		throw new Error(`Element "${element.id}" was created without a provider`);
 	const config = registry[type][provider as ProviderKey];

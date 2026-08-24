@@ -6,6 +6,7 @@ import {
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { getDefaultConnector } from "@/lib/connectors/registry";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";
 
@@ -30,18 +31,18 @@ export function createCanvasNode(
 		provider,
 		connectorConfig?.defaultModel,
 	);
-	const customAttributes: Record<string, string> = {
+	const attributes: Record<string, string> = {
 		...schema.defaultAttributes,
 		...opts.attrs,
 	};
 	if (connectorConfig?.defaultModel) {
-		customAttributes.model = connectorConfig.defaultModel;
-		customAttributes.provider = provider;
+		attributes.model = connectorConfig.defaultModel;
+		attributes.provider = provider;
 	}
 	return {
 		id: opts.id ?? makeNodeId(),
 		type,
-		customAttributes,
+		...splitAttributes(attributes),
 		children: [
 			{ id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
 			{ id: makeNodeId(), type, text: (opts.text ?? "").trim() },

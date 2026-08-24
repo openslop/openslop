@@ -2,7 +2,9 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { DEFAULT_PROVIDER } from "@/lib/connectors/types";
 import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
+import type { ElementVersion } from "@/lib/generation/versions";
 import type { ProjectData } from "@/lib/project/store";
+import type { MetadataCharacter } from "@/lib/project/types";
 
 export const characterAvatarElementId = (name: string) =>
 	derivedNodeId("avatar", name);
@@ -29,6 +31,16 @@ export function characterAvatarState(
 	return uploaded ? "uploaded" : "generated";
 }
 
+/** The inverse of {@link characterAvatarElement}: what a past take says the character was. */
+export function characterFromAvatarInputs(
+	version: ElementVersion,
+): Partial<MetadataCharacter> {
+	return {
+		appearance: String(version.inputs.attributes.appearance ?? ""),
+		avatarUploaded: version.pinned,
+	};
+}
+
 /** Appearance rides in the attributes so editing it makes the avatar stale. */
 export function characterAvatarElement(
 	state: ProjectData,
@@ -39,7 +51,7 @@ export function characterAvatarElement(
 	return {
 		id,
 		type: "image",
-		customAttributes: {
+		generationAttributes: {
 			kind: "avatar",
 			appearance,
 			provider: DEFAULT_PROVIDER,

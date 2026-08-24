@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Image as ImageIcon, Video } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
@@ -12,6 +12,7 @@ import type {
 	ElementPreviewProps,
 	GenerationState,
 	PlaceholderProps,
+	PreviewOverlays,
 } from "./status";
 
 type ModeState = GenerationState & {
@@ -19,18 +20,32 @@ type ModeState = GenerationState & {
 	url: string | undefined;
 };
 
-type AnimatedImageMediaProps = Pick<PlaceholderProps, "onDiscard"> & {
-	animated: ModeState;
-	still: ModeState;
-};
+type AnimatedImageMediaProps = Pick<PlaceholderProps, "onDiscard"> &
+	PreviewOverlays & {
+		animated: ModeState;
+		still: ModeState;
+	};
 
 export function AnimatedImageMedia({
 	animated,
 	still,
 	onDiscard,
+	topRight,
 }: AnimatedImageMediaProps) {
 	const [mode, setMode] = useState<"animated" | "still">("animated");
 	const { url, ...state } = mode === "animated" ? animated : still;
+
+	const toggle: ReactNode = (
+		<MediaToggle
+			className="shadow-sm"
+			value={mode}
+			onChange={setMode}
+			options={[
+				{ value: "animated", label: "Video", icon: Video },
+				{ value: "still", label: "Still", icon: ImageIcon },
+			]}
+		/>
+	);
 
 	return (
 		<div
@@ -42,15 +57,12 @@ export function AnimatedImageMedia({
 				onDiscard={onDiscard}
 				url={url}
 				outputKind={mode === "animated" ? "video" : "image"}
-			/>
-			<MediaToggle
-				className="absolute top-2 right-2 z-30 shadow-sm"
-				value={mode}
-				onChange={setMode}
-				options={[
-					{ value: "animated", label: "Video", icon: Video },
-					{ value: "still", label: "Still", icon: ImageIcon },
-				]}
+				topRight={
+					<>
+						{topRight}
+						{toggle}
+					</>
+				}
 			/>
 		</div>
 	);
@@ -62,6 +74,7 @@ export function AnimatedImagePreview({
 	error,
 	result,
 	onDiscard,
+	topRight,
 }: ElementPreviewProps) {
 	const { node } = useElementGeneration();
 	const still = useQueueSelector((queue) => stillSnapshot(node, queue));
@@ -69,6 +82,7 @@ export function AnimatedImagePreview({
 	return (
 		<AnimatedImageMedia
 			onDiscard={onDiscard}
+			topRight={topRight}
 			animated={{ status, seconds, error, url: result?.videoUrl }}
 			still={{
 				status: still.status,

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatedImageMedia } from "../AnimatedImagePreview";
+import { PreviewChrome } from "../overlays";
 import { AudioPlaceholder, MediaResult } from "../results";
 
 const withTooltip = (node: React.ReactNode) =>
@@ -64,11 +65,14 @@ describe("cancel button offset", () => {
 	});
 });
 
-const mediaToggleClass = (html: string) => {
-	const match = html.match(/class="([^"]*bg-media-toggle-bg[^"]*)"/);
-	if (!match) throw new Error("media toggle not found in rendered markup");
-	return match[1];
-};
+describe("PreviewChrome", () => {
+	it("stacks its corner above the error overlay so it stays clickable", () => {
+		// The error overlay renders at z-20; chrome must sit above it.
+		const html = withTooltip(<PreviewChrome topRight={<span>badge</span>} />);
+		expect(html).toContain("z-30");
+		expect(html).toContain("badge");
+	});
+});
 
 describe("AnimatedImageMedia", () => {
 	const failed = {
@@ -78,7 +82,7 @@ describe("AnimatedImageMedia", () => {
 		url: undefined,
 	} as const;
 
-	it("stacks the still/video toggle above the error overlay so it stays clickable", () => {
+	it("keeps the still/video toggle reachable over a failed generation", () => {
 		const html = withTooltip(
 			<AnimatedImageMedia
 				onDiscard={() => {}}
@@ -86,8 +90,7 @@ describe("AnimatedImageMedia", () => {
 				still={failed}
 			/>,
 		);
-		// Error overlay renders at z-20; the toggle must sit above it.
 		expect(html).toContain("z-20");
-		expect(mediaToggleClass(html)).toContain("z-30");
+		expect(html).toContain("bg-media-toggle-bg");
 	});
 });

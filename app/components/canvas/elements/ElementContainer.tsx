@@ -12,6 +12,8 @@ import { DuplicateButton } from "./DuplicateButton";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
+import { ElementHistoryButton } from "./ElementHistoryButton";
+import { HeaderIconButton } from "./HeaderIconButton";
 import { ElementGenerationProvider } from "./ElementGenerationContext";
 import { AnimateButton } from "./AnimateButton";
 import { ElementUploadButton } from "./ElementUploadButton";
@@ -33,14 +35,9 @@ function ElementSettings({ element }: { element: CanvasContentElement }) {
 		<Popover>
 			<SimpleTooltip label="Settings">
 				<PopoverTrigger asChild>
-					<button
-						type="button"
-						aria-label="Settings"
-						onMouseDown={(e) => e.preventDefault()}
-						className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
-					>
+					<HeaderIconButton ariaLabel="Settings">
 						<SlidersHorizontal size={14} />
-					</button>
+					</HeaderIconButton>
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
@@ -103,8 +100,9 @@ export function ElementContainer({
 								<ElementCharacters element={element} />
 								<ModelBadge element={element} />
 								<ElementSettings element={element} />
+								<ElementHistoryButton element={element} />
 							</div>
-							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto">
+							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto">
 								<DuplicateButton element={element} />
 								<DeleteButton element={element} />
 							</div>

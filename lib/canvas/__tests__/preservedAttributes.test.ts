@@ -6,7 +6,12 @@ function element(
 	type: CanvasContentElement["type"],
 	customAttributes?: Record<string, string>,
 ): CanvasContentElement {
-	return { id: "n1", type, customAttributes, children: [] };
+	return {
+		id: "n1",
+		type,
+		generationAttributes: customAttributes,
+		children: [],
+	};
 }
 
 describe("preservedAttributes", () => {

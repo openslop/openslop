@@ -129,7 +129,11 @@ function replaceNodeType(
 	});
 	Transforms.setNodes(
 		editor,
-		{ type, customAttributes: replacement.customAttributes },
+		{
+			type,
+			generationAttributes: replacement.generationAttributes,
+			layoutAttributes: replacement.layoutAttributes,
+		},
 		{ at: path },
 	);
 	return findNodeById(editor, id);

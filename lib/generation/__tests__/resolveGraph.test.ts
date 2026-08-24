@@ -11,7 +11,10 @@ import {
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
+import {
+	LAYOUT_ATTRIBUTE_KEYS,
+	splitAttributes,
+} from "@/lib/video/elementAttributes";
 import {
 	flattenGraph,
 	forElement,
@@ -40,7 +43,7 @@ const element = (
 ): CanvasContentElement => ({
 	id,
 	type,
-	customAttributes: { provider: "openslop", ...customAttributes },
+	...splitAttributes({ provider: "openslop", ...customAttributes }),
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 

@@ -1,18 +1,22 @@
 import { useSlateStatic } from "slate-react";
-import { DeleteButton as DeleteIconButton } from "@/components/ui/delete-button";
+import { Trash2 } from "@/components/ui/icon";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { removeElement } from "@/app/components/canvas/utils/nodeOps";
-import type { CanvasElement } from "@/lib/canvas/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
+import { HeaderIconButton } from "./HeaderIconButton";
 
-export function DeleteButton({ element }: { element: CanvasElement }) {
+export function DeleteButton({ element }: { element: CanvasContentElement }) {
 	const editor = useSlateStatic();
 
 	return (
-		<DeleteIconButton
-			ariaLabel="Delete element"
-			onMouseDown={(e) => {
-				e.preventDefault();
-				removeElement(editor, element);
-			}}
-		/>
+		<SimpleTooltip label="Delete">
+			<HeaderIconButton
+				ariaLabel="Delete element"
+				className="text-destructive hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20"
+				onClick={() => removeElement(editor, element)}
+			>
+				<Trash2 size={14} />
+			</HeaderIconButton>
+		</SimpleTooltip>
 	);
 }

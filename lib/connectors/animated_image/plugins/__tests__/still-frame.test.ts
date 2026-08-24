@@ -19,6 +19,7 @@ import {
 	stillElementId,
 	stillSnapshot,
 } from "../still-frame";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 const ELEMENT_ID = "anim-1";
 const STILL_URL = "https://example.com/still.png";
@@ -88,7 +89,7 @@ describe("stillSnapshot", () => {
 	const animated = {
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		customAttributes: { provider: "openslop", videoPrompt: "slow pan" },
+		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
 		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
 	};
 
@@ -151,7 +152,7 @@ describe("duplicated animation", () => {
 	const animated = (id: string) => ({
 		id,
 		type: "animated_image" as const,
-		customAttributes: { provider: "openslop", videoPrompt: "slow pan" },
+		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
 		children: [
 			{ id: `${id}-t`, type: "animated_image" as const, text: "a forest" },
 		],
@@ -198,7 +199,7 @@ describe("uploaded still lifetime", () => {
 	const animated = (text: string, videoPrompt: string) => ({
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		customAttributes: { provider: "openslop", videoPrompt },
+		...splitAttributes({ provider: "openslop", videoPrompt }),
 		children: [{ id: "t", type: "animated_image" as const, text }],
 	});
 

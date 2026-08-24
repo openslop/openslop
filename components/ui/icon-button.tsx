@@ -3,7 +3,7 @@ import * as React from "react";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const SIZES = { sm: "h-5 w-5", default: "h-7 w-7" } as const;
+const SIZES = { sm: "h-5 w-5", header: "h-6 w-6", default: "h-7 w-7" } as const;
 
 export function IconButton({
 	ariaLabel,

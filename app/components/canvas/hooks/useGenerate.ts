@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from "react";
+import { useElementHistoryStore } from "@/lib/generation/ElementHistoryProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -9,6 +10,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 
 export function useGenerate(element: CanvasContentElement) {
 	const queue = useGenerationQueue();
+	const history = useElementHistoryStore();
 	const buildNode = useNodeBuilder();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
 	const node = useMemo(
@@ -19,8 +21,10 @@ export function useGenerate(element: CanvasContentElement) {
 
 	useEffect(() => {
 		if (!stale) return;
-		queue.restoreResult(element.id, nodeInputs(node, queue));
-	}, [queue, element.id, node, stale]);
+		const inputs = nodeInputs(node, queue);
+		const take = history.matching(element.id, inputs);
+		if (take) queue.restoreResult(element.id, inputs, take.result);
+	}, [queue, history, element.id, node, stale]);
 
 	const generate = useCallback(() => {
 		if (!node.inputs.prompt) {
@@ -40,6 +44,7 @@ export function useGenerate(element: CanvasContentElement) {
 		seconds: snapshot.seconds,
 		result: snapshot.result,
 		error: snapshot.error,
+		pinned: snapshot.pinned,
 		stale,
 		hasPrompt: Boolean(node.inputs.prompt),
 		hasResult: Boolean(snapshot.result),

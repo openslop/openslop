@@ -15,6 +15,7 @@ import {
 	type CanvasContentElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 function el(
 	type: CanvasContentElement["type"],
@@ -24,7 +25,7 @@ function el(
 	return {
 		id: "e1",
 		type,
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: "t1", type, text }],
 	};
 }
@@ -80,7 +81,7 @@ function elWithId(
 	return {
 		id,
 		type,
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: `${id}-t`, type, text }],
 	};
 }

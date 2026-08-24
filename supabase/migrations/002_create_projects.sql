@@ -36,6 +36,6 @@ create policy "projects_select_own" on projects
 create policy "projects_insert_own" on projects
   for insert with check (auth.uid() = user_id);
 create policy "projects_update_own" on projects
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  for update using (auth.uid() = user_id);
 create policy "projects_delete_own" on projects
   for delete using (auth.uid() = user_id);

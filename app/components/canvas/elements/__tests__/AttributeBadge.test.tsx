@@ -5,6 +5,7 @@ import { Editable, Slate, withReact } from "slate-react";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "../AttributeBadge";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 const elementWith = (
 	customAttributes: Record<string, string>,
@@ -12,7 +13,7 @@ const elementWith = (
 	({
 		id: "el",
 		type: "animated_image",
-		customAttributes,
+		...splitAttributes(customAttributes),
 		children: [{ id: "text", type: "animated_image", text: "" }],
 	}) as unknown as CanvasContentElement;
 
