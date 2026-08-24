@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { usePointerDrag } from "@/lib/components/usePointerDrag";
 import { clamp, cn } from "@/lib/utils";
 
 /** A slice of a segmented track; `basis` is its fraction (0–1) of the whole. */
@@ -97,42 +98,33 @@ export function ScrubBar({
 	children,
 }: ScrubBarProps) {
 	const trackRef = useRef<HTMLDivElement>(null);
-	const draggingRef = useRef(false);
 	const [hoverRatio, setHoverRatio] = useState<number | null>(null);
 	const continuous = !segments;
 	const segs = segments ?? SINGLE;
 
-	const hoverFrom = (e: PointerEvent<HTMLDivElement>): ScrubHover | null => {
+	const hoverFrom = (e: PointerEvent<HTMLElement>): ScrubHover | null => {
 		const rect = trackRef.current?.getBoundingClientRect();
 		if (!rect) return null;
 		const x = e.clientX - rect.left;
 		return { x, width: rect.width, ratio: clamp(x / rect.width, 0, 1) };
 	};
 
-	const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-		if (e.button !== 0) return;
-		const p = hoverFrom(e);
-		if (!p) return;
-		e.currentTarget.setPointerCapture(e.pointerId);
-		draggingRef.current = true;
-		onScrubStart?.();
-		onScrub(p.ratio);
-	};
+	const drag = usePointerDrag({
+		onStart: onScrubStart,
+		onMove: (e) => {
+			const p = hoverFrom(e);
+			if (p) onScrub(p.ratio);
+		},
+		onEnd: onScrubEnd,
+	});
 
 	const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
 		const p = hoverFrom(e);
-		if (!p) return;
-		setHoverRatio(p.ratio);
-		onHoverChange?.(p);
-		if (e.currentTarget.hasPointerCapture(e.pointerId)) onScrub(p.ratio);
-	};
-
-	const endDrag = (e: PointerEvent<HTMLDivElement>) => {
-		if (e.currentTarget.hasPointerCapture(e.pointerId))
-			e.currentTarget.releasePointerCapture(e.pointerId);
-		if (!draggingRef.current) return;
-		draggingRef.current = false;
-		onScrubEnd?.();
+		if (p) {
+			setHoverRatio(p.ratio);
+			onHoverChange?.(p);
+		}
+		drag.onPointerMove(e);
 	};
 
 	const onPointerLeave = () => {
@@ -187,10 +179,8 @@ export function ScrubBar({
 					"--scrub-preview": hoverRatio ?? 0,
 				} as CSSProperties
 			}
-			onPointerDown={onPointerDown}
+			{...drag}
 			onPointerMove={onPointerMove}
-			onPointerUp={endDrag}
-			onPointerCancel={endDrag}
 			onPointerLeave={onPointerLeave}
 		>
 			{track}

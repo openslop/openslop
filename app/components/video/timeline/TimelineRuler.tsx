@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, type CSSProperties, type PointerEvent } from "react";
+import { useMemo, type CSSProperties } from "react";
+import { usePointerDrag } from "@/lib/components/usePointerDrag";
 import { formatTime } from "@/lib/video/timestamps";
 import { cn } from "@/lib/utils";
 import { buildTicks, subdivision, tickInterval } from "./timelineTicks";
@@ -42,34 +43,21 @@ export function TimelineRuler({
 		};
 	}, [totalDurationSec, pxPerSec]);
 
-	const scrubFrom = (event: PointerEvent<HTMLDivElement>) => {
-		const rect = event.currentTarget.getBoundingClientRect();
-		onScrub((event.clientX - rect.left) / pxPerSec);
-	};
-
-	const endScrub = (event: PointerEvent<HTMLDivElement>) => {
-		if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
-		event.currentTarget.releasePointerCapture(event.pointerId);
-		onScrubEnd();
-	};
+	const drag = usePointerDrag({
+		onStart: onScrubStart,
+		onMove: (event) => {
+			const rect = event.currentTarget.getBoundingClientRect();
+			onScrub((event.clientX - rect.left) / pxPerSec);
+		},
+		onEnd: onScrubEnd,
+	});
 
 	return (
 		<div
 			role="presentation"
 			className={`relative shrink-0 cursor-pointer select-none text-border ${RULER_HEIGHT}`}
 			style={{ touchAction: "none", ...dots(spacing) }}
-			onPointerDown={(event) => {
-				if (event.button !== 0) return;
-				event.currentTarget.setPointerCapture(event.pointerId);
-				onScrubStart();
-				scrubFrom(event);
-			}}
-			onPointerMove={(event) => {
-				if (event.currentTarget.hasPointerCapture(event.pointerId))
-					scrubFrom(event);
-			}}
-			onPointerUp={endScrub}
-			onPointerCancel={endScrub}
+			{...drag}
 		>
 			{ticks.map((seconds, index) => (
 				<span
