@@ -34,7 +34,7 @@ export async function createJob(input: {
 	connectorType: ConnectorType;
 	request: Record<string, unknown>;
 }): Promise<{ id: string }> {
-	const supabase = await createClient();
+	const supabase = createServiceClient();
 	const { data, error } = await supabase
 		.from("jobs")
 		.insert({
