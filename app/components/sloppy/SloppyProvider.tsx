@@ -16,15 +16,12 @@ import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
 import { useAgentContext } from "@/lib/agent/projectContext";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/connectors/registry";
 import { toastError } from "@/lib/toastError";
+import { useSloppyModel } from "./SloppyModelProvider";
 
 type SloppyControl = {
 	send: (message: string) => void;
 	stop: () => void;
-	model: string;
-	setModel: (model: string) => void;
-	models: string[];
 	loading: boolean;
 	writingScript: boolean;
 };
@@ -75,12 +72,11 @@ export function SloppyProvider({
 	editor: Editor;
 	children: ReactNode;
 }) {
-	const { projectId, connectorConfig } = useConfig();
+	const { projectId } = useConfig();
 	const runTool = useAgentTools(editor);
 	const readContext = useAgentContext(editor);
 	const restored = useTranscript(projectId);
-	const { config } = getDefaultConnector(connectorConfig, "llm");
-	const [model, setModel] = useState(config.defaultModel);
+	const { model } = useSloppyModel();
 	const turnModel = useRef<string>(undefined);
 	// Stopping should also cancel the tool call in flight
 	const turn = useRef<AbortController>(undefined);
@@ -138,11 +134,8 @@ export function SloppyProvider({
 			},
 			loading: working,
 			writingScript,
-			model,
-			setModel,
-			models: config.models,
 		}),
-		[sendMessage, stop, working, writingScript, model, config.models],
+		[sendMessage, stop, working, writingScript, model],
 	);
 
 	// History sits in front of the chat's own turns rather than being written

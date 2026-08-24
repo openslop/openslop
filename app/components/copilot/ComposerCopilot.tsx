@@ -47,7 +47,7 @@ import {
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
-import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
+import { useSloppyModel } from "@/app/components/sloppy/SloppyModelProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 import { SettingPill, type SettingPillOption } from "./SettingPill";
@@ -194,7 +194,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
-	const { model, setModel, models } = useSloppy();
+	const { model, setModel, models } = useSloppyModel();
 
 	const {
 		openPicker,

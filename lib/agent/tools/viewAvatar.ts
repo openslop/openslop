@@ -31,4 +31,5 @@ export const viewAvatar = defineTool({
 			);
 		return { name, url };
 	},
+	snapshot: true,
 });

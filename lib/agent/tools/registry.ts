@@ -66,19 +66,20 @@ export type AgentToolOutput = {
 	[TName in AgentToolName]: ToolOutput<TName>;
 }[AgentToolName];
 
+type ToolFlag = "snapshot" | "rewritesCanvas";
+
+const namesFlagged = (flag: ToolFlag): ReadonlySet<string> =>
+	new Set(
+		Object.entries(TOOLS)
+			.filter(([, def]) => def[flag])
+			.map(([name]) => name),
+	);
+
 /** Output that is only true until the next edit, so only its own turn keeps it. */
-export const SNAPSHOT_TOOLS = new Set<string>([
-	"read_script" satisfies AgentToolName,
-	"view_reference_images" satisfies AgentToolName,
-	"view_avatar" satisfies AgentToolName,
-]);
+export const SNAPSHOT_TOOLS = namesFlagged("snapshot");
 
 /** Calls that rewrite the canvas, so what is rendered from it is mid-change. */
-export const SCRIPT_TOOLS = new Set<string>([
-	"write_script" satisfies AgentToolName,
-	"adapt_script" satisfies AgentToolName,
-	"edit_script" satisfies AgentToolName,
-]);
+export const SCRIPT_TOOLS = namesFlagged("rewritesCanvas");
 
 /** A failure is reported, not thrown: the model reads it as the next observation. */
 export type ToolOutcome =

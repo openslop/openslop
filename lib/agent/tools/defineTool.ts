@@ -14,8 +14,12 @@ export function defineTool<Input, Output>(def: {
 	output: z.ZodType<Output>;
 	toModelOutput?: Tool<Input, Output>["toModelOutput"];
 	execute: (input: Input, ctx: AgentToolContext) => Promise<Output>;
+	/** Output that is only true until the next edit, so only its own turn keeps it. */
+	snapshot?: true;
+	/** The call rewrites the canvas, so what is rendered from it is mid-change. */
+	rewritesCanvas?: true;
 }) {
-	const { input, output, execute, ...rest } = def;
+	const { input, output, execute, snapshot, rewritesCanvas, ...rest } = def;
 	// Tool's shape is conditional on OUTPUT, which never resolves against a
 	// generic; the def parameter above already checks every field against it.
 	const spec = {
@@ -23,7 +27,7 @@ export function defineTool<Input, Output>(def: {
 		inputSchema: input,
 		outputSchema: output,
 	} as unknown as Tool<Input, Output>;
-	return { input, execute, spec };
+	return { input, execute, spec, snapshot, rewritesCanvas };
 }
 
 /** A tool-result image, handed to the model by URL for the provider to fetch. */

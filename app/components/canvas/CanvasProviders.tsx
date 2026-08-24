@@ -11,6 +11,7 @@ import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
 import { ActiveCaptionFont } from "./CaptionFonts";
+import { SloppyModelProvider } from "../sloppy/SloppyModelProvider";
 import { SloppyProvider } from "../sloppy/SloppyProvider";
 import { EditorPanelProvider } from "./panel/EditorPanelContext";
 
@@ -45,9 +46,11 @@ export function CanvasProviders({
 						<ActiveSceneProvider>
 							<AutoScrollProvider>
 								<ViewModeProvider editor={editor}>
-									<SloppyProvider editor={editor}>
-										<EditorPanelProvider>{children}</EditorPanelProvider>
-									</SloppyProvider>
+									<SloppyModelProvider>
+										<SloppyProvider editor={editor}>
+											<EditorPanelProvider>{children}</EditorPanelProvider>
+										</SloppyProvider>
+									</SloppyModelProvider>
 								</ViewModeProvider>
 							</AutoScrollProvider>
 						</ActiveSceneProvider>

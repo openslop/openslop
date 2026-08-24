@@ -10,6 +10,7 @@ import {
 import { SelectMenu } from "@/components/ui/select-menu";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
+import { useSloppyModel } from "./SloppyModelProvider";
 import { useSloppy } from "./SloppyProvider";
 
 function ModelPicker({
@@ -49,7 +50,8 @@ function ModelPicker({
 }
 
 export function SloppyComposer() {
-	const { send, stop, loading, model, setModel, models } = useSloppy();
+	const { send, stop, loading } = useSloppy();
+	const { model, setModel, models } = useSloppyModel();
 	const [value, setValue] = useState("");
 	const hasText = value.trim().length > 0;
 
