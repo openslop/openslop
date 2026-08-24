@@ -20,7 +20,6 @@ export const splitAttributes = (
 	layoutAttributes: pick(attributes, LAYOUT_ATTRIBUTE_KEYS),
 });
 
-/** Both buckets back as the flat bag OSML writes. */
 export const flatAttributes = (element: SplitAttributes) => ({
 	...element.generationAttributes,
 	...element.layoutAttributes,
@@ -58,7 +57,6 @@ const DURATIONS = DURATION_OPTIONS.map(Number);
 const DURATION_MIN = Math.min(...DURATIONS);
 const DURATION_MAX = Math.max(...DURATIONS);
 
-/** Seconds a timed visual is generated to run for. */
 export function getDuration(element: CanvasContentElement): number {
 	return clampedAttribute(element, "duration", {
 		min: DURATION_MIN,

@@ -31,7 +31,6 @@ export function characterAvatarState(
 	return uploaded ? "uploaded" : "generated";
 }
 
-/** The inverse of {@link characterAvatarElement}: what a past version says the character was. */
 export function characterFromAvatarInputs(
 	version: ElementVersion,
 ): Partial<MetadataCharacter> {

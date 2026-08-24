@@ -2,10 +2,7 @@ import type { ComponentProps } from "react";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 
-/**
- * The quiet icon button the element header row is built from. Keeps the caret
- * where it is: pressing one must not take selection from the element's text.
- */
+/** Pressing a header button must not take the caret from the element's text. */
 export function HeaderIconButton({
 	className,
 	onMouseDown,

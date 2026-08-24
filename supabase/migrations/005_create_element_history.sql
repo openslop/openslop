@@ -1,7 +1,5 @@
--- Generation history: one row per set of inputs an element has been run with.
--- The project row keeps only the active result per element; every version it ever
--- had lives here so time travel survives a reload. Nothing is pruned: a version
--- the user might want back should never be dropped on their behalf.
+-- One row per set of inputs an element has been run with. The project row keeps
+-- only the active result; nothing here is ever pruned.
 create table if not exists element_history (
   id uuid primary key,
   project_id uuid not null references projects(id) on delete cascade,

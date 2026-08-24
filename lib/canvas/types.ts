@@ -85,9 +85,7 @@ export const SCENE_TYPE = "scene" as const;
 export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };
 
 export type SplitAttributes = {
-	/** Inputs to the generative model that the providers see */
 	generationAttributes?: Record<string, string>;
-	/** Client-only attributes that control how the element sits in playback layout */
 	layoutAttributes?: Record<string, string>;
 };
 

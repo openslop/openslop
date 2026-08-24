@@ -97,7 +97,6 @@ export class SnapshotStore {
 		this.state.set(id, { ...this.get(id), ...patch });
 	}
 
-	/** Drops the live entry. Versions already generated survive: history is append-only. */
 	remove(id: string) {
 		if (this.state.get(id)?.result) this.resultVersion++;
 		this.state.delete(id);

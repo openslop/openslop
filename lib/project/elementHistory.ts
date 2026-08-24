@@ -70,10 +70,6 @@ const versionRowId = (projectId: string, version: ElementVersion): string =>
 		ROW_ID_NAMESPACE,
 	);
 
-/**
- * The `element_history` rows are untyped JSON to the client. Parse them once
- * here so the queue can trust what it hydrates from; a malformed row throws.
- */
 export function parseElementVersions(rows: unknown): ElementVersion[] {
 	return z
 		.array(RowSchema)
@@ -81,7 +77,6 @@ export function parseElementVersions(rows: unknown): ElementVersion[] {
 		.map(toVersion);
 }
 
-/** One element's versions, oldest first. */
 export async function fetchElementVersions(
 	projectId: string,
 	elementId: string,
@@ -112,7 +107,6 @@ export async function saveElementVersion(
 	if (error) throw error;
 }
 
-/** The project's history as the generation layer stores and reads it. */
 export const elementHistoryStorage = (projectId: string): VersionStorage => ({
 	read: (elementId) => fetchElementVersions(projectId, elementId),
 	write: (version) =>

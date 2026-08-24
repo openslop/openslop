@@ -53,7 +53,6 @@ export class GenerationQueue {
 		this.snapshots = new SnapshotStore(initialState);
 	}
 
-	/** Announces each finished version, so history can file it. */
 	onCommitted = (listener: (version: CommittedVersion) => void) => {
 		this.commitListeners.add(listener);
 		return () => {
@@ -157,7 +156,6 @@ export class GenerationQueue {
 		);
 	}
 
-	/** Shows a version the element made before, provenance and all. */
 	restoreResult({ elementId, inputs, result, pinned }: CommittedVersion): void {
 		this.snapshots.update(elementId, {
 			result,

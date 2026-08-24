@@ -24,7 +24,6 @@ interface AttributeBadgeProps {
 	attrKey: string;
 	spec: AttributeSpec;
 	hideLabel?: boolean;
-	/** Sizing for the badge and its menu, so it can match the row it sits in. */
 	className?: string;
 	/** Extra attrs to merge alongside the new value (e.g. schema reconciliation on model change). */
 	deriveExtraAttrs?: (next: string) => Record<string, string | null>;

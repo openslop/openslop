@@ -15,7 +15,6 @@ export type PreviewOverlays = {
 	topRight?: ReactNode;
 };
 
-/** The uniform contract every entry in `ELEMENT_PREVIEWS` renders against. */
 export type ElementPreviewProps = PlaceholderProps &
 	PreviewOverlays & {
 		result: ElementSnapshot["result"];

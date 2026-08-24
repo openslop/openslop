@@ -14,7 +14,6 @@ export type VersionHistory = {
 	activeIndex: number;
 };
 
-/** An element's versions and which one it is showing. */
 export function useElementHistory(elementId: string): VersionHistory {
 	const versions = useHistorySelector((h) => h.get(elementId));
 	const loaded = useHistorySelector((h) => h.isLoaded(elementId));

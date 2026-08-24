@@ -1,19 +1,33 @@
 import * as React from "react";
 import { Copy } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
-import { IconButton, TooltipIconButton } from "@/components/ui/icon-button";
+import {
+	IconButton,
+	LOOKS,
+	TooltipIconButton,
+} from "@/components/ui/icon-button";
 
 export function DuplicateButton({
 	className,
+	size = "default",
 	...props
-}: React.ComponentProps<typeof IconButton>) {
+}: React.ComponentProps<typeof IconButton> & {
+	size?: keyof typeof LOOKS;
+}) {
+	const { icon, chip } = LOOKS[size];
+
 	return (
 		<TooltipIconButton
 			label="Duplicate"
-			className={cn("bg-muted text-muted-foreground", className)}
+			size={size}
+			className={cn(
+				chip,
+				"text-muted-foreground hover:text-foreground",
+				className,
+			)}
 			{...props}
 		>
-			<Copy className="h-4 w-4" />
+			<Copy size={icon} />
 		</TooltipIconButton>
 	);
 }

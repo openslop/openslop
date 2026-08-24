@@ -5,6 +5,15 @@ import { cn } from "@/lib/utils";
 
 const SIZES = { sm: "h-5 w-5", header: "h-6 w-6", default: "h-7 w-7" } as const;
 
+/**
+ * A header-row button sits quiet among a card's other controls; at the larger
+ * sizes these float over media and carry their own chip.
+ */
+export const LOOKS = {
+	header: { icon: 14, chip: "" },
+	default: { icon: 16, chip: "bg-muted" },
+} as const;
+
 export function IconButton({
 	ariaLabel,
 	size = "default",

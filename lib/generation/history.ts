@@ -1,13 +1,11 @@
 import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 
-/** Where an element's versions are kept between sessions. */
 export interface VersionStorage {
 	read(elementId: string): Promise<ElementVersion[]>;
 	write(version: ElementVersion): void;
 }
 
-/** Keeps history in memory only, for callers with nothing to persist to. */
 export const SESSION_ONLY: VersionStorage = {
 	read: () => Promise.resolve([]),
 	write: () => {},
