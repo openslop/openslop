@@ -85,7 +85,7 @@ export function updateNodeText(
 /**
  * Replaces what the generator sees, leaving the element's layout alone.
  */
-export function setGenerationAttrs(
+export function replaceGenerationAttrs(
 	editor: Editor,
 	path: Path,
 	attributes: Record<string, string | number>,
@@ -101,7 +101,7 @@ export function setGenerationAttrs(
  * Merge attrs into the element's attributes, each landing in its own bucket.
  * Keys with null values are deleted from the result.
  */
-export function setNodeAttrs(
+export function mergeAttrs(
 	editor: Editor,
 	path: Path,
 	element: CanvasContentElement,

@@ -4,7 +4,6 @@ import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { serializeInputs, type GenerationInputs } from "./inputs";
 
 export type ElementVersion = {
-	id: string;
 	elementId: string;
 	createdAt: string;
 	connectorType: AssetConnectorType;
@@ -14,13 +13,15 @@ export type ElementVersion = {
 	pinned: boolean;
 };
 
-export type CommittedTake = Omit<ElementVersion, "id" | "createdAt">;
+export type CommittedVersion = Omit<ElementVersion, "createdAt">;
 
 const NO_VERSIONS: readonly ElementVersion[] = [];
 
-/** A take is identified by the inputs that made it. */
-const keyOf = ({ inputs }: Pick<ElementVersion, "inputs">) =>
-	serializeInputs(inputs);
+export const versionKey = ({
+	inputs,
+	pinned,
+}: Pick<CommittedVersion, "inputs" | "pinned">): string =>
+	`${pinned ? "supplied" : "generated"}:${serializeInputs(inputs)}`;
 
 export class VersionLog {
 	private byElement = new Map<string, ElementVersion[]>();
@@ -33,36 +34,24 @@ export class VersionLog {
 
 	hydrate(elementId: string, stored: ElementVersion[]) {
 		const merged = {
-			...keyBy(stored, keyOf),
-			...keyBy(this.get(elementId), keyOf),
+			...keyBy(stored, versionKey),
+			...keyBy(this.get(elementId), versionKey),
 		};
 		this.byElement.set(elementId, sortBy(merged, "createdAt"));
 		this.hydrated.add(elementId);
 	}
 
-	matching = (
-		elementId: string,
-		inputs: GenerationInputs,
-	): ElementVersion | null => {
-		const key = serializeInputs(inputs);
-		return (
-			this.get(elementId).find((version) => keyOf(version) === key) ?? null
-		);
-	};
-
-	/** A replacement keeps the original id and date: the same take, remade. */
-	record(take: CommittedTake, createdAt: string): ElementVersion {
-		const key = keyOf(take);
-		const byInputs = keyBy(this.get(take.elementId), keyOf);
-		const previous: ElementVersion | undefined = byInputs[key];
+	/** A replacement keeps the original date: the same version, remade. */
+	record(committed: CommittedVersion, createdAt: string): ElementVersion {
+		const key = versionKey(committed);
+		const byKey = keyBy(this.get(committed.elementId), versionKey);
 		const version: ElementVersion = {
-			...take,
-			id: previous?.id ?? crypto.randomUUID(),
-			createdAt: previous?.createdAt ?? createdAt,
+			...committed,
+			createdAt: byKey[key]?.createdAt ?? createdAt,
 		};
 		this.byElement.set(
-			take.elementId,
-			Object.values({ ...byInputs, [key]: version }),
+			committed.elementId,
+			Object.values({ ...byKey, [key]: version }),
 		);
 		return version;
 	}

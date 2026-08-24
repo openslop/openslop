@@ -2,8 +2,8 @@ import { type Editor, Transforms } from "slate";
 import { ReactEditor } from "slate-react";
 import {
 	duplicateNode,
-	setGenerationAttrs,
-	setNodeAttrs,
+	replaceGenerationAttrs,
+	mergeAttrs,
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
@@ -15,7 +15,7 @@ export function updateElementAttrs(
 	element: CanvasContentElement,
 	attrs: Record<string, string | null>,
 ): void {
-	setNodeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
+	mergeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
 }
 
 export function applyNodeInputs(
@@ -24,7 +24,7 @@ export function applyNodeInputs(
 	inputs: NodeInputs,
 ): void {
 	const path = ReactEditor.findPath(editor, element);
-	setGenerationAttrs(editor, path, inputs.attributes);
+	replaceGenerationAttrs(editor, path, inputs.attributes);
 	updateNodeText(editor, path, inputs.prompt);
 }
 

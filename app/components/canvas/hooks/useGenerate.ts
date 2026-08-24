@@ -1,16 +1,14 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { useElementHistoryStore } from "@/lib/generation/ElementHistoryProvider";
+import { useCallback, useMemo } from "react";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { forElement, isNodeStale, nodeInputs } from "@/lib/generation/graph";
+import { forElement, isNodeStale } from "@/lib/generation/graph";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 export function useGenerate(element: CanvasContentElement) {
 	const queue = useGenerationQueue();
-	const history = useElementHistoryStore();
 	const buildNode = useNodeBuilder();
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
 	const node = useMemo(
@@ -18,13 +16,6 @@ export function useGenerate(element: CanvasContentElement) {
 		[buildNode, element],
 	);
 	const stale = useQueueSelector((q) => isNodeStale(node, q));
-
-	useEffect(() => {
-		if (!stale) return;
-		const inputs = nodeInputs(node, queue);
-		const take = history.matching(element.id, inputs);
-		if (take) queue.restoreResult(element.id, inputs, take.result);
-	}, [queue, history, element.id, node, stale]);
 
 	const generate = useCallback(() => {
 		if (!node.inputs.prompt) {

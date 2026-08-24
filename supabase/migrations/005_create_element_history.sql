@@ -1,6 +1,6 @@
 -- Generation history: one row per set of inputs an element has been run with.
--- The project row keeps only the active result per element; every take it ever
--- had lives here so time travel survives a reload. Nothing is pruned: a take
+-- The project row keeps only the active result per element; every version it ever
+-- had lives here so time travel survives a reload. Nothing is pruned: a version
 -- the user might want back should never be dropped on their behalf.
 create table if not exists element_history (
   id uuid primary key,
@@ -32,7 +32,7 @@ create policy "element_history_insert_own" on element_history
       where p.id = element_history.project_id and p.user_id = auth.uid()
     )
   );
--- Regenerating an element with unchanged inputs overwrites its take in place,
+-- Regenerating an element with unchanged inputs overwrites its version in place,
 -- so the client upserts and needs update alongside insert.
 create policy "element_history_update_own" on element_history
   for update using (

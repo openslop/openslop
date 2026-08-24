@@ -5,8 +5,7 @@ import {
 	useHistorySelector,
 } from "@/lib/generation/ElementHistoryProvider";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import { serializeInputs } from "@/lib/generation/inputs";
-import type { ElementVersion } from "@/lib/generation/versions";
+import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 
 export type VersionHistory = {
 	versions: readonly ElementVersion[];
@@ -15,25 +14,22 @@ export type VersionHistory = {
 	activeIndex: number;
 };
 
-/**
- * An element's takes and which one it is showing. A take is identified by its
- * inputs, so the shown take is the one whose inputs produced the live result.
- */
+/** An element's versions and which one it is showing. */
 export function useElementHistory(elementId: string): VersionHistory {
 	const versions = useHistorySelector((h) => h.get(elementId));
 	const loaded = useHistorySelector((h) => h.isLoaded(elementId));
 	const failed = useHistorySelector((h) => h.isFailed(elementId));
-	const activeInputs = useQueueSelector(
-		(q) => q.getElementSnapshot(elementId).resultInputs,
-	);
-	const activeKey = activeInputs ? serializeInputs(activeInputs) : null;
+	const snapshot = useQueueSelector((q) => q.getElementSnapshot(elementId));
+	const activeKey = snapshot.resultInputs
+		? versionKey({ inputs: snapshot.resultInputs, pinned: snapshot.pinned })
+		: null;
 
 	return {
 		versions,
 		loaded,
 		failed,
 		activeIndex: versions.findIndex(
-			(version) => serializeInputs(version.inputs) === activeKey,
+			(version) => versionKey(version) === activeKey,
 		),
 	};
 }

@@ -84,7 +84,7 @@ describe("SnapshotStore", () => {
 		expect(store.ids()).toEqual(["kept"]);
 	});
 
-	it("reports each commit as the take it produced", () => {
+	it("reports each commit as the version it produced", () => {
 		const store = new SnapshotStore();
 		expect(
 			store.commit("a", result("a.png"), inputs("a.png"), "image", false),

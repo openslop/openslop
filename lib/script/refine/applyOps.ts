@@ -1,7 +1,7 @@
 import { Editor, Path, Transforms } from "slate";
 import {
 	findNodeById,
-	setNodeAttrs,
+	mergeAttrs,
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
 import { insertElement } from "@/lib/canvas/insertElement";
@@ -156,7 +156,7 @@ function applySet(
 	const [element, path] = target;
 
 	if (op.attrs) {
-		setNodeAttrs(editor, path, element, op.attrs);
+		mergeAttrs(editor, path, element, op.attrs);
 	}
 
 	if (op.text !== undefined) {

@@ -8,7 +8,7 @@ import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
 import type { GenerationInputs } from "./inputs";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
-import type { CommittedTake } from "./versions";
+import type { CommittedVersion } from "./versions";
 import {
 	flattenGraph,
 	isSourceNode,
@@ -38,7 +38,9 @@ export class GenerationQueue {
 	private pending: JobNode[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
-	private readonly commitListeners = new Set<(take: CommittedTake) => void>();
+	private readonly commitListeners = new Set<
+		(version: CommittedVersion) => void
+	>();
 
 	constructor({
 		limits,
@@ -51,8 +53,8 @@ export class GenerationQueue {
 		this.snapshots = new SnapshotStore(initialState);
 	}
 
-	/** Announces each finished take, so history can file it. */
-	onCommitted = (listener: (take: CommittedTake) => void) => {
+	/** Announces each finished version, so history can file it. */
+	onCommitted = (listener: (version: CommittedVersion) => void) => {
 		this.commitListeners.add(listener);
 		return () => {
 			this.commitListeners.delete(listener);
@@ -155,15 +157,13 @@ export class GenerationQueue {
 		);
 	}
 
-	restoreResult(
-		elementId: string,
-		inputs: GenerationInputs,
-		result: AssetResult,
-	): void {
+	/** Shows a version the element made before, provenance and all. */
+	restoreResult({ elementId, inputs, result, pinned }: CommittedVersion): void {
 		this.snapshots.update(elementId, {
 			result,
 			error: null,
 			resultInputs: inputs,
+			pinned,
 		});
 		this.snapshots.notify();
 	}
@@ -175,7 +175,7 @@ export class GenerationQueue {
 		connectorType: GenerationJob["connectorType"],
 		pinned = false,
 	): void {
-		const take = this.snapshots.commit(
+		const version = this.snapshots.commit(
 			elementId,
 			result,
 			inputs,
@@ -183,7 +183,7 @@ export class GenerationQueue {
 			pinned,
 		);
 		this.snapshots.notify();
-		for (const listener of this.commitListeners) listener(take);
+		for (const listener of this.commitListeners) listener(version);
 	}
 
 	private abortJob(id: string) {

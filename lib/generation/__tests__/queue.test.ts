@@ -13,7 +13,7 @@ import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../inputs";
 import type { GenerationJob, GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
-import type { CommittedTake } from "../versions";
+import type { CommittedVersion } from "../versions";
 
 const EMPTY_STATE = {
 	hydrated: true,
@@ -61,7 +61,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 }
 
 let generationQueue: GenerationQueue;
-let committed: Mock<(take: CommittedTake) => void> = vi.fn();
+let committed: Mock<(version: CommittedVersion) => void> = vi.fn();
 
 describe("GenerationQueue", () => {
 	beforeEach(() => {
@@ -557,7 +557,13 @@ describe("GenerationQueue", () => {
 			generationQueue.setError("rr1", "stale");
 			expect(generationQueue.getElementSnapshot("rr1").result).toBeNull();
 
-			generationQueue.restoreResult("rr1", inputs, result);
+			generationQueue.restoreResult({
+				elementId: "rr1",
+				connectorType: "image",
+				inputs,
+				result,
+				pinned: false,
+			});
 			expect(generationQueue.getElementSnapshot("rr1")).toMatchObject({
 				result,
 				resultInputs: inputs,
@@ -581,7 +587,13 @@ describe("GenerationQueue", () => {
 			]);
 			await vi.advanceTimersByTimeAsync(0);
 
-			generationQueue.restoreResult("rr2", inputs, first);
+			generationQueue.restoreResult({
+				elementId: "rr2",
+				connectorType: "image",
+				inputs,
+				result: first,
+				pinned: false,
+			});
 
 			expect(generationQueue.getElementSnapshot("rr2")).toMatchObject({
 				status: "generating",
@@ -590,30 +602,54 @@ describe("GenerationQueue", () => {
 			generationQueue.discard("rr2");
 		});
 
-		it("leaves `pinned` alone, so an upload's inputs do not pin the element", async () => {
+		it("carries the version's provenance, so a restored upload stays pinned", async () => {
 			const uploaded = {
 				imageUrl: "https://example.com/up.png",
 				durationSec: 0,
 			};
 			const shared = { prompt: "p", attributes: {}, dependencies: {} };
-			generationQueue.commitResult(
-				makeJob("rr3", { inputs: shared }),
-				uploaded,
-				{
-					pinned: true,
-				},
-			);
 			generateMock.mockResolvedValue({ imageUrl: "gen.png", durationSec: 0 });
-			generationQueue.enqueueGraph([
-				makeJob("rr3", { inputs: { ...shared, prompt: "other" } }),
-			]);
+			generationQueue.enqueueGraph([makeJob("rr3", { inputs: shared })]);
 			await vi.runAllTimersAsync();
 			expect(generationQueue.getElementSnapshot("rr3").pinned).toBe(false);
 
-			generationQueue.restoreResult("rr3", shared, uploaded);
+			generationQueue.restoreResult({
+				elementId: "rr3",
+				connectorType: "image",
+				inputs: shared,
+				result: uploaded,
+				pinned: true,
+			});
 
 			expect(generationQueue.getElementSnapshot("rr3")).toMatchObject({
 				result: uploaded,
+				pinned: true,
+			});
+		});
+
+		it("unpins the element when the restored version was generated", async () => {
+			const generated = {
+				imageUrl: "https://example.com/gen.png",
+				durationSec: 0,
+			};
+			const shared = { prompt: "p", attributes: {}, dependencies: {} };
+			generationQueue.commitResult(
+				makeJob("rr4", { inputs: shared }),
+				{ imageUrl: "https://example.com/up.png", durationSec: 0 },
+				{ pinned: true },
+			);
+			expect(generationQueue.getElementSnapshot("rr4").pinned).toBe(true);
+
+			generationQueue.restoreResult({
+				elementId: "rr4",
+				connectorType: "image",
+				inputs: shared,
+				result: generated,
+				pinned: false,
+			});
+
+			expect(generationQueue.getElementSnapshot("rr4")).toMatchObject({
+				result: generated,
 				pinned: false,
 			});
 		});
@@ -672,14 +708,14 @@ describe("GenerationQueue", () => {
 		});
 	});
 
-	describe("committed takes", () => {
+	describe("committed versions", () => {
 		const generate = async (id: string, url: string) => {
 			generateMock.mockResolvedValue({ url, durationSec: 0 });
 			generationQueue.enqueueGraph([makeJob(id)]);
 			await vi.advanceTimersByTimeAsync(0);
 		};
 
-		it("announces each finished take to its listeners", async () => {
+		it("announces each finished version to its listeners", async () => {
 			await generate("v1", "first.png");
 
 			expect(committed).toHaveBeenCalledWith(
@@ -692,7 +728,7 @@ describe("GenerationQueue", () => {
 			);
 		});
 
-		it("announces an upload as a take of its own", () => {
+		it("announces an upload as a version of its own", () => {
 			const node = makeJob("v2");
 			generationQueue.commitResult(
 				node,

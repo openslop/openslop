@@ -15,7 +15,7 @@ const result = (imageUrl: string): AssetResult => ({
 	durationSec: 0,
 });
 
-const take = (prompt: string, url = `${prompt}.png`) => ({
+const version = (prompt: string, url = `${prompt}.png`) => ({
 	elementId: "a",
 	connectorType: "image" as const,
 	inputs: inputs(prompt),
@@ -24,8 +24,7 @@ const take = (prompt: string, url = `${prompt}.png`) => ({
 });
 
 const stored: ElementVersion = {
-	...take("kept"),
-	id: "kept-1",
+	...version("kept"),
 	createdAt: "2026-01-01T00:00:00.000Z",
 };
 
@@ -37,11 +36,11 @@ const storageOf = (
 };
 
 describe("ElementHistory", () => {
-	it("files a committed take and stores it", () => {
+	it("files a committed version and stores it", () => {
 		const [storage, write] = storageOf();
 		const history = new ElementHistory(storage);
 
-		history.record(take("a"));
+		history.record(version("a"));
 
 		expect(history.get("a")).toHaveLength(1);
 		expect(write).toHaveBeenCalledWith(
@@ -49,19 +48,21 @@ describe("ElementHistory", () => {
 		);
 	});
 
-	it("overwrites the take an unchanged regeneration remade", () => {
+	it("overwrites the version an unchanged regeneration remade", () => {
 		const [storage, write] = storageOf();
 		const history = new ElementHistory(storage);
 
-		history.record(take("a"));
-		history.record(take("a", "redone.png"));
+		history.record(version("a"));
+		history.record(version("a", "redone.png"));
 
 		expect(history.get("a")).toHaveLength(1);
 		expect(history.get("a")[0]?.result).toEqual(result("redone.png"));
-		expect(write.mock.calls[1]?.[0].id).toBe(write.mock.calls[0]?.[0].id);
+		expect(write.mock.calls[1]?.[0].createdAt).toBe(
+			write.mock.calls[0]?.[0].createdAt,
+		);
 	});
 
-	it("reads an element's stored takes once, on demand", async () => {
+	it("reads an element's stored versions once, on demand", async () => {
 		const read = vi.fn().mockResolvedValue([stored]);
 		const [storage] = storageOf(read);
 		const history = new ElementHistory(storage);
@@ -91,22 +92,13 @@ describe("ElementHistory", () => {
 		expect(history.get("a")).toEqual([stored]);
 	});
 
-	it("finds the take a set of inputs produced", () => {
-		const [storage] = storageOf();
-		const history = new ElementHistory(storage);
-		history.record(take("a"));
-
-		expect(history.matching("a", inputs("a"))?.result).toEqual(result("a.png"));
-		expect(history.matching("a", inputs("never"))).toBeNull();
-	});
-
-	it("notifies subscribers when a take arrives", () => {
+	it("notifies subscribers when a version arrives", () => {
 		const [storage] = storageOf();
 		const history = new ElementHistory(storage);
 		const listener = vi.fn();
 		history.subscribe(listener);
 
-		history.record(take("a"));
+		history.record(version("a"));
 		expect(listener).toHaveBeenCalledTimes(1);
 	});
 });

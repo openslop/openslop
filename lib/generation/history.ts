@@ -1,8 +1,7 @@
-import type { GenerationInputs } from "./inputs";
-import type { CommittedTake, ElementVersion } from "./versions";
+import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 
-/** Where an element's takes are kept between sessions. */
+/** Where an element's versions are kept between sessions. */
 export interface VersionStorage {
 	read(elementId: string): Promise<ElementVersion[]>;
 	write(version: ElementVersion): void;
@@ -62,13 +61,8 @@ export class ElementHistory {
 		return load;
 	};
 
-	matching = (
-		elementId: string,
-		inputs: GenerationInputs,
-	): ElementVersion | null => this.log.matching(elementId, inputs);
-
-	record = (take: CommittedTake) => {
-		this.storage.write(this.log.record(take, new Date().toISOString()));
+	record = (version: CommittedVersion) => {
+		this.storage.write(this.log.record(version, new Date().toISOString()));
 		this.notify();
 	};
 }

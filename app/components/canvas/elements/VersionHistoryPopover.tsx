@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { truncateMiddle } from "@/lib/format";
-import type { ElementVersion } from "@/lib/generation/versions";
+import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
+import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { relativeTime } from "@/lib/project/relativeTime";
 import { formatTime } from "@/lib/video/timestamps";
 import { cn } from "@/lib/utils";
@@ -37,7 +38,7 @@ const Dot = () => (
 	</span>
 );
 
-function TakeThumbnail({ result }: { result: ElementVersion["result"] }) {
+function VersionThumbnail({ result }: { result: ElementVersion["result"] }) {
 	const src = result.videoUrl ?? result.imageUrl;
 	if (!src) return null;
 	return (
@@ -72,7 +73,7 @@ function VersionRow({
 			)}
 		>
 			<div className="flex items-center gap-2.5">
-				<TakeThumbnail result={version.result} />
+				<VersionThumbnail result={version.result} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span
@@ -133,8 +134,8 @@ function LoadingRows() {
 }
 
 /**
- * Takes are read on open, and read here rather than in the body so no card
- * subscribes to takes it never shows.
+ * Versions are read on open, and read here rather than in the body so no card
+ * subscribes to versions it never shows.
  */
 export function VersionHistoryPopover({
 	elementId,
@@ -187,6 +188,13 @@ function VersionHistoryBody({
 }) {
 	const { versions, loaded, failed, activeIndex } =
 		useElementHistory(elementId);
+	const queue = useGenerationQueue();
+
+	const restore = (version: ElementVersion) => {
+		queue.restoreResult(version);
+		onRestore(version);
+		onClose();
+	};
 
 	return (
 		<>
@@ -208,21 +216,18 @@ function VersionHistoryBody({
 					<LoadingRows />
 				) : versions.length === 0 ? (
 					<p className="px-2 py-1.5 text-label-xs text-muted-foreground">
-						No takes yet.
+						No versions yet.
 					</p>
 				) : (
 					<ul className="flex flex-col">
 						{versions
 							.map((version, index) => (
 								<VersionRow
-									key={version.id}
+									key={versionKey(version)}
 									version={version}
 									label={String(index + 1)}
 									active={index === activeIndex}
-									onRestore={() => {
-										onRestore(version);
-										onClose();
-									}}
+									onRestore={() => restore(version)}
 								/>
 							))
 							.reverse()}

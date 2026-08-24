@@ -8,8 +8,8 @@ import {
 	findElementById,
 	findNodeById,
 	updateNodeText,
-	setGenerationAttrs,
-	setNodeAttrs,
+	replaceGenerationAttrs,
+	mergeAttrs,
 } from "../editorOps";
 import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
@@ -176,12 +176,12 @@ describe("duplicateNode", () => {
 	});
 });
 
-describe("setGenerationAttrs", () => {
+describe("replaceGenerationAttrs", () => {
 	it("drops attributes the new set does not carry", () => {
 		const el = content("image", "n1", "", { style: "ink", ratio: "16:9" });
 		const editor = makeEditor([scene([el])]);
 
-		setGenerationAttrs(editor, [0, 0], { style: "oil" });
+		replaceGenerationAttrs(editor, [0, 0], { style: "oil" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(node.children[0].generationAttributes).toEqual({ style: "oil" });
@@ -191,7 +191,7 @@ describe("setGenerationAttrs", () => {
 		const el = content("image", "n1", "", { style: "ink", motion: "pan" });
 		const editor = makeEditor([scene([el])]);
 
-		setGenerationAttrs(editor, [0, 0], { style: "oil" });
+		replaceGenerationAttrs(editor, [0, 0], { style: "oil" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(node.children[0].layoutAttributes).toEqual({ motion: "pan" });
@@ -201,19 +201,19 @@ describe("setGenerationAttrs", () => {
 		const el = content("image", "n1");
 		const editor = makeEditor([scene([el])]);
 
-		setGenerationAttrs(editor, [0, 0], { seed: 7 });
+		replaceGenerationAttrs(editor, [0, 0], { seed: 7 });
 
 		const node = editor.children[0] as SceneElement;
 		expect(node.children[0].generationAttributes).toEqual({ seed: "7" });
 	});
 });
 
-describe("setNodeAttrs", () => {
+describe("mergeAttrs", () => {
 	it("merges new attrs into existing", () => {
 		const el = content("character", "n1", "", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { emotion: "excited" });
+		mergeAttrs(editor, [0, 0], el, { emotion: "excited" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(flatAttributes(node.children[0])).toEqual({
@@ -229,7 +229,7 @@ describe("setNodeAttrs", () => {
 		});
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { emotion: null });
+		mergeAttrs(editor, [0, 0], el, { emotion: null });
 
 		const node = editor.children[0] as SceneElement;
 		expect(flatAttributes(node.children[0])).toEqual({ name: "Lyra" });
@@ -239,7 +239,7 @@ describe("setNodeAttrs", () => {
 		const el = content("narration", "n1");
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { emotion: "calm" });
+		mergeAttrs(editor, [0, 0], el, { emotion: "calm" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(flatAttributes(node.children[0])).toEqual({ emotion: "calm" });

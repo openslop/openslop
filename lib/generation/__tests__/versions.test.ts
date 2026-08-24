@@ -16,7 +16,7 @@ const result = (imageUrl: string): AssetResult => ({
 
 const AT = "2026-01-01T00:00:00.000Z";
 
-const take = (prompt: string, url = `${prompt}.png`) => ({
+const version = (prompt: string, url = `${prompt}.png`) => ({
 	elementId: "a",
 	connectorType: "image" as const,
 	inputs: inputs(prompt),
@@ -24,64 +24,73 @@ const take = (prompt: string, url = `${prompt}.png`) => ({
 	pinned: false,
 });
 
-const stored = (prompt: string, createdAt: string, id: string) => ({
-	...take(prompt),
+const stored = (prompt: string, createdAt: string) => ({
+	...version(prompt),
 	createdAt,
-	id,
 });
 
 describe("VersionLog", () => {
-	it("keeps one take per input set, overwriting what those inputs made before", () => {
+	it("keeps one version per input set, overwriting what those inputs made before", () => {
 		const log = new VersionLog();
-		const first = log.record(take("a"), AT);
+		log.record(version("a"), AT);
 		const again = log.record(
-			take("a", "redone.png"),
+			version("a", "redone.png"),
 			"2026-02-02T00:00:00.000Z",
 		);
 
 		expect(log.get("a")).toEqual([again]);
-		expect(again.id).toBe(first.id);
 		expect(again.createdAt).toBe(AT);
 		expect(again.result).toEqual(result("redone.png"));
 	});
 
-	it("keeps takes from different inputs side by side, oldest first", () => {
+	it("keeps versions from different inputs side by side, oldest first", () => {
 		const log = new VersionLog();
-		const first = log.record(take("a"), AT);
-		const second = log.record(take("b"), AT);
+		const first = log.record(version("a"), AT);
+		const second = log.record(version("b"), AT);
 
-		expect(log.get("a").map((v) => v.id)).toEqual([first.id, second.id]);
-		expect(first.id).not.toBe(second.id);
+		expect(log.get("a")).toEqual([first, second]);
 	});
 
-	it("orders hydrated takes by their timestamps", () => {
+	it("files an upload beside the version it was made to replace", () => {
+		const log = new VersionLog();
+		const generated = log.record(version("a"), AT);
+		const uploaded = log.record(
+			{ ...version("a", "upload.png"), pinned: true },
+			"2026-02-02T00:00:00.000Z",
+		);
+
+		expect(log.get("a")).toEqual([generated, uploaded]);
+	});
+
+	it("orders hydrated versions by their timestamps", () => {
 		const log = new VersionLog();
 		log.hydrate("a", [
-			stored("late", "2026-01-02T00:00:00.000Z", "2"),
-			stored("early", "2026-01-01T00:00:00.000Z", "1"),
+			stored("late", "2026-01-02T00:00:00.000Z"),
+			stored("early", "2026-01-01T00:00:00.000Z"),
 		]);
-		expect(log.get("a").map((v) => v.id)).toEqual(["1", "2"]);
+		expect(log.get("a").map((v) => v.inputs.prompt)).toEqual(["early", "late"]);
 		expect(log.isHydrated("a")).toBe(true);
 	});
 
-	it("reports an element as unhydrated until its stored takes arrive", () => {
+	it("reports an element as unhydrated until its stored versions arrive", () => {
 		const log = new VersionLog();
 		expect(log.isHydrated("a")).toBe(false);
 		expect(log.get("a")).toEqual([]);
 	});
 
-	it("keeps takes recorded while the read was in flight", () => {
+	it("keeps versions recorded while the read was in flight", () => {
 		const log = new VersionLog();
-		const fresh = log.record(take("new"), "2026-01-03T00:00:00.000Z");
-		log.hydrate("a", [stored("old", "2026-01-01T00:00:00.000Z", "1")]);
+		const fresh = log.record(version("new"), "2026-01-03T00:00:00.000Z");
+		const old = stored("old", "2026-01-01T00:00:00.000Z");
+		log.hydrate("a", [old]);
 
-		expect(log.get("a").map((v) => v.id)).toEqual(["1", fresh.id]);
+		expect(log.get("a")).toEqual([old, fresh]);
 	});
 
-	it("lets a take recorded mid-read supersede the stored one it remade", () => {
+	it("lets a version recorded mid-read supersede the stored one it remade", () => {
 		const log = new VersionLog();
-		const fresh = log.record(take("same", "fresh.png"), AT);
-		log.hydrate("a", [stored("same", "2026-01-01T00:00:00.000Z", "stale")]);
+		const fresh = log.record(version("same", "fresh.png"), AT);
+		log.hydrate("a", [stored("same", "2026-01-01T00:00:00.000Z")]);
 
 		expect(log.get("a")).toEqual([fresh]);
 	});

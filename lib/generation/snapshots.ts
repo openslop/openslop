@@ -1,6 +1,6 @@
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import type { GenerationInputs } from "./inputs";
-import type { CommittedTake } from "./versions";
+import type { CommittedVersion } from "./versions";
 
 export type GenerationStatus = "idle" | "queued" | "generating";
 
@@ -97,7 +97,7 @@ export class SnapshotStore {
 		this.state.set(id, { ...this.get(id), ...patch });
 	}
 
-	/** Drops the live entry. Takes already generated survive: history is append-only. */
+	/** Drops the live entry. Versions already generated survive: history is append-only. */
 	remove(id: string) {
 		if (this.state.get(id)?.result) this.resultVersion++;
 		this.state.delete(id);
@@ -127,7 +127,7 @@ export class SnapshotStore {
 		inputs: GenerationInputs,
 		connectorType: AssetConnectorType,
 		pinned: boolean,
-	): CommittedTake {
+	): CommittedVersion {
 		this.update(id, {
 			status: "idle",
 			seconds: 0,

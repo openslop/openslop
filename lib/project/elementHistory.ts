@@ -1,9 +1,10 @@
+import { v5 as uuidv5 } from "uuid";
 import { z } from "zod";
 import { ASSET_CONNECTOR_TYPES } from "@/lib/connectors/types";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { VersionStorage } from "@/lib/generation/history";
 import type { GenerationInputs } from "@/lib/generation/inputs";
-import type { ElementVersion } from "@/lib/generation/versions";
+import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { createClient } from "@/lib/supabase/client";
 import { toastError } from "@/lib/toastError";
 
@@ -26,7 +27,6 @@ const ResultSchema = z.object({
 }) satisfies z.ZodType<AssetResult>;
 
 const RowSchema = z.object({
-	id: z.string(),
 	element_id: z.string(),
 	created_at: z.string(),
 	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
@@ -36,7 +36,6 @@ const RowSchema = z.object({
 });
 
 const toVersion = (row: z.infer<typeof RowSchema>): ElementVersion => ({
-	id: row.id,
 	elementId: row.element_id,
 	createdAt: row.created_at,
 	connectorType: row.connector_type,
@@ -46,10 +45,9 @@ const toVersion = (row: z.infer<typeof RowSchema>): ElementVersion => ({
 });
 
 const toRow = (projectId: string, version: ElementVersion) => ({
-	id: version.id,
+	id: versionRowId(projectId, version),
 	project_id: projectId,
 	element_id: version.elementId,
-	created_at: version.createdAt,
 	connector_type: version.connectorType,
 	inputs: version.inputs,
 	result: version.result,
@@ -57,7 +55,20 @@ const toRow = (projectId: string, version: ElementVersion) => ({
 });
 
 const COLUMNS =
-	"id, element_id, created_at, connector_type, inputs, result, pinned";
+	"element_id, created_at, connector_type, inputs, result, pinned";
+
+/** Changing this re-keys every row, so it is fixed for the table's lifetime. */
+const ROW_ID_NAMESPACE = "5673ca03-e04d-4279-b92d-df493e2b9150";
+
+/**
+ * A version's row is identified by what made it, so the same version always
+ * lands on the same row however little the client happens to have read back.
+ */
+const versionRowId = (projectId: string, version: ElementVersion): string =>
+	uuidv5(
+		[projectId, version.elementId, versionKey(version)].join("\u0000"),
+		ROW_ID_NAMESPACE,
+	);
 
 /**
  * The `element_history` rows are untyped JSON to the client. Parse them once
@@ -70,7 +81,7 @@ export function parseElementVersions(rows: unknown): ElementVersion[] {
 		.map(toVersion);
 }
 
-/** One element's takes, oldest first. */
+/** One element's versions, oldest first. */
 export async function fetchElementVersions(
 	projectId: string,
 	elementId: string,
@@ -87,8 +98,9 @@ export async function fetchElementVersions(
 }
 
 /**
- * A take is identified by the inputs that made it, so regenerating an unchanged
- * element overwrites the row it already has.
+ * Regenerating an unchanged element overwrites the row that version already has.
+ * `created_at` is left to the column default so a remake keeps its original
+ * date rather than jumping to the top of the list.
  */
 export async function saveElementVersion(
 	projectId: string,
@@ -105,6 +117,6 @@ export const elementHistoryStorage = (projectId: string): VersionStorage => ({
 	read: (elementId) => fetchElementVersions(projectId, elementId),
 	write: (version) =>
 		saveElementVersion(projectId, version).catch((err: unknown) =>
-			toastError(err, "Saving this take failed"),
+			toastError(err, "Saving this version failed"),
 		),
 });
