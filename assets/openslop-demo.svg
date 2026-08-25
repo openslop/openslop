@@ -680,11 +680,10 @@
 <g class="sp0"><text x="458" y="567" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" text-anchor="middle">Scene 1</text></g>
 <g class="sp1"><text x="458" y="567" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" text-anchor="middle">Scene 2</text></g>
 <g class="sp2"><text x="458" y="567" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" text-anchor="middle">Scene 3</text></g>
-<g transform="translate(778.0,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g>
-<g transform="translate(784.0,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g>
-<g class="an-pausebtn"><g transform="translate(808.0,557.0) scale(0.8125)"><path d="M5.2 3.4 12.4 8 5.2 12.6 Z" fill="#f1eaed"/></g></g>
+<g transform="translate(771.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(777.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(1628,0) scale(-1,1)"><g transform="translate(771.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(777.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+<g class="an-pausebtn"><g transform="translate(806.8,557.0) scale(0.8125)"><path d="M5.2 3.4 12.4 8 5.2 12.6 Z" fill="#f1eaed"/></g></g>
 <g class="an-playbtn"><rect x="808" y="557" width="4" height="13" rx="1" fill="#f1eaed"/><rect x="816" y="557" width="4" height="13" rx="1" fill="#f1eaed"/></g>
-<g transform="translate(1704,1128) rotate(180)"><g transform="translate(838.0,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(844.0,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g></g>
 <g transform="translate(1160.0,557.0) scale(0.7500)"><path d="M3 6.2 H5.6 L8.8 3.2 V12.8 L5.6 9.8 H3 Z M11 6 A3 3 0 0 1 11 10" fill="none" stroke="#9d8b93" stroke-width="1.73" stroke-linecap="round" stroke-linejoin="round"/></g>
 <rect x="1178" y="562" width="56" height="3" rx="1.5" fill="#4a4548"/>
 <rect x="1178" y="562" width="40" height="3" rx="1.5" fill="#c8c2c5"/>
@@ -725,8 +724,8 @@
 <line x1="1305.5" y1="584" x2="1305.5" y2="588" stroke="#332a2e" opacity="0.6"/>
 <line x1="1342.5" y1="584" x2="1342.5" y2="588" stroke="#332a2e" opacity="0.6"/>
 <line x1="1379.5" y1="584" x2="1379.5" y2="588" stroke="#332a2e" opacity="0.6"/>
-<g transform="translate(358.0,620.0) scale(0.8125)"><path d="M2 3.6 H14 V12.4 H2 Z M2 6.5 H14 M2 9.5 H14 M5.2 3.6 V12.4 M10.8 3.6 V12.4" fill="none" stroke="#9d8b93" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round"/></g>
-<g transform="translate(358.0,676.0) scale(0.8125)"><path d="M2 8 V8 M4.2 5 V11 M6.4 3.4 V12.6 M8.6 5.8 V10.2 M10.8 4 V12 M13 6.4 V9.6" fill="none" stroke="#9d8b93" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(370.0,620.0) scale(0.8125)"><path d="M2 3.6 H14 V12.4 H2 Z M2 6.5 H14 M2 9.5 H14 M5.2 3.6 V12.4 M10.8 3.6 V12.4" fill="none" stroke="#9d8b93" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(370.0,676.0) scale(0.8125)"><path d="M2 8 V8 M4.2 5 V11 M6.4 3.4 V12.6 M8.6 5.8 V10.2 M10.8 4 V12 M13 6.4 V9.6" fill="none" stroke="#9d8b93" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round"/></g>
 <g>
 <g clip-path="url(#cpc20)">
 <rect x="402" y="600" width="118" height="54" rx="5" fill="#23363c"/>
