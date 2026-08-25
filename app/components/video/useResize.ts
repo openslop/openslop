@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { usePointerDrag } from "@/lib/components/usePointerDrag";
 import { clamp } from "@/lib/utils";
 
 export type ResizeAxis = "vertical" | "horizontal";
@@ -25,60 +26,6 @@ export function clampResize(
 	return clamp(startSize + delta, minSize, maxSize);
 }
 
-type ResizeListenerHost = {
-	addEventListener: (type: string, listener: (ev: MouseEvent) => void) => void;
-	removeEventListener: (
-		type: string,
-		listener: (ev: MouseEvent) => void,
-	) => void;
-};
-
-export function attachResizeListeners(
-	host: ResizeListenerHost,
-	options: {
-		axis: ResizeAxis;
-		startPos: number;
-		startSize: number;
-		minSize: number;
-		maxSize: number;
-		invert?: boolean;
-		onResize: (size: number) => void;
-		onEnd: () => void;
-	},
-): () => void {
-	const onMove = (ev: MouseEvent) => {
-		const pos = options.axis === "vertical" ? ev.clientY : ev.clientX;
-		options.onResize(
-			clampResize(
-				options.axis,
-				options.startPos,
-				pos,
-				options.startSize,
-				options.minSize,
-				options.maxSize,
-				options.invert,
-			),
-		);
-	};
-
-	let cleaned = false;
-	const cleanup = () => {
-		if (cleaned) return;
-		cleaned = true;
-		host.removeEventListener("mousemove", onMove);
-		host.removeEventListener("mouseup", onUp);
-	};
-
-	const onUp = () => {
-		options.onEnd();
-		cleanup();
-	};
-
-	host.addEventListener("mousemove", onMove);
-	host.addEventListener("mouseup", onUp);
-	return cleanup;
-}
-
 export function useResize({
 	axis,
 	defaultSize,
@@ -94,41 +41,39 @@ export function useResize({
 }) {
 	const [size, setSize] = useState(defaultSize);
 	const [resizing, setResizing] = useState(false);
-	const sizeRef = useRef(size);
-	useEffect(() => {
-		sizeRef.current = size;
-	}, [size]);
+	// Where the grab started, so a move is a delta rather than a running total.
+	const origin = useRef({ pos: 0, size: defaultSize, maxSize: Infinity });
 
-	const cleanupRef = useRef<(() => void) | null>(null);
+	const along = (event: { clientX: number; clientY: number }) =>
+		axis === "vertical" ? event.clientY : event.clientX;
 
-	useEffect(
-		() => () => {
-			cleanupRef.current?.();
-			cleanupRef.current = null;
-		},
-		[],
-	);
-
-	const handleMouseDown = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			cleanupRef.current?.();
-			setResizing(true);
+	const handleProps = usePointerDrag({
+		onStart: (event) => {
+			// Otherwise the browser starts a text selection under the pointer.
+			event.preventDefault();
 			const viewport =
 				axis === "vertical" ? window.innerHeight : window.innerWidth;
-			cleanupRef.current = attachResizeListeners(document, {
-				axis,
-				startPos: axis === "vertical" ? e.clientY : e.clientX,
-				startSize: sizeRef.current,
-				minSize,
+			origin.current = {
+				pos: along(event),
+				size,
 				maxSize: viewport * maxViewportFraction,
-				invert,
-				onResize: setSize,
-				onEnd: () => setResizing(false),
-			});
+			};
+			setResizing(true);
 		},
-		[axis, minSize, maxViewportFraction, invert],
-	);
+		onMove: (event) =>
+			setSize(
+				clampResize(
+					axis,
+					origin.current.pos,
+					along(event),
+					origin.current.size,
+					minSize,
+					origin.current.maxSize,
+					invert,
+				),
+			),
+		onEnd: () => setResizing(false),
+	});
 
-	return { size, handleMouseDown, resizing };
+	return { size, handleProps, resizing };
 }

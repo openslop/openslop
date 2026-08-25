@@ -18,7 +18,7 @@ const FILLS_DOCK: Record<BottomView, boolean> = {
 /** The transport bar and its panel, resized by a handle on the dock's top edge. */
 export function BottomDock({ children }: { children: ReactNode }) {
 	const { view } = useBottomView();
-	const { size, handleMouseDown, resizing } = useResize({
+	const { size, handleProps, resizing } = useResize({
 		axis: "vertical",
 		invert: true,
 		defaultSize: DEFAULT_HEIGHT,
@@ -37,7 +37,7 @@ export function BottomDock({ children }: { children: ReactNode }) {
 				<ResizeHandle
 					axis="vertical"
 					resizing={resizing}
-					onMouseDown={handleMouseDown}
+					handleProps={handleProps}
 				/>
 			) : null}
 			<BottomTransportBar />

@@ -1,15 +1,17 @@
 "use client";
 
+import type { PointerDragProps } from "@/lib/components/usePointerDrag";
+
 type ResizeHandleProps = {
 	axis: "vertical" | "horizontal";
 	resizing: boolean;
-	onMouseDown: (e: React.MouseEvent) => void;
+	handleProps: PointerDragProps;
 };
 
 export function ResizeHandle({
 	axis,
 	resizing,
-	onMouseDown,
+	handleProps,
 }: ResizeHandleProps) {
 	// A "vertical" axis resizes top/bottom panels, so the handle itself is a
 	// horizontal line (shadow on its bottom); "horizontal" is a vertical line
@@ -18,8 +20,8 @@ export function ResizeHandle({
 
 	return (
 		<div
-			onMouseDown={onMouseDown}
-			className={`group relative flex shrink-0 items-center justify-center ${
+			{...handleProps}
+			className={`group relative flex shrink-0 touch-none items-center justify-center ${
 				isHorizontalLine
 					? "h-2 w-full cursor-row-resize"
 					: "h-full w-4 cursor-col-resize"
