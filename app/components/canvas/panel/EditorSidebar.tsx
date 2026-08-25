@@ -130,7 +130,7 @@ function EditorSidebarComponent() {
 		<div className="flex shrink-0">
 			<nav
 				aria-label="Panels"
-				className="flex w-14 shrink-0 flex-col items-center gap-1 pt-16 mr-2 pl-1 lg:w-[72px] lg:pt-4"
+				className="flex w-14 shrink-0 flex-col items-center gap-1 pt-4 mr-2 pl-1 lg:w-[72px]"
 			>
 				<RailItem icon={Home} label="Home" href="/" />
 				<div className="my-1 h-px w-full bg-border" />
@@ -147,7 +147,7 @@ function EditorSidebarComponent() {
 			</nav>
 
 			{current && HeaderIcon && Panel && (
-				<div className="flex w-64 shrink-0 flex-col gap-3 pr-1 pt-4 pb-3 text-panel-fg">
+				<div className="flex w-64 shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg">
 					<div className="flex shrink-0 items-center gap-2 px-1">
 						<HeaderIcon className="h-5 w-5 text-panel-label" />
 						<h2 className="text-body font-semibold text-panel-label">

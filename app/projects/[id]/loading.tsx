@@ -115,14 +115,14 @@ export default function Loading() {
 			/>
 
 			{/* Profile avatar */}
-			<div className="fixed top-4 left-4 z-[100]">
-				<Skeleton className="h-9 w-9 rounded-full" />
+			<div className="fixed top-4 left-5 z-[100]">
+				<Skeleton className="size-8 rounded-full" />
 			</div>
 
 			{/* Refine bar + generate and export buttons */}
-			<div className="z-40 flex w-full shrink-0 items-center gap-3 px-4 py-1.5 pl-16">
+			<div className="z-40 flex w-full shrink-0 items-center gap-3 px-4 py-1.5">
 				<div className="hidden flex-1 sm:block" aria-hidden />
-				<Skeleton className="h-10 min-w-0 max-w-2xl flex-1 rounded-xl" />
+				<Skeleton className="h-8 min-w-0 max-w-2xl flex-1 rounded-xl" />
 				<div className="flex flex-1 items-center justify-end gap-2">
 					<Skeleton className="h-8 w-28 rounded-md" />
 					<Skeleton className="h-8 w-20 rounded-md" />
@@ -131,7 +131,7 @@ export default function Loading() {
 
 			{/* Left rail + canvas card */}
 			<div className="flex min-h-0 flex-1 overflow-hidden">
-				<nav className="mr-2 flex w-14 shrink-0 flex-col items-center gap-1 pt-16 pr-0.5 pl-1 lg:w-[72px] lg:pt-4">
+				<nav className="mr-2 flex w-14 shrink-0 flex-col items-center gap-1 pt-4 pr-0.5 pl-1 lg:w-[72px]">
 					<RailItemSkeleton />
 					<div className="my-1 h-px w-full bg-border" />
 					<RailItemSkeleton />
