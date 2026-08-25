@@ -38,6 +38,10 @@ export function useAutosave(projectId: string, editor: Editor): () => void {
 		[projectId, store, queue, editor],
 	);
 
+	// Runs after the rehydration effect above it in useEditorSession, so the
+	// loaded document is the baseline and reopening a project saves nothing.
+	useEffect(() => autosaver.markSaved(), [autosaver]);
+
 	useEffect(() => () => autosaver.flush(), [autosaver]);
 
 	useEffect(() => store.subscribe(autosaver.schedule), [store, autosaver]);
