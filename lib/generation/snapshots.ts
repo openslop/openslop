@@ -1,5 +1,6 @@
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
-import { serializeInputs, type GenerationInputs } from "./inputs";
+import type { GenerationInputs } from "./inputs";
+import type { CommittedVersion } from "./versions";
 
 export type GenerationStatus = "idle" | "queued" | "generating";
 
@@ -35,7 +36,6 @@ export const isGenerationActive = (status: GenerationStatus) =>
  */
 export class SnapshotStore {
 	private state = new Map<string, ElementSnapshot>();
-	private history = new Map<string, Map<string, AssetResult>>();
 	private listeners = new Set<() => void>();
 	private resultVersion = 0;
 
@@ -97,7 +97,6 @@ export class SnapshotStore {
 		this.state.set(id, { ...this.get(id), ...patch });
 	}
 
-	/** Drops the entry entirely; anything it held is gone. */
 	remove(id: string) {
 		if (this.state.get(id)?.result) this.resultVersion++;
 		this.state.delete(id);
@@ -127,10 +126,7 @@ export class SnapshotStore {
 		inputs: GenerationInputs,
 		connectorType: AssetConnectorType,
 		pinned: boolean,
-	) {
-		const elHistory = this.history.get(id) ?? new Map<string, AssetResult>();
-		elHistory.set(serializeInputs(inputs), result);
-		this.history.set(id, elHistory);
+	): CommittedVersion {
 		this.update(id, {
 			status: "idle",
 			seconds: 0,
@@ -140,13 +136,6 @@ export class SnapshotStore {
 			connectorType,
 			pinned,
 		});
-	}
-
-	/** Reinstates a result already generated for exactly these inputs. */
-	restore(id: string, inputs: GenerationInputs): boolean {
-		const cached = this.history.get(id)?.get(serializeInputs(inputs));
-		if (!cached) return false;
-		this.update(id, { result: cached, error: null, resultInputs: inputs });
-		return true;
+		return { elementId: id, connectorType, inputs, result, pinned };
 	}
 }

@@ -8,8 +8,10 @@ import {
 	findElementById,
 	findNodeById,
 	updateNodeText,
-	setNodeAttrs,
+	replaceGenerationAttrs,
+	mergeAttrs,
 } from "../editorOps";
+import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
 /** Mirrors `createCanvasNode`: a caret marker leaf, then the body. */
 function content(
@@ -21,7 +23,7 @@ function content(
 	return {
 		id,
 		type,
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [
 			{ id: `${id}-m`, type, text: ZERO_WIDTH_SPACE },
 			{ id: `${id}-t`, type, text },
@@ -168,21 +170,53 @@ describe("duplicateNode", () => {
 
 		const copy = (editor.children[0] as SceneElement).children[1];
 		expect(copyId).not.toBe("c1");
-		expect(copy.customAttributes).toEqual({ name: "Lyra" });
+		expect(flatAttributes(copy)).toEqual({ name: "Lyra" });
 		expect(copy.children.map((leaf) => leaf.id)).not.toContain("c1-t");
 		expect(new Set(copy.children.map((leaf) => leaf.id)).size).toBe(2);
 	});
 });
 
-describe("setNodeAttrs", () => {
+describe("replaceGenerationAttrs", () => {
+	it("drops attributes the new set does not carry", () => {
+		const el = content("image", "n1", "", { style: "ink", ratio: "16:9" });
+		const editor = makeEditor([scene([el])]);
+
+		replaceGenerationAttrs(editor, [0, 0], { style: "oil" });
+
+		const node = editor.children[0] as SceneElement;
+		expect(node.children[0].generationAttributes).toEqual({ style: "oil" });
+	});
+
+	it("leaves the element's layout attributes untouched", () => {
+		const el = content("image", "n1", "", { style: "ink", motion: "pan" });
+		const editor = makeEditor([scene([el])]);
+
+		replaceGenerationAttrs(editor, [0, 0], { style: "oil" });
+
+		const node = editor.children[0] as SceneElement;
+		expect(node.children[0].layoutAttributes).toEqual({ motion: "pan" });
+	});
+
+	it("stringifies numeric values", () => {
+		const el = content("image", "n1");
+		const editor = makeEditor([scene([el])]);
+
+		replaceGenerationAttrs(editor, [0, 0], { seed: 7 });
+
+		const node = editor.children[0] as SceneElement;
+		expect(node.children[0].generationAttributes).toEqual({ seed: "7" });
+	});
+});
+
+describe("mergeAttrs", () => {
 	it("merges new attrs into existing", () => {
 		const el = content("character", "n1", "", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { emotion: "excited" });
+		mergeAttrs(editor, [0, 0], el, { emotion: "excited" });
 
 		const node = editor.children[0] as SceneElement;
-		expect(node.children[0].customAttributes).toEqual({
+		expect(flatAttributes(node.children[0])).toEqual({
 			name: "Lyra",
 			emotion: "excited",
 		});
@@ -195,20 +229,20 @@ describe("setNodeAttrs", () => {
 		});
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { emotion: null });
+		mergeAttrs(editor, [0, 0], el, { emotion: null });
 
 		const node = editor.children[0] as SceneElement;
-		expect(node.children[0].customAttributes).toEqual({ name: "Lyra" });
+		expect(flatAttributes(node.children[0])).toEqual({ name: "Lyra" });
 	});
 
 	it("handles element with no existing customAttributes", () => {
 		const el = content("narration", "n1");
 		const editor = makeEditor([scene([el])]);
 
-		setNodeAttrs(editor, [0, 0], el, { emotion: "calm" });
+		mergeAttrs(editor, [0, 0], el, { emotion: "calm" });
 
 		const node = editor.children[0] as SceneElement;
-		expect(node.children[0].customAttributes).toEqual({ emotion: "calm" });
+		expect(flatAttributes(node.children[0])).toEqual({ emotion: "calm" });
 	});
 });
 

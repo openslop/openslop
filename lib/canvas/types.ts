@@ -84,10 +84,14 @@ export const SCENE_TYPE = "scene" as const;
 
 export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };
 
-export type CanvasContentElement = {
+export type SplitAttributes = {
+	generationAttributes?: Record<string, string>;
+	layoutAttributes?: Record<string, string>;
+};
+
+export type CanvasContentElement = SplitAttributes & {
 	id: string;
 	type: CanvasElementType;
-	customAttributes?: Record<string, string>;
 	children: CanvasText[];
 };
 
@@ -105,7 +109,7 @@ export type CanvasText = {
 	text: string;
 };
 
-export type ParsedElement = {
+export type ParsedElement = SplitAttributes & {
 	id: string;
 	type: string;
 	customAttributes?: Record<string, string>;

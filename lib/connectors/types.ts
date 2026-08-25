@@ -7,16 +7,18 @@ import type { AttributeSchema } from "./attributes/schema";
 import type { ThinkingLevel } from "./llm/enums";
 import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
 
-export type ConnectorType =
-	| "llm"
-	| "music"
-	| "sfx"
-	| "image"
-	| "animated_image"
-	| "tts"
-	| "video";
+export const ASSET_CONNECTOR_TYPES = [
+	"music",
+	"sfx",
+	"image",
+	"animated_image",
+	"tts",
+	"video",
+] as const;
 
-export type AssetConnectorType = Exclude<ConnectorType, "llm">;
+export type AssetConnectorType = (typeof ASSET_CONNECTOR_TYPES)[number];
+
+export type ConnectorType = AssetConnectorType | "llm";
 
 export type ProviderKey = "openslop";
 

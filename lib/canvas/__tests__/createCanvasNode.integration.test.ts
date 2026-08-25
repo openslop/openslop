@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "../createCanvasNode";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const connectors: ConnectorRegistry = {
 	llm: {
@@ -64,7 +65,7 @@ const connectors: ConnectorRegistry = {
 describe("createCanvasNode — schema defaults (integration)", () => {
 	it("applies full TTS defaults for narration", () => {
 		const node = createCanvasNode("narration", connectors);
-		expect(node.customAttributes).toMatchObject({
+		expect(flatAttributes(node)).toMatchObject({
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
@@ -75,7 +76,7 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 
 	it("applies the same TTS defaults for character", () => {
 		const node = createCanvasNode("character", connectors);
-		expect(node.customAttributes).toMatchObject({
+		expect(flatAttributes(node)).toMatchObject({
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
@@ -86,7 +87,7 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 
 	it("applies sfx defaults for sound", () => {
 		const node = createCanvasNode("sound", connectors);
-		expect(node.customAttributes).toMatchObject({
+		expect(flatAttributes(node)).toMatchObject({
 			loops: "1",
 			volume: "2",
 			model: "sfx-model",
@@ -96,7 +97,7 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 
 	it("applies animated_image defaults including videoPrompt", () => {
 		const node = createCanvasNode("animated_image", connectors);
-		expect(node.customAttributes).toMatchObject({
+		expect(flatAttributes(node)).toMatchObject({
 			videoPrompt: "slow cinematic pan",
 			duration: "10",
 			motion: "none",

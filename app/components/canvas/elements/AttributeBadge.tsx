@@ -4,8 +4,10 @@ import { SelectMenu } from "@/components/ui/select-menu";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { cn } from "@/lib/utils";
 import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const UNSET = "—";
 
@@ -22,6 +24,7 @@ interface AttributeBadgeProps {
 	attrKey: string;
 	spec: AttributeSpec;
 	hideLabel?: boolean;
+	className?: string;
 	/** Extra attrs to merge alongside the new value (e.g. schema reconciliation on model change). */
 	deriveExtraAttrs?: (next: string) => Record<string, string | null>;
 }
@@ -31,10 +34,11 @@ export function AttributeBadge({
 	attrKey,
 	spec,
 	hideLabel = false,
+	className,
 	deriveExtraAttrs,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
-	const value = element.customAttributes?.[attrKey] ?? "";
+	const value = flatAttributes(element)[attrKey] ?? "";
 	if (!value && !spec.edit) return null;
 
 	const SpecIcon = spec.icon;
@@ -57,7 +61,7 @@ export function AttributeBadge({
 
 	if (!spec.edit) {
 		return (
-			<span className={PILL} title={tooltip}>
+			<span className={cn(PILL, className)} title={tooltip}>
 				{labeled}
 			</span>
 		);
@@ -105,11 +109,15 @@ export function AttributeBadge({
 				label: formatValue(opt, spec.unit),
 			}))}
 			contentClassName="max-h-64 min-w-24"
+			itemClassName={className}
 		>
 			<button
 				aria-label={tooltip}
 				onMouseDown={(e) => e.preventDefault()}
-				className="inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground"
+				className={cn(
+					"inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground focus-ring",
+					className,
+				)}
 			>
 				<span className="min-w-0 truncate">{labeled}</span>
 				<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />

@@ -21,7 +21,7 @@ export function createReferenceImagesPlugin(): ConnectorPlugin<ParamsWithReferen
 	return {
 		name: "reference-images",
 		dependencies: (element) =>
-			element.customAttributes?.[REFERENCE_IMAGES_ATTR] === undefined
+			element.generationAttributes?.[REFERENCE_IMAGES_ATTR] === undefined
 				? [forReferenceImages]
 				: [],
 		beforeGenerate(params, ctx) {

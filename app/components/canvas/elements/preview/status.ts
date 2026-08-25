@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 export type GenerationState = {
@@ -10,7 +11,11 @@ export type PlaceholderProps = GenerationState & {
 	onDiscard: () => void;
 };
 
-/** The uniform contract every entry in `ELEMENT_PREVIEWS` renders against. */
-export type ElementPreviewProps = PlaceholderProps & {
-	result: ElementSnapshot["result"];
+export type PreviewOverlays = {
+	topRight?: ReactNode;
 };
+
+export type ElementPreviewProps = PlaceholderProps &
+	PreviewOverlays & {
+		result: ElementSnapshot["result"];
+	};

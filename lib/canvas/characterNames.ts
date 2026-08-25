@@ -23,7 +23,7 @@ const CHARACTER_NAME_EXTRACTORS: Record<string, (value: string) => string[]> = {
 export function getElementCharacterNames(
 	element: CanvasContentElement,
 ): string[] {
-	const attrs = element.customAttributes;
+	const attrs = element.generationAttributes;
 	if (!attrs) return [];
 	return uniq(
 		Object.entries(CHARACTER_NAME_EXTRACTORS).flatMap(([key, extract]) => {

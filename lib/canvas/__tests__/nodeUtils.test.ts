@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { Element } from "slate";
+import type { CanvasContentElement } from "../types";
 import { makeNodeId, assignIdRecursively, stripIds } from "../nodeUtils";
+import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
 describe("makeNodeId", () => {
 	it("returns a 16-character string", () => {
@@ -106,15 +108,13 @@ describe("stripIds", () => {
 		const node = {
 			id: "abc",
 			type: "image" as const,
-			customAttributes: { src: "url" },
+			...splitAttributes({ src: "url" }),
 			children: [{ type: "image" as const, text: "", id: "t1" }],
 		} as Element;
 
-		const stripped = stripIds(node) as Element & {
-			customAttributes?: Record<string, string>;
-		};
+		const stripped = stripIds(node) as CanvasContentElement;
 		expect(stripped.type).toBe("image");
-		expect(stripped.customAttributes).toEqual({ src: "url" });
+		expect(flatAttributes(stripped)).toEqual({ src: "url" });
 	});
 
 	it("returns a shallow clone for text nodes", () => {

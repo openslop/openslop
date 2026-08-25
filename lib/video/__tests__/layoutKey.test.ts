@@ -5,6 +5,7 @@ import {
 	type SceneElement,
 } from "@/lib/canvas/types";
 import { getLayoutKey } from "../layoutKey";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 function el(
 	id: string,
@@ -13,7 +14,7 @@ function el(
 	return {
 		id,
 		type: "sound",
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: `${id}-t`, type: "sound", text: "" }],
 	};
 }

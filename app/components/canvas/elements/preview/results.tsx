@@ -3,36 +3,55 @@ import { isGenerationActive } from "@/lib/generation/snapshots";
 import { AudioPlayer } from "../AudioPlayer";
 import { MediaWithSkeleton } from "../MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
-import type { GenerationState, PlaceholderProps } from "./status";
+import type {
+	GenerationState,
+	PlaceholderProps,
+	PreviewOverlays,
+} from "./status";
 import { PlaceholderBallsLoader } from "./placeholderBalls";
 import {
 	AUDIO_SAMPLE_COUNT,
 	buildSoundwaveMask,
 } from "@/lib/components/soundwave";
-import { ErrorMessage, PlaceholderOverlay, ResultOverlay } from "./overlays";
+import {
+	ErrorMessage,
+	PlaceholderOverlay,
+	PreviewChrome,
+	ResultOverlay,
+} from "./overlays";
 
 export function AudioResult({
 	src,
 	status,
 	seconds,
-}: GenerationState & {
-	src: string;
-}) {
+	topRight,
+}: GenerationState &
+	PreviewOverlays & {
+		src: string;
+	}) {
 	return (
-		<div className="group relative w-full min-h-16 rounded-lg overflow-hidden border border-border bg-element-card flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5">
-			{isGenerationActive(status) && (
-				<GenerationIndicator
-					status={status}
-					seconds={seconds}
-					className="shrink-0"
-				/>
-			)}
-			<AudioPlayer key={src} src={src} />
+		<div className="group relative flex w-full min-h-16 flex-col gap-1 overflow-hidden rounded-lg border border-border bg-element-card px-2 py-1.5">
+			<div className="flex flex-wrap items-center justify-end gap-1.5 empty:hidden">
+				{topRight}
+			</div>
+			<div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
+				{isGenerationActive(status) && (
+					<GenerationIndicator
+						status={status}
+						seconds={seconds}
+						className="shrink-0"
+					/>
+				)}
+				<AudioPlayer key={src} src={src} />
+			</div>
 		</div>
 	);
 }
 
-export function AudioPlaceholder(props: PlaceholderProps) {
+export function AudioPlaceholder({
+	topRight,
+	...props
+}: PlaceholderProps & PreviewOverlays) {
 	const [mask] = useState(() => {
 		const bars = Array.from(
 			{ length: AUDIO_SAMPLE_COUNT },
@@ -60,15 +79,20 @@ export function AudioPlaceholder(props: PlaceholderProps) {
 				</div>
 			</div>
 			<PlaceholderOverlay {...props} />
+			<PreviewChrome topRight={topRight} />
 		</div>
 	);
 }
 
-export function MediaPlaceholder(props: PlaceholderProps) {
+export function MediaPlaceholder({
+	topRight,
+	...props
+}: PlaceholderProps & PreviewOverlays) {
 	return (
 		<div className="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border">
 			<PlaceholderOverlay {...props} />
 			<PlaceholderBallsLoader generating={props.status === "generating"} />
+			<PreviewChrome topRight={topRight} />
 		</div>
 	);
 }
@@ -77,22 +101,14 @@ export function MediaResult({
 	url,
 	outputKind,
 	...state
-}: PlaceholderProps & {
-	url: string | undefined;
-	outputKind: "image" | "video";
-}) {
-	if (!url) {
-		return <MediaPlaceholder {...state} />;
-	}
+}: PlaceholderProps &
+	PreviewOverlays & {
+		url: string | undefined;
+		outputKind: "image" | "video";
+	}) {
+	if (!url) return <MediaPlaceholder {...state} />;
 	return (
-		<MediaPreview
-			key={url}
-			url={url}
-			outputKind={outputKind}
-			status={state.status}
-			seconds={state.seconds}
-			error={state.error}
-		/>
+		<MediaPreview key={url} {...state} url={url} outputKind={outputKind} />
 	);
 }
 
@@ -102,11 +118,13 @@ export function MediaPreview({
 	status,
 	seconds,
 	error,
-}: GenerationState & {
-	url: string;
-	outputKind: "image" | "video";
-	error: string | null;
-}) {
+	topRight,
+}: GenerationState &
+	PreviewOverlays & {
+		url: string;
+		outputKind: "image" | "video";
+		error: string | null;
+	}) {
 	return (
 		<div className="group relative w-full aspect-video rounded-lg overflow-hidden border border-border">
 			<MediaWithSkeleton
@@ -118,6 +136,7 @@ export function MediaPreview({
 			/>
 			{error && <ErrorMessage message={error} />}
 			<ResultOverlay status={status} seconds={seconds} />
+			<PreviewChrome topRight={topRight} />
 		</div>
 	);
 }

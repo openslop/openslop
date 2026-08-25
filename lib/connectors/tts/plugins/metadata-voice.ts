@@ -10,7 +10,7 @@ import type {
 export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "metadata-voice",
-		dependencies: (element) => [forVoice(element.customAttributes?.name)],
+		dependencies: (element) => [forVoice(element.generationAttributes?.name)],
 		beforeGenerate(params, ctx) {
 			const { narration, characters, language } = requireState(
 				ctx,

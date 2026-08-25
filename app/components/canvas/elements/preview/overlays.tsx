@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { GenerationIndicator } from "../GenerationIndicator";
-import type { GenerationState, PlaceholderProps } from "./status";
+import type {
+	GenerationState,
+	PlaceholderProps,
+	PreviewOverlays,
+} from "./status";
 
 /**
  * Vertical offset is inherited from `--cancel-offset`, so a placeholder whose
@@ -13,15 +18,27 @@ import type { GenerationState, PlaceholderProps } from "./status";
 function CancelButton({ onClick }: { onClick: () => void }) {
 	return (
 		<SimpleTooltip label="Cancel generation">
-			<button
-				type="button"
-				aria-label="Cancel generation"
-				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 w-6 h-6 rounded-full bg-muted hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+			<IconButton
+				ariaLabel="Cancel generation"
+				size="header"
+				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 rounded-full bg-muted opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}
 			>
-				<XIcon className="w-3 h-3 text-foreground" />
-			</button>
+				<XIcon className="w-3 h-3 text-foreground" aria-hidden="true" />
+			</IconButton>
 		</SimpleTooltip>
+	);
+}
+
+/**
+ * Sits above every other overlay so its controls stay clickable through an
+ * error message, and wraps rather than overflows on a narrow card.
+ */
+export function PreviewChrome({ topRight }: PreviewOverlays) {
+	return (
+		<div className="absolute right-2 top-2 z-30 flex flex-wrap items-center justify-end gap-1.5 empty:hidden">
+			{topRight}
+		</div>
 	);
 }
 

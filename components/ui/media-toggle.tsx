@@ -12,7 +12,7 @@ export type MediaToggleOption<T extends string> = {
 	disabled?: boolean;
 } & ({ icon: IconComponent; text?: never } | { icon?: never; text: string });
 
-const pill =
+const mediaChromePill =
 	"inline-flex items-center gap-0.5 rounded-md bg-media-toggle-bg p-0.5";
 
 // The tooltip trigger owns `data-state` on the item, so the selected look comes
@@ -77,7 +77,7 @@ export function MediaToggle<T extends string>({
 			// Radix clears the value when the active segment is pressed again; a
 			// segmented control always keeps one selected.
 			onValueChange={(next) => next && onChange(next as T)}
-			className={cn(pill, className)}
+			className={cn(mediaChromePill, className)}
 		>
 			{options.map((option) => (
 				<Segment
@@ -119,7 +119,7 @@ export function MediaToggleFlags<T extends string>({
 					if (on !== values[value]) onToggle(value, on);
 				}
 			}}
-			className={cn(pill, className)}
+			className={cn(mediaChromePill, className)}
 		>
 			{options.map((option) => (
 				<Segment

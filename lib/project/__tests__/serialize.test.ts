@@ -10,6 +10,7 @@ import {
 	type SceneElement,
 } from "@/lib/canvas/types";
 import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
+import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
 const connector = {
 	openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
@@ -31,7 +32,7 @@ const makeEl = (
 ): CanvasContentElement => ({
 	id: `${type}-id`,
 	type,
-	...(attrs && { customAttributes: attrs }),
+	...splitAttributes(attrs ?? {}),
 	children: [{ id: `${type}-t`, type, text }],
 });
 
@@ -86,11 +87,11 @@ describe("deserializeWithScenes", () => {
 		const image = scenes[0].children[0];
 		expect(image.type).toBe("image");
 		expect(image.id).toBe("image-id");
-		expect(image.customAttributes?.prompt).toBe('a 24" monitor & a <box>');
+		expect(flatAttributes(image).prompt).toBe('a 24" monitor & a <box>');
 		expect(getElementText(image)).toContain("5 < 10 & 20 > 15");
 	});
 
-	it("round-trips with serializeWithScenes preserving customAttributes.url", () => {
+	it("round-trips with serializeWithScenes preserving attributes", () => {
 		const original = [
 			makeScene([
 				makeEl("image", "", { url: "https://cdn/a.png", durationSec: "3" }),
@@ -106,8 +107,8 @@ describe("deserializeWithScenes", () => {
 
 		const firstImage = scenes[0].children[0];
 		expect(firstImage.type).toBe("image");
-		expect(firstImage.customAttributes?.url).toBe("https://cdn/a.png");
-		expect(firstImage.customAttributes?.durationSec).toBe("3");
+		expect(flatAttributes(firstImage).url).toBe("https://cdn/a.png");
+		expect(flatAttributes(firstImage).durationSec).toBe("3");
 
 		const firstNarration = scenes[0].children[1];
 		expect(firstNarration.type).toBe("narration");
@@ -117,6 +118,6 @@ describe("deserializeWithScenes", () => {
 
 		const secondClip = scenes[1].children[0];
 		expect(secondClip.type).toBe("clip");
-		expect(secondClip.customAttributes?.url).toBe("https://cdn/b.mp4");
+		expect(flatAttributes(secondClip).url).toBe("https://cdn/b.mp4");
 	});
 });

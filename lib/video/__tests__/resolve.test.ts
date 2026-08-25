@@ -6,6 +6,7 @@ import {
 	type SceneElement,
 } from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 function makeElement(
 	id: string,
@@ -15,7 +16,7 @@ function makeElement(
 	return {
 		id,
 		type,
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: `${id}-text`, type, text: "test" }],
 	};
 }

@@ -36,8 +36,8 @@ export function stillElement(
 		...element,
 		id: stillElementId(element.id),
 		type: "image",
-		customAttributes: {
-			...omit(element.customAttributes ?? {}, VIDEO_ONLY_KEYS),
+		generationAttributes: {
+			...omit(element.generationAttributes ?? {}, VIDEO_ONLY_KEYS),
 			// The element's own provider generates the video, not the still.
 			provider: DEFAULT_PROVIDER,
 		},

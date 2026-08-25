@@ -6,6 +6,7 @@ import {
 	resolveElementSchema,
 } from "../elementConnector";
 import type { CanvasContentElement } from "../types";
+import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
 function element(
 	type: CanvasContentElement["type"],
@@ -14,7 +15,7 @@ function element(
 	return {
 		id: "n1",
 		type,
-		customAttributes: { provider: "openslop", ...customAttributes },
+		...splitAttributes({ provider: "openslop", ...customAttributes }),
 		children: [],
 	};
 }
@@ -67,7 +68,7 @@ describe("createCanvasNode", () => {
 			attrs: { provider: "retired-vendor" },
 		});
 
-		expect(node.customAttributes?.provider).toBe("openslop");
+		expect(flatAttributes(node).provider).toBe("openslop");
 		expect(resolveElementConnector(node, registry).config).toBe(imageDefaults);
 	});
 });

@@ -13,10 +13,9 @@ export function DuplicateButton({
 	return (
 		<DuplicateIconButton
 			ariaLabel="Duplicate element"
-			onMouseDown={(e) => {
-				e.preventDefault();
-				duplicateElement(editor, element);
-			}}
+			size="header"
+			onMouseDown={(e) => e.preventDefault()}
+			onClick={() => duplicateElement(editor, element)}
 		/>
 	);
 }

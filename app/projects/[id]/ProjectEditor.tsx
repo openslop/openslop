@@ -14,6 +14,8 @@ import {
 } from "@/lib/project/storeSnapshot";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { GenerationQueueProvider } from "@/lib/generation/GenerationQueueProvider";
+import { ElementHistoryProvider } from "@/lib/generation/ElementHistoryProvider";
+import { elementHistoryStorage } from "@/lib/project/elementHistory";
 import Editor from "@/app/components/Editor";
 
 export default function ProjectEditor({
@@ -40,15 +42,17 @@ export default function ProjectEditor({
 	return (
 		<TooltipProvider>
 			<GenerationQueueProvider initialState={initialGeneration}>
-				<ProjectStoreProvider store={store}>
-					<ConfigProvider projectId={projectId}>
-						<ScriptProvider initialScript={initialScript}>
-							<UserProvider user={user}>
-								<Editor />
-							</UserProvider>
-						</ScriptProvider>
-					</ConfigProvider>
-				</ProjectStoreProvider>
+				<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>
+					<ProjectStoreProvider store={store}>
+						<ConfigProvider projectId={projectId}>
+							<ScriptProvider initialScript={initialScript}>
+								<UserProvider user={user}>
+									<Editor />
+								</UserProvider>
+							</ScriptProvider>
+						</ConfigProvider>
+					</ProjectStoreProvider>
+				</ElementHistoryProvider>
 			</GenerationQueueProvider>
 		</TooltipProvider>
 	);

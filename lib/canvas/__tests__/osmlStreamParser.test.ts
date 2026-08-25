@@ -3,6 +3,7 @@ import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
 import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const connectors: ConnectorRegistry = {
 	llm: {
@@ -49,7 +50,7 @@ describe("OSMLStreamParser", () => {
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("character");
-		expect(nodes[0].customAttributes?.name).toBe("Alice");
+		expect(flatAttributes(nodes[0]).name).toBe("Alice");
 		expect(getElementText(nodes[0])).toContain("Hello world");
 	});
 
@@ -158,7 +159,7 @@ describe("OSMLStreamParser", () => {
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].customAttributes).toMatchObject({
+		expect(flatAttributes(nodes[0])).toMatchObject({
 			effect: "thunder",
 			volume: "loud",
 		});
@@ -170,8 +171,8 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk("<music>epic orchestral</music>", connectors);
 
 		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes[0].customAttributes?.loops).toBe("1");
-		expect(nodes[1].customAttributes?.loops).toBe("1");
+		expect(flatAttributes(nodes[0]).loops).toBe("1");
+		expect(flatAttributes(nodes[1]).loops).toBe("1");
 	});
 
 	it("preserves explicit id attribute as node.id for canvas elements", () => {
@@ -180,7 +181,7 @@ describe("OSMLStreamParser", () => {
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes[0].id).toBe("abc");
-		expect(nodes[0].customAttributes?.id).toBeUndefined();
+		expect(flatAttributes(nodes[0]).id).toBeUndefined();
 	});
 
 	it("parses <animated_image> with a videoPrompt attribute", () => {
@@ -193,7 +194,7 @@ describe("OSMLStreamParser", () => {
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("animated_image");
-		expect(nodes[0].customAttributes?.videoPrompt).toBe("slow zoom in");
+		expect(flatAttributes(nodes[0]).videoPrompt).toBe("slow zoom in");
 		expect(getElementText(nodes[0])).toContain("a dark forest");
 	});
 
@@ -202,7 +203,7 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk("<image>a sunset</image>", connectors);
 
 		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes[0].customAttributes).toMatchObject({
+		expect(flatAttributes(nodes[0])).toMatchObject({
 			model: "m",
 			provider: "openslop",
 		});

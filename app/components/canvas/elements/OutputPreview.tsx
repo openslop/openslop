@@ -1,6 +1,7 @@
 import { memo } from "react";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ELEMENT_PREVIEWS } from "./preview/registry";
+import { UploadedBadge } from "./preview/UploadedBadge";
 import { useElementGeneration } from "./ElementGenerationContext";
 
 function OutputPreviewComponent({
@@ -18,6 +19,7 @@ function OutputPreviewComponent({
 			result={result}
 			error={error}
 			onDiscard={discard}
+			topRight={<UploadedBadge />}
 		/>
 	);
 }

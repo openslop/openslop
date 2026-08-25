@@ -12,8 +12,8 @@ describe("relativeTime", () => {
 
 	const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
 
-	it('returns "just now" under a minute', () => {
-		expect(relativeTime(ago(30_000))).toBe("just now");
+	it('returns "now" under a minute', () => {
+		expect(relativeTime(ago(30_000))).toBe("now");
 	});
 
 	it("returns minutes, hours, and days", () => {

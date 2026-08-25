@@ -16,7 +16,7 @@ export function preservedAttributes(
 	source: CanvasContentElement,
 	targetType: CanvasElementType,
 ): Record<string, string> {
-	const attrs = source.customAttributes ?? {};
+	const attrs = source.generationAttributes ?? {};
 	const preserved: Record<string, string> = {};
 	for (const [attribute, types] of Object.entries(PRESERVED_ATTRIBUTE_TYPES)) {
 		const value = attrs[attribute];

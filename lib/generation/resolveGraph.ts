@@ -1,4 +1,3 @@
-import omit from "lodash/omit";
 import {
 	resolveElementConnector,
 	type ElementConnector,
@@ -6,7 +5,6 @@ import {
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/video/elementAttributes";
 import { getPromptText } from "./inputs";
 import {
 	isElementNode,
@@ -31,7 +29,7 @@ const toNode = (
 	id: element.id,
 	inputs: {
 		prompt: getPromptText(element),
-		attributes: omit(element.customAttributes ?? {}, LAYOUT_ATTRIBUTE_KEYS),
+		attributes: element.generationAttributes ?? {},
 	},
 	dependsOn,
 	job: {

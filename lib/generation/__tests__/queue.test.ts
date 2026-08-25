@@ -1,10 +1,19 @@
 import { MetadataSchema } from "@/lib/project/types";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import {
+	describe,
+	expect,
+	it,
+	vi,
+	beforeEach,
+	afterEach,
+	type Mock,
+} from "vitest";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../inputs";
 import type { GenerationJob, GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
+import type { CommittedVersion } from "../versions";
 
 const EMPTY_STATE = {
 	hydrated: true,
@@ -52,12 +61,15 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 }
 
 let generationQueue: GenerationQueue;
+let committed: Mock<(version: CommittedVersion) => void> = vi.fn();
 
 describe("GenerationQueue", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		generateMock = vi.fn();
+		committed = vi.fn();
 		generationQueue = new GenerationQueue({ limits: { image: 3 } });
+		generationQueue.onCommitted(committed);
 	});
 
 	afterEach(() => {
@@ -478,25 +490,6 @@ describe("GenerationQueue", () => {
 			generationQueue.discard("sm3");
 		});
 
-		it("populates history so a later restoreResult recovers it", () => {
-			const uploaded = {
-				imageUrl: "https://example.com/upload.png",
-				durationSec: 0,
-			};
-			const inputs = { prompt: "p", attributes: {}, dependencies: {} };
-			generationQueue.commitResult(makeJob("sm4", { inputs }), uploaded);
-			generationQueue.setError("sm4", "prompt changed");
-			expect(generationQueue.getElementSnapshot("sm4").result).toBeNull();
-
-			const restored = generationQueue.restoreResult("sm4", inputs);
-			expect(restored).toBe(true);
-			expect(generationQueue.getElementSnapshot("sm4").result).toEqual(
-				uploaded,
-			);
-
-			generationQueue.discard("sm4");
-		});
-
 		it("notifies subscribers", () => {
 			const listener = vi.fn();
 			generationQueue.subscribe(listener);
@@ -548,8 +541,11 @@ describe("GenerationQueue", () => {
 	});
 
 	describe("restoreResult", () => {
-		it("restores cached result for the same inputs", async () => {
-			const result = { url: "https://example.com/asset.png", durationSec: 0 };
+		it("shows a result supplied for inputs the element has drifted from", async () => {
+			const result = {
+				imageUrl: "https://example.com/asset.png",
+				durationSec: 0,
+			};
 			generateMock.mockResolvedValue(result);
 			const inputs = {
 				prompt: "p",
@@ -558,50 +554,104 @@ describe("GenerationQueue", () => {
 			};
 			generationQueue.enqueueGraph([makeJob("rr1", { inputs })]);
 			await vi.runAllTimersAsync();
-
-			// Simulate the result drifting by setting an error first
 			generationQueue.setError("rr1", "stale");
 			expect(generationQueue.getElementSnapshot("rr1").result).toBeNull();
 
-			const restored = generationQueue.restoreResult("rr1", inputs);
-			expect(restored).toBe(true);
-			const snap = generationQueue.getElementSnapshot("rr1");
-			expect(snap.result).toEqual(result);
-			expect(snap.error).toBeNull();
-		});
-
-		it("returns false when no cached result exists", () => {
-			const restored = generationQueue.restoreResult("never-generated", {
-				prompt: "p",
-				attributes: {},
-				dependencies: {},
+			generationQueue.restoreResult({
+				elementId: "rr1",
+				connectorType: "image",
+				inputs,
+				result,
+				pinned: false,
 			});
-			expect(restored).toBe(false);
+			expect(generationQueue.getElementSnapshot("rr1")).toMatchObject({
+				result,
+				resultInputs: inputs,
+				error: null,
+			});
 		});
 
-		it("hits cache regardless of attribute key order (serialization stability)", async () => {
-			const result = { url: "https://example.com/asset.png", durationSec: 0 };
-			generateMock.mockResolvedValue(result);
-			generationQueue.enqueueGraph([
-				makeJob("rr2", {
-					inputs: {
-						prompt: "p",
-						attributes: { a: "1", b: "2" },
-						dependencies: {},
-					},
-				}),
-			]);
+		it("leaves an in-flight generation running", async () => {
+			const first = {
+				imageUrl: "https://example.com/first.png",
+				durationSec: 0,
+			};
+			generateMock.mockResolvedValue(first);
+			const inputs = { prompt: "p", attributes: {}, dependencies: {} };
+			generationQueue.enqueueGraph([makeJob("rr2", { inputs })]);
 			await vi.runAllTimersAsync();
-			generationQueue.setError("rr2", "stale");
 
-			// Look up with reversed key insertion order
-			const restored = generationQueue.restoreResult("rr2", {
-				prompt: "p",
-				attributes: { b: "2", a: "1" },
-				dependencies: {},
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([
+				makeJob("rr2", { inputs: { ...inputs, prompt: "next" } }),
+			]);
+			await vi.advanceTimersByTimeAsync(0);
+
+			generationQueue.restoreResult({
+				elementId: "rr2",
+				connectorType: "image",
+				inputs,
+				result: first,
+				pinned: false,
 			});
-			expect(restored).toBe(true);
-			expect(generationQueue.getElementSnapshot("rr2").result).toEqual(result);
+
+			expect(generationQueue.getElementSnapshot("rr2")).toMatchObject({
+				status: "generating",
+				result: first,
+			});
+			generationQueue.discard("rr2");
+		});
+
+		it("carries the version's provenance, so a restored upload stays pinned", async () => {
+			const uploaded = {
+				imageUrl: "https://example.com/up.png",
+				durationSec: 0,
+			};
+			const shared = { prompt: "p", attributes: {}, dependencies: {} };
+			generateMock.mockResolvedValue({ imageUrl: "gen.png", durationSec: 0 });
+			generationQueue.enqueueGraph([makeJob("rr3", { inputs: shared })]);
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("rr3").pinned).toBe(false);
+
+			generationQueue.restoreResult({
+				elementId: "rr3",
+				connectorType: "image",
+				inputs: shared,
+				result: uploaded,
+				pinned: true,
+			});
+
+			expect(generationQueue.getElementSnapshot("rr3")).toMatchObject({
+				result: uploaded,
+				pinned: true,
+			});
+		});
+
+		it("unpins the element when the restored version was generated", async () => {
+			const generated = {
+				imageUrl: "https://example.com/gen.png",
+				durationSec: 0,
+			};
+			const shared = { prompt: "p", attributes: {}, dependencies: {} };
+			generationQueue.commitResult(
+				makeJob("rr4", { inputs: shared }),
+				{ imageUrl: "https://example.com/up.png", durationSec: 0 },
+				{ pinned: true },
+			);
+			expect(generationQueue.getElementSnapshot("rr4").pinned).toBe(true);
+
+			generationQueue.restoreResult({
+				elementId: "rr4",
+				connectorType: "image",
+				inputs: shared,
+				result: generated,
+				pinned: false,
+			});
+
+			expect(generationQueue.getElementSnapshot("rr4")).toMatchObject({
+				result: generated,
+				pinned: false,
+			});
 		});
 	});
 
@@ -658,6 +708,40 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("committed versions", () => {
+		const generate = async (id: string, url: string) => {
+			generateMock.mockResolvedValue({ url, durationSec: 0 });
+			generationQueue.enqueueGraph([makeJob(id)]);
+			await vi.advanceTimersByTimeAsync(0);
+		};
+
+		it("announces each finished version to its listeners", async () => {
+			await generate("v1", "first.png");
+
+			expect(committed).toHaveBeenCalledWith(
+				expect.objectContaining({
+					elementId: "v1",
+					connectorType: "image",
+					pinned: false,
+					result: { url: "first.png", durationSec: 0 },
+				}),
+			);
+		});
+
+		it("announces an upload as a version of its own", () => {
+			const node = makeJob("v2");
+			generationQueue.commitResult(
+				node,
+				{ imageUrl: "up.png", durationSec: 0 },
+				{ pinned: true },
+			);
+
+			expect(committed).toHaveBeenCalledWith(
+				expect.objectContaining({ elementId: "v2", pinned: true }),
+			);
+		});
+	});
+
 	describe("snapshot", () => {
 		const idleEntry = {
 			status: "idle" as const,
@@ -676,7 +760,9 @@ describe("GenerationQueue", () => {
 			]);
 			await vi.advanceTimersByTimeAsync(0);
 
-			expect(generationQueue.snapshot()).toEqual({ s1: idleEntry });
+			expect(generationQueue.snapshot()).toEqual({
+				s1: idleEntry,
+			});
 		});
 
 		it("includes errored entries", () => {

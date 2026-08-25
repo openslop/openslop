@@ -17,7 +17,7 @@ export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCha
 	return {
 		name: "character-references",
 		dependencies: (element) =>
-			parseCharacterNames(element.customAttributes?.[CHARACTERS_ATTR]).map(
+			parseCharacterNames(element.generationAttributes?.[CHARACTERS_ATTR]).map(
 				forCharacterAvatar,
 			),
 		beforeGenerate(params, ctx?: PluginContext<ParamsWithCharacters>) {

@@ -3,6 +3,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 let store: ProjectStore;
 
@@ -88,7 +89,7 @@ describe("createReferenceImagesPlugin", () => {
 		expect(
 			dependencies?.({
 				...element,
-				customAttributes: { referenceImagesOverride: "https://img/own.png" },
+				...splitAttributes({ referenceImagesOverride: "https://img/own.png" }),
 			}),
 		).toEqual([]);
 	});

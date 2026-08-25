@@ -38,7 +38,9 @@ export function ReferenceImagesPopover({
 }: ReferenceImagesPopoverProps) {
 	const editor = useSlateStatic();
 	const projectImages = useProject((s) => s.referenceImages);
-	const override = parseReferenceImages(element.customAttributes?.[attrKey]);
+	const override = parseReferenceImages(
+		element.generationAttributes?.[attrKey],
+	);
 	const urls = override ?? projectImages;
 
 	const setOverride = (next: string[]) =>

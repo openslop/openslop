@@ -8,6 +8,7 @@ import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
 import type { GenerationInputs } from "./inputs";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
+import type { CommittedVersion } from "./versions";
 import {
 	flattenGraph,
 	isSourceNode,
@@ -37,6 +38,9 @@ export class GenerationQueue {
 	private pending: JobNode[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
+	private readonly commitListeners = new Set<
+		(version: CommittedVersion) => void
+	>();
 
 	constructor({
 		limits,
@@ -48,6 +52,13 @@ export class GenerationQueue {
 		this.limits = resolveConcurrencyLimits(limits);
 		this.snapshots = new SnapshotStore(initialState);
 	}
+
+	onCommitted = (listener: (version: CommittedVersion) => void) => {
+		this.commitListeners.add(listener);
+		return () => {
+			this.commitListeners.delete(listener);
+		};
+	};
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id?: string): ElementSnapshot => this.snapshots.get(id);
@@ -145,10 +156,14 @@ export class GenerationQueue {
 		);
 	}
 
-	restoreResult(elementId: string, inputs: GenerationInputs): boolean {
-		if (!this.snapshots.restore(elementId, inputs)) return false;
+	restoreResult({ elementId, inputs, result, pinned }: CommittedVersion): void {
+		this.snapshots.update(elementId, {
+			result,
+			error: null,
+			resultInputs: inputs,
+			pinned,
+		});
 		this.snapshots.notify();
-		return true;
 	}
 
 	private commit(
@@ -158,8 +173,15 @@ export class GenerationQueue {
 		connectorType: GenerationJob["connectorType"],
 		pinned = false,
 	): void {
-		this.snapshots.commit(elementId, result, inputs, connectorType, pinned);
+		const version = this.snapshots.commit(
+			elementId,
+			result,
+			inputs,
+			connectorType,
+			pinned,
+		);
 		this.snapshots.notify();
+		for (const listener of this.commitListeners) listener(version);
 	}
 
 	private abortJob(id: string) {

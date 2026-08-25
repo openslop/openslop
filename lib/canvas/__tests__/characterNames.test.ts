@@ -7,6 +7,7 @@ import {
 	getElementCharacterNames,
 	parseCharacterNames,
 } from "../characterNames";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 describe("parseCharacterNames", () => {
 	it("splits, trims, and drops empty names", () => {
@@ -31,7 +32,7 @@ function makeElement(
 	return {
 		id: "e1",
 		type,
-		...(customAttributes && { customAttributes }),
+		...splitAttributes(customAttributes ?? {}),
 		children: [{ id: "t1", type, text: "" }],
 	};
 }
