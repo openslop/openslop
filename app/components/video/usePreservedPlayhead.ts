@@ -2,7 +2,8 @@ import type { PlayerRef } from "@remotion/player";
 import { useEffect, type MutableRefObject } from "react";
 import { clamp } from "@/lib/utils";
 
-// Carries the playhead across the player's `key` remount via a parent-owned ref.
+// The preview unmounts whenever the queue goes busy or the script is being
+// written, so the frame lives in a ref the panel owns across those swaps.
 export function usePreservedPlayhead(
 	player: PlayerRef | null,
 	frameRef: MutableRefObject<number | null>,

@@ -8,7 +8,7 @@ import { QueueProgressBar } from "./QueueProgressBar";
 import { PlayerShimmer } from "./PlayerShimmer";
 
 function VideoPanelBody() {
-	const { layout, ready, playerKey } = useLayout();
+	const { layout, ready } = useLayout();
 	const { writingScript } = useSloppy();
 	const restoreFrameRef = useRef<number | null>(null);
 
@@ -27,13 +27,7 @@ function VideoPanelBody() {
 		);
 	}
 	if (!ready) return <QueueProgressBar />;
-	return (
-		<VideoPreview
-			key={playerKey}
-			layout={layout}
-			restoreFrameRef={restoreFrameRef}
-		/>
-	);
+	return <VideoPreview layout={layout} restoreFrameRef={restoreFrameRef} />;
 }
 
 export function VideoPanel() {

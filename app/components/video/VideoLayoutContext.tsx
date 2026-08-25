@@ -19,7 +19,6 @@ import { useVideoLayout } from "./useVideoLayout";
 type VideoLayoutValue = {
 	layout: VideoLayout;
 	ready: boolean;
-	playerKey: string;
 	segments: SceneSegment[];
 	scenes: SceneElement[];
 	sequenceByElementId: SequenceIndex;
@@ -31,7 +30,7 @@ export { useLayout };
 
 export function VideoLayoutProvider({ children }: { children: ReactNode }) {
 	const editor = useSlateStatic();
-	const { layout, playerKey, scenes } = useVideoLayout(editor);
+	const { layout, scenes } = useVideoLayout(editor);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
@@ -41,8 +40,8 @@ export function VideoLayoutProvider({ children }: { children: ReactNode }) {
 	);
 	const segments = useMemo(() => buildSceneSegments(layout), [layout]);
 	const value = useMemo(
-		() => ({ layout, ready, playerKey, segments, scenes, sequenceByElementId }),
-		[layout, ready, playerKey, segments, scenes, sequenceByElementId],
+		() => ({ layout, ready, segments, scenes, sequenceByElementId }),
+		[layout, ready, segments, scenes, sequenceByElementId],
 	);
 	return <VideoLayoutContext value={value}>{children}</VideoLayoutContext>;
 }
