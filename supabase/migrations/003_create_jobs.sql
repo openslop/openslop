@@ -27,6 +27,4 @@ alter table jobs enable row level security;
 
 create policy "jobs_select_own" on jobs
   for select using (auth.uid() = user_id);
-create policy "jobs_insert_own" on jobs
-  for insert with check (auth.uid() = user_id);
--- UPDATE/DELETE only via service role (bypasses RLS).
+-- INSERT/UPDATE/DELETE only via service role (bypasses RLS).
