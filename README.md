@@ -22,7 +22,10 @@
 </p>
 
 <p align="center">
-  <img src="./assets/openslop-demo.gif" alt="OpenSlop - your free AI video creator" width="100%">
+  <picture>
+    <source srcset="./assets/openslop-demo.webp" type="image/webp">
+    <img src="./assets/openslop-demo.gif" alt="OpenSlop - your free AI video creator" width="100%">
+  </picture>
 </p>
 
 ---
