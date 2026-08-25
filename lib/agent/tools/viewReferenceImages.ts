@@ -29,4 +29,5 @@ export const viewReferenceImages = defineTool({
 			);
 		return { urls };
 	},
+	snapshot: true,
 });

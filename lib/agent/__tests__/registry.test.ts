@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
-import { SLOPPY_TOOLS, executeToolCall } from "../tools/registry";
+import {
+	SCRIPT_TOOLS,
+	SLOPPY_TOOLS,
+	SNAPSHOT_TOOLS,
+	executeToolCall,
+} from "../tools/registry";
 import { MetadataSchema } from "@/lib/project/types";
 
 const metadata = MetadataSchema.parse({
@@ -383,5 +388,23 @@ describe("a call the editor cannot run", () => {
 			ok: false,
 			errorText: "render_video is not a tool.",
 		});
+	});
+});
+
+describe("tool flags", () => {
+	it("collects the tools whose output only lasts the turn", () => {
+		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
+			"read_script",
+			"view_avatar",
+			"view_reference_images",
+		]);
+	});
+
+	it("collects the tools that rewrite the canvas", () => {
+		expect([...SCRIPT_TOOLS].sort()).toEqual([
+			"adapt_script",
+			"edit_script",
+			"write_script",
+		]);
 	});
 });

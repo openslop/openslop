@@ -57,4 +57,5 @@ export const editScript = defineTool({
 			"Read the script again before retrying; the ids you used may be stale.",
 		].join(" ");
 	},
+	rewritesCanvas: true,
 });

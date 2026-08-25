@@ -46,4 +46,5 @@ export const adaptScript = defineTool({
 		await ctx.adaptScript(script, notes);
 		return "Put that script onto the canvas. Read it to see what landed.";
 	},
+	rewritesCanvas: true,
 });
