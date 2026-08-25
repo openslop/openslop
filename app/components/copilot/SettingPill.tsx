@@ -50,7 +50,7 @@ export function SettingPill<T extends string>({
 				aria-label={`${name}: ${selected.label}`}
 				disabled={disabled}
 				className={cn(
-					"focus-ring inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label text-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none disabled:opacity-50",
+					"focus-ring inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label whitespace-nowrap text-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none disabled:opacity-50",
 					className,
 				)}
 				style={style}
