@@ -70,6 +70,7 @@ describe("createAutosaver", () => {
 		createAutosaver({
 			projectId,
 			store,
+			initialScript: "<osml/>",
 			getScript: () => "<osml/>",
 			getGeneration: () => ({}),
 			onSaved,
@@ -161,6 +162,27 @@ describe("createAutosaver", () => {
 		expect(onSaved).not.toHaveBeenCalled();
 	});
 
+	it("does not save the loaded script back when the editor rehydrates", async () => {
+		hydrate();
+		// Slate is filled in an effect, so the editor is empty at this point.
+		let script = "";
+		const autosaver = createAutosaver({
+			projectId,
+			store,
+			initialScript: "<osml/>",
+			getScript: () => script,
+			getGeneration: () => ({}),
+			onSaved,
+			onError,
+		});
+
+		script = "<osml/>";
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).not.toHaveBeenCalled();
+	});
+
 	it("saves the first real edit after an unchanged open", async () => {
 		hydrate();
 		const autosaver = build();
@@ -199,6 +221,7 @@ describe("createAutosaver", () => {
 		const autosaver = createAutosaver({
 			projectId,
 			store,
+			initialScript: "<osml/>",
 			getScript: () => "<osml/>",
 			getGeneration: () => generation,
 			onSaved,
