@@ -120,14 +120,9 @@ export class SnapshotStore {
 		}
 	}
 
-	commit(
-		id: string,
-		result: AssetResult,
-		inputs: GenerationInputs,
-		connectorType: AssetConnectorType,
-		pinned: boolean,
-	): CommittedVersion {
-		this.update(id, {
+	commit(version: CommittedVersion): CommittedVersion {
+		const { elementId, result, inputs, connectorType, pinned } = version;
+		this.update(elementId, {
 			status: "idle",
 			seconds: 0,
 			result,
@@ -136,6 +131,6 @@ export class SnapshotStore {
 			connectorType,
 			pinned,
 		});
-		return { elementId: id, connectorType, inputs, result, pinned };
+		return version;
 	}
 }

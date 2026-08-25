@@ -15,6 +15,7 @@ import { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { MetadataSchema } from "@/lib/project/types";
 import {
+	carryOverStill,
 	createStillFramePlugin,
 	stillElementId,
 	stillSnapshot,
@@ -245,5 +246,73 @@ describe("uploaded still lifetime", () => {
 		const { animation, still } = afterUpload("a forest", "slow pan");
 		expect(still).toBe(false);
 		expect(animation).toBe(false);
+	});
+});
+
+describe("carryOverStill", () => {
+	const registry = DEFAULT_CONNECTOR_REGISTRY;
+	const state = {
+		hydrated: true,
+		metadata: MetadataSchema.parse({}),
+		referenceImages: [],
+	};
+	const image = {
+		id: ELEMENT_ID,
+		type: "image" as const,
+		generationAttributes: { provider: "openslop" },
+		children: [{ id: "t", type: "image" as const, text: "a forest" }],
+	};
+	const animated = (text = "a forest") => ({
+		...image,
+		type: "animated_image" as const,
+		generationAttributes: {
+			...image.generationAttributes,
+			videoPrompt: "slow pan",
+		},
+		children: [{ id: "t", type: "animated_image" as const, text }],
+	});
+
+	const stillOf = (node: GenerationNode) => {
+		const still = node.dependsOn.find(
+			(dep) => dep.id === stillElementId(ELEMENT_ID),
+		);
+		if (!still) throw new Error("expected a still dependency");
+		return still;
+	};
+
+	const animate = (generated: boolean) => {
+		const queue = new GenerationQueue();
+		const build = nodeBuilder(registry, state);
+		if (generated)
+			queue.commitResult(build(forElement(image)), {
+				imageUrl: STILL_URL,
+				durationSec: 0,
+			});
+		carryOverStill(image, queue, build);
+		return { queue, build };
+	};
+
+	it("animates the frame the image already had", () => {
+		const { queue, build } = animate(true);
+		const node = build(forElement(animated()));
+
+		expect(stillSnapshot(node, queue).result?.imageUrl).toBe(STILL_URL);
+		expect(needsGeneration(stillOf(node), queue)).toBe(false);
+		expect(needsGeneration(node, queue)).toBe(true);
+	});
+
+	it("leaves the carried-over still stale-able by its own prompt", () => {
+		const { queue, build } = animate(true);
+		const edited = build(forElement(animated("a meadow")));
+
+		expect(needsGeneration(stillOf(edited), queue)).toBe(true);
+	});
+
+	it("does nothing for an image that has not been generated", () => {
+		const { queue, build } = animate(false);
+		const node = build(forElement(animated()));
+
+		expect(stillSnapshot(node, queue).result).toBeNull();
+		expect(needsGeneration(stillOf(node), queue)).toBe(true);
 	});
 });

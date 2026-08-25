@@ -1,5 +1,6 @@
 import keyBy from "lodash/keyBy";
 import sortBy from "lodash/sortBy";
+import type { CanvasElementType } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { serializeInputs, type GenerationInputs } from "./inputs";
 
@@ -7,6 +8,8 @@ export type ElementVersion = {
 	elementId: string;
 	createdAt: string;
 	connectorType: AssetConnectorType;
+	/** Absent on versions stored before the element type was recorded. */
+	elementType?: CanvasElementType;
 	inputs: GenerationInputs;
 	result: AssetResult;
 	/** The result was supplied rather than generated. */

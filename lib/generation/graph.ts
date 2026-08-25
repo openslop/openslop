@@ -1,6 +1,9 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type {
+	CanvasContentElement,
+	CanvasElementType,
+} from "@/lib/canvas/types";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type {
 	AssetConnectorType,
@@ -21,6 +24,7 @@ export type NodeId = string;
 /** Everything the queue needs to run one node. */
 export type GenerationJob = {
 	elementId: string;
+	elementType: CanvasElementType;
 	connectorType: AssetConnectorType;
 	provider: ProviderKey;
 	config: ConnectorConfig;

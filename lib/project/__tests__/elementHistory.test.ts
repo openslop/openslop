@@ -38,6 +38,18 @@ describe("parseElementVersions", () => {
 		]);
 	});
 
+	it("reads the element type a version was generated as", () => {
+		const [version] = parseElementVersions([
+			row({ element_type: "animated_image" }),
+		]);
+		expect(version?.elementType).toBe("animated_image");
+	});
+
+	it("leaves the element type unset on a row written without one", () => {
+		const [version] = parseElementVersions([row()]);
+		expect(version?.elementType).toBeUndefined();
+	});
+
 	it("treats a project with no history as empty", () => {
 		expect(parseElementVersions(null)).toEqual([]);
 	});
@@ -110,6 +122,14 @@ describe("saveElementVersion", () => {
 		const theirs = await savedRow("p2", makeVersion());
 
 		expect(theirs.id).not.toBe(mine.id);
+	});
+
+	it("writes the element type the version was generated as", async () => {
+		const saved = await savedRow(
+			"p1",
+			makeVersion({ elementType: "animated_image" }),
+		);
+		expect(saved.element_type).toBe("animated_image");
 	});
 
 	it("throws when the write fails", async () => {

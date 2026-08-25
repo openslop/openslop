@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ElementVersion } from "@/lib/generation/versions";
-import { applyNodeInputs } from "../utils/nodeOps";
+import { applyElementVersion } from "../utils/nodeOps";
 import { VersionHistoryPopover } from "./VersionHistoryPopover";
 
 export function ElementHistoryButton({
@@ -13,13 +13,10 @@ export function ElementHistoryButton({
 	element: CanvasContentElement;
 }) {
 	const editor = useSlateStatic();
-	const restoreInputs = useCallback(
-		(version: ElementVersion) =>
-			applyNodeInputs(editor, element, version.inputs),
+	const restore = useCallback(
+		(version: ElementVersion) => applyElementVersion(editor, element, version),
 		[editor, element],
 	);
 
-	return (
-		<VersionHistoryPopover elementId={element.id} onRestore={restoreInputs} />
-	);
+	return <VersionHistoryPopover elementId={element.id} onRestore={restore} />;
 }

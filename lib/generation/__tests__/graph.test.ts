@@ -33,6 +33,7 @@ function node(
 ): GenerationNode {
 	const job: GenerationJob = {
 		elementId: id,
+		elementType: "image",
 		connectorType: "image",
 		provider: "openslop",
 		config,

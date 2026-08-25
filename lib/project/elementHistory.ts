@@ -1,5 +1,9 @@
 import { v5 as uuidv5 } from "uuid";
 import { z } from "zod";
+import {
+	CANVAS_ELEMENT_TYPES,
+	type CanvasElementType,
+} from "@/lib/canvas/types";
 import { ASSET_CONNECTOR_TYPES } from "@/lib/connectors/types";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { VersionStorage } from "@/lib/generation/history";
@@ -26,10 +30,16 @@ const ResultSchema = z.object({
 		.optional(),
 }) satisfies z.ZodType<AssetResult>;
 
+const ElementTypeSchema = z.enum([...CANVAS_ELEMENT_TYPES] as [
+	CanvasElementType,
+	...CanvasElementType[],
+]);
+
 const RowSchema = z.object({
 	element_id: z.string(),
 	created_at: z.string(),
 	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
+	element_type: ElementTypeSchema.nullish(),
 	inputs: InputsSchema,
 	result: ResultSchema,
 	pinned: z.boolean(),
@@ -39,6 +49,7 @@ const toVersion = (row: z.infer<typeof RowSchema>): ElementVersion => ({
 	elementId: row.element_id,
 	createdAt: row.created_at,
 	connectorType: row.connector_type,
+	elementType: row.element_type ?? undefined,
 	inputs: row.inputs,
 	result: row.result,
 	pinned: row.pinned,
@@ -49,13 +60,14 @@ const toRow = (projectId: string, version: ElementVersion) => ({
 	project_id: projectId,
 	element_id: version.elementId,
 	connector_type: version.connectorType,
+	element_type: version.elementType ?? null,
 	inputs: version.inputs,
 	result: version.result,
 	pinned: version.pinned,
 });
 
 const COLUMNS =
-	"element_id, created_at, connector_type, inputs, result, pinned";
+	"element_id, created_at, connector_type, element_type, inputs, result, pinned";
 
 /** Changing this re-keys every row, so it is fixed for the table's lifetime. */
 const ROW_ID_NAMESPACE = "5673ca03-e04d-4279-b92d-df493e2b9150";

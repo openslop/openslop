@@ -147,13 +147,14 @@ export class GenerationQueue {
 		if (isSourceNode(node))
 			throw new Error(`Source node "${node.id}" cannot hold a result`);
 		this.cancel(node.id);
-		this.commit(
-			node.id,
+		this.commit({
+			elementId: node.id,
+			elementType: node.job.elementType,
+			connectorType: node.job.connectorType,
+			inputs: nodeInputs(node, this),
 			result,
-			nodeInputs(node, this),
-			node.job.connectorType,
 			pinned,
-		);
+		});
 	}
 
 	restoreResult({ elementId, inputs, result, pinned }: CommittedVersion): void {
@@ -166,20 +167,8 @@ export class GenerationQueue {
 		this.snapshots.notify();
 	}
 
-	private commit(
-		elementId: string,
-		result: AssetResult,
-		inputs: GenerationInputs,
-		connectorType: GenerationJob["connectorType"],
-		pinned = false,
-	): void {
-		const version = this.snapshots.commit(
-			elementId,
-			result,
-			inputs,
-			connectorType,
-			pinned,
-		);
+	private commit(version: CommittedVersion): void {
+		this.snapshots.commit(version);
 		this.snapshots.notify();
 		for (const listener of this.commitListeners) listener(version);
 	}
@@ -281,7 +270,14 @@ export class GenerationQueue {
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		this.commit(job.elementId, result, inputs, job.connectorType);
+		this.commit({
+			elementId: job.elementId,
+			elementType: job.elementType,
+			connectorType: job.connectorType,
+			inputs,
+			result,
+			pinned: false,
+		});
 	}
 
 	private handleJobError(

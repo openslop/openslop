@@ -5,6 +5,7 @@ create table if not exists element_history (
   project_id uuid not null references projects(id) on delete cascade,
   element_id text not null,
   connector_type text not null,
+  element_type text,
   inputs jsonb not null,
   result jsonb not null,
   pinned boolean not null default false,

@@ -14,6 +14,7 @@ import {
 	type NodeSpec,
 } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
+import type { NodeBuilder } from "@/lib/generation/resolveGraph";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /**
@@ -59,6 +60,22 @@ export const stillSnapshot = (
 	node: GenerationNode,
 	queue: GenerationQueue,
 ): ElementSnapshot => queue.getElementSnapshot(stillDependency(node)?.id);
+
+/**
+ * Moves an image's own result onto the still it is about to become, so animating
+ * an image animates the frame the user already has instead of a fresh one. The
+ * still stays a node with its own inputs, so editing it still stales the animation.
+ */
+export function carryOverStill(
+	element: CanvasContentElement,
+	queue: GenerationQueue,
+	buildNode: NodeBuilder,
+): void {
+	const { result } = queue.getElementSnapshot(element.id);
+	if (!result) return;
+	queue.commitResult(buildNode(forStillOf(element)), result);
+	queue.discard(element.id);
+}
 
 const stillFrame = (
 	ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,

@@ -34,6 +34,7 @@ const config: ConnectorConfig = {
 function makeJob(connectorType: AssetConnectorType): GenerationJob {
 	return {
 		elementId: "el-1",
+		elementType: "image",
 		connectorType,
 		provider: "openslop",
 		config,
