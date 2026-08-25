@@ -24,6 +24,7 @@ export function useEditorSession(): EditorSession {
 	useProjectRehydrate(editor, useScriptInitial());
 	useScriptSync(editor);
 	useMetadataSync();
+	// Last: autosave takes the document these leave behind as its saved baseline.
 	const onDocumentChange = useAutosave(projectId, editor);
 
 	return { editor, onDocumentChange };

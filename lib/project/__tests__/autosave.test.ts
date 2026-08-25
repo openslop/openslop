@@ -70,7 +70,6 @@ describe("createAutosaver", () => {
 		createAutosaver({
 			projectId,
 			store,
-			initialScript: "<osml/>",
 			getScript: () => "<osml/>",
 			getGeneration: () => ({}),
 			onSaved,
@@ -153,6 +152,7 @@ describe("createAutosaver", () => {
 	it("does not save when the hydrated state is unchanged", async () => {
 		hydrate();
 		const autosaver = build();
+		autosaver.markSaved();
 		// The echo a real open produces: metadata written back with identical content.
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
 		autosaver.schedule();
@@ -162,30 +162,43 @@ describe("createAutosaver", () => {
 		expect(onSaved).not.toHaveBeenCalled();
 	});
 
-	it("does not save the loaded script back when the editor rehydrates", async () => {
+	it("does not save the document it was handed as already saved", async () => {
 		hydrate();
-		// Slate is filled in an effect, so the editor is empty at this point.
+		// Slate is filled in an effect, so the editor is empty until markSaved.
 		let script = "";
 		const autosaver = createAutosaver({
 			projectId,
 			store,
-			initialScript: "<osml/>",
 			getScript: () => script,
 			getGeneration: () => ({}),
 			onSaved,
 			onError,
 		});
 
-		script = "<osml/>";
 		autosaver.schedule();
+		script = "<osml/>";
+		autosaver.markSaved();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 
 		expect(saveProject).not.toHaveBeenCalled();
 	});
 
+	it("saves an edit made after the baseline was taken", async () => {
+		hydrate();
+		const autosaver = build();
+		autosaver.markSaved();
+
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(1);
+	});
+
 	it("saves the first real edit after an unchanged open", async () => {
 		hydrate();
 		const autosaver = build();
+		autosaver.markSaved();
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
@@ -221,7 +234,6 @@ describe("createAutosaver", () => {
 		const autosaver = createAutosaver({
 			projectId,
 			store,
-			initialScript: "<osml/>",
 			getScript: () => "<osml/>",
 			getGeneration: () => generation,
 			onSaved,

@@ -6,7 +6,6 @@ import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { createAutosaver } from "@/lib/project/autosave";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { useScriptInitial } from "@/lib/script/ScriptProvider";
 
 const TOAST_OPTIONS = {
 	id: "autosave",
@@ -21,14 +20,12 @@ const TOAST_OPTIONS = {
 export function useAutosave(projectId: string, editor: Editor): () => void {
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
-	const initialScript = useScriptInitial();
 
 	const autosaver = useMemo(
 		() =>
 			createAutosaver({
 				projectId,
 				store,
-				initialScript,
 				getScript: () => serializeOSMLWithScenes(editor.children),
 				getGeneration: () => queue.snapshot(),
 				onSaved: () => toast("Saved", TOAST_OPTIONS),
@@ -38,8 +35,12 @@ export function useAutosave(projectId: string, editor: Editor): () => void {
 						duration: 4000,
 					}),
 			}),
-		[projectId, store, initialScript, queue, editor],
+		[projectId, store, queue, editor],
 	);
+
+	// Runs after the rehydration effect above it in useEditorSession, so the
+	// loaded document is the baseline and reopening a project saves nothing.
+	useEffect(() => autosaver.markSaved(), [autosaver]);
 
 	useEffect(() => () => autosaver.flush(), [autosaver]);
 
