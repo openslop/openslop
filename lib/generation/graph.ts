@@ -86,6 +86,12 @@ const DERIVED_PREFIX = "~";
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
 
+const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
+
+/** The node a derived id was minted from, if it was derived at all. */
+export const derivedFrom = (id: NodeId): NodeId | null =>
+	DERIVED_ID.exec(id)?.[1] ?? null;
+
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,
