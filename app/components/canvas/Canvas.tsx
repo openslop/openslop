@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, KeyboardEvent } from "react";
-import { Editor } from "slate";
-import { Editable, RenderElementProps } from "slate-react";
+import { Editable, RenderElementProps, useSlateStatic } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -17,7 +16,8 @@ import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { AssetsSection } from "./elements/AssetsSection";
 
-export default function Canvas({ editor }: { editor: Editor }) {
+export default function Canvas() {
+	const editor = useSlateStatic();
 	const {
 		activeId,
 		sceneItems,

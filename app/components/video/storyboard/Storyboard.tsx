@@ -1,8 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import type { Editor } from "slate";
-import { ReactEditor } from "slate-react";
+import { ReactEditor, useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { removeElement } from "@/app/components/canvas/utils/nodeOps";
@@ -19,7 +18,8 @@ import {
 } from "./storyboardScenes";
 import { StoryboardScene } from "./StoryboardScene";
 
-export function Storyboard({ editor }: { editor: Editor }) {
+export function Storyboard() {
+	const editor = useSlateStatic();
 	const { layout, segments, scenes } = useLayout();
 	const { player } = usePlayerControl();
 	const { connectorConfig } = useConfig();

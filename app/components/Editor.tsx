@@ -21,11 +21,7 @@ export default function Editor() {
 							showWorkspace ? "" : "pt-[22vh]"
 						}`}
 					>
-						{showWorkspace ? (
-							<PostPromptView editor={editor} />
-						) : (
-							<PrePromptView />
-						)}
+						{showWorkspace ? <PostPromptView /> : <PrePromptView />}
 					</div>
 				</CanvasProviders>
 			</BottomViewProvider>

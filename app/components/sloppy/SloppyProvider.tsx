@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
@@ -65,13 +65,8 @@ function useTranscript(projectId: string): SloppyMessage[] | null {
  * canvas, and the result goes straight back as the next step, until the model
  * answers with text instead of another call.
  */
-export function SloppyProvider({
-	editor,
-	children,
-}: {
-	editor: Editor;
-	children: ReactNode;
-}) {
+export function SloppyProvider({ children }: { children: ReactNode }) {
+	const editor = useSlateStatic();
 	const { projectId } = useConfig();
 	const runTool = useAgentTools(editor);
 	const readContext = useAgentContext(editor);

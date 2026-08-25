@@ -72,6 +72,7 @@ Staleness falls out of the graph: a node needs generating when it has no result,
 - `lib/canvas/elementConnector.ts` answers "which connector, provider and model does this element use?" for both the UI and the queue. An element pins its provider when created, so this is also where a pin that no longer resolves falls back to the registry default.
 - `lib/script/` provides script context and refinement utilities.
 - `app/components/canvas/hooks/useEditorSession.ts` is the one place the Slate editor gets wired to a project: initial hydration, streaming script sync, metadata sync, and autosave. Views call it and render the editor; they never assemble it.
+- The editor instance is a prop in exactly one place: `Editor` hands it to `CanvasProviders`, which puts it in `<Slate>`. Everything below reaches it with `useSlateStatic()`, so no component takes it just to pass it on.
 - `lib/project/autosave.ts` owns saving: it builds the row from the store snapshot, script and generation snapshot, then debounces and serializes writes so a slow save can't land after a newer one. `useAutosave` only subscribes the editor value, the store, and the queue to it, and turns the result into a toast.
 
 ## Data

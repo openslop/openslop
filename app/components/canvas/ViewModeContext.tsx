@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
-import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import type { CanvasElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
@@ -18,13 +18,8 @@ const [ViewModeContext, useViewMode] =
 	createRequiredContext<ViewModeValue>("ViewModeContext");
 export { useViewMode };
 
-export function ViewModeProvider({
-	editor,
-	children,
-}: {
-	editor: Editor;
-	children: ReactNode;
-}) {
+export function ViewModeProvider({ children }: { children: ReactNode }) {
+	const editor = useSlateStatic();
 	const [collapsedScenes, setCollapsedScenes] = useState<Set<string>>(
 		() => new Set(),
 	);

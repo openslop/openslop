@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { CanvasEditor } from "@/lib/canvas/types";
 
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
@@ -15,14 +14,14 @@ import { Timeline } from "./video/timeline/Timeline";
 import { useBottomView, type BottomView } from "./video/BottomViewContext";
 import { usePlayerPosition } from "./video/PlayerPositionContext";
 
-export default function PostPromptView({ editor }: { editor: CanvasEditor }) {
+export default function PostPromptView() {
 	const { position, visible } = usePlayerPosition();
 	const { view } = useBottomView();
 	const isTop = position === "top";
 
 	const bottomPanel: Record<BottomView, ReactNode> = {
 		timeline: <Timeline />,
-		storyboard: <Storyboard editor={editor} />,
+		storyboard: <Storyboard />,
 		hidden: null,
 	};
 
@@ -34,7 +33,7 @@ export default function PostPromptView({ editor }: { editor: CanvasEditor }) {
 			/>
 			<UserProfile />
 
-			<EditorToolbar editor={editor} />
+			<EditorToolbar />
 			<div className="flex min-h-0 flex-1 overflow-hidden">
 				<EditorSidebar />
 				<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
@@ -48,7 +47,7 @@ export default function PostPromptView({ editor }: { editor: CanvasEditor }) {
 							>
 								<div className="mx-auto max-w-6xl px-4 py-4">
 									<ProjectTitle />
-									<Canvas editor={editor} />
+									<Canvas />
 								</div>
 							</div>
 
