@@ -262,7 +262,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 					</div>
 				</div>
 				<div className="flex items-center justify-between pt-2">
-					<div className="flex items-center gap-2">
+					<div className="flex min-w-0 flex-wrap items-center gap-2">
 						{inputElement}
 						<AttachMenu openPicker={openPicker} uploading={uploading} />
 						<SettingPill
