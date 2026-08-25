@@ -97,7 +97,6 @@ describe("createAutosaver", () => {
 		store.getState().markHydrated();
 	};
 
-	/** A real user change, so the autosaver has something to save. */
 	let refCount = 0;
 	const edit = () => {
 		refCount += 1;
@@ -240,7 +239,6 @@ describe("createAutosaver", () => {
 			onError,
 		});
 
-		// A finished generation result, with the store untouched.
 		generation = { a: imageSnapshot("https://cdn/a.png") };
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
