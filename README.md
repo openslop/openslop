@@ -1,4 +1,6 @@
-<h1 align="center">OpenSlop</h1>
+<p align="center">
+  <img src="./assets/openslop-lockup-animated.svg" alt="OpenSlop" width="560">
+</p>
 
 <p align="center"><b>Free, open-source AI video creator.</b></p>
 
