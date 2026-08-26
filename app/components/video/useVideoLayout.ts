@@ -16,7 +16,6 @@ import type { VideoLayout } from "@/lib/video/types";
 
 export function useVideoLayout(editor: Editor): {
 	layout: VideoLayout;
-	playerKey: string;
 	scenes: SceneElement[];
 } {
 	const queue = useGenerationQueue();
@@ -60,5 +59,5 @@ export function useVideoLayout(editor: Editor): {
 		queue,
 	]);
 
-	return { layout, playerKey: `${layoutKey}-${resultVersion}`, scenes };
+	return { layout, scenes };
 }
