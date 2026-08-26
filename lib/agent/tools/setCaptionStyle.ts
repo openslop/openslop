@@ -1,4 +1,5 @@
 import dedent from "dedent";
+import merge from "lodash/merge";
 import { z } from "zod";
 import {
 	CAPTION_PRESET_KEYS,
@@ -61,18 +62,11 @@ export const setCaptionStyle = defineTool({
 		.refine(notEmpty, named("caption setting")),
 	output: z.string(),
 	execute: async ({ preset, captions, ...overrides }, ctx) => {
-		const from =
-			preset !== undefined
-				? captionPresetStyle(preset)
-				: ctx.readMetadata().videoSettings.captionStyle;
-
-		// Parsed back into a whole style so what is persisted is never a partial.
-		const captionStyle = CaptionStyleSchema.parse({
-			...from,
-			...overrides,
-			base: { ...from.base, ...overrides.base },
-			activeWord: { ...from.activeWord, ...overrides.activeWord },
-		});
+		// Metadata patches are deep-merged, so a partial style lands on the stored one.
+		const captionStyle =
+			preset === undefined
+				? overrides
+				: merge({}, captionPresetStyle(preset), overrides);
 
 		ctx.setMetadata({
 			videoSettings: {

@@ -11,10 +11,7 @@ import {
 	type DeepPartial,
 	type Metadata,
 } from "@/lib/project/types";
-import {
-	CaptionStyleSchema,
-	DEFAULT_CAPTION_STYLE,
-} from "@/lib/video/captionStyle";
+import { CaptionStyleSchema } from "@/lib/video/captionStyle";
 
 const metadata = MetadataSchema.parse({
 	title: "Little Red",
@@ -220,17 +217,14 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("Karaoke preset");
 	});
 
-	it("changes one caption field against the style the project already has", async () => {
+	it("sends only the caption field it was given, so the rest of the style stands", async () => {
 		const patches: DeepPartial<Metadata>[] = [];
 		await executeToolCall(
 			{ toolName: "set_caption_style", input: { fontSize: 120 } },
 			context({ setMetadata: (patch) => void patches.push(patch) }),
 		);
 
-		expect(patches[0]?.videoSettings?.captionStyle).toEqual({
-			...DEFAULT_CAPTION_STYLE,
-			fontSize: 120,
-		});
+		expect(patches[0]?.videoSettings?.captionStyle).toEqual({ fontSize: 120 });
 	});
 
 	it("turns captions off without disturbing their style", async () => {
@@ -242,7 +236,7 @@ describe("executeToolCall", () => {
 
 		expect(patches[0]?.videoSettings).toEqual({
 			captions: false,
-			captionStyle: DEFAULT_CAPTION_STYLE,
+			captionStyle: {},
 		});
 		expect(outcome.ok && outcome.output).toContain("captions off");
 	});
