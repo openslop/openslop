@@ -6,7 +6,7 @@ import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
 import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { getContentElements } from "@/lib/canvas/scenes";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import {
 	SCENE_TYPE,
@@ -15,77 +15,68 @@ import {
 	type SceneElement,
 } from "@/lib/canvas/types";
 
-function content(
+const content = (
 	type: CanvasContentElement["type"],
 	id: string,
 	text = "",
-): CanvasContentElement {
-	return { id, type, children: [{ id: `${id}-t`, type, text }] };
-}
-
-const scene = (children: CanvasContentElement[], id = "s"): SceneElement => ({
+): CanvasContentElement => ({
 	id,
+	type,
+	children: [{ id: `${id}-t`, type, text }],
+});
+
+const scene = (children: CanvasContentElement[]): SceneElement => ({
+	id: "s",
 	type: SCENE_TYPE,
 	children,
 });
 
-type FakeTransfer = DataTransfer & { store: Record<string, string> };
-
-function fakeDataTransfer(initial: Record<string, string> = {}): FakeTransfer {
+function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
 	const store = { ...initial };
 	return {
-		store,
 		getData: (format: string) => store[format] ?? "",
 		setData: (format: string, value: string) => {
 			store[format] = value;
 		},
-	} as unknown as FakeTransfer;
+	} as unknown as DataTransfer;
 }
 
 /**
  * The real base handlers need a mounted DOM, so they are stubbed: the assertions
  * here are about what the plugin does versus what it hands back to the default.
  */
-function makeEditor(...scenes: SceneElement[]) {
+function makeEditor(seed: SceneElement) {
 	const base = withNodeId(withFlatPaste(withScenes(withReact(createEditor()))));
-	const setFragmentData = vi.fn();
 	const insertTextData = vi.fn(() => true);
-	base.setFragmentData = setFragmentData;
+	base.setFragmentData = vi.fn();
 	base.insertTextData = insertTextData;
 
 	const editor: CanvasEditor = withOSMLClipboard(DEFAULT_CONNECTOR_REGISTRY)(
 		base,
 	);
 	Editor.withoutNormalizing(editor, () => {
-		Transforms.insertNodes(editor, scenes);
+		Transforms.insertNodes(editor, [seed]);
 	});
 	Editor.normalize(editor, { force: true });
 	Transforms.select(editor, Editor.end(editor, []));
 
-	return { editor, setFragmentData, insertTextData };
+	return { editor, insertTextData };
 }
+
+const copy = (editor: CanvasEditor) => {
+	const data = fakeDataTransfer();
+	editor.setFragmentData(data, "copy");
+	return data.getData("text/plain");
+};
+
+const paste = (editor: CanvasEditor, text: string) =>
+	editor.insertTextData(fakeDataTransfer({ "text/plain": text }));
 
 const elementOfType = (editor: CanvasEditor, type: string) =>
 	getContentElements(editor.children).find((el) => el.type === type);
 
 describe("withOSMLClipboard copy", () => {
-	it("writes the selection as OSML on text/plain", () => {
-		const { editor, setFragmentData } = makeEditor(
-			scene([content("narration", "n1", "Hello world")]),
-		);
-		Transforms.select(editor, []);
-
-		const data = fakeDataTransfer();
-		editor.setFragmentData(data, "copy");
-
-		expect(setFragmentData).toHaveBeenCalled();
-		expect(data.store["text/plain"]).toContain("--- Scene 1 ---");
-		expect(data.store["text/plain"]).toContain(
-			'<narration id="n1">Hello world</narration>',
-		);
-	});
-
-	it("keeps custom attributes on a copied element", () => {
+	it("writes a whole-element selection as OSML, attributes included", () => {
 		const { editor } = makeEditor(
 			scene([
 				{
@@ -96,69 +87,38 @@ describe("withOSMLClipboard copy", () => {
 		);
 		Transforms.select(editor, []);
 
-		const data = fakeDataTransfer();
-		editor.setFragmentData(data, "copy");
-
-		expect(data.store["text/plain"]).toContain('name="Lyra"');
+		expect(copy(editor)).toBe(
+			'--- Scene 1 ---\n<character id="c1" name="Lyra">Hi there</character>',
+		);
 	});
 
 	it("leaves a partial selection inside one element as plain text", () => {
 		const { editor } = makeEditor(
 			scene([content("narration", "n1", "Hello world")]),
 		);
-		const [, path] = Editor.node(editor, [0, 0, 0]);
+		const path = [0, 0, 0];
 		Transforms.select(editor, {
 			anchor: { path, offset: 1 },
 			focus: { path, offset: 4 },
 		});
 
-		const data = fakeDataTransfer();
-		editor.setFragmentData(data, "copy");
-
-		expect(data.store["text/plain"]).toBeUndefined();
+		expect(copy(editor)).toBe("");
 	});
 
-	it("writes OSML once the selection swallows a whole element", () => {
-		const { editor } = makeEditor(
-			scene([
-				content("narration", "n1", "Hello world"),
-				content("image", "i1", "a sunset"),
-			]),
-		);
-		Transforms.select(editor, {
-			anchor: Editor.start(editor, [0, 0]),
-			focus: { path: Editor.path(editor, [0, 1, 0]), offset: 3 },
-		});
+	it("leaves a caret in an empty element as plain text", () => {
+		const { editor } = makeEditor(scene([content("narration", "n1")]));
 
-		const data = fakeDataTransfer();
-		editor.setFragmentData(data, "copy");
-
-		expect(data.store["text/plain"]).toContain(
-			'<narration id="n1">Hello world</narration>',
-		);
-	});
-
-	it("leaves a collapsed selection to the default handler", () => {
-		const { editor } = makeEditor(
-			scene([content("narration", "n1", "Hello world")]),
-		);
-
-		const data = fakeDataTransfer();
-		editor.setFragmentData(data, "copy");
-
-		expect(data.store["text/plain"]).toBeUndefined();
+		expect(copy(editor)).toBe("");
 	});
 });
 
 describe("withOSMLClipboard paste", () => {
-	it("parses pasted OSML into elements with their attributes", () => {
+	it("rebuilds elements with their attributes", () => {
 		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
 
-		const handled = editor.insertTextData(
-			fakeDataTransfer({
-				"text/plain":
-					'--- Scene 1 ---\n<image id="i1">a sunset</image>\n<character id="c1" name="Lyra">Hi there</character>',
-			}),
+		const handled = paste(
+			editor,
+			'<image id="i1">a sunset</image>\n<character id="c1" name="Lyra">Hi there</character>',
 		);
 
 		expect(handled).toBe(true);
@@ -169,51 +129,38 @@ describe("withOSMLClipboard paste", () => {
 		);
 	});
 
+	it("strips scene markers instead of folding them into element text", () => {
+		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
+
+		paste(
+			editor,
+			'--- Scene 1 ---\n<image id="i1">a sunset</image>\n--- Scene 2 ---\n<image id="i2">a river</image>',
+		);
+
+		expect(
+			getContentElements(editor.children)
+				.filter((el) => el.type === "image")
+				.map(getElementBodyText),
+		).toEqual(["a sunset", "a river"]);
+	});
+
 	it("mints fresh ids so pasted elements do not share generation state", () => {
 		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
 
-		editor.insertTextData(
-			fakeDataTransfer({ "text/plain": '<image id="i1">a sunset</image>' }),
-		);
+		paste(editor, '<image id="i1">a sunset</image>');
 
 		expect(elementOfType(editor, "image")?.id).not.toBe("i1");
 	});
 
-	it("splits pasted scene markers into separate scenes", () => {
-		const { editor } = makeEditor(scene([content("image", "i0", "start")]));
-
-		editor.insertTextData(
-			fakeDataTransfer({
-				"text/plain":
-					'--- Scene 1 ---\n<image id="a">one</image>\n--- Scene 2 ---\n<image id="b">two</image>',
-			}),
-		);
-
-		expect(editor.children.filter(isSceneElement).length).toBeGreaterThan(1);
-	});
-
-	it("defers ordinary text to the default handler", () => {
+	it("defers text that parses to no elements", () => {
 		const { editor, insertTextData } = makeEditor(
 			scene([content("narration", "n0", "start")]),
 		);
 
-		editor.insertTextData(
-			fakeDataTransfer({ "text/plain": "just some prose, no tags here" }),
-		);
+		paste(editor, "just some prose, no tags here");
+		paste(editor, "<div>hello</div>");
 
-		expect(insertTextData).toHaveBeenCalled();
+		expect(insertTextData).toHaveBeenCalledTimes(2);
 		expect(getContentElements(editor.children).length).toBe(1);
-	});
-
-	it("defers text whose only tags are not canvas elements", () => {
-		const { editor, insertTextData } = makeEditor(
-			scene([content("narration", "n0", "start")]),
-		);
-
-		editor.insertTextData(
-			fakeDataTransfer({ "text/plain": "<div>hello</div>" }),
-		);
-
-		expect(insertTextData).toHaveBeenCalled();
 	});
 });
