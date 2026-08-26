@@ -9,6 +9,7 @@ import {
 	Pencil,
 	Robot,
 	SlidersHorizontal,
+	TextBox,
 	Translate,
 	User,
 	type IconComponent,
@@ -73,6 +74,8 @@ function offeredTool(part: ToolPart): ToolPresentation {
 				icon: Hourglass,
 				label: "Measuring scene lengths",
 			};
+		case "tool-set_caption_style":
+			return { icon: TextBox, label: "Styling the captions" };
 		case "tool-set_language":
 			return { icon: Translate, label: "Setting the language" };
 		case "tool-set_metadata":

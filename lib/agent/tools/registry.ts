@@ -7,6 +7,7 @@ import { measureTotalLength } from "./measureTotalLength";
 import { editScript } from "./editScript";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
+import { setCaptionStyle } from "./setCaptionStyle";
 import { setCharacter } from "./setCharacter";
 import { setLanguage } from "./setLanguage";
 import { setMetadata } from "./setMetadata";
@@ -23,6 +24,7 @@ const TOOLS = {
 	write_script: writeScript,
 	adapt_script: adaptScript,
 	set_video_settings: setVideoSettings,
+	set_caption_style: setCaptionStyle,
 	set_language: setLanguage,
 	view_reference_images: viewReferenceImages,
 	view_avatar: viewAvatar,

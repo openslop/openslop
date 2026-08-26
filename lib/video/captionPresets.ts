@@ -4,14 +4,27 @@ import {
 	type CaptionTextStyle,
 } from "./captionStyle";
 
-export type CaptionPreset = { key: string; label: string; style: CaptionStyle };
+export const CAPTION_PRESET_KEYS = [
+	"classic",
+	"karaoke",
+	"pop",
+	"boxed",
+	"spotlight",
+	"neon",
+] as const;
+
+export type CaptionPresetKey = (typeof CAPTION_PRESET_KEYS)[number];
+
+export type CaptionPreset = {
+	key: CaptionPresetKey;
+	label: string;
+	style: CaptionStyle;
+};
 
 const preset = (
-	key: string,
 	label: string,
 	style: Partial<CaptionStyle>,
-): CaptionPreset => ({
-	key,
+): Omit<CaptionPreset, "key"> => ({
 	label,
 	style: { ...DEFAULT_CAPTION_STYLE, ...style },
 });
@@ -21,9 +34,10 @@ const text = (style: Partial<CaptionTextStyle>): CaptionTextStyle => ({
 	...style,
 });
 
-export const CAPTION_PRESETS: readonly CaptionPreset[] = [
-	preset("classic", "Classic", { alignX: "center" }),
-	preset("karaoke", "Karaoke", {
+/** Keyed by {@link CAPTION_PRESET_KEYS}, so every key names exactly one preset. */
+const PRESETS: Record<CaptionPresetKey, Omit<CaptionPreset, "key">> = {
+	classic: preset("Classic", { alignX: "center" }),
+	karaoke: preset("Karaoke", {
 		font: "bangers",
 		fontSize: 62,
 		casing: "upper",
@@ -32,7 +46,7 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		base: text({ bold: false }),
 		activeWord: text({ fill: "#6DC7C8", bold: false }),
 	}),
-	preset("pop", "Pop", {
+	pop: preset("Pop", {
 		font: "montserrat",
 		fontSize: 40,
 		casing: "none",
@@ -43,19 +57,19 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 		maxWordsPerLine: 4,
 		base: text({ bold: false }),
 	}),
-	preset("boxed", "Boxed", {
+	boxed: preset("Boxed", {
 		font: "oswald",
 		casing: "upper",
 		reveal: "line",
 		alignX: "center",
 		activeWord: text({ background: "#FE2953" }),
 	}),
-	preset("spotlight", "Spotlight", {
+	spotlight: preset("Spotlight", {
 		reveal: "line",
 		alignX: "center",
 		alignY: "bottom",
 	}),
-	preset("neon", "Neon", {
+	neon: preset("Neon", {
 		font: "bebasNeue",
 		fontSize: 80,
 		casing: "upper",
@@ -70,7 +84,16 @@ export const CAPTION_PRESETS: readonly CaptionPreset[] = [
 			border: { width: 40, color: "#000000" },
 		}),
 	}),
-];
+};
+
+export const CAPTION_PRESETS: readonly CaptionPreset[] =
+	CAPTION_PRESET_KEYS.map((key) => ({ key, ...PRESETS[key] }));
+
+export const captionPresetStyle = (key: CaptionPresetKey): CaptionStyle =>
+	PRESETS[key].style;
+
+export const captionPresetLabel = (key: CaptionPresetKey): string =>
+	PRESETS[key].label;
 
 /** Stand-in narration for the panel previews. */
 export const CAPTION_SAMPLE_WORDS = [
