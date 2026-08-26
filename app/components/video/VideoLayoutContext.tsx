@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
-import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import type { SceneElement } from "@/lib/canvas/types";
@@ -29,13 +29,8 @@ const [VideoLayoutContext, useLayout] =
 	createRequiredContext<VideoLayoutValue>("VideoLayoutContext");
 export { useLayout };
 
-export function VideoLayoutProvider({
-	editor,
-	children,
-}: {
-	editor: Editor;
-	children: ReactNode;
-}) {
+export function VideoLayoutProvider({ children }: { children: ReactNode }) {
+	const editor = useSlateStatic();
 	const { layout, playerKey, scenes } = useVideoLayout(editor);
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());

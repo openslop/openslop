@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { memo } from "react";
-import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import { Lock, Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -65,7 +65,8 @@ function getGenerateLabel(loading: boolean, generating: boolean): string {
 	return "Generate All";
 }
 
-function EditorToolbarComponent({ editor }: { editor: Editor }) {
+function EditorToolbarComponent() {
+	const editor = useSlateStatic();
 	const { loading } = useSloppy();
 	const { generateAll } = useGenerateAll(editor);
 	const queue = useGenerationQueue();

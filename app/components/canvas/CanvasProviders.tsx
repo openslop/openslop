@@ -22,7 +22,8 @@ const EMPTY_DOCUMENT: Descendant[] = [];
  * layout, player control, scene selection, auto-scroll, collapse state) into a
  * single boundary so the top-level view stays a flat orchestrator rather than a
  * provider pyramid. The document lives in `<Slate>`, so consumers subscribe to
- * the slices they need and a keystroke never re-renders the shell.
+ * the slices they need and a keystroke never re-renders the shell, and they
+ * reach the editor itself with `useSlateStatic()` rather than a drilled prop.
  */
 export function CanvasProviders({
 	editor,
@@ -41,13 +42,13 @@ export function CanvasProviders({
 		>
 			<RenderProvider>
 				<ActiveCaptionFont />
-				<VideoLayoutProvider editor={editor}>
+				<VideoLayoutProvider>
 					<PlayerControlProvider>
 						<ActiveSceneProvider>
 							<AutoScrollProvider>
-								<ViewModeProvider editor={editor}>
+								<ViewModeProvider>
 									<SloppyModelProvider>
-										<SloppyProvider editor={editor}>
+										<SloppyProvider>
 											<EditorPanelProvider>{children}</EditorPanelProvider>
 										</SloppyProvider>
 									</SloppyModelProvider>
