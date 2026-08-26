@@ -26,7 +26,10 @@ export function SortableScene({
 		<SortableItem
 			sceneId={element.id}
 			sortableType="scene"
-			disabled={!isCollapsed(element.id)}
+			disabled={{
+				draggable: !isCollapsed(element.id),
+				droppable: false,
+			}}
 			wrapperClassName={`${styles.scene} border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? "border-transparent" : "border-border"}`}
 			contentClassName={isActive ? ACTIVE_SCENE_CLASS : undefined}
 			attributes={attributes}

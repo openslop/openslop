@@ -16,7 +16,11 @@ interface SortableItemProps {
 	contentClassName?: string;
 	insertMenu?: React.ReactNode;
 	menuOpen?: boolean;
-	disabled?: boolean;
+	/**
+	 * Both axes, always: `useSortable` reads a bare boolean as draggable-only and
+	 * leaves the card a drop target, which is never what a caller means here.
+	 */
+	disabled: { draggable: boolean; droppable: boolean };
 	readOnly?: boolean;
 	attributes: RenderElementProps["attributes"];
 	element: CanvasElement;
@@ -73,7 +77,7 @@ export function SortableItem({
 				<div
 					className={`${styles.hoverTarget} align-middle${menuOpen ? ` ${styles.menuOpen}` : ""}`}
 				>
-					{!disabled && (
+					{!disabled.draggable && (
 						<div
 							className={`self-center ${styles.actions}`}
 							contentEditable={false}

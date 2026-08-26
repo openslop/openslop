@@ -76,7 +76,7 @@ export function SortableContent({
 				/>
 			}
 			menuOpen={isMenuOpen}
-			disabled={collapsed}
+			disabled={{ draggable: collapsed, droppable: collapsed }}
 			readOnly={collapsed}
 			attributes={attributes}
 			element={element}
