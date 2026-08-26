@@ -3,8 +3,16 @@
 <desc>Sloppy, the OpenSlop copilot, rewrites a scene's music, adds a rival character, then builds a whole drift scene — new elements land on the canvas and the timeline, get reordered by hand, and the edit plays back.</desc>
 <style>
 @keyframes kf-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
-.orb { animation: kf-orb 40s infinite both; transform-box: fill-box; transform-origin: center; }
-@keyframes kf-orb { 0% { transform: scale(0.8); } 18% { transform: scale(1.06); } 20% { transform: scale(0.86); } 22% { transform: scale(1.06); } 24% { transform: scale(0.86); } 26% { transform: scale(1.06); } 28% { transform: scale(0.86); } 30% { transform: scale(1.06); } 32% { transform: scale(0.86); } 34% { transform: scale(0.9); } 49% { transform: scale(0.9); } 50% { transform: scale(1.06); } 52% { transform: scale(0.86); } 54% { transform: scale(1.06); } 56% { transform: scale(0.86); } 58% { transform: scale(1.06); } 60% { transform: scale(0.86); } 62% { transform: scale(1.06); } 64% { transform: scale(0.86); } 70% { transform: scale(0.9); } 100% { transform: scale(0.9); } }
+.orb { animation: kf-orb-colorize 6s ease-in-out infinite; }
+@keyframes kf-orb-colorize { 0% { filter: hue-rotate(0deg); } 20% { filter: hue-rotate(-30deg); } 40% { filter: hue-rotate(-60deg); } 60% { filter: hue-rotate(-90deg); } 80% { filter: hue-rotate(-45deg); } 100% { filter: hue-rotate(0deg); } }
+.orb-goo { filter: contrast(15); animation: kf-orb-roundness 1s linear infinite; }
+@keyframes kf-orb-roundness { 0% { filter: contrast(15); } 20%,40% { filter: contrast(3); } 60%,100% { filter: contrast(15); } }
+.orb-goo polygon { filter: blur(12px); }
+.orb-p0 { transform-origin: 75px 25px; transform: rotate(90deg); }
+.orb-p1 { transform-origin: 50px 50px; animation: kf-orb-spin 2s linear infinite reverse; }
+.orb-p2 { transform-origin: 50px 60px; animation: kf-orb-spin 2s linear infinite; animation-delay: -0.667s; }
+.orb-p3 { transform-origin: 40px 40px; animation: kf-orb-spin 2s linear infinite reverse; }
+@keyframes kf-orb-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .an-user1 { animation: kf-an-user1 40s infinite both; }
 @keyframes kf-an-user1 { 0%,17.6% { opacity: 0; transform: translate(0,6px); } 18.6%,100% { opacity: 1; transform: translate(0,0); } }
 .an-think1 { animation: kf-an-think1 40s infinite both; }
@@ -15,16 +23,6 @@
 @keyframes kf-an-t26 { 0%,26.5% { opacity: 0; transform: translate(0,6px); } 27.5%,100% { opacity: 1; transform: translate(0,0); } }
 .an-reply1 { animation: kf-an-reply1 40s infinite both; }
 @keyframes kf-an-reply1 { 0%,32.5% { opacity: 0; transform: translate(0,6px); } 33.5%,100% { opacity: 1; transform: translate(0,0); } }
-.ty-r1-0 { animation: kf-ty-r1-0 40s infinite both; }
-@keyframes kf-ty-r1-0 { 0%,33.40% { transform: translateX(0); animation-timing-function: steps(41, end); } 34.67%,100% { transform: translateX(223.5px); } }
-.ty-r1-1 { animation: kf-ty-r1-1 40s infinite both; }
-@keyframes kf-ty-r1-1 { 0%,34.67% { transform: translateX(0); animation-timing-function: steps(31, end); } 35.62%,100% { transform: translateX(169.0px); } }
-.ty-r1-2 { animation: kf-ty-r1-2 40s infinite both; }
-@keyframes kf-ty-r1-2 { 0%,35.62% { transform: translateX(0); animation-timing-function: steps(1, end); } 35.65%,100% { transform: translateX(1.0px); } }
-.ty-r1-3 { animation: kf-ty-r1-3 40s infinite both; }
-@keyframes kf-ty-r1-3 { 0%,35.65% { transform: translateX(0); animation-timing-function: steps(41, end); } 36.92%,100% { transform: translateX(223.5px); } }
-.ty-r1-4 { animation: kf-ty-r1-4 40s infinite both; }
-@keyframes kf-ty-r1-4 { 0%,36.92% { transform: translateX(0); animation-timing-function: steps(35, end); } 38.00%,100% { transform: translateX(190.8px); } }
 .an-r1t { animation: kf-an-r1t 40s infinite both; }
 @keyframes kf-an-r1t { 0% { opacity: 0; } 33.2% { opacity: 0; } 33.4% { opacity: 1; } 100% { opacity: 1; } }
 .an-w1 { animation: kf-an-w1 40s infinite both; }
@@ -45,40 +43,72 @@
 @keyframes kf-an-u60 { 0%,60.5% { opacity: 0; transform: translate(0,6px); } 61.5%,100% { opacity: 1; transform: translate(0,0); } }
 .an-reply2 { animation: kf-an-reply2 40s infinite both; }
 @keyframes kf-an-reply2 { 0%,64.5% { opacity: 0; transform: translate(0,6px); } 65.5%,100% { opacity: 1; transform: translate(0,0); } }
-.ty-r2-0 { animation: kf-ty-r2-0 40s infinite both; }
-@keyframes kf-ty-r2-0 { 0%,65.40% { transform: translateX(0); animation-timing-function: steps(42, end); } 66.82%,100% { transform: translateX(228.9px); } }
-.ty-r2-1 { animation: kf-ty-r2-1 40s infinite both; }
-@keyframes kf-ty-r2-1 { 0%,66.82% { transform: translateX(0); animation-timing-function: steps(42, end); } 68.23%,100% { transform: translateX(228.9px); } }
-.ty-r2-2 { animation: kf-ty-r2-2 40s infinite both; }
-@keyframes kf-ty-r2-2 { 0%,68.23% { transform: translateX(0); animation-timing-function: steps(8, end); } 68.50%,100% { transform: translateX(43.6px); } }
-.ty-r2-3 { animation: kf-ty-r2-3 40s infinite both; }
-@keyframes kf-ty-r2-3 { 0%,68.50% { transform: translateX(0); animation-timing-function: steps(1, end); } 68.54%,100% { transform: translateX(1.0px); } }
-.ty-r2-4 { animation: kf-ty-r2-4 40s infinite both; }
-@keyframes kf-ty-r2-4 { 0%,68.54% { transform: translateX(0); animation-timing-function: steps(42, end); } 69.95%,100% { transform: translateX(228.9px); } }
-.ty-r2-5 { animation: kf-ty-r2-5 40s infinite both; }
-@keyframes kf-ty-r2-5 { 0%,69.95% { transform: translateX(0); animation-timing-function: steps(31, end); } 71.00%,100% { transform: translateX(169.0px); } }
 .an-r2t { animation: kf-an-r2t 40s infinite both; }
 @keyframes kf-an-r2t { 0% { opacity: 0; } 65.2% { opacity: 0; } 65.4% { opacity: 1; } 100% { opacity: 1; } }
 .an-w2 { animation: kf-an-w2 40s infinite both; }
 @keyframes kf-an-w2 { 0%,71.4% { opacity: 0; transform: translate(0,5px); } 72.4%,100% { opacity: 1; transform: translate(0,0); } }
 .tr-scroll { animation: kf-scroll 40s infinite both; animation-timing-function: cubic-bezier(.22,1,.36,1); }
-@keyframes kf-scroll { 0%,17.6% { transform: translateY(477px); } 18.6% { transform: translateY(423px); } 19.4% { transform: translateY(395px); } 21.0% { transform: translateY(363px); } 27.5% { transform: translateY(331px); } 33.5% { transform: translateY(222px); } 39.4% { transform: translateY(196px); } 51.8% { transform: translateY(142px); } 52.5% { transform: translateY(114px); } 53.0% { transform: translateY(82px); } 54.5% { transform: translateY(50px); } 56.0% { transform: translateY(18px); } 57.5% { transform: translateY(-14px); } 61.5% { transform: translateY(-46px); } 65.5% { transform: translateY(-170px); } 72.4%,100% { transform: translateY(-196px); } }
+@keyframes kf-scroll { 0%,17.6% { transform: translateY(420px); } 18.6% { transform: translateY(351px); } 19.4% { transform: translateY(323px); } 21.0% { transform: translateY(291px); } 27.5% { transform: translateY(259px); } 33.5% { transform: translateY(105px); } 39.4% { transform: translateY(79px); } 51.8% { transform: translateY(25px); } 52.5% { transform: translateY(-3px); } 53.0% { transform: translateY(-35px); } 54.5% { transform: translateY(-67px); } 56.0% { transform: translateY(-99px); } 57.5% { transform: translateY(-131px); } 61.5% { transform: translateY(-163px); } 65.5% { transform: translateY(-317px); } 72.4%,100% { transform: translateY(-343px); } }
+.ty-r1-0 { animation: kf-ty-r1-0 40s infinite both; }
+@keyframes kf-ty-r1-0 { 0%,33.40% { transform: translateX(0); animation-timing-function: steps(18, end); } 33.97%,100% { transform: translateX(98.1px); } }
+.ty-r1-1 { animation: kf-ty-r1-1 40s infinite both; }
+@keyframes kf-ty-r1-1 { 0%,33.97% { transform: translateX(0); animation-timing-function: steps(22, end); } 34.66%,100% { transform: translateX(119.9px); } }
+.ty-r1-2 { animation: kf-ty-r1-2 40s infinite both; }
+@keyframes kf-ty-r1-2 { 0%,34.66% { transform: translateX(0); animation-timing-function: steps(25, end); } 35.45%,100% { transform: translateX(136.3px); } }
+.ty-r1-3 { animation: kf-ty-r1-3 40s infinite both; }
+@keyframes kf-ty-r1-3 { 0%,35.45% { transform: translateX(0); animation-timing-function: steps(5, end); } 35.61%,100% { transform: translateX(27.3px); } }
+.ty-r1-4 { animation: kf-ty-r1-4 40s infinite both; }
+@keyframes kf-ty-r1-4 { 0%,35.61% { transform: translateX(0); animation-timing-function: steps(1, end); } 35.64%,100% { transform: translateX(5.5px); } }
+.ty-r1-5 { animation: kf-ty-r1-5 40s infinite both; }
+@keyframes kf-ty-r1-5 { 0%,35.64% { transform: translateX(0); animation-timing-function: steps(25, end); } 36.42%,100% { transform: translateX(136.3px); } }
+.ty-r1-6 { animation: kf-ty-r1-6 40s infinite both; }
+@keyframes kf-ty-r1-6 { 0%,36.42% { transform: translateX(0); animation-timing-function: steps(25, end); } 37.21%,100% { transform: translateX(136.3px); } }
+.ty-r1-7 { animation: kf-ty-r1-7 40s infinite both; }
+@keyframes kf-ty-r1-7 { 0%,37.21% { transform: translateX(0); animation-timing-function: steps(25, end); } 38.00%,100% { transform: translateX(136.3px); } }
+.ty-r2-0 { animation: kf-ty-r2-0 40s infinite both; }
+@keyframes kf-ty-r2-0 { 0%,65.40% { transform: translateX(0); animation-timing-function: steps(19, end); } 66.05%,100% { transform: translateX(103.6px); } }
+.ty-r2-1 { animation: kf-ty-r2-1 40s infinite both; }
+@keyframes kf-ty-r2-1 { 0%,66.05% { transform: translateX(0); animation-timing-function: steps(22, end); } 66.80%,100% { transform: translateX(119.9px); } }
+.ty-r2-2 { animation: kf-ty-r2-2 40s infinite both; }
+@keyframes kf-ty-r2-2 { 0%,66.80% { transform: translateX(0); animation-timing-function: steps(26, end); } 67.69%,100% { transform: translateX(141.7px); } }
+.ty-r2-3 { animation: kf-ty-r2-3 40s infinite both; }
+@keyframes kf-ty-r2-3 { 0%,67.69% { transform: translateX(0); animation-timing-function: steps(24, end); } 68.51%,100% { transform: translateX(130.8px); } }
+.ty-r2-4 { animation: kf-ty-r2-4 40s infinite both; }
+@keyframes kf-ty-r2-4 { 0%,68.51% { transform: translateX(0); animation-timing-function: steps(1, end); } 68.54%,100% { transform: translateX(5.5px); } }
+.ty-r2-5 { animation: kf-ty-r2-5 40s infinite both; }
+@keyframes kf-ty-r2-5 { 0%,68.54% { transform: translateX(0); animation-timing-function: steps(22, end); } 69.29%,100% { transform: translateX(119.9px); } }
+.ty-r2-6 { animation: kf-ty-r2-6 40s infinite both; }
+@keyframes kf-ty-r2-6 { 0%,69.29% { transform: translateX(0); animation-timing-function: steps(26, end); } 70.18%,100% { transform: translateX(141.7px); } }
+.ty-r2-7 { animation: kf-ty-r2-7 40s infinite both; }
+@keyframes kf-ty-r2-7 { 0%,70.18% { transform: translateX(0); animation-timing-function: steps(24, end); } 71.00%,100% { transform: translateX(130.8px); } }
+.ty-p0-0 { animation: kf-ty-p0-0 40s infinite both; }
+@keyframes kf-ty-p0-0 { 0%,7.40% { transform: translateX(0); animation-timing-function: steps(28, end); } 12.58%,17.20% { transform: translateX(145.0px); } 17.8%,100% { transform: translateX(0); } }
+.ty-p0-1 { animation: kf-ty-p0-1 40s infinite both; }
+@keyframes kf-ty-p0-1 { 0%,12.58% { transform: translateX(0); animation-timing-function: steps(25, end); } 17.20%,100% { transform: translateX(129.5px); } 17.8%,100% { transform: translateX(0); } }
+.ty-p1-0 { animation: kf-ty-p1-0 40s infinite both; }
+@keyframes kf-ty-p1-0 { 0%,41.90% { transform: translateX(0); animation-timing-function: steps(27, end); } 47.12%,50.40% { transform: translateX(139.8px); } 51.0%,100% { transform: translateX(0); } }
+.ty-p1-1 { animation: kf-ty-p1-1 40s infinite both; }
+@keyframes kf-ty-p1-1 { 0%,47.12% { transform: translateX(0); animation-timing-function: steps(17, end); } 50.40%,100% { transform: translateX(88.0px); } 51.0%,100% { transform: translateX(0); } }
+.cr-p0-0 { animation: kf-cr-p0-0 40s infinite both, kf-blink 1s steps(2,end) infinite; }
+@keyframes kf-cr-p0-0 { 0%,7.40% { transform: translateX(0); animation-timing-function: steps(28, end); } 12.58%,100% { transform: translateX(145.0px); } }
+.an-caret-p0-0 { animation: kf-an-caret-p0-0 40s infinite both; }
+@keyframes kf-an-caret-p0-0 { 0% { opacity: 0; } 6.00% { opacity: 0; } 6.20% { opacity: 1; } 12.58% { opacity: 1; } 12.63% { opacity: 0; } 100% { opacity: 0; } }
+.cr-p0-1 { animation: kf-cr-p0-1 40s infinite both, kf-blink 1s steps(2,end) infinite; }
+@keyframes kf-cr-p0-1 { 0%,12.58% { transform: translateX(0); animation-timing-function: steps(25, end); } 17.20%,100% { transform: translateX(129.5px); } }
+.an-caret-p0-1 { animation: kf-an-caret-p0-1 40s infinite both; }
+@keyframes kf-an-caret-p0-1 { 0% { opacity: 0; } 12.38% { opacity: 0; } 12.58% { opacity: 1; } 17.40% { opacity: 1; } 17.60% { opacity: 0; } 100% { opacity: 0; } }
+.cr-p1-0 { animation: kf-cr-p1-0 40s infinite both, kf-blink 1s steps(2,end) infinite; }
+@keyframes kf-cr-p1-0 { 0%,41.90% { transform: translateX(0); animation-timing-function: steps(27, end); } 47.12%,100% { transform: translateX(139.8px); } }
+.an-caret-p1-0 { animation: kf-an-caret-p1-0 40s infinite both; }
+@keyframes kf-an-caret-p1-0 { 0% { opacity: 0; } 40.50% { opacity: 0; } 40.70% { opacity: 1; } 47.12% { opacity: 1; } 47.17% { opacity: 0; } 100% { opacity: 0; } }
+.cr-p1-1 { animation: kf-cr-p1-1 40s infinite both, kf-blink 1s steps(2,end) infinite; }
+@keyframes kf-cr-p1-1 { 0%,47.12% { transform: translateX(0); animation-timing-function: steps(17, end); } 50.40%,100% { transform: translateX(88.0px); } }
+.an-caret-p1-1 { animation: kf-an-caret-p1-1 40s infinite both; }
+@keyframes kf-an-caret-p1-1 { 0% { opacity: 0; } 46.92% { opacity: 0; } 47.12% { opacity: 1; } 50.60% { opacity: 1; } 50.80% { opacity: 0; } 100% { opacity: 0; } }
 .an-ring { animation: kf-an-ring 40s infinite both; }
 @keyframes kf-an-ring { 0% { opacity: 0; } 5% { opacity: 0; } 6% { opacity: 0.9; } 17.6% { opacity: 0.9; } 18.4% { opacity: 0; } 40% { opacity: 0; } 41% { opacity: 0.9; } 50.8% { opacity: 0.9; } 51.5% { opacity: 0; } 100% { opacity: 0; } }
 .an-ph { animation: kf-an-ph 40s infinite both; }
 @keyframes kf-an-ph { 0% { opacity: 1; } 7% { opacity: 1; } 7.4% { opacity: 0; } 18.0% { opacity: 0; } 18.6% { opacity: 1; } 41.5% { opacity: 1; } 41.9% { opacity: 0; } 51.2% { opacity: 0; } 51.8% { opacity: 1; } 100% { opacity: 1; } }
-.ty-p0-0 { animation: kf-ty-p0-0 40s infinite both; }
-@keyframes kf-ty-p0-0 { 0%,7.40% { transform: translateX(0); animation-timing-function: steps(54, end); } 17.20%,100% { transform: translateX(279.6px); } 17.8%,100% { transform: translateX(0); } }
-.cr-p0 { animation: kf-cr-p0 40s infinite both, kf-blink 1s steps(2,end) infinite; }
-@keyframes kf-cr-p0 { 0%,7.4% { transform: translateX(0); animation-timing-function: steps(54, end); } 17.2%,100% { transform: translateX(279.6px); } }
-.an-caret0 { animation: kf-an-caret0 40s infinite both; }
-@keyframes kf-an-caret0 { 0% { opacity: 0; } 6.0% { opacity: 0; } 6.2% { opacity: 1; } 17.400000000000002% { opacity: 1; } 17.6% { opacity: 0; } 100% { opacity: 0; } }
-.ty-p1-0 { animation: kf-ty-p1-0 40s infinite both; }
-@keyframes kf-ty-p1-0 { 0%,41.90% { transform: translateX(0); animation-timing-function: steps(45, end); } 50.40%,100% { transform: translateX(233.0px); } 51.0%,100% { transform: translateX(0); } }
-.cr-p1 { animation: kf-cr-p1 40s infinite both, kf-blink 1s steps(2,end) infinite; }
-@keyframes kf-cr-p1 { 0%,41.9% { transform: translateX(0); animation-timing-function: steps(45, end); } 50.4%,100% { transform: translateX(233.0px); } }
-.an-caret1 { animation: kf-an-caret1 40s infinite both; }
-@keyframes kf-an-caret1 { 0% { opacity: 0; } 40.5% { opacity: 0; } 40.699999999999996% { opacity: 1; } 50.6% { opacity: 1; } 50.8% { opacity: 0; } 100% { opacity: 0; } }
 .an-oldmusic { animation: kf-an-oldmusic 40s infinite both; }
 @keyframes kf-an-oldmusic { 0% { opacity: 1; } 19.6% { opacity: 1; } 20.4% { opacity: 0; } 100% { opacity: 0; } }
 .ty-music-0 { animation: kf-ty-music-0 40s infinite both; }
@@ -152,7 +182,8 @@
 @keyframes kf-pv8 { 0% { opacity: 0; } 92.8% { opacity: 0; } 94% { opacity: 1; } 100% { opacity: 1; } }
 .ph-x { animation: kf-phx 40s infinite both; transform-box: fill-box; transform-origin: left center; }
 @keyframes kf-phx { 0%,82.0% { transform: scaleX(0.003); animation-timing-function: linear; } 97.0%,100% { transform: scaleX(0.985); } }
-.ph-dot { animation: kf-phm 40s infinite both; }
+.ph-dot { animation: kf-phmd 40s infinite both; }
+@keyframes kf-phmd { 0%,82.0% { transform: translateX(0); animation-timing-function: linear; } 97.0%,100% { transform: translateX(935px); } }
 .tc0 { animation: kf-tc0 40s infinite both; }
 @keyframes kf-tc0 { 0% { opacity: 1; } 81.99% { opacity: 1; } 82.0% { opacity: 0; } 100% { opacity: 0; } }
 .tc1 { animation: kf-tc1 40s infinite both; }
@@ -200,7 +231,7 @@
 .an-play { animation: kf-an-play 40s infinite both; }
 @keyframes kf-an-play { 0% { opacity: 0; } 81.5% { opacity: 0; } 82.0% { opacity: 1; } 100% { opacity: 1; } }
 .cursor { animation: kf-cursor 40s infinite both; animation-timing-function: cubic-bezier(.4,0,.2,1); }
-@keyframes kf-cursor { 0% { transform: translate(700px,300px); } 3% { transform: translate(700px,300px); } 6.5% { transform: translate(150px,656px); } 17.6% { transform: translate(150px,656px); } 18.0% { transform: translate(150px,656px); } 21.5% { transform: translate(560px,230px); } 27.0% { transform: translate(560px,230px); } 31.5% { transform: translate(700px,400px); } 38.0% { transform: translate(700px,400px); } 41.0% { transform: translate(150px,656px); } 50.8% { transform: translate(150px,656px); } 51.2% { transform: translate(150px,656px); } 55.0% { transform: translate(720px,300px); } 58.5% { transform: translate(740px,330px); } 64.0% { transform: translate(740px,400px); } 68.5% { transform: translate(500px,170px); } 70.3% { transform: translate(500px,170px); } 74.5% { transform: translate(500px,258px); } 76.5% { transform: translate(500px,258px); } 78.0% { transform: translate(1216px,618px); } 80.5% { transform: translate(1188px,618px); } 81.6% { transform: translate(814px,563px); } 85.0% { transform: translate(814px,563px); } 89.0% { transform: translate(1050px,300px); } 100% { transform: translate(1050px,300px); } }
+@keyframes kf-cursor { 0% { transform: translate(676px,336px); } 3% { transform: translate(676px,336px); } 6.5% { transform: translate(150px,656px); } 17.6% { transform: translate(150px,656px); } 18.0% { transform: translate(150px,656px); } 21.5% { transform: translate(517px,257px); } 27.0% { transform: translate(517px,257px); } 31.5% { transform: translate(676px,450px); } 38.0% { transform: translate(676px,450px); } 41.0% { transform: translate(150px,656px); } 50.8% { transform: translate(150px,656px); } 51.2% { transform: translate(150px,656px); } 55.0% { transform: translate(699px,336px); } 58.5% { transform: translate(722px,371px); } 64.0% { transform: translate(722px,450px); } 68.5% { transform: translate(448px,188px); } 70.3% { transform: translate(448px,188px); } 74.5% { transform: translate(448px,289px); } 76.5% { transform: translate(448px,289px); } 78.0% { transform: translate(1212px,618px); } 80.5% { transform: translate(1182px,618px); } 81.6% { transform: translate(778px,563px); } 85.0% { transform: translate(778px,563px); } 89.0% { transform: translate(1050px,300px); } 100% { transform: translate(1050px,300px); } }
 .rip0 { animation: kf-rip0 40s infinite both; transform-box: fill-box; transform-origin: center; }
 @keyframes kf-rip0 { 0%,17.6% { opacity: 0; transform: scale(0.4); } 17.75% { opacity: 0.9; transform: scale(0.6); } 19.0%,100% { opacity: 0; transform: scale(3.4); } }
 .rip1 { animation: kf-rip1 40s infinite both; transform-box: fill-box; transform-origin: center; }
@@ -233,22 +264,30 @@
 <filter id="grainf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
 <pattern id="grain" width="120" height="120" patternUnits="userSpaceOnUse"><rect width="120" height="120" filter="url(#grainf)" opacity="0.5"/></pattern>
 <clipPath id="cp-av"><circle cx="28" cy="18" r="10"/></clipPath>
-<clipPath id="cp-tr"><rect x="58" y="66" width="292" height="562"/></clipPath>
-<radialGradient id="orb" cx="35%" cy="30%"><stop offset="0%" stop-color="#ffbf48"/><stop offset="100%" stop-color="#be4a1d"/></radialGradient>
-<clipPath id="cp-ty-r1-0"><rect class="ty-r1-0" x="-209.5" y="317.0" width="223.5" height="15"/></clipPath>
-<clipPath id="cp-ty-r1-1"><rect class="ty-r1-1" x="-155.0" y="332.0" width="169.0" height="15"/></clipPath>
-<clipPath id="cp-ty-r1-2"><rect class="ty-r1-2" x="13.0" y="347.0" width="1.0" height="15"/></clipPath>
-<clipPath id="cp-ty-r1-3"><rect class="ty-r1-3" x="-209.5" y="362.0" width="223.5" height="15"/></clipPath>
-<clipPath id="cp-ty-r1-4"><rect class="ty-r1-4" x="-176.8" y="377.0" width="190.8" height="15"/></clipPath>
-<clipPath id="cp-ty-r2-0"><rect class="ty-r2-0" x="-214.9" y="694.0" width="228.9" height="15"/></clipPath>
-<clipPath id="cp-ty-r2-1"><rect class="ty-r2-1" x="-214.9" y="709.0" width="228.9" height="15"/></clipPath>
-<clipPath id="cp-ty-r2-2"><rect class="ty-r2-2" x="-29.6" y="724.0" width="43.6" height="15"/></clipPath>
-<clipPath id="cp-ty-r2-3"><rect class="ty-r2-3" x="13.0" y="739.0" width="1.0" height="15"/></clipPath>
-<clipPath id="cp-ty-r2-4"><rect class="ty-r2-4" x="-214.9" y="754.0" width="228.9" height="15"/></clipPath>
-<clipPath id="cp-ty-r2-5"><rect class="ty-r2-5" x="-155.0" y="769.0" width="169.0" height="15"/></clipPath>
-<clipPath id="cp-ty-p0-0"><rect class="ty-p0-0" x="-193.6" y="652.5" width="279.6" height="15"/></clipPath>
-<clipPath id="cp-ty-p1-0"><rect class="ty-p1-0" x="-147.0" y="652.5" width="233.0" height="15"/></clipPath>
-<clipPath id="cp-cv"><rect x="353" y="37" width="519" height="491"/></clipPath>
+<clipPath id="cp-tr"><rect x="58" y="66" width="220" height="550"/></clipPath>
+<linearGradient id="orb" x1="0" y1="0" x2="0" y2="1"><stop offset="30%" stop-color="#ffbf48"/><stop offset="70%" stop-color="#be4a1d"/></linearGradient>
+<mask id="orb-mask"><g class="orb-goo"><polygon class="orb-p0" points="0,0 100,0 100,100 0,100" fill="#000000"/><polygon class="orb-p1" points="25,25 75,25 50,75" fill="#ffffff"/><polygon class="orb-p2" points="50,25 75,75 25,75" fill="#ffffff"/><polygon class="orb-p3" points="35,35 65,35 50,65" fill="#ffffff"/></g></mask>
+<clipPath id="cp-ty-r1-0"><rect class="ty-r1-0" x="-84.1" y="377.0" width="98.1" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-1"><rect class="ty-r1-1" x="-105.9" y="392.0" width="119.9" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-2"><rect class="ty-r1-2" x="-122.3" y="407.0" width="136.3" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-3"><rect class="ty-r1-3" x="-13.3" y="422.0" width="27.3" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-4"><rect class="ty-r1-4" x="8.5" y="437.0" width="5.5" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-5"><rect class="ty-r1-5" x="-122.3" y="452.0" width="136.3" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-6"><rect class="ty-r1-6" x="-122.3" y="467.0" width="136.3" height="15"/></clipPath>
+<clipPath id="cp-ty-r1-7"><rect class="ty-r1-7" x="-122.3" y="482.0" width="136.3" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-0"><rect class="ty-r2-0" x="-89.6" y="799.0" width="103.6" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-1"><rect class="ty-r2-1" x="-105.9" y="814.0" width="119.9" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-2"><rect class="ty-r2-2" x="-127.7" y="829.0" width="141.7" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-3"><rect class="ty-r2-3" x="-116.8" y="844.0" width="130.8" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-4"><rect class="ty-r2-4" x="8.5" y="859.0" width="5.5" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-5"><rect class="ty-r2-5" x="-105.9" y="874.0" width="119.9" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-6"><rect class="ty-r2-6" x="-127.7" y="889.0" width="141.7" height="15"/></clipPath>
+<clipPath id="cp-ty-r2-7"><rect class="ty-r2-7" x="-116.8" y="904.0" width="130.8" height="15"/></clipPath>
+<clipPath id="cp-ty-p0-0"><rect class="ty-p0-0" x="-59.0" y="636.5" width="145.0" height="15"/></clipPath>
+<clipPath id="cp-ty-p0-1"><rect class="ty-p0-1" x="-43.5" y="649.5" width="129.5" height="15"/></clipPath>
+<clipPath id="cp-ty-p1-0"><rect class="ty-p1-0" x="-53.8" y="636.5" width="139.8" height="15"/></clipPath>
+<clipPath id="cp-ty-p1-1"><rect class="ty-p1-1" x="-2.0" y="649.5" width="88.0" height="15"/></clipPath>
+<clipPath id="cp-cv"><rect x="281" y="37" width="591" height="491"/></clipPath>
 <linearGradient id="shim" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f1eaed" stop-opacity="0"/><stop offset="50%" stop-color="#f1eaed" stop-opacity="0.13"/><stop offset="100%" stop-color="#f1eaed" stop-opacity="0"/></linearGradient>
 <clipPath id="cpp1"><rect x="488.0" y="68.0" width="48.0" height="48.0" rx="8"/></clipPath>
 <clipPath id="cpp2"><rect x="548.0" y="68.0" width="48.0" height="48.0" rx="8"/></clipPath>
@@ -271,7 +310,7 @@
 <clipPath id="cpp17"><rect x="884.0" y="168.0" width="384.0" height="216.0" rx="8"/></clipPath>
 <clipPath id="cpp18"><rect x="884.0" y="168.0" width="384.0" height="216.0" rx="8"/></clipPath>
 <clipPath id="cpp19"><rect x="884.0" y="168.0" width="384.0" height="216.0" rx="8"/></clipPath>
-<clipPath id="cp-tl"><rect x="353" y="529" width="927" height="191"/></clipPath>
+<clipPath id="cp-tl"><rect x="281" y="529" width="999" height="191"/></clipPath>
 <clipPath id="cpc20"><rect x="402" y="600" width="118" height="54" rx="5"/></clipPath>
 <clipPath id="cpp21"><rect x="406.0" y="618.0" width="58.7" height="33.0" rx="3"/></clipPath>
 <clipPath id="cpc22"><rect x="524" y="600" width="96" height="54" rx="5"/></clipPath>
@@ -328,109 +367,118 @@
 <rect x="8" y="658" width="40" height="42" rx="10" fill="#251e21" stroke="#332a2e" stroke-width="1"/>
 <g transform="translate(20.0,664.0) scale(1.0000)"><path d="M11 5a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2.5V3.412A1.498 1.498 0 0 1 8 .5a1.5 1.5 0 0 1 .5 2.912V5zM1 12a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zm5-4a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1m4 0a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1m5 0a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1z" fill="#f1eaed"/></g>
 <text x="28" y="693" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="7.6" font-weight="600" text-anchor="middle">Sloppy</text>
-<line x1="352.5" y1="36" x2="352.5" y2="720" stroke="#332a2e" stroke-width="1"/>
+<line x1="280.5" y1="36" x2="280.5" y2="720" stroke="#332a2e" stroke-width="1"/>
 <g transform="translate(68.0,46.0) scale(0.9375)"><path d="M11 5a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h2.5V3.412A1.498 1.498 0 0 1 8 .5a1.5 1.5 0 0 1 .5 2.912V5zM1 12a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zm5-4a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1m4 0a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1m5 0a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1z" fill="#f1eaed"/></g>
 <text x="89" y="58" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="600">Sloppy</text>
-<g clip-path="url(#cp-tr)"><g transform="translate(68,0)"><g class="tr-scroll"><rect x="18.899999999999977" y="0" width="233.10000000000002" height="42" rx="9" fill="#e2dde0"/>
-<text x="31.899999999999977" y="18" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">we're doing a tokyo street race short,</text>
-<text x="31.899999999999977" y="33" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">45 seconds, two characters</text>
-<rect x="0" y="54" width="252" height="67" rx="11" fill="#231e21" stroke="#332a2e" stroke-width="1"/>
-<text x="14" y="76" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">on it. drafted three scenes — neon street</text>
-<text x="14" y="91" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">establish, takeshi in the car, then the</text>
-<text x="14" y="106" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">confrontation. music and narration are in.</text>
+<g clip-path="url(#cp-tr)"><g transform="translate(68,0)"><g class="tr-scroll"><rect x="13.5" y="0" width="166.5" height="57" rx="9" fill="#e2dde0"/><text x="26.5" y="18" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">we're doing a tokyo</text><text x="26.5" y="33" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">street race short, 45</text><text x="26.5" y="48" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">seconds, two characters</text>
+<rect x="0" y="69" width="180" height="97" rx="11" fill="#231e21" stroke="#332a2e" stroke-width="1"/>
+<text x="14" y="91" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">on it. drafted three scenes</text>
+<text x="14" y="106" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">— neon street establish,</text>
+<text x="14" y="121" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">takeshi in the car, then</text>
+<text x="14" y="136" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">the confrontation. music</text>
+<text x="14" y="151" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">and narration are in.</text>
 <g>
-<g transform="translate(2.0,131.0) scale(0.6250)"><path d="M8 1.6 9.5 6.5 14.4 8 9.5 9.5 8 14.4 6.5 9.5 1.6 8 6.5 6.5 Z" fill="#9d8b93"/></g>
-<text x="16" y="140" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Worked for 12s</text>
+<g transform="translate(2.0,176.0) scale(0.6250)"><path d="M8 1.6 9.5 6.5 14.4 8 9.5 9.5 8 14.4 6.5 9.5 1.6 8 6.5 6.5 Z" fill="#9d8b93"/></g>
+<text x="16" y="185" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Worked for 12s</text>
 </g>
-<g class="an-user1"><rect x="18.899999999999977" y="159" width="233.10000000000002" height="42" rx="9" fill="#e2dde0"/><text x="31.899999999999977" y="177" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">make the music more dramatic and add a</text><text x="31.899999999999977" y="192" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">rival character</text></g>
+<g class="an-user1"><rect x="13.5" y="204" width="166.5" height="57" rx="9" fill="#e2dde0"/><text x="26.5" y="222" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">make the music more</text><text x="26.5" y="237" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">dramatic and add a rival</text><text x="26.5" y="252" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">character</text></g>
 <g class="an-think1">
-<circle class="orb" cx="7" cy="221" r="6" fill="url(#orb)"/>
-<text x="20" y="225" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Slopping…</text>
-<text x="71" y="225" fill="#74666c" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">· 9s</text>
+<g class="orb" transform="translate(-3,271) rotate(90,10,10) scale(0.2)"><rect width="100" height="100" fill="url(#orb)" mask="url(#orb-mask)"/></g>
+<text x="20" y="285" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Slopping…</text>
+<text x="71" y="285" fill="#74666c" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">· 9s</text>
 </g>
 <g class="an-t20">
-<rect x="0" y="237" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,244.0) scale(0.6250)"><path d="M7 11.6 V4.4 L12.6 3 V10.2" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5.3" cy="11.6" r="1.75" fill="none" stroke="#ecb2f3" stroke-width="2.40"/><circle cx="10.9" cy="10.2" r="1.75" fill="none" stroke="#ecb2f3" stroke-width="2.40"/></g>
-<text x="25" y="252.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Rewrote the music prompt</text>
-<path d="M236 246 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="297" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,304.0) scale(0.6250)"><path d="M7 11.6 V4.4 L12.6 3 V10.2" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5.3" cy="11.6" r="1.75" fill="none" stroke="#ecb2f3" stroke-width="2.40"/><circle cx="10.9" cy="10.2" r="1.75" fill="none" stroke="#ecb2f3" stroke-width="2.40"/></g>
+<text x="25" y="312.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Rewrote the music prompt</text>
+<path d="M164 306 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <g class="an-t26">
-<rect x="0" y="269" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,276.0) scale(0.6250)"><path d="M8 8.4 A2.7 2.7 0 1 0 8 3 A2.7 2.7 0 0 0 8 8.4 Z M3.2 14 A4.9 4.9 0 0 1 12.8 14" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="25" y="284.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Added Ryu · character</text>
-<path d="M236 278 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="329" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,336.0) scale(0.6250)"><path d="M8 8.4 A2.7 2.7 0 1 0 8 3 A2.7 2.7 0 0 0 8 8.4 Z M3.2 14 A4.9 4.9 0 0 1 12.8 14" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="25" y="344.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Added Ryu · character</text>
+<path d="M164 338 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
-<g class="an-reply1"><rect x="0" y="305" width="252" height="97" rx="11" fill="#231e21" stroke="#332a2e" stroke-width="1"/></g>
-<g class="an-r1t"><g clip-path="url(#cp-ty-r1-0)"><text x="14" y="327" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">done. the music is orchestral now — taiko</text></g>
-<g clip-path="url(#cp-ty-r1-1)"><text x="14" y="342" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">under a screeching guitar line.</text></g>
-<g clip-path="url(#cp-ty-r1-2)"><text x="14" y="357" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400"></text></g>
-<g clip-path="url(#cp-ty-r1-3)"><text x="14" y="372" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">ryu's in scene 2 with one line. she reads</text></g>
-<g clip-path="url(#cp-ty-r1-4)"><text x="14" y="387" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">menacing, which is what you wanted.</text></g></g>
+<g class="an-reply1"><rect x="0" y="365" width="180" height="142" rx="11" fill="#231e21" stroke="#332a2e" stroke-width="1"/></g>
+<g class="an-r1t"><g clip-path="url(#cp-ty-r1-0)"><text x="14" y="387" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">done. the music is</text></g>
+<g clip-path="url(#cp-ty-r1-1)"><text x="14" y="402" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">orchestral now — taiko</text></g>
+<g clip-path="url(#cp-ty-r1-2)"><text x="14" y="417" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">under a screeching guitar</text></g>
+<g clip-path="url(#cp-ty-r1-3)"><text x="14" y="432" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">line.</text></g>
+<g clip-path="url(#cp-ty-r1-4)"><text x="14" y="447" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400"></text></g>
+<g clip-path="url(#cp-ty-r1-5)"><text x="14" y="462" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">ryu's in scene 2 with one</text></g>
+<g clip-path="url(#cp-ty-r1-6)"><text x="14" y="477" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">line. she reads menacing,</text></g>
+<g clip-path="url(#cp-ty-r1-7)"><text x="14" y="492" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">which is what you wanted.</text></g></g>
 <g class="an-w1">
-<g transform="translate(2.0,412.0) scale(0.6250)"><path d="M8 1.6 9.5 6.5 14.4 8 9.5 9.5 8 14.4 6.5 9.5 1.6 8 6.5 6.5 Z" fill="#9d8b93"/></g>
-<text x="16" y="421" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Worked for 22s</text>
+<g transform="translate(2.0,517.0) scale(0.6250)"><path d="M8 1.6 9.5 6.5 14.4 8 9.5 9.5 8 14.4 6.5 9.5 1.6 8 6.5 6.5 Z" fill="#9d8b93"/></g>
+<text x="16" y="526" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Worked for 22s</text>
 </g>
-<g class="an-user2"><rect x="18.899999999999977" y="440" width="233.10000000000002" height="42" rx="9" fill="#e2dde0"/><text x="31.899999999999977" y="458" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">add a drift scene with tire screeching</text><text x="31.899999999999977" y="473" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">sounds</text></g>
+<g class="an-user2"><rect x="13.5" y="545" width="166.5" height="42" rx="9" fill="#e2dde0"/><text x="26.5" y="563" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">add a drift scene with</text><text x="26.5" y="578" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">tire screeching sounds</text></g>
 <g class="an-think2">
-<circle class="orb" cx="7" cy="502" r="6" fill="url(#orb)"/>
-<text x="20" y="506" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Slopping…</text>
-<text x="71" y="506" fill="#74666c" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">· 13s</text>
+<g class="orb" transform="translate(-3,597) rotate(90,10,10) scale(0.2)"><rect width="100" height="100" fill="url(#orb)" mask="url(#orb-mask)"/></g>
+<text x="20" y="611" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Slopping…</text>
+<text x="71" y="611" fill="#74666c" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">· 13s</text>
 </g>
 <g class="an-u52">
-<rect x="0" y="518" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,525.0) scale(0.6250)"><path d="M2 3.6 H14 V12.4 H2 Z M2 6.5 H14 M2 9.5 H14 M5.2 3.6 V12.4 M10.8 3.6 V12.4" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="25" y="533.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Created Scene 3</text>
-<path d="M236 527 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="623" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,630.0) scale(0.6250)"><path d="M2 3.6 H14 V12.4 H2 Z M2 6.5 H14 M2 9.5 H14 M5.2 3.6 V12.4 M10.8 3.6 V12.4" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="25" y="638.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Created Scene 3</text>
+<path d="M164 632 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <g class="an-u54">
-<rect x="0" y="550" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,557.0) scale(0.6250)"><path d="M2 8 V8 M4.2 5 V11 M6.4 3.4 V12.6 M8.6 5.8 V10.2 M10.8 4 V12 M13 6.4 V9.6" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="25" y="565.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Added tyre screech · SFX</text>
-<path d="M236 559 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="655" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,662.0) scale(0.6250)"><path d="M2 8 V8 M4.2 5 V11 M6.4 3.4 V12.6 M8.6 5.8 V10.2 M10.8 4 V12 M13 6.4 V9.6" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="25" y="670.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Added tyre screech · SFX</text>
+<path d="M164 664 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <g class="an-u55">
-<rect x="0" y="582" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,589.0) scale(0.6250)"><path d="M8 2 A2 2 0 0 1 10 4 V8 A2 2 0 0 1 6 8 V4 A2 2 0 0 1 8 2 Z M4 7.6 A4 4 0 0 0 12 7.6 M8 12 V14.2" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="25" y="597.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Added narration</text>
-<path d="M236 591 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="687" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,694.0) scale(0.6250)"><path d="M8 2 A2 2 0 0 1 10 4 V8 A2 2 0 0 1 6 8 V4 A2 2 0 0 1 8 2 Z M4 7.6 A4 4 0 0 0 12 7.6 M8 12 V14.2" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="25" y="702.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Added narration</text>
+<path d="M164 696 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <g class="an-u56">
-<rect x="0" y="614" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,621.0) scale(0.6250)"><path d="M2.6 3.6 H13.4 A1.2 1.2 0 0 1 14.6 4.8 V11.2 A1.2 1.2 0 0 1 13.4 12.4 H2.6 A1.2 1.2 0 0 1 1.4 11.2 V4.8 A1.2 1.2 0 0 1 2.6 3.6 Z M2 11.4 6.4 7.6 9 10 10.8 8.6 14 11.4" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5.4" cy="6.9" r="1.15" fill="#ecb2f3"/></g>
-<text x="25" y="629.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Generated animated image</text>
-<path d="M236 623 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="719" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,726.0) scale(0.6250)"><path d="M2.6 3.6 H13.4 A1.2 1.2 0 0 1 14.6 4.8 V11.2 A1.2 1.2 0 0 1 13.4 12.4 H2.6 A1.2 1.2 0 0 1 1.4 11.2 V4.8 A1.2 1.2 0 0 1 2.6 3.6 Z M2 11.4 6.4 7.6 9 10 10.8 8.6 14 11.4" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5.4" cy="6.9" r="1.15" fill="#ecb2f3"/></g>
+<text x="25" y="734.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Generated animated image</text>
+<path d="M164 728 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
 <g class="an-u60">
-<rect x="0" y="646" width="252" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
-<g transform="translate(9.0,653.0) scale(0.6250)"><path d="M2 3.6 H14 V12.4 H2 Z M2 6.5 H14 M2 9.5 H14 M5.2 3.6 V12.4 M10.8 3.6 V12.4" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="25" y="661.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Generated clip · slow-mo drift</text>
-<path d="M236 655 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="0" y="751" width="180" height="24" rx="7" fill="#1e181b" stroke="#332a2e" stroke-width="1"/>
+<g transform="translate(9.0,758.0) scale(0.6250)"><path d="M2 3.6 H14 V12.4 H2 Z M2 6.5 H14 M2 9.5 H14 M5.2 3.6 V12.4 M10.8 3.6 V12.4" fill="none" stroke="#ecb2f3" stroke-width="2.40" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="25" y="766.5" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Generated clip · slow-mo drift</text>
+<path d="M164 760 l4 3 -4 3" fill="none" stroke="#9d8b93" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </g>
-<g class="an-reply2"><rect x="0" y="682" width="252" height="112" rx="11" fill="#231e21" stroke="#332a2e" stroke-width="1"/></g>
-<g class="an-r2t"><g clip-path="url(#cp-ty-r2-0)"><text x="14" y="704" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">scene 3 is in — the screech, the handbrake</text></g>
-<g clip-path="url(#cp-ty-r2-1)"><text x="14" y="719" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">beat, the drift shot and a slow-mo clip to</text></g>
-<g clip-path="url(#cp-ty-r2-2)"><text x="14" y="734" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">land it.</text></g>
-<g clip-path="url(#cp-ty-r2-3)"><text x="14" y="749" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400"></text></g>
-<g clip-path="url(#cp-ty-r2-4)"><text x="14" y="764" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">three new clips on the timeline. drag them</text></g>
-<g clip-path="url(#cp-ty-r2-5)"><text x="14" y="779" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">around if the pacing feels off.</text></g></g>
+<g class="an-reply2"><rect x="0" y="787" width="180" height="142" rx="11" fill="#231e21" stroke="#332a2e" stroke-width="1"/></g>
+<g class="an-r2t"><g clip-path="url(#cp-ty-r2-0)"><text x="14" y="809" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">scene 3 is in — the</text></g>
+<g clip-path="url(#cp-ty-r2-1)"><text x="14" y="824" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">screech, the handbrake</text></g>
+<g clip-path="url(#cp-ty-r2-2)"><text x="14" y="839" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">beat, the drift shot and a</text></g>
+<g clip-path="url(#cp-ty-r2-3)"><text x="14" y="854" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">slow-mo clip to land it.</text></g>
+<g clip-path="url(#cp-ty-r2-4)"><text x="14" y="869" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400"></text></g>
+<g clip-path="url(#cp-ty-r2-5)"><text x="14" y="884" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">three new clips on the</text></g>
+<g clip-path="url(#cp-ty-r2-6)"><text x="14" y="899" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">timeline. drag them around</text></g>
+<g clip-path="url(#cp-ty-r2-7)"><text x="14" y="914" fill="#ded6da" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">if the pacing feels off.</text></g></g>
 <g class="an-w2">
-<g transform="translate(2.0,804.0) scale(0.6250)"><path d="M8 1.6 9.5 6.5 14.4 8 9.5 9.5 8 14.4 6.5 9.5 1.6 8 6.5 6.5 Z" fill="#9d8b93"/></g>
-<text x="16" y="813" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Worked for 34s</text>
+<g transform="translate(2.0,939.0) scale(0.6250)"><path d="M8 1.6 9.5 6.5 14.4 8 9.5 9.5 8 14.4 6.5 9.5 1.6 8 6.5 6.5 Z" fill="#9d8b93"/></g>
+<text x="16" y="948" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Worked for 34s</text>
 </g></g></g></g>
-<rect x="68" y="636" width="272" height="70" rx="10" fill="#251e21" stroke="#332a2e" stroke-width="1"/>
-<rect x="76" y="645" width="256" height="26" rx="7" fill="#1a1417" stroke="#332a2e" stroke-width="1"/>
-<g class="an-ring"><rect x="75" y="644" width="258" height="28" rx="8" fill="none" stroke="#7a79d6" stroke-width="1.2"/></g>
-<g class="an-ph"><text x="86" y="662" fill="#7b6c72" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Write or change the script…</text></g>
-<g clip-path="url(#cp-ty-p0-0)"><text x="86" y="662" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">make the music more dramatic and add a rival character</text></g>
-<g class="an-caret0"><rect class="cr-p0" x="86" y="653" width="1.4" height="12" rx="0.7" fill="#7a79d6"/></g>
-<g clip-path="url(#cp-ty-p1-0)"><text x="86" y="662" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">add a drift scene with tire screeching sounds</text></g>
-<g class="an-caret1"><rect class="cr-p1" x="86" y="653" width="1.4" height="12" rx="0.7" fill="#7a79d6"/></g>
-<g transform="translate(78.0,684.0) scale(0.6875)"><path d="M8 2 13.6 5 V11 L8 14 2.4 11 V5 Z M2.4 5 8 8 13.6 5 M8 8 V14" fill="none" stroke="#9d8b93" stroke-width="1.89" stroke-linecap="round" stroke-linejoin="round"/></g>
-<text x="93" y="693" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Slop LLM v1</text>
-<g transform="translate(143.0,685.0) scale(0.6250)"><path d="M5 6.6 8 9.6 11 6.6" fill="none" stroke="#9d8b93" stroke-width="2.24" stroke-linecap="round" stroke-linejoin="round"/></g>
-<rect x="312" y="682" width="20" height="20" rx="6" fill="#7a79d6"/>
-<path d="M322 688 v8 M318.4 691.6 322 688 325.6 691.6" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-<g clip-path="url(#cp-cv)"><g class="cv-scroll"><text x="368" y="38" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="19" font-weight="600">Neon Drift</text>
+<rect x="68" y="626" width="200" height="80" rx="10" fill="#251e21" stroke="#332a2e" stroke-width="1"/>
+<rect x="76" y="632" width="184" height="38" rx="7" fill="#1a1417" stroke="#332a2e" stroke-width="1"/>
+<g class="an-ring"><rect x="75" y="631" width="186" height="40" rx="8" fill="none" stroke="#7a79d6" stroke-width="1.2"/></g>
+<g class="an-ph"><text x="86" y="646" fill="#7b6c72" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Write or change the script…</text></g>
+<g clip-path="url(#cp-ty-p0-0)"><text x="86" y="646" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">make the music more dramatic</text></g>
+<g clip-path="url(#cp-ty-p0-1)"><text x="86" y="659" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">and add a rival character</text></g>
+<g class="an-caret-p0-0"><rect class="cr-p0-0" x="86" y="637" width="1.4" height="12" rx="0.7" fill="#7a79d6"/></g>
+<g class="an-caret-p0-1"><rect class="cr-p0-1" x="86" y="650" width="1.4" height="12" rx="0.7" fill="#7a79d6"/></g>
+<g clip-path="url(#cp-ty-p1-0)"><text x="86" y="646" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">add a drift scene with tire</text></g>
+<g clip-path="url(#cp-ty-p1-1)"><text x="86" y="659" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">screeching sounds</text></g>
+<g class="an-caret-p1-0"><rect class="cr-p1-0" x="86" y="637" width="1.4" height="12" rx="0.7" fill="#7a79d6"/></g>
+<g class="an-caret-p1-1"><rect class="cr-p1-1" x="86" y="650" width="1.4" height="12" rx="0.7" fill="#7a79d6"/></g>
+<g transform="translate(78.0,682.0) scale(0.6875)"><path d="M8 2 13.6 5 V11 L8 14 2.4 11 V5 Z M2.4 5 8 8 13.6 5 M8 8 V14" fill="none" stroke="#9d8b93" stroke-width="1.89" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="93" y="691" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400">Slop LLM v1</text>
+<g transform="translate(143.0,683.0) scale(0.6250)"><path d="M5 6.6 8 9.6 11 6.6" fill="none" stroke="#9d8b93" stroke-width="2.24" stroke-linecap="round" stroke-linejoin="round"/></g>
+<rect x="240" y="680" width="20" height="20" rx="6" fill="#7a79d6"/>
+<path d="M250 686 v8 M246.4 689.6 250 686 253.6 689.6" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g clip-path="url(#cp-cv)"><g transform="translate(-120.971,-5.133) scale(1.138728)"><g class="cv-scroll"><text x="368" y="38" fill="#f1eaed" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="19" font-weight="600">Neon Drift</text>
 <text x="368" y="60" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="500">Assets</text>
 <rect x="368" y="68" width="48" height="48" rx="8" fill="#1b1518" stroke="#3d3236" stroke-width="1" stroke-dasharray="3 3"/>
 <g transform="translate(384.0,84.0) scale(1.0000)"><path d="M8 2.2 A5.8 5.8 0 1 0 8 13.8 A1.5 1.5 0 0 0 9.2 11.4 A1.5 1.5 0 0 1 10.4 9 H12 A1.9 1.9 0 0 0 13.8 7 A5.8 5.8 0 0 0 8 2.2 Z" fill="none" stroke="#887880" stroke-width="1.30" stroke-linecap="round" stroke-linejoin="round"/></g>
@@ -651,7 +699,7 @@
 </g>
 <g class="gs2-p" clip-path="url(#cpp10)"><use href="#ph-smoke1" transform="translate(656.0,1230.0) scale(11.0000,11.0000)"/></g>
 <g class="gs2-r"><rect x="374.5" y="1216.5" width="471" height="125" rx="10" fill="none" stroke="#505390" stroke-width="1.4"/></g>
-<g class="drag-lift"><g class="an-lift"><rect x="376" y="910" width="468" height="78" rx="9" fill="none" stroke="#7a79d6" stroke-width="1.4"/></g></g></g></g>
+<g class="drag-lift"><g class="an-lift"><rect x="376" y="910" width="468" height="78" rx="9" fill="none" stroke="#7a79d6" stroke-width="1.4"/></g></g></g></g></g>
 <rect x="883" y="167" width="386" height="218" rx="9" fill="#0e090b" stroke="#332a2e" stroke-width="1"/>
 <g class="pv0" clip-path="url(#cpp11)"><use href="#ph-tokyo0" transform="translate(884.0,168.0) scale(24.0000,24.0000)"/></g>
 <g class="pv1" clip-path="url(#cpp12)"><use href="#ph-city1" transform="translate(884.0,168.0) scale(24.0000,24.0000)"/></g>
@@ -663,9 +711,9 @@
 <g class="pv7" clip-path="url(#cpp18)"><use href="#ph-drift1" transform="translate(884.0,168.0) scale(24.0000,24.0000)"/></g>
 <g class="pv8" clip-path="url(#cpp19)"><use href="#ph-smoke1" transform="translate(884.0,168.0) scale(24.0000,24.0000)"/></g>
 <rect x="884" y="168" width="384" height="216" rx="8" fill="none" stroke="#ffffff1f" stroke-width="1"/>
-<line x1="352" y1="528.5" x2="1280" y2="528.5" stroke="#332a2e" stroke-width="1"/>
-<g clip-path="url(#cp-tl)"><rect x="364" y="540" width="904" height="3" rx="1.5" fill="#4a4548"/>
-<g class="ph-x"><rect x="364" y="540" width="904" height="3" rx="1.5" fill="#ffffff"/></g>
+<line x1="280" y1="528.5" x2="1280" y2="528.5" stroke="#332a2e" stroke-width="1"/>
+<g clip-path="url(#cp-tl)"><g transform="translate(-72,0)"><rect x="364" y="540" width="976" height="3" rx="1.5" fill="#4a4548"/>
+<g class="ph-x"><rect x="364" y="540" width="976" height="3" rx="1.5" fill="#ffffff"/></g>
 <g class="ph-dot"><circle cx="368" cy="541.5" r="5" fill="#ffffff"/></g>
 <g class="tc0"><text x="364" y="569" fill="#f1eaed" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">0:00</text></g>
 <g class="tc1"><text x="364" y="569" fill="#f1eaed" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">0:07</text></g>
@@ -680,16 +728,16 @@
 <g class="sp0"><text x="458" y="567" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" text-anchor="middle">Scene 1</text></g>
 <g class="sp1"><text x="458" y="567" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" text-anchor="middle">Scene 2</text></g>
 <g class="sp2"><text x="458" y="567" fill="#c8bcc1" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" text-anchor="middle">Scene 3</text></g>
-<g transform="translate(771.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(777.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g>
+</g><g transform="translate(-36,0)"><g transform="translate(771.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(777.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g>
 <g transform="translate(1628,0) scale(-1,1)"><g transform="translate(771.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(777.2,557.0) scale(0.7500)"><path d="M9.4 4.6 6 8 9.4 11.4" fill="none" stroke="#9d8b93" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"/></g></g>
 <g class="an-pausebtn"><g transform="translate(806.8,557.0) scale(0.8125)"><path d="M5.2 3.4 12.4 8 5.2 12.6 Z" fill="#f1eaed"/></g></g>
 <g class="an-playbtn"><rect x="808" y="557" width="4" height="13" rx="1" fill="#f1eaed"/><rect x="816" y="557" width="4" height="13" rx="1" fill="#f1eaed"/></g>
-<g transform="translate(1160.0,557.0) scale(0.7500)"><path d="M3 6.2 H5.6 L8.8 3.2 V12.8 L5.6 9.8 H3 Z M11 6 A3 3 0 0 1 11 10" fill="none" stroke="#9d8b93" stroke-width="1.73" stroke-linecap="round" stroke-linejoin="round"/></g>
+</g><g><g transform="translate(1160.0,557.0) scale(0.7500)"><path d="M3 6.2 H5.6 L8.8 3.2 V12.8 L5.6 9.8 H3 Z M11 6 A3 3 0 0 1 11 10" fill="none" stroke="#9d8b93" stroke-width="1.73" stroke-linecap="round" stroke-linejoin="round"/></g>
 <rect x="1178" y="562" width="56" height="3" rx="1.5" fill="#4a4548"/>
 <rect x="1178" y="562" width="40" height="3" rx="1.5" fill="#c8c2c5"/>
 <rect x="1242" y="555" width="17" height="17" rx="4" fill="#3a3134"/>
 <g transform="translate(1245.0,558.0) scale(0.6875)"><path d="M2 8 V8 M4.2 5 V11 M6.4 3.4 V12.6 M8.6 5.8 V10.2 M10.8 4 V12 M13 6.4 V9.6" fill="none" stroke="#c8bcc1" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></g>
-<line x1="380.5" y1="580" x2="380.5" y2="588" stroke="#332a2e"/>
+</g><g transform="translate(-100.991,0) scale(1.079646,1)"><line x1="380.5" y1="580" x2="380.5" y2="588" stroke="#332a2e"/>
 <text x="384" y="590" fill="#9d8b93" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="8" font-weight="400">0:00</text>
 <line x1="417.5" y1="584" x2="417.5" y2="588" stroke="#332a2e" opacity="0.6"/>
 <line x1="454.5" y1="584" x2="454.5" y2="588" stroke="#332a2e" opacity="0.6"/>
@@ -956,10 +1004,10 @@
 </g>
 <rect x="1238.5" y="660.5" width="43" height="45" rx="5" fill="none" stroke="#2b6f57" stroke-width="1"/>
 </g>
-<g class="an-play"><g class="ph-move"><line x1="402" y1="578" x2="402" y2="710" stroke="#f1eaed" stroke-width="1.2" opacity="0.9"/><path d="M397 578 h10 v6 l-5 4 -5 -4 Z" fill="#f1eaed"/></g></g></g>
+<g class="an-play"><g class="ph-move"><line x1="402" y1="578" x2="402" y2="710" stroke="#f1eaed" stroke-width="1.2" opacity="0.9"/><path d="M397 578 h10 v6 l-5 4 -5 -4 Z" fill="#f1eaed"/></g></g></g></g>
 <g class="cursor"><path d="M0 0 L0 13.5 L3.4 10.3 L5.6 15.3 L8 14.2 L5.8 9.3 L10.4 9.1 Z" fill="#ffffff" stroke="#161013" stroke-width="1" stroke-linejoin="round"/></g>
 <g class="rip0"><circle cx="152" cy="660" r="4" fill="none" stroke="#7a79d6" stroke-width="1.6"/></g>
 <g class="rip1"><circle cx="152" cy="660" r="4" fill="none" stroke="#7a79d6" stroke-width="1.6"/></g>
-<g class="rip2"><circle cx="816" cy="567" r="4" fill="none" stroke="#7a79d6" stroke-width="1.6"/></g>
+<g class="rip2"><circle cx="780" cy="567" r="4" fill="none" stroke="#7a79d6" stroke-width="1.6"/></g>
 <rect class="loopfade" x="0" y="0" width="1280" height="720" fill="#0b0709"/>
 </svg>
