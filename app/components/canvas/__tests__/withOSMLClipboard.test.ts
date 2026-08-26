@@ -102,6 +102,42 @@ describe("withOSMLClipboard copy", () => {
 		expect(data.store["text/plain"]).toContain('name="Lyra"');
 	});
 
+	it("leaves a partial selection inside one element as plain text", () => {
+		const { editor } = makeEditor(
+			scene([content("narration", "n1", "Hello world")]),
+		);
+		const [, path] = Editor.node(editor, [0, 0, 0]);
+		Transforms.select(editor, {
+			anchor: { path, offset: 1 },
+			focus: { path, offset: 4 },
+		});
+
+		const data = fakeDataTransfer();
+		editor.setFragmentData(data, "copy");
+
+		expect(data.store["text/plain"]).toBeUndefined();
+	});
+
+	it("writes OSML once the selection swallows a whole element", () => {
+		const { editor } = makeEditor(
+			scene([
+				content("narration", "n1", "Hello world"),
+				content("image", "i1", "a sunset"),
+			]),
+		);
+		Transforms.select(editor, {
+			anchor: Editor.start(editor, [0, 0]),
+			focus: { path: Editor.path(editor, [0, 1, 0]), offset: 3 },
+		});
+
+		const data = fakeDataTransfer();
+		editor.setFragmentData(data, "copy");
+
+		expect(data.store["text/plain"]).toContain(
+			'<narration id="n1">Hello world</narration>',
+		);
+	});
+
 	it("leaves a collapsed selection to the default handler", () => {
 		const { editor } = makeEditor(
 			scene([content("narration", "n1", "Hello world")]),
