@@ -6,7 +6,15 @@ import {
 	SNAPSHOT_TOOLS,
 	executeToolCall,
 } from "../tools/registry";
-import { MetadataSchema } from "@/lib/project/types";
+import {
+	MetadataSchema,
+	type DeepPartial,
+	type Metadata,
+} from "@/lib/project/types";
+import {
+	CaptionStyleSchema,
+	DEFAULT_CAPTION_STYLE,
+} from "@/lib/video/captionStyle";
 
 const metadata = MetadataSchema.parse({
 	title: "Little Red",
@@ -188,6 +196,76 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("next script");
 	});
 
+	it("applies a caption preset whole, with overrides on top", async () => {
+		const patches: DeepPartial<Metadata>[] = [];
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_caption_style",
+				input: {
+					preset: "karaoke",
+					alignY: "top",
+					activeWord: { fill: "#ffe14d" },
+				},
+			},
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		const style = patches[0]?.videoSettings?.captionStyle;
+		expect(style).toMatchObject({
+			font: "bangers",
+			alignY: "top",
+			activeWord: { fill: "#ffe14d", bold: false },
+		});
+		expect(CaptionStyleSchema.safeParse(style).success).toBe(true);
+		expect(outcome.ok && outcome.output).toContain("Karaoke preset");
+	});
+
+	it("changes one caption field against the style the project already has", async () => {
+		const patches: DeepPartial<Metadata>[] = [];
+		await executeToolCall(
+			{ toolName: "set_caption_style", input: { fontSize: 120 } },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches[0]?.videoSettings?.captionStyle).toEqual({
+			...DEFAULT_CAPTION_STYLE,
+			fontSize: 120,
+		});
+	});
+
+	it("turns captions off without disturbing their style", async () => {
+		const patches: DeepPartial<Metadata>[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_caption_style", input: { captions: false } },
+			context({ setMetadata: (patch) => void patches.push(patch) }),
+		);
+
+		expect(patches[0]?.videoSettings).toEqual({
+			captions: false,
+			captionStyle: DEFAULT_CAPTION_STYLE,
+		});
+		expect(outcome.ok && outcome.output).toContain("captions off");
+	});
+
+	it("rejects a caption size the panel could not set either", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "set_caption_style", input: { fontSize: 400 } },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain("set_caption_style");
+	});
+
+	it("rejects a caption call that names nothing to change", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "set_caption_style", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+	});
+
 	it("rejects a setting call that changes nothing", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "set_video_settings", input: {} },
@@ -349,6 +427,7 @@ describe("SLOPPY_TOOLS", () => {
 			"write_script",
 			"adapt_script",
 			"set_video_settings",
+			"set_caption_style",
 			"set_language",
 			"view_reference_images",
 			"view_avatar",
