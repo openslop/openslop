@@ -89,6 +89,9 @@ export class GenerationQueue {
 			this.snapshots.update(node.id, {
 				status: "queued",
 				seconds: 0,
+				// The previous attempt's failure is what this run is answering, so it
+				// stops being reportable the moment the node is queued again.
+				error: null,
 				connectorType: node.job.connectorType,
 			});
 			this.pending.push(node);

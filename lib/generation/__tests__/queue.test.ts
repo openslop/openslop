@@ -257,6 +257,22 @@ describe("GenerationQueue", () => {
 			);
 		});
 
+		it("clears the previous failure when the element is queued again", async () => {
+			generateMock.mockRejectedValue(new Error("boom"));
+			generationQueue.enqueueGraph([makeJob("retry1")]);
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("retry1").error).toBe("boom");
+
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("retry1")]);
+
+			const snap = generationQueue.getElementSnapshot("retry1");
+			expect(snap.status).toBe("generating");
+			expect(snap.error).toBeNull();
+
+			generationQueue.discard("retry1");
+		});
+
 		it("notifies subscribers when a job fails", async () => {
 			generateMock.mockRejectedValue(new Error("boom"));
 			generationQueue.enqueueGraph([makeJob("err3")]);
