@@ -1,13 +1,10 @@
-const ANIMATE_IMAGE_INSTRUCTION = "animate the image element with id";
-const ANIMATE_IMAGE_PATTERN = new RegExp(
-	`${ANIMATE_IMAGE_INSTRUCTION}="([^"]+)"`,
-	"i",
-);
+const ANIMATE_IMAGE_PATTERN = /animate the image in scene (\d+)/i;
 
-export function animateImagePrompt(id: string): string {
-	return `${ANIMATE_IMAGE_INSTRUCTION}="${id}"`;
-}
+export const animateImagePrompt = (scene: number): string =>
+	`Animate the image in scene ${scene}, reusing the frame it has already generated.`;
 
-export function matchAnimateImagePrompt(prompt: string): string | null {
-	return ANIMATE_IMAGE_PATTERN.exec(prompt)?.[1] ?? null;
-}
+/** The scene an animate request names, or null when it is not one. */
+export const animateImageScene = (prompt: string): number | null => {
+	const scene = ANIMATE_IMAGE_PATTERN.exec(prompt)?.[1];
+	return scene === undefined ? null : Number(scene);
+};

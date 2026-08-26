@@ -77,7 +77,7 @@ export const DEFAULT_CAPTION_STYLE: CaptionStyle = {
 	font: "inter",
 	fontSize: 40,
 	casing: "none",
-	alignX: "left",
+	alignX: "center",
 	alignY: "bottom",
 	maxWordsPerLine: 4,
 	reveal: "word",

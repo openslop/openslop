@@ -9,6 +9,7 @@ import {
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import {
+	derivedDependency,
 	derivedNodeId,
 	type GenerationNode,
 	type NodeSpec,
@@ -22,8 +23,10 @@ import type { ElementSnapshot } from "@/lib/generation/snapshots";
  */
 const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "model"] as const;
 
+const STILL = "still";
+
 export const stillElementId = (elementId: string) =>
-	derivedNodeId("still", elementId);
+	derivedNodeId(STILL, elementId);
 
 /**
  * The frame an animated image animates. Being a node of its own is what makes it
@@ -50,7 +53,7 @@ export const forStillOf =
 
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>
-	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
+	derivedDependency(node, STILL);
 
 /**
  * The snapshot of the still a node depends on

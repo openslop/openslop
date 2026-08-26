@@ -1,6 +1,9 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type {
+	CanvasContentElement,
+	CanvasElementType,
+} from "@/lib/canvas/types";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type {
 	AssetConnectorType,
@@ -21,6 +24,7 @@ export type NodeId = string;
 /** Everything the queue needs to run one node. */
 export type GenerationJob = {
 	elementId: string;
+	elementType: CanvasElementType;
 	connectorType: AssetConnectorType;
 	provider: ProviderKey;
 	config: ConnectorConfig;
@@ -85,6 +89,10 @@ const DERIVED_PREFIX = "~";
 /** Ids for nodes the graph derives; the prefix keeps them off element ids. */
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
+
+/** The dependency a node derives for `kind`, when its plugins declare one. */
+export const derivedDependency = (node: GenerationNode, kind: string) =>
+	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
 
 const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
 

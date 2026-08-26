@@ -26,6 +26,7 @@ const config: ConnectorConfig = {
 function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	const job: GenerationJob = {
 		elementId: id,
+		elementType: "image",
 		connectorType: "image",
 		provider: "openslop",
 		config,

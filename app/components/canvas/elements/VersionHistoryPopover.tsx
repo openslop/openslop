@@ -19,7 +19,6 @@ import { restoreVersion } from "@/lib/generation/restore";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { relativeTime } from "@/lib/project/relativeTime";
 import { toastError } from "@/lib/toastError";
-import { formatTime } from "@/lib/video/timestamps";
 import { cn } from "@/lib/utils";
 import {
 	useElementHistory,
@@ -66,7 +65,7 @@ function VersionRow({
 	active: boolean;
 	onRestore: () => void;
 }) {
-	const { audioUrl, durationSec } = version.result;
+	const { audioUrl } = version.result;
 	return (
 		<li
 			aria-current={active}
@@ -85,14 +84,6 @@ function VersionRow({
 						<Dot />
 						{version.pinned && <Pin className="h-3 w-3" />}
 						{relativeTime(version.createdAt)}
-						{durationSec > 0 && (
-							<>
-								<Dot />
-								<span className="font-mono tabular-nums">
-									{formatTime(durationSec)}
-								</span>
-							</>
-						)}
 					</span>
 					<span className="w-full truncate text-label-xs text-muted-foreground">
 						{version.inputs.prompt

@@ -3,6 +3,7 @@ import { createEditor, Editor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
+	applyNodeVersion,
 	clearEditor,
 	duplicateNode,
 	findElementById,
@@ -257,5 +258,57 @@ describe("clearEditor", () => {
 		clearEditor(editor);
 
 		expect(editor.children).toEqual([]);
+	});
+});
+
+describe("applyNodeVersion", () => {
+	const version = (
+		elementType: CanvasContentElement["type"] | undefined,
+		attributes: Record<string, string>,
+		prompt: string,
+	) => ({ elementType, inputs: { prompt, attributes, dependencies: {} } });
+
+	// An animated image restored to the image version it was animated from keeps
+	// the videoPrompt of the animation without it.
+	it("restores the type the version was generated as", () => {
+		const el = content("animated_image", "n1", "a fox", {
+			style: "ink",
+			videoPrompt: "slow pan",
+		});
+		const editor = makeEditor([scene([el])]);
+
+		applyNodeVersion(
+			editor,
+			[0, 0],
+			version("image", { style: "ink" }, "a fox"),
+		);
+
+		const node = (editor.children[0] as SceneElement).children[0];
+		expect(node.type).toBe("image");
+		expect(node.generationAttributes).toEqual({ style: "ink" });
+	});
+
+	it("restores the prompt the version was generated from", () => {
+		const el = content("image", "n1", "a fox");
+		const editor = makeEditor([scene([el])]);
+
+		applyNodeVersion(editor, [0, 0], version("image", {}, "a wolf"));
+
+		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
+	});
+
+	it("leaves the type alone for a version stored without one", () => {
+		const el = content("animated_image", "n1", "a fox", { style: "ink" });
+		const editor = makeEditor([scene([el])]);
+
+		applyNodeVersion(
+			editor,
+			[0, 0],
+			version(undefined, { style: "oil" }, "a fox"),
+		);
+
+		const node = (editor.children[0] as SceneElement).children[0];
+		expect(node.type).toBe("animated_image");
+		expect(node.generationAttributes).toEqual({ style: "oil" });
 	});
 });

@@ -29,6 +29,12 @@ const setOp = z.object({
 	type: canvasElementType.optional(),
 	attrs: z.record(z.string(), z.string().nullable()).optional().nullable(),
 	text: z.string().optional(),
+	deps: z
+		.record(z.string(), z.string())
+		.optional()
+		.describe(
+			'Reuse a result instead of making a new one, as input name to element id. Example: {"still": "abc123"}.',
+		),
 });
 
 export const refineOpSchema = z.discriminatedUnion("op", [

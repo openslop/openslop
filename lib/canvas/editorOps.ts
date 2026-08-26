@@ -1,6 +1,7 @@
 import mapValues from "lodash/mapValues";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
+import type { ElementVersion } from "@/lib/generation/versions";
 import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { isContentElement } from "./guards";
@@ -92,6 +93,23 @@ export function replaceGenerationAttrs(
 		{ generationAttributes: mapValues(attributes, String) },
 		{ at: path },
 	);
+}
+
+/**
+ * Puts an element back into the state that produced a version: the type it was
+ * generated as, and the prompt and attributes it was generated from. Restoring
+ * the inputs alone would leave, say, an animated image holding the attributes of
+ * the image it was animated from, with no videoPrompt left to animate on.
+ */
+export function applyNodeVersion(
+	editor: Editor,
+	path: Path,
+	{ elementType, inputs }: Pick<ElementVersion, "elementType" | "inputs">,
+): void {
+	if (elementType)
+		Transforms.setNodes(editor, { type: elementType }, { at: path });
+	replaceGenerationAttrs(editor, path, inputs.attributes);
+	updateNodeText(editor, path, inputs.prompt);
 }
 
 export function mergeAttrs(

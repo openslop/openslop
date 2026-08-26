@@ -46,6 +46,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 	} = overrides;
 	const job: GenerationJob = {
 		elementId: id,
+		elementType: "image",
 		connectorType: "image",
 		provider: "openslop",
 		config,
@@ -725,6 +726,16 @@ describe("GenerationQueue", () => {
 					pinned: false,
 					result: { url: "first.png", durationSec: 0 },
 				}),
+			);
+		});
+
+		// A version is restored onto the element, so it has to remember the type it
+		// was generated as, not just the connector that ran it.
+		it("announces the element type the version was generated as", async () => {
+			await generate("v3", "third.png");
+
+			expect(committed).toHaveBeenCalledWith(
+				expect.objectContaining({ elementId: "v3", elementType: "image" }),
 			);
 		});
 

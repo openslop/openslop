@@ -15,7 +15,14 @@ const result = (imageUrl: string): AssetResult => ({
 });
 
 const commit = (store: SnapshotStore, id: string, url: string) =>
-	store.commit(id, result(url), inputs(url), "image", false);
+	store.commit({
+		elementId: id,
+		elementType: "image",
+		connectorType: "image",
+		inputs: inputs(url),
+		result: result(url),
+		pinned: false,
+	});
 
 describe("SnapshotStore", () => {
 	it("reports an unknown element as idle and empty", () => {
@@ -87,7 +94,14 @@ describe("SnapshotStore", () => {
 	it("reports each commit as the version it produced", () => {
 		const store = new SnapshotStore();
 		expect(
-			store.commit("a", result("a.png"), inputs("a.png"), "image", false),
+			store.commit({
+				elementId: "a",
+				elementType: "image",
+				connectorType: "image",
+				inputs: inputs("a.png"),
+				result: result("a.png"),
+				pinned: false,
+			}),
 		).toMatchObject({ elementId: "a", connectorType: "image", pinned: false });
 	});
 

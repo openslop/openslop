@@ -5,7 +5,6 @@ import { withoutCaretMarker } from "./constants";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import { escapeXml } from "./xmlEscape";
 
-export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;
 const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
 
 export function getElementText(element: ParsedElement): string {

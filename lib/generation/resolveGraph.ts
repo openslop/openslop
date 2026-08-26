@@ -34,6 +34,7 @@ const toNode = (
 	dependsOn,
 	job: {
 		elementId: element.id,
+		elementType: element.type,
 		connectorType: connector.type,
 		provider: connector.provider,
 		config: { ...connector.config, plugins },

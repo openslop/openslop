@@ -1,13 +1,12 @@
 import { type Editor, Transforms } from "slate";
 import { ReactEditor } from "slate-react";
 import {
+	applyNodeVersion,
 	duplicateNode,
-	replaceGenerationAttrs,
 	mergeAttrs,
-	updateNodeText,
 } from "@/lib/canvas/editorOps";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
-import type { NodeInputs } from "@/lib/generation/inputs";
+import type { ElementVersion } from "@/lib/generation/versions";
 
 /** Merge attrs into a live element's attributes (a null value deletes the key). */
 export function updateElementAttrs(
@@ -18,14 +17,13 @@ export function updateElementAttrs(
 	mergeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
 }
 
-export function applyNodeInputs(
+/** Restore a live element to the state a version was generated from. */
+export function applyElementVersion(
 	editor: Editor,
 	element: CanvasContentElement,
-	inputs: NodeInputs,
+	version: Pick<ElementVersion, "elementType" | "inputs">,
 ): void {
-	const path = ReactEditor.findPath(editor, element);
-	replaceGenerationAttrs(editor, path, inputs.attributes);
-	updateNodeText(editor, path, inputs.prompt);
+	applyNodeVersion(editor, ReactEditor.findPath(editor, element), version);
 }
 
 /** Inserts a copy of a live element directly after it. Returns the copy's id. */
