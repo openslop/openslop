@@ -74,8 +74,6 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 			);
 		case "audio":
 			return <AudioSequence element={element} />;
-		default:
-			return null;
 	}
 }
 
@@ -121,18 +119,16 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 	const layeredSequenceNodes = useMemo(
 		() =>
 			Object.entries(sequences).flatMap(([type, seqs]) =>
-				(seqs ?? []).map((seq, i) =>
-					seq.element ? (
-						<Sequence
-							key={`${type}-${seq.element.id}-${i}`}
-							from={toFrames(seq.start, fps)}
-							durationInFrames={toFrames(seq.duration, fps)}
-							premountFor={fps}
-						>
-							<SequenceContent element={seq.element} />
-						</Sequence>
-					) : null,
-				),
+				(seqs ?? []).map((seq, i) => (
+					<Sequence
+						key={`${type}-${seq.element.id}-${i}`}
+						from={toFrames(seq.start, fps)}
+						durationInFrames={toFrames(seq.duration, fps)}
+						premountFor={fps}
+					>
+						<SequenceContent element={seq.element} />
+					</Sequence>
+				)),
 			),
 		[fps, sequences],
 	);

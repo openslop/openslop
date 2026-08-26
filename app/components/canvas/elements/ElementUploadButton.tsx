@@ -2,15 +2,16 @@
 
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { stillDependency } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { pictureNode } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { useElementGeneration } from "./ElementGenerationContext";
 
+/** Supplies the picture an element would otherwise generate, so only the elements that make one offer it. */
 export function ElementUploadButton() {
 	const queue = useGenerationQueue();
 	const { node, status } = useElementGeneration();
-	// An upload replaces the still, leaving the animation stale to re-render.
-	const target = stillDependency(node) ?? node;
+	const target = pictureNode(node);
+	if (!target) return null;
 
 	return (
 		<UploadImageButton

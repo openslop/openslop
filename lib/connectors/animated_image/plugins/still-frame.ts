@@ -1,5 +1,5 @@
 import omit from "lodash/omit";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import {
 	DEFAULT_PROVIDER,
 	type AnimatedImageGenerateParams,
@@ -11,7 +11,9 @@ import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import {
 	derivedDependency,
 	derivedNodeId,
+	isSourceNode,
 	type GenerationNode,
+	type JobNode,
 	type NodeSpec,
 } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
@@ -54,6 +56,19 @@ export const forStillOf =
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>
 	derivedDependency(node, STILL);
+
+/**
+ * The node that makes an element's picture: the still behind an animated image,
+ * an image element itself, and nothing at all for an element that makes no
+ * picture. Whoever supplies a picture writes it here.
+ */
+export function pictureNode(node: GenerationNode): JobNode | null {
+	const target = stillDependency(node) ?? node;
+	if (isSourceNode(target)) return null;
+	const makesPicture =
+		ELEMENT_TYPES[target.job.elementType].outputKind === "image";
+	return makesPicture ? target : null;
+}
 
 /**
  * The snapshot of the still a node depends on
