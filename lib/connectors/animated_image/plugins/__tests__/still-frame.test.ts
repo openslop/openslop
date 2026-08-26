@@ -16,6 +16,7 @@ import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createStillFramePlugin,
+	pictureNode,
 	stillElementId,
 	stillSnapshot,
 } from "../still-frame";
@@ -245,5 +246,41 @@ describe("uploaded still lifetime", () => {
 		const { animation, still } = afterUpload("a forest", "slow pan");
 		expect(still).toBe(false);
 		expect(animation).toBe(false);
+	});
+});
+
+describe("pictureNode", () => {
+	const registry = DEFAULT_CONNECTOR_REGISTRY;
+	const state = {
+		hydrated: true,
+		metadata: MetadataSchema.parse({}),
+		referenceImages: [],
+	};
+
+	const element = (
+		type: "image" | "animated_image" | "clip" | "narration",
+	) => ({
+		id: `el-${type}`,
+		type,
+		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		children: [{ id: `el-${type}-t`, type, text: "a forest" }],
+	});
+
+	const pictureFor = (type: Parameters<typeof element>[0]) =>
+		pictureNode(nodeBuilder(registry, state)(forElement(element(type))));
+
+	it("is the element itself when it generates an image", () => {
+		expect(pictureFor("image")?.id).toBe("el-image");
+	});
+
+	it("is the still behind an animated image, not the animation", () => {
+		expect(pictureFor("animated_image")?.id).toBe(
+			stillElementId("el-animated_image"),
+		);
+	});
+
+	it("is nothing for an element that makes no picture", () => {
+		expect(pictureFor("clip")).toBeNull();
+		expect(pictureFor("narration")).toBeNull();
 	});
 });

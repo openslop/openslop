@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { clamp } from "@/lib/utils";
 import { findSegmentIndexAtFrame } from "@/lib/video/sceneSegments";
 import { usePlayerControl } from "./PlayerControlContext";
@@ -21,17 +21,18 @@ export function SegmentedSeekBar() {
 	const progress = clamp(frame / Math.max(1, totalFrames - 1), 0, 1);
 
 	const [hover, setHover] = useState<ScrubHover | null>(null);
-	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-	const [settledIndex, setSettledIndex] = useState<number | null>(null);
-	const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// Pulling a frame per segment the pointer sweeps across is wasted work, so
+	// the thumbnail follows only once the pointer holds still.
+	const [settled, setSettled] = useState<ScrubHover | null>(null);
 	const scrub = usePlayerScrub();
 
-	useEffect(
-		() => () => {
-			if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-		},
-		[],
-	);
+	if (!hover && settled) setSettled(null);
+
+	useEffect(() => {
+		if (!hover) return;
+		const timer = setTimeout(() => setSettled(hover), HOVER_SETTLE_MS);
+		return () => clearTimeout(timer);
+	}, [hover]);
 
 	const scrubSegments = useMemo(
 		() =>
@@ -42,29 +43,15 @@ export function SegmentedSeekBar() {
 		[segments, totalDurationSec],
 	);
 
-	const onHoverChange = (h: ScrubHover | null) => {
-		setHover(h);
-		if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-		if (!h) {
-			setHoverIndex(null);
-			setSettledIndex(null);
-			return;
-		}
-		const index = findSegmentIndexAtFrame(
-			segments,
-			toScrubFrame(h.ratio),
-			layout.fps,
-		);
-		setHoverIndex(index);
-		settleTimerRef.current = setTimeout(
-			() => setSettledIndex(index),
-			HOVER_SETTLE_MS,
-		);
-	};
+	const segmentAt = (at: ScrubHover | null) =>
+		at
+			? (segments[
+					findSegmentIndexAtFrame(segments, toScrubFrame(at.ratio), layout.fps)
+				] ?? null)
+			: null;
 
-	const hoverSegment = hoverIndex != null ? segments[hoverIndex] : null;
-	const thumbnailSegment =
-		settledIndex != null ? (segments[settledIndex] ?? null) : null;
+	const hoverSegment = segmentAt(hover);
+	const thumbnailSegment = segmentAt(settled);
 
 	return (
 		<ScrubBar
@@ -76,7 +63,7 @@ export function SegmentedSeekBar() {
 			onScrub={(ratio) => scrub.seekTo(toScrubFrame(ratio))}
 			onScrubStart={scrub.start}
 			onScrubEnd={scrub.end}
-			onHoverChange={onHoverChange}
+			onHoverChange={setHover}
 		>
 			{hover && hoverSegment ? (
 				<SeekTooltip
