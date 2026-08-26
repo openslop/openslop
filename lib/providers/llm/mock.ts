@@ -7,8 +7,9 @@ import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
+import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
-import { isAnimateImageRequest } from "@/lib/script/refine/animatePrompt";
+import { animateImageScene } from "@/lib/script/refine/animatePrompt";
 import type { AgentModel } from "./agentModel";
 
 const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
@@ -175,6 +176,10 @@ export class MockLLM {
 
 const ELEMENT_ID = /id="([^"]+)"/;
 const IMAGE_ID = /<image[^>]*\bid="([^"]+)"/;
+
+/** What a script reads as between one scene marker and the next. */
+const sceneSection = (script: string, scene: number): string =>
+	script.split(SCENE_MARKER_PATTERN)[scene] ?? "";
 const EDIT_REQUEST =
 	/\b(add|remove|delete|change|edit|rewrite|shorten|lengthen|make|replace|move|swap|fix|tweak|animate|shorter|longer|warmer|colder)\b/i;
 
@@ -235,7 +240,7 @@ function parts(
  */
 function mockCall(prompt: LanguageModelV3Prompt) {
 	const asked = lastUserText(prompt);
-	const animating = isAnimateImageRequest(asked);
+	const scene = animateImageScene(asked);
 	const last = lastToolResult(prompt);
 
 	// The canvas is never in the prompt, so a step that has not read it, or that
@@ -250,9 +255,11 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		};
 	}
 
-	const elementId = (animating ? IMAGE_ID : ELEMENT_ID).exec(
-		last?.text ?? "",
-	)?.[1];
+	const script = last?.text ?? "";
+	const elementId =
+		scene === null
+			? ELEMENT_ID.exec(script)?.[1]
+			: IMAGE_ID.exec(sceneSection(script, scene))?.[1];
 
 	if (!elementId) {
 		return {
@@ -262,7 +269,7 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		};
 	}
 
-	if (!animating && !EDIT_REQUEST.test(asked)) {
+	if (scene === null && !EDIT_REQUEST.test(asked)) {
 		return {
 			say: "No API key is set, so I am a mock. Ask me to change the script and I will edit it.",
 		};
@@ -273,7 +280,7 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		toolName: "edit_script",
 		input: {
 			ops: [
-				animating
+				scene !== null
 					? {
 							op: "set",
 							id: elementId,
