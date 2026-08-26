@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
+import {
+	OSMLStreamParser,
+	looksLikeOSML,
+	parseOSML,
+} from "../osmlStreamParser";
 import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
@@ -219,5 +223,23 @@ describe("parseOSML", () => {
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("narration");
 		expect(getElementText(nodes[0])).toContain("Once upon a time");
+	});
+});
+
+describe("looksLikeOSML", () => {
+	it("recognizes a canvas element tag", () => {
+		expect(looksLikeOSML('<image id="i1">a sunset</image>')).toBe(true);
+	});
+
+	it("recognizes a scene marker on its own", () => {
+		expect(looksLikeOSML("--- Scene 2 ---")).toBe(true);
+	});
+
+	it("rejects prose", () => {
+		expect(looksLikeOSML("a sunset over the harbour")).toBe(false);
+	});
+
+	it("rejects markup that is not a canvas element", () => {
+		expect(looksLikeOSML("<div><p>hello</p></div>")).toBe(false);
 	});
 });

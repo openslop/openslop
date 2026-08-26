@@ -5,6 +5,7 @@ import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import { createCanvasNode } from "./createCanvasNode";
 import { unescapeXml } from "./xmlEscape";
+import { SCENE_MARKER_PATTERN } from "./constants";
 
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<([^<>/][^<>]*?)>|<\/([^<>/][^<>]*?)>/g;
@@ -98,6 +99,16 @@ export class OSMLStreamParser {
 			this.buffer.length >= MIN_BUFFER_LENGTH
 		);
 	}
+}
+
+const OPEN_TAG_PATTERN = /<([a-z_]+)(?:\s[^<>]*)?>/gi;
+
+/** Whether arbitrary text (a clipboard payload) should be read as OSML rather than prose. */
+export function looksLikeOSML(text: string): boolean {
+	if (SCENE_MARKER_PATTERN.test(text)) return true;
+	return [...text.matchAll(OPEN_TAG_PATTERN)].some(([, tag]) =>
+		isCanvasElementType(tag),
+	);
 }
 
 // TODO store and rehydrate element-scoped connector snapshot too

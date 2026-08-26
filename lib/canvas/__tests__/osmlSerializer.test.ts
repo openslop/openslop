@@ -116,13 +116,21 @@ describe("serializeOSMLWithScenes", () => {
 		expect(lines[2]).toContain("s1");
 	});
 
-	it("ignores non-scene top-level nodes", () => {
-		// serializeOSMLWithScenes only walks scene elements
+	it("serializes a bare content element without a scene marker", () => {
+		const result = serializeOSMLWithScenes([elWithId("narration", "n1", "hi")]);
+		expect(result).toBe('<narration id="n1">hi</narration>');
+	});
+
+	it("keeps scene numbering across a mixed fragment", () => {
 		const result = serializeOSMLWithScenes([
-			wrap(elWithId("narration", "n1", "hello")),
+			elWithId("narration", "n1", "loose"),
+			wrap(elWithId("image", "img1", "sunset")),
 		]);
-		expect(result).toContain("Scene 1");
-		expect(result).not.toContain("Scene 2");
+		expect(result.split("\n").filter(Boolean)).toEqual([
+			'<narration id="n1">loose</narration>',
+			"--- Scene 1 ---",
+			'<image id="img1">sunset</image>',
+		]);
 	});
 });
 

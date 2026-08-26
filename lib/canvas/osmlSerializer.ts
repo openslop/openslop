@@ -1,6 +1,7 @@
 import { Descendant } from "slate";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
 import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import { isContentElement } from "@/lib/canvas/guards";
 import { withoutCaretMarker } from "./constants";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import { escapeXml } from "./xmlEscape";
@@ -30,6 +31,11 @@ export function serializeOSML(descendants: Descendant[]): string {
 	return getContentElements(descendants).map(serializeElement).join("").trim();
 }
 
+/**
+ * The single OSML entry point for a whole document or an arbitrary fragment:
+ * scene nodes emit `--- Scene N ---` markers, and content elements outside a
+ * scene (a partial clipboard selection) emit bare tags rather than being dropped.
+ */
 export function serializeOSMLWithScenes(descendants: Descendant[]): string {
 	let osml = "";
 	let sceneNum = 0;
@@ -40,6 +46,8 @@ export function serializeOSMLWithScenes(descendants: Descendant[]): string {
 			for (const child of node.children) {
 				osml += serializeElement(child);
 			}
+		} else if (isContentElement(node)) {
+			osml += serializeElement(node);
 		}
 	}
 	return osml.trim();
