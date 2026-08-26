@@ -3,8 +3,16 @@
 <desc>Sloppy, the OpenSlop copilot, rewrites a scene's music, adds a rival character, then builds a whole drift scene — new elements land on the canvas and the timeline, get reordered by hand, and the edit plays back.</desc>
 <style>
 @keyframes kf-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
-.orb { animation: kf-orb 40s infinite both; transform-box: fill-box; transform-origin: center; }
-@keyframes kf-orb { 0% { transform: scale(0.8); } 18% { transform: scale(1.06); } 20% { transform: scale(0.86); } 22% { transform: scale(1.06); } 24% { transform: scale(0.86); } 26% { transform: scale(1.06); } 28% { transform: scale(0.86); } 30% { transform: scale(1.06); } 32% { transform: scale(0.86); } 34% { transform: scale(0.9); } 49% { transform: scale(0.9); } 50% { transform: scale(1.06); } 52% { transform: scale(0.86); } 54% { transform: scale(1.06); } 56% { transform: scale(0.86); } 58% { transform: scale(1.06); } 60% { transform: scale(0.86); } 62% { transform: scale(1.06); } 64% { transform: scale(0.86); } 70% { transform: scale(0.9); } 100% { transform: scale(0.9); } }
+.orb { animation: kf-orb-colorize 6s ease-in-out infinite; }
+@keyframes kf-orb-colorize { 0% { filter: hue-rotate(0deg); } 20% { filter: hue-rotate(-30deg); } 40% { filter: hue-rotate(-60deg); } 60% { filter: hue-rotate(-90deg); } 80% { filter: hue-rotate(-45deg); } 100% { filter: hue-rotate(0deg); } }
+.orb-goo { filter: contrast(15); animation: kf-orb-roundness 1s linear infinite; }
+@keyframes kf-orb-roundness { 0% { filter: contrast(15); } 20%,40% { filter: contrast(3); } 60%,100% { filter: contrast(15); } }
+.orb-goo polygon { filter: blur(12px); }
+.orb-p0 { transform-origin: 75px 25px; transform: rotate(90deg); }
+.orb-p1 { transform-origin: 50px 50px; animation: kf-orb-spin 2s linear infinite reverse; }
+.orb-p2 { transform-origin: 50px 60px; animation: kf-orb-spin 2s linear infinite; animation-delay: -0.667s; }
+.orb-p3 { transform-origin: 40px 40px; animation: kf-orb-spin 2s linear infinite reverse; }
+@keyframes kf-orb-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .an-user1 { animation: kf-an-user1 40s infinite both; }
 @keyframes kf-an-user1 { 0%,17.6% { opacity: 0; transform: translate(0,6px); } 18.6%,100% { opacity: 1; transform: translate(0,0); } }
 .an-think1 { animation: kf-an-think1 40s infinite both; }
@@ -257,7 +265,8 @@
 <pattern id="grain" width="120" height="120" patternUnits="userSpaceOnUse"><rect width="120" height="120" filter="url(#grainf)" opacity="0.5"/></pattern>
 <clipPath id="cp-av"><circle cx="28" cy="18" r="10"/></clipPath>
 <clipPath id="cp-tr"><rect x="58" y="66" width="220" height="550"/></clipPath>
-<radialGradient id="orb" cx="35%" cy="30%"><stop offset="0%" stop-color="#ffbf48"/><stop offset="100%" stop-color="#be4a1d"/></radialGradient>
+<linearGradient id="orb" x1="0" y1="0" x2="0" y2="1"><stop offset="30%" stop-color="#ffbf48"/><stop offset="70%" stop-color="#be4a1d"/></linearGradient>
+<mask id="orb-mask"><g class="orb-goo"><polygon class="orb-p0" points="0,0 100,0 100,100 0,100" fill="#000000"/><polygon class="orb-p1" points="25,25 75,25 50,75" fill="#ffffff"/><polygon class="orb-p2" points="50,25 75,75 25,75" fill="#ffffff"/><polygon class="orb-p3" points="35,35 65,35 50,65" fill="#ffffff"/></g></mask>
 <clipPath id="cp-ty-r1-0"><rect class="ty-r1-0" x="-84.1" y="377.0" width="98.1" height="15"/></clipPath>
 <clipPath id="cp-ty-r1-1"><rect class="ty-r1-1" x="-105.9" y="392.0" width="119.9" height="15"/></clipPath>
 <clipPath id="cp-ty-r1-2"><rect class="ty-r1-2" x="-122.3" y="407.0" width="136.3" height="15"/></clipPath>
@@ -374,7 +383,7 @@
 </g>
 <g class="an-user1"><rect x="13.5" y="204" width="166.5" height="57" rx="9" fill="#e2dde0"/><text x="26.5" y="222" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">make the music more</text><text x="26.5" y="237" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">dramatic and add a rival</text><text x="26.5" y="252" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">character</text></g>
 <g class="an-think1">
-<circle class="orb" cx="7" cy="281" r="6" fill="url(#orb)"/>
+<g class="orb" transform="translate(-3,271) rotate(90,10,10) scale(0.2)"><rect width="100" height="100" fill="url(#orb)" mask="url(#orb-mask)"/></g>
 <text x="20" y="285" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Slopping…</text>
 <text x="71" y="285" fill="#74666c" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">· 9s</text>
 </g>
@@ -405,7 +414,7 @@
 </g>
 <g class="an-user2"><rect x="13.5" y="545" width="166.5" height="42" rx="9" fill="#e2dde0"/><text x="26.5" y="563" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">add a drift scene with</text><text x="26.5" y="578" fill="#231e21" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="400">tire screeching sounds</text></g>
 <g class="an-think2">
-<circle class="orb" cx="7" cy="607" r="6" fill="url(#orb)"/>
+<g class="orb" transform="translate(-3,597) rotate(90,10,10) scale(0.2)"><rect width="100" height="100" fill="url(#orb)" mask="url(#orb-mask)"/></g>
 <text x="20" y="611" fill="#9d8b93" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400">Slopping…</text>
 <text x="71" y="611" fill="#74666c" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="9.5" font-weight="400">· 13s</text>
 </g>
