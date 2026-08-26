@@ -90,6 +90,10 @@ const DERIVED_PREFIX = "~";
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
 
+/** The dependency a node derives for `kind`, when its plugins declare one. */
+export const derivedDependency = (node: GenerationNode, kind: string) =>
+	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
+
 const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
 
 /** The node a derived id was minted from, if it was derived at all. */

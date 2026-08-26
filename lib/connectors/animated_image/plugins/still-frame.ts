@@ -9,12 +9,12 @@ import {
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import {
+	derivedDependency,
 	derivedNodeId,
 	type GenerationNode,
 	type NodeSpec,
 } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
-import type { NodeBuilder } from "@/lib/generation/resolveGraph";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /**
@@ -23,8 +23,10 @@ import type { ElementSnapshot } from "@/lib/generation/snapshots";
  */
 const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "model"] as const;
 
+const STILL = "still";
+
 export const stillElementId = (elementId: string) =>
-	derivedNodeId("still", elementId);
+	derivedNodeId(STILL, elementId);
 
 /**
  * The frame an animated image animates. Being a node of its own is what makes it
@@ -51,7 +53,7 @@ export const forStillOf =
 
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>
-	node.dependsOn.find((dep) => dep.id === stillElementId(node.id));
+	derivedDependency(node, STILL);
 
 /**
  * The snapshot of the still a node depends on
@@ -60,22 +62,6 @@ export const stillSnapshot = (
 	node: GenerationNode,
 	queue: GenerationQueue,
 ): ElementSnapshot => queue.getElementSnapshot(stillDependency(node)?.id);
-
-/**
- * Moves an image's own result onto the still it is about to become, so animating
- * an image animates the frame the user already has instead of a fresh one. The
- * still stays a node with its own inputs, so editing it still stales the animation.
- */
-export function carryOverStill(
-	element: CanvasContentElement,
-	queue: GenerationQueue,
-	buildNode: NodeBuilder,
-): void {
-	const { result } = queue.getElementSnapshot(element.id);
-	if (!result) return;
-	queue.commitResult(buildNode(forStillOf(element)), result);
-	queue.discard(element.id);
-}
 
 const stillFrame = (
 	ctx?: PluginContext<AnimatedImageGenerateParams, AssetResult>,

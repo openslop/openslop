@@ -22,6 +22,13 @@ export const editScript = defineTool({
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it.
 
+	  \`deps\` goes on a \`set\` and reuses a result the element already has, instead of
+	  throwing it away. Send it whenever you retype an element into one built on what it
+	  already made: an image becoming an animated_image sends
+	  \`deps: {"still": "<the image's id>"}\`, so the animation opens on the picture that
+	  image already made instead of generating a new one. Retyping keeps the id, so that is
+	  the id you already read. \`still\` is the only name \`deps\` takes today.
+
 	  To move an element, remove it and insert it again.
 
 	  Element types: ${ELEMENT_TYPES}

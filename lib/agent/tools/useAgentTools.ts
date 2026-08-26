@@ -11,7 +11,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { createDefaultConnector } from "@/lib/connectors/registry";
-import { applyRefineOps } from "@/lib/script/refine/applyOps";
+import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
@@ -42,7 +42,16 @@ export function useAgentTools(editor: Editor) {
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,
-				editScript: (ops) => applyRefineOps(editor, ops, connectorConfig),
+				editScript: (ops) =>
+					applyScriptEdit(
+						{
+							editor,
+							queue,
+							connectors: connectorConfig,
+							state: store.getState(),
+						},
+						ops,
+					),
 				// The stream appends what it cannot find by id, so the canvas is cleared
 				// first or the new script stacks under the old one.
 				writeScript: (brief) => {
