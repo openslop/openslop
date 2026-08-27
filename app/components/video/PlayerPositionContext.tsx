@@ -19,7 +19,7 @@ const [PlayerPositionContext, usePlayerPosition] = createRequiredContext<{
 export { usePlayerPosition };
 
 export function PlayerPositionProvider({ children }: { children: ReactNode }) {
-	const [position, setPosition] = useState<PlayerPosition>("right");
+	const [preferredPosition, setPosition] = useState<PlayerPosition>("right");
 	const [visible, setVisible] = useState(true);
 	const [narrowViewport, setNarrowViewport] = useState(false);
 
@@ -27,16 +27,14 @@ export function PlayerPositionProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		const mql = window.matchMedia(NARROW_QUERY);
-		const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
+		const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
 			setNarrowViewport(e.matches);
-			if (e.matches) {
-				setPosition((prev) => (prev === "right" ? "top" : prev));
-			}
-		};
 		onChange(mql);
 		mql.addEventListener("change", onChange);
 		return () => mql.removeEventListener("change", onChange);
 	}, []);
+
+	const position = narrowViewport ? "top" : preferredPosition;
 
 	return (
 		<PlayerPositionContext
