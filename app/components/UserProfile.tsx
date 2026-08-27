@@ -6,7 +6,7 @@ import { signOut } from "@/lib/auth/session";
 import { toastError } from "@/lib/toastError";
 import { useUser } from "@/lib/user/UserProvider";
 import { useTheme } from "next-themes";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "./UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import {
 	DropdownMenu,
@@ -36,7 +36,6 @@ function UserProfile() {
 	const [impersonateOpen, setImpersonateOpen] = useState(false);
 	const user = useUser();
 	const email = user.email ?? "";
-	const avatarUrl: string | undefined = user.user_metadata?.avatar_url;
 	const name: string | undefined = user.user_metadata?.full_name;
 
 	const handleLogout = async () => {
@@ -49,8 +48,6 @@ function UserProfile() {
 		router.refresh();
 	};
 
-	const initials = email.split("@")[0].slice(0, 2).toUpperCase();
-
 	return (
 		<div className="fixed left-5 top-4 z-[100] animate-in fade-in duration-300 motion-reduce:transition-none">
 			<DropdownMenu modal={false}>
@@ -61,10 +58,7 @@ function UserProfile() {
 						aria-label="Account menu"
 						className="cursor-pointer rounded-full focus-ring"
 					>
-						<Avatar>
-							{avatarUrl && <AvatarImage src={avatarUrl} alt={email} />}
-							<AvatarFallback className="text-label">{initials}</AvatarFallback>
-						</Avatar>
+						<UserAvatar user={user} />
 					</button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="start" className="w-56">

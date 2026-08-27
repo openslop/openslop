@@ -16,7 +16,7 @@ const ownedDependencies = ({ elementId, inputs }: ElementVersion) =>
  * character avatars, project style — are state other elements read, and a
  * restore here must never move them.
  */
-export async function restoreVersion(
+export async function restoreElementVersion(
 	queue: GenerationQueue,
 	history: ElementHistory,
 	version: ElementVersion,
@@ -28,7 +28,7 @@ export async function restoreVersion(
 			const match = history
 				.get(id)
 				.find((candidate) => resultIdentity(candidate.result) === identity);
-			if (match) await restoreVersion(queue, history, match);
+			if (match) await restoreElementVersion(queue, history, match);
 		}),
 	);
 }

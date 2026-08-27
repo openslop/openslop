@@ -31,9 +31,17 @@ export function applyStoreSnapshot(
 	store: ProjectStore,
 	snapshot: ProjectStoreSnapshot,
 ): void {
+	if (store.getState().hydrated) return;
+	replaceStoreSnapshot(store, snapshot);
+	store.getState().markHydrated();
+}
+
+export function replaceStoreSnapshot(
+	store: ProjectStore,
+	snapshot: ProjectStoreSnapshot,
+): void {
 	const state = store.getState();
-	if (state.hydrated) return;
+	state.reset();
 	state.updateMetadata(snapshot.metadata);
 	state.setReferenceImages(snapshot.referenceImages);
-	state.markHydrated();
 }

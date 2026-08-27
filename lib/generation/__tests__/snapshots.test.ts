@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "../inputs";
 import { SnapshotStore, type ElementSnapshot } from "../snapshots";
@@ -129,5 +129,18 @@ describe("SnapshotStore", () => {
 		unsubscribe();
 		store.notify();
 		expect(calls).toBe(1);
+	});
+
+	it("adopts a whole result set and drops what is not in it", () => {
+		const store = new SnapshotStore();
+		commit(store, "a", "https://cdn/a.png");
+		const listener = vi.fn();
+		store.subscribe(listener);
+
+		store.replaceAll({ b: store.get("a") });
+
+		expect(store.ids()).toEqual(["b"]);
+		expect(store.get("a").result).toBeNull();
+		expect(listener).toHaveBeenCalledTimes(1);
 	});
 });

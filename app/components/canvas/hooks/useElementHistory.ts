@@ -2,22 +2,22 @@
 
 import {
 	useElementHistoryStore,
-	useHistorySelector,
+	useElementHistorySelector,
 } from "@/lib/generation/ElementHistoryProvider";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 
-export type VersionHistory = {
+export type ElementVersionHistory = {
 	versions: readonly ElementVersion[];
 	loaded: boolean;
 	failed: boolean;
 	activeIndex: number;
 };
 
-export function useElementHistory(elementId: string): VersionHistory {
-	const versions = useHistorySelector((h) => h.get(elementId));
-	const loaded = useHistorySelector((h) => h.isLoaded(elementId));
-	const failed = useHistorySelector((h) => h.isFailed(elementId));
+export function useElementHistory(elementId: string): ElementVersionHistory {
+	const versions = useElementHistorySelector((h) => h.get(elementId));
+	const loaded = useElementHistorySelector((h) => h.isLoaded(elementId));
+	const failed = useElementHistorySelector((h) => h.isFailed(elementId));
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(elementId));
 	const activeKey = snapshot.resultInputs
 		? versionKey({ inputs: snapshot.resultInputs, pinned: snapshot.pinned })

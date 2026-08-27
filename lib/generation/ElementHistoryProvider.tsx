@@ -7,14 +7,14 @@ import {
 	type ReactNode,
 } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import { ElementHistory, type VersionStorage } from "./history";
+import { ElementHistory, type ElementVersionStorage } from "./history";
 import { useGenerationQueue } from "./GenerationQueueProvider";
 
 const [ElementHistoryContext, useElementHistoryStore] =
 	createRequiredContext<ElementHistory>("ElementHistoryContext");
 export { useElementHistoryStore };
 
-export function useHistorySelector<T>(
+export function useElementHistorySelector<T>(
 	selector: (history: ElementHistory) => T,
 ): T {
 	const history = useElementHistoryStore();
@@ -29,7 +29,7 @@ export function ElementHistoryProvider({
 	storage,
 	children,
 }: {
-	storage: VersionStorage;
+	storage: ElementVersionStorage;
 	children: ReactNode;
 }) {
 	const queue = useGenerationQueue();

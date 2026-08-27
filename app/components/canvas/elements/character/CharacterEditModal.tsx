@@ -32,7 +32,7 @@ import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaResult } from "../preview/results";
-import { VersionHistoryPopover } from "../VersionHistoryPopover";
+import { ElementHistoryPopover } from "../ElementHistoryPopover";
 import { TextAreaField } from "./fields";
 import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
 import { VoiceSection } from "./VoiceMetadataFields";
@@ -154,7 +154,7 @@ function CharacterEditDialogBody({
 							placeholder="Describe the character's look"
 						/>
 						<div className="flex items-center justify-end gap-2">
-							<VersionHistoryPopover
+							<ElementHistoryPopover
 								elementId={avatarElementId}
 								onRestore={restoreAppearance}
 							/>

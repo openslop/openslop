@@ -92,6 +92,7 @@
 	--amber-400: #c38a40;
 	--amber-500: #a77231;
 	--amber-700: #6f4509;
+	--amber-800: #4a2d00;
 	--amber-500-a: #f6bd6026;
 
 	--radius: 0.625rem;
@@ -152,6 +153,9 @@
 	--success-foreground: #fff;
 	--caution: var(--amber-500);
 	--caution-foreground: #fff;
+	--version-preview: var(--amber-100);
+	--version-preview-foreground: var(--amber-700);
+	--version-preview-link: var(--amber-800);
 	--border: var(--grey-100-a);
 	--input: var(--grey-30-a);
 	--ring: var(--blurple-500);
@@ -234,8 +238,11 @@
 	--green-600: #53a57b;
 	--green-500-a: #00945426;
 
+	--amber-100: #623b00;
 	--amber-400: #8b5b20;
 	--amber-500: #b57e38;
+	--amber-700: #e4c69a;
+	--amber-800: #f8e0bd;
 	--amber-500-a: #a7723159;
 
 	/* Surface overrides (warm near-blacks) */
@@ -349,6 +356,9 @@
 	--color-success-foreground: var(--success-foreground);
 	--color-caution: var(--caution);
 	--color-caution-foreground: var(--caution-foreground);
+	--color-version-preview: var(--version-preview);
+	--color-version-preview-foreground: var(--version-preview-foreground);
+	--color-version-preview-link: var(--version-preview-link);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);

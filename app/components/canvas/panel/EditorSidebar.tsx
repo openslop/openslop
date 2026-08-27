@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { memo } from "react";
 import {
+	History,
 	Home,
 	Layout,
 	type IconComponent,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/SloppyComposer";
 import { SloppyPanel } from "@/app/components/sloppy/SloppyPanel";
 import { useEditorPanel, type PanelKey } from "./EditorPanelContext";
+import { CanvasHistoryPanel } from "./CanvasHistoryPanel";
 import { CaptionsPanel } from "./CaptionsPanel";
 import { LayoutPanel } from "./LayoutPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -49,6 +51,12 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		icon: SlidersAlt,
 		iconActive: SlidersAltFill,
 		Panel: PropertiesPanel,
+	},
+	history: {
+		label: "History",
+		icon: History,
+		iconActive: History,
+		Panel: CanvasHistoryPanel,
 	},
 	sloppy: {
 		label: "Sloppy",
@@ -154,7 +162,7 @@ function EditorSidebarComponent() {
 							{current.label}
 						</h2>
 					</div>
-					<div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pr-1 [scrollbar-gutter:stable]">
+					<div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 [scrollbar-gutter:stable]">
 						<Panel />
 					</div>
 					{current.Footer && (

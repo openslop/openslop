@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import { rehydrateProjectEditor } from "../useProjectRehydrate";
+import { applyScriptToEditor } from "../applyScript";
 
 const connector = {
 	openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
@@ -32,12 +32,12 @@ const scene: SceneElement = {
 	],
 };
 
-describe("rehydrateProjectEditor", () => {
+describe("applyScriptToEditor", () => {
 	it("does not save project load operations to undo history", () => {
 		const editor = withHistory(createEditor());
 		const osml = serializeOSMLWithScenes([scene]);
 
-		rehydrateProjectEditor(editor, osml, connectors);
+		applyScriptToEditor(editor, osml, connectors);
 
 		expect(editor.children).toHaveLength(1);
 		expect(editor.history.undos).toEqual([]);
