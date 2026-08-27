@@ -9,6 +9,7 @@ import { withNodeId } from "../plugins/withNodeId";
 import { withLayout } from "../plugins/withLayout";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
+import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
 
 export function useEditorSetup(): CanvasEditor {
 	const { connectorConfig } = useConfig();
@@ -21,6 +22,7 @@ export function useEditorSetup(): CanvasEditor {
 			withScenes,
 			withFlatPaste,
 			withNodeId,
+			withOSMLClipboard(connectorConfig),
 		)(createEditor()),
 	);
 

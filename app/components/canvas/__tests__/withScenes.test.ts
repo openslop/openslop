@@ -3,33 +3,12 @@ import { createEditor, Editor, Element, Transforms } from "slate";
 import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withNodeId } from "../plugins/withNodeId";
-import {
-	CanvasContentElement,
-	SceneElement,
-	SCENE_TYPE,
-} from "@/lib/canvas/types";
+import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
+import { content, scene } from "./fixtures";
 
 function makeEditor() {
 	return withNodeId(withScenes(withReact(createEditor())));
-}
-
-function content(
-	type: CanvasContentElement["type"],
-	id: string = type,
-): CanvasContentElement {
-	return {
-		id,
-		type,
-		children: [{ id: `${id}-t`, type, text: "" }],
-	};
-}
-
-function scene(
-	children: CanvasContentElement[],
-	id: string = "s",
-): SceneElement {
-	return { id, type: SCENE_TYPE, children };
 }
 
 function setChildren(editor: Editor, children: Element[]) {
