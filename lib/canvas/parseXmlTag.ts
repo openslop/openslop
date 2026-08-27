@@ -6,16 +6,18 @@ export type XmlTag = {
 	attributes: Record<string, string>;
 };
 
+const ATTRIBUTE_PATTERN = /(\w+)="([^"]*)"/g;
+
 export function parseXmlTag(tagString: string): XmlTag {
-	const [rawTag, ...rest] = tagString.trim().split(/\s+/);
-	const attributesString = rest.join(" ");
+	const trimmed = tagString.trim();
 	const attributes: Record<string, string> = {};
-	const regex = /(\w+)="([^"]*)"/g;
+	ATTRIBUTE_PATTERN.lastIndex = 0;
 	let match: RegExpExecArray | null;
 
-	while ((match = regex.exec(attributesString)) !== null) {
+	while ((match = ATTRIBUTE_PATTERN.exec(trimmed)) !== null) {
 		attributes[match[1]] = unescapeXml(match[2]);
 	}
 
+	const [rawTag = ""] = trimmed.split(/\s/, 1);
 	return { tag: rawTag.replace(/\/$/, ""), attributes };
 }
