@@ -1,34 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, Editor, Element, Transforms } from "slate";
+import { createEditor, Editor, Element } from "slate";
 import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
-import {
-	CanvasContentElement,
-	SceneElement,
-	SCENE_TYPE,
-	CanvasEditor,
-} from "@/lib/canvas/types";
+import { CanvasEditor } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
-
-function content(
-	type: CanvasContentElement["type"],
-	id: string = type,
-): CanvasContentElement {
-	return {
-		id,
-		type,
-		children: [{ id: `${id}-t`, type, text: "" }],
-	};
-}
-
-function scene(
-	children: CanvasContentElement[],
-	id: string = "s",
-): SceneElement {
-	return { id, type: SCENE_TYPE, children };
-}
+import { content, scene, seedScene } from "./fixtures";
 
 function makeEditor(): CanvasEditor {
 	return withNodeId(withFlatPaste(withScenes(withReact(createEditor()))));
@@ -52,12 +30,7 @@ function hasNestedScene(editor: Editor): boolean {
 describe("withFlatPaste", () => {
 	it("flattens scene wrappers in pasted fragments", () => {
 		const editor = makeEditor();
-		// Seed with one scene so we have a valid selection target
-		Editor.withoutNormalizing(editor, () => {
-			Transforms.insertNodes(editor, scene([content("narration", "n0")]));
-		});
-		Editor.normalize(editor, { force: true });
-		Transforms.select(editor, Editor.end(editor, []));
+		seedScene(editor, scene([content("narration", "n0")]));
 
 		editor.insertFragment([
 			scene([content("image", "i1"), content("narration", "n1")], "ps1"),
@@ -68,11 +41,7 @@ describe("withFlatPaste", () => {
 
 	it("passes through bare content elements unchanged", () => {
 		const editor = makeEditor();
-		Editor.withoutNormalizing(editor, () => {
-			Transforms.insertNodes(editor, scene([content("narration", "n0")]));
-		});
-		Editor.normalize(editor, { force: true });
-		Transforms.select(editor, Editor.end(editor, []));
+		seedScene(editor, scene([content("narration", "n0")]));
 
 		editor.insertFragment([content("sound", "snd1")]);
 
@@ -83,11 +52,7 @@ describe("withFlatPaste", () => {
 
 	it("handles a mixed fragment of scenes and bare content", () => {
 		const editor = makeEditor();
-		Editor.withoutNormalizing(editor, () => {
-			Transforms.insertNodes(editor, scene([content("narration", "n0")]));
-		});
-		Editor.normalize(editor, { force: true });
-		Transforms.select(editor, Editor.end(editor, []));
+		seedScene(editor, scene([content("narration", "n0")]));
 
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEditor, Editor, Transforms } from "slate";
+import { createEditor, Transforms } from "slate";
 import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
@@ -7,29 +7,9 @@ import { withNodeId } from "../plugins/withNodeId";
 import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { getContentElements } from "@/lib/canvas/scenes";
+import { content, scene, seedScene } from "./fixtures";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import {
-	SCENE_TYPE,
-	type CanvasContentElement,
-	type CanvasEditor,
-	type SceneElement,
-} from "@/lib/canvas/types";
-
-const content = (
-	type: CanvasContentElement["type"],
-	id: string,
-	text = "",
-): CanvasContentElement => ({
-	id,
-	type,
-	children: [{ id: `${id}-t`, type, text }],
-});
-
-const scene = (children: CanvasContentElement[]): SceneElement => ({
-	id: "s",
-	type: SCENE_TYPE,
-	children,
-});
+import type { CanvasEditor, SceneElement } from "@/lib/canvas/types";
 
 function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
 	const store = { ...initial };
@@ -54,11 +34,7 @@ function makeEditor(seed: SceneElement) {
 	const editor: CanvasEditor = withOSMLClipboard(DEFAULT_CONNECTOR_REGISTRY)(
 		base,
 	);
-	Editor.withoutNormalizing(editor, () => {
-		Transforms.insertNodes(editor, [seed]);
-	});
-	Editor.normalize(editor, { force: true });
-	Transforms.select(editor, Editor.end(editor, []));
+	seedScene(editor, seed);
 
 	return { editor, insertTextData };
 }
