@@ -136,6 +136,11 @@ export default function Loading() {
 					<div className="my-1 h-px w-full bg-border" />
 					<RailItemSkeleton />
 					<RailItemSkeleton />
+					<RailItemSkeleton />
+					<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
+						<div className="my-1 h-px w-full bg-border" />
+						<RailItemSkeleton />
+					</div>
 				</nav>
 
 				<div className="relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
