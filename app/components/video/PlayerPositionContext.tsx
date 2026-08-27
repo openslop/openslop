@@ -29,9 +29,9 @@ export function PlayerPositionProvider({ children }: { children: ReactNode }) {
 		const mql = window.matchMedia(NARROW_QUERY);
 		const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
 			setNarrowViewport(e.matches);
-			if (e.matches) {
-				setPosition((prev) => (prev === "right" ? "top" : prev));
-			}
+if (e.matches) {
+  setPosition((prev) => (prev === "right" ? "left" : prev));
+}
 		};
 		onChange(mql);
 		mql.addEventListener("change", onChange);
