@@ -21,6 +21,8 @@ export type ElementLength = {
 	/** The spoken words that follow it, up to the next visual. */
 	words: number;
 	dialogueIds: string[];
+	/** The length the clip is generated at, where the type has one at all. */
+	durationSec?: number;
 };
 
 type Span = {
@@ -31,8 +33,10 @@ type Span = {
 };
 
 /** A generated clip runs for its own length; a still has none of its own. */
-const ownSeconds = (element: CanvasContentElement): number =>
-	ELEMENT_TYPES[element.type].outputKind === "video" ? getDuration(element) : 0;
+const ownDuration = (element: CanvasContentElement): number | undefined =>
+	ELEMENT_TYPES[element.type].outputKind === "video"
+		? getDuration(element)
+		: undefined;
 
 const toLength = (
 	{ element, sceneNumber, words, dialogueIds }: Span,
@@ -43,9 +47,10 @@ const toLength = (
 	sceneNumber,
 	words,
 	dialogueIds,
+	durationSec: ownDuration(element),
 	seconds: Math.max(
 		secondsForWords(words),
-		trimVisualsToDialogue ? 0 : ownSeconds(element),
+		trimVisualsToDialogue ? 0 : (ownDuration(element) ?? 0),
 		MIN_DURATION_SEC,
 	),
 });

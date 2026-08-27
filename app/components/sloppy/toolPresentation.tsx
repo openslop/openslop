@@ -74,6 +74,8 @@ function offeredTool(part: ToolPart): ToolPresentation {
 				icon: Hourglass,
 				label: "Measuring scene lengths",
 			};
+		case "tool-fit_durations":
+			return { icon: Hourglass, label: "Fitting clips to the dialogue" };
 		case "tool-set_caption_style":
 			return { icon: TextBox, label: "Styling the captions" };
 		case "tool-set_language":

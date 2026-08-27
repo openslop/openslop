@@ -12,6 +12,7 @@ import {
 	type Metadata,
 } from "@/lib/project/types";
 import { CaptionStyleSchema } from "@/lib/video/captionStyle";
+import type { RefineOp } from "@/lib/script/refine/types";
 
 const metadata = MetadataSchema.parse({
 	title: "Little Red",
@@ -341,6 +342,123 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("fits each clip to the dialogue under it and says it went stale", async () => {
+		const ops: RefineOp[][] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						id: "ai1",
+						type: "animated_image",
+						sceneNumber: 1,
+						seconds: 4,
+						words: 12,
+						dialogueIds: ["nar1"],
+						durationSec: 10,
+					},
+					{
+						id: "img1",
+						type: "image",
+						sceneNumber: 1,
+						seconds: 30,
+						words: 90,
+						dialogueIds: ["nar2"],
+					},
+				],
+				editScript: (applied) => {
+					ops.push(applied);
+					return { applied: applied.length, failures: [] };
+				},
+			}),
+		);
+
+		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 animated_image ai1: 10s to 5s, for 4.0s of dialogue.",
+		);
+		expect(outcome.ok && outcome.output).toContain("need regenerating");
+		expect(outcome.ok && outcome.output).toContain("1 image still left alone.");
+	});
+
+	it("names a clip whose dialogue outruns the longest option instead of hiding the clamp", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: { scene: 2 } },
+			context({
+				measureElementLengths: () => [
+					{
+						id: "ai1",
+						type: "animated_image",
+						sceneNumber: 1,
+						seconds: 4,
+						words: 12,
+						dialogueIds: [],
+						durationSec: 10,
+					},
+					{
+						id: "clip1",
+						type: "clip",
+						sceneNumber: 2,
+						seconds: 60,
+						words: 180,
+						dialogueIds: ["nar2"],
+						durationSec: 15,
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("Scene 2 clip clip1 needs");
+		expect(outcome.ok && outcome.output).toContain("split the dialogue");
+		expect(outcome.ok && outcome.output).not.toContain("ai1");
+	});
+
+	it("leaves durations alone when every clip already covers its dialogue", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: { element_ids: ["clip1"] } },
+			context({
+				measureElementLengths: () => [
+					{
+						id: "clip1",
+						type: "clip",
+						sceneNumber: 1,
+						seconds: 4,
+						words: 12,
+						dialogueIds: ["nar1"],
+						durationSec: 5,
+					},
+				],
+				editScript: () => {
+					throw new Error("nothing to apply");
+				},
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("nothing to change");
+	});
+
+	it("says there is nothing to fit when only stills are in scope", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						id: "img1",
+						type: "image",
+						sceneNumber: 1,
+						seconds: 30,
+						words: 90,
+						dialogueIds: ["nar1"],
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"No animated_image or clip in scope.",
+		);
+	});
+
 	it("says the canvas has no visuals rather than reporting an empty table", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_element_lengths", input: {} },
@@ -428,6 +546,7 @@ describe("SLOPPY_TOOLS", () => {
 			"outline_story",
 			"measure_total_length",
 			"measure_element_lengths",
+			"fit_durations",
 			"set_metadata",
 			"set_narrator",
 			"set_character",
@@ -477,6 +596,7 @@ describe("tool flags", () => {
 		expect([...SCRIPT_TOOLS].sort()).toEqual([
 			"adapt_script",
 			"edit_script",
+			"fit_durations",
 			"write_script",
 		]);
 	});
