@@ -1,4 +1,4 @@
-import { createEditor } from "slate";
+import { createEditor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { describe, expect, it } from "vitest";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
@@ -20,17 +20,19 @@ const connectors: ConnectorRegistry = {
 	music: connector,
 };
 
-const scene: SceneElement = {
-	id: "scene-id",
+const sceneWithId = (id: string): SceneElement => ({
+	id,
 	type: SCENE_TYPE,
 	children: [
 		{
-			id: "narration-id",
+			id: `${id}-narration`,
 			type: "narration",
-			children: [{ id: "text-id", type: "narration", text: "hello" }],
+			children: [{ id: `${id}-text`, type: "narration", text: "hello" }],
 		},
 	],
-};
+});
+
+const scene = sceneWithId("scene-id");
 
 describe("applyScriptToEditor", () => {
 	it("does not save project load operations to undo history", () => {
@@ -41,5 +43,25 @@ describe("applyScriptToEditor", () => {
 
 		expect(editor.children).toHaveLength(1);
 		expect(editor.history.undos).toEqual([]);
+	});
+
+	it("drops undo entries that point into the replaced document", () => {
+		const editor = withHistory(createEditor());
+		const two = serializeOSMLWithScenes([sceneWithId("a"), sceneWithId("b")]);
+		applyScriptToEditor(editor, two, connectors);
+
+		Transforms.insertText(editor, "!", { at: { path: [1, 0, 0], offset: 5 } });
+		expect(editor.history.undos.length).toBeGreaterThan(0);
+
+		applyScriptToEditor(
+			editor,
+			serializeOSMLWithScenes([sceneWithId("a")]),
+			connectors,
+		);
+
+		expect(editor.history.undos).toEqual([]);
+		expect(() => {
+			editor.undo();
+		}).not.toThrow();
 	});
 });

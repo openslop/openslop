@@ -3,7 +3,10 @@ import { HistoryEditor } from "slate-history";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { deserializeWithScenes } from "./serialize";
 
-/** Outside undo history: loading or restoring is not something to undo into. */
+/**
+ * Replaces the document outside undo history and clears the stack, whose
+ * entries point at paths this swap removes.
+ */
 export function applyScriptToEditor(
 	editor: Editor,
 	script: string,
@@ -24,6 +27,8 @@ export function applyScriptToEditor(
 
 	if (HistoryEditor.isHistoryEditor(editor)) {
 		HistoryEditor.withoutSaving(editor, replaceChildren);
+		editor.history.undos = [];
+		editor.history.redos = [];
 		return;
 	}
 
