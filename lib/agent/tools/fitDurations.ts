@@ -21,6 +21,39 @@ const changeLine = ({ length, duration, needed }: DurationFit) =>
 const shortLine = ({ length, needed }: DurationFit) =>
 	`${where(length)} needs ${sec(needed)} but ${DURATION_MAX}s is the longest a clip can be generated at; split the dialogue after it across more visuals.`;
 
+const report = (...lines: (string | false)[]) =>
+	lines.filter(Boolean).join("\n");
+
+const isUnfitted = ({ length, duration }: DurationFit) =>
+	length.durationSec !== duration;
+
+const toSetOp = ({ length, duration }: DurationFit) => ({
+	op: "set" as const,
+	id: length.id,
+	attrs: { duration: String(duration) },
+});
+
+/** The visuals asked for, and the ids that named none of them. */
+const scopeTo = (lengths: ElementLength[], ids?: string[]) => {
+	if (!ids) return { scoped: lengths, unknown: [] };
+	const wanted = new Set(ids);
+	const scoped = lengths.filter((length) => wanted.has(length.id));
+	const found = new Set(scoped.map((length) => length.id));
+	return { scoped, unknown: ids.filter((id) => !found.has(id)) };
+};
+
+type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
+
+const headline = ({ fits, changes, short, applied }: Counts) => {
+	if (fits === 0)
+		return "No animated_image or clip in scope. Images carry no duration and already stretch to the dialogue under them.";
+	if (changes > 0)
+		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
+	if (short > 0)
+		return "Nothing to change: the ones that fall short are already at the longest option.";
+	return `All ${fits} already cover their dialogue; nothing to change.`;
+};
+
 export const fitDurations = defineTool({
 	description: dedent`
 	  Fit every animated_image and clip to the dialogue that runs under it: set each one's
@@ -40,58 +73,35 @@ export const fitDurations = defineTool({
 	}),
 	output: z.string(),
 	execute: async ({ element_ids }, ctx) => {
-		const lengths = ctx.measureElementLengths();
-		const wanted = element_ids && new Set(element_ids);
-		const scoped = wanted
-			? lengths.filter((length) => wanted.has(length.id))
-			: lengths;
-		const found = new Set(scoped.map((length) => length.id));
-		const unknown = element_ids?.filter((id) => !found.has(id));
-
-		const unknownLine =
-			unknown?.length &&
-			`Not a visual on the canvas: ${unknown.join(", ")}. Read the script again.`;
-
-		const fits = durationFits(scoped);
-		if (fits.length === 0) {
-			return [
-				"No animated_image or clip in scope. Images carry no duration and already stretch to the dialogue under them.",
-				unknownLine,
-			]
-				.filter(Boolean)
-				.join("\n");
-		}
-
-		const changes = fits.filter(
-			({ length, duration }) => length.durationSec !== duration,
+		const { scoped, unknown } = scopeTo(
+			ctx.measureElementLengths(),
+			element_ids,
 		);
+		const fits = durationFits(scoped);
+		const changes = fits.filter(isUnfitted);
 		const short = fits.filter(fallsShort);
 		const stills = scoped.length - fits.length;
 
 		const { applied, failures } = changes.length
-			? ctx.editScript(
-					changes.map(({ length, duration }) => ({
-						op: "set" as const,
-						id: length.id,
-						attrs: { duration: String(duration) },
-					})),
-				)
+			? ctx.editScript(changes.map(toSetOp))
 			: { applied: 0, failures: [] };
 
-		return [
-			changes.length === 0
-				? `All ${fits.length} already cover their dialogue; nothing to change.`
-				: `Fitted ${applied} of ${changes.length}. Those elements are stale now and need regenerating.`,
+		return report(
+			headline({
+				fits: fits.length,
+				changes: changes.length,
+				short: short.length,
+				applied,
+			}),
 			...changes.map(changeLine),
 			...short.map(shortLine),
 			stills > 0 &&
 				`${stills} image still${stills === 1 ? "" : "s"} left alone.`,
-			unknownLine,
+			unknown.length > 0 &&
+				`Not a visual on the canvas: ${unknown.join(", ")}. Read the script again.`,
 			failures.length > 0 &&
 				`Failed: ${failures.join("; ")}. Read the script again; the ids may be stale.`,
-		]
-			.filter(Boolean)
-			.join("\n");
+		);
 	},
 	rewritesCanvas: true,
 });

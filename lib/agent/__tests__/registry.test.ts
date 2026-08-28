@@ -411,6 +411,7 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("Scene 2 clip clip1 needs");
 		expect(outcome.ok && outcome.output).toContain("split the dialogue");
 		expect(outcome.ok && outcome.output).not.toContain("ai1");
+		expect(outcome.ok && outcome.output).not.toContain("already cover");
 	});
 
 	it("leaves durations alone when every clip already covers its dialogue", async () => {
