@@ -25,7 +25,10 @@ function makeRequest(body: unknown) {
 	);
 }
 
-const validBody = { renderId: "render-1", bucketName: "bucket-1" };
+const validBody = {
+	renderId: "render-1",
+	bucketName: "remotionlambda-useast1-abc123",
+};
 
 describe("POST /api/render/progress", () => {
 	beforeEach(() => {
@@ -45,6 +48,24 @@ describe("POST /api/render/progress", () => {
 		const res = await POST(makeRequest({ renderId: "render-1" }));
 
 		expect(res.status).toBe(400);
+	});
+
+	it("rejects a bucket the renderer never minted", async () => {
+		const res = await POST(
+			makeRequest({ ...validBody, bucketName: "someone-elses-bucket" }),
+		);
+
+		expect(res.status).toBe(400);
+		expect(mockGetRenderProgress).not.toHaveBeenCalled();
+	});
+
+	it("rejects a renderId that walks out of its key prefix", async () => {
+		const res = await POST(
+			makeRequest({ ...validBody, renderId: "../../secrets" }),
+		);
+
+		expect(res.status).toBe(400);
+		expect(mockGetRenderProgress).not.toHaveBeenCalled();
 	});
 
 	it("reports fatal errors with the first error message", async () => {
