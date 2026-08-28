@@ -67,12 +67,12 @@ describe("ElementHistory", () => {
 		const [storage] = storageOf(read);
 		const history = new ElementHistory(storage);
 
-		expect(history.isLoaded("a")).toBe(false);
+		expect(history.status("a")).toBe("loading");
 		await Promise.all([history.load("a"), history.load("a")]);
 		await history.load("a");
 
 		expect(read).toHaveBeenCalledTimes(1);
-		expect(history.isLoaded("a")).toBe(true);
+		expect(history.status("a")).toBe("ready");
 		expect(history.get("a")).toEqual([stored]);
 	});
 
@@ -85,10 +85,10 @@ describe("ElementHistory", () => {
 		const history = new ElementHistory(storage);
 
 		await expect(history.load("a")).rejects.toThrow("offline");
-		expect(history.isFailed("a")).toBe(true);
+		expect(history.status("a")).toBe("failed");
 
 		await history.load("a");
-		expect(history.isFailed("a")).toBe(false);
+		expect(history.status("a")).toBe("ready");
 		expect(history.get("a")).toEqual([stored]);
 	});
 
