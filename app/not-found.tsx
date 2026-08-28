@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { headers } from "next/headers";
 import { Button } from "@/components/ui/button";
 import SlopYard from "./components/not-found/SlopYard";
 
@@ -9,32 +8,7 @@ export const metadata: Metadata = {
 	description: "The page you asked for was generated, and it came out wrong.",
 };
 
-const EXCUSES = [
-	"The model was very confident about this one.",
-	"This page was in the training data. It is not in the app.",
-	"Generated 4 variations. All of them were this.",
-	"404 tokens in, zero pages out.",
-	"We regenerated it. It got worse.",
-	"The URL you typed is plausible. That is the whole problem.",
-] as const;
-
-function excuseIndex(seed: string): number {
-	let h = 0;
-	for (let i = 0; i < seed.length; i++) {
-		h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-	}
-	return h % EXCUSES.length;
-}
-
-export default async function NotFound() {
-	const h = await headers();
-	const seed =
-		h.get("x-request-id") ??
-		h.get("x-vercel-id") ??
-		h.get("user-agent") ??
-		"openslop-404";
-	const excuse = EXCUSES[excuseIndex(seed)] ?? EXCUSES[0];
-
+export default function NotFound() {
 	return (
 		<div className="relative min-h-screen bg-background text-foreground">
 			<div
@@ -63,7 +37,7 @@ export default async function NotFound() {
 						The page you asked for was generated, and it came out wrong.
 					</h1>
 					<p className="text-body text-muted-foreground text-balance">
-						{excuse}
+						The model was very confident about this one.
 					</p>
 				</div>
 
