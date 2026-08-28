@@ -5,16 +5,15 @@ export type ConcurrencyLimits = Record<AssetConnectorType, number>;
 
 /**
  * Hardcoded until BYOK, where these become per-user settings: the limits exist
- * to keep our shared provider keys under their rate limits, so heavier media
- * gets a smaller share.
+ * to keep our shared provider keys under their rate limits
  */
 const DEFAULT_CONCURRENCY_LIMITS: ConcurrencyLimits = {
 	video: 3,
 	image: 3,
 	animated_image: 3,
-	tts: 2,
-	music: 5,
-	sfx: 5,
+	tts: 1,
+	music: 1,
+	sfx: 1,
 };
 
 export const resolveConcurrencyLimits = (
