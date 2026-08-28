@@ -63,6 +63,20 @@ describe("findNodeById", () => {
 		const editor = makeEditor([scene([content("narration", "n1")], "s1")]);
 		expect(findNodeById(editor, "s1")).toBeNull();
 	});
+
+	it("finds the same node searching from the tail", () => {
+		const editor = makeEditor([
+			scene([content("narration", "n1"), content("image", "img1")], "s1"),
+			scene([content("narration", "n2")], "s2"),
+		]);
+
+		for (const id of ["n1", "img1", "n2"]) {
+			expect(findNodeById(editor, id, { reverse: true })).toEqual(
+				findNodeById(editor, id),
+			);
+		}
+		expect(findNodeById(editor, "nope", { reverse: true })).toBeNull();
+	});
 });
 
 describe("findElementById", () => {

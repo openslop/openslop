@@ -19,12 +19,19 @@ export function findElementById(
 	return entry ?? null;
 }
 
+/**
+ * Ids are unique, so `reverse` only picks the search direction. Callers looking
+ * up something they just appended pass it to stop the walk at the tail instead
+ * of crossing the whole document to reach it.
+ */
 export function findNodeById(
 	editor: Editor,
 	id: string,
+	{ reverse = false }: { reverse?: boolean } = {},
 ): NodeEntry<CanvasContentElement> | null {
 	const [entry] = Editor.nodes<CanvasContentElement>(editor, {
 		at: [],
+		reverse,
 		match: (n) => isContentElement(n) && n.id === id,
 	});
 	return entry ?? null;

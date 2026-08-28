@@ -18,7 +18,10 @@ export function useScriptSync(editor: Editor): void {
 				const nextText = getElementBodyText(node);
 				if (!nextText) continue;
 
-				const entry = findNodeById(editor, node.id);
+				// The script streams in order, so a node already on the canvas is
+				// one of the last written. Searching forward would re-cross the whole
+				// document for every chunk, growing with the script as it arrives.
+				const entry = findNodeById(editor, node.id, { reverse: true });
 				if (entry) {
 					const [, path] = entry;
 					updateNodeText(editor, path, nextText);
