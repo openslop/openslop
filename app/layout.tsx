@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AppToaster } from "./components/AppToaster";
 import { GlobalErrorToaster } from "./components/GlobalErrorToaster";
 import { ToastErrorBoundary } from "./components/ToastErrorBoundary";
 
-const sloptastic = localFont({
-	src: "../public/fonts/Sloptastic.woff2",
-	variable: "--font-sloptastic",
+const slopella = localFont({
+	src: "../public/fonts/Slopella.woff2",
+	variable: "--font-slopella",
 	weight: "100 900",
 	display: "swap",
 });
@@ -26,12 +26,6 @@ const inter = localFont({
 	variable: "--font-inter",
 	weight: "100 900",
 	display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-	variable: "--font-ibm-plex-mono",
-	subsets: ["latin"],
-	weight: ["400", "500", "600"],
 });
 
 const instrumentSerif = Instrument_Serif({
@@ -56,7 +50,7 @@ export default function RootLayout({
 				<meta name="theme-color" content="#fdfcfc" />
 			</head>
 			<body
-				className={`${sloptastic.variable} ${sentient.variable} ${inter.variable} ${ibmPlexMono.variable} ${instrumentSerif.variable} antialiased`}
+				className={`${slopella.variable} ${sentient.variable} ${inter.variable} ${instrumentSerif.variable} antialiased`}
 			>
 				<ThemeProvider
 					attribute="class"

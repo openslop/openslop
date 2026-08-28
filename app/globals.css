@@ -31,6 +31,13 @@
 	@apply outline-none focus-visible:ring-2 focus-visible:ring-ring;
 }
 
+/* Slopella's tabular figures: fixed-width digits for any number that
+   updates in place — timecodes, counters, percentages — so it never jitters. */
+@utility font-numeric {
+	font-family: var(--font-slopella), ui-sans-serif, system-ui, sans-serif;
+	font-variant-numeric: tabular-nums;
+}
+
 /* Raw palette ramps. Ramps flip in .dark so semantic
    tokens that reference them adapt automatically. */
 :root {
@@ -372,9 +379,8 @@
 	--color-media-sound: var(--media-sound);
 	--color-media-narration: var(--media-narration);
 
-	--font-sans: var(--font-sloptastic);
+	--font-sans: var(--font-slopella);
 	--font-body: var(--font-inter);
-	--font-mono: var(--font-ibm-plex-mono);
 	--font-serif: var(--font-instrument-serif), serif;
 
 	/* Semantic type scale (DESIGN.md typography) */
@@ -422,7 +428,7 @@
 	}
 	body {
 		@apply bg-background text-foreground;
-		font-family: var(--font-sloptastic), ui-sans-serif, system-ui, sans-serif;
+		font-family: var(--font-slopella), ui-sans-serif, system-ui, sans-serif;
 		letter-spacing: -0.006em;
 	}
 	button {
@@ -459,7 +465,7 @@
 }
 
 .font-title {
-	font-family: var(--font-sloptastic), ui-sans-serif, system-ui, sans-serif;
+	font-family: var(--font-slopella), ui-sans-serif, system-ui, sans-serif;
 	font-weight: 575;
 	letter-spacing: -0.02em;
 	line-height: 1.2;

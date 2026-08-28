@@ -48,7 +48,7 @@ export function SeekTooltip({
 				) : null}
 			</div>
 			<div className="mt-1 flex items-center justify-between gap-2 rounded-md bg-on-media/80 px-2 py-1 text-label text-on-media-foreground shadow-sm">
-				<span className="tabular-nums">{formatTime(timeSec)}</span>
+				<span className="font-numeric">{formatTime(timeSec)}</span>
 				<span className="truncate text-on-media-foreground/70">{label}</span>
 			</div>
 		</div>

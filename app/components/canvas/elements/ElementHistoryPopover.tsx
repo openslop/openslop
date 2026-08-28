@@ -83,7 +83,7 @@ function ElementVersionRow({
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span
-							className={cn("font-mono", active && "text-accent")}
+							className={cn("font-numeric", active && "text-accent")}
 						>{`v${label}`}</span>
 						<Dot />
 						{version.pinned && <Pin className="h-3 w-3" />}
