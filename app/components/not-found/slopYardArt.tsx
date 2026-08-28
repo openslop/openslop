@@ -356,6 +356,21 @@ export function Sloppy({
 			<path d="M400 130v-30l18-14" />
 			<circle cx="420" cy="84" r="8" className={`fill-caution ${blinkClass}`} />
 
+			<path
+				d="M300 171h14"
+				strokeWidth="2"
+				className="stroke-muted-foreground"
+			/>
+			<text
+				x="242"
+				y="176"
+				fontSize="15"
+				stroke="none"
+				className="font-title fill-muted-foreground"
+			>
+				Sloppy
+			</text>
+
 			<path d="M462 266c36-2 62-18 78-44" strokeWidth="7" />
 		</g>
 	);
