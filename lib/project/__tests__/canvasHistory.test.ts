@@ -108,6 +108,31 @@ describe("CanvasHistory", () => {
 			expect(ids(history)).toEqual(["v2", "v1"]);
 		});
 
+		it("folds into the version it created, not the top of a stale list", async () => {
+			storage.rows.set("old", content("old"));
+			let releaseList = () => {};
+			const listed = new Promise<void>((resolve) => {
+				releaseList = () => {
+					resolve();
+				};
+			});
+			vi.spyOn(storage, "list").mockImplementation(async () => {
+				await listed;
+				return [{ id: "old", updatedAt: "updated-old" }];
+			});
+
+			// The list query runs before the create commits, but resolves after it.
+			const loading = history.load();
+			await history.record(content("a"));
+			releaseList();
+			await loading;
+
+			await history.record(content("b"));
+
+			expect(storage.rows.get("old")).toEqual(content("old"));
+			expect(storage.rows.get("v1")).toEqual(content("b"));
+		});
+
 		it("starts a new version for the first save of a session", async () => {
 			storage.rows.set("old", content("old"));
 			await history.load();

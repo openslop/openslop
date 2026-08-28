@@ -37,7 +37,8 @@ export class CanvasHistory {
 		status: "loading",
 		previewId: null,
 	};
-	private foldUntil = 0;
+	/** The version still absorbing saves, and when it stops taking them. */
+	private open: { id: string; until: number } | null = null;
 	/** What the canvas returns to, held for as long as a preview lasts. */
 	private stash: ProjectContent | null = null;
 	private readonly listeners = new Set<() => void>();
@@ -74,12 +75,11 @@ export class CanvasHistory {
 	};
 
 	record = async (content: ProjectContent): Promise<void> => {
-		const open =
-			Date.now() < this.foldUntil ? this.state.versions[0] : undefined;
+		const open = this.open && Date.now() < this.open.until ? this.open : null;
 		const version = open
 			? await this.storage.update(open.id, content)
 			: await this.storage.create(content);
-		this.foldUntil = Date.now() + FOLD_WINDOW_MS;
+		this.open = { id: version.id, until: Date.now() + FOLD_WINDOW_MS };
 		this.setState({
 			versions: [
 				version,
@@ -104,7 +104,7 @@ export class CanvasHistory {
 
 	/** Adopts what is on screen, edits made during the preview included. */
 	restore = (): void => {
-		this.foldUntil = 0;
+		this.open = null;
 		this.endPreview();
 		this.autosaver.schedule();
 	};
