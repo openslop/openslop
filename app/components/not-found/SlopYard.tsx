@@ -9,6 +9,7 @@ import {
 import styles from "./SlopYard.module.css";
 import {
 	RegeneratedTwin,
+	SceneDefs,
 	Skyline,
 	Sloppy,
 	SlopYardForeground,
@@ -66,6 +67,7 @@ export default function SlopYard() {
 				strokeLinejoin="round"
 				aria-hidden
 			>
+				<SceneDefs />
 				<Layer depth={4}>
 					<Skyline spinClass={styles.spin} />
 				</Layer>

@@ -26,6 +26,66 @@ function Hand({ transform }: { transform: string }) {
 	);
 }
 
+export function SceneDefs() {
+	return (
+		<defs>
+			<pattern
+				id="slop-dot-grid"
+				width="12"
+				height="12"
+				patternUnits="userSpaceOnUse"
+			>
+				<path
+					d="M6 5h2v1H6v2H5V6H3V5h2V3h1z"
+					stroke="none"
+					className="fill-foreground/15"
+				/>
+			</pattern>
+			<linearGradient
+				id="slop-floor-fade"
+				x1="0"
+				y1="372"
+				x2="0"
+				y2="500"
+				gradientUnits="userSpaceOnUse"
+			>
+				<stop offset="0" stopColor="white" stopOpacity="0" />
+				<stop offset="0.55" stopColor="white" stopOpacity="0.75" />
+				<stop offset="1" stopColor="white" stopOpacity="1" />
+			</linearGradient>
+			<mask id="slop-floor-mask">
+				<rect
+					x="0"
+					y="372"
+					width="800"
+					height="128"
+					fill="url(#slop-floor-fade)"
+				/>
+			</mask>
+			<filter id="slop-grain" x="0%" y="0%" width="100%" height="100%">
+				<feTurbulence
+					type="fractalNoise"
+					baseFrequency="0.95"
+					numOctaves="2"
+					stitchTiles="stitch"
+					result="noise"
+				/>
+				<feColorMatrix in="noise" type="saturate" values="0" result="mono" />
+				<feComponentTransfer in="mono" result="soft">
+					<feFuncA type="linear" slope="0.13" />
+				</feComponentTransfer>
+				<feComposite
+					in="soft"
+					in2="SourceAlpha"
+					operator="in"
+					result="speckle"
+				/>
+				<feComposite in="speckle" in2="SourceGraphic" operator="over" />
+			</filter>
+		</defs>
+	);
+}
+
 export function Skyline({ spinClass }: { spinClass: string }) {
 	return (
 		<g
@@ -59,6 +119,15 @@ export function Skyline({ spinClass }: { spinClass: string }) {
 export function Yard({ spinClass }: { spinClass: string }) {
 	return (
 		<g strokeWidth="2.5">
+			<rect
+				x="0"
+				y="372"
+				width="800"
+				height="128"
+				stroke="none"
+				fill="url(#slop-dot-grid)"
+				mask="url(#slop-floor-mask)"
+			/>
 			<path d="M0 372h800" className="stroke-foreground/70" />
 			<path
 				d="M0 372c56-24 112-16 156 6"
@@ -69,7 +138,11 @@ export function Yard({ spinClass }: { spinClass: string }) {
 				className="stroke-muted-foreground/70"
 			/>
 
-			<g transform="rotate(-7 142 128)" strokeDasharray="7 7">
+			<g
+				transform="rotate(-7 142 128)"
+				strokeDasharray="7 7"
+				filter="url(#slop-grain)"
+			>
 				<rect
 					x="86"
 					y="84"
@@ -77,6 +150,15 @@ export function Yard({ spinClass }: { spinClass: string }) {
 					height="88"
 					rx="10"
 					className="fill-element-card"
+				/>
+				<rect
+					x="86"
+					y="84"
+					width="112"
+					height="88"
+					rx="10"
+					stroke="none"
+					fill="url(#slop-dot-grid)"
 				/>
 				<circle
 					cx="142"
@@ -282,7 +364,7 @@ export function Sloppy({
 export function SlopYardForeground() {
 	return (
 		<g strokeWidth="3">
-			<g transform="rotate(-10 566 152)">
+			<g transform="rotate(-10 566 152)" filter="url(#slop-grain)">
 				<rect
 					x="498"
 					y="100"
@@ -314,7 +396,7 @@ export function SlopYardForeground() {
 			</g>
 			<Hand transform="translate(470 190) rotate(-22) scale(0.76)" />
 
-			<g transform="rotate(-8 172 404)">
+			<g transform="rotate(-8 172 404)" filter="url(#slop-grain)">
 				<rect
 					x="118"
 					y="358"
@@ -343,7 +425,7 @@ export function SlopYardForeground() {
 				</text>
 			</g>
 
-			<g transform="rotate(9 540 420)">
+			<g transform="rotate(9 540 420)" filter="url(#slop-grain)">
 				<rect
 					x="486"
 					y="378"
