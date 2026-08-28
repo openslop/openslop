@@ -80,6 +80,17 @@ export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 
 export const DEFAULT_DURATION = "10";
 
+const DURATIONS = DURATION_OPTIONS.map(Number);
+
+export const DURATION_MIN = Math.min(...DURATIONS);
+
+/** The longest a clip can be generated at, so the ceiling on what one visual covers. */
+export const DURATION_MAX = Math.max(...DURATIONS);
+
+/** The shortest option that still covers `seconds`, or the longest there is. */
+export const snapDurationUp = (seconds: number): number =>
+	DURATIONS.find((option) => option >= seconds) ?? DURATION_MAX;
+
 export const SCENE_TYPE = "scene" as const;
 
 export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };

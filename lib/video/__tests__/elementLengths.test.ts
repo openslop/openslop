@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import { measureElementLengths } from "../elementLengths";
-import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "../scene-builder";
+import {
+	buildVideoLayout,
+	DEFAULT_TRIM_VISUALS_TO_DIALOGUE,
+} from "../scene-builder";
+import type { ResolvedElement } from "../types";
+import { ELEMENT_TYPES } from "@/lib/canvas/types";
+import { secondsForWords } from "../videoLength";
 import { splitAttributes } from "@/lib/video/elementAttributes";
 
 let nextId = 0;
@@ -104,5 +110,57 @@ describe("measureElementLengths", () => {
 
 	it("measures an empty canvas as nothing", () => {
 		expect(trimmed([])).toEqual([]);
+	});
+});
+
+/**
+ * `measureElementLengths` mirrors the scene-builder rule off the unrendered
+ * script, so the two have to agree once the assets exist. Nothing else enforces
+ * that: the layout skips ungenerated elements, which is why the estimate exists.
+ */
+describe("against buildVideoLayout", () => {
+	const resolved = (
+		node: ReturnType<typeof element>,
+		durationSec: number,
+	): ResolvedElement => {
+		const spec = ELEMENT_TYPES[node.type];
+		return {
+			id: node.id,
+			type: node.type,
+			role: spec.role,
+			layer: spec.layer,
+			sceneId: "s",
+			sceneNumber: 1,
+			prompt: "",
+			url: `https://example.com/${node.id}`,
+			durationSec,
+			loops: 1,
+			volume: 10,
+			motion: "none",
+		};
+	};
+
+	it("estimates the same lengths the layout lays down", () => {
+		const first = element("image", "A forest.");
+		const line = element("narration", words(90));
+		const second = element("animated_image", "A pan.", { duration: "8" });
+		const shortLine = element("character", words(15));
+
+		const lengths = trimmed([
+			scene(first, line),
+			scene(second, shortLine, element("music", "Soft piano.")),
+		]);
+		const { series } = buildVideoLayout([
+			resolved(first, 0),
+			resolved(line, secondsForWords(90)),
+			resolved(second, 8),
+			resolved(shortLine, secondsForWords(15)),
+		]);
+
+		expect(series).toHaveLength(lengths.length);
+		series.forEach((seq, i) => {
+			expect(seq.element.id).toBe(lengths[i].id);
+			expect(seq.duration).toBeCloseTo(lengths[i].seconds);
+		});
 	});
 });

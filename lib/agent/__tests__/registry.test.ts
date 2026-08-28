@@ -320,7 +320,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 30,
 						words: 90,
-						dialogueSec: 30,
 						dialogueIds: ["nar1"],
 					},
 					{
@@ -329,7 +328,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 2,
 						seconds: 1,
 						words: 0,
-						dialogueSec: 0,
 						dialogueIds: [],
 					},
 				],
@@ -356,7 +354,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
-						dialogueSec: 4.0,
 						dialogueIds: ["nar1"],
 						durationSec: 10,
 					},
@@ -366,7 +363,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 30,
 						words: 90,
-						dialogueSec: 30.0,
 						dialogueIds: ["nar2"],
 					},
 				],
@@ -379,7 +375,7 @@ describe("executeToolCall", () => {
 
 		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 animated_image ai1: 10s to 5s, for 4.0s of dialogue.",
+			"Scene 1 animated_image ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain("1 image still left alone.");
@@ -396,7 +392,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
-						dialogueSec: 4.0,
 						dialogueIds: [],
 						durationSec: 10,
 					},
@@ -406,7 +401,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 2,
 						seconds: 60,
 						words: 180,
-						dialogueSec: 60.0,
 						dialogueIds: ["nar2"],
 						durationSec: 15,
 					},
@@ -430,7 +424,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
-						dialogueSec: 4.0,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
 					},
@@ -444,6 +437,29 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("nothing to change");
 	});
 
+	it("names element_ids that match no visual instead of reporting a clean pass", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: { element_ids: ["clip1", "nope"] } },
+			context({
+				measureElementLengths: () => [
+					{
+						id: "clip1",
+						type: "clip",
+						sceneNumber: 1,
+						seconds: 4,
+						words: 12,
+						dialogueIds: ["nar1"],
+						durationSec: 5,
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Not a visual on the canvas: nope.",
+		);
+	});
+
 	it("says there is nothing to fit when only stills are in scope", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
@@ -455,7 +471,6 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 30,
 						words: 90,
-						dialogueSec: 30.0,
 						dialogueIds: ["nar1"],
 					},
 				],
