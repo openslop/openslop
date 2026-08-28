@@ -2,7 +2,8 @@ import omit from "lodash/omit";
 import pick from "lodash/pick";
 import {
 	DEFAULT_DURATION,
-	DURATION_OPTIONS,
+	DURATION_MAX,
+	DURATION_MIN,
 	type CanvasContentElement,
 	type SplitAttributes,
 } from "@/lib/canvas/types";
@@ -52,10 +53,6 @@ export function getVolume(element: CanvasContentElement): number {
 		fallback: DEFAULT_VOLUME,
 	});
 }
-
-const DURATIONS = DURATION_OPTIONS.map(Number);
-const DURATION_MIN = Math.min(...DURATIONS);
-const DURATION_MAX = Math.max(...DURATIONS);
 
 export function getDuration(element: CanvasContentElement): number {
 	return clampedAttribute(element, "duration", {

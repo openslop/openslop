@@ -5,6 +5,7 @@ import { adaptScript } from "./adaptScript";
 import { measureElementLengths } from "./measureElementLengths";
 import { measureTotalLength } from "./measureTotalLength";
 import { editScript } from "./editScript";
+import { fitDurations } from "./fitDurations";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
 import { setCaptionStyle } from "./setCaptionStyle";
@@ -31,6 +32,7 @@ const TOOLS = {
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
 	measure_element_lengths: measureElementLengths,
+	fit_durations: fitDurations,
 	set_metadata: setMetadata,
 	set_narrator: setNarrator,
 	set_character: setCharacter,
