@@ -108,6 +108,7 @@ function commitCurrent(element: CanvasContentElement) {
 }
 
 const { useGenerateAll } = await import("../hooks/useGenerateAll");
+const { useGenerateElements } = await import("../hooks/useGenerateElements");
 
 function useGenerateAllFor(elements: CanvasContentElement[]) {
 	const children: Descendant[] = [wrapInScene(elements)];
@@ -197,5 +198,27 @@ describe("useGenerateAll", () => {
 			makeElement("b", "narration", "   "),
 		]);
 		expect(ids).toEqual(["a"]);
+	});
+});
+
+describe("useGenerateElements", () => {
+	const sceneOne = [
+		makeElement("a", "image", "sunset"),
+		makeElement("b", "narration", "hello"),
+	];
+	const sceneTwo = [makeElement("c", "image", "a scene away")];
+
+	it("enqueues only the elements it is given", async () => {
+		useGenerateElements()(sceneOne);
+		expect(enqueuedIds()).toEqual(["a", "b"]);
+	});
+
+	it("leaves out an element from another scene of the same document", async () => {
+		useGenerateAllFor([...sceneOne, ...sceneTwo]);
+		expect(enqueuedIds()).toEqual(["a", "b", "c"]);
+
+		vi.clearAllMocks();
+		useGenerateElements()(sceneTwo);
+		expect(enqueuedIds()).toEqual(["c"]);
 	});
 });
