@@ -27,8 +27,7 @@ export function applyScriptToEditor(
 
 	if (HistoryEditor.isHistoryEditor(editor)) {
 		HistoryEditor.withoutSaving(editor, replaceChildren);
-		editor.history.undos = [];
-		editor.history.redos = [];
+		editor.history = { undos: [], redos: [] };
 		return;
 	}
 
