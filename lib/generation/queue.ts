@@ -89,6 +89,7 @@ export class GenerationQueue {
 			this.snapshots.update(node.id, {
 				status: "queued",
 				seconds: 0,
+				error: null,
 				connectorType: node.job.connectorType,
 			});
 			this.pending.push(node);

@@ -221,3 +221,27 @@ describe("parseOSML", () => {
 		expect(getElementText(nodes[0])).toContain("Once upon a time");
 	});
 });
+
+describe("OSMLStreamParser update signalling", () => {
+	it("reports an update for a chunk that only opens a tag", () => {
+		const s = new OSMLStreamParser();
+		expect(s.appendChunk("<narration>", connectors)).toBe(true);
+		expect(s.getNodes()).toHaveLength(1);
+	});
+
+	it("reports an update for a body-less metadata tag", () => {
+		const s = new OSMLStreamParser();
+		expect(
+			s.appendChunk(
+				'<metadata_narration voiceId="v1"></metadata_narration>',
+				connectors,
+			),
+		).toBe(true);
+		expect(s.getNodes()).toHaveLength(1);
+	});
+
+	it("reports no update for a chunk that adds nothing", () => {
+		const s = new OSMLStreamParser();
+		expect(s.appendChunk("<im", connectors)).toBe(false);
+	});
+});

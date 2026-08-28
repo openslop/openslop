@@ -5,10 +5,12 @@ import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
 import {
 	buildSceneSegments,
 	buildSequenceIndex,
+	findSceneSequence,
 	findSegmentIndexAtFrame,
 	type SceneSegment,
 } from "../sceneSegments";
 import { blankScene } from "@/lib/video/blankScene";
+import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
 
 const seg = (
 	sceneId: string,
@@ -207,5 +209,56 @@ describe("buildSceneSegments", () => {
 			start: 0,
 			duration: 2,
 		});
+	});
+});
+
+describe("findSceneSequence", () => {
+	const scene = (
+		id: string,
+		children: SceneElement["children"],
+	): SceneElement => ({ id, type: SCENE_TYPE, children });
+
+	const foreground = (id: string): SceneElement["children"][number] => ({
+		id,
+		type: "image",
+		children: [{ id: `${id}-t`, type: "image", text: "" }],
+	});
+
+	const overlay = (id: string): SceneElement["children"][number] => ({
+		id,
+		type: "narration",
+		children: [{ id: `${id}-t`, type: "narration", text: "hi" }],
+	});
+
+	it("returns the sequence of the scene's foreground", () => {
+		const seq = sequence(0, 2, resolved("a.png"));
+		const index = buildSequenceIndex([seq]);
+		expect(
+			findSceneSequence(scene("s1", [foreground("a.png-el")]), index),
+		).toBe(seq);
+	});
+
+	it("skips a foreground that never reached the layout", () => {
+		const seq = sequence(0, 2, resolved("b.png"));
+		const index = buildSequenceIndex([seq]);
+		expect(
+			findSceneSequence(
+				scene("s1", [
+					foreground("ungenerated"),
+					overlay("n1"),
+					foreground("b.png-el"),
+				]),
+				index,
+			),
+		).toBe(seq);
+	});
+
+	it("returns undefined when no foreground reached the layout", () => {
+		expect(
+			findSceneSequence(
+				scene("s1", [foreground("ungenerated")]),
+				buildSequenceIndex([]),
+			),
+		).toBeUndefined();
 	});
 });

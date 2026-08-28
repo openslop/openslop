@@ -26,13 +26,20 @@ export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
 	return index;
 }
 
+/**
+ * An ungenerated foreground never reaches the layout, so a scene's sequence is
+ * the first foreground that made it in, not simply the first one on the scene.
+ */
 export function findSceneSequence(
 	scene: SceneElement,
 	index: SequenceIndex,
 ): Sequence | undefined {
-	const fg = scene.children.find(isForeground);
-	if (!fg) return undefined;
-	return index.get(fg.id);
+	for (const child of scene.children) {
+		if (!isForeground(child)) continue;
+		const sequence = index.get(child.id);
+		if (sequence) return sequence;
+	}
+	return undefined;
 }
 
 /**

@@ -54,6 +54,7 @@ export class OSMLStreamParser {
 			if (openTag) {
 				const { tag, attributes } = parseXmlTag(openTag);
 				this.appendNext(tag, attributes, connectors);
+				updated = true;
 			}
 			lastIndex = match.index + match[0].length;
 		}

@@ -272,6 +272,34 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("retrying a failed generation", () => {
+		it("clears the previous error while the retry is in flight", async () => {
+			generateMock.mockRejectedValue(new Error("boom"));
+			generationQueue.enqueueGraph([makeJob("retry1")]);
+			await vi.runAllTimersAsync();
+			expect(generationQueue.getElementSnapshot("retry1").error).toBe("boom");
+
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("retry1")]);
+
+			const snap = generationQueue.getElementSnapshot("retry1");
+			expect(snap.status).toBe("generating");
+			expect(snap.error).toBeNull();
+		});
+
+		it("leaves no error behind when the retry is cancelled", async () => {
+			generateMock.mockRejectedValue(new Error("boom"));
+			generationQueue.enqueueGraph([makeJob("retry2")]);
+			await vi.runAllTimersAsync();
+
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("retry2")]);
+			generationQueue.cancel("retry2");
+
+			expect(generationQueue.getElementSnapshot("retry2").error).toBeNull();
+		});
+	});
+
 	describe("cancel", () => {
 		it("cancels a generating job and resets to idle", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
