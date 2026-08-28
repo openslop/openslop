@@ -26,6 +26,22 @@ describe("parseXmlTag", () => {
 		});
 	});
 
+	it("preserves runs of whitespace and newlines inside attribute values", () => {
+		expect(parseXmlTag('image prompt="a  b\nc"')).toEqual({
+			tag: "image",
+			attributes: { prompt: "a  b\nc" },
+		});
+	});
+
+	it("parses attributes that follow a newline-separated value", () => {
+		expect(
+			parseXmlTag('image prompt="line one\nline two" style="noir"'),
+		).toEqual({
+			tag: "image",
+			attributes: { prompt: "line one\nline two", style: "noir" },
+		});
+	});
+
 	it("keeps a `tag` attribute separate from the tag name", () => {
 		expect(parseXmlTag('image tag="hero"')).toEqual({
 			tag: "image",

@@ -41,18 +41,23 @@ export default function AuthForm({
 		setLoading(true);
 		setError("");
 
-		const { error } = await sendMagicLink({
-			email,
-			shouldCreateUser,
-			data: otpData,
-		});
+		try {
+			const { error } = await sendMagicLink({
+				email,
+				shouldCreateUser,
+				data: otpData,
+			});
 
-		if (error) {
-			setError(error);
-		} else {
-			setSent(true);
+			if (error) {
+				setError(error);
+			} else {
+				setSent(true);
+			}
+		} catch (cause) {
+			setError(errorMessage(cause));
+		} finally {
+			setLoading(false);
 		}
-		setLoading(false);
 	};
 
 	const handleGoogle = async () => {

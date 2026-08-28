@@ -10,6 +10,7 @@ import {
 	useState,
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toastError } from "@/lib/toastError";
 import { clamp, cn } from "@/lib/utils";
 import { loadPeaks } from "./peaks";
 import {
@@ -26,6 +27,14 @@ export interface WaveformProps {
 	onPause?: () => void;
 	onTimeUpdate?: (time: number, duration: number) => void;
 	onFinish?: () => void;
+}
+
+/** A play cut short by a pause is normal use, not a failure worth surfacing. */
+function startPlayback(audio: HTMLAudioElement): void {
+	audio.play().catch((error: unknown) => {
+		if (error instanceof DOMException && error.name === "AbortError") return;
+		toastError(error, "Could not play audio");
+	});
 }
 
 export interface WaveformHandle {
@@ -93,7 +102,8 @@ export function Waveform({
 		ref,
 		() => ({
 			play() {
-				audioRef.current?.play();
+				const a = audioRef.current;
+				if (a) startPlayback(a);
 			},
 			pause() {
 				audioRef.current?.pause();
@@ -101,7 +111,7 @@ export function Waveform({
 			toggle() {
 				const a = audioRef.current;
 				if (a) {
-					if (a.paused) a.play();
+					if (a.paused) startPlayback(a);
 					else a.pause();
 				}
 			},

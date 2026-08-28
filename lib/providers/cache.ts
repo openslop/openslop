@@ -121,13 +121,15 @@ export const audioBundleCache = (type: string) => ({
 	fromMetadata: (m: Metadata): BundleResponse | undefined => {
 		const url = m.url || m.audioUrl;
 		if (typeof url !== "string" || url === "") return undefined;
+		const durationSec = Number(m.duration);
+		if (!Number.isFinite(durationSec)) return undefined;
 		return {
 			id: url,
 			type,
 			provider: "pinecone-cache",
 			result: { audio: url },
 			metadata: {
-				durationSec: Number(m.duration),
+				durationSec,
 				cached: true,
 				description: String(m.description),
 			},
