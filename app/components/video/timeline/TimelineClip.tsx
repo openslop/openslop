@@ -106,7 +106,7 @@ export function TimelineClip({
 				)}
 			</div>
 			{sceneNumber ? (
-				<span className="absolute bottom-0.5 left-0.5 max-w-full truncate rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 font-mono text-badge-xs text-on-media-foreground">
+				<span className="absolute bottom-0.5 left-0.5 max-w-full truncate rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 font-numeric text-badge-xs text-on-media-foreground">
 					{fit(`Scene ${sceneNumber}`, width)}
 				</span>
 			) : null}

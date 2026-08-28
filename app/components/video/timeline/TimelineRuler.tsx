@@ -8,8 +8,7 @@ import { buildTicks, subdivision, tickInterval } from "./timelineTicks";
 
 export const RULER_HEIGHT = "h-7";
 /** Shared so a readout can line up with the ticks. */
-export const RULER_LABEL =
-	"font-mono text-label tabular-nums text-muted-foreground";
+export const RULER_LABEL = "font-numeric text-label-xs text-muted-foreground";
 export const RULER_LABEL_OFFSET = "top-3.5 -translate-y-1/2";
 
 const dots = (spacing: number): CSSProperties => ({

@@ -33,7 +33,7 @@ export function AudioPlayer({ src }: { src: string }) {
 				}}
 				onFinish={() => setPlaying(false)}
 			/>
-			<span className="shrink-0 ml-auto text-badge tabular-nums text-muted-foreground">
+			<span className="shrink-0 ml-auto text-badge font-numeric text-muted-foreground">
 				{formatTime(currentTime)}/{formatTime(duration)}
 			</span>
 		</>

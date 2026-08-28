@@ -75,7 +75,7 @@ export function ExportButton() {
 								{isRendering ? "Rendering…" : "Starting…"}
 							</span>
 							{isRendering && (
-								<span className="font-mono tabular-nums">
+								<span className="font-numeric">
 									{Math.round(state.progress * 100)}%
 								</span>
 							)}
@@ -91,9 +91,7 @@ export function ExportButton() {
 					<div className="flex animate-in flex-col gap-3 fade-in">
 						<div className="flex items-center justify-between text-label">
 							<span>Size</span>
-							<span className="font-mono tabular-nums">
-								{formatBytes(state.size)}
-							</span>
+							<span className="font-numeric">{formatBytes(state.size)}</span>
 						</div>
 						<Button asChild variant="generate" size="sm" className="w-full">
 							<a href={state.url} download>

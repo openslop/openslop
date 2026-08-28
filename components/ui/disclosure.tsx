@@ -46,7 +46,7 @@ export function Disclosure({
 
 export function DisclosureText({ children }: { children: string }) {
 	return (
-		<pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-md bg-surface-recessed p-2 font-mono text-label-xs text-muted-foreground">
+		<pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-md bg-surface-recessed p-2 font-numeric text-label-xs text-muted-foreground">
 			{children}
 		</pre>
 	);

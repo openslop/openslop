@@ -58,7 +58,7 @@ export function NumberScrubber({
 	// Reserving the widest value keeps the box one size, whether it is showing
 	// three digits, one, or an input.
 	const valueWidth = `${String(max).length + suffix.length}ch`;
-	const valueText = "text-right font-mono text-label-xs tabular-nums";
+	const valueText = "text-right font-numeric text-label-xs";
 
 	if (draft !== null) {
 		const commit = (next: string) => {

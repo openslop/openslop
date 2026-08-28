@@ -110,7 +110,7 @@ export function ColorField({
 						prefixed
 						alpha
 						aria-label={`${label} hex`}
-						className="h-7 w-full min-w-0 rounded-md bg-input px-2 font-mono text-label-xs text-foreground uppercase outline-none focus-ring"
+						className="h-7 w-full min-w-0 rounded-md bg-input px-2 font-numeric text-label-xs text-foreground uppercase outline-none focus-ring"
 					/>
 					<label className="flex h-7 shrink-0 items-center rounded-md bg-input pr-1 pl-2 focus-within:ring-2 focus-within:ring-ring">
 						<span className="sr-only">{label} opacity</span>
@@ -122,7 +122,7 @@ export function ColorField({
 							onChange={(event) =>
 								onChange(withAlphaPercent(color, event.target.valueAsNumber))
 							}
-							className="w-9 bg-transparent text-right font-mono text-label-xs text-foreground tabular-nums outline-none"
+							className="w-9 bg-transparent text-right font-numeric text-label-xs text-foreground outline-none"
 						/>
 						<span className="text-label-xs text-muted-foreground">%</span>
 					</label>
