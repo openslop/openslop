@@ -15,7 +15,7 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { truncateMiddle } from "@/lib/format";
 import { useElementHistoryStore } from "@/lib/generation/ElementHistoryProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { restoreVersion } from "@/lib/generation/restore";
+import { restoreElementVersion } from "@/lib/generation/restore";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { relativeTime } from "@/lib/project/relativeTime";
 import { toastError } from "@/lib/toastError";
@@ -40,7 +40,11 @@ const Dot = () => (
 	</span>
 );
 
-function VersionThumbnail({ result }: { result: ElementVersion["result"] }) {
+function ElementVersionThumbnail({
+	result,
+}: {
+	result: ElementVersion["result"];
+}) {
 	const src = result.videoUrl ?? result.imageUrl;
 	if (!src) return null;
 	return (
@@ -54,7 +58,7 @@ function VersionThumbnail({ result }: { result: ElementVersion["result"] }) {
 	);
 }
 
-function VersionRow({
+function ElementVersionRow({
 	version,
 	label,
 	active,
@@ -75,7 +79,7 @@ function VersionRow({
 			)}
 		>
 			<div className="flex items-center gap-2.5">
-				<VersionThumbnail result={version.result} />
+				<ElementVersionThumbnail result={version.result} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span
@@ -131,7 +135,7 @@ function LoadingRows() {
  * Versions are read on open, and read here rather than in the body so no card
  * subscribes to versions it never shows.
  */
-export function VersionHistoryPopover({
+export function ElementHistoryPopover({
 	elementId,
 	onRestore,
 }: {
@@ -161,7 +165,7 @@ export function VersionHistoryPopover({
 				aria-label="Generation history"
 				className="w-80 font-medium"
 			>
-				<VersionHistoryBody
+				<ElementHistoryBody
 					elementId={elementId}
 					onRestore={onRestore}
 					onClose={() => setOpen(false)}
@@ -171,7 +175,7 @@ export function VersionHistoryPopover({
 	);
 }
 
-function VersionHistoryBody({
+function ElementHistoryBody({
 	elementId,
 	onRestore,
 	onClose,
@@ -186,7 +190,7 @@ function VersionHistoryBody({
 	const history = useElementHistoryStore();
 
 	const restore = (version: ElementVersion) => {
-		restoreVersion(queue, history, version).catch((err: unknown) =>
+		restoreElementVersion(queue, history, version).catch((err: unknown) =>
 			toastError(err, "Restoring this version failed"),
 		);
 		onRestore(version);
@@ -219,7 +223,7 @@ function VersionHistoryBody({
 					<ul className="flex flex-col">
 						{versions
 							.map((version, index) => (
-								<VersionRow
+								<ElementVersionRow
 									key={versionKey(version)}
 									version={version}
 									label={String(index + 1)}

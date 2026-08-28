@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
-import { ElementHistory, type VersionStorage } from "../history";
+import { ElementHistory, type ElementVersionStorage } from "../history";
 import type { GenerationInputs } from "../inputs";
 import { GenerationQueue } from "../queue";
-import { restoreVersion } from "../restore";
+import { restoreElementVersion } from "../restore";
 import type { ElementVersion } from "../versions";
 
 const ELEMENT = "el";
@@ -48,17 +48,17 @@ const historyOf = (rows: Record<string, ElementVersion[]>) => {
 	const read = vi.fn((elementId: string) =>
 		Promise.resolve(rows[elementId] ?? []),
 	);
-	const storage: VersionStorage = { read, write: () => {} };
+	const storage: ElementVersionStorage = { read, write: () => {} };
 	return { history: new ElementHistory(storage), read };
 };
 
-describe("restoreVersion", () => {
+describe("restoreElementVersion", () => {
 	it("restores the still a version was made from alongside it", async () => {
 		const queue = new GenerationQueue();
 		const { history } = historyOf({ [STILL]: [oldStill, newStill] });
 		queue.restoreResult(newStill);
 
-		await restoreVersion(queue, history, oldTake);
+		await restoreElementVersion(queue, history, oldTake);
 
 		expect(queue.getElementSnapshot(ELEMENT).result).toEqual(oldTake.result);
 		expect(queue.getElementSnapshot(STILL).result).toEqual(oldStill.result);
@@ -72,7 +72,7 @@ describe("restoreVersion", () => {
 		});
 		const { history, read } = historyOf({ [AVATAR]: [avatar] });
 
-		await restoreVersion(queue, history, oldTake);
+		await restoreElementVersion(queue, history, oldTake);
 
 		expect(read).not.toHaveBeenCalledWith(AVATAR);
 		expect(queue.getElementSnapshot(AVATAR).result).toBeNull();
@@ -83,7 +83,7 @@ describe("restoreVersion", () => {
 		const { history } = historyOf({ [STILL]: [newStill] });
 		queue.restoreResult(newStill);
 
-		await restoreVersion(queue, history, oldTake);
+		await restoreElementVersion(queue, history, oldTake);
 
 		expect(queue.getElementSnapshot(ELEMENT).result).toEqual(oldTake.result);
 		expect(queue.getElementSnapshot(STILL).result).toEqual(newStill.result);

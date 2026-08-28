@@ -1,12 +1,12 @@
 import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 
-export interface VersionStorage {
+export interface ElementVersionStorage {
 	read(elementId: string): Promise<ElementVersion[]>;
 	write(version: ElementVersion): void;
 }
 
-export const SESSION_ONLY: VersionStorage = {
+export const SESSION_ONLY: ElementVersionStorage = {
 	read: () => Promise.resolve([]),
 	write: () => {},
 };
@@ -17,7 +17,7 @@ export class ElementHistory {
 	private loading = new Map<string, Promise<void>>();
 	private failed = new Set<string>();
 
-	constructor(private readonly storage: VersionStorage = SESSION_ONLY) {}
+	constructor(private readonly storage: ElementVersionStorage = SESSION_ONLY) {}
 
 	subscribe = (listener: () => void) => {
 		this.listeners.add(listener);

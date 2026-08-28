@@ -5,30 +5,16 @@ import {
 	type CanvasElementType,
 } from "@/lib/canvas/types";
 import { ASSET_CONNECTOR_TYPES } from "@/lib/connectors/types";
-import type { AssetResult } from "@/lib/connectors/types";
-import type { VersionStorage } from "@/lib/generation/history";
-import type { GenerationInputs } from "@/lib/generation/inputs";
+import type { ElementVersionStorage } from "@/lib/generation/history";
+import {
+	AssetResultSchema,
+	GenerationInputsSchema,
+} from "@/lib/generation/snapshots";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { createClient } from "@/lib/supabase/client";
 import { toastError } from "@/lib/toastError";
 
 const TABLE = "element_history";
-
-const InputsSchema = z.object({
-	prompt: z.string(),
-	attributes: z.record(z.string(), z.union([z.string(), z.number()])),
-	dependencies: z.record(z.string(), z.string()),
-}) satisfies z.ZodType<GenerationInputs>;
-
-const ResultSchema = z.object({
-	durationSec: z.number(),
-	imageUrl: z.string().optional(),
-	audioUrl: z.string().optional(),
-	videoUrl: z.string().optional(),
-	textTimestamps: z
-		.array(z.object({ text: z.string(), start: z.number(), end: z.number() }))
-		.optional(),
-}) satisfies z.ZodType<AssetResult>;
 
 const ElementTypeSchema = z.enum([...CANVAS_ELEMENT_TYPES] as [
 	CanvasElementType,
@@ -40,8 +26,8 @@ const RowSchema = z.object({
 	created_at: z.string(),
 	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
 	element_type: ElementTypeSchema.nullish(),
-	inputs: InputsSchema,
-	result: ResultSchema,
+	inputs: GenerationInputsSchema,
+	result: AssetResultSchema,
 	pinned: z.boolean(),
 });
 
@@ -119,7 +105,9 @@ export async function saveElementVersion(
 	if (error) throw error;
 }
 
-export const elementHistoryStorage = (projectId: string): VersionStorage => ({
+export const elementHistoryStorage = (
+	projectId: string,
+): ElementVersionStorage => ({
 	read: (elementId) => fetchElementVersions(projectId, elementId),
 	write: (version) =>
 		saveElementVersion(projectId, version).catch((err: unknown) =>

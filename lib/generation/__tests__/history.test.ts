@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
-import { ElementHistory, type VersionStorage } from "../history";
+import { ElementHistory, type ElementVersionStorage } from "../history";
 import type { GenerationInputs } from "../inputs";
 import type { ElementVersion } from "../versions";
 
@@ -29,8 +29,8 @@ const stored: ElementVersion = {
 };
 
 const storageOf = (
-	read: VersionStorage["read"] = () => Promise.resolve([]),
-): [VersionStorage, ReturnType<typeof vi.fn>] => {
+	read: ElementVersionStorage["read"] = () => Promise.resolve([]),
+): [ElementVersionStorage, ReturnType<typeof vi.fn>] => {
 	const write = vi.fn();
 	return [{ read, write }, write];
 };

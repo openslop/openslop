@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
 import Canvas from "./canvas/Canvas";
+import { CanvasVersionBanner } from "./canvas/CanvasVersionBanner";
 import { EditorSidebar } from "./canvas/panel/EditorSidebar";
 import { ProjectTitle } from "./canvas/ProjectTitle";
 import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
@@ -34,6 +35,7 @@ export default function PostPromptView() {
 			<UserProfile />
 
 			<EditorToolbar />
+			<CanvasVersionBanner />
 			<div className="flex min-h-0 flex-1 overflow-hidden">
 				<EditorSidebar />
 				<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">

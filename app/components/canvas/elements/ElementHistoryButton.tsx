@@ -5,7 +5,7 @@ import { useSlateStatic } from "slate-react";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ElementVersion } from "@/lib/generation/versions";
 import { applyElementVersion } from "../utils/nodeOps";
-import { VersionHistoryPopover } from "./VersionHistoryPopover";
+import { ElementHistoryPopover } from "./ElementHistoryPopover";
 
 export function ElementHistoryButton({
 	element,
@@ -18,5 +18,5 @@ export function ElementHistoryButton({
 		[editor, element],
 	);
 
-	return <VersionHistoryPopover elementId={element.id} onRestore={restore} />;
+	return <ElementHistoryPopover elementId={element.id} onRestore={restore} />;
 }

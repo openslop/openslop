@@ -1,9 +1,8 @@
 import { useEffect, useMemo } from "react";
-import type { Editor } from "slate";
 import { toast } from "sonner";
 import { toastError } from "@/lib/toastError";
-import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
-import { createAutosaver } from "@/lib/project/autosave";
+import { createAutosaver, type Autosaver } from "@/lib/project/autosave";
+import type { ProjectContent } from "@/lib/project/projectDocument";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 
@@ -16,8 +15,10 @@ const TOAST_OPTIONS = {
 	duration: 1500,
 };
 
-/** Returns the callback that schedules a save for a document change. */
-export function useAutosave(projectId: string, editor: Editor): () => void {
+export function useAutosave(
+	projectId: string,
+	read: () => ProjectContent,
+): Autosaver {
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
 
@@ -26,8 +27,7 @@ export function useAutosave(projectId: string, editor: Editor): () => void {
 			createAutosaver({
 				projectId,
 				store,
-				getScript: () => serializeOSMLWithScenes(editor.children),
-				getGeneration: () => queue.snapshot(),
+				read,
 				onSaved: () => toast("Saved", TOAST_OPTIONS),
 				onError: (err) =>
 					toastError(err, "Save failed", {
@@ -35,7 +35,7 @@ export function useAutosave(projectId: string, editor: Editor): () => void {
 						duration: 4000,
 					}),
 			}),
-		[projectId, store, queue, editor],
+		[projectId, store, read],
 	);
 
 	// Runs after the rehydration effect above it in useEditorSession, so the
@@ -56,5 +56,5 @@ export function useAutosave(projectId: string, editor: Editor): () => void {
 		});
 	}, [queue, autosaver]);
 
-	return autosaver.schedule;
+	return autosaver;
 }

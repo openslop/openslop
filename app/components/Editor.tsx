@@ -1,5 +1,6 @@
 "use client";
 
+import { CanvasHistoryProvider } from "@/lib/project/CanvasHistoryProvider";
 import { useShowWorkspace } from "@/lib/script/ScriptProvider";
 import PrePromptView from "./PrePromptView";
 import PostPromptView from "./PostPromptView";
@@ -9,21 +10,23 @@ import { BottomViewProvider } from "./video/BottomViewContext";
 import { PlayerPositionProvider } from "./video/PlayerPositionContext";
 
 export default function Editor() {
-	const { editor, onDocumentChange } = useEditorSession();
+	const { editor, onDocumentChange, history } = useEditorSession();
 	const showWorkspace = useShowWorkspace();
 
 	return (
 		<PlayerPositionProvider>
 			<BottomViewProvider>
-				<CanvasProviders editor={editor} onDocumentChange={onDocumentChange}>
-					<div
-						className={`flex min-h-screen flex-col items-center transition-[padding] duration-700 ease-out ${
-							showWorkspace ? "" : "pt-[22vh]"
-						}`}
-					>
-						{showWorkspace ? <PostPromptView /> : <PrePromptView />}
-					</div>
-				</CanvasProviders>
+				<CanvasHistoryProvider history={history}>
+					<CanvasProviders editor={editor} onDocumentChange={onDocumentChange}>
+						<div
+							className={`flex min-h-screen flex-col items-center transition-[padding] duration-700 ease-out ${
+								showWorkspace ? "" : "pt-[22vh]"
+							}`}
+						>
+							{showWorkspace ? <PostPromptView /> : <PrePromptView />}
+						</div>
+					</CanvasProviders>
+				</CanvasHistoryProvider>
 			</BottomViewProvider>
 		</PlayerPositionProvider>
 	);

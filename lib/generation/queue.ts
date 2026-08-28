@@ -108,6 +108,11 @@ export class GenerationQueue {
 		this.processQueue();
 	}
 
+	replaceSnapshots(state: Record<string, ElementSnapshot>) {
+		this.cancelAll();
+		this.snapshots.replaceAll(state);
+	}
+
 	cancelAll() {
 		for (const [id, { controller }] of this.active) {
 			controller.abort();

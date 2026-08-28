@@ -4,7 +4,12 @@ import { useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useScriptInitial } from "@/lib/script/ScriptProvider";
 
-export type PanelKey = "layout" | "captions" | "properties" | "sloppy";
+export type PanelKey =
+	| "layout"
+	| "captions"
+	| "properties"
+	| "history"
+	| "sloppy";
 
 type EditorPanelValue = {
 	active: PanelKey | null;

@@ -9,11 +9,15 @@ import {
 	type MetadataVoice,
 } from "./types";
 
-/** What a project holds. Generation reads this; only the UI calls the setters. */
-export type ProjectData = {
-	hydrated: boolean;
+/** What gets saved to the project row. */
+export type ProjectPersisted = {
 	metadata: Metadata;
 	referenceImages: string[];
+};
+
+/** What a project holds. Generation reads this; only the UI calls the setters. */
+export type ProjectData = ProjectPersisted & {
+	hydrated: boolean;
 };
 
 export type ProjectContext = ProjectData & {
@@ -32,16 +36,16 @@ export type ProjectContext = ProjectData & {
 
 export type ProjectStore = StoreApi<ProjectContext>;
 
-const initialState = {
-	hydrated: false,
+const freshPersisted = (): ProjectPersisted => ({
 	metadata: MetadataSchema.parse({}),
-	referenceImages: [] as string[],
-};
+	referenceImages: [],
+});
 
 export function createProjectStore(): ProjectStore {
 	return createStore<ProjectContext>()(
 		immer((set) => ({
-			...structuredClone(initialState),
+			hydrated: false,
+			...freshPersisted(),
 			updateMetadata: (partial) =>
 				set((state) => {
 					merge(state.metadata, partial);
@@ -85,11 +89,7 @@ export function createProjectStore(): ProjectStore {
 				set((state) => {
 					state.hydrated = true;
 				}),
-			reset: () =>
-				set((state) => {
-					state.metadata = structuredClone(initialState.metadata);
-					state.referenceImages = [];
-				}),
+			reset: () => set(freshPersisted()),
 		})),
 	);
 }

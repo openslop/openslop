@@ -17,7 +17,7 @@ Global light + dark via `next-themes` (`attribute="class"`, default light, syste
 - **Neutrals:** warm, red-tinted greys (`--grey-900` foreground through `--grey-0`).
 - **Surfaces:** `--background`, `--surface-recessed` (panels), `--card` / `--surface-elevated` (raised: popovers, select menus, with `--surface-hover` for hovered controls on them), `--element-card` (element cards and side-panel sections, text from `--panel-fg` / `--panel-label`). Borders are hairline (`--border`).
 - **Accent — blurple** (`--accent`, `--ring`): focus rings, selection, links, send, and `accent` CTAs only. Disciplined, never an ambient wash.
-- **State:** `--destructive` (red), `--success` (green), `--caution` (amber).
+- **State:** `--destructive` (red), `--success` (green), `--caution` (amber), each with a matching `-foreground` for solid fills. `--caution-soft` / `--caution-soft-foreground` is the same amber tinted for banners. Use one ramp per state; never add a second red, green, or amber.
 - **Media-type tints** (`--media-character/image/clip/animated/music/sound/narration`): the element-card icon color, so each storyboard type reads at a glance. Brighter in dark, deeper in light.
 - **Scrims** (`--overlay`, `--on-media`, `--on-media-foreground`): theme-independent dark washes. `bg-overlay` for modal scrims; `bg-on-media/55…80` for chrome floating over media (`--on-media` is solid black, so the opacity modifier sets the strength), paired with `text-on-media-foreground`.
 

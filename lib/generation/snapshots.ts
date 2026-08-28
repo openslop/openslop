@@ -1,4 +1,9 @@
-import type { AssetConnectorType, AssetResult } from "../connectors/types";
+import { z } from "zod";
+import {
+	ASSET_CONNECTOR_TYPES,
+	type AssetConnectorType,
+	type AssetResult,
+} from "../connectors/types";
 import type { GenerationInputs } from "./inputs";
 import type { CommittedVersion } from "./versions";
 
@@ -15,6 +20,38 @@ export type ElementSnapshot = {
 	pinned: boolean;
 };
 
+export const GenerationInputsSchema = z.object({
+	prompt: z.string(),
+	attributes: z.record(z.string(), z.union([z.string(), z.number()])),
+	dependencies: z.record(z.string(), z.string()),
+}) satisfies z.ZodType<GenerationInputs>;
+
+export const AssetResultSchema = z.object({
+	durationSec: z.number(),
+	imageUrl: z.string().optional(),
+	audioUrl: z.string().optional(),
+	videoUrl: z.string().optional(),
+	textTimestamps: z
+		.array(z.object({ text: z.string(), start: z.number(), end: z.number() }))
+		.optional(),
+}) satisfies z.ZodType<AssetResult>;
+
+const ElementSnapshotSchema = z.object({
+	status: z.enum(["idle", "queued", "generating"]),
+	seconds: z.number(),
+	result: AssetResultSchema.nullable(),
+	error: z.string().nullable(),
+	resultInputs: GenerationInputsSchema.nullable(),
+	connectorType: z.enum(ASSET_CONNECTOR_TYPES).nullable(),
+	pinned: z.boolean(),
+}) satisfies z.ZodType<ElementSnapshot>;
+
+/** The `generation` column is untyped JSON; parse it once at the boundary. */
+export const GenerationSnapshotSchema = z.record(
+	z.string(),
+	ElementSnapshotSchema,
+);
+
 const EMPTY_SNAPSHOT: ElementSnapshot = {
 	status: "idle",
 	seconds: 0,
@@ -24,6 +61,14 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	connectorType: null,
 	pinned: false,
 };
+
+const settled = (state: Record<string, ElementSnapshot>) =>
+	new Map(
+		Object.entries(state).map(([id, snap]) => [
+			id,
+			{ ...snap, status: "idle" as const, seconds: 0 },
+		]),
+	);
 
 /** A generation is active from the moment it is queued until it settles. */
 export const isGenerationActive = (status: GenerationStatus) =>
@@ -35,14 +80,18 @@ export const isGenerationActive = (status: GenerationStatus) =>
  * notifying to the caller so a batch of edits lands as one update.
  */
 export class SnapshotStore {
-	private state = new Map<string, ElementSnapshot>();
+	private state: Map<string, ElementSnapshot>;
 	private listeners = new Set<() => void>();
 	private resultVersion = 0;
 
 	constructor(initialState: Record<string, ElementSnapshot> = {}) {
-		for (const [id, snap] of Object.entries(initialState)) {
-			this.state.set(id, { ...snap, status: "idle", seconds: 0 });
-		}
+		this.state = settled(initialState);
+	}
+
+	replaceAll(state: Record<string, ElementSnapshot>) {
+		this.state = settled(state);
+		this.resultVersion++;
+		this.notify();
 	}
 
 	subscribe = (listener: () => void) => {

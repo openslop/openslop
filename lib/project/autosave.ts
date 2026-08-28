@@ -1,31 +1,19 @@
 import debounce from "lodash/debounce";
 import isEqual from "lodash/isEqual";
 import PQueue from "p-queue";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { saveProject, type SaveProjectInput } from "./api";
+import type { ProjectContent } from "./projectDocument";
 import { deriveProjectName } from "./projectName";
 import type { ProjectStore } from "./store";
-import {
-	extractStoreSnapshot,
-	type ProjectStoreSnapshot,
-} from "./storeSnapshot";
 import { pickThumbnailUrl } from "./thumbnail";
 
 export const AUTOSAVE_DEBOUNCE_MS = 2000;
 
-export type GenerationSnapshot = Record<string, ElementSnapshot>;
-
-export function buildProjectSave(
-	snapshot: ProjectStoreSnapshot,
-	script: string,
-	generation: GenerationSnapshot,
-): SaveProjectInput {
+export function buildProjectSave(content: ProjectContent): SaveProjectInput {
 	return {
-		name: deriveProjectName(snapshot.metadata),
-		script,
-		store: snapshot,
-		generation,
-		thumbnail_url: pickThumbnailUrl(Object.entries(generation)),
+		...content,
+		name: deriveProjectName(content.store.metadata),
+		thumbnail_url: pickThumbnailUrl(Object.entries(content.generation)),
 	};
 }
 
@@ -33,11 +21,10 @@ export interface AutosaverOptions {
 	projectId: string;
 	store: ProjectStore;
 	/**
-	 * Produces the script for the next save. Called only when a save runs, so
+	 * Produces the content for the next save. Called when the debounce fires, so
 	 * serializing stays off the per-keystroke path.
 	 */
-	getScript: () => string;
-	getGeneration: () => GenerationSnapshot;
+	read: () => ProjectContent;
 	onSaved: () => void;
 	onError: (error: unknown) => void;
 }
@@ -49,6 +36,11 @@ export interface Autosaver {
 	flush: () => void;
 	/** Treat the current state as the one the server already holds. */
 	markSaved: () => void;
+	/** Persist any pending edit, then hold every later save until {@link resume}. */
+	suspend: () => void;
+	/** Resume saving, with one save for whatever was dropped while suspended. */
+	resume: () => void;
+	onProjectSaved: (listener: (input: SaveProjectInput) => void) => () => void;
 }
 
 /**
@@ -62,39 +54,45 @@ export interface Autosaver {
 export function createAutosaver({
 	projectId,
 	store,
-	getScript,
-	getGeneration,
+	read,
 	onSaved,
 	onError,
 }: AutosaverOptions): Autosaver {
 	const queue = new PQueue({ concurrency: 1 });
+	const savedListeners = new Set<(input: SaveProjectInput) => void>();
 
-	const buildInput = (): SaveProjectInput =>
-		buildProjectSave(extractStoreSnapshot(store), getScript(), getGeneration());
+	const buildInput = (): SaveProjectInput => buildProjectSave(read());
 
 	/** Null until the loaded state is known: an unknown baseline has to save. */
 	let lastSaved: SaveProjectInput | null = null;
+	let suspended = false;
 
-	const save = async () => {
-		if (!store.getState().hydrated) {
-			console.error("Autosave aborted: store not hydrated", { projectId });
-			return;
-		}
+	const persist = async (input: SaveProjectInput) => {
+		if (isEqual(input, lastSaved)) return;
 		try {
-			const input = buildInput();
-			if (isEqual(input, lastSaved)) return;
 			await saveProject(projectId, input);
 			lastSaved = input;
 			onSaved();
+			for (const listener of savedListeners) listener(input);
 		} catch (err) {
 			console.error("Autosave failed", err);
 			onError(err);
 		}
 	};
 
+	/**
+	 * Reads the payload as the debounce fires, not as the save runs, so a save
+	 * queued behind a slow one still writes the state it was scheduled for.
+	 */
 	const schedule = debounce(() => {
+		if (suspended) return;
+		if (!store.getState().hydrated) {
+			console.error("Autosave aborted: store not hydrated", { projectId });
+			return;
+		}
+		const input = buildInput();
 		queue.clear();
-		void queue.add(save);
+		void queue.add(() => persist(input));
 	}, AUTOSAVE_DEBOUNCE_MS);
 
 	return {
@@ -104,6 +102,20 @@ export function createAutosaver({
 		},
 		markSaved: () => {
 			lastSaved = buildInput();
+		},
+		suspend: () => {
+			schedule.flush();
+			suspended = true;
+		},
+		resume: () => {
+			suspended = false;
+			schedule();
+		},
+		onProjectSaved: (listener) => {
+			savedListeners.add(listener);
+			return () => {
+				savedListeners.delete(listener);
+			};
 		},
 	};
 }

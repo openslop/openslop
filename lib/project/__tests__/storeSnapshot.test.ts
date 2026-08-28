@@ -7,6 +7,7 @@ import {
 	applyStoreSnapshot,
 	extractStoreSnapshot,
 	parseStoreSnapshot,
+	replaceStoreSnapshot,
 } from "../storeSnapshot";
 
 describe("storeSnapshot", () => {
@@ -91,5 +92,22 @@ describe("parseStoreSnapshot", () => {
 	it("throws on a structurally invalid row", () => {
 		expect(() => parseStoreSnapshot({ metadata: { title: 42 } })).toThrow();
 		expect(() => parseStoreSnapshot({ referenceImages: "a.png" })).toThrow();
+	});
+
+	it("swaps a hydrated store's contents wholesale", () => {
+		const store = createProjectStore();
+		applyStoreSnapshot(
+			store,
+			parseStoreSnapshot({ metadata: { title: "One" } }),
+		);
+		store.getState().setReferenceImages(["https://cdn/a.png"]);
+
+		replaceStoreSnapshot(
+			store,
+			parseStoreSnapshot({ metadata: { title: "Two" } }),
+		);
+
+		expect(store.getState().metadata.title).toBe("Two");
+		expect(store.getState().referenceImages).toEqual([]);
 	});
 });

@@ -12,10 +12,13 @@ import {
 	AUTOSAVE_DEBOUNCE_MS,
 	buildProjectSave,
 	createAutosaver,
-	type GenerationSnapshot,
 } from "../autosave";
+import type { ProjectContent } from "../projectDocument";
 import { createProjectStore, type ProjectStore } from "../store";
-import type { ProjectStoreSnapshot } from "../storeSnapshot";
+import {
+	extractStoreSnapshot,
+	type ProjectStoreSnapshot,
+} from "../storeSnapshot";
 
 const saveProject = vi.hoisted(() => vi.fn());
 vi.mock("../api", () => ({ saveProject }));
@@ -30,6 +33,12 @@ const imageSnapshot = (imageUrl: string): ElementSnapshot => ({
 	pinned: false,
 });
 
+const content = (
+	store: ProjectStoreSnapshot,
+	script: string,
+	generation: ProjectContent["generation"] = {},
+): ProjectContent => ({ script, store, generation });
+
 const snapshot = (title: string): ProjectStoreSnapshot => ({
 	metadata: {
 		title,
@@ -42,20 +51,20 @@ const snapshot = (title: string): ProjectStoreSnapshot => ({
 
 describe("buildProjectSave", () => {
 	it("names the project from its metadata title", () => {
-		const input = buildProjectSave(snapshot("Moon Rabbit"), "<osml/>", {});
+		const input = buildProjectSave(content(snapshot("Moon Rabbit"), "<osml/>"));
 		expect(input.name).toBe("Moon Rabbit");
 		expect(input.script).toBe("<osml/>");
 		expect(input.thumbnail_url).toBeNull();
 	});
 
 	it("falls back to Untitled when the title is blank", () => {
-		expect(buildProjectSave(snapshot("  "), "", {}).name).toBe("Untitled");
+		expect(buildProjectSave(content(snapshot("  "), "")).name).toBe("Untitled");
 	});
 
 	it("picks the thumbnail from the generation snapshot", () => {
-		const input = buildProjectSave(snapshot("x"), "", {
-			a: imageSnapshot("https://cdn/a.png"),
-		});
+		const input = buildProjectSave(
+			content(snapshot("x"), "", { a: imageSnapshot("https://cdn/a.png") }),
+		);
 		expect(input.thumbnail_url).toBe("https://cdn/a.png");
 	});
 });
@@ -70,8 +79,7 @@ describe("createAutosaver", () => {
 		createAutosaver({
 			projectId,
 			store,
-			getScript: () => "<osml/>",
-			getGeneration: () => ({}),
+			read: () => content(extractStoreSnapshot(store), "<osml/>"),
 			onSaved,
 			onError,
 		});
@@ -168,8 +176,7 @@ describe("createAutosaver", () => {
 		const autosaver = createAutosaver({
 			projectId,
 			store,
-			getScript: () => script,
-			getGeneration: () => ({}),
+			read: () => content(extractStoreSnapshot(store), script),
 			onSaved,
 			onError,
 		});
@@ -229,12 +236,11 @@ describe("createAutosaver", () => {
 
 	it("still saves when only the generation snapshot changed", async () => {
 		hydrate();
-		let generation: GenerationSnapshot = {};
+		let generation: ProjectContent["generation"] = {};
 		const autosaver = createAutosaver({
 			projectId,
 			store,
-			getScript: () => "<osml/>",
-			getGeneration: () => generation,
+			read: () => content(extractStoreSnapshot(store), "<osml/>", generation),
 			onSaved,
 			onError,
 		});
@@ -248,6 +254,108 @@ describe("createAutosaver", () => {
 			projectId,
 			expect.objectContaining({ thumbnail_url: "https://cdn/a.png" }),
 		);
+	});
+
+	it("holds saves while suspended and takes them again on resume", async () => {
+		hydrate();
+		const autosaver = build();
+		autosaver.markSaved();
+		autosaver.suspend();
+
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+		expect(saveProject).not.toHaveBeenCalled();
+
+		autosaver.resume();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(1);
+	});
+
+	it("stays quiet on resume when nothing was held", async () => {
+		hydrate();
+		const autosaver = build();
+		autosaver.markSaved();
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+		expect(saveProject).toHaveBeenCalledTimes(1);
+
+		autosaver.suspend();
+		autosaver.resume();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(1);
+	});
+
+	it("persists a pending edit before suspending", async () => {
+		hydrate();
+		const autosaver = build();
+		autosaver.markSaved();
+		edit();
+		autosaver.schedule();
+
+		autosaver.suspend();
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(saveProject).toHaveBeenCalledTimes(1);
+	});
+
+	it("saves the document as it stood when suspend was called", async () => {
+		hydrate();
+		let script = "live";
+		let release = () => {};
+		saveProject.mockImplementationOnce(
+			() => new Promise<void>((resolve) => (release = () => resolve())),
+		);
+		const autosaver = createAutosaver({
+			projectId,
+			store,
+			read: () => content(extractStoreSnapshot(store), script),
+			onSaved,
+			onError,
+		});
+		autosaver.markSaved();
+
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		// A second edit queues behind the in-flight save, then a preview swaps
+		// the script out from under it.
+		edit();
+		autosaver.schedule();
+		autosaver.suspend();
+		script = "an older version on screen";
+		release();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(2);
+		expect(saveProject).toHaveBeenLastCalledWith(
+			projectId,
+			expect.objectContaining({ script: "live" }),
+		);
+	});
+
+	it("reports every save to its subscribers until they unsubscribe", async () => {
+		hydrate();
+		const autosaver = build();
+		const seen: string[] = [];
+		const stop = autosaver.onProjectSaved(({ script }) => seen.push(script));
+
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+		expect(seen).toEqual(["<osml/>"]);
+
+		stop();
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(2);
+		expect(seen).toEqual(["<osml/>"]);
 	});
 
 	it("reports a failed save instead of throwing", async () => {
