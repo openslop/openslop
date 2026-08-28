@@ -14,8 +14,8 @@ const sec = (seconds: number) => `${seconds.toFixed(1)}s`;
 const where = ({ sceneNumber, type, id }: ElementLength) =>
 	`Scene ${sceneNumber} ${type} ${id}`;
 
-const changeLine = ({ length, duration, dialogue }: DurationFit) =>
-	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${sec(dialogue)} of dialogue.`;
+const changeLine = ({ length, duration }: DurationFit) =>
+	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${sec(length.dialogueSec)} of dialogue.`;
 
 const shortLine = ({ length, needed }: DurationFit) =>
 	`${where(length)} needs ${sec(needed)} but ${LONGEST_DURATION_SEC}s is the longest a clip can be generated at; split the dialogue after it across more visuals.`;
@@ -27,25 +27,22 @@ export const fitDurations = defineTool({
 	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter clips stop dead under long dialogue;
 	  longer ones are generated video nobody sees.
 
-	  Scope it with \`scene\` or \`element_ids\`, or send neither for the whole canvas.
+	  The dialogue under a visual is every line between it and the next visual, whether or
+	  not a scene boundary falls between them, so this is scoped by element, never by scene.
+	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
 
 	  Images carry no duration and already stretch, so they are left alone. Changing a
 	  duration stales the element: tell the user to regenerate it afterwards.
 	`,
 	input: z.object({
-		scene: z.number().int().positive().optional(),
 		element_ids: z.array(z.string()).min(1).optional(),
 	}),
 	output: z.string(),
-	execute: async ({ scene, element_ids }, ctx) => {
+	execute: async ({ element_ids }, ctx) => {
 		const ids = element_ids && new Set(element_ids);
 		const scoped = ctx
 			.measureElementLengths()
-			.filter(
-				(length) =>
-					(scene === undefined || length.sceneNumber === scene) &&
-					(!ids || ids.has(length.id)),
-			);
+			.filter((length) => !ids || ids.has(length.id));
 
 		const fits = durationFits(scoped);
 		if (fits.length === 0) {

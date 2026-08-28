@@ -18,6 +18,8 @@ export type ElementLength = {
 	type: CanvasElementType;
 	sceneNumber: number;
 	seconds: number;
+	/** How long the dialogue that follows it, up to the next visual, runs for. */
+	dialogueSec: number;
 	/** The spoken words that follow it, up to the next visual. */
 	words: number;
 	dialogueIds: string[];
@@ -41,19 +43,23 @@ const ownDuration = (element: CanvasContentElement): number | undefined =>
 const toLength = (
 	{ element, sceneNumber, words, dialogueIds }: Span,
 	trimVisualsToDialogue: boolean,
-): ElementLength => ({
-	id: element.id,
-	type: element.type,
-	sceneNumber,
-	words,
-	dialogueIds,
-	durationSec: ownDuration(element),
-	seconds: Math.max(
-		secondsForWords(words),
-		trimVisualsToDialogue ? 0 : (ownDuration(element) ?? 0),
-		MIN_DURATION_SEC,
-	),
-});
+): ElementLength => {
+	const dialogueSec = secondsForWords(words);
+	return {
+		id: element.id,
+		type: element.type,
+		sceneNumber,
+		words,
+		dialogueIds,
+		dialogueSec,
+		durationSec: ownDuration(element),
+		seconds: Math.max(
+			dialogueSec,
+			trimVisualsToDialogue ? 0 : (ownDuration(element) ?? 0),
+			MIN_DURATION_SEC,
+		),
+	};
+};
 
 /**
  * What every visual on the canvas is on screen for, estimated from the script

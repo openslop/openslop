@@ -320,6 +320,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 30,
 						words: 90,
+						dialogueSec: 30,
 						dialogueIds: ["nar1"],
 					},
 					{
@@ -328,6 +329,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 2,
 						seconds: 1,
 						words: 0,
+						dialogueSec: 0,
 						dialogueIds: [],
 					},
 				],
@@ -354,6 +356,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
+						dialogueSec: 4.0,
 						dialogueIds: ["nar1"],
 						durationSec: 10,
 					},
@@ -363,6 +366,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 30,
 						words: 90,
+						dialogueSec: 30.0,
 						dialogueIds: ["nar2"],
 					},
 				],
@@ -383,7 +387,7 @@ describe("executeToolCall", () => {
 
 	it("names a clip whose dialogue outruns the longest option instead of hiding the clamp", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { scene: 2 } },
+			{ toolName: "fit_durations", input: { element_ids: ["clip1"] } },
 			context({
 				measureElementLengths: () => [
 					{
@@ -392,6 +396,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
+						dialogueSec: 4.0,
 						dialogueIds: [],
 						durationSec: 10,
 					},
@@ -401,6 +406,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 2,
 						seconds: 60,
 						words: 180,
+						dialogueSec: 60.0,
 						dialogueIds: ["nar2"],
 						durationSec: 15,
 					},
@@ -424,6 +430,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
+						dialogueSec: 4.0,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
 					},
@@ -448,6 +455,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						seconds: 30,
 						words: 90,
+						dialogueSec: 30.0,
 						dialogueIds: ["nar1"],
 					},
 				],
