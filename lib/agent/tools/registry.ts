@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import { adaptScript } from "./adaptScript";
@@ -70,6 +71,28 @@ export type AgentToolOutput = {
 	[TName in AgentToolName]: ToolOutput<TName>;
 }[AgentToolName];
 
+const isToolName = (name: string): name is AgentToolName => name in TOOLS;
+
+/** How a call reads in the transcript. */
+export type ToolPresentation = { icon: IconComponent; label: string };
+
+// Same widening as DISPATCH, and the input is read as the SDK streams it, so
+// each label reads its own fields optionally.
+const PRESENT = TOOLS as unknown as Record<
+	AgentToolName,
+	{ present: { icon: IconComponent; label: (input: unknown) => string } }
+>;
+
+/** Null for a tool this build no longer offers, which a stored transcript still holds. */
+export function presentToolCall(
+	toolName: string,
+	input: unknown,
+): ToolPresentation | null {
+	if (!isToolName(toolName)) return null;
+	const { icon, label } = PRESENT[toolName].present;
+	return { icon, label: label(input ?? {}) };
+}
+
 type ToolFlag = "snapshot" | "rewritesCanvas";
 
 const namesFlagged = (flag: ToolFlag): ReadonlySet<string> =>
@@ -89,8 +112,6 @@ export const SCRIPT_TOOLS = namesFlagged("rewritesCanvas");
 export type ToolOutcome =
 	| { ok: true; output: AgentToolOutput }
 	| { ok: false; errorText: string };
-
-const isToolName = (name: string): name is AgentToolName => name in TOOLS;
 
 const run = async <TName extends AgentToolName>(
 	toolName: TName,

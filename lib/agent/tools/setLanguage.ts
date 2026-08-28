@@ -1,6 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { LANGUAGE_CHOICES, languageLabel } from "@/lib/project/language";
+import { Translate } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 export const setLanguage = defineTool({
@@ -14,6 +15,8 @@ export const setLanguage = defineTool({
 	`,
 	input: z.object({ language: z.enum(LANGUAGE_CHOICES) }),
 	output: z.string(),
+	icon: Translate,
+	label: "Setting the language",
 	execute: async ({ language }, ctx) => {
 		ctx.setMetadata({ language });
 		return `Set the language to ${languageLabel(language)}. It applies to the next script written; what is on the canvas is unchanged.`;

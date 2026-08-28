@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { Mic } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty, VOICE_TRAITS } from "./inputs";
 
@@ -12,6 +13,8 @@ export const setNarrator = defineTool({
 	`,
 	input: z.object({ ...VOICE_TRAITS }).refine(notEmpty, named("trait")),
 	output: z.string(),
+	icon: Mic,
+	label: "Adjusting the narrator's voice",
 	execute: async (traits, ctx) => {
 		ctx.setMetadata({ narration: traits });
 		return "Set the narrator's voice.";

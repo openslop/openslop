@@ -6,6 +6,7 @@ import {
 	VIDEO_LENGTH_SPECS,
 	VIDEO_LENGTH_TARGETS,
 } from "@/lib/video/videoLength";
+import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";
 
@@ -27,6 +28,8 @@ export const setVideoSettings = defineTool({
 		})
 		.refine(notEmpty, named("setting")),
 	output: z.string(),
+	icon: Hourglass,
+	label: "Adjusting the video settings",
 	execute: async ({ length, aspect_ratio }, ctx) => {
 		ctx.setMetadata({
 			videoSettings: {

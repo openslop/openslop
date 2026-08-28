@@ -4,6 +4,7 @@ import {
 	NARRATION_WORDS_PER_MINUTE,
 	videoLengthBudget,
 } from "@/lib/video/videoLength";
+import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 const minutes = (words: number) =>
@@ -21,6 +22,8 @@ export const measureTotalLength = defineTool({
 	`,
 	input: z.object({}),
 	output: z.string(),
+	icon: Hourglass,
+	label: "Measuring the video's length",
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const { length } = ctx.readMetadata().videoSettings;

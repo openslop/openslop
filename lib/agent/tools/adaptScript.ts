@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { Film } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 export const adaptScript = defineTool({
@@ -42,6 +43,8 @@ export const adaptScript = defineTool({
 			),
 	}),
 	output: z.string(),
+	icon: Film,
+	label: "Putting your script on the canvas",
 	execute: async ({ script, notes }, ctx) => {
 		await ctx.adaptScript(script, notes);
 		return "Put that script onto the canvas. Read it to see what landed.";

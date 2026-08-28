@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { User } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { VOICE_TRAITS } from "./inputs";
 
@@ -21,6 +22,9 @@ export const setCharacter = defineTool({
 		...VOICE_TRAITS,
 	}),
 	output: z.string(),
+	icon: User,
+	label: ({ name }) =>
+		name ? `Setting the character ${name}` : "Setting a character",
 	execute: async ({ name, ...patch }, ctx) => {
 		const settled = ctx.setCharacter(name, patch);
 

@@ -2,6 +2,7 @@ import dedent from "dedent";
 import { z } from "zod";
 import { spokenLanguage } from "@/lib/script/prompt/language";
 import { outlinePrompt } from "@/lib/script/prompt/outline";
+import { Pencil } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 export const outlineStory = defineTool({
@@ -26,6 +27,8 @@ export const outlineStory = defineTool({
 			),
 	}),
 	output: z.string(),
+	icon: Pencil,
+	label: "Outlining the story",
 	execute: async ({ brief }, ctx) => {
 		const language = spokenLanguage(
 			ctx.readMetadata(),

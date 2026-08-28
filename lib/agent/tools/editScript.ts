@@ -4,6 +4,7 @@ import { CANVAS_ELEMENT_TYPES, DURATION_OPTIONS } from "@/lib/canvas/types";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
+import { Pencil } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 const ELEMENT_TYPES = [...CANVAS_ELEMENT_TYPES].join(", ");
@@ -53,6 +54,9 @@ export const editScript = defineTool({
 			.describe("Operations to apply, in order."),
 	}),
 	output: z.string(),
+	icon: Pencil,
+	label: ({ ops }) =>
+		`Editing the script (${ops?.length ?? 0} change${ops?.length === 1 ? "" : "s"})`,
 	execute: async ({ ops }, ctx) => {
 		const { applied, failures } = ctx.editScript(ops);
 		if (failures.length === 0) {
