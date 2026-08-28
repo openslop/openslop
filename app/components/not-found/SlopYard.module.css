@@ -1,0 +1,67 @@
+.scene {
+	--px: 0;
+	--py: 0;
+}
+
+.layer {
+	transform: translate3d(
+		calc(var(--px) * var(--depth) * 1px),
+		calc(var(--py) * var(--depth) * 1px),
+		0
+	);
+	transition: transform var(--duration-fast) var(--ease-casual);
+}
+
+.spin {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: slopSpin 9s linear infinite;
+}
+
+.blink {
+	animation: slopBlink 2.4s steps(1, end) infinite;
+}
+
+.scan {
+	transform-box: fill-box;
+	animation: slopScan 3.6s var(--ease-casual) infinite alternate;
+}
+
+@keyframes slopSpin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes slopBlink {
+	0%,
+	55% {
+		opacity: 1;
+	}
+	56%,
+	100% {
+		opacity: 0.3;
+	}
+}
+
+@keyframes slopScan {
+	from {
+		transform: translateY(-8px);
+	}
+	to {
+		transform: translateY(52px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.layer {
+		transform: none;
+		transition: none;
+	}
+
+	.spin,
+	.blink,
+	.scan {
+		animation: none;
+	}
+}
