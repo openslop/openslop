@@ -153,9 +153,8 @@
 	--success-foreground: #fff;
 	--caution: var(--amber-500);
 	--caution-foreground: #fff;
-	--version-preview: var(--amber-100);
-	--version-preview-foreground: var(--amber-700);
-	--version-preview-link: var(--amber-800);
+	--caution-soft: var(--amber-500-a);
+	--caution-soft-foreground: var(--amber-700);
 	--border: var(--grey-100-a);
 	--input: var(--grey-30-a);
 	--ring: var(--blurple-500);
@@ -356,9 +355,8 @@
 	--color-success-foreground: var(--success-foreground);
 	--color-caution: var(--caution);
 	--color-caution-foreground: var(--caution-foreground);
-	--color-version-preview: var(--version-preview);
-	--color-version-preview-foreground: var(--version-preview-foreground);
-	--color-version-preview-link: var(--version-preview-link);
+	--color-caution-soft: var(--caution-soft);
+	--color-caution-soft-foreground: var(--caution-soft-foreground);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);

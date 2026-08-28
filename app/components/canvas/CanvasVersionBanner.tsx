@@ -19,7 +19,7 @@ function BannerAction({
 		<button
 			type="button"
 			onClick={onClick}
-			className="focus-ring rounded-md text-version-preview-link underline decoration-1 underline-offset-2 hover:decoration-2"
+			className="focus-ring rounded-md underline decoration-1 underline-offset-2 hover:decoration-2"
 		>
 			{children}
 		</button>
@@ -35,7 +35,7 @@ export function CanvasVersionBanner() {
 	return (
 		<div role="status">
 			{previewId && (
-				<div className="mx-2 mt-3 mb-2 flex items-center justify-center gap-2 rounded-md bg-version-preview px-3 py-1.5 text-center text-version-preview-foreground">
+				<div className="mx-2 mt-3 mb-2 flex items-center justify-center gap-2 rounded-md bg-caution-soft px-3 py-1.5 text-center text-caution-soft-foreground">
 					<History className="size-4 shrink-0" />
 					<p className="text-label leading-5 font-medium">
 						{version

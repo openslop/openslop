@@ -21,7 +21,7 @@ export interface AutosaverOptions {
 	projectId: string;
 	store: ProjectStore;
 	/**
-	 * Produces the content for the next save. Called only when a save runs, so
+	 * Produces the content for the next save. Called when the debounce fires, so
 	 * serializing stays off the per-keystroke path.
 	 */
 	read: () => ProjectContent;
@@ -38,6 +38,7 @@ export interface Autosaver {
 	markSaved: () => void;
 	/** Persist any pending edit, then hold every later save until {@link resume}. */
 	suspend: () => void;
+	/** Resume saving, with one save for whatever was dropped while suspended. */
 	resume: () => void;
 	onProjectSaved: (listener: (input: SaveProjectInput) => void) => () => void;
 }
@@ -66,14 +67,9 @@ export function createAutosaver({
 	let lastSaved: SaveProjectInput | null = null;
 	let suspended = false;
 
-	const save = async () => {
-		if (!store.getState().hydrated) {
-			console.error("Autosave aborted: store not hydrated", { projectId });
-			return;
-		}
+	const persist = async (input: SaveProjectInput) => {
+		if (isEqual(input, lastSaved)) return;
 		try {
-			const input = buildInput();
-			if (isEqual(input, lastSaved)) return;
 			await saveProject(projectId, input);
 			lastSaved = input;
 			onSaved();
@@ -84,10 +80,19 @@ export function createAutosaver({
 		}
 	};
 
+	/**
+	 * Reads the payload as the debounce fires, not as the save runs, so a save
+	 * queued behind a slow one still writes the state it was scheduled for.
+	 */
 	const schedule = debounce(() => {
 		if (suspended) return;
+		if (!store.getState().hydrated) {
+			console.error("Autosave aborted: store not hydrated", { projectId });
+			return;
+		}
+		const input = buildInput();
 		queue.clear();
-		void queue.add(save);
+		void queue.add(() => persist(input));
 	}, AUTOSAVE_DEBOUNCE_MS);
 
 	return {
@@ -104,6 +109,7 @@ export function createAutosaver({
 		},
 		resume: () => {
 			suspended = false;
+			schedule();
 		},
 		onProjectSaved: (listener) => {
 			savedListeners.add(listener);

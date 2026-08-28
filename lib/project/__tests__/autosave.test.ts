@@ -268,7 +268,22 @@ describe("createAutosaver", () => {
 		expect(saveProject).not.toHaveBeenCalled();
 
 		autosaver.resume();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(1);
+	});
+
+	it("stays quiet on resume when nothing was held", async () => {
+		hydrate();
+		const autosaver = build();
+		autosaver.markSaved();
+		edit();
 		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+		expect(saveProject).toHaveBeenCalledTimes(1);
+
+		autosaver.suspend();
+		autosaver.resume();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 
 		expect(saveProject).toHaveBeenCalledTimes(1);
@@ -285,6 +300,42 @@ describe("createAutosaver", () => {
 		await vi.advanceTimersByTimeAsync(0);
 
 		expect(saveProject).toHaveBeenCalledTimes(1);
+	});
+
+	it("saves the document as it stood when suspend was called", async () => {
+		hydrate();
+		let script = "live";
+		let release = () => {};
+		saveProject.mockImplementationOnce(
+			() => new Promise<void>((resolve) => (release = () => resolve())),
+		);
+		const autosaver = createAutosaver({
+			projectId,
+			store,
+			read: () => content(extractStoreSnapshot(store), script),
+			onSaved,
+			onError,
+		});
+		autosaver.markSaved();
+
+		edit();
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		// A second edit queues behind the in-flight save, then a preview swaps
+		// the script out from under it.
+		edit();
+		autosaver.schedule();
+		autosaver.suspend();
+		script = "an older version on screen";
+		release();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(2);
+		expect(saveProject).toHaveBeenLastCalledWith(
+			projectId,
+			expect.objectContaining({ script: "live" }),
+		);
 	});
 
 	it("reports every save to its subscribers until they unsubscribe", async () => {

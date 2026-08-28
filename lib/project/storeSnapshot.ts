@@ -1,22 +1,20 @@
 import { z } from "zod";
-import type { ProjectStore } from "./store";
+import type { ProjectPersisted, ProjectStore } from "./store";
 import { MetadataSchema } from "./types";
 
+/** A new field on `ProjectPersisted` will not compile until it is added here too. */
 const ProjectStoreSnapshotSchema = z.object({
 	metadata: z.preprocess((value) => value ?? {}, MetadataSchema),
 	referenceImages: z.array(z.string()).default([]),
-});
+}) satisfies z.ZodType<ProjectPersisted>;
 
-export type ProjectStoreSnapshot = z.infer<typeof ProjectStoreSnapshotSchema>;
+export type ProjectStoreSnapshot = ProjectPersisted;
 
 export function extractStoreSnapshot(
 	store: ProjectStore,
 ): ProjectStoreSnapshot {
 	const { metadata, referenceImages } = store.getState();
-	return {
-		metadata: structuredClone(metadata),
-		referenceImages: [...referenceImages],
-	};
+	return structuredClone({ metadata, referenceImages });
 }
 
 /**
@@ -32,16 +30,12 @@ export function applyStoreSnapshot(
 	snapshot: ProjectStoreSnapshot,
 ): void {
 	if (store.getState().hydrated) return;
-	replaceStoreSnapshot(store, snapshot);
-	store.getState().markHydrated();
+	store.setState({ ...snapshot, hydrated: true });
 }
 
 export function replaceStoreSnapshot(
 	store: ProjectStore,
 	snapshot: ProjectStoreSnapshot,
 ): void {
-	const state = store.getState();
-	state.reset();
-	state.updateMetadata(snapshot.metadata);
-	state.setReferenceImages(snapshot.referenceImages);
+	store.setState(snapshot);
 }
