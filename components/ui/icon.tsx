@@ -77,6 +77,7 @@ export const Image = icon("image");
 export const ImagePlus = icon("add-image");
 export const Italic = icon("italic");
 export const Layout = icon("layout");
+export const Lightbulb = icon("lightbulb");
 export const Loader2 = icon("spinner");
 export const Lock = icon("lock");
 export const LogOut = icon("log-out");
