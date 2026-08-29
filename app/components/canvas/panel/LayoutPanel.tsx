@@ -5,59 +5,23 @@ import {
 	ChevronsUpDown,
 	Circle,
 	Crosshair,
-	MonitorOff,
-	PanelRight,
-	PanelTop,
 } from "@/components/ui/icon";
-import {
-	MediaToggle,
-	type MediaToggleOption,
-} from "@/components/ui/media-toggle";
+import { MediaToggle } from "@/components/ui/media-toggle";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { BottomViewToggle } from "@/app/components/video/BottomViewToggle";
-import { usePlayerPosition } from "@/app/components/video/PlayerPositionContext";
+import { PlayerPlacementToggle } from "@/app/components/video/PlayerPlacementToggle";
 import { useViewMode } from "../ViewModeContext";
 import { PanelCard, PanelField } from "./PanelCard";
 
-type PlayerPositionValue = "top" | "right" | "hidden";
-
 export function LayoutPanel() {
-	const { position, visible, setPosition, setVisible, narrowViewport } =
-		usePlayerPosition();
 	const { hasCollapsed, expandAll, collapseAll } = useViewMode();
 	const { enabled, setEnabled } = useAutoScroll();
-
-	const positionValue: PlayerPositionValue = visible ? position : "hidden";
-	const onPositionChange = (value: PlayerPositionValue) => {
-		if (value === "hidden") {
-			setVisible(false);
-			return;
-		}
-		setPosition(value);
-		setVisible(true);
-	};
-
-	const positionOptions: MediaToggleOption<PlayerPositionValue>[] = [
-		{ value: "top", label: "Top", icon: PanelTop },
-		{
-			value: "right",
-			label: "Right",
-			icon: PanelRight,
-			disabled: narrowViewport,
-		},
-		{ value: "hidden", label: "Hidden", icon: MonitorOff },
-	];
 
 	return (
 		<>
 			<PanelCard title="View">
 				<PanelField label="Player position">
-					<MediaToggle
-						value={positionValue}
-						options={positionOptions}
-						onChange={onPositionChange}
-						ariaLabel="Player position"
-					/>
+					<PlayerPlacementToggle />
 				</PanelField>
 				<PanelField label="Bottom panel">
 					<BottomViewToggle />

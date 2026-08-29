@@ -13,12 +13,11 @@ import { BottomDock } from "./video/BottomDock";
 import { Storyboard } from "./video/storyboard/Storyboard";
 import { Timeline } from "./video/timeline/Timeline";
 import { useBottomView, type BottomView } from "./video/BottomViewContext";
-import { usePlayerPosition } from "./video/PlayerPositionContext";
+import { usePlayerPlacement } from "./video/PlayerPlacementContext";
 
 export default function PostPromptView() {
-	const { position, visible } = usePlayerPosition();
+	const { placement } = usePlayerPlacement();
 	const { view } = useBottomView();
-	const isTop = position === "top";
 
 	const bottomPanel: Record<BottomView, ReactNode> = {
 		timeline: <Timeline />,
@@ -40,7 +39,7 @@ export default function PostPromptView() {
 				<EditorSidebar />
 				<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
 					<div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
-						{visible && isTop && <TopPlayerPanel />}
+						{placement === "top" && <TopPlayerPanel />}
 
 						<div className="flex min-h-0 flex-1 overflow-hidden">
 							<div
@@ -53,7 +52,7 @@ export default function PostPromptView() {
 								</div>
 							</div>
 
-							{visible && !isTop && <SidePlayerPanel />}
+							{placement === "right" && <SidePlayerPanel />}
 						</div>
 
 						<BottomDock>{bottomPanel[view]}</BottomDock>

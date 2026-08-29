@@ -3,7 +3,7 @@
 import type { PlayerRef } from "@remotion/player";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import { usePlayerPosition } from "./PlayerPositionContext";
+import { usePlayerPlacement } from "./PlayerPlacementContext";
 import { startPlaybackAt } from "./startPlaybackAt";
 
 type PlayerControl = {
@@ -21,7 +21,7 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	// `registerPlayer` is the mounted player's ref callback, so this state is the
 	// only copy of the handle — nothing downstream mirrors it.
 	const [player, registerPlayer] = useState<PlayerRef | null>(null);
-	const { showPlayer } = usePlayerPosition();
+	const { showPlayer } = usePlayerPlacement();
 
 	const playFromFrame = useCallback(
 		(frame: number) => {
