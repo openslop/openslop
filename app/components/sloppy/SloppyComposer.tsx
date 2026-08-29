@@ -7,6 +7,7 @@ import {
 	CornerDownLeft,
 	Lightbulb,
 	SquareFilled,
+	X,
 } from "@/components/ui/icon";
 import { SelectMenu } from "@/components/ui/select-menu";
 import { cn } from "@/lib/utils";
@@ -76,6 +77,47 @@ function SuggestionButton({
 	);
 }
 
+/**
+ * Messages typed while a turn was running. Editing one pulls it back out of the
+ * queue and into the textarea, so a pending message is only ever text.
+ */
+function QueuedMessages({ onEdit }: { onEdit: (text: string) => void }) {
+	const { queued, dropQueued } = useSloppy();
+
+	if (queued.length === 0) return null;
+
+	return (
+		<ul aria-label="Queued messages" className="flex flex-col gap-1">
+			{queued.map(({ id, text }) => (
+				<li
+					key={id}
+					className="flex items-center gap-1 rounded-md bg-secondary px-2 py-1"
+				>
+					<button
+						type="button"
+						aria-label={`Edit queued message: ${text}`}
+						onClick={() => {
+							dropQueued(id);
+							onEdit(text);
+						}}
+						className="focus-ring min-w-0 flex-1 cursor-pointer truncate rounded-sm text-left text-label text-muted-foreground transition-colors hover:text-panel-fg"
+					>
+						{text}
+					</button>
+					<button
+						type="button"
+						aria-label={`Remove queued message: ${text}`}
+						onClick={() => dropQueued(id)}
+						className="focus-ring shrink-0 cursor-pointer rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-panel-fg"
+					>
+						<X className="h-3 w-3" aria-hidden="true" />
+					</button>
+				</li>
+			))}
+		</ul>
+	);
+}
+
 export function SloppyComposer() {
 	const { send, stop, loading } = useSloppy();
 	const { model, setModel, models } = useSloppyModel();
@@ -90,14 +132,20 @@ export function SloppyComposer() {
 	};
 
 	const submit = () => {
-		if (!hasText || loading) return;
+		if (!hasText) return;
 		const message = value;
 		setValue("");
 		send(message);
 	};
 
+	const edit = (text: string) => {
+		setValue(text);
+		textareaRef.current?.focus();
+	};
+
 	return (
 		<PanelCard>
+			<QueuedMessages onEdit={edit} />
 			<textarea
 				ref={textareaRef}
 				rows={2}
@@ -121,7 +169,7 @@ export function SloppyComposer() {
 					<ModelPicker model={model} onChange={setModel} options={models} />
 					<SuggestionButton
 						onPick={suggest}
-						disabled={loading || (hasText && !showsSuggestion)}
+						disabled={hasText && !showsSuggestion}
 					/>
 				</div>
 				{loading ? (

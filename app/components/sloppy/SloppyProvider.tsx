@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { nanoid } from "nanoid";
 import { useSlateStatic } from "slate-react";
 import {
 	DefaultChatTransport,
@@ -19,9 +20,14 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { toastError } from "@/lib/toastError";
 import { useSloppyModel } from "./SloppyModelProvider";
 
+type QueuedMessage = { id: string; text: string };
+
 type SloppyControl = {
 	send: (message: string) => void;
 	stop: () => void;
+	/** Typed mid-turn and waiting for its own turn, in the order they were sent. */
+	queued: QueuedMessage[];
+	dropQueued: (id: string) => void;
 	loading: boolean;
 	writingScript: boolean;
 };
@@ -75,6 +81,10 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	const turnModel = useRef<string>(undefined);
 	// Stopping should also cancel the tool call in flight
 	const turn = useRef<AbortController>(undefined);
+	const [queued, setQueued] = useState<QueuedMessage[]>([]);
+	// `sendMessage` only reaches "submitted" a microtask later, so a turn can be
+	// under way while the chat still reads as ready.
+	const dispatching = useRef(false);
 
 	const { messages, sendMessage, stop, status, addToolOutput } =
 		useChat<SloppyMessage>({
@@ -116,21 +126,58 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 		status === "streaming" ||
 		hasPendingToolCall(messages);
 	const writingScript = hasPendingToolCall(messages, SCRIPT_TOOLS);
+
+	const dispatch = useCallback(
+		(text: string) => {
+			dispatching.current = true;
+			turnModel.current = model;
+			turn.current = new AbortController();
+			void sendMessage({ text });
+		},
+		[sendMessage, model],
+	);
+
+	// The chat is the external system this synchronizes against: a queued
+	// message goes out once its predecessor's turn has fully settled. A failed
+	// turn leaves `status` on "error" and holds the queue there until the user
+	// sends something themselves. Between a tool result and the follow-up step
+	// the SDK sends for it the chat also reads as idle, so the same predicate
+	// that continues the loop keeps a queued message out of that gap.
+	useEffect(() => {
+		if (working || status !== "ready") {
+			dispatching.current = false;
+			return;
+		}
+		const next = queued[0];
+		if (!next || dispatching.current) return;
+		if (lastAssistantMessageIsCompleteWithToolCalls({ messages })) return;
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- shifting the queue is the synchronization, not a cascading render
+		setQueued((pending) => pending.slice(1));
+		dispatch(next.text);
+	}, [queued, working, status, messages, dispatch]);
+
 	const control = useMemo<SloppyControl>(
 		() => ({
 			send: (message) => {
-				turnModel.current = model;
-				turn.current = new AbortController();
-				void sendMessage({ text: message });
+				if (working || dispatching.current) {
+					setQueued((pending) => [...pending, { id: nanoid(), text: message }]);
+					return;
+				}
+				dispatch(message);
 			},
 			stop: () => {
 				turn.current?.abort();
 				void stop();
+				dispatching.current = false;
+				setQueued([]);
 			},
+			queued,
+			dropQueued: (id) =>
+				setQueued((pending) => pending.filter((message) => message.id !== id)),
 			loading: working,
 			writingScript,
 		}),
-		[sendMessage, stop, working, writingScript, model],
+		[dispatch, stop, working, writingScript, queued, setQueued],
 	);
 
 	// History sits in front of the chat's own turns rather than being written
