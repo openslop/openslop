@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { SlidersHorizontal } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";
 
@@ -18,6 +19,8 @@ export const setMetadata = defineTool({
 		})
 		.refine(notEmpty, named("setting")),
 	output: z.string(),
+	icon: SlidersHorizontal,
+	label: "Setting the project's settings",
 	execute: async ({ title, style }, ctx) => {
 		ctx.setMetadata({
 			...(title !== undefined && { title }),

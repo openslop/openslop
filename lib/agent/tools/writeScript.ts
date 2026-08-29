@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { Film } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 export const writeScript = defineTool({
@@ -23,6 +24,8 @@ export const writeScript = defineTool({
 			.describe("What the video is about, in a sentence or a few."),
 	}),
 	output: z.string(),
+	icon: Film,
+	label: "Writing a new script",
 	execute: async ({ brief }, ctx) => {
 		await ctx.writeScript(brief);
 		return "Wrote a new script onto the canvas. Read it to see what landed.";

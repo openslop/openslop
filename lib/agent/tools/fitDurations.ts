@@ -8,6 +8,7 @@ import {
 	type DurationFit,
 } from "@/lib/video/durationFit";
 import type { ElementLength } from "@/lib/video/elementLengths";
+import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 const sec = (seconds: number) => `${seconds.toFixed(1)}s`;
@@ -72,6 +73,8 @@ export const fitDurations = defineTool({
 		element_ids: z.array(z.string()).min(1).optional(),
 	}),
 	output: z.string(),
+	icon: Hourglass,
+	label: "Fitting clips to the dialogue",
 	execute: async ({ element_ids }, ctx) => {
 		const { scoped, unknown } = scopeTo(
 			ctx.measureElementLengths(),
