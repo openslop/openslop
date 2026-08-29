@@ -132,8 +132,8 @@ function LoadingRows() {
 }
 
 /**
- * Versions are read on open, and read here rather than in the body so no card
- * subscribes to versions it never shows.
+ * Versions are read on open, and the list that subscribes to them only mounts
+ * while the popover is open, so no card watches versions it never shows.
  */
 export function ElementHistoryPopover({
 	elementId,
@@ -144,6 +144,7 @@ export function ElementHistoryPopover({
 }) {
 	const loadHistory = useLoadElementHistory();
 	const [open, setOpen] = useState(false);
+	const close = () => setOpen(false);
 
 	return (
 		<Popover
@@ -165,17 +166,27 @@ export function ElementHistoryPopover({
 				aria-label="Generation history"
 				className="w-80 font-medium"
 			>
-				<ElementHistoryBody
-					elementId={elementId}
-					onRestore={onRestore}
-					onClose={() => setOpen(false)}
-				/>
+				<div className="flex items-center justify-between">
+					<span className="text-label font-semibold">Generation history</span>
+					<CloseButton onClick={close} />
+				</div>
+				<Separator className={RULE} />
+				<div
+					aria-live="polite"
+					className="-mx-1 flex max-h-80 flex-col overflow-y-auto overscroll-contain"
+				>
+					<ElementVersionList
+						elementId={elementId}
+						onRestore={onRestore}
+						onClose={close}
+					/>
+				</div>
 			</PopoverContent>
 		</Popover>
 	);
 }
 
-function ElementHistoryBody({
+function ElementVersionList({
 	elementId,
 	onRestore,
 	onClose,
@@ -184,8 +195,7 @@ function ElementHistoryBody({
 	onRestore: (version: ElementVersion) => void;
 	onClose: () => void;
 }) {
-	const { versions, loaded, failed, activeIndex } =
-		useElementHistory(elementId);
+	const { versions, status, activeIndex } = useElementHistory(elementId);
 	const queue = useGenerationQueue();
 	const history = useElementHistoryStore();
 
@@ -197,44 +207,36 @@ function ElementHistoryBody({
 		onClose();
 	};
 
+	if (status === "failed")
+		return (
+			<p className="flex items-center gap-1.5 px-2 py-1.5 text-label-xs text-destructive">
+				<AlertCircle className="h-3.5 w-3.5" />
+				Could not load history. Close and reopen to try again.
+			</p>
+		);
+
+	if (status === "loading") return <LoadingRows />;
+
+	if (versions.length === 0)
+		return (
+			<p className="px-2 py-1.5 text-label-xs text-muted-foreground">
+				No versions yet.
+			</p>
+		);
+
 	return (
-		<>
-			<div className="flex items-center justify-between">
-				<span className="text-label font-semibold">Generation history</span>
-				<CloseButton onClick={onClose} />
-			</div>
-			<Separator className={RULE} />
-			<div
-				aria-live="polite"
-				className="-mx-1 flex max-h-80 flex-col overflow-y-auto overscroll-contain"
-			>
-				{failed ? (
-					<p className="flex items-center gap-1.5 px-2 py-1.5 text-label-xs text-destructive">
-						<AlertCircle className="h-3.5 w-3.5" />
-						Could not load history. Close and reopen to try again.
-					</p>
-				) : !loaded ? (
-					<LoadingRows />
-				) : versions.length === 0 ? (
-					<p className="px-2 py-1.5 text-label-xs text-muted-foreground">
-						No versions yet.
-					</p>
-				) : (
-					<ul className="flex flex-col">
-						{versions
-							.map((version, index) => (
-								<ElementVersionRow
-									key={versionKey(version)}
-									version={version}
-									label={String(index + 1)}
-									active={index === activeIndex}
-									onRestore={() => restore(version)}
-								/>
-							))
-							.reverse()}
-					</ul>
-				)}
-			</div>
-		</>
+		<ul className="flex flex-col">
+			{versions
+				.map((version, index) => (
+					<ElementVersionRow
+						key={versionKey(version)}
+						version={version}
+						label={String(index + 1)}
+						active={index === activeIndex}
+						onRestore={() => restore(version)}
+					/>
+				))
+				.reverse()}
+		</ul>
 	);
 }
