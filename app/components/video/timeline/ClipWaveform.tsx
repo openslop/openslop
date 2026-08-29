@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadPeaks } from "@/lib/components/peaks";
+import { useNearViewport } from "@/lib/components/useNearViewport";
 import {
 	buildSoundwaveMask,
 	SOUNDWAVE_MASK_STYLE,
@@ -21,10 +22,11 @@ type Decode =
 	| { status: "ready"; peaks: number[] }
 	| { status: "failed" };
 
-function usePeaks(src: string): Decode {
+function usePeaks(src: string | null): Decode {
 	const [decode, setDecode] = useState<Decode>({ status: "loading" });
 
 	useEffect(() => {
+		if (!src) return;
 		let cancelled = false;
 		loadPeaks(src)
 			.then((peaks) => {
@@ -55,7 +57,8 @@ export function ClipWaveform({
 	width: number;
 	className?: string;
 }) {
-	const decode = usePeaks(src);
+	const { ref, near } = useNearViewport<HTMLDivElement>();
+	const decode = usePeaks(near ? src : null);
 	const sampleCount = clamp(
 		Math.round(width / SAMPLE_SPACING_PX / SAMPLE_QUANTUM) * SAMPLE_QUANTUM,
 		SAMPLE_RANGE.min,
@@ -76,10 +79,13 @@ export function ClipWaveform({
 	// A failed decode stops shimmering: the clip is there, its audio is not.
 	if (decode.status === "failed")
 		return (
-			<div className={cn("flex items-center", className)}>
+			<div ref={ref} className={cn("flex items-center", className)}>
 				<div className="h-px w-full bg-current opacity-40" />
 			</div>
 		);
-	if (!style) return <Skeleton className={cn("rounded-xs", className)} />;
-	return <div className={cn("bg-current", className)} style={style} />;
+	if (!style)
+		return <Skeleton ref={ref} className={cn("rounded-xs", className)} />;
+	return (
+		<div ref={ref} className={cn("bg-current", className)} style={style} />
+	);
 }

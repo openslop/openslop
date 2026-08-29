@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toastError } from "@/lib/toastError";
 import { clamp, cn } from "@/lib/utils";
 import { loadPeaks } from "./peaks";
+import { useNearViewport } from "./useNearViewport";
 import {
 	AUDIO_SAMPLE_COUNT,
 	buildSoundwaveMask,
@@ -57,6 +58,7 @@ export function Waveform({
 	const barsRef = useRef<HTMLDivElement>(null);
 	const progressRef = useRef<HTMLDivElement>(null);
 	const peaksRef = useRef<number[]>([]);
+	const { ref: trackRef, near } = useNearViewport<HTMLDivElement>();
 	const [peaksSettledFor, setPeaksSettledFor] = useState<string | null>(null);
 	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
 	const loading = peaksSettledFor !== src || audioSettledFor !== src;
@@ -81,6 +83,7 @@ export function Waveform({
 
 	useEffect(() => {
 		peaksRef.current = [];
+		if (!near) return;
 
 		let cancelled = false;
 		loadPeaks(src)
@@ -96,7 +99,7 @@ export function Waveform({
 		return () => {
 			cancelled = true;
 		};
-	}, [src, paint]);
+	}, [src, paint, near]);
 
 	useImperativeHandle(
 		ref,
@@ -138,6 +141,7 @@ export function Waveform({
 	return (
 		<>
 			<div
+				ref={trackRef}
 				className={cn("relative cursor-pointer", className)}
 				onClick={handleClick}
 			>
