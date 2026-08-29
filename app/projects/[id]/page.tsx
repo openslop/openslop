@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import ProjectEditor from "./ProjectEditor";
 
@@ -8,6 +9,9 @@ export default async function ProjectPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
+	// A malformed id makes Postgres throw on the cast; guid() matches every shape it accepts.
+	if (!z.guid().safeParse(id).success) notFound();
+
 	const supabase = await createClient();
 	// Safe to run concurrently: row access is enforced by RLS, not by this user read.
 	const [

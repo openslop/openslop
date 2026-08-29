@@ -11,7 +11,7 @@ import {
 	parseSearchParams,
 	type ParseResult,
 } from "./parse";
-import { badRequest } from "./response";
+import { notFound } from "./response";
 
 type AuthTier = typeof withApiAccess;
 
@@ -123,9 +123,10 @@ export async function pollJob(
 ) {
 	return withApiAccess("Job poll", async (user) => {
 		const { jobId } = await context.params;
-		if (!jobId) return badRequest("jobId is required");
+		// A malformed id makes Postgres throw on the cast; guid() matches every shape it accepts.
+		if (!z.guid().safeParse(jobId).success) return notFound();
 		const job = await getJob(jobId, user.id);
-		if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
+		if (!job) return notFound();
 		const view: JobPoll = {
 			jobId: job.id,
 			status: job.status,

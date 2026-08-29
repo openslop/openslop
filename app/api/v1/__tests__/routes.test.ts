@@ -92,6 +92,8 @@ function referenceImagesSuite(
 	});
 }
 
+const JOB_ID = "00000000-0000-0000-0000-000000000001";
+
 describe("API routes", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -268,14 +270,16 @@ describe("API routes", () => {
 		it("returns job status", async () => {
 			const { GET } = await import("@/app/api/v1/video/[jobId]/route");
 			mockGetJob.mockResolvedValue({
-				id: "j1",
+				id: JOB_ID,
 				status: "completed",
 				result: { id: "x", provider: "p", result: { video: "v.mp4" } },
 				error: null,
 			});
 
-			const req = makeRequest("/api/v1/video/j1", undefined, "GET");
-			const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
+			const req = makeRequest(`/api/v1/video/${JOB_ID}`, undefined, "GET");
+			const res = await GET(req, {
+				params: Promise.resolve({ jobId: JOB_ID }),
+			});
 			const json = await res.json();
 
 			expect(res.status).toBe(200);
@@ -287,8 +291,10 @@ describe("API routes", () => {
 			const { GET } = await import("@/app/api/v1/video/[jobId]/route");
 			mockGetJob.mockResolvedValue(null);
 
-			const req = makeRequest("/api/v1/video/j1", undefined, "GET");
-			const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
+			const req = makeRequest(`/api/v1/video/${JOB_ID}`, undefined, "GET");
+			const res = await GET(req, {
+				params: Promise.resolve({ jobId: JOB_ID }),
+			});
 			expect(res.status).toBe(404);
 		});
 
@@ -296,8 +302,10 @@ describe("API routes", () => {
 			const { GET } = await import("@/app/api/v1/video/[jobId]/route");
 			mockGetJob.mockRejectedValue(new Error("db error"));
 
-			const req = makeRequest("/api/v1/video/j1", undefined, "GET");
-			const res = await GET(req, { params: Promise.resolve({ jobId: "j1" }) });
+			const req = makeRequest(`/api/v1/video/${JOB_ID}`, undefined, "GET");
+			const res = await GET(req, {
+				params: Promise.resolve({ jobId: JOB_ID }),
+			});
 			expect(res.status).toBe(500);
 		});
 	});
