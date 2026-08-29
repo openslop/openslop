@@ -1,5 +1,5 @@
 /**
- * Starter prompts offered behind the composer's lightbulb. Each one must be
+ * Starter prompts offered by the composer's lightbulb. Each one must be
  * answerable by a tool in `lib/agent/tools/registry.ts`, and worded plainly:
  * under ~9 words, no product jargon.
  */
@@ -11,3 +11,8 @@ export const SUGGESTIONS = [
 	"End every third scene on a cliffhanger",
 	"Match the caption style to the mood",
 ];
+
+export function nextSuggestion(current: string): string {
+	const pool = SUGGESTIONS.filter((suggestion) => suggestion !== current);
+	return pool[Math.floor(Math.random() * pool.length)];
+}

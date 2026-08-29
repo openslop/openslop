@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
 	ChevronDown,
 	Codesandbox,
@@ -8,14 +8,13 @@ import {
 	Lightbulb,
 	SquareFilled,
 } from "@/components/ui/icon";
-import { ActionMenu } from "@/components/ui/action-menu";
 import { SelectMenu } from "@/components/ui/select-menu";
 import { cn } from "@/lib/utils";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
 import { useSloppyModel } from "./SloppyModelProvider";
 import { useSloppy } from "./SloppyProvider";
-import { SUGGESTIONS } from "./suggestions";
+import { nextSuggestion, SUGGESTIONS } from "./suggestions";
 
 const controlClassName =
 	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
@@ -56,33 +55,24 @@ function ModelPicker({
 	);
 }
 
-function SuggestionPicker({
+function SuggestionButton({
 	onPick,
 	disabled,
 }: {
-	onPick: (suggestion: string) => void;
+	onPick: () => void;
 	disabled: boolean;
 }) {
 	return (
-		<ActionMenu
-			side="top"
-			items={SUGGESTIONS.map((suggestion) => ({
-				key: suggestion,
-				label: suggestion,
-				onSelect: () => onPick(suggestion),
-			}))}
-			contentClassName="max-w-72"
+		<button
+			type="button"
+			aria-label="Suggest a prompt"
+			disabled={disabled}
+			onMouseDown={(event) => event.preventDefault()}
+			onClick={onPick}
+			className={controlClassName}
 		>
-			<button
-				type="button"
-				aria-label="Suggested prompts"
-				disabled={disabled}
-				onMouseDown={(event) => event.preventDefault()}
-				className={controlClassName}
-			>
-				<Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-			</button>
-		</ActionMenu>
+			<Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+		</button>
 	);
 }
 
@@ -90,7 +80,14 @@ export function SloppyComposer() {
 	const { send, stop, loading } = useSloppy();
 	const { model, setModel, models } = useSloppyModel();
 	const [value, setValue] = useState("");
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const hasText = value.trim().length > 0;
+	const showsSuggestion = SUGGESTIONS.includes(value);
+
+	const suggest = () => {
+		setValue(nextSuggestion(value));
+		textareaRef.current?.focus();
+	};
 
 	const submit = () => {
 		if (!hasText || loading) return;
@@ -102,6 +99,7 @@ export function SloppyComposer() {
 	return (
 		<PanelCard>
 			<textarea
+				ref={textareaRef}
 				rows={2}
 				name="message"
 				autoComplete="off"
@@ -121,7 +119,10 @@ export function SloppyComposer() {
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-center gap-1">
 					<ModelPicker model={model} onChange={setModel} options={models} />
-					<SuggestionPicker onPick={send} disabled={loading} />
+					<SuggestionButton
+						onPick={suggest}
+						disabled={loading || (hasText && !showsSuggestion)}
+					/>
 				</div>
 				{loading ? (
 					<ActionButton
