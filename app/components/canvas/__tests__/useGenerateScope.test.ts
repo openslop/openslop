@@ -62,12 +62,14 @@ const registry: ConnectorRegistry = {
 
 vi.mock("react", () => ({
 	useCallback: <T>(fn: T) => fn,
+	useMemo: <T>(fn: () => T) => fn(),
 }));
 
 let queue: GenerationQueue;
 
 vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 	useGenerationQueue: () => queue,
+	useQueueSelector: <T>(selector: (q: GenerationQueue) => T) => selector(queue),
 }));
 
 // The hook under test is about which elements get queued, so bind a real
@@ -108,14 +110,18 @@ function commitCurrent(element: CanvasContentElement) {
 }
 
 const { useGenerateAll } = await import("../hooks/useGenerateAll");
-const { useGenerateElements } = await import("../hooks/useGenerateElements");
+const { useGenerateScope } = await import("../hooks/useGenerateScope");
 
-function useGenerateAllFor(elements: CanvasContentElement[]) {
+function useScopeForAll(elements: CanvasContentElement[]) {
 	const children: Descendant[] = [wrapInScene(elements)];
 	const editor = { children } as unknown as Parameters<
 		typeof useGenerateAll
 	>[0];
-	useGenerateAll(editor).generateAll();
+	return useGenerateAll(editor);
+}
+
+function useGenerateAllFor(elements: CanvasContentElement[]) {
+	useScopeForAll(elements).generate();
 	return enqueuedIds();
 }
 
@@ -181,6 +187,37 @@ describe("useGenerateAll", () => {
 		expect(useGenerateAllFor(elements)).toEqual([]);
 	});
 
+	it("reports no pending work once every element is current", async () => {
+		const elements = [
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "narration", "hello"),
+		];
+		elements.forEach(commitCurrent);
+
+		expect(useScopeForAll(elements)).toMatchObject({
+			empty: false,
+			active: false,
+			pending: 0,
+			total: 2,
+		});
+	});
+
+	it("counts the elements still to generate", async () => {
+		const a = makeElement("a", "image", "sunset");
+		commitCurrent(a);
+
+		expect(
+			useScopeForAll([a, makeElement("b", "narration", "hello")]),
+		).toMatchObject({ pending: 1, total: 2 });
+	});
+
+	it("is empty when nothing in scope carries a prompt", async () => {
+		expect(useScopeForAll([makeElement("a", "image", "")])).toMatchObject({
+			empty: true,
+			total: 0,
+		});
+	});
+
 	it("does not include an uploaded image, which has no prompt", async () => {
 		const uploaded = makeElement("a", "image", "");
 		commitCurrent(uploaded);
@@ -201,7 +238,7 @@ describe("useGenerateAll", () => {
 	});
 });
 
-describe("useGenerateElements", () => {
+describe("useGenerateScope", () => {
 	const sceneOne = [
 		makeElement("a", "image", "sunset"),
 		makeElement("b", "narration", "hello"),
@@ -209,8 +246,15 @@ describe("useGenerateElements", () => {
 	const sceneTwo = [makeElement("c", "image", "a scene away")];
 
 	it("enqueues only the elements it is given", async () => {
-		useGenerateElements()(sceneOne);
+		useGenerateScope(sceneOne).generate();
 		expect(enqueuedIds()).toEqual(["a", "b"]);
+	});
+
+	it("regenerates a current scope on request, leaving sibling scenes alone", async () => {
+		[...sceneOne, ...sceneTwo].forEach(commitCurrent);
+
+		useGenerateScope(sceneTwo).regenerate();
+		expect(enqueuedIds()).toEqual(["c"]);
 	});
 
 	it("leaves out an element from another scene of the same document", async () => {
@@ -218,7 +262,7 @@ describe("useGenerateElements", () => {
 		expect(enqueuedIds()).toEqual(["a", "b", "c"]);
 
 		vi.clearAllMocks();
-		useGenerateElements()(sceneTwo);
+		useGenerateScope(sceneTwo).generate();
 		expect(enqueuedIds()).toEqual(["c"]);
 	});
 });

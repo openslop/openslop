@@ -1,15 +1,12 @@
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { Editor } from "slate";
 import { getContentElements } from "@/lib/canvas/scenes";
-import { useGenerateElements } from "./useGenerateElements";
+import { useGenerateScope, type GenerateScope } from "./useGenerateScope";
 
-export function useGenerateAll(editor: Editor) {
-	const generateElements = useGenerateElements();
-
-	const generateAll = useCallback(
-		() => generateElements(getContentElements(editor.children)),
-		[generateElements, editor],
+export function useGenerateAll(editor: Editor): GenerateScope {
+	const elements = useMemo(
+		() => getContentElements(editor.children),
+		[editor.children],
 	);
-
-	return { generateAll };
+	return useGenerateScope(elements);
 }
