@@ -1,6 +1,6 @@
 import { Editor, Transforms } from "slate";
 import { HistoryEditor } from "slate-history";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { deserializeWithScenes } from "./serialize";
 
 /**
@@ -10,9 +10,9 @@ import { deserializeWithScenes } from "./serialize";
 export function applyScriptToEditor(
 	editor: Editor,
 	script: string,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): void {
-	const scenes = deserializeWithScenes(script, connectors);
+	const scenes = deserializeWithScenes(script, projectModels);
 
 	const replaceChildren = () => {
 		Editor.withoutNormalizing(editor, () => {

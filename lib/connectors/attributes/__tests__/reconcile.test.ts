@@ -47,7 +47,15 @@ describe("reconcileAttributes", () => {
 		expect(delta).toEqual({});
 	});
 
-	it("never touches attrs outside both schemas (e.g. model/provider metadata)", () => {
+	it("leaves a kept key alone when its value is missing", () => {
+		const schema = AttributeSchema.from([
+			{ key: "volume", label: "Volume", default: "5" },
+		]);
+
+		expect(reconcileAttributes(schema, schema, {})).toEqual({});
+	});
+
+	it("never touches attrs outside both schemas (e.g. provider metadata)", () => {
 		const oldSchema = AttributeSchema.from([
 			{ key: "volume", label: "Volume", default: "5" },
 		]);
@@ -55,7 +63,6 @@ describe("reconcileAttributes", () => {
 
 		const delta = reconcileAttributes(oldSchema, newSchema, {
 			volume: "8",
-			model: "next-model",
 			provider: "openslop",
 			characters: "Red,Granny",
 		});

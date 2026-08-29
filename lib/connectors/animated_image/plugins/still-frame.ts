@@ -1,7 +1,6 @@
 import omit from "lodash/omit";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import {
-	DEFAULT_PROVIDER,
 	type AnimatedImageGenerateParams,
 	type AssetResult,
 	type ConnectorPlugin,
@@ -19,11 +18,13 @@ import {
 import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
-/**
- * Attributes that drive only the animation. `model` is among them: it names a
- * video model, which the still's image generation cannot use.
- */
-const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "model"] as const;
+/** Attributes of the animation, which the still's image generation has no use for. */
+const VIDEO_ONLY_KEYS = [
+	"videoPrompt",
+	"duration",
+	"model",
+	"provider",
+] as const;
 
 const STILL = "still";
 
@@ -37,14 +38,16 @@ export const stillElementId = (elementId: string) =>
 export function stillElement(
 	element: CanvasContentElement,
 ): CanvasContentElement {
+	const { stillModel, ...attributes } = element.generationAttributes ?? {};
 	return {
 		...element,
 		id: stillElementId(element.id),
 		type: "image",
 		generationAttributes: {
-			...omit(element.generationAttributes ?? {}, VIDEO_ONLY_KEYS),
-			// The element's own provider generates the video, not the still.
-			provider: DEFAULT_PROVIDER,
+			...omit(attributes, VIDEO_ONLY_KEYS),
+			// Each generation only ever sees a model its own connector understands,
+			// and each resolves its own provider from that.
+			...(stillModel && { model: stillModel }),
 		},
 	};
 }
@@ -93,7 +96,7 @@ export function createStillFramePlugin(): ConnectorPlugin<
 		name: "still-frame",
 		dependencies: (element) => [forStillOf(element)],
 		beforeGenerate(params, ctx) {
-			const { videoPrompt, ...rest } = params;
+			const { videoPrompt, stillModel: _stillModel, ...rest } = params;
 			if (!videoPrompt) {
 				throw new Error(
 					"animated_image element is missing required videoPrompt attribute",

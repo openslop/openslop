@@ -2,37 +2,13 @@ import { describe, expect, it } from "vitest";
 import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
 import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { IMAGE_MODELS } from "@/lib/connectors/image/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
-
-const connectors: ConnectorRegistry = {
-	llm: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	tts: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	image: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	animated_image: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	video: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	sfx: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	music: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-};
 
 describe("OSMLStreamParser", () => {
 	it("parses a single complete tag", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<image>a sunset</image>", connectors);
+		s.appendChunk("<image>a sunset</image>");
 		const nodes = s.getNodes() as ParsedElement[];
 
 		expect(nodes).toHaveLength(1);
@@ -42,10 +18,10 @@ describe("OSMLStreamParser", () => {
 
 	it("handles streaming chunks across tag boundaries", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<char", connectors);
-		s.appendChunk('acter name="Al', connectors);
-		s.appendChunk('ice">Hello', connectors);
-		s.appendChunk(" world</character>", connectors);
+		s.appendChunk("<char");
+		s.appendChunk('acter name="Al');
+		s.appendChunk('ice">Hello');
+		s.appendChunk(" world</character>");
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
@@ -57,8 +33,8 @@ describe("OSMLStreamParser", () => {
 	it("flushes plain text after buffer threshold", () => {
 		const s = new OSMLStreamParser();
 		// Need an initial node for text to append to
-		s.appendChunk("<narration>", connectors);
-		s.appendChunk("Some long narration text here", connectors);
+		s.appendChunk("<narration>");
+		s.appendChunk("Some long narration text here");
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
@@ -67,8 +43,8 @@ describe("OSMLStreamParser", () => {
 
 	it("decodes an entity split across chunk boundaries", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<narration>Rock &a", connectors);
-		s.appendChunk("mp; Roll forever</narration>", connectors);
+		s.appendChunk("<narration>Rock &a");
+		s.appendChunk("mp; Roll forever</narration>");
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(getElementText(nodes[0])).toContain("Rock & Roll forever");
@@ -76,7 +52,7 @@ describe("OSMLStreamParser", () => {
 
 	it("preserves raw tag name for unknown tags", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<unknowntag>content</unknowntag>", connectors);
+		s.appendChunk("<unknowntag>content</unknowntag>");
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
@@ -87,7 +63,6 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk(
 			"<metadata_style>Warm earth tones with watercolor style</metadata_style>",
-			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -102,7 +77,6 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk(
 			'<metadata_character name="Mia">Brown hair, green eyes</metadata_character>',
-			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -116,7 +90,6 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk(
 			'<metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>',
-			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -133,14 +106,10 @@ describe("OSMLStreamParser", () => {
 
 	it("parses mixed canvas and metadata tags", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk(
-			"<metadata_style>dark moody tones</metadata_style>",
-			connectors,
-		);
-		s.appendChunk("<narration>Once upon a time</narration>", connectors);
+		s.appendChunk("<metadata_style>dark moody tones</metadata_style>");
+		s.appendChunk("<narration>Once upon a time</narration>");
 		s.appendChunk(
 			'<metadata_character name="Bob">tall and thin</metadata_character>',
-			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -152,10 +121,7 @@ describe("OSMLStreamParser", () => {
 
 	it("parses attributes correctly", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk(
-			'<sound effect="thunder" volume="loud">boom</sound>',
-			connectors,
-		);
+		s.appendChunk('<sound effect="thunder" volume="loud">boom</sound>');
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
@@ -167,8 +133,8 @@ describe("OSMLStreamParser", () => {
 
 	it("backfills defaultAttributes for streamed canvas elements", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<sound>thunder</sound>", connectors);
-		s.appendChunk("<music>epic orchestral</music>", connectors);
+		s.appendChunk("<sound>thunder</sound>");
+		s.appendChunk("<music>epic orchestral</music>");
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(flatAttributes(nodes[0]).loops).toBe("1");
@@ -177,7 +143,7 @@ describe("OSMLStreamParser", () => {
 
 	it("preserves explicit id attribute as node.id for canvas elements", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk('<sound id="abc">thunder</sound>', connectors);
+		s.appendChunk('<sound id="abc">thunder</sound>');
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes[0].id).toBe("abc");
@@ -188,7 +154,6 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk(
 			'<animated_image videoPrompt="slow zoom in">a dark forest</animated_image>',
-			connectors,
 		);
 
 		const nodes = s.getNodes() as ParsedElement[];
@@ -198,24 +163,32 @@ describe("OSMLStreamParser", () => {
 		expect(getElementText(nodes[0])).toContain("a dark forest");
 	});
 
-	it("hydrates connector model and provider on streamed canvas elements", () => {
+	it("hydrates the schema's model on streamed canvas elements", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<image>a sunset</image>", connectors);
+		s.appendChunk("<image>a sunset</image>");
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(flatAttributes(nodes[0])).toMatchObject({
-			model: "m",
-			provider: "openslop",
+			model: IMAGE_MODELS.defaultModel,
 		});
 	});
 });
 
 describe("parseOSML", () => {
-	it("parses a complete OSML string in one shot", () => {
-		const nodes = parseOSML(
-			"<narration>Once upon a time</narration>",
-			connectors,
+	// A saved project is reloaded through here, so a clobbered model would be a
+	// model pick that never survives a reload.
+	it("keeps a model the OSML names over the schema default", () => {
+		const [node] = parseOSML(
+			'<animated_image model="Slop Video v2" stillModel="Slop Image v2">a sunset</animated_image>',
 		);
+		expect(flatAttributes(node)).toMatchObject({
+			model: "Slop Video v2",
+			stillModel: "Slop Image v2",
+		});
+	});
+
+	it("parses a complete OSML string in one shot", () => {
+		const nodes = parseOSML("<narration>Once upon a time</narration>");
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("narration");
 		expect(getElementText(nodes[0])).toContain("Once upon a time");

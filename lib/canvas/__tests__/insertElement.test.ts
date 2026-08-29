@@ -1,52 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
-vi.mock("@/lib/connectors/registry", () => ({
-	getDefaultConnector: () => ({
-		provider: "openslop",
-		config: {
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-		},
-	}),
-}));
-
 vi.mock("@/lib/connectors/factory", () => ({
 	resolveAttributeSchema: (type: string) => ({
 		defaultAttributes: type === "tts" ? { emotion: "neutral" } : {},
-		visibleAttributes: {},
 		keys: [],
 	}),
 }));
 
 import { insertElement } from "../insertElement";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
-
-const connectors: ConnectorRegistry = {
-	llm: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	tts: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	image: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	animated_image: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	video: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	sfx: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-	music: {
-		openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-	},
-};
 
 function makeEditor() {
 	const editor = createEditor();
@@ -70,7 +34,7 @@ describe("insertElement", () => {
 	it("inserts a node with correct type", () => {
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "narration", [0, 1], connectors);
+			insertElement(editor, "narration", [0, 1]);
 		});
 
 		const scene = editor.children[0] as {
@@ -85,7 +49,7 @@ describe("insertElement", () => {
 	it("applies default attributes from element config", () => {
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "narration", [0, 1], connectors);
+			insertElement(editor, "narration", [0, 1]);
 		});
 
 		const scene = editor.children[0] as {
@@ -96,10 +60,10 @@ describe("insertElement", () => {
 		expect(attrs.emotion).toBe("neutral");
 	});
 
-	it("hydrates connector config (model and provider)", () => {
+	it("hydrates the model a new element generates with", () => {
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "image", [0, 1], connectors);
+			insertElement(editor, "image", [0, 1]);
 		});
 
 		const scene = editor.children[0] as {
@@ -107,14 +71,28 @@ describe("insertElement", () => {
 		};
 		const inserted = scene.children[1];
 		const attrs = flatAttributes(inserted) as Record<string, string>;
-		expect(attrs.model).toBe("test-model");
-		expect(attrs.provider).toBe("openslop");
+		expect(attrs.model).toBe(MODEL_CATALOGS.image.defaultModel);
+	});
+
+	it("passes the project's configured model to the new element", () => {
+		const editor = makeEditor();
+		Editor.withoutNormalizing(editor, () => {
+			insertElement(editor, "image", [0, 1], {
+				projectModels: { image: "Slop Image v1" },
+			});
+		});
+
+		const scene = editor.children[0] as {
+			children: Array<Record<string, unknown>>;
+		};
+		const attrs = flatAttributes(scene.children[1]) as Record<string, string>;
+		expect(attrs.model).toBe("Slop Image v1");
 	});
 
 	it("element without defaultAttributes gets undefined customAttributes base", () => {
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "image", [0, 1], connectors);
+			insertElement(editor, "image", [0, 1]);
 		});
 
 		const scene = editor.children[0] as {
@@ -122,8 +100,7 @@ describe("insertElement", () => {
 		};
 		const inserted = scene.children[1];
 		const attrs = flatAttributes(inserted) as Record<string, string>;
-		expect(attrs.model).toBe("test-model");
-		expect(attrs.provider).toBe("openslop");
+		expect(attrs.model).toBe(MODEL_CATALOGS.image.defaultModel);
 		expect(attrs.emotion).toBeUndefined();
 	});
 });

@@ -19,6 +19,8 @@ export interface AttributeDef extends AttributeSpec {
 	key: string;
 	/** Value seeded into `customAttributes` when the element is created. */
 	default?: string;
+	/** Rendered on the element header rather than inside the settings popover. */
+	badge?: boolean;
 }
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
@@ -33,10 +35,20 @@ export class AttributeSchema {
 		return this.defs.map((def) => def.key);
 	}
 
-	/** Shape consumed by `AttributeBadge`/`ElementSettings`. */
-	get visibleAttributes(): Record<string, AttributeSpec> {
+	/** The attributes shown on the element header, in def order. */
+	get badgeAttributes(): Record<string, AttributeSpec> {
+		return this.specs(true);
+	}
+
+	/** The attributes shown in the settings popover, in def order. */
+	get settingsAttributes(): Record<string, AttributeSpec> {
+		return this.specs(false);
+	}
+
+	private specs(badge: boolean): Record<string, AttributeSpec> {
 		const out: Record<string, AttributeSpec> = {};
 		for (const def of this.defs) {
+			if ((def.badge ?? false) !== badge) continue;
 			out[def.key] = {
 				label: def.label,
 				icon: def.icon,

@@ -8,8 +8,6 @@ const BUNDLE_URL = `/assets/image/openslop/${TEST_ID}`;
 const IMAGE_URL = `${BUNDLE_URL}/output.png`;
 
 const config = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 	apiKey: "",
 };

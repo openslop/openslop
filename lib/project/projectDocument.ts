@@ -1,6 +1,5 @@
 import type { Editor } from "slate";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { applyScriptToEditor } from "./applyScript";
@@ -30,12 +29,10 @@ export function createProjectDocument({
 	editor,
 	store,
 	queue,
-	connectors,
 }: {
 	editor: Editor;
 	store: ProjectStore;
 	queue: GenerationQueue;
-	connectors: ConnectorRegistry;
 }): ProjectDocument {
 	return {
 		read: () => ({
@@ -45,7 +42,11 @@ export function createProjectDocument({
 		}),
 
 		write: (content) => {
-			applyScriptToEditor(editor, content.script, connectors);
+			applyScriptToEditor(
+				editor,
+				content.script,
+				store.getState().metadata.connectorModels,
+			);
 			replaceStoreSnapshot(store, content.store);
 			queue.replaceSnapshots(content.generation);
 		},

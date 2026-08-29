@@ -5,9 +5,9 @@ import { bodySchema, createApiRouteHandler } from "@/lib/api/route-handler";
 import { optionalReferenceImages } from "@/lib/api/request-schema-fields";
 import { createSSEStreamResponse } from "@/lib/api/sse";
 import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
-import { LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
+import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 
-const schema = bodySchema(LLM_MODELS, {
+const schema = bodySchema(OPENSLOP_LLM_MODELS, {
 	systemPrompt: z.string().optional(),
 	thinkingLevel: z.enum(THINKING_LEVELS).optional(),
 	maxTokens: z.number().optional(),

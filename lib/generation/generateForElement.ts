@@ -1,4 +1,5 @@
 import { createConnector } from "@/lib/connectors/factory";
+import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "./inputs";
 import type { NodeId } from "./graph";
@@ -17,7 +18,7 @@ export async function generateForElement(
 	return connector.generate(
 		{
 			prompt: inputs.prompt,
-			model: job.config.defaultModel,
+			model: MODEL_CATALOGS[job.connectorType].defaultModel,
 			...inputs.attributes,
 		},
 		{ elementId: job.elementId, dependencies, state: job.state },

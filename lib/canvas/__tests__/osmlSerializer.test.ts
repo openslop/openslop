@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { Node } from "slate";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import {
 	getElementBodyText,
 	getElementText,
@@ -172,16 +171,11 @@ describe("getElementBodyText", () => {
 
 describe("serialize round trip", () => {
 	const reload = (scene: SceneElement): SceneElement =>
-		wrap(
-			...(parseOSML(
-				serializeOSML([scene]),
-				DEFAULT_CONNECTOR_REGISTRY,
-			) as CanvasContentElement[]),
-		);
+		wrap(...(parseOSML(serializeOSML([scene])) as CanvasContentElement[]));
 
 	it("does not grow the script each time it is saved and reloaded", () => {
 		let scene = wrap(
-			createCanvasNode("narration", DEFAULT_CONNECTOR_REGISTRY, {
+			createCanvasNode("narration", {
 				id: "e1",
 				text: "hello",
 			}),
@@ -194,11 +188,7 @@ describe("serialize round trip", () => {
 	});
 
 	it("keeps a reloaded empty element recognisably empty", () => {
-		const scene = reload(
-			wrap(
-				createCanvasNode("narration", DEFAULT_CONNECTOR_REGISTRY, { id: "e1" }),
-			),
-		);
+		const scene = reload(wrap(createCanvasNode("narration", { id: "e1" })));
 		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
 });

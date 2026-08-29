@@ -133,12 +133,7 @@ describe("resolveGraph", () => {
 		const still = anim.dependsOn.find(
 			(node) => node.id === stillElementId("anim"),
 		);
-		// The still generates an image, so it takes the image provider rather than
-		// the video one the element pins.
-		expect(still?.inputs.attributes).toEqual({
-			format: "png",
-			provider: "openslop",
-		});
+		expect(still?.inputs.attributes).toEqual({ format: "png" });
 		expect(anim.inputs.attributes).toMatchObject({
 			videoPrompt: "slow pan",
 			duration: "8",

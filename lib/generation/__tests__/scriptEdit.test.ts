@@ -5,6 +5,7 @@ import {
 	stillElementId,
 } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
+import type { SceneElement } from "@/lib/canvas/types";
 import { MetadataSchema } from "@/lib/project/types";
 import { splitAttributes } from "@/lib/video/elementAttributes";
 import { forElement, needsGeneration } from "../graph";
@@ -65,6 +66,12 @@ const animate = (
 		},
 	]);
 
+const animated = (ctx: ScriptEditContext) => {
+	const [scene] = ctx.editor.children as SceneElement[];
+	const [element] = scene.children;
+	return element;
+};
+
 const stillResult = (ctx: ScriptEditContext) =>
 	ctx.queue.getElementSnapshot(STILL_ID);
 
@@ -79,7 +86,7 @@ describe("applyScriptEdit", () => {
 	it("leaves the seeded still off the work the animation still needs", () => {
 		const ctx = context();
 		animate(ctx);
-		const node = buildNode(forElement({ ...image, type: "animated_image" }));
+		const node = buildNode(forElement(animated(ctx)));
 		const still = stillDependency(node);
 
 		expect(still && needsGeneration(still, ctx.queue)).toBe(false);

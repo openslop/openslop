@@ -7,7 +7,7 @@ import {
 import { insertElement } from "@/lib/canvas/insertElement";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { preservedAttributes } from "@/lib/canvas/preservedAttributes";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -18,19 +18,19 @@ export function applyRefineOp(
 	editor: Editor,
 	op: RefineOp,
 	anchorMap: Record<string, string>,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): RefineOpResult {
 	let result: RefineOpResult = OK;
 	Editor.withoutNormalizing(editor, () => {
 		switch (op.op) {
 			case "insert":
-				result = applyInsert(editor, op, anchorMap, connectors);
+				result = applyInsert(editor, op, anchorMap, projectModels);
 				break;
 			case "remove":
 				result = applyRemove(editor, op);
 				break;
 			case "set":
-				result = applySet(editor, op, connectors);
+				result = applySet(editor, op, projectModels);
 				break;
 		}
 	});
@@ -45,14 +45,14 @@ export function applyRefineOp(
 export function applyRefineOps(
 	editor: Editor,
 	ops: RefineOp[],
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): { applied: number; failures: string[] } {
 	const anchorMap: Record<string, string> = {};
 	const failures: string[] = [];
 	let applied = 0;
 
 	for (const op of ops) {
-		const result = applyRefineOp(editor, op, anchorMap, connectors);
+		const result = applyRefineOp(editor, op, anchorMap, projectModels);
 		if (result.ok) applied += 1;
 		else failures.push(result.reason);
 	}
@@ -81,7 +81,7 @@ function applyInsert(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): RefineOpResult {
 	const at = resolveInsertPath(editor, op, anchorMap);
 	if (!at) {
@@ -91,9 +91,10 @@ function applyInsert(
 		};
 	}
 
-	const id = insertElement(editor, op.type, at, connectors, {
+	const id = insertElement(editor, op.type, at, {
 		attrs: op.attrs,
 		text: op.text,
+		projectModels,
 	});
 
 	if (op.anchor_id) {
@@ -120,12 +121,13 @@ function replaceNodeType(
 	id: string,
 	entry: NodeEntry,
 	type: SetType,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): NodeEntry | null {
 	const [element, path] = entry;
-	const replacement = createCanvasNode(type, connectors, {
+	const replacement = createCanvasNode(type, {
 		id,
 		attrs: preservedAttributes(element, type),
+		projectModels,
 	});
 	Transforms.setNodes(
 		editor,
@@ -142,14 +144,14 @@ function replaceNodeType(
 function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): RefineOpResult {
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 
 	const target =
 		op.type && op.type !== entry[0].type
-			? replaceNodeType(editor, op.id, entry, op.type, connectors)
+			? replaceNodeType(editor, op.id, entry, op.type, projectModels)
 			: entry;
 	if (!target)
 		return { ok: false, reason: `set: could not retype element "${op.id}"` };

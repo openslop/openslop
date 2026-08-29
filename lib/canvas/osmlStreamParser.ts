@@ -1,8 +1,8 @@
 import type { ParsedElement } from "@/lib/canvas/types";
 import { isCanvasElementType } from "@/lib/canvas/guards";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { createCanvasNode } from "./createCanvasNode";
 import { unescapeXml } from "./xmlEscape";
 
@@ -21,16 +21,16 @@ export class OSMLStreamParser {
 	private buffer = "";
 	private nodes: ParsedElement[] = [];
 
-	appendChunk(chunk: string, connectors: ConnectorRegistry): boolean {
+	appendChunk(chunk: string, projectModels?: ConnectorModels): boolean {
 		this.buffer += chunk;
-		return this.parseBuffer(connectors);
+		return this.parseBuffer(projectModels);
 	}
 
 	getNodes(): ParsedElement[] {
 		return this.nodes;
 	}
 
-	private parseBuffer(connectors: ConnectorRegistry): boolean {
+	private parseBuffer(projectModels?: ConnectorModels): boolean {
 		TAG_PATTERN.lastIndex = 0;
 
 		if (this.shouldFlushBuffer()) {
@@ -53,7 +53,7 @@ export class OSMLStreamParser {
 			const openTag = match[1];
 			if (openTag) {
 				const { tag, attributes } = parseXmlTag(openTag);
-				this.appendNext(tag, attributes, connectors);
+				this.appendNext(tag, attributes, projectModels);
 			}
 			lastIndex = match.index + match[0].length;
 		}
@@ -73,11 +73,11 @@ export class OSMLStreamParser {
 	private appendNext(
 		type: string,
 		attributes: Record<string, string>,
-		connectors: ConnectorRegistry,
+		projectModels?: ConnectorModels,
 	): void {
 		if (isCanvasElementType(type)) {
 			const { id, ...attrs } = attributes;
-			this.nodes.push(createCanvasNode(type, connectors, { id, attrs }));
+			this.nodes.push(createCanvasNode(type, { id, attrs, projectModels }));
 			return;
 		}
 		// Non-canvas tags (metadata_*) pass through as generic nodes; the
@@ -106,9 +106,9 @@ export class OSMLStreamParser {
  */
 export function parseOSML(
 	osml: string,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): ParsedElement[] {
 	const parser = new OSMLStreamParser();
-	parser.appendChunk(`${osml}\n`, connectors);
+	parser.appendChunk(`${osml}\n`, projectModels);
 	return parser.getNodes();
 }

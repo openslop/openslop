@@ -83,6 +83,7 @@ export const createPublicRouteHandler = publicRouteHandler(parseBody);
 export const createPublicQueryRouteHandler =
 	publicRouteHandler(parseSearchParams);
 
+/** The models this API serves, mapped to the ids it forwards. */
 export function modelField(models: Record<string, string>) {
 	const names = Object.keys(models);
 	return z

@@ -11,8 +11,6 @@ class TestConnector extends BaseConnector {
 
 describe("BaseConnector", () => {
 	const config: ConnectorConfig = {
-		defaultModel: "test-model",
-		models: ["test-model"],
 		isDefault: true,
 		apiKey: "key",
 		plugins: [{ name: "p1" }],
@@ -25,8 +23,6 @@ describe("BaseConnector", () => {
 
 	it("defaults plugins to empty array", () => {
 		const c = new TestConnector({
-			defaultModel: "test-model",
-			models: ["test-model"],
 			isDefault: true,
 			apiKey: "key",
 		});
@@ -45,8 +41,6 @@ describe("BaseConnector", () => {
 			},
 		];
 		const c = new TestConnector({
-			defaultModel: "test-model",
-			models: ["test-model"],
 			isDefault: true,
 			plugins,
 		});
@@ -71,8 +65,6 @@ describe("BaseConnector", () => {
 			},
 		];
 		const c = new TestConnector({
-			defaultModel: "test-model",
-			models: ["test-model"],
 			isDefault: true,
 			plugins,
 		});

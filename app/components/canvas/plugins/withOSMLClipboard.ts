@@ -1,6 +1,6 @@
 import { Editor, Range, Transforms } from "slate";
 import type { CanvasEditor } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { splitScenes } from "@/lib/project/serialize";
@@ -19,7 +19,7 @@ const coversWholeElement = (editor: CanvasEditor, at: Range) =>
  * `withNodeId`.
  */
 export const withOSMLClipboard =
-	(connectors: ConnectorRegistry) =>
+	(projectModels: () => ConnectorModels) =>
 	(editor: CanvasEditor): CanvasEditor => {
 		const { setFragmentData, insertTextData } = editor;
 
@@ -33,7 +33,7 @@ export const withOSMLClipboard =
 
 		editor.insertTextData = (data) => {
 			const elements = splitScenes(data.getData("text/plain"))
-				.flatMap((sceneOsml) => parseOSML(sceneOsml, connectors))
+				.flatMap((sceneOsml) => parseOSML(sceneOsml, projectModels()))
 				.filter(isParsedContentElement)
 				.map(stripIds);
 			if (elements.length === 0) return insertTextData(data);
