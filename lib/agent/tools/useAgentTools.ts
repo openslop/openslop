@@ -2,14 +2,18 @@
 
 import { useCallback } from "react";
 import type { Editor } from "slate";
-import { clearEditor } from "@/lib/canvas/editorOps";
-import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
+import {
+	getElementBodyText,
+	serializeOSMLWithScenes,
+} from "@/lib/canvas/osmlSerializer";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import { measureElementLengths } from "@/lib/video/elementLengths";
 import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
+import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { createDefaultConnector } from "@/lib/connectors/registry";
 import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
@@ -36,6 +40,18 @@ export function useAgentTools(editor: Editor) {
 					),
 				referenceImages: () => store.getState().referenceImages,
 				avatarUrl: (name) => characterAvatarUrl(queue, name),
+				elementImage: (id) => {
+					const entry = findNodeById(editor, id);
+					if (!entry) return undefined;
+					const [element] = entry;
+					const { status, result } = queue.getElementSnapshot(id);
+					return {
+						type: element.type,
+						prompt: getElementBodyText(element),
+						status,
+						url: getPrimaryUrl(result, "image"),
+					};
+				},
 				generateText: async (prompt, options) => {
 					const llm = createDefaultConnector(connectorConfig, "llm");
 					const { text } = await llm.generate({ prompt, ...options });

@@ -1,3 +1,5 @@
+import type { CanvasElementType } from "@/lib/canvas/types";
+import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementLength } from "@/lib/video/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type {
@@ -6,6 +8,14 @@ import type {
 	MetadataCharacter,
 } from "@/lib/project/types";
 
+/** An element's generated image and the prompt behind it, never the rest of the result. */
+export type ElementImage = {
+	type: CanvasElementType;
+	prompt: string;
+	status: GenerationStatus;
+	url: string | undefined;
+};
+
 /** What a tool can do to the canvas, never the parts it is built from. */
 export type AgentToolContext = {
 	readScript: () => string;
@@ -13,6 +23,7 @@ export type AgentToolContext = {
 	measureElementLengths: () => ElementLength[];
 	referenceImages: () => string[];
 	avatarUrl: (name: string) => string | undefined;
+	elementImage: (id: string) => ElementImage | undefined;
 	/** One focused LLM call, for tools whose whole job is a generation. */
 	generateText: (
 		prompt: string,

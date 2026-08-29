@@ -18,6 +18,9 @@ const ROLE = dedent`
     first with view_reference_images, otherwise an uploaded character avatar with
     view_avatar. Look, then persist it with set_metadata in the same turn. An art style
     that is already set stands.
+  - Look at an image element's result with view_image before saying anything about how it
+    turned out. It hands back the image and the prompt that made it, so judge one against
+    the other; only image elements have a result you can see.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it. After two failed attempts at the same change, stop and tell
     the user plainly what went wrong.

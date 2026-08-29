@@ -16,6 +16,7 @@ import { setMetadata } from "./setMetadata";
 import { setNarrator } from "./setNarrator";
 import { setVideoSettings } from "./setVideoSettings";
 import { viewAvatar } from "./viewAvatar";
+import { viewImage } from "./viewImage";
 import { viewReferenceImages } from "./viewReferenceImages";
 import { writeScript } from "./writeScript";
 
@@ -30,6 +31,7 @@ const TOOLS = {
 	set_language: setLanguage,
 	view_reference_images: viewReferenceImages,
 	view_avatar: viewAvatar,
+	view_image: viewImage,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
 	measure_element_lengths: measureElementLengths,
