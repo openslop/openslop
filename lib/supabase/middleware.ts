@@ -30,7 +30,11 @@ export async function updateSession(request: NextRequest) {
 	} = await supabase.auth.getUser();
 
 	if (user && AUTH_ROUTES.includes(request.nextUrl.pathname)) {
-		return NextResponse.redirect(new URL("/", request.url));
+		// Carry over whatever `getUser` rotated, or the redirect signs the user out.
+		const redirect = NextResponse.redirect(new URL("/", request.url));
+		for (const cookie of supabaseResponse.cookies.getAll())
+			redirect.cookies.set(cookie);
+		return redirect;
 	}
 
 	return supabaseResponse;
