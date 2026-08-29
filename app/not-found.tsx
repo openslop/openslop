@@ -37,7 +37,8 @@ export default function NotFound() {
 						The page you asked for was generated, and it came out wrong.
 					</h1>
 					<p className="text-body text-muted-foreground text-balance">
-						The model was very confident about this one.
+						The model was very confident about this one. It may never have
+						existed, or it may belong to someone else.
 					</p>
 				</div>
 
