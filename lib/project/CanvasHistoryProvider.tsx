@@ -1,21 +1,15 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
-import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import type { ReactNode } from "react";
+import { createStoreContext } from "@/lib/store/createStoreContext";
 import type { CanvasHistory, CanvasHistoryState } from "./canvasHistory";
 
-const [CanvasHistoryContext, useCanvasHistory] =
-	createRequiredContext<CanvasHistory>("CanvasHistoryProvider");
+const [CanvasHistoryContext, useCanvasHistory, useCanvasHistorySelector] =
+	createStoreContext<CanvasHistory>("CanvasHistoryProvider");
 export { useCanvasHistory };
 
-export function useCanvasHistoryState(): CanvasHistoryState {
-	const history = useCanvasHistory();
-	return useSyncExternalStore(
-		history.subscribe,
-		history.getState,
-		history.getState,
-	);
-}
+export const useCanvasHistoryState = (): CanvasHistoryState =>
+	useCanvasHistorySelector((history) => history.getState());
 
 export function CanvasHistoryProvider({
 	history,

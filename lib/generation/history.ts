@@ -1,3 +1,4 @@
+import { createEmitter } from "@/lib/store/emitter";
 import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 
@@ -16,22 +17,13 @@ export type ElementHistoryStatus = "loading" | "ready" | "failed";
 
 export class ElementHistory {
 	private readonly log = new VersionLog();
-	private readonly listeners = new Set<() => void>();
+	private readonly emitter = createEmitter();
 	private loading = new Map<string, Promise<void>>();
 	private failed = new Set<string>();
 
 	constructor(private readonly storage: ElementVersionStorage = SESSION_ONLY) {}
 
-	subscribe = (listener: () => void) => {
-		this.listeners.add(listener);
-		return () => {
-			this.listeners.delete(listener);
-		};
-	};
-
-	private notify() {
-		for (const listener of this.listeners) listener();
-	}
+	subscribe = this.emitter.subscribe;
 
 	get = (elementId: string): readonly ElementVersion[] =>
 		this.log.get(elementId);
@@ -57,7 +49,7 @@ export class ElementHistory {
 			})
 			.finally(() => {
 				this.loading.delete(elementId);
-				this.notify();
+				this.emitter.notify();
 			});
 		this.loading.set(elementId, load);
 		return load;
@@ -65,6 +57,6 @@ export class ElementHistory {
 
 	record = (version: CommittedVersion) => {
 		this.storage.write(this.log.record(version, new Date().toISOString()));
-		this.notify();
+		this.emitter.notify();
 	};
 }

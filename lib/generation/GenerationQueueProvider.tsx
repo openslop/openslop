@@ -1,29 +1,13 @@
 "use client";
 
-import {
-	useEffect,
-	useState,
-	useSyncExternalStore,
-	type ReactNode,
-} from "react";
-import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import { useEffect, useState, type ReactNode } from "react";
+import { createStoreContext } from "@/lib/store/createStoreContext";
 import { GenerationQueue } from "./queue";
 import type { ElementSnapshot } from "./snapshots";
 
-const [GenerationQueueContext, useGenerationQueue] =
-	createRequiredContext<GenerationQueue>("GenerationQueueContext");
-export { useGenerationQueue };
-
-export function useQueueSelector<T>(
-	selector: (queue: GenerationQueue) => T,
-): T {
-	const queue = useGenerationQueue();
-	return useSyncExternalStore(
-		queue.subscribe,
-		() => selector(queue),
-		() => selector(queue),
-	);
-}
+const [GenerationQueueContext, useGenerationQueue, useQueueSelector] =
+	createStoreContext<GenerationQueue>("GenerationQueueContext");
+export { useGenerationQueue, useQueueSelector };
 
 export function GenerationQueueProvider({
 	initialState,

@@ -1,29 +1,16 @@
 "use client";
 
-import {
-	useEffect,
-	useState,
-	useSyncExternalStore,
-	type ReactNode,
-} from "react";
-import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import { useEffect, useState, type ReactNode } from "react";
+import { createStoreContext } from "@/lib/store/createStoreContext";
 import { ElementHistory, type ElementVersionStorage } from "./history";
 import { useGenerationQueue } from "./GenerationQueueProvider";
 
-const [ElementHistoryContext, useElementHistoryStore] =
-	createRequiredContext<ElementHistory>("ElementHistoryContext");
-export { useElementHistoryStore };
-
-export function useElementHistorySelector<T>(
-	selector: (history: ElementHistory) => T,
-): T {
-	const history = useElementHistoryStore();
-	return useSyncExternalStore(
-		history.subscribe,
-		() => selector(history),
-		() => selector(history),
-	);
-}
+const [
+	ElementHistoryContext,
+	useElementHistoryStore,
+	useElementHistorySelector,
+] = createStoreContext<ElementHistory>("ElementHistoryContext");
+export { useElementHistoryStore, useElementHistorySelector };
 
 export function ElementHistoryProvider({
 	storage,
