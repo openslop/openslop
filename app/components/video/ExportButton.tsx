@@ -65,7 +65,7 @@ export function ExportButton() {
 					<span className="text-label font-semibold">Export</span>
 					<CloseButton onClick={() => setOpen(false)} />
 				</div>
-				<Separator className="-mx-3 my-2 data-[orientation=horizontal]:w-[calc(100%+1.5rem)]" />
+				<Separator bleed />
 
 				{(state.status === "invoking" || state.status === "rendering") && (
 					<div className="animate-fadeInUp flex flex-col gap-2">
@@ -125,7 +125,7 @@ export function ExportButton() {
 								{state.message}
 							</p>
 						)}
-						<Separator className="-mx-3 my-2 data-[orientation=horizontal]:w-[calc(100%+1.5rem)]" />
+						<Separator bleed />
 						<Button
 							type="button"
 							variant="generate"

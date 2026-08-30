@@ -1,3 +1,7 @@
+import {
+	PINNED_PANEL_KEYS,
+	RAIL_PANEL_KEYS,
+} from "@/app/components/canvas/panel/panelKeys";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const SCENES = [3, 2, 4];
@@ -134,13 +138,14 @@ export default function Loading() {
 				<nav className="mr-2 flex w-14 shrink-0 flex-col items-center gap-1 pt-4 pr-0.5 pl-1 lg:w-[72px]">
 					<RailItemSkeleton />
 					<div className="my-1 h-px w-full bg-border" />
-					<RailItemSkeleton />
-					<RailItemSkeleton />
-					<RailItemSkeleton />
-					<RailItemSkeleton />
+					{RAIL_PANEL_KEYS.map((key) => (
+						<RailItemSkeleton key={key} />
+					))}
 					<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
 						<div className="my-1 h-px w-full bg-border" />
-						<RailItemSkeleton />
+						{PINNED_PANEL_KEYS.map((key) => (
+							<RailItemSkeleton key={key} />
+						))}
 					</div>
 				</nav>
 

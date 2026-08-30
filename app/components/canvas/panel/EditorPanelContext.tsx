@@ -3,13 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useScriptInitial } from "@/lib/script/ScriptProvider";
-
-export type PanelKey =
-	| "layout"
-	| "captions"
-	| "properties"
-	| "history"
-	| "sloppy";
+import type { PanelKey } from "./panelKeys";
 
 type EditorPanelValue = {
 	active: PanelKey | null;

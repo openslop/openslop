@@ -14,11 +14,11 @@ import {
 	TextBox,
 	TextBoxFill,
 } from "@/components/ui/icon";
-import partition from "lodash/partition";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/SloppyComposer";
 import { SloppyPanel } from "@/app/components/sloppy/SloppyPanel";
-import { useEditorPanel, type PanelKey } from "./EditorPanelContext";
+import { useEditorPanel } from "./EditorPanelContext";
+import { PINNED_PANEL_KEYS, RAIL_PANEL_KEYS, type PanelKey } from "./panelKeys";
 import { CanvasHistoryPanel } from "./CanvasHistoryPanel";
 import { CaptionsPanel } from "./CaptionsPanel";
 import { LayoutPanel } from "./LayoutPanel";
@@ -29,7 +29,6 @@ type PanelEntry = {
 	icon: IconComponent;
 	iconActive: IconComponent;
 	Panel: () => React.ReactNode;
-	pinned?: boolean;
 	Footer?: () => React.ReactNode;
 };
 
@@ -63,15 +62,9 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		icon: Robot,
 		iconActive: RobotFill,
 		Panel: SloppyPanel,
-		pinned: true,
 		Footer: SloppyComposer,
 	},
 };
-
-const [PINNED_KEYS, RAIL_KEYS] = partition(
-	Object.keys(PANELS) as PanelKey[],
-	(key) => PANELS[key].pinned,
-);
 
 function RailItem({
 	icon: Icon,
@@ -142,13 +135,13 @@ function EditorSidebarComponent() {
 			>
 				<RailItem icon={Home} label="Home" href="/" />
 				<div className="my-1 h-px w-full bg-border" />
-				{RAIL_KEYS.map((key) => (
+				{RAIL_PANEL_KEYS.map((key) => (
 					<PanelRailItem key={key} panelKey={key} />
 				))}
 
 				<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
 					<div className="my-1 h-px w-full bg-border" />
-					{PINNED_KEYS.map((key) => (
+					{PINNED_PANEL_KEYS.map((key) => (
 						<PanelRailItem key={key} panelKey={key} />
 					))}
 				</div>
