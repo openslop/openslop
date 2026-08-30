@@ -18,8 +18,6 @@ vi.mock("../generateForElement", () => ({
 }));
 
 const config: ConnectorConfig = {
-	defaultModel: "m",
-	models: ["m"],
 	isDefault: true,
 };
 

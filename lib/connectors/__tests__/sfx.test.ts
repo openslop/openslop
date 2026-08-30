@@ -7,8 +7,6 @@ const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/sfx/openslop/${TEST_ID}/output.mp3`;
 
 const config = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 	apiKey: "",
 };

@@ -3,8 +3,8 @@ import { Node } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { resolveElementSchema } from "@/lib/canvas/elementConnector";
+import { elementSchema } from "@/lib/canvas/elementConnector";
+import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/textDirection";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
@@ -17,7 +17,6 @@ import { HeaderIconButton } from "./HeaderIconButton";
 import { ElementGenerationProvider } from "./ElementGenerationContext";
 import { AnimateButton } from "./AnimateButton";
 import { ElementUploadButton } from "./ElementUploadButton";
-import { ModelBadge } from "./ModelBadge";
 import {
 	Popover,
 	PopoverContent,
@@ -26,10 +25,32 @@ import {
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
 
-function ElementSettings({ element }: { element: CanvasContentElement }) {
-	const { connectorConfig } = useConfig();
-	const schema = resolveElementSchema(element, connectorConfig);
-	const entries = Object.entries(schema.visibleAttributes);
+function ElementAttributeBadges({
+	element,
+	specs,
+}: {
+	element: CanvasContentElement;
+	specs: Record<string, AttributeSpec>;
+}) {
+	return Object.entries(specs).map(([key, spec]) => (
+		<AttributeBadge
+			key={key}
+			element={element}
+			attrKey={key}
+			spec={spec}
+			className="text-label-xs"
+		/>
+	));
+}
+
+function ElementSettings({
+	element,
+	specs,
+}: {
+	element: CanvasContentElement;
+	specs: Record<string, AttributeSpec>;
+}) {
+	const entries = Object.entries(specs);
 	if (entries.length === 0) return null;
 	return (
 		<Popover>
@@ -72,6 +93,7 @@ export function ElementContainer({
 	element,
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
+	const schema = elementSchema(element);
 	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
 	const { dir, nodeAttributes } = splitTextDirection(attributes);
 
@@ -98,8 +120,14 @@ export function ElementContainer({
 									</span>
 								</span>
 								<ElementCharacters element={element} />
-								<ModelBadge element={element} />
-								<ElementSettings element={element} />
+								<ElementAttributeBadges
+									element={element}
+									specs={schema.badgeAttributes}
+								/>
+								<ElementSettings
+									element={element}
+									specs={schema.settingsAttributes}
+								/>
 								<ElementHistoryButton element={element} />
 							</div>
 							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto">

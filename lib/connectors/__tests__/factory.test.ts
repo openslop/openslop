@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createConnector, resolveAttributeSchema } from "../factory";
-import type { ConnectorType } from "../types";
+import { MODEL_CATALOGS } from "../models";
+import { DEFAULT_CONNECTOR_REGISTRY, getDefaultConnector } from "../registry";
+import { ASSET_CONNECTOR_TYPES, type ConnectorType } from "../types";
 
 const stubConfig = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 	apiKey: "test-key",
 };
@@ -42,6 +42,7 @@ describe("resolveAttributeSchema", () => {
 	it("resolves the connector type's base schema, keyed by connector type not element type", () => {
 		// narration and character both resolve through "tts" and get the same schema.
 		expect(resolveAttributeSchema("tts", "openslop").keys).toEqual([
+			"model",
 			"emotion",
 			"speed",
 			"volume",
@@ -50,15 +51,35 @@ describe("resolveAttributeSchema", () => {
 
 	it("resolves distinct schemas for image vs animated_image", () => {
 		expect(resolveAttributeSchema("image", "openslop").keys).toEqual([
+			"model",
 			"referenceImagesOverride",
 			"motion",
 		]);
 		expect(resolveAttributeSchema("animated_image", "openslop").keys).toEqual([
+			"model",
+			"stillModel",
 			"referenceImagesOverride",
 			"videoPrompt",
 			"duration",
 			"motion",
 		]);
+	});
+
+	it("offers every asset connector's own catalog as a badge, defaulted", () => {
+		for (const type of ASSET_CONNECTOR_TYPES) {
+			const { provider } = getDefaultConnector(
+				DEFAULT_CONNECTOR_REGISTRY,
+				type,
+			);
+			const catalog = MODEL_CATALOGS[type];
+			const schema = resolveAttributeSchema(type, provider);
+
+			expect(schema.badgeAttributes.model?.edit).toEqual({
+				kind: "enum",
+				options: catalog.names,
+			});
+			expect(schema.defaultAttributes.model).toBe(catalog.defaultModel);
+		}
 	});
 
 	it("llm has no element-settings attributes, inherited empty from the base connector", () => {

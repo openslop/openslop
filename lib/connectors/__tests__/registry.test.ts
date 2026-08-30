@@ -8,8 +8,6 @@ import {
 
 function makeConfig(overrides?: Partial<ConnectorConfig>): ConnectorConfig {
 	return {
-		defaultModel: "m1",
-		models: ["m1"],
 		isDefault: false,
 		...overrides,
 	};
@@ -58,7 +56,6 @@ describe("getDefaultConnector", () => {
 
 		const result = getDefaultConnector(registry, "image");
 		expect(result.provider).toBe("solo");
-		expect(result.config.defaultModel).toBe("m1");
 	});
 
 	it("throws when no providers are configured for the type", () => {
@@ -70,13 +67,13 @@ describe("getDefaultConnector", () => {
 
 	it("returns the first default when multiple are marked default", () => {
 		const registry = makeRegistry({
-			first: makeConfig({ isDefault: true, defaultModel: "x" }),
-			second: makeConfig({ isDefault: true, defaultModel: "y" }),
+			first: makeConfig({ isDefault: true, apiKey: "first" }),
+			second: makeConfig({ isDefault: true, apiKey: "second" }),
 		});
 
 		const result = getDefaultConnector(registry, "image");
 		expect(result.provider).toBe("first");
-		expect(result.config.defaultModel).toBe("x");
+		expect(result.config.apiKey).toBe("first");
 	});
 });
 

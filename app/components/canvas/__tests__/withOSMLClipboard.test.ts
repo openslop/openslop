@@ -5,7 +5,6 @@ import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
 import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { content, scene, seedScene } from "./fixtures";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
@@ -31,9 +30,7 @@ function makeEditor(seed: SceneElement) {
 	base.setFragmentData = vi.fn();
 	base.insertTextData = insertTextData;
 
-	const editor: CanvasEditor = withOSMLClipboard(DEFAULT_CONNECTOR_REGISTRY)(
-		base,
-	);
+	const editor: CanvasEditor = withOSMLClipboard(() => ({}))(base);
 	seedScene(editor, seed);
 
 	return { editor, insertTextData };

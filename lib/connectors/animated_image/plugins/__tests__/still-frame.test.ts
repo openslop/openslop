@@ -13,10 +13,12 @@ import {
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createStillFramePlugin,
 	pictureNode,
+	stillElement,
 	stillElementId,
 	stillSnapshot,
 } from "../still-frame";
@@ -64,6 +66,22 @@ describe("still-frame plugin", () => {
 		});
 	});
 
+	it("keeps the still's model out of the video generation", async () => {
+		const params = await plugin.beforeGenerate?.(
+			{
+				prompt: "a dark forest",
+				videoPrompt: "slow zoom in",
+				stillModel: "Slop Image v1",
+			},
+			ctx(STILL_URL),
+		);
+
+		expect(params).toEqual({
+			prompt: "slow zoom in",
+			frameImages: [STILL_URL],
+		});
+	});
+
 	it("throws when videoPrompt is missing", () => {
 		expect(() =>
 			plugin.beforeGenerate?.({ prompt: "a dark forest" }, ctx(STILL_URL)),
@@ -90,7 +108,7 @@ describe("stillSnapshot", () => {
 	const animated = {
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		...splitAttributes({ videoPrompt: "slow pan" }),
 		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
 	};
 
@@ -153,7 +171,7 @@ describe("duplicated animation", () => {
 	const animated = (id: string) => ({
 		id,
 		type: "animated_image" as const,
-		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		...splitAttributes({ videoPrompt: "slow pan" }),
 		children: [
 			{ id: `${id}-t`, type: "animated_image" as const, text: "a forest" },
 		],
@@ -200,7 +218,7 @@ describe("uploaded still lifetime", () => {
 	const animated = (text: string, videoPrompt: string) => ({
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		...splitAttributes({ provider: "openslop", videoPrompt }),
+		...splitAttributes({ videoPrompt }),
 		children: [{ id: "t", type: "animated_image" as const, text }],
 	});
 
@@ -262,7 +280,7 @@ describe("pictureNode", () => {
 	) => ({
 		id: `el-${type}`,
 		type,
-		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		...splitAttributes({ videoPrompt: "slow pan" }),
 		children: [{ id: `el-${type}-t`, type, text: "a forest" }],
 	});
 
@@ -282,5 +300,37 @@ describe("pictureNode", () => {
 	it("is nothing for an element that makes no picture", () => {
 		expect(pictureFor("clip")).toBeNull();
 		expect(pictureFor("narration")).toBeNull();
+	});
+});
+
+describe("stillElement", () => {
+	const animated = (attrs: Record<string, string>) => ({
+		id: ELEMENT_ID,
+		type: "animated_image" as const,
+		...splitAttributes({
+			model: "Slop Video v1",
+			videoPrompt: "slow pan",
+			...attrs,
+		}),
+		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
+	});
+
+	const stillAttributes = (attrs: Record<string, string>) =>
+		stillElement(animated(attrs)).generationAttributes ?? {};
+
+	it("generates the still with the image model the element names", () => {
+		expect(stillAttributes({ stillModel: "Slop Image v1" })).toEqual({
+			model: "Slop Image v1",
+		});
+	});
+
+	it("falls back to the image catalog for an unknown still model", () => {
+		expect(stillAttributes({ stillModel: "Slop Video v1" })).toEqual({
+			model: MODEL_CATALOGS.image.defaultModel,
+		});
+	});
+
+	it("never hands the still a video model", () => {
+		expect(stillAttributes({})).toEqual({});
 	});
 });

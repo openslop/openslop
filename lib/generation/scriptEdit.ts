@@ -42,7 +42,11 @@ export function applyScriptEdit(
 	ctx: ScriptEditContext,
 	ops: RefineOp[],
 ): { applied: number; failures: string[] } {
-	const { applied, failures } = applyRefineOps(ctx.editor, ops, ctx.connectors);
+	const { applied, failures } = applyRefineOps(
+		ctx.editor,
+		ops,
+		ctx.state.metadata.connectorModels,
+	);
 	return {
 		applied,
 		failures: [

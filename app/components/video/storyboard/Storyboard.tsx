@@ -7,7 +7,7 @@ import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveScen
 import { removeElement } from "@/app/components/canvas/utils/nodeOps";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { insertScene } from "@/lib/canvas/insertScene";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { useProject } from "@/lib/project/useProject";
 import { toFrames } from "@/lib/video/frames";
 import { usePlayerControl } from "../PlayerControlContext";
 import { useLayout } from "../VideoLayoutContext";
@@ -22,8 +22,8 @@ export function Storyboard() {
 	const editor = useSlateStatic();
 	const { layout, segments, scenes } = useLayout();
 	const { player } = usePlayerControl();
-	const { connectorConfig } = useConfig();
 	const setActiveSceneId = useSetActiveSceneId();
+	const projectModels = useProject((s) => s.metadata.connectorModels);
 	const [deleting, setDeleting] = useState<StoryboardSceneData | null>(null);
 
 	const items = useMemo(
@@ -38,7 +38,7 @@ export function Storyboard() {
 		const at = anchor
 			? ReactEditor.findPath(editor, anchor)
 			: [editor.children.length];
-		insertScene(editor, at, connectorConfig);
+		insertScene(editor, at, projectModels);
 	};
 
 	return (

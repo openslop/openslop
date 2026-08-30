@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Path } from "slate";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -9,6 +8,7 @@ import type {
 import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
+import { useProject } from "@/lib/project/useProject";
 import { useViewMode } from "../ViewModeContext";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
@@ -37,8 +37,8 @@ export function SortableContent({
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const editor = useSlateStatic();
-	const { connectorConfig } = useConfig();
 	const { isCollapsed } = useViewMode();
+	const projectModels = useProject((s) => s.metadata.connectorModels);
 
 	const path = ReactEditor.findPath(editor, element);
 	const sceneId = parentSceneId(editor, path);
@@ -58,9 +58,9 @@ export function SortableContent({
 	const handleInsert = useCallback(
 		(type: CanvasElementType) => {
 			const p = ReactEditor.findPath(editor, element);
-			insertElement(editor, type, Path.next(p), connectorConfig);
+			insertElement(editor, type, Path.next(p), { projectModels });
 		},
-		[connectorConfig, editor, element],
+		[editor, element, projectModels],
 	);
 
 	return (

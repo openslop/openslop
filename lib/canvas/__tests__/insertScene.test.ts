@@ -1,30 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
-vi.mock("@/lib/connectors/registry", () => ({
-	getDefaultConnector: () => ({
-		provider: "openslop",
-		config: {
-			defaultModel: "test-model",
-			models: ["test-model"],
-			isDefault: true,
-		},
-	}),
-}));
-
 vi.mock("@/lib/connectors/factory", () => ({
 	resolveAttributeSchema: () => ({
 		defaultAttributes: {},
-		visibleAttributes: {},
 		keys: [],
+		resolve: (attrs: Record<string, string>) => attrs,
 	}),
 }));
 
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { isSceneElement } from "../scenes";
 import { insertScene } from "../insertScene";
-
-const connectors = {} as ConnectorRegistry;
 
 function makeEditor() {
 	const editor = createEditor();
@@ -48,7 +34,7 @@ describe("insertScene", () => {
 	it("inserts a scene holding one foreground element", () => {
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertScene(editor, [0], connectors);
+			insertScene(editor, [0]);
 		});
 
 		const inserted = editor.children[0];
@@ -62,7 +48,7 @@ describe("insertScene", () => {
 		const editor = makeEditor();
 		let id = "";
 		Editor.withoutNormalizing(editor, () => {
-			id = insertScene(editor, [1], connectors);
+			id = insertScene(editor, [1]);
 		});
 
 		expect(editor.children).toHaveLength(2);

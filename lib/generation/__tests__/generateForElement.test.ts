@@ -5,6 +5,7 @@ import type {
 	AssetResult,
 	ConnectorConfig,
 } from "@/lib/connectors/types";
+import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import type { GenerationInputs } from "../inputs";
 import type { GenerationJob } from "../graph";
 
@@ -26,8 +27,6 @@ const EMPTY_STATE = {
 };
 
 const config: ConnectorConfig = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 };
 
@@ -69,7 +68,7 @@ describe("generateForElement", () => {
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{
 				prompt: "a sunset",
-				model: "test-model",
+				model: MODEL_CATALOGS.image.defaultModel,
 				width: "1024",
 			},
 			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
@@ -77,7 +76,7 @@ describe("generateForElement", () => {
 		expect(result).toEqual(expected);
 	});
 
-	it("passes default model from config", async () => {
+	it("falls back to the connector type's default model", async () => {
 		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 0 });
 
 		await generateForElement(makeJob("music"), inputs("jazz beat"), {});
@@ -85,7 +84,7 @@ describe("generateForElement", () => {
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{
 				prompt: "jazz beat",
-				model: "test-model",
+				model: MODEL_CATALOGS.music.defaultModel,
 			},
 			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
@@ -103,7 +102,7 @@ describe("generateForElement", () => {
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{
 				prompt: "hello world",
-				model: "test-model",
+				model: MODEL_CATALOGS.tts.defaultModel,
 				voiceId: "voice-1",
 				speed: "fast",
 			},

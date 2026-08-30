@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { ANIMATED_IMAGE_ATTRIBUTES } from "@/lib/connectors/animated_image/attributes";
+import { IMAGE_ATTRIBUTES } from "@/lib/connectors/image/attributes";
+import { IMAGE_MODELS } from "@/lib/connectors/image/models";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createCanvasNode } from "../createCanvasNode";
-import {
-	resolveElementConnector,
-	resolveElementSchema,
-} from "../elementConnector";
+import { elementSchema, resolveElementConnector } from "../elementConnector";
 import type { CanvasContentElement } from "../types";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/video/elementAttributes";
 
 function element(
 	type: CanvasContentElement["type"],
@@ -37,49 +37,47 @@ describe("resolveElementConnector", () => {
 		expect(resolveElementConnector(element("image"), registry)).toEqual({
 			type: "image",
 			provider: "openslop",
-			model: imageDefaults.defaultModel,
+			model: IMAGE_MODELS.defaultModel,
 			config: imageDefaults,
 		});
 	});
 
 	it("keeps a pinned model over the connector default", () => {
-		const pinned = imageDefaults.models[1] ?? imageDefaults.models[0];
+		const [pinned] = IMAGE_MODELS.names;
 		expect(
 			resolveElementConnector(element("image", { model: pinned }), registry)
 				.model,
 		).toBe(pinned);
 	});
 
-	it("uses a pinned provider that is still registered", () => {
+	it("derives the provider from the model, ignoring a stored one", () => {
 		const { provider, config } = resolveElementConnector(
-			element("image", { provider: "openslop" }),
+			element("image", { provider: "retired-vendor" }),
 			registry,
 		);
-		expect(provider).toBe("openslop");
+		expect(provider).toBe(IMAGE_MODELS.providerFor(undefined));
 		expect(config).toBe(imageDefaults);
 	});
 });
 
-// resolveElementConnector trusts the pin, so the guarantee that a pin is always
-// a registry provider has to hold where elements are made.
+// An element carries no provider of its own, so one a saved project still names
+// decides nothing: the model it was created with does.
 describe("createCanvasNode", () => {
-	it("overwrites an incoming provider with the registry's own", () => {
-		const node = createCanvasNode("image", registry, {
+	it("resolves through the model, whatever provider came in", () => {
+		const node = createCanvasNode("image", {
 			attrs: { provider: "retired-vendor" },
 		});
 
-		expect(flatAttributes(node).provider).toBe("openslop");
+		expect(resolveElementConnector(node, registry).provider).toBe("openslop");
 		expect(resolveElementConnector(node, registry).config).toBe(imageDefaults);
 	});
 });
 
-describe("resolveElementSchema", () => {
-	it("resolves the schema for an element with no pin", () => {
-		expect(resolveElementSchema(element("image"), registry)).toEqual(
-			resolveElementSchema(
-				element("image", { provider: "openslop" }),
-				registry,
-			),
+describe("elementSchema", () => {
+	it("resolves the connector type's schema from the element's own attributes", () => {
+		expect(elementSchema(element("image")).keys).toEqual(IMAGE_ATTRIBUTES.keys);
+		expect(elementSchema(element("animated_image")).keys).toEqual(
+			ANIMATED_IMAGE_ATTRIBUTES.keys,
 		);
 	});
 });

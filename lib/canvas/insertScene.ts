@@ -1,5 +1,5 @@
 import { Transforms, type Editor, type Path } from "slate";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { createCanvasNode } from "./createCanvasNode";
 import { makeNodeId } from "./nodeUtils";
 import { SCENE_TYPE, type SceneElement } from "./types";
@@ -10,12 +10,12 @@ const NEW_SCENE_ELEMENT = "image";
 export function insertScene(
 	editor: Editor,
 	at: Path,
-	connectors: ConnectorRegistry,
+	projectModels?: ConnectorModels,
 ): string {
 	const scene: SceneElement = {
 		id: makeNodeId(),
 		type: SCENE_TYPE,
-		children: [createCanvasNode(NEW_SCENE_ELEMENT, connectors)],
+		children: [createCanvasNode(NEW_SCENE_ELEMENT, { projectModels })],
 	};
 	Transforms.insertNodes(editor, scene, { at });
 	return scene.id;

@@ -77,6 +77,8 @@ export const MetadataSchema = z.object({
 	narration: MetadataVoiceSchema.default({}),
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
 	videoSettings: VideoSettingsSchema,
+	/** The model each connector type generates with, when the project pins one. */
+	connectorModels: z.record(z.string(), z.string()).default({}),
 	/** The template the project's scripts are written against, when it has one. */
 	templateId: optionalString,
 });
