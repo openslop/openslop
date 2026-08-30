@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "../createCanvasNode";
+import { IMAGE_MODELS } from "@/lib/connectors/image/models";
 import { SFX_MODELS } from "@/lib/connectors/sfx/models";
 import { TTS_MODELS } from "@/lib/connectors/tts/models";
 import { VIDEO_MODELS } from "@/lib/connectors/video/models";
@@ -45,5 +46,12 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			motion: "none",
 			model: VIDEO_MODELS.defaultModel,
 		});
+	});
+
+	it("rejects a stillModel the image connector doesn't offer", () => {
+		const node = createCanvasNode("animated_image", {
+			attrs: { stillModel: VIDEO_MODELS.defaultModel },
+		});
+		expect(flatAttributes(node).stillModel).toBe(IMAGE_MODELS.defaultModel);
 	});
 });

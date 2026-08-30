@@ -2,10 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor } from "slate";
 
 vi.mock("@/lib/connectors/factory", () => ({
-	resolveAttributeSchema: (type: string) => ({
-		defaultAttributes: type === "tts" ? { emotion: "neutral" } : {},
-		keys: [],
-	}),
+	resolveAttributeSchema: (type: string) => {
+		const defaultAttributes = type === "tts" ? { emotion: "neutral" } : {};
+		return {
+			defaultAttributes,
+			keys: [],
+			resolve: (attrs: Record<string, string>) => ({
+				...defaultAttributes,
+				...attrs,
+			}),
+		};
+	},
 }));
 
 import { insertElement } from "../insertElement";

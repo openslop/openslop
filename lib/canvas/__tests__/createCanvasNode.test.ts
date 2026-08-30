@@ -1,10 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/connectors/factory", () => ({
-	resolveAttributeSchema: (type: string) => ({
-		defaultAttributes: type === "sfx" ? { loops: "1" } : {},
-		keys: [],
-	}),
+	resolveAttributeSchema: (type: string) => {
+		const defaultAttributes = type === "sfx" ? { loops: "1" } : {};
+		return {
+			defaultAttributes,
+			keys: [],
+			resolve: (attrs: Record<string, string>) => ({
+				...defaultAttributes,
+				...attrs,
+			}),
+		};
+	},
 }));
 
 import { createCanvasNode } from "../createCanvasNode";

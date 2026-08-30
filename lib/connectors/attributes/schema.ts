@@ -58,6 +58,29 @@ export class AttributeSchema {
 		);
 	}
 
+	/** Whether the schema would let the settings popover produce this value. */
+	private offers(key: string, value: string): boolean {
+		const edit = this.defs.find((def) => def.key === key)?.edit;
+		if (edit?.kind === "enum") {
+			return edit.options.includes(value);
+		}
+		return true;
+	}
+
+	/**
+	 * The attributes an element carries: the caller's, with defaults standing in
+	 * wherever they name an option the schema doesn't offer (pasted OSML, a
+	 * saved project from an older catalog).
+	 */
+	resolve(attrs: Record<string, string>): Record<string, string> {
+		return {
+			...this.defaultAttributes,
+			...Object.fromEntries(
+				Object.entries(attrs).filter(([key, value]) => this.offers(key, value)),
+			),
+		};
+	}
+
 	get defaultAttributes(): Record<string, string> {
 		const out: Record<string, string> = {};
 		for (const def of this.defs) {

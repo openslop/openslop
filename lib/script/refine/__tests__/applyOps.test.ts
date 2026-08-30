@@ -14,7 +14,14 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, string>> = {
 vi.mock("@/lib/connectors/factory", () => ({
 	resolveAttributeSchema: (type: string) => {
 		const defaultAttributes = SCHEMA_DEFAULTS[type] ?? {};
-		return { defaultAttributes, keys: Object.keys(defaultAttributes) };
+		return {
+			defaultAttributes,
+			keys: Object.keys(defaultAttributes),
+			resolve: (attrs: Record<string, string>) => ({
+				...defaultAttributes,
+				...attrs,
+			}),
+		};
 	},
 }));
 

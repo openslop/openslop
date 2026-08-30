@@ -122,14 +122,21 @@ describe("OSMLStreamParser", () => {
 
 	it("parses attributes correctly", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk('<sound effect="thunder" volume="loud">boom</sound>');
+		s.appendChunk('<sound effect="thunder" volume="8">boom</sound>');
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
 		expect(flatAttributes(nodes[0])).toMatchObject({
 			effect: "thunder",
-			volume: "loud",
+			volume: "8",
 		});
+	});
+
+	it("replaces an attribute value the schema doesn't offer with its default", () => {
+		const s = new OSMLStreamParser();
+		s.appendChunk('<sound volume="loud">boom</sound>');
+
+		expect(flatAttributes(s.getNodes()[0]).volume).toBe("2");
 	});
 
 	it("backfills defaultAttributes for streamed canvas elements", () => {

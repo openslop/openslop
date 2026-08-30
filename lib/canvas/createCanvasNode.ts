@@ -29,11 +29,7 @@ export function createCanvasNode(
 	);
 	const provider = catalog.providerFor(model);
 	const schema = resolveAttributeSchema(connector, provider, model);
-	const attributes: Record<string, string> = {
-		...schema.defaultAttributes,
-		...opts.attrs,
-		model,
-	};
+	const attributes = schema.resolve({ ...opts.attrs, model });
 	return {
 		id: opts.id ?? makeNodeId(),
 		type,
