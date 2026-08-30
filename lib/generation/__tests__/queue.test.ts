@@ -35,8 +35,6 @@ type JobOverrides = Partial<GenerationJob> & {
 
 function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 	const config: ConnectorConfig = {
-		defaultModel: "test-model",
-		models: ["test-model"],
 		isDefault: true,
 	};
 	const {

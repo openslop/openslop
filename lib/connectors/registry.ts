@@ -6,12 +6,6 @@ import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
 import { createDimensionsPlugin } from "./plugins/dimensions";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
-import { IMAGE_MODELS } from "./image/openslop/models";
-import { LLM_MODELS } from "./llm/openslop/models";
-import { MUSIC_MODELS } from "./music/openslop/models";
-import { SFX_MODELS } from "./sfx/openslop/models";
-import { TTS_MODELS } from "./tts/openslop/models";
-import { VIDEO_MODELS } from "./video/openslop/models";
 import type {
 	ConnectorConfig,
 	ConnectorPlugin,
@@ -26,13 +20,9 @@ export type ConnectorRegistry = Record<
 >;
 
 const openslopConfig = (
-	defaultModel: string,
-	models: Record<string, unknown>,
 	plugins?: ConnectorPlugin[],
 ): Record<ProviderKey, ConnectorConfig> => ({
 	openslop: {
-		defaultModel,
-		models: Object.keys(models),
 		isDefault: true,
 		apiKey: "",
 		...(plugins && { plugins }),
@@ -41,23 +31,16 @@ const openslopConfig = (
 
 /** Static plugin chains; `ConfigProvider` layers the project-scoped ones on top. */
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
-	llm: openslopConfig("Slop LLM v1", LLM_MODELS),
-	tts: openslopConfig("Slop TTS v1", TTS_MODELS, [
-		createMetadataVoicePlugin(),
-		createVoiceSearchPlugin(),
-	]),
-	image: openslopConfig("Slop Image v1", IMAGE_MODELS, buildImagePlugins()),
-	animated_image: openslopConfig(
-		"Slop Video v1",
-		VIDEO_MODELS,
-		buildAnimatedImagePlugins(),
-	),
-	video: openslopConfig("Slop Video v1", VIDEO_MODELS, [
+	llm: openslopConfig(),
+	tts: openslopConfig([createMetadataVoicePlugin(), createVoiceSearchPlugin()]),
+	image: openslopConfig(buildImagePlugins()),
+	animated_image: openslopConfig(buildAnimatedImagePlugins()),
+	video: openslopConfig([
 		createReferenceImagesPlugin(),
 		createDimensionsPlugin("video"),
 	]),
-	sfx: openslopConfig("Slop SFX v1", SFX_MODELS),
-	music: openslopConfig("Slop Music v1", MUSIC_MODELS),
+	sfx: openslopConfig(),
+	music: openslopConfig(),
 };
 
 export function getDefaultConnector(

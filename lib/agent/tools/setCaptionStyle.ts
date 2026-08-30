@@ -16,6 +16,7 @@ import {
 	CaptionStyleSchema,
 } from "@/lib/video/captionStyle";
 import { CAPTION_FONTS } from "@/lib/video/captionFonts";
+import { TextBox } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";
 
@@ -61,6 +62,8 @@ export const setCaptionStyle = defineTool({
 		})
 		.refine(notEmpty, named("caption setting")),
 	output: z.string(),
+	icon: TextBox,
+	label: "Styling the captions",
 	execute: async ({ preset, captions, ...overrides }, ctx) => {
 		// Metadata patches are deep-merged, so a partial style lands on the stored one.
 		const captionStyle =

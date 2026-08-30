@@ -3,7 +3,6 @@ import {
 	getElementText,
 	serializeOSMLWithScenes,
 } from "@/lib/canvas/osmlSerializer";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
@@ -11,19 +10,6 @@ import {
 } from "@/lib/canvas/types";
 import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
 import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
-
-const connector = {
-	openslop: { defaultModel: "m", models: ["m"], isDefault: true, apiKey: "" },
-};
-const connectors: ConnectorRegistry = {
-	llm: connector,
-	tts: connector,
-	image: connector,
-	animated_image: connector,
-	video: connector,
-	sfx: connector,
-	music: connector,
-};
 
 const makeEl = (
 	type: CanvasContentElement["type"],
@@ -59,11 +45,11 @@ describe("splitScenes", () => {
 
 describe("deserializeWithScenes", () => {
 	it("returns [] for empty input", () => {
-		expect(deserializeWithScenes("", connectors)).toEqual([]);
+		expect(deserializeWithScenes("")).toEqual([]);
 	});
 
 	it("turns BLANK_SCRIPT into one scene holding one empty narration", () => {
-		const scenes = deserializeWithScenes(BLANK_SCRIPT, connectors);
+		const scenes = deserializeWithScenes(BLANK_SCRIPT);
 
 		expect(scenes).toHaveLength(1);
 		expect(scenes[0].children).toHaveLength(1);
@@ -79,10 +65,7 @@ describe("deserializeWithScenes", () => {
 			]),
 		];
 
-		const scenes = deserializeWithScenes(
-			serializeOSMLWithScenes(original),
-			connectors,
-		);
+		const scenes = deserializeWithScenes(serializeOSMLWithScenes(original));
 
 		const image = scenes[0].children[0];
 		expect(image.type).toBe("image");
@@ -101,7 +84,7 @@ describe("deserializeWithScenes", () => {
 		];
 
 		const osml = serializeOSMLWithScenes(original);
-		const scenes = deserializeWithScenes(osml, connectors);
+		const scenes = deserializeWithScenes(osml);
 
 		expect(scenes).toHaveLength(2);
 

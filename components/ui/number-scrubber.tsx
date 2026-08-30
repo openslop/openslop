@@ -3,14 +3,11 @@
 import { useRef, useState } from "react";
 import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { clamp, cn } from "@/lib/utils";
 
 /** Pointer travel, in px, that moves the value by one step. */
 const PX_PER_STEP = 3;
 const DRAG_THRESHOLD_PX = 3;
-
-const clamp = (value: number, min: number, max: number) =>
-	Math.min(max, Math.max(min, value));
 
 function quantize(value: number, min: number, max: number, step: number) {
 	const decimals = (String(step).split(".")[1] ?? "").length;

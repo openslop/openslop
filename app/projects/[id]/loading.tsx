@@ -137,6 +137,7 @@ export default function Loading() {
 					<RailItemSkeleton />
 					<RailItemSkeleton />
 					<RailItemSkeleton />
+					<RailItemSkeleton />
 					<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
 						<div className="my-1 h-px w-full bg-border" />
 						<RailItemSkeleton />

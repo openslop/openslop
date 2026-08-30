@@ -71,21 +71,23 @@ Staleness falls out of the graph: a node needs generating when it has no result,
 - `MetadataSchema` (`lib/project/types.ts`) is where a metadata default lives, not the reader. `videoSettings` in particular is total once parsed — `VideoSettingsSchema` fills every knob — so the aspect ratio, transition, length, and caption settings are read straight off the store (`useVideoSetting`) with no fallback in sight, and written back through `useUpdateVideoSettings` rather than a hand-assembled metadata patch.
 - `lib/canvas/elementConnector.ts` answers "which connector, provider and model does this element use?" for both the UI and the queue. An element pins its provider when created, so this is also where a pin that no longer resolves falls back to the registry default.
 - `lib/script/` provides script context and refinement utilities.
-- `app/components/canvas/hooks/useEditorSession.ts` is the one place the Slate editor gets wired to a project: initial hydration, streaming script sync, metadata sync, and autosave. Views call it and render the editor; they never assemble it.
-- The editor instance is a prop in exactly one place: `Editor` hands it to `CanvasProviders`, which puts it in `<Slate>`. Everything below reaches it with `useSlateStatic()`, so no component takes it just to pass it on.
+- `app/components/canvas/hooks/useEditorSession.ts` is the one place the Slate editor gets wired to a project: initial hydration, streaming script sync, metadata sync, autosave and version history. `CanvasProviders` opens the session and composes every canvas-scoped provider around it; views render the editor and never assemble it.
+- The editor instance is never a prop. `CanvasProviders` puts it straight into `<Slate>`, and everything below reaches it with `useSlateStatic()`.
+- `lib/project/projectDocument.ts` is the live project as one readable, writable unit (script, store snapshot, generation snapshot), so a version is never half applied. `canvasHistory.ts` is the state machine over it: saves fold into the newest version for `FOLD_WINDOW_MS`, previewing stashes the live content and suspends autosave, and restoring adopts whatever is on screen.
 - `lib/project/autosave.ts` owns saving: it builds the row from the store snapshot, script and generation snapshot, then debounces and serializes writes so a slow save can't land after a newer one. `useAutosave` only subscribes the editor value, the store, and the queue to it, and turns the result into a toast.
 
 ## Data
 
 Supabase Postgres with RLS (users only read their own rows; queue workers use the service role):
 
-| Table           | Purpose                                                                              |
-| --------------- | ------------------------------------------------------------------------------------ |
-| `auth.users`    | Supabase auth users                                                                  |
-| `projects`      | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
-| `jobs`          | Async generation jobs: `pending → processing → completed \| failed`                  |
-| `conversations` | One Sloppy conversation per project                                                  |
-| `messages`      | Its turns: `parts` (text / reasoning / tool-call / tool-result) plus usage           |
+| Table             | Purpose                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `auth.users`      | Supabase auth users                                                                  |
+| `projects`        | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
+| `canvas_versions` | Autosaved history of those same three columns, one row per folded checkpoint         |
+| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`                  |
+| `conversations`   | One Sloppy conversation per project                                                  |
+| `messages`        | Its turns: `parts` (text / reasoning / tool-call / tool-result) plus usage           |
 
 Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, served as public CDN URLs.
 

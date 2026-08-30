@@ -1,9 +1,13 @@
+import isNull from "lodash/isNull";
 import mapValues from "lodash/mapValues";
+import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
+import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { ElementVersion } from "@/lib/generation/versions";
 import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
+import { attributeSchemaFor } from "./elementConnector";
 import { isContentElement } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 
@@ -112,19 +116,34 @@ export function applyNodeVersion(
 	updateNodeText(editor, path, inputs.prompt);
 }
 
+/** Attributes with changes applied, where a null value deletes its key. */
+const withAttrs = (
+	attributes: Record<string, string>,
+	changes: Record<string, string | null>,
+): Record<string, string> =>
+	omitBy({ ...attributes, ...changes }, isNull) as Record<string, string>;
+
+/**
+ * An element's schema is resolved from its own attributes, so the merge is
+ * followed by a reconciliation against the schema it now names. Inert while
+ * every `attributesFor` ignores its model: the seam is here so that a model
+ * with its own attribute set cannot leave the element holding another's.
+ */
 export function mergeAttrs(
 	editor: Editor,
 	path: Path,
 	element: CanvasContentElement,
 	attrs: Record<string, string | null>,
 ): void {
-	const merged = flatAttributes(element);
-	for (const [key, value] of Object.entries(attrs)) {
-		if (value === null) {
-			delete merged[key];
-		} else {
-			merged[key] = value;
-		}
-	}
-	Transforms.setNodes(editor, splitAttributes(merged), { at: path });
+	const current = flatAttributes(element);
+	const merged = withAttrs(current, attrs);
+	const reconciled = withAttrs(
+		merged,
+		reconcileAttributes(
+			attributeSchemaFor(element.type, current),
+			attributeSchemaFor(element.type, merged),
+			merged,
+		),
+	);
+	Transforms.setNodes(editor, splitAttributes(reconciled), { at: path });
 }

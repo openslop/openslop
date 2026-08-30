@@ -1,8 +1,8 @@
 import { optionalDurationSeconds } from "@/lib/api/request-schema-fields";
 import { bodySchema, createAssetRouteHandlers } from "@/lib/api/route-handler";
-import { SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
+import { OPENSLOP_SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
 
-const schema = bodySchema(SFX_MODELS, optionalDurationSeconds);
+const schema = bodySchema(OPENSLOP_SFX_MODELS, optionalDurationSeconds);
 
 export const { POST } = createAssetRouteHandlers({
 	connectorType: "sfx",

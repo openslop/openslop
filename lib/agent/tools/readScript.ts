@@ -5,6 +5,7 @@ import {
 	type Metadata,
 	type MetadataVoice,
 } from "@/lib/project/types";
+import { Eye } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 const UNSET = "unset";
@@ -38,6 +39,8 @@ export const readScript = defineTool({
 	`,
 	input: z.object({}),
 	output: z.string(),
+	icon: Eye,
+	label: "Reading the script",
 	execute: async (_input, ctx) => {
 		const metadata = ctx.readMetadata();
 		const script = ctx.readScript().trim();

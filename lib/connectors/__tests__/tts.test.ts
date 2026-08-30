@@ -8,8 +8,6 @@ const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
 
 const config = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 	apiKey: "",
 };

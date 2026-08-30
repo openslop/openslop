@@ -17,10 +17,6 @@ import {
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
 import {
-	LLM_MODELS,
-	type LLMModelName,
-} from "@/lib/connectors/llm/openslop/models";
-import {
 	findOrCreateConversation,
 	listConversationMessages,
 	saveConversationMessage,
@@ -36,7 +32,8 @@ export type AgentTurnRequest = {
 	userId: string;
 	message: SloppyMessage;
 	context: AgentContext;
-	model?: LLMModelName;
+	/** The provider's own model id: the route resolves it from the picked name. */
+	model?: string;
 };
 
 /**
@@ -60,9 +57,7 @@ export async function streamAgentTurn(
 	await saveConversationMessage(conversationId, incoming);
 
 	const carried = stored?.metadata?.workSeconds ?? 0;
-	const { model, providerOptions } = getLLMProvider().agentModel(
-		request.model && LLM_MODELS[request.model],
-	);
+	const { model, providerOptions } = getLLMProvider().agentModel(request.model);
 
 	const modelMessages = pruneMessages({
 		messages: await convertToModelMessages(pruneTranscript(messages), {

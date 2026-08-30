@@ -63,8 +63,6 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 }
 
 const config: ConnectorConfig = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 };
 

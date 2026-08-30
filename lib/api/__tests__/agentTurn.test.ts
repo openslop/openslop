@@ -4,7 +4,6 @@ import type {
 	LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
-import type { LLMModelName } from "@/lib/connectors/llm/openslop/models";
 import type { SloppyMessage } from "@/lib/agent/types";
 
 const { conversations, provider } = vi.hoisted(() => ({
@@ -83,7 +82,7 @@ async function runTurn(
 	chunks: LanguageModelV3StreamPart[],
 	options: {
 		message?: SloppyMessage;
-		model?: LLMModelName;
+		model?: string;
 		history?: SloppyMessage[];
 	} = {},
 ) {
@@ -242,7 +241,7 @@ describe("a turn that takes more than one step", () => {
 		await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),
 			history: recorded(spent, reading("call-1", "the script")),
-			model: "Slop LLM v1",
+			model: "claude-opus-5",
 		});
 
 		expect(provider.agentModel).toHaveBeenCalledWith("claude-opus-5");
@@ -319,8 +318,9 @@ describe("a turn that takes more than one step", () => {
 });
 
 describe("model selection", () => {
-	it("runs the picked model, resolved to what the provider takes", async () => {
-		await runTurn(TEXT_TURN, { model: "Slop LLM v1" });
+	// The picked name is resolved to the provider's id at the route boundary.
+	it("runs the model the request names", async () => {
+		await runTurn(TEXT_TURN, { model: "claude-opus-5" });
 
 		expect(provider.agentModel).toHaveBeenCalledWith("claude-opus-5");
 	});

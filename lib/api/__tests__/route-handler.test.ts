@@ -7,7 +7,15 @@ import {
 	createApiRouteHandler,
 	createSessionFormRouteHandler,
 	createSessionRouteHandler,
+	pollJob,
 } from "../route-handler";
+
+const mockGetJob = vi.fn();
+vi.mock("../jobs", () => ({
+	createJob: vi.fn(),
+	enqueueJob: vi.fn(),
+	getJob: (...args: unknown[]) => mockGetJob(...args),
+}));
 
 vi.mock("../logger", () => ({
 	logger: { warn: vi.fn(), error: vi.fn() },
@@ -19,6 +27,7 @@ vi.mock("../auth", () => ({
 }));
 
 beforeEach(() => {
+	mockGetJob.mockReset();
 	mockGetUser.mockResolvedValue({
 		id: "user-1",
 		app_metadata: { api_access: true },
@@ -234,5 +243,42 @@ describe("createSessionFormRouteHandler", () => {
 		mockGetUser.mockResolvedValue(null);
 		const res = await handler(makeFormRequest({ file: imageOfSize(4) }));
 		expect(res.status).toBe(401);
+	});
+});
+
+describe("pollJob", () => {
+	const request = new NextRequest("http://localhost/api/v1/image/bruh");
+
+	function poll(jobId: string) {
+		return pollJob(request, { params: Promise.resolve({ jobId }) });
+	}
+
+	it("returns 404 for a malformed job id without querying the database", async () => {
+		const res = await poll("bruh");
+		expect(res.status).toBe(404);
+		expect(mockGetJob).not.toHaveBeenCalled();
+	});
+
+	it("returns 404 for a well-formed id with no matching job", async () => {
+		mockGetJob.mockResolvedValue(null);
+		const res = await poll("00000000-0000-0000-0000-000000000000");
+		expect(res.status).toBe(404);
+	});
+
+	it("returns the job view when the job exists", async () => {
+		mockGetJob.mockResolvedValue({
+			id: "00000000-0000-0000-0000-000000000000",
+			status: "pending",
+			result: null,
+			error: null,
+		});
+		const res = await poll("00000000-0000-0000-0000-000000000000");
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({
+			jobId: "00000000-0000-0000-0000-000000000000",
+			status: "pending",
+			result: null,
+			error: null,
+		});
 	});
 });

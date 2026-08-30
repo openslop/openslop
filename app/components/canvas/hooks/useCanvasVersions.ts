@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { Editor } from "slate";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { CanvasHistory } from "@/lib/project/canvasHistory";
 import { canvasVersionStorage } from "@/lib/project/canvasVersionStorage";
@@ -15,15 +14,9 @@ export function useCanvasVersions(
 ): { history: CanvasHistory; onDocumentChange: () => void } {
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
-	const { connectorConfig } = useConfig();
 
 	const [document] = useState(() =>
-		createProjectDocument({
-			editor,
-			store,
-			queue,
-			connectors: connectorConfig,
-		}),
+		createProjectDocument({ editor, store, queue }),
 	);
 
 	const autosaver = useAutosave(projectId, document.read);

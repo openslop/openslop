@@ -11,6 +11,9 @@ export const SESSION_ONLY: ElementVersionStorage = {
 	write: () => {},
 };
 
+/** A version list is either still arriving, readable, or unreadable. */
+export type ElementHistoryStatus = "loading" | "ready" | "failed";
+
 export class ElementHistory {
 	private readonly log = new VersionLog();
 	private readonly listeners = new Set<() => void>();
@@ -33,12 +36,13 @@ export class ElementHistory {
 	get = (elementId: string): readonly ElementVersion[] =>
 		this.log.get(elementId);
 
-	isLoaded = (elementId: string): boolean => this.log.isHydrated(elementId);
-
-	isFailed = (elementId: string): boolean => this.failed.has(elementId);
+	status = (elementId: string): ElementHistoryStatus => {
+		if (this.log.isHydrated(elementId)) return "ready";
+		return this.failed.has(elementId) ? "failed" : "loading";
+	};
 
 	load = (elementId: string): Promise<void> => {
-		if (this.isLoaded(elementId)) return Promise.resolve();
+		if (this.log.isHydrated(elementId)) return Promise.resolve();
 		const inFlight = this.loading.get(elementId);
 		if (inFlight) return inFlight;
 		this.failed.delete(elementId);

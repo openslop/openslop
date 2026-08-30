@@ -8,8 +8,6 @@ import { OpenSlopVideo } from "../video/openslop";
 import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 
 const config = {
-	defaultModel: "test-model",
-	models: ["test-model"],
 	isDefault: true,
 	apiKey: "test",
 };

@@ -1,6 +1,5 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { DEFAULT_PROVIDER } from "@/lib/connectors/types";
 import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
 import type { ElementVersion } from "@/lib/generation/versions";
 import type { ProjectData } from "@/lib/project/store";
@@ -50,11 +49,7 @@ export function characterAvatarElement(
 	return {
 		id,
 		type: "image",
-		generationAttributes: {
-			kind: "avatar",
-			appearance,
-			provider: DEFAULT_PROVIDER,
-		},
+		generationAttributes: { kind: "avatar", appearance },
 		children: [{ id: `${id}-t`, type: "image", text: name }],
 	};
 }

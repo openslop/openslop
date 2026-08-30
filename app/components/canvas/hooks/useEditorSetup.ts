@@ -3,8 +3,8 @@ import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { withHistory } from "slate-history";
 import flow from "lodash/flow";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import type { CanvasEditor } from "@/lib/canvas/types";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { withNodeId } from "../plugins/withNodeId";
 import { withLayout } from "../plugins/withLayout";
 import { withScenes } from "../plugins/withScenes";
@@ -12,19 +12,20 @@ import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
 
 export function useEditorSetup(): CanvasEditor {
-	const { connectorConfig } = useConfig();
+	const store = useProjectStoreHandle();
 
-	const [editor] = useState(() =>
-		flow(
+	const [editor] = useState(() => {
+		const projectModels = () => store.getState().metadata.connectorModels;
+		return flow(
 			withHistory,
 			withReact,
-			withLayout(connectorConfig),
+			withLayout(projectModels),
 			withScenes,
 			withFlatPaste,
 			withNodeId,
-			withOSMLClipboard(connectorConfig),
-		)(createEditor()),
-	);
+			withOSMLClipboard(projectModels),
+		)(createEditor());
+	});
 
 	return editor;
 }

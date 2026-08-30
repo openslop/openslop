@@ -25,8 +25,6 @@ interface AttributeBadgeProps {
 	spec: AttributeSpec;
 	hideLabel?: boolean;
 	className?: string;
-	/** Extra attrs to merge alongside the new value (e.g. schema reconciliation on model change). */
-	deriveExtraAttrs?: (next: string) => Record<string, string | null>;
 }
 
 export function AttributeBadge({
@@ -35,7 +33,6 @@ export function AttributeBadge({
 	spec,
 	hideLabel = false,
 	className,
-	deriveExtraAttrs,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
 	const value = flatAttributes(element)[attrKey] ?? "";
@@ -94,10 +91,7 @@ export function AttributeBadge({
 	}
 
 	const handleSelect = (next: string) => {
-		updateElementAttrs(editor, element, {
-			[attrKey]: next,
-			...deriveExtraAttrs?.(next),
-		});
+		updateElementAttrs(editor, element, { [attrKey]: next });
 	};
 
 	return (

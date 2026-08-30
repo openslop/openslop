@@ -8,17 +8,18 @@ import {
 import {
 	createApiQueryRouteHandler,
 	createApiRouteHandler,
+	modelField,
 } from "@/lib/api/route-handler";
 import { badRequest } from "@/lib/api/response";
 import { parseSloppyMessage } from "@/lib/agent/messages";
 import { agentContextSchema } from "@/lib/agent/context";
-import { isLLMModelName } from "@/lib/connectors/llm/openslop/models";
+import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 
 const turnSchema = z.object({
 	projectId: z.uuid(),
 	message: z.unknown(),
 	context: agentContextSchema,
-	model: z.string().refine(isLLMModelName).optional(),
+	model: modelField(OPENSLOP_LLM_MODELS),
 });
 
 export const POST = createApiRouteHandler({

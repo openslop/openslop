@@ -2,6 +2,7 @@ import dedent from "dedent";
 import { z } from "zod";
 import type { ElementLength } from "@/lib/video/elementLengths";
 import { NARRATION_WORDS_PER_MINUTE } from "@/lib/video/videoLength";
+import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
 const WORDS_PER_SECOND = Math.round(NARRATION_WORDS_PER_MINUTE / 60);
@@ -30,6 +31,8 @@ export const measureElementLengths = defineTool({
 	`,
 	input: z.object({}),
 	output: z.string(),
+	icon: Hourglass,
+	label: "Measuring scene lengths",
 	execute: async (_input, ctx) => {
 		const lengths = ctx.measureElementLengths();
 		if (lengths.length === 0) return "No visual elements on the canvas yet.";
