@@ -16,12 +16,13 @@ export class ModelCatalog {
 		byProvider: Partial<Record<ProviderKey, Record<string, unknown>>>,
 		defaultModel: string,
 	): ModelCatalog {
-		const providers: Record<string, ProviderKey> = {};
-		for (const [provider, models] of Object.entries(byProvider)) {
-			for (const name of Object.keys(models)) {
-				providers[name] = provider as ProviderKey;
-			}
-		}
+		const providers = Object.fromEntries(
+			Object.entries(byProvider).flatMap(([provider, models]) =>
+				Object.keys(models).map(
+					(name) => [name, provider as ProviderKey] as const,
+				),
+			),
+		);
 		if (!providers[defaultModel])
 			throw new Error(`Default model "${defaultModel}" is not in the catalog`);
 		return new ModelCatalog(providers, defaultModel);
@@ -43,7 +44,7 @@ export class ModelCatalog {
 	}
 
 	/** The connector serving a model. An unnamed or unknown model takes the default's. */
-	providerFor(model = this.defaultModel): ProviderKey {
-		return this.providers[this.has(model) ? model : this.defaultModel];
+	providerFor(model?: string): ProviderKey {
+		return this.providers[this.resolve(model)];
 	}
 }
