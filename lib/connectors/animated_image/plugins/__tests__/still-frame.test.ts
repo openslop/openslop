@@ -108,7 +108,7 @@ describe("stillSnapshot", () => {
 	const animated = {
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		...splitAttributes({ videoPrompt: "slow pan" }),
 		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
 	};
 
@@ -171,7 +171,7 @@ describe("duplicated animation", () => {
 	const animated = (id: string) => ({
 		id,
 		type: "animated_image" as const,
-		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		...splitAttributes({ videoPrompt: "slow pan" }),
 		children: [
 			{ id: `${id}-t`, type: "animated_image" as const, text: "a forest" },
 		],
@@ -218,7 +218,7 @@ describe("uploaded still lifetime", () => {
 	const animated = (text: string, videoPrompt: string) => ({
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
-		...splitAttributes({ provider: "openslop", videoPrompt }),
+		...splitAttributes({ videoPrompt }),
 		children: [{ id: "t", type: "animated_image" as const, text }],
 	});
 
@@ -280,7 +280,7 @@ describe("pictureNode", () => {
 	) => ({
 		id: `el-${type}`,
 		type,
-		...splitAttributes({ provider: "openslop", videoPrompt: "slow pan" }),
+		...splitAttributes({ videoPrompt: "slow pan" }),
 		children: [{ id: `el-${type}-t`, type, text: "a forest" }],
 	});
 
@@ -308,7 +308,6 @@ describe("stillElement", () => {
 		id: ELEMENT_ID,
 		type: "animated_image" as const,
 		...splitAttributes({
-			provider: "openslop",
 			model: "Slop Video v1",
 			videoPrompt: "slow pan",
 			...attrs,
@@ -325,7 +324,6 @@ describe("stillElement", () => {
 		});
 	});
 
-	// Hand-authored OSML can name a video model on the still.
 	it("falls back to the image catalog for an unknown still model", () => {
 		expect(stillAttributes({ stillModel: "Slop Video v1" })).toEqual({
 			model: MODEL_CATALOGS.image.defaultModel,

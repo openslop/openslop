@@ -5,7 +5,7 @@ import type { AttributeSchema } from "./schema";
  * partial-update payload (`null` deletes the key, matching `updateElementAttrs`).
  * Drops attrs whose key left the schema and fills defaults for keys it gained,
  * so identical schemas reconcile to nothing. Never touches keys outside both
- * schemas (e.g. `provider`).
+ * schemas.
  */
 export function reconcileAttributes(
 	oldSchema: AttributeSchema,

@@ -43,7 +43,7 @@ const element = (
 ): CanvasContentElement => ({
 	id,
 	type,
-	...splitAttributes({ provider: "openslop", ...customAttributes }),
+	...splitAttributes({ ...customAttributes }),
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
@@ -147,14 +147,12 @@ describe("resolveGraph", () => {
 			element("clip", "clip", {
 				model: "Slop Video v1",
 				duration: "5",
-				provider: "openslop",
 			}),
 		);
 		expect(node.inputs.prompt).toBe("a sunset");
 		expect(node.inputs.attributes).toEqual({
 			model: "Slop Video v1",
 			duration: "5",
-			provider: "openslop",
 		});
 	});
 
@@ -168,10 +166,7 @@ describe("resolveGraph", () => {
 		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
 			expect(node.inputs.attributes).not.toHaveProperty(key);
 		}
-		expect(node.inputs.attributes).toEqual({
-			model: "Slop Video v1",
-			provider: "openslop",
-		});
+		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
 	});
 
 	it("sizes a clip from the project aspect ratio via its dependency", () => {

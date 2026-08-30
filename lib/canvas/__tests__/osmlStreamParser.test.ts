@@ -188,7 +188,6 @@ describe("parseOSML", () => {
 		});
 	});
 
-	// A retired model name would otherwise stick on the node and fail every generate.
 	it("replaces a model the catalog no longer offers", () => {
 		const [node] = parseOSML(
 			'<animated_image model="Slop Video v0">a sunset</animated_image>',

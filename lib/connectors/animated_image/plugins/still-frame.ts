@@ -20,12 +20,7 @@ import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /** Attributes of the animation, which the still's image generation has no use for. */
-const VIDEO_ONLY_KEYS = [
-	"videoPrompt",
-	"duration",
-	"model",
-	"provider",
-] as const;
+const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "model"] as const;
 
 const STILL = "still";
 
@@ -46,8 +41,6 @@ export function stillElement(
 		type: "image",
 		generationAttributes: {
 			...omit(attributes, VIDEO_ONLY_KEYS),
-			// Each generation only ever sees a model its own connector understands,
-			// and each resolves its own provider from that.
 			...(stillModel && { model: MODEL_CATALOGS.image.resolve(stillModel) }),
 		},
 	};
@@ -97,7 +90,7 @@ export function createStillFramePlugin(): ConnectorPlugin<
 		name: "still-frame",
 		dependencies: (element) => [forStillOf(element)],
 		beforeGenerate(params, ctx) {
-			const { videoPrompt, stillModel: _stillModel, ...rest } = params;
+			const { videoPrompt } = params;
 			if (!videoPrompt) {
 				throw new Error(
 					"animated_image element is missing required videoPrompt attribute",
@@ -110,7 +103,11 @@ export function createStillFramePlugin(): ConnectorPlugin<
 				);
 			}
 			// The element's own text prompts the still, not the animation.
-			return { ...rest, prompt: videoPrompt, frameImages: [imageUrl] };
+			return {
+				...omit(params, "videoPrompt", "stillModel"),
+				prompt: videoPrompt,
+				frameImages: [imageUrl],
+			};
 		},
 		afterGenerate: (result, ctx) => ({
 			...result,

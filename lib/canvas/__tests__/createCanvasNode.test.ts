@@ -71,7 +71,6 @@ describe("createCanvasNode", () => {
 		expect(flatAttributes(node).model).toBe("Slop Image v1");
 	});
 
-	// Pasted OSML can name a model from another connector's catalog.
 	it("falls back to the catalog when the caller names an unknown model", () => {
 		const node = createCanvasNode("image", {
 			attrs: { model: MODEL_CATALOGS.video.defaultModel },
