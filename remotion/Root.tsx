@@ -1,5 +1,6 @@
 import React from "react";
 import { Composition } from "remotion";
+import { CaptionFont } from "./components/CaptionFont";
 import { VideoComposition } from "./compositions/VideoComposition";
 import type { VideoLayout } from "@/lib/video/types";
 import { COMPOSITION_ID, DEFAULT_CONFIG } from "@/lib/video/types";
@@ -22,10 +23,22 @@ const defaultProps: VideoLayout = {
 	captionStyle: DEFAULT_CAPTION_STYLE,
 };
 
+/**
+ * The rendered tree. The Player already has the active face registered by the
+ * editor, so loading it belongs here, where the composition's own props say
+ * which one of the library it needs.
+ */
+const RenderedVideo: React.FC<VideoLayout> = (props) => (
+	<>
+		<CaptionFont font={props.captionStyle.font} />
+		<VideoComposition {...props} />
+	</>
+);
+
 export const RemotionRoot: React.FC = () => (
 	<Composition
 		id={COMPOSITION_ID}
-		component={VideoComposition}
+		component={RenderedVideo}
 		durationInFrames={1}
 		fps={DEFAULT_CONFIG.fps}
 		width={DEFAULT_CONFIG.width}
