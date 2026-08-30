@@ -4,11 +4,7 @@ import {
 	type CanvasElementType,
 } from "@/lib/canvas/types";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import {
-	defaultModelFor,
-	MODEL_CATALOGS,
-	type ConnectorModels,
-} from "@/lib/connectors/models";
+import { MODEL_CATALOGS, type ConnectorModels } from "@/lib/connectors/models";
 import { splitAttributes } from "@/lib/video/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";
@@ -26,9 +22,12 @@ export function createCanvasNode(
 	opts: Opts = {},
 ): CanvasContentElement {
 	const { connector } = ELEMENT_TYPES[type];
-	const model =
-		opts.attrs?.model ?? defaultModelFor(connector, opts.projectModels);
-	const provider = MODEL_CATALOGS[connector].providerFor(model);
+	const catalog = MODEL_CATALOGS[connector];
+	const model = catalog.resolve(
+		opts.attrs?.model,
+		opts.projectModels?.[connector],
+	);
+	const provider = catalog.providerFor(model);
 	const schema = resolveAttributeSchema(connector, provider, model);
 	const attributes: Record<string, string> = {
 		...schema.defaultAttributes,

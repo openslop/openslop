@@ -38,7 +38,5 @@ export function defaultModelFor(
 	type: ConnectorType,
 	models: ConnectorModels = {},
 ): string {
-	const catalog = MODEL_CATALOGS[type];
-	const pinned = models[type];
-	return pinned && catalog.has(pinned) ? pinned : catalog.defaultModel;
+	return MODEL_CATALOGS[type].resolve(models[type]);
 }

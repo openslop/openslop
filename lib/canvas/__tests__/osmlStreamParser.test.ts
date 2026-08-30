@@ -3,6 +3,7 @@ import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
 import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
 import { IMAGE_MODELS } from "@/lib/connectors/image/models";
+import { VIDEO_MODELS } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
 describe("OSMLStreamParser", () => {
@@ -179,12 +180,20 @@ describe("parseOSML", () => {
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
 		const [node] = parseOSML(
-			'<animated_image model="Slop Video v2" stillModel="Slop Image v2">a sunset</animated_image>',
+			'<animated_image model="Slop Video v1" stillModel="Slop Image v1">a sunset</animated_image>',
 		);
 		expect(flatAttributes(node)).toMatchObject({
-			model: "Slop Video v2",
-			stillModel: "Slop Image v2",
+			model: "Slop Video v1",
+			stillModel: "Slop Image v1",
 		});
+	});
+
+	// A retired model name would otherwise stick on the node and fail every generate.
+	it("replaces a model the catalog no longer offers", () => {
+		const [node] = parseOSML(
+			'<animated_image model="Slop Video v0">a sunset</animated_image>',
+		);
+		expect(flatAttributes(node).model).toBe(VIDEO_MODELS.defaultModel);
 	});
 
 	it("parses a complete OSML string in one shot", () => {

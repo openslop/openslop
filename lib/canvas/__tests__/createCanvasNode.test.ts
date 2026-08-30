@@ -64,11 +64,19 @@ describe("createCanvasNode", () => {
 	});
 
 	it("keeps a caller-supplied model over the project's", () => {
-		const node = createCanvasNode("narration", {
-			attrs: { model: "pinned-model" },
-			projectModels: { tts: "Slop TTS v1" },
+		const node = createCanvasNode("image", {
+			attrs: { model: "Slop Image v1" },
+			projectModels: { image: "Retired v0" },
 		});
-		expect(flatAttributes(node).model).toBe("pinned-model");
+		expect(flatAttributes(node).model).toBe("Slop Image v1");
+	});
+
+	// Pasted OSML can name a model from another connector's catalog.
+	it("falls back to the catalog when the caller names an unknown model", () => {
+		const node = createCanvasNode("image", {
+			attrs: { model: MODEL_CATALOGS.video.defaultModel },
+		});
+		expect(flatAttributes(node).model).toBe(MODEL_CATALOGS.image.defaultModel);
 	});
 
 	it("preserves provided id", () => {

@@ -7,6 +7,7 @@ import {
 	type PluginContext,
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
+import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import {
 	derivedDependency,
 	derivedNodeId,
@@ -47,7 +48,7 @@ export function stillElement(
 			...omit(attributes, VIDEO_ONLY_KEYS),
 			// Each generation only ever sees a model its own connector understands,
 			// and each resolves its own provider from that.
-			...(stillModel && { model: stillModel }),
+			...(stillModel && { model: MODEL_CATALOGS.image.resolve(stillModel) }),
 		},
 	};
 }

@@ -31,6 +31,13 @@ export class ModelCatalog {
 		return model in this.providers;
 	}
 
+	/** The first candidate the catalog offers, falling back to its default. */
+	resolve(...candidates: (string | undefined)[]): string {
+		return (
+			candidates.find((name) => name && this.has(name)) ?? this.defaultModel
+		);
+	}
+
 	get names(): string[] {
 		return Object.keys(this.providers);
 	}

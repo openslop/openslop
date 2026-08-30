@@ -13,6 +13,7 @@ import {
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createStillFramePlugin,
@@ -321,6 +322,13 @@ describe("stillElement", () => {
 	it("generates the still with the image model the element names", () => {
 		expect(stillAttributes({ stillModel: "Slop Image v1" })).toEqual({
 			model: "Slop Image v1",
+		});
+	});
+
+	// Hand-authored OSML can name a video model on the still.
+	it("falls back to the image catalog for an unknown still model", () => {
+		expect(stillAttributes({ stillModel: "Slop Video v1" })).toEqual({
+			model: MODEL_CATALOGS.image.defaultModel,
 		});
 	});
 
