@@ -94,11 +94,19 @@ export const derivedNodeId = (kind: string, key: string): NodeId =>
 export const derivedDependency = (node: GenerationNode, kind: string) =>
 	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
 
-const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
+const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}([^:]+):(.+)$`);
+
+/** The kind and key a derived id was minted from, if it was derived at all. */
+export function parseDerivedId(
+	id: NodeId,
+): { kind: string; key: string } | null {
+	const [, kind, key] = DERIVED_ID.exec(id) ?? [];
+	return kind && key ? { kind, key } : null;
+}
 
 /** The node a derived id was minted from, if it was derived at all. */
 export const derivedFrom = (id: NodeId): NodeId | null =>
-	DERIVED_ID.exec(id)?.[1] ?? null;
+	parseDerivedId(id)?.key ?? null;
 
 export function sourceNode(
 	id: NodeId,
