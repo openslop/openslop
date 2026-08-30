@@ -11,6 +11,7 @@ import {
 	Palette,
 	Plus,
 	Proportions,
+	TextBox,
 	Translate,
 	User,
 	X,
@@ -46,6 +47,7 @@ import {
 	type VideoLength,
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { useScriptUpload } from "@/lib/upload/useScriptUpload";
 import { cn } from "@/lib/utils";
 import { useSloppyModel } from "@/app/components/sloppy/SloppyModelProvider";
 import { ActionButton } from "./ActionButton";
@@ -90,9 +92,11 @@ const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map((t) => ({
 
 function AttachMenu({
 	openPicker,
+	openScriptPicker,
 	uploading,
 }: {
 	openPicker: () => void;
+	openScriptPicker: () => void;
 	uploading: boolean;
 }) {
 	const { openCreateCharacter, openNarrator, openArtStyle } = useAssetEditors();
@@ -103,6 +107,12 @@ function AttachMenu({
 			label: "Upload reference images",
 			icon: <ImagePlus className={iconClass} />,
 			onSelect: openPicker,
+		},
+		{
+			key: "script",
+			label: "Upload script (PDF)",
+			icon: <TextBox className={iconClass} />,
+			onSelect: openScriptPicker,
 		},
 		{
 			key: "character",
@@ -196,6 +206,12 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const [language, setLanguage] = useScriptLanguage();
 	const { model, setModel, models } = useSloppyModel();
 
+	/** A pasted script sets its own length, so the target goes back to auto. */
+	const chooseIntent = (next: ComposerIntent) => {
+		setIntent(next);
+		if (next === "script") updateVideoSettings({ length: "auto" });
+	};
+
 	const {
 		openPicker,
 		uploading,
@@ -204,15 +220,19 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 		dropZoneProps,
 		isDraggingOver,
 	} = useImageUpload({ multiple: true, onUpload: addReferenceImages });
+	const {
+		openPicker: openScriptPicker,
+		extracting,
+		inputElement: scriptInputElement,
+	} = useScriptUpload({
+		onExtract: (text) => {
+			chooseIntent("script");
+			onValueChange(text);
+		},
+	});
 	const hasText = value.trim().length > 0;
 	const pasting = intent === "script";
 	const activeTemplate = pasting ? undefined : template;
-
-	/** A pasted script sets its own length, so the target goes back to auto. */
-	const chooseIntent = (next: ComposerIntent) => {
-		setIntent(next);
-		if (next === "script") updateVideoSettings({ length: "auto" });
-	};
 
 	const handleSubmit = () => {
 		if (hasText) onSubmit(templateBrief(activeTemplate, value));
@@ -264,7 +284,12 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex min-w-0 flex-wrap items-center gap-2">
 						{inputElement}
-						<AttachMenu openPicker={openPicker} uploading={uploading} />
+						{scriptInputElement}
+						<AttachMenu
+							openPicker={openPicker}
+							openScriptPicker={openScriptPicker}
+							uploading={uploading || extracting}
+						/>
 						<SettingPill
 							name="Aspect ratio"
 							icon={<Proportions className="mr-1 h-3 w-3" />}

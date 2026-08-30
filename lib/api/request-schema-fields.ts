@@ -46,6 +46,16 @@ export const imageFile = (maxBytes: number) =>
 			message: `File must be under ${maxBytes / 1024 / 1024} MB`,
 		});
 
+export const pdfFile = (maxBytes: number) =>
+	z
+		.instanceof(File, { error: "No file provided" })
+		.refine((file) => file.type === "application/pdf", {
+			message: "File must be a PDF",
+		})
+		.refine((file) => file.size <= maxBytes, {
+			message: `File must be under ${maxBytes / 1024 / 1024} MB`,
+		});
+
 export const requiredVoiceId = z
 	.string({ error: "voiceId is required" })
 	.min(1, {
