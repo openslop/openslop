@@ -102,7 +102,6 @@ export function createStillFramePlugin(): ConnectorPlugin<
 					"animated_image expected a still frame from its dependency",
 				);
 			}
-			// The element's own text prompts the still, not the animation.
 			return {
 				...omit(params, "videoPrompt", "stillModel"),
 				prompt: videoPrompt,
