@@ -37,26 +37,25 @@ export class AttributeSchema {
 
 	/** The attributes shown on the element header, in def order. */
 	get badgeAttributes(): Record<string, AttributeSpec> {
-		return this.specs(true);
+		return this.specsWhere((def) => def.badge === true);
 	}
 
 	/** The attributes shown in the settings popover, in def order. */
 	get settingsAttributes(): Record<string, AttributeSpec> {
-		return this.specs(false);
+		return this.specsWhere((def) => def.badge !== true);
 	}
 
-	private specs(badge: boolean): Record<string, AttributeSpec> {
-		const out: Record<string, AttributeSpec> = {};
-		for (const def of this.defs) {
-			if ((def.badge ?? false) !== badge) continue;
-			out[def.key] = {
-				label: def.label,
-				icon: def.icon,
-				unit: def.unit,
-				edit: def.edit,
-			};
-		}
-		return out;
+	private specsWhere(
+		include: (def: AttributeDef) => boolean,
+	): Record<string, AttributeSpec> {
+		return Object.fromEntries(
+			this.defs
+				.filter(include)
+				.map(({ key, label, icon, unit, edit }): [string, AttributeSpec] => [
+					key,
+					{ label, icon, unit, edit },
+				]),
+		);
 	}
 
 	get defaultAttributes(): Record<string, string> {
