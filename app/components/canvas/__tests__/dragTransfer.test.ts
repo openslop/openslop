@@ -40,7 +40,7 @@ describe("createDragTransferStore", () => {
 		expect(createDragTransferStore().get()).toBeNull();
 	});
 
-	it("notifies subscribers on every write", () => {
+	it("notifies subscribers on every change", () => {
 		const store = createDragTransferStore();
 		const listener = vi.fn();
 		store.subscribe(listener);
@@ -51,6 +51,17 @@ describe("createDragTransferStore", () => {
 		store.set(null);
 		expect(store.get()).toBeNull();
 		expect(listener).toHaveBeenCalledTimes(2);
+	});
+
+	// Every drag-over clears the transfer, so the common case is a write that
+	// changes nothing and must not wake every element card mid-drag.
+	it("stays quiet when the write leaves the value alone", () => {
+		const store = createDragTransferStore();
+		const listener = vi.fn();
+		store.subscribe(listener);
+
+		store.set(null);
+		expect(listener).not.toHaveBeenCalled();
 	});
 
 	it("stops notifying once unsubscribed", () => {

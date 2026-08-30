@@ -561,4 +561,43 @@ describe("buildVideoLayout", () => {
 			expect(layout.totalDurationSec).toBe(10);
 		});
 	});
+
+	// The renderer positions each scene by rounding its own duration and stacking
+	// the results, while every layered clip is positioned from the accumulated
+	// seconds. Sub-frame scene durations make those two disagree by a frame that
+	// grows with the scene count, which is audio drifting off its picture.
+	describe("frame grid", () => {
+		const fps = 24;
+		// 60.5 frames: the worst case for round(sum) vs sum(round).
+		const OFF_GRID_SEC = 60.5 / fps;
+
+		const fiveScenes = () =>
+			Array.from({ length: 5 }, (_, i) => [
+				el({ id: `img${i}`, type: "image" }),
+				el({ id: `nar${i}`, type: "narration", durationSec: OFF_GRID_SEC }),
+			]).flat();
+
+		it("keeps every layered start on the scene the renderer draws it over", () => {
+			const layout = buildVideoLayout(fiveScenes(), { fps });
+			const overlapFrames = toFrames(layout.transitionDurationSec, fps);
+
+			let rendered = 0;
+			layout.series.forEach((scene, i) => {
+				if (i > 0) rendered -= overlapFrames;
+				expect(toFrames(seqs(layout, "narration")[i].start, fps)).toBe(
+					rendered,
+				);
+				rendered += toFrames(scene.duration, fps);
+			});
+		});
+
+		it("snaps durations so no sequence rounds down to nothing", () => {
+			const layout = buildVideoLayout(fiveScenes(), { fps });
+			for (const list of Object.values(layout.sequences)) {
+				for (const seq of list ?? []) {
+					expect(toFrames(seq.duration, fps)).toBeGreaterThan(0);
+				}
+			}
+		});
+	});
 });

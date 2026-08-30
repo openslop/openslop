@@ -103,18 +103,19 @@ export function buildVideoLayout(
 		options?.trimVisualsToDialogue ?? DEFAULT_TRIM_VISUALS_TO_DIALOGUE;
 	const visualDuration = (element: ResolvedElement) =>
 		trimVisualsToDialogue ? 0 : element.durationSec;
-	// TransitionSeries lays transitions down in whole frames, so the overlap has
-	// to sit on the frame grid too. Subtracting the raw seconds would drift the
-	// absolutely-positioned layers a fraction of a frame per scene boundary.
-	const transitionDurationSec = toSeconds(
-		toFrames(TRANSITION_DURATION_SEC, cfg.fps),
-		cfg.fps,
-	);
+	// The renderer lays scenes down in whole frames and rounds each one on its
+	// own, so `round(sum)` only equals `sum(round)` if every duration entering
+	// the layout is already a whole number of frames. Snap once, here, and the
+	// absolutely-positioned layers stay on the scenes they belong to instead of
+	// drifting a fraction of a frame per boundary.
+	const onGrid = (sec: number) => toSeconds(toFrames(sec, cfg.fps), cfg.fps);
+	const transitionDurationSec = onGrid(TRANSITION_DURATION_SEC);
 	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;
 
-	for (const element of elements) {
+	for (const raw of elements) {
+		const element = { ...raw, durationSec: onGrid(raw.durationSec) };
 		const current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);
 

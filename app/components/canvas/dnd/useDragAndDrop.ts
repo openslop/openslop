@@ -44,6 +44,10 @@ export function useDragAndDrop(editor: Editor) {
 
 	const handleDragOver = useCallback(
 		(event: DragOverEvent) => {
+			// dnd-kit reports leaving every droppable as `over: null`, so clearing
+			// up front is what keeps the gap from outliving the pointer.
+			dragTransferStore.set(null);
+
 			const { active, over } = event;
 			if (!over?.id || active.id === over.id) return;
 			if (active.data.current?.type === "scene") return;
@@ -51,12 +55,7 @@ export function useDragAndDrop(editor: Editor) {
 			const fromSceneId = active.data.current?.sceneId;
 			const toSceneId = over.data.current?.sceneId;
 
-			if (!fromSceneId || !toSceneId) return;
-
-			if (fromSceneId === toSceneId) {
-				dragTransferStore.set(null);
-				return;
-			}
+			if (!fromSceneId || !toSceneId || fromSceneId === toSceneId) return;
 
 			const overEntry = findElementById(editor, String(over.id));
 			if (!overEntry) return;

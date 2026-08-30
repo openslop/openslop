@@ -8,16 +8,22 @@ import type { ProjectData } from "./store";
 const DERIVE_PROMPT = dedent`Vividly and concisely describe the visual art style of the attached reference image(s) in 1–2 concise sentences. Include ultra specific detail on character art style and overall art style. Only respond with the style description written as if it's a preamble for an image model prompt, no other text. This description should be generic enough to prepend to any image prompt, scene, or setting in this style.`;
 
 /** Generated avatars already carry the style, so reading them back is circular. */
+export function uploadedAvatarUrls(
+	state: ProjectData,
+	results: NodeResults,
+): string[] {
+	return compact(
+		Object.entries(state.metadata.characters).map(([name, character]) =>
+			character.avatarUploaded ? characterAvatarUrl(results, name) : undefined,
+		),
+	);
+}
+
 export function artStyleReferences(
 	state: ProjectData,
 	results: NodeResults,
 ): string[] {
-	return compact([
-		...state.referenceImages,
-		...Object.entries(state.metadata.characters).map(([name, character]) =>
-			character.avatarUploaded ? characterAvatarUrl(results, name) : undefined,
-		),
-	]);
+	return [...state.referenceImages, ...uploadedAvatarUrls(state, results)];
 }
 
 /** "" when there is nothing to read, so callers can leave the style alone. */

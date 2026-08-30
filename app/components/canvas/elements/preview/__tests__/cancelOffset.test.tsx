@@ -51,7 +51,6 @@ describe("cancel button offset", () => {
 	it("is pushed below the still/video toggle by AnimatedImageMedia", () => {
 		const html = withTooltip(
 			<AnimatedImageMedia
-				onDiscard={() => {}}
 				animated={{ ...generating, url: undefined }}
 				still={{ ...generating, url: undefined }}
 			/>,
@@ -80,15 +79,12 @@ describe("AnimatedImageMedia", () => {
 		seconds: 0,
 		error: "generation failed",
 		url: undefined,
+		onDiscard: () => {},
 	} as const;
 
 	it("keeps the still/video toggle reachable over a failed generation", () => {
 		const html = withTooltip(
-			<AnimatedImageMedia
-				onDiscard={() => {}}
-				animated={failed}
-				still={failed}
-			/>,
+			<AnimatedImageMedia animated={failed} still={failed} />,
 		);
 		expect(html).toContain("z-20");
 		expect(html).toContain("bg-media-toggle-bg");
