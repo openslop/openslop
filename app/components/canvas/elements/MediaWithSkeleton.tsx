@@ -9,6 +9,8 @@ interface MediaWithSkeletonProps {
 	alt: string;
 	videoInteractive?: boolean;
 	objectFit?: "cover" | "contain";
+	/** CSS width the media renders at, so an image is fetched at that size and not at the generator's full 2560px output. */
+	sizes: string;
 }
 
 export function MediaWithSkeleton({
@@ -17,6 +19,7 @@ export function MediaWithSkeleton({
 	alt,
 	videoInteractive = false,
 	objectFit = "cover",
+	sizes,
 }: MediaWithSkeletonProps) {
 	const [videoLoaded, setVideoLoaded] = useState(false);
 	const fitClass = objectFit === "contain" ? "object-contain" : "object-cover";
@@ -27,8 +30,8 @@ export function MediaWithSkeleton({
 				src={src}
 				alt={alt}
 				fill
+				sizes={sizes}
 				className={fitClass}
-				unoptimized
 			/>
 		);
 	}
