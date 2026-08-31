@@ -15,7 +15,6 @@ interface AuthFormProps {
 	subtitle: string;
 	submitLabel: string;
 	sentKind?: string;
-	initialError?: string;
 	shouldCreateUser?: boolean;
 	otpData?: Record<string, unknown>;
 	footer?: React.ReactNode;
@@ -27,7 +26,6 @@ export default function AuthForm({
 	subtitle,
 	submitLabel,
 	sentKind = "login",
-	initialError = "",
 	shouldCreateUser,
 	otpData,
 	footer,
@@ -36,7 +34,7 @@ export default function AuthForm({
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [sent, setSent] = useState(false);
-	const [error, setError] = useState(initialError);
+	const [error, setError] = useState("");
 
 	const handleMagicLink = async (e?: React.FormEvent) => {
 		e?.preventDefault();
