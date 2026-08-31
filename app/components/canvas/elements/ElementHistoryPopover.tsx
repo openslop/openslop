@@ -51,6 +51,7 @@ function ElementVersionThumbnail({
 				outputKind={result.videoUrl ? "video" : "image"}
 				src={src}
 				alt=""
+				sizes="64px"
 			/>
 		</div>
 	);

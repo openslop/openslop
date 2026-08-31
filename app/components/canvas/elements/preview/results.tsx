@@ -133,6 +133,7 @@ export function MediaPreview({
 				alt="Generated"
 				videoInteractive
 				objectFit="contain"
+				sizes="(min-width: 1024px) 60vw, 100vw"
 			/>
 			{error && <ErrorMessage message={error} />}
 			<ResultOverlay status={status} seconds={seconds} />

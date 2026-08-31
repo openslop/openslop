@@ -63,7 +63,7 @@ export function AssetTile({
 						src={previewUrl}
 						alt={name ?? ""}
 						fill
-						unoptimized
+						sizes="80px"
 						className="object-cover"
 					/>
 				) : (
