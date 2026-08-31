@@ -34,17 +34,13 @@ export default function ProjectsList({
 	};
 
 	const handleDelete = async (id: string) => {
-		const index = projects.findIndex((x) => x.id === id);
-		const removed = projects[index];
-		if (!removed) return;
+		const previous = projects;
 		setProjects((p) => p.filter((x) => x.id !== id));
 		try {
 			await deleteProject(id);
 		} catch (err) {
 			toastError(err, "Could not delete project");
-			// Put back only this row: a snapshot of the whole list would resurrect
-			// any other delete that landed while this one was in flight.
-			setProjects((p) => p.toSpliced(index, 0, removed));
+			setProjects(previous);
 		}
 	};
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
@@ -23,13 +23,8 @@ export default function AccessCodeInput() {
 	const resetWithError = useCallback((message: string) => {
 		setError(message);
 		setValues(emptyAccessCode());
+		inputRefs.current[0]?.focus();
 	}, []);
-
-	// The boxes are disabled while loading, so focus has to wait for the render
-	// that re-enables them.
-	useEffect(() => {
-		if (error && !loading) inputRefs.current[0]?.focus();
-	}, [error, loading]);
 
 	const submitCode = useCallback(
 		async (code: string) => {
