@@ -7,26 +7,36 @@ import { sourceNode, type NodeSpec } from "./graph";
  * change to it, which is what keeps reads from drifting out of the inputs.
  */
 export const forReferenceImages: NodeSpec = (state) =>
-	sourceNode("project:referenceImages", {
-		urls: state.referenceImages.join(","),
-	});
+	sourceNode(
+		"project:referenceImages",
+		{ urls: state.referenceImages.join(",") },
+		"the reference images",
+	);
 
 export const forArtStyle: NodeSpec = (state) =>
-	sourceNode("project:artStyle", { style: state.metadata.style.trim() });
+	sourceNode(
+		"project:artStyle",
+		{ style: state.metadata.style.trim() },
+		"the art style",
+	);
 
 export const forAspectRatio: NodeSpec = (state) =>
-	sourceNode("project:aspectRatio", {
-		aspectRatio: state.metadata.videoSettings.aspectRatio,
-	});
+	sourceNode(
+		"project:aspectRatio",
+		{ aspectRatio: state.metadata.videoSettings.aspectRatio },
+		"the aspect ratio",
+	);
 
 export const forVoice =
 	(characterName?: string): NodeSpec =>
 	(state) => {
 		const { narration, characters } = state.metadata;
 		const voice = characterName ? characters[characterName] : narration;
-		return sourceNode(`project:voice:${characterName ?? "narrator"}`, {
-			voiceId: voice?.voiceId ?? "",
-		});
+		return sourceNode(
+			`project:voice:${characterName ?? "narrator"}`,
+			{ voiceId: voice?.voiceId ?? "" },
+			`${characterName ?? "the narrator"}'s voice`,
+		);
 	};
 
 export const aspectDimensions = (state: ProjectData) =>

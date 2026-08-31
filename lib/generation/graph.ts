@@ -36,6 +36,8 @@ type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
 	dependsOn: GenerationNode[];
+	/** How the node reads when a dependent has to name it to the user. */
+	label?: string;
 };
 
 /** Project state that is read rather than generated; its identity is its inputs. */
@@ -51,6 +53,7 @@ export type GenerationNode = SourceNode | JobNode;
 export type ElementNode = {
 	element: CanvasContentElement;
 	plugins?: ConnectorPlugin[];
+	label?: string;
 };
 
 /**
@@ -103,11 +106,13 @@ export const derivedFrom = (id: NodeId): NodeId | null =>
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,
+	label?: string,
 ): SourceNode {
 	return {
 		id,
 		inputs: { prompt: "", attributes },
 		dependsOn: [],
+		label,
 		job: null,
 	};
 }

@@ -17,7 +17,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { isNodeStale } from "@/lib/generation/graph";
+import { staleReason } from "@/lib/generation/staleReason";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
@@ -100,7 +100,8 @@ function CharacterEditDialogBody({
 		queue.enqueueGraph([avatarNode]);
 	};
 
-	const isStale = isNodeStale(avatarNode, queue);
+	const reason = staleReason(avatarNode, queue);
+	const isStale = reason !== null;
 
 	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
@@ -158,7 +159,7 @@ function CharacterEditDialogBody({
 								elementId={avatarElementId}
 								onRestore={restoreAppearance}
 							/>
-							{isStale && <StaleIndicator />}
+							{reason && <StaleIndicator reason={reason} />}
 							<GenerateButton
 								status={avatarSnapshot.status}
 								hasResult={Boolean(avatarUrl)}

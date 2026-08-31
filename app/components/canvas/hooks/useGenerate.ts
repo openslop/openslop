@@ -3,7 +3,8 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { forElement, isNodeStale } from "@/lib/generation/graph";
+import { forElement } from "@/lib/generation/graph";
+import { staleReason } from "@/lib/generation/staleReason";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
@@ -15,7 +16,7 @@ export function useGenerate(element: CanvasContentElement) {
 		() => buildNode(forElement(element)),
 		[buildNode, element],
 	);
-	const stale = useQueueSelector((q) => isNodeStale(node, q));
+	const reason = useQueueSelector((q) => staleReason(node, q));
 
 	const generate = useCallback(() => {
 		if (!node.inputs.prompt) {
@@ -36,7 +37,7 @@ export function useGenerate(element: CanvasContentElement) {
 		result: snapshot.result,
 		error: snapshot.error,
 		pinned: snapshot.pinned,
-		stale,
+		staleReason: reason,
 		hasPrompt: Boolean(node.inputs.prompt),
 		hasResult: Boolean(snapshot.result),
 		generate,

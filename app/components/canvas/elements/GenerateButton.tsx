@@ -10,9 +10,9 @@ import {
 } from "@/lib/generation/snapshots";
 import { useElementGeneration } from "./ElementGenerationContext";
 
-export function StaleIndicator() {
+export function StaleIndicator({ reason }: { reason: string }) {
 	return (
-		<SimpleTooltip label="Prompt changed — regenerate to update">
+		<SimpleTooltip label={reason}>
 			<span className="inline-flex items-center gap-1 rounded-full border border-tertiary/50 bg-tertiary/10 px-2 py-0.5 text-label-xs font-medium text-tertiary">
 				<AlertCircle className="h-3 w-3" />
 				Stale
@@ -22,9 +22,9 @@ export function StaleIndicator() {
 }
 
 export function ElementStaleIndicator() {
-	const { stale } = useElementGeneration();
-	if (!stale) return null;
-	return <StaleIndicator />;
+	const { staleReason } = useElementGeneration();
+	if (!staleReason) return null;
+	return <StaleIndicator reason={staleReason} />;
 }
 
 function generateLabel(status: GenerationStatus, hasResult: boolean) {
