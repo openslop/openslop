@@ -3,14 +3,11 @@
 import { Fragment, useMemo, useState } from "react";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
 import { removeElement } from "@/app/components/canvas/utils/nodeOps";
-import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { insertScene } from "@/lib/canvas/insertScene";
 import { useProject } from "@/lib/project/useProject";
-import { toFrames } from "@/lib/video/frames";
-import { usePlayerControl } from "../PlayerControlContext";
 import { useLayout } from "../VideoLayoutContext";
+import { useSelectScene } from "../useSelectScene";
 import { SceneInsertHandle } from "./SceneInsertHandle";
 import {
 	buildStoryboardScenes,
@@ -21,8 +18,7 @@ import { StoryboardScene } from "./StoryboardScene";
 export function Storyboard() {
 	const editor = useSlateStatic();
 	const { layout, segments, scenes } = useLayout();
-	const { player } = usePlayerControl();
-	const setActiveSceneId = useSetActiveSceneId();
+	const selectScene = useSelectScene();
 	const projectModels = useProject((s) => s.metadata.connectorModels);
 	const [deleting, setDeleting] = useState<StoryboardSceneData | null>(null);
 
@@ -52,12 +48,7 @@ export function Storyboard() {
 					<StoryboardScene
 						item={item}
 						aspectRatio={aspectRatio}
-						onSelect={() => {
-							setActiveSceneId(item.scene.id);
-							scrollToScene(item.scene.id);
-							if (item.start === null) return;
-							player?.seekTo(toFrames(item.start, layout.fps));
-						}}
+						onSelect={() => selectScene(item.scene.id, item.start)}
 						onRequestDelete={() => setDeleting(item)}
 					/>
 				</Fragment>

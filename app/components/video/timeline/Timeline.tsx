@@ -8,14 +8,13 @@ import {
 } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { useSetActiveSceneId } from "@/app/components/scene-selection/ActiveSceneContext";
-import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
 import { useElementWidth } from "@/lib/components/useElementWidth";
 import type { LayerType } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/video/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../PlayerControlContext";
 import { usePlayerScrub } from "../usePlayerScrub";
+import { useSelectScene } from "../useSelectScene";
 import { useLayout } from "../VideoLayoutContext";
 import { TimelineClip } from "./TimelineClip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./TimelineHoverHead";
@@ -101,7 +100,7 @@ function TimelineEmpty() {
 export function Timeline() {
 	const { layout } = useLayout();
 	const { player } = usePlayerControl();
-	const setActiveSceneId = useSetActiveSceneId();
+	const selectScene = useSelectScene();
 	const [selectedKey, setSelectedKey] = useState<string | null>(null);
 	const hoverHead = useRef<HoverHeadHandle>(null);
 	const {
@@ -124,10 +123,7 @@ export function Timeline() {
 
 	const select = (clip: TimelineClipData) => {
 		setSelectedKey(clip.key);
-		const { sceneId } = clip.element;
-		setActiveSceneId(sceneId);
-		scrollToScene(sceneId);
-		seek(clip.start);
+		selectScene(clip.element.sceneId, clip.start);
 	};
 
 	return (

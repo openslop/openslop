@@ -2,9 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-
-/** Which view occupies the strip under the transport bar. */
-export type BottomView = "timeline" | "storyboard" | "hidden";
+import type { BottomView } from "./bottomViews";
 
 const [BottomViewContext, useBottomView] = createRequiredContext<{
 	view: BottomView;

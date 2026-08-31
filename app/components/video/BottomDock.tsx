@@ -1,22 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { BottomTransportBar } from "./BottomTransportBar";
-import { useBottomView, type BottomView } from "./BottomViewContext";
+import { BOTTOM_VIEWS } from "./bottomViews";
+import { useBottomView } from "./BottomViewContext";
 import { ResizeHandle } from "./ResizeHandle";
 import { useResize } from "./useResize";
 
 const DEFAULT_HEIGHT = 260;
 
-/** Views that fill the dock; the rest sit at their own height. */
-const FILLS_DOCK: Record<BottomView, boolean> = {
-	timeline: true,
-	storyboard: false,
-	hidden: false,
-};
-
 /** The transport bar and its panel, resized by a handle on the dock's top edge. */
-export function BottomDock({ children }: { children: ReactNode }) {
+export function BottomDock() {
 	const { view } = useBottomView();
 	const { size, handleProps, resizing } = useResize({
 		axis: "vertical",
@@ -26,14 +19,14 @@ export function BottomDock({ children }: { children: ReactNode }) {
 		maxViewportFraction: 0.75,
 	});
 
-	const fills = FILLS_DOCK[view];
+	const { fillsDock, panel } = BOTTOM_VIEWS[view];
 
 	return (
 		<div
 			className="flex shrink-0 flex-col"
-			style={fills ? { height: size } : undefined}
+			style={fillsDock ? { height: size } : undefined}
 		>
-			{fills ? (
+			{fillsDock ? (
 				<ResizeHandle
 					axis="vertical"
 					resizing={resizing}
@@ -41,10 +34,10 @@ export function BottomDock({ children }: { children: ReactNode }) {
 				/>
 			) : null}
 			<BottomTransportBar />
-			{fills ? (
-				<div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+			{fillsDock ? (
+				<div className="min-h-0 flex-1 overflow-hidden">{panel}</div>
 			) : (
-				children
+				panel
 			)}
 		</div>
 	);
