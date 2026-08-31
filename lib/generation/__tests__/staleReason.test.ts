@@ -17,8 +17,6 @@ const EMPTY_STATE = {
 };
 
 const config: ConnectorConfig = {
-	defaultModel: "m",
-	models: ["m"],
 	isDefault: true,
 };
 
