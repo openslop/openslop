@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import {
+	DialogBody,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -41,9 +42,9 @@ function NarratorEditDialogBody({ onClose }: { onClose: () => void }) {
 				<DialogDescription>Change how the narrator sounds</DialogDescription>
 			</DialogHeader>
 
-			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
+			<DialogBody>
 				<VoiceSection voice={narration} onChange={update} />
-			</div>
+			</DialogBody>
 
 			<DialogFooter className="shrink-0">
 				<Button type="button" size="sm" onClick={onClose}>

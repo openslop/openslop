@@ -5,6 +5,7 @@ import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
 import {
+	DialogBody,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -144,7 +145,7 @@ function CharacterEditDialogBody({
 				</DialogDescription>
 			</DialogHeader>
 
-			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
+			<DialogBody>
 				<div className="grid gap-4 sm:grid-cols-2">
 					<div className="flex flex-col gap-2">
 						<TextAreaField
@@ -191,7 +192,7 @@ function CharacterEditDialogBody({
 					</div>
 				</div>
 				<VoiceSection voice={character} onChange={update} />
-			</div>
+			</DialogBody>
 
 			<DialogFooter className="shrink-0">
 				<Button
