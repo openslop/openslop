@@ -32,8 +32,6 @@ const PROMPT_LENGTH = 72;
 
 const SKELETON_ROWS = [0, 1, 2];
 
-const RULE = "-mx-3 my-2 data-[orientation=horizontal]:w-[calc(100%+1.5rem)]";
-
 const Dot = () => (
 	<span aria-hidden="true" className="text-muted-foreground">
 		·
@@ -170,7 +168,7 @@ export function ElementHistoryPopover({
 					<span className="text-label font-semibold">Generation history</span>
 					<CloseButton onClick={close} />
 				</div>
-				<Separator className={RULE} />
+				<Separator bleed />
 				<div
 					aria-live="polite"
 					className="-mx-1 flex max-h-80 flex-col overflow-y-auto overscroll-contain"
