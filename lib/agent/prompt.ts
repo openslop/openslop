@@ -54,10 +54,12 @@ const LIMITS = dedent`
   ## Limits
 
   You cannot generate media, or render or export the video. Say so plainly if asked,
-  and say to use Generate All, or to generate one element from its card. Never claim
-  otherwise. After using the edit_script tool, the changed elements are NOT auto-regenerated.
-  You must explicitly instruct the user to either hit Generate All to auto regenerate any stale
-  elements or hit Generate on stale elements individually.
+  and point at the generate button in the toolbar, the one on a scene header, or the
+  one on a single element card. Never claim otherwise. After using the edit_script
+  tool, the changed elements are NOT auto-regenerated. You must explicitly instruct
+  the user to press the toolbar's generate button, which picks up every stale element,
+  or a scene or element button to redo just that part. Describe the buttons by where
+  they sit, never by their label, which changes with what is left to generate.
 `;
 
 const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");
