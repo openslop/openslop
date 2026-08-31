@@ -4,7 +4,11 @@ import type {
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
 import { stubAvatarResults } from "@/lib/connectors/__tests__/_node-results";
-import { artStyleReferences, deriveArtStyle } from "../deriveArtStyle";
+import {
+	artStyleReferences,
+	deriveArtStyle,
+	uploadedAvatarUrls,
+} from "../deriveArtStyle";
 import { createProjectStore, type ProjectStore } from "../store";
 
 let store: ProjectStore;
@@ -42,6 +46,23 @@ describe("artStyleReferences", () => {
 
 	it("is empty when nothing has been uploaded", () => {
 		expect(artStyleReferences(project(), stubAvatarResults({}))).toEqual([]);
+	});
+});
+
+describe("uploadedAvatarUrls", () => {
+	it("leaves out reference images, which the project store owns", () => {
+		project().setReferenceImages(["https://example.com/reference.jpg"]);
+		project().setCharacter("Mira", {
+			appearance: "blue hair",
+			avatarUploaded: true,
+		});
+
+		expect(
+			uploadedAvatarUrls(
+				project(),
+				stubAvatarResults({ Mira: "https://example.com/uploaded.jpg" }),
+			),
+		).toEqual(["https://example.com/uploaded.jpg"]);
 	});
 });
 

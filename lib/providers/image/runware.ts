@@ -8,6 +8,9 @@ type RawImageResult = {
 	format: string;
 } & WithMetadata;
 
+// Runware defaults to JPG when the request names no format.
+const OUTPUT_FORMAT = "PNG";
+
 export class RunwareImage extends BaseProvider<
 	ImageGenerateParams,
 	RawImageResult
@@ -39,6 +42,7 @@ export class RunwareImage extends BaseProvider<
 				width: params.width || 2848,
 				height: params.height || 1600,
 				outputType: "base64Data",
+				outputFormat: OUTPUT_FORMAT,
 				numberResults: 1,
 				referenceImages: params.referenceImages,
 			});
@@ -48,7 +52,7 @@ export class RunwareImage extends BaseProvider<
 
 			return {
 				data: image.imageBase64Data,
-				format: "png" as const,
+				format: OUTPUT_FORMAT.toLowerCase(),
 			};
 		});
 	}

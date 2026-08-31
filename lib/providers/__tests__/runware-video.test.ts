@@ -48,6 +48,7 @@ describe("RunwareVideo", () => {
 				duration: 5,
 				outputType: "URL",
 				deliveryMethod: "async",
+				skipResponse: true,
 				inputs: {
 					frameImages: undefined,
 					referenceImages: undefined,
@@ -96,6 +97,27 @@ describe("RunwareVideo", () => {
 
 			expect(result.metadata?.jobId).toBe("job-arr");
 			expect(result.url).toBe("https://v.mp4");
+		});
+
+		it("asks the SDK for the ack rather than the finished video", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-3",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({ prompt: "test" });
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({ skipResponse: true }),
+			);
+		});
+
+		it("fails loudly when the ack carries no task id", async () => {
+			mockVideoInference.mockResolvedValue({});
+
+			await expect(
+				new RunwareVideo("test-key").submit({ prompt: "test" }),
+			).rejects.toThrow("returned no task");
 		});
 
 		it("disconnects on error", async () => {

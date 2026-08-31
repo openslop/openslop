@@ -18,8 +18,8 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { createDefaultConnector } from "@/lib/connectors/registry";
 import {
-	artStyleReferences,
 	deriveArtStyle,
+	uploadedAvatarUrls,
 } from "@/lib/project/deriveArtStyle";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useProject } from "@/lib/project/useProject";
@@ -53,9 +53,11 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 
 	const [deriving, setDeriving] = useState(false);
 
-	const hasReferences = useQueueSelector(
-		(q) => artStyleReferences(store.getState(), q).length > 0,
+	const uploadedCount = useProject((s) => s.referenceImages.length);
+	const avatarCount = useQueueSelector(
+		(q) => uploadedAvatarUrls(store.getState(), q).length,
 	);
+	const hasReferences = uploadedCount + avatarCount > 0;
 
 	const deriveFromReferences = async () => {
 		setDeriving(true);

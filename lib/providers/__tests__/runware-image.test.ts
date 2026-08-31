@@ -16,6 +16,7 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
+import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareImage } from "../image/runware";
 
 describe("RunwareImage", () => {
@@ -38,10 +39,32 @@ describe("RunwareImage", () => {
 			width: 2848,
 			height: 1600,
 			outputType: "base64Data",
+			outputFormat: "PNG",
 			numberResults: 1,
 			referenceImages: undefined,
 		});
 		expect(mockDisconnect).toHaveBeenCalled();
+	});
+
+	it("asks for the format it labels the bytes with", async () => {
+		mockImageInference.mockResolvedValue([{ imageBase64Data: "abc" }]);
+
+		await new RunwareImage("test-key").generate({ prompt: "a cat" });
+
+		expect(mockImageInference).toHaveBeenCalledWith(
+			expect.objectContaining({ outputFormat: "PNG" }),
+		);
+		expect(AssetBundle.upload).toHaveBeenCalledWith(
+			"image",
+			"runware",
+			[
+				expect.objectContaining({
+					filename: "output.png",
+					contentType: "image/png",
+				}),
+			],
+			undefined,
+		);
 	});
 
 	it("passes custom dimensions and model", async () => {

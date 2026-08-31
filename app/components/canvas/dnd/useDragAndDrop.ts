@@ -44,6 +44,9 @@ export function useDragAndDrop(editor: Editor) {
 
 	const handleDragOver = useCallback(
 		(event: DragOverEvent) => {
+			// Leaving every droppable arrives as `over: null`, below the early return.
+			dragTransferStore.set(null);
+
 			const { active, over } = event;
 			if (!over?.id || active.id === over.id) return;
 			if (active.data.current?.type === "scene") return;
@@ -51,12 +54,7 @@ export function useDragAndDrop(editor: Editor) {
 			const fromSceneId = active.data.current?.sceneId;
 			const toSceneId = over.data.current?.sceneId;
 
-			if (!fromSceneId || !toSceneId) return;
-
-			if (fromSceneId === toSceneId) {
-				dragTransferStore.set(null);
-				return;
-			}
+			if (!fromSceneId || !toSceneId || fromSceneId === toSceneId) return;
 
 			const overEntry = findElementById(editor, String(over.id));
 			if (!overEntry) return;

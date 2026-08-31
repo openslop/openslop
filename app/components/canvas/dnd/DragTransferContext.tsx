@@ -26,6 +26,7 @@ export function createDragTransferStore(): DragTransferStore {
 	return {
 		get: () => transfer,
 		set: (next) => {
+			if (transfer === next) return;
 			transfer = next;
 			for (const listener of listeners) listener();
 		},

@@ -36,6 +36,8 @@ export class RunwareVideo extends BaseVideoProvider {
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
+				// Without this the SDK polls the task to completion before returning.
+				skipResponse: true,
 				inputs: {
 					frameImages: params.frameImages,
 					referenceImages: params.referenceImages,
@@ -46,7 +48,8 @@ export class RunwareVideo extends BaseVideoProvider {
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;
-			if (!video) throw new Error("Runware video inference returned no result");
+			if (!video?.taskUUID)
+				throw new Error("Runware video inference returned no task");
 			return toVideoJob(video);
 		});
 	}
