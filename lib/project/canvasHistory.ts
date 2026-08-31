@@ -1,3 +1,4 @@
+import { createEmitter } from "@/lib/store/emitter";
 import type { Autosaver } from "./autosave";
 import type { ProjectContent, ProjectDocument } from "./projectDocument";
 
@@ -41,7 +42,7 @@ export class CanvasHistory {
 	private open: { id: string; until: number } | null = null;
 	/** What the canvas returns to, held for as long as a preview lasts. */
 	private stash: ProjectContent | null = null;
-	private readonly listeners = new Set<() => void>();
+	private readonly emitter = createEmitter();
 
 	constructor(
 		private readonly storage: CanvasVersionStorage,
@@ -49,18 +50,13 @@ export class CanvasHistory {
 		private readonly autosaver: Autosaver,
 	) {}
 
-	subscribe = (listener: () => void) => {
-		this.listeners.add(listener);
-		return () => {
-			this.listeners.delete(listener);
-		};
-	};
+	subscribe = this.emitter.subscribe;
 
 	getState = (): CanvasHistoryState => this.state;
 
 	private setState(patch: Partial<CanvasHistoryState>) {
 		this.state = { ...this.state, ...patch };
-		for (const listener of this.listeners) listener();
+		this.emitter.notify();
 	}
 
 	load = async (): Promise<void> => {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createEmitter } from "@/lib/store/emitter";
 import {
 	ASSET_CONNECTOR_TYPES,
 	type AssetConnectorType,
@@ -81,7 +82,7 @@ export const isGenerationActive = (status: GenerationStatus) =>
  */
 export class SnapshotStore {
 	private state: Map<string, ElementSnapshot>;
-	private listeners = new Set<() => void>();
+	private readonly emitter = createEmitter();
 	private resultVersion = 0;
 
 	constructor(initialState: Record<string, ElementSnapshot> = {}) {
@@ -94,18 +95,9 @@ export class SnapshotStore {
 		this.notify();
 	}
 
-	subscribe = (listener: () => void) => {
-		this.listeners.add(listener);
-		return () => {
-			this.listeners.delete(listener);
-		};
-	};
+	subscribe = this.emitter.subscribe;
 
-	notify() {
-		for (const listener of this.listeners) {
-			listener();
-		}
-	}
+	notify = this.emitter.notify;
 
 	get = (id?: string): ElementSnapshot =>
 		(id && this.state.get(id)) || EMPTY_SNAPSHOT;
