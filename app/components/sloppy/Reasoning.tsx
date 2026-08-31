@@ -2,18 +2,16 @@
 
 import { Sparkles } from "@/components/ui/icon";
 import { Disclosure, DisclosureText } from "@/components/ui/disclosure";
-import { reasoningOpen } from "./turnDisplay";
 
 export function Reasoning({
 	text,
 	streaming,
-	superseded,
+	open,
 }: {
 	text: string;
 	streaming: boolean;
-	superseded: boolean;
+	open: boolean;
 }) {
-	const open = reasoningOpen(superseded, text);
 	return (
 		<Disclosure
 			// Keyed on the auto state so reasoning that streams in open shuts itself

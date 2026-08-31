@@ -22,6 +22,11 @@ export function userText(message: SloppyMessage): string {
 
 const LONG_REASONING = 600;
 
-export function reasoningOpen(superseded: boolean, text: string): boolean {
-	return !superseded && text.length <= LONG_REASONING;
+/** Opening is a live-streaming affordance, so a restored thought stays shut whatever state it was stored in. */
+export function reasoningOpen(
+	live: boolean,
+	superseded: boolean,
+	text: string,
+): boolean {
+	return live && !superseded && text.length <= LONG_REASONING;
 }
