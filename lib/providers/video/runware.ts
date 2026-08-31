@@ -36,8 +36,7 @@ export class RunwareVideo extends BaseVideoProvider {
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
-				// Without this the SDK polls the task to completion before it
-				// returns, which is the blocking wait the job queue exists to avoid.
+				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
 				inputs: {
 					frameImages: params.frameImages,

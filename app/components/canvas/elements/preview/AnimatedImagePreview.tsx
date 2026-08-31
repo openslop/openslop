@@ -26,7 +26,6 @@ import type {
 	PreviewOverlays,
 } from "./status";
 
-/** Each mode owns its own node, so Cancel has to cancel the one on screen. */
 type ModeState = GenerationState &
 	Pick<PlaceholderProps, "onDiscard"> & {
 		error: string | null;

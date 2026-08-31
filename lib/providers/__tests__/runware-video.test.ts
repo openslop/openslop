@@ -99,8 +99,6 @@ describe("RunwareVideo", () => {
 			expect(result.url).toBe("https://v.mp4");
 		});
 
-		// Without skipResponse the SDK polls the task to completion before it
-		// returns, holding the queue worker open for the whole generation.
 		it("asks the SDK for the ack rather than the finished video", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-3",

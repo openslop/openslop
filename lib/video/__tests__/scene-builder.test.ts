@@ -562,10 +562,6 @@ describe("buildVideoLayout", () => {
 		});
 	});
 
-	// The renderer positions each scene by rounding its own duration and stacking
-	// the results, while every layered clip is positioned from the accumulated
-	// seconds. Sub-frame scene durations make those two disagree by a frame that
-	// grows with the scene count, which is audio drifting off its picture.
 	describe("frame grid", () => {
 		const fps = 24;
 		// 60.5 frames: the worst case for round(sum) vs sum(round).

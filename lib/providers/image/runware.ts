@@ -8,10 +8,7 @@ type RawImageResult = {
 	format: string;
 } & WithMetadata;
 
-/**
- * Runware defaults to JPG when the request names no format, so asking for one
- * is what keeps the bytes and the `image/png` we declare for them in agreement.
- */
+// Runware defaults to JPG when the request names no format.
 const OUTPUT_FORMAT = "PNG";
 
 export class RunwareImage extends BaseProvider<

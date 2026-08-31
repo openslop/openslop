@@ -46,8 +46,6 @@ describe("RunwareImage", () => {
 		expect(mockDisconnect).toHaveBeenCalled();
 	});
 
-	// Runware falls back to JPG when the request names no format, which would
-	// leave the bytes disagreeing with the image/png the bundle declares.
 	it("asks for the format it labels the bytes with", async () => {
 		mockImageInference.mockResolvedValue([{ imageBase64Data: "abc" }]);
 

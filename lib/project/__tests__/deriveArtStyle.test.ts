@@ -49,8 +49,6 @@ describe("artStyleReferences", () => {
 	});
 });
 
-// The two halves live in different stores, so a caller that wants to react to a
-// change needs to subscribe to each one.
 describe("uploadedAvatarUrls", () => {
 	it("leaves out reference images, which the project store owns", () => {
 		project().setReferenceImages(["https://example.com/reference.jpg"]);

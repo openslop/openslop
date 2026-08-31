@@ -53,7 +53,6 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 
 	const [deriving, setDeriving] = useState(false);
 
-	// `artStyleReferences` spans both stores, so each half needs its own subscription.
 	const uploadedCount = useProject((s) => s.referenceImages.length);
 	const avatarCount = useQueueSelector(
 		(q) => uploadedAvatarUrls(store.getState(), q).length,

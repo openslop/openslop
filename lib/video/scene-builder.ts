@@ -103,11 +103,8 @@ export function buildVideoLayout(
 		options?.trimVisualsToDialogue ?? DEFAULT_TRIM_VISUALS_TO_DIALOGUE;
 	const visualDuration = (element: ResolvedElement) =>
 		trimVisualsToDialogue ? 0 : element.durationSec;
-	// The renderer lays scenes down in whole frames and rounds each one on its
-	// own, so `round(sum)` only equals `sum(round)` if every duration entering
-	// the layout is already a whole number of frames. Snap once, here, and the
-	// absolutely-positioned layers stay on the scenes they belong to instead of
-	// drifting a fraction of a frame per boundary.
+	// Scenes are laid down one rounded duration at a time while layers are
+	// positioned from the accumulated seconds; snapping here keeps them equal.
 	const onGrid = (sec: number) => toSeconds(toFrames(sec, cfg.fps), cfg.fps);
 	const transitionDurationSec = onGrid(TRANSITION_DURATION_SEC);
 	const series: Sequence[] = [];
