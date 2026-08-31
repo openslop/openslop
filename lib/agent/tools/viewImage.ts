@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
-import { ELEMENT_TYPES } from "@/lib/canvas/types";
+import { hasPicture } from "@/lib/connectors/animated_image/plugins/still-frame";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
 import { defineTool, imagePart } from "./defineTool";
 
@@ -13,10 +13,11 @@ const NOT_READY: Record<GenerationStatus, string> = {
 
 export const viewImage = defineTool({
 	description: dedent`
-	  Look at what an image element generated. You receive the image itself alongside the
-	  prompt that made it, so you can say whether the result matches what was asked for.
-	  Take the id from read_script. Only image elements have a result you can see; video
-	  and audio ones do not.
+	  Look at the picture an element generated: an image element's result, or the still
+	  frame an animated_image animates. You receive the picture itself alongside the prompt
+	  that made it, so you can say whether the result matches what was asked for. Take the
+	  id from read_script. Only image and animated_image elements have a picture; clip and
+	  audio ones do not.
 	  What you see is gone next turn, so act on it in this one.
 	`,
 	input: z.object({
@@ -44,9 +45,9 @@ export const viewImage = defineTool({
 			throw new Error(
 				`There is no element ${id} on the canvas. Read the script for the ids there are.`,
 			);
-		if (ELEMENT_TYPES[element.type].outputKind !== "image")
+		if (!hasPicture(element.type))
 			throw new Error(
-				`${id} is a ${element.type}, and only an image element's result can be looked at.`,
+				`${id} is a ${element.type}, and only an image or animated_image has a picture to look at.`,
 			);
 		if (!element.url)
 			throw new Error(

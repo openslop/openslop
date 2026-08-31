@@ -13,6 +13,7 @@ import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
+import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { createDefaultConnector } from "@/lib/connectors/registry";
 import { applyScriptEdit } from "@/lib/generation/scriptEdit";
@@ -44,7 +45,9 @@ export function useAgentTools(editor: Editor) {
 					const entry = findNodeById(editor, id);
 					if (!entry) return undefined;
 					const [element] = entry;
-					const { status, result } = queue.getElementSnapshot(id);
+					const { status, result } = queue.getElementSnapshot(
+						pictureElementId(element),
+					);
 					return {
 						type: element.type,
 						prompt: getElementBodyText(element),

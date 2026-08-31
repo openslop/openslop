@@ -558,6 +558,26 @@ describe("executeToolCall", () => {
 		});
 	});
 
+	it("hands over the still frame an animated image animates", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_image", input: { id: "anim-1" } },
+			context({
+				elementImage: () => ({
+					type: "animated_image",
+					prompt: "a wolf at the door",
+					status: "idle",
+					url: "https://example.com/still.png",
+				}),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toEqual({
+			id: "anim-1",
+			prompt: "a wolf at the door",
+			url: "https://example.com/still.png",
+		});
+	});
+
 	it("says an element id is not on the canvas rather than inventing a result", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "view_image", input: { id: "nope" } },
