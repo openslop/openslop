@@ -6,7 +6,7 @@ import { PanelCard } from "../canvas/panel/PanelCard";
 import { Reasoning } from "./Reasoning";
 import { Tool } from "./Tool";
 import { WorkedStatus } from "./TurnStatus";
-import { userText, type TurnPart } from "./turnDisplay";
+import { reasoningOpen, userText, type TurnPart } from "./turnDisplay";
 
 export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
@@ -26,14 +26,23 @@ function ReplyText({ text }: { text: string }) {
 	);
 }
 
-function Step({ part, superseded }: { part: TurnPart; superseded: boolean }) {
+function Step({
+	part,
+	live,
+	superseded,
+}: {
+	part: TurnPart;
+	/** A restored transcript is never live, however its parts were stored. */
+	live: boolean;
+	superseded: boolean;
+}) {
 	if (isTextUIPart(part)) return <ReplyText text={part.text} />;
 	if (part.type === "reasoning") {
 		return (
 			<Reasoning
 				text={part.text}
-				streaming={part.state === "streaming"}
-				superseded={superseded}
+				streaming={live && part.state === "streaming"}
+				open={reasoningOpen(live, superseded, part.text)}
 			/>
 		);
 	}
@@ -57,6 +66,7 @@ export function AgentTurn({
 				<Step
 					key={`${message.id}-${index}`}
 					part={part}
+					live={streaming}
 					superseded={part !== newest}
 				/>
 			))}

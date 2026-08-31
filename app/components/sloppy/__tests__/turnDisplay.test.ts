@@ -40,15 +40,19 @@ describe("turnStatus", () => {
 });
 
 describe("reasoningOpen", () => {
-	it("opens the thought while it is the newest thing in the turn", () => {
-		expect(reasoningOpen(false, "weighing")).toBe(true);
+	it("opens the thought while it is the newest thing in a live turn", () => {
+		expect(reasoningOpen(true, false, "weighing")).toBe(true);
 	});
 
 	it("shuts it once Sloppy has moved on", () => {
-		expect(reasoningOpen(true, "weighing")).toBe(false);
+		expect(reasoningOpen(true, true, "weighing")).toBe(false);
 	});
 
 	it("shuts a long thought even while it is the newest thing", () => {
-		expect(reasoningOpen(false, "x".repeat(601))).toBe(false);
+		expect(reasoningOpen(true, false, "x".repeat(601))).toBe(false);
+	});
+
+	it("shuts a restored thought the turn was interrupted in the middle of", () => {
+		expect(reasoningOpen(false, false, "half a thought")).toBe(false);
 	});
 });

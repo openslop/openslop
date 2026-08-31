@@ -234,6 +234,10 @@ function parts(
 	] as LanguageModelV3StreamPart[];
 }
 
+/** Long-winded so the mock thinks for a couple of seconds, the way a real model does. */
+const MOCK_THOUGHT =
+	"Reading the canvas to see what is already on it. Working out which scene the request points at, which elements sit inside that scene, and what the script currently says about each of them. Weighing whether this reads as a question to answer or as an edit to make, since the two want different tools, and a wrong guess there means an edit nobody asked for. Then picking the smallest change that does what was asked, so nothing else in the script has to move around, and nothing already on the canvas gets rewritten by accident. ";
+
 /**
  * Only edits when the message reads like a request to change something, so a
  * plain question gets a plain answer the way a real model would give one.
@@ -308,7 +312,7 @@ function mockAgentModel() {
 			const { say, toolName, input } = mockCall(prompt);
 			const chunks: LanguageModelV3StreamPart[] = [
 				{ type: "stream-start", warnings: [] },
-				...parts("reasoning", "r0", "Reading the canvas. "),
+				...parts("reasoning", "r0", MOCK_THOUGHT),
 				...parts("text", "t0", say),
 				...(toolName
 					? ([
