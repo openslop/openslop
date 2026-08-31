@@ -117,6 +117,23 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
+/**
+ * The scrolling middle of a header/body/footer dialog. The negative margin lets
+ * focus rings on the edge of a field survive the `overflow-y-auto` clip.
+ */
+function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="dialog-body"
+			className={cn(
+				"-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1",
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
+
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
@@ -165,6 +182,7 @@ export {
 	DialogOverlay,
 	DialogContent,
 	DialogHeader,
+	DialogBody,
 	DialogFooter,
 	DialogTitle,
 	DialogDescription,

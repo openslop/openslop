@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+	DialogBody,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -83,7 +84,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 				</DialogDescription>
 			</DialogHeader>
 
-			<div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
+			<DialogBody>
 				<section aria-label="Reference images" className="flex flex-col gap-2">
 					<FieldLabel>Reference images</FieldLabel>
 					<div className="flex flex-wrap gap-2">
@@ -122,7 +123,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 				</div>
 
 				<ArtStylePresets value={style} onSelect={setStyle} />
-			</div>
+			</DialogBody>
 
 			<DialogFooter className="shrink-0">
 				<Button type="button" size="sm" onClick={onClose}>
