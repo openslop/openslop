@@ -545,8 +545,7 @@ describe("executeToolCall", () => {
 				elementImage: () => ({
 					type: "image",
 					prompt: "a wolf at the door",
-					status: "idle",
-					url: "https://example.com/wolf.png",
+					picture: { status: "idle", url: "https://example.com/wolf.png" },
 				}),
 			}),
 		);
@@ -565,8 +564,7 @@ describe("executeToolCall", () => {
 				elementImage: () => ({
 					type: "animated_image",
 					prompt: "a wolf at the door",
-					status: "idle",
-					url: "https://example.com/still.png",
+					picture: { status: "idle", url: "https://example.com/still.png" },
 				}),
 			}),
 		);
@@ -588,15 +586,14 @@ describe("executeToolCall", () => {
 		expect(!outcome.ok && outcome.errorText).toContain("no element nope");
 	});
 
-	it("refuses an element whose result is not an image", async () => {
+	it("refuses an element that generates no picture", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "view_image", input: { id: "clip-1" } },
 			context({
 				elementImage: () => ({
 					type: "clip",
 					prompt: "a wolf running",
-					status: "idle",
-					url: undefined,
+					picture: null,
 				}),
 			}),
 		);
@@ -612,8 +609,7 @@ describe("executeToolCall", () => {
 				elementImage: () => ({
 					type: "image",
 					prompt: "a wolf at the door",
-					status: "generating",
-					url: undefined,
+					picture: { status: "generating", url: undefined },
 				}),
 			}),
 		);

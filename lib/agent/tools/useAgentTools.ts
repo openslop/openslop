@@ -13,9 +13,11 @@ import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
-import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { pictureNode } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { createDefaultConnector } from "@/lib/connectors/registry";
+import { forElement } from "@/lib/generation/graph";
+import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
@@ -45,14 +47,19 @@ export function useAgentTools(editor: Editor) {
 					const entry = findNodeById(editor, id);
 					if (!entry) return undefined;
 					const [element] = entry;
-					const { status, result } = queue.getElementSnapshot(
-						pictureElementId(element),
-					);
+					const node = nodeBuilder(
+						connectorConfig,
+						store.getState(),
+					)(forElement(element));
+					const picture = pictureNode(node);
+					const { status, result } = queue.getElementSnapshot(picture?.id);
 					return {
 						type: element.type,
 						prompt: getElementBodyText(element),
-						status,
-						url: getPrimaryUrl(result, "image"),
+						picture: picture && {
+							status,
+							url: getPrimaryUrl(result, "image"),
+						},
 					};
 				},
 				generateText: async (prompt, options) => {

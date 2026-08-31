@@ -16,8 +16,6 @@ import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createStillFramePlugin,
-	hasPicture,
-	pictureElementId,
 	pictureNode,
 	stillElementId,
 	stillSnapshot,
@@ -79,33 +77,6 @@ describe("still-frame plugin", () => {
 				ctx(),
 			),
 		).toThrow(/still frame/);
-	});
-});
-
-describe("an element's picture", () => {
-	const element = (type: "image" | "animated_image" | "clip") => ({
-		id: ELEMENT_ID,
-		type,
-		children: [{ id: "t", type, text: "a forest" }],
-	});
-
-	it("is an image element's own result", () => {
-		expect(hasPicture("image")).toBe(true);
-		expect(pictureElementId(element("image"))).toBe(ELEMENT_ID);
-	});
-
-	// The animation's own result carries the frame it rendered from, which goes
-	// stale the moment the still is replaced.
-	it("is the still node for an animated image, not the animation", () => {
-		expect(hasPicture("animated_image")).toBe(true);
-		expect(pictureElementId(element("animated_image"))).toBe(
-			stillElementId(ELEMENT_ID),
-		);
-	});
-
-	it("does not exist for a clip or a sound", () => {
-		expect(hasPicture("clip")).toBe(false);
-		expect(hasPicture("narration")).toBe(false);
 	});
 });
 

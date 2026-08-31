@@ -1,9 +1,5 @@
 import omit from "lodash/omit";
-import {
-	ELEMENT_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
-} from "@/lib/canvas/types";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import {
 	DEFAULT_PROVIDER,
 	type AnimatedImageGenerateParams,
@@ -60,14 +56,6 @@ export const forStillOf =
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>
 	derivedDependency(node, STILL);
-
-/** Whether a type ends up with a picture: an image's own result, or an animated image's still. */
-export const hasPicture = (type: CanvasElementType) =>
-	type === "animated_image" || ELEMENT_TYPES[type].outputKind === "image";
-
-/** The element whose result holds that picture. */
-export const pictureElementId = (element: CanvasContentElement) =>
-	element.type === "animated_image" ? stillElementId(element.id) : element.id;
 
 /**
  * The node that makes an element's picture: the still behind an animated image,

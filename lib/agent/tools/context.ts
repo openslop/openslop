@@ -8,12 +8,12 @@ import type {
 	MetadataCharacter,
 } from "@/lib/project/types";
 
-/** An element's generated image and the prompt behind it, never the rest of the result. */
+/** An element's generated picture and the prompt behind it, never the rest of the result. */
 export type ElementImage = {
 	type: CanvasElementType;
 	prompt: string;
-	status: GenerationStatus;
-	url: string | undefined;
+	/** Null when the element's type makes no picture at all, so there is never one to wait for. */
+	picture: { status: GenerationStatus; url: string | undefined } | null;
 };
 
 /** What a tool can do to the canvas, never the parts it is built from. */
