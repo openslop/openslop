@@ -3,21 +3,17 @@
 import { useCallback } from "react";
 import type { Editor } from "slate";
 import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
-import {
-	getElementBodyText,
-	serializeOSMLWithScenes,
-} from "@/lib/canvas/osmlSerializer";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import { measureElementLengths } from "@/lib/video/elementLengths";
 import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
-import { pictureNode } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { createDefaultConnector } from "@/lib/connectors/registry";
-import { forElement } from "@/lib/generation/graph";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { getPromptText } from "@/lib/generation/inputs";
 import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
@@ -44,22 +40,16 @@ export function useAgentTools(editor: Editor) {
 				referenceImages: () => store.getState().referenceImages,
 				avatarUrl: (name) => characterAvatarUrl(queue, name),
 				elementImage: (id) => {
-					const entry = findNodeById(editor, id);
-					if (!entry) return undefined;
-					const [element] = entry;
-					const node = nodeBuilder(
-						connectorConfig,
-						store.getState(),
-					)(forElement(element));
-					const picture = pictureNode(node);
-					const { status, result } = queue.getElementSnapshot(picture?.id);
+					const element = findNodeById(editor, id)?.[0];
+					if (!element) return undefined;
+					const pictureId = pictureElementId(element);
+					const { status, result } = queue.getElementSnapshot(pictureId);
 					return {
 						type: element.type,
-						prompt: getElementBodyText(element),
-						picture: picture && {
-							status,
-							url: getPrimaryUrl(result, "image"),
-						},
+						prompt: getPromptText(element),
+						picture: pictureId
+							? { status, url: getPrimaryUrl(result, "image") }
+							: undefined,
 					};
 				},
 				generateText: async (prompt, options) => {

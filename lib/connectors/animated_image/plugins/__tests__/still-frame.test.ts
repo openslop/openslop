@@ -16,6 +16,7 @@ import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createStillFramePlugin,
+	pictureElementId,
 	pictureNode,
 	stillElementId,
 	stillSnapshot,
@@ -249,7 +250,7 @@ describe("uploaded still lifetime", () => {
 	});
 });
 
-describe("pictureNode", () => {
+describe("an element's picture", () => {
 	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
 		hydrated: true,
@@ -271,16 +272,19 @@ describe("pictureNode", () => {
 
 	it("is the element itself when it generates an image", () => {
 		expect(pictureFor("image")?.id).toBe("el-image");
+		expect(pictureElementId(element("image"))).toBe("el-image");
 	});
 
 	it("is the still behind an animated image, not the animation", () => {
-		expect(pictureFor("animated_image")?.id).toBe(
-			stillElementId("el-animated_image"),
-		);
+		const still = stillElementId("el-animated_image");
+		expect(pictureFor("animated_image")?.id).toBe(still);
+		expect(pictureElementId(element("animated_image"))).toBe(still);
 	});
 
 	it("is nothing for an element that makes no picture", () => {
 		expect(pictureFor("clip")).toBeNull();
 		expect(pictureFor("narration")).toBeNull();
+		expect(pictureElementId(element("clip"))).toBeUndefined();
+		expect(pictureElementId(element("narration"))).toBeUndefined();
 	});
 });

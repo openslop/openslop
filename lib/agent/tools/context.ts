@@ -12,8 +12,8 @@ import type {
 export type ElementImage = {
 	type: CanvasElementType;
 	prompt: string;
-	/** Null when the element's type makes no picture at all, so there is never one to wait for. */
-	picture: { status: GenerationStatus; url: string | undefined } | null;
+	/** Absent when the element's type makes no picture, so there is never one to wait for. */
+	picture: { status: GenerationStatus; url: string | undefined } | undefined;
 };
 
 /** What a tool can do to the canvas, never the parts it is built from. */

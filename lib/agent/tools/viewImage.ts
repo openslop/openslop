@@ -2,7 +2,7 @@ import dedent from "dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
-import { defineTool, imagePart } from "./defineTool";
+import { defineTool, imageOutput } from "./defineTool";
 
 const NOT_READY: Record<GenerationStatus, string> = {
 	idle: "has not been generated yet",
@@ -15,8 +15,7 @@ export const viewImage = defineTool({
 	  Look at the picture an element generated: an image element's result, or the still
 	  frame an animated_image animates. You receive the picture itself alongside the prompt
 	  that made it, so you can say whether the result matches what was asked for. Take the
-	  id from read_script. Only image and animated_image elements have a picture; a clip
-	  and the audio ones do not.
+	  id from read_script.
 	  What you see is gone next turn, so act on it in this one.
 	`,
 	input: z.object({
@@ -28,16 +27,8 @@ export const viewImage = defineTool({
 	output: z.object({ id: z.string(), prompt: z.string(), url: z.string() }),
 	icon: Eye,
 	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a generated image"),
-	toModelOutput: ({ output }) => ({
-		type: "content",
-		value: [
-			{
-				type: "text",
-				text: `${output.id}, generated from "${output.prompt}":`,
-			},
-			imagePart(output.url),
-		],
-	}),
+	toModelOutput: ({ output }) =>
+		imageOutput(`${output.id}, generated from "${output.prompt}":`, output.url),
 	execute: async ({ id }, ctx) => {
 		const element = ctx.elementImage(id);
 		if (!element)
