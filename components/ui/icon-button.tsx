@@ -18,12 +18,16 @@ export function IconButton({
 	ariaLabel,
 	size = "default",
 	className,
+	unavailable,
+	onClick,
 	children,
 	ref,
 	...props
 }: React.ComponentProps<"button"> & {
 	ariaLabel: string;
 	size?: keyof typeof SIZES;
+	/** Inert, but still hoverable so a tooltip can explain why. */
+	unavailable?: boolean;
 }) {
 	return (
 		<button
@@ -31,10 +35,12 @@ export function IconButton({
 			type="button"
 			aria-label={ariaLabel}
 			className={cn(
-				"flex shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-button-hover focus-ring disabled:pointer-events-none disabled:opacity-40",
+				"flex shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-button-hover focus-ring disabled:pointer-events-none unavailable:opacity-40",
 				SIZES[size],
 				className,
 			)}
+			aria-disabled={unavailable || undefined}
+			onClick={unavailable ? undefined : onClick}
 			{...props}
 		>
 			{children}
@@ -46,13 +52,15 @@ export function IconButton({
 export function TooltipIconButton({
 	label,
 	ariaLabel,
+	side,
 	...props
 }: Omit<React.ComponentProps<typeof IconButton>, "ariaLabel"> & {
 	label: string;
 	ariaLabel?: string;
+	side?: React.ComponentProps<typeof SimpleTooltip>["side"];
 }) {
 	return (
-		<SimpleTooltip label={label}>
+		<SimpleTooltip label={label} side={side}>
 			<IconButton ariaLabel={ariaLabel ?? label} {...props} />
 		</SimpleTooltip>
 	);

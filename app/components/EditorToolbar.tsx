@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { memo } from "react";
-import { useSlateStatic } from "slate-react";
 import { Check, Lock, Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,7 +12,10 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
-import type { GenerateScope } from "./canvas/hooks/useGenerateScope";
+import {
+	countPhrase,
+	type GenerateScope,
+} from "./canvas/hooks/useGenerateScope";
 import { useSloppy } from "./sloppy/SloppyProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
@@ -60,31 +62,27 @@ function Breadcrumbs() {
 	);
 }
 
-/**
- * Generate All only ever runs what is missing or out of date, so when there is
- * nothing left it says so instead of offering a click that would do nothing.
- */
 function getGenerateLabel(
 	loading: boolean,
 	generating: boolean,
-	{ empty, pending, total }: GenerateScope,
+	scope: GenerateScope,
 ): string {
 	if (loading) return "Writing…";
 	if (generating) return "Generating…";
-	if (empty || pending === total) return "Generate All";
-	if (pending === 0) return "Up to date";
-	return `Generate ${pending} of ${total}`;
+	if (scope.empty) return "Generate all";
+	if (scope.pending === 0) return "All generated";
+	return countPhrase(scope);
 }
 
 function EditorToolbarComponent() {
-	const editor = useSlateStatic();
 	const { loading } = useSloppy();
-	const scope = useGenerateAll(editor);
+	const scope = useGenerateAll();
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
 	const busy = loading || generating;
 	const generateLabel = getGenerateLabel(loading, generating, scope);
-	const current = !busy && !scope.empty && scope.pending === 0;
+	const current = !scope.empty && scope.pending === 0;
+	const unavailable = busy || scope.pending === 0;
 
 	return (
 		<div
@@ -97,10 +95,12 @@ function EditorToolbarComponent() {
 						type="button"
 						variant="generate"
 						size="sm"
-						onClick={scope.generate}
 						className="shrink-0 sm:px-4"
 						aria-label={generateLabel}
-						disabled={busy || scope.empty || current}
+						tooltip={scope.description}
+						tooltipSide="bottom"
+						unavailable={unavailable}
+						onClick={scope.run}
 					>
 						{busy ? (
 							<Spinner className="text-current" />

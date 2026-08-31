@@ -21,9 +21,6 @@ import { useSloppy } from "../sloppy/SloppyProvider";
 import { useRender } from "./RenderProvider";
 import { useLayout } from "./VideoLayoutContext";
 
-const triggerClass =
-	"shrink-0 border-tertiary/50 bg-tertiary/10 text-tertiary hover:bg-tertiary/20 sm:px-4";
-
 const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
 	value: String(resolution.width),
 	label: resolution.label,
@@ -43,9 +40,9 @@ export function ExportButton() {
 			<PopoverTrigger asChild>
 				<Button
 					type="button"
-					variant="secondary"
+					variant="panel"
 					size="sm"
-					className={triggerClass}
+					className="shrink-0 sm:px-4"
 					aria-label="Export"
 					disabled={disabled}
 				>

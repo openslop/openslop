@@ -1,6 +1,6 @@
 import { createProjectStore } from "@/lib/project/store";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { Descendant } from "slate";
+import type { Descendant, Editor } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
@@ -46,9 +46,17 @@ const registry: ConnectorRegistry = {
 	},
 };
 
+let editorUnderTest: Editor;
+
+vi.mock("slate-react", () => ({
+	useSlateSelector: <T>(selector: (editor: Editor) => T) =>
+		selector(editorUnderTest),
+}));
+
 vi.mock("react", () => ({
 	useCallback: <T>(fn: T) => fn,
 	useMemo: <T>(fn: () => T) => fn(),
+	useDeferredValue: <T>(value: T) => value,
 }));
 
 let queue: GenerationQueue;
@@ -100,14 +108,14 @@ const { useGenerateScope } = await import("../hooks/useGenerateScope");
 
 function useScopeForAll(elements: CanvasContentElement[]) {
 	const children: Descendant[] = [wrapInScene(elements)];
-	const editor = { children } as unknown as Parameters<
-		typeof useGenerateAll
-	>[0];
-	return useGenerateAll(editor);
+	// Stands in for Slate's provider by seeding the document the selector reads.
+	// eslint-disable-next-line react-hooks/globals
+	editorUnderTest = { children } as unknown as Editor;
+	return useGenerateAll();
 }
 
 function useGenerateAllFor(elements: CanvasContentElement[]) {
-	useScopeForAll(elements).generate();
+	useScopeForAll(elements).run();
 	return enqueuedIds();
 }
 
@@ -184,7 +192,7 @@ describe("useGenerateAll", () => {
 			empty: false,
 			active: false,
 			pending: 0,
-			total: 2,
+			stale: 0,
 		});
 	});
 
@@ -194,13 +202,13 @@ describe("useGenerateAll", () => {
 
 		expect(
 			useScopeForAll([a, makeElement("b", "narration", "hello")]),
-		).toMatchObject({ pending: 1, total: 2 });
+		).toMatchObject({ pending: 1, stale: 0 });
 	});
 
 	it("is empty when nothing in scope carries a prompt", async () => {
 		expect(useScopeForAll([makeElement("a", "image", "")])).toMatchObject({
 			empty: true,
-			total: 0,
+			pending: 0,
 		});
 	});
 
@@ -232,15 +240,15 @@ describe("useGenerateScope", () => {
 	const sceneTwo = [makeElement("c", "image", "a scene away")];
 
 	it("enqueues only the elements it is given", async () => {
-		useGenerateScope(sceneOne).generate();
+		useGenerateScope(sceneOne, "scene").run();
 		expect(enqueuedIds()).toEqual(["a", "b"]);
 	});
 
-	it("regenerates a current scope on request, leaving sibling scenes alone", async () => {
+	it("queues nothing when the scope is already current", async () => {
 		[...sceneOne, ...sceneTwo].forEach(commitCurrent);
 
-		useGenerateScope(sceneTwo).regenerate();
-		expect(enqueuedIds()).toEqual(["c"]);
+		useGenerateScope(sceneTwo, "scene").run();
+		expect(enqueuedIds()).toEqual([]);
 	});
 
 	it("leaves out an element from another scene of the same document", async () => {
@@ -248,7 +256,105 @@ describe("useGenerateScope", () => {
 		expect(enqueuedIds()).toEqual(["a", "b", "c"]);
 
 		vi.clearAllMocks();
-		useGenerateScope(sceneTwo).generate();
+		useGenerateScope(sceneTwo, "scene").run();
 		expect(enqueuedIds()).toEqual(["c"]);
+	});
+});
+
+describe("scope description", () => {
+	const useDescription = (
+		elements: CanvasContentElement[],
+		subject: Parameters<typeof useGenerateScope>[1] = "project",
+	) => useGenerateScope(elements, subject).description;
+
+	it("asks for a prompt when nothing in scope has one", () => {
+		expect(useDescription([makeElement("a", "image", "")], "scene")).toBe(
+			"Add a prompt to generate this scene",
+		);
+	});
+
+	it("reports work already under way", () => {
+		const running = {
+			...queue.getElementSnapshot("a"),
+			status: "generating" as const,
+		};
+		vi.spyOn(queue, "getElementSnapshot").mockReturnValue(running);
+
+		expect(useDescription([makeElement("a", "image", "sunset")])).toBe(
+			"Generating this project…",
+		);
+	});
+
+	it("names the whole scope when none of it has run", () => {
+		const elements = [
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "narration", "hello"),
+		];
+		expect(useDescription(elements)).toBe(
+			"Generate 2 elements in this project",
+		);
+	});
+
+	it("reports the state, not a click, when every result is current", () => {
+		const elements = [
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "image", "sunrise"),
+		];
+		elements.forEach(commitCurrent);
+		expect(useDescription(elements, "scene")).toBe(
+			"Everything in this scene is generated",
+		);
+	});
+
+	it("counts only the elements still to run when some are current", () => {
+		const current = makeElement("a", "image", "sunset");
+		commitCurrent(current);
+		const elements = [
+			current,
+			makeElement("b", "image", "sunrise"),
+			makeElement("c", "image", "moonrise"),
+		];
+		expect(useDescription(elements, "scene")).toBe(
+			"Generate 2 elements in this scene",
+		);
+	});
+
+	it("calls it a regenerate when every stale element has a result", () => {
+		const elements = [
+			makeElement("a", "image", "sunset"),
+			makeElement("b", "image", "sunrise"),
+		];
+		elements.forEach(commitCurrent);
+		elements[1].children[0].text = "moonrise";
+
+		expect(useDescription(elements, "scene")).toBe(
+			"Regenerate 1 stale element in this scene",
+		);
+	});
+
+	it("splits a mixed scope into what is new and what is stale", () => {
+		const drifted = makeElement("a", "image", "sunset");
+		commitCurrent(drifted);
+		drifted.children[0].text = "moonrise";
+
+		const elements = [
+			drifted,
+			makeElement("b", "image", "sunrise"),
+			makeElement("c", "narration", "hello"),
+		];
+		expect(useDescription(elements, "scene")).toBe(
+			"Generate 2 elements and regenerate 1 stale in this scene",
+		);
+	});
+
+	it("says element in the singular", () => {
+		const current = makeElement("a", "image", "sunset");
+		commitCurrent(current);
+		expect(
+			useDescription([current, makeElement("b", "image", "sunrise")], "scene"),
+		).toBe("Generate 1 element in this scene");
+		expect(useDescription([current], "scene")).toBe(
+			"Everything in this scene is generated",
+		);
 	});
 });
