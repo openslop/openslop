@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-body font-medium transition-[color,background-color,border-color,box-shadow,filter] focus-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-body font-medium transition-[color,background-color,border-color,box-shadow,filter] focus-ring disabled:pointer-events-none aria-disabled:cursor-default unavailable:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
 	{
 		variants: {
 			variant: {
@@ -18,10 +18,13 @@ const buttonVariants = cva(
 					"border border-border bg-secondary text-secondary-foreground hover:bg-button-hover",
 				outline: "border border-border bg-transparent hover:bg-button-hover",
 				ghost: "hover:bg-button-hover hover:text-foreground",
+				/** The side panel's quiet look, for chrome next to a primary action. */
+				panel:
+					"text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
 				destructive:
 					"bg-destructive text-destructive-foreground hover:brightness-110 active:brightness-95",
 				generate:
-					"bg-generate text-generate-foreground hover:bg-generate-hover disabled:bg-generate-disabled disabled:text-generate-disabled-foreground disabled:opacity-100",
+					"bg-generate text-generate-foreground hover:bg-generate-hover unavailable:bg-generate-disabled unavailable:text-generate-disabled-foreground unavailable:opacity-100 unavailable:hover:bg-generate-disabled",
 				link: "text-accent underline-offset-4 hover:underline",
 			},
 			size: {
@@ -46,11 +49,17 @@ function Button({
 	size,
 	asChild = false,
 	tooltip,
+	tooltipSide,
+	unavailable,
+	onClick,
 	...props
 }: React.ComponentProps<"button"> &
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
 		tooltip?: string;
+		tooltipSide?: React.ComponentProps<typeof SimpleTooltip>["side"];
+		/** Inert, but still hoverable so a tooltip can explain why. */
+		unavailable?: boolean;
 	}) {
 	const Comp = asChild ? Slot.Root : "button";
 	const button = (
@@ -58,11 +67,17 @@ function Button({
 			data-slot="button"
 			aria-label={tooltip}
 			className={cn(buttonVariants({ variant, size, className }))}
+			aria-disabled={unavailable || undefined}
+			onClick={unavailable ? undefined : onClick}
 			{...props}
 		/>
 	);
 	if (tooltip == null) return button;
-	return <SimpleTooltip label={tooltip}>{button}</SimpleTooltip>;
+	return (
+		<SimpleTooltip label={tooltip} side={tooltipSide}>
+			{button}
+		</SimpleTooltip>
+	);
 }
 
 export { Button, buttonVariants };

@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { memo } from "react";
-import { useSlateStatic } from "slate-react";
-import { Lock, Sparkles, X } from "@/components/ui/icon";
+import { Check, Lock, Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TooltipIconButton } from "@/components/ui/icon-button";
@@ -13,6 +12,11 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
+import {
+	countPhrase,
+	NOTHING_TO_GENERATE,
+	type GenerateScope,
+} from "./canvas/hooks/useGenerateScope";
 import { useSloppy } from "./sloppy/SloppyProvider";
 import { ExportButton } from "./video/ExportButton";
 import editorStyles from "./Editor.module.css";
@@ -59,20 +63,27 @@ function Breadcrumbs() {
 	);
 }
 
-function getGenerateLabel(loading: boolean, generating: boolean): string {
+function getGenerateLabel(
+	loading: boolean,
+	generating: boolean,
+	scope: GenerateScope,
+): string {
 	if (loading) return "Writing…";
 	if (generating) return "Generating…";
-	return "Generate All";
+	if (scope.empty) return "Generate all";
+	if (scope.pending === 0) return "All generated";
+	return countPhrase(scope);
 }
 
 function EditorToolbarComponent() {
-	const editor = useSlateStatic();
 	const { loading } = useSloppy();
-	const { generateAll } = useGenerateAll(editor);
+	const scope = useGenerateAll();
 	const queue = useGenerationQueue();
 	const generating = useQueueSelector((q) => q.isBusy());
 	const busy = loading || generating;
-	const generateLabel = getGenerateLabel(loading, generating);
+	const generateLabel = getGenerateLabel(loading, generating, scope);
+	const current = !scope.empty && scope.pending === 0;
+	const unavailable = busy || scope.pending === 0;
 
 	return (
 		<div
@@ -81,23 +92,6 @@ function EditorToolbarComponent() {
 			<Breadcrumbs />
 			<div className="flex w-full items-center gap-3">
 				<div className="ml-auto flex shrink-0 items-center justify-end gap-2">
-					<Button
-						type="button"
-						variant="generate"
-						size="sm"
-						onClick={generateAll}
-						className="shrink-0 sm:px-4"
-						aria-label={generateLabel}
-						disabled={busy}
-					>
-						{busy ? (
-							<Spinner className="text-current" />
-						) : (
-							<Sparkles aria-hidden="true" />
-						)}
-						<span className="hidden sm:inline">{generateLabel}</span>
-					</Button>
-					<ExportButton />
 					{generating && (
 						<TooltipIconButton
 							label="Cancel generation"
@@ -107,6 +101,27 @@ function EditorToolbarComponent() {
 							<X className="h-3 w-3" aria-hidden="true" />
 						</TooltipIconButton>
 					)}
+					<Button
+						type="button"
+						variant="generate"
+						size="sm"
+						className="shrink-0 sm:px-4"
+						aria-label={generateLabel}
+						tooltip={loading ? NOTHING_TO_GENERATE : scope.description}
+						tooltipSide="bottom"
+						unavailable={unavailable}
+						onClick={scope.run}
+					>
+						{busy ? (
+							<Spinner className="text-current" />
+						) : current ? (
+							<Check aria-hidden="true" />
+						) : (
+							<Sparkles aria-hidden="true" />
+						)}
+						<span className="hidden sm:inline">{generateLabel}</span>
+					</Button>
+					<ExportButton />
 				</div>
 			</div>
 		</div>

@@ -60,16 +60,18 @@ function TooltipContent({
  */
 function SimpleTooltip({
 	label,
+	side,
 	children,
 	...props
 }: Omit<React.ComponentProps<typeof TooltipPrimitive.Root>, "children"> & {
 	label: React.ReactNode;
+	side?: React.ComponentProps<typeof TooltipContent>["side"];
 	children: React.ReactNode;
 }) {
 	return (
 		<Tooltip {...props}>
 			<TooltipTrigger asChild>{children}</TooltipTrigger>
-			<TooltipContent>{label}</TooltipContent>
+			<TooltipContent side={side}>{label}</TooltipContent>
 		</Tooltip>
 	);
 }

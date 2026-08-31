@@ -4,6 +4,9 @@
 @import "../components/ui/icons.css";
 
 @custom-variant dark (&:is(.dark *));
+/* A control you cannot act on: either `disabled`, or `aria-disabled` when it
+   has to stay hoverable for its tooltip. */
+@custom-variant unavailable (&:disabled, &[aria-disabled="true"]);
 
 /* The negative margin gives back the room the padding makes for the bar. */
 @utility scrollbar-overlay {

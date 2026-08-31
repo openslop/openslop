@@ -14,6 +14,7 @@ import { CollapsibleHeader } from "./CollapsibleHeader";
 import { ForegroundPreview } from "./ForegroundPreview";
 import { PlayFromHereButton } from "./PlayFromHereButton";
 import { SceneDeleteButton } from "./SceneDeleteButton";
+import { SceneGenerateButton } from "./SceneGenerateButton";
 import { SceneTimestamp } from "./SceneTimestamp";
 
 const COLLAPSED_MAX_VISIBLE = 3;
@@ -72,6 +73,7 @@ function SceneHeader({
 			ariaLabel={collapsed ? "Expand scene" : "Collapse scene"}
 			rightSlot={
 				<div className="flex items-center gap-1">
+					<SceneGenerateButton scene={element} />
 					<PlayFromHereButton scene={element} />
 					<SceneDeleteButton scene={element} />
 				</div>
