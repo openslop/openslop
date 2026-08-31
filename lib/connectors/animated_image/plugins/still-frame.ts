@@ -1,5 +1,9 @@
 import omit from "lodash/omit";
-import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
+import {
+	ELEMENT_TYPES,
+	type CanvasContentElement,
+	type CanvasElementType,
+} from "@/lib/canvas/types";
 import {
 	type AnimatedImageGenerateParams,
 	type AssetResult,
@@ -54,17 +58,24 @@ export const forStillOf =
 export const stillDependency = (node: GenerationNode) =>
 	derivedDependency(node, STILL);
 
+const makesPicture = (type: CanvasElementType) =>
+	ELEMENT_TYPES[type].outputKind === "image";
+
 /**
- * The node that makes an element's picture: the still behind an animated image,
- * an image element itself, and nothing at all for an element that makes no
- * picture. Whoever supplies a picture writes it here.
+ * Where an element's picture comes from: the still behind an animated image, an
+ * image element itself, and nowhere at all for a type that makes none. Whoever
+ * reads or supplies a picture goes through here.
  */
+export function pictureElementId(element: CanvasContentElement) {
+	if (element.type === "animated_image") return stillElementId(element.id);
+	return makesPicture(element.type) ? element.id : undefined;
+}
+
+/** The same answer off a built node, which is what supplying a picture needs. */
 export function pictureNode(node: GenerationNode): JobNode | null {
 	const target = stillDependency(node) ?? node;
 	if (isSourceNode(target)) return null;
-	const makesPicture =
-		ELEMENT_TYPES[target.job.elementType].outputKind === "image";
-	return makesPicture ? target : null;
+	return makesPicture(target.job.elementType) ? target : null;
 }
 
 /**

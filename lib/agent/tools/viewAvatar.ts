@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
-import { defineTool, imagePart } from "./defineTool";
+import { defineTool, imageOutput } from "./defineTool";
 
 export const viewAvatar = defineTool({
 	description: dedent`
@@ -20,13 +20,8 @@ export const viewAvatar = defineTool({
 	icon: Eye,
 	label: ({ name }) =>
 		name ? `Looking at ${name}'s avatar` : "Looking at an avatar",
-	toModelOutput: ({ output }) => ({
-		type: "content",
-		value: [
-			{ type: "text", text: `${output.name}'s avatar:` },
-			imagePart(output.url),
-		],
-	}),
+	toModelOutput: ({ output }) =>
+		imageOutput(`${output.name}'s avatar:`, output.url),
 	execute: async ({ name }, ctx) => {
 		const url = ctx.avatarUrl(name);
 		if (!url)

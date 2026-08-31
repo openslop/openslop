@@ -48,8 +48,14 @@ export function defineTool<Input, Output>(def: {
 }
 
 /** A tool-result image, handed to the model by URL for the provider to fetch. */
-export const imagePart = (url: string) => ({
+const imagePart = (url: string) => ({
 	type: "file" as const,
 	mediaType: "image",
 	data: { type: "url" as const, url: new URL(url) },
+});
+
+/** What a look-at tool hands back: what the model is about to see, then the images. */
+export const imageOutput = (text: string, ...urls: string[]) => ({
+	type: "content" as const,
+	value: [{ type: "text" as const, text }, ...urls.map(imagePart)],
 });

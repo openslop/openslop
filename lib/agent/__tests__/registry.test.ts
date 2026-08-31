@@ -28,6 +28,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	generateText: async () => "an outline",
 	referenceImages: () => [],
 	avatarUrl: () => undefined,
+	elementImage: () => undefined,
 	readMetadata: () => metadata,
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
@@ -537,6 +538,67 @@ describe("executeToolCall", () => {
 		expect(!outcome.ok && outcome.errorText).toContain("no avatar image yet");
 	});
 
+	it("hands over a generated image with the prompt that made it", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_image", input: { id: "img-1" } },
+			context({
+				elementImage: () => ({
+					type: "image",
+					prompt: "a wolf at the door",
+					picture: { status: "idle", url: "https://example.com/wolf.png" },
+				}),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toEqual({
+			id: "img-1",
+			prompt: "a wolf at the door",
+			url: "https://example.com/wolf.png",
+		});
+	});
+
+	it("says an element id is not on the canvas rather than inventing a result", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_image", input: { id: "nope" } },
+			context(),
+		);
+
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain("no element nope");
+	});
+
+	it("refuses an element that generates no picture", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_image", input: { id: "clip-1" } },
+			context({
+				elementImage: () => ({
+					type: "clip",
+					prompt: "a wolf running",
+					picture: undefined,
+				}),
+			}),
+		);
+
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain("is a clip");
+	});
+
+	it("reports how far along an image is when there is nothing to look at yet", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_image", input: { id: "img-1" } },
+			context({
+				elementImage: () => ({
+					type: "image",
+					prompt: "a wolf at the door",
+					picture: { status: "generating", url: undefined },
+				}),
+			}),
+		);
+
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain("is still generating");
+	});
+
 	it("outlines a brief through one focused generation", async () => {
 		const prompts: string[] = [];
 		const outcome = await executeToolCall(
@@ -567,6 +629,7 @@ describe("SLOPPY_TOOLS", () => {
 			"set_language",
 			"view_reference_images",
 			"view_avatar",
+			"view_image",
 			"outline_story",
 			"measure_total_length",
 			"measure_element_lengths",
@@ -612,6 +675,7 @@ describe("tool flags", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
 			"view_avatar",
+			"view_image",
 			"view_reference_images",
 		]);
 	});

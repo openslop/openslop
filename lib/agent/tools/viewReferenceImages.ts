@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
-import { defineTool, imagePart } from "./defineTool";
+import { defineTool, imageOutput } from "./defineTool";
 
 export const viewReferenceImages = defineTool({
 	description: dedent`
@@ -14,16 +14,11 @@ export const viewReferenceImages = defineTool({
 	output: z.object({ urls: z.array(z.string()) }),
 	icon: Eye,
 	label: "Looking at the reference images",
-	toModelOutput: ({ output }) => ({
-		type: "content",
-		value: [
-			{
-				type: "text",
-				text: `${output.urls.length} reference image(s), in upload order:`,
-			},
-			...output.urls.map((url) => imagePart(url)),
-		],
-	}),
+	toModelOutput: ({ output }) =>
+		imageOutput(
+			`${output.urls.length} reference image(s), in upload order:`,
+			...output.urls,
+		),
 	execute: async (_input, ctx) => {
 		const urls = ctx.referenceImages();
 		if (urls.length === 0)
