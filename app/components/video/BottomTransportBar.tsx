@@ -8,7 +8,7 @@ import { toFrames } from "@/lib/video/frames";
 import { findSegmentIndexAtFrame } from "@/lib/video/sceneSegments";
 import { BottomViewToggle } from "./BottomViewToggle";
 import { usePlayerControl } from "./PlayerControlContext";
-import { usePlayerPosition } from "./PlayerPositionContext";
+import { usePlayerPlacement } from "./PlayerPlacementContext";
 import { useLayout } from "./VideoLayoutContext";
 import { usePlayerPlaying } from "./usePlayerState";
 import { SCRUB_BAR_HEIGHT } from "./ScrubBar";
@@ -22,7 +22,7 @@ import {
 
 function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
-	const { showPlayer } = usePlayerPosition();
+	const { showPlayer } = usePlayerPlacement();
 	const { layout, ready, segments } = useLayout();
 	const playing = usePlayerPlaying();
 
