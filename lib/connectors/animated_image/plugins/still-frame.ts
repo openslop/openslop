@@ -52,7 +52,11 @@ export function stillElement(
 
 export const forStillOf =
 	(element: CanvasContentElement): NodeSpec =>
-	() => ({ element: stillElement(element), plugins: buildImagePlugins() });
+	() => ({
+		element: stillElement(element),
+		plugins: buildImagePlugins(),
+		label: "the still frame",
+	});
 
 /** The still node behind an animated image, when the element has one. */
 export const stillDependency = (node: GenerationNode) =>

@@ -100,8 +100,8 @@ function CharacterEditDialogBody({
 		queue.enqueueGraph([avatarNode]);
 	};
 
-	const staleWhy = staleReason(avatarNode, queue);
-	const isStale = staleWhy !== null;
+	const reason = staleReason(avatarNode, queue);
+	const isStale = reason !== null;
 
 	const generating = isGenerationActive(avatarSnapshot.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
@@ -159,7 +159,7 @@ function CharacterEditDialogBody({
 								elementId={avatarElementId}
 								onRestore={restoreAppearance}
 							/>
-							{staleWhy && <StaleIndicator reason={staleWhy} />}
+							{reason && <StaleIndicator reason={reason} />}
 							<GenerateButton
 								status={avatarSnapshot.status}
 								hasResult={Boolean(avatarUrl)}

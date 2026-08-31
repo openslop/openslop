@@ -25,8 +25,10 @@ const toNode = (
 	plugins: ConnectorPlugin[],
 	state: ProjectData,
 	dependsOn: GenerationNode[],
+	label: string | undefined,
 ): JobNode => ({
 	id: element.id,
+	label,
 	inputs: {
 		prompt: getPromptText(element),
 		attributes: element.generationAttributes ?? {},
@@ -57,7 +59,7 @@ export function nodeBuilder(
 		const resolved = new Map<string, JobNode>();
 		const resolving = new Set<string>();
 
-		const build = ({ element, plugins: override }: ElementNode) => {
+		const build = ({ element, plugins: override, label }: ElementNode) => {
 			const { id } = element;
 			const existing = resolved.get(id);
 			if (existing) return existing;
@@ -70,7 +72,7 @@ export function nodeBuilder(
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
-			const node = toNode(element, connector, plugins, state, dependsOn);
+			const node = toNode(element, connector, plugins, state, dependsOn, label);
 
 			resolving.delete(id);
 			resolved.set(id, node);

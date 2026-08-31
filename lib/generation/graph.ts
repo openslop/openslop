@@ -36,6 +36,8 @@ type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
 	dependsOn: GenerationNode[];
+	/** How the node reads when a dependent has to name it to the user. */
+	label?: string;
 };
 
 /** Project state that is read rather than generated; its identity is its inputs. */
@@ -51,6 +53,7 @@ export type GenerationNode = SourceNode | JobNode;
 export type ElementNode = {
 	element: CanvasContentElement;
 	plugins?: ConnectorPlugin[];
+	label?: string;
 };
 
 /**
@@ -94,28 +97,22 @@ export const derivedNodeId = (kind: string, key: string): NodeId =>
 export const derivedDependency = (node: GenerationNode, kind: string) =>
 	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
 
-const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}([^:]+):(.+)$`);
-
-/** The kind and key a derived id was minted from, if it was derived at all. */
-export function parseDerivedId(
-	id: NodeId,
-): { kind: string; key: string } | null {
-	const [, kind, key] = DERIVED_ID.exec(id) ?? [];
-	return kind && key ? { kind, key } : null;
-}
+const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
 
 /** The node a derived id was minted from, if it was derived at all. */
 export const derivedFrom = (id: NodeId): NodeId | null =>
-	parseDerivedId(id)?.key ?? null;
+	DERIVED_ID.exec(id)?.[1] ?? null;
 
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,
+	label?: string,
 ): SourceNode {
 	return {
 		id,
 		inputs: { prompt: "", attributes },
 		dependsOn: [],
+		label,
 		job: null,
 	};
 }
