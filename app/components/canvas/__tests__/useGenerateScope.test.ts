@@ -267,9 +267,9 @@ describe("scope description", () => {
 		subject: Parameters<typeof useGenerateScope>[1] = "project",
 	) => useGenerateScope(elements, subject).description;
 
-	it("asks for a prompt when nothing in scope has one", () => {
+	it("reports no work when nothing in scope has a prompt", () => {
 		expect(useDescription([makeElement("a", "image", "")], "scene")).toBe(
-			"Add a prompt to generate this scene",
+			"Nothing to generate right now",
 		);
 	});
 

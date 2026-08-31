@@ -14,6 +14,7 @@ import {
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
 import {
 	countPhrase,
+	NOTHING_TO_GENERATE,
 	type GenerateScope,
 } from "./canvas/hooks/useGenerateScope";
 import { useSloppy } from "./sloppy/SloppyProvider";
@@ -91,13 +92,22 @@ function EditorToolbarComponent() {
 			<Breadcrumbs />
 			<div className="flex w-full items-center gap-3">
 				<div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+					{generating && (
+						<TooltipIconButton
+							label="Cancel generation"
+							className="self-center bg-muted text-muted-foreground hover:text-foreground"
+							onClick={() => queue.cancelAll()}
+						>
+							<X className="h-3 w-3" aria-hidden="true" />
+						</TooltipIconButton>
+					)}
 					<Button
 						type="button"
 						variant="generate"
 						size="sm"
 						className="shrink-0 sm:px-4"
 						aria-label={generateLabel}
-						tooltip={scope.description}
+						tooltip={loading ? NOTHING_TO_GENERATE : scope.description}
 						tooltipSide="bottom"
 						unavailable={unavailable}
 						onClick={scope.run}
@@ -112,15 +122,6 @@ function EditorToolbarComponent() {
 						<span className="hidden sm:inline">{generateLabel}</span>
 					</Button>
 					<ExportButton />
-					{generating && (
-						<TooltipIconButton
-							label="Cancel generation"
-							className="self-center bg-muted text-muted-foreground hover:text-foreground"
-							onClick={() => queue.cancelAll()}
-						>
-							<X className="h-3 w-3" aria-hidden="true" />
-						</TooltipIconButton>
-					)}
 				</div>
 			</div>
 		</div>
