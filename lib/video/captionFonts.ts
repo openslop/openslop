@@ -3,7 +3,7 @@
  * draw with the same glyphs. Each entry names a real font family, so one
  * `font-family` value works in both once the files are loaded — the editor
  * registers them in `app/components/canvas/CaptionFonts.tsx`, the renderer in
- * `remotion/components/CaptionFont.tsx`.
+ * `remotion/components/ActiveCaptionFont.tsx`.
  */
 export type CaptionFontFile = {
 	/** Path under `public/fonts`. */
