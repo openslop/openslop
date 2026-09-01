@@ -47,7 +47,7 @@ Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`, durations `--
 Two opt-in treatments, both quiet:
 
 - `.grain`: film grain (`--grain-opacity`) on raised surfaces (dialogs, panel cards, the canvas card, onboarding, the inline copilot). Needs a positioned element and paints through `::after`. Not on dense element cards.
-- `.dot-grid-bg`: the "+" grid behind the editor and gallery. Render it `aria-hidden` and `pointer-events-none`, behind content.
+- `.dot-grid-bg`: the "+" grid behind the editor and gallery. Reach for `<DotGrid />` (`components/ui/dot-grid.tsx`), which renders it `aria-hidden` and `pointer-events-none`, behind content.
 
 ## Components
 

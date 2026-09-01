@@ -9,6 +9,7 @@ import type { ProjectRow } from "@/lib/project/api";
 import UserProfile from "@/app/components/UserProfile";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { DotGrid } from "@/components/ui/dot-grid";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProjectCard } from "./ProjectCard";
 
@@ -47,10 +48,7 @@ export default function ProjectsList({
 	return (
 		<TooltipProvider>
 			<div className="relative min-h-screen bg-background text-foreground">
-				<div
-					aria-hidden
-					className="dot-grid-bg pointer-events-none absolute inset-0 z-0"
-				/>
+				<DotGrid placement="container" />
 				<UserProfile />
 				<div className="relative z-10 mx-auto max-w-7xl px-6 pt-20 pb-16">
 					<header className="mb-10 flex items-end justify-between">

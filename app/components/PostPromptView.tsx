@@ -1,5 +1,6 @@
 "use client";
 
+import { DotGrid } from "@/components/ui/dot-grid";
 import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
 import Canvas from "./canvas/Canvas";
@@ -15,10 +16,7 @@ export default function PostPromptView() {
 
 	return (
 		<div className="relative flex h-screen w-full flex-col overflow-hidden">
-			<div
-				aria-hidden
-				className="dot-grid-bg pointer-events-none fixed inset-0 -z-10"
-			/>
+			<DotGrid />
 			<UserProfile />
 
 			<EditorToolbar />
