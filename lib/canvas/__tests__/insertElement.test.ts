@@ -85,7 +85,7 @@ describe("insertElement", () => {
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
 			insertElement(editor, "image", [0, 1], {
-				projectModels: { image: "Slop Image v1" },
+				defaultModels: { image: "Slop Image v1" },
 			});
 		});
 

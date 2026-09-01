@@ -1,7 +1,14 @@
 import type { IconComponent } from "@/components/ui/icon";
+import type { ConnectorType } from "../types";
 
 export type AttributeEdit =
 	| { kind: "enum"; options: readonly string[] }
+	/**
+	 * The model a generation runs on. An enum whose options come from a
+	 * catalog, picked through a control that can also say what each model costs
+	 * and which of them the account can actually reach.
+	 */
+	| { kind: "model"; connector: ConnectorType; options: readonly string[] }
 	| { kind: "text"; placeholder?: string; rows?: number }
 	/** A list of image URLs, edited as tiles. */
 	| { kind: "images" };
@@ -61,10 +68,7 @@ export class AttributeSchema {
 	/** Whether the schema would let the settings popover produce this value. */
 	private offers(key: string, value: string): boolean {
 		const edit = this.defs.find((def) => def.key === key)?.edit;
-		if (edit?.kind === "enum") {
-			return edit.options.includes(value);
-		}
-		return true;
+		return edit && "options" in edit ? edit.options.includes(value) : true;
 	}
 
 	/**

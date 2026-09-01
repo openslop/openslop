@@ -5,7 +5,8 @@ import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { createDefaultConnector } from "@/lib/connectors/registry";
+import { createModelConnector } from "@/lib/connectors/registry";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import type { VoiceInfo } from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
 import type { MetadataVoice } from "@/lib/project/types";
@@ -59,9 +60,10 @@ export function VoicePicker({
 	onSelect: (voice: VoiceInfo) => void;
 }) {
 	const { connectorConfig } = useConfig();
+	const model = useDefaultModels().tts;
 	const ttsConnector = useMemo(
-		() => createDefaultConnector(connectorConfig, "tts"),
-		[connectorConfig],
+		() => createModelConnector(connectorConfig, "tts", model),
+		[connectorConfig, model],
 	);
 
 	const [voices, setVoices] = useState<VoiceInfo[]>([]);

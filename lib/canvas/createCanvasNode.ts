@@ -13,8 +13,8 @@ type Opts = {
 	id?: string;
 	attrs?: Record<string, string>;
 	text?: string;
-	/** The project's configured models, which a new element takes its own from. */
-	projectModels?: ConnectorModels;
+	/** The models a new element takes its own from, already resolved by scope. */
+	defaultModels?: ConnectorModels;
 };
 
 export function createCanvasNode(
@@ -25,7 +25,7 @@ export function createCanvasNode(
 	const catalog = MODEL_CATALOGS[connector];
 	const model = catalog.resolve(
 		opts.attrs?.model,
-		opts.projectModels?.[connector],
+		opts.defaultModels?.[connector],
 	);
 	const provider = catalog.providerFor(model);
 	const schema = resolveAttributeSchema(connector, provider, model);

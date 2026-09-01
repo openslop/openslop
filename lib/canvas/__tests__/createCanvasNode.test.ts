@@ -57,7 +57,7 @@ describe("createCanvasNode", () => {
 
 	it("takes the model the project configured for the connector type", () => {
 		const node = createCanvasNode("narration", {
-			projectModels: { tts: "Slop TTS v1" },
+			defaultModels: { tts: "Slop TTS v1" },
 		});
 		expect(flatAttributes(node).model).toBe("Slop TTS v1");
 	});
@@ -65,7 +65,7 @@ describe("createCanvasNode", () => {
 	// A project can name a model that has since been retired.
 	it("falls back to the catalog when the project names an unknown model", () => {
 		const node = createCanvasNode("narration", {
-			projectModels: { tts: "Retired v0" },
+			defaultModels: { tts: "Retired v0" },
 		});
 		expect(flatAttributes(node).model).toBe(MODEL_CATALOGS.tts.defaultModel);
 	});
@@ -73,7 +73,7 @@ describe("createCanvasNode", () => {
 	it("keeps a caller-supplied model over the project's", () => {
 		const node = createCanvasNode("image", {
 			attrs: { model: "Slop Image v1" },
-			projectModels: { image: "Retired v0" },
+			defaultModels: { image: "Retired v0" },
 		});
 		expect(flatAttributes(node).model).toBe("Slop Image v1");
 	});

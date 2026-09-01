@@ -17,7 +17,8 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { createDefaultConnector } from "@/lib/connectors/registry";
+import { createModelConnector } from "@/lib/connectors/registry";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import {
 	deriveArtStyle,
 	uploadedAvatarUrls,
@@ -53,6 +54,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 	const setStyle = (next: string) => updateMetadata({ style: next });
 
 	const [deriving, setDeriving] = useState(false);
+	const model = useDefaultModels().llm;
 
 	const uploadedCount = useProject((s) => s.referenceImages.length);
 	const avatarCount = useQueueSelector(
@@ -64,7 +66,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 		setDeriving(true);
 		try {
 			const derived = await deriveArtStyle(
-				createDefaultConnector(connectorConfig, "llm"),
+				createModelConnector(connectorConfig, "llm", model),
 				store.getState(),
 				queue,
 			);

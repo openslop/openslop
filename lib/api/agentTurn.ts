@@ -16,13 +16,14 @@ import {
 } from "@/lib/agent/messages";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
+import type { ProviderKey } from "@/lib/connectors/types";
 import {
 	findOrCreateConversation,
 	listConversationMessages,
 	saveConversationMessage,
 } from "./conversations";
 import { logger } from "./logger";
-import { getLLMProvider } from "./providers";
+import { llmProviderFor } from "./providers";
 
 /** What one turn may spend before the tools come off and it has to end in a reply. */
 const MAX_TOOL_CALLS = 20;
@@ -34,6 +35,8 @@ export type AgentTurnRequest = {
 	context: AgentContext;
 	/** The provider's own model id: the route resolves it from the picked name. */
 	model?: string;
+	/** Whose key the turn runs on, resolved from the picked model. */
+	provider: ProviderKey;
 };
 
 /**
@@ -57,7 +60,11 @@ export async function streamAgentTurn(
 	await saveConversationMessage(conversationId, incoming);
 
 	const carried = stored?.metadata?.workSeconds ?? 0;
-	const { model, providerOptions } = getLLMProvider().agentModel(request.model);
+	const llm = await llmProviderFor({
+		userId: request.userId,
+		provider: request.provider,
+	});
+	const { model, providerOptions } = llm.agentModel(request.model);
 
 	const modelMessages = pruneMessages({
 		messages: await convertToModelMessages(pruneTranscript(messages), {

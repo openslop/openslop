@@ -29,8 +29,6 @@ describe("BaseLLMConnector", () => {
 			},
 		};
 		const connector = new OpenSlopLLM({
-			isDefault: true,
-			apiKey: "",
 			plugins: [plugin],
 		});
 		await connector.generate({ prompt: "test" });
@@ -46,8 +44,6 @@ describe("BaseLLMConnector", () => {
 			}),
 		};
 		const connector = new OpenSlopLLM({
-			isDefault: true,
-			apiKey: "",
 			plugins: [plugin],
 		});
 		const result = await connector.generate({ prompt: "test" });
@@ -63,8 +59,6 @@ describe("BaseLLMConnector", () => {
 		};
 
 		const connector = new OpenSlopLLM({
-			isDefault: true,
-			apiKey: "",
 			plugins: [plugin],
 		});
 
@@ -94,8 +88,6 @@ describe("BaseLLMConnector", () => {
 			},
 		];
 		const connector = new OpenSlopLLM({
-			isDefault: true,
-			apiKey: "",
 			plugins,
 		});
 		await connector.generate({ prompt: "test" });
@@ -104,9 +96,7 @@ describe("BaseLLMConnector", () => {
 
 	it("hands the caller's abort signal to the stream request", async () => {
 		const fetchMock = vi.mocked(fetch);
-		const connector = new OpenSlopLLM({
-			isDefault: true,
-		});
+		const connector = new OpenSlopLLM({});
 		const controller = new AbortController();
 
 		await connector.stream({ prompt: "test" }, controller.signal).next();
@@ -120,7 +110,6 @@ describe("BaseLLMConnector", () => {
 	it("runs onError when transformPrompt throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new OpenSlopLLM({
-			isDefault: true,
 			plugins: [
 				{
 					name: "bad-transform",
@@ -142,7 +131,6 @@ describe("BaseLLMConnector", () => {
 	it("runs onError when beforeGenerate throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new OpenSlopLLM({
-			isDefault: true,
 			plugins: [
 				{
 					name: "bad-before",

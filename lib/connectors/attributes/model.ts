@@ -1,4 +1,3 @@
-import { Codesandbox } from "@/components/ui/icon";
 import { MODEL_CATALOGS } from "../models";
 import type { ConnectorType } from "../types";
 import type { AttributeDef } from "./schema";
@@ -16,9 +15,8 @@ export const modelDef = (
 	return {
 		key: "model",
 		label: "Model",
-		icon: Codesandbox,
 		badge: true,
-		edit: { kind: "enum", options: catalog.names },
+		edit: { kind: "model", connector: type, options: catalog.names },
 		default: catalog.defaultModel,
 		...overrides,
 	};

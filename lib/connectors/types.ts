@@ -18,9 +18,16 @@ export const ASSET_CONNECTOR_TYPES = [
 
 export type AssetConnectorType = (typeof ASSET_CONNECTOR_TYPES)[number];
 
+export const CONNECTOR_TYPES = [...ASSET_CONNECTOR_TYPES, "llm"] as const;
+
 export type ConnectorType = AssetConnectorType | "llm";
 
-export type ProviderKey = "openslop";
+export type ProviderKey =
+	| "openslop"
+	| "anthropic"
+	| "runware"
+	| "cartesia"
+	| "elevenlabs";
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
@@ -68,8 +75,8 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 }
 
 export interface ConnectorConfig {
-	isDefault: boolean;
-	apiKey?: string;
+	/** Which provider this config is for. Stamped by `createConnector`. */
+	provider?: ProviderKey;
 	baseUrl?: string;
 	plugins?: ConnectorPlugin[];
 }

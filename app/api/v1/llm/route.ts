@@ -1,27 +1,18 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { getLLMProvider } from "@/lib/api/providers";
-import { bodySchema, createApiRouteHandler } from "@/lib/api/route-handler";
-import { optionalReferenceImages } from "@/lib/api/request-schema-fields";
+import { bodySchema, LLM_FIELDS } from "@/lib/api/generation-schema";
+import { createApiRouteHandler } from "@/lib/api/route-handler";
 import { createSSEStreamResponse } from "@/lib/api/sse";
-import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
+import { LLM_MODELS } from "@/lib/connectors/llm/models";
 import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 
-const schema = bodySchema(OPENSLOP_LLM_MODELS, {
-	systemPrompt: z.string().optional(),
-	thinkingLevel: z.enum(THINKING_LEVELS).optional(),
-	maxTokens: z.number().optional(),
-	temperature: z.number().optional(),
-	...optionalReferenceImages,
-	stream: z.boolean().optional(),
-});
-
 export const POST = createApiRouteHandler({
-	schema,
+	schema: bodySchema(OPENSLOP_LLM_MODELS, LLM_FIELDS),
 	label: "LLM generation",
 	handle: async ({ input }) => {
 		const provider = getLLMProvider();
-		const { stream, ...genParams } = input;
+		const { stream, model, ...rest } = input;
+		const genParams = { ...rest, model: LLM_MODELS.idFor(model) };
 		if (stream) {
 			return createSSEStreamResponse(provider.stream(genParams), "LLM");
 		}

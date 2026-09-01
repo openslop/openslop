@@ -6,6 +6,7 @@ export const RAIL_PANEL_KEYS = [
 	"layout",
 	"captions",
 	"properties",
+	"connectors",
 	"history",
 ] as const;
 

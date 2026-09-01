@@ -16,9 +16,7 @@ const EMPTY_STATE = {
 	referenceImages: [],
 };
 
-const config: ConnectorConfig = {
-	isDefault: true,
-};
+const config: ConnectorConfig = {};
 
 function node(
 	id: string,

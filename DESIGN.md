@@ -30,7 +30,7 @@ Semantic tokens only. Never raw hexes, `bg-black/N`, or `*-white/N`.
 
 Sizes: `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display`. Never `text-xs`, `text-sm`, or `text-[Npx]`.
 
-- Each bakes its own line-height, so add `leading-*` only to override it, and `font-medium` for weight. `text-label-xs` also bakes weight 475.
+- Each bakes its own line-height, so add `leading-*` only to override it, and `font-medium` for weight. `text-label-xs` also bakes weight 475; `font-book` is that same weight for the sizes that do not.
 - `.font-body` and `.font-title` are unlayered, so their line-height (1.5 / 1.2) beats a token's baked leading wherever they pair (form controls, buttons, titles). Those need an explicit `leading-*`.
 - In a dense row, a label and its description share one size and weight, separated by color alone: `text-foreground` against `text-muted-foreground`.
 

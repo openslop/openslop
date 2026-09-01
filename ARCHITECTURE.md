@@ -39,8 +39,17 @@ Turns are stored as the SDK's UI message type, so the stream, the rows and the p
 The generation pipeline is split so providers and asset types can be swapped independently:
 
 - **Connectors** (`lib/connectors/`): what the editor calls. Model-agnostic, plugin-pipelined, return an `AssetResult`. `DEFAULT_CONNECTOR_REGISTRY` declares each type's static plugin chain; `ConfigProvider` appends only the chains that need a live project store.
-- **Gateways** (`lib/gateway/`): thin HTTP clients between connectors and our `/api/v1/*` routes. This seam lets connectors run against the live API or a mock. Today there is one OpenSlop gateway. A BYOK gateway will be added so users can call providers with their own API keys.
-- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. LLM providers go through the Vercel AI SDK; `getLLMProvider` in `lib/api/providers.ts` is the one place a vendor is chosen, and the provider's `agentModel()` builds the `LanguageModel` and maps vendor-specific knobs like reasoning effort.
+- **Gateways** (`lib/gateway/`): thin HTTP clients between connectors and our own routes. `HttpAssetGateway` / `HttpLLMGateway` (`lib/gateway/http.ts`) hold the protocol; a gateway family is only the prefix its connectors post to. `openslop/` posts to `/api/v1/*` for the models we host, `thirdparty/` posts to `/api/third-party/*` for the ones a user brings a key for.
+- **Providers** (`lib/providers/`): server-side adapters for vendors (Runware, ElevenLabs, Cartesia, Anthropic). Call the vendor SDK, upload assets, return a bundle response. The same classes serve both gateway families; only where the key comes from differs. `lib/api/providers.ts` is the one place a vendor is chosen: `byokAware` pairs a type's hosted provider with the vendors a user can reach on their own key, and returns whichever the request names. LLM providers go through the Vercel AI SDK, and the provider's `agentModel()` builds the `LanguageModel` and maps vendor-specific knobs like reasoning effort.
+
+## BYOK
+
+A model name is the whole routing decision. `ModelCatalog` (`lib/connectors/modelCatalog.ts`) maps each name to the provider serving it and the id that provider's API takes, so `providerForModel` decides the connector, the gateway family, and whose key runs the generation — nothing stores a provider separately.
+
+- **Which model.** `defaultModelFor` resolves element override → project default (`metadata.connectorModels`) → account default (`user_metadata.connectorModels`) → the catalog's recommendation, and `modelSourceFor` names the scope that supplied it, which is what the provenance tooltips read.
+- **Keys.** Stored per user in `connectors`, one row per provider. The key itself lives in Supabase Vault; the row keeps only the last four characters and the last verification result. Reads and writes go through `security definer` functions that only the service role may execute (`lib/api/connectorKeys.ts`), so a key is decrypted on the server, for the one request about to use it, and is never returned to a client.
+- **Routes.** `/api/third-party/*` mirrors `/api/v1/*` but is session-authenticated rather than api-access gated, and derives the provider from the model instead of accepting one. Asset generation creates the same `jobs` row, so polling, timeouts, cancel and history are unchanged.
+- **When the name becomes an id.** A request keeps the model's _name_ all the way to the code that reaches a vendor, because the name is what says which provider serves it. The synchronous routes translate at their own call site; an asset job stores the name, and the queue worker resolves both the provider and the vendor's id from it (`providerRequest` / `vendorParams`). Translating at the HTTP boundary instead would throw the routing away — two models can share a vendor id (`Slop Image v1` _is_ `Seedream 5 Lite`, on our key rather than yours), so the id alone can never say whose key to read.
 
 ## API routes
 
@@ -83,14 +92,15 @@ Staleness falls out of the graph: a node needs generating when it has no result,
 
 Supabase Postgres with RLS (users only read their own rows; queue workers use the service role):
 
-| Table             | Purpose                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| `auth.users`      | Supabase auth users                                                                  |
-| `projects`        | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB) |
-| `canvas_versions` | Autosaved history of those same three columns, one row per folded checkpoint         |
-| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`                  |
-| `conversations`   | One Sloppy conversation per project                                                  |
-| `messages`        | Its turns: `parts` (text / reasoning / tool-call / tool-result) plus usage           |
+| Table             | Purpose                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| `auth.users`      | Supabase auth users                                                                     |
+| `projects`        | One row per project: `script` (text) plus `store` and `generation` snapshots (JSONB)    |
+| `canvas_versions` | Autosaved history of those same three columns, one row per folded checkpoint            |
+| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`                     |
+| `connectors`      | One row per user + provider: vault secret id, last four characters, verification status |
+| `conversations`   | One Sloppy conversation per project                                                     |
+| `messages`        | Its turns: `parts` (text / reasoning / tool-call / tool-result) plus usage              |
 
 Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, served as public CDN URLs.
 
@@ -99,8 +109,8 @@ Generated assets live in Vercel Blob under `assets/{type}/{provider}/{id}/`, ser
 - `proxy.ts` (Next.js 16's renamed middleware, keep this name) refreshes the Supabase session on each request.
 - API routes have two auth tiers, both defined in `lib/api/with-auth.ts`:
   - `withApiAccess` (`/api/v1/*`): same-origin Supabase session cookie plus the `api_access` grant in `app_metadata` (403 without it).
-  - `withSession` (`/api/render*`, `/api/upload/*`): any signed-in user.
+  - `withSession` (`/api/render*`, `/api/upload/*`, `/api/connectors*`, `/api/third-party/*`): any signed-in user. BYOK runs on the user's own key, so it is not gated on our API grant.
 
 ## Adding a new asset type
 
-Add a connector + gateway + provider, register the provider in `lib/api/providers.ts`, declare a models map, and add the route under `app/api/v1/<type>`. Tests live in `__tests__` folders next to the code.
+Add a connector + gateway + provider, register the provider in `lib/api/providers.ts`, declare a models map, and add the route under `app/api/v1/<type>`. To add a BYOK provider instead, give it an entry in `PROVIDER_CATALOG`, a models map under `lib/connectors/<type>/<provider>/models.ts` folded into that type's catalog, a constructor in the matching `byokAware` pairing, and a validation probe in `lib/api/connectorValidation.ts`; the factory, registry and settings UI all read from the catalog. Tests live in `__tests__` folders next to the code.

@@ -34,9 +34,7 @@ type JobOverrides = Partial<GenerationJob> & {
 };
 
 function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
-	const config: ConnectorConfig = {
-		isDefault: true,
-	};
+	const config: ConnectorConfig = {};
 	const {
 		inputs = { prompt: "test prompt", attributes: {}, dependencies: {} },
 		dependsOn = [],

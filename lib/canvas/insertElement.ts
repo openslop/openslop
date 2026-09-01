@@ -10,7 +10,7 @@ export function insertElement(
 	overrides?: {
 		attrs?: Record<string, string>;
 		text?: string;
-		projectModels?: ConnectorModels;
+		defaultModels?: ConnectorModels;
 	},
 ): string {
 	const node = createCanvasNode(type, overrides);

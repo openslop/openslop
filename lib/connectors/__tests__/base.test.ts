@@ -11,8 +11,6 @@ class TestConnector extends BaseConnector {
 
 describe("BaseConnector", () => {
 	const config: ConnectorConfig = {
-		isDefault: true,
-		apiKey: "key",
 		plugins: [{ name: "p1" }],
 	};
 
@@ -22,10 +20,7 @@ describe("BaseConnector", () => {
 	});
 
 	it("defaults plugins to empty array", () => {
-		const c = new TestConnector({
-			isDefault: true,
-			apiKey: "key",
-		});
+		const c = new TestConnector({});
 		expect((c as unknown as { plugins: unknown[] }).plugins).toEqual([]);
 	});
 
@@ -41,7 +36,6 @@ describe("BaseConnector", () => {
 			},
 		];
 		const c = new TestConnector({
-			isDefault: true,
 			plugins,
 		});
 		await expect(c.generate({ prompt: "hi" })).rejects.toThrow(
@@ -65,7 +59,6 @@ describe("BaseConnector", () => {
 			},
 		];
 		const c = new TestConnector({
-			isDefault: true,
 			plugins,
 		});
 		await expect(c.generate({ prompt: "hi" })).rejects.toThrow("before failed");

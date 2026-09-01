@@ -6,10 +6,7 @@ import { mockGatewaySuccess } from "./_gateway-mock";
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/music/openslop/${TEST_ID}/output.mp3`;
 
-const config = {
-	isDefault: true,
-	apiKey: "",
-};
+const config = {};
 
 function mockSuccess() {
 	mockGatewaySuccess({

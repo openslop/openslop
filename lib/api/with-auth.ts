@@ -1,12 +1,14 @@
 import type { User } from "@supabase/supabase-js";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
+import { MissingConnectorKeyError } from "./connectorKeys";
 import { logger } from "./logger";
-import { forbidden, serverError, unauthorized } from "./response";
+import { badRequest, forbidden, serverError, unauthorized } from "./response";
 
 type RouteBody = (user: User) => Promise<Response>;
 
-// Uniform error envelope: thrown errors are logged and returned as 500.
+// Uniform error envelope: an unconnected provider is the caller's to fix, so it
+// comes back as a 400; anything else is logged and returned as 500.
 async function runGuarded(
 	label: string,
 	run: () => Promise<Response>,
@@ -14,6 +16,8 @@ async function runGuarded(
 	try {
 		return await run();
 	} catch (error) {
+		if (error instanceof MissingConnectorKeyError)
+			return badRequest(error.message);
 		logger.error(error, `${label} failed`);
 		return serverError(`${label} failed: ${stringifyError(error)}`);
 	}

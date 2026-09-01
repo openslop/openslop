@@ -17,9 +17,7 @@ vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
-const config: ConnectorConfig = {
-	isDefault: true,
-};
+const config: ConnectorConfig = {};
 
 function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	const job: GenerationJob = {

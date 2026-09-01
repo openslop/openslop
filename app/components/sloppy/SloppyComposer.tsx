@@ -3,12 +3,13 @@
 import { useRef, useState } from "react";
 import {
 	ChevronDown,
-	Codesandbox,
 	CornerDownLeft,
 	Lightbulb,
 	SquareFilled,
 } from "@/components/ui/icon";
-import { SelectMenu } from "@/components/ui/select-menu";
+import { ModelSelect } from "@/app/components/connectors/ModelSelect";
+import { ProviderIcon } from "@/app/components/connectors/ProviderIcon";
+import { providerForModel } from "@/lib/connectors/models";
 import { cn } from "@/lib/utils";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
@@ -22,36 +23,23 @@ const controlClassName =
 function ModelPicker({
 	model,
 	onChange,
-	options,
 }: {
 	model: string;
 	onChange: (next: string) => void;
-	options: string[];
 }) {
 	return (
-		<SelectMenu
-			value={model}
-			onChange={onChange}
-			options={options.map((option) => ({
-				value: option,
-				label: option,
-			}))}
-			contentClassName="max-h-64 min-w-24"
-		>
+		<ModelSelect type="llm" value={model} onChange={onChange} side="top">
 			<button
 				type="button"
 				aria-label={`Model: ${model}`}
 				onMouseDown={(event) => event.preventDefault()}
 				className={cn(controlClassName, "max-w-[140px]")}
 			>
-				<Codesandbox
-					className="h-3 w-3 shrink-0 opacity-70"
-					aria-hidden="true"
-				/>
+				<ProviderIcon provider={providerForModel("llm", model)} size={12} />
 				<span className="min-w-0 truncate">{model}</span>
 				<ChevronDown className="h-3 w-3 shrink-0" aria-hidden="true" />
 			</button>
-		</SelectMenu>
+		</ModelSelect>
 	);
 }
 
@@ -78,7 +66,7 @@ function SuggestionButton({
 
 export function SloppyComposer() {
 	const { send, stop, loading } = useSloppy();
-	const { model, setModel, models } = useSloppyModel();
+	const { model, setModel } = useSloppyModel();
 	const [value, setValue] = useState("");
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const hasText = value.trim().length > 0;
@@ -118,7 +106,7 @@ export function SloppyComposer() {
 			/>
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-center gap-1">
-					<ModelPicker model={model} onChange={setModel} options={models} />
+					<ModelPicker model={model} onChange={setModel} />
 					<SuggestionButton
 						onPick={suggest}
 						disabled={loading || (hasText && !showsSuggestion)}

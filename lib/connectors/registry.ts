@@ -1,9 +1,10 @@
 import set from "lodash/fp/set";
-import { createConnector } from "./factory";
+import { createConnector, providersFor } from "./factory";
 import { buildAnimatedImagePlugins } from "./animated_image/plugins/animated-image-chain";
 import { buildImagePlugins } from "./image/plugins/imageChain";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
 import { createDimensionsPlugin } from "./plugins/dimensions";
+import { providerForModel } from "./models";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
 import type {
@@ -16,65 +17,69 @@ import type {
 /** Every connector type mapped to the providers configured for it. */
 export type ConnectorRegistry = Record<
 	ConnectorType,
-	Record<ProviderKey, ConnectorConfig>
+	Partial<Record<ProviderKey, ConnectorConfig>>
 >;
 
-const openslopConfig = (
+/**
+ * Every provider serving a type, sharing that type's plugin chain: plugins are
+ * what the connector type does, not what one vendor does. Which provider a
+ * generation uses is the model's decision, so nothing here is marked default.
+ */
+const configFor = (
+	type: ConnectorType,
 	plugins?: ConnectorPlugin[],
-): Record<ProviderKey, ConnectorConfig> => ({
-	openslop: {
-		isDefault: true,
-		apiKey: "",
-		...(plugins && { plugins }),
-	},
-});
+): Partial<Record<ProviderKey, ConnectorConfig>> =>
+	Object.fromEntries(
+		providersFor(type).map((provider) => [
+			provider,
+			plugins ? { plugins } : {},
+		]),
+	);
 
 /** Static plugin chains; `ConfigProvider` layers the project-scoped ones on top. */
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
-	llm: openslopConfig(),
-	tts: openslopConfig([createMetadataVoicePlugin(), createVoiceSearchPlugin()]),
-	image: openslopConfig(buildImagePlugins()),
-	animated_image: openslopConfig(buildAnimatedImagePlugins()),
-	video: openslopConfig([
+	llm: configFor("llm"),
+	tts: configFor("tts", [
+		createMetadataVoicePlugin(),
+		createVoiceSearchPlugin(),
+	]),
+	image: configFor("image", buildImagePlugins()),
+	animated_image: configFor("animated_image", buildAnimatedImagePlugins()),
+	video: configFor("video", [
 		createReferenceImagesPlugin(),
 		createDimensionsPlugin("video"),
 	]),
-	sfx: openslopConfig(),
-	music: openslopConfig(),
+	sfx: configFor("sfx"),
+	music: configFor("music"),
 };
 
-export function getDefaultConnector(
-	registry: ConnectorRegistry,
-	type: ConnectorType,
-): { provider: ProviderKey; config: ConnectorConfig } {
-	const providers = registry[type];
-	for (const [provider, config] of Object.entries(providers)) {
-		if (config.isDefault) {
-			return { provider: provider as ProviderKey, config };
-		}
-	}
-	const first = Object.entries(providers)[0];
-	if (!first)
-		throw new Error(`No providers configured for connector type "${type}"`);
-	const [provider, config] = first;
-	return { provider: provider as ProviderKey, config };
-}
-
-export function createDefaultConnector<T extends ConnectorType>(
+/**
+ * The connector serving a model. Picking a model picks the provider, and so the
+ * gateway and the key the generation runs on.
+ */
+export function createModelConnector<T extends ConnectorType>(
 	registry: ConnectorRegistry,
 	type: T,
+	model: string | undefined,
 ) {
-	const { provider, config } = getDefaultConnector(registry, type);
+	const provider = providerForModel(type, model);
+	const config = registry[type][provider];
+	if (!config)
+		throw new Error(`No "${provider}" connector configured for "${type}"`);
 	return createConnector(type, provider, config);
 }
 
 export function withRegistry(registry: ConnectorRegistry) {
 	const apply = (cfg: ConnectorRegistry) => ({
+		/** Appended for every provider of the type, since a plugin is the type's behaviour. */
 		appendPlugins: (type: ConnectorType, ...plugins: ConnectorPlugin[]) => {
-			const { provider, config } = getDefaultConnector(cfg, type);
-			const next = set(
-				[type, provider, "plugins"],
-				[...(config.plugins ?? []), ...plugins],
+			const next = Object.entries(cfg[type]).reduce(
+				(acc, [provider, config]) =>
+					set(
+						[type, provider, "plugins"],
+						[...(config.plugins ?? []), ...plugins],
+						acc,
+					),
 				cfg,
 			);
 			return apply(next);

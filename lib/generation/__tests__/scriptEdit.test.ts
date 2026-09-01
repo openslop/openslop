@@ -4,6 +4,7 @@ import {
 	stillDependency,
 	stillElementId,
 } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { SceneElement } from "@/lib/canvas/types";
 import { MetadataSchema } from "@/lib/project/types";
@@ -49,6 +50,7 @@ const context = ({ generated = true, pinned = false } = {}) => {
 		queue,
 		connectors: DEFAULT_CONNECTOR_REGISTRY,
 		state,
+		models: resolveDefaultModels(),
 	} satisfies ScriptEditContext;
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { type ReactNode } from "react";
-import { Check } from "@/components/ui/icon";
+import { type ComponentProps, type ReactNode } from "react";
+import { Check, ChevronDown } from "@/components/ui/icon";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -49,6 +49,31 @@ export function SelectMenuItem({
 			</span>
 			{children}
 		</DropdownMenuItem>
+	);
+}
+
+/**
+ * The field-shaped trigger a `SelectMenu` hangs off when it stands in for a
+ * form field: the look of `SelectField`'s trigger, with room for whatever the
+ * menu's rows show, since a menu row is richer than a listbox option.
+ */
+export function SelectMenuTrigger({
+	className,
+	children,
+	...props
+}: ComponentProps<"button">) {
+	return (
+		<button
+			type="button"
+			className={cn(
+				"flex h-8 w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-2.5 font-body text-label whitespace-nowrap outline-none transition-colors hover:bg-surface-hover focus-ring unavailable:opacity-50",
+				className,
+			)}
+			{...props}
+		>
+			{children}
+			<ChevronDown className="size-4 shrink-0 opacity-60" aria-hidden="true" />
+		</button>
 	);
 }
 

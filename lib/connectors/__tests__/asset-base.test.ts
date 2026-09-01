@@ -62,9 +62,7 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	}
 }
 
-const config: ConnectorConfig = {
-	isDefault: true,
-};
+const config: ConnectorConfig = {};
 
 describe("BaseAssetConnector", () => {
 	beforeEach(() => {

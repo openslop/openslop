@@ -26,9 +26,7 @@ const EMPTY_STATE = {
 	referenceImages: [],
 };
 
-const config: ConnectorConfig = {
-	isDefault: true,
-};
+const config: ConnectorConfig = {};
 
 function makeJob(connectorType: AssetConnectorType): GenerationJob {
 	return {

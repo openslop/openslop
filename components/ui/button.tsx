@@ -28,6 +28,8 @@ const buttonVariants = cva(
 				link: "text-accent underline-offset-4 hover:underline",
 			},
 			size: {
+				/** Dense rows, where a full control would outgrow the line it sits on. */
+				xs: "h-6 gap-1 rounded-md px-2 text-label [&_svg:not([class*='size-'])]:size-3",
 				sm: "h-8 rounded-md px-3 text-label",
 				default: "h-9 px-4",
 				/** Auth and hero call to action; pair with `w-full`. */

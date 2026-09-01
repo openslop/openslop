@@ -1,13 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createConnector, resolveAttributeSchema } from "../factory";
 import { MODEL_CATALOGS } from "../models";
-import { DEFAULT_CONNECTOR_REGISTRY, getDefaultConnector } from "../registry";
+
 import { ASSET_CONNECTOR_TYPES, type ConnectorType } from "../types";
 
-const stubConfig = {
-	isDefault: true,
-	apiKey: "test-key",
-};
+const stubConfig = {};
 
 describe("createConnector", () => {
 	it("creates a valid LLM connector", () => {
@@ -67,15 +64,12 @@ describe("resolveAttributeSchema", () => {
 
 	it("offers every asset connector's own catalog as a badge, defaulted", () => {
 		for (const type of ASSET_CONNECTOR_TYPES) {
-			const { provider } = getDefaultConnector(
-				DEFAULT_CONNECTOR_REGISTRY,
-				type,
-			);
 			const catalog = MODEL_CATALOGS[type];
-			const schema = resolveAttributeSchema(type, provider);
+			const schema = resolveAttributeSchema(type, catalog.providerFor());
 
 			expect(schema.badgeAttributes.model?.edit).toEqual({
-				kind: "enum",
+				kind: "model",
+				connector: type,
 				options: catalog.names,
 			});
 			expect(schema.defaultAttributes.model).toBe(catalog.defaultModel);

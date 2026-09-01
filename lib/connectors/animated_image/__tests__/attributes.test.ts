@@ -14,11 +14,13 @@ describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 
 	it("picks each from its own connector's models", () => {
 		expect(badges.model?.edit).toEqual({
-			kind: "enum",
+			kind: "model",
+			connector: "animated_image",
 			options: VIDEO_MODELS.names,
 		});
 		expect(badges.stillModel?.edit).toEqual({
-			kind: "enum",
+			kind: "model",
+			connector: "image",
 			options: IMAGE_MODELS.names,
 		});
 	});

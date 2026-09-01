@@ -10,39 +10,25 @@ import { splitAttributes } from "@/lib/video/elementAttributes";
 
 const registry: ConnectorRegistry = {
 	llm: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 	tts: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 	image: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 	animated_image: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 	video: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 	sfx: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 	music: {
-		openslop: {
-			isDefault: true,
-		},
+		openslop: {},
 	},
 };
 

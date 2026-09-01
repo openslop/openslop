@@ -2,12 +2,12 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { imageFile } from "../request-schema-fields";
+import { pollJob } from "../asset-routes";
+import { bodySchema } from "../generation-schema";
 import {
-	bodySchema,
 	createApiRouteHandler,
 	createSessionFormRouteHandler,
 	createSessionRouteHandler,
-	pollJob,
 } from "../route-handler";
 
 const mockGetJob = vi.fn();
@@ -123,7 +123,9 @@ describe("createApiRouteHandler", () => {
 		expect(json.error).toContain("model-a");
 	});
 
-	it("maps model name to slug and passes to handle", async () => {
+	// The name is what says which provider serves the model, so it survives the
+	// boundary; only the code that reaches a vendor turns it into that vendor's id.
+	it("passes the model through by name", async () => {
 		const handle = vi.fn(async () => NextResponse.json({ done: true }));
 		const handler = makeHandler(handle);
 		await handler(makeRequest({ prompt: "hello", model: "model-a" }));
@@ -131,7 +133,7 @@ describe("createApiRouteHandler", () => {
 		expect(handle).toHaveBeenCalledWith(
 			expect.objectContaining({
 				user: expect.objectContaining({ id: "user-1" }),
-				input: expect.objectContaining({ prompt: "hello", model: "slug-a" }),
+				input: expect.objectContaining({ prompt: "hello", model: "model-a" }),
 			}),
 		);
 	});

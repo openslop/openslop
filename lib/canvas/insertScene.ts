@@ -10,12 +10,12 @@ const NEW_SCENE_ELEMENT = "image";
 export function insertScene(
 	editor: Editor,
 	at: Path,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): string {
 	const scene: SceneElement = {
 		id: makeNodeId(),
 		type: SCENE_TYPE,
-		children: [createCanvasNode(NEW_SCENE_ELEMENT, { projectModels })],
+		children: [createCanvasNode(NEW_SCENE_ELEMENT, { defaultModels })],
 	};
 	Transforms.insertNodes(editor, scene, { at });
 	return scene.id;

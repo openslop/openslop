@@ -362,6 +362,21 @@ describe("API routes", () => {
 			expect((await res.json()).text).toBe("Hello");
 		});
 
+		// The name survives the boundary; this route is where it becomes the id
+		// Anthropic's own API takes.
+		it("forwards the vendor's id for the model it was asked for", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			mockLLMGenerate.mockResolvedValue({ text: "Hello", model: "x" });
+
+			await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", model: "Slop LLM v1" }),
+			);
+
+			expect(mockLLMGenerate).toHaveBeenCalledWith(
+				expect.objectContaining({ model: "claude-opus-5" }),
+			);
+		});
+
 		it("returns SSE stream when stream=true", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			mockLLMStream.mockReturnValue(

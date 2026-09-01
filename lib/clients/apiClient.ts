@@ -1,6 +1,6 @@
 import { apiFetch, apiJson } from "./http";
 
-export class OpenSlopClient {
+export class ApiClient {
 	private baseUrl: string;
 
 	constructor(baseUrl?: string) {

@@ -8,7 +8,7 @@ import {
 	lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { AGENT_PATH, loadAgentTranscript } from "@/lib/agent/client";
+import { agentPathFor, loadAgentTranscript } from "@/lib/agent/client";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
@@ -81,7 +81,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			messageMetadataSchema: sloppyMetadataSchema,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new DefaultChatTransport<SloppyMessage>({
-				api: AGENT_PATH,
+				api: agentPathFor(model),
 				prepareSendMessagesRequest: ({ messages, body }) => ({
 					body: {
 						...body,

@@ -5,21 +5,23 @@ import {
 	findConversation,
 	listConversationMessages,
 } from "@/lib/api/conversations";
+import { hostedModelField } from "@/lib/api/generation-schema";
 import {
 	createApiQueryRouteHandler,
 	createApiRouteHandler,
-	modelField,
 } from "@/lib/api/route-handler";
 import { badRequest } from "@/lib/api/response";
 import { parseSloppyMessage } from "@/lib/agent/messages";
 import { agentContextSchema } from "@/lib/agent/context";
+import { LLM_MODELS } from "@/lib/connectors/llm/models";
 import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
+import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
 
 const turnSchema = z.object({
 	projectId: z.uuid(),
 	message: z.unknown(),
 	context: agentContextSchema,
-	model: modelField(OPENSLOP_LLM_MODELS),
+	model: hostedModelField(OPENSLOP_LLM_MODELS),
 });
 
 export const POST = createApiRouteHandler({
@@ -28,7 +30,13 @@ export const POST = createApiRouteHandler({
 	handle: async ({ user, input }) => {
 		const message = await parseSloppyMessage(input.message);
 		if (!message) return badRequest("message is not a Sloppy message");
-		return streamAgentTurn({ ...input, message, userId: user.id });
+		return streamAgentTurn({
+			...input,
+			message,
+			userId: user.id,
+			provider: MANAGED_PROVIDER,
+			model: LLM_MODELS.idFor(input.model),
+		});
 	},
 });
 

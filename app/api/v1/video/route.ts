@@ -1,21 +1,9 @@
-import {
-	optionalFrameImages,
-	optionalImageDimensions,
-	optionalReferenceImages,
-	optionalVideoDuration,
-} from "@/lib/api/request-schema-fields";
-import { bodySchema, createAssetRouteHandlers } from "@/lib/api/route-handler";
+import { createAssetRouteHandlers } from "@/lib/api/asset-routes";
+import { bodySchema, VIDEO_FIELDS } from "@/lib/api/generation-schema";
 import { OPENSLOP_VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
-
-const schema = bodySchema(OPENSLOP_VIDEO_MODELS, {
-	...optionalReferenceImages,
-	...optionalFrameImages,
-	...optionalVideoDuration,
-	...optionalImageDimensions,
-});
 
 export const { POST } = createAssetRouteHandlers({
 	connectorType: "video",
-	schema,
+	schema: bodySchema(OPENSLOP_VIDEO_MODELS, VIDEO_FIELDS),
 	label: "Video submission",
 });

@@ -12,12 +12,14 @@ import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { createDefaultConnector } from "@/lib/connectors/registry";
+import { createModelConnector } from "@/lib/connectors/registry";
 import { getPromptText } from "@/lib/generation/inputs";
 import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { useAccountStoreHandle } from "@/lib/user/AccountStoreProvider";
 import type { AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
 
@@ -25,6 +27,7 @@ export function useAgentTools(editor: Editor) {
 	const { connectorConfig } = useConfig();
 	const { runScript } = useScriptControl();
 	const store = useProjectStoreHandle();
+	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
 
 	return useCallback(
@@ -53,8 +56,12 @@ export function useAgentTools(editor: Editor) {
 					};
 				},
 				generateText: async (prompt, options) => {
-					const llm = createDefaultConnector(connectorConfig, "llm");
-					const { text } = await llm.generate({ prompt, ...options });
+					const model = resolveDefaultModels({
+						project: store.getState().metadata.connectorModels,
+						account: account.getState().models,
+					}).llm;
+					const llm = createModelConnector(connectorConfig, "llm", model);
+					const { text } = await llm.generate({ prompt, model, ...options });
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,
@@ -65,6 +72,10 @@ export function useAgentTools(editor: Editor) {
 							queue,
 							connectors: connectorConfig,
 							state: store.getState(),
+							models: resolveDefaultModels({
+								project: store.getState().metadata.connectorModels,
+								account: account.getState().models,
+							}),
 						},
 						ops,
 					),
@@ -90,6 +101,6 @@ export function useAgentTools(editor: Editor) {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, connectorConfig, runScript, store, queue],
+		[editor, connectorConfig, runScript, store, account, queue],
 	);
 }

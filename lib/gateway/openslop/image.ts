@@ -1,6 +1,8 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
-import { OpenSlopAssetGateway } from "./base";
+import { HttpAssetGateway } from "../http";
+import { OPENSLOP_API_PREFIX } from "./base";
 
-export class OpenSlopImageGateway extends OpenSlopAssetGateway<ImageGenerateParams> {
+export class OpenSlopImageGateway extends HttpAssetGateway<ImageGenerateParams> {
+	protected readonly apiPrefix = OPENSLOP_API_PREFIX;
 	protected readonly path = "image";
 }

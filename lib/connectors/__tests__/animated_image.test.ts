@@ -5,10 +5,7 @@ import { mockGatewaySuccess } from "./_gateway-mock";
 
 const VIDEO_URL = "https://cdn.example.com/v.mp4";
 
-const config = {
-	isDefault: true,
-	apiKey: "",
-};
+const config = {};
 
 describe("BaseAnimatedImageConnector", () => {
 	beforeEach(() => {

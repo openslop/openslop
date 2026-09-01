@@ -22,7 +22,7 @@ const { conversations, provider } = vi.hoisted(() => ({
 }));
 
 vi.mock("../conversations", () => conversations);
-vi.mock("../providers", () => ({ getLLMProvider: () => provider }));
+vi.mock("../providers", () => ({ llmProviderFor: async () => provider }));
 
 import type { AgentContext } from "@/lib/agent/context";
 import { streamAgentTurn } from "../agentTurn";
@@ -108,6 +108,7 @@ async function runTurn(
 		message: options.message ?? asked("make it shorter"),
 		context: AGENT_CONTEXT,
 		model: options.model,
+		provider: "openslop",
 	});
 	return chunksOf(response);
 }

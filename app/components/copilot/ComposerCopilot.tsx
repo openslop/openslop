@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-	Codesandbox,
 	CornerDownLeft,
 	Hourglass,
 	ImagePlus,
@@ -50,7 +49,14 @@ import { cn } from "@/lib/utils";
 import { useSloppyModel } from "@/app/components/sloppy/SloppyModelProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
-import { SettingPill, type SettingPillOption } from "./SettingPill";
+import {
+	SettingPill,
+	SettingPillButton,
+	type SettingPillOption,
+} from "./SettingPill";
+import { ModelSelect } from "@/app/components/connectors/ModelSelect";
+import { ProviderIcon } from "@/app/components/connectors/ProviderIcon";
+import { providerForModel } from "@/lib/connectors/models";
 
 /** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
 type ComposerIntent = "story" | "script";
@@ -194,7 +200,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
-	const { model, setModel, models } = useSloppyModel();
+	const { model, setModel } = useSloppyModel();
 
 	const {
 		openPicker,
@@ -281,13 +287,16 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={LANGUAGE_OPTIONS}
 							onChange={setLanguage}
 						/>
-						<SettingPill
-							name="Model"
-							icon={<Codesandbox className="mr-1 h-3 w-3" />}
-							value={model}
-							options={models.map((value) => ({ value, label: value }))}
-							onChange={setModel}
-						/>
+						<ModelSelect type="llm" value={model} onChange={setModel}>
+							<SettingPillButton aria-label={`Model: ${model}`}>
+								<ProviderIcon
+									provider={providerForModel("llm", model)}
+									size={12}
+									className="mr-1"
+								/>
+								{model}
+							</SettingPillButton>
+						</ModelSelect>
 						<SettingPill
 							name="Video length"
 							icon={<Hourglass className="mr-1 h-3 w-3" />}

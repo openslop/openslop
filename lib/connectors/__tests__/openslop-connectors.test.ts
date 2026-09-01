@@ -7,10 +7,7 @@ import { OpenSlopTTS } from "../tts/openslop";
 import { OpenSlopVideo } from "../video/openslop";
 import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 
-const config = {
-	isDefault: true,
-	apiKey: "test",
-};
+const config = {};
 
 function jsonResponse(data: unknown, status = 200) {
 	return new Response(JSON.stringify(data), {

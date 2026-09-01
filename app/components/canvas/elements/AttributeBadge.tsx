@@ -6,6 +6,7 @@ import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
+import { ModelAttribute } from "./attributes/ModelAttribute";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
@@ -71,6 +72,19 @@ export function AttributeBadge({
 				attrKey={attrKey}
 				label={spec.label}
 				hideLabel={hideLabel}
+			/>
+		);
+	}
+
+	if (spec.edit.kind === "model") {
+		return (
+			<ModelAttribute
+				element={element}
+				attrKey={attrKey}
+				connector={spec.edit.connector}
+				label={spec.label}
+				value={value}
+				className={className}
 			/>
 		);
 	}

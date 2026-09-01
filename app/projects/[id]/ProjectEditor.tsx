@@ -41,19 +41,21 @@ export default function ProjectEditor({
 
 	return (
 		<TooltipProvider>
-			<GenerationQueueProvider initialState={initialGeneration}>
-				<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>
-					<ProjectStoreProvider store={store}>
-						<ConfigProvider projectId={projectId}>
-							<ScriptProvider initialScript={initialScript}>
-								<UserProvider user={user}>
+			{/* The account's own settings outrank the project's, so they are in
+			    scope before anything that resolves a model against them. */}
+			<UserProvider user={user}>
+				<GenerationQueueProvider initialState={initialGeneration}>
+					<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>
+						<ProjectStoreProvider store={store}>
+							<ConfigProvider projectId={projectId}>
+								<ScriptProvider initialScript={initialScript}>
 									<Editor />
-								</UserProvider>
-							</ScriptProvider>
-						</ConfigProvider>
-					</ProjectStoreProvider>
-				</ElementHistoryProvider>
-			</GenerationQueueProvider>
+								</ScriptProvider>
+							</ConfigProvider>
+						</ProjectStoreProvider>
+					</ElementHistoryProvider>
+				</GenerationQueueProvider>
+			</UserProvider>
 		</TooltipProvider>
 	);
 }

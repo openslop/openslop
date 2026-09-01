@@ -1,12 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { OpenSlopClient } from "../openslop";
+import { ApiClient } from "../apiClient";
 
-describe("OpenSlopClient", () => {
-	let client: OpenSlopClient;
+describe("ApiClient", () => {
+	let client: ApiClient;
 	let fetchMock: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
-		client = new OpenSlopClient("https://api.test.com");
+		client = new ApiClient("https://api.test.com");
 		fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
 	});

@@ -6,8 +6,8 @@ import { MODEL_CATALOGS } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import { withLayout } from "../plugins/withLayout";
 
-const seeded = (projectModels: Record<string, string>) => {
-	const editor = withLayout(() => projectModels)(
+const seeded = (defaultModels: Record<string, string>) => {
+	const editor = withLayout(() => defaultModels)(
 		withReact(createEditor()) as CanvasEditor,
 	);
 	editor.children = [];

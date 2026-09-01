@@ -2,6 +2,7 @@
 
 import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -13,10 +14,10 @@ import { useElementGeneration } from "./ElementGenerationContext";
 export function StaleIndicator({ reason }: { reason: string }) {
 	return (
 		<SimpleTooltip label={reason}>
-			<span className="inline-flex items-center gap-1 rounded-full border border-tertiary/50 bg-tertiary/10 px-2 py-0.5 text-label-xs font-medium text-tertiary">
-				<AlertCircle className="h-3 w-3" />
+			<Badge variant="tertiary" className="text-label-xs">
+				<AlertCircle />
 				Stale
-			</span>
+			</Badge>
 		</SimpleTooltip>
 	);
 }
