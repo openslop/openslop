@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
+import { notFound } from "./response";
 import { withApiAccess, withPublic, withSession } from "./with-auth";
 import {
 	parseBody,
@@ -10,7 +11,7 @@ import {
 } from "./parse";
 
 /** How a route authenticates. The tiers themselves live in `with-auth`. */
-export type AuthTier = typeof withApiAccess;
+type AuthTier = typeof withApiAccess;
 
 /** Turns a request into validated data, or into the 400 that explains why not. */
 type ParseSource = <TSchema extends z.ZodType>(
@@ -63,6 +64,33 @@ export const createSessionFormRouteHandler = routeHandler(
 	withSession,
 	parseFormData,
 );
+
+/**
+ * Routes addressed by their path. The segments are parsed like any other
+ * external input, and a shape the schema will not take names nothing that
+ * exists, so it answers 404 rather than surfacing the mismatch.
+ */
+function paramRouteHandler(authTier: AuthTier) {
+	return function createHandler<TSchema extends z.ZodType>(
+		opts: RouteOptions<
+			TSchema,
+			{ user: User; params: z.infer<TSchema>; request: NextRequest }
+		>,
+	) {
+		return async (
+			request: NextRequest,
+			context: { params: Promise<unknown> },
+		) =>
+			authTier(opts.label, async (user) => {
+				const parsed = opts.schema.safeParse(await context.params);
+				if (!parsed.success) return notFound();
+				return opts.handle({ user, params: parsed.data, request });
+			});
+	};
+}
+
+export const createApiParamRouteHandler = paramRouteHandler(withApiAccess);
+export const createSessionParamRouteHandler = paramRouteHandler(withSession);
 
 function publicRouteHandler(parse: ParseSource) {
 	return function createHandler<TSchema extends z.ZodType>(

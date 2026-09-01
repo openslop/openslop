@@ -21,7 +21,7 @@ function element(
 }
 
 const registry = DEFAULT_CONNECTOR_REGISTRY;
-const imageDefaults = registry.image.openslop;
+const imageDefaults = registry.image;
 
 describe("resolveElementConnector", () => {
 	it("maps the element type to its connector type", () => {

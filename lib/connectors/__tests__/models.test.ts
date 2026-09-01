@@ -3,11 +3,10 @@ import {
 	defaultModelFor,
 	differsFromRecommended,
 	MODEL_CATALOGS,
+	modalitiesFor,
 	modelSourceFor,
 	resolveDefaultModels,
 } from "../models";
-import { MODEL_META } from "../modelMeta";
-import { PROVIDER_CATALOG } from "../providerCatalog";
 import { CONNECTOR_TYPES } from "../types";
 
 describe("defaultModelFor", () => {
@@ -133,22 +132,16 @@ describe("differsFromRecommended", () => {
 	});
 });
 
-describe("catalog coverage", () => {
-	it("annotates every model the catalogs offer", () => {
-		const missing = CONNECTOR_TYPES.flatMap((type) =>
-			MODEL_CATALOGS[type].names.filter((name) => !MODEL_META[name]),
-		);
-		expect(missing).toEqual([]);
+describe("modalitiesFor", () => {
+	it("reports every type a provider serves models in", () => {
+		expect(modalitiesFor("runware")).toEqual([
+			"image",
+			"animated_image",
+			"video",
+		]);
 	});
 
-	it("declares a modality for every type a provider serves models in", () => {
-		const undeclared = CONNECTOR_TYPES.flatMap((type) =>
-			MODEL_CATALOGS[type].providers
-				.filter(
-					(provider) => !PROVIDER_CATALOG[provider].modalities.includes(type),
-				)
-				.map((provider) => `${provider}:${type}`),
-		);
-		expect(undeclared).toEqual([]);
+	it("reports only the type a single-purpose provider serves", () => {
+		expect(modalitiesFor("cartesia")).toEqual(["tts"]);
 	});
 });

@@ -75,11 +75,14 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 }
 
 export interface ConnectorConfig {
-	/** Which provider this config is for. Stamped by `createConnector`. */
-	provider?: ProviderKey;
 	baseUrl?: string;
 	plugins?: ConnectorPlugin[];
 }
+
+/** A config with its provider stamped on, as `createConnector` builds one. */
+export type ResolvedConnectorConfig = ConnectorConfig & {
+	provider: ProviderKey;
+};
 
 export type ConnectorGenerateParams = {
 	prompt: string;
@@ -219,6 +222,6 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 };
 
 export interface ProviderConstructor<T extends Connector = Connector> {
-	new (config: ConnectorConfig): T;
+	new (config: ResolvedConnectorConfig): T;
 	attributesFor(model?: string): AttributeSchema;
 }

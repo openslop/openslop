@@ -23,15 +23,27 @@ const modelName = (names: string[]) =>
 		message: `Invalid model. Supported: ${names.join(", ")}`,
 	});
 
-/** The models OpenSlop hosts. Optional: leaving it out takes the default. */
-export const hostedModelField = (models: Record<string, string>) =>
-	modelName(Object.keys(models)).optional();
+/** Which keys a route generates on, and so which half of a catalog it serves. */
+export type ModelScope = "hosted" | "byok";
 
-/** The models of a type that run on a user's own key, by name. */
-export const byokModelNames = (type: ConnectorType): string[] =>
-	MODEL_CATALOGS[type].names.filter(
-		(name) => MODEL_CATALOGS[type].providerFor(name) !== MANAGED_PROVIDER,
+const modelNames = (type: ConnectorType, scope: ModelScope) => {
+	const catalog = MODEL_CATALOGS[type];
+	const hosted = scope === "hosted";
+	return catalog.names.filter(
+		(name) => (catalog.providerFor(name) === MANAGED_PROVIDER) === hosted,
 	);
+};
+
+/**
+ * The models one route family serves. Both halves come from the same catalog,
+ * so a model wired in is offered by exactly the family that can pay for it.
+ * Hosted routes may leave it out and take the catalog's default; a BYOK one
+ * cannot, since the name is what says whose key to read.
+ */
+export const modelField = (type: ConnectorType, scope: ModelScope) =>
+	scope === "hosted"
+		? modelName(modelNames(type, "hosted")).optional()
+		: modelName(modelNames(type, "byok"));
 
 /**
  * A generation request: the prompt every provider takes, the model that decides
@@ -54,23 +66,16 @@ function generationBody<TModel extends z.ZodType, TShape extends z.ZodRawShape>(
 	);
 }
 
-/** A generation on the models OpenSlop hosts, named as this API names them. */
-export const bodySchema = <TShape extends z.ZodRawShape>(
-	models: Record<string, string>,
-	shape: TShape,
-) => generationBody(hostedModelField(models), shape);
-
 /**
- * A generation on the user's own key. Unlike the hosted routes it keeps the
- * model's name rather than transforming it to the provider's id: the name is
- * what says which provider serves it, and so whose key to read.
+ * A generation as one route family takes it. The model's name is kept rather
+ * than transformed into the provider's id: the name is what says which provider
+ * serves it, and so whose key to read.
  */
-export function byokBodySchema<TShape extends z.ZodRawShape>(
+export const bodySchema = <TShape extends z.ZodRawShape>(
 	type: ConnectorType,
+	scope: ModelScope,
 	shape: TShape,
-) {
-	return generationBody(modelName(byokModelNames(type)), shape);
-}
+) => generationBody(modelField(type, scope), shape);
 
 /**
  * What each connector type accepts beyond the prompt and the model. Shared by

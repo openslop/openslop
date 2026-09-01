@@ -1,12 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { OpenSlopMusic } from "../music/openslop";
+import { HttpMusicConnector } from "../music/connector";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/music/openslop/${TEST_ID}/output.mp3`;
 
-const config = {};
+const config = { provider: "openslop" } as const;
 
 function mockSuccess() {
 	mockGatewaySuccess({
@@ -28,7 +28,7 @@ describe("BaseMusicConnector", () => {
 			name: "transform",
 			transformPrompt: (p) => `epic: ${p}`,
 		};
-		const result = await new OpenSlopMusic({
+		const result = await new HttpMusicConnector({
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "rock song" });
@@ -45,7 +45,7 @@ describe("BaseMusicConnector", () => {
 			name: "after",
 			afterGenerate: () => replacement,
 		};
-		const result = await new OpenSlopMusic({
+		const result = await new HttpMusicConnector({
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "test" });
@@ -55,7 +55,7 @@ describe("BaseMusicConnector", () => {
 	it("runs onError plugin on failure", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("music failed"));
 		const errors: string[] = [];
-		const connector = new OpenSlopMusic({
+		const connector = new HttpMusicConnector({
 			...config,
 			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});

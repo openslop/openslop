@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Pencil, RefreshCw, Trash2 } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Tile } from "@/components/ui/tile";
@@ -11,6 +12,7 @@ import { useConnector } from "@/app/components/connectors/useConnectors";
 import {
 	MANAGED_PROVIDER,
 	providerMeta,
+	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { formatDate } from "@/lib/format";
@@ -18,6 +20,39 @@ import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/toastError";
 import { useAccount } from "@/lib/user/useAccount";
 import { ConnectorKeyForm } from "./ConnectorKeyForm";
+
+/** The mark, the name and whatever the row has to say for itself. */
+function ConnectorHeading({
+	provider,
+	children,
+}: {
+	provider: ProviderKey;
+	children: ReactNode;
+}) {
+	return (
+		<div className="flex items-center gap-2.5">
+			<ProviderIcon provider={provider} size={20} />
+			<p className="truncate text-label font-medium text-foreground">
+				{providerMeta(provider).name}
+			</p>
+			{children}
+		</div>
+	);
+}
+
+/** The hosted provider: it comes with the account, so there is nothing to manage. */
+export function HostedConnectorCard() {
+	return (
+		<Tile>
+			<ConnectorHeading provider={MANAGED_PROVIDER}>
+				<ConnectorStatusBadge status="valid" />
+				<p className="ml-auto text-label-xs text-muted-foreground">
+					Included with your account
+				</p>
+			</ConnectorHeading>
+		</Tile>
+	);
+}
 
 /**
  * One provider's key: whether it works, when it was added, and the actions that
@@ -29,7 +64,7 @@ export function ConnectorCard({
 	selected = false,
 	onDismissed,
 }: {
-	provider: ProviderKey;
+	provider: BYOKProvider;
 	/** The connector a link asked for: revealed, and open for a key if it needs one. */
 	selected?: boolean;
 	/** The row is gone: removed, or backed out of before a key was ever stored. */
@@ -37,13 +72,12 @@ export function ConnectorCard({
 }) {
 	const meta = providerMeta(provider);
 	const connector = useConnector(provider);
-	// The hosted provider comes with the account: nothing to add, nothing to remove.
-	const managed = provider === MANAGED_PROVIDER;
 	const testKey = useAccount((state) => state.testKey);
 	const removeKey = useAccount((state) => state.removeKey);
 
-	const [editing, setEditing] = useState(!managed && (selected || !connector));
+	const [editing, setEditing] = useState(selected || !connector);
 	const [testing, setTesting] = useState(false);
+	const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 	const card = useRef<HTMLDivElement>(null);
 
 	/** Backing out of a key that was never stored leaves no row behind. */
@@ -71,25 +105,20 @@ export function ConnectorCard({
 	}, [selected]);
 
 	// Nothing left to show once the key is gone: the row goes with it.
-	if (!managed && !connector && !editing) return null;
+	if (!connector && !editing) return null;
 
 	return (
 		<Tile ref={card} className={cn("gap-2", selected && "ring-1 ring-accent")}>
-			<div className="flex items-center gap-2.5">
-				<ProviderIcon provider={provider} size={20} />
-				<p className="truncate text-label font-medium text-foreground">
-					{meta.name}
-				</p>
-				{(managed || connector) && (
-					<ConnectorStatusBadge status={connector?.status ?? "valid"} />
+			<ConnectorHeading provider={provider}>
+				{connector && (
+					<>
+						<ConnectorStatusBadge status={connector.status} />
+						<p className="ml-auto text-label-xs text-muted-foreground">
+							{`••••${connector.last4} · added ${formatDate(connector.createdAt)}`}
+						</p>
+					</>
 				)}
-				<p className="ml-auto text-label-xs text-muted-foreground">
-					{managed
-						? "Included with your account"
-						: connector &&
-							`••••${connector.last4} · added ${formatDate(connector.createdAt)}`}
-				</p>
-			</div>
+			</ConnectorHeading>
 
 			{editing ? (
 				<ConnectorKeyForm
@@ -98,12 +127,12 @@ export function ConnectorCard({
 					onCancel={cancel}
 				/>
 			) : (
-				(managed || connector) && (
+				connector && (
 					<div className="flex flex-wrap items-center gap-2">
 						<Button
 							size="sm"
 							variant="generate"
-							disabled={managed || testing}
+							disabled={testing}
 							onClick={() => void test()}
 						>
 							{testing ? <Spinner className="text-current" /> : <RefreshCw />}
@@ -112,7 +141,6 @@ export function ConnectorCard({
 						<Button
 							size="sm"
 							variant="generate"
-							disabled={managed}
 							onClick={() => setEditing(true)}
 						>
 							<Pencil />
@@ -122,10 +150,7 @@ export function ConnectorCard({
 							size="sm"
 							variant="destructive"
 							className="ml-auto"
-							disabled={managed}
-							onClick={() =>
-								void removeKey(provider).then(onDismissed).catch(toastError)
-							}
+							onClick={() => setConfirmingRemoval(true)}
 						>
 							<Trash2 />
 							Disconnect
@@ -133,6 +158,17 @@ export function ConnectorCard({
 					</div>
 				)
 			)}
+
+			<ConfirmDeleteDialog
+				open={confirmingRemoval}
+				onOpenChange={setConfirmingRemoval}
+				title={`Disconnect ${meta.name}?`}
+				description={`Your key is deleted, and models served by ${meta.name} stop being available. You can connect it again with a new key.`}
+				actionLabel="Disconnect"
+				onConfirm={() =>
+					void removeKey(provider).then(onDismissed).catch(toastError)
+				}
+			/>
 		</Tile>
 	);
 }

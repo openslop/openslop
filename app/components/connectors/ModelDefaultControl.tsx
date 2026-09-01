@@ -5,6 +5,7 @@ import {
 	defaultModelFor,
 	modelSourceFor,
 	providerForModel,
+	type ConnectorModels,
 	type ModelDefaults,
 } from "@/lib/connectors/models";
 import type { ConnectorType } from "@/lib/connectors/types";
@@ -34,7 +35,8 @@ export function ModelDefaultControl({
 	tier: DefaultsTier;
 	/** The whole chain, so the control can resolve and explain what it shows. */
 	chain: ModelDefaults;
-	onChange: (model: string) => void;
+	/** The pick, spread across every type this control covers. */
+	onChange: (models: ConnectorModels) => void;
 	label: string;
 	className?: string;
 }) {
@@ -43,7 +45,13 @@ export function ModelDefaultControl({
 	const pinnedHere = Boolean(chain[tier]?.[type]);
 
 	return (
-		<ModelSelect type={type} value={model} onChange={onChange}>
+		<ModelSelect
+			type={type}
+			value={model}
+			onChange={(picked) =>
+				onChange(Object.fromEntries(types.map((each) => [each, picked])))
+			}
+		>
 			<SelectMenuTrigger
 				aria-label={`${label} model`}
 				title={

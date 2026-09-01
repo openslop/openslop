@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { CAPABILITIES } from "../capabilities";
+import { CONNECTOR_GROUPS } from "../connectorConfigs";
 import { searchConnectors } from "../providerSearch";
+import type { ConnectorType } from "../types";
 
-const all = CAPABILITIES[0];
+/** No capability asked for: the "All" filter. */
+const all: ConnectorType[] | null = null;
 const capability = (key: string) =>
-	CAPABILITIES.find((entry) => entry.key === key) ?? all;
-const names = (query: string, cap = all) =>
+	CONNECTOR_GROUPS.find((group) => group.key === key)?.types ?? all;
+const names = (query: string, cap: ConnectorType[] | null = all) =>
 	searchConnectors(query, cap).map((match) => match.provider);
 
 describe("searchConnectors", () => {

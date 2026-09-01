@@ -1,4 +1,7 @@
-/** What Runware's API accepts, and the id a BYOK generation forwards for each. */
 export const RUNWARE_IMAGE_MODELS = {
-	"Seedream 5 Lite": "bytedance:seedream@5.0-lite",
+	"Seedream 5 Lite": {
+		id: "bytedance:seedream@5.0-lite",
+		cost: "low",
+		speed: "high",
+	},
 } as const;

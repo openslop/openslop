@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MaskedIcon } from "@/components/ui/icon";
 import { providerMeta } from "@/lib/connectors/providerCatalog";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
@@ -21,13 +22,10 @@ export function ProviderIcon({
 
 	if (mark.masked) {
 		return (
-			<span
-				aria-hidden="true"
-				className={cn("icon", className)}
-				style={{
-					fontSize: `${size}px`,
-					["--icon-mask" as string]: `url("${mark.src}")`,
-				}}
+			<MaskedIcon
+				mask={`url("${mark.src}")`}
+				size={size}
+				className={className}
 			/>
 		);
 	}

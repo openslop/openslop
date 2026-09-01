@@ -16,8 +16,18 @@ export interface IconProps extends ComponentPropsWithoutRef<"span"> {
 
 export type IconComponent = (props: IconProps) => React.ReactElement;
 
-function icon(name: string): IconComponent {
-	const Component = ({ size = 16, className, style, ...props }: IconProps) => (
+/**
+ * An icon painted from any mask value, so a mark that lives outside the token
+ * set — a brand file, say — still takes the current text color.
+ */
+export function MaskedIcon({
+	mask,
+	size = 16,
+	className,
+	style,
+	...props
+}: IconProps & { mask: string }) {
+	return (
 		<span
 			aria-hidden="true"
 			className={cn("icon", className)}
@@ -25,11 +35,17 @@ function icon(name: string): IconComponent {
 				{
 					fontSize: typeof size === "number" ? `${size}px` : size,
 					...style,
-					"--icon-mask": `var(--${name}-icon)`,
+					"--icon-mask": mask,
 				} as CSSProperties
 			}
 			{...props}
 		/>
+	);
+}
+
+function icon(name: string): IconComponent {
+	const Component = (props: IconProps) => (
+		<MaskedIcon mask={`var(--${name}-icon)`} {...props} />
 	);
 	Component.displayName = `Icon(${name})`;
 	return Component;

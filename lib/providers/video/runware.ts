@@ -1,7 +1,8 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { VideoJob, VideoJobMetadata, VideoJobStatus } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
-import { withRunware } from "../runware";
+import { validateRunwareKey, withRunware } from "../runware";
+import type { ValidatingProvider } from "../validate";
 
 function toVideoJob(video: {
 	taskUUID: string;
@@ -17,13 +18,20 @@ function toVideoJob(video: {
 	};
 }
 
-export class RunwareVideo extends BaseVideoProvider {
+export class RunwareVideo
+	extends BaseVideoProvider
+	implements ValidatingProvider
+{
 	protected readonly blobConfig = { type: "video", provider: "runware" };
 	private apiKey: string;
 
 	constructor(apiKey: string) {
 		super();
 		this.apiKey = apiKey;
+	}
+
+	async validate() {
+		return validateRunwareKey(this.apiKey);
 	}
 
 	async submit(params: VideoGenerateParams) {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { connectorsView, saveConnectorKey } from "@/lib/api/connectorKeys";
-import { verifyConnector } from "@/lib/api/connectorValidation";
+import { verifyConnector } from "@/lib/api/providers";
 import { byokProviderField } from "@/lib/api/request-schema-fields";
 import {
 	createSessionQueryRouteHandler,

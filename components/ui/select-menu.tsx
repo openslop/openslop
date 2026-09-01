@@ -53,6 +53,36 @@ export function SelectMenuItem({
 }
 
 /**
+ * The inline trigger a picker hangs off when it is part of the surface rather
+ * than a form field: a badge in a row of them, or a control in a composer.
+ * Mousedown is swallowed so opening a picker never moves the caret out of the
+ * text it sits in.
+ */
+export function InlineMenuTrigger({
+	className,
+	children,
+	...props
+}: ComponentProps<"button">) {
+	return (
+		<button
+			type="button"
+			onMouseDown={(event) => event.preventDefault()}
+			className={cn(
+				"focus-ring inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
+				className,
+			)}
+			{...props}
+		>
+			{children}
+			<ChevronDown
+				className="h-3 w-3 shrink-0 text-muted-foreground"
+				aria-hidden="true"
+			/>
+		</button>
+	);
+}
+
+/**
  * The field-shaped trigger a `SelectMenu` hangs off when it stands in for a
  * form field: the look of `SelectField`'s trigger, with room for whatever the
  * menu's rows show, since a menu row is richer than a listbox option.

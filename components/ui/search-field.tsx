@@ -6,10 +6,7 @@ import { cn } from "@/lib/utils";
  * A field that filters what sits below it. The magnifier is the label, so the
  * placeholder is free to say what can be searched rather than repeat "search".
  */
-export function SearchField({
-	className,
-	...props
-}: ComponentProps<"input"> & { className?: string }) {
+export function SearchField({ className, ...props }: ComponentProps<"input">) {
 	return (
 		<div
 			className={cn(

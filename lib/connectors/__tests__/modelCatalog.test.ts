@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { ModelCatalog } from "../modelCatalog";
 
+const entry = (id: string) => ({ id, cost: "low", speed: "high" }) as const;
+
 const catalog = ModelCatalog.from(
 	{
 		openslop: {
-			"Slop Image v1": "slop:image@1",
-			"Bytedance Seedream 2.0": "bytedance:2.0",
+			"Slop Image v1": entry("slop:image@1"),
+			"Bytedance Seedream 2.0": entry("bytedance:2.0"),
 		},
-		runware: { "Seedream 5 Lite": "bytedance:seedream@5.0-lite" },
+		runware: { "Seedream 5 Lite": entry("bytedance:seedream@5.0-lite") },
 	},
 	"Slop Image v1",
 );
@@ -56,8 +58,8 @@ describe("ModelCatalog", () => {
 	});
 
 	it("refuses a default that is not in the catalog", () => {
-		expect(() => ModelCatalog.from({ openslop: { a: "a" } }, "b")).toThrow(
-			/not in the catalog/,
-		);
+		expect(() =>
+			ModelCatalog.from({ openslop: { a: entry("a") } }, "b"),
+		).toThrow(/not in the catalog/);
 	});
 });

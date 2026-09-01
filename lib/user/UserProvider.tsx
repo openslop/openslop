@@ -9,7 +9,8 @@ import { AccountStoreProvider } from "./AccountStoreProvider";
 const [UserContext, useUser] = createRequiredContext<User>("UserProvider");
 export { useUser };
 
-const AccountModelsSchema = z.record(z.string(), z.string()).catch({});
+/** Whatever the account last saved, ignored if it is not a model map. */
+const accountModelsSchema = z.record(z.string(), z.string()).catch({});
 
 export function UserProvider({
 	user,
@@ -21,7 +22,7 @@ export function UserProvider({
 	return (
 		<UserContext value={user}>
 			<AccountStoreProvider
-				models={AccountModelsSchema.parse(user.user_metadata?.connectorModels)}
+				models={accountModelsSchema.parse(user.user_metadata?.connectorModels)}
 			>
 				{children}
 			</AccountStoreProvider>

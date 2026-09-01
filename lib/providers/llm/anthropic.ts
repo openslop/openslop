@@ -15,6 +15,7 @@ import { parseImageSource } from "@/lib/api/imageSource";
 import { stringifyError } from "@/lib/errors";
 import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
 import { BaseProvider } from "../base";
+import { fromStatus, probe, type ValidatingProvider } from "../validate";
 import type { AgentModel } from "./agentModel";
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [
@@ -49,17 +50,28 @@ function toImagePart(image: string): FilePart {
 const DEFAULT_MODEL = "claude-opus-5";
 const DEFAULT_MAX_TOKENS = 65536;
 
-export class AnthropicLLM extends BaseProvider<
-	LLMGenerateParams,
-	LLMGenerateResult,
-	LLMGenerateResult
-> {
+export class AnthropicLLM
+	extends BaseProvider<LLMGenerateParams, LLMGenerateResult, LLMGenerateResult>
+	implements ValidatingProvider
+{
 	protected readonly blobConfig = { type: "llm", provider: "anthropic" };
 	private apiKey: string;
 
 	constructor(apiKey: string) {
 		super();
 		this.apiKey = apiKey;
+	}
+
+	/** Listing one model is the cheapest call the API authenticates. */
+	async validate() {
+		return fromStatus(
+			await probe("https://api.anthropic.com/v1/models?limit=1", {
+				headers: {
+					"x-api-key": this.apiKey,
+					"anthropic-version": "2023-06-01",
+				},
+			}),
+		);
 	}
 
 	protected toFiles() {

@@ -3,7 +3,10 @@ import type {
 	ConnectorStatus,
 	ValidationResult,
 } from "@/lib/connectors/connectorRecord";
-import { providerMeta } from "@/lib/connectors/providerCatalog";
+import {
+	providerMeta,
+	type BYOKProvider,
+} from "@/lib/connectors/providerCatalog";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -29,7 +32,7 @@ type ConnectorRow = {
 };
 
 const toRecord = (row: ConnectorRow): ConnectorRecord => ({
-	provider: row.provider as ProviderKey,
+	provider: row.provider as BYOKProvider,
 	last4: row.last4,
 	status: row.status,
 	verifiedAt: row.verified_at,
@@ -54,19 +57,36 @@ export async function listConnectors(
 	return (data as ConnectorRow[]).map(toRecord);
 }
 
+/**
+ * The vault-backed functions, which only the service role may execute. They are
+ * the only way a key is written or read, so the client and the throw-on-failure
+ * contract live here rather than at each call site.
+ */
+async function connectorRpc<T>(
+	fn: string,
+	args: Record<string, string>,
+	failure: string,
+): Promise<T> {
+	const { data, error } = await createServiceClient().rpc(fn, args);
+	if (error) throw new Error(`${failure}: ${error.message}`);
+	return data as T;
+}
+
 export async function saveConnectorKey(
 	userId: string,
-	provider: ProviderKey,
+	provider: BYOKProvider,
 	key: string,
 ): Promise<void> {
-	const supabase = createServiceClient();
-	const { error } = await supabase.rpc("connector_set_key", {
-		p_user_id: userId,
-		p_provider: provider,
-		p_key: key,
-		p_last4: key.slice(-4),
-	});
-	if (error) throw new Error(`Failed to store connector key: ${error.message}`);
+	await connectorRpc(
+		"connector_set_key",
+		{
+			p_user_id: userId,
+			p_provider: provider,
+			p_key: key,
+			p_last4: key.slice(-4),
+		},
+		"Failed to store connector key",
+	);
 }
 
 /** The plaintext key, for the one request that is about to use it. */
@@ -74,39 +94,36 @@ export async function readConnectorKey(
 	userId: string,
 	provider: ProviderKey,
 ): Promise<string | null> {
-	const supabase = createServiceClient();
-	const { data, error } = await supabase.rpc("connector_read_key", {
-		p_user_id: userId,
-		p_provider: provider,
-	});
-	if (error) throw new Error(`Failed to read connector key: ${error.message}`);
-	return (data as string | null) ?? null;
+	return (
+		(await connectorRpc<string | null>(
+			"connector_read_key",
+			{ p_user_id: userId, p_provider: provider },
+			"Failed to read connector key",
+		)) ?? null
+	);
 }
 
 export async function deleteConnector(
 	userId: string,
-	provider: ProviderKey,
+	provider: BYOKProvider,
 ): Promise<void> {
-	const supabase = createServiceClient();
-	const { error } = await supabase.rpc("connector_delete", {
-		p_user_id: userId,
-		p_provider: provider,
-	});
-	if (error) throw new Error(`Failed to remove connector: ${error.message}`);
+	await connectorRpc(
+		"connector_delete",
+		{ p_user_id: userId, p_provider: provider },
+		"Failed to remove connector",
+	);
 }
 
 export async function setConnectorStatus(
 	userId: string,
-	provider: ProviderKey,
+	provider: BYOKProvider,
 	status: ConnectorStatus,
 ): Promise<void> {
-	const supabase = createServiceClient();
-	const { error } = await supabase.rpc("connector_set_status", {
-		p_user_id: userId,
-		p_provider: provider,
-		p_status: status,
-	});
-	if (error) throw new Error(`Failed to update connector: ${error.message}`);
+	await connectorRpc(
+		"connector_set_status",
+		{ p_user_id: userId, p_provider: provider, p_status: status },
+		"Failed to update connector",
+	);
 }
 
 /**

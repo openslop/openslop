@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-/** A labelled group of settings inside a pane, with the action that acts on it. */
+/** A labelled group of settings, with the action that acts on the group. */
 export function SettingsSection({
 	title,
 	action,
@@ -32,7 +32,6 @@ export function SettingsList({ children }: { children: ReactNode }) {
 	);
 }
 
-/** One setting: what it governs on the left, what it is set to on the right. */
 export function SettingsRow({
 	label,
 	children,

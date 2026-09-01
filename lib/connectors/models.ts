@@ -2,7 +2,6 @@ import { IMAGE_MODELS } from "./image/models";
 import { LLM_MODELS } from "./llm/models";
 import type { ModelCatalog } from "./modelCatalog";
 import { MUSIC_MODELS } from "./music/models";
-import { providerMeta } from "./providerCatalog";
 import { SFX_MODELS } from "./sfx/models";
 import { TTS_MODELS } from "./tts/models";
 import { CONNECTOR_TYPES, type ConnectorType, type ProviderKey } from "./types";
@@ -22,13 +21,11 @@ export const MODEL_CATALOGS: Record<ConnectorType, ModelCatalog> = {
 	music: MUSIC_MODELS,
 };
 
-/** The connector serving a model, and so the gateway its generation is routed through. */
 export const providerForModel = (
 	type: ConnectorType,
 	model: string | undefined,
 ): ProviderKey => MODEL_CATALOGS[type].providerFor(model);
 
-/** The id the serving provider's own API takes for a model. */
 export const vendorModelFor = (
 	type: ConnectorType,
 	model: string | undefined,
@@ -107,11 +104,18 @@ export function resolveDefaultModels(
 	);
 }
 
+/** What a provider can generate here: the types whose catalogs it serves. */
+export function modalitiesFor(provider: ProviderKey): ConnectorType[] {
+	return CONNECTOR_TYPES.filter((type) =>
+		MODEL_CATALOGS[type].providers.includes(provider),
+	);
+}
+
 /** Every model a provider serves, once each, across the types it covers. */
 export function modelNamesForProvider(provider: ProviderKey): string[] {
 	return [
 		...new Set(
-			providerMeta(provider).modalities.flatMap((type) =>
+			modalitiesFor(provider).flatMap((type) =>
 				MODEL_CATALOGS[type].namesFor(provider),
 			),
 		),

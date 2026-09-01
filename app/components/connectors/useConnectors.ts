@@ -2,12 +2,14 @@
 
 import { useMemo } from "react";
 import type { ConnectorRecord } from "@/lib/connectors/connectorRecord";
-import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
+import {
+	MANAGED_PROVIDER,
+	type BYOKProvider,
+} from "@/lib/connectors/providerCatalog";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { useAccount } from "@/lib/user/useAccount";
 
-/** The stored key for a provider, when the account has one. */
-export function useConnector(provider: ProviderKey): ConnectorRecord | null {
+export function useConnector(provider: BYOKProvider): ConnectorRecord | null {
 	const connectors = useAccount((state) => state.connectors);
 	return useMemo(
 		() => connectors.find((row) => row.provider === provider) ?? null,
@@ -16,14 +18,17 @@ export function useConnector(provider: ProviderKey): ConnectorRecord | null {
 }
 
 /**
- * Whether a generation can run on a provider at all. The hosted one always can;
- * the rest need a key, whether or not it has been verified since.
+ * The key a provider is still missing, or null when a generation can already
+ * run on it: the hosted one never needs one, and a stored key counts whether or
+ * not it has been verified since.
  */
-export function useCanGenerateWith(): (provider: ProviderKey) => boolean {
+export function useMissingKey(): (
+	provider: ProviderKey,
+) => BYOKProvider | null {
 	const connectors = useAccount((state) => state.connectors);
 	return useMemo(() => {
-		const stored = new Set(connectors.map((row) => row.provider));
+		const stored = new Set<ProviderKey>(connectors.map((row) => row.provider));
 		return (provider: ProviderKey) =>
-			provider === MANAGED_PROVIDER || stored.has(provider);
+			provider === MANAGED_PROVIDER || stored.has(provider) ? null : provider;
 	}, [connectors]);
 }

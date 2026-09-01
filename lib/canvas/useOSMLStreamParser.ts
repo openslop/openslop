@@ -1,18 +1,18 @@
 import { useCallback, useRef, useState } from "react";
 import type { ParsedElement } from "@/lib/canvas/types";
-import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { OSMLStreamParser } from "./osmlStreamParser";
 
 const MAX_NODES_TO_SYNC = 3;
 
 export function useOSMLStreamParser() {
-	const defaultModels = useDefaultModels();
+	const defaultModels = useResolveDefaultModels();
 	const parserRef = useRef(new OSMLStreamParser());
 	const [nodes, setNodes] = useState<ParsedElement[]>([]);
 
 	const appendChunk = useCallback(
 		(chunk: string) => {
-			const updated = parserRef.current.appendChunk(chunk, defaultModels);
+			const updated = parserRef.current.appendChunk(chunk, defaultModels());
 			if (updated) {
 				setNodes(
 					structuredClone(

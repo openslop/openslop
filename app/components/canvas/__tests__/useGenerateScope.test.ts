@@ -9,27 +9,13 @@ import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/video/elementAttributes";
 
 const registry: ConnectorRegistry = {
-	llm: {
-		openslop: {},
-	},
-	tts: {
-		openslop: {},
-	},
-	image: {
-		openslop: {},
-	},
-	animated_image: {
-		openslop: {},
-	},
-	video: {
-		openslop: {},
-	},
-	sfx: {
-		openslop: {},
-	},
-	music: {
-		openslop: {},
-	},
+	llm: {},
+	tts: {},
+	image: {},
+	animated_image: {},
+	video: {},
+	sfx: {},
+	music: {},
 };
 
 let editorUnderTest: Editor;

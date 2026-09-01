@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { validateConnectorKey } from "../connectorValidation";
+import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
+import { validateKey } from "../providers";
 
-describe("validateConnectorKey", () => {
+describe("validateKey", () => {
 	let fetchMock: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
@@ -12,7 +13,7 @@ describe("validateConnectorKey", () => {
 	it("sends the key in the header the vendor expects", async () => {
 		fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
 
-		await validateConnectorKey("anthropic", "sk-test");
+		await validateKey("anthropic", "sk-test");
 
 		const [, init] = fetchMock.mock.calls[0];
 		expect(init.headers["x-api-key"]).toBe("sk-test");
@@ -21,7 +22,7 @@ describe("validateConnectorKey", () => {
 	it("reads a rejected key from the status", async () => {
 		fetchMock.mockResolvedValue(new Response("{}", { status: 401 }));
 
-		expect(await validateConnectorKey("elevenlabs", "bad")).toEqual({
+		expect(await validateKey("elevenlabs", "bad")).toEqual({
 			ok: false,
 			error: "The provider rejected this key.",
 		});
@@ -36,7 +37,7 @@ describe("validateConnectorKey", () => {
 			}),
 		);
 
-		expect(await validateConnectorKey("runware", "bad")).toEqual({
+		expect(await validateKey("runware", "bad")).toEqual({
 			ok: false,
 			error: "The provider rejected this key.",
 		});
@@ -46,16 +47,19 @@ describe("validateConnectorKey", () => {
 	it("reports unreachable providers instead of throwing", async () => {
 		fetchMock.mockRejectedValue(new Error("network down"));
 
-		const result = await validateConnectorKey("cartesia", "key");
+		const result = await validateKey("cartesia", "key");
 
 		expect(result.ok).toBe(false);
 	});
 
-	it("refuses the hosted provider, which takes no key", async () => {
-		expect(await validateConnectorKey("openslop", "key")).toEqual({
-			ok: false,
-			error: "openslop does not take a key",
-		});
-		expect(fetchMock).not.toHaveBeenCalled();
+	// Every vendor a user can bring a key for has a class that can answer for it.
+	it("can ask every vendor about its key", async () => {
+		fetchMock.mockImplementation(
+			async () => new Response("{}", { status: 200 }),
+		);
+
+		for (const provider of BYOK_PROVIDERS) {
+			expect(await validateKey(provider, "key")).toEqual({ ok: true });
+		}
 	});
 });

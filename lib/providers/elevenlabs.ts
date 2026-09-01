@@ -3,6 +3,7 @@ import type { AllowedOutputFormats } from "@elevenlabs/elevenlabs-js/api";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { type AudioFormat, audioDurationSec } from "./audio-duration";
 import { BaseProvider, type WithMetadata } from "./base";
+import { fromStatus, probe, type ValidatingProvider } from "./validate";
 import { streamToBuffer } from "./stream";
 
 type AudioResult = {
@@ -23,12 +24,26 @@ export function toElevenLabsOutputFormat(
 /** Shared base for ElevenLabs providers that emit a single audio asset. */
 export abstract class BaseElevenLabsAudio<
 	TParams extends { durationSeconds?: number },
-> extends BaseProvider<TParams, AudioResult> {
+>
+	extends BaseProvider<TParams, AudioResult>
+	implements ValidatingProvider
+{
 	protected readonly client: ElevenLabsClient;
+	private readonly apiKey: string;
 
 	constructor(apiKey: string) {
 		super();
+		this.apiKey = apiKey;
 		this.client = new ElevenLabsClient({ apiKey });
+	}
+
+	/** Reading the account behind the key is the cheapest authenticated call. */
+	async validate() {
+		return fromStatus(
+			await probe("https://api.elevenlabs.io/v1/user", {
+				headers: { "xi-api-key": this.apiKey },
+			}),
+		);
 	}
 
 	protected abstract readonly outputFormat: AudioFormat;

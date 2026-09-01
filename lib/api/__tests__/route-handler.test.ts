@@ -42,8 +42,7 @@ function makeRequest(body: unknown) {
 	});
 }
 
-const models = { "model-a": "slug-a", "model-b": "slug-b" };
-const schema = bodySchema(models, {});
+const schema = bodySchema("image", "hosted", {});
 
 function makeHandler(
 	handle?: Parameters<typeof createApiRouteHandler>[0]["handle"],
@@ -120,7 +119,7 @@ describe("createApiRouteHandler", () => {
 		expect(res.status).toBe(400);
 		const json = await res.json();
 		expect(json.error).toContain("Invalid model");
-		expect(json.error).toContain("model-a");
+		expect(json.error).toContain("Slop Image v1");
 	});
 
 	// The name is what says which provider serves the model, so it survives the
@@ -128,12 +127,15 @@ describe("createApiRouteHandler", () => {
 	it("passes the model through by name", async () => {
 		const handle = vi.fn(async () => NextResponse.json({ done: true }));
 		const handler = makeHandler(handle);
-		await handler(makeRequest({ prompt: "hello", model: "model-a" }));
+		await handler(makeRequest({ prompt: "hello", model: "Slop Image v1" }));
 
 		expect(handle).toHaveBeenCalledWith(
 			expect.objectContaining({
 				user: expect.objectContaining({ id: "user-1" }),
-				input: expect.objectContaining({ prompt: "hello", model: "model-a" }),
+				input: expect.objectContaining({
+					prompt: "hello",
+					model: "Slop Image v1",
+				}),
 			}),
 		);
 	});

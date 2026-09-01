@@ -29,13 +29,7 @@ export function ConnectorsPanel() {
 						tier="project"
 						chain={{ project, account }}
 						label={label}
-						onChange={(model) =>
-							updateMetadata({
-								connectorModels: Object.fromEntries(
-									types.map((type) => [type, model]),
-								),
-							})
-						}
+						onChange={(connectorModels) => updateMetadata({ connectorModels })}
 						className="w-full"
 					/>
 				</PanelCard>

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { OpenSlopImage } from "../image/openslop";
+import { HttpImageConnector } from "../image/connector";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
@@ -7,7 +7,7 @@ const TEST_ID = "test-id";
 const BUNDLE_URL = `/assets/image/openslop/${TEST_ID}`;
 const IMAGE_URL = `${BUNDLE_URL}/output.png`;
 
-const config = {};
+const config = { provider: "openslop" } as const;
 
 function mockSuccess() {
 	mockGatewaySuccess({
@@ -25,7 +25,7 @@ describe("BaseImageConnector", () => {
 
 	it("generates image via provider", async () => {
 		mockSuccess();
-		const result = await new OpenSlopImage(config).generate({
+		const result = await new HttpImageConnector(config).generate({
 			prompt: "a cat",
 		});
 		expect(result.imageUrl).toBe(IMAGE_URL);
@@ -41,7 +41,7 @@ describe("BaseImageConnector", () => {
 			name: "resize",
 			afterGenerate: () => replacement,
 		};
-		const result = await new OpenSlopImage({
+		const result = await new HttpImageConnector({
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "test" });

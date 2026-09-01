@@ -2,36 +2,29 @@ import { describe, expect, it } from "vitest";
 import type { ConnectorConfig, ConnectorPlugin } from "@/lib/connectors/types";
 import { withRegistry, type ConnectorRegistry } from "../registry";
 
-function makeConfig(overrides?: Partial<ConnectorConfig>): ConnectorConfig {
-	return { ...overrides };
-}
-
-/** The plugins one provider of a type ended up with. */
 const pluginsOf = (
 	registry: ConnectorRegistry,
 	type: "llm" | "image" | "tts",
-	provider = "openslop",
-) => (registry[type] as Record<string, ConnectorConfig>)[provider].plugins;
+) => registry[type].plugins;
 
 function makePlugin(name: string): ConnectorPlugin {
 	return { name };
 }
 
 function makeFullRegistry(
-	overrides?: Partial<Record<string, Record<string, ConnectorConfig>>>,
+	overrides?: Partial<Record<string, ConnectorConfig>>,
 ): ConnectorRegistry {
-	const defaultProviders = { openslop: makeConfig() };
 	return {
-		llm: defaultProviders,
-		music: defaultProviders,
-		sfx: defaultProviders,
-		image: defaultProviders,
-		tts: defaultProviders,
-		video: defaultProviders,
+		llm: {},
+		music: {},
+		sfx: {},
+		image: {},
+		animated_image: {},
+		tts: {},
+		video: {},
 		...overrides,
-	} as ConnectorRegistry;
+	};
 }
-
 describe("withRegistry", () => {
 	it("returns the original registry when no operations are chained", () => {
 		const registry = makeFullRegistry();
@@ -64,11 +57,7 @@ describe("withRegistry", () => {
 
 	it("preserves existing plugins when appending", () => {
 		const existing = makePlugin("existing");
-		const registry = makeFullRegistry({
-			image: {
-				openslop: makeConfig({ plugins: [existing] }),
-			},
-		});
+		const registry = makeFullRegistry({ image: { plugins: [existing] } });
 		const added = makePlugin("added");
 
 		const result = withRegistry(registry).appendPlugins("image", added).build();
@@ -127,23 +116,5 @@ describe("withRegistry", () => {
 
 		expect(pluginsOf(result, "llm")).toBeUndefined();
 		expect(pluginsOf(result, "tts")).toBeUndefined();
-	});
-
-	it("reaches every provider of the type", () => {
-		const registry = makeFullRegistry({
-			image: {
-				providerA: makeConfig(),
-				providerB: makeConfig(),
-			},
-		});
-		const plugin = makePlugin("shared");
-
-		const result = withRegistry(registry)
-			.appendPlugins("image", plugin)
-			.build();
-
-		const image = result.image as Record<string, ConnectorConfig>;
-		expect(image["providerA"].plugins).toEqual([plugin]);
-		expect(image["providerB"].plugins).toEqual([plugin]);
 	});
 });

@@ -7,11 +7,7 @@ import {
 	Minutes3,
 	type IconComponent,
 } from "@/components/ui/icon";
-import {
-	MODEL_META,
-	type ModelMeta,
-	type Tier,
-} from "@/lib/connectors/modelMeta";
+import type { ModelMeta, Tier } from "@/lib/connectors/modelCatalog";
 import { cn } from "@/lib/utils";
 import { IconChip } from "./IconChip";
 
@@ -42,14 +38,12 @@ const METRICS: Metric[] = [
  * anyone who cannot see the difference.
  */
 export function ModelChips({
-	model,
+	meta,
 	className,
 }: {
-	model: string;
+	meta: ModelMeta;
 	className?: string;
 }) {
-	const meta = MODEL_META[model];
-	if (!meta) return null;
 	return (
 		<span className={cn("flex flex-wrap items-center gap-1", className)}>
 			{METRICS.map(({ key, icon, phrase }) => {

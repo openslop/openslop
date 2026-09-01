@@ -1,12 +1,9 @@
 import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
 import { parseImageSource } from "./imageSource";
 
 /** A provider the user supplies a key for, parsed at the boundary. */
-export const byokProviderField = z.enum(
-	BYOK_PROVIDERS as [ProviderKey, ...ProviderKey[]],
-);
+export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
 const optionalCoercedNumber = z
 	.union([z.number(), z.string()])

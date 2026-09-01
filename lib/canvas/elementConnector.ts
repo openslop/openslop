@@ -33,11 +33,12 @@ export function resolveElementConnector(
 	const type = ELEMENT_TYPES[element.type].connector;
 	const catalog = MODEL_CATALOGS[type];
 	const { model } = element.generationAttributes ?? {};
-	const provider = catalog.providerFor(model);
-	const config = registry[type][provider];
-	if (!config)
-		throw new Error(`No "${provider}" connector configured for "${type}"`);
-	return { type, provider, model: model ?? catalog.defaultModel, config };
+	return {
+		type,
+		provider: catalog.providerFor(model),
+		model: model ?? catalog.defaultModel,
+		config: registry[type],
+	};
 }
 
 /**

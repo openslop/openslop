@@ -14,6 +14,7 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
+import { fromStatus, probe, type ValidatingProvider } from "../validate";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
 import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
@@ -124,7 +125,10 @@ const collectVoicesCached = unstable_cache(
 	{ revalidate: 3600 },
 );
 
-export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
+export class CartesiaTTS
+	extends BaseProvider<TTSGenerateParams, RawTTSResult>
+	implements ValidatingProvider
+{
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
 	private client: Cartesia;
 	private apiKey: string;
@@ -133,6 +137,18 @@ export class CartesiaTTS extends BaseProvider<TTSGenerateParams, RawTTSResult> {
 		super();
 		this.apiKey = apiKey;
 		this.client = new Cartesia({ apiKey });
+	}
+
+	/** Listing one voice is the cheapest call the API authenticates. */
+	async validate() {
+		return fromStatus(
+			await probe("https://api.cartesia.ai/voices/?limit=1", {
+				headers: {
+					"X-API-Key": this.apiKey,
+					"Cartesia-Version": "2024-11-13",
+				},
+			}),
+		);
 	}
 
 	async fetchVoicePreview(url: string): Promise<Response> {

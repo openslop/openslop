@@ -1,6 +1,5 @@
-import { ChevronDown } from "@/components/ui/icon";
 import { useSlateStatic } from "slate-react";
-import { SelectMenu } from "@/components/ui/select-menu";
+import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
@@ -119,17 +118,9 @@ export function AttributeBadge({
 			contentClassName="max-h-64 min-w-24"
 			itemClassName={className}
 		>
-			<button
-				aria-label={tooltip}
-				onMouseDown={(e) => e.preventDefault()}
-				className={cn(
-					"inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground focus-ring",
-					className,
-				)}
-			>
+			<InlineMenuTrigger aria-label={tooltip} className={className}>
 				<span className="min-w-0 truncate">{labeled}</span>
-				<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
-			</button>
+			</InlineMenuTrigger>
 		</SelectMenu>
 	);
 }

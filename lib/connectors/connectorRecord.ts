@@ -1,4 +1,4 @@
-import type { ProviderKey } from "./types";
+import type { BYOKProvider } from "./providerCatalog";
 
 /** Whether a stored key has been seen to work since it was last written. */
 export type ConnectorStatus = "unverified" | "valid" | "invalid";
@@ -9,7 +9,7 @@ export type ConnectorStatus = "unverified" | "valid" | "invalid";
  * key they stored without it being readable again.
  */
 export type ConnectorRecord = {
-	provider: ProviderKey;
+	provider: BYOKProvider;
 	last4: string;
 	status: ConnectorStatus;
 	verifiedAt: string | null;

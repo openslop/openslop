@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -8,15 +8,19 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@/components/ui/icon";
-import { SelectMenuItem } from "@/components/ui/select-menu";
+import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
 import { MODEL_CATALOGS } from "@/lib/connectors/models";
-import { providerMeta } from "@/lib/connectors/providerCatalog";
-import type { ConnectorType, ProviderKey } from "@/lib/connectors/types";
+import {
+	providerMeta,
+	type BYOKProvider,
+} from "@/lib/connectors/providerCatalog";
+import { providerForModel } from "@/lib/connectors/models";
+import type { ConnectorType } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./ModelChips";
 import { ProviderIcon } from "./ProviderIcon";
-import { useCanGenerateWith } from "./useConnectors";
+import { useMissingKey } from "./useConnectors";
 
 /**
  * Every model a connector type offers, whether or not the account can run it.
@@ -39,7 +43,7 @@ export function ModelSelect({
 	children: ReactNode;
 }) {
 	const catalog = MODEL_CATALOGS[type];
-	const canGenerateWith = useCanGenerateWith();
+	const missingKey = useMissingKey();
 	const settings = useSettings();
 
 	return (
@@ -54,35 +58,33 @@ export function ModelSelect({
 			>
 				{catalog.names.map((name) => {
 					const provider = catalog.providerFor(name);
-					const available = canGenerateWith(provider);
+					const missing = missingKey(provider);
 					return (
 						<SelectMenuItem
 							key={name}
 							selected={name === value}
 							onSelect={() =>
-								available
-									? onChange(name)
-									: settings.open("connectors", provider)
+								missing ? settings.open("connectors", missing) : onChange(name)
 							}
 							className="gap-2"
 						>
 							<ProviderIcon
 								provider={provider}
 								size={14}
-								className={cn(!available && "opacity-40")}
+								className={cn(missing && "opacity-40")}
 							/>
 							<span
 								className={cn(
 									"min-w-0 truncate",
-									!available && "text-muted-foreground",
+									missing && "text-muted-foreground",
 								)}
 							>
 								{name}
 							</span>
-							{available ? (
-								<ModelChips model={name} className="ml-auto" />
+							{missing ? (
+								<ConnectHint provider={missing} />
 							) : (
-								<ConnectHint provider={provider} />
+								<ModelChips meta={catalog.metaFor(name)} className="ml-auto" />
 							)}
 						</SelectMenuItem>
 					);
@@ -93,7 +95,7 @@ export function ModelSelect({
 }
 
 /** Looks like the buttons it stands in for, without nesting one inside a menu row. */
-function ConnectHint({ provider }: { provider: ProviderKey }) {
+function ConnectHint({ provider }: { provider: BYOKProvider }) {
 	const { name } = providerMeta(provider);
 	return (
 		<span
@@ -106,5 +108,29 @@ function ConnectHint({ provider }: { provider: ProviderKey }) {
 			<Link aria-hidden="true" className="size-2.5" />
 			Connect
 		</span>
+	);
+}
+
+/**
+ * The face a model picker hangs off where the trigger is part of the surface
+ * rather than a form field: the provider's mark, the model, and the chevron
+ * that says it opens.
+ */
+export function ModelSelectTrigger({
+	connector,
+	model,
+	label,
+	...props
+}: ComponentProps<"button"> & {
+	connector: ConnectorType;
+	model: string;
+	/** What this model is for, since one element can pick more than one. */
+	label: string;
+}) {
+	return (
+		<InlineMenuTrigger aria-label={`${label}: ${model}`} {...props}>
+			<ProviderIcon provider={providerForModel(connector, model)} size={12} />
+			<span className="min-w-0 truncate">{model}</span>
+		</InlineMenuTrigger>
 	);
 }

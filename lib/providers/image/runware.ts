@@ -1,7 +1,8 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider, type WithMetadata } from "../base";
-import { withRunware } from "../runware";
+import { validateRunwareKey, withRunware } from "../runware";
+import type { ValidatingProvider } from "../validate";
 
 type RawImageResult = {
 	data: string;
@@ -11,16 +12,20 @@ type RawImageResult = {
 // Runware defaults to JPG when the request names no format.
 const OUTPUT_FORMAT = "PNG";
 
-export class RunwareImage extends BaseProvider<
-	ImageGenerateParams,
-	RawImageResult
-> {
+export class RunwareImage
+	extends BaseProvider<ImageGenerateParams, RawImageResult>
+	implements ValidatingProvider
+{
 	protected readonly blobConfig = { type: "image", provider: "runware" };
 	private apiKey: string;
 
 	constructor(apiKey: string) {
 		super();
 		this.apiKey = apiKey;
+	}
+
+	async validate() {
+		return validateRunwareKey(this.apiKey);
 	}
 
 	protected toFiles(r: RawImageResult): BundleFile[] {

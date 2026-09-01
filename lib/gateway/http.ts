@@ -1,65 +1,60 @@
 import { ApiClient } from "@/lib/clients/apiClient";
 import { readSSE } from "@/lib/api/sse";
+import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 	LLMStreamChunk,
+	ProviderKey,
 	TTSGenerateParams,
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
 import { AssetGateway, GatewayClient } from "./base";
 import type { JobPoll, JobSubmission } from "./base";
+import { apiPrefixFor } from "./prefix";
 
 /**
- * Gateways that reach a provider through one of our own API prefixes. The
- * prefix is the seam: `/api/v1` serves the models OpenSlop hosts, and the
- * third-party prefix serves the ones a user brings their own key for. Every
- * route under a prefix speaks the same protocol, so a gateway family is only
- * the prefix its connectors post to.
+ * A generation reached through one of our own API prefixes: `/api/v1` serves
+ * the models OpenSlop hosts, and the third-party prefix serves the ones a user
+ * brings a key for. Every route under a prefix speaks the same protocol, so
+ * which one to post to is the provider's decision, not a subclass's.
  */
-export abstract class HttpGatewayClient<
-	TParams = unknown,
-	TResult = unknown,
-> extends GatewayClient<TParams, TResult> {
-	protected client: ApiClient;
-	protected abstract readonly apiPrefix: string;
+export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
+	protected readonly client: ApiClient;
+	protected readonly route: string;
 
-	constructor(baseUrl?: string) {
+	constructor(provider: ProviderKey, path: string, baseUrl?: string) {
 		super();
 		this.client = new ApiClient(baseUrl);
-	}
-}
-
-export abstract class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
-	protected client: ApiClient;
-	protected abstract readonly apiPrefix: string;
-	protected abstract readonly path: string;
-
-	constructor(baseUrl?: string) {
-		super();
-		this.client = new ApiClient(baseUrl);
+		this.route = `${apiPrefixFor(provider)}/${path}`;
 	}
 
 	async generate(params: TParams): Promise<JobSubmission> {
-		return this.client.post<JobSubmission>(
-			`${this.apiPrefix}/${this.path}`,
-			params,
-		);
+		return this.client.post<JobSubmission>(this.route, params);
 	}
 
 	async poll(jobId: string): Promise<JobPoll> {
-		return this.client.get<JobPoll>(`${this.apiPrefix}/${this.path}/${jobId}`);
+		return this.client.get<JobPoll>(`${this.route}/${jobId}`);
 	}
 }
 
 /** Text runs in the request rather than as a job, and may stream. */
-export abstract class HttpLLMGateway extends HttpGatewayClient<
+export class HttpLLMGateway extends GatewayClient<
 	LLMGenerateParams,
 	LLMGenerateResult
 > {
+	private readonly client: ApiClient;
+	private readonly route: string;
+
+	constructor(provider: ProviderKey, baseUrl?: string) {
+		super();
+		this.client = new ApiClient(baseUrl);
+		this.route = `${apiPrefixFor(provider)}/llm`;
+	}
+
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
-		return this.client.post(`${this.apiPrefix}/llm`, params);
+		return this.client.post(this.route, params);
 	}
 
 	async *stream(
@@ -67,7 +62,7 @@ export abstract class HttpLLMGateway extends HttpGatewayClient<
 		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
 		const res = await this.client.postStream(
-			`${this.apiPrefix}/llm`,
+			this.route,
 			{ ...params, stream: true },
 			signal,
 		);
@@ -76,18 +71,27 @@ export abstract class HttpLLMGateway extends HttpGatewayClient<
 	}
 }
 
-export abstract class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
-	protected readonly path = "tts";
-
-	/** What the voice search is scoped by, beyond the search itself. */
-	protected voiceQuery(params: VoiceSearchParams): Record<string, string> {
-		return params as Record<string, string>;
+export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
+	constructor(
+		private readonly provider: ProviderKey,
+		baseUrl?: string,
+	) {
+		super(provider, "tts", baseUrl);
 	}
 
+	/**
+	 * A third-party voice search names its provider: unlike a generation it
+	 * carries no model to resolve one from, and the route has to know whose key
+	 * to read. The hosted route reads only its own.
+	 */
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
+		const query = {
+			...params,
+			...(this.provider !== MANAGED_PROVIDER && { provider: this.provider }),
+		} as Record<string, string>;
 		const result = await this.client.get<{ voices: VoiceInfo[] }>(
-			`${this.apiPrefix}/tts/voices`,
-			this.voiceQuery(params),
+			`${this.route}/voices`,
+			query,
 		);
 		return result.voices;
 	}

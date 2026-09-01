@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { OpenSlopTTS } from "../tts/openslop";
+import { HttpTTSConnector } from "../tts/connector";
 import { createVoiceSearchPlugin } from "@/lib/connectors/tts/plugins/voice-search";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
@@ -7,7 +7,7 @@ import { mockGatewaySequence } from "./_gateway-mock";
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
 
-const config = {};
+const config = { provider: "openslop" } as const;
 
 function mockSuccess() {
 	mockGatewaySequence([
@@ -32,7 +32,7 @@ describe("BaseTTSConnector", () => {
 
 	it("generates TTS via provider with voiceId", async () => {
 		mockSuccess();
-		const result = await new OpenSlopTTS(config).generate({
+		const result = await new HttpTTSConnector(config).generate({
 			prompt: "hello",
 			voiceId: "default",
 		});
@@ -42,7 +42,7 @@ describe("BaseTTSConnector", () => {
 
 	it("resolves voice via voice-search plugin when no voiceId", async () => {
 		mockSuccess();
-		const connector = new OpenSlopTTS({
+		const connector = new HttpTTSConnector({
 			...config,
 			plugins: [createVoiceSearchPlugin()],
 		});
@@ -69,7 +69,7 @@ describe("BaseTTSConnector", () => {
 	});
 
 	it("throws when no matching voice found via voice-search plugin", async () => {
-		const connector = new OpenSlopTTS({
+		const connector = new HttpTTSConnector({
 			...config,
 			plugins: [createVoiceSearchPlugin()],
 		});
@@ -86,7 +86,7 @@ describe("BaseTTSConnector", () => {
 			name: "transform",
 			transformPrompt: (p) => p.toUpperCase(),
 		};
-		const result = await new OpenSlopTTS({
+		const result = await new HttpTTSConnector({
 			...config,
 			plugins: [plugin],
 		}).generate({ prompt: "hello", voiceId: "default" });
@@ -96,7 +96,7 @@ describe("BaseTTSConnector", () => {
 	it("runs onError plugin on failure", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("tts failed"));
 		const errors: string[] = [];
-		const connector = new OpenSlopTTS({
+		const connector = new HttpTTSConnector({
 			...config,
 			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});

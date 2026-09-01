@@ -1,16 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
 import {
-	ChevronDown,
-	CornerDownLeft,
-	Lightbulb,
-	SquareFilled,
-} from "@/components/ui/icon";
-import { ModelSelect } from "@/app/components/connectors/ModelSelect";
-import { ProviderIcon } from "@/app/components/connectors/ProviderIcon";
-import { providerForModel } from "@/lib/connectors/models";
-import { cn } from "@/lib/utils";
+	ModelSelect,
+	ModelSelectTrigger,
+} from "@/app/components/connectors/ModelSelect";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
 import { useSloppyModel } from "./SloppyModelProvider";
@@ -29,16 +24,7 @@ function ModelPicker({
 }) {
 	return (
 		<ModelSelect type="llm" value={model} onChange={onChange} side="top">
-			<button
-				type="button"
-				aria-label={`Model: ${model}`}
-				onMouseDown={(event) => event.preventDefault()}
-				className={cn(controlClassName, "max-w-[140px]")}
-			>
-				<ProviderIcon provider={providerForModel("llm", model)} size={12} />
-				<span className="min-w-0 truncate">{model}</span>
-				<ChevronDown className="h-3 w-3 shrink-0" aria-hidden="true" />
-			</button>
+			<ModelSelectTrigger connector="llm" model={model} label="Model" />
 		</ModelSelect>
 	);
 }

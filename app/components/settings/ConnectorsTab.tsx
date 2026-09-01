@@ -9,14 +9,14 @@ import { CONNECTOR_GROUPS } from "@/lib/connectors/connectorConfigs";
 import {
 	defaultModelFor,
 	differsFromRecommended,
+	MODEL_CATALOGS,
 } from "@/lib/connectors/models";
-import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { toastError } from "@/lib/toastError";
 import { useSettings } from "@/lib/settings/useSettings";
 import { useAccount } from "@/lib/user/useAccount";
 import { useUser } from "@/lib/user/UserProvider";
-import { ConnectorCard } from "./ConnectorCard";
+import { ConnectorCard, HostedConnectorCard } from "./ConnectorCard";
 import { SettingsList, SettingsRow, SettingsSection } from "./SettingsSection";
 
 /**
@@ -28,7 +28,7 @@ export function ConnectorsTab({
 	onAddConnector,
 }: {
 	/** The connector a link asked to open on, shown even before it has a key. */
-	selected: ProviderKey | null;
+	selected: BYOKProvider | null;
 	onAddConnector: () => void;
 }) {
 	const models = useAccount((state) => state.models);
@@ -39,14 +39,12 @@ export function ConnectorsTab({
 	const settings = useSettings();
 
 	const stored = connectors.map((row) => row.provider);
-	const shown: ProviderKey[] = [
-		// A link that named a connector leads here: it goes first, so what the
-		// link was about is the first thing read.
-		...(selected && !stored.includes(selected) ? [selected] : []),
-		// Hosted generation comes with API access, which not every account has.
-		...(user.app_metadata?.api_access ? [MANAGED_PROVIDER] : []),
-		...stored,
-	];
+	// A link that named a connector leads here: it goes first, so what the link
+	// was about is the first thing read.
+	const shown =
+		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
+	// Hosted generation comes with API access, which not every account has.
+	const hosted = Boolean(user.app_metadata?.api_access);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -61,12 +59,13 @@ export function ConnectorsTab({
 					</Button>
 				}
 			>
-				{shown.length === 0 ? (
+				{shown.length === 0 && !hosted ? (
 					<p className="rounded-xl border border-dashed border-border p-6 text-center text-label text-muted-foreground">
 						No connectors yet. Add one to generate on your own key.
 					</p>
 				) : (
 					<div className="flex flex-col gap-2">
+						{hosted && <HostedConnectorCard />}
 						{shown.map((provider) => (
 							<ConnectorCard
 								key={provider}
@@ -110,18 +109,16 @@ export function ConnectorsTab({
 							}
 						>
 							<ModelChips
-								model={defaultModelFor(types[0], { account: models })}
+								meta={MODEL_CATALOGS[types[0]].metaFor(
+									defaultModelFor(types[0], { account: models }),
+								)}
 							/>
 							<ModelDefaultControl
 								types={types}
 								tier="account"
 								chain={{ account: models }}
 								label={label}
-								onChange={(model) =>
-									void setModels(
-										Object.fromEntries(types.map((type) => [type, model])),
-									).catch(toastError)
-								}
+								onChange={(models) => void setModels(models).catch(toastError)}
 							/>
 						</SettingsRow>
 					))}

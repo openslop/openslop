@@ -7,7 +7,7 @@ const mockTTSSearch = vi.fn();
 
 const noopProvider = () => ({ generate: vi.fn(), poll: vi.fn() });
 vi.mock("@/lib/api/providers", () => ({
-	getLLMProvider: () => ({
+	llmProviderFor: async () => ({
 		generate: mockLLMGenerate,
 		stream: mockLLMStream,
 	}),

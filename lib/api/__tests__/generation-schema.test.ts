@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { byokBodySchema, byokModelNames } from "../generation-schema";
+import { bodySchema } from "../generation-schema";
 
-const schema = byokBodySchema("image", {});
+const schema = bodySchema("image", "byok", {});
 
-describe("byokBodySchema", () => {
-	it("offers only the models a user's own key serves", () => {
-		expect(byokModelNames("image")).not.toContain("Slop Image v1");
-		expect(byokModelNames("image")).toContain("Seedream 5 Lite");
-	});
-
+describe("bodySchema, byok scope", () => {
 	// The hosted models have their own routes, with their own auth and keys.
-	it("rejects a model OpenSlop hosts", () => {
+	it("offers only the models a user's own key serves", () => {
 		const parsed = schema.safeParse({
 			prompt: "a cat",
 			model: "Slop Image v1",

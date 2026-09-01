@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Key } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { providerMeta } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import {
+	providerMeta,
+	type BYOKProvider,
+} from "@/lib/connectors/providerCatalog";
 import { toastError } from "@/lib/toastError";
 import { useAccount } from "@/lib/user/useAccount";
 
@@ -23,7 +25,7 @@ export function ConnectorKeyForm({
 	onSaved,
 	onCancel,
 }: {
-	provider: ProviderKey;
+	provider: BYOKProvider;
 	onSaved: () => void;
 	onCancel: () => void;
 }) {

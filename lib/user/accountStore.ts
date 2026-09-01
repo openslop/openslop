@@ -5,7 +5,7 @@ import type {
 	ValidationResult,
 } from "@/lib/connectors/connectorRecord";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import type { ConnectorType, ProviderKey } from "@/lib/connectors/types";
+import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { createClient } from "@/lib/supabase/client";
 
 /** What the account, rather than any one project, configures. */
@@ -19,11 +19,13 @@ export type AccountData = {
 
 export type AccountContext = AccountData & {
 	loadConnectors: () => Promise<void>;
-	saveKey: (provider: ProviderKey, apiKey: string) => Promise<ValidationResult>;
-	testKey: (provider: ProviderKey) => Promise<ValidationResult>;
-	removeKey: (provider: ProviderKey) => Promise<void>;
-	setModel: (type: ConnectorType, model: string) => Promise<void>;
-	/** Several types at once, so adopting a provider is one save. */
+	saveKey: (
+		provider: BYOKProvider,
+		apiKey: string,
+	) => Promise<ValidationResult>;
+	testKey: (provider: BYOKProvider) => Promise<ValidationResult>;
+	removeKey: (provider: BYOKProvider) => Promise<void>;
+	/** Several types at once, since one pick can cover more than one. */
 	setModels: (patch: ConnectorModels) => Promise<void>;
 	/** Hands every type back to the model OpenSlop recommends. */
 	resetModels: () => Promise<void>;
@@ -86,9 +88,6 @@ export function createAccountStore(models: ConnectorModels): AccountStore {
 					}),
 				);
 			},
-
-			setModel: async (type, model) =>
-				applyModels({ ...get().models, [type]: model }),
 
 			setModels: async (patch) => applyModels({ ...get().models, ...patch }),
 

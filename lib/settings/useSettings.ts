@@ -3,8 +3,10 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
-import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import {
+	BYOK_PROVIDERS,
+	type BYOKProvider,
+} from "@/lib/connectors/providerCatalog";
 
 /** The tabs account settings offers. */
 const tabSchema = z.enum(["connectors"]);
@@ -12,17 +14,15 @@ const tabSchema = z.enum(["connectors"]);
 export type SettingsTab = z.infer<typeof tabSchema>;
 
 /** Which connector the tab should open on, so a "connect" link lands on it. */
-const connectorSchema = z.enum(
-	BYOK_PROVIDERS as [ProviderKey, ...ProviderKey[]],
-);
+const connectorSchema = z.enum(BYOK_PROVIDERS);
 
 const TAB_PARAM = "settings";
 const CONNECTOR_PARAM = "connector";
 
 export type SettingsRoute = {
 	tab: SettingsTab | null;
-	connector: ProviderKey | null;
-	open: (tab: SettingsTab, connector?: ProviderKey) => void;
+	connector: BYOKProvider | null;
+	open: (tab: SettingsTab, connector?: BYOKProvider) => void;
 	close: () => void;
 };
 

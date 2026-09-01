@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { useSettings } from "@/lib/settings/useSettings";
 import { AddConnectorView } from "./AddConnectorView";
 import { ConnectorsTab } from "./ConnectorsTab";
@@ -29,7 +29,7 @@ export function SettingsDialog() {
 		settings.close();
 	};
 
-	const pick = (provider: ProviderKey) => {
+	const pick = (provider: BYOKProvider) => {
 		setBrowsing(false);
 		settings.open("connectors", provider);
 	};

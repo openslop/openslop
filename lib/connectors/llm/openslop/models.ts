@@ -1,1 +1,3 @@
-export const OPENSLOP_LLM_MODELS = { "Slop LLM v1": "claude-opus-5" } as const;
+export const OPENSLOP_LLM_MODELS = {
+	"Slop LLM v1": { id: "claude-opus-5", cost: "high", speed: "low" },
+} as const;

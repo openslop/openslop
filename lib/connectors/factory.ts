@@ -1,96 +1,58 @@
-import type { BaseImageConnector } from "./image/connector";
-import { OpenSlopImage } from "./image/openslop";
-import { ThirdPartyImage } from "./image/thirdparty";
-import type { BaseAnimatedImageConnector } from "./animated_image/connector";
-import { OpenSlopAnimatedImage } from "./animated_image/openslop";
-import { ThirdPartyAnimatedImage } from "./animated_image/thirdparty";
-import { OpenSlopLLM } from "./llm/openslop";
-import { ThirdPartyLLM } from "./llm/thirdparty";
-import type { BaseMusicConnector } from "./music/connector";
-import { OpenSlopMusic } from "./music/openslop";
-import { ThirdPartyMusic } from "./music/thirdparty";
-import type { BaseSFXConnector } from "./sfx/connector";
-import { OpenSlopSFX } from "./sfx/openslop";
-import { ThirdPartySFX } from "./sfx/thirdparty";
-import { OpenSlopTTS } from "./tts/openslop";
-import { ThirdPartyTTS } from "./tts/thirdparty";
-import type { BaseVideoConnector } from "./video/connector";
-import { OpenSlopVideo } from "./video/openslop";
-import { ThirdPartyVideo } from "./video/thirdparty";
+import { HttpAnimatedImageConnector } from "./animated_image/connector";
+import { HttpImageConnector } from "./image/connector";
+import { HttpLLMConnector } from "./llm/connector";
+import { HttpMusicConnector } from "./music/connector";
+import { HttpSFXConnector } from "./sfx/connector";
+import { HttpTTSConnector } from "./tts/connector";
+import { HttpVideoConnector } from "./video/connector";
 import type { AttributeSchema } from "./attributes/schema";
 import { MODEL_CATALOGS } from "./models";
-import { MANAGED_PROVIDER } from "./providerCatalog";
-import {
-	CONNECTOR_TYPES,
-	type ConnectorConfig,
-	type ConnectorType,
-	type LLMConnector,
-	type ProviderConstructor,
-	type ProviderKey,
-	type TTSConnector,
+import type {
+	ConnectorConfig,
+	ConnectorType,
+	LLMConnector,
+	ProviderConstructor,
+	ProviderKey,
+	TTSConnector,
 } from "./types";
 
 type ConnectorTypeMap = {
 	llm: LLMConnector;
-	music: BaseMusicConnector;
-	sfx: BaseSFXConnector;
-	image: BaseImageConnector;
-	animated_image: BaseAnimatedImageConnector;
+	music: HttpMusicConnector;
+	sfx: HttpSFXConnector;
+	image: HttpImageConnector;
+	animated_image: HttpAnimatedImageConnector;
 	tts: TTSConnector;
-	video: BaseVideoConnector;
-};
-
-/** The connector that reaches each type through the models OpenSlop hosts. */
-const HOSTED: Record<ConnectorType, ProviderConstructor> = {
-	llm: OpenSlopLLM,
-	music: OpenSlopMusic,
-	sfx: OpenSlopSFX,
-	image: OpenSlopImage,
-	animated_image: OpenSlopAnimatedImage,
-	tts: OpenSlopTTS,
-	video: OpenSlopVideo,
-};
-
-/** The connector that reaches each type on a key the user brings. */
-const THIRD_PARTY: Record<ConnectorType, ProviderConstructor> = {
-	llm: ThirdPartyLLM,
-	music: ThirdPartyMusic,
-	sfx: ThirdPartySFX,
-	image: ThirdPartyImage,
-	animated_image: ThirdPartyAnimatedImage,
-	tts: ThirdPartyTTS,
-	video: ThirdPartyVideo,
+	video: HttpVideoConnector;
 };
 
 /**
- * Which class serves each (type, provider). The catalog decides who is on the
- * list: a provider serves a type exactly when it has models there, so wiring a
- * model in is all it takes to make its provider selectable.
+ * The connector serving each type. One class covers every provider of that
+ * type: a generation reaches the same routes either way, and which family it
+ * posts to follows from the provider the config carries.
  */
-const PROVIDERS = Object.fromEntries(
-	CONNECTOR_TYPES.map((type) => [
-		type,
-		Object.fromEntries(
-			MODEL_CATALOGS[type].providers.map((provider) => [
-				provider,
-				provider === MANAGED_PROVIDER ? HOSTED[type] : THIRD_PARTY[type],
-			]),
-		),
-	]),
-) as Record<ConnectorType, Partial<Record<ProviderKey, ProviderConstructor>>>;
+const CONNECTORS: Record<ConnectorType, ProviderConstructor> = {
+	llm: HttpLLMConnector,
+	music: HttpMusicConnector,
+	sfx: HttpSFXConnector,
+	image: HttpImageConnector,
+	animated_image: HttpAnimatedImageConnector,
+	tts: HttpTTSConnector,
+	video: HttpVideoConnector,
+};
 
-/** Every provider a connector type can be generated with. */
-export const providersFor = (type: ConnectorType): ProviderKey[] =>
-	Object.keys(PROVIDERS[type]) as ProviderKey[];
-
+/**
+ * The class that serves a (type, provider). The catalog decides who is on the
+ * list: a provider serves a type exactly when it has models there, so wiring a
+ * model in is all it takes to make its provider reachable.
+ */
 function providerCtor(
 	type: ConnectorType,
 	provider: ProviderKey,
 ): ProviderConstructor {
-	const Ctor = PROVIDERS[type][provider];
-	if (!Ctor)
+	if (!MODEL_CATALOGS[type].providers.includes(provider))
 		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
-	return Ctor;
+	return CONNECTORS[type];
 }
 
 export function createConnector<T extends ConnectorType>(
