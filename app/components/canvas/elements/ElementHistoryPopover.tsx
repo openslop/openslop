@@ -26,7 +26,7 @@ import {
 } from "../hooks/useElementHistory";
 import { AudioPlayer } from "./AudioPlayer";
 import { HeaderIconButton } from "./HeaderIconButton";
-import { MediaWithSkeleton } from "./MediaWithSkeleton";
+import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 
 const PROMPT_LENGTH = 72;
 

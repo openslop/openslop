@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { AudioPlayer } from "../AudioPlayer";
-import { MediaWithSkeleton } from "../MediaWithSkeleton";
+import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { GenerationIndicator } from "../GenerationIndicator";
 import type {
 	GenerationState,
@@ -11,7 +11,7 @@ import type {
 import { PlaceholderBallsLoader } from "./placeholderBalls";
 import {
 	AUDIO_SAMPLE_COUNT,
-	buildSoundwaveMask,
+	soundwaveMaskStyle,
 } from "@/lib/components/soundwave";
 import {
 	ErrorMessage,
@@ -52,13 +52,11 @@ export function AudioPlaceholder({
 	topRight,
 	...props
 }: PlaceholderProps & PreviewOverlays) {
-	const [mask] = useState(() => {
-		const bars = Array.from(
-			{ length: AUDIO_SAMPLE_COUNT },
-			() => 20 + Math.random() * 80,
-		);
-		return buildSoundwaveMask(bars);
-	});
+	const [mask] = useState(() =>
+		soundwaveMaskStyle(
+			Array.from({ length: AUDIO_SAMPLE_COUNT }, () => 20 + Math.random() * 80),
+		),
+	);
 
 	return (
 		<div
@@ -66,15 +64,7 @@ export function AudioPlaceholder({
 			style={{ "--cancel-offset": "calc(50% - 0.75rem)" } as CSSProperties}
 		>
 			<div className="absolute inset-0 blur-[6px]" aria-hidden="true">
-				<div
-					className="absolute inset-0"
-					style={{
-						maskImage: mask,
-						WebkitMaskImage: mask,
-						maskSize: "100% 100%",
-						WebkitMaskSize: "100% 100%",
-					}}
-				>
+				<div className="absolute inset-0" style={mask}>
 					<PlaceholderBallsLoader generating={props.status === "generating"} />
 				</div>
 			</div>

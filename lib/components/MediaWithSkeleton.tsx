@@ -1,6 +1,8 @@
+"use client";
+
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
+import { ImageWithShimmer } from "./ImageWithShimmer";
 import type { ResultKind } from "@/lib/canvas/types";
 
 interface MediaWithSkeletonProps {
