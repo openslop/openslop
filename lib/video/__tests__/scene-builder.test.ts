@@ -8,6 +8,9 @@ import type { CanvasElementType } from "@/lib/canvas/types";
 // The rendered transition overlap: TRANSITION_DURATION_SEC (0.4s) snapped to the
 // 24fps frame grid, which is what <TransitionSeries> actually lays down.
 const OVERLAP = 10 / 24;
+// LOOP_CROSSFADE_SEC (0.15s) on the same grid: how far each copy of a looping
+// effect slides back so it overlaps the tail of the one before it.
+const LOOP_OVERLAP = 4 / 24;
 
 function seqs(layout: VideoLayout, type: CanvasElementType): Sequence[] {
 	const s = layout.sequences[type];
@@ -369,7 +372,7 @@ describe("buildVideoLayout", () => {
 			expect(seqs(layout, "sound")[1].duration).toBe(20);
 		});
 
-		it("emits N consecutive copies of a looped effect at the native clip duration", () => {
+		it("emits N copies of a looped effect at the native clip duration, overlapping by the crossfade", () => {
 			const layout = untrimmed([
 				el({ id: "clip1", type: "clip", durationSec: 12 }),
 				el({ id: "s1", type: "sound", durationSec: 4, loops: 3 }),
@@ -378,9 +381,9 @@ describe("buildVideoLayout", () => {
 			expect(sound).toHaveLength(3);
 			expect(sound[0].start).toBe(0);
 			expect(sound[0].duration).toBe(4);
-			expect(sound[1].start).toBe(4);
+			expect(sound[1].start).toBeCloseTo(4 - LOOP_OVERLAP, 5);
 			expect(sound[1].duration).toBe(4);
-			expect(sound[2].start).toBe(8);
+			expect(sound[2].start).toBeCloseTo(8 - 2 * LOOP_OVERLAP, 5);
 			expect(sound[2].duration).toBe(4);
 			expect(sound.every((s) => s.element?.id === "s1")).toBe(true);
 		});
@@ -394,9 +397,9 @@ describe("buildVideoLayout", () => {
 			expect(sound).toHaveLength(3);
 			expect(sound[0].start).toBe(0);
 			expect(sound[0].duration).toBe(4);
-			expect(sound[1].start).toBe(4);
-			expect(sound[1].duration).toBe(1);
-			expect(sound[2].start).toBe(8);
+			expect(sound[1].start).toBeCloseTo(4 - LOOP_OVERLAP, 5);
+			expect(sound[1].duration).toBeCloseTo(1 + LOOP_OVERLAP, 5);
+			expect(sound[2].start).toBeCloseTo(8 - 2 * LOOP_OVERLAP, 5);
 			expect(sound[2].duration).toBe(1);
 		});
 
