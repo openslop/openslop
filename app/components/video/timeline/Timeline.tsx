@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
 	Timeline as TimelineIcon,
 	ZoomIn,
@@ -27,11 +27,36 @@ import {
 } from "./timelineRows";
 import { useTimelineZoom } from "./useTimelineZoom";
 
-const ROW_HEIGHT: Record<LayerType, string> = { visual: "h-20", audio: "h-16" };
+const LANE_HEIGHT: Record<LayerType, string> = {
+	visual: "h-20",
+	audio: "h-16",
+};
 const GUTTER_PX = 40;
 /** Runway past the last tick, so its label isn't cut off by the end. */
 const RULER_TAIL_PX = 32;
 const MIN_CLIP_WIDTH_PX = 2;
+
+/**
+ * A lane's height and rule, shared by the track and the gutter cell beside it.
+ * They are drawn in separate grid columns and have to line up exactly.
+ */
+function Lane({
+	kind,
+	className,
+	children,
+}: {
+	kind: LayerType;
+	className?: string;
+	children: ReactNode;
+}) {
+	return (
+		<div
+			className={cn("border-b border-border/50", LANE_HEIGHT[kind], className)}
+		>
+			{children}
+		</div>
+	);
+}
 
 function Track({
 	row,
@@ -45,9 +70,7 @@ function Track({
 	onSelect: (clip: TimelineClipData) => void;
 }) {
 	return (
-		<div
-			className={cn("relative border-b border-border/50", ROW_HEIGHT[row.kind])}
-		>
+		<Lane kind={row.kind} className="relative">
 			<ul aria-label={row.label} className="absolute inset-0">
 				{row.clips.map((clip) => {
 					const width = Math.max(clip.duration * pxPerSec, MIN_CLIP_WIDTH_PX);
@@ -72,9 +95,7 @@ function Track({
 									label={clip.element.prompt}
 									selected={selected}
 									sceneNumber={
-										row.id === "foreground"
-											? clip.element.sceneNumber
-											: undefined
+										row.numbered ? clip.element.sceneNumber : undefined
 									}
 								/>
 							</button>
@@ -82,7 +103,7 @@ function Track({
 					);
 				})}
 			</ul>
-		</div>
+		</Lane>
 	);
 }
 
@@ -233,14 +254,12 @@ export function Timeline() {
 					>
 						{rows.map((row) => (
 							<SimpleTooltip key={row.key} label={row.label}>
-								<div
-									className={cn(
-										"flex items-center justify-center border-b border-border/50 text-muted-foreground",
-										ROW_HEIGHT[row.kind],
-									)}
+								<Lane
+									kind={row.kind}
+									className="flex items-center justify-center text-muted-foreground"
 								>
 									<row.icon size={14} />
-								</div>
+								</Lane>
 							</SimpleTooltip>
 						))}
 					</div>

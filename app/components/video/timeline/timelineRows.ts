@@ -16,18 +16,20 @@ export type TimelineRow = {
 	label: string;
 	icon: IconComponent;
 	kind: LayerType;
+	/** Only the scene lane carries scene numbers; the rest sit under it unlabelled. */
+	numbered: boolean;
 	clips: TimelineClip[];
 };
 
 /** One lane per role, in stacking order, mirroring `buildVideoLayout`'s cases. */
 const ROWS: Record<
 	ElementRole,
-	{ label: string; icon: IconComponent; kind: LayerType }
+	{ label: string; icon: IconComponent; kind: LayerType; numbered: boolean }
 > = {
-	foreground: { label: "Video", icon: Film, kind: "visual" },
-	overlay: { label: "Voice", icon: Voice, kind: "audio" },
-	effect: { label: "Effects", icon: Waveform, kind: "audio" },
-	background: { label: "Music", icon: Music, kind: "audio" },
+	foreground: { label: "Video", icon: Film, kind: "visual", numbered: true },
+	overlay: { label: "Voice", icon: Voice, kind: "audio", numbered: false },
+	effect: { label: "Effects", icon: Waveform, kind: "audio", numbered: false },
+	background: { label: "Music", icon: Music, kind: "audio", numbered: false },
 };
 
 // Clips accumulated on the frame grid land a few ULPs apart, so a hair of
