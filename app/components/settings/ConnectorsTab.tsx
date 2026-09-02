@@ -11,11 +11,11 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
+import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
+import type { ProviderKey } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toastError";
 import { useSettings } from "@/lib/settings/useSettings";
 import { useAccount } from "@/lib/user/useAccount";
-import { useUser } from "@/lib/user/UserProvider";
 import { ConnectorCard, HostedConnectorCard } from "./ConnectorCard";
 import { SettingsList, SettingsRow, SettingsSection } from "./SettingsSection";
 
@@ -24,14 +24,13 @@ export function ConnectorsTab({
 	onAddConnector,
 }: {
 	/** The connector a link asked to open on, shown even before it has a key. */
-	selected: BYOKProvider | null;
+	selected: ProviderKey | null;
 	onAddConnector: () => void;
 }) {
 	const models = useAccount((state) => state.models);
 	const setModels = useAccount((state) => state.setModels);
 	const resetModels = useAccount((state) => state.resetModels);
 	const connectors = useAccount((state) => state.connectors);
-	const user = useUser();
 	const settings = useSettings();
 
 	const stored = connectors.map((row) => row.provider);
@@ -39,8 +38,6 @@ export function ConnectorsTab({
 	// was about is the first thing read.
 	const shown =
 		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
-	// Hosted generation comes with API access, which not every account has.
-	const hosted = Boolean(user.app_metadata?.api_access);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -55,22 +52,25 @@ export function ConnectorsTab({
 					</Button>
 				}
 			>
-				{shown.length === 0 && !hosted ? (
+				{shown.length === 0 ? (
 					<p className="rounded-xl border border-dashed border-border p-6 text-center text-label text-muted-foreground">
 						No connectors yet. Add one to generate on your own key.
 					</p>
 				) : (
 					<div className="flex flex-col gap-2">
-						{hosted && <HostedConnectorCard />}
-						{shown.map((provider) => (
-							<ConnectorCard
-								key={provider}
-								provider={provider}
-								selected={provider === selected}
-								// A link pointing at a row that is gone has nothing to open.
-								onDismissed={() => settings.open("connectors")}
-							/>
-						))}
+						{shown.map((provider) =>
+							provider === MANAGED_PROVIDER ? (
+								<HostedConnectorCard key={provider} />
+							) : (
+								<ConnectorCard
+									key={provider}
+									provider={provider}
+									selected={provider === selected}
+									// A link pointing at a row that is gone has nothing to open.
+									onDismissed={() => settings.open("connectors")}
+								/>
+							),
+						)}
 					</div>
 				)}
 			</SettingsSection>

@@ -5,7 +5,10 @@ import type {
 	ValidationResult,
 } from "@/lib/connectors/connectorRecord";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
+import {
+	MANAGED_PROVIDER,
+	type BYOKProvider,
+} from "@/lib/connectors/providerCatalog";
 import { createClient } from "@/lib/supabase/client";
 
 export type AccountData = {
@@ -37,6 +40,19 @@ type ConnectorsResponse = {
 	validation?: ValidationResult;
 };
 
+/**
+ * The hosted provider as a connector like any other, so nothing downstream asks
+ * which provider needs a key. It comes with API access today; when it takes a
+ * key of its own, it will come from the server like the rest.
+ */
+const MANAGED_CONNECTOR: ConnectorRecord = {
+	provider: MANAGED_PROVIDER,
+	last4: "",
+	status: "valid",
+	verifiedAt: null,
+	createdAt: "",
+};
+
 /** The account's defaults live on the user record, so they follow the login. */
 async function persistModels(models: ConnectorModels): Promise<void> {
 	const { error } = await createClient().auth.updateUser({
@@ -45,20 +61,24 @@ async function persistModels(models: ConnectorModels): Promise<void> {
 	if (error) throw new Error(`Failed to save defaults: ${error.message}`);
 }
 
-export function createAccountStore(models: ConnectorModels): AccountStore {
+export function createAccountStore(
+	models: ConnectorModels,
+	hosted: boolean,
+): AccountStore {
+	const included = hosted ? [MANAGED_CONNECTOR] : [];
 	return createStore<AccountContext>()((set, get) => {
 		const applyModels = async (next: ConnectorModels) => {
 			await persistModels(next);
 			set({ models: next });
 		};
 		const applyResponse = ({ connectors, validation }: ConnectorsResponse) => {
-			set({ connectors, loaded: true });
+			set({ connectors: [...included, ...connectors], loaded: true });
 			return validation ?? { ok: true as const };
 		};
 
 		return {
 			models,
-			connectors: [],
+			connectors: included,
 			loaded: false,
 
 			loadConnectors: async () => {

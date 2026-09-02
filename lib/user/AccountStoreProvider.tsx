@@ -12,12 +12,15 @@ export { useAccountStoreHandle };
 
 export function AccountStoreProvider({
 	models,
+	hosted,
 	children,
 }: {
 	models: ConnectorModels;
+	/** Whether the account may generate on the hosted provider. */
+	hosted: boolean;
 	children: ReactNode;
 }) {
-	const [store] = useState(() => createAccountStore(models));
+	const [store] = useState(() => createAccountStore(models, hosted));
 
 	// Stored keys decide what the model pickers offer, so they are read once for
 	// the session rather than on opening the settings that manage them.

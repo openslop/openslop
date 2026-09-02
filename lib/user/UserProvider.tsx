@@ -23,6 +23,7 @@ export function UserProvider({
 		<UserContext value={user}>
 			<AccountStoreProvider
 				models={accountModelsSchema.parse(user.user_metadata?.connectorModels)}
+				hosted={Boolean(user.app_metadata?.api_access)}
 			>
 				{children}
 			</AccountStoreProvider>

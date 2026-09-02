@@ -16,11 +16,12 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { listModels, sameModel } from "@/lib/connectors/models";
-import {
-	providerMeta,
-	type BYOKProvider,
-} from "@/lib/connectors/providerCatalog";
-import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
+import { providerMeta } from "@/lib/connectors/providerCatalog";
+import type {
+	ConnectorType,
+	ModelRef,
+	ProviderKey,
+} from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./ModelChips";
@@ -121,7 +122,7 @@ export function ModelSelect({
 }
 
 /** Looks like the buttons it stands in for, without nesting one inside a menu row. */
-function ConnectHint({ provider }: { provider: BYOKProvider }) {
+function ConnectHint({ provider }: { provider: ProviderKey }) {
 	const { name } = providerMeta(provider);
 	return (
 		<SimpleTooltip
