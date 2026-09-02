@@ -3,32 +3,30 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { forElement } from "@/lib/generation/graph";
+import { forElement, type NodeSpec } from "@/lib/generation/graph";
 import { staleReason } from "@/lib/generation/staleReason";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
-export function useGenerate(element: CanvasContentElement) {
+/** One generation lifecycle for whatever node `spec` names. Memoize the spec. */
+export function useGenerateNode(spec: NodeSpec) {
 	const queue = useGenerationQueue();
 	const buildNode = useNodeBuilder();
-	const snapshot = useQueueSelector((q) => q.getElementSnapshot(element.id));
-	const node = useMemo(
-		() => buildNode(forElement(element)),
-		[buildNode, element],
-	);
+	const node = useMemo(() => buildNode(spec), [buildNode, spec]);
+	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
 	const generate = useCallback(() => {
 		if (!node.inputs.prompt) {
-			queue.setError(element.id, "Enter a prompt first");
+			queue.setError(node.id, "Enter a prompt first");
 			return;
 		}
 		queue.enqueueGraph([node]);
-	}, [queue, element.id, node]);
+	}, [queue, node]);
 
 	const discard = useCallback(() => {
-		queue.discard(element.id);
-	}, [queue, element.id]);
+		queue.discard(node.id);
+	}, [queue, node.id]);
 
 	return {
 		node,
@@ -43,4 +41,9 @@ export function useGenerate(element: CanvasContentElement) {
 		generate,
 		discard,
 	};
+}
+
+export function useGenerate(element: CanvasContentElement) {
+	const spec = useMemo(() => forElement(element), [element]);
+	return useGenerateNode(spec);
 }

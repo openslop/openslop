@@ -1,17 +1,22 @@
 import { Node } from "slate";
+import { z } from "zod";
 import { withoutCaretMarker } from "@/lib/canvas/constants";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 /** What the user authored on the element. Project state arrives via dependencies. */
-export type NodeInputs = {
-	prompt: string;
-	attributes: Record<string, string | number>;
-};
+const NodeInputsSchema = z.object({
+	prompt: z.string(),
+	attributes: z.record(z.string(), z.union([z.string(), z.number()])),
+});
+
+export type NodeInputs = z.infer<typeof NodeInputsSchema>;
 
 /** `NodeInputs` plus the identity each dependency resolved to. */
-export type GenerationInputs = NodeInputs & {
-	dependencies: Record<string, string>;
-};
+export const GenerationInputsSchema = NodeInputsSchema.extend({
+	dependencies: z.record(z.string(), z.string()),
+});
+
+export type GenerationInputs = z.infer<typeof GenerationInputsSchema>;
 
 const sortedEntries = (record: Record<string, string | number>) =>
 	Object.fromEntries(
