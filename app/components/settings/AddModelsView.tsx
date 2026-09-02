@@ -26,7 +26,7 @@ const ALL = "all";
  * serves, so knowing only "Claude Opus 5" is enough to find Anthropic; the
  * capability filters are for browsing when you do not know what to type.
  */
-export function AddConnectorView({
+export function AddModelsView({
 	onPick,
 }: {
 	onPick: (provider: BYOKProvider) => void;

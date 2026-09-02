@@ -19,13 +19,13 @@ import { useAccount } from "@/lib/user/useAccount";
 import { ConnectorCard, HostedConnectorCard } from "./ConnectorCard";
 import { SettingsList, SettingsRow, SettingsSection } from "./SettingsSection";
 
-export function ConnectorsTab({
+export function ModelsTab({
 	selected,
-	onAddConnector,
+	onAddModels,
 }: {
 	/** The connector a link asked to open on, shown even before it has a key. */
 	selected: ProviderKey | null;
-	onAddConnector: () => void;
+	onAddModels: () => void;
 }) {
 	const models = useAccount((state) => state.models);
 	const setModels = useAccount((state) => state.setModels);
@@ -46,7 +46,7 @@ export function ConnectorsTab({
 			<SettingsSection
 				title="Your keys"
 				action={
-					<Button size="sm" variant="generate" onClick={onAddConnector}>
+					<Button size="sm" variant="generate" onClick={onAddModels}>
 						<Plus />
 						Add models
 					</Button>

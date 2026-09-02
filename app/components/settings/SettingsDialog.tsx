@@ -11,8 +11,8 @@ import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
-import { AddConnectorView } from "./AddConnectorView";
-import { ConnectorsTab } from "./ConnectorsTab";
+import { AddModelsView } from "./AddModelsView";
+import { ModelsTab } from "./ModelsTab";
 import { SettingsNav } from "./SettingsNav";
 
 /**
@@ -71,12 +71,12 @@ export function SettingsDialog() {
 										Add models
 									</h3>
 								</div>
-								<AddConnectorView onPick={pick} />
+								<AddModelsView onPick={pick} />
 							</div>
 						) : (
-							<ConnectorsTab
+							<ModelsTab
 								selected={settings.connector}
-								onAddConnector={() => setBrowsing(true)}
+								onAddModels={() => setBrowsing(true)}
 							/>
 						)}
 					</div>

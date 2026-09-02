@@ -14,7 +14,7 @@ import { PanelCard } from "./PanelCard";
  * left alone inherits from the account, so a project only records what it
  * deliberately differs on.
  */
-export function ConnectorsPanel() {
+export function ModelsPanel() {
 	const project = useProject((state) => state.metadata.connectorModels);
 	const updateMetadata = useProject((state) => state.updateMetadata);
 	const account = useAccount((state) => state.models);

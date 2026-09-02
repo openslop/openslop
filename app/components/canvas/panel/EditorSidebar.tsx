@@ -22,7 +22,7 @@ import { SloppyPanel } from "@/app/components/sloppy/SloppyPanel";
 import { useEditorPanel } from "./EditorPanelContext";
 import { PINNED_PANEL_KEYS, RAIL_PANEL_KEYS, type PanelKey } from "./panelKeys";
 import { CanvasHistoryPanel } from "./CanvasHistoryPanel";
-import { ConnectorsPanel } from "./ConnectorsPanel";
+import { ModelsPanel } from "./ModelsPanel";
 import { CaptionsPanel } from "./CaptionsPanel";
 import { LayoutPanel } from "./LayoutPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -58,7 +58,7 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		label: "Models",
 		icon: InsertElement,
 		iconActive: InsertElementFill,
-		Panel: ConnectorsPanel,
+		Panel: ModelsPanel,
 	},
 	history: {
 		label: "History",
