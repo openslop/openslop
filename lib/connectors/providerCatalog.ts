@@ -1,4 +1,4 @@
-import type { ProviderKey } from "./types";
+import type { Provider } from "./types";
 
 /**
  * A brand mark. Marks drawn in one flat color are `masked`, so the icon paints
@@ -55,14 +55,14 @@ export const PROVIDER_CATALOG: Record<typeof MANAGED_PROVIDER, ProviderMeta> &
 
 export const MANAGED_PROVIDER = "openslop" as const;
 
-export type BYOKProvider = Exclude<ProviderKey, typeof MANAGED_PROVIDER>;
+export type BYOKProvider = Exclude<Provider, typeof MANAGED_PROVIDER>;
 
-export const ALL_PROVIDERS = Object.keys(PROVIDER_CATALOG) as ProviderKey[];
+export const ALL_PROVIDERS = Object.keys(PROVIDER_CATALOG) as Provider[];
 
 export const BYOK_PROVIDERS = ALL_PROVIDERS.filter(
 	(key): key is BYOKProvider => key !== MANAGED_PROVIDER,
 );
 
-export const providerMeta = <P extends ProviderKey>(
+export const providerMeta = <P extends Provider>(
 	provider: P,
 ): (typeof PROVIDER_CATALOG)[P] => PROVIDER_CATALOG[provider];

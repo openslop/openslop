@@ -12,7 +12,7 @@ import {
 	type ModelPick,
 	type ModelRef,
 	type ModelsByProvider,
-	type ProviderKey,
+	type Provider,
 } from "./types";
 import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
 
@@ -74,14 +74,14 @@ export const resolveModel = (
 export function listModels(type: ConnectorType): (ModelRef & ModelEntry)[] {
 	return Object.entries(MODELS[type]).flatMap(([provider, table]) =>
 		Object.entries(table).map(([model, entry]) => ({
-			provider: provider as ProviderKey,
+			provider: provider as Provider,
 			model,
 			...entry,
 		})),
 	);
 }
 
-export function modalitiesFor(provider: ProviderKey): ConnectorType[] {
+export function modalitiesFor(provider: Provider): ConnectorType[] {
 	return CONNECTOR_TYPES.filter((type) => MODELS[type][provider] !== undefined);
 }
 

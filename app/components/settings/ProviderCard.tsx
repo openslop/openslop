@@ -14,7 +14,7 @@ import {
 	providerMeta,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/toastError";
@@ -25,7 +25,7 @@ function ProviderHeading({
 	provider,
 	children,
 }: {
-	provider: ProviderKey;
+	provider: Provider;
 	children: ReactNode;
 }) {
 	return (

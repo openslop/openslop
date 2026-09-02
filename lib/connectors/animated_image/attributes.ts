@@ -9,7 +9,7 @@ export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
 	...modelDefs("animated_image", { label: "Video model" }),
 	...modelDefs("image", {
 		key: "stillModel",
-		providerKey: "stillProvider",
+		providerAttr: "stillProvider",
 		label: "Image model",
 		icon: Image,
 	}),

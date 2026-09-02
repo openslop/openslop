@@ -81,8 +81,8 @@ export function AttributeBadge({
 			<ModelAttribute
 				element={element}
 				attrKey={attrKey}
-				providerKey={spec.edit.providerKey}
-				pick={{ provider: attrs[spec.edit.providerKey], model: value }}
+				providerAttr={spec.edit.providerAttr}
+				pick={{ provider: attrs[spec.edit.providerAttr], model: value }}
 				connector={spec.edit.connector}
 				label={spec.label}
 				className={className}

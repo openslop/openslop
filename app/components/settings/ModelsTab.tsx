@@ -12,7 +12,7 @@ import {
 	modelEntry,
 } from "@/lib/connectors/models";
 import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toastError";
 import { useSettings } from "@/lib/settings/useSettings";
 import { useAccount } from "@/lib/user/useAccount";
@@ -24,7 +24,7 @@ export function ModelsTab({
 	onAddProviders,
 }: {
 	/** The provider a link asked to open on, shown even before it has a key. */
-	selected: ProviderKey | null;
+	selected: Provider | null;
 	onAddProviders: () => void;
 }) {
 	const models = useAccount((state) => state.models);

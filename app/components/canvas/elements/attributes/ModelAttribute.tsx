@@ -15,7 +15,7 @@ import type { ConnectorType } from "@/lib/connectors/types";
 export function ModelAttribute({
 	element,
 	attrKey,
-	providerKey,
+	providerAttr,
 	pick,
 	connector,
 	label,
@@ -23,7 +23,7 @@ export function ModelAttribute({
 }: {
 	element: CanvasContentElement;
 	attrKey: string;
-	providerKey: string;
+	providerAttr: string;
 	/** The stored pair, resolved here so a pick the tables dropped shows the fallback. */
 	pick: { provider?: string; model?: string };
 	connector: ConnectorType;
@@ -42,7 +42,7 @@ export function ModelAttribute({
 			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(connector, value, chain)]}`}
 			onChange={(next) =>
 				updateElementAttrs(editor, element, {
-					[providerKey]: next.provider,
+					[providerAttr]: next.provider,
 					[attrKey]: next.model,
 				})
 			}

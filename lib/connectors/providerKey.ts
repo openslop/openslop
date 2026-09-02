@@ -1,4 +1,4 @@
-import type { ProviderKey } from "./types";
+import type { Provider } from "./types";
 
 /** Whether a stored key has been seen to work since it was last written. */
 export type KeyStatus = "unverified" | "valid" | "invalid";
@@ -9,7 +9,7 @@ export type KeyStatus = "unverified" | "valid" | "invalid";
  * key they stored without it being readable again.
  */
 export type ProviderKeyRecord = {
-	provider: ProviderKey;
+	provider: Provider;
 	last4: string;
 	status: KeyStatus;
 	verifiedAt: string | null;

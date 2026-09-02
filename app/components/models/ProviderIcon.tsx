@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { MaskedIcon } from "@/components/ui/icon";
 import { providerMeta } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 
 export function ProviderIcon({
@@ -9,7 +9,7 @@ export function ProviderIcon({
 	size = 16,
 	className,
 }: {
-	provider: ProviderKey;
+	provider: Provider;
 	size?: number;
 	className?: string;
 }) {

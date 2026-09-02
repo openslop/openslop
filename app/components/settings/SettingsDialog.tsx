@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
 import { AddProvidersView } from "./AddProvidersView";
 import { ModelsTab } from "./ModelsTab";
@@ -29,7 +29,7 @@ export function SettingsDialog() {
 		settings.close();
 	};
 
-	const pick = (provider: ProviderKey) => {
+	const pick = (provider: Provider) => {
 		setBrowsing(false);
 		settings.open("models", provider);
 	};

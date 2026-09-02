@@ -1,10 +1,10 @@
 import { MODELS, modalitiesFor } from "./models";
 import { ALL_PROVIDERS, providerMeta } from "./providerCatalog";
-import type { ConnectorType, ProviderKey } from "./types";
+import type { ConnectorType, Provider } from "./types";
 
-export type ProviderMatch = { provider: ProviderKey; models: string[] };
+export type ProviderMatch = { provider: Provider; models: string[] };
 
-const modelNamesFor = (provider: ProviderKey): string[] => [
+const modelNamesFor = (provider: Provider): string[] => [
 	...new Set(
 		modalitiesFor(provider).flatMap((type) =>
 			Object.keys(MODELS[type][provider] ?? {}),

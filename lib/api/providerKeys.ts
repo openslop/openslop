@@ -7,7 +7,7 @@ import {
 	providerMeta,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -17,7 +17,7 @@ import { createServiceClient } from "@/lib/supabase/service";
  * it answers the same way: the uniform error envelope maps it to a 400.
  */
 export class MissingProviderKeyError extends Error {
-	constructor(readonly provider: ProviderKey) {
+	constructor(readonly provider: Provider) {
 		super(`Connect ${providerMeta(provider).name} to use this model.`);
 		this.name = "MissingProviderKeyError";
 	}
@@ -92,7 +92,7 @@ export async function saveProviderKey(
 /** The plaintext key, for the one request that is about to use it. */
 export async function readProviderKey(
 	userId: string,
-	provider: ProviderKey,
+	provider: Provider,
 ): Promise<string | null> {
 	return (
 		(await providerKeyRpc<string | null>(

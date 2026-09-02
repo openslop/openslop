@@ -7,12 +7,12 @@ export const modelDefs = (
 	type: ConnectorType,
 	{
 		key = "model",
-		providerKey = "provider",
+		providerAttr = "provider",
 		...spec
-	}: Partial<AttributeDef> & { providerKey?: string } = {},
+	}: Partial<AttributeDef> & { providerAttr?: string } = {},
 ): AttributeDef[] => [
 	{
-		key: providerKey,
+		key: providerAttr,
 		label: "Provider",
 		hidden: true,
 		default: DEFAULT_MODELS[type].provider,
@@ -21,7 +21,7 @@ export const modelDefs = (
 		key,
 		label: "Model",
 		badge: true,
-		edit: { kind: "model", connector: type, providerKey },
+		edit: { kind: "model", connector: type, providerAttr },
 		default: DEFAULT_MODELS[type].model,
 		...spec,
 	},

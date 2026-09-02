@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
 import { ALL_PROVIDERS } from "@/lib/connectors/providerCatalog";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 
 const tabSchema = z.enum(["models"]);
 
@@ -18,8 +18,8 @@ const PROVIDER_PARAM = "provider";
 
 export type SettingsRoute = {
 	tab: SettingsTab | null;
-	provider: ProviderKey | null;
-	open: (tab: SettingsTab, provider?: ProviderKey) => void;
+	provider: Provider | null;
+	open: (tab: SettingsTab, provider?: Provider) => void;
 	close: () => void;
 };
 

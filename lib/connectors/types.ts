@@ -22,7 +22,7 @@ export const CONNECTOR_TYPES = [...ASSET_CONNECTOR_TYPES, "llm"] as const;
 
 export type ConnectorType = AssetConnectorType | "llm";
 
-export type ProviderKey =
+export type Provider =
 	| "openslop"
 	| "anthropic"
 	| "runware"
@@ -46,10 +46,10 @@ export type ModelEntry = ModelMeta & {
 
 export type ModelTable = Record<string, ModelEntry>;
 
-export type ModelsByProvider = Partial<Record<ProviderKey, ModelTable>>;
+export type ModelsByProvider = Partial<Record<Provider, ModelTable>>;
 
 /** Names are only unique within a provider, so the pair is the identity everywhere. */
-export type ModelRef = { provider: ProviderKey; model: string };
+export type ModelRef = { provider: Provider; model: string };
 
 export type ModelPick = { provider?: string; model?: string };
 
