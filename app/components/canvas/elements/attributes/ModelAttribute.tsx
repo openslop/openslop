@@ -39,6 +39,7 @@ export function ModelAttribute({
 		<ModelSelect
 			type={connector}
 			value={value}
+			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(connector, value, chain)]}`}
 			onChange={(next) =>
 				updateElementAttrs(editor, element, {
 					[providerKey]: next.provider,
@@ -46,12 +47,7 @@ export function ModelAttribute({
 				})
 			}
 		>
-			<ModelSelectTrigger
-				model={value}
-				label={label}
-				title={`${label} · ${MODEL_PROVENANCE[modelSourceFor(connector, value, chain)]}`}
-				className={className}
-			/>
+			<ModelSelectTrigger model={value} label={label} className={className} />
 		</ModelSelect>
 	);
 }

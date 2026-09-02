@@ -46,17 +46,17 @@ export function ModelDefaultControl({
 		<ModelSelect
 			type={type}
 			value={model}
+			tooltip={
+				pinnedHere
+					? undefined
+					: MODEL_PROVENANCE[modelSourceFor(type, model, chain)]
+			}
 			onChange={(picked) =>
 				onChange(Object.fromEntries(types.map((each) => [each, picked])))
 			}
 		>
 			<SelectMenuTrigger
 				aria-label={`${label} model`}
-				title={
-					pinnedHere
-						? undefined
-						: MODEL_PROVENANCE[modelSourceFor(type, model, chain)]
-				}
 				className={cn("min-w-0", className)}
 			>
 				<ProviderIcon

@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@/components/ui/icon";
 import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { listModels, sameModel } from "@/lib/connectors/models";
 import {
 	providerMeta,
@@ -36,6 +41,7 @@ export function ModelSelect({
 	onChange,
 	side = "bottom",
 	align = "start",
+	tooltip,
 	children,
 }: {
 	type: ConnectorType;
@@ -43,58 +49,69 @@ export function ModelSelect({
 	onChange: (model: ModelRef) => void;
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
+	/** Shown over the trigger, typically where the current pick came from. */
+	tooltip?: ReactNode;
 	children: ReactNode;
 }) {
 	const missingKey = useMissingKey();
 	const settings = useSettings();
 
 	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side={side}
-				align={align}
-				// The raised popover surface, so a model picker reads the same as the
-				// settings and history popovers it sits beside.
-				className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
-			>
-				{listModels(type).map(({ provider, model, cost, speed }) => {
-					const missing = missingKey(provider);
-					return (
-						<SelectMenuItem
-							key={`${provider}/${model}`}
-							aria-label={modelLabel({ provider, model })}
-							selected={sameModel({ provider, model }, value)}
-							onSelect={() =>
-								missing
-									? settings.open("connectors", missing)
-									: onChange({ provider, model })
-							}
-							className="gap-2"
-						>
-							<ProviderIcon
-								provider={provider}
-								size={14}
-								className={cn(missing && "opacity-40")}
-							/>
-							<span
-								className={cn(
-									"min-w-0 truncate",
-									missing && "text-muted-foreground",
-								)}
+		<Tooltip>
+			<DropdownMenu modal={false}>
+				<DropdownMenuTrigger asChild>
+					{tooltip ? (
+						<TooltipTrigger asChild>{children}</TooltipTrigger>
+					) : (
+						children
+					)}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent
+					side={side}
+					align={align}
+					// The raised popover surface, so a model picker reads the same as the
+					// settings and history popovers it sits beside.
+					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
+				>
+					{listModels(type).map(({ provider, model, cost, speed }) => {
+						const missing = missingKey(provider);
+						return (
+							<SelectMenuItem
+								key={`${provider}/${model}`}
+								aria-label={modelLabel({ provider, model })}
+								selected={sameModel({ provider, model }, value)}
+								onSelect={() =>
+									missing
+										? settings.open("connectors", missing)
+										: onChange({ provider, model })
+								}
+								className="gap-2"
 							>
-								{model}
-							</span>
-							{missing ? (
-								<ConnectHint provider={missing} />
-							) : (
-								<ModelChips meta={{ cost, speed }} className="ml-auto" />
-							)}
-						</SelectMenuItem>
-					);
-				})}
-			</DropdownMenuContent>
-		</DropdownMenu>
+								<ProviderIcon
+									provider={provider}
+									size={14}
+									className={cn(missing && "opacity-40")}
+								/>
+								<span
+									className={cn(
+										"min-w-0 truncate",
+										missing && "text-muted-foreground",
+									)}
+								>
+									{model}
+								</span>
+								{missing ? (
+									<ConnectHint provider={missing} />
+								) : (
+									<ModelChips meta={{ cost, speed }} className="ml-auto" />
+								)}
+							</SelectMenuItem>
+						);
+					})}
+				</DropdownMenuContent>
+			</DropdownMenu>
+			{tooltip && <TooltipContent side={side}>{tooltip}</TooltipContent>}
+		</Tooltip>
 	);
 }
 
