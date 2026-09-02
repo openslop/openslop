@@ -39,14 +39,17 @@ function ConnectorHeading({
 	);
 }
 
-/** The hosted provider: it comes with the account, so there is nothing to manage. */
+/** The hosted provider: there is nothing to manage on it yet, only its standing to read. */
 export function HostedConnectorCard() {
+	const status = useConnector(MANAGED_PROVIDER)?.status ?? "invalid";
 	return (
 		<Tile>
 			<ConnectorHeading provider={MANAGED_PROVIDER}>
-				<ConnectorStatusBadge status="valid" />
+				<ConnectorStatusBadge status={status} />
 				<p className="ml-auto text-label-xs text-muted-foreground">
-					Included with your account
+					{status === "valid"
+						? "Included with your account"
+						: "Not included with your account"}
 				</p>
 			</ConnectorHeading>
 		</Tile>

@@ -42,16 +42,17 @@ type ConnectorsResponse = {
 
 /**
  * The hosted provider as a connector like any other, so nothing downstream asks
- * which provider needs a key. It comes with API access today; when it takes a
- * key of its own, it will come from the server like the rest.
+ * which provider needs a key. Every account has it; API access is what makes
+ * it valid today, and when it takes a key of its own it will come from the
+ * server like the rest.
  */
-const MANAGED_CONNECTOR: ConnectorRecord = {
+const managedConnector = (hosted: boolean): ConnectorRecord => ({
 	provider: MANAGED_PROVIDER,
 	last4: "",
-	status: "valid",
+	status: hosted ? "valid" : "invalid",
 	verifiedAt: null,
 	createdAt: "",
-};
+});
 
 /** The account's defaults live on the user record, so they follow the login. */
 async function persistModels(models: ConnectorModels): Promise<void> {
@@ -65,7 +66,7 @@ export function createAccountStore(
 	models: ConnectorModels,
 	hosted: boolean,
 ): AccountStore {
-	const included = hosted ? [MANAGED_CONNECTOR] : [];
+	const included = [managedConnector(hosted)];
 	return createStore<AccountContext>()((set, get) => {
 		const applyModels = async (next: ConnectorModels) => {
 			await persistModels(next);

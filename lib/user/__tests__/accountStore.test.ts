@@ -20,7 +20,7 @@ const providers = (store: ReturnType<typeof createAccountStore>) =>
 	store.getState().connectors.map((row) => row.provider);
 
 describe("createAccountStore", () => {
-	it("counts the hosted provider as connected for an account with API access", async () => {
+	it("lists the hosted provider ahead of the stored keys", async () => {
 		const store = createAccountStore({}, true);
 		expect(providers(store)).toEqual(["openslop"]);
 
@@ -28,9 +28,10 @@ describe("createAccountStore", () => {
 		expect(providers(store)).toEqual(["openslop", "anthropic"]);
 	});
 
-	it("leaves the hosted provider out for an account without API access", async () => {
-		const store = createAccountStore({}, false);
-		await store.getState().loadConnectors();
-		expect(providers(store)).toEqual(["anthropic"]);
+	it("marks the hosted provider by whether the account has API access", () => {
+		const status = (hosted: boolean) =>
+			createAccountStore({}, hosted).getState().connectors[0]?.status;
+		expect(status(true)).toBe("valid");
+		expect(status(false)).toBe("invalid");
 	});
 });
