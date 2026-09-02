@@ -110,7 +110,11 @@ export function ModelSelect({
 					})}
 				</DropdownMenuContent>
 			</DropdownMenu>
-			{tooltip && <TooltipContent side={side}>{tooltip}</TooltipContent>}
+			{tooltip && (
+				<TooltipContent side={side === "bottom" ? "top" : "bottom"}>
+					{tooltip}
+				</TooltipContent>
+			)}
 		</Tooltip>
 	);
 }
