@@ -41,7 +41,7 @@ export function ConnectorsPanel() {
 				onClick={() => settings.open("connectors")}
 			>
 				<Settings />
-				Manage connectors
+				Manage models
 			</Button>
 		</>
 	);

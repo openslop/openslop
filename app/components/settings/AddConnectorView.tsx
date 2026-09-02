@@ -48,12 +48,12 @@ export function AddConnectorView({
 				autoFocus
 				value={query}
 				onChange={(event) => setQuery(event.target.value)}
-				placeholder="Search connectors and models"
-				aria-label="Search connectors and models"
+				placeholder="Search models and providers"
+				aria-label="Search models and providers"
 			/>
 
 			<SegmentedControl
-				ariaLabel="Filter connectors by capability"
+				ariaLabel="Filter models by capability"
 				value={groupKey}
 				onChange={setGroupKey}
 				options={[
@@ -67,7 +67,7 @@ export function AddConnectorView({
 				<p className="py-8 text-center text-label text-muted-foreground">
 					{query.trim()
 						? `Nothing matches "${query.trim()}".`
-						: "No connectors for that yet."}
+						: "No models for that yet."}
 				</p>
 			) : (
 				<ul className="flex flex-col gap-2">

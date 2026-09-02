@@ -55,7 +55,7 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		Panel: PropertiesPanel,
 	},
 	connectors: {
-		label: "Connectors",
+		label: "Models",
 		icon: InsertElement,
 		iconActive: InsertElementFill,
 		Panel: ConnectorsPanel,

@@ -41,20 +41,20 @@ export function ConnectorsTab({
 
 	return (
 		<div className="flex flex-col gap-6">
-			<h3 className="text-label font-semibold text-foreground">Connectors</h3>
+			<h3 className="text-label font-semibold text-foreground">Models</h3>
 
 			<SettingsSection
 				title="Your keys"
 				action={
 					<Button size="sm" variant="generate" onClick={onAddConnector}>
 						<Plus />
-						Add connector
+						Add models
 					</Button>
 				}
 			>
 				{shown.length === 0 ? (
 					<p className="rounded-xl border border-dashed border-border p-6 text-center text-label text-muted-foreground">
-						No connectors yet. Add one to generate on your own key.
+						No keys yet. Add one to generate with more models.
 					</p>
 				) : (
 					<div className="flex flex-col gap-2">

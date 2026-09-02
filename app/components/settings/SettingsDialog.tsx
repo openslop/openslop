@@ -68,7 +68,7 @@ export function SettingsDialog() {
 										<ArrowLeft />
 									</IconButton>
 									<h3 className="text-label font-semibold text-foreground">
-										Add connector
+										Add models
 									</h3>
 								</div>
 								<AddConnectorView onPick={pick} />
