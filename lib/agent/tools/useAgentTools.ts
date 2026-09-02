@@ -12,7 +12,7 @@ import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { createModelConnector } from "@/lib/connectors/registry";
+import { createConnector } from "@/lib/connectors/factory";
 import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { getPromptText } from "@/lib/generation/inputs";
 import { applyScriptEdit } from "@/lib/generation/scriptEdit";
@@ -56,7 +56,7 @@ export function useAgentTools(editor: Editor) {
 				},
 				generateText: async (prompt, options) => {
 					const model = defaultModels().llm;
-					const llm = createModelConnector(connectorConfig, "llm", model);
+					const llm = createConnector("llm", model, connectorConfig.llm);
 					const { text } = await llm.generate({ prompt, ...options });
 					return text;
 				},

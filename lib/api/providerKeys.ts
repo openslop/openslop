@@ -4,7 +4,7 @@ import type {
 	ValidationResult,
 } from "@/lib/connectors/providerKey";
 import {
-	providerMeta,
+	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import type { Provider } from "@/lib/connectors/types";
@@ -18,7 +18,7 @@ import { createServiceClient } from "@/lib/supabase/service";
  */
 export class MissingProviderKeyError extends Error {
 	constructor(readonly provider: Provider) {
-		super(`Connect ${providerMeta(provider).name} to use this model.`);
+		super(`Connect ${PROVIDER_CATALOG[provider].name} to use this model.`);
 		this.name = "MissingProviderKeyError";
 	}
 }

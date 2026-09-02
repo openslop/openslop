@@ -9,7 +9,7 @@ import {
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { createModelConnector } from "@/lib/connectors/registry";
+import { createConnector } from "@/lib/connectors/factory";
 import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
 import type { MetadataVoice } from "@/lib/project/types";
@@ -69,7 +69,7 @@ export function VoicePicker({
 }) {
 	const { connectorConfig } = useConfig();
 	const ttsConnector = useMemo(
-		() => createModelConnector(connectorConfig, "tts", model),
+		() => createConnector("tts", model, connectorConfig.tts),
 		[connectorConfig, model],
 	);
 

@@ -1,5 +1,5 @@
 import { MODELS, modalitiesFor } from "./models";
-import { ALL_PROVIDERS, providerMeta } from "./providerCatalog";
+import { ALL_PROVIDERS, PROVIDER_CATALOG } from "./providerCatalog";
 import type { ConnectorType, Provider } from "./types";
 
 export type ProviderMatch = { provider: Provider; models: string[] };
@@ -32,7 +32,9 @@ export function searchProviders(
 		const models = modelNamesFor(provider).filter((name) =>
 			name.toLowerCase().includes(needle),
 		);
-		const named = providerMeta(provider).name.toLowerCase().includes(needle);
+		const named = PROVIDER_CATALOG[provider].name
+			.toLowerCase()
+			.includes(needle);
 		return named || models.length > 0 ? [{ provider, models }] : [];
 	});
 }

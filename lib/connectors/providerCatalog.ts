@@ -62,7 +62,3 @@ export const ALL_PROVIDERS = Object.keys(PROVIDER_CATALOG) as Provider[];
 export const BYOK_PROVIDERS = ALL_PROVIDERS.filter(
 	(key): key is BYOKProvider => key !== MANAGED_PROVIDER,
 );
-
-export const providerMeta = <P extends Provider>(
-	provider: P,
-): (typeof PROVIDER_CATALOG)[P] => PROVIDER_CATALOG[provider];

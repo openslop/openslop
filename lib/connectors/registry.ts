@@ -1,17 +1,11 @@
 import set from "lodash/fp/set";
-import { createConnector } from "./factory";
 import { buildAnimatedImagePlugins } from "./animated_image/plugins/animated-image-chain";
 import { buildImagePlugins } from "./image/plugins/imageChain";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
 import { createDimensionsPlugin } from "./plugins/dimensions";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
-import type {
-	ConnectorConfig,
-	ConnectorPlugin,
-	ConnectorType,
-	ModelRef,
-} from "./types";
+import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
 
 /**
  * How each connector type is configured. One config per type, not per provider:
@@ -32,14 +26,6 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	sfx: {},
 	music: {},
 };
-
-export function createModelConnector<T extends ConnectorType>(
-	registry: ConnectorRegistry,
-	type: T,
-	model: ModelRef,
-) {
-	return createConnector(type, model, registry[type]);
-}
 
 export function withRegistry(registry: ConnectorRegistry) {
 	const apply = (cfg: ConnectorRegistry) => ({

@@ -16,7 +16,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { listModels, sameModel } from "@/lib/connectors/models";
-import { providerMeta } from "@/lib/connectors/providerCatalog";
+import { PROVIDER_CATALOG } from "@/lib/connectors/providerCatalog";
 import type { ConnectorType, ModelRef, Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ import { useMissingKey } from "./useProviderKeys";
 
 /** Read aloud, the icon says nothing, so the provider is spelled out. */
 export const modelLabel = ({ provider, model }: ModelRef): string =>
-	`${model} (${providerMeta(provider).name})`;
+	`${model} (${PROVIDER_CATALOG[provider].name})`;
 
 /**
  * Every model a connector type offers, whether or not the account can run it.
@@ -119,7 +119,7 @@ export function ModelSelect({
 
 /** Looks like the buttons it stands in for, without nesting one inside a menu row. */
 function ConnectHint({ provider }: { provider: Provider }) {
-	const { name } = providerMeta(provider);
+	const { name } = PROVIDER_CATALOG[provider];
 	return (
 		<SimpleTooltip
 			label={`Add your ${name} API key to generate with this model`}

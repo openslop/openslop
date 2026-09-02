@@ -17,7 +17,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { createModelConnector } from "@/lib/connectors/registry";
+import { createConnector } from "@/lib/connectors/factory";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import {
 	deriveArtStyle,
@@ -66,7 +66,7 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 		setDeriving(true);
 		try {
 			const derived = await deriveArtStyle(
-				createModelConnector(connectorConfig, "llm", model),
+				createConnector("llm", model, connectorConfig.llm),
 				store.getState(),
 				queue,
 			);

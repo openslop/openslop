@@ -6,7 +6,7 @@ import { ExternalLink, Key } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-	providerMeta,
+	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import { toastError } from "@/lib/toastError";
@@ -29,7 +29,7 @@ export function ProviderKeyForm({
 	onSaved: () => void;
 	onCancel: () => void;
 }) {
-	const meta = providerMeta(provider);
+	const meta = PROVIDER_CATALOG[provider];
 	const saveKey = useAccount((state) => state.saveKey);
 	const fieldId = useId();
 	const [apiKey, setApiKey] = useState("");

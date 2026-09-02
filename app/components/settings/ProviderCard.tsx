@@ -11,7 +11,7 @@ import { ProviderIcon } from "@/app/components/models/ProviderIcon";
 import { useProviderKey } from "@/app/components/models/useProviderKeys";
 import {
 	MANAGED_PROVIDER,
-	providerMeta,
+	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import type { Provider } from "@/lib/connectors/types";
@@ -32,7 +32,7 @@ function ProviderHeading({
 		<div className="flex items-center gap-2.5">
 			<ProviderIcon provider={provider} size={20} />
 			<p className="truncate text-label font-medium text-foreground">
-				{providerMeta(provider).name}
+				{PROVIDER_CATALOG[provider].name}
 			</p>
 			{children}
 		</div>
@@ -67,7 +67,7 @@ export function ProviderCard({
 	/** The row is gone: removed, or backed out of before a key was ever stored. */
 	onDismissed: () => void;
 }) {
-	const meta = providerMeta(provider);
+	const meta = PROVIDER_CATALOG[provider];
 	const key = useProviderKey(provider);
 	const testKey = useAccount((state) => state.testKey);
 	const removeKey = useAccount((state) => state.removeKey);

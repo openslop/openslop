@@ -12,7 +12,7 @@ import { useMissingKey } from "@/app/components/models/useProviderKeys";
 import { MODEL_GROUPS } from "@/lib/connectors/modelGroups";
 import {
 	MANAGED_PROVIDER,
-	providerMeta,
+	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import { modalitiesFor } from "@/lib/connectors/models";
@@ -72,7 +72,7 @@ export function AddProvidersView({
 			) : (
 				<ul className="flex flex-col gap-2">
 					{matches.map(({ provider, models }) => {
-						const meta = providerMeta(provider);
+						const meta = PROVIDER_CATALOG[provider];
 						const connected = !missingKey(provider);
 						return (
 							<Tile key={provider} asChild className="flex-row items-center">

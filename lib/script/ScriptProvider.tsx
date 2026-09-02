@@ -11,7 +11,7 @@ import {
 import type { ParsedElement } from "@/lib/canvas/types";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { createModelConnector } from "@/lib/connectors/registry";
+import { createConnector } from "@/lib/connectors/factory";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useProject } from "@/lib/project/useProject";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
@@ -64,7 +64,7 @@ export function ScriptProvider({
 	const runScript = useCallback(
 		async (source: ScriptSource, signal?: AbortSignal) => {
 			reset();
-			const connector = createModelConnector(connectorConfig, "llm", model);
+			const connector = createConnector("llm", model, connectorConfig.llm);
 			const { system, prompt } = buildScriptPrompt(
 				store.getState().metadata,
 				source,

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { MaskedIcon } from "@/components/ui/icon";
-import { providerMeta } from "@/lib/connectors/providerCatalog";
+import { PROVIDER_CATALOG } from "@/lib/connectors/providerCatalog";
 import type { Provider } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ export function ProviderIcon({
 	size?: number;
 	className?: string;
 }) {
-	const { name, mark } = providerMeta(provider);
+	const { name, mark } = PROVIDER_CATALOG[provider];
 
 	if (mark.masked) {
 		return (
