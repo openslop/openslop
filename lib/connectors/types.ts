@@ -254,5 +254,5 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 
 export interface ProviderConstructor<T extends Connector = Connector> {
 	new (config: ResolvedConnectorConfig): T;
-	attributesFor(model?: string): AttributeSchema;
+	attributesFor(model: ModelRef): AttributeSchema;
 }

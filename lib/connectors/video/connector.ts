@@ -6,6 +6,7 @@ import type {
 	AssetResult,
 	ResolvedConnectorConfig,
 	VideoGenerateParams,
+	ModelRef,
 } from "../types";
 
 export class HttpVideoConnector extends BaseAssetConnector<
@@ -19,7 +20,7 @@ export class HttpVideoConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "video", config.baseUrl), config);
 	}
 
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return VIDEO_ATTRIBUTES;
 	}
 }

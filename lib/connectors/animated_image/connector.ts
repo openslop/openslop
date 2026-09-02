@@ -6,6 +6,7 @@ import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
 	ResolvedConnectorConfig,
+	ModelRef,
 } from "../types";
 
 /**
@@ -24,7 +25,7 @@ export class HttpAnimatedImageConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "video", config.baseUrl), config);
 	}
 
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return ANIMATED_IMAGE_ATTRIBUTES;
 	}
 }

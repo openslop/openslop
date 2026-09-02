@@ -6,6 +6,7 @@ import type {
 	AssetResult,
 	ResolvedConnectorConfig,
 	SFXGenerateParams,
+	ModelRef,
 } from "../types";
 
 export class HttpSFXConnector extends BaseAssetConnector<
@@ -19,7 +20,7 @@ export class HttpSFXConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "sfx", config.baseUrl), config);
 	}
 
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return SFX_ATTRIBUTES;
 	}
 }

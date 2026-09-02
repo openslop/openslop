@@ -25,11 +25,11 @@ export abstract class BaseConnector<
 	protected readonly model: ModelRef;
 
 	/**
-	 * Attribute schema for this connector type/model. Types with no element-settings
-	 * UI (e.g. llm) inherit this empty default. For per-model sets, override on the
-	 * provider subclass and branch on `model`.
+	 * Attribute schema for this connector type and model. Types with no
+	 * element-settings UI (e.g. llm) inherit this empty default. For per-model
+	 * sets, override and branch on the provider and model.
 	 */
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return AttributeSchema.from([]);
 	}
 

@@ -6,6 +6,7 @@ import type {
 	AssetResult,
 	ImageGenerateParams,
 	ResolvedConnectorConfig,
+	ModelRef,
 } from "../types";
 
 export class HttpImageConnector extends BaseAssetConnector<
@@ -19,7 +20,7 @@ export class HttpImageConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "image", config.baseUrl), config);
 	}
 
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return IMAGE_ATTRIBUTES;
 	}
 }

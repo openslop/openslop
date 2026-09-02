@@ -12,6 +12,7 @@ import type {
 	TTSResult,
 	VoiceInfo,
 	VoiceSearchParams,
+	ModelRef,
 } from "../types";
 
 export class HttpTTSConnector
@@ -25,7 +26,7 @@ export class HttpTTSConnector
 		super(new HttpTTSGateway(config.model, config.baseUrl), config);
 	}
 
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return TTS_ATTRIBUTES;
 	}
 

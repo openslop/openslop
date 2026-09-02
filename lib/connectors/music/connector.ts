@@ -6,6 +6,7 @@ import type {
 	AssetResult,
 	MusicGenerateParams,
 	ResolvedConnectorConfig,
+	ModelRef,
 } from "../types";
 
 export class HttpMusicConnector extends BaseAssetConnector<
@@ -19,7 +20,7 @@ export class HttpMusicConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "music", config.baseUrl), config);
 	}
 
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return MUSIC_ATTRIBUTES;
 	}
 }

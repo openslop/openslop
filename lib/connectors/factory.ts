@@ -55,5 +55,5 @@ export function resolveAttributeSchema(
 	type: ConnectorType,
 	model: ModelRef,
 ): AttributeSchema {
-	return CONNECTORS[type].attributesFor(model.model);
+	return CONNECTORS[type].attributesFor(model);
 }
