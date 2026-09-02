@@ -11,7 +11,7 @@ type NavItem = { tab: SettingsTab; label: string; icon: IconComponent };
 const GROUPS: { heading: string; items: NavItem[] }[] = [
 	{
 		heading: "Account",
-		items: [{ tab: "connectors", label: "Models", icon: Link }],
+		items: [{ tab: "models", label: "Models", icon: Link }],
 	},
 ];
 

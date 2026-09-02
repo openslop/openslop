@@ -54,7 +54,7 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		iconActive: SlidersAltFill,
 		Panel: PropertiesPanel,
 	},
-	connectors: {
+	models: {
 		label: "Models",
 		icon: InsertElement,
 		iconActive: InsertElementFill,

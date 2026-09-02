@@ -6,20 +6,20 @@ import { z } from "zod";
 import { ALL_PROVIDERS } from "@/lib/connectors/providerCatalog";
 import type { ProviderKey } from "@/lib/connectors/types";
 
-const tabSchema = z.enum(["connectors"]);
+const tabSchema = z.enum(["models"]);
 
 export type SettingsTab = z.infer<typeof tabSchema>;
 
-/** Which connector the tab should open on, so a "connect" link lands on it. */
-const connectorSchema = z.enum(ALL_PROVIDERS);
+/** Which provider the tab should open on, so a "connect" link lands on it. */
+const providerSchema = z.enum(ALL_PROVIDERS);
 
 const TAB_PARAM = "settings";
-const CONNECTOR_PARAM = "connector";
+const PROVIDER_PARAM = "provider";
 
 export type SettingsRoute = {
 	tab: SettingsTab | null;
-	connector: ProviderKey | null;
-	open: (tab: SettingsTab, connector?: ProviderKey) => void;
+	provider: ProviderKey | null;
+	open: (tab: SettingsTab, provider?: ProviderKey) => void;
 	close: () => void;
 };
 
@@ -50,18 +50,18 @@ export function useSettings(): SettingsRoute {
 	return useMemo(
 		() => ({
 			tab: parse(tabSchema, params.get(TAB_PARAM)),
-			connector: parse(connectorSchema, params.get(CONNECTOR_PARAM)),
-			open: (tab, connector) => {
+			provider: parse(providerSchema, params.get(PROVIDER_PARAM)),
+			open: (tab, provider) => {
 				const next = new URLSearchParams(params);
 				next.set(TAB_PARAM, tab);
-				if (connector) next.set(CONNECTOR_PARAM, connector);
-				else next.delete(CONNECTOR_PARAM);
+				if (provider) next.set(PROVIDER_PARAM, provider);
+				else next.delete(PROVIDER_PARAM);
 				navigate(next);
 			},
 			close: () => {
 				const next = new URLSearchParams(params);
 				next.delete(TAB_PARAM);
-				next.delete(CONNECTOR_PARAM);
+				next.delete(PROVIDER_PARAM);
 				navigate(next);
 			},
 		}),

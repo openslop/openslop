@@ -26,7 +26,7 @@ import { useSettings } from "@/lib/settings/useSettings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./ModelChips";
 import { ProviderIcon } from "./ProviderIcon";
-import { useMissingKey } from "./useConnectors";
+import { useMissingKey } from "./useProviderKeys";
 
 /** Read aloud, the icon says nothing, so the provider is spelled out. */
 export const modelLabel = ({ provider, model }: ModelRef): string =>
@@ -84,7 +84,7 @@ export function ModelSelect({
 								selected={sameModel({ provider, model }, value)}
 								onSelect={() =>
 									missing
-										? settings.open("connectors", missing)
+										? settings.open("models", missing)
 										: onChange({ provider, model })
 								}
 								className="gap-2"

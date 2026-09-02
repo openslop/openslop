@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
-import { MissingConnectorKeyError } from "./connectorKeys";
+import { MissingProviderKeyError } from "./providerKeys";
 import { logger } from "./logger";
 import { badRequest, forbidden, serverError, unauthorized } from "./response";
 
@@ -16,7 +16,7 @@ async function runGuarded(
 	try {
 		return await run();
 	} catch (error) {
-		if (error instanceof MissingConnectorKeyError)
+		if (error instanceof MissingProviderKeyError)
 			return badRequest(error.message);
 		logger.error(error, `${label} failed`);
 		return serverError(`${label} failed: ${stringifyError(error)}`);

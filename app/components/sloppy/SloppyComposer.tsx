@@ -5,7 +5,7 @@ import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
 import {
 	ModelSelect,
 	ModelSelectTrigger,
-} from "@/app/components/connectors/ModelSelect";
+} from "@/app/components/models/ModelSelect";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useProject } from "@/lib/project/useProject";
 import { PanelCard } from "../canvas/panel/PanelCard";
@@ -23,7 +23,7 @@ function ModelPicker() {
 		<ModelSelect
 			type="llm"
 			value={model}
-			onChange={(llm) => updateMetadata({ connectorModels: { llm } })}
+			onChange={(llm) => updateMetadata({ models: { llm } })}
 			side="top"
 		>
 			<ModelSelectTrigger model={model} label="Model" />

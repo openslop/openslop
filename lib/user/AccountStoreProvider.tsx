@@ -25,7 +25,7 @@ export function AccountStoreProvider({
 	// Stored keys decide what the model pickers offer, so they are read once for
 	// the session rather than on opening the settings that manage them.
 	useEffect(() => {
-		store.getState().loadConnectors().catch(toastError);
+		store.getState().loadProviderKeys().catch(toastError);
 	}, [store]);
 
 	return <AccountStoreContext value={store}>{children}</AccountStoreContext>;

@@ -1,4 +1,4 @@
-import { groupFor } from "@/lib/connectors/connectorConfigs";
+import { groupFor } from "@/lib/connectors/modelGroups";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 import { IconChip } from "./IconChip";

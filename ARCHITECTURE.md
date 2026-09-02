@@ -17,13 +17,22 @@ A 10k-foot view of how OpenSlop fits together.
 
 The conversational agent in the editor's left panel. A turn is a ReAct loop over the agent route: the server streams text and tool calls, the client runs each tool against the Slate editor and posts the result back, until the model answers in text. The agent never writes the project itself, so the client stays the single writer. `lib/agent/` is the domain, `lib/api/agentTurn.ts` runs a turn, `app/components/sloppy/` is the panel.
 
+## Vocabulary
+
+Users see models and providers; developers also see connectors. Each word means one thing everywhere.
+
+- **Model**: what an element generates with, a `{ provider, model }` pair such as Claude Opus 5 on Anthropic.
+- **Provider**: the vendor serving a model (Anthropic, Runware, ElevenLabs, Cartesia, or OpenSlop's hosted gateway). A user connects one by storing a key.
+- **Provider key**: the stored credential, one row per user and provider in `provider_keys`, held in Vault.
+- **Connector** (internal only): the seam between a canvas element and its model. It owns which attributes an element exposes for a given model and relays them through a gateway as a generation request.
+
 ## Three layers
 
 - **Connectors** (`lib/connectors/`): what the editor calls. One class per media type, plugin-pipelined, serving every provider of that type.
 - **Gateways** (`lib/gateway/`): thin HTTP clients from connectors to our own routes. The provider a model names picks the route family: `/api/v1` for models OpenSlop hosts, `/api/third-party` for models a user brings a key for.
 - **Providers** (`lib/providers/`): server-side vendor adapters (Runware, ElevenLabs, Cartesia, Anthropic). The same classes serve both families; only where the key comes from differs.
 
-## Models and keys
+## Models and provider keys
 
 A model is a `{ provider, model }` pair, never a bare name. `MODELS[type][provider][name]` in `lib/connectors/models.ts` is the whole table, and nothing anywhere derives a provider from a name. Elements store the pair as attributes; a voice stores its pair in project metadata and its narration and character elements inherit it. Defaults resolve element, then project, then account, then the recommendation.
 
@@ -50,7 +59,7 @@ Supabase Postgres with row-level security. Queue workers use the service role.
 | `projects`        | Script plus store and generation snapshots                          |
 | `canvas_versions` | Autosaved history of those columns                                  |
 | `jobs`            | Async generation jobs: `pending → processing → completed \| failed` |
-| `connectors`      | One row per user and provider: vault id, last four, status          |
+| `provider_keys`   | One row per user and provider: vault id, last four, status          |
 | `conversations`   | One Sloppy conversation per project                                 |
 | `messages`        | Its turns                                                           |
 

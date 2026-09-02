@@ -90,7 +90,7 @@ export const MetadataSchema = z.object({
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
 	videoSettings: VideoSettingsSchema,
 	/** The model each connector type generates with, when the project pins one. */
-	connectorModels: connectorModelsSchema.default({}),
+	models: connectorModelsSchema.default({}),
 	/** The template the project's scripts are written against, when it has one. */
 	templateId: optionalString,
 });

@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { CONNECTOR_GROUPS, groupFor } from "../connectorConfigs";
+import { MODEL_GROUPS, groupFor } from "../modelGroups";
 import { MODELS } from "../models";
 import { CONNECTOR_TYPES } from "../types";
 
-describe("CONNECTOR_GROUPS", () => {
+describe("MODEL_GROUPS", () => {
 	it("covers every connector type exactly once", () => {
-		const covered = CONNECTOR_GROUPS.flatMap((group) => group.types);
+		const covered = MODEL_GROUPS.flatMap((group) => group.types);
 		expect([...covered].sort()).toEqual([...CONNECTOR_TYPES].sort());
 	});
 
 	// One control sets the whole group, so the types it covers have to offer the
 	// same models — otherwise it would write a model one of them cannot run.
 	it("only groups types that pick from the same catalog", () => {
-		for (const { key, types } of CONNECTOR_GROUPS) {
+		for (const { key, types } of MODEL_GROUPS) {
 			const [first, ...rest] = types;
 			for (const type of rest) {
 				expect({ key, models: MODELS[type] }, `${key} spans catalogs`).toEqual({

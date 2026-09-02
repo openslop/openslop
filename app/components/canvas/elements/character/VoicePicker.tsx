@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
 	ModelSelect,
 	ModelSelectTrigger,
-} from "@/app/components/connectors/ModelSelect";
+} from "@/app/components/models/ModelSelect";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { createModelConnector } from "@/lib/connectors/registry";
 import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";

@@ -20,7 +20,7 @@ const MIN_KEY_LENGTH = 8;
  * provider accepted it; the key is never read back, so the field always starts
  * empty, including when replacing one.
  */
-export function ConnectorKeyForm({
+export function ProviderKeyForm({
 	provider,
 	onSaved,
 	onCancel,

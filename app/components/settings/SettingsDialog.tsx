@@ -11,13 +11,13 @@ import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
-import { AddModelsView } from "./AddModelsView";
+import { AddProvidersView } from "./AddProvidersView";
 import { ModelsTab } from "./ModelsTab";
 import { SettingsNav } from "./SettingsNav";
 
 /**
  * Account settings, opened from the URL: a nav down the side, and the section
- * it selects raised onto its own pane. Browsing for a connector pushes a second
+ * it selects raised onto its own pane. Browsing for a provider pushes a second
  * view into that pane rather than stacking another dialog on top.
  */
 export function SettingsDialog() {
@@ -31,7 +31,7 @@ export function SettingsDialog() {
 
 	const pick = (provider: ProviderKey) => {
 		setBrowsing(false);
-		settings.open("connectors", provider);
+		settings.open("models", provider);
 	};
 
 	return (
@@ -50,7 +50,7 @@ export function SettingsDialog() {
 
 				<div className="flex min-h-0 flex-1 gap-3">
 					<SettingsNav
-						active={settings.tab ?? "connectors"}
+						active={settings.tab ?? "models"}
 						onSelect={(tab) => {
 							setBrowsing(false);
 							settings.open(tab);
@@ -68,15 +68,15 @@ export function SettingsDialog() {
 										<ArrowLeft />
 									</IconButton>
 									<h3 className="text-label font-semibold text-foreground">
-										Add models
+										Add providers
 									</h3>
 								</div>
-								<AddModelsView onPick={pick} />
+								<AddProvidersView onPick={pick} />
 							</div>
 						) : (
 							<ModelsTab
-								selected={settings.connector}
-								onAddModels={() => setBrowsing(true)}
+								selected={settings.provider}
+								onAddProviders={() => setBrowsing(true)}
 							/>
 						)}
 					</div>

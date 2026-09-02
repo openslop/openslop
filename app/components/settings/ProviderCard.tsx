@@ -6,9 +6,9 @@ import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Pencil, RefreshCw, Trash2 } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Tile } from "@/components/ui/tile";
-import { ConnectorStatusBadge } from "@/app/components/connectors/ConnectorStatusBadge";
-import { ProviderIcon } from "@/app/components/connectors/ProviderIcon";
-import { useConnector } from "@/app/components/connectors/useConnectors";
+import { KeyStatusBadge } from "@/app/components/models/KeyStatusBadge";
+import { ProviderIcon } from "@/app/components/models/ProviderIcon";
+import { useProviderKey } from "@/app/components/models/useProviderKeys";
 import {
 	MANAGED_PROVIDER,
 	providerMeta,
@@ -19,9 +19,9 @@ import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/toastError";
 import { useAccount } from "@/lib/user/useAccount";
-import { ConnectorKeyForm } from "./ConnectorKeyForm";
+import { ProviderKeyForm } from "./ProviderKeyForm";
 
-function ConnectorHeading({
+function ProviderHeading({
 	provider,
 	children,
 }: {
@@ -40,46 +40,46 @@ function ConnectorHeading({
 }
 
 /** The hosted provider: there is nothing to manage on it yet, only its standing to read. */
-export function HostedConnectorCard() {
-	const status = useConnector(MANAGED_PROVIDER)?.status ?? "invalid";
+export function HostedProviderCard() {
+	const status = useProviderKey(MANAGED_PROVIDER)?.status ?? "invalid";
 	return (
 		<Tile>
-			<ConnectorHeading provider={MANAGED_PROVIDER}>
-				<ConnectorStatusBadge status={status} />
+			<ProviderHeading provider={MANAGED_PROVIDER}>
+				<KeyStatusBadge status={status} />
 				<p className="ml-auto text-label-xs text-muted-foreground">
 					{status === "valid"
 						? "Included with your account"
 						: "Not included with your account"}
 				</p>
-			</ConnectorHeading>
+			</ProviderHeading>
 		</Tile>
 	);
 }
 
-export function ConnectorCard({
+export function ProviderCard({
 	provider,
 	selected = false,
 	onDismissed,
 }: {
 	provider: BYOKProvider;
-	/** The connector a link asked for: revealed, and open for a key if it needs one. */
+	/** The provider a link asked for: revealed, and open for a key if it needs one. */
 	selected?: boolean;
 	/** The row is gone: removed, or backed out of before a key was ever stored. */
 	onDismissed: () => void;
 }) {
 	const meta = providerMeta(provider);
-	const connector = useConnector(provider);
+	const key = useProviderKey(provider);
 	const testKey = useAccount((state) => state.testKey);
 	const removeKey = useAccount((state) => state.removeKey);
 
-	const [editing, setEditing] = useState(selected || !connector);
+	const [editing, setEditing] = useState(selected || !key);
 	const [testing, setTesting] = useState(false);
 	const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 	const card = useRef<HTMLDivElement>(null);
 
 	const cancel = () => {
 		setEditing(false);
-		if (!connector) onDismissed();
+		if (!key) onDismissed();
 	};
 
 	const test = async () => {
@@ -93,35 +93,35 @@ export function ConnectorCard({
 		}
 	};
 
-	// A link that names a connector has to land on it, not at the top of a list
+	// A link that names a provider has to land on it, not at the top of a list
 	// it happens to be in.
 	useEffect(() => {
 		if (selected) card.current?.scrollIntoView({ block: "center" });
 	}, [selected]);
 
-	if (!connector && !editing) return null;
+	if (!key && !editing) return null;
 
 	return (
 		<Tile ref={card} className={cn("gap-2", selected && "ring-1 ring-accent")}>
-			<ConnectorHeading provider={provider}>
-				{connector && (
+			<ProviderHeading provider={provider}>
+				{key && (
 					<>
-						<ConnectorStatusBadge status={connector.status} />
+						<KeyStatusBadge status={key.status} />
 						<p className="ml-auto text-label-xs text-muted-foreground">
-							{`••••${connector.last4} · added ${formatDate(connector.createdAt)}`}
+							{`••••${key.last4} · added ${formatDate(key.createdAt)}`}
 						</p>
 					</>
 				)}
-			</ConnectorHeading>
+			</ProviderHeading>
 
 			{editing ? (
-				<ConnectorKeyForm
+				<ProviderKeyForm
 					provider={provider}
 					onSaved={() => setEditing(false)}
 					onCancel={cancel}
 				/>
 			) : (
-				connector && (
+				key && (
 					<div className="flex flex-wrap items-center gap-2">
 						<Button
 							size="sm"

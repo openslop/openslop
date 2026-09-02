@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { CONNECTOR_GROUPS } from "../connectorConfigs";
-import { searchConnectors } from "../providerSearch";
+import { MODEL_GROUPS } from "../modelGroups";
+import { searchProviders } from "../providerSearch";
 import type { ConnectorType } from "../types";
 
 /** No capability asked for: the "All" filter. */
 const all: ConnectorType[] | null = null;
 const capability = (key: string) =>
-	CONNECTOR_GROUPS.find((group) => group.key === key)?.types ?? all;
+	MODEL_GROUPS.find((group) => group.key === key)?.types ?? all;
 const names = (query: string, cap: ConnectorType[] | null = all) =>
-	searchConnectors(query, cap).map((match) => match.provider);
+	searchProviders(query, cap).map((match) => match.provider);
 
-describe("searchConnectors", () => {
+describe("searchProviders", () => {
 	// The hosted provider is listed too: it is what a new account already runs on.
 	it("offers every connector when nothing is typed, hosted first", () => {
 		expect(names("")).toEqual([
@@ -34,7 +34,7 @@ describe("searchConnectors", () => {
 	});
 
 	it("says which models matched, so a row can explain itself", () => {
-		expect(searchConnectors("claude", all)).toEqual([
+		expect(searchProviders("claude", all)).toEqual([
 			{
 				provider: "anthropic",
 				models: ["Claude Opus 5", "Claude Sonnet 5", "Claude Haiku 4.5"],
@@ -43,7 +43,7 @@ describe("searchConnectors", () => {
 	});
 
 	it("names no models when the provider itself was the match", () => {
-		expect(searchConnectors("runware", all)).toEqual([
+		expect(searchProviders("runware", all)).toEqual([
 			{ provider: "runware", models: [] },
 		]);
 	});

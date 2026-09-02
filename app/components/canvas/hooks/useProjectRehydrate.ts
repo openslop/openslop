@@ -11,10 +11,6 @@ export function useProjectRehydrate(editor: Editor, script: string): void {
 		if (ranRef.current || script.length === 0) return;
 		ranRef.current = true;
 
-		applyScriptToEditor(
-			editor,
-			script,
-			store.getState().metadata.connectorModels,
-		);
+		applyScriptToEditor(editor, script, store.getState().metadata.models);
 	}, [editor, script, store]);
 }

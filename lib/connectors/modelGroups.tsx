@@ -14,7 +14,7 @@ import type { ConnectorType } from "./types";
  * nobody wants to choose a video model twice because an animated image and a
  * clip are generated differently, so a group sets every type it covers.
  */
-export interface ConnectorGroup {
+export interface ModelGroup {
 	key: string;
 	label: string;
 	description: string;
@@ -23,7 +23,7 @@ export interface ConnectorGroup {
 	types: ConnectorType[];
 }
 
-export const CONNECTOR_GROUPS: ConnectorGroup[] = [
+export const MODEL_GROUPS: ModelGroup[] = [
 	{
 		key: "images",
 		label: "Images",
@@ -69,8 +69,8 @@ export const CONNECTOR_GROUPS: ConnectorGroup[] = [
 ];
 
 /** The group a connector type belongs to. Every type is in exactly one. */
-export function groupFor(type: ConnectorType): ConnectorGroup {
-	const group = CONNECTOR_GROUPS.find((entry) => entry.types.includes(type));
-	if (!group) throw new Error(`No connector group covers "${type}"`);
+export function groupFor(type: ConnectorType): ModelGroup {
+	const group = MODEL_GROUPS.find((entry) => entry.types.includes(type));
+	if (!group) throw new Error(`No model group covers "${type}"`);
 	return group;
 }

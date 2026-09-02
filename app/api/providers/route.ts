@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { connectorsView, saveConnectorKey } from "@/lib/api/connectorKeys";
-import { verifyConnector } from "@/lib/api/providers/byok";
+import { providerKeysView, saveProviderKey } from "@/lib/api/providerKeys";
+import { verifyProviderKey } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/request-schema-fields";
 import {
 	createSessionQueryRouteHandler,
@@ -10,8 +10,9 @@ import {
 
 export const GET = createSessionQueryRouteHandler({
 	schema: z.object({}),
-	label: "Connector list",
-	handle: async ({ user }) => NextResponse.json(await connectorsView(user.id)),
+	label: "Provider key list",
+	handle: async ({ user }) =>
+		NextResponse.json(await providerKeysView(user.id)),
 });
 
 const saveSchema = z.object({
@@ -26,11 +27,11 @@ const saveSchema = z.object({
  */
 export const POST = createSessionRouteHandler({
 	schema: saveSchema,
-	label: "Connector save",
+	label: "Provider key save",
 	handle: async ({ user, input }) => {
 		const { provider, apiKey } = input;
-		await saveConnectorKey(user.id, provider, apiKey);
-		const validation = await verifyConnector(user.id, provider, apiKey);
-		return NextResponse.json(await connectorsView(user.id, validation));
+		await saveProviderKey(user.id, provider, apiKey);
+		const validation = await verifyProviderKey(user.id, provider, apiKey);
+		return NextResponse.json(await providerKeysView(user.id, validation));
 	},
 });

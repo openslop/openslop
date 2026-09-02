@@ -1,4 +1,4 @@
-import type { ValidationResult } from "@/lib/connectors/connectorRecord";
+import type { ValidationResult } from "@/lib/connectors/providerKey";
 import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { stringifyError } from "@/lib/errors";
 import { RunwareImage } from "@/lib/providers/image/runware";
@@ -9,10 +9,10 @@ import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import type { ValidatingProvider } from "@/lib/providers/validate";
 import { RunwareVideo } from "@/lib/providers/video/runware";
 import {
-	MissingConnectorKeyError,
-	readConnectorKey,
-	setConnectorStatus,
-} from "../connectorKeys";
+	MissingProviderKeyError,
+	readProviderKey,
+	setKeyStatus,
+} from "../providerKeys";
 
 type VendorClasses = {
 	llm: AnthropicLLM;
@@ -54,8 +54,8 @@ export async function byokProviderFor<K extends VendorType>(
 	const Ctor = VENDORS[provider][type];
 	if (!Ctor)
 		throw new Error(`"${provider}" does not serve ${type} generations`);
-	const key = await readConnectorKey(userId, provider);
-	if (!key) throw new MissingConnectorKeyError(provider);
+	const key = await readProviderKey(userId, provider);
+	if (!key) throw new MissingProviderKeyError(provider);
 	return new Ctor(key);
 }
 
@@ -79,12 +79,12 @@ export async function validateKey(
 	}
 }
 
-export async function verifyConnector(
+export async function verifyProviderKey(
 	userId: string,
 	provider: BYOKProvider,
 	key: string,
 ): Promise<ValidationResult> {
 	const result = await validateKey(provider, key);
-	await setConnectorStatus(userId, provider, result.ok ? "valid" : "invalid");
+	await setKeyStatus(userId, provider, result.ok ? "valid" : "invalid");
 	return result;
 }

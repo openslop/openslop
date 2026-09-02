@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Settings } from "@/components/ui/icon";
-import { ModelDefaultControl } from "@/app/components/connectors/ModelDefaultControl";
-import { CONNECTOR_GROUPS } from "@/lib/connectors/connectorConfigs";
+import { ModelDefaultControl } from "@/app/components/models/ModelDefaultControl";
+import { MODEL_GROUPS } from "@/lib/connectors/modelGroups";
 import { useProject } from "@/lib/project/useProject";
 import { useSettings } from "@/lib/settings/useSettings";
 import { useAccount } from "@/lib/user/useAccount";
@@ -15,21 +15,21 @@ import { PanelCard } from "./PanelCard";
  * deliberately differs on.
  */
 export function ModelsPanel() {
-	const project = useProject((state) => state.metadata.connectorModels);
+	const project = useProject((state) => state.metadata.models);
 	const updateMetadata = useProject((state) => state.updateMetadata);
 	const account = useAccount((state) => state.models);
 	const settings = useSettings();
 
 	return (
 		<>
-			{CONNECTOR_GROUPS.map(({ key, label, types }) => (
+			{MODEL_GROUPS.map(({ key, label, types }) => (
 				<PanelCard key={key} title={label}>
 					<ModelDefaultControl
 						types={types}
 						tier="project"
 						chain={{ project, account }}
 						label={label}
-						onChange={(connectorModels) => updateMetadata({ connectorModels })}
+						onChange={(models) => updateMetadata({ models })}
 						className="w-full"
 					/>
 				</PanelCard>
@@ -38,7 +38,7 @@ export function ModelsPanel() {
 				size="sm"
 				variant="panel"
 				className="w-full shrink-0"
-				onClick={() => settings.open("connectors")}
+				onClick={() => settings.open("models")}
 			>
 				<Settings />
 				Manage models

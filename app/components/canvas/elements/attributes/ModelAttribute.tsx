@@ -4,8 +4,8 @@ import { useSlateStatic } from "slate-react";
 import {
 	ModelSelect,
 	ModelSelectTrigger,
-} from "@/app/components/connectors/ModelSelect";
-import { MODEL_PROVENANCE } from "@/app/components/connectors/provenance";
+} from "@/app/components/models/ModelSelect";
+import { MODEL_PROVENANCE } from "@/app/components/models/provenance";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { modelSourceFor, resolveModel } from "@/lib/connectors/models";

@@ -54,11 +54,8 @@ import {
 	SettingPillButton,
 	type SettingPillOption,
 } from "./SettingPill";
-import {
-	ModelSelect,
-	modelLabel,
-} from "@/app/components/connectors/ModelSelect";
-import { ProviderIcon } from "@/app/components/connectors/ProviderIcon";
+import { ModelSelect, modelLabel } from "@/app/components/models/ModelSelect";
+import { ProviderIcon } from "@/app/components/models/ProviderIcon";
 
 /** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
 type ComposerIntent = "story" | "script";
@@ -293,7 +290,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 						<ModelSelect
 							type="llm"
 							value={model}
-							onChange={(llm) => updateMetadata({ connectorModels: { llm } })}
+							onChange={(llm) => updateMetadata({ models: { llm } })}
 						>
 							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
 								<ProviderIcon

@@ -6,17 +6,17 @@ import { Check, Link } from "@/components/ui/icon";
 import { SearchField } from "@/components/ui/search-field";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Tile } from "@/components/ui/tile";
-import { ModalityPills } from "@/app/components/connectors/ModalityPills";
-import { ProviderIcon } from "@/app/components/connectors/ProviderIcon";
-import { useMissingKey } from "@/app/components/connectors/useConnectors";
-import { CONNECTOR_GROUPS } from "@/lib/connectors/connectorConfigs";
+import { ModalityPills } from "@/app/components/models/ModalityPills";
+import { ProviderIcon } from "@/app/components/models/ProviderIcon";
+import { useMissingKey } from "@/app/components/models/useProviderKeys";
+import { MODEL_GROUPS } from "@/lib/connectors/modelGroups";
 import {
 	MANAGED_PROVIDER,
 	providerMeta,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import { modalitiesFor } from "@/lib/connectors/models";
-import { searchConnectors } from "@/lib/connectors/providerSearch";
+import { searchProviders } from "@/lib/connectors/providerSearch";
 
 /** No capability asked for, so nothing is filtered out. */
 const ALL = "all";
@@ -26,7 +26,7 @@ const ALL = "all";
  * serves, so knowing only "Claude Opus 5" is enough to find Anthropic; the
  * capability filters are for browsing when you do not know what to type.
  */
-export function AddModelsView({
+export function AddProvidersView({
 	onPick,
 }: {
 	onPick: (provider: BYOKProvider) => void;
@@ -36,9 +36,9 @@ export function AddModelsView({
 	const missingKey = useMissingKey();
 
 	const capability =
-		CONNECTOR_GROUPS.find((group) => group.key === groupKey)?.types ?? null;
+		MODEL_GROUPS.find((group) => group.key === groupKey)?.types ?? null;
 	const matches = useMemo(
-		() => searchConnectors(query, capability),
+		() => searchProviders(query, capability),
 		[query, capability],
 	);
 
@@ -48,17 +48,17 @@ export function AddModelsView({
 				autoFocus
 				value={query}
 				onChange={(event) => setQuery(event.target.value)}
-				placeholder="Search models and providers"
-				aria-label="Search models and providers"
+				placeholder="Search providers and models"
+				aria-label="Search providers and models"
 			/>
 
 			<SegmentedControl
-				ariaLabel="Filter models by capability"
+				ariaLabel="Filter providers by capability"
 				value={groupKey}
 				onChange={setGroupKey}
 				options={[
 					{ value: ALL, label: "All" },
-					...CONNECTOR_GROUPS.map(({ key, label }) => ({ value: key, label })),
+					...MODEL_GROUPS.map(({ key, label }) => ({ value: key, label })),
 				]}
 				className="flex-wrap"
 			/>
@@ -67,7 +67,7 @@ export function AddModelsView({
 				<p className="py-8 text-center text-label text-muted-foreground">
 					{query.trim()
 						? `Nothing matches "${query.trim()}".`
-						: "No models for that yet."}
+						: "No providers for that yet."}
 				</p>
 			) : (
 				<ul className="flex flex-col gap-2">

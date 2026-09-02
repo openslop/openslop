@@ -1,5 +1,5 @@
 import { Runware } from "@runware/sdk-js";
-import type { ValidationResult } from "@/lib/connectors/connectorRecord";
+import type { ValidationResult } from "@/lib/connectors/providerKey";
 import { probe, rejected } from "./validate";
 
 export async function withRunware<T>(

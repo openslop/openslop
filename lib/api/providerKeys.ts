@@ -1,8 +1,8 @@
 import type {
-	ConnectorRecord,
-	ConnectorStatus,
+	ProviderKeyRecord,
+	KeyStatus,
 	ValidationResult,
-} from "@/lib/connectors/connectorRecord";
+} from "@/lib/connectors/providerKey";
 import {
 	providerMeta,
 	type BYOKProvider,
@@ -16,22 +16,22 @@ import { createServiceClient } from "@/lib/supabase/service";
  * expected failure with one wording and one status, so every route that can hit
  * it answers the same way: the uniform error envelope maps it to a 400.
  */
-export class MissingConnectorKeyError extends Error {
+export class MissingProviderKeyError extends Error {
 	constructor(readonly provider: ProviderKey) {
 		super(`Connect ${providerMeta(provider).name} to use this model.`);
-		this.name = "MissingConnectorKeyError";
+		this.name = "MissingProviderKeyError";
 	}
 }
 
-type ConnectorRow = {
+type ProviderKeyRow = {
 	provider: string;
 	last4: string;
-	status: ConnectorStatus;
+	status: KeyStatus;
 	verified_at: string | null;
 	created_at: string;
 };
 
-const toRecord = (row: ConnectorRow): ConnectorRecord => ({
+const toRecord = (row: ProviderKeyRow): ProviderKeyRecord => ({
 	provider: row.provider as BYOKProvider,
 	last4: row.last4,
 	status: row.status,
@@ -44,17 +44,17 @@ const toRecord = (row: ConnectorRow): ConnectorRecord => ({
  * in the vault and is read one generation at a time. Read through the caller's
  * own session, so row-level security is a second lock on the filter below.
  */
-export async function listConnectors(
+export async function listProviderKeys(
 	userId: string,
-): Promise<ConnectorRecord[]> {
+): Promise<ProviderKeyRecord[]> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
-		.from("connectors")
+		.from("provider_keys")
 		.select("provider, last4, status, verified_at, created_at")
 		.eq("user_id", userId)
 		.order("created_at", { ascending: true });
-	if (error) throw new Error(`Failed to load connectors: ${error.message}`);
-	return (data as ConnectorRow[]).map(toRecord);
+	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
+	return (data as ProviderKeyRow[]).map(toRecord);
 }
 
 /**
@@ -62,7 +62,7 @@ export async function listConnectors(
  * the only way a key is written or read, so the client and the throw-on-failure
  * contract live here rather than at each call site.
  */
-async function connectorRpc<T>(
+async function providerKeyRpc<T>(
 	fn: string,
 	args: Record<string, string>,
 	failure: string,
@@ -72,66 +72,69 @@ async function connectorRpc<T>(
 	return data as T;
 }
 
-export async function saveConnectorKey(
+export async function saveProviderKey(
 	userId: string,
 	provider: BYOKProvider,
 	key: string,
 ): Promise<void> {
-	await connectorRpc(
-		"connector_set_key",
+	await providerKeyRpc(
+		"provider_key_set",
 		{
 			p_user_id: userId,
 			p_provider: provider,
 			p_key: key,
 			p_last4: key.slice(-4),
 		},
-		"Failed to store connector key",
+		"Failed to store provider key",
 	);
 }
 
 /** The plaintext key, for the one request that is about to use it. */
-export async function readConnectorKey(
+export async function readProviderKey(
 	userId: string,
 	provider: ProviderKey,
 ): Promise<string | null> {
 	return (
-		(await connectorRpc<string | null>(
-			"connector_read_key",
+		(await providerKeyRpc<string | null>(
+			"provider_key_read",
 			{ p_user_id: userId, p_provider: provider },
-			"Failed to read connector key",
+			"Failed to read provider key",
 		)) ?? null
 	);
 }
 
-export async function deleteConnector(
+export async function deleteProviderKey(
 	userId: string,
 	provider: BYOKProvider,
 ): Promise<void> {
-	await connectorRpc(
-		"connector_delete",
+	await providerKeyRpc(
+		"provider_key_delete",
 		{ p_user_id: userId, p_provider: provider },
-		"Failed to remove connector",
+		"Failed to remove provider key",
 	);
 }
 
-export async function setConnectorStatus(
+export async function setKeyStatus(
 	userId: string,
 	provider: BYOKProvider,
-	status: ConnectorStatus,
+	status: KeyStatus,
 ): Promise<void> {
-	await connectorRpc(
-		"connector_set_status",
+	await providerKeyRpc(
+		"provider_key_set_status",
 		{ p_user_id: userId, p_provider: provider, p_status: status },
-		"Failed to update connector",
+		"Failed to update provider key",
 	);
 }
 
-export async function connectorsView(
+export async function providerKeysView(
 	userId: string,
 	validation?: ValidationResult,
-): Promise<{ connectors: ConnectorRecord[]; validation?: ValidationResult }> {
+): Promise<{
+	providerKeys: ProviderKeyRecord[];
+	validation?: ValidationResult;
+}> {
 	return {
-		connectors: await listConnectors(userId),
+		providerKeys: await listProviderKeys(userId),
 		...(validation && { validation }),
 	};
 }

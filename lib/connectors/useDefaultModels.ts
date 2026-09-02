@@ -12,7 +12,7 @@ import {
 } from "./models";
 
 export function useModelChain(): ModelDefaults {
-	const project = useProject((state) => state.metadata.connectorModels);
+	const project = useProject((state) => state.metadata.models);
 	const account = useAccount((state) => state.models);
 	return useMemo(() => ({ project, account }), [project, account]);
 }
@@ -32,7 +32,7 @@ export function useResolveDefaultModels(): () => ConnectorModels {
 	return useCallback(
 		() =>
 			resolveDefaultModels({
-				project: project.getState().metadata.connectorModels,
+				project: project.getState().metadata.models,
 				account: account.getState().models,
 			}),
 		[project, account],

@@ -93,7 +93,7 @@ function UserProfile() {
 						</DropdownMenuSubContent>
 					</DropdownMenuSub>
 					<DropdownMenuItem
-						onClick={() => settings.open("connectors")}
+						onClick={() => settings.open("models")}
 						className="cursor-pointer"
 					>
 						<Settings />

@@ -1,4 +1,4 @@
-import type { ValidationResult } from "@/lib/connectors/connectorRecord";
+import type { ValidationResult } from "@/lib/connectors/providerKey";
 
 /**
  * A vendor that can be asked whether the key it was built with works. The check
