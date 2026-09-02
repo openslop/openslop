@@ -157,7 +157,7 @@
 	--orb-from: #d99b1f;
 	--orb-to: #9c3813;
 	--tertiary: #772a4d;
-	--tertiary-foreground: #fff;
+	--tertiary-foreground: #d29cb8;
 	--accent: var(--blurple-500);
 	--accent-foreground: #fff;
 	--accent-soft: var(--blurple-500-a);
@@ -296,7 +296,7 @@
 	--orb-from: #ffbf48;
 	--orb-to: #be4a1d;
 	--tertiary: #772a4d;
-	--tertiary-foreground: #fff;
+	--tertiary-foreground: #d29cb8;
 	--accent-foreground: #fff;
 	--destructive-foreground: #fff;
 
