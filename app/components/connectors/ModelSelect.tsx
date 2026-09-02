@@ -10,6 +10,7 @@ import {
 import { Link } from "@/components/ui/icon";
 import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
 import {
+	SimpleTooltip,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
@@ -123,16 +124,19 @@ export function ModelSelect({
 function ConnectHint({ provider }: { provider: BYOKProvider }) {
 	const { name } = providerMeta(provider);
 	return (
-		<span
-			className={cn(
-				buttonVariants({ variant: "secondary", size: "xs" }),
-				"ml-auto h-5 px-1.5 text-label-xs",
-			)}
-			title={`Add your ${name} API key to generate with this model`}
+		<SimpleTooltip
+			label={`Add your ${name} API key to generate with this model`}
 		>
-			<Link aria-hidden="true" className="size-2.5" />
-			Connect
-		</span>
+			<span
+				className={cn(
+					buttonVariants({ variant: "secondary", size: "xs" }),
+					"ml-auto h-5 px-1.5 text-label-xs",
+				)}
+			>
+				<Link aria-hidden="true" className="size-2.5" />
+				Connect
+			</span>
+		</SimpleTooltip>
 	);
 }
 
