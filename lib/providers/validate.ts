@@ -1,14 +1,5 @@
 import type { ValidationResult } from "@/lib/connectors/providerKey";
 
-/**
- * A vendor that can be asked whether the key it was built with works. The check
- * is the vendor's own to define: only it knows which call is cheapest and how
- * it reports a refusal.
- */
-export interface ValidatingProvider {
-	validate(): Promise<ValidationResult>;
-}
-
 export const rejected = (status: number): ValidationResult => ({
 	ok: false,
 	error:

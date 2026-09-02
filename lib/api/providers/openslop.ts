@@ -14,6 +14,7 @@ import { ElevenLabsSFX } from "@/lib/providers/sfx/elevenlabs";
 import { MockSFX } from "@/lib/providers/sfx/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import { MockTTS } from "@/lib/providers/tts/mock";
+import type { ProviderType, Providers } from "@/lib/providers/types";
 import { MockVideo } from "@/lib/providers/video/mock";
 import { RunwareVideo } from "@/lib/providers/video/runware";
 
@@ -32,20 +33,9 @@ function hosted<R, M>(
 	};
 }
 
-export type HostedProviders = {
-	llm: AnthropicLLM | MockLLM;
-	tts: CartesiaTTS | MockTTS;
-	image: RunwareImage | MockImage;
-	video: RunwareVideo | MockVideo;
-	sfx: ElevenLabsSFX | MockSFX;
-	music: ElevenLabsMusic | MockMusic;
-};
-
-export type HostedType = keyof HostedProviders;
-
-type Sources<K extends HostedType, TModels> = Record<
+type Sources<K extends ProviderType, TModels> = Record<
 	keyof TModels,
-	() => HostedProviders[K]
+	() => Providers[K]
 >;
 
 /** Keyed by the model tables' own names, so a model cannot be listed without saying what serves it. */
@@ -71,13 +61,13 @@ const OPENSLOP_PROVIDERS: {
 	},
 };
 
-export function hostedProviderFor<K extends HostedType>(
+export function hostedProviderFor<K extends ProviderType>(
 	type: K,
 	model: string,
-): HostedProviders[K] {
-	const sources: Partial<Record<string, () => HostedProviders[HostedType]>> =
+): Providers[K] {
+	const sources: Partial<Record<string, () => Providers[ProviderType]>> =
 		OPENSLOP_PROVIDERS[type];
 	const source = sources[model];
 	if (!source) throw new Error(`OpenSlop hosts no ${type} model "${model}"`);
-	return source() as HostedProviders[K];
+	return source() as Providers[K];
 }

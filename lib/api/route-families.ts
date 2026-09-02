@@ -4,13 +4,10 @@ import {
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import type { ModelRef, ModelTable } from "@/lib/connectors/types";
+import type { ProviderType, Providers } from "@/lib/providers/types";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";
-import { byokProviderFor, type VendorType } from "./providers/byok";
-import {
-	hostedProviderFor,
-	type HostedProviders,
-	type HostedType,
-} from "./providers/openslop";
+import { byokProviderFor } from "./providers/byok";
+import { hostedProviderFor } from "./providers/openslop";
 import {
 	createApiParamRouteHandler,
 	createApiQueryRouteHandler,
@@ -19,8 +16,6 @@ import {
 	createSessionQueryRouteHandler,
 	createSessionRouteHandler,
 } from "./route-handler";
-
-export type ProviderType = HostedType & VendorType;
 
 /**
  * Everything that differs between the two route families, in one place: who a
@@ -36,7 +31,7 @@ export type RouteFamily<TModels, TPicked extends ModelRef> = {
 		userId: string,
 		type: K,
 		picked: TPicked,
-	) => Promise<HostedProviders[K]>;
+	) => Promise<Providers[K]>;
 };
 
 export const HOSTED: RouteFamily<ModelTable, ModelRef> = {
@@ -68,7 +63,7 @@ export const providerForPick = <K extends ProviderType>(
 	userId: string,
 	type: K,
 	picked: ModelRef,
-): Promise<HostedProviders[K]> =>
+): Promise<Providers[K]> =>
 	isByokPick(picked)
 		? BYOK.providerFor(userId, type, picked)
 		: HOSTED.providerFor(userId, type, picked);

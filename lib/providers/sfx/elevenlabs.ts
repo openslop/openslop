@@ -10,8 +10,12 @@ import {
 	ELEVENLABS_AUDIO_FORMAT,
 	toElevenLabsOutputFormat,
 } from "../elevenlabs";
+import type { SFXProvider } from "./base";
 
-export class ElevenLabsSFX extends BaseElevenLabsAudio<SFXGenerateParams> {
+export class ElevenLabsSFX
+	extends BaseElevenLabsAudio<SFXGenerateParams>
+	implements SFXProvider
+{
 	protected readonly blobConfig = { type: "sfx", provider: "elevenlabs" };
 	protected readonly outputFormat = ELEVENLABS_AUDIO_FORMAT;
 

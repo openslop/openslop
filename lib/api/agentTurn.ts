@@ -18,7 +18,7 @@ import {
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ModelRef } from "@/lib/connectors/types";
-import type { HostedProviders } from "./providers/openslop";
+import type { LLMProvider } from "@/lib/providers/llm/base";
 import {
 	findOrCreateConversation,
 	listConversationMessages,
@@ -50,8 +50,6 @@ export const agentTurnSchema = <TModel extends ModelRef>(
 		})
 		.and(model);
 
-export type AgentLLM = HostedProviders["llm"];
-
 export type AgentTurnRequest = {
 	projectId: string;
 	userId: string;
@@ -59,7 +57,7 @@ export type AgentTurnRequest = {
 	context: AgentContext;
 	/** The provider's own model id: the route resolves it from the picked name. */
 	model: string;
-	llm: () => Promise<AgentLLM>;
+	llm: () => Promise<LLMProvider>;
 };
 
 /**

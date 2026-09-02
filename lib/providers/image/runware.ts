@@ -2,7 +2,7 @@ import type { ImageGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateRunwareKey, withRunware } from "../runware";
-import type { ValidatingProvider } from "../validate";
+import type { ImageProvider } from "./base";
 
 type RawImageResult = {
 	data: string;
@@ -14,7 +14,7 @@ const OUTPUT_FORMAT = "PNG";
 
 export class RunwareImage
 	extends BaseProvider<ImageGenerateParams, RawImageResult>
-	implements ValidatingProvider
+	implements ImageProvider
 {
 	protected readonly blobConfig = { type: "image", provider: "runware" };
 	private apiKey: string;

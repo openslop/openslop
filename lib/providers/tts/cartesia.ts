@@ -14,7 +14,8 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
-import { fromStatus, probe, type ValidatingProvider } from "../validate";
+import { fromStatus, probe } from "../validate";
+import type { TTSProvider } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
 import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
@@ -127,7 +128,7 @@ const collectVoicesCached = unstable_cache(
 
 export class CartesiaTTS
 	extends BaseProvider<TTSGenerateParams, RawTTSResult>
-	implements ValidatingProvider
+	implements TTSProvider
 {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
 	private client: Cartesia;

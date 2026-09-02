@@ -1,6 +1,6 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
-import type { WithMetadata } from "../base";
+import type { Provider, WithMetadata } from "../base";
 import { BaseProvider } from "../base";
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
@@ -29,11 +29,15 @@ export type VideoPoll =
 	| { kind: "pending"; metadata?: VideoJobMetadata }
 	| { kind: "ready"; asset: VideoProviderResponse };
 
-export abstract class BaseVideoProvider extends BaseProvider<
-	VideoGenerateParams,
-	VideoJob,
-	VideoProviderResponse
-> {
+export interface VideoProvider extends Provider {
+	generate(params: VideoGenerateParams): Promise<VideoProviderResponse>;
+	poll(jobId: string, request: VideoGenerateParams): Promise<VideoPoll>;
+}
+
+export abstract class BaseVideoProvider
+	extends BaseProvider<VideoGenerateParams, VideoJob, VideoProviderResponse>
+	implements VideoProvider
+{
 	protected toFiles(r: VideoJob): BundleFile[] {
 		return r.url
 			? [

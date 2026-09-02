@@ -6,7 +6,7 @@ import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
 import { ElevenLabsMusic } from "@/lib/providers/music/elevenlabs";
 import { ElevenLabsSFX } from "@/lib/providers/sfx/elevenlabs";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
-import type { ValidatingProvider } from "@/lib/providers/validate";
+import type { ProviderType, Providers } from "@/lib/providers/types";
 import { RunwareVideo } from "@/lib/providers/video/runware";
 import {
 	MissingProviderKeyError,
@@ -14,30 +14,16 @@ import {
 	setKeyStatus,
 } from "../providerKeys";
 
-type VendorClasses = {
-	llm: AnthropicLLM;
-	tts: CartesiaTTS;
-	image: RunwareImage;
-	video: RunwareVideo;
-	sfx: ElevenLabsSFX;
-	music: ElevenLabsMusic;
-};
-
-export type VendorType = keyof VendorClasses;
-
-type VendorClass<K extends VendorType> = new (
-	apiKey: string,
-) => VendorClasses[K] & ValidatingProvider;
+type VendorClass<K extends ProviderType> = new (apiKey: string) => Providers[K];
 
 /**
  * Every vendor a user can bring a key for, and what each of its classes serves.
  * One home per vendor: the generation lookup and the key check read the same
- * table, and every class listed must be able to validate, so a vendor's answer
- * for its key is written once and shared by all of them.
+ * table.
  */
 const VENDORS: Record<
 	BYOKProvider,
-	Partial<{ [K in VendorType]: VendorClass<K> }>
+	Partial<{ [K in ProviderType]: VendorClass<K> }>
 > = {
 	anthropic: { llm: AnthropicLLM },
 	runware: { image: RunwareImage, video: RunwareVideo },
@@ -46,11 +32,11 @@ const VENDORS: Record<
 };
 
 /** The only place a stored key is read, one generation at a time. */
-export async function byokProviderFor<K extends VendorType>(
+export async function byokProviderFor<K extends ProviderType>(
 	userId: string,
 	provider: BYOKProvider,
 	type: K,
-): Promise<VendorClasses[K]> {
+): Promise<Providers[K]> {
 	const Ctor = VENDORS[provider][type];
 	if (!Ctor)
 		throw new Error(`"${provider}" does not serve ${type} generations`);

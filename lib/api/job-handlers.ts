@@ -10,7 +10,8 @@ import type {
 } from "@/lib/connectors/types";
 import { videoHandler } from "./handlers/video";
 import type { JobRow } from "./jobs";
-import { providerForPick, type ProviderType } from "./route-families";
+import type { ProviderType } from "@/lib/providers/types";
+import { providerForPick } from "./route-families";
 
 type JobRequest = { user_id: string; request: ModelRef };
 

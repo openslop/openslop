@@ -1,10 +1,14 @@
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
+import type { MusicProvider } from "./base";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/music/mock`;
 
-export class MockMusic extends MockProvider<MusicGenerateParams> {
+export class MockMusic
+	extends MockProvider<MusicGenerateParams>
+	implements MusicProvider
+{
 	protected readonly delayMs = 2000;
 	protected readonly variants = [
 		{

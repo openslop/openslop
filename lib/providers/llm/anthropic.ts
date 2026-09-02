@@ -15,8 +15,9 @@ import { parseImageSource } from "@/lib/api/imageSource";
 import { stringifyError } from "@/lib/errors";
 import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
 import { BaseProvider } from "../base";
-import { fromStatus, probe, type ValidatingProvider } from "../validate";
+import { fromStatus, probe } from "../validate";
 import type { AgentModel } from "./agentModel";
+import type { LLMProvider } from "./base";
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [
 	"image/jpeg",
@@ -52,7 +53,7 @@ const DEFAULT_MAX_TOKENS = 65536;
 
 export class AnthropicLLM
 	extends BaseProvider<LLMGenerateParams, LLMGenerateResult, LLMGenerateResult>
-	implements ValidatingProvider
+	implements LLMProvider
 {
 	protected readonly blobConfig = { type: "llm", provider: "anthropic" };
 	private apiKey: string;

@@ -24,7 +24,8 @@ const { conversations, provider } = vi.hoisted(() => ({
 vi.mock("../conversations", () => conversations);
 
 import type { AgentContext } from "@/lib/agent/context";
-import { streamAgentTurn, type AgentLLM } from "../agentTurn";
+import type { LLMProvider } from "@/lib/providers/llm/base";
+import { streamAgentTurn } from "../agentTurn";
 
 const AGENT_CONTEXT: AgentContext = {
 	title: "",
@@ -107,7 +108,7 @@ async function runTurn(
 		message: options.message ?? asked("make it shorter"),
 		context: AGENT_CONTEXT,
 		model: options.model ?? "claude-opus-5",
-		llm: async () => provider as unknown as AgentLLM,
+		llm: async () => provider as unknown as LLMProvider,
 	});
 	return chunksOf(response);
 }
