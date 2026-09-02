@@ -43,7 +43,7 @@ export const stillElementId = (elementId: string) =>
 export function stillElement(
 	element: CanvasContentElement,
 ): CanvasContentElement {
-	const { stillProvider, stillModel, ...attributes } =
+	const { imageProvider, imageModel, ...attributes } =
 		element.generationAttributes ?? {};
 	return {
 		...element,
@@ -51,7 +51,7 @@ export function stillElement(
 		type: "image",
 		generationAttributes: {
 			...omit(attributes, VIDEO_ONLY_KEYS),
-			...resolveModel("image", { provider: stillProvider, model: stillModel }),
+			...resolveModel("image", { provider: imageProvider, model: imageModel }),
 		},
 	};
 }
@@ -125,7 +125,7 @@ export function createStillFramePlugin(): ConnectorPlugin<
 			}
 			// The element's own text prompts the still, not the animation.
 			return {
-				...omit(params, "videoPrompt", "stillModel"),
+				...omit(params, "videoPrompt", "imageModel"),
 				prompt: videoPrompt,
 				frameImages: [imageUrl],
 			};

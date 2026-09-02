@@ -185,13 +185,13 @@ describe("parseOSML", () => {
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
 		const [node] = parseOSML(
-			'<animated_image provider="runware" model="Seedance 2 Fast" stillProvider="runware" stillModel="Seedream 5 Lite">a sunset</animated_image>',
+			'<animated_image provider="runware" model="Seedance 2 Fast" imageProvider="runware" imageModel="Seedream 5 Lite">a sunset</animated_image>',
 		);
 		expect(flatAttributes(node)).toMatchObject({
 			provider: "runware",
 			model: "Seedance 2 Fast",
-			stillProvider: "runware",
-			stillModel: "Seedream 5 Lite",
+			imageProvider: "runware",
+			imageModel: "Seedream 5 Lite",
 		});
 	});
 

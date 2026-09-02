@@ -72,7 +72,7 @@ describe("still-frame plugin", () => {
 			{
 				prompt: "a dark forest",
 				videoPrompt: "slow zoom in",
-				stillModel: "Slop Image v1",
+				imageModel: "Slop Image v1",
 			},
 			ctx(STILL_URL),
 		);
@@ -325,8 +325,8 @@ describe("stillElement", () => {
 	it("generates the still with the image model the element names", () => {
 		expect(
 			stillAttributes({
-				stillProvider: "runware",
-				stillModel: "Seedream 5 Lite",
+				imageProvider: "runware",
+				imageModel: "Seedream 5 Lite",
 			}),
 		).toEqual({ provider: "runware", model: "Seedream 5 Lite" });
 	});
@@ -334,8 +334,8 @@ describe("stillElement", () => {
 	it("falls back to the recommended image model for an unknown still model", () => {
 		expect(
 			stillAttributes({
-				stillProvider: "openslop",
-				stillModel: "Slop Video v1",
+				imageProvider: "openslop",
+				imageModel: "Slop Video v1",
 			}),
 		).toEqual(DEFAULT_MODELS.image);
 	});

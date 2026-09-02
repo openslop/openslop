@@ -51,8 +51,8 @@ describe("resolveAttributeSchema", () => {
 		).toEqual([
 			"provider",
 			"model",
-			"stillProvider",
-			"stillModel",
+			"imageProvider",
+			"imageModel",
 			"referenceImagesOverride",
 			"videoPrompt",
 			"duration",

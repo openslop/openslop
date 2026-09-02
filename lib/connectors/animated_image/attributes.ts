@@ -8,8 +8,8 @@ import { referenceImagesDef } from "../attributes/referenceImages";
 export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
 	...modelDefs("animated_image", { label: "Video model" }),
 	...modelDefs("image", {
-		key: "stillModel",
-		providerAttr: "stillProvider",
+		key: "imageModel",
+		providerAttr: "imageProvider",
 		label: "Image model",
 		icon: Image,
 	}),

@@ -186,9 +186,9 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 /** A video generation whose conditioning frame comes from the element's still. */
 export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	videoPrompt?: string;
-	/** The still's own model. The still-frame plugin keeps it off the video call. */
-	stillProvider?: string;
-	stillModel?: string;
+	/** The image's own model. The still-frame plugin keeps it off the video call. */
+	imageProvider?: string;
+	imageModel?: string;
 };
 
 // TTS types

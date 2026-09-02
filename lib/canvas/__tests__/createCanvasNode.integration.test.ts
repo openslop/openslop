@@ -50,8 +50,8 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 	it("seeds the still with the recommended image model", () => {
 		const node = createCanvasNode("animated_image");
 		expect(flatAttributes(node)).toMatchObject({
-			stillProvider: DEFAULT_IMAGE_MODEL.provider,
-			stillModel: DEFAULT_IMAGE_MODEL.model,
+			imageProvider: DEFAULT_IMAGE_MODEL.provider,
+			imageModel: DEFAULT_IMAGE_MODEL.model,
 		});
 	});
 });
