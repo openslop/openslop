@@ -59,6 +59,9 @@ export type BYOKProvider = Exclude<Provider, typeof MANAGED_PROVIDER>;
 
 export const ALL_PROVIDERS = Object.keys(PROVIDER_CATALOG) as Provider[];
 
+export const isProvider = (value: string | undefined): value is Provider =>
+	value !== undefined && Object.hasOwn(PROVIDER_CATALOG, value);
+
 export const BYOK_PROVIDERS = ALL_PROVIDERS.filter(
 	(key): key is BYOKProvider => key !== MANAGED_PROVIDER,
 );

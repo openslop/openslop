@@ -2,7 +2,7 @@ import { z } from "zod";
 import { DEFAULT_IMAGE_MODEL, IMAGE_MODELS } from "./image/models";
 import { DEFAULT_LLM_MODEL, LLM_MODELS } from "./llm/models";
 import { DEFAULT_MUSIC_MODEL, MUSIC_MODELS } from "./music/models";
-import { ALL_PROVIDERS } from "./providerCatalog";
+import { ALL_PROVIDERS, isProvider } from "./providerCatalog";
 import { DEFAULT_SFX_MODEL, SFX_MODELS } from "./sfx/models";
 import { DEFAULT_TTS_MODEL, TTS_MODELS } from "./tts/models";
 import {
@@ -42,11 +42,7 @@ export const DEFAULT_MODELS: Record<ConnectorType, ModelRef> = {
 };
 
 const tableFor = (type: ConnectorType, provider: string | undefined) =>
-	provider === undefined
-		? undefined
-		: (MODELS[type] as Partial<Record<string, Record<string, ModelEntry>>>)[
-				provider
-			];
+	isProvider(provider) ? MODELS[type][provider] : undefined;
 
 export const hasModel = (
 	type: ConnectorType,
