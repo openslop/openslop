@@ -9,7 +9,6 @@ const STATUS = {
 	unverified: { variant: "caution", Icon: Hourglass, label: "Unverified" },
 } as const;
 
-/** How the stored key fared the last time it was tried. */
 export function ConnectorStatusBadge({ status }: { status: ConnectorStatus }) {
 	const { variant, Icon, label } = STATUS[status];
 	return (

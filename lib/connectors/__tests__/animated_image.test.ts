@@ -5,7 +5,9 @@ import { mockGatewaySuccess } from "./_gateway-mock";
 
 const VIDEO_URL = "https://cdn.example.com/v.mp4";
 
-const config = { provider: "openslop" } as const;
+const config = {
+	model: { provider: "openslop", model: "Slop Video v1" },
+} as const;
 
 describe("BaseAnimatedImageConnector", () => {
 	beforeEach(() => {

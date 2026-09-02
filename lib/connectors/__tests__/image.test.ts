@@ -7,7 +7,9 @@ const TEST_ID = "test-id";
 const BUNDLE_URL = `/assets/image/openslop/${TEST_ID}`;
 const IMAGE_URL = `${BUNDLE_URL}/output.png`;
 
-const config = { provider: "openslop" } as const;
+const config = {
+	model: { provider: "openslop", model: "Slop Image v1" },
+} as const;
 
 function mockSuccess() {
 	mockGatewaySuccess({

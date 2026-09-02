@@ -10,7 +10,6 @@ import {
 	type ParseResult,
 } from "./parse";
 
-/** How a route authenticates. The tiers themselves live in `with-auth`. */
 type AuthTier = typeof withApiAccess;
 
 /** Turns a request into validated data, or into the 400 that explains why not. */

@@ -8,7 +8,6 @@ import type { ConnectorModels } from "@/lib/connectors/models";
 import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { createClient } from "@/lib/supabase/client";
 
-/** What the account, rather than any one project, configures. */
 export type AccountData = {
 	/** The model each connector type falls back to across every project. */
 	models: ConnectorModels;

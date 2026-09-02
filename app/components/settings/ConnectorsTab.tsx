@@ -9,7 +9,7 @@ import { CONNECTOR_GROUPS } from "@/lib/connectors/connectorConfigs";
 import {
 	defaultModelFor,
 	differsFromRecommended,
-	MODEL_CATALOGS,
+	modelEntry,
 } from "@/lib/connectors/models";
 import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { toastError } from "@/lib/toastError";
@@ -19,10 +19,6 @@ import { useUser } from "@/lib/user/UserProvider";
 import { ConnectorCard, HostedConnectorCard } from "./ConnectorCard";
 import { SettingsList, SettingsRow, SettingsSection } from "./SettingsSection";
 
-/**
- * Account-wide connector settings: the model each kind of element falls back
- * to, and the keys those models can run on.
- */
 export function ConnectorsTab({
 	selected,
 	onAddConnector,
@@ -109,7 +105,8 @@ export function ConnectorsTab({
 							}
 						>
 							<ModelChips
-								meta={MODEL_CATALOGS[types[0]].metaFor(
+								meta={modelEntry(
+									types[0],
 									defaultModelFor(types[0], { account: models }),
 								)}
 							/>

@@ -21,7 +21,6 @@ import { toastError } from "@/lib/toastError";
 import { useAccount } from "@/lib/user/useAccount";
 import { ConnectorKeyForm } from "./ConnectorKeyForm";
 
-/** The mark, the name and whatever the row has to say for itself. */
 function ConnectorHeading({
 	provider,
 	children,
@@ -54,11 +53,6 @@ export function HostedConnectorCard() {
 	);
 }
 
-/**
- * One provider's key: whether it works, when it was added, and the actions that
- * change that. What the provider is and can do belongs to the browser you added
- * it from; here it is already chosen, so the row stays short.
- */
 export function ConnectorCard({
 	provider,
 	selected = false,
@@ -80,13 +74,11 @@ export function ConnectorCard({
 	const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 	const card = useRef<HTMLDivElement>(null);
 
-	/** Backing out of a key that was never stored leaves no row behind. */
 	const cancel = () => {
 		setEditing(false);
 		if (!connector) onDismissed();
 	};
 
-	/** Reaching the provider takes a moment, so the button says it is trying. */
 	const test = async () => {
 		setTesting(true);
 		try {
@@ -104,7 +96,6 @@ export function ConnectorCard({
 		if (selected) card.current?.scrollIntoView({ block: "center" });
 	}, [selected]);
 
-	// Nothing left to show once the key is gone: the row goes with it.
 	if (!connector && !editing) return null;
 
 	return (

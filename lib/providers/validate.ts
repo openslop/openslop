@@ -9,7 +9,6 @@ export interface ValidatingProvider {
 	validate(): Promise<ValidationResult>;
 }
 
-/** The provider rejected the key, or answered something we cannot read as a yes. */
 export const rejected = (status: number): ValidationResult => ({
 	ok: false,
 	error:
@@ -27,6 +26,5 @@ export const fromStatus = (response: Response): ValidationResult =>
  */
 const TIMEOUT_MS = 5_000;
 
-/** The one authenticated request a validation makes. */
 export const probe = (url: string, init?: RequestInit) =>
 	fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });

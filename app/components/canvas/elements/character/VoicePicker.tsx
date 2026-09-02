@@ -4,10 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	ModelSelect,
+	ModelSelectTrigger,
+} from "@/app/components/connectors/ModelSelect";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { createModelConnector } from "@/lib/connectors/registry";
-import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
-import type { VoiceInfo } from "@/lib/connectors/types";
+import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
 import type { MetadataVoice } from "@/lib/project/types";
 import { FieldLabel } from "./fields";
@@ -52,15 +55,19 @@ const VOICE_LIMIT = 50;
 
 export function VoicePicker({
 	filters,
+	model,
 	selectedVoiceId,
 	onSelect,
+	onModelChange,
 }: {
 	filters: MetadataVoice;
+	/** The model the voices are listed for, and the one a pick will speak with. */
+	model: ModelRef;
 	selectedVoiceId?: string;
 	onSelect: (voice: VoiceInfo) => void;
+	onModelChange: (model: ModelRef) => void;
 }) {
 	const { connectorConfig } = useConfig();
-	const model = useDefaultModels().tts;
 	const ttsConnector = useMemo(
 		() => createModelConnector(connectorConfig, "tts", model),
 		[connectorConfig, model],
@@ -96,7 +103,12 @@ export function VoicePicker({
 
 	return (
 		<div className="flex min-w-0 flex-col gap-1.5">
-			<FieldLabel>Voices</FieldLabel>
+			<div className="flex items-center justify-between gap-2">
+				<FieldLabel>Voices</FieldLabel>
+				<ModelSelect type="tts" value={model} onChange={onModelChange}>
+					<ModelSelectTrigger model={model} label="Voice model" />
+				</ModelSelect>
+			</div>
 			{error && <span className="text-label-xs text-destructive">{error}</span>}
 			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{loading &&

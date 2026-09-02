@@ -10,6 +10,7 @@ function mockJsonResponse(data: unknown) {
 }
 
 const llmResult = { text: "Hello", model: "test-model" };
+const model = { provider: "openslop", model: "Slop LLM v1" } as const;
 
 describe("BaseLLMConnector", () => {
 	beforeEach(() => {
@@ -29,7 +30,7 @@ describe("BaseLLMConnector", () => {
 			},
 		};
 		const connector = new HttpLLMConnector({
-			provider: "openslop",
+			model,
 			plugins: [plugin],
 		});
 		await connector.generate({ prompt: "test" });
@@ -45,7 +46,7 @@ describe("BaseLLMConnector", () => {
 			}),
 		};
 		const connector = new HttpLLMConnector({
-			provider: "openslop",
+			model,
 			plugins: [plugin],
 		});
 		const result = await connector.generate({ prompt: "test" });
@@ -61,7 +62,7 @@ describe("BaseLLMConnector", () => {
 		};
 
 		const connector = new HttpLLMConnector({
-			provider: "openslop",
+			model,
 			plugins: [plugin],
 		});
 
@@ -91,7 +92,7 @@ describe("BaseLLMConnector", () => {
 			},
 		];
 		const connector = new HttpLLMConnector({
-			provider: "openslop",
+			model,
 			plugins,
 		});
 		await connector.generate({ prompt: "test" });
@@ -100,7 +101,7 @@ describe("BaseLLMConnector", () => {
 
 	it("hands the caller's abort signal to the stream request", async () => {
 		const fetchMock = vi.mocked(fetch);
-		const connector = new HttpLLMConnector({ provider: "openslop" });
+		const connector = new HttpLLMConnector({ model });
 		const controller = new AbortController();
 
 		await connector.stream({ prompt: "test" }, controller.signal).next();
@@ -114,7 +115,7 @@ describe("BaseLLMConnector", () => {
 	it("runs onError when transformPrompt throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new HttpLLMConnector({
-			provider: "openslop",
+			model,
 			plugins: [
 				{
 					name: "bad-transform",
@@ -136,7 +137,7 @@ describe("BaseLLMConnector", () => {
 	it("runs onError when beforeGenerate throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new HttpLLMConnector({
-			provider: "openslop",
+			model,
 			plugins: [
 				{
 					name: "bad-before",

@@ -21,10 +21,7 @@ export class HttpAnimatedImageConnector extends BaseAssetConnector<
 	readonly assetKey = "video" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(
-			new HttpAssetGateway(config.provider, "video", config.baseUrl),
-			config,
-		);
+		super(new HttpAssetGateway(config.model, "video", config.baseUrl), config);
 	}
 
 	static attributesFor(_model?: string): AttributeSchema {

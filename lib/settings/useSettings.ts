@@ -8,7 +8,6 @@ import {
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 
-/** The tabs account settings offers. */
 const tabSchema = z.enum(["connectors"]);
 
 export type SettingsTab = z.infer<typeof tabSchema>;

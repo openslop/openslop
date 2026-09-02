@@ -1,7 +1,9 @@
+export type QueryParams = Record<string, string | number | undefined>;
+
 type RequestOptions = {
 	method?: string;
 	body?: unknown;
-	params?: Record<string, string>;
+	params?: QueryParams;
 	signal?: AbortSignal;
 };
 
@@ -28,10 +30,12 @@ function buildInit(method: string, body: unknown): RequestInit {
 	};
 }
 
-function buildUrl(url: string, params?: Record<string, string>): string {
+function buildUrl(url: string, params?: QueryParams): string {
 	if (!params) return url;
 	const qs = new URLSearchParams(
-		Object.entries(params).filter(([, value]) => value !== undefined),
+		Object.entries(params).flatMap(([key, value]) =>
+			value === undefined ? [] : [[key, String(value)]],
+		),
 	).toString();
 	return qs ? `${url}?${qs}` : url;
 }

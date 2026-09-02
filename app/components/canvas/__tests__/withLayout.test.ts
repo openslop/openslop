@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import type { CanvasContentElement, CanvasEditor } from "@/lib/canvas/types";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import { withLayout } from "../plugins/withLayout";
 
-const seeded = (defaultModels: Record<string, string>) => {
+const seeded = (defaultModels: ConnectorModels) => {
 	const editor = withLayout(() => defaultModels)(
 		withReact(createEditor()) as CanvasEditor,
 	);
@@ -20,15 +20,10 @@ describe("withLayout", () => {
 		expect(seeded({})).toMatchObject({ type: "narration" });
 	});
 
-	it("seeds it with the model the project configured", () => {
-		expect(flatAttributes(seeded({ tts: "Slop TTS v1" }))).toMatchObject({
-			model: "Slop TTS v1",
-		});
-	});
-
-	it("falls back to the catalog when the project configured none", () => {
-		expect(flatAttributes(seeded({}))).toMatchObject({
-			model: MODEL_CATALOGS.tts.defaultModel,
-		});
+	// Speech takes its model from the voice in metadata, not the element.
+	it("seeds it without a model of its own", () => {
+		const attrs = flatAttributes(seeded({ tts: DEFAULT_MODELS.tts }));
+		expect(attrs.provider).toBeUndefined();
+		expect(attrs.model).toBeUndefined();
 	});
 });

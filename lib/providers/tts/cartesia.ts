@@ -205,9 +205,7 @@ export class CartesiaTTS
 			language: voice.language,
 			gender: TTS_GENDERS.find((g) => g === voice.gender),
 			description: voice.description,
-			previewUrl: voice.preview_file_url
-				? `/api/v1/tts/voices/preview?url=${encodeURIComponent(voice.preview_file_url)}`
-				: undefined,
+			previewUrl: voice.preview_file_url ?? undefined,
 		}));
 	}
 

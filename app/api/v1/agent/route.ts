@@ -5,12 +5,11 @@ import {
 	listConversationMessages,
 } from "@/lib/api/conversations";
 import { createAgentRouteHandler } from "@/lib/api/llm-routes";
-import {
-	createApiQueryRouteHandler,
-	createApiRouteHandler,
-} from "@/lib/api/route-handler";
+import { HOSTED } from "@/lib/api/route-families";
+import { createApiQueryRouteHandler } from "@/lib/api/route-handler";
+import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 
-export const POST = createAgentRouteHandler(createApiRouteHandler, "hosted");
+export const POST = createAgentRouteHandler(HOSTED, OPENSLOP_LLM_MODELS);
 
 export const GET = createApiQueryRouteHandler({
 	schema: z.object({ projectId: z.uuid() }),

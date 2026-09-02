@@ -4,11 +4,11 @@ import type { ConnectorType } from "../types";
 export type AttributeEdit =
 	| { kind: "enum"; options: readonly string[] }
 	/**
-	 * The model a generation runs on. An enum whose options come from a
-	 * catalog, picked through a control that can also say what each model costs
-	 * and which of them the account can actually reach.
+	 * The model a generation runs on, picked through a control that can also
+	 * say what each model costs and which of them the account can reach. One
+	 * pick writes two attributes: this one and the provider it names.
 	 */
-	| { kind: "model"; connector: ConnectorType; options: readonly string[] }
+	| { kind: "model"; connector: ConnectorType; providerKey: string }
 	| { kind: "text"; placeholder?: string; rows?: number }
 	/** A list of image URLs, edited as tiles. */
 	| { kind: "images" };
@@ -28,6 +28,8 @@ export interface AttributeDef extends AttributeSpec {
 	default?: string;
 	/** Rendered on the element header rather than inside the settings popover. */
 	badge?: boolean;
+	/** Carried on the element but shown nowhere: another attribute's control sets it. */
+	hidden?: boolean;
 }
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
@@ -49,7 +51,7 @@ export class AttributeSchema {
 
 	/** The attributes shown in the settings popover, in def order. */
 	get settingsAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere((def) => def.badge !== true);
+		return this.specsWhere((def) => def.badge !== true && def.hidden !== true);
 	}
 
 	private specsWhere(

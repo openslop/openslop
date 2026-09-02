@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
-import { validateKey } from "../providers";
+import { validateKey } from "../providers/byok";
 
 describe("validateKey", () => {
 	let fetchMock: ReturnType<typeof vi.fn>;

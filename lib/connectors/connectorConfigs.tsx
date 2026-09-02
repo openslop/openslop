@@ -17,7 +17,6 @@ import type { ConnectorType } from "./types";
 export interface ConnectorGroup {
 	key: string;
 	label: string;
-	/** What picking a model here changes, in the user's terms. */
 	description: string;
 	Icon: IconComponent;
 	/** The connector types this group sets, first one deciding what it shows. */

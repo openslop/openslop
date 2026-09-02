@@ -1,18 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
-import type { VideoGenerateParams } from "@/lib/connectors/types";
+import type { ModelRef, VideoGenerateParams } from "@/lib/connectors/types";
 import type { TypedJobRow } from "@/lib/api/job-handlers";
 import { videoHandler } from "../video";
 
 const generate = vi.fn();
 const poll = vi.fn();
 
-vi.mock("@/lib/api/providers", async (importOriginal) => ({
-	...(await importOriginal<typeof import("@/lib/api/providers")>()),
-	videoProviderFor: async () => ({ generate, poll }),
+vi.mock("@/lib/api/providers/openslop", () => ({
+	hostedProviderFor: () => ({ generate, poll }),
 }));
 
-type VideoJobRow = TypedJobRow<VideoGenerateParams, { providerJobId?: string }>;
+type VideoJobRow = TypedJobRow<
+	VideoGenerateParams & ModelRef,
+	{ providerJobId?: string }
+>;
 
 const bundle = { id: "bundle-1" } as unknown as BundleResponse;
 
@@ -29,7 +31,7 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 		project_id: null,
 		connector_type: "video",
 		status: "processing",
-		request: { prompt: "a cat", model: "Slop Video v1" } as VideoGenerateParams,
+		request: { prompt: "a cat", provider: "openslop", model: "Slop Video v1" },
 		result: null,
 		metadata: { providerJobId: "upstream-1" },
 		error: null,

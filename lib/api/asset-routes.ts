@@ -1,86 +1,54 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
-import { providerForModel } from "@/lib/connectors/models";
-import type { ConnectorType } from "@/lib/connectors/types";
-import { requireConnector } from "./connectorKeys";
+import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import { createJob, enqueueJob, getJob } from "./jobs";
+import { bodySchema } from "./generation-schema";
 import { notFound } from "./response";
-import {
-	createApiParamRouteHandler,
-	createApiRouteHandler,
-	createSessionParamRouteHandler,
-	createSessionRouteHandler,
-} from "./route-handler";
+import type { RouteFamily } from "./route-families";
 
-type AssetBody = { projectId?: string; model?: string } & Record<
-	string,
-	unknown
->;
+type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
 
-type RouteOptions<TSchema extends z.ZodType> = {
+type AssetRoute<TModels, TShape extends z.ZodRawShape> = {
 	connectorType: ConnectorType;
-	schema: TSchema;
+	models: TModels;
+	fields: TShape;
 	label: string;
 };
 
-/** Queues one generation and answers with the job the client polls. */
-async function submitJob(job: {
-	userId: string;
-	projectId?: string;
-	connectorType: ConnectorType;
-	request: Record<string, unknown>;
-}): Promise<Response> {
-	const { id } = await createJob(job);
-	await enqueueJob(id, job.connectorType);
-	return NextResponse.json({ jobId: id, status: "pending" });
-}
+export const createAssetRouteHandler = <
+	TModels,
+	TPicked extends ModelRef,
+	TShape extends z.ZodRawShape,
+>(
+	family: RouteFamily<TModels, TPicked>,
+	route: AssetRoute<TModels, TShape>,
+) =>
+	family.createHandler({
+		// The intersection's inferred type does not survive a generic field
+		// shape; every route's body is this shape regardless.
+		schema: bodySchema(
+			family.model(route.models),
+			route.fields,
+		) as z.ZodType<AssetBody>,
+		label: route.label,
+		handle: async ({ user, input }) => {
+			const { projectId, ...request } = input;
+			const { id } = await createJob({
+				userId: user.id,
+				projectId,
+				connectorType: route.connectorType,
+				request,
+			});
+			await enqueueJob(id, route.connectorType);
+			return NextResponse.json({ jobId: id, status: "pending" });
+		},
+	});
 
-/**
- * Asset generation, queued as a job the client then polls. The tiers differ
- * only in who they let in and what they check first: the hosted routes bill our
- * own keys, and a BYOK route refuses before queueing when the account has no
- * key for the provider its model names, so no job is created that could only
- * fail. The job records the model's name and no routing decision of its own.
- */
-const assetRoutes =
-	(
-		createHandler: typeof createApiRouteHandler,
-		check?: (
-			userId: string,
-			connectorType: ConnectorType,
-			body: AssetBody,
-		) => Promise<void>,
-	) =>
-	<TSchema extends z.ZodType<AssetBody>>(opts: RouteOptions<TSchema>) => {
-		const POST = createHandler({
-			schema: opts.schema,
-			label: opts.label,
-			handle: async ({ user, input }) => {
-				await check?.(user.id, opts.connectorType, input);
-				const { projectId, ...request } = input;
-				return submitJob({
-					userId: user.id,
-					projectId,
-					connectorType: opts.connectorType,
-					request,
-				});
-			},
-		});
-		return { POST };
-	};
-
-export const createAssetRouteHandlers = assetRoutes(createApiRouteHandler);
-
-export const createThirdPartyAssetRouteHandlers = assetRoutes(
-	createSessionRouteHandler,
-	(userId, type, body) =>
-		requireConnector(userId, providerForModel(type, body.model)),
-);
-
-/** The job as its submitter may see it, whichever family they submitted through. */
-const jobPoller = (createHandler: typeof createApiParamRouteHandler) =>
-	createHandler({
+export const createJobPollHandler = (
+	family: Pick<RouteFamily<never, ModelRef>, "createParamHandler">,
+) =>
+	family.createParamHandler({
 		// A malformed id makes Postgres throw on the cast; guid() matches every
 		// shape it accepts, so anything else is a 404 before the query.
 		schema: z.object({ jobId: z.guid() }),
@@ -97,8 +65,3 @@ const jobPoller = (createHandler: typeof createApiParamRouteHandler) =>
 			return NextResponse.json(view);
 		},
 	});
-
-export const pollJob = jobPoller(createApiParamRouteHandler);
-
-/** The same poll, for a job the caller submitted against their own key. */
-export const pollThirdPartyJob = jobPoller(createSessionParamRouteHandler);

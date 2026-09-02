@@ -1,40 +1,39 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
-import { providerForModel, vendorModelFor } from "@/lib/connectors/models";
+import { modelEntry } from "@/lib/connectors/models";
 import type {
 	ConnectorType,
 	ImageGenerateParams,
+	ModelRef,
 	MusicGenerateParams,
 	SFXGenerateParams,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
 import { videoHandler } from "./handlers/video";
 import type { JobRow } from "./jobs";
-import {
-	imageProviderFor,
-	musicProviderFor,
-	sfxProviderFor,
-	ttsProviderFor,
-	type ProviderRequest,
-} from "./providers";
+import { providerForPick, type ProviderType } from "./route-families";
 
-/** The model a job named decides who runs it, and so whose key is read. */
-export const providerRequest = (job: {
-	user_id: string;
-	connector_type: ConnectorType;
-	request: { model?: string };
-}): ProviderRequest => ({
-	userId: job.user_id,
-	provider: providerForModel(job.connector_type, job.request.model),
-});
+type JobRequest = { user_id: string; request: ModelRef };
 
-/** The same params, with the id that provider's own API takes for the model. */
-export const vendorParams = <TReq extends { model?: string }>(job: {
+export const providerForJob = <K extends ProviderType>(
+	type: K,
+	job: JobRequest,
+) => providerForPick(job.user_id, type, job.request);
+
+export type VendorParams<TReq extends ModelRef> = Omit<
+	TReq,
+	"provider" | "model"
+> & { model: string };
+
+export const vendorParams = <TReq extends ModelRef>(job: {
 	connector_type: ConnectorType;
 	request: TReq;
-}): TReq => ({
-	...job.request,
-	model: vendorModelFor(job.connector_type, job.request.model),
-});
+}): VendorParams<TReq> => {
+	const { provider, model, ...rest } = job.request;
+	return {
+		...rest,
+		model: modelEntry(job.connector_type, { provider, model }).id,
+	};
+};
 
 export type ProcessOutcome<TMeta = Record<string, unknown>> =
 	| { kind: "completed"; result: BundleResponse }
@@ -52,26 +51,32 @@ export interface JobHandler<
 	process(job: TypedJobRow<TReq, TMeta>): Promise<ProcessOutcome<TMeta>>;
 }
 
-function assetHandler<TReq extends { model?: string }>(
+function assetHandler<TReq extends ModelRef>(
 	providerFor: (
-		request: ProviderRequest,
-	) => Promise<{ generate(p: TReq): Promise<BundleResponse> }>,
+		job: JobRequest,
+	) => Promise<{ generate(p: VendorParams<TReq>): Promise<BundleResponse> }>,
 ): JobHandler<TReq> {
 	return {
 		process: async (job) => ({
 			kind: "completed",
-			result: await (
-				await providerFor(providerRequest(job))
-			).generate(vendorParams(job)),
+			result: await (await providerFor(job)).generate(vendorParams(job)),
 		}),
 	};
 }
 
 const HANDLERS: Partial<Record<ConnectorType, JobHandler>> = {
-	image: assetHandler<ImageGenerateParams>(imageProviderFor),
-	music: assetHandler<MusicGenerateParams>(musicProviderFor),
-	sfx: assetHandler<SFXGenerateParams>(sfxProviderFor),
-	tts: assetHandler<TTSGenerateParams>(ttsProviderFor),
+	image: assetHandler<ImageGenerateParams & ModelRef>((job) =>
+		providerForJob("image", job),
+	),
+	music: assetHandler<MusicGenerateParams & ModelRef>((job) =>
+		providerForJob("music", job),
+	),
+	sfx: assetHandler<SFXGenerateParams & ModelRef>((job) =>
+		providerForJob("sfx", job),
+	),
+	tts: assetHandler<TTSGenerateParams & ModelRef>((job) =>
+		providerForJob("tts", job),
+	),
 	video: videoHandler,
 };
 

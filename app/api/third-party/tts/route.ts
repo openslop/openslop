@@ -1,8 +1,11 @@
-import { createThirdPartyAssetRouteHandlers } from "@/lib/api/asset-routes";
-import { bodySchema, TTS_FIELDS } from "@/lib/api/generation-schema";
+import { createAssetRouteHandler } from "@/lib/api/asset-routes";
+import { TTS_FIELDS } from "@/lib/api/generation-schema";
+import { BYOK } from "@/lib/api/route-families";
+import { BYOK_TTS_MODELS } from "@/lib/connectors/tts/models";
 
-export const { POST } = createThirdPartyAssetRouteHandlers({
+export const POST = createAssetRouteHandler(BYOK, {
 	connectorType: "tts",
-	schema: bodySchema("tts", "byok", TTS_FIELDS),
+	models: BYOK_TTS_MODELS,
+	fields: TTS_FIELDS,
 	label: "TTS generation",
 });

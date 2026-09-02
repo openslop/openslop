@@ -4,10 +4,14 @@ import { buildAnimatedImagePlugins } from "./animated_image/plugins/animated-ima
 import { buildImagePlugins } from "./image/plugins/imageChain";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
 import { createDimensionsPlugin } from "./plugins/dimensions";
-import { providerForModel } from "./models";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
-import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
+import type {
+	ConnectorConfig,
+	ConnectorPlugin,
+	ConnectorType,
+	ModelRef,
+} from "./types";
 
 /**
  * How each connector type is configured. One config per type, not per provider:
@@ -29,16 +33,12 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	music: {},
 };
 
-/**
- * The connector serving a model. Picking a model picks the provider, and so the
- * gateway and the key the generation runs on.
- */
 export function createModelConnector<T extends ConnectorType>(
 	registry: ConnectorRegistry,
 	type: T,
-	model: string | undefined,
+	model: ModelRef,
 ) {
-	return createConnector(type, providerForModel(type, model), registry[type]);
+	return createConnector(type, model, registry[type]);
 }
 
 export function withRegistry(registry: ConnectorRegistry) {

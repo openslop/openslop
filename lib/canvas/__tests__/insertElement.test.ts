@@ -6,7 +6,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 		const defaultAttributes = type === "tts" ? { emotion: "neutral" } : {};
 		return {
 			defaultAttributes,
-			keys: [],
+			keys: type === "tts" ? [] : ["model"],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,
@@ -16,7 +16,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { insertElement } from "../insertElement";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
 function makeEditor() {
@@ -77,23 +77,22 @@ describe("insertElement", () => {
 			children: Array<Record<string, unknown>>;
 		};
 		const inserted = scene.children[1];
-		const attrs = flatAttributes(inserted) as Record<string, string>;
-		expect(attrs.model).toBe(MODEL_CATALOGS.image.defaultModel);
+		expect(flatAttributes(inserted)).toMatchObject(DEFAULT_MODELS.image);
 	});
 
 	it("passes the project's configured model to the new element", () => {
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
 		const editor = makeEditor();
 		Editor.withoutNormalizing(editor, () => {
 			insertElement(editor, "image", [0, 1], {
-				defaultModels: { image: "Slop Image v1" },
+				defaultModels: { image: pinned },
 			});
 		});
 
 		const scene = editor.children[0] as {
 			children: Array<Record<string, unknown>>;
 		};
-		const attrs = flatAttributes(scene.children[1]) as Record<string, string>;
-		expect(attrs.model).toBe("Slop Image v1");
+		expect(flatAttributes(scene.children[1])).toMatchObject(pinned);
 	});
 
 	it("element without defaultAttributes gets undefined customAttributes base", () => {
@@ -107,7 +106,7 @@ describe("insertElement", () => {
 		};
 		const inserted = scene.children[1];
 		const attrs = flatAttributes(inserted) as Record<string, string>;
-		expect(attrs.model).toBe(MODEL_CATALOGS.image.defaultModel);
+		expect(attrs).toMatchObject(DEFAULT_MODELS.image);
 		expect(attrs.emotion).toBeUndefined();
 	});
 });

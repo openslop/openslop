@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { IMAGE_MODELS } from "@/lib/connectors/image/models";
-import { VIDEO_MODELS } from "@/lib/connectors/video/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { ANIMATED_IMAGE_ATTRIBUTES } from "../attributes";
 
 describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
@@ -12,23 +11,31 @@ describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 		expect(badges.stillModel?.label).toBe("Image model");
 	});
 
-	it("picks each from its own connector's models", () => {
+	it("picks each from its own connector's models, writing its own provider", () => {
 		expect(badges.model?.edit).toEqual({
 			kind: "model",
 			connector: "animated_image",
-			options: VIDEO_MODELS.names,
+			providerKey: "provider",
 		});
 		expect(badges.stillModel?.edit).toEqual({
 			kind: "model",
 			connector: "image",
-			options: IMAGE_MODELS.names,
+			providerKey: "stillProvider",
 		});
 	});
 
-	it("defaults both, so a new element names the model each generation runs on", () => {
+	it("keeps both providers off the settings popover", () => {
+		const settings = ANIMATED_IMAGE_ATTRIBUTES.settingsAttributes;
+		expect(settings.provider).toBeUndefined();
+		expect(settings.stillProvider).toBeUndefined();
+	});
+
+	it("defaults both pairs, so a new element names the model each generation runs on", () => {
 		expect(ANIMATED_IMAGE_ATTRIBUTES.defaultAttributes).toMatchObject({
-			model: VIDEO_MODELS.defaultModel,
-			stillModel: IMAGE_MODELS.defaultModel,
+			provider: DEFAULT_MODELS.video.provider,
+			model: DEFAULT_MODELS.video.model,
+			stillProvider: DEFAULT_MODELS.image.provider,
+			stillModel: DEFAULT_MODELS.image.model,
 		});
 	});
 });

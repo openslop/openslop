@@ -58,6 +58,32 @@ describe("createMetadataVoicePlugin", () => {
 		});
 	});
 
+	it("names the model the voice was picked for", () => {
+		store.getState().updateMetadata({
+			narration: { provider: "cartesia", model: "Sonic 3.5" },
+		});
+		const { model } = createMetadataVoicePlugin();
+		expect(
+			model?.({ id: "n1", type: "narration", children: [] }, store.getState()),
+		).toMatchObject({ provider: "cartesia", model: "Sonic 3.5" });
+	});
+
+	// The connector already carries the pair; only the voice's traits are merged.
+	it("keeps the voice's model out of the generation params", () => {
+		store.getState().updateMetadata({
+			narration: {
+				gender: "feminine",
+				provider: "cartesia",
+				model: "Sonic 3.5",
+			},
+		});
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(beforeGenerate?.({ prompt: "hello" }, stateCtx(store))).toEqual({
+			prompt: "hello",
+			gender: "feminine",
+		});
+	});
+
 	it("returns params unchanged when name references unknown character", () => {
 		store.getState().updateMetadata({
 			narration: { gender: "masculine" },

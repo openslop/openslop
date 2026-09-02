@@ -6,13 +6,12 @@ import {
 	MissingConnectorKeyError,
 	readConnectorKey,
 } from "@/lib/api/connectorKeys";
-import { verifyConnector } from "@/lib/api/providers";
+import { verifyConnector } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/request-schema-fields";
 import { createSessionParamRouteHandler } from "@/lib/api/route-handler";
 
 const paramsSchema = z.object({ provider: byokProviderField });
 
-/** Re-checks the stored key against the provider and records what it found. */
 export const POST = createSessionParamRouteHandler({
 	schema: paramsSchema,
 	label: "Connector test",

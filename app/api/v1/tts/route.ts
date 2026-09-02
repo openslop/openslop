@@ -1,8 +1,11 @@
-import { createAssetRouteHandlers } from "@/lib/api/asset-routes";
-import { bodySchema, TTS_FIELDS } from "@/lib/api/generation-schema";
+import { createAssetRouteHandler } from "@/lib/api/asset-routes";
+import { TTS_FIELDS } from "@/lib/api/generation-schema";
+import { HOSTED } from "@/lib/api/route-families";
+import { OPENSLOP_TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 
-export const { POST } = createAssetRouteHandlers({
+export const POST = createAssetRouteHandler(HOSTED, {
 	connectorType: "tts",
-	schema: bodySchema("tts", "hosted", TTS_FIELDS),
+	models: OPENSLOP_TTS_MODELS,
+	fields: TTS_FIELDS,
 	label: "TTS generation",
 });

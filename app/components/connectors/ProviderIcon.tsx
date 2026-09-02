@@ -4,11 +4,6 @@ import { providerMeta } from "@/lib/connectors/providerCatalog";
 import type { ProviderKey } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 
-/**
- * A provider's brand mark. Marks drawn in a single flat color are painted
- * through the icon set's mask, so they take the current text color and stay
- * legible in either theme; marks with their own palette are drawn as they are.
- */
 export function ProviderIcon({
 	provider,
 	size = 16,

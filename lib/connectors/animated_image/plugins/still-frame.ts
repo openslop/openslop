@@ -11,7 +11,7 @@ import {
 	type PluginContext,
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { resolveModel } from "@/lib/connectors/models";
 import {
 	derivedDependency,
 	derivedNodeId,
@@ -24,7 +24,12 @@ import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /** Attributes of the animation, which the still's image generation has no use for. */
-const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "model"] as const;
+const VIDEO_ONLY_KEYS = [
+	"videoPrompt",
+	"duration",
+	"provider",
+	"model",
+] as const;
 
 const STILL = "still";
 
@@ -38,14 +43,15 @@ export const stillElementId = (elementId: string) =>
 export function stillElement(
 	element: CanvasContentElement,
 ): CanvasContentElement {
-	const { stillModel, ...attributes } = element.generationAttributes ?? {};
+	const { stillProvider, stillModel, ...attributes } =
+		element.generationAttributes ?? {};
 	return {
 		...element,
 		id: stillElementId(element.id),
 		type: "image",
 		generationAttributes: {
 			...omit(attributes, VIDEO_ONLY_KEYS),
-			...(stillModel && { model: MODEL_CATALOGS.image.resolve(stillModel) }),
+			...resolveModel("image", { provider: stillProvider, model: stillModel }),
 		},
 	};
 }

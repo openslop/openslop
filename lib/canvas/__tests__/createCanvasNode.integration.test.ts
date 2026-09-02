@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "../createCanvasNode";
-import { IMAGE_MODELS } from "@/lib/connectors/image/models";
-import { SFX_MODELS } from "@/lib/connectors/sfx/models";
-import { TTS_MODELS } from "@/lib/connectors/tts/models";
-import { VIDEO_MODELS } from "@/lib/connectors/video/models";
+import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
+import { DEFAULT_SFX_MODEL } from "@/lib/connectors/sfx/models";
+import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
 // The model is a schema default like any other attribute, so the registry's own
@@ -15,8 +14,8 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
-			model: TTS_MODELS.defaultModel,
 		});
+		expect(flatAttributes(node).model).toBeUndefined();
 	});
 
 	it("applies the same TTS defaults for character", () => {
@@ -25,8 +24,8 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
-			model: TTS_MODELS.defaultModel,
 		});
+		expect(flatAttributes(node).model).toBeUndefined();
 	});
 
 	it("applies sfx defaults for sound", () => {
@@ -34,7 +33,7 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 		expect(flatAttributes(node)).toMatchObject({
 			loops: "1",
 			volume: "2",
-			model: SFX_MODELS.defaultModel,
+			...DEFAULT_SFX_MODEL,
 		});
 	});
 
@@ -44,14 +43,15 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			videoPrompt: "slow cinematic pan",
 			duration: "10",
 			motion: "none",
-			model: VIDEO_MODELS.defaultModel,
+			...DEFAULT_VIDEO_MODEL,
 		});
 	});
 
-	it("rejects a stillModel the image connector doesn't offer", () => {
-		const node = createCanvasNode("animated_image", {
-			attrs: { stillModel: VIDEO_MODELS.defaultModel },
+	it("seeds the still with the recommended image model", () => {
+		const node = createCanvasNode("animated_image");
+		expect(flatAttributes(node)).toMatchObject({
+			stillProvider: DEFAULT_IMAGE_MODEL.provider,
+			stillModel: DEFAULT_IMAGE_MODEL.model,
 		});
-		expect(flatAttributes(node).stillModel).toBe(IMAGE_MODELS.defaultModel);
 	});
 });

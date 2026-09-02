@@ -2,12 +2,12 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import { LLM_MODELS } from "@/lib/connectors/llm/models";
+import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 
 type SloppyModelChoice = {
-	model: string;
-	setModel: (model: string) => void;
+	model: ModelRef;
+	setModel: (model: ModelRef) => void;
 };
 
 const [SloppyModelContext, useSloppyModel] =
@@ -23,8 +23,8 @@ export { useSloppyModel };
  */
 export function SloppyModelProvider({ children }: { children: ReactNode }) {
 	const defaults = useDefaultModels();
-	const [picked, setPicked] = useState<string>();
-	const model = picked && LLM_MODELS.has(picked) ? picked : defaults.llm;
+	const [picked, setPicked] = useState<ModelRef>();
+	const model = picked ?? defaults.llm;
 
 	const choice = useMemo(() => ({ model, setModel: setPicked }), [model]);
 

@@ -1,4 +1,4 @@
-import { apiFetch, apiJson } from "./http";
+import { apiFetch, apiJson, type QueryParams } from "./http";
 
 export class ApiClient {
 	private baseUrl: string;
@@ -11,7 +11,7 @@ export class ApiClient {
 		return apiJson<T>(`${this.baseUrl}${path}`, { method: "POST", body });
 	}
 
-	async get<T>(path: string, params?: Record<string, string>): Promise<T> {
+	async get<T>(path: string, params?: QueryParams): Promise<T> {
 		return apiJson<T>(`${this.baseUrl}${path}`, { params });
 	}
 

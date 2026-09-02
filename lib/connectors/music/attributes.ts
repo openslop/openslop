@@ -1,9 +1,9 @@
 import { AttributeSchema } from "../attributes/schema";
 import { loopsDef, volumeDef } from "../attributes/common";
-import { modelDef } from "../attributes/model";
+import { modelDefs } from "../attributes/model";
 
 export const MUSIC_ATTRIBUTES = AttributeSchema.from([
-	modelDef("music"),
+	...modelDefs("music"),
 	loopsDef("1"),
 	volumeDef("2"),
 ]);

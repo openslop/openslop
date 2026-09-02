@@ -2,15 +2,15 @@
 
 import { type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { z } from "zod";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import { connectorModelsSchema } from "@/lib/connectors/models";
 import { AccountStoreProvider } from "./AccountStoreProvider";
 
 const [UserContext, useUser] = createRequiredContext<User>("UserProvider");
 export { useUser };
 
 /** Whatever the account last saved, ignored if it is not a model map. */
-const accountModelsSchema = z.record(z.string(), z.string()).catch({});
+const accountModelsSchema = connectorModelsSchema.catch({});
 
 export function UserProvider({
 	user,

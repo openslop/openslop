@@ -2,7 +2,6 @@ import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
 import { parseImageSource } from "./imageSource";
 
-/** A provider the user supplies a key for, parsed at the boundary. */
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
 const optionalCoercedNumber = z

@@ -6,7 +6,9 @@ import { mockGatewaySuccess } from "./_gateway-mock";
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/music/openslop/${TEST_ID}/output.mp3`;
 
-const config = { provider: "openslop" } as const;
+const config = {
+	model: { provider: "openslop", model: "Slop Music v1" },
+} as const;
 
 function mockSuccess() {
 	mockGatewaySuccess({

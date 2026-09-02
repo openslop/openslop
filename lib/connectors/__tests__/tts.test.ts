@@ -7,7 +7,9 @@ import { mockGatewaySequence } from "./_gateway-mock";
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
 
-const config = { provider: "openslop" } as const;
+const config = {
+	model: { provider: "openslop", model: "Slop TTS v1" },
+} as const;
 
 function mockSuccess() {
 	mockGatewaySequence([

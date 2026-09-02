@@ -9,18 +9,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@/components/ui/icon";
 import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { listModels, sameModel } from "@/lib/connectors/models";
 import {
 	providerMeta,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
-import { providerForModel } from "@/lib/connectors/models";
-import type { ConnectorType } from "@/lib/connectors/types";
+import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./ModelChips";
 import { ProviderIcon } from "./ProviderIcon";
 import { useMissingKey } from "./useConnectors";
+
+/** Read aloud, the icon says nothing, so the provider is spelled out. */
+export const modelLabel = ({ provider, model }: ModelRef): string =>
+	`${model} (${providerMeta(provider).name})`;
 
 /**
  * Every model a connector type offers, whether or not the account can run it.
@@ -36,13 +39,12 @@ export function ModelSelect({
 	children,
 }: {
 	type: ConnectorType;
-	value: string;
-	onChange: (model: string) => void;
+	value: ModelRef;
+	onChange: (model: ModelRef) => void;
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
 	children: ReactNode;
 }) {
-	const catalog = MODEL_CATALOGS[type];
 	const missingKey = useMissingKey();
 	const settings = useSettings();
 
@@ -56,15 +58,17 @@ export function ModelSelect({
 				// settings and history popovers it sits beside.
 				className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
 			>
-				{catalog.names.map((name) => {
-					const provider = catalog.providerFor(name);
+				{listModels(type).map(({ provider, model, cost, speed }) => {
 					const missing = missingKey(provider);
 					return (
 						<SelectMenuItem
-							key={name}
-							selected={name === value}
+							key={`${provider}/${model}`}
+							aria-label={modelLabel({ provider, model })}
+							selected={sameModel({ provider, model }, value)}
 							onSelect={() =>
-								missing ? settings.open("connectors", missing) : onChange(name)
+								missing
+									? settings.open("connectors", missing)
+									: onChange({ provider, model })
 							}
 							className="gap-2"
 						>
@@ -79,12 +83,12 @@ export function ModelSelect({
 									missing && "text-muted-foreground",
 								)}
 							>
-								{name}
+								{model}
 							</span>
 							{missing ? (
 								<ConnectHint provider={missing} />
 							) : (
-								<ModelChips meta={catalog.metaFor(name)} className="ml-auto" />
+								<ModelChips meta={{ cost, speed }} className="ml-auto" />
 							)}
 						</SelectMenuItem>
 					);
@@ -111,26 +115,19 @@ function ConnectHint({ provider }: { provider: BYOKProvider }) {
 	);
 }
 
-/**
- * The face a model picker hangs off where the trigger is part of the surface
- * rather than a form field: the provider's mark, the model, and the chevron
- * that says it opens.
- */
 export function ModelSelectTrigger({
-	connector,
 	model,
 	label,
 	...props
 }: ComponentProps<"button"> & {
-	connector: ConnectorType;
-	model: string;
+	model: ModelRef;
 	/** What this model is for, since one element can pick more than one. */
 	label: string;
 }) {
 	return (
-		<InlineMenuTrigger aria-label={`${label}: ${model}`} {...props}>
-			<ProviderIcon provider={providerForModel(connector, model)} size={12} />
-			<span className="min-w-0 truncate">{model}</span>
+		<InlineMenuTrigger aria-label={`${label}: ${modelLabel(model)}`} {...props}>
+			<ProviderIcon provider={model.provider} size={12} />
+			<span className="min-w-0 truncate">{model.model}</span>
 		</InlineMenuTrigger>
 	);
 }

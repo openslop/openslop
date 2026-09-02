@@ -1,5 +1,6 @@
 import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it } from "vitest";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
 	derivedFrom,
@@ -31,7 +32,7 @@ function node(
 		elementId: id,
 		elementType: "image",
 		connectorType: "image",
-		provider: "openslop",
+		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
 	};

@@ -17,39 +17,41 @@ import {
 } from "@/lib/agent/messages";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
-import type { ProviderKey } from "@/lib/connectors/types";
+import type { ModelRef } from "@/lib/connectors/types";
+import type { HostedProviders } from "./providers/openslop";
 import {
 	findOrCreateConversation,
 	listConversationMessages,
 	saveConversationMessage,
 } from "./conversations";
 import { logger } from "./logger";
-import { llmProviderFor } from "./providers";
 
 /** What one turn may spend before the tools come off and it has to end in a reply. */
 const MAX_TOOL_CALLS = 20;
 
 /** A turn as it arrives, before the message is parsed into a Sloppy one. */
-export type AgentTurnBody = {
+export type AgentTurnBody<TModel extends ModelRef = ModelRef> = TModel & {
 	projectId: string;
 	message: unknown;
 	context: AgentContext;
-	model?: string;
 };
 
 /**
  * What a turn is asked for. The routes differ only in which models they will
  * take, so the field carrying that is theirs to supply.
  */
-export const agentTurnSchema = (
-	model: z.ZodType<string | undefined>,
-): z.ZodType<AgentTurnBody> =>
-	z.object({
-		projectId: z.uuid(),
-		message: z.unknown(),
-		context: agentContextSchema,
-		model,
-	});
+export const agentTurnSchema = <TModel extends ModelRef>(
+	model: z.ZodType<TModel>,
+): z.ZodType<AgentTurnBody<TModel>> =>
+	z
+		.object({
+			projectId: z.uuid(),
+			message: z.unknown(),
+			context: agentContextSchema,
+		})
+		.and(model);
+
+export type AgentLLM = HostedProviders["llm"];
 
 export type AgentTurnRequest = {
 	projectId: string;
@@ -57,9 +59,9 @@ export type AgentTurnRequest = {
 	message: SloppyMessage;
 	context: AgentContext;
 	/** The provider's own model id: the route resolves it from the picked name. */
-	model?: string;
-	/** Whose key the turn runs on, resolved from the picked model. */
-	provider: ProviderKey;
+	model: string;
+	/** The provider the turn runs on, built with whichever key the route reads. */
+	llm: () => Promise<AgentLLM>;
 };
 
 /**
@@ -72,7 +74,7 @@ export async function streamAgentTurn(
 	// Reading the key this turn runs on depends on nothing else here, and would
 	// otherwise sit in front of the first token.
 	const [llm, conversationId] = await Promise.all([
-		llmProviderFor({ userId: request.userId, provider: request.provider }),
+		request.llm(),
 		findOrCreateConversation(request.projectId, request.userId),
 	]);
 	const history = await listConversationMessages(conversationId);

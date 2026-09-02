@@ -4,7 +4,6 @@ import { SelectMenuTrigger } from "@/components/ui/select-menu";
 import {
 	defaultModelFor,
 	modelSourceFor,
-	providerForModel,
 	type ConnectorModels,
 	type ModelDefaults,
 } from "@/lib/connectors/models";
@@ -14,7 +13,6 @@ import { ModelSelect } from "./ModelSelect";
 import { ProviderIcon } from "./ProviderIcon";
 import { MODEL_PROVENANCE } from "./provenance";
 
-/** Which scope of the chain a control writes to. */
 export type DefaultsTier = keyof ModelDefaults;
 
 /**
@@ -62,7 +60,7 @@ export function ModelDefaultControl({
 				className={cn("min-w-0", className)}
 			>
 				<ProviderIcon
-					provider={providerForModel(type, model)}
+					provider={model.provider}
 					size={14}
 					className={cn(!pinnedHere && "opacity-70")}
 				/>
@@ -72,7 +70,7 @@ export function ModelDefaultControl({
 						!pinnedHere && "text-muted-foreground",
 					)}
 				>
-					{model}
+					{model.model}
 				</span>
 			</SelectMenuTrigger>
 		</ModelSelect>

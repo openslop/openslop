@@ -6,6 +6,7 @@ import {
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/connectors/ModelSelect";
+import type { ModelRef } from "@/lib/connectors/types";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
 import { useSloppyModel } from "./SloppyModelProvider";
@@ -19,12 +20,12 @@ function ModelPicker({
 	model,
 	onChange,
 }: {
-	model: string;
-	onChange: (next: string) => void;
+	model: ModelRef;
+	onChange: (next: ModelRef) => void;
 }) {
 	return (
 		<ModelSelect type="llm" value={model} onChange={onChange} side="top">
-			<ModelSelectTrigger connector="llm" model={model} label="Model" />
+			<ModelSelectTrigger model={model} label="Model" />
 		</ModelSelect>
 	);
 }

@@ -1,11 +1,10 @@
 import { ApiClient } from "@/lib/clients/apiClient";
 import { readSSE } from "@/lib/api/sse";
-import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 	LLMStreamChunk,
-	ProviderKey,
+	ModelRef,
 	TTSGenerateParams,
 	VoiceInfo,
 	VoiceSearchParams,
@@ -18,16 +17,16 @@ import { apiPrefixFor } from "./prefix";
  * A generation reached through one of our own API prefixes: `/api/v1` serves
  * the models OpenSlop hosts, and the third-party prefix serves the ones a user
  * brings a key for. Every route under a prefix speaks the same protocol, so
- * which one to post to is the provider's decision, not a subclass's.
+ * which one to post to is the model's provider's decision, not a subclass's.
  */
 export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
 	protected readonly client: ApiClient;
 	protected readonly route: string;
 
-	constructor(provider: ProviderKey, path: string, baseUrl?: string) {
+	constructor(model: ModelRef, path: string, baseUrl?: string) {
 		super();
 		this.client = new ApiClient(baseUrl);
-		this.route = `${apiPrefixFor(provider)}/${path}`;
+		this.route = `${apiPrefixFor(model.provider)}/${path}`;
 	}
 
 	async generate(params: TParams): Promise<JobSubmission> {
@@ -47,10 +46,10 @@ export class HttpLLMGateway extends GatewayClient<
 	private readonly client: ApiClient;
 	private readonly route: string;
 
-	constructor(provider: ProviderKey, baseUrl?: string) {
+	constructor(model: ModelRef, baseUrl?: string) {
 		super();
 		this.client = new ApiClient(baseUrl);
-		this.route = `${apiPrefixFor(provider)}/llm`;
+		this.route = `${apiPrefixFor(model.provider)}/llm`;
 	}
 
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
@@ -73,26 +72,30 @@ export class HttpLLMGateway extends GatewayClient<
 
 export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 	constructor(
-		private readonly provider: ProviderKey,
+		private readonly model: ModelRef,
 		baseUrl?: string,
 	) {
-		super(provider, "tts", baseUrl);
+		super(model, "tts", baseUrl);
 	}
 
 	/**
-	 * A third-party voice search names its provider: unlike a generation it
-	 * carries no model to resolve one from, and the route has to know whose key
-	 * to read. The hosted route reads only its own.
+	 * A voice search names its model like a generation does, so the route knows
+	 * whose key to read. Previews are vendor files behind that same key, so each
+	 * comes back proxied through the route that can fetch it.
 	 */
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const query = {
-			...params,
-			...(this.provider !== MANAGED_PROVIDER && { provider: this.provider }),
-		} as Record<string, string>;
 		const result = await this.client.get<{ voices: VoiceInfo[] }>(
 			`${this.route}/voices`,
-			query,
+			{ ...params, ...this.model },
 		);
-		return result.voices;
+		return result.voices.map((voice) => ({
+			...voice,
+			previewUrl: voice.previewUrl && this.previewRoute(voice.previewUrl),
+		}));
+	}
+
+	private previewRoute(url: string): string {
+		const query = new URLSearchParams({ url, ...this.model });
+		return `${this.route}/voices/preview?${query}`;
 	}
 }

@@ -10,7 +10,7 @@ import type {
 	AssetResult,
 	ConnectorConfig,
 	ConnectorPlugin,
-	ProviderKey,
+	ModelRef,
 } from "@/lib/connectors/types";
 import type { ProjectData } from "@/lib/project/store";
 import {
@@ -26,7 +26,7 @@ export type GenerationJob = {
 	elementId: string;
 	elementType: CanvasElementType;
 	connectorType: AssetConnectorType;
-	provider: ProviderKey;
+	model: ModelRef;
 	config: ConnectorConfig;
 	/** The project state this job's inputs were resolved against. */
 	state: ProjectData;

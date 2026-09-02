@@ -13,7 +13,6 @@ export type ProviderMeta = {
 	mark: BrandMark;
 };
 
-/** A provider the user brings a key for, which is somewhere they can get one. */
 export type BYOKProviderMeta = ProviderMeta & { keysUrl: string };
 
 /**
@@ -54,16 +53,12 @@ export const PROVIDER_CATALOG: Record<typeof MANAGED_PROVIDER, ProviderMeta> &
 	},
 };
 
-/** The hosted provider, which every account can generate with. */
 export const MANAGED_PROVIDER = "openslop" as const;
 
-/** A provider reached with a key the user brings. */
 export type BYOKProvider = Exclude<ProviderKey, typeof MANAGED_PROVIDER>;
 
-/** Every provider a generation can run on, hosted first. */
 export const ALL_PROVIDERS = Object.keys(PROVIDER_CATALOG) as ProviderKey[];
 
-/** Providers the user supplies a key for, in the order they are offered. */
 export const BYOK_PROVIDERS = ALL_PROVIDERS.filter(
 	(key): key is BYOKProvider => key !== MANAGED_PROVIDER,
 );

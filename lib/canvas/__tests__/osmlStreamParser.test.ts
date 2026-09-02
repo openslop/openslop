@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
 import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
-import { IMAGE_MODELS } from "@/lib/connectors/image/models";
-import { VIDEO_MODELS } from "@/lib/connectors/video/models";
+import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
+import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
 describe("OSMLStreamParser", () => {
@@ -176,9 +176,7 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk("<image>a sunset</image>");
 
 		const nodes = s.getNodes() as ParsedElement[];
-		expect(flatAttributes(nodes[0])).toMatchObject({
-			model: IMAGE_MODELS.defaultModel,
-		});
+		expect(flatAttributes(nodes[0])).toMatchObject(DEFAULT_IMAGE_MODEL);
 	});
 });
 
@@ -187,11 +185,13 @@ describe("parseOSML", () => {
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
 		const [node] = parseOSML(
-			'<animated_image model="Slop Video v1" stillModel="Slop Image v1">a sunset</animated_image>',
+			'<animated_image provider="runware" model="Seedance 2 Fast" stillProvider="runware" stillModel="Seedream 5 Lite">a sunset</animated_image>',
 		);
 		expect(flatAttributes(node)).toMatchObject({
-			model: "Slop Video v1",
-			stillModel: "Slop Image v1",
+			provider: "runware",
+			model: "Seedance 2 Fast",
+			stillProvider: "runware",
+			stillModel: "Seedream 5 Lite",
 		});
 	});
 
@@ -199,7 +199,7 @@ describe("parseOSML", () => {
 		const [node] = parseOSML(
 			'<animated_image model="Slop Video v0">a sunset</animated_image>',
 		);
-		expect(flatAttributes(node).model).toBe(VIDEO_MODELS.defaultModel);
+		expect(flatAttributes(node)).toMatchObject(DEFAULT_VIDEO_MODEL);
 	});
 
 	it("parses a complete OSML string in one shot", () => {

@@ -8,11 +8,12 @@ import {
 } from "./plugins";
 import type {
 	Connector,
-	ConnectorConfig,
 	ConnectorPlugin,
 	ConnectorType,
 	GenerationContext,
+	ModelRef,
 	PluginContext,
+	ResolvedConnectorConfig,
 } from "./types";
 
 export abstract class BaseConnector<
@@ -21,6 +22,7 @@ export abstract class BaseConnector<
 > implements Connector {
 	abstract readonly type: ConnectorType;
 	protected plugins: ConnectorPlugin[];
+	protected readonly model: ModelRef;
 
 	/**
 	 * Attribute schema for this connector type/model. Types with no element-settings
@@ -31,8 +33,9 @@ export abstract class BaseConnector<
 		return AttributeSchema.from([]);
 	}
 
-	constructor(config: ConnectorConfig) {
+	constructor(config: ResolvedConnectorConfig) {
 		this.plugins = config.plugins ?? [];
+		this.model = config.model;
 	}
 
 	protected pluginContext(): PluginContext<TParams, TResult> {
@@ -44,7 +47,11 @@ export abstract class BaseConnector<
 		ctx: PluginContext<TParams, TResult>,
 	): Promise<TParams> {
 		const prompt = await runTransformPrompt(this.plugins, params.prompt, ctx);
-		return runBeforeGenerate(this.plugins, { ...params, prompt }, ctx);
+		return runBeforeGenerate(
+			this.plugins,
+			{ ...params, ...this.model, prompt },
+			ctx,
+		);
 	}
 
 	async generate(

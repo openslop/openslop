@@ -2,8 +2,10 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { imageFile } from "../request-schema-fields";
-import { pollJob } from "../asset-routes";
-import { bodySchema } from "../generation-schema";
+import { createJobPollHandler } from "../asset-routes";
+import { HOSTED } from "../route-families";
+import { OPENSLOP_IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
+import { bodySchema, hostedModel } from "../generation-schema";
 import {
 	createApiRouteHandler,
 	createSessionFormRouteHandler,
@@ -34,6 +36,8 @@ beforeEach(() => {
 	});
 });
 
+const VALID_BODY = { prompt: "hello", model: "Slop Image v1" };
+
 function makeRequest(body: unknown) {
 	return new NextRequest("http://localhost/api/test", {
 		method: "POST",
@@ -42,7 +46,7 @@ function makeRequest(body: unknown) {
 	});
 }
 
-const schema = bodySchema("image", "hosted", {});
+const schema = bodySchema(hostedModel(OPENSLOP_IMAGE_MODELS), {});
 
 function makeHandler(
 	handle?: Parameters<typeof createApiRouteHandler>[0]["handle"],
@@ -124,7 +128,7 @@ describe("createApiRouteHandler", () => {
 
 	// The name is what says which provider serves the model, so it survives the
 	// boundary; only the code that reaches a vendor turns it into that vendor's id.
-	it("passes the model through by name", async () => {
+	it("passes the model through by name, with the provider it runs on", async () => {
 		const handle = vi.fn(async () => NextResponse.json({ done: true }));
 		const handler = makeHandler(handle);
 		await handler(makeRequest({ prompt: "hello", model: "Slop Image v1" }));
@@ -134,6 +138,7 @@ describe("createApiRouteHandler", () => {
 				user: expect.objectContaining({ id: "user-1" }),
 				input: expect.objectContaining({
 					prompt: "hello",
+					provider: "openslop",
 					model: "Slop Image v1",
 				}),
 			}),
@@ -142,7 +147,7 @@ describe("createApiRouteHandler", () => {
 
 	it("returns successful response when valid", async () => {
 		const handler = makeHandler();
-		const res = await handler(makeRequest({ prompt: "hello" }));
+		const res = await handler(makeRequest(VALID_BODY));
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ ok: true, prompt: "hello" });
 	});
@@ -151,7 +156,7 @@ describe("createApiRouteHandler", () => {
 		const handler = makeHandler(async () => {
 			throw new Error("boom");
 		});
-		const res = await handler(makeRequest({ prompt: "hello" }));
+		const res = await handler(makeRequest(VALID_BODY));
 		expect(res.status).toBe(500);
 		const json = await res.json();
 		expect(json.error).toContain("TestRoute failed: ");
@@ -162,7 +167,7 @@ describe("createApiRouteHandler", () => {
 		const handler = makeHandler(async () => {
 			throw "raw string failure";
 		});
-		const res = await handler(makeRequest({ prompt: "hello" }));
+		const res = await handler(makeRequest(VALID_BODY));
 		expect(res.status).toBe(500);
 		const json = await res.json();
 		expect(json.error).toContain("TestRoute failed: ");
@@ -187,7 +192,7 @@ describe("createSessionRouteHandler", () => {
 
 	it("allows signed-in users without api_access", async () => {
 		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
-		const res = await makeUserHandler()(makeRequest({ prompt: "hello" }));
+		const res = await makeUserHandler()(makeRequest(VALID_BODY));
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ prompt: "hello" });
 	});
@@ -250,7 +255,8 @@ describe("createSessionFormRouteHandler", () => {
 	});
 });
 
-describe("pollJob", () => {
+describe("createJobPollHandler", () => {
+	const pollJob = createJobPollHandler(HOSTED);
 	const request = new NextRequest("http://localhost/api/v1/image/bruh");
 
 	function poll(jobId: string) {

@@ -70,7 +70,7 @@ export function ScriptProvider({
 				source,
 			);
 			for await (const chunk of connector.stream(
-				{ prompt, systemPrompt: system, model },
+				{ prompt, systemPrompt: system },
 				signal,
 			)) {
 				if (!chunk.text) continue;

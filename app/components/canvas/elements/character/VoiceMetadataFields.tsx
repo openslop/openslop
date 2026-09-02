@@ -8,6 +8,8 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
+import { resolveModel } from "@/lib/connectors/models";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import type { MetadataVoice } from "@/lib/project/types";
 import { EnumField, FieldLabel, TextField } from "./fields";
 import { VoicePicker } from "./VoicePicker";
@@ -94,12 +96,15 @@ export function MetadataVoicePicker({
 		() => ({ gender, age, pitch, accent, description, language }),
 		[gender, age, pitch, accent, description, language],
 	);
+	const defaults = useDefaultModels();
 
 	return (
 		<VoicePicker
 			filters={filters}
+			model={resolveModel("tts", voice, defaults.tts)}
 			selectedVoiceId={voice.voiceId ?? voice.resolvedVoiceId}
 			onSelect={(picked) => onChange({ voiceId: picked.id })}
+			onModelChange={onChange}
 		/>
 	);
 }

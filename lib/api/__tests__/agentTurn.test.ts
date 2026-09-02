@@ -22,10 +22,9 @@ const { conversations, provider } = vi.hoisted(() => ({
 }));
 
 vi.mock("../conversations", () => conversations);
-vi.mock("../providers", () => ({ llmProviderFor: async () => provider }));
 
 import type { AgentContext } from "@/lib/agent/context";
-import { streamAgentTurn } from "../agentTurn";
+import { streamAgentTurn, type AgentLLM } from "../agentTurn";
 
 const AGENT_CONTEXT: AgentContext = {
 	title: "",
@@ -107,8 +106,8 @@ async function runTurn(
 		userId: "u1",
 		message: options.message ?? asked("make it shorter"),
 		context: AGENT_CONTEXT,
-		model: options.model,
-		provider: "openslop",
+		model: options.model ?? "claude-opus-5",
+		llm: async () => provider as unknown as AgentLLM,
 	});
 	return chunksOf(response);
 }
@@ -321,14 +320,10 @@ describe("a turn that takes more than one step", () => {
 describe("model selection", () => {
 	// The picked name is resolved to the provider's id at the route boundary.
 	it("runs the model the request names", async () => {
-		await runTurn(TEXT_TURN, { model: "claude-opus-5" });
+		await runTurn(TEXT_TURN, { model: "claude-haiku-4-5-20251001" });
 
-		expect(provider.agentModel).toHaveBeenCalledWith("claude-opus-5");
-	});
-
-	it("leaves the provider on its own default when nothing was picked", async () => {
-		await runTurn(TEXT_TURN);
-
-		expect(provider.agentModel).toHaveBeenCalledWith(undefined);
+		expect(provider.agentModel).toHaveBeenCalledWith(
+			"claude-haiku-4-5-20251001",
+		);
 	});
 });

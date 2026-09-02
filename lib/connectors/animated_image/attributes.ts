@@ -2,13 +2,14 @@ import { Image } from "@/components/ui/icon";
 import { AttributeSchema } from "../attributes/schema";
 import { DEFAULT_DURATION } from "@/lib/canvas/types";
 import { durationDef, motionDef } from "../attributes/common";
-import { modelDef } from "../attributes/model";
+import { modelDefs } from "../attributes/model";
 import { referenceImagesDef } from "../attributes/referenceImages";
 
 export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
-	modelDef("animated_image", { label: "Video model" }),
-	modelDef("image", {
+	...modelDefs("animated_image", { label: "Video model" }),
+	...modelDefs("image", {
 		key: "stillModel",
+		providerKey: "stillProvider",
 		label: "Image model",
 		icon: Image,
 	}),

@@ -7,7 +7,7 @@ import {
 	Minutes3,
 	type IconComponent,
 } from "@/components/ui/icon";
-import type { ModelMeta, Tier } from "@/lib/connectors/modelCatalog";
+import type { ModelMeta, Tier } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 import { IconChip } from "./IconChip";
 

@@ -6,6 +6,7 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
+import { connectorModelsSchema, modelRefSchema } from "@/lib/connectors/models";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
 import { VideoSettingsSchema } from "@/lib/video/videoSettings";
 
@@ -29,6 +30,8 @@ const voiceTraitsSchema = z.object({
 export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	voiceId: optionalString,
 	resolvedVoiceId: optionalString,
+	provider: modelRefSchema.shape.provider.optional().catch(undefined),
+	model: optionalString,
 });
 
 /** What describes a voice, as opposed to identifying one, in reading order. */
@@ -67,6 +70,15 @@ export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 
 export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
 
+export const metadataVoiceFor = (
+	metadata: {
+		narration: MetadataVoice;
+		characters: Record<string, MetadataVoice>;
+	},
+	characterName?: string,
+): MetadataVoice | undefined =>
+	characterName ? metadata.characters[characterName] : metadata.narration;
+
 export const MetadataSchema = z.object({
 	title: z.string().default(""),
 	style: z.string().default(""),
@@ -78,7 +90,7 @@ export const MetadataSchema = z.object({
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
 	videoSettings: VideoSettingsSchema,
 	/** The model each connector type generates with, when the project pins one. */
-	connectorModels: z.record(z.string(), z.string()).default({}),
+	connectorModels: connectorModelsSchema.default({}),
 	/** The template the project's scripts are written against, when it has one. */
 	templateId: optionalString,
 });

@@ -16,7 +16,10 @@ vi.mock("@/lib/connectors/factory", () => ({
 		const defaultAttributes = SCHEMA_DEFAULTS[type] ?? {};
 		return {
 			defaultAttributes,
-			keys: Object.keys(defaultAttributes),
+			keys: [
+				...(type === "tts" ? [] : ["model"]),
+				...Object.keys(defaultAttributes),
+			],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,
@@ -26,7 +29,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { applyRefineOp, applyRefineOps } from "../applyOps";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 
 const ZWSP = "\u200B";
@@ -229,7 +232,7 @@ describe("applyRefineOp — insert", () => {
 		}
 		expect(flatAttributes(nodes[0])).toEqual({
 			loops: "3",
-			model: MODEL_CATALOGS.sfx.defaultModel,
+			...DEFAULT_MODELS.sfx,
 		});
 	});
 });
@@ -373,7 +376,7 @@ describe("applyRefineOp — set", () => {
 		const el = getNode(editor, "n1");
 		expect(el.type).toBe("animated_image");
 		expect(flatAttributes(el)).toEqual({
-			model: MODEL_CATALOGS.animated_image.defaultModel,
+			...DEFAULT_MODELS.animated_image,
 			characters: "Red,Granny",
 			duration: "5",
 			videoPrompt: "slow push-in",

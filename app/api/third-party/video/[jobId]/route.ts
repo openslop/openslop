@@ -1,3 +1,4 @@
-import { pollThirdPartyJob } from "@/lib/api/asset-routes";
+import { createJobPollHandler } from "@/lib/api/asset-routes";
+import { BYOK } from "@/lib/api/route-families";
 
-export const GET = pollThirdPartyJob;
+export const GET = createJobPollHandler(BYOK);

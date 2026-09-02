@@ -1,23 +1,28 @@
-import { MODEL_CATALOGS } from "../models";
+import { DEFAULT_MODELS } from "../models";
 import type { ConnectorType } from "../types";
 import type { AttributeDef } from "./schema";
 
-/**
- * The model a generation runs on. An ordinary enum attribute, so an element type
- * that runs two generations declares two of them — naming the connector type
- * each one picks from, which is also what its provider is resolved from.
- */
-export const modelDef = (
+/** Two attributes rather than one: a model name is only unique within its provider. */
+export const modelDefs = (
 	type: ConnectorType,
-	overrides: Partial<AttributeDef> = {},
-): AttributeDef => {
-	const catalog = MODEL_CATALOGS[type];
-	return {
-		key: "model",
+	{
+		key = "model",
+		providerKey = "provider",
+		...spec
+	}: Partial<AttributeDef> & { providerKey?: string } = {},
+): AttributeDef[] => [
+	{
+		key: providerKey,
+		label: "Provider",
+		hidden: true,
+		default: DEFAULT_MODELS[type].provider,
+	},
+	{
+		key,
 		label: "Model",
 		badge: true,
-		edit: { kind: "model", connector: type, options: catalog.names },
-		default: catalog.defaultModel,
-		...overrides,
-	};
-};
+		edit: { kind: "model", connector: type, providerKey },
+		default: DEFAULT_MODELS[type].model,
+		...spec,
+	},
+];

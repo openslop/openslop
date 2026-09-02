@@ -57,7 +57,7 @@ export function useAgentTools(editor: Editor) {
 				generateText: async (prompt, options) => {
 					const model = defaultModels().llm;
 					const llm = createModelConnector(connectorConfig, "llm", model);
-					const { text } = await llm.generate({ prompt, model, ...options });
+					const { text } = await llm.generate({ prompt, ...options });
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,

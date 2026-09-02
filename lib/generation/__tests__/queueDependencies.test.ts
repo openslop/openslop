@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
 import { MetadataSchema } from "@/lib/project/types";
 import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
@@ -24,7 +25,7 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 		elementId: id,
 		elementType: "image",
 		connectorType: "image",
-		provider: "openslop",
+		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
 	};

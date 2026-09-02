@@ -1,8 +1,11 @@
-import { createAssetRouteHandlers } from "@/lib/api/asset-routes";
-import { bodySchema, IMAGE_FIELDS } from "@/lib/api/generation-schema";
+import { createAssetRouteHandler } from "@/lib/api/asset-routes";
+import { IMAGE_FIELDS } from "@/lib/api/generation-schema";
+import { HOSTED } from "@/lib/api/route-families";
+import { OPENSLOP_IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 
-export const { POST } = createAssetRouteHandlers({
+export const POST = createAssetRouteHandler(HOSTED, {
 	connectorType: "image",
-	schema: bodySchema("image", "hosted", IMAGE_FIELDS),
+	models: OPENSLOP_IMAGE_MODELS,
+	fields: IMAGE_FIELDS,
 	label: "Image generation",
 });

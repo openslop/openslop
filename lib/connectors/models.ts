@@ -1,17 +1,27 @@
-import { IMAGE_MODELS } from "./image/models";
-import { LLM_MODELS } from "./llm/models";
-import type { ModelCatalog } from "./modelCatalog";
-import { MUSIC_MODELS } from "./music/models";
-import { SFX_MODELS } from "./sfx/models";
-import { TTS_MODELS } from "./tts/models";
-import { CONNECTOR_TYPES, type ConnectorType, type ProviderKey } from "./types";
-import { VIDEO_MODELS } from "./video/models";
+import { z } from "zod";
+import { DEFAULT_IMAGE_MODEL, IMAGE_MODELS } from "./image/models";
+import { DEFAULT_LLM_MODEL, LLM_MODELS } from "./llm/models";
+import { DEFAULT_MUSIC_MODEL, MUSIC_MODELS } from "./music/models";
+import { ALL_PROVIDERS } from "./providerCatalog";
+import { DEFAULT_SFX_MODEL, SFX_MODELS } from "./sfx/models";
+import { DEFAULT_TTS_MODEL, TTS_MODELS } from "./tts/models";
+import {
+	CONNECTOR_TYPES,
+	type ConnectorType,
+	type ModelEntry,
+	type ModelPick,
+	type ModelRef,
+	type ModelsByProvider,
+	type ProviderKey,
+} from "./types";
+import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
 
 /**
- * The catalog each connector type picks from. An animated image animates a
- * video model; the still it is made from picks separately, from the image one.
+ * Every model each connector type offers, by the provider serving it. An
+ * animated image animates a video model; the still it is made from picks
+ * separately, from the image ones.
  */
-export const MODEL_CATALOGS: Record<ConnectorType, ModelCatalog> = {
+export const MODELS: Record<ConnectorType, ModelsByProvider> = {
 	llm: LLM_MODELS,
 	tts: TTS_MODELS,
 	image: IMAGE_MODELS,
@@ -21,18 +31,68 @@ export const MODEL_CATALOGS: Record<ConnectorType, ModelCatalog> = {
 	music: MUSIC_MODELS,
 };
 
-export const providerForModel = (
-	type: ConnectorType,
-	model: string | undefined,
-): ProviderKey => MODEL_CATALOGS[type].providerFor(model);
+export const DEFAULT_MODELS: Record<ConnectorType, ModelRef> = {
+	llm: DEFAULT_LLM_MODEL,
+	tts: DEFAULT_TTS_MODEL,
+	image: DEFAULT_IMAGE_MODEL,
+	animated_image: DEFAULT_VIDEO_MODEL,
+	video: DEFAULT_VIDEO_MODEL,
+	sfx: DEFAULT_SFX_MODEL,
+	music: DEFAULT_MUSIC_MODEL,
+};
 
-export const vendorModelFor = (
-	type: ConnectorType,
-	model: string | undefined,
-): string => MODEL_CATALOGS[type].idFor(model);
+const tableFor = (type: ConnectorType, provider: string | undefined) =>
+	provider === undefined
+		? undefined
+		: (MODELS[type] as Partial<Record<string, Record<string, ModelEntry>>>)[
+				provider
+			];
 
-/** The model each connector type generates with, as one scope configures it. */
-export type ConnectorModels = Record<string, string>;
+export const hasModel = (
+	type: ConnectorType,
+	pick: ModelPick | undefined,
+): pick is ModelRef =>
+	pick?.model !== undefined &&
+	tableFor(type, pick.provider)?.[pick.model] !== undefined;
+
+export function modelEntry(type: ConnectorType, ref: ModelRef): ModelEntry {
+	const entry = tableFor(type, ref.provider)?.[ref.model];
+	if (!entry)
+		throw new Error(`"${ref.provider}" has no ${type} model "${ref.model}"`);
+	return entry;
+}
+
+export const sameModel = (a: ModelRef, b: ModelRef): boolean =>
+	a.provider === b.provider && a.model === b.model;
+
+export const resolveModel = (
+	type: ConnectorType,
+	...candidates: (ModelPick | undefined)[]
+): ModelRef =>
+	candidates.find((pick) => hasModel(type, pick)) ?? DEFAULT_MODELS[type];
+
+export function listModels(type: ConnectorType): (ModelRef & ModelEntry)[] {
+	return Object.entries(MODELS[type]).flatMap(([provider, table]) =>
+		Object.entries(table).map(([model, entry]) => ({
+			provider: provider as ProviderKey,
+			model,
+			...entry,
+		})),
+	);
+}
+
+export function modalitiesFor(provider: ProviderKey): ConnectorType[] {
+	return CONNECTOR_TYPES.filter((type) => MODELS[type][provider] !== undefined);
+}
+
+export const modelRefSchema = z.object({
+	provider: z.enum(ALL_PROVIDERS),
+	model: z.string(),
+});
+
+export const connectorModelsSchema = z.record(z.string(), modelRefSchema);
+
+export type ConnectorModels = z.infer<typeof connectorModelsSchema>;
 
 /**
  * The scopes a model default can come from, outermost last. An element's own
@@ -46,18 +106,11 @@ export type ModelDefaults = {
 
 export type ModelSource = "element" | "project" | "account" | "recommended";
 
-/**
- * The model a new element is created with: the nearest scope that names one the
- * catalog still offers, and the catalog's own default otherwise.
- */
 export function defaultModelFor(
 	type: ConnectorType,
 	defaults: ModelDefaults = {},
-): string {
-	return MODEL_CATALOGS[type].resolve(
-		defaults.project?.[type],
-		defaults.account?.[type],
-	);
+): ModelRef {
+	return resolveModel(type, defaults.project?.[type], defaults.account?.[type]);
 }
 
 /**
@@ -68,14 +121,12 @@ export function defaultModelFor(
  */
 export function modelSourceFor(
 	type: ConnectorType,
-	model: string,
+	model: ModelRef,
 	defaults: ModelDefaults = {},
 ): ModelSource {
-	if (model !== defaultModelFor(type, defaults)) return "element";
-	const offered = (name?: string) =>
-		Boolean(name && MODEL_CATALOGS[type].has(name));
-	if (offered(defaults.project?.[type])) return "project";
-	if (offered(defaults.account?.[type])) return "account";
+	if (!sameModel(model, defaultModelFor(type, defaults))) return "element";
+	if (hasModel(type, defaults.project?.[type])) return "project";
+	if (hasModel(type, defaults.account?.[type])) return "account";
 	return "recommended";
 }
 
@@ -86,38 +137,16 @@ export function modelSourceFor(
  * resolves back to the default, so it does not count either.
  */
 export function differsFromRecommended(models: ConnectorModels): boolean {
-	return Object.entries(models).some(([type, model]) => {
-		const catalog = MODEL_CATALOGS[type as ConnectorType];
-		return catalog && catalog.resolve(model) !== catalog.defaultModel;
-	});
+	return CONNECTOR_TYPES.some(
+		(type) =>
+			!sameModel(resolveModel(type, models[type]), DEFAULT_MODELS[type]),
+	);
 }
 
-/**
- * Every connector type's effective model, so the places that create elements
- * read one flat map instead of walking the scopes themselves.
- */
 export function resolveDefaultModels(
 	defaults: ModelDefaults = {},
 ): ConnectorModels {
 	return Object.fromEntries(
 		CONNECTOR_TYPES.map((type) => [type, defaultModelFor(type, defaults)]),
 	);
-}
-
-/** What a provider can generate here: the types whose catalogs it serves. */
-export function modalitiesFor(provider: ProviderKey): ConnectorType[] {
-	return CONNECTOR_TYPES.filter((type) =>
-		MODEL_CATALOGS[type].providers.includes(provider),
-	);
-}
-
-/** Every model a provider serves, once each, across the types it covers. */
-export function modelNamesForProvider(provider: ProviderKey): string[] {
-	return [
-		...new Set(
-			modalitiesFor(provider).flatMap((type) =>
-				MODEL_CATALOGS[type].namesFor(provider),
-			),
-		),
-	];
 }

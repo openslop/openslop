@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CONNECTOR_GROUPS, groupFor } from "../connectorConfigs";
-import { MODEL_CATALOGS } from "../models";
+import { MODELS } from "../models";
 import { CONNECTOR_TYPES } from "../types";
 
 describe("CONNECTOR_GROUPS", () => {
@@ -15,10 +15,10 @@ describe("CONNECTOR_GROUPS", () => {
 		for (const { key, types } of CONNECTOR_GROUPS) {
 			const [first, ...rest] = types;
 			for (const type of rest) {
-				expect(
-					{ key, models: MODEL_CATALOGS[type].names },
-					`${key} spans catalogs`,
-				).toEqual({ key, models: MODEL_CATALOGS[first].names });
+				expect({ key, models: MODELS[type] }, `${key} spans catalogs`).toEqual({
+					key,
+					models: MODELS[first],
+				});
 			}
 		}
 	});

@@ -6,13 +6,12 @@ import { HttpSFXConnector } from "./sfx/connector";
 import { HttpTTSConnector } from "./tts/connector";
 import { HttpVideoConnector } from "./video/connector";
 import type { AttributeSchema } from "./attributes/schema";
-import { MODEL_CATALOGS } from "./models";
 import type {
 	ConnectorConfig,
 	ConnectorType,
 	LLMConnector,
+	ModelRef,
 	ProviderConstructor,
-	ProviderKey,
 	TTSConnector,
 } from "./types";
 
@@ -41,36 +40,20 @@ const CONNECTORS: Record<ConnectorType, ProviderConstructor> = {
 	video: HttpVideoConnector,
 };
 
-/**
- * The class that serves a (type, provider). The catalog decides who is on the
- * list: a provider serves a type exactly when it has models there, so wiring a
- * model in is all it takes to make its provider reachable.
- */
-function providerCtor(
-	type: ConnectorType,
-	provider: ProviderKey,
-): ProviderConstructor {
-	if (!MODEL_CATALOGS[type].providers.includes(provider))
-		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
-	return CONNECTORS[type];
-}
-
 export function createConnector<T extends ConnectorType>(
 	type: T,
-	provider: ProviderKey,
+	model: ModelRef,
 	config: ConnectorConfig,
 ): ConnectorTypeMap[T] {
-	return new (providerCtor(type, provider))({
+	return new CONNECTORS[type]({
 		...config,
-		provider,
+		model,
 	}) as ConnectorTypeMap[T];
 }
 
-/** Resolve the attribute schema for a (connectorType, provider, model), via the same class hierarchy `createConnector` instantiates. */
 export function resolveAttributeSchema(
 	type: ConnectorType,
-	provider: ProviderKey,
-	model?: string,
+	model: ModelRef,
 ): AttributeSchema {
-	return providerCtor(type, provider).attributesFor(model);
+	return CONNECTORS[type].attributesFor(model.model);
 }

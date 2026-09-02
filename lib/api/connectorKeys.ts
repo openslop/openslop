@@ -126,27 +126,6 @@ export async function setConnectorStatus(
 	);
 }
 
-/**
- * Refuses early when the account has no key for a provider, before a job is
- * created for a generation that could only fail. Reads the row rather than the
- * secret, so nothing is decrypted to answer a question about existence.
- */
-export async function requireConnector(
-	userId: string,
-	provider: ProviderKey,
-): Promise<void> {
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("connectors")
-		.select("provider")
-		.eq("user_id", userId)
-		.eq("provider", provider)
-		.maybeSingle();
-	if (error) throw new Error(`Failed to load connector: ${error.message}`);
-	if (!data) throw new MissingConnectorKeyError(provider);
-}
-
-/** What every connector mutation answers with: the fresh list, and any verdict. */
 export async function connectorsView(
 	userId: string,
 	validation?: ValidationResult,

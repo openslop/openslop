@@ -5,7 +5,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 		const defaultAttributes = type === "sfx" ? { loops: "1" } : {};
 		return {
 			defaultAttributes,
-			keys: [],
+			keys: type === "tts" ? [] : ["model"],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,
@@ -15,7 +15,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { createCanvasNode } from "../createCanvasNode";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const ZWSP = "​";
@@ -43,46 +43,65 @@ describe("createCanvasNode", () => {
 		});
 	});
 
-	it("takes the catalog's default model", () => {
-		const node = createCanvasNode("narration");
-		expect(flatAttributes(node).model).toBe(MODEL_CATALOGS.tts.defaultModel);
-	});
-
-	// The provider is resolved from the model wherever it is needed.
-	it("stores no provider of its own", () => {
-		expect(flatAttributes(createCanvasNode("narration"))).not.toHaveProperty(
-			"provider",
-		);
+	it("takes the recommended model, provider and name", () => {
+		const node = createCanvasNode("sound");
+		expect(flatAttributes(node)).toMatchObject(DEFAULT_MODELS.sfx);
 	});
 
 	it("takes the model the project configured for the connector type", () => {
-		const node = createCanvasNode("narration", {
-			defaultModels: { tts: "Slop TTS v1" },
+		const pinned = {
+			provider: "elevenlabs",
+			model: "Eleven Text to Sound v2",
+		} as const;
+		const node = createCanvasNode("sound", {
+			defaultModels: { sfx: pinned },
 		});
-		expect(flatAttributes(node).model).toBe("Slop TTS v1");
+		expect(flatAttributes(node)).toMatchObject(pinned);
 	});
 
 	// A project can name a model that has since been retired.
-	it("falls back to the catalog when the project names an unknown model", () => {
-		const node = createCanvasNode("narration", {
-			defaultModels: { tts: "Retired v0" },
+	it("falls back to the recommendation when the project names an unknown model", () => {
+		const node = createCanvasNode("sound", {
+			defaultModels: { sfx: { provider: "openslop", model: "Retired v0" } },
 		});
-		expect(flatAttributes(node).model).toBe(MODEL_CATALOGS.tts.defaultModel);
+		expect(flatAttributes(node)).toMatchObject(DEFAULT_MODELS.sfx);
+	});
+
+	// Speech inherits its model from the voice in project metadata.
+	it("gives a narration no model of its own", () => {
+		const attrs = flatAttributes(
+			createCanvasNode("narration", {
+				defaultModels: { tts: DEFAULT_MODELS.tts },
+			}),
+		);
+		expect(attrs.provider).toBeUndefined();
+		expect(attrs.model).toBeUndefined();
 	});
 
 	it("keeps a caller-supplied model over the project's", () => {
 		const node = createCanvasNode("image", {
-			attrs: { model: "Slop Image v1" },
-			defaultModels: { image: "Retired v0" },
+			attrs: { provider: "runware", model: "Seedream 5 Lite" },
+			defaultModels: { image: { provider: "openslop", model: "Retired v0" } },
 		});
-		expect(flatAttributes(node).model).toBe("Slop Image v1");
+		expect(flatAttributes(node)).toMatchObject({
+			provider: "runware",
+			model: "Seedream 5 Lite",
+		});
 	});
 
-	it("falls back to the catalog when the caller names an unknown model", () => {
+	// A name is only meaningful on its own provider.
+	it("falls back to the recommendation when the caller pairs a model with the wrong provider", () => {
 		const node = createCanvasNode("image", {
-			attrs: { model: MODEL_CATALOGS.video.defaultModel },
+			attrs: { provider: "openslop", model: "Seedream 5 Lite" },
 		});
-		expect(flatAttributes(node).model).toBe(MODEL_CATALOGS.image.defaultModel);
+		expect(flatAttributes(node)).toMatchObject(DEFAULT_MODELS.image);
+	});
+
+	it("falls back to the recommendation when the caller names an unknown model", () => {
+		const node = createCanvasNode("image", {
+			attrs: DEFAULT_MODELS.video,
+		});
+		expect(flatAttributes(node)).toMatchObject(DEFAULT_MODELS.image);
 	});
 
 	it("preserves provided id", () => {

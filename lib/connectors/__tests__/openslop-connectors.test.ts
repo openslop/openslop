@@ -7,7 +7,8 @@ import { HttpTTSConnector } from "../tts/connector";
 import { HttpVideoConnector } from "../video/connector";
 import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 
-const config = { provider: "openslop" } as const;
+const config = (model: string) =>
+	({ model: { provider: "openslop", model } }) as const;
 
 function jsonResponse(data: unknown, status = 200) {
 	return new Response(JSON.stringify(data), {
@@ -38,7 +39,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 			}),
 		);
 
-		const c = new HttpLLMConnector(config);
+		const c = new HttpLLMConnector(config("Slop LLM v1"));
 		const result = await c.generate({ prompt: "hello" });
 
 		expect(result.text).toBe("Hello");
@@ -59,7 +60,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 			}),
 		);
 
-		const c = new HttpLLMConnector(config);
+		const c = new HttpLLMConnector(config("Slop LLM v1"));
 		const chunks: { text: string; done: boolean }[] = [];
 		for await (const chunk of c.stream({ prompt: "hi" })) {
 			chunks.push(chunk);
@@ -73,7 +74,9 @@ describe("OpenSlop connectors (via gateways)", () => {
 
 	it("Music: generate returns AssetResult with url", async () => {
 		const bundleUrl = mockAsset("music", { audio: "output.mp3" });
-		const result = await new HttpMusicConnector(config).generate({
+		const result = await new HttpMusicConnector(
+			config("Slop Music v1"),
+		).generate({
 			prompt: "jazz",
 		});
 		expect(result.audioUrl).toBe(`${bundleUrl}/output.mp3`);
@@ -81,7 +84,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 
 	it("SFX: generate returns AssetResult with url", async () => {
 		const bundleUrl = mockAsset("sfx", { audio: "output.mp3" });
-		const result = await new HttpSFXConnector(config).generate({
+		const result = await new HttpSFXConnector(config("Slop SFX v1")).generate({
 			prompt: "boom",
 		});
 		expect(result.audioUrl).toBe(`${bundleUrl}/output.mp3`);
@@ -89,7 +92,9 @@ describe("OpenSlop connectors (via gateways)", () => {
 
 	it("Image: generate returns AssetResult with url", async () => {
 		const bundleUrl = mockAsset("image", { image: "output.png" });
-		const result = await new HttpImageConnector(config).generate({
+		const result = await new HttpImageConnector(
+			config("Slop Image v1"),
+		).generate({
 			prompt: "mountain",
 		});
 		expect(result.imageUrl).toBe(`${bundleUrl}/output.png`);
@@ -111,7 +116,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 			{ payload: [{ text: "hello", start: 0, end: 0.5 }] },
 		]);
 
-		const result = await new HttpTTSConnector(config).generate({
+		const result = await new HttpTTSConnector(config("Slop TTS v1")).generate({
 			prompt: "hello",
 			voiceId: "v1",
 		});
@@ -128,7 +133,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 			}),
 		);
 
-		const c = new HttpTTSConnector(config);
+		const c = new HttpTTSConnector(config("Slop TTS v1"));
 		const voices = await c.searchVoices({ query: "test" });
 
 		expect(voices).toHaveLength(1);
@@ -137,7 +142,9 @@ describe("OpenSlop connectors (via gateways)", () => {
 
 	it("Video: generate returns AssetResult with url", async () => {
 		mockAsset("video", { video: "https://cdn.example.com/v.mp4" });
-		const result = await new HttpVideoConnector(config).generate({
+		const result = await new HttpVideoConnector(
+			config("Slop Video v1"),
+		).generate({
 			prompt: "sunset",
 		});
 		expect(result.videoUrl).toBe("https://cdn.example.com/v.mp4");

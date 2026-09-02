@@ -3,7 +3,6 @@ import type { ConnectorType } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 import { IconChip } from "./IconChip";
 
-/** What a provider can generate, one mark per kind it covers. */
 export function ModalityPills({
 	modalities,
 	className,

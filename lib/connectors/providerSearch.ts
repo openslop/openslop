@@ -1,9 +1,16 @@
-import { modalitiesFor, modelNamesForProvider } from "./models";
+import { MODELS, modalitiesFor } from "./models";
 import { ALL_PROVIDERS, providerMeta } from "./providerCatalog";
 import type { ConnectorType, ProviderKey } from "./types";
 
-/** A connector the browser is offering, with whichever models matched. */
 export type ConnectorMatch = { provider: ProviderKey; models: string[] };
+
+const modelNamesFor = (provider: ProviderKey): string[] => [
+	...new Set(
+		modalitiesFor(provider).flatMap((type) =>
+			Object.keys(MODELS[type][provider] ?? {}),
+		),
+	),
+];
 
 /**
  * Connectors matching a query, which may name either the provider or one of
@@ -22,7 +29,7 @@ export function searchConnectors(
 			return [];
 		if (!needle) return [{ provider, models: [] }];
 
-		const models = modelNamesForProvider(provider).filter((name) =>
+		const models = modelNamesFor(provider).filter((name) =>
 			name.toLowerCase().includes(needle),
 		);
 		const named = providerMeta(provider).name.toLowerCase().includes(needle);

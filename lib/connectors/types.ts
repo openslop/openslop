@@ -29,6 +29,30 @@ export type ProviderKey =
 	| "cartesia"
 	| "elevenlabs";
 
+/** How a model trades off against its siblings. Relative within a connector type, never absolute. */
+export type Tier = "low" | "medium" | "high";
+
+export type ModelMeta = {
+	/** What a generation costs. Lower is cheaper. */
+	cost: Tier;
+	/** How quickly it returns. Higher is faster. */
+	speed: Tier;
+};
+
+export type ModelEntry = ModelMeta & {
+	/** The id the provider's own API takes. */
+	id: string;
+};
+
+export type ModelTable = Record<string, ModelEntry>;
+
+export type ModelsByProvider = Partial<Record<ProviderKey, ModelTable>>;
+
+/** Names are only unique within a provider, so the pair is the identity everywhere. */
+export type ModelRef = { provider: ProviderKey; model: string };
+
+export type ModelPick = { provider?: string; model?: string };
+
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
 export interface PluginContext<TParams = unknown, TResult = unknown> {
@@ -56,6 +80,14 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * ordering and staleness; reading anything undeclared goes stale-blind.
 	 */
 	dependencies?(element: CanvasContentElement): NodeSpec[];
+	/**
+	 * Where the element's model comes from when not its own attributes, for a
+	 * type whose model is picked elsewhere and inherited.
+	 */
+	model?(
+		element: CanvasContentElement,
+		state: ProjectData,
+	): ModelPick | undefined;
 	beforeGenerate?(
 		params: TParams,
 		ctx?: PluginContext<TParams, TResult>,
@@ -79,15 +111,13 @@ export interface ConnectorConfig {
 	plugins?: ConnectorPlugin[];
 }
 
-/** A config with its provider stamped on, as `createConnector` builds one. */
-export type ResolvedConnectorConfig = ConnectorConfig & {
-	provider: ProviderKey;
-};
+export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
 
-export type ConnectorGenerateParams = {
-	prompt: string;
-	model?: string;
-};
+/**
+ * The connector stamps its own model onto every generation, so a caller only
+ * supplies what varies per call.
+ */
+export type ConnectorGenerateParams = Partial<ModelRef> & { prompt: string };
 
 export type AssetResult = {
 	durationSec: number;
@@ -157,6 +187,7 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	videoPrompt?: string;
 	/** The still's own model. The still-frame plugin keeps it off the video call. */
+	stillProvider?: string;
 	stillModel?: string;
 };
 

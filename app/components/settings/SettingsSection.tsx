@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** A labelled group of settings, with the action that acts on the group. */
 export function SettingsSection({
 	title,
 	action,
@@ -23,7 +22,6 @@ export function SettingsSection({
 	);
 }
 
-/** Rows that belong together: fenced as one block, and ruled between. */
 export function SettingsList({ children }: { children: ReactNode }) {
 	return (
 		<div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
