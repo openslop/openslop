@@ -17,7 +17,7 @@ Semantic tokens only. Never raw hexes, `bg-black/N`, or `*-white/N`.
 - **Neutrals:** warm, red-tinted greys, `--grey-900` (foreground) through `--grey-0`.
 - **Surfaces:** `--background`; `--surface-recessed` (panels); `--card` / `--surface-elevated` (popovers, select menus) with `--surface-hover` for hovered controls on them; `--element-card` (element cards and side-panel sections, text from `--panel-fg` / `--panel-label`). Hairline `--border`.
 - **Accent:** blurple `--accent` / `--ring`, for focus rings, selection, links, send, and `accent` CTAs only. Never an ambient wash.
-- **State:** `--destructive`, `--success`, `--caution`, each with a `-foreground` for solid fills, plus `--caution-soft` / `--caution-soft-foreground` for banners. One ramp per state; never a second red, green, or amber.
+- **State:** `--destructive`, `--success`, `--caution`, `--tertiary` (stale and not-working badges), each with a `-foreground` for solid fills, plus `--caution-soft` / `--caution-soft-foreground` for banners. One ramp per state; never a second red, green, or amber.
 - **Media tints:** `--media-character/image/clip/animated/music/sound/narration` color the element-card icon so each storyboard type reads at a glance. Brighter in dark, deeper in light.
 - **Scrims:** theme-independent dark washes. `bg-overlay` for modal scrims; `bg-on-media/55…80` over media with `text-on-media-foreground` (`--on-media` is solid black, so the opacity sets the strength).
 

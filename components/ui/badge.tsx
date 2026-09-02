@@ -17,7 +17,7 @@ const badgeVariants = cva(
 				destructive:
 					"border-transparent bg-destructive text-destructive-foreground",
 				new: "border-transparent bg-accent-soft text-accent",
-				tertiary: "border-tertiary/50 bg-tertiary/10 text-tertiary",
+				tertiary: "border-transparent bg-tertiary text-tertiary-foreground",
 			},
 			size: {
 				default: "px-2 py-0.5 text-label [&_svg:not([class*='size-'])]:size-3",
