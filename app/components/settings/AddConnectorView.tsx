@@ -18,6 +18,9 @@ import {
 import { modalitiesFor } from "@/lib/connectors/models";
 import { searchConnectors } from "@/lib/connectors/providerSearch";
 
+/** No capability asked for, so nothing is filtered out. */
+const ALL = "all";
+
 /**
  * Search for something to connect. A query matches a provider or any model it
  * serves, so knowing only "Claude Opus 5" is enough to find Anthropic; the
@@ -29,8 +32,7 @@ export function AddConnectorView({
 	onPick: (provider: BYOKProvider) => void;
 }) {
 	const [query, setQuery] = useState("");
-	// Empty is the "All" filter: no capability asked for, so nothing filtered out.
-	const [groupKey, setGroupKey] = useState("");
+	const [groupKey, setGroupKey] = useState(ALL);
 	const missingKey = useMissingKey();
 
 	const capability =
@@ -55,7 +57,7 @@ export function AddConnectorView({
 				value={groupKey}
 				onChange={setGroupKey}
 				options={[
-					{ value: "", label: "All" },
+					{ value: ALL, label: "All" },
 					...CONNECTOR_GROUPS.map(({ key, label }) => ({ value: key, label })),
 				]}
 				className="flex-wrap"
