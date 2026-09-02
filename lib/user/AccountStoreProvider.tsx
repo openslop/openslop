@@ -16,7 +16,6 @@ export function AccountStoreProvider({
 	children,
 }: {
 	models: ConnectorModels;
-	/** Whether the account may generate on the hosted provider. */
 	hosted: boolean;
 	children: ReactNode;
 }) {

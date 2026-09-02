@@ -15,11 +15,6 @@ import { MODEL_PROVENANCE } from "./provenance";
 
 export type DefaultsTier = keyof ModelDefaults;
 
-/**
- * The model one connector type falls back to, for whichever scope is editing
- * it. A value this scope has not pinned reads muted and says where it came
- * from, so a row can be understood without opening it.
- */
 export function ModelDefaultControl({
 	types,
 	tier,
@@ -31,9 +26,7 @@ export function ModelDefaultControl({
 	/** Every type this control sets; the first decides what it shows. */
 	types: ConnectorType[];
 	tier: DefaultsTier;
-	/** The whole chain, so the control can resolve and explain what it shows. */
 	chain: ModelDefaults;
-	/** The pick, spread across every type this control covers. */
 	onChange: (models: ConnectorModels) => void;
 	label: string;
 	className?: string;

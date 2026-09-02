@@ -5,7 +5,6 @@ import type { ProviderKeyRecord } from "@/lib/connectors/providerKey";
 import type { Provider } from "@/lib/connectors/types";
 import { useAccount } from "@/lib/user/useAccount";
 
-/** One read of the account's provider keys, for callers that ask about many providers in a render. */
 export function useProviderKeyLookup(): (
 	provider: Provider,
 ) => ProviderKeyRecord | null {

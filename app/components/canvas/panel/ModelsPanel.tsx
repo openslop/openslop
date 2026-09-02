@@ -9,11 +9,6 @@ import { useSettings } from "@/lib/settings/useSettings";
 import { useAccount } from "@/lib/user/useAccount";
 import { PanelCard } from "./PanelCard";
 
-/**
- * The models this project generates with, one card per kind of element. A card
- * left alone inherits from the account, so a project only records what it
- * deliberately differs on.
- */
 export function ModelsPanel() {
 	const project = useProject((state) => state.metadata.models);
 	const updateMetadata = useProject((state) => state.updateMetadata);

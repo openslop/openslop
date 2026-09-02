@@ -15,11 +15,6 @@ import { useAccount } from "@/lib/user/useAccount";
 /** Shorter than any provider issues, so a paste that missed is caught here. */
 const MIN_KEY_LENGTH = 8;
 
-/**
- * Where a key is entered. Saving stores it and reports back whether the
- * provider accepted it; the key is never read back, so the field always starts
- * empty, including when replacing one.
- */
 export function ProviderKeyForm({
 	provider,
 	onSaved,

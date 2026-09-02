@@ -39,7 +39,6 @@ function ProviderHeading({
 	);
 }
 
-/** The hosted provider: there is nothing to manage on it yet, only its standing to read. */
 export function HostedProviderCard() {
 	const status = useProviderKey(MANAGED_PROVIDER)?.status ?? "invalid";
 	return (
@@ -62,7 +61,6 @@ export function ProviderCard({
 	onDismissed,
 }: {
 	provider: BYOKProvider;
-	/** The provider a link asked for: revealed, and open for a key if it needs one. */
 	selected?: boolean;
 	/** The row is gone: removed, or backed out of before a key was ever stored. */
 	onDismissed: () => void;

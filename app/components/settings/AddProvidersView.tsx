@@ -18,14 +18,8 @@ import {
 import { modalitiesFor } from "@/lib/connectors/models";
 import { searchProviders } from "@/lib/connectors/providerSearch";
 
-/** No capability asked for, so nothing is filtered out. */
 const ALL = "all";
 
-/**
- * Search for something to connect. A query matches a provider or any model it
- * serves, so knowing only "Claude Opus 5" is enough to find Anthropic; the
- * capability filters are for browsing when you do not know what to type.
- */
 export function AddProvidersView({
 	onPick,
 }: {

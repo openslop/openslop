@@ -10,7 +10,6 @@ export interface SettingPillOption<T extends string> {
 	label: string;
 }
 
-/** The composer's pill face, for a setting whose picker is not a plain list. */
 export function SettingPillButton({
 	className,
 	children,

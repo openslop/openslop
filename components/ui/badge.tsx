@@ -22,7 +22,6 @@ const badgeVariants = cva(
 			size: {
 				default: "px-2 py-0.5 text-label [&_svg:not([class*='size-'])]:size-3",
 				sm: "gap-1 px-1.5 py-0 text-badge-xs [&_svg:not([class*='size-'])]:size-2.5",
-				/** Only an icon, so it needs room rather than a text box. */
 				icon: "size-6 rounded-md p-0 [&_svg:not([class*='size-'])]:size-4",
 			},
 		},

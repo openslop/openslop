@@ -61,7 +61,6 @@ export function VoicePicker({
 	onModelChange,
 }: {
 	filters: MetadataVoice;
-	/** The model the voices are listed for, and the one a pick will speak with. */
 	model: ModelRef;
 	selectedVoiceId?: string;
 	onSelect: (voice: VoiceInfo) => void;

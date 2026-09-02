@@ -28,11 +28,6 @@ import { useMissingKey } from "./useProviderKeys";
 export const modelLabel = ({ provider, model }: ModelRef): string =>
 	`${model} (${PROVIDER_CATALOG[provider].name})`;
 
-/**
- * Every model a connector type offers, whether or not the account can run it.
- * A model on a provider with no key stays visible but unavailable, carrying the
- * one action that would change that, so the picker teaches what it costs to use.
- */
 export function ModelSelect({
 	type,
 	value,
@@ -47,7 +42,6 @@ export function ModelSelect({
 	onChange: (model: ModelRef) => void;
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
-	/** Shown over the trigger, typically where the current pick came from. */
 	tooltip?: ReactNode;
 	children: ReactNode;
 }) {
@@ -67,8 +61,6 @@ export function ModelSelect({
 				<DropdownMenuContent
 					side={side}
 					align={align}
-					// The raised popover surface, so a model picker reads the same as the
-					// settings and history popovers it sits beside.
 					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
 				>
 					{listModels(type).map(({ provider, model, cost, speed }) => {
@@ -143,7 +135,6 @@ export function ModelSelectTrigger({
 	...props
 }: ComponentProps<"button"> & {
 	model: ModelRef;
-	/** What this model is for, since one element can pick more than one. */
 	label: string;
 }) {
 	return (

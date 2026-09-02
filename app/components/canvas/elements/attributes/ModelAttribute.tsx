@@ -27,7 +27,6 @@ export function ModelAttribute({
 	/** The stored pair, resolved here so a pick the tables dropped shows the fallback. */
 	pick: { provider?: string; model?: string };
 	connector: ConnectorType;
-	/** What this model is for, since an element can pick more than one. */
 	label: string;
 	className?: string;
 }) {

@@ -29,7 +29,6 @@ import { logger } from "./logger";
 /** What one turn may spend before the tools come off and it has to end in a reply. */
 const MAX_TOOL_CALLS = 20;
 
-/** A turn as it arrives, before the message is parsed into a Sloppy one. */
 export type AgentTurnBody<TModel extends ModelRef = ModelRef> = TModel & {
 	projectId: string;
 	message: unknown;
@@ -60,7 +59,6 @@ export type AgentTurnRequest = {
 	context: AgentContext;
 	/** The provider's own model id: the route resolves it from the picked name. */
 	model: string;
-	/** The provider the turn runs on, built with whichever key the route reads. */
 	llm: () => Promise<AgentLLM>;
 };
 

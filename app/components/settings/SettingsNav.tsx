@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 type NavItem = { tab: SettingsTab; label: string; icon: IconComponent };
 
-/** Grouped the way the settings read: a heading, then what it covers. */
 const GROUPS: { heading: string; items: NavItem[] }[] = [
 	{
 		heading: "Account",

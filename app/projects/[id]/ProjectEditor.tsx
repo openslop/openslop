@@ -41,8 +41,6 @@ export default function ProjectEditor({
 
 	return (
 		<TooltipProvider>
-			{/* The account's own settings outrank the project's, so they are in
-			    scope before anything that resolves a model against them. */}
 			<UserProvider user={user}>
 				<GenerationQueueProvider initialState={initialGeneration}>
 					<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>

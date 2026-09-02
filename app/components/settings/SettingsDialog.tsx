@@ -15,11 +15,6 @@ import { AddProvidersView } from "./AddProvidersView";
 import { ModelsTab } from "./ModelsTab";
 import { SettingsNav } from "./SettingsNav";
 
-/**
- * Account settings, opened from the URL: a nav down the side, and the section
- * it selects raised onto its own pane. Browsing for a provider pushes a second
- * view into that pane rather than stacking another dialog on top.
- */
 export function SettingsDialog() {
 	const settings = useSettings();
 	const [browsing, setBrowsing] = useState(false);

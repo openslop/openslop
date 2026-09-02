@@ -29,7 +29,6 @@ export type AccountContext = AccountData & {
 	removeKey: (provider: BYOKProvider) => Promise<void>;
 	/** Several types at once, since one pick can cover more than one. */
 	setModels: (patch: ConnectorModels) => Promise<void>;
-	/** Hands every type back to the model OpenSlop recommends. */
 	resetModels: () => Promise<void>;
 };
 

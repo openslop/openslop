@@ -13,9 +13,7 @@ import { IconChip } from "./IconChip";
 
 type Metric = {
 	key: keyof ModelMeta;
-	/** Both metrics count: coins for what it costs, minutes for what it takes. */
 	icon: Record<Tier, IconComponent>;
-	/** How the tier reads on its own, since the chip shows no other label. */
 	phrase: Record<Tier, string>;
 };
 
@@ -32,11 +30,6 @@ const METRICS: Metric[] = [
 	},
 ];
 
-/**
- * How a model compares to its siblings. The icons carry the reading — a stack
- * of coins, a dial of minutes — so the words are only there on hover, and for
- * anyone who cannot see the difference.
- */
 export function ModelChips({
 	meta,
 	className,

@@ -52,12 +52,7 @@ export function SelectMenuItem({
 	);
 }
 
-/**
- * The inline trigger a picker hangs off when it is part of the surface rather
- * than a form field: a badge in a row of them, or a control in a composer.
- * Mousedown is swallowed so opening a picker never moves the caret out of the
- * text it sits in.
- */
+/** Mousedown is swallowed so opening a picker never moves the caret out of the text it sits in. */
 export function InlineMenuTrigger({
 	className,
 	children,
@@ -82,11 +77,6 @@ export function InlineMenuTrigger({
 	);
 }
 
-/**
- * The field-shaped trigger a `SelectMenu` hangs off when it stands in for a
- * form field: the look of `SelectField`'s trigger, with room for whatever the
- * menu's rows show, since a menu row is richer than a listbox option.
- */
 export function SelectMenuTrigger({
 	className,
 	children,
