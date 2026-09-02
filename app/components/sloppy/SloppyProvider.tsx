@@ -10,6 +10,7 @@ import {
 import { useChat } from "@ai-sdk/react";
 import { agentPathFor, loadAgentTranscript } from "@/lib/agent/client";
 import type { ModelRef } from "@/lib/connectors/types";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
@@ -18,7 +19,6 @@ import { useAgentContext } from "@/lib/agent/projectContext";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { toastError } from "@/lib/toastError";
-import { useSloppyModel } from "./SloppyModelProvider";
 
 type SloppyControl = {
 	send: (message: string) => void;
@@ -72,7 +72,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	const runTool = useAgentTools(editor);
 	const readContext = useAgentContext(editor);
 	const restored = useTranscript(projectId);
-	const { model } = useSloppyModel();
+	const model = useDefaultModels().llm;
 	const turnModel = useRef<ModelRef>(undefined);
 	// Stopping should also cancel the tool call in flight
 	const turn = useRef<AbortController>(undefined);

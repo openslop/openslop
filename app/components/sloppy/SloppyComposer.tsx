@@ -6,25 +6,26 @@ import {
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/connectors/ModelSelect";
-import type { ModelRef } from "@/lib/connectors/types";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { useProject } from "@/lib/project/useProject";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
-import { useSloppyModel } from "./SloppyModelProvider";
 import { useSloppy } from "./SloppyProvider";
 import { nextSuggestion, SUGGESTIONS } from "./suggestions";
 
 const controlClassName =
 	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
 
-function ModelPicker({
-	model,
-	onChange,
-}: {
-	model: ModelRef;
-	onChange: (next: ModelRef) => void;
-}) {
+function ModelPicker() {
+	const model = useDefaultModels().llm;
+	const updateMetadata = useProject((state) => state.updateMetadata);
 	return (
-		<ModelSelect type="llm" value={model} onChange={onChange} side="top">
+		<ModelSelect
+			type="llm"
+			value={model}
+			onChange={(llm) => updateMetadata({ connectorModels: { llm } })}
+			side="top"
+		>
 			<ModelSelectTrigger model={model} label="Model" />
 		</ModelSelect>
 	);
@@ -53,7 +54,6 @@ function SuggestionButton({
 
 export function SloppyComposer() {
 	const { send, stop, loading } = useSloppy();
-	const { model, setModel } = useSloppyModel();
 	const [value, setValue] = useState("");
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const hasText = value.trim().length > 0;
@@ -93,7 +93,7 @@ export function SloppyComposer() {
 			/>
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-center gap-1">
-					<ModelPicker model={model} onChange={setModel} />
+					<ModelPicker />
 					<SuggestionButton
 						onPick={suggest}
 						disabled={loading || (hasText && !showsSuggestion)}

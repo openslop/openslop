@@ -14,7 +14,6 @@ import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
 import { ActiveCaptionFont } from "./CaptionFonts";
-import { SloppyModelProvider } from "../sloppy/SloppyModelProvider";
 import { SloppyProvider } from "../sloppy/SloppyProvider";
 import { EditorPanelProvider } from "./panel/EditorPanelContext";
 import { useEditorSession } from "./hooks/useEditorSession";
@@ -30,7 +29,6 @@ const CanvasScopedProviders = composeProviders(
 	ActiveSceneProvider,
 	AutoScrollProvider,
 	ViewModeProvider,
-	SloppyModelProvider,
 	SloppyProvider,
 	EditorPanelProvider,
 );

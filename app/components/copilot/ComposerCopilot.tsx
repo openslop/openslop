@@ -34,6 +34,7 @@ import {
 	type LanguageChoice,
 } from "@/lib/project/language";
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import {
 	useUpdateVideoSettings,
@@ -46,7 +47,6 @@ import {
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
-import { useSloppyModel } from "@/app/components/sloppy/SloppyModelProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
 import {
@@ -202,7 +202,8 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
-	const { model, setModel } = useSloppyModel();
+	const model = useDefaultModels().llm;
+	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	const {
 		openPicker,
@@ -289,7 +290,11 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={LANGUAGE_OPTIONS}
 							onChange={setLanguage}
 						/>
-						<ModelSelect type="llm" value={model} onChange={setModel}>
+						<ModelSelect
+							type="llm"
+							value={model}
+							onChange={(llm) => updateMetadata({ connectorModels: { llm } })}
+						>
 							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
 								<ProviderIcon
 									provider={model.provider}
