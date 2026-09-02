@@ -102,7 +102,7 @@ describe("createAutosaver", () => {
 
 	const hydrate = () => {
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
-		store.getState().markHydrated();
+		store.setState({ hydrated: true });
 	};
 
 	let refCount = 0;

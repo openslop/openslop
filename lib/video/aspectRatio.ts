@@ -25,6 +25,6 @@ export const ASPECT_RATIO_DIMENSIONS: Record<
 };
 
 export function getAspectRatioValue(ratio: AspectRatio): number {
-	const { width, height } = ASPECT_RATIO_DIMENSIONS[ratio].video;
+	const { width, height } = ASPECT_RATIO_DIMENSIONS[ratio].output;
 	return width / height;
 }

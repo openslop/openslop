@@ -1,5 +1,6 @@
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
+import { createEmitter } from "../store/emitter";
 import {
 	resolveConcurrencyLimits,
 	type ConcurrencyLimits,
@@ -18,6 +19,7 @@ import {
 	type GenerationNode,
 	type JobNode,
 	type NodeId,
+	type NodeResults,
 } from "./graph";
 
 type ActiveJob = {
@@ -30,7 +32,7 @@ type ActiveJob = {
  * time and never before their dependencies have settled. All per-element state
  * lives in the snapshot store; the queue owns only what is in flight.
  */
-export class GenerationQueue {
+export class GenerationQueue implements NodeResults {
 	private readonly snapshots: SnapshotStore;
 	private readonly ticker = new ElapsedTicker((elapsed) =>
 		this.onTick(elapsed),
@@ -38,9 +40,7 @@ export class GenerationQueue {
 	private pending: JobNode[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
-	private readonly commitListeners = new Set<
-		(version: CommittedVersion) => void
-	>();
+	private readonly committed = createEmitter<CommittedVersion>();
 
 	constructor({
 		limits,
@@ -53,12 +53,7 @@ export class GenerationQueue {
 		this.snapshots = new SnapshotStore(initialState);
 	}
 
-	onCommitted = (listener: (version: CommittedVersion) => void) => {
-		this.commitListeners.add(listener);
-		return () => {
-			this.commitListeners.delete(listener);
-		};
-	};
+	onCommitted = this.committed.subscribe;
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id?: string): ElementSnapshot => this.snapshots.get(id);
@@ -162,11 +157,18 @@ export class GenerationQueue {
 		});
 	}
 
-	restoreResult({ elementId, inputs, result, pinned }: CommittedVersion): void {
+	restoreResult({
+		elementId,
+		inputs,
+		result,
+		connectorType,
+		pinned,
+	}: CommittedVersion): void {
 		this.snapshots.update(elementId, {
 			result,
 			error: null,
 			resultInputs: inputs,
+			connectorType,
 			pinned,
 		});
 		this.snapshots.notify();
@@ -175,7 +177,7 @@ export class GenerationQueue {
 	private commit(version: CommittedVersion): void {
 		this.snapshots.commit(version);
 		this.snapshots.notify();
-		for (const listener of this.commitListeners) listener(version);
+		this.committed.notify(version);
 	}
 
 	private abortJob(id: string) {

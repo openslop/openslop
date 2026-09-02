@@ -1,6 +1,7 @@
 import debounce from "lodash/debounce";
 import isEqual from "lodash/isEqual";
 import PQueue from "p-queue";
+import { createEmitter } from "@/lib/store/emitter";
 import { saveProject, type SaveProjectInput } from "./api";
 import type { ProjectContent } from "./projectDocument";
 import { deriveProjectName } from "./projectName";
@@ -59,7 +60,7 @@ export function createAutosaver({
 	onError,
 }: AutosaverOptions): Autosaver {
 	const queue = new PQueue({ concurrency: 1 });
-	const savedListeners = new Set<(input: SaveProjectInput) => void>();
+	const saved = createEmitter<SaveProjectInput>();
 
 	const buildInput = (): SaveProjectInput => buildProjectSave(read());
 
@@ -73,7 +74,7 @@ export function createAutosaver({
 			await saveProject(projectId, input);
 			lastSaved = input;
 			onSaved();
-			for (const listener of savedListeners) listener(input);
+			saved.notify(input);
 		} catch (err) {
 			console.error("Autosave failed", err);
 			onError(err);
@@ -111,11 +112,6 @@ export function createAutosaver({
 			suspended = false;
 			schedule();
 		},
-		onProjectSaved: (listener) => {
-			savedListeners.add(listener);
-			return () => {
-				savedListeners.delete(listener);
-			};
-		},
+		onProjectSaved: saved.subscribe,
 	};
 }

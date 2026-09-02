@@ -12,6 +12,19 @@ export const TRANSITION_TYPES = [
 
 export type TransitionType = (typeof TRANSITION_TYPES)[number];
 
+const TRANSITION_LABELS: Record<TransitionType, string> = {
+	none: "None",
+	fade: "Fade",
+	slide: "Slide",
+	wipe: "Wipe",
+	flip: "Flip",
+	clockWipe: "Clock Wipe",
+	iris: "Iris",
+};
+
+export const transitionLabel = (type: TransitionType): string =>
+	TRANSITION_LABELS[type];
+
 export const DEFAULT_TRANSITION: TransitionType = "none";
 export const TRANSITION_DURATION_SEC = 0.4;
 export const AUDIO_FADE_SEC = 2;

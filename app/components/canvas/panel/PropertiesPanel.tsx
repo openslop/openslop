@@ -1,26 +1,20 @@
 "use client";
 
 import { SelectField } from "@/components/ui/select-field";
-import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
+import {
+	TRANSITION_TYPES,
+	transitionLabel,
+	type TransitionType,
+} from "@/lib/video/transitions";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
 } from "@/lib/video/useVideoSetting";
 import { PanelCard, PanelField } from "./PanelCard";
 
-const LABELS: Record<TransitionType, string> = {
-	none: "None",
-	fade: "Fade",
-	slide: "Slide",
-	wipe: "Wipe",
-	flip: "Flip",
-	clockWipe: "Clock Wipe",
-	iris: "Iris",
-};
-
 const OPTIONS = TRANSITION_TYPES.map((value) => ({
 	value,
-	label: LABELS[value],
+	label: transitionLabel(value),
 }));
 
 export function PropertiesPanel() {
