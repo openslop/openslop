@@ -1,10 +1,14 @@
 "use client";
 
+import { getImageProps } from "next/image";
 import { User } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { RemoveCrossButton } from "./RemoveCrossButton";
+
+/** `size-6` in CSS pixels. */
+const AVATAR_PX = 24;
 
 function useCharacterAvatarUrl(name?: string) {
 	return useQueueSelector((queue) =>
@@ -24,10 +28,16 @@ function CharacterAvatar({
 	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
 		<Avatar size="sm" className={className}>
+			{/* Radix preloads whatever `src` it is handed, so it gets the optimizer's
+			    candidates for a 24px box rather than the full-size generated original. */}
 			{avatarUrl && (
 				<AvatarImage
-					src={avatarUrl}
-					alt={name ?? "Character"}
+					{...getImageProps({
+						src: avatarUrl,
+						alt: name ?? "Character",
+						width: AVATAR_PX,
+						height: AVATAR_PX,
+					}).props}
 					className="object-cover object-center"
 				/>
 			)}

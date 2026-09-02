@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { clamp } from "@/lib/utils";
 import { formatTime } from "@/lib/video/timestamps";
 import type { SeekThumbnail } from "@/lib/video/sceneSegments";
@@ -27,14 +28,15 @@ export function SeekTooltip({
 			className="pointer-events-none absolute bottom-full z-50 mb-2 -translate-x-1/2"
 			style={{ left, width: TOOLTIP_WIDTH }}
 		>
-			<div className="aspect-video w-full overflow-hidden rounded-md bg-on-media/80 ring-1 ring-border">
+			<div className="relative aspect-video w-full overflow-hidden rounded-md bg-on-media/80 ring-1 ring-border">
 				{thumbnail ? (
 					thumbnail.kind === "image" ? (
-						// eslint-disable-next-line @next/next/no-img-element
-						<img
+						<Image
 							src={thumbnail.url}
 							alt=""
-							className="h-full w-full object-contain"
+							fill
+							sizes={`${TOOLTIP_WIDTH}px`}
+							className="object-contain"
 						/>
 					) : (
 						<video
