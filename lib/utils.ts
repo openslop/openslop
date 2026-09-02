@@ -35,3 +35,7 @@ export function cn(...inputs: ClassValue[]) {
 export function clamp(n: number, min: number, max: number) {
 	return Math.max(min, Math.min(max, n));
 }
+
+export function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}

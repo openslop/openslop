@@ -5,11 +5,8 @@ import type { Metadata } from "@/lib/project/types";
 export const INPUT_LANGUAGE =
 	"the language of the user's own topic or script, or English when that is unclear";
 
-export function spokenLanguage(
-	metadata: Metadata | undefined,
-	fallback: string,
-): string {
-	const language = declaredLanguage(metadata?.language);
+export function spokenLanguage(metadata: Metadata, fallback: string): string {
+	const language = declaredLanguage(metadata.language);
 	return language ? `${language} (ISO 639-1)` : fallback;
 }
 

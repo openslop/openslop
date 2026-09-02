@@ -14,8 +14,7 @@ export function formatTimeRange(start: number, duration: number): string {
 }
 
 // Derive the badge from the same floored endpoints the start–end range shows,
-// so the two can never disagree (#426). Rounding the raw length instead diverges
-// from the floored range whenever start/duration are non-integer.
+// so the two can never disagree when start/duration are non-integer.
 export function formatRangeDuration(start: number, duration: number): string {
 	return `${floorSeconds(start + duration) - floorSeconds(start)}s`;
 }

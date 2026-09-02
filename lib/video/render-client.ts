@@ -1,4 +1,5 @@
 import { apiJson } from "@/lib/clients/http";
+import { sleep } from "@/lib/utils";
 import type { RenderHandle, RenderProgress } from "./render-api";
 import type { VideoLayout } from "./types";
 
@@ -7,8 +8,6 @@ export type RenderUpdate =
 	| { status: "done"; url: string; size: number };
 
 const POLL_INTERVAL_MS = 5000;
-
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /**
  * Starts a Lambda render and yields progress until the output is ready.
@@ -37,6 +36,6 @@ export async function* runRender(
 		}
 
 		yield { status: "rendering", progress: result.progress };
-		await wait(POLL_INTERVAL_MS);
+		await sleep(POLL_INTERVAL_MS);
 	}
 }

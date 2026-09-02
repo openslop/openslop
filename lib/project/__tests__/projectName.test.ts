@@ -5,10 +5,6 @@ import { MetadataSchema, type Metadata } from "../types";
 const base: Metadata = MetadataSchema.parse({});
 
 describe("deriveProjectName", () => {
-	it("returns 'Untitled' for missing metadata", () => {
-		expect(deriveProjectName(undefined)).toBe("Untitled");
-	});
-
 	it("returns 'Untitled' for empty or whitespace titles", () => {
 		expect(deriveProjectName({ ...base, title: "" })).toBe("Untitled");
 		expect(deriveProjectName({ ...base, title: "   " })).toBe("Untitled");

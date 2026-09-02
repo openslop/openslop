@@ -3,8 +3,7 @@ import { supabaseSecretKey, supabaseUrl } from "./env";
 
 let cached: SupabaseClient | null = null;
 
-// Admin client for server-side writes that bypass RLS. Uses the newer
-// `sb_secret_*` key (legacy `SUPABASE_SERVICE_ROLE_KEY` is deprecated).
+// Admin client for server-side writes that bypass RLS.
 export function createServiceClient(): SupabaseClient {
 	if (cached) return cached;
 	cached = createClient(supabaseUrl(), supabaseSecretKey(), {

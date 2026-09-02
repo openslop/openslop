@@ -34,18 +34,16 @@ export function projectPreamble(metadata: Metadata): string {
 			${metadata.style}`);
 	}
 
-	if (metadata.narration) {
-		const voice = renderVoice(metadata.narration);
-		if (voice)
-			sections.push(dedent`
-				# Narration Voice
+	const voice = renderVoice(metadata.narration);
+	if (voice)
+		sections.push(dedent`
+			# Narration Voice
 
-				Below is the exact voice description for the narrator. Do not change it.
+			Below is the exact voice description for the narrator. Do not change it.
 
-				${voice}`);
-	}
+			${voice}`);
 
-	const characterEntries = Object.entries(metadata.characters ?? {});
+	const characterEntries = Object.entries(metadata.characters);
 	if (characterEntries.length > 0) {
 		const blocks = characterEntries.map(([name, character]) =>
 			renderCharacter(name, character),

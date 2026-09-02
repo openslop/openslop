@@ -10,6 +10,7 @@ import type {
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { animateImageScene } from "@/lib/script/refine/animatePrompt";
+import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
 
 const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
@@ -137,10 +138,6 @@ function mockResponse(params: LLMGenerateParams): string {
 	return match ? match.respond(params) : MOCK_SCRIPT;
 }
 
-function delay(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export class MockLLM {
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
 		return {
@@ -153,12 +150,12 @@ export class MockLLM {
 	async *stream(
 		params: LLMGenerateParams,
 	): AsyncGenerator<{ text: string; done: boolean }> {
-		await delay(500);
+		await sleep(500);
 		const text = mockResponse(params);
 		let i = 0;
 		while (i < text.length) {
 			const size = 1 + Math.floor(Math.random() * 12);
-			await delay(20 + Math.random() * 40);
+			await sleep(20 + Math.random() * 40);
 			yield { text: text.slice(i, i + size), done: false };
 			i += size;
 		}
@@ -253,13 +250,13 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		return { say: "Reading the script. ", toolName: "read_script", input: {} };
 	}
 
-	if (last?.toolName === "edit_script") {
+	if (last.toolName === "edit_script") {
 		return {
 			say: "Done. That is as much as a mock can do without an API key.",
 		};
 	}
 
-	const script = last?.text ?? "";
+	const script = last.text ?? "";
 	const elementId =
 		scene === null
 			? ELEMENT_ID.exec(script)?.[1]
