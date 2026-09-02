@@ -24,7 +24,6 @@ export function ModelAttribute({
 	element: CanvasContentElement;
 	attrKey: string;
 	providerAttr: string;
-	/** The stored pair, resolved here so a pick the tables dropped shows the fallback. */
 	pick: { provider?: string; model?: string };
 	connector: ConnectorType;
 	label: string;
