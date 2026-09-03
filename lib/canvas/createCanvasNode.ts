@@ -29,7 +29,7 @@ export function createCanvasNode(
 		resolveModel(connector, attrs, defaults[connector]),
 	);
 	const models = Object.fromEntries(
-		schema.modelPicks.flatMap(({ key, providerAttr, connector: picks }) => {
+		schema.modelPicks.flatMap(({ key, providerAttr, type: picks }) => {
 			const { provider, model } = resolveModel(
 				picks,
 				{ provider: attrs[providerAttr], model: attrs[key] },

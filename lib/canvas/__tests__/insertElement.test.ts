@@ -14,7 +14,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 								kind: "model",
 								key: "model",
 								providerAttr: "provider",
-								connector: type,
+								type,
 							},
 						],
 			resolve: (attrs: Record<string, string>) => ({

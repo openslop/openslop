@@ -67,7 +67,7 @@ describe("resolveAttributeSchema", () => {
 
 			expect(schema.badgeAttributes.model?.edit).toEqual({
 				kind: "model",
-				connector: type,
+				type,
 				providerAttr: "provider",
 			});
 			expect(schema.badgeAttributes.provider).toBeUndefined();

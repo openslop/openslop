@@ -21,7 +21,7 @@ export const modelDefs = (
 		key,
 		label: "Model",
 		badge: true,
-		edit: { kind: "model", connector: type, providerAttr },
+		edit: { kind: "model", type, providerAttr },
 		default: DEFAULT_MODELS[type].model,
 		...spec,
 	},

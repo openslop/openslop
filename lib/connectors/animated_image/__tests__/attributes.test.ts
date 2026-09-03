@@ -14,12 +14,12 @@ describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 	it("picks each from its own connector's models, writing its own provider", () => {
 		expect(badges.model?.edit).toEqual({
 			kind: "model",
-			connector: "animated_image",
+			type: "animated_image",
 			providerAttr: "provider",
 		});
 		expect(badges.imageModel?.edit).toEqual({
 			kind: "model",
-			connector: "image",
+			type: "image",
 			providerAttr: "imageProvider",
 		});
 	});

@@ -15,7 +15,7 @@ import { flatAttributes } from "@/lib/video/elementAttributes";
 
 export function ModelAttribute({
 	element,
-	pick: { key, providerAttr, connector },
+	pick: { key, providerAttr, type },
 	label,
 	className,
 }: {
@@ -27,16 +27,16 @@ export function ModelAttribute({
 	const editor = useSlateStatic();
 	const chain = useModelChain();
 	const attrs = flatAttributes(element);
-	const value = resolveModel(connector, {
+	const value = resolveModel(type, {
 		provider: attrs[providerAttr],
 		model: attrs[key],
 	});
 
 	return (
 		<ModelSelect
-			type={connector}
+			type={type}
 			value={value}
-			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(connector, value, chain)]}`}
+			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(type, value, chain)]}`}
 			onChange={(next) =>
 				updateElementAttrs(editor, element, {
 					[providerAttr]: next.provider,

@@ -8,7 +8,7 @@ export type AttributeEdit =
 	 * say what each model costs and which of them the account can reach. One
 	 * pick writes two attributes: this one and the provider it names.
 	 */
-	| { kind: "model"; connector: ConnectorType; providerAttr: string }
+	| { kind: "model"; type: ConnectorType; providerAttr: string }
 	| { kind: "text"; placeholder?: string; rows?: number }
 	/** A list of image URLs, edited as tiles. */
 	| { kind: "images" };
