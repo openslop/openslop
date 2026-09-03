@@ -1,4 +1,5 @@
 import { cosineSimilarity } from "ai";
+import sortBy from "lodash/sortBy";
 import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { embedText, embedTexts } from "../embed";
 
@@ -28,10 +29,9 @@ export async function rankBySimilarity(
 		embedTexts(voices.map((v) => `${v.name} ${v.description ?? ""}`)),
 	]);
 
-	const scores = new Map(
-		voices.map((v, i) => [v.id, cosineSimilarity(query, voiceVecs[i])]),
-	);
-	return [...voices].sort(
-		(a, b) => (scores.get(b.id) ?? -Infinity) - (scores.get(a.id) ?? -Infinity),
-	);
+	const scored = voices.map((voice, i) => ({
+		voice,
+		score: cosineSimilarity(query, voiceVecs[i]),
+	}));
+	return sortBy(scored, (s) => -s.score).map((s) => s.voice);
 }

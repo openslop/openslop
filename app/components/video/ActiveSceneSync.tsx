@@ -19,8 +19,7 @@ export function ActiveSceneSync() {
 	const { enabled: autoScrollEnabled } = useAutoScroll();
 	const playing = usePlayerPlaying();
 	const activeIndex = useActiveSegmentIndex();
-	const activeId =
-		activeIndex >= 0 ? (segments[activeIndex]?.sceneId ?? null) : null;
+	const activeId = segments[activeIndex]?.sceneId ?? null;
 
 	useEffect(() => {
 		setActiveSceneId(activeId);

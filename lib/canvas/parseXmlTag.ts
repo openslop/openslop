@@ -10,14 +10,12 @@ const ATTRIBUTE_PATTERN = /(\w+)="([^"]*)"/g;
 
 export function parseXmlTag(tagString: string): XmlTag {
 	const trimmed = tagString.trim();
-	const attributes: Record<string, string> = {};
-	ATTRIBUTE_PATTERN.lastIndex = 0;
-	let match: RegExpExecArray | null;
-
-	while ((match = ATTRIBUTE_PATTERN.exec(trimmed)) !== null) {
-		attributes[match[1]] = unescapeXml(match[2]);
-	}
-
+	const attributes = Object.fromEntries(
+		Array.from(trimmed.matchAll(ATTRIBUTE_PATTERN), ([, key, value]) => [
+			key,
+			unescapeXml(value),
+		]),
+	);
 	const [rawTag = ""] = trimmed.split(/\s/, 1);
 	return { tag: rawTag.replace(/\/$/, ""), attributes };
 }

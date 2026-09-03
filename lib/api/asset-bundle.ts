@@ -118,10 +118,9 @@ export class AssetBundle {
 			}),
 		);
 
-		const result: Record<string, string> = {};
-		for (const file of files) {
-			result[file.key] = file.filename;
-		}
+		const result = Object.fromEntries(
+			files.map((file) => [file.key, file.filename]),
+		);
 
 		const manifest: AssetManifest = {
 			version: 1,

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import minBy from "lodash/minBy";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
@@ -96,14 +97,11 @@ export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
 	candidates: CacheMatch[],
 	params: P,
 ): CacheMatch | undefined => {
-	if (candidates.length === 0) return undefined;
 	const target = params.durationSeconds;
 	if (target == null) return candidates[0];
-	return candidates.reduce((best, c) => {
-		const bd = Math.abs(Number(best.metadata?.duration ?? 0) - target);
-		const cd = Math.abs(Number(c.metadata?.duration ?? 0) - target);
-		return cd < bd ? c : best;
-	});
+	return minBy(candidates, (c) =>
+		Math.abs(Number(c.metadata?.duration ?? 0) - target),
+	);
 };
 
 /**

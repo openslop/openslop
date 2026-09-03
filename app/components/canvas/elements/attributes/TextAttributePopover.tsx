@@ -42,13 +42,8 @@ export function TextAttributePopover({
 	);
 
 	const handleOpenChange = (next: boolean) => {
-		if (next) {
-			setDraft(value);
-		} else if (cancelRef.current) {
-			setDraft(value);
-		} else {
-			commit(draft);
-		}
+		if (next || cancelRef.current) setDraft(value);
+		else commit(draft);
 		cancelRef.current = false;
 		setOpen(next);
 	};

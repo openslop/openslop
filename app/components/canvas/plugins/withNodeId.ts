@@ -14,16 +14,8 @@ export const withNodeId = (editor: ReactEditor): CanvasEditor => {
 	};
 
 	editor.apply = (operation) => {
-		if (operation.type === "insert_node") {
-			assignIdRecursively(operation.node);
-			return apply(operation);
-		}
-
-		if (operation.type === "split_node") {
-			operation.properties.id = makeNodeId();
-			return apply(operation);
-		}
-
+		if (operation.type === "insert_node") assignIdRecursively(operation.node);
+		if (operation.type === "split_node") operation.properties.id = makeNodeId();
 		return apply(operation);
 	};
 

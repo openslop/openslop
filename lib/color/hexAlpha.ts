@@ -1,3 +1,4 @@
+import { clamp } from "@/lib/utils";
 /** Opacity lives in the trailing pair of an 8-digit hex; a 6-digit one is opaque. */
 const OPAQUE = "ff";
 
@@ -21,7 +22,7 @@ export const alphaPercent = (color: string): number => {
 export const withAlphaPercent = (color: string, percent: number): string => {
 	if (Number.isNaN(percent)) return color;
 
-	const clamped = Math.min(100, Math.max(0, percent));
+	const clamped = clamp(percent, 0, 100);
 	const pair = Math.round((clamped / 100) * 255)
 		.toString(16)
 		.padStart(2, "0");

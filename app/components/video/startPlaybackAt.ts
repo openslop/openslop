@@ -9,9 +9,8 @@ export type PlaybackTarget = Pick<
 /**
  * The play has to land a whole frame after the seek. In the same tick the
  * Player parks its frame driver on the seek's buffering block while `play()`
- * starts the shared audio tags anyway, so audio runs against a frozen picture
- * (#425); a `setTimeout` fires too early and freezes the same way. `pause()`
- * keeps `seekTo` off its own pause-and-resume path, which also stalls.
+ * starts the shared audio tags anyway, so audio runs against a frozen picture.
+ * `pause()` keeps `seekTo` off its own pause-and-resume path, which also stalls.
  */
 export function startPlaybackAt(player: PlaybackTarget, frame: number) {
 	player.pause();
