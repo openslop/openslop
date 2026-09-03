@@ -1,13 +1,16 @@
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ProjectStoreSnapshot } from "./storeSnapshot";
 
-export type ProjectRow = {
-	id: string;
-	name: string;
-	thumbnail_url: string | null;
-	updated_at: string;
-};
+const ProjectRowSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	thumbnail_url: z.string().nullable(),
+	updated_at: z.string(),
+});
+
+export type ProjectRow = z.infer<typeof ProjectRowSchema>;
 
 export type SaveProjectInput = {
 	name: string;
@@ -29,7 +32,7 @@ export async function createProject(): Promise<ProjectRow> {
 		.select("id, name, thumbnail_url, updated_at")
 		.single();
 	if (error) throw error;
-	return data;
+	return ProjectRowSchema.parse(data);
 }
 
 export async function deleteProject(id: string): Promise<void> {

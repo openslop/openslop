@@ -1,11 +1,9 @@
 import { deployFunction } from "@remotion/lambda";
-import { DISK, RAM, REGION, TIMEOUT } from "../lib/video/lambda-config";
+import { LAMBDA_FUNCTION_SPEC, REGION } from "../lib/video/lambda-config";
 
 const { functionName, alreadyExisted } = await deployFunction({
 	region: REGION,
-	memorySizeInMb: RAM,
-	diskSizeInMb: DISK,
-	timeoutInSeconds: TIMEOUT,
+	...LAMBDA_FUNCTION_SPEC,
 	createCloudWatchLogGroup: true,
 });
 

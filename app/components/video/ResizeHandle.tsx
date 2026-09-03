@@ -2,8 +2,34 @@
 
 import type { PointerDragProps } from "@/lib/components/usePointerDrag";
 
+type ResizeAxis = "vertical" | "horizontal";
+
+const fade = (direction: "to right" | "to bottom") =>
+	`linear-gradient(${direction}, transparent, black 20%, black 80%, transparent)`;
+
+// A "vertical" axis resizes top/bottom panels, so the handle itself is a
+// horizontal line (shadow on its bottom); "horizontal" is a vertical line
+// (shadow on its right).
+const LINES: Record<
+	ResizeAxis,
+	{ handle: string; line: string; bar: string; mask: string }
+> = {
+	vertical: {
+		handle: "h-2 w-full cursor-row-resize",
+		line: "h-0.5 w-full flex-col",
+		bar: "h-px w-full",
+		mask: fade("to right"),
+	},
+	horizontal: {
+		handle: "h-full w-4 cursor-col-resize",
+		line: "h-full w-0.5",
+		bar: "h-full w-px",
+		mask: fade("to bottom"),
+	},
+};
+
 type ResizeHandleProps = {
-	axis: "vertical" | "horizontal";
+	axis: ResizeAxis;
 	resizing: boolean;
 	handleProps: PointerDragProps;
 };
@@ -13,41 +39,21 @@ export function ResizeHandle({
 	resizing,
 	handleProps,
 }: ResizeHandleProps) {
-	// A "vertical" axis resizes top/bottom panels, so the handle itself is a
-	// horizontal line (shadow on its bottom); "horizontal" is a vertical line
-	// (shadow on its right).
-	const isHorizontalLine = axis === "vertical";
+	const { handle, line, bar, mask } = LINES[axis];
 
 	return (
 		<div
 			{...handleProps}
-			className={`group relative flex shrink-0 touch-none items-center justify-center ${
-				isHorizontalLine
-					? "h-2 w-full cursor-row-resize"
-					: "h-full w-4 cursor-col-resize"
-			} ${resizing ? "select-none" : ""}`}
+			className={`group relative flex shrink-0 touch-none items-center justify-center ${handle} ${resizing ? "select-none" : ""}`}
 		>
 			<div
-				className={`flex ${isHorizontalLine ? "h-0.5 w-full flex-col" : "h-full w-0.5"}`}
-				style={{
-					maskImage: `linear-gradient(${
-						isHorizontalLine ? "to right" : "to bottom"
-					}, transparent, black 20%, black 80%, transparent)`,
-					WebkitMaskImage: `linear-gradient(${
-						isHorizontalLine ? "to right" : "to bottom"
-					}, transparent, black 20%, black 80%, transparent)`,
-				}}
+				className={`flex ${line}`}
+				style={{ maskImage: mask, WebkitMaskImage: mask }}
 			>
 				<div
-					className={`bg-resizer transition-colors group-hover:bg-resizer-hover ${
-						isHorizontalLine ? "h-px w-full" : "h-full w-px"
-					}`}
+					className={`bg-resizer transition-colors group-hover:bg-resizer-hover ${bar}`}
 				/>
-				<div
-					className={`bg-resizer-shadow ${
-						isHorizontalLine ? "h-px w-full" : "h-full w-px"
-					}`}
-				/>
+				<div className={`bg-resizer-shadow ${bar}`} />
 			</div>
 		</div>
 	);

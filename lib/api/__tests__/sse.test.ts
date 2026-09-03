@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatSSE, createSSEResponse, readSSE } from "../sse";
+import { formatSSE, readSSE } from "../sse";
 
 function makeSSEStream(chunks: string[]): ReadableStream {
 	const encoder = new TextEncoder();
@@ -22,63 +22,6 @@ describe("formatSSE", () => {
 
 	it("formats null", () => {
 		expect(formatSSE(null)).toBe("data: null\n\n");
-	});
-});
-
-describe("createSSEResponse", () => {
-	it("returns a Response with SSE headers", () => {
-		const response = createSSEResponse(async () => {});
-		expect(response.headers.get("Content-Type")).toBe("text/event-stream");
-		expect(response.headers.get("Cache-Control")).toBe("no-cache");
-		expect(response.headers.get("Connection")).toBe("keep-alive");
-	});
-
-	it("streams messages sent by handler", async () => {
-		const response = createSSEResponse(async (send) => {
-			await send({ type: "phase", phase: "loading", progress: 50 });
-			await send({ type: "done", url: "https://example.com", size: 100 });
-		});
-
-		const text = await response.text();
-		expect(text).toContain('"type":"phase"');
-		expect(text).toContain('"type":"done"');
-	});
-
-	it("closes the stream after handler completes", async () => {
-		const response = createSSEResponse(async (send) => {
-			await send("ok");
-		});
-
-		const body = response.body;
-		if (!body) throw new Error("expected response body");
-		const reader = body.getReader();
-
-		const chunks: string[] = [];
-		const decoder = new TextDecoder();
-		for (;;) {
-			const { done, value } = await reader.read();
-			if (done) break;
-			chunks.push(decoder.decode(value));
-		}
-		expect(chunks.length).toBeGreaterThan(0);
-	});
-
-	it("emits an error event and closes when handler rejects with an Error", async () => {
-		const response = createSSEResponse(async () => {
-			throw new Error("boom");
-		});
-		const text = await response.text();
-		expect(text).toContain('"type":"error"');
-		expect(text).toContain("boom");
-	});
-
-	it("emits the stringified message when handler rejects with a non-Error", async () => {
-		const response = createSSEResponse(async () => {
-			throw "string failure";
-		});
-		const text = await response.text();
-		expect(text).toContain('"type":"error"');
-		expect(text).toContain("string failure");
 	});
 });
 

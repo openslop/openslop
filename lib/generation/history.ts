@@ -7,11 +7,6 @@ export interface ElementVersionStorage {
 	write(version: ElementVersion): void;
 }
 
-export const SESSION_ONLY: ElementVersionStorage = {
-	read: () => Promise.resolve([]),
-	write: () => {},
-};
-
 /** A version list is either still arriving, readable, or unreadable. */
 export type ElementHistoryStatus = "loading" | "ready" | "failed";
 
@@ -21,7 +16,7 @@ export class ElementHistory {
 	private loading = new Map<string, Promise<void>>();
 	private failed = new Set<string>();
 
-	constructor(private readonly storage: ElementVersionStorage = SESSION_ONLY) {}
+	constructor(private readonly storage: ElementVersionStorage) {}
 
 	subscribe = this.emitter.subscribe;
 
