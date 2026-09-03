@@ -12,7 +12,6 @@ export const STILL_MODEL = {
 } as const;
 
 export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
-	...modelDefs("animated_image", { label: "Video model" }),
 	...modelDefs("image", { ...STILL_MODEL, label: "Image model", icon: Image }),
 	referenceImagesDef,
 	{

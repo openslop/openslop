@@ -1,4 +1,5 @@
 import type { IconComponent } from "@/components/ui/icon";
+import { resolveModel, type ConnectorModels } from "../models";
 import type { ConnectorType } from "../types";
 
 export type AttributeEdit =
@@ -49,8 +50,8 @@ export class AttributeSchema {
 		return this.defs.map((def) => def.key);
 	}
 
-	/** The model picks the element carries, each naming the connector it resolves from. */
-	get modelPicks(): ModelPick[] {
+	/** The models the element carries beside its own, each naming the connector it resolves from. */
+	private get modelPicks(): ModelPick[] {
 		return this.defs.flatMap(({ key, edit }) =>
 			edit?.kind === "model" ? [{ key, ...edit }] : [],
 		);
@@ -88,14 +89,33 @@ export class AttributeSchema {
 	/**
 	 * The attributes an element carries: the caller's, with defaults standing in
 	 * wherever they name an option the schema doesn't offer (pasted OSML, a
-	 * saved project from an older catalog).
+	 * saved project from an older catalog). A model the schema carries resolves
+	 * like the element's own: the caller's pair, else the scoped default, else
+	 * the recommendation.
 	 */
-	resolve(attrs: Record<string, string>): Record<string, string> {
+	resolve(
+		attrs: Record<string, string>,
+		defaultModels: ConnectorModels = {},
+	): Record<string, string> {
+		const models = Object.fromEntries(
+			this.modelPicks.flatMap(({ key, providerAttr, type }) => {
+				const pick = resolveModel(
+					type,
+					{ provider: attrs[providerAttr], model: attrs[key] },
+					defaultModels[type],
+				);
+				return [
+					[providerAttr, pick.provider],
+					[key, pick.model],
+				];
+			}),
+		);
 		return {
 			...this.defaultAttributes,
 			...Object.fromEntries(
 				Object.entries(attrs).filter(([key, value]) => this.offers(key, value)),
 			),
+			...models,
 		};
 	}
 

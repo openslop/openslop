@@ -67,7 +67,7 @@ export function nodeBuilder(
 				throw new Error(`Cyclic generation dependency at "${id}"`);
 			resolving.add(id);
 
-			const connector = resolveElementConnector(element, registry, state);
+			const connector = resolveElementConnector(element, registry);
 			const plugins = override ?? connector.config.plugins ?? [];
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],

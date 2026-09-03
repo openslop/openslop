@@ -58,7 +58,7 @@ export abstract class BaseConnector<
 		params: TParams,
 		context?: GenerationContext,
 	): Promise<TResult> {
-		const ctx = { ...this.pluginContext(), ...context };
+		const ctx = { ...this.pluginContext(), ...context, model: this.model };
 		try {
 			const prepared = await this.prepareParams(params, ctx);
 			let result = await this._generate(prepared);

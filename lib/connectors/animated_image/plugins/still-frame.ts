@@ -12,6 +12,7 @@ import {
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import { resolveModel } from "@/lib/connectors/models";
+import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
 import { STILL_MODEL } from "../attributes";
 import {
 	derivedDependency,
@@ -25,7 +26,11 @@ import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /** Attributes of the animation, which the still's image generation has no use for. */
-const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "provider", "model"];
+const VIDEO_ONLY_KEYS = [
+	"videoPrompt",
+	"duration",
+	...Object.values(ELEMENT_MODEL),
+];
 
 const STILL_MODEL_KEYS = Object.values(STILL_MODEL);
 

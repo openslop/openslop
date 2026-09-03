@@ -5,17 +5,6 @@ vi.mock("@/lib/connectors/factory", () => ({
 		const defaultAttributes = type === "sfx" ? { loops: "1" } : {};
 		return {
 			defaultAttributes,
-			modelPicks:
-				type === "tts"
-					? []
-					: [
-							{
-								kind: "model",
-								key: "model",
-								providerAttr: "provider",
-								type,
-							},
-						],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,
@@ -77,15 +66,12 @@ describe("createCanvasNode", () => {
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_MODELS.sfx);
 	});
 
-	// Speech inherits its model from the voice in project metadata.
-	it("gives a narration no model of its own", () => {
-		const attrs = flatAttributes(
-			createCanvasNode("narration", {
-				defaultModels: { tts: DEFAULT_MODELS.tts },
-			}),
-		);
-		expect(attrs.provider).toBeUndefined();
-		expect(attrs.model).toBeUndefined();
+	it("gives speech a model of its own, like every other type", () => {
+		const pinned = { provider: "cartesia", model: "Sonic 3.5" } as const;
+		const node = createCanvasNode("narration", {
+			defaultModels: { tts: pinned },
+		});
+		expect(flatAttributes(node)).toMatchObject(pinned);
 	});
 
 	it("keeps a caller-supplied model over the project's", () => {

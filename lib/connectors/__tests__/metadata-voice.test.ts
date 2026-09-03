@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMetadataVoicePlugin } from "@/lib/connectors/tts/plugins/metadata-voice";
+import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
 
@@ -58,16 +60,6 @@ describe("createMetadataVoicePlugin", () => {
 		});
 	});
 
-	it("names the model the voice was picked for", () => {
-		store.getState().updateMetadata({
-			narration: { provider: "cartesia", model: "Sonic 3.5" },
-		});
-		const { model } = createMetadataVoicePlugin();
-		expect(
-			model?.({ id: "n1", type: "narration", children: [] }, store.getState()),
-		).toMatchObject({ provider: "cartesia", model: "Sonic 3.5" });
-	});
-
 	// The connector already carries the pair; only the voice's traits are merged.
 	it("keeps the voice's model out of the generation params", () => {
 		store.getState().updateMetadata({
@@ -82,6 +74,63 @@ describe("createMetadataVoicePlugin", () => {
 			prompt: "hello",
 			gender: "feminine",
 		});
+	});
+
+	it("uses the voice's id on the pair it was found on", () => {
+		store.getState().updateMetadata({
+			narration: { ...DEFAULT_TTS_MODEL, voiceId: "v-picked" },
+		});
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(
+			beforeGenerate?.(
+				{ prompt: "hello", ...DEFAULT_TTS_MODEL },
+				stateCtx(store),
+			),
+		).toEqual({ prompt: "hello", ...DEFAULT_TTS_MODEL, voiceId: "v-picked" });
+	});
+
+	it("falls back to the resolved id when none was picked", () => {
+		store.getState().updateMetadata({
+			narration: { ...DEFAULT_TTS_MODEL, resolvedVoiceId: "v-found" },
+		});
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(
+			beforeGenerate?.(
+				{ prompt: "hello", ...DEFAULT_TTS_MODEL },
+				stateCtx(store),
+			),
+		).toMatchObject({ voiceId: "v-found" });
+	});
+
+	// A voice id only means something to the provider and model it came from.
+	it("leaves the id behind when the element runs on another pair", () => {
+		store.getState().updateMetadata({
+			narration: {
+				provider: "cartesia",
+				model: "Sonic 3.5",
+				gender: "feminine",
+				voiceId: "v-cartesia",
+				resolvedVoiceId: "v-cartesia",
+			},
+		});
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(
+			beforeGenerate?.(
+				{ prompt: "hello", ...DEFAULT_TTS_MODEL },
+				stateCtx(store),
+			),
+		).toEqual({ prompt: "hello", ...DEFAULT_TTS_MODEL, gender: "feminine" });
+	});
+
+	it("treats a voice that names no pair as found nowhere", () => {
+		store.getState().updateMetadata({ narration: { voiceId: "v-legacy" } });
+		const { beforeGenerate } = createMetadataVoicePlugin();
+		expect(
+			beforeGenerate?.(
+				{ prompt: "hello", ...DEFAULT_TTS_MODEL },
+				stateCtx(store),
+			),
+		).toMatchObject({ voiceId: undefined });
 	});
 
 	it("returns params unchanged when name references unknown character", () => {
@@ -161,5 +210,46 @@ describe("createMetadataVoicePlugin", () => {
 		expect(result).not.toHaveProperty("pitch");
 		expect(result).not.toHaveProperty("accent");
 		expect(result).not.toHaveProperty("description");
+	});
+
+	describe("dependencies", () => {
+		const cartesia = { provider: "cartesia", model: "Sonic 3.5" } as const;
+		const narration = (
+			attrs: Record<string, string>,
+		): CanvasContentElement => ({
+			id: "n1",
+			type: "narration",
+			generationAttributes: attrs,
+			children: [],
+		});
+		const voiceInput = (element: CanvasContentElement) => {
+			const [spec] = createMetadataVoicePlugin().dependencies?.(element) ?? [];
+			const node = spec?.(store.getState());
+			return node && "inputs" in node ? node.inputs.attributes : undefined;
+		};
+
+		it("reads the id picked for the element's own pair", () => {
+			store.getState().updateMetadata({
+				narration: { ...cartesia, voiceId: "v-cartesia" },
+			});
+			expect(voiceInput(narration(cartesia))).toEqual({
+				voiceId: "v-cartesia",
+			});
+		});
+
+		// The found id is remembered, not read, or generating would stale the element.
+		it("reads nothing on another pair, and never the id a search found", () => {
+			store.getState().updateMetadata({
+				narration: {
+					...DEFAULT_TTS_MODEL,
+					voiceId: "v-slop",
+					resolvedVoiceId: "v-slop",
+				},
+			});
+			expect(voiceInput(narration(cartesia))).toEqual({ voiceId: "" });
+			expect(voiceInput(narration(DEFAULT_TTS_MODEL))).toEqual({
+				voiceId: "v-slop",
+			});
+		});
 	});
 });

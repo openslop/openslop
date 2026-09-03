@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import type { CanvasContentElement, CanvasEditor } from "@/lib/canvas/types";
-import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import { withLayout } from "../plugins/withLayout";
 
@@ -20,10 +20,8 @@ describe("withLayout", () => {
 		expect(seeded({})).toMatchObject({ type: "narration" });
 	});
 
-	// Speech takes its model from the voice in metadata, not the element.
-	it("seeds it without a model of its own", () => {
-		const attrs = flatAttributes(seeded({ tts: DEFAULT_MODELS.tts }));
-		expect(attrs.provider).toBeUndefined();
-		expect(attrs.model).toBeUndefined();
+	it("seeds it with the model the project speaks in", () => {
+		const pinned = { provider: "cartesia", model: "Sonic 3.5" } as const;
+		expect(flatAttributes(seeded({ tts: pinned }))).toMatchObject(pinned);
 	});
 });

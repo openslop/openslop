@@ -34,7 +34,7 @@ Users see models and providers; developers also see connectors. Each word means 
 
 ## Models and provider keys
 
-A model is a `{ provider, model }` pair, never a bare name. `MODELS[type][provider][name]` in `lib/connectors/models.ts` is the whole table, and nothing anywhere derives a provider from a name. Elements store the pair as attributes; a voice stores its pair in project metadata and its narration and character elements inherit it. Defaults resolve element, then project, then account, then the recommendation.
+A model is a `{ provider, model }` pair, never a bare name. `MODELS[type][provider][name]` in `lib/connectors/models.ts` is the whole table, and nothing anywhere derives a provider from a name. Every element stores its own pair as attributes, speech included. A voice in project metadata stores the pair its voice id was found on; a narration or character element on any other pair searches for a voice afresh, and the id it finds is remembered on that pair. Defaults resolve element, then project, then account, then the recommendation.
 
 Everything that differs between the two route families is one object each in `lib/api/route-families.ts`. `HOSTED` is API-access gated, takes only a model name, and runs on our keys. `BYOK` is session gated, takes the pair, and runs on the account's key. A route file picks a family and the models it serves. A job stores the pair, and the worker builds the provider from it at the last moment, which is the one place the server branches on the family.
 

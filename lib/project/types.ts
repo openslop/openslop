@@ -6,7 +6,13 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
-import { connectorModelsSchema, modelRefSchema } from "@/lib/connectors/models";
+import {
+	connectorModelsSchema,
+	hasModel,
+	modelRefSchema,
+	sameModel,
+} from "@/lib/connectors/models";
+import type { ModelRef } from "@/lib/connectors/types";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
 import { VideoSettingsSchema } from "@/lib/video/videoSettings";
 
@@ -18,7 +24,7 @@ export const ageSchema = z.enum(TTS_AGES).optional().catch(undefined);
 export const pitchSchema = z.enum(TTS_PITCHES).optional().catch(undefined);
 export const accentSchema = z.enum(TTS_ACCENTS).optional().catch(undefined);
 
-const voiceTraitsSchema = z.object({
+export const voiceTraitsSchema = z.object({
 	gender: genderSchema,
 	age: ageSchema,
 	pitch: pitchSchema,
@@ -61,6 +67,39 @@ export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 });
 
 export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
+
+const voiceIsOn = (voice: MetadataVoice, model: ModelRef) =>
+	hasModel("tts", voice) && sameModel(voice, model);
+
+/** The id picked for a voice on a model. An id picked on another pair means nothing here. */
+export const pickedVoiceIdOn = (
+	voice: MetadataVoice,
+	model: ModelRef,
+): string | undefined => (voiceIsOn(voice, model) ? voice.voiceId : undefined);
+
+/** The id a voice has on a model: picked, or else found by an earlier search. */
+export const voiceIdOn = (
+	voice: MetadataVoice,
+	model: ModelRef,
+): string | undefined =>
+	voiceIsOn(voice, model)
+		? (voice.voiceId ?? voice.resolvedVoiceId)
+		: undefined;
+
+/** The voice moved to a model. Its ids stay behind on the pair they were found on. */
+export const voiceOnModel = <V extends MetadataVoice>(
+	voice: V,
+	model: ModelRef,
+): V =>
+	voiceIsOn(voice, model)
+		? voice
+		: {
+				...voice,
+				provider: model.provider,
+				model: model.model,
+				voiceId: undefined,
+				resolvedVoiceId: undefined,
+			};
 
 export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 	appearance: z.string(),

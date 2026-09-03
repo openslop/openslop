@@ -68,6 +68,8 @@ export interface PluginContext<TParams = unknown, TResult = unknown> {
 	dependencies?: Record<string, AssetResult>;
 	/** The project state the node's inputs were resolved against. */
 	state?: ProjectData;
+	/** The pair the connector runs on. */
+	model?: ModelRef;
 }
 
 /** The parts of a plugin context the caller supplies per generation. */
@@ -83,14 +85,6 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * ordering and staleness; reading anything undeclared goes stale-blind.
 	 */
 	dependencies?(element: CanvasContentElement): NodeSpec[];
-	/**
-	 * Where the element's model comes from when not its own attributes, for a
-	 * type whose model is picked elsewhere and inherited.
-	 */
-	model?(
-		element: CanvasContentElement,
-		state: ProjectData,
-	): ModelPick | undefined;
 	beforeGenerate?(
 		params: TParams,
 		ctx?: PluginContext<TParams, TResult>,

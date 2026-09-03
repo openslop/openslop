@@ -1,15 +1,24 @@
 import { DEFAULT_MODELS } from "../models";
-import type { ConnectorType } from "../types";
+import type { ConnectorType, ModelRef } from "../types";
 import type { AttributeDef } from "./schema";
 
-/** Two attributes rather than one: a model name is only unique within its provider. */
+/** The attributes every element carries as its own model, whatever its type. */
+export const ELEMENT_MODEL = {
+	key: "model",
+	providerAttr: "provider",
+} as const satisfies { key: keyof ModelRef; providerAttr: keyof ModelRef };
+
+/**
+ * A further model an element carries beside its own. Two attributes rather
+ * than one: a model name is only unique within its provider.
+ */
 export const modelDefs = (
 	type: ConnectorType,
 	{
-		key = "model",
-		providerAttr = "provider",
+		key,
+		providerAttr,
 		...spec
-	}: Partial<AttributeDef> & { providerAttr?: string } = {},
+	}: Partial<AttributeDef> & { key: string; providerAttr: string },
 ): AttributeDef[] => [
 	{
 		key: providerAttr,

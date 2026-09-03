@@ -1,4 +1,8 @@
-import type { AttributeSchema } from "@/lib/connectors/attributes/schema";
+import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
+import type {
+	AttributeSchema,
+	ModelPick,
+} from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
@@ -7,7 +11,6 @@ import type {
 	ConnectorConfig,
 	ModelRef,
 } from "@/lib/connectors/types";
-import type { ProjectData } from "@/lib/project/store";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import {
 	ELEMENT_TYPES,
@@ -24,17 +27,12 @@ export type ElementConnector = {
 export function resolveElementConnector(
 	element: CanvasContentElement,
 	registry: ConnectorRegistry,
-	state: ProjectData,
 ): ElementConnector {
 	const type = ELEMENT_TYPES[element.type].connector;
-	const config = registry[type];
-	const inherited = (config.plugins ?? []).map((plugin) =>
-		plugin.model?.(element, state),
-	);
 	return {
 		type,
-		model: resolveModel(type, ...inherited, element.generationAttributes),
-		config,
+		model: resolveModel(type, element.generationAttributes),
+		config: registry[type],
 	};
 }
 
@@ -48,3 +46,10 @@ export function attributeSchemaFor(
 
 export const elementSchema = (element: CanvasContentElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
+
+/** The element's own model, picked from its connector type's. */
+export const elementModelPick = (element: CanvasContentElement): ModelPick => ({
+	kind: "model",
+	type: ELEMENT_TYPES[element.type].connector,
+	...ELEMENT_MODEL,
+});

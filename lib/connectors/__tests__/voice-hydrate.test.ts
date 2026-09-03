@@ -7,6 +7,7 @@ import type {
 	TTSGenerateParams,
 	VoiceInfo,
 } from "@/lib/connectors/types";
+import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
 
@@ -65,5 +66,57 @@ describe("voice-hydrate end-to-end", () => {
 
 		const state = store.getState();
 		expect(state.metadata.narration.resolvedVoiceId).toBe("v-narrator");
+	});
+
+	it("remembers the id on the pair it was found on", async () => {
+		store.getState().updateMetadata({ narration: { gender: "masculine" } });
+		const ctx = ctxWith([{ id: "v-found", name: "Found", description: "" }]);
+
+		await runPipeline({ prompt: "hi", ...DEFAULT_TTS_MODEL }, ctx);
+
+		expect(store.getState().metadata.narration).toMatchObject({
+			...DEFAULT_TTS_MODEL,
+			resolvedVoiceId: "v-found",
+		});
+	});
+
+	it("moves the voice to the element's pair, leaving the picked id behind", async () => {
+		store.getState().updateMetadata({
+			narration: {
+				provider: "cartesia",
+				model: "Sonic 3.5",
+				voiceId: "v-cartesia",
+				resolvedVoiceId: "v-cartesia",
+			},
+		});
+		const ctx = ctxWith([{ id: "v-slop", name: "Slop", description: "" }]);
+
+		const params = await runPipeline(
+			{ prompt: "hi", ...DEFAULT_TTS_MODEL },
+			ctx,
+		);
+
+		expect(params.voiceId).toBe("v-slop");
+		expect(store.getState().metadata.narration).toEqual({
+			...DEFAULT_TTS_MODEL,
+			resolvedVoiceId: "v-slop",
+		});
+	});
+
+	it("skips the search and the write when the voice already has an id on this pair", async () => {
+		store.getState().updateMetadata({
+			narration: { ...DEFAULT_TTS_MODEL, voiceId: "v-picked" },
+		});
+		const ctx = ctxWith([{ id: "v-other", name: "Other", description: "" }]);
+		const before = store.getState().metadata.narration;
+
+		const params = await runPipeline(
+			{ prompt: "hi", ...DEFAULT_TTS_MODEL },
+			ctx,
+		);
+
+		expect(params.voiceId).toBe("v-picked");
+		expect(ctx.searchVoices).not.toHaveBeenCalled();
+		expect(store.getState().metadata.narration).toBe(before);
 	});
 });

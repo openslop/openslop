@@ -5,18 +5,12 @@ import { ANIMATED_IMAGE_ATTRIBUTES } from "../attributes";
 describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 	const badges = ANIMATED_IMAGE_ATTRIBUTES.badgeAttributes;
 
-	it("offers a model per generation: the animation's and the still's", () => {
-		expect(Object.keys(badges)).toEqual(["model", "imageModel"]);
-		expect(badges.model?.label).toBe("Video model");
+	it("offers the still's model beside the element's own", () => {
+		expect(Object.keys(badges)).toEqual(["imageModel"]);
 		expect(badges.imageModel?.label).toBe("Image model");
 	});
 
-	it("picks each from its own connector's models, writing its own provider", () => {
-		expect(badges.model?.edit).toEqual({
-			kind: "model",
-			type: "animated_image",
-			providerAttr: "provider",
-		});
+	it("picks the still from the image models, writing its own provider", () => {
 		expect(badges.imageModel?.edit).toEqual({
 			kind: "model",
 			type: "image",
@@ -24,16 +18,14 @@ describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 		});
 	});
 
-	it("keeps both providers off the settings popover", () => {
-		const settings = ANIMATED_IMAGE_ATTRIBUTES.settingsAttributes;
-		expect(settings.provider).toBeUndefined();
-		expect(settings.imageProvider).toBeUndefined();
+	it("keeps the still's provider off the settings popover", () => {
+		expect(
+			ANIMATED_IMAGE_ATTRIBUTES.settingsAttributes.imageProvider,
+		).toBeUndefined();
 	});
 
-	it("defaults both pairs, so a new element names the model each generation runs on", () => {
+	it("defaults the still's pair, so a new element names the model it runs on", () => {
 		expect(ANIMATED_IMAGE_ATTRIBUTES.defaultAttributes).toMatchObject({
-			provider: DEFAULT_MODELS.video.provider,
-			model: DEFAULT_MODELS.video.model,
 			imageProvider: DEFAULT_MODELS.image.provider,
 			imageModel: DEFAULT_MODELS.image.model,
 		});

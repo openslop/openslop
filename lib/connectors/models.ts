@@ -76,11 +76,15 @@ export function vendorParams<TReq extends ModelRef>(
 export const sameModel = (a: ModelRef, b: ModelRef): boolean =>
 	a.provider === b.provider && a.model === b.model;
 
-export const resolveModel = (
+/** The first candidate the catalog knows, as a bare pair whatever else it carried. */
+export function resolveModel(
 	type: ConnectorType,
 	...candidates: (ModelPick | undefined)[]
-): ModelRef =>
-	candidates.find((pick) => hasModel(type, pick)) ?? DEFAULT_MODELS[type];
+): ModelRef {
+	const { provider, model } =
+		candidates.find((pick) => hasModel(type, pick)) ?? DEFAULT_MODELS[type];
+	return { provider, model };
+}
 
 export function listModels(type: ConnectorType): (ModelRef & ModelEntry)[] {
 	return Object.entries(MODELS[type]).flatMap(([provider, table]) =>

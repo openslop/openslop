@@ -40,8 +40,6 @@ describe("resolveAttributeSchema", () => {
 
 	it("resolves distinct schemas for image vs animated_image", () => {
 		expect(resolveAttributeSchema("image", DEFAULT_MODELS.image).keys).toEqual([
-			"provider",
-			"model",
 			"referenceImagesOverride",
 			"motion",
 		]);
@@ -49,8 +47,6 @@ describe("resolveAttributeSchema", () => {
 			resolveAttributeSchema("animated_image", DEFAULT_MODELS.animated_image)
 				.keys,
 		).toEqual([
-			"provider",
-			"model",
 			"imageProvider",
 			"imageModel",
 			"referenceImagesOverride",
@@ -60,20 +56,35 @@ describe("resolveAttributeSchema", () => {
 		]);
 	});
 
-	// Speech inherits its model from the voice in metadata, so tts declares none.
-	it("offers every other asset connector's models as a badge, defaulted to the recommendation", () => {
-		for (const type of ASSET_CONNECTOR_TYPES.filter((t) => t !== "tts")) {
+	// An element's own pair is what picks the schema, so no schema carries it.
+	it("keeps the element's own model out of every schema", () => {
+		for (const type of ASSET_CONNECTOR_TYPES) {
 			const schema = resolveAttributeSchema(type, DEFAULT_MODELS[type]);
-
-			expect(schema.badgeAttributes.model?.edit).toEqual({
-				kind: "model",
-				type,
-				providerAttr: "provider",
-			});
-			expect(schema.badgeAttributes.provider).toBeUndefined();
-			expect(schema.settingsAttributes.provider).toBeUndefined();
-			expect(schema.defaultAttributes).toMatchObject(DEFAULT_MODELS[type]);
+			expect(schema.keys).not.toContain("provider");
+			expect(schema.keys).not.toContain("model");
 		}
+	});
+
+	it("resolves the still behind an animated image from the image models", () => {
+		const schema = resolveAttributeSchema(
+			"animated_image",
+			DEFAULT_MODELS.animated_image,
+		);
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
+
+		expect(schema.resolve({}, { image: pinned })).toMatchObject({
+			imageProvider: pinned.provider,
+			imageModel: pinned.model,
+		});
+		expect(
+			schema.resolve({
+				imageProvider: "openslop",
+				imageModel: "Seedream 5 Lite",
+			}),
+		).toMatchObject({
+			imageProvider: DEFAULT_MODELS.image.provider,
+			imageModel: DEFAULT_MODELS.image.model,
+		});
 	});
 
 	it("llm has no element-settings attributes, inherited empty from the base connector", () => {

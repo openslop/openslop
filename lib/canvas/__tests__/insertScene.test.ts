@@ -5,7 +5,6 @@ vi.mock("@/lib/connectors/factory", () => ({
 	resolveAttributeSchema: () => ({
 		defaultAttributes: {},
 		keys: [],
-		modelPicks: [],
 		resolve: (attrs: Record<string, string>) => attrs,
 	}),
 }));

@@ -3,7 +3,7 @@ import { Node } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
-import { elementSchema } from "@/lib/canvas/elementConnector";
+import { elementModelPick, elementSchema } from "@/lib/canvas/elementConnector";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/textDirection";
 import { OutputPreview } from "./OutputPreview";
@@ -11,6 +11,7 @@ import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
 import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
+import { ModelAttribute } from "./attributes/ModelAttribute";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
 import { ElementHistoryButton } from "./ElementHistoryButton";
 import { HeaderIconButton } from "./HeaderIconButton";
@@ -120,6 +121,12 @@ export function ElementContainer({
 									</span>
 								</span>
 								<ElementCharacters element={element} />
+								<ModelAttribute
+									element={element}
+									pick={elementModelPick(element)}
+									label="Model"
+									className="text-label-xs"
+								/>
 								<ElementAttributeBadges
 									element={element}
 									specs={schema.badgeAttributes}

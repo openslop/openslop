@@ -24,24 +24,9 @@ export function createCanvasNode(
 	const { connector } = ELEMENT_TYPES[type];
 	const attrs = opts.attrs ?? {};
 	const defaults = opts.defaultModels ?? {};
-	const schema = resolveAttributeSchema(
-		connector,
-		resolveModel(connector, attrs, defaults[connector]),
-	);
-	const models = Object.fromEntries(
-		schema.modelPicks.flatMap(({ key, providerAttr, type: picks }) => {
-			const { provider, model } = resolveModel(
-				picks,
-				{ provider: attrs[providerAttr], model: attrs[key] },
-				defaults[picks],
-			);
-			return [
-				[providerAttr, provider],
-				[key, model],
-			];
-		}),
-	);
-	const attributes = schema.resolve({ ...attrs, ...models });
+	const model = resolveModel(connector, attrs, defaults[connector]);
+	const schema = resolveAttributeSchema(connector, model);
+	const attributes = schema.resolve({ ...attrs, ...model }, defaults);
 	return {
 		id: opts.id ?? makeNodeId(),
 		type,

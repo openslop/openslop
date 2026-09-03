@@ -2,11 +2,10 @@ import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "../createCanvasNode";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_SFX_MODEL } from "@/lib/connectors/sfx/models";
+import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
-// The model is a schema default like any other attribute, so the registry's own
-// defaultModel does not decide what a new element is created with.
 describe("createCanvasNode — schema defaults (integration)", () => {
 	it("applies full TTS defaults for narration", () => {
 		const node = createCanvasNode("narration");
@@ -14,8 +13,8 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
+			...DEFAULT_TTS_MODEL,
 		});
-		expect(flatAttributes(node).model).toBeUndefined();
 	});
 
 	it("applies the same TTS defaults for character", () => {
@@ -24,8 +23,8 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 			emotion: "neutral",
 			speed: "medium",
 			volume: "10",
+			...DEFAULT_TTS_MODEL,
 		});
-		expect(flatAttributes(node).model).toBeUndefined();
 	});
 
 	it("applies sfx defaults for sound", () => {

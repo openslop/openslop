@@ -1,4 +1,6 @@
+import { requireModel } from "@/lib/connectors/plugins";
 import type { ProjectStore } from "@/lib/project/store";
+import { metadataVoiceFor, voiceIdOn, voiceOnModel } from "@/lib/project/types";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
@@ -14,20 +16,16 @@ export function createVoiceHydratePlugin(
 ): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "voice-hydrate",
-		beforeGenerate(params) {
-			if (!params.voiceId) return params;
-			const { metadata, setCharacter, updateMetadata } = store.getState();
-			if (params.name) {
-				const character = metadata.characters[params.name];
-				if (character && character.resolvedVoiceId !== params.voiceId) {
-					setCharacter(params.name, {
-						...character,
-						resolvedVoiceId: params.voiceId,
-					});
-				}
-			} else if (metadata.narration.resolvedVoiceId !== params.voiceId) {
-				updateMetadata({ narration: { resolvedVoiceId: params.voiceId } });
-			}
+		beforeGenerate(params, ctx) {
+			const { voiceId, name } = params;
+			if (!voiceId) return params;
+			const model = requireModel(ctx, "voice-hydrate");
+			const { metadata, updateCharacter, setNarration } = store.getState();
+			const voice = metadataVoiceFor(metadata, name);
+			if (!voice || voiceIdOn(voice, model) === voiceId) return params;
+			const next = { ...voiceOnModel(voice, model), resolvedVoiceId: voiceId };
+			if (name) updateCharacter(name, next);
+			else setNarration(next);
 			return params;
 		},
 	};
