@@ -2,7 +2,7 @@ import type { ImageGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateRunwareKey, withRunware } from "../runware";
-import type { ImageProvider } from "./base";
+import type { ImageProvider } from "../types";
 
 type RawImageResult = {
 	data: string;

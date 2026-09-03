@@ -30,7 +30,7 @@ function buildInit(method: string, body: unknown): RequestInit {
 	};
 }
 
-function buildUrl(url: string, params?: QueryParams): string {
+export function buildUrl(url: string, params?: QueryParams): string {
 	if (!params) return url;
 	const qs = new URLSearchParams(
 		Object.entries(params).flatMap(([key, value]) =>

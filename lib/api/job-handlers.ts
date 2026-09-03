@@ -1,5 +1,5 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
-import { modelEntry } from "@/lib/connectors/models";
+import { vendorParams, type VendorParams } from "@/lib/connectors/models";
 import type {
 	ConnectorType,
 	ImageGenerateParams,
@@ -13,28 +13,19 @@ import type { JobRow } from "./jobs";
 import type { ProviderType } from "@/lib/providers/types";
 import { providerForPick } from "./route-families";
 
-type JobRequest = { user_id: string; request: ModelRef };
+type JobRequest<TReq extends ModelRef = ModelRef> = {
+	user_id: string;
+	connector_type: ConnectorType;
+	request: TReq;
+};
 
 export const providerForJob = <K extends ProviderType>(
 	type: K,
 	job: JobRequest,
 ) => providerForPick(job.user_id, type, job.request);
 
-export type VendorParams<TReq extends ModelRef> = Omit<
-	TReq,
-	"provider" | "model"
-> & { model: string };
-
-export const vendorParams = <TReq extends ModelRef>(job: {
-	connector_type: ConnectorType;
-	request: TReq;
-}): VendorParams<TReq> => {
-	const { provider, model, ...rest } = job.request;
-	return {
-		...rest,
-		model: modelEntry(job.connector_type, { provider, model }).id,
-	};
-};
+export const jobVendorParams = <TReq extends ModelRef>(job: JobRequest<TReq>) =>
+	vendorParams(job.connector_type, job.request);
 
 export type ProcessOutcome<TMeta = Record<string, unknown>> =
 	| { kind: "completed"; result: BundleResponse }
@@ -60,7 +51,7 @@ function assetHandler<TReq extends ModelRef>(
 	return {
 		process: async (job) => ({
 			kind: "completed",
-			result: await (await providerFor(job)).generate(vendorParams(job)),
+			result: await (await providerFor(job)).generate(jobVendorParams(job)),
 		}),
 	};
 }

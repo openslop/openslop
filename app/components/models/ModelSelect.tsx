@@ -22,32 +22,30 @@ import { useSettings } from "@/lib/settings/useSettings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./ModelChips";
 import { ProviderIcon } from "./ProviderIcon";
-import { useMissingKey } from "./useProviderKeys";
+import { useProviderKeyLookup } from "./useProviderKeys";
 
 /** Read aloud, the icon says nothing, so the provider is spelled out. */
 export const modelLabel = ({ provider, model }: ModelRef): string =>
 	`${model} (${PROVIDER_CATALOG[provider].name})`;
 
+type ModelSelectProps = {
+	type: ConnectorType;
+	value: ModelRef;
+	onChange: (model: ModelRef) => void;
+};
+
 export function ModelSelect({
-	type,
-	value,
-	onChange,
 	side = "bottom",
 	align = "start",
 	tooltip,
 	children,
-}: {
-	type: ConnectorType;
-	value: ModelRef;
-	onChange: (model: ModelRef) => void;
+	...menu
+}: ModelSelectProps & {
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
 	tooltip?: ReactNode;
 	children: ReactNode;
 }) {
-	const missingKey = useMissingKey();
-	const settings = useSettings();
-
 	return (
 		<Tooltip>
 			<DropdownMenu modal={false}>
@@ -63,41 +61,7 @@ export function ModelSelect({
 					align={align}
 					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
 				>
-					{listModels(type).map(({ provider, model, cost, speed }) => {
-						const missing = missingKey(provider);
-						return (
-							<SelectMenuItem
-								key={`${provider}/${model}`}
-								aria-label={modelLabel({ provider, model })}
-								selected={sameModel({ provider, model }, value)}
-								onSelect={() =>
-									missing
-										? settings.open("models", missing)
-										: onChange({ provider, model })
-								}
-								className="gap-2"
-							>
-								<ProviderIcon
-									provider={provider}
-									size={14}
-									className={cn(missing && "opacity-40")}
-								/>
-								<span
-									className={cn(
-										"min-w-0 truncate",
-										missing && "text-muted-foreground",
-									)}
-								>
-									{model}
-								</span>
-								{missing ? (
-									<ConnectHint provider={missing} />
-								) : (
-									<ModelChips meta={{ cost, speed }} className="ml-auto" />
-								)}
-							</SelectMenuItem>
-						);
-					})}
+					<ModelMenuItems {...menu} />
 				</DropdownMenuContent>
 			</DropdownMenu>
 			{tooltip && (
@@ -107,6 +71,45 @@ export function ModelSelect({
 			)}
 		</Tooltip>
 	);
+}
+
+/** Mounted only while the menu is open, so a closed picker subscribes to nothing. */
+function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
+	const keyFor = useProviderKeyLookup();
+	const settings = useSettings();
+
+	return listModels(type).map(({ provider, model, cost, speed }) => {
+		const missing = keyFor(provider) === null;
+		return (
+			<SelectMenuItem
+				key={`${provider}/${model}`}
+				aria-label={modelLabel({ provider, model })}
+				selected={sameModel({ provider, model }, value)}
+				onSelect={() =>
+					missing
+						? settings.open("models", provider)
+						: onChange({ provider, model })
+				}
+				className="gap-2"
+			>
+				<ProviderIcon
+					provider={provider}
+					size={14}
+					className={cn(missing && "opacity-40")}
+				/>
+				<span
+					className={cn("min-w-0 truncate", missing && "text-muted-foreground")}
+				>
+					{model}
+				</span>
+				{missing ? (
+					<ConnectHint provider={provider} />
+				) : (
+					<ModelChips meta={{ cost, speed }} className="ml-auto" />
+				)}
+			</SelectMenuItem>
+		);
+	});
 }
 
 /** Looks like the buttons it stands in for, without nesting one inside a menu row. */

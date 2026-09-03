@@ -13,12 +13,12 @@ export type WithMetadata<
  * check is the vendor's own to define: only it knows which call is cheapest and
  * how it reports a refusal.
  */
-export interface Provider {
+export interface ProviderContract {
 	validate(): Promise<ValidationResult>;
 }
 
 /** A provider that turns a request into a stored asset bundle. */
-export interface AssetProvider<TParams> extends Provider {
+export interface AssetProvider<TParams> extends ProviderContract {
 	generate(params: TParams): Promise<BundleResponse>;
 }
 
@@ -26,7 +26,7 @@ export abstract class BaseProvider<
 	TParams = unknown,
 	TRawResult extends WithMetadata = WithMetadata,
 	TOutput = BundleResponse,
-> implements Provider {
+> implements ProviderContract {
 	protected abstract readonly blobConfig: { type: string; provider: string };
 
 	abstract validate(): Promise<ValidationResult>;

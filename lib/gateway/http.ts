@@ -1,4 +1,5 @@
 import { ApiClient } from "@/lib/clients/apiClient";
+import { buildUrl } from "@/lib/clients/http";
 import { readSSE } from "@/lib/api/sse";
 import type {
 	LLMGenerateParams,
@@ -23,7 +24,11 @@ export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
 	protected readonly client: ApiClient;
 	protected readonly route: string;
 
-	constructor(model: ModelRef, path: string, baseUrl?: string) {
+	constructor(
+		protected readonly model: ModelRef,
+		path: string,
+		baseUrl?: string,
+	) {
 		super();
 		this.client = new ApiClient(baseUrl);
 		this.route = `${apiPrefixFor(model.provider)}/${path}`;
@@ -71,10 +76,7 @@ export class HttpLLMGateway extends GatewayClient<
 }
 
 export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
-	constructor(
-		private readonly model: ModelRef,
-		baseUrl?: string,
-	) {
+	constructor(model: ModelRef, baseUrl?: string) {
 		super(model, "tts", baseUrl);
 	}
 
@@ -95,7 +97,6 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 	}
 
 	private previewRoute(url: string): string {
-		const query = new URLSearchParams({ url, ...this.model });
-		return `${this.route}/voices/preview?${query}`;
+		return buildUrl(`${this.route}/voices/preview`, { url, ...this.model });
 	}
 }

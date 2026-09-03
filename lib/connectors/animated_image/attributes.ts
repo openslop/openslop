@@ -5,14 +5,15 @@ import { durationDef, motionDef } from "../attributes/common";
 import { modelDefs } from "../attributes/model";
 import { referenceImagesDef } from "../attributes/referenceImages";
 
+/** The still's own model pair, carried beside the animation's. */
+export const STILL_MODEL = {
+	key: "imageModel",
+	providerAttr: "imageProvider",
+} as const;
+
 export const ANIMATED_IMAGE_ATTRIBUTES = AttributeSchema.from([
 	...modelDefs("animated_image", { label: "Video model" }),
-	...modelDefs("image", {
-		key: "imageModel",
-		providerAttr: "imageProvider",
-		label: "Image model",
-		icon: Image,
-	}),
+	...modelDefs("image", { ...STILL_MODEL, label: "Image model", icon: Image }),
 	referenceImagesDef,
 	{
 		key: "videoPrompt",

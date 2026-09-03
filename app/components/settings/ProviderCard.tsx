@@ -15,6 +15,7 @@ import {
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import type { Provider } from "@/lib/connectors/types";
+import { scrollIntoContainer } from "@/lib/components/scrollIntoContainer";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/toastError";
@@ -94,7 +95,7 @@ export function ProviderCard({
 	// A link that names a provider has to land on it, not at the top of a list
 	// it happens to be in.
 	useEffect(() => {
-		if (selected) card.current?.scrollIntoView({ block: "center" });
+		if (selected && card.current) scrollIntoContainer(card.current, "center");
 	}, [selected]);
 
 	if (!key && !editing) return null;

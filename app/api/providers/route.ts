@@ -1,23 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { providerKeysView, saveProviderKey } from "@/lib/api/providerKeys";
+import { MIN_KEY_LENGTH } from "@/lib/connectors/providerKey";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/request-schema-fields";
-import {
-	createSessionQueryRouteHandler,
-	createSessionRouteHandler,
-} from "@/lib/api/route-handler";
-
-export const GET = createSessionQueryRouteHandler({
-	schema: z.object({}),
-	label: "Provider key list",
-	handle: async ({ user }) =>
-		NextResponse.json(await providerKeysView(user.id)),
-});
+import { createSessionRouteHandler } from "@/lib/api/route-handler";
 
 const saveSchema = z.object({
 	provider: byokProviderField,
-	apiKey: z.string().min(8, { message: "That key looks too short." }),
+	apiKey: z
+		.string()
+		.min(MIN_KEY_LENGTH, { message: "That key looks too short." }),
 });
 
 /**
@@ -32,6 +25,6 @@ export const POST = createSessionRouteHandler({
 		const { provider, apiKey } = input;
 		await saveProviderKey(user.id, provider, apiKey);
 		const validation = await verifyProviderKey(user.id, provider, apiKey);
-		return NextResponse.json(await providerKeysView(user.id, validation));
+		return NextResponse.json(await providerKeysView(user, validation));
 	},
 });

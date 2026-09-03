@@ -47,7 +47,7 @@ export function createConnector<T extends ConnectorType>(
 ): ConnectorTypeMap[T] {
 	return new CONNECTORS[type]({
 		...config,
-		model,
+		model: { provider: model.provider, model: model.model },
 	}) as ConnectorTypeMap[T];
 }
 

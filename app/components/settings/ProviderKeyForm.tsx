@@ -9,11 +9,9 @@ import {
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
+import { MIN_KEY_LENGTH } from "@/lib/connectors/providerKey";
 import { toastError } from "@/lib/toastError";
 import { useAccount } from "@/lib/user/useAccount";
-
-/** Shorter than any provider issues, so a paste that missed is caught here. */
-const MIN_KEY_LENGTH = 8;
 
 export function ProviderKeyForm({
 	provider,
@@ -59,6 +57,7 @@ export function ProviderKeyForm({
 			</Label>
 			<Input
 				id={fieldId}
+				name="apiKey"
 				className="h-8 text-label"
 				type="password"
 				autoComplete="off"

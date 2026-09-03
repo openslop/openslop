@@ -113,9 +113,6 @@
 	--foreground-secondary: var(--grey-600);
 	--surface-recessed: #f3f1f0;
 	--surface-elevated: #fdfcfc;
-	/* Settings: a quieter ground than a popover, with its panes raised off it. */
-	--settings-surface: #f4f1f0;
-	--settings-pane: #fdfcfc;
 	--surface-hover: #edeced;
 	--card: #fff;
 	--card-foreground: var(--grey-900);
@@ -262,8 +259,6 @@
 	--background: #140e11;
 	--surface-recessed: #140e11;
 	--surface-elevated: #41393c;
-	--settings-surface: #160e11;
-	--settings-pane: #251e21;
 	--surface-hover: #4d4448;
 	--card: #251e21;
 	--popover: #251e21;
@@ -326,8 +321,6 @@
 	--color-foreground: var(--foreground);
 	--color-foreground-secondary: var(--foreground-secondary);
 	--color-surface-recessed: var(--surface-recessed);
-	--color-settings-surface: var(--settings-surface);
-	--color-settings-pane: var(--settings-pane);
 	--color-surface-elevated: var(--surface-elevated);
 	--color-surface-hover: var(--surface-hover);
 	--color-card: var(--card);

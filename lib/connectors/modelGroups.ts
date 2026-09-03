@@ -17,7 +17,6 @@ import type { ConnectorType } from "./types";
 export interface ModelGroup {
 	key: string;
 	label: string;
-	description: string;
 	Icon: IconComponent;
 	/** The connector types this group sets, first one deciding what it shows. */
 	types: ConnectorType[];
@@ -27,42 +26,36 @@ export const MODEL_GROUPS: ModelGroup[] = [
 	{
 		key: "images",
 		label: "Images",
-		description: "Stills on image elements",
 		Icon: ImageIcon,
 		types: ["image"],
 	},
 	{
 		key: "videos",
 		label: "Videos",
-		description: "Animated images and clips",
 		Icon: Video,
 		types: ["animated_image", "video"],
 	},
 	{
 		key: "voice",
 		label: "Voice",
-		description: "Narration and character speech",
 		Icon: Voice,
 		types: ["tts"],
 	},
 	{
 		key: "sound",
 		label: "Sound",
-		description: "Sound effects",
 		Icon: Waveform,
 		types: ["sfx"],
 	},
 	{
 		key: "music",
 		label: "Music",
-		description: "Background music",
 		Icon: Music,
 		types: ["music"],
 	},
 	{
 		key: "text",
 		label: "Text",
-		description: "Scripting, editing and chat",
 		Icon: TextBox,
 		types: ["llm"],
 	},

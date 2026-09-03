@@ -6,7 +6,17 @@ vi.mock("@/lib/connectors/factory", () => ({
 		const defaultAttributes = type === "tts" ? { emotion: "neutral" } : {};
 		return {
 			defaultAttributes,
-			keys: type === "tts" ? [] : ["model"],
+			modelPicks:
+				type === "tts"
+					? []
+					: [
+							{
+								kind: "model",
+								key: "model",
+								providerAttr: "provider",
+								connector: type,
+							},
+						],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,

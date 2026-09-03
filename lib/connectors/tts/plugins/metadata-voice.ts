@@ -1,3 +1,4 @@
+import omit from "lodash/omit";
 import { requireState } from "@/lib/connectors/plugins";
 import { forVoice } from "@/lib/generation/sourceNodes";
 import { declaredLanguage } from "@/lib/project/language";
@@ -17,12 +18,12 @@ export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> 
 			const { metadata } = requireState(ctx, "metadata-voice");
 			const voice = metadataVoiceFor(metadata, params.name);
 			if (!voice) return params;
-			const {
-				resolvedVoiceId,
-				provider: _provider,
-				model: _model,
-				...fields
-			} = MetadataVoiceSchema.parse(voice);
+			// The connector already carries the pair; only the voice's traits are merged.
+			const { resolvedVoiceId, ...fields } = omit(
+				MetadataVoiceSchema.parse(voice),
+				"provider",
+				"model",
+			);
 			return {
 				...params,
 				...fields,

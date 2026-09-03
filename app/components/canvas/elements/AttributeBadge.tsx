@@ -35,8 +35,7 @@ export function AttributeBadge({
 	className,
 }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
-	const attrs = flatAttributes(element);
-	const value = attrs[attrKey] ?? "";
+	const value = flatAttributes(element)[attrKey] ?? "";
 	if (!value && !spec.edit) return null;
 
 	const SpecIcon = spec.icon;
@@ -80,10 +79,7 @@ export function AttributeBadge({
 		return (
 			<ModelAttribute
 				element={element}
-				attrKey={attrKey}
-				providerAttr={spec.edit.providerAttr}
-				pick={{ provider: attrs[spec.edit.providerAttr], model: value }}
-				connector={spec.edit.connector}
+				pick={{ key: attrKey, ...spec.edit }}
 				label={spec.label}
 				className={className}
 			/>

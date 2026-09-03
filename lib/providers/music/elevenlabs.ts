@@ -10,7 +10,7 @@ import {
 	ELEVENLABS_AUDIO_FORMAT,
 	toElevenLabsOutputFormat,
 } from "../elevenlabs";
-import type { MusicProvider } from "./base";
+import type { MusicProvider } from "../types";
 
 export class ElevenLabsMusic
 	extends BaseElevenLabsAudio<MusicGenerateParams>

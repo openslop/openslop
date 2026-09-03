@@ -1,6 +1,7 @@
+import omit from "lodash/omit";
 import { NextResponse } from "next/server";
 import { parseSloppyMessage } from "@/lib/agent/messages";
-import { modelEntry } from "@/lib/connectors/models";
+import { modelEntry, vendorParams } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
 import { agentTurnSchema, streamAgentTurn } from "./agentTurn";
 import { bodySchema, LLM_FIELDS } from "./generation-schema";
@@ -16,15 +17,9 @@ export const createLLMRouteHandler = <TModels, TPicked extends ModelRef>(
 		schema: bodySchema(family.model(models), LLM_FIELDS),
 		label: "LLM generation",
 		handle: async ({ user, input }) => {
-			const {
-				stream,
-				projectId: _projectId,
-				provider: _provider,
-				...rest
-			} = input;
 			const llm = await family.providerFor(user.id, "llm", input);
-			const params = { ...rest, model: modelEntry("llm", input).id };
-			return stream
+			const params = vendorParams("llm", omit(input, "stream", "projectId"));
+			return input.stream
 				? createSSEStreamResponse(llm.stream(params), "LLM")
 				: NextResponse.json(await llm.generate(params));
 		},

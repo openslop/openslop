@@ -8,6 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { selectTriggerClassName } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export interface SelectMenuOption<T extends string> {
@@ -52,6 +53,10 @@ export function SelectMenuItem({
 	);
 }
 
+/** A control that sits inline with text: a badge on an element, a button in a composer. */
+export const inlineControlClassName =
+	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
+
 /** Mousedown is swallowed so opening a picker never moves the caret out of the text it sits in. */
 export function InlineMenuTrigger({
 	className,
@@ -62,10 +67,7 @@ export function InlineMenuTrigger({
 		<button
 			type="button"
 			onMouseDown={(event) => event.preventDefault()}
-			className={cn(
-				"focus-ring inline-flex max-w-[140px] cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
-				className,
-			)}
+			className={cn(inlineControlClassName, "max-w-[140px]", className)}
 			{...props}
 		>
 			{children}
@@ -77,6 +79,7 @@ export function InlineMenuTrigger({
 	);
 }
 
+/** The Select trigger's face on a menu, for a picker whose rows are richer than a Select's. */
 export function SelectMenuTrigger({
 	className,
 	children,
@@ -85,14 +88,16 @@ export function SelectMenuTrigger({
 	return (
 		<button
 			type="button"
+			data-size="sm"
 			className={cn(
-				"flex h-8 w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-2.5 font-body text-label whitespace-nowrap outline-none transition-colors hover:bg-surface-hover focus-ring unavailable:opacity-50",
+				selectTriggerClassName,
+				"px-2.5 hover:bg-surface-hover",
 				className,
 			)}
 			{...props}
 		>
 			{children}
-			<ChevronDown className="size-4 shrink-0 opacity-60" aria-hidden="true" />
+			<ChevronDown className="opacity-60" aria-hidden="true" />
 		</button>
 	);
 }

@@ -1,3 +1,4 @@
+import omit from "lodash/omit";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { ModelRef } from "@/lib/connectors/types";
@@ -12,9 +13,9 @@ export const createVoiceSearchHandler = <TModels, TPicked extends ModelRef>(
 		schema: voiceSearchParamsSchema.and(family.model(models)),
 		label: "Voice search",
 		handle: async ({ user, input }) => {
-			const { provider: _provider, model: _model, ...params } = input;
 			const tts = await family.providerFor(user.id, "tts", input);
-			return NextResponse.json({ voices: await tts.search(params) });
+			const voices = await tts.search(omit(input, "provider", "model"));
+			return NextResponse.json({ voices });
 		},
 	});
 

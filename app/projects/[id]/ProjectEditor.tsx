@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
+import type { ProviderKeyRecord } from "@/lib/connectors/providerKey";
 import { ConfigProvider } from "@/lib/config/ConfigProvider";
 import { ScriptProvider } from "@/lib/script/ScriptProvider";
 import { UserProvider } from "@/lib/user/UserProvider";
@@ -24,12 +25,14 @@ export default function ProjectEditor({
 	initialStore,
 	initialGeneration,
 	user,
+	providerKeys,
 }: {
 	projectId: string;
 	initialScript: string;
 	initialStore: unknown;
 	initialGeneration: Record<string, ElementSnapshot>;
 	user: User;
+	providerKeys: ProviderKeyRecord[];
 }): ReactNode {
 	// Build and hydrate the store once, before children render and without
 	// re-running each render.
@@ -41,7 +44,7 @@ export default function ProjectEditor({
 
 	return (
 		<TooltipProvider>
-			<UserProvider user={user}>
+			<UserProvider user={user} providerKeys={providerKeys}>
 				<GenerationQueueProvider initialState={initialGeneration}>
 					<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>
 						<ProjectStoreProvider store={store}>

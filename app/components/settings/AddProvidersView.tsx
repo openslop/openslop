@@ -8,7 +8,7 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Tile } from "@/components/ui/tile";
 import { ModalityPills } from "@/app/components/models/ModalityPills";
 import { ProviderIcon } from "@/app/components/models/ProviderIcon";
-import { useMissingKey } from "@/app/components/models/useProviderKeys";
+import { useProviderKeyLookup } from "@/app/components/models/useProviderKeys";
 import { MODEL_GROUPS } from "@/lib/connectors/modelGroups";
 import {
 	MANAGED_PROVIDER,
@@ -27,7 +27,7 @@ export function AddProvidersView({
 }) {
 	const [query, setQuery] = useState("");
 	const [groupKey, setGroupKey] = useState(ALL);
-	const missingKey = useMissingKey();
+	const keyFor = useProviderKeyLookup();
 
 	const capability =
 		MODEL_GROUPS.find((group) => group.key === groupKey)?.types ?? null;
@@ -60,14 +60,14 @@ export function AddProvidersView({
 			{matches.length === 0 ? (
 				<p className="py-8 text-center text-label text-muted-foreground">
 					{query.trim()
-						? `Nothing matches "${query.trim()}".`
+						? `Nothing matches “${query.trim()}”.`
 						: "No providers for that yet."}
 				</p>
 			) : (
 				<ul className="flex flex-col gap-2">
 					{matches.map(({ provider, models }) => {
 						const meta = PROVIDER_CATALOG[provider];
-						const connected = !missingKey(provider);
+						const connected = keyFor(provider) !== null;
 						return (
 							<Tile key={provider} asChild className="flex-row items-center">
 								<li>

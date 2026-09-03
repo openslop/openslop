@@ -1,9 +1,11 @@
+import type { User } from "@supabase/supabase-js";
 import type {
 	ProviderKeyRecord,
 	KeyStatus,
 	ValidationResult,
 } from "@/lib/connectors/providerKey";
 import {
+	MANAGED_PROVIDER,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
@@ -40,21 +42,36 @@ const toRecord = (row: ProviderKeyRow): ProviderKeyRecord => ({
 });
 
 /**
- * The keys an account has stored. Only ever the metadata: the key itself lives
- * in the vault and is read one generation at a time. Read through the caller's
- * own session, so row-level security is a second lock on the filter below.
+ * The hosted provider has a key row like any other, so nothing downstream asks
+ * which provider needs a key. Every account has it; API access is what makes
+ * it valid today, and when it takes a key of its own it will be stored like
+ * the rest.
+ */
+const hostedKey = (user: User): ProviderKeyRecord => ({
+	provider: MANAGED_PROVIDER,
+	last4: "",
+	status: user.app_metadata?.api_access ? "valid" : "invalid",
+	verifiedAt: null,
+	createdAt: "",
+});
+
+/**
+ * The keys an account can generate on: the hosted one, then whatever it has
+ * stored. Only ever the metadata: the key itself lives in the vault and is
+ * read one generation at a time. Read through the caller's own session, so
+ * row-level security is a second lock on the filter below.
  */
 export async function listProviderKeys(
-	userId: string,
+	user: User,
 ): Promise<ProviderKeyRecord[]> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("provider_keys")
 		.select("provider, last4, status, verified_at, created_at")
-		.eq("user_id", userId)
+		.eq("user_id", user.id)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
-	return (data as ProviderKeyRow[]).map(toRecord);
+	return [hostedKey(user), ...(data as ProviderKeyRow[]).map(toRecord)];
 }
 
 /**
@@ -126,15 +143,17 @@ export async function setKeyStatus(
 	);
 }
 
-export async function providerKeysView(
-	userId: string,
-	validation?: ValidationResult,
-): Promise<{
+export type ProviderKeysView = {
 	providerKeys: ProviderKeyRecord[];
 	validation?: ValidationResult;
-}> {
+};
+
+export async function providerKeysView(
+	user: User,
+	validation?: ValidationResult,
+): Promise<ProviderKeysView> {
 	return {
-		providerKeys: await listProviderKeys(userId),
+		providerKeys: await listProviderKeys(user),
 		...(validation && { validation }),
 	};
 }

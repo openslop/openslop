@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
+import { inlineControlClassName } from "@/components/ui/select-menu";
 import {
 	ModelSelect,
 	ModelSelectTrigger,
@@ -12,9 +13,6 @@ import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
 import { useSloppy } from "./SloppyProvider";
 import { nextSuggestion, SUGGESTIONS } from "./suggestions";
-
-const controlClassName =
-	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
 
 function ModelPicker() {
 	const model = useDefaultModels().llm;
@@ -45,7 +43,7 @@ function SuggestionButton({
 			disabled={disabled}
 			onMouseDown={(event) => event.preventDefault()}
 			onClick={onPick}
-			className={controlClassName}
+			className={inlineControlClassName}
 		>
 			<Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
 		</button>

@@ -17,3 +17,6 @@ export type ProviderKeyRecord = {
 };
 
 export type ValidationResult = { ok: true } | { ok: false; error: string };
+
+/** Shorter than any provider issues, so a paste that missed is caught before it is stored. */
+export const MIN_KEY_LENGTH = 8;

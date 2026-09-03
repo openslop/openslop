@@ -10,7 +10,7 @@ import {
 	ELEVENLABS_AUDIO_FORMAT,
 	toElevenLabsOutputFormat,
 } from "../elevenlabs";
-import type { SFXProvider } from "./base";
+import type { SFXProvider } from "../types";
 
 export class ElevenLabsSFX
 	extends BaseElevenLabsAudio<SFXGenerateParams>

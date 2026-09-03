@@ -32,6 +32,11 @@ export interface AttributeDef extends AttributeSpec {
 	hidden?: boolean;
 }
 
+export type ModelPick = { key: string } & Extract<
+	AttributeEdit,
+	{ kind: "model" }
+>;
+
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {
 	private constructor(private readonly defs: readonly AttributeDef[]) {}
@@ -42,6 +47,13 @@ export class AttributeSchema {
 
 	get keys(): string[] {
 		return this.defs.map((def) => def.key);
+	}
+
+	/** The model picks the element carries, each naming the connector it resolves from. */
+	get modelPicks(): ModelPick[] {
+		return this.defs.flatMap(({ key, edit }) =>
+			edit?.kind === "model" ? [{ key, ...edit }] : [],
+		);
 	}
 
 	/** The attributes shown on the element header, in def order. */

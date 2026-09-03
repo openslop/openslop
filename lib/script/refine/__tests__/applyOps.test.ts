@@ -20,6 +20,17 @@ vi.mock("@/lib/connectors/factory", () => ({
 				...(type === "tts" ? [] : ["model"]),
 				...Object.keys(defaultAttributes),
 			],
+			modelPicks:
+				type === "tts"
+					? []
+					: [
+							{
+								kind: "model",
+								key: "model",
+								providerAttr: "provider",
+								connector: type,
+							},
+						],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,

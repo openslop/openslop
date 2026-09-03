@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { connectorModelsSchema } from "@/lib/connectors/models";
+import type { ProviderKeyRecord } from "@/lib/connectors/providerKey";
 import { AccountStoreProvider } from "./AccountStoreProvider";
 
 const [UserContext, useUser] = createRequiredContext<User>("UserProvider");
@@ -14,16 +15,21 @@ const accountModelsSchema = connectorModelsSchema.catch({});
 
 export function UserProvider({
 	user,
+	providerKeys,
 	children,
 }: {
 	user: User;
+	/** Read on the server beside the user, so the pickers never open on a guess. */
+	providerKeys: ProviderKeyRecord[];
 	children: ReactNode;
 }) {
 	return (
 		<UserContext value={user}>
 			<AccountStoreProvider
-				models={accountModelsSchema.parse(user.user_metadata?.models)}
-				hosted={Boolean(user.app_metadata?.api_access)}
+				account={{
+					models: accountModelsSchema.parse(user.user_metadata?.models),
+					providerKeys,
+				}}
 			>
 				{children}
 			</AccountStoreProvider>

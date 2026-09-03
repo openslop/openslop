@@ -1,7 +1,7 @@
 import type { SFXGenerateParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
-import type { SFXProvider } from "./base";
+import type { SFXProvider } from "../types";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/sfx/mock`;
 

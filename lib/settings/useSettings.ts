@@ -3,15 +3,14 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
-import { ALL_PROVIDERS } from "@/lib/connectors/providerCatalog";
-import type { Provider } from "@/lib/connectors/types";
+import { PROVIDERS, type Provider } from "@/lib/connectors/types";
 
 const tabSchema = z.enum(["models"]);
 
 export type SettingsTab = z.infer<typeof tabSchema>;
 
 /** Which provider the tab should open on, so a "connect" link lands on it. */
-const providerSchema = z.enum(ALL_PROVIDERS);
+const providerSchema = z.enum(PROVIDERS);
 
 const TAB_PARAM = "settings";
 const PROVIDER_PARAM = "provider";
@@ -23,10 +22,8 @@ export type SettingsRoute = {
 	close: () => void;
 };
 
-const parse = <T>(schema: z.ZodType<T>, value: string | null): T | null => {
-	const result = schema.safeParse(value);
-	return result.success ? result.data : null;
-};
+const parse = <T>(schema: z.ZodType<T>, value: string | null): T | null =>
+	schema.safeParse(value).data ?? null;
 
 /**
  * Settings live in the URL, so every way in is the same way: a menu item, a

@@ -1,7 +1,7 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
-import type { ImageProvider } from "./base";
+import type { ImageProvider } from "../types";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/image/mock`;
 

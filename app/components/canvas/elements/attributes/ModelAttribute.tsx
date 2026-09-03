@@ -8,30 +8,29 @@ import {
 import { MODEL_PROVENANCE } from "@/app/components/models/provenance";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ModelPick } from "@/lib/connectors/attributes/schema";
 import { modelSourceFor, resolveModel } from "@/lib/connectors/models";
 import { useModelChain } from "@/lib/connectors/useDefaultModels";
-import type { ConnectorType } from "@/lib/connectors/types";
+import { flatAttributes } from "@/lib/video/elementAttributes";
 
 export function ModelAttribute({
 	element,
-	attrKey,
-	providerAttr,
-	pick,
-	connector,
+	pick: { key, providerAttr, connector },
 	label,
 	className,
 }: {
 	element: CanvasContentElement;
-	attrKey: string;
-	providerAttr: string;
-	pick: { provider?: string; model?: string };
-	connector: ConnectorType;
+	pick: ModelPick;
 	label: string;
 	className?: string;
 }) {
 	const editor = useSlateStatic();
 	const chain = useModelChain();
-	const value = resolveModel(connector, pick);
+	const attrs = flatAttributes(element);
+	const value = resolveModel(connector, {
+		provider: attrs[providerAttr],
+		model: attrs[key],
+	});
 
 	return (
 		<ModelSelect
@@ -41,7 +40,7 @@ export function ModelAttribute({
 			onChange={(next) =>
 				updateElementAttrs(editor, element, {
 					[providerAttr]: next.provider,
-					[attrKey]: next.model,
+					[key]: next.model,
 				})
 			}
 		>

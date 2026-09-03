@@ -1,4 +1,4 @@
-import type { Provider } from "./types";
+import { PROVIDERS, type Provider } from "./types";
 
 /**
  * A brand mark. Marks drawn in one flat color are `masked`, so the icon paints
@@ -57,11 +57,9 @@ export const MANAGED_PROVIDER = "openslop" as const;
 
 export type BYOKProvider = Exclude<Provider, typeof MANAGED_PROVIDER>;
 
-export const ALL_PROVIDERS = Object.keys(PROVIDER_CATALOG) as Provider[];
-
 export const isProvider = (value: string | undefined): value is Provider =>
-	value !== undefined && Object.hasOwn(PROVIDER_CATALOG, value);
+	PROVIDERS.some((provider) => provider === value);
 
-export const BYOK_PROVIDERS = ALL_PROVIDERS.filter(
+export const BYOK_PROVIDERS = PROVIDERS.filter(
 	(key): key is BYOKProvider => key !== MANAGED_PROVIDER,
 );

@@ -92,33 +92,34 @@ export function ModelsTab({
 				}
 			>
 				<SettingsList>
-					{MODEL_GROUPS.map(({ key, label, Icon, types }) => (
-						<SettingsRow
-							key={key}
-							label={
-								<>
-									<span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
-										<Icon className="size-4" />
-									</span>
-									{label}
-								</>
-							}
-						>
-							<ModelChips
-								meta={modelEntry(
-									types[0],
-									defaultModelFor(types[0], { account: models }),
-								)}
-							/>
-							<ModelDefaultControl
-								types={types}
-								tier="account"
-								chain={{ account: models }}
-								label={label}
-								onChange={(models) => void setModels(models).catch(toastError)}
-							/>
-						</SettingsRow>
-					))}
+					{MODEL_GROUPS.map(({ key, label, Icon, types }) => {
+						const [type] = types;
+						const model = defaultModelFor(type, { account: models });
+						return (
+							<SettingsRow
+								key={key}
+								label={
+									<>
+										<span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
+											<Icon className="size-4" />
+										</span>
+										{label}
+									</>
+								}
+							>
+								<ModelChips meta={modelEntry(type, model)} />
+								<ModelDefaultControl
+									types={types}
+									tier="account"
+									chain={{ account: models }}
+									label={label}
+									onChange={(models) =>
+										void setModels(models).catch(toastError)
+									}
+								/>
+							</SettingsRow>
+						);
+					})}
 				</SettingsList>
 			</SettingsSection>
 		</div>

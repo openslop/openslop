@@ -37,8 +37,8 @@ export function SettingsNav({
 							className={cn(
 								"focus-ring flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-label transition-colors",
 								tab === active
-									? "bg-settings-pane font-medium text-foreground"
-									: "text-muted-foreground hover:bg-settings-pane/60 hover:text-foreground",
+									? "bg-card font-medium text-foreground"
+									: "text-muted-foreground hover:bg-card/60 hover:text-foreground",
 							)}
 						>
 							<Icon className="size-3.5 shrink-0" />

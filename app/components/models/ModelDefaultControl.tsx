@@ -3,6 +3,7 @@
 import { SelectMenuTrigger } from "@/components/ui/select-menu";
 import {
 	defaultModelFor,
+	hasModel,
 	modelSourceFor,
 	type ConnectorModels,
 	type ModelDefaults,
@@ -33,7 +34,7 @@ export function ModelDefaultControl({
 }) {
 	const [type] = types;
 	const model = defaultModelFor(type, chain);
-	const pinnedHere = Boolean(chain[tier]?.[type]);
+	const pinnedHere = hasModel(type, chain[tier]?.[type]);
 
 	return (
 		<ModelSelect

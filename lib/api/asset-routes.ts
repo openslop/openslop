@@ -9,24 +9,19 @@ import type { RouteFamily } from "./route-families";
 
 type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
 
-type AssetRoute<TModels, TShape extends z.ZodRawShape> = {
+type AssetRoute<TModels> = {
 	connectorType: ConnectorType;
 	models: TModels;
-	fields: TShape;
+	fields: z.ZodRawShape;
 	label: string;
 };
 
-export const createAssetRouteHandler = <
-	TModels,
-	TPicked extends ModelRef,
-	TShape extends z.ZodRawShape,
->(
+export const createAssetRouteHandler = <TModels, TPicked extends ModelRef>(
 	family: RouteFamily<TModels, TPicked>,
-	route: AssetRoute<TModels, TShape>,
+	route: AssetRoute<TModels>,
 ) =>
 	family.createHandler({
-		// The intersection's inferred type does not survive a generic field
-		// shape; every route's body is this shape regardless.
+		// Every route's body is this shape; the fields only add optional keys.
 		schema: bodySchema(
 			family.model(route.models),
 			route.fields,

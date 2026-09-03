@@ -12,6 +12,7 @@ import {
 } from "@/lib/connectors/types";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import { resolveModel } from "@/lib/connectors/models";
+import { STILL_MODEL } from "../attributes";
 import {
 	derivedDependency,
 	derivedNodeId,
@@ -24,12 +25,9 @@ import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 /** Attributes of the animation, which the still's image generation has no use for. */
-const VIDEO_ONLY_KEYS = [
-	"videoPrompt",
-	"duration",
-	"provider",
-	"model",
-] as const;
+const VIDEO_ONLY_KEYS = ["videoPrompt", "duration", "provider", "model"];
+
+const STILL_MODEL_KEYS = Object.values(STILL_MODEL);
 
 const STILL = "still";
 
@@ -43,15 +41,17 @@ export const stillElementId = (elementId: string) =>
 export function stillElement(
 	element: CanvasContentElement,
 ): CanvasContentElement {
-	const { imageProvider, imageModel, ...attributes } =
-		element.generationAttributes ?? {};
+	const attributes = element.generationAttributes ?? {};
 	return {
 		...element,
 		id: stillElementId(element.id),
 		type: "image",
 		generationAttributes: {
-			...omit(attributes, VIDEO_ONLY_KEYS),
-			...resolveModel("image", { provider: imageProvider, model: imageModel }),
+			...omit(attributes, VIDEO_ONLY_KEYS, STILL_MODEL_KEYS),
+			...resolveModel("image", {
+				provider: attributes[STILL_MODEL.providerAttr],
+				model: attributes[STILL_MODEL.key],
+			}),
 		},
 	};
 }
@@ -125,7 +125,7 @@ export function createStillFramePlugin(): ConnectorPlugin<
 			}
 			// The element's own text prompts the still, not the animation.
 			return {
-				...omit(params, "videoPrompt", "imageModel"),
+				...omit(params, "videoPrompt", STILL_MODEL_KEYS),
 				prompt: videoPrompt,
 				frameImages: [imageUrl],
 			};

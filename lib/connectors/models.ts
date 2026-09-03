@@ -2,7 +2,7 @@ import { z } from "zod";
 import { DEFAULT_IMAGE_MODEL, IMAGE_MODELS } from "./image/models";
 import { DEFAULT_LLM_MODEL, LLM_MODELS } from "./llm/models";
 import { DEFAULT_MUSIC_MODEL, MUSIC_MODELS } from "./music/models";
-import { ALL_PROVIDERS, isProvider } from "./providerCatalog";
+import { isProvider } from "./providerCatalog";
 import { DEFAULT_SFX_MODEL, SFX_MODELS } from "./sfx/models";
 import { DEFAULT_TTS_MODEL, TTS_MODELS } from "./tts/models";
 import {
@@ -13,6 +13,7 @@ import {
 	type ModelRef,
 	type ModelsByProvider,
 	type Provider,
+	PROVIDERS,
 } from "./types";
 import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
 
@@ -58,6 +59,20 @@ export function modelEntry(type: ConnectorType, ref: ModelRef): ModelEntry {
 	return entry;
 }
 
+export type VendorParams<TReq extends ModelRef> = Omit<
+	TReq,
+	"provider" | "model"
+> & { model: string };
+
+/** A request as the provider's own API takes it: the pair swapped for the vendor's model id. */
+export function vendorParams<TReq extends ModelRef>(
+	type: ConnectorType,
+	request: TReq,
+): VendorParams<TReq> {
+	const { provider, model, ...rest } = request;
+	return { ...rest, model: modelEntry(type, { provider, model }).id };
+}
+
 export const sameModel = (a: ModelRef, b: ModelRef): boolean =>
 	a.provider === b.provider && a.model === b.model;
 
@@ -82,7 +97,7 @@ export function modalitiesFor(provider: Provider): ConnectorType[] {
 }
 
 export const modelRefSchema = z.object({
-	provider: z.enum(ALL_PROVIDERS),
+	provider: z.enum(PROVIDERS),
 	model: z.string(),
 });
 

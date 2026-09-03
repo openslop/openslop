@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Settings } from "@/components/ui/icon";
 import { ModelDefaultControl } from "@/app/components/models/ModelDefaultControl";
 import { MODEL_GROUPS } from "@/lib/connectors/modelGroups";
+import { useModelChain } from "@/lib/connectors/useDefaultModels";
 import { useProject } from "@/lib/project/useProject";
 import { useSettings } from "@/lib/settings/useSettings";
-import { useAccount } from "@/lib/user/useAccount";
 import { PanelCard } from "./PanelCard";
 
 export function ModelsPanel() {
-	const project = useProject((state) => state.metadata.models);
+	const chain = useModelChain();
 	const updateMetadata = useProject((state) => state.updateMetadata);
-	const account = useAccount((state) => state.models);
 	const settings = useSettings();
 
 	return (
@@ -22,7 +21,7 @@ export function ModelsPanel() {
 					<ModelDefaultControl
 						types={types}
 						tier="project"
-						chain={{ project, account }}
+						chain={chain}
 						label={label}
 						onChange={(models) => updateMetadata({ models })}
 						className="w-full"

@@ -1,7 +1,7 @@
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
-import type { MusicProvider } from "./base";
+import type { MusicProvider } from "../types";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/music/mock`;
 

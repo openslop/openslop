@@ -29,19 +29,13 @@ import { logger } from "./logger";
 /** What one turn may spend before the tools come off and it has to end in a reply. */
 const MAX_TOOL_CALLS = 20;
 
-export type AgentTurnBody<TModel extends ModelRef = ModelRef> = TModel & {
-	projectId: string;
-	message: unknown;
-	context: AgentContext;
-};
-
 /**
  * What a turn is asked for. The routes differ only in which models they will
  * take, so the field carrying that is theirs to supply.
  */
 export const agentTurnSchema = <TModel extends ModelRef>(
 	model: z.ZodType<TModel>,
-): z.ZodType<AgentTurnBody<TModel>> =>
+) =>
 	z
 		.object({
 			projectId: z.uuid(),

@@ -22,12 +22,15 @@ export const CONNECTOR_TYPES = [...ASSET_CONNECTOR_TYPES, "llm"] as const;
 
 export type ConnectorType = AssetConnectorType | "llm";
 
-export type Provider =
-	| "openslop"
-	| "anthropic"
-	| "runware"
-	| "cartesia"
-	| "elevenlabs";
+export const PROVIDERS = [
+	"openslop",
+	"anthropic",
+	"runware",
+	"cartesia",
+	"elevenlabs",
+] as const;
+
+export type Provider = (typeof PROVIDERS)[number];
 
 /** How a model trades off against its siblings. Relative within a connector type, never absolute. */
 export type Tier = "low" | "medium" | "high";

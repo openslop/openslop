@@ -1,16 +1,16 @@
 import { MODELS, modalitiesFor } from "./models";
-import { ALL_PROVIDERS, PROVIDER_CATALOG } from "./providerCatalog";
-import type { ConnectorType, Provider } from "./types";
+import uniq from "lodash/uniq";
+import { PROVIDER_CATALOG } from "./providerCatalog";
+import { PROVIDERS, type ConnectorType, type Provider } from "./types";
 
 export type ProviderMatch = { provider: Provider; models: string[] };
 
-const modelNamesFor = (provider: Provider): string[] => [
-	...new Set(
+const modelNamesFor = (provider: Provider): string[] =>
+	uniq(
 		modalitiesFor(provider).flatMap((type) =>
 			Object.keys(MODELS[type][provider] ?? {}),
 		),
-	),
-];
+	);
 
 /**
  * Providers matching a query, which may name either the provider or one of
@@ -23,7 +23,7 @@ export function searchProviders(
 	capability: ConnectorType[] | null,
 ): ProviderMatch[] {
 	const needle = query.trim().toLowerCase();
-	return ALL_PROVIDERS.flatMap((provider) => {
+	return PROVIDERS.flatMap((provider) => {
 		const modalities = modalitiesFor(provider);
 		if (capability && !capability.some((type) => modalities.includes(type)))
 			return [];

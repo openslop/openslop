@@ -1,3 +1,4 @@
+import once from "lodash/once";
 import { OPENSLOP_IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 import { OPENSLOP_MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
@@ -18,20 +19,15 @@ import type { ProviderType, Providers } from "@/lib/providers/types";
 import { MockVideo } from "@/lib/providers/video/mock";
 import { RunwareVideo } from "@/lib/providers/video/runware";
 
-function hosted<R, M>(
+const hosted = <R, M>(
 	envVar: string,
 	Real: new (apiKey: string) => R,
 	Mock: new () => M,
-): () => R | M {
-	let instance: R | M | undefined;
-	return () => {
-		if (instance === undefined) {
-			const apiKey = process.env[envVar];
-			instance = apiKey ? new Real(apiKey) : new Mock();
-		}
-		return instance;
-	};
-}
+): (() => R | M) =>
+	once(() => {
+		const apiKey = process.env[envVar];
+		return apiKey ? new Real(apiKey) : new Mock();
+	});
 
 type Sources<K extends ProviderType, TModels> = Record<
 	keyof TModels,

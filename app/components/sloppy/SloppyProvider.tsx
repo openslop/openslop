@@ -82,16 +82,19 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			messageMetadataSchema: sloppyMetadataSchema,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new DefaultChatTransport<SloppyMessage>({
-				api: agentPathFor(model),
-				prepareSendMessagesRequest: ({ messages, body }) => ({
-					body: {
-						...body,
-						projectId,
-						message: messages.at(-1),
-						context: readContext(),
-						...turnModel.current,
-					},
-				}),
+				prepareSendMessagesRequest: ({ messages, body }) => {
+					const picked = turnModel.current ?? model;
+					return {
+						api: agentPathFor(picked),
+						body: {
+							...body,
+							projectId,
+							message: messages.at(-1),
+							context: readContext(),
+							...picked,
+						},
+					};
+				},
 			}),
 			sendAutomaticallyWhen: (options) =>
 				!turn.current?.signal.aborted &&

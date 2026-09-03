@@ -36,7 +36,7 @@ export function SettingsDialog() {
 		>
 			<DialogContent
 				glow={false}
-				className="h-[min(46rem,calc(100dvh-2rem))] max-w-4xl gap-3 bg-settings-surface p-4"
+				className="h-[min(46rem,calc(100dvh-2rem))] max-w-4xl gap-3 bg-surface-recessed p-4"
 			>
 				<DialogTitle className="text-label font-semibold">Settings</DialogTitle>
 				<DialogDescription className="sr-only">
@@ -51,7 +51,7 @@ export function SettingsDialog() {
 							settings.open(tab);
 						}}
 					/>
-					<div className="min-h-0 flex-1 overflow-y-auto rounded-xl bg-settings-pane p-4">
+					<div className="min-h-0 flex-1 overflow-y-auto rounded-xl bg-card p-4">
 						{browsing ? (
 							<div className="flex flex-col gap-4">
 								<div className="flex items-center gap-2">
