@@ -1,3 +1,7 @@
+import isUndefined from "lodash/isUndefined";
+import mapValues from "lodash/mapValues";
+import omitBy from "lodash/omitBy";
+
 export type QueryParams = Record<string, string | number | undefined>;
 
 type RequestOptions = {
@@ -33,9 +37,7 @@ function buildInit(method: string, body: unknown): RequestInit {
 export function buildUrl(url: string, params?: QueryParams): string {
 	if (!params) return url;
 	const qs = new URLSearchParams(
-		Object.entries(params).flatMap(([key, value]) =>
-			value === undefined ? [] : [[key, String(value)]],
-		),
+		mapValues(omitBy(params, isUndefined), String),
 	).toString();
 	return qs ? `${url}?${qs}` : url;
 }
