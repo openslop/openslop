@@ -1,6 +1,6 @@
 import { requireModel } from "@/lib/connectors/plugins";
 import type { ProjectStore } from "@/lib/project/store";
-import { metadataVoiceFor, voiceIdOn, voiceOnModel } from "@/lib/project/types";
+import { metadataVoiceFor, voiceIdOn } from "@/lib/project/types";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
@@ -8,8 +8,9 @@ import type {
 
 /**
  * Persists the voiceId resolved by voice-search back to the project store as
- * `resolvedVoiceId` so subsequent generations skip the search. Writes to the
- * matching character (when `params.name` is set) or to narration.
+ * `resolvedVoiceId` so subsequent generations skip the search, on the pair it
+ * was found for. Writes to the matching character (when `params.name` is set)
+ * or to narration.
  */
 export function createVoiceHydratePlugin(
 	store: ProjectStore,
@@ -23,7 +24,7 @@ export function createVoiceHydratePlugin(
 			const { metadata, updateCharacter, setNarration } = store.getState();
 			const voice = metadataVoiceFor(metadata, name);
 			if (!voice || voiceIdOn(voice, model) === voiceId) return params;
-			const next = { ...voiceOnModel(voice, model), resolvedVoiceId: voiceId };
+			const next = { ...voice, ...model, resolvedVoiceId: voiceId };
 			if (name) updateCharacter(name, next);
 			else setNarration(next);
 			return params;

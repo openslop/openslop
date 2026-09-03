@@ -5,9 +5,11 @@ import { buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "@/components/ui/icon";
+import { Link, Settings } from "@/components/ui/icon";
 import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
 import {
 	SimpleTooltip,
@@ -62,6 +64,8 @@ export function ModelSelect({
 					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
 				>
 					<ModelMenuItems {...menu} />
+					<DropdownMenuSeparator />
+					<ConfigureModelsItem />
 				</DropdownMenuContent>
 			</DropdownMenu>
 			{tooltip && (
@@ -110,6 +114,19 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 			</SelectMenuItem>
 		);
 	});
+}
+
+function ConfigureModelsItem() {
+	const settings = useSettings();
+	return (
+		<DropdownMenuItem
+			onSelect={() => settings.open("models")}
+			className="cursor-pointer py-1"
+		>
+			<Settings />
+			Configure models
+		</DropdownMenuItem>
+	);
 }
 
 /** Looks like the buttons it stands in for, without nesting one inside a menu row. */

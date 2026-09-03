@@ -85,6 +85,11 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * ordering and staleness; reading anything undeclared goes stale-blind.
 	 */
 	dependencies?(element: CanvasContentElement): NodeSpec[];
+	/**
+	 * The model the element generates on, for a type whose model is picked
+	 * somewhere other than the element itself.
+	 */
+	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
 	beforeGenerate?(
 		params: TParams,
 		ctx?: PluginContext<TParams, TResult>,

@@ -87,6 +87,15 @@ describe("resolveAttributeSchema", () => {
 		});
 	});
 
+	// A voice picks its model in its own editor, so speech shows no control of its own.
+	it("hides the model control on speech alone", () => {
+		for (const type of ASSET_CONNECTOR_TYPES) {
+			expect(
+				resolveAttributeSchema(type, DEFAULT_MODELS[type]).hidesModel,
+			).toBe(type === "tts");
+		}
+	});
+
 	it("llm has no element-settings attributes, inherited empty from the base connector", () => {
 		expect(resolveAttributeSchema("llm", DEFAULT_MODELS.llm).keys).toEqual([]);
 	});

@@ -71,12 +71,6 @@ export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 const voiceIsOn = (voice: MetadataVoice, model: ModelRef) =>
 	hasModel("tts", voice) && sameModel(voice, model);
 
-/** The id picked for a voice on a model. An id picked on another pair means nothing here. */
-export const pickedVoiceIdOn = (
-	voice: MetadataVoice,
-	model: ModelRef,
-): string | undefined => (voiceIsOn(voice, model) ? voice.voiceId : undefined);
-
 /** The id a voice has on a model: picked, or else found by an earlier search. */
 export const voiceIdOn = (
 	voice: MetadataVoice,

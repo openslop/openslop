@@ -7,19 +7,38 @@ import {
 	voiceIdOn,
 	voiceTraitsSchema,
 } from "@/lib/project/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
 	ConnectorPlugin,
+	ModelRef,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
+import type { ProjectData } from "@/lib/project/store";
+
+/**
+ * Speech speaks with the pair its voice picked in the voice's editor, and
+ * with the pair it was created with until the voice picks one.
+ */
+const voiceModel = (
+	element: CanvasContentElement,
+	state: ProjectData,
+): ModelRef =>
+	resolveModel(
+		"tts",
+		metadataVoiceFor(state.metadata, element.generationAttributes?.name),
+		element.generationAttributes,
+	);
 
 export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "metadata-voice",
+		model: voiceModel,
 		dependencies: (element) => [
-			forVoice(
-				element.generationAttributes?.name,
-				resolveModel("tts", element.generationAttributes),
-			),
+			(state) =>
+				forVoice(
+					element.generationAttributes?.name,
+					voiceModel(element, state),
+				)(state),
 		],
 		beforeGenerate(params, ctx) {
 			const { metadata } = requireState(ctx, "metadata-voice");

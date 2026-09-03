@@ -212,7 +212,7 @@ describe("createMetadataVoicePlugin", () => {
 		expect(result).not.toHaveProperty("description");
 	});
 
-	describe("dependencies", () => {
+	describe("the model speech speaks with", () => {
 		const cartesia = { provider: "cartesia", model: "Sonic 3.5" } as const;
 		const narration = (
 			attrs: Record<string, string>,
@@ -228,27 +228,33 @@ describe("createMetadataVoicePlugin", () => {
 			return node && "inputs" in node ? node.inputs.attributes : undefined;
 		};
 
-		it("reads the id picked for the element's own pair", () => {
+		it("is the voice's pair once picked, and the element's own until then", () => {
+			const { model } = createMetadataVoicePlugin();
+			expect(model?.(narration(cartesia), store.getState())).toEqual(cartesia);
+			store.getState().updateMetadata({ narration: DEFAULT_TTS_MODEL });
+			expect(model?.(narration(cartesia), store.getState())).toEqual(
+				DEFAULT_TTS_MODEL,
+			);
+		});
+
+		it("is what the element reads of its voice, with the id picked for it", () => {
 			store.getState().updateMetadata({
-				narration: { ...cartesia, voiceId: "v-cartesia" },
+				narration: { ...DEFAULT_TTS_MODEL, voiceId: "v-picked" },
 			});
 			expect(voiceInput(narration(cartesia))).toEqual({
-				voiceId: "v-cartesia",
+				voiceId: "v-picked",
+				...DEFAULT_TTS_MODEL,
 			});
 		});
 
 		// The found id is remembered, not read, or generating would stale the element.
-		it("reads nothing on another pair, and never the id a search found", () => {
+		it("leaves the id a search found out of what the element reads", () => {
 			store.getState().updateMetadata({
-				narration: {
-					...DEFAULT_TTS_MODEL,
-					voiceId: "v-slop",
-					resolvedVoiceId: "v-slop",
-				},
+				narration: { ...DEFAULT_TTS_MODEL, resolvedVoiceId: "v-found" },
 			});
-			expect(voiceInput(narration(cartesia))).toEqual({ voiceId: "" });
-			expect(voiceInput(narration(DEFAULT_TTS_MODEL))).toEqual({
-				voiceId: "v-slop",
+			expect(voiceInput(narration(cartesia))).toEqual({
+				voiceId: "",
+				...DEFAULT_TTS_MODEL,
 			});
 		});
 	});

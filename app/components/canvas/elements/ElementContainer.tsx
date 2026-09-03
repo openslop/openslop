@@ -14,6 +14,7 @@ import { AttributeBadge } from "./AttributeBadge";
 import { ModelAttribute } from "./attributes/ModelAttribute";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
 import { ElementHistoryButton } from "./ElementHistoryButton";
+import { ElementVoiceButton } from "./ElementVoiceButton";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { ElementGenerationProvider } from "./ElementGenerationContext";
 import { AnimateButton } from "./AnimateButton";
@@ -121,12 +122,14 @@ export function ElementContainer({
 									</span>
 								</span>
 								<ElementCharacters element={element} />
-								<ModelAttribute
-									element={element}
-									pick={elementModelPick(element)}
-									label="Model"
-									className="text-label-xs"
-								/>
+								{!schema.hidesModel && (
+									<ModelAttribute
+										element={element}
+										pick={elementModelPick(element)}
+										label="Model"
+										className="text-label-xs"
+									/>
+								)}
 								<ElementAttributeBadges
 									element={element}
 									specs={schema.badgeAttributes}
@@ -135,6 +138,7 @@ export function ElementContainer({
 									element={element}
 									specs={schema.settingsAttributes}
 								/>
+								<ElementVoiceButton element={element} />
 								<ElementHistoryButton element={element} />
 							</div>
 							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto">

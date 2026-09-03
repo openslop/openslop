@@ -80,26 +80,18 @@ describe("voice-hydrate end-to-end", () => {
 		});
 	});
 
-	it("moves the voice to the element's pair, leaving the picked id behind", async () => {
+	it("keeps the picked id when the found id joins it on the same pair", async () => {
 		store.getState().updateMetadata({
-			narration: {
-				provider: "cartesia",
-				model: "Sonic 3.5",
-				voiceId: "v-cartesia",
-				resolvedVoiceId: "v-cartesia",
-			},
+			narration: { ...DEFAULT_TTS_MODEL, gender: "feminine" },
 		});
-		const ctx = ctxWith([{ id: "v-slop", name: "Slop", description: "" }]);
+		const ctx = ctxWith([{ id: "v-found", name: "Found", description: "" }]);
 
-		const params = await runPipeline(
-			{ prompt: "hi", ...DEFAULT_TTS_MODEL },
-			ctx,
-		);
+		await runPipeline({ prompt: "hi", ...DEFAULT_TTS_MODEL }, ctx);
 
-		expect(params.voiceId).toBe("v-slop");
 		expect(store.getState().metadata.narration).toEqual({
 			...DEFAULT_TTS_MODEL,
-			resolvedVoiceId: "v-slop",
+			gender: "feminine",
+			resolvedVoiceId: "v-found",
 		});
 	});
 

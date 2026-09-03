@@ -38,12 +38,27 @@ export type ModelPick = { key: string } & Extract<
 	{ kind: "model" }
 >;
 
+type SchemaOptions = {
+	/** Keeps the element's own model control off the header, for a type whose model is picked elsewhere. */
+	hideModel?: boolean;
+};
+
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {
-	private constructor(private readonly defs: readonly AttributeDef[]) {}
+	private constructor(
+		private readonly defs: readonly AttributeDef[],
+		private readonly options: SchemaOptions,
+	) {}
 
-	static from(defs: readonly AttributeDef[]): AttributeSchema {
-		return new AttributeSchema(defs);
+	static from(
+		defs: readonly AttributeDef[],
+		options: SchemaOptions = {},
+	): AttributeSchema {
+		return new AttributeSchema(defs, options);
+	}
+
+	get hidesModel(): boolean {
+		return this.options.hideModel === true;
 	}
 
 	get keys(): string[] {

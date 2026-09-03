@@ -1,6 +1,6 @@
 import type { ModelRef } from "@/lib/connectors/types";
 import type { ProjectData } from "@/lib/project/store";
-import { metadataVoiceFor, pickedVoiceIdOn } from "@/lib/project/types";
+import { metadataVoiceFor } from "@/lib/project/types";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/video/aspectRatio";
 import { sourceNode, type NodeSpec } from "./graph";
 
@@ -29,14 +29,18 @@ export const forAspectRatio: NodeSpec = (state) =>
 		"the aspect ratio",
 	);
 
-/** The voice as an element on a pair reads it: the id picked for that pair, if any. */
+/**
+ * What an element reads of its voice: the id picked for it and the pair it
+ * speaks with. The id a search found is left out, since recording it would
+ * stale the element that just found it.
+ */
 export const forVoice =
 	(characterName: string | undefined, model: ModelRef): NodeSpec =>
 	(state) => {
 		const voice = metadataVoiceFor(state.metadata, characterName);
 		return sourceNode(
 			`project:voice:${characterName ?? "narrator"}`,
-			{ voiceId: (voice && pickedVoiceIdOn(voice, model)) ?? "" },
+			{ voiceId: voice?.voiceId ?? "", ...model },
 			`${characterName ?? "the narrator"}'s voice`,
 		);
 	};

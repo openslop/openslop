@@ -6,6 +6,7 @@ import type {
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ProjectData } from "@/lib/project/store";
 import type {
 	AssetConnectorType,
 	ConnectorConfig,
@@ -27,12 +28,19 @@ export type ElementConnector = {
 export function resolveElementConnector(
 	element: CanvasContentElement,
 	registry: ConnectorRegistry,
+	state: ProjectData,
 ): ElementConnector {
 	const type = ELEMENT_TYPES[element.type].connector;
+	const config = registry[type];
+	const supplier = config.plugins?.find((plugin) => plugin.model);
 	return {
 		type,
-		model: resolveModel(type, element.generationAttributes),
-		config: registry[type],
+		model: resolveModel(
+			type,
+			supplier?.model?.(element, state),
+			element.generationAttributes,
+		),
+		config,
 	};
 }
 

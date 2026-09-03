@@ -67,9 +67,11 @@ export function VoicePicker({
 	onModelChange: (model: ModelRef) => void;
 }) {
 	const { connectorConfig } = useConfig();
+	const { provider, model: name } = model;
 	const ttsConnector = useMemo(
-		() => createConnector("tts", model, connectorConfig.tts),
-		[connectorConfig, model],
+		() =>
+			createConnector("tts", { provider, model: name }, connectorConfig.tts),
+		[connectorConfig, provider, name],
 	);
 
 	const [voices, setVoices] = useState<VoiceInfo[]>([]);

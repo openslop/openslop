@@ -8,7 +8,6 @@ import {
 	CharacterAssetTiles,
 	NarratorAssetTile,
 } from "./AssetTiles";
-import { AssetEditProvider } from "./character/AssetEditProvider";
 import { CollapsibleHeader } from "./CollapsibleHeader";
 import { ReferenceImages } from "./ReferenceImages";
 
@@ -19,28 +18,23 @@ function AssetsSectionComponent() {
 	if (!hydrated) return null;
 
 	return (
-		<AssetEditProvider>
-			<section
-				className="group/collapsible mb-4 select-none"
-				aria-label="Assets"
-			>
-				<CollapsibleHeader
-					label="Assets"
-					collapsed={collapsed}
-					onToggle={() => setCollapsed((c) => !c)}
-					ariaLabel={collapsed ? "Expand assets" : "Collapse assets"}
-				/>
-				{!collapsed && (
-					<div className="flex flex-wrap gap-2">
-						<ArtStyleAssetTile />
-						<NarratorAssetTile />
-						<CharacterAssetTiles />
-						<AddCharacterTile />
-						<ReferenceImages />
-					</div>
-				)}
-			</section>
-		</AssetEditProvider>
+		<section className="group/collapsible mb-4 select-none" aria-label="Assets">
+			<CollapsibleHeader
+				label="Assets"
+				collapsed={collapsed}
+				onToggle={() => setCollapsed((c) => !c)}
+				ariaLabel={collapsed ? "Expand assets" : "Collapse assets"}
+			/>
+			{!collapsed && (
+				<div className="flex flex-wrap gap-2">
+					<ArtStyleAssetTile />
+					<NarratorAssetTile />
+					<CharacterAssetTiles />
+					<AddCharacterTile />
+					<ReferenceImages />
+				</div>
+			)}
+		</section>
 	);
 }
 
