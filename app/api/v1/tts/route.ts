@@ -1,19 +1,11 @@
-import { z } from "zod";
-import { requiredVoiceId } from "@/lib/api/request-schema-fields";
-import { bodySchema, createAssetRouteHandlers } from "@/lib/api/route-handler";
-import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
+import { createAssetRouteHandler } from "@/lib/api/asset-routes";
+import { TTS_FIELDS } from "@/lib/api/generation-schema";
+import { HOSTED } from "@/lib/api/route-families";
 import { OPENSLOP_TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 
-const schema = bodySchema(OPENSLOP_TTS_MODELS, {
-	voiceId: requiredVoiceId,
-	speed: z.enum(TTS_SPEEDS).optional(),
-	volume: z.number().optional(),
-	emotion: z.string().optional(),
-	format: z.string().optional(),
-});
-
-export const { POST } = createAssetRouteHandlers({
+export const POST = createAssetRouteHandler(HOSTED, {
 	connectorType: "tts",
-	schema,
+	models: OPENSLOP_TTS_MODELS,
+	fields: TTS_FIELDS,
 	label: "TTS generation",
 });

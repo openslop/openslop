@@ -3,11 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadPeaks } from "@/lib/components/peaks";
-import {
-	buildSoundwaveMask,
-	SOUNDWAVE_MASK_STYLE,
-	toBarHeights,
-} from "@/lib/components/soundwave";
+import { soundwaveMaskStyle, toBarHeights } from "@/lib/components/soundwave";
 import { clamp, cn } from "@/lib/utils";
 
 const SAMPLE_SPACING_PX = 2;
@@ -63,15 +59,10 @@ export function ClipWaveform({
 	);
 
 	const peaks = decode.status === "ready" ? decode.peaks : null;
-	const style = useMemo(() => {
-		if (!peaks) return null;
-		const mask = buildSoundwaveMask(toBarHeights(peaks, sampleCount));
-		return {
-			...SOUNDWAVE_MASK_STYLE,
-			maskImage: mask,
-			WebkitMaskImage: mask,
-		};
-	}, [peaks, sampleCount]);
+	const style = useMemo(
+		() => (peaks ? soundwaveMaskStyle(toBarHeights(peaks, sampleCount)) : null),
+		[peaks, sampleCount],
+	);
 
 	// A failed decode stops shimmering: the clip is there, its audio is not.
 	if (decode.status === "failed")

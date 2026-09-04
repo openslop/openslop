@@ -1,32 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { IMAGE_MODELS } from "@/lib/connectors/image/models";
-import { VIDEO_MODELS } from "@/lib/connectors/video/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { ANIMATED_IMAGE_ATTRIBUTES } from "../attributes";
 
 describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 	const badges = ANIMATED_IMAGE_ATTRIBUTES.badgeAttributes;
 
-	it("offers a model per generation: the animation's and the still's", () => {
-		expect(Object.keys(badges)).toEqual(["model", "stillModel"]);
-		expect(badges.model?.label).toBe("Video model");
-		expect(badges.stillModel?.label).toBe("Image model");
+	it("offers the still's model beside the element's own", () => {
+		expect(Object.keys(badges)).toEqual(["imageModel"]);
+		expect(badges.imageModel?.label).toBe("Image model");
 	});
 
-	it("picks each from its own connector's models", () => {
-		expect(badges.model?.edit).toEqual({
-			kind: "enum",
-			options: VIDEO_MODELS.names,
-		});
-		expect(badges.stillModel?.edit).toEqual({
-			kind: "enum",
-			options: IMAGE_MODELS.names,
+	it("picks the still from the image models, writing its own provider", () => {
+		expect(badges.imageModel?.edit).toEqual({
+			kind: "model",
+			type: "image",
+			providerAttr: "imageProvider",
 		});
 	});
 
-	it("defaults both, so a new element names the model each generation runs on", () => {
+	it("keeps the still's provider off the settings popover", () => {
+		expect(
+			ANIMATED_IMAGE_ATTRIBUTES.settingsAttributes.imageProvider,
+		).toBeUndefined();
+	});
+
+	it("defaults the still's pair, so a new element names the model it runs on", () => {
 		expect(ANIMATED_IMAGE_ATTRIBUTES.defaultAttributes).toMatchObject({
-			model: VIDEO_MODELS.defaultModel,
-			stillModel: IMAGE_MODELS.defaultModel,
+			imageProvider: DEFAULT_MODELS.image.provider,
+			imageModel: DEFAULT_MODELS.image.model,
 		});
 	});
 });

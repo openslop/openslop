@@ -1,11 +1,16 @@
-import type { AttributeSchema } from "@/lib/connectors/attributes/schema";
+import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
+import type {
+	AttributeSchema,
+	ModelPick,
+} from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import type { ProjectData } from "@/lib/project/store";
 import type {
 	AssetConnectorType,
 	ConnectorConfig,
-	ProviderKey,
+	ModelRef,
 } from "@/lib/connectors/types";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 import {
@@ -16,47 +21,43 @@ import {
 
 export type ElementConnector = {
 	type: AssetConnectorType;
-	provider: ProviderKey;
-	model: string | undefined;
+	model: ModelRef;
 	config: ConnectorConfig;
 };
 
-/**
- * Which connector, provider and model an element generates with. The provider is
- * derived from the model rather than stored: it is the connector that serves the
- * model, and the seam a generation is routed through.
- */
 export function resolveElementConnector(
 	element: CanvasContentElement,
 	registry: ConnectorRegistry,
+	state: ProjectData,
 ): ElementConnector {
 	const type = ELEMENT_TYPES[element.type].connector;
-	const catalog = MODEL_CATALOGS[type];
-	const { model } = element.generationAttributes ?? {};
-	const provider = catalog.providerFor(model);
-	const config = registry[type][provider];
-	if (!config)
-		throw new Error(`No "${provider}" connector configured for "${type}"`);
-	return { type, provider, model: model ?? catalog.defaultModel, config };
+	const config = registry[type];
+	const supplier = config.plugins?.find((plugin) => plugin.model);
+	return {
+		type,
+		model: resolveModel(
+			type,
+			supplier?.model?.(element, state),
+			element.generationAttributes,
+		),
+		config,
+	};
 }
 
-/**
- * The attribute schema an element generates with, resolved from the element's
- * own attributes: picking a model picks the provider, and so what the element
- * can be configured with.
- */
 export function attributeSchemaFor(
 	type: CanvasElementType,
 	attributes: Record<string, string>,
 ): AttributeSchema {
 	const connector = ELEMENT_TYPES[type].connector;
-	const { model } = attributes;
-	return resolveAttributeSchema(
-		connector,
-		MODEL_CATALOGS[connector].providerFor(model),
-		model,
-	);
+	return resolveAttributeSchema(connector, resolveModel(connector, attributes));
 }
 
 export const elementSchema = (element: CanvasContentElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
+
+/** The element's own model, picked from its connector type's. */
+export const elementModelPick = (element: CanvasContentElement): ModelPick => ({
+	kind: "model",
+	type: ELEMENT_TYPES[element.type].connector,
+	...ELEMENT_MODEL,
+});

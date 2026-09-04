@@ -1,4 +1,4 @@
--- Async generation jobs. One row per /api/v1/{asset} request; queue consumer writes status+result.
+-- Async generation jobs. One row per asset generation request; queue consumer writes status+result.
 create table if not exists jobs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,

@@ -1,5 +1,5 @@
-import { useCallback, useSyncExternalStore } from "react";
-import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import { createStoreContext } from "@/lib/store/createStoreContext";
+import { createEmitter, type Emitter } from "@/lib/store/emitter";
 
 export type DragTransfer = {
 	itemId: string;
@@ -11,7 +11,7 @@ export type DragTransfer = {
 export type DragTransferStore = {
 	get: () => DragTransfer;
 	set: (next: DragTransfer) => void;
-	subscribe: (onChange: () => void) => () => void;
+	subscribe: Emitter["subscribe"];
 };
 
 /**
@@ -21,21 +21,16 @@ export type DragTransferStore = {
  * re-render only when its own answer flips.
  */
 export function createDragTransferStore(): DragTransferStore {
+	const { subscribe, notify } = createEmitter();
 	let transfer: DragTransfer = null;
-	const listeners = new Set<() => void>();
 	return {
 		get: () => transfer,
 		set: (next) => {
 			if (transfer === next) return;
 			transfer = next;
-			for (const listener of listeners) listener();
+			notify();
 		},
-		subscribe: (onChange) => {
-			listeners.add(onChange);
-			return () => {
-				listeners.delete(onChange);
-			};
-		},
+		subscribe,
 	};
 }
 
@@ -49,18 +44,11 @@ export function dropIndexIn(
 	return transfer.atIndex;
 }
 
-const [DragTransferContext, useDragTransferStore] =
-	createRequiredContext<DragTransferStore>("DragTransferContext");
+const [DragTransferContext, , useDragTransfer] =
+	createStoreContext<DragTransferStore>("DragTransferContext");
 export { DragTransferContext };
-
-const noDrop = () => null;
 
 /** Where an incoming cross-scene drag would land in this scene, if anywhere. */
 export function useDropIndex(sceneId: string): number | null {
-	const store = useDragTransferStore();
-	const getSnapshot = useCallback(
-		() => dropIndexIn(store.get(), sceneId),
-		[store, sceneId],
-	);
-	return useSyncExternalStore(store.subscribe, getSnapshot, noDrop);
+	return useDragTransfer((store) => dropIndexIn(store.get(), sceneId));
 }

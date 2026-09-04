@@ -1,71 +1,59 @@
-import type { BaseImageConnector } from "./image/connector";
-import { OpenSlopImage } from "./image/openslop";
-import type { BaseAnimatedImageConnector } from "./animated_image/connector";
-import { OpenSlopAnimatedImage } from "./animated_image/openslop";
-import { OpenSlopLLM } from "./llm/openslop";
-import type { BaseMusicConnector } from "./music/connector";
-import { OpenSlopMusic } from "./music/openslop";
-import type { BaseSFXConnector } from "./sfx/connector";
-import { OpenSlopSFX } from "./sfx/openslop";
-import { OpenSlopTTS } from "./tts/openslop";
-import type { BaseVideoConnector } from "./video/connector";
-import { OpenSlopVideo } from "./video/openslop";
+import { HttpAnimatedImageConnector } from "./animated_image/connector";
+import { HttpImageConnector } from "./image/connector";
+import { HttpLLMConnector } from "./llm/connector";
+import { HttpMusicConnector } from "./music/connector";
+import { HttpSFXConnector } from "./sfx/connector";
+import { HttpTTSConnector } from "./tts/connector";
+import { HttpVideoConnector } from "./video/connector";
 import type { AttributeSchema } from "./attributes/schema";
 import type {
 	ConnectorConfig,
 	ConnectorType,
 	LLMConnector,
+	ModelRef,
 	ProviderConstructor,
-	ProviderKey,
 	TTSConnector,
 } from "./types";
 
 type ConnectorTypeMap = {
 	llm: LLMConnector;
-	music: BaseMusicConnector;
-	sfx: BaseSFXConnector;
-	image: BaseImageConnector;
-	animated_image: BaseAnimatedImageConnector;
+	music: HttpMusicConnector;
+	sfx: HttpSFXConnector;
+	image: HttpImageConnector;
+	animated_image: HttpAnimatedImageConnector;
 	tts: TTSConnector;
-	video: BaseVideoConnector;
+	video: HttpVideoConnector;
 };
 
-const PROVIDERS: Record<
-	ConnectorType,
-	Record<ProviderKey, ProviderConstructor>
-> = {
-	llm: { openslop: OpenSlopLLM },
-	music: { openslop: OpenSlopMusic },
-	sfx: { openslop: OpenSlopSFX },
-	image: { openslop: OpenSlopImage },
-	animated_image: { openslop: OpenSlopAnimatedImage },
-	tts: { openslop: OpenSlopTTS },
-	video: { openslop: OpenSlopVideo },
+/**
+ * The connector serving each type. One class covers every provider of that
+ * type: a generation reaches the same routes either way, and which family it
+ * posts to follows from the provider the config carries.
+ */
+const CONNECTORS: Record<ConnectorType, ProviderConstructor> = {
+	llm: HttpLLMConnector,
+	music: HttpMusicConnector,
+	sfx: HttpSFXConnector,
+	image: HttpImageConnector,
+	animated_image: HttpAnimatedImageConnector,
+	tts: HttpTTSConnector,
+	video: HttpVideoConnector,
 };
-
-function providerCtor(
-	type: ConnectorType,
-	provider: ProviderKey,
-): ProviderConstructor {
-	const Ctor = PROVIDERS[type][provider];
-	if (!Ctor)
-		throw new Error(`Unknown provider "${provider}" for type "${type}"`);
-	return Ctor;
-}
 
 export function createConnector<T extends ConnectorType>(
 	type: T,
-	provider: ProviderKey,
+	model: ModelRef,
 	config: ConnectorConfig,
 ): ConnectorTypeMap[T] {
-	return new (providerCtor(type, provider))(config) as ConnectorTypeMap[T];
+	return new CONNECTORS[type]({
+		...config,
+		model: { provider: model.provider, model: model.model },
+	}) as ConnectorTypeMap[T];
 }
 
-/** Resolve the attribute schema for a (connectorType, provider, model), via the same class hierarchy `createConnector` instantiates. */
 export function resolveAttributeSchema(
 	type: ConnectorType,
-	provider: ProviderKey,
-	model?: string,
+	model: ModelRef,
 ): AttributeSchema {
-	return providerCtor(type, provider).attributesFor(model);
+	return CONNECTORS[type].attributesFor(model);
 }

@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ANIMATED_IMAGE_ATTRIBUTES } from "../animated_image/attributes";
-import { OpenSlopAnimatedImage } from "../animated_image/openslop";
+import { HttpAnimatedImageConnector } from "../animated_image/connector";
+import { DEFAULT_VIDEO_MODEL } from "../video/models";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
 const VIDEO_URL = "https://cdn.example.com/v.mp4";
 
 const config = {
-	isDefault: true,
-	apiKey: "",
-};
+	model: { provider: "openslop", model: "Slop Video v1" },
+} as const;
 
 describe("BaseAnimatedImageConnector", () => {
 	beforeEach(() => {
@@ -26,7 +26,7 @@ describe("BaseAnimatedImageConnector", () => {
 			metadata: { durationSec: 5 },
 		});
 
-		const result = await new OpenSlopAnimatedImage(config).generate({
+		const result = await new HttpAnimatedImageConnector(config).generate({
 			prompt: "slow zoom in",
 			frameImages: ["https://example.com/still.png"],
 		});
@@ -36,7 +36,7 @@ describe("BaseAnimatedImageConnector", () => {
 	});
 
 	it("keeps its own attribute schema rather than the video one", () => {
-		expect(OpenSlopAnimatedImage.attributesFor()).toBe(
+		expect(HttpAnimatedImageConnector.attributesFor(DEFAULT_VIDEO_MODEL)).toBe(
 			ANIMATED_IMAGE_ATTRIBUTES,
 		);
 	});

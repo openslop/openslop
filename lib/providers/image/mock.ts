@@ -1,10 +1,14 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
+import type { ImageProvider } from "../types";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/image/mock`;
 
-export class MockImage extends MockProvider<ImageGenerateParams> {
+export class MockImage
+	extends MockProvider<ImageGenerateParams>
+	implements ImageProvider
+{
 	protected readonly delayMs = 2000;
 	protected readonly variants = [
 		{ id: "1", result: { image: `${BLOB_BASE}/1/output.webp` } },

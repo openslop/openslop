@@ -21,16 +21,16 @@ export class OSMLStreamParser {
 	private buffer = "";
 	private nodes: ParsedElement[] = [];
 
-	appendChunk(chunk: string, projectModels?: ConnectorModels): boolean {
+	appendChunk(chunk: string, defaultModels?: ConnectorModels): boolean {
 		this.buffer += chunk;
-		return this.parseBuffer(projectModels);
+		return this.parseBuffer(defaultModels);
 	}
 
 	getNodes(): ParsedElement[] {
 		return this.nodes;
 	}
 
-	private parseBuffer(projectModels?: ConnectorModels): boolean {
+	private parseBuffer(defaultModels?: ConnectorModels): boolean {
 		TAG_PATTERN.lastIndex = 0;
 
 		if (this.shouldFlushBuffer()) {
@@ -53,7 +53,7 @@ export class OSMLStreamParser {
 			const openTag = match[1];
 			if (openTag) {
 				const { tag, attributes } = parseXmlTag(openTag);
-				this.appendNext(tag, attributes, projectModels);
+				this.appendNext(tag, attributes, defaultModels);
 			}
 			lastIndex = match.index + match[0].length;
 		}
@@ -73,11 +73,11 @@ export class OSMLStreamParser {
 	private appendNext(
 		type: string,
 		attributes: Record<string, string>,
-		projectModels?: ConnectorModels,
+		defaultModels?: ConnectorModels,
 	): void {
 		if (isCanvasElementType(type)) {
 			const { id, ...attrs } = attributes;
-			this.nodes.push(createCanvasNode(type, { id, attrs, projectModels }));
+			this.nodes.push(createCanvasNode(type, { id, attrs, defaultModels }));
 			return;
 		}
 		// Non-canvas tags (metadata_*) pass through as generic nodes; the
@@ -106,9 +106,9 @@ export class OSMLStreamParser {
  */
 export function parseOSML(
 	osml: string,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): ParsedElement[] {
 	const parser = new OSMLStreamParser();
-	parser.appendChunk(`${osml}\n`, projectModels);
+	parser.appendChunk(`${osml}\n`, defaultModels);
 	return parser.getNodes();
 }

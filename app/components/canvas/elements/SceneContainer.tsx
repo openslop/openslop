@@ -29,21 +29,15 @@ interface SceneProps {
 	children: React.ReactNode;
 }
 
-function useSceneState(element: SceneElement) {
-	const childIds = useMemo(
-		() => element.children.map((c) => c.id),
-		[element.children],
-	);
-
+/** Opens a gap at the end of the scene while a cross-scene drag would land there. */
+function useDropPadding(element: SceneElement): React.CSSProperties {
 	const dropIndex = useDropIndex(element.id);
-
 	return {
-		childIds,
-		dropPadding: {
-			paddingBottom:
-				dropIndex !== null && dropIndex >= childIds.length ? "3rem" : undefined,
-			transition: "padding-bottom 200ms ease",
-		} as React.CSSProperties,
+		paddingBottom:
+			dropIndex !== null && dropIndex >= element.children.length
+				? "3rem"
+				: undefined,
+		transition: "padding-bottom 200ms ease",
 	};
 }
 
@@ -88,7 +82,7 @@ function CollapsedScene({
 	sceneIndex,
 	children,
 }: SceneProps) {
-	const { dropPadding } = useSceneState(element);
+	const dropPadding = useDropPadding(element);
 	const { toggle } = useViewMode();
 
 	const foregroundElement = useMemo(
@@ -152,8 +146,12 @@ function ExpandedScene({
 	sceneIndex,
 	children,
 }: SceneProps) {
-	const { childIds, dropPadding } = useSceneState(element);
+	const dropPadding = useDropPadding(element);
 	const { toggle } = useViewMode();
+	const childIds = useMemo(
+		() => element.children.map((child) => child.id),
+		[element.children],
+	);
 
 	return (
 		<div

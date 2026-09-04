@@ -1,9 +1,17 @@
-import { ModelCatalog } from "../modelCatalog";
+import type { ModelRef, ModelsByProvider } from "../types";
+import { ELEVENLABS_MUSIC_MODELS } from "./elevenlabs/models";
 import { OPENSLOP_MUSIC_MODELS } from "./openslop/models";
 
-const DEFAULT_MUSIC_MODEL = "Slop Music v1";
+export const BYOK_MUSIC_MODELS = {
+	elevenlabs: ELEVENLABS_MUSIC_MODELS,
+} satisfies ModelsByProvider;
 
-export const MUSIC_MODELS = ModelCatalog.from(
-	{ openslop: OPENSLOP_MUSIC_MODELS },
-	DEFAULT_MUSIC_MODEL,
-);
+export const MUSIC_MODELS = {
+	openslop: OPENSLOP_MUSIC_MODELS,
+	...BYOK_MUSIC_MODELS,
+} satisfies ModelsByProvider;
+
+export const DEFAULT_MUSIC_MODEL: ModelRef = {
+	provider: "openslop",
+	model: "Slop Music v1",
+};

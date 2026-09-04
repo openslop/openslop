@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
+import { listProviderKeys } from "@/lib/api/providerKeys";
 import { createClient } from "@/lib/supabase/server";
 import ProjectEditor from "./ProjectEditor";
 
@@ -40,6 +41,7 @@ export default async function ProjectPage({
 			initialStore={project.store}
 			initialGeneration={project.generation}
 			user={user}
+			providerKeys={await listProviderKeys(user)}
 		/>
 	);
 }

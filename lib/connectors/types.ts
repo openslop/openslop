@@ -18,9 +18,43 @@ export const ASSET_CONNECTOR_TYPES = [
 
 export type AssetConnectorType = (typeof ASSET_CONNECTOR_TYPES)[number];
 
+export const CONNECTOR_TYPES = [...ASSET_CONNECTOR_TYPES, "llm"] as const;
+
 export type ConnectorType = AssetConnectorType | "llm";
 
-export type ProviderKey = "openslop";
+export const PROVIDERS = [
+	"openslop",
+	"anthropic",
+	"runware",
+	"cartesia",
+	"elevenlabs",
+] as const;
+
+export type Provider = (typeof PROVIDERS)[number];
+
+/** How a model trades off against its siblings. Relative within a connector type, never absolute. */
+export type Tier = "low" | "medium" | "high";
+
+export type ModelMeta = {
+	/** What a generation costs. Lower is cheaper. */
+	cost: Tier;
+	/** How quickly it returns. Higher is faster. */
+	speed: Tier;
+};
+
+export type ModelEntry = ModelMeta & {
+	/** The id the provider's own API takes. */
+	id: string;
+};
+
+export type ModelTable = Record<string, ModelEntry>;
+
+export type ModelsByProvider = Partial<Record<Provider, ModelTable>>;
+
+/** Names are only unique within a provider, so the pair is the identity everywhere. */
+export type ModelRef = { provider: Provider; model: string };
+
+export type ModelPick = { provider?: string; model?: string };
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
@@ -34,6 +68,8 @@ export interface PluginContext<TParams = unknown, TResult = unknown> {
 	dependencies?: Record<string, AssetResult>;
 	/** The project state the node's inputs were resolved against. */
 	state?: ProjectData;
+	/** The pair the connector runs on. */
+	model?: ModelRef;
 }
 
 /** The parts of a plugin context the caller supplies per generation. */
@@ -49,6 +85,11 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * ordering and staleness; reading anything undeclared goes stale-blind.
 	 */
 	dependencies?(element: CanvasContentElement): NodeSpec[];
+	/**
+	 * The model the element generates on, for a type whose model is picked
+	 * somewhere other than the element itself.
+	 */
+	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
 	beforeGenerate?(
 		params: TParams,
 		ctx?: PluginContext<TParams, TResult>,
@@ -68,16 +109,17 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 }
 
 export interface ConnectorConfig {
-	isDefault: boolean;
-	apiKey?: string;
 	baseUrl?: string;
 	plugins?: ConnectorPlugin[];
 }
 
-export type ConnectorGenerateParams = {
-	prompt: string;
-	model?: string;
-};
+export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
+
+/**
+ * The connector stamps its own model onto every generation, so a caller only
+ * supplies what varies per call.
+ */
+export type ConnectorGenerateParams = Partial<ModelRef> & { prompt: string };
 
 export type AssetResult = {
 	durationSec: number;
@@ -146,8 +188,9 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 /** A video generation whose conditioning frame comes from the element's still. */
 export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	videoPrompt?: string;
-	/** The still's own model. The still-frame plugin keeps it off the video call. */
-	stillModel?: string;
+	/** The image's own model. The still-frame plugin keeps it off the video call. */
+	imageProvider?: string;
+	imageModel?: string;
 };
 
 // TTS types
@@ -212,6 +255,6 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 };
 
 export interface ProviderConstructor<T extends Connector = Connector> {
-	new (config: ConnectorConfig): T;
-	attributesFor(model?: string): AttributeSchema;
+	new (config: ResolvedConnectorConfig): T;
+	attributesFor(model: ModelRef): AttributeSchema;
 }

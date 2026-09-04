@@ -5,13 +5,17 @@ import type {
 } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
+import type { TTSProvider } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 
 const PREVIEW_HOST = new URL(BLOB_BASE).hostname;
 
-export class MockTTS extends MockProvider<TTSGenerateParams> {
+export class MockTTS
+	extends MockProvider<TTSGenerateParams>
+	implements TTSProvider
+{
 	protected readonly variants = [
 		{
 			id: "1",

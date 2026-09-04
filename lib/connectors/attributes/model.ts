@@ -1,25 +1,37 @@
-import { Codesandbox } from "@/components/ui/icon";
-import { MODEL_CATALOGS } from "../models";
-import type { ConnectorType } from "../types";
+import { DEFAULT_MODELS } from "../models";
+import type { ConnectorType, ModelRef } from "../types";
 import type { AttributeDef } from "./schema";
 
+/** The attributes every element carries as its own model, whatever its type. */
+export const ELEMENT_MODEL = {
+	key: "model",
+	providerAttr: "provider",
+} as const satisfies { key: keyof ModelRef; providerAttr: keyof ModelRef };
+
 /**
- * The model a generation runs on. An ordinary enum attribute, so an element type
- * that runs two generations declares two of them — naming the connector type
- * each one picks from, which is also what its provider is resolved from.
+ * A further model an element carries beside its own. Two attributes rather
+ * than one: a model name is only unique within its provider.
  */
-export const modelDef = (
+export const modelDefs = (
 	type: ConnectorType,
-	overrides: Partial<AttributeDef> = {},
-): AttributeDef => {
-	const catalog = MODEL_CATALOGS[type];
-	return {
-		key: "model",
+	{
+		key,
+		providerAttr,
+		...spec
+	}: Partial<AttributeDef> & { key: string; providerAttr: string },
+): AttributeDef[] => [
+	{
+		key: providerAttr,
+		label: "Provider",
+		hidden: true,
+		default: DEFAULT_MODELS[type].provider,
+	},
+	{
+		key,
 		label: "Model",
-		icon: Codesandbox,
 		badge: true,
-		edit: { kind: "enum", options: catalog.names },
-		default: catalog.defaultModel,
-		...overrides,
-	};
-};
+		edit: { kind: "model", type, providerAttr },
+		default: DEFAULT_MODELS[type].model,
+		...spec,
+	},
+];

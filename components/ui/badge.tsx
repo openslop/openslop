@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-	"inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-0.5 text-label font-medium whitespace-nowrap [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3 [&_svg]:shrink-0",
+	"inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap [&_svg]:pointer-events-none [&_svg]:shrink-0",
 	{
 		variants: {
 			variant: {
@@ -17,10 +17,17 @@ const badgeVariants = cva(
 				destructive:
 					"border-transparent bg-destructive text-destructive-foreground",
 				new: "border-transparent bg-accent-soft text-accent",
+				tertiary: "border-transparent bg-tertiary text-tertiary-foreground",
+			},
+			size: {
+				default: "px-2 py-0.5 text-label [&_svg:not([class*='size-'])]:size-3",
+				sm: "gap-1 px-1.5 py-0 text-badge-xs [&_svg:not([class*='size-'])]:size-2.5",
+				icon: "size-6 rounded-md p-0 [&_svg:not([class*='size-'])]:size-4",
 			},
 		},
 		defaultVariants: {
 			variant: "default",
+			size: "default",
 		},
 	},
 );
@@ -28,6 +35,7 @@ const badgeVariants = cva(
 function Badge({
 	className,
 	variant,
+	size,
 	asChild = false,
 	...props
 }: React.ComponentProps<"span"> &
@@ -38,7 +46,7 @@ function Badge({
 	return (
 		<Comp
 			data-slot="badge"
-			className={cn(badgeVariants({ variant, className }))}
+			className={cn(badgeVariants({ variant, size, className }))}
 			{...props}
 		/>
 	);

@@ -17,7 +17,7 @@ Semantic tokens only. Never raw hexes, `bg-black/N`, or `*-white/N`.
 - **Neutrals:** warm, red-tinted greys, `--grey-900` (foreground) through `--grey-0`.
 - **Surfaces:** `--background`; `--surface-recessed` (panels); `--card` / `--surface-elevated` (popovers, select menus) with `--surface-hover` for hovered controls on them; `--element-card` (element cards and side-panel sections, text from `--panel-fg` / `--panel-label`). Hairline `--border`.
 - **Accent:** blurple `--accent` / `--ring`, for focus rings, selection, links, send, and `accent` CTAs only. Never an ambient wash.
-- **State:** `--destructive`, `--success`, `--caution`, each with a `-foreground` for solid fills, plus `--caution-soft` / `--caution-soft-foreground` for banners. One ramp per state; never a second red, green, or amber.
+- **State:** `--destructive`, `--success`, `--caution`, `--tertiary` (stale and not-working badges), each with a `-foreground` for solid fills, plus `--caution-soft` / `--caution-soft-foreground` for banners. One ramp per state; never a second red, green, or amber.
 - **Media tints:** `--media-character/image/clip/animated/music/sound/narration` color the element-card icon so each storyboard type reads at a glance. Brighter in dark, deeper in light.
 - **Scrims:** theme-independent dark washes. `bg-overlay` for modal scrims; `bg-on-media/55…80` over media with `text-on-media-foreground` (`--on-media` is solid black, so the opacity sets the strength).
 
@@ -30,7 +30,7 @@ Semantic tokens only. Never raw hexes, `bg-black/N`, or `*-white/N`.
 
 Sizes: `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display`. Never `text-xs`, `text-sm`, or `text-[Npx]`.
 
-- Each bakes its own line-height, so add `leading-*` only to override it, and `font-medium` for weight. `text-label-xs` also bakes weight 475.
+- Each bakes its own line-height, so add `leading-*` only to override it, and `font-medium` for weight. `text-label-xs` also bakes weight 475; `font-book` is that same weight for the sizes that do not.
 - `.font-body` and `.font-title` are unlayered, so their line-height (1.5 / 1.2) beats a token's baked leading wherever they pair (form controls, buttons, titles). Those need an explicit `leading-*`.
 - In a dense row, a label and its description share one size and weight, separated by color alone: `text-foreground` against `text-muted-foreground`.
 
@@ -47,7 +47,7 @@ Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`, durations `--
 Two opt-in treatments, both quiet:
 
 - `.grain`: film grain (`--grain-opacity`) on raised surfaces (dialogs, panel cards, the canvas card, onboarding, the inline copilot). Needs a positioned element and paints through `::after`. Not on dense element cards.
-- `.dot-grid-bg`: the "+" grid behind the editor and gallery. Render it `aria-hidden` and `pointer-events-none`, behind content.
+- `.dot-grid-bg`: the "+" grid behind the editor and gallery. Reach for `<DotGrid />` (`components/ui/dot-grid.tsx`), which renders it `aria-hidden` and `pointer-events-none`, behind content.
 
 ## Components
 

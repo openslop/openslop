@@ -6,6 +6,13 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
+import {
+	connectorModelsSchema,
+	hasModel,
+	modelRefSchema,
+	sameModel,
+} from "@/lib/connectors/models";
+import type { ModelRef } from "@/lib/connectors/types";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
 import { VideoSettingsSchema } from "@/lib/video/videoSettings";
 
@@ -17,7 +24,7 @@ export const ageSchema = z.enum(TTS_AGES).optional().catch(undefined);
 export const pitchSchema = z.enum(TTS_PITCHES).optional().catch(undefined);
 export const accentSchema = z.enum(TTS_ACCENTS).optional().catch(undefined);
 
-const voiceTraitsSchema = z.object({
+export const voiceTraitsSchema = z.object({
 	gender: genderSchema,
 	age: ageSchema,
 	pitch: pitchSchema,
@@ -29,6 +36,8 @@ const voiceTraitsSchema = z.object({
 export const MetadataVoiceSchema = voiceTraitsSchema.extend({
 	voiceId: optionalString,
 	resolvedVoiceId: optionalString,
+	provider: modelRefSchema.shape.provider.optional().catch(undefined),
+	model: optionalString,
 });
 
 /** What describes a voice, as opposed to identifying one, in reading order. */
@@ -59,13 +68,50 @@ export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 
 export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
 
+const voiceIsOn = (voice: MetadataVoice, model: ModelRef) =>
+	hasModel("tts", voice) && sameModel(voice, model);
+
+/** The id a voice has on a model: picked, or else found by an earlier search. */
+export const voiceIdOn = (
+	voice: MetadataVoice,
+	model: ModelRef,
+): string | undefined =>
+	voiceIsOn(voice, model)
+		? (voice.voiceId ?? voice.resolvedVoiceId)
+		: undefined;
+
+/** The voice moved to a model. Its ids stay behind on the pair they were found on. */
+export const voiceOnModel = <V extends MetadataVoice>(
+	voice: V,
+	model: ModelRef,
+): V =>
+	voiceIsOn(voice, model)
+		? voice
+		: {
+				...voice,
+				provider: model.provider,
+				model: model.model,
+				voiceId: undefined,
+				resolvedVoiceId: undefined,
+			};
+
 export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 	appearance: z.string(),
 	/** Whether the avatar node's result came from an upload rather than generation. */
 	avatarUploaded: z.boolean().optional().catch(undefined),
+	avatarModel: modelRefSchema.optional().catch(undefined),
 });
 
 export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
+
+export const metadataVoiceFor = (
+	metadata: {
+		narration: MetadataVoice;
+		characters: Record<string, MetadataVoice>;
+	},
+	characterName?: string,
+): MetadataVoice | undefined =>
+	characterName ? metadata.characters[characterName] : metadata.narration;
 
 export const MetadataSchema = z.object({
 	title: z.string().default(""),
@@ -78,7 +124,7 @@ export const MetadataSchema = z.object({
 	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
 	videoSettings: VideoSettingsSchema,
 	/** The model each connector type generates with, when the project pins one. */
-	connectorModels: z.record(z.string(), z.string()).default({}),
+	models: connectorModelsSchema.default({}),
 	/** The template the project's scripts are written against, when it has one. */
 	templateId: optionalString,
 });

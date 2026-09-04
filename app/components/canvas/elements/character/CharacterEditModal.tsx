@@ -16,7 +16,13 @@ import {
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import {
+	ConfigureModelsItem,
+	ModelSelect,
+	ModelSelectTrigger,
+} from "@/app/components/models/ModelSelect";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { resolveModel } from "@/lib/connectors/models";
 import { characterFromAvatarInputs } from "@/lib/project/characterAvatar";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
@@ -71,7 +77,7 @@ function CharacterEditDialogBody({
 	const avatarSpec = useMemo(() => forCharacterAvatar(name), [name]);
 	const avatar = useGenerateNode(avatarSpec);
 	const avatarUrl = avatar.result?.imageUrl;
-	const restoreAppearance = useCallback(
+	const restoreAvatar = useCallback(
 		(version: ElementVersion) =>
 			updateCharacter(name, characterFromAvatarInputs(version)),
 		[updateCharacter, name],
@@ -87,6 +93,7 @@ function CharacterEditDialogBody({
 		avatar.generate();
 	};
 
+	const avatarModel = resolveModel("image", character.avatarModel);
 	const isStale = avatar.staleReason !== null;
 
 	const generating = isGenerationActive(avatar.status);
@@ -132,7 +139,7 @@ function CharacterEditDialogBody({
 
 			<DialogBody>
 				<div className="grid gap-4 sm:grid-cols-2">
-					<div className="flex flex-col gap-2">
+					<div className="flex min-w-0 flex-col gap-2">
 						<TextAreaField
 							className="min-h-0 flex-1"
 							label="Appearance"
@@ -140,20 +147,30 @@ function CharacterEditDialogBody({
 							onChange={(appearance) => update({ appearance })}
 							placeholder="Describe the character's look"
 						/>
-						<div className="flex items-center justify-end gap-2">
-							<ElementHistoryPopover
-								elementId={avatar.node.id}
-								onRestore={restoreAppearance}
-							/>
-							{avatar.staleReason && (
-								<StaleIndicator reason={avatar.staleReason} />
-							)}
-							<GenerateButton
-								status={avatar.status}
-								hasResult={Boolean(avatarUrl)}
-								disabled={generateDisabled}
-								onGenerate={regenerateAvatar}
-							/>
+						<div className="flex flex-wrap items-center gap-2">
+							<ModelSelect
+								type="image"
+								value={avatarModel}
+								onChange={(next) => update({ avatarModel: next })}
+								footer={<ConfigureModelsItem />}
+							>
+								<ModelSelectTrigger model={avatarModel} label="Avatar model" />
+							</ModelSelect>
+							<div className="ml-auto flex items-center gap-2">
+								<ElementHistoryPopover
+									elementId={avatar.node.id}
+									onRestore={restoreAvatar}
+								/>
+								{avatar.staleReason && (
+									<StaleIndicator reason={avatar.staleReason} />
+								)}
+								<GenerateButton
+									status={avatar.status}
+									hasResult={Boolean(avatarUrl)}
+									disabled={generateDisabled}
+									onGenerate={regenerateAvatar}
+								/>
+							</div>
 						</div>
 					</div>
 					<div className="relative">

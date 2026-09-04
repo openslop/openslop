@@ -10,6 +10,12 @@ export const SOUNDWAVE_MASK_STYLE: CSSProperties = {
 	WebkitMaskRepeat: "no-repeat",
 };
 
+/** The whole style a soundwave needs: the mask for `heights`, stretched to fit. */
+export function soundwaveMaskStyle(heights: number[]): CSSProperties {
+	const mask = buildSoundwaveMask(heights);
+	return { ...SOUNDWAVE_MASK_STYLE, maskImage: mask, WebkitMaskImage: mask };
+}
+
 /** Silence still draws a hairline, so an empty stretch reads as audio, not a gap. */
 const MIN_HEIGHT = 4;
 

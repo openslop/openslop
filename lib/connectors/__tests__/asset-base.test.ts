@@ -3,7 +3,7 @@ import { BaseAssetConnector } from "../asset-base";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { AssetGateway, JobPoll } from "@/lib/gateway/base";
-import type { ConnectorConfig, ConnectorType } from "../types";
+import type { ConnectorType, ResolvedConnectorConfig } from "../types";
 
 type TestParams = { prompt: string };
 type TestResult = { imageUrl?: string; durationSec: number };
@@ -44,7 +44,7 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	readonly assetKey = "image";
 
 	constructor(
-		config: ConnectorConfig,
+		config: ResolvedConnectorConfig,
 		generateFn?: (params: TestParams) => Promise<BundleResponse>,
 	) {
 		super(
@@ -62,8 +62,8 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	}
 }
 
-const config: ConnectorConfig = {
-	isDefault: true,
+const config: ResolvedConnectorConfig = {
+	model: { provider: "openslop", model: "Slop Image v1" },
 };
 
 describe("BaseAssetConnector", () => {
@@ -141,7 +141,10 @@ describe("BaseAssetConnector", () => {
 
 			const result = await connector.generate({ prompt: "test" });
 
-			expect(generateFn).toHaveBeenCalledWith({ prompt: "test" });
+			expect(generateFn).toHaveBeenCalledWith({
+				prompt: "test",
+				...config.model,
+			});
 			expect(result.imageUrl).toBe(
 				"https://blob.example.com/assets/image/mock/abc/output.png",
 			);
