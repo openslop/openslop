@@ -165,10 +165,14 @@ describe("buildTimelineRows", () => {
 		const effects = buildTimelineRows(layout).filter(
 			(row) => row.id === "effect",
 		);
-		// Copies at 0 and 4 fall inside a 5s video; the one at 8 does not.
-		expect(
-			effects.flatMap((row) => row.clips).map((clip) => clip.start),
-		).toEqual([0, 4]);
+		// Two copies fall inside a 5s video; the third starts past the end. The
+		// second starts a crossfade early, so it lands short of the 4s clip length.
+		const starts = effects
+			.flatMap((row) => row.clips)
+			.map((clip) => clip.start);
+		expect(starts).toHaveLength(2);
+		expect(starts[0]).toBe(0);
+		expect(starts[1]).toBeCloseTo(4 - 4 / 24, 5);
 	});
 
 	it("draws a clip that overruns the end only as far as the video goes", () => {

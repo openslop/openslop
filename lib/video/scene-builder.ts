@@ -9,6 +9,7 @@ import { DEFAULT_CONFIG } from "./types";
 import { type AspectRatio, ASPECT_RATIO_DIMENSIONS } from "./aspectRatio";
 import { DEFAULT_CAPTION_STYLE, type CaptionStyle } from "./captionStyle";
 import { blankScene } from "./blankScene";
+import { loopStrideSec } from "./audioFade";
 import { toFrames, toSeconds } from "./frames";
 import {
 	DEFAULT_TRANSITION,
@@ -46,20 +47,20 @@ function createSequence(
 
 type SequenceMap = Partial<Record<CanvasElementType, Sequence[]>>;
 
+/**
+ * Lays down `element.loops` copies, each `stride` after the last. A stride
+ * shorter than the copy overlaps them, which is how a looping effect crossfades
+ * across its seam rather than cutting.
+ */
 function pushSequence(
 	sequences: SequenceMap,
 	element: ResolvedElement,
 	start: number,
+	stride: number,
 ) {
 	const list = (sequences[element.type] ??= []);
 	for (let i = 0; i < element.loops; i++) {
-		list.push(
-			createSequence(
-				element,
-				start + i * element.durationSec,
-				element.durationSec,
-			),
-		);
+		list.push(createSequence(element, start + i * stride, element.durationSec));
 	}
 }
 
@@ -113,17 +114,18 @@ export function buildVideoLayout(
 
 	for (const raw of elements) {
 		const element = { ...raw, durationSec: onGrid(raw.durationSec) };
+		const stride = onGrid(loopStrideSec(element));
 		const current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);
 
 		switch (element.role) {
 			case "effect": {
-				pushSequence(sequences, element, cursor);
+				pushSequence(sequences, element, cursor, stride);
 				break;
 			}
 			case "background": {
 				trimSequencesAt(sequences[element.type], foregroundCursor);
-				pushSequence(sequences, element, foregroundCursor);
+				pushSequence(sequences, element, foregroundCursor, stride);
 				break;
 			}
 			case "foreground": {
@@ -148,7 +150,7 @@ export function buildVideoLayout(
 						cursor + element.durationSec - current.start,
 					);
 				}
-				pushSequence(sequences, element, cursor);
+				pushSequence(sequences, element, cursor, stride);
 				cursor += element.durationSec;
 				break;
 			}
