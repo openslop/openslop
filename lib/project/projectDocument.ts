@@ -45,7 +45,7 @@ export function createProjectDocument({
 			applyScriptToEditor(
 				editor,
 				content.script,
-				store.getState().metadata.connectorModels,
+				store.getState().metadata.models,
 			);
 			replaceStoreSnapshot(store, content.store);
 			queue.replaceSnapshots(content.generation);

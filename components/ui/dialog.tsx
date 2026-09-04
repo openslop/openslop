@@ -71,9 +71,12 @@ function DialogContent({
 	className,
 	children,
 	showCloseButton = true,
+	glow = true,
 	...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
 	showCloseButton?: boolean;
+	/** The light from above. Off for dialogs that carry their own surface. */
+	glow?: boolean;
 }) {
 	return (
 		<DialogPortal>
@@ -86,14 +89,16 @@ function DialogContent({
 				)}
 				{...props}
 			>
-				<div
-					aria-hidden
-					className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40"
-					style={{
-						backgroundImage:
-							"radial-gradient(60% 100% at 50% 0%, var(--glow), transparent 70%)",
-					}}
-				/>
+				{glow && (
+					<div
+						aria-hidden
+						className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40"
+						style={{
+							backgroundImage:
+								"radial-gradient(60% 100% at 50% 0%, var(--glow), transparent 70%)",
+						}}
+					/>
+				)}
 				<div className="relative z-[2] flex min-h-0 flex-1 flex-col gap-4">
 					{children}
 				</div>

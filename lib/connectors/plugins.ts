@@ -1,6 +1,6 @@
 import type { GatewayClient } from "@/lib/gateway/base";
 import type { ProjectData } from "@/lib/project/store";
-import type { ConnectorPlugin, PluginContext } from "./types";
+import type { ConnectorPlugin, ModelRef, PluginContext } from "./types";
 
 /** Assert the plugin was given a gateway, returning the narrowed dependency. */
 export function requireGateway<P, R>(
@@ -19,6 +19,15 @@ export function requireState<P, R>(
 ): ProjectData {
 	if (!ctx?.state) throw new Error(`${plugin} plugin requires project state`);
 	return ctx.state;
+}
+
+/** Assert the plugin was told the pair its connector runs on. */
+export function requireModel<P, R>(
+	ctx: PluginContext<P, R> | undefined,
+	plugin: string,
+): ModelRef {
+	if (!ctx?.model) throw new Error(`${plugin} plugin requires a model`);
+	return ctx.model;
 }
 
 export async function runBeforeGenerate<T>(

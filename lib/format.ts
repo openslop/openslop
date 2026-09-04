@@ -34,6 +34,16 @@ const DATE_TIME = new Intl.DateTimeFormat(undefined, {
 	minute: "2-digit",
 });
 
+const DATE = new Intl.DateTimeFormat(undefined, {
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+});
+
+export function formatDate(iso: string): string {
+	return DATE.format(new Date(iso));
+}
+
 export function formatDateTime(iso: string): string {
 	return DATE_TIME.format(new Date(iso));
 }

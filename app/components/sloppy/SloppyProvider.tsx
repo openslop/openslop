@@ -8,7 +8,9 @@ import {
 	lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { AGENT_PATH, loadAgentTranscript } from "@/lib/agent/client";
+import { agentPathFor, loadAgentTranscript } from "@/lib/agent/client";
+import type { ModelRef } from "@/lib/connectors/types";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
@@ -17,7 +19,6 @@ import { useAgentContext } from "@/lib/agent/projectContext";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { toastError } from "@/lib/toastError";
-import { useSloppyModel } from "./SloppyModelProvider";
 
 type SloppyControl = {
 	send: (message: string) => void;
@@ -71,8 +72,8 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	const runTool = useAgentTools(editor);
 	const readContext = useAgentContext(editor);
 	const restored = useTranscript(projectId);
-	const { model } = useSloppyModel();
-	const turnModel = useRef<string>(undefined);
+	const model = useDefaultModels().llm;
+	const turnModel = useRef<ModelRef>(undefined);
 	// Stopping should also cancel the tool call in flight
 	const turn = useRef<AbortController>(undefined);
 
@@ -81,16 +82,19 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			messageMetadataSchema: sloppyMetadataSchema,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new DefaultChatTransport<SloppyMessage>({
-				api: AGENT_PATH,
-				prepareSendMessagesRequest: ({ messages, body }) => ({
-					body: {
-						...body,
-						projectId,
-						message: messages.at(-1),
-						context: readContext(),
-						model: turnModel.current,
-					},
-				}),
+				prepareSendMessagesRequest: ({ messages, body }) => {
+					const picked = turnModel.current ?? model;
+					return {
+						api: agentPathFor(picked),
+						body: {
+							...body,
+							projectId,
+							message: messages.at(-1),
+							context: readContext(),
+							...picked,
+						},
+					};
+				},
 			}),
 			sendAutomaticallyWhen: (options) =>
 				!turn.current?.signal.aborted &&

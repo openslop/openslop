@@ -10,8 +10,12 @@ import {
 	ELEVENLABS_AUDIO_FORMAT,
 	toElevenLabsOutputFormat,
 } from "../elevenlabs";
+import type { MusicProvider } from "../types";
 
-export class ElevenLabsMusic extends BaseElevenLabsAudio<MusicGenerateParams> {
+export class ElevenLabsMusic
+	extends BaseElevenLabsAudio<MusicGenerateParams>
+	implements MusicProvider
+{
 	protected readonly blobConfig = { type: "music", provider: "elevenlabs" };
 	protected readonly outputFormat = ELEVENLABS_AUDIO_FORMAT;
 

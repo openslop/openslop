@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
 import { MetadataSchema } from "@/lib/project/types";
 import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
@@ -17,16 +18,14 @@ vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
-const config: ConnectorConfig = {
-	isDefault: true,
-};
+const config: ConnectorConfig = {};
 
 function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	const job: GenerationJob = {
 		elementId: id,
 		elementType: "image",
 		connectorType: "image",
-		provider: "openslop",
+		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
 	};

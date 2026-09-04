@@ -1,28 +1,25 @@
-import type { GatewayClient } from "@/lib/gateway/base";
+import { HttpLLMGateway } from "@/lib/gateway/http";
 import { stringifyError } from "@/lib/errors";
 import { BaseConnector } from "../base";
 import { runOnError } from "../plugins";
 import type {
-	ConnectorConfig,
 	LLMConnector,
 	LLMGenerateParams,
 	LLMGenerateResult,
 	LLMStreamChunk,
+	ResolvedConnectorConfig,
 } from "../types";
 
-export abstract class BaseLLMConnector<
-	TGateway extends GatewayClient<LLMGenerateParams, LLMGenerateResult> =
-		GatewayClient<LLMGenerateParams, LLMGenerateResult>,
->
+export class HttpLLMConnector
 	extends BaseConnector<LLMGenerateParams, LLMGenerateResult>
 	implements LLMConnector
 {
 	readonly type = "llm" as const;
-	protected gateway: TGateway;
+	private gateway: HttpLLMGateway;
 
-	constructor(gateway: TGateway, config: ConnectorConfig) {
+	constructor(config: ResolvedConnectorConfig) {
 		super(config);
-		this.gateway = gateway;
+		this.gateway = new HttpLLMGateway(config.model, config.baseUrl);
 	}
 
 	protected pluginContext() {
@@ -42,15 +39,10 @@ export abstract class BaseLLMConnector<
 		const ctx = this.pluginContext();
 		try {
 			const prepared = await this.prepareParams(params, ctx);
-			yield* this._stream(prepared, signal);
+			yield* this.gateway.stream(prepared, signal);
 		} catch (error) {
 			await runOnError(this.plugins, stringifyError(error), ctx);
 			throw error;
 		}
 	}
-
-	protected abstract _stream(
-		params: LLMGenerateParams,
-		signal?: AbortSignal,
-	): AsyncGenerator<LLMStreamChunk>;
 }

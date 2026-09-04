@@ -1,17 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
-import type { ConnectorType } from "@/lib/connectors/types";
+import { notFound } from "./response";
 import { withApiAccess, withPublic, withSession } from "./with-auth";
-import type { JobPoll } from "@/lib/gateway/base";
-import { createJob, enqueueJob, getJob } from "./jobs";
 import {
 	parseBody,
 	parseFormData,
 	parseSearchParams,
 	type ParseResult,
 } from "./parse";
-import { notFound } from "./response";
 
 type AuthTier = typeof withApiAccess;
 
@@ -58,10 +55,41 @@ export const createApiQueryRouteHandler = routeHandler(
 	withApiAccess,
 	parseSearchParams,
 );
+export const createSessionQueryRouteHandler = routeHandler(
+	withSession,
+	parseSearchParams,
+);
 export const createSessionFormRouteHandler = routeHandler(
 	withSession,
 	parseFormData,
 );
+
+/**
+ * Routes addressed by their path. The segments are parsed like any other
+ * external input, and a shape the schema will not take names nothing that
+ * exists, so it answers 404 rather than surfacing the mismatch.
+ */
+function paramRouteHandler(authTier: AuthTier) {
+	return function createHandler<TSchema extends z.ZodType>(
+		opts: RouteOptions<
+			TSchema,
+			{ user: User; params: z.infer<TSchema>; request: NextRequest }
+		>,
+	) {
+		return async (
+			request: NextRequest,
+			context: { params: Promise<unknown> },
+		) =>
+			authTier(opts.label, async (user) => {
+				const parsed = opts.schema.safeParse(await context.params);
+				if (!parsed.success) return notFound();
+				return opts.handle({ user, params: parsed.data, request });
+			});
+	};
+}
+
+export const createApiParamRouteHandler = paramRouteHandler(withApiAccess);
+export const createSessionParamRouteHandler = paramRouteHandler(withSession);
 
 function publicRouteHandler(parse: ParseSource) {
 	return function createHandler<TSchema extends z.ZodType>(
@@ -82,75 +110,3 @@ function publicRouteHandler(parse: ParseSource) {
 export const createPublicRouteHandler = publicRouteHandler(parseBody);
 export const createPublicQueryRouteHandler =
 	publicRouteHandler(parseSearchParams);
-
-/** The models this API serves, mapped to the ids it forwards. */
-export function modelField(models: Record<string, string>) {
-	const names = Object.keys(models);
-	return z
-		.string()
-		.optional()
-		.refine((v) => v === undefined || names.includes(v), {
-			message: `Invalid model. Supported: ${names.join(", ")}`,
-		})
-		.transform((v) => (v === undefined ? undefined : models[v]));
-}
-
-type AssetBody = { projectId?: string } & Record<string, unknown>;
-
-export function createAssetRouteHandlers<
-	TSchema extends z.ZodType<AssetBody>,
->(opts: { connectorType: ConnectorType; schema: TSchema; label: string }) {
-	const POST = createApiRouteHandler({
-		schema: opts.schema,
-		label: opts.label,
-		handle: async ({ user, input }) => {
-			const { projectId, ...request } = input;
-			const job = await createJob({
-				userId: user.id,
-				projectId,
-				connectorType: opts.connectorType,
-				request,
-			});
-			await enqueueJob(job.id, opts.connectorType);
-			return NextResponse.json({ jobId: job.id, status: "pending" });
-		},
-	});
-	return { POST };
-}
-
-export async function pollJob(
-	_request: NextRequest,
-	context: { params: Promise<{ jobId: string }> },
-) {
-	return withApiAccess("Job poll", async (user) => {
-		const { jobId } = await context.params;
-		// A malformed id makes Postgres throw on the cast; guid() matches every shape it accepts.
-		if (!z.guid().safeParse(jobId).success) return notFound();
-		const job = await getJob(jobId, user.id);
-		if (!job) return notFound();
-		const view: JobPoll = {
-			jobId: job.id,
-			status: job.status,
-			result: job.result,
-			error: job.error,
-		};
-		return NextResponse.json(view);
-	});
-}
-
-export function bodySchema<TShape extends z.ZodRawShape>(
-	models: Record<string, string>,
-	shape: TShape,
-) {
-	return z.object(
-		{
-			prompt: z.string({ error: "prompt is required" }).min(1, {
-				message: "prompt is required",
-			}),
-			model: modelField(models),
-			projectId: z.uuid().optional(),
-			...shape,
-		},
-		"Request body must be a JSON object",
-	);
-}

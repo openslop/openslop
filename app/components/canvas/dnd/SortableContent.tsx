@@ -8,7 +8,7 @@ import type {
 import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
-import { useProject } from "@/lib/project/useProject";
+import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useViewMode } from "../ViewModeContext";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
@@ -38,7 +38,7 @@ export function SortableContent({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const editor = useSlateStatic();
 	const { isCollapsed } = useViewMode();
-	const projectModels = useProject((s) => s.metadata.connectorModels);
+	const defaultModels = useResolveDefaultModels();
 
 	const path = ReactEditor.findPath(editor, element);
 	const sceneId = parentSceneId(editor, path);
@@ -58,9 +58,11 @@ export function SortableContent({
 	const handleInsert = useCallback(
 		(type: CanvasElementType) => {
 			const p = ReactEditor.findPath(editor, element);
-			insertElement(editor, type, Path.next(p), { projectModels });
+			insertElement(editor, type, Path.next(p), {
+				defaultModels: defaultModels(),
+			});
 		},
-		[editor, element, projectModels],
+		[editor, element, defaultModels],
 	);
 
 	return (

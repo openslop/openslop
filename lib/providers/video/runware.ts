@@ -1,7 +1,7 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { VideoJob, VideoJobMetadata, VideoJobStatus } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
-import { withRunware } from "../runware";
+import { validateRunwareKey, withRunware } from "../runware";
 
 function toVideoJob(video: {
 	taskUUID: string;
@@ -24,6 +24,10 @@ export class RunwareVideo extends BaseVideoProvider {
 	constructor(apiKey: string) {
 		super();
 		this.apiKey = apiKey;
+	}
+
+	async validate() {
+		return validateRunwareKey(this.apiKey);
 	}
 
 	async submit(params: VideoGenerateParams) {

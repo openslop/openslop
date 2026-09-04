@@ -53,7 +53,7 @@ describe("AttributeBadge", () => {
 	});
 
 	it("never presents a value the element does not have", () => {
-		expect(render(elementWith({}), motionSpec)).not.toContain("none");
+		expect(control(render(elementWith({}), motionSpec))).not.toBe("none");
 	});
 
 	it("omits the unit suffix when there is no value", () => {

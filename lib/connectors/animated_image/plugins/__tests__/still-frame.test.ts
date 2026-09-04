@@ -13,7 +13,7 @@ import {
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createStillFramePlugin,
@@ -72,7 +72,7 @@ describe("still-frame plugin", () => {
 			{
 				prompt: "a dark forest",
 				videoPrompt: "slow zoom in",
-				stillModel: "Slop Image v1",
+				imageModel: "Slop Image v1",
 			},
 			ctx(STILL_URL),
 		);
@@ -323,18 +323,26 @@ describe("stillElement", () => {
 		stillElement(animated(attrs)).generationAttributes ?? {};
 
 	it("generates the still with the image model the element names", () => {
-		expect(stillAttributes({ stillModel: "Slop Image v1" })).toEqual({
-			model: "Slop Image v1",
-		});
+		expect(
+			stillAttributes({
+				imageProvider: "runware",
+				imageModel: "Seedream 5 Lite",
+			}),
+		).toEqual({ provider: "runware", model: "Seedream 5 Lite" });
 	});
 
-	it("falls back to the image catalog for an unknown still model", () => {
-		expect(stillAttributes({ stillModel: "Slop Video v1" })).toEqual({
-			model: MODEL_CATALOGS.image.defaultModel,
-		});
+	it("falls back to the recommended image model for an unknown still model", () => {
+		expect(
+			stillAttributes({
+				imageProvider: "openslop",
+				imageModel: "Slop Video v1",
+			}),
+		).toEqual(DEFAULT_MODELS.image);
 	});
 
-	it("never hands the still a video model", () => {
-		expect(stillAttributes({})).toEqual({});
+	it("never hands the still the video model", () => {
+		expect(
+			stillAttributes({ provider: "openslop", model: "Slop Video v1" }),
+		).toEqual(DEFAULT_MODELS.image);
 	});
 });

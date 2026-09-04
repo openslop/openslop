@@ -13,6 +13,10 @@ class TestProvider extends BaseProvider<TestParams, TestRawResult> {
 	protected readonly blobConfig = { type: "test", provider: "mock" };
 	generateFn = vi.fn<(params: TestParams) => Promise<TestRawResult>>();
 
+	async validate() {
+		return { ok: true as const };
+	}
+
 	protected toFiles(r: TestRawResult): BundleFile[] {
 		return [
 			{

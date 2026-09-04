@@ -8,11 +8,12 @@ import {
 } from "./plugins";
 import type {
 	Connector,
-	ConnectorConfig,
 	ConnectorPlugin,
 	ConnectorType,
 	GenerationContext,
+	ModelRef,
 	PluginContext,
+	ResolvedConnectorConfig,
 } from "./types";
 
 export abstract class BaseConnector<
@@ -21,18 +22,20 @@ export abstract class BaseConnector<
 > implements Connector {
 	abstract readonly type: ConnectorType;
 	protected plugins: ConnectorPlugin[];
+	protected readonly model: ModelRef;
 
 	/**
-	 * Attribute schema for this connector type/model. Types with no element-settings
-	 * UI (e.g. llm) inherit this empty default. For per-model sets, override on the
-	 * provider subclass and branch on `model`.
+	 * Attribute schema for this connector type and model. Types with no
+	 * element-settings UI (e.g. llm) inherit this empty default. For per-model
+	 * sets, override and branch on the provider and model.
 	 */
-	static attributesFor(_model?: string): AttributeSchema {
+	static attributesFor(_model: ModelRef): AttributeSchema {
 		return AttributeSchema.from([]);
 	}
 
-	constructor(config: ConnectorConfig) {
+	constructor(config: ResolvedConnectorConfig) {
 		this.plugins = config.plugins ?? [];
+		this.model = config.model;
 	}
 
 	protected pluginContext(): PluginContext<TParams, TResult> {
@@ -44,14 +47,18 @@ export abstract class BaseConnector<
 		ctx: PluginContext<TParams, TResult>,
 	): Promise<TParams> {
 		const prompt = await runTransformPrompt(this.plugins, params.prompt, ctx);
-		return runBeforeGenerate(this.plugins, { ...params, prompt }, ctx);
+		return runBeforeGenerate(
+			this.plugins,
+			{ ...params, ...this.model, prompt },
+			ctx,
+		);
 	}
 
 	async generate(
 		params: TParams,
 		context?: GenerationContext,
 	): Promise<TResult> {
-		const ctx = { ...this.pluginContext(), ...context };
+		const ctx = { ...this.pluginContext(), ...context, model: this.model };
 		try {
 			const prepared = await this.prepareParams(params, ctx);
 			let result = await this._generate(prepared);

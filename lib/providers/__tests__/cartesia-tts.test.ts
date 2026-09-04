@@ -380,7 +380,7 @@ describe("CartesiaTTS", () => {
 					language: "en",
 					gender: "feminine",
 					description: "A warm voice",
-					previewUrl: `/api/v1/tts/voices/preview?url=${encodeURIComponent("https://preview.mp3")}`,
+					previewUrl: "https://preview.mp3",
 				},
 				{
 					id: "v2",

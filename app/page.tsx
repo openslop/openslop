@@ -7,6 +7,7 @@ import { AuthFooterLink } from "./components/AuthFooterLink";
 import AccessCodeInput from "./components/AccessCodeInput";
 import ProjectsList from "./components/projects/ProjectsList";
 import { Button } from "@/components/ui/button";
+import { listProviderKeys } from "@/lib/api/providerKeys";
 import { UserProvider } from "@/lib/user/UserProvider";
 
 const icons = fs
@@ -21,13 +22,16 @@ export default async function Home() {
 	} = await supabase.auth.getUser();
 
 	if (user) {
-		const { data: projects, error } = await supabase
-			.from("projects")
-			.select("id, name, thumbnail_url, updated_at")
-			.order("updated_at", { ascending: false });
+		const [{ data: projects, error }, providerKeys] = await Promise.all([
+			supabase
+				.from("projects")
+				.select("id, name, thumbnail_url, updated_at")
+				.order("updated_at", { ascending: false }),
+			listProviderKeys(user),
+		]);
 		if (error) throw error;
 		return (
-			<UserProvider user={user}>
+			<UserProvider user={user} providerKeys={providerKeys}>
 				<ProjectsList initialProjects={projects ?? []} />
 			</UserProvider>
 		);

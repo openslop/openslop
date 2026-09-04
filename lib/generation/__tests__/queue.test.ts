@@ -11,6 +11,7 @@ import {
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { GenerationInputs } from "../inputs";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { GenerationJob, GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import type { CommittedVersion } from "../versions";
@@ -34,9 +35,7 @@ type JobOverrides = Partial<GenerationJob> & {
 };
 
 function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
-	const config: ConnectorConfig = {
-		isDefault: true,
-	};
+	const config: ConnectorConfig = {};
 	const {
 		inputs = { prompt: "test prompt", attributes: {}, dependencies: {} },
 		dependsOn = [],
@@ -46,7 +45,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 		elementId: id,
 		elementType: "image",
 		connectorType: "image",
-		provider: "openslop",
+		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
 		...rest,

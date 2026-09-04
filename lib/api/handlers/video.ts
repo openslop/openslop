@@ -1,15 +1,21 @@
-import type { VideoGenerateParams } from "@/lib/connectors/types";
-import type { JobHandler } from "../job-handlers";
-import { getVideoProvider } from "../providers";
+import type { ModelRef, VideoGenerateParams } from "@/lib/connectors/types";
+import {
+	jobVendorParams,
+	providerForJob,
+	type JobHandler,
+} from "../job-handlers";
 
 type VideoMetadata = { providerJobId?: string };
 
-export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
+export const videoHandler: JobHandler<
+	VideoGenerateParams & ModelRef,
+	VideoMetadata
+> = {
 	process: async (job) => {
-		const provider = getVideoProvider();
+		const provider = await providerForJob("video", job);
 		const providerJobId = job.metadata.providerJobId;
 		if (!providerJobId) {
-			const submitted = await provider.generate(job.request);
+			const submitted = await provider.generate(jobVendorParams(job));
 			if (!submitted.metadata?.jobId) {
 				throw new Error(
 					"Video provider returned no jobId for async generation",
@@ -21,7 +27,7 @@ export const videoHandler: JobHandler<VideoGenerateParams, VideoMetadata> = {
 			};
 		}
 
-		const upstream = await provider.poll(providerJobId, job.request);
+		const upstream = await provider.poll(providerJobId, jobVendorParams(job));
 		if (upstream.kind === "ready") {
 			return { kind: "completed", result: upstream.asset };
 		}

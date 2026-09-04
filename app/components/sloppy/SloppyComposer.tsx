@@ -1,57 +1,31 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
+import { inlineControlClassName } from "@/components/ui/select-menu";
 import {
-	ChevronDown,
-	Codesandbox,
-	CornerDownLeft,
-	Lightbulb,
-	SquareFilled,
-} from "@/components/ui/icon";
-import { SelectMenu } from "@/components/ui/select-menu";
-import { cn } from "@/lib/utils";
+	ModelSelect,
+	ModelSelectTrigger,
+} from "@/app/components/models/ModelSelect";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { useProject } from "@/lib/project/useProject";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
-import { useSloppyModel } from "./SloppyModelProvider";
 import { useSloppy } from "./SloppyProvider";
 import { nextSuggestion, SUGGESTIONS } from "./suggestions";
 
-const controlClassName =
-	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
-
-function ModelPicker({
-	model,
-	onChange,
-	options,
-}: {
-	model: string;
-	onChange: (next: string) => void;
-	options: string[];
-}) {
+function ModelPicker() {
+	const model = useDefaultModels().llm;
+	const updateMetadata = useProject((state) => state.updateMetadata);
 	return (
-		<SelectMenu
+		<ModelSelect
+			type="llm"
 			value={model}
-			onChange={onChange}
-			options={options.map((option) => ({
-				value: option,
-				label: option,
-			}))}
-			contentClassName="max-h-64 min-w-24"
+			onChange={(llm) => updateMetadata({ models: { llm } })}
+			side="top"
 		>
-			<button
-				type="button"
-				aria-label={`Model: ${model}`}
-				onMouseDown={(event) => event.preventDefault()}
-				className={cn(controlClassName, "max-w-[140px]")}
-			>
-				<Codesandbox
-					className="h-3 w-3 shrink-0 opacity-70"
-					aria-hidden="true"
-				/>
-				<span className="min-w-0 truncate">{model}</span>
-				<ChevronDown className="h-3 w-3 shrink-0" aria-hidden="true" />
-			</button>
-		</SelectMenu>
+			<ModelSelectTrigger model={model} label="Model" />
+		</ModelSelect>
 	);
 }
 
@@ -69,7 +43,7 @@ function SuggestionButton({
 			disabled={disabled}
 			onMouseDown={(event) => event.preventDefault()}
 			onClick={onPick}
-			className={controlClassName}
+			className={inlineControlClassName}
 		>
 			<Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
 		</button>
@@ -78,7 +52,6 @@ function SuggestionButton({
 
 export function SloppyComposer() {
 	const { send, stop, loading } = useSloppy();
-	const { model, setModel, models } = useSloppyModel();
 	const [value, setValue] = useState("");
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const hasText = value.trim().length > 0;
@@ -118,7 +91,7 @@ export function SloppyComposer() {
 			/>
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-center gap-1">
-					<ModelPicker model={model} onChange={setModel} options={models} />
+					<ModelPicker />
 					<SuggestionButton
 						onPick={suggest}
 						disabled={loading || (hasText && !showsSuggestion)}

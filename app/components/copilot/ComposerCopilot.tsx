@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-	Codesandbox,
 	CornerDownLeft,
 	Hourglass,
 	ImagePlus,
@@ -35,6 +34,7 @@ import {
 	type LanguageChoice,
 } from "@/lib/project/language";
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import type { AspectRatio } from "@/lib/video/aspectRatio";
 import {
 	useUpdateVideoSettings,
@@ -47,10 +47,15 @@ import {
 } from "@/lib/video/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
-import { useSloppyModel } from "@/app/components/sloppy/SloppyModelProvider";
 import { ActionButton } from "./ActionButton";
 import { ComposerAssets } from "./ComposerAssets";
-import { SettingPill, type SettingPillOption } from "./SettingPill";
+import {
+	SettingPill,
+	SettingPillButton,
+	type SettingPillOption,
+} from "./SettingPill";
+import { ModelSelect, modelLabel } from "@/app/components/models/ModelSelect";
+import { ProviderIcon } from "@/app/components/models/ProviderIcon";
 
 /** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
 type ComposerIntent = "story" | "script";
@@ -194,7 +199,8 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
-	const { model, setModel, models } = useSloppyModel();
+	const model = useDefaultModels().llm;
+	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	const {
 		openPicker,
@@ -281,13 +287,20 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={LANGUAGE_OPTIONS}
 							onChange={setLanguage}
 						/>
-						<SettingPill
-							name="Model"
-							icon={<Codesandbox className="mr-1 h-3 w-3" />}
+						<ModelSelect
+							type="llm"
 							value={model}
-							options={models.map((value) => ({ value, label: value }))}
-							onChange={setModel}
-						/>
+							onChange={(llm) => updateMetadata({ models: { llm } })}
+						>
+							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
+								<ProviderIcon
+									provider={model.provider}
+									size={12}
+									className="mr-1"
+								/>
+								{model.model}
+							</SettingPillButton>
+						</ModelSelect>
 						<SettingPill
 							name="Video length"
 							icon={<Hourglass className="mr-1 h-3 w-3" />}

@@ -11,8 +11,8 @@ import {
 import type { ParsedElement } from "@/lib/canvas/types";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
-import { getDefaultConnector } from "@/lib/connectors/registry";
 import { createConnector } from "@/lib/connectors/factory";
+import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useProject } from "@/lib/project/useProject";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
@@ -59,15 +59,12 @@ export function ScriptProvider({
 	const [showWorkspace, setShowWorkspace] = useState(initialScript.length > 0);
 	const { nodes, appendChunk, reset } = useOSMLStreamParser();
 
-	const { provider: llmProvider, config: llmConfig } = getDefaultConnector(
-		connectorConfig,
-		"llm",
-	);
+	const model = useDefaultModels().llm;
 
 	const runScript = useCallback(
 		async (source: ScriptSource, signal?: AbortSignal) => {
 			reset();
-			const connector = createConnector("llm", llmProvider, llmConfig);
+			const connector = createConnector("llm", model, connectorConfig.llm);
 			const { system, prompt } = buildScriptPrompt(
 				store.getState().metadata,
 				source,
@@ -80,7 +77,7 @@ export function ScriptProvider({
 				appendChunk(chunk.text);
 			}
 		},
-		[store, llmProvider, llmConfig, appendChunk, reset],
+		[store, connectorConfig, model, appendChunk, reset],
 	);
 
 	const startBlank = useCallback(() => {

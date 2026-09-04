@@ -1,5 +1,8 @@
 import { z } from "zod";
+import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
 import { parseImageSource } from "./imageSource";
+
+export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
 const optionalCoercedNumber = z
 	.union([z.number(), z.string()])

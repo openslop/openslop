@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { OpenSlopSFX } from "../sfx/openslop";
+import { HttpSFXConnector } from "../sfx/connector";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
@@ -7,9 +7,8 @@ const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/sfx/openslop/${TEST_ID}/output.mp3`;
 
 const config = {
-	isDefault: true,
-	apiKey: "",
-};
+	model: { provider: "openslop", model: "Slop SFX v1" },
+} as const;
 
 function mockSuccess(metadata?: Record<string, unknown>) {
 	mockGatewaySuccess({
@@ -28,7 +27,7 @@ describe("BaseSFXConnector", () => {
 
 	it("generates audio via provider", async () => {
 		mockSuccess();
-		const result = await new OpenSlopSFX(config).generate({
+		const result = await new HttpSFXConnector(config).generate({
 			prompt: "explosion",
 		});
 		expect(result.audioUrl).toBe(AUDIO_URL);
@@ -52,7 +51,7 @@ describe("BaseSFXConnector", () => {
 				return r;
 			},
 		};
-		await new OpenSlopSFX({ ...config, plugins: [plugin] }).generate({
+		await new HttpSFXConnector({ ...config, plugins: [plugin] }).generate({
 			prompt: "test",
 		});
 		expect(order).toEqual(["transform", "before", "after"]);
@@ -60,7 +59,7 @@ describe("BaseSFXConnector", () => {
 
 	it("returns the native asset durationSec from metadata (looping is a layout concern)", async () => {
 		mockSuccess({ durationSec: 7 });
-		const result = await new OpenSlopSFX(config).generate({
+		const result = await new HttpSFXConnector(config).generate({
 			prompt: "footsteps",
 		});
 		expect(result.durationSec).toBe(7);

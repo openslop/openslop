@@ -1,29 +1,55 @@
-import { requireState } from "@/lib/connectors/plugins";
+import { resolveModel } from "@/lib/connectors/models";
+import { requireModel, requireState } from "@/lib/connectors/plugins";
 import { forVoice } from "@/lib/generation/sourceNodes";
 import { declaredLanguage } from "@/lib/project/language";
-import { MetadataVoiceSchema } from "@/lib/project/types";
+import {
+	metadataVoiceFor,
+	voiceIdOn,
+	voiceTraitsSchema,
+} from "@/lib/project/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
 	ConnectorPlugin,
+	ModelRef,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
+import type { ProjectData } from "@/lib/project/store";
+
+/**
+ * Speech speaks with the pair its voice picked in the voice's editor, and
+ * with the pair it was created with until the voice picks one.
+ */
+const voiceModel = (
+	element: CanvasContentElement,
+	state: ProjectData,
+): ModelRef =>
+	resolveModel(
+		"tts",
+		metadataVoiceFor(state.metadata, element.generationAttributes?.name),
+		element.generationAttributes,
+	);
 
 export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "metadata-voice",
-		dependencies: (element) => [forVoice(element.generationAttributes?.name)],
+		model: voiceModel,
+		dependencies: (element) => [
+			(state) =>
+				forVoice(
+					element.generationAttributes?.name,
+					voiceModel(element, state),
+				)(state),
+		],
 		beforeGenerate(params, ctx) {
-			const { narration, characters, language } = requireState(
-				ctx,
-				"metadata-voice",
-			).metadata;
-			const voice = params.name ? characters[params.name] : narration;
+			const { metadata } = requireState(ctx, "metadata-voice");
+			const voice = metadataVoiceFor(metadata, params.name);
 			if (!voice) return params;
-			const { resolvedVoiceId, ...fields } = MetadataVoiceSchema.parse(voice);
+			const traits = voiceTraitsSchema.parse(voice);
 			return {
 				...params,
-				...fields,
-				language: declaredLanguage(language) ?? fields.language,
-				voiceId: fields.voiceId ?? resolvedVoiceId,
+				...traits,
+				language: declaredLanguage(metadata.language) ?? traits.language,
+				voiceId: voiceIdOn(voice, requireModel(ctx, "metadata-voice")),
 			};
 		},
 	};

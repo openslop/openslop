@@ -1,10 +1,14 @@
 import type { SFXGenerateParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
+import type { SFXProvider } from "../types";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/sfx/mock`;
 
-export class MockSFX extends MockProvider<SFXGenerateParams> {
+export class MockSFX
+	extends MockProvider<SFXGenerateParams>
+	implements SFXProvider
+{
 	protected readonly variants = [
 		{
 			id: "1",

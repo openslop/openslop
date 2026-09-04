@@ -5,7 +5,7 @@ import type {
 	AssetResult,
 	ConnectorConfig,
 } from "@/lib/connectors/types";
-import { MODEL_CATALOGS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { GenerationInputs } from "../inputs";
 import type { GenerationJob } from "../graph";
 
@@ -26,16 +26,14 @@ const EMPTY_STATE = {
 	referenceImages: [],
 };
 
-const config: ConnectorConfig = {
-	isDefault: true,
-};
+const config: ConnectorConfig = {};
 
 function makeJob(connectorType: AssetConnectorType): GenerationJob {
 	return {
 		elementId: "el-1",
 		elementType: "image",
 		connectorType,
-		provider: "openslop",
+		model: DEFAULT_MODELS[connectorType],
 		config,
 		state: EMPTY_STATE,
 	};
@@ -64,28 +62,31 @@ describe("generateForElement", () => {
 			{},
 		);
 
-		expect(createConnector).toHaveBeenCalledWith("image", "openslop", config);
+		expect(createConnector).toHaveBeenCalledWith(
+			"image",
+			DEFAULT_MODELS.image,
+			config,
+		);
 		expect(mockGenerate).toHaveBeenCalledWith(
-			{
-				prompt: "a sunset",
-				model: MODEL_CATALOGS.image.defaultModel,
-				width: "1024",
-			},
+			{ prompt: "a sunset", width: "1024" },
 			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
 		expect(result).toEqual(expected);
 	});
 
-	it("falls back to the connector type's default model", async () => {
+	// The connector is built for the job's model and stamps it itself.
+	it("builds the connector for the job's model", async () => {
 		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 0 });
 
 		await generateForElement(makeJob("music"), inputs("jazz beat"), {});
 
+		expect(createConnector).toHaveBeenCalledWith(
+			"music",
+			DEFAULT_MODELS.music,
+			config,
+		);
 		expect(mockGenerate).toHaveBeenCalledWith(
-			{
-				prompt: "jazz beat",
-				model: MODEL_CATALOGS.music.defaultModel,
-			},
+			{ prompt: "jazz beat" },
 			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
 	});
@@ -100,12 +101,7 @@ describe("generateForElement", () => {
 		);
 
 		expect(mockGenerate).toHaveBeenCalledWith(
-			{
-				prompt: "hello world",
-				model: MODEL_CATALOGS.tts.defaultModel,
-				voiceId: "voice-1",
-				speed: "fast",
-			},
+			{ prompt: "hello world", voiceId: "voice-1", speed: "fast" },
 			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
 		);
 	});
