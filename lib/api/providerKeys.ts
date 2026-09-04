@@ -1,8 +1,10 @@
 import type { User } from "@supabase/supabase-js";
-import type {
-	ProviderKeyRecord,
-	KeyStatus,
-	ValidationResult,
+import { z } from "zod";
+import {
+	KEY_STATUSES,
+	type KeyStatus,
+	type ProviderKeyRecord,
+	type ValidationResult,
 } from "@/lib/connectors/providerKey";
 import {
 	MANAGED_PROVIDER,
@@ -12,6 +14,7 @@ import {
 import type { Provider } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { byokProviderField } from "./request-schema-fields";
 
 /**
  * The account has no key for a provider it was asked to generate with. An
@@ -25,15 +28,19 @@ export class MissingProviderKeyError extends Error {
 	}
 }
 
-type ProviderKeyRow = {
-	provider: BYOKProvider;
-	last4: string;
-	status: KeyStatus;
-	verified_at: string | null;
-	created_at: string;
-};
+const ProviderKeyRowsSchema = z.array(
+	z.object({
+		provider: byokProviderField,
+		last4: z.string(),
+		status: z.enum(KEY_STATUSES),
+		verified_at: z.string().nullable(),
+		created_at: z.string(),
+	}),
+);
 
-const toRecord = (row: ProviderKeyRow): ProviderKeyRecord => ({
+const toRecord = (
+	row: z.infer<typeof ProviderKeyRowsSchema>[number],
+): ProviderKeyRecord => ({
 	provider: row.provider,
 	last4: row.last4,
 	status: row.status,
@@ -74,7 +81,7 @@ export async function listProviderKeys(
 		.eq("user_id", user.id)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
-	return [hostedKey(user), ...(data as ProviderKeyRow[]).map(toRecord)];
+	return [hostedKey(user), ...ProviderKeyRowsSchema.parse(data).map(toRecord)];
 }
 
 /**
@@ -82,14 +89,14 @@ export async function listProviderKeys(
  * the only way a key is written or read, so the client and the throw-on-failure
  * contract live here rather than at each call site.
  */
-async function providerKeyRpc<T>(
+async function providerKeyRpc(
 	fn: string,
 	args: Record<string, string>,
 	failure: string,
-): Promise<T> {
+): Promise<unknown> {
 	const { data, error } = await createServiceClient().rpc(fn, args);
 	if (error) throw new Error(`${failure}: ${error.message}`);
-	return data as T;
+	return data;
 }
 
 export async function saveProviderKey(
@@ -114,11 +121,16 @@ export async function readProviderKey(
 	userId: string,
 	provider: Provider,
 ): Promise<string | null> {
-	return providerKeyRpc<string | null>(
-		"provider_key_read",
-		{ p_user_id: userId, p_provider: provider },
-		"Failed to read provider key",
-	);
+	return z
+		.string()
+		.nullable()
+		.parse(
+			await providerKeyRpc(
+				"provider_key_read",
+				{ p_user_id: userId, p_provider: provider },
+				"Failed to read provider key",
+			),
+		);
 }
 
 export async function deleteProviderKey(

@@ -1,22 +1,12 @@
 import { z } from "zod";
 import { createEmitter } from "@/lib/store/emitter";
-import { ASSET_CONNECTOR_TYPES, type AssetResult } from "../connectors/types";
+import { ASSET_CONNECTOR_TYPES, AssetResultSchema } from "../connectors/types";
 import { GenerationInputsSchema } from "./inputs";
 import type { CommittedVersion } from "./versions";
 
 const GenerationStatusSchema = z.enum(["idle", "queued", "generating"]);
 
 export type GenerationStatus = z.infer<typeof GenerationStatusSchema>;
-
-export const AssetResultSchema = z.object({
-	durationSec: z.number(),
-	imageUrl: z.string().optional(),
-	audioUrl: z.string().optional(),
-	videoUrl: z.string().optional(),
-	textTimestamps: z
-		.array(z.object({ text: z.string(), start: z.number(), end: z.number() }))
-		.optional(),
-}) satisfies z.ZodType<AssetResult>;
 
 const ElementSnapshotSchema = z.object({
 	status: GenerationStatusSchema,
