@@ -1,7 +1,7 @@
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { useGenerate } from "../hooks/useGenerate";
 import { PlaceholderBallsLoader } from "./preview/placeholderBalls";
-import { MediaWithSkeleton } from "./MediaWithSkeleton";
+import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 
 export function ForegroundPreview({
