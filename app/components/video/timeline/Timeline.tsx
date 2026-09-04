@@ -7,7 +7,6 @@ import {
 	ZoomOut,
 } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useElementWidth } from "@/lib/components/useElementWidth";
 import type { LayerType } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/video/frames";
@@ -253,14 +252,13 @@ export function Timeline() {
 						className="sticky left-0 z-30 border-r border-border bg-element-card"
 					>
 						{rows.map((row) => (
-							<SimpleTooltip key={row.key} label={row.label}>
-								<Lane
-									kind={row.kind}
-									className="flex items-center justify-center text-muted-foreground"
-								>
-									<row.icon size={14} />
-								</Lane>
-							</SimpleTooltip>
+							<Lane
+								key={row.key}
+								kind={row.kind}
+								className="flex items-center justify-center text-muted-foreground"
+							>
+								<row.icon size={14} />
+							</Lane>
 						))}
 					</div>
 				</div>
