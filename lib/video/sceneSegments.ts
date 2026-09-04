@@ -39,9 +39,8 @@ export function findSceneSequence(
  * Frame space, not seconds: the player only ever addresses whole frames, and
  * `toFrames` rounds. Segment starts are arbitrary reals, so comparing a rounded
  * playhead against an unrounded boundary reports the previous segment whenever
- * the seek rounded down — which is what stuck the scene skip buttons. Rounding
- * both sides the same way makes a seek to `toFrames(seg.start, fps)` land in
- * `seg` by construction.
+ * the seek rounded down. Rounding both sides the same way makes a seek to
+ * `toFrames(seg.start, fps)` land in `seg` by construction.
  */
 export function findSegmentIndexAtFrame(
 	segments: SceneSegment[],

@@ -1,4 +1,5 @@
 import { JOB_TIMEOUT_MS } from "@/lib/gateway/base";
+import { sleep } from "@/lib/utils";
 
 export async function awaitCompletion<T>(
 	pollFn: (jobId: string) => Promise<T>,
@@ -11,7 +12,7 @@ export async function awaitCompletion<T>(
 	while (Date.now() < deadline) {
 		const result = await pollFn(jobId);
 		if (isDone(result)) return result;
-		await new Promise((r) => setTimeout(r, intervalMs));
+		await sleep(intervalMs);
 	}
 	throw new Error(`Job ${jobId} timed out after ${timeoutMs}ms`);
 }
