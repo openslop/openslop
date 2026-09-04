@@ -87,7 +87,12 @@ export function useAgentTools(editor: Editor) {
 					const name = normalizeCharacterName(raw);
 					const { metadata, setCharacter, updateCharacter } = store.getState();
 					const created = !(name in metadata.characters);
-					if (created) setCharacter(name, { appearance: "", ...patch });
+					if (created)
+						setCharacter(name, {
+							appearance: "",
+							avatarModel: defaultModels().image,
+							...patch,
+						});
 					else updateCharacter(name, patch);
 					return { name, created };
 				},

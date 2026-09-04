@@ -1,5 +1,6 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { modelRefSchema } from "@/lib/connectors/models";
 import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
 import type { ElementVersion } from "@/lib/generation/versions";
 import type { ProjectData } from "@/lib/project/store";
@@ -36,20 +37,25 @@ export function characterFromAvatarInputs(
 	return {
 		appearance: String(version.inputs.attributes.appearance ?? ""),
 		avatarUploaded: version.pinned,
+		avatarModel: modelRefSchema.safeParse(version.inputs.attributes).data,
 	};
 }
 
-/** Appearance rides in the attributes so editing it makes the avatar stale. */
+/** Appearance and the picked model ride in the attributes so editing either makes the avatar stale. */
 export function characterAvatarElement(
 	state: ProjectData,
 	name: string,
 ): CanvasContentElement {
 	const id = characterAvatarElementId(name);
-	const appearance = state.metadata.characters[name]?.appearance ?? "";
+	const character = state.metadata.characters[name];
 	return {
 		id,
 		type: "image",
-		generationAttributes: { kind: "avatar", appearance },
+		generationAttributes: {
+			kind: "avatar",
+			appearance: character?.appearance ?? "",
+			...character?.avatarModel,
+		},
 		children: [{ id: `${id}-t`, type: "image", text: name }],
 	};
 }
