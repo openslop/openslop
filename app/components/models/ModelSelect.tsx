@@ -40,12 +40,15 @@ export function ModelSelect({
 	side = "bottom",
 	align = "start",
 	tooltip,
+	footer,
 	children,
 	...menu
 }: ModelSelectProps & {
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
 	tooltip?: ReactNode;
+	/** Rows after the models, such as a `ConfigureModelsItem`. */
+	footer?: ReactNode;
 	children: ReactNode;
 }) {
 	return (
@@ -64,8 +67,7 @@ export function ModelSelect({
 					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
 				>
 					<ModelMenuItems {...menu} />
-					<DropdownMenuSeparator />
-					<ConfigureModelsItem />
+					{footer}
 				</DropdownMenuContent>
 			</DropdownMenu>
 			{tooltip && (
@@ -116,16 +118,20 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 	});
 }
 
-function ConfigureModelsItem() {
+/** A way into the models settings from a picker that stands far from them. */
+export function ConfigureModelsItem() {
 	const settings = useSettings();
 	return (
-		<DropdownMenuItem
-			onSelect={() => settings.open("models")}
-			className="cursor-pointer py-1"
-		>
-			<Settings />
-			Configure models
-		</DropdownMenuItem>
+		<>
+			<DropdownMenuSeparator />
+			<DropdownMenuItem
+				onSelect={() => settings.open("models")}
+				className="cursor-pointer py-1"
+			>
+				<Settings />
+				Configure models
+			</DropdownMenuItem>
+		</>
 	);
 }
 

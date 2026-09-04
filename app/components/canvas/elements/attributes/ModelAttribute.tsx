@@ -2,6 +2,7 @@
 
 import { useSlateStatic } from "slate-react";
 import {
+	ConfigureModelsItem,
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
@@ -37,6 +38,7 @@ export function ModelAttribute({
 			type={type}
 			value={value}
 			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(type, value, chain)]}`}
+			footer={<ConfigureModelsItem />}
 			onChange={(next) =>
 				updateElementAttrs(editor, element, {
 					[providerAttr]: next.provider,

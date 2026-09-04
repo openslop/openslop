@@ -146,7 +146,7 @@ export function ProviderCard({
 							onClick={() => setConfirmingRemoval(true)}
 						>
 							<Trash2 />
-							Disconnect
+							Delete key
 						</Button>
 					</div>
 				)
@@ -155,9 +155,9 @@ export function ProviderCard({
 			<ConfirmDeleteDialog
 				open={confirmingRemoval}
 				onOpenChange={setConfirmingRemoval}
-				title={`Disconnect ${meta.name}?`}
-				description={`Your key is deleted, and models served by ${meta.name} stop being available. You can connect it again with a new key.`}
-				actionLabel="Disconnect"
+				title={`Delete your ${meta.name} key?`}
+				description={`Models served by ${meta.name} stop being available until you add a new key.`}
+				actionLabel="Delete key"
 				onConfirm={() =>
 					void removeKey(provider).then(onDismissed).catch(toastError)
 				}
