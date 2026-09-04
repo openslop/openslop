@@ -21,6 +21,7 @@ import {
 import { staleReason } from "@/lib/generation/staleReason";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import {
+	ConfigureModelsItem,
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
@@ -166,6 +167,7 @@ function CharacterEditDialogBody({
 								type="image"
 								value={avatarModel}
 								onChange={(next) => update({ avatarModel: next })}
+								footer={<ConfigureModelsItem />}
 							>
 								<ModelSelectTrigger model={avatarModel} label="Avatar model" />
 							</ModelSelect>

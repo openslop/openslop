@@ -5,6 +5,7 @@ import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+	ConfigureModelsItem,
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
@@ -106,7 +107,12 @@ export function VoicePicker({
 		<div className="flex min-w-0 flex-col gap-1.5">
 			<div className="flex items-center justify-between gap-2">
 				<FieldLabel>Voices</FieldLabel>
-				<ModelSelect type="tts" value={model} onChange={onModelChange}>
+				<ModelSelect
+					type="tts"
+					value={model}
+					onChange={onModelChange}
+					footer={<ConfigureModelsItem />}
+				>
 					<ModelSelectTrigger model={model} label="Voice model" />
 				</ModelSelect>
 			</div>
