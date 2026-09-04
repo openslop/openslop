@@ -40,8 +40,12 @@ type NodeBase = {
 	label?: string;
 };
 
-/** Project state that is read rather than generated; its identity is its inputs. */
-export type SourceNode = NodeBase & { job: null };
+/**
+ * Project state that is read rather than generated. It has no edges and never
+ * changes once built, so its identity is settled at construction rather than
+ * re-serialized for every dependent that asks.
+ */
+export type SourceNode = NodeBase & { job: null; identity: string };
 
 /** A unit of generation: something the queue can run. */
 export type JobNode = NodeBase & { job: GenerationJob };
@@ -108,12 +112,14 @@ export function sourceNode(
 	attributes: Record<string, string | number>,
 	label?: string,
 ): SourceNode {
+	const inputs = { prompt: "", attributes };
 	return {
 		id,
-		inputs: { prompt: "", attributes },
+		inputs,
 		dependsOn: [],
 		label,
 		job: null,
+		identity: serializeInputs({ ...inputs, dependencies: {} }),
 	};
 }
 
@@ -128,7 +134,7 @@ export function nodeIdentity(
 	results: NodeResults,
 ): string {
 	return isSourceNode(node)
-		? serializeInputs(nodeInputs(node, results))
+		? node.identity
 		: resultIdentity(results.getElementSnapshot(node.id).result);
 }
 
