@@ -1,31 +1,21 @@
 import { v5 as uuidv5 } from "uuid";
 import { z } from "zod";
-import {
-	CANVAS_ELEMENT_TYPES,
-	type CanvasElementType,
-} from "@/lib/canvas/types";
+import { CanvasElementTypeSchema } from "@/lib/canvas/types";
 import { ASSET_CONNECTOR_TYPES } from "@/lib/connectors/types";
 import type { ElementVersionStorage } from "@/lib/generation/history";
-import {
-	AssetResultSchema,
-	GenerationInputsSchema,
-} from "@/lib/generation/snapshots";
+import { GenerationInputsSchema } from "@/lib/generation/inputs";
+import { AssetResultSchema } from "@/lib/generation/snapshots";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { createClient } from "@/lib/supabase/client";
 import { toastError } from "@/lib/toastError";
 
 const TABLE = "element_history";
 
-const ElementTypeSchema = z.enum([...CANVAS_ELEMENT_TYPES] as [
-	CanvasElementType,
-	...CanvasElementType[],
-]);
-
 const RowSchema = z.object({
 	element_id: z.string(),
 	created_at: z.string(),
 	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
-	element_type: ElementTypeSchema.nullish(),
+	element_type: CanvasElementTypeSchema.nullish(),
 	inputs: GenerationInputsSchema,
 	result: AssetResultSchema,
 	pinned: z.boolean(),

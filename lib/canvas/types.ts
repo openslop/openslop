@@ -1,5 +1,6 @@
 import type { BaseEditor } from "slate";
 import type { ReactEditor } from "slate-react";
+import { z } from "zod";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
@@ -68,6 +69,10 @@ const ALL_ELEMENT_TYPES = Object.keys(ELEMENT_TYPES) as CanvasElementType[];
 
 export const CANVAS_ELEMENT_TYPES: ReadonlySet<CanvasElementType> = new Set(
 	ALL_ELEMENT_TYPES,
+);
+
+export const CanvasElementTypeSchema = z.enum(
+	ALL_ELEMENT_TYPES as [CanvasElementType, ...CanvasElementType[]],
 );
 
 export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set(

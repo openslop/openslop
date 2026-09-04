@@ -1,31 +1,12 @@
 import { z } from "zod";
 import { createEmitter } from "@/lib/store/emitter";
-import {
-	ASSET_CONNECTOR_TYPES,
-	type AssetConnectorType,
-	type AssetResult,
-} from "../connectors/types";
-import type { GenerationInputs } from "./inputs";
+import { ASSET_CONNECTOR_TYPES, type AssetResult } from "../connectors/types";
+import { GenerationInputsSchema } from "./inputs";
 import type { CommittedVersion } from "./versions";
 
-export type GenerationStatus = "idle" | "queued" | "generating";
+const GenerationStatusSchema = z.enum(["idle", "queued", "generating"]);
 
-export type ElementSnapshot = {
-	status: GenerationStatus;
-	seconds: number;
-	result: AssetResult | null;
-	error: string | null;
-	resultInputs: GenerationInputs | null;
-	connectorType: AssetConnectorType | null;
-	/** The result was supplied rather than generated, so it is never regenerated. */
-	pinned: boolean;
-};
-
-export const GenerationInputsSchema = z.object({
-	prompt: z.string(),
-	attributes: z.record(z.string(), z.union([z.string(), z.number()])),
-	dependencies: z.record(z.string(), z.string()),
-}) satisfies z.ZodType<GenerationInputs>;
+export type GenerationStatus = z.infer<typeof GenerationStatusSchema>;
 
 export const AssetResultSchema = z.object({
 	durationSec: z.number(),
@@ -38,14 +19,17 @@ export const AssetResultSchema = z.object({
 }) satisfies z.ZodType<AssetResult>;
 
 const ElementSnapshotSchema = z.object({
-	status: z.enum(["idle", "queued", "generating"]),
+	status: GenerationStatusSchema,
 	seconds: z.number(),
 	result: AssetResultSchema.nullable(),
 	error: z.string().nullable(),
 	resultInputs: GenerationInputsSchema.nullable(),
 	connectorType: z.enum(ASSET_CONNECTOR_TYPES).nullable(),
+	/** The result was supplied rather than generated, so it is never regenerated. */
 	pinned: z.boolean(),
-}) satisfies z.ZodType<ElementSnapshot>;
+});
+
+export type ElementSnapshot = z.infer<typeof ElementSnapshotSchema>;
 
 /** The `generation` column is untyped JSON; parse it once at the boundary. */
 export const GenerationSnapshotSchema = z.record(
