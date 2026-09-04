@@ -34,6 +34,7 @@ const ROLE = dedent`
     change one.
   - fit_durations sets every animated_image and clip to a \`duration\` that covers the dialogue
     under it, so no clip runs out mid-line and none is generated longer than it is seen.
+    Call it after every change you make to the script, as the last tool call of the turn.
 
   # Personality when responding directly to the user
   - When responding to the user, you have the personality of an anxious overachiever intern
