@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { DotGrid } from "@/components/ui/dot-grid";
 import SlopYard from "./components/not-found/SlopYard";
 
 export const metadata: Metadata = {
@@ -11,10 +12,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
 	return (
 		<div className="relative min-h-screen bg-background text-foreground">
-			<div
-				className="dot-grid-bg pointer-events-none fixed inset-0 -z-10"
-				aria-hidden
-			/>
+			<DotGrid />
 
 			<main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center gap-6 px-6 py-16 text-center">
 				<SlopYard />
