@@ -2,8 +2,7 @@ import type { CSSProperties } from "react";
 
 export const AUDIO_SAMPLE_COUNT = 120;
 
-/** Pairs with {@link buildSoundwaveMask}: stretches the mask over the element. */
-export const SOUNDWAVE_MASK_STYLE: CSSProperties = {
+const SOUNDWAVE_MASK_STYLE: CSSProperties = {
 	maskSize: "100% 100%",
 	WebkitMaskSize: "100% 100%",
 	maskRepeat: "no-repeat",
@@ -28,12 +27,14 @@ function smooth(values: number[]): number[] {
 	});
 }
 
-/** Resamples normalized peaks (0–1) to `count` smoothed heights (0–100). */
+/**
+ * Resamples normalized peaks (0–1) to `count` smoothed heights (0–100). No
+ * peaks draws as silence, so a waveform still has a shape before it decodes.
+ */
 export function toBarHeights(peaks: number[], count: number): number[] {
-	if (peaks.length === 0) return [];
 	const sampled = Array.from(
 		{ length: count },
-		(_, i) => peaks[Math.floor((i * peaks.length) / count)] * 100,
+		(_, i) => (peaks[Math.floor((i * peaks.length) / count)] ?? 0) * 100,
 	);
 	return smooth(sampled).map((height) => Math.max(MIN_HEIGHT, height));
 }

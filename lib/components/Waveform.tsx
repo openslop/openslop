@@ -14,7 +14,6 @@ import { toastError } from "@/lib/toastError";
 import { clamp, cn } from "@/lib/utils";
 import {
 	AUDIO_SAMPLE_COUNT,
-	SOUNDWAVE_MASK_STYLE,
 	soundwaveMaskStyle,
 	toBarHeights,
 } from "./soundwave";
@@ -59,13 +58,15 @@ export function Waveform({
 	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
 	const loading = decode.status === "loading" || audioSettledFor !== src;
 
-	const peaks = decode.status === "ready" ? decode.peaks : null;
 	const maskStyle = useMemo(
 		() =>
-			peaks
-				? soundwaveMaskStyle(toBarHeights(peaks, AUDIO_SAMPLE_COUNT))
-				: SOUNDWAVE_MASK_STYLE,
-		[peaks],
+			soundwaveMaskStyle(
+				toBarHeights(
+					decode.status === "ready" ? decode.peaks : [],
+					AUDIO_SAMPLE_COUNT,
+				),
+			),
+		[decode],
 	);
 
 	const setProgress = useCallback((progress: number) => {
