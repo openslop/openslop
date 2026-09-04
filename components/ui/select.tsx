@@ -22,6 +22,9 @@ function SelectValue(
 	return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 
+export const selectTriggerClassName =
+	"flex w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 font-body whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=default]:text-body data-[size=sm]:h-8 data-[size=sm]:text-label [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0";
+
 function SelectTrigger({
 	className,
 	size = "default",
@@ -34,10 +37,7 @@ function SelectTrigger({
 		<SelectPrimitive.Trigger
 			data-slot="select-trigger"
 			data-size={size}
-			className={cn(
-				"flex w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 font-body whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=default]:text-body data-[size=sm]:h-8 data-[size=sm]:text-label [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
-				className,
-			)}
+			className={cn(selectTriggerClassName, className)}
 			{...props}
 		>
 			{children}

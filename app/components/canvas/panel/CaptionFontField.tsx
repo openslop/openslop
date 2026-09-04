@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown, Search } from "@/components/ui/icon";
+import { Check, ChevronDown } from "@/components/ui/icon";
+import { SearchField } from "@/components/ui/search-field";
 import {
 	Popover,
 	PopoverContent,
@@ -53,17 +54,14 @@ export function CaptionFontField({
 				align="start"
 				className="w-[var(--radix-popover-trigger-width)] min-w-0 p-1"
 			>
-				<div className="flex items-center gap-2 rounded-md bg-input px-2 focus-within:ring-2 focus-within:ring-ring">
-					<Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-					<input
-						autoFocus
-						value={query}
-						onChange={(event) => setQuery(event.target.value)}
-						placeholder="Search…"
-						aria-label="Search fonts"
-						className="h-8 w-full bg-transparent text-body text-foreground outline-none placeholder:text-muted-foreground"
-					/>
-				</div>
+				<SearchField
+					autoFocus
+					value={query}
+					onChange={(event) => setQuery(event.target.value)}
+					placeholder="Search…"
+					aria-label="Search fonts"
+					className="h-8 border-transparent"
+				/>
 				<ul className="mt-1 max-h-56 overflow-y-auto">
 					{matches.map((font) => (
 						<li key={font}>

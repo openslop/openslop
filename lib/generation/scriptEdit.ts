@@ -1,5 +1,6 @@
 import type { Editor } from "slate";
 import { findNodeById } from "@/lib/canvas/editorOps";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { ProjectData } from "@/lib/project/store";
 import { applyRefineOps } from "@/lib/script/refine/applyOps";
@@ -13,6 +14,8 @@ export type ScriptEditContext = {
 	queue: GenerationQueue;
 	connectors: ConnectorRegistry;
 	state: ProjectData;
+	/** The models a newly created element takes, already resolved by scope. */
+	models: ConnectorModels;
 };
 
 function seedDependencies(
@@ -42,11 +45,7 @@ export function applyScriptEdit(
 	ctx: ScriptEditContext,
 	ops: RefineOp[],
 ): { applied: number; failures: string[] } {
-	const { applied, failures } = applyRefineOps(
-		ctx.editor,
-		ops,
-		ctx.state.metadata.connectorModels,
-	);
+	const { applied, failures } = applyRefineOps(ctx.editor, ops, ctx.models);
 	return {
 		applied,
 		failures: [

@@ -9,6 +9,8 @@ import {
 	type IconComponent,
 	SlidersAlt,
 	SlidersAltFill,
+	InsertElement,
+	InsertElementFill,
 	Robot,
 	RobotFill,
 	TextBox,
@@ -20,6 +22,7 @@ import { SloppyPanel } from "@/app/components/sloppy/SloppyPanel";
 import { useEditorPanel } from "./EditorPanelContext";
 import { PINNED_PANEL_KEYS, RAIL_PANEL_KEYS, type PanelKey } from "./panelKeys";
 import { CanvasHistoryPanel } from "./CanvasHistoryPanel";
+import { ModelsPanel } from "./ModelsPanel";
 import { CaptionsPanel } from "./CaptionsPanel";
 import { LayoutPanel } from "./LayoutPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -50,6 +53,12 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		icon: SlidersAlt,
 		iconActive: SlidersAltFill,
 		Panel: PropertiesPanel,
+	},
+	models: {
+		label: "Models",
+		icon: InsertElement,
+		iconActive: InsertElementFill,
+		Panel: ModelsPanel,
 	},
 	history: {
 		label: "History",

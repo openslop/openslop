@@ -14,23 +14,22 @@ import {
 	MountedDialog,
 } from "@/components/ui/dialog";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import {
-	useGenerationQueue,
-	useQueueSelector,
-} from "@/lib/generation/GenerationQueueProvider";
-import { staleReason } from "@/lib/generation/staleReason";
+import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
-import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import {
-	characterAvatarElementId,
-	characterFromAvatarInputs,
-} from "@/lib/project/characterAvatar";
+	ConfigureModelsItem,
+	ModelSelect,
+	ModelSelectTrigger,
+} from "@/app/components/models/ModelSelect";
+import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import { resolveModel } from "@/lib/connectors/models";
+import { characterFromAvatarInputs } from "@/lib/project/characterAvatar";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
 import { useProject } from "@/lib/project/useProject";
 import type { ElementVersion } from "@/lib/generation/versions";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
+import { useGenerateNode } from "../../hooks/useGenerate";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaResult } from "../preview/results";
 import { ElementHistoryPopover } from "../ElementHistoryPopover";
@@ -69,23 +68,16 @@ function CharacterEditDialogBody({
 }) {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
-	const buildNode = useNodeBuilder();
 	const character = useProject((s) => s.metadata.characters[name]);
 	const updateCharacter = useProject((s) => s.updateCharacter);
 
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [closeConfirm, setCloseConfirm] = useState(false);
 
-	const avatarElementId = characterAvatarElementId(name);
-	const avatarSnapshot = useQueueSelector((q) =>
-		q.getElementSnapshot(avatarElementId),
-	);
-	const avatarUrl = avatarSnapshot.result?.imageUrl;
-	const avatarNode = useMemo(
-		() => buildNode(forCharacterAvatar(name)),
-		[buildNode, name],
-	);
-	const restoreAppearance = useCallback(
+	const avatarSpec = useMemo(() => forCharacterAvatar(name), [name]);
+	const avatar = useGenerateNode(avatarSpec);
+	const avatarUrl = avatar.result?.imageUrl;
+	const restoreAvatar = useCallback(
 		(version: ElementVersion) =>
 			updateCharacter(name, characterFromAvatarInputs(version)),
 		[updateCharacter, name],
@@ -98,13 +90,13 @@ function CharacterEditDialogBody({
 
 	const regenerateAvatar = () => {
 		if (character.avatarUploaded) update({ avatarUploaded: false });
-		queue.enqueueGraph([avatarNode]);
+		avatar.generate();
 	};
 
-	const reason = staleReason(avatarNode, queue);
-	const isStale = reason !== null;
+	const avatarModel = resolveModel("image", character.avatarModel);
+	const isStale = avatar.staleReason !== null;
 
-	const generating = isGenerationActive(avatarSnapshot.status);
+	const generating = isGenerationActive(avatar.status);
 	const hasAppearance = Boolean(character.appearance?.trim());
 	const generateDisabled = generating || !hasAppearance;
 
@@ -147,7 +139,7 @@ function CharacterEditDialogBody({
 
 			<DialogBody>
 				<div className="grid gap-4 sm:grid-cols-2">
-					<div className="flex flex-col gap-2">
+					<div className="flex min-w-0 flex-col gap-2">
 						<TextAreaField
 							className="min-h-0 flex-1"
 							label="Appearance"
@@ -155,34 +147,46 @@ function CharacterEditDialogBody({
 							onChange={(appearance) => update({ appearance })}
 							placeholder="Describe the character's look"
 						/>
-						<div className="flex items-center justify-end gap-2">
-							<ElementHistoryPopover
-								elementId={avatarElementId}
-								onRestore={restoreAppearance}
-							/>
-							{reason && <StaleIndicator reason={reason} />}
-							<GenerateButton
-								status={avatarSnapshot.status}
-								hasResult={Boolean(avatarUrl)}
-								disabled={generateDisabled}
-								onGenerate={regenerateAvatar}
-							/>
+						<div className="flex flex-wrap items-center gap-2">
+							<ModelSelect
+								type="image"
+								value={avatarModel}
+								onChange={(next) => update({ avatarModel: next })}
+								footer={<ConfigureModelsItem />}
+							>
+								<ModelSelectTrigger model={avatarModel} label="Avatar model" />
+							</ModelSelect>
+							<div className="ml-auto flex items-center gap-2">
+								<ElementHistoryPopover
+									elementId={avatar.node.id}
+									onRestore={restoreAvatar}
+								/>
+								{avatar.staleReason && (
+									<StaleIndicator reason={avatar.staleReason} />
+								)}
+								<GenerateButton
+									status={avatar.status}
+									hasResult={Boolean(avatarUrl)}
+									disabled={generateDisabled}
+									onGenerate={regenerateAvatar}
+								/>
+							</div>
 						</div>
 					</div>
 					<div className="relative">
 						<MediaResult
 							url={avatarUrl}
 							outputKind="image"
-							status={avatarSnapshot.status}
-							seconds={avatarSnapshot.seconds}
-							error={avatarSnapshot.error}
-							onDiscard={() => queue.discard(avatarElementId)}
+							status={avatar.status}
+							seconds={avatar.seconds}
+							error={avatar.error}
+							onDiscard={avatar.discard}
 						/>
 						<UploadImageButton
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
 							onUpload={(url) => {
 								queue.commitResult(
-									avatarNode,
+									avatar.node,
 									{ imageUrl: url, durationSec: 0 },
 									{ pinned: true },
 								);

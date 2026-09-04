@@ -1,6 +1,7 @@
 import type { VideoJob, VideoProviderResponse } from "./base";
 import { BaseVideoProvider } from "./base";
 import { BLOB_BASE_URL } from "@/lib/blob";
+import type { ValidationResult } from "@/lib/connectors/providerKey";
 import { mockDelay, pickRandom } from "../mock-utils";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/video/mock`;
@@ -13,6 +14,10 @@ const MOCK_VARIANTS = [
 
 export class MockVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "mock" };
+
+	async validate(): Promise<ValidationResult> {
+		return { ok: true };
+	}
 
 	protected async store(result: VideoJob): Promise<VideoProviderResponse> {
 		return {

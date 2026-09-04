@@ -1,6 +1,6 @@
 import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { MediaWithSkeleton } from "@/app/components/canvas/elements/MediaWithSkeleton";
+import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { truncateMiddle } from "@/lib/format";
 import { formatTimeRange } from "@/lib/video/timestamps";
@@ -99,7 +99,6 @@ export function TimelineClip({
 							outputKind={config.outputKind}
 							src={element.url}
 							alt=""
-							sizes="64px"
 						/>
 					</div>
 				) : (

@@ -5,17 +5,11 @@ const mockLLMGenerate = vi.fn();
 const mockLLMStream = vi.fn();
 const mockTTSSearch = vi.fn();
 
-const noopProvider = () => ({ generate: vi.fn(), poll: vi.fn() });
-vi.mock("@/lib/api/providers", () => ({
-	getLLMProvider: () => ({
-		generate: mockLLMGenerate,
-		stream: mockLLMStream,
-	}),
-	getTTSProvider: () => ({ search: mockTTSSearch, generate: vi.fn() }),
-	getImageProvider: noopProvider,
-	getMusicProvider: noopProvider,
-	getSFXProvider: noopProvider,
-	getVideoProvider: noopProvider,
+vi.mock("@/lib/api/providers/openslop", () => ({
+	hostedProviderFor: (type: string) =>
+		type === "llm"
+			? { generate: mockLLMGenerate, stream: mockLLMStream }
+			: { search: mockTTSSearch, generate: vi.fn(), poll: vi.fn() },
 }));
 
 const mockCreateJob = vi.fn();
@@ -36,14 +30,27 @@ vi.mock("@/lib/api/auth", () => ({
 	getUser: () => mockGetUser(),
 }));
 
+/** The model each hosted route serves; a body with a prompt names it unless it says otherwise. */
+const HOSTED_MODELS: Record<string, string> = {
+	image: "Slop Image v1",
+	video: "Slop Video v1",
+	music: "Slop Music v1",
+	sfx: "Slop SFX v1",
+	llm: "Slop LLM v1",
+	tts: "Slop TTS v1",
+};
+
 function makeRequest(
 	url: string,
 	body?: Record<string, unknown>,
 	method = "POST",
 ) {
+	const type = url.split("/")[3] ?? "";
+	const withModel =
+		body && "prompt" in body ? { model: HOSTED_MODELS[type], ...body } : body;
 	return new NextRequest(new URL(url, "http://localhost:3000"), {
 		method,
-		...(body ? { body: JSON.stringify(body) } : {}),
+		...(withModel ? { body: JSON.stringify(withModel) } : {}),
 	});
 }
 
@@ -362,6 +369,21 @@ describe("API routes", () => {
 			expect((await res.json()).text).toBe("Hello");
 		});
 
+		// The name survives the boundary; this route is where it becomes the id
+		// Anthropic's own API takes.
+		it("forwards the vendor's id for the model it was asked for", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			mockLLMGenerate.mockResolvedValue({ text: "Hello", model: "x" });
+
+			await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", model: "Slop LLM v1" }),
+			);
+
+			expect(mockLLMGenerate).toHaveBeenCalledWith(
+				expect.objectContaining({ model: "claude-opus-5" }),
+			);
+		});
+
 		it("returns SSE stream when stream=true", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			mockLLMStream.mockReturnValue(
@@ -422,7 +444,7 @@ describe("API routes", () => {
 			]);
 
 			const req = makeRequest(
-				"/api/v1/tts/voices?query=english",
+				"/api/v1/tts/voices?query=english&model=Slop%20TTS%20v1",
 				undefined,
 				"GET",
 			);
@@ -434,11 +456,24 @@ describe("API routes", () => {
 			expect(json.voices[0].name).toBe("Voice 1");
 		});
 
+		// The search names its model like a generation does, so the route knows whose key to read.
+		it("returns 400 without a model", async () => {
+			const { GET } = await import("@/app/api/v1/tts/voices/route");
+
+			const req = makeRequest("/api/v1/tts/voices", undefined, "GET");
+			expect((await GET(req)).status).toBe(400);
+			expect(mockTTSSearch).not.toHaveBeenCalled();
+		});
+
 		it("returns 500 on error", async () => {
 			const { GET } = await import("@/app/api/v1/tts/voices/route");
 			mockTTSSearch.mockRejectedValue(new Error("api down"));
 
-			const req = makeRequest("/api/v1/tts/voices", undefined, "GET");
+			const req = makeRequest(
+				"/api/v1/tts/voices?model=Slop%20TTS%20v1",
+				undefined,
+				"GET",
+			);
 			const res = await GET(req);
 			expect(res.status).toBe(500);
 		});

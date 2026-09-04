@@ -10,9 +10,9 @@ import { deserializeWithScenes } from "./serialize";
 export function applyScriptToEditor(
 	editor: Editor,
 	script: string,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): void {
-	const scenes = deserializeWithScenes(script, projectModels);
+	const scenes = deserializeWithScenes(script, defaultModels);
 
 	const replaceChildren = () => {
 		Editor.withoutNormalizing(editor, () => {

@@ -1,103 +1,30 @@
 import { describe, expect, it } from "vitest";
 import type { ConnectorConfig, ConnectorPlugin } from "@/lib/connectors/types";
-import {
-	getDefaultConnector,
-	withRegistry,
-	type ConnectorRegistry,
-} from "../registry";
+import { withRegistry, type ConnectorRegistry } from "../registry";
 
-function makeConfig(overrides?: Partial<ConnectorConfig>): ConnectorConfig {
-	return {
-		isDefault: false,
-		...overrides,
-	};
-}
-
-function makeRegistry(
-	imageProviders: Record<string, ConnectorConfig>,
-): ConnectorRegistry {
-	const empty = {} as Record<string, ConnectorConfig>;
-	return {
-		llm: empty,
-		music: empty,
-		sfx: empty,
-		image: imageProviders,
-		tts: empty,
-		video: empty,
-	} as ConnectorRegistry;
-}
-
-describe("getDefaultConnector", () => {
-	it("returns the provider marked as default", () => {
-		const registry = makeRegistry({
-			providerA: makeConfig({ isDefault: false }),
-			providerB: makeConfig({ isDefault: true }),
-		});
-
-		const result = getDefaultConnector(registry, "image");
-		expect(result.provider).toBe("providerB");
-		expect(result.config.isDefault).toBe(true);
-	});
-
-	it("falls back to the first provider when none is marked default", () => {
-		const registry = makeRegistry({
-			providerA: makeConfig({ isDefault: false }),
-			providerB: makeConfig({ isDefault: false }),
-		});
-
-		const result = getDefaultConnector(registry, "image");
-		expect(result.provider).toBe("providerA");
-	});
-
-	it("returns the only provider when there is exactly one", () => {
-		const registry = makeRegistry({
-			solo: makeConfig({ isDefault: true }),
-		});
-
-		const result = getDefaultConnector(registry, "image");
-		expect(result.provider).toBe("solo");
-	});
-
-	it("throws when no providers are configured for the type", () => {
-		const registry = makeRegistry({});
-		expect(() => getDefaultConnector(registry, "image")).toThrow(
-			/No providers configured/,
-		);
-	});
-
-	it("returns the first default when multiple are marked default", () => {
-		const registry = makeRegistry({
-			first: makeConfig({ isDefault: true, apiKey: "first" }),
-			second: makeConfig({ isDefault: true, apiKey: "second" }),
-		});
-
-		const result = getDefaultConnector(registry, "image");
-		expect(result.provider).toBe("first");
-		expect(result.config.apiKey).toBe("first");
-	});
-});
+const pluginsOf = (
+	registry: ConnectorRegistry,
+	type: "llm" | "image" | "tts",
+) => registry[type].plugins;
 
 function makePlugin(name: string): ConnectorPlugin {
 	return { name };
 }
 
 function makeFullRegistry(
-	overrides?: Partial<Record<string, Record<string, ConnectorConfig>>>,
+	overrides?: Partial<Record<string, ConnectorConfig>>,
 ): ConnectorRegistry {
-	const defaultProviders = {
-		openslop: makeConfig({ isDefault: true }),
-	};
 	return {
-		llm: defaultProviders,
-		music: defaultProviders,
-		sfx: defaultProviders,
-		image: defaultProviders,
-		tts: defaultProviders,
-		video: defaultProviders,
+		llm: {},
+		music: {},
+		sfx: {},
+		image: {},
+		animated_image: {},
+		tts: {},
+		video: {},
 		...overrides,
-	} as ConnectorRegistry;
+	};
 }
-
 describe("withRegistry", () => {
 	it("returns the original registry when no operations are chained", () => {
 		const registry = makeFullRegistry();
@@ -113,8 +40,7 @@ describe("withRegistry", () => {
 			.appendPlugins("image", plugin)
 			.build();
 
-		const { config } = getDefaultConnector(result, "image");
-		expect(config.plugins).toEqual([plugin]);
+		expect(pluginsOf(result, "image")).toEqual([plugin]);
 	});
 
 	it("appends multiple plugins in a single call", () => {
@@ -126,23 +52,17 @@ describe("withRegistry", () => {
 			.appendPlugins("image", p1, p2)
 			.build();
 
-		const { config } = getDefaultConnector(result, "image");
-		expect(config.plugins).toEqual([p1, p2]);
+		expect(pluginsOf(result, "image")).toEqual([p1, p2]);
 	});
 
 	it("preserves existing plugins when appending", () => {
 		const existing = makePlugin("existing");
-		const registry = makeFullRegistry({
-			image: {
-				openslop: makeConfig({ isDefault: true, plugins: [existing] }),
-			},
-		});
+		const registry = makeFullRegistry({ image: { plugins: [existing] } });
 		const added = makePlugin("added");
 
 		const result = withRegistry(registry).appendPlugins("image", added).build();
 
-		const { config } = getDefaultConnector(result, "image");
-		expect(config.plugins).toEqual([existing, added]);
+		expect(pluginsOf(result, "image")).toEqual([existing, added]);
 	});
 
 	it("chains operations across different connector types", () => {
@@ -157,15 +77,9 @@ describe("withRegistry", () => {
 			.appendPlugins("tts", ttsPlugin)
 			.build();
 
-		expect(getDefaultConnector(result, "llm").config.plugins).toEqual([
-			llmPlugin,
-		]);
-		expect(getDefaultConnector(result, "image").config.plugins).toEqual([
-			imagePlugin,
-		]);
-		expect(getDefaultConnector(result, "tts").config.plugins).toEqual([
-			ttsPlugin,
-		]);
+		expect(pluginsOf(result, "llm")).toEqual([llmPlugin]);
+		expect(pluginsOf(result, "image")).toEqual([imagePlugin]);
+		expect(pluginsOf(result, "tts")).toEqual([ttsPlugin]);
 	});
 
 	it("appends to the same connector type across multiple calls", () => {
@@ -178,8 +92,7 @@ describe("withRegistry", () => {
 			.appendPlugins("image", p2)
 			.build();
 
-		const { config } = getDefaultConnector(result, "image");
-		expect(config.plugins).toEqual([p1, p2]);
+		expect(pluginsOf(result, "image")).toEqual([p1, p2]);
 	});
 
 	it("does not mutate the original registry", () => {
@@ -201,28 +114,7 @@ describe("withRegistry", () => {
 			.appendPlugins("image", makePlugin("img"))
 			.build();
 
-		expect(getDefaultConnector(result, "llm").config.plugins).toBeUndefined();
-		expect(getDefaultConnector(result, "tts").config.plugins).toBeUndefined();
-	});
-
-	it("targets the default provider when multiple providers exist", () => {
-		const registry = makeFullRegistry({
-			image: {
-				providerA: makeConfig({ isDefault: false }),
-				providerB: makeConfig({ isDefault: true }),
-			},
-		});
-		const plugin = makePlugin("targeted");
-
-		const result = withRegistry(registry)
-			.appendPlugins("image", plugin)
-			.build();
-
-		expect(
-			(result.image as Record<string, ConnectorConfig>)["providerB"].plugins,
-		).toEqual([plugin]);
-		expect(
-			(result.image as Record<string, ConnectorConfig>)["providerA"].plugins,
-		).toBeUndefined();
+		expect(pluginsOf(result, "llm")).toBeUndefined();
+		expect(pluginsOf(result, "tts")).toBeUndefined();
 	});
 });

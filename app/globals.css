@@ -153,7 +153,8 @@
 	--generate-disabled-foreground: var(--grey-500);
 	--orb-from: #d99b1f;
 	--orb-to: #9c3813;
-	--tertiary: #a64d78;
+	--tertiary: #772a4d;
+	--tertiary-foreground: #d29cb8;
 	--accent: var(--blurple-500);
 	--accent-foreground: #fff;
 	--accent-soft: var(--blurple-500-a);
@@ -289,7 +290,8 @@
 	--generate-disabled-foreground: var(--grey-500);
 	--orb-from: #ffbf48;
 	--orb-to: #be4a1d;
-	--tertiary: #d99bb8;
+	--tertiary: #772a4d;
+	--tertiary-foreground: #d29cb8;
 	--accent-foreground: #fff;
 	--destructive-foreground: #fff;
 
@@ -356,6 +358,7 @@
 	--color-generate-disabled: var(--generate-disabled);
 	--color-generate-disabled-foreground: var(--generate-disabled-foreground);
 	--color-tertiary: var(--tertiary);
+	--color-tertiary-foreground: var(--tertiary-foreground);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-accent-soft: var(--accent-soft);
@@ -385,6 +388,9 @@
 	--font-sans: var(--font-slopella);
 	--font-body: var(--font-inter);
 	--font-serif: var(--font-instrument-serif), serif;
+
+	/* Between regular and medium: emphasis without the weight of a heading. */
+	--font-weight-book: 475;
 
 	/* Semantic type scale (DESIGN.md typography) */
 	--text-badge-xs: 0.5625rem; /* 9px — uppercase micro tags */

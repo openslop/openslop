@@ -285,6 +285,8 @@ export const TEMPLATES: Template[] = [
 			accent: "british",
 			age: "child",
 			description: "Wistful, young male for emotional narrations",
+			provider: "openslop",
+			model: "Slop TTS v1",
 			voiceId: "4f7f1324-1853-48a6-b294-4e78e8036a83",
 		},
 		showcase: {

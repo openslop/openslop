@@ -19,7 +19,7 @@ const coversWholeElement = (editor: CanvasEditor, at: Range) =>
  * `withNodeId`.
  */
 export const withOSMLClipboard =
-	(projectModels: () => ConnectorModels) =>
+	(defaultModels: () => ConnectorModels) =>
 	(editor: CanvasEditor): CanvasEditor => {
 		const { setFragmentData, insertTextData } = editor;
 
@@ -33,7 +33,7 @@ export const withOSMLClipboard =
 
 		editor.insertTextData = (data) => {
 			const elements = splitScenes(data.getData("text/plain"))
-				.flatMap((sceneOsml) => parseOSML(sceneOsml, projectModels()))
+				.flatMap((sceneOsml) => parseOSML(sceneOsml, defaultModels()))
 				.filter(isParsedContentElement)
 				.map(stripIds);
 			if (elements.length === 0) return insertTextData(data);

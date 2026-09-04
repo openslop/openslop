@@ -1,24 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createConnector, resolveAttributeSchema } from "../factory";
-import { MODEL_CATALOGS } from "../models";
-import { DEFAULT_CONNECTOR_REGISTRY, getDefaultConnector } from "../registry";
+import { DEFAULT_MODELS } from "../models";
 import { ASSET_CONNECTOR_TYPES, type ConnectorType } from "../types";
 
-const stubConfig = {
-	isDefault: true,
-	apiKey: "test-key",
-};
+const stubConfig = {};
 
 describe("createConnector", () => {
 	it("creates a valid LLM connector", () => {
-		const connector = createConnector("llm", "openslop", stubConfig);
+		const connector = createConnector("llm", DEFAULT_MODELS.llm, stubConfig);
 		expect(connector.type).toBe("llm");
-	});
-
-	it("throws for unknown provider", () => {
-		expect(() =>
-			createConnector("llm", "nonexistent" as never, stubConfig),
-		).toThrow('Unknown provider "nonexistent" for type "llm"');
 	});
 
 	it("creates all connector types, each reporting the type it was registered under", () => {
@@ -32,7 +22,7 @@ describe("createConnector", () => {
 			"video",
 		];
 		for (const type of types) {
-			const connector = createConnector(type, "openslop", stubConfig);
+			const connector = createConnector(type, DEFAULT_MODELS[type], stubConfig);
 			expect(connector.type).toBe(type);
 		}
 	});
@@ -41,8 +31,7 @@ describe("createConnector", () => {
 describe("resolveAttributeSchema", () => {
 	it("resolves the connector type's base schema, keyed by connector type not element type", () => {
 		// narration and character both resolve through "tts" and get the same schema.
-		expect(resolveAttributeSchema("tts", "openslop").keys).toEqual([
-			"model",
+		expect(resolveAttributeSchema("tts", DEFAULT_MODELS.tts).keys).toEqual([
 			"emotion",
 			"speed",
 			"volume",
@@ -50,14 +39,16 @@ describe("resolveAttributeSchema", () => {
 	});
 
 	it("resolves distinct schemas for image vs animated_image", () => {
-		expect(resolveAttributeSchema("image", "openslop").keys).toEqual([
-			"model",
+		expect(resolveAttributeSchema("image", DEFAULT_MODELS.image).keys).toEqual([
 			"referenceImagesOverride",
 			"motion",
 		]);
-		expect(resolveAttributeSchema("animated_image", "openslop").keys).toEqual([
-			"model",
-			"stillModel",
+		expect(
+			resolveAttributeSchema("animated_image", DEFAULT_MODELS.animated_image)
+				.keys,
+		).toEqual([
+			"imageProvider",
+			"imageModel",
 			"referenceImagesOverride",
 			"videoPrompt",
 			"duration",
@@ -65,30 +56,47 @@ describe("resolveAttributeSchema", () => {
 		]);
 	});
 
-	it("offers every asset connector's own catalog as a badge, defaulted", () => {
+	// An element's own pair is what picks the schema, so no schema carries it.
+	it("keeps the element's own model out of every schema", () => {
 		for (const type of ASSET_CONNECTOR_TYPES) {
-			const { provider } = getDefaultConnector(
-				DEFAULT_CONNECTOR_REGISTRY,
-				type,
-			);
-			const catalog = MODEL_CATALOGS[type];
-			const schema = resolveAttributeSchema(type, provider);
+			const schema = resolveAttributeSchema(type, DEFAULT_MODELS[type]);
+			expect(schema.keys).not.toContain("provider");
+			expect(schema.keys).not.toContain("model");
+		}
+	});
 
-			expect(schema.badgeAttributes.model?.edit).toEqual({
-				kind: "enum",
-				options: catalog.names,
-			});
-			expect(schema.defaultAttributes.model).toBe(catalog.defaultModel);
+	it("resolves the still behind an animated image from the image models", () => {
+		const schema = resolveAttributeSchema(
+			"animated_image",
+			DEFAULT_MODELS.animated_image,
+		);
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
+
+		expect(schema.resolve({}, { image: pinned })).toMatchObject({
+			imageProvider: pinned.provider,
+			imageModel: pinned.model,
+		});
+		expect(
+			schema.resolve({
+				imageProvider: "openslop",
+				imageModel: "Seedream 5 Lite",
+			}),
+		).toMatchObject({
+			imageProvider: DEFAULT_MODELS.image.provider,
+			imageModel: DEFAULT_MODELS.image.model,
+		});
+	});
+
+	// A voice picks its model in its own editor, so speech shows no control of its own.
+	it("hides the model control on speech alone", () => {
+		for (const type of ASSET_CONNECTOR_TYPES) {
+			expect(
+				resolveAttributeSchema(type, DEFAULT_MODELS[type]).hidesModel,
+			).toBe(type === "tts");
 		}
 	});
 
 	it("llm has no element-settings attributes, inherited empty from the base connector", () => {
-		expect(resolveAttributeSchema("llm", "openslop").keys).toEqual([]);
-	});
-
-	it("throws for unknown provider", () => {
-		expect(() => resolveAttributeSchema("tts", "nonexistent" as never)).toThrow(
-			'Unknown provider "nonexistent" for type "tts"',
-		);
+		expect(resolveAttributeSchema("llm", DEFAULT_MODELS.llm).keys).toEqual([]);
 	});
 });

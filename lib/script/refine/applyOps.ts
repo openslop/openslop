@@ -18,19 +18,19 @@ export function applyRefineOp(
 	editor: Editor,
 	op: RefineOp,
 	anchorMap: Record<string, string>,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): RefineOpResult {
 	let result: RefineOpResult = OK;
 	Editor.withoutNormalizing(editor, () => {
 		switch (op.op) {
 			case "insert":
-				result = applyInsert(editor, op, anchorMap, projectModels);
+				result = applyInsert(editor, op, anchorMap, defaultModels);
 				break;
 			case "remove":
 				result = applyRemove(editor, op);
 				break;
 			case "set":
-				result = applySet(editor, op, projectModels);
+				result = applySet(editor, op, defaultModels);
 				break;
 		}
 	});
@@ -45,14 +45,14 @@ export function applyRefineOp(
 export function applyRefineOps(
 	editor: Editor,
 	ops: RefineOp[],
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): { applied: number; failures: string[] } {
 	const anchorMap: Record<string, string> = {};
 	const failures: string[] = [];
 	let applied = 0;
 
 	for (const op of ops) {
-		const result = applyRefineOp(editor, op, anchorMap, projectModels);
+		const result = applyRefineOp(editor, op, anchorMap, defaultModels);
 		if (result.ok) applied += 1;
 		else failures.push(result.reason);
 	}
@@ -81,7 +81,7 @@ function applyInsert(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): RefineOpResult {
 	const at = resolveInsertPath(editor, op, anchorMap);
 	if (!at) {
@@ -94,7 +94,7 @@ function applyInsert(
 	const id = insertElement(editor, op.type, at, {
 		attrs: op.attrs,
 		text: op.text,
-		projectModels,
+		defaultModels,
 	});
 
 	if (op.anchor_id) {
@@ -121,13 +121,13 @@ function replaceNodeType(
 	id: string,
 	entry: NodeEntry,
 	type: SetType,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): NodeEntry | null {
 	const [element, path] = entry;
 	const replacement = createCanvasNode(type, {
 		id,
 		attrs: preservedAttributes(element, type),
-		projectModels,
+		defaultModels,
 	});
 	Transforms.setNodes(
 		editor,
@@ -144,14 +144,14 @@ function replaceNodeType(
 function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
-	projectModels?: ConnectorModels,
+	defaultModels?: ConnectorModels,
 ): RefineOpResult {
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 
 	const target =
 		op.type && op.type !== entry[0].type
-			? replaceNodeType(editor, op.id, entry, op.type, projectModels)
+			? replaceNodeType(editor, op.id, entry, op.type, defaultModels)
 			: entry;
 	if (!target)
 		return { ok: false, reason: `set: could not retype element "${op.id}"` };

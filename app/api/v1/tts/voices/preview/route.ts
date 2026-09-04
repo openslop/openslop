@@ -1,28 +1,5 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { getTTSProvider } from "@/lib/api/providers";
-import { createApiQueryRouteHandler } from "@/lib/api/route-handler";
+import { HOSTED } from "@/lib/api/route-families";
+import { createVoicePreviewHandler } from "@/lib/api/voice-routes";
+import { OPENSLOP_TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 
-const previewParamsSchema = z.object({ url: z.string().url() });
-
-export const GET = createApiQueryRouteHandler({
-	schema: previewParamsSchema,
-	label: "Voice preview fetch",
-	handle: async ({ input }) => {
-		const upstream = await getTTSProvider().fetchVoicePreview(input.url);
-		if (!upstream.ok) {
-			return new NextResponse(null, { status: upstream.status });
-		}
-
-		const body = await upstream.arrayBuffer();
-		return new NextResponse(body, {
-			status: 200,
-			headers: {
-				"Content-Type":
-					upstream.headers.get("Content-Type") ?? "application/octet-stream",
-				"Content-Length": String(body.byteLength),
-				"Cache-Control": "public, max-age=3600",
-			},
-		});
-	},
-});
+export const GET = createVoicePreviewHandler(HOSTED, OPENSLOP_TTS_MODELS);

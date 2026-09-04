@@ -19,8 +19,10 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, Contrast, LogOut, User } from "@/components/ui/icon";
+import { Check, Contrast, LogOut, Settings, User } from "@/components/ui/icon";
 import ImpersonateDialog from "./ImpersonateDialog";
+import { SettingsDialog } from "./settings/SettingsDialog";
+import { useSettings } from "@/lib/settings/useSettings";
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 
@@ -35,6 +37,7 @@ function UserProfile() {
 	const { theme, setTheme } = useTheme();
 	const [impersonateOpen, setImpersonateOpen] = useState(false);
 	const user = useUser();
+	const settings = useSettings();
 	const email = user.email ?? "";
 	const name: string | undefined = user.user_metadata?.full_name;
 
@@ -89,6 +92,13 @@ function UserProfile() {
 							))}
 						</DropdownMenuSubContent>
 					</DropdownMenuSub>
+					<DropdownMenuItem
+						onClick={() => settings.open("models")}
+						className="cursor-pointer"
+					>
+						<Settings />
+						Settings
+					</DropdownMenuItem>
 					{IS_DEV && (
 						<DropdownMenuItem
 							onClick={() => setImpersonateOpen(true)}
@@ -107,6 +117,7 @@ function UserProfile() {
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
+			<SettingsDialog />
 			{IS_DEV && (
 				<ImpersonateDialog
 					open={impersonateOpen}

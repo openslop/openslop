@@ -1,13 +1,5 @@
-import { NextResponse } from "next/server";
-import { getTTSProvider } from "@/lib/api/providers";
-import { createApiQueryRouteHandler } from "@/lib/api/route-handler";
-import { voiceSearchParamsSchema } from "@/lib/project/types";
+import { HOSTED } from "@/lib/api/route-families";
+import { createVoiceSearchHandler } from "@/lib/api/voice-routes";
+import { OPENSLOP_TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 
-export const GET = createApiQueryRouteHandler({
-	schema: voiceSearchParamsSchema,
-	label: "Voice search",
-	handle: async ({ input }) => {
-		const voices = await getTTSProvider().search(input);
-		return NextResponse.json({ voices });
-	},
-});
+export const GET = createVoiceSearchHandler(HOSTED, OPENSLOP_TTS_MODELS);

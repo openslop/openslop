@@ -4,7 +4,7 @@ import { type AssetGateway, isTerminal } from "@/lib/gateway/base";
 import { awaitCompletion } from "@/lib/providers/poll";
 import { assetUrlField } from "./assetUrl";
 import { BaseConnector } from "./base";
-import type { ConnectorConfig } from "./types";
+import type { ResolvedConnectorConfig } from "./types";
 
 export abstract class BaseAssetConnector<
 	TParams extends { prompt: string },
@@ -15,7 +15,7 @@ export abstract class BaseAssetConnector<
 
 	constructor(
 		protected gateway: TGateway,
-		config: ConnectorConfig,
+		config: ResolvedConnectorConfig,
 	) {
 		super(config);
 	}

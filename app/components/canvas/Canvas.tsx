@@ -15,6 +15,7 @@ import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { AssetsSection } from "./elements/AssetsSection";
+import { AssetEditProvider } from "./elements/character/AssetEditProvider";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -56,31 +57,33 @@ export default function Canvas() {
 	);
 
 	return (
-		<DragTransferContext value={dragTransferStore}>
-			<DndContext
-				sensors={sensors}
-				collisionDetection={pointerWithin}
-				onDragStart={handleDragStart}
-				onDragOver={handleDragOver}
-				onDragEnd={handleDragEnd}
-				onDragCancel={handleDragCancel}
-			>
-				<AssetsSection />
-				<SortableContext
-					items={sceneItems}
-					strategy={verticalListSortingStrategy}
+		<AssetEditProvider>
+			<DragTransferContext value={dragTransferStore}>
+				<DndContext
+					sensors={sensors}
+					collisionDetection={pointerWithin}
+					onDragStart={handleDragStart}
+					onDragOver={handleDragOver}
+					onDragEnd={handleDragEnd}
+					onDragCancel={handleDragCancel}
 				>
-					<Editable
-						placeholder="Start typing your story…"
-						renderElement={renderElement}
-						onKeyDown={handleKeyDown}
-						className="font-body text-body leading-relaxed focus-ring"
-					/>
-				</SortableContext>
-				<DragOverlay>
-					{activeElement && <DragOverlayContent element={activeElement} />}
-				</DragOverlay>
-			</DndContext>
-		</DragTransferContext>
+					<AssetsSection />
+					<SortableContext
+						items={sceneItems}
+						strategy={verticalListSortingStrategy}
+					>
+						<Editable
+							placeholder="Start typing your story…"
+							renderElement={renderElement}
+							onKeyDown={handleKeyDown}
+							className="font-body text-body leading-relaxed focus-ring"
+						/>
+					</SortableContext>
+					<DragOverlay>
+						{activeElement && <DragOverlayContent element={activeElement} />}
+					</DragOverlay>
+				</DndContext>
+			</DragTransferContext>
+		</AssetEditProvider>
 	);
 }

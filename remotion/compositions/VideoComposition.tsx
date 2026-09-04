@@ -11,10 +11,10 @@ import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type { VideoLayout, ResolvedElement } from "@/lib/video/types";
 import { toFrames } from "@/lib/video/frames";
 import {
-	AUDIO_FADE_SEC,
 	TRANSITION_DURATION_SEC,
 	VIDEO_PREMOUNT_SEC,
 } from "@/lib/video/transitions";
+import { audioFadeSec } from "@/lib/video/audioFade";
 import { getPresentation } from "@/lib/video/transitionPresentations";
 import { audioVolume } from "@/lib/video/audioVolume";
 import { volumeToGain } from "@/lib/video/elementAttributes";
@@ -33,8 +33,7 @@ const blackBg: React.CSSProperties = { backgroundColor: "black" };
 function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
-	const hasFadeEnvelope = element.role === "background";
-	const fadeFrames = hasFadeEnvelope ? toFrames(AUDIO_FADE_SEC, fps) : 0;
+	const fadeFrames = toFrames(audioFadeSec(element), fps);
 	const volume = useMemo(
 		() => audioVolume(gain, durationInFrames, fadeFrames),
 		[gain, durationInFrames, fadeFrames],

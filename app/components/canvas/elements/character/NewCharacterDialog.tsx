@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
+import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { FIELD_CLS } from "./fields";
 import { useProject } from "@/lib/project/useProject";
@@ -37,6 +38,7 @@ function NewCharacterDialogBody({
 }) {
 	const characters = useProject((s) => s.metadata.characters);
 	const setCharacter = useProject((s) => s.setCharacter);
+	const defaultModels = useResolveDefaultModels();
 	const [name, setName] = useState("");
 
 	const normalized = normalizeCharacterName(name);
@@ -46,7 +48,10 @@ function NewCharacterDialogBody({
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();
 		if (!canSubmit) return;
-		setCharacter(normalized, { appearance: "" });
+		setCharacter(normalized, {
+			appearance: "",
+			avatarModel: defaultModels().image,
+		});
 		onCreated(normalized);
 	};
 

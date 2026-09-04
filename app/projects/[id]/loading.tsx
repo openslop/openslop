@@ -2,6 +2,7 @@ import {
 	PINNED_PANEL_KEYS,
 	RAIL_PANEL_KEYS,
 } from "@/app/components/canvas/panel/panelKeys";
+import { DotGrid } from "@/components/ui/dot-grid";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const SCENES = [3, 2, 4];
@@ -113,10 +114,7 @@ function SceneSkeleton({
 export default function Loading() {
 	return (
 		<div className="relative flex h-screen w-full flex-col overflow-hidden text-foreground">
-			<div
-				aria-hidden
-				className="dot-grid-bg pointer-events-none fixed inset-0 -z-10"
-			/>
+			<DotGrid />
 
 			{/* Profile avatar */}
 			<div className="fixed top-4 left-5 z-[100]">

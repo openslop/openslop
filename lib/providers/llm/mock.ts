@@ -3,6 +3,7 @@ import type {
 	LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
+import type { ValidationResult } from "@/lib/connectors/providerKey";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
@@ -12,6 +13,7 @@ import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { animateImageScene } from "@/lib/script/refine/animatePrompt";
 import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
+import type { LLMProvider } from "./base";
 
 const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
@@ -138,7 +140,11 @@ function mockResponse(params: LLMGenerateParams): string {
 	return match ? match.respond(params) : MOCK_SCRIPT;
 }
 
-export class MockLLM {
+export class MockLLM implements LLMProvider {
+	async validate(): Promise<ValidationResult> {
+		return { ok: true };
+	}
+
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
 		return {
 			text: mockResponse(params),

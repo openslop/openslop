@@ -45,7 +45,7 @@ describe("cancel button offset", () => {
 			/>,
 		);
 		expect(html).not.toContain('aria-label="Cancel generation"');
-		expect(html).toContain("cdn.example.com");
+		expect(html).toContain("https://cdn.example.com/a.png");
 	});
 
 	it("is pushed below the still/video toggle by AnimatedImageMedia", () => {

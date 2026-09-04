@@ -6,9 +6,10 @@ import {
 	toUIMessageStream,
 } from "ai";
 import { nanoid } from "nanoid";
+import { z } from "zod";
 import { stringifyError } from "@/lib/errors";
 import { sloppyInstructions } from "@/lib/agent/prompt";
-import type { AgentContext } from "@/lib/agent/context";
+import { agentContextSchema, type AgentContext } from "@/lib/agent/context";
 import {
 	toolCallsMade,
 	upsertMessage,
@@ -16,16 +17,32 @@ import {
 } from "@/lib/agent/messages";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
+import type { ModelRef } from "@/lib/connectors/types";
+import type { LLMProvider } from "@/lib/providers/llm/base";
 import {
 	findOrCreateConversation,
 	listConversationMessages,
 	saveConversationMessage,
 } from "./conversations";
 import { logger } from "./logger";
-import { getLLMProvider } from "./providers";
 
 /** What one turn may spend before the tools come off and it has to end in a reply. */
 const MAX_TOOL_CALLS = 20;
+
+/**
+ * What a turn is asked for. The routes differ only in which models they will
+ * take, so the field carrying that is theirs to supply.
+ */
+export const agentTurnSchema = <TModel extends ModelRef>(
+	model: z.ZodType<TModel>,
+) =>
+	z
+		.object({
+			projectId: z.uuid(),
+			message: z.unknown(),
+			context: agentContextSchema,
+		})
+		.and(model);
 
 export type AgentTurnRequest = {
 	projectId: string;
@@ -33,7 +50,8 @@ export type AgentTurnRequest = {
 	message: SloppyMessage;
 	context: AgentContext;
 	/** The provider's own model id: the route resolves it from the picked name. */
-	model?: string;
+	model: string;
+	llm: () => Promise<LLMProvider>;
 };
 
 /**
@@ -43,10 +61,12 @@ export type AgentTurnRequest = {
 export async function streamAgentTurn(
 	request: AgentTurnRequest,
 ): Promise<Response> {
-	const conversationId = await findOrCreateConversation(
-		request.projectId,
-		request.userId,
-	);
+	// Reading the key this turn runs on depends on nothing else here, and would
+	// otherwise sit in front of the first token.
+	const [llm, conversationId] = await Promise.all([
+		request.llm(),
+		findOrCreateConversation(request.projectId, request.userId),
+	]);
 	const history = await listConversationMessages(conversationId);
 	const stored = history.find((row) => row.id === request.message.id);
 	const incoming: SloppyMessage = {
@@ -57,7 +77,7 @@ export async function streamAgentTurn(
 	await saveConversationMessage(conversationId, incoming);
 
 	const carried = stored?.metadata?.workSeconds ?? 0;
-	const { model, providerOptions } = getLLMProvider().agentModel(request.model);
+	const { model, providerOptions } = llm.agentModel(request.model);
 
 	const modelMessages = pruneMessages({
 		messages: await convertToModelMessages(pruneTranscript(messages), {

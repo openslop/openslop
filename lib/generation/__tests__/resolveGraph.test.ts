@@ -1,3 +1,4 @@
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildAnimatedImagePlugins } from "@/lib/connectors/animated_image/plugins/animated-image-chain";
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
@@ -133,7 +134,10 @@ describe("resolveGraph", () => {
 		const still = anim.dependsOn.find(
 			(node) => node.id === stillElementId("anim"),
 		);
-		expect(still?.inputs.attributes).toEqual({ format: "png" });
+		expect(still?.inputs.attributes).toEqual({
+			format: "png",
+			...DEFAULT_MODELS.image,
+		});
 		expect(anim.inputs.attributes).toMatchObject({
 			videoPrompt: "slow pan",
 			duration: "8",
