@@ -9,9 +9,7 @@ export function QueueProgressBar() {
 	const done = useQueueSelector((q) => q.getGeneratedCount());
 	const total = active + done;
 	// A reloaded project seeds its finished results back into the queue, so `done`
-	// is already > 0 before anything runs. Only report progress while something is
-	// actually generating — otherwise reopening a generated project flashes
-	// "N of N generated" at 100% during the prefetch window.
+	// is nonzero before anything runs; only report progress while generating.
 	const generating = active > 0;
 	const pct = generating ? (done / total) * 100 : 0;
 

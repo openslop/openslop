@@ -45,8 +45,7 @@ export async function createJob(input: {
 		})
 		.select("id")
 		.single();
-	if (error || !data)
-		throw new Error(`Failed to create job: ${error?.message}`);
+	if (error) throw new Error(`Failed to create job: ${error.message}`);
 	return { id: data.id };
 }
 
@@ -72,8 +71,7 @@ export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
 		.select("*")
 		.eq("id", jobId)
 		.single();
-	if (error || !data)
-		throw new Error(`Job ${jobId} not found: ${error?.message}`);
+	if (error) throw new Error(`Job ${jobId} not found: ${error.message}`);
 	return data as JobRow;
 }
 

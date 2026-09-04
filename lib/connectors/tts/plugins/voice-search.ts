@@ -1,4 +1,5 @@
 import omit from "lodash/omit";
+import pick from "lodash/pick";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
@@ -25,12 +26,7 @@ export function createVoiceSearchPlugin(): ConnectorPlugin<TTSGenerateParams> {
 				);
 			}
 			const voices = await ctx.searchVoices({
-				query: params.query,
-				gender: params.gender,
-				age: params.age,
-				pitch: params.pitch,
-				accent: params.accent,
-				description: params.description,
+				...pick(params, VOICE_DESCRIPTOR_KEYS),
 				language: params.language || "en",
 			});
 			if (!voices.length) throw new Error("No matching voice found");

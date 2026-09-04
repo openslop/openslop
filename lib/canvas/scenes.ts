@@ -32,11 +32,5 @@ export const isScriptEmpty = (nodes: Descendant[]): boolean =>
 	);
 
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
-	let count = 0;
-	for (const node of nodes) {
-		if (!isSceneElement(node)) continue;
-		count += 1;
-		if (node.id === sceneId) return count;
-	}
-	return 0;
+	return nodes.filter(isSceneElement).findIndex((n) => n.id === sceneId) + 1;
 }

@@ -39,6 +39,10 @@ export function hasPendingToolCall(
 	);
 }
 
+const isPruned = (part: SloppyMessage["parts"][number]) =>
+	part.type === "reasoning" ||
+	(isToolUIPart(part) && SNAPSHOT_TOOLS.has(getToolName(part)));
+
 /**
  * Remove all prior reasoning blocks and snapshots tool results
  */
@@ -47,12 +51,7 @@ export function pruneTranscript(messages: SloppyMessage[]): SloppyMessage[] {
 		if (idx !== messages.length - 1 && message.role === "assistant") {
 			return {
 				...message,
-				parts: message.parts.filter((part) => {
-					if (part.type === "reasoning") {
-						return false;
-					}
-					return !(isToolUIPart(part) && SNAPSHOT_TOOLS.has(getToolName(part)));
-				}),
+				parts: message.parts.filter((part) => !isPruned(part)),
 			};
 		}
 		return message;

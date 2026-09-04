@@ -1,4 +1,6 @@
 import lowerCase from "lodash/lowerCase";
+import union from "lodash/union";
+import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
 import {
 	isNodeStale,
@@ -19,24 +21,23 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
 	if (!previous) return [];
 	const current = nodeInputs(node, results);
 
-	const changed = new Set<string>();
-	if (current.prompt !== previous.prompt) changed.add("the prompt");
-	const keys = [
-		...Object.keys(current.attributes),
-		...Object.keys(previous.attributes),
-	];
-	for (const key of keys) {
-		if (current.attributes[key] !== previous.attributes[key])
-			changed.add(lowerCase(key));
-	}
-	for (const dep of node.dependsOn) {
-		if (
-			current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
-			needsGeneration(dep, results)
-		)
-			changed.add(dep.label ?? "an upstream element");
-	}
-	return [...changed];
+	const attributeKeys = union(
+		Object.keys(current.attributes),
+		Object.keys(previous.attributes),
+	);
+	return uniq([
+		...(current.prompt !== previous.prompt ? ["the prompt"] : []),
+		...attributeKeys
+			.filter((key) => current.attributes[key] !== previous.attributes[key])
+			.map(lowerCase),
+		...node.dependsOn
+			.filter(
+				(dep) =>
+					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
+					needsGeneration(dep, results),
+			)
+			.map((dep) => dep.label ?? "an upstream element"),
+	]);
 }
 
 /**

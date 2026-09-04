@@ -34,7 +34,7 @@ export const POST = createPublicRouteHandler({
 		}
 		if (data !== "valid") {
 			return NextResponse.json(
-				{ error: ERROR_MESSAGES[data] ?? "Invalid access code" },
+				{ error: ERROR_MESSAGES[data] ?? ERROR_MESSAGES.invalid },
 				{ status: 401 },
 			);
 		}

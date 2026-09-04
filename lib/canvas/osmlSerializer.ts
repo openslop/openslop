@@ -31,16 +31,12 @@ export function serializeOSML(descendants: Descendant[]): string {
 }
 
 export function serializeOSMLWithScenes(descendants: Descendant[]): string {
-	let osml = "";
-	let sceneNum = 0;
-	for (const node of descendants) {
-		if (isSceneElement(node)) {
-			sceneNum++;
-			osml += sceneMarker(sceneNum);
-			for (const child of node.children) {
-				osml += serializeElement(child);
-			}
-		}
-	}
-	return osml.trim();
+	return descendants
+		.filter(isSceneElement)
+		.map(
+			(scene, index) =>
+				sceneMarker(index + 1) + scene.children.map(serializeElement).join(""),
+		)
+		.join("")
+		.trim();
 }
