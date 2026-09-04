@@ -1,10 +1,12 @@
 import { v5 as uuidv5 } from "uuid";
 import { z } from "zod";
 import { CanvasElementTypeSchema } from "@/lib/canvas/types";
-import { ASSET_CONNECTOR_TYPES } from "@/lib/connectors/types";
+import {
+	ASSET_CONNECTOR_TYPES,
+	AssetResultSchema,
+} from "@/lib/connectors/types";
 import type { ElementVersionStorage } from "@/lib/generation/history";
 import { GenerationInputsSchema } from "@/lib/generation/inputs";
-import { AssetResultSchema } from "@/lib/generation/snapshots";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { createClient } from "@/lib/supabase/client";
 import { toastError } from "@/lib/toastError";

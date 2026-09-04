@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { loadPeaks } from "@/lib/components/peaks";
 import { soundwaveMaskStyle, toBarHeights } from "@/lib/components/soundwave";
+import { usePeaks } from "@/lib/components/usePeaks";
 import { clamp, cn } from "@/lib/utils";
 
 const SAMPLE_SPACING_PX = 2;
@@ -11,32 +11,6 @@ const SAMPLE_SPACING_PX = 2;
 const SAMPLE_QUANTUM = 16;
 // Past the count `loadPeaks` extracts, more samples only repeat themselves.
 const SAMPLE_RANGE = { min: 8, max: 200 };
-
-type Decode =
-	| { status: "loading" }
-	| { status: "ready"; peaks: number[] }
-	| { status: "failed" };
-
-function usePeaks(src: string): Decode {
-	const [decode, setDecode] = useState<Decode>({ status: "loading" });
-
-	useEffect(() => {
-		let cancelled = false;
-		loadPeaks(src)
-			.then((peaks) => {
-				if (!cancelled) setDecode({ status: "ready", peaks });
-			})
-			.catch((error) => {
-				console.error("Failed to decode audio:", error);
-				if (!cancelled) setDecode({ status: "failed" });
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [src]);
-
-	return decode;
-}
 
 /**
  * The clip's audio as a mask-painted envelope, so it takes its colour from the

@@ -4,7 +4,6 @@ import type { KeyStatus } from "@/lib/connectors/providerKey";
 
 const STATUS = {
 	valid: { variant: "default", Icon: CheckCircle, label: "Connected" },
-	// The same pill a stale element wears: something to look at, not an error.
 	invalid: { variant: "tertiary", Icon: AlertCircle, label: "Not working" },
 	unverified: { variant: "caution", Icon: Hourglass, label: "Unverified" },
 } as const;

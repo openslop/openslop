@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { GatewayClient } from "@/lib/gateway/base";
 import type { NodeSpec } from "@/lib/generation/graph";
@@ -120,13 +121,23 @@ export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
  */
 export type ConnectorGenerateParams = Partial<ModelRef> & { prompt: string };
 
-export type AssetResult = {
-	durationSec: number;
-	imageUrl?: string;
-	audioUrl?: string;
-	videoUrl?: string;
-	textTimestamps?: TextTimestamp[];
-};
+const TextTimestampSchema = z.object({
+	text: z.string(),
+	start: z.number(),
+	end: z.number(),
+});
+
+export type TextTimestamp = z.infer<typeof TextTimestampSchema>;
+
+export const AssetResultSchema = z.object({
+	durationSec: z.number(),
+	imageUrl: z.string().optional(),
+	audioUrl: z.string().optional(),
+	videoUrl: z.string().optional(),
+	textTimestamps: z.array(TextTimestampSchema).optional(),
+});
+
+export type AssetResult = z.infer<typeof AssetResultSchema>;
 
 export interface Connector {
 	readonly type: ConnectorType;
@@ -183,8 +194,6 @@ export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	imageProvider?: string;
 	imageModel?: string;
 };
-
-export type TextTimestamp = { text: string; start: number; end: number };
 
 export type TTSResult = AssetResult & {
 	textTimestamps: TextTimestamp[];
