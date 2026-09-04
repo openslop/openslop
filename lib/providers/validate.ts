@@ -19,3 +19,8 @@ const TIMEOUT_MS = 5_000;
 
 export const probe = (url: string, init?: RequestInit) =>
 	fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+
+export const validateByProbe = async (
+	url: string,
+	init?: RequestInit,
+): Promise<ValidationResult> => fromStatus(await probe(url, init));

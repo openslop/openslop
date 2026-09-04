@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
 import {
-	BYOK_PROVIDERS,
 	MANAGED_PROVIDER,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import type { ModelRef, ModelTable } from "@/lib/connectors/types";
 import {
+	byokProviderField,
 	optionalDurationSeconds,
 	optionalFrameImages,
 	optionalImageDimensions,
@@ -35,7 +35,7 @@ export const byokModel = (
 	tables: Partial<Record<BYOKProvider, ModelTable>>,
 ): z.ZodType<BYOKModelRef> =>
 	z
-		.object({ provider: z.enum(BYOK_PROVIDERS), model: z.string() })
+		.object({ provider: byokProviderField, model: z.string() })
 		.refine(({ provider, model }) => model in (tables[provider] ?? {}), {
 			message: `Invalid model. Supported: ${Object.entries(tables)
 				.flatMap(([provider, table]) =>

@@ -4,21 +4,20 @@ import {
 	type MouseEvent,
 	type Ref,
 	useCallback,
-	useEffect,
 	useImperativeHandle,
+	useMemo,
 	useRef,
 	useState,
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toastError } from "@/lib/toastError";
 import { clamp, cn } from "@/lib/utils";
-import { loadPeaks } from "./peaks";
 import {
 	AUDIO_SAMPLE_COUNT,
-	buildSoundwaveMask,
-	SOUNDWAVE_MASK_STYLE,
+	soundwaveMaskStyle,
 	toBarHeights,
 } from "./soundwave";
+import { usePeaks } from "./usePeaks";
 
 export interface WaveformProps {
 	src: string;
@@ -54,49 +53,27 @@ export function Waveform({
 	onFinish,
 }: WaveformProps & { ref?: Ref<WaveformHandle> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
-	const barsRef = useRef<HTMLDivElement>(null);
 	const progressRef = useRef<HTMLDivElement>(null);
-	const peaksRef = useRef<number[]>([]);
-	const [peaksSettledFor, setPeaksSettledFor] = useState<string | null>(null);
+	const decode = usePeaks(src);
 	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
-	const loading = peaksSettledFor !== src || audioSettledFor !== src;
+	const loading = decode.status === "loading" || audioSettledFor !== src;
+
+	const maskStyle = useMemo(
+		() =>
+			soundwaveMaskStyle(
+				toBarHeights(
+					decode.status === "ready" ? decode.peaks : [],
+					AUDIO_SAMPLE_COUNT,
+				),
+			),
+		[decode],
+	);
 
 	const setProgress = useCallback((progress: number) => {
 		const el = progressRef.current;
 		if (el)
 			el.style.clipPath = `inset(0 ${(1 - clamp(progress, 0, 1)) * 100}% 0 0)`;
 	}, []);
-
-	const paint = useCallback(() => {
-		const peaks = peaksRef.current;
-		if (!peaks.length) return;
-		const mask = buildSoundwaveMask(toBarHeights(peaks, AUDIO_SAMPLE_COUNT));
-		for (const el of [barsRef.current, progressRef.current]) {
-			if (!el) continue;
-			el.style.setProperty("mask-image", mask);
-			el.style.setProperty("-webkit-mask-image", mask);
-		}
-		setProgress(0);
-	}, [setProgress]);
-
-	useEffect(() => {
-		peaksRef.current = [];
-
-		let cancelled = false;
-		loadPeaks(src)
-			.then((peaks) => {
-				if (cancelled) return;
-				peaksRef.current = peaks;
-				paint();
-			})
-			.catch((e) => console.error("Failed to decode audio:", e))
-			.finally(() => {
-				if (!cancelled) setPeaksSettledFor(src);
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [src, paint]);
 
 	useImperativeHandle(
 		ref,
@@ -142,14 +119,13 @@ export function Waveform({
 				onClick={handleClick}
 			>
 				<div
-					ref={barsRef}
 					className="absolute inset-0 bg-muted-foreground"
-					style={SOUNDWAVE_MASK_STYLE}
+					style={maskStyle}
 				/>
 				<div
 					ref={progressRef}
 					className="absolute inset-0 bg-foreground"
-					style={{ ...SOUNDWAVE_MASK_STYLE, clipPath: "inset(0 100% 0 0)" }}
+					style={{ ...maskStyle, clipPath: "inset(0 100% 0 0)" }}
 				/>
 				{loading && (
 					<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
@@ -170,6 +146,7 @@ export function Waveform({
 				onLoadedMetadata={() => {
 					const a = audioRef.current;
 					if (!a) return;
+					setProgress(0);
 					if (Number.isFinite(a.duration) && a.duration > 0) {
 						setAudioSettledFor(src);
 					}

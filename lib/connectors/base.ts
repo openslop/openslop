@@ -54,11 +54,17 @@ export abstract class BaseConnector<
 		);
 	}
 
+	protected contextFor(
+		context?: GenerationContext,
+	): PluginContext<TParams, TResult> {
+		return { ...this.pluginContext(), ...context, model: this.model };
+	}
+
 	async generate(
 		params: TParams,
 		context?: GenerationContext,
 	): Promise<TResult> {
-		const ctx = { ...this.pluginContext(), ...context, model: this.model };
+		const ctx = this.contextFor(context);
 		try {
 			const prepared = await this.prepareParams(params, ctx);
 			let result = await this._generate(prepared);

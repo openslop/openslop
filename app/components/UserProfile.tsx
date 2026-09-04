@@ -39,7 +39,7 @@ function UserProfile() {
 	const user = useUser();
 	const settings = useSettings();
 	const email = user.email ?? "";
-	const name: string | undefined = user.user_metadata?.full_name;
+	const name: string | undefined = user.user_metadata.full_name;
 
 	const handleLogout = async () => {
 		try {

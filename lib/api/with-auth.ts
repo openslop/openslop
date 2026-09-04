@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
-import { MissingProviderKeyError } from "./providerKeys";
+import { hasApiAccess, MissingProviderKeyError } from "./providerKeys";
 import { logger } from "./logger";
 import { badRequest, forbidden, serverError, unauthorized } from "./response";
 
@@ -23,8 +23,6 @@ async function runGuarded(
 	}
 }
 
-// Wraps a route handler with auth + the error envelope. The handler only runs
-// for authorized users.
 async function guard(
 	label: string,
 	run: RouteBody,
@@ -40,12 +38,9 @@ async function guard(
 }
 
 export const withApiAccess = (label: string, run: RouteBody) =>
-	guard(label, run, (user) =>
-		user.app_metadata?.api_access ? null : forbidden(),
-	);
+	guard(label, run, (user) => (hasApiAccess(user) ? null : forbidden()));
 
 export const withSession = (label: string, run: RouteBody) => guard(label, run);
 
-// Public routes: no auth, but still get the uniform error envelope.
 export const withPublic = (label: string, run: () => Promise<Response>) =>
 	runGuarded(label, run);

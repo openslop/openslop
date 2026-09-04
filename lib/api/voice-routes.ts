@@ -19,7 +19,7 @@ export const createVoiceSearchHandler = <TModels, TPicked extends ModelRef>(
 		},
 	});
 
-const previewParamsSchema = z.object({ url: z.string().url() });
+const previewParamsSchema = z.object({ url: z.url() });
 
 export const createVoicePreviewHandler = <TModels, TPicked extends ModelRef>(
 	family: RouteFamily<TModels, TPicked>,

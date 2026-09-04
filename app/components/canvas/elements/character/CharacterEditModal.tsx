@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
@@ -97,7 +98,7 @@ function CharacterEditDialogBody({
 	const isStale = avatar.staleReason !== null;
 
 	const generating = isGenerationActive(avatar.status);
-	const hasAppearance = Boolean(character.appearance?.trim());
+	const hasAppearance = Boolean(character.appearance.trim());
 	const generateDisabled = generating || !hasAppearance;
 
 	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
@@ -204,9 +205,10 @@ function CharacterEditDialogBody({
 					variant={confirmDelete ? "destructive" : "outline"}
 					size="sm"
 					onClick={handleDelete}
-					className={
-						confirmDelete ? "sm:mr-auto" : "text-muted-foreground sm:mr-auto"
-					}
+					className={cn(
+						"sm:mr-auto",
+						!confirmDelete && "text-muted-foreground",
+					)}
 				>
 					<Trash2 />
 					{confirmDelete ? "Confirm delete" : "Delete"}

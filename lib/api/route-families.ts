@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import {
-	MANAGED_PROVIDER,
+	isByokProvider,
 	type BYOKProvider,
 } from "@/lib/connectors/providerCatalog";
 import type { ModelRef, ModelTable } from "@/lib/connectors/types";
@@ -56,7 +56,7 @@ export const BYOK: RouteFamily<
 };
 
 const isByokPick = (picked: ModelRef): picked is BYOKModelRef =>
-	picked.provider !== MANAGED_PROVIDER;
+	isByokProvider(picked.provider);
 
 /** For the worker, which serves both families from one queue: the one place the server branches on the family. */
 export const providerForPick = <K extends ProviderType>(

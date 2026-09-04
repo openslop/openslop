@@ -34,8 +34,6 @@ export default function ProjectEditor({
 	user: User;
 	providerKeys: ProviderKeyRecord[];
 }): ReactNode {
-	// Build and hydrate the store once, before children render and without
-	// re-running each render.
 	const [store] = useState(() => {
 		const created = createProjectStore();
 		applyStoreSnapshot(created, parseStoreSnapshot(initialStore));

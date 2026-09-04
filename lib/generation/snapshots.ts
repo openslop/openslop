@@ -1,22 +1,12 @@
 import { z } from "zod";
 import { createEmitter } from "@/lib/store/emitter";
-import { ASSET_CONNECTOR_TYPES, type AssetResult } from "../connectors/types";
+import { ASSET_CONNECTOR_TYPES, AssetResultSchema } from "../connectors/types";
 import { GenerationInputsSchema } from "./inputs";
 import type { CommittedVersion } from "./versions";
 
 const GenerationStatusSchema = z.enum(["idle", "queued", "generating"]);
 
 export type GenerationStatus = z.infer<typeof GenerationStatusSchema>;
-
-export const AssetResultSchema = z.object({
-	durationSec: z.number(),
-	imageUrl: z.string().optional(),
-	audioUrl: z.string().optional(),
-	videoUrl: z.string().optional(),
-	textTimestamps: z
-		.array(z.object({ text: z.string(), start: z.number(), end: z.number() }))
-		.optional(),
-}) satisfies z.ZodType<AssetResult>;
 
 const ElementSnapshotSchema = z.object({
 	status: GenerationStatusSchema,
@@ -95,19 +85,11 @@ export class SnapshotStore {
 
 	isActive = (id: string): boolean => isGenerationActive(this.get(id).status);
 
-	isBusy = (): boolean => {
-		for (const snap of this.state.values()) {
-			if (isGenerationActive(snap.status)) return true;
-		}
-		return false;
-	};
+	isBusy = (): boolean =>
+		Array.from(this.state.values()).some((s) => isGenerationActive(s.status));
 
 	private count(predicate: (snap: ElementSnapshot) => boolean): number {
-		let n = 0;
-		for (const snap of this.state.values()) {
-			if (predicate(snap)) n++;
-		}
-		return n;
+		return Array.from(this.state.values()).filter(predicate).length;
 	}
 
 	getActiveCount = (): number =>

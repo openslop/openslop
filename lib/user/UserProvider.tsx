@@ -27,7 +27,7 @@ export function UserProvider({
 		<UserContext value={user}>
 			<AccountStoreProvider
 				account={{
-					models: accountModelsSchema.parse(user.user_metadata?.models),
+					models: accountModelsSchema.parse(user.user_metadata.models),
 					providerKeys,
 				}}
 			>

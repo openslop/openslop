@@ -1,7 +1,9 @@
 import type { Provider } from "./types";
 
 /** Whether a stored key has been seen to work since it was last written. */
-export type KeyStatus = "unverified" | "valid" | "invalid";
+export const KEY_STATUSES = ["unverified", "valid", "invalid"] as const;
+
+export type KeyStatus = (typeof KEY_STATUSES)[number];
 
 /**
  * Everything about a stored key that is safe to show its owner. The key itself

@@ -10,12 +10,13 @@ import {
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
+	LLMStreamChunk,
 } from "@/lib/connectors/types";
 import { parseImageSource } from "@/lib/api/imageSource";
 import { stringifyError } from "@/lib/errors";
 import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
 import { BaseProvider } from "../base";
-import { fromStatus, probe } from "../validate";
+import { validateByProbe } from "../validate";
 import type { AgentModel } from "./agentModel";
 import type { LLMProvider } from "./base";
 
@@ -65,14 +66,12 @@ export class AnthropicLLM
 
 	/** Listing one model is the cheapest call the API authenticates. */
 	async validate() {
-		return fromStatus(
-			await probe("https://api.anthropic.com/v1/models?limit=1", {
-				headers: {
-					"x-api-key": this.apiKey,
-					"anthropic-version": "2023-06-01",
-				},
-			}),
-		);
+		return validateByProbe("https://api.anthropic.com/v1/models?limit=1", {
+			headers: {
+				"x-api-key": this.apiKey,
+				"anthropic-version": "2023-06-01",
+			},
+		});
 	}
 
 	protected toFiles() {
@@ -100,7 +99,7 @@ export class AnthropicLLM
 		};
 	}
 
-	agentModel(model = DEFAULT_MODEL): AgentModel {
+	agentModel(model: string): AgentModel {
 		return {
 			model: this.model(model),
 			modelId: model,
@@ -139,9 +138,7 @@ export class AnthropicLLM
 
 	// fullStream, not textStream: textStream filters error parts out, which
 	// would end a failed generation as a clean, empty success.
-	async *stream(
-		params: LLMGenerateParams,
-	): AsyncGenerator<{ text: string; done: boolean }> {
+	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
 		const result = streamText(this.buildRequest(params));
 		for await (const part of result.fullStream) {
 			if (part.type === "text-delta") yield { text: part.text, done: false };

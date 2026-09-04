@@ -20,7 +20,6 @@ function PreviewPlayButton({ src }: { src: string }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [playing, setPlaying] = useState(false);
 
-	// Pause when the previewed voice changes
 	useEffect(() => {
 		audioRef.current?.pause();
 	}, [src]);
@@ -53,6 +52,8 @@ function PreviewPlayButton({ src }: { src: string }) {
 const DEBOUNCE_MS = 300;
 const SKELETON_ROWS = 5;
 const VOICE_LIMIT = 50;
+const VOICE_TAG_CLASS =
+	"shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground";
 
 export function VoicePicker({
 	filters,
@@ -151,16 +152,11 @@ export function VoicePicker({
 									<span className="min-w-0 flex-1 truncate text-label text-foreground">
 										{voice.name}
 									</span>
-									{voice.language && (
-										<span className="shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground">
-											{voice.language}
+									{[voice.language, voice.gender].filter(Boolean).map((tag) => (
+										<span key={tag} className={VOICE_TAG_CLASS}>
+											{tag}
 										</span>
-									)}
-									{voice.gender && (
-										<span className="shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground">
-											{voice.gender}
-										</span>
-									)}
+									))}
 									{selected && (
 										<Check className="h-3 w-3 shrink-0 text-accent" />
 									)}

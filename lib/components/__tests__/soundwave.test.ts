@@ -50,7 +50,7 @@ describe("toBarHeights", () => {
 		expect(toBarHeights([0, 0, 0], 3).every((h) => h > 0)).toBe(true);
 	});
 
-	it("has nothing to draw without peaks", () => {
-		expect(toBarHeights([], 8)).toEqual([]);
+	it("draws silence without peaks", () => {
+		expect(toBarHeights([], 8)).toEqual(toBarHeights([0], 8));
 	});
 });

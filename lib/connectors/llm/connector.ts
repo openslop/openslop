@@ -36,7 +36,7 @@ export class HttpLLMConnector
 		params: LLMGenerateParams,
 		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		const ctx = this.pluginContext();
+		const ctx = this.contextFor();
 		try {
 			const prepared = await this.prepareParams(params, ctx);
 			yield* this.gateway.stream(prepared, signal);
