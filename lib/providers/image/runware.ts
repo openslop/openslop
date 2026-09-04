@@ -10,7 +10,7 @@ type RawImageResult = {
 } & WithMetadata;
 
 // Runware defaults to JPG when the request names no format.
-const OUTPUT_FORMAT = "PNG";
+const OUTPUT_FORMAT = "WEBP";
 
 export class RunwareImage
 	extends BaseProvider<ImageGenerateParams, RawImageResult>
