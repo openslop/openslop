@@ -1,11 +1,8 @@
 "use client";
 
 import { SelectField } from "@/components/ui/select-field";
-import {
-	TRANSITION_TYPES,
-	transitionLabel,
-	type TransitionType,
-} from "@/lib/video/transitions";
+import startCase from "lodash/startCase";
+import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
@@ -14,7 +11,7 @@ import { PanelCard, PanelField } from "./PanelCard";
 
 const OPTIONS = TRANSITION_TYPES.map((value) => ({
 	value,
-	label: transitionLabel(value),
+	label: startCase(value),
 }));
 
 export function PropertiesPanel() {
