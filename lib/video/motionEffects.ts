@@ -1,17 +1,5 @@
 import { Easing, interpolate } from "remotion";
-import {
-	MOTION_EFFECTS,
-	type ActiveMotionEffect,
-	type MotionEffect,
-} from "./motionEffectNames";
-
-export const DEFAULT_MOTION: MotionEffect = "none";
-
-const MOTION_SET: ReadonlySet<string> = new Set(MOTION_EFFECTS);
-
-export function isMotionEffect(value: unknown): value is MotionEffect {
-	return typeof value === "string" && MOTION_SET.has(value);
-}
+import type { ActiveMotionEffect, MotionEffect } from "./motionEffectNames";
 
 /**
  * Per-frame motion components. `tx`/`ty` are percentages of the frame (CSS

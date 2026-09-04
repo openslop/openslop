@@ -8,8 +8,11 @@ import {
 	type SplitAttributes,
 } from "@/lib/canvas/types";
 import { clamp } from "@/lib/utils";
-import { DEFAULT_MOTION, isMotionEffect } from "./motionEffects";
-import type { MotionEffect } from "./motionEffectNames";
+import {
+	DEFAULT_MOTION,
+	isMotionEffect,
+	type MotionEffect,
+} from "./motionEffectNames";
 
 /** Raw attribute keys that, when changed, require a layout recompute but are omitted from generation inputs */
 export const LAYOUT_ATTRIBUTE_KEYS = ["loops", "volume", "motion"] as const;

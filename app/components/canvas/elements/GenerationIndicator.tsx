@@ -6,10 +6,7 @@ import {
 } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import {
-	isGenerationActive,
-	type ElementSnapshot,
-} from "@/lib/generation/snapshots";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 type Status = ElementSnapshot["status"];
 
@@ -36,31 +33,26 @@ const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
 	},
 };
 
-function statusLabel(status: Status, seconds: number, idleLabel: string) {
+function statusLabel(status: Status, seconds: number) {
 	if (status === "queued") return "Queued…";
 	if (status === "generating") return `Generating ${seconds}s`;
-	return idleLabel;
+	return "Generate";
 }
 
 export function GenerationIndicator({
 	status,
 	seconds = 0,
-	idleLabel = "Generate",
 	size = "md",
-	onClick,
 	className = "",
 }: {
 	status: Status;
 	seconds?: number;
-	idleLabel?: string;
 	size?: Size;
-	onClick?: () => void;
 	className?: string;
 }) {
 	const Icon = ICONS[status];
 	const sizes = SIZE_CLASSES[size];
-	const label = statusLabel(status, seconds, idleLabel);
-	const active = isGenerationActive(status);
+	const label = statusLabel(status, seconds);
 	const iconEl = (
 		<Icon
 			className={cn(sizes.icon, "text-foreground", ICON_ANIMATION[status])}
@@ -81,8 +73,7 @@ export function GenerationIndicator({
 					baseWrapper,
 					"transition-[opacity,background-color] disabled:cursor-not-allowed",
 				)}
-				disabled={active || !onClick}
-				onClick={onClick}
+				disabled
 			>
 				{iconEl}
 			</button>

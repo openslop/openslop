@@ -65,27 +65,13 @@ cd openslop
 npm install
 ```
 
-3. Create a `.env.local` file with your environment variables:
+3. Copy the annotated env template and fill it in:
 
-Required (auth and database):
-
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SECRET_KEY=your-service-role-key   # generation jobs read/write with it
+```bash
+cp .env.example .env.local
 ```
 
-Without provider keys, the app falls back to mock providers. To use real ones, add any of:
-
-```
-ANTHROPIC_API_KEY=        # LLM
-RUNWARE_API_KEY=          # Image + video
-ELEVENLABS_API_KEY=       # Music + SFX
-CARTESIA_API_KEY=         # Text-to-speech
-BLOB_READ_WRITE_TOKEN=    # Vercel Blob (asset storage)
-NEXT_PUBLIC_BLOB_URL=     # Vercel Blob public URL
-PINECONE_API_KEY=         # Reuses similar past music/SFX generations; unset disables the cache
-```
+The Supabase variables are required. Everything else is optional: a provider whose key is unset falls back to a mock.
 
 4. Run the database migrations:
 

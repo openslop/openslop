@@ -21,3 +21,11 @@ export const MOTION_EFFECTS = [
 
 export type MotionEffect = (typeof MOTION_EFFECTS)[number];
 export type ActiveMotionEffect = Exclude<MotionEffect, "none">;
+
+export const DEFAULT_MOTION: MotionEffect = "none";
+
+const MOTION_SET: ReadonlySet<string> = new Set(MOTION_EFFECTS);
+
+export function isMotionEffect(value: unknown): value is MotionEffect {
+	return typeof value === "string" && MOTION_SET.has(value);
+}

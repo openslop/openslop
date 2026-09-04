@@ -2,14 +2,13 @@
 
 import { useCallback, useState } from "react";
 import { errorMessage } from "@/lib/errors";
-import { runRender } from "@/lib/video/render-client";
+import { runRender, type RenderUpdate } from "@/lib/video/render-client";
 import type { VideoLayout } from "@/lib/video/types";
 
 type RenderState =
 	| { status: "idle" }
 	| { status: "invoking" }
-	| { status: "rendering"; progress: number }
-	| { status: "done"; url: string; size: number }
+	| RenderUpdate
 	| { status: "error"; message: string };
 
 export function useRendering() {

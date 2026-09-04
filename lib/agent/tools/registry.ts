@@ -52,21 +52,27 @@ export type ToolInput<TName extends AgentToolName> = z.output<
 	(typeof TOOLS)[TName]["input"]
 >;
 
+export type ToolOutput<TName extends AgentToolName> = Awaited<
+	ReturnType<(typeof TOOLS)[TName]["execute"]>
+>;
+
+/** How a call reads in the transcript. */
+export type ToolPresentation = { icon: IconComponent; label: string };
+
 // The record's inferred type does not correlate a name with its schema and
-// executor, so calls go through this mapped view of the same object.
-const DISPATCH = TOOLS as unknown as {
+// executor, so calls go through this mapped view of the same object. The
+// input is read as the SDK streams it, so each label reads its own fields
+// optionally.
+const BY_NAME = TOOLS as unknown as {
 	[TName in AgentToolName]: {
 		input: z.ZodType<ToolInput<TName>>;
 		execute: (
 			input: ToolInput<TName>,
 			ctx: AgentToolContext,
 		) => Promise<ToolOutput<TName>>;
+		present: { icon: IconComponent; label: (input: unknown) => string };
 	};
 };
-
-export type ToolOutput<TName extends AgentToolName> = Awaited<
-	ReturnType<(typeof TOOLS)[TName]["execute"]>
->;
 
 /** Any tool's output: what an executor hands back for the model to read. */
 export type AgentToolOutput = {
@@ -75,23 +81,13 @@ export type AgentToolOutput = {
 
 const isToolName = (name: string): name is AgentToolName => name in TOOLS;
 
-/** How a call reads in the transcript. */
-export type ToolPresentation = { icon: IconComponent; label: string };
-
-// Same widening as DISPATCH, and the input is read as the SDK streams it, so
-// each label reads its own fields optionally.
-const PRESENT = TOOLS as unknown as Record<
-	AgentToolName,
-	{ present: { icon: IconComponent; label: (input: unknown) => string } }
->;
-
 /** Null for a tool this build no longer offers, which a stored transcript still holds. */
 export function presentToolCall(
 	toolName: string,
 	input: unknown,
 ): ToolPresentation | null {
 	if (!isToolName(toolName)) return null;
-	const { icon, label } = PRESENT[toolName].present;
+	const { icon, label } = BY_NAME[toolName].present;
 	return { icon, label: label(input ?? {}) };
 }
 
@@ -120,7 +116,7 @@ const run = async <TName extends AgentToolName>(
 	input: unknown,
 	ctx: AgentToolContext,
 ): Promise<ToolOutcome> => {
-	const parsed = DISPATCH[toolName].input.safeParse(input);
+	const parsed = BY_NAME[toolName].input.safeParse(input);
 	if (!parsed.success) {
 		return {
 			ok: false,
@@ -129,7 +125,7 @@ const run = async <TName extends AgentToolName>(
 	}
 	return {
 		ok: true,
-		output: await DISPATCH[toolName].execute(parsed.data, ctx),
+		output: await BY_NAME[toolName].execute(parsed.data, ctx),
 	};
 };
 

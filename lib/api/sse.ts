@@ -1,4 +1,3 @@
-import { stringifyError } from "../errors";
 import { logger } from "./logger";
 
 export function formatSSE(data: unknown): string {
@@ -10,37 +9,6 @@ const SSE_HEADERS = {
 	"Cache-Control": "no-cache",
 	Connection: "keep-alive",
 } as const;
-
-export function createSSEResponse(
-	handler: (send: (message: unknown) => Promise<void>) => Promise<void>,
-): Response {
-	const encoder = new TextEncoder();
-	const stream = new TransformStream();
-	const writer = stream.writable.getWriter();
-
-	const send = async (message: unknown) => {
-		await writer.write(encoder.encode(formatSSE(message)));
-	};
-
-	handler(send)
-		.catch((err) =>
-			send({
-				type: "error",
-				message: stringifyError(err),
-			}).catch((sendErr) =>
-				logger.warn({ err: sendErr }, "SSE: failed to deliver error frame"),
-			),
-		)
-		.finally(() =>
-			writer
-				.close()
-				.catch((closeErr) =>
-					logger.warn({ err: closeErr }, "SSE: writer close failed"),
-				),
-		);
-
-	return new Response(stream.readable, { headers: SSE_HEADERS });
-}
 
 export function createSSEStreamResponse<T>(
 	iter: AsyncIterable<T>,

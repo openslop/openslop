@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { coverScale, motionTransform } from "../motionEffects";
 import {
-	coverScale,
 	DEFAULT_MOTION,
 	isMotionEffect,
-	motionTransform,
-} from "../motionEffects";
-import { MOTION_EFFECTS, type MotionEffect } from "../motionEffectNames";
+	MOTION_EFFECTS,
+	type MotionEffect,
+} from "../motionEffectNames";
 
 const ACTIVE: ReadonlyArray<Exclude<MotionEffect, "none">> =
 	MOTION_EFFECTS.filter((e) => e !== "none") as Exclude<MotionEffect, "none">[];
