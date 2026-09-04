@@ -39,7 +39,7 @@ describe("RunwareImage", () => {
 			width: 2848,
 			height: 1600,
 			outputType: "base64Data",
-			outputFormat: "PNG",
+			outputFormat: "WEBP",
 			numberResults: 1,
 			referenceImages: undefined,
 		});
@@ -52,15 +52,15 @@ describe("RunwareImage", () => {
 		await new RunwareImage("test-key").generate({ prompt: "a cat" });
 
 		expect(mockImageInference).toHaveBeenCalledWith(
-			expect.objectContaining({ outputFormat: "PNG" }),
+			expect.objectContaining({ outputFormat: "WEBP" }),
 		);
 		expect(AssetBundle.upload).toHaveBeenCalledWith(
 			"image",
 			"runware",
 			[
 				expect.objectContaining({
-					filename: "output.png",
-					contentType: "image/png",
+					filename: "output.webp",
+					contentType: "image/webp",
 				}),
 			],
 			undefined,
