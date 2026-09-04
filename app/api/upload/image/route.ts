@@ -31,7 +31,7 @@ export const POST = createSessionFormRouteHandler({
 			},
 		]);
 
-		const url = `${AssetBundle.buildUrl("upload", "user", response.id)}/${encodeURIComponent(filename)}`;
+		const url = AssetBundle.fromResponse(response).resolve("image");
 		return NextResponse.json({ url });
 	},
 });

@@ -30,7 +30,6 @@ export type ProjectContext = ProjectData & {
 	setReferenceImages: (urls: string[]) => void;
 	addReferenceImages: (urls: string[]) => void;
 	removeReferenceImage: (index: number) => void;
-	markHydrated: () => void;
 	reset: () => void;
 };
 
@@ -84,10 +83,6 @@ export function createProjectStore(): ProjectStore {
 			removeReferenceImage: (index) =>
 				set((state) => {
 					state.referenceImages.splice(index, 1);
-				}),
-			markHydrated: () =>
-				set((state) => {
-					state.hydrated = true;
 				}),
 			reset: () => set(freshPersisted()),
 		})),

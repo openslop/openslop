@@ -6,16 +6,9 @@ vi.mock("@/lib/api/auth", () => ({
 	getUser: () => mockGetUser(),
 }));
 
-const mockUpload = vi.fn();
-const mockBuildUrl = vi.fn();
-vi.mock("@/lib/api/asset-bundle", () => ({
-	AssetBundle: {
-		upload: (...args: unknown[]) => mockUpload(...args),
-		buildUrl: (...args: unknown[]) => mockBuildUrl(...args),
-	},
-}));
-
+const { AssetBundle } = await import("@/lib/api/asset-bundle");
 const { POST } = await import("@/app/api/upload/image/route");
+const mockUpload = vi.spyOn(AssetBundle, "upload");
 
 function makeRequest(formData: FormData) {
 	return new NextRequest(
@@ -35,8 +28,13 @@ describe("POST /api/upload/image", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({ id: "user-1" });
-		mockUpload.mockResolvedValue({ id: "bundle-1" });
-		mockBuildUrl.mockReturnValue("https://assets.test/upload/user/bundle-1");
+		AssetBundle.baseUrl = "https://assets.test";
+		mockUpload.mockResolvedValue({
+			id: "bundle-1",
+			type: "upload",
+			provider: "user",
+			result: { image: "photo.png" },
+		});
 	});
 
 	it("returns 401 when unauthenticated", async () => {
@@ -85,7 +83,7 @@ describe("POST /api/upload/image", () => {
 
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
-			url: "https://assets.test/upload/user/bundle-1/photo.png",
+			url: "https://assets.test/assets/upload/user/bundle-1/photo.png",
 		});
 		expect(mockUpload).toHaveBeenCalledWith("upload", "user", [
 			expect.objectContaining({
@@ -94,7 +92,6 @@ describe("POST /api/upload/image", () => {
 				contentType: "image/png",
 			}),
 		]);
-		expect(mockBuildUrl).toHaveBeenCalledWith("upload", "user", "bundle-1");
 	});
 
 	it("sanitizes unsafe filenames", async () => {

@@ -1,11 +1,11 @@
 /** A store's subscription list, shaped for `useSyncExternalStore`. */
-export interface Emitter {
-	subscribe: (listener: () => void) => () => void;
-	notify: () => void;
+export interface Emitter<T = void> {
+	subscribe: (listener: (payload: T) => void) => () => void;
+	notify: (payload: T) => void;
 }
 
-export function createEmitter(): Emitter {
-	const listeners = new Set<() => void>();
+export function createEmitter<T = void>(): Emitter<T> {
+	const listeners = new Set<(payload: T) => void>();
 	return {
 		subscribe: (listener) => {
 			listeners.add(listener);
@@ -13,8 +13,8 @@ export function createEmitter(): Emitter {
 				listeners.delete(listener);
 			};
 		},
-		notify: () => {
-			for (const listener of listeners) listener();
+		notify: (payload) => {
+			for (const listener of listeners) listener(payload);
 		},
 	};
 }
