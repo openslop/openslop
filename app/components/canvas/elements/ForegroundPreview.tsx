@@ -27,7 +27,6 @@ export function ForegroundPreview({
 				outputKind={outputKind}
 				src={url}
 				alt="Scene preview"
-				sizes="128px"
 			/>
 		</div>
 	);

@@ -99,7 +99,6 @@ export function TimelineClip({
 							outputKind={config.outputKind}
 							src={element.url}
 							alt=""
-							sizes="64px"
 						/>
 					</div>
 				) : (
