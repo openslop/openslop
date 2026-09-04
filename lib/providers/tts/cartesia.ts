@@ -14,7 +14,7 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
-import { fromStatus, probe } from "../validate";
+import { validateByProbe } from "../validate";
 import type { TTSProvider } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
@@ -142,14 +142,12 @@ export class CartesiaTTS
 
 	/** Listing one voice is the cheapest call the API authenticates. */
 	async validate() {
-		return fromStatus(
-			await probe("https://api.cartesia.ai/voices/?limit=1", {
-				headers: {
-					"X-API-Key": this.apiKey,
-					"Cartesia-Version": "2024-11-13",
-				},
-			}),
-		);
+		return validateByProbe("https://api.cartesia.ai/voices/?limit=1", {
+			headers: {
+				"X-API-Key": this.apiKey,
+				"Cartesia-Version": "2024-11-13",
+			},
+		});
 	}
 
 	async fetchVoicePreview(url: string): Promise<Response> {
@@ -244,13 +242,9 @@ export class CartesiaTTS
 				}
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
-					for (let i = 0; i < words.length; i++) {
-						textTimestamps.push({
-							text: words[i],
-							start: start[i],
-							end: end[i],
-						});
-					}
+					textTimestamps.push(
+						...words.map((text, i) => ({ text, start: start[i], end: end[i] })),
+					);
 				}
 			}
 

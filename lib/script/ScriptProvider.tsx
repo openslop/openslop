@@ -46,10 +46,10 @@ export function useScriptInitial() {
 }
 
 export function ScriptProvider({
-	initialScript = "",
+	initialScript,
 	children,
 }: {
-	initialScript?: string;
+	initialScript: string;
 	children: ReactNode;
 }) {
 	const { connectorConfig } = useConfig();

@@ -11,7 +11,7 @@ export function UserAvatar({
 	size?: "sm" | "default" | "lg";
 }) {
 	const email = user.email ?? "";
-	const avatarUrl: string | undefined = user.user_metadata?.avatar_url;
+	const avatarUrl: string | undefined = user.user_metadata.avatar_url;
 	const initials = email.split("@")[0].slice(0, 2).toUpperCase();
 
 	return (

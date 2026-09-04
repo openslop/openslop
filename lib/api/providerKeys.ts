@@ -26,7 +26,7 @@ export class MissingProviderKeyError extends Error {
 }
 
 type ProviderKeyRow = {
-	provider: string;
+	provider: BYOKProvider;
 	last4: string;
 	status: KeyStatus;
 	verified_at: string | null;
@@ -34,12 +34,15 @@ type ProviderKeyRow = {
 };
 
 const toRecord = (row: ProviderKeyRow): ProviderKeyRecord => ({
-	provider: row.provider as BYOKProvider,
+	provider: row.provider,
 	last4: row.last4,
 	status: row.status,
 	verifiedAt: row.verified_at,
 	createdAt: row.created_at,
 });
+
+export const hasApiAccess = (user: User): boolean =>
+	Boolean(user.app_metadata.api_access);
 
 /**
  * The hosted provider has a key row like any other, so nothing downstream asks
@@ -50,7 +53,7 @@ const toRecord = (row: ProviderKeyRow): ProviderKeyRecord => ({
 const hostedKey = (user: User): ProviderKeyRecord => ({
 	provider: MANAGED_PROVIDER,
 	last4: "",
-	status: user.app_metadata?.api_access ? "valid" : "invalid",
+	status: hasApiAccess(user) ? "valid" : "invalid",
 	verifiedAt: null,
 	createdAt: "",
 });
@@ -111,12 +114,10 @@ export async function readProviderKey(
 	userId: string,
 	provider: Provider,
 ): Promise<string | null> {
-	return (
-		(await providerKeyRpc<string | null>(
-			"provider_key_read",
-			{ p_user_id: userId, p_provider: provider },
-			"Failed to read provider key",
-		)) ?? null
+	return providerKeyRpc<string | null>(
+		"provider_key_read",
+		{ p_user_id: userId, p_provider: provider },
+		"Failed to read provider key",
 	);
 }
 

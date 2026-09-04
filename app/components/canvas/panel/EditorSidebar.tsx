@@ -133,8 +133,6 @@ function PanelRailItem({ panelKey }: { panelKey: PanelKey }) {
 function EditorSidebarComponent() {
 	const { active } = useEditorPanel();
 	const current = active ? PANELS[active] : null;
-	const HeaderIcon = current?.iconActive;
-	const Panel = current?.Panel;
 
 	return (
 		<div className="flex shrink-0">
@@ -156,16 +154,16 @@ function EditorSidebarComponent() {
 				</div>
 			</nav>
 
-			{current && HeaderIcon && Panel && (
+			{current && (
 				<div className="flex w-64 shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg">
 					<div className="flex shrink-0 items-center gap-2 px-1">
-						<HeaderIcon className="h-5 w-5 text-panel-label" />
+						<current.iconActive className="h-5 w-5 text-panel-label" />
 						<h2 className="text-body font-semibold text-panel-label">
 							{current.label}
 						</h2>
 					</div>
 					<div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 [scrollbar-gutter:stable]">
-						<Panel />
+						<current.Panel />
 					</div>
 					{current.Footer && (
 						// The scroll area's own inset plus the 6px scrollbar globals.css

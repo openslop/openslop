@@ -2,11 +2,7 @@
 
 import Image from "next/image";
 import { ChevronRight } from "@/components/ui/icon";
-import {
-	TEMPLATES,
-	type Template,
-	type TemplateShowcase,
-} from "@/lib/templates/templates";
+import { TEMPLATES } from "@/lib/templates/templates";
 
 function CardImage({ src, alt }: { src: string; alt: string }) {
 	return (
@@ -22,22 +18,16 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
 	);
 }
 
-type ShowcasedTemplate = Template & { showcase: TemplateShowcase };
-
 export default function TemplateGallery({
 	onSelect,
 }: {
 	onSelect: (templateId: string, examplePrompt: string) => void;
 }) {
-	const showcased = TEMPLATES.filter((t): t is ShowcasedTemplate =>
-		Boolean(t.showcase),
-	);
-
 	return (
 		<div className="mt-6 w-full">
 			<p className="mb-3 text-label text-muted-foreground">Need inspiration?</p>
 			<div className="flex flex-wrap justify-center gap-3">
-				{showcased.map((template) => (
+				{TEMPLATES.map((template) => (
 					<button
 						key={template.id}
 						type="button"

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,12 @@ export function ElementStaleIndicator() {
 	if (!staleReason) return null;
 	return <StaleIndicator reason={staleReason} />;
 }
+
+const GENERATE_ICON: Record<GenerationStatus, ReactNode> = {
+	generating: <Spinner className="text-current" />,
+	queued: <Hourglass aria-hidden="true" />,
+	idle: <Sparkles aria-hidden="true" />,
+};
 
 function generateLabel(status: GenerationStatus, hasResult: boolean) {
 	if (status === "generating") return "Generating…";
@@ -58,13 +65,7 @@ export function GenerateButton({
 			aria-label={label}
 			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
 		>
-			{status === "generating" ? (
-				<Spinner className="text-current" />
-			) : status === "queued" ? (
-				<Hourglass aria-hidden="true" />
-			) : (
-				<Sparkles aria-hidden="true" />
-			)}
+			{GENERATE_ICON[status]}
 			{label}
 		</Button>
 	);

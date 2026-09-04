@@ -1,8 +1,7 @@
 import { createConnector } from "@/lib/connectors/factory";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "./inputs";
-import type { NodeId } from "./graph";
-import type { GenerationJob } from "./graph";
+import type { GenerationJob, NodeId } from "./graph";
 
 export async function generateForElement(
 	job: GenerationJob,

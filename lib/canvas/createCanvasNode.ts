@@ -9,7 +9,7 @@ import { splitAttributes } from "@/lib/video/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";
 
-type Opts = {
+export type CreateNodeOptions = {
 	id?: string;
 	attrs?: Record<string, string>;
 	text?: string;
@@ -19,7 +19,7 @@ type Opts = {
 
 export function createCanvasNode(
 	type: CanvasElementType,
-	opts: Opts = {},
+	opts: CreateNodeOptions = {},
 ): CanvasContentElement {
 	const { connector } = ELEMENT_TYPES[type];
 	const attrs = opts.attrs ?? {};

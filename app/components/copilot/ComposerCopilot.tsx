@@ -35,7 +35,7 @@ import {
 } from "@/lib/project/language";
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
-import type { AspectRatio } from "@/lib/video/aspectRatio";
+import { ASPECT_RATIOS, type AspectRatio } from "@/lib/video/aspectRatio";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
@@ -77,10 +77,8 @@ there was a small glowing garden hidden on the moon.
 
 And in that garden… lived a little rabbit named Lumi…`;
 
-const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] = [
-	{ value: "16:9", label: "16:9" },
-	{ value: "9:16", label: "9:16" },
-];
+const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] =
+	ASPECT_RATIOS.map((value) => ({ value, label: value }));
 
 const VIDEO_LENGTH_OPTIONS: SettingPillOption<VideoLength>[] =
 	VIDEO_LENGTHS.map((value) => ({ value, label: videoLengthLabel(value) }));
@@ -160,7 +158,7 @@ function TemplatePill({
 }) {
 	return (
 		<span
-			className=" relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
+			className="relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
 			<button
@@ -258,7 +256,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							}}
 							placeholder={pasting ? SCRIPT_PLACEHOLDER : undefined}
 							style={{ fieldSizing: "content" }}
-							className=" max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+							className="max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !activeTemplate && !pasting && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">

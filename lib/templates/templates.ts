@@ -28,8 +28,8 @@ export interface Template {
 	characters?: Record<string, MetadataCharacter>;
 	/** Prebuilt avatars, seeded as the character avatar nodes' results. */
 	characterAvatars?: Record<string, string>;
-	narration?: MetadataVoice;
-	showcase?: TemplateShowcase;
+	narration: MetadataVoice;
+	showcase: TemplateShowcase;
 }
 
 export const TEMPLATES: Template[] = [

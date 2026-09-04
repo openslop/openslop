@@ -48,16 +48,13 @@ export function applyRefineOps(
 	defaultModels?: ConnectorModels,
 ): { applied: number; failures: string[] } {
 	const anchorMap: Record<string, string> = {};
-	const failures: string[] = [];
-	let applied = 0;
-
-	for (const op of ops) {
-		const result = applyRefineOp(editor, op, anchorMap, defaultModels);
-		if (result.ok) applied += 1;
-		else failures.push(result.reason);
-	}
-
-	return { applied, failures };
+	const results = ops.map((op) =>
+		applyRefineOp(editor, op, anchorMap, defaultModels),
+	);
+	return {
+		applied: results.filter((result) => result.ok).length,
+		failures: results.flatMap((result) => (result.ok ? [] : [result.reason])),
+	};
 }
 
 function resolveInsertPath(

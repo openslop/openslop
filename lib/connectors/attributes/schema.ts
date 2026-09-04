@@ -135,10 +135,10 @@ export class AttributeSchema {
 	}
 
 	get defaultAttributes(): Record<string, string> {
-		const out: Record<string, string> = {};
-		for (const def of this.defs) {
-			if (def.default !== undefined) out[def.key] = def.default;
-		}
-		return out;
+		return Object.fromEntries(
+			this.defs.flatMap((def) =>
+				def.default === undefined ? [] : [[def.key, def.default]],
+			),
+		);
 	}
 }

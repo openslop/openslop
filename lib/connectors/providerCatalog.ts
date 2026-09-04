@@ -60,6 +60,7 @@ export type BYOKProvider = Exclude<Provider, typeof MANAGED_PROVIDER>;
 export const isProvider = (value: string | undefined): value is Provider =>
 	PROVIDERS.some((provider) => provider === value);
 
-export const BYOK_PROVIDERS = PROVIDERS.filter(
-	(key): key is BYOKProvider => key !== MANAGED_PROVIDER,
-);
+export const isByokProvider = (provider: Provider): provider is BYOKProvider =>
+	provider !== MANAGED_PROVIDER;
+
+export const BYOK_PROVIDERS = PROVIDERS.filter(isByokProvider);

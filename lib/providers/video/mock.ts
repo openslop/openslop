@@ -1,5 +1,5 @@
 import type { VideoJob, VideoProviderResponse } from "./base";
-import { BaseVideoProvider } from "./base";
+import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { ValidationResult } from "@/lib/connectors/providerKey";
 import { mockDelay, pickRandom } from "../mock-utils";
@@ -34,7 +34,11 @@ export class MockVideo extends BaseVideoProvider {
 	protected async _generate(): Promise<VideoJob> {
 		await mockDelay(2000);
 		return {
-			metadata: { jobId: "mock-job", status: "processing", durationSec: 5 },
+			metadata: {
+				jobId: "mock-job",
+				status: "processing",
+				durationSec: DEFAULT_VIDEO_DURATION_SEC,
+			},
 		};
 	}
 

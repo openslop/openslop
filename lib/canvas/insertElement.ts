@@ -1,17 +1,12 @@
 import { Editor, Path, Transforms } from "slate";
 import type { CanvasElementType } from "@/lib/canvas/types";
-import type { ConnectorModels } from "@/lib/connectors/models";
-import { createCanvasNode } from "./createCanvasNode";
+import { createCanvasNode, type CreateNodeOptions } from "./createCanvasNode";
 
 export function insertElement(
 	editor: Editor,
 	type: CanvasElementType,
 	at: Path,
-	overrides?: {
-		attrs?: Record<string, string>;
-		text?: string;
-		defaultModels?: ConnectorModels;
-	},
+	overrides?: Omit<CreateNodeOptions, "id">,
 ): string {
 	const node = createCanvasNode(type, overrides);
 	Transforms.insertNodes(editor, node, { at });

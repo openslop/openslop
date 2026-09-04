@@ -95,19 +95,11 @@ export class SnapshotStore {
 
 	isActive = (id: string): boolean => isGenerationActive(this.get(id).status);
 
-	isBusy = (): boolean => {
-		for (const snap of this.state.values()) {
-			if (isGenerationActive(snap.status)) return true;
-		}
-		return false;
-	};
+	isBusy = (): boolean =>
+		Array.from(this.state.values()).some((s) => isGenerationActive(s.status));
 
 	private count(predicate: (snap: ElementSnapshot) => boolean): number {
-		let n = 0;
-		for (const snap of this.state.values()) {
-			if (predicate(snap)) n++;
-		}
-		return n;
+		return Array.from(this.state.values()).filter(predicate).length;
 	}
 
 	getActiveCount = (): number =>

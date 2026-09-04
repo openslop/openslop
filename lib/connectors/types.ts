@@ -61,7 +61,6 @@ export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 export interface PluginContext<TParams = unknown, TResult = unknown> {
 	gateway?: GatewayClient<TParams, TResult>;
 	searchVoices?: VoiceSearchFn;
-	data?: Record<string, unknown>;
 	/** Id of the node being generated. */
 	elementId?: string;
 	/** Outputs of that node's dependencies, keyed by node id. */
@@ -134,8 +133,6 @@ export interface Connector {
 	generate(params: ConnectorGenerateParams): Promise<unknown>;
 }
 
-// LLM types
-
 export type LLMGenerateParams = ConnectorGenerateParams & {
 	systemPrompt?: string;
 	thinkingLevel?: ThinkingLevel;
@@ -164,19 +161,13 @@ export interface LLMConnector extends Connector {
 	): AsyncGenerator<LLMStreamChunk>;
 }
 
-// Music types
-
 export type MusicGenerateParams = ConnectorGenerateParams & {
 	durationSeconds?: number;
 };
 
-// SFX types
-
 export type SFXGenerateParams = ConnectorGenerateParams & {
 	durationSeconds?: number;
 };
-
-// Image types
 
 export type ImageGenerateParams = ConnectorGenerateParams & {
 	format?: string;
@@ -192,8 +183,6 @@ export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	imageProvider?: string;
 	imageModel?: string;
 };
-
-// TTS types
 
 export type TextTimestamp = { text: string; start: number; end: number };
 
@@ -243,8 +232,6 @@ export interface TTSConnector extends Connector {
 	generate(params: TTSGenerateParams): Promise<TTSResult>;
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 }
-
-// Video types
 
 export type VideoGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
