@@ -7,6 +7,7 @@ import type { ValidationResult } from "@/lib/connectors/providerKey";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
+	LLMStreamChunk,
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
@@ -153,9 +154,7 @@ export class MockLLM implements LLMProvider {
 		};
 	}
 
-	async *stream(
-		params: LLMGenerateParams,
-	): AsyncGenerator<{ text: string; done: boolean }> {
+	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
 		await sleep(500);
 		const text = mockResponse(params);
 		let i = 0;
@@ -168,7 +167,7 @@ export class MockLLM implements LLMProvider {
 		yield { text: "", done: true };
 	}
 
-	agentModel(model = "mock"): AgentModel {
+	agentModel(model: string): AgentModel {
 		return {
 			model: mockAgentModel(),
 			modelId: model,
@@ -262,7 +261,7 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		};
 	}
 
-	const script = last.text ?? "";
+	const script = last.text;
 	const elementId =
 		scene === null
 			? ELEMENT_ID.exec(script)?.[1]
