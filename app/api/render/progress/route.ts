@@ -4,6 +4,7 @@ import { createSessionRouteHandler } from "@/lib/api/route-handler";
 import { getFunctionName, REGION } from "@/lib/video/lambda-config";
 import {
 	RenderHandleRequest,
+	renderFailureMessage,
 	type RenderProgress,
 } from "@/lib/video/render-api";
 
@@ -21,7 +22,7 @@ export const POST = createSessionRouteHandler({
 		if (progress.fatalErrorEncountered) {
 			return NextResponse.json<RenderProgress>({
 				type: "error",
-				message: progress.errors[0]?.message ?? "Render failed",
+				message: renderFailureMessage(progress.errors),
 			});
 		}
 		if (progress.done) {

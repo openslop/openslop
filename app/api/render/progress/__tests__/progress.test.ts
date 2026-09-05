@@ -68,10 +68,23 @@ describe("POST /api/render/progress", () => {
 		expect(mockGetRenderProgress).not.toHaveBeenCalled();
 	});
 
-	it("reports fatal errors with the first error message", async () => {
+	it("reports the fatal error's message, skipping retried chunks", async () => {
 		mockGetRenderProgress.mockResolvedValue({
 			fatalErrorEncountered: true,
-			errors: [{ message: "lambda exploded" }],
+			errors: [
+				{
+					name: "Error",
+					message: "chunk flaked",
+					isFatal: true,
+					willRetry: true,
+				},
+				{
+					name: "Error",
+					message: "lambda exploded",
+					isFatal: true,
+					willRetry: false,
+				},
+			],
 		});
 
 		const res = await POST(makeRequest(validBody));
@@ -80,6 +93,28 @@ describe("POST /api/render/progress", () => {
 		expect(await res.json()).toEqual({
 			type: "error",
 			message: "lambda exploded",
+		});
+	});
+
+	it("maps the stitcher timeout to an actionable message", async () => {
+		mockGetRenderProgress.mockResolvedValue({
+			fatalErrorEncountered: true,
+			errors: [
+				{
+					name: "TimeoutError",
+					message: "The main function timed out. ▸ Visit the logs",
+					isFatal: true,
+					willRetry: false,
+				},
+			],
+		});
+
+		const res = await POST(makeRequest(validBody));
+
+		expect(await res.json()).toEqual({
+			type: "error",
+			message:
+				"The export took too long to finish. Try a lower resolution or a shorter video.",
 		});
 	});
 
