@@ -1,4 +1,3 @@
-import type { EnhancedErrorInfo } from "@remotion/lambda/client";
 import { z } from "zod";
 
 /** Wire contract for `/api/render` and `/api/render/progress`. */
@@ -23,13 +22,3 @@ export type RenderProgress =
 	| { type: "progress"; progress: number }
 	| { type: "done"; url: string; size: number }
 	| { type: "error"; message: string };
-
-/** Remotion's stitcher timeout text is written for the deployer (CloudWatch links, deploy flags). */
-export function renderFailureMessage(errors: EnhancedErrorInfo[]): string {
-	const fatal = errors.find((error) => error.isFatal && !error.willRetry);
-	if (fatal == null) return "Render failed";
-	if (fatal.name === "TimeoutError") {
-		return "The export took too long to finish. Try a lower resolution or a shorter video.";
-	}
-	return fatal.message;
-}
