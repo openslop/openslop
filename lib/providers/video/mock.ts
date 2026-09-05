@@ -21,7 +21,7 @@ export class MockVideo extends BaseVideoProvider {
 
 	protected async store(result: VideoJob): Promise<VideoProviderResponse> {
 		return {
-			id: result.metadata?.jobId ?? "",
+			id: result.metadata.jobId,
 			type: this.blobConfig.type,
 			provider: this.blobConfig.provider,
 			result: {

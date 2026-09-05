@@ -8,6 +8,7 @@ import AccessCodeInput from "./components/AccessCodeInput";
 import ProjectsList from "./components/projects/ProjectsList";
 import { Button } from "@/components/ui/button";
 import { listProviderKeys } from "@/lib/api/providerKeys";
+import { PROJECT_ROW_COLUMNS, ProjectRowSchema } from "@/lib/project/api";
 import { UserProvider } from "@/lib/user/UserProvider";
 
 const icons = fs
@@ -25,14 +26,16 @@ export default async function Home() {
 		const [{ data: projects, error }, providerKeys] = await Promise.all([
 			supabase
 				.from("projects")
-				.select("id, name, thumbnail_url, updated_at")
+				.select(PROJECT_ROW_COLUMNS)
 				.order("updated_at", { ascending: false }),
 			listProviderKeys(user),
 		]);
 		if (error) throw error;
 		return (
 			<UserProvider user={user} providerKeys={providerKeys}>
-				<ProjectsList initialProjects={projects ?? []} />
+				<ProjectsList
+					initialProjects={ProjectRowSchema.array().parse(projects)}
+				/>
 			</UserProvider>
 		);
 	}

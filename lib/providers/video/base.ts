@@ -1,6 +1,6 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
-import type { ProviderContract, WithMetadata } from "../base";
+import type { ProviderContract } from "../base";
 import { BaseProvider } from "../base";
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
@@ -18,7 +18,8 @@ export type VideoJobMetadata = {
 export type VideoJob = {
 	url?: string;
 	progress?: number;
-} & WithMetadata<VideoJobMetadata>;
+	metadata: VideoJobMetadata;
+};
 
 export type VideoProviderResponse = BundleResponse & {
 	metadata?: VideoJobMetadata;
@@ -26,7 +27,7 @@ export type VideoProviderResponse = BundleResponse & {
 
 /** A provider that is still working has no asset to hand back yet. */
 export type VideoPoll =
-	| { kind: "pending"; metadata?: VideoJobMetadata }
+	| { kind: "pending"; metadata: VideoJobMetadata }
 	| { kind: "ready"; asset: VideoProviderResponse };
 
 export interface VideoProvider extends ProviderContract {
@@ -59,10 +60,9 @@ export abstract class BaseVideoProvider
 			return { kind: "pending", metadata: result.metadata };
 		}
 		const metadata = {
-			jobId,
 			...result.metadata,
 			durationSec:
-				result.metadata?.durationSec ??
+				result.metadata.durationSec ??
 				request.duration ??
 				DEFAULT_VIDEO_DURATION_SEC,
 		};

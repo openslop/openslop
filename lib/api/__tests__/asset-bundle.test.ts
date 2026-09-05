@@ -25,9 +25,6 @@ describe("AssetBundle", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/image/runware/abc",
 				{
-					version: 1,
-					type: "image",
-					createdAt: "",
 					result: { image: "output.png" },
 				},
 			);
@@ -40,9 +37,6 @@ describe("AssetBundle", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/video/mock/xyz",
 				{
-					version: 1,
-					type: "video",
-					createdAt: "",
 					result: { video: "https://cdn.example.com/video.mp4" },
 				},
 			);
@@ -51,9 +45,6 @@ describe("AssetBundle", () => {
 
 		it("throws for unknown key", () => {
 			const bundle = new AssetBundle("https://blob.example.com/x", {
-				version: 1,
-				type: "image",
-				createdAt: "",
 				result: {},
 			});
 			expect(() => bundle.resolve("missing")).toThrow('No file "missing"');
@@ -76,8 +67,6 @@ describe("AssetBundle", () => {
 			expect(bundle.resolve("image")).toBe(
 				"https://blob.example.com/assets/image/runware/abc/output.png",
 			);
-			expect(bundle.manifest.type).toBe("image");
-			expect(bundle.manifest.version).toBe(1);
 		});
 	});
 
@@ -101,9 +90,6 @@ describe("AssetBundle", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/tts/cartesia/abc",
 				{
-					version: 1,
-					type: "tts",
-					createdAt: "",
 					result: { timestamps: "timestamps.json" },
 				},
 			);
@@ -130,9 +116,6 @@ describe("AssetBundle", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/tts/cartesia/abc",
 				{
-					version: 1,
-					type: "tts",
-					createdAt: "",
 					result: { timestamps: "timestamps.json" },
 				},
 			);

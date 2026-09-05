@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { z } from "zod";
 
 async function fetchOk(url: string, label: string): Promise<Response> {
 	const res = await fetch(url);
@@ -13,13 +14,16 @@ async function fetchJson<T>(url: string, label: string): Promise<T> {
 	return res.json() as Promise<T>;
 }
 
-export type AssetManifest = {
+type AssetManifest = {
 	version: number;
 	type: string;
 	createdAt: string;
 	result: Record<string, string>;
 	metadata?: Record<string, unknown>;
 };
+
+/** The parts of a manifest a bundle is read through. */
+type BundleContents = Pick<AssetManifest, "result" | "metadata">;
 
 type BundleFileBase = {
 	key: string;
@@ -50,20 +54,22 @@ async function sourceOf(
 	return { body: res.body, multipart: true };
 }
 
-export type BundleResponse = {
-	id: string;
-	type: string;
-	provider: string;
-	result: Record<string, string>;
-	metadata?: Record<string, unknown>;
-};
+export const BundleResponseSchema = z.object({
+	id: z.string(),
+	type: z.string(),
+	provider: z.string(),
+	result: z.record(z.string(), z.string()),
+	metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+export type BundleResponse = z.infer<typeof BundleResponseSchema>;
 
 export class AssetBundle {
 	static baseUrl = process.env.NEXT_PUBLIC_BLOB_URL ?? "";
 
 	constructor(
 		readonly url: string,
-		readonly manifest: AssetManifest,
+		readonly manifest: BundleContents,
 	) {}
 
 	resolve(key: string): string {
@@ -87,13 +93,7 @@ export class AssetBundle {
 			response.provider,
 			response.id,
 		);
-		return new AssetBundle(url, {
-			version: 1,
-			type: response.type,
-			createdAt: "",
-			result: response.result,
-			metadata: response.metadata,
-		});
+		return new AssetBundle(url, response);
 	}
 
 	static async upload(

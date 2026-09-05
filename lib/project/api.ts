@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ProjectStoreSnapshot } from "./storeSnapshot";
 
-const ProjectRowSchema = z.object({
+export const ProjectRowSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	thumbnail_url: z.string().nullable(),
@@ -11,6 +11,11 @@ const ProjectRowSchema = z.object({
 });
 
 export type ProjectRow = z.infer<typeof ProjectRowSchema>;
+
+/** Selected wherever a project row is read, so the query cannot drift from the schema. */
+export const PROJECT_ROW_COLUMNS = Object.keys(ProjectRowSchema.shape).join(
+	", ",
+);
 
 export type SaveProjectInput = {
 	name: string;
@@ -29,7 +34,7 @@ export async function createProject(): Promise<ProjectRow> {
 	const { data, error } = await supabase
 		.from("projects")
 		.insert({ user_id: user.id })
-		.select("id, name, thumbnail_url, updated_at")
+		.select(PROJECT_ROW_COLUMNS)
 		.single();
 	if (error) throw error;
 	return ProjectRowSchema.parse(data);

@@ -1,27 +1,24 @@
-import {
-	Hourglass,
-	Loader2,
-	Wand2,
-	type IconComponent,
-} from "@/components/ui/icon";
+import { Hourglass, Loader2, type IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
-
-type Status = ElementSnapshot["status"];
+import type { ActiveGenerationStatus } from "@/lib/generation/snapshots";
 
 type Size = "sm" | "md";
 
-const ICONS: Record<Status, IconComponent> = {
-	idle: Wand2,
-	queued: Hourglass,
-	generating: Loader2,
-};
-
-const ICON_ANIMATION: Record<Status, string> = {
-	idle: "",
-	queued: "animate-pulse",
-	generating: "animate-spin",
+const STATUS: Record<
+	ActiveGenerationStatus,
+	{ icon: IconComponent; animation: string; label: (seconds: number) => string }
+> = {
+	queued: {
+		icon: Hourglass,
+		animation: "animate-pulse",
+		label: () => "Queued…",
+	},
+	generating: {
+		icon: Loader2,
+		animation: "animate-spin",
+		label: (seconds) => `Generating ${seconds}s`,
+	},
 };
 
 const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
@@ -33,36 +30,20 @@ const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
 	},
 };
 
-function statusLabel(status: Status, seconds: number) {
-	if (status === "queued") return "Queued…";
-	if (status === "generating") return `Generating ${seconds}s`;
-	return "Generate";
-}
-
 export function GenerationIndicator({
 	status,
 	seconds = 0,
 	size = "md",
 	className = "",
 }: {
-	status: Status;
+	status: ActiveGenerationStatus;
 	seconds?: number;
 	size?: Size;
 	className?: string;
 }) {
-	const Icon = ICONS[status];
+	const { icon: Icon, animation, label: labelFor } = STATUS[status];
 	const sizes = SIZE_CLASSES[size];
-	const label = statusLabel(status, seconds);
-	const iconEl = (
-		<Icon
-			className={cn(sizes.icon, "text-foreground", ICON_ANIMATION[status])}
-		/>
-	);
-	const baseWrapper = cn(
-		"relative flex items-center justify-center rounded-full overflow-hidden text-foreground",
-		sizes.wrapper,
-		className,
-	);
+	const label = labelFor(seconds);
 
 	return (
 		<SimpleTooltip label={label}>
@@ -70,12 +51,14 @@ export function GenerationIndicator({
 				type="button"
 				aria-label={label}
 				className={cn(
-					baseWrapper,
+					"relative flex items-center justify-center rounded-full overflow-hidden text-foreground",
+					sizes.wrapper,
+					className,
 					"transition-[opacity,background-color] disabled:cursor-not-allowed",
 				)}
 				disabled
 			>
-				{iconEl}
+				<Icon className={cn(sizes.icon, "text-foreground", animation)} />
 			</button>
 		</SimpleTooltip>
 	);

@@ -77,9 +77,6 @@ describe("BaseAssetConnector", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/image/runware/abc",
 				{
-					version: 1,
-					type: "image",
-					createdAt: "",
 					result: { image: "output.png" },
 					metadata: { durationSec: 10 },
 				},
@@ -98,9 +95,6 @@ describe("BaseAssetConnector", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/image/mock/xyz",
 				{
-					version: 1,
-					type: "image",
-					createdAt: "",
 					result: { image: "output.jpg" },
 				},
 			);
@@ -114,9 +108,6 @@ describe("BaseAssetConnector", () => {
 			const bundle = new AssetBundle(
 				"https://blob.example.com/assets/image/mock/xyz",
 				{
-					version: 1,
-					type: "image",
-					createdAt: "",
 					result: { image: "output.jpg" },
 					metadata: { otherField: "value" },
 				},
