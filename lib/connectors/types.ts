@@ -112,19 +112,19 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
 	beforeGenerate?(
 		params: TParams,
-		ctx?: PluginContext<TParams, TResult>,
+		ctx: PluginContext<TParams, TResult>,
 	): TParams | Promise<TParams>;
 	afterGenerate?(
 		result: TResult,
-		ctx?: PluginContext<TParams, TResult>,
+		ctx: PluginContext<TParams, TResult>,
 	): TResult | Promise<TResult>;
 	transformPrompt?(
 		prompt: string,
-		ctx?: PluginContext<TParams, TResult>,
+		ctx: PluginContext<TParams, TResult>,
 	): string | Promise<string>;
 	onError?(
 		error: string,
-		ctx?: PluginContext<TParams, TResult>,
+		ctx: PluginContext<TParams, TResult>,
 	): void | Promise<void>;
 }
 

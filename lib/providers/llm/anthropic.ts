@@ -7,18 +7,13 @@ import {
 	type LanguageModel,
 	type TextPart,
 } from "ai";
-import type {
-	LLMGenerateParams,
-	LLMGenerateResult,
-	LLMStreamChunk,
-} from "@/lib/connectors/types";
+import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
 import { parseImageSource } from "@/lib/api/imageSource";
 import { stringifyError } from "@/lib/errors";
 import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
-import { BaseProvider } from "../base";
 import { validateByProbe } from "../validate";
 import type { AgentModel } from "./agentModel";
-import type { LLMProvider } from "./base";
+import type { LLMProvider, LLMRequest } from "./base";
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [
 	"image/jpeg",
@@ -49,18 +44,12 @@ function toImagePart(image: string): FilePart {
 	return { type: "file", mediaType: source.mediaType, data: source.data };
 }
 
-const DEFAULT_MODEL = "claude-opus-5";
 const DEFAULT_MAX_TOKENS = 65536;
 
-export class AnthropicLLM
-	extends BaseProvider<LLMGenerateParams, LLMGenerateResult, LLMGenerateResult>
-	implements LLMProvider
-{
-	protected readonly blobConfig = { type: "llm", provider: "anthropic" };
+export class AnthropicLLM implements LLMProvider {
 	private apiKey: string;
 
 	constructor(apiKey: string) {
-		super();
 		this.apiKey = apiKey;
 	}
 
@@ -72,14 +61,6 @@ export class AnthropicLLM
 				"anthropic-version": "2023-06-01",
 			},
 		});
-	}
-
-	protected toFiles() {
-		return [];
-	}
-
-	protected async store(result: LLMGenerateResult) {
-		return result;
 	}
 
 	private model(modelId: string): LanguageModel {
@@ -107,14 +88,14 @@ export class AnthropicLLM
 		};
 	}
 
-	private buildRequest(params: LLMGenerateParams) {
+	private buildRequest(params: LLMRequest) {
 		const images = params.referenceImages ?? [];
 		const content: (FilePart | TextPart)[] = [
 			...images.map(toImagePart),
 			{ type: "text", text: params.prompt },
 		];
 		return {
-			model: this.model(params.model || DEFAULT_MODEL),
+			model: this.model(params.model),
 			instructions: params.systemPrompt || undefined,
 			messages: [{ role: "user" as const, content }],
 			maxOutputTokens: params.maxTokens || DEFAULT_MAX_TOKENS,
@@ -124,11 +105,11 @@ export class AnthropicLLM
 		};
 	}
 
-	protected async _generate(params: LLMGenerateParams) {
+	async generate(params: LLMRequest): Promise<LLMGenerateResult> {
 		const response = await generateText(this.buildRequest(params));
 		return {
 			text: response.text,
-			model: response.response.modelId ?? params.model ?? DEFAULT_MODEL,
+			model: response.response.modelId ?? params.model,
 			usage: {
 				inputTokens: response.usage.inputTokens ?? 0,
 				outputTokens: response.usage.outputTokens ?? 0,
@@ -138,7 +119,7 @@ export class AnthropicLLM
 
 	// fullStream, not textStream: textStream filters error parts out, which
 	// would end a failed generation as a clean, empty success.
-	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
+	async *stream(params: LLMRequest): AsyncGenerator<LLMStreamChunk> {
 		const result = streamText(this.buildRequest(params));
 		for await (const part of result.fullStream) {
 			if (part.type === "text-delta") yield { text: part.text, done: false };

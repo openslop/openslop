@@ -7,6 +7,7 @@ import {
 } from "@/lib/connectors/image/enums";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateRunwareKey, withRunware } from "../runware";
+import type { VendorParams } from "@/lib/connectors/models";
 import type { ImageProvider } from "../types";
 
 type RawImageResult = { data: string; format: ImageFormat } & WithMetadata;
@@ -14,7 +15,7 @@ type RawImageResult = { data: string; format: ImageFormat } & WithMetadata;
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
 export class RunwareImage
-	extends BaseProvider<ImageGenerateParams, RawImageResult>
+	extends BaseProvider<VendorParams<ImageGenerateParams>, RawImageResult>
 	implements ImageProvider
 {
 	protected readonly blobConfig = { type: "image", provider: "runware" };
@@ -40,12 +41,12 @@ export class RunwareImage
 		];
 	}
 
-	protected async _generate(params: ImageGenerateParams) {
+	protected async _generate(params: VendorParams<ImageGenerateParams>) {
 		const format = params.format ?? DEFAULT_IMAGE_FORMAT;
 		return withRunware(this.apiKey, async (runware) => {
 			const results = await runware.imageInference({
 				positivePrompt: params.prompt,
-				model: params.model || "bytedance:seedream@5.0-lite",
+				model: params.model,
 				width: params.width || 2848,
 				height: params.height || 1600,
 				outputType: "base64Data",

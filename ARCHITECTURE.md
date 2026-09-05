@@ -30,7 +30,7 @@ Users see models and providers; developers also see connectors. Each word means 
 
 - **Connectors** (`lib/connectors/`): what the editor calls. One class per media type, plugin-pipelined, serving every provider of that type.
 - **Gateways** (`lib/gateway/`): thin HTTP clients from connectors to our own routes. The provider a model names picks the route family: `/api/v1` for models OpenSlop hosts, `/api/third-party` for models a user brings a key for.
-- **Providers** (`lib/providers/`): server-side vendor adapters (Runware, ElevenLabs, Cartesia, Anthropic). The same classes serve both families; only where the key comes from differs.
+- **Providers** (`lib/providers/`): server-side vendor adapters (Runware, ElevenLabs, Cartesia, Anthropic). The same classes serve both families; only where the key comes from differs. A provider takes the request as its vendor's API does, the model id already resolved by the route, so no vendor falls back to a model of its own.
 
 ## Models and provider keys
 

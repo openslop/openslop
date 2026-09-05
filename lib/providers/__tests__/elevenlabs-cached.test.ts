@@ -35,6 +35,9 @@ async function loadProviders() {
 	};
 }
 
+const MUSIC_MODEL = "music_v1";
+const SFX_MODEL = "eleven_text_to_sound_v2";
+
 describe("ElevenLabs providers with pinecone cache enabled", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -57,7 +60,10 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		});
 
 		const { music: ElevenLabsMusic } = await loadProviders();
-		const result = await new ElevenLabsMusic("k").generate({ prompt: "jazz" });
+		const result = await new ElevenLabsMusic("k").generate({
+			prompt: "jazz",
+			model: MUSIC_MODEL,
+		});
 
 		expect(result.result.audio).toBe("https://blob/cached.mp3");
 		expect(result.metadata?.cached).toBe(true);
@@ -81,6 +87,7 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		const result = await new ElevenLabsMusic("k").generate({
 			prompt: "jazz",
 			durationSeconds: 5,
+			model: MUSIC_MODEL,
 		});
 
 		expect(result.result.audio).toBe("url"); // mocked AssetBundle.upload
@@ -114,6 +121,7 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		await new ElevenLabsSFX("k").generate({
 			prompt: "boom",
 			durationSeconds: 3,
+			model: SFX_MODEL,
 		});
 
 		expect(mockEmbedText).toHaveBeenCalledWith("boom");
@@ -133,7 +141,10 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		);
 
 		const { music: ElevenLabsMusic } = await loadProviders();
-		const result = await new ElevenLabsMusic("k").generate({ prompt: "rock" });
+		const result = await new ElevenLabsMusic("k").generate({
+			prompt: "rock",
+			model: MUSIC_MODEL,
+		});
 		expect(result.result.audio).toBe("url"); // fresh, not "stale"
 		expect(mockCompose).toHaveBeenCalled();
 	});

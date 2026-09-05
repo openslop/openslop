@@ -20,7 +20,7 @@ export function createVoiceSearchPlugin(): ConnectorPlugin<TTSGenerateParams> {
 		name: "voice-search",
 		async beforeGenerate(params, ctx) {
 			if (params.voiceId) return params;
-			if (!ctx?.searchVoices) {
+			if (!ctx.searchVoices) {
 				throw new Error(
 					"voice-search plugin requires searchVoices in PluginContext",
 				);

@@ -20,14 +20,14 @@ export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCha
 			parseCharacterNames(element.generationAttributes?.[CHARACTERS_ATTR]).map(
 				forCharacterAvatar,
 			),
-		beforeGenerate(params, ctx?: PluginContext<ParamsWithCharacters>) {
+		beforeGenerate(params, ctx: PluginContext<ParamsWithCharacters>) {
 			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
 			if (!characters) return params;
 
 			const referenceImages = compact(
 				parseCharacterNames(characters).map(
 					(name) =>
-						ctx?.dependencies?.[characterAvatarElementId(name)]?.imageUrl,
+						ctx.dependencies?.[characterAvatarElementId(name)]?.imageUrl,
 				),
 			);
 			if (referenceImages.length === 0) return rest;

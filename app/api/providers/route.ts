@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { providerKeysView, saveProviderKey } from "@/lib/api/providerKeys";
+import { providerKeyCheck, saveProviderKey } from "@/lib/api/providerKeys";
 import { MIN_KEY_LENGTH } from "@/lib/connectors/providerKey";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/request-schema-fields";
@@ -25,6 +25,6 @@ export const POST = createSessionRouteHandler({
 		const { provider, apiKey } = input;
 		await saveProviderKey(user.id, provider, apiKey);
 		const validation = await verifyProviderKey(user.id, provider, apiKey);
-		return NextResponse.json(await providerKeysView(user, validation));
+		return NextResponse.json(await providerKeyCheck(user, validation));
 	},
 });

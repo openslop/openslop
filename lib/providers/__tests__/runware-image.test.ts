@@ -19,6 +19,8 @@ vi.mock("@runware/sdk-js", () => ({
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareImage } from "../image/runware";
 
+const MODEL = "bytedance:seedream@5.0-lite";
+
 describe("RunwareImage", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -30,12 +32,12 @@ describe("RunwareImage", () => {
 		]);
 
 		const provider = new RunwareImage("test-key");
-		const result = await provider.generate({ prompt: "a cat" });
+		const result = await provider.generate({ prompt: "a cat", model: MODEL });
 
 		expect(result.result.image).toBe("url");
 		expect(mockImageInference).toHaveBeenCalledWith({
 			positivePrompt: "a cat",
-			model: "bytedance:seedream@5.0-lite",
+			model: MODEL,
 			width: 2848,
 			height: 1600,
 			outputType: "base64Data",
@@ -51,6 +53,7 @@ describe("RunwareImage", () => {
 
 		await new RunwareImage("test-key").generate({
 			prompt: "a cat",
+			model: MODEL,
 			format: "webp",
 		});
 
@@ -94,9 +97,9 @@ describe("RunwareImage", () => {
 		mockImageInference.mockResolvedValue([{}]);
 
 		const provider = new RunwareImage("test-key");
-		await expect(provider.generate({ prompt: "test" })).rejects.toThrow(
-			"No image data returned",
-		);
+		await expect(
+			provider.generate({ prompt: "test", model: MODEL }),
+		).rejects.toThrow("No image data returned");
 		expect(mockDisconnect).toHaveBeenCalled();
 	});
 
@@ -104,9 +107,9 @@ describe("RunwareImage", () => {
 		mockImageInference.mockRejectedValue(new Error("API error"));
 
 		const provider = new RunwareImage("test-key");
-		await expect(provider.generate({ prompt: "test" })).rejects.toThrow(
-			"API error",
-		);
+		await expect(
+			provider.generate({ prompt: "test", model: MODEL }),
+		).rejects.toThrow("API error");
 		expect(mockDisconnect).toHaveBeenCalled();
 	});
 });

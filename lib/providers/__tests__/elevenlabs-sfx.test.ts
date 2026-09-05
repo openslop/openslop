@@ -21,6 +21,8 @@ function mockReadableStream(data: Uint8Array) {
 	});
 }
 
+const MODEL = "eleven_text_to_sound_v2";
+
 describe("ElevenLabsSFX", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -32,7 +34,7 @@ describe("ElevenLabsSFX", () => {
 		mockConvert.mockResolvedValue(mockReadableStream(audio));
 
 		const provider = new ElevenLabsSFX("test-key");
-		const result = await provider.generate({ prompt: "boom" });
+		const result = await provider.generate({ prompt: "boom", model: MODEL });
 
 		expect(result.result.audio).toBe("url");
 		expect(result.metadata?.durationSec).toBe(2);
@@ -47,7 +49,11 @@ describe("ElevenLabsSFX", () => {
 		mockConvert.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
 
 		const provider = new ElevenLabsSFX("test-key");
-		await provider.generate({ prompt: "crash", durationSeconds: 10 });
+		await provider.generate({
+			prompt: "crash",
+			durationSeconds: 10,
+			model: MODEL,
+		});
 
 		expect(mockConvert).toHaveBeenCalledWith(
 			expect.objectContaining({ durationSeconds: 10 }),
