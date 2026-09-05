@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { ElementLength } from "@/lib/video/elementLengths";
 import { NARRATION_WORDS_PER_MINUTE } from "@/lib/video/videoLength";
 import { Hourglass } from "@/components/ui/icon";
-import { defineTool } from "./defineTool";
+import { defineTool, seconds } from "./defineTool";
 
 const WORDS_PER_SECOND = Math.round(NARRATION_WORDS_PER_MINUTE / 60);
 
@@ -13,7 +13,7 @@ const from = ({ words, dialogueIds }: ElementLength) =>
 		: `from ${words} words of dialogue after it (${dialogueIds.join(", ")})`;
 
 const line = (length: ElementLength) =>
-	`Scene ${length.sceneNumber} ${length.type} ${length.id}: ${length.seconds.toFixed(1)}s, ${from(length)}.`;
+	`Scene ${length.sceneNumber} ${length.type} ${length.id}: ${seconds(length.seconds)}, ${from(length)}.`;
 
 export const measureElementLengths = defineTool({
 	description: dedent`

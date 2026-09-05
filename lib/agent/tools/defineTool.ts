@@ -59,3 +59,12 @@ export const imageOutput = (text: string, ...urls: string[]) => ({
 	type: "content" as const,
 	value: [{ type: "text" as const, text }, ...urls.map(imagePart)],
 });
+
+/** The one way a tool refuses an id the canvas does not have. */
+export const noSuchElement = (id: string) =>
+	new Error(
+		`There is no element ${id} on the canvas. Read the script for the ids there are.`,
+	);
+
+/** A length as tool output speaks it. */
+export const seconds = (value: number) => `${value.toFixed(1)}s`;

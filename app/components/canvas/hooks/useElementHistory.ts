@@ -6,7 +6,10 @@ import {
 } from "@/lib/generation/ElementHistoryProvider";
 import type { ElementHistoryStatus } from "@/lib/generation/history";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import { versionKey, type ElementVersion } from "@/lib/generation/versions";
+import {
+	currentVersionIndex,
+	type ElementVersion,
+} from "@/lib/generation/versions";
 
 export type ElementVersionHistory = {
 	versions: readonly ElementVersion[];
@@ -18,16 +21,11 @@ export function useElementHistory(elementId: string): ElementVersionHistory {
 	const versions = useElementHistorySelector((h) => h.get(elementId));
 	const status = useElementHistorySelector((h) => h.status(elementId));
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(elementId));
-	const activeKey = snapshot.resultInputs
-		? versionKey({ inputs: snapshot.resultInputs, pinned: snapshot.pinned })
-		: null;
 
 	return {
 		versions,
 		status,
-		activeIndex: versions.findIndex(
-			(version) => versionKey(version) === activeKey,
-		),
+		activeIndex: currentVersionIndex(versions, snapshot),
 	};
 }
 

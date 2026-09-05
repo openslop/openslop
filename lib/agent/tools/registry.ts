@@ -8,7 +8,9 @@ import { measureTotalLength } from "./measureTotalLength";
 import { editScript } from "./editScript";
 import { fitDurations } from "./fitDurations";
 import { outlineStory } from "./outlineStory";
+import { readElementHistory } from "./readElementHistory";
 import { readScript } from "./readScript";
+import { restoreElementVersion } from "./restoreElementVersion";
 import { setCaptionStyle } from "./setCaptionStyle";
 import { setCharacter } from "./setCharacter";
 import { setLanguage } from "./setLanguage";
@@ -32,6 +34,8 @@ const TOOLS = {
 	view_reference_images: viewReferenceImages,
 	view_avatar: viewAvatar,
 	view_image: viewImage,
+	read_element_history: readElementHistory,
+	restore_element_version: restoreElementVersion,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
 	measure_element_lengths: measureElementLengths,

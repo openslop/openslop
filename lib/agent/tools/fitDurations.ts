@@ -9,18 +9,16 @@ import {
 } from "@/lib/video/durationFit";
 import type { ElementLength } from "@/lib/video/elementLengths";
 import { Hourglass } from "@/components/ui/icon";
-import { defineTool } from "./defineTool";
-
-const sec = (seconds: number) => `${seconds.toFixed(1)}s`;
+import { defineTool, seconds } from "./defineTool";
 
 const where = ({ sceneNumber, type, id }: ElementLength) =>
 	`Scene ${sceneNumber} ${type} ${id}`;
 
 const changeLine = ({ length, duration, needed }: DurationFit) =>
-	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${sec(needed)} of dialogue and leeway.`;
+	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${seconds(needed)} of dialogue and leeway.`;
 
 const shortLine = ({ length, needed }: DurationFit) =>
-	`${where(length)} needs ${sec(needed)} but ${DURATION_MAX}s is the longest a clip can be generated at; split the dialogue after it across more visuals.`;
+	`${where(length)} needs ${seconds(needed)} but ${DURATION_MAX}s is the longest a clip can be generated at; split the dialogue after it across more visuals.`;
 
 const report = (...lines: (string | false)[]) =>
 	lines.filter(Boolean).join("\n");

@@ -2,13 +2,24 @@
 
 import { useCallback } from "react";
 import type { Editor } from "slate";
-import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
+import {
+	applyNodeVersion,
+	clearEditor,
+	findNodeById,
+} from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import { getContentElements } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import { measureElementLengths } from "@/lib/video/elementLengths";
 import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { useElementHistoryStore } from "@/lib/generation/ElementHistoryProvider";
+import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
+import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { restoreElementVersion } from "@/lib/generation/restore";
+import { staleReason } from "@/lib/generation/staleReason";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
@@ -19,6 +30,7 @@ import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { elementState, summarizeVersions } from "../elementState";
 import type { AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
 
@@ -28,9 +40,12 @@ export function useAgentTools(editor: Editor) {
 	const store = useProjectStoreHandle();
 	const defaultModels = useResolveDefaultModels();
 	const queue = useGenerationQueue();
+	const history = useElementHistoryStore();
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
+			const nodeFor = (element: CanvasContentElement) =>
+				nodeBuilder(connectorConfig, store.getState())(forElement(element));
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
@@ -52,6 +67,29 @@ export function useAgentTools(editor: Editor) {
 						picture: pictureId
 							? { status, url: getPrimaryUrl(result, "image") }
 							: undefined,
+					};
+				},
+				elementStates: () =>
+					getContentElements(editor.children).map((element) =>
+						elementState(element.id, queue.getElementSnapshot(element.id), () =>
+							staleReason(nodeFor(element), queue),
+						),
+					),
+				elementHistory: async (id) => {
+					const found = findNodeById(editor, id);
+					if (!found) return undefined;
+					const [element, path] = found;
+					await history.load(id);
+					const versions = history.get(id);
+					return {
+						versions: summarizeVersions(nodeFor(element), versions, queue),
+						restore: async (number) => {
+							const version = versions[number - 1];
+							if (!version) throw new Error(`${id} has no version ${number}`);
+							const restored = restoreElementVersion(queue, history, version);
+							applyNodeVersion(editor, path, version);
+							await restored;
+						},
 					};
 				},
 				generateText: async (prompt, options) => {
@@ -99,6 +137,6 @@ export function useAgentTools(editor: Editor) {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, connectorConfig, runScript, store, defaultModels, queue],
+		[editor, connectorConfig, runScript, store, defaultModels, queue, history],
 	);
 }

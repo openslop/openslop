@@ -19,6 +19,11 @@ export const VOICE_TRAITS = {
 		.describe("How the voice sounds, in a few words."),
 };
 
+export const ELEMENT_ID = z
+	.string()
+	.min(1)
+	.describe("The element's id, exactly as read_script gives it.");
+
 export const named = (what: string) => ({
 	message: `name at least one ${what} to change`,
 });
