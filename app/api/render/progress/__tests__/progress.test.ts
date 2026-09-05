@@ -68,10 +68,13 @@ describe("POST /api/render/progress", () => {
 		expect(mockGetRenderProgress).not.toHaveBeenCalled();
 	});
 
-	it("reports fatal errors with the first error message", async () => {
+	it("reports the fatal error's message, skipping retried chunks", async () => {
 		mockGetRenderProgress.mockResolvedValue({
 			fatalErrorEncountered: true,
-			errors: [{ message: "lambda exploded" }],
+			errors: [
+				{ message: "chunk flaked", isFatal: true, willRetry: true },
+				{ message: "lambda exploded", isFatal: true, willRetry: false },
+			],
 		});
 
 		const res = await POST(makeRequest(validBody));

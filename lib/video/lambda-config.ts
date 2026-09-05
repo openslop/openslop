@@ -3,7 +3,7 @@ import { type AwsRegion, speculateFunctionName } from "@remotion/lambda/client";
 export const REGION: AwsRegion = "us-east-1";
 const RAM = 3008;
 const DISK = 10240;
-const TIMEOUT = 240;
+const TIMEOUT = 900;
 
 /** The deployed function is named from this spec, so deploys and callers share it. */
 export const LAMBDA_FUNCTION_SPEC = {

@@ -19,9 +19,10 @@ export const POST = createSessionRouteHandler({
 		});
 
 		if (progress.fatalErrorEncountered) {
+			const fatal = progress.errors.find((e) => e.isFatal && !e.willRetry);
 			return NextResponse.json<RenderProgress>({
 				type: "error",
-				message: progress.errors[0]?.message ?? "Render failed",
+				message: fatal?.message ?? "Render failed",
 			});
 		}
 		if (progress.done) {
