@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { UnreachableError } from "@/lib/clients/http";
 import { uploadImage } from "../uploadImage";
 
 const file = new File(["x"], "x.png", { type: "image/png" });
@@ -46,6 +47,6 @@ describe("uploadImage", () => {
 
 	it("propagates network failures", async () => {
 		fetchMock.mockRejectedValue(new TypeError("network down"));
-		await expect(uploadImage(file)).rejects.toThrow("network down");
+		await expect(uploadImage(file)).rejects.toBeInstanceOf(UnreachableError);
 	});
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { UnreachableError } from "@/lib/clients/http";
 import { awaitCompletion } from "../poll";
 
 type Job = { status: string; url?: string };
@@ -39,8 +40,12 @@ describe("awaitCompletion", () => {
 		expect(poll).toHaveBeenCalledTimes(3);
 	});
 
-	it("throws on timeout", async () => {
+	it("throws on timeout, whether the server answers or not", async () => {
 		const poll = vi.fn().mockResolvedValue(makeJob("processing"));
+		await expect(awaitCompletion(poll, "j1", isDone, 10, 50)).rejects.toThrow(
+			"timed out",
+		);
+		poll.mockRejectedValue(new UnreachableError(new TypeError()));
 		await expect(awaitCompletion(poll, "j1", isDone, 10, 50)).rejects.toThrow(
 			"timed out",
 		);
@@ -52,10 +57,21 @@ describe("awaitCompletion", () => {
 		expect(poll).toHaveBeenCalledWith("my-job-id");
 	});
 
-	it("propagates pollFn errors", async () => {
-		const poll = vi.fn().mockRejectedValue(new Error("network error"));
+	it("propagates errors the server answered with", async () => {
+		const poll = vi.fn().mockRejectedValue(new Error("404 Not Found"));
 		await expect(awaitCompletion(poll, "j1", isDone)).rejects.toThrow(
-			"network error",
+			"404 Not Found",
 		);
+		expect(poll).toHaveBeenCalledTimes(1);
+	});
+
+	it("keeps polling when a request never reaches the server", async () => {
+		const poll = vi
+			.fn()
+			.mockRejectedValueOnce(new UnreachableError(new TypeError()))
+			.mockResolvedValueOnce(makeJob("completed"));
+		const result = await awaitCompletion(poll, "j1", isDone, 10, 5000);
+		expect(result.status).toBe("completed");
+		expect(poll).toHaveBeenCalledTimes(2);
 	});
 });

@@ -50,9 +50,13 @@ describe("BaseVideoConnector", () => {
 			},
 		]);
 
-		const result = await new HttpVideoConnector(config).generate({
+		vi.useFakeTimers();
+		const pending = new HttpVideoConnector(config).generate({
 			prompt: "a sunset",
 		});
+		await vi.runAllTimersAsync();
+		const result = await pending;
+		vi.useRealTimers();
 		expect(result.videoUrl).toBe(VIDEO_URL);
 		expect(result.durationSec).toBe(5);
 		expect(fetch).toHaveBeenCalledTimes(3);

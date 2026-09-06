@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { apiFetch, apiJson } from "../http";
+import { apiFetch, apiJson, UnreachableError } from "../http";
 
 describe("apiFetch", () => {
 	let fetchMock: ReturnType<typeof vi.fn>;
@@ -7,6 +7,21 @@ describe("apiFetch", () => {
 	beforeEach(() => {
 		fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
+	});
+
+	it("types a fetch that never reached the server", async () => {
+		fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+
+		await expect(apiFetch("/api/render")).rejects.toBeInstanceOf(
+			UnreachableError,
+		);
+	});
+
+	it("leaves an abort as-is", async () => {
+		const abort = new DOMException("aborted", "AbortError");
+		fetchMock.mockRejectedValue(abort);
+
+		await expect(apiFetch("/api/render")).rejects.toBe(abort);
 	});
 
 	it("defaults to GET without a body", async () => {
