@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiJson } from "@/lib/clients/http";
+import { apiJson, UnreachableError } from "@/lib/clients/http";
 import type { VideoLayout } from "../types";
 import { runRender, type RenderUpdate } from "../render-client";
 
-vi.mock("@/lib/clients/http", () => ({ apiJson: vi.fn() }));
+vi.mock("@/lib/clients/http", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/clients/http")>()),
+	apiJson: vi.fn(),
+}));
 
 const apiJsonMock = vi.mocked(apiJson);
 
@@ -58,6 +61,22 @@ describe("runRender", () => {
 			method: "POST",
 			body: HANDLE,
 		});
+	});
+
+	it("keeps polling when a progress request never reaches the server", async () => {
+		apiJsonMock
+			.mockResolvedValueOnce(HANDLE)
+			.mockRejectedValueOnce(new UnreachableError(new TypeError()))
+			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1024 });
+
+		const seen = await collect(runRender(LAYOUT));
+
+		expect(seen.at(-1)).toEqual({
+			status: "done",
+			url: "/out.mp4",
+			size: 1024,
+		});
+		expect(apiJsonMock).toHaveBeenCalledTimes(3);
 	});
 
 	it("stops polling once the render is done", async () => {

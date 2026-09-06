@@ -42,6 +42,21 @@ export function buildUrl(url: string, params?: QueryParams): string {
 	return qs ? `${url}?${qs}` : url;
 }
 
+/** The request never reached the server (offline, stalled connection, DNS). */
+export class UnreachableError extends Error {
+	constructor(cause: unknown) {
+		super("Failed to reach the server", { cause });
+		this.name = "UnreachableError";
+	}
+}
+
+// fetch rejects with a TypeError only when no response came back at all;
+// an abort is a DOMException and stays as-is.
+function asUnreachable(error: unknown): never {
+	if (error instanceof TypeError) throw new UnreachableError(error);
+	throw error;
+}
+
 /** Calls one of our own API routes, surfacing its error envelope as a thrown `Error`. */
 export async function apiFetch(
 	url: string,
@@ -50,7 +65,7 @@ export async function apiFetch(
 	const res = await fetch(buildUrl(url, params), {
 		...buildInit(method, body),
 		signal,
-	});
+	}).catch(asUnreachable);
 	if (!res.ok) throw new Error(await readErrorMessage(res));
 	return res;
 }

@@ -1,4 +1,5 @@
-import { apiJson } from "@/lib/clients/http";
+import { apiJson, UnreachableError } from "@/lib/clients/http";
+import { POLL_INTERVAL_MS } from "@/lib/providers/poll";
 import { sleep } from "@/lib/utils";
 import type { RenderHandle, RenderProgress } from "./render-api";
 import type { VideoLayout } from "./types";
@@ -6,8 +7,6 @@ import type { VideoLayout } from "./types";
 export type RenderUpdate =
 	| { status: "rendering"; progress: number }
 	| { status: "done"; url: string; size: number };
-
-const POLL_INTERVAL_MS = 5000;
 
 /**
  * Starts a Lambda render and yields progress until the output is ready.
@@ -24,18 +23,20 @@ export async function* runRender(
 	yield { status: "rendering", progress: 0 };
 
 	for (;;) {
-		const result = await apiJson<RenderProgress>("/api/render/progress", {
-			method: "POST",
-			body: handle,
-		});
-
-		if (result.type === "error") throw new Error(result.message);
-		if (result.type === "done") {
-			yield { status: "done", url: result.url, size: result.size };
-			return;
+		try {
+			const result = await apiJson<RenderProgress>("/api/render/progress", {
+				method: "POST",
+				body: handle,
+			});
+			if (result.type === "error") throw new Error(result.message);
+			if (result.type === "done") {
+				yield { status: "done", url: result.url, size: result.size };
+				return;
+			}
+			yield { status: "rendering", progress: result.progress };
+		} catch (error) {
+			if (!(error instanceof UnreachableError)) throw error;
 		}
-
-		yield { status: "rendering", progress: result.progress };
 		await sleep(POLL_INTERVAL_MS);
 	}
 }
