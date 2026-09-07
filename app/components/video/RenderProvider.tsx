@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
 import { toast } from "sonner";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { ExportDoneToast, ExportProgressToast } from "./ExportToast";
@@ -24,7 +30,16 @@ const TOAST_OPTIONS = {
 
 export function RenderProvider({ children }: { children: ReactNode }) {
 	const { state, render, reset } = useRendering();
-	const [open, setOpen] = useState(false);
+	const [open, setOpenState] = useState(false);
+
+	// Sonner restores focus when it leaves the toast list, and Radix treats that
+	// as a focus-outside that dismisses the popover. Blur first so nothing listens.
+	const setOpen = useCallback((next: boolean) => {
+		if (next && document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		setOpenState(next);
+	}, []);
 
 	useEffect(() => {
 		if (open || state.status === "idle") {
@@ -63,7 +78,7 @@ export function RenderProvider({ children }: { children: ReactNode }) {
 			id: TOAST_ID,
 			position: "bottom-right",
 		});
-	}, [state, open]);
+	}, [state, open, setOpen]);
 
 	useEffect(() => {
 		return () => {
@@ -73,7 +88,7 @@ export function RenderProvider({ children }: { children: ReactNode }) {
 
 	const value = useMemo(
 		() => ({ state, render, reset, open, setOpen }),
-		[state, render, reset, open],
+		[state, render, reset, open, setOpen],
 	);
 	return <RenderContext value={value}>{children}</RenderContext>;
 }
