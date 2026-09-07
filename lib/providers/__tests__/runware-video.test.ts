@@ -20,6 +20,8 @@ vi.mock("@runware/sdk-js", () => ({
 
 import { RunwareVideo } from "../video/runware";
 
+const MODEL = "bytedance:seedance@2.0-fast";
+
 describe("RunwareVideo", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -34,7 +36,10 @@ describe("RunwareVideo", () => {
 			});
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.submit({ prompt: "a sunset" });
+			const result = await provider.submit({
+				prompt: "a sunset",
+				model: MODEL,
+			});
 
 			expect(result).toEqual({
 				url: undefined,
@@ -66,6 +71,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			await provider.submit({
 				prompt: "animate this",
+				model: MODEL,
 				referenceImages: ["data:image/png;base64,ref"],
 				frameImages: ["data:image/png;base64,frame"],
 			});
@@ -130,7 +136,7 @@ describe("RunwareVideo", () => {
 			]);
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.submit({ prompt: "test" });
+			const result = await provider.submit({ prompt: "test", model: MODEL });
 
 			expect(result.metadata?.jobId).toBe("job-arr");
 			expect(result.url).toBe("https://v.mp4");
@@ -142,7 +148,10 @@ describe("RunwareVideo", () => {
 				status: "processing",
 			});
 
-			await new RunwareVideo("test-key").submit({ prompt: "test" });
+			await new RunwareVideo("test-key").submit({
+				prompt: "test",
+				model: MODEL,
+			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({ skipResponse: true }),
@@ -153,7 +162,7 @@ describe("RunwareVideo", () => {
 			mockVideoInference.mockResolvedValue({});
 
 			await expect(
-				new RunwareVideo("test-key").submit({ prompt: "test" }),
+				new RunwareVideo("test-key").submit({ prompt: "test", model: MODEL }),
 			).rejects.toThrow("returned no task");
 		});
 
@@ -161,7 +170,9 @@ describe("RunwareVideo", () => {
 			mockVideoInference.mockRejectedValue(new Error("fail"));
 
 			const provider = new RunwareVideo("test-key");
-			await expect(provider.submit({ prompt: "test" })).rejects.toThrow("fail");
+			await expect(
+				provider.submit({ prompt: "test", model: MODEL }),
+			).rejects.toThrow("fail");
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 	});
@@ -174,7 +185,10 @@ describe("RunwareVideo", () => {
 			});
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.generate({ prompt: "a sunset" });
+			const result = await provider.generate({
+				prompt: "a sunset",
+				model: MODEL,
+			});
 
 			expect(result.provider).toBe("runware");
 			expect(result.metadata).toEqual({
@@ -193,6 +207,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			const result = await provider.generate({
 				prompt: "test",
+				model: MODEL,
 				duration: 10,
 			});
 
@@ -209,6 +224,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			const poll = await provider.poll("job-1", {
 				prompt: "test",
+				model: MODEL,
 				duration: 8,
 			});
 
@@ -226,7 +242,10 @@ describe("RunwareVideo", () => {
 			]);
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.poll("job-1", { prompt: "test" });
+			const result = await provider.poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
 
 			expect(result).toMatchObject({
 				kind: "ready",
@@ -244,7 +263,10 @@ describe("RunwareVideo", () => {
 			]);
 
 			const provider = new RunwareVideo("test-key");
-			const result = await provider.poll("job-1", { prompt: "test" });
+			const result = await provider.poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
 
 			expect(result).toEqual({
 				kind: "pending",
@@ -257,7 +279,7 @@ describe("RunwareVideo", () => {
 
 			const provider = new RunwareVideo("test-key");
 			await expect(
-				provider.poll("missing", { prompt: "test" }),
+				provider.poll("missing", { prompt: "test", model: MODEL }),
 			).rejects.toThrow("Job not found");
 			expect(mockDisconnect).toHaveBeenCalled();
 		});

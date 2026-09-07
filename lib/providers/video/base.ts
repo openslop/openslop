@@ -1,9 +1,12 @@
-import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
+import type { VendorParams } from "@/lib/connectors/models";
+import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { ProviderContract } from "../base";
 import { BaseProvider } from "../base";
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
+
+export type VideoRequest = VendorParams<VideoGenerateParams>;
 
 /** What a video runs for when the request names no duration, for asking and for reporting. */
 export const DEFAULT_VIDEO_DURATION_SEC = 5;
@@ -31,12 +34,12 @@ export type VideoPoll =
 	| { kind: "ready"; asset: VideoProviderResponse };
 
 export interface VideoProvider extends ProviderContract {
-	generate(params: VideoGenerateParams): Promise<VideoProviderResponse>;
-	poll(jobId: string, request: VideoGenerateParams): Promise<VideoPoll>;
+	generate(params: VideoRequest): Promise<VideoProviderResponse>;
+	poll(jobId: string, request: VideoRequest): Promise<VideoPoll>;
 }
 
 export abstract class BaseVideoProvider
-	extends BaseProvider<VideoGenerateParams, VideoJob, VideoProviderResponse>
+	extends BaseProvider<VideoRequest, VideoJob, VideoProviderResponse>
 	implements VideoProvider
 {
 	protected toFiles(r: VideoJob): BundleFile[] {
@@ -54,7 +57,7 @@ export abstract class BaseVideoProvider
 
 	protected abstract _poll(jobId: string): Promise<VideoJob>;
 
-	async poll(jobId: string, request: VideoGenerateParams): Promise<VideoPoll> {
+	async poll(jobId: string, request: VideoRequest): Promise<VideoPoll> {
 		const result = await this._poll(jobId);
 		if (this.toFiles(result).length === 0) {
 			return { kind: "pending", metadata: result.metadata };

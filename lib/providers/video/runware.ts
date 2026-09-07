@@ -1,6 +1,4 @@
-import type { VideoGenerateParams } from "@/lib/connectors/types";
-import { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
-import type { VideoJob, VideoJobStatus } from "./base";
+import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
 import {
@@ -23,13 +21,11 @@ function toVideoJob(video: {
 	};
 }
 
-const DEFAULT_MODEL = RUNWARE_VIDEO_MODELS["Seedance 2 Fast"].id;
-
 const DEFAULT_SIZE =
 	ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[DEFAULT_VIDEO_RESOLUTION];
 
 /** A frame-conditioned video takes its aspect from the frame, so it is sized by preset. */
-const sizeFor = (params: VideoGenerateParams) =>
+const sizeFor = (params: VideoRequest) =>
 	params.frameImages && params.resolution
 		? { resolution: params.resolution }
 		: {
@@ -50,11 +46,11 @@ export class RunwareVideo extends BaseVideoProvider {
 		return validateRunwareKey(this.apiKey);
 	}
 
-	async submit(params: VideoGenerateParams) {
+	async submit(params: VideoRequest) {
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({
 				positivePrompt: params.prompt,
-				model: params.model || DEFAULT_MODEL,
+				model: params.model,
 				...sizeFor(params),
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
@@ -74,7 +70,7 @@ export class RunwareVideo extends BaseVideoProvider {
 		});
 	}
 
-	protected async _generate(params: VideoGenerateParams): Promise<VideoJob> {
+	protected async _generate(params: VideoRequest): Promise<VideoJob> {
 		const job = await this.submit(params);
 		return {
 			...job,
