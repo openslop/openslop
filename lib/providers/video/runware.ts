@@ -1,6 +1,6 @@
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
-import type { VideoJob, VideoJobMetadata, VideoJobStatus } from "./base";
+import type { VideoJob, VideoJobStatus } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
 import {
@@ -13,7 +13,7 @@ function toVideoJob(video: {
 	taskUUID: string;
 	status: string;
 	videoURL?: string;
-}): VideoJob & { metadata: VideoJobMetadata } {
+}): VideoJob {
 	return {
 		url: video.videoURL,
 		metadata: {

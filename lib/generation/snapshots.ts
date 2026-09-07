@@ -45,8 +45,12 @@ const settled = (state: Record<string, ElementSnapshot>) =>
 		]),
 	);
 
+export type ActiveGenerationStatus = Exclude<GenerationStatus, "idle">;
+
 /** A generation is active from the moment it is queued until it settles. */
-export const isGenerationActive = (status: GenerationStatus) =>
+export const isGenerationActive = (
+	status: GenerationStatus,
+): status is ActiveGenerationStatus =>
 	status === "queued" || status === "generating";
 
 /**

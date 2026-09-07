@@ -1,27 +1,33 @@
 import { send } from "@vercel/queue";
 import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
-import type { BundleResponse } from "@/lib/api/asset-bundle";
-import type { ConnectorType } from "@/lib/connectors/types";
-import type { JobStatus } from "@/lib/gateway/base";
+import { z } from "zod";
+import {
+	BundleResponseSchema,
+	type BundleResponse,
+} from "@/lib/api/asset-bundle";
+import { CONNECTOR_TYPES, type ConnectorType } from "@/lib/connectors/types";
+import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
 const ASSET_QUEUE_TOPIC = "asset-generate";
 
-export type JobRow = {
-	id: string;
-	user_id: string;
-	project_id: string | null;
-	connector_type: ConnectorType;
-	status: JobStatus;
-	request: Record<string, unknown>;
-	result: BundleResponse | null;
-	metadata: Record<string, unknown>;
-	error: string | null;
-	created_at: string;
-	updated_at: string;
-};
+const JobRowSchema = z.object({
+	id: z.string(),
+	user_id: z.string(),
+	project_id: z.string().nullable(),
+	connector_type: z.enum(CONNECTOR_TYPES),
+	status: z.enum(JOB_STATUSES),
+	request: z.record(z.string(), z.unknown()),
+	result: BundleResponseSchema.nullable(),
+	metadata: z.record(z.string(), z.unknown()),
+	error: z.string().nullable(),
+	created_at: z.string(),
+	updated_at: z.string(),
+});
+
+export type JobRow = z.infer<typeof JobRowSchema>;
 
 export type AssetQueueMessage = {
 	jobId: string;
@@ -61,7 +67,7 @@ export async function getJob(
 		.eq("user_id", userId)
 		.maybeSingle();
 	if (error) throw new Error(`Failed to load job: ${error.message}`);
-	return (data as JobRow) ?? null;
+	return data ? JobRowSchema.parse(data) : null;
 }
 
 export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
@@ -72,7 +78,7 @@ export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
 		.eq("id", jobId)
 		.single();
 	if (error) throw new Error(`Job ${jobId} not found: ${error.message}`);
-	return data as JobRow;
+	return JobRowSchema.parse(data);
 }
 
 export async function updateJob(

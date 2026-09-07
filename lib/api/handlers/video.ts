@@ -31,7 +31,7 @@ export const videoHandler: JobHandler<
 		if (upstream.kind === "ready") {
 			return { kind: "completed", result: upstream.asset };
 		}
-		if (upstream.metadata?.status === "failed") {
+		if (upstream.metadata.status === "failed") {
 			throw new Error(upstream.metadata.error ?? "Video generation failed");
 		}
 		return { kind: "pending", metadata: { providerJobId } };
