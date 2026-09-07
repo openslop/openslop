@@ -3,11 +3,13 @@ import { cn } from "@/lib/utils";
 
 /**
  * Self-contained icon library backed by the masked-SVG token set in
- * `icons.css`. Each icon is a CSS variable (`--<name>-icon`) holding a
- * `currentColor` data-URI; the `.icon` base class paints it with the current
- * text color via `mask-image`, so icons inherit color and size (`1em`) like
- * text. Add a new icon by dropping its `--<name>-icon` variable into
- * `icons.css` and an `icon("<name>")` export below.
+ * `icons/`, one file per category (arrows, layout, design, text, media,
+ * timeline, files, actions, status, social, ai, misc). Each icon is a CSS
+ * variable (`--<name>-icon`) holding a `currentColor` data-URI; the `.icon`
+ * base class in `icons/base.css` paints it with the current text color via
+ * `mask-image`, so icons inherit color and size (`1em`) like text. Add a new
+ * icon by dropping its `--<name>-icon` variable into the matching category
+ * file and an `icon("<name>")` export below.
  */
 export interface IconProps extends ComponentPropsWithoutRef<"span"> {
 	/** Pixel size (number) or any CSS length. Defaults to 16. */
