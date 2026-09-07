@@ -29,8 +29,13 @@ function charactersOf(metadata: Metadata): string[] {
 	);
 }
 
-const stateLine = ({ id, state, detail }: ElementState) =>
-	`- ${id}: ${state}${detail ? ` (${detail})` : ""}`;
+function statesOf(states: ElementState[]): string[] {
+	if (states.length === 0) return ["None yet."];
+	return states.map(
+		({ id, state, detail }) =>
+			`- ${id}: ${state}${detail ? ` (${detail})` : ""}`,
+	);
+}
 
 /** Settings live in the per-request context block; this reads what it cannot carry. */
 export const readScript = defineTool({
@@ -55,7 +60,7 @@ export const readScript = defineTool({
 			section("Script", [
 				script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
-			section("Generation state", ctx.elementStates().map(stateLine)),
+			section("Generation state", statesOf(ctx.elementStates())),
 		].join("\n\n");
 	},
 	snapshot: true,
