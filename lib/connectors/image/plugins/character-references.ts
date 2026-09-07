@@ -3,7 +3,7 @@ import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
 } from "@/lib/canvas/characterNames";
-import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
+import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { forCharacterAvatar } from "./characterAvatarNode";
 
@@ -20,7 +20,7 @@ export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCha
 			parseCharacterNames(element.generationAttributes?.[CHARACTERS_ATTR]).map(
 				forCharacterAvatar,
 			),
-		beforeGenerate(params, ctx: PluginContext<ParamsWithCharacters>) {
+		beforeGenerate(params, ctx) {
 			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
 			if (!characters) return params;
 

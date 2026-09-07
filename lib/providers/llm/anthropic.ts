@@ -10,7 +10,10 @@ import {
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
 import { parseImageSource } from "@/lib/api/imageSource";
 import { stringifyError } from "@/lib/errors";
-import { DEFAULT_THINKING_LEVEL } from "@/lib/connectors/llm/enums";
+import {
+	DEFAULT_THINKING_LEVEL,
+	type ThinkingLevel,
+} from "@/lib/connectors/llm/enums";
 import { validateByProbe } from "../validate";
 import type { AgentModel } from "./agentModel";
 import type { LLMProvider, LLMRequest } from "./base";
@@ -71,7 +74,7 @@ export class AnthropicLLM implements LLMProvider {
 	 * `display` defaults to "omitted", which streams empty thinking blocks.
 	 * Summarized is what makes thoughts visible.
 	 */
-	private thinking(effort: string): SharedV3ProviderOptions {
+	private thinking(effort: ThinkingLevel): SharedV3ProviderOptions {
 		return {
 			anthropic: {
 				thinking: { type: "adaptive", display: "summarized" },
@@ -109,7 +112,7 @@ export class AnthropicLLM implements LLMProvider {
 		const response = await generateText(this.buildRequest(params));
 		return {
 			text: response.text,
-			model: response.response.modelId ?? params.model,
+			model: response.response.modelId,
 			usage: {
 				inputTokens: response.usage.inputTokens ?? 0,
 				outputTokens: response.usage.outputTokens ?? 0,

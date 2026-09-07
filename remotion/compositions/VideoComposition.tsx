@@ -13,6 +13,7 @@ import type { VideoLayout, ResolvedElement } from "@/lib/video/types";
 import { toFrames } from "@/lib/video/frames";
 import {
 	TRANSITION_DURATION_SEC,
+	LAYER_PREMOUNT_SEC,
 	VIDEO_PREMOUNT_SEC,
 } from "@/lib/video/transitions";
 import { audioFadeSec } from "@/lib/video/audioFade";
@@ -141,7 +142,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						key={`${type}-${seq.element.id}-${i}`}
 						from={toFrames(seq.start, fps)}
 						durationInFrames={toFrames(seq.duration, fps)}
-						premountFor={fps}
+						premountFor={toFrames(LAYER_PREMOUNT_SEC, fps)}
 					>
 						<SequenceContent element={seq.element} />
 					</Sequence>

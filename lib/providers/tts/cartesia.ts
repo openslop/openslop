@@ -6,11 +6,7 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import {
-	TTS_GENDERS,
-	type TTSGender,
-	type TTSSpeed,
-} from "@/lib/connectors/tts/enums";
+import { TTS_GENDERS, type TTSSpeed } from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
@@ -19,7 +15,10 @@ import type { VendorParams } from "@/lib/connectors/models";
 import type { TTSProvider } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
-import { GenerationRequest } from "@cartesia/cartesia-js/resources/tts.mjs";
+import type {
+	GenerationRequest,
+	RawEncoding,
+} from "@cartesia/cartesia-js/resources/tts.mjs";
 import type {
 	Voice,
 	VoiceListParams,
@@ -32,7 +31,7 @@ type RawTTSResult = {
 
 const SAMPLE_RATE = 44100;
 const NUM_CHANNELS = 1;
-const ENCODING = "pcm_f32le";
+const ENCODING: RawEncoding = "pcm_f32le";
 const CARTESIA_VOLUME = 1.0;
 
 const CARTESIA_SPEED: Record<TTSSpeed, number> = {
@@ -42,7 +41,7 @@ const CARTESIA_SPEED: Record<TTSSpeed, number> = {
 };
 
 const PCM_WAV_PARAMS: Record<
-	string,
+	RawEncoding,
 	{ audioFormat: number; bitsPerSample: number }
 > = {
 	pcm_f32le: { audioFormat: 3, bitsPerSample: 32 },
@@ -175,8 +174,8 @@ export class CartesiaTTS
 	}
 
 	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const { gender, limit, language } = params;
-		const results = await this._search(gender, language);
+		const { limit } = params;
+		const results = await this._search(params);
 		const queryText = buildQueryText(params);
 		const ranked = queryText
 			? await rankBySimilarity(results, queryText).catch((err) => {
@@ -190,10 +189,10 @@ export class CartesiaTTS
 		return ranked.slice(0, limit || ranked.length);
 	}
 
-	private async _search(
-		gender?: TTSGender,
-		language?: string,
-	): Promise<VoiceInfo[]> {
+	private async _search({
+		gender,
+		language,
+	}: VoiceSearchParams): Promise<VoiceInfo[]> {
 		const voices = await collectVoicesCached(
 			this.apiKey,
 			{ gender, language, expand: ["preview_file_url"] },
@@ -235,11 +234,7 @@ export class CartesiaTTS
 			};
 			for await (const response of ws.generate(req)) {
 				if (response.type === "chunk" && response.audio) {
-					audioChunks.push(
-						Buffer.isBuffer(response.audio)
-							? response.audio
-							: Buffer.from(response.audio),
-					);
+					audioChunks.push(response.audio);
 				}
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
