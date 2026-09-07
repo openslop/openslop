@@ -135,6 +135,7 @@ describe("against buildVideoLayout", () => {
 			url: `https://example.com/${node.id}`,
 			durationSec,
 			loops: 1,
+			loop: false,
 			volume: 10,
 			motion: "none",
 		};

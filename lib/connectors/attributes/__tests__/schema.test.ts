@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Play } from "@/components/ui/icon";
 import { AttributeSchema } from "../schema";
 
 describe("AttributeSchema", () => {
@@ -61,24 +62,50 @@ describe("AttributeSchema", () => {
 				edit: { kind: "enum", options: ["x"] },
 			},
 			{ key: "prompt", label: "Prompt", edit: { kind: "text" } },
+			{
+				key: "loop",
+				label: "Loop",
+				edit: {
+					kind: "toggle",
+					on: { icon: Play, label: "On" },
+					off: { icon: Play, label: "Off" },
+				},
+				default: "false",
+			},
 		]);
 
 		it("fills defaults for attributes the caller left unset", () => {
-			expect(schema.resolve({})).toEqual({ model: "a" });
+			expect(schema.resolve({})).toEqual({ model: "a", loop: "false" });
+		});
+
+		it("offers a toggle only its two boolean values", () => {
+			expect(schema.resolve({ loop: "true" })).toMatchObject({ loop: "true" });
+			expect(schema.resolve({ loop: "yes" })).toMatchObject({ loop: "false" });
 		});
 
 		it("falls back to the default when a value is not an offered option", () => {
-			expect(schema.resolve({ model: "nope" })).toEqual({ model: "a" });
+			expect(schema.resolve({ model: "nope" })).toEqual({
+				model: "a",
+				loop: "false",
+			});
 		});
 
 		it("drops an unoffered value when the def has no default", () => {
-			expect(schema.resolve({ motion: "nope" })).toEqual({ model: "a" });
+			expect(schema.resolve({ motion: "nope" })).toEqual({
+				model: "a",
+				loop: "false",
+			});
 		});
 
 		it("keeps offered values, free text and unknown keys", () => {
 			expect(
 				schema.resolve({ model: "b", prompt: "anything", extra: "kept" }),
-			).toEqual({ model: "b", prompt: "anything", extra: "kept" });
+			).toEqual({
+				model: "b",
+				loop: "false",
+				prompt: "anything",
+				extra: "kept",
+			});
 		});
 	});
 });

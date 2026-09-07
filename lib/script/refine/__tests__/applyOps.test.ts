@@ -35,6 +35,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 				...defaultAttributes,
 				...attrs,
 			}),
+			offers: () => true,
 		};
 	},
 }));

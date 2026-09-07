@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ANIMATED_IMAGE_ATTRIBUTES } from "@/lib/connectors/animated_image/attributes";
+import { animatedImageAttributesFor } from "@/lib/connectors/animated_image/attributes";
 import { IMAGE_ATTRIBUTES } from "@/lib/connectors/image/attributes";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
@@ -121,7 +121,7 @@ describe("elementSchema", () => {
 	it("resolves the connector type's schema from the element's own attributes", () => {
 		expect(elementSchema(element("image")).keys).toEqual(IMAGE_ATTRIBUTES.keys);
 		expect(elementSchema(element("animated_image")).keys).toEqual(
-			ANIMATED_IMAGE_ATTRIBUTES.keys,
+			animatedImageAttributesFor(DEFAULT_MODELS.animated_image).keys,
 		);
 		expect(elementSchema(element("narration")).keys).toEqual(
 			TTS_ATTRIBUTES.keys,

@@ -67,12 +67,13 @@ describe("still-frame plugin", () => {
 		});
 	});
 
-	it("keeps the still's model out of the video generation", async () => {
+	it("keeps the still's model and format out of the video generation", async () => {
 		const params = await plugin.beforeGenerate?.(
 			{
 				prompt: "a dark forest",
 				videoPrompt: "slow zoom in",
 				imageModel: "Slop Image v1",
+				format: "png",
 			},
 			ctx(STILL_URL),
 		);
@@ -329,6 +330,12 @@ describe("stillElement", () => {
 				imageModel: "Seedream 5 Lite",
 			}),
 		).toEqual({ provider: "runware", model: "Seedream 5 Lite" });
+	});
+
+	it("hands the still its format while keeping the animation's own attributes", () => {
+		const attrs = stillAttributes({ format: "png", resolution: "1080p" });
+		expect(attrs).toMatchObject({ format: "png" });
+		expect(attrs).not.toHaveProperty("resolution");
 	});
 
 	it("falls back to the recommended image model for an unknown still model", () => {

@@ -2,8 +2,15 @@ import type { IconComponent } from "@/components/ui/icon";
 import { resolveModel, type ConnectorModels } from "../models";
 import type { ConnectorType } from "../types";
 
+export const TOGGLE_VALUES: readonly string[] = ["false", "true"];
+
+/** One face of a toggle: what it shows and says while in that state. */
+export type ToggleFace = { icon: IconComponent; label: string };
+
 export type AttributeEdit =
 	| { kind: "enum"; options: readonly string[] }
+	/** A boolean stored as "true" or "false", switched between two iconed faces. */
+	| { kind: "toggle"; on: ToggleFace; off: ToggleFace }
 	/**
 	 * The model a generation runs on, picked through a control that can also
 	 * say what each model costs and which of them the account can reach. One
@@ -96,9 +103,11 @@ export class AttributeSchema {
 	}
 
 	/** Whether the schema would let the settings popover produce this value. */
-	private offers(key: string, value: string): boolean {
+	offers(key: string, value: string): boolean {
 		const edit = this.defs.find((def) => def.key === key)?.edit;
-		return edit && "options" in edit ? edit.options.includes(value) : true;
+		if (edit?.kind === "enum") return edit.options.includes(value);
+		if (edit?.kind === "toggle") return TOGGLE_VALUES.includes(value);
+		return true;
 	}
 
 	/**

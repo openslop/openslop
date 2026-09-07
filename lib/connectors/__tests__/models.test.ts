@@ -13,6 +13,7 @@ import {
 	resolveModel,
 } from "../models";
 import { CONNECTOR_TYPES } from "../types";
+import { DEFAULT_VIDEO_RESOLUTION } from "@/lib/video/aspectRatio";
 
 const SEEDREAM = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const SLOP_IMAGE = DEFAULT_MODELS.image;
@@ -21,6 +22,16 @@ describe("DEFAULT_MODELS", () => {
 	it("recommends a model every type actually offers", () => {
 		for (const type of CONNECTOR_TYPES) {
 			expect(hasModel(type, DEFAULT_MODELS[type]), type).toBe(true);
+		}
+	});
+});
+
+describe("VIDEO_MODELS", () => {
+	it("has every video model render at the resolution new elements default to", () => {
+		for (const model of listModels("video")) {
+			expect(modelEntry("video", model).resolutions, model.model).toContain(
+				DEFAULT_VIDEO_RESOLUTION,
+			);
 		}
 	});
 });
@@ -66,7 +77,10 @@ describe("modelEntry", () => {
 
 	it("throws for a pair nobody offers", () => {
 		expect(() =>
-			modelEntry("image", { provider: "anthropic", model: "Slop Image v1" }),
+			modelEntry("image", {
+				provider: "anthropic",
+				model: "Slop Image v1",
+			}),
 		).toThrow('"anthropic" has no image model "Slop Image v1"');
 	});
 });

@@ -1,7 +1,7 @@
 import { HttpAssetGateway } from "@/lib/gateway/http";
 import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
-import { ANIMATED_IMAGE_ATTRIBUTES } from "./attributes";
+import { animatedImageAttributesFor } from "./attributes";
 import type {
 	AnimatedImageGenerateParams,
 	AssetResult,
@@ -25,7 +25,7 @@ export class HttpAnimatedImageConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "video", config.baseUrl), config);
 	}
 
-	static attributesFor(_model: ModelRef): AttributeSchema {
-		return ANIMATED_IMAGE_ATTRIBUTES;
+	static attributesFor(model: ModelRef): AttributeSchema {
+		return animatedImageAttributesFor(model);
 	}
 }

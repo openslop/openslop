@@ -78,6 +78,7 @@ describe("resolveElements", () => {
 			url: "https://example.com/img.png",
 			durationSec: 3,
 			loops: 1,
+			loop: false,
 			volume: 10,
 			motion: "none",
 		});
@@ -92,6 +93,7 @@ describe("resolveElements", () => {
 			url: "https://example.com/nar.mp3",
 			durationSec: 8,
 			loops: 1,
+			loop: false,
 			volume: 10,
 			motion: "none",
 		});

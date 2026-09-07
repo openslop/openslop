@@ -41,6 +41,7 @@ describe("resolveAttributeSchema", () => {
 	it("resolves distinct schemas for image vs animated_image", () => {
 		expect(resolveAttributeSchema("image", DEFAULT_MODELS.image).keys).toEqual([
 			"referenceImagesOverride",
+			"format",
 			"motion",
 		]);
 		expect(
@@ -50,8 +51,12 @@ describe("resolveAttributeSchema", () => {
 			"imageProvider",
 			"imageModel",
 			"referenceImagesOverride",
+			"format",
 			"videoPrompt",
+			"resolution",
 			"duration",
+			"loop",
+			"volume",
 			"motion",
 		]);
 	});

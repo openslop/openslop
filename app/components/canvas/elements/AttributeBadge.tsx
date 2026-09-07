@@ -1,4 +1,5 @@
 import { useSlateStatic } from "slate-react";
+import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
@@ -104,6 +105,22 @@ export function AttributeBadge({
 	const handleSelect = (next: string) => {
 		updateElementAttrs(editor, element, { [attrKey]: next });
 	};
+
+	if (spec.edit.kind === "toggle") {
+		const { on, off } = spec.edit;
+		return (
+			<MediaToggle
+				value={value === "true" ? "true" : "false"}
+				onChange={handleSelect}
+				ariaLabel={spec.label}
+				options={[
+					{ value: "false", ...off },
+					{ value: "true", ...on },
+				]}
+				className={className}
+			/>
+		);
+	}
 
 	return (
 		<SelectMenu

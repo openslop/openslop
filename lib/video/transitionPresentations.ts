@@ -6,9 +6,8 @@ import { none } from "@remotion/transitions/none";
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import type { TransitionPresentation } from "@remotion/transitions";
+import type { Dimensions } from "./aspectRatio";
 import type { TransitionType } from "./transitions";
-
-type Dimensions = { width: number; height: number };
 
 // Each presentation has its own prop type — TransitionPresentation is invariant
 // in its generic, so we widen with `any` at the boundary.

@@ -50,6 +50,7 @@ const OPENSLOP_PROVIDERS: {
 	},
 	video: {
 		"Slop Video v1": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
+		"Slop Video v1 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 	},
 	sfx: { "Slop SFX v1": hosted("ELEVENLABS_API_KEY", ElevenLabsSFX, MockSFX) },
 	music: {

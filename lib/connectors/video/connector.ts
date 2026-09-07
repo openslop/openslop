@@ -1,7 +1,7 @@
 import { HttpAssetGateway } from "@/lib/gateway/http";
 import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
-import { VIDEO_ATTRIBUTES } from "./attributes";
+import { videoAttributesFor } from "./attributes";
 import type {
 	AssetResult,
 	ResolvedConnectorConfig,
@@ -20,7 +20,7 @@ export class HttpVideoConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "video", config.baseUrl), config);
 	}
 
-	static attributesFor(_model: ModelRef): AttributeSchema {
-		return VIDEO_ATTRIBUTES;
+	static attributesFor(model: ModelRef): AttributeSchema {
+		return videoAttributesFor(model);
 	}
 }

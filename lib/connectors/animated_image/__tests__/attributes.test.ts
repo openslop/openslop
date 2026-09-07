@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { ANIMATED_IMAGE_ATTRIBUTES } from "../attributes";
+import { animatedImageAttributesFor } from "../attributes";
 
-describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
-	const badges = ANIMATED_IMAGE_ATTRIBUTES.badgeAttributes;
+describe("animatedImageAttributesFor", () => {
+	const schema = animatedImageAttributesFor(DEFAULT_MODELS.animated_image);
+	const badges = schema.badgeAttributes;
 
 	it("offers the still's model beside the element's own", () => {
 		expect(Object.keys(badges)).toEqual(["imageModel"]);
@@ -19,15 +20,26 @@ describe("ANIMATED_IMAGE_ATTRIBUTES", () => {
 	});
 
 	it("keeps the still's provider off the settings popover", () => {
-		expect(
-			ANIMATED_IMAGE_ATTRIBUTES.settingsAttributes.imageProvider,
-		).toBeUndefined();
+		expect(schema.settingsAttributes.imageProvider).toBeUndefined();
 	});
 
 	it("defaults the still's pair, so a new element names the model it runs on", () => {
-		expect(ANIMATED_IMAGE_ATTRIBUTES.defaultAttributes).toMatchObject({
+		expect(schema.defaultAttributes).toMatchObject({
 			imageProvider: DEFAULT_MODELS.image.provider,
 			imageModel: DEFAULT_MODELS.image.model,
 		});
+	});
+
+	it("loops new animations by default", () => {
+		expect(schema.defaultAttributes).toMatchObject({ loop: "true" });
+	});
+
+	it("offers the resolutions the animation's own model renders at", () => {
+		expect(
+			animatedImageAttributesFor({
+				provider: "runware",
+				model: "Kling 3 Turbo",
+			}).settingsAttributes.resolution?.edit,
+		).toEqual({ kind: "enum", options: ["720p", "1080p"] });
 	});
 });

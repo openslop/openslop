@@ -17,6 +17,7 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		url: BLACK_PIXEL,
 		durationSec: opener.durationSec,
 		loops: 1,
+		loop: false,
 		volume: 0,
 		motion: "none",
 	};

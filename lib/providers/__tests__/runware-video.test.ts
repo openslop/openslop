@@ -53,9 +53,6 @@ describe("RunwareVideo", () => {
 					frameImages: undefined,
 					referenceImages: undefined,
 				},
-				settings: {
-					audio: false,
-				},
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
@@ -81,6 +78,46 @@ describe("RunwareVideo", () => {
 					},
 				}),
 			);
+		});
+
+		it("sizes a frame-conditioned video by resolution preset", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-k",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "animate this",
+				model: "klingai:kling-video@3.0-turbo",
+				frameImages: ["https://example.com/still.png"],
+				resolution: "1080p",
+				width: 1920,
+				height: 1080,
+			});
+
+			const request = mockVideoInference.mock.calls[0]?.[0];
+			expect(request).toMatchObject({ resolution: "1080p" });
+			expect(request).not.toHaveProperty("width");
+			expect(request).not.toHaveProperty("height");
+		});
+
+		it("sizes a prompted video by pixels even when a resolution is named", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-k2",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "a sunset",
+				model: "klingai:kling-video@3.0-turbo",
+				resolution: "1080p",
+				width: 1920,
+				height: 1080,
+			});
+
+			const request = mockVideoInference.mock.calls[0]?.[0];
+			expect(request).toMatchObject({ width: 1920, height: 1080 });
+			expect(request).not.toHaveProperty("resolution");
 		});
 
 		it("handles array response from videoInference", async () => {
