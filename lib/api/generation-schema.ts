@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { IMAGE_FORMATS } from "@/lib/connectors/image/enums";
 import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
 import {
 	MANAGED_PROVIDER,
@@ -13,6 +14,7 @@ import {
 	optionalImageDimensions,
 	optionalReferenceImages,
 	optionalVideoDuration,
+	optionalVideoResolution,
 	requiredVoiceId,
 } from "./request-schema-fields";
 
@@ -65,7 +67,7 @@ export const bodySchema = <
 		.and(model);
 
 export const IMAGE_FIELDS = {
-	format: z.string().optional(),
+	format: z.enum(IMAGE_FORMATS).optional(),
 	...optionalImageDimensions,
 	...optionalReferenceImages,
 } as const;
@@ -74,6 +76,7 @@ export const VIDEO_FIELDS = {
 	...optionalReferenceImages,
 	...optionalFrameImages,
 	...optionalVideoDuration,
+	...optionalVideoResolution,
 	...optionalImageDimensions,
 } as const;
 

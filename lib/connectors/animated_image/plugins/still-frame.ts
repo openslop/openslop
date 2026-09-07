@@ -29,10 +29,14 @@ import type { ElementSnapshot } from "@/lib/generation/snapshots";
 const VIDEO_ONLY_KEYS = [
 	"videoPrompt",
 	"duration",
+	"resolution",
 	...Object.values(ELEMENT_MODEL),
 ];
 
 const STILL_MODEL_KEYS = Object.values(STILL_MODEL);
+
+/** Attributes of the still, which the animation's video generation has no use for. */
+const STILL_ONLY_KEYS = ["format", ...STILL_MODEL_KEYS];
 
 const STILL = "still";
 
@@ -130,7 +134,7 @@ export function createStillFramePlugin(): ConnectorPlugin<
 			}
 			// The element's own text prompts the still, not the animation.
 			return {
-				...omit(params, "videoPrompt", STILL_MODEL_KEYS),
+				...omit(params, "videoPrompt", STILL_ONLY_KEYS),
 				prompt: videoPrompt,
 				frameImages: [imageUrl],
 			};

@@ -39,7 +39,7 @@ describe("RunwareImage", () => {
 			width: 2848,
 			height: 1600,
 			outputType: "base64Data",
-			outputFormat: "WEBP",
+			outputFormat: "JPG",
 			numberResults: 1,
 			referenceImages: undefined,
 		});
@@ -49,7 +49,10 @@ describe("RunwareImage", () => {
 	it("asks for the format it labels the bytes with", async () => {
 		mockImageInference.mockResolvedValue([{ imageBase64Data: "abc" }]);
 
-		await new RunwareImage("test-key").generate({ prompt: "a cat" });
+		await new RunwareImage("test-key").generate({
+			prompt: "a cat",
+			format: "webp",
+		});
 
 		expect(mockImageInference).toHaveBeenCalledWith(
 			expect.objectContaining({ outputFormat: "WEBP" }),

@@ -4,7 +4,9 @@ import type { GatewayClient } from "@/lib/gateway/base";
 import type { NodeSpec } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
+import type { VideoResolution } from "@/lib/video/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
+import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
 import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
 
@@ -48,9 +50,27 @@ export type ModelEntry = ModelMeta & {
 	id: string;
 };
 
+/** A video model also says which output resolutions the vendor renders it at. */
+export type VideoModelEntry = ModelEntry & {
+	resolutions: readonly VideoResolution[];
+};
+
+/** What each connector type's catalog entries carry. */
+export type ModelEntries = {
+	llm: ModelEntry;
+	tts: ModelEntry;
+	image: ModelEntry;
+	animated_image: VideoModelEntry;
+	video: VideoModelEntry;
+	sfx: ModelEntry;
+	music: ModelEntry;
+};
+
 export type ModelTable = Record<string, ModelEntry>;
 
-export type ModelsByProvider = Partial<Record<Provider, ModelTable>>;
+export type ModelsByProvider<E extends ModelEntry = ModelEntry> = Partial<
+	Record<Provider, Record<string, E>>
+>;
 
 /** Names are only unique within a provider, so the pair is the identity everywhere. */
 export type ModelRef = { provider: Provider; model: string };
@@ -181,7 +201,7 @@ export type SFXGenerateParams = ConnectorGenerateParams & {
 };
 
 export type ImageGenerateParams = ConnectorGenerateParams & {
-	format?: string;
+	format?: ImageFormat;
 	width?: number;
 	height?: number;
 	referenceImages?: string[];
@@ -190,9 +210,10 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 /** A video generation whose conditioning frame comes from the element's still. */
 export type AnimatedImageGenerateParams = VideoGenerateParams & {
 	videoPrompt?: string;
-	/** The image's own model. The still-frame plugin keeps it off the video call. */
+	/** The still's own model and format. The still-frame plugin keeps them off the video call. */
 	imageProvider?: string;
 	imageModel?: string;
+	format?: ImageFormat;
 };
 
 export type TTSResult = AssetResult & {
@@ -246,6 +267,7 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 	frameImages?: string[];
 	duration?: number;
+	resolution?: VideoResolution;
 	width?: number;
 	height?: number;
 };

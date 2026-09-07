@@ -1,16 +1,17 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
 import type { BundleFile } from "@/lib/api/asset-bundle";
+import {
+	DEFAULT_IMAGE_FORMAT,
+	IMAGE_MIME_TYPES,
+	type ImageFormat,
+} from "@/lib/connectors/image/enums";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateRunwareKey, withRunware } from "../runware";
 import type { ImageProvider } from "../types";
 
-type RawImageResult = {
-	data: string;
-	format: string;
-} & WithMetadata;
+type RawImageResult = { data: string; format: ImageFormat } & WithMetadata;
 
-// Runware defaults to JPG when the request names no format.
-const OUTPUT_FORMAT = "WEBP";
+const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
 export class RunwareImage
 	extends BaseProvider<ImageGenerateParams, RawImageResult>
@@ -34,12 +35,13 @@ export class RunwareImage
 				key: "image",
 				filename: `output.${r.format}`,
 				data: Buffer.from(r.data, "base64"),
-				contentType: `image/${r.format}`,
+				contentType: IMAGE_MIME_TYPES[r.format],
 			},
 		];
 	}
 
 	protected async _generate(params: ImageGenerateParams) {
+		const format = params.format ?? DEFAULT_IMAGE_FORMAT;
 		return withRunware(this.apiKey, async (runware) => {
 			const results = await runware.imageInference({
 				positivePrompt: params.prompt,
@@ -47,7 +49,7 @@ export class RunwareImage
 				width: params.width || 2848,
 				height: params.height || 1600,
 				outputType: "base64Data",
-				outputFormat: OUTPUT_FORMAT,
+				outputFormat: RUNWARE_FORMATS[format],
 				numberResults: 1,
 				referenceImages: params.referenceImages,
 			});
@@ -55,10 +57,7 @@ export class RunwareImage
 			const image = results?.[0];
 			if (!image?.imageBase64Data) throw new Error("No image data returned");
 
-			return {
-				data: image.imageBase64Data,
-				format: OUTPUT_FORMAT.toLowerCase(),
-			};
+			return { data: image.imageBase64Data, format };
 		});
 	}
 }

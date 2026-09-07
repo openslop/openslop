@@ -3,6 +3,7 @@ import {
 	AbsoluteFill,
 	Html5Audio,
 	Img,
+	Loop,
 	OffthreadVideo,
 	Sequence,
 	useVideoConfig,
@@ -55,6 +56,27 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 }
 
+/** A looping clip restarts each time it ends; a single pass holds its last frame for the rest of the scene. */
+function VisualVideo({ element }: { element: ResolvedElement }) {
+	const { fps } = useVideoConfig();
+	const video = (
+		<OffthreadVideo
+			src={element.url}
+			style={coverStyle}
+			volume={volumeToGain(element.volume)}
+		/>
+	);
+	if (!element.loop) return video;
+	return (
+		<Loop
+			durationInFrames={Math.max(1, toFrames(element.durationSec, fps))}
+			layout="none"
+		>
+			{video}
+		</Loop>
+	);
+}
+
 function SequenceContent({ element }: { element: ResolvedElement }) {
 	switch (element.layer) {
 		case "visual":
@@ -63,11 +85,7 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 					{ELEMENT_TYPES[element.type].outputKind === "image" ? (
 						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
 					) : (
-						<OffthreadVideo
-							src={element.url}
-							style={coverStyle}
-							volume={volumeToGain(element.volume)}
-						/>
+						<VisualVideo element={element} />
 					)}
 				</MotionLayer>
 			);

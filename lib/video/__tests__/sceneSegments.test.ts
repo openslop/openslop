@@ -112,6 +112,7 @@ const resolved = (
 	url,
 	durationSec: 0,
 	loops: 1,
+	loop: false,
 	volume: 10,
 	motion: "none",
 });

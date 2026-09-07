@@ -8,6 +8,7 @@ import { DEFAULT_TTS_MODEL, TTS_MODELS } from "./tts/models";
 import {
 	CONNECTOR_TYPES,
 	type ConnectorType,
+	type ModelEntries,
 	type ModelEntry,
 	type ModelPick,
 	type ModelRef,
@@ -22,7 +23,9 @@ import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
  * animated image animates a video model; the still it is made from picks
  * separately, from the image ones.
  */
-export const MODELS: Record<ConnectorType, ModelsByProvider> = {
+export const MODELS: {
+	[T in ConnectorType]: ModelsByProvider<ModelEntries[T]>;
+} = {
 	llm: LLM_MODELS,
 	tts: TTS_MODELS,
 	image: IMAGE_MODELS,
@@ -42,18 +45,19 @@ export const DEFAULT_MODELS: Record<ConnectorType, ModelRef> = {
 	music: DEFAULT_MUSIC_MODEL,
 };
 
-const tableFor = (type: ConnectorType, provider: string | undefined) =>
-	isProvider(provider) ? MODELS[type][provider] : undefined;
-
 export const hasModel = (
 	type: ConnectorType,
 	pick: ModelPick | undefined,
 ): pick is ModelRef =>
 	pick?.model !== undefined &&
-	tableFor(type, pick.provider)?.[pick.model] !== undefined;
+	isProvider(pick.provider) &&
+	MODELS[type][pick.provider]?.[pick.model] !== undefined;
 
-export function modelEntry(type: ConnectorType, ref: ModelRef): ModelEntry {
-	const entry = tableFor(type, ref.provider)?.[ref.model];
+export function modelEntry<T extends ConnectorType>(
+	type: T,
+	ref: ModelRef,
+): ModelEntries[T] {
+	const entry = MODELS[type][ref.provider]?.[ref.model];
 	if (!entry)
 		throw new Error(`"${ref.provider}" has no ${type} model "${ref.model}"`);
 	return entry;

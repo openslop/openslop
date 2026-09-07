@@ -25,6 +25,7 @@ function el(
 		url: `https://example.com/${id}`,
 		durationSec: 4,
 		loops: 1,
+		loop: false,
 		volume: 10,
 		motion: "none",
 		...overrides,

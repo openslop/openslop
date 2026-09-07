@@ -20,6 +20,7 @@ function el(overrides: Partial<ResolvedElement>): ResolvedElement {
 		url: "https://example.com/e1",
 		durationSec: 4,
 		loops: 1,
+		loop: false,
 		volume: 10,
 		motion: "none",
 		...overrides,

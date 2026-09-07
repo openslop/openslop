@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ANIMATED_IMAGE_ATTRIBUTES } from "../animated_image/attributes";
+import { animatedImageAttributesFor } from "../animated_image/attributes";
 import { HttpAnimatedImageConnector } from "../animated_image/connector";
 import { DEFAULT_VIDEO_MODEL } from "../video/models";
 import { mockGatewaySuccess } from "./_gateway-mock";
@@ -36,8 +36,8 @@ describe("BaseAnimatedImageConnector", () => {
 	});
 
 	it("keeps its own attribute schema rather than the video one", () => {
-		expect(HttpAnimatedImageConnector.attributesFor(DEFAULT_VIDEO_MODEL)).toBe(
-			ANIMATED_IMAGE_ATTRIBUTES,
-		);
+		expect(
+			HttpAnimatedImageConnector.attributesFor(DEFAULT_VIDEO_MODEL).keys,
+		).toEqual(animatedImageAttributesFor(DEFAULT_VIDEO_MODEL).keys);
 	});
 });

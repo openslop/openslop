@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
+import { VIDEO_RESOLUTIONS } from "@/lib/video/aspectRatio";
 import { parseImageSource } from "./imageSource";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
@@ -23,6 +24,10 @@ export const optionalDurationSeconds = {
 
 export const optionalVideoDuration = {
 	duration: optionalCoercedNumber,
+} as const;
+
+export const optionalVideoResolution = {
+	resolution: z.enum(VIDEO_RESOLUTIONS).optional(),
 } as const;
 
 export const referenceImageUrlOrDataUri = z

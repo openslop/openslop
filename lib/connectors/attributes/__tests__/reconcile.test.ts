@@ -69,4 +69,30 @@ describe("reconcileAttributes", () => {
 
 		expect(delta).toEqual({ volume: null });
 	});
+
+	it("resets a kept key to its default once the new schema stops offering its value", () => {
+		const oldSchema = AttributeSchema.from([
+			{
+				key: "resolution",
+				label: "Resolution",
+				edit: { kind: "enum", options: ["720p", "1080p"] },
+				default: "720p",
+			},
+		]);
+		const newSchema = AttributeSchema.from([
+			{
+				key: "resolution",
+				label: "Resolution",
+				edit: { kind: "enum", options: ["720p"] },
+				default: "720p",
+			},
+		]);
+
+		expect(
+			reconcileAttributes(oldSchema, newSchema, { resolution: "1080p" }),
+		).toEqual({ resolution: "720p" });
+		expect(
+			reconcileAttributes(oldSchema, newSchema, { resolution: "720p" }),
+		).toEqual({});
+	});
 });

@@ -20,6 +20,8 @@ export type ResolvedElement = {
 	url: string;
 	durationSec: number;
 	loops: number;
+	/** Whether a visual clip restarts when it ends, instead of holding its last frame. */
+	loop: boolean;
 	volume: number;
 	motion: MotionEffect;
 	captionTimestamps?: TextTimestamp[];

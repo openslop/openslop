@@ -15,7 +15,12 @@ import {
 } from "./motionEffectNames";
 
 /** Raw attribute keys that, when changed, require a layout recompute but are omitted from generation inputs */
-export const LAYOUT_ATTRIBUTE_KEYS = ["loops", "volume", "motion"] as const;
+export const LAYOUT_ATTRIBUTE_KEYS = [
+	"loops",
+	"loop",
+	"volume",
+	"motion",
+] as const;
 
 export const splitAttributes = (
 	attributes: Record<string, string>,
@@ -75,6 +80,9 @@ export function getLoops(element: CanvasContentElement): number {
 		fallback: DEFAULT_LOOPS,
 	});
 }
+
+export const getLoop = (element: CanvasContentElement): boolean =>
+	element.layoutAttributes?.loop === "true";
 
 export function getMotion(element: CanvasContentElement): MotionEffect {
 	const raw = element.layoutAttributes?.motion;

@@ -49,6 +49,7 @@ function el(
 		url: `https://example.com/${overrides.id}`,
 		durationSec: 0,
 		loops: 1,
+		loop: false,
 		volume: 10,
 		motion: "none",
 		...overrides,
@@ -106,6 +107,24 @@ describe("buildVideoLayout", () => {
 			expect(layout.series[1].start).toBeCloseTo(5 - OVERLAP, 5);
 			expect(seqs(layout, "narration")[0].start).toBeCloseTo(5 - OVERLAP, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(8 - OVERLAP, 5);
+		});
+
+		it("lays a looping clip down once; it repeats inside the scene it already has", () => {
+			const looped = el({
+				id: "clip1",
+				type: "clip",
+				durationSec: 3,
+				loop: true,
+			});
+			const untrimmedLayout = untrimmed([looped]);
+			expect(untrimmedLayout.series).toHaveLength(1);
+			expect(untrimmedLayout.series[0].duration).toBe(3);
+			expect(untrimmedLayout.sequences.clip).toBeUndefined();
+
+			const trimmed = buildVideoLayout([looped], {
+				trimVisualsToDialogue: true,
+			});
+			expect(trimmed.series[0].duration).toBe(1);
 		});
 
 		it("clamps a foreground shorter than the minimum duration", () => {

@@ -1,4 +1,10 @@
+import { Freeze, Repeat } from "@/components/ui/icon";
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
+import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
+import {
+	DEFAULT_VIDEO_RESOLUTION,
+	type VideoResolution,
+} from "@/lib/video/aspectRatio";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
 import type { AttributeDef } from "./schema";
 
@@ -46,3 +52,30 @@ export const loopsDef = (defaultValue: string): AttributeDef => ({
 	edit: { kind: "enum", options: LOOPS_OPTIONS },
 	default: defaultValue,
 });
+
+export const resolutionDef = (
+	options: readonly VideoResolution[],
+): AttributeDef => ({
+	key: "resolution",
+	label: "Resolution",
+	edit: { kind: "enum", options },
+	default: DEFAULT_VIDEO_RESOLUTION,
+});
+
+export const formatDef: AttributeDef = {
+	key: "format",
+	label: "Image format",
+	edit: { kind: "enum", options: IMAGE_FORMATS },
+	default: DEFAULT_IMAGE_FORMAT,
+};
+
+export const loopDef: AttributeDef = {
+	key: "loop",
+	label: "Loop",
+	edit: {
+		kind: "toggle",
+		off: { icon: Freeze, label: "Freeze on last frame" },
+		on: { icon: Repeat, label: "Loop" },
+	},
+	default: "true",
+};
