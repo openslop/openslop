@@ -15,6 +15,7 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";
+import type { VendorParams } from "@/lib/connectors/models";
 import type { TTSProvider } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
@@ -127,7 +128,7 @@ const collectVoicesCached = unstable_cache(
 );
 
 export class CartesiaTTS
-	extends BaseProvider<TTSGenerateParams, RawTTSResult>
+	extends BaseProvider<VendorParams<TTSGenerateParams>, RawTTSResult>
 	implements TTSProvider
 {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
@@ -208,7 +209,7 @@ export class CartesiaTTS
 		}));
 	}
 
-	protected async _generate(params: TTSGenerateParams) {
+	protected async _generate(params: VendorParams<TTSGenerateParams>) {
 		if (!params.voiceId) throw new Error("voiceId is required");
 		const ws = await this.client.tts.websocket();
 		await ws.connect();
@@ -217,7 +218,7 @@ export class CartesiaTTS
 			const audioChunks: Buffer[] = [];
 			const textTimestamps: TextTimestamp[] = [];
 			const req: GenerationRequest = {
-				model_id: params.model || "sonic-3.5",
+				model_id: params.model,
 				transcript: params.prompt,
 				voice: { mode: "id", id: params.voiceId },
 				output_format: {

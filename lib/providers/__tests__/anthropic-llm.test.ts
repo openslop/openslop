@@ -11,8 +11,10 @@ vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
 
 import { AnthropicLLM } from "../llm/anthropic";
 
+const MODEL_ID = "claude-opus-5";
+
 const model = new MockLanguageModelV3({
-	modelId: "claude-opus-5",
+	modelId: MODEL_ID,
 	// Matches what the real provider declares, so image URLs are passed through
 	// rather than downloaded and inlined.
 	supportedUrls: { "image/*": [/^https?:\/\/.*$/] },
@@ -75,7 +77,7 @@ describe("AnthropicLLM", () => {
 			respondWith("Hello world");
 
 			const provider = new AnthropicLLM("test-key");
-			const result = await provider.generate({ prompt: "hi" });
+			const result = await provider.generate({ prompt: "hi", model: MODEL_ID });
 
 			expect(result).toEqual({
 				text: "Hello world",
@@ -90,7 +92,10 @@ describe("AnthropicLLM", () => {
 		it("asks for summarized thinking, so thoughts are not empty", async () => {
 			respondWith("ok");
 
-			await new AnthropicLLM("test-key").generate({ prompt: "hi" });
+			await new AnthropicLLM("test-key").generate({
+				prompt: "hi",
+				model: MODEL_ID,
+			});
 
 			expect(lastCall().providerOptions?.anthropic).toEqual({
 				thinking: { type: "adaptive", display: "summarized" },
@@ -124,6 +129,7 @@ describe("AnthropicLLM", () => {
 
 			await new AnthropicLLM("test-key").generate({
 				prompt: "hi",
+				model: MODEL_ID,
 				temperature: 0.5,
 			});
 
@@ -135,6 +141,7 @@ describe("AnthropicLLM", () => {
 
 			await new AnthropicLLM("test-key").generate({
 				prompt: "describe",
+				model: MODEL_ID,
 				referenceImages: ["https://a/1.jpg", "https://a/2.jpg"],
 			});
 
@@ -158,6 +165,7 @@ describe("AnthropicLLM", () => {
 
 			await new AnthropicLLM("test-key").generate({
 				prompt: "describe",
+				model: MODEL_ID,
 				referenceImages: ["data:image/png;base64,iVBORw0KGgo="],
 			});
 
@@ -174,6 +182,7 @@ describe("AnthropicLLM", () => {
 			await expect(
 				provider.generate({
 					prompt: "describe",
+					model: MODEL_ID,
 					referenceImages: ["ftp://nope/img.png"],
 				}),
 			).rejects.toThrow(/must be an http\(s\) URL or a base64 data URI/);
@@ -187,6 +196,7 @@ describe("AnthropicLLM", () => {
 			await expect(
 				provider.generate({
 					prompt: "describe",
+					model: MODEL_ID,
 					referenceImages: ["data:image/svg+xml;base64,PHN2Zy8+"],
 				}),
 			).rejects.toThrow(/media type "image\/svg\+xml" is not supported/);
@@ -200,7 +210,10 @@ describe("AnthropicLLM", () => {
 
 			const provider = new AnthropicLLM("test-key");
 			const chunks: { text: string; done: boolean }[] = [];
-			for await (const chunk of provider.stream({ prompt: "hi" })) {
+			for await (const chunk of provider.stream({
+				prompt: "hi",
+				model: MODEL_ID,
+			})) {
 				chunks.push(chunk);
 			}
 
@@ -217,7 +230,10 @@ describe("AnthropicLLM", () => {
 			const provider = new AnthropicLLM("test-key");
 			const read = async () => {
 				const chunks: { text: string; done: boolean }[] = [];
-				for await (const chunk of provider.stream({ prompt: "hi" })) {
+				for await (const chunk of provider.stream({
+					prompt: "hi",
+					model: MODEL_ID,
+				})) {
 					chunks.push(chunk);
 				}
 				return chunks;

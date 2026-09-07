@@ -1,6 +1,9 @@
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { apiJson } from "@/lib/clients/http";
-import type { ProviderKeysView } from "@/lib/api/providerKeys";
+import type {
+	ProviderKeyCheck,
+	ProviderKeysView,
+} from "@/lib/api/providerKeys";
 import type {
 	ProviderKeyRecord,
 	ValidationResult,
@@ -43,9 +46,9 @@ export function createAccountStore(initial: AccountData): AccountStore {
 			await persistModels(next);
 			set({ models: next });
 		};
-		const applyView = ({ providerKeys, validation }: ProviderKeysView) => {
-			set({ providerKeys });
-			return validation ?? { ok: true as const };
+		const applyView = <T extends ProviderKeysView>(view: T): T => {
+			set({ providerKeys: view.providerKeys });
+			return view;
 		};
 
 		return {
@@ -53,18 +56,18 @@ export function createAccountStore(initial: AccountData): AccountStore {
 
 			saveKey: async (provider, apiKey) =>
 				applyView(
-					await apiJson<ProviderKeysView>("/api/providers", {
+					await apiJson<ProviderKeyCheck>("/api/providers", {
 						method: "POST",
 						body: { provider, apiKey },
 					}),
-				),
+				).validation,
 
 			testKey: async (provider) =>
 				applyView(
-					await apiJson<ProviderKeysView>(`/api/providers/${provider}`, {
+					await apiJson<ProviderKeyCheck>(`/api/providers/${provider}`, {
 						method: "POST",
 					}),
-				),
+				).validation,
 
 			removeKey: async (provider) => {
 				applyView(

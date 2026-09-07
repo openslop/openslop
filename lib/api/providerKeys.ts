@@ -156,17 +156,20 @@ export async function setKeyStatus(
 	);
 }
 
-export type ProviderKeysView = {
-	providerKeys: ProviderKeyRecord[];
-	validation?: ValidationResult;
+export type ProviderKeysView = { providerKeys: ProviderKeyRecord[] };
+
+/** A key change answered with whether that key works, beside the list it changed. */
+export type ProviderKeyCheck = ProviderKeysView & {
+	validation: ValidationResult;
 };
 
-export async function providerKeysView(
+export async function providerKeysView(user: User): Promise<ProviderKeysView> {
+	return { providerKeys: await listProviderKeys(user) };
+}
+
+export async function providerKeyCheck(
 	user: User,
-	validation?: ValidationResult,
-): Promise<ProviderKeysView> {
-	return {
-		providerKeys: await listProviderKeys(user),
-		...(validation && { validation }),
-	};
+	validation: ValidationResult,
+): Promise<ProviderKeyCheck> {
+	return { ...(await providerKeysView(user)), validation };
 }

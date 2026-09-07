@@ -21,6 +21,8 @@ function mockReadableStream(data: Uint8Array) {
 	});
 }
 
+const MODEL = "music_v1";
+
 describe("ElevenLabsMusic", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -32,14 +34,14 @@ describe("ElevenLabsMusic", () => {
 		mockCompose.mockResolvedValue(mockReadableStream(audio));
 
 		const provider = new ElevenLabsMusic("test-key");
-		const result = await provider.generate({ prompt: "jazz" });
+		const result = await provider.generate({ prompt: "jazz", model: MODEL });
 
 		expect(result.result.audio).toBe("url");
 		expect(result.metadata?.durationSec).toBe(1);
 		expect(mockCompose).toHaveBeenCalledWith({
 			prompt: "jazz",
 			musicLengthMs: undefined,
-			modelId: "music_v1",
+			modelId: MODEL,
 			outputFormat: "mp3_44100_128",
 			forceInstrumental: true,
 		});
@@ -49,7 +51,11 @@ describe("ElevenLabsMusic", () => {
 		mockCompose.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
 
 		const provider = new ElevenLabsMusic("test-key");
-		await provider.generate({ prompt: "rock", durationSeconds: 60 });
+		await provider.generate({
+			prompt: "rock",
+			durationSeconds: 60,
+			model: MODEL,
+		});
 
 		expect(mockCompose).toHaveBeenCalledWith(
 			expect.objectContaining({ musicLengthMs: 60000 }),

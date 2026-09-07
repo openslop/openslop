@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
-	providerKeysView,
 	deleteProviderKey,
 	MissingProviderKeyError,
+	providerKeyCheck,
+	providerKeysView,
 	readProviderKey,
 } from "@/lib/api/providerKeys";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
@@ -19,7 +20,7 @@ export const POST = createSessionParamRouteHandler({
 		const key = await readProviderKey(user.id, params.provider);
 		if (!key) throw new MissingProviderKeyError(params.provider);
 		const validation = await verifyProviderKey(user.id, params.provider, key);
-		return NextResponse.json(await providerKeysView(user, validation));
+		return NextResponse.json(await providerKeyCheck(user, validation));
 	},
 });
 

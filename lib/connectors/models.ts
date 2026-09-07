@@ -63,12 +63,11 @@ export function modelEntry<T extends ConnectorType>(
 	return entry;
 }
 
-export type VendorParams<TReq extends ModelRef> = Omit<
-	TReq,
-	"provider" | "model"
-> & { model: string };
+/** A request as the vendor's API takes it: the catalog pair swapped for the vendor's own model id. */
+export type VendorParams<TReq> = Omit<TReq, "provider" | "model"> & {
+	model: string;
+};
 
-/** A request as the provider's own API takes it: the pair swapped for the vendor's model id. */
 export function vendorParams<TReq extends ModelRef>(
 	type: ConnectorType,
 	request: TReq,

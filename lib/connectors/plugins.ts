@@ -4,36 +4,36 @@ import type { ConnectorPlugin, ModelRef, PluginContext } from "./types";
 
 /** Assert the plugin was given a gateway, returning the narrowed dependency. */
 export function requireGateway<P, R>(
-	ctx: PluginContext<P, R> | undefined,
+	ctx: PluginContext<P, R>,
 	plugin: string,
 ): GatewayClient<P, R> {
-	if (!ctx?.gateway)
+	if (!ctx.gateway)
 		throw new Error(`${plugin} plugin requires gateway context`);
 	return ctx.gateway;
 }
 
 /** Assert the plugin was given project state, returning it narrowed. */
 export function requireState<P, R>(
-	ctx: PluginContext<P, R> | undefined,
+	ctx: PluginContext<P, R>,
 	plugin: string,
 ): ProjectData {
-	if (!ctx?.state) throw new Error(`${plugin} plugin requires project state`);
+	if (!ctx.state) throw new Error(`${plugin} plugin requires project state`);
 	return ctx.state;
 }
 
 /** Assert the plugin was told the pair its connector runs on. */
 export function requireModel<P, R>(
-	ctx: PluginContext<P, R> | undefined,
+	ctx: PluginContext<P, R>,
 	plugin: string,
 ): ModelRef {
-	if (!ctx?.model) throw new Error(`${plugin} plugin requires a model`);
+	if (!ctx.model) throw new Error(`${plugin} plugin requires a model`);
 	return ctx.model;
 }
 
 export async function runBeforeGenerate<T>(
 	plugins: ConnectorPlugin[],
 	params: T,
-	ctx?: PluginContext,
+	ctx: PluginContext,
 ): Promise<T> {
 	let result = params;
 	for (const plugin of plugins) {
@@ -47,7 +47,7 @@ export async function runBeforeGenerate<T>(
 export async function runAfterGenerate<T>(
 	plugins: ConnectorPlugin[],
 	result: T,
-	ctx?: PluginContext,
+	ctx: PluginContext,
 ): Promise<T> {
 	let current = result;
 	for (const plugin of plugins) {
@@ -61,7 +61,7 @@ export async function runAfterGenerate<T>(
 export async function runTransformPrompt(
 	plugins: ConnectorPlugin[],
 	prompt: string,
-	ctx?: PluginContext,
+	ctx: PluginContext,
 ): Promise<string> {
 	let current = prompt;
 	for (const plugin of plugins) {
@@ -75,7 +75,7 @@ export async function runTransformPrompt(
 export async function runOnError(
 	plugins: ConnectorPlugin[],
 	error: string,
-	ctx?: PluginContext,
+	ctx: PluginContext,
 ): Promise<void> {
 	for (const plugin of plugins) {
 		if (plugin.onError) {

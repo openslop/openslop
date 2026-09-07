@@ -199,6 +199,8 @@ describe("pcmDurationSec", () => {
 	});
 });
 
+const MODEL = "sonic-3.5";
+
 describe("CartesiaTTS", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -230,6 +232,7 @@ describe("CartesiaTTS", () => {
 			const result = await provider.generate({
 				prompt: "hello world",
 				voiceId: "voice-1",
+				model: MODEL,
 			});
 
 			expect(result.result.audio).toBe("url");
@@ -258,6 +261,7 @@ describe("CartesiaTTS", () => {
 			const result = await provider.generate({
 				prompt: "hello",
 				voiceId: "voice-1",
+				model: MODEL,
 			});
 
 			expect(result.metadata?.durationSec).toBe(3);
@@ -275,6 +279,7 @@ describe("CartesiaTTS", () => {
 			const result = await provider.generate({
 				prompt: "hello",
 				voiceId: "voice-1",
+				model: MODEL,
 			});
 
 			expect(result.metadata?.durationSec).toBe(4);
@@ -285,7 +290,11 @@ describe("CartesiaTTS", () => {
 
 			const provider = new CartesiaTTS("test-key");
 			await expect(
-				provider.generate({ prompt: "hello", voiceId: "voice-1" }),
+				provider.generate({
+					prompt: "hello",
+					voiceId: "voice-1",
+					model: MODEL,
+				}),
 			).rejects.toThrow("Cartesia returned no audio for voice voice-1");
 			expect(mockClose).toHaveBeenCalled();
 		});
@@ -322,6 +331,7 @@ describe("CartesiaTTS", () => {
 			await provider.generate({
 				prompt: "test",
 				voiceId: "v1",
+				model: MODEL,
 				emotion: TTSEmotion.Excited,
 			});
 
@@ -341,7 +351,7 @@ describe("CartesiaTTS", () => {
 
 			const provider = new CartesiaTTS("test-key");
 			await expect(
-				provider.generate({ prompt: "test", voiceId: "v1" }),
+				provider.generate({ prompt: "test", voiceId: "v1", model: MODEL }),
 			).rejects.toThrow("ws error");
 			expect(mockClose).toHaveBeenCalled();
 		});

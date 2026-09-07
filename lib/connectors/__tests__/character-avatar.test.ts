@@ -19,12 +19,12 @@ describe("character-avatar plugin", () => {
 	it("passes an image result through untouched", () => {
 		const result = { imageUrl: "https://img/alice.png", durationSec: 0 };
 		const plugin = createCharacterAvatarPlugin("Alice");
-		expect(plugin.afterGenerate?.(result)).toEqual(result);
+		expect(plugin.afterGenerate?.(result, {})).toEqual(result);
 	});
 
 	it("throws when the generation produced no image", () => {
 		const plugin = createCharacterAvatarPlugin("Alice");
-		expect(() => plugin.afterGenerate?.({ durationSec: 0 })).toThrow(
+		expect(() => plugin.afterGenerate?.({ durationSec: 0 }, {})).toThrow(
 			/imageUrl/,
 		);
 	});
