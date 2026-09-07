@@ -1,7 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "../components/ui/icons.css";
+@import "../components/ui/icons/base.css";
+@import "../components/ui/icons/arrows.css";
+@import "../components/ui/icons/layout.css";
+@import "../components/ui/icons/design.css";
+@import "../components/ui/icons/text.css";
+@import "../components/ui/icons/media.css";
+@import "../components/ui/icons/timeline.css";
+@import "../components/ui/icons/files.css";
+@import "../components/ui/icons/actions.css";
+@import "../components/ui/icons/status.css";
+@import "../components/ui/icons/social.css";
+@import "../components/ui/icons/ai.css";
+@import "../components/ui/icons/misc.css";
 
 @custom-variant dark (&:is(.dark *));
 /* A control you cannot act on: either `disabled`, or `aria-disabled` when it

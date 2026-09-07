@@ -97,7 +97,7 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 | Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | Video     | [Remotion 4](https://remotion.dev) (composition, rendering, player)                                          |
 | Storage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (generated asset storage)                         |
-| Icons     | In-house masked-SVG set (`components/ui/icon.tsx` + `icons.css`), no icon dependency                         |
+| Icons     | In-house masked-SVG set (`components/ui/icon.tsx` + `icons/`), no icon dependency                            |
 
 ## Project structure
 
