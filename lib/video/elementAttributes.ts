@@ -89,10 +89,6 @@ export function getMotion(element: CanvasContentElement): MotionEffect {
 	return isMotionEffect(raw) ? raw : DEFAULT_MOTION;
 }
 
-/**
- * Stable signature over the raw layout-affecting attribute values, in
- * `LAYOUT_ATTRIBUTE_KEYS` order. Used to build the layout memo key.
- */
 export function layoutAttributeSignature(
 	element: CanvasContentElement,
 ): string {

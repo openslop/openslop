@@ -34,7 +34,7 @@ export function GenerationIndicator({
 	status,
 	seconds = 0,
 	size = "md",
-	className = "",
+	className,
 }: {
 	status: ActiveGenerationStatus;
 	seconds?: number;
@@ -58,7 +58,7 @@ export function GenerationIndicator({
 				)}
 				disabled
 			>
-				<Icon className={cn(sizes.icon, "text-foreground", animation)} />
+				<Icon className={cn(sizes.icon, animation)} />
 			</button>
 		</SimpleTooltip>
 	);

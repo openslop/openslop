@@ -9,11 +9,6 @@ async function fetchOk(url: string, label: string): Promise<Response> {
 	return res;
 }
 
-async function fetchJson<T>(url: string, label: string): Promise<T> {
-	const res = await fetchOk(url, label);
-	return res.json() as Promise<T>;
-}
-
 type AssetManifest = {
 	version: number;
 	type: string;
@@ -80,7 +75,8 @@ export class AssetBundle {
 	}
 
 	async fetchJson<T>(key: string): Promise<T> {
-		return fetchJson<T>(this.resolve(key), `Failed to fetch "${key}"`);
+		const res = await fetchOk(this.resolve(key), `Failed to fetch "${key}"`);
+		return res.json() as Promise<T>;
 	}
 
 	static buildUrl(type: string, provider: string, id: string): string {

@@ -13,6 +13,7 @@ import {
 import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
 import { resolveModel } from "@/lib/connectors/models";
 import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
+import { formatDef } from "@/lib/connectors/attributes/common";
 import { STILL_MODEL } from "../attributes";
 import {
 	derivedDependency,
@@ -36,7 +37,7 @@ const VIDEO_ONLY_KEYS = [
 const STILL_MODEL_KEYS = Object.values(STILL_MODEL);
 
 /** Attributes of the still, which the animation's video generation has no use for. */
-const STILL_ONLY_KEYS = ["format", ...STILL_MODEL_KEYS];
+const STILL_ONLY_KEYS = [formatDef.key, ...STILL_MODEL_KEYS];
 
 const STILL = "still";
 
@@ -97,9 +98,6 @@ export function pictureNode(node: GenerationNode): JobNode | null {
 	return makesPicture(target.job.elementType) ? target : null;
 }
 
-/**
- * The snapshot of the still a node depends on
- */
 export const stillSnapshot = (
 	node: GenerationNode,
 	queue: GenerationQueue,

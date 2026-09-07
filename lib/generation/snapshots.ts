@@ -89,8 +89,7 @@ export class SnapshotStore {
 
 	isActive = (id: string): boolean => isGenerationActive(this.get(id).status);
 
-	isBusy = (): boolean =>
-		Array.from(this.state.values()).some((s) => isGenerationActive(s.status));
+	isBusy = (): boolean => this.getActiveCount() > 0;
 
 	private count(predicate: (snap: ElementSnapshot) => boolean): number {
 		return Array.from(this.state.values()).filter(predicate).length;
@@ -115,20 +114,9 @@ export class SnapshotStore {
 
 	/** Clears in-flight progress, keeping whatever the element already had. */
 	resetToIdle(id: string) {
-		const { result, error, resultInputs, connectorType, pinned } = this.get(id);
-		if (result || error) {
-			this.state.set(id, {
-				status: "idle",
-				seconds: 0,
-				result,
-				error,
-				resultInputs,
-				connectorType,
-				pinned,
-			});
-		} else {
-			this.state.delete(id);
-		}
+		const { result, error } = this.get(id);
+		if (result || error) this.update(id, { status: "idle", seconds: 0 });
+		else this.state.delete(id);
 	}
 
 	commit(version: CommittedVersion): CommittedVersion {

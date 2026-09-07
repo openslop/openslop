@@ -18,3 +18,4 @@ export const AUDIO_FADE_SEC = 2;
 // Lead time to mount foreground video before it's visible so it decodes ahead
 // of the transition and doesn't stall the Player (which would stutter audio).
 export const VIDEO_PREMOUNT_SEC = 2;
+export const LAYER_PREMOUNT_SEC = 1;
