@@ -1,7 +1,6 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import { vendorParams, type VendorParams } from "@/lib/connectors/models";
 import type {
-	ConnectorType,
 	ImageGenerateParams,
 	ModelRef,
 	MusicGenerateParams,
@@ -9,13 +8,13 @@ import type {
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
 import { videoHandler } from "./handlers/video";
-import type { JobRow } from "./jobs";
+import type { JobConnectorType, JobRow } from "./jobs";
 import type { ProviderType } from "@/lib/providers/types";
 import { providerForPick } from "./route-families";
 
 type JobRequest<TReq extends ModelRef = ModelRef> = {
 	user_id: string;
-	connector_type: ConnectorType;
+	connector_type: JobConnectorType;
 	request: TReq;
 };
 
@@ -56,7 +55,7 @@ function assetHandler<TReq extends ModelRef>(
 	};
 }
 
-const HANDLERS: Partial<Record<ConnectorType, JobHandler>> = {
+const HANDLERS: Record<JobConnectorType, JobHandler> = {
 	image: assetHandler<ImageGenerateParams & ModelRef>((job) =>
 		providerForJob("image", job),
 	),
@@ -72,6 +71,5 @@ const HANDLERS: Partial<Record<ConnectorType, JobHandler>> = {
 	video: videoHandler,
 };
 
-export function getJobHandler(type: ConnectorType): JobHandler | undefined {
-	return HANDLERS[type];
-}
+export const getJobHandler = (type: JobConnectorType): JobHandler =>
+	HANDLERS[type];

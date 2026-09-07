@@ -6,18 +6,28 @@ import {
 	BundleResponseSchema,
 	type BundleResponse,
 } from "@/lib/api/asset-bundle";
-import { CONNECTOR_TYPES, type ConnectorType } from "@/lib/connectors/types";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
 const ASSET_QUEUE_TOPIC = "asset-generate";
 
+/** What an asset route queues. LLM turns stream, and an animated image reaches the worker as a video job. */
+export const JOB_CONNECTOR_TYPES = [
+	"image",
+	"music",
+	"sfx",
+	"tts",
+	"video",
+] as const;
+
+export type JobConnectorType = (typeof JOB_CONNECTOR_TYPES)[number];
+
 const JobRowSchema = z.object({
 	id: z.string(),
 	user_id: z.string(),
 	project_id: z.string().nullable(),
-	connector_type: z.enum(CONNECTOR_TYPES),
+	connector_type: z.enum(JOB_CONNECTOR_TYPES),
 	status: z.enum(JOB_STATUSES),
 	request: z.record(z.string(), z.unknown()),
 	result: BundleResponseSchema.nullable(),
@@ -31,13 +41,13 @@ export type JobRow = z.infer<typeof JobRowSchema>;
 
 export type AssetQueueMessage = {
 	jobId: string;
-	connectorType: ConnectorType;
+	connectorType: JobConnectorType;
 };
 
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
-	connectorType: ConnectorType;
+	connectorType: JobConnectorType;
 	request: Record<string, unknown>;
 }): Promise<{ id: string }> {
 	const supabase = createServiceClient();
@@ -99,7 +109,7 @@ export async function updateJob(
 
 export async function enqueueJob(
 	jobId: string,
-	connectorType: ConnectorType,
+	connectorType: JobConnectorType,
 	options?: { delaySeconds: number },
 ): Promise<void> {
 	const message: AssetQueueMessage = { jobId, connectorType };
