@@ -8,7 +8,7 @@ import { escapeXml } from "./xmlEscape";
 const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
 
 export function getElementText(element: ParsedElement): string {
-	return element.children.map((child) => child.text ?? "").join("");
+	return element.children.map((child) => child.text).join("");
 }
 
 /** What the user actually typed, with the caret marker leaf left behind. */
