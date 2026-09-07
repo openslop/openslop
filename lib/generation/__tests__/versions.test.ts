@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "../inputs";
-import { VersionLog, currentVersionIndex } from "../versions";
+import { VersionLog } from "../versions";
 
 const inputs = (prompt: string): GenerationInputs => ({
 	prompt,
@@ -93,39 +93,5 @@ describe("VersionLog", () => {
 		log.hydrate("a", [stored("same", "2026-01-01T00:00:00.000Z")]);
 
 		expect(log.get("a")).toEqual([fresh]);
-	});
-});
-
-describe("currentVersionIndex", () => {
-	const log = new VersionLog();
-	const generated = log.record(version("a"), AT);
-	const uploaded = log.record({ ...version("a", "up.png"), pinned: true }, AT);
-	const versions = log.get("a");
-
-	it("finds the take whose inputs and provenance made the result on the canvas", () => {
-		expect(
-			currentVersionIndex(versions, {
-				result: generated.result,
-				resultInputs: generated.inputs,
-				pinned: false,
-			}),
-		).toBe(0);
-		expect(
-			currentVersionIndex(versions, {
-				result: uploaded.result,
-				resultInputs: uploaded.inputs,
-				pinned: true,
-			}),
-		).toBe(1);
-	});
-
-	it("is -1 for an element with nothing on the canvas", () => {
-		expect(
-			currentVersionIndex(versions, {
-				result: null,
-				resultInputs: null,
-				pinned: false,
-			}),
-		).toBe(-1);
 	});
 });

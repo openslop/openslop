@@ -1,6 +1,6 @@
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
-import type { ElementState, ElementVersionSummary } from "../elementState";
+import type { ElementState } from "../elementState";
 import type { ElementLength } from "@/lib/video/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type {
@@ -17,13 +17,6 @@ export type ElementImage = {
 	picture: { status: GenerationStatus; url: string | undefined } | undefined;
 };
 
-/** An element's takes, and the way to put one back. */
-export type ElementHistoryRead = {
-	versions: ElementVersionSummary[];
-	/** Puts the numbered take back on the canvas, with the text and attributes that made it. */
-	restore: (version: number) => Promise<void>;
-};
-
 /** What a tool can do to the canvas, never the parts it is built from. */
 export type AgentToolContext = {
 	readScript: () => string;
@@ -32,10 +25,7 @@ export type AgentToolContext = {
 	referenceImages: () => string[];
 	avatarUrl: (name: string) => string | undefined;
 	elementImage: (id: string) => ElementImage | undefined;
-	/** Where every element on the canvas stands, in script order. */
 	elementStates: () => ElementState[];
-	/** Every take an element has produced, oldest first; undefined for an id not on the canvas. */
-	elementHistory: (id: string) => Promise<ElementHistoryRead | undefined>;
 	/** One focused LLM call, for tools whose whole job is a generation. */
 	generateText: (
 		prompt: string,

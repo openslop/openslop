@@ -2,7 +2,6 @@ import keyBy from "lodash/keyBy";
 import sortBy from "lodash/sortBy";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
-import type { NodeResult } from "./graph";
 import { serializeInputs, type GenerationInputs } from "./inputs";
 
 export type ElementVersion = {
@@ -26,16 +25,6 @@ export const versionKey = ({
 	pinned,
 }: Pick<CommittedVersion, "inputs" | "pinned">): string =>
 	`${pinned ? "supplied" : "generated"}:${serializeInputs(inputs)}`;
-
-/** The version an element shows now: the one made from the inputs its result carries. -1 when none. */
-export const currentVersionIndex = (
-	versions: readonly ElementVersion[],
-	{ resultInputs, pinned }: NodeResult,
-): number => {
-	if (!resultInputs) return -1;
-	const key = versionKey({ inputs: resultInputs, pinned });
-	return versions.findIndex((version) => versionKey(version) === key);
-};
 
 export class VersionLog {
 	private byElement = new Map<string, ElementVersion[]>();

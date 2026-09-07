@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ElementVersionSummary } from "../elementState";
-import type { AgentToolContext, ElementHistoryRead } from "../tools/context";
+import type { AgentToolContext } from "../tools/context";
 import {
 	SCRIPT_TOOLS,
 	SLOPPY_TOOLS,
@@ -31,7 +30,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	avatarUrl: () => undefined,
 	elementImage: () => undefined,
 	elementStates: () => [],
-	elementHistory: async () => undefined,
 	readMetadata: () => metadata,
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
@@ -40,13 +38,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	setCharacter: (name) => ({ name, created: !(name in metadata.characters) }),
 	...over,
 });
-
-const historyOf =
-	(
-		versions: ElementVersionSummary[],
-		restore: ElementHistoryRead["restore"] = async () => {},
-	): AgentToolContext["elementHistory"] =>
-	async () => ({ versions, restore });
 
 describe("executeToolCall", () => {
 	it("hands back the script and the settings around it", async () => {
@@ -68,7 +59,6 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
-		expect(outcome.ok && outcome.output).not.toContain("Generation state");
 	});
 
 	it("reports where each element's generation stands under the script", async () => {
@@ -76,13 +66,13 @@ describe("executeToolCall", () => {
 			{ toolName: "read_script", input: {} },
 			context({
 				elementStates: () => [
-					{ id: "n1", state: "generated", durationSec: 4.25 },
+					{ id: "n1", state: "generated" },
 					{
 						id: "img1",
 						state: "stale",
-						reason: "The prompt changed — regenerate to update",
+						detail: "The prompt changed — regenerate to update",
 					},
-					{ id: "ai1", state: "failed", error: "Provider returned 503" },
+					{ id: "ai1", state: "failed", detail: "Provider returned 503" },
 					{ id: "clip1", state: "ungenerated" },
 				],
 			}),
@@ -91,182 +81,11 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain(
 			[
 				"## Generation state",
-				"- n1: generated, 4.3s",
+				"- n1: generated",
 				"- img1: stale (The prompt changed — regenerate to update)",
 				"- ai1: failed (Provider returned 503)",
 				"- clip1: ungenerated",
 			].join("\n"),
-		);
-	});
-
-	it("lists an element's takes, oldest first, with what changed and which is current", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "read_element_history", input: { id: "img1" } },
-			context({
-				elementHistory: historyOf([
-					{
-						index: 1,
-						createdAt: "2026-01-01T00:00:00.000Z",
-						prompt: "a knight",
-						attributes: { motion: "pan" },
-						pinned: false,
-						current: false,
-						changed: [],
-					},
-					{
-						index: 2,
-						createdAt: "2026-01-02T00:00:00.000Z",
-						prompt: "a wizard",
-						attributes: {},
-						pinned: true,
-						durationSec: 4,
-						current: true,
-						changed: ["the prompt", "motion"],
-					},
-				]),
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toBe(
-			[
-				"img1 has 2 versions, oldest first. v2 is on the canvas now.",
-				'- v1; generated 2026-01-01T00:00:00.000Z; "a knight" (motion: pan)',
-				'- v2 (on the canvas now); uploaded 2026-01-02T00:00:00.000Z; "a wizard"; 4.0s; changed from v1: the prompt, motion',
-			].join("\n"),
-		);
-	});
-
-	it("says an element has no takes yet rather than handing back an empty list", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "read_element_history", input: { id: "img1" } },
-			context({ elementHistory: historyOf([]) }),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("no versions yet");
-	});
-
-	it("says an id has no element rather than inventing a history", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "read_element_history", input: { id: "nope" } },
-			context(),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("no element nope");
-	});
-
-	it("reports a history that could not be read rather than an empty one", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "read_element_history", input: { id: "img1" } },
-			context({
-				elementHistory: async () => {
-					throw new Error("history table unreachable");
-				},
-			}),
-		);
-
-		expect(outcome).toEqual({
-			ok: false,
-			errorText: "history table unreachable",
-		});
-	});
-
-	it("restores a take by its number and says the script changed", async () => {
-		const restored: number[] = [];
-		const outcome = await executeToolCall(
-			{
-				toolName: "restore_element_version",
-				input: { id: "img1", version: 1 },
-			},
-			context({
-				elementHistory: historyOf(
-					[
-						{
-							index: 1,
-							createdAt: "2026-01-01T00:00:00.000Z",
-							prompt: "a knight",
-							attributes: {},
-							pinned: false,
-							current: false,
-							changed: [],
-						},
-						{
-							index: 2,
-							createdAt: "2026-01-02T00:00:00.000Z",
-							prompt: "a wizard",
-							attributes: {},
-							pinned: false,
-							current: true,
-							changed: ["the prompt"],
-						},
-					],
-					async (version) => {
-						restored.push(version);
-					},
-				),
-			}),
-		);
-
-		expect(restored).toEqual([1]);
-		expect(outcome.ok && outcome.output).toContain(
-			'Restored v1 of img1: "a knight"',
-		);
-		expect(outcome.ok && outcome.output).toContain("read it again");
-	});
-
-	it("leaves the canvas alone when the take asked for is already on it", async () => {
-		const restore = vi.fn(async () => {});
-		const outcome = await executeToolCall(
-			{
-				toolName: "restore_element_version",
-				input: { id: "img1", version: 1 },
-			},
-			context({
-				elementHistory: historyOf(
-					[
-						{
-							index: 1,
-							createdAt: "2026-01-01T00:00:00.000Z",
-							prompt: "a knight",
-							attributes: {},
-							pinned: false,
-							current: true,
-							changed: [],
-						},
-					],
-					restore,
-				),
-			}),
-		);
-
-		expect(restore).not.toHaveBeenCalled();
-		expect(outcome.ok && outcome.output).toContain("already on the canvas");
-	});
-
-	it("names how many takes there are when asked for one that does not exist", async () => {
-		const outcome = await executeToolCall(
-			{
-				toolName: "restore_element_version",
-				input: { id: "img1", version: 3 },
-			},
-			context({
-				elementHistory: historyOf([
-					{
-						index: 1,
-						createdAt: "2026-01-01T00:00:00.000Z",
-						prompt: "a knight",
-						attributes: {},
-						pinned: false,
-						current: true,
-						changed: [],
-					},
-				]),
-			}),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain(
-			"img1 has 1 version, so there is no v3",
 		);
 	});
 
@@ -840,8 +659,6 @@ describe("SLOPPY_TOOLS", () => {
 			"view_reference_images",
 			"view_avatar",
 			"view_image",
-			"read_element_history",
-			"restore_element_version",
 			"outline_story",
 			"measure_total_length",
 			"measure_element_lengths",
@@ -885,7 +702,6 @@ describe("a call the editor cannot run", () => {
 describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
-			"read_element_history",
 			"read_script",
 			"view_avatar",
 			"view_image",
@@ -898,7 +714,6 @@ describe("tool flags", () => {
 			"adapt_script",
 			"edit_script",
 			"fit_durations",
-			"restore_element_version",
 			"write_script",
 		]);
 	});

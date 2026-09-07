@@ -7,7 +7,7 @@ import {
 } from "@/lib/project/types";
 import { Eye } from "@/components/ui/icon";
 import type { ElementState } from "../elementState";
-import { defineTool, seconds } from "./defineTool";
+import { defineTool } from "./defineTool";
 
 const UNSET = "unset";
 
@@ -29,20 +29,16 @@ function charactersOf(metadata: Metadata): string[] {
 	);
 }
 
-const stateLine = ({ id, state, reason, error, durationSec }: ElementState) => {
-	const length = durationSec === undefined ? "" : `, ${seconds(durationSec)}`;
-	const detail = reason ?? error;
-	return `- ${id}: ${state}${length}${detail ? ` (${detail})` : ""}`;
-};
+const stateLine = ({ id, state, detail }: ElementState) =>
+	`- ${id}: ${state}${detail ? ` (${detail})` : ""}`;
 
 /** Settings live in the per-request context block; this reads what it cannot carry. */
 export const readScript = defineTool({
 	description: dedent`
 	  Read the canvas: the project's characters, the script as OSML with the \`id\` of every
 	  element, then where each element's generation stands: ungenerated, queued, generating,
-	  generated, stale (and why), failed (and the error), or pinned to an upload. Generated
-	  audio and video carry their real length. The project's settings arrive with every
-	  request; this is the script.
+	  generated, stale (and why), failed (and the error), or pinned to an upload. The
+	  project's settings arrive with every request; this is the script.
 
 	  Read before your first edit, and again after anything changed the script. Ids and text
 	  move when a script is edited, so editing from a stale reading fails.
@@ -59,10 +55,8 @@ export const readScript = defineTool({
 			section("Script", [
 				script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
-			script && section("Generation state", ctx.elementStates().map(stateLine)),
-		]
-			.filter(Boolean)
-			.join("\n\n");
+			section("Generation state", ctx.elementStates().map(stateLine)),
+		].join("\n\n");
 	},
 	snapshot: true,
 });
