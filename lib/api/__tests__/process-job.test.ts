@@ -64,16 +64,6 @@ describe("processQueuedJob", () => {
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 	});
 
-	it("throws when no handler is registered for the connector type", async () => {
-		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
-		mockGetJobHandler.mockReturnValue(undefined);
-
-		await expect(processQueuedJob(JOB_ID)).rejects.toThrow(
-			"No job handler registered for image",
-		);
-		expect(mockUpdateJob).not.toHaveBeenCalled();
-	});
-
 	it("marks the job processing then completed with the handler result", async () => {
 		const job = pendingJob();
 		mockLoadJobForProcessing.mockResolvedValue(job);

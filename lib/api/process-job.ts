@@ -18,9 +18,6 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 
 	const connectorType = job.connector_type;
 	const handler = getJobHandler(connectorType);
-	if (!handler) {
-		throw new Error(`No job handler registered for ${connectorType}`);
-	}
 
 	if (job.status !== "processing") {
 		await updateJob(jobId, { status: "processing" });

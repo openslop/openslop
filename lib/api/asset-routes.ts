@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
-import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
-import { createJob, enqueueJob, getJob } from "./jobs";
+import type { ModelRef } from "@/lib/connectors/types";
+import { createJob, enqueueJob, getJob, type JobConnectorType } from "./jobs";
 import { bodySchema } from "./generation-schema";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
@@ -10,7 +10,7 @@ import type { RouteFamily } from "./route-families";
 type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
 
 type AssetRoute<TModels> = {
-	connectorType: ConnectorType;
+	connectorType: JobConnectorType;
 	models: TModels;
 	fields: z.ZodRawShape;
 	label: string;
