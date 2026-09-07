@@ -32,11 +32,8 @@ export function RenderProvider({ children }: { children: ReactNode }) {
 	const { state, render, reset } = useRendering();
 	const [open, setOpenState] = useState(false);
 
-	// The toasts open the popover from inside sonner's list. Sonner returns focus
-	// to whatever had it before the toast as soon as focus leaves the list, and
-	// Radix reads that restored focus as a focus-outside and dismisses the popover
-	// it just opened. Dropping focus first lets the restore run while nothing is
-	// listening.
+	// Sonner restores focus when it leaves the toast list, and Radix treats that
+	// as a focus-outside that dismisses the popover. Blur first so nothing listens.
 	const setOpen = useCallback((next: boolean) => {
 		if (next && document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
