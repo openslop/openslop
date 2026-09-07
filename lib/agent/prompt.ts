@@ -58,10 +58,11 @@ const ROLE = dedent`
 const LIMITS = dedent`
   ## Limits
 
-  You cannot generate media, or render or export the video. Say so plainly if asked,
-  and never claim otherwise. After edit_script, changed elements are NOT auto-regenerated:
-  tell the user to press generate in the toolbar for the whole project, or on a scene or
-  element for just that part. Name buttons by where they sit; their labels change.
+  You cannot run generation, or render or export the video. Say so plainly if asked, and
+  never claim otherwise. Nothing regenerates on its own: after changing the script, read it
+  and tell the user which elements are stale or ungenerated, and to press generate in the
+  toolbar for the whole project, or on a scene or element for just that part. Name buttons
+  by where they sit; their labels change.
 `;
 
 const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");

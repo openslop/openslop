@@ -4,11 +4,15 @@ import { useCallback } from "react";
 import type { Editor } from "slate";
 import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import { getContentElements } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import { measureElementLengths } from "@/lib/video/elementLengths";
 import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
+import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { staleReason } from "@/lib/generation/staleReason";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
@@ -19,6 +23,7 @@ import { applyScriptEdit } from "@/lib/generation/scriptEdit";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { elementState } from "../elementState";
 import type { AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
 
@@ -53,6 +58,16 @@ export function useAgentTools(editor: Editor) {
 							? { status, url: getPrimaryUrl(result, "image") }
 							: undefined,
 					};
+				},
+				elementStates: () => {
+					const buildNode = nodeBuilder(connectorConfig, store.getState());
+					return getContentElements(editor.children).map((element) =>
+						elementState(
+							element.id,
+							queue.getElementSnapshot(element.id),
+							staleReason(buildNode(forElement(element)), queue),
+						),
+					);
 				},
 				generateText: async (prompt, options) => {
 					const model = defaultModels().llm;

@@ -59,3 +59,5 @@ export const imageOutput = (text: string, ...urls: string[]) => ({
 	type: "content" as const,
 	value: [{ type: "text" as const, text }, ...urls.map(imagePart)],
 });
+
+export const seconds = (value: number) => `${value.toFixed(1)}s`;

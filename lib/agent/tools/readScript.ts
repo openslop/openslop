@@ -6,6 +6,7 @@ import {
 	type MetadataVoice,
 } from "@/lib/project/types";
 import { Eye } from "@/components/ui/icon";
+import type { ElementState } from "../elementState";
 import { defineTool } from "./defineTool";
 
 const UNSET = "unset";
@@ -28,11 +29,21 @@ function charactersOf(metadata: Metadata): string[] {
 	);
 }
 
+function statesOf(states: ElementState[]): string[] {
+	if (states.length === 0) return ["None yet."];
+	return states.map(
+		({ id, state, detail }) =>
+			`- ${id}: ${state}${detail ? ` (${detail})` : ""}`,
+	);
+}
+
 /** Settings live in the per-request context block; this reads what it cannot carry. */
 export const readScript = defineTool({
 	description: dedent`
-	  Read the canvas: the project's characters, then the script as OSML with the \`id\` of
-	  every element. The project's settings arrive with every request; this is the script.
+	  Read the canvas: the project's characters, the script as OSML with the \`id\` of every
+	  element, then where each element's generation stands: ungenerated, queued, generating,
+	  generated, stale (and why), failed (and the error), or pinned to an upload. The
+	  project's settings arrive with every request; this is the script.
 
 	  Read before your first edit, and again after anything changed the script. Ids and text
 	  move when a script is edited, so editing from a stale reading fails.
@@ -44,12 +55,12 @@ export const readScript = defineTool({
 	execute: async (_input, ctx) => {
 		const metadata = ctx.readMetadata();
 		const script = ctx.readScript().trim();
-
 		return [
 			section("Characters", charactersOf(metadata)),
 			section("Script", [
 				script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
+			section("Generation state", statesOf(ctx.elementStates())),
 		].join("\n\n");
 	},
 	snapshot: true,

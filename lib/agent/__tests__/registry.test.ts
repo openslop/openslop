@@ -29,6 +29,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	referenceImages: () => [],
 	avatarUrl: () => undefined,
 	elementImage: () => undefined,
+	elementStates: () => [],
 	readMetadata: () => metadata,
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
@@ -58,6 +59,37 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
+		expect(outcome.ok && outcome.output).toContain(
+			"## Generation state\nNone yet.",
+		);
+	});
+
+	it("reports where each element's generation stands under the script", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_script", input: {} },
+			context({
+				elementStates: () => [
+					{ id: "n1", state: "generated" },
+					{
+						id: "img1",
+						state: "stale",
+						detail: "The prompt changed — regenerate to update",
+					},
+					{ id: "ai1", state: "failed", detail: "Provider returned 503" },
+					{ id: "clip1", state: "ungenerated" },
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			[
+				"## Generation state",
+				"- n1: generated",
+				"- img1: stale (The prompt changed — regenerate to update)",
+				"- ai1: failed (Provider returned 503)",
+				"- clip1: ungenerated",
+			].join("\n"),
+		);
 	});
 
 	it("reports what an edit could not apply, so the model can fix the call", async () => {
