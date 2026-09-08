@@ -141,13 +141,7 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for how these layers interact.
 
 ## Contributing
 
-Contributions welcome. Fork it, make your changes, run the checks, open a PR.
-
-Read these first:
-
-- [`CONVENTIONS.md`](CONVENTIONS.md) is the coding style. The codebase is rigid and opinionated on purpose, so match what's there.
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) shows how connectors, gateways, providers and the generation queue fit together.
-- [`AGENTS.md`](AGENTS.md) has the workflow and tooling notes for AI coding agents
+Contributions welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the check sequence, and what we look for in a PR.
 
 ## Community
 
