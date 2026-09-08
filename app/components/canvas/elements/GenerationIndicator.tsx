@@ -47,19 +47,17 @@ export function GenerationIndicator({
 
 	return (
 		<SimpleTooltip label={label}>
-			<button
-				type="button"
+			<span
+				role="status"
 				aria-label={label}
 				className={cn(
-					"relative flex items-center justify-center rounded-full overflow-hidden text-foreground",
+					"relative flex items-center justify-center rounded-full overflow-hidden text-on-media-foreground transition-[opacity,background-color]",
 					sizes.wrapper,
 					className,
-					"transition-[opacity,background-color] disabled:cursor-not-allowed",
 				)}
-				disabled
 			>
 				<Icon className={cn(sizes.icon, animation)} />
-			</button>
+			</span>
 		</SimpleTooltip>
 	);
 }

@@ -4,7 +4,9 @@ import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
+import { Button } from "@/components/ui/button";
 import {
+	ACCESS_CODE_LENGTH,
 	type CodeEntry,
 	emptyAccessCode,
 	eraseBefore,
@@ -12,6 +14,8 @@ import {
 	pasteCode,
 	typeChar,
 } from "@/lib/auth/accessCode";
+
+const INCOMPLETE_CODE = `Enter all ${ACCESS_CODE_LENGTH} characters of your access code`;
 
 export default function AccessCodeInput() {
 	const router = useRouter();
@@ -78,47 +82,70 @@ export default function AccessCodeInput() {
 		apply(entry);
 	};
 
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!isComplete(values)) {
+			setError(INCOMPLETE_CODE);
+			return;
+		}
+		submitCode(values.join(""));
+	};
+
 	return (
-		<div>
-			<div className="flex gap-2 justify-center">
-				{values.map((val, i) => (
-					<input
-						key={i}
-						ref={(el) => {
-							inputRefs.current[i] = el;
-						}}
-						type="text"
-						inputMode="text"
-						maxLength={1}
-						value={val}
-						onChange={(e) => handleChange(i, e.target.value)}
-						onKeyDown={(e) => handleKeyDown(i, e)}
-						onPaste={i === 0 ? handlePaste : undefined}
-						disabled={loading}
-						aria-label={`Code character ${i + 1}`}
-						spellCheck={false}
-						autoComplete="off"
-						className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
-						autoFocus={i === 0}
-					/>
-				))}
+		<form
+			onSubmit={handleSubmit}
+			className="flex w-full flex-col gap-4 sm:gap-6"
+		>
+			<div>
+				<div className="flex gap-2 justify-center">
+					{values.map((val, i) => (
+						<input
+							key={i}
+							ref={(el) => {
+								inputRefs.current[i] = el;
+							}}
+							type="text"
+							inputMode="text"
+							maxLength={1}
+							value={val}
+							onChange={(e) => handleChange(i, e.target.value)}
+							onKeyDown={(e) => handleKeyDown(i, e)}
+							onPaste={i === 0 ? handlePaste : undefined}
+							disabled={loading}
+							aria-label={`Code character ${i + 1}`}
+							spellCheck={false}
+							autoComplete="off"
+							className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
+							autoFocus={i === 0}
+						/>
+					))}
+				</div>
+				{error && (
+					<p
+						aria-live="polite"
+						className="mt-3 text-center text-body text-destructive"
+					>
+						{error}
+					</p>
+				)}
+				{loading && (
+					<p
+						aria-live="polite"
+						className="mt-3 text-center text-body text-muted-foreground"
+					>
+						Validating&hellip;
+					</p>
+				)}
 			</div>
-			{error && (
-				<p
-					aria-live="polite"
-					className="mt-3 text-center text-body text-destructive"
-				>
-					{error}
-				</p>
-			)}
-			{loading && (
-				<p
-					aria-live="polite"
-					className="mt-3 text-center text-body text-muted-foreground"
-				>
-					Validating&hellip;
-				</p>
-			)}
-		</div>
+			<Button
+				type="submit"
+				variant="accent"
+				size="cta"
+				disabled={loading}
+				className="mt-2 w-full"
+			>
+				Get Started
+			</Button>
+		</form>
 	);
 }
