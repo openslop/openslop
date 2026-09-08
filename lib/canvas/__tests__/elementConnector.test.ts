@@ -73,7 +73,7 @@ describe("resolveElementConnector for speech", () => {
 		store.getState().updateMetadata({ narration });
 		return store.getState();
 	};
-	const own = { provider: "cartesia", model: "Sonic 3.5" };
+	const own = { provider: "cartesia", model: "Sonic 3.6" };
 
 	it("speaks with the pair its voice picked, over its own", () => {
 		expect(

@@ -199,7 +199,7 @@ describe("pcmDurationSec", () => {
 	});
 });
 
-const MODEL = "sonic-3.5";
+const MODEL = "sonic-3.6";
 
 describe("CartesiaTTS", () => {
 	beforeEach(() => {

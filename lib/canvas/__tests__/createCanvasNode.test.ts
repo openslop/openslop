@@ -67,7 +67,7 @@ describe("createCanvasNode", () => {
 	});
 
 	it("gives speech a model of its own, like every other type", () => {
-		const pinned = { provider: "cartesia", model: "Sonic 3.5" } as const;
+		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
 		const node = createCanvasNode("narration", {
 			defaultModels: { tts: pinned },
 		});

@@ -22,7 +22,7 @@ const HOSTED_IMAGE = { provider: "openslop", model: "Slop Image v1" } as const;
 const BYOK_IMAGE = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const HOSTED_VIDEO = { provider: "openslop", model: "Slop Video v1" } as const;
 const HOSTED_TTS = { provider: "openslop", model: "Slop TTS v1" } as const;
-const BYOK_TTS = { provider: "cartesia", model: "Sonic 3.5" } as const;
+const BYOK_TTS = { provider: "cartesia", model: "Sonic 3.6" } as const;
 const HOSTED_LLM = { provider: "openslop", model: "Slop LLM v1" } as const;
 const BYOK_LLM = { provider: "anthropic", model: "Claude Sonnet 5" } as const;
 
@@ -109,7 +109,7 @@ describe("HTTP gateways", () => {
 			expect(preview.pathname).toBe("/api/third-party/tts/voices/preview");
 			expect(preview.searchParams.get("url")).toBe("https://vendor/a.mp3");
 			expect(preview.searchParams.get("provider")).toBe("cartesia");
-			expect(preview.searchParams.get("model")).toBe("Sonic 3.5");
+			expect(preview.searchParams.get("model")).toBe("Sonic 3.6");
 			expect(bob?.previewUrl).toBeUndefined();
 		});
 
@@ -125,7 +125,7 @@ describe("HTTP gateways", () => {
 			const url = new URL(fetchMock.mock.calls[0][0] as string);
 			expect(url.pathname).toBe("/api/third-party/tts/voices");
 			expect(url.searchParams.get("provider")).toBe("cartesia");
-			expect(url.searchParams.get("model")).toBe("Sonic 3.5");
+			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
 			expect(url.searchParams.has("query")).toBe(false);
 		});
 	});
