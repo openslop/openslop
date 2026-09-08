@@ -1,26 +1,26 @@
-# Contributing to OpenSlop
+# Contributing
 
-Issues and pull requests of all sorts are welcome. This is the short version of how to get a change in. The canonical docs are linked rather than repeated, so if this file and one of them disagree, the linked doc wins.
+PRs and issues welcome. Quick notes below, the real docs are linked.
 
-This project ships with a [Code of Conduct](CODE_OF_CONDUCT.md). By taking part you agree to follow it.
+Code of conduct is in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Before you start
 
-- Look through the [open issues](https://github.com/openslop/openslop/issues). If you want one, comment on it so nobody doubles up.
-- `good first issue` and `size: XS` / `size: S` are the on-ramp.
-- For anything big (a refactor, a new subsystem, a new dependency) open an issue and talk it through first. It saves you writing code we can't merge.
+- Pick something from the [open issues](https://github.com/openslop/openslop/issues). Comment on it so we know you're on it
+- `good first issue` and `size: XS` / `size: S` are the easy ones
+- Big stuff (refactors, new deps, new subsystems) open an issue first. Don't want you writing a bunch of code we can't merge
 
 ## Setup
 
-Follow [Getting started](README.md#getting-started) in the README. A few things worth knowing up front:
+See [Getting started](README.md#getting-started) in the README. Couple things:
 
-- This repo uses **npm**. Not pnpm, not yarn. `npm install`, `npm run`.
-- Node 20.9 or newer. CI runs 22.
-- Only the Supabase variables are required. Any provider whose key is unset falls back to a mock, so you can work on most of the app without paying for an API.
+- npm only. no pnpm, no yarn
+- Node 20.9+, CI is on 22
+- You only need the Supabase env vars. Every provider without a key falls back to a mock, so no need to pay for any API
 
 ## Before you open a PR
 
-CI runs these in this order. Run them locally and get them green first:
+Run these, same order as CI:
 
 ```bash
 npm run lint
@@ -32,46 +32,43 @@ npm run test:run
 npm run test:e2e
 ```
 
-Don't skip `npm run build`. It catches server-bundle breakage that `typecheck` misses, like a type-only import that became a value import.
+Don't skip `build`, it catches server bundle stuff typecheck doesn't.
 
-`npm run test:e2e` needs a Playwright browser. Install it once with `npx playwright install --with-deps chromium`.
+e2e needs a browser: `npx playwright install --with-deps chromium`
 
 ## How we write code
 
-[`CONVENTIONS.md`](CONVENTIONS.md) is the style guide and it is deliberately rigid. Read it once before your first PR. The rules that bounce PRs most often:
+Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose. Stuff that gets PRs bounced most:
 
-- One canonical way to do a thing. If your feature needs one-off wiring, rearchitect so it composes from what's already there.
-- Deep modules. Simple interface, complexity pushed down behind it.
-- No non-null assertions (`!`). Lint fails on them.
-- Fail loudly. Never swallow an error on a critical path.
-- `lib/` never imports from `app/`. ESLint enforces it.
-- Server Components by default. `"use client"` stays at the leaves.
-- No barrel files.
-- Use the `@/*` alias for imports that cross two or more directories. Single-level `../` is fine.
-- Comments are a last resort. Code should explain itself, and history belongs in the commit message, not the source.
-- Prefer the stack we already have (Next.js, React, Remotion, Zustand, Supabase) over a new dependency.
+- One way to do a thing. No one-off wiring
+- No `!` non-null assertions (lint fails)
+- Fail loudly, don't swallow errors
+- `lib/` never imports from `app/` (eslint enforces)
+- Server components by default, `"use client"` at the leaves
+- No barrel files
+- `@/*` alias for imports going 2+ dirs up, `../` is fine for one
+- Comments are a last resort. No history in comments, that's what commit messages are for
+- Use what's already in the stack (Next, React, Remotion, Zustand, Supabase) before adding a dep
 
-[`DESIGN.md`](DESIGN.md) governs anything visual and is not up for negotiation. Read it before touching UI.
+Anything visual: [DESIGN.md](DESIGN.md), not negotiable.
 
-[`ARCHITECTURE.md`](ARCHITECTURE.md) explains how connectors, gateways, providers and the generation queue fit together.
+How the pieces fit (connectors, gateways, providers, queue): [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Tests
 
-Test behavior, not internals. Cover the seams: pure helpers and module boundaries. That keeps refactors safe without tests that break every time a file moves.
+Test behavior not internals. Pure helpers and module boundaries. Vitest for unit, Playwright for smoke.
 
-Vitest for unit tests (`npm run test` to watch). Playwright for smoke tests (`npm run test:e2e`).
+## PRs
 
-## Pull requests
+- One change per PR
+- Title says what, description says why
+- Link the issue
+- Read your own diff before pushing
 
-- One focused change per PR.
-- A title that says what changed. A description that says why.
-- Link the issue it closes.
-- Read your own diff before you push.
+## AI stuff
 
-## AI-assisted contributions
-
-Agent-written code is welcome. It's held to the same bar as everything else, so run the checks and read the diff before you push. [`AGENTS.md`](AGENTS.md) has the workflow notes agents are expected to follow.
+Agent written code is fine, same bar as everything else. Run the checks, read the diff. [AGENTS.md](AGENTS.md) has the agent notes.
 
 ## Questions
 
-Ask in the [Discord](https://discord.gg/zeP5482ced) or open an issue.
+[Discord](https://discord.gg/zeP5482ced) or open an issue.
