@@ -67,7 +67,7 @@ export abstract class BaseConnector<
 		const ctx = this.contextFor(context);
 		try {
 			const prepared = await this.prepareParams(params, ctx);
-			let result = await this._generate(prepared);
+			let result = await this._generate(prepared, ctx.signal);
 			result = await runAfterGenerate(this.plugins, result, ctx);
 			return result;
 		} catch (error) {
@@ -76,5 +76,8 @@ export abstract class BaseConnector<
 		}
 	}
 
-	protected abstract _generate(params: TParams): Promise<TResult>;
+	protected abstract _generate(
+		params: TParams,
+		signal?: AbortSignal,
+	): Promise<TResult>;
 }

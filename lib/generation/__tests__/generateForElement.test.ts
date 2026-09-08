@@ -128,6 +128,18 @@ describe("generateForElement", () => {
 		});
 	});
 
+	it("forwards the abort signal in the generation context", async () => {
+		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
+		const { signal } = new AbortController();
+
+		await generateForElement(makeJob("image"), inputs("test"), {}, signal);
+
+		expect(mockGenerate).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ signal }),
+		);
+	});
+
 	it("propagates errors from connector.generate", async () => {
 		mockGenerate.mockRejectedValue(new Error("generation failed"));
 

@@ -90,12 +90,14 @@ export interface PluginContext<TParams = unknown, TResult = unknown> {
 	state?: ProjectData;
 	/** The pair the connector runs on. */
 	model?: ModelRef;
+	/** Aborts when the caller cancels the generation. */
+	signal?: AbortSignal;
 }
 
 /** The parts of a plugin context the caller supplies per generation. */
 export type GenerationContext = Pick<
 	PluginContext,
-	"elementId" | "dependencies" | "state"
+	"elementId" | "dependencies" | "state" | "signal"
 >;
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {

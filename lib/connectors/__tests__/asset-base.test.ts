@@ -151,6 +151,24 @@ describe("BaseAssetConnector", () => {
 			);
 		});
 
+		it("polls with the caller's abort signal", async () => {
+			const connector = new TestAssetConnector(
+				config,
+				vi.fn().mockResolvedValue({
+					id: "abc",
+					type: "image",
+					provider: "mock",
+					result: { image: "output.png" },
+				}),
+			);
+			const poll = vi.spyOn(connector["gateway"], "poll");
+			const { signal } = new AbortController();
+
+			await connector.generate({ prompt: "test" }, { signal });
+
+			expect(poll).toHaveBeenCalledWith("abc", signal);
+		});
+
 		it("handles external urls in bundle response", async () => {
 			const response: BundleResponse = {
 				id: "xyz",

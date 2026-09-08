@@ -7,10 +7,11 @@ export async function generateForElement(
 	job: GenerationJob,
 	inputs: GenerationInputs,
 	dependencies: Record<NodeId, AssetResult>,
+	signal?: AbortSignal,
 ): Promise<AssetResult> {
 	const connector = createConnector(job.connectorType, job.model, job.config);
 	return connector.generate(
 		{ prompt: inputs.prompt, ...inputs.attributes },
-		{ elementId: job.elementId, dependencies, state: job.state },
+		{ elementId: job.elementId, dependencies, state: job.state, signal },
 	);
 }

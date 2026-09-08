@@ -264,7 +264,12 @@ export class GenerationQueue implements NodeResults {
 		this.ticker.start(elementId);
 
 		const inputs = nodeInputs(node, this);
-		generateForElement(job, inputs, this.dependencyResults(node))
+		generateForElement(
+			job,
+			inputs,
+			this.dependencyResults(node),
+			controller.signal,
+		)
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
 			.catch((err) => this.handleJobError(elementId, err, controller))
 			.finally(() => this.finalizeJob(elementId, controller));

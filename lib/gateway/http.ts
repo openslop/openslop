@@ -38,8 +38,8 @@ export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
 		return this.client.post<JobSubmission>(this.route, params);
 	}
 
-	async poll(jobId: string): Promise<JobPoll> {
-		return this.client.get<JobPoll>(`${this.route}/${jobId}`);
+	async poll(jobId: string, signal?: AbortSignal): Promise<JobPoll> {
+		return this.client.get<JobPoll>(`${this.route}/${jobId}`, { signal });
 	}
 }
 
@@ -88,7 +88,7 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
 		const result = await this.client.get<{ voices: VoiceInfo[] }>(
 			`${this.route}/voices`,
-			{ ...params, ...this.model },
+			{ params: { ...params, ...this.model } },
 		);
 		return result.voices.map((voice) => ({
 			...voice,
