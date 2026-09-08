@@ -4,11 +4,8 @@ import { useSlateStatic } from "slate-react";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { CharacterPill } from "./CharacterPill";
-import {
-	CharacterSwitcher,
-	CharactersPicker,
-	removeCharacter,
-} from "./CharactersPicker";
+import { removeCharacter } from "@/app/components/canvas/utils/characterOps";
+import { CharacterSwitcher, CharactersPicker } from "./CharactersPicker";
 
 export function ElementCharacters({
 	element,

@@ -4,6 +4,7 @@ import type {
 	CanvasElementType,
 } from "@/lib/canvas/types";
 import {
+	formatCharacterNames,
 	getElementCharacterNames,
 	parseCharacterNames,
 } from "../characterNames";
@@ -22,6 +23,19 @@ describe("parseCharacterNames", () => {
 		expect(parseCharacterNames(undefined)).toEqual([]);
 		expect(parseCharacterNames("")).toEqual([]);
 		expect(parseCharacterNames("  ,  ")).toEqual([]);
+	});
+});
+
+describe("formatCharacterNames", () => {
+	it("round-trips through parseCharacterNames", () => {
+		const names = ["Alice", "Bob"];
+		expect(parseCharacterNames(formatCharacterNames(names) ?? "")).toEqual(
+			names,
+		);
+	});
+
+	it("clears the attribute for an empty list", () => {
+		expect(formatCharacterNames([])).toBeNull();
 	});
 });
 

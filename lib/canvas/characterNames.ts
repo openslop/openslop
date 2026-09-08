@@ -15,6 +15,11 @@ export function parseCharacterNames(value: string | undefined): string[] {
 		.filter(Boolean);
 }
 
+/** Inverse of `parseCharacterNames`; an empty list clears the attribute. */
+export function formatCharacterNames(names: string[]): string | null {
+	return names.join(", ") || null;
+}
+
 const CHARACTER_NAME_EXTRACTORS: Record<string, (value: string) => string[]> = {
 	name: (v) => [v.trim()],
 	[CHARACTERS_ATTR]: parseCharacterNames,

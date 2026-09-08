@@ -1,7 +1,6 @@
 "use client";
 
 import { UserPlus } from "@/components/ui/icon";
-import { Editor } from "slate";
 import { useSlateStatic } from "slate-react";
 import {
 	DropdownMenu,
@@ -10,11 +9,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SelectMenuItem } from "@/components/ui/select-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { getElementCharacterNames } from "@/lib/canvas/characterNames";
 import {
-	CHARACTERS_ATTR,
-	getElementCharacterNames,
-} from "@/lib/canvas/characterNames";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
+	setCharacterName,
+	toggleCharacter,
+} from "@/app/components/canvas/utils/characterOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useProject } from "@/lib/project/useProject";
 import { useShallow } from "zustand/react/shallow";
@@ -23,47 +22,6 @@ import { CharacterPill } from "./CharacterPill";
 
 function useProjectCharacterNames(): string[] {
 	return useProject(useShallow((s) => Object.keys(s.metadata.characters)));
-}
-
-function writeCharacters(
-	editor: Editor,
-	element: CanvasContentElement,
-	names: string[],
-): void {
-	const joined = names.join(", ");
-	updateElementAttrs(editor, element, { [CHARACTERS_ATTR]: joined || null });
-}
-
-export function toggleCharacter(
-	editor: Editor,
-	element: CanvasContentElement,
-	name: string,
-): void {
-	const current = getElementCharacterNames(element);
-	const next = current.includes(name)
-		? current.filter((n) => n !== name)
-		: [...current, name];
-	writeCharacters(editor, element, next);
-}
-
-export function removeCharacter(
-	editor: Editor,
-	element: CanvasContentElement,
-	name: string,
-): void {
-	writeCharacters(
-		editor,
-		element,
-		getElementCharacterNames(element).filter((n) => n !== name),
-	);
-}
-
-function setCharacterName(
-	editor: Editor,
-	element: CanvasContentElement,
-	name: string,
-): void {
-	updateElementAttrs(editor, element, { name });
 }
 
 /** Dropdown listing the project's characters with checkmarks for selected ones. */
