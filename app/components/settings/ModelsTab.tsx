@@ -11,7 +11,10 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
+import {
+	isByokProvider,
+	MANAGED_PROVIDER,
+} from "@/lib/connectors/providerCatalog";
 import type { Provider } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toastError";
 import { useSettings } from "@/lib/settings/useSettings";
@@ -33,11 +36,15 @@ export function ModelsTab({
 	const providerKeys = useAccount((state) => state.providerKeys);
 	const settings = useSettings();
 
-	const stored = providerKeys.map((row) => row.provider);
 	// A link that named a provider leads here: it goes first, so what the link
-	// was about is the first thing read.
-	const shown =
-		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
+	// was about is the first thing read, even before it has a key.
+	const pending =
+		selected &&
+		isByokProvider(selected) &&
+		!providerKeys.some((row) => row.provider === selected)
+			? selected
+			: null;
+	const dismiss = () => settings.open("models");
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -52,27 +59,29 @@ export function ModelsTab({
 					</Button>
 				}
 			>
-				{shown.length === 0 ? (
-					<p className="rounded-xl border border-dashed border-border p-6 text-center text-label text-muted-foreground">
-						No providers connected yet. Add one to generate on your own key.
-					</p>
-				) : (
-					<div className="flex flex-col gap-2">
-						{shown.map((provider) =>
-							provider === MANAGED_PROVIDER ? (
-								<HostedProviderCard key={provider} />
-							) : (
-								<ProviderCard
-									key={provider}
-									provider={provider}
-									selected={provider === selected}
-									// A link pointing at a row that is gone has nothing to open.
-									onDismissed={() => settings.open("models")}
-								/>
-							),
-						)}
-					</div>
-				)}
+				<div className="flex flex-col gap-2">
+					{pending && (
+						<ProviderCard
+							provider={pending}
+							providerKey={null}
+							selected
+							onDismissed={dismiss}
+						/>
+					)}
+					{providerKeys.map((row) =>
+						row.provider === MANAGED_PROVIDER ? (
+							<HostedProviderCard key={row.provider} status={row.status} />
+						) : (
+							<ProviderCard
+								key={row.provider}
+								provider={row.provider}
+								providerKey={row}
+								selected={row.provider === selected}
+								onDismissed={dismiss}
+							/>
+						),
+					)}
+				</div>
 			</SettingsSection>
 
 			<Separator />

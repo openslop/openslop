@@ -1,8 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ProviderKeyRecord } from "@/lib/connectors/providerKey";
+import type {
+	HostedProviderKey,
+	StoredProviderKey,
+} from "@/lib/connectors/providerKey";
 import { createAccountStore } from "../accountStore";
 
-const key = (provider: ProviderKeyRecord["provider"]): ProviderKeyRecord => ({
+const hosted: HostedProviderKey = { provider: "openslop", status: "valid" };
+
+const key = (provider: StoredProviderKey["provider"]): StoredProviderKey => ({
 	provider,
 	last4: "abcd",
 	status: "valid",
@@ -24,7 +29,7 @@ describe("createAccountStore", () => {
 	it("starts from the rows the server read", () => {
 		const store = createAccountStore({
 			models: {},
-			providerKeys: [key("openslop")],
+			providerKeys: [hosted],
 		});
 		expect(providers(store)).toEqual(["openslop"]);
 	});
@@ -33,7 +38,7 @@ describe("createAccountStore", () => {
 	it("replaces the rows with each answer and reports the validation", async () => {
 		const store = createAccountStore({ models: {}, providerKeys: [] });
 		apiJson.mockResolvedValueOnce({
-			providerKeys: [key("openslop"), key("anthropic")],
+			providerKeys: [hosted, key("anthropic")],
 			validation: { ok: false, error: "nope" },
 		});
 

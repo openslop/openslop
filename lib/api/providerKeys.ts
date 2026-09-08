@@ -2,8 +2,10 @@ import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import {
 	KEY_STATUSES,
+	type HostedProviderKey,
 	type KeyStatus,
 	type ProviderKeyRecord,
+	type StoredProviderKey,
 	type ValidationResult,
 } from "@/lib/connectors/providerKey";
 import {
@@ -40,7 +42,7 @@ const ProviderKeyRowsSchema = z.array(
 
 const toRecord = (
 	row: z.infer<typeof ProviderKeyRowsSchema>[number],
-): ProviderKeyRecord => ({
+): StoredProviderKey => ({
 	provider: row.provider,
 	last4: row.last4,
 	status: row.status,
@@ -51,18 +53,9 @@ const toRecord = (
 export const hasApiAccess = (user: User): boolean =>
 	Boolean(user.app_metadata.api_access);
 
-/**
- * The hosted provider has a key row like any other, so nothing downstream asks
- * which provider needs a key. Every account has it; API access is what makes
- * it valid today, and when it takes a key of its own it will be stored like
- * the rest.
- */
-const hostedKey = (user: User): ProviderKeyRecord => ({
+const hostedKey = (user: User): HostedProviderKey => ({
 	provider: MANAGED_PROVIDER,
-	last4: "",
 	status: hasApiAccess(user) ? "valid" : "invalid",
-	verifiedAt: null,
-	createdAt: "",
 });
 
 /**

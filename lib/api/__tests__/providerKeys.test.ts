@@ -29,8 +29,16 @@ describe("listProviderKeys", () => {
 			},
 		]);
 		const keys = await listProviderKeys(user(true));
-		expect(keys.map((row) => row.provider)).toEqual(["openslop", "anthropic"]);
-		expect(keys[1]).toMatchObject({ last4: "abcd", createdAt: "2026-01-01" });
+		expect(keys).toEqual([
+			{ provider: "openslop", status: "valid" },
+			{
+				provider: "anthropic",
+				last4: "abcd",
+				status: "valid",
+				verifiedAt: null,
+				createdAt: "2026-01-01",
+			},
+		]);
 	});
 
 	it("marks the hosted provider by whether the account has API access", async () => {

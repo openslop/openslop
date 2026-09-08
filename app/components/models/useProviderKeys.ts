@@ -12,7 +12,3 @@ export function useProviderKeyLookup(): (
 	return (provider) =>
 		providerKeys.find((row) => row.provider === provider) ?? null;
 }
-
-export function useProviderKey(provider: Provider): ProviderKeyRecord | null {
-	return useProviderKeyLookup()(provider);
-}

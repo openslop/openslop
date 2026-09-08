@@ -8,7 +8,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tile } from "@/components/ui/tile";
 import { KeyStatusBadge } from "@/app/components/models/KeyStatusBadge";
 import { ProviderIcon } from "@/app/components/models/ProviderIcon";
-import { useProviderKey } from "@/app/components/models/useProviderKeys";
+import type {
+	KeyStatus,
+	StoredProviderKey,
+} from "@/lib/connectors/providerKey";
 import {
 	MANAGED_PROVIDER,
 	PROVIDER_CATALOG,
@@ -40,8 +43,7 @@ function ProviderHeading({
 	);
 }
 
-export function HostedProviderCard() {
-	const status = useProviderKey(MANAGED_PROVIDER)?.status ?? "invalid";
+export function HostedProviderCard({ status }: { status: KeyStatus }) {
 	return (
 		<Tile>
 			<ProviderHeading provider={MANAGED_PROVIDER}>
@@ -58,16 +60,18 @@ export function HostedProviderCard() {
 
 export function ProviderCard({
 	provider,
+	providerKey: key,
 	selected = false,
 	onDismissed,
 }: {
 	provider: BYOKProvider;
+	/** Null until a key is stored: the card opens on its form. */
+	providerKey: StoredProviderKey | null;
 	selected?: boolean;
 	/** The row is gone: removed, or backed out of before a key was ever stored. */
 	onDismissed: () => void;
 }) {
 	const meta = PROVIDER_CATALOG[provider];
-	const key = useProviderKey(provider);
 	const testKey = useAccount((state) => state.testKey);
 	const removeKey = useAccount((state) => state.removeKey);
 

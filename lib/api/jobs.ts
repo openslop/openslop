@@ -1,6 +1,4 @@
 import { send } from "@vercel/queue";
-import isUndefined from "lodash/isUndefined";
-import omitBy from "lodash/omitBy";
 import { z } from "zod";
 import {
 	BundleResponseSchema,
@@ -91,19 +89,24 @@ export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
 	return JobRowSchema.parse(data);
 }
 
+type Status<S extends JobStatus> = { status: S };
+
+/** The writes a job's life makes, each carrying exactly what that step knows. */
+export type JobTransition =
+	| Status<"processing">
+	| (Status<"completed"> & { result: BundleResponse })
+	| (Status<"failed"> & { error: string })
+	| { metadata: Record<string, unknown> };
+
 export async function updateJob(
 	jobId: string,
-	patch: {
-		status?: JobStatus;
-		result?: BundleResponse;
-		error?: string;
-		metadata?: Record<string, unknown>;
-	},
+	transition: JobTransition,
 ): Promise<void> {
-	const update = omitBy(patch, isUndefined);
-	if (Object.keys(update).length === 0) return;
 	const supabase = createServiceClient();
-	const { error } = await supabase.from("jobs").update(update).eq("id", jobId);
+	const { error } = await supabase
+		.from("jobs")
+		.update(transition)
+		.eq("id", jobId);
 	if (error) throw new Error(`Failed to update job: ${error.message}`);
 }
 
