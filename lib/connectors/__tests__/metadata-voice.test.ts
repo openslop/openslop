@@ -66,7 +66,7 @@ describe("createMetadataVoicePlugin", () => {
 			narration: {
 				gender: "feminine",
 				provider: "cartesia",
-				model: "Sonic 3.5",
+				model: "Sonic 3.6",
 			},
 		});
 		const { beforeGenerate } = createMetadataVoicePlugin();
@@ -107,7 +107,7 @@ describe("createMetadataVoicePlugin", () => {
 		store.getState().updateMetadata({
 			narration: {
 				provider: "cartesia",
-				model: "Sonic 3.5",
+				model: "Sonic 3.6",
 				gender: "feminine",
 				voiceId: "v-cartesia",
 				resolvedVoiceId: "v-cartesia",
@@ -213,7 +213,7 @@ describe("createMetadataVoicePlugin", () => {
 	});
 
 	describe("the model speech speaks with", () => {
-		const cartesia = { provider: "cartesia", model: "Sonic 3.5" } as const;
+		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
 		const narration = (
 			attrs: Record<string, string>,
 		): CanvasContentElement => ({

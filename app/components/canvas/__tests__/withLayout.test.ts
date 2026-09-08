@@ -21,7 +21,7 @@ describe("withLayout", () => {
 	});
 
 	it("seeds it with the model the project speaks in", () => {
-		const pinned = { provider: "cartesia", model: "Sonic 3.5" } as const;
+		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
 		expect(flatAttributes(seeded({ tts: pinned }))).toMatchObject(pinned);
 	});
 });
