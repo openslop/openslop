@@ -12,11 +12,10 @@ import type { JobConnectorType, JobRow } from "./jobs";
 import type { ProviderType } from "@/lib/providers/types";
 import { providerForPick } from "./route-families";
 
-type JobRequest<TReq extends ModelRef = ModelRef> = {
-	user_id: string;
-	connector_type: JobConnectorType;
-	request: TReq;
-};
+type JobRequest<TReq extends ModelRef = ModelRef> = Pick<
+	JobRow,
+	"user_id" | "connector_type"
+> & { request: TReq };
 
 export const providerForJob = <K extends ProviderType>(
 	type: K,
