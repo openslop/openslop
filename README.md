@@ -157,6 +157,8 @@ Read these first:
 
 Questions, ideas, or just want to hang out? [Join our Discord](https://discord.gg/zeP5482ced) or [email us](mailto:hi@openslop.ai).
 
+Everyone in the community is expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md). To report a problem, email [hi@openslop.ai](mailto:hi@openslop.ai).
+
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
