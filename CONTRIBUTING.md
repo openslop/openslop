@@ -17,7 +17,7 @@ See [Getting started](README.md#getting-started) in the README:
 - npm only. no pnpm, no yarn
 - Node 20.9+, CI is on 22
 - We do not yet support [local mode](https://github.com/openslop/openslop/issues/379), so until then you'll need to link to your own Supabase and Vercel accounts via filling in .env.local
-- You only need the Supabase and Vercel env vars. You can setup keys in the app (or leave them out for mocks), so no need to pay for an API
+- Supabase is the only hard requirement. Vercel Blob is needed for real generations (that's where providers store output), mocks skip it. Provider keys go in the app, leave them out and you get mocks, so no need to pay for an API
 
 ## Before you open a PR
 
@@ -29,7 +29,7 @@ npm run format:check
 npm run typecheck
 npm run knip
 npm run build
-npm run test:run
+npm run test:coverage
 npm run test:e2e
 ```
 
