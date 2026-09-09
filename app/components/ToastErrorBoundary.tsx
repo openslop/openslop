@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { catchError, type ErrorInfo } from "next/error";
 import { toastError } from "@/lib/toastError";
+import { Button } from "@/components/ui/button";
 
 export type ToastErrorBoundaryProps = { label?: string };
 
@@ -27,13 +28,9 @@ export function ToastErrorFallback(
 			<p className="text-sm text-muted-foreground">
 				{label ? `${label} failed to render.` : "Something went wrong."}
 			</p>
-			<button
-				type="button"
-				onClick={retry}
-				className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-primary-foreground transition-[filter] hover:brightness-110 active:brightness-95"
-			>
+			<Button size="sm" onClick={retry}>
 				Try again
-			</button>
+			</Button>
 		</div>
 	);
 }

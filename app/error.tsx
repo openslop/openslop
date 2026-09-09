@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { errorMessage } from "@/lib/errors";
+import { Button } from "@/components/ui/button";
 
 /**
  * Segment-level recovery for render errors thrown by `page.tsx` and nested
@@ -33,13 +34,9 @@ export default function Error({
 			<p className="text-body text-muted-foreground text-balance">
 				{errorMessage(error)}
 			</p>
-			<button
-				type="button"
-				onClick={retry}
-				className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-primary-foreground transition-[filter] hover:brightness-110 active:brightness-95"
-			>
+			<Button size="sm" onClick={retry}>
 				Try again
-			</button>
+			</Button>
 		</div>
 	);
 }
