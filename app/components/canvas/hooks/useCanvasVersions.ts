@@ -5,6 +5,7 @@ import { CanvasHistory } from "@/lib/project/canvasHistory";
 import { canvasVersionStorage } from "@/lib/project/canvasVersionStorage";
 import { createProjectDocument } from "@/lib/project/projectDocument";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
+import { useAccountStoreHandle } from "@/lib/user/AccountStoreProvider";
 import { toastError } from "@/lib/toastError";
 import { useAutosave } from "./useAutosave";
 
@@ -14,9 +15,10 @@ export function useCanvasVersions(
 ): { history: CanvasHistory; onDocumentChange: () => void } {
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
+	const accountStore = useAccountStoreHandle();
 
 	const [document] = useState(() =>
-		createProjectDocument({ editor, store, queue }),
+		createProjectDocument({ editor, store, queue, accountStore }),
 	);
 
 	const autosaver = useAutosave(projectId, document.read);

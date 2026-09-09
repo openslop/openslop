@@ -14,7 +14,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { createCanvasNode } from "../createCanvasNode";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS, resolveDefaultModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/video/elementAttributes";
 
 const ZWSP = "​";
@@ -123,5 +123,33 @@ describe("createCanvasNode", () => {
 	it("defaults text child to empty string", () => {
 		const node = createCanvasNode("narration");
 		expect(node.children[1].text).toBe("");
+	});
+
+	it("takes the account default when the project pins nothing for the type", () => {
+		const account = {
+			provider: "runware",
+			model: "Seedream 5 Lite",
+		} as const;
+		// Insert/normalize/paste resolve the full scope chain via
+		// useResolveDefaultModels(); a project-only map would miss the account.
+		const node = createCanvasNode("image", {
+			defaultModels: resolveDefaultModels({
+				project: {},
+				account: { image: account },
+			}),
+		});
+		expect(flatAttributes(node)).toMatchObject(account);
+	});
+
+	it("the project default beats the account default when both pin the type", () => {
+		const project = { provider: "openslop", model: "Slop Image v1" } as const;
+		const account = { provider: "runware", model: "Seedream 5 Lite" } as const;
+		const node = createCanvasNode("image", {
+			defaultModels: resolveDefaultModels({
+				project: { image: project },
+				account: { image: account },
+			}),
+		});
+		expect(flatAttributes(node)).toMatchObject(project);
 	});
 });
