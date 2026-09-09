@@ -1,5 +1,6 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
+import omit from "lodash/omit";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -48,7 +49,11 @@ type NodeBase = {
 export type SourceNode = NodeBase & { job: null; identity: string };
 
 /** A unit of generation: something the queue can run. */
-export type JobNode = NodeBase & { job: GenerationJob };
+export type JobNode = NodeBase & {
+	job: GenerationJob;
+	/** Attribute keys excluded from the staleness fingerprint (but kept in inputs for persistence). */
+	fingerprintOmitKeys?: string[];
+};
 
 /** A node and its edges. */
 export type GenerationNode = SourceNode | JobNode;
@@ -150,6 +155,15 @@ export function nodeInputs(
 	};
 }
 
+/** `inputs` with `keys` omitted from the attributes, for fingerprint comparison only. */
+function withoutFingerprintKeys(
+	inputs: GenerationInputs | null,
+	keys: string[],
+): GenerationInputs | null {
+	if (!inputs || keys.length === 0) return inputs;
+	return { ...inputs, attributes: omit(inputs.attributes, keys) };
+}
+
 export function needsGeneration(
 	node: GenerationNode,
 	results: NodeResults,
@@ -159,9 +173,17 @@ export function needsGeneration(
 	if (!snapshot.result) return true;
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
+	// Keys the plugin strips from its vendor call are excluded from the staleness
+	// fingerprint, but remain in `inputs` so restoring a version preserves them.
+	const omitKeys = node.fingerprintOmitKeys ?? [];
+	const currentInputs = withoutFingerprintKeys(
+		nodeInputs(node, results),
+		omitKeys,
+	);
+	const storedInputs = withoutFingerprintKeys(snapshot.resultInputs, omitKeys);
 	return (
 		node.dependsOn.some((dep) => needsGeneration(dep, results)) ||
-		!isEqual(nodeInputs(node, results), snapshot.resultInputs)
+		!isEqual(currentInputs, storedInputs)
 	);
 }
 

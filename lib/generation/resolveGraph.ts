@@ -1,4 +1,3 @@
-import omit from "lodash/omit";
 import {
 	resolveElementConnector,
 	type ElementConnector,
@@ -31,7 +30,9 @@ const toNode = (
 	// Keys a plugin strips from its vendor call never reach the generator, so
 	// changing them must not re-stale the node. Mirrors `stillElement` dropping
 	// the video's keys from the still, keeping the fingerprint and the call in
-	// sync.
+	// sync. The keys are kept in `inputs` so that restoring a version writes the
+	// full attributes back onto the element; they are only omitted at the
+	// fingerprint comparison inside `needsGeneration`.
 	const fingerprintOmitKeys = plugins.flatMap(
 		(plugin) => plugin.omitFromFingerprint?.(element) ?? [],
 	);
@@ -40,8 +41,9 @@ const toNode = (
 		label,
 		inputs: {
 			prompt: getPromptText(element),
-			attributes: omit(element.generationAttributes ?? {}, fingerprintOmitKeys),
+			attributes: element.generationAttributes ?? {},
 		},
+		fingerprintOmitKeys,
 		dependsOn,
 		job: {
 			elementId: element.id,
