@@ -1,12 +1,11 @@
 import lowerCase from "lodash/lowerCase";
-import omit from "lodash/omit";
 import union from "lodash/union";
 import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
 import {
+	applyFingerprintOmit,
 	fingerprintInputs,
 	isNodeStale,
-	isSourceNode,
 	needsGeneration,
 	type GenerationNode,
 	type NodeResults,
@@ -23,15 +22,8 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
 	if (!storedInputs) return [];
 	// Apply the same omit set that needsGeneration uses so the badge names only
 	// the keys that would actually trigger a regeneration.
-	const omitKeys = isSourceNode(node) ? [] : (node.fingerprintOmitKeys ?? []);
 	const current = fingerprintInputs(node, results);
-	const previous = {
-		...storedInputs,
-		attributes: omit(storedInputs.attributes, omitKeys) as Record<
-			string,
-			string | number
-		>,
-	};
+	const previous = applyFingerprintOmit(node, storedInputs) ?? storedInputs;
 
 	const attributeKeys = union(
 		Object.keys(current.attributes),
