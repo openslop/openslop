@@ -308,6 +308,16 @@ describe("GenerationQueue", () => {
 			expect(listener).not.toHaveBeenCalled();
 		});
 
+		it("aborts the signal handed to the job so its poll stops", () => {
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("c3")]);
+			const signal = generateMock.mock.calls[0]?.[3] as AbortSignal;
+			expect(signal.aborted).toBe(false);
+
+			generationQueue.cancel("c3");
+			expect(signal.aborted).toBe(true);
+		});
+
 		it("promotes queued jobs when a generating job is cancelled", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph([
@@ -347,6 +357,18 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("a3").status).toBe("idle");
 			// a4 was queued (not generating), so it had no result/error — state deleted
 			expect(generationQueue.getElementSnapshot("a4").status).toBe("idle");
+		});
+
+		it("aborts every in-flight job's signal", () => {
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("a5"), makeJob("a6")]);
+			const signals = generateMock.mock.calls.map(
+				(call) => call[3] as AbortSignal,
+			);
+			expect(signals).toHaveLength(2);
+
+			generationQueue.cancelAll();
+			expect(signals.every((signal) => signal.aborted)).toBe(true);
 		});
 	});
 

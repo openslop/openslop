@@ -11,8 +11,11 @@ export class ApiClient {
 		return apiJson<T>(`${this.baseUrl}${path}`, { method: "POST", body });
 	}
 
-	async get<T>(path: string, params?: QueryParams): Promise<T> {
-		return apiJson<T>(`${this.baseUrl}${path}`, { params });
+	async get<T>(
+		path: string,
+		options: { params?: QueryParams; signal?: AbortSignal } = {},
+	): Promise<T> {
+		return apiJson<T>(`${this.baseUrl}${path}`, options);
 	}
 
 	async postStream(

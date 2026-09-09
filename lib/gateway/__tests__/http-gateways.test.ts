@@ -70,6 +70,28 @@ describe("HTTP gateways", () => {
 				expect.objectContaining({ method: "GET" }),
 			);
 		});
+
+		it("hands the abort signal to the poll request", async () => {
+			fetchMock.mockResolvedValue(
+				jsonResponse({
+					jobId: "job-1",
+					status: "processing",
+					result: null,
+					error: null,
+				}),
+			);
+			const { signal } = new AbortController();
+
+			await new HttpAssetGateway(HOSTED_VIDEO, "video", BASE).poll(
+				"job-1",
+				signal,
+			);
+
+			expect(fetchMock).toHaveBeenCalledWith(
+				`${BASE}/api/v1/video/job-1`,
+				expect.objectContaining({ signal }),
+			);
+		});
 	});
 
 	describe("HttpTTSGateway", () => {

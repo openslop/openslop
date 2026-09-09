@@ -39,7 +39,9 @@ describe("ApiClient", () => {
 				json: () => Promise.resolve({ voices: [] }),
 			});
 
-			await client.get("/api/v1/tts/voices", { gender: "feminine" });
+			await client.get("/api/v1/tts/voices", {
+				params: { gender: "feminine" },
+			});
 
 			expect(fetchMock).toHaveBeenCalledWith(
 				"https://api.test.com/api/v1/tts/voices?gender=feminine",
@@ -61,6 +63,21 @@ describe("ApiClient", () => {
 			);
 		});
 
+		it("hands the abort signal to fetch", async () => {
+			fetchMock.mockResolvedValue({
+				ok: true,
+				json: () => Promise.resolve({}),
+			});
+			const { signal } = new AbortController();
+
+			await client.get("/api/v1/video/job-1", { signal });
+
+			expect(fetchMock).toHaveBeenCalledWith(
+				"https://api.test.com/api/v1/video/job-1",
+				expect.objectContaining({ method: "GET", signal }),
+			);
+		});
+
 		it("filters out undefined param values", async () => {
 			fetchMock.mockResolvedValue({
 				ok: true,
@@ -68,8 +85,7 @@ describe("ApiClient", () => {
 			});
 
 			await client.get("/api/v1/tts/voices", {
-				gender: "masculine",
-				age: undefined as unknown as string,
+				params: { gender: "masculine", age: undefined as unknown as string },
 			});
 
 			const url = fetchMock.mock.calls[0][0] as string;

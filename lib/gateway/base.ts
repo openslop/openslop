@@ -37,5 +37,5 @@ export abstract class AssetGateway<TParams> extends GatewayClient<
 	TParams,
 	JobSubmission
 > {
-	abstract poll(jobId: string): Promise<JobPoll>;
+	abstract poll(jobId: string, signal?: AbortSignal): Promise<JobPoll>;
 }

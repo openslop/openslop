@@ -16,7 +16,7 @@ export async function loadAgentTranscript(
 ): Promise<SloppyMessage[]> {
 	const { messages } = await client.get<{ messages: SloppyMessage[] }>(
 		AGENT_PATH,
-		{ projectId },
+		{ params: { projectId } },
 	);
 	return messages;
 }
