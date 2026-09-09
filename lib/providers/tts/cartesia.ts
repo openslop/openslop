@@ -8,7 +8,6 @@ import type {
 } from "@/lib/connectors/types";
 import { TTS_GENDERS, type TTSSpeed } from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
-import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";
 import type { VendorParams } from "@/lib/connectors/models";
@@ -178,13 +177,7 @@ export class CartesiaTTS
 		const results = await this._search(params);
 		const queryText = buildQueryText(params);
 		const ranked = queryText
-			? await rankBySimilarity(results, queryText).catch((err) => {
-					logger.warn(
-						{ err },
-						"Voice similarity ranking failed; returning unranked results",
-					);
-					return results;
-				})
+			? await rankBySimilarity(results, queryText)
 			: results;
 		return ranked.slice(0, limit || ranked.length);
 	}
@@ -254,9 +247,7 @@ export class CartesiaTTS
 			return {
 				data: wrapPcmInWav(combined).toString("base64"),
 				textTimestamps,
-				// We add an extra second for brief pauses between audio segments
-				// to make it sound more natural
-				metadata: { durationSec: pcmDurationSec(combined.length) + 1 },
+				metadata: { durationSec: pcmDurationSec(combined.length) },
 			};
 		} finally {
 			ws.close();

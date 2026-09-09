@@ -5,6 +5,7 @@ import { measureElementLengths } from "../elementLengths";
 import {
 	buildVideoLayout,
 	DEFAULT_TRIM_VISUALS_TO_DIALOGUE,
+	DIALOGUE_GAP_SEC,
 } from "../scene-builder";
 import type { ResolvedElement } from "../types";
 import { ELEMENT_TYPES } from "@/lib/canvas/types";
@@ -46,11 +47,11 @@ describe("measureElementLengths", () => {
 
 		expect(first).toMatchObject({
 			id: image.id,
-			seconds: 30,
+			seconds: 30 + DIALOGUE_GAP_SEC,
 			words: 90,
 			dialogueIds: [narration.id],
 		});
-		expect(second.seconds).toBe(60);
+		expect(second.seconds).toBe(60 + DIALOGUE_GAP_SEC);
 	});
 
 	it("counts dialogue across scene boundaries, since only a visual ends a span", () => {
@@ -61,7 +62,11 @@ describe("measureElementLengths", () => {
 			scene(element("character", words(90))),
 		]);
 
-		expect(only).toMatchObject({ seconds: 60, words: 180, sceneNumber: 1 });
+		expect(only).toMatchObject({
+			seconds: 60 + 2 * DIALOGUE_GAP_SEC,
+			words: 180,
+			sceneNumber: 1,
+		});
 	});
 
 	it("cuts a clip to the dialogue after it, whatever it was generated at", () => {
@@ -74,8 +79,8 @@ describe("measureElementLengths", () => {
 			),
 		]);
 
-		expect(cut.seconds).toBe(3);
-		expect(extended.seconds).toBe(30);
+		expect(cut.seconds).toBe(3 + DIALOGUE_GAP_SEC);
+		expect(extended.seconds).toBe(30 + DIALOGUE_GAP_SEC);
 	});
 
 	it("holds a clip for its generated length when trimming is off", () => {

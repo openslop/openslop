@@ -9,7 +9,7 @@ import {
 	type CanvasElementType,
 } from "@/lib/canvas/types";
 import { getDuration } from "./elementAttributes";
-import { MIN_DURATION_SEC } from "./scene-builder";
+import { DIALOGUE_GAP_SEC, MIN_DURATION_SEC } from "./scene-builder";
 import { secondsForWords } from "./videoLength";
 
 /** How long one visual holds the screen, and what decides it. */
@@ -51,7 +51,7 @@ const toLength = (
 		dialogueIds,
 		durationSec,
 		seconds: Math.max(
-			secondsForWords(words),
+			secondsForWords(words) + dialogueIds.length * DIALOGUE_GAP_SEC,
 			trimVisualsToDialogue ? 0 : (durationSec ?? 0),
 			MIN_DURATION_SEC,
 		),

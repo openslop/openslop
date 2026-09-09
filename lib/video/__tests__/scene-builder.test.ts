@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
 import { isBlankScene } from "../blankScene";
-import { buildVideoLayout, type BuildLayoutOptions } from "../scene-builder";
+import {
+	buildVideoLayout,
+	DIALOGUE_GAP_SEC,
+	type BuildLayoutOptions,
+} from "../scene-builder";
 import type { ResolvedElement, Sequence, VideoLayout } from "../types";
 import type { CanvasElementType } from "@/lib/canvas/types";
 
@@ -145,7 +149,18 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(1);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(layout.series[0].duration).toBe(4);
+			expect(layout.series[0].duration).toBe(4 + DIALOGUE_GAP_SEC);
+		});
+
+		it("lays a gap after each line and leaves the line's own audio unpadded", () => {
+			const layout = untrimmed([
+				el({ id: "n1", type: "narration", durationSec: 3 }),
+				el({ id: "n2", type: "narration", durationSec: 4 }),
+			]);
+			expect(seqs(layout, "narration")[0].duration).toBe(3);
+			expect(seqs(layout, "narration")[1].start).toBe(3 + DIALOGUE_GAP_SEC);
+			expect(seqs(layout, "narration")[1].duration).toBe(4);
+			expect(layout.totalDurationSec).toBe(7 + 2 * DIALOGUE_GAP_SEC);
 		});
 
 		it("collapses consecutive leading overlays into one blank scene", () => {
@@ -155,10 +170,10 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(1);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(layout.series[0].duration).toBe(7);
+			expect(layout.series[0].duration).toBe(7 + 2 * DIALOGUE_GAP_SEC);
 			expect(seqs(layout, "narration")).toHaveLength(2);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "narration")[1].start).toBe(3);
+			expect(seqs(layout, "narration")[1].start).toBe(3 + DIALOGUE_GAP_SEC);
 		});
 
 		it("extends the current series entry to fit a longer overlay", () => {
@@ -167,7 +182,7 @@ describe("buildVideoLayout", () => {
 				el({ id: "n1", type: "narration", durationSec: 8 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].duration).toBe(8);
+			expect(layout.series[0].duration).toBe(8 + DIALOGUE_GAP_SEC);
 			expect(seqs(layout, "narration")).toHaveLength(1);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
 			expect(seqs(layout, "narration")[0].duration).toBe(8);
@@ -179,9 +194,9 @@ describe("buildVideoLayout", () => {
 				el({ id: "n1", type: "narration", durationSec: 5 }),
 				el({ id: "c1", type: "character", durationSec: 3 }),
 			]);
-			expect(layout.series[0].duration).toBe(8);
+			expect(layout.series[0].duration).toBe(8 + 2 * DIALOGUE_GAP_SEC);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "character")[0].start).toBe(5);
+			expect(seqs(layout, "character")[0].start).toBe(5 + DIALOGUE_GAP_SEC);
 		});
 
 		it("plays a foreground after the overlay that leads it", () => {
@@ -191,9 +206,12 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(layout.series[0].duration).toBe(9);
+			expect(layout.series[0].duration).toBe(9 + DIALOGUE_GAP_SEC);
 			expect(layout.series[1].element.id).toBe("img1");
-			expect(layout.series[1].start).toBeCloseTo(9 - OVERLAP, 5);
+			expect(layout.series[1].start).toBeCloseTo(
+				9 + DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
 			expect(layout.series[1].duration).toBe(5);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
 		});
@@ -206,7 +224,10 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].start).toBeCloseTo(9 - OVERLAP, 5);
+			expect(layout.series[1].start).toBeCloseTo(
+				9 + DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
 			expect(layout.series[1].duration).toBe(6);
 		});
 
@@ -232,12 +253,21 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(layout.series[0].duration).toBe(12);
+			expect(layout.series[0].duration).toBe(12 + 2 * DIALOGUE_GAP_SEC);
 			expect(layout.series[1].element.id).toBe("img1");
-			expect(layout.series[1].duration).toBeCloseTo(5, 5);
+			expect(layout.series[1].duration).toBeCloseTo(
+				5 + 2 * DIALOGUE_GAP_SEC,
+				5,
+			);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "narration")[1].start).toBeCloseTo(12 - OVERLAP, 5);
-			expect(seqs(layout, "narration")[2].start).toBeCloseTo(14 - OVERLAP, 5);
+			expect(seqs(layout, "narration")[1].start).toBeCloseTo(
+				12 + 2 * DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
+			expect(seqs(layout, "narration")[2].start).toBeCloseTo(
+				14 + 3 * DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
 		});
 	});
 
@@ -283,13 +313,19 @@ describe("buildVideoLayout", () => {
 				el({ id: "c2", type: "character", durationSec: 5 }),
 				el({ id: "img1", type: "image", durationSec: 6 }),
 			]);
-			expect(layout.totalDurationSec).toBeCloseTo(16 - OVERLAP, 5);
+			expect(layout.totalDurationSec).toBeCloseTo(
+				16 + 2 * DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "music")[1].start).toBe(10);
 			// m2 trimmed to the rendered total since img1 is overlapped by one transition.
-			expect(seqs(layout, "music")[1].duration).toBeCloseTo(6 - OVERLAP, 5);
+			expect(seqs(layout, "music")[1].duration).toBeCloseTo(
+				6 + 2 * DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
@@ -447,17 +483,17 @@ describe("buildVideoLayout", () => {
 			]);
 			expect(layout.series).toHaveLength(2);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(layout.series[0].duration).toBe(11);
+			expect(layout.series[0].duration).toBe(11 + 2 * DIALOGUE_GAP_SEC);
 			expect(layout.series[1].element.id).toBe("clip1");
 			expect(layout.series[1].duration).toBe(2);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
 			expect(seqs(layout, "narration")[0].duration).toBe(4);
-			expect(seqs(layout, "character")[0].start).toBe(4);
+			expect(seqs(layout, "character")[0].start).toBe(4 + DIALOGUE_GAP_SEC);
 			expect(seqs(layout, "character")[0].duration).toBe(7);
 			expect(seqs(layout, "music")[0].start).toBe(0);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "sound")[0].start).toBe(0);
-			expect(seqs(layout, "sound")[1].start).toBe(4);
+			expect(seqs(layout, "sound")[1].start).toBe(4 + DIALOGUE_GAP_SEC);
 			expect(seqs(layout, "music")).toHaveLength(2);
 		});
 
@@ -472,10 +508,13 @@ describe("buildVideoLayout", () => {
 
 			expect(layout.series).toHaveLength(2);
 			expect(layout.series[0].element?.id).toBe("img1");
-			expect(layout.series[0].duration).toBe(5);
+			expect(layout.series[0].duration).toBe(5 + DIALOGUE_GAP_SEC);
 			expect(layout.series[1].element?.id).toBe("clip1");
-			expect(layout.series[1].duration).toBeCloseTo(6, 5);
-			expect(layout.totalDurationSec).toBeCloseTo(11 - OVERLAP, 5);
+			expect(layout.series[1].duration).toBeCloseTo(6 + DIALOGUE_GAP_SEC, 5);
+			expect(layout.totalDurationSec).toBeCloseTo(
+				11 + 2 * DIALOGUE_GAP_SEC - OVERLAP,
+				5,
+			);
 
 			expect(seqs(layout, "music")).toHaveLength(1);
 			expect(seqs(layout, "narration")).toHaveLength(2);
@@ -551,8 +590,8 @@ describe("buildVideoLayout", () => {
 				el({ id: "clip1", type: "clip", durationSec: 10 }),
 				el({ id: "n1", type: "narration", durationSec: 3 }),
 			]);
-			expect(layout.series[0].duration).toBe(3);
-			expect(layout.totalDurationSec).toBe(3);
+			expect(layout.series[0].duration).toBe(3 + DIALOGUE_GAP_SEC);
+			expect(layout.totalDurationSec).toBe(3 + DIALOGUE_GAP_SEC);
 		});
 
 		it("holds a foreground with no dialogue after it for the minimum duration", () => {
@@ -568,7 +607,7 @@ describe("buildVideoLayout", () => {
 				el({ id: "clip1", type: "clip", durationSec: 10 }),
 				el({ id: "n1", type: "narration", durationSec: 4 }),
 			]);
-			expect(seqs(layout, "music")[0].duration).toBe(4);
+			expect(seqs(layout, "music")[0].duration).toBe(4 + DIALOGUE_GAP_SEC);
 		});
 
 		it("plays the clip out in full when trimming is off", () => {

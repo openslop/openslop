@@ -264,7 +264,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(3);
+			expect(result.metadata?.durationSec).toBe(2);
 		});
 
 		it("reports duration even when the model returns no timestamps", async () => {
@@ -282,7 +282,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(4);
+			expect(result.metadata?.durationSec).toBe(3);
 		});
 
 		it("throws when the stream yields no audio", async () => {
@@ -587,7 +587,7 @@ describe("CartesiaTTS", () => {
 			expect(mockEmbedMany).not.toHaveBeenCalled();
 		});
 
-		it("falls back to unranked results when embedding throws", async () => {
+		it("propagates an embedding failure instead of returning unranked voices", async () => {
 			mockGet.mockResolvedValue(
 				makePage([
 					{
@@ -617,9 +617,9 @@ describe("CartesiaTTS", () => {
 			});
 
 			const provider = new CartesiaTTS("test-key");
-			const voices = await provider.search({ description: "anything" });
-
-			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
+			await expect(
+				provider.search({ description: "anything" }),
+			).rejects.toThrow("missing api key");
 		});
 
 		it("passes language filter to the API", async () => {
