@@ -25,7 +25,7 @@ export function ToastErrorFallback(
 			role="alert"
 			className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center"
 		>
-			<p className="text-sm text-muted-foreground">
+			<p className="text-body text-muted-foreground">
 				{label ? `${label} failed to render.` : "Something went wrong."}
 			</p>
 			<Button size="sm" onClick={retry}>
