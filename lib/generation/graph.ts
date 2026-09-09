@@ -161,22 +161,11 @@ export function nodeInputs(
  */
 export function applyFingerprintOmit(
 	node: GenerationNode,
-	inputs: GenerationInputs | null,
-): GenerationInputs | null {
-	const omitKeys = isSourceNode(node) ? [] : (node.fingerprintOmitKeys ?? []);
-	if (!inputs || omitKeys.length === 0) return inputs;
-	return { ...inputs, attributes: omit(inputs.attributes, omitKeys) };
-}
-
-/** `nodeInputs` with the node's `fingerprintOmitKeys` stripped — one definition of what counts as a change. */
-export function fingerprintInputs(
-	node: GenerationNode,
-	results: NodeResults,
+	inputs: GenerationInputs,
 ): GenerationInputs {
-	return applyFingerprintOmit(
-		node,
-		nodeInputs(node, results),
-	) as GenerationInputs;
+	const omitKeys = isSourceNode(node) ? [] : (node.fingerprintOmitKeys ?? []);
+	if (omitKeys.length === 0) return inputs;
+	return { ...inputs, attributes: omit(inputs.attributes, omitKeys) };
 }
 
 export function needsGeneration(
@@ -188,6 +177,7 @@ export function needsGeneration(
 	if (!snapshot.result) return true;
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
+	if (!snapshot.resultInputs) return true;
 	const currentInputs = applyFingerprintOmit(node, nodeInputs(node, results));
 	const storedInputs = applyFingerprintOmit(node, snapshot.resultInputs);
 	return (

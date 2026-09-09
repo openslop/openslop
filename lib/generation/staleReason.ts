@@ -4,9 +4,9 @@ import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
 import {
 	applyFingerprintOmit,
-	fingerprintInputs,
 	isNodeStale,
 	needsGeneration,
+	nodeInputs,
 	type GenerationNode,
 	type NodeResults,
 } from "./graph";
@@ -22,8 +22,8 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
 	if (!storedInputs) return [];
 	// Apply the same omit set that needsGeneration uses so the badge names only
 	// the keys that would actually trigger a regeneration.
-	const current = fingerprintInputs(node, results);
-	const previous = applyFingerprintOmit(node, storedInputs) ?? storedInputs;
+	const current = applyFingerprintOmit(node, nodeInputs(node, results));
+	const previous = applyFingerprintOmit(node, storedInputs);
 
 	const attributeKeys = union(
 		Object.keys(current.attributes),
