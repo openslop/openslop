@@ -26,6 +26,27 @@ export const versionKey = ({
 }: Pick<CommittedVersion, "inputs" | "pinned">): string =>
 	`${pinned ? "supplied" : "generated"}:${serializeInputs(inputs)}`;
 
+/**
+ * The index of the version whose inputs produced the result on screen, or -1
+ * when there is none. `resultInputs` outlives a failed regeneration (the error
+ * path nulls `result` only), so the gate has to be on `result` — not just
+ * `resultInputs` — or a stale prior version stays highlighted through the error.
+ */
+export function activeVersionIndex(
+	versions: readonly ElementVersion[],
+	snapshot: {
+		result: AssetResult | null;
+		resultInputs: GenerationInputs | null;
+		pinned: boolean;
+	},
+): number {
+	const activeKey =
+		snapshot.result && snapshot.resultInputs
+			? versionKey({ inputs: snapshot.resultInputs, pinned: snapshot.pinned })
+			: null;
+	return versions.findIndex((version) => versionKey(version) === activeKey);
+}
+
 export class VersionLog {
 	private byElement = new Map<string, ElementVersion[]>();
 	private hydrated = new Set<string>();
