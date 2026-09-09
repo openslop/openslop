@@ -1,3 +1,4 @@
+import PQueue from "p-queue";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { apiJson } from "@/lib/clients/http";
 import type {
@@ -42,10 +43,18 @@ async function persistModels(models: ConnectorModels): Promise<void> {
 
 export function createAccountStore(initial: AccountData): AccountStore {
 	return createStore<AccountContext>()((set, get) => {
-		const applyModels = async (next: ConnectorModels) => {
-			await persistModels(next);
-			set({ models: next });
-		};
+		// One persist at a time. A second pick made before the network round-trip
+		// resolves otherwise reads the pre-call snapshot both calls share, so the
+		// last-resolving call overwrites the other in the store and in
+		// user_metadata.models. The queue computes `next` only after the prior
+		// persist+set has settled, so each call sees the result of the last one.
+		const queue = new PQueue({ concurrency: 1 });
+		const applyModels = (makeNext: () => ConnectorModels) =>
+			queue.add(async () => {
+				const next = makeNext();
+				await persistModels(next);
+				set({ models: next });
+			});
 		const applyView = <T extends ProviderKeysView>(view: T): T => {
 			set({ providerKeys: view.providerKeys });
 			return view;
@@ -77,9 +86,9 @@ export function createAccountStore(initial: AccountData): AccountStore {
 				);
 			},
 
-			setModels: async (patch) => applyModels({ ...get().models, ...patch }),
+			setModels: (patch) => applyModels(() => ({ ...get().models, ...patch })),
 
-			resetModels: async () => applyModels({}),
+			resetModels: () => applyModels(() => ({})),
 		};
 	});
 }
