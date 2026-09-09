@@ -51,7 +51,7 @@ export type SourceNode = NodeBase & { job: null; identity: string };
 /** A unit of generation: something the queue can run. */
 export type JobNode = NodeBase & {
 	job: GenerationJob;
-	/** Attribute keys excluded from the staleness fingerprint (but kept in inputs for persistence). */
+	/** @see ConnectorPlugin.omitFromFingerprint */
 	fingerprintOmitKeys?: string[];
 };
 
@@ -164,6 +164,18 @@ function withoutFingerprintKeys(
 	return { ...inputs, attributes: omit(inputs.attributes, keys) };
 }
 
+/** `nodeInputs` with the node's `fingerprintOmitKeys` stripped — one definition of what counts as a change. */
+export function fingerprintInputs(
+	node: GenerationNode,
+	results: NodeResults,
+): GenerationInputs {
+	const omitKeys = isSourceNode(node) ? [] : (node.fingerprintOmitKeys ?? []);
+	return withoutFingerprintKeys(
+		nodeInputs(node, results),
+		omitKeys,
+	) as GenerationInputs;
+}
+
 export function needsGeneration(
 	node: GenerationNode,
 	results: NodeResults,
@@ -173,8 +185,6 @@ export function needsGeneration(
 	if (!snapshot.result) return true;
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
-	// Keys the plugin strips from its vendor call are excluded from the staleness
-	// fingerprint, but remain in `inputs` so restoring a version preserves them.
 	const omitKeys = node.fingerprintOmitKeys ?? [];
 	const currentInputs = withoutFingerprintKeys(
 		nodeInputs(node, results),

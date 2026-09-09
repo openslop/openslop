@@ -1,11 +1,13 @@
 import lowerCase from "lodash/lowerCase";
+import omit from "lodash/omit";
 import union from "lodash/union";
 import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
 import {
+	fingerprintInputs,
 	isNodeStale,
+	isSourceNode,
 	needsGeneration,
-	nodeInputs,
 	type GenerationNode,
 	type NodeResults,
 } from "./graph";
@@ -17,9 +19,19 @@ const list = new Intl.ListFormat("en", { type: "conjunction" });
 
 /** Everything about `node` that no longer matches the result it produced. */
 function changedInputs(node: GenerationNode, results: NodeResults): string[] {
-	const previous = results.getElementSnapshot(node.id).resultInputs;
-	if (!previous) return [];
-	const current = nodeInputs(node, results);
+	const storedInputs = results.getElementSnapshot(node.id).resultInputs;
+	if (!storedInputs) return [];
+	// Apply the same omit set that needsGeneration uses so the badge names only
+	// the keys that would actually trigger a regeneration.
+	const omitKeys = isSourceNode(node) ? [] : (node.fingerprintOmitKeys ?? []);
+	const current = fingerprintInputs(node, results);
+	const previous = {
+		...storedInputs,
+		attributes: omit(storedInputs.attributes, omitKeys) as Record<
+			string,
+			string | number
+		>,
+	};
 
 	const attributeKeys = union(
 		Object.keys(current.attributes),

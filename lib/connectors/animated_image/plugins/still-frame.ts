@@ -117,9 +117,6 @@ export function createStillFramePlugin(): ConnectorPlugin<
 	return {
 		name: "still-frame",
 		dependencies: (element) => [forStillOf(element)],
-		// The same `STILL_ONLY_KEYS` `beforeGenerate` strips from the vendor
-		// call, so the animation's staleness fingerprint and the request it
-		// sends stay in step: a still-only edit no longer re-runs the video.
 		omitFromFingerprint: () => STILL_ONLY_KEYS,
 		beforeGenerate(params, ctx) {
 			const { videoPrompt } = params;
