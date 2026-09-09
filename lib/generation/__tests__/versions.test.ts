@@ -94,4 +94,30 @@ describe("VersionLog", () => {
 
 		expect(log.get("a")).toEqual([fresh]);
 	});
+
+	it("keeps the original date of a remake recorded before it is hydrated", () => {
+		const ORIGINAL = "2026-01-01T00:00:00.000Z";
+		const NOW = "2026-02-02T00:00:00.000Z";
+
+		const log = new VersionLog();
+		log.record(version("same", "fresh.png"), NOW);
+		log.hydrate("a", [stored("same", ORIGINAL)]);
+
+		const merged = log.get("a");
+		expect(merged).toHaveLength(1);
+		expect(merged[0]?.createdAt).toBe(ORIGINAL);
+		expect(merged[0]?.result).toEqual(result("fresh.png"));
+	});
+
+	it("keeps a new version's date when it has no stored version to inherit from", () => {
+		const ORIGINAL = "2026-01-01T00:00:00.000Z";
+		const NOW = "2026-02-02T00:00:00.000Z";
+
+		const log = new VersionLog();
+		const fresh = log.record(version("unseen", "fresh.png"), NOW);
+		const older = stored("stored", ORIGINAL);
+		log.hydrate("a", [older]);
+
+		expect(log.get("a")).toEqual([older, fresh]);
+	});
 });

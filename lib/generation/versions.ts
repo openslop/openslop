@@ -35,11 +35,23 @@ export class VersionLog {
 	get = (elementId: string): readonly ElementVersion[] =>
 		this.byElement.get(elementId) ?? NO_VERSIONS;
 
+	/** On collision a stored take supplies its createdAt so a remake keeps its original date. */
 	hydrate(elementId: string, stored: ElementVersion[]) {
+		const storedByKey = keyBy(stored, versionKey);
+		const inMemoryByKey = keyBy(this.get(elementId), versionKey);
 		const merged = {
-			...keyBy(stored, versionKey),
-			...keyBy(this.get(elementId), versionKey),
+			...storedByKey,
+			...inMemoryByKey,
 		};
+		for (const [key, inMemory] of Object.entries(inMemoryByKey)) {
+			const storedVersion = storedByKey[key];
+			if (storedVersion) {
+				merged[key] = {
+					...inMemory,
+					createdAt: storedVersion.createdAt,
+				};
+			}
+		}
 		this.byElement.set(elementId, sortBy(merged, "createdAt"));
 		this.hydrated.add(elementId);
 	}
