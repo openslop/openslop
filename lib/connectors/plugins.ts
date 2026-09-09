@@ -19,46 +19,47 @@ export function requireModel<P, R>(
 	return ctx.model;
 }
 
-export async function runBeforeGenerate<T>(
+type TransformHook = "beforeGenerate" | "afterGenerate" | "transformPrompt";
+
+/** Threads a value through every plugin that implements the hook, in order. */
+async function fold<T>(
+	plugins: ConnectorPlugin[],
+	hook: TransformHook,
+	value: T,
+	ctx: PluginContext,
+): Promise<T> {
+	let current = value;
+	for (const plugin of plugins) {
+		const step = plugin[hook] as
+			| ((value: T, ctx: PluginContext) => T | Promise<T>)
+			| undefined;
+		if (step) current = await step(current, ctx);
+	}
+	return current;
+}
+
+export function runBeforeGenerate<T>(
 	plugins: ConnectorPlugin[],
 	params: T,
 	ctx: PluginContext,
 ): Promise<T> {
-	let result = params;
-	for (const plugin of plugins) {
-		if (plugin.beforeGenerate) {
-			result = (await plugin.beforeGenerate(result, ctx)) as T;
-		}
-	}
-	return result;
+	return fold(plugins, "beforeGenerate", params, ctx);
 }
 
-export async function runAfterGenerate<T>(
+export function runAfterGenerate<T>(
 	plugins: ConnectorPlugin[],
 	result: T,
 	ctx: PluginContext,
 ): Promise<T> {
-	let current = result;
-	for (const plugin of plugins) {
-		if (plugin.afterGenerate) {
-			current = (await plugin.afterGenerate(current, ctx)) as T;
-		}
-	}
-	return current;
+	return fold(plugins, "afterGenerate", result, ctx);
 }
 
-export async function runTransformPrompt(
+export function runTransformPrompt(
 	plugins: ConnectorPlugin[],
 	prompt: string,
 	ctx: PluginContext,
 ): Promise<string> {
-	let current = prompt;
-	for (const plugin of plugins) {
-		if (plugin.transformPrompt) {
-			current = await plugin.transformPrompt(current, ctx);
-		}
-	}
-	return current;
+	return fold(plugins, "transformPrompt", prompt, ctx);
 }
 
 export async function runOnError(

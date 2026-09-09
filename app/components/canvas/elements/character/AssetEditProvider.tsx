@@ -15,6 +15,13 @@ type AssetEditors = {
 	openArtStyle: () => void;
 };
 
+/** The one asset dialog open at a time, so two can never stack. */
+type AssetEdit =
+	| { kind: "create" }
+	| { kind: "character"; name: string }
+	| { kind: "narrator" }
+	| { kind: "style" };
+
 const [AssetEditContext, useAssetEditors] =
 	createRequiredContext<AssetEditors>("AssetEditProvider");
 export { useAssetEditors };
@@ -24,17 +31,18 @@ export { useAssetEditors };
  * than each view wiring the same four openers down to the tiles that use them.
  */
 export function AssetEditProvider({ children }: { children: ReactNode }) {
-	const [creating, setCreating] = useState(false);
-	const [editingName, setEditingName] = useState<string | undefined>();
-	const [editingNarrator, setEditingNarrator] = useState(false);
-	const [editingArtStyle, setEditingArtStyle] = useState(false);
+	const [editing, setEditing] = useState<AssetEdit | null>(null);
+	const onOpenChange = (open: boolean) => {
+		if (!open) setEditing(null);
+	};
+	const character = editing?.kind === "character" ? editing : undefined;
 
 	const editors = useMemo<AssetEditors>(
 		() => ({
-			openCreateCharacter: () => setCreating(true),
-			editCharacter: (name) => setEditingName(name),
-			openNarrator: () => setEditingNarrator(true),
-			openArtStyle: () => setEditingArtStyle(true),
+			openCreateCharacter: () => setEditing({ kind: "create" }),
+			editCharacter: (name) => setEditing({ kind: "character", name }),
+			openNarrator: () => setEditing({ kind: "narrator" }),
+			openArtStyle: () => setEditing({ kind: "style" }),
 		}),
 		[],
 	);
@@ -43,23 +51,23 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 		<AssetEditContext value={editors}>
 			{children}
 			<NewCharacterDialog
-				open={creating}
-				onOpenChange={setCreating}
-				onCreated={(name) => {
-					setCreating(false);
-					setEditingName(name);
-				}}
+				open={editing?.kind === "create"}
+				onOpenChange={onOpenChange}
+				onCreated={editors.editCharacter}
 			/>
 			<CharacterEditModal
-				open={editingName !== undefined}
-				onOpenChange={(open) => !open && setEditingName(undefined)}
-				name={editingName}
+				open={character !== undefined}
+				onOpenChange={onOpenChange}
+				name={character?.name}
 			/>
 			<NarratorEditModal
-				open={editingNarrator}
-				onOpenChange={setEditingNarrator}
+				open={editing?.kind === "narrator"}
+				onOpenChange={onOpenChange}
 			/>
-			<ArtStyleModal open={editingArtStyle} onOpenChange={setEditingArtStyle} />
+			<ArtStyleModal
+				open={editing?.kind === "style"}
+				onOpenChange={onOpenChange}
+			/>
 		</AssetEditContext>
 	);
 }

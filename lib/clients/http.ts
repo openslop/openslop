@@ -1,6 +1,7 @@
 import isUndefined from "lodash/isUndefined";
 import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
+import { ApiErrorEnvelope } from "@/lib/api/error-envelope";
 
 export type QueryParams = Record<string, string | number | undefined>;
 
@@ -11,17 +12,12 @@ type RequestOptions = {
 	signal?: AbortSignal;
 };
 
-/** Every internal route answers failures with `{ error }` (see `lib/api/response.ts`). */
 async function readErrorMessage(res: Response): Promise<string> {
-	const fallback = `${res.status} ${res.statusText}`;
-	const detail = await res.json().then(
-		(body: unknown) =>
-			typeof body === "object" && body !== null && "error" in body
-				? body.error
-				: undefined,
-		() => undefined,
+	const body: unknown = await res.json().catch(() => undefined);
+	return (
+		ApiErrorEnvelope.safeParse(body).data?.error ??
+		`${res.status} ${res.statusText}`
 	);
-	return (typeof detail === "string" && detail) || fallback;
 }
 
 function buildInit(method: string, body: unknown): RequestInit {
