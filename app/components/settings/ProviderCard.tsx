@@ -59,10 +59,20 @@ export function HostedProviderCard() {
 export function ProviderCard({
 	provider,
 	selected = false,
+	dismissed = false,
+	onDismissForm,
 	onDismissed,
 }: {
 	provider: BYOKProvider;
 	selected?: boolean;
+	/**
+	 * The key form was already dismissed for this provider this session, so a
+	 * remount (e.g. the Add→Back toggle) must not re-open it even if the
+	 * `?provider` URL param is still set.
+	 */
+	dismissed?: boolean;
+	/** Mark the key form dismissed for this provider for the rest of the session. */
+	onDismissForm: (provider: BYOKProvider) => void;
 	/** The row is gone: removed, or backed out of before a key was ever stored. */
 	onDismissed: () => void;
 }) {
@@ -71,13 +81,17 @@ export function ProviderCard({
 	const testKey = useAccount((state) => state.testKey);
 	const removeKey = useAccount((state) => state.removeKey);
 
-	const [editing, setEditing] = useState(selected || !key);
+	// Form-open is decoupled from the sticky "selected" flag (which still
+	// drives scroll/highlight): a `?provider` link lands the form once, then
+	// an explicit dismiss (save/cancel) keeps it closed for the session.
+	const [editing, setEditing] = useState((selected || !key) && !dismissed);
 	const [testing, setTesting] = useState(false);
 	const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 	const card = useRef<HTMLDivElement>(null);
 
 	const cancel = () => {
 		setEditing(false);
+		onDismissForm(provider);
 		if (!key) onDismissed();
 	};
 
@@ -116,7 +130,10 @@ export function ProviderCard({
 			{editing ? (
 				<ProviderKeyForm
 					provider={provider}
-					onSaved={() => setEditing(false)}
+					onSaved={() => {
+						setEditing(false);
+						onDismissForm(provider);
+					}}
 					onCancel={cancel}
 				/>
 			) : (

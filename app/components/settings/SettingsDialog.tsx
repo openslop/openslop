@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
-import type { Provider } from "@/lib/connectors/types";
+import { type BYOKProvider } from "@/lib/connectors/providerCatalog";
 import { useSettings } from "@/lib/settings/useSettings";
 import { AddProvidersView } from "./AddProvidersView";
 import { ModelsTab } from "./ModelsTab";
@@ -18,14 +18,32 @@ import { SettingsNav } from "./SettingsNav";
 export function SettingsDialog() {
 	const settings = useSettings();
 	const [browsing, setBrowsing] = useState(false);
+	// Providers whose key form the user already finished with (saved or
+	// cancelled) this dialog session. Lives here so it survives the
+	// ModelsTab unmount/remount driven by the Add→Back toggle, which is what
+	// made the `?provider`-driven form reopen.
+	const [dismissed, setDismissed] = useState<Set<BYOKProvider>>(new Set());
+
+	const dismissForm = (provider: BYOKProvider) =>
+		setDismissed((prev) => new Set(prev).add(provider));
 
 	const close = () => {
 		setBrowsing(false);
+		setDismissed(new Set());
 		settings.close();
 	};
 
-	const pick = (provider: Provider) => {
+	const pick = (provider: BYOKProvider) => {
 		setBrowsing(false);
+		// A fresh "Connect" is a new landing, so its key form is allowed to
+		// open again even if it was dismissed earlier this session. The
+		// Add→Back toggle does not go through here, so it stays dismissed.
+		setDismissed((prev) => {
+			if (!prev.has(provider)) return prev;
+			const next = new Set(prev);
+			next.delete(provider);
+			return next;
+		});
 		settings.open("models", provider);
 	};
 
@@ -48,6 +66,7 @@ export function SettingsDialog() {
 						active={settings.tab ?? "models"}
 						onSelect={(tab) => {
 							setBrowsing(false);
+							setDismissed(new Set());
 							settings.open(tab);
 						}}
 					/>
@@ -71,6 +90,8 @@ export function SettingsDialog() {
 						) : (
 							<ModelsTab
 								selected={settings.provider}
+								dismissed={dismissed}
+								onDismissForm={dismissForm}
 								onAddProviders={() => setBrowsing(true)}
 							/>
 						)}
