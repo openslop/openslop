@@ -9,8 +9,7 @@ import "./globals.css";
  * Root-level recovery for errors thrown by the root layout itself. Replaces
  * the root layout while active, so it owns `<html>`/`<body>` and imports
  * global styles explicitly. Offers `retry()` (re-fetch + re-render) and a
- * full reload as the last-resort recovery — the only recovery previously
- * available to users was a manual page reload.
+ * full reload as the last-resort recovery.
  */
 export default function GlobalError({
 	error,

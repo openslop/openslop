@@ -90,14 +90,11 @@ describe("ToastErrorBoundary", () => {
 			</ToastErrorBoundary>,
 		);
 
-		// The thrown render error becomes durable UI — never `null` for the
-		// lifetime of the instance, which was the bug.
 		expect(container.hasChildNodes()).toBe(true);
 		expect(text()).toContain("Something went wrong.");
 		expect(text()).toContain("Try again");
 		expect(container.querySelector("button")).not.toBeNull();
 
-		// The pre-existing signal — surfacing the cause via sonner — is preserved.
 		expect(errorToast).toHaveBeenCalledTimes(1);
 		expect(errorToast).toHaveBeenCalledWith("player crashed", undefined);
 	});
@@ -118,7 +115,7 @@ describe("ToastErrorBoundary", () => {
 		);
 	});
 
-	it("recovers by re-rendering children on Try again once the cause clears — no manual page reload needed", () => {
+	it("recovers by re-rendering children on Try again once the cause clears", () => {
 		broken = true;
 		mount(
 			<ToastErrorBoundary>
@@ -129,8 +126,7 @@ describe("ToastErrorBoundary", () => {
 		expect(text()).toContain("Something went wrong.");
 		expect(errorToast).toHaveBeenCalledTimes(1);
 
-		// Simulate the transient cause resolving, then exercise the recovery
-		// affordance that did not exist before the fix.
+		// Simulate the transient cause resolving, then exercise the retry affordance.
 		broken = false;
 		act(() => {
 			getButton("Try again").click();

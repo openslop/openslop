@@ -18,8 +18,6 @@ describe("app/error.tsx (segment-level recovery)", () => {
 		const html = renderSegment(new Error("boom in segment"));
 
 		expect(html).toContain("Something went wrong");
-		// The cause is shown in-page, replacing the auto-dismissing toast that
-		// left users with no signal after ~4s.
 		expect(html).toContain("boom in segment");
 		expect(html).toContain("Try again");
 		expect(html).toContain("<button");
@@ -44,7 +42,7 @@ describe("app/global-error.tsx (root-level recovery)", () => {
 		expect(html).toContain("root layout exploded");
 	});
 
-	it("offers both retry and an explicit reload — the recovery that previously required a manual page reload", () => {
+	it("offers both retry and an explicit reload", () => {
 		const html = renderGlobal(new Error("boom"));
 
 		expect(html).toContain("Try again");
