@@ -36,9 +36,17 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
 	const fadeFrames = toFrames(audioFadeSec(element), fps);
+	// Effects crossfade against the audio file's true length; scene-builder
+	// inflates the per-copy <Sequence> window to MIN_DURATION_SEC, which would
+	// land the fade-out tail past the audio's end and overshoot at the seam.
+	// Backgrounds keep the inflated window so their edge fades span the scene.
+	const audioFileFrames =
+		element.role === "effect"
+			? toFrames(element.durationSec, fps)
+			: durationInFrames;
 	const volume = useMemo(
-		() => audioVolume(gain, durationInFrames, fadeFrames),
-		[gain, durationInFrames, fadeFrames],
+		() => audioVolume(gain, audioFileFrames, fadeFrames),
+		[gain, audioFileFrames, fadeFrames],
 	);
 	return (
 		<>
