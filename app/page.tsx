@@ -6,7 +6,6 @@ import OnboardingCard from "./components/OnboardingCard";
 import { AuthFooterLink } from "./components/AuthFooterLink";
 import AccessCodeInput from "./components/AccessCodeInput";
 import ProjectsList from "./components/projects/ProjectsList";
-import { Button } from "@/components/ui/button";
 import { listProviderKeys } from "@/lib/api/providerKeys";
 import { PROJECT_ROW_COLUMNS, ProjectRowSchema } from "@/lib/project/api";
 import { UserProvider } from "@/lib/user/UserProvider";
@@ -71,10 +70,6 @@ export default async function Home() {
 			</p>
 
 			<AccessCodeInput />
-
-			<Button type="button" variant="accent" size="cta" className="mt-2 w-full">
-				Get Started
-			</Button>
 		</OnboardingCard>
 	);
 }
