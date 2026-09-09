@@ -5,18 +5,23 @@ import { PROVIDERS, type ConnectorType, type Provider } from "./types";
 
 export type ProviderMatch = { provider: Provider; models: string[] };
 
-const modelNamesFor = (provider: Provider): string[] =>
+const modelNamesFor = (
+	provider: Provider,
+	capability: ConnectorType[] | null,
+): string[] =>
 	uniq(
-		modalitiesFor(provider).flatMap((type) =>
-			Object.keys(MODELS[type][provider] ?? {}),
-		),
+		(capability ?? modalitiesFor(provider))
+			.filter((type) => modalitiesFor(provider).includes(type))
+			.flatMap((type) => Object.keys(MODELS[type][provider] ?? {})),
 	);
 
 /**
  * Providers matching a query, which may name either the provider or one of
  * its models: someone who knows the model they want should not have to know
  * who serves it. The matched models come back so a row can say why it is here.
- * An absent capability filter matches everything.
+ * An absent capability filter matches everything; an active one scopes the
+ * model match to the modalities the user is browsing, so a row can only appear
+ * (and explain itself) via a model in that capability.
  */
 export function searchProviders(
 	query: string,
@@ -29,7 +34,7 @@ export function searchProviders(
 			return [];
 		if (!needle) return [{ provider, models: [] }];
 
-		const models = modelNamesFor(provider).filter((name) =>
+		const models = modelNamesFor(provider, capability).filter((name) =>
 			name.toLowerCase().includes(needle),
 		);
 		const named = PROVIDER_CATALOG[provider].name
