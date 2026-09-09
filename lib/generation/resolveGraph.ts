@@ -1,3 +1,4 @@
+import omit from "lodash/omit";
 import {
 	resolveElementConnector,
 	type ElementConnector,
@@ -26,23 +27,32 @@ const toNode = (
 	state: ProjectData,
 	dependsOn: GenerationNode[],
 	label: string | undefined,
-): JobNode => ({
-	id: element.id,
-	label,
-	inputs: {
-		prompt: getPromptText(element),
-		attributes: element.generationAttributes ?? {},
-	},
-	dependsOn,
-	job: {
-		elementId: element.id,
-		elementType: element.type,
-		connectorType: connector.type,
-		model: connector.model,
-		config: { ...connector.config, plugins },
-		state,
-	},
-});
+): JobNode => {
+	// Keys a plugin strips from its vendor call never reach the generator, so
+	// changing them must not re-stale the node. Mirrors `stillElement` dropping
+	// the video's keys from the still, keeping the fingerprint and the call in
+	// sync.
+	const fingerprintOmitKeys = plugins.flatMap(
+		(plugin) => plugin.omitFromFingerprint?.(element) ?? [],
+	);
+	return {
+		id: element.id,
+		label,
+		inputs: {
+			prompt: getPromptText(element),
+			attributes: omit(element.generationAttributes ?? {}, fingerprintOmitKeys),
+		},
+		dependsOn,
+		job: {
+			elementId: element.id,
+			elementType: element.type,
+			connectorType: connector.type,
+			model: connector.model,
+			config: { ...connector.config, plugins },
+			state,
+		},
+	};
+};
 
 /**
  * Edges come from the plugin chain each node runs, so one declaration drives
