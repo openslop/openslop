@@ -1,5 +1,5 @@
 import { resolveModel } from "@/lib/connectors/models";
-import { requireModel, requireState } from "@/lib/connectors/plugins";
+import { requireContext } from "@/lib/connectors/plugins";
 import { forVoice } from "@/lib/generation/sourceNodes";
 import { declaredLanguage } from "@/lib/project/language";
 import {
@@ -41,7 +41,7 @@ export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> 
 				)(state),
 		],
 		beforeGenerate(params, ctx) {
-			const { metadata } = requireState(ctx, "metadata-voice");
+			const { metadata } = requireContext(ctx, "state", "metadata-voice");
 			const voice = metadataVoiceFor(metadata, params.name);
 			if (!voice) return params;
 			const traits = voiceTraitsSchema.parse(voice);
@@ -49,7 +49,10 @@ export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> 
 				...params,
 				...traits,
 				language: declaredLanguage(metadata.language) ?? traits.language,
-				voiceId: voiceIdOn(voice, requireModel(ctx, "metadata-voice")),
+				voiceId: voiceIdOn(
+					voice,
+					requireContext(ctx, "model", "metadata-voice"),
+				),
 			};
 		},
 	};

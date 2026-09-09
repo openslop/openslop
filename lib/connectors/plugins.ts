@@ -1,22 +1,16 @@
-import type { ProjectData } from "@/lib/project/store";
-import type { ConnectorPlugin, ModelRef, PluginContext } from "./types";
+import type { ConnectorPlugin, PluginContext } from "./types";
 
-/** Assert the plugin was given project state, returning it narrowed. */
-export function requireState<P, R>(
-	ctx: PluginContext<P, R>,
+/** Assert the plugin was given a context field, returning it narrowed. */
+export function requireContext<K extends keyof PluginContext>(
+	ctx: PluginContext,
+	key: K,
 	plugin: string,
-): ProjectData {
-	if (!ctx.state) throw new Error(`${plugin} plugin requires project state`);
-	return ctx.state;
-}
-
-/** Assert the plugin was told the pair its connector runs on. */
-export function requireModel<P, R>(
-	ctx: PluginContext<P, R>,
-	plugin: string,
-): ModelRef {
-	if (!ctx.model) throw new Error(`${plugin} plugin requires a model`);
-	return ctx.model;
+): NonNullable<PluginContext[K]> {
+	const value = ctx[key];
+	if (value === undefined) {
+		throw new Error(`${plugin} plugin requires ${key} in its context`);
+	}
+	return value;
 }
 
 type TransformHook = "beforeGenerate" | "afterGenerate" | "transformPrompt";

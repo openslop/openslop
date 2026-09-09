@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type {
-	AnimatedImageGenerateParams,
-	AssetResult,
-	PluginContext,
-} from "@/lib/connectors/types";
+import type { PluginContext } from "@/lib/connectors/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
@@ -28,9 +24,7 @@ import { splitAttributes } from "@/lib/video/elementAttributes";
 const ELEMENT_ID = "anim-1";
 const STILL_URL = "https://example.com/still.png";
 
-const ctx = (
-	imageUrl?: string,
-): PluginContext<AnimatedImageGenerateParams, AssetResult> => ({
+const ctx = (imageUrl?: string): PluginContext => ({
 	elementId: ELEMENT_ID,
 	dependencies: imageUrl
 		? { [stillElementId(ELEMENT_ID)]: { imageUrl, durationSec: 0 } }

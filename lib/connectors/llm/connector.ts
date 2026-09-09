@@ -22,10 +22,6 @@ export class HttpLLMConnector
 		this.gateway = new HttpLLMGateway(config.model, config.baseUrl);
 	}
 
-	protected pluginContext() {
-		return { gateway: this.gateway };
-	}
-
 	protected async _generate(
 		params: LLMGenerateParams,
 	): Promise<LLMGenerateResult> {

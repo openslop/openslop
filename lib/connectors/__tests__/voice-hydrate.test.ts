@@ -17,7 +17,7 @@ beforeEach(() => {
 	store = createProjectStore();
 });
 
-function ctxWith(voices: VoiceInfo[]): PluginContext<TTSGenerateParams> {
+function ctxWith(voices: VoiceInfo[]): PluginContext {
 	return {
 		searchVoices: vi.fn(async () => voices),
 		...stateCtx(store),
@@ -26,7 +26,7 @@ function ctxWith(voices: VoiceInfo[]): PluginContext<TTSGenerateParams> {
 
 async function runPipeline(
 	params: TTSGenerateParams,
-	ctx: PluginContext<TTSGenerateParams>,
+	ctx: PluginContext,
 ): Promise<TTSGenerateParams> {
 	const plugins = [
 		createMetadataVoicePlugin(),

@@ -38,13 +38,9 @@ export abstract class BaseConnector<
 		this.model = config.model;
 	}
 
-	protected pluginContext(): PluginContext<TParams, TResult> {
-		return {};
-	}
-
 	protected async prepareParams(
 		params: TParams,
-		ctx: PluginContext<TParams, TResult>,
+		ctx: PluginContext,
 	): Promise<TParams> {
 		const prompt = await runTransformPrompt(this.plugins, params.prompt, ctx);
 		return runBeforeGenerate(
@@ -54,10 +50,8 @@ export abstract class BaseConnector<
 		);
 	}
 
-	protected contextFor(
-		context?: GenerationContext,
-	): PluginContext<TParams, TResult> {
-		return { ...this.pluginContext(), ...context, model: this.model };
+	protected contextFor(context?: GenerationContext): PluginContext {
+		return { ...context, model: this.model };
 	}
 
 	async generate(

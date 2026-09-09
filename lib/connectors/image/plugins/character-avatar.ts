@@ -1,4 +1,4 @@
-import { requireState } from "@/lib/connectors/plugins";
+import { requireContext } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 
 export function createCharacterAvatarPlugin(
@@ -8,8 +8,9 @@ export function createCharacterAvatarPlugin(
 		name: "character-avatar",
 		transformPrompt(_, ctx) {
 			const appearance =
-				requireState(ctx, "character-avatar").metadata.characters[name]
-					?.appearance ?? "";
+				requireContext(ctx, "state", "character-avatar").metadata.characters[
+					name
+				]?.appearance ?? "";
 			return [
 				`Character portrait of ${name}`,
 				appearance,

@@ -4,6 +4,7 @@ import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
 import { TTS_ATTRIBUTES } from "./attributes";
 import type {
+	GenerationContext,
 	PluginContext,
 	ResolvedConnectorConfig,
 	TextTimestamp,
@@ -42,7 +43,10 @@ export class HttpTTSConnector
 		};
 	}
 
-	protected pluginContext(): PluginContext<TTSGenerateParams, TTSResult> {
-		return { searchVoices: (p) => this.searchVoices(p) };
+	protected contextFor(context?: GenerationContext): PluginContext {
+		return {
+			...super.contextFor(context),
+			searchVoices: (p) => this.searchVoices(p),
+		};
 	}
 }
