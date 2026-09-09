@@ -33,6 +33,23 @@ export function SettingsDialog() {
 		settings.close();
 	};
 
+	// Track the last provider we saw so we can re-arm on change during render.
+	const [lastProvider, setLastProvider] = useState(settings.provider);
+
+	// Re-arm a provider's key form when settings.provider changes externally
+	// (e.g. ModelDefaultControl calling settings.open directly, bypassing pick).
+	// We do this during render rather than in an effect to avoid cascading renders.
+	let effectiveDismissed = dismissed;
+	if (settings.provider !== lastProvider) {
+		setLastProvider(settings.provider);
+		if (settings.provider && dismissed.has(settings.provider as BYOKProvider)) {
+			const next = new Set(dismissed);
+			next.delete(settings.provider as BYOKProvider);
+			setDismissed(next);
+			effectiveDismissed = next;
+		}
+	}
+
 	const pick = (provider: BYOKProvider) => {
 		setBrowsing(false);
 		// A fresh "Connect" is a new landing, so its key form is allowed to
@@ -90,7 +107,7 @@ export function SettingsDialog() {
 						) : (
 							<ModelsTab
 								selected={settings.provider}
-								dismissed={dismissed}
+								dismissed={effectiveDismissed}
 								onDismissForm={dismissForm}
 								onAddProviders={() => setBrowsing(true)}
 							/>
