@@ -65,16 +65,11 @@ describe("sendMagicLink", () => {
 		});
 	});
 
-	it("maps a Supabase error to its message", async () => {
-		signInWithOtp.mockResolvedValue({ error: { message: "rate limited" } });
+	it("throws the Supabase error", async () => {
+		const error = new Error("rate limited");
+		signInWithOtp.mockResolvedValue({ error });
 
-		expect(await sendMagicLink({ email: "a@b.com" })).toEqual({
-			error: "rate limited",
-		});
-	});
-
-	it("returns no error on success", async () => {
-		expect(await sendMagicLink({ email: "a@b.com" })).toEqual({});
+		await expect(sendMagicLink({ email: "a@b.com" })).rejects.toBe(error);
 	});
 });
 

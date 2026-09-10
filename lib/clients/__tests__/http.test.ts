@@ -69,16 +69,35 @@ describe("apiFetch", () => {
 		);
 	});
 
-	it("falls back to the status line when there is no error message", async () => {
-		fetchMock.mockResolvedValue({
-			ok: false,
-			status: 500,
-			statusText: "Internal Server Error",
-			json: () => Promise.reject(new Error("not json")),
-		});
+	it.each([
+		[
+			"not JSON",
+			500,
+			"Internal Server Error",
+			() => Promise.reject(new Error()),
+		],
+		["has no error field", 403, "Forbidden", () => Promise.resolve({ m: 1 })],
+		["is a primitive", 502, "Bad Gateway", () => Promise.resolve("upstream")],
+	])(
+		"falls back to the status line when the body %s",
+		async (_, status, statusText, json) => {
+			fetchMock.mockResolvedValue({ ok: false, status, statusText, json });
 
-		await expect(apiFetch("/api/render")).rejects.toThrow(
-			"500 Internal Server Error",
+			await expect(apiFetch("/api/render")).rejects.toThrow(
+				`${status} ${statusText}`,
+			);
+		},
+	);
+
+	it("hands the abort signal to fetch", async () => {
+		fetchMock.mockResolvedValue({ ok: true });
+		const { signal } = new AbortController();
+
+		await apiFetch("/api/v1/video/job-1", { signal });
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			"/api/v1/video/job-1",
+			expect.objectContaining({ method: "GET", signal }),
 		);
 	});
 });

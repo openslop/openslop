@@ -15,7 +15,7 @@ export async function sendMagicLink({
 	email,
 	shouldCreateUser,
 	data,
-}: MagicLinkParams): Promise<{ error?: string }> {
+}: MagicLinkParams): Promise<void> {
 	const { error } = await createClient().auth.signInWithOtp({
 		email,
 		options: {
@@ -24,7 +24,7 @@ export async function sendMagicLink({
 			...(data && { data }),
 		},
 	});
-	return error ? { error: error.message } : {};
+	if (error) throw error;
 }
 
 export async function signInWithGoogle(): Promise<void> {
