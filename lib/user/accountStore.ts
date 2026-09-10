@@ -43,11 +43,8 @@ async function persistModels(models: ConnectorModels): Promise<void> {
 
 export function createAccountStore(initial: AccountData): AccountStore {
 	return createStore<AccountContext>()((set, get) => {
-		// One persist at a time. A second pick made before the network round-trip
-		// resolves otherwise reads the pre-call snapshot both calls share, so the
-		// last-resolving call overwrites the other in the store and in
-		// user_metadata.models. The queue computes `next` only after the prior
-		// persist+set has settled, so each call sees the result of the last one.
+		// Serialized so a pick made mid-flight builds on the previous one, not on
+		// a shared stale snapshot.
 		const queue = new PQueue({ concurrency: 1 });
 		const applyModels = (makeNext: () => ConnectorModels) =>
 			queue.add(async () => {
