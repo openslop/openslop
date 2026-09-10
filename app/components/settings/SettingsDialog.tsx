@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
-import { type BYOKProvider } from "@/lib/connectors/providerCatalog";
+import type { Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/useSettings";
 import { AddProvidersView } from "./AddProvidersView";
 import { ModelsTab } from "./ModelsTab";
@@ -18,49 +18,14 @@ import { SettingsNav } from "./SettingsNav";
 export function SettingsDialog() {
 	const settings = useSettings();
 	const [browsing, setBrowsing] = useState(false);
-	// Providers whose key form the user already finished with (saved or
-	// cancelled) this dialog session. Lives here so it survives the
-	// ModelsTab unmount/remount driven by the Add→Back toggle, which is what
-	// made the `?provider`-driven form reopen.
-	const [dismissed, setDismissed] = useState<Set<BYOKProvider>>(new Set());
-
-	const dismissForm = (provider: BYOKProvider) =>
-		setDismissed((prev) => new Set(prev).add(provider));
 
 	const close = () => {
 		setBrowsing(false);
-		setDismissed(new Set());
 		settings.close();
 	};
 
-	// Track the last provider we saw so we can re-arm on change during render.
-	const [lastProvider, setLastProvider] = useState(settings.provider);
-
-	// Re-arm a provider's key form when settings.provider changes externally
-	// (e.g. ModelDefaultControl calling settings.open directly, bypassing pick).
-	// We do this during render rather than in an effect to avoid cascading renders.
-	let effectiveDismissed = dismissed;
-	if (settings.provider !== lastProvider) {
-		setLastProvider(settings.provider);
-		if (settings.provider && dismissed.has(settings.provider as BYOKProvider)) {
-			const next = new Set(dismissed);
-			next.delete(settings.provider as BYOKProvider);
-			setDismissed(next);
-			effectiveDismissed = next;
-		}
-	}
-
-	const pick = (provider: BYOKProvider) => {
+	const pick = (provider: Provider) => {
 		setBrowsing(false);
-		// A fresh "Connect" is a new landing, so its key form is allowed to
-		// open again even if it was dismissed earlier this session. The
-		// Add→Back toggle does not go through here, so it stays dismissed.
-		setDismissed((prev) => {
-			if (!prev.has(provider)) return prev;
-			const next = new Set(prev);
-			next.delete(provider);
-			return next;
-		});
 		settings.open("models", provider);
 	};
 
@@ -83,7 +48,6 @@ export function SettingsDialog() {
 						active={settings.tab ?? "models"}
 						onSelect={(tab) => {
 							setBrowsing(false);
-							setDismissed(new Set());
 							settings.open(tab);
 						}}
 					/>
@@ -107,8 +71,6 @@ export function SettingsDialog() {
 						) : (
 							<ModelsTab
 								selected={settings.provider}
-								dismissed={effectiveDismissed}
-								onDismissForm={dismissForm}
 								onAddProviders={() => setBrowsing(true)}
 							/>
 						)}

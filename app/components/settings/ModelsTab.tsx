@@ -11,10 +11,7 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import {
-	MANAGED_PROVIDER,
-	type BYOKProvider,
-} from "@/lib/connectors/providerCatalog";
+import { MANAGED_PROVIDER } from "@/lib/connectors/providerCatalog";
 import type { Provider } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toastError";
 import { useSettings } from "@/lib/settings/useSettings";
@@ -24,20 +21,10 @@ import { SettingsList, SettingsRow, SettingsSection } from "./SettingsSection";
 
 export function ModelsTab({
 	selected,
-	dismissed,
-	onDismissForm,
 	onAddProviders,
 }: {
 	/** The provider a link asked to open on, shown even before it has a key. */
 	selected: Provider | null;
-	/**
-	 * Providers whose key form has already been dismissed this dialog
-	 * session, so a ModelsTab remount (the Add→Back toggle) does not reopen
-	 * a form the user just finished with.
-	 */
-	dismissed: Set<BYOKProvider>;
-	/** Mark a provider's key form dismissed for the rest of this dialog session. */
-	onDismissForm: (provider: BYOKProvider) => void;
 	onAddProviders: () => void;
 }) {
 	const models = useAccount((state) => state.models);
@@ -79,8 +66,6 @@ export function ModelsTab({
 									key={provider}
 									provider={provider}
 									selected={provider === selected}
-									dismissed={dismissed.has(provider)}
-									onDismissForm={onDismissForm}
 									// A link pointing at a row that is gone has nothing to open.
 									onDismissed={() => settings.open("models")}
 								/>
