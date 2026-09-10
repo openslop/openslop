@@ -9,8 +9,11 @@ import {
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
-import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
-import type { VoiceDescriptor } from "@/lib/connectors/tts/plugins/voice-search";
+import type {
+	ModelRef,
+	VoiceInfo,
+	VoiceSearchParams,
+} from "@/lib/connectors/types";
 import { useVoiceSearch } from "@/lib/connectors/tts/useVoiceSearch";
 import { FieldLabel } from "./fields";
 
@@ -58,7 +61,7 @@ export function VoicePicker({
 	onSelect,
 	onModelChange,
 }: {
-	filters: VoiceDescriptor;
+	filters: VoiceSearchParams;
 	model: ModelRef;
 	selectedVoiceId?: string;
 	onSelect: (voice: VoiceInfo) => void;
@@ -87,60 +90,57 @@ export function VoicePicker({
 					Array.from({ length: SKELETON_ROWS }).map((_, i) => (
 						<Skeleton key={`skel-${i}`} className="h-12 shrink-0 rounded-md" />
 					))}
+				{search.status === "ready" && search.voices.length === 0 && (
+					<span className="px-2 py-3 text-center text-label-xs text-muted-foreground">
+						No voices match these filters.
+					</span>
+				)}
 				{search.status === "ready" &&
-					(search.voices.length === 0 ? (
-						<span className="px-2 py-3 text-center text-label-xs text-muted-foreground">
-							No voices match these filters.
-						</span>
-					) : (
-						search.voices.map((voice) => {
-							const selected = voice.id === selectedVoiceId;
-							return (
-								<div
-									key={voice.id}
-									role="button"
-									tabIndex={0}
-									onClick={() => onSelect(voice)}
-									onKeyDown={(e) => {
-										if (e.target !== e.currentTarget) return;
-										if (e.key === "Enter" || e.key === " ") {
-											e.preventDefault();
-											onSelect(voice);
-										}
-									}}
-									className={`flex min-w-0 cursor-pointer flex-col gap-1 rounded-md px-2 py-1 transition-colors ${
-										selected ? "bg-muted" : "hover:bg-voice-hover"
-									}`}
-								>
-									<div className="flex min-w-0 items-center gap-1.5">
-										<span className="min-w-0 flex-1 truncate text-label text-foreground">
-											{voice.name}
+					search.voices.map((voice) => {
+						const selected = voice.id === selectedVoiceId;
+						return (
+							<div
+								key={voice.id}
+								role="button"
+								tabIndex={0}
+								onClick={() => onSelect(voice)}
+								onKeyDown={(e) => {
+									if (e.target !== e.currentTarget) return;
+									if (e.key === "Enter" || e.key === " ") {
+										e.preventDefault();
+										onSelect(voice);
+									}
+								}}
+								className={`flex min-w-0 cursor-pointer flex-col gap-1 rounded-md px-2 py-1 transition-colors ${
+									selected ? "bg-muted" : "hover:bg-voice-hover"
+								}`}
+							>
+								<div className="flex min-w-0 items-center gap-1.5">
+									<span className="min-w-0 flex-1 truncate text-label text-foreground">
+										{voice.name}
+									</span>
+									{[voice.language, voice.gender].filter(Boolean).map((tag) => (
+										<span key={tag} className={VOICE_TAG_CLASS}>
+											{tag}
 										</span>
-										{[voice.language, voice.gender]
-											.filter(Boolean)
-											.map((tag) => (
-												<span key={tag} className={VOICE_TAG_CLASS}>
-													{tag}
-												</span>
-											))}
-										{selected && (
-											<Check className="h-3 w-3 shrink-0 text-accent" />
-										)}
-									</div>
-									{(voice.description || voice.previewUrl) && (
-										<div className="flex min-w-0 items-center justify-between gap-2">
-											<span className="min-w-0 flex-1 truncate text-label text-muted-foreground">
-												{voice.description}
-											</span>
-											{voice.previewUrl && (
-												<PreviewPlayButton src={voice.previewUrl} />
-											)}
-										</div>
+									))}
+									{selected && (
+										<Check className="h-3 w-3 shrink-0 text-accent" />
 									)}
 								</div>
-							);
-						})
-					))}
+								{(voice.description || voice.previewUrl) && (
+									<div className="flex min-w-0 items-center justify-between gap-2">
+										<span className="min-w-0 flex-1 truncate text-label text-muted-foreground">
+											{voice.description}
+										</span>
+										{voice.previewUrl && (
+											<PreviewPlayButton src={voice.previewUrl} />
+										)}
+									</div>
+								)}
+							</div>
+						);
+					})}
 			</div>
 		</div>
 	);

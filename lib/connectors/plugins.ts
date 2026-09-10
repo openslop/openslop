@@ -1,6 +1,5 @@
 import type { ConnectorPlugin, PluginContext } from "./types";
 
-/** Assert the plugin was given a context field, returning it narrowed. */
 export function requireContext<K extends keyof PluginContext>(
 	ctx: PluginContext,
 	key: K,

@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { createConnector } from "@/lib/connectors/factory";
-import type { VoiceDescriptor } from "@/lib/connectors/tts/plugins/voice-search";
-import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
+import type {
+	ModelRef,
+	VoiceInfo,
+	VoiceSearchParams,
+} from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
 
 export type VoiceSearch =
@@ -16,9 +19,8 @@ const DEBOUNCE_MS = 300;
 const VOICE_LIMIT = 50;
 const LOADING: VoiceSearch = { status: "loading" };
 
-/** The voices a pair offers for the filters, searched again whenever either changes. */
 export function useVoiceSearch(
-	filters: VoiceDescriptor,
+	filters: VoiceSearchParams,
 	model: ModelRef,
 ): VoiceSearch {
 	const { connectorConfig } = useConfig();
