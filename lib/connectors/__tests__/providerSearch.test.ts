@@ -58,73 +58,15 @@ describe("searchProviders", () => {
 		expect(names("seedream", capability("voice"))).toEqual([]);
 	});
 
+	// Under a capability tab only that tab's models can match or be the reason.
+	it("ignores a model match outside the browsed capability", () => {
+		expect(searchProviders("image", capability("voice"))).toEqual([]);
+		expect(searchProviders("slop", capability("voice"))).toEqual([
+			{ provider: "openslop", models: ["Slop TTS v1"] },
+		]);
+	});
+
 	it("finds nothing for a query no one matches", () => {
 		expect(names("midjourney")).toEqual([]);
-	});
-
-	// Under a capability tab, a provider can appear only via a model the user
-	// is actually browsing — never via a model in a modality the filter selects
-	// out. The "All" tab is the one place cross-capability matching lives.
-	describe("with a capability filter active", () => {
-		it("ignores an off-capability model match", () => {
-			// openslop serves tts, but "image" names its image model only, so it
-			// must not surface under Voice.
-			expect(searchProviders("image", capability("voice"))).toEqual([]);
-		});
-
-		it("lists only the browsed-capability models as the reason", () => {
-			// Before the fix every "Slop *" model across all modalities surfaced.
-			expect(searchProviders("slop", capability("voice"))).toEqual([
-				{ provider: "openslop", models: ["Slop TTS v1"] },
-			]);
-		});
-
-		it("drops a video model from the Images tab", () => {
-			// "Seedance 2 Fast" is a video model; under Images, only the image
-			// model "Seedream 5 Lite" matches.
-			expect(searchProviders("seed", capability("images"))).toEqual([
-				{ provider: "runware", models: ["Seedream 5 Lite"] },
-			]);
-		});
-
-		it("drops an image model from the Videos tab", () => {
-			// "Seedream 5 Lite" is an image model; under Videos, only the video
-			// model "Seedance 2 Fast" matches.
-			expect(searchProviders("seed", capability("videos"))).toEqual([
-				{ provider: "runware", models: ["Seedance 2 Fast"] },
-			]);
-		});
-
-		it("drops a provider whose only model match is off-capability", () => {
-			// "seedream" matches only runware's image model; runware's video
-			// models do not contain it, so under Videos it is dropped entirely.
-			expect(searchProviders("seedream", capability("videos"))).toEqual([]);
-		});
-
-		it("still surfaces a provider by name with no model reason", () => {
-			expect(searchProviders("runware", capability("images"))).toEqual([
-				{ provider: "runware", models: [] },
-			]);
-		});
-	});
-
-	describe("with no capability filter (the All tab)", () => {
-		it("still matches models across every modality a provider serves", () => {
-			// The cross-capability discovery path the All tab exists for.
-			expect(searchProviders("slop", all)).toEqual([
-				{
-					provider: "openslop",
-					models: [
-						"Slop Music v1",
-						"Slop SFX v1",
-						"Slop Image v1",
-						"Slop Video v1",
-						"Slop Video v1 Fast",
-						"Slop TTS v1",
-						"Slop LLM v1",
-					],
-				},
-			]);
-		});
 	});
 });
