@@ -86,6 +86,24 @@ describe("RunwareVideo", () => {
 			);
 		});
 
+		it("sends the requested pixel size instead of the preset", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-px",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "a sunset",
+				model: MODEL,
+				width: 640,
+				height: 360,
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({ width: 640, height: 360 }),
+			);
+		});
+
 		it("sizes a frame-conditioned video by resolution preset", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-k",
@@ -138,7 +156,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			const result = await provider.submit({ prompt: "test", model: MODEL });
 
-			expect(result.metadata?.jobId).toBe("job-arr");
+			expect(result.metadata.jobId).toBe("job-arr");
 			expect(result.url).toBe("https://v.mp4");
 		});
 
@@ -211,7 +229,7 @@ describe("RunwareVideo", () => {
 				duration: 10,
 			});
 
-			expect(result.metadata?.durationSec).toBe(10);
+			expect(result.metadata.durationSec).toBe(10);
 		});
 	});
 
@@ -229,7 +247,7 @@ describe("RunwareVideo", () => {
 			});
 
 			expect(poll.kind).toBe("ready");
-			expect(poll.kind === "ready" && poll.asset.metadata?.durationSec).toBe(8);
+			expect(poll.kind === "ready" && poll.asset.metadata.durationSec).toBe(8);
 		});
 
 		it("returns the stored asset when the job is completed", async () => {
@@ -272,6 +290,20 @@ describe("RunwareVideo", () => {
 				kind: "pending",
 				metadata: { jobId: "job-1", status: "processing" },
 			});
+		});
+
+		it("reports a failed job as its own outcome, not as pending", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "failed" },
+			]);
+
+			const provider = new RunwareVideo("test-key");
+			const result = await provider.poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			expect(result).toEqual({ kind: "failed" });
 		});
 
 		it("throws when job not found", async () => {

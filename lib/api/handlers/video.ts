@@ -16,11 +16,6 @@ export const videoHandler: JobHandler<
 		const providerJobId = job.metadata.providerJobId;
 		if (!providerJobId) {
 			const submitted = await provider.generate(jobVendorParams(job));
-			if (!submitted.metadata?.jobId) {
-				throw new Error(
-					"Video provider returned no jobId for async generation",
-				);
-			}
 			return {
 				kind: "pending",
 				metadata: { providerJobId: submitted.metadata.jobId },
@@ -28,12 +23,13 @@ export const videoHandler: JobHandler<
 		}
 
 		const upstream = await provider.poll(providerJobId, jobVendorParams(job));
-		if (upstream.kind === "ready") {
-			return { kind: "completed", result: upstream.asset };
+		switch (upstream.kind) {
+			case "ready":
+				return { kind: "completed", result: upstream.asset };
+			case "failed":
+				throw new Error("Video generation failed");
+			case "pending":
+				return { kind: "pending", metadata: { providerJobId } };
 		}
-		if (upstream.metadata.status === "failed") {
-			throw new Error(upstream.metadata.error ?? "Video generation failed");
-		}
-		return { kind: "pending", metadata: { providerJobId } };
 	},
 };

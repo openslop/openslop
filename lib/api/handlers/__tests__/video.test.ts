@@ -70,14 +70,6 @@ describe("videoHandler.process", () => {
 		expect(poll).toHaveBeenCalledWith("upstream-1", VENDOR_PARAMS);
 	});
 
-	it("throws when the provider returns no job id", async () => {
-		generate.mockResolvedValue({ metadata: {} });
-
-		await expect(videoHandler.process(job({ metadata: {} }))).rejects.toThrow(
-			"Video provider returned no jobId",
-		);
-	});
-
 	it("completes with the re-hosted bundle once upstream reports a video", async () => {
 		const asset = { ...bundle, result: { video: "output.mp4" } };
 		poll.mockResolvedValue({ kind: "ready", asset });
@@ -88,17 +80,8 @@ describe("videoHandler.process", () => {
 		});
 	});
 
-	it("throws the upstream error message on failure", async () => {
-		poll.mockResolvedValue({
-			kind: "pending",
-			metadata: { status: "failed", error: "content policy" },
-		});
-
-		await expect(videoHandler.process(job())).rejects.toThrow("content policy");
-	});
-
-	it("throws a fallback message when upstream fails without one", async () => {
-		poll.mockResolvedValue({ kind: "pending", metadata: { status: "failed" } });
+	it("fails the job when upstream reports the generation failed", async () => {
+		poll.mockResolvedValue({ kind: "failed" });
 
 		await expect(videoHandler.process(job())).rejects.toThrow(
 			"Video generation failed",

@@ -5,17 +5,21 @@ import { parseImageSource } from "./imageSource";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
-const optionalCoercedNumber = z
+const POSITIVE_NUMBER = "must be a positive number";
+
+const optionalPositiveNumber = z
 	.union([z.number(), z.string()])
 	.transform((v) =>
 		typeof v === "string" && v.trim() === "" ? NaN : Number(v),
 	)
-	.refine((v) => Number.isFinite(v), { message: "must be a finite number" })
+	.pipe(
+		z.number({ error: POSITIVE_NUMBER }).positive({ error: POSITIVE_NUMBER }),
+	)
 	.optional();
 
 export const optionalImageDimensions = {
-	width: optionalCoercedNumber,
-	height: optionalCoercedNumber,
+	width: optionalPositiveNumber,
+	height: optionalPositiveNumber,
 } as const;
 
 export const optionalDurationSeconds = {
@@ -23,7 +27,7 @@ export const optionalDurationSeconds = {
 } as const;
 
 export const optionalVideoDuration = {
-	duration: optionalCoercedNumber,
+	duration: optionalPositiveNumber,
 } as const;
 
 export const optionalVideoResolution = {

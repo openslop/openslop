@@ -29,8 +29,8 @@ const sizeFor = (params: VideoRequest) =>
 	params.frameImages && params.resolution
 		? { resolution: params.resolution }
 		: {
-				width: params.width || DEFAULT_SIZE.width,
-				height: params.height || DEFAULT_SIZE.height,
+				width: params.width ?? DEFAULT_SIZE.width,
+				height: params.height ?? DEFAULT_SIZE.height,
 			};
 
 export class RunwareVideo extends BaseVideoProvider {

@@ -15,7 +15,6 @@ export type VideoJobMetadata = {
 	jobId: string;
 	durationSec?: number;
 	status?: VideoJobStatus;
-	error?: string;
 };
 
 export type VideoJob = {
@@ -25,12 +24,13 @@ export type VideoJob = {
 };
 
 export type VideoProviderResponse = BundleResponse & {
-	metadata?: VideoJobMetadata;
+	metadata: VideoJobMetadata;
 };
 
 /** A provider that is still working has no asset to hand back yet. */
 export type VideoPoll =
 	| { kind: "pending"; metadata: VideoJobMetadata }
+	| { kind: "failed" }
 	| { kind: "ready"; asset: VideoProviderResponse };
 
 export interface VideoProvider extends ProviderContract {
@@ -59,6 +59,7 @@ export abstract class BaseVideoProvider
 
 	async poll(jobId: string, request: VideoRequest): Promise<VideoPoll> {
 		const result = await this._poll(jobId);
+		if (result.metadata.status === "failed") return { kind: "failed" };
 		if (this.toFiles(result).length === 0) {
 			return { kind: "pending", metadata: result.metadata };
 		}

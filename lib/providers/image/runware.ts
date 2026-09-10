@@ -47,8 +47,8 @@ export class RunwareImage
 			const results = await runware.imageInference({
 				positivePrompt: params.prompt,
 				model: params.model,
-				width: params.width || 2848,
-				height: params.height || 1600,
+				width: params.width ?? 2848,
+				height: params.height ?? 1600,
 				outputType: "base64Data",
 				outputFormat: RUNWARE_FORMATS[format],
 				numberResults: 1,
