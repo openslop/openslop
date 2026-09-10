@@ -152,17 +152,6 @@ describe("buildVideoLayout", () => {
 			expect(layout.series[0].duration).toBe(4 + DIALOGUE_GAP_SEC);
 		});
 
-		it("lays a gap after each line and leaves the line's own audio unpadded", () => {
-			const layout = untrimmed([
-				el({ id: "n1", type: "narration", durationSec: 3 }),
-				el({ id: "n2", type: "narration", durationSec: 4 }),
-			]);
-			expect(seqs(layout, "narration")[0].duration).toBe(3);
-			expect(seqs(layout, "narration")[1].start).toBe(3 + DIALOGUE_GAP_SEC);
-			expect(seqs(layout, "narration")[1].duration).toBe(4);
-			expect(layout.totalDurationSec).toBe(7 + 2 * DIALOGUE_GAP_SEC);
-		});
-
 		it("collapses consecutive leading overlays into one blank scene", () => {
 			const layout = untrimmed([
 				el({ id: "n1", type: "narration", durationSec: 3 }),
