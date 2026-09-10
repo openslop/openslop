@@ -155,18 +155,17 @@ export function nodeInputs(
 	};
 }
 
-/**
- * Applies the node's `fingerprintOmitKeys` to any `GenerationInputs` —
- * the single definition of what counts as a change for fingerprint comparison.
- */
-export function applyFingerprintOmit(
+/** The part of a node's inputs that counts as a change. */
+export const fingerprintInputs = (
 	node: GenerationNode,
 	inputs: GenerationInputs,
-): GenerationInputs {
-	const omitKeys = isSourceNode(node) ? [] : (node.fingerprintOmitKeys ?? []);
-	if (omitKeys.length === 0) return inputs;
-	return { ...inputs, attributes: omit(inputs.attributes, omitKeys) };
-}
+): GenerationInputs =>
+	isSourceNode(node)
+		? inputs
+		: {
+				...inputs,
+				attributes: omit(inputs.attributes, node.fingerprintOmitKeys ?? []),
+			};
 
 export function needsGeneration(
 	node: GenerationNode,
@@ -178,11 +177,12 @@ export function needsGeneration(
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	if (!snapshot.resultInputs) return true;
-	const currentInputs = applyFingerprintOmit(node, nodeInputs(node, results));
-	const storedInputs = applyFingerprintOmit(node, snapshot.resultInputs);
 	return (
 		node.dependsOn.some((dep) => needsGeneration(dep, results)) ||
-		!isEqual(currentInputs, storedInputs)
+		!isEqual(
+			fingerprintInputs(node, nodeInputs(node, results)),
+			fingerprintInputs(node, snapshot.resultInputs),
+		)
 	);
 }
 

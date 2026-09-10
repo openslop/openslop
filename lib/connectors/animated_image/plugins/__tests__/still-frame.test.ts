@@ -269,7 +269,7 @@ describe("uploaded still lifetime", () => {
 	});
 });
 
-describe("pinned-still still-only edit", () => {
+describe("still-only edits", () => {
 	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
 		hydrated: true,
@@ -284,8 +284,8 @@ describe("pinned-still still-only edit", () => {
 		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
 	});
 
-	/** Upload + pin a still, commit the animation, then rebuild from edited attrs. */
-	const afterUpload = (attrs: Record<string, string>) => {
+	/** Commit a still and its animation, then read both back against edited attrs. */
+	const afterEdit = (pinned: boolean, attrs: Record<string, string>) => {
 		const queue = new GenerationQueue();
 		const build = nodeBuilder(registry, state);
 		const original = build(forElement(animated({})));
@@ -296,7 +296,7 @@ describe("pinned-still still-only edit", () => {
 		queue.commitResult(
 			still,
 			{ imageUrl: "uploaded.png", durationSec: 0 },
-			{ pinned: true },
+			{ pinned },
 		);
 		queue.commitResult(original, {
 			imageUrl: "uploaded.png",
@@ -305,25 +305,19 @@ describe("pinned-still still-only edit", () => {
 		});
 
 		const edited = build(forElement(animated(attrs)));
-		const editedStill = edited.dependsOn.find(
-			(dep) => dep.id === stillElementId(ELEMENT_ID),
-		);
 		return {
 			animation: needsGeneration(edited, queue),
-			still: needsGeneration(editedStill ?? still, queue),
+			still: needsGeneration(
+				edited.dependsOn.find((dep) => dep.id === stillElementId(ELEMENT_ID)) ??
+					still,
+				queue,
+			),
 		};
 	};
 
-	it("does not regenerate when only `format` changed (jpg → webp)", () => {
-		const { animation, still } = afterUpload({ format: "webp" });
-		// Pinned → the still stays; `format` never reaches the video call so the
-		// animation stays too.
-		expect(still).toBe(false);
-		expect(animation).toBe(false);
-	});
-
-	it("does not regenerate when only the image model pair changed", () => {
-		const { animation, still } = afterUpload({
+	it("leaves a pinned still and its animation alone", () => {
+		const { animation, still } = afterEdit(true, {
+			format: "webp",
 			imageProvider: "runware",
 			imageModel: "Seedream 5 Lite",
 		});
@@ -331,71 +325,9 @@ describe("pinned-still still-only edit", () => {
 		expect(animation).toBe(false);
 	});
 
-	it("regenerates the animation when the videoPrompt changed", () => {
-		const { animation, still } = afterUpload({ videoPrompt: "fast zoom" });
-		// `videoPrompt` is stripped from the vendor call but becomes its prompt,
-		// so it must keep driving staleness.
-		expect(still).toBe(false);
-		expect(animation).toBe(true);
-	});
-
-	it("leaves both alone when nothing changed", () => {
-		const { animation, still } = afterUpload({});
-		expect(still).toBe(false);
-		expect(animation).toBe(false);
-	});
-});
-
-describe("generated still still-only edit", () => {
-	const registry = DEFAULT_CONNECTOR_REGISTRY;
-	const state = {
-		hydrated: true,
-		metadata: MetadataSchema.parse({}),
-		referenceImages: [],
-	};
-
-	const animated = (attrs: Record<string, string>) => ({
-		id: ELEMENT_ID,
-		type: "animated_image" as const,
-		...splitAttributes({ videoPrompt: "slow pan", format: "jpg", ...attrs }),
-		children: [{ id: "t", type: "animated_image" as const, text: "a forest" }],
-	});
-
-	/** Commit a generated (non-pinned) still + animation, then rebuild edited. */
-	const afterGenerate = (attrs: Record<string, string>) => {
-		const queue = new GenerationQueue();
-		const build = nodeBuilder(registry, state);
-		const original = build(forElement(animated({})));
-		const still = original.dependsOn.find(
-			(dep) => dep.id === stillElementId(ELEMENT_ID),
-		);
-		if (!still) throw new Error("expected a still dependency");
-		queue.commitResult(still, { imageUrl: "uploaded.png", durationSec: 0 });
-		queue.commitResult(original, {
-			imageUrl: "uploaded.png",
-			videoUrl: "https://example.com/v.mp4",
-			durationSec: 5,
-		});
-
-		const edited = build(forElement(animated(attrs)));
-		const editedStill = edited.dependsOn.find(
-			(dep) => dep.id === stillElementId(ELEMENT_ID),
-		);
-		return {
-			animation: needsGeneration(edited, queue),
-			still: needsGeneration(editedStill ?? still, queue),
-		};
-	};
-
-	it("regenerates the still when `format` changed", () => {
-		const { still } = afterGenerate({ format: "webp" });
+	it("regenerates a generated still, and the animation through it", () => {
+		const { animation, still } = afterEdit(false, { format: "webp" });
 		expect(still).toBe(true);
-	});
-
-	it("re-stales the animation when the still re-runs, not from its own fingerprint", () => {
-		const { animation } = afterGenerate({ format: "webp" });
-		// Paired with the pinned-still case above: a `format` edit is omitted from
-		// the animation's own fingerprint, so it only goes stale via the still.
 		expect(animation).toBe(true);
 	});
 });

@@ -3,7 +3,7 @@ import union from "lodash/union";
 import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
 import {
-	applyFingerprintOmit,
+	fingerprintInputs,
 	isNodeStale,
 	needsGeneration,
 	nodeInputs,
@@ -18,12 +18,10 @@ const list = new Intl.ListFormat("en", { type: "conjunction" });
 
 /** Everything about `node` that no longer matches the result it produced. */
 function changedInputs(node: GenerationNode, results: NodeResults): string[] {
-	const storedInputs = results.getElementSnapshot(node.id).resultInputs;
-	if (!storedInputs) return [];
-	// Apply the same omit set that needsGeneration uses so the badge names only
-	// the keys that would actually trigger a regeneration.
-	const current = applyFingerprintOmit(node, nodeInputs(node, results));
-	const previous = applyFingerprintOmit(node, storedInputs);
+	const stored = results.getElementSnapshot(node.id).resultInputs;
+	if (!stored) return [];
+	const current = fingerprintInputs(node, nodeInputs(node, results));
+	const previous = fingerprintInputs(node, stored);
 
 	const attributeKeys = union(
 		Object.keys(current.attributes),

@@ -112,12 +112,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * somewhere other than the element itself.
 	 */
 	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
-	/**
-	 * Attribute keys this plugin's own node generation never reads — those it
-	 * strips from its vendor call belong here — so they are excluded from the
-	 * node's staleness fingerprint. Keeping this set and the strip set in sync
-	 * prevents an edit that never reaches the generator from triggering one.
-	 */
+	/** Attribute keys the node's own generation never reads, so editing them cannot stale it. */
 	omitFromFingerprint?(element: CanvasContentElement): string[];
 	beforeGenerate?(
 		params: TParams,

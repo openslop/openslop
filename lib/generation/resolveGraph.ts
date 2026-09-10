@@ -26,29 +26,26 @@ const toNode = (
 	state: ProjectData,
 	dependsOn: GenerationNode[],
 	label: string | undefined,
-): JobNode => {
-	const fingerprintOmitKeys = plugins.flatMap(
+): JobNode => ({
+	id: element.id,
+	label,
+	inputs: {
+		prompt: getPromptText(element),
+		attributes: element.generationAttributes ?? {},
+	},
+	fingerprintOmitKeys: plugins.flatMap(
 		(plugin) => plugin.omitFromFingerprint?.(element) ?? [],
-	);
-	return {
-		id: element.id,
-		label,
-		inputs: {
-			prompt: getPromptText(element),
-			attributes: element.generationAttributes ?? {},
-		},
-		fingerprintOmitKeys,
-		dependsOn,
-		job: {
-			elementId: element.id,
-			elementType: element.type,
-			connectorType: connector.type,
-			model: connector.model,
-			config: { ...connector.config, plugins },
-			state,
-		},
-	};
-};
+	),
+	dependsOn,
+	job: {
+		elementId: element.id,
+		elementType: element.type,
+		connectorType: connector.type,
+		model: connector.model,
+		config: { ...connector.config, plugins },
+		state,
+	},
+});
 
 /**
  * Edges come from the plugin chain each node runs, so one declaration drives
