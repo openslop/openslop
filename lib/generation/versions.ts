@@ -1,4 +1,5 @@
 import keyBy from "lodash/keyBy";
+import mapValues from "lodash/mapValues";
 import sortBy from "lodash/sortBy";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
@@ -35,24 +36,19 @@ export class VersionLog {
 	get = (elementId: string): readonly ElementVersion[] =>
 		this.byElement.get(elementId) ?? NO_VERSIONS;
 
-	/** On collision a stored take supplies its createdAt so a remake keeps its original date. */
 	hydrate(elementId: string, stored: ElementVersion[]) {
 		const storedByKey = keyBy(stored, versionKey);
-		const inMemoryByKey = keyBy(this.get(elementId), versionKey);
-		const merged = {
-			...storedByKey,
-			...inMemoryByKey,
-		};
-		for (const [key, inMemory] of Object.entries(inMemoryByKey)) {
-			const storedVersion = storedByKey[key];
-			if (storedVersion) {
-				merged[key] = {
-					...inMemory,
-					createdAt: storedVersion.createdAt,
-				};
-			}
-		}
-		this.byElement.set(elementId, sortBy(merged, "createdAt"));
+		const remade = mapValues(
+			keyBy(this.get(elementId), versionKey),
+			(version, key) => ({
+				...version,
+				createdAt: storedByKey[key]?.createdAt ?? version.createdAt,
+			}),
+		);
+		this.byElement.set(
+			elementId,
+			sortBy({ ...storedByKey, ...remade }, "createdAt"),
+		);
 		this.hydrated.add(elementId);
 	}
 
