@@ -1,4 +1,4 @@
-import { Editor } from "slate";
+import { Node } from "slate";
 import { ReactEditor } from "slate-react";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import {
@@ -16,12 +16,12 @@ export const withNodeId = (editor: ReactEditor): CanvasEditor => {
 
 	editor.apply = (operation) => {
 		if (operation.type === "insert_node") assignIdRecursively(operation.node);
-		if (operation.type === "split_node") {
-			const [source] = Editor.node(editor, operation.path);
-			const sourceId = (source as { id?: string } | undefined)?.id;
-			if (!sourceId || operation.properties.id === sourceId)
-				operation.properties.id = makeNodeId();
-		}
+		// A history replay carries the id it minted the first time; keep it.
+		if (
+			operation.type === "split_node" &&
+			operation.properties.id === Node.get(editor, operation.path).id
+		)
+			operation.properties.id = makeNodeId();
 		return apply(operation);
 	};
 

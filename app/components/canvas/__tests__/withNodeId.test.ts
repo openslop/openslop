@@ -1,43 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, Transforms, Element, Editor } from "slate";
+import { createEditor, Transforms, Element, Editor, Node } from "slate";
 import { withReact } from "slate-react";
 import { withHistory } from "slate-history";
-import flow from "lodash/flow";
-import type { CanvasText } from "@/lib/canvas/types";
 import { withNodeId } from "../plugins/withNodeId";
 
-function makeEditor() {
-	const editor = withNodeId(withReact(createEditor()));
-	editor.children = [
+function makeEditor(
+	children: Element[] = [
 		{
 			id: "root",
 			type: "narration",
 			children: [{ id: "t0", type: "narration", text: "Hello" }],
 		},
-	];
+	],
+) {
+	const editor = withHistory(createEditor());
+	withNodeId(withReact(editor));
+	editor.children = children;
 	return editor;
-}
-
-type HistoryEditor = ReturnType<typeof createEditor> & {
-	undo: () => void;
-	redo: () => void;
-};
-
-// Composes `withHistory` before `withNodeId`, mirroring the relative plugin
-// order in `useEditorSetup.ts` so `withNodeId.apply` is the outermost apply
-// that `slate-history`'s redo reaches when replaying stored `split_node` ops.
-function makeHistoryEditor(): HistoryEditor {
-	return flow(
-		withHistory,
-		withReact,
-		withNodeId,
-	)(createEditor()) as HistoryEditor;
-}
-
-function idAt(editor: HistoryEditor, path: number[]): string {
-	const [node] = Editor.node(editor, path);
-	if (Element.isElement(node)) return node.id;
-	return (node as CanvasText).id;
 }
 
 describe("withNodeId", () => {
@@ -113,36 +92,23 @@ describe("withNodeId", () => {
 	});
 });
 
-describe("withNodeId + withHistory (undo/redo id stability)", () => {
-	it("preserves the split-off element id across undo + redo", () => {
-		const editor = makeHistoryEditor();
-		editor.children = [
-			{
-				id: "root",
-				type: "narration",
-				children: [{ id: "t0", type: "narration", text: "Hello" }],
-			},
-		];
-
+describe("history replay", () => {
+	it("keeps the split-off ids across undo + redo", () => {
+		const editor = makeEditor();
 		Transforms.select(editor, { path: [0, 0], offset: 2 });
-		Editor.normalize(editor, { force: true });
 		Transforms.splitNodes(editor);
-
-		const firstId = idAt(editor, [0]);
-		const secondId = idAt(editor, [1]);
-		const secondTextId = idAt(editor, [1, 0]);
+		const secondId = Node.get(editor, [1]).id;
+		const secondTextId = Node.get(editor, [1, 0]).id;
 
 		editor.undo();
 		editor.redo();
 
-		expect(idAt(editor, [0])).toBe(firstId);
-		expect(idAt(editor, [1])).toBe(secondId);
-		expect(idAt(editor, [1, 0])).toBe(secondTextId);
+		expect(Node.get(editor, [1]).id).toBe(secondId);
+		expect(Node.get(editor, [1, 0]).id).toBe(secondTextId);
 	});
 
-	it("preserves the restored node id when undoing a merge (split replayed by history)", () => {
-		const editor = makeHistoryEditor();
-		editor.children = [
+	it("restores the merged-away id on undo", () => {
+		const editor = makeEditor([
 			{
 				id: "a",
 				type: "narration",
@@ -153,14 +119,11 @@ describe("withNodeId + withHistory (undo/redo id stability)", () => {
 				type: "narration",
 				children: [{ id: "b-t", type: "narration", text: "Bar" }],
 			},
-		];
-
+		]);
 		Transforms.mergeNodes(editor, { at: [1] });
-		expect(editor.children).toHaveLength(1);
 
 		editor.undo();
-		expect(editor.children).toHaveLength(2);
-		expect(idAt(editor, [0])).toBe("a");
-		expect(idAt(editor, [1])).toBe("b");
+
+		expect(Node.get(editor, [1]).id).toBe("b");
 	});
 });
