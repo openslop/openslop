@@ -1,30 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
 import { errorMessage } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
 
-/**
- * Segment-level recovery for render errors thrown by `page.tsx` and nested
- * segments during client navigation. Next.js mounts a recovery-capable error
- * boundary around the segment (clearing the error on path change and wiring
- * `retry()`/`reset()`), so a render failure here is surfaced as durable UI —
- * not a permanent blank or an auto-dismissing toast.
- */
-export default function Error({
+export default function ErrorPage({
 	error,
 	retry,
 }: {
-	error: Error & { digest?: string };
+	error: Error;
 	retry: () => void;
 }) {
-	useEffect(() => {
-		// Surface the error to monitoring just like the production default.
-		console.error(error);
-	}, [error]);
-
 	return (
-		<div
+		<main
 			role="alert"
 			className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 px-6 text-center"
 		>
@@ -37,6 +24,6 @@ export default function Error({
 			<Button size="sm" onClick={retry}>
 				Try again
 			</Button>
-		</div>
+		</main>
 	);
 }
