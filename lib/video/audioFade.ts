@@ -1,3 +1,4 @@
+import { toFrames } from "./frames";
 import { AUDIO_FADE_SEC } from "./transitions";
 import type { ResolvedElement } from "./types";
 
@@ -32,4 +33,17 @@ export function audioFadeSec(element: ResolvedElement): number {
 	return element.role === "background"
 		? AUDIO_FADE_SEC
 		: loopCrossfadeSec(element);
+}
+
+/**
+ * The window a copy's fade envelope spans: its `<Sequence>`, or the audio file
+ * when that ends first (a sequence is padded to a one-second floor, the audio
+ * is not).
+ */
+export function audioEnvelopeFrames(
+	element: ResolvedElement,
+	sequenceFrames: number,
+	fps: number,
+): number {
+	return Math.min(sequenceFrames, toFrames(element.durationSec, fps));
 }
