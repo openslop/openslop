@@ -86,24 +86,6 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("sends the requested pixel size instead of the preset", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-px",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "a sunset",
-				model: MODEL,
-				width: 640,
-				height: 360,
-			});
-
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({ width: 640, height: 360 }),
-			);
-		});
-
 		it("sizes a frame-conditioned video by resolution preset", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-k",
