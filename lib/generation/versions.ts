@@ -3,6 +3,7 @@ import sortBy from "lodash/sortBy";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { serializeInputs, type GenerationInputs } from "./inputs";
+import type { ElementSnapshot } from "./snapshots";
 
 export type ElementVersion = {
 	elementId: string;
@@ -26,26 +27,19 @@ export const versionKey = ({
 }: Pick<CommittedVersion, "inputs" | "pinned">): string =>
 	`${pinned ? "supplied" : "generated"}:${serializeInputs(inputs)}`;
 
-/**
- * The index of the version whose inputs produced the result on screen, or -1
- * when there is none. `resultInputs` outlives a failed regeneration (the error
- * path nulls `result` only), so the gate has to be on `result` — not just
- * `resultInputs` — or a stale prior version stays highlighted through the error.
- */
-export function activeVersionIndex(
+/** A failed regeneration nulls `result` but leaves `resultInputs`, so gate on both. */
+export const activeVersionIndex = (
 	versions: readonly ElementVersion[],
-	snapshot: {
-		result: AssetResult | null;
-		resultInputs: GenerationInputs | null;
-		pinned: boolean;
-	},
-): number {
-	const activeKey =
-		snapshot.result && snapshot.resultInputs
-			? versionKey({ inputs: snapshot.resultInputs, pinned: snapshot.pinned })
-			: null;
-	return versions.findIndex((version) => versionKey(version) === activeKey);
-}
+	{
+		result,
+		resultInputs,
+		pinned,
+	}: Pick<ElementSnapshot, "result" | "resultInputs" | "pinned">,
+): number => {
+	if (!result || !resultInputs) return -1;
+	const key = versionKey({ inputs: resultInputs, pinned });
+	return versions.findIndex((version) => versionKey(version) === key);
+};
 
 export class VersionLog {
 	private byElement = new Map<string, ElementVersion[]>();
