@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "../inputs";
-import { VersionLog } from "../versions";
+import { activeVersionIndex, VersionLog } from "../versions";
 
 const inputs = (prompt: string): GenerationInputs => ({
 	prompt,
@@ -93,5 +93,23 @@ describe("VersionLog", () => {
 		log.hydrate("a", [stored("same", "2026-01-01T00:00:00.000Z")]);
 
 		expect(log.get("a")).toEqual([fresh]);
+	});
+});
+
+describe("activeVersionIndex", () => {
+	const versions = [stored("a", AT), stored("b", AT)];
+
+	it("finds the version whose inputs made the result on screen", () => {
+		const snapshot = {
+			result: result("b.png"),
+			resultInputs: inputs("b"),
+			pinned: false,
+		};
+		expect(activeVersionIndex(versions, snapshot)).toBe(1);
+	});
+
+	it("highlights nothing when a failed regeneration left stale inputs behind", () => {
+		const snapshot = { result: null, resultInputs: inputs("b"), pinned: false };
+		expect(activeVersionIndex(versions, snapshot)).toBe(-1);
 	});
 });

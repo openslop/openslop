@@ -3,6 +3,7 @@ import sortBy from "lodash/sortBy";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { serializeInputs, type GenerationInputs } from "./inputs";
+import type { ElementSnapshot } from "./snapshots";
 
 export type ElementVersion = {
 	elementId: string;
@@ -25,6 +26,20 @@ export const versionKey = ({
 	pinned,
 }: Pick<CommittedVersion, "inputs" | "pinned">): string =>
 	`${pinned ? "supplied" : "generated"}:${serializeInputs(inputs)}`;
+
+/** A failed regeneration nulls `result` but leaves `resultInputs`, so gate on both. */
+export const activeVersionIndex = (
+	versions: readonly ElementVersion[],
+	{
+		result,
+		resultInputs,
+		pinned,
+	}: Pick<ElementSnapshot, "result" | "resultInputs" | "pinned">,
+): number => {
+	if (!result || !resultInputs) return -1;
+	const key = versionKey({ inputs: resultInputs, pinned });
+	return versions.findIndex((version) => versionKey(version) === key);
+};
 
 export class VersionLog {
 	private byElement = new Map<string, ElementVersion[]>();
