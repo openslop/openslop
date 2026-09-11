@@ -42,17 +42,8 @@ export default function AuthForm({
 		setError("");
 
 		try {
-			const { error } = await sendMagicLink({
-				email,
-				shouldCreateUser,
-				data: otpData,
-			});
-
-			if (error) {
-				setError(error);
-			} else {
-				setSent(true);
-			}
+			await sendMagicLink({ email, shouldCreateUser, data: otpData });
+			setSent(true);
 		} catch (cause) {
 			setError(errorMessage(cause));
 		} finally {

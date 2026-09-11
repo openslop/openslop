@@ -1,5 +1,4 @@
-import { ApiClient } from "@/lib/clients/apiClient";
-import { buildUrl } from "@/lib/clients/http";
+import { apiFetch, apiJson, buildUrl } from "@/lib/clients/http";
 import { readSSE } from "@/lib/api/sse";
 import type {
 	LLMGenerateParams,
@@ -21,25 +20,23 @@ import { apiPrefixFor } from "./prefix";
  * which one to post to is the model's provider's decision, not a subclass's.
  */
 export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
-	protected readonly client: ApiClient;
 	protected readonly route: string;
 
 	constructor(
 		protected readonly model: ModelRef,
 		path: string,
-		baseUrl?: string,
+		baseUrl = "",
 	) {
 		super();
-		this.client = new ApiClient(baseUrl);
-		this.route = `${apiPrefixFor(model.provider)}/${path}`;
+		this.route = `${baseUrl}${apiPrefixFor(model.provider)}/${path}`;
 	}
 
 	async generate(params: TParams): Promise<JobSubmission> {
-		return this.client.post<JobSubmission>(this.route, params);
+		return apiJson<JobSubmission>(this.route, { method: "POST", body: params });
 	}
 
 	async poll(jobId: string, signal?: AbortSignal): Promise<JobPoll> {
-		return this.client.get<JobPoll>(`${this.route}/${jobId}`, { signal });
+		return apiJson<JobPoll>(`${this.route}/${jobId}`, { signal });
 	}
 }
 
@@ -48,28 +45,26 @@ export class HttpLLMGateway extends GatewayClient<
 	LLMGenerateParams,
 	LLMGenerateResult
 > {
-	private readonly client: ApiClient;
 	private readonly route: string;
 
-	constructor(model: ModelRef, baseUrl?: string) {
+	constructor(model: ModelRef, baseUrl = "") {
 		super();
-		this.client = new ApiClient(baseUrl);
-		this.route = `${apiPrefixFor(model.provider)}/llm`;
+		this.route = `${baseUrl}${apiPrefixFor(model.provider)}/llm`;
 	}
 
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
-		return this.client.post(this.route, params);
+		return apiJson(this.route, { method: "POST", body: params });
 	}
 
 	async *stream(
 		params: LLMGenerateParams,
 		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		const res = await this.client.postStream(
-			this.route,
-			{ ...params, stream: true },
+		const res = await apiFetch(this.route, {
+			method: "POST",
+			body: { ...params, stream: true },
 			signal,
-		);
+		});
 		if (!res.body) throw new Error("No response body");
 		yield* readSSE<LLMStreamChunk>(res.body);
 	}
@@ -86,7 +81,7 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 	 * comes back proxied through the route that can fetch it.
 	 */
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const result = await this.client.get<{ voices: VoiceInfo[] }>(
+		const result = await apiJson<{ voices: VoiceInfo[] }>(
 			`${this.route}/voices`,
 			{ params: { ...params, ...this.model } },
 		);
