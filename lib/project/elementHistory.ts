@@ -7,9 +7,12 @@ import {
 } from "@/lib/connectors/types";
 import type { ElementVersionStorage } from "@/lib/generation/history";
 import { GenerationInputsSchema } from "@/lib/generation/inputs";
-import { versionKey, type ElementVersion } from "@/lib/generation/versions";
+import {
+	versionKey,
+	type CommittedVersion,
+	type ElementVersion,
+} from "@/lib/generation/versions";
 import { createClient } from "@/lib/supabase/client";
-import { toastError } from "@/lib/toastError";
 
 const TABLE = "element_history";
 
@@ -33,7 +36,7 @@ const toVersion = (row: z.infer<typeof RowSchema>): ElementVersion => ({
 	pinned: row.pinned,
 });
 
-const toRow = (projectId: string, version: ElementVersion) => ({
+const toRow = (projectId: string, version: CommittedVersion) => ({
 	id: versionRowId(projectId, version),
 	project_id: projectId,
 	element_id: version.elementId,
@@ -54,7 +57,7 @@ const ROW_ID_NAMESPACE = "5673ca03-e04d-4279-b92d-df493e2b9150";
  * A version's row is identified by what made it, so the same version always
  * lands on the same row however little the client happens to have read back.
  */
-const versionRowId = (projectId: string, version: ElementVersion): string =>
+const versionRowId = (projectId: string, version: CommittedVersion): string =>
 	uuidv5(
 		[projectId, version.elementId, versionKey(version)].join("\u0000"),
 		ROW_ID_NAMESPACE,
@@ -83,26 +86,25 @@ export async function fetchElementVersions(
 }
 
 /**
- * Regenerating an unchanged element overwrites the row that version already has.
- * `created_at` is left to the column default so a remake keeps its original
- * date rather than jumping to the top of the list.
+ * A remake overwrites the row its version already has and keeps that row's
+ * `created_at`, so the returned date is the version's first, not this run's.
  */
 export async function saveElementVersion(
 	projectId: string,
-	version: ElementVersion,
-): Promise<void> {
-	const { error } = await createClient()
+	version: CommittedVersion,
+): Promise<ElementVersion> {
+	const { data, error } = await createClient()
 		.from(TABLE)
-		.upsert(toRow(projectId, version), { onConflict: "id" });
+		.upsert(toRow(projectId, version), { onConflict: "id" })
+		.select(COLUMNS)
+		.single();
 	if (error) throw error;
+	return toVersion(RowSchema.parse(data));
 }
 
 export const elementHistoryStorage = (
 	projectId: string,
 ): ElementVersionStorage => ({
 	read: (elementId) => fetchElementVersions(projectId, elementId),
-	write: (version) =>
-		saveElementVersion(projectId, version).catch((err: unknown) =>
-			toastError(err, "Saving this version failed"),
-		),
+	write: (version) => saveElementVersion(projectId, version),
 });

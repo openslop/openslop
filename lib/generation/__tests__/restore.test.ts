@@ -48,7 +48,7 @@ const historyOf = (rows: Record<string, ElementVersion[]>) => {
 	const read = vi.fn((elementId: string) =>
 		Promise.resolve(rows[elementId] ?? []),
 	);
-	const storage: ElementVersionStorage = { read, write: () => {} };
+	const storage: ElementVersionStorage = { read, write: vi.fn() };
 	return { history: new ElementHistory(storage), read };
 };
 

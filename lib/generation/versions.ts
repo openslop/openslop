@@ -1,5 +1,4 @@
 import keyBy from "lodash/keyBy";
-import mapValues from "lodash/mapValues";
 import sortBy from "lodash/sortBy";
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
@@ -37,33 +36,19 @@ export class VersionLog {
 		this.byElement.get(elementId) ?? NO_VERSIONS;
 
 	hydrate(elementId: string, stored: ElementVersion[]) {
-		const storedByKey = keyBy(stored, versionKey);
-		const remade = mapValues(
-			keyBy(this.get(elementId), versionKey),
-			(version, key) => ({
-				...version,
-				createdAt: storedByKey[key]?.createdAt ?? version.createdAt,
-			}),
-		);
-		this.byElement.set(
-			elementId,
-			sortBy({ ...storedByKey, ...remade }, "createdAt"),
-		);
+		const merged = {
+			...keyBy(stored, versionKey),
+			...keyBy(this.get(elementId), versionKey),
+		};
+		this.byElement.set(elementId, sortBy(merged, "createdAt"));
 		this.hydrated.add(elementId);
 	}
 
-	/** A replacement keeps the original date: the same version, remade. */
-	record(committed: CommittedVersion, createdAt: string): ElementVersion {
-		const key = versionKey(committed);
-		const byKey = keyBy(this.get(committed.elementId), versionKey);
-		const version: ElementVersion = {
-			...committed,
-			createdAt: byKey[key]?.createdAt ?? createdAt,
-		};
+	record(version: ElementVersion) {
+		const byKey = keyBy(this.get(version.elementId), versionKey);
 		this.byElement.set(
-			committed.elementId,
-			Object.values({ ...byKey, [key]: version }),
+			version.elementId,
+			Object.values({ ...byKey, [versionKey(version)]: version }),
 		);
-		return version;
 	}
 }
