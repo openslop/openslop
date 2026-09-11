@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+	audioEnvelopeFrames,
 	audioFadeSec,
 	LOOP_CROSSFADE_SEC,
 	loopCrossfadeSec,
 	loopStrideSec,
 } from "../audioFade";
+import { audioVolume } from "../audioVolume";
+import { toFrames } from "../frames";
 import { AUDIO_FADE_SEC } from "../transitions";
 import type { ResolvedElement } from "../types";
 
@@ -74,5 +77,27 @@ describe("audioFadeSec", () => {
 	it("holds a one-shot effect and narration at full volume", () => {
 		expect(audioFadeSec(el({ loops: 1 }))).toBe(0);
 		expect(audioFadeSec(el({ type: "narration", role: "overlay" }))).toBe(0);
+	});
+});
+
+describe("audioEnvelopeFrames", () => {
+	it("spans the audio file when the sequence window outlasts it", () => {
+		expect(audioEnvelopeFrames(el({ durationSec: 0.5 }), 24, 24)).toBe(12);
+	});
+
+	it("spans the sequence window when the audio outlasts it", () => {
+		expect(audioEnvelopeFrames(el({ durationSec: 4 }), 48, 24)).toBe(48);
+	});
+
+	it("sums a looping effect's copies to a constant across the seam", () => {
+		const fps = 24;
+		const element = el({ durationSec: 0.5, loops: 2 });
+		const window = audioEnvelopeFrames(element, toFrames(1, fps), fps);
+		const volume = audioVolume(1, window, toFrames(audioFadeSec(element), fps));
+		if (typeof volume !== "function") throw new Error("Expected function");
+		const stride = toFrames(loopStrideSec(element), fps);
+		for (let f = stride; f < window; f++) {
+			expect(volume(f) + volume(f - stride)).toBeCloseTo(1, 5);
+		}
 	});
 });
