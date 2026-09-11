@@ -41,6 +41,7 @@ describe("ElevenLabsSFX", () => {
 		expect(mockConvert).toHaveBeenCalledWith({
 			text: "boom",
 			durationSeconds: undefined,
+			modelId: MODEL,
 			outputFormat: "mp3_44100_128",
 		});
 	});
@@ -56,7 +57,7 @@ describe("ElevenLabsSFX", () => {
 		});
 
 		expect(mockConvert).toHaveBeenCalledWith(
-			expect.objectContaining({ durationSeconds: 10 }),
+			expect.objectContaining({ durationSeconds: 10, modelId: MODEL }),
 		);
 	});
 });
