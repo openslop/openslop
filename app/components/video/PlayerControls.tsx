@@ -20,7 +20,7 @@ export function TimeDisplay() {
 	const { layout } = useLayout();
 	const seconds = usePlayerValue(
 		FRAME_EVENTS,
-		(p) => Math.floor(toSeconds(p.getCurrentFrame(), layout.fps)),
+		(player) => Math.floor(toSeconds(player.getCurrentFrame(), layout.fps)),
 		0,
 	);
 	return (

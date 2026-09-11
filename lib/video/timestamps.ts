@@ -4,9 +4,8 @@ function floorSeconds(seconds: number): number {
 
 export function formatTime(seconds: number): string {
 	const total = floorSeconds(seconds);
-	const m = Math.floor(total / 60);
-	const s = total % 60;
-	return `${m}:${s.toString().padStart(2, "0")}`;
+	const minutes = Math.floor(total / 60);
+	return `${minutes}:${String(total % 60).padStart(2, "0")}`;
 }
 
 export function formatTimeRange(start: number, duration: number): string {

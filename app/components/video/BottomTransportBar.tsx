@@ -31,14 +31,14 @@ function BottomTransportBarComponent() {
 	const canPlay = ready && segments.length > 0;
 	const canSeek = canPlay && player !== null;
 
-	const seekToAdjacentScene = (dir: -1 | 1) => {
+	const seekToAdjacentScene = (direction: -1 | 1) => {
 		if (!player || segments.length === 0) return;
 		const current = findSegmentIndexAtFrame(
 			segments,
 			player.getCurrentFrame(),
 			layout.fps,
 		);
-		const target = segments[current + dir];
+		const target = segments[current + direction];
 		if (target) player.seekTo(toFrames(target.start, layout.fps));
 	};
 

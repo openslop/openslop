@@ -112,17 +112,17 @@ export function ScrubBar({
 	const drag = usePointerDrag({
 		onStart: onScrubStart,
 		onMove: (e) => {
-			const p = hoverFrom(e);
-			if (p) onScrub(p.ratio);
+			const hover = hoverFrom(e);
+			if (hover) onScrub(hover.ratio);
 		},
 		onEnd: onScrubEnd,
 	});
 
 	const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-		const p = hoverFrom(e);
-		if (p) {
-			setHoverRatio(p.ratio);
-			onHoverChange?.(p);
+		const hover = hoverFrom(e);
+		if (hover) {
+			setHoverRatio(hover.ratio);
+			onHoverChange?.(hover);
 		}
 		drag.onPointerMove(e);
 	};

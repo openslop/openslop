@@ -17,15 +17,15 @@ export function fadeRamp(
 	fadeFrames: number,
 ): FadeRamp | null {
 	if (durationInFrames <= 1 || fadeFrames <= 0) return null;
-	const f = Math.min(fadeFrames, Math.floor((durationInFrames - 1) / 2));
-	if (f <= 0) {
+	const edge = Math.min(fadeFrames, Math.floor((durationInFrames - 1) / 2));
+	if (edge <= 0) {
 		return {
 			input: [0, durationInFrames / 2, durationInFrames],
 			output: [0, 1, 0],
 		};
 	}
 	return {
-		input: [0, f, durationInFrames - f, durationInFrames],
+		input: [0, edge, durationInFrames - edge, durationInFrames],
 		output: [0, 1, 1, 0],
 	};
 }
