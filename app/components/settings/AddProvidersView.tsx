@@ -29,11 +29,11 @@ export function AddProvidersView({
 	const [groupKey, setGroupKey] = useState(ALL);
 	const keyFor = useProviderKeyLookup();
 
-	const capability =
+	const capabilities =
 		MODEL_GROUPS.find((group) => group.key === groupKey)?.types ?? null;
 	const matches = useMemo(
-		() => searchProviders(query, capability),
-		[query, capability],
+		() => searchProviders(query, capabilities),
+		[query, capabilities],
 	);
 
 	return (

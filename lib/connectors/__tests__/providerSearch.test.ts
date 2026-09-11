@@ -5,10 +5,10 @@ import type { ConnectorType } from "../types";
 
 /** No capability asked for: the "All" filter. */
 const all: ConnectorType[] | null = null;
-const capability = (key: string) =>
+const capabilities = (key: string) =>
 	MODEL_GROUPS.find((group) => group.key === key)?.types ?? all;
-const names = (query: string, cap: ConnectorType[] | null = all) =>
-	searchProviders(query, cap).map((match) => match.provider);
+const names = (query: string, capabilities: ConnectorType[] | null = all) =>
+	searchProviders(query, capabilities).map((match) => match.provider);
 
 describe("searchProviders", () => {
 	// The hosted provider is listed too: it is what a new account already runs on.
@@ -49,13 +49,21 @@ describe("searchProviders", () => {
 	});
 
 	it("narrows to the capability being browsed", () => {
-		expect(names("", capability("videos"))).toEqual(["openslop", "runware"]);
-		expect(names("", capability("voice"))).toEqual(["openslop", "cartesia"]);
+		expect(names("", capabilities("videos"))).toEqual(["openslop", "runware"]);
+		expect(names("", capabilities("voice"))).toEqual(["openslop", "cartesia"]);
 	});
 
 	// A model can only be reached through a provider the filter still allows.
 	it("keeps the capability filter over a model match", () => {
-		expect(names("seedream", capability("voice"))).toEqual([]);
+		expect(names("seedream", capabilities("voice"))).toEqual([]);
+	});
+
+	// Under a capability tab only that tab's models can match or be the reason.
+	it("ignores a model match outside the browsed capability", () => {
+		expect(searchProviders("image", capabilities("voice"))).toEqual([]);
+		expect(searchProviders("slop", capabilities("voice"))).toEqual([
+			{ provider: "openslop", models: ["Slop TTS v1"] },
+		]);
 	});
 
 	it("finds nothing for a query no one matches", () => {
