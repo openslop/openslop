@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="./assets/openslop-lockup-animated.svg" alt="OpenSlop" width="560">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/openslop-lockup-animated-dark.svg">
+    <img src="./assets/openslop-lockup-animated-light.svg" alt="OpenSlop" width="560">
+  </picture>
 </p>
 
 <p align="center"><b>Free, open-source AI video creator.</b></p>
@@ -22,7 +25,10 @@
 </p>
 
 <p align="center">
-  <img src="./assets/openslop-demo.svg" alt="OpenSlop - your free AI video creator" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/openslop-demo-dark.svg">
+    <img src="./assets/openslop-demo-light.svg" alt="OpenSlop - your free AI video creator" width="100%">
+  </picture>
 </p>
 
 ---

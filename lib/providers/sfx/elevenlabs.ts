@@ -26,6 +26,7 @@ export class ElevenLabsSFX
 		return this.client.textToSoundEffects.convert({
 			text: params.prompt,
 			durationSeconds: params.durationSeconds,
+			modelId: params.model,
 			outputFormat: toElevenLabsOutputFormat(this.outputFormat),
 		});
 	}
