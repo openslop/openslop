@@ -49,6 +49,18 @@ Open-source, free forever.
 - Runs in your browser, nothing to install
 - Built by engineers from Meta, Google, Stripe, and Dropbox
 
+## Supported providers
+
+Bring your own accounts. A provider whose key is unset falls back to a mock, so none of them is required to run the app.
+
+<p>
+  <a href="https://runware.ai"><kbd><img src="https://www.google.com/s2/favicons?domain=runware.ai&amp;sz=64" alt="Runware logo" width="16" valign="middle"> Runware &middot; image, video</kbd></a> &nbsp;
+  <a href="https://elevenlabs.io"><kbd><img src="https://www.google.com/s2/favicons?domain=elevenlabs.io&amp;sz=64" alt="ElevenLabs logo" width="16" valign="middle"> ElevenLabs &middot; music, SFX</kbd></a> &nbsp;
+  <a href="https://cartesia.ai"><kbd><img src="https://www.google.com/s2/favicons?domain=cartesia.ai&amp;sz=64" alt="Cartesia logo" width="16" valign="middle"> Cartesia &middot; text-to-speech</kbd></a> &nbsp;
+  <a href="https://www.anthropic.com"><kbd><img src="https://www.google.com/s2/favicons?domain=anthropic.com&amp;sz=64" alt="Anthropic logo" width="16" valign="middle"> Anthropic &middot; LLM</kbd></a> &nbsp;
+  <a href=".env.example"><kbd>+ more, see .env.example</kbd></a>
+</p>
+
 ## Getting started
 
 ### Prerequisites
