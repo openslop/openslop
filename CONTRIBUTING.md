@@ -63,6 +63,7 @@ Test behavior not internals. Pure helpers and module boundaries. Vitest for unit
 - Title says what, description says why
 - Link the issue
 - Read your own diff before pushing
+- Adding or removing an adapter in `lib/providers/`? Update the **Supported providers** chips in [README.md](README.md#supported-providers) in the same PR
 
 ## AI
 
