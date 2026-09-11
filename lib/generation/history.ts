@@ -1,10 +1,12 @@
 import { createEmitter } from "@/lib/store/emitter";
+import { toastError } from "@/lib/toastError";
 import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 
 export interface ElementVersionStorage {
 	read(elementId: string): Promise<ElementVersion[]>;
-	write(version: ElementVersion): void;
+	/** Resolves with the version as stored; storage alone decides its date. */
+	write(version: CommittedVersion): Promise<ElementVersion>;
 }
 
 /** A version list is either still arriving, readable, or unreadable. */
@@ -50,8 +52,13 @@ export class ElementHistory {
 		return load;
 	};
 
-	record = (version: CommittedVersion) => {
-		this.storage.write(this.log.record(version, new Date().toISOString()));
+	record = async (committed: CommittedVersion): Promise<void> => {
+		try {
+			this.log.record(await this.storage.write(committed));
+		} catch (err) {
+			toastError(err, "Saving this version failed");
+			return;
+		}
 		this.emitter.notify();
 	};
 }

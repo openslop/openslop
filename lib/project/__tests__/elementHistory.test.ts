@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { upsert } = vi.hoisted(() => ({ upsert: vi.fn() }));
+const { upsert, single } = vi.hoisted(() => ({
+	upsert: vi.fn(),
+	single: vi.fn(),
+}));
 
 vi.mock("@/lib/supabase/client", () => ({
 	createClient: () => ({ from: () => ({ upsert }) }),
 }));
 
-import type { ElementVersion } from "@/lib/generation/versions";
+import type { CommittedVersion } from "@/lib/generation/versions";
 import { parseElementVersions, saveElementVersion } from "../elementHistory";
 
 const row = (overrides: Record<string, unknown> = {}) => ({
@@ -63,10 +66,9 @@ describe("parseElementVersions", () => {
 });
 
 const makeVersion = (
-	overrides: Partial<ElementVersion> = {},
-): ElementVersion => ({
+	overrides: Partial<CommittedVersion> = {},
+): CommittedVersion => ({
 	elementId: "el-1",
-	createdAt: "2026-01-01T00:00:00.000Z",
 	connectorType: "image",
 	inputs: { prompt: "a fox", attributes: {}, dependencies: {} },
 	result: { durationSec: 0, imageUrl: "https://cdn/a.png" },
@@ -76,7 +78,7 @@ const makeVersion = (
 
 const savedRow = async (
 	projectId: string,
-	version: ElementVersion,
+	version: CommittedVersion,
 ): Promise<Record<string, unknown>> => {
 	upsert.mockClear();
 	await saveElementVersion(projectId, version);
@@ -85,7 +87,8 @@ const savedRow = async (
 
 describe("saveElementVersion", () => {
 	beforeEach(() => {
-		upsert.mockResolvedValue({ error: null });
+		upsert.mockReturnValue({ select: () => ({ single }) });
+		single.mockResolvedValue({ data: row(), error: null });
 	});
 
 	it("gives a version the same row whatever the client has read back", async () => {
@@ -93,7 +96,6 @@ describe("saveElementVersion", () => {
 		const remade = await savedRow(
 			"p1",
 			makeVersion({
-				createdAt: "2026-02-02T00:00:00.000Z",
 				result: { durationSec: 0, imageUrl: "https://cdn/redone.png" },
 			}),
 		);
@@ -104,10 +106,13 @@ describe("saveElementVersion", () => {
 		);
 	});
 
-	it("leaves a remade version's date alone", async () => {
+	it("leaves the date to the row and hands back the row's", async () => {
 		expect(await savedRow("p1", makeVersion())).not.toHaveProperty(
 			"created_at",
 		);
+		expect(await saveElementVersion("p1", makeVersion())).toMatchObject({
+			createdAt: "2026-01-01T00:00:00.000Z",
+		});
 	});
 
 	it("gives an upload a row of its own", async () => {
@@ -133,7 +138,7 @@ describe("saveElementVersion", () => {
 	});
 
 	it("throws when the write fails", async () => {
-		upsert.mockResolvedValue({ error: new Error("denied") });
+		single.mockResolvedValue({ data: null, error: new Error("denied") });
 		await expect(saveElementVersion("p1", makeVersion())).rejects.toThrow(
 			"denied",
 		);

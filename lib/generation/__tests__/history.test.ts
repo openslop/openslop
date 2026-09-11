@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
 import { ElementHistory, type ElementVersionStorage } from "../history";
 import type { GenerationInputs } from "../inputs";
-import type { ElementVersion } from "../versions";
+import type { CommittedVersion, ElementVersion } from "../versions";
+
+const { toastError } = vi.hoisted(() => ({ toastError: vi.fn() }));
+vi.mock("@/lib/toastError", () => ({ toastError }));
 
 const inputs = (prompt: string): GenerationInputs => ({
 	prompt,
@@ -15,57 +18,68 @@ const result = (imageUrl: string): AssetResult => ({
 	durationSec: 0,
 });
 
-const version = (prompt: string, url = `${prompt}.png`) => ({
+const version = (prompt: string, url = `${prompt}.png`): CommittedVersion => ({
 	elementId: "a",
-	connectorType: "image" as const,
+	connectorType: "image",
 	inputs: inputs(prompt),
 	result: result(url),
 	pinned: false,
 });
 
-const stored: ElementVersion = {
-	...version("kept"),
-	createdAt: "2026-01-01T00:00:00.000Z",
-};
+const AT = "2026-01-01T00:00:00.000Z";
+const stored: ElementVersion = { ...version("kept"), createdAt: AT };
 
+/** Storage that dates every write like the database does: the first run's. */
 const storageOf = (
 	read: ElementVersionStorage["read"] = () => Promise.resolve([]),
-): [ElementVersionStorage, ReturnType<typeof vi.fn>] => {
-	const write = vi.fn();
-	return [{ read, write }, write];
-};
+): ElementVersionStorage => ({
+	read,
+	write: vi.fn((committed) => Promise.resolve({ ...committed, createdAt: AT })),
+});
 
 describe("ElementHistory", () => {
-	it("files a committed version and stores it", () => {
-		const [storage, write] = storageOf();
+	it("files a version once storage has dated it", async () => {
+		const storage = storageOf();
 		const history = new ElementHistory(storage);
+		const listener = vi.fn();
+		history.subscribe(listener);
 
-		history.record(version("a"));
+		await history.record(version("a"));
 
-		expect(history.get("a")).toHaveLength(1);
-		expect(write).toHaveBeenCalledWith(
-			expect.objectContaining({ elementId: "a", result: result("a.png") }),
-		);
+		expect(storage.write).toHaveBeenCalledWith(version("a"));
+		expect(history.get("a")).toEqual([{ ...version("a"), createdAt: AT }]);
+		expect(listener).toHaveBeenCalledTimes(1);
 	});
 
-	it("overwrites the version an unchanged regeneration remade", () => {
-		const [storage, write] = storageOf();
-		const history = new ElementHistory(storage);
+	it("overwrites the version an unchanged regeneration remade", async () => {
+		const history = new ElementHistory(storageOf());
 
-		history.record(version("a"));
-		history.record(version("a", "redone.png"));
+		await history.record(version("a"));
+		await history.record(version("a", "redone.png"));
 
-		expect(history.get("a")).toHaveLength(1);
-		expect(history.get("a")[0]?.result).toEqual(result("redone.png"));
-		expect(write.mock.calls[1]?.[0].createdAt).toBe(
-			write.mock.calls[0]?.[0].createdAt,
+		expect(history.get("a")).toEqual([
+			{ ...version("a", "redone.png"), createdAt: AT },
+		]);
+	});
+
+	it("surfaces a failed write and files nothing", async () => {
+		const history = new ElementHistory({
+			read: () => Promise.resolve([]),
+			write: () => Promise.reject(new Error("denied")),
+		});
+
+		await history.record(version("a"));
+
+		expect(history.get("a")).toEqual([]);
+		expect(toastError).toHaveBeenCalledWith(
+			expect.any(Error),
+			"Saving this version failed",
 		);
 	});
 
 	it("reads an element's stored versions once, on demand", async () => {
 		const read = vi.fn().mockResolvedValue([stored]);
-		const [storage] = storageOf(read);
-		const history = new ElementHistory(storage);
+		const history = new ElementHistory(storageOf(read));
 
 		expect(history.status("a")).toBe("loading");
 		await Promise.all([history.load("a"), history.load("a")]);
@@ -81,8 +95,7 @@ describe("ElementHistory", () => {
 			.fn()
 			.mockRejectedValueOnce(new Error("offline"))
 			.mockResolvedValue([stored]);
-		const [storage] = storageOf(read);
-		const history = new ElementHistory(storage);
+		const history = new ElementHistory(storageOf(read));
 
 		await expect(history.load("a")).rejects.toThrow("offline");
 		expect(history.status("a")).toBe("failed");
@@ -90,15 +103,5 @@ describe("ElementHistory", () => {
 		await history.load("a");
 		expect(history.status("a")).toBe("ready");
 		expect(history.get("a")).toEqual([stored]);
-	});
-
-	it("notifies subscribers when a version arrives", () => {
-		const [storage] = storageOf();
-		const history = new ElementHistory(storage);
-		const listener = vi.fn();
-		history.subscribe(listener);
-
-		history.record(version("a"));
-		expect(listener).toHaveBeenCalledTimes(1);
 	});
 });

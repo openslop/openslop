@@ -59,18 +59,11 @@ export class VersionLog {
 		this.hydrated.add(elementId);
 	}
 
-	/** A replacement keeps the original date: the same version, remade. */
-	record(committed: CommittedVersion, createdAt: string): ElementVersion {
-		const key = versionKey(committed);
-		const byKey = keyBy(this.get(committed.elementId), versionKey);
-		const version: ElementVersion = {
-			...committed,
-			createdAt: byKey[key]?.createdAt ?? createdAt,
-		};
+	record(version: ElementVersion) {
+		const byKey = keyBy(this.get(version.elementId), versionKey);
 		this.byElement.set(
-			committed.elementId,
-			Object.values({ ...byKey, [key]: version }),
+			version.elementId,
+			Object.values({ ...byKey, [versionKey(version)]: version }),
 		);
-		return version;
 	}
 }
