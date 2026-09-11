@@ -1,14 +1,6 @@
+import { RUNWARE_VIDEO_MODELS } from "../runware/models";
+
 export const OPENSLOP_VIDEO_MODELS = {
-	"Slop Video v1": {
-		id: "bytedance:seedance@2.0-fast",
-		cost: "high",
-		speed: "medium",
-		resolutions: ["720p"],
-	},
-	"Slop Video v1 Fast": {
-		id: "klingai:kling-video@3.0-turbo",
-		cost: "high",
-		speed: "high",
-		resolutions: ["720p", "1080p"],
-	},
+	"Slop Video v1": RUNWARE_VIDEO_MODELS["Seedance 2 Fast"],
+	"Slop Video v1 Fast": RUNWARE_VIDEO_MODELS["Kling 3 Turbo"],
 } as const;

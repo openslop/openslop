@@ -1,4 +1,4 @@
-import { requireModel } from "@/lib/connectors/plugins";
+import { requireContext } from "@/lib/connectors/plugins";
 import type { ProjectStore } from "@/lib/project/store";
 import { metadataVoiceFor, voiceIdOn } from "@/lib/project/types";
 import type {
@@ -20,7 +20,7 @@ export function createVoiceHydratePlugin(
 		beforeGenerate(params, ctx) {
 			const { voiceId, name } = params;
 			if (!voiceId) return params;
-			const model = requireModel(ctx, "voice-hydrate");
+			const model = requireContext(ctx, "model", "voice-hydrate");
 			const { metadata, updateCharacter, setNarration } = store.getState();
 			const voice = metadataVoiceFor(metadata, name);
 			if (!voice || voiceIdOn(voice, model) === voiceId) return params;

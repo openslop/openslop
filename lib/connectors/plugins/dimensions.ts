@@ -1,4 +1,4 @@
-import { requireState } from "@/lib/connectors/plugins";
+import { requireContext } from "@/lib/connectors/plugins";
 import { aspectDimensions, forAspectRatio } from "@/lib/generation/sourceNodes";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import {
@@ -21,7 +21,7 @@ export function createDimensionsPlugin(
 		name: "dimensions",
 		dependencies: () => [forAspectRatio],
 		beforeGenerate(params, ctx) {
-			const dims = aspectDimensions(requireState(ctx, "dimensions"));
+			const dims = aspectDimensions(requireContext(ctx, "state", "dimensions"));
 			if (kind === "image") return { ...params, ...dims.image };
 			const resolution = params.resolution ?? DEFAULT_VIDEO_RESOLUTION;
 			return { ...params, resolution, ...dims.video[resolution] };

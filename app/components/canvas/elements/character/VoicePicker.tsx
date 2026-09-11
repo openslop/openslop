@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,11 +9,12 @@ import {
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { createConnector } from "@/lib/connectors/factory";
-import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
-import { errorMessage } from "@/lib/errors";
-import type { MetadataVoice } from "@/lib/project/types";
+import type {
+	ModelRef,
+	VoiceInfo,
+	VoiceSearchParams,
+} from "@/lib/connectors/types";
+import { useVoiceSearch } from "@/lib/connectors/tts/useVoiceSearch";
 import { FieldLabel } from "./fields";
 
 function PreviewPlayButton({ src }: { src: string }) {
@@ -49,9 +50,7 @@ function PreviewPlayButton({ src }: { src: string }) {
 	);
 }
 
-const DEBOUNCE_MS = 300;
 const SKELETON_ROWS = 5;
-const VOICE_LIMIT = 50;
 const VOICE_TAG_CLASS =
 	"shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground";
 
@@ -62,47 +61,13 @@ export function VoicePicker({
 	onSelect,
 	onModelChange,
 }: {
-	filters: MetadataVoice;
+	filters: VoiceSearchParams;
 	model: ModelRef;
 	selectedVoiceId?: string;
 	onSelect: (voice: VoiceInfo) => void;
 	onModelChange: (model: ModelRef) => void;
 }) {
-	const { connectorConfig } = useConfig();
-	const { provider, model: name } = model;
-	const ttsConnector = useMemo(
-		() =>
-			createConnector("tts", { provider, model: name }, connectorConfig.tts),
-		[connectorConfig, provider, name],
-	);
-
-	const [voices, setVoices] = useState<VoiceInfo[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		let cancelled = false;
-		const handle = setTimeout(async () => {
-			setLoading(true);
-			setError(null);
-			try {
-				const result = await ttsConnector.searchVoices({
-					...filters,
-					limit: VOICE_LIMIT,
-				});
-				if (!cancelled) setVoices(result);
-			} catch (err) {
-				if (!cancelled) setError(errorMessage(err));
-			} finally {
-				if (!cancelled) setLoading(false);
-			}
-		}, DEBOUNCE_MS);
-
-		return () => {
-			cancelled = true;
-			clearTimeout(handle);
-		};
-	}, [filters, ttsConnector]);
+	const search = useVoiceSearch(filters, model);
 
 	return (
 		<div className="flex min-w-0 flex-col gap-1.5">
@@ -117,19 +82,21 @@ export function VoicePicker({
 					<ModelSelectTrigger model={model} label="Voice model" />
 				</ModelSelect>
 			</div>
-			{error && <span className="text-label-xs text-destructive">{error}</span>}
+			{search.status === "failed" && (
+				<span className="text-label-xs text-destructive">{search.message}</span>
+			)}
 			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
-				{loading &&
+				{search.status === "loading" &&
 					Array.from({ length: SKELETON_ROWS }).map((_, i) => (
 						<Skeleton key={`skel-${i}`} className="h-12 shrink-0 rounded-md" />
 					))}
-				{!loading && voices.length === 0 && !error && (
+				{search.status === "ready" && search.voices.length === 0 && (
 					<span className="px-2 py-3 text-center text-label-xs text-muted-foreground">
 						No voices match these filters.
 					</span>
 				)}
-				{!loading &&
-					voices.map((voice) => {
+				{search.status === "ready" &&
+					search.voices.map((voice) => {
 						const selected = voice.id === selectedVoiceId;
 						return (
 							<div

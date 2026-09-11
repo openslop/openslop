@@ -2,7 +2,7 @@ import {
 	parseReferenceImages,
 	REFERENCE_IMAGES_ATTR,
 } from "@/lib/connectors/attributes/referenceImages";
-import { requireState } from "@/lib/connectors/plugins";
+import { requireContext } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { forReferenceImages } from "@/lib/generation/sourceNodes";
 
@@ -33,7 +33,7 @@ export function createReferenceImagesPlugin(): ConnectorPlugin<ParamsWithReferen
 			const urls = [
 				...existing,
 				...(parseReferenceImages(override) ??
-					requireState(ctx, "reference-images").referenceImages),
+					requireContext(ctx, "state", "reference-images").referenceImages),
 			];
 			return urls.length === 0 ? rest : { ...rest, referenceImages: urls };
 		},

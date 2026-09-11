@@ -103,9 +103,7 @@ export const stillSnapshot = (
 	queue: GenerationQueue,
 ): ElementSnapshot => queue.getElementSnapshot(stillDependency(node)?.id);
 
-const stillFrame = (
-	ctx: PluginContext<AnimatedImageGenerateParams, AssetResult>,
-): string | undefined =>
+const stillFrame = (ctx: PluginContext): string | undefined =>
 	ctx.elementId
 		? ctx.dependencies?.[stillElementId(ctx.elementId)]?.imageUrl
 		: undefined;

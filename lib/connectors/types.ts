@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import type { GatewayClient } from "@/lib/gateway/base";
 import type { NodeSpec } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
@@ -79,8 +78,7 @@ export type ModelPick = { provider?: string; model?: string };
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
-export interface PluginContext<TParams = unknown, TResult = unknown> {
-	gateway?: GatewayClient<TParams, TResult>;
+export interface PluginContext {
 	searchVoices?: VoiceSearchFn;
 	/** Id of the node being generated. */
 	elementId?: string;
@@ -114,20 +112,17 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
 	beforeGenerate?(
 		params: TParams,
-		ctx: PluginContext<TParams, TResult>,
+		ctx: PluginContext,
 	): TParams | Promise<TParams>;
 	afterGenerate?(
 		result: TResult,
-		ctx: PluginContext<TParams, TResult>,
+		ctx: PluginContext,
 	): TResult | Promise<TResult>;
 	transformPrompt?(
 		prompt: string,
-		ctx: PluginContext<TParams, TResult>,
+		ctx: PluginContext,
 	): string | Promise<string>;
-	onError?(
-		error: string,
-		ctx: PluginContext<TParams, TResult>,
-	): void | Promise<void>;
+	onError?(error: string, ctx: PluginContext): void | Promise<void>;
 }
 
 export interface ConnectorConfig {

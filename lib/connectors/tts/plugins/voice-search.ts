@@ -1,5 +1,6 @@
 import omit from "lodash/omit";
 import pick from "lodash/pick";
+import { requireContext } from "@/lib/connectors/plugins";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
@@ -20,12 +21,8 @@ export function createVoiceSearchPlugin(): ConnectorPlugin<TTSGenerateParams> {
 		name: "voice-search",
 		async beforeGenerate(params, ctx) {
 			if (params.voiceId) return params;
-			if (!ctx.searchVoices) {
-				throw new Error(
-					"voice-search plugin requires searchVoices in PluginContext",
-				);
-			}
-			const voices = await ctx.searchVoices({
+			const searchVoices = requireContext(ctx, "searchVoices", "voice-search");
+			const voices = await searchVoices({
 				...pick(params, VOICE_DESCRIPTOR_KEYS),
 				language: params.language || "en",
 			});
