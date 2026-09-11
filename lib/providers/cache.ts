@@ -1,13 +1,12 @@
 import { randomUUID } from "node:crypto";
 import minBy from "lodash/minBy";
-import { Pinecone } from "@pinecone-database/pinecone";
+import { Pinecone, type RecordMetadata } from "@pinecone-database/pinecone";
+import { z } from "zod";
 import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { embedText } from "./embed";
 
-type Metadata = Record<string, string | number | boolean>;
-
-export type CacheMatch = { score?: number; metadata?: Metadata };
+export type CacheMatch = { score?: number; metadata?: RecordMetadata };
 
 const DEFAULT_THRESHOLD = 0.8;
 const RANKED_TOP_K = 5;
@@ -15,9 +14,9 @@ const defaultSerialize = (...args: unknown[]): string => JSON.stringify(args);
 
 type PineconeCacheOptions<Args extends unknown[], Result> = {
 	index: string;
-	toMetadata: (result: Result, description: string) => Metadata;
+	toMetadata: (result: Result, description: string) => RecordMetadata;
 	/** Return `undefined` when the stored row can't be rehydrated, forcing a miss. */
-	fromMetadata: (metadata: Metadata) => Result | undefined;
+	fromMetadata: (metadata: RecordMetadata) => Result | undefined;
 	threshold?: number;
 	serialize?: (...args: Args) => string;
 	namespace?: string;
@@ -59,7 +58,7 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 			});
 			const eligible: CacheMatch[] = (matches ?? [])
 				.filter((m) => (m.score ?? 0) >= threshold)
-				.map((m) => ({ score: m.score, metadata: m.metadata as Metadata }));
+				.map((m) => ({ score: m.score, metadata: m.metadata }));
 			const hit = opts.rank ? opts.rank(eligible, ...args) : eligible[0];
 			if (hit?.metadata) {
 				const cached = opts.fromMetadata(hit.metadata);
@@ -104,33 +103,34 @@ export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
 	);
 };
 
+const audioRow = z.object({
+	url: z.string().min(1),
+	duration: z.number(),
+	description: z.string(),
+});
+
 /**
  * Reusable strategy for any method returning an audio BundleResponse. Stores
  * the *resolved* absolute URL so cache hits round-trip through
- * `AssetBundle.resolve` without reconstructing a bogus path. `audioUrl` is the
- * legacy key for rows written before the rename.
+ * `AssetBundle.resolve` without reconstructing a bogus path.
  */
 export const audioBundleCache = (type: string) => ({
-	toMetadata: (r: BundleResponse, description: string): Metadata => ({
+	toMetadata: (r: BundleResponse, description: string): RecordMetadata => ({
 		url: AssetBundle.fromResponse(r).resolve("audio"),
 		duration: Number(r.metadata?.durationSec ?? 0),
 		description,
 	}),
-	fromMetadata: (m: Metadata): BundleResponse | undefined => {
-		const url = m.url || m.audioUrl;
-		if (typeof url !== "string" || url === "") return undefined;
-		const durationSec = Number(m.duration);
-		if (!Number.isFinite(durationSec)) return undefined;
+	fromMetadata: (m: RecordMetadata): BundleResponse | undefined => {
+		// `audioUrl` is the legacy key for rows written before the rename.
+		const row = audioRow.safeParse({ ...m, url: m.url ?? m.audioUrl });
+		if (!row.success) return undefined;
+		const { url, duration, description } = row.data;
 		return {
 			id: url,
 			type,
 			provider: "pinecone-cache",
 			result: { audio: url },
-			metadata: {
-				durationSec,
-				cached: true,
-				description: String(m.description),
-			},
+			metadata: { durationSec: duration, cached: true, description },
 		};
 	},
 });
