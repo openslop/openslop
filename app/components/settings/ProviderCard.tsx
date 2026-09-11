@@ -73,7 +73,7 @@ export function ProviderCard({
 
 	const [editing, setEditing] = useState(selected || !key);
 	const [testing, setTesting] = useState(false);
-	const [confirmingRemoval, setConfirmingRemoval] = useState(false);
+	const [removing, setRemoving] = useState<BYOKProvider>();
 	const card = useRef<HTMLDivElement>(null);
 
 	const done = () => {
@@ -139,7 +139,7 @@ export function ProviderCard({
 							size="sm"
 							variant="destructive"
 							className="ml-auto"
-							onClick={() => setConfirmingRemoval(true)}
+							onClick={() => setRemoving(provider)}
 						>
 							<Trash2 />
 							Delete key
@@ -149,13 +149,13 @@ export function ProviderCard({
 			)}
 
 			<ConfirmDeleteDialog
-				open={confirmingRemoval}
-				onOpenChange={setConfirmingRemoval}
-				title={`Delete your ${meta.name} key?`}
+				target={removing}
+				onClose={() => setRemoving(undefined)}
+				title={() => `Delete your ${meta.name} key?`}
 				description={`Models served by ${meta.name} stop being available until you add a new key.`}
 				actionLabel="Delete key"
-				onConfirm={() =>
-					void removeKey(provider).then(onDismissed).catch(toastError)
+				onConfirm={(target) =>
+					void removeKey(target).then(onDismissed).catch(toastError)
 				}
 			/>
 		</Tile>

@@ -80,17 +80,12 @@ export default function ProjectsList({
 				</div>
 			</div>
 			<ConfirmDeleteDialog
-				open={deleting !== undefined}
-				onOpenChange={(open) => {
-					if (!open) setDeleting(undefined);
-				}}
-				title={`Delete ${deleting?.name}?`}
+				target={deleting}
+				onClose={() => setDeleting(undefined)}
+				title={(project) => `Delete ${project.name}?`}
 				description="This permanently deletes the project and everything generated in it. It can't be undone."
 				actionLabel="Delete project"
-				onConfirm={() => {
-					if (deleting) handleDelete(deleting.id);
-					setDeleting(undefined);
-				}}
+				onConfirm={(project) => void handleDelete(project.id)}
 			/>
 		</TooltipProvider>
 	);

@@ -126,7 +126,6 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 }
 
 export interface ConnectorConfig {
-	baseUrl?: string;
 	plugins?: ConnectorPlugin[];
 }
 
