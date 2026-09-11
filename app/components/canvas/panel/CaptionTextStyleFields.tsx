@@ -49,7 +49,7 @@ export function CaptionTextStyleFields({
 					label="Fill color"
 					value={value.fill}
 					swatches={CAPTION_PALETTE}
-					onChange={(fill) => onChange({ ...value, fill: fill ?? value.fill })}
+					onChange={(fill) => onChange({ ...value, fill })}
 				/>
 			</PanelField>
 
@@ -70,13 +70,14 @@ export function CaptionTextStyleFields({
 						label="Border color"
 						value={border?.color ?? null}
 						swatches={CAPTION_PALETTE}
-						emptyLabel="No border"
+						empty={{
+							label: "No border",
+							onSelect: () => onChange({ ...value, border: null }),
+						}}
 						onChange={(color) =>
 							onChange({
 								...value,
-								border: color
-									? { width: border?.width ?? DEFAULT_BORDER_WIDTH, color }
-									: null,
+								border: { width: border?.width ?? DEFAULT_BORDER_WIDTH, color },
 							})
 						}
 					/>
@@ -88,7 +89,10 @@ export function CaptionTextStyleFields({
 					label="Background color"
 					value={value.background}
 					swatches={CAPTION_PALETTE}
-					emptyLabel="No background"
+					empty={{
+						label: "No background",
+						onSelect: () => onChange({ ...value, background: null }),
+					}}
 					onChange={(background) => onChange({ ...value, background })}
 				/>
 			</PanelField>

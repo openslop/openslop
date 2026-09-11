@@ -65,22 +65,21 @@ function SwatchButton({
 
 /**
  * Color picker in a popover: a saturation field with hue and opacity sliders,
- * hex entry, and the palette. Layers that can be switched off also offer a
- * "none" swatch, which yields `null`.
+ * hex entry, and the palette. A layer that can be switched off also gets a
+ * "none" swatch.
  */
 export function ColorField({
 	value,
 	onChange,
 	swatches,
 	label,
-	emptyLabel,
+	empty,
 }: {
 	value: string | null;
-	onChange: (value: string | null) => void;
+	onChange: (value: string) => void;
 	swatches: readonly string[];
 	label: string;
-	/** When set, the picker offers a "none" choice that yields `null`. */
-	emptyLabel?: string;
+	empty?: { label: string; onSelect: () => void };
 }) {
 	const [open, setOpen] = useState(false);
 	const color = value ?? "#ffffff";
@@ -129,13 +128,13 @@ export function ColorField({
 				</div>
 
 				<div className="mt-3 grid grid-cols-7 gap-1.5 border-t border-border pt-3">
-					{emptyLabel && (
+					{empty && (
 						<SwatchButton
 							color={null}
-							label={emptyLabel}
+							label={empty.label}
 							selected={value === null}
 							onSelect={() => {
-								onChange(null);
+								empty.onSelect();
 								setOpen(false);
 							}}
 						/>

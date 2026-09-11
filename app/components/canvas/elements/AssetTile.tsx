@@ -38,7 +38,7 @@ export function AssetTile({
 	removeAffordance = "overlay",
 	fallback = "initial",
 }: {
-	name?: string;
+	name: string;
 	previewUrl?: string;
 	Icon: IconComponent;
 	elementId?: string;
@@ -51,9 +51,12 @@ export function AssetTile({
 	const status = useQueueSelector(
 		(q) => q.getElementSnapshot(elementId).status,
 	);
-	const initial = name?.trim().charAt(0).toUpperCase();
 	const fallbackContent =
-		fallback === "icon" || !initial ? <Icon className="h-5 w-5" /> : initial;
+		fallback === "icon" ? (
+			<Icon className="h-5 w-5" />
+		) : (
+			name.trim().charAt(0).toUpperCase()
+		);
 	return (
 		<div className="group/tile relative flex w-16 flex-col gap-1 sm:w-20">
 			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
@@ -61,7 +64,7 @@ export function AssetTile({
 					<ImageWithShimmer
 						key={previewUrl}
 						src={previewUrl}
-						alt={name ?? ""}
+						alt={name}
 						fill
 						unoptimized
 						className="object-cover"
@@ -92,7 +95,7 @@ export function AssetTile({
 				{onEdit && (
 					<OverlayButton
 						icon={Pencil}
-						label={`Edit ${name ?? "asset"}`}
+						label={`Edit ${name}`}
 						onClick={onEdit}
 					/>
 				)}
@@ -101,26 +104,21 @@ export function AssetTile({
 					status !== "generating" && (
 						<OverlayButton
 							icon={X}
-							label={`Remove ${name ?? "asset"}`}
+							label={`Remove ${name}`}
 							onClick={onRemove}
 						/>
 					)}
 			</div>
 			{onRemove && removeAffordance === "corner" && status !== "generating" && (
 				<RemoveCrossButton
-					label={`Remove ${name ?? "asset"}`}
+					label={`Remove ${name}`}
 					onClick={onRemove}
 					className="z-10 opacity-0 group-hover/tile:opacity-100"
 				/>
 			)}
-			{name && (
-				<span
-					className="truncate text-badge text-muted-foreground"
-					title={name}
-				>
-					{name}
-				</span>
-			)}
+			<span className="truncate text-badge text-muted-foreground" title={name}>
+				{name}
+			</span>
 		</div>
 	);
 }

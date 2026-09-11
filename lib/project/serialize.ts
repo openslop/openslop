@@ -1,6 +1,7 @@
-import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
+import type { SceneElement } from "@/lib/canvas/types";
 import { SCENE_TYPE } from "@/lib/canvas/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
+import { isParsedContentElement } from "@/lib/canvas/guards";
 import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { makeNodeId } from "@/lib/canvas/nodeUtils";
 import type { ConnectorModels } from "@/lib/connectors/models";
@@ -24,6 +25,8 @@ export function deserializeWithScenes(
 	return splitScenes(osml).map((sceneOsml) => ({
 		id: makeNodeId(),
 		type: SCENE_TYPE,
-		children: parseOSML(sceneOsml, defaultModels) as CanvasContentElement[],
+		children: parseOSML(sceneOsml, defaultModels).filter(
+			isParsedContentElement,
+		),
 	}));
 }

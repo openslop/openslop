@@ -485,6 +485,16 @@ describe("audioBundleCache", () => {
 		expect(cache.fromMetadata({ url: "", duration: 5 })).toBe(undefined);
 	});
 
+	it("fromMetadata forces a miss when the row has no description", async () => {
+		const { audioBundleCache } = await loadCache();
+		expect(
+			audioBundleCache("music").fromMetadata({
+				url: "https://a/audio.mp3",
+				duration: 5,
+			}),
+		).toBe(undefined);
+	});
+
 	it("fromMetadata forces a miss when the row has no usable duration", async () => {
 		const { audioBundleCache } = await loadCache();
 		const cache = audioBundleCache("music");

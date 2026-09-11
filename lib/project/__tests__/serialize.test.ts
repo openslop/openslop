@@ -56,6 +56,17 @@ describe("deserializeWithScenes", () => {
 		expect(scenes[0].children[0].type).toBe("narration");
 	});
 
+	it("keeps metadata tags out of the scene", () => {
+		const scenes = deserializeWithScenes(
+			'<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright" language="en">A girl</metadata_character><narration>hello</narration>',
+		);
+
+		expect(scenes).toHaveLength(1);
+		expect(scenes[0].children.map((child) => child.type)).toEqual([
+			"narration",
+		]);
+	});
+
 	it("round-trips quotes and angle brackets in attributes and text", () => {
 		const original = [
 			makeScene([
