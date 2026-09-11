@@ -17,7 +17,7 @@ export class HttpVideoConnector extends BaseAssetConnector<
 	readonly assetKey = "video" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(new HttpAssetGateway(config.model, "video", config.baseUrl), config);
+		super(new HttpAssetGateway(config.model, "video"), config);
 	}
 
 	static attributesFor(model: ModelRef): AttributeSchema {

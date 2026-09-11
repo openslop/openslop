@@ -25,10 +25,9 @@ export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
 	constructor(
 		protected readonly model: ModelRef,
 		path: string,
-		baseUrl = "",
 	) {
 		super();
-		this.route = `${baseUrl}${apiPrefixFor(model.provider)}/${path}`;
+		this.route = `${apiPrefixFor(model.provider)}/${path}`;
 	}
 
 	async generate(params: TParams): Promise<JobSubmission> {
@@ -47,9 +46,9 @@ export class HttpLLMGateway extends GatewayClient<
 > {
 	private readonly route: string;
 
-	constructor(model: ModelRef, baseUrl = "") {
+	constructor(model: ModelRef) {
 		super();
-		this.route = `${baseUrl}${apiPrefixFor(model.provider)}/llm`;
+		this.route = `${apiPrefixFor(model.provider)}/llm`;
 	}
 
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
@@ -71,8 +70,8 @@ export class HttpLLMGateway extends GatewayClient<
 }
 
 export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
-	constructor(model: ModelRef, baseUrl?: string) {
-		super(model, "tts", baseUrl);
+	constructor(model: ModelRef) {
+		super(model, "tts");
 	}
 
 	/**

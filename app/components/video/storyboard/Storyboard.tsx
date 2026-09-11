@@ -20,7 +20,7 @@ export function Storyboard() {
 	const { layout, segments, scenes } = useLayout();
 	const selectScene = useSelectScene();
 	const defaultModels = useResolveDefaultModels();
-	const [deleting, setDeleting] = useState<StoryboardSceneData | null>(null);
+	const [deleting, setDeleting] = useState<StoryboardSceneData>();
 
 	const items = useMemo(
 		() => buildStoryboardScenes(scenes, segments),
@@ -55,17 +55,12 @@ export function Storyboard() {
 			))}
 			<SceneInsertHandle onInsert={() => addSceneBefore(items.length)} />
 			<ConfirmDeleteDialog
-				open={deleting !== null}
-				onOpenChange={(open) => {
-					if (!open) setDeleting(null);
-				}}
-				title={`Delete scene ${deleting?.sceneIndex}?`}
+				target={deleting}
+				onClose={() => setDeleting(undefined)}
+				title={(item) => `Delete scene ${item.sceneIndex}?`}
 				description="This removes the scene and everything in it. Undo from the canvas to bring it back."
 				actionLabel="Delete scene"
-				onConfirm={() => {
-					if (deleting) removeElement(editor, deleting.scene);
-					setDeleting(null);
-				}}
+				onConfirm={(item) => removeElement(editor, item.scene)}
 			/>
 		</section>
 	);

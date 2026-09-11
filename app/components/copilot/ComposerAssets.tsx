@@ -23,11 +23,6 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 
 	const hasNarration = Object.keys(narration).length > 0;
 
-	const confirmDelete = () => {
-		if (deletingName) deleteCharacter(store, queue, deletingName);
-		setDeletingName(undefined);
-	};
-
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
 			{hasArtStyle && <ArtStyleAssetTile />}
@@ -41,14 +36,12 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 				/>
 			))}
 			<ConfirmDeleteDialog
-				open={deletingName !== undefined}
-				onOpenChange={(open) => {
-					if (!open) setDeletingName(undefined);
-				}}
-				title={`Delete ${deletingName}?`}
+				target={deletingName}
+				onClose={() => setDeletingName(undefined)}
+				title={(name) => `Delete ${name}?`}
 				description="This permanently removes the character and its avatar. It can't be undone."
 				actionLabel="Delete character"
-				onConfirm={confirmDelete}
+				onConfirm={(name) => deleteCharacter(store, queue, name)}
 			/>
 		</div>
 	);

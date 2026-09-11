@@ -17,7 +17,7 @@ export class HttpImageConnector extends BaseAssetConnector<
 	readonly assetKey = "image" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(new HttpAssetGateway(config.model, "image", config.baseUrl), config);
+		super(new HttpAssetGateway(config.model, "image"), config);
 	}
 
 	static attributesFor(_model: ModelRef): AttributeSchema {

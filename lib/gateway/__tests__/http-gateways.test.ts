@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpAssetGateway, HttpLLMGateway, HttpTTSGateway } from "../http";
 
-const BASE = "https://api.test.com";
+/** Routes are app-relative, so they parse against any origin. */
+const parseUrl = (url: string) => new URL(url, "http://localhost");
 
 function jsonResponse(data: unknown) {
 	return new Response(JSON.stringify(data), {
@@ -44,11 +45,11 @@ describe("HTTP gateways", () => {
 			const submission = { jobId: "job-1", status: "pending" };
 			fetchMock.mockResolvedValue(jsonResponse(submission));
 
-			const gw = new HttpAssetGateway(model, "image", BASE);
+			const gw = new HttpAssetGateway(model, "image");
 
 			expect(await gw.generate({ prompt: "a cat" })).toEqual(submission);
 			expect(fetchMock).toHaveBeenCalledWith(
-				`${BASE}${prefix}/image`,
+				`${prefix}/image`,
 				expect.objectContaining({ method: "POST" }),
 			);
 		});
@@ -62,11 +63,11 @@ describe("HTTP gateways", () => {
 			};
 			fetchMock.mockResolvedValue(jsonResponse(poll));
 
-			const gw = new HttpAssetGateway(HOSTED_VIDEO, "video", BASE);
+			const gw = new HttpAssetGateway(HOSTED_VIDEO, "video");
 
 			expect(await gw.poll("job-1")).toEqual(poll);
 			expect(fetchMock).toHaveBeenCalledWith(
-				`${BASE}/api/v1/video/job-1`,
+				`/api/v1/video/job-1`,
 				expect.objectContaining({ method: "GET" }),
 			);
 		});
@@ -82,13 +83,10 @@ describe("HTTP gateways", () => {
 			);
 			const { signal } = new AbortController();
 
-			await new HttpAssetGateway(HOSTED_VIDEO, "video", BASE).poll(
-				"job-1",
-				signal,
-			);
+			await new HttpAssetGateway(HOSTED_VIDEO, "video").poll("job-1", signal);
 
 			expect(fetchMock).toHaveBeenCalledWith(
-				`${BASE}/api/v1/video/job-1`,
+				`/api/v1/video/job-1`,
 				expect.objectContaining({ signal }),
 			);
 		});
@@ -99,12 +97,12 @@ describe("HTTP gateways", () => {
 			const voices = [{ id: "v1", name: "Alice", gender: "feminine" }];
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
-			const gw = new HttpTTSGateway(HOSTED_TTS, BASE);
+			const gw = new HttpTTSGateway(HOSTED_TTS);
 
 			expect(await gw.searchVoices({ gender: "feminine", limit: 5 })).toEqual(
 				voices,
 			);
-			const url = new URL(fetchMock.mock.calls[0][0] as string);
+			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
 			expect(url.pathname).toBe("/api/v1/tts/voices");
 			expect(url.searchParams.get("gender")).toBe("feminine");
 			expect(url.searchParams.get("limit")).toBe("5");
@@ -122,12 +120,9 @@ describe("HTTP gateways", () => {
 				}),
 			);
 
-			const [alice, bob] = await new HttpTTSGateway(
-				BYOK_TTS,
-				BASE,
-			).searchVoices({});
+			const [alice, bob] = await new HttpTTSGateway(BYOK_TTS).searchVoices({});
 
-			const preview = new URL(alice?.previewUrl ?? "", BASE);
+			const preview = parseUrl(alice?.previewUrl ?? "");
 			expect(preview.pathname).toBe("/api/third-party/tts/voices/preview");
 			expect(preview.searchParams.get("url")).toBe("https://vendor/a.mp3");
 			expect(preview.searchParams.get("provider")).toBe("cartesia");
@@ -140,11 +135,11 @@ describe("HTTP gateways", () => {
 		it("names its model when the key is the user's own", async () => {
 			fetchMock.mockResolvedValue(jsonResponse({ voices: [] }));
 
-			await new HttpTTSGateway(BYOK_TTS, BASE).searchVoices({
+			await new HttpTTSGateway(BYOK_TTS).searchVoices({
 				query: undefined,
 			});
 
-			const url = new URL(fetchMock.mock.calls[0][0] as string);
+			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
 			expect(url.pathname).toBe("/api/third-party/tts/voices");
 			expect(url.searchParams.get("provider")).toBe("cartesia");
 			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
@@ -157,11 +152,11 @@ describe("HTTP gateways", () => {
 			const response = { text: "Hello!", model: "claude-3" };
 			fetchMock.mockResolvedValue(jsonResponse(response));
 
-			const gw = new HttpLLMGateway(HOSTED_LLM, BASE);
+			const gw = new HttpLLMGateway(HOSTED_LLM);
 
 			expect(await gw.generate({ prompt: "hi" })).toEqual(response);
 			expect(fetchMock).toHaveBeenCalledWith(
-				`${BASE}/api/v1/llm`,
+				`/api/v1/llm`,
 				expect.objectContaining({ method: "POST" }),
 			);
 		});
@@ -173,14 +168,14 @@ describe("HTTP gateways", () => {
 			];
 			fetchMock.mockResolvedValue(sseResponse(chunks));
 
-			const gw = new HttpLLMGateway(BYOK_LLM, BASE);
+			const gw = new HttpLLMGateway(BYOK_LLM);
 			const results: unknown[] = [];
 			for await (const chunk of gw.stream({ prompt: "hi" })) {
 				results.push(chunk);
 			}
 
 			expect(results).toEqual(chunks);
-			expect(fetchMock.mock.calls[0][0]).toBe(`${BASE}/api/third-party/llm`);
+			expect(fetchMock.mock.calls[0][0]).toBe(`/api/third-party/llm`);
 			const body = JSON.parse(
 				fetchMock.mock.calls[0][1].body as string,
 			) as Record<string, unknown>;
@@ -192,7 +187,7 @@ describe("HTTP gateways", () => {
 				new Response(null, { status: 200, headers: {} }),
 			);
 
-			const gw = new HttpLLMGateway(HOSTED_LLM, BASE);
+			const gw = new HttpLLMGateway(HOSTED_LLM);
 			await expect(async () => {
 				for await (const _ of gw.stream({ prompt: "hi" })) {
 					// consume

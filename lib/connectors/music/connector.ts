@@ -17,7 +17,7 @@ export class HttpMusicConnector extends BaseAssetConnector<
 	readonly assetKey = "audio" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(new HttpAssetGateway(config.model, "music", config.baseUrl), config);
+		super(new HttpAssetGateway(config.model, "music"), config);
 	}
 
 	static attributesFor(_model: ModelRef): AttributeSchema {
