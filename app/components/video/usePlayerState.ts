@@ -18,7 +18,7 @@ const MUTE_EVENTS: readonly PlayerEvent[] = ["mutechange"];
 
 export function usePlayerValue<T>(
 	events: readonly PlayerEvent[],
-	read: (p: PlayerRef) => T,
+	read: (player: PlayerRef) => T,
 	fallback: T,
 ): T {
 	const { player } = usePlayerControl();
@@ -40,17 +40,17 @@ export function usePlayerValue<T>(
 }
 
 export function usePlayerFrame() {
-	return usePlayerValue(FRAME_EVENTS, (p) => p.getCurrentFrame(), 0);
+	return usePlayerValue(FRAME_EVENTS, (player) => player.getCurrentFrame(), 0);
 }
 
 export function usePlayerPlaying() {
-	return usePlayerValue(PLAY_EVENTS, (p) => p.isPlaying(), false);
+	return usePlayerValue(PLAY_EVENTS, (player) => player.isPlaying(), false);
 }
 
 export function usePlayerVolume() {
-	return usePlayerValue(VOLUME_EVENTS, (p) => p.getVolume(), 1);
+	return usePlayerValue(VOLUME_EVENTS, (player) => player.getVolume(), 1);
 }
 
 export function usePlayerMuted() {
-	return usePlayerValue(MUTE_EVENTS, (p) => p.isMuted(), false);
+	return usePlayerValue(MUTE_EVENTS, (player) => player.isMuted(), false);
 }

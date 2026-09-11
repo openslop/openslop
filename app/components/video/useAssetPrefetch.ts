@@ -7,10 +7,10 @@ type PrefetchHandle = ReturnType<typeof PrefetchFn>;
 let prefetchPromise: Promise<typeof PrefetchFn> | null = null;
 const loadPrefetch = () =>
 	(prefetchPromise ??= import("remotion")
-		.then((m) => m.prefetch)
-		.catch((err) => {
+		.then((remotion) => remotion.prefetch)
+		.catch((error) => {
 			prefetchPromise = null;
-			throw err;
+			throw error;
 		}));
 
 export function collectUrls(layout: VideoLayout): Set<string> {
@@ -47,7 +47,7 @@ export function reconcilePrefetch(
 }
 
 export async function awaitPrefetch(handles: PrefetchHandle[]): Promise<void> {
-	await Promise.allSettled(handles.map((h) => h.waitUntilDone()));
+	await Promise.allSettled(handles.map((handle) => handle.waitUntilDone()));
 }
 
 export function useAssetPrefetch(layout: VideoLayout): boolean {
@@ -67,9 +67,9 @@ export function useAssetPrefetch(layout: VideoLayout): boolean {
 				await awaitPrefetch([...active.values()]);
 				if (!cancelled) setReady(true);
 			})
-			.catch((err) => {
+			.catch((error) => {
 				if (cancelled) return;
-				console.error("Failed to load remotion for prefetch", err);
+				console.error("Failed to load remotion for prefetch", error);
 				setReady(true);
 			});
 

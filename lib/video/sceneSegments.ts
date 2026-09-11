@@ -21,18 +21,15 @@ export type SequenceIndex = ReadonlyMap<string, Sequence>;
  * the render payload carries the ordered `series`, not this projection of it.
  */
 export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
-	const index = new Map<string, Sequence>();
-	for (const seq of series) index.set(seq.element.id, seq);
-	return index;
+	return new Map(series.map((seq) => [seq.element.id, seq]));
 }
 
 export function findSceneSequence(
 	scene: SceneElement,
 	index: SequenceIndex,
 ): Sequence | undefined {
-	const fg = scene.children.find(isForeground);
-	if (!fg) return undefined;
-	return index.get(fg.id);
+	const foreground = scene.children.find(isForeground);
+	return foreground ? index.get(foreground.id) : undefined;
 }
 
 /**
@@ -48,11 +45,10 @@ export function findSegmentIndexAtFrame(
 	fps: number,
 ): number {
 	if (segments.length === 0) return -1;
-	for (let i = 0; i < segments.length; i++) {
-		const seg = segments[i];
-		if (frame < toFrames(seg.start + seg.duration, fps)) return i;
-	}
-	return segments.length - 1;
+	const index = segments.findIndex(
+		(seg) => frame < toFrames(seg.start + seg.duration, fps),
+	);
+	return index === -1 ? segments.length - 1 : index;
 }
 
 function toThumbnail(element: ResolvedElement): SeekThumbnail | null {

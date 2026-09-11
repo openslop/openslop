@@ -17,8 +17,8 @@ export function getLayoutKey(
 		.filter(isSceneElement)
 		.flatMap((scene) =>
 			scene.children.map(
-				(el) =>
-					`${scene.id}:${el.id}:${el.type}:${layoutAttributeSignature(el)}`,
+				(element) =>
+					`${scene.id}:${element.id}:${element.type}:${layoutAttributeSignature(element)}`,
 			),
 		)
 		.join("|");

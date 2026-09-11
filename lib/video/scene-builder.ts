@@ -66,15 +66,9 @@ function pushSequence(
 
 function trimSequencesAt(list: Sequence[] | undefined, cutoff: number) {
 	if (!list) return;
-	while (list.length > 0) {
-		const last = list[list.length - 1];
-		if (last.start >= cutoff) {
-			list.pop();
-			continue;
-		}
-		last.duration = Math.min(last.duration, cutoff - last.start);
-		return;
-	}
+	while (list.length > 0 && list[list.length - 1].start >= cutoff) list.pop();
+	const last = list.at(-1);
+	if (last) last.duration = Math.min(last.duration, cutoff - last.start);
 }
 
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {

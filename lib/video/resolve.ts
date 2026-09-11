@@ -18,11 +18,11 @@ export function resolveElements(
 		if (!isSceneElement(scene)) continue;
 		sceneNumber += 1;
 
-		for (const el of scene.children) {
-			const snapshot = getSnapshot(el.id);
+		for (const element of scene.children) {
+			const snapshot = getSnapshot(element.id);
 			if (!snapshot.result) continue;
 
-			const spec = ELEMENT_TYPES[el.type];
+			const spec = ELEMENT_TYPES[element.type];
 			const url = getPrimaryUrl(snapshot.result, spec.outputKind);
 			if (!url) continue;
 
@@ -31,19 +31,19 @@ export function resolveElements(
 				captionsEnabled && timestamps?.length ? timestamps : undefined;
 
 			resolved.push({
-				id: el.id,
-				type: el.type,
+				id: element.id,
+				type: element.type,
 				role: spec.role,
 				layer: spec.layer,
 				sceneId: scene.id,
 				sceneNumber,
-				prompt: getPromptText(el),
+				prompt: getPromptText(element),
 				url,
 				durationSec: snapshot.result.durationSec,
-				loops: getLoops(el),
-				loop: getLoop(el),
-				volume: getVolume(el),
-				motion: getMotion(el),
+				loops: getLoops(element),
+				loop: getLoop(element),
+				volume: getVolume(element),
+				motion: getMotion(element),
 				captionTimestamps,
 			});
 		}

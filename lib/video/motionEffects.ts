@@ -17,9 +17,9 @@ const ZERO: Components = { tx: 0, ty: 0, rotation: 0, extraScale: 0 };
 
 const easeInOut = Easing.inOut(Easing.ease);
 
-function ramp(frame: number, d: number, a: number, b: number): number {
-	if (d <= 0) return b;
-	return interpolate(frame, [0, d], [a, b], {
+function ramp(frame: number, duration: number, from: number, to: number) {
+	if (duration <= 0) return to;
+	return interpolate(frame, [0, duration], [from, to], {
 		extrapolateLeft: "clamp",
 		extrapolateRight: "clamp",
 		easing: easeInOut,
@@ -106,10 +106,10 @@ export function motionTransform(
 	aspectRatio: number = 16 / 9,
 ): string {
 	if (effect === "none") return "none";
-	const d = Math.max(1, durationInFrames);
-	const ar = Math.max(1, aspectRatio);
-	const c = SPECS[effect](frame, d);
+	const duration = Math.max(1, durationInFrames);
+	const aspect = Math.max(1, aspectRatio);
+	const { tx, ty, rotation, extraScale } = SPECS[effect](frame, duration);
 	const scale =
-		coverScale(c.tx, c.ty, c.rotation, ar) + COVER_HEADROOM + c.extraScale;
-	return `translate(${c.tx.toFixed(3)}%, ${c.ty.toFixed(3)}%) scale(${scale.toFixed(4)}) rotate(${c.rotation.toFixed(3)}deg)`;
+		coverScale(tx, ty, rotation, aspect) + COVER_HEADROOM + extraScale;
+	return `translate(${tx.toFixed(3)}%, ${ty.toFixed(3)}%) scale(${scale.toFixed(4)}) rotate(${rotation.toFixed(3)}deg)`;
 }

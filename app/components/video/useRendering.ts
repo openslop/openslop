@@ -18,8 +18,8 @@ export function useRendering() {
 		setState({ status: "invoking" });
 		try {
 			for await (const update of runRender(layout, scale)) setState(update);
-		} catch (err) {
-			setState({ status: "error", message: errorMessage(err) });
+		} catch (error) {
+			setState({ status: "error", message: errorMessage(error) });
 		}
 	}, []);
 

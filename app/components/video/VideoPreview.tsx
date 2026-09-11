@@ -75,7 +75,7 @@ export function VideoPreview({ layout, restoreFrameRef }: VideoPreviewProps) {
 		if (!player) return;
 		const willPlay = !player.isPlaying();
 		player.toggle();
-		setFlash((f) => ({ key: (f?.key ?? 0) + 1, playing: willPlay }));
+		setFlash((prev) => ({ key: (prev?.key ?? 0) + 1, playing: willPlay }));
 	};
 	return (
 		<div className={`relative h-full w-full ${styles.player}`}>
