@@ -19,6 +19,10 @@
 </p>
 
 <p align="center">
+  <sub><a href="docs/readme/README.zh-CN.md">中文</a> · <a href="docs/readme/README.ja.md">日本語</a> · <a href="docs/readme/README.ko.md">한국어</a> · <a href="docs/readme/README.es.md">Español</a> · <a href="docs/readme/README.fr.md">Français</a> · <a href="docs/readme/README.pt.md">Português</a></sub>
+</p>
+
+<p align="center">
   <a href="https://openslop.ai"><b>openslop.ai</b></a>
   &nbsp;·&nbsp;
   <a href="https://app.openslop.ai">app.openslop.ai</a>
@@ -40,14 +44,123 @@
 
 OpenSlop wires all your favorite AI tools into one workflow so you can make good-looking video in minutes, no more jumping between ten tabs. You bring your AI accounts, OpenSlop brings the workflow. That's it.
 
-Open-source, free forever.
+It runs in your browser, nothing to install. Open-source, free forever. Built by engineers from Meta, Google, Stripe, and Dropbox.
 
-## Key capabilities
+## Features
 
-- Talk to a bunch of AI providers in one place
-- A real editing workflow, not just a prompt box
-- Runs in your browser, nothing to install
-- Built by engineers from Meta, Google, Stripe, and Dropbox
+<table>
+<tr>
+<td width="50%" valign="middle">
+
+### Describe your video
+
+Type one line. Pick 16:9 or 9:16, a language, a model, and a length, or paste a script you already have. Seven templates are there if you need a nudge.
+
+[The composer →](app/components/copilot/ComposerCopilot.tsx)
+
+</td>
+<td width="50%">
+  <a href="app/components/copilot/ComposerCopilot.tsx"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/describe-dark.svg">
+    <img src="./assets/features/describe-light.svg" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%">
+  </picture></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+### Sloppy writes it with you
+
+The copilot lives in the left panel. It reads the script, outlines the story, writes the scenes, and fits the clips to the dialogue. Everything it does lands on the canvas while you watch.
+
+[How a turn works →](ARCHITECTURE.md#sloppy)
+
+</td>
+<td width="50%">
+  <a href="ARCHITECTURE.md#sloppy"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/sloppy-dark.svg">
+    <img src="./assets/features/sloppy-light.svg" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%">
+  </picture></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+### A storyboard, not a prompt box
+
+Every scene is a stack of cards: narration, character, image, animated image, clip, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
+
+[The document model →](lib/canvas)
+
+</td>
+<td width="50%">
+  <a href="lib/canvas"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/canvas-dark.svg">
+    <img src="./assets/features/canvas-light.svg" alt="Hovering a row opens the insert menu with the seven element types and a new Sound card appears" width="100%">
+  </picture></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+### One click generates everything
+
+Generate all queues every element and runs dependencies first: a still frame before its animated clip, an avatar before the image it appears in. Change a prompt later and the card says **Stale** and why.
+
+[The generation graph →](ARCHITECTURE.md#generation-graph)
+
+</td>
+<td width="50%">
+  <a href="ARCHITECTURE.md#generation-graph"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/generate-dark.svg">
+    <img src="./assets/features/generate-light.svg" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%">
+  </picture></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+### Player and timeline
+
+Watch the cut as it fills in, captions word by word. Four lanes underneath: video, voice, effects, music. Scrub the ruler, jump by scene, or switch to the storyboard strip.
+
+[The player →](app/components/video)
+
+</td>
+<td width="50%">
+  <a href="app/components/video"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/timeline-dark.svg">
+    <img src="./assets/features/timeline-light.svg" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%">
+  </picture></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+### Bring your own keys
+
+Hosted models come with your account. Paste a key for Anthropic, Runware, Cartesia, or ElevenLabs and their models show up in every picker. Keys live in Supabase Vault and never reach the browser.
+
+[Models and provider keys →](ARCHITECTURE.md#models-and-provider-keys)
+
+</td>
+<td width="50%">
+  <a href="ARCHITECTURE.md#models-and-provider-keys"><picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/providers-dark.svg">
+    <img src="./assets/features/providers-light.svg" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%">
+  </picture></a>
+</td>
+</tr>
+</table>
+
+**Also in the box:**
+
+- **[Captions](app/components/canvas/panel/CaptionsPanel.tsx)** — Six presets, twelve fonts, word-by-word or line-by-line reveal, and every color, border, and placement is yours to change.
+- **[Export up to 4K](app/components/video/ExportButton.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
+- **[Version history](app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
+- **[Characters and art style](app/components/canvas/elements/AssetsSection.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.
+- **[Templates](lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, and more. Each seeds a style, a narrator, and a length.
+- **[Mocks for development](.env.example)** — Leave a provider key unset and its calls fall back to canned results, so you can build without paying.
 
 ## Getting started
 
@@ -158,6 +271,21 @@ Contributions welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the c
 Questions, ideas, or just want to hang out? [Join our Discord](https://discord.gg/zeP5482ced) or [email us](mailto:hi@openslop.ai).
 
 Everyone in the community is expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md). To report a problem, email [hi@openslop.ai](mailto:hi@openslop.ai).
+
+<a href="https://github.com/openslop/openslop/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=openslop/openslop" alt="OpenSlop contributors">
+</a>
+
+## Star history
+
+<p align="center">
+  <a href="https://star-history.com/#openslop/openslop&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark">
+      <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date" alt="GitHub star history chart for openslop/openslop" width="880">
+    </picture>
+  </a>
+</p>
 
 ## License
 
