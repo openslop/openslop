@@ -195,7 +195,7 @@ describe("API routes", () => {
 			);
 
 			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("must be a finite number");
+			expect((await res.json()).error).toContain("must be a positive number");
 			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 	});
@@ -259,7 +259,7 @@ describe("API routes", () => {
 			);
 
 			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("must be a finite number");
+			expect((await res.json()).error).toContain("must be a positive number");
 			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
