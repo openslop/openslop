@@ -14,12 +14,12 @@ const EMPTY: ElementSnapshot = {
 
 /** Stands in for the queue when a plugin only reads committed avatar results. */
 export function stubAvatarResults(
-	avatars: Record<string, string>,
+	avatars: Record<string, { imageUrl: string; pinned?: boolean }>,
 ): NodeResults {
 	const byId = new Map(
-		Object.entries(avatars).map(([name, imageUrl]) => [
+		Object.entries(avatars).map(([name, { imageUrl, pinned = false }]) => [
 			characterAvatarElementId(name),
-			{ ...EMPTY, result: { imageUrl, durationSec: 0 } },
+			{ ...EMPTY, result: { imageUrl, durationSec: 0 }, pinned },
 		]),
 	);
 	return {

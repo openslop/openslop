@@ -89,11 +89,6 @@ function CharacterEditDialogBody({
 	const update = (partial: Partial<MetadataCharacter>) =>
 		updateCharacter(name, partial);
 
-	const regenerateAvatar = () => {
-		if (character.avatarUploaded) update({ avatarUploaded: false });
-		avatar.generate();
-	};
-
 	const avatarModel = resolveModel("image", character.avatarModel);
 	const isStale = avatar.staleReason !== null;
 
@@ -169,7 +164,7 @@ function CharacterEditDialogBody({
 									status={avatar.status}
 									hasResult={Boolean(avatarUrl)}
 									disabled={generateDisabled}
-									onGenerate={regenerateAvatar}
+									onGenerate={avatar.generate}
 								/>
 							</div>
 						</div>
@@ -185,14 +180,13 @@ function CharacterEditDialogBody({
 						/>
 						<UploadImageButton
 							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
-							onUpload={(url) => {
+							onUpload={(url) =>
 								queue.commitResult(
 									avatar.node,
 									{ imageUrl: url, durationSec: 0 },
 									{ pinned: true },
-								);
-								update({ avatarUploaded: true });
-							}}
+								)
+							}
 						/>
 					</div>
 				</div>
@@ -224,7 +218,7 @@ function CharacterEditDialogBody({
 				characterName={name}
 				onLeaveStale={onClose}
 				onRegenerate={() => {
-					regenerateAvatar();
+					avatar.generate();
 					onClose();
 				}}
 			/>

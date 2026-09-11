@@ -97,8 +97,6 @@ export const voiceOnModel = <V extends MetadataVoice>(
 
 export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
 	appearance: z.string(),
-	/** Whether the avatar node's result came from an upload rather than generation. */
-	avatarUploaded: z.boolean().optional().catch(undefined),
 	avatarModel: modelRefSchema.optional().catch(undefined),
 });
 

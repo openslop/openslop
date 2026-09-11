@@ -5,7 +5,6 @@ import { createEmitter } from "@/lib/store/emitter";
 import { saveProject, type SaveProjectInput } from "./api";
 import type { ProjectContent } from "./projectDocument";
 import { deriveProjectName } from "./projectName";
-import type { ProjectStore } from "./store";
 import { pickThumbnailUrl } from "./thumbnail";
 
 export const AUTOSAVE_DEBOUNCE_MS = 2000;
@@ -20,7 +19,6 @@ export function buildProjectSave(content: ProjectContent): SaveProjectInput {
 
 export interface AutosaverOptions {
 	projectId: string;
-	store: ProjectStore;
 	/**
 	 * Produces the content for the next save. Called when the debounce fires, so
 	 * serializing stays off the per-keystroke path.
@@ -54,7 +52,6 @@ export interface Autosaver {
  */
 export function createAutosaver({
 	projectId,
-	store,
 	read,
 	onSaved,
 	onError,
@@ -87,10 +84,6 @@ export function createAutosaver({
 	 */
 	const schedule = debounce(() => {
 		if (suspended) return;
-		if (!store.getState().hydrated) {
-			console.error("Autosave aborted: store not hydrated", { projectId });
-			return;
-		}
 		const input = buildInput();
 		queue.clear();
 		void queue.add(() => persist(input));

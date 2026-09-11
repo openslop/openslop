@@ -19,7 +19,6 @@ const STILL_ID = stillElementId(ID);
 const IMAGE_URL = "https://example.com/frame.png";
 
 const state = {
-	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

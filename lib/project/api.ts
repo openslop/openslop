@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import type { ProjectStoreSnapshot } from "./storeSnapshot";
+import type { ProjectData } from "./store";
 
 export const ProjectRowSchema = z.object({
 	id: z.string(),
@@ -20,7 +20,7 @@ export const PROJECT_ROW_COLUMNS = Object.keys(ProjectRowSchema.shape).join(
 export type SaveProjectInput = {
 	name: string;
 	script: string;
-	store: ProjectStoreSnapshot;
+	store: ProjectData;
 	generation: Record<string, ElementSnapshot>;
 	thumbnail_url: string | null;
 };

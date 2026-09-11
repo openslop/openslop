@@ -5,16 +5,12 @@ import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { resolveDefaultModels } from "@/lib/connectors/models";
 import type { AccountStore } from "@/lib/user/accountStore";
 import { applyScriptToEditor } from "./applyScript";
-import type { ProjectStore } from "./store";
-import {
-	extractStoreSnapshot,
-	replaceStoreSnapshot,
-	type ProjectStoreSnapshot,
-} from "./storeSnapshot";
+import type { ProjectData, ProjectStore } from "./store";
+import { extractStoreSnapshot } from "./storeSnapshot";
 
 export type ProjectContent = {
 	script: string;
-	store: ProjectStoreSnapshot;
+	store: ProjectData;
 	generation: Record<string, ElementSnapshot>;
 };
 
@@ -51,7 +47,7 @@ export function createProjectDocument({
 				account: accountStore.getState().models,
 			});
 			applyScriptToEditor(editor, content.script, defaultModels);
-			replaceStoreSnapshot(store, content.store);
+			store.setState(content.store);
 			queue.replaceSnapshots(content.generation);
 		},
 	};

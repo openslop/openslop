@@ -26,7 +26,6 @@ export function useAutosave(
 		() =>
 			createAutosaver({
 				projectId,
-				store,
 				read,
 				onSaved: () => toast("Saved", TOAST_OPTIONS),
 				onError: (err) =>
@@ -35,7 +34,7 @@ export function useAutosave(
 						duration: 4000,
 					}),
 			}),
-		[projectId, store, read],
+		[projectId, read],
 	);
 
 	// Runs after the rehydration effect above it in useEditorSession, so the

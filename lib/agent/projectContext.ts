@@ -32,7 +32,7 @@ function toAgentContext(
 			([name, character]) => ({
 				name,
 				hasAppearance: character.appearance.trim().length > 0,
-				avatar: characterAvatarState(results, name, character.avatarUploaded),
+				avatar: characterAvatarState(results, name),
 			}),
 		),
 		referenceImageCount: state.referenceImages.length,

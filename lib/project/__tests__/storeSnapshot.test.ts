@@ -3,12 +3,7 @@ import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
 import { DEFAULT_VIDEO_LENGTH } from "@/lib/video/videoLength";
 import { createProjectStore } from "../store";
 import { MetadataSchema } from "../types";
-import {
-	applyStoreSnapshot,
-	extractStoreSnapshot,
-	parseStoreSnapshot,
-	replaceStoreSnapshot,
-} from "../storeSnapshot";
+import { extractStoreSnapshot, parseStoreSnapshot } from "../storeSnapshot";
 
 describe("storeSnapshot", () => {
 	it("extracts a method-free snapshot", () => {
@@ -25,7 +20,7 @@ describe("storeSnapshot", () => {
 		}
 	});
 
-	it("round-trips through apply", () => {
+	it("round-trips through createProjectStore", () => {
 		const src = createProjectStore();
 		src.getState().updateMetadata({
 			title: "T",
@@ -34,22 +29,17 @@ describe("storeSnapshot", () => {
 		});
 		src.getState().setReferenceImages(["x", "y"]);
 
-		const snap = extractStoreSnapshot(src);
-		const dest = createProjectStore();
-		applyStoreSnapshot(dest, snap);
-
-		const after = dest.getState();
+		const after = createProjectStore(extractStoreSnapshot(src)).getState();
 		expect(after.metadata.title).toBe("T");
 		expect(after.metadata.style).toBe("noir");
 		expect(after.metadata.narration.age).toBe("adult");
 		expect(after.referenceImages).toEqual(["x", "y"]);
 	});
 
-	it("no-ops on an empty parsed snapshot", () => {
-		const store = createProjectStore();
-		const before = JSON.stringify(extractStoreSnapshot(store));
-		applyStoreSnapshot(store, parseStoreSnapshot(null));
-		expect(JSON.stringify(extractStoreSnapshot(store))).toBe(before);
+	it("creates the same store from an empty parsed snapshot as from nothing", () => {
+		expect(
+			extractStoreSnapshot(createProjectStore(parseStoreSnapshot(null))),
+		).toEqual(extractStoreSnapshot(createProjectStore()));
 	});
 });
 
@@ -92,22 +82,5 @@ describe("parseStoreSnapshot", () => {
 	it("throws on a structurally invalid row", () => {
 		expect(() => parseStoreSnapshot({ metadata: { title: 42 } })).toThrow();
 		expect(() => parseStoreSnapshot({ referenceImages: "a.png" })).toThrow();
-	});
-
-	it("swaps a hydrated store's contents wholesale", () => {
-		const store = createProjectStore();
-		applyStoreSnapshot(
-			store,
-			parseStoreSnapshot({ metadata: { title: "One" } }),
-		);
-		store.getState().setReferenceImages(["https://cdn/a.png"]);
-
-		replaceStoreSnapshot(
-			store,
-			parseStoreSnapshot({ metadata: { title: "Two" } }),
-		);
-
-		expect(store.getState().metadata.title).toBe("Two");
-		expect(store.getState().referenceImages).toEqual([]);
 	});
 });

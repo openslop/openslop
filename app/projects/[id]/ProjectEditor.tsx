@@ -9,10 +9,7 @@ import { UserProvider } from "@/lib/user/UserProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createProjectStore } from "@/lib/project/store";
 import { ProjectStoreProvider } from "@/lib/project/ProjectStoreProvider";
-import {
-	applyStoreSnapshot,
-	parseStoreSnapshot,
-} from "@/lib/project/storeSnapshot";
+import { parseStoreSnapshot } from "@/lib/project/storeSnapshot";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { GenerationQueueProvider } from "@/lib/generation/GenerationQueueProvider";
 import { ElementHistoryProvider } from "@/lib/generation/ElementHistoryProvider";
@@ -34,11 +31,9 @@ export default function ProjectEditor({
 	user: User;
 	providerKeys: ProviderKeyRecord[];
 }): ReactNode {
-	const [store] = useState(() => {
-		const created = createProjectStore();
-		applyStoreSnapshot(created, parseStoreSnapshot(initialStore));
-		return created;
-	});
+	const [store] = useState(() =>
+		createProjectStore(parseStoreSnapshot(initialStore)),
+	);
 
 	return (
 		<TooltipProvider>

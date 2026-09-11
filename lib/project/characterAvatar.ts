@@ -12,23 +12,30 @@ export const characterAvatarElementId = (name: string) =>
 export const isCharacterAvatarId = (id: string) =>
 	id.startsWith(characterAvatarElementId(""));
 
+const avatarSnapshot = (results: NodeResults, name: string) =>
+	results.getElementSnapshot(characterAvatarElementId(name));
+
 /** A character's avatar is whatever its node last produced. */
 export const characterAvatarUrl = (results: NodeResults, name: string) =>
-	getPrimaryUrl(
-		results.getElementSnapshot(characterAvatarElementId(name)).result,
-		"image",
-	);
+	getPrimaryUrl(avatarSnapshot(results, name).result, "image");
+
+/** The avatar's url only when the user supplied it: a pinned result. */
+export function uploadedAvatarUrl(
+	results: NodeResults,
+	name: string,
+): string | undefined {
+	const { result, pinned } = avatarSnapshot(results, name);
+	return pinned ? getPrimaryUrl(result, "image") : undefined;
+}
 
 export type CharacterAvatarState = "none" | "generated" | "uploaded";
 
-/** The uploaded flag only means something once an avatar image exists. */
 export function characterAvatarState(
 	results: NodeResults,
 	name: string,
-	uploaded: boolean | undefined,
 ): CharacterAvatarState {
 	if (!characterAvatarUrl(results, name)) return "none";
-	return uploaded ? "uploaded" : "generated";
+	return uploadedAvatarUrl(results, name) ? "uploaded" : "generated";
 }
 
 export function characterFromAvatarInputs(
@@ -36,7 +43,6 @@ export function characterFromAvatarInputs(
 ): Partial<MetadataCharacter> {
 	return {
 		appearance: String(version.inputs.attributes.appearance ?? ""),
-		avatarUploaded: version.pinned,
 		avatarModel: modelRefSchema.safeParse(version.inputs.attributes).data,
 	};
 }

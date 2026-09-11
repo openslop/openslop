@@ -21,21 +21,15 @@ beforeEach(() => {
 describe("artStyleReferences", () => {
 	it("combines reference images with uploaded avatars, excluding generated ones", () => {
 		project().setReferenceImages(["https://example.com/reference.jpg"]);
-		project().setCharacter("Mira", {
-			appearance: "blue hair",
-			avatarUploaded: true,
-		});
-		project().setCharacter("Generated", {
-			appearance: "green hair",
-			avatarUploaded: false,
-		});
+		project().setCharacter("Mira", { appearance: "blue hair" });
+		project().setCharacter("Generated", { appearance: "green hair" });
 
 		expect(
 			artStyleReferences(
 				project(),
 				stubAvatarResults({
-					Mira: "https://example.com/uploaded.jpg",
-					Generated: "https://example.com/generated.jpg",
+					Mira: { imageUrl: "https://example.com/uploaded.jpg", pinned: true },
+					Generated: { imageUrl: "https://example.com/generated.jpg" },
 				}),
 			),
 		).toEqual([
@@ -52,15 +46,14 @@ describe("artStyleReferences", () => {
 describe("uploadedAvatarUrls", () => {
 	it("leaves out reference images, which the project store owns", () => {
 		project().setReferenceImages(["https://example.com/reference.jpg"]);
-		project().setCharacter("Mira", {
-			appearance: "blue hair",
-			avatarUploaded: true,
-		});
+		project().setCharacter("Mira", { appearance: "blue hair" });
 
 		expect(
 			uploadedAvatarUrls(
 				project(),
-				stubAvatarResults({ Mira: "https://example.com/uploaded.jpg" }),
+				stubAvatarResults({
+					Mira: { imageUrl: "https://example.com/uploaded.jpg", pinned: true },
+				}),
 			),
 		).toEqual(["https://example.com/uploaded.jpg"]);
 	});

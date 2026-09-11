@@ -17,7 +17,6 @@ import { GenerationQueue } from "../queue";
 import type { CommittedVersion } from "../versions";
 
 const EMPTY_STATE = {
-	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

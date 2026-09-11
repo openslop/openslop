@@ -6,7 +6,6 @@ import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 
 const EMPTY_STATE = {
-	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };
