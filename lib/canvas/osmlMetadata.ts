@@ -51,14 +51,3 @@ export function collectMetadata(nodes: ParsedElement[]): DeepPartial<Metadata> {
 	}
 	return metadata;
 }
-
-export function collectWritableMetadata(
-	nodes: ParsedElement[],
-	stored: Metadata,
-): DeepPartial<Metadata> {
-	const patch = collectMetadata(nodes);
-
-	// Once the user sets the art style, the LLM-generated script shouldn't overwrite it
-	if (stored.style.trim()) delete patch.style;
-	return patch;
-}
