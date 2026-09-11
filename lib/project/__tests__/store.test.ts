@@ -29,16 +29,16 @@ describe("project store updateMetadata", () => {
 			characters: { Alice: { appearance: "A girl" } },
 		});
 		store.getState().updateMetadata({
-			characters: { Alice: { avatarUploaded: true } },
+			characters: { Alice: { accent: "british" } },
 		});
 
 		expect(store.getState().metadata.characters["Alice"]).toEqual({
 			appearance: "A girl",
-			avatarUploaded: true,
+			accent: "british",
 		});
 	});
 
-	it("reset returns the store to initial state", () => {
+	it("reset returns the store to a blank project", () => {
 		const store = createProjectStore();
 		store.getState().updateMetadata({
 			title: "My Project",
@@ -91,19 +91,19 @@ describe("project store updateMetadata", () => {
 		store
 			.getState()
 			.setCharacter("Alice", { appearance: "A girl", accent: "british" });
-		store.getState().updateCharacter("Alice", { avatarUploaded: true });
+		store.getState().updateCharacter("Alice", { age: "adult" });
 
 		expect(store.getState().metadata.characters["Alice"]).toEqual({
 			appearance: "A girl",
 			accent: "british",
-			avatarUploaded: true,
+			age: "adult",
 		});
 	});
 
 	it("updateCharacter throws for an unknown character", () => {
 		const store = createProjectStore();
 		expect(() =>
-			store.getState().updateCharacter("Nobody", { avatarUploaded: true }),
+			store.getState().updateCharacter("Nobody", { age: "adult" }),
 		).toThrow(/Nobody/);
 	});
 

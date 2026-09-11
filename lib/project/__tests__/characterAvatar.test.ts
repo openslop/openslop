@@ -48,7 +48,6 @@ describe("characterFromAvatarInputs", () => {
 			),
 		).toEqual({
 			appearance: "blue hair",
-			avatarUploaded: false,
 			avatarModel: RUNWARE,
 		});
 	});

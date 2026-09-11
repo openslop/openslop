@@ -12,7 +12,6 @@ import { GenerationQueue } from "../queue";
 import { staleReason } from "../staleReason";
 
 const EMPTY_STATE = {
-	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

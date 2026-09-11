@@ -1,7 +1,6 @@
 "use client";
 
 import { memo, useState } from "react";
-import { useProject } from "@/lib/project/useProject";
 import {
 	AddCharacterTile,
 	ArtStyleAssetTile,
@@ -12,10 +11,7 @@ import { CollapsibleHeader } from "./CollapsibleHeader";
 import { ReferenceImages } from "./ReferenceImages";
 
 function AssetsSectionComponent() {
-	const hydrated = useProject((s) => s.hydrated);
 	const [collapsed, setCollapsed] = useState(false);
-
-	if (!hydrated) return null;
 
 	return (
 		<section className="group/collapsible mb-4 select-none" aria-label="Assets">

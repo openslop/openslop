@@ -16,7 +16,6 @@ import {
 import { GenerationQueue } from "../queue";
 
 const EMPTY_STATE = {
-	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

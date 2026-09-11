@@ -8,7 +8,6 @@ import { staleReason } from "@/lib/generation/staleReason";
 import { elementState } from "../elementState";
 
 const EMPTY_STATE = {
-	hydrated: true,
 	metadata: MetadataSchema.parse({}),
 	referenceImages: [],
 };

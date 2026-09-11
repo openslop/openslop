@@ -97,7 +97,6 @@ describe("still-frame plugin", () => {
 describe("stillSnapshot", () => {
 	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
-		hydrated: true,
 		metadata: MetadataSchema.parse({}),
 		referenceImages: [],
 	};
@@ -158,7 +157,6 @@ describe("stillSnapshot", () => {
 describe("duplicated animation", () => {
 	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
-		hydrated: true,
 		metadata: MetadataSchema.parse({}),
 		referenceImages: [],
 	};
@@ -206,7 +204,6 @@ describe("duplicated animation", () => {
 describe("uploaded still lifetime", () => {
 	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
-		hydrated: true,
 		metadata: MetadataSchema.parse({}),
 		referenceImages: [],
 	};
@@ -266,7 +263,6 @@ describe("uploaded still lifetime", () => {
 describe("an element's picture", () => {
 	const registry = DEFAULT_CONNECTOR_REGISTRY;
 	const state = {
-		hydrated: true,
 		metadata: MetadataSchema.parse({}),
 		referenceImages: [],
 	};

@@ -14,11 +14,12 @@ import {
 	createAutosaver,
 } from "../autosave";
 import type { ProjectContent } from "../projectDocument";
-import { createProjectStore, type ProjectStore } from "../store";
 import {
-	extractStoreSnapshot,
-	type ProjectStoreSnapshot,
-} from "../storeSnapshot";
+	createProjectStore,
+	type ProjectData,
+	type ProjectStore,
+} from "../store";
+import { extractStoreSnapshot } from "../storeSnapshot";
 
 const saveProject = vi.hoisted(() => vi.fn());
 vi.mock("../api", () => ({ saveProject }));
@@ -34,18 +35,18 @@ const imageSnapshot = (imageUrl: string): ElementSnapshot => ({
 });
 
 const content = (
-	store: ProjectStoreSnapshot,
+	store: ProjectData,
 	script: string,
 	generation: ProjectContent["generation"] = {},
 ): ProjectContent => ({ script, store, generation });
 
-const snapshot = (title: string): ProjectStoreSnapshot => ({
+const snapshot = (title: string): ProjectData => ({
 	metadata: {
 		title,
 		style: "",
 		narration: {},
 		characters: {},
-	} as ProjectStoreSnapshot["metadata"],
+	} as ProjectData["metadata"],
 	referenceImages: [],
 });
 
@@ -78,7 +79,6 @@ describe("createAutosaver", () => {
 	const build = () =>
 		createAutosaver({
 			projectId,
-			store,
 			read: () => content(extractStoreSnapshot(store), "<osml/>"),
 			onSaved,
 			onError,
@@ -100,9 +100,8 @@ describe("createAutosaver", () => {
 		vi.restoreAllMocks();
 	});
 
-	const hydrate = () => {
+	const setTitle = () => {
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
-		store.setState({ hydrated: true });
 	};
 
 	let refCount = 0;
@@ -116,7 +115,7 @@ describe("createAutosaver", () => {
 	};
 
 	it("coalesces a burst of changes into one save", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -137,7 +136,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("flush runs a pending save immediately", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -147,17 +146,8 @@ describe("createAutosaver", () => {
 		expect(saveProject).toHaveBeenCalledTimes(1);
 	});
 
-	it("skips the save until the store is hydrated", async () => {
-		const autosaver = build();
-		autosaver.schedule();
-		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
-
-		expect(saveProject).not.toHaveBeenCalled();
-		expect(onSaved).not.toHaveBeenCalled();
-	});
-
-	it("does not save when the hydrated state is unchanged", async () => {
-		hydrate();
+	it("does not save when the loaded state is unchanged", async () => {
+		setTitle();
 		const autosaver = build();
 		autosaver.markSaved();
 		// The echo a real open produces: metadata written back with identical content.
@@ -170,12 +160,11 @@ describe("createAutosaver", () => {
 	});
 
 	it("does not save the document it was handed as already saved", async () => {
-		hydrate();
+		setTitle();
 		// Slate is filled in an effect, so the editor is empty until markSaved.
 		let script = "";
 		const autosaver = createAutosaver({
 			projectId,
-			store,
 			read: () => content(extractStoreSnapshot(store), script),
 			onSaved,
 			onError,
@@ -190,7 +179,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("saves an edit made after the baseline was taken", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		autosaver.markSaved();
 
@@ -202,7 +191,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("saves the first real edit after an unchanged open", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		autosaver.markSaved();
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
@@ -219,7 +208,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("skips a repeat of a payload it just saved", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -235,11 +224,10 @@ describe("createAutosaver", () => {
 	});
 
 	it("still saves when only the generation snapshot changed", async () => {
-		hydrate();
+		setTitle();
 		let generation: ProjectContent["generation"] = {};
 		const autosaver = createAutosaver({
 			projectId,
-			store,
 			read: () => content(extractStoreSnapshot(store), "<osml/>", generation),
 			onSaved,
 			onError,
@@ -257,7 +245,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("holds saves while suspended and takes them again on resume", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		autosaver.markSaved();
 		autosaver.suspend();
@@ -274,7 +262,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("stays quiet on resume when nothing was held", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		autosaver.markSaved();
 		edit();
@@ -290,7 +278,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("persists a pending edit before suspending", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		autosaver.markSaved();
 		edit();
@@ -303,7 +291,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("saves the document as it stood when suspend was called", async () => {
-		hydrate();
+		setTitle();
 		let script = "live";
 		let release = () => {};
 		saveProject.mockImplementationOnce(
@@ -311,7 +299,6 @@ describe("createAutosaver", () => {
 		);
 		const autosaver = createAutosaver({
 			projectId,
-			store,
 			read: () => content(extractStoreSnapshot(store), script),
 			onSaved,
 			onError,
@@ -339,7 +326,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("reports every save to its subscribers until they unsubscribe", async () => {
-		hydrate();
+		setTitle();
 		const autosaver = build();
 		const seen: string[] = [];
 		const stop = autosaver.onProjectSaved(({ script }) => seen.push(script));
@@ -359,7 +346,7 @@ describe("createAutosaver", () => {
 	});
 
 	it("reports a failed save instead of throwing", async () => {
-		hydrate();
+		setTitle();
 		const boom = new Error("offline");
 		saveProject.mockRejectedValue(boom);
 		const autosaver = build();

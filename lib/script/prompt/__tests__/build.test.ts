@@ -113,12 +113,10 @@ describe("buildScriptPrompt", () => {
 		expect(system).toContain("a small grey rabbit");
 	});
 
-	it("carries a described appearance for a character with an uploaded avatar", () => {
+	it("lists a character's appearance as its own line", () => {
 		const { system } = buildScriptPrompt(
 			metadata({
-				characters: {
-					Mira: { appearance: "a freckled girl", avatarUploaded: true },
-				},
+				characters: { Mira: { appearance: "a freckled girl" } },
 			}),
 			{ kind: "brief", brief: "a brief" },
 		);
