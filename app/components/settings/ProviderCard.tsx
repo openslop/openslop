@@ -63,7 +63,7 @@ export function ProviderCard({
 }: {
 	provider: BYOKProvider;
 	selected?: boolean;
-	/** The row is gone: removed, or backed out of before a key was ever stored. */
+	/** The link that opened this row is spent: saved, cancelled, or key removed. */
 	onDismissed: () => void;
 }) {
 	const meta = PROVIDER_CATALOG[provider];
@@ -76,9 +76,9 @@ export function ProviderCard({
 	const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 	const card = useRef<HTMLDivElement>(null);
 
-	const cancel = () => {
+	const done = () => {
 		setEditing(false);
-		if (!key) onDismissed();
+		onDismissed();
 	};
 
 	const test = async () => {
@@ -114,11 +114,7 @@ export function ProviderCard({
 			</ProviderHeading>
 
 			{editing ? (
-				<ProviderKeyForm
-					provider={provider}
-					onSaved={() => setEditing(false)}
-					onCancel={cancel}
-				/>
+				<ProviderKeyForm provider={provider} onSaved={done} onCancel={done} />
 			) : (
 				key && (
 					<div className="flex flex-wrap items-center gap-2">
