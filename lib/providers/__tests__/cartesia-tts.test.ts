@@ -264,7 +264,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(2);
+			expect(result.metadata?.durationSec).toBe(3);
 		});
 
 		it("reports duration even when the model returns no timestamps", async () => {
@@ -282,7 +282,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(3);
+			expect(result.metadata?.durationSec).toBe(4);
 		});
 
 		it("throws when the stream yields no audio", async () => {

@@ -3,7 +3,6 @@ import { ELEMENT_TYPES, type CanvasElementType } from "@/lib/canvas/types";
 import { isBlankScene } from "@/lib/video/blankScene";
 import {
 	buildVideoLayout,
-	DIALOGUE_GAP_SEC,
 	type BuildLayoutOptions,
 } from "@/lib/video/scene-builder";
 import type { ResolvedElement } from "@/lib/video/types";
@@ -111,11 +110,7 @@ describe("buildTimelineRows", () => {
 			"c1",
 			"n2",
 		]);
-		expect(voice?.clips.map((clip) => clip.start)).toEqual([
-			0,
-			2 + DIALOGUE_GAP_SEC,
-			5 + 2 * DIALOGUE_GAP_SEC,
-		]);
+		expect(voice?.clips.map((clip) => clip.start)).toEqual([0, 2, 5]);
 	});
 
 	it("expands a looped element into one clip per loop", () => {

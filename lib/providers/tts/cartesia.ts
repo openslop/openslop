@@ -247,7 +247,9 @@ export class CartesiaTTS
 			return {
 				data: wrapPcmInWav(combined).toString("base64"),
 				textTimestamps,
-				metadata: { durationSec: pcmDurationSec(combined.length) },
+				// We add an extra second for brief pauses between audio segments
+				// to make it sound more natural
+				metadata: { durationSec: pcmDurationSec(combined.length) + 1 },
 			};
 		} finally {
 			ws.close();

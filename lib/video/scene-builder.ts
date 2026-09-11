@@ -33,8 +33,6 @@ export const DEFAULT_TRIM_VISUALS_TO_DIALOGUE = true;
 
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
-/** Silence laid down after each line of dialogue, so consecutive lines breathe. */
-export const DIALOGUE_GAP_SEC = 1;
 // Durations accumulated on the frame grid land a few ULPs above a whole frame.
 // Without this slack the total ceils into a trailing frame with no content.
 const FRAME_EPSILON = 1e-6;
@@ -142,17 +140,18 @@ export function buildVideoLayout(
 				break;
 			}
 			case "overlay": {
-				const slot = element.durationSec + DIALOGUE_GAP_SEC;
 				if (!current) {
-					series.push(createSequence(blankScene(element), cursor, slot));
+					series.push(
+						createSequence(blankScene(element), cursor, element.durationSec),
+					);
 				} else {
 					current.duration = Math.max(
 						current.duration,
-						cursor + slot - current.start,
+						cursor + element.durationSec - current.start,
 					);
 				}
 				pushSequence(sequences, element, cursor, stride);
-				cursor += slot;
+				cursor += element.durationSec;
 				break;
 			}
 		}
