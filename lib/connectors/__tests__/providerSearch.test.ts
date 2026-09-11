@@ -7,8 +7,8 @@ import type { ConnectorType } from "../types";
 const all: ConnectorType[] | null = null;
 const capability = (key: string) =>
 	MODEL_GROUPS.find((group) => group.key === key)?.types ?? all;
-const names = (query: string, cap: ConnectorType[] | null = all) =>
-	searchProviders(query, cap).map((match) => match.provider);
+const names = (query: string, capabilities: ConnectorType[] | null = all) =>
+	searchProviders(query, capabilities).map((match) => match.provider);
 
 describe("searchProviders", () => {
 	// The hosted provider is listed too: it is what a new account already runs on.
