@@ -2,11 +2,14 @@
 
 import { SelectField } from "@/components/ui/select-field";
 import startCase from "lodash/startCase";
-import { TRANSITION_TYPES, type TransitionType } from "@/lib/video/transitions";
+import {
+	TRANSITION_TYPES,
+	type TransitionType,
+} from "@/lib/render/transitions";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
-} from "@/lib/video/useVideoSetting";
+} from "@/lib/project/useVideoSetting";
 import { PanelCard, PanelField } from "./PanelCard";
 
 const OPTIONS = TRANSITION_TYPES.map((value) => ({

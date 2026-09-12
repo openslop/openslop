@@ -1,7 +1,7 @@
 import type { ModelRef } from "@/lib/connectors/types";
 import type { ProjectData } from "@/lib/project/store";
 import { metadataVoiceFor } from "@/lib/project/types";
-import { ASPECT_RATIO_DIMENSIONS } from "@/lib/video/aspectRatio";
+import { ASPECT_RATIO_DIMENSIONS } from "@/lib/project/aspectRatio";
 import { sourceNode, type NodeSpec } from "./graph";
 
 /**

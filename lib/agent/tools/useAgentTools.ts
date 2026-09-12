@@ -7,7 +7,7 @@ import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { makesPicture } from "@/lib/canvas/types";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
-import { measureElementLengths } from "@/lib/video/elementLengths";
+import { measureElementLengths } from "@/lib/render/elementLengths";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";

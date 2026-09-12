@@ -6,7 +6,10 @@ import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { ElementVersion } from "@/lib/generation/versions";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { createCanvasNode } from "./createCanvasNode";
 import { attributeSchemaFor } from "./elementConnector";

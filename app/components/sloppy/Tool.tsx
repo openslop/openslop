@@ -22,7 +22,7 @@ function Outcome({ failed = false, text }: { failed?: boolean; text: string }) {
 		if (body) setClipped(body.scrollHeight > body.clientHeight);
 	}, [text]);
 
-	const clips = clipped || expanded;
+	const showToggle = clipped || expanded;
 
 	return (
 		<div
@@ -40,7 +40,7 @@ function Outcome({ failed = false, text }: { failed?: boolean; text: string }) {
 			>
 				{text}
 			</p>
-			{clips && (
+			{showToggle && (
 				<button
 					type="button"
 					onClick={() => setExpanded((prev) => !prev)}

@@ -71,7 +71,7 @@ Tapez une ligne. Choisissez 16:9 ou 9:16, une langue, un modèle et une durée, 
 
 ### Sloppy l'écrit avec vous
 
-Le copilote vit dans le panneau de gauche. Il lit le script, structure l'histoire, écrit les scènes et ajuste les clips au dialogue. Tout ce qu'il fait atterrit sur le canevas sous vos yeux.
+Le copilote vit dans le panneau de gauche. Il lit le script, structure l'histoire, écrit les scènes et ajuste les cartes vidéo au dialogue. Tout ce qu'il fait atterrit sur le canevas sous vos yeux.
 
 [Comment un tour fonctionne →](../../ARCHITECTURE.md#sloppy)
 
@@ -88,7 +88,7 @@ Le copilote vit dans le panneau de gauche. Il lit le script, structure l'histoir
 
 ### Un storyboard, pas une zone de prompt
 
-Chaque scène est une pile de cartes : narration, personnage, image, clip, son, musique. Modifiez n'importe quel prompt, choisissez un modèle par carte, glissez pour réordonner, et insérez là où vous survolez.
+Chaque scène est une pile de cartes : narration, personnage, image, vidéo, son, musique. Modifiez n'importe quel prompt, choisissez un modèle par carte, glissez pour réordonner, et insérez là où vous survolez.
 
 [Le modèle de document →](../../lib/canvas)
 
@@ -105,7 +105,7 @@ Chaque scène est une pile de cartes : narration, personnage, image, clip, son, 
 
 ### Un clic génère tout
 
-Generate all (tout générer) met chaque élément en file d'attente et lance d'abord les dépendances : le clip dont une scène continue avant la scène elle-même, un avatar avant l'image où il apparaît. Changez un prompt plus tard et la carte affiche **Stale** (obsolète) et pourquoi.
+Generate all (tout générer) met chaque élément en file d'attente et lance d'abord les dépendances : la carte vidéo dont une scène continue avant la scène elle-même, un avatar avant l'image où il apparaît. Changez un prompt plus tard et la carte affiche **Stale** (obsolète) et pourquoi.
 
 [Le graphe de génération →](../../ARCHITECTURE.md#generation-graph)
 
@@ -122,13 +122,13 @@ Generate all (tout générer) met chaque élément en file d'attente et lance d'
 
 ### Lecteur et timeline
 
-Regardez le montage se remplir, sous-titres mot par mot. Quatre pistes en dessous : vidéo, voix, effets, musique. Parcourez la règle, sautez de scène en scène, ou passez à la bande storyboard.
+Regardez le montage se remplir, sous-titres mot par mot. Quatre pistes en dessous : visuels, voix, effets, musique. Parcourez la règle, sautez de scène en scène, ou passez à la bande storyboard.
 
-[Le lecteur →](../../app/components/video)
+[Le lecteur →](../../app/components/player)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/video"><picture>
+  <a href="../../app/components/player"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
     <img src="../../assets/features/timeline-light.svg" alt="Le lecteur joue avec des sous-titres mot par mot pendant que la tête de lecture balaie une timeline à quatre pistes" width="100%">
   </picture></a>
@@ -156,7 +156,7 @@ Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, R
 **Aussi dans la boîte :**
 
 - **[Sous-titres](../../app/components/canvas/panel/CaptionsPanel.tsx)** — Six préréglages, douze polices, apparition mot par mot ou ligne par ligne, et chaque couleur, bordure et placement est à vous de changer.
-- **[Export jusqu'en 4K](../../app/components/video/ExportButton.tsx)** — Rend sur Remotion Lambda en morceaux parallèles et vous livre un MP4.
+- **[Export jusqu'en 4K](../../app/components/player/ExportButton.tsx)** — Rend sur Remotion Lambda en morceaux parallèles et vous livre un MP4.
 - **[Historique des versions](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Sauvegarde automatique pendant que vous travaillez, regroupée en points de contrôle. Consultez n'importe quelle version et restaurez-la.
 - **[Personnages et style graphique](../../app/components/canvas/elements/AssetsSection.tsx)** — Nommez un personnage une fois et chaque image, réplique et avatar reste cohérent.
 - **[Modèles](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, et plus. Chacun amorce un style, un narrateur et une durée.

@@ -108,7 +108,7 @@ describe("generateForElement", () => {
 
 	it("forwards dependency results to the connector", async () => {
 		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
-		// The canvas image a clip opens on, resolved by the queue before it ran.
+		// The canvas image a video opens on, resolved by the queue before it ran.
 		const dependencies = {
 			"img-1": {
 				imageUrl: "https://example.com/frame.png",

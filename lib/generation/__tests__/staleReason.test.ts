@@ -70,7 +70,7 @@ describe("staleReason", () => {
 	it("names the changed attribute rather than blaming the prompt", () => {
 		const queue = new GenerationQueue();
 		const withModel = (model: string) =>
-			node("a", { attributes: { model, videoPrompt: "pan" } });
+			node("a", { attributes: { model, motion: "pan" } });
 		commit(queue, withModel("fast"), "a.png");
 
 		expect(staleReason(withModel("slow"), queue)).toBe(

@@ -20,17 +20,17 @@ function renderMedia(
 	);
 }
 
-function ImagePreview(props: ElementPreviewProps) {
+function ImageResultPreview(props: ElementPreviewProps) {
 	return renderMedia(props, "image");
 }
 
-function VideoPreview(props: ElementPreviewProps) {
+function VideoResultPreview(props: ElementPreviewProps) {
 	return renderMedia(props, "video");
 }
 
 /** How generated output of each kind renders. */
 export const PREVIEWS_BY_KIND: Record<ResultKind, ElementPreview> = {
 	audio: AudioPreview,
-	image: ImagePreview,
-	video: VideoPreview,
+	image: ImageResultPreview,
+	video: VideoResultPreview,
 };

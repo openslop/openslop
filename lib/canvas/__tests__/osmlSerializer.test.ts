@@ -14,7 +14,7 @@ import {
 	type CanvasContentElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 function el(
 	type: CanvasContentElement["type"],

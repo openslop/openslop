@@ -5,7 +5,7 @@ import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
 	DEFAULT_VIDEO_RESOLUTION,
-} from "@/lib/video/aspectRatio";
+} from "@/lib/project/aspectRatio";
 
 function toVideoJob(video: {
 	taskUUID: string;

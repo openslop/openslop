@@ -6,7 +6,7 @@ import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
 	splitAttributes,
-} from "@/lib/video/elementAttributes";
+} from "@/lib/canvas/elementAttributes";
 import {
 	flattenGraph,
 	forElement,
@@ -110,7 +110,7 @@ describe("resolveGraph", () => {
 	// the authored attributes, minus the centralized layout contract.
 	it("keeps generation-affecting attributes as the node's own inputs", () => {
 		const node = resolve(
-			element("clip", "clip", {
+			element("vid-1", "video", {
 				model: "Slop Video v1",
 				duration: "5",
 			}),
@@ -127,7 +127,7 @@ describe("resolveGraph", () => {
 			LAYOUT_ATTRIBUTE_KEYS.map((key) => [key, "1"]),
 		);
 		const node = resolve(
-			element("clip", "clip", { ...layoutOnly, model: "Slop Video v1" }),
+			element("vid-1", "video", { ...layoutOnly, model: "Slop Video v1" }),
 		);
 		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
 			expect(node.inputs.attributes).not.toHaveProperty(key);
@@ -135,45 +135,45 @@ describe("resolveGraph", () => {
 		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
 	});
 
-	it("sizes a clip from the project aspect ratio via its dependency", () => {
-		const ids = idsOf(element("clip", "clip"));
+	it("sizes a video from the project aspect ratio via its dependency", () => {
+		const ids = idsOf(element("vid-1", "video"));
 		expect(ids).toContain("project:aspectRatio");
 	});
 
-	it("builds the canvas element a clip opens on ahead of the clip", () => {
+	it("builds the canvas element a video opens on ahead of the video", () => {
 		const img = element("img", "image");
-		const clip = element("clip", "clip", { startFrame: "img" });
+		const video = element("vid-1", "video", { startFrame: "img" });
 
-		const ids = flattenGraph([resolveOn(clip, [img])]).map((node) => node.id);
+		const ids = flattenGraph([resolveOn(video, [img])]).map((node) => node.id);
 		expect(ids).toContain("img");
-		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("clip"));
+		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("vid-1"));
 	});
 
-	it("marks a clip stale when its start frame is replaced by an upload", () => {
+	it("marks a video stale when its start frame is replaced by an upload", () => {
 		const img = element("img", "image");
-		const clip = resolveOn(element("clip", "clip", { startFrame: "img" }), [
+		const video = resolveOn(element("vid-1", "video", { startFrame: "img" }), [
 			img,
 		]);
-		const frame = clip.dependsOn.find((node) => node.id === "img");
+		const frame = video.dependsOn.find((node) => node.id === "img");
 		if (!frame) throw new Error("expected a start-frame dependency");
 
 		const queue = new GenerationQueue();
-		const commit = (node: typeof clip, url: string) =>
+		const commit = (node: typeof video, url: string) =>
 			queue.commitResult(node, { imageUrl: url, durationSec: 0 });
 
 		commit(frame, "frame.png");
-		commit(clip, "clip.mp4");
-		expect(isNodeStale(clip, queue)).toBe(false);
+		commit(video, "video.mp4");
+		expect(isNodeStale(video, queue)).toBe(false);
 
 		commit(frame, "uploaded.png");
-		expect(isNodeStale(clip, queue)).toBe(true);
+		expect(isNodeStale(video, queue)).toBe(true);
 	});
 
 	// A start frame whose element left the canvas still resolves, as a source
-	// the queue never runs: the clip keeps reading whatever it last produced.
+	// the queue never runs: the video keeps reading whatever it last produced.
 	it("reads a start frame that left the canvas as a source, not a job", () => {
-		const clip = resolve(element("clip", "clip", { startFrame: "gone" }));
-		const frame = clip.dependsOn.find((node) => node.id === "gone");
+		const video = resolve(element("vid-1", "video", { startFrame: "gone" }));
+		const frame = video.dependsOn.find((node) => node.id === "gone");
 
 		expect(frame && isSourceNode(frame)).toBe(true);
 		expect(frame?.label).toBe("the start frame");

@@ -48,12 +48,12 @@ const PRESENTATION: Record<CanvasElementType, ElementPresentation> = {
 		colorClass: "text-media-image",
 		placeholder: "Describe the image...",
 	},
-	clip: {
-		label: "Clip",
+	video: {
+		label: "Video",
 		Icon: Video,
-		iconBgClass: "bg-media-clip/15",
-		colorClass: "text-media-clip",
-		placeholder: "Describe the video clip...",
+		iconBgClass: "bg-media-video/15",
+		colorClass: "text-media-video",
+		placeholder: "Describe the video...",
 	},
 	sound: {
 		label: "Sound",

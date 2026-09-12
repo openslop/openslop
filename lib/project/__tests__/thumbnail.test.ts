@@ -62,8 +62,8 @@ describe("pickThumbnailUrl", () => {
 		).toBe("scene.png");
 	});
 
-	// A clip's frame is as much a picture of the project as a still is.
-	it("takes the image url a clip carries beside its video", () => {
+	// A video element's frame is as much a picture of the project as a still is.
+	it("takes the image url a video element carries beside its videoUrl", () => {
 		expect(
 			pickThumbnailUrl([
 				entry("1", "tts", { audioUrl: "n.mp3" }),
@@ -72,7 +72,7 @@ describe("pickThumbnailUrl", () => {
 		).toBe("frame.png");
 	});
 
-	it("returns null for a clip with only a videoUrl", () => {
+	it("returns null for a video with only a videoUrl", () => {
 		expect(
 			pickThumbnailUrl([entry("1", "video", { videoUrl: "video.mp4" })]),
 		).toBeNull();

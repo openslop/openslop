@@ -42,7 +42,10 @@ vi.mock("@/lib/connectors/factory", () => ({
 
 import { applyRefineOp, applyRefineOps } from "../applyOps";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 
 const ZWSP = "\u200B";
 
@@ -379,14 +382,14 @@ describe("applyRefineOp — set", () => {
 			{
 				op: "set",
 				id: "n1",
-				type: "clip",
+				type: "video",
 				attrs: { startFrame: "n0", motion: "kenBurnsIn" },
 			},
 			{},
 		);
 
 		const el = getNode(editor, "n1");
-		expect(el.type).toBe("clip");
+		expect(el.type).toBe("video");
 		expect(flatAttributes(el)).toEqual({
 			...DEFAULT_MODELS.video,
 			referenceImagesOverride: "https://img/red.png",

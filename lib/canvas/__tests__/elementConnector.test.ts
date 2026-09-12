@@ -13,7 +13,7 @@ import {
 	resolveElementConnector,
 } from "../elementConnector";
 import type { CanvasContentElement } from "../types";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 function element(
 	type: CanvasContentElement["type"],
@@ -36,9 +36,9 @@ describe("resolveElementConnector", () => {
 		expect(
 			resolveElementConnector(element("narration"), registry, state).type,
 		).toBe("tts");
-		expect(resolveElementConnector(element("clip"), registry, state).type).toBe(
-			"video",
-		);
+		expect(
+			resolveElementConnector(element("video"), registry, state).type,
+		).toBe("video");
 	});
 
 	it("falls back to the recommendation when nothing is pinned", () => {
@@ -120,7 +120,7 @@ describe("createCanvasNode", () => {
 describe("elementSchema", () => {
 	it("resolves the connector type's schema from the element's own attributes", () => {
 		expect(elementSchema(element("image")).keys).toEqual(IMAGE_ATTRIBUTES.keys);
-		expect(elementSchema(element("clip")).keys).toEqual(
+		expect(elementSchema(element("video")).keys).toEqual(
 			videoAttributesFor(DEFAULT_MODELS.video).keys,
 		);
 		expect(elementSchema(element("narration")).keys).toEqual(

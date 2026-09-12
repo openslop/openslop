@@ -22,9 +22,9 @@ export function updateElementAttrs(
 }
 
 /**
- * Makes an image a clip that opens on the picture it already made. The card
+ * Makes an image a video that opens on the picture it already made. The card
  * keeps its id, so the picture goes in by URL rather than as a live edge: there
- * is no image left to depend on. Returns the scene the clip is in.
+ * is no image left to depend on. Returns the scene the video is in.
  */
 export function animateElement(
 	editor: Editor,
@@ -33,7 +33,7 @@ export function animateElement(
 	defaultModels?: ConnectorModels,
 ): number {
 	const path = ReactEditor.findPath(editor, element);
-	retypeNode(editor, path, element, "clip", {
+	retypeNode(editor, path, element, "video", {
 		attrs: { [START_FRAME_ATTR]: picture },
 		defaultModels,
 	});

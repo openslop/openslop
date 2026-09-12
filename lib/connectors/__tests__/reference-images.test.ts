@@ -3,7 +3,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 let store: ProjectStore;
 

@@ -3,7 +3,7 @@ import { createCanvasNode } from "../createCanvasNode";
 import { DEFAULT_SFX_MODEL } from "@/lib/connectors/sfx/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 describe("createCanvasNode — schema defaults (integration)", () => {
 	it("applies full TTS defaults for narration", () => {
@@ -35,8 +35,8 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 		});
 	});
 
-	it("applies clip defaults, opening on the previous scene", () => {
-		const node = createCanvasNode("clip");
+	it("applies video defaults, opening on the previous scene", () => {
+		const node = createCanvasNode("video");
 		const attributes = flatAttributes(node);
 		expect(attributes).toMatchObject({
 			duration: "10",

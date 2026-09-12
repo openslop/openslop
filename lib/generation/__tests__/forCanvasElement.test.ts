@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import {
 	flattenGraph,
 	forElement,
@@ -35,50 +35,50 @@ beforeEach(() => {
 	queue = new GenerationQueue();
 });
 
-describe("a clip that opens on the visual before it", () => {
+describe("a video that opens on the visual before it", () => {
 	const image = element("img", "image");
-	const clip = element("clip", "clip", { startFrame: "previous" });
+	const video = element("vid-1", "video", { startFrame: "previous" });
 
 	it("depends on it, found by document order", () => {
-		const node = builder([image, clip])(forElement(clip));
+		const node = builder([image, video])(forElement(video));
 		expect(node.dependsOn.find((dep) => dep.id === "img")?.job).not.toBeNull();
 	});
 
 	it("goes stale when what comes before it changes", () => {
 		const other = element("other", "image");
-		const node = builder([image, clip])(forElement(clip));
-		queue.commitResult(builder([image, clip])(forElement(image)), {
+		const node = builder([image, video])(forElement(video));
+		queue.commitResult(builder([image, video])(forElement(image)), {
 			imageUrl: "https://img/1.png",
 			durationSec: 0,
 		});
 		queue.commitResult(node, { videoUrl: "https://vid/1.mp4", durationSec: 5 });
 		expect(isNodeStale(node, queue)).toBe(false);
 
-		const moved = builder([image, other, clip])(forElement(clip));
+		const moved = builder([image, other, video])(forElement(video));
 		expect(isNodeStale(moved, queue)).toBe(true);
 	});
 
 	it("reads no source when nothing comes before it", () => {
-		const node = builder([clip, image])(forElement(clip));
+		const node = builder([video, image])(forElement(video));
 		expect(node.dependsOn.every((dep) => dep.job === null)).toBe(true);
 	});
 });
 
-describe("a clip that opens on another visual", () => {
+describe("a video that opens on another visual", () => {
 	const image = element("img", "image");
-	const clip = element("clip", "clip", { startFrame: "img" });
+	const video = element("vid-1", "video", { startFrame: "img" });
 
-	it("depends on it, so it is built and ordered before the clip", () => {
-		const node = builder([image, clip])(forElement(clip));
+	it("depends on it, so it is built and ordered before the video", () => {
+		const node = builder([image, video])(forElement(video));
 		const ids = flattenGraph([node]).map((n) => n.id);
-		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("clip"));
+		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("vid-1"));
 		expect(node.dependsOn.find((dep) => dep.id === "img")?.job).not.toBeNull();
 	});
 
 	it("goes stale when the source regenerates", () => {
-		const build = builder([image, clip]);
+		const build = builder([image, video]);
 		const source = build(forElement(image));
-		const node = build(forElement(clip));
+		const node = build(forElement(video));
 		queue.commitResult(source, {
 			imageUrl: "https://img/1.png",
 			durationSec: 0,
@@ -94,30 +94,30 @@ describe("a clip that opens on another visual", () => {
 	});
 
 	it("keeps reading a deleted source's result as it was left", () => {
-		const withSource = builder([image, clip]);
+		const withSource = builder([image, video]);
 		queue.commitResult(withSource(forElement(image)), {
 			imageUrl: "https://img/1.png",
 			durationSec: 0,
 		});
-		queue.commitResult(withSource(forElement(clip)), {
+		queue.commitResult(withSource(forElement(video)), {
 			videoUrl: "https://vid/1.mp4",
 			durationSec: 5,
 		});
 
-		const node = builder([clip])(forElement(clip));
+		const node = builder([video])(forElement(video));
 		const orphan = node.dependsOn.find((dep) => dep.id === "img");
 		expect(orphan?.job).toBeNull();
 		expect(needsGeneration(orphan as GenerationNode, queue)).toBe(false);
-		// Nothing changed from the clip's point of view: the picture it opened on is still there.
+		// Nothing changed from the video's point of view: the picture it opened on is still there.
 		expect(isNodeStale(node, queue)).toBe(false);
 		expect(queue.getElementSnapshot("img").result?.imageUrl).toBe(
 			"https://img/1.png",
 		);
 	});
 
-	it("lets two clips that open on each other read what the other left", () => {
-		const a = element("a", "clip", { startFrame: "b" });
-		const b = element("b", "clip", { startFrame: "a" });
+	it("lets two videos that open on each other read what the other left", () => {
+		const a = element("a", "video", { startFrame: "b" });
+		const b = element("b", "video", { startFrame: "a" });
 		const node = builder([a, b])(forElement(a));
 		const back = node.dependsOn[0]?.dependsOn.find((dep) => dep.id === "a");
 		expect(back?.job).toBeNull();

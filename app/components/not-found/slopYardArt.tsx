@@ -473,11 +473,11 @@ export function SlopYardForeground() {
 				</text>
 			</g>
 
-			<g stroke="none" className="fill-media-clip/20">
+			<g stroke="none" className="fill-media-video/20">
 				<path d="M246 346c15 6 17 26 21 44 4 20 14 34 30 42l-56 4c-14-28-19-58 5-90z" />
 				<path d="M206 480c12-26 56-38 110-32 40 4 76 2 112-8 44-10 104-4 136 24 8 8-2 16-34 16H234c-26 0-34-6-28-16z" />
 			</g>
-			<g fill="none" className="stroke-media-clip/50">
+			<g fill="none" className="stroke-media-video/50">
 				<path d="M206 480c12-26 56-38 110-32 40 4 76 2 112-8 44-10 104-4 136 24" />
 				<path d="M340 468c9 9 23 9 30-2M462 458c7 7 20 7 27-2" />
 			</g>

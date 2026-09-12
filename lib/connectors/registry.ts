@@ -1,5 +1,5 @@
 import set from "lodash/fp/set";
-import { buildVisualPlugins } from "./image/plugins/imageChain";
+import { buildVisualPlugins } from "./plugins/visualChain";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
 import { createStartFramePlugin } from "./video/plugins/start-frame";

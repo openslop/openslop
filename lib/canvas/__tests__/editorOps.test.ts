@@ -12,7 +12,10 @@ import {
 	replaceGenerationAttrs,
 	mergeAttrs,
 } from "../editorOps";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 
 /** Mirrors `createCanvasNode`: a caret marker leaf, then the body. */
 function content(
@@ -268,10 +271,10 @@ describe("applyNodeVersion", () => {
 		prompt: string,
 	) => ({ elementType, inputs: { prompt, attributes, dependencies: {} } });
 
-	// A clip restored to an image version it once was goes back to being an
-	// image, without the start frame the clip alone had.
+	// A video restored to an image version it once was goes back to being an
+	// image, without the start frame the video alone had.
 	it("restores the type the version was generated as", () => {
-		const el = content("clip", "n1", "a fox", {
+		const el = content("video", "n1", "a fox", {
 			style: "ink",
 			startFrame: "img0",
 		});
@@ -298,7 +301,7 @@ describe("applyNodeVersion", () => {
 	});
 
 	it("leaves the type alone for a version stored without one", () => {
-		const el = content("clip", "n1", "a fox", { style: "ink" });
+		const el = content("video", "n1", "a fox", { style: "ink" });
 		const editor = makeEditor([scene([el])]);
 
 		applyNodeVersion(
@@ -308,7 +311,7 @@ describe("applyNodeVersion", () => {
 		);
 
 		const node = (editor.children[0] as SceneElement).children[0];
-		expect(node.type).toBe("clip");
+		expect(node.type).toBe("video");
 		expect(node.generationAttributes).toEqual({ style: "oil" });
 	});
 });

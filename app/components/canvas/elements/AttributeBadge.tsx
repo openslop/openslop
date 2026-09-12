@@ -9,7 +9,7 @@ import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
 import { StartFramePicker } from "./attributes/StartFramePicker";
 import { ModelAttribute } from "./attributes/ModelAttribute";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 const UNSET = "—";
 

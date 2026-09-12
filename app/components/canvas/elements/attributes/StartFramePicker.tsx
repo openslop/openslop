@@ -11,7 +11,7 @@ import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
 	NO_FRAME,
 	parseStartFrame,
-	PREVIOUS_SCENE,
+	PREVIOUS_VISUAL,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/startFrame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
@@ -56,7 +56,7 @@ function FrameTile({
 	);
 }
 
-/** What the visual before this clip has made, if anything yet. */
+/** What the visual before this video has made, if anything yet. */
 function PreviousScenePreview({ element }: { element: CanvasContentElement }) {
 	const editor = useSlate();
 	const source = previousVisual(
@@ -82,7 +82,7 @@ function PreviousScenePreview({ element }: { element: CanvasContentElement }) {
 }
 
 /**
- * The picture a clip opens on: none, the end of the visual before it, or one
+ * The picture a video opens on: none, the end of the visual before it, or one
  * the user uploaded. Each choice shows the picture it stands for, and an
  * upload is kept while another choice is made so it can be chosen again.
  */
@@ -134,7 +134,7 @@ export function StartFramePicker({
 					<FrameTile
 						label="Previous scene"
 						selected={usesPrevious}
-						onSelect={() => setFrame(PREVIOUS_SCENE)}
+						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					>
 						<PreviousScenePreview element={element} />
 					</FrameTile>
@@ -149,7 +149,7 @@ export function StartFramePicker({
 							</FrameTile>
 							<RemoveCrossButton
 								label="Remove uploaded picture"
-								onClick={() => setFrame(PREVIOUS_SCENE, null)}
+								onClick={() => setFrame(PREVIOUS_VISUAL, null)}
 								className="opacity-0 group-hover/tile:opacity-100"
 							/>
 						</div>

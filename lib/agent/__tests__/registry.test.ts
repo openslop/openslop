@@ -11,7 +11,7 @@ import {
 	type DeepPartial,
 	type Metadata,
 } from "@/lib/project/types";
-import { CaptionStyleSchema } from "@/lib/video/captionStyle";
+import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
 
 const metadata = MetadataSchema.parse({
@@ -76,7 +76,7 @@ describe("executeToolCall", () => {
 						detail: "The prompt changed — regenerate to update",
 					},
 					{ id: "ai1", state: "failed", detail: "Provider returned 503" },
-					{ id: "clip1", state: "ungenerated" },
+					{ id: "vid1", state: "ungenerated" },
 				],
 			}),
 		);
@@ -87,7 +87,7 @@ describe("executeToolCall", () => {
 				"- n1: generated",
 				"- img1: stale (The prompt changed — regenerate to update)",
 				"- ai1: failed (Provider returned 503)",
-				"- clip1: ungenerated",
+				"- vid1: ungenerated",
 			].join("\n"),
 		);
 	});
@@ -357,7 +357,7 @@ describe("executeToolCall", () => {
 					},
 					{
 						id: "ai1",
-						type: "clip",
+						type: "video",
 						sceneNumber: 2,
 						seconds: 1,
 						words: 0,
@@ -371,11 +371,11 @@ describe("executeToolCall", () => {
 			"Scene 1 image img1: 30.0s, from 90 words of dialogue after it (nar1)",
 		);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 2 clip ai1: 1.0s, nothing after it, so it holds the minimum",
+			"Scene 2 video ai1: 1.0s, nothing after it, so it holds the minimum",
 		);
 	});
 
-	it("fits each clip to the dialogue under it and says it went stale", async () => {
+	it("fits each video element to the dialogue under it and says it went stale", async () => {
 		const ops: RefineOp[][] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
@@ -383,7 +383,7 @@ describe("executeToolCall", () => {
 				measureElementLengths: () => [
 					{
 						id: "ai1",
-						type: "clip",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
@@ -408,20 +408,20 @@ describe("executeToolCall", () => {
 
 		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 clip ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
+			"Scene 1 video ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain("1 image still left alone.");
 	});
 
-	it("names a clip whose dialogue outruns the longest option instead of hiding the clamp", async () => {
+	it("names a video element whose dialogue outruns the longest option instead of hiding the clamp", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["clip1"] } },
+			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
 				measureElementLengths: () => [
 					{
 						id: "ai1",
-						type: "clip",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
@@ -429,8 +429,8 @@ describe("executeToolCall", () => {
 						durationSec: 10,
 					},
 					{
-						id: "clip1",
-						type: "clip",
+						id: "vid1",
+						type: "video",
 						sceneNumber: 2,
 						seconds: 60,
 						words: 180,
@@ -441,20 +441,20 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("Scene 2 clip clip1 needs");
+		expect(outcome.ok && outcome.output).toContain("Scene 2 video vid1 needs");
 		expect(outcome.ok && outcome.output).toContain("split the dialogue");
 		expect(outcome.ok && outcome.output).not.toContain("ai1");
 		expect(outcome.ok && outcome.output).not.toContain("already cover");
 	});
 
-	it("leaves durations alone when every clip already covers its dialogue", async () => {
+	it("leaves durations alone when every video element already covers its dialogue", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["clip1"] } },
+			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
 				measureElementLengths: () => [
 					{
-						id: "clip1",
-						type: "clip",
+						id: "vid1",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
@@ -473,12 +473,12 @@ describe("executeToolCall", () => {
 
 	it("names element_ids that match no visual instead of reporting a clean pass", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["clip1", "nope"] } },
+			{ toolName: "fit_durations", input: { element_ids: ["vid1", "nope"] } },
 			context({
 				measureElementLengths: () => [
 					{
-						id: "clip1",
-						type: "clip",
+						id: "vid1",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
@@ -511,7 +511,9 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("No clip in scope.");
+		expect(outcome.ok && outcome.output).toContain(
+			"No video elements in scope.",
+		);
 	});
 
 	it("says the canvas has no visuals rather than reporting an empty table", async () => {
@@ -599,10 +601,10 @@ describe("executeToolCall", () => {
 
 	it("refuses an element that generates no picture", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "clip-1" } },
+			{ toolName: "view_image", input: { id: "vid-1" } },
 			context({
 				elementImage: () => ({
-					type: "clip",
+					type: "video",
 					prompt: "a wolf running",
 					picture: undefined,
 				}),
@@ -610,7 +612,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("is a clip");
+		expect(!outcome.ok && outcome.errorText).toContain("is a video");
 	});
 
 	it("reports how far along an image is when there is nothing to look at yet", async () => {

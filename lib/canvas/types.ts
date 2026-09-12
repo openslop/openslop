@@ -37,7 +37,7 @@ export const ELEMENT_TYPES = {
 		role: "foreground",
 		layer: "visual",
 	},
-	clip: {
+	video: {
 		connector: "video",
 		outputKind: "video",
 		role: "foreground",
@@ -87,7 +87,7 @@ const DURATIONS = DURATION_OPTIONS.map(Number);
 
 export const DURATION_MIN = Math.min(...DURATIONS);
 
-/** The longest a clip can be generated at, so the ceiling on what one visual covers. */
+/** The longest a video can be generated at, so the ceiling on what one visual covers. */
 export const DURATION_MAX = Math.max(...DURATIONS);
 
 /** The shortest option that still covers `seconds`, or the longest there is. */

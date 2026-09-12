@@ -5,7 +5,7 @@ import {
 	CAPTION_PRESET_KEYS,
 	captionPresetLabel,
 	captionPresetStyle,
-} from "@/lib/video/captionPresets";
+} from "@/lib/captions/captionPresets";
 import {
 	CAPTION_ALIGN_X,
 	CAPTION_ALIGN_Y,
@@ -14,8 +14,8 @@ import {
 	CAPTION_RANGES,
 	CAPTION_REVEALS,
 	CaptionStyleSchema,
-} from "@/lib/video/captionStyle";
-import { CAPTION_FONTS } from "@/lib/video/captionFonts";
+} from "@/lib/captions/captionStyle";
+import { CAPTION_FONTS } from "@/lib/captions/captionFonts";
 import { TextBox } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";
@@ -33,7 +33,7 @@ const range = ({ min, max }: { min: number; max: number }) =>
 
 export const setCaptionStyle = defineTool({
 	description: dedent`
-	  Style the captions burned into the video, or turn them off. Send only what changes.
+	  Style the captions burned into the finished video, or turn them off. Send only what changes.
 
 	  A preset resets the whole look; anything else you send applies on top of it. Without a
 	  preset, changes apply to the style the project already has.

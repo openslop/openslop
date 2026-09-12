@@ -28,7 +28,7 @@ const PICTURE_ATTRIBUTES = [
 const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
 	character: ["name"],
 	image: PICTURE_ATTRIBUTES,
-	clip: [...PICTURE_ATTRIBUTES, "startFrame (previous | none)"],
+	video: [...PICTURE_ATTRIBUTES, "startFrame (previous | none)"],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };
 
@@ -79,8 +79,8 @@ export const editScript = defineTool({
 	  ${ATTRIBUTES_BY_TYPE}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. Image, clip, sound and
-	  music descriptions are always English.
+	  surrounding script, whatever language the request is in. The text of image, video, sound
+	  and music elements is always English.
 	`,
 	input: z.object({
 		ops: z

@@ -4,8 +4,8 @@ import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
 import {
 	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
-} from "@/lib/video/aspectRatio";
-import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
+} from "@/lib/project/aspectRatio";
+import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
 import type { AttributeDef } from "./schema";
 
 const VOLUME_OPTIONS = [

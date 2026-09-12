@@ -1,4 +1,4 @@
-import { formatRangeDuration, formatTimeRange } from "@/lib/video/timestamps";
+import { formatRangeDuration, formatTimeRange } from "@/lib/render/timestamps";
 
 export function SceneTimestamp({
 	start,

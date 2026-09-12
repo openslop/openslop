@@ -5,7 +5,7 @@ import type {
 	PluginContext,
 } from "@/lib/connectors/types";
 import { forCanvasElement, forPreviousVisual } from "@/lib/generation/graph";
-import { captureLastFrame } from "@/lib/video/captureLastFrame";
+import { captureLastFrame } from "@/lib/connectors/video/captureLastFrame";
 import {
 	parseStartFrame,
 	START_FRAME_ATTR,
@@ -20,14 +20,14 @@ export type ParamsWithStartFrame = {
 
 const LABEL = "the start frame";
 
-/** The picture a settled visual hands on: a clip its last frame, an image itself. */
+/** The picture a settled visual hands on: the last frame of a video result, or the image itself. */
 async function pictureOf(source: AssetResult): Promise<string> {
 	if (source.videoUrl) return captureLastFrame(source.videoUrl);
 	if (source.imageUrl) return source.imageUrl;
 	throw new Error("The start frame's source generated no picture to open on");
 }
 
-/** The picture to open on, or nothing for a clip with no visual before it. */
+/** The picture to open on, or nothing for a video element with no visual before it. */
 async function frameUrl(
 	frame: StartFrame,
 	{ elementId = "", canvas = [], dependencies = {} }: PluginContext,
@@ -43,9 +43,9 @@ async function frameUrl(
 }
 
 /**
- * Opens the clip on a picture. A source on the canvas is a dependency, so the
- * clip waits for it, and regenerating it stales the clip; a plain URL is only
- * an input.
+ * Opens the video element on a picture. A canvas source is a dependency, so the
+ * element waits for it, and regenerating the source stales the element; a plain
+ * URL is only an input.
  */
 export function createStartFramePlugin(): ConnectorPlugin<ParamsWithStartFrame> {
 	return {

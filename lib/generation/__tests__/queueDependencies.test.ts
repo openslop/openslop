@@ -84,15 +84,15 @@ describe("dependency ordering", () => {
 		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
 
 		// enqueueGraph walks the graph itself, so a node reached only through
-		// another dependency still gets queued: here a clip opening on an image
+		// another dependency still gets queued: here a video opening on an image
 		// that in turn draws a character.
 		const avatar = node("~avatar:Alice");
 		const frame = node("img", [avatar]);
-		queue.enqueueGraph([node("clip", [frame])]);
+		queue.enqueueGraph([node("vid-1", [frame])]);
 
 		expect(queue.getElementSnapshot("~avatar:Alice").status).not.toBe("idle");
 		expect(queue.getElementSnapshot("img").status).not.toBe("idle");
-		expect(queue.getElementSnapshot("clip").status).toBe("queued");
+		expect(queue.getElementSnapshot("vid-1").status).toBe("queued");
 	});
 
 	it("visits a dependency shared by two roots once", () => {

@@ -5,16 +5,16 @@ import { Editable, Slate, withReact } from "slate-react";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "../AttributeBadge";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 const elementWith = (
 	customAttributes: Record<string, string>,
 ): CanvasContentElement =>
 	({
 		id: "el",
-		type: "clip",
+		type: "video",
 		...splitAttributes(customAttributes),
-		children: [{ id: "text", type: "clip", text: "" }],
+		children: [{ id: "text", type: "video", text: "" }],
 	}) as unknown as CanvasContentElement;
 
 const motionSpec: AttributeSpec = {

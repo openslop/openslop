@@ -6,7 +6,7 @@ import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 const registry: ConnectorRegistry = {
 	llm: {},

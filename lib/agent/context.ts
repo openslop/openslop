@@ -2,8 +2,8 @@ import { z } from "zod";
 import dedent from "dedent";
 import { languageLabel, LANGUAGE_CHOICES } from "@/lib/project/language";
 import { MetadataVoiceSchema, voiceTraitEntries } from "@/lib/project/types";
-import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
-import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/video/videoLength";
+import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
+import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/project/videoLength";
 
 const UNSET = "not set";
 

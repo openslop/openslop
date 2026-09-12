@@ -1,6 +1,6 @@
 import dedent from "dedent";
-import { DURATION_OPTIONS } from "@/lib/canvas/types";
-import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
+import { DEFAULT_DURATION, DURATION_OPTIONS } from "@/lib/canvas/types";
+import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
 import { VIDEO_SHAPES } from "./shapes";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
@@ -21,7 +21,7 @@ export function osmlSpec(language: string): string {
 
   ## **General Guidelines**
   - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
-  - Descriptions in image tags are opaque to the reader, so the narrative prose should include some details that are only in the image tags.
+  - Descriptions in <image> and <video> tags are opaque to the reader, so the narrative prose should include some details that are only in those tags.
 
 ${languagePrompt(language)}
 - Write the metadata_title in that same language, and the metadata_style description in English.
@@ -56,7 +56,7 @@ ${VIDEO_SHAPES}
   - For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
 
   ### Image XML Tags
-  - Each scene opens with a visual: an <image>, or a <clip> where the shape of the video calls for one. Example:
+  - Each scene opens with a visual: an <image>, or a <video> where the script's shape calls for one. Example:
     <image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - motion: Camera-motion effect applied for the element's full duration. Almost always set one — a still image with no motion reads as a flat, lifeless slide. Use at most one per scene. Example: <image motion="kenBurnsIn">...</image>
   - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
@@ -75,21 +75,21 @@ ${VIDEO_SHAPES}
   - Reference characters by their names in the image description, NEVER describe their appearance in the image description
   - Each image description should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous descriptions or the story.
 
-  ### Clip XML Tags
-  - A <clip> tag is a short generated video. Use it for hero moments, establishing shots, or emotional beats that benefit from motion. The tag body is the prompt for the video model: describe the frame the way you would an <image> (time of day, background, weather, objects, characters by name) and then one simple camera or subject motion (e.g. "slow cinematic pan", "gentle dolly in"). One move per shot. Example:
-    <clip characters="Red,Wolf" overlays="rain">A dark forest clearing under a full moon, rain falling through the trees. Red and Wolf keep walking as the camera slowly zooms out to reveal the whole moonlit clearing.</clip>
-  - duration: optional. The length of the clip in seconds (default 5). Allowed values: ${DURATION_OPTIONS.join(", ")}.
-  - startFrame: optional, "previous" by default: the clip opens on the end of the visual before it, so consecutive shots continue from one another; write its body as the seconds that follow that picture. Set it to "none" for a shot that cuts to somewhere new.
-  - trimToDialogue: optional, "true" by default. Trimmed, the clip is on screen for exactly the dialogue after it. Set it to "false" for a shot that should play its full length even with little or no dialogue under it, such as an action beat or a montage cut.
+  ### Video XML Tags
+  - A <video> tag is a short generated video element. Use it for hero moments, establishing shots, or emotional beats that benefit from motion. The tag body is the prompt for the video model: describe the frame the way you would an <image> (time of day, background, weather, objects, characters by name) and then one simple camera or subject motion (e.g. "slow cinematic pan", "gentle dolly in"). One move per <video>. Example:
+    <video characters="Red,Wolf" overlays="rain">A dark forest clearing under a full moon, rain falling through the trees. Red and Wolf keep walking as the camera slowly zooms out to reveal the whole moonlit clearing.</video>
+  - duration: optional. How many seconds the <video> is generated for (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
+  - startFrame: optional, "previous" by default: the <video> opens on the end of the visual before it, so consecutive <video> elements continue from one another; write its body as the seconds that follow that picture. Set it to "none" for a <video> that cuts to somewhere new.
+  - trimToDialogue: optional, "true" by default. Trimmed, the <video> is on screen for exactly the dialogue after it. Set it to "false" for a <video> that should play its full length even with little or no dialogue under it, such as an action beat or a montage cut.
   - motion: normally set to "none". Only set a motion effect when the body describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
   - characters: optional. Same as for <image>: a comma-separated list of exact story character names appearing in the frame.
   - All <image> description rules apply unchanged: depict the moment the following narration and dialogue describe, and repeat any details necessary even if they appeared in earlier prompts.
-  - In a Slideshow, use <clip> sparingly, mostly at intro shots and hero moments, and default to <image>: video generation is significantly slower and more expensive. In a Film or Motion explainer, clips are the visuals.
+  - In a Slideshow, use <video> sparingly, mostly for intros and hero moments, and default to <image>: video generation is significantly slower and more expensive. In a Film or Motion explainer, <video> elements are the visuals.
 
   ### Sound XML Tags
   - Frequently insert <sound> tags (as if prompting a sound model) that should accompany a scene before the relevant dialogue (character or narration).
   - The descriptions within <sound> tags should be common, simple, short, clear ASMR pleasing sound descriptions like rain, wind, fire crackling, footsteps, etc.
-  - The optional loops attribute is an integer (default 1) that controls how many times the generated sound clip plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
+  - The optional loops attribute is an integer (default 1) that controls how many times the generated sound plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
     <sound loops="4">Wind</sound>
     <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
     <sound>Tiger roar</sound>
@@ -109,7 +109,7 @@ ${VIDEO_SHAPES}
   - The descriptions within <music> tags should be common, simple, short, clear, and direct.
   - Music should change frequently (at least once every few scenes) to keep the reader engaged.
   - length: ${Object.values(MusicLength).join(", ")}
-  - The optional loops attribute is an integer (default 1) that controls how many times the generated music clip plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
+  - The optional loops attribute is an integer (default 1) that controls how many times the generated music plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
 
   ### Metadata Title XML tag
   - The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:

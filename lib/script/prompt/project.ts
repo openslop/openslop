@@ -5,7 +5,7 @@ import {
 	type MetadataCharacter,
 	type MetadataVoice,
 } from "@/lib/project/types";
-import { videoLengthBudget } from "@/lib/video/videoLength";
+import { videoLengthBudget } from "@/lib/project/videoLength";
 
 function renderVoice(voice: MetadataVoice): string {
 	return voiceTraitEntries(voice)

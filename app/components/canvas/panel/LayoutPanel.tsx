@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/icon";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
-import { BottomViewToggle } from "@/app/components/video/BottomViewToggle";
-import { PlayerPlacementToggle } from "@/app/components/video/PlayerPlacementToggle";
+import { BottomViewToggle } from "@/app/components/player/BottomViewToggle";
+import { PlayerPlacementToggle } from "@/app/components/player/PlayerPlacementToggle";
 import { useViewMode } from "../ViewModeContext";
 import { PanelCard, PanelField } from "./PanelCard";
 

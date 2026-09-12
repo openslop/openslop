@@ -6,7 +6,7 @@ export const ADAPT_GUIDELINES = dedent`
   annotations according to the XML format described below. Do NOT modify the script
   itself, simply conform the text to the XML format described below. If the script doesn't contain
   any explicit narration/image/character/music/sound annotations, assume the text is all narration
-  and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a video.
+  and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a finished video.
 
   ### Miscellaneous Rules
   - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.

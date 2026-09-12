@@ -96,13 +96,13 @@ describe("parentSceneId", () => {
 });
 
 describe("previousVisual", () => {
-	const el = (id: string, type: "image" | "clip" | "narration") =>
+	const el = (id: string, type: "image" | "video" | "narration") =>
 		({ id, type, children: [{ id: `${id}-t`, type, text: "" }] }) as never;
 	const elements = [
 		el("a", "image"),
 		el("n", "narration"),
-		el("b", "clip"),
-		el("c", "clip"),
+		el("b", "video"),
+		el("c", "video"),
 	];
 
 	it("skips dialogue to the visual before", () => {

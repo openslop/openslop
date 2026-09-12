@@ -5,7 +5,7 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { SceneElement } from "@/lib/canvas/types";
-import { useSceneSequence } from "@/app/components/video/VideoLayoutContext";
+import { useSceneSequence } from "@/app/components/player/RenderLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
 import { useDropIndex } from "../dnd/DragTransferContext";
 import { useViewMode } from "../ViewModeContext";

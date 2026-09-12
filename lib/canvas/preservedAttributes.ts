@@ -7,8 +7,8 @@ type ElementTypeGroup = readonly CanvasElementType[];
 
 /** Attributes that survive a retype, by the types they mean the same thing on. */
 const PRESERVED_ATTRIBUTE_TYPES: Partial<Record<string, ElementTypeGroup>> = {
-	[CHARACTERS_ATTR]: ["image", "clip"],
-	[REFERENCE_IMAGES_ATTR]: ["image", "clip"],
+	[CHARACTERS_ATTR]: ["image", "video"],
+	[REFERENCE_IMAGES_ATTR]: ["image", "video"],
 };
 
 export function preservedAttributes(

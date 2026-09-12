@@ -3,7 +3,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { NodeSpec } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/video/aspectRatio";
+import type { VideoResolution } from "@/lib/project/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";

@@ -4,7 +4,7 @@ import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 describe("OSMLStreamParser", () => {
 	it("parses a single complete tag", () => {
@@ -158,13 +158,13 @@ describe("OSMLStreamParser", () => {
 		expect(flatAttributes(nodes[0]).id).toBeUndefined();
 	});
 
-	it("parses <clip> with a startFrame attribute", () => {
+	it("parses <video> with a startFrame attribute", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk('<clip startFrame="img1">a dark forest</clip>');
+		s.appendChunk('<video startFrame="img1">a dark forest</video>');
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("clip");
+		expect(nodes[0].type).toBe("video");
 		expect(flatAttributes(nodes[0]).startFrame).toBe("img1");
 		expect(getElementText(nodes[0])).toContain("a dark forest");
 	});
@@ -183,7 +183,7 @@ describe("parseOSML", () => {
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
 		const [node] = parseOSML(
-			'<clip provider="runware" model="Seedance 2 Fast">a sunset</clip>',
+			'<video provider="runware" model="Seedance 2 Fast">a sunset</video>',
 		);
 		expect(flatAttributes(node)).toMatchObject({
 			provider: "runware",
@@ -192,7 +192,7 @@ describe("parseOSML", () => {
 	});
 
 	it("replaces a model the catalog no longer offers", () => {
-		const [node] = parseOSML('<clip model="Slop Video v0">a sunset</clip>');
+		const [node] = parseOSML('<video model="Slop Video v0">a sunset</video>');
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_VIDEO_MODEL);
 	});
 

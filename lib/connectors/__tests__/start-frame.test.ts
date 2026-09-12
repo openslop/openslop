@@ -10,15 +10,17 @@ import type { AssetResult, ConnectorPlugin } from "../types";
 const captureLastFrame = vi.hoisted(() =>
 	vi.fn<(url: string) => Promise<string>>(),
 );
-vi.mock("@/lib/video/captureLastFrame", () => ({ captureLastFrame }));
+vi.mock("@/lib/connectors/video/captureLastFrame", () => ({
+	captureLastFrame,
+}));
 
 const EMPTY_STATE = { metadata: MetadataSchema.parse({}), referenceImages: [] };
 
-const clip = (startFrame?: string): CanvasContentElement => ({
-	id: "clip-1",
-	type: "clip",
+const video = (startFrame?: string): CanvasContentElement => ({
+	id: "video-1",
+	type: "video",
 	generationAttributes: startFrame ? { startFrame } : {},
-	children: [{ id: "t", type: "clip", text: "slow pan" }],
+	children: [{ id: "t", type: "video", text: "slow pan" }],
 });
 
 const image: CanvasContentElement = {
@@ -33,11 +35,11 @@ describe("start-frame plugin", () => {
 	const before = (
 		params: ParamsWithStartFrame,
 		dependencies: Record<string, AssetResult> = {},
-		canvas: CanvasContentElement[] = [image, clip("previous")],
+		canvas: CanvasContentElement[] = [image, video("previous")],
 	) => {
 		if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
 		return plugin.beforeGenerate(params, {
-			elementId: "clip-1",
+			elementId: "video-1",
 			dependencies,
 			canvas,
 		});
@@ -50,30 +52,30 @@ describe("start-frame plugin", () => {
 
 	describe("dependencies", () => {
 		it("declares none without a start frame, or with a picture by URL", () => {
-			expect(plugin.dependencies?.(clip())).toEqual([]);
-			expect(plugin.dependencies?.(clip("https://img/a.png"))).toEqual([]);
+			expect(plugin.dependencies?.(video())).toEqual([]);
+			expect(plugin.dependencies?.(video("https://img/a.png"))).toEqual([]);
 		});
 
-		it("declares the visual before the clip, by document order", () => {
-			const [spec] = plugin.dependencies?.(clip("previous")) ?? [];
+		it("declares the visual before the video, by document order", () => {
+			const [spec] = plugin.dependencies?.(video("previous")) ?? [];
 			const declared = spec?.({
 				state: EMPTY_STATE,
-				canvas: () => [image, clip("previous")],
+				canvas: () => [image, video("previous")],
 			});
 			expect(declared).toEqual({ element: image, label: "the start frame" });
 		});
 
-		it("declares an empty leaf when nothing comes before the clip", () => {
-			const [spec] = plugin.dependencies?.(clip("previous")) ?? [];
+		it("declares an empty leaf when nothing comes before the video", () => {
+			const [spec] = plugin.dependencies?.(video("previous")) ?? [];
 			const declared = spec?.({
 				state: EMPTY_STATE,
-				canvas: () => [clip("previous"), image],
+				canvas: () => [video("previous"), image],
 			});
 			expect(declared).toMatchObject({ job: null });
 		});
 
 		it("declares a source named by id, and keeps a deleted one as an orphan", () => {
-			const [spec] = plugin.dependencies?.(clip("img-1")) ?? [];
+			const [spec] = plugin.dependencies?.(video("img-1")) ?? [];
 			expect(spec?.({ state: EMPTY_STATE, canvas: () => [image] })).toEqual({
 				element: image,
 				label: "the start frame",
@@ -86,7 +88,7 @@ describe("start-frame plugin", () => {
 	});
 
 	describe("beforeGenerate", () => {
-		it("leaves a clip with no start frame alone", async () => {
+		it("leaves a video with no start frame alone", async () => {
 			await expect(before({ prompt: "slow pan" })).resolves.toEqual({
 				prompt: "slow pan",
 			});
@@ -116,7 +118,7 @@ describe("start-frame plugin", () => {
 		it("opens on nothing when no visual comes before it", async () => {
 			await expect(
 				before({ prompt: "slow pan", startFrame: "previous" }, {}, [
-					clip("previous"),
+					video("previous"),
 					image,
 				]),
 			).resolves.toEqual({ prompt: "slow pan" });
@@ -134,13 +136,13 @@ describe("start-frame plugin", () => {
 			});
 		});
 
-		it("opens on a clip source's last frame, captured from its video", async () => {
+		it("opens on the last frame of a video source's generated file", async () => {
 			captureLastFrame.mockResolvedValue("https://img/last.png");
 			await expect(
 				before(
-					{ prompt: "slow pan", startFrame: "clip-0" },
+					{ prompt: "slow pan", startFrame: "video-0" },
 					{
-						"clip-0": {
+						"video-0": {
 							imageUrl: "https://img/first.png",
 							videoUrl: "https://vid/a.mp4",
 							durationSec: 5,
