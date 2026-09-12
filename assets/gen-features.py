@@ -307,27 +307,30 @@ class Card:
             inner = re.sub(r'fill="(?!none)[^"]*"', f'fill="{color}"', inner)
             inner = re.sub(r"<path (?![^>]*fill=)", f'<path fill="{color}" ', inner)
         rx = ' rx="3"' if provider not in ("openslop", "cartesia") else ""
-        self.raw(self.wrap(f'<svg x="{x}" y="{y}" width="{size}" height="{size}" viewBox="{vb}" overflow="visible">{inner}</svg>', cls))
+        self.raw(self.wrap(f'<svg x="{x}" y="{y}" width="{size}" height="{size}" viewBox="{vb}" overflow="visible" color="{color}">{inner}</svg>', cls))
 
-    def orb(self, x, y, size=12, cls=""):
-        """The OrbLoader: a warm amber-to-rust blob that keeps changing shape."""
+    def orb(self, x, y, size=20, cls=""):
+        """The OrbLoader exactly as the README demo draws it: three blurred triangles spinning under a
+        contrast filter (the goo), masking a warm gradient that slowly shifts hue."""
         t = self.t
-        gid = self.cls("orb")
-        self.defs.append(
-            f'<linearGradient id="{gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{t["orb0"]}"/><stop offset="1" stop-color="{t["orb1"]}"/></linearGradient>'
-        )
-        r1, r2 = self.spin(2.0), self.spin(1.4)
-        c = size / 2
-        self.raw(
-            self.wrap(
-                f'<g transform="translate({x},{y})">'
-                f'<circle cx="{c}" cy="{c}" r="{c * 0.72:.2f}" fill="url(#{gid})"/>'
-                f'<g class="{r1}"><g><circle cx="{c + c * 0.32:.2f}" cy="{c}" r="{c * 0.5:.2f}" fill="url(#{gid})"/></g></g>'
-                f'<g class="{r2}"><g><circle cx="{c - c * 0.3:.2f}" cy="{c + c * 0.2:.2f}" r="{c * 0.44:.2f}" fill="url(#{gid})"/></g></g>'
-                f"</g>",
-                cls,
+        if "orb" not in self._images:
+            self._images.add("orb")
+            self.defs.append(
+                f'<linearGradient id="orb" x1="0" y1="0" x2="0" y2="1"><stop offset="30%" stop-color="{t["orb0"]}"/><stop offset="70%" stop-color="{t["orb1"]}"/></linearGradient>'
+                '<mask id="orb-mask"><g class="orb-goo"><polygon class="orb-p0" points="0,0 100,0 100,100 0,100" fill="#000000"/><polygon class="orb-p1" points="25,25 75,25 50,75" fill="#ffffff"/><polygon class="orb-p2" points="50,25 75,75 25,75" fill="#ffffff"/><polygon class="orb-p3" points="35,35 65,35 50,65" fill="#ffffff"/></g></mask>'
             )
-        )
+            self.css.append(
+                ".orb{animation:kf-orb-colorize 6s ease-in-out infinite}@keyframes kf-orb-colorize{0%{filter:hue-rotate(0deg)}20%{filter:hue-rotate(-30deg)}40%{filter:hue-rotate(-60deg)}60%{filter:hue-rotate(-90deg)}80%{filter:hue-rotate(-45deg)}100%{filter:hue-rotate(0deg)}}"
+                ".orb-goo{filter:contrast(15);animation:kf-orb-roundness 1s linear infinite}@keyframes kf-orb-roundness{0%{filter:contrast(15)}20%,40%{filter:contrast(3)}60%,100%{filter:contrast(15)}}"
+                ".orb-goo polygon{filter:blur(12px)}"
+                ".orb-p0{transform-origin:75px 25px;transform:rotate(90deg)}"
+                ".orb-p1{transform-origin:50px 50px;animation:kf-orb-spin 2s linear infinite reverse}"
+                ".orb-p2{transform-origin:50px 60px;animation:kf-orb-spin 2s linear infinite;animation-delay:-0.667s}"
+                ".orb-p3{transform-origin:40px 40px;animation:kf-orb-spin 2s linear infinite reverse}"
+                "@keyframes kf-orb-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}"
+            )
+        k = size / 100
+        self.raw(self.wrap(f'<g class="orb" transform="translate({x},{y}) rotate(90,{size / 2},{size / 2}) scale({k:.3f})"><rect width="100" height="100" fill="url(#orb)" mask="url(#orb-mask)"/></g>', cls))
 
     def waveform(self, x, y, w, h, color, seed=1, cls="", bars=None, opacity=1):
         import math
@@ -421,16 +424,56 @@ class Card:
         if stroke:
             self.rect(x + 0.5, y + 0.5, w - 1, h - 1, "none", rx=rx, stroke=t["border"], cls=cls)
 
+    def element_card(self, x, y, w, kind, label, model, lines, badge=None, cls="", placeholder=False, footer=False, gap=6):
+        """An element card laid out like ElementContainer: header row, prompt box sized to its lines,
+        optional footer row. Returns (height, footer_y, input_top)."""
+        t = self.t
+        ih = 10 + 12 * max(1, len(lines))
+        h = 28 + ih + (26 if footer else 0) + 6
+        self.raw("<g>" if not cls else "".join(f'<g class="{k}">' for k in cls.split()))
+        self.rect(x, y, w, h, t["elcard"], rx=10, stroke=t["border"])
+        pw = self.type_pill(x + 8, y + 6, kind, label)
+        bx = x + 8 + pw + 6
+        if model:
+            bx += self.model_badge(bx, y + 6, model[0], provider=model[1]) + 4
+        if badge:
+            bx += self.model_badge(bx, y + 6, badge, icon_name="image") + 4
+        self.icon("sliders", x + w - 26, y + 9, 12, t["muted"], opacity=0.8)
+        if kind in ("narration", "character"):
+            self.icon("voice", x + w - 44, y + 9, 12, t["muted"], opacity=0.8)
+        top = y + 28
+        self.rect(x + 8, top, w - 16, ih, t["elinput"], rx=7)
+        for i, ln in enumerate(lines):
+            self.text(x + 16, top + 14 + i * 12, ln, 9, t["muted"] if placeholder else t["fg"])
+        self.raw(f'<line x1="{x + w + 14}" y1="{y + 6}" x2="{x + w + 14}" y2="{y + h - 6}" stroke="{t["border"]}"/>')
+        self.raw("</g>" * max(1, len(cls.split())))
+        return h, top + ih + 6, top
+
+    def file_image(self, name, x, y, w, h, clip, cls=""):
+        """A small JPEG from assets/features/src, cropped like object-fit: cover."""
+        import base64
+
+        path = OUT / "src" / name
+        data = base64.b64encode(path.read_bytes()).decode()
+        uid = f"fi-{name.split('.')[0]}"
+        if uid not in self._images:
+            self._images.add(uid)
+            self.defs.append(f'<image id="{uid}" width="16" height="9" preserveAspectRatio="xMidYMid slice" href="data:image/jpeg;base64,{data}"/>')
+        sc = max(w / 16, h / 9)
+        ox, oy = x + (w - 16 * sc) / 2, y + (h - 9 * sc) / 2
+        self.raw(self.wrap(f'<g clip-path="url(#{clip})"><use href="#{uid}" transform="translate({ox:.2f},{oy:.2f}) scale({sc:.4f})"/></g>', cls))
+
     def grain(self, x, y, w, h, rx=12, cls=""):
         """The .grain texture the app paints over raised surfaces (film grain at --grain-opacity)."""
         if "grainf" not in self._images:
             self._images.add("grainf")
             self.defs.append(
-                '<filter id="grainf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>'
-                '<pattern id="grainp" width="120" height="120" patternUnits="userSpaceOnUse"><rect width="120" height="120" filter="url(#grainf)"/></pattern>'
+                '<filter id="grainf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" stitchTiles="stitch"/>'
+                '<feColorMatrix type="matrix" values="0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0.4 0.4 0.4 0 -0.25"/></filter>'
+                '<pattern id="grainp" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" filter="url(#grainf)"/></pattern>'
             )
-        op = 0.07 if self.theme == "dark" else 0.05
-        self.raw(self.wrap(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="url(#grainp)" opacity="{op}" style="mix-blend-mode:overlay"/>', cls))
+        op = 0.26 if self.theme == "dark" else 0.2
+        self.raw(self.wrap(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="url(#grainp)" opacity="{op}"/>', cls))
 
     # ---- chrome shared by the cards
     def bg(self):
@@ -486,7 +529,7 @@ def card_describe(theme):
         ("a documentary-style video about the rise and fall of Rome…", 4.6, 6.7, 7.5, 8.1),
     ]
     c.text(tx, ty, "Create ", 12.5, t["muted"], cls=c.span(0, 8.3))
-    cw = tw("Create ", 12.5) + 3
+    cw = tw("Create ", 12.5) + 1
     for s, t0, t1, e0, e1 in ph:
         c.typewriter(tx + cw, ty, s, t0, t1, 12.5, t["muted"], erase=(e0, e1))
     user = "A street race short in neon-lit Tokyo, two rivals, 45 seconds."
@@ -517,7 +560,7 @@ def card_describe(theme):
     c.icon("corner-down-left", sbx + 4, sby + 4, 14, t["accentfg"], cls=pressed)
     # Sloppy picks it up
     took = c.appear(11.6, dy=3)
-    c.orb(bx + bw - 118, by + bh + 8, 12, cls=took)
+    c.orb(bx + bw - 120, by + bh + 6, 16, cls=took)
     c.text(bx + bw - 100, by + bh + 18, "Slopping… · 1s", 9.5, t["muted"], cls=took)
 
     c.text(W / 2, by + bh + 20, "Skip to a blank canvas", 10, t["muted"], anchor="middle", cls=c.span(0, 11.6))
@@ -526,17 +569,15 @@ def card_describe(theme):
     gy = 270
     c.text(bx, gy, "Need inspiration?", 10, t["muted"])
     cards = [
-        ("POV Your Life as A...", "Second-person POV voiceover with cartoons…", "POV Life", "#F59E0B", ("#fbbf24", "#b45309")),
-        ("Get Sleepy with...", "Slow, soothing narration to lull listeners…", "Sleep Story", "#6366F1", ("#818cf8", "#312e81")),
+        ("POV Your Life as A...", "Second-person POV voiceover with cartoons…", "POV Life", "#F59E0B", "template-pov-life.jpg"),
+        ("Get Sleepy with...", "Slow, soothing narration to lull listeners…", "Sleep Story", "#6366F1", "template-sleep-story.jpg"),
     ]
-    for i, (title, desc, name, col, grad) in enumerate(cards):
+    for i, (title, desc, name, col, img) in enumerate(cards):
         x = bx + i * 236
         y = gy + 8
-        gid = f"tpl{i}"
-        c.defs.append(f'<linearGradient id="{gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{grad[0]}"/><stop offset="1" stop-color="{grad[1]}"/></linearGradient>')
         c.rect(x, y, 224, 60, t["card"], rx=10, stroke=t["border"])
-        c.defs.append(f'<clipPath id="tplc{i}"><rect x="{x}" y="{y}" width="46" height="60" rx="10"/></clipPath>')
-        c.raw(f'<g clip-path="url(#tplc{i})"><rect x="{x}" y="{y}" width="56" height="60" fill="url(#{gid})"/><circle cx="{x + 16}" cy="{y + 22}" r="7" fill="#ffffff" opacity="0.6"/><rect x="{x + 6}" y="{y + 34}" width="22" height="18" rx="4" fill="#ffffff" opacity="0.35"/></g>')
+        c.defs.append(f'<clipPath id="tplc{i}"><path d="M{x + 10} {y}h36v60h-36a10 10 0 0 1 -10 -10v-40a10 10 0 0 1 10 -10z"/></clipPath>')
+        c.file_image(img, x, y, 46, 60, clip=f"tplc{i}")
         c.text(x + 56, y + 18, title, 11, t["fg"], weight=600)
         c.icon("chevron-right", x + 206, y + 9, 10, t["muted"])
         c.text(x + 56, y + 33, desc, 8.5, t["muted"])
@@ -577,7 +618,7 @@ def card_sloppy(theme):
 
     def status(y, t0, t1, label):
         s = c.span(t0, t1, fade=0.1)
-        c.orb(PX + 2, y - 9, 12, cls=s)
+        c.orb(PX, y - 11, 16, cls=s)
         c.text(PX + 19, y, label, 9.5, t["muted"], cls=s + " " + c.pulse(1.6, 0.55))
 
     def step(y, t0, icon, label):
@@ -717,43 +758,18 @@ def card_canvas(theme):
     CX, CW = SX + 40, 330
     PXX = SX + 400
 
-    def element(y, h, kind, label, model, prompt_lines, cls="", placeholder=False, footer=False):
-        c.raw("<g>" if not cls else "".join(f'<g class="{k}">' for k in cls.split()))
-        c.rect(CX, y, CW, h, t["elcard"], rx=10, stroke=t["border"])
-        w = c.type_pill(CX + 8, y + 8, kind, label)
-        x = CX + 8 + w + 6
-        if model:
-            x += c.model_badge(x, y + 8, model[0], provider=model[1]) + 4
-        c.icon("sliders", CX + CW - 26, y + 11, 12, t["muted"], opacity=0.8)
-        if kind in ("narration", "character"):
-            c.icon("voice", CX + CW - 44, y + 11, 12, t["muted"], opacity=0.8)
-        ih = (h - 40) if not footer else (h - 62)
-        c.rect(CX + 8, y + 30, CW - 16, ih, t["elinput"], rx=7)
-        for i, ln in enumerate(prompt_lines):
-            c.text(CX + 16, y + 43 + i * 12, ln, 9, t["muted"] if placeholder else t["fg"])
-        c.raw(f'<line x1="{CX + CW + 14}" y1="{y + 6}" x2="{CX + CW + 14}" y2="{y + h - 6}" stroke="{t["border"]}"/>')
-        c.raw("</g>" * max(1, len(cls.split())))
-
     y1 = SY + 110
-    element(y1, 62, "image", "Image", ("Seedream 5 Lite", "runware"), ["A neon-lit tokyo street after rain. Signage in every", "colour reflects off the asphalt toward the overpass."])
-    c.image("city0", PXX, y1 + 2, 104, 58, rx=6)
-    y2 = y1 + 68
-    element(y2, 44, "narration", "Narration", None, ["The engine caught on the second turn."])
-    c.rect(PXX, y2 + 3, 200, 38, t["elcard"], rx=6, stroke=t["border"])
-    c.icon("play", PXX + 8, y2 + 15, 14, t["fg"])
-    c.waveform(PXX + 28, y2 + 11, 124, 22, t["muted"], seed=2)
-    c.text(PXX + 192, y2 + 26, "0:00/0:03", 7.5, t["muted"], anchor="end")
-    y3 = y2 + 50
-    shifted = c.shift(5.9, dy=66)
-    element(y3, 44, "music", "Music", ("Eleven Music v1", "elevenlabs"), ["Epic orchestral with aggressive taiko drums and a screeching guitar"], cls=shifted)
-    c.raw(f'<g class="{shifted}">')
-    c.rect(PXX, y3 + 3, 200, 38, t["elcard"], rx=6, stroke=t["border"])
-    c.icon("play", PXX + 8, y3 + 15, 14, t["fg"])
-    c.waveform(PXX + 28, y3 + 11, 124, 22, t["m_music"], seed=5, opacity=0.8)
-    c.text(PXX + 192, y3 + 26, "0:00/2:00", 7.5, t["muted"], anchor="end")
-    c.raw("</g>")
+    h1, _, _ = c.element_card(CX, y1, CW, "image", "Image", ("Seedream 5 Lite", "runware"), ["A neon-lit tokyo street after rain. Signage in every", "colour reflects off the asphalt toward the overpass."])
+    c.image("city0", PXX, y1 + 2, (h1 - 4) * 16 / 9, h1 - 4, rx=6)
+    y2 = y1 + h1 + 6
+    h2, _, top2 = c.element_card(CX, y2, CW, "narration", "Narration", None, ["The engine caught on the second turn."])
+    c.rect(PXX, y2 + 3, 200, h2 - 6, t["elcard"], rx=6, stroke=t["border"])
+    c.icon("play", PXX + 8, y2 + h2 / 2 - 7, 14, t["fg"])
+    c.waveform(PXX + 28, y2 + h2 / 2 - 11, 124, 22, t["muted"], seed=2)
+    c.text(PXX + 192, y2 + h2 / 2 + 3, "0:00/0:03", 7.5, t["muted"], anchor="end")
+    y3 = y2 + h2 + 6
 
-    # hover gutter → insert menu → Sound
+    # hover gutter on the narration row → insert menu → Sound
     hv = c.span(3.0, 5.9)
     c.icon("plus", SX + 15, y2 + 6, 16, t["muted"], cls=hv)
     c.raw(c.wrap(f'<g color="{t["muted"]}" transform="translate({SX + 17},{y2 + 24}) scale(0.8)"><circle cx="5" cy="4" r="1.3" fill="currentColor"/><circle cx="11" cy="4" r="1.3" fill="currentColor"/><circle cx="5" cy="9" r="1.3" fill="currentColor"/><circle cx="11" cy="9" r="1.3" fill="currentColor"/><circle cx="5" cy="14" r="1.3" fill="currentColor"/><circle cx="11" cy="14" r="1.3" fill="currentColor"/></g>', hv))
@@ -772,14 +788,14 @@ def card_canvas(theme):
     cur = c.span(3.0, 5.8, fade=0.1) + " " + c.shift(4.2, dx=52, dy=108, dur=0.7)
     c.raw(c.wrap(f'<path transform="translate({SX + 20},{y2 + 12})" d="M0 0l0 14 4-3.5 2.6 5.6 2.4-1.1-2.6-5.6h5z" fill="{t["fg"]}" stroke="{t["bg"]}" stroke-width="1"/>', cur))
 
-    # the new Sound card, with its footer
+    # the new Sound card, with its footer, below the row that was hovered
     ys = y3
     grp = c.appear(6.0)
-    element(ys, 60, "sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), [], cls=grp)
-    c.text(CX + 16, ys + 43, "Describe the sound effect...", 9, t["muted"], cls=c.span(6.0, 7.0, fade=0.05))
-    c.typewriter(CX + 16, ys + 43, "tyre screech, long and close", 7.1, 8.4, 9, t["fg"], cls=grp)
-    c.button(CX + CW - 8 - 64, ys + 60 - 24, "Generate", icon="magic", h=18, size=8.5, pad=7, cls=grp)
-    c.audio_placeholder(PXX, ys + 3, 200, 38, cls=grp, animate=False, seed=6)
+    hs, fy, tops = c.element_card(CX, ys, CW, "sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), [""], cls=grp, footer=True)
+    c.text(CX + 16, tops + 14, "Describe the sound effect...", 9, t["muted"], cls=c.span(6.0, 7.0, fade=0.05))
+    c.typewriter(CX + 16, tops + 14, "tyre screech, long and close", 7.1, 8.4, 9, t["fg"], cls=grp)
+    c.button(CX + CW - 8 - 64, fy, "Generate", icon="magic", h=18, size=8.5, pad=7, cls=grp)
+    c.audio_placeholder(PXX, ys + (hs - 40) / 2, 200, 40, cls=grp, animate=False, seed=6)
     c.write()
 
 
@@ -820,31 +836,22 @@ def card_generate(theme):
     CX, CW = SX + 14, 362
     PXX = SX + 404
     rows = [
-        (SY + 34, 88, "animated", "Animated image", ("Seedance 2 Fast", "runware"), ("Seedream 5 Lite", "image"), ["Slow motion on the drift, smoke billowing off the", "rear tyres as the car swings back into line."], "media"),
-        (SY + 128, 76, "narration", "Narration", None, None, ["The rear wheels broke loose. Takeshi kept the", "wheel light and let the silvia swing."], "audio"),
-        (SY + 210, 76, "sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), None, ["tyre screech, long and close"], "audio"),
+        ("animated", "Animated image", ("Seedance 2 Fast", "runware"), "Seedream 5 Lite", ["Slow motion on the drift, smoke billowing off the", "rear tyres as the car swings back into line."], "media"),
+        ("narration", "Narration", None, None, ["The rear wheels broke loose. Takeshi kept the", "wheel light and let the silvia swing."], "audio"),
+        ("sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), None, ["tyre screech, long and close"], "audio"),
     ]
     timing = {"animated": (1.6, 6.8), "narration": (1.6, 4.6), "sound": (4.6, 7.6)}
-    for y, h, kind, label, model, badge, lines, pk in rows:
-        c.rect(CX, y, CW, h, t["elcard"], rx=10, stroke=t["border"])
-        w = c.type_pill(CX + 8, y + 8, kind, label)
-        x = CX + 8 + w + 6
-        if model:
-            x += c.model_badge(x, y + 8, model[0], provider=model[1]) + 4
-        if badge:
-            x += c.model_badge(x, y + 8, badge[0], icon_name="image") + 4
-        c.icon("sliders", CX + CW - 26, y + 11, 12, t["muted"], opacity=0.8)
-        c.rect(CX + 8, y + 30, CW - 16, h - 60, t["elinput"], rx=7)
-        for i, ln in enumerate(lines):
-            if kind == "animated" and i == 1:
-                c.text(CX + 16, y + 55, ln, 9, t["fg"], cls=c.span(0, 10.0, fade=0))
-                c.typewriter(CX + 16, y + 55, ln[:-1] + " under the overpass.", 10.0, 10.5, 9, t["fg"], start=len(ln) - 1, cls=c.span(10.0, 14, fade=0))
-            else:
-                c.text(CX + 16, y + 43 + i * 12, ln, 9, t["fg"])
-        c.raw(f'<line x1="{CX + CW + 16}" y1="{y + 6}" x2="{CX + CW + 16}" y2="{y + h - 6}" stroke="{t["border"]}"/>')
+    y = SY + 34
+    for kind, label, model, badge, lines, pk in rows:
+        h, fy, top = c.element_card(CX, y, CW, kind, label, model, lines, badge=badge, footer=True)
+        if kind == "animated":
+            # the second line is retyped late in the loop with an edit on the end
+            ln = lines[1]
+            c.rect(CX + 8, top + 18, CW - 16, 13, t["elinput"])
+            c.text(CX + 16, top + 26, ln, 9, t["fg"], cls=c.span(0, 10.0, fade=0))
+            c.typewriter(CX + 16, top + 26, ln[:-1] + " under the overpass.", 10.0, 10.5, 9, t["fg"], start=len(ln) - 1, cls=c.span(10.0, 14, fade=0))
         g0, g1 = timing[kind]
         fx = CX + CW - 8
-        fy = y + h - 24
         for t0, t1, lab, ic, spin in ((0, 1.3, "Generate", "magic", False), (1.3, g0, "Queued", "hour-glass", False), (g0, g1, "Generating…", "spinner", True), (g1, 14, "Regenerate", "magic", False)):
             if t1 <= t0:
                 continue
@@ -873,14 +880,14 @@ def card_generate(theme):
             c.text(PXX + pw - 19, y + 16, "Still", 7.5, "#ffffff", anchor="middle", weight=500, cls=done, extra='opacity="0.6"')
         else:
             pw, ph = 200, 40
-            py = y + (h - ph) / 2 - 6
+            py = y + (h - ph) / 2
             c.audio_placeholder(PXX, py, pw, ph, cls=c.span(0, g1, fade=0.3), animate=True, seed=7 if kind == "sound" else 3)
             done = c.appear(g1, dy=0, fade=0.4)
             c.rect(PXX, py, pw, ph, t["elcard"], rx=6, stroke=t["border"], cls=done)
             c.icon("play", PXX + 8, py + 13, 14, t["fg"], cls=done)
             c.waveform(PXX + 28, py + 8, 124, 24, t["m_" + kind] if kind != "narration" else t["muted"], seed=3 if kind == "sound" else 7, cls=done, opacity=0.85)
             c.text(PXX + 192, py + 24, "0:00/0:05" if kind == "narration" else "0:00/0:02", 7.5, t["muted"], anchor="end", cls=done)
-        chip_x, chip_y = PXX + 6, (y + 8 if pk == "media" else y + (h - 40) / 2)
+        chip_x, chip_y = PXX + 6, (y + 8 if pk == "media" else y + (h - 40) / 2 + 10)
         q = c.span(1.3, g0, fade=0.05)
         c.raw(c.wrap(f'<circle cx="{chip_x + 10}" cy="{chip_y + 10}" r="10" fill="{t["onmedia"]}" opacity="0.55"/>', q))
         c.icon("hour-glass", chip_x + 5, chip_y + 5, 10, "#ffffff", cls=q + " " + c.pulse(1.2, 0.5))
@@ -890,6 +897,7 @@ def card_generate(theme):
         c.icon("spinner", chip_x + 5, chip_y + 5, 10, "#ffffff", cls=gen + " " + c.spin(1.0))
         for i in range(int(g1 - g0)):
             c.text(chip_x + 19, chip_y + 13.5, f"Generating {i + 1}s", 7.5, "#ffffff", cls=c.span(g0 + i, g0 + i + 1, fade=0.0), weight=500)
+        y += h + 6
     c.write()
 
 
@@ -1009,91 +1017,98 @@ def card_providers(theme):
     c = Card("providers", "Bring your own keys", "In Settings, a Cartesia key is pasted and validated: the badge goes Unverified, then Connected, next to OpenSlop's hosted models and an Anthropic key.", 12, theme)
     t = c.t
     c.bg()
-    # scrim + dialog
     c.rect(0, 0, W, H, "#000000", opacity=0.35)
+    P = 16  # the dialog's padding and the pane's inner padding
     DX, DY, DW, DH = 60, 16, 520, 328
     c.shadow(DX, DY, DW, DH, 8, 1.2)
     c.rect(DX, DY, DW, DH, t["recessed"], rx=8, stroke=t["border"])
     c.grain(DX, DY, DW, DH, 8)
-    c.text(DX + 14, DY + 20, "Settings", 11, t["fg"], weight=600)
-    c.icon("x", DX + DW - 24, DY + 10, 12, t["muted"])
+    c.text(DX + P, DY + P + 8, "Settings", 11, t["fg"], weight=600)
+    c.icon("x", DX + DW - P - 12, DY + P, 12, t["muted"])
     # nav
-    c.text(DX + 20, DY + 46, "Account", 10, t["fg"], weight=600)
-    c.rect(DX + 14, DY + 54, 110, 20, t["card"], rx=5)
-    c.icon("link", DX + 20, DY + 58, 11, t["fg"])
-    c.text(DX + 36, DY + 68, "Models", 10, t["fg"], weight=500)
-    # right pane
-    RX, RY, RW, RH = DX + 136, DY + 32, DW - 148, DH - 44
+    NX, NW = DX + P, 104
+    NY = DY + P + 24
+    c.text(NX + 8, NY + 11, "Account", 10, t["fg"], weight=600)
+    c.rect(NX, NY + 22, NW, 22, t["card"], rx=5)
+    c.icon("link", NX + 8, NY + 27.5, 11, t["fg"])
+    c.text(NX + 24, NY + 36.5, "Models", 10, t["fg"], weight=500)
+    # pane
+    RX, RY = NX + NW + 12, NY
+    RW, RH = DX + DW - P - RX, DY + DH - P - RY
     c.rect(RX, RY, RW, RH, t["card"], rx=10)
-    c.text(RX + 14, RY + 20, "Models", 11, t["fg"], weight=600)
-    c.text(RX + 14, RY + 42, "Providers", 10, t["muted"], weight=600)
-    c.button(RX + RW - 14 - 84, RY + 30, "Add providers", icon="plus", size=9, h=20, pad=8)
+    c.defs.append(f'<clipPath id="pane"><rect x="{RX}" y="{RY}" width="{RW}" height="{RH}" rx="10"/></clipPath>')
+    IX, IW = RX + P, RW - 2 * P  # content column
+    c.text(IX, RY + P + 8, "Models", 11, t["fg"], weight=600)
+    hy = RY + P + 26
+    c.text(IX, hy + 14, "Providers", 10, t["muted"], weight=600)
+    abw = 16 + tw("Add providers", 9, 500) + 17
+    c.button(IX + IW - abw, hy + 2, "Add providers", icon="plus", size=9, h=20, pad=8)
+    TP = 12  # tile padding
+    TH = 36
+
+    def tile_row(x, y, w, provider, name, status, right=None, cls=""):
+        c.provider_mark(provider, x + TP, y + 10, 16, cls=cls)
+        c.text(x + TP + 24, y + 21.5, name, 10, t["fg"], weight=500, cls=cls)
+        nx = x + TP + 24 + tw(name, 10, 500) + 8
+        if status == "valid":
+            c.badge(nx, y + 10, "Connected", "default", icon="check-circle", cls=cls)
+        elif status == "unverified":
+            c.badge(nx, y + 10, "Unverified", "caution", icon="hour-glass", cls=cls)
+        if right:
+            c.text(x + w - TP, y + 21.5, right, 8.5, t["muted"], anchor="end", cls=cls)
 
     def tile(y, h, provider, name, status, right=None, cls=""):
-        c.rect(RX + 14, y, RW - 28, h, t["elcard"], rx=8, stroke=t["border"], cls=cls)
-        c.provider_mark(provider, RX + 24, y + 9, 16, cls=cls)
-        c.text(RX + 46, y + 21, name, 10, t["fg"], weight=500, cls=cls)
-        nx = RX + 46 + tw(name, 10) + 8
-        if status == "valid":
-            c.badge(nx, y + 9.5, "Connected", "default", icon="check-circle", cls=cls)
-        elif status == "unverified":
-            c.badge(nx, y + 9.5, "Unverified", "caution", icon="hour-glass", cls=cls)
-        if right:
-            c.text(RX + RW - 24, y + 21, right, 8.5, t["muted"], anchor="end", cls=cls)
-        return nx
+        c.rect(IX, y, IW, h, t["elcard"], rx=8, stroke=t["border"], cls=cls)
+        tile_row(IX, y, IW, provider, name, status, right, cls)
 
-    y = RY + 54
-    tile(y, 34, "openslop", "OpenSlop", "valid", "Included with your account")
-    tile(y + 40, 34, "anthropic", "Anthropic", "valid", "••••k3Qp · added Sep 3")
+    y = hy + 30
+    tile(y, TH, "openslop", "OpenSlop", "valid", "Included with your account")
+    y += TH + 8
+    tile(y, TH, "anthropic", "Anthropic", "valid", "••••k3Qp · added Sep 3")
+    y += TH + 8
+    cy = y
     # Cartesia: the key form, then the connected tile
-    cy = y + 80
+    FH = 100
     form = c.span(0, 7.4, fade=0.15)
-    c.rect(RX + 14, cy, RW - 28, 96, t["elcard"], rx=8, stroke=t["border"], cls=form)
-    c.rect(RX + 14, cy, RW - 28, 96, "none", rx=8, stroke=t["accent"], cls=c.span(0, 0.6, fade=0.4))
-    c.provider_mark("cartesia", RX + 24, cy + 9, 16, cls=form)
-    c.text(RX + 46, cy + 21, "Cartesia", 10, t["fg"], weight=500, cls=form)
-    nx = RX + 46 + tw("Cartesia", 10) + 8
-    c.badge(nx, cy + 9.5, "Unverified", "caution", icon="hour-glass", cls=c.span(4.0, 7.4, fade=0.1))
-    c.text(RX + 24, cy + 42, "Cartesia API key", 9, t["fg"], cls=form)
-    c.rect(RX + 24, cy + 48, RW - 48, 20, t["elinput"], rx=5, stroke=t["border"], cls=form)
-    c.rect(RX + 24, cy + 48, RW - 48, 20, "none", rx=5, stroke=t["accent"], sw=1.5, cls=c.span(1.0, 3.6, fade=0.1))
-    c.text(RX + 31, cy + 61.5, "Paste in your API key here", 9, t["muted"], cls=c.span(0, 1.4, fade=0.05))
-    c.typewriter(RX + 31, cy + 61.5, "•" * 34, 1.4, 3.0, 9, t["fg"], cls=form)
-    # buttons: Save and validate · Cancel · Get a key
-    sv = c.span(0, 7.4, fade=0.1)
-    c.button(RX + 24, cy + 72, "Save and validate", icon="key", variant="primary", size=8.5, h=18, pad=7, cls=sv)
-    c.rect(RX + 22, cy + 70, 118, 22, "none", rx=7, stroke=t["accent"], sw=1.5, cls=c.span(3.5, 3.9, fade=0.08))
-    c.text(RX + 150, cy + 84, "Cancel", 8.5, t["muted"], cls=form)
-    c.text(RX + RW - 24 - 10, cy + 84, "Get a key", 8.5, t["fg"], anchor="end", weight=600, cls=form, extra='text-decoration="underline"')
-    c.icon("arrow-up-right", RX + RW - 32, cy + 76, 9, t["fg"], cls=form)
-    # validating: spinner in the badge slot
-    val = c.span(3.9, 4.0, fade=0.05)
-    # connected tile replaces the form
+    c.rect(IX, cy, IW, FH, t["elcard"], rx=8, stroke=t["border"], cls=form)
+    c.rect(IX, cy, IW, FH, "none", rx=8, stroke=t["accent"], cls=c.span(0, 0.6, fade=0.4))
+    tile_row(IX, cy, IW, "cartesia", "Cartesia", None, cls=form)
+    nx = IX + TP + 24 + tw("Cartesia", 10, 500) + 8
+    c.badge(nx, cy + 10, "Unverified", "caution", icon="hour-glass", cls=c.span(4.0, 7.4, fade=0.1))
+    c.text(IX + TP, cy + 44, "Cartesia API key", 9, t["fg"], cls=form)
+    c.rect(IX + TP, cy + 50, IW - 2 * TP, 22, t["elinput"], rx=5, stroke=t["border"], cls=form)
+    c.rect(IX + TP, cy + 50, IW - 2 * TP, 22, "none", rx=5, stroke=t["accent"], sw=1.5, cls=c.span(1.0, 3.6, fade=0.1))
+    c.text(IX + TP + 8, cy + 64.5, "Paste in your API key here", 9, t["muted"], cls=c.span(0, 1.4, fade=0.05))
+    c.typewriter(IX + TP + 8, cy + 64.5, "•" * 34, 1.4, 3.0, 9, t["fg"], cls=form)
+    sw_ = 14 + tw("Save and validate", 8.5, 500) + 16.5
+    c.button(IX + TP, cy + 78, "Save and validate", icon="key", variant="primary", size=8.5, h=18, pad=7, cls=form)
+    c.rect(IX + TP - 2, cy + 76, sw_ + 4, 22, "none", rx=7, stroke=t["accent"], sw=1.5, cls=c.span(3.5, 3.9, fade=0.08))
+    c.text(IX + TP + sw_ + 14, cy + 90, "Cancel", 8.5, t["muted"], cls=form)
+    c.text(IX + IW - TP - 12, cy + 90, "Get a key", 8.5, t["fg"], anchor="end", weight=600, cls=form, extra='text-decoration="underline"')
+    c.icon("arrow-up-right", IX + IW - TP - 9, cy + 82, 9, t["fg"], cls=form)
+    CH = 66
     con = c.appear(7.5, dy=0)
-    nx2 = tile(cy, 34, "cartesia", "Cartesia", "valid", "••••x9Lm · added just now", cls=con)
-    # buttons under the connected tile: Test · Replace key · Delete key
-    c.rect(RX + 14, cy + 34, RW - 28, 30, t["elcard"], rx=8, cls=con)
-    c.rect(RX + 14, cy, RW - 28, 64, "none", rx=8, stroke=t["border"], cls=con)
-    c.rect(RX + 15, cy + 28, RW - 30, 10, t["elcard"], cls=con)
-    bx = RX + 24
-    bx += c.button(bx, cy + 38, "Test", icon="refresh-cw", size=8.5, h=18, pad=7, cls=con) + 6
-    bx += c.button(bx, cy + 38, "Replace key", icon="pencil", size=8.5, h=18, pad=7, cls=con) + 6
-    c.button(RX + RW - 24 - 64, cy + 38, "Delete key", icon="trash", variant="destructive", size=8.5, h=18, pad=7, cls=con)
-    # ElevenLabs: not connected yet; it and the defaults move up once the form collapses
-    ey = cy + 104
-    up = c.shift(7.5, dy=-32, dur=0.3)
-    c.defs.append(f'<clipPath id="pane"><rect x="{RX}" y="{RY}" width="{RW}" height="{RH}" rx="10"/></clipPath>')
+    c.rect(IX, cy, IW, CH, t["elcard"], rx=8, stroke=t["border"], cls=con)
+    tile_row(IX, cy, IW, "cartesia", "Cartesia", "valid", "••••x9Lm · added just now", cls=con)
+    bx = IX + TP
+    bx += c.button(bx, cy + 40, "Test", icon="refresh-cw", size=8.5, h=18, pad=7, cls=con) + 6
+    c.button(bx, cy + 40, "Replace key", icon="pencil", size=8.5, h=18, pad=7, cls=con)
+    dw = 14 + tw("Delete key", 8.5, 500) + 16.5
+    c.button(IX + IW - TP - dw, cy + 40, "Delete key", icon="trash", variant="destructive", size=8.5, h=18, pad=7, cls=con)
+    # the rows below move up once the form collapses
+    up = c.shift(7.5, dy=-(FH - CH), dur=0.3)
     c.raw(f'<g clip-path="url(#pane)"><g class="{up}">')
-    c.rect(RX + 14, ey, RW - 28, 34, t["elcard"], rx=8, stroke=t["border"])
-    c.provider_mark("elevenlabs", RX + 24, ey + 9, 16)
-    c.text(RX + 46, ey + 21, "ElevenLabs", 10, t["fg"], weight=500)
-    c.text(RX + 46 + tw("ElevenLabs", 10) + 8, ey + 21, "Sound effects and music from a prompt.", 8.5, t["muted"])
-    c.button(RX + RW - 24 - 58, ey + 7, "Connect", icon="link", size=8.5, h=20, pad=7)
-    # account defaults peek
-    dy2 = ey + 52
-    c.raw(f'<line x1="{RX + 14}" y1="{dy2 - 10}" x2="{RX + RW - 14}" y2="{dy2 - 10}" stroke="{t["border"]}"/>')
-    c.text(RX + 14, dy2 + 4, "Account defaults", 10, t["muted"], weight=600)
-    c.text(RX + RW - 14, dy2 + 4, "Reset to recommended", 8.5, t["muted"], anchor="end")
+    ey = cy + FH + 8
+    c.rect(IX, ey, IW, TH, t["elcard"], rx=8, stroke=t["border"])
+    c.provider_mark("elevenlabs", IX + TP, ey + 10, 16)
+    c.text(IX + TP + 24, ey + 21.5, "ElevenLabs", 10, t["fg"], weight=500)
+    c.text(IX + TP + 24 + tw("ElevenLabs", 10, 500) + 8, ey + 21.5, "Sound effects and music from a prompt.", 8.5, t["muted"])
+    cw_ = 14 + tw("Connect", 8.5, 500) + 16.5
+    c.button(IX + IW - TP - cw_, ey + 8, "Connect", icon="link", size=8.5, h=20, pad=7)
+    dy2 = ey + TH + 16
+    c.raw(f'<line x1="{IX}" y1="{dy2}" x2="{IX + IW}" y2="{dy2}" stroke="{t["border"]}"/>')
+    c.text(IX, dy2 + 26, "Account defaults", 10, t["muted"], weight=600)
+    c.text(IX + IW, dy2 + 26, "Reset to recommended", 8.5, t["muted"], anchor="end")
     c.raw("</g></g>")
     c.write()
 
