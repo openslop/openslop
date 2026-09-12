@@ -88,7 +88,7 @@ Le copilote vit dans le panneau de gauche. Il lit le script, structure l'histoir
 
 ### Un storyboard, pas une zone de prompt
 
-Chaque scène est une pile de cartes : narration, personnage, image, image animée, clip, son, musique. Modifiez n'importe quel prompt, choisissez un modèle par carte, glissez pour réordonner, et insérez là où vous survolez.
+Chaque scène est une pile de cartes : narration, personnage, image, clip, son, musique. Modifiez n'importe quel prompt, choisissez un modèle par carte, glissez pour réordonner, et insérez là où vous survolez.
 
 [Le modèle de document →](../../lib/canvas)
 
@@ -105,7 +105,7 @@ Chaque scène est une pile de cartes : narration, personnage, image, image anim�
 
 ### Un clic génère tout
 
-Generate all (tout générer) met chaque élément en file d'attente et lance d'abord les dépendances : une image fixe avant son clip animé, un avatar avant l'image où il apparaît. Changez un prompt plus tard et la carte affiche **Stale** (obsolète) et pourquoi.
+Generate all (tout générer) met chaque élément en file d'attente et lance d'abord les dépendances : le clip dont une scène continue avant la scène elle-même, un avatar avant l'image où il apparaît. Changez un prompt plus tard et la carte affiche **Stale** (obsolète) et pourquoi.
 
 [Le graphe de génération →](../../ARCHITECTURE.md#generation-graph)
 

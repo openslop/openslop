@@ -357,7 +357,7 @@ describe("executeToolCall", () => {
 					},
 					{
 						id: "ai1",
-						type: "animated_image",
+						type: "clip",
 						sceneNumber: 2,
 						seconds: 1,
 						words: 0,
@@ -371,7 +371,7 @@ describe("executeToolCall", () => {
 			"Scene 1 image img1: 30.0s, from 90 words of dialogue after it (nar1)",
 		);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 2 animated_image ai1: 1.0s, nothing after it, so it holds the minimum",
+			"Scene 2 clip ai1: 1.0s, nothing after it, so it holds the minimum",
 		);
 	});
 
@@ -383,7 +383,7 @@ describe("executeToolCall", () => {
 				measureElementLengths: () => [
 					{
 						id: "ai1",
-						type: "animated_image",
+						type: "clip",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
@@ -408,7 +408,7 @@ describe("executeToolCall", () => {
 
 		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 animated_image ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
+			"Scene 1 clip ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain("1 image still left alone.");
@@ -421,7 +421,7 @@ describe("executeToolCall", () => {
 				measureElementLengths: () => [
 					{
 						id: "ai1",
-						type: "animated_image",
+						type: "clip",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
@@ -511,9 +511,7 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain(
-			"No animated_image or clip in scope.",
-		);
+		expect(outcome.ok && outcome.output).toContain("No clip in scope.");
 	});
 
 	it("says the canvas has no visuals rather than reporting an empty table", async () => {

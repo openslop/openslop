@@ -191,7 +191,6 @@
 	--media-character: #d97706;
 	--media-image: #0891b2;
 	--media-clip: #4f46e5;
-	--media-animated: #c026d3;
 	--media-music: #7c3aed;
 	--media-sound: #059669;
 	--media-narration: var(--grey-600);
@@ -311,7 +310,6 @@
 	--media-character: #fbbf24;
 	--media-image: #22d3ee;
 	--media-clip: #818cf8;
-	--media-animated: #e879f9;
 	--media-music: #a78bfa;
 	--media-sound: #34d399;
 	--media-narration: var(--grey-600);
@@ -392,7 +390,6 @@
 	--color-media-character: var(--media-character);
 	--color-media-image: var(--media-image);
 	--color-media-clip: var(--media-clip);
-	--color-media-animated: var(--media-animated);
 	--color-media-music: var(--media-music);
 	--color-media-sound: var(--media-sound);
 	--color-media-narration: var(--media-narration);

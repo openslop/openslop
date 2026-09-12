@@ -12,9 +12,9 @@ const elementWith = (
 ): CanvasContentElement =>
 	({
 		id: "el",
-		type: "animated_image",
+		type: "clip",
 		...splitAttributes(customAttributes),
-		children: [{ id: "text", type: "animated_image", text: "" }],
+		children: [{ id: "text", type: "clip", text: "" }],
 	}) as unknown as CanvasContentElement;
 
 const motionSpec: AttributeSpec = {

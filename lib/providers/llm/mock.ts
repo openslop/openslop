@@ -11,7 +11,7 @@ import type {
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
-import { animateImageScene } from "@/lib/script/refine/animatePrompt";
+import { animateClipScene } from "@/lib/script/refine/animatePrompt";
 import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
 import type { LLMProvider } from "./base";
@@ -30,7 +30,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
-<animated_image videoPrompt="slow pan across the village to the forest path">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</animated_image>
+<clip>Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path leading into the woods. Birds fly overhead and flowers bloom along the path.</clip>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
@@ -52,7 +52,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound>footsteps on dirt path</sound>
 
-<animated_image videoPrompt="gentle pan upward through the forest canopy" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</animated_image>
+<clip characters="Owl">Gentle pan upward through the forest canopy to Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) perched high in the branches of an ancient oak, sunlight filtering through the leaves around her.</clip>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
@@ -102,7 +102,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<animated_image videoPrompt="slow push-in toward the cottage door" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</animated_image>
+<clip characters="Granny">Slow push-in toward the open door of a small thatched cottage nestled among ancient oaks, smoke curling from the chimney and a window box of bright marigolds, where Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) leans on a wooden cane, smiling warmly.</clip>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;
@@ -177,7 +177,7 @@ export class MockLLM implements LLMProvider {
 }
 
 const ELEMENT_ID = /id="([^"]+)"/;
-const IMAGE_ID = /<image[^>]*\bid="([^"]+)"/;
+const CLIP_ID = /<clip[^>]*\bid="([^"]+)"/;
 
 /** What a script reads as between one scene marker and the next. */
 const sceneSection = (script: string, scene: number): string =>
@@ -246,7 +246,7 @@ const MOCK_THOUGHT =
  */
 function mockCall(prompt: LanguageModelV3Prompt) {
 	const asked = lastUserText(prompt);
-	const scene = animateImageScene(asked);
+	const scene = animateClipScene(asked);
 	const last = lastToolResult(prompt);
 
 	// The canvas is never in the prompt, so a step that has not read it, or that
@@ -265,7 +265,7 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 	const elementId =
 		scene === null
 			? ELEMENT_ID.exec(script)?.[1]
-			: IMAGE_ID.exec(sceneSection(script, scene))?.[1];
+			: CLIP_ID.exec(sceneSection(script, scene))?.[1];
 
 	if (!elementId) {
 		return {
@@ -286,19 +286,14 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		toolName: "edit_script",
 		input: {
 			ops: [
-				scene !== null
-					? {
-							op: "set",
-							id: elementId,
-							type: "animated_image",
-							attrs: { videoPrompt: "slow cinematic push-in" },
-							deps: { still: elementId },
-						}
-					: {
-							op: "set",
-							id: elementId,
-							text: "A mock edit, from the agent running without an API key.",
-						},
+				{
+					op: "set",
+					id: elementId,
+					text:
+						scene === null
+							? "A mock edit, from the agent running without an API key."
+							: "Slow cinematic push-in, the light shifting gently across the frame.",
+				},
 			],
 		},
 	};

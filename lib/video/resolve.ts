@@ -4,7 +4,13 @@ import { getPromptText } from "@/lib/generation/inputs";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ResolvedElement } from "./types";
-import { getLoop, getLoops, getMotion, getVolume } from "./elementAttributes";
+import {
+	getLoop,
+	getTrimToDialogue,
+	getLoops,
+	getMotion,
+	getVolume,
+} from "./elementAttributes";
 
 export function resolveElements(
 	elements: CanvasElement[],
@@ -42,6 +48,7 @@ export function resolveElements(
 				durationSec: snapshot.result.durationSec,
 				loops: getLoops(element),
 				loop: getLoop(element),
+				trimToDialogue: getTrimToDialogue(element),
 				volume: getVolume(element),
 				motion: getMotion(element),
 				captionTimestamps,

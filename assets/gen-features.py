@@ -30,7 +30,7 @@ THEMES = {
         cautionsoft="#f6bd6026", cautionsoftfg="#6f4509", success="#3e8b6a", destructive="#e62324",
         scrubtrack="#e2dde0", scrubprog="#655c61", scrubhover="#d7c7d1", panelfg="#26171d", panellabel="#6a595f",
         orb0="#d99b1f", orb1="#9c3813", onmedia="#000000", onmediafg="#ffffff",
-        m_character="#d97706", m_image="#0891b2", m_clip="#4f46e5", m_animated="#c026d3", m_music="#7c3aed",
+        m_character="#d97706", m_image="#0891b2", m_clip="#4f46e5", m_music="#7c3aed",
         m_sound="#059669", m_narration="#6a595f", dot="#26171d", dotop="0.10", shadow="#26171d", shadowop="0.10",
         blob="#f5d3a3", blobop="0.9",
     ),
@@ -43,7 +43,7 @@ THEMES = {
         cautionsoft="#a7723159", cautionsoftfg="#e4c69a", success="#489872", destructive="#f73b3b",
         scrubtrack="#656264", scrubprog="#ffffff", scrubhover="#c2c0c1", panelfg="#e0dbde", panellabel="#f9e6f6",
         orb0="#ffbf48", orb1="#be4a1d", onmedia="#000000", onmediafg="#ffffff",
-        m_character="#fbbf24", m_image="#22d3ee", m_clip="#818cf8", m_animated="#e879f9", m_music="#a78bfa",
+        m_character="#fbbf24", m_image="#22d3ee", m_clip="#818cf8", m_music="#a78bfa",
         m_sound="#34d399", m_narration="#9d8b93", dot="#f1eaed", dotop="0.08", shadow="#000000", shadowop="0.35",
         blob="#4a3a2a", blobop="0.9",
     ),
@@ -272,7 +272,7 @@ class Card:
         """The element card's tinted type pill: bg media/15, text media."""
         t = self.t
         tint = t["m_" + kind]
-        icon = {"narration": "voice", "character": "user", "image": "image", "animated": "motion", "clip": "video", "sound": "wave-sine", "music": "music"}[kind]
+        icon = {"narration": "voice", "character": "user", "image": "image", "clip": "video", "sound": "wave-sine", "music": "music"}[kind]
         bg = mix(t["elcard"], tint, 0.15)
         return self.pill(x, y, label, size, bg, tint, icon=icon, h=h, pad=5, cls=cls, weight=500, icon_size=11)
 
@@ -591,7 +591,7 @@ def card_describe(theme):
 # =====================================================================================
 # 2. Sloppy — the copilot in the left panel
 # =====================================================================================
-KIND_ICON = {"narration": "voice", "character": "user", "image": "image", "animated": "motion", "clip": "video", "sound": "wave-sine", "music": "music"}
+KIND_ICON = {"narration": "voice", "character": "user", "image": "image", "clip": "video", "sound": "wave-sine", "music": "music"}
 
 
 def card_sloppy(theme):
@@ -708,7 +708,7 @@ def card_sloppy(theme):
     compact(SY + 212, "character", "Takeshi: “Then keep up.”", 8.6)
     c.raw(c.wrap(f'<line x1="{SX + 14}" y1="{SY + 228}" x2="{SX + SW - 14}" y2="{SY + 228}" stroke="{t["border"]}"/>', c.appear(8.9)))
     scene_head(SY + 248, 3, "0:26 – 0:38", "12s", 8.9)
-    compact(SY + 268, "animated", "Slow motion on the drift, smoke billowing…", 9.1)
+    compact(SY + 268, "clip", "Slow motion on the drift, smoke billowing…", 9.1)
     compact(SY + 288, "sound", "tyre screech", 9.4)
     compact(SY + 308, "narration", "The rear wheels broke loose.", 9.7)
     c.text(SX + 36, SY + 328, "+2 more", 8, t["muted"], cls=c.appear(9.9))
@@ -783,7 +783,7 @@ def card_canvas(theme):
     mx, my = SX + 30, y2 + 28
     c.shadow(mx, my, 132, 128, 8, 0.8, cls=menu)
     c.rect(mx, my, 132, 128, t["card"], rx=8, stroke=t["border"], cls=menu)
-    types = [("narration", "Narration"), ("character", "Character"), ("image", "Image"), ("animated", "Animated image"), ("clip", "Clip"), ("sound", "Sound"), ("music", "Music")]
+    types = [("narration", "Narration"), ("character", "Character"), ("image", "Image"), ("clip", "Clip"), ("sound", "Sound"), ("music", "Music")]
     for i, (k, lab) in enumerate(types):
         ry = my + 6 + i * 17
         if k == "sound":
@@ -843,15 +843,15 @@ def card_generate(theme):
     COLX = CX + CW + 24
     COLW = SX + SW - 14 - COLX
     rows = [
-        ("animated", "Animated image", ("Seedance 2 Fast", "runware"), "Seedream 5 Lite", ["Slow motion on the drift, smoke billowing off the", "rear tyres as the car swings back into line."], "media"),
+        ("clip", "Clip", ("Seedance 2 Fast", "runware"), None, ["Slow motion on the drift, smoke billowing off the", "rear tyres as the car swings back into line."], "media"),
         ("narration", "Narration", None, None, ["The rear wheels broke loose. Takeshi kept the", "wheel light and let the silvia swing."], "audio"),
         ("sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), None, ["tyre screech, long and close"], "audio"),
     ]
-    timing = {"animated": (1.6, 6.8), "narration": (1.6, 4.6), "sound": (4.6, 7.6)}
+    timing = {"clip": (1.6, 6.8), "narration": (1.6, 4.6), "sound": (4.6, 7.6)}
     y = SY + 34
     for kind, label, model, badge, lines, pk in rows:
         h, fy, top = c.element_card(CX, y, CW, kind, label, model, lines, badge=badge, footer=True)
-        if kind == "animated":
+        if kind == "clip":
             # the second line is retyped late in the loop with an edit on the end
             ln = lines[1]
             c.rect(CX + 8, top + 18, CW - 16, 13, t["elinput"])
@@ -865,7 +865,7 @@ def card_generate(theme):
             s = c.span(t0, t1, fade=0.08)
             bw = tw(lab, 8.5, 500) + 14 + 16.5
             c.button(fx - bw, fy, lab, icon=ic, h=18, size=8.5, pad=7, cls=s, icon_cls=(s + " " + c.spin(1.0)) if spin else s)
-        if kind == "animated":
+        if kind == "clip":
             st = c.appear(10.6)
             rw = tw("Regenerate", 8.5, 500) + 14 + 16.5
             bx = fx - rw - 6 - (tw("Stale", 9, 500) + 12 + 14)
@@ -1006,7 +1006,7 @@ def card_timeline(theme):
     clip("film", 0, 4, "image", "A neon-lit tokyo street", 1, "city0")
     clip("film", 4, 7, "clip", "Ryu steps out of the silvia", 2, "conf1")
     clip("film", 7, 10, "clip", "Sideways through the corner", 3, "drift2")
-    clip("film", 10, 12, "animated", "Slow-mo, smoke off the tyres", 4, "smoke0")
+    clip("film", 10, 12, "clip", "Slow-mo, smoke off the tyres", 4, "smoke0")
     clip("voice", 0, 3.6, "narration", "The engine caught…", wave_seed=2)
     clip("voice", 4, 6.6, "character", "Ryu: Tonight we settle this", wave_seed=6)
     clip("voice", 7, 9.6, "narration", "The rear wheels broke loose", wave_seed=4)

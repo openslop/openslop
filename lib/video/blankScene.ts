@@ -18,6 +18,7 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		durationSec: opener.durationSec,
 		loops: 1,
 		loop: false,
+		trimToDialogue: true,
 		volume: 0,
 		motion: "none",
 	};

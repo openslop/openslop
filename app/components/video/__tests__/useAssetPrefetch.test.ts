@@ -30,6 +30,7 @@ function el(url: string): ResolvedElement {
 		durationSec: 1,
 		loops: 1,
 		loop: false,
+		trimToDialogue: true,
 		volume: 1,
 		motion: "none",
 	};

@@ -17,13 +17,13 @@ const line = (length: ElementLength) =>
 
 export const measureElementLengths = defineTool({
 	description: dedent`
-	  Measure each visual: how long every image, animated_image and clip on the canvas is on
+	  Measure each visual: how long every image and clip on the canvas is on
 	  screen, and which dialogue decides it. For the whole video's runtime, use
 	  measure_total_length instead.
 
 	  A visual is on screen for as long as the dialogue that follows it, up to the next
 	  visual, about ${WORDS_PER_SECOND} spoken words a second. The \`duration\` on an
-	  animated_image or clip is the generated video's length, not its time on screen.
+	  clip is the generated video's length, not its time on screen.
 
 	  Run this whenever the user asks how long something is shown, or asks to change it. To
 	  shorten a visual, split the dialogue after it and insert a visual at the split; to

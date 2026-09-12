@@ -2,6 +2,7 @@ import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { TRIM_TO_DIALOGUE_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { formatTimeRange } from "@/lib/video/timestamps";
 import { cn } from "@/lib/utils";
@@ -72,9 +73,18 @@ export function TimelineClip({
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
 	const range = formatTimeRange(clip.start, clip.duration);
-	const accessibleLabel = sceneNumber
-		? `Scene ${sceneNumber}, ${config.label}, ${range}`
-		: `${config.label}, ${range}`;
+	const timing =
+		sceneNumber && config.outputKind === "video"
+			? TRIM_TO_DIALOGUE_FACES[element.trimToDialogue ? "on" : "off"]
+			: undefined;
+	const accessibleLabel = [
+		sceneNumber && `Scene ${sceneNumber}`,
+		config.label,
+		range,
+		timing?.label,
+	]
+		.filter(Boolean)
+		.join(", ");
 
 	return (
 		<div
@@ -109,6 +119,16 @@ export function TimelineClip({
 				<span className="absolute bottom-0.5 left-0.5 max-w-full truncate rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 font-numeric text-badge-xs text-on-media-foreground">
 					{fit(`Scene ${sceneNumber}`, width)}
 				</span>
+			) : null}
+			{timing ? (
+				<SimpleTooltip label={`${timing.label}: ${timing.hint}`}>
+					<span
+						aria-hidden="true"
+						className="absolute right-0.5 bottom-0.5 flex size-4 items-center justify-center rounded-sm bg-on-media/65 text-on-media-foreground"
+					>
+						<timing.icon size={HEADER_ICON_SIZE} />
+					</span>
+				</SimpleTooltip>
 			) : null}
 			{selected ? <SelectedWash /> : null}
 		</div>

@@ -16,7 +16,7 @@ const parsed = (type: string): ParsedElement => ({
 describe("isCanvasElementType", () => {
 	it("accepts declared element types", () => {
 		expect(isCanvasElementType("image")).toBe(true);
-		expect(isCanvasElementType("animated_image")).toBe(true);
+		expect(isCanvasElementType("clip")).toBe(true);
 	});
 
 	it("rejects scene, metadata and unknown tags", () => {

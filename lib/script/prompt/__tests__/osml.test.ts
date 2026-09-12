@@ -40,8 +40,8 @@ describe("osmlSpec", () => {
 		);
 	});
 
-	it("deters motion on animated_image, which competes with the videoPrompt animation", () => {
+	it("deters motion on clip, which competes with the motion the video model generates", () => {
 		expect(spec).toMatch(/motion: normally set to "none"/);
-		expect(spec).not.toMatch(/<animated_image[^>]*\smotion=/);
+		expect(spec).not.toMatch(/<clip[^>]*\smotion=/);
 	});
 });

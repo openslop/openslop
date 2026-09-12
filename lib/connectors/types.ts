@@ -13,7 +13,6 @@ export const ASSET_CONNECTOR_TYPES = [
 	"music",
 	"sfx",
 	"image",
-	"animated_image",
 	"tts",
 	"video",
 ] as const;
@@ -59,7 +58,6 @@ export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	image: ModelEntry;
-	animated_image: VideoModelEntry;
 	video: VideoModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
@@ -201,15 +199,6 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	width?: number;
 	height?: number;
 	referenceImages?: string[];
-};
-
-/** A video generation whose conditioning frame comes from the element's still. */
-export type AnimatedImageGenerateParams = VideoGenerateParams & {
-	videoPrompt?: string;
-	/** The still's own model and format. The still-frame plugin keeps them off the video call. */
-	imageProvider?: string;
-	imageModel?: string;
-	format?: ImageFormat;
 };
 
 export type TTSResult = AssetResult & {

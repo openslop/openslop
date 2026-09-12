@@ -88,7 +88,7 @@ The copilot lives in the left panel. It reads the script, outlines the story, wr
 
 ### A storyboard, not a prompt box
 
-Every scene is a stack of cards: narration, character, image, animated image, clip, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
+Every scene is a stack of cards: narration, character, image, clip, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
 
 [The document model →](lib/canvas)
 
@@ -105,7 +105,7 @@ Every scene is a stack of cards: narration, character, image, animated image, cl
 
 ### One click generates everything
 
-Generate all queues every element and runs dependencies first: a still frame before its animated clip, an avatar before the image it appears in. Change a prompt later and the card says **Stale** and why.
+Generate all queues every element and runs dependencies first: the clip a scene continues from before the scene itself, an avatar before the image it appears in. Change a prompt later and the card says **Stale** and why.
 
 [The generation graph →](ARCHITECTURE.md#generation-graph)
 

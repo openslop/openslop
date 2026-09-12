@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { ElementLength } from "../elementLengths";
 import { measureElementLengths } from "../elementLengths";
-import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "../scene-builder";
 import {
 	DURATION_FIT_LEEWAY_SEC,
 	durationFits,
@@ -11,7 +10,7 @@ import {
 
 const length = (over: Partial<ElementLength> = {}): ElementLength => ({
 	id: "e1",
-	type: "animated_image",
+	type: "clip",
 	sceneNumber: 1,
 	seconds: 10,
 	words: 30,
@@ -55,7 +54,7 @@ const words = (count: number) => Array(count).fill("word").join(" ");
 
 const node = (
 	id: string,
-	type: "animated_image" | "narration",
+	type: "clip" | "narration",
 	text: string,
 	generationAttributes?: Record<string, string>,
 ) => ({
@@ -72,7 +71,7 @@ describe("durationFits over a measured canvas", () => {
 				id: "s1",
 				type: "scene",
 				children: [
-					node("clip1", "animated_image", "A pan.", { duration: "4" }),
+					node("clip1", "clip", "A pan.", { duration: "4" }),
 					node("n1", "narration", words(15)),
 				],
 			},
@@ -83,9 +82,7 @@ describe("durationFits over a measured canvas", () => {
 			},
 		] as unknown as Descendant[];
 
-		const [fit] = durationFits(
-			measureElementLengths(script, DEFAULT_TRIM_VISUALS_TO_DIALOGUE),
-		);
+		const [fit] = durationFits(measureElementLengths(script));
 
 		expect(fit.length.id).toBe("clip1");
 		expect(fit.duration).toBe(11);

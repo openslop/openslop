@@ -107,16 +107,17 @@ describe("generateForElement", () => {
 
 	it("forwards dependency results to the connector", async () => {
 		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
+		// The canvas image a clip opens on, resolved by the queue before it ran.
 		const dependencies = {
-			"el-1:still": {
-				imageUrl: "https://example.com/still.png",
+			"img-1": {
+				imageUrl: "https://example.com/frame.png",
 				durationSec: 0,
 			},
 		};
 
 		await generateForElement(
-			makeJob("animated_image"),
-			inputs("a sunset", { videoPrompt: "pan" }),
+			makeJob("video"),
+			inputs("a sunset", { startFrame: "img-1" }),
 			dependencies,
 		);
 

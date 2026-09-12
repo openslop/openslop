@@ -19,7 +19,9 @@ export type AttributeEdit =
 	| { kind: "model"; type: ConnectorType; providerAttr: string }
 	| { kind: "text"; placeholder?: string; rows?: number }
 	/** A list of image URLs, edited as tiles. */
-	| { kind: "images" };
+	| { kind: "images" }
+	/** One picture to open on: another visual's id, or an image URL. */
+	| { kind: "frame" };
 
 export interface AttributeSpec {
 	label: string;

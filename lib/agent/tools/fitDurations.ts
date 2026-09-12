@@ -45,7 +45,7 @@ type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
 
 const headline = ({ fits, changes, short, applied }: Counts) => {
 	if (fits === 0)
-		return "No animated_image or clip in scope. Images carry no duration and already stretch to the dialogue under them.";
+		return "No clip in scope. Images carry no duration and already stretch to the dialogue under them.";
 	if (changes > 0)
 		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
 	if (short > 0)
@@ -55,7 +55,7 @@ const headline = ({ fits, changes, short, applied }: Counts) => {
 
 export const fitDurations = defineTool({
 	description: dedent`
-	  Fit every animated_image and clip to the dialogue that runs under it: set each one's
+	  Fit every clip to the dialogue that runs under it: set each one's
 	  \`duration\` to just cover the speech that follows it, up to the next visual, plus
 	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter clips stop dead under long dialogue;
 	  longer ones are generated video nobody sees.

@@ -117,7 +117,6 @@ export const Minutes3 = icon("minutes-3");
 export const MoreHorizontal = icon("more-horizontal");
 export const Mic = icon("mic");
 export const MonitorOff = icon("monitor-off");
-export const Motion = icon("motion");
 export const Palette = icon("theme-swatches");
 export const PanelLeft = icon("sidebar-left");
 export const PanelRight = icon("layout-alt-4");

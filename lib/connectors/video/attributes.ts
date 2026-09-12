@@ -5,19 +5,25 @@ import {
 	loopDef,
 	motionDef,
 	resolutionDef,
+	trimToDialogueDef,
 	volumeDef,
 } from "../attributes/common";
+import { referenceImagesDef } from "../attributes/referenceImages";
 import { modelEntry } from "../models";
 import type { ModelRef } from "../types";
+import { startFrameDef } from "./startFrame";
 
-/** How a generated clip renders and plays back, whichever element type made it. */
-export const clipPlaybackDefs = (model: ModelRef): AttributeDef[] => [
+/** Every current video model takes a conditioning frame; one that does not leaves `startFrameDef` out. */
+const videoDefs = (model: ModelRef): AttributeDef[] => [
+	startFrameDef,
+	referenceImagesDef,
 	resolutionDef(modelEntry("video", model).resolutions),
 	durationDef(DEFAULT_DURATION),
+	trimToDialogueDef,
 	loopDef,
 	volumeDef("5"),
 	motionDef("none"),
 ];
 
 export const videoAttributesFor = (model: ModelRef) =>
-	AttributeSchema.from(clipPlaybackDefs(model));
+	AttributeSchema.from(videoDefs(model));

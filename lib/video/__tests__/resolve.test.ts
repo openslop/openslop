@@ -79,6 +79,7 @@ describe("resolveElements", () => {
 			durationSec: 3,
 			loops: 1,
 			loop: false,
+			trimToDialogue: true,
 			volume: 10,
 			motion: "none",
 		});
@@ -94,6 +95,7 @@ describe("resolveElements", () => {
 			durationSec: 8,
 			loops: 1,
 			loop: false,
+			trimToDialogue: true,
 			volume: 10,
 			motion: "none",
 		});
@@ -128,7 +130,6 @@ describe("resolveElements", () => {
 	it("assigns correct roles and layers for all element types", () => {
 		const types: CanvasContentElement["type"][] = [
 			"image",
-			"animated_image",
 			"clip",
 			"narration",
 			"character",
@@ -143,7 +144,6 @@ describe("resolveElements", () => {
 		const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
 		expect(roleMap).toEqual({
 			image: "foreground",
-			animated_image: "foreground",
 			clip: "foreground",
 			narration: "overlay",
 			character: "overlay",
@@ -154,7 +154,6 @@ describe("resolveElements", () => {
 		const layerMap = Object.fromEntries(resolved.map((r) => [r.type, r.layer]));
 		expect(layerMap).toEqual({
 			image: "visual",
-			animated_image: "visual",
 			clip: "visual",
 			narration: "audio",
 			character: "audio",
@@ -213,6 +212,18 @@ describe("resolveElements", () => {
 		expect(resolved[0].volume).toBe(0);
 		expect(resolved[1].volume).toBe(10);
 		expect(resolved[2].volume).toBe(10);
+	});
+
+	it("reads trimToDialogue from layout attributes, trimming unless told not to", () => {
+		const elements = [
+			makeElement("c1", "clip"),
+			makeElement("c2", "clip", { trimToDialogue: "false" }),
+			makeElement("c3", "clip", { trimToDialogue: "true" }),
+		];
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
+			captionsEnabled: true,
+		});
+		expect(resolved.map((r) => r.trimToDialogue)).toEqual([true, false, true]);
 	});
 
 	it("keeps a blank volume attribute audible in the rendered layout", () => {

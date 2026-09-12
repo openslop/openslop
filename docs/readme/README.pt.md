@@ -88,7 +88,7 @@ O copiloto mora no painel da esquerda. Ele lê o roteiro, esboça a história, e
 
 ### Um storyboard, não uma caixa de prompt
 
-Cada cena é uma pilha de cartões: narração, personagem, imagem, imagem animada, clipe, som, música. Edite qualquer prompt, escolha um modelo por cartão, arraste para reordenar e insira onde você passar o mouse.
+Cada cena é uma pilha de cartões: narração, personagem, imagem, clipe, som, música. Edite qualquer prompt, escolha um modelo por cartão, arraste para reordenar e insira onde você passar o mouse.
 
 [O modelo de documento →](../../lib/canvas)
 
@@ -105,7 +105,7 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, imagem anima
 
 ### Um clique gera tudo
 
-**Generate all** (gerar tudo) coloca cada elemento na fila e roda as dependências primeiro: um quadro parado antes do clipe animado dele, um avatar antes da imagem em que ele aparece. Mude um prompt depois e o cartão diz **Stale** (desatualizado) e o motivo.
+**Generate all** (gerar tudo) coloca cada elemento na fila e roda as dependências primeiro: o clipe do qual uma cena continua antes da própria cena, um avatar antes da imagem em que ele aparece. Mude um prompt depois e o cartão diz **Stale** (desatualizado) e o motivo.
 
 [O grafo de geração →](../../ARCHITECTURE.md#generation-graph)
 

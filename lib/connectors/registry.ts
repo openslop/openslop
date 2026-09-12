@@ -1,10 +1,8 @@
 import set from "lodash/fp/set";
-import { buildAnimatedImagePlugins } from "./animated_image/plugins/animated-image-chain";
-import { buildImagePlugins } from "./image/plugins/imageChain";
-import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
-import { createDimensionsPlugin } from "./plugins/dimensions";
+import { buildVisualPlugins } from "./image/plugins/imageChain";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
+import { createStartFramePlugin } from "./video/plugins/start-frame";
 import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
 
 /**
@@ -18,10 +16,9 @@ export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	llm: {},
 	tts: { plugins: [createMetadataVoicePlugin(), createVoiceSearchPlugin()] },
-	image: { plugins: buildImagePlugins() },
-	animated_image: { plugins: buildAnimatedImagePlugins() },
+	image: { plugins: buildVisualPlugins("image") },
 	video: {
-		plugins: [createReferenceImagesPlugin(), createDimensionsPlugin("video")],
+		plugins: [createStartFramePlugin(), ...buildVisualPlugins("video")],
 	},
 	sfx: {},
 	music: {},

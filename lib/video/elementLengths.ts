@@ -8,7 +8,7 @@ import {
 	type CanvasContentElement,
 	type CanvasElementType,
 } from "@/lib/canvas/types";
-import { getDuration } from "./elementAttributes";
+import { getDuration, getTrimToDialogue } from "./elementAttributes";
 import { MIN_DURATION_SEC } from "./scene-builder";
 import { secondsForWords } from "./videoLength";
 
@@ -38,10 +38,12 @@ const ownDuration = (element: CanvasContentElement): number | undefined =>
 		? getDuration(element)
 		: undefined;
 
-const toLength = (
-	{ element, sceneNumber, words, dialogueIds }: Span,
-	trimVisualsToDialogue: boolean,
-): ElementLength => {
+const toLength = ({
+	element,
+	sceneNumber,
+	words,
+	dialogueIds,
+}: Span): ElementLength => {
 	const durationSec = ownDuration(element);
 	return {
 		id: element.id,
@@ -52,7 +54,7 @@ const toLength = (
 		durationSec,
 		seconds: Math.max(
 			secondsForWords(words),
-			trimVisualsToDialogue ? 0 : (durationSec ?? 0),
+			getTrimToDialogue(element) ? 0 : (durationSec ?? 0),
 			MIN_DURATION_SEC,
 		),
 	};
@@ -65,7 +67,6 @@ const toLength = (
  */
 export function measureElementLengths(
 	descendants: Descendant[],
-	trimVisualsToDialogue: boolean,
 ): ElementLength[] {
 	const spans: Span[] = [];
 	let sceneNumber = 0;
@@ -86,5 +87,5 @@ export function measureElementLengths(
 		}
 	}
 
-	return spans.map((span) => toLength(span, trimVisualsToDialogue));
+	return spans.map(toLength);
 }

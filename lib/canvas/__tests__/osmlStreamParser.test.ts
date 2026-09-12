@@ -158,16 +158,14 @@ describe("OSMLStreamParser", () => {
 		expect(flatAttributes(nodes[0]).id).toBeUndefined();
 	});
 
-	it("parses <animated_image> with a videoPrompt attribute", () => {
+	it("parses <clip> with a startFrame attribute", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk(
-			'<animated_image videoPrompt="slow zoom in">a dark forest</animated_image>',
-		);
+		s.appendChunk('<clip startFrame="img1">a dark forest</clip>');
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("animated_image");
-		expect(flatAttributes(nodes[0]).videoPrompt).toBe("slow zoom in");
+		expect(nodes[0].type).toBe("clip");
+		expect(flatAttributes(nodes[0]).startFrame).toBe("img1");
 		expect(getElementText(nodes[0])).toContain("a dark forest");
 	});
 
@@ -185,20 +183,16 @@ describe("parseOSML", () => {
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
 		const [node] = parseOSML(
-			'<animated_image provider="runware" model="Seedance 2 Fast" imageProvider="runware" imageModel="Seedream 5 Lite">a sunset</animated_image>',
+			'<clip provider="runware" model="Seedance 2 Fast">a sunset</clip>',
 		);
 		expect(flatAttributes(node)).toMatchObject({
 			provider: "runware",
 			model: "Seedance 2 Fast",
-			imageProvider: "runware",
-			imageModel: "Seedream 5 Lite",
 		});
 	});
 
 	it("replaces a model the catalog no longer offers", () => {
-		const [node] = parseOSML(
-			'<animated_image model="Slop Video v0">a sunset</animated_image>',
-		);
+		const [node] = parseOSML('<clip model="Slop Video v0">a sunset</clip>');
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_VIDEO_MODEL);
 	});
 

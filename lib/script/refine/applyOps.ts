@@ -2,11 +2,10 @@ import { Editor, Path, Transforms } from "slate";
 import {
 	findNodeById,
 	mergeAttrs,
+	retypeNode,
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
 import { insertElement } from "@/lib/canvas/insertElement";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import { preservedAttributes } from "@/lib/canvas/preservedAttributes";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { RefineOp } from "./types";
 
@@ -121,20 +120,7 @@ function replaceNodeType(
 	defaultModels?: ConnectorModels,
 ): NodeEntry | null {
 	const [element, path] = entry;
-	const replacement = createCanvasNode(type, {
-		id,
-		attrs: preservedAttributes(element, type),
-		defaultModels,
-	});
-	Transforms.setNodes(
-		editor,
-		{
-			type,
-			generationAttributes: replacement.generationAttributes,
-			layoutAttributes: replacement.layoutAttributes,
-		},
-		{ at: path },
-	);
+	retypeNode(editor, path, element, type, { defaultModels });
 	return findNodeById(editor, id);
 }
 

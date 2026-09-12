@@ -1,4 +1,4 @@
-import { Freeze, Repeat } from "@/components/ui/icon";
+import { Film, Freeze, Repeat, Waveform } from "@/components/ui/icon";
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
 import {
@@ -77,5 +77,26 @@ export const loopDef: AttributeDef = {
 		off: { icon: Freeze, label: "Freeze on last frame" },
 		on: { icon: Repeat, label: "Loop" },
 	},
+	default: "true",
+};
+
+/**
+ * Trimmed, a visual is on screen for the dialogue that follows it and no
+ * longer. Untrimmed, it plays out in full and the dialogue can only extend it.
+ * The same faces name the mode wherever it shows, on the card and the timeline.
+ */
+export const TRIM_TO_DIALOGUE_FACES = {
+	on: {
+		icon: Waveform,
+		label: "Trim to dialogue",
+		hint: "Trimmed to the dialogue under it",
+	},
+	off: { icon: Film, label: "Play in full", hint: "Plays its full length" },
+} as const;
+
+export const trimToDialogueDef: AttributeDef = {
+	key: "trimToDialogue",
+	label: "Timing",
+	edit: { kind: "toggle", ...TRIM_TO_DIALOGUE_FACES },
 	default: "true",
 };

@@ -8,6 +8,8 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import {
 	isElementNode,
+	orphanNode,
+	type BuildContext,
 	type ElementNode,
 	type GenerationNode,
 	type JobNode,
@@ -51,7 +53,9 @@ const toNode = (
 export function nodeBuilder(
 	registry: ConnectorRegistry,
 	state: ProjectData,
+	elementById: BuildContext["elementById"],
 ): NodeBuilder {
+	const ctx: BuildContext = { state, elementById };
 	return (spec) => {
 		// Scoped to one call: it dedupes nodes shared within a single graph and
 		// detects cycles. Held across calls it would serve a stale node back once
@@ -63,8 +67,9 @@ export function nodeBuilder(
 			const { id } = element;
 			const existing = resolved.get(id);
 			if (existing) return existing;
-			if (resolving.has(id))
-				throw new Error(`Cyclic generation dependency at "${id}"`);
+			// A chain that loops back reads what the other end left rather than
+			// never building; both ends then read as stale, which the picker never offers.
+			if (resolving.has(id)) return orphanNode(id, label);
 			resolving.add(id);
 
 			const connector = resolveElementConnector(element, registry, state);
@@ -80,7 +85,7 @@ export function nodeBuilder(
 		};
 
 		const resolve = (dep: NodeSpec): GenerationNode => {
-			const declared = dep(state);
+			const declared = dep(ctx);
 			return isElementNode(declared) ? build(declared) : declared;
 		};
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
 import { isBlankScene } from "../blankScene";
-import { buildVideoLayout, type BuildLayoutOptions } from "../scene-builder";
+import { buildVideoLayout } from "../scene-builder";
 import type { ResolvedElement, Sequence, VideoLayout } from "../types";
 import type { CanvasElementType } from "@/lib/canvas/types";
 
@@ -50,23 +50,19 @@ function el(
 		durationSec: 0,
 		loops: 1,
 		loop: false,
+		// Trimming makes a visual's own length moot, which most of these cases
+		// are built on; the trimming cases opt back in per element.
+		trimToDialogue: false,
 		volume: 10,
 		motion: "none",
 		...overrides,
 	};
 }
 
-/** Trimming makes a visual's own length moot, which most of these cases are built on. */
-const untrimmed = (
-	elements: ResolvedElement[],
-	options?: BuildLayoutOptions,
-): VideoLayout =>
-	buildVideoLayout(elements, { trimVisualsToDialogue: false, ...options });
-
 describe("buildVideoLayout", () => {
 	describe("empty input", () => {
 		it("returns an empty layout with the minimum frame count", () => {
-			const layout = untrimmed([]);
+			const layout = buildVideoLayout([]);
 			expect(layout.series).toHaveLength(0);
 			expect(layout.totalDurationSec).toBe(0);
 			expect(layout.totalFrames).toBe(2);
@@ -75,7 +71,7 @@ describe("buildVideoLayout", () => {
 
 	describe("foreground elements (image, clip)", () => {
 		it("creates a series entry for a single foreground element", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 			]);
 			expect(layout.series).toHaveLength(1);
@@ -86,7 +82,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("plays consecutive foreground elements end-to-end", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 				el({ id: "clip1", type: "clip", durationSec: 3 }),
 			]);
@@ -99,7 +95,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("places overlays on the rendered timeline so they align with transitioned visuals", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 				el({ id: "img2", type: "image", durationSec: 3 }),
 				el({ id: "n1", type: "narration", durationSec: 2 }),
@@ -116,19 +112,17 @@ describe("buildVideoLayout", () => {
 				durationSec: 3,
 				loop: true,
 			});
-			const untrimmedLayout = untrimmed([looped]);
-			expect(untrimmedLayout.series).toHaveLength(1);
-			expect(untrimmedLayout.series[0].duration).toBe(3);
-			expect(untrimmedLayout.sequences.clip).toBeUndefined();
+			const untrimmed = buildVideoLayout([looped]);
+			expect(untrimmed.series).toHaveLength(1);
+			expect(untrimmed.series[0].duration).toBe(3);
+			expect(untrimmed.sequences.clip).toBeUndefined();
 
-			const trimmed = buildVideoLayout([looped], {
-				trimVisualsToDialogue: true,
-			});
+			const trimmed = buildVideoLayout([{ ...looped, trimToDialogue: true }]);
 			expect(trimmed.series[0].duration).toBe(1);
 		});
 
 		it("clamps a foreground shorter than the minimum duration", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 0 }),
 			]);
 			expect(layout.series).toHaveLength(1);
@@ -140,7 +134,7 @@ describe("buildVideoLayout", () => {
 
 	describe("overlay elements (narration, character)", () => {
 		it("opens a blank scene when no foreground precedes", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 4 }),
 			]);
 			expect(layout.series).toHaveLength(1);
@@ -149,7 +143,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("collapses consecutive leading overlays into one blank scene", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 3 }),
 				el({ id: "n2", type: "narration", durationSec: 4 }),
 			]);
@@ -162,7 +156,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("extends the current series entry to fit a longer overlay", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "clip1", type: "clip", durationSec: 5 }),
 				el({ id: "n1", type: "narration", durationSec: 8 }),
 			]);
@@ -174,7 +168,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("stacks consecutive overlays within the current series entry", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 0 }),
 				el({ id: "n1", type: "narration", durationSec: 5 }),
 				el({ id: "c1", type: "character", durationSec: 3 }),
@@ -185,7 +179,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("plays a foreground after the overlay that leads it", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "img1", type: "image", durationSec: 5 }),
 			]);
@@ -199,7 +193,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("delays the next foreground when an overlay extends past it", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "clip1", type: "clip", durationSec: 6 }),
@@ -211,7 +205,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("starts the next foreground immediately when the overlay is shorter", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 30 }),
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "clip1", type: "clip", durationSec: 6 }),
@@ -223,7 +217,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("stretches the blank scene over the overlays that lead the video", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "c1", type: "character", durationSec: 3 }),
 				el({ id: "img1", type: "image", durationSec: 4 }),
@@ -243,7 +237,7 @@ describe("buildVideoLayout", () => {
 
 	describe("background elements (music)", () => {
 		it("trims a background to the foreground duration", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 30 }),
 				el({ id: "img1", type: "image", durationSec: 10 }),
 			]);
@@ -253,7 +247,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("clamps a background placed after a foreground to the minimum duration", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "img1", type: "image", durationSec: 10 }),
 				el({ id: "m1", type: "music", durationSec: 30 }),
 			]);
@@ -263,7 +257,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("caps the previous background when a new background of the same type starts", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 30 }),
 				el({ id: "img1", type: "image", durationSec: 10 }),
 				el({ id: "m2", type: "music", durationSec: 20 }),
@@ -275,7 +269,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("leaves an earlier background untouched when it ends before its replacement", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 10 }),
 				el({ id: "clip1", type: "clip", durationSec: 10 }),
 				el({ id: "c1", type: "character", durationSec: 5 }),
@@ -293,7 +287,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 10 }),
 				el({ id: "m2", type: "music", durationSec: 20 }),
 				el({ id: "m3", type: "music", durationSec: 30 }),
@@ -312,7 +306,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("emits N consecutive copies for a looped background, trimmed to the foreground span", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 10, loops: 4 }),
 				el({ id: "img1", type: "image", durationSec: 25 }),
 			]);
@@ -327,7 +321,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("drops looped background copies that fall after a replacement background", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 10, loops: 4 }),
 				el({ id: "img1", type: "image", durationSec: 15 }),
 				el({ id: "m2", type: "music", durationSec: 20 }),
@@ -344,7 +338,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("emits a clamped background sequence when no series elements exist", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 30 }),
 			]);
 			expect(layout.series).toHaveLength(0);
@@ -357,7 +351,7 @@ describe("buildVideoLayout", () => {
 
 	describe("effect elements (sound)", () => {
 		it("stacks multiple effects at the current cursor", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "s1", type: "sound", durationSec: 1 }),
 				el({ id: "s2", type: "sound", durationSec: 5 }),
 				el({ id: "clip1", type: "clip", durationSec: 6 }),
@@ -378,7 +372,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("trims effects that extend beyond the total duration", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "clip1", type: "clip", durationSec: 20 }),
 				el({ id: "s1", type: "sound", durationSec: 50 }),
 				el({ id: "s2", type: "sound", durationSec: 20 }),
@@ -392,7 +386,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("emits N copies of a looped effect at the native clip duration, overlapping by the crossfade", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "clip1", type: "clip", durationSec: 12 }),
 				el({ id: "s1", type: "sound", durationSec: 4, loops: 3 }),
 			]);
@@ -408,7 +402,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("trims looped effect copies that extend past the total duration", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "clip1", type: "clip", durationSec: 5 }),
 				el({ id: "s1", type: "sound", durationSec: 4, loops: 3 }),
 			]);
@@ -423,7 +417,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("emits a clamped effect sequence when no series elements exist", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "s1", type: "sound", durationSec: 5 }),
 			]);
 			expect(layout.series).toHaveLength(0);
@@ -436,7 +430,7 @@ describe("buildVideoLayout", () => {
 
 	describe("mixed scenes", () => {
 		it("coagulates leading non-foreground elements into the first scene", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 10 }),
 				el({ id: "s1", type: "sound", durationSec: 5 }),
 				el({ id: "n1", type: "narration", durationSec: 4 }),
@@ -462,7 +456,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("composes foreground, overlay, and background within a single layout", () => {
-			const layout = untrimmed([
+			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 60 }),
 				el({ id: "img1", type: "image", durationSec: 3 }),
 				el({ id: "n1", type: "narration", durationSec: 5 }),
@@ -484,7 +478,7 @@ describe("buildVideoLayout", () => {
 
 	describe("config", () => {
 		it("computes totalFrames from totalDurationSec and a custom fps", () => {
-			const layout = untrimmed(
+			const layout = buildVideoLayout(
 				[el({ id: "img1", type: "image", durationSec: 5 })],
 				{ fps: 30 },
 			);
@@ -492,7 +486,7 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("propagates custom width and height to the layout", () => {
-			const layout = untrimmed(
+			const layout = buildVideoLayout(
 				[el({ id: "img1", type: "image", durationSec: 1 })],
 				{ width: 1280, height: 720 },
 			);
@@ -513,7 +507,7 @@ describe("buildVideoLayout", () => {
 					el({ id: `img${i}`, type: "image", durationSec: 5 }),
 					el({ id: `n${i}`, type: "narration", durationSec: 4 }),
 				]).flat();
-				const layout = untrimmed(elements, { fps });
+				const layout = buildVideoLayout(elements, { fps });
 				const overlap = toFrames(layout.transitionDurationSec, fps);
 
 				let renderedStart = 0;
@@ -533,7 +527,7 @@ describe("buildVideoLayout", () => {
 			const elements = Array.from({ length: 10 }, (_, i) =>
 				el({ id: `img${i}`, type: "image", durationSec: 5 }),
 			);
-			const layout = untrimmed(elements, { fps });
+			const layout = buildVideoLayout(elements, { fps });
 			const overlap = toFrames(layout.transitionDurationSec, fps);
 
 			const rendered = layout.series.reduce(
@@ -545,10 +539,15 @@ describe("buildVideoLayout", () => {
 		});
 	});
 
-	describe("trimming visuals to dialogue (the default)", () => {
+	// Each visual decides for itself; the resolver reads it off the element's
+	// `trimToDialogue` attribute, which is on unless the element says otherwise.
+	describe("trimming a visual to its dialogue", () => {
+		const trimmedClip = (id: string, durationSec: number) =>
+			el({ id, type: "clip", durationSec, trimToDialogue: true });
+
 		it("cuts a foreground to the dialogue after it, ignoring its own length", () => {
 			const layout = buildVideoLayout([
-				el({ id: "clip1", type: "clip", durationSec: 10 }),
+				trimmedClip("clip1", 10),
 				el({ id: "n1", type: "narration", durationSec: 3 }),
 			]);
 			expect(layout.series[0].duration).toBe(3);
@@ -556,31 +555,62 @@ describe("buildVideoLayout", () => {
 		});
 
 		it("holds a foreground with no dialogue after it for the minimum duration", () => {
-			const layout = buildVideoLayout([
-				el({ id: "clip1", type: "clip", durationSec: 10 }),
-			]);
+			const layout = buildVideoLayout([trimmedClip("clip1", 10)]);
 			expect(layout.series[0].duration).toBe(1);
 		});
 
 		it("trims a background to the dialogue-driven span, not the clip's own length", () => {
 			const layout = buildVideoLayout([
 				el({ id: "m1", type: "music", durationSec: 30 }),
-				el({ id: "clip1", type: "clip", durationSec: 10 }),
+				trimmedClip("clip1", 10),
 				el({ id: "n1", type: "narration", durationSec: 4 }),
 			]);
 			expect(seqs(layout, "music")[0].duration).toBe(4);
 		});
 
-		it("plays the clip out in full when trimming is off", () => {
-			const layout = buildVideoLayout(
-				[
-					el({ id: "clip1", type: "clip", durationSec: 10 }),
-					el({ id: "n1", type: "narration", durationSec: 3 }),
-				],
-				{ trimVisualsToDialogue: false },
-			);
+		it("plays a clip out in full when it says not to trim", () => {
+			const layout = buildVideoLayout([
+				el({
+					id: "clip1",
+					type: "clip",
+					durationSec: 10,
+					trimToDialogue: false,
+				}),
+				el({ id: "n1", type: "narration", durationSec: 3 }),
+			]);
 			expect(layout.series[0].duration).toBe(10);
 			expect(layout.totalDurationSec).toBe(10);
+		});
+
+		it("mixes a trimmed and an untrimmed clip in one layout", () => {
+			const layout = buildVideoLayout([
+				trimmedClip("cut", 10),
+				el({ id: "n1", type: "narration", durationSec: 3 }),
+				el({
+					id: "held",
+					type: "clip",
+					durationSec: 10,
+					trimToDialogue: false,
+				}),
+				el({ id: "n2", type: "narration", durationSec: 3 }),
+				trimmedClip("cutAgain", 10),
+				el({ id: "n3", type: "narration", durationSec: 3 }),
+			]);
+			expect(layout.series.map((seq) => seq.element.id)).toEqual([
+				"cut",
+				"held",
+				"cutAgain",
+			]);
+			expect(layout.series.map((seq) => seq.duration)).toEqual([3, 10, 3]);
+			expect(layout.series[1].start).toBeCloseTo(3 - OVERLAP, 5);
+			expect(layout.series[2].start).toBeCloseTo(13 - 2 * OVERLAP, 5);
+			// The held clip's narration still lines up under it, not after it.
+			expect(seqs(layout, "narration")[1].start).toBeCloseTo(3 - OVERLAP, 5);
+			expect(seqs(layout, "narration")[2].start).toBeCloseTo(
+				13 - 2 * OVERLAP,
+				5,
+			);
+			expect(layout.totalDurationSec).toBeCloseTo(16 - 2 * OVERLAP, 5);
 		});
 	});
 

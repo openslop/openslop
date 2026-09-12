@@ -4,8 +4,12 @@ import {
 	applyNodeVersion,
 	duplicateNode,
 	mergeAttrs,
+	retypeNode,
 } from "@/lib/canvas/editorOps";
+import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
+import type { ConnectorModels } from "@/lib/connectors/models";
+import { START_FRAME_ATTR } from "@/lib/connectors/video/startFrame";
 import type { ElementVersion } from "@/lib/generation/versions";
 
 /** Merge attrs into a live element's attributes (a null value deletes the key). */
@@ -15,6 +19,25 @@ export function updateElementAttrs(
 	attrs: Record<string, string | null>,
 ): void {
 	mergeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
+}
+
+/**
+ * Makes an image a clip that opens on the picture it already made. The card
+ * keeps its id, so the picture goes in by URL rather than as a live edge: there
+ * is no image left to depend on. Returns the scene the clip is in.
+ */
+export function animateElement(
+	editor: Editor,
+	element: CanvasContentElement,
+	picture: string,
+	defaultModels?: ConnectorModels,
+): number {
+	const path = ReactEditor.findPath(editor, element);
+	retypeNode(editor, path, element, "clip", {
+		attrs: { [START_FRAME_ATTR]: picture },
+		defaultModels,
+	});
+	return sceneIndexOf(editor.children, parentSceneId(editor, path));
 }
 
 /** Restore a live element to the state a version was generated from. */

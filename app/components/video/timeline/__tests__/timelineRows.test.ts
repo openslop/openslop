@@ -26,6 +26,7 @@ function el(
 		durationSec: 4,
 		loops: 1,
 		loop: false,
+		trimToDialogue: false,
 		volume: 10,
 		motion: "none",
 		...overrides,
@@ -34,7 +35,7 @@ function el(
 
 /** These rows are laid out from a visual's own length, which trimming makes moot. */
 const untrimmed = (elements: ResolvedElement[], options?: BuildLayoutOptions) =>
-	buildVideoLayout(elements, { trimVisualsToDialogue: false, ...options });
+	buildVideoLayout(elements, options);
 
 describe("packLanes", () => {
 	const clip = (start: number, duration: number) => ({

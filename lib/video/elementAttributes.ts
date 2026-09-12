@@ -20,6 +20,7 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"loop",
 	"volume",
 	"motion",
+	"trimToDialogue",
 ] as const;
 
 export const splitAttributes = (
@@ -83,6 +84,10 @@ export function getLoops(element: CanvasContentElement): number {
 
 export const getLoop = (element: CanvasContentElement): boolean =>
 	element.layoutAttributes?.loop === "true";
+
+/** Absent means trimmed: a visual yields to its dialogue unless it says otherwise. */
+export const getTrimToDialogue = (element: CanvasContentElement): boolean =>
+	element.layoutAttributes?.trimToDialogue !== "false";
 
 export function getMotion(element: CanvasContentElement): MotionEffect {
 	const raw = element.layoutAttributes?.motion;

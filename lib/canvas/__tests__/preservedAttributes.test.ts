@@ -17,7 +17,7 @@ function element(
 describe("preservedAttributes", () => {
 	it("carries shared attributes between types in the same group", () => {
 		const source = element("image", { characters: "Red,Granny" });
-		expect(preservedAttributes(source, "animated_image")).toEqual({
+		expect(preservedAttributes(source, "clip")).toEqual({
 			characters: "Red,Granny",
 		});
 	});
@@ -32,7 +32,7 @@ describe("preservedAttributes", () => {
 			characters: "Red",
 			url: "https://example.com/old.png",
 		});
-		expect(preservedAttributes(source, "animated_image")).toEqual({
+		expect(preservedAttributes(source, "clip")).toEqual({
 			characters: "Red",
 		});
 	});
@@ -41,18 +41,18 @@ describe("preservedAttributes", () => {
 		const source = element("image", {
 			referenceImagesOverride: "https://img/a.png",
 		});
-		expect(preservedAttributes(source, "animated_image")).toEqual({
+		expect(preservedAttributes(source, "clip")).toEqual({
 			referenceImagesOverride: "https://img/a.png",
 		});
 		expect(
 			preservedAttributes(
-				element("image", { referenceImagesOverride: "" }),
-				"animated_image",
+				element("clip", { referenceImagesOverride: "" }),
+				"image",
 			),
 		).toEqual({ referenceImagesOverride: "" });
 	});
 
 	it("returns an empty object when there are no custom attributes", () => {
-		expect(preservedAttributes(element("image"), "animated_image")).toEqual({});
+		expect(preservedAttributes(element("image"), "clip")).toEqual({});
 	});
 });

@@ -1,6 +1,5 @@
 import {
 	Voice,
-	Motion,
 	Music,
 	User,
 	Image as ImageIcon,
@@ -48,13 +47,6 @@ const PRESENTATION: Record<CanvasElementType, ElementPresentation> = {
 		iconBgClass: "bg-media-image/15",
 		colorClass: "text-media-image",
 		placeholder: "Describe the image...",
-	},
-	animated_image: {
-		label: "Animated image",
-		Icon: Motion,
-		iconBgClass: "bg-media-animated/15",
-		colorClass: "text-media-animated",
-		placeholder: "Describe the still image...",
 	},
 	clip: {
 		label: "Clip",

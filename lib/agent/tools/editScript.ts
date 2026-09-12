@@ -28,7 +28,10 @@ const PICTURE_ATTRIBUTES = [
 const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
 	character: ["name"],
 	image: PICTURE_ATTRIBUTES,
-	animated_image: PICTURE_ATTRIBUTES,
+	clip: [
+		...PICTURE_ATTRIBUTES,
+		"startFrame (the id of an earlier image or clip this one opens on)",
+	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };
 
@@ -71,13 +74,6 @@ export const editScript = defineTool({
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it.
 
-	  \`deps\` goes on a \`set\` and reuses a result the element already has, instead of
-	  throwing it away. Send it whenever you retype an element into one built on what it
-	  already made: an image becoming an animated_image sends
-	  \`deps: {"still": "<the image's id>"}\`, so the animation opens on the picture that
-	  image already made instead of generating a new one. Retyping keeps the id, so that is
-	  the id you already read. \`still\` is the only name \`deps\` takes today.
-
 	  To move an element, remove it and insert it again.
 
 	  Element types: ${ELEMENT_TYPE_NAMES.join(", ")}
@@ -86,8 +82,8 @@ export const editScript = defineTool({
 	  ${ATTRIBUTES_BY_TYPE}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. Image, animated_image
-	  (including videoPrompt), sound and music descriptions are always English.
+	  surrounding script, whatever language the request is in. Image, clip, sound and
+	  music descriptions are always English.
 	`,
 	input: z.object({
 		ops: z

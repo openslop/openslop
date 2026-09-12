@@ -4,11 +4,12 @@ import { createArtStylePlugin } from "./art-style";
 import { createCharacterReferencesPlugin } from "./character-references";
 import { createReferenceImagesPlugin } from "./reference-images";
 
-export function buildImagePlugins(): ConnectorPlugin[] {
+/** What every visual generates with: the project's style, its characters and references, at its aspect. */
+export function buildVisualPlugins(type: "image" | "video"): ConnectorPlugin[] {
 	return [
 		createArtStylePlugin(),
 		createCharacterReferencesPlugin(),
 		createReferenceImagesPlugin(),
-		createDimensionsPlugin("image"),
+		createDimensionsPlugin(type),
 	];
 }

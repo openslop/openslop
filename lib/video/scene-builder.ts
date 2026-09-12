@@ -21,7 +21,6 @@ export type BuildLayoutOptions = Partial<VideoConfig> & {
 	transitionType?: TransitionType;
 	aspectRatio?: AspectRatio;
 	captionStyle?: CaptionStyle;
-	trimVisualsToDialogue?: boolean;
 };
 
 /**
@@ -29,7 +28,8 @@ export type BuildLayoutOptions = Partial<VideoConfig> & {
  * so a generated clip's own length only decides what plays before it is cut.
  * Untrimmed, the clip plays out in full and the dialogue can only extend it.
  */
-export const DEFAULT_TRIM_VISUALS_TO_DIALOGUE = true;
+const visualDuration = (element: ResolvedElement): number =>
+	element.trimToDialogue ? 0 : element.durationSec;
 
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
@@ -94,10 +94,6 @@ export function buildVideoLayout(
 		: undefined;
 	const cfg = { ...DEFAULT_CONFIG, ...aspectDims, ...options };
 	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
-	const trimVisualsToDialogue =
-		options?.trimVisualsToDialogue ?? DEFAULT_TRIM_VISUALS_TO_DIALOGUE;
-	const visualDuration = (element: ResolvedElement) =>
-		trimVisualsToDialogue ? 0 : element.durationSec;
 	// Scenes are laid down one rounded duration at a time while layers are
 	// positioned from the accumulated seconds; snapping here keeps them equal.
 	const onGrid = (sec: number) => toSeconds(toFrames(sec, cfg.fps), cfg.fps);
