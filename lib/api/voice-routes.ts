@@ -5,12 +5,11 @@ import type { ModelRef } from "@/lib/connectors/types";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 import type { RouteFamily } from "./route-families";
 
-export const createVoiceSearchHandler = <TModels, TPicked extends ModelRef>(
-	family: RouteFamily<TModels, TPicked>,
-	models: TModels,
+export const createVoiceSearchHandler = <TPicked extends ModelRef>(
+	family: RouteFamily<TPicked>,
 ) =>
 	family.createQueryHandler({
-		schema: voiceSearchParamsSchema.and(family.model(models)),
+		schema: voiceSearchParamsSchema.and(family.model("tts")),
 		label: "Voice search",
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
@@ -21,12 +20,11 @@ export const createVoiceSearchHandler = <TModels, TPicked extends ModelRef>(
 
 const previewParamsSchema = z.object({ url: z.url() });
 
-export const createVoicePreviewHandler = <TModels, TPicked extends ModelRef>(
-	family: RouteFamily<TModels, TPicked>,
-	models: TModels,
+export const createVoicePreviewHandler = <TPicked extends ModelRef>(
+	family: RouteFamily<TPicked>,
 ) =>
 	family.createQueryHandler({
-		schema: previewParamsSchema.and(family.model(models)),
+		schema: previewParamsSchema.and(family.model("tts")),
 		label: "Voice preview fetch",
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
