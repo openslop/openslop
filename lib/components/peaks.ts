@@ -1,10 +1,7 @@
 const PEAK_COUNT = 200;
 
-let sharedAudioCtx: AudioContext | null = null;
-const getAudioCtx = () => {
-	if (!sharedAudioCtx) sharedAudioCtx = new AudioContext();
-	return sharedAudioCtx;
-};
+let sharedAudioContext: AudioContext | null = null;
+const getAudioContext = () => (sharedAudioContext ??= new AudioContext());
 
 /**
  * Normalized amplitudes (0–1) from raw audio samples, one per bucket.
@@ -15,20 +12,16 @@ const getAudioCtx = () => {
 export function extractPeaks(data: Float32Array, count: number): number[] {
 	const step = Math.floor(data.length / count);
 	if (step === 0) return [];
-	const peaks: number[] = [];
-	let max = 0;
-	for (let i = 0; i < count; i++) {
-		const offset = i * step;
-		let sumOfSquares = 0;
-		for (let j = 0; j < step; j++) {
-			const sample = data[offset + j];
-			sumOfSquares += sample * sample;
-		}
-		const rms = Math.sqrt(sumOfSquares / step);
-		peaks.push(rms);
-		if (rms > max) max = rms;
-	}
-	return max > 0 ? peaks.map((p) => p / max) : peaks;
+	const peaks = Array.from({ length: count }, (_, bucket) => {
+		const samples = data.subarray(bucket * step, (bucket + 1) * step);
+		const sumOfSquares = samples.reduce(
+			(sum, sample) => sum + sample * sample,
+			0,
+		);
+		return Math.sqrt(sumOfSquares / step);
+	});
+	const max = peaks.reduce((loudest, peak) => Math.max(loudest, peak), 0);
+	return max > 0 ? peaks.map((peak) => peak / max) : peaks;
 }
 
 const decoded = new Map<string, Promise<number[]>>();
@@ -53,7 +46,7 @@ async function decodePeaks(src: string): Promise<number[]> {
 	if (!response.ok) {
 		throw new Error(`Failed to fetch audio: ${response.status}`);
 	}
-	const audio = await getAudioCtx().decodeAudioData(
+	const audio = await getAudioContext().decodeAudioData(
 		await response.arrayBuffer(),
 	);
 	return extractPeaks(audio.getChannelData(0), PEAK_COUNT);
