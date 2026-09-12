@@ -429,7 +429,7 @@ class Card:
         optional footer row. Returns (height, footer_y, input_top)."""
         t = self.t
         ih = 10 + 12 * max(1, len(lines))
-        h = 28 + ih + (26 if footer else 0) + 6
+        h = 28 + ih + (24 if footer else 0) + 4
         self.raw("<g>" if not cls else "".join(f'<g class="{k}">' for k in cls.split()))
         self.rect(x, y, w, h, t["elcard"], rx=10, stroke=t["border"])
         pw = self.type_pill(x + 8, y + 6, kind, label)
@@ -447,7 +447,7 @@ class Card:
             self.text(x + 16, top + 14 + i * 12, ln, 9, t["muted"] if placeholder else t["fg"])
         self.raw(f'<line x1="{x + w + 14}" y1="{y + 6}" x2="{x + w + 14}" y2="{y + h - 6}" stroke="{t["border"]}"/>')
         self.raw("</g>" * max(1, len(cls.split())))
-        return h, top + ih + 6, top
+        return h, top + ih + 4, top
 
     def file_image(self, name, x, y, w, h, clip, cls=""):
         """A small JPEG from assets/features/src, cropped like object-fit: cover."""
@@ -759,11 +759,14 @@ def card_canvas(theme):
         c.icon(ic, SX + SW - 96 + i * 26, sy - 8, 12, t["muted"], opacity=0.7)
 
     CX, CW = SX + 40, 330
-    PXX = SX + 400
+    COLX = CX + CW + 22
+    COLW = SX + SW - 14 - COLX
+    PXX = COLX + (COLW - 200) / 2  # audio boxes are 200 wide
 
     y1 = SY + 110
     h1, _, _ = c.element_card(CX, y1, CW, "image", "Image", ("Seedream 5 Lite", "runware"), ["A neon-lit tokyo street after rain. Signage in every", "colour reflects off the asphalt toward the overpass."])
-    c.image("city0", PXX, y1 + 2, (h1 - 4) * 16 / 9, h1 - 4, rx=6)
+    iw = (h1 - 4) * 16 / 9
+    c.image("city0", COLX + (COLW - iw) / 2, y1 + 2, iw, h1 - 4, rx=6)
     y2 = y1 + h1 + 6
     h2, _, top2 = c.element_card(CX, y2, CW, "narration", "Narration", None, ["The engine caught on the second turn."])
     c.rect(PXX, y2 + 3, 200, h2 - 6, t["elcard"], rx=6, stroke=t["border"])
@@ -837,7 +840,8 @@ def card_generate(theme):
     c.text(SX + 137, sy, "12s", 8, t["muted"], anchor="middle")
 
     CX, CW = SX + 14, 362
-    PXX = SX + 404
+    COLX = CX + CW + 24
+    COLW = SX + SW - 14 - COLX
     rows = [
         ("animated", "Animated image", ("Seedance 2 Fast", "runware"), "Seedream 5 Lite", ["Slow motion on the drift, smoke billowing off the", "rear tyres as the car swings back into line."], "media"),
         ("narration", "Narration", None, None, ["The rear wheels broke loose. Takeshi kept the", "wheel light and let the silvia swing."], "audio"),
@@ -875,6 +879,7 @@ def card_generate(theme):
             c.text(tx + 8, fy + 12.3, msg, 8.5, t["bg"], cls=tip)
         if pk == "media":
             pw, ph = 150, 84
+            PXX = COLX + (COLW - pw) / 2
             c.media_placeholder(PXX, y + 2, pw, ph, cls=c.span(0, g1, fade=0.3), animate=True, seed=5)
             done = c.appear(g1, dy=0, fade=0.5)
             c.image("smoke0", PXX, y + 2, pw, ph, rx=6, cls=done)
@@ -883,6 +888,7 @@ def card_generate(theme):
             c.text(PXX + pw - 19, y + 16, "Still", 7.5, "#ffffff", anchor="middle", weight=500, cls=done, extra='opacity="0.6"')
         else:
             pw, ph = 200, 40
+            PXX = COLX + (COLW - pw) / 2
             py = y + (h - ph) / 2
             c.audio_placeholder(PXX, py, pw, ph, cls=c.span(0, g1, fade=0.3), animate=True, seed=7 if kind == "sound" else 3)
             done = c.appear(g1, dy=0, fade=0.4)
