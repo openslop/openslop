@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { ResultKind } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { AudioPreview } from "./AudioPreview";
+import { AudioResultPreview } from "./AudioResultPreview";
 import { MediaResult } from "./results";
 import type { ElementPreviewProps } from "./status";
 
@@ -30,7 +30,7 @@ function VideoResultPreview(props: ElementPreviewProps) {
 
 /** How generated output of each kind renders. */
 export const PREVIEWS_BY_KIND: Record<ResultKind, ElementPreview> = {
-	audio: AudioPreview,
+	audio: AudioResultPreview,
 	image: ImageResultPreview,
 	video: VideoResultPreview,
 };
