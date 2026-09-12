@@ -21,11 +21,7 @@ export function updateElementAttrs(
 	mergeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
 }
 
-/**
- * Makes an image a video that opens on the picture it already made. The card
- * keeps its id, so the picture goes in by URL rather than as a live edge: there
- * is no image left to depend on. Returns the scene the video is in.
- */
+/** Turns an image into a video opening on its picture, by URL since the image is gone. Returns its scene. */
 export function animateElement(
 	editor: Editor,
 	element: CanvasContentElement,
