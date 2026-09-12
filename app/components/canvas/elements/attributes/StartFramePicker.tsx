@@ -1,7 +1,7 @@
 "use client";
 
 import { useSlate } from "slate-react";
-import { ArrowLeft, ImagePlus, X } from "@/components/ui/icon";
+import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
@@ -71,7 +71,7 @@ function PreviousScenePreview({ element }: { element: CanvasContentElement }) {
 				)
 			: undefined,
 	);
-	if (!source || !url) return <ArrowLeft className="h-5 w-5" />;
+	if (!source || !url) return <Transition className="h-5 w-5" />;
 	return (
 		<MediaWithSkeleton
 			outputKind={ELEMENT_TYPES[source.type].outputKind}
@@ -122,14 +122,14 @@ export function StartFramePicker({
 				{!hideLabel && <span className="opacity-70 mr-1">{label}</span>}
 				{summary}
 			</AttributeTrigger>
-			<PopoverContent align="start" className="w-auto">
+			<PopoverContent align="end" className="w-auto">
 				<div role="radiogroup" aria-label={label} className="flex gap-3">
 					<FrameTile
 						label="None"
 						selected={!usesUpload && !usesPrevious}
 						onSelect={() => setFrame(NO_FRAME)}
 					>
-						<X className="h-5 w-5" />
+						<Forbidden className="h-5 w-5" />
 					</FrameTile>
 					<FrameTile
 						label="Previous scene"

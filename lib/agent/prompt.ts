@@ -1,4 +1,5 @@
 import dedent from "dedent";
+import { VIDEO_SHAPES } from "@/lib/script/prompt/shapes";
 import { renderAgentContext, type AgentContext } from "./context";
 
 const ROLE = dedent`
@@ -28,8 +29,9 @@ const ROLE = dedent`
   - Ask only when the answer would change the work. Otherwise decide and say what you chose.
 
   # How long a visual is on screen
-  - A visual (image, clip) is on screen for the dialogue after it, up to the
-    next visual. \`duration\` sets the generated video's length, not its time on screen.
+  - A visual (image, clip) trimmed to dialogue is on screen for the dialogue after it, up to
+    the next visual; an untrimmed clip plays its full length. \`duration\` sets the generated
+    video's length, not its time on screen.
   - Never guess a length. measure_element_lengths reads them off the canvas and says how to
     change one.
   - fit_durations sets every clip to a \`duration\` that covers the dialogue
@@ -65,7 +67,16 @@ const LIMITS = dedent`
   by where they sit; their labels change.
 `;
 
-const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");
+const SHAPES = dedent`
+  # Shapes of video
+
+  ${VIDEO_SHAPES.split("\n").slice(1).join("\n")}
+
+  Name the shape in the brief you hand write_script, and when the user changes their mind,
+  set startFrame and trimToDialogue on the clips with edit_script rather than rewriting.
+`;
+
+const SLOPPY_SYSTEM_PROMPT = [ROLE, SHAPES, LIMITS].join("\n\n");
 
 /**
  * The settings snapshot goes last so the stable half stays a cacheable prefix.

@@ -1,6 +1,7 @@
 import dedent from "dedent";
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
+import { VIDEO_SHAPES } from "./shapes";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import {
@@ -24,6 +25,8 @@ export function osmlSpec(language: string): string {
 
 ${languagePrompt(language)}
 - Write the metadata_title in that same language, and the metadata_style description in English.
+
+${VIDEO_SHAPES}
 
   ## **XML Tagging**
 
@@ -53,14 +56,14 @@ ${languagePrompt(language)}
   - For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
 
   ### Image XML Tags
-  - Each scene should include an image XML tag that describes the current scene. Example:
+  - Each scene opens with a visual: an <image>, or a <clip> where the shape of the video calls for one. Example:
     <image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - motion: Camera-motion effect applied for the element's full duration. Almost always set one — a still image with no motion reads as a flat, lifeless slide. Use at most one per scene. Example: <image motion="kenBurnsIn">...</image>
   - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
   - characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
     <image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
   - After the metadata tags, open the story with an <image> tag that describes the image for the opening scene.
-  - Frequently change the image at least every 2 narrative lines.
+  - Under narration, change the visual at least every 2 narrative lines.
   - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
   - For example, if there is rain in the image, add the rain overlay. If there is smoke, add the smoke overlay. If there is lightning, add the lightning overlay. If there are multiple effects, add all of them.
   - Overlays should be a comma-separated list containing any of the following: ${Object.values(
@@ -81,7 +84,7 @@ ${languagePrompt(language)}
   - motion: normally set to "none". Only set a motion effect when the body describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
   - characters: optional. Same as for <image>: a comma-separated list of exact story character names appearing in the frame.
   - All <image> description rules apply unchanged: depict the moment the following narration and dialogue describe, and repeat any details necessary even if they appeared in earlier prompts.
-  - Use <clip> sparingly, mostly at intro shots and hero moments. Default to <image> for typical scenes; video generation is significantly slower and more expensive.
+  - In a Slideshow, use <clip> sparingly, mostly at intro shots and hero moments, and default to <image>: video generation is significantly slower and more expensive. In a Film or Motion explainer, clips are the visuals.
 
   ### Sound XML Tags
   - Frequently insert <sound> tags (as if prompting a sound model) that should accompany a scene before the relevant dialogue (character or narration).

@@ -1,4 +1,4 @@
-import { Film, Freeze, Repeat, Waveform } from "@/components/ui/icon";
+import { Freeze, FullTimeline, Repeat, Trim } from "@/components/ui/icon";
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
 import {
@@ -87,11 +87,15 @@ export const loopDef: AttributeDef = {
  */
 export const TRIM_TO_DIALOGUE_FACES = {
 	on: {
-		icon: Waveform,
+		icon: Trim,
 		label: "Trim to dialogue",
 		hint: "Trimmed to the dialogue under it",
 	},
-	off: { icon: Film, label: "Play in full", hint: "Plays its full length" },
+	off: {
+		icon: FullTimeline,
+		label: "Play in full",
+		hint: "Plays its full length",
+	},
 } as const;
 
 export const trimToDialogueDef: AttributeDef = {
