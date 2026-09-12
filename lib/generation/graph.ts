@@ -4,6 +4,7 @@ import type {
 	CanvasContentElement,
 	CanvasElementType,
 } from "@/lib/canvas/types";
+import { previousVisual } from "@/lib/canvas/scenes";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type {
 	AssetConnectorType,
@@ -28,8 +29,9 @@ export type GenerationJob = {
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
-	/** The project state this job's inputs were resolved against. */
+	/** The project state and canvas this job's inputs were resolved against. */
 	state: ProjectData;
+	canvas: CanvasContentElement[];
 };
 
 type NodeBase = {
@@ -63,10 +65,10 @@ export type ElementNode = {
 	label?: string;
 };
 
-/** What a spec may read while naming its node: project state, and the canvas by id. */
+/** What a spec may read while naming its node: project state, and the canvas in document order. */
 export type BuildContext = {
 	state: ProjectData;
-	elementById: (id: string) => CanvasContentElement | undefined;
+	canvas: () => CanvasContentElement[];
 };
 
 /**
@@ -90,9 +92,23 @@ export const forElement =
  */
 export const forCanvasElement =
 	(id: string, label: string): NodeSpec =>
-	({ elementById }) => {
-		const element = elementById(id);
+	({ canvas }) => {
+		const element = canvas().find((candidate) => candidate.id === id);
 		return element ? { element, label } : orphanNode(id, label);
+	};
+
+/**
+ * The visual before an element in document order. Resolved at build time, so
+ * reordering the script changes what it names and stales the dependent. With
+ * nothing before it, an empty leaf stands in and the dependent reads no result.
+ */
+export const forPreviousVisual =
+	(id: string, label: string): NodeSpec =>
+	({ canvas }) => {
+		const element = previousVisual(canvas(), id);
+		return element
+			? { element, label }
+			: sourceNode(derivedNodeId("first", id), {}, label);
 	};
 
 /** What the graph reads back about a node the queue has settled. */

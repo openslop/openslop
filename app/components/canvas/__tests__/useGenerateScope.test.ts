@@ -41,7 +41,7 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 // resolver rather than standing up the config and project providers.
 const store = createProjectStore();
 
-const resolve = () => nodeBuilder(registry, store.getState(), () => undefined);
+const resolve = () => nodeBuilder(registry, store.getState(), () => []);
 
 vi.mock("@/lib/generation/useNodeBuilder", () => ({
 	useNodeBuilder: () => resolve(),
@@ -67,11 +67,9 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	const node = nodeBuilder(
-		registry,
-		store.getState(),
-		() => undefined,
-	)(forElement(element));
+	const node = nodeBuilder(registry, store.getState(), () => [])(
+		forElement(element),
+	);
 	queue.commitResult(node, {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,

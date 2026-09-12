@@ -47,7 +47,7 @@ export function resolveElements(
 				url,
 				durationSec: snapshot.result.durationSec,
 				loops: getLoops(element),
-				loop: getLoop(element),
+				loop: getTrimToDialogue(element) && getLoop(element),
 				trimToDialogue: getTrimToDialogue(element),
 				volume: getVolume(element),
 				motion: getMotion(element),

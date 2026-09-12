@@ -6,7 +6,12 @@ import type {
 	CanvasElement,
 	SceneElement,
 } from "../types";
-import { isScriptEmpty, parentSceneId, sceneIndexOf } from "../scenes";
+import {
+	isScriptEmpty,
+	parentSceneId,
+	previousVisual,
+	sceneIndexOf,
+} from "../scenes";
 
 const scene = (
 	id: string,
@@ -87,5 +92,26 @@ describe("parentSceneId", () => {
 	it("throws when the parent is not a scene", () => {
 		const editor = editorWith([scene("s1")]);
 		expect(() => parentSceneId(editor, [0])).toThrow(/not inside a scene/);
+	});
+});
+
+describe("previousVisual", () => {
+	const el = (id: string, type: "image" | "clip" | "narration") =>
+		({ id, type, children: [{ id: `${id}-t`, type, text: "" }] }) as never;
+	const elements = [
+		el("a", "image"),
+		el("n", "narration"),
+		el("b", "clip"),
+		el("c", "clip"),
+	];
+
+	it("skips dialogue to the visual before", () => {
+		expect(previousVisual(elements, "b")?.id).toBe("a");
+		expect(previousVisual(elements, "c")?.id).toBe("b");
+	});
+
+	it("is nothing for the first visual or an unknown id", () => {
+		expect(previousVisual(elements, "a")).toBeUndefined();
+		expect(previousVisual(elements, "zzz")).toBeUndefined();
 	});
 });

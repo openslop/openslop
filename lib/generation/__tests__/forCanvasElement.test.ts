@@ -28,13 +28,40 @@ let store: ProjectStore;
 let queue: GenerationQueue;
 
 const builder = (canvas: CanvasContentElement[]) =>
-	nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, store.getState(), (id) =>
-		canvas.find((el) => el.id === id),
-	);
+	nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, store.getState(), () => canvas);
 
 beforeEach(() => {
 	store = createProjectStore();
 	queue = new GenerationQueue();
+});
+
+describe("a clip that opens on the visual before it", () => {
+	const image = element("img", "image");
+	const clip = element("clip", "clip", { startFrame: "previous" });
+
+	it("depends on it, found by document order", () => {
+		const node = builder([image, clip])(forElement(clip));
+		expect(node.dependsOn.find((dep) => dep.id === "img")?.job).not.toBeNull();
+	});
+
+	it("goes stale when what comes before it changes", () => {
+		const other = element("other", "image");
+		const node = builder([image, clip])(forElement(clip));
+		queue.commitResult(builder([image, clip])(forElement(image)), {
+			imageUrl: "https://img/1.png",
+			durationSec: 0,
+		});
+		queue.commitResult(node, { videoUrl: "https://vid/1.mp4", durationSec: 5 });
+		expect(isNodeStale(node, queue)).toBe(false);
+
+		const moved = builder([image, other, clip])(forElement(clip));
+		expect(isNodeStale(moved, queue)).toBe(true);
+	});
+
+	it("reads no source when nothing comes before it", () => {
+		const node = builder([clip, image])(forElement(clip));
+		expect(node.dependsOn.every((dep) => dep.job === null)).toBe(true);
+	});
 });
 
 describe("a clip that opens on another visual", () => {

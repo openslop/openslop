@@ -10,6 +10,7 @@ import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { createCanvasNode } from "./createCanvasNode";
 import { attributeSchemaFor } from "./elementConnector";
+import { getContentElements } from "./scenes";
 import { isContentElement } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 import { preservedAttributes } from "./preservedAttributes";
@@ -26,11 +27,9 @@ export function findElementById(
 	return entry ?? null;
 }
 
-/** The canvas by id, read live: what a node builder resolves another element from. */
-export const elementLookup =
-	(editor: Editor) =>
-	(id: string): CanvasContentElement | undefined =>
-		findNodeById(editor, id)?.[0];
+/** The canvas in document order, read live: what a node builder resolves other elements from. */
+export const canvasOf = (editor: Editor) => () =>
+	getContentElements(editor.children);
 
 export function findNodeById(
 	editor: Editor,

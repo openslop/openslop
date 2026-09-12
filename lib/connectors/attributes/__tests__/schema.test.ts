@@ -109,3 +109,18 @@ describe("AttributeSchema", () => {
 		});
 	});
 });
+
+describe("visibleSettings", () => {
+	it("shows a setting only while the attributes it waits on hold", () => {
+		const schema = AttributeSchema.from([
+			{ key: "trimToDialogue", label: "Timing" },
+			{ key: "loop", label: "Loop", when: { trimToDialogue: "true" } },
+		]);
+		expect(
+			Object.keys(schema.visibleSettings({ trimToDialogue: "true" })),
+		).toEqual(["trimToDialogue", "loop"]);
+		expect(
+			Object.keys(schema.visibleSettings({ trimToDialogue: "false" })),
+		).toEqual(["trimToDialogue"]);
+	});
+});

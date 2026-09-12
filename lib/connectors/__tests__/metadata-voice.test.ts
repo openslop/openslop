@@ -226,7 +226,7 @@ describe("createMetadataVoicePlugin", () => {
 			const [spec] = createMetadataVoicePlugin().dependencies?.(element) ?? [];
 			const node = spec?.({
 				state: store.getState(),
-				elementById: () => undefined,
+				canvas: () => [],
 			});
 			return node && "inputs" in node ? node.inputs.attributes : undefined;
 		};

@@ -1,5 +1,10 @@
-import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
-import { forCanvasElement } from "@/lib/generation/graph";
+import { previousVisual } from "@/lib/canvas/scenes";
+import type {
+	AssetResult,
+	ConnectorPlugin,
+	PluginContext,
+} from "@/lib/connectors/types";
+import { forCanvasElement, forPreviousVisual } from "@/lib/generation/graph";
 import { captureLastFrame } from "@/lib/video/captureLastFrame";
 import {
 	parseStartFrame,
@@ -13,20 +18,28 @@ export type ParamsWithStartFrame = {
 	[START_FRAME_ATTR]?: string;
 };
 
-/** The picture to open on: the URL itself, an image source's picture, or a clip source's last frame. */
-async function frameUrl(
-	frame: StartFrame,
-	sources: Record<string, AssetResult> = {},
-): Promise<string> {
-	if (frame.kind === "url") return frame.url;
-	const source = sources[frame.id];
-	if (!source)
-		throw new Error(
-			`The start frame's source "${frame.id}" has not generated yet`,
-		);
+const LABEL = "the start frame";
+
+/** The picture a settled visual hands on: a clip its last frame, an image itself. */
+async function pictureOf(source: AssetResult): Promise<string> {
 	if (source.videoUrl) return captureLastFrame(source.videoUrl);
 	if (source.imageUrl) return source.imageUrl;
 	throw new Error("The start frame's source generated no picture to open on");
+}
+
+/** The picture to open on, or nothing for a clip with no visual before it. */
+async function frameUrl(
+	frame: StartFrame,
+	{ elementId = "", canvas = [], dependencies = {} }: PluginContext,
+): Promise<string | undefined> {
+	if (frame.kind === "url") return frame.url;
+	const id =
+		frame.kind === "element" ? frame.id : previousVisual(canvas, elementId)?.id;
+	if (!id) return undefined;
+	const source = dependencies[id];
+	if (!source)
+		throw new Error(`The start frame's source "${id}" has not generated yet`);
+	return pictureOf(source);
 }
 
 /**
@@ -41,17 +54,15 @@ export function createStartFramePlugin(): ConnectorPlugin<ParamsWithStartFrame> 
 			const frame = parseStartFrame(
 				element.generationAttributes?.[START_FRAME_ATTR],
 			);
-			return frame?.kind === "element"
-				? [forCanvasElement(frame.id, "the start frame")]
-				: [];
+			if (frame?.kind === "previous")
+				return [forPreviousVisual(element.id, LABEL)];
+			if (frame?.kind === "element") return [forCanvasElement(frame.id, LABEL)];
+			return [];
 		},
 		async beforeGenerate({ [START_FRAME_ATTR]: raw, ...params }, ctx) {
 			const frame = parseStartFrame(raw);
-			if (!frame) return params;
-			return {
-				...params,
-				frameImages: [await frameUrl(frame, ctx.dependencies)],
-			};
+			const url = frame && (await frameUrl(frame, ctx));
+			return url ? { ...params, frameImages: [url] } : params;
 		},
 	};
 }

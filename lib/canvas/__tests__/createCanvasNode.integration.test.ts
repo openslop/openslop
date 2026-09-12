@@ -35,15 +35,15 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 		});
 	});
 
-	it("applies clip defaults, leaving the start frame open", () => {
+	it("applies clip defaults, opening on the previous scene", () => {
 		const node = createCanvasNode("clip");
 		const attributes = flatAttributes(node);
 		expect(attributes).toMatchObject({
 			duration: "10",
 			trimToDialogue: "true",
+			startFrame: "previous",
 			motion: "none",
 			...DEFAULT_VIDEO_MODEL,
 		});
-		expect(attributes).not.toHaveProperty("startFrame");
 	});
 });

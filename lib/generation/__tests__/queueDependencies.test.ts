@@ -27,6 +27,7 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
+		canvas: [],
 	};
 	return {
 		id,

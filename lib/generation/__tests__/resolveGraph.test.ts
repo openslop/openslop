@@ -32,8 +32,10 @@ const element = (
 
 /** Builds `el` against a canvas holding `others`, which a start frame may name. */
 const resolveOn = (el: CanvasContentElement, others: CanvasContentElement[]) =>
-	nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, store.getState(), (id) =>
-		others.find((other) => other.id === id),
+	nodeBuilder(
+		DEFAULT_CONNECTOR_REGISTRY,
+		store.getState(),
+		() => others,
 	)(forElement(el));
 
 const resolve = (el: CanvasContentElement) => resolveOn(el, []);
@@ -55,7 +57,7 @@ describe("resolveGraph", () => {
 		const buildNode = nodeBuilder(
 			DEFAULT_CONNECTOR_REGISTRY,
 			store.getState(),
-			() => undefined,
+			() => [],
 		);
 		const withText = (text: string) => ({
 			...element("img", "image"),

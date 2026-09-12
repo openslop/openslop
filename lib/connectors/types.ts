@@ -82,8 +82,9 @@ export interface PluginContext {
 	elementId?: string;
 	/** Outputs of that node's dependencies, keyed by node id. */
 	dependencies?: Record<string, AssetResult>;
-	/** The project state the node's inputs were resolved against. */
+	/** The project state and canvas the node's inputs were resolved against. */
 	state?: ProjectData;
+	canvas?: CanvasContentElement[];
 	/** The pair the connector runs on. */
 	model?: ModelRef;
 	/** Aborts when the caller cancels the generation. */
@@ -93,7 +94,7 @@ export interface PluginContext {
 /** The parts of a plugin context the caller supplies per generation. */
 export type GenerationContext = Pick<
 	PluginContext,
-	"elementId" | "dependencies" | "state" | "signal"
+	"elementId" | "dependencies" | "state" | "canvas" | "signal"
 >;
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {

@@ -33,9 +33,14 @@ describe("start-frame plugin", () => {
 	const before = (
 		params: ParamsWithStartFrame,
 		dependencies: Record<string, AssetResult> = {},
+		canvas: CanvasContentElement[] = [image, clip("previous")],
 	) => {
 		if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
-		return plugin.beforeGenerate(params, { elementId: "clip-1", dependencies });
+		return plugin.beforeGenerate(params, {
+			elementId: "clip-1",
+			dependencies,
+			canvas,
+		});
 	};
 
 	beforeEach(() => {
@@ -49,22 +54,34 @@ describe("start-frame plugin", () => {
 			expect(plugin.dependencies?.(clip("https://img/a.png"))).toEqual([]);
 		});
 
-		it("declares the source visual, found on the canvas by id", () => {
-			const [spec] = plugin.dependencies?.(clip("img-1")) ?? [];
+		it("declares the visual before the clip, by document order", () => {
+			const [spec] = plugin.dependencies?.(clip("previous")) ?? [];
 			const declared = spec?.({
 				state: EMPTY_STATE,
-				elementById: (id) => (id === "img-1" ? image : undefined),
+				canvas: () => [image, clip("previous")],
 			});
 			expect(declared).toEqual({ element: image, label: "the start frame" });
 		});
 
-		it("keeps a deleted source as a source node under the same id", () => {
-			const [spec] = plugin.dependencies?.(clip("img-1")) ?? [];
+		it("declares an empty leaf when nothing comes before the clip", () => {
+			const [spec] = plugin.dependencies?.(clip("previous")) ?? [];
 			const declared = spec?.({
 				state: EMPTY_STATE,
-				elementById: () => undefined,
+				canvas: () => [clip("previous"), image],
 			});
-			expect(declared).toMatchObject({ id: "img-1", job: null });
+			expect(declared).toMatchObject({ job: null });
+		});
+
+		it("declares a source named by id, and keeps a deleted one as an orphan", () => {
+			const [spec] = plugin.dependencies?.(clip("img-1")) ?? [];
+			expect(spec?.({ state: EMPTY_STATE, canvas: () => [image] })).toEqual({
+				element: image,
+				label: "the start frame",
+			});
+			expect(spec?.({ state: EMPTY_STATE, canvas: () => [] })).toMatchObject({
+				id: "img-1",
+				job: null,
+			});
 		});
 	});
 
@@ -82,6 +99,27 @@ describe("start-frame plugin", () => {
 				prompt: "slow pan",
 				frameImages: ["https://img/a.png"],
 			});
+		});
+
+		it("opens on the picture of the visual before it", async () => {
+			await expect(
+				before(
+					{ prompt: "slow pan", startFrame: "previous" },
+					{ "img-1": { imageUrl: "https://img/sunset.png", durationSec: 0 } },
+				),
+			).resolves.toEqual({
+				prompt: "slow pan",
+				frameImages: ["https://img/sunset.png"],
+			});
+		});
+
+		it("opens on nothing when no visual comes before it", async () => {
+			await expect(
+				before({ prompt: "slow pan", startFrame: "previous" }, {}, [
+					clip("previous"),
+					image,
+				]),
+			).resolves.toEqual({ prompt: "slow pan" });
 		});
 
 		it("opens on an image source's picture", async () => {

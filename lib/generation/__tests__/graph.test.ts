@@ -32,6 +32,7 @@ function node(
 		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
+		canvas: [],
 	};
 	return {
 		id,
