@@ -569,8 +569,8 @@ def card_describe(theme):
     gy = 270
     c.text(bx, gy, "Need inspiration?", 10, t["muted"])
     cards = [
-        ("POV Your Life as A...", "Second-person POV voiceover with cartoons…", "POV Life", "#F59E0B", "template-pov-life.jpg"),
-        ("Get Sleepy with...", "Slow, soothing narration to lull listeners…", "Sleep Story", "#6366F1", "template-sleep-story.jpg"),
+        ("POV Your Life as A...", "Second-person POV voiceover with…", "POV Life", "#F59E0B", "template-pov-life.jpg"),
+        ("Get Sleepy with...", "Slow, soothing narration to lull…", "Sleep Story", "#6366F1", "template-sleep-story.jpg"),
     ]
     for i, (title, desc, name, col, img) in enumerate(cards):
         x = bx + i * 236
@@ -578,9 +578,12 @@ def card_describe(theme):
         c.rect(x, y, 224, 60, t["card"], rx=10, stroke=t["border"])
         c.defs.append(f'<clipPath id="tplc{i}"><path d="M{x + 10} {y}h36v60h-36a10 10 0 0 1 -10 -10v-40a10 10 0 0 1 10 -10z"/></clipPath>')
         c.file_image(img, x, y, 46, 60, clip=f"tplc{i}")
+        c.defs.append(f'<clipPath id="tplt{i}"><rect x="{x + 56}" y="{y}" width="{224 - 56 - 12}" height="60"/></clipPath>')
+        c.raw(f'<g clip-path="url(#tplt{i})">')
         c.text(x + 56, y + 18, title, 11, t["fg"], weight=600)
-        c.icon("chevron-right", x + 206, y + 9, 10, t["muted"])
         c.text(x + 56, y + 33, desc, 8.5, t["muted"])
+        c.raw("</g>")
+        c.icon("chevron-right", x + 206, y + 9, 10, t["muted"])
         c.pill(x + 56, y + 40, name, 8, col, "#ffffff", h=13, pad=5, weight=500)
     c.write()
 
