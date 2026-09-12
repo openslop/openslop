@@ -1,4 +1,3 @@
-import { Link } from "@/components/ui/icon";
 import type { AttributeDef } from "../attributes/schema";
 
 export const START_FRAME_ATTR = "startFrame";
@@ -27,7 +26,6 @@ export function parseStartFrame(
 export const startFrameDef: AttributeDef = {
 	key: START_FRAME_ATTR,
 	label: "Start frame",
-	icon: Link,
 	edit: { kind: "frame" },
 	default: PREVIOUS_SCENE,
 };

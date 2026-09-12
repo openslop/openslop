@@ -6,7 +6,7 @@ import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
-import { StartFrameToggle } from "./attributes/StartFrameToggle";
+import { StartFramePicker } from "./attributes/StartFramePicker";
 import { ModelAttribute } from "./attributes/ModelAttribute";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
 import { flatAttributes } from "@/lib/video/elementAttributes";
@@ -79,10 +79,11 @@ export function AttributeBadge({
 
 	if (spec.edit.kind === "frame") {
 		return (
-			<StartFrameToggle
+			<StartFramePicker
 				element={element}
 				attrKey={attrKey}
 				label={spec.label}
+				hideLabel={hideLabel}
 			/>
 		);
 	}
