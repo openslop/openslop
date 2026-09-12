@@ -2,7 +2,6 @@ import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
-import { flatAttributes } from "@/lib/video/elementAttributes";
 import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { elementModelPick, elementSchema } from "@/lib/canvas/elementConnector";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
@@ -137,7 +136,7 @@ export function ElementContainer({
 								/>
 								<ElementSettings
 									element={element}
-									specs={schema.visibleSettings(flatAttributes(element))}
+									specs={schema.settingsAttributes}
 								/>
 								<ElementVoiceButton element={element} />
 								<ElementHistoryButton element={element} />

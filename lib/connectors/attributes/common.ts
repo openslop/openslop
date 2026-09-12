@@ -69,11 +69,9 @@ export const formatDef: AttributeDef = {
 	default: DEFAULT_IMAGE_FORMAT,
 };
 
-/** Only a trimmed clip can run out under its dialogue, so only then is there anything to loop. */
 export const loopDef: AttributeDef = {
 	key: "loop",
 	label: "Loop",
-	when: { trimToDialogue: "true" },
 	edit: {
 		kind: "toggle",
 		off: { icon: Freeze, label: "Freeze on last frame" },
