@@ -98,6 +98,7 @@ describe("applyTemplate", () => {
 		const node = nodeBuilder(
 			DEFAULT_CONNECTOR_REGISTRY,
 			store.getState(),
+			() => [],
 		)(forCharacterAvatar(name));
 
 		expect(needsGeneration(node, queue)).toBe(false);

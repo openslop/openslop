@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
-import type { ElementLength } from "@/lib/video/elementLengths";
-import { NARRATION_WORDS_PER_MINUTE } from "@/lib/video/videoLength";
+import type { ElementLength } from "@/lib/render/elementLengths";
+import { NARRATION_WORDS_PER_MINUTE } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./defineTool";
 
@@ -17,13 +17,13 @@ const line = (length: ElementLength) =>
 
 export const measureElementLengths = defineTool({
 	description: dedent`
-	  Measure each visual: how long every image, animated_image and clip on the canvas is on
-	  screen, and which dialogue decides it. For the whole video's runtime, use
-	  measure_total_length instead.
+	  Measure each visual: how long every image and video element on the canvas
+	  is on screen, and which dialogue decides it. For the finished video's total runtime,
+	  use measure_total_length instead.
 
 	  A visual is on screen for as long as the dialogue that follows it, up to the next
-	  visual, about ${WORDS_PER_SECOND} spoken words a second. The \`duration\` on an
-	  animated_image or clip is the generated video's length, not its time on screen.
+	  visual, about ${WORDS_PER_SECOND} spoken words a second. The \`duration\` on a
+	  video element is how long it is generated, not its time on screen.
 
 	  Run this whenever the user asks how long something is shown, or asks to change it. To
 	  shorten a visual, split the dialogue after it and insert a visual at the split; to

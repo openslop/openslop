@@ -5,7 +5,10 @@ import {
 	delayRender,
 	staticFile,
 } from "remotion";
-import { loadCaptionFonts, type CaptionFont } from "@/lib/video/captionFonts";
+import {
+	loadCaptionFonts,
+	type CaptionFont,
+} from "@/lib/captions/captionFonts";
 
 /**
  * The one face this composition captions with. Rendering is held until it is

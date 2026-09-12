@@ -2,24 +2,23 @@
 
 import { useCallback } from "react";
 import type { Editor } from "slate";
-import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
+import { canvasOf, clearEditor, findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
+import { makesPicture } from "@/lib/canvas/types";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
-import { measureElementLengths } from "@/lib/video/elementLengths";
-import { DEFAULT_TRIM_VISUALS_TO_DIALOGUE } from "@/lib/video/scene-builder";
+import { measureElementLengths } from "@/lib/render/elementLengths";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import { staleReason } from "@/lib/generation/staleReason";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
-import { pictureElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { createConnector } from "@/lib/connectors/factory";
 import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { getPromptText } from "@/lib/generation/inputs";
-import { applyScriptEdit } from "@/lib/generation/scriptEdit";
+import { applyRefineOps } from "@/lib/script/refine/applyOps";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
@@ -39,17 +38,13 @@ export function useAgentTools(editor: Editor) {
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
-				measureElementLengths: () =>
-					measureElementLengths(
-						editor.children,
-						DEFAULT_TRIM_VISUALS_TO_DIALOGUE,
-					),
+				measureElementLengths: () => measureElementLengths(editor.children),
 				referenceImages: () => store.getState().referenceImages,
 				avatarUrl: (name) => characterAvatarUrl(queue, name),
 				elementImage: (id) => {
 					const element = findNodeById(editor, id)?.[0];
 					if (!element) return undefined;
-					const pictureId = pictureElementId(element);
+					const pictureId = makesPicture(element.type) ? element.id : undefined;
 					const { status, result } = queue.getElementSnapshot(pictureId);
 					return {
 						type: element.type,
@@ -60,7 +55,11 @@ export function useAgentTools(editor: Editor) {
 					};
 				},
 				elementStates: () => {
-					const buildNode = nodeBuilder(connectorConfig, store.getState());
+					const buildNode = nodeBuilder(
+						connectorConfig,
+						store.getState(),
+						canvasOf(editor),
+					);
 					return getContentElements(editor.children).map((element) =>
 						elementState(
 							element.id,
@@ -76,17 +75,7 @@ export function useAgentTools(editor: Editor) {
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,
-				editScript: (ops) =>
-					applyScriptEdit(
-						{
-							editor,
-							queue,
-							connectors: connectorConfig,
-							state: store.getState(),
-							models: defaultModels(),
-						},
-						ops,
-					),
+				editScript: (ops) => applyRefineOps(editor, ops, defaultModels()),
 				// The stream appends what it cannot find by id, so the canvas is cleared
 				// first or the new script stacks under the old one.
 				writeScript: (brief) => {

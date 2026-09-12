@@ -6,13 +6,12 @@ import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
 import { nodeBuilder } from "@/lib/generation/resolveGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 const registry: ConnectorRegistry = {
 	llm: {},
 	tts: {},
 	image: {},
-	animated_image: {},
 	video: {},
 	sfx: {},
 	music: {},
@@ -42,7 +41,7 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 // resolver rather than standing up the config and project providers.
 const store = createProjectStore();
 
-const resolve = () => nodeBuilder(registry, store.getState());
+const resolve = () => nodeBuilder(registry, store.getState(), () => []);
 
 vi.mock("@/lib/generation/useNodeBuilder", () => ({
 	useNodeBuilder: () => resolve(),
@@ -68,7 +67,9 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	const node = nodeBuilder(registry, store.getState())(forElement(element));
+	const node = nodeBuilder(registry, store.getState(), () => [])(
+		forElement(element),
+	);
 	queue.commitResult(node, {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,

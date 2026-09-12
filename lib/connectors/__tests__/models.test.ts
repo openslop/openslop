@@ -5,7 +5,6 @@ import {
 	differsFromRecommended,
 	hasModel,
 	listModels,
-	MODELS,
 	modalitiesFor,
 	modelEntry,
 	modelSourceFor,
@@ -13,7 +12,7 @@ import {
 	resolveModel,
 } from "../models";
 import { CONNECTOR_TYPES } from "../types";
-import { DEFAULT_VIDEO_RESOLUTION } from "@/lib/video/aspectRatio";
+import { DEFAULT_VIDEO_RESOLUTION } from "@/lib/project/aspectRatio";
 
 const SEEDREAM = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const SLOP_IMAGE = DEFAULT_MODELS.image;
@@ -110,19 +109,11 @@ describe("listModels", () => {
 			{ ...SEEDREAM, ...modelEntry("image", SEEDREAM) },
 		]);
 	});
-
-	it("lists the video models for an animated image", () => {
-		expect(listModels("animated_image")).toEqual(listModels("video"));
-	});
 });
 
 describe("modalitiesFor", () => {
 	it("names every type a provider has models for", () => {
-		expect(modalitiesFor("runware").sort()).toEqual([
-			"animated_image",
-			"image",
-			"video",
-		]);
+		expect(modalitiesFor("runware").sort()).toEqual(["image", "video"]);
 		expect(modalitiesFor("anthropic")).toEqual(["llm"]);
 		expect(modalitiesFor("openslop")).toEqual([...CONNECTOR_TYPES]);
 	});
@@ -167,10 +158,6 @@ describe("defaultModelFor", () => {
 				project: { image: { provider: "openslop", model: "Retired v0" } },
 			}),
 		).toEqual(SLOP_IMAGE);
-	});
-
-	it("gives an animated image its video model, and the still its own", () => {
-		expect(defaultModelFor("animated_image")).toEqual(DEFAULT_MODELS.video);
 	});
 });
 
@@ -246,11 +233,5 @@ describe("differsFromRecommended", () => {
 
 	it("ignores a key that is not a connector type", () => {
 		expect(differsFromRecommended({ bogus: SEEDREAM })).toBe(false);
-	});
-});
-
-describe("MODELS", () => {
-	it("shares the video tables between clips and animated images", () => {
-		expect(MODELS.animated_image).toBe(MODELS.video);
 	});
 });

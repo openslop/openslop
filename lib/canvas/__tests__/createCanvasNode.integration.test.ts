@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "../createCanvasNode";
-import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_SFX_MODEL } from "@/lib/connectors/sfx/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 describe("createCanvasNode — schema defaults (integration)", () => {
 	it("applies full TTS defaults for narration", () => {
@@ -36,21 +35,15 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 		});
 	});
 
-	it("applies animated_image defaults including videoPrompt", () => {
-		const node = createCanvasNode("animated_image");
-		expect(flatAttributes(node)).toMatchObject({
-			videoPrompt: "slow cinematic pan",
+	it("applies video defaults, opening on the previous scene", () => {
+		const node = createCanvasNode("video");
+		const attributes = flatAttributes(node);
+		expect(attributes).toMatchObject({
 			duration: "10",
+			trimToDialogue: "true",
+			startFrame: "previous",
 			motion: "none",
 			...DEFAULT_VIDEO_MODEL,
-		});
-	});
-
-	it("seeds the still with the recommended image model", () => {
-		const node = createCanvasNode("animated_image");
-		expect(flatAttributes(node)).toMatchObject({
-			imageProvider: DEFAULT_IMAGE_MODEL.provider,
-			imageModel: DEFAULT_IMAGE_MODEL.model,
 		});
 	});
 });

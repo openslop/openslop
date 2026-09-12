@@ -12,7 +12,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 const ASSET_QUEUE_TOPIC = "asset-generate";
 
-/** What an asset route queues. LLM turns stream, and an animated image reaches the worker as a video job. */
+/** What an asset route queues. LLM turns stream, and a video element reaches the worker as a video job. */
 export const JOB_CONNECTOR_TYPES = [
 	"image",
 	"music",

@@ -5,8 +5,8 @@ export const ADAPT_GUIDELINES = dedent`
   The user will provide some text, and you will return that text with
   annotations according to the XML format described below. Do NOT modify the script
   itself, simply conform the text to the XML format described below. If the script doesn't contain
-  any explicit narration/image/character/music/sound annotations, assume the text is all narration
-  and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a video.
+  any explicit narration/character/image/video/sound/music annotations, assume the text is all narration
+  and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a finished video.
 
   ### Miscellaneous Rules
   - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.
@@ -18,7 +18,7 @@ export const notesSection = (notes: string): string => dedent`
   ### Notes from the user
 
   These came alongside the script and are about it, not part of it. Let them inform what
-  you add around the script: the images, sound and music, and the style and voice
+  you add around the script: the visuals, sound and music, and the style and voice
   metadata. Never speak them, and never fold them into narration or dialogue.
 
   ${notes}

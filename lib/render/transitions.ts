@@ -1,0 +1,21 @@
+// zoomBlur and zoomInOut are excluded — both rely on the HTML-in-canvas API
+// (chrome://flags/#canvas-draw-element), which isn't enabled in stable browsers.
+export const TRANSITION_TYPES = [
+	"none",
+	"fade",
+	"slide",
+	"wipe",
+	"flip",
+	"clockWipe",
+	"iris",
+] as const;
+
+export type TransitionType = (typeof TRANSITION_TYPES)[number];
+
+export const DEFAULT_TRANSITION: TransitionType = "none";
+export const TRANSITION_DURATION_SEC = 0.4;
+export const AUDIO_FADE_SEC = 2;
+// Lead time to mount a foreground visual before it is visible so a video decodes
+// ahead of the transition and doesn't stall the Player (which would stutter audio).
+export const FOREGROUND_PREMOUNT_SEC = 2;
+export const LAYER_PREMOUNT_SEC = 1;

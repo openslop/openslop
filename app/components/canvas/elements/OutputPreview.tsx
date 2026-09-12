@@ -1,6 +1,6 @@
 import { memo } from "react";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_PREVIEWS } from "./preview/registry";
+import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
+import { PREVIEWS_BY_KIND } from "./preview/registry";
 import { UploadedBadge } from "./preview/UploadedBadge";
 import { useElementGeneration } from "./ElementGenerationContext";
 
@@ -10,7 +10,7 @@ function OutputPreviewComponent({
 	element: CanvasContentElement;
 }) {
 	const { status, seconds, result, error, discard } = useElementGeneration();
-	const Preview = ELEMENT_PREVIEWS[element.type];
+	const Preview = PREVIEWS_BY_KIND[ELEMENT_TYPES[element.type].outputKind];
 
 	return (
 		<Preview

@@ -21,7 +21,7 @@ export function buildCharacterAvatarPlugins(name: string): ConnectorPlugin[] {
 
 export const forCharacterAvatar =
 	(name: string): NodeSpec =>
-	(state) => ({
+	({ state }) => ({
 		element: characterAvatarElement(state, name),
 		plugins: buildCharacterAvatarPlugins(name),
 		label: `${name}'s avatar`,
@@ -40,7 +40,8 @@ export function seedCharacterAvatar(
 	imageUrl: string,
 ): void {
 	queue.commitResult(
-		nodeBuilder(registry, state)(forCharacterAvatar(name)),
+		// An avatar reads project state only, never another element on the canvas.
+		nodeBuilder(registry, state, () => [])(forCharacterAvatar(name)),
 		{ imageUrl, durationSec: 0 },
 		{ pinned: true },
 	);

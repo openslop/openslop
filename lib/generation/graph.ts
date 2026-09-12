@@ -4,6 +4,7 @@ import type {
 	CanvasContentElement,
 	CanvasElementType,
 } from "@/lib/canvas/types";
+import { previousVisual } from "@/lib/canvas/scenes";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type {
 	AssetConnectorType,
@@ -28,8 +29,9 @@ export type GenerationJob = {
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
-	/** The project state this job's inputs were resolved against. */
+	/** The project state and canvas this job's inputs were resolved against. */
 	state: ProjectData;
+	canvas: CanvasContentElement[];
 };
 
 type NodeBase = {
@@ -41,11 +43,14 @@ type NodeBase = {
 };
 
 /**
- * Project state that is read rather than generated. It has no edges and never
- * changes once built, so its identity is settled at construction rather than
- * re-serialized for every dependent that asks.
+ * A leaf the queue never runs: project state that is read rather than
+ * generated, or an orphan whose result was left behind. What a dependent
+ * records of it is its identity, settled by the node itself.
  */
-export type SourceNode = NodeBase & { job: null; identity: string };
+export type SourceNode = NodeBase & {
+	job: null;
+	identity: (results: NodeResults) => string;
+};
 
 /** A unit of generation: something the queue can run. */
 export type JobNode = NodeBase & { job: GenerationJob };
@@ -60,11 +65,17 @@ export type ElementNode = {
 	label?: string;
 };
 
+/** What a spec may read while naming its node: project state, and the canvas in document order. */
+export type BuildContext = {
+	state: ProjectData;
+	canvas: () => CanvasContentElement[];
+};
+
 /**
  * Declares which node to build without saying how; only the builder knows the
  * registry and the state. A source-node spec returns its node directly.
  */
-export type NodeSpec = (state: ProjectData) => ElementNode | GenerationNode;
+export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
 
 /** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
 export const isElementNode = (
@@ -74,6 +85,31 @@ export const isElementNode = (
 export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
 	() => ({ element });
+
+/**
+ * Another element on the canvas, by id. One that has since been deleted still
+ * resolves, as an orphan whose snapshot the dependent reads as it was left.
+ */
+export const forCanvasElement =
+	(id: string, label: string): NodeSpec =>
+	({ canvas }) => {
+		const element = canvas().find((candidate) => candidate.id === id);
+		return element ? { element, label } : orphanNode(id, label);
+	};
+
+/**
+ * The visual before an element in document order. Resolved at build time, so
+ * reordering the script changes what it names and stales the dependent. With
+ * nothing before it, an empty leaf stands in and the dependent reads no result.
+ */
+export const forPreviousVisual =
+	(id: string, label: string): NodeSpec =>
+	({ canvas }) => {
+		const element = previousVisual(canvas(), id);
+		return element
+			? { element, label }
+			: sourceNode(derivedNodeId("first", id), {}, label);
+	};
 
 /** What the graph reads back about a node the queue has settled. */
 export type NodeResult = {
@@ -97,31 +133,29 @@ const DERIVED_PREFIX = "~";
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
 
-/** The dependency a node derives for `kind`, when its plugins declare one. */
-export const derivedDependency = (node: GenerationNode, kind: string) =>
-	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
-
-const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
-
-/** The node a derived id was minted from, if it was derived at all. */
-export const derivedFrom = (id: NodeId): NodeId | null =>
-	DERIVED_ID.exec(id)?.[1] ?? null;
-
+/** Never changes once built, so its identity is settled at construction. */
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,
 	label?: string,
 ): SourceNode {
 	const inputs = { prompt: "", attributes };
+	const identity = serializeInputs({ ...inputs, dependencies: {} });
 	return {
 		id,
 		inputs,
 		dependsOn: [],
 		label,
 		job: null,
-		identity: serializeInputs({ ...inputs, dependencies: {} }),
+		identity: () => identity,
 	};
 }
+
+/** A node nothing builds any more; what it is, is the result it left behind. */
+export const orphanNode = (id: NodeId, label?: string): SourceNode => ({
+	...sourceNode(id, {}, label),
+	identity: (results) => resultIdentity(results.getElementSnapshot(id).result),
+});
 
 /** What a dependent records about a dependency's output. */
 export function resultIdentity(result: AssetResult | null): string {
@@ -134,7 +168,7 @@ export function nodeIdentity(
 	results: NodeResults,
 ): string {
 	return isSourceNode(node)
-		? node.identity
+		? node.identity(results)
 		: resultIdentity(results.getElementSnapshot(node.id).result);
 }
 

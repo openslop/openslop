@@ -1,6 +1,7 @@
 import dedent from "dedent";
-import { DURATION_OPTIONS } from "@/lib/canvas/types";
-import { MOTION_EFFECTS } from "@/lib/video/motionEffectNames";
+import { DEFAULT_DURATION, DURATION_OPTIONS } from "@/lib/canvas/types";
+import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
+import { VIDEO_SHAPES } from "./shapes";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import {
@@ -20,10 +21,12 @@ export function osmlSpec(language: string): string {
 
   ## **General Guidelines**
   - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
-  - Descriptions in image tags are opaque to the reader, so the narrative prose should include some details that are only in the image tags.
+  - Prompts in <image> and <video> tags are opaque to the reader, so the narrative prose should include some details that are only in those prompts.
 
 ${languagePrompt(language)}
 - Write the metadata_title in that same language, and the metadata_style description in English.
+
+${VIDEO_SHAPES}
 
   ## **XML Tagging**
 
@@ -53,41 +56,40 @@ ${languagePrompt(language)}
   - For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
 
   ### Image XML Tags
-  - Each scene should include an image XML tag that describes the current scene. Example:
+  - Each scene opens with a visual: an <image>, or a <video> where the script's shape calls for one. Example:
     <image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
   - motion: Camera-motion effect applied for the element's full duration. Almost always set one — a still image with no motion reads as a flat, lifeless slide. Use at most one per scene. Example: <image motion="kenBurnsIn">...</image>
   - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
   - characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
     <image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
   - After the metadata tags, open the story with an <image> tag that describes the image for the opening scene.
-  - Frequently change the image at least every 2 narrative lines.
+  - Under narration, change the visual at least every 2 narrative lines.
   - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
   - For example, if there is rain in the image, add the rain overlay. If there is smoke, add the smoke overlay. If there is lightning, add the lightning overlay. If there are multiple effects, add all of them.
   - Overlays should be a comma-separated list containing any of the following: ${Object.values(
 		EffectType,
 	).join(", ")}
-  - Image descriptions should describe the time of day, the background, the weather (if outdoors), and objects in detail.
-  - Each image must depict the specific moment described by the narration and dialogue that follow it, up to the next image tag: the concrete subject, action, and expression of those lines, not just the scene's general setting. If the line names an object, a gesture, or a reaction, it belongs in the description.
-  - Each <image> description must be written as a standalone prompt, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
-  - Reference characters by their names in the image description, NEVER describe their appearance in the image description
-  - Each image description should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous descriptions or the story.
+  - Image prompts should describe the time of day, the background, the weather (if outdoors), and objects in detail.
+  - Each image must depict the specific moment described by the narration and dialogue that follow it, up to the next image tag: the concrete subject, action, and expression of those lines, not just the scene's general setting. If the line names an object, a gesture, or a reaction, it belongs in the prompt.
+  - Each <image> prompt must stand alone, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
+  - Reference characters by their names in the image prompt, NEVER describe their appearance in the image prompt
+  - Each image prompt should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous prompts or the story.
 
-  ### Animated Image XML Tags
-  - An <animated_image> tag is an <image> tag whose still frame is then animated by an image-to-video model. Use it for hero moments, establishing shots, or emotional beats that benefit from subtle motion. The tag body describes the still frame in the same way as an <image>; the videoPrompt attribute describes the camera/subject motion. The still described in the tag body is generated first and handed to the video model as the clip's FIRST FRAME, so the two are not independent: the clip literally opens on that still. Example:
-    <animated_image videoPrompt="slow zoom out from Red and Wolf as they keep walking, revealing the full moonlit clearing around them, rain still falling" characters="Red,Wolf" overlays="rain">A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows. Red (a cheerful girl with warm brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak) walks beside Wolf (a large gray wolf with kind amber eyes, soft thick fur).</animated_image>
-  - videoPrompt: required. A short, focused, relaxing description of the motion or camera movement (e.g. "slow cinematic pan", "gentle dolly in", "warm zoom on the character's face"). Keep it simple — one camera move per shot.
-  - videoPrompt must CONTINUE FROM the still described in the tag body — same subjects, same framing, same location, same time of day, same weather — and describe only what changes over the next few seconds. Write it as the seconds that follow that exact frame, not as a new shot.
-  - videoPrompt must NEVER open on a different scene, introduce a subject that is not already in the still, relocate or jump time of day, or imply a cut to another shot. If the motion you want needs a different opening image, change the tag body to describe that image instead.
-  - duration: optional. The length of the animated clip in seconds (default 5). Allowed values: ${DURATION_OPTIONS.join(", ")}.
-  - motion: normally set to "none". Only set a motion effect when the videoPrompt describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
-  - characters: optional. Same as for <image> — a comma-separated list of exact story character names appearing in the frame. Note how the videoPrompt below continues the exact moment the body describes rather than starting a new one. Example: <animated_image videoPrompt="gentle dolly in as Red lets go of the basket and Granny takes its weight" characters="Red,Granny">Red hands the basket to Granny at the cottage door.</animated_image>
-  - All <image> description rules apply unchanged: depict the moment the following narration and dialogue describe, and write a prompt that describes the time of day, background, weather, and objects in detail. Repeat any details necessary even if they appeared in earlier prompts.
-  - Use <animated_image> sparingly — mostly at intro shots and hero moments. Default to <image> for typical scenes; image-to-video generation is significantly slower and more expensive.
+  ### Video XML Tags
+  - A <video> tag is a short generated video element. Use it for hero moments, establishing shots, or emotional beats that benefit from motion. The tag body is the video prompt: describe the frame the way you would an <image> (time of day, background, weather, objects, characters by name) and then one simple camera or subject motion (e.g. "slow cinematic pan", "gentle dolly in"). One move per <video>. Example:
+    <video characters="Red,Wolf" overlays="rain">A dark forest clearing under a full moon, rain falling through the trees. Red and Wolf keep walking as the camera slowly zooms out to reveal the whole moonlit clearing.</video>
+  - duration: optional. How many seconds the <video> is generated for (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
+  - startFrame: optional, "previous" by default: the <video> opens on the end of the visual before it, so consecutive <video> elements continue from one another; write its prompt as the seconds that follow that picture. Set it to "none" for a <video> that cuts to somewhere new.
+  - trimToDialogue: optional, "true" by default. Trimmed, the <video> is on screen for exactly the dialogue after it. Set it to "false" for a <video> that should play its full length even with little or no dialogue under it, such as an action beat or a montage cut.
+  - motion: normally set to "none". Only set a motion effect when the prompt describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
+  - characters: optional. Same as for <image>: a comma-separated list of exact story character names appearing in the frame.
+  - All <image> prompt rules apply unchanged: depict the moment the following narration and dialogue describe, and repeat any details necessary even if they appeared in earlier prompts.
+  - In a Slideshow, use <video> sparingly, mostly for intros and hero moments, and default to <image>: video generation is significantly slower and more expensive. In a Film or Motion explainer, <video> elements are the visuals.
 
   ### Sound XML Tags
   - Frequently insert <sound> tags (as if prompting a sound model) that should accompany a scene before the relevant dialogue (character or narration).
-  - The descriptions within <sound> tags should be common, simple, short, clear ASMR pleasing sound descriptions like rain, wind, fire crackling, footsteps, etc.
-  - The optional loops attribute is an integer (default 1) that controls how many times the generated sound clip plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
+  - Sound prompts within <sound> tags should be common, simple, short, clear ASMR pleasing sounds like rain, wind, fire crackling, footsteps, etc.
+  - The optional loops attribute is an integer (default 1) that controls how many times the generated sound plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
     <sound loops="4">Wind</sound>
     <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
     <sound>Tiger roar</sound>
@@ -104,10 +106,10 @@ ${languagePrompt(language)}
     <music length="long">Soft, slow, sad piano music for a romantic breakup</music>
     or
     <music length="medium">Epic battle over snow-covered mountains, powerful brass, pounding timpani, fast, heroic</music>
-  - The descriptions within <music> tags should be common, simple, short, clear, and direct.
+  - Music prompts within <music> tags should be common, simple, short, clear, and direct.
   - Music should change frequently (at least once every few scenes) to keep the reader engaged.
   - length: ${Object.values(MusicLength).join(", ")}
-  - The optional loops attribute is an integer (default 1) that controls how many times the generated music clip plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
+  - The optional loops attribute is an integer (default 1) that controls how many times the generated music plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
 
   ### Metadata Title XML tag
   - The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:

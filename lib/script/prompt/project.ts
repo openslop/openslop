@@ -5,7 +5,7 @@ import {
 	type MetadataCharacter,
 	type MetadataVoice,
 } from "@/lib/project/types";
-import { videoLengthBudget } from "@/lib/video/videoLength";
+import { videoLengthBudget } from "@/lib/project/videoLength";
 
 function renderVoice(voice: MetadataVoice): string {
 	return voiceTraitEntries(voice)
@@ -69,5 +69,5 @@ export function lengthSection(metadata: Metadata): string {
 		# Length
 
 		Write ${minWords} to ${maxWords} words of dialogue. Only spoken words count;
-		descriptions and attributes do not.`;
+		prompts and attributes do not.`;
 }

@@ -1,11 +1,11 @@
 import dedent from "dedent";
 import { z } from "zod";
-import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
+import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
 import {
 	VIDEO_LENGTHS,
 	VIDEO_LENGTH_SPECS,
 	VIDEO_LENGTH_TARGETS,
-} from "@/lib/video/videoLength";
+} from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";

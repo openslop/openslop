@@ -4,12 +4,19 @@ import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import type { ElementVersion } from "@/lib/generation/versions";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
+import { createCanvasNode } from "./createCanvasNode";
 import { attributeSchemaFor } from "./elementConnector";
+import { getContentElements } from "./scenes";
 import { isContentElement } from "./guards";
 import { makeNodeId } from "./nodeUtils";
+import { preservedAttributes } from "./preservedAttributes";
 
 /** Any canvas element by id — scenes included. Use {@link findNodeById} when only content will do. */
 export function findElementById(
@@ -22,6 +29,10 @@ export function findElementById(
 	});
 	return entry ?? null;
 }
+
+/** The canvas in document order, read live: what a node builder resolves other elements from. */
+export const canvasOf = (editor: Editor) => () =>
+	getContentElements(editor.children);
 
 export function findNodeById(
 	editor: Editor,
@@ -87,6 +98,37 @@ export function updateNodeText(
 	});
 }
 
+/**
+ * Makes an element another type in place, keeping its id and text. Of what it
+ * had, only the attributes shared with the new type carry over, plus `attrs`,
+ * resolved against the new type's schema the way a fresh element would be.
+ */
+export function retypeNode(
+	editor: Editor,
+	path: Path,
+	element: CanvasContentElement,
+	type: CanvasContentElement["type"],
+	{
+		attrs = {},
+		defaultModels,
+	}: { attrs?: Record<string, string>; defaultModels?: ConnectorModels } = {},
+): void {
+	const replacement = createCanvasNode(type, {
+		id: element.id,
+		attrs: { ...preservedAttributes(element, type), ...attrs },
+		defaultModels,
+	});
+	Transforms.setNodes(
+		editor,
+		{
+			type,
+			generationAttributes: replacement.generationAttributes,
+			layoutAttributes: replacement.layoutAttributes,
+		},
+		{ at: path },
+	);
+}
+
 export function replaceGenerationAttrs(
 	editor: Editor,
 	path: Path,
@@ -102,8 +144,8 @@ export function replaceGenerationAttrs(
 /**
  * Puts an element back into the state that produced a version: the type it was
  * generated as, and the prompt and attributes it was generated from. Restoring
- * the inputs alone would leave, say, an animated image holding the attributes of
- * the image it was animated from, with no videoPrompt left to animate on.
+ * the inputs alone would leave an element of one type holding another type's
+ * attributes.
  */
 export function applyNodeVersion(
 	editor: Editor,

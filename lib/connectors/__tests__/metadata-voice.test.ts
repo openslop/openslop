@@ -224,7 +224,10 @@ describe("createMetadataVoicePlugin", () => {
 		});
 		const voiceInput = (element: CanvasContentElement) => {
 			const [spec] = createMetadataVoicePlugin().dependencies?.(element) ?? [];
-			const node = spec?.(store.getState());
+			const node = spec?.({
+				state: store.getState(),
+				canvas: () => [],
+			});
 			return node && "inputs" in node ? node.inputs.attributes : undefined;
 		};
 

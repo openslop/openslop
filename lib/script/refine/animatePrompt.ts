@@ -1,10 +1,12 @@
-const ANIMATE_IMAGE_PATTERN = /animate the image in scene (\d+)/i;
+const ANIMATE_VIDEO_PATTERN =
+	/write the motion for the video element in scene (\d+)/i;
 
-export const animateImagePrompt = (scene: number): string =>
-	`Animate the image in scene ${scene}, reusing the frame it has already generated.`;
+/** What the animate button asks Sloppy, once the image has become a video element that opens on its picture. */
+export const animateVideoPrompt = (scene: number): string =>
+	`Write the motion for the video element in scene ${scene}: it opens on the picture it already shows, so rewrite its prompt as one short camera or subject movement that continues from that exact frame.`;
 
 /** The scene an animate request names, or null when it is not one. */
-export const animateImageScene = (prompt: string): number | null => {
-	const scene = ANIMATE_IMAGE_PATTERN.exec(prompt)?.[1];
+export const animateVideoScene = (prompt: string): number | null => {
+	const scene = ANIMATE_VIDEO_PATTERN.exec(prompt)?.[1];
 	return scene === undefined ? null : Number(scene);
 };

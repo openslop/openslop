@@ -20,7 +20,7 @@ function mockSuccess() {
 	});
 }
 
-describe("BaseVideoConnector", () => {
+describe("HttpVideoConnector", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 	});

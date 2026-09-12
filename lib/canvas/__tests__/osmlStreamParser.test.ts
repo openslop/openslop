@@ -4,7 +4,7 @@ import { getElementText } from "../osmlSerializer";
 import type { ParsedElement } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 describe("OSMLStreamParser", () => {
 	it("parses a single complete tag", () => {
@@ -158,16 +158,14 @@ describe("OSMLStreamParser", () => {
 		expect(flatAttributes(nodes[0]).id).toBeUndefined();
 	});
 
-	it("parses <animated_image> with a videoPrompt attribute", () => {
+	it("parses <video> with a startFrame attribute", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk(
-			'<animated_image videoPrompt="slow zoom in">a dark forest</animated_image>',
-		);
+		s.appendChunk('<video startFrame="img1">a dark forest</video>');
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("animated_image");
-		expect(flatAttributes(nodes[0]).videoPrompt).toBe("slow zoom in");
+		expect(nodes[0].type).toBe("video");
+		expect(flatAttributes(nodes[0]).startFrame).toBe("img1");
 		expect(getElementText(nodes[0])).toContain("a dark forest");
 	});
 
@@ -185,20 +183,16 @@ describe("parseOSML", () => {
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
 		const [node] = parseOSML(
-			'<animated_image provider="runware" model="Seedance 2 Fast" imageProvider="runware" imageModel="Seedream 5 Lite">a sunset</animated_image>',
+			'<video provider="runware" model="Seedance 2 Fast">a sunset</video>',
 		);
 		expect(flatAttributes(node)).toMatchObject({
 			provider: "runware",
 			model: "Seedance 2 Fast",
-			imageProvider: "runware",
-			imageModel: "Seedream 5 Lite",
 		});
 	});
 
 	it("replaces a model the catalog no longer offers", () => {
-		const [node] = parseOSML(
-			'<animated_image model="Slop Video v0">a sunset</animated_image>',
-		);
+		const [node] = parseOSML('<video model="Slop Video v0">a sunset</video>');
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_VIDEO_MODEL);
 	});
 

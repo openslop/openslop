@@ -6,8 +6,8 @@ import {
 	durationFits,
 	fallsShort,
 	type DurationFit,
-} from "@/lib/video/durationFit";
-import type { ElementLength } from "@/lib/video/elementLengths";
+} from "@/lib/render/durationFit";
+import type { ElementLength } from "@/lib/render/elementLengths";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./defineTool";
 
@@ -18,7 +18,7 @@ const changeLine = ({ length, duration, needed }: DurationFit) =>
 	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${seconds(needed)} of dialogue and leeway.`;
 
 const shortLine = ({ length, needed }: DurationFit) =>
-	`${where(length)} needs ${seconds(needed)} but ${DURATION_MAX}s is the longest a clip can be generated at; split the dialogue after it across more visuals.`;
+	`${where(length)} needs ${seconds(needed)} but ${DURATION_MAX}s is the longest a video element can be generated at; split the dialogue after it across more visuals.`;
 
 const report = (...lines: (string | false)[]) =>
 	lines.filter(Boolean).join("\n");
@@ -45,7 +45,7 @@ type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
 
 const headline = ({ fits, changes, short, applied }: Counts) => {
 	if (fits === 0)
-		return "No animated_image or clip in scope. Images carry no duration and already stretch to the dialogue under them.";
+		return "No video elements in scope. Images carry no duration and already stretch to the dialogue under them.";
 	if (changes > 0)
 		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
 	if (short > 0)
@@ -55,10 +55,10 @@ const headline = ({ fits, changes, short, applied }: Counts) => {
 
 export const fitDurations = defineTool({
 	description: dedent`
-	  Fit every animated_image and clip to the dialogue that runs under it: set each one's
+	  Fit every video element to the dialogue that runs under it: set each one's
 	  \`duration\` to just cover the speech that follows it, up to the next visual, plus
-	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter clips stop dead under long dialogue;
-	  longer ones are generated video nobody sees.
+	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter ones stop dead under long dialogue;
+	  longer ones are generated footage nobody sees.
 
 	  The dialogue under a visual is every line between it and the next visual, whether or
 	  not a scene boundary falls between them, so this is scoped by element, never by scene.
@@ -72,7 +72,7 @@ export const fitDurations = defineTool({
 	}),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Fitting clips to the dialogue",
+	label: "Fitting video elements to the dialogue",
 	execute: async ({ element_ids }, ctx) => {
 		const { scoped, unknown } = scopeTo(
 			ctx.measureElementLengths(),

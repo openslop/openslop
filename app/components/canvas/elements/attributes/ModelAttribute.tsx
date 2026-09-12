@@ -12,7 +12,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ModelPick } from "@/lib/connectors/attributes/schema";
 import { modelSourceFor, resolveModel } from "@/lib/connectors/models";
 import { useModelChain } from "@/lib/connectors/useDefaultModels";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 export function ModelAttribute({
 	element,

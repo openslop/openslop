@@ -8,6 +8,8 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import {
 	isElementNode,
+	orphanNode,
+	type BuildContext,
 	type ElementNode,
 	type GenerationNode,
 	type JobNode,
@@ -23,9 +25,9 @@ const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	state: ProjectData,
 	dependsOn: GenerationNode[],
 	label: string | undefined,
+	{ state, canvas }: BuildContext,
 ): JobNode => ({
 	id: element.id,
 	label,
@@ -41,6 +43,7 @@ const toNode = (
 		model: connector.model,
 		config: { ...connector.config, plugins },
 		state,
+		canvas: canvas(),
 	},
 });
 
@@ -51,8 +54,12 @@ const toNode = (
 export function nodeBuilder(
 	registry: ConnectorRegistry,
 	state: ProjectData,
+	canvas: BuildContext["canvas"],
 ): NodeBuilder {
 	return (spec) => {
+		// Read once per build, so every node in the graph sees the same canvas.
+		const elements = canvas();
+		const ctx: BuildContext = { state, canvas: () => elements };
 		// Scoped to one call: it dedupes nodes shared within a single graph and
 		// detects cycles. Held across calls it would serve a stale node back once
 		// its element changed, since element content is not part of `state`.
@@ -63,8 +70,9 @@ export function nodeBuilder(
 			const { id } = element;
 			const existing = resolved.get(id);
 			if (existing) return existing;
-			if (resolving.has(id))
-				throw new Error(`Cyclic generation dependency at "${id}"`);
+			// A chain that loops back reads what the other end left rather than
+			// never building; both ends then read as stale, which the picker never offers.
+			if (resolving.has(id)) return orphanNode(id, label);
 			resolving.add(id);
 
 			const connector = resolveElementConnector(element, registry, state);
@@ -72,7 +80,7 @@ export function nodeBuilder(
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
-			const node = toNode(element, connector, plugins, state, dependsOn, label);
+			const node = toNode(element, connector, plugins, dependsOn, label, ctx);
 
 			resolving.delete(id);
 			resolved.set(id, node);
@@ -80,7 +88,7 @@ export function nodeBuilder(
 		};
 
 		const resolve = (dep: NodeSpec): GenerationNode => {
-			const declared = dep(state);
+			const declared = dep(ctx);
 			return isElementNode(declared) ? build(declared) : declared;
 		};
 

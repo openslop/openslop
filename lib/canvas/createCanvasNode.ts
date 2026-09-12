@@ -5,7 +5,7 @@ import {
 } from "@/lib/canvas/types";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { makeNodeId } from "./nodeUtils";
 

@@ -1,4 +1,3 @@
-import { HttpAnimatedImageConnector } from "./animated_image/connector";
 import { HttpImageConnector } from "./image/connector";
 import { HttpLLMConnector } from "./llm/connector";
 import { HttpMusicConnector } from "./music/connector";
@@ -20,7 +19,6 @@ type ConnectorTypeMap = {
 	music: HttpMusicConnector;
 	sfx: HttpSFXConnector;
 	image: HttpImageConnector;
-	animated_image: HttpAnimatedImageConnector;
 	tts: TTSConnector;
 	video: HttpVideoConnector;
 };
@@ -35,7 +33,6 @@ const CONNECTORS: Record<ConnectorType, ProviderConstructor> = {
 	music: HttpMusicConnector,
 	sfx: HttpSFXConnector,
 	image: HttpImageConnector,
-	animated_image: HttpAnimatedImageConnector,
 	tts: HttpTTSConnector,
 	video: HttpVideoConnector,
 };

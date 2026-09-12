@@ -3,7 +3,7 @@ import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import type { CanvasContentElement, CanvasEditor } from "@/lib/canvas/types";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { withLayout } from "../plugins/withLayout";
 
 const seeded = (defaultModels: ConnectorModels) => {

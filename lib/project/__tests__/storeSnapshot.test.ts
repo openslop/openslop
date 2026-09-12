@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
-import { DEFAULT_VIDEO_LENGTH } from "@/lib/video/videoLength";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
+import { DEFAULT_VIDEO_LENGTH } from "@/lib/project/videoLength";
 import { createProjectStore } from "../store";
 import { MetadataSchema } from "../types";
 import { extractStoreSnapshot, parseStoreSnapshot } from "../storeSnapshot";

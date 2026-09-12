@@ -3,8 +3,6 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
-	derivedFrom,
-	derivedNodeId,
 	flattenGraph,
 	isNodeStale,
 	needsGeneration,
@@ -34,6 +32,7 @@ function node(
 		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
+		canvas: [],
 	};
 	return {
 		id,
@@ -160,17 +159,5 @@ describe("flattenGraph", () => {
 			"left",
 			"right",
 		]);
-	});
-});
-
-describe("derivedFrom", () => {
-	it("names the node a derived id was minted from", () => {
-		expect(derivedFrom(derivedNodeId("still", "el-1"))).toBe("el-1");
-		expect(derivedFrom(derivedNodeId("avatar", "Jane"))).toBe("Jane");
-	});
-
-	it("has no answer for an id the graph did not derive", () => {
-		expect(derivedFrom("el-1")).toBeNull();
-		expect(derivedFrom("project:artStyle")).toBeNull();
 	});
 });

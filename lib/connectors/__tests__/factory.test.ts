@@ -17,7 +17,6 @@ describe("createConnector", () => {
 			"music",
 			"sfx",
 			"image",
-			"animated_image",
 			"tts",
 			"video",
 		];
@@ -38,23 +37,19 @@ describe("resolveAttributeSchema", () => {
 		]);
 	});
 
-	it("resolves distinct schemas for image vs animated_image", () => {
+	it("resolves distinct schemas for image vs video", () => {
 		expect(resolveAttributeSchema("image", DEFAULT_MODELS.image).keys).toEqual([
 			"referenceImagesOverride",
 			"format",
 			"motion",
 		]);
-		expect(
-			resolveAttributeSchema("animated_image", DEFAULT_MODELS.animated_image)
-				.keys,
-		).toEqual([
-			"imageProvider",
-			"imageModel",
+		expect(resolveAttributeSchema("video", DEFAULT_MODELS.video).keys).toEqual([
+			"startFrame",
+			"uploadedFrame",
 			"referenceImagesOverride",
-			"format",
-			"videoPrompt",
 			"resolution",
 			"duration",
+			"trimToDialogue",
 			"loop",
 			"volume",
 			"motion",
@@ -68,28 +63,6 @@ describe("resolveAttributeSchema", () => {
 			expect(schema.keys).not.toContain("provider");
 			expect(schema.keys).not.toContain("model");
 		}
-	});
-
-	it("resolves the still behind an animated image from the image models", () => {
-		const schema = resolveAttributeSchema(
-			"animated_image",
-			DEFAULT_MODELS.animated_image,
-		);
-		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-
-		expect(schema.resolve({}, { image: pinned })).toMatchObject({
-			imageProvider: pinned.provider,
-			imageModel: pinned.model,
-		});
-		expect(
-			schema.resolve({
-				imageProvider: "openslop",
-				imageModel: "Seedream 5 Lite",
-			}),
-		).toMatchObject({
-			imageProvider: DEFAULT_MODELS.image.provider,
-			imageModel: DEFAULT_MODELS.image.model,
-		});
 	});
 
 	// A voice picks its model in its own editor, so speech shows no control of its own.

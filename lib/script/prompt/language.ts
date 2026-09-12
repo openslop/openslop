@@ -14,5 +14,5 @@ export function languagePrompt(language: string): string {
 	return dedent`
 		## **Language**
 		- Write all narration text and character dialogue in ${language}.
-		- Always write image, animated_image (including videoPrompt), sound, and music descriptions in English, whatever language the spoken text is in.`;
+		- Always write <image>, <video>, <sound>, and <music> prompts in English, whatever language the spoken text is in.`;
 }

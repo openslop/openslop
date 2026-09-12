@@ -72,7 +72,7 @@ export function PlaceholderBallsLoader({
 }) {
 	const staticRotations = useStaticRotations();
 	return (
-		<div className={loaderStyles.clip} aria-hidden="true">
+		<div className={loaderStyles.clipBox} aria-hidden="true">
 			<div className={loaderStyles.containerLoader}>
 				<PlaceholderBalls
 					generating={generating}
