@@ -25,7 +25,8 @@ import {
 } from "@/lib/project/deriveArtStyle";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useProject } from "@/lib/project/useProject";
-import { FIELD_CLS, FieldLabel } from "../character/fields";
+import { Textarea } from "@/components/ui/textarea";
+import { FieldLabel } from "../character/fields";
 import { ReferenceImages } from "../ReferenceImages";
 import { ArtStylePresets } from "./ArtStylePresets";
 
@@ -114,13 +115,14 @@ function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
 						{deriving && <Spinner className="text-current" />}
 						Use references
 					</Button>
-					<textarea
+					<Textarea
+						size="sm"
 						id={DESCRIPTION_ID}
 						rows={5}
 						value={style}
 						onChange={(e) => setStyle(e.target.value)}
 						placeholder="Describe the look of every image, or paste a full image prompt"
-						className={`${FIELD_CLS} resize-none`}
+						className="resize-none"
 					/>
 				</div>
 
