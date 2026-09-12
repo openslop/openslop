@@ -9,9 +9,9 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("ALL CAPS");
 	});
 
-	it("writes spoken text in the user's language while pinning descriptions to English", () => {
+	it("writes spoken text in the user's language while pinning prompts to English", () => {
 		expect(spec).toContain("the language of the user's own topic");
-		expect(spec).toMatch(/descriptions in English/);
+		expect(spec).toMatch(/prompts in English/);
 	});
 
 	it("names English as the fallback rather than ruling any language out", () => {
@@ -34,9 +34,9 @@ describe("osmlSpec", () => {
 		expect(spec).toContain(
 			"depict the specific moment described by the narration and dialogue that follow it",
 		);
-		expect(spec).toContain("must be written as a standalone prompt");
+		expect(spec).toContain("<image> prompt must stand alone");
 		expect(spec).toContain(
-			"Reference characters by their names in the image description",
+			"Reference characters by their names in the image prompt",
 		);
 	});
 

@@ -13,7 +13,7 @@ const minutes = (words: number) =>
 export const measureTotalLength = defineTool({
 	description: dedent`
 	  Measure the finished video: the spoken words on the canvas (narration and dialogue only;
-	  descriptions and attributes are silent) and the runtime they add up to, against the
+	  prompts and attributes are silent) and the runtime they add up to, against the
 	  project's target length. For how long each visual is on screen, use
 	  measure_element_lengths instead.
 

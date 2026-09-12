@@ -79,8 +79,8 @@ export const editScript = defineTool({
 	  ${ATTRIBUTES_BY_TYPE}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. The text of image, video, sound
-	  and music elements is always English.
+	  surrounding script, whatever language the request is in. Image, video, sound and music
+	  prompts are always in English.
 	`,
 	input: z.object({
 		ops: z
