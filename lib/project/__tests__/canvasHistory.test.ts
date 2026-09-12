@@ -61,7 +61,6 @@ function fakeDocument() {
 const fakeAutosaver = (): Autosaver => ({
 	schedule: vi.fn(),
 	flush: vi.fn(),
-	markSaved: vi.fn(),
 	suspend: vi.fn(),
 	resume: vi.fn(),
 	onProjectSaved: vi.fn(() => () => {}),
