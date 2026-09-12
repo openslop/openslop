@@ -33,7 +33,7 @@ const [ScriptControlContext, useScriptControl] =
 	createRequiredContext<ScriptControl>("ScriptControlContext");
 export { useScriptNodes, useScriptControl };
 // Nothing renders the live script string: the shell reads a stable boolean and
-// the editor rehydrates once, keeping the tree off the per-token render path.
+// the editor opens on it once, keeping the tree off the per-token render path.
 const ShowWorkspaceContext = createContext(false);
 const ScriptInitialContext = createContext<string>("");
 

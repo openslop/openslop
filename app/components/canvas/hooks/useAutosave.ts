@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { toastError } from "@/lib/toastError";
 import { createAutosaver, type Autosaver } from "@/lib/project/autosave";
@@ -22,24 +22,18 @@ export function useAutosave(
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
 
-	const autosaver = useMemo(
-		() =>
-			createAutosaver({
-				projectId,
-				read,
-				onSaved: () => toast("Saved", TOAST_OPTIONS),
-				onError: (err) =>
-					toastError(err, "Save failed", {
-						...TOAST_OPTIONS,
-						duration: 4000,
-					}),
-			}),
-		[projectId, read],
+	const [autosaver] = useState(() =>
+		createAutosaver({
+			projectId,
+			read,
+			onSaved: () => toast("Saved", TOAST_OPTIONS),
+			onError: (err) =>
+				toastError(err, "Save failed", {
+					...TOAST_OPTIONS,
+					duration: 4000,
+				}),
+		}),
 	);
-
-	// Runs after the rehydration effect above it in useEditorSession, so the
-	// loaded document is the baseline and reopening a project saves nothing.
-	useEffect(() => autosaver.markSaved(), [autosaver]);
 
 	useEffect(() => () => autosaver.flush(), [autosaver]);
 

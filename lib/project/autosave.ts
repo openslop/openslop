@@ -20,8 +20,8 @@ export function buildProjectSave(content: ProjectContent): SaveProjectInput {
 export interface AutosaverOptions {
 	projectId: string;
 	/**
-	 * Produces the content for the next save. Called when the debounce fires, so
-	 * serializing stays off the per-keystroke path.
+	 * Produces the content to save. Called once at construction for the baseline
+	 * and then when the debounce fires, so serializing stays off the per-keystroke path.
 	 */
 	read: () => ProjectContent;
 	onSaved: () => void;
@@ -33,8 +33,6 @@ export interface Autosaver {
 	schedule: () => void;
 	/** Run any pending save immediately. */
 	flush: () => void;
-	/** Treat the current state as the one the server already holds. */
-	markSaved: () => void;
 	/** Persist any pending edit, then hold every later save until {@link resume}. */
 	suspend: () => void;
 	/** Resume saving, with one save for whatever was dropped while suspended. */
@@ -46,9 +44,9 @@ export interface Autosaver {
  * Debounces edits into one save at a time. The queue keeps a slow save from
  * overlapping the next one, so the last scheduled state always lands last.
  *
- * A save whose payload matches the last one is dropped. Restoring the loaded
- * document into the empty editor is a Slate change like any other, so without
- * this an untouched project saves itself on open and reports "Saved".
+ * The document it is built from counts as saved, and a save whose payload
+ * matches the last one is dropped, so an untouched project never saves itself
+ * on open or reports "Saved" for an echo of what it loaded.
  */
 export function createAutosaver({
 	projectId,
@@ -61,8 +59,7 @@ export function createAutosaver({
 
 	const buildInput = (): SaveProjectInput => buildProjectSave(read());
 
-	/** Null until the loaded state is known: an unknown baseline has to save. */
-	let lastSaved: SaveProjectInput | null = null;
+	let lastSaved = buildInput();
 	let suspended = false;
 
 	const persist = async (input: SaveProjectInput) => {
@@ -93,9 +90,6 @@ export function createAutosaver({
 		schedule,
 		flush: () => {
 			schedule.flush();
-		},
-		markSaved: () => {
-			lastSaved = buildInput();
 		},
 		suspend: () => {
 			schedule.flush();
