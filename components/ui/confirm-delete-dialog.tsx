@@ -48,12 +48,10 @@ export function ConfirmDeleteDialog<T>({
 					<AlertDialogTitle>{title(latched)}</AlertDialogTitle>
 					<AlertDialogDescription>{description}</AlertDialogDescription>
 					<AlertDialogFooter>
-						<AlertDialogCancel className="rounded-md px-2.5 py-1 text-label text-muted-foreground transition-colors hover:text-foreground">
-							Cancel
-						</AlertDialogCancel>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
 						<AlertDialogAction
+							variant="destructive"
 							onClick={() => onConfirm(latched)}
-							className="rounded-md bg-destructive px-3 py-1 text-label font-medium text-destructive-foreground shadow-elevation-5 transition hover:brightness-110"
 						>
 							{actionLabel}
 						</AlertDialogAction>

@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useSlateStatic } from "slate-react";
 import { Popover, PopoverContent } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import { AttributeTrigger } from "./AttributeTrigger";
@@ -66,7 +67,8 @@ export function TextAttributePopover({
 				}}
 				className="w-72 p-1.5"
 			>
-				<textarea
+				<Textarea
+					size="sm"
 					autoFocus
 					rows={rows}
 					value={draft}
@@ -79,7 +81,7 @@ export function TextAttributePopover({
 							setOpen(false);
 						}
 					}}
-					className="w-full resize-none rounded-lg border border-border bg-card px-2 py-1.5 font-body text-label text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50"
+					className="resize-none"
 				/>
 				<div className="mt-1 px-1 text-badge text-muted-foreground">
 					⌘↵ to save · esc to cancel
