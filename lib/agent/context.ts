@@ -77,7 +77,7 @@ export function renderAgentContext(ctx: AgentContext): string {
 		- title: ${ctx.title || UNSET}
 		- art style: ${ctx.style || UNSET}
 		- language: ${languageLabel(ctx.language)}
-		- video length: ${length}
+		- target length: ${length}
 		- aspect ratio: ${ctx.aspectRatio}
 		- template: ${ctx.templateName ?? "none"}
 		- narrator voice: ${renderNarrator(ctx.narration)}

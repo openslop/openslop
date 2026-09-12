@@ -73,7 +73,7 @@ export const TEMPLATES: Template[] = [
 		# Important
 		- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images where appropriate
 		- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story
-		- Never mention any specific ages in the image descriptions, just generic ones like young man`,
+		- Never mention any specific ages in the image and video prompts, just generic ones like young man`,
 		exampleText: dedent`
 				#Image: A title card with a black background and white Arial text that says "Level 1: The Kid with the Idea"
 				#Narration: Level 1: The Kid with the Idea
