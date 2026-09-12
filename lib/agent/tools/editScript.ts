@@ -28,7 +28,7 @@ const PICTURE_ATTRIBUTES = [
 const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
 	character: ["name"],
 	image: PICTURE_ATTRIBUTES,
-	clip: PICTURE_ATTRIBUTES,
+	clip: [...PICTURE_ATTRIBUTES, "startFrame (previous | none)"],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };
 

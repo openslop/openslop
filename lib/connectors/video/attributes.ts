@@ -11,11 +11,12 @@ import {
 import { referenceImagesDef } from "../attributes/referenceImages";
 import { modelEntry } from "../models";
 import type { ModelRef } from "../types";
-import { startFrameDef } from "./startFrame";
+import { startFrameDef, uploadedFrameDef } from "./startFrame";
 
 /** Every current video model takes a conditioning frame; one that does not leaves `startFrameDef` out. */
 const videoDefs = (model: ModelRef): AttributeDef[] => [
 	startFrameDef,
+	uploadedFrameDef,
 	referenceImagesDef,
 	resolutionDef(modelEntry("video", model).resolutions),
 	durationDef(DEFAULT_DURATION),

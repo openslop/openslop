@@ -172,6 +172,7 @@ describe("layoutAttributeSignature", () => {
 			"volume",
 			"motion",
 			"trimToDialogue",
+			"uploadedFrame",
 		]);
 		expect(
 			layoutAttributeSignature(
@@ -182,16 +183,18 @@ describe("layoutAttributeSignature", () => {
 					trimToDialogue: "false",
 				}),
 			),
-		).toBe("2::5:kenBurnsIn:false");
+		).toBe("2::5:kenBurnsIn:false:");
 	});
 
 	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
-		expect(layoutAttributeSignature(el())).toBe("::::");
-		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0::::");
-		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10::");
-		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe(":::shake:");
+		expect(layoutAttributeSignature(el())).toBe(":::::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10:::");
+		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe(
+			":::shake::",
+		);
 		expect(layoutAttributeSignature(el({ trimToDialogue: "false" }))).toBe(
-			"::::false",
+			"::::false:",
 		);
 	});
 });

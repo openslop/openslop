@@ -14,13 +14,14 @@ import {
 	type MotionEffect,
 } from "./motionEffectNames";
 
-/** Raw attribute keys that, when changed, require a layout recompute but are omitted from generation inputs */
+/** Raw attribute keys omitted from generation inputs: layout knobs, and what the card remembers for the user. */
 export const LAYOUT_ATTRIBUTE_KEYS = [
 	"loops",
 	"loop",
 	"volume",
 	"motion",
 	"trimToDialogue",
+	"uploadedFrame",
 ] as const;
 
 export const splitAttributes = (

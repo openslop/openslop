@@ -45,6 +45,7 @@ describe("resolveAttributeSchema", () => {
 		]);
 		expect(resolveAttributeSchema("video", DEFAULT_MODELS.video).keys).toEqual([
 			"startFrame",
+			"uploadedFrame",
 			"referenceImagesOverride",
 			"resolution",
 			"duration",

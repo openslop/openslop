@@ -1,7 +1,7 @@
 "use client";
 
 import { useSlate } from "slate-react";
-import { ArrowLeft, ImagePlus } from "@/components/ui/icon";
+import { ArrowLeft, ImagePlus, X } from "@/components/ui/icon";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
@@ -9,8 +9,10 @@ import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import {
+	NO_FRAME,
 	parseStartFrame,
 	PREVIOUS_SCENE,
+	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/startFrame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
@@ -80,8 +82,9 @@ function PreviousScenePreview({ element }: { element: CanvasContentElement }) {
 }
 
 /**
- * The picture a clip opens on: the end of the visual before it, or one of the
- * user's own. Each choice shows the picture it stands for.
+ * The picture a clip opens on: none, the end of the visual before it, or one
+ * the user uploaded. Each choice shows the picture it stands for, and an
+ * upload is kept while another choice is made so it can be chosen again.
  */
 export function StartFramePicker({
 	element,
@@ -96,13 +99,22 @@ export function StartFramePicker({
 }) {
 	const editor = useSlate();
 	const frame = parseStartFrame(element.generationAttributes?.[attrKey]);
-	const own = frame?.kind === "url" ? frame.url : undefined;
-	const setFrame = (next: string) =>
-		updateElementAttrs(editor, element, { [attrKey]: next });
+	const uploaded = element.layoutAttributes?.[UPLOADED_FRAME_ATTR];
+	const usesUpload = frame?.kind === "url";
+	const usesPrevious = frame?.kind === "previous";
+	const setFrame = (next: string, upload = uploaded ?? null) =>
+		updateElementAttrs(editor, element, {
+			[attrKey]: next,
+			[UPLOADED_FRAME_ATTR]: upload,
+		});
 	const { openPicker, uploading, inputElement } = useImageUpload({
-		onUpload: ([url]) => url && setFrame(url),
+		onUpload: ([url]) => url && setFrame(url, url),
 	});
-	const summary = own ? "Your picture" : "Previous scene";
+	const summary = usesUpload
+		? "Uploaded picture"
+		: usesPrevious
+			? "Previous scene"
+			: "None";
 
 	return (
 		<Popover>
@@ -113,27 +125,38 @@ export function StartFramePicker({
 			<PopoverContent align="start" className="w-auto">
 				<div role="radiogroup" aria-label={label} className="flex gap-3">
 					<FrameTile
+						label="None"
+						selected={!usesUpload && !usesPrevious}
+						onSelect={() => setFrame(NO_FRAME)}
+					>
+						<X className="h-5 w-5" />
+					</FrameTile>
+					<FrameTile
 						label="Previous scene"
-						selected={!own}
+						selected={usesPrevious}
 						onSelect={() => setFrame(PREVIOUS_SCENE)}
 					>
 						<PreviousScenePreview element={element} />
 					</FrameTile>
-					{own ? (
+					{uploaded ? (
 						<div className="group/tile relative">
-							<FrameTile label="Your picture" selected onSelect={() => {}}>
-								<MediaWithSkeleton outputKind="image" src={own} alt="" />
+							<FrameTile
+								label="Uploaded picture"
+								selected={usesUpload}
+								onSelect={() => setFrame(uploaded)}
+							>
+								<MediaWithSkeleton outputKind="image" src={uploaded} alt="" />
 							</FrameTile>
 							<RemoveCrossButton
-								label="Remove your picture"
-								onClick={() => setFrame(PREVIOUS_SCENE)}
+								label="Remove uploaded picture"
+								onClick={() => setFrame(PREVIOUS_SCENE, null)}
 								className="opacity-0 group-hover/tile:opacity-100"
 							/>
 						</div>
 					) : (
 						<AddAssetTile
-							label="Your picture"
-							ariaLabel="Upload your own start frame"
+							label="Upload picture"
+							ariaLabel="Upload a picture to open on"
 							Icon={ImagePlus}
 							onClick={openPicker}
 							disabled={uploading}
