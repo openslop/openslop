@@ -55,6 +55,11 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("Leave Sound out of the last shot when you can");
 	});
 
+	it("cuts between videos unless a shot must carry on unbroken", () => {
+		expect(spec).toContain('Videos cut: set startFrame="none" on every video.');
+		expect(spec).toContain("use it rarely");
+	});
+
 	it("opens a continued video where the one before it ends", () => {
 		expect(spec).toContain("starts where that video's last shot ends");
 	});

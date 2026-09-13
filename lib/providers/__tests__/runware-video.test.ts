@@ -124,7 +124,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image4 as the first frame. animate this",
+					positivePrompt: "@Image 4 as the first frame. animate this",
 					inputs: {
 						frameImages: undefined,
 						referenceImages: ["https://img/avatar.png", ...FRAMES],
@@ -147,7 +147,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image3 as the first frame. animate this",
+					positivePrompt: "@Image 3 as the first frame. animate this",
 				}),
 			);
 		});

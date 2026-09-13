@@ -83,7 +83,7 @@ function inputsFor(params: VideoRequest, profile: ModelProfile): ModelInputs {
 		};
 	const referenceImages = [...references, ...frames];
 	return {
-		prompt: `@Image${referenceImages.length} as the first frame. ${params.prompt}`,
+		prompt: `@Image ${referenceImages.length} as the first frame. ${params.prompt}`,
 		frameImages: [],
 		referenceImages,
 	};
