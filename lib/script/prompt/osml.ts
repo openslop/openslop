@@ -67,7 +67,7 @@ ${languagePrompt(language)}
   - startFrame, trimToDialogue and loop: see Shape.
   - characters and overlays: as for <image>. Every shot follows the <image> prompt rules.
   - motion: normally set to "none". Only set one when the shots have no camera move of their own.
-  - Example: <video characters="Red,Wolf" overlays="rain" trimToDialogue="false">Shot 1: Wide shot of a moonlit forest clearing as Red and Wolf walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby. Shot 2: The camera slowly rises to show the whole clearing. Sound: an owl hooting far off.</video>
+  - Example: <video characters="Red,Wolf" overlays="rain" trimToDialogue="false">Shot 1: Wide shot of a moonlit forest clearing as Red and Wolf walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby. Shot 2: The camera slowly rises to show the whole clearing.</video>
 
 ${VIDEO_PROMPT_FORMAT}
 

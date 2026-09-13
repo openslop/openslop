@@ -7,12 +7,18 @@ import {
 } from "../video/plugins/start-frame";
 import type { AssetResult, ConnectorPlugin } from "../types";
 
-const captureLastFrame = vi.hoisted(() =>
-	vi.fn<(url: string) => Promise<string>>(),
+const captureFrames = vi.hoisted(() =>
+	vi.fn<(url: string) => Promise<string[]>>(),
 );
-vi.mock("@/lib/connectors/video/captureLastFrame", () => ({
-	captureLastFrame,
+vi.mock("@/lib/connectors/video/captureFrames", () => ({
+	captureFrames,
 }));
+
+const FRAMES = [
+	"https://img/first.png",
+	"https://img/middle.png",
+	"https://img/last.png",
+];
 
 const EMPTY_STATE = { metadata: MetadataSchema.parse({}), referenceImages: [] };
 
@@ -47,7 +53,7 @@ describe("start-frame plugin", () => {
 
 	beforeEach(() => {
 		plugin = createStartFramePlugin();
-		captureLastFrame.mockReset();
+		captureFrames.mockReset();
 	});
 
 	describe("dependencies", () => {
@@ -136,8 +142,8 @@ describe("start-frame plugin", () => {
 			});
 		});
 
-		it("opens on the last frame of a video source's generated file", async () => {
-			captureLastFrame.mockResolvedValue("https://img/last.png");
+		it("hands on a video source's first, middle and last frames, in that order", async () => {
+			captureFrames.mockResolvedValue(FRAMES);
 			await expect(
 				before(
 					{ prompt: "slow pan", startFrame: "video-0" },
@@ -151,9 +157,9 @@ describe("start-frame plugin", () => {
 				),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				frameImages: ["https://img/last.png"],
+				frameImages: FRAMES,
 			});
-			expect(captureLastFrame).toHaveBeenCalledWith("https://vid/a.mp4");
+			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4");
 		});
 
 		it("fails loudly when the source has not generated", async () => {

@@ -21,6 +21,11 @@ vi.mock("@runware/sdk-js", () => ({
 import { RunwareVideo } from "../video/runware";
 
 const MODEL = "bytedance:seedance@2.0-fast";
+const FRAMES = [
+	"https://img/first.png",
+	"https://img/middle.png",
+	"https://img/last.png",
+];
 
 describe("RunwareVideo", () => {
 	beforeEach(() => {
@@ -80,7 +85,7 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("passes referenceImages and frameImages through separately", async () => {
+		it("opens Kling on its frame and never sends it reference images", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-2",
 				status: "processing",
@@ -98,13 +103,13 @@ describe("RunwareVideo", () => {
 				expect.objectContaining({
 					inputs: {
 						frameImages: ["data:image/png;base64,frame"],
-						referenceImages: ["data:image/png;base64,ref"],
+						referenceImages: undefined,
 					},
 				}),
 			);
 		});
 
-		it("drops Seedance's reference images when it opens on a first frame", async () => {
+		it("gives Seedance every start frame after its reference images, naming the last", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-s",
 				status: "processing",
@@ -114,24 +119,66 @@ describe("RunwareVideo", () => {
 				prompt: "animate this",
 				model: MODEL,
 				referenceImages: ["https://img/avatar.png"],
-				frameImages: ["https://img/frame.png"],
-				resolution: "720p",
+				frameImages: FRAMES,
 			});
 
-			const request = mockVideoInference.mock.calls[0]?.[0];
-			expect(request).toMatchObject({
-				positivePrompt: "animate this",
-				resolution: "720p",
-				inputs: {
-					frameImages: ["https://img/frame.png"],
-					referenceImages: undefined,
-				},
-			});
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					positivePrompt: "@Image4 as the first frame. animate this",
+					inputs: {
+						frameImages: undefined,
+						referenceImages: ["https://img/avatar.png", ...FRAMES],
+					},
+				}),
+			);
 		});
 
-		it("keeps Seedance's reference images when there is no first frame", async () => {
+		it("names the last of Seedance's start frames when it has no other references", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-s2",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "animate this",
+				model: MODEL,
+				frameImages: FRAMES,
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					positivePrompt: "@Image3 as the first frame. animate this",
+				}),
+			);
+		});
+
+		it("opens other models on the last start frame alone", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-k3",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "animate this",
+				model: "klingai:kling-video@3.0-turbo",
+				referenceImages: ["https://img/avatar.png"],
+				frameImages: FRAMES,
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					positivePrompt: "animate this",
+					inputs: {
+						frameImages: ["https://img/last.png"],
+						referenceImages: undefined,
+					},
+				}),
+			);
+		});
+
+		it("keeps Seedance's reference images as they are when there is no first frame", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-s3",
 				status: "processing",
 			});
 
@@ -143,12 +190,42 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
+					positivePrompt: "animate this",
 					inputs: {
 						frameImages: undefined,
 						referenceImages: ["https://img/avatar.png"],
 					},
 				}),
 			);
+		});
+
+		it("sends Kling no reference images when it starts fresh either", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-k4",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "a sunset",
+				model: "klingai:kling-video@3.0-turbo",
+				referenceImages: ["https://img/avatar.png"],
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					inputs: { frameImages: undefined, referenceImages: undefined },
+				}),
+			);
+		});
+
+		it("fails loudly for a model it has no profile for", async () => {
+			await expect(
+				new RunwareVideo("test-key").submit({
+					prompt: "a sunset",
+					model: "vidu:q3",
+				}),
+			).rejects.toThrow(/no video model "vidu:q3"/);
+			expect(mockVideoInference).not.toHaveBeenCalled();
 		});
 
 		it("sizes a frame-conditioned video by resolution preset", async () => {

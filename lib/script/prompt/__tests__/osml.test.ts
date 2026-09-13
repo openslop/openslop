@@ -51,6 +51,14 @@ describe("osmlSpec", () => {
 		);
 	});
 
+	it("keeps sound out of a video's last shot, where it gets cut off", () => {
+		expect(spec).toContain("Leave Sound out of the last shot when you can");
+	});
+
+	it("opens a continued video where the one before it ends", () => {
+		expect(spec).toContain("starts where that video's last shot ends");
+	});
+
 	it("introduces every character in a video's opening shot", () => {
 		expect(spec).toContain("Every character in the video appears in Shot 1.");
 	});

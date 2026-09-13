@@ -10,7 +10,7 @@ import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { lastFrame } from "@/lib/connectors/video/captureLastFrame";
+import { lastFrame } from "@/lib/connectors/video/captureFrames";
 import {
 	NO_FRAME,
 	parseStartFrame,
@@ -59,7 +59,7 @@ function FrameTile({
 	);
 }
 
-/** The frame the start-frame plugin captures from a video, decoded the same way. */
+/** A video's last frame, the one a video continuing from it opens on. */
 function LastFrame({ src }: { src: string }) {
 	const [frame, setFrame] = useState<{ url: string } | "failed" | null>(null);
 	useEffect(() => {
