@@ -14,7 +14,7 @@ export const writeScript = defineTool({
 	  finished video needs. For an invented narrative, outline_story first and fold the outline in;
 	  for anything that is not a story, write the brief directly.
 
-	  Say which shape the finished video takes (Slideshow, Film, Motion explainer, or a mix) and why,
+	  Say which shape the finished video takes (Film, Slideshow or Motion explainer) and why,
 	  since the writer reads only the brief.
 
 	  When the user gave you the actual text they want on the canvas, rather than an idea to

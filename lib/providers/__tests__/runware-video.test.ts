@@ -62,6 +62,24 @@ describe("RunwareVideo", () => {
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
+		it("asks Kling for its soundtrack, which it leaves off by default", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-k",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "a sunset",
+				model: "klingai:kling-video@3.0-turbo",
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					providerSettings: { klingai: { sound: true } },
+				}),
+			);
+		});
+
 		it("passes referenceImages and frameImages through separately", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-2",
@@ -71,7 +89,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			await provider.submit({
 				prompt: "animate this",
-				model: MODEL,
+				model: "klingai:kling-video@3.0-turbo",
 				referenceImages: ["data:image/png;base64,ref"],
 				frameImages: ["data:image/png;base64,frame"],
 			});
@@ -81,6 +99,53 @@ describe("RunwareVideo", () => {
 					inputs: {
 						frameImages: ["data:image/png;base64,frame"],
 						referenceImages: ["data:image/png;base64,ref"],
+					},
+				}),
+			);
+		});
+
+		it("drops Seedance's reference images when it opens on a first frame", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-s",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "animate this",
+				model: MODEL,
+				referenceImages: ["https://img/avatar.png"],
+				frameImages: ["https://img/frame.png"],
+				resolution: "720p",
+			});
+
+			const request = mockVideoInference.mock.calls[0]?.[0];
+			expect(request).toMatchObject({
+				positivePrompt: "animate this",
+				resolution: "720p",
+				inputs: {
+					frameImages: ["https://img/frame.png"],
+					referenceImages: undefined,
+				},
+			});
+		});
+
+		it("keeps Seedance's reference images when there is no first frame", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-s2",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "animate this",
+				model: MODEL,
+				referenceImages: ["https://img/avatar.png"],
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					inputs: {
+						frameImages: undefined,
+						referenceImages: ["https://img/avatar.png"],
 					},
 				}),
 			);

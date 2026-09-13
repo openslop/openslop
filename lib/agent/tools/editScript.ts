@@ -13,6 +13,7 @@ import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { MusicLength } from "@/lib/connectors/music/enums";
+import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/videoPrompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
@@ -78,9 +79,11 @@ export const editScript = defineTool({
 	  Attributes by type, all string values:
 	  ${ATTRIBUTES_BY_TYPE}
 
+	  ${VIDEO_PROMPT_FORMAT}
+
 	  Send the fewest operations that do the job. Write element text in the language of the
 	  surrounding script, whatever language the request is in. Image, video, sound and music
-	  prompts are always in English.
+	  prompts are always in English, except speech quoted inside a video prompt.
 	`,
 	input: z.object({
 		ops: z

@@ -14,135 +14,75 @@ import {
 	TTS_SPEEDS,
 } from "@/lib/connectors/tts/enums";
 import { languagePrompt } from "./language";
+import { VIDEO_PROMPT_FORMAT } from "./videoPrompt";
 
 export function osmlSpec(language: string): string {
 	return dedent`
-  The story script must be written in a special XML format that strictly follows these rules:
-
-  ## **General Guidelines**
-  - Never write words in ALL CAPS in narration or dialogue — the TTS engine mispronounces them. Acronyms (USA, FBI, NASA) stay capitalized; convey emphasis through word choice or punctuation.
-  - Prompts in <image> and <video> tags are opaque to the reader, so the narrative prose should include some details that are only in those prompts.
-
-${languagePrompt(language)}
-- Write the metadata_title in that same language, and the metadata_style description in English.
+  The story script must be written in OSML, the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never put a tag inside another tag.
 
 ${VIDEO_SHAPES}
 
-  ## **XML Tagging**
+${languagePrompt(language)}
 
-  ### Response XML Tags
-  - Return only raw XML.
-  - Do not wrap the output in markdown code fences.
-  - Do not include xml, backticks, explanations, or any surrounding text.
-  - The first character of your response must be < and the last character must be >.
+  ## Order
+  1. <metadata_title>, then <metadata_style>, then <metadata_narration>, then one <metadata_character> per character.
+  2. The story, using only the elements your shape allows. Start with a visual, and change the visual at least every two spoken lines.
 
-  ### Narration XML Tags
-  - The narration element is the primary voice of the story.
-  - All narrative prose should be wrapped in narration XML tags. Example:
-    <narration emotion="neutral">The sun was setting in the west, casting a warm glow on the forest.</narration>
-  - Supported attributes for narration tags are emotion and speed
+  ## Metadata tags
+  - <metadata_title>: a short title of 1 to 4 words. Example: <metadata_title>Little Red</metadata_title>
+  - <metadata_style>: how everything is drawn: the medium, linework, colors and lighting. Never a place, a setting, a subject or a time of day. Example: <metadata_style>Warm earth tones. Whimsical storybook illustration with soft watercolors and warm lighting.</metadata_style>
+  - <metadata_narration>: an empty tag for the narrator's voice. Example: <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise" language="en"></metadata_narration>
+  - <metadata_character>: one per character, not the narrator. The body says what they look like, written like an image prompt. name is their exact name in the story. Example:
+    <metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="curious" language="en">A girl around ten years old with warm brown skin, dark curly hair just past her shoulders, bright hazel eyes and a small gap between her front teeth. She wears a mustard-yellow cardigan, rolled-up denim overalls and scuffed red sneakers.</metadata_character>
+  - Both voice tags take these attributes:
+    - gender: ${TTS_GENDERS.join(", ")}.
+    - age: ${TTS_AGES.join(", ")}.
+    - pitch: ${TTS_PITCHES.join(", ")}.
+    - accent: ${TTS_ACCENTS.join(", ")}.
+    - description: a word or two for the voice, like Warm, Deep, Upbeat or Soft.
+    - language: ISO 639-1 code of the language the narration and dialogue are written in. Allowed values: ${TTS_LANGUAGES.join(", ")}.
 
-  ### Character Dialogue XML Tags
-  - Each character's entire dialogue is wrapped in character XML tags with required attributes being name and emotion. Example:
-    <narration emotion="neutral">Lyra steps forward. </narration>
-    <character name="Lyra" emotion="excited">Truce?</character>
-  - Frequently use nonverbalisms. Example: <character name="Mia" emotion="happy">[laughter] That's the way I want it!</character>.
-  - Allowed list of nonverbalisms: [laughter]. Do not use any other nonverbalisms.
-  - Occasionally insert ellipsis (...) to indicate a pause or a break in the dialogue, or use exclamations (!) to indicate a strong emotion or action.
-  - Supported attributes for character tags are name, emotion, and speed
+  ## Speech
+  - <narration>: what the narrator says. Example: <narration emotion="neutral">The sun was setting in the west.</narration>
+  - <character>: what one character says out loud. name is required. Example: <character name="Lyra" emotion="excited">Truce?</character>
+  - Keep dialogue dead simple: everyday words, short sentences, one clear thought per line. Every line must make sense for who says it and what just happened.
+  - Both take emotion (${TTS_EMOTIONS.join(", ")}) and speed (${TTS_SPEEDS.join(", ")}).
+  - Never write words in ALL CAPS, because the voice engine mispronounces them. Acronyms like USA stay capitalized.
+  - The only nonverbal cue is [laughter]. Use ... for a pause and ! for strong feeling. Example: <character name="Mia" emotion="happy">[laughter] That's the way I want it!</character>
+  - Nobody sees the prompts, so let the narration mention some of what the pictures show.
 
-  ### Narration and Character XML Tags
-  - For both character and narration tags, the emotion attribute should be appropriately set to one of the following: ${TTS_EMOTIONS.join(", ")}.
-  - For both character and narration tags, the speed attribute should be appropriately set to one of the following: ${TTS_SPEEDS.join(", ")}.
+  ## <image>
+  - The body is an image prompt: the time of day, the background, the weather if outdoors, and the objects, in detail.
+  - Depict the specific moment described by the narration and dialogue that follow it, up to the next visual: who is there, what they do and how they look, not just the setting.
+  - Each <image> prompt must stand alone. The image model knows nothing about the story or the other prompts, so repeat any detail it needs.
+  - Reference characters by their names in the image prompt, and list them in characters. Never describe their appearance.
+  - characters: the exact names of the characters in the picture, comma-separated.
+  - motion: a camera move for the whole time the image is on screen. Set one on almost every image, at most one per scene. Allowed values: ${MOTION_EFFECTS.join(", ")}.
+  - overlays: effects that match the picture, comma-separated. Allowed values: ${Object.values(EffectType).join(", ")}.
+  - Example: <image characters="Red,Granny" motion="kenBurnsIn" overlays="rain">Red hands a basket to Granny at the door of a thatched cottage on a rainy afternoon.</image>
 
-  ### Image XML Tags
-  - Each scene opens with a visual: an <image>, or a <video> where the script's shape calls for one. Example:
-    <image>A dark forest with a clearing in the center. A full moon shines through the trees, casting eerie shadows.</image>
-  - motion: Camera-motion effect applied for the element's full duration. Almost always set one — a still image with no motion reads as a flat, lifeless slide. Use at most one per scene. Example: <image motion="kenBurnsIn">...</image>
-  - Allowed motion values: ${MOTION_EFFECTS.join(", ")}
-  - characters: Include a comma-separated list of character names that occur in the image. These should be characters from the story with their exact names. Example:
-    <image characters="Red,Granny">Red hands the basket to Granny at the cottage door.</image>
-  - After the metadata tags, open the story with an <image> tag that describes the image for the opening scene.
-  - Under narration, change the visual at least every 2 narrative lines.
-  - As appropriate, add an overlays attribute to the <image> tag. Example: <image overlays="smoke,lightning">A thunderclap echoes through the forest. A bolt of lightning strikes a tree.</image>
-  - For example, if there is rain in the image, add the rain overlay. If there is smoke, add the smoke overlay. If there is lightning, add the lightning overlay. If there are multiple effects, add all of them.
-  - Overlays should be a comma-separated list containing any of the following: ${Object.values(
-		EffectType,
-	).join(", ")}
-  - Image prompts should describe the time of day, the background, the weather (if outdoors), and objects in detail.
-  - Each image must depict the specific moment described by the narration and dialogue that follow it, up to the next image tag: the concrete subject, action, and expression of those lines, not just the scene's general setting. If the line names an object, a gesture, or a reaction, it belongs in the prompt.
-  - Each <image> prompt must stand alone, as if the generative image model has absolutely no knowledge of the story, prior images, or previous prompts.
-  - Reference characters by their names in the image prompt, NEVER describe their appearance in the image prompt
-  - Each image prompt should include all relevant details about the scene (except for art style and character descriptions), even if this requires repeating details from previous prompts or the story.
+  ## <video>
+  - A short generated video that makes its own sound. The body is a video prompt, written as the Video prompts section says.
+  - duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
+  - startFrame, trimToDialogue and loop: see Shape.
+  - characters and overlays: as for <image>. Every shot follows the <image> prompt rules.
+  - motion: normally set to "none". Only set one when the shots have no camera move of their own.
+  - Example: <video characters="Red,Wolf" overlays="rain" trimToDialogue="false">Shot 1: Wide shot of a moonlit forest clearing as Red and Wolf walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby. Shot 2: The camera slowly rises to show the whole clearing. Sound: an owl hooting far off.</video>
 
-  ### Video XML Tags
-  - A <video> tag is a short generated video element. Use it for hero moments, establishing shots, or emotional beats that benefit from motion. The tag body is the video prompt: describe the frame the way you would an <image> (time of day, background, weather, objects, characters by name) and then one simple camera or subject motion (e.g. "slow cinematic pan", "gentle dolly in"). One move per <video>. Example:
-    <video characters="Red,Wolf" overlays="rain">A dark forest clearing under a full moon, rain falling through the trees. Red and Wolf keep walking as the camera slowly zooms out to reveal the whole moonlit clearing.</video>
-  - duration: optional. How many seconds the <video> is generated for (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
-  - startFrame: optional, "previous" by default: the <video> opens on the end of the visual before it, so consecutive <video> elements continue from one another; write its prompt as the seconds that follow that picture. Set it to "none" for a <video> that cuts to somewhere new.
-  - trimToDialogue: optional, "true" by default. Trimmed, the <video> is on screen for exactly the dialogue after it. Set it to "false" for a <video> that should play its full length even with little or no dialogue under it, such as an action beat or a montage cut.
-  - motion: normally set to "none". Only set a motion effect when the prompt describes subject movement with no camera move of its own. Allowed motion values: ${MOTION_EFFECTS.join(", ")}.
-  - characters: optional. Same as for <image>: a comma-separated list of exact story character names appearing in the frame.
-  - All <image> prompt rules apply unchanged: depict the moment the following narration and dialogue describe, and repeat any details necessary even if they appeared in earlier prompts.
-  - In a Slideshow, use <video> sparingly, mostly for intros and hero moments, and default to <image>: video generation is significantly slower and more expensive. In a Film or Motion explainer, <video> elements are the visuals.
+${VIDEO_PROMPT_FORMAT}
 
-  ### Sound XML Tags
-  - Frequently insert <sound> tags (as if prompting a sound model) that should accompany a scene before the relevant dialogue (character or narration).
-  - Sound prompts within <sound> tags should be common, simple, short, clear ASMR pleasing sounds like rain, wind, fire crackling, footsteps, etc.
-  - The optional loops attribute is an integer (default 1) that controls how many times the generated sound plays back-to-back. Use a higher loops value for atmospheric beds that should fill a scene (rain, wind, birds, stream, ocean) and 1 (or omit) for one-shot punctual sounds tied to a narrative beat (footsteps, doors, bridge creak). Example:
+  ## <sound>
+  - A sound effect that no <video> already makes. The body is a short, plain sound prompt, like rain, wind, a fire crackling or footsteps.
+  - Place it right before the line it belongs to.
+  - loops: how many times it plays back to back (default 1). Use more for a sound that fills a scene, like rain or wind, and 1 for a single moment, like a door. Example:
     <sound loops="4">Wind</sound>
-    <narration emotion="peaceful">They walked through the windy forest, the air was crisp.</narration>
-    <sound>Tiger roar</sound>
-    <narration emotion="alarmed">Suddenly, they heard a tiger roar in the distance.</narration>
-  - One-shot sound tags should be placed right before the narrative prose that describes the sound. Example:
-    <sound>footsteps</sound>
-    <narration emotion="calm">Hana slowly walks into the room</narration>
-    <sound>door creaks</sound>
-    <narration emotion="calm">and opens the door</narration>
-  - Sounds should NEVER be vocal (no sighing, no gasping, no moaning, no laughter, no crying, etc)
+    <narration emotion="peaceful">They walked through the windy forest.</narration>
+  - Never a voice: no sighs, gasps, laughter or crying.
 
-  ### Music XML Tags
-  - As appropriate, insert tags to describe the type of music that should accompany a scene (as if prompting a text-to-music model). Example:
-    <music length="long">Soft, slow, sad piano music for a romantic breakup</music>
-    or
-    <music length="medium">Epic battle over snow-covered mountains, powerful brass, pounding timpani, fast, heroic</music>
-  - Music prompts within <music> tags should be common, simple, short, clear, and direct.
-  - Music should change frequently (at least once every few scenes) to keep the reader engaged.
-  - length: ${Object.values(MusicLength).join(", ")}
-  - The optional loops attribute is an integer (default 1) that controls how many times the generated music plays back-to-back; use higher values for atmospheric music beds that should fill multiple scenes.
-
-  ### Metadata Title XML tag
-  - The script must begin with a single, short <metadata_title>...</metadata_title> tag containing a succinct title (1-4 words) for the story. Example:
-  <metadata_title>Little Red</metadata_title>
-
-  ### Metadata Style XML tag
-  - Right after the metadata_title tag, emit a single, concise <metadata_style>...</metadata_style> tag that describes the visual style of the story as if prompting an image model. Example:
-  <metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
-
-  ### Metadata Narration XML tags
-  - Right after the metadata_style tag, emit a single, empty metadata_narration tag that describes the narrator voice. Example:
-    <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise" language="en"></metadata_narration>
-  - The attributes should be from the metadata Character/Narration attributes section
-
-  ### Metadata Character XML tags
-  - Right after the metadata_narration tag, emit short <metadata_character>...</metadata_character> tags that describe each character's visual appearance (excluding the narrator) from the story in detail as if prompting an image model. Example:
-    <metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="wise" language="en">A girl around ten years old with warm brown skin, dark curly hair falling
-    just past her shoulders, bright hazel eyes, a small gap between her front
-    teeth. Wearing a mustard-yellow cardigan over a white tee, rolled-up denim
-    overalls, scuffed red sneakers, a canvas satchel slung across one shoulder.
-    </metadata_character>
-  - name: the exact name for the character (case-sensitive) used in the story
-
-  ### Metadata Character/Narration attributes
-  - For metadata_character and metadata_narration tags, always include these attributes in addition to any other they may have
-  - gender: ${TTS_GENDERS.join(", ")}.
-  - age: ${TTS_AGES.join(", ")}.
-  - pitch: ${TTS_PITCHES.join(", ")}.
-  - accent: ${TTS_ACCENTS.join(", ")}.
-  - description: A simple descriptor of the voice. Examples: Charming, Confident, Approachable, Friendly, Energetic, Casual, Mature, Warm, Clear, Upbeat, Deep, Soft, etc.
-  - language: ISO 639-1 code of the language the narration and dialogue are written in, per the Language rules above. Allowed values: ${TTS_LANGUAGES.join(", ")}.
-
-  ### General XML Tag Rules
-  - NEVER nest XML tags within other XML tags.
+  ## <music>
+  - Music for the mood of part of the story. The body is a short, plain music prompt. Example: <music length="long">Soft, slow, sad piano for a breakup</music>
+  - Change the music every few scenes.
+  - length: ${Object.values(MusicLength).join(", ")}.
+  - loops: how many times it plays back to back (default 1). Use more for music that should fill several scenes.
 `;
 }

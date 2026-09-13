@@ -33,6 +33,22 @@ const sizeFor = (params: VideoRequest) =>
 				height: params.height ?? DEFAULT_SIZE.height,
 			};
 
+/** Kling renders its soundtrack only when asked; Seedance always does. */
+const soundFor = (model: string) =>
+	model.startsWith("klingai:")
+		? { providerSettings: { klingai: { sound: true } } }
+		: {};
+
+/** Seedance refuses a first frame beside reference images, and the frame already shows who is on screen. */
+function withFirstFrame(params: VideoRequest): VideoRequest {
+	if (
+		!params.frameImages?.length ||
+		!params.model.startsWith("bytedance:seedance")
+	)
+		return params;
+	return { ...params, referenceImages: undefined };
+}
+
 export class RunwareVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "runware" };
 	private apiKey: string;
@@ -47,19 +63,21 @@ export class RunwareVideo extends BaseVideoProvider {
 	}
 
 	async submit(params: VideoRequest) {
+		const request = withFirstFrame(params);
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({
-				positivePrompt: params.prompt,
-				model: params.model,
-				...sizeFor(params),
-				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
+				positivePrompt: request.prompt,
+				model: request.model,
+				...sizeFor(request),
+				duration: request.duration ?? DEFAULT_VIDEO_DURATION_SEC,
+				...soundFor(request.model),
 				outputType: "URL",
 				deliveryMethod: "async",
 				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
 				inputs: {
-					frameImages: params.frameImages,
-					referenceImages: params.referenceImages,
+					frameImages: request.frameImages,
+					referenceImages: request.referenceImages,
 				},
 			});
 

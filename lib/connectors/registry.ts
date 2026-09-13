@@ -2,6 +2,7 @@ import set from "lodash/fp/set";
 import { buildVisualPlugins } from "./plugins/visualChain";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
+import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
 import { createStartFramePlugin } from "./video/plugins/start-frame";
 import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
 
@@ -18,7 +19,11 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	tts: { plugins: [createMetadataVoicePlugin(), createVoiceSearchPlugin()] },
 	image: { plugins: buildVisualPlugins("image") },
 	video: {
-		plugins: [createStartFramePlugin(), ...buildVisualPlugins("video")],
+		plugins: [
+			createStartFramePlugin(),
+			...buildVisualPlugins("video"),
+			createVideoOutputRulesPlugin(),
+		],
 	},
 	sfx: {},
 	music: {},

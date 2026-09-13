@@ -119,7 +119,9 @@ describe("a video that opens on another visual", () => {
 		const a = element("a", "video", { startFrame: "b" });
 		const b = element("b", "video", { startFrame: "a" });
 		const node = builder([a, b])(forElement(a));
-		const back = node.dependsOn[0]?.dependsOn.find((dep) => dep.id === "a");
+		const back = node.dependsOn
+			.find((dep) => dep.id === "b")
+			?.dependsOn.find((dep) => dep.id === "a");
 		expect(back?.job).toBeNull();
 	});
 });

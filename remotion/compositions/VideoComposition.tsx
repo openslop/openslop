@@ -1,7 +1,7 @@
 import React, { Fragment, useMemo } from "react";
+import { Audio } from "@remotion/media";
 import {
 	AbsoluteFill,
-	Html5Audio,
 	Img,
 	Loop,
 	OffthreadVideo,
@@ -32,6 +32,9 @@ const coverStyle: React.CSSProperties = {
 
 const blackBg: React.CSSProperties = { backgroundColor: "black" };
 
+/** Keeps the old `<Html5Audio crossOrigin>` behaviour if @remotion/media falls back to it. */
+const fallbackHtml5AudioProps = { crossOrigin: "anonymous" } as const;
+
 function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
@@ -43,7 +46,11 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 	return (
 		<>
-			<Html5Audio src={element.url} crossOrigin="anonymous" volume={volume} />
+			<Audio
+				src={element.url}
+				volume={volume}
+				fallbackHtml5AudioProps={fallbackHtml5AudioProps}
+			/>
 			{element.captionTimestamps && (
 				<Sequence
 					durationInFrames={Math.max(

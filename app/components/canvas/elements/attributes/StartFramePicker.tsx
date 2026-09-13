@@ -1,13 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSlate } from "slate-react";
 import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
 import { Popover, PopoverContent } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { lastFrame } from "@/lib/connectors/video/captureLastFrame";
 import {
 	NO_FRAME,
 	parseStartFrame,
@@ -56,8 +59,36 @@ function FrameTile({
 	);
 }
 
-/** What the visual before this video has made, if anything yet. */
-function PreviousScenePreview({ element }: { element: CanvasContentElement }) {
+/** The frame the start-frame plugin captures from a video, decoded the same way. */
+function LastFrame({ src }: { src: string }) {
+	const [frame, setFrame] = useState<{ url: string } | "failed" | null>(null);
+	useEffect(() => {
+		let objectUrl: string | undefined;
+		let cancelled = false;
+		lastFrame(src).then(
+			(jpeg) => {
+				if (cancelled) return;
+				objectUrl = URL.createObjectURL(jpeg);
+				setFrame({ url: objectUrl });
+			},
+			// A preview that cannot decode falls back to the icon; generating still fails loudly.
+			() => !cancelled && setFrame("failed"),
+		);
+		return () => {
+			cancelled = true;
+			if (objectUrl) URL.revokeObjectURL(objectUrl);
+		};
+	}, [src]);
+	if (frame === "failed") return <Transition className="h-5 w-5" />;
+	if (!frame)
+		return (
+			<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
+		);
+	return <MediaWithSkeleton outputKind="image" src={frame.url} alt="" />;
+}
+
+/** The picture the visual before this video hands on, if it has made one yet. */
+function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
 	const editor = useSlate();
 	const source = previousVisual(
 		getContentElements(editor.children),
@@ -72,13 +103,9 @@ function PreviousScenePreview({ element }: { element: CanvasContentElement }) {
 			: undefined,
 	);
 	if (!source || !url) return <Transition className="h-5 w-5" />;
-	return (
-		<MediaWithSkeleton
-			outputKind={ELEMENT_TYPES[source.type].outputKind}
-			src={url}
-			alt=""
-		/>
-	);
+	if (ELEMENT_TYPES[source.type].outputKind === "video")
+		return <LastFrame key={url} src={url} />;
+	return <MediaWithSkeleton outputKind="image" src={url} alt="" />;
 }
 
 /**
@@ -136,7 +163,7 @@ export function StartFramePicker({
 						selected={usesPrevious}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					>
-						<PreviousScenePreview element={element} />
+						<PreviousVisualPreview element={element} />
 					</FrameTile>
 					{uploaded ? (
 						<div className="group/tile relative">

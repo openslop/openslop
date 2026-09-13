@@ -21,7 +21,7 @@ describe("osmlSpec", () => {
 
 	it("pins the script to the project language when one is declared", () => {
 		const declared = osmlSpec("fr (ISO 639-1)");
-		expect(declared).toContain("dialogue in fr (ISO 639-1)");
+		expect(declared).toContain("The script language is fr (ISO 639-1)");
 		expect(declared).not.toContain("the language of the user's own topic");
 	});
 
@@ -32,12 +32,34 @@ describe("osmlSpec", () => {
 
 	it("ties each image to the moment its narration describes without dropping the standalone-prompt rule", () => {
 		expect(spec).toContain(
-			"depict the specific moment described by the narration and dialogue that follow it",
+			"Depict the specific moment described by the narration and dialogue that follow it",
 		);
 		expect(spec).toContain("<image> prompt must stand alone");
 		expect(spec).toContain(
 			"Reference characters by their names in the image prompt",
 		);
+	});
+
+	it("asks for dead simple dialogue that fits the scene", () => {
+		expect(spec).toContain("Keep dialogue dead simple");
+		expect(spec).toContain("make sense for who says it and what just happened");
+	});
+
+	it("keeps places and subjects out of the art style, which leads every prompt", () => {
+		expect(spec).toContain(
+			"Never a place, a setting, a subject or a time of day",
+		);
+	});
+
+	it("introduces every character in a video's opening shot", () => {
+		expect(spec).toContain("Every character in the video appears in Shot 1.");
+	});
+
+	it("keeps a film to videos and music, whatever the other element rules say", () => {
+		expect(spec).toContain(
+			"Film: the picture tells the story. Only <video> and <music>.",
+		);
+		expect(spec).toContain("Use no others.");
 	});
 
 	it("deters motion on video, which competes with the motion the video model generates", () => {

@@ -1,36 +1,20 @@
 import dedent from "dedent";
 
 /**
- * How scenes join up, and the shapes that fall out of it. One text, read by
- * the model that writes a script and by Sloppy, so both reason from the same
- * controls rather than from a list of genres.
+ * Which elements a script uses and how its videos join. One text, read by the
+ * script writer and by Sloppy, so the shape is decided before any element is.
  */
 export const VIDEO_SHAPES = dedent`
-  ## Shapes of the finished video
+  ## Shape
+  First pick the shape closest to the request. The shape decides which elements you may write. Use no others.
 
-  Two settings on a video element decide how scenes join up; which elements you write decides the rest.
+  - Film: the picture tells the story. Only <video> and <music>. Characters speak inside the video prompts. Set trimToDialogue="false" on every video, and keep startFrame="previous" unless the story cuts somewhere new. For anime, drama, short films, trailers, music videos and ambient pieces.
+  - Slideshow: a voice tells the story over pictures. <narration>, <character>, <image>, <sound> and <music>, plus a <video> only for a key moment. Each visual stays on screen for the speech after it. Set startFrame="none" on a video. For stories read aloud, explainers, lessons and lists.
+  - Motion explainer: a voice explains over moving pictures. <narration>, <video> and <music>. The videos make sound, but nobody speaks in them. Set trimToDialogue="false" on every video, and keep startFrame="previous". For Vox-style explainers, product tours and walkthroughs.
 
-  - startFrame: what a video element opens on. "previous" continues from the end of the visual before it,
-    so two video elements read as one unbroken take; the element waits for that visual and regenerates when
-    it changes. "none" starts fresh, like a cut. (A picture the user uploads is a third value, set
-    on the canvas.)
-  - trimToDialogue: whether a visual is on screen only as long as the speech after it ("true"),
-    or for its full generated length ("false"). Trimmed, speech and picture stay in lockstep and a
-    video element's own length only decides what plays before it is cut. Untrimmed, the video element sets the pace
-    and speech can only extend it.
-  - loop: when the speech under a video element outruns it, whether it repeats ("true") or holds its last
-    frame ("false").
-
-  These combine into any pacing. Three shapes cover most requests; pick the closest to what the
-  user asked for, and mix them scene by scene when one part of the finished video wants another feel:
-
-  - Slideshow: the words lead. Narration or dialogue throughout, images with a little motion,
-    video elements only for hero moments, every visual trimmed to its words, startFrame "none" so each
-    visual is its own cut. Explainers, stories, lessons, anything read aloud.
-  - Film: the picture leads. Consecutive video elements and nothing spoken, no narration, no character
-    lines, untrimmed so each plays out in full, startFrame "previous" so the video elements flow into
-    one another. Anime, music videos, ambient scenes.
-  - Motion explainer: the words lead but the picture never cuts. Narration over video elements that chain
-    with startFrame "previous", trimmed to the words, so the visuals move seamlessly under a
-    voiceover. Vox-style explainers, product tours, animated walkthroughs.
+  The video settings behind this:
+  - startFrame="previous" (the default) opens a video on the last frame of the visual before it, so the two play as one take. startFrame="none" starts fresh, like a cut.
+  - trimToDialogue="true" (the default) keeps a visual on screen only while the speech after it plays. "false" plays a video in full.
+  - A video that the next video continues from must use trimToDialogue="false". If it is trimmed, the picture jumps.
+  - loop="true" repeats a video while the speech under it runs longer. Otherwise it holds its last frame.
 `;
