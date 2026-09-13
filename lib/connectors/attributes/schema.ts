@@ -20,7 +20,7 @@ export type AttributeEdit =
 	| { kind: "text"; placeholder?: string; rows?: number }
 	/** A list of image URLs, edited as tiles. */
 	| { kind: "images" }
-	/** One picture to open on: another visual's id, or an image URL. */
+	/** One picture to open on: the visual before, or an image URL. */
 	| { kind: "frame" };
 
 export interface AttributeSpec {

@@ -3,7 +3,7 @@ const ANIMATE_VIDEO_PATTERN =
 
 /** What the animate button asks Sloppy, once the image has become a video element that opens on its picture. */
 export const animateVideoPrompt = (scene: number): string =>
-	`Write the motion for the video element in scene ${scene}: it opens on the picture it already shows, so rewrite its prompt as shots that continue from that exact frame, with the sounds they make.`;
+	`Write the motion for the video element in scene ${scene}: it opens on the picture it already shows, so rewrite its prompt as shots that continue from that exact frame, written as the Video prompts section says.`;
 
 /** The scene an animate request names, or null when it is not one. */
 export const animateVideoScene = (prompt: string): number | null => {

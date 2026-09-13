@@ -21,13 +21,14 @@ export const measureElementLengths = defineTool({
 	  is on screen, and which dialogue decides it. For the finished video's total runtime,
 	  use measure_total_length instead.
 
-	  A visual is on screen for as long as the dialogue that follows it, up to the next
-	  visual, about ${WORDS_PER_SECOND} spoken words a second. The \`duration\` on a
-	  video element is how long it is generated, not its time on screen.
+	  A visual trimmed to dialogue is on screen for as long as the dialogue that follows it,
+	  up to the next visual, about ${WORDS_PER_SECOND} spoken words a second; an untrimmed
+	  video plays its full \`duration\`, longer if the dialogue after it runs on.
 
 	  Run this whenever the user asks how long something is shown, or asks to change it. To
-	  shorten a visual, split the dialogue after it and insert a visual at the split; to
-	  lengthen one, merge or add dialogue.
+	  shorten a trimmed visual, split the dialogue after it and insert a visual at the split;
+	  to lengthen one, merge or add dialogue. To change an untrimmed video, change its
+	  \`duration\`.
 	`,
 	input: z.object({}),
 	output: z.string(),

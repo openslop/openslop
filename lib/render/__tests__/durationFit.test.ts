@@ -16,10 +16,15 @@ const length = (over: Partial<ElementLength> = {}): ElementLength => ({
 	words: 30,
 	dialogueIds: ["n1"],
 	durationSec: 10,
+	trimToDialogue: true,
 	...over,
 });
 
 describe("durationFits", () => {
+	it("leaves out untrimmed videos, which play in full", () => {
+		expect(durationFits([length({ trimToDialogue: false })])).toEqual([]);
+	});
+
 	it("covers the dialogue under a video, plus the leeway", () => {
 		const [fit] = durationFits([length({ words: 30 })]);
 

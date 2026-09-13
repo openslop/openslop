@@ -50,12 +50,6 @@ const PROFILES: Record<ModelId, ModelProfile> = {
 
 const isModelId = (model: string): model is ModelId => model in PROFILES;
 
-function profileFor(model: string): ModelProfile {
-	if (!isModelId(model))
-		throw new Error(`Runware has no video model "${model}"`);
-	return PROFILES[model];
-}
-
 type ModelInputs = {
 	prompt: string;
 	frameImages: string[];
@@ -68,17 +62,10 @@ function inputsFor(params: VideoRequest, profile: ModelProfile): ModelInputs {
 		? (params.referenceImages ?? [])
 		: [];
 	const frames = params.frameImages ?? [];
-	const last = frames.at(-1);
-	if (!last)
+	if (frames.length === 0 || profile.startFrames === "firstFrame")
 		return {
 			prompt: params.prompt,
-			frameImages: [],
-			referenceImages: references,
-		};
-	if (profile.startFrames === "firstFrame")
-		return {
-			prompt: params.prompt,
-			frameImages: [last],
+			frameImages: frames.slice(-1),
 			referenceImages: references,
 		};
 	const referenceImages = [...references, ...frames];
@@ -123,7 +110,9 @@ export class RunwareVideo extends BaseVideoProvider {
 	}
 
 	async submit(params: VideoRequest) {
-		const profile = profileFor(params.model);
+		if (!isModelId(params.model))
+			throw new Error(`Runware has no video model "${params.model}"`);
+		const profile = PROFILES[params.model];
 		const inputs = inputsFor(params, profile);
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({

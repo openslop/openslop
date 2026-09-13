@@ -23,6 +23,8 @@ export type ElementLength = {
 	dialogueIds: string[];
 	/** The length it is generated at, where its type has one at all. */
 	durationSec?: number;
+	/** Whether it yields to its dialogue, or plays its own length in full. */
+	trimToDialogue: boolean;
 };
 
 type Span = {
@@ -45,6 +47,7 @@ const toLength = ({
 	dialogueIds,
 }: Span): ElementLength => {
 	const durationSec = ownDuration(element);
+	const trimToDialogue = getTrimToDialogue(element);
 	return {
 		id: element.id,
 		type: element.type,
@@ -52,9 +55,10 @@ const toLength = ({
 		words,
 		dialogueIds,
 		durationSec,
+		trimToDialogue,
 		seconds: Math.max(
 			secondsForWords(words),
-			getTrimToDialogue(element) ? 0 : (durationSec ?? 0),
+			trimToDialogue ? 0 : (durationSec ?? 0),
 			MIN_DURATION_SEC,
 		),
 	};

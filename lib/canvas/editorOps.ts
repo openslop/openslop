@@ -13,7 +13,6 @@ import {
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { createCanvasNode } from "./createCanvasNode";
 import { attributeSchemaFor } from "./elementConnector";
-import { getContentElements } from "./scenes";
 import { isContentElement } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 import { preservedAttributes } from "./preservedAttributes";
@@ -29,10 +28,6 @@ export function findElementById(
 	});
 	return entry ?? null;
 }
-
-/** The canvas in document order, read live: what a node builder resolves other elements from. */
-export const canvasOf = (editor: Editor) => () =>
-	getContentElements(editor.children);
 
 export function findNodeById(
 	editor: Editor,

@@ -176,7 +176,7 @@ export function StartFramePicker({
 							</FrameTile>
 							<RemoveCrossButton
 								label="Remove uploaded picture"
-								onClick={() => setFrame(PREVIOUS_VISUAL, null)}
+								onClick={() => setFrame(NO_FRAME, null)}
 								className="opacity-0 group-hover/tile:opacity-100"
 							/>
 						</div>

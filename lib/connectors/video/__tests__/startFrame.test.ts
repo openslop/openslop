@@ -15,10 +15,8 @@ describe("parseStartFrame", () => {
 		});
 	});
 
-	it("reads anything else as another visual's id", () => {
-		expect(parseStartFrame(" abc123 ")).toEqual({
-			kind: "element",
-			id: "abc123",
-		});
+	it("reads none as no frame, and previous as the visual before", () => {
+		expect(parseStartFrame("none")).toBeUndefined();
+		expect(parseStartFrame(" previous ")).toEqual({ kind: "previous" });
 	});
 });

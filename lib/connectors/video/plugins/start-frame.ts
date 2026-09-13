@@ -4,7 +4,11 @@ import type {
 	ConnectorPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
-import { forCanvasElement, forPreviousVisual } from "@/lib/generation/graph";
+import {
+	derivedNodeId,
+	sourceNode,
+	type NodeSpec,
+} from "@/lib/generation/graph";
 import { captureFrames } from "@/lib/connectors/video/captureFrames";
 import {
 	parseStartFrame,
@@ -20,6 +24,20 @@ export type ParamsWithStartFrame = {
 
 const LABEL = "the start frame";
 
+/**
+ * The visual before an element in document order. Resolved at build time, so
+ * reordering the script changes what it names and stales the dependent. With
+ * nothing before it, an empty leaf stands in and the dependent reads no result.
+ */
+const forPreviousVisual =
+	(id: string): NodeSpec =>
+	({ canvas }) => {
+		const element = previousVisual(canvas, id);
+		return element
+			? { element, label: LABEL }
+			: sourceNode(derivedNodeId("first", id), {}, LABEL);
+	};
+
 /** What a settled visual hands on: a video's first, middle and last frames, or the image itself. */
 async function picturesOf(source: AssetResult): Promise<string[]> {
 	if (source.videoUrl) return captureFrames(source.videoUrl);
@@ -34,8 +52,7 @@ async function frameUrls(
 ): Promise<string[]> {
 	if (!frame) return [];
 	if (frame.kind === "url") return [frame.url];
-	const id =
-		frame.kind === "element" ? frame.id : previousVisual(canvas, elementId)?.id;
+	const id = previousVisual(canvas, elementId)?.id;
 	if (!id) return [];
 	const source = dependencies[id];
 	if (!source)
@@ -44,8 +61,8 @@ async function frameUrls(
 }
 
 /**
- * Opens the video element on a picture. A canvas source is a dependency, so the
- * element waits for it, and regenerating the source stales the element; a plain
+ * Opens the video element on a picture. The visual before it is a dependency,
+ * so the element waits for it, and regenerating it stales the element; a plain
  * URL is only an input.
  */
 export function createStartFramePlugin(): ConnectorPlugin<ParamsWithStartFrame> {
@@ -55,10 +72,7 @@ export function createStartFramePlugin(): ConnectorPlugin<ParamsWithStartFrame> 
 			const frame = parseStartFrame(
 				element.generationAttributes?.[START_FRAME_ATTR],
 			);
-			if (frame?.kind === "previous")
-				return [forPreviousVisual(element.id, LABEL)];
-			if (frame?.kind === "element") return [forCanvasElement(frame.id, LABEL)];
-			return [];
+			return frame?.kind === "previous" ? [forPreviousVisual(element.id)] : [];
 		},
 		async beforeGenerate({ [START_FRAME_ATTR]: raw, ...params }, ctx) {
 			const urls = await frameUrls(parseStartFrame(raw), ctx);

@@ -4,7 +4,7 @@ export const ADAPT_GUIDELINES = dedent`
   You are a script-to-XML converter. Turn the user's script into OSML and keep their words exactly: never change, add or cut dialogue or prose.
   - Text without tags is narration. A line a character says is a <character> line.
   - Drop screenplay furniture: slug lines, stage directions, character cues and CONT'D.
-  - Their words are spoken, so the shape is Slideshow, or Motion explainer when the notes ask for moving pictures. Add the visuals, sound and music that shape allows around their words.
+  - Their words are spoken, so the shape is Slideshow, or Motion explainer when the notes ask for moving pictures; in a Motion explainer, keep character lines as <character>. Add the visuals, sound and music that shape allows around their words.
 `;
 
 /** Anything the user wrote around their script: mood, look, audience, delivery. */

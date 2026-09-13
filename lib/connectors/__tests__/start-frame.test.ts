@@ -66,7 +66,7 @@ describe("start-frame plugin", () => {
 			const [spec] = plugin.dependencies?.(video("previous")) ?? [];
 			const declared = spec?.({
 				state: EMPTY_STATE,
-				canvas: () => [image, video("previous")],
+				canvas: [image, video("previous")],
 			});
 			expect(declared).toEqual({ element: image, label: "the start frame" });
 		});
@@ -75,21 +75,9 @@ describe("start-frame plugin", () => {
 			const [spec] = plugin.dependencies?.(video("previous")) ?? [];
 			const declared = spec?.({
 				state: EMPTY_STATE,
-				canvas: () => [video("previous"), image],
+				canvas: [video("previous"), image],
 			});
 			expect(declared).toMatchObject({ job: null });
-		});
-
-		it("declares a source named by id, and keeps a deleted one as an orphan", () => {
-			const [spec] = plugin.dependencies?.(video("img-1")) ?? [];
-			expect(spec?.({ state: EMPTY_STATE, canvas: () => [image] })).toEqual({
-				element: image,
-				label: "the start frame",
-			});
-			expect(spec?.({ state: EMPTY_STATE, canvas: () => [] })).toMatchObject({
-				id: "img-1",
-				job: null,
-			});
 		});
 	});
 
@@ -130,23 +118,12 @@ describe("start-frame plugin", () => {
 			).resolves.toEqual({ prompt: "slow pan" });
 		});
 
-		it("opens on an image source's picture", async () => {
-			await expect(
-				before(
-					{ prompt: "slow pan", startFrame: "img-1" },
-					{ "img-1": { imageUrl: "https://img/sunset.png", durationSec: 0 } },
-				),
-			).resolves.toEqual({
-				prompt: "slow pan",
-				frameImages: ["https://img/sunset.png"],
-			});
-		});
-
 		it("hands on a video source's first, middle and last frames, in that order", async () => {
 			captureFrames.mockResolvedValue(FRAMES);
+			const source = { ...video(), id: "video-0" };
 			await expect(
 				before(
-					{ prompt: "slow pan", startFrame: "video-0" },
+					{ prompt: "slow pan", startFrame: "previous" },
 					{
 						"video-0": {
 							imageUrl: "https://img/first.png",
@@ -154,6 +131,7 @@ describe("start-frame plugin", () => {
 							durationSec: 5,
 						},
 					},
+					[source, video("previous")],
 				),
 			).resolves.toEqual({
 				prompt: "slow pan",
@@ -164,15 +142,15 @@ describe("start-frame plugin", () => {
 
 		it("fails loudly when the source has not generated", async () => {
 			await expect(
-				before({ prompt: "slow pan", startFrame: "img-1" }),
+				before({ prompt: "slow pan", startFrame: "previous" }),
 			).rejects.toThrow(/has not generated/);
 		});
 
 		it("fails loudly when the source made no picture", async () => {
 			await expect(
 				before(
-					{ prompt: "slow pan", startFrame: "nar-1" },
-					{ "nar-1": { audioUrl: "https://a/x.mp3", durationSec: 3 } },
+					{ prompt: "slow pan", startFrame: "previous" },
+					{ "img-1": { audioUrl: "https://a/x.mp3", durationSec: 3 } },
 				),
 			).rejects.toThrow(/no picture/);
 		});

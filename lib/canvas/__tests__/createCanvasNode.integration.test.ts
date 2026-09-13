@@ -35,13 +35,13 @@ describe("createCanvasNode — schema defaults (integration)", () => {
 		});
 	});
 
-	it("applies video defaults, opening on the previous scene", () => {
+	it("applies video defaults, cutting rather than continuing", () => {
 		const node = createCanvasNode("video");
 		const attributes = flatAttributes(node);
 		expect(attributes).toMatchObject({
 			duration: "10",
 			trimToDialogue: "true",
-			startFrame: "previous",
+			startFrame: "none",
 			motion: "none",
 			...DEFAULT_VIDEO_MODEL,
 		});

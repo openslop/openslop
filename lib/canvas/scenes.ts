@@ -38,9 +38,7 @@ export function previousVisual(
 	id: string,
 ): CanvasContentElement | undefined {
 	const at = elements.findIndex((element) => element.id === id);
-	return at < 0
-		? undefined
-		: elements.slice(0, at).reverse().find(isForeground);
+	return at < 0 ? undefined : elements.slice(0, at).findLast(isForeground);
 }
 
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {

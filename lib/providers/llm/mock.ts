@@ -30,7 +30,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
-<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead. Sound: wings fluttering past.</video>
+<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
@@ -52,13 +52,13 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound>footsteps on dirt path</sound>
 
-<video characters="Owl">Shot 1: Gentle upward pan through the forest canopy, sunlight filtering through the leaves. Sound: leaves rustling high above. Shot 2: Owl perched high in the branches of an ancient oak, slowly turning her head toward the path below. Sound: a soft hoot.</video>
+<video characters="Owl">Shot 1: Gentle upward pan through the forest canopy, sunlight filtering through the leaves. Sound: leaves rustling high above. Shot 2: Owl perched high in the branches of an ancient oak, slowly turning her head toward the path below.</video>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
 <character name="Owl" emotion="calm">"A child enters the forest today. The wind tells me she will not walk alone."</character>
 
-<video duration="4" motion="handheldDrift" characters="Wolf">Shot 1: Medium shot of Wolf carefully picking ripe red berries from thick bushes and placing them in a wicker basket, dappled sunlight through the canopy. Sound: branches rustling, berries dropping into the basket.</video>
+<video duration="4" motion="handheldDrift" characters="Wolf">Shot 1: Medium shot of Wolf carefully picking ripe red berries from thick bushes, dappled sunlight through the canopy. Sound: branches rustling. Shot 2: Close-up as he drops the berries into a wicker basket.</video>
 
 <narration emotion="mysterious">Not far away, someone else was in the forest that morning. Wolf was gathering wild berries near the path.</narration>
 
@@ -82,7 +82,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound loops="6">forest stream burbling</sound>
 
-<video duration="5" motion="panRight" characters="Red,Wolf">Shot 1: Tracking shot of Red and Wolf walking side by side along a winding fern-lined path, Red gesturing as she talks and Wolf listening with a gentle smile, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby.</video>
+<video duration="5" motion="panRight" characters="Red,Wolf">Shot 1: Tracking shot of Red and Wolf walking side by side along a winding fern-lined path, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby. Shot 2: Red gestures as she talks while Wolf listens with a gentle smile.</video>
 
 <music length="short">Light, twinkling music with playful pizzicato strings</music>
 
@@ -102,7 +102,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<video characters="Granny">Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Granny steps into the doorway leaning on a wooden cane, smiling warmly. Sound: the door creaking open.</video>
+<video characters="Granny">Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Granny steps into the doorway leaning on a wooden cane, smiling warmly.</video>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;

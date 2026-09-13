@@ -354,6 +354,7 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
+						trimToDialogue: true,
 					},
 					{
 						id: "ai1",
@@ -362,6 +363,7 @@ describe("executeToolCall", () => {
 						seconds: 1,
 						words: 0,
 						dialogueIds: [],
+						trimToDialogue: true,
 					},
 				],
 			}),
@@ -389,6 +391,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 10,
+						trimToDialogue: true,
 					},
 					{
 						id: "img1",
@@ -397,6 +400,7 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar2"],
+						trimToDialogue: true,
 					},
 				],
 				editScript: (applied) => {
@@ -411,7 +415,9 @@ describe("executeToolCall", () => {
 			"Scene 1 video ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
-		expect(outcome.ok && outcome.output).toContain("1 image still left alone.");
+		expect(outcome.ok && outcome.output).toContain(
+			"1 image or untrimmed video left alone.",
+		);
 	});
 
 	it("names a video element whose dialogue outruns the longest option instead of hiding the clamp", async () => {
@@ -427,6 +433,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: [],
 						durationSec: 10,
+						trimToDialogue: true,
 					},
 					{
 						id: "vid1",
@@ -436,6 +443,7 @@ describe("executeToolCall", () => {
 						words: 180,
 						dialogueIds: ["nar2"],
 						durationSec: 15,
+						trimToDialogue: true,
 					},
 				],
 			}),
@@ -460,6 +468,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
+						trimToDialogue: true,
 					},
 				],
 				editScript: () => {
@@ -484,6 +493,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
+						trimToDialogue: true,
 					},
 				],
 			}),
@@ -506,13 +516,14 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
+						trimToDialogue: true,
 					},
 				],
 			}),
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"No video elements in scope.",
+			"No video elements trimmed to dialogue in scope.",
 		);
 	});
 

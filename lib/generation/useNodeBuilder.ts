@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useSlateSelector, useSlateStatic } from "slate-react";
-import { canvasOf } from "@/lib/canvas/editorOps";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProject } from "@/lib/project/useProject";
@@ -23,7 +22,10 @@ export function useNodeBuilder(): NodeBuilder {
 			.join(","),
 	);
 	return useMemo(
-		() => nodeBuilder(connectorConfig, state, canvasOf(editor)),
+		() =>
+			nodeBuilder(connectorConfig, state, () =>
+				getContentElements(editor.children),
+			),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[connectorConfig, state, editor, order],
 	);

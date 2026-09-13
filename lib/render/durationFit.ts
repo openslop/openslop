@@ -15,8 +15,8 @@ export type DurationFit = {
 	needed: number;
 };
 
-const hasOwnDuration = (length: ElementLength): length is GeneratedLength =>
-	length.durationSec !== undefined;
+const isFittable = (length: ElementLength): length is GeneratedLength =>
+	length.trimToDialogue && length.durationSec !== undefined;
 
 const fit = (length: GeneratedLength): DurationFit => {
 	const needed = secondsForWords(length.words) + DURATION_FIT_LEEWAY_SEC;
@@ -29,8 +29,8 @@ export const fallsShort = ({ needed }: DurationFit): boolean =>
 /**
  * What each generated video's `duration` should be to cover the dialogue under it,
  * as `measureElementLengths` attributes it: every line between this visual and the
- * next, scene boundaries included. Stills carry no duration and already stretch to
- * fit, so they are left out.
+ * next, scene boundaries included. Stills already stretch to fit and untrimmed
+ * videos play in full, so both are left out.
  */
 export const durationFits = (lengths: ElementLength[]): DurationFit[] =>
-	lengths.filter(hasOwnDuration).map(fit);
+	lengths.filter(isFittable).map(fit);

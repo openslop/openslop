@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Editor } from "slate";
-import { canvasOf, clearEditor, findNodeById } from "@/lib/canvas/editorOps";
+import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { makesPicture } from "@/lib/canvas/types";
@@ -55,10 +55,8 @@ export function useAgentTools(editor: Editor) {
 					};
 				},
 				elementStates: () => {
-					const buildNode = nodeBuilder(
-						connectorConfig,
-						store.getState(),
-						canvasOf(editor),
+					const buildNode = nodeBuilder(connectorConfig, store.getState(), () =>
+						getContentElements(editor.children),
 					);
 					return getContentElements(editor.children).map((element) =>
 						elementState(

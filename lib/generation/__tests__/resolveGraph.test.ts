@@ -11,7 +11,6 @@ import {
 	flattenGraph,
 	forElement,
 	isNodeStale,
-	isSourceNode,
 	needsGeneration,
 } from "../graph";
 import { GenerationQueue } from "../queue";
@@ -30,7 +29,7 @@ const element = (
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
-/** Builds `el` against a canvas holding `others`, which a start frame may name. */
+/** Builds `el` against a canvas holding `others`, in document order. */
 const resolveOn = (el: CanvasContentElement, others: CanvasContentElement[]) =>
 	nodeBuilder(
 		DEFAULT_CONNECTOR_REGISTRY,
@@ -140,20 +139,21 @@ describe("resolveGraph", () => {
 		expect(ids).toContain("project:aspectRatio");
 	});
 
-	it("builds the canvas element a video opens on ahead of the video", () => {
+	it("builds the visual a video opens on ahead of the video", () => {
 		const img = element("img", "image");
-		const video = element("vid-1", "video", { startFrame: "img" });
+		const video = element("vid-1", "video", { startFrame: "previous" });
 
-		const ids = flattenGraph([resolveOn(video, [img])]).map((node) => node.id);
+		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
+			(node) => node.id,
+		);
 		expect(ids).toContain("img");
 		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("vid-1"));
 	});
 
 	it("marks a video stale when its start frame is replaced by an upload", () => {
 		const img = element("img", "image");
-		const video = resolveOn(element("vid-1", "video", { startFrame: "img" }), [
-			img,
-		]);
+		const el = element("vid-1", "video", { startFrame: "previous" });
+		const video = resolveOn(el, [img, el]);
 		const frame = video.dependsOn.find((node) => node.id === "img");
 		if (!frame) throw new Error("expected a start-frame dependency");
 
@@ -169,14 +169,20 @@ describe("resolveGraph", () => {
 		expect(isNodeStale(video, queue)).toBe(true);
 	});
 
-	// A start frame whose element left the canvas still resolves, as a source
-	// the queue never runs: the video keeps reading whatever it last produced.
-	it("reads a start frame that left the canvas as a source, not a job", () => {
-		const video = resolve(element("vid-1", "video", { startFrame: "gone" }));
-		const frame = video.dependsOn.find((node) => node.id === "gone");
+	it("marks a video stale when the visual before it changes", () => {
+		const queue = new GenerationQueue();
+		const img = element("img", "image");
+		const other = element("other", "image");
+		const el = element("vid-1", "video", { startFrame: "previous" });
+		const video = resolveOn(el, [img, el]);
+		queue.commitResult(resolveOn(img, [img, el]), {
+			imageUrl: "frame.png",
+			durationSec: 0,
+		});
+		queue.commitResult(video, { videoUrl: "video.mp4", durationSec: 5 });
+		expect(isNodeStale(video, queue)).toBe(false);
 
-		expect(frame && isSourceNode(frame)).toBe(true);
-		expect(frame?.label).toBe("the start frame");
+		expect(isNodeStale(resolveOn(el, [img, other, el]), queue)).toBe(true);
 	});
 
 	// An upload replaces a generated result with the user's own image. Project

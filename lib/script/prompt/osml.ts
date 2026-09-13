@@ -53,19 +53,19 @@ ${languagePrompt(language)}
 
   ## <image>
   - The body is an image prompt: the time of day, the background, the weather if outdoors, and the objects, in detail.
-  - Depict the specific moment described by the narration and dialogue that follow it, up to the next visual: who is there, what they do and how they look, not just the setting.
+  - Depict the specific moment described by the narration and dialogue that follow it, up to the next visual: who is there, what they do and their expressions, not just the setting.
   - Each <image> prompt must stand alone. The image model knows nothing about the story or the other prompts, so repeat any detail it needs.
   - Reference characters by their names in the image prompt, and list them in characters. Never describe their appearance.
   - characters: the exact names of the characters in the picture, comma-separated.
-  - motion: a camera move for the whole time the image is on screen. Set one on almost every image, at most one per scene. Allowed values: ${MOTION_EFFECTS.join(", ")}.
+  - motion: a camera move for the whole time the image is on screen. Set one on almost every image. Allowed values: ${MOTION_EFFECTS.join(", ")}.
   - overlays: effects that match the picture, comma-separated. Allowed values: ${Object.values(EffectType).join(", ")}.
   - Example: <image characters="Red,Granny" motion="kenBurnsIn" overlays="rain">Red hands a basket to Granny at the door of a thatched cottage on a rainy afternoon.</image>
 
   ## <video>
-  - A short generated video that makes its own sound. The body is a video prompt, written as the Video prompts section says.
+  - A short generated video whose sound is written into its shots. The body is a video prompt, written as the Video prompts section says.
   - duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
   - startFrame, trimToDialogue and loop: see Shape.
-  - characters and overlays: as for <image>. Every shot follows the <image> prompt rules.
+  - characters and overlays: as for <image>. Name characters in shots as for <image>.
   - motion: normally set to "none". Only set one when the shots have no camera move of their own.
   - Example: <video characters="Red,Wolf" overlays="rain" startFrame="none" trimToDialogue="false">Shot 1: Wide shot of a moonlit forest clearing as Red and Wolf walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby. Shot 2: The camera slowly rises to show the whole clearing.</video>
 
