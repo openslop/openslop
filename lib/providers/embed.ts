@@ -7,10 +7,10 @@ const providerOptions = { openai: { dimensions: 512 } };
 
 export const embedText = (text: string): Promise<number[]> =>
 	embed({ model: embedModel, value: text, providerOptions }).then(
-		(r) => r.embedding,
+		({ embedding }) => embedding,
 	);
 
 export const embedTexts = (texts: string[]): Promise<number[][]> =>
 	embedMany({ model: embedModel, values: texts, providerOptions }).then(
-		(r) => r.embeddings,
+		({ embeddings }) => embeddings,
 	);
