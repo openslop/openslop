@@ -28,8 +28,9 @@ export type GenerationJob = {
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
-	/** The project state this job's inputs were resolved against. */
+	/** The project state and canvas this job's inputs were resolved against. */
 	state: ProjectData;
+	canvas: CanvasContentElement[];
 };
 
 type NodeBase = {
@@ -60,11 +61,17 @@ export type ElementNode = {
 	label?: string;
 };
 
+/** What a spec may read while naming its node: project state, and the canvas in document order. */
+export type BuildContext = {
+	state: ProjectData;
+	canvas: CanvasContentElement[];
+};
+
 /**
  * Declares which node to build without saying how; only the builder knows the
  * registry and the state. A source-node spec returns its node directly.
  */
-export type NodeSpec = (state: ProjectData) => ElementNode | GenerationNode;
+export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
 
 /** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
 export const isElementNode = (
@@ -96,16 +103,6 @@ const DERIVED_PREFIX = "~";
 /** Ids for nodes the graph derives; the prefix keeps them off element ids. */
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
-
-/** The dependency a node derives for `kind`, when its plugins declare one. */
-export const derivedDependency = (node: GenerationNode, kind: string) =>
-	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
-
-const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
-
-/** The node a derived id was minted from, if it was derived at all. */
-export const derivedFrom = (id: NodeId): NodeId | null =>
-	DERIVED_ID.exec(id)?.[1] ?? null;
 
 export function sourceNode(
 	id: NodeId,

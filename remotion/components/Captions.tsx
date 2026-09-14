@@ -3,9 +3,12 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { CaptionOverlay } from "@/components/captions/CaptionOverlay";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import type { TextTimestamp } from "@/lib/connectors/types";
-import { activeWordIndex, captionWordsAt } from "@/lib/video/captionLayout";
-import { captionFontSizePx, type CaptionStyle } from "@/lib/video/captionStyle";
-import { toSeconds } from "@/lib/video/frames";
+import { activeWordIndex, captionWordsAt } from "@/lib/captions/captionLayout";
+import {
+	captionFontSizePx,
+	type CaptionStyle,
+} from "@/lib/captions/captionStyle";
+import { toSeconds } from "@/lib/render/frames";
 
 // Caption styling applies to every caption in the composition, so it rides a
 // provider rather than threading through the sequence layers that never read it.

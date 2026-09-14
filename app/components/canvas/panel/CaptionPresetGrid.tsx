@@ -5,8 +5,8 @@ import isEqual from "lodash/isEqual";
 import {
 	CAPTION_PRESETS,
 	type CaptionPreset,
-} from "@/lib/video/captionPresets";
-import type { CaptionStyle } from "@/lib/video/captionStyle";
+} from "@/lib/captions/captionPresets";
+import type { CaptionStyle } from "@/lib/captions/captionStyle";
 import { cn } from "@/lib/utils";
 import { CaptionStage, useCaptionCycle } from "./CaptionStage";
 

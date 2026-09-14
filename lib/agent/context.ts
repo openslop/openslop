@@ -2,8 +2,8 @@ import { z } from "zod";
 import dedent from "dedent";
 import { languageLabel, LANGUAGE_CHOICES } from "@/lib/project/language";
 import { MetadataVoiceSchema, voiceTraitEntries } from "@/lib/project/types";
-import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
-import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/video/videoLength";
+import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
+import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/project/videoLength";
 
 const UNSET = "not set";
 
@@ -77,7 +77,7 @@ export function renderAgentContext(ctx: AgentContext): string {
 		- title: ${ctx.title || UNSET}
 		- art style: ${ctx.style || UNSET}
 		- language: ${languageLabel(ctx.language)}
-		- video length: ${length}
+		- target length: ${length}
 		- aspect ratio: ${ctx.aspectRatio}
 		- template: ${ctx.templateName ?? "none"}
 		- narrator voice: ${renderNarrator(ctx.narration)}

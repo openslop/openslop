@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildScriptPrompt } from "../build";
 import { MetadataSchema, type Metadata } from "@/lib/project/types";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
-import { VIDEO_LENGTH_SPECS } from "@/lib/video/videoLength";
+import { VIDEO_LENGTH_SPECS } from "@/lib/project/videoLength";
 
 const base = MetadataSchema.parse({});
 

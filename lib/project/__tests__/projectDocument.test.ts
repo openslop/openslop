@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { SceneElement } from "@/lib/canvas/types";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { createAccountStore } from "@/lib/user/accountStore";
 import { createProjectDocument, type ProjectContent } from "../projectDocument";
 import { createProjectStore } from "../store";

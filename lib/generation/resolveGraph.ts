@@ -8,6 +8,7 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import {
 	isElementNode,
+	type BuildContext,
 	type ElementNode,
 	type GenerationNode,
 	type JobNode,
@@ -23,9 +24,9 @@ const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	state: ProjectData,
 	dependsOn: GenerationNode[],
 	label: string | undefined,
+	{ state, canvas }: BuildContext,
 ): JobNode => ({
 	id: element.id,
 	label,
@@ -41,6 +42,7 @@ const toNode = (
 		model: connector.model,
 		config: { ...connector.config, plugins },
 		state,
+		canvas,
 	},
 });
 
@@ -51,8 +53,11 @@ const toNode = (
 export function nodeBuilder(
 	registry: ConnectorRegistry,
 	state: ProjectData,
+	canvas: () => CanvasContentElement[],
 ): NodeBuilder {
 	return (spec) => {
+		// Read once per build, so every node in the graph sees the same canvas.
+		const ctx: BuildContext = { state, canvas: canvas() };
 		// Scoped to one call: it dedupes nodes shared within a single graph and
 		// detects cycles. Held across calls it would serve a stale node back once
 		// its element changed, since element content is not part of `state`.
@@ -72,7 +77,7 @@ export function nodeBuilder(
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
-			const node = toNode(element, connector, plugins, state, dependsOn, label);
+			const node = toNode(element, connector, plugins, dependsOn, label, ctx);
 
 			resolving.delete(id);
 			resolved.set(id, node);
@@ -80,7 +85,7 @@ export function nodeBuilder(
 		};
 
 		const resolve = (dep: NodeSpec): GenerationNode => {
-			const declared = dep(state);
+			const declared = dep(ctx);
 			return isElementNode(declared) ? build(declared) : declared;
 		};
 

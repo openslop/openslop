@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { Play, Pause } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
-import { formatTime } from "@/lib/video/timestamps";
+import { formatTime } from "@/lib/render/timestamps";
 
 export function AudioPlayer({ src }: { src: string }) {
 	const waveformRef = useRef<WaveformHandle>(null);

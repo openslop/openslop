@@ -1,0 +1,200 @@
+import { describe, expect, it } from "vitest";
+import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	LAYOUT_ATTRIBUTE_KEYS,
+	getDuration,
+	getLoops,
+	getMotion,
+	getTrimToDialogue,
+	getVolume,
+	flatAttributes,
+	layoutAttributeSignature,
+	splitAttributes,
+} from "../elementAttributes";
+
+function el(customAttributes?: Record<string, string>): CanvasContentElement {
+	return {
+		id: "e1",
+		type: "music",
+		...splitAttributes(customAttributes ?? {}),
+		children: [{ id: "e1-t", type: "music", text: "" }],
+	};
+}
+
+describe("splitAttributes", () => {
+	it("sorts layout keys out of what the generator sees", () => {
+		expect(
+			splitAttributes({
+				style: "ink",
+				volume: "5",
+				motion: "pan",
+				loops: "2",
+				trimToDialogue: "false",
+			}),
+		).toEqual({
+			generationAttributes: { style: "ink" },
+			layoutAttributes: {
+				volume: "5",
+				motion: "pan",
+				loops: "2",
+				trimToDialogue: "false",
+			},
+		});
+	});
+
+	it("round-trips through flatAttributes", () => {
+		const attributes = { style: "ink", volume: "5" };
+		expect(flatAttributes(splitAttributes(attributes))).toEqual(attributes);
+	});
+});
+
+describe("getVolume", () => {
+	it("defaults to 10 when missing or non-numeric", () => {
+		expect(getVolume(el())).toBe(10);
+		expect(getVolume(el({ volume: "not-a-number" }))).toBe(10);
+	});
+
+	it("passes through valid values including 0", () => {
+		expect(getVolume(el({ volume: "0" }))).toBe(0);
+		expect(getVolume(el({ volume: "3" }))).toBe(3);
+	});
+
+	it("reads a blank attribute as unset rather than as a deliberate mute", () => {
+		expect(getVolume(el({ volume: "" }))).toBe(10);
+		expect(getVolume(el({ volume: "  " }))).toBe(10);
+	});
+
+	it("clamps out-of-range values to [0, 10]", () => {
+		expect(getVolume(el({ volume: "-2" }))).toBe(0);
+		expect(getVolume(el({ volume: "42" }))).toBe(10);
+	});
+});
+
+describe("getDuration", () => {
+	it("defaults to 10 when missing or non-numeric", () => {
+		expect(getDuration(el())).toBe(10);
+		expect(getDuration(el({ duration: "not-a-number" }))).toBe(10);
+	});
+
+	it("reads a blank attribute as unset rather than as the shortest option", () => {
+		expect(getDuration(el({ duration: "" }))).toBe(10);
+		expect(getDuration(el({ duration: "  " }))).toBe(10);
+	});
+
+	it("clamps out-of-range values to the offered options", () => {
+		expect(getDuration(el({ duration: "1" }))).toBe(4);
+		expect(getDuration(el({ duration: "99" }))).toBe(15);
+	});
+
+	it("passes through offered values", () => {
+		expect(getDuration(el({ duration: "7" }))).toBe(7);
+	});
+});
+
+describe("getLoops", () => {
+	it("defaults to 1 when missing, invalid, or below 1", () => {
+		expect(getLoops(el())).toBe(1);
+		expect(getLoops(el({ loops: "not-a-number" }))).toBe(1);
+		expect(getLoops(el({ loops: "0" }))).toBe(1);
+	});
+
+	it("reads valid loop counts", () => {
+		expect(getLoops(el({ loops: "4" }))).toBe(4);
+	});
+
+	it("reads a blank attribute as unset", () => {
+		expect(getLoops(el({ loops: "" }))).toBe(1);
+		expect(getLoops(el({ loops: "  " }))).toBe(1);
+	});
+
+	it("passes fractional loop counts through", () => {
+		expect(getLoops(el({ loops: "4.7" }))).toBe(4.7);
+		expect(getLoops(el({ loops: "1.999" }))).toBe(1.999);
+	});
+
+	it("rejects Infinity and NaN, defaulting to 1", () => {
+		expect(getLoops(el({ loops: "Infinity" }))).toBe(1);
+		expect(getLoops(el({ loops: "-Infinity" }))).toBe(1);
+		expect(getLoops(el({ loops: "NaN" }))).toBe(1);
+	});
+
+	it("clamps absurdly large loop counts to a sane maximum", () => {
+		expect(getLoops(el({ loops: "999999999" }))).toBe(1000);
+	});
+
+	it("clamps negative loop counts to 1", () => {
+		expect(getLoops(el({ loops: "-5" }))).toBe(1);
+	});
+});
+
+describe("getMotion", () => {
+	it("defaults to 'none' when missing or invalid", () => {
+		expect(getMotion(el())).toBe("none");
+		expect(getMotion(el({ motion: "not-an-effect" }))).toBe("none");
+		expect(getMotion(el({ motion: "" }))).toBe("none");
+	});
+
+	it("passes through known effects", () => {
+		expect(getMotion(el({ motion: "kenBurnsIn" }))).toBe("kenBurnsIn");
+		expect(getMotion(el({ motion: "shake" }))).toBe("shake");
+	});
+
+	it("is included in LAYOUT_ATTRIBUTE_KEYS so changes invalidate layout memos", () => {
+		expect(LAYOUT_ATTRIBUTE_KEYS).toContain("motion");
+	});
+});
+
+describe("getTrimToDialogue", () => {
+	it("trims when the attribute is absent, since that is the default", () => {
+		expect(getTrimToDialogue(el())).toBe(true);
+	});
+
+	it("plays in full only on an explicit 'false'", () => {
+		expect(getTrimToDialogue(el({ trimToDialogue: "false" }))).toBe(false);
+		expect(getTrimToDialogue(el({ trimToDialogue: "true" }))).toBe(true);
+		expect(getTrimToDialogue(el({ trimToDialogue: "" }))).toBe(true);
+		expect(getTrimToDialogue(el({ trimToDialogue: "no" }))).toBe(true);
+	});
+
+	it("is a layout attribute, so it never reaches the generator", () => {
+		expect(LAYOUT_ATTRIBUTE_KEYS).toContain("trimToDialogue");
+		expect(
+			splitAttributes({ trimToDialogue: "false" }).generationAttributes,
+		).toEqual({});
+	});
+});
+
+describe("layoutAttributeSignature", () => {
+	it("joins raw layout attribute values in LAYOUT_ATTRIBUTE_KEYS order", () => {
+		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual([
+			"loops",
+			"loop",
+			"volume",
+			"motion",
+			"trimToDialogue",
+			"uploadedFrame",
+		]);
+		expect(
+			layoutAttributeSignature(
+				el({
+					loops: "2",
+					volume: "5",
+					motion: "kenBurnsIn",
+					trimToDialogue: "false",
+				}),
+			),
+		).toBe("2::5:kenBurnsIn:false:");
+	});
+
+	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
+		expect(layoutAttributeSignature(el())).toBe(":::::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10:::");
+		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe(
+			":::shake::",
+		);
+		expect(layoutAttributeSignature(el({ trimToDialogue: "false" }))).toBe(
+			"::::false:",
+		);
+	});
+});

@@ -2,6 +2,7 @@
 
 import { useSlateStatic } from "slate-react";
 import { getElementCharacterNames } from "@/lib/canvas/characterNames";
+import { isForeground } from "@/lib/canvas/guards";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { CharacterPill } from "./CharacterPill";
 import { removeCharacter } from "@/app/components/canvas/utils/characterOps";
@@ -15,8 +16,7 @@ export function ElementCharacters({
 	const editor = useSlateStatic();
 	if (element.type === "character")
 		return <CharacterSwitcher element={element} />;
-	if (element.type !== "image" && element.type !== "animated_image")
-		return null;
+	if (!isForeground(element)) return null;
 	const characters = getElementCharacterNames(element);
 	return (
 		<>

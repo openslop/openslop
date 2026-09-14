@@ -2,7 +2,8 @@
 
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { pictureNode } from "@/lib/connectors/animated_image/plugins/still-frame";
+import { makesPicture } from "@/lib/canvas/types";
+import { isSourceNode } from "@/lib/generation/graph";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { useElementGeneration } from "./ElementGenerationContext";
 
@@ -10,8 +11,7 @@ import { useElementGeneration } from "./ElementGenerationContext";
 export function ElementUploadButton() {
 	const queue = useGenerationQueue();
 	const { node, status } = useElementGeneration();
-	const target = pictureNode(node);
-	if (!target) return null;
+	if (isSourceNode(node) || !makesPicture(node.job.elementType)) return null;
 
 	return (
 		<UploadImageButton
@@ -19,7 +19,7 @@ export function ElementUploadButton() {
 			disabled={isGenerationActive(status)}
 			onUpload={(url) =>
 				queue.commitResult(
-					target,
+					node,
 					{ imageUrl: url, durationSec: 0 },
 					{ pinned: true },
 				)

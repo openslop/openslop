@@ -1,10 +1,9 @@
 import set from "lodash/fp/set";
-import { buildAnimatedImagePlugins } from "./animated_image/plugins/animated-image-chain";
-import { buildImagePlugins } from "./image/plugins/imageChain";
-import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
-import { createDimensionsPlugin } from "./plugins/dimensions";
+import { buildVisualPlugins } from "./plugins/visualChain";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
+import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
+import { createPreviousVisualPlugin } from "./video/plugins/previous-visual";
 import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
 
 /**
@@ -18,10 +17,14 @@ export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	llm: {},
 	tts: { plugins: [createMetadataVoicePlugin(), createVoiceSearchPlugin()] },
-	image: { plugins: buildImagePlugins() },
-	animated_image: { plugins: buildAnimatedImagePlugins() },
+	image: { plugins: buildVisualPlugins("image") },
 	video: {
-		plugins: [createReferenceImagesPlugin(), createDimensionsPlugin("video")],
+		plugins: [
+			...buildVisualPlugins("video"),
+			// Last, so a model's reference image limit drops the previous scene's frames before characters.
+			createPreviousVisualPlugin(),
+			createVideoOutputRulesPlugin(),
+		],
 	},
 	sfx: {},
 	music: {},

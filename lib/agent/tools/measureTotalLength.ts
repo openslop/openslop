@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
 	NARRATION_WORDS_PER_MINUTE,
 	videoLengthBudget,
-} from "@/lib/video/videoLength";
+} from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 
@@ -12,8 +12,8 @@ const minutes = (words: number) =>
 
 export const measureTotalLength = defineTool({
 	description: dedent`
-	  Measure the whole video: the spoken words on the canvas (narration and dialogue only;
-	  descriptions and attributes are silent) and the runtime they add up to, against the
+	  Measure the finished video: the spoken words on the canvas (narration and dialogue only;
+	  prompts and attributes are silent) and the runtime they add up to, against the
 	  project's target length. For how long each visual is on screen, use
 	  measure_element_lengths instead.
 
@@ -23,7 +23,7 @@ export const measureTotalLength = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Measuring the video's length",
+	label: "Measuring the total length",
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const { length } = ctx.readMetadata().videoSettings;

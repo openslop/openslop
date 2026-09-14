@@ -70,13 +70,14 @@ export function useGenerateScope(
 	const queue = useGenerationQueue();
 	const buildNode = useNodeBuilder();
 
-	const nodes = useMemo(
+	const buildNodes = useCallback(
 		() =>
 			elements
 				.map((element) => buildNode(forElement(element)))
 				.filter((node) => node.inputs.prompt),
 		[elements, buildNode],
 	);
+	const nodes = useMemo(() => buildNodes(), [buildNodes]);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -91,9 +92,12 @@ export function useGenerateScope(
 		(q) => nodes.filter((node) => isNodeStale(node, q)).length,
 	);
 
+	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
-		queue.enqueueGraph(nodes.filter((node) => needsGeneration(node, queue)));
-	}, [queue, nodes]);
+		queue.enqueueGraph(
+			buildNodes().filter((node) => needsGeneration(node, queue)),
+		);
+	}, [queue, buildNodes]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

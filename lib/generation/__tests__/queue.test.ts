@@ -47,6 +47,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
+		canvas: [],
 		...rest,
 	};
 	return {

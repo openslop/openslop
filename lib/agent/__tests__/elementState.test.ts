@@ -22,6 +22,7 @@ function node(id: string, prompt = id): GenerationNode {
 		model: DEFAULT_MODELS.image,
 		config,
 		state: EMPTY_STATE,
+		canvas: [],
 	};
 	return { id, inputs: { prompt, attributes: {} }, dependsOn: [], job };
 }

@@ -35,6 +35,7 @@ function makeJob(connectorType: AssetConnectorType): GenerationJob {
 		model: DEFAULT_MODELS[connectorType],
 		config,
 		state: EMPTY_STATE,
+		canvas: [],
 	};
 }
 
@@ -68,7 +69,7 @@ describe("generateForElement", () => {
 		);
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "a sunset", width: "1024" },
-			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
+			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE, canvas: [] },
 		);
 		expect(result).toEqual(expected);
 	});
@@ -86,7 +87,7 @@ describe("generateForElement", () => {
 		);
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "jazz beat" },
-			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
+			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE, canvas: [] },
 		);
 	});
 
@@ -101,22 +102,23 @@ describe("generateForElement", () => {
 
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "hello world", voiceId: "voice-1", speed: "fast" },
-			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE },
+			{ elementId: "el-1", dependencies: {}, state: EMPTY_STATE, canvas: [] },
 		);
 	});
 
 	it("forwards dependency results to the connector", async () => {
 		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
+		// The canvas image a video opens on, resolved by the queue before it ran.
 		const dependencies = {
-			"el-1:still": {
-				imageUrl: "https://example.com/still.png",
+			"img-1": {
+				imageUrl: "https://example.com/frame.png",
 				durationSec: 0,
 			},
 		};
 
 		await generateForElement(
-			makeJob("animated_image"),
-			inputs("a sunset", { videoPrompt: "pan" }),
+			makeJob("video"),
+			inputs("a sunset", { startFrame: "img-1" }),
 			dependencies,
 		);
 
@@ -124,6 +126,7 @@ describe("generateForElement", () => {
 			elementId: "el-1",
 			dependencies,
 			state: EMPTY_STATE,
+			canvas: [],
 		});
 	});
 

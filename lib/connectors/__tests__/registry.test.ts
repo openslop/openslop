@@ -19,7 +19,6 @@ function makeFullRegistry(
 		music: {},
 		sfx: {},
 		image: {},
-		animated_image: {},
 		tts: {},
 		video: {},
 		...overrides,

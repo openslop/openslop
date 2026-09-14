@@ -8,7 +8,7 @@ import {
 	getElementCharacterNames,
 	parseCharacterNames,
 } from "../characterNames";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 describe("parseCharacterNames", () => {
 	it("splits, trims, and drops empty names", () => {

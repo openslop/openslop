@@ -16,7 +16,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 
 import { insertElement } from "../insertElement";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 function makeEditor() {
 	const editor = createEditor();

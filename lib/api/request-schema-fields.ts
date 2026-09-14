@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
-import { VIDEO_RESOLUTIONS } from "@/lib/video/aspectRatio";
+import { VIDEO_RESOLUTIONS } from "@/lib/project/aspectRatio";
 import { parseImageSource } from "./imageSource";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);

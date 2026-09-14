@@ -42,10 +42,8 @@ describe("parseElementVersions", () => {
 	});
 
 	it("reads the element type a version was generated as", () => {
-		const [version] = parseElementVersions([
-			row({ element_type: "animated_image" }),
-		]);
-		expect(version?.elementType).toBe("animated_image");
+		const [version] = parseElementVersions([row({ element_type: "video" })]);
+		expect(version?.elementType).toBe("video");
 	});
 
 	it("leaves the element type unset on a row written without one", () => {
@@ -130,11 +128,8 @@ describe("saveElementVersion", () => {
 	});
 
 	it("writes the element type the version was generated as", async () => {
-		const saved = await savedRow(
-			"p1",
-			makeVersion({ elementType: "animated_image" }),
-		);
-		expect(saved.element_type).toBe("animated_image");
+		const saved = await savedRow("p1", makeVersion({ elementType: "video" }));
+		expect(saved.element_type).toBe("video");
 	});
 
 	it("throws when the write fails", async () => {

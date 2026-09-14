@@ -18,7 +18,7 @@ import {
 	type GenerateScope,
 } from "./canvas/hooks/useGenerateScope";
 import { useSloppy } from "./sloppy/SloppyProvider";
-import { ExportButton } from "./video/ExportButton";
+import { ExportButton } from "./player/ExportButton";
 import editorStyles from "./Editor.module.css";
 
 function Breadcrumbs() {

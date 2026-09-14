@@ -5,7 +5,7 @@ import type { NodeResults } from "@/lib/generation/graph";
 import { uploadedAvatarUrl } from "./characterAvatar";
 import type { ProjectData } from "./store";
 
-const DERIVE_PROMPT = dedent`Vividly and concisely describe the visual art style of the attached reference image(s) in 1–2 concise sentences. Include ultra specific detail on character art style and overall art style. Only respond with the style description written as if it's a preamble for an image model prompt, no other text. This description should be generic enough to prepend to any image prompt, scene, or setting in this style.`;
+const DERIVE_PROMPT = dedent`Describe the visual art style of the attached reference image(s) in 1–2 concise sentences: the medium, linework, shading, colors and lighting, with specific detail on how characters are drawn. Never mention a place, a setting, a time of day, the subjects or what is happening: the description is placed in front of the prompt for every scene, so it must fit all of them. Reply with only the description.`;
 
 /** Generated avatars already carry the style, so reading them back is circular. */
 export function uploadedAvatarUrls(

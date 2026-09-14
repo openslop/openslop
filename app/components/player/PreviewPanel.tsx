@@ -1,0 +1,41 @@
+"use client";
+
+import { useRef } from "react";
+import { useSloppy } from "../sloppy/SloppyProvider";
+import { useLayout } from "./RenderLayoutContext";
+import { ProjectPreview } from "./ProjectPreview";
+import { QueueProgressBar } from "./QueueProgressBar";
+import { PlayerShimmer } from "./PlayerShimmer";
+
+function PreviewPanelBody() {
+	const { layout, ready } = useLayout();
+	const { writingScript } = useSloppy();
+	const restoreFrameRef = useRef<number | null>(null);
+
+	if (writingScript) {
+		return (
+			<PlayerShimmer>
+				<div className="text-label text-muted-foreground">Writing script…</div>
+			</PlayerShimmer>
+		);
+	}
+	if (!layout.series.length) {
+		return (
+			<div className="flex h-full w-full items-center justify-center px-4 text-center text-body text-muted-foreground">
+				Generate elements to playback
+			</div>
+		);
+	}
+	if (!ready) return <QueueProgressBar />;
+	return <ProjectPreview layout={layout} restoreFrameRef={restoreFrameRef} />;
+}
+
+export function PreviewPanel() {
+	return (
+		<div className="relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
+			<div className="relative z-[2] h-full w-full">
+				<PreviewPanelBody />
+			</div>
+		</div>
+	);
+}

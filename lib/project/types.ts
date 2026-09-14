@@ -14,7 +14,7 @@ import {
 } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
-import { VideoSettingsSchema } from "@/lib/video/videoSettings";
+import { VideoSettingsSchema } from "@/lib/project/videoSettings";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
 

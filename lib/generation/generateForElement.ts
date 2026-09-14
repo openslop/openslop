@@ -12,6 +12,12 @@ export async function generateForElement(
 	const connector = createConnector(job.connectorType, job.model, job.config);
 	return connector.generate(
 		{ prompt: inputs.prompt, ...inputs.attributes },
-		{ elementId: job.elementId, dependencies, state: job.state, signal },
+		{
+			elementId: job.elementId,
+			dependencies,
+			state: job.state,
+			canvas: job.canvas,
+			signal,
+		},
 	);
 }

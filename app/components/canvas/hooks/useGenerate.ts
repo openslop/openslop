@@ -16,13 +16,16 @@ export function useGenerateNode(spec: NodeSpec) {
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
+	// Built again at the click: the builder is not rebuilt for edits inside other
+	// elements, so the memoized graph can hold a dependency as it was, and queue it.
 	const generate = useCallback(() => {
-		if (!node.inputs.prompt) {
-			queue.setError(node.id, "Enter a prompt first");
+		const current = buildNode(spec);
+		if (!current.inputs.prompt) {
+			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
-		queue.enqueueGraph([node]);
-	}, [queue, node]);
+		queue.enqueueGraph([current]);
+	}, [queue, buildNode, spec]);
 
 	const discard = useCallback(() => {
 		queue.discard(node.id);

@@ -1,11 +1,12 @@
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
+import type { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
 import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
 	DEFAULT_VIDEO_RESOLUTION,
-} from "@/lib/video/aspectRatio";
+} from "@/lib/project/aspectRatio";
 
 function toVideoJob(video: {
 	taskUUID: string;
@@ -21,17 +22,84 @@ function toVideoJob(video: {
 	};
 }
 
+type ModelId =
+	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
+
+/** How a model takes a request, where Runware's models differ. */
+type ModelProfile = {
+	/** Pin the last start frame as the first frame, or name every start frame as a reference in the prompt. */
+	startFrames: "firstFrame" | "namedReferences";
+	/** The most reference images the model takes, a start frame named among them included. */
+	maxReferenceImages: number;
+	/** Whether the model renders its soundtrack only when asked. */
+	askForSound: boolean;
+};
+
+const PROFILES: Record<ModelId, ModelProfile> = {
+	// Refuses frame images beside reference images.
+	"bytedance:seedance@2.0-fast": {
+		startFrames: "namedReferences",
+		maxReferenceImages: 9,
+		askForSound: false,
+	},
+	"klingai:kling-video@3.0-turbo": {
+		startFrames: "firstFrame",
+		maxReferenceImages: 0,
+		askForSound: true,
+	},
+};
+
+const isModelId = (model: string): model is ModelId => model in PROFILES;
+
+type ModelInputs = {
+	prompt: string;
+	frameImages: string[];
+	referenceImages: string[];
+};
+
+/**
+ * Start frames arrive in time order, the last being the one to open on. Past
+ * the model's limit, the reference images at the end are dropped.
+ */
+function inputsFor(params: VideoRequest, profile: ModelProfile): ModelInputs {
+	const references = params.referenceImages ?? [];
+	const frames = params.frameImages ?? [];
+	if (frames.length === 0 || profile.startFrames === "firstFrame")
+		return {
+			prompt: params.prompt,
+			frameImages: frames.slice(-1),
+			referenceImages: references.slice(0, profile.maxReferenceImages),
+		};
+	const referenceImages = [
+		...references.slice(0, profile.maxReferenceImages - frames.length),
+		...frames,
+	];
+	return {
+		prompt: `@Image ${referenceImages.length} as the first frame. ${params.prompt}`,
+		frameImages: [],
+		referenceImages,
+	};
+}
+
 const DEFAULT_SIZE =
 	ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[DEFAULT_VIDEO_RESOLUTION];
 
-/** A frame-conditioned video takes its aspect from the frame, so it is sized by preset. */
-const sizeFor = (params: VideoRequest) =>
-	params.frameImages && params.resolution
+/** A video opening on a frame takes its aspect from the frame, so it is sized by preset. */
+const sizeFor = (params: VideoRequest, { frameImages }: ModelInputs) =>
+	frameImages.length > 0 && params.resolution
 		? { resolution: params.resolution }
 		: {
 				width: params.width ?? DEFAULT_SIZE.width,
 				height: params.height ?? DEFAULT_SIZE.height,
 			};
+
+/** Runware keys provider settings by the vendor that prefixes the model id. */
+const soundFor = (model: string, profile: ModelProfile) =>
+	profile.askForSound
+		? { providerSettings: { [model.split(":")[0]]: { sound: true } } }
+		: {};
+
+const orNone = (images: string[]) => (images.length > 0 ? images : undefined);
 
 export class RunwareVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "runware" };
@@ -47,19 +115,24 @@ export class RunwareVideo extends BaseVideoProvider {
 	}
 
 	async submit(params: VideoRequest) {
+		if (!isModelId(params.model))
+			throw new Error(`Runware has no video model "${params.model}"`);
+		const profile = PROFILES[params.model];
+		const inputs = inputsFor(params, profile);
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({
-				positivePrompt: params.prompt,
+				positivePrompt: inputs.prompt,
 				model: params.model,
-				...sizeFor(params),
+				...sizeFor(params, inputs),
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
+				...soundFor(params.model, profile),
 				outputType: "URL",
 				deliveryMethod: "async",
 				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
 				inputs: {
-					frameImages: params.frameImages,
-					referenceImages: params.referenceImages,
+					frameImages: orNone(inputs.frameImages),
+					referenceImages: orNone(inputs.referenceImages),
 				},
 			});
 

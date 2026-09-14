@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { loadCaptionFonts, type CaptionFont } from "@/lib/video/captionFonts";
-import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
-import { useVideoSetting } from "@/lib/video/useVideoSetting";
+import {
+	loadCaptionFonts,
+	type CaptionFont,
+} from "@/lib/captions/captionFonts";
+import { useCaptionStyle } from "@/lib/captions/useCaptionStyle";
+import { useVideoSetting } from "@/lib/project/useVideoSetting";
 
 const register = (fonts?: readonly CaptionFont[]) =>
 	loadCaptionFonts((file) => `/fonts/${file}`, fonts).catch((error: unknown) =>

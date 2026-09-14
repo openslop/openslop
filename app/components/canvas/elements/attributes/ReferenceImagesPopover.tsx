@@ -23,18 +23,21 @@ interface ReferenceImagesPopoverProps {
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;
+	children?: React.ReactNode;
 }
 
 /**
  * This element's reference images. With no override it shows the project's and
  * says so; the first add or remove copies them onto the element, from where they
- * stop tracking the project until reset.
+ * stop tracking the project until reset. Children show the references the
+ * element adds beneath them.
  */
 export function ReferenceImagesPopover({
 	element,
 	attrKey,
 	label,
 	hideLabel = false,
+	children,
 }: ReferenceImagesPopoverProps) {
 	const editor = useSlateStatic();
 	const projectImages = useProject((s) => s.referenceImages);
@@ -85,6 +88,7 @@ export function ReferenceImagesPopover({
 						}
 					/>
 				</div>
+				{children}
 			</PopoverContent>
 		</Popover>
 	);
