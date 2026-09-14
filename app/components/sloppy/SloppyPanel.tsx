@@ -94,7 +94,6 @@ export function SloppyPanel() {
 				target.scrollHeight - target.scrollTop - target.clientHeight;
 			isAtBottomRef.current = distance <= BOTTOM_THRESHOLD_PX;
 		};
-		onScroll();
 		target.addEventListener("scroll", onScroll, { passive: true });
 		return () => target.removeEventListener("scroll", onScroll);
 	}, []);
