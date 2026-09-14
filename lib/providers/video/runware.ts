@@ -29,7 +29,8 @@ type ModelId =
 type ModelProfile = {
 	/** Pin the last start frame as the first frame, or name every start frame as a reference in the prompt. */
 	startFrames: "firstFrame" | "namedReferences";
-	referenceImages: boolean;
+	/** The most reference images the model takes, a start frame named among them included. */
+	maxReferenceImages: number;
 	/** Whether the model renders its soundtrack only when asked. */
 	askForSound: boolean;
 };
@@ -38,12 +39,12 @@ const PROFILES: Record<ModelId, ModelProfile> = {
 	// Refuses frame images beside reference images.
 	"bytedance:seedance@2.0-fast": {
 		startFrames: "namedReferences",
-		referenceImages: true,
+		maxReferenceImages: 9,
 		askForSound: false,
 	},
 	"klingai:kling-video@3.0-turbo": {
 		startFrames: "firstFrame",
-		referenceImages: false,
+		maxReferenceImages: 0,
 		askForSound: true,
 	},
 };
@@ -56,19 +57,23 @@ type ModelInputs = {
 	referenceImages: string[];
 };
 
-/** Start frames arrive in time order, the last being the one to open on. */
+/**
+ * Start frames arrive in time order, the last being the one to open on. Past
+ * the model's limit, the reference images at the end are dropped.
+ */
 function inputsFor(params: VideoRequest, profile: ModelProfile): ModelInputs {
-	const references = profile.referenceImages
-		? (params.referenceImages ?? [])
-		: [];
+	const references = params.referenceImages ?? [];
 	const frames = params.frameImages ?? [];
 	if (frames.length === 0 || profile.startFrames === "firstFrame")
 		return {
 			prompt: params.prompt,
 			frameImages: frames.slice(-1),
-			referenceImages: references,
+			referenceImages: references.slice(0, profile.maxReferenceImages),
 		};
-	const referenceImages = [...references, ...frames];
+	const referenceImages = [
+		...references.slice(0, profile.maxReferenceImages - frames.length),
+		...frames,
+	];
 	return {
 		prompt: `@Image ${referenceImages.length} as the first frame. ${params.prompt}`,
 		frameImages: [],

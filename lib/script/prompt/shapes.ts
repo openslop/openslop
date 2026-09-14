@@ -14,6 +14,7 @@ export const VIDEO_SHAPES = dedent`
 
   The video settings behind this:
   - Videos cut: startFrame="none" (the default) starts each video fresh. Only when a shot must carry on unbroken from the video right before it, use startFrame="previous", which opens it on that video's last frame. The join is not perfect, so use it rarely: mostly for the odd seamless move in a Motion explainer.
+  - continuity="true" (the default) shows a video the pictures of the visual before it, so it keeps that place, light and look. Set continuity="false" when the video moves somewhere new or shows something unrelated.
   - trimToDialogue="true" (the default) keeps a visual on screen only while the speech after it plays. "false" plays a video in full.
   - A video that the next video continues from must use trimToDialogue="false". If it is trimmed, the picture jumps.
   - loop="true" (the default) repeats a video while the speech under it runs longer; "false" holds its last frame.

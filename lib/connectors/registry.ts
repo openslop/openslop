@@ -3,7 +3,7 @@ import { buildVisualPlugins } from "./plugins/visualChain";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
 import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
-import { createStartFramePlugin } from "./video/plugins/start-frame";
+import { createPreviousVisualPlugin } from "./video/plugins/previous-visual";
 import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
 
 /**
@@ -20,8 +20,9 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	image: { plugins: buildVisualPlugins("image") },
 	video: {
 		plugins: [
-			createStartFramePlugin(),
 			...buildVisualPlugins("video"),
+			// Last, so a model's reference image limit drops the previous scene's frames before characters.
+			createPreviousVisualPlugin(),
 			createVideoOutputRulesPlugin(),
 		],
 	},

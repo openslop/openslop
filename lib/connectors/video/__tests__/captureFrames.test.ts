@@ -46,7 +46,7 @@ vi.mock("@/lib/upload/uploadImage", () => ({
 	uploadImage: async (file: File) => `https://img/${await file.text()}`,
 }));
 
-const { lastFrame, captureFrames } = await import("../captureFrames");
+const { previewFrames, captureFrames } = await import("../captureFrames");
 
 beforeEach(() => {
 	media.track = {
@@ -90,11 +90,15 @@ describe("captureFrames", () => {
 	});
 });
 
-describe("lastFrame", () => {
-	it("gives the frame a continuing video opens on, from the same decode as the capture", async () => {
-		const last = await lastFrame("https://vid/shared.mp4");
+describe("previewFrames", () => {
+	it("gives the first, middle and last frames from the same decode as the capture", async () => {
+		const frames = await previewFrames("https://vid/shared.mp4");
 		await captureFrames("https://vid/shared.mp4");
-		expect(await last.text()).toBe("frame@8.5");
+		expect(await Promise.all(frames.map((frame) => frame.text()))).toEqual([
+			"frame@0.5",
+			"frame@4.5",
+			"frame@8.5",
+		]);
 		expect(media.inputs).toBe(1);
 	});
 });

@@ -176,6 +176,46 @@ describe("RunwareVideo", () => {
 			);
 		});
 
+		const references = Array.from(
+			{ length: 10 },
+			(_, i) => `https://img/ref-${i}.png`,
+		);
+
+		it.each([
+			{
+				frameImages: undefined,
+				positivePrompt: "animate this",
+				sent: references.slice(0, 9),
+			},
+			{
+				frameImages: ["https://img/last.png"],
+				positivePrompt: "@Image 9 as the first frame. animate this",
+				sent: [...references.slice(0, 8), "https://img/last.png"],
+			},
+		])(
+			"caps Seedance at nine reference images, keeping the first ones and any start frame",
+			async ({ frameImages, positivePrompt, sent }) => {
+				mockVideoInference.mockResolvedValue({
+					taskUUID: "job-s4",
+					status: "processing",
+				});
+
+				await new RunwareVideo("test-key").submit({
+					prompt: "animate this",
+					model: MODEL,
+					referenceImages: references,
+					frameImages,
+				});
+
+				expect(mockVideoInference).toHaveBeenCalledWith(
+					expect.objectContaining({
+						positivePrompt,
+						inputs: { frameImages: undefined, referenceImages: sent },
+					}),
+				);
+			},
+		);
+
 		it("keeps Seedance's reference images as they are when there is no first frame", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-s3",

@@ -11,13 +11,14 @@ import {
 import { referenceImagesDef } from "../attributes/referenceImages";
 import { modelEntry } from "../models";
 import type { ModelRef } from "../types";
-import { startFrameDef, uploadedFrameDef } from "./startFrame";
+import { continuityDef, startFrameDef, uploadedFrameDef } from "./startFrame";
 
 export const videoAttributesFor = (model: ModelRef) =>
 	AttributeSchema.from([
 		startFrameDef,
+		continuityDef,
 		uploadedFrameDef,
-		referenceImagesDef,
+		{ ...referenceImagesDef, edit: { kind: "images", continuity: true } },
 		resolutionDef(modelEntry("video", model).resolutions),
 		durationDef(DEFAULT_DURATION),
 		trimToDialogueDef,

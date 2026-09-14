@@ -1,28 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSlate } from "slate-react";
+import { useSlateStatic } from "slate-react";
 import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
-import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
-import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { lastFrame } from "@/lib/connectors/video/captureFrames";
 import {
 	NO_FRAME,
 	parseStartFrame,
 	PREVIOUS_VISUAL,
+	splitPrevious,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/startFrame";
-import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
 import { AddAssetTile } from "../AddAssetTile";
 import { RemoveCrossButton } from "../RemoveCrossButton";
 import { AttributeTrigger } from "./AttributeTrigger";
+import { usePreviousVisualPictures } from "./usePreviousVisualPictures";
 
 /** A square choice: the picture it stands for, or an icon while there is none. */
 function FrameTile({
@@ -59,53 +56,19 @@ function FrameTile({
 	);
 }
 
-/** A video's last frame, the one a video continuing from it opens on. */
-function LastFrame({ src }: { src: string }) {
-	const [frame, setFrame] = useState<{ url: string } | "failed" | null>(null);
-	useEffect(() => {
-		let objectUrl: string | undefined;
-		let cancelled = false;
-		lastFrame(src).then(
-			(jpeg) => {
-				if (cancelled) return;
-				objectUrl = URL.createObjectURL(jpeg);
-				setFrame({ url: objectUrl });
-			},
-			// A preview that cannot decode falls back to the icon; generating still fails loudly.
-			() => !cancelled && setFrame("failed"),
-		);
-		return () => {
-			cancelled = true;
-			if (objectUrl) URL.revokeObjectURL(objectUrl);
-		};
-	}, [src]);
-	if (frame === "failed") return <Transition className="h-5 w-5" />;
-	if (!frame)
+/** The picture a video opening on the visual before it starts from: its last, if it has made one yet. */
+function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
+	const pictures = usePreviousVisualPictures(element);
+	if (pictures.kind === "loading")
 		return (
 			<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
 		);
-	return <MediaWithSkeleton outputKind="image" src={frame.url} alt="" />;
-}
-
-/** The picture the visual before this video hands on, if it has made one yet. */
-function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
-	const editor = useSlate();
-	const source = previousVisual(
-		getContentElements(editor.children),
-		element.id,
-	);
-	const url = useQueueSelector((q) =>
-		source
-			? getPrimaryUrl(
-					q.getElementSnapshot(source.id).result,
-					ELEMENT_TYPES[source.type].outputKind,
-				)
-			: undefined,
-	);
-	if (!source || !url) return <Transition className="h-5 w-5" />;
-	if (ELEMENT_TYPES[source.type].outputKind === "video")
-		return <LastFrame key={url} src={url} />;
-	return <MediaWithSkeleton outputKind="image" src={url} alt="" />;
+	const [opening] = splitPrevious(
+		pictures.kind === "ready" ? pictures.urls : [],
+		true,
+	).startFrame;
+	if (!opening) return <Transition className="h-5 w-5" />;
+	return <MediaWithSkeleton outputKind="image" src={opening} alt="" />;
 }
 
 /**
@@ -124,7 +87,7 @@ export function StartFramePicker({
 	label: string;
 	hideLabel?: boolean;
 }) {
-	const editor = useSlate();
+	const editor = useSlateStatic();
 	const frame = parseStartFrame(element.generationAttributes?.[attrKey]);
 	const uploaded = element.layoutAttributes?.[UPLOADED_FRAME_ATTR];
 	const usesUpload = frame?.kind === "url";

@@ -82,18 +82,15 @@ function once<T>(
 const decoded = new Map<string, Promise<Frames>>();
 const uploaded = new Map<string, Promise<string[]>>();
 
-const frames = (videoUrl: string): Promise<Frames> =>
+/** A hosted video's first, middle and last frames, decoded here to preview what it hands on. Browser only. */
+export const previewFrames = (videoUrl: string): Promise<Frames> =>
 	once(decoded, videoUrl, () => decodeFrames(videoUrl));
-
-/** A hosted video's last frame, the one a video continuing from it opens on. Browser only. */
-export const lastFrame = async (videoUrl: string): Promise<Blob> =>
-	(await frames(videoUrl))[2];
 
 /** A hosted video's first, middle and last frames, as hosted pictures in that order. Browser only. */
 export const captureFrames = (videoUrl: string): Promise<string[]> =>
 	once(uploaded, videoUrl, async () =>
 		Promise.all(
-			(await frames(videoUrl)).map((jpeg, index) =>
+			(await previewFrames(videoUrl)).map((jpeg, index) =>
 				uploadImage(
 					new File([jpeg], `frame-${index}.jpg`, { type: jpeg.type }),
 				),

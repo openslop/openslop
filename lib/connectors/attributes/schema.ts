@@ -18,8 +18,12 @@ export type AttributeEdit =
 	 */
 	| { kind: "model"; type: ConnectorType; providerAttr: string }
 	| { kind: "text"; placeholder?: string; rows?: number }
-	/** A list of image URLs, edited as tiles. */
-	| { kind: "images" }
+	/**
+	 * A list of image URLs, edited as tiles. With `continuity`, the previous
+	 * visual's pictures show beneath them, so one control shows everything the
+	 * generation references.
+	 */
+	| { kind: "images"; continuity?: true }
 	/** One picture to open on: the visual before, or an image URL. */
 	| { kind: "frame" };
 
@@ -89,6 +93,10 @@ export class AttributeSchema {
 	/** The attributes shown in the settings popover, in def order. */
 	get settingsAttributes(): Record<string, AttributeSpec> {
 		return this.specsWhere((def) => def.badge !== true && def.hidden !== true);
+	}
+
+	get allAttributes(): Record<string, AttributeSpec> {
+		return this.specsWhere(() => true);
 	}
 
 	private specsWhere(

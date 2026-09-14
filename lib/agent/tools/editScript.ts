@@ -49,10 +49,9 @@ const describeAttribute = (key: string, edit?: AttributeEdit): string[] => {
 const attributesFor = (type: CanvasElementType): string[] => {
 	const connector = ELEMENT_TYPES[type].connector;
 	const schema = resolveAttributeSchema(connector, DEFAULT_MODELS[connector]);
-	return Object.entries({
-		...schema.badgeAttributes,
-		...schema.settingsAttributes,
-	}).flatMap(([key, { edit }]) => describeAttribute(key, edit));
+	return Object.entries(schema.allAttributes).flatMap(([key, { edit }]) =>
+		describeAttribute(key, edit),
+	);
 };
 
 const ELEMENT_TYPE_NAMES = [...CANVAS_ELEMENT_TYPES];

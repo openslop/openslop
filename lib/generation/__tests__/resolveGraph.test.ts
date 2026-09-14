@@ -155,7 +155,7 @@ describe("resolveGraph", () => {
 		const el = element("vid-1", "video", { startFrame: "previous" });
 		const video = resolveOn(el, [img, el]);
 		const frame = video.dependsOn.find((node) => node.id === "img");
-		if (!frame) throw new Error("expected a start-frame dependency");
+		if (!frame) throw new Error("expected a previous-visual dependency");
 
 		const queue = new GenerationQueue();
 		const commit = (node: typeof video, url: string) =>

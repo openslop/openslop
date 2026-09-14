@@ -55,9 +55,22 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("The last shot has no Sound and no speech");
 	});
 
+	it("holds a video's last shot longest, so the cut after it doesn't come early", () => {
+		expect(spec).toContain(
+			"The last shot is always the longest, at least 3 seconds",
+		);
+	});
+
 	it("cuts between videos unless a shot must carry on unbroken", () => {
 		expect(spec).toContain('Videos cut: startFrame="none" (the default)');
 		expect(spec).toContain("use it rarely");
+	});
+
+	it("carries the look of the visual before a video unless it moves somewhere new", () => {
+		expect(spec).toContain('continuity="true" (the default)');
+		expect(spec).toContain(
+			'continuity="false" when the video moves somewhere new',
+		);
 	});
 
 	it("opens a continued video where the one before it ends", () => {

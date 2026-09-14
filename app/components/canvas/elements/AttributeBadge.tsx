@@ -5,6 +5,11 @@ import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
+import {
+	CONTINUITY_ATTR,
+	continuityDef,
+} from "@/lib/connectors/video/startFrame";
+import { ContinuitySection } from "./attributes/ContinuitySection";
 import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
 import { StartFramePicker } from "./attributes/StartFramePicker";
 import { ModelAttribute } from "./attributes/ModelAttribute";
@@ -73,7 +78,17 @@ export function AttributeBadge({
 				attrKey={attrKey}
 				label={spec.label}
 				hideLabel={hideLabel}
-			/>
+			>
+				{spec.edit.continuity && (
+					<ContinuitySection element={element}>
+						<AttributeBadge
+							element={element}
+							attrKey={CONTINUITY_ATTR}
+							spec={continuityDef}
+						/>
+					</ContinuitySection>
+				)}
+			</ReferenceImagesPopover>
 		);
 	}
 

@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { parseStartFrame } from "../startFrame";
+import { parseStartFrame, splitPrevious } from "../startFrame";
+
+describe("splitPrevious", () => {
+	const frames = ["first", "middle", "last"];
+
+	it("opens on the last picture and leaves the rest, or leaves them all", () => {
+		expect(splitPrevious(frames, true)).toEqual({
+			startFrame: ["last"],
+			rest: ["first", "middle"],
+		});
+		expect(splitPrevious(frames, false)).toEqual({
+			startFrame: [],
+			rest: frames,
+		});
+	});
+});
 
 describe("parseStartFrame", () => {
 	it("reads nothing from an absent or blank value", () => {

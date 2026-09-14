@@ -1,4 +1,4 @@
-import { Freeze, FullTimeline, Repeat, Trim } from "@/components/ui/icon";
+import { ArrowsStretch, Freeze, Repeat, Trim } from "@/components/ui/icon";
 import { DURATION_OPTIONS } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
 import {
@@ -92,7 +92,7 @@ export const TRIM_TO_DIALOGUE_FACES = {
 		hint: "Trimmed to the dialogue under it",
 	},
 	off: {
-		icon: FullTimeline,
+		icon: ArrowsStretch,
 		label: "Play in full",
 		hint: "Plays its full length",
 	},

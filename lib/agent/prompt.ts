@@ -71,7 +71,7 @@ const SHAPES = dedent`
   ${VIDEO_SHAPES.split("\n").slice(1).join("\n")}
 
   Name the shape in the brief you hand write_script. When the user only wants the videos to join
-  differently, change startFrame and trimToDialogue with edit_script rather than rewriting.
+  differently, change startFrame, continuity and trimToDialogue with edit_script rather than rewriting.
 `;
 
 const SLOPPY_SYSTEM_PROMPT = [ROLE, SHAPES, LIMITS].join("\n\n");
