@@ -46,7 +46,7 @@ export class HttpTTSConnector
 	protected contextFor(context?: GenerationContext): PluginContext {
 		return {
 			...super.contextFor(context),
-			searchVoices: (p) => this.searchVoices(p),
+			searchVoices: (params) => this.searchVoices(params),
 		};
 	}
 }

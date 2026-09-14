@@ -156,40 +156,39 @@ export class CartesiaTTS
 		});
 	}
 
-	protected toFiles(r: RawTTSResult): BundleFile[] {
+	protected toFiles(result: RawTTSResult): BundleFile[] {
 		return [
 			{
 				key: "audio",
 				filename: "output.wav",
-				data: Buffer.from(r.data, "base64"),
+				data: Buffer.from(result.data, "base64"),
 				contentType: "audio/wav",
 			},
 			{
 				key: "timestamps",
 				filename: "timestamps.json",
-				data: JSON.stringify(r.textTimestamps),
+				data: JSON.stringify(result.textTimestamps),
 				contentType: "application/json",
 			},
 		];
 	}
 
 	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const { limit } = params;
-		const results = await this._search(params);
+		const voices = await this.listVoices(params);
 		const queryText = buildQueryText(params);
 		const ranked = queryText
-			? await rankBySimilarity(results, queryText).catch((err) => {
+			? await rankBySimilarity(voices, queryText).catch((err) => {
 					logger.warn(
 						{ err },
 						"Voice similarity ranking failed; returning unranked results",
 					);
-					return results;
+					return voices;
 				})
-			: results;
-		return ranked.slice(0, limit || ranked.length);
+			: voices;
+		return ranked.slice(0, params.limit || ranked.length);
 	}
 
-	private async _search({
+	private async listVoices({
 		gender,
 		language,
 	}: VoiceSearchParams): Promise<VoiceInfo[]> {
@@ -202,7 +201,7 @@ export class CartesiaTTS
 			id: voice.id,
 			name: voice.name,
 			language: voice.language,
-			gender: TTS_GENDERS.find((g) => g === voice.gender),
+			gender: TTS_GENDERS.find((option) => option === voice.gender),
 			description: voice.description,
 			previewUrl: voice.preview_file_url ?? undefined,
 		}));
@@ -210,13 +209,13 @@ export class CartesiaTTS
 
 	protected async _generate(params: VendorParams<TTSGenerateParams>) {
 		if (!params.voiceId) throw new Error("voiceId is required");
-		const ws = await this.client.tts.websocket();
-		await ws.connect();
+		const socket = await this.client.tts.websocket();
+		await socket.connect();
 
 		try {
 			const audioChunks: Buffer[] = [];
 			const textTimestamps: TextTimestamp[] = [];
-			const req: GenerationRequest = {
+			const request: GenerationRequest = {
 				model_id: params.model,
 				transcript: params.prompt,
 				voice: { mode: "id", id: params.voiceId },
@@ -232,7 +231,7 @@ export class CartesiaTTS
 					emotion: params.emotion || "neutral",
 				},
 			};
-			for await (const response of ws.generate(req)) {
+			for await (const response of socket.generate(request)) {
 				if (response.type === "chunk" && response.audio) {
 					audioChunks.push(response.audio);
 				}
@@ -244,22 +243,22 @@ export class CartesiaTTS
 				}
 			}
 
-			const combined = Buffer.concat(audioChunks);
-			if (combined.length === 0) {
+			const pcm = Buffer.concat(audioChunks);
+			if (pcm.length === 0) {
 				throw new Error(
 					`Cartesia returned no audio for voice ${params.voiceId}`,
 				);
 			}
 
 			return {
-				data: wrapPcmInWav(combined).toString("base64"),
+				data: wrapPcmInWav(pcm).toString("base64"),
 				textTimestamps,
 				// We add an extra second for brief pauses between audio segments
 				// to make it sound more natural
-				metadata: { durationSec: pcmDurationSec(combined.length) + 1 },
+				metadata: { durationSec: pcmDurationSec(pcm.length) + 1 },
 			};
 		} finally {
-			ws.close();
+			socket.close();
 		}
 	}
 }
