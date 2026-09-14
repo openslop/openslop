@@ -3,45 +3,55 @@ import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
 import { createJob, enqueueJob, getJob, type JobConnectorType } from "./jobs";
-import { bodySchema } from "./generation-schema";
+import {
+	AUDIO_FIELDS,
+	bodySchema,
+	IMAGE_FIELDS,
+	TTS_FIELDS,
+	VIDEO_FIELDS,
+} from "./generation-schema";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
 
 type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
 
-type AssetRoute<TModels> = {
-	connectorType: JobConnectorType;
-	models: TModels;
-	fields: z.ZodRawShape;
-	label: string;
+/** What each asset route takes beyond the prompt and model, and how the log names it. */
+const ASSET_ROUTES: Record<
+	JobConnectorType,
+	{ fields: z.ZodRawShape; label: string }
+> = {
+	image: { fields: IMAGE_FIELDS, label: "Image generation" },
+	video: { fields: VIDEO_FIELDS, label: "Video submission" },
+	tts: { fields: TTS_FIELDS, label: "TTS generation" },
+	music: { fields: AUDIO_FIELDS, label: "Music generation" },
+	sfx: { fields: AUDIO_FIELDS, label: "SFX generation" },
 };
 
-export const createAssetRouteHandler = <TModels, TPicked extends ModelRef>(
-	family: RouteFamily<TModels, TPicked>,
-	route: AssetRoute<TModels>,
-) =>
-	family.createHandler({
+export const createAssetRouteHandler = <TPicked extends ModelRef>(
+	family: RouteFamily<TPicked>,
+	type: JobConnectorType,
+) => {
+	const { fields, label } = ASSET_ROUTES[type];
+	return family.createHandler({
 		// Every route's body is this shape; the fields only add optional keys.
-		schema: bodySchema(
-			family.model(route.models),
-			route.fields,
-		) as z.ZodType<AssetBody>,
-		label: route.label,
+		schema: bodySchema(family.model(type), fields) as z.ZodType<AssetBody>,
+		label,
 		handle: async ({ user, input }) => {
 			const { projectId, ...request } = input;
 			const { id } = await createJob({
 				userId: user.id,
 				projectId,
-				connectorType: route.connectorType,
+				connectorType: type,
 				request,
 			});
-			await enqueueJob(id, route.connectorType);
+			await enqueueJob(id, type);
 			return NextResponse.json({ jobId: id, status: "pending" });
 		},
 	});
+};
 
 export const createJobPollHandler = (
-	family: Pick<RouteFamily<never, ModelRef>, "createParamHandler">,
+	family: Pick<RouteFamily<ModelRef>, "createParamHandler">,
 ) =>
 	family.createParamHandler({
 		// A malformed id makes Postgres throw on the cast; guid() matches every
