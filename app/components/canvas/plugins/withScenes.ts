@@ -40,14 +40,14 @@ const removeEmptyScene: SceneRule = (editor, [node, path]) => {
 
 const splitExtraForeground: SceneRule = (editor, [node, path]) => {
 	if (!isSceneElement(node)) return false;
-	const first = node.children.findIndex(isForeground);
-	if (first === -1) return false;
-	const second = node.children.findIndex(
-		(child, i) => i > first && isForeground(child),
+	const firstForeground = node.children.findIndex(isForeground);
+	if (firstForeground === -1) return false;
+	const secondForeground = node.children.findIndex(
+		(child, index) => index > firstForeground && isForeground(child),
 	);
-	if (second === -1) return false;
+	if (secondForeground === -1) return false;
 	Transforms.splitNodes(editor, {
-		at: [...path, second],
+		at: [...path, secondForeground],
 		match: isSceneElement,
 	});
 	return true;

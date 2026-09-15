@@ -9,15 +9,12 @@ import {
 	type GenerateCounts,
 } from "../hooks/useGenerateScope";
 
-function Icon({ empty, active, pending, stale }: GenerateCounts) {
+function SceneGenerateIcon({ empty, active, pending, stale }: GenerateCounts) {
 	if (active) return <Spinner className="h-4 w-4 text-current" />;
 	if (empty) return <Sparkles className="h-4 w-4" />;
 	if (pending === 0) return <Check className="h-4 w-4" />;
-	return stale === pending ? (
-		<RotateCcw className="h-4 w-4" />
-	) : (
-		<Sparkles className="h-4 w-4" />
-	);
+	if (stale === pending) return <RotateCcw className="h-4 w-4" />;
+	return <Sparkles className="h-4 w-4" />;
 }
 
 export function SceneGenerateButton({ scene }: { scene: SceneElement }) {
@@ -32,7 +29,7 @@ export function SceneGenerateButton({ scene }: { scene: SceneElement }) {
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={scope.run}
 		>
-			<Icon {...scope} />
+			<SceneGenerateIcon {...scope} />
 		</TooltipIconButton>
 	);
 }

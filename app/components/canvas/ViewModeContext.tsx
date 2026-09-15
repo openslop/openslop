@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
-import type { CanvasElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
@@ -43,7 +42,7 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const collapseAll = useCallback(() => {
-		const scenes = (editor.children as CanvasElement[]).filter(isSceneElement);
+		const scenes = editor.children.filter(isSceneElement);
 		setCollapsedScenes(new Set(scenes.map((scene) => scene.id)));
 	}, [editor]);
 

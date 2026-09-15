@@ -23,9 +23,7 @@ export function ProjectTitle() {
 
 	const commit = () => {
 		const next = draft.trim();
-		if (next && next !== title) {
-			updateMetadata({ title: next });
-		}
+		if (next && next !== title) updateMetadata({ title: next });
 		setEditing(false);
 	};
 
