@@ -8,7 +8,7 @@ import { NarratorEditModal } from "./NarratorEditModal";
 import { NewCharacterDialog } from "./NewCharacterDialog";
 
 /** Openers for the project's asset dialogs, one per asset an asset tile stands for. */
-type AssetEditors = {
+export type AssetEditors = {
 	openCreateCharacter: () => void;
 	editCharacter: (name: string) => void;
 	openNarrator: () => void;

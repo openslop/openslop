@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
 import type { CanvasElement } from "@/lib/canvas/types";
+import { cn } from "@/lib/utils";
 import styles from "../styles/sortable.module.css";
 import { splitTextDirection } from "../utils/textDirection";
 import { DragHandle } from "./SortableActions";
@@ -56,11 +57,7 @@ export function SortableItem({
 	return (
 		<div {...nodeAttributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
-				className={
-					contentClassName
-						? `${styles.sortable} ${contentClassName}`
-						: styles.sortable
-				}
+				className={cn(styles.sortable, contentClassName)}
 				{...sortableAttributes}
 				ref={setNodeRef}
 				style={{
