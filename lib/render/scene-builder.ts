@@ -19,7 +19,7 @@ import { loopStrideSec } from "./audioFade";
 import { toFrames, toSeconds } from "./frames";
 import {
 	DEFAULT_TRANSITION,
-	TRANSITION_DURATION_SEC,
+	transitionOverlapSec,
 	type TransitionType,
 } from "./transitions";
 
@@ -103,7 +103,7 @@ export function buildRenderLayout(
 	// Scenes are laid down one rounded duration at a time while layers are
 	// positioned from the accumulated seconds; snapping here keeps them equal.
 	const onGrid = (sec: number) => toSeconds(toFrames(sec, cfg.fps), cfg.fps);
-	const transitionDurationSec = onGrid(TRANSITION_DURATION_SEC);
+	const transitionDurationSec = onGrid(transitionOverlapSec(transitionType));
 	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;

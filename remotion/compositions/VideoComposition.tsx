@@ -12,7 +12,6 @@ import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
 import { toFrames } from "@/lib/render/frames";
 import {
-	TRANSITION_DURATION_SEC,
 	LAYER_PREMOUNT_SEC,
 	FOREGROUND_PREMOUNT_SEC,
 } from "@/lib/render/transitions";
@@ -35,7 +34,10 @@ const blackBg: React.CSSProperties = { backgroundColor: "black" };
 /** Keeps the old `<Html5Audio crossOrigin>` behaviour if @remotion/media falls back to it. */
 const fallbackHtml5AudioProps = { crossOrigin: "anonymous" } as const;
 
-function AudioSequence({ element }: { element: ResolvedElement }) {
+function AudioSequence({
+	element,
+	transitionDurationSec,
+}: SequenceContentProps) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
 	const fadeFrames = toFrames(audioFadeSec(element), fps);
@@ -55,7 +57,7 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 				<Sequence
 					durationInFrames={Math.max(
 						1,
-						durationInFrames - toFrames(TRANSITION_DURATION_SEC, fps),
+						durationInFrames - toFrames(transitionDurationSec, fps),
 					)}
 				>
 					<Captions timestamps={element.captionTimestamps} />
@@ -86,7 +88,16 @@ function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	);
 }
 
-function SequenceContent({ element }: { element: ResolvedElement }) {
+type SequenceContentProps = {
+	element: ResolvedElement;
+	/** The overlap the next scene steals from this one's tail; 0 on a cut. */
+	transitionDurationSec: number;
+};
+
+function SequenceContent({
+	element,
+	transitionDurationSec,
+}: SequenceContentProps) {
 	switch (element.layer) {
 		case "visual":
 			return (
@@ -99,7 +110,12 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 				</MotionLayer>
 			);
 		case "audio":
-			return <AudioSequence element={element} />;
+			return (
+				<AudioSequence
+					element={element}
+					transitionDurationSec={transitionDurationSec}
+				/>
+			);
 	}
 }
 
@@ -126,7 +142,7 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 		() =>
 			series.map((seq, i) => (
 				<Fragment key={seq.element.id}>
-					{i > 0 && (
+					{i > 0 && transitionFrames > 0 && (
 						<TransitionSeries.Transition
 							presentation={presentation}
 							timing={transitionTiming}
@@ -136,11 +152,21 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 						durationInFrames={toFrames(seq.duration, fps)}
 						premountFor={toFrames(FOREGROUND_PREMOUNT_SEC, fps)}
 					>
-						<SequenceContent element={seq.element} />
+						<SequenceContent
+							element={seq.element}
+							transitionDurationSec={transitionDurationSec}
+						/>
 					</TransitionSeries.Sequence>
 				</Fragment>
 			)),
-		[fps, presentation, series, transitionTiming],
+		[
+			fps,
+			presentation,
+			series,
+			transitionDurationSec,
+			transitionFrames,
+			transitionTiming,
+		],
 	);
 	const layeredSequenceNodes = useMemo(
 		() =>
@@ -152,11 +178,14 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 						durationInFrames={toFrames(seq.duration, fps)}
 						premountFor={toFrames(LAYER_PREMOUNT_SEC, fps)}
 					>
-						<SequenceContent element={seq.element} />
+						<SequenceContent
+							element={seq.element}
+							transitionDurationSec={transitionDurationSec}
+						/>
 					</Sequence>
 				)),
 			),
-		[fps, sequences],
+		[fps, sequences, transitionDurationSec],
 	);
 
 	return (

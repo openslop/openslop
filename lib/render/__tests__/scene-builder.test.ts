@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
 import { isBlankScene } from "../blankScene";
-import { buildRenderLayout } from "../scene-builder";
+import { buildRenderLayout, type BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import type { CanvasElementType } from "@/lib/canvas/types";
 
@@ -59,6 +59,14 @@ function el(
 	};
 }
 
+// A cut leaves scenes abutting; only a cross-fade overlaps them, so the layouts
+// that assert the overlap ask for one.
+const crossfaded = (
+	elements: ResolvedElement[],
+	options?: BuildLayoutOptions,
+): RenderLayout =>
+	buildRenderLayout(elements, { transitionType: "fade", ...options });
+
 describe("buildRenderLayout", () => {
 	describe("empty input", () => {
 		it("returns an empty layout with the minimum frame count", () => {
@@ -82,7 +90,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("plays consecutive foreground elements end-to-end", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 				el({ id: "video1", type: "video", durationSec: 3 }),
 			]);
@@ -95,7 +103,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("places overlays on the rendered timeline so they align with transitioned visuals", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 				el({ id: "img2", type: "image", durationSec: 3 }),
 				el({ id: "n1", type: "narration", durationSec: 2 }),
@@ -129,6 +137,29 @@ describe("buildRenderLayout", () => {
 			expect(layout.series[0].element?.id).toBe("img1");
 			expect(layout.series[0].duration).toBe(1);
 			expect(layout.totalDurationSec).toBe(1);
+		});
+	});
+
+	describe("transition overlap", () => {
+		it("overlaps consecutive scenes by the cross-fade", () => {
+			const layout = crossfaded([
+				el({ id: "img1", type: "image", durationSec: 5 }),
+				el({ id: "img2", type: "image", durationSec: 3 }),
+			]);
+			expect(layout.transitionDurationSec).toBeCloseTo(OVERLAP, 5);
+		});
+
+		it("leaves scenes whole when they cut instead of cross-fading", () => {
+			const layout = buildRenderLayout(
+				[
+					el({ id: "img1", type: "image", durationSec: 5 }),
+					el({ id: "img2", type: "image", durationSec: 3 }),
+				],
+				{ transitionType: "none" },
+			);
+			expect(layout.transitionDurationSec).toBe(0);
+			expect(layout.series[1].start).toBe(5);
+			expect(layout.totalDurationSec).toBe(8);
 		});
 	});
 
@@ -179,7 +210,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("plays a foreground after the overlay that leads it", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "img1", type: "image", durationSec: 5 }),
 			]);
@@ -193,7 +224,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("delays the next foreground when an overlay extends past it", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "img1", type: "image", durationSec: 5 }),
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "video1", type: "video", durationSec: 6 }),
@@ -205,7 +236,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("starts the next foreground immediately when the overlay is shorter", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "img1", type: "image", durationSec: 30 }),
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "video1", type: "video", durationSec: 6 }),
@@ -217,7 +248,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("stretches the blank scene over the overlays that open the video, before the first visual", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "n1", type: "narration", durationSec: 9 }),
 				el({ id: "c1", type: "character", durationSec: 3 }),
 				el({ id: "img1", type: "image", durationSec: 4 }),
@@ -269,7 +300,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("leaves an earlier background untouched when it ends before its replacement", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "m1", type: "music", durationSec: 10 }),
 				el({ id: "video1", type: "video", durationSec: 10 }),
 				el({ id: "c1", type: "character", durationSec: 5 }),
@@ -287,7 +318,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "m1", type: "music", durationSec: 10 }),
 				el({ id: "m2", type: "music", durationSec: 20 }),
 				el({ id: "m3", type: "music", durationSec: 30 }),
@@ -321,7 +352,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("drops looped background copies that fall after a replacement background", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "m1", type: "music", durationSec: 10, loops: 4 }),
 				el({ id: "img1", type: "image", durationSec: 15 }),
 				el({ id: "m2", type: "music", durationSec: 20 }),
@@ -456,7 +487,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("composes foreground, overlay, and background within a single layout", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				el({ id: "m1", type: "music", durationSec: 60 }),
 				el({ id: "img1", type: "image", durationSec: 3 }),
 				el({ id: "n1", type: "narration", durationSec: 5 }),
@@ -507,7 +538,7 @@ describe("buildRenderLayout", () => {
 					el({ id: `img${i}`, type: "image", durationSec: 5 }),
 					el({ id: `n${i}`, type: "narration", durationSec: 4 }),
 				]).flat();
-				const layout = buildRenderLayout(elements, { fps });
+				const layout = crossfaded(elements, { fps });
 				const overlap = toFrames(layout.transitionDurationSec, fps);
 
 				let renderedStart = 0;
@@ -527,7 +558,7 @@ describe("buildRenderLayout", () => {
 			const elements = Array.from({ length: 10 }, (_, i) =>
 				el({ id: `img${i}`, type: "image", durationSec: 5 }),
 			);
-			const layout = buildRenderLayout(elements, { fps });
+			const layout = crossfaded(elements, { fps });
 			const overlap = toFrames(layout.transitionDurationSec, fps);
 
 			const rendered = layout.series.reduce(
@@ -583,7 +614,7 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("mixes a trimmed and an untrimmed video in one layout", () => {
-			const layout = buildRenderLayout([
+			const layout = crossfaded([
 				trimmedVideo("cut", 10),
 				el({ id: "n1", type: "narration", durationSec: 3 }),
 				el({
@@ -626,7 +657,7 @@ describe("buildRenderLayout", () => {
 			]).flat();
 
 		it("keeps every layered start on the scene the renderer draws it over", () => {
-			const layout = buildRenderLayout(fiveScenes(), { fps });
+			const layout = crossfaded(fiveScenes(), { fps });
 			const overlapFrames = toFrames(layout.transitionDurationSec, fps);
 
 			let rendered = 0;

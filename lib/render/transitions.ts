@@ -13,9 +13,16 @@ export const TRANSITION_TYPES = [
 export type TransitionType = (typeof TRANSITION_TYPES)[number];
 
 export const DEFAULT_TRANSITION: TransitionType = "none";
-export const TRANSITION_DURATION_SEC = 0.4;
+const TRANSITION_DURATION_SEC = 0.4;
 export const AUDIO_FADE_SEC = 2;
 // Lead time to mount a foreground visual before it is visible so a video decodes
 // ahead of the transition and doesn't stall the Player (which would stutter audio).
 export const FOREGROUND_PREMOUNT_SEC = 2;
 export const LAYER_PREMOUNT_SEC = 1;
+
+/**
+ * How far consecutive scenes overlap. A cut has nothing to cross-fade, so its
+ * scenes abut and play for exactly as long as they say they do.
+ */
+export const transitionOverlapSec = (type: TransitionType): number =>
+	type === "none" ? 0 : TRANSITION_DURATION_SEC;

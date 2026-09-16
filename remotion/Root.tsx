@@ -7,7 +7,7 @@ import { COMPOSITION_ID, DEFAULT_CONFIG } from "@/lib/render/types";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import {
 	DEFAULT_TRANSITION,
-	TRANSITION_DURATION_SEC,
+	transitionOverlapSec,
 } from "@/lib/render/transitions";
 
 const defaultProps: RenderLayout = {
@@ -19,7 +19,7 @@ const defaultProps: RenderLayout = {
 	totalDurationSec: 0,
 	totalFrames: 1,
 	transitionType: DEFAULT_TRANSITION,
-	transitionDurationSec: TRANSITION_DURATION_SEC,
+	transitionDurationSec: transitionOverlapSec(DEFAULT_TRANSITION),
 	captionStyle: DEFAULT_CAPTION_STYLE,
 };
 

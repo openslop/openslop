@@ -131,11 +131,14 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("trims the transition overlap so scenes abut instead of running over", () => {
-		const layout = untrimmed([
-			el("a", "image", { durationSec: 5 }),
-			el("b", "image", { durationSec: 5 }),
-			el("c", "image", { durationSec: 5 }),
-		]);
+		const layout = untrimmed(
+			[
+				el("a", "image", { durationSec: 5 }),
+				el("b", "image", { durationSec: 5 }),
+				el("c", "image", { durationSec: 5 }),
+			],
+			{ transitionType: "fade" },
+		);
 		const clips = buildTimelineRows(layout)[0].clips;
 		for (const [i, clip] of clips.entries()) {
 			const next = clips[i + 1];
