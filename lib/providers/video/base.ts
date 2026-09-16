@@ -42,14 +42,14 @@ export abstract class BaseVideoProvider
 	extends BaseProvider<VideoRequest, VideoJob, VideoProviderResponse>
 	implements VideoProvider
 {
-	protected toFiles(r: VideoJob): BundleFile[] {
-		return r.url
+	protected toFiles(job: VideoJob): BundleFile[] {
+		return job.url
 			? [
 					{
 						key: "video",
 						filename: "output.mp4",
 						contentType: "video/mp4",
-						url: r.url,
+						url: job.url,
 					},
 				]
 			: [];
@@ -58,18 +58,18 @@ export abstract class BaseVideoProvider
 	protected abstract _poll(jobId: string): Promise<VideoJob>;
 
 	async poll(jobId: string, request: VideoRequest): Promise<VideoPoll> {
-		const result = await this._poll(jobId);
-		if (result.metadata.status === "failed") return { kind: "failed" };
-		if (this.toFiles(result).length === 0) {
-			return { kind: "pending", metadata: result.metadata };
+		const job = await this._poll(jobId);
+		if (job.metadata.status === "failed") return { kind: "failed" };
+		if (this.toFiles(job).length === 0) {
+			return { kind: "pending", metadata: job.metadata };
 		}
 		const metadata = {
-			...result.metadata,
+			...job.metadata,
 			durationSec:
-				result.metadata.durationSec ??
+				job.metadata.durationSec ??
 				request.duration ??
 				DEFAULT_VIDEO_DURATION_SEC,
 		};
-		return { kind: "ready", asset: await this.store({ ...result, metadata }) };
+		return { kind: "ready", asset: await this.store({ ...job, metadata }) };
 	}
 }

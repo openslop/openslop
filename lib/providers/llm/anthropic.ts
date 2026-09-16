@@ -83,10 +83,10 @@ export class AnthropicLLM implements LLMProvider {
 		};
 	}
 
-	agentModel(model: string): AgentModel {
+	agentModel(modelId: string): AgentModel {
 		return {
-			model: this.model(model),
-			modelId: model,
+			model: this.model(modelId),
+			modelId,
 			providerOptions: this.thinking(DEFAULT_THINKING_LEVEL),
 		};
 	}
@@ -109,13 +109,13 @@ export class AnthropicLLM implements LLMProvider {
 	}
 
 	async generate(params: LLMRequest): Promise<LLMGenerateResult> {
-		const response = await generateText(this.buildRequest(params));
+		const result = await generateText(this.buildRequest(params));
 		return {
-			text: response.text,
-			model: response.response.modelId,
+			text: result.text,
+			model: result.response.modelId,
 			usage: {
-				inputTokens: response.usage.inputTokens ?? 0,
-				outputTokens: response.usage.outputTokens ?? 0,
+				inputTokens: result.usage.inputTokens ?? 0,
+				outputTokens: result.usage.outputTokens ?? 0,
 			},
 		};
 	}

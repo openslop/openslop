@@ -1,4 +1,5 @@
 import { cosineSimilarity } from "ai";
+import compact from "lodash/compact";
 import sortBy from "lodash/sortBy";
 import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { embedText, embedTexts } from "../embed";
@@ -12,8 +13,7 @@ const SEMANTIC_FIELDS = [
 ] as const satisfies ReadonlyArray<keyof VoiceSearchParams>;
 
 export function buildQueryText(params: VoiceSearchParams): string {
-	return SEMANTIC_FIELDS.map((k) => params[k])
-		.filter((v): v is string => Boolean(v))
+	return compact(SEMANTIC_FIELDS.map((field) => params[field]))
 		.join(" ")
 		.trim();
 }
@@ -24,14 +24,14 @@ export async function rankBySimilarity(
 ): Promise<VoiceInfo[]> {
 	if (voices.length === 0) return [];
 
-	const [query, voiceVecs] = await Promise.all([
+	const [queryEmbedding, voiceEmbeddings] = await Promise.all([
 		embedText(queryText),
 		embedTexts(voices.map((v) => `${v.name} ${v.description ?? ""}`)),
 	]);
 
 	const scored = voices.map((voice, i) => ({
 		voice,
-		score: cosineSimilarity(query, voiceVecs[i]),
+		score: cosineSimilarity(queryEmbedding, voiceEmbeddings[i]),
 	}));
-	return sortBy(scored, (s) => -s.score).map((s) => s.voice);
+	return sortBy(scored, ({ score }) => -score).map(({ voice }) => voice);
 }

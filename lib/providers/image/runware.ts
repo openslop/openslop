@@ -30,13 +30,13 @@ export class RunwareImage
 		return validateRunwareKey(this.apiKey);
 	}
 
-	protected toFiles(r: RawImageResult): BundleFile[] {
+	protected toFiles(result: RawImageResult): BundleFile[] {
 		return [
 			{
 				key: "image",
-				filename: `output.${r.format}`,
-				data: Buffer.from(r.data, "base64"),
-				contentType: IMAGE_MIME_TYPES[r.format],
+				filename: `output.${result.format}`,
+				data: Buffer.from(result.data, "base64"),
+				contentType: IMAGE_MIME_TYPES[result.format],
 			},
 		];
 	}
