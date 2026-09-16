@@ -20,20 +20,14 @@ export function formatCharacterNames(names: string[]): string | null {
 	return names.join(", ") || null;
 }
 
-const CHARACTER_NAME_EXTRACTORS: Record<string, (value: string) => string[]> = {
-	name: (v) => [v.trim()],
-	[CHARACTERS_ATTR]: parseCharacterNames,
-};
-
 export function getElementCharacterNames(
 	element: CanvasContentElement,
 ): string[] {
 	const attrs = element.generationAttributes;
 	if (!attrs) return [];
-	return uniq(
-		Object.entries(CHARACTER_NAME_EXTRACTORS).flatMap(([key, extract]) => {
-			const value = attrs[key];
-			return value ? extract(value).filter(Boolean) : [];
-		}),
-	);
+	const name = attrs.name?.trim();
+	return uniq([
+		...(name ? [name] : []),
+		...parseCharacterNames(attrs[CHARACTERS_ATTR]),
+	]);
 }

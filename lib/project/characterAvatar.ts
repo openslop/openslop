@@ -3,8 +3,8 @@ import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { modelRefSchema } from "@/lib/connectors/models";
 import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
 import type { ElementVersion } from "@/lib/generation/versions";
-import type { ProjectData } from "@/lib/project/store";
-import type { MetadataCharacter } from "@/lib/project/types";
+import type { ProjectData } from "./store";
+import type { MetadataCharacter } from "./types";
 
 export const characterAvatarElementId = (name: string) =>
 	derivedNodeId("avatar", name);
