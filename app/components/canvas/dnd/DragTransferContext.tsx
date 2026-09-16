@@ -1,16 +1,10 @@
+import type { DragTransfer } from "@/lib/canvas/dragOps";
 import { createStoreContext } from "@/lib/store/createStoreContext";
 import { createEmitter, type Emitter } from "@/lib/store/emitter";
 
-export type DragTransfer = {
-	itemId: string;
-	fromSceneId: string;
-	toSceneId: string;
-	atIndex: number;
-} | null;
-
 export type DragTransferStore = {
-	get: () => DragTransfer;
-	set: (next: DragTransfer) => void;
+	get: () => DragTransfer | null;
+	set: (next: DragTransfer | null) => void;
 	subscribe: Emitter["subscribe"];
 };
 
@@ -22,25 +16,20 @@ export type DragTransferStore = {
  */
 export function createDragTransferStore(): DragTransferStore {
 	const { subscribe, notify } = createEmitter();
-	let transfer: DragTransfer = null;
+	let transfer: DragTransfer | null = null;
 	return {
 		get: () => transfer,
 		set: (next) => {
-			if (transfer === next) return;
+			if (
+				next?.sceneId === transfer?.sceneId &&
+				next?.atIndex === transfer?.atIndex
+			)
+				return;
 			transfer = next;
 			notify();
 		},
 		subscribe,
 	};
-}
-
-export function dropIndexIn(
-	transfer: DragTransfer,
-	sceneId: string,
-): number | null {
-	if (transfer?.toSceneId !== sceneId || transfer.fromSceneId === sceneId)
-		return null;
-	return transfer.atIndex;
 }
 
 const [DragTransferContext, , useDragTransfer] =
@@ -49,5 +38,8 @@ export { DragTransferContext };
 
 /** Where an incoming cross-scene drag would land in this scene, if anywhere. */
 export function useDropIndex(sceneId: string): number | null {
-	return useDragTransfer((store) => dropIndexIn(store.get(), sceneId));
+	return useDragTransfer((store) => {
+		const transfer = store.get();
+		return transfer?.sceneId === sceneId ? transfer.atIndex : null;
+	});
 }

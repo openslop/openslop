@@ -9,8 +9,7 @@ import { UserProvider } from "@/lib/user/UserProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createProjectStore } from "@/lib/project/store";
 import { ProjectStoreProvider } from "@/lib/project/ProjectStoreProvider";
-import { parseStoreSnapshot } from "@/lib/project/storeSnapshot";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
+import type { ProjectContent } from "@/lib/project/projectDocument";
 import { GenerationQueueProvider } from "@/lib/generation/GenerationQueueProvider";
 import { ElementHistoryProvider } from "@/lib/generation/ElementHistoryProvider";
 import { elementHistoryStorage } from "@/lib/project/elementHistory";
@@ -18,31 +17,25 @@ import Editor from "@/app/components/Editor";
 
 export default function ProjectEditor({
 	projectId,
-	initialScript,
-	initialStore,
-	initialGeneration,
+	initial,
 	user,
 	providerKeys,
 }: {
 	projectId: string;
-	initialScript: string;
-	initialStore: unknown;
-	initialGeneration: Record<string, ElementSnapshot>;
+	initial: ProjectContent;
 	user: User;
 	providerKeys: ProviderKeyRecord[];
 }): ReactNode {
-	const [store] = useState(() =>
-		createProjectStore(parseStoreSnapshot(initialStore)),
-	);
+	const [store] = useState(() => createProjectStore(initial.store));
 
 	return (
 		<TooltipProvider>
 			<UserProvider user={user} providerKeys={providerKeys}>
-				<GenerationQueueProvider initialState={initialGeneration}>
+				<GenerationQueueProvider initialState={initial.generation}>
 					<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>
 						<ProjectStoreProvider store={store}>
 							<ConfigProvider projectId={projectId}>
-								<ScriptProvider initialScript={initialScript}>
+								<ScriptProvider initialScript={initial.script}>
 									<Editor />
 								</ScriptProvider>
 							</ConfigProvider>

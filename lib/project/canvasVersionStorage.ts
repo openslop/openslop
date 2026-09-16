@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { GenerationSnapshotSchema } from "@/lib/generation/snapshots";
 import { createClient } from "@/lib/supabase/client";
 import type { CanvasVersion, CanvasVersionStorage } from "./canvasHistory";
-import { parseStoreSnapshot } from "./storeSnapshot";
+import { PROJECT_CONTENT_COLUMNS, parseProjectContent } from "./projectContent";
 
 const TABLE = "canvas_versions";
 
@@ -11,12 +10,6 @@ const LIST_LIMIT = 100;
 const META_COLUMNS = "id, updated_at";
 
 const MetaSchema = z.object({ id: z.string(), updated_at: z.string() });
-
-const RowSchema = z.object({
-	script: z.string(),
-	store: z.unknown(),
-	generation: GenerationSnapshotSchema,
-});
 
 const toVersion = (row: z.infer<typeof MetaSchema>): CanvasVersion => ({
 	id: row.id,
@@ -42,16 +35,11 @@ export function canvasVersionStorage(projectId: string): CanvasVersionStorage {
 		async read(id) {
 			const { data, error } = await createClient()
 				.from(TABLE)
-				.select("script, store, generation")
+				.select(PROJECT_CONTENT_COLUMNS)
 				.eq("id", id)
 				.single();
 			if (error) throw error;
-			const row = RowSchema.parse(data);
-			return {
-				script: row.script,
-				store: parseStoreSnapshot(row.store),
-				generation: row.generation,
-			};
+			return parseProjectContent(data);
 		},
 
 		async create(content) {

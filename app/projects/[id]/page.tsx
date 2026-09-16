@@ -1,6 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { listProviderKeys } from "@/lib/api/providerKeys";
+import {
+	PROJECT_CONTENT_COLUMNS,
+	parseProjectContent,
+} from "@/lib/project/projectContent";
 import { createClient } from "@/lib/supabase/server";
 import ProjectEditor from "./ProjectEditor";
 
@@ -24,7 +28,7 @@ export default async function ProjectPage({
 		supabase.auth.getUser(),
 		supabase
 			.from("projects")
-			.select("id, script, store, generation")
+			.select(PROJECT_CONTENT_COLUMNS)
 			.eq("id", id)
 			.maybeSingle(),
 	]);
@@ -35,11 +39,9 @@ export default async function ProjectPage({
 
 	return (
 		<ProjectEditor
-			key={project.id}
-			projectId={project.id}
-			initialScript={project.script ?? ""}
-			initialStore={project.store}
-			initialGeneration={project.generation}
+			key={id}
+			projectId={id}
+			initial={parseProjectContent(project)}
 			user={user}
 			providerKeys={await listProviderKeys(user)}
 		/>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { moveDraggedElement } from "../dragOps";
+import { crossSceneTransfer, moveDraggedElement } from "../dragOps";
 
 function content(id: string): CanvasContentElement {
 	return {
@@ -99,5 +99,51 @@ describe("moveDraggedElement", () => {
 		moveDraggedElement(editor, "a", "gone");
 		moveDraggedElement(editor, "gone", "a");
 		expect(layout(editor)).toEqual([["s1", ["a"]]]);
+	});
+});
+
+describe("crossSceneTransfer", () => {
+	const item = (id: string, sceneId: string) => ({
+		id,
+		data: { current: { type: "content" as const, sceneId } },
+	});
+	const sceneItem = (id: string) => ({
+		id,
+		data: { current: { type: "scene" as const, sceneId: id } },
+	});
+	const twoScenes = () =>
+		makeEditor([
+			scene("s1", [content("a"), content("b")]),
+			scene("s2", [content("c"), content("d")]),
+		]);
+
+	it("appends when content hovers another scene", () => {
+		expect(
+			crossSceneTransfer(twoScenes(), item("a", "s1"), sceneItem("s2")),
+		).toEqual({ sceneId: "s2", atIndex: 2 });
+	});
+
+	it("takes the slot of content hovered in another scene", () => {
+		expect(
+			crossSceneTransfer(twoScenes(), item("a", "s1"), item("d", "s2")),
+		).toEqual({ sceneId: "s2", atIndex: 1 });
+	});
+
+	it("reports nothing while reordering within a scene", () => {
+		expect(
+			crossSceneTransfer(twoScenes(), item("a", "s1"), item("b", "s1")),
+		).toBeNull();
+	});
+
+	it("reports nothing for a scene drag", () => {
+		expect(
+			crossSceneTransfer(twoScenes(), sceneItem("s1"), sceneItem("s2")),
+		).toBeNull();
+	});
+
+	it("reports nothing when the hovered id is gone", () => {
+		expect(
+			crossSceneTransfer(twoScenes(), item("a", "s1"), item("gone", "s2")),
+		).toBeNull();
 	});
 });
