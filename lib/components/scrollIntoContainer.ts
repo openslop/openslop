@@ -13,7 +13,7 @@ export function scrollTopFor(
 	return Math.max(0, node.top - container.top + scrollTop - slack);
 }
 
-function scrollableAncestor(node: Element): Element | null {
+export function findScrollableAncestor(node: Element): Element | null {
 	for (let el = node.parentElement; el; el = el.parentElement) {
 		const { overflowY } = getComputedStyle(el);
 		if (overflowY === "auto" || overflowY === "scroll") return el;
@@ -21,16 +21,12 @@ function scrollableAncestor(node: Element): Element | null {
 	return null;
 }
 
-/**
- * `scrollIntoView` aligns every scroll-container ancestor, including
- * `overflow: hidden` ones the user has no way to scroll back.
- */
 export function scrollIntoContainer(
 	node: Element,
 	block: ScrollBlock,
 	behavior: ScrollBehavior = "smooth",
 ) {
-	const container = scrollableAncestor(node);
+	const container = findScrollableAncestor(node);
 	const target = container ?? document.scrollingElement;
 	if (!target) return;
 
