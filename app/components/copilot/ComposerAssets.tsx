@@ -8,6 +8,7 @@ import {
 	ReferenceAssetTiles,
 } from "@/app/components/canvas/elements/AssetTiles";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { deleteCharacter } from "@/lib/project/deleteCharacter";
@@ -30,10 +31,7 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 			<CharacterAssetTiles onRemove={setDeletingName} />
 			<ReferenceAssetTiles />
 			{Array.from({ length: uploadingCount }).map((_, i) => (
-				<div
-					key={i}
-					className="aspect-square w-16 shrink-0 rounded-md shimmer-surface sm:w-20"
-				/>
+				<Skeleton key={i} className="aspect-square w-16 shrink-0 sm:w-20" />
 			))}
 			<ConfirmDeleteDialog
 				target={deletingName}
