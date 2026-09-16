@@ -6,6 +6,7 @@ import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
 import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { previewFrames } from "@/lib/connectors/video/captureFrames";
+import { HANDED_ON_FRAMES } from "@/lib/connectors/video/startFrame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 
 /** The pictures the visual before an element hands on, previewed locally, in time order. */
@@ -13,6 +14,25 @@ export type PreviousPictures =
 	| { kind: "loading" }
 	| { kind: "empty"; reason: string }
 	| { kind: "ready"; urls: string[] };
+
+const handsOnFrames = (source: CanvasContentElement) =>
+	ELEMENT_TYPES[source.type].outputKind === "video";
+
+const usePreviousVisual = (element: CanvasContentElement) =>
+	useSlateSelector((editor) =>
+		previousVisual(getContentElements(editor.children), element.id),
+	);
+
+/** What the visual before an element hands on, named before anything decodes. */
+export function usePreviousPictureNames(
+	element: CanvasContentElement,
+): string[] {
+	const source = usePreviousVisual(element);
+	if (!source) return [];
+	return handsOnFrames(source)
+		? HANDED_ON_FRAMES.map(({ name }) => name)
+		: ["Picture"];
+}
 
 /** A video's frames as object URLs, null when they cannot decode, undefined while they do. */
 function useDecodedFrames(videoUrl: string | undefined) {
@@ -41,13 +61,11 @@ function useDecodedFrames(videoUrl: string | undefined) {
 	return decoded && decoded.src === videoUrl ? decoded.urls : undefined;
 }
 
-/** A video's first, middle and last frames, or the image itself, once the visual before the element has generated. */
+/** The pictures {@link usePreviousPictureNames} names, once the visual before the element has generated. */
 export function usePreviousVisualPictures(
 	element: CanvasContentElement,
 ): PreviousPictures {
-	const source = useSlateSelector((editor) =>
-		previousVisual(getContentElements(editor.children), element.id),
-	);
+	const source = usePreviousVisual(element);
 	const url = useQueueSelector((q) =>
 		source
 			? getPrimaryUrl(
@@ -56,8 +74,7 @@ export function usePreviousVisualPictures(
 				)
 			: undefined,
 	);
-	const isVideo =
-		source !== undefined && ELEMENT_TYPES[source.type].outputKind === "video";
+	const isVideo = source !== undefined && handsOnFrames(source);
 	const frames = useDecodedFrames(isVideo ? url : undefined);
 
 	if (!source)

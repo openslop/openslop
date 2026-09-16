@@ -14,11 +14,7 @@ vi.mock("@/lib/connectors/video/captureFrames", () => ({
 	captureFrames,
 }));
 
-const FRAMES = [
-	"https://img/first.png",
-	"https://img/middle.png",
-	"https://img/last.png",
-];
+const FRAMES = ["https://img/middle.png", "https://img/last.png"];
 
 const EMPTY_STATE = { metadata: MetadataSchema.parse({}), referenceImages: [] };
 
@@ -39,10 +35,14 @@ const previousVideo = { ...video(), id: "video-0" };
 
 const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {
 	"video-0": {
-		imageUrl: "https://img/first.png",
+		imageUrl: "https://img/poster.png",
 		videoUrl: "https://vid/a.mp4",
 		durationSec: 5,
 	},
+};
+
+const PREVIOUS_IMAGE_RESULT: Record<string, AssetResult> = {
+	"img-1": { imageUrl: "https://img/sunset.png", durationSec: 0 },
 };
 
 describe("previous-visual plugin", () => {
@@ -72,7 +72,7 @@ describe("previous-visual plugin", () => {
 	});
 
 	describe("dependencies", () => {
-		it("declares none without continuity or a previous start frame", () => {
+		it("declares none when unlinked without a previous start frame", () => {
 			expect(plugin.dependencies?.(video())).toEqual([]);
 			expect(plugin.dependencies?.(video({ continuity: "false" }))).toEqual([]);
 			expect(
@@ -107,7 +107,7 @@ describe("previous-visual plugin", () => {
 	});
 
 	describe("beforeGenerate", () => {
-		it("leaves a video with no start frame and no continuity alone", async () => {
+		it("leaves an unlinked video with no start frame alone", async () => {
 			await expect(
 				before({ prompt: "slow pan", continuity: "false" }),
 			).resolves.toEqual({ prompt: "slow pan" });
@@ -126,11 +126,23 @@ describe("previous-visual plugin", () => {
 			await expect(
 				before(
 					{ prompt: "slow pan", startFrame: "previous" },
-					{ "img-1": { imageUrl: "https://img/sunset.png", durationSec: 0 } },
+					PREVIOUS_IMAGE_RESULT,
 				),
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImages: ["https://img/sunset.png"],
+			});
+		});
+
+		it("references the image before it when linked", async () => {
+			await expect(
+				before(
+					{ prompt: "slow pan", continuity: "true" },
+					PREVIOUS_IMAGE_RESULT,
+				),
+			).resolves.toEqual({
+				prompt: "slow pan",
+				referenceImages: ["https://img/sunset.png"],
 			});
 		});
 
@@ -154,7 +166,7 @@ describe("previous-visual plugin", () => {
 			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4");
 		});
 
-		it("adds a previous video's first, middle and last frames after the reference images, with continuity", async () => {
+		it("adds a previous video's frames after the reference images when linked", async () => {
 			await expect(
 				afterVideo({
 					prompt: "slow pan",
@@ -167,7 +179,7 @@ describe("previous-visual plugin", () => {
 			});
 		});
 
-		it("opens on the last frame and references the other two, with continuity", async () => {
+		it("opens on the last frame and references the middle one when linked", async () => {
 			await expect(
 				afterVideo({
 					prompt: "slow pan",
@@ -177,7 +189,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImages: ["https://img/last.png"],
-				referenceImages: ["https://img/first.png", "https://img/middle.png"],
+				referenceImages: ["https://img/middle.png"],
 			});
 		});
 

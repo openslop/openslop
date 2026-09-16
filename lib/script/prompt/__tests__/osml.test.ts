@@ -40,6 +40,11 @@ describe("osmlSpec", () => {
 		);
 	});
 
+	it("sets the visual cadence without dictating what the script opens with", () => {
+		expect(spec).toContain("Change the visual at least every two spoken lines");
+		expect(spec).not.toContain("Start with a visual");
+	});
+
 	it("asks for dead simple dialogue that fits the scene", () => {
 		expect(spec).toContain("Keep dialogue dead simple");
 		expect(spec).toContain("make sense for who says it and what just happened");
@@ -51,19 +56,13 @@ describe("osmlSpec", () => {
 		);
 	});
 
-	it("keeps sound out of a video's last shot, where it gets cut off", () => {
-		expect(spec).toContain("The last shot has no Sound and no speech");
+	it("describes every video prompt in detail, standing alone", () => {
+		expect(spec).toContain("Each video prompt is standalone");
 	});
 
-	it("holds a video's last shot longest, so the cut after it doesn't come early", () => {
-		expect(spec).toContain(
-			"The last shot is always the longest, at least 3 seconds",
-		);
-	});
-
-	it("cuts between videos unless a shot must carry on unbroken", () => {
-		expect(spec).toContain('Videos cut: startFrame="none" (the default)');
-		expect(spec).toContain("use it rarely");
+	it("mixes videos that start fresh with videos that continue the one before", () => {
+		expect(spec).toContain('startFrame="none" starts each video fresh');
+		expect(spec).toContain("Use both appropriately");
 	});
 
 	it("carries the look of the visual before a video unless it moves somewhere new", () => {
@@ -75,10 +74,6 @@ describe("osmlSpec", () => {
 
 	it("opens a continued video where the one before it ends", () => {
 		expect(spec).toContain("starts where that video's last shot ends");
-	});
-
-	it("introduces every character in a video's opening shot", () => {
-		expect(spec).toContain("Every character in the video appears in Shot 1.");
 	});
 
 	it("keeps a film to videos and music, whatever the other element rules say", () => {

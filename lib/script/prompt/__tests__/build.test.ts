@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildScriptPrompt } from "../build";
+import { buildScriptPrompt, scriptRules } from "../build";
 import { MetadataSchema, type Metadata } from "@/lib/project/types";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
 import { VIDEO_LENGTH_SPECS } from "@/lib/project/videoLength";
@@ -122,6 +122,18 @@ describe("buildScriptPrompt", () => {
 		);
 
 		expect(system).toContain("- appearance: a freckled girl");
+	});
+
+	it("hands a review the same rules the writer was given, minus the budget it cannot judge", () => {
+		const project = metadata({ style: "muted watercolor" });
+		const rules = scriptRules(project);
+
+		expect(
+			buildScriptPrompt(project, { kind: "brief", brief: "a brief" }).system,
+		).toContain(rules);
+		expect(rules).toContain("The story script must be written");
+		expect(rules).toContain("muted watercolor");
+		expect(rules).not.toContain("# Length");
 	});
 
 	it("names the declared language, and defers to the input when it is auto", () => {

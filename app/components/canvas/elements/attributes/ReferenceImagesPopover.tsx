@@ -18,25 +18,27 @@ const summarize = (override: string[] | undefined, projectCount: number) => {
 	return override.length ? `${override.length} custom` : "None";
 };
 
-interface ReferenceImagesPopoverProps {
+export interface ReferenceImagesPopoverProps {
 	element: CanvasContentElement;
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;
+	/** References the element adds beyond these, counted in the summary. */
+	added?: number;
 	children?: React.ReactNode;
 }
 
 /**
  * This element's reference images. With no override it shows the project's and
  * says so; the first add or remove copies them onto the element, from where they
- * stop tracking the project until reset. Children show the references the
- * element adds beneath them.
+ * stop tracking the project until reset.
  */
 export function ReferenceImagesPopover({
 	element,
 	attrKey,
 	label,
 	hideLabel = false,
+	added = 0,
 	children,
 }: ReferenceImagesPopoverProps) {
 	const editor = useSlateStatic();
@@ -51,7 +53,9 @@ export function ReferenceImagesPopover({
 			[attrKey]: serializeReferenceImages(next),
 		});
 
-	const summary = summarize(override, projectImages.length);
+	const summary =
+		summarize(override, projectImages.length) +
+		(added > 0 ? ` + ${added}` : "");
 	const tooltip = `${label}: ${summary}`;
 
 	return (

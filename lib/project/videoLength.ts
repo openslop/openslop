@@ -26,8 +26,12 @@ export const secondsForWords = (words: number): number =>
 
 export type VideoLengthSpec = {
 	label: string;
+	/** The budget a script is written to, since a writer writes words, not seconds. */
 	minWords: number;
 	maxWords: number;
+	/** The runtime a finished video is measured against, which silent footage also fills. */
+	minSec: number;
+	maxSec: number;
 };
 
 const spec = (
@@ -38,6 +42,8 @@ const spec = (
 	label,
 	minWords: wordsForSeconds(minSec),
 	maxWords: wordsForSeconds(maxSec),
+	minSec,
+	maxSec,
 });
 
 export const VIDEO_LENGTH_SPECS = {

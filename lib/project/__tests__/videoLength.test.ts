@@ -10,10 +10,14 @@ describe("VIDEO_LENGTH_SPECS", () => {
 		expect(VIDEO_LENGTH_SPECS["under-30s"]).toMatchObject({
 			minWords: 50,
 			maxWords: 90,
+			minSec: 15,
+			maxSec: 30,
 		});
 		expect(VIDEO_LENGTH_SPECS["10-15m"]).toMatchObject({
 			minWords: 1800,
 			maxWords: 2700,
+			minSec: 600,
+			maxSec: 900,
 		});
 	});
 

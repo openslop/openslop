@@ -45,17 +45,25 @@ function promptParts(
 	return { guidance: [lengthSection(metadata)], instruction: source.brief };
 }
 
+/**
+ * The rules a script is held to whatever it was written from, and the same text a
+ * review judges it against, so the two cannot drift apart. What only one source
+ * contributes — a length budget, a template, a pasted script's notes — stays with it.
+ */
+export function scriptRules(metadata: Metadata): string {
+	return compact([
+		projectPreamble(metadata),
+		osmlSpec(spokenLanguage(metadata, INPUT_LANGUAGE)),
+	]).join("\n\n");
+}
+
 export function buildScriptPrompt(
 	metadata: Metadata,
 	source: ScriptSource,
 ): ScriptPrompt {
 	const { guidance, instruction } = promptParts(source, metadata);
 	return {
-		system: compact([
-			...guidance,
-			projectPreamble(metadata),
-			osmlSpec(spokenLanguage(metadata, INPUT_LANGUAGE)),
-		]).join("\n\n"),
+		system: compact([...guidance, scriptRules(metadata)]).join("\n\n"),
 		prompt: instruction,
 	};
 }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/project/types";
 import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
+import { NO_FINDINGS } from "@/lib/script/prompt/review";
 
 const metadata = MetadataSchema.parse({
 	title: "Little Red",
@@ -303,36 +304,65 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("reports the count against the project's word budget", async () => {
+	/** A visual on screen for `seconds`, however that length was arrived at. */
+	const onScreen = (id: string, seconds: number) => ({
+		id,
+		type: "video" as const,
+		sceneNumber: 1,
+		seconds,
+		words: 0,
+		dialogueIds: [],
+		durationSec: seconds,
+		trimToDialogue: false,
+	});
+
+	it("reports the runtime against the project's target length", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ countSpokenWords: () => 700 }),
+			context({
+				countSpokenWords: () => 700,
+				measureElementLengths: () => [onScreen("v1", 240)],
+			}),
 		);
 
-		// The fixture metadata targets 3-5m: 540 to 900 words.
+		// The fixture metadata targets 3-5m: 180s to 300s.
+		expect(outcome.ok && outcome.output).toContain("240.0s of video");
 		expect(outcome.ok && outcome.output).toContain("700 spoken words");
 		expect(outcome.ok && outcome.output).toContain("within the target range");
 	});
 
-	it("says how far off the count is, so the model knows how much to cut or add", async () => {
+	it("counts every visual's time on screen, not just the speech over it", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_total_length", input: {} },
+			context({
+				countSpokenWords: () => 0,
+				measureElementLengths: () => [onScreen("v1", 10), onScreen("v2", 8)],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("18.0s of video");
+	});
+
+	it("says how far off the runtime is, so the model knows how much to cut or add", async () => {
 		const over = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ countSpokenWords: () => 1000 }),
+			context({ measureElementLengths: () => [onScreen("v1", 400)] }),
 		);
-		expect(over.ok && over.output).toContain("over by 100 words");
+		expect(over.ok && over.output).toContain("over by 100.0s");
 
 		const under = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ countSpokenWords: () => 500 }),
+			context({ measureElementLengths: () => [onScreen("v1", 100)] }),
 		);
-		expect(under.ok && under.output).toContain("under by 40 words");
+		expect(under.ok && under.output).toContain("under by 80.0s");
 	});
 
-	it("counts without a verdict when the length is auto", async () => {
+	it("measures without a verdict when the length is auto", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
 			context({
 				countSpokenWords: () => 1000,
+				measureElementLengths: () => [onScreen("v1", 600)],
 				readMetadata: () =>
 					MetadataSchema.parse({ videoSettings: { length: "auto" } }),
 			}),
@@ -658,6 +688,55 @@ describe("executeToolCall", () => {
 		expect(prompts[0]).toContain("a rabbit on the moon");
 		expect(prompts[0]).toContain("conflict, twists, and a resolution");
 	});
+
+	it("reviews the script against the rules it was written to", async () => {
+		const calls: { prompt: string; systemPrompt?: string }[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "review_script", input: { format: "Film" } },
+			context({
+				generateText: async (prompt, options) => {
+					calls.push({ prompt, systemPrompt: options?.systemPrompt });
+					return NO_FINDINGS;
+				},
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toBe(NO_FINDINGS);
+		expect(calls[0]?.prompt).toContain("<narration>hi</narration>");
+		expect(calls[0]?.prompt).toContain("intended as a Film");
+		expect(calls[0]?.systemPrompt).toContain(
+			"The story script must be written",
+		);
+	});
+
+	it("sets no token ceiling, so thinking cannot crowd out the findings", async () => {
+		const budgets: (number | undefined)[] = [];
+		await executeToolCall(
+			{ toolName: "review_script", input: {} },
+			context({
+				generateText: async (_prompt, options) => {
+					budgets.push(options?.maxTokens);
+					return NO_FINDINGS;
+				},
+			}),
+		);
+
+		expect(budgets[0]).toBeUndefined();
+	});
+
+	it("spends no generation reviewing an empty canvas", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "review_script", input: {} },
+			context({
+				readScript: () => "  ",
+				generateText: async () => {
+					throw new Error("reviewed an empty canvas");
+				},
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("nothing to review");
+	});
 });
 
 describe("SLOPPY_TOOLS", () => {
@@ -667,6 +746,7 @@ describe("SLOPPY_TOOLS", () => {
 			"edit_script",
 			"write_script",
 			"adapt_script",
+			"review_script",
 			"set_video_settings",
 			"set_caption_style",
 			"set_language",
@@ -717,6 +797,7 @@ describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
+			"review_script",
 			"view_avatar",
 			"view_image",
 			"view_reference_images",

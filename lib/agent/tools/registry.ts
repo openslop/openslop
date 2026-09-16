@@ -9,6 +9,7 @@ import { editScript } from "./editScript";
 import { fitDurations } from "./fitDurations";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
+import { reviewScript } from "./reviewScript";
 import { setCaptionStyle } from "./setCaptionStyle";
 import { setCharacter } from "./setCharacter";
 import { setLanguage } from "./setLanguage";
@@ -26,6 +27,7 @@ const TOOLS = {
 	edit_script: editScript,
 	write_script: writeScript,
 	adapt_script: adaptScript,
+	review_script: reviewScript,
 	set_video_settings: setVideoSettings,
 	set_caption_style: setCaptionStyle,
 	set_language: setLanguage,

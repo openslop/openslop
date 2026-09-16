@@ -29,7 +29,7 @@ export type AgentToolContext = {
 	/** One focused LLM call, for tools whose whole job is a generation. */
 	generateText: (
 		prompt: string,
-		options?: { maxTokens?: number },
+		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
 	readMetadata: () => Metadata;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };

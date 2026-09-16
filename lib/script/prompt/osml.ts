@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { DEFAULT_DURATION, DURATION_OPTIONS } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
-import { VIDEO_SHAPES } from "./shapes";
+import { VIDEO_FORMATS } from "./formats";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import {
@@ -20,13 +20,13 @@ export function osmlSpec(language: string): string {
 	return dedent`
   The story script must be written in OSML, the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never put a tag inside another tag.
 
-${VIDEO_SHAPES}
+${VIDEO_FORMATS}
 
 ${languagePrompt(language)}
 
   ## Order
   1. <metadata_title>, then <metadata_style>, then <metadata_narration>, then one <metadata_character> per character.
-  2. The story, using only the elements your shape allows. Start with a visual, and change the visual at least every two spoken lines.
+  2. The story, using only the elements your format allows. Change the visual at least every two spoken lines.
 
   ## Metadata tags
   - <metadata_title>: a short title of 1 to 4 words. Example: <metadata_title>Little Red</metadata_title>
@@ -64,7 +64,7 @@ ${languagePrompt(language)}
   ## <video>
   - A short generated video whose sound is written into its shots. The body is a video prompt, written as the Video prompts section says.
   - duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
-  - startFrame, continuity, trimToDialogue and loop: see Shape.
+  - startFrame, continuity, trimToDialogue and loop: see Format.
   - characters and overlays: as for <image>. Name characters in shots as for <image>.
   - motion: normally set to "none". Only set one when the shots have no camera move of their own.
   - Example: <video characters="Red,Wolf" overlays="rain" startFrame="none" trimToDialogue="false">Shot 1: Wide shot of a moonlit forest clearing as Red and Wolf walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby. Shot 2: The camera slowly rises to show the whole clearing.</video>

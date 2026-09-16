@@ -60,13 +60,12 @@ beforeEach(() => {
 });
 
 describe("captureFrames", () => {
-	it("uploads the first, middle and last frames in order, and releases the file", async () => {
+	it("uploads the middle and last frames in order, never the first, and releases the file", async () => {
 		await expect(captureFrames("https://vid/a.mp4")).resolves.toEqual([
-			"https://img/frame@0.5",
 			"https://img/frame@4.5",
 			"https://img/frame@8.5",
 		]);
-		expect(media.timestamps).toEqual([[0.5, 4.5, 8.5]]);
+		expect(media.timestamps).toEqual([[4.5, 8.5]]);
 		expect(media.dispose).toHaveBeenCalledOnce();
 	});
 
@@ -85,17 +84,16 @@ describe("captureFrames", () => {
 		);
 		media.missing = false;
 		await expect(captureFrames("https://vid/retry.mp4")).resolves.toHaveLength(
-			3,
+			2,
 		);
 	});
 });
 
 describe("previewFrames", () => {
-	it("gives the first, middle and last frames from the same decode as the capture", async () => {
+	it("gives the middle and last frames from the same decode as the capture", async () => {
 		const frames = await previewFrames("https://vid/shared.mp4");
 		await captureFrames("https://vid/shared.mp4");
 		expect(await Promise.all(frames.map((frame) => frame.text()))).toEqual([
-			"frame@0.5",
 			"frame@4.5",
 			"frame@8.5",
 		]);

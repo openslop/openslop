@@ -59,30 +59,8 @@ describe("RunwareVideo", () => {
 				outputType: "URL",
 				deliveryMethod: "async",
 				skipResponse: true,
-				inputs: {
-					frameImages: undefined,
-					referenceImages: undefined,
-				},
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
-		});
-
-		it("asks Kling for its soundtrack, which it leaves off by default", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-k",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "a sunset",
-				model: "klingai:kling-video@3.0-turbo",
-			});
-
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({
-					providerSettings: { klingai: { sound: true } },
-				}),
-			);
 		});
 
 		it("opens Kling on its frame and never sends it reference images", async () => {
@@ -239,7 +217,7 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("sends Kling no reference images when it starts fresh either", async () => {
+		it("leaves inputs off a Kling video that starts fresh, which Kling rejects even empty", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-k4",
 				status: "processing",
@@ -251,10 +229,8 @@ describe("RunwareVideo", () => {
 				referenceImages: ["https://img/avatar.png"],
 			});
 
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({
-					inputs: { frameImages: undefined, referenceImages: undefined },
-				}),
+			expect(mockVideoInference.mock.calls[0]?.[0]).not.toHaveProperty(
+				"inputs",
 			);
 		});
 

@@ -17,6 +17,9 @@ export const setVideoSettings = defineTool({
 	  Length is a budget the next written script is held to; it does not resize a script already
 	  on the canvas. To change what is there, set the length and then edit_script.
 
+	  When the length is auto, set it before write_script: the runtime the user asked for, else
+	  the runtime an outline states, as the option that covers it or the closest one.
+
 	  Lengths, with the spoken-word budget each carries:
 	  - auto: no budget. The script runs as long as the material needs.
 	${VIDEO_LENGTH_TARGETS.map((l) => `  - ${l}: ${VIDEO_LENGTH_SPECS[l].minWords} to ${VIDEO_LENGTH_SPECS[l].maxWords} words`).join("\n")}

@@ -1,3 +1,5 @@
+import isEmpty from "lodash/isEmpty";
+import pickBy from "lodash/pickBy";
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
@@ -31,8 +33,6 @@ type ModelProfile = {
 	startFrames: "firstFrame" | "namedReferences";
 	/** The most reference images the model takes, a start frame named among them included. */
 	maxReferenceImages: number;
-	/** Whether the model renders its soundtrack only when asked. */
-	askForSound: boolean;
 };
 
 const PROFILES: Record<ModelId, ModelProfile> = {
@@ -40,12 +40,10 @@ const PROFILES: Record<ModelId, ModelProfile> = {
 	"bytedance:seedance@2.0-fast": {
 		startFrames: "namedReferences",
 		maxReferenceImages: 9,
-		askForSound: false,
 	},
 	"klingai:kling-video@3.0-turbo": {
 		startFrames: "firstFrame",
 		maxReferenceImages: 0,
-		askForSound: true,
 	},
 };
 
@@ -93,13 +91,14 @@ const sizeFor = (params: VideoRequest, { frameImages }: ModelInputs) =>
 				height: params.height ?? DEFAULT_SIZE.height,
 			};
 
-/** Runware keys provider settings by the vendor that prefixes the model id. */
-const soundFor = (model: string, profile: ModelProfile) =>
-	profile.askForSound
-		? { providerSettings: { [model.split(":")[0]]: { sound: true } } }
-		: {};
-
-const orNone = (images: string[]) => (images.length > 0 ? images : undefined);
+/** A model that takes no pictures rejects even an empty inputs object, so it goes only with pictures in it. */
+const picturesFor = ({ frameImages, referenceImages }: ModelInputs) => {
+	const inputs = pickBy(
+		{ frameImages, referenceImages },
+		(images) => images.length > 0,
+	);
+	return isEmpty(inputs) ? {} : { inputs };
+};
 
 export class RunwareVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "runware" };
@@ -125,15 +124,11 @@ export class RunwareVideo extends BaseVideoProvider {
 				model: params.model,
 				...sizeFor(params, inputs),
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
-				...soundFor(params.model, profile),
 				outputType: "URL",
 				deliveryMethod: "async",
 				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
-				inputs: {
-					frameImages: orNone(inputs.frameImages),
-					referenceImages: orNone(inputs.referenceImages),
-				},
+				...picturesFor(inputs),
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;

@@ -20,8 +20,8 @@ export type AttributeEdit =
 	| { kind: "text"; placeholder?: string; rows?: number }
 	/**
 	 * A list of image URLs, edited as tiles. With `continuity`, the previous
-	 * visual's pictures show beneath them, so one control shows everything the
-	 * generation references.
+	 * visual's pictures and the toggle that links them show beneath, so one
+	 * control shows everything the generation references.
 	 */
 	| { kind: "images"; continuity?: true }
 	/** One picture to open on: the visual before, or an image URL. */

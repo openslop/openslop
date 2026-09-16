@@ -23,7 +23,7 @@ export const adaptScript = defineTool({
 
 	  Everything else in the message is still theirs, so place it:
 	  - what they said about the look, mood, pacing or delivery goes in 'notes', including
-	    the shape the finished video should take (Slideshow or Motion explainer)
+	    the format the finished video should take (Slideshow or Motion explainer)
 	  - a setting they stated outright has its own tool: set_metadata, set_narrator,
 	    set_video_settings, set_language, set_character
 	  - an instruction about the text itself ("make this shorter") is carried out with
@@ -48,7 +48,7 @@ export const adaptScript = defineTool({
 	label: "Putting your script on the canvas",
 	execute: async ({ script, notes }, ctx) => {
 		await ctx.adaptScript(script, notes);
-		return "Put that script onto the canvas. Read it to see what landed.";
+		return "Put that script onto the canvas. Read it to see what landed, then review_script it.";
 	},
 	rewritesCanvas: true,
 });

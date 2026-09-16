@@ -1,9 +1,16 @@
 const ANIMATE_VIDEO_PATTERN =
 	/write the motion for the video element in scene (\d+)/i;
 
-/** What the animate button asks Sloppy, once the image has become a video element that opens on its picture. */
-export const animateVideoPrompt = (scene: number): string =>
-	`Write the motion for the video element in scene ${scene}: it opens on the picture it already shows, so rewrite its prompt as shots that continue from that exact frame, written as the Video prompts section says.`;
+/**
+ * What the animate button asks Sloppy, once the image has become a video element.
+ * Both readings open the same way, so {@link animateVideoScene} still knows one.
+ */
+export const animateVideoPrompt = (scene: number, picture?: string): string =>
+	`Write the motion for the video element in scene ${scene}: ${
+		picture
+			? "it opens on the picture it already shows, so rewrite its prompt as shots that continue from that exact frame"
+			: "it has no picture to open on, so rewrite its prompt as shots of what it already describes"
+	}, written as the Video prompts section says.`;
 
 /** The scene an animate request names, or null when it is not one. */
 export const animateVideoScene = (prompt: string): number | null => {

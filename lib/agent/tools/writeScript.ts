@@ -14,7 +14,7 @@ export const writeScript = defineTool({
 	  finished video needs. For an invented narrative, outline_story first and fold the outline in;
 	  for anything that is not a story, write the brief directly.
 
-	  Say which shape the finished video takes (Film, Slideshow or Motion explainer) and why,
+	  Say which format the finished video takes (Film, Slideshow or Motion explainer) and why,
 	  since the writer reads only the brief.
 
 	  When the user gave you the actual text they want on the canvas, rather than an idea to
@@ -31,7 +31,7 @@ export const writeScript = defineTool({
 	label: "Writing a new script",
 	execute: async ({ brief }, ctx) => {
 		await ctx.writeScript(brief);
-		return "Wrote a new script onto the canvas. Read it to see what landed.";
+		return "Wrote a new script onto the canvas. Read it to see what landed, then review_script it.";
 	},
 	rewritesCanvas: true,
 });

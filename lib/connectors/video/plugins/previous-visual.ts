@@ -12,7 +12,7 @@ import {
 import { captureFrames } from "@/lib/connectors/video/captureFrames";
 import {
 	CONTINUITY_ATTR,
-	hasContinuity,
+	isLinked,
 	parseStartFrame,
 	splitPrevious,
 	START_FRAME_ATTR,
@@ -42,7 +42,7 @@ const forPreviousVisual =
 			: sourceNode(derivedNodeId("first", id), {}, LABEL);
 	};
 
-/** What a settled visual hands on: a video's first, middle and last frames, or the image itself. */
+/** What a settled visual hands on, in time order: a video's frames, or the image itself. */
 async function picturesOf(source: AssetResult): Promise<string[]> {
 	if (source.videoUrl) return captureFrames(source.videoUrl);
 	if (source.imageUrl) return [source.imageUrl];
@@ -65,17 +65,17 @@ async function previousPictures({
 
 /**
  * What a video takes from the visual before it: opening on it, the last
- * picture is the start frame; with continuity, the rest join the reference
- * images, so the place and look carry over. Either makes the visual a
- * dependency, so the element waits for it, and regenerating or moving it
- * stales the element; a start frame by URL is only an input.
+ * picture is the start frame; linked, the rest join the reference images, so
+ * the place and look carry over. Either makes the visual a dependency, so the
+ * element waits for it, and regenerating or moving it stales the element; a
+ * start frame by URL is only an input.
  */
 export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPreviousVisual> {
 	return {
 		name: "previous-visual",
 		dependencies: ({ id, generationAttributes: attrs = {} }) =>
 			parseStartFrame(attrs[START_FRAME_ATTR])?.kind === "previous" ||
-			hasContinuity(attrs[CONTINUITY_ATTR])
+			isLinked(attrs[CONTINUITY_ATTR])
 				? [forPreviousVisual(id)]
 				: [],
 		async beforeGenerate(
@@ -88,12 +88,12 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 		) {
 			const frame = parseStartFrame(rawFrame);
 			const opensOnPrevious = frame?.kind === "previous";
-			const continues = hasContinuity(continuity);
+			const linked = isLinked(continuity);
 			const pictures =
-				opensOnPrevious || continues ? await previousPictures(ctx) : [];
+				opensOnPrevious || linked ? await previousPictures(ctx) : [];
 			const { startFrame, rest } = splitPrevious(pictures, opensOnPrevious);
 			const frameImages = frame?.kind === "url" ? [frame.url] : startFrame;
-			const references = continues ? rest : [];
+			const references = linked ? rest : [];
 			return {
 				...params,
 				...(frameImages.length > 0 && { frameImages }),

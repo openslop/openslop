@@ -24,23 +24,29 @@ export const startFrameDef: AttributeDef = {
 	default: NO_FRAME,
 };
 
+/** The frames a video hands on, by how far through it they sit. Never its first. */
+export const HANDED_ON_FRAMES = [
+	{ name: "Middle frame", at: 0.5 },
+	{ name: "Last frame", at: 1 },
+] as const;
+
 export const CONTINUITY_ATTR = "continuity";
 
-/** Shows the video the pictures of the visual before it, so its place and look carry over. Set from the reference images control. */
+export const isLinked = (value: string | undefined): boolean =>
+	value === "true";
+
+/** Linked, a video references the pictures of the visual before it, so its place and look carry over. Set from the reference images control. */
 export const continuityDef: AttributeDef = {
 	key: CONTINUITY_ATTR,
 	label: "Continuity",
 	edit: {
 		kind: "toggle",
-		off: { icon: LinkedOff, label: "Fresh look" },
-		on: { icon: LinkedOn, label: "Keep the previous scene's look" },
+		off: { icon: LinkedOff, label: "Unlink for a fresh look" },
+		on: { icon: LinkedOn, label: "Link the previous scene's look" },
 	},
 	default: "true",
 	hidden: true,
 };
-
-export const hasContinuity = (value: string | undefined): boolean =>
-	value === "true";
 
 /** A video opening on the visual before it starts from its last picture, which leaves the rest to reference. */
 export const splitPrevious = <T>(
@@ -59,3 +65,9 @@ export const uploadedFrameDef: AttributeDef = {
 	label: "Uploaded picture",
 	hidden: true,
 };
+
+/** Opening on a picture of its own, which stays selectable so choosing another does not lose it. */
+export const openingOn = (picture: string): Record<string, string> => ({
+	[START_FRAME_ATTR]: picture,
+	[UPLOADED_FRAME_ATTR]: picture,
+});

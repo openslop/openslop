@@ -26,8 +26,12 @@ import {
 } from "./conversations";
 import { logger } from "./logger";
 
-/** What one turn may spend before the tools come off and it has to end in a reply. */
-const MAX_TOOL_CALLS = 20;
+/**
+ * What one turn may spend before the tools come off and it has to end in a reply.
+ * Sized for the longest sanctioned run: write, then up to three rounds of reading,
+ * reviewing and editing, and still room to fit the durations at the end.
+ */
+const MAX_TOOL_CALLS = 30;
 
 /**
  * What a turn is asked for. The routes differ only in which models they will

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseStartFrame, splitPrevious } from "../startFrame";
+import { openingOn, parseStartFrame, splitPrevious } from "../startFrame";
 
 describe("splitPrevious", () => {
 	const frames = ["first", "middle", "last"];
@@ -12,6 +12,15 @@ describe("splitPrevious", () => {
 		expect(splitPrevious(frames, false)).toEqual({
 			startFrame: [],
 			rest: frames,
+		});
+	});
+});
+
+describe("openingOn", () => {
+	it("opens on the picture and keeps it selectable, so choosing another does not lose it", () => {
+		expect(openingOn("https://img/frame.png")).toEqual({
+			startFrame: "https://img/frame.png",
+			uploadedFrame: "https://img/frame.png",
 		});
 	});
 });

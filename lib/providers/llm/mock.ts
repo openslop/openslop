@@ -11,6 +11,7 @@ import type {
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
+import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
 import { animateVideoScene } from "@/lib/script/refine/animatePrompt";
 import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
@@ -133,6 +134,10 @@ const MOCK_RESPONSES: {
 	{
 		matches: (p) => p.startsWith(OUTLINE_INSTRUCTION),
 		respond: () => MOCK_OUTLINE,
+	},
+	{
+		matches: (p) => p.startsWith(REVIEW_INSTRUCTION),
+		respond: () => NO_FINDINGS,
 	},
 ];
 

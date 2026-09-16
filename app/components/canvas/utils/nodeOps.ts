@@ -9,10 +9,7 @@ import {
 import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import {
-	CONTINUITY_ATTR,
-	START_FRAME_ATTR,
-} from "@/lib/connectors/video/startFrame";
+import { CONTINUITY_ATTR, openingOn } from "@/lib/connectors/video/startFrame";
 import type { ElementVersion } from "@/lib/generation/versions";
 
 /** Merge attrs into a live element's attributes (a null value deletes the key). */
@@ -28,12 +25,14 @@ export function updateElementAttrs(
 export function animateElement(
 	editor: Editor,
 	element: CanvasContentElement,
-	picture: string,
+	picture: string | undefined,
 	defaultModels?: ConnectorModels,
 ): number {
 	const path = ReactEditor.findPath(editor, element);
 	retypeNode(editor, path, element, "video", {
-		attrs: { [START_FRAME_ATTR]: picture, [CONTINUITY_ATTR]: "false" },
+		// Unlinked because the user did not choose this frame: the look of the
+		// visual before it would fight the picture the image already made.
+		attrs: picture ? { ...openingOn(picture), [CONTINUITY_ATTR]: "false" } : {},
 		defaultModels,
 	});
 	return sceneIndexOf(editor.children, parentSceneId(editor, path));
