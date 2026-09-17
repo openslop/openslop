@@ -65,7 +65,7 @@ export function usePreviousPictures(
 	if (outputKind !== "video")
 		return { kind: "ready", pictures: [{ name: "Picture", url }] };
 	if (decoded === undefined) return { kind: "loading" };
-	if (!decoded)
+	if (decoded === null)
 		return { kind: "empty", reason: "Couldn't preview the previous scene" };
 	return {
 		kind: "ready",
