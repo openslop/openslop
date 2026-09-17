@@ -33,5 +33,5 @@ export const writeScript = defineTool({
 		await ctx.writeScript(brief);
 		return "Wrote a new script onto the canvas. Read it to see what landed, then review_script it.";
 	},
-	rewritesCanvas: true,
+	draftsScript: true,
 });

@@ -105,5 +105,5 @@ export const fitDurations = defineTool({
 				`Failed: ${failures.join("; ")}. Read the script again; the ids may be stale.`,
 		);
 	},
-	rewritesCanvas: true,
+	draftsScript: true,
 });

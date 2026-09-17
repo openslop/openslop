@@ -20,15 +20,15 @@ export function defineTool<Input, Output>(def: {
 	execute: (input: Input, ctx: AgentToolContext) => Promise<Output>;
 	/** Output that is only true until the next edit, so only its own turn keeps it. */
 	snapshot?: true;
-	/** The call rewrites the canvas, so what is rendered from it is mid-change. */
-	rewritesCanvas?: true;
+	/** The call is part of writing the script, so what is rendered from the canvas is mid-change. */
+	draftsScript?: true;
 }) {
 	const {
 		input,
 		output,
 		execute,
 		snapshot,
-		rewritesCanvas,
+		draftsScript,
 		icon,
 		label,
 		...rest
@@ -44,7 +44,7 @@ export function defineTool<Input, Output>(def: {
 		icon,
 		label: typeof label === "function" ? label : () => label,
 	};
-	return { input, execute, spec, snapshot, rewritesCanvas, present };
+	return { input, execute, spec, snapshot, draftsScript, present };
 }
 
 /** A tool-result image, handed to the model by URL for the provider to fetch. */

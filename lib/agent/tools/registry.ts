@@ -93,7 +93,7 @@ export function presentToolCall(
 	return { icon, label: label(input ?? {}) };
 }
 
-type ToolFlag = "snapshot" | "rewritesCanvas";
+type ToolFlag = "snapshot" | "draftsScript";
 
 const namesFlagged = (flag: ToolFlag): ReadonlySet<string> =>
 	new Set(
@@ -105,8 +105,8 @@ const namesFlagged = (flag: ToolFlag): ReadonlySet<string> =>
 /** Output that is only true until the next edit, so only its own turn keeps it. */
 export const SNAPSHOT_TOOLS = namesFlagged("snapshot");
 
-/** Calls that rewrite the canvas, so what is rendered from it is mid-change. */
-export const SCRIPT_TOOLS = namesFlagged("rewritesCanvas");
+/** Calls that are part of writing the script, so what is rendered from the canvas is mid-change. */
+export const SCRIPT_TOOLS = namesFlagged("draftsScript");
 
 /** A failure is reported, not thrown: the model reads it as the next observation. */
 export type ToolOutcome =

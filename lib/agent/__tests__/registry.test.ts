@@ -803,11 +803,12 @@ describe("tool flags", () => {
 		]);
 	});
 
-	it("collects the tools that rewrite the canvas", () => {
+	it("collects the tools that write the script, reviewing it included", () => {
 		expect([...SCRIPT_TOOLS].sort()).toEqual([
 			"adapt_script",
 			"edit_script",
 			"fit_durations",
+			"review_script",
 			"write_script",
 		]);
 	});
