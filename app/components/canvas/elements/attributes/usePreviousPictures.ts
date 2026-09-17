@@ -15,11 +15,11 @@ export type PreviousPictures =
 	| { kind: "empty"; reason: string }
 	| { kind: "ready"; pictures: { name: string; url: string }[] };
 
-/** Null when the video cannot decode, undefined while it does. */
+/** Undefined while decoding, including when the stored frames are another URL's. */
 function useDecodedFrames(videoUrl: string | undefined) {
 	const [decoded, setDecoded] = useState<{
-		src: string;
-		urls: Record<FrameKey, string> | null;
+		videoUrl: string;
+		frames: Record<FrameKey, string> | "failed";
 	}>();
 	useEffect(() => {
 		if (!videoUrl) return;
@@ -30,17 +30,17 @@ function useDecodedFrames(videoUrl: string | undefined) {
 				if (cancelled) return;
 				const frameUrls = mapValues(jpegs, (jpeg) => URL.createObjectURL(jpeg));
 				urls = Object.values(frameUrls);
-				setDecoded({ src: videoUrl, urls: frameUrls });
+				setDecoded({ videoUrl, frames: frameUrls });
 			},
 			// A preview that cannot decode says so; generating still fails loudly.
-			() => !cancelled && setDecoded({ src: videoUrl, urls: null }),
+			() => !cancelled && setDecoded({ videoUrl, frames: "failed" }),
 		);
 		return () => {
 			cancelled = true;
 			urls.forEach((url) => URL.revokeObjectURL(url));
 		};
 	}, [videoUrl]);
-	return decoded && decoded.src === videoUrl ? decoded.urls : undefined;
+	return decoded && decoded.videoUrl === videoUrl ? decoded.frames : undefined;
 }
 
 export function usePreviousPictures(
@@ -65,7 +65,7 @@ export function usePreviousPictures(
 	if (outputKind !== "video")
 		return { kind: "ready", pictures: [{ name: "Picture", url }] };
 	if (decoded === undefined) return { kind: "loading" };
-	if (decoded === null)
+	if (decoded === "failed")
 		return { kind: "empty", reason: "Couldn't preview the previous scene" };
 	return {
 		kind: "ready",
