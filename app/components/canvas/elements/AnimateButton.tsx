@@ -1,20 +1,18 @@
 "use client";
 
-import { useSlateStatic } from "slate-react";
+import { ReactEditor, useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
 import { MagicVideo } from "@/components/ui/icon";
 import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
+import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { animateVideoPrompt } from "@/lib/script/refine/animatePrompt";
+import { animateImagePrompt } from "@/lib/script/refine/animatePrompt";
 import { useEditorPanel } from "../panel/EditorPanelContext";
-import { animateElement } from "../utils/nodeOps";
 import { useElementGeneration } from "./ElementGenerationContext";
 
 export function AnimateButton({ element }: { element: CanvasContentElement }) {
 	const editor = useSlateStatic();
-	const defaultModels = useResolveDefaultModels();
 	const { result, status } = useElementGeneration();
 	const { send, loading } = useSloppy();
 	const { setActive } = useEditorPanel();
@@ -32,9 +30,13 @@ export function AnimateButton({ element }: { element: CanvasContentElement }) {
 			disabled={loading || isGenerationActive(status)}
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={() => {
-				const scene = animateElement(editor, element, picture, defaultModels());
+				const path = ReactEditor.findPath(editor, element);
 				setActive("sloppy");
-				void send(animateVideoPrompt(scene, picture));
+				void send(
+					animateImagePrompt(
+						sceneIndexOf(editor.children, parentSceneId(editor, path)),
+					),
+				);
 			}}
 		>
 			<MagicVideo aria-hidden="true" />

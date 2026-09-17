@@ -31,7 +31,7 @@ const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
 	image: PICTURE_ATTRIBUTES,
 	video: [
 		...PICTURE_ATTRIBUTES,
-		"startFrame (none | previous, or a picture URL the user set: leave that alone)",
+		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };

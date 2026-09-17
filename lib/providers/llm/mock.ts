@@ -12,7 +12,7 @@ import type {
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
-import { animateVideoScene } from "@/lib/script/refine/animatePrompt";
+import { animateImageScene } from "@/lib/script/refine/animatePrompt";
 import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
 import type { LLMProvider } from "./base";
@@ -182,7 +182,7 @@ export class MockLLM implements LLMProvider {
 }
 
 const ELEMENT_ID = /id="([^"]+)"/;
-const VIDEO_ID = /<video[^>]*\bid="([^"]+)"/;
+const IMAGE_ID = /<image[^>]*\bid="([^"]+)"/;
 
 /** What a script reads as between one scene marker and the next. */
 const sceneSection = (script: string, scene: number): string =>
@@ -251,7 +251,7 @@ const MOCK_THOUGHT =
  */
 function mockCall(prompt: LanguageModelV3Prompt) {
 	const asked = lastUserText(prompt);
-	const scene = animateVideoScene(asked);
+	const scene = animateImageScene(asked);
 	const last = lastToolResult(prompt);
 
 	// The canvas is never in the prompt, so a step that has not read it, or that
@@ -270,7 +270,7 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 	const elementId =
 		scene === null
 			? ELEMENT_ID.exec(script)?.[1]
-			: VIDEO_ID.exec(sceneSection(script, scene))?.[1];
+			: IMAGE_ID.exec(sceneSection(script, scene))?.[1];
 
 	if (!elementId) {
 		return {
@@ -294,10 +294,14 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 				{
 					op: "set",
 					id: elementId,
-					text:
-						scene === null
-							? "A mock edit, from the agent running without an API key."
-							: "Slow cinematic push-in, the light shifting gently across the frame.",
+					...(scene === null
+						? {
+								text: "A mock edit, from the agent running without an API key.",
+							}
+						: {
+								type: "video",
+								text: "Slow cinematic push-in, the light shifting gently across the frame.",
+							}),
 				},
 			],
 		},

@@ -4,12 +4,8 @@ import {
 	applyNodeVersion,
 	duplicateNode,
 	mergeAttrs,
-	retypeNode,
 } from "@/lib/canvas/editorOps";
-import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
-import type { ConnectorModels } from "@/lib/connectors/models";
-import { CONTINUITY_ATTR, openingOn } from "@/lib/connectors/video/startFrame";
 import type { ElementVersion } from "@/lib/generation/versions";
 
 /** Merge attrs into a live element's attributes (a null value deletes the key). */
@@ -19,23 +15,6 @@ export function updateElementAttrs(
 	attrs: Record<string, string | null>,
 ): void {
 	mergeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
-}
-
-/** The picture goes by URL since the image is gone once retyped. Returns the scene index. */
-export function animateElement(
-	editor: Editor,
-	element: CanvasContentElement,
-	picture: string | undefined,
-	defaultModels: ConnectorModels,
-): number {
-	const path = ReactEditor.findPath(editor, element);
-	retypeNode(editor, path, element, "video", {
-		// Unlinked because the user did not choose this frame: the look of the
-		// visual before it would fight the picture the image already made.
-		attrs: picture ? { ...openingOn(picture), [CONTINUITY_ATTR]: "false" } : {},
-		defaultModels,
-	});
-	return sceneIndexOf(editor.children, parentSceneId(editor, path));
 }
 
 /** Restore a live element to the state a version was generated from. */

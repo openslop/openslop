@@ -27,7 +27,10 @@ export const viewImage = defineTool({
 	icon: Eye,
 	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a generated image"),
 	toModelOutput: ({ output }) =>
-		imageOutput(`${output.id}, generated from "${output.prompt}":`, output.url),
+		imageOutput(
+			`${output.id} (${output.url}), generated from "${output.prompt}":`,
+			output.url,
+		),
 	execute: async ({ id }, ctx) => {
 		const element = ctx.elementImage(id);
 		if (!element)
