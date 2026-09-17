@@ -4,8 +4,7 @@ import mapValues from "lodash/mapValues";
 import { useEffect, useState } from "react";
 import { useSlateSelector } from "slate-react";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
-import { ELEMENT_TYPES, type CanvasContentElement } from "@/lib/canvas/types";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { previewFrames } from "@/lib/connectors/video/captureFrames";
 import { FRAMES, type FrameKey } from "@/lib/connectors/video/startFrame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
@@ -48,23 +47,20 @@ export function usePreviousPictures(
 	const source = useSlateSelector((editor) =>
 		previousVisual(getContentElements(editor.children), element.id),
 	);
-	const url = useQueueSelector((q) =>
-		source
-			? getPrimaryUrl(
-					q.getElementSnapshot(source.id).result,
-					ELEMENT_TYPES[source.type].outputKind,
-				)
-			: undefined,
+	const result = useQueueSelector((q) =>
+		source ? q.getElementSnapshot(source.id).result : undefined,
 	);
-	const isVideo =
-		source !== undefined && ELEMENT_TYPES[source.type].outputKind === "video";
-	const decoded = useDecodedFrames(isVideo ? url : undefined);
+	const decoded = useDecodedFrames(result?.videoUrl);
 
 	if (!source)
 		return { kind: "empty", reason: "Nothing comes before this video" };
-	if (!url)
+	if (result?.imageUrl)
+		return {
+			kind: "ready",
+			pictures: [{ name: "Picture", url: result.imageUrl }],
+		};
+	if (!result?.videoUrl)
 		return { kind: "empty", reason: "The previous scene hasn't generated" };
-	if (!isVideo) return { kind: "ready", pictures: [{ name: "Picture", url }] };
 	if (decoded === undefined) return { kind: "loading" };
 	if (decoded === null)
 		return { kind: "empty", reason: "Couldn't preview the previous scene" };
