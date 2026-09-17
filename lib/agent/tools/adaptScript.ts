@@ -22,8 +22,7 @@ export const adaptScript = defineTool({
 	  however long it is. When you cannot tell where the script starts, keep the text rather than cut it.
 
 	  Everything else in the message is still theirs, so place it:
-	  - what they said about the look, mood, pacing or delivery goes in 'notes', including
-	    the format the finished video should take (Slideshow or Motion explainer)
+	  - what they said about the look, mood, pacing or delivery goes in 'notes'
 	  - a setting they stated outright has its own tool: set_metadata, set_narrator,
 	    set_video_settings, set_language, set_character
 	  - an instruction about the text itself ("make this shorter") is carried out with
