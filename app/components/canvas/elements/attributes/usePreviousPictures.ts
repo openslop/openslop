@@ -51,10 +51,10 @@ export function usePreviousPictures(
 		previousVisual(getContentElements(editor.children), element.id),
 	);
 	const outputKind = source && ELEMENT_TYPES[source.type].outputKind;
-	const url = useQueueSelector((q) =>
-		source && outputKind
-			? getPrimaryUrl(q.getElementSnapshot(source.id).result, outputKind)
-			: undefined,
+	const url = useQueueSelector(
+		(q) =>
+			outputKind &&
+			getPrimaryUrl(q.getElementSnapshot(source?.id).result, outputKind),
 	);
 	const decoded = useDecodedFrames(outputKind === "video" ? url : undefined);
 
