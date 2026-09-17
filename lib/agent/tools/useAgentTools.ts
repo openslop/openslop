@@ -5,7 +5,6 @@ import type { Editor } from "slate";
 import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
-import { makesPicture } from "@/lib/canvas/types";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import { measureElementLengths } from "@/lib/render/elementLengths";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -44,7 +43,7 @@ export function useAgentTools(editor: Editor) {
 				elementImage: (id) => {
 					const element = findNodeById(editor, id)?.[0];
 					if (!element) return undefined;
-					const pictureId = makesPicture(element.type) ? element.id : undefined;
+					const pictureId = element.type === "image" ? element.id : undefined;
 					const { status, result } = queue.getElementSnapshot(pictureId);
 					return {
 						type: element.type,

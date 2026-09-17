@@ -94,9 +94,7 @@ export function updateNodeText(
 }
 
 /**
- * Makes an element another type in place, keeping its id and text. Of what it
- * had, only the attributes shared with the new type carry over, plus `attrs`,
- * resolved against the new type's schema the way a fresh element would be.
+ * Makes an element another type in place, keeping its id and text.
  */
 export function retypeNode(
 	editor: Editor,

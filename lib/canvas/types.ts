@@ -69,10 +69,6 @@ export const CanvasElementTypeSchema = z.enum(
 	ALL_ELEMENT_TYPES as [CanvasElementType, ...CanvasElementType[]],
 );
 
-/** Whether a type's result is a picture, which is what an upload or a look can supply or read. */
-export const makesPicture = (type: CanvasElementType): boolean =>
-	ELEMENT_TYPES[type].outputKind === "image";
-
 export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set(
 	ALL_ELEMENT_TYPES.filter((type) => ELEMENT_TYPES[type].role === "foreground"),
 );

@@ -251,7 +251,6 @@ export interface TTSConnector extends Connector {
 
 export type VideoGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
-	/** Pictures to open on, in time order: the last is the one the video starts from. */
 	frameImages?: string[];
 	duration?: number;
 	resolution?: VideoResolution;

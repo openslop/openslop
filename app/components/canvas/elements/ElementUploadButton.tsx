@@ -2,16 +2,15 @@
 
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { makesPicture } from "@/lib/canvas/types";
 import { isSourceNode } from "@/lib/generation/graph";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
 import { useElementGeneration } from "./ElementGenerationContext";
 
-/** Supplies the picture an element would otherwise generate, so only the elements that make one offer it. */
+/** Supplies the picture an element would otherwise generate, so only image elements offer it. */
 export function ElementUploadButton() {
 	const queue = useGenerationQueue();
 	const { node, status } = useElementGeneration();
-	if (isSourceNode(node) || !makesPicture(node.job.elementType)) return null;
+	if (isSourceNode(node) || node.job.elementType !== "image") return null;
 
 	return (
 		<UploadImageButton
