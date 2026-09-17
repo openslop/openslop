@@ -5,18 +5,25 @@ import { useEffect, useState } from "react";
 import { useSlateSelector } from "slate-react";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { AssetResult } from "@/lib/connectors/types";
 import { previewFrames } from "@/lib/connectors/video/captureFrames";
 import { FRAMES, type FrameKey } from "@/lib/connectors/video/startFrame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 
+type Picture = { name: string; url: string };
+
 export type PreviousPictures =
 	| { kind: "loading" }
 	| { kind: "empty"; reason: string }
-	| { kind: "ready"; pictures: { name: string; url: string }[] };
+	| { kind: "ready"; pictures: Picture[] };
 
-/** Null when the video cannot decode, undefined while it does. */
-function useDecodedFrames(videoUrl: string | undefined) {
-	const [frames, setFrames] = useState<Record<FrameKey, string> | null>();
+/** The image itself, or a video's frames: null when they cannot decode, undefined while they do. */
+function usePictures(
+	result: AssetResult | null,
+	frames: readonly FrameKey[],
+): Picture[] | null | undefined {
+	const videoUrl = result?.videoUrl;
+	const [decoded, setDecoded] = useState<Record<FrameKey, string> | null>();
 	useEffect(() => {
 		if (!videoUrl) return;
 		let urls: string[] = [];
@@ -26,18 +33,23 @@ function useDecodedFrames(videoUrl: string | undefined) {
 				if (cancelled) return;
 				const frameUrls = mapValues(jpegs, (jpeg) => URL.createObjectURL(jpeg));
 				urls = Object.values(frameUrls);
-				setFrames(frameUrls);
+				setDecoded(frameUrls);
 			},
 			// A preview that cannot decode says so; generating still fails loudly.
-			() => !cancelled && setFrames(null),
+			() => !cancelled && setDecoded(null),
 		);
 		return () => {
 			cancelled = true;
 			urls.forEach((url) => URL.revokeObjectURL(url));
-			setFrames(undefined);
+			setDecoded(undefined);
 		};
 	}, [videoUrl]);
-	return frames;
+
+	if (result?.imageUrl) return [{ name: "Picture", url: result.imageUrl }];
+	return (
+		decoded &&
+		frames.map((frame) => ({ name: FRAMES[frame].name, url: decoded[frame] }))
+	);
 }
 
 export function usePreviousPictures(
@@ -48,27 +60,16 @@ export function usePreviousPictures(
 		previousVisual(getContentElements(editor.children), element.id),
 	);
 	const result = useQueueSelector((q) =>
-		source ? q.getElementSnapshot(source.id).result : undefined,
+		source ? q.getElementSnapshot(source.id).result : null,
 	);
-	const decoded = useDecodedFrames(result?.videoUrl);
+	const pictures = usePictures(result, frames);
 
 	if (!source)
 		return { kind: "empty", reason: "Nothing comes before this video" };
-	if (result?.imageUrl)
-		return {
-			kind: "ready",
-			pictures: [{ name: "Picture", url: result.imageUrl }],
-		};
-	if (!result?.videoUrl)
+	if (!result?.imageUrl && !result?.videoUrl)
 		return { kind: "empty", reason: "The previous scene hasn't generated" };
-	if (decoded === undefined) return { kind: "loading" };
-	if (decoded === null)
+	if (pictures === undefined) return { kind: "loading" };
+	if (pictures === null)
 		return { kind: "empty", reason: "Couldn't preview the previous scene" };
-	return {
-		kind: "ready",
-		pictures: frames.map((frame) => ({
-			name: FRAMES[frame].name,
-			url: decoded[frame],
-		})),
-	};
+	return { kind: "ready", pictures };
 }
