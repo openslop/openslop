@@ -48,20 +48,23 @@ export function usePreviousPictures(
 	const source = useSlateSelector((editor) =>
 		previousVisual(getContentElements(editor.children), element.id),
 	);
-	const outputKind = source && ELEMENT_TYPES[source.type].outputKind;
-	const url = useQueueSelector(
-		(q) =>
-			outputKind &&
-			getPrimaryUrl(q.getElementSnapshot(source?.id).result, outputKind),
+	const url = useQueueSelector((q) =>
+		source
+			? getPrimaryUrl(
+					q.getElementSnapshot(source.id).result,
+					ELEMENT_TYPES[source.type].outputKind,
+				)
+			: undefined,
 	);
-	const decoded = useDecodedFrames(outputKind === "video" ? url : undefined);
+	const isVideo =
+		source !== undefined && ELEMENT_TYPES[source.type].outputKind === "video";
+	const decoded = useDecodedFrames(isVideo ? url : undefined);
 
 	if (!source)
 		return { kind: "empty", reason: "Nothing comes before this video" };
 	if (!url)
 		return { kind: "empty", reason: "The previous scene hasn't generated" };
-	if (outputKind !== "video")
-		return { kind: "ready", pictures: [{ name: "Picture", url }] };
+	if (!isVideo) return { kind: "ready", pictures: [{ name: "Picture", url }] };
 	if (decoded === undefined) return { kind: "loading" };
 	if (decoded === null)
 		return { kind: "empty", reason: "Couldn't preview the previous scene" };
