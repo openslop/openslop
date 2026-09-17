@@ -1,7 +1,6 @@
 import dedent from "dedent";
 
 /**
- * How a video prompt is written, by the script writer and by Sloppy alike.
  * Plain labels and quotes read the same on every video model, where brackets
  * and braces are one vendor's dialect and reparse as tags in a script.
  */

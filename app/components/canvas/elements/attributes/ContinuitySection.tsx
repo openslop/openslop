@@ -24,7 +24,6 @@ function caption(previous: PreviousPictures, linked: boolean) {
 	return `+${previous.pictures.length} from the previous scene`;
 }
 
-/** A video's reference images, counting the pictures continuity adds, with those pictures and the toggle that links them beneath. */
 export function ContinuityReferencesPopover({
 	toggle,
 	...popover

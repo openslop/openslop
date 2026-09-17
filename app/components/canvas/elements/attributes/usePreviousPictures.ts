@@ -10,20 +10,16 @@ import { previewFrames } from "@/lib/connectors/video/captureFrames";
 import { FRAMES, type FrameKey } from "@/lib/connectors/video/startFrame";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 
-export type Picture = { name: string; url: string };
-
 export type PreviousPictures =
 	| { kind: "loading" }
 	| { kind: "empty"; reason: string }
-	| { kind: "ready"; pictures: Picture[] };
+	| { kind: "ready"; pictures: { name: string; url: string }[] };
 
-type FrameUrls = Record<FrameKey, string>;
-
-/** A video's frames as object URLs, null when they cannot decode, undefined while they do. */
+/** Null when the video cannot decode, undefined while it does. */
 function useDecodedFrames(videoUrl: string | undefined) {
 	const [decoded, setDecoded] = useState<{
 		src: string;
-		urls: FrameUrls | null;
+		urls: Record<FrameKey, string> | null;
 	}>();
 	useEffect(() => {
 		if (!videoUrl) return;
@@ -47,7 +43,6 @@ function useDecodedFrames(videoUrl: string | undefined) {
 	return decoded && decoded.src === videoUrl ? decoded.urls : undefined;
 }
 
-/** What the visual before an element hands on, previewed locally: the given frames of a video, in that order, or the image itself. */
 export function usePreviousPictures(
 	element: CanvasContentElement,
 	frames: readonly FrameKey[],

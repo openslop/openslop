@@ -31,7 +31,6 @@ const coverStyle: React.CSSProperties = {
 
 const blackBg: React.CSSProperties = { backgroundColor: "black" };
 
-/** Keeps the old `<Html5Audio crossOrigin>` behaviour if @remotion/media falls back to it. */
 const fallbackHtml5AudioProps = { crossOrigin: "anonymous" } as const;
 
 function AudioSequence({

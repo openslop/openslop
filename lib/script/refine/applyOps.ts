@@ -109,21 +109,6 @@ function applyRemove(
 	return OK;
 }
 
-type NodeEntry = NonNullable<ReturnType<typeof findNodeById>>;
-type SetType = NonNullable<Extract<RefineOp, { op: "set" }>["type"]>;
-
-function replaceNodeType(
-	editor: Editor,
-	id: string,
-	entry: NodeEntry,
-	type: SetType,
-	defaultModels?: ConnectorModels,
-): NodeEntry | null {
-	const [element, path] = entry;
-	retypeNode(editor, path, element, type, { defaultModels });
-	return findNodeById(editor, id);
-}
-
 function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
@@ -132,10 +117,9 @@ function applySet(
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 
-	const target =
-		op.type && op.type !== entry[0].type
-			? replaceNodeType(editor, op.id, entry, op.type, defaultModels)
-			: entry;
+	const retype = op.type && op.type !== entry[0].type ? op.type : undefined;
+	if (retype) retypeNode(editor, entry[1], entry[0], retype, { defaultModels });
+	const target = retype ? findNodeById(editor, op.id) : entry;
 	if (!target)
 		return { ok: false, reason: `set: could not retype element "${op.id}"` };
 	const [element, path] = target;

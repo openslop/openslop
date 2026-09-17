@@ -20,6 +20,7 @@ export function osmlSpec(language: string): string {
 	return dedent`
   The story script must be written in OSML, the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never put a tag inside another tag.
 
+  ## Format
 ${VIDEO_FORMATS}
 
 ${languagePrompt(language)}

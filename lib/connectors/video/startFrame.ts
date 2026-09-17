@@ -14,7 +14,7 @@ export const startFrameDef: AttributeDef = {
 
 export const CONTINUITY_ATTR = "continuity";
 
-/** Linked, a video references the pictures of the visual before it, so its place and look carry over. Set from the reference images control. */
+/** Hidden because the reference images control sets it. */
 export const continuityDef: AttributeDef = {
 	key: CONTINUITY_ATTR,
 	label: "Continuity",
@@ -27,7 +27,7 @@ export const continuityDef: AttributeDef = {
 	hidden: true,
 };
 
-/** The frames a video hands on, named, by how far through it they sit. */
+/** `at` is how far through the video the frame sits. */
 export const FRAMES = {
 	first: { name: "Beginning", at: 0 },
 	middle: { name: "Middle", at: 0.5 },
@@ -36,22 +36,20 @@ export const FRAMES = {
 
 export type FrameKey = keyof typeof FRAMES;
 
-/** Opening on the visual before, a video starts from its end. */
 export const START_FRAME: FrameKey = "last";
 
-/** The frames a linked video references: the end is left to the start frame. */
+/** The end is left to the start frame. */
 export const CONTINUITY_FRAMES: readonly FrameKey[] = ["first", "middle"];
 
 export const UPLOADED_FRAME_ATTR = "uploadedFrame";
 
-/** The picture the user uploaded, kept while the video element opens on the visual before it so it can be chosen again. */
+/** Kept while the video opens on the visual before it, so the upload can be chosen again. */
 export const uploadedFrameDef: AttributeDef = {
 	key: UPLOADED_FRAME_ATTR,
 	label: "Uploaded picture",
 	hidden: true,
 };
 
-/** Opening on a picture of its own, which stays selectable so choosing another does not lose it. */
 export const openingOn = (picture: string): Record<string, string> => ({
 	[START_FRAME_ATTR]: picture,
 	[UPLOADED_FRAME_ATTR]: picture,

@@ -1,9 +1,5 @@
 import { previousVisual } from "@/lib/canvas/scenes";
-import type {
-	AssetResult,
-	ConnectorPlugin,
-	PluginContext,
-} from "@/lib/connectors/types";
+import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
 import {
 	derivedNodeId,
 	sourceNode,
@@ -44,17 +40,6 @@ const forPreviousVisual =
 			: sourceNode(derivedNodeId("first", id), {}, LABEL);
 	};
 
-/** What a settled visual hands on: the given frames of a video, or the image itself. */
-async function picturesOf(
-	source: AssetResult,
-	frames: readonly FrameKey[],
-): Promise<string[]> {
-	if (source.videoUrl) return captureFrames(source.videoUrl, frames);
-	if (source.imageUrl) return [source.imageUrl];
-	throw new Error("The previous visual generated no picture to hand on");
-}
-
-/** The previous visual's pictures, or none for a video element with no visual before it. */
 async function previousPictures(
 	{ elementId = "", canvas = [], dependencies = {} }: PluginContext,
 	frames: readonly FrameKey[],
@@ -64,7 +49,9 @@ async function previousPictures(
 	const source = dependencies[id];
 	if (!source)
 		throw new Error(`The previous visual "${id}" has not generated yet`);
-	return picturesOf(source, frames);
+	if (source.videoUrl) return captureFrames(source.videoUrl, frames);
+	if (source.imageUrl) return [source.imageUrl];
+	throw new Error("The previous visual generated no picture to hand on");
 }
 
 /**

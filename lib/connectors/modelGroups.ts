@@ -9,10 +9,7 @@ import {
 } from "@/components/ui/icon";
 import type { ConnectorType } from "./types";
 
-/**
- * What a person picks a model for. Coarser than a connector type on purpose,
- * so one group can set every connector type it covers.
- */
+/** What a person picks a model for. */
 export interface ModelGroup {
 	key: string;
 	label: string;

@@ -30,9 +30,8 @@ const toJpeg = (canvas: HTMLCanvasElement | OffscreenCanvas): Promise<Blob> =>
 			);
 
 /**
- * Decodes the frames a video hands on straight from the file.
- * Nothing plays, so a background tab cannot pause it, and nothing seeks, so the
- * last frame cannot land short of the end.
+ * Decoded straight from the file: nothing plays, so a background tab cannot
+ * pause it, and nothing seeks, so the last frame cannot land short of the end.
  */
 async function decodeFrames(videoUrl: string): Promise<Frames> {
 	const input = new Input({
@@ -60,7 +59,7 @@ async function decodeFrames(videoUrl: string): Promise<Frames> {
 	}
 }
 
-/** Runs `make` once per key; a failure is forgotten so the next call tries again. */
+/** A failure is forgotten so the next call tries again. */
 function once<T>(
 	cache: Map<string, Promise<T>>,
 	key: string,
@@ -76,15 +75,15 @@ function once<T>(
 	return pending;
 }
 
-/** A hosted video never changes, so its frames are decoded once, and each uploaded once, per session. */
+/** A hosted video never changes, so its frames are decoded and uploaded once per session. */
 const decoded = new Map<string, Promise<Frames>>();
 const uploaded = new Map<string, Promise<string>>();
 
-/** Every frame a hosted video hands on, decoded here to preview them. Browser only. */
+/** Browser only. */
 export const previewFrames = (videoUrl: string): Promise<Frames> =>
 	once(decoded, videoUrl, () => decodeFrames(videoUrl));
 
-/** The given frames of a hosted video, as hosted pictures in the order asked. Browser only. */
+/** Browser only. */
 export const captureFrames = (
 	videoUrl: string,
 	keys: readonly FrameKey[],

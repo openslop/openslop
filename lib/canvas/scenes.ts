@@ -32,7 +32,6 @@ export const isScriptEmpty = (nodes: Descendant[]): boolean =>
 		(element) => withoutCaretMarker(Node.string(element)).trim() === "",
 	);
 
-/** The visual before `id` in document order, across scenes; none for the first. */
 export function previousVisual(
 	elements: CanvasContentElement[],
 	id: string,

@@ -21,12 +21,12 @@ export function updateElementAttrs(
 	mergeAttrs(editor, ReactEditor.findPath(editor, element), element, attrs);
 }
 
-/** Turns an image into a video opening on its picture, by URL since the image is gone. Returns its scene. */
+/** The picture goes by URL since the image is gone once retyped. Returns the scene index. */
 export function animateElement(
 	editor: Editor,
 	element: CanvasContentElement,
 	picture: string | undefined,
-	defaultModels?: ConnectorModels,
+	defaultModels: ConnectorModels,
 ): number {
 	const path = ReactEditor.findPath(editor, element);
 	retypeNode(editor, path, element, "video", {

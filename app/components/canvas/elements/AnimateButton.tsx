@@ -12,7 +12,6 @@ import { useEditorPanel } from "../panel/EditorPanelContext";
 import { animateElement } from "../utils/nodeOps";
 import { useElementGeneration } from "./ElementGenerationContext";
 
-/** Turns an image into a video, then has Sloppy write the movement. */
 export function AnimateButton({ element }: { element: CanvasContentElement }) {
 	const editor = useSlateStatic();
 	const defaultModels = useResolveDefaultModels();

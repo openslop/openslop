@@ -77,7 +77,7 @@ const LIMITS = dedent`
 const FORMATS = dedent`
   # Formats of the finished video
 
-  ${VIDEO_FORMATS.split("\n").slice(1).join("\n")}
+  ${VIDEO_FORMATS}
 
   Name the format in the brief you hand write_script. When the user only wants the videos to join
   differently, change startFrame, continuity and trimToDialogue with edit_script rather than rewriting.

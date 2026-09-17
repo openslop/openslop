@@ -86,8 +86,6 @@ describe("measureElementLengths", () => {
 		expect(held.seconds).toBe(8);
 	});
 
-	// Trimming is each video's own call, so two videos with the same dialogue
-	// after them can measure differently on the same canvas.
 	it("measures a trimmed and an untrimmed video differently side by side", () => {
 		const [cut, held] = measureElementLengths([
 			scene(

@@ -570,8 +570,6 @@ describe("buildRenderLayout", () => {
 		});
 	});
 
-	// Each visual decides for itself; the resolver reads it off the element's
-	// `trimToDialogue` attribute, which is on unless the element says otherwise.
 	describe("trimming a visual to its dialogue", () => {
 		const trimmedVideo = (id: string, durationSec: number) =>
 			el({ id, type: "video", durationSec, trimToDialogue: true });

@@ -304,7 +304,6 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	/** A visual on screen for `seconds`, however that length was arrived at. */
 	const onScreen = (id: string, seconds: number) => ({
 		id,
 		type: "video" as const,

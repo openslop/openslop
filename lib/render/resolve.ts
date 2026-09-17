@@ -6,9 +6,9 @@ import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ResolvedElement } from "./types";
 import {
 	getLoop,
-	getTrimToDialogue,
 	getLoops,
 	getMotion,
+	getTrimToDialogue,
 	getVolume,
 } from "../canvas/elementAttributes";
 

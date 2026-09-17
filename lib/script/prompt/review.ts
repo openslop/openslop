@@ -1,14 +1,13 @@
 import dedent from "dedent";
 
-/** The instruction the review opens with, so the mock can recognise its own prompt. */
+/** Exported so the mock LLM can recognise a review prompt. */
 export const REVIEW_INSTRUCTION = "Thoroughly review this OSML script";
 
-/** What a clean review replies, so the caller knows there is nothing left to fix. */
 export const NO_FINDINGS = "NO FINDINGS";
 
 /**
- * A second reader for a script, given the rules it was written to rather than a
- * summary of them: restating a rule here is how the two drift apart.
+ * Points at the rules' sections rather than restating them: the reviewer gets the
+ * writer's own rules as its system prompt, and a restatement would drift apart.
  */
 export function reviewPrompt(script: string, format?: string): string {
 	return dedent`

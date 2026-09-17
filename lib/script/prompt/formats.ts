@@ -1,18 +1,12 @@
 import dedent from "dedent";
 
-/** The formats a script can take, named once so the spec and the tools that read it cannot drift. */
 export const VIDEO_FORMAT_NAMES = [
 	"Film",
 	"Slideshow",
 	"Motion explainer",
 ] as const;
 
-/**
- * Which elements a script uses and how its videos join. One text, read by the
- * script writer and by Sloppy, so the format is decided before any element is.
- */
 export const VIDEO_FORMATS = dedent`
-  ## Format
   First pick the format closest to the request. The format decides which elements you may write. Use no others.
 
   - Film: the picture tells the story. Only <video> and <music>. Characters speak inside the video prompts. Set trimToDialogue="false" on every video. For anime, drama, short films, trailers, music videos and ambient pieces.

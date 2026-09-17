@@ -44,7 +44,6 @@ const editor = {
 } as unknown as Editor;
 vi.mock("slate-react", () => ({
 	useSlateSelector: <T>(selector: (e: Editor) => T) => selector(editor),
-	useSlateStatic: () => editor,
 }));
 
 vi.mock("@/lib/config/ConfigProvider", () => ({
@@ -83,9 +82,7 @@ describe("useNodeBuilder", () => {
 		expect(render(useNodeBuilder)).toBe(render(useNodeBuilder));
 	});
 
-	// The regression: `vid-1` is edited in place, so the element ids and their
-	// order are untouched. A builder keyed on those alone lived on, and every
-	// graph memoized from it went on holding `vid-1` as it used to be.
+	// Ids and order are untouched, so only the document's identity can tell.
 	it("rebuilds when an element changes without moving", () => {
 		const second = video("vid-2", "shot two");
 		children = document(video("vid-1", "shot one"), second);

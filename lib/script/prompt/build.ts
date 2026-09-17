@@ -46,9 +46,8 @@ function promptParts(
 }
 
 /**
- * The rules a script is held to whatever it was written from, and the same text a
- * review judges it against, so the two cannot drift apart. What only one source
- * contributes — a length budget, a template, a pasted script's notes — stays with it.
+ * Also the review's system prompt. What only one source contributes (a length
+ * budget, a template, a pasted script's notes) stays with that source.
  */
 export function scriptRules(metadata: Metadata): string {
 	return compact([

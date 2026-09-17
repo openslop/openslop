@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { toFrames } from "@/lib/render/frames";
-import type {
-	ResolvedElement,
-	Sequence,
-	RenderLayout,
-} from "@/lib/render/types";
+import { toFrames } from "../frames";
+import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import {
 	buildSceneSegments,
@@ -12,7 +8,7 @@ import {
 	findSegmentIndexAtFrame,
 	type SceneSegment,
 } from "../sceneSegments";
-import { blankScene } from "@/lib/render/blankScene";
+import { blankScene } from "../blankScene";
 
 const seg = (
 	sceneId: string,

@@ -29,12 +29,11 @@ const element = (
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
-/** Builds `el` against a canvas holding `others`, in document order. */
-const resolveOn = (el: CanvasContentElement, others: CanvasContentElement[]) =>
+const resolveOn = (el: CanvasContentElement, canvas: CanvasContentElement[]) =>
 	nodeBuilder(
 		DEFAULT_CONNECTOR_REGISTRY,
 		store.getState(),
-		() => others,
+		() => canvas,
 	)(forElement(el));
 
 const resolve = (el: CanvasContentElement) => resolveOn(el, []);

@@ -70,9 +70,6 @@ export function useAgentTools(editor: Editor) {
 					const model = defaultModels().llm;
 					const llm = createConnector("llm", model, connectorConfig.llm);
 					const { text } = await llm.generate({ prompt, ...options });
-					// Reasoning is spent from the same budget as the reply, and the
-					// model's own output ceiling caps that however much we ask for,
-					// so thinking can consume all of it and leave nothing to say.
 					if (!text.trim())
 						throw new Error(
 							"The model spent its whole output budget thinking and replied with nothing. Ask for less thinking, or for a shorter answer.",

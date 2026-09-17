@@ -1,10 +1,7 @@
 const ANIMATE_VIDEO_PATTERN =
 	/write the motion for the video element in scene (\d+)/i;
 
-/**
- * What the animate button asks Sloppy, once the image has become a video element.
- * Both readings open the same way, so {@link animateVideoScene} still knows one.
- */
+/** Both variants open the same way, so {@link animateVideoScene} matches either. */
 export const animateVideoPrompt = (scene: number, picture?: string): string =>
 	`Write the motion for the video element in scene ${scene}: ${
 		picture

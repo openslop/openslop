@@ -20,7 +20,6 @@ import { RemoveCrossButton } from "../RemoveCrossButton";
 import { AttributeTrigger } from "./AttributeTrigger";
 import { usePreviousPictures } from "./usePreviousPictures";
 
-/** A square choice: the picture it stands for, or an icon while there is none. */
 function FrameTile({
 	label,
 	selected,
@@ -55,11 +54,8 @@ function FrameTile({
 	);
 }
 
-const OPENING_FRAME = [START_FRAME];
-
-/** The picture a video opening on the visual before it starts from, if it has made one yet. */
 function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
-	const previous = usePreviousPictures(element, OPENING_FRAME);
+	const previous = usePreviousPictures(element, [START_FRAME]);
 	if (previous.kind === "loading")
 		return (
 			<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
@@ -69,16 +65,12 @@ function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
 	return <MediaWithSkeleton outputKind="image" src={opening.url} alt="" />;
 }
 
-/**
- * The picture a video opens on: none, the end of the visual before it, or one
- * the user uploaded. Each choice shows the picture it stands for, and an
- * upload is kept while another choice is made so it can be chosen again.
- */
+/** An upload is kept while another choice is made so it can be chosen again. */
 export function StartFramePicker({
 	element,
 	attrKey,
 	label,
-	hideLabel = false,
+	hideLabel,
 }: {
 	element: CanvasContentElement;
 	attrKey: string;

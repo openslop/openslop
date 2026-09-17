@@ -27,7 +27,6 @@ function toVideoJob(video: {
 type ModelId =
 	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
 
-/** How a model takes a request, where Runware's models differ. */
 type ModelProfile = {
 	/** Pin the last start frame as the first frame, or name every start frame as a reference in the prompt. */
 	startFrames: "firstFrame" | "namedReferences";
