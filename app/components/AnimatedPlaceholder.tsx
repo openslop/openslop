@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const SUGGESTIONS = [
 	"a claymation children's story about little red riding hood…",
@@ -11,7 +11,7 @@ const SUGGESTIONS = [
 	"a short animated cat story about a mischievous kitten…",
 	"a cinematic space documentary with epic music about the search for alien civilizations…",
 	"a dark documentary exploring an unsettling internet mystery…",
-	"a \u201CTop 5 Unsolved Archaeological Mysteries\u201D video",
+	"a “Top 5 Unsolved Archaeological Mysteries” video",
 	"a colorful animated children's story about a young rabbit…",
 	"a calming bedtime documentary about life in an ancient medieval village…",
 ];
@@ -23,51 +23,40 @@ const PAUSE_AFTER_ERASE_MS = 300;
 
 export default function AnimatedPlaceholder() {
 	const [display, setDisplay] = useState("");
-	const indexRef = useRef(0);
-	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-	const clear = useCallback(() => {
-		if (timerRef.current !== null) {
-			clearTimeout(timerRef.current);
-			timerRef.current = null;
-		}
-	}, []);
 
 	useEffect(() => {
+		let index = 0;
+		let text = SUGGESTIONS[index];
 		let count = 0;
-		let text = SUGGESTIONS[indexRef.current];
+		let timer = setTimeout(typeStep, TYPING_MS);
 
-		function tick() {
+		function typeStep() {
 			count++;
 			setDisplay(text.slice(0, count));
-			if (count < text.length) {
-				timerRef.current = setTimeout(tick, TYPING_MS);
-			} else {
-				timerRef.current = setTimeout(eraseTick, PAUSE_AFTER_TYPE_MS);
-			}
+			timer =
+				count < text.length
+					? setTimeout(typeStep, TYPING_MS)
+					: setTimeout(eraseStep, PAUSE_AFTER_TYPE_MS);
 		}
 
-		function eraseTick() {
+		function eraseStep() {
 			count--;
 			setDisplay(text.slice(0, count));
-			if (count > 0) {
-				timerRef.current = setTimeout(eraseTick, ERASING_MS);
-			} else {
-				timerRef.current = setTimeout(nextSuggestion, PAUSE_AFTER_ERASE_MS);
-			}
+			timer =
+				count > 0
+					? setTimeout(eraseStep, ERASING_MS)
+					: setTimeout(nextSuggestion, PAUSE_AFTER_ERASE_MS);
 		}
 
 		function nextSuggestion() {
-			indexRef.current = (indexRef.current + 1) % SUGGESTIONS.length;
-			text = SUGGESTIONS[indexRef.current];
+			index = (index + 1) % SUGGESTIONS.length;
+			text = SUGGESTIONS[index];
 			count = 0;
-			tick();
+			typeStep();
 		}
 
-		timerRef.current = setTimeout(tick, TYPING_MS);
-
-		return clear;
-	}, [clear]);
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<span
