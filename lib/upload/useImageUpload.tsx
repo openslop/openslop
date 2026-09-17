@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toastError } from "@/lib/toastError";
-import { partitionImageFiles } from "@/lib/upload/imageFiles";
-import { uploadImage } from "@/lib/upload/uploadImage";
+import { partitionImageFiles } from "./imageFiles";
+import { uploadImage } from "./uploadImage";
 
 const carriesFiles = (data: DataTransfer) => data.types.includes("Files");
 
@@ -46,17 +46,17 @@ export function useImageUpload({
 		const files = multiple ? accepted : accepted.slice(0, 1);
 		if (files.length === 0) return;
 
-		setUploadingCount((n) => n + files.length);
+		setUploadingCount((count) => count + files.length);
 		try {
 			const results = await Promise.allSettled(files.map(uploadImage));
 			const urls: string[] = [];
-			for (const r of results) {
-				if (r.status === "fulfilled") urls.push(r.value);
-				else toastError(r.reason);
+			for (const result of results) {
+				if (result.status === "fulfilled") urls.push(result.value);
+				else toastError(result.reason);
 			}
 			if (urls.length > 0) onUpload(urls);
 		} finally {
-			setUploadingCount((n) => n - files.length);
+			setUploadingCount((count) => count - files.length);
 		}
 	};
 

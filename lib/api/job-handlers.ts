@@ -1,4 +1,4 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { BundleResponse } from "./asset-bundle";
 import { vendorParams, type VendorParams } from "@/lib/connectors/models";
 import type {
 	ImageGenerateParams,

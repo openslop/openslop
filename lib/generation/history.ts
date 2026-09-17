@@ -40,9 +40,9 @@ export class ElementHistory {
 			.then((stored) => {
 				this.log.hydrate(elementId, stored);
 			})
-			.catch((err: unknown) => {
+			.catch((error: unknown) => {
 				this.failed.add(elementId);
-				throw err;
+				throw error;
 			})
 			.finally(() => {
 				this.loading.delete(elementId);
@@ -55,8 +55,8 @@ export class ElementHistory {
 	record = async (committed: CommittedVersion): Promise<void> => {
 		try {
 			this.log.record(await this.storage.write(committed));
-		} catch (err) {
-			toastError(err, "Saving this version failed");
+		} catch (error) {
+			toastError(error, "Saving this version failed");
 			return;
 		}
 		this.emitter.notify();

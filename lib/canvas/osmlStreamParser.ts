@@ -1,5 +1,5 @@
-import type { ParsedElement } from "@/lib/canvas/types";
-import { isCanvasElementType } from "@/lib/canvas/guards";
+import type { ParsedElement } from "./types";
+import { isCanvasElementType } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import type { ConnectorModels } from "@/lib/connectors/models";

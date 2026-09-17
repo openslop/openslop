@@ -271,7 +271,7 @@ export class GenerationQueue implements NodeResults {
 			controller.signal,
 		)
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
-			.catch((err) => this.handleJobError(elementId, err, controller))
+			.catch((error) => this.handleJobError(elementId, error, controller))
 			.finally(() => this.finalizeJob(elementId, controller));
 	}
 
@@ -294,16 +294,16 @@ export class GenerationQueue implements NodeResults {
 
 	private handleJobError(
 		elementId: string,
-		err: unknown,
+		error: unknown,
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		console.error(`Generation failed for element ${elementId}:`, err);
+		console.error(`Generation failed for element ${elementId}:`, error);
 		this.snapshots.update(elementId, {
 			status: "idle",
 			seconds: 0,
 			result: null,
-			error: errorMessage(err),
+			error: errorMessage(error),
 		});
 		this.snapshots.notify();
 	}

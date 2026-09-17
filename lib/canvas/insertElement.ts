@@ -1,5 +1,5 @@
 import { Editor, Path, Transforms } from "slate";
-import type { CanvasElementType } from "@/lib/canvas/types";
+import type { CanvasElementType } from "./types";
 import { createCanvasNode, type CreateNodeOptions } from "./createCanvasNode";
 
 export function insertElement(
