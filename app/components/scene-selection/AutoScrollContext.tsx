@@ -5,7 +5,7 @@ import { createRequiredContext } from "@/lib/components/createRequiredContext";
 
 type AutoScroll = {
 	enabled: boolean;
-	setEnabled: (v: boolean) => void;
+	setEnabled: (enabled: boolean) => void;
 };
 
 const [AutoScrollContext, useAutoScroll] =

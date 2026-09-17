@@ -28,19 +28,19 @@ export default function ProjectsList({
 			try {
 				const project = await createProject();
 				router.push(`/projects/${project.id}`);
-			} catch (err) {
-				toastError(err, "Could not create project");
+			} catch (cause) {
+				toastError(cause, "Could not create project");
 			}
 		});
 	};
 
 	const handleDelete = async (id: string) => {
 		const previous = projects;
-		setProjects((p) => p.filter((x) => x.id !== id));
+		setProjects((list) => list.filter((project) => project.id !== id));
 		try {
 			await deleteProject(id);
-		} catch (err) {
-			toastError(err, "Could not delete project");
+		} catch (cause) {
+			toastError(cause, "Could not delete project");
 			setProjects(previous);
 		}
 	};
