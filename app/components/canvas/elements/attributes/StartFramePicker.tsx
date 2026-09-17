@@ -9,9 +9,8 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import {
 	NO_FRAME,
-	parseStartFrame,
 	PREVIOUS_VISUAL,
-	splitPrevious,
+	START_FRAME,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/startFrame";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
@@ -19,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { AddAssetTile } from "../AddAssetTile";
 import { RemoveCrossButton } from "../RemoveCrossButton";
 import { AttributeTrigger } from "./AttributeTrigger";
-import { usePreviousVisualPictures } from "./usePreviousVisualPictures";
+import { usePreviousPictures } from "./usePreviousPictures";
 
 /** A square choice: the picture it stands for, or an icon while there is none. */
 function FrameTile({
@@ -56,19 +55,18 @@ function FrameTile({
 	);
 }
 
-/** The picture a video opening on the visual before it starts from: its last, if it has made one yet. */
+const OPENING_FRAME = [START_FRAME];
+
+/** The picture a video opening on the visual before it starts from, if it has made one yet. */
 function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
-	const pictures = usePreviousVisualPictures(element);
-	if (pictures.kind === "loading")
+	const previous = usePreviousPictures(element, OPENING_FRAME);
+	if (previous.kind === "loading")
 		return (
 			<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
 		);
-	const [opening] = splitPrevious(
-		pictures.kind === "ready" ? pictures.urls : [],
-		true,
-	).startFrame;
+	const [opening] = previous.kind === "ready" ? previous.pictures : [];
 	if (!opening) return <Transition className="h-5 w-5" />;
-	return <MediaWithSkeleton outputKind="image" src={opening} alt="" />;
+	return <MediaWithSkeleton outputKind="image" src={opening.url} alt="" />;
 }
 
 /**
@@ -88,10 +86,10 @@ export function StartFramePicker({
 	hideLabel?: boolean;
 }) {
 	const editor = useSlateStatic();
-	const frame = parseStartFrame(element.generationAttributes?.[attrKey]);
+	const frame = element.generationAttributes?.[attrKey] ?? NO_FRAME;
 	const uploaded = element.layoutAttributes?.[UPLOADED_FRAME_ATTR];
-	const usesUpload = frame?.kind === "url";
-	const usesPrevious = frame?.kind === "previous";
+	const usesPrevious = frame === PREVIOUS_VISUAL;
+	const usesUpload = URL.canParse(frame);
 	const setFrame = (next: string, upload = uploaded ?? null) =>
 		updateElementAttrs(editor, element, {
 			[attrKey]: next,

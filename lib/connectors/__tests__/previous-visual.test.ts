@@ -8,13 +8,13 @@ import {
 import type { AssetResult, ConnectorPlugin } from "../types";
 
 const captureFrames = vi.hoisted(() =>
-	vi.fn<(url: string) => Promise<string[]>>(),
+	vi.fn(async (_url: string, frames: readonly string[]) =>
+		frames.map((frame) => `https://img/${frame}.png`),
+	),
 );
 vi.mock("@/lib/connectors/video/captureFrames", () => ({
 	captureFrames,
 }));
-
-const FRAMES = ["https://img/middle.png", "https://img/last.png"];
 
 const EMPTY_STATE = { metadata: MetadataSchema.parse({}), referenceImages: [] };
 
@@ -61,14 +61,12 @@ describe("previous-visual plugin", () => {
 		});
 	};
 
-	const afterVideo = (params: ParamsWithPreviousVisual) => {
-		captureFrames.mockResolvedValue(FRAMES);
-		return before(params, PREVIOUS_VIDEO_RESULT, [previousVideo, video()]);
-	};
+	const afterVideo = (params: ParamsWithPreviousVisual) =>
+		before(params, PREVIOUS_VIDEO_RESULT, [previousVideo, video()]);
 
 	beforeEach(() => {
 		plugin = createPreviousVisualPlugin();
-		captureFrames.mockReset();
+		captureFrames.mockClear();
 	});
 
 	describe("dependencies", () => {
@@ -156,17 +154,17 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({ prompt: "slow pan" });
 		});
 
-		it("opens on a previous video's last frame alone", async () => {
+		it("opens on a previous video's end alone", async () => {
 			await expect(
 				afterVideo({ prompt: "slow pan", startFrame: "previous" }),
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImages: ["https://img/last.png"],
 			});
-			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4");
+			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4", ["last"]);
 		});
 
-		it("adds a previous video's frames after the reference images when linked", async () => {
+		it("adds a previous video's beginning and middle after the reference images when linked", async () => {
 			await expect(
 				afterVideo({
 					prompt: "slow pan",
@@ -175,11 +173,15 @@ describe("previous-visual plugin", () => {
 				}),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				referenceImages: ["https://img/avatar.png", ...FRAMES],
+				referenceImages: [
+					"https://img/avatar.png",
+					"https://img/first.png",
+					"https://img/middle.png",
+				],
 			});
 		});
 
-		it("opens on the last frame and references the middle one when linked", async () => {
+		it("opens on the end and references the beginning and middle when linked", async () => {
 			await expect(
 				afterVideo({
 					prompt: "slow pan",
@@ -189,11 +191,11 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImages: ["https://img/last.png"],
-				referenceImages: ["https://img/middle.png"],
+				referenceImages: ["https://img/first.png", "https://img/middle.png"],
 			});
 		});
 
-		it("references every frame while opening on an uploaded picture", async () => {
+		it("references the beginning and middle while opening on an uploaded picture", async () => {
 			await expect(
 				afterVideo({
 					prompt: "slow pan",
@@ -203,7 +205,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImages: ["https://img/a.png"],
-				referenceImages: FRAMES,
+				referenceImages: ["https://img/first.png", "https://img/middle.png"],
 			});
 		});
 

@@ -64,7 +64,7 @@ export function ReferenceImagesPopover({
 				{!hideLabel && <span className="opacity-70 mr-1">{label}</span>}
 				{summary}
 			</AttributeTrigger>
-			<PopoverContent align="start" className="w-72">
+			<PopoverContent align="end" className="w-72">
 				<div className="mb-2 flex items-baseline justify-between gap-2">
 					<span className="text-label text-muted-foreground">
 						{override ? "Custom for this element" : "Using project references"}

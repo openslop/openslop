@@ -5,18 +5,6 @@ export const START_FRAME_ATTR = "startFrame";
 export const PREVIOUS_VISUAL = "previous";
 export const NO_FRAME = "none";
 
-/** Where a video's first frame comes from: the visual before it, or a picture by URL. */
-export type StartFrame = { kind: "previous" } | { kind: "url"; url: string };
-
-export function parseStartFrame(
-	value: string | undefined,
-): StartFrame | undefined {
-	const trimmed = value?.trim();
-	if (!trimmed || trimmed === NO_FRAME) return undefined;
-	if (trimmed === PREVIOUS_VISUAL) return { kind: "previous" };
-	return { kind: "url", url: trimmed };
-}
-
 export const startFrameDef: AttributeDef = {
 	key: START_FRAME_ATTR,
 	label: "Start frame",
@@ -24,16 +12,7 @@ export const startFrameDef: AttributeDef = {
 	default: NO_FRAME,
 };
 
-/** The frames a video hands on, by how far through it they sit. Never its first. */
-export const HANDED_ON_FRAMES = [
-	{ name: "Middle frame", at: 0.5 },
-	{ name: "Last frame", at: 1 },
-] as const;
-
 export const CONTINUITY_ATTR = "continuity";
-
-export const isLinked = (value: string | undefined): boolean =>
-	value === "true";
 
 /** Linked, a video references the pictures of the visual before it, so its place and look carry over. Set from the reference images control. */
 export const continuityDef: AttributeDef = {
@@ -48,14 +27,20 @@ export const continuityDef: AttributeDef = {
 	hidden: true,
 };
 
-/** A video opening on the visual before it starts from its last picture, which leaves the rest to reference. */
-export const splitPrevious = <T>(
-	pictures: readonly T[],
-	opensOnPrevious: boolean,
-) => ({
-	startFrame: opensOnPrevious ? pictures.slice(-1) : [],
-	rest: opensOnPrevious ? pictures.slice(0, -1) : [...pictures],
-});
+/** The frames a video hands on, named, by how far through it they sit. */
+export const FRAMES = {
+	first: { name: "Beginning", at: 0 },
+	middle: { name: "Middle", at: 0.5 },
+	last: { name: "End", at: 1 },
+} as const;
+
+export type FrameKey = keyof typeof FRAMES;
+
+/** Opening on the visual before, a video starts from its end. */
+export const START_FRAME: FrameKey = "last";
+
+/** The frames a linked video references: the end is left to the start frame. */
+export const CONTINUITY_FRAMES: readonly FrameKey[] = ["first", "middle"];
 
 export const UPLOADED_FRAME_ATTR = "uploadedFrame";
 

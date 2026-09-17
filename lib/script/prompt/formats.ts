@@ -21,7 +21,7 @@ export const VIDEO_FORMATS = dedent`
 
   The video settings behind this:
   - startFrame="none" starts each video fresh, and startFrame="previous" continues from the previous video element's last frame. Use both appropriately so the story flows and the videos join smoothly. Prefer slower, gradual pacing.
-  - continuity="true" (the default) shows a video the middle and last frames of the visual before it, so it keeps that place, light and look. Set continuity="false" when the video moves somewhere new.
+  - continuity="true" (the default) shows a video the beginning and middle frames of the visual before it, so it keeps that place, light and look. Set continuity="false" when the video moves somewhere new.
   - trimToDialogue="true" (the default) keeps a visual on screen only while the speech elements after it play. "false" plays a video in full.
   - A video that the next video continues from must use trimToDialogue="false". If it is trimmed, the picture jumps.
   - loop="true" (the default) repeats a video while the speech under it runs longer; "false" holds its last frame.

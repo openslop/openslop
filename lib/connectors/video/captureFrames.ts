@@ -5,10 +5,15 @@ import {
 	UrlSource,
 	type WrappedCanvas,
 } from "mediabunny";
+import zipObject from "lodash/zipObject";
 import { uploadImage } from "@/lib/upload/uploadImage";
-import { HANDED_ON_FRAMES } from "./startFrame";
+import { FRAMES, type FrameKey } from "./startFrame";
 
 const JPEG_QUALITY = 0.92;
+
+const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
+
+export type Frames = Record<FrameKey, Blob>;
 
 const toJpeg = (canvas: HTMLCanvasElement | OffscreenCanvas): Promise<Blob> =>
 	"convertToBlob" in canvas
@@ -29,7 +34,7 @@ const toJpeg = (canvas: HTMLCanvasElement | OffscreenCanvas): Promise<Blob> =>
  * Nothing plays, so a background tab cannot pause it, and nothing seeks, so the
  * last frame cannot land short of the end.
  */
-async function decodeFrames(videoUrl: string): Promise<Blob[]> {
+async function decodeFrames(videoUrl: string): Promise<Frames> {
 	const input = new Input({
 		source: new UrlSource(videoUrl),
 		formats: ALL_FORMATS,
@@ -43,12 +48,13 @@ async function decodeFrames(videoUrl: string): Promise<Blob[]> {
 		]);
 		const frames: WrappedCanvas[] = [];
 		for await (const frame of new CanvasSink(track).canvasesAtTimestamps(
-			HANDED_ON_FRAMES.map(({ at }) => start + (end - start) * at),
+			FRAME_KEYS.map((key) => start + (end - start) * FRAMES[key].at),
 		)) {
 			if (!frame) throw new Error("Could not decode the video's frames");
 			frames.push(frame);
 		}
-		return await Promise.all(frames.map(({ canvas }) => toJpeg(canvas)));
+		const jpegs = await Promise.all(frames.map(({ canvas }) => toJpeg(canvas)));
+		return zipObject(FRAME_KEYS, jpegs) as Frames;
 	} finally {
 		input.dispose();
 	}
@@ -70,22 +76,26 @@ function once<T>(
 	return pending;
 }
 
-/** A hosted video never changes, so its frames are decoded and uploaded once per session. */
-const decoded = new Map<string, Promise<Blob[]>>();
-const uploaded = new Map<string, Promise<string[]>>();
+/** A hosted video never changes, so its frames are decoded once, and each uploaded once, per session. */
+const decoded = new Map<string, Promise<Frames>>();
+const uploaded = new Map<string, Promise<string>>();
 
-/** The frames a hosted video hands on, decoded here to preview them. Browser only. */
-export const previewFrames = (videoUrl: string): Promise<Blob[]> =>
+/** Every frame a hosted video hands on, decoded here to preview them. Browser only. */
+export const previewFrames = (videoUrl: string): Promise<Frames> =>
 	once(decoded, videoUrl, () => decodeFrames(videoUrl));
 
-/** The frames a hosted video hands on, as hosted pictures in time order. Browser only. */
-export const captureFrames = (videoUrl: string): Promise<string[]> =>
-	once(uploaded, videoUrl, async () =>
-		Promise.all(
-			(await previewFrames(videoUrl)).map((jpeg, index) =>
-				uploadImage(
-					new File([jpeg], `frame-${index}.jpg`, { type: jpeg.type }),
-				),
-			),
+/** The given frames of a hosted video, as hosted pictures in the order asked. Browser only. */
+export const captureFrames = (
+	videoUrl: string,
+	keys: readonly FrameKey[],
+): Promise<string[]> =>
+	Promise.all(
+		keys.map((key) =>
+			once(uploaded, `${key}@${videoUrl}`, async () => {
+				const jpeg = (await previewFrames(videoUrl))[key];
+				return uploadImage(
+					new File([jpeg], `frame-${key}.jpg`, { type: jpeg.type }),
+				);
+			}),
 		),
 	);

@@ -60,43 +60,44 @@ beforeEach(() => {
 });
 
 describe("captureFrames", () => {
-	it("uploads the middle and last frames in order, never the first, and releases the file", async () => {
-		await expect(captureFrames("https://vid/a.mp4")).resolves.toEqual([
-			"https://img/frame@4.5",
-			"https://img/frame@8.5",
-		]);
-		expect(media.timestamps).toEqual([[4.5, 8.5]]);
+	it("decodes the beginning, middle and end once, uploads the frames asked for in that order, and releases the file", async () => {
+		await expect(
+			captureFrames("https://vid/a.mp4", ["middle", "first"]),
+		).resolves.toEqual(["https://img/frame@4.5", "https://img/frame@0.5"]);
+		await expect(captureFrames("https://vid/a.mp4", ["last"])).resolves.toEqual(
+			["https://img/frame@8.5"],
+		);
+		expect(media.timestamps).toEqual([[0.5, 4.5, 8.5]]);
 		expect(media.dispose).toHaveBeenCalledOnce();
 	});
 
 	it("fails loudly for a file with no picture, still releasing it", async () => {
 		media.track = null;
-		await expect(captureFrames("https://vid/audio-only.mp4")).rejects.toThrow(
-			/no picture/,
-		);
+		await expect(
+			captureFrames("https://vid/audio-only.mp4", ["last"]),
+		).rejects.toThrow(/no picture/);
 		expect(media.dispose).toHaveBeenCalledOnce();
 	});
 
 	it("tries again after a failed decode", async () => {
 		media.missing = true;
-		await expect(captureFrames("https://vid/retry.mp4")).rejects.toThrow(
-			/Could not decode/,
-		);
+		await expect(
+			captureFrames("https://vid/retry.mp4", ["last"]),
+		).rejects.toThrow(/Could not decode/);
 		media.missing = false;
-		await expect(captureFrames("https://vid/retry.mp4")).resolves.toHaveLength(
-			2,
-		);
+		await expect(
+			captureFrames("https://vid/retry.mp4", ["last"]),
+		).resolves.toHaveLength(1);
 	});
 });
 
 describe("previewFrames", () => {
-	it("gives the middle and last frames from the same decode as the capture", async () => {
+	it("gives every frame by key from the same decode as the capture", async () => {
 		const frames = await previewFrames("https://vid/shared.mp4");
-		await captureFrames("https://vid/shared.mp4");
-		expect(await Promise.all(frames.map((frame) => frame.text()))).toEqual([
-			"frame@4.5",
-			"frame@8.5",
-		]);
+		await captureFrames("https://vid/shared.mp4", ["first"]);
+		expect(await frames.first.text()).toBe("frame@0.5");
+		expect(await frames.middle.text()).toBe("frame@4.5");
+		expect(await frames.last.text()).toBe("frame@8.5");
 		expect(media.inputs).toBe(1);
 	});
 });
