@@ -4,7 +4,7 @@ import { animateImagePrompt, animateImageScene } from "../animatePrompt";
 describe("animateImagePrompt", () => {
 	it("names the scene the user is looking at", () => {
 		expect(animateImagePrompt(9)).toBe(
-			"Animate the image in scene 9 and use its existing result as the start frame for the video.",
+			"Animate the image in scene 9 and use its existing result (if it exists) as the start frame for the video.",
 		);
 	});
 
