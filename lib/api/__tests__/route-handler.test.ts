@@ -4,7 +4,6 @@ import { z } from "zod";
 import { imageFile } from "../request-schema-fields";
 import { createJobPollHandler } from "../asset-routes";
 import { HOSTED } from "../route-families";
-import { OPENSLOP_IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 import { bodySchema, hostedModel } from "../generation-schema";
 import {
 	createApiRouteHandler,
@@ -46,7 +45,7 @@ function makeRequest(body: unknown) {
 	});
 }
 
-const schema = bodySchema(hostedModel(OPENSLOP_IMAGE_MODELS), {});
+const schema = bodySchema(hostedModel("image"), {});
 
 function makeHandler(
 	handle?: Parameters<typeof createApiRouteHandler>[0]["handle"],

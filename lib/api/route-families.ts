@@ -1,9 +1,6 @@
 import type { z } from "zod";
-import {
-	isByokProvider,
-	type BYOKProvider,
-} from "@/lib/connectors/providerCatalog";
-import type { ModelRef, ModelTable } from "@/lib/connectors/types";
+import { isByokProvider } from "@/lib/connectors/providerCatalog";
+import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import type { ProviderType, Providers } from "@/lib/providers/types";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";
 import { byokProviderFor } from "./providers/byok";
@@ -20,13 +17,13 @@ import {
 /**
  * Everything that differs between the two route families, in one place: who a
  * route lets in, how it names its models, and whose key a picked model runs
- * on. A route picks a family and its models; nothing else about it varies.
+ * on. A route picks a family and a connector type; nothing else about it varies.
  */
-export type RouteFamily<TModels, TPicked extends ModelRef> = {
+export type RouteFamily<TPicked extends ModelRef> = {
 	createHandler: typeof createApiRouteHandler;
 	createQueryHandler: typeof createApiQueryRouteHandler;
 	createParamHandler: typeof createApiParamRouteHandler;
-	model: (models: TModels) => z.ZodType<TPicked>;
+	model: (type: ConnectorType) => z.ZodType<TPicked>;
 	providerFor: <K extends ProviderType>(
 		userId: string,
 		type: K,
@@ -34,7 +31,7 @@ export type RouteFamily<TModels, TPicked extends ModelRef> = {
 	) => Promise<Providers[K]>;
 };
 
-export const HOSTED: RouteFamily<ModelTable, ModelRef> = {
+export const HOSTED: RouteFamily<ModelRef> = {
 	createHandler: createApiRouteHandler,
 	createQueryHandler: createApiQueryRouteHandler,
 	createParamHandler: createApiParamRouteHandler,
@@ -43,10 +40,7 @@ export const HOSTED: RouteFamily<ModelTable, ModelRef> = {
 		hostedProviderFor(type, picked.model),
 };
 
-export const BYOK: RouteFamily<
-	Partial<Record<BYOKProvider, ModelTable>>,
-	BYOKModelRef
-> = {
+export const BYOK: RouteFamily<BYOKModelRef> = {
 	createHandler: createSessionRouteHandler,
 	createQueryHandler: createSessionQueryRouteHandler,
 	createParamHandler: createSessionParamRouteHandler,

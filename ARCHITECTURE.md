@@ -36,7 +36,7 @@ Users see models and providers; developers also see connectors. Each word means 
 
 A model is a `{ provider, model }` pair, never a bare name. `MODELS[type][provider][name]` in `lib/connectors/models.ts` is the whole table, and nothing anywhere derives a provider from a name. Every element stores its own pair as attributes, speech included. A voice in project metadata stores the pair it was picked on, and its narration and character elements speak with that pair, falling back to their own until the voice picks one. A plugin declares where such an inherited model comes from, the same way it declares what it reads. Defaults resolve element, then project, then account, then the recommendation.
 
-Everything that differs between the two route families is one object each in `lib/api/route-families.ts`. `HOSTED` is API-access gated, takes only a model name, and runs on our keys. `BYOK` is session gated, takes the pair, and runs on the account's key. A route file picks a family and the models it serves. A job stores the pair, and the worker builds the provider from it at the last moment, which is the one place the server branches on the family.
+Everything that differs between the two route families is one object each in `lib/api/route-families.ts`. `HOSTED` is API-access gated, takes only a model name, and runs on our keys. `BYOK` is session gated, takes the pair, and runs on the account's key. A route file picks a family and a connector type; the family reads that type's models from the table. A job stores the pair, and the worker builds the provider from it at the last moment, which is the one place the server branches on the family.
 
 User keys live in Supabase Vault, one per provider, read by the service role for the single request about to use them and never returned to a client. A key is verified by asking the vendor.
 
@@ -71,4 +71,4 @@ Generated assets live in Vercel Blob as public CDN URLs.
 
 ## Adding a provider or asset type
 
-A hosted model is a row in its type's `openslop/models.ts` plus a row naming its class in `lib/api/providers/openslop.ts`. A BYOK provider is a brand entry in the provider catalog, a models map under `lib/connectors/<type>/<provider>/`, a class per type in the vendor table, and a `validate()` on those classes. A new asset type is a connector, a provider, a models map and two route files. Tests live in `__tests__` folders next to the code.
+A hosted model is a row in its type's `openslop/models.ts` plus a row naming its class in `lib/api/providers/openslop.ts`. A BYOK provider is a brand entry in the provider catalog, a models map under `lib/connectors/<type>/<provider>/`, a class per type in the vendor table, and a `validate()` on those classes. A new asset type is a connector, a provider, a models map, a row in `lib/api/asset-routes.ts` and two route files. Tests live in `__tests__` folders next to the code.

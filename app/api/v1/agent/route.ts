@@ -7,9 +7,8 @@ import {
 import { createAgentRouteHandler } from "@/lib/api/llm-routes";
 import { HOSTED } from "@/lib/api/route-families";
 import { createApiQueryRouteHandler } from "@/lib/api/route-handler";
-import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 
-export const POST = createAgentRouteHandler(HOSTED, OPENSLOP_LLM_MODELS);
+export const POST = createAgentRouteHandler(HOSTED);
 
 export const GET = createApiQueryRouteHandler({
 	schema: z.object({ projectId: z.uuid() }),
