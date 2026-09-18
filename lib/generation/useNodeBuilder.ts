@@ -8,10 +8,9 @@ import { useProject } from "@/lib/project/useProject";
 import { nodeBuilder, type NodeBuilder } from "./resolveGraph";
 
 /**
- * Keyed on the document it builds against rather than reading the live one, so
- * one builder never mixes nodes from two revisions. Slate swaps `children` on
- * every document edit but not on a selection move, so its identity is the
- * revision.
+ * Builds from a snapshot of the document, not the live one, so a builder never
+ * sees a half-edited canvas. `children` changes on every edit but not on a
+ * selection change, so it is a cheap way to know when to rebuild.
  */
 export function useNodeBuilder(): NodeBuilder {
 	const { connectorConfig } = useConfig();
