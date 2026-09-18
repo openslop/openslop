@@ -6,6 +6,7 @@ import {
 	type WrappedCanvas,
 } from "mediabunny";
 import zipObject from "lodash/zipObject";
+import { memoAsync } from "@/lib/memoAsync";
 import { uploadImage } from "@/lib/upload/uploadImage";
 import { FRAMES, type FrameKey } from "./startFrame";
 
@@ -53,42 +54,22 @@ async function decodeFrames(videoUrl: string): Promise<Frames> {
 	}
 }
 
-/** A failure is forgotten so the next call tries again. */
-function once<T>(
-	cache: Map<string, Promise<T>>,
-	key: string,
-	make: () => Promise<T>,
-): Promise<T> {
-	const pending =
-		cache.get(key) ??
-		make().catch((error: unknown) => {
-			cache.delete(key);
-			throw error;
-		});
-	cache.set(key, pending);
-	return pending;
-}
+/** Browser only. A hosted video never changes, so it is decoded once. */
+export const previewFrames = memoAsync(decodeFrames, (videoUrl) => videoUrl);
 
-/** A hosted video never changes, so its frames are decoded and uploaded once per session. */
-const decoded = new Map<string, Promise<Frames>>();
-const uploaded = new Map<string, Promise<string>>();
-
-/** Browser only. */
-export const previewFrames = (videoUrl: string): Promise<Frames> =>
-	once(decoded, videoUrl, () => decodeFrames(videoUrl));
+const uploadFrame = memoAsync(
+	async (videoUrl: string, key: FrameKey): Promise<string> => {
+		const jpeg = (await previewFrames(videoUrl))[key];
+		return uploadImage(
+			new File([jpeg], `frame-${key}.jpg`, { type: jpeg.type }),
+		);
+	},
+	(videoUrl, key) => `${key}@${videoUrl}`,
+);
 
 /** Browser only. */
 export const captureFrames = (
 	videoUrl: string,
 	keys: readonly FrameKey[],
 ): Promise<string[]> =>
-	Promise.all(
-		keys.map((key) =>
-			once(uploaded, `${key}@${videoUrl}`, async () => {
-				const jpeg = (await previewFrames(videoUrl))[key];
-				return uploadImage(
-					new File([jpeg], `frame-${key}.jpg`, { type: jpeg.type }),
-				);
-			}),
-		),
-	);
+	Promise.all(keys.map((key) => uploadFrame(videoUrl, key)));
