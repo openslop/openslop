@@ -7,6 +7,7 @@ const media = vi.hoisted(() => ({
 	} | null,
 	timestamps: [] as number[][],
 	missing: false,
+	unencodable: false,
 	dispose: vi.fn(),
 	inputs: 0,
 }));
@@ -32,9 +33,13 @@ vi.mock("mediabunny", () => ({
 					: {
 							timestamp,
 							canvas: {
-								convertToBlob: () =>
-									Promise.resolve(
-										new Blob([`frame@${timestamp}`], { type: "image/jpeg" }),
+								toBlob: (done: (blob: Blob | null) => void) =>
+									done(
+										media.unencodable
+											? null
+											: new Blob([`frame@${timestamp}`], {
+													type: "image/jpeg",
+												}),
 									),
 							},
 						};
@@ -55,6 +60,7 @@ beforeEach(() => {
 	};
 	media.timestamps = [];
 	media.missing = false;
+	media.unencodable = false;
 	media.dispose.mockReset();
 	media.inputs = 0;
 });
@@ -88,6 +94,14 @@ describe("captureFrames", () => {
 		await expect(
 			captureFrames("https://vid/retry.mp4", ["last"]),
 		).resolves.toHaveLength(1);
+	});
+
+	it("fails loudly for a frame that will not encode", async () => {
+		media.unencodable = true;
+		await expect(
+			captureFrames("https://vid/unencodable.mp4", ["last"]),
+		).rejects.toThrow(/Could not encode/);
+		expect(media.dispose).toHaveBeenCalledOnce();
 	});
 });
 

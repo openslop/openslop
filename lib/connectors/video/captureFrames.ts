@@ -15,24 +15,16 @@ const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
 
 export type Frames = Record<FrameKey, Blob>;
 
-const toJpeg = (canvas: HTMLCanvasElement | OffscreenCanvas): Promise<Blob> =>
-	"convertToBlob" in canvas
-		? canvas.convertToBlob({ type: "image/jpeg", quality: JPEG_QUALITY })
-		: new Promise((resolve, reject) =>
-				canvas.toBlob(
-					(blob) =>
-						blob
-							? resolve(blob)
-							: reject(new Error("Could not encode the frame")),
-					"image/jpeg",
-					JPEG_QUALITY,
-				),
-			);
+const toJpeg = (canvas: HTMLCanvasElement): Promise<Blob> =>
+	new Promise((resolve, reject) =>
+		canvas.toBlob(
+			(blob) =>
+				blob ? resolve(blob) : reject(new Error("Could not encode the frame")),
+			"image/jpeg",
+			JPEG_QUALITY,
+		),
+	);
 
-/**
- * Decoded straight from the file: nothing plays, so a background tab cannot
- * pause it, and nothing seeks, so the last frame cannot land short of the end.
- */
 async function decodeFrames(videoUrl: string): Promise<Frames> {
 	const input = new Input({
 		source: new UrlSource(videoUrl),
@@ -52,7 +44,9 @@ async function decodeFrames(videoUrl: string): Promise<Frames> {
 			if (!frame) throw new Error("Could not decode the video's frames");
 			frames.push(frame);
 		}
-		const jpegs = await Promise.all(frames.map(({ canvas }) => toJpeg(canvas)));
+		const jpegs = await Promise.all(
+			frames.map(({ canvas }) => toJpeg(canvas as HTMLCanvasElement)),
+		);
 		return zipObject(FRAME_KEYS, jpegs) as Frames;
 	} finally {
 		input.dispose();
