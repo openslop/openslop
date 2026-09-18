@@ -9,6 +9,7 @@ import { editScript } from "./editScript";
 import { fitDurations } from "./fitDurations";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
+import { readSettings } from "./readSettings";
 import { reviewScript } from "./reviewScript";
 import { setCaptionStyle } from "./setCaptionStyle";
 import { setCharacter } from "./setCharacter";
@@ -24,6 +25,7 @@ import { writeScript } from "./writeScript";
 /** Registration is the contract: one entry is a tool's whole definition. */
 const TOOLS = {
 	read_script: readScript,
+	read_settings: readSettings,
 	edit_script: editScript,
 	write_script: writeScript,
 	adapt_script: adaptScript,

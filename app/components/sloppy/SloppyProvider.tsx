@@ -15,7 +15,6 @@ import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/useAgentTools";
-import { useAgentContext } from "@/lib/agent/projectContext";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { toastError } from "@/lib/toastError";
@@ -70,7 +69,6 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	const editor = useSlateStatic();
 	const { projectId } = useConfig();
 	const runTool = useAgentTools(editor);
-	const readContext = useAgentContext(editor);
 	const restored = useTranscript(projectId);
 	const model = useDefaultModels().llm;
 	const turnModel = useRef<ModelRef>(undefined);
@@ -90,7 +88,6 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 							...body,
 							projectId,
 							message: messages.at(-1),
-							context: readContext(),
 							...picked,
 						},
 					};
