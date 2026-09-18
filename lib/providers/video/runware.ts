@@ -26,7 +26,7 @@ function toVideoJob(video: {
 type ModelId =
 	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
 
-type Pictures = { startFrame?: string; references: string[] };
+type Pictures = { startFrames: string[]; references: string[] };
 
 type Conditioning = Pick<IRequestVideo, "positivePrompt" | "inputs">;
 
@@ -43,22 +43,23 @@ const pictureInputs = (
 
 const openingOnFrameImage =
 	({ maxReferences }: { maxReferences: number }): Conditioner =>
-	(prompt, { startFrame, references }) => ({
+	(prompt, { startFrames, references }) => ({
 		positivePrompt: prompt,
 		...pictureInputs({
-			frameImages: startFrame ? [startFrame] : [],
+			frameImages: startFrames.slice(-1),
 			referenceImages: references.slice(0, maxReferences),
 		}),
 	});
 
 const openingOnNamedReference =
 	({ maxReferences }: { maxReferences: number }): Conditioner =>
-	(prompt, { startFrame, references }) => {
-		if (!startFrame)
-			return openingOnFrameImage({ maxReferences })(prompt, { references });
+	(prompt, pictures) => {
+		const { startFrames, references } = pictures;
+		if (startFrames.length === 0)
+			return openingOnFrameImage({ maxReferences })(prompt, pictures);
 		const referenceImages = [
-			...references.slice(0, maxReferences - 1),
-			startFrame,
+			...references.slice(0, maxReferences - startFrames.length),
+			...startFrames,
 		];
 		return {
 			positivePrompt: `@Image ${referenceImages.length} as the first frame. ${prompt}`,
@@ -101,7 +102,7 @@ export class RunwareVideo extends BaseVideoProvider {
 		if (!isModelId(params.model))
 			throw new Error(`Runware has no video model "${params.model}"`);
 		const conditioning = CONDITIONERS[params.model](params.prompt, {
-			startFrame: params.frameImages?.at(-1),
+			startFrames: params.frameImages ?? [],
 			references: params.referenceImages ?? [],
 		});
 		return withRunware(this.apiKey, async (runware) => {
