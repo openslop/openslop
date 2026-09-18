@@ -1,5 +1,4 @@
-import isEmpty from "lodash/isEmpty";
-import pickBy from "lodash/pickBy";
+import type { IRequestVideo } from "@runware/sdk-js";
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
@@ -27,77 +26,63 @@ function toVideoJob(video: {
 type ModelId =
 	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
 
-type ModelProfile = {
-	/** Pin the last start frame as the first frame, or name every start frame as a reference in the prompt. */
-	startFrames: "firstFrame" | "namedReferences";
-	/** The most reference images the model takes, a start frame named among them included. */
-	maxReferenceImages: number;
+type Pictures = { startFrame?: string; references: string[] };
+
+type Conditioning = Pick<IRequestVideo, "positivePrompt" | "inputs">;
+
+type Conditioner = (prompt: string, pictures: Pictures) => Conditioning;
+
+const pictureInputs = (
+	lists: Record<string, string[]>,
+): Pick<IRequestVideo, "inputs"> => {
+	const inputs = Object.fromEntries(
+		Object.entries(lists).filter(([, images]) => images.length > 0),
+	);
+	return Object.keys(inputs).length > 0 ? { inputs } : {};
 };
 
-const PROFILES: Record<ModelId, ModelProfile> = {
-	// Refuses frame images beside reference images.
-	"bytedance:seedance@2.0-fast": {
-		startFrames: "namedReferences",
-		maxReferenceImages: 9,
-	},
-	"klingai:kling-video@3.0-turbo": {
-		startFrames: "firstFrame",
-		maxReferenceImages: 0,
-	},
-};
+const openingOnFrameImage =
+	({ maxReferences }: { maxReferences: number }): Conditioner =>
+	(prompt, { startFrame, references }) => ({
+		positivePrompt: prompt,
+		...pictureInputs({
+			frameImages: startFrame ? [startFrame] : [],
+			referenceImages: references.slice(0, maxReferences),
+		}),
+	});
 
-const isModelId = (model: string): model is ModelId => model in PROFILES;
-
-type ModelInputs = {
-	prompt: string;
-	frameImages: string[];
-	referenceImages: string[];
-};
-
-/**
- * Start frames arrive in time order, the last being the one to open on. Past
- * the model's limit, the reference images at the end are dropped.
- */
-function inputsFor(params: VideoRequest, profile: ModelProfile): ModelInputs {
-	const references = params.referenceImages ?? [];
-	const frames = params.frameImages ?? [];
-	if (frames.length === 0 || profile.startFrames === "firstFrame")
+const openingOnNamedReference =
+	({ maxReferences }: { maxReferences: number }): Conditioner =>
+	(prompt, { startFrame, references }) => {
+		if (!startFrame)
+			return openingOnFrameImage({ maxReferences })(prompt, { references });
+		const referenceImages = [
+			...references.slice(0, maxReferences - 1),
+			startFrame,
+		];
 		return {
-			prompt: params.prompt,
-			frameImages: frames.slice(-1),
-			referenceImages: references.slice(0, profile.maxReferenceImages),
+			positivePrompt: `@Image ${referenceImages.length} as the first frame. ${prompt}`,
+			inputs: { referenceImages },
 		};
-	const referenceImages = [
-		...references.slice(0, profile.maxReferenceImages - frames.length),
-		...frames,
-	];
-	return {
-		prompt: `@Image ${referenceImages.length} as the first frame. ${params.prompt}`,
-		frameImages: [],
-		referenceImages,
 	};
-}
+
+const CONDITIONERS: Record<ModelId, Conditioner> = {
+	"bytedance:seedance@2.0-fast": openingOnNamedReference({ maxReferences: 9 }),
+	"klingai:kling-video@3.0-turbo": openingOnFrameImage({ maxReferences: 0 }),
+};
+
+const isModelId = (model: string): model is ModelId => model in CONDITIONERS;
 
 const DEFAULT_SIZE =
 	ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[DEFAULT_VIDEO_RESOLUTION];
 
-/** A video opening on a frame takes its aspect from the frame, so it is sized by preset. */
-const sizeFor = (params: VideoRequest, { frameImages }: ModelInputs) =>
-	frameImages.length > 0 && params.resolution
+const sizeFor = (params: VideoRequest, { inputs }: Conditioning) =>
+	inputs?.frameImages && params.resolution
 		? { resolution: params.resolution }
 		: {
 				width: params.width ?? DEFAULT_SIZE.width,
 				height: params.height ?? DEFAULT_SIZE.height,
 			};
-
-/** A model that takes no pictures rejects even an empty inputs object, so it goes only with pictures in it. */
-const picturesFor = ({ frameImages, referenceImages }: ModelInputs) => {
-	const inputs = pickBy(
-		{ frameImages, referenceImages },
-		(images) => images.length > 0,
-	);
-	return isEmpty(inputs) ? {} : { inputs };
-};
 
 export class RunwareVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "runware" };
@@ -115,19 +100,20 @@ export class RunwareVideo extends BaseVideoProvider {
 	async submit(params: VideoRequest) {
 		if (!isModelId(params.model))
 			throw new Error(`Runware has no video model "${params.model}"`);
-		const profile = PROFILES[params.model];
-		const inputs = inputsFor(params, profile);
+		const conditioning = CONDITIONERS[params.model](params.prompt, {
+			startFrame: params.frameImages?.at(-1),
+			references: params.referenceImages ?? [],
+		});
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({
-				positivePrompt: inputs.prompt,
 				model: params.model,
-				...sizeFor(params, inputs),
+				...conditioning,
+				...sizeFor(params, conditioning),
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
 				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
-				...picturesFor(inputs),
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;
