@@ -32,6 +32,17 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	elementImage: () => undefined,
 	elementStates: () => [],
 	readMetadata: () => metadata,
+	readSettings: () => ({
+		title: metadata.title,
+		style: metadata.style,
+		language: metadata.language,
+		length: metadata.videoSettings.length,
+		aspectRatio: metadata.videoSettings.aspectRatio,
+		narration: metadata.narration,
+		characters: [],
+		referenceImageCount: 0,
+		scriptIsEmpty: false,
+	}),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
@@ -51,6 +62,17 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain(
 			"- Red: a girl in a red cloak (voice: child)",
 		);
+	});
+
+	it("hands back the settings, which the prompt no longer carries", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_settings", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("- title: Little Red");
+		expect(outcome.ok && outcome.output).toContain("- art style: claymation");
+		expect(SNAPSHOT_TOOLS.has("read_settings")).toBe(true);
 	});
 
 	it("says the canvas is empty rather than handing back nothing", async () => {
@@ -742,6 +764,7 @@ describe("SLOPPY_TOOLS", () => {
 	it("offers the model exactly the tools the editor can run", () => {
 		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
 			"read_script",
+			"read_settings",
 			"edit_script",
 			"write_script",
 			"adapt_script",
@@ -796,6 +819,7 @@ describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
+			"read_settings",
 			"review_script",
 			"view_avatar",
 			"view_image",

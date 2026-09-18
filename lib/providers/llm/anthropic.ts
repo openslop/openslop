@@ -5,10 +5,12 @@ import {
 	streamText,
 	type FilePart,
 	type LanguageModel,
+	type SystemModelMessage,
 	type TextPart,
 } from "ai";
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
 import { parseImageSource } from "@/lib/api/imageSource";
+import { logger } from "@/lib/api/logger";
 import { stringifyError } from "@/lib/errors";
 import {
 	DEFAULT_THINKING_LEVEL,
@@ -49,6 +51,19 @@ function toImagePart(image: string): FilePart {
 
 const DEFAULT_MAX_TOKENS = 65536;
 
+/** A prefix the API keeps between requests and serves at a tenth of the price. */
+const CACHED = { cacheControl: { type: "ephemeral" } };
+const CACHED_PREFIX: SharedV3ProviderOptions = { anthropic: CACHED };
+
+/**
+ * `display` defaults to "omitted", which streams empty thinking blocks.
+ * Summarized is what makes thoughts visible.
+ */
+const thinking = (effort: ThinkingLevel) => ({
+	thinking: { type: "adaptive", display: "summarized" },
+	effort,
+});
+
 export class AnthropicLLM implements LLMProvider {
 	private apiKey: string;
 
@@ -70,24 +85,15 @@ export class AnthropicLLM implements LLMProvider {
 		return createAnthropic({ apiKey: this.apiKey })(modelId);
 	}
 
-	/**
-	 * `display` defaults to "omitted", which streams empty thinking blocks.
-	 * Summarized is what makes thoughts visible.
-	 */
-	private thinking(effort: ThinkingLevel): SharedV3ProviderOptions {
-		return {
-			anthropic: {
-				thinking: { type: "adaptive", display: "summarized" },
-				effort,
-			},
-		};
-	}
-
+	/** Caching the last block too keeps a turn's transcript warm across its round trips. */
 	agentModel(model: string): AgentModel {
 		return {
 			model: this.model(model),
 			modelId: model,
-			providerOptions: this.thinking(DEFAULT_THINKING_LEVEL),
+			providerOptions: {
+				anthropic: { ...thinking(DEFAULT_THINKING_LEVEL), ...CACHED },
+			},
+			cachedPrefix: CACHED_PREFIX,
 		};
 	}
 
@@ -97,19 +103,29 @@ export class AnthropicLLM implements LLMProvider {
 			...images.map(toImagePart),
 			{ type: "text", text: params.prompt },
 		];
+		const instructions: SystemModelMessage[] = params.systemPrompt
+			? [
+					{
+						role: "system",
+						content: params.systemPrompt,
+						providerOptions: CACHED_PREFIX,
+					},
+				]
+			: [];
 		return {
 			model: this.model(params.model),
-			instructions: params.systemPrompt || undefined,
+			instructions,
 			messages: [{ role: "user" as const, content }],
 			maxOutputTokens: params.maxTokens || DEFAULT_MAX_TOKENS,
-			providerOptions: this.thinking(
-				params.thinkingLevel || DEFAULT_THINKING_LEVEL,
-			),
+			providerOptions: {
+				anthropic: thinking(params.thinkingLevel || DEFAULT_THINKING_LEVEL),
+			},
 		};
 	}
 
 	async generate(params: LLMRequest): Promise<LLMGenerateResult> {
 		const response = await generateText(this.buildRequest(params));
+		logger.info({ usage: response.usage }, "LLM usage");
 		return {
 			text: response.text,
 			model: response.response.modelId,
@@ -131,6 +147,7 @@ export class AnthropicLLM implements LLMProvider {
 					? part.error
 					: new Error(stringifyError(part.error));
 		}
+		logger.info({ usage: await result.usage }, "LLM usage");
 		yield { text: "", done: true };
 	}
 }

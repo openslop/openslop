@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
 	LanguageModelV3CallOptions,
 	LanguageModelV3StreamPart,
+	SharedV3ProviderOptions,
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import type { SloppyMessage } from "@/lib/agent/types";
@@ -23,21 +24,8 @@ const { conversations, provider } = vi.hoisted(() => ({
 
 vi.mock("../conversations", () => conversations);
 
-import type { AgentContext } from "@/lib/agent/context";
 import type { LLMProvider } from "@/lib/providers/llm/base";
 import { streamAgentTurn } from "../agentTurn";
-
-const AGENT_CONTEXT: AgentContext = {
-	title: "",
-	style: "",
-	language: "auto",
-	length: "3-5m",
-	aspectRatio: "16:9",
-	narration: {},
-	characters: [],
-	referenceImageCount: 0,
-	scriptIsEmpty: true,
-};
 
 const USAGE = {
 	inputTokens: { total: 12, noCache: 12, cacheRead: 0, cacheWrite: 0 },
@@ -84,6 +72,7 @@ async function runTurn(
 		message?: SloppyMessage;
 		model?: string;
 		history?: SloppyMessage[];
+		cachedPrefix?: SharedV3ProviderOptions;
 	} = {},
 ) {
 	if (options.history) {
@@ -100,13 +89,13 @@ async function runTurn(
 		}),
 		modelId: "test-model",
 		providerOptions: {},
+		cachedPrefix: options.cachedPrefix ?? {},
 	});
 
 	const response = await streamAgentTurn({
 		projectId: "p1",
 		userId: "u1",
 		message: options.message ?? asked("make it shorter"),
-		context: AGENT_CONTEXT,
 		model: options.model ?? "claude-opus-5",
 		llm: async () => provider as unknown as LLMProvider,
 	});
@@ -326,5 +315,18 @@ describe("model selection", () => {
 		expect(provider.agentModel).toHaveBeenCalledWith(
 			"claude-haiku-4-5-20251001",
 		);
+	});
+});
+
+describe("prompt caching", () => {
+	const MARK = { anthropic: { cacheControl: { type: "ephemeral" } } };
+
+	it("sends the standing instructions as one system block, marked as a cached prefix", async () => {
+		await runTurn(TEXT_TURN, { cachedPrefix: MARK });
+
+		const [standing, next] = calls[0].prompt;
+		expect(standing).toMatchObject({ role: "system", providerOptions: MARK });
+		expect(JSON.stringify(standing)).toContain("You are Sloppy");
+		expect(next?.role).toBe("user");
 	});
 });
