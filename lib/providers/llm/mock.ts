@@ -177,6 +177,7 @@ export class MockLLM implements LLMProvider {
 			model: mockAgentModel(),
 			modelId: model,
 			providerOptions: {},
+			cachedPrefix: {},
 		};
 	}
 }
