@@ -5,48 +5,38 @@ export const REVIEW_INSTRUCTION = "Thoroughly review this script";
 
 export const NO_FINDINGS = "NO FINDINGS";
 
-/**
- * Points at the rules' sections rather than restating them: the reviewer gets the
- * writer's own rules as its system prompt, and a restatement would drift apart.
- */
 export function reviewPrompt(script: string, format?: string): string {
 	return dedent`
 	  ${REVIEW_INSTRUCTION} against the given rules.${format ? ` It was intended as a ${format}, so judge it accordingly.` : ""}
 
-	  Judge only the script below. The title, art style, narrator and characters reach it as
-	  project settings rather than as tags inside it, so never report a metadata tag as
-	  missing or wrong, whatever the Order section says about them.
+	  Judge only the script below. Metadata elements are outside the scope of this review.
 
-	  Read it as if you're watching a video generated from these prompts, then check it against those rules section
-	  by section:
+	  Read it as if you're watching a video generated from these prompts, then check it against those rules:
 	  - Format: only the elements that format allows, and the startFrame, continuity,
 	    trimToDialogue and loop rules stated with it.
-	  - Order, Speech, <image>, <video>, <sound> and <music>: every tag, attribute and value
-	    as those sections define them.
+	  - Each tag element, attribute and value as outlined by their rules.
 	  - Video prompts: every requirement of that section, in every video prompt.
 	  - Language: each part of the script in the language that section assigns it.
-	  - Art Style, Narration Voice and Characters: honoured exactly as given.
 
 	  Then judge what those rules cannot state, reading the script whole:
 	  - Continuity: characters, place, light and props hold from one visual to the next, and
 	    each video's startFrame and continuity match what its pictures actually do.
-	  - Dialogue: everyday words, one thought per line, true to who says it and to what just
-	    happened. It should be appropriate, simple, and make perfect sense in its context even to a 5-year old.
+	  - Dialogue: everyday words, idiomatic to the format, true to who says it and to what just
+	    happened. It should be appropriate, simple, and make perfect sense in its context.
 	  - Pacing and beats: the video progresses at a natural speed, with no sudden awkward cuts or overly dragged out scenes.
+		- Prompts: all prompts are clear, specific, and give the model enough information to generate the intended visuals and audio.
 
-	  Work through every scene to the last one, however long the script runs, and give any one
-	  element a single finding.
+	  Work through every scene and give each element a single finding.
 
 	  Write each finding as one bullet, three fields in this order:
 
-	  - <element id> — <the rule it breaks> — <the smallest change that fixes it>
+	  - <element id> | <the rule it breaks> | <the smallest change that fixes it>
 
-	  Copy the id from that element's id attribute; never invent one. Name the rule in a few
-	  words, after the section it comes from. Say what to change, not what is wrong, and keep
-	  the bullet to one line:
+	  Copy the id from that element's id attribute exactly. Name the rule concisely based on the section it comes from.
+		Say what to change, not what is wrong, and keep the bullet to one line:
 
-	  - kM2pQ7rT9wXz4bNc — Format: trimToDialogue — set trimToDialogue="false", because the next video continues from it
-	  - V1StGXR8_Z5jdHi6 — Continuity: props — Red's basket is missing; put it back in her hands
+	  - kM2pQ7rT9wXz4bNc | Format: trimToDialogue | set trimToDialogue="false", because the next video continues from it
+	  - V1StGXR8_Z5jdHi6 | Continuity: props | Red's basket is missing; put it back in her hands
 
 	  When nothing breaks a rule, reply with exactly ${NO_FINDINGS} and nothing else.
 
