@@ -7,7 +7,7 @@ import { VIDEO_FORMAT } from "./formats";
  */
 export const VIDEO_PROMPT_FORMAT = dedent`
   ## Video prompts
-  A <video> prompt is one or two numbered shots. Each video prompt is standalone, so it should include all relevant detail.
+  A <video> prompt is either one or two numbered shots. Each video prompt is standalone, so it should include all relevant detail except for the art style or character appearances.
 
   Describe each shot in vivid detail, including:
   - Camera: the shot size (wide, medium, close-up) and the angle.
@@ -21,7 +21,7 @@ export const VIDEO_PROMPT_FORMAT = dedent`
   - Keep the geography steady from shot to shot: a character on the left of frame stays on the left unless the shot shows them moving, and eyelines match (when Kai looks up at Mia, Mia looks down at Kai).
   - Sound: name what makes the noise and how near it is ("rain drumming on a tin roof, a car passing far off"), never a mood. NEVER include music or narration in the video prompt.
   - Speech: Write it as Name (tone): "line", one short sentence per shot in simple everyday words. Ensure the speech is perfectly idiomatic, appropriate, and realistic for the shot.
-  - A video that continues from the one before (startFrame="previous") starts where that video's last shot ends: Shot 1 keeps its place, framing, characters and action, then moves on from there.
+  - A video that continues from the one before (startFrame="previous") starts exactly where that video's last shot ends: Shot 1 keeps its place, framing, characters and action identically, then moves on from there.
   - Refer to characters by name in the video prompt, do not describe their appearance since this is already in the reference images passed to the model.
 	- If there's only one shot, do not pass in a label such as Shot 1
   - Example, 15 seconds (for ${VIDEO_FORMAT.film} type):
