@@ -22,6 +22,7 @@ import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useScriptControl } from "@/lib/script/ScriptProvider";
 import { elementState } from "../elementState";
+import { useAgentContext } from "../projectContext";
 import type { AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
 
@@ -31,6 +32,7 @@ export function useAgentTools(editor: Editor) {
 	const store = useProjectStoreHandle();
 	const defaultModels = useResolveDefaultModels();
 	const queue = useGenerationQueue();
+	const readSettings = useAgentContext(editor);
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
@@ -77,6 +79,7 @@ export function useAgentTools(editor: Editor) {
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,
+				readSettings,
 				editScript: (ops) => applyRefineOps(editor, ops, defaultModels()),
 				// The stream appends what it cannot find by id, so the canvas is cleared
 				// first or the new script stacks under the old one.
@@ -105,6 +108,14 @@ export function useAgentTools(editor: Editor) {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, connectorConfig, runScript, store, defaultModels, queue],
+		[
+			editor,
+			connectorConfig,
+			runScript,
+			store,
+			defaultModels,
+			queue,
+			readSettings,
+		],
 	);
 }

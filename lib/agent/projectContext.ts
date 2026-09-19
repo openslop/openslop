@@ -40,7 +40,7 @@ function toAgentContext(
 	};
 }
 
-/** Read fresh per request, so a turn's later steps see what its earlier ones changed. */
+/** Read at call time, so a reading reflects what the turn's earlier steps changed. */
 export function useAgentContext(editor: Editor): () => AgentContext {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();

@@ -1,37 +1,29 @@
-import { z } from "zod";
 import dedent from "dedent";
-import { languageLabel, LANGUAGE_CHOICES } from "@/lib/project/language";
-import { MetadataVoiceSchema, voiceTraitEntries } from "@/lib/project/types";
-import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
-import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/project/videoLength";
+import type { AspectRatio } from "@/lib/project/aspectRatio";
+import type { CharacterAvatarState } from "@/lib/project/characterAvatar";
+import { languageLabel, type LanguageChoice } from "@/lib/project/language";
+import { type MetadataVoice, voiceTraitEntries } from "@/lib/project/types";
+import { type VideoLength, videoLengthBudget } from "@/lib/project/videoLength";
 
 const UNSET = "not set";
 
-/**
- * The project as it stands when the turn starts. Sent with every request rather
- * than read through a tool: it is small, and it is what the model needs before
- * deciding whether it needs anything else.
- */
-export const agentContextSchema = z.object({
-	title: z.string(),
-	style: z.string(),
-	language: z.enum(LANGUAGE_CHOICES),
-	length: z.enum(VIDEO_LENGTHS),
-	aspectRatio: z.enum(ASPECT_RATIOS),
-	templateName: z.string().optional(),
-	narration: MetadataVoiceSchema,
-	characters: z.array(
-		z.object({
-			name: z.string(),
-			hasAppearance: z.boolean(),
-			avatar: z.enum(["none", "generated", "uploaded"]),
-		}),
-	),
-	referenceImageCount: z.number().int().min(0),
-	scriptIsEmpty: z.boolean(),
-});
-
-export type AgentContext = z.infer<typeof agentContextSchema>;
+/** The project as it stands, in the terms the model reasons about. */
+export type AgentContext = {
+	title: string;
+	style: string;
+	language: LanguageChoice;
+	length: VideoLength;
+	aspectRatio: AspectRatio;
+	templateName?: string;
+	narration: MetadataVoice;
+	characters: {
+		name: string;
+		hasAppearance: boolean;
+		avatar: CharacterAvatarState;
+	}[];
+	referenceImageCount: number;
+	scriptIsEmpty: boolean;
+};
 
 function renderNarrator(narration: AgentContext["narration"]): string {
 	const traits = voiceTraitEntries(narration).map(
@@ -71,8 +63,8 @@ export function renderAgentContext(ctx: AgentContext): string {
 	return dedent`
 		# The project
 
-		Settings as of your latest request. The script itself is not here; read_script is
-		the only way to see it.
+		Settings as of this reading. The script itself is not here; read_script is the
+		only way to see it.
 
 		- title: ${ctx.title || UNSET}
 		- art style: ${ctx.style || UNSET}

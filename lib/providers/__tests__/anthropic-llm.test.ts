@@ -118,6 +118,7 @@ describe("AnthropicLLM", () => {
 			expect(lastCall().prompt[0]).toEqual({
 				role: "system",
 				content: "You are helpful",
+				providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
 			});
 			expect(lastCall().providerOptions?.anthropic).toMatchObject({
 				effort: "low",
@@ -240,6 +241,20 @@ describe("AnthropicLLM", () => {
 			};
 
 			await expect(read()).rejects.toThrow("overloaded");
+		});
+	});
+});
+
+describe("agentModel", () => {
+	it("caches the prompt's last block and hands Sloppy the mark for its prefix", () => {
+		const agent = new AnthropicLLM("test-key").agentModel(MODEL_ID);
+
+		expect(agent.providerOptions.anthropic).toMatchObject({
+			cacheControl: { type: "ephemeral" },
+			thinking: { type: "adaptive", display: "summarized" },
+		});
+		expect(agent.cachedPrefix).toEqual({
+			anthropic: { cacheControl: { type: "ephemeral" } },
 		});
 	});
 });
