@@ -8,8 +8,9 @@ import { defineTool } from "./defineTool";
 
 export const reviewScript = defineTool({
 	description: dedent`
-	  Have the script on the canvas read back against every rule it was written to: OSML, the
-	  format's element list, the video prompt format, continuity, dialogue, pacing and style.
+	  Have the script on the canvas read back against every rule it was written to: the XML
+	  format, the format's element list, the video prompt format, continuity, dialogue,
+	  pacing and style.
 
 	  Findings come back one bullet each, naming the element's id, the rule it breaks and the
 	  smallest change that fixes it. Fix them with edit_script, read the script, then review

@@ -40,7 +40,7 @@ function statesOf(states: ElementState[]): string[] {
 /** Settings live in the per-request context block; this reads what it cannot carry. */
 export const readScript = defineTool({
 	description: dedent`
-	  Read the canvas: the project's characters, the script as OSML with the \`id\` of every
+	  Read the canvas: the project's characters, the script as XML with the \`id\` of every
 	  element, then where each element's generation stands: ungenerated, queued, generating,
 	  generated, stale (and why), failed (and the error), or pinned to an upload. The
 	  project's settings arrive with every request; this is the script.
@@ -58,7 +58,7 @@ export const readScript = defineTool({
 		return [
 			section("Characters", charactersOf(metadata)),
 			section("Script", [
-				script ? `\`\`\`osml\n${script}\n\`\`\`` : "The canvas is empty.",
+				script ? `\`\`\`xml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
 			section("Generation state", statesOf(ctx.elementStates())),
 		].join("\n\n");

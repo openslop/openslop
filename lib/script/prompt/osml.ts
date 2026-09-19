@@ -18,7 +18,7 @@ import { VIDEO_PROMPT_FORMAT } from "./videoPrompt";
 
 export function osmlSpec(language: string): string {
 	return dedent`
-  The story script must be written in OSML, the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never put a tag inside another tag.
+  The story script must be written in the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never nest tags.
 
   ## Format
 ${VIDEO_FORMATS}
@@ -27,7 +27,7 @@ ${languagePrompt(language)}
 
   ## Order
   1. <metadata_title>, then <metadata_style>, then <metadata_narration>, then one <metadata_character> per character.
-  2. The story, using only the elements your format allows. Change the visual at least every two spoken lines.
+  2. The story, using only the elements your format allows. There must be a new visual (image or video) at least once before every sentence in a character or narration element.
 
   ## Metadata tags
   - <metadata_title>: a short title of 1 to 4 words. Example: <metadata_title>Little Red</metadata_title>

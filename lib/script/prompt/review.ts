@@ -1,7 +1,7 @@
 import dedent from "dedent";
 
 /** Exported so the mock LLM can recognise a review prompt. */
-export const REVIEW_INSTRUCTION = "Thoroughly review this OSML script";
+export const REVIEW_INSTRUCTION = "Thoroughly review this script";
 
 export const NO_FINDINGS = "NO FINDINGS";
 
@@ -13,7 +13,7 @@ export function reviewPrompt(script: string, format?: string): string {
 	return dedent`
 	  ${REVIEW_INSTRUCTION} against the given rules.${format ? ` It was intended as a ${format}, so judge it accordingly.` : ""}
 
-	  Judge only the OSML below. The title, art style, narrator and characters reach it as
+	  Judge only the script below. The title, art style, narrator and characters reach it as
 	  project settings rather than as tags inside it, so never report a metadata tag as
 	  missing or wrong, whatever the Order section says about them.
 
