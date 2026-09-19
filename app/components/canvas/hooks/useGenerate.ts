@@ -5,6 +5,7 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { forElement, type NodeSpec } from "@/lib/generation/graph";
 import { staleReason } from "@/lib/generation/staleReason";
+import { useLiveNode } from "@/lib/generation/useLiveNodes";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
@@ -12,20 +13,21 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 export function useGenerateNode(spec: NodeSpec) {
 	const queue = useGenerationQueue();
 	const buildNode = useNodeBuilder();
-	const node = useMemo(() => buildNode(spec), [buildNode, spec]);
+	const build = useCallback(() => buildNode(spec), [buildNode, spec]);
+	const node = useLiveNode(build);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
-	// Built again at the click: the builder is not rebuilt for edits inside other
-	// elements, so the memoized graph can hold a dependency as it was, and queue it.
+	// We build again on generate since a node kept for an unchanged graph still carries
+	// a potentially a stale canvas or project state
 	const generate = useCallback(() => {
-		const current = buildNode(spec);
+		const current = build();
 		if (!current.inputs.prompt) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
 		queue.enqueueGraph([current]);
-	}, [queue, buildNode, spec]);
+	}, [queue, build]);
 
 	const discard = useCallback(() => {
 		queue.discard(node.id);

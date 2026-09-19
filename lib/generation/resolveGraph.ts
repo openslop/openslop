@@ -25,11 +25,9 @@ const toNode = (
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
 	dependsOn: GenerationNode[],
-	label: string | undefined,
 	{ state, canvas }: BuildContext,
 ): JobNode => ({
 	id: element.id,
-	label,
 	inputs: {
 		prompt: getPromptText(element),
 		attributes: element.generationAttributes ?? {},
@@ -46,6 +44,10 @@ const toNode = (
 	},
 });
 
+/** The label is used for staleness messaging */
+const labelled = (node: JobNode, label: string | undefined): JobNode =>
+	label === undefined ? node : { ...node, label };
+
 /**
  * Edges come from the plugin chain each node runs, so one declaration drives
  * what a job reads, what it waits for, and what makes it stale.
@@ -55,19 +57,20 @@ export function nodeBuilder(
 	state: ProjectData,
 	canvas: () => CanvasContentElement[],
 ): NodeBuilder {
+	// Nodes are shared between builds against the same canvas, so a document
+	// edit, which is a new canvas, is the only thing that builds an element again.
+	const revisions = new WeakMap<CanvasContentElement[], Map<string, JobNode>>();
 	return (spec) => {
 		// Read once per build, so every node in the graph sees the same canvas.
 		const ctx: BuildContext = { state, canvas: canvas() };
-		// Scoped to one call: it dedupes nodes shared within a single graph and
-		// detects cycles. Held across calls it would serve a stale node back once
-		// its element changed, since element content is not part of `state`.
-		const resolved = new Map<string, JobNode>();
+		const resolved = revisions.get(ctx.canvas) ?? new Map<string, JobNode>();
+		revisions.set(ctx.canvas, resolved);
 		const resolving = new Set<string>();
 
 		const build = ({ element, plugins: override, label }: ElementNode) => {
 			const { id } = element;
 			const existing = resolved.get(id);
-			if (existing) return existing;
+			if (existing) return labelled(existing, label);
 			if (resolving.has(id))
 				throw new Error(`Cyclic generation dependency at "${id}"`);
 			resolving.add(id);
@@ -77,11 +80,11 @@ export function nodeBuilder(
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
-			const node = toNode(element, connector, plugins, dependsOn, label, ctx);
+			const node = toNode(element, connector, plugins, dependsOn, ctx);
 
 			resolving.delete(id);
 			resolved.set(id, node);
-			return node;
+			return labelled(node, label);
 		};
 
 		const resolve = (dep: NodeSpec): GenerationNode => {

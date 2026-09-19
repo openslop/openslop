@@ -43,7 +43,7 @@ const editor = {
 	},
 } as unknown as Editor;
 vi.mock("slate-react", () => ({
-	useSlateSelector: <T>(selector: (e: Editor) => T) => selector(editor),
+	useSlateStatic: () => editor,
 }));
 
 vi.mock("@/lib/config/ConfigProvider", () => ({
@@ -76,32 +76,25 @@ beforeEach(() => {
 });
 
 describe("useNodeBuilder", () => {
-	it("keeps one builder while the document and the project state hold", () => {
-		children = document(video("vid-1", "shot one"), video("vid-2", "shot two"));
-
-		expect(render(useNodeBuilder)).toBe(render(useNodeBuilder));
-	});
-
-	// Ids and order are untouched, so only the document's identity can tell.
-	it("rebuilds when an element changes without moving", () => {
+	it("keeps one builder while the document is edited", () => {
 		const second = video("vid-2", "shot two");
 		children = document(video("vid-1", "shot one"), second);
 		const before = render(useNodeBuilder);
 
 		children = document(video("vid-1", "shot one, rewritten"), second);
 
-		expect(render(useNodeBuilder)).not.toBe(before);
+		expect(render(useNodeBuilder)).toBe(before);
 	});
 
-	it("reads an edited dependency as it is now, not as the graph first saw it", () => {
+	it("reads an edited dependency as it is now, not as it was when the builder was made", () => {
 		const second = video("vid-2", "shot two");
 		children = document(video("vid-1", "shot one"), second);
-		render(useNodeBuilder);
+		const build = render(useNodeBuilder);
 
 		children = document(video("vid-1", "shot one, rewritten"), second);
-		const dependency = render(useNodeBuilder)(
-			forElement(second),
-		).dependsOn.find((node) => node.id === "vid-1");
+		const dependency = build(forElement(second)).dependsOn.find(
+			(node) => node.id === "vid-1",
+		);
 
 		expect(dependency?.inputs.prompt).toBe("shot one, rewritten");
 	});

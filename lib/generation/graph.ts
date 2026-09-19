@@ -1,5 +1,6 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
+import isEqualWith from "lodash/isEqualWith";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -97,6 +98,21 @@ export type NodeResults = {
 
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	node.job === null;
+
+/** A rendered node's job is never queued, since a click builds again. */
+const ignoringJob = (_a: unknown, _b: unknown, key?: unknown) =>
+	key === "job" ? true : undefined;
+
+/** Whether two builds read the same thing: the same nodes, inputs and edges. */
+export const isSameGraph = (
+	a: GenerationNode | null,
+	b: GenerationNode,
+): boolean => isEqualWith(a, b, ignoringJob);
+
+export const areSameGraphs = (
+	a: GenerationNode[] | null,
+	b: GenerationNode[],
+): boolean => isEqualWith(a, b, ignoringJob);
 
 const DERIVED_PREFIX = "~";
 

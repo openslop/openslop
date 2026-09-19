@@ -5,11 +5,13 @@ import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
 	flattenGraph,
 	isNodeStale,
+	isSameGraph,
 	needsGeneration,
 	nodeInputs,
 	sourceNode,
 	type GenerationJob,
 	type GenerationNode,
+	type JobNode,
 } from "../graph";
 import { GenerationQueue } from "../queue";
 
@@ -24,7 +26,7 @@ function node(
 	id: string,
 	dependsOn: GenerationNode[] = [],
 	attributes: Record<string, string> = {},
-): GenerationNode {
+): JobNode {
 	const job: GenerationJob = {
 		elementId: id,
 		elementType: "image",
@@ -159,5 +161,48 @@ describe("flattenGraph", () => {
 			"left",
 			"right",
 		]);
+	});
+});
+
+describe("isSameGraph", () => {
+	it("is true for two builds that read the same thing", () => {
+		expect(isSameGraph(node("a", [node("b")]), node("a", [node("b")]))).toBe(
+			true,
+		);
+	});
+
+	it("sees a changed prompt", () => {
+		const changed = { ...node("a"), inputs: { prompt: "b", attributes: {} } };
+		expect(isSameGraph(node("a"), changed)).toBe(false);
+	});
+
+	it("sees a changed attribute", () => {
+		expect(isSameGraph(node("a"), node("a", [], { style: "noir" }))).toBe(
+			false,
+		);
+	});
+
+	it("sees a dependency edited, not just replaced", () => {
+		const edited = { ...node("b"), inputs: { prompt: "b2", attributes: {} } };
+		expect(isSameGraph(node("a", [node("b")]), node("a", [edited]))).toBe(
+			false,
+		);
+	});
+
+	it("sees a dependency swapped for another element", () => {
+		expect(isSameGraph(node("a", [node("b")]), node("a", [node("c")]))).toBe(
+			false,
+		);
+	});
+
+	it("sees a dependency stand in for an element, and the reverse", () => {
+		const leaf = sourceNode("~first:a", {}, "the previous visual");
+		expect(isSameGraph(node("a", [leaf]), node("a", [node("b")]))).toBe(false);
+	});
+
+	it("ignores the job, which is built fresh when the node runs", () => {
+		const a = node("a");
+		const elsewhere = { ...a, job: { ...a.job, canvas: [] } };
+		expect(isSameGraph(a, elsewhere)).toBe(true);
 	});
 });

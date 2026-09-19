@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { Check, RotateCcw, Sparkles } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Spinner } from "@/components/ui/spinner";
@@ -21,7 +22,8 @@ function Icon({ empty, active, pending, stale }: GenerateCounts) {
 }
 
 export function SceneGenerateButton({ scene }: { scene: SceneElement }) {
-	const scope = useGenerateScope(scene.children, "scene");
+	const select = useCallback(() => scene.children, [scene.children]);
+	const scope = useGenerateScope(select, "scene");
 	const unavailable = scope.empty || scope.active || scope.pending === 0;
 
 	return (

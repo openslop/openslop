@@ -1,23 +1,27 @@
 "use client";
 
+import memoize from "lodash/memoize";
 import { useMemo } from "react";
-import { useSlateSelector } from "slate-react";
+import { useSlateStatic } from "slate-react";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProject } from "@/lib/project/useProject";
 import { nodeBuilder, type NodeBuilder } from "./resolveGraph";
 
+// One canvas per document revision, so builds against the same document share nodes.
+const canvasOf = memoize(getContentElements);
+canvasOf.cache = new WeakMap();
+
 /**
- * Builds from a snapshot of the document, not the live one, so a builder never
- * sees a half-edited canvas. `children` changes on every edit but not on a
- * selection change, so it is a cheap way to know when to rebuild.
+ * Reads the canvas when it builds, not when it renders: a build always sees the
+ * document as it is, and no component re-renders for an edit it does not read.
  */
 export function useNodeBuilder(): NodeBuilder {
 	const { connectorConfig } = useConfig();
 	const state = useProject((store) => store);
-	const children = useSlateSelector((editor) => editor.children);
-	return useMemo(() => {
-		const canvas = getContentElements(children);
-		return nodeBuilder(connectorConfig, state, () => canvas);
-	}, [connectorConfig, state, children]);
+	const editor = useSlateStatic();
+	return useMemo(
+		() => nodeBuilder(connectorConfig, state, () => canvasOf(editor.children)),
+		[connectorConfig, state, editor],
+	);
 }

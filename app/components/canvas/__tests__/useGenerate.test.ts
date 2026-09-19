@@ -29,6 +29,11 @@ vi.mock("react", () => ({
 	},
 }));
 
+vi.mock("slate-react", () => ({
+	useSlateStatic: () => ({}),
+	useSlateSelector: <T>(selector: () => T) => selector(),
+}));
+
 let queue: GenerationQueue;
 vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 	useGenerationQueue: () => queue,
@@ -86,7 +91,7 @@ const queuedImage = (spy: ReturnType<typeof vi.spyOn>) => {
 let enqueue: ReturnType<typeof vi.spyOn>;
 
 const useVideoGeneration = () => useGenerate(video);
-const useVideoScope = () => useGenerateScope([video], "scene");
+const useVideoScope = () => useGenerateScope(() => [video], "scene");
 
 beforeEach(() => {
 	slots = [];

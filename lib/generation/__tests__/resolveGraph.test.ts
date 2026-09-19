@@ -49,8 +49,52 @@ beforeEach(() => {
 });
 
 describe("resolveGraph", () => {
-	// The builder is memoized across renders, so its per-graph dedupe cache must
-	// not outlive one call or an edited element keeps resolving to its old node.
+	it("shares a node between builds against the same canvas", () => {
+		const canvas = [element("img", "image")];
+		const buildNode = nodeBuilder(
+			DEFAULT_CONNECTOR_REGISTRY,
+			store.getState(),
+			() => canvas,
+		);
+		const spec = forElement(canvas[0]);
+
+		expect(buildNode(spec)).toBe(buildNode(spec));
+	});
+
+	it("builds again for a new canvas, which is what a document edit is", () => {
+		let canvas = [element("img", "image")];
+		const buildNode = nodeBuilder(
+			DEFAULT_CONNECTOR_REGISTRY,
+			store.getState(),
+			() => canvas,
+		);
+		const before = buildNode(forElement(canvas[0]));
+
+		canvas = [element("img", "image")];
+
+		expect(buildNode(forElement(canvas[0]))).not.toBe(before);
+	});
+
+	it("labels a dependency for its dependent without renaming the node itself", () => {
+		const image = element("img", "image");
+		const video = element("vid", "video", { startFrame: "previous" });
+		const canvas = [image, video];
+		const buildNode = nodeBuilder(
+			DEFAULT_CONNECTOR_REGISTRY,
+			store.getState(),
+			() => canvas,
+		);
+
+		const dependency = buildNode(forElement(video)).dependsOn.find(
+			(node) => node.id === "img",
+		);
+
+		expect(dependency?.label).toBe("the previous visual");
+		expect(buildNode(forElement(image)).label).toBeUndefined();
+	});
+
+	// The builder outlives a render; an edited element must not resolve to the
+	// node built for its old text.
 	it("rebuilds a node when its element changed", () => {
 		const buildNode = nodeBuilder(
 			DEFAULT_CONNECTOR_REGISTRY,
