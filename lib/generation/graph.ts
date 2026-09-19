@@ -22,16 +22,13 @@ import {
 
 export type NodeId = string;
 
-/** Everything the queue needs to run one node. */
+/** How a node runs: the connector and its configuration. */
 export type GenerationJob = {
 	elementId: string;
 	elementType: CanvasElementType;
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
-	/** The project state and canvas this job's inputs were resolved against. */
-	state: ProjectData;
-	canvas: CanvasContentElement[];
 };
 
 type NodeBase = {
@@ -62,7 +59,10 @@ export type ElementNode = {
 	label?: string;
 };
 
-/** What a spec may read while naming its node: project state, and the canvas in document order. */
+/**
+ * What a spec reads while naming its node, and what its job runs against:
+ * project state, and the canvas in document order.
+ */
 export type BuildContext = {
 	state: ProjectData;
 	canvas: CanvasContentElement[];
@@ -99,19 +99,16 @@ export type NodeResults = {
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	node.job === null;
 
-/** A rendered node's job is never queued, since a click builds again. */
 const ignoringJob = (_a: unknown, _b: unknown, key?: unknown) =>
 	key === "job" ? true : undefined;
 
-/** Whether two builds read the same thing: the same nodes, inputs and edges. */
+/**
+ * Whether two builds read the same thing: the same nodes, inputs and edges.
+ * The job, which is how a node runs, is not compared.
+ */
 export const isSameGraph = (
-	a: GenerationNode | null,
-	b: GenerationNode,
-): boolean => isEqualWith(a, b, ignoringJob);
-
-export const areSameGraphs = (
-	a: GenerationNode[] | null,
-	b: GenerationNode[],
+	a: GenerationNode | GenerationNode[] | null,
+	b: GenerationNode | GenerationNode[],
 ): boolean => isEqualWith(a, b, ignoringJob);
 
 const DERIVED_PREFIX = "~";

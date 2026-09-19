@@ -41,7 +41,9 @@ export function seedCharacterAvatar(
 ): void {
 	queue.commitResult(
 		// An avatar reads project state only, never another element on the canvas.
-		nodeBuilder(registry, state, () => [])(forCharacterAvatar(name)),
+		nodeBuilder(registry, () => ({ state, canvas: [] }))(
+			forCharacterAvatar(name),
+		),
 		{ imageUrl, durationSec: 0 },
 		{ pinned: true },
 	);

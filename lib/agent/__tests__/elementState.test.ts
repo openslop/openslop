@@ -1,4 +1,3 @@
-import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
@@ -6,11 +5,7 @@ import type { GenerationJob, GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { staleReason } from "@/lib/generation/staleReason";
 import { elementState } from "../elementState";
-
-const EMPTY_STATE = {
-	metadata: MetadataSchema.parse({}),
-	referenceImages: [],
-};
+import { EMPTY_CONTEXT } from "@/lib/generation/__tests__/_context";
 
 const config: ConnectorConfig = {};
 
@@ -21,8 +16,6 @@ function node(id: string, prompt = id): GenerationNode {
 		connectorType: "image",
 		model: DEFAULT_MODELS.image,
 		config,
-		state: EMPTY_STATE,
-		canvas: [],
 	};
 	return { id, inputs: { prompt, attributes: {} }, dependsOn: [], job };
 }
@@ -87,7 +80,7 @@ describe("elementState", () => {
 
 	it("reads what the queue is working on by its status", () => {
 		const queue = new GenerationQueue({ limits: { image: 1 } });
-		queue.enqueueGraph([node("a"), node("b")]);
+		queue.enqueueGraph([node("a"), node("b")], EMPTY_CONTEXT);
 
 		expect(stateOf(node("a"), queue).state).toBe("generating");
 		expect(stateOf(node("b"), queue).state).toBe("queued");

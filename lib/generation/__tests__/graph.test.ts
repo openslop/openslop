@@ -1,4 +1,3 @@
-import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
@@ -15,11 +14,6 @@ import {
 } from "../graph";
 import { GenerationQueue } from "../queue";
 
-const EMPTY_STATE = {
-	metadata: MetadataSchema.parse({}),
-	referenceImages: [],
-};
-
 const config: ConnectorConfig = {};
 
 function node(
@@ -33,8 +27,6 @@ function node(
 		connectorType: "image",
 		model: DEFAULT_MODELS.image,
 		config,
-		state: EMPTY_STATE,
-		canvas: [],
 	};
 	return {
 		id,
@@ -200,9 +192,9 @@ describe("isSameGraph", () => {
 		expect(isSameGraph(node("a", [leaf]), node("a", [node("b")]))).toBe(false);
 	});
 
-	it("ignores the job, which is built fresh when the node runs", () => {
+	it("ignores the job, which is how a node runs rather than what it reads", () => {
 		const a = node("a");
-		const elsewhere = { ...a, job: { ...a.job, canvas: [] } };
-		expect(isSameGraph(a, elsewhere)).toBe(true);
+		const reconfigured = { ...a, job: { ...a.job, config: { plugins: [] } } };
+		expect(isSameGraph(a, reconfigured)).toBe(true);
 	});
 });

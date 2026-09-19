@@ -15,6 +15,7 @@ import {
 	isSourceNode,
 	needsGeneration,
 	nodeInputs,
+	type BuildContext,
 	type GenerationJob,
 	type GenerationNode,
 	type JobNode,
@@ -27,6 +28,12 @@ type ActiveJob = {
 	connectorType: AssetConnectorType;
 };
 
+/** A node waiting to run, with the project and canvas it will run against. */
+type QueuedJob = {
+	node: JobNode;
+	context: BuildContext;
+};
+
 /**
  * Runs generation nodes, at most `limits[connectorType]` of each media type at a
  * time and never before their dependencies have settled. All per-element state
@@ -37,7 +44,7 @@ export class GenerationQueue implements NodeResults {
 	private readonly ticker = new ElapsedTicker((elapsed) =>
 		this.onTick(elapsed),
 	);
-	private pending: JobNode[] = [];
+	private pending: QueuedJob[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
@@ -74,8 +81,11 @@ export class GenerationQueue implements NodeResults {
 		if (changed) this.snapshots.notify();
 	}
 
-	/** Roots are always queued: asking to generate something means regenerating it. */
-	enqueueGraph(roots: GenerationNode[]) {
+	/**
+	 * Roots are always queued: asking to generate something means regenerating
+	 * it. Every job in the batch runs against `context`.
+	 */
+	enqueueGraph(roots: GenerationNode[], context: BuildContext) {
 		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
 		for (const node of flattenGraph(roots)) {
@@ -86,7 +96,7 @@ export class GenerationQueue implements NodeResults {
 				seconds: 0,
 				connectorType: node.job.connectorType,
 			});
-			this.pending.push(node);
+			this.pending.push({ node, context });
 			added = true;
 		}
 		if (added) {
@@ -184,7 +194,7 @@ export class GenerationQueue implements NodeResults {
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
 		this.ticker.stop(id);
-		this.pending = this.pending.filter((node) => node.id !== id);
+		this.pending = this.pending.filter(({ node }) => node.id !== id);
 	}
 
 	/** The dependency holding `node` back, if any: it gates until it settles. */
@@ -206,13 +216,13 @@ export class GenerationQueue implements NodeResults {
 	private processQueue() {
 		for (;;) {
 			const index = this.pending.findIndex(
-				(node) =>
+				({ node }) =>
 					this.hasCapacity(node.job.connectorType) &&
 					!this.blockingDependency(node),
 			);
 			if (index === -1) break;
-			const [node] = this.pending.splice(index, 1);
-			if (node) this.runJob(node);
+			const [queued] = this.pending.splice(index, 1);
+			if (queued) this.runJob(queued);
 		}
 		this.releaseBlocked();
 	}
@@ -234,7 +244,7 @@ export class GenerationQueue implements NodeResults {
 		if (this.active.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
-		for (const node of blocked) {
+		for (const { node } of blocked) {
 			const error = this.blockedByError(node);
 			this.snapshots.resetToIdle(node.id);
 			if (error) this.snapshots.update(node.id, { error });
@@ -250,7 +260,7 @@ export class GenerationQueue implements NodeResults {
 		return Object.fromEntries(entries);
 	}
 
-	private runJob(node: JobNode) {
+	private runJob({ node, context }: QueuedJob) {
 		const { job } = node;
 		const { elementId } = job;
 		const controller = new AbortController();
@@ -268,6 +278,7 @@ export class GenerationQueue implements NodeResults {
 			job,
 			inputs,
 			this.dependencyResults(node),
+			context,
 			controller.signal,
 		)
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))

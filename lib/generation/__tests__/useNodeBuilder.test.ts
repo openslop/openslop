@@ -89,7 +89,7 @@ describe("useNodeBuilder", () => {
 	it("reads an edited dependency as it is now, not as it was when the builder was made", () => {
 		const second = video("vid-2", "shot two");
 		children = document(video("vid-1", "shot one"), second);
-		const build = render(useNodeBuilder);
+		const { build } = render(useNodeBuilder);
 
 		children = document(video("vid-1", "shot one, rewritten"), second);
 		const dependency = build(forElement(second)).dependsOn.find(

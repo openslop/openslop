@@ -44,13 +44,10 @@ const store = createProjectStore();
 let canvas: CanvasContentElement[] = [];
 // Like the real hook, the builder keeps its identity while text inside an
 // element changes, and reads the canvas when it builds.
-const builder = nodeBuilder(
-	DEFAULT_CONNECTOR_REGISTRY,
-	store.getState(),
-	() => canvas,
-);
+const context = () => ({ state: store.getState(), canvas });
+const builder = nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, context);
 vi.mock("@/lib/generation/useNodeBuilder", () => ({
-	useNodeBuilder: () => builder,
+	useNodeBuilder: () => ({ build: builder, context }),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");

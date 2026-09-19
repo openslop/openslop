@@ -29,12 +29,14 @@ const element = (
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
+const builderOn = (canvas: () => CanvasContentElement[]) =>
+	nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, () => ({
+		state: store.getState(),
+		canvas: canvas(),
+	}));
+
 const resolveOn = (el: CanvasContentElement, canvas: CanvasContentElement[]) =>
-	nodeBuilder(
-		DEFAULT_CONNECTOR_REGISTRY,
-		store.getState(),
-		() => canvas,
-	)(forElement(el));
+	builderOn(() => canvas)(forElement(el));
 
 const resolve = (el: CanvasContentElement) => resolveOn(el, []);
 
@@ -51,11 +53,7 @@ beforeEach(() => {
 describe("resolveGraph", () => {
 	it("shares a node between builds against the same canvas", () => {
 		const canvas = [element("img", "image")];
-		const buildNode = nodeBuilder(
-			DEFAULT_CONNECTOR_REGISTRY,
-			store.getState(),
-			() => canvas,
-		);
+		const buildNode = builderOn(() => canvas);
 		const spec = forElement(canvas[0]);
 
 		expect(buildNode(spec)).toBe(buildNode(spec));
@@ -63,11 +61,7 @@ describe("resolveGraph", () => {
 
 	it("builds again for a new canvas, which is what a document edit is", () => {
 		let canvas = [element("img", "image")];
-		const buildNode = nodeBuilder(
-			DEFAULT_CONNECTOR_REGISTRY,
-			store.getState(),
-			() => canvas,
-		);
+		const buildNode = builderOn(() => canvas);
 		const before = buildNode(forElement(canvas[0]));
 
 		canvas = [element("img", "image")];
@@ -79,11 +73,7 @@ describe("resolveGraph", () => {
 		const image = element("img", "image");
 		const video = element("vid", "video", { startFrame: "previous" });
 		const canvas = [image, video];
-		const buildNode = nodeBuilder(
-			DEFAULT_CONNECTOR_REGISTRY,
-			store.getState(),
-			() => canvas,
-		);
+		const buildNode = builderOn(() => canvas);
 
 		const dependency = buildNode(forElement(video)).dependsOn.find(
 			(node) => node.id === "img",
@@ -96,11 +86,7 @@ describe("resolveGraph", () => {
 	// The builder outlives a render; an edited element must not resolve to the
 	// node built for its old text.
 	it("rebuilds a node when its element changed", () => {
-		const buildNode = nodeBuilder(
-			DEFAULT_CONNECTOR_REGISTRY,
-			store.getState(),
-			() => [],
-		);
+		const buildNode = builderOn(() => []);
 		const withText = (text: string) => ({
 			...element("img", "image"),
 			children: [{ id: "img-t", type: "image" as const, text }],

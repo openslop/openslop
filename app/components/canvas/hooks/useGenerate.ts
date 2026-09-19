@@ -12,22 +12,21 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 /** One generation lifecycle for whatever node `spec` names. Memoize the spec. */
 export function useGenerateNode(spec: NodeSpec) {
 	const queue = useGenerationQueue();
-	const buildNode = useNodeBuilder();
+	const { build: buildNode, context } = useNodeBuilder();
 	const build = useCallback(() => buildNode(spec), [buildNode, spec]);
 	const node = useLiveNode(build);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
-	// We build again on generate since a node kept for an unchanged graph still carries
-	// a potentially a stale canvas or project state
+	// Built again at the click: a live node's job may lag, see useLiveNode.
 	const generate = useCallback(() => {
 		const current = build();
 		if (!current.inputs.prompt) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
-		queue.enqueueGraph([current]);
-	}, [queue, build]);
+		queue.enqueueGraph([current], context());
+	}, [queue, build, context]);
 
 	const discard = useCallback(() => {
 		queue.discard(node.id);

@@ -73,7 +73,7 @@ export function useGenerateScope(
 ): GenerateScope {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();
-	const buildNode = useNodeBuilder();
+	const { build: buildNode, context } = useNodeBuilder();
 
 	const buildNodes = useCallback(
 		() =>
@@ -101,8 +101,9 @@ export function useGenerateScope(
 	const run = useCallback(() => {
 		queue.enqueueGraph(
 			buildNodes().filter((node) => needsGeneration(node, queue)),
+			context(),
 		);
-	}, [queue, buildNodes]);
+	}, [queue, buildNodes, context]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

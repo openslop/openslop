@@ -54,9 +54,10 @@ export function useAgentTools(editor: Editor) {
 					};
 				},
 				elementStates: () => {
-					const buildNode = nodeBuilder(connectorConfig, store.getState(), () =>
-						getContentElements(editor.children),
-					);
+					const buildNode = nodeBuilder(connectorConfig, () => ({
+						state: store.getState(),
+						canvas: getContentElements(editor.children),
+					}));
 					return getContentElements(editor.children).map((element) =>
 						elementState(
 							element.id,

@@ -1,14 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
-import { MetadataSchema } from "@/lib/project/types";
 import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
-
-const EMPTY_STATE = {
-	metadata: MetadataSchema.parse({}),
-	referenceImages: [],
-};
+import { EMPTY_CONTEXT } from "./_context";
 
 type GenerateFn = (...args: unknown[]) => Promise<AssetResult>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
@@ -26,8 +21,6 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 		connectorType: "image",
 		model: DEFAULT_MODELS.image,
 		config,
-		state: EMPTY_STATE,
-		canvas: [],
 	};
 	return {
 		id,
@@ -67,7 +60,7 @@ describe("dependency ordering", () => {
 		const alice = node("avatar:Alice");
 		const bob = node("avatar:Bob");
 		const image = node("image", [alice]);
-		queue.enqueueGraph([image, bob]);
+		queue.enqueueGraph([image, bob], EMPTY_CONTEXT);
 		await vi.advanceTimersByTimeAsync(0);
 
 		// Bob finishing frees a batch slot, but the image depends on Alice.
@@ -88,7 +81,7 @@ describe("dependency ordering", () => {
 		// that in turn draws a character.
 		const avatar = node("~avatar:Alice");
 		const frame = node("img", [avatar]);
-		queue.enqueueGraph([node("vid-1", [frame])]);
+		queue.enqueueGraph([node("vid-1", [frame])], EMPTY_CONTEXT);
 
 		expect(queue.getElementSnapshot("~avatar:Alice").status).not.toBe("idle");
 		expect(queue.getElementSnapshot("img").status).not.toBe("idle");
@@ -99,7 +92,10 @@ describe("dependency ordering", () => {
 		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
 
 		const avatar = node("~avatar:Alice");
-		queue.enqueueGraph([node("a", [avatar]), node("b", [avatar])]);
+		queue.enqueueGraph(
+			[node("a", [avatar]), node("b", [avatar])],
+			EMPTY_CONTEXT,
+		);
 
 		expect(queue.getActiveCount()).toBe(3);
 	});
@@ -113,7 +109,7 @@ describe("dependency ordering", () => {
 		);
 
 		const avatar = node("avatar:Alice");
-		queue.enqueueGraph([node("image", [avatar])]);
+		queue.enqueueGraph([node("image", [avatar])], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		const imageCall = generateMock.mock.calls.find(
@@ -134,7 +130,7 @@ describe("dependency ordering", () => {
 
 		const alice = node("avatar:Alice");
 		const image = node("image", [alice]);
-		queue.enqueueGraph([image, node("avatar:Bob")]);
+		queue.enqueueGraph([image, node("avatar:Bob")], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("image").result).not.toBeNull();
@@ -146,7 +142,7 @@ describe("dependency ordering", () => {
 		const avatar = node("avatar:Alice");
 		queue.commitResult(avatar, { imageUrl: "existing.png", durationSec: 0 });
 
-		queue.enqueueGraph([node("image", [avatar])]);
+		queue.enqueueGraph([node("image", [avatar])], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(startedIds()).toEqual(["image"]);
@@ -162,9 +158,9 @@ describe("dependency ordering", () => {
 
 		const image = node("image", [node("avatar:Alice")]);
 		queue.commitResult(image, { imageUrl: "existing.png", durationSec: 0 });
-		queue.enqueueGraph([node("avatar:Alice")]);
+		queue.enqueueGraph([node("avatar:Alice")], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
-		queue.enqueueGraph([image]);
+		queue.enqueueGraph([image], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		// The image never ran, so the URL it already held is still good.
@@ -182,7 +178,7 @@ describe("dependency ordering", () => {
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
-		queue.enqueueGraph([node("image", [node("avatar:Alice")])]);
+		queue.enqueueGraph([node("image", [node("avatar:Alice")])], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("image").status).toBe("idle");
@@ -198,7 +194,7 @@ describe("dependency ordering", () => {
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
-		queue.enqueueGraph([node("image", [node("~avatar:Alice")])]);
+		queue.enqueueGraph([node("image", [node("~avatar:Alice")])], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		// A derived node has no card, so its failure has to surface on the element.
@@ -213,7 +209,7 @@ describe("dependency ordering", () => {
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
-		queue.enqueueGraph([node("a", [node("b", [node("c")])])]);
+		queue.enqueueGraph([node("a", [node("b", [node("c")])])], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("b").error).toMatch(/root boom/);
@@ -223,7 +219,7 @@ describe("dependency ordering", () => {
 	it("leaves no error on a dependent released for a reason other than failure", async () => {
 		generateMock.mockResolvedValue({ imageUrl: "x.png", durationSec: 0 });
 
-		queue.enqueueGraph([node("image", [node("avatar:Alice")])]);
+		queue.enqueueGraph([node("image", [node("avatar:Alice")])], EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("image").error).toBeNull();

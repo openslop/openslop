@@ -14,7 +14,6 @@ import {
 	type JobNode,
 	type NodeSpec,
 } from "./graph";
-import type { ProjectData } from "@/lib/project/store";
 
 /** Builds the node a spec names, along with every node it depends on. */
 export type NodeBuilder = (spec: NodeSpec) => GenerationNode;
@@ -25,7 +24,6 @@ const toNode = (
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
 	dependsOn: GenerationNode[],
-	{ state, canvas }: BuildContext,
 ): JobNode => ({
 	id: element.id,
 	inputs: {
@@ -39,8 +37,6 @@ const toNode = (
 		connectorType: connector.type,
 		model: connector.model,
 		config: { ...connector.config, plugins },
-		state,
-		canvas,
 	},
 });
 
@@ -54,15 +50,14 @@ const labelled = (node: JobNode, label: string | undefined): JobNode =>
  */
 export function nodeBuilder(
 	registry: ConnectorRegistry,
-	state: ProjectData,
-	canvas: () => CanvasContentElement[],
+	context: () => BuildContext,
 ): NodeBuilder {
 	// Nodes are shared between builds against the same canvas, so a document
 	// edit, which is a new canvas, is the only thing that builds an element again.
 	const revisions = new WeakMap<CanvasContentElement[], Map<string, JobNode>>();
 	return (spec) => {
 		// Read once per build, so every node in the graph sees the same canvas.
-		const ctx: BuildContext = { state, canvas: canvas() };
+		const ctx = context();
 		const resolved = revisions.get(ctx.canvas) ?? new Map<string, JobNode>();
 		revisions.set(ctx.canvas, resolved);
 		const resolving = new Set<string>();
@@ -75,12 +70,12 @@ export function nodeBuilder(
 				throw new Error(`Cyclic generation dependency at "${id}"`);
 			resolving.add(id);
 
-			const connector = resolveElementConnector(element, registry, state);
+			const connector = resolveElementConnector(element, registry, ctx.state);
 			const plugins = override ?? connector.config.plugins ?? [];
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
-			const node = toNode(element, connector, plugins, dependsOn, ctx);
+			const node = toNode(element, connector, plugins, dependsOn);
 
 			resolving.delete(id);
 			resolved.set(id, node);
