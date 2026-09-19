@@ -11,6 +11,7 @@ import type {
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
+import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
 import { animateImageScene } from "@/lib/script/refine/animatePrompt";
 import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
@@ -30,7 +31,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
 
-<animated_image videoPrompt="slow pan across the village to the forest path">A peaceful village at the edge of a lush green forest on a sunny morning. A cozy cottage with a red door sits near the forest path. Birds fly overhead. Flowers bloom along the dirt path leading into the woods.</animated_image>
+<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
@@ -52,13 +53,13 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound>footsteps on dirt path</sound>
 
-<animated_image videoPrompt="gentle pan upward through the forest canopy" characters="Owl">High in the branches of an ancient oak, Owl (a tawny owl with copper and brown speckled feathers, enormous golden eyes, wearing a tiny silver pendant) watches with wisdom in her gaze. Sunlight filters through the leaves around her.</animated_image>
+<video characters="Owl">Shot 1: Gentle upward pan through the forest canopy, sunlight filtering through the leaves. Sound: leaves rustling high above. Shot 2: Owl perched high in the branches of an ancient oak, slowly turning her head toward the path below.</video>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
 <character name="Owl" emotion="calm">"A child enters the forest today. The wind tells me she will not walk alone."</character>
 
-<clip duration="4" motion="handheldDrift" characters="Wolf">A different part of the forest with thick berry bushes full of ripe red berries. Wolf (a large gray wolf with kind amber eyes, soft fur, wearing a worn brown vest) carefully picks berries and places them in a wicker basket. Dappled sunlight filters through the forest canopy above.</clip>
+<video duration="4" motion="handheldDrift" characters="Wolf">Shot 1: Medium shot of Wolf carefully picking ripe red berries from thick bushes, dappled sunlight through the canopy. Sound: branches rustling. Shot 2: Close-up as he drops the berries into a wicker basket.</video>
 
 <narration emotion="mysterious">Not far away, someone else was in the forest that morning. Wolf was gathering wild berries near the path.</narration>
 
@@ -82,7 +83,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <sound loops="6">forest stream burbling</sound>
 
-<clip duration="5" motion="panRight" characters="Red,Wolf">Red and Wolf walk side by side along a winding forest path lined with ferns. Red gestures animatedly while talking; Wolf listens with a gentle smile. A small stream sparkles in the background. The light is dappled and warm.</clip>
+<video duration="5" motion="panRight" characters="Red,Wolf">Shot 1: Tracking shot of Red and Wolf walking side by side along a winding fern-lined path, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby. Shot 2: Red gestures as she talks while Wolf listens with a gentle smile.</video>
 
 <music length="short">Light, twinkling music with playful pizzicato strings</music>
 
@@ -102,7 +103,7 @@ const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<animated_image videoPrompt="slow push-in toward the cottage door" characters="Granny">A small thatched cottage nestled among ancient oaks, with smoke curling from the chimney and a window box of bright marigolds. Granny (a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl) stands at the open door, leaning on a wooden cane, smiling warmly.</animated_image>
+<video characters="Granny">Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Granny steps into the doorway leaning on a wooden cane, smiling warmly.</video>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;
@@ -133,6 +134,10 @@ const MOCK_RESPONSES: {
 	{
 		matches: (p) => p.startsWith(OUTLINE_INSTRUCTION),
 		respond: () => MOCK_OUTLINE,
+	},
+	{
+		matches: (p) => p.startsWith(REVIEW_INSTRUCTION),
+		respond: () => NO_FINDINGS,
 	},
 ];
 
@@ -286,19 +291,18 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 		toolName: "edit_script",
 		input: {
 			ops: [
-				scene !== null
-					? {
-							op: "set",
-							id: elementId,
-							type: "animated_image",
-							attrs: { videoPrompt: "slow cinematic push-in" },
-							deps: { still: elementId },
-						}
-					: {
-							op: "set",
-							id: elementId,
-							text: "A mock edit, from the agent running without an API key.",
-						},
+				{
+					op: "set",
+					id: elementId,
+					...(scene === null
+						? {
+								text: "A mock edit, from the agent running without an API key.",
+							}
+						: {
+								type: "video",
+								text: "Slow cinematic push-in, the light shifting gently across the frame.",
+							}),
+				},
 			],
 		},
 	};

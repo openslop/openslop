@@ -22,12 +22,12 @@ import {
 	type CaptionAlignY,
 	type CaptionCasing,
 	type CaptionReveal,
-} from "@/lib/video/captionStyle";
-import { useCaptionStyle } from "@/lib/video/useCaptionStyle";
+} from "@/lib/captions/captionStyle";
+import { useCaptionStyle } from "@/lib/captions/useCaptionStyle";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
-} from "@/lib/video/useVideoSetting";
+} from "@/lib/project/useVideoSetting";
 import { CaptionFontLibrary } from "../CaptionFonts";
 import { CaptionFontField } from "./CaptionFontField";
 import { CaptionPresetGrid } from "./CaptionPresetGrid";

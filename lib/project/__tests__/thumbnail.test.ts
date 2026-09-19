@@ -1,28 +1,19 @@
 import { describe, expect, it } from "vitest";
-import type { AssetConnectorType } from "@/lib/connectors/types";
+import type { AssetConnectorType, AssetResult } from "@/lib/connectors/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import { stillElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
 import { characterAvatarElementId } from "../characterAvatar";
 import { pickThumbnailUrl } from "../thumbnail";
 
 const entry = (
 	id: string,
 	connectorType: AssetConnectorType | null,
-	imageUrl: string | null,
-	videoUrl?: string,
+	result: Partial<AssetResult> | null,
 ): [string, ElementSnapshot] => [
 	id,
 	{
 		status: "idle",
 		seconds: 0,
-		result:
-			imageUrl || videoUrl
-				? {
-						durationSec: 0,
-						...(imageUrl && { imageUrl }),
-						...(videoUrl && { videoUrl }),
-					}
-				: null,
+		result: result && { durationSec: 0, ...result },
 		error: null,
 		resultInputs: null,
 		connectorType,
@@ -38,20 +29,20 @@ describe("pickThumbnailUrl", () => {
 	it("returns the first image url in iteration order", () => {
 		expect(
 			pickThumbnailUrl([
-				entry("1", "tts", "n.mp3"),
-				entry("2", "image", "a.png"),
-				entry("3", "image", "b.png"),
+				entry("1", "tts", { audioUrl: "n.mp3" }),
+				entry("2", "image", { imageUrl: "a.png" }),
+				entry("3", "image", { imageUrl: "b.png" }),
 			]),
 		).toBe("a.png");
 	});
 
-	it("ignores non-image connector types", () => {
+	it("ignores entries without an image url, whatever their connector", () => {
 		expect(
 			pickThumbnailUrl([
-				entry("1", "tts", "n.mp3"),
-				entry("2", "video", "v.mp4"),
-				entry("3", "sfx", "s.mp3"),
-				entry("4", "music", "m.mp3"),
+				entry("1", "tts", { audioUrl: "n.mp3" }),
+				entry("2", "video", { videoUrl: "v.mp4" }),
+				entry("3", "sfx", { audioUrl: "s.mp3" }),
+				entry("4", "music", { audioUrl: "m.mp3" }),
 			]),
 		).toBeNull();
 	});
@@ -63,33 +54,27 @@ describe("pickThumbnailUrl", () => {
 	it("skips character avatar entries", () => {
 		expect(
 			pickThumbnailUrl([
-				entry(characterAvatarElementId("Alice"), "image", "avatar.png"),
-				entry("scene-1", "image", "scene.png"),
+				entry(characterAvatarElementId("Alice"), "image", {
+					imageUrl: "avatar.png",
+				}),
+				entry("scene-1", "image", { imageUrl: "scene.png" }),
 			]),
 		).toBe("scene.png");
 	});
 
-	// A still node is a real frame of the scene, unlike a character portrait.
-	it("allows the still behind an animated image", () => {
+	// A video element's frame is as much a picture of the project as a still is.
+	it("takes the image url a video element carries beside its videoUrl", () => {
 		expect(
 			pickThumbnailUrl([
-				entry(stillElementId("scene-1"), "image", "still.png"),
+				entry("1", "tts", { audioUrl: "n.mp3" }),
+				entry("2", "video", { imageUrl: "frame.png", videoUrl: "video.mp4" }),
 			]),
-		).toBe("still.png");
+		).toBe("frame.png");
 	});
 
-	it("uses the still imageUrl for animated_image entries", () => {
+	it("returns null for a video with only a videoUrl", () => {
 		expect(
-			pickThumbnailUrl([
-				entry("1", "tts", "n.mp3"),
-				entry("2", "animated_image", "still.png", "video.mp4"),
-			]),
-		).toBe("still.png");
-	});
-
-	it("returns null for animated_image with only a videoUrl", () => {
-		expect(
-			pickThumbnailUrl([entry("1", "animated_image", null, "video.mp4")]),
+			pickThumbnailUrl([entry("1", "video", { videoUrl: "video.mp4" })]),
 		).toBeNull();
 	});
 });

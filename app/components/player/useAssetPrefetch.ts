@@ -1,0 +1,90 @@
+import { useEffect, useRef, useState } from "react";
+import type { prefetch as PrefetchFn } from "remotion";
+import type { RenderLayout } from "@/lib/render/types";
+
+type PrefetchHandle = ReturnType<typeof PrefetchFn>;
+
+let prefetchPromise: Promise<typeof PrefetchFn> | null = null;
+const loadPrefetch = () =>
+	(prefetchPromise ??= import("remotion")
+		.then((remotion) => remotion.prefetch)
+		.catch((error) => {
+			prefetchPromise = null;
+			throw error;
+		}));
+
+export function collectUrls(layout: RenderLayout): Set<string> {
+	const urls = new Set<string>();
+	for (const seq of layout.series) urls.add(seq.element.url);
+	for (const seqs of Object.values(layout.sequences))
+		if (seqs) for (const seq of seqs) urls.add(seq.element.url);
+	return urls;
+}
+
+/**
+ * Frees handles for URLs no longer needed and prefetches newly required ones,
+ * mutating `active` in place. Returns true if any new prefetch was started.
+ */
+export function reconcilePrefetch(
+	desired: Set<string>,
+	active: Map<string, PrefetchHandle>,
+	prefetch: typeof PrefetchFn,
+): boolean {
+	for (const [url, handle] of active) {
+		if (!desired.has(url)) {
+			handle.free();
+			active.delete(url);
+		}
+	}
+	let added = false;
+	for (const url of desired) {
+		if (!active.has(url)) {
+			active.set(url, prefetch(url));
+			added = true;
+		}
+	}
+	return added;
+}
+
+export async function awaitPrefetch(handles: PrefetchHandle[]): Promise<void> {
+	await Promise.allSettled(handles.map((handle) => handle.waitUntilDone()));
+}
+
+export function useAssetPrefetch(layout: RenderLayout): boolean {
+	const activeRef = useRef(new Map<string, PrefetchHandle>());
+	const [ready, setReady] = useState(false);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		loadPrefetch()
+			.then(async (prefetch) => {
+				if (cancelled) return;
+				const active = activeRef.current;
+				if (reconcilePrefetch(collectUrls(layout), active, prefetch)) {
+					setReady(false);
+				}
+				await awaitPrefetch([...active.values()]);
+				if (!cancelled) setReady(true);
+			})
+			.catch((error) => {
+				if (cancelled) return;
+				console.error("Failed to load remotion for prefetch", error);
+				setReady(true);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [layout]);
+
+	useEffect(() => {
+		const active = activeRef.current;
+		return () => {
+			for (const handle of active.values()) handle.free();
+			active.clear();
+		};
+	}, []);
+
+	return ready;
+}

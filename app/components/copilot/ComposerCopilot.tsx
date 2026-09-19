@@ -35,16 +35,16 @@ import {
 } from "@/lib/project/language";
 import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
-import { ASPECT_RATIOS, type AspectRatio } from "@/lib/video/aspectRatio";
+import { ASPECT_RATIOS, type AspectRatio } from "@/lib/project/aspectRatio";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
-} from "@/lib/video/useVideoSetting";
+} from "@/lib/project/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
 	videoLengthLabel,
 	type VideoLength,
-} from "@/lib/video/videoLength";
+} from "@/lib/project/videoLength";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./ActionButton";

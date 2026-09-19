@@ -3,11 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ToolUIPart } from "ai";
 import { cn } from "@/lib/utils";
-import {
-	Disclosure,
-	DisclosureJson,
-	DisclosureText,
-} from "@/components/ui/disclosure";
+import { Disclosure, DisclosureJson } from "@/components/ui/disclosure";
 import type { SloppyTools } from "@/lib/agent/types";
 import { toolPresentation } from "./toolPresentation";
 
@@ -22,7 +18,7 @@ function Outcome({ failed = false, text }: { failed?: boolean; text: string }) {
 		if (body) setClipped(body.scrollHeight > body.clientHeight);
 	}, [text]);
 
-	const clips = clipped || expanded;
+	const showToggle = clipped || expanded;
 
 	return (
 		<div
@@ -40,7 +36,7 @@ function Outcome({ failed = false, text }: { failed?: boolean; text: string }) {
 			>
 				{text}
 			</p>
-			{clips && (
+			{showToggle && (
 				<button
 					type="button"
 					onClick={() => setExpanded((prev) => !prev)}
@@ -67,18 +63,7 @@ export function Tool({ part }: { part: ToolUIPart<SloppyTools> }) {
 				icon={<Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
 				label={label}
 			>
-				<div className="flex flex-col gap-1.5">
-					<DisclosureJson value={part.input} />
-					{part.state === "output-available" &&
-						(typeof part.output === "string" ? (
-							<DisclosureText>{part.output}</DisclosureText>
-						) : (
-							<DisclosureJson value={part.output} />
-						))}
-					{part.state === "output-error" && (
-						<DisclosureText>{part.errorText}</DisclosureText>
-					)}
-				</div>
+				<DisclosureJson value={part.input} />
 			</Disclosure>
 			{part.state === "output-available" && (
 				<Outcome text={outputText(part.output)} />

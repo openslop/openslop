@@ -1901,13 +1901,13 @@
       "boundElements": [
         {
           "type": "text",
-          "id": "chip-clip-label"
+          "id": "chip-video-label"
         }
       ],
       "updated": 1781285536270,
       "link": null,
       "locked": false,
-      "id": "chip-clip",
+      "id": "chip-video",
       "type": "rectangle",
       "x": 115,
       "y": 855,
@@ -1935,20 +1935,20 @@
       "updated": 1781285536270,
       "link": null,
       "locked": false,
-      "id": "chip-clip-label",
+      "id": "chip-video-label",
       "type": "text",
-      "x": 168.1,
+      "x": 164.5,
       "y": 866.5,
-      "width": 28.799999999999997,
+      "width": 36,
       "height": 15,
-      "text": "clip",
-      "originalText": "clip",
+      "text": "video",
+      "originalText": "video",
       "fontSize": 12,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "lineHeight": 1.25,
-      "containerId": "chip-clip",
+      "containerId": "chip-video",
       "autoResize": true,
       "index": "ar"
     },

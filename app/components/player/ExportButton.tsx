@@ -1,0 +1,142 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Download } from "@/components/ui/icon";
+import { CloseButton } from "@/components/ui/close-button";
+import {
+	Popover,
+	PopoverAnchor,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { SelectField } from "@/components/ui/select-field";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
+import { formatBytes } from "@/lib/format";
+import { RESOLUTIONS, scaleForWidth } from "@/lib/project/resolutions";
+import { BASE_WIDTH } from "@/lib/render/types";
+import { useSloppy } from "../sloppy/SloppyProvider";
+import { useRender } from "./RenderProvider";
+import { useLayout } from "./RenderLayoutContext";
+
+const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
+	value: String(resolution.width),
+	label: resolution.label,
+}));
+
+export function ExportButton() {
+	const { layout, ready } = useLayout();
+	const { loading } = useSloppy();
+	const { state, render, reset, open, setOpen } = useRender();
+	const [width, setWidth] = useState(BASE_WIDTH);
+
+	const disabled = loading || !layout.series.length || !ready;
+	const isRendering = state.status === "rendering";
+
+	return (
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
+				<Button
+					type="button"
+					variant="panel"
+					size="sm"
+					className="shrink-0 sm:px-4"
+					aria-label="Export"
+					disabled={disabled}
+				>
+					<Download aria-hidden="true" />
+					<span className="hidden sm:inline">Export</span>
+				</Button>
+			</PopoverTrigger>
+			{/* Dock the popover to the viewport's bottom-right, independent of the toolbar trigger. */}
+			<PopoverAnchor className="pointer-events-none fixed right-4 bottom-4" />
+			<PopoverContent
+				align="end"
+				side="top"
+				sideOffset={8}
+				className="w-80 p-3 font-medium"
+			>
+				<div className="flex items-center justify-between">
+					<span className="text-label font-semibold">Export</span>
+					<CloseButton onClick={() => setOpen(false)} />
+				</div>
+				<Separator bleed />
+
+				{(state.status === "invoking" || state.status === "rendering") && (
+					<div className="animate-fadeInUp flex flex-col gap-2">
+						<div className="flex items-center justify-between text-label font-medium">
+							<span className="flex items-center gap-2">
+								<Spinner className="size-3.5" />
+								{isRendering ? "Rendering…" : "Starting…"}
+							</span>
+							{isRendering && (
+								<span className="font-numeric">
+									{Math.round(state.progress * 100)}%
+								</span>
+							)}
+						</div>
+						<Progress
+							value={isRendering ? state.progress * 100 : 0}
+							className="h-2.5"
+						/>
+					</div>
+				)}
+
+				{state.status === "done" && (
+					<div className="flex animate-in flex-col gap-3 fade-in">
+						<div className="flex items-center justify-between text-label">
+							<span>Size</span>
+							<span className="font-numeric">{formatBytes(state.size)}</span>
+						</div>
+						<Button asChild variant="generate" size="sm" className="w-full">
+							<a href={state.url} download>
+								<Download aria-hidden="true" />
+								Download
+							</a>
+						</Button>
+						<button
+							type="button"
+							onClick={reset}
+							className="text-label transition-colors hover:text-foreground"
+						>
+							Export again
+						</button>
+					</div>
+				)}
+
+				{(state.status === "idle" || state.status === "error") && (
+					<>
+						<div className="flex items-center justify-between gap-3">
+							<span className="text-label">Resolution</span>
+							<SelectField
+								value={String(width)}
+								options={RESOLUTION_OPTIONS}
+								onChange={(value) => setWidth(Number(value))}
+								ariaLabel="Resolution"
+							/>
+						</div>
+						{state.status === "error" && (
+							<p className="mt-3 text-label text-destructive">
+								{state.message}
+							</p>
+						)}
+						<Separator bleed />
+						<Button
+							type="button"
+							variant="generate"
+							size="sm"
+							onClick={() => render(layout, scaleForWidth(width))}
+							disabled={disabled}
+							className="w-full"
+						>
+							<Download aria-hidden="true" />
+							Export
+						</Button>
+					</>
+				)}
+			</PopoverContent>
+		</Popover>
+	);
+}

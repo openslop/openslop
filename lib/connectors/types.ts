@@ -3,7 +3,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { NodeSpec } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/video/aspectRatio";
+import type { VideoResolution } from "@/lib/project/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
@@ -13,7 +13,6 @@ export const ASSET_CONNECTOR_TYPES = [
 	"music",
 	"sfx",
 	"image",
-	"animated_image",
 	"tts",
 	"video",
 ] as const;
@@ -59,7 +58,6 @@ export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	image: ModelEntry;
-	animated_image: VideoModelEntry;
 	video: VideoModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
@@ -84,8 +82,9 @@ export interface PluginContext {
 	elementId?: string;
 	/** Outputs of that node's dependencies, keyed by node id. */
 	dependencies?: Record<string, AssetResult>;
-	/** The project state the node's inputs were resolved against. */
+	/** The project state and canvas the node's inputs were resolved against. */
 	state?: ProjectData;
+	canvas?: CanvasContentElement[];
 	/** The pair the connector runs on. */
 	model?: ModelRef;
 	/** Aborts when the caller cancels the generation. */
@@ -95,7 +94,7 @@ export interface PluginContext {
 /** The parts of a plugin context the caller supplies per generation. */
 export type GenerationContext = Pick<
 	PluginContext,
-	"elementId" | "dependencies" | "state" | "signal"
+	"elementId" | "dependencies" | "state" | "canvas" | "signal"
 >;
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
@@ -201,15 +200,6 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	width?: number;
 	height?: number;
 	referenceImages?: string[];
-};
-
-/** A video generation whose conditioning frame comes from the element's still. */
-export type AnimatedImageGenerateParams = VideoGenerateParams & {
-	videoPrompt?: string;
-	/** The still's own model and format. The still-frame plugin keeps them off the video call. */
-	imageProvider?: string;
-	imageModel?: string;
-	format?: ImageFormat;
 };
 
 export type TTSResult = AssetResult & {

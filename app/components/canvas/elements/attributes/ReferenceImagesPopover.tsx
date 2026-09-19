@@ -18,11 +18,14 @@ const summarize = (override: string[] | undefined, projectCount: number) => {
 	return override.length ? `${override.length} custom` : "None";
 };
 
-interface ReferenceImagesPopoverProps {
+export interface ReferenceImagesPopoverProps {
 	element: CanvasContentElement;
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;
+	/** References the element adds beyond these, counted in the summary. */
+	added?: number;
+	children?: React.ReactNode;
 }
 
 /**
@@ -35,6 +38,8 @@ export function ReferenceImagesPopover({
 	attrKey,
 	label,
 	hideLabel = false,
+	added = 0,
+	children,
 }: ReferenceImagesPopoverProps) {
 	const editor = useSlateStatic();
 	const projectImages = useProject((s) => s.referenceImages);
@@ -48,7 +53,9 @@ export function ReferenceImagesPopover({
 			[attrKey]: serializeReferenceImages(next),
 		});
 
-	const summary = summarize(override, projectImages.length);
+	const summary =
+		summarize(override, projectImages.length) +
+		(added > 0 ? ` + ${added}` : "");
 	const tooltip = `${label}: ${summary}`;
 
 	return (
@@ -57,7 +64,7 @@ export function ReferenceImagesPopover({
 				{!hideLabel && <span className="opacity-70 mr-1">{label}</span>}
 				{summary}
 			</AttributeTrigger>
-			<PopoverContent align="start" className="w-72">
+			<PopoverContent align="end" className="w-72">
 				<div className="mb-2 flex items-baseline justify-between gap-2">
 					<span className="text-label text-muted-foreground">
 						{override ? "Custom for this element" : "Using project references"}
@@ -85,6 +92,7 @@ export function ReferenceImagesPopover({
 						}
 					/>
 				</div>
+				{children}
 			</PopoverContent>
 		</Popover>
 	);

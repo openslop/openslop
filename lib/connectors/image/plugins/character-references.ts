@@ -9,6 +9,7 @@ import { forCharacterAvatar } from "./characterAvatarNode";
 
 export type ParamsWithCharacters = {
 	prompt: string;
+	referenceImages?: string[];
 	[CHARACTERS_ATTR]?: string;
 };
 
@@ -24,18 +25,18 @@ export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCha
 			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
 			if (!characters) return params;
 
-			const referenceImages = compact(
+			const avatars = compact(
 				parseCharacterNames(characters).map(
 					(name) =>
 						ctx.dependencies?.[characterAvatarElementId(name)]?.imageUrl,
 				),
 			);
-			if (referenceImages.length === 0) return rest;
+			if (avatars.length === 0) return rest;
 
 			return {
 				...rest,
 				prompt: `${rest.prompt}. No nameplates`,
-				referenceImages,
+				referenceImages: [...(rest.referenceImages ?? []), ...avatars],
 			};
 		},
 	};

@@ -138,7 +138,7 @@ the app, phrased as an instruction ("Create a new slop, ...", "Click on ...").
 ```
 🍝 **OpenSlop Update**
 
-🚀 **New**: Did you get a `content flagged` error when animating a photo of a real person? Try the new `Slop Video v1 Fast` model. It works with real people. You can also now set the resolution, loop, and volume on each clip
+🚀 **New**: Did you get a `content flagged` error when animating a photo of a real person? Try the new `Slop Video v1 Fast` model. It works with real people. You can also now set the resolution, loop, and volume on each video card
 ✨ **Better**: Sloppy can now see if an element is done, stale, or failed. If something breaks, ask Sloppy "what went wrong?" and it will help you fix it
 🐛 **Fixed**: Bad wifi used to give a `Failed to fetch` error and stop your generation. Now we keep going. 4K exports also no longer time out
 🧪 **Try it**: Animate a photo of a person with `Slop Video v1 Fast`, then ask Sloppy "did everything generate?"

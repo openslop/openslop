@@ -12,7 +12,7 @@ describe("character-avatar plugin", () => {
 
 		const plugin = createCharacterAvatarPlugin("Alice");
 		expect(plugin.transformPrompt?.("ignored", stateCtx(store))).toBe(
-			'Character portrait of Alice. A young girl with red hair. A small rectangular nameplate at the bottom of the frame reads "Alice" in clean sans-serif lettering. White background',
+			'Character portrait of Alice. A young girl with red hair. A small rectangular nameplate at the bottom of the frame reads "Alice" in clean sans-serif lettering. Plain solid white background, with no scenery, objects or location behind them',
 		);
 	});
 

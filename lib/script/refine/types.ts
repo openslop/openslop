@@ -1,13 +1,16 @@
 import { z } from "zod";
 import { CanvasElementTypeSchema } from "@/lib/canvas/types";
 
+const ELEMENT_TEXT =
+	"The element's content: the spoken line for narration and character, the prompt for image, video, sound and music.";
+
 const insertOp = z.object({
 	op: z.literal("insert"),
 	anchor_id: z.string().optional(),
 	position: z.enum(["before", "after"]).optional(),
 	type: CanvasElementTypeSchema,
 	attrs: z.record(z.string(), z.string()).optional(),
-	text: z.string(),
+	text: z.string().describe(ELEMENT_TEXT),
 });
 
 const removeOp = z.object({
@@ -20,13 +23,7 @@ const setOp = z.object({
 	id: z.string(),
 	type: CanvasElementTypeSchema.optional(),
 	attrs: z.record(z.string(), z.string().nullable()).optional().nullable(),
-	text: z.string().optional(),
-	deps: z
-		.record(z.string(), z.string())
-		.optional()
-		.describe(
-			'Reuse a result instead of making a new one, as input name to element id. Example: {"still": "abc123"}.',
-		),
+	text: z.string().optional().describe(ELEMENT_TEXT),
 });
 
 export const refineOpSchema = z.discriminatedUnion("op", [

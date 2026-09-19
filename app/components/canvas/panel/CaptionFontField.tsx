@@ -14,7 +14,7 @@ import {
 	captionFontLabel,
 	captionFontStack,
 	type CaptionFont,
-} from "@/lib/video/captionFonts";
+} from "@/lib/captions/captionFonts";
 
 /** Full-width font picker; each row is set in the face it selects. */
 export function CaptionFontField({

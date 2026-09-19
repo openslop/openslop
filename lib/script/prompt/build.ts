@@ -45,17 +45,24 @@ function promptParts(
 	return { guidance: [lengthSection(metadata)], instruction: source.brief };
 }
 
+/**
+ * Also the review's system prompt. What only one source contributes (a length
+ * budget, a template, a pasted script's notes) stays with that source.
+ */
+export function scriptRules(metadata: Metadata): string {
+	return compact([
+		projectPreamble(metadata),
+		osmlSpec(spokenLanguage(metadata, INPUT_LANGUAGE)),
+	]).join("\n\n");
+}
+
 export function buildScriptPrompt(
 	metadata: Metadata,
 	source: ScriptSource,
 ): ScriptPrompt {
 	const { guidance, instruction } = promptParts(source, metadata);
 	return {
-		system: compact([
-			...guidance,
-			projectPreamble(metadata),
-			osmlSpec(spokenLanguage(metadata, INPUT_LANGUAGE)),
-		]).join("\n\n"),
+		system: compact([...guidance, scriptRules(metadata)]).join("\n\n"),
 		prompt: instruction,
 	};
 }

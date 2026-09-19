@@ -71,7 +71,7 @@ Type one line. Pick 16:9 or 9:16, a language, a model, and a length, or paste a 
 
 ### Sloppy writes it with you
 
-The copilot lives in the left panel. It reads the script, outlines the story, writes the scenes, and fits the clips to the dialogue. Everything it does lands on the canvas while you watch.
+The copilot lives in the left panel. It reads the script, outlines the story, writes the scenes, and fits each video card to its dialogue. Everything it does lands on the canvas while you watch.
 
 [How a turn works →](ARCHITECTURE.md#sloppy)
 
@@ -88,7 +88,7 @@ The copilot lives in the left panel. It reads the script, outlines the story, wr
 
 ### A storyboard, not a prompt box
 
-Every scene is a stack of cards: narration, character, image, animated image, clip, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
+Every scene is a stack of cards: narration, character, image, video, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
 
 [The document model →](lib/canvas)
 
@@ -105,7 +105,7 @@ Every scene is a stack of cards: narration, character, image, animated image, cl
 
 ### One click generates everything
 
-Generate all queues every element and runs dependencies first: a still frame before its animated clip, an avatar before the image it appears in. Change a prompt later and the card says **Stale** and why.
+Generate all queues every element and runs dependencies first: the video card a scene continues from before the scene itself, an avatar before the image it appears in. Change a prompt later and the card says **Stale** and why.
 
 [The generation graph →](ARCHITECTURE.md#generation-graph)
 
@@ -122,13 +122,13 @@ Generate all queues every element and runs dependencies first: a still frame bef
 
 ### Player and timeline
 
-Watch the cut as it fills in, captions word by word. Four lanes underneath: video, voice, effects, music. Scrub the ruler, jump by scene, or switch to the storyboard strip.
+Watch the cut as it fills in, captions word by word. Four lanes underneath: visuals, voice, effects, music. Scrub the ruler, jump by scene, or switch to the storyboard strip.
 
-[The player →](app/components/video)
+[The player →](app/components/player)
 
 </td>
 <td width="50%">
-  <a href="app/components/video"><picture>
+  <a href="app/components/player"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/features/timeline-dark.svg">
     <img src="./assets/features/timeline-light.svg" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%">
   </picture></a>
@@ -156,7 +156,7 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 **Also in the box:**
 
 - **[Captions](app/components/canvas/panel/CaptionsPanel.tsx)** — Six presets, twelve fonts, word-by-word or line-by-line reveal, and every color, border, and placement is yours to change.
-- **[Export up to 4K](app/components/video/ExportButton.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
+- **[Export up to 4K](app/components/player/ExportButton.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
 - **[Version history](app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
 - **[Characters and art style](app/components/canvas/elements/AssetsSection.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.
 - **[Templates](lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, and more. Each seeds a style, a narrator, and a length.

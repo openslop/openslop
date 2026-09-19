@@ -95,10 +95,10 @@ describe("applyTemplate", () => {
 	it("seeds a prebuilt avatar that is not stale on arrival", () => {
 		apply("pov-life");
 		const name = "Protagonist";
-		const node = nodeBuilder(
-			DEFAULT_CONNECTOR_REGISTRY,
-			store.getState(),
-		)(forCharacterAvatar(name));
+		const node = nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, () => ({
+			state: store.getState(),
+			canvas: [],
+		}))(forCharacterAvatar(name));
 
 		expect(needsGeneration(node, queue)).toBe(false);
 	});

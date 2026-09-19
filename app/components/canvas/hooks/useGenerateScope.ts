@@ -1,4 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
+import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -9,6 +11,7 @@ import {
 	needsGeneration,
 } from "@/lib/generation/graph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { useLiveNodes } from "@/lib/generation/useLiveNodes";
 import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
@@ -60,23 +63,26 @@ function describe(
 }
 
 /**
- * The generate control for any slice of the document. `subject` names that
- * slice, so what a control says and what it queues are decided in one place.
+ * The generate control for any slice of the document. `select` reads that slice
+ * from the document as it is, and `subject` names it, so what a control says
+ * and what it queues are decided in one place. Memoize `select`.
  */
 export function useGenerateScope(
-	elements: CanvasContentElement[],
+	select: (editor: Editor) => CanvasContentElement[],
 	subject: GenerateSubject,
 ): GenerateScope {
 	const queue = useGenerationQueue();
-	const buildNode = useNodeBuilder();
+	const editor = useSlateStatic();
+	const { build: buildNode, context } = useNodeBuilder();
 
-	const nodes = useMemo(
+	const buildNodes = useCallback(
 		() =>
-			elements
+			select(editor)
 				.map((element) => buildNode(forElement(element)))
 				.filter((node) => node.inputs.prompt),
-		[elements, buildNode],
+		[select, editor, buildNode],
 	);
+	const nodes = useLiveNodes(buildNodes);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -91,9 +97,13 @@ export function useGenerateScope(
 		(q) => nodes.filter((node) => isNodeStale(node, q)).length,
 	);
 
+	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
-		queue.enqueueGraph(nodes.filter((node) => needsGeneration(node, queue)));
-	}, [queue, nodes]);
+		queue.enqueueGraph(
+			buildNodes().filter((node) => needsGeneration(node, queue)),
+			context(),
+		);
+	}, [queue, buildNodes, context]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

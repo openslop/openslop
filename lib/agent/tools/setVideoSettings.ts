@@ -1,11 +1,11 @@
 import dedent from "dedent";
 import { z } from "zod";
-import { ASPECT_RATIOS } from "@/lib/video/aspectRatio";
+import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
 import {
 	VIDEO_LENGTHS,
 	VIDEO_LENGTH_SPECS,
 	VIDEO_LENGTH_TARGETS,
-} from "@/lib/video/videoLength";
+} from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
 import { named, notEmpty } from "./inputs";
@@ -16,6 +16,10 @@ export const setVideoSettings = defineTool({
 
 	  Length is a budget the next written script is held to; it does not resize a script already
 	  on the canvas. To change what is there, set the length and then edit_script.
+
+	  If the length is auto, set it before you call write_script. Use the runtime the user asked
+	  for. If they didn't give one, use the runtime the outline gives. Pick the length that fits
+	  that runtime. If none fits, pick the one closest to it.
 
 	  Lengths, with the spoken-word budget each carries:
 	  - auto: no budget. The script runs as long as the material needs.

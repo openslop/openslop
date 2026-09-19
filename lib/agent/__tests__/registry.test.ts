@@ -11,8 +11,9 @@ import {
 	type DeepPartial,
 	type Metadata,
 } from "@/lib/project/types";
-import { CaptionStyleSchema } from "@/lib/video/captionStyle";
+import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
+import { NO_FINDINGS } from "@/lib/script/prompt/review";
 
 const metadata = MetadataSchema.parse({
 	title: "Little Red",
@@ -76,7 +77,7 @@ describe("executeToolCall", () => {
 						detail: "The prompt changed — regenerate to update",
 					},
 					{ id: "ai1", state: "failed", detail: "Provider returned 503" },
-					{ id: "clip1", state: "ungenerated" },
+					{ id: "vid1", state: "ungenerated" },
 				],
 			}),
 		);
@@ -87,7 +88,7 @@ describe("executeToolCall", () => {
 				"- n1: generated",
 				"- img1: stale (The prompt changed — regenerate to update)",
 				"- ai1: failed (Provider returned 503)",
-				"- clip1: ungenerated",
+				"- vid1: ungenerated",
 			].join("\n"),
 		);
 	});
@@ -303,36 +304,64 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("reports the count against the project's word budget", async () => {
+	const onScreen = (id: string, seconds: number) => ({
+		id,
+		type: "video" as const,
+		sceneNumber: 1,
+		seconds,
+		words: 0,
+		dialogueIds: [],
+		durationSec: seconds,
+		trimToDialogue: false,
+	});
+
+	it("reports the runtime against the project's target length", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ countSpokenWords: () => 700 }),
+			context({
+				countSpokenWords: () => 700,
+				measureElementLengths: () => [onScreen("v1", 240)],
+			}),
 		);
 
-		// The fixture metadata targets 3-5m: 540 to 900 words.
+		// The fixture metadata targets 3-5m: 180s to 300s.
+		expect(outcome.ok && outcome.output).toContain("240.0s of video");
 		expect(outcome.ok && outcome.output).toContain("700 spoken words");
 		expect(outcome.ok && outcome.output).toContain("within the target range");
 	});
 
-	it("says how far off the count is, so the model knows how much to cut or add", async () => {
+	it("counts every visual's time on screen, not just the speech over it", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_total_length", input: {} },
+			context({
+				countSpokenWords: () => 0,
+				measureElementLengths: () => [onScreen("v1", 10), onScreen("v2", 8)],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("18.0s of video");
+	});
+
+	it("says how far off the runtime is, so the model knows how much to cut or add", async () => {
 		const over = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ countSpokenWords: () => 1000 }),
+			context({ measureElementLengths: () => [onScreen("v1", 400)] }),
 		);
-		expect(over.ok && over.output).toContain("over by 100 words");
+		expect(over.ok && over.output).toContain("over by 100.0s");
 
 		const under = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ countSpokenWords: () => 500 }),
+			context({ measureElementLengths: () => [onScreen("v1", 100)] }),
 		);
-		expect(under.ok && under.output).toContain("under by 40 words");
+		expect(under.ok && under.output).toContain("under by 80.0s");
 	});
 
-	it("counts without a verdict when the length is auto", async () => {
+	it("measures without a verdict when the length is auto", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
 			context({
 				countSpokenWords: () => 1000,
+				measureElementLengths: () => [onScreen("v1", 600)],
 				readMetadata: () =>
 					MetadataSchema.parse({ videoSettings: { length: "auto" } }),
 			}),
@@ -354,14 +383,16 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
+						trimToDialogue: true,
 					},
 					{
 						id: "ai1",
-						type: "animated_image",
+						type: "video",
 						sceneNumber: 2,
 						seconds: 1,
 						words: 0,
 						dialogueIds: [],
+						trimToDialogue: true,
 					},
 				],
 			}),
@@ -371,11 +402,11 @@ describe("executeToolCall", () => {
 			"Scene 1 image img1: 30.0s, from 90 words of dialogue after it (nar1)",
 		);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 2 animated_image ai1: 1.0s, nothing after it, so it holds the minimum",
+			"Scene 2 video ai1: 1.0s, nothing after it, so it holds the minimum",
 		);
 	});
 
-	it("fits each clip to the dialogue under it and says it went stale", async () => {
+	it("fits each video element to the dialogue under it and says it went stale", async () => {
 		const ops: RefineOp[][] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
@@ -383,12 +414,13 @@ describe("executeToolCall", () => {
 				measureElementLengths: () => [
 					{
 						id: "ai1",
-						type: "animated_image",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 10,
+						trimToDialogue: true,
 					},
 					{
 						id: "img1",
@@ -397,6 +429,7 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar2"],
+						trimToDialogue: true,
 					},
 				],
 				editScript: (applied) => {
@@ -408,58 +441,63 @@ describe("executeToolCall", () => {
 
 		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 animated_image ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
+			"Scene 1 video ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
-		expect(outcome.ok && outcome.output).toContain("1 image still left alone.");
+		expect(outcome.ok && outcome.output).toContain(
+			"1 image or untrimmed video left alone.",
+		);
 	});
 
-	it("names a clip whose dialogue outruns the longest option instead of hiding the clamp", async () => {
+	it("names a video element whose dialogue outruns the longest option instead of hiding the clamp", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["clip1"] } },
+			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
 				measureElementLengths: () => [
 					{
 						id: "ai1",
-						type: "animated_image",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
 						dialogueIds: [],
 						durationSec: 10,
+						trimToDialogue: true,
 					},
 					{
-						id: "clip1",
-						type: "clip",
+						id: "vid1",
+						type: "video",
 						sceneNumber: 2,
 						seconds: 60,
 						words: 180,
 						dialogueIds: ["nar2"],
 						durationSec: 15,
+						trimToDialogue: true,
 					},
 				],
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("Scene 2 clip clip1 needs");
+		expect(outcome.ok && outcome.output).toContain("Scene 2 video vid1 needs");
 		expect(outcome.ok && outcome.output).toContain("split the dialogue");
 		expect(outcome.ok && outcome.output).not.toContain("ai1");
 		expect(outcome.ok && outcome.output).not.toContain("already cover");
 	});
 
-	it("leaves durations alone when every clip already covers its dialogue", async () => {
+	it("leaves durations alone when every video element already covers its dialogue", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["clip1"] } },
+			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
 				measureElementLengths: () => [
 					{
-						id: "clip1",
-						type: "clip",
+						id: "vid1",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
+						trimToDialogue: true,
 					},
 				],
 				editScript: () => {
@@ -473,17 +511,18 @@ describe("executeToolCall", () => {
 
 	it("names element_ids that match no visual instead of reporting a clean pass", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["clip1", "nope"] } },
+			{ toolName: "fit_durations", input: { element_ids: ["vid1", "nope"] } },
 			context({
 				measureElementLengths: () => [
 					{
-						id: "clip1",
-						type: "clip",
+						id: "vid1",
+						type: "video",
 						sceneNumber: 1,
 						seconds: 4,
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
+						trimToDialogue: true,
 					},
 				],
 			}),
@@ -506,13 +545,14 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
+						trimToDialogue: true,
 					},
 				],
 			}),
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"No animated_image or clip in scope.",
+			"No video elements trimmed to dialogue in scope.",
 		);
 	});
 
@@ -601,10 +641,10 @@ describe("executeToolCall", () => {
 
 	it("refuses an element that generates no picture", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "clip-1" } },
+			{ toolName: "view_image", input: { id: "vid-1" } },
 			context({
 				elementImage: () => ({
-					type: "clip",
+					type: "video",
 					prompt: "a wolf running",
 					picture: undefined,
 				}),
@@ -612,7 +652,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("is a clip");
+		expect(!outcome.ok && outcome.errorText).toContain("is a video");
 	});
 
 	it("reports how far along an image is when there is nothing to look at yet", async () => {
@@ -647,6 +687,55 @@ describe("executeToolCall", () => {
 		expect(prompts[0]).toContain("a rabbit on the moon");
 		expect(prompts[0]).toContain("conflict, twists, and a resolution");
 	});
+
+	it("reviews the script against the rules it was written to", async () => {
+		const calls: { prompt: string; systemPrompt?: string }[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "review_script", input: { format: "Film" } },
+			context({
+				generateText: async (prompt, options) => {
+					calls.push({ prompt, systemPrompt: options?.systemPrompt });
+					return NO_FINDINGS;
+				},
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toBe(NO_FINDINGS);
+		expect(calls[0]?.prompt).toContain("<narration>hi</narration>");
+		expect(calls[0]?.prompt).toContain("intended as a Film");
+		expect(calls[0]?.systemPrompt).toContain(
+			"The story script must be written",
+		);
+	});
+
+	it("sets no token ceiling, so thinking cannot crowd out the findings", async () => {
+		const budgets: (number | undefined)[] = [];
+		await executeToolCall(
+			{ toolName: "review_script", input: {} },
+			context({
+				generateText: async (_prompt, options) => {
+					budgets.push(options?.maxTokens);
+					return NO_FINDINGS;
+				},
+			}),
+		);
+
+		expect(budgets[0]).toBeUndefined();
+	});
+
+	it("spends no generation reviewing an empty canvas", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "review_script", input: {} },
+			context({
+				readScript: () => "  ",
+				generateText: async () => {
+					throw new Error("reviewed an empty canvas");
+				},
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("nothing to review");
+	});
 });
 
 describe("SLOPPY_TOOLS", () => {
@@ -656,6 +745,7 @@ describe("SLOPPY_TOOLS", () => {
 			"edit_script",
 			"write_script",
 			"adapt_script",
+			"review_script",
 			"set_video_settings",
 			"set_caption_style",
 			"set_language",
@@ -706,17 +796,19 @@ describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
+			"review_script",
 			"view_avatar",
 			"view_image",
 			"view_reference_images",
 		]);
 	});
 
-	it("collects the tools that rewrite the canvas", () => {
+	it("collects the tools that write the script, reviewing it included", () => {
 		expect([...SCRIPT_TOOLS].sort()).toEqual([
 			"adapt_script",
 			"edit_script",
 			"fit_durations",
+			"review_script",
 			"write_script",
 		]);
 	});

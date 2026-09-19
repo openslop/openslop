@@ -1,11 +1,13 @@
+import type { IRequestVideo } from "@runware/sdk-js";
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
+import type { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
 import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
 	DEFAULT_VIDEO_RESOLUTION,
-} from "@/lib/video/aspectRatio";
+} from "@/lib/project/aspectRatio";
 
 function toVideoJob(video: {
 	taskUUID: string;
@@ -21,12 +23,62 @@ function toVideoJob(video: {
 	};
 }
 
+type ModelId =
+	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
+
+type Pictures = { startFrames: string[]; references: string[] };
+
+type Conditioning = Pick<IRequestVideo, "positivePrompt" | "inputs">;
+
+type Conditioner = (prompt: string, pictures: Pictures) => Conditioning;
+
+const pictureInputs = (
+	lists: Record<string, string[]>,
+): Pick<IRequestVideo, "inputs"> => {
+	const inputs = Object.fromEntries(
+		Object.entries(lists).filter(([, images]) => images.length > 0),
+	);
+	return Object.keys(inputs).length > 0 ? { inputs } : {};
+};
+
+const openingOnFrameImage =
+	({ maxReferences }: { maxReferences: number }): Conditioner =>
+	(prompt, { startFrames, references }) => ({
+		positivePrompt: prompt,
+		...pictureInputs({
+			frameImages: startFrames.slice(-1),
+			referenceImages: references.slice(0, maxReferences),
+		}),
+	});
+
+const openingOnNamedReference =
+	({ maxReferences }: { maxReferences: number }): Conditioner =>
+	(prompt, pictures) => {
+		const { startFrames, references } = pictures;
+		if (startFrames.length === 0)
+			return openingOnFrameImage({ maxReferences })(prompt, pictures);
+		const referenceImages = [
+			...references.slice(0, maxReferences - startFrames.length),
+			...startFrames,
+		];
+		return {
+			positivePrompt: `@Image ${referenceImages.length} as the first frame. ${prompt}`,
+			inputs: { referenceImages },
+		};
+	};
+
+const CONDITIONERS: Record<ModelId, Conditioner> = {
+	"bytedance:seedance@2.0-fast": openingOnNamedReference({ maxReferences: 9 }),
+	"klingai:kling-video@3.0-turbo": openingOnFrameImage({ maxReferences: 0 }),
+};
+
+const isModelId = (model: string): model is ModelId => model in CONDITIONERS;
+
 const DEFAULT_SIZE =
 	ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[DEFAULT_VIDEO_RESOLUTION];
 
-/** A frame-conditioned video takes its aspect from the frame, so it is sized by preset. */
-const sizeFor = (params: VideoRequest) =>
-	params.frameImages && params.resolution
+const sizeFor = (params: VideoRequest, { inputs }: Conditioning) =>
+	inputs?.frameImages && params.resolution
 		? { resolution: params.resolution }
 		: {
 				width: params.width ?? DEFAULT_SIZE.width,
@@ -47,20 +99,22 @@ export class RunwareVideo extends BaseVideoProvider {
 	}
 
 	async submit(params: VideoRequest) {
+		if (!isModelId(params.model))
+			throw new Error(`Runware has no video model "${params.model}"`);
+		const conditioning = CONDITIONERS[params.model](params.prompt, {
+			startFrames: params.frameImages ?? [],
+			references: params.referenceImages ?? [],
+		});
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({
-				positivePrompt: params.prompt,
 				model: params.model,
-				...sizeFor(params),
+				...conditioning,
+				...sizeFor(params, conditioning),
 				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
 				// Without this the SDK polls the task to completion before returning.
 				skipResponse: true,
-				inputs: {
-					frameImages: params.frameImages,
-					referenceImages: params.referenceImages,
-				},
 			});
 
 			const video = Array.isArray(result) ? result[0] : result;

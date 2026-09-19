@@ -1,24 +1,18 @@
-import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
-	derivedFrom,
-	derivedNodeId,
 	flattenGraph,
 	isNodeStale,
+	isSameGraph,
 	needsGeneration,
 	nodeInputs,
 	sourceNode,
 	type GenerationJob,
 	type GenerationNode,
+	type JobNode,
 } from "../graph";
 import { GenerationQueue } from "../queue";
-
-const EMPTY_STATE = {
-	metadata: MetadataSchema.parse({}),
-	referenceImages: [],
-};
 
 const config: ConnectorConfig = {};
 
@@ -26,14 +20,13 @@ function node(
 	id: string,
 	dependsOn: GenerationNode[] = [],
 	attributes: Record<string, string> = {},
-): GenerationNode {
+): JobNode {
 	const job: GenerationJob = {
 		elementId: id,
 		elementType: "image",
 		connectorType: "image",
 		model: DEFAULT_MODELS.image,
 		config,
-		state: EMPTY_STATE,
 	};
 	return {
 		id,
@@ -163,14 +156,45 @@ describe("flattenGraph", () => {
 	});
 });
 
-describe("derivedFrom", () => {
-	it("names the node a derived id was minted from", () => {
-		expect(derivedFrom(derivedNodeId("still", "el-1"))).toBe("el-1");
-		expect(derivedFrom(derivedNodeId("avatar", "Jane"))).toBe("Jane");
+describe("isSameGraph", () => {
+	it("is true for two builds that read the same thing", () => {
+		expect(isSameGraph(node("a", [node("b")]), node("a", [node("b")]))).toBe(
+			true,
+		);
 	});
 
-	it("has no answer for an id the graph did not derive", () => {
-		expect(derivedFrom("el-1")).toBeNull();
-		expect(derivedFrom("project:artStyle")).toBeNull();
+	it("sees a changed prompt", () => {
+		const changed = { ...node("a"), inputs: { prompt: "b", attributes: {} } };
+		expect(isSameGraph(node("a"), changed)).toBe(false);
+	});
+
+	it("sees a changed attribute", () => {
+		expect(isSameGraph(node("a"), node("a", [], { style: "noir" }))).toBe(
+			false,
+		);
+	});
+
+	it("sees a dependency edited, not just replaced", () => {
+		const edited = { ...node("b"), inputs: { prompt: "b2", attributes: {} } };
+		expect(isSameGraph(node("a", [node("b")]), node("a", [edited]))).toBe(
+			false,
+		);
+	});
+
+	it("sees a dependency swapped for another element", () => {
+		expect(isSameGraph(node("a", [node("b")]), node("a", [node("c")]))).toBe(
+			false,
+		);
+	});
+
+	it("sees a dependency stand in for an element, and the reverse", () => {
+		const leaf = sourceNode("~first:a", {}, "the previous visual");
+		expect(isSameGraph(node("a", [leaf]), node("a", [node("b")]))).toBe(false);
+	});
+
+	it("ignores the job, which is how a node runs rather than what it reads", () => {
+		const a = node("a");
+		const reconfigured = { ...a, job: { ...a.job, config: { plugins: [] } } };
+		expect(isSameGraph(a, reconfigured)).toBe(true);
 	});
 });

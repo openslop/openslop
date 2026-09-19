@@ -15,7 +15,7 @@ export const adaptScript = defineTool({
 	  "here's my script:" caught in the span is read as a line to speak.
 
 	  Screenplay furniture is stripped for you, so leave slug lines, stage directions and
-	  character cues where they are. Nothing is invented either: the conversion adds images,
+	  character cues where they are. Nothing is invented either: the conversion adds visuals,
 	  sound and music around their words, never new dialogue or prose.
 
 	  Pass the script through EXACTLY as they gave it. Never summarize, rewrite or shorten it,
@@ -47,7 +47,7 @@ export const adaptScript = defineTool({
 	label: "Putting your script on the canvas",
 	execute: async ({ script, notes }, ctx) => {
 		await ctx.adaptScript(script, notes);
-		return "Put that script onto the canvas. Read it to see what landed.";
+		return "Put that script onto the canvas. Read it to see what landed, then review_script it.";
 	},
-	rewritesCanvas: true,
+	draftsScript: true,
 });

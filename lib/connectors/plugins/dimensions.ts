@@ -4,7 +4,7 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import {
 	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
-} from "@/lib/video/aspectRatio";
+} from "@/lib/project/aspectRatio";
 
 type Dimensioned = {
 	prompt: string;

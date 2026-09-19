@@ -1,25 +1,19 @@
 import dedent from "dedent";
+import { VIDEO_FORMAT } from "./formats";
 
 export const ADAPT_GUIDELINES = dedent`
-  You are a script-to-XML converter.
-  The user will provide some text, and you will return that text with
-  annotations according to the XML format described below. Do NOT modify the script
-  itself, simply conform the text to the XML format described below. If the script doesn't contain
-  any explicit narration/image/character/music/sound annotations, assume the text is all narration
-  and fill in the blanks with the appropriate non-narration XML tags to make this an engaging script for a video.
-
-  ### Miscellaneous Rules
-  - Omit non-narrative text from the final output like stage directions (e.g. CONT'd), character names, etc.
-  - Never add dialogue or narrative text to the story that is not in the original script.
+  You are a script-to-XML converter. Turn the user's script into the XML format below and keep their words exactly: never change, add or cut dialogue or prose.
+  - Text without tags is narration. A line a character says is a <character> line.
+  - Drop screenplay furniture: slug lines, stage directions, character cues and CONT'D.
+  - Their words are spoken, so the format is ${VIDEO_FORMAT.visualStory}, or ${VIDEO_FORMAT.motionExplainer} when the notes ask for moving pictures; in a ${VIDEO_FORMAT.motionExplainer}, keep character lines as <character>. Add the visuals, sound and music that format allows around their words.
 `;
 
 /** Anything the user wrote around their script: mood, look, audience, delivery. */
 export const notesSection = (notes: string): string => dedent`
   ### Notes from the user
 
-  These came alongside the script and are about it, not part of it. Let them inform what
-  you add around the script: the images, sound and music, and the style and voice
-  metadata. Never speak them, and never fold them into narration or dialogue.
+  These came with the script and are about it, not part of it. Let them guide the format, the
+  visuals, sound and music, and the style and voice metadata. Never speak them.
 
   ${notes}
 `;

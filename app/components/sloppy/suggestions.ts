@@ -4,7 +4,7 @@
  * under ~9 words, no product jargon.
  */
 export const SUGGESTIONS = [
-	"Make every video long enough for its words",
+	"Make every video element long enough for its words",
 	"Make each scene about 5 seconds long",
 	"Tell me how to make this video better",
 	"Make this video more fun to watch",

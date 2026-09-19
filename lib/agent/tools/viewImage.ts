@@ -12,8 +12,7 @@ const NOT_READY: Record<GenerationStatus, string> = {
 
 export const viewImage = defineTool({
 	description: dedent`
-	  Look at the picture an element generated: an image element's result, or the still
-	  frame an animated_image animates. You receive the picture itself alongside the prompt
+	  Look at the picture an image element generated. You receive the picture itself alongside the prompt
 	  that made it, so you can say whether the result matches what was asked for. Take the
 	  id from read_script.
 	  What you see is gone next turn, so act on it in this one.
@@ -28,7 +27,10 @@ export const viewImage = defineTool({
 	icon: Eye,
 	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a generated image"),
 	toModelOutput: ({ output }) =>
-		imageOutput(`${output.id}, generated from "${output.prompt}":`, output.url),
+		imageOutput(
+			`${output.id} (${output.url}), generated from "${output.prompt}":`,
+			output.url,
+		),
 	execute: async ({ id }, ctx) => {
 		const element = ctx.elementImage(id);
 		if (!element)
