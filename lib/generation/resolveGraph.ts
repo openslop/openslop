@@ -8,12 +8,12 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import {
 	isElementNode,
+	type BuildContext,
 	type ElementNode,
 	type GenerationNode,
 	type JobNode,
 	type NodeSpec,
 } from "./graph";
-import type { ProjectData } from "@/lib/project/store";
 
 /** Builds the node a spec names, along with every node it depends on. */
 export type NodeBuilder = (spec: NodeSpec) => GenerationNode;
@@ -23,12 +23,9 @@ const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	state: ProjectData,
 	dependsOn: GenerationNode[],
-	label: string | undefined,
 ): JobNode => ({
 	id: element.id,
-	label,
 	inputs: {
 		prompt: getPromptText(element),
 		attributes: element.generationAttributes ?? {},
@@ -40,9 +37,12 @@ const toNode = (
 		connectorType: connector.type,
 		model: connector.model,
 		config: { ...connector.config, plugins },
-		state,
 	},
 });
+
+/** The label is used for staleness messaging */
+const labelled = (node: JobNode, label: string | undefined): JobNode =>
+	label === undefined ? node : { ...node, label };
 
 /**
  * Edges come from the plugin chain each node runs, so one declaration drives
@@ -50,37 +50,40 @@ const toNode = (
  */
 export function nodeBuilder(
 	registry: ConnectorRegistry,
-	state: ProjectData,
+	context: () => BuildContext,
 ): NodeBuilder {
+	// Nodes are shared between builds against the same canvas, so a document
+	// edit, which is a new canvas, is the only thing that builds an element again.
+	const revisions = new WeakMap<CanvasContentElement[], Map<string, JobNode>>();
 	return (spec) => {
-		// Scoped to one call: it dedupes nodes shared within a single graph and
-		// detects cycles. Held across calls it would serve a stale node back once
-		// its element changed, since element content is not part of `state`.
-		const resolved = new Map<string, JobNode>();
+		// Read once per build, so every node in the graph sees the same canvas.
+		const ctx = context();
+		const resolved = revisions.get(ctx.canvas) ?? new Map<string, JobNode>();
+		revisions.set(ctx.canvas, resolved);
 		const resolving = new Set<string>();
 
 		const build = ({ element, plugins: override, label }: ElementNode) => {
 			const { id } = element;
 			const existing = resolved.get(id);
-			if (existing) return existing;
+			if (existing) return labelled(existing, label);
 			if (resolving.has(id))
 				throw new Error(`Cyclic generation dependency at "${id}"`);
 			resolving.add(id);
 
-			const connector = resolveElementConnector(element, registry, state);
+			const connector = resolveElementConnector(element, registry, ctx.state);
 			const plugins = override ?? connector.config.plugins ?? [];
 			const dependsOn = plugins.flatMap(
 				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
 			);
-			const node = toNode(element, connector, plugins, state, dependsOn, label);
+			const node = toNode(element, connector, plugins, dependsOn);
 
 			resolving.delete(id);
 			resolved.set(id, node);
-			return node;
+			return labelled(node, label);
 		};
 
 		const resolve = (dep: NodeSpec): GenerationNode => {
-			const declared = dep(state);
+			const declared = dep(ctx);
 			return isElementNode(declared) ? build(declared) : declared;
 		};
 

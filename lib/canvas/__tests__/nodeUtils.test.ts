@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { Element } from "slate";
 import type { CanvasContentElement } from "../types";
 import { makeNodeId, assignIdRecursively, stripIds } from "../nodeUtils";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 
 describe("makeNodeId", () => {
 	it("returns a 16-character string", () => {

@@ -1,7 +1,7 @@
 import React, { Fragment, useMemo } from "react";
+import { Audio } from "@remotion/media";
 import {
 	AbsoluteFill,
-	Html5Audio,
 	Img,
 	Loop,
 	OffthreadVideo,
@@ -9,17 +9,16 @@ import {
 	useVideoConfig,
 } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
-import type { VideoLayout, ResolvedElement } from "@/lib/video/types";
-import { toFrames } from "@/lib/video/frames";
+import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
+import { toFrames } from "@/lib/render/frames";
 import {
-	TRANSITION_DURATION_SEC,
 	LAYER_PREMOUNT_SEC,
-	VIDEO_PREMOUNT_SEC,
-} from "@/lib/video/transitions";
-import { audioEnvelopeFrames, audioFadeSec } from "@/lib/video/audioFade";
-import { getPresentation } from "@/lib/video/transitionPresentations";
-import { audioVolume } from "@/lib/video/audioVolume";
-import { volumeToGain } from "@/lib/video/elementAttributes";
+	FOREGROUND_PREMOUNT_SEC,
+} from "@/lib/render/transitions";
+import { audioEnvelopeFrames, audioFadeSec } from "@/lib/render/audioFade";
+import { getPresentation } from "@/lib/render/transitionPresentations";
+import { audioVolume } from "@/lib/render/audioVolume";
+import { volumeToGain } from "@/lib/canvas/elementAttributes";
 import { ELEMENT_TYPES } from "@/lib/canvas/types";
 import { CaptionStyleProvider, Captions } from "../components/Captions";
 import { MotionLayer } from "../components/MotionLayer";
@@ -32,7 +31,12 @@ const coverStyle: React.CSSProperties = {
 
 const blackBg: React.CSSProperties = { backgroundColor: "black" };
 
-function AudioSequence({ element }: { element: ResolvedElement }) {
+const fallbackHtml5AudioProps = { crossOrigin: "anonymous" } as const;
+
+function AudioSequence({
+	element,
+	transitionDurationSec,
+}: SequenceContentProps) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
 	const fadeFrames = toFrames(audioFadeSec(element), fps);
@@ -43,12 +47,16 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 	return (
 		<>
-			<Html5Audio src={element.url} crossOrigin="anonymous" volume={volume} />
+			<Audio
+				src={element.url}
+				volume={volume}
+				fallbackHtml5AudioProps={fallbackHtml5AudioProps}
+			/>
 			{element.captionTimestamps && (
 				<Sequence
 					durationInFrames={Math.max(
 						1,
-						durationInFrames - toFrames(TRANSITION_DURATION_SEC, fps),
+						durationInFrames - toFrames(transitionDurationSec, fps),
 					)}
 				>
 					<Captions timestamps={element.captionTimestamps} />
@@ -58,8 +66,8 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 }
 
-/** A looping clip restarts each time it ends; a single pass holds its last frame for the rest of the scene. */
-function VisualVideo({ element }: { element: ResolvedElement }) {
+/** A looping video restarts each time it ends; a single pass holds its last frame for the rest of the scene. */
+function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	const { fps } = useVideoConfig();
 	const video = (
 		<OffthreadVideo
@@ -79,7 +87,16 @@ function VisualVideo({ element }: { element: ResolvedElement }) {
 	);
 }
 
-function SequenceContent({ element }: { element: ResolvedElement }) {
+type SequenceContentProps = {
+	element: ResolvedElement;
+	/** The overlap the next scene steals from this one's tail; 0 on a cut. */
+	transitionDurationSec: number;
+};
+
+function SequenceContent({
+	element,
+	transitionDurationSec,
+}: SequenceContentProps) {
 	switch (element.layer) {
 		case "visual":
 			return (
@@ -87,16 +104,21 @@ function SequenceContent({ element }: { element: ResolvedElement }) {
 					{ELEMENT_TYPES[element.type].outputKind === "image" ? (
 						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
 					) : (
-						<VisualVideo element={element} />
+						<VideoElementPlayer element={element} />
 					)}
 				</MotionLayer>
 			);
 		case "audio":
-			return <AudioSequence element={element} />;
+			return (
+				<AudioSequence
+					element={element}
+					transitionDurationSec={transitionDurationSec}
+				/>
+			);
 	}
 }
 
-export const VideoComposition: React.FC<VideoLayout> = ({
+export const VideoComposition: React.FC<RenderLayout> = ({
 	series,
 	sequences,
 	fps,
@@ -119,7 +141,7 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 		() =>
 			series.map((seq, i) => (
 				<Fragment key={seq.element.id}>
-					{i > 0 && (
+					{i > 0 && transitionFrames > 0 && (
 						<TransitionSeries.Transition
 							presentation={presentation}
 							timing={transitionTiming}
@@ -127,13 +149,23 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 					)}
 					<TransitionSeries.Sequence
 						durationInFrames={toFrames(seq.duration, fps)}
-						premountFor={toFrames(VIDEO_PREMOUNT_SEC, fps)}
+						premountFor={toFrames(FOREGROUND_PREMOUNT_SEC, fps)}
 					>
-						<SequenceContent element={seq.element} />
+						<SequenceContent
+							element={seq.element}
+							transitionDurationSec={transitionDurationSec}
+						/>
 					</TransitionSeries.Sequence>
 				</Fragment>
 			)),
-		[fps, presentation, series, transitionTiming],
+		[
+			fps,
+			presentation,
+			series,
+			transitionDurationSec,
+			transitionFrames,
+			transitionTiming,
+		],
 	);
 	const layeredSequenceNodes = useMemo(
 		() =>
@@ -145,11 +177,14 @@ export const VideoComposition: React.FC<VideoLayout> = ({
 						durationInFrames={toFrames(seq.duration, fps)}
 						premountFor={toFrames(LAYER_PREMOUNT_SEC, fps)}
 					>
-						<SequenceContent element={seq.element} />
+						<SequenceContent
+							element={seq.element}
+							transitionDurationSec={transitionDurationSec}
+						/>
 					</Sequence>
 				)),
 			),
-		[fps, sequences],
+		[fps, sequences, transitionDurationSec],
 	);
 
 	return (

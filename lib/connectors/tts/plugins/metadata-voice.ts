@@ -34,11 +34,11 @@ export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> 
 		name: "metadata-voice",
 		model: voiceModel,
 		dependencies: (element) => [
-			(state) =>
+			(ctx) =>
 				forVoice(
 					element.generationAttributes?.name,
-					voiceModel(element, state),
-				)(state),
+					voiceModel(element, ctx.state),
+				)(ctx),
 		],
 		beforeGenerate(params, ctx) {
 			const { metadata } = requireContext(ctx, "state", "metadata-voice");

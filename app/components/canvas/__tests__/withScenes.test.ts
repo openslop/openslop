@@ -88,9 +88,9 @@ describe("withScenes", () => {
 		it("splits at the second foreground", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
-				scene([content("image", "i1"), content("clip", "c1")]),
+				scene([content("image", "i1"), content("video", "v1")]),
 			]);
-			expect(shape(editor)).toEqual([["image"], ["clip"]]);
+			expect(shape(editor)).toEqual([["image"], ["video"]]);
 		});
 
 		it("keeps overlays before the split with the prior foreground", () => {
@@ -100,12 +100,12 @@ describe("withScenes", () => {
 					content("narration", "n1"),
 					content("image", "i1"),
 					content("character", "ch1"),
-					content("clip", "c1"),
+					content("video", "v1"),
 				]),
 			]);
 			expect(shape(editor)).toEqual([
 				["narration", "image", "character"],
-				["clip"],
+				["video"],
 			]);
 		});
 
@@ -114,11 +114,11 @@ describe("withScenes", () => {
 			setChildren(editor, [
 				scene([
 					content("image", "i1"),
-					content("clip", "c1"),
+					content("video", "v1"),
 					content("sound", "snd1"),
 				]),
 			]);
-			expect(shape(editor)).toEqual([["image"], ["clip", "sound"]]);
+			expect(shape(editor)).toEqual([["image"], ["video", "sound"]]);
 		});
 
 		it("splits scenes with three foregrounds into three scenes", () => {
@@ -126,11 +126,11 @@ describe("withScenes", () => {
 			setChildren(editor, [
 				scene([
 					content("image", "i1"),
-					content("clip", "c1"),
+					content("video", "v1"),
 					content("image", "i2"),
 				]),
 			]);
-			expect(shape(editor)).toEqual([["image"], ["clip"], ["image"]]);
+			expect(shape(editor)).toEqual([["image"], ["video"], ["image"]]);
 		});
 
 		it("splits a nested overlay cluster correctly", () => {
@@ -140,14 +140,14 @@ describe("withScenes", () => {
 					content("narration", "n1"),
 					content("image", "i1"),
 					content("character", "ch1"),
-					content("clip", "c1"),
+					content("video", "v1"),
 					content("sound", "snd1"),
 					content("music", "m1"),
 				]),
 			]);
 			expect(shape(editor)).toEqual([
 				["narration", "image", "character"],
-				["clip", "sound", "music"],
+				["video", "sound", "music"],
 			]);
 		});
 	});
@@ -217,9 +217,9 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				scene([content("character", "ch1"), content("clip", "c1")], "s2"),
+				scene([content("character", "ch1"), content("video", "v1")], "s2"),
 			]);
-			expect(shape(editor)).toEqual([["image"], ["character", "clip"]]);
+			expect(shape(editor)).toEqual([["image"], ["character", "video"]]);
 			Transforms.removeNodes(editor, { at: [1, 1] });
 			expect(shape(editor)).toEqual([["image", "character"]]);
 		});
@@ -231,7 +231,7 @@ describe("withScenes", () => {
 				content("narration", "n2"),
 				content("image", "i1"),
 				content("narration", "n3"),
-				content("clip", "c1"),
+				content("video", "v1"),
 				content("sound", "snd1"),
 			];
 			for (const node of sequence) {
@@ -241,14 +241,14 @@ describe("withScenes", () => {
 			}
 			expect(shape(editor)).toEqual([
 				["narration", "narration", "image", "narration"],
-				["clip", "sound"],
+				["video", "sound"],
 			]);
 		});
 
 		it("split produces two scenes with distinct, non-empty ids", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
-				scene([content("image", "i1"), content("clip", "c1")], "s1"),
+				scene([content("image", "i1"), content("video", "v1")], "s1"),
 			]);
 			const ids = editor.children.map((n) => (n as SceneElement).id);
 			expect(ids).toHaveLength(2);
@@ -261,7 +261,7 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("narration", "n1"), content("image", "i1")], "s1"),
-				scene([content("character", "ch1"), content("clip", "c1")], "s2"),
+				scene([content("character", "ch1"), content("video", "v1")], "s2"),
 			]);
 			const before = editor.children.map((n) => (n as SceneElement).id);
 			Editor.normalize(editor, { force: true });
@@ -275,7 +275,7 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("narration", "n1"), content("image", "i1")], "s1"),
-				scene([content("character", "ch1"), content("clip", "c1")], "s2"),
+				scene([content("character", "ch1"), content("video", "v1")], "s2"),
 			]);
 			const snapshot = JSON.parse(JSON.stringify(editor.children));
 			Editor.normalize(editor, { force: true });
@@ -289,14 +289,14 @@ describe("withScenes", () => {
 					content("narration", "n1"),
 					content("image", "i1"),
 					content("sound", "snd1"),
-					content("clip", "c1"),
+					content("video", "v1"),
 					content("music", "m1"),
 					content("image", "i2"),
 				]),
 			]);
 			expect(shape(editor)).toEqual([
 				["narration", "image", "sound"],
-				["clip", "music"],
+				["video", "music"],
 				["image"],
 			]);
 		});

@@ -57,13 +57,13 @@ describe("withFlatPaste", () => {
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),
 			content("music", "m1"),
-			scene([content("clip", "c1")], "ps2"),
+			scene([content("video", "v1")], "ps2"),
 		]);
 
 		const types = shape(editor).flat();
 		expect(types).toContain("image");
 		expect(types).toContain("music");
-		expect(types).toContain("clip");
+		expect(types).toContain("video");
 		expect(hasNestedScene(editor)).toBe(false);
 	});
 });

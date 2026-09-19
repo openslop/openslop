@@ -29,14 +29,14 @@ describe("renderAgentContext", () => {
 		const rendered = renderAgentContext(context({ length: "under-30s" }));
 
 		expect(rendered).toMatch(
-			/video length: under-30s \(\d+ to \d+ spoken words\)/,
+			/target length: under-30s \(\d+ to \d+ spoken words\)/,
 		);
 	});
 
 	it("says auto carries no target rather than naming a budget", () => {
 		const rendered = renderAgentContext(context({ length: "auto" }));
 
-		expect(rendered).toContain("video length: auto (no target");
+		expect(rendered).toContain("target length: auto (no target");
 	});
 
 	it("names the language rather than handing over a code", () => {

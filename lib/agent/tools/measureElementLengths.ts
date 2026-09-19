@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
-import type { ElementLength } from "@/lib/video/elementLengths";
-import { NARRATION_WORDS_PER_MINUTE } from "@/lib/video/videoLength";
+import type { ElementLength } from "@/lib/render/elementLengths";
+import { NARRATION_WORDS_PER_MINUTE } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./defineTool";
 
@@ -17,17 +17,19 @@ const line = (length: ElementLength) =>
 
 export const measureElementLengths = defineTool({
 	description: dedent`
-	  Measure each visual: how long every image, animated_image and clip on the canvas is on
-	  screen, and which dialogue decides it. For the whole video's runtime, use
-	  measure_total_length instead.
+	  Measure each visual: how long every image and video element on the canvas
+	  is on screen, and which dialogue decides it. For the finished video's total runtime,
+	  use measure_total_length instead.
 
-	  A visual is on screen for as long as the dialogue that follows it, up to the next
-	  visual, about ${WORDS_PER_SECOND} spoken words a second. The \`duration\` on an
-	  animated_image or clip is the generated video's length, not its time on screen.
+	  A visual trimmed to dialogue is on screen for as long as the dialogue that follows it,
+	  up to the next visual, about ${WORDS_PER_SECOND} spoken words a second; an untrimmed
+	  video plays its full \`duration\`, longer if the dialogue after it runs on.
 
 	  Run this whenever the user asks how long something is shown, or asks to change it. To
-	  shorten a visual, split the dialogue after it and insert a visual at the split; to
-	  lengthen one, merge or add dialogue.
+	  shorten a trimmed visual, split the dialogue after it and insert a visual at the split;
+	  to lengthen one, merge or add dialogue. An untrimmed video (trimToDialogue="false") is on
+	  screen for its \`duration\` or the dialogue after it, whichever is longer, so change its
+	  length with \`duration\`, and cut the dialogue too when that is what runs longer.
 	`,
 	input: z.object({}),
 	output: z.string(),

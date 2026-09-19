@@ -1,0 +1,67 @@
+"use client";
+
+import { Fragment, useMemo, useState } from "react";
+import { ReactEditor, useSlateStatic } from "slate-react";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { removeElement } from "@/app/components/canvas/utils/nodeOps";
+import { insertScene } from "@/lib/canvas/insertScene";
+import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { useLayout } from "../RenderLayoutContext";
+import { useSelectScene } from "../useSelectScene";
+import { SceneInsertHandle } from "./SceneInsertHandle";
+import {
+	buildStoryboardScenes,
+	type StoryboardScene as StoryboardSceneData,
+} from "./storyboardScenes";
+import { StoryboardScene } from "./StoryboardScene";
+
+export function Storyboard() {
+	const editor = useSlateStatic();
+	const { layout, segments, scenes } = useLayout();
+	const selectScene = useSelectScene();
+	const defaultModels = useResolveDefaultModels();
+	const [deleting, setDeleting] = useState<StoryboardSceneData>();
+
+	const items = useMemo(
+		() => buildStoryboardScenes(scenes, segments),
+		[scenes, segments],
+	);
+
+	const aspectRatio = `${layout.width} / ${layout.height}`;
+
+	const addSceneBefore = (index: number) => {
+		const anchor = items[index]?.scene;
+		const at = anchor
+			? ReactEditor.findPath(editor, anchor)
+			: [editor.children.length];
+		insertScene(editor, at, defaultModels());
+	};
+
+	return (
+		<section
+			aria-label="Storyboard"
+			className="scrollbar-overlay flex shrink-0 items-start overflow-x-auto border-t border-border px-3 py-4"
+		>
+			{items.map((item, index) => (
+				<Fragment key={item.scene.id}>
+					<SceneInsertHandle onInsert={() => addSceneBefore(index)} />
+					<StoryboardScene
+						item={item}
+						aspectRatio={aspectRatio}
+						onSelect={() => selectScene(item.scene.id, item.start)}
+						onRequestDelete={() => setDeleting(item)}
+					/>
+				</Fragment>
+			))}
+			<SceneInsertHandle onInsert={() => addSceneBefore(items.length)} />
+			<ConfirmDeleteDialog
+				target={deleting}
+				onClose={() => setDeleting(undefined)}
+				title={(item) => `Delete scene ${item.sceneIndex}?`}
+				description="This removes the scene and everything in it. Undo from the canvas to bring it back."
+				actionLabel="Delete scene"
+				onConfirm={(item) => removeElement(editor, item.scene)}
+			/>
+		</section>
+	);
+}

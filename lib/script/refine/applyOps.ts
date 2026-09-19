@@ -2,11 +2,10 @@ import { Editor, Path, Transforms } from "slate";
 import {
 	findNodeById,
 	mergeAttrs,
+	retypeNode,
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
 import { insertElement } from "@/lib/canvas/insertElement";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import { preservedAttributes } from "@/lib/canvas/preservedAttributes";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { RefineOp } from "./types";
 
@@ -110,34 +109,6 @@ function applyRemove(
 	return OK;
 }
 
-type NodeEntry = NonNullable<ReturnType<typeof findNodeById>>;
-type SetType = NonNullable<Extract<RefineOp, { op: "set" }>["type"]>;
-
-function replaceNodeType(
-	editor: Editor,
-	id: string,
-	entry: NodeEntry,
-	type: SetType,
-	defaultModels?: ConnectorModels,
-): NodeEntry | null {
-	const [element, path] = entry;
-	const replacement = createCanvasNode(type, {
-		id,
-		attrs: preservedAttributes(element, type),
-		defaultModels,
-	});
-	Transforms.setNodes(
-		editor,
-		{
-			type,
-			generationAttributes: replacement.generationAttributes,
-			layoutAttributes: replacement.layoutAttributes,
-		},
-		{ at: path },
-	);
-	return findNodeById(editor, id);
-}
-
 function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
@@ -146,10 +117,9 @@ function applySet(
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 
-	const target =
-		op.type && op.type !== entry[0].type
-			? replaceNodeType(editor, op.id, entry, op.type, defaultModels)
-			: entry;
+	const retype = op.type && op.type !== entry[0].type ? op.type : undefined;
+	if (retype) retypeNode(editor, entry[1], entry[0], retype, { defaultModels });
+	const target = retype ? findNodeById(editor, op.id) : entry;
 	if (!target)
 		return { ok: false, reason: `set: could not retype element "${op.id}"` };
 	const [element, path] = target;

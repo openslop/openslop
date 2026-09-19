@@ -1,5 +1,6 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
+import isEqualWith from "lodash/isEqualWith";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -21,15 +22,13 @@ import {
 
 export type NodeId = string;
 
-/** Everything the queue needs to run one node. */
+/** How a node runs: the connector and its configuration. */
 export type GenerationJob = {
 	elementId: string;
 	elementType: CanvasElementType;
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
-	/** The project state this job's inputs were resolved against. */
-	state: ProjectData;
 };
 
 type NodeBase = {
@@ -61,10 +60,19 @@ export type ElementNode = {
 };
 
 /**
+ * What a spec reads while naming its node, and what its job runs against:
+ * project state, and the canvas in document order.
+ */
+export type BuildContext = {
+	state: ProjectData;
+	canvas: CanvasContentElement[];
+};
+
+/**
  * Declares which node to build without saying how; only the builder knows the
  * registry and the state. A source-node spec returns its node directly.
  */
-export type NodeSpec = (state: ProjectData) => ElementNode | GenerationNode;
+export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
 
 /** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
 export const isElementNode = (
@@ -91,21 +99,23 @@ export type NodeResults = {
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	node.job === null;
 
+const ignoringJob = (_a: unknown, _b: unknown, key?: unknown) =>
+	key === "job" ? true : undefined;
+
+/**
+ * Whether two builds read the same thing: the same nodes, inputs and edges.
+ * The job, which is how a node runs, is not compared.
+ */
+export const isSameGraph = (
+	a: GenerationNode | GenerationNode[] | null,
+	b: GenerationNode | GenerationNode[],
+): boolean => isEqualWith(a, b, ignoringJob);
+
 const DERIVED_PREFIX = "~";
 
 /** Ids for nodes the graph derives; the prefix keeps them off element ids. */
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
-
-/** The dependency a node derives for `kind`, when its plugins declare one. */
-export const derivedDependency = (node: GenerationNode, kind: string) =>
-	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
-
-const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
-
-/** The node a derived id was minted from, if it was derived at all. */
-export const derivedFrom = (id: NodeId): NodeId | null =>
-	DERIVED_ID.exec(id)?.[1] ?? null;
 
 export function sourceNode(
 	id: NodeId,

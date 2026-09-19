@@ -37,14 +37,14 @@ describe("AttributeSchema", () => {
 
 	it("omits defs with no default from defaultAttributes", () => {
 		const schema = AttributeSchema.from([
-			{ key: "videoPrompt", label: "Video prompt", edit: { kind: "text" } },
+			{ key: "startFrame", label: "Start frame", edit: { kind: "frame" } },
 		]);
 
 		expect(schema.defaultAttributes).toEqual({});
-		expect(schema.settingsAttributes.videoPrompt).toEqual({
-			label: "Video prompt",
+		expect(schema.settingsAttributes.startFrame).toEqual({
+			label: "Start frame",
 			icon: undefined,
-			edit: { kind: "text" },
+			edit: { kind: "frame" },
 		});
 	});
 

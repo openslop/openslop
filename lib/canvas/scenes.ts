@@ -1,5 +1,6 @@
 import { Element, Node, type Descendant, type Editor, type Path } from "slate";
 import { withoutCaretMarker } from "./constants";
+import { isForeground } from "./guards";
 import {
 	type CanvasContentElement,
 	type SceneElement,
@@ -30,6 +31,14 @@ export const isScriptEmpty = (nodes: Descendant[]): boolean =>
 	getContentElements(nodes).every(
 		(element) => withoutCaretMarker(Node.string(element)).trim() === "",
 	);
+
+export function previousVisual(
+	elements: CanvasContentElement[],
+	id: string,
+): CanvasContentElement | undefined {
+	const at = elements.findIndex((element) => element.id === id);
+	return at < 0 ? undefined : elements.slice(0, at).findLast(isForeground);
+}
 
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
 	return nodes.filter(isSceneElement).findIndex((n) => n.id === sceneId) + 1;
