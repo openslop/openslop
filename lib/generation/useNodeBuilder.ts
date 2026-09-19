@@ -13,11 +13,7 @@ import { nodeBuilder, type NodeBuilder } from "./resolveGraph";
 const canvasOf = memoize(getContentElements);
 canvasOf.cache = new WeakMap();
 
-/**
- * `build` reads the project and canvas when it builds, not when it rendered, so
- * a node always describes the document as it is and no component re-renders
- * for an edit it does not read. `context` is what those nodes run against.
- */
+/** The canvas is read at build time, so document edits never re-render the caller. */
 export function useNodeBuilder(): {
 	build: NodeBuilder;
 	context: () => BuildContext;
