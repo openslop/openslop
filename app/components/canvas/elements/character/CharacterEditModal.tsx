@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/close-button";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import {
 	DialogBody,
 	DialogContent,
@@ -105,15 +105,6 @@ function CharacterEditDialogBody({
 		}
 	};
 
-	const handleDelete = () => {
-		if (!confirmDelete) {
-			setConfirmDelete(true);
-			return;
-		}
-		deleteCharacter(store, queue, name);
-		onClose();
-	};
-
 	return (
 		<DialogContent
 			className="max-w-2xl"
@@ -196,22 +187,30 @@ function CharacterEditDialogBody({
 			<DialogFooter className="shrink-0">
 				<Button
 					type="button"
-					variant={confirmDelete ? "destructive" : "outline"}
+					variant="outline"
 					size="sm"
-					onClick={handleDelete}
-					className={cn(
-						"sm:mr-auto",
-						!confirmDelete && "text-muted-foreground",
-					)}
+					onClick={() => setConfirmDelete(true)}
+					className="text-muted-foreground sm:mr-auto"
 				>
 					<Trash2 />
-					{confirmDelete ? "Confirm delete" : "Delete"}
+					Delete
 				</Button>
 				<Button type="button" size="sm" onClick={requestClose}>
 					Done
 				</Button>
 			</DialogFooter>
 
+			<ConfirmDeleteDialog
+				target={confirmDelete ? name : undefined}
+				onClose={() => setConfirmDelete(false)}
+				title={(target) => `Delete ${target}?`}
+				description="This permanently removes the character and its avatar. It can't be undone."
+				actionLabel="Delete character"
+				onConfirm={() => {
+					deleteCharacter(store, queue, name);
+					onClose();
+				}}
+			/>
 			<StaleAvatarCloseDialog
 				open={closeConfirm}
 				onOpenChange={setCloseConfirm}

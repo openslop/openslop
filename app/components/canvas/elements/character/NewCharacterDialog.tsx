@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
 	DialogContent,
 	DialogDescription,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { normalizeCharacterName } from "@/lib/project/characterName";
-import { FIELD_CLS } from "./fields";
 import { useProject } from "@/lib/project/useProject";
 
 export function NewCharacterDialog({
@@ -65,14 +65,13 @@ function NewCharacterDialogBody({
 					</DialogDescription>
 				</DialogHeader>
 
-				<input
-					type="text"
+				<Input
+					size="sm"
 					autoFocus
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					placeholder="Character name"
 					aria-label="Character name"
-					className={FIELD_CLS}
 				/>
 
 				{collision && (
