@@ -20,11 +20,8 @@ export function DuplicateButton({
 		<TooltipIconButton
 			label="Duplicate"
 			size={size}
-			className={cn(
-				chip,
-				"text-muted-foreground hover:text-foreground",
-				className,
-			)}
+			variant="quiet"
+			className={cn(chip, className)}
 			{...props}
 		>
 			<Copy size={icon} />

@@ -1,4 +1,5 @@
 import { GripVertical, Plus } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
 import { useCallback, useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react";
@@ -52,19 +53,13 @@ export function DragOverlayContent({ element }: { element: CanvasElement }) {
 	return (
 		<div className={styles.dragOverlay}>
 			<Slate editor={editor} initialValue={value}>
-				<div className={styles.actions}>
-					<button
-						aria-label="Add element"
-						className="inline-flex items-center rounded-md p-0.5 text-foreground"
-					>
+				<div className={styles.actions} aria-hidden>
+					<IconButton ariaLabel="Add element">
 						<Plus size={18} />
-					</button>
-					<button
-						aria-label="Drag handle"
-						className="inline-flex items-center rounded-md p-0.5 text-foreground"
-					>
+					</IconButton>
+					<IconButton ariaLabel="Drag handle">
 						<GripVertical size={22} />
-					</button>
+					</IconButton>
 				</div>
 				<Editable
 					readOnly={true}
