@@ -3,12 +3,16 @@ import type {
 	AssetConnectorType,
 	AssetResult,
 	ConnectorConfig,
+	GenerationContext,
 } from "@/lib/connectors/types";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { GenerationInputs } from "../inputs";
 import type { GenerationJob } from "../graph";
 
-const mockGenerate = vi.fn<() => Promise<AssetResult>>();
+const mockGenerate =
+	vi.fn<
+		(params: unknown, context: GenerationContext) => Promise<AssetResult>
+	>();
 
 vi.mock("@/lib/connectors/factory", () => ({
 	createConnector: vi.fn(() => ({
@@ -37,6 +41,13 @@ const inputs = (
 	attributes: Record<string, string> = {},
 ): GenerationInputs => ({ prompt, attributes, dependencies: {} });
 
+/** What every job runs with: the queue's results, the build's state, and speech to borrow voices from. */
+const generationContext = (dependencies: Record<string, AssetResult> = {}) => ({
+	dependencies,
+	state: EMPTY_CONTEXT.state,
+	speech: expect.any(Function),
+});
+
 describe("generateForElement", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -63,7 +74,7 @@ describe("generateForElement", () => {
 		);
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "a sunset", width: "1024" },
-			{ elementId: "el-1", dependencies: {}, ...EMPTY_CONTEXT },
+			generationContext(),
 		);
 		expect(result).toEqual(expected);
 	});
@@ -86,7 +97,7 @@ describe("generateForElement", () => {
 		);
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "jazz beat" },
-			{ elementId: "el-1", dependencies: {}, ...EMPTY_CONTEXT },
+			generationContext(),
 		);
 	});
 
@@ -102,7 +113,7 @@ describe("generateForElement", () => {
 
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "hello world", voiceId: "voice-1", speed: "fast" },
-			{ elementId: "el-1", dependencies: {}, ...EMPTY_CONTEXT },
+			generationContext(),
 		);
 	});
 
@@ -123,11 +134,10 @@ describe("generateForElement", () => {
 			EMPTY_CONTEXT,
 		);
 
-		expect(mockGenerate).toHaveBeenCalledWith(expect.anything(), {
-			elementId: "el-1",
-			dependencies,
-			...EMPTY_CONTEXT,
-		});
+		expect(mockGenerate).toHaveBeenCalledWith(
+			expect.anything(),
+			generationContext(dependencies),
+		);
 	});
 
 	it("forwards the abort signal in the generation context", async () => {
@@ -145,6 +155,26 @@ describe("generateForElement", () => {
 		expect(mockGenerate).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.objectContaining({ signal }),
+		);
+	});
+
+	it("lends plugins speech on a pair, configured as the registry the graph was built with has it", async () => {
+		mockGenerate.mockResolvedValue({ videoUrl: "x", durationSec: 5 });
+		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
+
+		await generateForElement(
+			makeJob("video"),
+			inputs("they talk"),
+			{},
+			EMPTY_CONTEXT,
+		);
+
+		const [, context] = mockGenerate.mock.calls[0] ?? [];
+		context?.speech?.(cartesia);
+		expect(createConnector).toHaveBeenLastCalledWith(
+			"tts",
+			cartesia,
+			EMPTY_CONTEXT.registry.tts,
 		);
 	});
 

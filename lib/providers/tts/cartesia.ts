@@ -126,6 +126,15 @@ const collectVoicesCached = unstable_cache(
 	{ revalidate: 3600 },
 );
 
+const toVoiceInfo = (voice: Voice): VoiceInfo => ({
+	id: voice.id,
+	name: voice.name,
+	language: voice.language,
+	gender: TTS_GENDERS.find((g) => g === voice.gender),
+	description: voice.description,
+	previewUrl: voice.preview_file_url ?? undefined,
+});
+
 export class CartesiaTTS
 	extends BaseProvider<VendorParams<TTSGenerateParams>, RawTTSResult>
 	implements TTSProvider
@@ -173,6 +182,19 @@ export class CartesiaTTS
 		];
 	}
 
+	async getVoice(voiceId: string): Promise<VoiceInfo | null> {
+		try {
+			const voice = await this.client.get<Voice>(
+				`/voices/${encodeURIComponent(voiceId)}`,
+				{ query: { expand: ["preview_file_url"] } },
+			);
+			return toVoiceInfo(voice);
+		} catch (error) {
+			if (error instanceof Cartesia.NotFoundError) return null;
+			throw error;
+		}
+	}
+
 	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
 		const { limit } = params;
 		const results = await this._search(params);
@@ -198,14 +220,7 @@ export class CartesiaTTS
 			{ gender, language, expand: ["preview_file_url"] },
 			MAX_VOICES,
 		);
-		return voices.map((voice) => ({
-			id: voice.id,
-			name: voice.name,
-			language: voice.language,
-			gender: TTS_GENDERS.find((g) => g === voice.gender),
-			description: voice.description,
-			previewUrl: voice.preview_file_url ?? undefined,
-		}));
+		return voices.map(toVoiceInfo);
 	}
 
 	protected async _generate(params: VendorParams<TTSGenerateParams>) {

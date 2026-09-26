@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
+import {
+	createReferenceImagesPlugin,
+	projectReferenceImages,
+} from "@/lib/connectors/image/plugins/reference-images";
+import { forReferenceImages } from "@/lib/generation/sourceNodes";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
@@ -79,15 +83,16 @@ describe("createReferenceImagesPlugin", () => {
 	});
 
 	it("depends on the project's references only while inheriting them", () => {
-		const { dependencies } = createReferenceImagesPlugin();
 		const element = {
 			id: "el",
 			type: "image",
 			children: [],
 		} as unknown as CanvasContentElement;
-		expect(dependencies?.(element)).toHaveLength(1);
+		expect(projectReferenceImages.specs(element)).toEqual([
+			["referenceImages", forReferenceImages],
+		]);
 		expect(
-			dependencies?.({
+			projectReferenceImages.specs({
 				...element,
 				...splitAttributes({ referenceImagesOverride: "https://img/own.png" }),
 			}),

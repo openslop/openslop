@@ -2,6 +2,7 @@ import set from "lodash/fp/set";
 import { buildVisualPlugins } from "./plugins/visualChain";
 import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
 import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
+import { createCharacterVoicesPlugin } from "./video/plugins/character-voices";
 import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
 import { createPreviousVisualPlugin } from "./video/plugins/previous-visual";
 import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
@@ -20,6 +21,8 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	image: { plugins: buildVisualPlugins("image") },
 	video: {
 		plugins: [
+			// First, while the characters are still named; character-references consumes them.
+			createCharacterVoicesPlugin(),
 			...buildVisualPlugins("video"),
 			// Last, so a model's reference image limit drops the previous scene's frames before characters.
 			createPreviousVisualPlugin(),

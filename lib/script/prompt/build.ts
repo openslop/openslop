@@ -4,7 +4,7 @@ import { getTemplate } from "@/lib/templates/templates";
 import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
 import { osmlSpec } from "./osml";
-import { lengthSection, projectPreamble } from "./project";
+import { formatSection, lengthSection, projectPreamble } from "./project";
 import { templatePrompt } from "./template";
 
 /** What the user gave us: an idea to write from, or text to convert as it stands. */
@@ -34,7 +34,11 @@ function promptParts(
 	const { templateId } = metadata;
 	if (templateId)
 		return {
-			guidance: [lengthSection(metadata), getTemplate(templateId).systemPrompt],
+			guidance: [
+				formatSection(metadata),
+				lengthSection(metadata),
+				getTemplate(templateId).systemPrompt,
+			],
 			instruction: templatePrompt(
 				templateId,
 				source.brief,
@@ -42,7 +46,10 @@ function promptParts(
 			),
 		};
 
-	return { guidance: [lengthSection(metadata)], instruction: source.brief };
+	return {
+		guidance: [formatSection(metadata), lengthSection(metadata)],
+		instruction: source.brief,
+	};
 }
 
 /**

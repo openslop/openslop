@@ -10,8 +10,9 @@ import type { ModelRef, ModelTable } from "@/lib/connectors/types";
 import {
 	byokProviderField,
 	optionalDurationSeconds,
-	optionalFrameImages,
+	optionalFrameImage,
 	optionalImageDimensions,
+	optionalReferenceAudios,
 	optionalReferenceImages,
 	optionalVideoDuration,
 	optionalVideoResolution,
@@ -74,7 +75,8 @@ export const IMAGE_FIELDS = {
 
 export const VIDEO_FIELDS = {
 	...optionalReferenceImages,
-	...optionalFrameImages,
+	...optionalFrameImage,
+	...optionalReferenceAudios,
 	...optionalVideoDuration,
 	...optionalVideoResolution,
 	...optionalImageDimensions,

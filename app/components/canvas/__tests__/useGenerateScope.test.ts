@@ -4,7 +4,7 @@ import type { Descendant, Editor } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
@@ -38,14 +38,13 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 }));
 
 // The hook under test is about which elements get queued, so bind a real
-// resolver rather than standing up the config and project providers.
+// context rather than standing up the config and project providers.
 const store = createProjectStore();
 
-const context = () => ({ state: store.getState(), canvas: [] });
-const resolve = () => nodeBuilder(registry, context);
+const context = () => ({ state: store.getState(), canvas: [], registry });
 
-vi.mock("@/lib/generation/useNodeBuilder", () => ({
-	useNodeBuilder: () => ({ build: resolve(), context }),
+vi.mock("@/lib/generation/useBuildContext", () => ({
+	useBuildContext: () => context,
 }));
 
 function makeElement(
@@ -68,8 +67,7 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	const node = resolve()(forElement(element));
-	queue.commitResult(node, {
+	queue.commitResult(buildNode(forElement(element), context()), {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,
 	});

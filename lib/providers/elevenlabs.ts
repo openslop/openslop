@@ -1,7 +1,6 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { AllowedOutputFormats } from "@elevenlabs/elevenlabs-js/api";
 import type { BundleFile } from "@/lib/api/asset-bundle";
-import { type AudioFormat, audioDurationSec } from "./audio-duration";
 import { BaseProvider, type WithMetadata } from "./base";
 import { validateByProbe } from "./validate";
 import { streamToBuffer } from "./stream";
@@ -9,6 +8,15 @@ import { streamToBuffer } from "./stream";
 type AudioResult = {
 	data: ArrayBuffer;
 } & WithMetadata;
+
+export type AudioFormat = {
+	sampleRate: number;
+	bitrateKbps: number;
+};
+
+/** An estimate from size alone, right for the constant-bitrate MP3 ElevenLabs streams. */
+const cbrDurationSec = (format: AudioFormat, data: ArrayBuffer): number =>
+	(data.byteLength * 8) / (format.bitrateKbps * 1000);
 
 export const ELEVENLABS_AUDIO_FORMAT: AudioFormat = {
 	sampleRate: 44100,
@@ -61,7 +69,7 @@ export abstract class BaseElevenLabsAudio<
 	protected async _generate(params: TParams) {
 		const stream = await this.requestStream(params);
 		const data = await streamToBuffer(stream);
-		const durationSec = audioDurationSec(this.outputFormat, data);
+		const durationSec = cbrDurationSec(this.outputFormat, data);
 		return { data, metadata: { durationSec } };
 	}
 }

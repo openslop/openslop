@@ -3,6 +3,7 @@ import { DEFAULT_ASPECT_RATIO } from "../aspectRatio";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import { DEFAULT_TRANSITION } from "@/lib/render/transitions";
 import { DEFAULT_VIDEO_LENGTH } from "../videoLength";
+import { DEFAULT_VIDEO_FORMAT } from "../videoFormat";
 import { VideoSettingsSchema } from "../videoSettings";
 
 describe("VideoSettingsSchema", () => {
@@ -11,6 +12,7 @@ describe("VideoSettingsSchema", () => {
 			transitionType: DEFAULT_TRANSITION,
 			aspectRatio: DEFAULT_ASPECT_RATIO,
 			length: DEFAULT_VIDEO_LENGTH,
+			format: DEFAULT_VIDEO_FORMAT,
 			captions: true,
 			captionStyle: DEFAULT_CAPTION_STYLE,
 		};
@@ -27,6 +29,7 @@ describe("VideoSettingsSchema", () => {
 			transitionType: "fade" as const,
 			aspectRatio: "9:16" as const,
 			length: "10-15m" as const,
+			format: "faceless" as const,
 			captions: false,
 			captionStyle: { ...DEFAULT_CAPTION_STYLE, casing: "upper" as const },
 		};
@@ -35,5 +38,6 @@ describe("VideoSettingsSchema", () => {
 
 	it("rejects an unknown value rather than silently defaulting it", () => {
 		expect(() => VideoSettingsSchema.parse({ aspectRatio: "4:3" })).toThrow();
+		expect(() => VideoSettingsSchema.parse({ format: "Film" })).toThrow();
 	});
 });

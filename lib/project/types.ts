@@ -10,9 +10,10 @@ import {
 	connectorModelsSchema,
 	hasModel,
 	modelRefSchema,
+	resolveModel,
 	sameModel,
 } from "@/lib/connectors/models";
-import type { ModelRef } from "@/lib/connectors/types";
+import type { ModelPick, ModelRef } from "@/lib/connectors/types";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
 import { VideoSettingsSchema } from "@/lib/project/videoSettings";
 
@@ -110,6 +111,20 @@ export const metadataVoiceFor = (
 	characterName?: string,
 ): MetadataVoice | undefined =>
 	characterName ? metadata.characters[characterName] : metadata.narration;
+
+/**
+ * The pair a voice speaks with, or else the first pair the candidates name,
+ * and the voice's id there if it has one.
+ */
+export function resolveVoice(
+	metadata: Parameters<typeof metadataVoiceFor>[0],
+	characterName: string | undefined,
+	...candidates: (ModelPick | undefined)[]
+): { model: ModelRef; voiceId?: string } {
+	const voice = metadataVoiceFor(metadata, characterName);
+	const model = resolveModel("tts", voice, ...candidates);
+	return { model, voiceId: voice && voiceIdOn(voice, model) };
+}
 
 export const MetadataSchema = z.object({
 	title: z.string().default(""),

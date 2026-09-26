@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { createMetadataVoicePlugin } from "@/lib/connectors/tts/plugins/metadata-voice";
+import {
+	createMetadataVoicePlugin,
+	speakerVoice,
+} from "@/lib/connectors/tts/plugins/metadata-voice";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { stateCtx } from "./_state-ctx";
@@ -223,10 +227,11 @@ describe("createMetadataVoicePlugin", () => {
 			children: [],
 		});
 		const voiceInput = (element: CanvasContentElement) => {
-			const [spec] = createMetadataVoicePlugin().dependencies?.(element) ?? [];
-			const node = spec?.({
+			const [edge] = speakerVoice.specs(element);
+			const node = edge?.[1]({
 				state: store.getState(),
 				canvas: [],
+				registry: DEFAULT_CONNECTOR_REGISTRY,
 			});
 			return node && "inputs" in node ? node.inputs.attributes : undefined;
 		};

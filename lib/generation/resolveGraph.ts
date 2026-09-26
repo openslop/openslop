@@ -3,7 +3,6 @@ import {
 	type ElementConnector,
 } from "@/lib/canvas/elementConnector";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import {
@@ -15,17 +14,16 @@ import {
 	type NodeSpec,
 } from "./graph";
 
-/** Builds the node a spec names, along with every node it depends on. */
-export type NodeBuilder = (spec: NodeSpec) => GenerationNode;
-
 /** The node an element becomes, and the job that generates it. */
 const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	dependsOn: GenerationNode[],
+	dependsOn: Record<string, GenerationNode>,
+	label: string | undefined,
 ): JobNode => ({
 	id: element.id,
+	label,
 	inputs: {
 		prompt: getPromptText(element),
 		attributes: element.generationAttributes ?? {},
@@ -40,53 +38,58 @@ const toNode = (
 	},
 });
 
-/** The label is used for staleness messaging */
-const labelled = (node: JobNode, label: string | undefined): JobNode =>
-	label === undefined ? node : { ...node, label };
+/** One graph's worth of state: nodes shared within it, and the cycle guard. */
+const resolver = (ctx: BuildContext) => {
+	const resolved = new Map<string, JobNode>();
+	const resolving = new Set<string>();
 
-/**
- * Edges come from the plugin chain each node runs, so one declaration drives
- * what a job reads, what it waits for, and what makes it stale.
- */
-export function nodeBuilder(
-	registry: ConnectorRegistry,
-	context: () => BuildContext,
-): NodeBuilder {
-	// Nodes are shared between builds against the same canvas, so a document
-	// edit, which is a new canvas, is the only thing that builds an element again.
-	const revisions = new WeakMap<CanvasContentElement[], Map<string, JobNode>>();
-	return (spec) => {
-		// Read once per build, so every node in the graph sees the same canvas.
-		const ctx = context();
-		const resolved = revisions.get(ctx.canvas) ?? new Map<string, JobNode>();
-		revisions.set(ctx.canvas, resolved);
-		const resolving = new Set<string>();
+	const build = ({ element, plugins: override, label }: ElementNode) => {
+		const { id } = element;
+		const existing = resolved.get(id);
+		if (existing) return existing;
+		if (resolving.has(id))
+			throw new Error(`Cyclic generation dependency at "${id}"`);
+		resolving.add(id);
 
-		const build = ({ element, plugins: override, label }: ElementNode) => {
-			const { id } = element;
-			const existing = resolved.get(id);
-			if (existing) return labelled(existing, label);
-			if (resolving.has(id))
-				throw new Error(`Cyclic generation dependency at "${id}"`);
-			resolving.add(id);
+		const connector = resolveElementConnector(element, ctx.registry, ctx.state);
+		const plugins = override ?? connector.config.plugins ?? [];
+		const edges = plugins.flatMap((plugin) =>
+			(plugin.dependencies ?? []).flatMap((declared) =>
+				declared
+					.specs(element)
+					.map(([key, spec]) => [key, resolve(spec)] as const),
+			),
+		);
+		const keys = edges.map(([key]) => key);
+		const shared = keys.find((key, i) => keys.indexOf(key) !== i);
+		if (shared)
+			throw new Error(`Two dependencies of "${id}" share the key "${shared}"`);
+		const node = toNode(
+			element,
+			connector,
+			plugins,
+			Object.fromEntries(edges),
+			label,
+		);
 
-			const connector = resolveElementConnector(element, registry, ctx.state);
-			const plugins = override ?? connector.config.plugins ?? [];
-			const dependsOn = plugins.flatMap(
-				(plugin) => plugin.dependencies?.(element).map(resolve) ?? [],
-			);
-			const node = toNode(element, connector, plugins, dependsOn);
-
-			resolving.delete(id);
-			resolved.set(id, node);
-			return labelled(node, label);
-		};
-
-		const resolve = (dep: NodeSpec): GenerationNode => {
-			const declared = dep(ctx);
-			return isElementNode(declared) ? build(declared) : declared;
-		};
-
-		return resolve(spec);
+		resolving.delete(id);
+		resolved.set(id, node);
+		return node;
 	};
-}
+
+	const resolve = (dep: NodeSpec): GenerationNode => {
+		const named = dep(ctx);
+		return isElementNode(named) ? build(named) : named;
+	};
+
+	return resolve;
+};
+
+export const buildNode = (spec: NodeSpec, ctx: BuildContext): GenerationNode =>
+	resolver(ctx)(spec);
+
+/** One graph, so a shared node is built once and a root reached as a dependency keeps no label. */
+export const buildNodes = (
+	specs: NodeSpec[],
+	ctx: BuildContext,
+): GenerationNode[] => specs.map(resolver(ctx));

@@ -12,7 +12,7 @@ export const writeScript = defineTool({
 
 	  The brief is the writer's whole instruction: anything from a one-line premise to a
 	  full treatment, carrying the genre, tone, characters, structure and constraints the
-	  finished video needs. For an invented narrative, outline_story first and fold the outline in;
+	  finished video needs. For a story prompt without a sufficient plot outline, outline_story first and fold the outline in;
 	  for anything that is not a story, write the brief directly.
 
 	  Say which format the finished video takes (${VIDEO_FORMAT_NAMES.join(", ")}) and why,

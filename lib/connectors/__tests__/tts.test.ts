@@ -70,6 +70,20 @@ describe("BaseTTSConnector", () => {
 		expect(result.audioUrl).toBe(AUDIO_URL);
 	});
 
+	it("settles a speaker's voice through its plugins without speaking", async () => {
+		const fetchSpy = vi.spyOn(globalThis, "fetch");
+		const connector = new HttpTTSConnector({
+			...config,
+			plugins: [createVoiceSearchPlugin()],
+		});
+		vi.spyOn(connector, "searchVoices").mockResolvedValue([
+			{ id: "voice-42", name: "Test Voice", description: "" },
+		]);
+
+		await expect(connector.voiceFor("Red")).resolves.toBe("voice-42");
+		expect(fetchSpy).not.toHaveBeenCalled();
+	});
+
 	it("throws when no matching voice found via voice-search plugin", async () => {
 		const connector = new HttpTTSConnector({
 			...config,

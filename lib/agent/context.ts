@@ -4,6 +4,10 @@ import { languageLabel, LANGUAGE_CHOICES } from "@/lib/project/language";
 import { MetadataVoiceSchema, voiceTraitEntries } from "@/lib/project/types";
 import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
 import { VIDEO_LENGTHS, videoLengthBudget } from "@/lib/project/videoLength";
+import {
+	VIDEO_FORMAT_CHOICES,
+	videoFormatLabel,
+} from "@/lib/project/videoFormat";
 
 const UNSET = "not set";
 
@@ -17,6 +21,7 @@ export const agentContextSchema = z.object({
 	style: z.string(),
 	language: z.enum(LANGUAGE_CHOICES),
 	length: z.enum(VIDEO_LENGTHS),
+	format: z.enum(VIDEO_FORMAT_CHOICES),
 	aspectRatio: z.enum(ASPECT_RATIOS),
 	templateName: z.string().optional(),
 	narration: MetadataVoiceSchema,
@@ -67,6 +72,10 @@ export function renderAgentContext(ctx: AgentContext): string {
 	const length = budget
 		? `${ctx.length} (${budget.minWords} to ${budget.maxWords} spoken words)`
 		: "auto (no target; write to fit the material)";
+	const format =
+		ctx.format === "auto"
+			? "auto (pick the one that fits the brief)"
+			: videoFormatLabel(ctx.format);
 
 	return dedent`
 		# The project
@@ -78,6 +87,7 @@ export function renderAgentContext(ctx: AgentContext): string {
 		- art style: ${ctx.style || UNSET}
 		- language: ${languageLabel(ctx.language)}
 		- target length: ${length}
+		- format: ${format}
 		- aspect ratio: ${ctx.aspectRatio}
 		- template: ${ctx.templateName ?? "none"}
 		- narrator voice: ${renderNarrator(ctx.narration)}

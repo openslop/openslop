@@ -3,7 +3,7 @@ import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import type { NodeSpec } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import { characterAvatarElement } from "@/lib/project/characterAvatar";
 import type { ProjectContext } from "@/lib/project/store";
 import { createArtStylePlugin } from "./art-style";
@@ -41,9 +41,7 @@ export function seedCharacterAvatar(
 ): void {
 	queue.commitResult(
 		// An avatar reads project state only, never another element on the canvas.
-		nodeBuilder(registry, () => ({ state, canvas: [] }))(
-			forCharacterAvatar(name),
-		),
+		buildNode(forCharacterAvatar(name), { state, canvas: [], registry }),
 		{ imageUrl, durationSec: 0 },
 		{ pinned: true },
 	);

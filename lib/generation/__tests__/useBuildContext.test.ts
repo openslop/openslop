@@ -8,10 +8,9 @@ import {
 } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import { forElement } from "../graph";
 
-// Real useMemo semantics: the value survives only while its deps are identical,
-// which is the whole subject of these tests.
+// Real useCallback semantics: the value survives only while its deps are
+// identical, which is the whole subject of these tests.
 let slots: { deps?: unknown[]; value: unknown }[] = [];
 let slot = 0;
 const render = <T>(hook: () => T): T => {
@@ -19,7 +18,7 @@ const render = <T>(hook: () => T): T => {
 	return hook();
 };
 vi.mock("react", () => ({
-	useMemo: <T>(fn: () => T, deps?: unknown[]) => {
+	useCallback: <T>(fn: T, deps?: unknown[]) => {
 		const index = slot++;
 		const cached = slots[index];
 		const unchanged =
@@ -28,9 +27,8 @@ vi.mock("react", () => ({
 			cached.deps.length === deps.length &&
 			cached.deps.every((dep, i) => Object.is(dep, deps[i]));
 		if (unchanged) return cached.value as T;
-		const value = fn();
-		slots[index] = { deps, value };
-		return value;
+		slots[index] = { deps, value: fn };
+		return fn;
 	},
 }));
 
@@ -56,7 +54,7 @@ vi.mock("@/lib/project/useProject", () => ({
 		selector(store.getState()),
 }));
 
-const { useNodeBuilder } = await import("../useNodeBuilder");
+const { useBuildContext } = await import("../useBuildContext");
 
 const video = (id: string, text: string): CanvasContentElement => ({
 	id,
@@ -75,36 +73,31 @@ beforeEach(() => {
 	store = createProjectStore();
 });
 
-describe("useNodeBuilder", () => {
-	it("keeps one builder while the document is edited", () => {
-		const second = video("vid-2", "shot two");
-		children = document(video("vid-1", "shot one"), second);
-		const before = render(useNodeBuilder);
-
-		children = document(video("vid-1", "shot one, rewritten"), second);
-
-		expect(render(useNodeBuilder)).toBe(before);
-	});
-
-	it("reads an edited dependency as it is now, not as it was when the builder was made", () => {
-		const second = video("vid-2", "shot two");
-		children = document(video("vid-1", "shot one"), second);
-		const { build } = render(useNodeBuilder);
-
-		children = document(video("vid-1", "shot one, rewritten"), second);
-		const dependency = build(forElement(second)).dependsOn.find(
-			(node) => node.id === "vid-1",
-		);
-
-		expect(dependency?.inputs.prompt).toBe("shot one, rewritten");
-	});
-
-	it("rebuilds when the project state changes, which nodes also read", () => {
+describe("useBuildContext", () => {
+	it("keeps its identity while the document is edited", () => {
 		children = document(video("vid-1", "shot one"));
-		const before = render(useNodeBuilder);
+		const before = render(useBuildContext);
+
+		children = document(video("vid-1", "shot one, rewritten"));
+
+		expect(render(useBuildContext)).toBe(before);
+	});
+
+	it("reads the canvas when called, not when rendered", () => {
+		children = document(video("vid-1", "shot one"));
+		const context = render(useBuildContext);
+
+		children = document(video("vid-1", "shot one, rewritten"));
+
+		expect(context().canvas[0]?.children[0]?.text).toBe("shot one, rewritten");
+	});
+
+	it("changes when the project state changes, which a build also reads", () => {
+		children = document(video("vid-1", "shot one"));
+		const before = render(useBuildContext);
 
 		store.getState().updateMetadata({ style: "noir" });
 
-		expect(render(useNodeBuilder)).not.toBe(before);
+		expect(render(useBuildContext)).not.toBe(before);
 	});
 });

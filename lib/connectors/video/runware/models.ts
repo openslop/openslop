@@ -4,6 +4,7 @@ export const RUNWARE_VIDEO_MODELS = {
 		cost: "high",
 		speed: "medium",
 		resolutions: ["720p"],
+		referenceAudios: true,
 	},
 	"Kling 3 Turbo": {
 		id: "klingai:kling-video@3.0-turbo",

@@ -12,9 +12,10 @@ import {
 	forElement,
 	isNodeStale,
 	needsGeneration,
+	type BuildContext,
 } from "../graph";
 import { GenerationQueue } from "../queue";
-import { nodeBuilder } from "../resolveGraph";
+import { buildNode } from "../resolveGraph";
 
 let store: ProjectStore;
 
@@ -29,14 +30,14 @@ const element = (
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
-const builderOn = (canvas: () => CanvasContentElement[]) =>
-	nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, () => ({
-		state: store.getState(),
-		canvas: canvas(),
-	}));
+const context = (canvas: CanvasContentElement[]): BuildContext => ({
+	state: store.getState(),
+	canvas,
+	registry: DEFAULT_CONNECTOR_REGISTRY,
+});
 
 const resolveOn = (el: CanvasContentElement, canvas: CanvasContentElement[]) =>
-	builderOn(() => canvas)(forElement(el));
+	buildNode(forElement(el), context(canvas));
 
 const resolve = (el: CanvasContentElement) => resolveOn(el, []);
 
@@ -51,53 +52,44 @@ beforeEach(() => {
 });
 
 describe("resolveGraph", () => {
-	it("shares a node between builds against the same canvas", () => {
-		const canvas = [element("img", "image")];
-		const buildNode = builderOn(() => canvas);
-		const spec = forElement(canvas[0]);
+	// A card's spec is made at render, but Slate notifies selectors before the
+	// next render, so the spec can hold the element as it was one edit ago.
+	it("builds from the element on the canvas, not the one the spec captured", () => {
+		const stale = element("vid", "video", { duration: "10" });
+		const canvas = [element("vid", "video", { duration: "11" })];
 
-		expect(buildNode(spec)).toBe(buildNode(spec));
+		const node = resolveOn(stale, canvas);
+
+		expect(node.inputs.attributes.duration).toBe("11");
+		expect(node.inputs.attributes).toBe(canvas[0].generationAttributes);
 	});
 
-	it("builds again for a new canvas, which is what a document edit is", () => {
-		let canvas = [element("img", "image")];
-		const buildNode = builderOn(() => canvas);
-		const before = buildNode(forElement(canvas[0]));
+	it("builds the given element when the canvas does not carry it", () => {
+		const offCanvas = element("avatar", "image", { kind: "avatar" });
 
-		canvas = [element("img", "image")];
-
-		expect(buildNode(forElement(canvas[0]))).not.toBe(before);
+		expect(resolve(offCanvas).inputs.attributes.kind).toBe("avatar");
 	});
 
 	it("labels a dependency for its dependent without renaming the node itself", () => {
 		const image = element("img", "image");
 		const video = element("vid", "video", { startFrame: "previous" });
 		const canvas = [image, video];
-		const buildNode = builderOn(() => canvas);
 
-		const dependency = buildNode(forElement(video)).dependsOn.find(
-			(node) => node.id === "img",
+		expect(resolveOn(video, canvas).dependsOn.previousVisual?.label).toBe(
+			"the previous visual",
 		);
-
-		expect(dependency?.label).toBe("the previous visual");
-		expect(buildNode(forElement(image)).label).toBeUndefined();
+		expect(resolveOn(image, canvas).label).toBeUndefined();
 	});
 
-	// The builder outlives a render; an edited element must not resolve to the
-	// node built for its old text.
-	it("rebuilds a node when its element changed", () => {
-		const buildNode = builderOn(() => []);
-		const withText = (text: string) => ({
-			...element("img", "image"),
-			children: [{ id: "img-t", type: "image" as const, text }],
-		});
+	it("keys each edge by the name its plugin declared", () => {
+		const video = element("vid", "video", { startFrame: "previous" });
 
-		expect(buildNode(forElement(withText("first"))).inputs.prompt).toBe(
-			"first",
-		);
-		expect(buildNode(forElement(withText("second"))).inputs.prompt).toBe(
-			"second",
-		);
+		expect(Object.keys(resolveOn(video, [video]).dependsOn)).toEqual([
+			"artStyle",
+			"referenceImages",
+			"aspectRatio",
+			"previousVisual",
+		]);
 	});
 
 	it("depends on the project state an image reads", () => {
@@ -118,10 +110,12 @@ describe("resolveGraph", () => {
 	});
 
 	it("gives a referenced avatar its own art-style and reference-image edges", () => {
-		const avatar = resolve(
-			element("img", "image", { characters: "Alice" }),
-		).dependsOn.find((node) => node.id === characterAvatarElementId("Alice"));
-		expect(avatar?.dependsOn.map((node) => node.id)).toEqual([
+		const avatar = Object.values(
+			resolve(element("img", "image", { characters: "Alice" })).dependsOn,
+		).find((node) => node.id === characterAvatarElementId("Alice"));
+		expect(
+			Object.values(avatar?.dependsOn ?? {}).map((node) => node.id),
+		).toEqual([
 			"project:artStyle",
 			"project:referenceImages",
 			"project:aspectRatio",
@@ -183,7 +177,7 @@ describe("resolveGraph", () => {
 		const img = element("img", "image");
 		const el = element("vid-1", "video", { startFrame: "previous" });
 		const video = resolveOn(el, [img, el]);
-		const frame = video.dependsOn.find((node) => node.id === "img");
+		const frame = video.dependsOn.previousVisual;
 		if (!frame) throw new Error("expected a previous-visual dependency");
 
 		const queue = new GenerationQueue();

@@ -12,6 +12,9 @@ import { staleReason } from "../staleReason";
 
 const config: ConnectorConfig = {};
 
+const byId = (nodes: GenerationNode[]) =>
+	Object.fromEntries(nodes.map((node) => [node.id, node]));
+
 function node(
 	id: string,
 	{
@@ -33,7 +36,13 @@ function node(
 		model: DEFAULT_MODELS.image,
 		config,
 	};
-	return { id, inputs: { prompt, attributes }, dependsOn, label, job };
+	return {
+		id,
+		inputs: { prompt, attributes },
+		dependsOn: byId(dependsOn),
+		label,
+		job,
+	};
 }
 
 const commit = (queue: GenerationQueue, target: GenerationNode, url: string) =>

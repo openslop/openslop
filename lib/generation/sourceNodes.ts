@@ -1,4 +1,5 @@
-import type { ModelRef } from "@/lib/connectors/types";
+import { resolveModel } from "@/lib/connectors/models";
+import type { ModelPick } from "@/lib/connectors/types";
 import type { ProjectData } from "@/lib/project/store";
 import { metadataVoiceFor } from "@/lib/project/types";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/project/aspectRatio";
@@ -29,17 +30,25 @@ export const forAspectRatio: NodeSpec = ({ state }) =>
 		"the aspect ratio",
 	);
 
+export const voiceNodeId = (characterName?: string) =>
+	`project:voice:${characterName ?? "narrator"}`;
+
 /**
  * What an element reads of its voice: the id picked for it and the pair it
- * speaks with. The id a search found is left out, since recording it would
- * stale the element that just found it.
+ * speaks with, which is the voice's own pair or else the first candidate's.
+ * The id a search found is left out, since recording it would stale the
+ * element that just found it.
  */
 export const forVoice =
-	(characterName: string | undefined, model: ModelRef): NodeSpec =>
+	(
+		characterName: string | undefined,
+		...candidates: (ModelPick | undefined)[]
+	): NodeSpec =>
 	({ state }) => {
 		const voice = metadataVoiceFor(state.metadata, characterName);
+		const model = resolveModel("tts", voice, ...candidates);
 		return sourceNode(
-			`project:voice:${characterName ?? "narrator"}`,
+			voiceNodeId(characterName),
 			{ voiceId: voice?.voiceId ?? "", ...model },
 			`${characterName ?? "the narrator"}'s voice`,
 		);

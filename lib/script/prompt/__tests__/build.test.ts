@@ -41,6 +41,19 @@ describe("buildScriptPrompt", () => {
 		);
 	});
 
+	it("holds a brief to the format the user picked, and only then", () => {
+		const formatOf = (format: "faceless" | "auto"): Metadata =>
+			metadata({ videoSettings: { ...base.videoSettings, format } });
+		const brief = { kind: "brief", brief: "a brief" } as const;
+
+		expect(buildScriptPrompt(formatOf("faceless"), brief).system).toContain(
+			"The user picked the Faceless format",
+		);
+		expect(buildScriptPrompt(formatOf("auto"), brief).system).not.toContain(
+			"The user picked the",
+		);
+	});
+
 	it("leaves a brief on auto with no budget to write to", () => {
 		const { system } = buildScriptPrompt(lengthOf("auto"), {
 			kind: "brief",

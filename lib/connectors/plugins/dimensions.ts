@@ -1,4 +1,5 @@
 import { requireContext } from "@/lib/connectors/plugins";
+import { dependency } from "@/lib/generation/dependency";
 import { aspectDimensions, forAspectRatio } from "@/lib/generation/sourceNodes";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import {
@@ -19,7 +20,7 @@ export function createDimensionsPlugin(
 ): ConnectorPlugin<Dimensioned> {
 	return {
 		name: "dimensions",
-		dependencies: () => [forAspectRatio],
+		dependencies: [dependency("aspectRatio", () => forAspectRatio)],
 		beforeGenerate(params, ctx) {
 			const dims = aspectDimensions(requireContext(ctx, "state", "dimensions"));
 			if (kind === "image") return { ...params, ...dims.image };

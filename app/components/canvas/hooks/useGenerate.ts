@@ -5,28 +5,30 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { forElement, type NodeSpec } from "@/lib/generation/graph";
 import { staleReason } from "@/lib/generation/staleReason";
+import { buildNode } from "@/lib/generation/resolveGraph";
+import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNode } from "@/lib/generation/useLiveNodes";
-import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 /** One generation lifecycle for whatever node `spec` names. Memoize the spec. */
 export function useGenerateNode(spec: NodeSpec) {
 	const queue = useGenerationQueue();
-	const { build: buildNode, context } = useNodeBuilder();
-	const build = useCallback(() => buildNode(spec), [buildNode, spec]);
+	const context = useBuildContext();
+	const build = useCallback(() => buildNode(spec, context()), [spec, context]);
 	const node = useLiveNode(build);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
 	// Built again at the click: a live node's job may lag, see useLiveNode.
 	const generate = useCallback(() => {
-		const current = build();
+		const ctx = context();
+		const current = buildNode(spec, ctx);
 		if (!current.inputs.prompt) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
-		queue.enqueueGraph([current], context());
-	}, [queue, build, context]);
+		queue.enqueueGraph([current], ctx);
+	}, [queue, spec, context]);
 
 	const discard = useCallback(() => {
 		queue.discard(node.id);

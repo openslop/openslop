@@ -691,7 +691,7 @@ describe("executeToolCall", () => {
 	it("reviews the script against the rules it was written to", async () => {
 		const calls: { prompt: string; systemPrompt?: string }[] = [];
 		const outcome = await executeToolCall(
-			{ toolName: "review_script", input: { format: "Film" } },
+			{ toolName: "review_script", input: { format: "Cinematic" } },
 			context({
 				generateText: async (prompt, options) => {
 					calls.push({ prompt, systemPrompt: options?.systemPrompt });
@@ -702,7 +702,7 @@ describe("executeToolCall", () => {
 
 		expect(outcome.ok && outcome.output).toBe(NO_FINDINGS);
 		expect(calls[0]?.prompt).toContain("<narration>hi</narration>");
-		expect(calls[0]?.prompt).toContain("intended as a Film");
+		expect(calls[0]?.prompt).toContain("intended as a Cinematic");
 		expect(calls[0]?.systemPrompt).toContain(
 			"The story script must be written",
 		);

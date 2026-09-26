@@ -110,24 +110,38 @@ describe("HTTP gateways", () => {
 			expect(url.searchParams.get("model")).toBe("Slop TTS v1");
 		});
 
-		it("proxies each preview through its own family, naming the model", async () => {
-			fetchMock.mockResolvedValue(
-				jsonResponse({
-					voices: [
-						{ id: "v1", name: "Alice", previewUrl: "https://vendor/a.mp3" },
-						{ id: "v2", name: "Bob" },
-					],
-				}),
-			);
+		it("hands previews back as the vendor names them", async () => {
+			const voices = [
+				{ id: "v1", name: "Alice", previewUrl: "https://vendor/a.mp3" },
+			];
+			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
-			const [alice, bob] = await new HttpTTSGateway(BYOK_TTS).searchVoices({});
+			await expect(
+				new HttpTTSGateway(BYOK_TTS).searchVoices({}),
+			).resolves.toEqual(voices);
+		});
 
-			const preview = parseUrl(alice?.previewUrl ?? "");
-			expect(preview.pathname).toBe("/api/third-party/tts/voices/preview");
-			expect(preview.searchParams.get("url")).toBe("https://vendor/a.mp3");
-			expect(preview.searchParams.get("provider")).toBe("cartesia");
-			expect(preview.searchParams.get("model")).toBe("Sonic 3.6");
-			expect(bob?.previewUrl).toBeUndefined();
+		it("asks its own family for a voice's preview, naming the model", async () => {
+			const preview = { url: "https://assets/preview.mp3", durationSec: 6 };
+			fetchMock.mockResolvedValue(jsonResponse({ preview }));
+
+			await expect(
+				new HttpTTSGateway(BYOK_TTS).voicePreview("v-sol"),
+			).resolves.toEqual(preview);
+
+			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
+			expect(url.pathname).toBe("/api/third-party/tts/voices/preview");
+			expect(url.searchParams.get("voiceId")).toBe("v-sol");
+			expect(url.searchParams.get("provider")).toBe("cartesia");
+			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
+		});
+
+		it("hands back nothing for a voice without a preview", async () => {
+			fetchMock.mockResolvedValue(jsonResponse({}));
+
+			await expect(
+				new HttpTTSGateway(HOSTED_TTS).voicePreview("v-mute"),
+			).resolves.toBeUndefined();
 		});
 
 		// A voice search names its model like a generation does, so the route

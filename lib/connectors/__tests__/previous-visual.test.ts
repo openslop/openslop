@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
+import type { BuildContext } from "@/lib/generation/graph";
 import { MetadataSchema } from "@/lib/project/types";
 import {
 	createPreviousVisualPlugin,
+	previousVisualDependency,
 	type ParamsWithPreviousVisual,
 } from "../video/plugins/previous-visual";
 import type { AssetResult, ConnectorPlugin } from "../types";
@@ -17,6 +20,16 @@ vi.mock("@/lib/connectors/video/captureFrames", () => ({
 }));
 
 const EMPTY_STATE = { metadata: MetadataSchema.parse({}), referenceImages: [] };
+const context = (canvas: CanvasContentElement[]): BuildContext => ({
+	state: EMPTY_STATE,
+	canvas,
+	registry: DEFAULT_CONNECTOR_REGISTRY,
+});
+
+const declaredOn = (
+	element: CanvasContentElement,
+	canvas: CanvasContentElement[],
+) => previousVisualDependency.specs(element)[0]?.[1](context(canvas));
 
 const video = (attrs: Record<string, string> = {}): CanvasContentElement => ({
 	id: "video-1",
@@ -31,10 +44,8 @@ const image: CanvasContentElement = {
 	children: [{ id: "t", type: "image", text: "a sunset" }],
 };
 
-const previousVideo = { ...video(), id: "video-0" };
-
 const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {
-	"video-0": {
+	previousVisual: {
 		imageUrl: "https://img/poster.png",
 		videoUrl: "https://vid/a.mp4",
 		durationSec: 5,
@@ -42,7 +53,7 @@ const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {
 };
 
 const PREVIOUS_IMAGE_RESULT: Record<string, AssetResult> = {
-	"img-1": { imageUrl: "https://img/sunset.png", durationSec: 0 },
+	previousVisual: { imageUrl: "https://img/sunset.png", durationSec: 0 },
 };
 
 describe("previous-visual plugin", () => {
@@ -51,18 +62,13 @@ describe("previous-visual plugin", () => {
 	const before = (
 		params: ParamsWithPreviousVisual,
 		dependencies: Record<string, AssetResult> = {},
-		canvas: CanvasContentElement[] = [image, video()],
 	) => {
 		if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
-		return plugin.beforeGenerate(params, {
-			elementId: "video-1",
-			dependencies,
-			canvas,
-		});
+		return plugin.beforeGenerate(params, { dependencies });
 	};
 
 	const afterVideo = (params: ParamsWithPreviousVisual) =>
-		before(params, PREVIOUS_VIDEO_RESULT, [previousVideo, video()]);
+		before(params, PREVIOUS_VIDEO_RESULT);
 
 	beforeEach(() => {
 		plugin = createPreviousVisualPlugin();
@@ -71,10 +77,14 @@ describe("previous-visual plugin", () => {
 
 	describe("dependencies", () => {
 		it("declares none when unlinked without a previous start frame", () => {
-			expect(plugin.dependencies?.(video())).toEqual([]);
-			expect(plugin.dependencies?.(video({ continuity: "false" }))).toEqual([]);
+			expect(previousVisualDependency.specs(video())).toEqual([]);
 			expect(
-				plugin.dependencies?.(video({ startFrame: "https://img/a.png" })),
+				previousVisualDependency.specs(video({ continuity: "false" })),
+			).toEqual([]);
+			expect(
+				previousVisualDependency.specs(
+					video({ startFrame: "https://img/a.png" }),
+				),
 			).toEqual([]);
 		});
 
@@ -84,12 +94,7 @@ describe("previous-visual plugin", () => {
 		])(
 			"declares the visual before the video, by document order, for %o",
 			(attrs) => {
-				const [spec] = plugin.dependencies?.(video(attrs)) ?? [];
-				const declared = spec?.({
-					state: EMPTY_STATE,
-					canvas: [image, video(attrs)],
-				});
-				expect(declared).toEqual({
+				expect(declaredOn(video(attrs), [image, video(attrs)])).toEqual({
 					element: image,
 					label: "the previous visual",
 				});
@@ -97,10 +102,9 @@ describe("previous-visual plugin", () => {
 		);
 
 		it("declares an empty leaf when nothing comes before the video", () => {
-			const [spec] =
-				plugin.dependencies?.(video({ startFrame: "previous" })) ?? [];
-			const declared = spec?.({ state: EMPTY_STATE, canvas: [video(), image] });
-			expect(declared).toMatchObject({ job: null });
+			expect(
+				declaredOn(video({ startFrame: "previous" }), [video(), image]),
+			).toMatchObject({ job: null });
 		});
 	});
 
@@ -116,7 +120,7 @@ describe("previous-visual plugin", () => {
 				before({ prompt: "slow pan", startFrame: "https://img/a.png" }),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				frameImages: ["https://img/a.png"],
+				frameImage: "https://img/a.png",
 			});
 		});
 
@@ -128,7 +132,7 @@ describe("previous-visual plugin", () => {
 				),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				frameImages: ["https://img/sunset.png"],
+				frameImage: "https://img/sunset.png",
 			});
 		});
 
@@ -146,11 +150,11 @@ describe("previous-visual plugin", () => {
 
 		it("hands on nothing when no visual comes before it", async () => {
 			await expect(
-				before(
-					{ prompt: "slow pan", startFrame: "previous", continuity: "true" },
-					{},
-					[video(), image],
-				),
+				before({
+					prompt: "slow pan",
+					startFrame: "previous",
+					continuity: "true",
+				}),
 			).resolves.toEqual({ prompt: "slow pan" });
 		});
 
@@ -159,7 +163,7 @@ describe("previous-visual plugin", () => {
 				afterVideo({ prompt: "slow pan", startFrame: "previous" }),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				frameImages: ["https://img/last.png"],
+				frameImage: "https://img/last.png",
 			});
 			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4", ["last"]);
 		});
@@ -190,7 +194,7 @@ describe("previous-visual plugin", () => {
 				}),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				frameImages: ["https://img/last.png"],
+				frameImage: "https://img/last.png",
 				referenceImages: ["https://img/first.png", "https://img/middle.png"],
 			});
 		});
@@ -204,22 +208,16 @@ describe("previous-visual plugin", () => {
 				}),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				frameImages: ["https://img/a.png"],
+				frameImage: "https://img/a.png",
 				referenceImages: ["https://img/first.png", "https://img/middle.png"],
 			});
-		});
-
-		it("fails loudly when the previous visual has not generated", async () => {
-			await expect(
-				before({ prompt: "slow pan", continuity: "true" }),
-			).rejects.toThrow(/has not generated/);
 		});
 
 		it("fails loudly when the previous visual made no picture", async () => {
 			await expect(
 				before(
 					{ prompt: "slow pan", startFrame: "previous" },
-					{ "img-1": { audioUrl: "https://a/x.mp3", durationSec: 3 } },
+					{ previousVisual: { audioUrl: "https://a/x.mp3", durationSec: 3 } },
 				),
 			).rejects.toThrow(/no picture/);
 		});

@@ -1,24 +1,28 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
+const httpError = (res: Response, label: string) =>
+	new Error(`${label} (${res.status} ${res.statusText})`);
+
 async function fetchOk(url: string, label: string): Promise<Response> {
 	const res = await fetch(url);
-	if (!res.ok) {
-		throw new Error(`${label} (${res.status} ${res.statusText})`);
-	}
+	if (!res.ok) throw httpError(res, label);
 	return res;
 }
 
-type AssetManifest = {
+/** The parts of a manifest a bundle is read through. */
+const BundleContentsSchema = z.object({
+	result: z.record(z.string(), z.string()),
+	metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+type BundleContents = z.infer<typeof BundleContentsSchema>;
+
+type AssetManifest = BundleContents & {
 	version: number;
 	type: string;
 	createdAt: string;
-	result: Record<string, string>;
-	metadata?: Record<string, unknown>;
 };
-
-/** The parts of a manifest a bundle is read through. */
-type BundleContents = Pick<AssetManifest, "result" | "metadata">;
 
 type BundleFileBase = {
 	key: string;
@@ -49,15 +53,15 @@ async function sourceOf(
 	return { body: res.body, multipart: true };
 }
 
-export const BundleResponseSchema = z.object({
+export const BundleResponseSchema = BundleContentsSchema.extend({
 	id: z.string(),
 	type: z.string(),
 	provider: z.string(),
-	result: z.record(z.string(), z.string()),
-	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type BundleResponse = z.infer<typeof BundleResponseSchema>;
+
+type UploadOptions = { id?: string };
 
 export class AssetBundle {
 	static baseUrl = process.env.NEXT_PUBLIC_BLOB_URL ?? "";
@@ -66,6 +70,10 @@ export class AssetBundle {
 		readonly url: string,
 		readonly manifest: BundleContents,
 	) {}
+
+	get durationSec(): number {
+		return Number(this.manifest.metadata?.durationSec ?? 0);
+	}
 
 	resolve(key: string): string {
 		const value = this.manifest.result[key];
@@ -92,15 +100,35 @@ export class AssetBundle {
 		return new AssetBundle(url, response);
 	}
 
+	static async load(
+		type: string,
+		provider: string,
+		id: string,
+	): Promise<BundleResponse | null> {
+		const url = AssetBundle.buildUrl(type, provider, id);
+		const res = await fetch(`${url}/manifest.json`);
+		if (res.status === 404) return null;
+		if (!res.ok) throw httpError(res, "Failed to load asset bundle");
+		return {
+			id,
+			type,
+			provider,
+			...BundleContentsSchema.parse(await res.json()),
+		};
+	}
+
 	static async upload(
 		type: string,
 		provider: string,
 		files: BundleFile[],
 		metadata?: Record<string, unknown>,
+		{ id }: UploadOptions = {},
 	): Promise<BundleResponse> {
 		const { put } = await import("@vercel/blob");
-		const id = nanoid();
-		const basePath = `assets/${type}/${provider}/${id}`;
+		// Two callers naming the same bundle write the same bytes, so the second may overwrite.
+		const named = id !== undefined;
+		const bundleId = id ?? nanoid();
+		const basePath = `assets/${type}/${provider}/${bundleId}`;
 
 		await Promise.all(
 			files.map(async (file) => {
@@ -109,6 +137,7 @@ export class AssetBundle {
 					access: "public",
 					contentType: file.contentType,
 					addRandomSuffix: false,
+					allowOverwrite: named,
 					multipart,
 				});
 			}),
@@ -130,8 +159,9 @@ export class AssetBundle {
 			access: "public",
 			contentType: "application/json",
 			addRandomSuffix: false,
+			allowOverwrite: named,
 		});
 
-		return { id, type, provider, result, metadata };
+		return { id: bundleId, type, provider, result, metadata };
 	}
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
 	CornerDownLeft,
+	FilmSlate,
 	Hourglass,
 	ImagePlus,
 	Loader2,
@@ -45,6 +46,12 @@ import {
 	videoLengthLabel,
 	type VideoLength,
 } from "@/lib/project/videoLength";
+import {
+	VIDEO_FORMAT_CHOICES,
+	videoFormatLabel,
+	videoFormatSummary,
+	type VideoFormat,
+} from "@/lib/project/videoFormat";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./ActionButton";
@@ -82,6 +89,13 @@ const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] =
 
 const VIDEO_LENGTH_OPTIONS: SettingPillOption<VideoLength>[] =
 	VIDEO_LENGTHS.map((value) => ({ value, label: videoLengthLabel(value) }));
+
+const VIDEO_FORMAT_OPTIONS: SettingPillOption<VideoFormat>[] =
+	VIDEO_FORMAT_CHOICES.map((value) => ({
+		value,
+		label: videoFormatLabel(value),
+		description: videoFormatSummary(value),
+	}));
 
 const LANGUAGE_OPTIONS: SettingPillOption<LanguageChoice>[] =
 	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
@@ -194,6 +208,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const videoLength = useVideoSetting("length");
+	const videoFormat = useVideoSetting("format");
 	const updateVideoSettings = useUpdateVideoSettings();
 	const addReferenceImages = useProject((s) => s.addReferenceImages);
 	const [language, setLanguage] = useScriptLanguage();
@@ -212,10 +227,11 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const pasting = intent === "script";
 	const activeTemplate = pasting ? undefined : template;
 
-	/** A pasted script sets its own length, so the target goes back to auto. */
+	/** A pasted script sets its own length and format, so both go back to auto. */
 	const chooseIntent = (next: ComposerIntent) => {
 		setIntent(next);
-		if (next === "script") updateVideoSettings({ length: "auto" });
+		if (next === "script")
+			updateVideoSettings({ length: "auto", format: "auto" });
 	};
 
 	const handleSubmit = () => {
@@ -276,6 +292,16 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={ASPECT_RATIO_OPTIONS}
 							onChange={(next: AspectRatio) =>
 								updateVideoSettings({ aspectRatio: next })
+							}
+						/>
+						<SettingPill
+							name="Format"
+							icon={<FilmSlate className="mr-1 h-3 w-3" />}
+							value={videoFormat}
+							options={VIDEO_FORMAT_OPTIONS}
+							disabled={pasting}
+							onChange={(next: VideoFormat) =>
+								updateVideoSettings({ format: next })
 							}
 						/>
 						<SettingPill

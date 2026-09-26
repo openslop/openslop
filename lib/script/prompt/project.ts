@@ -6,6 +6,7 @@ import {
 	type MetadataVoice,
 } from "@/lib/project/types";
 import { videoLengthBudget } from "@/lib/project/videoLength";
+import { videoFormatLabel } from "@/lib/project/videoFormat";
 
 function renderVoice(voice: MetadataVoice): string {
 	return voiceTraitEntries(voice)
@@ -57,6 +58,17 @@ export function projectPreamble(metadata: Metadata): string {
 	}
 
 	return sections.join("\n\n");
+}
+
+/** Empty on `auto`: the writer then picks the format closest to the brief. */
+export function formatSection(metadata: Metadata): string {
+	const { format } = metadata.videoSettings;
+	if (format === "auto") return "";
+
+	return dedent`
+		# Format
+
+		The user picked the ${videoFormatLabel(format)} format. Write in it.`;
 }
 
 /** Empty on `auto`: no budget is a budget the model would otherwise invent. */

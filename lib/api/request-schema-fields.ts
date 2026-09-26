@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
+import { ReferenceAudioSchema } from "@/lib/connectors/types";
 import { VIDEO_RESOLUTIONS } from "@/lib/project/aspectRatio";
 import { parseImageSource } from "./imageSource";
 
@@ -44,8 +45,12 @@ export const optionalReferenceImages = {
 	referenceImages: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 
-export const optionalFrameImages = {
-	frameImages: z.array(referenceImageUrlOrDataUri).optional(),
+export const optionalFrameImage = {
+	frameImage: referenceImageUrlOrDataUri.optional(),
+} as const;
+
+export const optionalReferenceAudios = {
+	referenceAudios: z.array(ReferenceAudioSchema).optional(),
 } as const;
 
 export const imageFile = (maxBytes: number) =>

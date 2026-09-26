@@ -23,7 +23,7 @@ export abstract class BaseAssetConnector<
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {
 			[assetUrlField(this.assetKey)]: bundle.resolve(this.assetKey),
-			durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
+			durationSec: bundle.durationSec,
 		} as TResult;
 	}
 

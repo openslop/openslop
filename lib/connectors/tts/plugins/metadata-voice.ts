@@ -1,9 +1,10 @@
-import { resolveModel } from "@/lib/connectors/models";
 import { requireContext } from "@/lib/connectors/plugins";
+import { dependency } from "@/lib/generation/dependency";
 import { forVoice } from "@/lib/generation/sourceNodes";
 import { declaredLanguage } from "@/lib/project/language";
 import {
 	metadataVoiceFor,
+	resolveVoice,
 	voiceIdOn,
 	voiceTraitsSchema,
 } from "@/lib/project/types";
@@ -23,23 +24,22 @@ const voiceModel = (
 	element: CanvasContentElement,
 	state: ProjectData,
 ): ModelRef =>
-	resolveModel(
-		"tts",
-		metadataVoiceFor(state.metadata, element.generationAttributes?.name),
+	resolveVoice(
+		state.metadata,
+		element.generationAttributes?.name,
 		element.generationAttributes,
-	);
+	).model;
+
+export const speakerVoice = dependency(
+	"voice",
+	({ generationAttributes: attrs }) => forVoice(attrs?.name, attrs),
+);
 
 export function createMetadataVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "metadata-voice",
 		model: voiceModel,
-		dependencies: (element) => [
-			(ctx) =>
-				forVoice(
-					element.generationAttributes?.name,
-					voiceModel(element, ctx.state),
-				)(ctx),
-		],
+		dependencies: [speakerVoice],
 		beforeGenerate(params, ctx) {
 			const { metadata } = requireContext(ctx, "state", "metadata-voice");
 			const voice = metadataVoiceFor(metadata, params.name);

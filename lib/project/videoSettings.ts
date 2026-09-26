@@ -6,6 +6,7 @@ import {
 } from "../captions/captionStyle";
 import { DEFAULT_TRANSITION, TRANSITION_TYPES } from "../render/transitions";
 import { DEFAULT_VIDEO_LENGTH, VIDEO_LENGTHS } from "./videoLength";
+import { DEFAULT_VIDEO_FORMAT, VIDEO_FORMAT_CHOICES } from "./videoFormat";
 
 /**
  * Every knob that shapes the finished video, with its default. Parsed metadata
@@ -16,6 +17,7 @@ const settings = z.object({
 	transitionType: z.enum(TRANSITION_TYPES).default(DEFAULT_TRANSITION),
 	aspectRatio: z.enum(ASPECT_RATIOS).default(DEFAULT_ASPECT_RATIO),
 	length: z.enum(VIDEO_LENGTHS).default(DEFAULT_VIDEO_LENGTH),
+	format: z.enum(VIDEO_FORMAT_CHOICES).default(DEFAULT_VIDEO_FORMAT),
 	captions: z.boolean().default(true),
 	/** A style stored by an older build may no longer parse; the default beats not opening. */
 	captionStyle: CaptionStyleSchema.catch(DEFAULT_CAPTION_STYLE),

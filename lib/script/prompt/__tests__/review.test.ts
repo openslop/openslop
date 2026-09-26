@@ -22,38 +22,40 @@ describe("reviewPrompt", () => {
 	});
 
 	it("holds the script to its format only when one is named", () => {
-		expect(reviewPrompt(script, "Film")).toContain(
-			"It was intended as a Film, so judge it accordingly.",
+		expect(reviewPrompt(script, "Cinematic")).toContain(
+			"It was intended as a Cinematic, so judge it accordingly.",
 		);
 		expect(reviewPrompt(script)).not.toContain("It was intended as a");
 	});
 
 	it("opens on one clean sentence whether or not a format is named", () => {
-		expect(reviewPrompt(script, "Film")).not.toContain("..");
+		expect(reviewPrompt(script, "Cinematic")).not.toContain("..");
 		expect(reviewPrompt(script)).not.toContain(" .");
 	});
 
 	it("keeps the reviewer off metadata, which is a project setting and never a tag", () => {
 		const prompt = reviewPrompt(script);
 
-		expect(prompt).toContain("never report a metadata tag");
+		expect(prompt).toContain(
+			"Metadata elements are outside the scope of this review",
+		);
 		expect(prompt).not.toContain("Metadata tags,");
 	});
 
 	it("asks for every scene, so a long script is not half reviewed", () => {
-		expect(reviewPrompt(script)).toContain("every scene to the last one");
+		expect(reviewPrompt(script)).toContain("Work through every scene");
 	});
 
 	it("asks for findings in one shape, and names the reply that ends the loop", () => {
 		expect(reviewPrompt(script)).toContain(
-			"- <element id> — <the rule it breaks> — <the smallest change that fixes it>",
+			"- <element id> | <the rule it breaks> | <the smallest change that fixes it>",
 		);
 		expect(reviewPrompt(script)).toContain(NO_FINDINGS);
 	});
 
 	it("shows a worked finding, so the shape is copied rather than guessed", () => {
 		expect(reviewPrompt(script)).toContain(
-			"- kM2pQ7rT9wXz4bNc — Format: trimToDialogue — ",
+			"- kM2pQ7rT9wXz4bNc | Format: trimToDialogue | ",
 		);
 	});
 });

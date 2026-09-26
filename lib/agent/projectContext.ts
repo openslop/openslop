@@ -23,6 +23,7 @@ function toAgentContext(
 		style: metadata.style,
 		language: metadata.language,
 		length: metadata.videoSettings.length,
+		format: metadata.videoSettings.format,
 		aspectRatio: metadata.videoSettings.aspectRatio,
 		templateName: metadata.templateId
 			? getTemplateById(metadata.templateId)?.name

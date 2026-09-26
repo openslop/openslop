@@ -32,6 +32,12 @@ export const isScriptEmpty = (nodes: Descendant[]): boolean =>
 		(element) => withoutCaretMarker(Node.string(element)).trim() === "",
 	);
 
+export const elementById = (
+	elements: CanvasContentElement[],
+	id: string,
+): CanvasContentElement | undefined =>
+	elements.find((element) => element.id === id);
+
 export function previousVisual(
 	elements: CanvasContentElement[],
 	id: string,

@@ -32,6 +32,7 @@ const AGENT_CONTEXT: AgentContext = {
 	style: "",
 	language: "auto",
 	length: "3-5m",
+	format: "auto",
 	aspectRatio: "16:9",
 	narration: {},
 	characters: [],

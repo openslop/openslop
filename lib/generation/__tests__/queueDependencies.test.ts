@@ -14,6 +14,9 @@ vi.mock("../generateForElement", () => ({
 
 const config: ConnectorConfig = {};
 
+const byId = (nodes: GenerationNode[]) =>
+	Object.fromEntries(nodes.map((node) => [node.id, node]));
+
 function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	const job: GenerationJob = {
 		elementId: id,
@@ -25,7 +28,7 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	return {
 		id,
 		inputs: { prompt: id, attributes: {} },
-		dependsOn,
+		dependsOn: byId(dependsOn),
 		job,
 	};
 }

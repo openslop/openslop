@@ -10,7 +10,7 @@ import { measureElementLengths } from "@/lib/render/elementLengths";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import { staleReason } from "@/lib/generation/staleReason";
 import { characterAvatarUrl } from "@/lib/project/characterAvatar";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
@@ -54,15 +54,16 @@ export function useAgentTools(editor: Editor) {
 					};
 				},
 				elementStates: () => {
-					const buildNode = nodeBuilder(connectorConfig, () => ({
+					const ctx = {
 						state: store.getState(),
 						canvas: getContentElements(editor.children),
-					}));
-					return getContentElements(editor.children).map((element) =>
+						registry: connectorConfig,
+					};
+					return ctx.canvas.map((element) =>
 						elementState(
 							element.id,
 							queue.getElementSnapshot(element.id),
-							staleReason(buildNode(forElement(element)), queue),
+							staleReason(buildNode(forElement(element), ctx), queue),
 						),
 					);
 				},

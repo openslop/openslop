@@ -16,6 +16,9 @@ import { GenerationQueue } from "../queue";
 
 const config: ConnectorConfig = {};
 
+const byId = (nodes: GenerationNode[]) =>
+	Object.fromEntries(nodes.map((node) => [node.id, node]));
+
 function node(
 	id: string,
 	dependsOn: GenerationNode[] = [],
@@ -31,7 +34,7 @@ function node(
 	return {
 		id,
 		inputs: { prompt: id, attributes },
-		dependsOn,
+		dependsOn: byId(dependsOn),
 		job,
 	};
 }

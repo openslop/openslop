@@ -9,10 +9,12 @@ import {
 	forElement,
 	isNodeStale,
 	needsGeneration,
+	type BuildContext,
 } from "@/lib/generation/graph";
+import { buildNodes } from "@/lib/generation/resolveGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNodes } from "@/lib/generation/useLiveNodes";
-import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 export type GenerateScope = {
@@ -73,16 +75,20 @@ export function useGenerateScope(
 ): GenerateScope {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();
-	const { build: buildNode, context } = useNodeBuilder();
+	const context = useBuildContext();
 
-	const buildNodes = useCallback(
-		() =>
-			select(editor)
-				.map((element) => buildNode(forElement(element)))
-				.filter((node) => node.inputs.prompt),
-		[select, editor, buildNode],
+	const buildScope = useCallback(
+		(ctx: BuildContext) =>
+			buildNodes(select(editor).map(forElement), ctx).filter(
+				(node) => node.inputs.prompt,
+			),
+		[select, editor],
 	);
-	const nodes = useLiveNodes(buildNodes);
+	const buildLive = useCallback(
+		() => buildScope(context()),
+		[buildScope, context],
+	);
+	const nodes = useLiveNodes(buildLive);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -99,11 +105,12 @@ export function useGenerateScope(
 
 	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
+		const ctx = context();
 		queue.enqueueGraph(
-			buildNodes().filter((node) => needsGeneration(node, queue)),
-			context(),
+			buildScope(ctx).filter((node) => needsGeneration(node, queue)),
+			ctx,
 		);
-	}, [queue, buildNodes, context]);
+	}, [queue, buildScope, context]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

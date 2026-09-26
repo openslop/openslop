@@ -23,6 +23,9 @@ vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
 
+const byId = (nodes: GenerationNode[]) =>
+	Object.fromEntries(nodes.map((node) => [node.id, node]));
+
 type JobOverrides = Partial<GenerationJob> & {
 	inputs?: GenerationInputs;
 	dependsOn?: GenerationNode[];
@@ -46,7 +49,7 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 	return {
 		id,
 		inputs: { prompt: inputs.prompt, attributes: inputs.attributes },
-		dependsOn,
+		dependsOn: byId(dependsOn),
 		job,
 	};
 }

@@ -6,6 +6,7 @@ const context = (over: Partial<AgentContext> = {}): AgentContext => ({
 	style: "",
 	language: "auto",
 	length: "3-5m",
+	format: "auto",
 	aspectRatio: "16:9",
 	narration: {},
 	characters: [],
@@ -37,6 +38,15 @@ describe("renderAgentContext", () => {
 		const rendered = renderAgentContext(context({ length: "auto" }));
 
 		expect(rendered).toContain("target length: auto (no target");
+	});
+
+	it("names the format the user picked, and says auto is the writer's call", () => {
+		expect(renderAgentContext(context({ format: "faceless" }))).toContain(
+			"format: Faceless",
+		);
+		expect(renderAgentContext(context({ format: "auto" }))).toContain(
+			"format: auto (pick the one that fits the brief)",
+		);
 	});
 
 	it("names the language rather than handing over a code", () => {

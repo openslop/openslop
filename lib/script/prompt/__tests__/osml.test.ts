@@ -49,7 +49,9 @@ describe("osmlSpec", () => {
 
 	it("asks for dead simple dialogue that fits the scene", () => {
 		expect(spec).toContain("Keep dialogue dead simple");
-		expect(spec).toContain("make sense for who says it and what just happened");
+		expect(spec).toContain(
+			"Every line must make complete sense to the listener",
+		);
 	});
 
 	it("keeps places and subjects out of the art style, which leads every prompt", () => {
@@ -59,7 +61,14 @@ describe("osmlSpec", () => {
 	});
 
 	it("describes every video prompt in detail, standing alone", () => {
-		expect(spec).toContain("Each video prompt is standalone");
+		expect(spec).toContain("Each prompt is standalone");
+	});
+
+	it("asks for one to three labelled shots, varied to suit the moment", () => {
+		expect(spec).toContain("one to three numbered shots");
+		expect(spec).toContain("even when there is only one");
+		expect(spec).toContain("Vary the shot count");
+		expect(spec).not.toContain("do not pass in a label");
 	});
 
 	it("mixes videos that start fresh with videos that continue the one before", () => {
@@ -75,14 +84,14 @@ describe("osmlSpec", () => {
 	});
 
 	it("opens a continued video where the one before it ends", () => {
-		expect(spec).toContain("starts where that video's last shot ends");
+		expect(spec).toContain("starts exactly where that video's last shot ends");
 	});
 
 	it("keeps a film to videos and music, whatever the other element rules say", () => {
 		expect(spec).toContain(
-			"Film: the picture tells the story. Only <video> and <music>.",
+			"Cinematic: visuals and music tell the story. Only <video> and <music>",
 		);
-		expect(spec).toContain("Use no others.");
+		expect(spec).toContain("The format decides which elements you write.");
 	});
 
 	it("deters motion on video, which competes with the motion the video model generates", () => {

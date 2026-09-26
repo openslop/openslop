@@ -19,7 +19,6 @@ import {
 	type GenerationJob,
 	type GenerationNode,
 	type JobNode,
-	type NodeId,
 	type NodeResults,
 } from "./graph";
 
@@ -199,7 +198,7 @@ export class GenerationQueue implements NodeResults {
 
 	/** The dependency holding `node` back, if any: it gates until it settles. */
 	private blockingDependency(node: GenerationNode) {
-		return node.dependsOn.find(
+		return Object.values(node.dependsOn).find(
 			(dep) =>
 				!isSourceNode(dep) &&
 				(this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result),
@@ -252,10 +251,10 @@ export class GenerationQueue implements NodeResults {
 		this.snapshots.notify();
 	}
 
-	private dependencyResults(node: GenerationNode): Record<NodeId, AssetResult> {
-		const entries = node.dependsOn.flatMap((dep) => {
+	private dependencyResults(node: GenerationNode): Record<string, AssetResult> {
+		const entries = Object.entries(node.dependsOn).flatMap(([key, dep]) => {
 			const { result } = this.snapshots.get(dep.id);
-			return result ? [[dep.id, result] as const] : [];
+			return result ? [[key, result] as const] : [];
 		});
 		return Object.fromEntries(entries);
 	}

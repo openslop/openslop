@@ -1,5 +1,6 @@
 import { previousVisual } from "@/lib/canvas/scenes";
-import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
+import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
+import { dependency } from "@/lib/generation/dependency";
 import {
 	derivedNodeId,
 	sourceNode,
@@ -18,7 +19,7 @@ import {
 
 export type ParamsWithPreviousVisual = {
 	prompt: string;
-	frameImages?: string[];
+	frameImage?: string;
 	referenceImages?: string[];
 	[START_FRAME_ATTR]?: string;
 	[CONTINUITY_ATTR]?: string;
@@ -40,35 +41,32 @@ const forPreviousVisual =
 			: sourceNode(derivedNodeId("first", id), {}, LABEL);
 	};
 
+/** No result means the empty leaf: nothing came before the video. */
 async function previousPictures(
-	{ elementId = "", canvas = [], dependencies = {} }: PluginContext,
+	source: AssetResult | undefined,
 	frames: readonly FrameKey[],
 ): Promise<string[]> {
-	const id = previousVisual(canvas, elementId)?.id;
-	if (!id) return [];
-	const source = dependencies[id];
-	if (!source)
-		throw new Error(`The previous visual "${id}" has not generated yet`);
+	if (!source) return [];
 	if (source.videoUrl) return captureFrames(source.videoUrl, frames);
 	if (source.imageUrl) return [source.imageUrl];
 	throw new Error("The previous visual generated no picture to hand on");
 }
 
-/**
- * What a video takes from the visual before it: opening on it, its end is the
- * start frame; linked, its beginning and middle join the reference images,
- * so the place and look carry over. Either makes the visual a dependency, so the
- * element waits for it, and regenerating or moving it stales the element; a
- * start frame by URL is only an input.
- */
+/** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
+export const previousVisualDependency = dependency(
+	"previousVisual",
+	({ id, generationAttributes: attrs = {} }) =>
+		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
+		attrs[CONTINUITY_ATTR] === "true"
+			? forPreviousVisual(id)
+			: null,
+);
+
+/** Opening on the previous visual takes its end as the start frame; linking adds its beginning and middle as references. */
 export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPreviousVisual> {
 	return {
 		name: "previous-visual",
-		dependencies: ({ id, generationAttributes: attrs = {} }) =>
-			attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
-			attrs[CONTINUITY_ATTR] === "true"
-				? [forPreviousVisual(id)]
-				: [],
+		dependencies: [previousVisualDependency],
 		async beforeGenerate(
 			{
 				[START_FRAME_ATTR]: frame = NO_FRAME,
@@ -77,19 +75,20 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 			},
 			ctx,
 		) {
-			const frameImages =
+			const source = previousVisualDependency.read(ctx);
+			const [frameImage] =
 				frame === PREVIOUS_VISUAL
-					? await previousPictures(ctx, [START_FRAME])
+					? await previousPictures(source, [START_FRAME])
 					: URL.canParse(frame)
 						? [frame]
 						: [];
 			const references =
 				continuity === "true"
-					? await previousPictures(ctx, CONTINUITY_FRAMES)
+					? await previousPictures(source, CONTINUITY_FRAMES)
 					: [];
 			return {
 				...params,
-				...(frameImages.length > 0 && { frameImages }),
+				...(frameImage && { frameImage }),
 				...(references.length > 0 && {
 					referenceImages: [...(params.referenceImages ?? []), ...references],
 				}),

@@ -5,7 +5,9 @@ import type {
 	CanvasContentElement,
 	CanvasElementType,
 } from "@/lib/canvas/types";
+import { elementById } from "@/lib/canvas/scenes";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AssetConnectorType,
 	AssetResult,
@@ -34,7 +36,8 @@ export type GenerationJob = {
 type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
-	dependsOn: GenerationNode[];
+	/** Keyed by the name the declaring plugin gave the edge, which is how its result reaches that plugin. */
+	dependsOn: Record<string, GenerationNode>;
 	/** How the node reads when a dependent has to name it to the user. */
 	label?: string;
 };
@@ -60,12 +63,13 @@ export type ElementNode = {
 };
 
 /**
- * What a spec reads while naming its node, and what its job runs against:
- * project state, and the canvas in document order.
+ * What a build reads: project state, the canvas in document order, and the
+ * registry that gives each element its connector and plugins.
  */
 export type BuildContext = {
 	state: ProjectData;
 	canvas: CanvasContentElement[];
+	registry: ConnectorRegistry;
 };
 
 /**
@@ -79,9 +83,13 @@ export const isElementNode = (
 	value: ElementNode | GenerationNode,
 ): value is ElementNode => "element" in value;
 
+/**
+ * The element as the canvas being built has it. The given one stands in only
+ * when it is not on that canvas, as a character's avatar is not.
+ */
 export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
-	() => ({ element });
+	({ canvas }) => ({ element: elementById(canvas, element.id) ?? element });
 
 /** What the graph reads back about a node the queue has settled. */
 export type NodeResult = {
@@ -126,7 +134,7 @@ export function sourceNode(
 	return {
 		id,
 		inputs,
-		dependsOn: [],
+		dependsOn: {},
 		label,
 		job: null,
 		identity: serializeInputs({ ...inputs, dependencies: {} }),
@@ -155,7 +163,10 @@ export function nodeInputs(
 	return {
 		...node.inputs,
 		dependencies: Object.fromEntries(
-			node.dependsOn.map((dep) => [dep.id, nodeIdentity(dep, results)]),
+			Object.values(node.dependsOn).map((dep) => [
+				dep.id,
+				nodeIdentity(dep, results),
+			]),
 		),
 	};
 }
@@ -170,8 +181,9 @@ export function needsGeneration(
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	return (
-		node.dependsOn.some((dep) => needsGeneration(dep, results)) ||
-		!isEqual(nodeInputs(node, results), snapshot.resultInputs)
+		Object.values(node.dependsOn).some((dep) =>
+			needsGeneration(dep, results),
+		) || !isEqual(nodeInputs(node, results), snapshot.resultInputs)
 	);
 }
 
@@ -189,7 +201,7 @@ export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
 	const visit = (node: GenerationNode) => {
 		if (seen.has(node.id)) return;
 		seen.add(node.id);
-		for (const dep of node.dependsOn) visit(dep);
+		for (const dep of Object.values(node.dependsOn)) visit(dep);
 		ordered.push(node);
 	};
 	for (const root of roots) visit(root);

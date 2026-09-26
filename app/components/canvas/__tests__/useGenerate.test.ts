@@ -8,7 +8,7 @@ import {
 	type GenerationNode,
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import { createProjectStore } from "@/lib/project/store";
 
 // Memos hold across renders, as React's do: the bug is a graph kept from an
@@ -42,12 +42,15 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 
 const store = createProjectStore();
 let canvas: CanvasContentElement[] = [];
-// Like the real hook, the builder keeps its identity while text inside an
-// element changes, and reads the canvas when it builds.
-const context = () => ({ state: store.getState(), canvas });
-const builder = nodeBuilder(DEFAULT_CONNECTOR_REGISTRY, context);
-vi.mock("@/lib/generation/useNodeBuilder", () => ({
-	useNodeBuilder: () => ({ build: builder, context }),
+// Like the real hook, the context keeps its identity while text inside an
+// element changes, and reads the canvas when it is made.
+const context = () => ({
+	state: store.getState(),
+	canvas,
+	registry: DEFAULT_CONNECTOR_REGISTRY,
+});
+vi.mock("@/lib/generation/useBuildContext", () => ({
+	useBuildContext: () => context,
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");
@@ -74,7 +77,7 @@ const edited = element("img", "image", "a sunrise");
 /** The image as it was regenerated from its own card: current, not stale. */
 function regenerateImageFromItsCard() {
 	canvas = [edited, video];
-	queue.commitResult(builder(forElement(edited)), {
+	queue.commitResult(buildNode(forElement(edited), context()), {
 		imageUrl: "https://img/sunrise.png",
 		durationSec: 0,
 	});
@@ -82,7 +85,7 @@ function regenerateImageFromItsCard() {
 
 const queuedImage = (spy: ReturnType<typeof vi.spyOn>) => {
 	const roots = spy.mock.calls[0]?.[0] as GenerationNode[];
-	return roots[0]?.dependsOn.find((dep) => dep.id === "img");
+	return roots[0]?.dependsOn.previousVisual;
 };
 
 let enqueue: ReturnType<typeof vi.spyOn>;

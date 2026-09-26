@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { createConnector } from "@/lib/connectors/factory";
+import { useEffect, useState } from "react";
 import type {
-	ModelRef,
+	TTSConnector,
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
@@ -21,15 +19,8 @@ const LOADING: VoiceSearch = { status: "loading" };
 
 export function useVoiceSearch(
 	filters: VoiceSearchParams,
-	model: ModelRef,
+	connector: TTSConnector,
 ): VoiceSearch {
-	const { connectorConfig } = useConfig();
-	const { provider, model: name } = model;
-	const connector = useMemo(
-		() =>
-			createConnector("tts", { provider, model: name }, connectorConfig.tts),
-		[connectorConfig, provider, name],
-	);
 	const [search, setSearch] = useState<VoiceSearch>(LOADING);
 
 	useEffect(() => {

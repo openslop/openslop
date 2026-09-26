@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import { DEFAULT_VIDEO_LENGTH } from "@/lib/project/videoLength";
+import { DEFAULT_VIDEO_FORMAT } from "@/lib/project/videoFormat";
 import { createProjectStore } from "../store";
 import { MetadataSchema } from "../types";
 import { extractStoreSnapshot, parseStoreSnapshot } from "../storeSnapshot";
@@ -74,6 +75,7 @@ describe("parseStoreSnapshot", () => {
 		expect(parsed.metadata.videoSettings).toEqual({
 			...metadata.videoSettings,
 			length: DEFAULT_VIDEO_LENGTH,
+			format: DEFAULT_VIDEO_FORMAT,
 			captions: true,
 			captionStyle: DEFAULT_CAPTION_STYLE,
 		});

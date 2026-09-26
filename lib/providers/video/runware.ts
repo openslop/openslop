@@ -1,6 +1,10 @@
 import type { IRequestVideo } from "@runware/sdk-js";
+import compact from "lodash/compact";
+import type { ReferenceAudio } from "@/lib/connectors/types";
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
+import pickBy from "lodash/pickBy";
+import { cutVoice, secondsCap } from "../audio-cut";
 import { validateRunwareKey, withRunware } from "../runware";
 import type { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
 import {
@@ -26,49 +30,93 @@ function toVideoJob(video: {
 type ModelId =
 	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
 
-type Pictures = { startFrames: string[]; references: string[] };
+type Sources = {
+	startFrame?: string;
+	references: string[];
+	voices: ReferenceAudio[];
+};
 
 type Conditioning = Pick<IRequestVideo, "positivePrompt" | "inputs">;
 
-type Conditioner = (prompt: string, pictures: Pictures) => Conditioning;
+type Conditioner = (
+	prompt: string,
+	sources: Sources,
+) => Conditioning | Promise<Conditioning>;
 
-const pictureInputs = (
+const inputsOf = (
 	lists: Record<string, string[]>,
 ): Pick<IRequestVideo, "inputs"> => {
-	const inputs = Object.fromEntries(
-		Object.entries(lists).filter(([, images]) => images.length > 0),
-	);
+	const inputs = pickBy(lists, (items) => items.length > 0);
 	return Object.keys(inputs).length > 0 ? { inputs } : {};
 };
 
 const openingOnFrameImage =
 	({ maxReferences }: { maxReferences: number }): Conditioner =>
-	(prompt, { startFrames, references }) => ({
+	(prompt, { startFrame, references }) => ({
 		positivePrompt: prompt,
-		...pictureInputs({
-			frameImages: startFrames.slice(-1),
+		...inputsOf({
+			frameImages: compact([startFrame]),
 			referenceImages: references.slice(0, maxReferences),
 		}),
 	});
 
-const openingOnNamedReference =
-	({ maxReferences }: { maxReferences: number }): Conditioner =>
-	(prompt, pictures) => {
-		const { startFrames, references } = pictures;
-		if (startFrames.length === 0)
-			return openingOnFrameImage({ maxReferences })(prompt, pictures);
-		const referenceImages = [
-			...references.slice(0, maxReferences - startFrames.length),
-			...startFrames,
-		];
+const imageCue = (number: number) => `@Image ${number} as the first frame.`;
+
+const voiceCue = ({ speaker }: ReferenceAudio, index: number) =>
+	`@Audio ${index + 1} defines ${speaker}'s vocal timbre, pitch, and speech cadence.`;
+
+type Limits = {
+	maxReferences: number;
+	maxAudios: number;
+	minAudioSec: number;
+	totalAudioSec: number;
+};
+
+const audibleVoices = async (
+	voices: ReferenceAudio[],
+	{ maxAudios, minAudioSec, totalAudioSec }: Limits,
+): Promise<ReferenceAudio[]> => {
+	const heard = voices
+		.filter(({ durationSec }) => durationSec >= minAudioSec)
+		.slice(0, maxAudios);
+	const cap = secondsCap(
+		heard.map(({ durationSec }) => durationSec),
+		totalAudioSec,
+	);
+	return Promise.all(
+		heard.map(async (voice) => ({ ...voice, ...(await cutVoice(voice, cap)) })),
+	);
+};
+
+/** The start frame is named last. */
+const namingReferences =
+	(limits: Limits): Conditioner =>
+	async (prompt, { startFrame, references, voices }) => {
+		const referenceImages = startFrame
+			? [...references.slice(0, limits.maxReferences - 1), startFrame]
+			: references.slice(0, limits.maxReferences);
+		const heard = await audibleVoices(voices, limits);
+		const cues = compact([
+			startFrame && imageCue(referenceImages.length),
+			...heard.map(voiceCue),
+		]);
 		return {
-			positivePrompt: `@Image ${referenceImages.length} as the first frame. ${prompt}`,
-			inputs: { referenceImages },
+			positivePrompt: [...cues, prompt].join(" "),
+			...inputsOf({
+				referenceImages,
+				referenceAudios: heard.map(({ url }) => url),
+			}),
 		};
 	};
 
 const CONDITIONERS: Record<ModelId, Conditioner> = {
-	"bytedance:seedance@2.0-fast": openingOnNamedReference({ maxReferences: 9 }),
+	// Runware allows 0.2 s over the 15 s, which covers a cut running a frame long.
+	"bytedance:seedance@2.0-fast": namingReferences({
+		maxReferences: 9,
+		maxAudios: 3,
+		minAudioSec: 2,
+		totalAudioSec: 15,
+	}),
 	"klingai:kling-video@3.0-turbo": openingOnFrameImage({ maxReferences: 0 }),
 };
 
@@ -101,9 +149,10 @@ export class RunwareVideo extends BaseVideoProvider {
 	async submit(params: VideoRequest) {
 		if (!isModelId(params.model))
 			throw new Error(`Runware has no video model "${params.model}"`);
-		const conditioning = CONDITIONERS[params.model](params.prompt, {
-			startFrames: params.frameImages ?? [],
+		const conditioning = await CONDITIONERS[params.model](params.prompt, {
+			startFrame: params.frameImage,
 			references: params.referenceImages ?? [],
+			voices: params.referenceAudios ?? [],
 		});
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({

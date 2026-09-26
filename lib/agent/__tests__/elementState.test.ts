@@ -17,7 +17,7 @@ function node(id: string, prompt = id): GenerationNode {
 		model: DEFAULT_MODELS.image,
 		config,
 	};
-	return { id, inputs: { prompt, attributes: {} }, dependsOn: [], job };
+	return { id, inputs: { prompt, attributes: {} }, dependsOn: {}, job };
 }
 
 const image = (imageUrl: string): AssetResult => ({ imageUrl, durationSec: 0 });

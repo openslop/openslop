@@ -1,22 +1,29 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import {
+	characterAvatars,
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
-import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 
-/** Avatars reach the plugin as dependency results, keyed by avatar node id. */
+/** Keyed by declaring them for an element that names these characters. */
 function avatarResults(
 	avatars: Record<string, string>,
 ): Record<string, AssetResult> {
+	const element: CanvasContentElement = {
+		id: "img",
+		type: "image",
+		generationAttributes: { characters: Object.keys(avatars).join(", ") },
+		children: [],
+	};
+	const urls = Object.values(avatars);
 	return Object.fromEntries(
-		Object.entries(avatars)
-			.filter(([, url]) => url)
-			.map(([name, url]) => [
-				characterAvatarElementId(name),
-				{ imageUrl: url, durationSec: 0 },
-			]),
+		characterAvatars
+			.specs(element)
+			.flatMap(([key], i) =>
+				urls[i] ? [[key, { imageUrl: urls[i], durationSec: 0 }]] : [],
+			),
 	);
 }
 

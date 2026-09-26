@@ -1,3 +1,4 @@
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore } from "@/lib/project/store";
 import type { BuildContext } from "../graph";
 
@@ -5,4 +6,5 @@ import type { BuildContext } from "../graph";
 export const EMPTY_CONTEXT: BuildContext = {
 	state: createProjectStore().getState(),
 	canvas: [],
+	registry: DEFAULT_CONNECTOR_REGISTRY,
 };
