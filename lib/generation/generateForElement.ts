@@ -7,7 +7,7 @@ export async function generateForElement(
 	job: GenerationJob,
 	inputs: GenerationInputs,
 	dependencies: Record<string, AssetResult>,
-	{ state, registry }: BuildContext,
+	{ store, state, registry }: BuildContext,
 	signal?: AbortSignal,
 ): Promise<AssetResult> {
 	const connector = createConnector(job.connectorType, job.model, job.config);
@@ -16,6 +16,7 @@ export async function generateForElement(
 		{
 			dependencies,
 			state,
+			store,
 			signal,
 			speech: (model) => createConnector("tts", model, registry.tts),
 		},

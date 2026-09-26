@@ -15,7 +15,7 @@ import type {
 	ConnectorPlugin,
 	ModelRef,
 } from "@/lib/connectors/types";
-import type { ProjectData } from "@/lib/project/store";
+import type { ProjectData, ProjectStore } from "@/lib/project/store";
 import {
 	serializeInputs,
 	type GenerationInputs,
@@ -64,9 +64,12 @@ export type ElementNode = {
 
 /**
  * What a build reads: project state, the canvas in document order, and the
- * registry that gives each element its connector and plugins.
+ * registry that gives each element its connector and plugins. `state` is a
+ * snapshot of `store`, so a job generates from the state its inputs were
+ * recorded against, however long it waits in the queue.
  */
 export type BuildContext = {
+	store: ProjectStore;
 	state: ProjectData;
 	canvas: CanvasContentElement[];
 	registry: ConnectorRegistry;

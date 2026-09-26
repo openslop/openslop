@@ -25,6 +25,6 @@ export function applyTemplate(
 	for (const [name, imageUrl] of Object.entries(
 		template.characterAvatars ?? {},
 	)) {
-		seedCharacterAvatar(store.getState(), queue, registry, name, imageUrl);
+		seedCharacterAvatar(store, queue, registry, name, imageUrl);
 	}
 }

@@ -53,6 +53,9 @@ vi.mock("@/lib/project/useProject", () => ({
 	useProject: <T>(selector: (state: unknown) => T) =>
 		selector(store.getState()),
 }));
+vi.mock("@/lib/project/ProjectStoreProvider", () => ({
+	useProjectStoreHandle: () => store,
+}));
 
 const { useBuildContext } = await import("../useBuildContext");
 
@@ -99,5 +102,13 @@ describe("useBuildContext", () => {
 		store.getState().updateMetadata({ style: "noir" });
 
 		expect(render(useBuildContext)).not.toBe(before);
+	});
+
+	it("carries the store its state was read from, for a build to write to", () => {
+		children = document();
+		const context = render(useBuildContext)();
+
+		expect(context.store).toBe(store);
+		expect(context.state).toBe(store.getState());
 	});
 });

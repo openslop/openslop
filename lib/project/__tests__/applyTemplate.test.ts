@@ -96,6 +96,7 @@ describe("applyTemplate", () => {
 		apply("pov-life");
 		const name = "Protagonist";
 		const node = buildNode(forCharacterAvatar(name), {
+			store,
 			state: store.getState(),
 			canvas: [],
 			registry: DEFAULT_CONNECTOR_REGISTRY,

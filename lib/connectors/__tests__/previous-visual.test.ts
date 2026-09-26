@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { BuildContext } from "@/lib/generation/graph";
-import { MetadataSchema } from "@/lib/project/types";
+import { createProjectStore } from "@/lib/project/store";
 import {
 	createPreviousVisualPlugin,
 	previousVisualDependency,
@@ -19,9 +19,10 @@ vi.mock("@/lib/connectors/video/captureFrames", () => ({
 	captureFrames,
 }));
 
-const EMPTY_STATE = { metadata: MetadataSchema.parse({}), referenceImages: [] };
+const store = createProjectStore();
 const context = (canvas: CanvasContentElement[]): BuildContext => ({
-	state: EMPTY_STATE,
+	store,
+	state: store.getState(),
 	canvas,
 	registry: DEFAULT_CONNECTOR_REGISTRY,
 });

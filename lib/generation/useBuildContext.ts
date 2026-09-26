@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { useConfig } from "@/lib/config/ConfigProvider";
+import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useProject } from "@/lib/project/useProject";
 import type { BuildContext } from "./graph";
 
@@ -15,9 +16,15 @@ import type { BuildContext } from "./graph";
 export function useBuildContext(): () => BuildContext {
 	const { connectorConfig: registry } = useConfig();
 	const state = useProject((store) => store);
+	const store = useProjectStoreHandle();
 	const editor = useSlateStatic();
 	return useCallback(
-		() => ({ state, canvas: getContentElements(editor.children), registry }),
-		[registry, state, editor],
+		() => ({
+			store,
+			state,
+			canvas: getContentElements(editor.children),
+			registry,
+		}),
+		[registry, store, state, editor],
 	);
 }

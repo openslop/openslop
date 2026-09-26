@@ -41,7 +41,12 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 // context rather than standing up the config and project providers.
 const store = createProjectStore();
 
-const context = () => ({ state: store.getState(), canvas: [], registry });
+const context = () => ({
+	store,
+	state: store.getState(),
+	canvas: [],
+	registry,
+});
 
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => context,

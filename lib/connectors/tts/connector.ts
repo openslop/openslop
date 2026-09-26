@@ -40,17 +40,6 @@ export class HttpTTSConnector
 		return this.gateway.voicePreview(voiceId);
 	}
 
-	async resolveVoiceId(
-		speakerName: string | undefined,
-		context?: GenerationContext,
-	): Promise<string | undefined> {
-		const { voiceId } = await this.prepareParams(
-			{ prompt: "", name: speakerName },
-			this.contextFor(context),
-		);
-		return voiceId;
-	}
-
 	/** Speech carries the word timings the karaoke captions are drawn from. */
 	async resolveBundle(bundle: AssetBundle): Promise<TTSResult> {
 		return {

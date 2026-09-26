@@ -55,6 +55,7 @@ export function useAgentTools(editor: Editor) {
 				},
 				elementStates: () => {
 					const ctx = {
+						store,
 						state: store.getState(),
 						canvas: getContentElements(editor.children),
 						registry: connectorConfig,

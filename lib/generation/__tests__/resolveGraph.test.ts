@@ -31,6 +31,7 @@ const element = (
 });
 
 const context = (canvas: CanvasContentElement[]): BuildContext => ({
+	store,
 	state: store.getState(),
 	canvas,
 	registry: DEFAULT_CONNECTOR_REGISTRY,

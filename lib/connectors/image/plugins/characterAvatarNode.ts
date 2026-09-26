@@ -5,7 +5,7 @@ import type { NodeSpec } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { buildNode } from "@/lib/generation/resolveGraph";
 import { characterAvatarElement } from "@/lib/project/characterAvatar";
-import type { ProjectContext } from "@/lib/project/store";
+import type { ProjectStore } from "@/lib/project/store";
 import { createArtStylePlugin } from "./art-style";
 import { createCharacterAvatarPlugin } from "./character-avatar";
 import { createReferenceImagesPlugin } from "./reference-images";
@@ -33,7 +33,7 @@ export const forCharacterAvatar =
  * describes and does not read as stale the moment it lands.
  */
 export function seedCharacterAvatar(
-	state: ProjectContext,
+	store: ProjectStore,
 	queue: GenerationQueue,
 	registry: ConnectorRegistry,
 	name: string,
@@ -41,7 +41,12 @@ export function seedCharacterAvatar(
 ): void {
 	queue.commitResult(
 		// An avatar reads project state only, never another element on the canvas.
-		buildNode(forCharacterAvatar(name), { state, canvas: [], registry }),
+		buildNode(forCharacterAvatar(name), {
+			store,
+			state: store.getState(),
+			canvas: [],
+			registry,
+		}),
 		{ imageUrl, durationSec: 0 },
 		{ pinned: true },
 	);

@@ -3,8 +3,9 @@ import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
 } from "@/lib/canvas/characterNames";
-import { modelEntry, resolveModel } from "@/lib/connectors/models";
+import { modelEntry } from "@/lib/connectors/models";
 import { requireContext } from "@/lib/connectors/plugins";
+import { resolveVoiceId, speakerFor } from "@/lib/connectors/tts/speakers";
 import type {
 	ConnectorPlugin,
 	PluginContext,
@@ -12,7 +13,8 @@ import type {
 } from "@/lib/connectors/types";
 import type { DependencyDeclaration } from "@/lib/generation/dependency";
 import { forVoice } from "@/lib/generation/sourceNodes";
-import { metadataVoiceFor } from "@/lib/project/types";
+
+const NAME = "character-voices";
 
 export type ParamsWithCharacterVoices = {
 	prompt: string;
@@ -22,19 +24,21 @@ export type ParamsWithCharacterVoices = {
 
 /**
  * A character's voice is whatever their speech would speak with, so a
- * character with none yet gets one found and remembered here, as narration does.
+ * character with none yet gets one found and kept here, as their speech would.
  */
 async function characterVoice(
 	name: string,
 	ctx: PluginContext,
 ): Promise<ReferenceAudio | undefined> {
-	const state = requireContext(ctx, "state", "character-voices");
-	const voice = metadataVoiceFor(state.metadata, name);
-	if (!voice) return undefined;
-	const speech = requireContext(ctx, "speech", "character-voices");
-	const tts = speech(resolveModel("tts", voice));
-	const voiceId = await tts.resolveVoiceId(name, { state, signal: ctx.signal });
-	if (!voiceId) return undefined;
+	const { metadata } = requireContext(ctx, "state", NAME);
+	const speaker = speakerFor(metadata, name);
+	if (!speaker) return undefined;
+	const tts = requireContext(ctx, "speech", NAME)(speaker.model);
+	const voiceId = await resolveVoiceId(
+		speaker,
+		(params) => tts.searchVoices(params),
+		requireContext(ctx, "store", NAME),
+	);
 	const hosted = await tts.voicePreview(voiceId);
 	return hosted && { ...hosted, speaker: name };
 }
@@ -53,11 +57,11 @@ export const characterVoices: DependencyDeclaration = {
  */
 export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharacterVoices> {
 	return {
-		name: "character-voices",
+		name: NAME,
 		dependencies: [characterVoices],
 		async beforeGenerate(params, ctx) {
 			const names = parseCharacterNames(params[CHARACTERS_ATTR]);
-			const model = requireContext(ctx, "model", "character-voices");
+			const model = requireContext(ctx, "model", NAME);
 			if (names.length === 0 || !modelEntry("video", model).referenceAudios)
 				return params;
 			const voices = compact(

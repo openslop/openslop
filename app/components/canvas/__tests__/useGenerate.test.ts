@@ -45,6 +45,7 @@ let canvas: CanvasContentElement[] = [];
 // Like the real hook, the context keeps its identity while text inside an
 // element changes, and reads the canvas when it is made.
 const context = () => ({
+	store,
 	state: store.getState(),
 	canvas,
 	registry: DEFAULT_CONNECTOR_REGISTRY,

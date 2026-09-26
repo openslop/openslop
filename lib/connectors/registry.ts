@@ -1,11 +1,9 @@
-import set from "lodash/fp/set";
 import { buildVisualPlugins } from "./plugins/visualChain";
-import { createMetadataVoicePlugin } from "./tts/plugins/metadata-voice";
-import { createVoiceSearchPlugin } from "./tts/plugins/voice-search";
+import { createSpeakerVoicePlugin } from "./tts/plugins/speaker-voice";
 import { createCharacterVoicesPlugin } from "./video/plugins/character-voices";
 import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
 import { createPreviousVisualPlugin } from "./video/plugins/previous-visual";
-import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
+import type { ConnectorConfig, ConnectorType } from "./types";
 
 /**
  * How each connector type is configured. One config per type, not per provider:
@@ -14,10 +12,9 @@ import type { ConnectorConfig, ConnectorPlugin, ConnectorType } from "./types";
  */
 export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
 
-/** Static plugin chains; `ConfigProvider` layers the project-scoped ones on top. */
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	llm: {},
-	tts: { plugins: [createMetadataVoicePlugin(), createVoiceSearchPlugin()] },
+	tts: { plugins: [createSpeakerVoicePlugin()] },
 	image: { plugins: buildVisualPlugins("image") },
 	video: {
 		plugins: [
@@ -32,14 +29,3 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	sfx: {},
 	music: {},
 };
-
-export function withRegistry(registry: ConnectorRegistry) {
-	const apply = (cfg: ConnectorRegistry) => ({
-		appendPlugins: (type: ConnectorType, ...plugins: ConnectorPlugin[]) =>
-			apply(
-				set([type, "plugins"], [...(cfg[type].plugins ?? []), ...plugins], cfg),
-			),
-		build: () => cfg,
-	});
-	return apply(registry);
-}

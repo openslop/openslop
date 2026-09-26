@@ -4,7 +4,7 @@ import type {
 	DependencyDeclaration,
 	DependencyResults,
 } from "@/lib/generation/dependency";
-import type { ProjectData } from "@/lib/project/store";
+import type { ProjectData, ProjectStore } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
@@ -98,6 +98,8 @@ export interface PluginContext {
 	dependencies?: DependencyResults;
 	/** The project state the node's inputs were resolved against. */
 	state?: ProjectData;
+	/** Only written to: plugins read `state`, the snapshot their inputs were recorded against. */
+	store?: ProjectStore;
 	/** The pair the connector runs on. */
 	model?: ModelRef;
 	/** Aborts when the caller cancels the generation. */
@@ -107,7 +109,7 @@ export interface PluginContext {
 /** The parts of a plugin context the caller supplies per generation. */
 export type GenerationContext = Pick<
 	PluginContext,
-	"dependencies" | "state" | "signal" | "speech"
+	"dependencies" | "state" | "store" | "signal" | "speech"
 >;
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
@@ -262,14 +264,6 @@ export interface TTSConnector extends Connector {
 	generate(params: TTSGenerateParams): Promise<TTSResult>;
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 	voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined>;
-	/**
-	 * The voice id a speaker speaks with on this model: the one picked for
-	 * them, else one found and remembered now, as generating their speech would.
-	 */
-	resolveVoiceId(
-		speakerName: string | undefined,
-		context?: GenerationContext,
-	): Promise<string | undefined>;
 }
 
 /** Audio a video's speech should sound like, and whose voice it is. */

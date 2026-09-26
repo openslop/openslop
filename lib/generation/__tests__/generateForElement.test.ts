@@ -41,10 +41,10 @@ const inputs = (
 	attributes: Record<string, string> = {},
 ): GenerationInputs => ({ prompt, attributes, dependencies: {} });
 
-/** What every job runs with: the queue's results, the build's state, and speech to borrow voices from. */
 const generationContext = (dependencies: Record<string, AssetResult> = {}) => ({
 	dependencies,
 	state: EMPTY_CONTEXT.state,
+	store: EMPTY_CONTEXT.store,
 	speech: expect.any(Function),
 });
 

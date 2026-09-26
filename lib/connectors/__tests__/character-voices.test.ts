@@ -2,9 +2,6 @@ import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { HttpTTSConnector } from "@/lib/connectors/tts/connector";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
-import { createMetadataVoicePlugin } from "@/lib/connectors/tts/plugins/metadata-voice";
-import { createVoiceHydratePlugin } from "@/lib/connectors/tts/plugins/voice-hydrate";
-import { createVoiceSearchPlugin } from "@/lib/connectors/tts/plugins/voice-search";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectData } from "@/lib/project/store";
 import { MetadataSchema } from "@/lib/project/types";
@@ -15,11 +12,12 @@ import {
 } from "../video/plugins/character-voices";
 import type {
 	ConnectorPlugin,
-	GenerationContext,
 	HostedVoicePreview,
 	ModelRef,
 	PluginContext,
 	TTSConnector,
+	VoiceInfo,
+	VoiceSearchParams,
 } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
 
@@ -44,13 +42,7 @@ const stateWith = (
 
 const PICKED = { ...CARTESIA, voiceId: "v-sol" };
 
-/** What each character's speech answers when asked for their voice. */
-const SPOKEN_WITH: Record<string, string> = {
-	Sol: "v-sol",
-	Mira: "v-mira",
-	Unpicked: "v-found",
-	Mute: "v-mute",
-};
+const FOUND: VoiceInfo = { id: "v-found", name: "Found", description: "" };
 
 const hosted = (voiceId: string): HostedVoicePreview => ({
 	url: `https://audio/${voiceId}.mp3`,
@@ -60,12 +52,8 @@ const hosted = (voiceId: string): HostedVoicePreview => ({
 describe("character-voices plugin", () => {
 	let plugin: ConnectorPlugin<ParamsWithCharacterVoices>;
 	let speech: Mock<(model: ModelRef) => TTSConnector>;
-	let resolveVoiceId: Mock<
-		(
-			model: ModelRef,
-			speakerName: string | undefined,
-			context?: GenerationContext,
-		) => Promise<string | undefined>
+	let searchVoices: Mock<
+		(model: ModelRef, params: VoiceSearchParams) => Promise<VoiceInfo[]>
 	>;
 	let voicePreview: Mock<
 		(
@@ -82,6 +70,7 @@ describe("character-voices plugin", () => {
 		if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
 		return plugin.beforeGenerate(params, {
 			state,
+			store: createProjectStore(state),
 			model: SEEDANCE,
 			speech,
 			...ctx,
@@ -90,13 +79,12 @@ describe("character-voices plugin", () => {
 
 	beforeEach(() => {
 		plugin = createCharacterVoicesPlugin();
-		resolveVoiceId = vi.fn(async (_model, name) => name && SPOKEN_WITH[name]);
+		searchVoices = vi.fn(async () => [FOUND]);
 		voicePreview = vi.fn(async (_model, voiceId) => hosted(voiceId));
 		speech = vi.fn(
 			(model) =>
 				({
-					resolveVoiceId: (name, context) =>
-						resolveVoiceId(model, name, context),
+					searchVoices: (params) => searchVoices(model, params),
 					voicePreview: (voiceId) => voicePreview(model, voiceId),
 				}) as TTSConnector,
 		);
@@ -109,13 +97,16 @@ describe("character-voices plugin", () => {
 			generationAttributes: { characters: "Sol, Mira" },
 			children: [],
 		};
-		const state = stateWith({ Sol: PICKED, Mira: {} });
+		const store = createProjectStore(stateWith({ Sol: PICKED, Mira: {} }));
 
-		const declared = characterVoices
-			.specs(element)
-			.map(([, spec]) =>
-				spec({ state, canvas: [], registry: DEFAULT_CONNECTOR_REGISTRY }),
-			);
+		const declared = characterVoices.specs(element).map(([, spec]) =>
+			spec({
+				store,
+				state: store.getState(),
+				canvas: [],
+				registry: DEFAULT_CONNECTOR_REGISTRY,
+			}),
+		);
 
 		expect(declared).toMatchObject([
 			{
@@ -131,12 +122,9 @@ describe("character-voices plugin", () => {
 			Sol: PICKED,
 			Mira: { ...HOSTED, resolvedVoiceId: "v-mira" },
 		});
-		const { signal } = new AbortController();
 
 		await expect(
-			before({ prompt: "they talk", characters: "Sol, Mira" }, state, {
-				signal,
-			}),
+			before({ prompt: "they talk", characters: "Sol, Mira" }, state),
 		).resolves.toEqual({
 			prompt: "they talk",
 			characters: "Sol, Mira",
@@ -145,67 +133,82 @@ describe("character-voices plugin", () => {
 				{ ...hosted("v-mira"), speaker: "Mira" },
 			],
 		});
-		expect(resolveVoiceId).toHaveBeenCalledWith(CARTESIA, "Sol", {
-			state,
-			signal,
-		});
-		expect(resolveVoiceId).toHaveBeenCalledWith(HOSTED, "Mira", {
-			state,
-			signal,
-		});
+		expect(searchVoices).not.toHaveBeenCalled();
 		expect(voicePreview).toHaveBeenCalledWith(CARTESIA, "v-sol");
 		expect(voicePreview).toHaveBeenCalledWith(HOSTED, "v-mira");
 	});
 
-	// Speech finds and remembers a voice for a speaker with none; a video asks the same way.
-	it("lends a character with no voice yet the one their speech settles on", async () => {
-		const state = stateWith({ Unpicked: { ...CARTESIA }, Fresh: {} });
-		resolveVoiceId.mockResolvedValue("v-found");
+	it("finds a character with no voice yet one on their own pair, and remembers it", async () => {
+		const store = createProjectStore(
+			stateWith({ Unpicked: { ...CARTESIA, gender: "feminine" }, Fresh: {} }),
+		);
 
 		await expect(
-			before({ prompt: "they talk", characters: "Unpicked, Fresh" }, state),
+			before(
+				{ prompt: "they talk", characters: "Unpicked, Fresh" },
+				store.getState(),
+				{ store },
+			),
 		).resolves.toMatchObject({
 			referenceAudios: [
 				{ ...hosted("v-found"), speaker: "Unpicked" },
 				{ ...hosted("v-found"), speaker: "Fresh" },
 			],
 		});
-		expect(speech).toHaveBeenCalledWith(CARTESIA);
-		expect(speech).toHaveBeenCalledWith(DEFAULT_TTS_MODEL);
+		expect(searchVoices).toHaveBeenCalledWith(CARTESIA, {
+			gender: "feminine",
+			language: "en",
+		});
+		expect(searchVoices).toHaveBeenCalledWith(DEFAULT_TTS_MODEL, {
+			language: "en",
+		});
+		const { characters } = store.getState().metadata;
+		expect(characters["Unpicked"]).toMatchObject({
+			...CARTESIA,
+			resolvedVoiceId: "v-found",
+		});
+		expect(characters["Fresh"]).toMatchObject({
+			...DEFAULT_TTS_MODEL,
+			resolvedVoiceId: "v-found",
+		});
 	});
 
-	it("passes over a character the project does not know, one whose speech has no voice, or one the vendor cannot lend", async () => {
+	it("fails the video when no voice sounds like a character, as their speech would", async () => {
+		searchVoices.mockResolvedValue([]);
+
+		await expect(
+			before(
+				{ prompt: "they talk", characters: "Silent" },
+				stateWith({ Silent: { ...CARTESIA } }),
+			),
+		).rejects.toThrow("No matching voice found");
+	});
+
+	it("passes over a character the project does not know, or one the vendor cannot lend", async () => {
 		voicePreview.mockImplementation(async (_model, voiceId) =>
 			voiceId === "v-mute" ? undefined : hosted(voiceId),
 		);
 		const state = stateWith({
 			Sol: PICKED,
-			Silent: { ...CARTESIA },
 			Mute: { ...CARTESIA, voiceId: "v-mute" },
 		});
 
 		await expect(
-			before(
-				{ prompt: "they talk", characters: "Sol, Silent, Mute, Unknown" },
-				state,
-			),
+			before({ prompt: "they talk", characters: "Sol, Mute, Unknown" }, state),
 		).resolves.toMatchObject({
 			referenceAudios: [{ ...hosted("v-sol"), speaker: "Sol" }],
 		});
-		expect(speech).toHaveBeenCalledTimes(3);
+		expect(speech).toHaveBeenCalledTimes(2);
 		expect(voicePreview).toHaveBeenCalledTimes(2);
 	});
 
-	it("leaves a video with no characters, or none voiced, alone", async () => {
+	it("leaves a video with no characters alone", async () => {
 		const state = stateWith({ Silent: {} });
 
 		await expect(before({ prompt: "a sunset" }, state)).resolves.toEqual({
 			prompt: "a sunset",
 		});
-		await expect(
-			before({ prompt: "a sunset", characters: "Silent" }, state),
-		).resolves.toEqual({ prompt: "a sunset", characters: "Silent" });
-		expect(voicePreview).not.toHaveBeenCalled();
+		expect(speech).not.toHaveBeenCalled();
 	});
 
 	it("asks for no voices on a model that does not listen", async () => {
@@ -230,7 +233,7 @@ describe("character-voices plugin", () => {
 		).rejects.toThrow(/requires speech/);
 	});
 
-	describe("through speech's own plugins", () => {
+	describe("through speech's own vendor", () => {
 		beforeEach(() => {
 			vi.restoreAllMocks();
 		});
@@ -240,11 +243,6 @@ describe("character-voices plugin", () => {
 			store.getState().updateMetadata({
 				characters: { Red: { appearance: "A girl", gender: "feminine" } },
 			});
-			const plugins = [
-				createMetadataVoicePlugin(),
-				createVoiceSearchPlugin(),
-				createVoiceHydratePlugin(store),
-			];
 			const fetchSpy = mockGatewaySequence([
 				{
 					payload: { voices: [{ id: "v-red", name: "Red", description: "" }] },
@@ -255,7 +253,10 @@ describe("character-voices plugin", () => {
 			const params = await before(
 				{ prompt: "she talks", characters: "Red" },
 				store.getState(),
-				{ speech: (model) => new HttpTTSConnector({ model, plugins }) },
+				{
+					speech: (model) => new HttpTTSConnector({ model }),
+					store,
+				},
 			);
 
 			expect(params.referenceAudios).toEqual([
