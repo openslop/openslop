@@ -80,7 +80,7 @@ describe("BaseTTSConnector", () => {
 			{ id: "voice-42", name: "Test Voice", description: "" },
 		]);
 
-		await expect(connector.voiceFor("Red")).resolves.toBe("voice-42");
+		await expect(connector.resolveVoiceId("Red")).resolves.toBe("voice-42");
 		expect(fetchSpy).not.toHaveBeenCalled();
 	});
 

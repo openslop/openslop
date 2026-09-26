@@ -60,10 +60,10 @@ const hosted = (voiceId: string): HostedVoicePreview => ({
 describe("character-voices plugin", () => {
 	let plugin: ConnectorPlugin<ParamsWithCharacterVoices>;
 	let speech: Mock<(model: ModelRef) => TTSConnector>;
-	let voiceFor: Mock<
+	let resolveVoiceId: Mock<
 		(
 			model: ModelRef,
-			name: string | undefined,
+			speakerName: string | undefined,
 			context?: GenerationContext,
 		) => Promise<string | undefined>
 	>;
@@ -90,12 +90,13 @@ describe("character-voices plugin", () => {
 
 	beforeEach(() => {
 		plugin = createCharacterVoicesPlugin();
-		voiceFor = vi.fn(async (_model, name) => name && SPOKEN_WITH[name]);
+		resolveVoiceId = vi.fn(async (_model, name) => name && SPOKEN_WITH[name]);
 		voicePreview = vi.fn(async (_model, voiceId) => hosted(voiceId));
 		speech = vi.fn(
 			(model) =>
 				({
-					voiceFor: (name, context) => voiceFor(model, name, context),
+					resolveVoiceId: (name, context) =>
+						resolveVoiceId(model, name, context),
 					voicePreview: (voiceId) => voicePreview(model, voiceId),
 				}) as TTSConnector,
 		);
@@ -144,8 +145,14 @@ describe("character-voices plugin", () => {
 				{ ...hosted("v-mira"), speaker: "Mira" },
 			],
 		});
-		expect(voiceFor).toHaveBeenCalledWith(CARTESIA, "Sol", { state, signal });
-		expect(voiceFor).toHaveBeenCalledWith(HOSTED, "Mira", { state, signal });
+		expect(resolveVoiceId).toHaveBeenCalledWith(CARTESIA, "Sol", {
+			state,
+			signal,
+		});
+		expect(resolveVoiceId).toHaveBeenCalledWith(HOSTED, "Mira", {
+			state,
+			signal,
+		});
 		expect(voicePreview).toHaveBeenCalledWith(CARTESIA, "v-sol");
 		expect(voicePreview).toHaveBeenCalledWith(HOSTED, "v-mira");
 	});
@@ -153,7 +160,7 @@ describe("character-voices plugin", () => {
 	// Speech finds and remembers a voice for a speaker with none; a video asks the same way.
 	it("lends a character with no voice yet the one their speech settles on", async () => {
 		const state = stateWith({ Unpicked: { ...CARTESIA }, Fresh: {} });
-		voiceFor.mockResolvedValue("v-found");
+		resolveVoiceId.mockResolvedValue("v-found");
 
 		await expect(
 			before({ prompt: "they talk", characters: "Unpicked, Fresh" }, state),

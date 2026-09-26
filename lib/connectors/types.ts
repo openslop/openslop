@@ -263,11 +263,11 @@ export interface TTSConnector extends Connector {
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
 	voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined>;
 	/**
-	 * The id a speaker speaks with here, found and remembered now if none was
-	 * picked, as generating their speech would settle it.
+	 * The voice id a speaker speaks with on this model: the one picked for
+	 * them, else one found and remembered now, as generating their speech would.
 	 */
-	voiceFor(
-		name: string | undefined,
+	resolveVoiceId(
+		speakerName: string | undefined,
 		context?: GenerationContext,
 	): Promise<string | undefined>;
 }

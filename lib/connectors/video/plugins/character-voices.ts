@@ -33,7 +33,7 @@ async function characterVoice(
 	if (!voice) return undefined;
 	const speech = requireContext(ctx, "speech", "character-voices");
 	const tts = speech(resolveModel("tts", voice));
-	const voiceId = await tts.voiceFor(name, { state, signal: ctx.signal });
+	const voiceId = await tts.resolveVoiceId(name, { state, signal: ctx.signal });
 	if (!voiceId) return undefined;
 	const hosted = await tts.voicePreview(voiceId);
 	return hosted && { ...hosted, speaker: name };

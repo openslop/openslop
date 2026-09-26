@@ -40,12 +40,12 @@ export class HttpTTSConnector
 		return this.gateway.voicePreview(voiceId);
 	}
 
-	async voiceFor(
-		name: string | undefined,
+	async resolveVoiceId(
+		speakerName: string | undefined,
 		context?: GenerationContext,
 	): Promise<string | undefined> {
 		const { voiceId } = await this.prepareParams(
-			{ prompt: "", name },
+			{ prompt: "", name: speakerName },
 			this.contextFor(context),
 		);
 		return voiceId;
