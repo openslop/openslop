@@ -13,9 +13,7 @@ export const stripIds = (node: Node): Node => {
 
 export const assignIdRecursively = (node: Node) => {
 	if (Element.isElement(node)) {
-		if (!node.id) {
-			node.id = makeNodeId();
-		}
+		node.id ||= makeNodeId();
 		node.children.forEach(assignIdRecursively);
 	}
 };

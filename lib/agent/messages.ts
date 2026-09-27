@@ -47,14 +47,13 @@ const isPruned = (part: SloppyMessage["parts"][number]) =>
  * Remove all prior reasoning blocks and snapshots tool results
  */
 export function pruneTranscript(messages: SloppyMessage[]): SloppyMessage[] {
-	return messages.map((message, idx) => {
-		if (idx !== messages.length - 1 && message.role === "assistant") {
-			return {
-				...message,
-				parts: message.parts.filter((part) => !isPruned(part)),
-			};
-		}
-		return message;
+	return messages.map((message, index) => {
+		if (index === messages.length - 1 || message.role !== "assistant")
+			return message;
+		return {
+			...message,
+			parts: message.parts.filter((part) => !isPruned(part)),
+		};
 	});
 }
 

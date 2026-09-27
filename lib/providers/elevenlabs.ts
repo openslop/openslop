@@ -55,12 +55,12 @@ export abstract class BaseElevenLabsAudio<
 		params: TParams,
 	): Promise<ReadableStream<Uint8Array>>;
 
-	protected toFiles(r: AudioResult): BundleFile[] {
+	protected toFiles(result: AudioResult): BundleFile[] {
 		return [
 			{
 				key: "audio",
 				filename: "output.mp3",
-				data: r.data,
+				data: result.data,
 				contentType: "audio/mpeg",
 			},
 		];

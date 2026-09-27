@@ -23,7 +23,7 @@ const SCENE_ID_SEPARATOR = ",";
 const selectSceneIdKey = (editor: Editor) =>
 	editor.children
 		.filter(isSceneElement)
-		.map((s) => s.id)
+		.map((scene) => scene.id)
 		.join(SCENE_ID_SEPARATOR);
 
 export function useDragAndDrop(editor: Editor) {
@@ -64,7 +64,7 @@ export function useDragAndDrop(editor: Editor) {
 				? overNode.children.length
 				: overPath[overPath.length - 1];
 			dragTransferStore.set({
-				itemId: active.id as string,
+				itemId: String(active.id),
 				fromSceneId,
 				toSceneId,
 				atIndex,

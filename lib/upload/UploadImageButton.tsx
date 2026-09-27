@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ImagePlus, Loader2 } from "@/components/ui/icon";
-import { useImageUpload } from "@/lib/upload/useImageUpload";
+import { useImageUpload } from "./useImageUpload";
 
 export function UploadImageButton({
 	onUpload,

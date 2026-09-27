@@ -105,7 +105,6 @@ export function ElementContainer({
 				className="flex items-stretch mb-1.5 animate-fadeInUp"
 				{...nodeAttributes}
 			>
-				{/* Left: element card */}
 				<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
 					<div className="relative z-10 min-w-0">
 						<div
@@ -174,7 +173,6 @@ export function ElementContainer({
 					</div>
 				</div>
 
-				{/* Center divider */}
 				<div
 					className="flex shrink-0 items-stretch px-3 select-none sm:px-4"
 					contentEditable={false}
@@ -183,7 +181,6 @@ export function ElementContainer({
 					<div className="w-px self-stretch bg-border" />
 				</div>
 
-				{/* Right: preview */}
 				<div
 					className="flex-1 min-w-0 flex items-center select-none"
 					contentEditable={false}

@@ -38,9 +38,8 @@ export function dropIndexIn(
 	transfer: DragTransfer,
 	sceneId: string,
 ): number | null {
-	if (!transfer) return null;
-	if (transfer.toSceneId !== sceneId) return null;
-	if (transfer.fromSceneId === sceneId) return null;
+	if (transfer?.toSceneId !== sceneId || transfer.fromSceneId === sceneId)
+		return null;
 	return transfer.atIndex;
 }
 
