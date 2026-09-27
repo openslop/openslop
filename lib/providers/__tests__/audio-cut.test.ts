@@ -37,7 +37,10 @@ describe("trimAudio", () => {
 describe("cutVoice", () => {
 	const { load, upload } = spyAssetBundle();
 	const fetchMock = vi.fn();
-	const VOICE = { url: "https://assets.test/preview/sol.wav", durationSec: 10 };
+	const VOICE = {
+		url: "https://assets.test/assets/preview/voice/sol/audio",
+		durationSec: 10,
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -103,6 +106,16 @@ describe("cutVoice", () => {
 			expect(fetchMock).not.toHaveBeenCalled();
 		},
 	);
+
+	it.each([
+		"http://169.254.169.254/latest/meta-data",
+		"https://assets.test.evil.com/assets/preview/voice/sol/audio",
+	])("refuses to fetch a voice outside our store: %s", async (url) => {
+		await expect(cutVoice({ ...VOICE, url }, 4)).rejects.toThrow(
+			"Voice preview is not in our store",
+		);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
 
 	it("fails loudly when the preview cannot be fetched", async () => {
 		fetchMock.mockResolvedValue(new Response(null, { status: 404 }));

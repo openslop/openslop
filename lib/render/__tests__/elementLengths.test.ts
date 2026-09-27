@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { CanvasElementType } from "@/lib/canvas/types";
-import { measureElementLengths } from "../elementLengths";
+import { measureElementLengths, measureRuntime } from "../elementLengths";
 import { buildRenderLayout } from "../scene-builder";
 import type { ResolvedElement } from "../types";
 import { ELEMENT_TYPES } from "@/lib/canvas/types";
@@ -129,6 +129,39 @@ describe("measureElementLengths", () => {
 
 	it("measures an empty canvas as nothing", () => {
 		expect(measureElementLengths([])).toEqual([]);
+	});
+});
+
+describe("measureRuntime", () => {
+	it("adds up every visual's time on screen, not just the speech over it", () => {
+		const runtime = measureRuntime([
+			scene(
+				element("video", "A fox runs.", {
+					duration: "10",
+					trimToDialogue: "false",
+				}),
+				element("video", "It stops.", {
+					duration: "8",
+					trimToDialogue: "false",
+				}),
+			),
+		]);
+
+		expect(runtime).toBe(18);
+	});
+
+	it("counts dialogue before the first visual, which plays over a blank scene", () => {
+		const runtime = measureRuntime([
+			scene(element("narration", words(180)), element("image", "A forest.")),
+		]);
+
+		expect(runtime).toBe(secondsForWords(180) + 1);
+	});
+
+	it("measures a narration-only script by its speech", () => {
+		expect(measureRuntime([scene(element("narration", words(90)))])).toBe(
+			secondsForWords(90),
+		);
 	});
 });
 

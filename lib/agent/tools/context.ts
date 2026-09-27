@@ -22,6 +22,7 @@ export type AgentToolContext = {
 	readScript: () => string;
 	countSpokenWords: () => number;
 	measureElementLengths: () => ElementLength[];
+	measureRuntime: () => number;
 	referenceImages: () => string[];
 	avatarUrl: (name: string) => string | undefined;
 	elementImage: (id: string) => ElementImage | undefined;

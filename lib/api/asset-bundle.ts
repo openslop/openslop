@@ -91,6 +91,11 @@ export class AssetBundle {
 		return `${AssetBundle.baseUrl}/assets/${type}/${provider}/${id}`;
 	}
 
+	/** Whether `url` points into our own store, so it is safe to fetch server side. */
+	static holds(url: string): boolean {
+		return url.startsWith(`${AssetBundle.baseUrl}/assets/`);
+	}
+
 	static fromResponse(response: BundleResponse): AssetBundle {
 		const url = AssetBundle.buildUrl(
 			response.type,

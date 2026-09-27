@@ -6,7 +6,10 @@ import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
-import { measureElementLengths } from "@/lib/render/elementLengths";
+import {
+	measureElementLengths,
+	measureRuntime,
+} from "@/lib/render/elementLengths";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
@@ -38,6 +41,7 @@ export function useAgentTools(editor: Editor) {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				measureElementLengths: () => measureElementLengths(editor.children),
+				measureRuntime: () => measureRuntime(editor.children),
 				referenceImages: () => store.getState().referenceImages,
 				avatarUrl: (name) => characterAvatarUrl(queue, name),
 				elementImage: (id) => {
