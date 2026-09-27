@@ -8,7 +8,7 @@ import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 const SCHEMA_DEFAULTS: Record<string, Record<string, string>> = {
 	sfx: { loops: "1" },
 	tts: { emotion: "neutral" },
-	animated_image: { duration: "5" },
+	video: { duration: "5" },
 };
 
 vi.mock("@/lib/connectors/factory", () => ({
@@ -42,7 +42,10 @@ vi.mock("@/lib/connectors/factory", () => ({
 
 import { applyRefineOp, applyRefineOps } from "../applyOps";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 
 const ZWSP = "\u200B";
 
@@ -367,7 +370,7 @@ describe("applyRefineOp — set", () => {
 		const editor = makeEditor([
 			scene([
 				content("image", "n1", "a red riding hood", {
-					characters: "Red,Granny",
+					referenceImagesOverride: "https://img/red.png",
 					url: "https://example.com/old.png",
 					motion: "none",
 				}),
@@ -379,19 +382,19 @@ describe("applyRefineOp — set", () => {
 			{
 				op: "set",
 				id: "n1",
-				type: "animated_image",
-				attrs: { videoPrompt: "slow push-in", motion: "kenBurnsIn" },
+				type: "video",
+				attrs: { startFrame: "n0", motion: "kenBurnsIn" },
 			},
 			{},
 		);
 
 		const el = getNode(editor, "n1");
-		expect(el.type).toBe("animated_image");
+		expect(el.type).toBe("video");
 		expect(flatAttributes(el)).toEqual({
-			...DEFAULT_MODELS.animated_image,
-			characters: "Red,Granny",
+			...DEFAULT_MODELS.video,
+			referenceImagesOverride: "https://img/red.png",
 			duration: "5",
-			videoPrompt: "slow push-in",
+			startFrame: "n0",
 			motion: "kenBurnsIn",
 		});
 	});

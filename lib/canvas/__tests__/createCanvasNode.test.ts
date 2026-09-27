@@ -15,7 +15,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 
 import { createCanvasNode } from "../createCanvasNode";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 const ZWSP = "​";
 

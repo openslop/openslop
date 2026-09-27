@@ -10,7 +10,6 @@ export type ConcurrencyLimits = Record<AssetConnectorType, number>;
 const DEFAULT_CONCURRENCY_LIMITS: ConcurrencyLimits = {
 	video: 3,
 	image: 3,
-	animated_image: 3,
 	tts: 1,
 	music: 1,
 	sfx: 1,

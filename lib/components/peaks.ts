@@ -1,3 +1,5 @@
+import { memoAsync } from "@/lib/memoAsync";
+
 const PEAK_COUNT = 200;
 
 let sharedAudioContext: AudioContext | null = null;
@@ -24,22 +26,8 @@ export function extractPeaks(data: Float32Array, count: number): number[] {
 	return max > 0 ? peaks.map((peak) => peak / max) : peaks;
 }
 
-const decoded = new Map<string, Promise<number[]>>();
-
-/**
- * Fetch and decode an audio file into normalized peaks. Asset URLs are
- * immutable, so a source is decoded once; a failure is dropped so it retries.
- */
-export function loadPeaks(src: string): Promise<number[]> {
-	const existing = decoded.get(src);
-	if (existing) return existing;
-	const pending = decodePeaks(src).catch((error) => {
-		decoded.delete(src);
-		throw error;
-	});
-	decoded.set(src, pending);
-	return pending;
-}
+/** Asset URLs are immutable, so a source is decoded once. */
+export const loadPeaks = memoAsync(decodePeaks, (src) => src);
 
 async function decodePeaks(src: string): Promise<number[]> {
 	const response = await fetch(src, { mode: "cors" });

@@ -24,7 +24,7 @@ describe("MODEL_GROUPS", () => {
 	});
 
 	it("finds the group a type belongs to", () => {
-		expect(groupFor("animated_image").key).toBe("videos");
+		expect(groupFor("image").key).toBe("images");
 		expect(groupFor("video").key).toBe("videos");
 		expect(groupFor("llm").key).toBe("text");
 	});

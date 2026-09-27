@@ -2,13 +2,13 @@
 
 import { Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { usePlayerControl } from "@/app/components/video/PlayerControlContext";
+import { usePlayerControl } from "@/app/components/player/PlayerControlContext";
 import {
 	useLayout,
 	useSceneSequence,
-} from "@/app/components/video/VideoLayoutContext";
+} from "@/app/components/player/RenderLayoutContext";
 import type { SceneElement } from "@/lib/canvas/types";
-import { toFrames } from "@/lib/video/frames";
+import { toFrames } from "@/lib/render/frames";
 
 export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
 	const { layout } = useLayout();

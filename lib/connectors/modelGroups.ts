@@ -9,11 +9,7 @@ import {
 } from "@/components/ui/icon";
 import type { ConnectorType } from "./types";
 
-/**
- * What a person picks a model for. Coarser than a connector type on purpose:
- * nobody wants to choose a video model twice because an animated image and a
- * clip are generated differently, so a group sets every type it covers.
- */
+/** What a person picks a model for. */
 export interface ModelGroup {
 	key: string;
 	label: string;
@@ -33,7 +29,7 @@ export const MODEL_GROUPS: ModelGroup[] = [
 		key: "videos",
 		label: "Videos",
 		Icon: Video,
-		types: ["animated_image", "video"],
+		types: ["video"],
 	},
 	{
 		key: "voice",

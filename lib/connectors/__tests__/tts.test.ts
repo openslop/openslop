@@ -1,11 +1,17 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpTTSConnector } from "../tts/connector";
-import { createVoiceSearchPlugin } from "@/lib/connectors/tts/plugins/voice-search";
+import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
+import { createProjectStore } from "@/lib/project/store";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
+
+function projectContext() {
+	const store = createProjectStore();
+	return { store, state: store.getState() };
+}
 
 const config = {
 	model: { provider: "openslop", model: "Slop TTS v1" },
@@ -42,21 +48,20 @@ describe("BaseTTSConnector", () => {
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
-	it("resolves voice via voice-search plugin when no voiceId", async () => {
+	it("resolves voice via speaker-voice plugin when no voiceId", async () => {
 		mockSuccess();
 		const connector = new HttpTTSConnector({
 			...config,
-			plugins: [createVoiceSearchPlugin()],
+			plugins: [createSpeakerVoicePlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([
 			{ id: "voice-42", name: "Test Voice", description: "" },
 		]);
 
-		const result = await connector.generate({
-			prompt: "hello",
-			gender: "masculine",
-			accent: "american",
-		});
+		const result = await connector.generate(
+			{ prompt: "hello", gender: "masculine", accent: "american" },
+			projectContext(),
+		);
 
 		expect(connector.searchVoices).toHaveBeenCalledWith({
 			query: undefined,
@@ -70,15 +75,18 @@ describe("BaseTTSConnector", () => {
 		expect(result.audioUrl).toBe(AUDIO_URL);
 	});
 
-	it("throws when no matching voice found via voice-search plugin", async () => {
+	it("throws when no matching voice found via speaker-voice plugin", async () => {
 		const connector = new HttpTTSConnector({
 			...config,
-			plugins: [createVoiceSearchPlugin()],
+			plugins: [createSpeakerVoicePlugin()],
 		});
 		vi.spyOn(connector, "searchVoices").mockResolvedValue([]);
 
 		await expect(
-			connector.generate({ prompt: "hello", gender: "masculine" }),
+			connector.generate(
+				{ prompt: "hello", gender: "masculine" },
+				projectContext(),
+			),
 		).rejects.toThrow("No matching voice found");
 	});
 

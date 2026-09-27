@@ -1,13 +1,13 @@
 import type { CSSProperties } from "react";
-import type { CaptionWord } from "@/lib/video/captionLayout";
-import { captionFontStack } from "@/lib/video/captionFonts";
+import type { CaptionWord } from "@/lib/captions/captionLayout";
+import { captionFontStack } from "@/lib/captions/captionFonts";
 import {
 	type CaptionAlignX,
 	type CaptionAlignY,
 	type CaptionCasing,
 	type CaptionStyle,
 	type CaptionTextStyle,
-} from "@/lib/video/captionStyle";
+} from "@/lib/captions/captionStyle";
 
 const ALIGN_Y: Record<CaptionAlignY, CSSProperties["alignItems"]> = {
 	top: "flex-start",

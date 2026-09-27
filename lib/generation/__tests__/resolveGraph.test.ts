@@ -1,41 +1,23 @@
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { beforeEach, describe, expect, it } from "vitest";
-import { buildAnimatedImagePlugins } from "@/lib/connectors/animated_image/plugins/animated-image-chain";
-import { buildImagePlugins } from "@/lib/connectors/image/plugins/imageChain";
-import { createDimensionsPlugin } from "@/lib/connectors/plugins/dimensions";
-import { stillElementId } from "@/lib/connectors/animated_image/plugins/still-frame";
-import {
-	DEFAULT_CONNECTOR_REGISTRY,
-	withRegistry,
-	type ConnectorRegistry,
-} from "@/lib/connectors/registry";
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
 	splitAttributes,
-} from "@/lib/video/elementAttributes";
+} from "@/lib/canvas/elementAttributes";
 import {
 	flattenGraph,
 	forElement,
 	isNodeStale,
 	needsGeneration,
+	type BuildContext,
 } from "../graph";
 import { GenerationQueue } from "../queue";
-import { nodeBuilder } from "../resolveGraph";
+import { buildNode } from "../resolveGraph";
 
 let store: ProjectStore;
-
-function buildRegistry(): ConnectorRegistry {
-	const base = withRegistry(DEFAULT_CONNECTOR_REGISTRY)
-		.appendPlugins("image", ...buildImagePlugins())
-		.appendPlugins("video", createDimensionsPlugin("video"))
-		.build();
-	return withRegistry(base)
-		.appendPlugins("animated_image", ...buildAnimatedImagePlugins())
-		.build();
-}
 
 const element = (
 	id: string,
@@ -48,8 +30,17 @@ const element = (
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
-const resolve = (el: CanvasContentElement) =>
-	nodeBuilder(buildRegistry(), store.getState())(forElement(el));
+const context = (canvas: CanvasContentElement[]): BuildContext => ({
+	store,
+	state: store.getState(),
+	canvas,
+	registry: DEFAULT_CONNECTOR_REGISTRY,
+});
+
+const resolveOn = (el: CanvasContentElement, canvas: CanvasContentElement[]) =>
+	buildNode(forElement(el), context(canvas));
+
+const resolve = (el: CanvasContentElement) => resolveOn(el, []);
 
 const idsOf = (el: CanvasContentElement) =>
 	flattenGraph([resolve(el)]).map((node) => node.id);
@@ -62,21 +53,44 @@ beforeEach(() => {
 });
 
 describe("resolveGraph", () => {
-	// The builder is memoized across renders, so its per-graph dedupe cache must
-	// not outlive one call or an edited element keeps resolving to its old node.
-	it("rebuilds a node when its element changed", () => {
-		const buildNode = nodeBuilder(buildRegistry(), store.getState());
-		const withText = (text: string) => ({
-			...element("img", "image"),
-			children: [{ id: "img-t", type: "image" as const, text }],
-		});
+	// A card's spec is made at render, but Slate notifies selectors before the
+	// next render, so the spec can hold the element as it was one edit ago.
+	it("builds from the element on the canvas, not the one the spec captured", () => {
+		const stale = element("vid", "video", { duration: "10" });
+		const canvas = [element("vid", "video", { duration: "11" })];
 
-		expect(buildNode(forElement(withText("first"))).inputs.prompt).toBe(
-			"first",
+		const node = resolveOn(stale, canvas);
+
+		expect(node.inputs.attributes.duration).toBe("11");
+		expect(node.inputs.attributes).toBe(canvas[0].generationAttributes);
+	});
+
+	it("builds the given element when the canvas does not carry it", () => {
+		const offCanvas = element("avatar", "image", { kind: "avatar" });
+
+		expect(resolve(offCanvas).inputs.attributes.kind).toBe("avatar");
+	});
+
+	it("labels a dependency for its dependent without renaming the node itself", () => {
+		const image = element("img", "image");
+		const video = element("vid", "video", { startFrame: "previous" });
+		const canvas = [image, video];
+
+		expect(resolveOn(video, canvas).dependsOn.previousVisual?.label).toBe(
+			"the previous visual",
 		);
-		expect(buildNode(forElement(withText("second"))).inputs.prompt).toBe(
-			"second",
-		);
+		expect(resolveOn(image, canvas).label).toBeUndefined();
+	});
+
+	it("keys each edge by the name its plugin declared", () => {
+		const video = element("vid", "video", { startFrame: "previous" });
+
+		expect(Object.keys(resolveOn(video, [video]).dependsOn)).toEqual([
+			"artStyle",
+			"referenceImages",
+			"aspectRatio",
+			"previousVisual",
+		]);
 	});
 
 	it("depends on the project state an image reads", () => {
@@ -97,10 +111,12 @@ describe("resolveGraph", () => {
 	});
 
 	it("gives a referenced avatar its own art-style and reference-image edges", () => {
-		const avatar = resolve(
-			element("img", "image", { characters: "Alice" }),
-		).dependsOn.find((node) => node.id === characterAvatarElementId("Alice"));
-		expect(avatar?.dependsOn.map((node) => node.id)).toEqual([
+		const avatar = Object.values(
+			resolve(element("img", "image", { characters: "Alice" })).dependsOn,
+		).find((node) => node.id === characterAvatarElementId("Alice"));
+		expect(
+			Object.values(avatar?.dependsOn ?? {}).map((node) => node.id),
+		).toEqual([
 			"project:artStyle",
 			"project:referenceImages",
 			"project:aspectRatio",
@@ -113,42 +129,11 @@ describe("resolveGraph", () => {
 		expect(ids).not.toContain(characterAvatarElementId("Bob"));
 	});
 
-	it("splits an animated image into a still node and the animation", () => {
-		const ids = idsOf(
-			element("anim", "animated_image", { videoPrompt: "slow pan" }),
-		);
-		expect(ids).toContain(stillElementId("anim"));
-		expect(ids.indexOf(stillElementId("anim"))).toBeLessThan(
-			ids.indexOf("anim"),
-		);
-	});
-
-	it("keeps animation-only attributes out of the still's inputs", () => {
-		const anim = resolve(
-			element("anim", "animated_image", {
-				videoPrompt: "slow pan",
-				duration: "8",
-				format: "png",
-			}),
-		);
-		const still = anim.dependsOn.find(
-			(node) => node.id === stillElementId("anim"),
-		);
-		expect(still?.inputs.attributes).toEqual({
-			format: "png",
-			...DEFAULT_MODELS.image,
-		});
-		expect(anim.inputs.attributes).toMatchObject({
-			videoPrompt: "slow pan",
-			duration: "8",
-		});
-	});
-
 	// Ported from the deleted getGenerationInputs tests: node inputs are exactly
 	// the authored attributes, minus the centralized layout contract.
 	it("keeps generation-affecting attributes as the node's own inputs", () => {
 		const node = resolve(
-			element("clip", "clip", {
+			element("vid-1", "video", {
 				model: "Slop Video v1",
 				duration: "5",
 			}),
@@ -165,7 +150,7 @@ describe("resolveGraph", () => {
 			LAYOUT_ATTRIBUTE_KEYS.map((key) => [key, "1"]),
 		);
 		const node = resolve(
-			element("clip", "clip", { ...layoutOnly, model: "Slop Video v1" }),
+			element("vid-1", "video", { ...layoutOnly, model: "Slop Video v1" }),
 		);
 		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
 			expect(node.inputs.attributes).not.toHaveProperty(key);
@@ -173,30 +158,55 @@ describe("resolveGraph", () => {
 		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
 	});
 
-	it("sizes a clip from the project aspect ratio via its dependency", () => {
-		const ids = idsOf(element("clip", "clip"));
+	it("sizes a video from the project aspect ratio via its dependency", () => {
+		const ids = idsOf(element("vid-1", "video"));
 		expect(ids).toContain("project:aspectRatio");
 	});
 
-	it("marks the animation stale when its still is replaced by an upload", () => {
-		const anim = resolve(
-			element("anim", "animated_image", { videoPrompt: "slow pan" }),
+	it("builds the visual a video opens on ahead of the video", () => {
+		const img = element("img", "image");
+		const video = element("vid-1", "video", { startFrame: "previous" });
+
+		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
+			(node) => node.id,
 		);
-		const still = anim.dependsOn.find(
-			(node) => node.id === stillElementId("anim"),
-		);
-		if (!still) throw new Error("expected a still dependency");
+		expect(ids).toContain("img");
+		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("vid-1"));
+	});
+
+	it("marks a video stale when its start frame is replaced by an upload", () => {
+		const img = element("img", "image");
+		const el = element("vid-1", "video", { startFrame: "previous" });
+		const video = resolveOn(el, [img, el]);
+		const frame = video.dependsOn.previousVisual;
+		if (!frame) throw new Error("expected a previous-visual dependency");
 
 		const queue = new GenerationQueue();
-		const commit = (node: typeof anim, url: string) =>
+		const commit = (node: typeof video, url: string) =>
 			queue.commitResult(node, { imageUrl: url, durationSec: 0 });
 
-		commit(still, "still.png");
-		commit(anim, "anim.png");
-		expect(isNodeStale(anim, queue)).toBe(false);
+		commit(frame, "frame.png");
+		commit(video, "video.mp4");
+		expect(isNodeStale(video, queue)).toBe(false);
 
-		commit(still, "uploaded.png");
-		expect(isNodeStale(anim, queue)).toBe(true);
+		commit(frame, "uploaded.png");
+		expect(isNodeStale(video, queue)).toBe(true);
+	});
+
+	it("marks a video stale when the visual before it changes", () => {
+		const queue = new GenerationQueue();
+		const img = element("img", "image");
+		const other = element("other", "image");
+		const el = element("vid-1", "video", { startFrame: "previous" });
+		const video = resolveOn(el, [img, el]);
+		queue.commitResult(resolveOn(img, [img, el]), {
+			imageUrl: "frame.png",
+			durationSec: 0,
+		});
+		queue.commitResult(video, { videoUrl: "video.mp4", durationSec: 5 });
+		expect(isNodeStale(video, queue)).toBe(false);
+
+		expect(isNodeStale(resolveOn(el, [img, other, el]), queue)).toBe(true);
 	});
 
 	// An upload replaces a generated result with the user's own image. Project

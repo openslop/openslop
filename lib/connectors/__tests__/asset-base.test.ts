@@ -188,7 +188,7 @@ describe("BaseAssetConnector", () => {
 	describe("storage namespace", () => {
 		it("resolves from the namespace the provider wrote, not the connector type", async () => {
 			class ReroutedConnector extends TestAssetConnector {
-				readonly type: ConnectorType = "animated_image";
+				readonly type: ConnectorType = "video";
 			}
 			const connector = new ReroutedConnector(
 				config,
@@ -200,7 +200,7 @@ describe("BaseAssetConnector", () => {
 				}),
 			);
 
-			expect(connector.type).toBe("animated_image");
+			expect(connector.type).toBe("video");
 			expect((await connector.generate({ prompt: "test" })).imageUrl).toBe(
 				"https://blob.example.com/assets/image/mock/abc/output.png",
 			);

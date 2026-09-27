@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { animatedImageAttributesFor } from "@/lib/connectors/animated_image/attributes";
 import { IMAGE_ATTRIBUTES } from "@/lib/connectors/image/attributes";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
+import { videoAttributesFor } from "@/lib/connectors/video/attributes";
 import { createProjectStore } from "@/lib/project/store";
 import { createCanvasNode } from "../createCanvasNode";
 import {
@@ -13,7 +13,7 @@ import {
 	resolveElementConnector,
 } from "../elementConnector";
 import type { CanvasContentElement } from "../types";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 function element(
 	type: CanvasContentElement["type"],
@@ -37,8 +37,8 @@ describe("resolveElementConnector", () => {
 			resolveElementConnector(element("narration"), registry, state).type,
 		).toBe("tts");
 		expect(
-			resolveElementConnector(element("animated_image"), registry, state).type,
-		).toBe("animated_image");
+			resolveElementConnector(element("video"), registry, state).type,
+		).toBe("video");
 	});
 
 	it("falls back to the recommendation when nothing is pinned", () => {
@@ -120,8 +120,8 @@ describe("createCanvasNode", () => {
 describe("elementSchema", () => {
 	it("resolves the connector type's schema from the element's own attributes", () => {
 		expect(elementSchema(element("image")).keys).toEqual(IMAGE_ATTRIBUTES.keys);
-		expect(elementSchema(element("animated_image")).keys).toEqual(
-			animatedImageAttributesFor(DEFAULT_MODELS.animated_image).keys,
+		expect(elementSchema(element("video")).keys).toEqual(
+			videoAttributesFor(DEFAULT_MODELS.video).keys,
 		);
 		expect(elementSchema(element("narration")).keys).toEqual(
 			TTS_ATTRIBUTES.keys,

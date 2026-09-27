@@ -13,12 +13,9 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { truncateMiddle } from "@/lib/format";
-import { useElementHistoryStore } from "@/lib/generation/ElementHistoryProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { restoreElementVersion } from "@/lib/generation/restore";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { relativeTime } from "@/lib/project/relativeTime";
-import { toastError } from "@/lib/toastError";
 import { cn } from "@/lib/utils";
 import {
 	useElementHistory,
@@ -195,12 +192,8 @@ function ElementVersionList({
 }) {
 	const { versions, status, activeIndex } = useElementHistory(elementId);
 	const queue = useGenerationQueue();
-	const history = useElementHistoryStore();
-
 	const restore = (version: ElementVersion) => {
-		restoreElementVersion(queue, history, version).catch((err: unknown) =>
-			toastError(err, "Restoring this version failed"),
-		);
+		queue.restoreResult(version);
 		onRestore(version);
 		onClose();
 	};

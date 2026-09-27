@@ -5,6 +5,7 @@ import type { AttributeSchema } from "../attributes/schema";
 import { TTS_ATTRIBUTES } from "./attributes";
 import type {
 	GenerationContext,
+	HostedVoicePreview,
 	PluginContext,
 	ResolvedConnectorConfig,
 	TextTimestamp,
@@ -33,6 +34,10 @@ export class HttpTTSConnector
 
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
 		return this.gateway.searchVoices(params);
+	}
+
+	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {
+		return this.gateway.voicePreview(voiceId);
 	}
 
 	/** Speech carries the word timings the karaoke captions are drawn from. */

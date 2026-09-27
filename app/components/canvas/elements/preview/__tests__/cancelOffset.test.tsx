@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AnimatedImageMedia } from "../AnimatedImagePreview";
 import { PreviewChrome } from "../overlays";
 import { AudioPlaceholder, MediaResult } from "../results";
 
@@ -48,16 +47,6 @@ describe("cancel button offset", () => {
 		expect(html).toContain("https://cdn.example.com/a.png");
 	});
 
-	it("is pushed below the still/video toggle by AnimatedImageMedia", () => {
-		const html = withTooltip(
-			<AnimatedImageMedia
-				animated={{ ...generating, url: undefined }}
-				still={{ ...generating, url: undefined }}
-			/>,
-		);
-		expect(html).toContain("--cancel-offset:2.5rem");
-	});
-
 	it("is centred in the audio placeholder's shorter track", () => {
 		const html = withTooltip(<AudioPlaceholder {...generating} />);
 		expect(html).toContain("--cancel-offset:calc(50% - 0.75rem)");
@@ -70,23 +59,5 @@ describe("PreviewChrome", () => {
 		const html = withTooltip(<PreviewChrome topRight={<span>badge</span>} />);
 		expect(html).toContain("z-30");
 		expect(html).toContain("badge");
-	});
-});
-
-describe("AnimatedImageMedia", () => {
-	const failed = {
-		status: "idle",
-		seconds: 0,
-		error: "generation failed",
-		url: undefined,
-		onDiscard: () => {},
-	} as const;
-
-	it("keeps the still/video toggle reachable over a failed generation", () => {
-		const html = withTooltip(
-			<AnimatedImageMedia animated={failed} still={failed} />,
-		);
-		expect(html).toContain("z-20");
-		expect(html).toContain("bg-media-toggle-bg");
 	});
 });

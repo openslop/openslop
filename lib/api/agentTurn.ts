@@ -26,13 +26,8 @@ import {
 } from "./conversations";
 import { logger } from "./logger";
 
-/** What one turn may spend before the tools come off and it has to end in a reply. */
-const MAX_TOOL_CALLS = 20;
+const MAX_TOOL_CALLS = 30;
 
-/**
- * What a turn is asked for. The routes differ only in which models they will
- * take, so the field carrying that is theirs to supply.
- */
 export const agentTurnSchema = <TModel extends ModelRef>(
 	model: z.ZodType<TModel>,
 ) =>
@@ -49,7 +44,6 @@ export type AgentTurnRequest = {
 	userId: string;
 	message: SloppyMessage;
 	context: AgentContext;
-	/** The provider's own model id: the route resolves it from the picked name. */
 	model: string;
 	llm: () => Promise<LLMProvider>;
 };

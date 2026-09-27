@@ -5,7 +5,7 @@ import { applyTemplate } from "@/lib/templates/applyTemplate";
 import { getTemplateById } from "@/lib/templates/templates";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
 import { needsGeneration } from "@/lib/generation/graph";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import { characterAvatarElementId } from "../characterAvatar";
 import { createProjectStore, type ProjectStore } from "../store";
 
@@ -95,10 +95,12 @@ describe("applyTemplate", () => {
 	it("seeds a prebuilt avatar that is not stale on arrival", () => {
 		apply("pov-life");
 		const name = "Protagonist";
-		const node = nodeBuilder(
-			DEFAULT_CONNECTOR_REGISTRY,
-			store.getState(),
-		)(forCharacterAvatar(name));
+		const node = buildNode(forCharacterAvatar(name), {
+			store,
+			state: store.getState(),
+			canvas: [],
+			registry: DEFAULT_CONNECTOR_REGISTRY,
+		});
 
 		expect(needsGeneration(node, queue)).toBe(false);
 	});

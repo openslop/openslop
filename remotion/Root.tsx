@@ -2,15 +2,15 @@ import React from "react";
 import { Composition } from "remotion";
 import { ActiveCaptionFont } from "./components/ActiveCaptionFont";
 import { VideoComposition } from "./compositions/VideoComposition";
-import type { VideoLayout } from "@/lib/video/types";
-import { COMPOSITION_ID, DEFAULT_CONFIG } from "@/lib/video/types";
-import { DEFAULT_CAPTION_STYLE } from "@/lib/video/captionStyle";
+import type { RenderLayout } from "@/lib/render/types";
+import { COMPOSITION_ID, DEFAULT_CONFIG } from "@/lib/render/types";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import {
 	DEFAULT_TRANSITION,
-	TRANSITION_DURATION_SEC,
-} from "@/lib/video/transitions";
+	transitionOverlapSec,
+} from "@/lib/render/transitions";
 
-const defaultProps: VideoLayout = {
+const defaultProps: RenderLayout = {
 	series: [],
 	sequences: {},
 	fps: DEFAULT_CONFIG.fps,
@@ -19,7 +19,7 @@ const defaultProps: VideoLayout = {
 	totalDurationSec: 0,
 	totalFrames: 1,
 	transitionType: DEFAULT_TRANSITION,
-	transitionDurationSec: TRANSITION_DURATION_SEC,
+	transitionDurationSec: transitionOverlapSec(DEFAULT_TRANSITION),
 	captionStyle: DEFAULT_CAPTION_STYLE,
 };
 
@@ -27,7 +27,7 @@ const defaultProps: VideoLayout = {
  * Only the renderer registers the font here: the Player imports
  * `VideoComposition` directly and the editor has already registered the face.
  */
-const RenderedVideo: React.FC<VideoLayout> = (props) => (
+const RenderedVideo: React.FC<RenderLayout> = (props) => (
 	<>
 		<ActiveCaptionFont font={props.captionStyle.font} />
 		<VideoComposition {...props} />

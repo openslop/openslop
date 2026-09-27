@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,36 +14,51 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
+import { useTTSConnector } from "@/lib/connectors/tts/useTTSConnector";
 import { useVoiceSearch } from "@/lib/connectors/tts/useVoiceSearch";
 import { FieldLabel } from "./fields";
 
-function PreviewPlayButton({ src }: { src: string }) {
+function PreviewPlayButton({
+	load,
+}: {
+	load: () => Promise<string | undefined>;
+}) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [playing, setPlaying] = useState(false);
+	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		audioRef.current?.pause();
-	}, [src]);
-
-	const toggle = (e: React.MouseEvent) => {
+	const toggle = async (e: React.MouseEvent) => {
 		e.stopPropagation();
 		const audio = audioRef.current;
-		if (!audio) return;
-		if (audio.paused) void audio.play().catch(() => setPlaying(false));
-		else audio.pause();
+		if (!audio || loading) return;
+		if (!audio.paused) {
+			audio.pause();
+			return;
+		}
+		if (!audio.src) {
+			setLoading(true);
+			const src = await load().finally(() => setLoading(false));
+			if (!src) return;
+			audio.src = src;
+		}
+		void audio.play().catch(() => setPlaying(false));
 	};
 
 	return (
 		<>
 			<audio
 				ref={audioRef}
-				src={src}
 				preload="none"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}
 				onEnded={() => setPlaying(false)}
 			/>
-			<TooltipIconButton label={playing ? "Pause" : "Play"} onClick={toggle}>
+			<TooltipIconButton
+				label={playing ? "Pause" : "Play"}
+				onClick={toggle}
+				aria-busy={loading}
+				aria-disabled={loading}
+			>
 				{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
 			</TooltipIconButton>
 		</>
@@ -67,7 +82,8 @@ export function VoicePicker({
 	onSelect: (voice: VoiceInfo) => void;
 	onModelChange: (model: ModelRef) => void;
 }) {
-	const search = useVoiceSearch(filters, model);
+	const connector = useTTSConnector(model);
+	const search = useVoiceSearch(filters, connector);
 
 	return (
 		<div className="flex min-w-0 flex-col gap-1.5">
@@ -134,7 +150,11 @@ export function VoicePicker({
 											{voice.description}
 										</span>
 										{voice.previewUrl && (
-											<PreviewPlayButton src={voice.previewUrl} />
+											<PreviewPlayButton
+												load={async () =>
+													(await connector.voicePreview(voice.id))?.url
+												}
+											/>
 										)}
 									</div>
 								)}
