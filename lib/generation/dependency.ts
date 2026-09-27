@@ -26,8 +26,8 @@ export function dependency(
 ): Dependency {
 	return {
 		specs: (element) => {
-			const named = spec(element);
-			return named ? [[key, named]] : [];
+			const nodeSpec = spec(element);
+			return nodeSpec ? [[key, nodeSpec]] : [];
 		},
 		read: (ctx) => ctx.dependencies?.[key],
 	};

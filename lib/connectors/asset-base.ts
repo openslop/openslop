@@ -35,7 +35,7 @@ export abstract class BaseAssetConnector<
 		const completed = await awaitCompletion(
 			(id) => this.gateway.poll(id, signal),
 			jobId,
-			(p) => isTerminal(p.status),
+			(job) => isTerminal(job.status),
 		);
 		if (completed.status === "failed") {
 			throw new Error(completed.error ?? "Generation failed");
