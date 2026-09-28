@@ -17,7 +17,7 @@ export async function audioOf(
 	};
 }
 
-const TYPE = "preview";
+const BUNDLE_TYPE = "preview";
 
 async function ingest(
 	provider: string,
@@ -27,7 +27,7 @@ async function ingest(
 	const { data, contentType } = await produce();
 	const durationSec = await audioDurationSec(data);
 	return AssetBundle.upload(
-		TYPE,
+		BUNDLE_TYPE,
 		provider,
 		[{ key: "audio", filename: "audio", data, contentType }],
 		{ durationSec },
@@ -46,7 +46,7 @@ export async function hostedAudio(
 ): Promise<HostedVoicePreview> {
 	const id = createHash("sha256").update(key).digest("hex");
 	const response =
-		(await AssetBundle.load(TYPE, provider, id)) ??
+		(await AssetBundle.load(BUNDLE_TYPE, provider, id)) ??
 		(await ingest(provider, id, produce));
 	const bundle = AssetBundle.fromResponse(response);
 	return { url: bundle.resolve("audio"), durationSec: bundle.durationSec };

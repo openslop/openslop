@@ -33,9 +33,9 @@ export function useVoiceSearch(
 					limit: VOICE_LIMIT,
 				});
 				if (!cancelled) setSearch({ status: "ready", voices });
-			} catch (err) {
+			} catch (error) {
 				if (!cancelled)
-					setSearch({ status: "failed", message: errorMessage(err) });
+					setSearch({ status: "failed", message: errorMessage(error) });
 			}
 		}, DEBOUNCE_MS);
 

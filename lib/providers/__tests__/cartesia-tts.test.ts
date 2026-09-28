@@ -63,7 +63,7 @@ const pcmChunk = (seconds: number) =>
 
 const streamOf = (responses: object[]) => ({
 	[Symbol.asyncIterator]: async function* () {
-		for (const r of responses) yield r;
+		yield* responses;
 	},
 });
 
@@ -214,24 +214,20 @@ describe("CartesiaTTS", () => {
 
 	describe("generate", () => {
 		it("collects audio chunks and text timestamps", async () => {
-			const audioData = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]);
-			const responses = [
-				{ type: "chunk", audio: audioData },
-				{
-					type: "timestamps",
-					word_timestamps: {
-						words: ["hello", "world"],
-						start: [0.0, 0.5],
-						end: [0.4, 0.9],
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]) },
+					{
+						type: "timestamps",
+						word_timestamps: {
+							words: ["hello", "world"],
+							start: [0.0, 0.5],
+							end: [0.4, 0.9],
+						},
 					},
-				},
-				{ type: "done", done: true },
-			];
-			mockGenerate.mockReturnValue({
-				[Symbol.asyncIterator]: async function* () {
-					for (const r of responses) yield r;
-				},
-			});
+					{ type: "done", done: true },
+				]),
+			);
 
 			const provider = new CartesiaTTS("test-key");
 			const result = await provider.generate({
@@ -559,7 +555,7 @@ describe("CartesiaTTS", () => {
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ description: "warm british" });
 
-			expect(voices.map((v) => v.id)).toEqual(["v2", "v1"]);
+			expect(voices.map((voice) => voice.id)).toEqual(["v2", "v1"]);
 			expect(mockEmbed).toHaveBeenCalledWith(
 				expect.objectContaining({ value: "warm british" }),
 			);
@@ -619,7 +615,7 @@ describe("CartesiaTTS", () => {
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ gender: "masculine" });
 
-			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
+			expect(voices.map((voice) => voice.id)).toEqual(["v1", "v2"]);
 			expect(mockEmbed).not.toHaveBeenCalled();
 			expect(mockEmbedMany).not.toHaveBeenCalled();
 		});
@@ -667,7 +663,7 @@ describe("CartesiaTTS", () => {
 			const provider = new CartesiaTTS("test-key");
 			const voices = await provider.search({ description: "anything" });
 
-			expect(voices.map((v) => v.id)).toEqual(["v1", "v2"]);
+			expect(voices.map((voice) => voice.id)).toEqual(["v1", "v2"]);
 		});
 
 		it("passes language filter to the API", async () => {

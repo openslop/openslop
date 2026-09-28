@@ -45,9 +45,9 @@ describe("HTTP gateways", () => {
 			const submission = { jobId: "job-1", status: "pending" };
 			fetchMock.mockResolvedValue(jsonResponse(submission));
 
-			const gw = new HttpAssetGateway(model, "image");
+			const gateway = new HttpAssetGateway(model, "image");
 
-			expect(await gw.generate({ prompt: "a cat" })).toEqual(submission);
+			expect(await gateway.generate({ prompt: "a cat" })).toEqual(submission);
 			expect(fetchMock).toHaveBeenCalledWith(
 				`${prefix}/image`,
 				expect.objectContaining({ method: "POST" }),
@@ -63,9 +63,9 @@ describe("HTTP gateways", () => {
 			};
 			fetchMock.mockResolvedValue(jsonResponse(poll));
 
-			const gw = new HttpAssetGateway(HOSTED_VIDEO, "video");
+			const gateway = new HttpAssetGateway(HOSTED_VIDEO, "video");
 
-			expect(await gw.poll("job-1")).toEqual(poll);
+			expect(await gateway.poll("job-1")).toEqual(poll);
 			expect(fetchMock).toHaveBeenCalledWith(
 				`/api/v1/video/job-1`,
 				expect.objectContaining({ method: "GET" }),
@@ -97,11 +97,11 @@ describe("HTTP gateways", () => {
 			const voices = [{ id: "v1", name: "Alice", gender: "feminine" }];
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
-			const gw = new HttpTTSGateway(HOSTED_TTS);
+			const gateway = new HttpTTSGateway(HOSTED_TTS);
 
-			expect(await gw.searchVoices({ gender: "feminine", limit: 5 })).toEqual(
-				voices,
-			);
+			expect(
+				await gateway.searchVoices({ gender: "feminine", limit: 5 }),
+			).toEqual(voices);
 			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
 			expect(url.pathname).toBe("/api/v1/tts/voices");
 			expect(url.searchParams.get("gender")).toBe("feminine");
@@ -166,9 +166,9 @@ describe("HTTP gateways", () => {
 			const response = { text: "Hello!", model: "claude-3" };
 			fetchMock.mockResolvedValue(jsonResponse(response));
 
-			const gw = new HttpLLMGateway(HOSTED_LLM);
+			const gateway = new HttpLLMGateway(HOSTED_LLM);
 
-			expect(await gw.generate({ prompt: "hi" })).toEqual(response);
+			expect(await gateway.generate({ prompt: "hi" })).toEqual(response);
 			expect(fetchMock).toHaveBeenCalledWith(
 				`/api/v1/llm`,
 				expect.objectContaining({ method: "POST" }),
@@ -182,9 +182,9 @@ describe("HTTP gateways", () => {
 			];
 			fetchMock.mockResolvedValue(sseResponse(chunks));
 
-			const gw = new HttpLLMGateway(BYOK_LLM);
+			const gateway = new HttpLLMGateway(BYOK_LLM);
 			const results: unknown[] = [];
-			for await (const chunk of gw.stream({ prompt: "hi" })) {
+			for await (const chunk of gateway.stream({ prompt: "hi" })) {
 				results.push(chunk);
 			}
 
@@ -201,9 +201,9 @@ describe("HTTP gateways", () => {
 				new Response(null, { status: 200, headers: {} }),
 			);
 
-			const gw = new HttpLLMGateway(HOSTED_LLM);
+			const gateway = new HttpLLMGateway(HOSTED_LLM);
 			await expect(async () => {
-				for await (const _ of gw.stream({ prompt: "hi" })) {
+				for await (const _ of gateway.stream({ prompt: "hi" })) {
 					// consume
 				}
 			}).rejects.toThrow("No response body");
