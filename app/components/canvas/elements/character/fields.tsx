@@ -1,16 +1,15 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { ChevronDown } from "@/components/ui/icon";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SelectMenuItem } from "@/components/ui/select-menu";
-
-export const FIELD_CLS =
-	"w-full rounded-md border border-border bg-card px-2 py-1.5 font-body text-label text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50";
+import { Input } from "@/components/ui/input";
+import { SelectMenuItem, SelectMenuTrigger } from "@/components/ui/select-menu";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (
@@ -34,12 +33,11 @@ export function TextField({
 	return (
 		<label className="flex flex-col gap-1">
 			<FieldLabel>{label}</FieldLabel>
-			<input
-				type="text"
+			<Input
+				size="sm"
 				value={value ?? ""}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}
-				className={FIELD_CLS}
 			/>
 		</label>
 	);
@@ -51,7 +49,7 @@ export function TextAreaField({
 	onChange,
 	placeholder,
 	rows = 4,
-	className = "",
+	className,
 }: {
 	label: string;
 	value: string;
@@ -61,14 +59,15 @@ export function TextAreaField({
 	className?: string;
 }) {
 	return (
-		<label className={`flex flex-col gap-1 ${className}`}>
+		<label className={cn("flex flex-col gap-1", className)}>
 			<FieldLabel>{label}</FieldLabel>
-			<textarea
+			<Textarea
+				size="sm"
 				rows={rows}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}
-				className={`${FIELD_CLS} grow resize-none`}
+				className="grow resize-none"
 			/>
 		</label>
 	);
@@ -89,14 +88,14 @@ export function EnumField<T extends string>({
 		<div className="flex flex-col gap-1">
 			<FieldLabel>{label}</FieldLabel>
 			<DropdownMenu modal={false}>
-				<DropdownMenuTrigger
-					aria-label={label}
-					className={`${FIELD_CLS} flex items-center justify-between text-left`}
-				>
-					<span className={value ? "text-foreground" : "text-muted-foreground"}>
-						{value ?? "—"}
-					</span>
-					<ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
+				<DropdownMenuTrigger asChild>
+					<SelectMenuTrigger aria-label={label} className="w-full">
+						<span
+							className={value ? "text-foreground" : "text-muted-foreground"}
+						>
+							{value ?? "—"}
+						</span>
+					</SelectMenuTrigger>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					align="start"
