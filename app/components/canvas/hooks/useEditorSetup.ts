@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { withHistory } from "slate-history";
@@ -16,6 +16,7 @@ import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
 function createCanvasEditor(
 	script: string,
 	defaultModels: () => ConnectorModels,
+	sceneId: (index: number) => string,
 ): CanvasEditor {
 	const editor = flow(
 		withHistory,
@@ -27,12 +28,16 @@ function createCanvasEditor(
 		withOSMLClipboard(defaultModels),
 	)(createEditor());
 	// Loading an empty script would seed the layout's narration ahead of the first one streamed in.
-	if (script) applyScriptToEditor(editor, script, defaultModels());
+	if (script) applyScriptToEditor(editor, script, defaultModels(), sceneId);
 	return editor;
 }
 
 export function useEditorSetup(script: string): CanvasEditor {
 	const defaultModels = useResolveDefaultModels();
-	const [editor] = useState(() => createCanvasEditor(script, defaultModels));
+	// Scene ids render as data-scene-id, so the server render and hydration must mint the same ones.
+	const idPrefix = useId();
+	const [editor] = useState(() =>
+		createCanvasEditor(script, defaultModels, (index) => `${idPrefix}${index}`),
+	);
 	return editor;
 }
