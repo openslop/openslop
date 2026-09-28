@@ -7,9 +7,9 @@ import Canvas from "./canvas/Canvas";
 import { CanvasVersionBanner } from "./canvas/CanvasVersionBanner";
 import { EditorSidebar } from "./canvas/panel/EditorSidebar";
 import { ProjectTitle } from "./canvas/ProjectTitle";
-import { TopPlayerPanel, SidePlayerPanel } from "./video/PlayerPanel";
-import { BottomDock } from "./video/BottomDock";
-import { usePlayerPlacement } from "./video/PlayerPlacementContext";
+import { TopPlayerPanel, SidePlayerPanel } from "./player/PlayerPanel";
+import { BottomDock } from "./player/BottomDock";
+import { usePlayerPlacement } from "./player/PlayerPlacementContext";
 
 export default function PostPromptView() {
 	const { placement } = usePlayerPlacement();

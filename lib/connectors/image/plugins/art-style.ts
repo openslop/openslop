@@ -1,11 +1,12 @@
 import { requireContext } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
+import { dependency } from "@/lib/generation/dependency";
 import { forArtStyle } from "@/lib/generation/sourceNodes";
 
 export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {
 	return {
 		name: "art-style",
-		dependencies: () => [forArtStyle],
+		dependencies: [dependency("artStyle", () => forArtStyle)],
 		transformPrompt(prompt, ctx) {
 			const style = requireContext(
 				ctx,

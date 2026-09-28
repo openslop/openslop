@@ -30,7 +30,7 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
 		...attributeKeys
 			.filter((key) => current.attributes[key] !== previous.attributes[key])
 			.map(lowerCase),
-		...node.dependsOn
+		...Object.values(node.dependsOn)
 			.filter(
 				(dep) =>
 					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||

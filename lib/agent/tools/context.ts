@@ -1,7 +1,7 @@
 import type { CanvasElementType } from "@/lib/canvas/types";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementState } from "../elementState";
-import type { ElementLength } from "@/lib/video/elementLengths";
+import type { ElementLength } from "@/lib/render/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type {
 	DeepPartial,
@@ -29,7 +29,7 @@ export type AgentToolContext = {
 	/** One focused LLM call, for tools whose whole job is a generation. */
 	generateText: (
 		prompt: string,
-		options?: { maxTokens?: number },
+		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
 	readMetadata: () => Metadata;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };

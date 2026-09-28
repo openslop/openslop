@@ -10,5 +10,6 @@ export interface TTSProvider extends AssetProvider<
 	VendorParams<TTSGenerateParams>
 > {
 	search(params: VoiceSearchParams): Promise<VoiceInfo[]>;
+	getVoice(voiceId: string): Promise<VoiceInfo | null>;
 	fetchVoicePreview(url: string): Promise<Response>;
 }

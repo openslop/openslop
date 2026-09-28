@@ -42,9 +42,8 @@ export default function Canvas() {
 
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
-		if (isSceneElement(element)) {
+		if (isSceneElement(element))
 			return <SortableScene {...props} element={element} />;
-		}
 		return <SortableContent {...props} element={element} />;
 	}, []);
 

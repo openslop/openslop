@@ -23,8 +23,13 @@ const mockGet = vi.fn();
 const mockEmbed = vi.fn();
 const mockEmbedMany = vi.fn();
 
+const { MockNotFoundError } = vi.hoisted(() => ({
+	MockNotFoundError: class extends Error {},
+}));
+
 vi.mock("@cartesia/cartesia-js", () => ({
 	default: class {
+		static NotFoundError = MockNotFoundError;
 		tts = {
 			websocket: vi.fn().mockResolvedValue({
 				connect: mockConnect,
@@ -354,6 +359,49 @@ describe("CartesiaTTS", () => {
 				provider.generate({ prompt: "test", voiceId: "v1", model: MODEL }),
 			).rejects.toThrow("ws error");
 			expect(mockClose).toHaveBeenCalled();
+		});
+	});
+
+	describe("getVoice", () => {
+		it("looks a voice up by id, with its preview", async () => {
+			mockGet.mockResolvedValue({
+				id: "v-sol",
+				name: "Sol",
+				language: "en",
+				gender: "masculine",
+				description: "Bright",
+				preview_file_url: "https://files.cartesia.ai/sol.mp3",
+			});
+
+			const voice = await new CartesiaTTS("test-key").getVoice("v-sol");
+
+			expect(voice).toEqual({
+				id: "v-sol",
+				name: "Sol",
+				language: "en",
+				gender: "masculine",
+				description: "Bright",
+				previewUrl: "https://files.cartesia.ai/sol.mp3",
+			});
+			expect(mockGet).toHaveBeenCalledWith("/voices/v-sol", {
+				query: { expand: ["preview_file_url"] },
+			});
+		});
+
+		it("finds no voice by an id the vendor has dropped", async () => {
+			mockGet.mockRejectedValue(new MockNotFoundError("gone"));
+
+			await expect(
+				new CartesiaTTS("test-key").getVoice("v-gone"),
+			).resolves.toBeNull();
+		});
+
+		it("surfaces any other failure of a lookup by id", async () => {
+			mockGet.mockRejectedValue(new Error("down"));
+
+			await expect(
+				new CartesiaTTS("test-key").getVoice("v-down"),
+			).rejects.toThrow("down");
 		});
 	});
 

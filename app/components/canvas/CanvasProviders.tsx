@@ -5,11 +5,11 @@ import type { Descendant } from "slate";
 import { Slate } from "slate-react";
 import { composeProviders } from "@/lib/components/composeProviders";
 import { CanvasHistoryProvider } from "@/lib/project/CanvasHistoryProvider";
-import { VideoLayoutProvider } from "../video/VideoLayoutContext";
-import { BottomViewProvider } from "../video/BottomViewContext";
-import { PlayerPlacementProvider } from "../video/PlayerPlacementContext";
-import { PlayerControlProvider } from "../video/PlayerControlContext";
-import { RenderProvider } from "../video/RenderProvider";
+import { RenderLayoutProvider } from "../player/RenderLayoutContext";
+import { BottomViewProvider } from "../player/BottomViewContext";
+import { PlayerPlacementProvider } from "../player/PlayerPlacementContext";
+import { PlayerControlProvider } from "../player/PlayerControlContext";
+import { RenderProvider } from "../player/RenderProvider";
 import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
@@ -22,7 +22,7 @@ const EMPTY_DOCUMENT: Descendant[] = [];
 
 const CanvasScopedProviders = composeProviders(
 	RenderProvider,
-	VideoLayoutProvider,
+	RenderLayoutProvider,
 	PlayerPlacementProvider,
 	BottomViewProvider,
 	PlayerControlProvider,

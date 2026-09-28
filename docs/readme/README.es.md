@@ -71,7 +71,7 @@ Escribe una línea. Elige 16:9 o 9:16, un idioma, un modelo y una duración, o p
 
 ### Sloppy lo escribe contigo
 
-El copiloto vive en el panel izquierdo. Lee el guion, esboza la historia, escribe las escenas y ajusta los clips al diálogo. Todo lo que hace aparece en el lienzo mientras miras.
+El copiloto vive en el panel izquierdo. Lee el guion, esboza la historia, escribe las escenas y ajusta las tarjetas de vídeo al diálogo. Todo lo que hace aparece en el lienzo mientras miras.
 
 [Cómo funciona un turno →](../../ARCHITECTURE.md#sloppy)
 
@@ -88,7 +88,7 @@ El copiloto vive en el panel izquierdo. Lee el guion, esboza la historia, escrib
 
 ### Un storyboard, no una caja de prompt
 
-Cada escena es una pila de tarjetas: narración, personaje, imagen, imagen animada, clip, sonido, música. Edita cualquier prompt, elige un modelo por tarjeta, arrastra para reordenar e inserta donde pases el ratón.
+Cada escena es una pila de tarjetas: narración, personaje, imagen, vídeo, sonido, música. Edita cualquier prompt, elige un modelo por tarjeta, arrastra para reordenar e inserta donde pases el ratón.
 
 [El modelo de documento →](../../lib/canvas)
 
@@ -105,7 +105,7 @@ Cada escena es una pila de tarjetas: narración, personaje, imagen, imagen anima
 
 ### Un clic lo genera todo
 
-Generate all (generar todo) pone en cola cada elemento y corre primero las dependencias: un fotograma fijo antes de su clip animado, un avatar antes de la imagen en la que aparece. Cambia un prompt después y la tarjeta dice **Stale** (obsoleto) y por qué.
+Generate all (generar todo) pone en cola cada elemento y corre primero las dependencias: la tarjeta de vídeo de la que una escena continúa antes de la escena misma, un avatar antes de la imagen en la que aparece. Cambia un prompt después y la tarjeta dice **Stale** (obsoleto) y por qué.
 
 [El grafo de generación →](../../ARCHITECTURE.md#generation-graph)
 
@@ -122,13 +122,13 @@ Generate all (generar todo) pone en cola cada elemento y corre primero las depen
 
 ### Reproductor y línea de tiempo
 
-Mira el montaje mientras se rellena, con subtítulos palabra por palabra. Cuatro pistas debajo: vídeo, voz, efectos, música. Recorre la regla, salta por escena o cambia a la tira del storyboard.
+Mira el montaje mientras se rellena, con subtítulos palabra por palabra. Cuatro pistas debajo: visuales, voz, efectos, música. Recorre la regla, salta por escena o cambia a la tira del storyboard.
 
-[El reproductor →](../../app/components/video)
+[El reproductor →](../../app/components/player)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/video"><picture>
+  <a href="../../app/components/player"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
     <img src="../../assets/features/timeline-light.svg" alt="El reproductor reproduce con subtítulos palabra por palabra mientras el cabezal recorre una línea de tiempo de cuatro pistas" width="100%">
   </picture></a>
@@ -156,7 +156,7 @@ Los modelos alojados vienen con tu cuenta. Pega una clave de Anthropic, Runware,
 **También en la caja:**
 
 - **[Subtítulos](../../app/components/canvas/panel/CaptionsPanel.tsx)** — Seis preajustes, doce fuentes, aparición palabra por palabra o línea por línea, y cada color, borde y posición es tuyo para cambiarlo.
-- **[Exporta hasta 4K](../../app/components/video/ExportButton.tsx)** — Renderiza en Remotion Lambda en fragmentos paralelos y te entrega un MP4.
+- **[Exporta hasta 4K](../../app/components/player/ExportButton.tsx)** — Renderiza en Remotion Lambda en fragmentos paralelos y te entrega un MP4.
 - **[Historial de versiones](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Guarda automáticamente mientras trabajas, agrupado en puntos de control. Mira cualquier versión y restáurala.
 - **[Personajes y estilo artístico](../../app/components/canvas/elements/AssetsSection.tsx)** — Nombra un personaje una vez y cada imagen, línea de voz y avatar se mantiene coherente.
 - **[Plantillas](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime y más. Cada una siembra un estilo, un narrador y una duración.

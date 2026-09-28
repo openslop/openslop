@@ -70,46 +70,40 @@ export function Waveform({
 	);
 
 	const setProgress = useCallback((progress: number) => {
-		const el = progressRef.current;
-		if (el)
-			el.style.clipPath = `inset(0 ${(1 - clamp(progress, 0, 1)) * 100}% 0 0)`;
+		const overlay = progressRef.current;
+		if (overlay)
+			overlay.style.clipPath = `inset(0 ${(1 - clamp(progress, 0, 1)) * 100}% 0 0)`;
 	}, []);
 
-	useImperativeHandle(
-		ref,
+	const handle = useMemo<WaveformHandle>(
 		() => ({
 			play() {
-				const a = audioRef.current;
-				if (a) startPlayback(a);
+				const audio = audioRef.current;
+				if (audio) startPlayback(audio);
 			},
 			pause() {
 				audioRef.current?.pause();
 			},
 			toggle() {
-				const a = audioRef.current;
-				if (a) {
-					if (a.paused) startPlayback(a);
-					else a.pause();
-				}
+				const audio = audioRef.current;
+				if (!audio) return;
+				if (audio.paused) startPlayback(audio);
+				else audio.pause();
 			},
 			seek(progress: number) {
-				const a = audioRef.current;
-				if (a?.duration) {
-					a.currentTime = clamp(progress, 0, 1) * a.duration;
-					setProgress(progress);
-				}
+				const audio = audioRef.current;
+				if (!audio?.duration) return;
+				audio.currentTime = clamp(progress, 0, 1) * audio.duration;
+				setProgress(progress);
 			},
 		}),
 		[setProgress],
 	);
+	useImperativeHandle(ref, () => handle, [handle]);
 
-	const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-		const a = audioRef.current;
-		if (!a?.duration) return;
-		const rect = e.currentTarget.getBoundingClientRect();
-		const progress = (e.clientX - rect.left) / rect.width;
-		a.currentTime = clamp(progress, 0, 1) * a.duration;
-		setProgress(progress);
+	const handleClick = (event: MouseEvent<HTMLDivElement>) => {
+		const rect = event.currentTarget.getBoundingClientRect();
+		handle.seek((event.clientX - rect.left) / rect.width);
 	};
 
 	return (
@@ -137,20 +131,17 @@ export function Waveform({
 				crossOrigin="anonymous"
 				preload="metadata"
 				hidden
-				onTimeUpdate={() => {
-					const a = audioRef.current;
-					if (!a) return;
-					setProgress(a.duration ? a.currentTime / a.duration : 0);
-					onTimeUpdate?.(a.currentTime, a.duration || 0);
+				onTimeUpdate={(event) => {
+					const audio = event.currentTarget;
+					setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
+					onTimeUpdate?.(audio.currentTime, audio.duration || 0);
 				}}
-				onLoadedMetadata={() => {
-					const a = audioRef.current;
-					if (!a) return;
+				onLoadedMetadata={(event) => {
+					const audio = event.currentTarget;
 					setProgress(0);
-					if (Number.isFinite(a.duration) && a.duration > 0) {
+					if (Number.isFinite(audio.duration) && audio.duration > 0)
 						setAudioSettledFor(src);
-					}
-					onTimeUpdate?.(0, a.duration || 0);
+					onTimeUpdate?.(0, audio.duration || 0);
 				}}
 				onError={() => setAudioSettledFor(src)}
 				onPlay={onPlay}

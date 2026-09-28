@@ -36,7 +36,7 @@ ElevenLabsSFX.prototype.generate = pineconeCache<[SFXRequest], BundleResponse>(
 	ElevenLabsSFX.prototype.generate,
 	{
 		index: process.env.PINECONE_SFX_INDEX || "sfx",
-		serialize: (p) => p.prompt,
+		serialize: ({ prompt }) => prompt,
 		rank: rankByNearestDuration,
 		...audioBundleCache("sfx"),
 	},

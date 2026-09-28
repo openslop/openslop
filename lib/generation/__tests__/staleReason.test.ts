@@ -1,4 +1,3 @@
-import { MetadataSchema } from "@/lib/project/types";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
@@ -11,12 +10,10 @@ import {
 import { GenerationQueue } from "../queue";
 import { staleReason } from "../staleReason";
 
-const EMPTY_STATE = {
-	metadata: MetadataSchema.parse({}),
-	referenceImages: [],
-};
-
 const config: ConnectorConfig = {};
+
+const byId = (nodes: GenerationNode[]) =>
+	Object.fromEntries(nodes.map((node) => [node.id, node]));
 
 function node(
 	id: string,
@@ -38,9 +35,14 @@ function node(
 		connectorType: "image",
 		model: DEFAULT_MODELS.image,
 		config,
-		state: EMPTY_STATE,
 	};
-	return { id, inputs: { prompt, attributes }, dependsOn, label, job };
+	return {
+		id,
+		inputs: { prompt, attributes },
+		dependsOn: byId(dependsOn),
+		label,
+		job,
+	};
 }
 
 const commit = (queue: GenerationQueue, target: GenerationNode, url: string) =>
@@ -69,7 +71,7 @@ describe("staleReason", () => {
 	it("names the changed attribute rather than blaming the prompt", () => {
 		const queue = new GenerationQueue();
 		const withModel = (model: string) =>
-			node("a", { attributes: { model, videoPrompt: "pan" } });
+			node("a", { attributes: { model, motion: "pan" } });
 		commit(queue, withModel("fast"), "a.png");
 
 		expect(staleReason(withModel("slow"), queue)).toBe(

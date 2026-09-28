@@ -57,8 +57,8 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 				includeMetadata: true,
 			});
 			const eligible: CacheMatch[] = (matches ?? [])
-				.filter((m) => (m.score ?? 0) >= threshold)
-				.map((m) => ({ score: m.score, metadata: m.metadata }));
+				.filter((match) => (match.score ?? 0) >= threshold)
+				.map(({ score, metadata }) => ({ score, metadata }));
 			const hit = opts.rank ? opts.rank(eligible, ...args) : eligible[0];
 			if (hit?.metadata) {
 				const cached = opts.fromMetadata(hit.metadata);
@@ -98,8 +98,8 @@ export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
 ): CacheMatch | undefined => {
 	const target = params.durationSeconds;
 	if (target == null) return candidates[0];
-	return minBy(candidates, (c) =>
-		Math.abs(Number(c.metadata?.duration ?? 0) - target),
+	return minBy(candidates, (candidate) =>
+		Math.abs(Number(candidate.metadata?.duration ?? 0) - target),
 	);
 };
 

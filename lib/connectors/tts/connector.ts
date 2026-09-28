@@ -5,6 +5,7 @@ import type { AttributeSchema } from "../attributes/schema";
 import { TTS_ATTRIBUTES } from "./attributes";
 import type {
 	GenerationContext,
+	HostedVoicePreview,
 	PluginContext,
 	ResolvedConnectorConfig,
 	TextTimestamp,
@@ -35,6 +36,10 @@ export class HttpTTSConnector
 		return this.gateway.searchVoices(params);
 	}
 
+	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {
+		return this.gateway.voicePreview(voiceId);
+	}
+
 	/** Speech carries the word timings the karaoke captions are drawn from. */
 	async resolveBundle(bundle: AssetBundle): Promise<TTSResult> {
 		return {
@@ -46,7 +51,7 @@ export class HttpTTSConnector
 	protected contextFor(context?: GenerationContext): PluginContext {
 		return {
 			...super.contextFor(context),
-			searchVoices: (p) => this.searchVoices(p),
+			searchVoices: (params) => this.searchVoices(params),
 		};
 	}
 }

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { Play, Pause } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Waveform, type WaveformHandle } from "@/lib/components/Waveform";
-import { formatTime } from "@/lib/video/timestamps";
+import { formatTime } from "@/lib/render/timestamps";
 
 export function AudioPlayer({ src }: { src: string }) {
 	const waveformRef = useRef<WaveformHandle>(null);
@@ -27,9 +27,9 @@ export function AudioPlayer({ src }: { src: string }) {
 				className="flex-1 basis-[160px] min-w-0 h-10"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}
-				onTimeUpdate={(t, d) => {
-					setCurrentTime(t);
-					setDuration(d);
+				onTimeUpdate={(time, duration) => {
+					setCurrentTime(time);
+					setDuration(duration);
 				}}
 				onFinish={() => setPlaying(false)}
 			/>

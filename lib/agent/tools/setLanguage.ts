@@ -11,7 +11,7 @@ export const setLanguage = defineTool({
 
 	  This applies to scripts written from here on. It does not translate what is on the canvas.
 
-	  Languages: ${LANGUAGE_CHOICES.map((c) => `${c} (${languageLabel(c)})`).join(", ")}
+	  Languages: ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}
 	`,
 	input: z.object({ language: z.enum(LANGUAGE_CHOICES) }),
 	output: z.string(),

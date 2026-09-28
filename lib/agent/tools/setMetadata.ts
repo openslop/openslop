@@ -15,7 +15,9 @@ export const setMetadata = defineTool({
 				.string()
 				.min(1)
 				.optional()
-				.describe("The art style every visual follows, in English."),
+				.describe(
+					"How every visual is drawn, in English: the medium, linework, colors and lighting. Never a place, setting, subject or time of day.",
+				),
 		})
 		.refine(notEmpty, named("setting")),
 	output: z.string(),

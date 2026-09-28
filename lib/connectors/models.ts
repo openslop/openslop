@@ -19,9 +19,7 @@ import {
 import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
 
 /**
- * Every model each connector type offers, by the provider serving it. An
- * animated image animates a video model; the still it is made from picks
- * separately, from the image ones.
+ * Every model each connector type offers, by the provider serving it.
  */
 export const MODELS: {
 	[T in ConnectorType]: ModelsByProvider<ModelEntries[T]>;
@@ -29,7 +27,6 @@ export const MODELS: {
 	llm: LLM_MODELS,
 	tts: TTS_MODELS,
 	image: IMAGE_MODELS,
-	animated_image: VIDEO_MODELS,
 	video: VIDEO_MODELS,
 	sfx: SFX_MODELS,
 	music: MUSIC_MODELS,
@@ -39,7 +36,6 @@ export const DEFAULT_MODELS: Record<ConnectorType, ModelRef> = {
 	llm: DEFAULT_LLM_MODEL,
 	tts: DEFAULT_TTS_MODEL,
 	image: DEFAULT_IMAGE_MODEL,
-	animated_image: DEFAULT_VIDEO_MODEL,
 	video: DEFAULT_VIDEO_MODEL,
 	sfx: DEFAULT_SFX_MODEL,
 	music: DEFAULT_MUSIC_MODEL,

@@ -13,6 +13,7 @@ import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { MusicLength } from "@/lib/connectors/music/enums";
+import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/videoPrompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
@@ -28,7 +29,10 @@ const PICTURE_ATTRIBUTES = [
 const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
 	character: ["name"],
 	image: PICTURE_ATTRIBUTES,
-	animated_image: PICTURE_ATTRIBUTES,
+	video: [
+		...PICTURE_ATTRIBUTES,
+		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
+	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };
 
@@ -45,10 +49,9 @@ const describeAttribute = (key: string, edit?: AttributeEdit): string[] => {
 const attributesFor = (type: CanvasElementType): string[] => {
 	const connector = ELEMENT_TYPES[type].connector;
 	const schema = resolveAttributeSchema(connector, DEFAULT_MODELS[connector]);
-	return Object.entries({
-		...schema.badgeAttributes,
-		...schema.settingsAttributes,
-	}).flatMap(([key, { edit }]) => describeAttribute(key, edit));
+	return Object.entries(schema.allAttributes).flatMap(([key, { edit }]) =>
+		describeAttribute(key, edit),
+	);
 };
 
 const ELEMENT_TYPE_NAMES = [...CANVAS_ELEMENT_TYPES];
@@ -71,13 +74,6 @@ export const editScript = defineTool({
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it.
 
-	  \`deps\` goes on a \`set\` and reuses a result the element already has, instead of
-	  throwing it away. Send it whenever you retype an element into one built on what it
-	  already made: an image becoming an animated_image sends
-	  \`deps: {"still": "<the image's id>"}\`, so the animation opens on the picture that
-	  image already made instead of generating a new one. Retyping keeps the id, so that is
-	  the id you already read. \`still\` is the only name \`deps\` takes today.
-
 	  To move an element, remove it and insert it again.
 
 	  Element types: ${ELEMENT_TYPE_NAMES.join(", ")}
@@ -85,9 +81,11 @@ export const editScript = defineTool({
 	  Attributes by type, all string values:
 	  ${ATTRIBUTES_BY_TYPE}
 
+	  ${VIDEO_PROMPT_FORMAT}
+
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. Image, animated_image
-	  (including videoPrompt), sound and music descriptions are always English.
+	  surrounding script, whatever language the request is in. Image, video, sound and music
+	  prompts are always in English, except speech quoted inside a video prompt.
 	`,
 	input: z.object({
 		ops: z
@@ -110,5 +108,5 @@ export const editScript = defineTool({
 			"Read the script again before retrying; the ids you used may be stale.",
 		].join(" ");
 	},
-	rewritesCanvas: true,
+	draftsScript: true,
 });

@@ -15,16 +15,22 @@ import {
 	isSourceNode,
 	needsGeneration,
 	nodeInputs,
+	type BuildContext,
 	type GenerationJob,
 	type GenerationNode,
 	type JobNode,
-	type NodeId,
 	type NodeResults,
 } from "./graph";
 
 type ActiveJob = {
 	controller: AbortController;
 	connectorType: AssetConnectorType;
+};
+
+/** A node waiting to run, with the project and canvas it will run against. */
+type QueuedJob = {
+	node: JobNode;
+	context: BuildContext;
 };
 
 /**
@@ -37,7 +43,7 @@ export class GenerationQueue implements NodeResults {
 	private readonly ticker = new ElapsedTicker((elapsed) =>
 		this.onTick(elapsed),
 	);
-	private pending: JobNode[] = [];
+	private pending: QueuedJob[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
@@ -74,8 +80,11 @@ export class GenerationQueue implements NodeResults {
 		if (changed) this.snapshots.notify();
 	}
 
-	/** Roots are always queued: asking to generate something means regenerating it. */
-	enqueueGraph(roots: GenerationNode[]) {
+	/**
+	 * Roots are always queued: asking to generate something means regenerating
+	 * it. Every job in the batch runs against `context`.
+	 */
+	enqueueGraph(roots: GenerationNode[], context: BuildContext) {
 		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
 		for (const node of flattenGraph(roots)) {
@@ -86,7 +95,7 @@ export class GenerationQueue implements NodeResults {
 				seconds: 0,
 				connectorType: node.job.connectorType,
 			});
-			this.pending.push(node);
+			this.pending.push({ node, context });
 			added = true;
 		}
 		if (added) {
@@ -184,12 +193,12 @@ export class GenerationQueue implements NodeResults {
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
 		this.ticker.stop(id);
-		this.pending = this.pending.filter((node) => node.id !== id);
+		this.pending = this.pending.filter(({ node }) => node.id !== id);
 	}
 
 	/** The dependency holding `node` back, if any: it gates until it settles. */
 	private blockingDependency(node: GenerationNode) {
-		return node.dependsOn.find(
+		return Object.values(node.dependsOn).find(
 			(dep) =>
 				!isSourceNode(dep) &&
 				(this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result),
@@ -206,13 +215,13 @@ export class GenerationQueue implements NodeResults {
 	private processQueue() {
 		for (;;) {
 			const index = this.pending.findIndex(
-				(node) =>
+				({ node }) =>
 					this.hasCapacity(node.job.connectorType) &&
 					!this.blockingDependency(node),
 			);
 			if (index === -1) break;
-			const [node] = this.pending.splice(index, 1);
-			if (node) this.runJob(node);
+			const [queued] = this.pending.splice(index, 1);
+			if (queued) this.runJob(queued);
 		}
 		this.releaseBlocked();
 	}
@@ -234,7 +243,7 @@ export class GenerationQueue implements NodeResults {
 		if (this.active.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
-		for (const node of blocked) {
+		for (const { node } of blocked) {
 			const error = this.blockedByError(node);
 			this.snapshots.resetToIdle(node.id);
 			if (error) this.snapshots.update(node.id, { error });
@@ -242,15 +251,15 @@ export class GenerationQueue implements NodeResults {
 		this.snapshots.notify();
 	}
 
-	private dependencyResults(node: GenerationNode): Record<NodeId, AssetResult> {
-		const entries = node.dependsOn.flatMap((dep) => {
+	private dependencyResults(node: GenerationNode): Record<string, AssetResult> {
+		const entries = Object.entries(node.dependsOn).flatMap(([key, dep]) => {
 			const { result } = this.snapshots.get(dep.id);
-			return result ? [[dep.id, result] as const] : [];
+			return result ? [[key, result] as const] : [];
 		});
 		return Object.fromEntries(entries);
 	}
 
-	private runJob(node: JobNode) {
+	private runJob({ node, context }: QueuedJob) {
 		const { job } = node;
 		const { elementId } = job;
 		const controller = new AbortController();
@@ -268,10 +277,11 @@ export class GenerationQueue implements NodeResults {
 			job,
 			inputs,
 			this.dependencyResults(node),
+			context,
 			controller.signal,
 		)
 			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
-			.catch((err) => this.handleJobError(elementId, err, controller))
+			.catch((error) => this.handleJobError(elementId, error, controller))
 			.finally(() => this.finalizeJob(elementId, controller));
 	}
 
@@ -294,16 +304,16 @@ export class GenerationQueue implements NodeResults {
 
 	private handleJobError(
 		elementId: string,
-		err: unknown,
+		error: unknown,
 		controller: AbortController,
 	) {
 		if (controller.signal.aborted) return;
-		console.error(`Generation failed for element ${elementId}:`, err);
+		console.error(`Generation failed for element ${elementId}:`, error);
 		this.snapshots.update(elementId, {
 			status: "idle",
 			seconds: 0,
 			result: null,
-			error: errorMessage(err),
+			error: errorMessage(error),
 		});
 		this.snapshots.notify();
 	}

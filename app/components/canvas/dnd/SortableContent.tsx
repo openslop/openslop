@@ -17,12 +17,12 @@ import { useDropIndex } from "./DragTransferContext";
 import { InsertMenu, type InsertOption } from "./SortableActions";
 
 const INSERT_OPTIONS: InsertOption<CanvasElementType>[] = ELEMENT_LIST.map(
-	(c) => ({
-		key: c.type,
-		label: c.label,
-		icon: <c.Icon size={16} />,
-		iconBgClass: c.iconBgClass,
-		colorClass: c.colorClass,
+	({ type, label, Icon, iconBgClass, colorClass }) => ({
+		key: type,
+		label,
+		icon: <Icon size={16} />,
+		iconBgClass,
+		colorClass,
 	}),
 );
 
@@ -57,8 +57,8 @@ export function SortableContent({
 
 	const handleInsert = useCallback(
 		(type: CanvasElementType) => {
-			const p = ReactEditor.findPath(editor, element);
-			insertElement(editor, type, Path.next(p), {
+			const elementPath = ReactEditor.findPath(editor, element);
+			insertElement(editor, type, Path.next(elementPath), {
 				defaultModels: defaultModels(),
 			});
 		},
