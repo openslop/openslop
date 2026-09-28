@@ -399,10 +399,42 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 image img1: 30.0s, from 90 words of dialogue after it (nar1)",
+			"Scene 1 image img1: 30.0s, 90 words of dialogue (nar1) after it.",
 		);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 2 video ai1: 1.0s, nothing after it, so it holds the minimum",
+			"Scene 2 video ai1: 1.0s, the minimum, no dialogue after it.",
+		);
+	});
+
+	it("says when an untrimmed video's own duration sets its length", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_element_lengths", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						...onScreen("v1", 8),
+						words: 6,
+						dialogueIds: ["nar1"],
+					},
+					onScreen("v2", 5),
+					{
+						...onScreen("v3", 30),
+						durationSec: 5,
+						words: 90,
+						dialogueIds: ["nar2"],
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v1: 8.0s, its full duration, untrimmed; 6 words of dialogue (nar1) after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v2: 5.0s, its full duration, untrimmed; no dialogue after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v3: 30.0s, 90 words of dialogue (nar2) after it, longer than its 5.0s duration.",
 		);
 	});
 
@@ -563,7 +595,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toBe(
-			"No visual elements on the canvas yet.",
+			"No images or videos on the canvas yet.",
 		);
 	});
 
