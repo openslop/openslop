@@ -36,6 +36,17 @@ describe("parseProjectContent", () => {
 		expect(content.generation).toEqual({});
 	});
 
+	it("opens a row saved before snapshots carried pinned", () => {
+		const { pinned: _, ...legacy } = snapshot;
+		const content = parseProjectContent({
+			script: "",
+			store: {},
+			generation: { el1: legacy },
+		});
+
+		expect(content.generation.el1).toEqual(snapshot);
+	});
+
 	it("throws on a structurally wrong row", () => {
 		expect(() =>
 			parseProjectContent({ script: null, store: {}, generation: {} }),

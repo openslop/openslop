@@ -16,7 +16,7 @@ const ElementSnapshotSchema = z.object({
 	resultInputs: GenerationInputsSchema.nullable(),
 	connectorType: z.enum(ASSET_CONNECTOR_TYPES).nullable(),
 	/** The result was supplied rather than generated, so it is never regenerated. */
-	pinned: z.boolean(),
+	pinned: z.boolean().default(false),
 });
 
 export type ElementSnapshot = z.infer<typeof ElementSnapshotSchema>;
