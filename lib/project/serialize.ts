@@ -21,9 +21,10 @@ export function splitScenes(osml: string): string[] {
 export function deserializeWithScenes(
 	osml: string,
 	defaultModels?: ConnectorModels,
+	sceneId: (index: number) => string = makeNodeId,
 ): SceneElement[] {
-	return splitScenes(osml).map((sceneOsml) => ({
-		id: makeNodeId(),
+	return splitScenes(osml).map((sceneOsml, index) => ({
+		id: sceneId(index),
 		type: SCENE_TYPE,
 		children: parseOSML(sceneOsml, defaultModels).filter(
 			isParsedContentElement,

@@ -11,8 +11,9 @@ export function applyScriptToEditor(
 	editor: Editor,
 	script: string,
 	defaultModels?: ConnectorModels,
+	sceneId?: (index: number) => string,
 ): void {
-	const scenes = deserializeWithScenes(script, defaultModels);
+	const scenes = deserializeWithScenes(script, defaultModels, sceneId);
 
 	const replaceChildren = () => {
 		Editor.withoutNormalizing(editor, () => {

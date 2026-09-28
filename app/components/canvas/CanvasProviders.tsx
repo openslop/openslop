@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { Descendant } from "slate";
 import { Slate } from "slate-react";
 import { composeProviders } from "@/lib/components/composeProviders";
 import { CanvasHistoryProvider } from "@/lib/project/CanvasHistoryProvider";
@@ -17,8 +16,6 @@ import { ActiveCaptionFont } from "./CaptionFonts";
 import { SloppyProvider } from "../sloppy/SloppyProvider";
 import { EditorPanelProvider } from "./panel/EditorPanelContext";
 import { useEditorSession } from "./hooks/useEditorSession";
-
-const EMPTY_DOCUMENT: Descendant[] = [];
 
 const CanvasScopedProviders = composeProviders(
 	RenderProvider,
@@ -48,7 +45,7 @@ export function CanvasProviders({ children }: { children: ReactNode }) {
 	return (
 		<Slate
 			editor={editor}
-			initialValue={EMPTY_DOCUMENT}
+			initialValue={editor.children}
 			onValueChange={onDocumentChange}
 		>
 			<CanvasHistoryProvider history={history}>
