@@ -191,28 +191,50 @@ describe("AssetBundle", () => {
 			);
 		});
 
+		const remoteVideo = {
+			key: "video",
+			filename: "output.mp4",
+			contentType: "video/mp4",
+			url: "https://cdn.example.com/video.mp4",
+		};
+
 		it("re-hosts remote files by streaming them into our own blob", async () => {
-			const body = new ReadableStream();
 			vi.stubGlobal(
 				"fetch",
-				vi.fn().mockResolvedValue({ ok: true, body, status: 200 }),
+				vi.fn().mockResolvedValue(new Response("fake-video")),
 			);
 
 			const result = await AssetBundle.upload("video", "runware", [
-				{
-					key: "video",
-					filename: "output.mp4",
-					contentType: "video/mp4",
-					url: "https://cdn.example.com/video.mp4",
-				},
+				remoteVideo,
 			]);
 
 			expect(fetch).toHaveBeenCalledWith("https://cdn.example.com/video.mp4");
 			expect(result.result.video).toBe("output.mp4");
+			expect(await new Response(putMock.mock.calls[0][1]).text()).toBe(
+				"fake-video",
+			);
 			expect(putMock).toHaveBeenCalledWith(
 				expect.stringMatching(/^assets\/video\/runware\/.+\/output\.mp4$/),
-				body,
+				expect.any(ReadableStream),
 				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
+			);
+
+			vi.unstubAllGlobals();
+		});
+
+		it("names the file and provider when a remote file comes back with no bytes", async () => {
+			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("")));
+			putMock.mockImplementation(async (_path: string, body: BodyInit) => {
+				await new Response(body).arrayBuffer();
+			});
+
+			await expect(
+				AssetBundle.upload("video", "runware", [remoteVideo]),
+			).rejects.toThrow('Empty file for "video" from runware');
+			expect(putMock).not.toHaveBeenCalledWith(
+				expect.stringMatching(/manifest\.json$/),
+				expect.anything(),
+				expect.anything(),
 			);
 
 			vi.unstubAllGlobals();
@@ -230,14 +252,7 @@ describe("AssetBundle", () => {
 			);
 
 			await expect(
-				AssetBundle.upload("video", "runware", [
-					{
-						key: "video",
-						filename: "output.mp4",
-						contentType: "video/mp4",
-						url: "https://cdn.example.com/gone.mp4",
-					},
-				]),
+				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toThrow(/video.*404.*Not Found/);
 
 			vi.unstubAllGlobals();

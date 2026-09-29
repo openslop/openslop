@@ -60,9 +60,10 @@ export abstract class BaseVideoProvider
 	async poll(jobId: string, request: VideoRequest): Promise<VideoPoll> {
 		const job = await this._poll(jobId);
 		if (job.metadata.status === "failed") return { kind: "failed" };
-		if (this.toFiles(job).length === 0) {
+		if (job.metadata.status !== "completed") {
 			return { kind: "pending", metadata: job.metadata };
 		}
+		if (!job.url) throw new Error("Video job completed without a video");
 		const metadata = {
 			...job.metadata,
 			durationSec:

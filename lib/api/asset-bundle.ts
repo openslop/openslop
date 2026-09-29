@@ -43,14 +43,33 @@ export type BundleFile = BundleFileData | BundleFileRemote;
 
 type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
 
+/** Blob turns an upload of no bytes down as "Invalid body", which names neither the file nor the cause. */
+function failingWhenEmpty(label: string) {
+	let bytes = 0;
+	return new TransformStream<Uint8Array, Uint8Array>({
+		transform(chunk, controller) {
+			bytes += chunk.byteLength;
+			controller.enqueue(chunk);
+		},
+		flush() {
+			if (bytes === 0) throw new Error(label);
+		},
+	});
+}
+
 /** Remote sources stream in at an unknown size, so they upload in chunks. */
 async function sourceOf(
 	file: BundleFile,
+	provider: string,
 ): Promise<{ body: PutBody; multipart: boolean }> {
 	if ("data" in file) return { body: file.data, multipart: false };
 	const res = await fetchOk(file.url, `Failed to fetch "${file.key}"`);
-	if (!res.body) throw new Error(`Empty response body for "${file.key}"`);
-	return { body: res.body, multipart: true };
+	const empty = `Empty file for "${file.key}" from ${provider}`;
+	if (!res.body) throw new Error(empty);
+	return {
+		body: res.body.pipeThrough(failingWhenEmpty(empty)),
+		multipart: true,
+	};
 }
 
 export const BundleResponseSchema = BundleContentsSchema.extend({
@@ -137,7 +156,7 @@ export class AssetBundle {
 
 		await Promise.all(
 			files.map(async (file) => {
-				const { body, multipart } = await sourceOf(file);
+				const { body, multipart } = await sourceOf(file, provider);
 				return put(`${basePath}/${file.filename}`, body, {
 					access: "public",
 					contentType: file.contentType,
