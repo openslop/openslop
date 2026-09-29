@@ -1,3 +1,4 @@
+import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { HostedVoicePreview } from "@/lib/connectors/types";
 import { type AudioBytes, audioOf, hostedAudio } from "./hosted-audio";
 
@@ -63,11 +64,16 @@ export function secondsCap(durations: number[], budget: number): number {
 	return Infinity;
 }
 
-/** At most `seconds` of a hosted voice, cut once per length and kept in our store. */
+/**
+ * At most `seconds` of a hosted voice, cut once per length and kept in our store.
+ * The voice comes from the request, so only one already in our store is fetched.
+ */
 export async function cutVoice(
 	voice: HostedVoicePreview,
 	seconds: number,
 ): Promise<HostedVoicePreview> {
+	if (!AssetBundle.holds(voice.url))
+		throw new Error(`Voice preview is not in our store: ${voice.url}`);
 	if (seconds >= voice.durationSec - FRAME_SEC) return voice;
 	return hostedAudio("voice-cut", `${voice.url}\n${seconds}`, async () => {
 		const { data } = await audioOf(

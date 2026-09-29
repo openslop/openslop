@@ -19,6 +19,10 @@ describe("parseCharacterNames", () => {
 		]);
 	});
 
+	it("names a repeated character once", () => {
+		expect(parseCharacterNames("Sol, Mira, Sol")).toEqual(["Sol", "Mira"]);
+	});
+
 	it("returns an empty array for undefined or empty input", () => {
 		expect(parseCharacterNames(undefined)).toEqual([]);
 		expect(parseCharacterNames("")).toEqual([]);

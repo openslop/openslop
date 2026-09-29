@@ -26,6 +26,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
 	countSpokenWords: () => 1,
 	measureElementLengths: () => [],
+	measureRuntime: () => 0,
 	generateText: async () => "an outline",
 	referenceImages: () => [],
 	avatarUrl: () => undefined,
@@ -327,23 +328,12 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	const onScreen = (id: string, seconds: number) => ({
-		id,
-		type: "video" as const,
-		sceneNumber: 1,
-		seconds,
-		words: 0,
-		dialogueIds: [],
-		durationSec: seconds,
-		trimToDialogue: false,
-	});
-
 	it("reports the runtime against the project's target length", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
 			context({
 				countSpokenWords: () => 700,
-				measureElementLengths: () => [onScreen("v1", 240)],
+				measureRuntime: () => 240,
 			}),
 		);
 
@@ -353,28 +343,16 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("within the target range");
 	});
 
-	it("counts every visual's time on screen, not just the speech over it", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "measure_total_length", input: {} },
-			context({
-				countSpokenWords: () => 0,
-				measureElementLengths: () => [onScreen("v1", 10), onScreen("v2", 8)],
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("18.0s of video");
-	});
-
 	it("says how far off the runtime is, so the model knows how much to cut or add", async () => {
 		const over = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ measureElementLengths: () => [onScreen("v1", 400)] }),
+			context({ measureRuntime: () => 400 }),
 		);
 		expect(over.ok && over.output).toContain("over by 100.0s");
 
 		const under = await executeToolCall(
 			{ toolName: "measure_total_length", input: {} },
-			context({ measureElementLengths: () => [onScreen("v1", 100)] }),
+			context({ measureRuntime: () => 100 }),
 		);
 		expect(under.ok && under.output).toContain("under by 80.0s");
 	});
@@ -384,7 +362,7 @@ describe("executeToolCall", () => {
 			{ toolName: "measure_total_length", input: {} },
 			context({
 				countSpokenWords: () => 1000,
-				measureElementLengths: () => [onScreen("v1", 600)],
+				measureRuntime: () => 600,
 				readMetadata: () =>
 					MetadataSchema.parse({ videoSettings: { length: "auto" } }),
 			}),
@@ -392,6 +370,17 @@ describe("executeToolCall", () => {
 
 		expect(outcome.ok && outcome.output).toContain("1000 spoken words");
 		expect(outcome.ok && outcome.output).not.toContain("over by");
+	});
+
+	const onScreen = (id: string, seconds: number) => ({
+		id,
+		type: "video" as const,
+		sceneNumber: 1,
+		seconds,
+		words: 0,
+		dialogueIds: [],
+		durationSec: seconds,
+		trimToDialogue: false,
 	});
 
 	it("reports what each visual is on screen for, and the dialogue holding it", async () => {

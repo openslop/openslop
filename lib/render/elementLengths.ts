@@ -64,15 +64,11 @@ const toLength = ({
 	};
 };
 
-/**
- * What every visual on the canvas is on screen for, estimated from the script
- * alone: the same rule `buildRenderLayout` lays out with, read off the unrendered
- * script. Dialogue before the first visual belongs to no visual and is left out.
- */
-export function measureElementLengths(
-	descendants: Descendant[],
-): ElementLength[] {
+type Walk = { spans: Span[]; leadingWords: number };
+
+const walk = (descendants: Descendant[]): Walk => {
 	const spans: Span[] = [];
+	let leadingWords = 0;
 	let sceneNumber = 0;
 
 	for (const node of descendants) {
@@ -84,12 +80,37 @@ export function measureElementLengths(
 				spans.push({ element, sceneNumber, words: 0, dialogueIds: [] });
 				continue;
 			}
+			if (ELEMENT_TYPES[element.type].connector !== "tts") continue;
+			const words = countWords(getElementBodyText(element));
 			const open = spans.at(-1);
-			if (!open || ELEMENT_TYPES[element.type].connector !== "tts") continue;
-			open.words += countWords(getElementBodyText(element));
+			if (!open) {
+				leadingWords += words;
+				continue;
+			}
+			open.words += words;
 			open.dialogueIds.push(element.id);
 		}
 	}
 
-	return spans.map(toLength);
-}
+	return { spans, leadingWords };
+};
+
+/**
+ * What every visual on the canvas is on screen for, estimated from the script
+ * alone: the same rule `buildRenderLayout` lays out with, read off the unrendered
+ * script. Dialogue before the first visual belongs to no visual and is left out.
+ */
+export const measureElementLengths = (
+	descendants: Descendant[],
+): ElementLength[] => walk(descendants).spans.map(toLength);
+
+/** The whole video's length, dialogue before the first visual included: it plays over a blank scene. */
+export const measureRuntime = (descendants: Descendant[]): number => {
+	const { spans, leadingWords } = walk(descendants);
+	return spans
+		.map(toLength)
+		.reduce(
+			(total, { seconds }) => total + seconds,
+			secondsForWords(leadingWords),
+		);
+};
