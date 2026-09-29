@@ -252,32 +252,6 @@ describe("applyRefineOp — insert", () => {
 	});
 });
 
-describe("applyRefineOp — insert start frame", () => {
-	it("keeps an inserted video's start frame picture as the upload", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
-		const picture = "https://img/frame.png";
-
-		applyRefineOp(
-			editor,
-			{
-				op: "insert",
-				type: "video",
-				text: "A fox runs.",
-				attrs: { startFrame: picture },
-			},
-			{},
-		);
-
-		const [video] = getContentIds(editor)
-			.map((id) => getNode(editor, id))
-			.filter((node) => node.type === "video");
-		expect(flatAttributes(video)).toMatchObject({
-			startFrame: picture,
-			uploadedFrame: picture,
-		});
-	});
-});
-
 describe("applyRefineOp — remove", () => {
 	it("removes a node by id", () => {
 		const editor = makeEditor([
@@ -351,44 +325,6 @@ describe("applyRefineOp — set", () => {
 
 		const el = getNode(editor, "n1");
 		expect(flatAttributes(el)).toEqual({ name: "Lyra" });
-	});
-
-	it("keeps a start frame picture as the upload, so it can be chosen again", () => {
-		const editor = makeEditor([scene([content("video", "v1", "A fox runs.")])]);
-		const picture = "https://img/frame.png";
-
-		applyRefineOp(
-			editor,
-			{ op: "set", id: "v1", attrs: { startFrame: picture } },
-			{},
-		);
-
-		expect(flatAttributes(getNode(editor, "v1"))).toMatchObject({
-			startFrame: picture,
-			uploadedFrame: picture,
-		});
-	});
-
-	it("leaves the upload alone when the start frame is not a picture", () => {
-		const editor = makeEditor([
-			scene([
-				content("video", "v1", "A fox runs.", {
-					startFrame: "https://img/frame.png",
-					uploadedFrame: "https://img/frame.png",
-				}),
-			]),
-		]);
-
-		applyRefineOp(
-			editor,
-			{ op: "set", id: "v1", attrs: { startFrame: "previous" } },
-			{},
-		);
-
-		expect(flatAttributes(getNode(editor, "v1"))).toMatchObject({
-			startFrame: "previous",
-			uploadedFrame: "https://img/frame.png",
-		});
 	});
 
 	it("applies attrs and text together", () => {

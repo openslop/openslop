@@ -7,20 +7,11 @@ import {
 } from "@/lib/canvas/editorOps";
 import { insertElement } from "@/lib/canvas/insertElement";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { openingOn, START_FRAME_ATTR } from "@/lib/connectors/video/startFrame";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
 
 const OK: RefineOpResult = { ok: true };
-
-/** A picture set as the start frame is kept as the upload too, so the picker can offer it again. */
-const keepingFrame = <T extends Record<string, string | null>>(attrs: T): T => {
-	const frame = attrs[START_FRAME_ATTR];
-	return frame && URL.canParse(frame)
-		? { ...attrs, ...openingOn(frame) }
-		: attrs;
-};
 
 export function applyRefineOp(
 	editor: Editor,
@@ -97,7 +88,7 @@ function applyInsert(
 	}
 
 	const id = insertElement(editor, op.type, at, {
-		attrs: op.attrs && keepingFrame(op.attrs),
+		attrs: op.attrs,
 		text: op.text,
 		defaultModels,
 	});
@@ -134,7 +125,7 @@ function applySet(
 	const [element, path] = target;
 
 	if (op.attrs) {
-		mergeAttrs(editor, path, element, keepingFrame(op.attrs));
+		mergeAttrs(editor, path, element, op.attrs);
 	}
 
 	if (op.text !== undefined) {

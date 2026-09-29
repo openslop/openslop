@@ -79,9 +79,12 @@ export function StartFramePicker({
 }) {
 	const editor = useSlateStatic();
 	const frame = element.generationAttributes?.[attrKey] ?? NO_FRAME;
-	const uploaded = element.layoutAttributes?.[UPLOADED_FRAME_ATTR];
 	const usesPrevious = frame === PREVIOUS_VISUAL;
 	const usesUpload = URL.canParse(frame);
+	// Sloppy sets a picture as the start frame without remembering it as the upload.
+	const uploaded =
+		element.layoutAttributes?.[UPLOADED_FRAME_ATTR] ??
+		(usesUpload ? frame : undefined);
 	const setFrame = (next: string, upload = uploaded ?? null) =>
 		updateElementAttrs(editor, element, {
 			[attrKey]: next,
