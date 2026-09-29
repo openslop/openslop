@@ -2,7 +2,7 @@ import { Descendant } from "slate";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
 import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
 import { withoutCaretMarker } from "./constants";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { escapeXml } from "./xmlEscape";
 
 const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;

@@ -23,7 +23,7 @@ export abstract class BaseAssetConnector<
 	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
 		return {
 			[assetUrlField(this.assetKey)]: bundle.resolve(this.assetKey),
-			durationSec: Number(bundle.manifest.metadata?.durationSec ?? 0),
+			durationSec: bundle.durationSec,
 		} as TResult;
 	}
 
@@ -35,7 +35,7 @@ export abstract class BaseAssetConnector<
 		const completed = await awaitCompletion(
 			(id) => this.gateway.poll(id, signal),
 			jobId,
-			(p) => isTerminal(p.status),
+			(job) => isTerminal(job.status),
 		);
 		if (completed.status === "failed") {
 			throw new Error(completed.error ?? "Generation failed");

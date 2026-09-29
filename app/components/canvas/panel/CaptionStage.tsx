@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { CaptionOverlay } from "@/components/captions/CaptionOverlay";
-import { captionWordsAt } from "@/lib/video/captionLayout";
-import type { CaptionStyle } from "@/lib/video/captionStyle";
+import { captionWordsAt } from "@/lib/captions/captionLayout";
+import type { CaptionStyle } from "@/lib/captions/captionStyle";
 
 const WORD_MS = 420;
 

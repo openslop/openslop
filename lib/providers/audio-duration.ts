@@ -1,12 +1,15 @@
-// Constant-bitrate audio only: audioDurationSec assumes a fixed bitrate.
-export type AudioFormat = {
-	sampleRate: number;
-	bitrateKbps: number;
-};
-
-export function audioDurationSec(
-	format: AudioFormat,
-	data: ArrayBuffer,
-): number {
-	return (data.byteLength * 8) / (format.bitrateKbps * 1000);
+export async function audioDurationSec(bytes: ArrayBuffer): Promise<number> {
+	const { ADTS, BufferSource, FLAC, Input, MP3, MP4, OGG, WAVE } =
+		await import("mediabunny");
+	const input = new Input({
+		source: new BufferSource(bytes),
+		formats: [MP3, WAVE, OGG, MP4, FLAC, ADTS],
+	});
+	try {
+		return (
+			(await input.getDurationFromMetadata()) ?? (await input.computeDuration())
+		);
+	} finally {
+		input.dispose();
+	}
 }

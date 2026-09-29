@@ -15,7 +15,7 @@ export function createCharacterAvatarPlugin(
 				`Character portrait of ${name}`,
 				appearance,
 				`A small rectangular nameplate at the bottom of the frame reads "${name}" in clean sans-serif lettering`,
-				"White background",
+				"Plain solid white background, with no scenery, objects or location behind them",
 			].join(". ");
 		},
 		afterGenerate(result) {

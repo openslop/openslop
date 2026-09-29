@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
+import type { SortableData } from "@/lib/canvas/dragOps";
 import type { CanvasElement } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import styles from "../styles/sortable.module.css";
@@ -11,7 +12,7 @@ import { DragHandle } from "./SortableActions";
 // built by the caller: constructing them here rebuilds N card subtrees.
 interface SortableItemProps {
 	sceneId: string;
-	sortableType: "scene" | "content";
+	sortableType: SortableData["type"];
 	wrapperClassName?: string;
 	wrapperStyle?: React.CSSProperties;
 	contentClassName?: string;
@@ -48,7 +49,7 @@ export function SortableItem({
 		attributes: sortableAttributes,
 	} = useSortable({
 		id: element.id,
-		data: { type: sortableType, sceneId },
+		data: { type: sortableType, sceneId } satisfies SortableData,
 		disabled,
 	});
 

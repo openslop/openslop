@@ -71,7 +71,7 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 ### Sloppy 和你一起写
 
-副驾驶住在左侧面板里。它读脚本，列出故事大纲，写出场景，再把片段对到台词上。它做的每一步都会在你眼前落到画布上。
+副驾驶住在左侧面板里。它读脚本，列出故事大纲，写出场景，再把视频卡片对到台词上。它做的每一步都会在你眼前落到画布上。
 
 [一轮对话是怎么进行的 →](../../ARCHITECTURE.md#sloppy)
 
@@ -88,7 +88,7 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 ### 是分镜板，不是提示框
 
-每个场景是一叠卡片：旁白、角色、图片、动态图片、片段、音效、音乐。改任意一条提示词，为每张卡片单独选模型，拖动排序，鼠标停在哪里就能在哪里插入。
+每个场景是一叠卡片：旁白、角色、图片、视频、音效、音乐。改任意一条提示词，为每张卡片单独选模型，拖动排序，鼠标停在哪里就能在哪里插入。
 
 [文档模型 →](../../lib/canvas)
 
@@ -105,7 +105,7 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 ### 一键生成全部
 
-Generate all（全部生成）会把每个元素排进队列，并先处理依赖：先出静态帧再出它的动态片段，先出头像再出它所在的图片。之后改了提示词，卡片会标上 **Stale**（已过期）并说明原因。
+Generate all（全部生成）会把每个元素排进队列，并先处理依赖：先出一个场景所接续的视频卡片再出该场景，先出头像再出它所在的图片。之后改了提示词，卡片会标上 **Stale**（已过期）并说明原因。
 
 [生成图 →](../../ARCHITECTURE.md#generation-graph)
 
@@ -122,13 +122,13 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 ### 播放器和时间线
 
-一边生成一边看成片，字幕逐词显示。下面四条轨道：视频、人声、音效、音乐。拖动标尺，按场景跳转，或者切到分镜条。
+一边生成一边看成片，字幕逐词显示。下面四条轨道：画面、人声、音效、音乐。拖动标尺，按场景跳转，或者切到分镜条。
 
-[播放器 →](../../app/components/video)
+[播放器 →](../../app/components/player)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/video"><picture>
+  <a href="../../app/components/player"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
     <img src="../../assets/features/timeline-light.svg" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
   </picture></a>
@@ -156,7 +156,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 **盒子里还有：**
 
 - **[字幕](../../app/components/canvas/panel/CaptionsPanel.tsx)** — 六种预设、十二种字体、逐词或逐行显示，每种颜色、描边和位置都随你改。
-- **[导出最高 4K](../../app/components/video/ExportButton.tsx)** — 在 Remotion Lambda 上分块并行渲染，交给你一个 MP4。
+- **[导出最高 4K](../../app/components/player/ExportButton.tsx)** — 在 Remotion Lambda 上分块并行渲染，交给你一个 MP4。
 - **[版本历史](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — 边做边自动保存，合并成检查点。查看任意版本并恢复。
 - **[角色和画风](../../app/components/canvas/elements/AssetsSection.tsx)** — 给角色起一次名，每张图片、每句配音和每个头像都保持一致。
 - **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一位旁白和一个时长。

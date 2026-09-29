@@ -1,9 +1,12 @@
 import { z } from "zod";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import type { NodeSpec } from "@/lib/generation/graph";
-import type { ProjectData } from "@/lib/project/store";
+import type {
+	DependencyDeclaration,
+	DependencyResults,
+} from "@/lib/generation/dependency";
+import type { ProjectData, ProjectStore } from "@/lib/project/store";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/video/aspectRatio";
+import type { VideoResolution } from "@/lib/project/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
@@ -13,7 +16,6 @@ export const ASSET_CONNECTOR_TYPES = [
 	"music",
 	"sfx",
 	"image",
-	"animated_image",
 	"tts",
 	"video",
 ] as const;
@@ -49,9 +51,10 @@ export type ModelEntry = ModelMeta & {
 	id: string;
 };
 
-/** A video model also says which output resolutions the vendor renders it at. */
+/** A video model also says which output resolutions the vendor renders it at, and whether it listens to reference audio. */
 export type VideoModelEntry = ModelEntry & {
 	resolutions: readonly VideoResolution[];
+	referenceAudios?: true;
 };
 
 /** What each connector type's catalog entries carry. */
@@ -59,7 +62,6 @@ export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	image: ModelEntry;
-	animated_image: VideoModelEntry;
 	video: VideoModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
@@ -78,14 +80,26 @@ export type ModelPick = { provider?: string; model?: string };
 
 export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
 
+/** A voice's preview at a URL anyone can fetch, and how long it plays. */
+export const HostedVoicePreviewSchema = z.object({
+	url: z.url({ error: "A hosted preview needs an HTTP(S) URL" }),
+	durationSec: z
+		.number()
+		.positive({ error: "A hosted preview must say how long it plays" }),
+});
+
+export type HostedVoicePreview = z.infer<typeof HostedVoicePreviewSchema>;
+
 export interface PluginContext {
 	searchVoices?: VoiceSearchFn;
-	/** Id of the node being generated. */
-	elementId?: string;
-	/** Outputs of that node's dependencies, keyed by node id. */
-	dependencies?: Record<string, AssetResult>;
+	/** Speech on a pair, for a type that borrows voices. */
+	speech?: (model: ModelRef) => TTSConnector;
+	/** Read through the handles that declared them. */
+	dependencies?: DependencyResults;
 	/** The project state the node's inputs were resolved against. */
 	state?: ProjectData;
+	/** Only written to: plugins read `state`, the snapshot their inputs were recorded against. */
+	store?: ProjectStore;
 	/** The pair the connector runs on. */
 	model?: ModelRef;
 	/** Aborts when the caller cancels the generation. */
@@ -95,16 +109,16 @@ export interface PluginContext {
 /** The parts of a plugin context the caller supplies per generation. */
 export type GenerationContext = Pick<
 	PluginContext,
-	"elementId" | "dependencies" | "state" | "signal"
+	"dependencies" | "state" | "store" | "signal" | "speech"
 >;
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
 	/**
-	 * What this plugin reads. Declaring it is what makes the read participate in
-	 * ordering and staleness; reading anything undeclared goes stale-blind.
+	 * Declaring a node is what makes the element wait for it, go stale with it
+	 * and receive its result; an undeclared read goes stale-blind.
 	 */
-	dependencies?(element: CanvasContentElement): NodeSpec[];
+	dependencies?: readonly DependencyDeclaration[];
 	/**
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.
@@ -203,15 +217,6 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 };
 
-/** A video generation whose conditioning frame comes from the element's still. */
-export type AnimatedImageGenerateParams = VideoGenerateParams & {
-	videoPrompt?: string;
-	/** The still's own model and format. The still-frame plugin keeps them off the video call. */
-	imageProvider?: string;
-	imageModel?: string;
-	format?: ImageFormat;
-};
-
 export type TTSResult = AssetResult & {
 	textTimestamps: TextTimestamp[];
 };
@@ -238,6 +243,7 @@ export type VoiceInfo = {
 	gender?: TTSGender;
 	accent?: string;
 	description: string;
+	/** Where the vendor keeps the voice's preview, behind its key; hear it through `voicePreview`. */
 	previewUrl?: string;
 };
 
@@ -257,11 +263,22 @@ export interface TTSConnector extends Connector {
 	readonly type: "tts";
 	generate(params: TTSGenerateParams): Promise<TTSResult>;
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
+	voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined>;
 }
+
+/** Audio a video's speech should sound like, and whose voice it is. */
+export const ReferenceAudioSchema = HostedVoicePreviewSchema.extend({
+	speaker: z
+		.string()
+		.min(1, { error: "A reference audio must name its speaker" }),
+});
+
+export type ReferenceAudio = z.infer<typeof ReferenceAudioSchema>;
 
 export type VideoGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
-	frameImages?: string[];
+	frameImage?: string;
+	referenceAudios?: ReferenceAudio[];
 	duration?: number;
 	resolution?: VideoResolution;
 	width?: number;

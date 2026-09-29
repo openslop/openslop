@@ -28,30 +28,30 @@ const SCENE_LABEL =
 	"Sloppy, the OpenSlop robot, standing in a yard of failed generations and proudly holding up a broken render";
 
 export default function SlopYard() {
-	const ref = useRef<HTMLDivElement>(null);
+	const sceneRef = useRef<HTMLDivElement>(null);
 
 	function aim(event: PointerEvent<HTMLDivElement>) {
-		const el = ref.current;
-		if (!el) return;
-		const box = el.getBoundingClientRect();
-		el.style.setProperty(
+		const scene = sceneRef.current;
+		if (!scene) return;
+		const box = scene.getBoundingClientRect();
+		scene.style.setProperty(
 			"--px",
 			`${(event.clientX - box.left) / box.width - 0.5}`,
 		);
-		el.style.setProperty(
+		scene.style.setProperty(
 			"--py",
 			`${(event.clientY - box.top) / box.height - 0.5}`,
 		);
 	}
 
 	function recenter() {
-		ref.current?.style.setProperty("--px", "0");
-		ref.current?.style.setProperty("--py", "0");
+		sceneRef.current?.style.setProperty("--px", "0");
+		sceneRef.current?.style.setProperty("--py", "0");
 	}
 
 	return (
 		<div
-			ref={ref}
+			ref={sceneRef}
 			role="img"
 			aria-label={SCENE_LABEL}
 			onPointerMove={aim}

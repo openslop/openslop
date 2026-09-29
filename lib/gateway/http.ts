@@ -1,6 +1,7 @@
-import { apiFetch, apiJson, buildUrl } from "@/lib/clients/http";
+import { apiFetch, apiJson } from "@/lib/clients/http";
 import { readSSE } from "@/lib/api/sse";
 import type {
+	HostedVoicePreview,
 	LLMGenerateParams,
 	LLMGenerateResult,
 	LLMStreamChunk,
@@ -59,13 +60,13 @@ export class HttpLLMGateway extends GatewayClient<
 		params: LLMGenerateParams,
 		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		const res = await apiFetch(this.route, {
+		const response = await apiFetch(this.route, {
 			method: "POST",
 			body: { ...params, stream: true },
 			signal,
 		});
-		if (!res.body) throw new Error("No response body");
-		yield* readSSE<LLMStreamChunk>(res.body);
+		if (!response.body) throw new Error("No response body");
+		yield* readSSE<LLMStreamChunk>(response.body);
 	}
 }
 
@@ -74,23 +75,20 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 		super(model, "tts");
 	}
 
-	/**
-	 * A voice search names its model like a generation does, so the route knows
-	 * whose key to read. Previews are vendor files behind that same key, so each
-	 * comes back proxied through the route that can fetch it.
-	 */
+	/** A voice search names its model like a generation does, so the route knows whose key to read. */
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const result = await apiJson<{ voices: VoiceInfo[] }>(
+		const { voices } = await apiJson<{ voices: VoiceInfo[] }>(
 			`${this.route}/voices`,
 			{ params: { ...params, ...this.model } },
 		);
-		return result.voices.map((voice) => ({
-			...voice,
-			previewUrl: voice.previewUrl && this.previewRoute(voice.previewUrl),
-		}));
+		return voices;
 	}
 
-	private previewRoute(url: string): string {
-		return buildUrl(`${this.route}/voices/preview`, { url, ...this.model });
+	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {
+		const { preview } = await apiJson<{ preview?: HostedVoicePreview }>(
+			`${this.route}/voices/preview`,
+			{ params: { voiceId, ...this.model } },
+		);
+		return preview;
 	}
 }

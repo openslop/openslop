@@ -1,17 +1,24 @@
 import { createConnector } from "@/lib/connectors/factory";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationInputs } from "./inputs";
-import type { GenerationJob, NodeId } from "./graph";
+import type { BuildContext, GenerationJob } from "./graph";
 
 export async function generateForElement(
 	job: GenerationJob,
 	inputs: GenerationInputs,
-	dependencies: Record<NodeId, AssetResult>,
+	dependencies: Record<string, AssetResult>,
+	{ store, state, registry }: BuildContext,
 	signal?: AbortSignal,
 ): Promise<AssetResult> {
 	const connector = createConnector(job.connectorType, job.model, job.config);
 	return connector.generate(
 		{ prompt: inputs.prompt, ...inputs.attributes },
-		{ elementId: job.elementId, dependencies, state: job.state, signal },
+		{
+			dependencies,
+			state,
+			store,
+			signal,
+			speech: (model) => createConnector("tts", model, registry.tts),
+		},
 	);
 }

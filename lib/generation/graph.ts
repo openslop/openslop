@@ -1,10 +1,13 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
+import isEqualWith from "lodash/isEqualWith";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
 } from "@/lib/canvas/types";
+import { elementById } from "@/lib/canvas/scenes";
 import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
+import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AssetConnectorType,
 	AssetResult,
@@ -12,7 +15,7 @@ import type {
 	ConnectorPlugin,
 	ModelRef,
 } from "@/lib/connectors/types";
-import type { ProjectData } from "@/lib/project/store";
+import type { ProjectData, ProjectStore } from "@/lib/project/store";
 import {
 	serializeInputs,
 	type GenerationInputs,
@@ -21,21 +24,20 @@ import {
 
 export type NodeId = string;
 
-/** Everything the queue needs to run one node. */
+/** How a node runs: the connector and its configuration. */
 export type GenerationJob = {
 	elementId: string;
 	elementType: CanvasElementType;
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
-	/** The project state this job's inputs were resolved against. */
-	state: ProjectData;
 };
 
 type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
-	dependsOn: GenerationNode[];
+	/** Keyed by the name the declaring plugin gave the edge, which is how its result reaches that plugin. */
+	dependsOn: Record<string, GenerationNode>;
 	/** How the node reads when a dependent has to name it to the user. */
 	label?: string;
 };
@@ -61,19 +63,36 @@ export type ElementNode = {
 };
 
 /**
+ * What a build reads: project state, the canvas in document order, and the
+ * registry that gives each element its connector and plugins. `state` is a
+ * snapshot of `store`, so a job generates from the state its inputs were
+ * recorded against, however long it waits in the queue.
+ */
+export type BuildContext = {
+	store: ProjectStore;
+	state: ProjectData;
+	canvas: CanvasContentElement[];
+	registry: ConnectorRegistry;
+};
+
+/**
  * Declares which node to build without saying how; only the builder knows the
  * registry and the state. A source-node spec returns its node directly.
  */
-export type NodeSpec = (state: ProjectData) => ElementNode | GenerationNode;
+export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
 
 /** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
 export const isElementNode = (
 	value: ElementNode | GenerationNode,
 ): value is ElementNode => "element" in value;
 
+/**
+ * The element as the canvas being built has it. The given one stands in only
+ * when it is not on that canvas, as a character's avatar is not.
+ */
 export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
-	() => ({ element });
+	({ canvas }) => ({ element: elementById(canvas, element.id) ?? element });
 
 /** What the graph reads back about a node the queue has settled. */
 export type NodeResult = {
@@ -91,21 +110,23 @@ export type NodeResults = {
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	node.job === null;
 
+const ignoringJob = (_a: unknown, _b: unknown, key?: unknown) =>
+	key === "job" ? true : undefined;
+
+/**
+ * Whether two builds read the same thing: the same nodes, inputs and edges.
+ * The job, which is how a node runs, is not compared.
+ */
+export const isSameGraph = (
+	a: GenerationNode | GenerationNode[] | null,
+	b: GenerationNode | GenerationNode[],
+): boolean => isEqualWith(a, b, ignoringJob);
+
 const DERIVED_PREFIX = "~";
 
 /** Ids for nodes the graph derives; the prefix keeps them off element ids. */
 export const derivedNodeId = (kind: string, key: string): NodeId =>
 	`${DERIVED_PREFIX}${kind}:${key}`;
-
-/** The dependency a node derives for `kind`, when its plugins declare one. */
-export const derivedDependency = (node: GenerationNode, kind: string) =>
-	node.dependsOn.find((dep) => dep.id === derivedNodeId(kind, node.id));
-
-const DERIVED_ID = new RegExp(`^\\${DERIVED_PREFIX}[^:]+:(.+)$`);
-
-/** The node a derived id was minted from, if it was derived at all. */
-export const derivedFrom = (id: NodeId): NodeId | null =>
-	DERIVED_ID.exec(id)?.[1] ?? null;
 
 export function sourceNode(
 	id: NodeId,
@@ -116,7 +137,7 @@ export function sourceNode(
 	return {
 		id,
 		inputs,
-		dependsOn: [],
+		dependsOn: {},
 		label,
 		job: null,
 		identity: serializeInputs({ ...inputs, dependencies: {} }),
@@ -145,7 +166,10 @@ export function nodeInputs(
 	return {
 		...node.inputs,
 		dependencies: Object.fromEntries(
-			node.dependsOn.map((dep) => [dep.id, nodeIdentity(dep, results)]),
+			Object.values(node.dependsOn).map((dep) => [
+				dep.id,
+				nodeIdentity(dep, results),
+			]),
 		),
 	};
 }
@@ -160,8 +184,9 @@ export function needsGeneration(
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	return (
-		node.dependsOn.some((dep) => needsGeneration(dep, results)) ||
-		!isEqual(nodeInputs(node, results), snapshot.resultInputs)
+		Object.values(node.dependsOn).some((dep) =>
+			needsGeneration(dep, results),
+		) || !isEqual(nodeInputs(node, results), snapshot.resultInputs)
 	);
 }
 
@@ -179,7 +204,7 @@ export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
 	const visit = (node: GenerationNode) => {
 		if (seen.has(node.id)) return;
 		seen.add(node.id);
-		for (const dep of node.dependsOn) visit(dep);
+		for (const dep of Object.values(node.dependsOn)) visit(dep);
 		ordered.push(node);
 	};
 	for (const root of roots) visit(root);

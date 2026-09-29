@@ -158,6 +158,37 @@ describe("AssetBundle", () => {
 			expect(result.id).toBeTruthy();
 			// 2 calls: one for the file, one for manifest.json
 			expect(putMock).toHaveBeenCalledTimes(2);
+			for (const [, , options] of putMock.mock.calls) {
+				expect(options).toMatchObject({ allowOverwrite: false });
+			}
+		});
+
+		it("stores a named bundle where its name says, overwriting a twin", async () => {
+			await AssetBundle.upload(
+				"preview",
+				"voice",
+				[
+					{
+						key: "audio",
+						filename: "preview.mp3",
+						data: Buffer.from("bytes"),
+						contentType: "audio/mpeg",
+					},
+				],
+				{ durationSec: 6 },
+				{ id: "abc123" },
+			);
+
+			expect(putMock).toHaveBeenCalledWith(
+				"assets/preview/voice/abc123/preview.mp3",
+				expect.anything(),
+				expect.objectContaining({ allowOverwrite: true }),
+			);
+			expect(putMock).toHaveBeenCalledWith(
+				"assets/preview/voice/abc123/manifest.json",
+				expect.stringContaining('"durationSec":6'),
+				expect.objectContaining({ allowOverwrite: true }),
+			);
 		});
 
 		it("re-hosts remote files by streaming them into our own blob", async () => {
@@ -210,6 +241,70 @@ describe("AssetBundle", () => {
 			).rejects.toThrow(/video.*404.*Not Found/);
 
 			vi.unstubAllGlobals();
+		});
+	});
+
+	describe("load", () => {
+		beforeEach(() => {
+			AssetBundle.baseUrl = "https://blob.example.com";
+		});
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it("reads a stored bundle back by name", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue(
+					new Response(
+						JSON.stringify({
+							result: { audio: "preview.mp3" },
+							metadata: { durationSec: 6 },
+						}),
+						{ status: 200 },
+					),
+				),
+			);
+
+			const response = await AssetBundle.load("preview", "voice", "abc123");
+
+			expect(fetch).toHaveBeenCalledWith(
+				"https://blob.example.com/assets/preview/voice/abc123/manifest.json",
+			);
+			expect(response).toEqual({
+				id: "abc123",
+				type: "preview",
+				provider: "voice",
+				result: { audio: "preview.mp3" },
+				metadata: { durationSec: 6 },
+			});
+		});
+
+		it("finds nothing under a name never stored", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
+			);
+
+			await expect(
+				AssetBundle.load("preview", "voice", "missing"),
+			).resolves.toBeNull();
+		});
+
+		it("fails loudly when the store itself misbehaves", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi
+					.fn()
+					.mockResolvedValue(
+						new Response(null, { status: 500, statusText: "Boom" }),
+					),
+			);
+
+			await expect(
+				AssetBundle.load("preview", "voice", "abc123"),
+			).rejects.toThrow("500 Boom");
 		});
 	});
 });

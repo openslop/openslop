@@ -9,7 +9,10 @@ import {
 	type SceneElement,
 } from "@/lib/canvas/types";
 import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
-import { flatAttributes, splitAttributes } from "@/lib/video/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 
 const makeEl = (
 	type: CanvasContentElement["type"],
@@ -56,6 +59,16 @@ describe("deserializeWithScenes", () => {
 		expect(scenes[0].children[0].type).toBe("narration");
 	});
 
+	it("names scenes with the given id factory", () => {
+		const scenes = deserializeWithScenes(
+			"<narration>a</narration>\n--- Scene 2 ---\n<narration>b</narration>",
+			undefined,
+			(index) => `scene-${index}`,
+		);
+
+		expect(scenes.map((scene) => scene.id)).toEqual(["scene-0", "scene-1"]);
+	});
+
 	it("keeps metadata tags out of the scene", () => {
 		const scenes = deserializeWithScenes(
 			'<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright" language="en">A girl</metadata_character><narration>hello</narration>',
@@ -91,7 +104,7 @@ describe("deserializeWithScenes", () => {
 				makeEl("image", "", { url: "https://cdn/a.png", durationSec: "3" }),
 				makeEl("narration", "hello"),
 			]),
-			makeScene([makeEl("clip", "", { url: "https://cdn/b.mp4" })]),
+			makeScene([makeEl("video", "", { url: "https://cdn/b.mp4" })]),
 		];
 
 		const osml = serializeOSMLWithScenes(original);
@@ -110,8 +123,8 @@ describe("deserializeWithScenes", () => {
 			"hello",
 		);
 
-		const secondClip = scenes[1].children[0];
-		expect(secondClip.type).toBe("clip");
-		expect(flatAttributes(secondClip).url).toBe("https://cdn/b.mp4");
+		const secondVideo = scenes[1].children[0];
+		expect(secondVideo.type).toBe("video");
+		expect(flatAttributes(secondVideo).url).toBe("https://cdn/b.mp4");
 	});
 });

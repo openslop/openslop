@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { unauthorized } from "@/lib/api/response";
 import { createPublicRouteHandler } from "@/lib/api/route-handler";
 import { createClient } from "@/lib/supabase/server";
 
-const ERROR_MESSAGES: Record<string, string> = {
+const Outcome = z.enum(["valid", "invalid", "inactive", "expired"]);
+
+const REJECTIONS: Record<Exclude<z.infer<typeof Outcome>, "valid">, string> = {
 	invalid: "Invalid access code",
 	inactive: "This code is no longer active",
 	expired: "This code has expired",
@@ -29,15 +32,8 @@ export const POST = createPublicRouteHandler({
 		});
 
 		if (error) throw error;
-		if (typeof data !== "string") {
-			throw new Error("validate_access_code returned an unexpected result");
-		}
-		if (data !== "valid") {
-			return NextResponse.json(
-				{ error: ERROR_MESSAGES[data] ?? ERROR_MESSAGES.invalid },
-				{ status: 401 },
-			);
-		}
+		const outcome = Outcome.parse(data);
+		if (outcome !== "valid") return unauthorized(REJECTIONS[outcome]);
 
 		return NextResponse.json({ redirect: "/signup" });
 	},

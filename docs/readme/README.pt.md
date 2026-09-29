@@ -71,7 +71,7 @@ Digite uma linha. Escolha 16:9 ou 9:16, um idioma, um modelo e uma duração, ou
 
 ### Sloppy escreve com você
 
-O copiloto mora no painel da esquerda. Ele lê o roteiro, esboça a história, escreve as cenas e encaixa os clipes no diálogo. Tudo o que ele faz aparece no canvas enquanto você assiste.
+O copiloto mora no painel da esquerda. Ele lê o roteiro, esboça a história, escreve as cenas e encaixa os cartões de vídeo no diálogo. Tudo o que ele faz aparece no canvas enquanto você assiste.
 
 [Como funciona um turno →](../../ARCHITECTURE.md#sloppy)
 
@@ -88,7 +88,7 @@ O copiloto mora no painel da esquerda. Ele lê o roteiro, esboça a história, e
 
 ### Um storyboard, não uma caixa de prompt
 
-Cada cena é uma pilha de cartões: narração, personagem, imagem, imagem animada, clipe, som, música. Edite qualquer prompt, escolha um modelo por cartão, arraste para reordenar e insira onde você passar o mouse.
+Cada cena é uma pilha de cartões: narração, personagem, imagem, vídeo, som, música. Edite qualquer prompt, escolha um modelo por cartão, arraste para reordenar e insira onde você passar o mouse.
 
 [O modelo de documento →](../../lib/canvas)
 
@@ -105,7 +105,7 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, imagem anima
 
 ### Um clique gera tudo
 
-**Generate all** (gerar tudo) coloca cada elemento na fila e roda as dependências primeiro: um quadro parado antes do clipe animado dele, um avatar antes da imagem em que ele aparece. Mude um prompt depois e o cartão diz **Stale** (desatualizado) e o motivo.
+**Generate all** (gerar tudo) coloca cada elemento na fila e roda as dependências primeiro: o cartão de vídeo do qual uma cena continua antes da própria cena, um avatar antes da imagem em que ele aparece. Mude um prompt depois e o cartão diz **Stale** (desatualizado) e o motivo.
 
 [O grafo de geração →](../../ARCHITECTURE.md#generation-graph)
 
@@ -122,13 +122,13 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, imagem anima
 
 ### Player e linha do tempo
 
-Assista ao corte enquanto ele vai sendo preenchido, com legendas palavra por palavra. Quatro faixas embaixo: vídeo, voz, efeitos, música. Arraste pela régua, pule por cena ou troque para a tira do storyboard.
+Assista ao corte enquanto ele vai sendo preenchido, com legendas palavra por palavra. Quatro faixas embaixo: visuais, voz, efeitos, música. Arraste pela régua, pule por cena ou troque para a tira do storyboard.
 
-[O player →](../../app/components/video)
+[O player →](../../app/components/player)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/video"><picture>
+  <a href="../../app/components/player"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
     <img src="../../assets/features/timeline-light.svg" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%">
   </picture></a>
@@ -156,7 +156,7 @@ Os modelos hospedados vêm com sua conta. Cole uma chave da Anthropic, Runware, 
 **Também vem na caixa:**
 
 - **[Legendas](../../app/components/canvas/panel/CaptionsPanel.tsx)** — Seis predefinições, doze fontes, revelação palavra por palavra ou linha por linha, e cada cor, borda e posição é sua para mudar.
-- **[Exportação em até 4K](../../app/components/video/ExportButton.tsx)** — Renderiza no Remotion Lambda em blocos paralelos e entrega um MP4.
+- **[Exportação em até 4K](../../app/components/player/ExportButton.tsx)** — Renderiza no Remotion Lambda em blocos paralelos e entrega um MP4.
 - **[Histórico de versões](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Salva automaticamente enquanto você trabalha, agrupado em checkpoints. Veja qualquer versão e restaure.
 - **[Personagens e estilo de arte](../../app/components/canvas/elements/AssetsSection.tsx)** — Dê nome a um personagem uma vez e cada imagem, fala e avatar fica consistente.
 - **[Templates](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime e mais. Cada um define um estilo, um narrador e uma duração.

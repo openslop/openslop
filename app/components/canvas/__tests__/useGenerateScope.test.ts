@@ -4,15 +4,14 @@ import type { Descendant, Editor } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
-import { nodeBuilder } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/video/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 const registry: ConnectorRegistry = {
 	llm: {},
 	tts: {},
 	image: {},
-	animated_image: {},
 	video: {},
 	sfx: {},
 	music: {},
@@ -21,6 +20,7 @@ const registry: ConnectorRegistry = {
 let editorUnderTest: Editor;
 
 vi.mock("slate-react", () => ({
+	useSlateStatic: () => editorUnderTest,
 	useSlateSelector: <T>(selector: (editor: Editor) => T) =>
 		selector(editorUnderTest),
 }));
@@ -28,7 +28,6 @@ vi.mock("slate-react", () => ({
 vi.mock("react", () => ({
 	useCallback: <T>(fn: T) => fn,
 	useMemo: <T>(fn: () => T) => fn(),
-	useDeferredValue: <T>(value: T) => value,
 }));
 
 let queue: GenerationQueue;
@@ -39,13 +38,18 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 }));
 
 // The hook under test is about which elements get queued, so bind a real
-// resolver rather than standing up the config and project providers.
+// context rather than standing up the config and project providers.
 const store = createProjectStore();
 
-const resolve = () => nodeBuilder(registry, store.getState());
+const context = () => ({
+	store,
+	state: store.getState(),
+	canvas: [],
+	registry,
+});
 
-vi.mock("@/lib/generation/useNodeBuilder", () => ({
-	useNodeBuilder: () => resolve(),
+vi.mock("@/lib/generation/useBuildContext", () => ({
+	useBuildContext: () => context,
 }));
 
 function makeElement(
@@ -68,8 +72,7 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	const node = nodeBuilder(registry, store.getState())(forElement(element));
-	queue.commitResult(node, {
+	queue.commitResult(buildNode(forElement(element), context()), {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,
 	});
@@ -212,14 +215,14 @@ describe("useGenerateScope", () => {
 	const sceneTwo = [makeElement("c", "image", "a scene away")];
 
 	it("enqueues only the elements it is given", async () => {
-		useGenerateScope(sceneOne, "scene").run();
+		useGenerateScope(() => sceneOne, "scene").run();
 		expect(enqueuedIds()).toEqual(["a", "b"]);
 	});
 
 	it("queues nothing when the scope is already current", async () => {
 		[...sceneOne, ...sceneTwo].forEach(commitCurrent);
 
-		useGenerateScope(sceneTwo, "scene").run();
+		useGenerateScope(() => sceneTwo, "scene").run();
 		expect(enqueuedIds()).toEqual([]);
 	});
 
@@ -228,7 +231,7 @@ describe("useGenerateScope", () => {
 		expect(enqueuedIds()).toEqual(["a", "b", "c"]);
 
 		vi.clearAllMocks();
-		useGenerateScope(sceneTwo, "scene").run();
+		useGenerateScope(() => sceneTwo, "scene").run();
 		expect(enqueuedIds()).toEqual(["c"]);
 	});
 });
@@ -237,7 +240,7 @@ describe("scope description", () => {
 	const useDescription = (
 		elements: CanvasContentElement[],
 		subject: Parameters<typeof useGenerateScope>[1] = "project",
-	) => useGenerateScope(elements, subject).description;
+	) => useGenerateScope(() => elements, subject).description;
 
 	it("reports no work when nothing in scope has a prompt", () => {
 		expect(useDescription([makeElement("a", "image", "")], "scene")).toBe(

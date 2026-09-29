@@ -1,22 +1,29 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import {
+	characterAvatars,
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
-import { characterAvatarElementId } from "@/lib/project/characterAvatar";
 
-/** Avatars reach the plugin as dependency results, keyed by avatar node id. */
+/** Keyed by declaring them for an element that names these characters. */
 function avatarResults(
 	avatars: Record<string, string>,
 ): Record<string, AssetResult> {
+	const element: CanvasContentElement = {
+		id: "img",
+		type: "image",
+		generationAttributes: { characters: Object.keys(avatars).join(", ") },
+		children: [],
+	};
+	const urls = Object.values(avatars);
 	return Object.fromEntries(
-		Object.entries(avatars)
-			.filter(([, url]) => url)
-			.map(([name, url]) => [
-				characterAvatarElementId(name),
-				{ imageUrl: url, durationSec: 0 },
-			]),
+		characterAvatars
+			.specs(element)
+			.flatMap(([key], i) =>
+				urls[i] ? [[key, { imageUrl: urls[i], durationSec: 0 }]] : [],
+			),
 	);
 }
 
@@ -28,14 +35,11 @@ describe("character-references plugin", () => {
 		dependencies = avatarResults(avatars);
 	};
 
-	function runBeforeGenerate(
-		p: ConnectorPlugin<ParamsWithCharacters>,
-		params: ParamsWithCharacters,
-	) {
-		if (!p.beforeGenerate) {
-			throw new Error(`Plugin "${p.name}" has no beforeGenerate hook`);
+	function runBeforeGenerate(params: ParamsWithCharacters) {
+		if (!plugin.beforeGenerate) {
+			throw new Error(`Plugin "${plugin.name}" has no beforeGenerate hook`);
 		}
-		return p.beforeGenerate(params, { dependencies });
+		return plugin.beforeGenerate(params, { dependencies });
 	}
 
 	beforeEach(() => {
@@ -49,7 +53,7 @@ describe("character-references plugin", () => {
 			Granny: "https://img/granny.png",
 		});
 
-		const result = runBeforeGenerate(plugin, {
+		const result = runBeforeGenerate({
 			prompt: "Red meets Granny",
 			characters: "Red,Granny",
 		});
@@ -65,7 +69,7 @@ describe("character-references plugin", () => {
 			Wolf: "",
 		});
 
-		const result = runBeforeGenerate(plugin, {
+		const result = runBeforeGenerate({
 			prompt: "The wolf howls",
 			characters: "Wolf",
 		});
@@ -76,7 +80,7 @@ describe("character-references plugin", () => {
 
 	it("returns params unchanged when no characters attribute", () => {
 		const params: ParamsWithCharacters = { prompt: "A sunset" };
-		const result = runBeforeGenerate(plugin, params);
+		const result = runBeforeGenerate(params);
 		expect(result).toEqual(params);
 	});
 
@@ -86,7 +90,7 @@ describe("character-references plugin", () => {
 			Bob: "https://img/bob.png",
 		});
 
-		const result = runBeforeGenerate(plugin, {
+		const result = runBeforeGenerate({
 			prompt: "Hello",
 			characters: " Alice , Bob ",
 		});
@@ -103,7 +107,7 @@ describe("character-references plugin", () => {
 			Bob: "",
 		});
 
-		const result = runBeforeGenerate(plugin, {
+		const result = runBeforeGenerate({
 			prompt: "Hello",
 			characters: "Alice,Bob",
 		});
@@ -119,7 +123,7 @@ describe("character-references plugin", () => {
 			Alice: "https://img/alice.png",
 		});
 
-		const result = runBeforeGenerate(plugin, {
+		const result = runBeforeGenerate({
 			prompt: "Hello",
 			characters: "Alice,Unknown",
 		});

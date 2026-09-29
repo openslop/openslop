@@ -78,16 +78,16 @@ function UserProfile() {
 							<DropdownMenuLabel className="text-label text-muted-foreground">
 								Mode
 							</DropdownMenuLabel>
-							{THEME_MODES.map((m) => (
+							{THEME_MODES.map((mode) => (
 								<DropdownMenuItem
-									key={m.value}
-									onClick={() => setTheme(m.value)}
+									key={mode.value}
+									onClick={() => setTheme(mode.value)}
 									className="cursor-pointer"
 								>
 									<span className="flex w-4 items-center justify-center">
-										{theme === m.value && <Check className="size-3.5" />}
+										{theme === mode.value && <Check className="size-3.5" />}
 									</span>
-									{m.label}
+									{mode.label}
 								</DropdownMenuItem>
 							))}
 						</DropdownMenuSubContent>

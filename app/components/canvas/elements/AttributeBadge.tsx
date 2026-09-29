@@ -4,11 +4,17 @@ import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { CanvasContentElement } from "@/lib/canvas/types";
+import {
+	CONTINUITY_ATTR,
+	continuityDef,
+} from "@/lib/connectors/video/startFrame";
 import { cn } from "@/lib/utils";
+import { ContinuityReferencesPopover } from "./attributes/ContinuitySection";
 import { ReferenceImagesPopover } from "./attributes/ReferenceImagesPopover";
+import { StartFramePicker } from "./attributes/StartFramePicker";
 import { ModelAttribute } from "./attributes/ModelAttribute";
 import { TextAttributePopover } from "./attributes/TextAttributePopover";
-import { flatAttributes } from "@/lib/video/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 const UNSET = "—";
 
@@ -66,8 +72,26 @@ export function AttributeBadge({
 	}
 
 	if (spec.edit.kind === "images") {
+		const popover = { element, attrKey, label: spec.label, hideLabel };
+		return spec.edit.continuity ? (
+			<ContinuityReferencesPopover
+				{...popover}
+				toggle={
+					<AttributeBadge
+						element={element}
+						attrKey={CONTINUITY_ATTR}
+						spec={continuityDef}
+					/>
+				}
+			/>
+		) : (
+			<ReferenceImagesPopover {...popover} />
+		);
+	}
+
+	if (spec.edit.kind === "frame") {
 		return (
-			<ReferenceImagesPopover
+			<StartFramePicker
 				element={element}
 				attrKey={attrKey}
 				label={spec.label}

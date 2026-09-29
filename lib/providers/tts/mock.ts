@@ -160,6 +160,10 @@ export class MockTTS
 		},
 	];
 
+	async getVoice(voiceId: string): Promise<VoiceInfo | null> {
+		return this.voices.find((voice) => voice.id === voiceId) ?? null;
+	}
+
 	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
 		const shuffled = [...this.voices].sort(() => Math.random() - 0.5);
 		return params.limit ? shuffled.slice(0, params.limit) : shuffled;

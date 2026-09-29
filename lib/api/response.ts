@@ -18,8 +18,8 @@ export function serverError(message: string) {
 	return errorResponse(message, 500);
 }
 
-export function unauthorized() {
-	return errorResponse("Unauthorized", 401);
+export function unauthorized(message = "Unauthorized") {
+	return errorResponse(message, 401);
 }
 
 export function forbidden() {

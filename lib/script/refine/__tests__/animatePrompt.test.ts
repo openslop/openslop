@@ -4,12 +4,12 @@ import { animateImagePrompt, animateImageScene } from "../animatePrompt";
 describe("animateImagePrompt", () => {
 	it("names the scene the user is looking at", () => {
 		expect(animateImagePrompt(9)).toBe(
-			"Animate the image in scene 9, reusing the frame it has already generated.",
+			"Animate the image in scene 9 and use its existing result (if it exists) as the start frame for the video.",
 		);
 	});
 
-	it("says nothing about ids or tool arguments", () => {
-		expect(animateImagePrompt(9)).not.toMatch(/deps|still|id=/);
+	it("says nothing about ids or attributes", () => {
+		expect(animateImagePrompt(9)).not.toMatch(/id=|startFrame|continuity|http/);
 	});
 
 	it("reads back the scene it named", () => {

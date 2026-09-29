@@ -1,4 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
+import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -7,9 +9,12 @@ import {
 	forElement,
 	isNodeStale,
 	needsGeneration,
+	type BuildContext,
 } from "@/lib/generation/graph";
+import { buildNodes } from "@/lib/generation/resolveGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { useNodeBuilder } from "@/lib/generation/useNodeBuilder";
+import { useBuildContext } from "@/lib/generation/useBuildContext";
+import { useLiveNodes } from "@/lib/generation/useLiveNodes";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 
 export type GenerateScope = {
@@ -60,23 +65,30 @@ function describe(
 }
 
 /**
- * The generate control for any slice of the document. `subject` names that
- * slice, so what a control says and what it queues are decided in one place.
+ * The generate control for any slice of the document. `select` reads that slice
+ * from the document as it is, and `subject` names it, so what a control says
+ * and what it queues are decided in one place. Memoize `select`.
  */
 export function useGenerateScope(
-	elements: CanvasContentElement[],
+	select: (editor: Editor) => CanvasContentElement[],
 	subject: GenerateSubject,
 ): GenerateScope {
 	const queue = useGenerationQueue();
-	const buildNode = useNodeBuilder();
+	const editor = useSlateStatic();
+	const context = useBuildContext();
 
-	const nodes = useMemo(
-		() =>
-			elements
-				.map((element) => buildNode(forElement(element)))
-				.filter((node) => node.inputs.prompt),
-		[elements, buildNode],
+	const buildScope = useCallback(
+		(ctx: BuildContext) =>
+			buildNodes(select(editor).map(forElement), ctx).filter(
+				(node) => node.inputs.prompt,
+			),
+		[select, editor],
 	);
+	const buildLive = useCallback(
+		() => buildScope(context()),
+		[buildScope, context],
+	);
+	const nodes = useLiveNodes(buildLive);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -91,9 +103,14 @@ export function useGenerateScope(
 		(q) => nodes.filter((node) => isNodeStale(node, q)).length,
 	);
 
+	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
-		queue.enqueueGraph(nodes.filter((node) => needsGeneration(node, queue)));
-	}, [queue, nodes]);
+		const ctx = context();
+		queue.enqueueGraph(
+			buildScope(ctx).filter((node) => needsGeneration(node, queue)),
+			ctx,
+		);
+	}, [queue, buildScope, context]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

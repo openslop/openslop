@@ -5,9 +5,9 @@ import {
 	getFunctionName,
 	getSiteName,
 	REGION,
-} from "@/lib/video/lambda-config";
-import { RenderRequest, type RenderHandle } from "@/lib/video/render-api";
-import { COMPOSITION_ID } from "@/lib/video/types";
+} from "@/lib/render/lambda-config";
+import { RenderRequest, type RenderHandle } from "@/lib/render/render-api";
+import { COMPOSITION_ID } from "@/lib/render/types";
 
 export const POST = createSessionRouteHandler({
 	schema: RenderRequest,

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { motionTransform } from "@/lib/video/motionEffects";
-import type { MotionEffect } from "@/lib/video/motionEffectNames";
+import { motionTransform } from "@/lib/render/motionEffects";
+import type { MotionEffect } from "@/lib/render/motionEffectNames";
 
 const clip: React.CSSProperties = { overflow: "hidden" };
 

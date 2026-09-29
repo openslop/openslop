@@ -13,7 +13,7 @@ import {
 	DEFAULT_BORDER_WIDTH,
 	type CaptionEmphasis,
 	type CaptionTextStyle,
-} from "@/lib/video/captionStyle";
+} from "@/lib/captions/captionStyle";
 import { PanelField } from "./PanelCard";
 
 const EMPHASIS_OPTIONS: MediaToggleOption<CaptionEmphasis>[] = [

@@ -3,14 +3,15 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { ModelRef } from "@/lib/connectors/types";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
+import { voicePreview } from "@/lib/providers/tts/voicePreview";
+import { requiredVoiceId } from "./request-schema-fields";
 import type { RouteFamily } from "./route-families";
 
-export const createVoiceSearchHandler = <TModels, TPicked extends ModelRef>(
-	family: RouteFamily<TModels, TPicked>,
-	models: TModels,
+export const createVoiceSearchHandler = <TPicked extends ModelRef>(
+	family: RouteFamily<TPicked>,
 ) =>
 	family.createQueryHandler({
-		schema: voiceSearchParamsSchema.and(family.model(models)),
+		schema: voiceSearchParamsSchema.and(family.model("tts")),
 		label: "Voice search",
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
@@ -19,29 +20,23 @@ export const createVoiceSearchHandler = <TModels, TPicked extends ModelRef>(
 		},
 	});
 
-const previewParamsSchema = z.object({ url: z.url() });
+const previewParamsSchema = z.object({ voiceId: requiredVoiceId });
 
-export const createVoicePreviewHandler = <TModels, TPicked extends ModelRef>(
-	family: RouteFamily<TModels, TPicked>,
-	models: TModels,
+/**
+ * A preview is fetched from our blob storage if available, otherwise live
+ * from the TTS provider and uploaded to blob storage.
+ */
+export const createVoicePreviewHandler = <TPicked extends ModelRef>(
+	family: RouteFamily<TPicked>,
 ) =>
 	family.createQueryHandler({
-		schema: previewParamsSchema.and(family.model(models)),
-		label: "Voice preview fetch",
+		schema: previewParamsSchema.and(family.model("tts")),
+		label: "Voice preview",
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
-			const upstream = await tts.fetchVoicePreview(input.url);
-			if (!upstream.ok)
-				return new NextResponse(null, { status: upstream.status });
-			const body = await upstream.arrayBuffer();
-			return new NextResponse(body, {
-				status: 200,
-				headers: {
-					"Content-Type":
-						upstream.headers.get("Content-Type") ?? "application/octet-stream",
-					"Content-Length": String(body.byteLength),
-					"Cache-Control": "public, max-age=3600",
-				},
-			});
+			return NextResponse.json(
+				{ preview: await voicePreview(tts, input.voiceId) },
+				{ headers: { "Cache-Control": "private, max-age=3600" } },
+			);
 		},
 	});
