@@ -91,6 +91,14 @@ describe("POST /api/validate-code", () => {
 		expect((await res.json()).error).toContain("validate-code failed");
 	});
 
+	it("surfaces a 500 when the RPC answers something it never should", async () => {
+		mockRpc.mockResolvedValue({ data: "banana", error: null });
+
+		const res = await POST(makeRequest({ code: "ABC123" }));
+		expect(res.status).toBe(500);
+		expect((await res.json()).error).toContain("validate-code failed");
+	});
+
 	it("succeeds for valid code", async () => {
 		mockRpc.mockResolvedValue({ data: "valid", error: null });
 
