@@ -60,13 +60,13 @@ export class HttpLLMGateway extends GatewayClient<
 		params: LLMGenerateParams,
 		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		const res = await apiFetch(this.route, {
+		const response = await apiFetch(this.route, {
 			method: "POST",
 			body: { ...params, stream: true },
 			signal,
 		});
-		if (!res.body) throw new Error("No response body");
-		yield* readSSE<LLMStreamChunk>(res.body);
+		if (!response.body) throw new Error("No response body");
+		yield* readSSE<LLMStreamChunk>(response.body);
 	}
 }
 
@@ -77,11 +77,11 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 
 	/** A voice search names its model like a generation does, so the route knows whose key to read. */
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const result = await apiJson<{ voices: VoiceInfo[] }>(
+		const { voices } = await apiJson<{ voices: VoiceInfo[] }>(
 			`${this.route}/voices`,
 			{ params: { ...params, ...this.model } },
 		);
-		return result.voices;
+		return voices;
 	}
 
 	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {

@@ -40,9 +40,9 @@ export default function AccessCodeInput() {
 					{ method: "POST", body: { code } },
 				);
 				router.push(redirect);
-			} catch (err) {
-				console.error("Access code validation failed", err);
-				resetWithError(errorMessage(err));
+			} catch (cause) {
+				console.error("Access code validation failed", cause);
+				resetWithError(errorMessage(cause));
 			} finally {
 				setLoading(false);
 			}
@@ -50,7 +50,7 @@ export default function AccessCodeInput() {
 		[router, resetWithError],
 	);
 
-	const apply = (entry: CodeEntry | null) => {
+	const applyEntry = (entry: CodeEntry | null) => {
 		if (!entry) return;
 		setValues(entry.values);
 		if (entry.focusIndex !== null) {
@@ -63,27 +63,27 @@ export default function AccessCodeInput() {
 		const entry = typeChar(values, index, value);
 		if (!entry) return;
 		setError("");
-		apply(entry);
+		applyEntry(entry);
 	};
 
 	const handleKeyDown = (
 		index: number,
-		e: React.KeyboardEvent<HTMLInputElement>,
+		event: React.KeyboardEvent<HTMLInputElement>,
 	) => {
-		if (e.key !== "Backspace") return;
-		apply(eraseBefore(values, index));
+		if (event.key !== "Backspace") return;
+		applyEntry(eraseBefore(values, index));
 	};
 
-	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-		e.preventDefault();
-		const entry = pasteCode(e.clipboardData.getData("text"));
+	const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		const entry = pasteCode(event.clipboardData.getData("text"));
 		if (!entry) return;
 		setError("");
-		apply(entry);
+		applyEntry(entry);
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleSubmit = (event: React.FormEvent) => {
+		event.preventDefault();
 		if (!isComplete(values)) {
 			setError(INCOMPLETE_CODE);
 			return;
@@ -98,25 +98,25 @@ export default function AccessCodeInput() {
 		>
 			<div>
 				<div className="flex gap-2 justify-center">
-					{values.map((val, i) => (
+					{values.map((value, index) => (
 						<input
-							key={i}
-							ref={(el) => {
-								inputRefs.current[i] = el;
+							key={index}
+							ref={(element) => {
+								inputRefs.current[index] = element;
 							}}
 							type="text"
 							inputMode="text"
 							maxLength={1}
-							value={val}
-							onChange={(e) => handleChange(i, e.target.value)}
-							onKeyDown={(e) => handleKeyDown(i, e)}
-							onPaste={i === 0 ? handlePaste : undefined}
+							value={value}
+							onChange={(event) => handleChange(index, event.target.value)}
+							onKeyDown={(event) => handleKeyDown(index, event)}
+							onPaste={index === 0 ? handlePaste : undefined}
 							disabled={loading}
-							aria-label={`Code character ${i + 1}`}
+							aria-label={`Code character ${index + 1}`}
 							spellCheck={false}
 							autoComplete="off"
 							className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
-							autoFocus={i === 0}
+							autoFocus={index === 0}
 						/>
 					))}
 				</div>

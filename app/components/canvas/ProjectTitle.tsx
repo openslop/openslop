@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Pencil } from "@/components/ui/icon";
+import { IconButton } from "@/components/ui/icon-button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useProject } from "@/lib/project/useProject";
 import { useSloppy } from "../sloppy/SloppyProvider";
 
@@ -16,7 +18,7 @@ export function ProjectTitle() {
 		if (!loading) return null;
 		return (
 			<div className="mb-3 flex h-8 items-center">
-				<div className="shimmer-surface h-7 w-48 rounded-md" />
+				<Skeleton className="h-7 w-48" />
 			</div>
 		);
 	}
@@ -55,14 +57,15 @@ export function ProjectTitle() {
 			<h1 className="font-body text-heading font-semibold text-foreground">
 				{title}
 			</h1>
-			<button
-				type="button"
+			<IconButton
+				ariaLabel="Edit title"
+				size="sm"
+				variant="quiet"
+				className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={startEditing}
-				className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
-				aria-label="Edit title"
 			>
-				<Pencil className="h-3.5 w-3.5" />
-			</button>
+				<Pencil size={14} />
+			</IconButton>
 		</div>
 	);
 }

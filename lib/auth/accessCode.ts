@@ -12,7 +12,7 @@ export interface CodeEntry {
 }
 
 export const isComplete = (values: string[]): boolean =>
-	values.length === ACCESS_CODE_LENGTH && values.every((v) => v !== "");
+	values.length === ACCESS_CODE_LENGTH && values.every((value) => value !== "");
 
 /**
  * Next state for typing into one box. `null` means the keystroke is rejected
@@ -48,6 +48,6 @@ export function pasteCode(text: string): CodeEntry | null {
 		.slice(0, ACCESS_CODE_LENGTH);
 	if (!pasted) return null;
 
-	const values = emptyAccessCode().map((_, i) => pasted[i] ?? "");
+	const values = emptyAccessCode().map((_, index) => pasted[index] ?? "");
 	return { values, focusIndex: isComplete(values) ? null : pasted.length };
 }

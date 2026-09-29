@@ -130,7 +130,7 @@ const toVoiceInfo = (voice: Voice): VoiceInfo => ({
 	id: voice.id,
 	name: voice.name,
 	language: voice.language,
-	gender: TTS_GENDERS.find((g) => g === voice.gender),
+	gender: TTS_GENDERS.find((gender) => gender === voice.gender),
 	description: voice.description,
 	previewUrl: voice.preview_file_url ?? undefined,
 });

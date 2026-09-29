@@ -13,7 +13,7 @@ export type NodeInputs = z.infer<typeof NodeInputsSchema>;
 
 /** `NodeInputs` plus the identity each dependency resolved to. */
 export const GenerationInputsSchema = NodeInputsSchema.extend({
-	dependencies: z.record(z.string(), z.string()),
+	dependencies: z.record(z.string(), z.string()).default({}),
 });
 
 export type GenerationInputs = z.infer<typeof GenerationInputsSchema>;

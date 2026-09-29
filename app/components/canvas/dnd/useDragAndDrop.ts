@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-	DragEndEvent,
-	DragOverEvent,
-	DragStartEvent,
-	UniqueIdentifier,
+	type DragEndEvent,
+	type DragOverEvent,
+	type DragStartEvent,
+	type UniqueIdentifier,
 	PointerSensor,
 	TouchSensor,
 	useSensor,
@@ -11,8 +11,7 @@ import {
 } from "@dnd-kit/core";
 import { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
-import { moveDraggedElement } from "@/lib/canvas/dragOps";
-import { findElementById } from "@/lib/canvas/editorOps";
+import { crossSceneTransfer, moveDraggedElement } from "@/lib/canvas/dragOps";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { createDragTransferStore } from "./DragTransferContext";
 
@@ -42,33 +41,10 @@ export function useDragAndDrop(editor: Editor) {
 		setActiveId(event.active.id);
 	}, []);
 
+	// Leaving every droppable arrives as `over: null`.
 	const handleDragOver = useCallback(
-		(event: DragOverEvent) => {
-			// Leaving every droppable arrives as `over: null`, below the early return.
-			dragTransferStore.set(null);
-
-			const { active, over } = event;
-			if (!over?.id || active.id === over.id) return;
-			if (active.data.current?.type === "scene") return;
-
-			const fromSceneId = active.data.current?.sceneId;
-			const toSceneId = over.data.current?.sceneId;
-
-			if (!fromSceneId || !toSceneId || fromSceneId === toSceneId) return;
-
-			const overEntry = findElementById(editor, String(over.id));
-			if (!overEntry) return;
-
-			const [overNode, overPath] = overEntry;
-			const atIndex = isSceneElement(overNode)
-				? overNode.children.length
-				: overPath[overPath.length - 1];
-			dragTransferStore.set({
-				itemId: String(active.id),
-				fromSceneId,
-				toSceneId,
-				atIndex,
-			});
+		({ active, over }: DragOverEvent) => {
+			dragTransferStore.set(over && crossSceneTransfer(editor, active, over));
 		},
 		[dragTransferStore, editor],
 	);

@@ -8,13 +8,9 @@ export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {
 		name: "art-style",
 		dependencies: [dependency("artStyle", () => forArtStyle)],
 		transformPrompt(prompt, ctx) {
-			const style = requireContext(
-				ctx,
-				"state",
-				"art-style",
-			).metadata.style.trim();
-			if (!style) return prompt;
-			return `${style}. ${prompt}`;
+			const { metadata } = requireContext(ctx, "state", "art-style");
+			const style = metadata.style.trim();
+			return style ? `${style}. ${prompt}` : prompt;
 		},
 	};
 }

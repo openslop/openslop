@@ -59,6 +59,16 @@ describe("deserializeWithScenes", () => {
 		expect(scenes[0].children[0].type).toBe("narration");
 	});
 
+	it("names scenes with the given id factory", () => {
+		const scenes = deserializeWithScenes(
+			"<narration>a</narration>\n--- Scene 2 ---\n<narration>b</narration>",
+			undefined,
+			(index) => `scene-${index}`,
+		);
+
+		expect(scenes.map((scene) => scene.id)).toEqual(["scene-0", "scene-1"]);
+	});
+
 	it("keeps metadata tags out of the scene", () => {
 		const scenes = deserializeWithScenes(
 			'<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright" language="en">A girl</metadata_character><narration>hello</narration>',

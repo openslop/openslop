@@ -33,6 +33,18 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	elementImage: () => undefined,
 	elementStates: () => [],
 	readMetadata: () => metadata,
+	readSettings: () => ({
+		title: metadata.title,
+		style: metadata.style,
+		language: metadata.language,
+		format: metadata.videoSettings.format,
+		length: metadata.videoSettings.length,
+		aspectRatio: metadata.videoSettings.aspectRatio,
+		narration: metadata.narration,
+		characters: [],
+		referenceImageCount: 0,
+		scriptIsEmpty: false,
+	}),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
@@ -52,6 +64,17 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain(
 			"- Red: a girl in a red cloak (voice: child)",
 		);
+	});
+
+	it("hands back the settings, which the prompt no longer carries", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_settings", input: {} },
+			context(),
+		);
+
+		expect(outcome.ok && outcome.output).toContain("- title: Little Red");
+		expect(outcome.ok && outcome.output).toContain("- art style: claymation");
+		expect(SNAPSHOT_TOOLS.has("read_settings")).toBe(true);
 	});
 
 	it("says the canvas is empty rather than handing back nothing", async () => {
@@ -349,6 +372,17 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).not.toContain("over by");
 	});
 
+	const onScreen = (id: string, seconds: number) => ({
+		id,
+		type: "video" as const,
+		sceneNumber: 1,
+		seconds,
+		words: 0,
+		dialogueIds: [],
+		durationSec: seconds,
+		trimToDialogue: false,
+	});
+
 	it("reports what each visual is on screen for, and the dialogue holding it", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "measure_element_lengths", input: {} },
@@ -377,10 +411,42 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 image img1: 30.0s, from 90 words of dialogue after it (nar1)",
+			"Scene 1 image img1: 30.0s, 90 words of dialogue (nar1) after it.",
 		);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 2 video ai1: 1.0s, nothing after it, so it holds the minimum",
+			"Scene 2 video ai1: 1.0s, the minimum, no dialogue after it.",
+		);
+	});
+
+	it("says when an untrimmed video's own duration sets its length", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_element_lengths", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						...onScreen("v1", 8),
+						words: 6,
+						dialogueIds: ["nar1"],
+					},
+					onScreen("v2", 5),
+					{
+						...onScreen("v3", 30),
+						durationSec: 5,
+						words: 90,
+						dialogueIds: ["nar2"],
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v1: 8.0s, its full duration, untrimmed; 6 words of dialogue (nar1) after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v2: 5.0s, its full duration, untrimmed; no dialogue after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v3: 30.0s, 90 words of dialogue (nar2) after it, longer than its 5.0s duration.",
 		);
 	});
 
@@ -541,7 +607,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toBe(
-			"No visual elements on the canvas yet.",
+			"No images or videos on the canvas yet.",
 		);
 	});
 
@@ -720,6 +786,7 @@ describe("SLOPPY_TOOLS", () => {
 	it("offers the model exactly the tools the editor can run", () => {
 		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
 			"read_script",
+			"read_settings",
 			"edit_script",
 			"write_script",
 			"adapt_script",
@@ -774,6 +841,7 @@ describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
+			"read_settings",
 			"review_script",
 			"view_avatar",
 			"view_image",

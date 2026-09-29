@@ -146,54 +146,20 @@ describe("createAutosaver", () => {
 		expect(saveProject).toHaveBeenCalledTimes(1);
 	});
 
-	it("does not save when the loaded state is unchanged", async () => {
+	it("does not save the document it was built from", async () => {
 		setTitle();
 		const autosaver = build();
-		autosaver.markSaved();
-		// The echo a real open produces: metadata written back with identical content.
-		store.getState().updateMetadata({ title: "Moon Rabbit" });
+
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 
 		expect(saveProject).not.toHaveBeenCalled();
-		expect(onSaved).not.toHaveBeenCalled();
-	});
-
-	it("does not save the document it was handed as already saved", async () => {
-		setTitle();
-		// Slate is filled in an effect, so the editor is empty until markSaved.
-		let script = "";
-		const autosaver = createAutosaver({
-			projectId,
-			read: () => content(extractStoreSnapshot(store), script),
-			onSaved,
-			onError,
-		});
-
-		autosaver.schedule();
-		script = "<osml/>";
-		autosaver.markSaved();
-		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
-
-		expect(saveProject).not.toHaveBeenCalled();
-	});
-
-	it("saves an edit made after the baseline was taken", async () => {
-		setTitle();
-		const autosaver = build();
-		autosaver.markSaved();
-
-		edit();
-		autosaver.schedule();
-		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
-
-		expect(saveProject).toHaveBeenCalledTimes(1);
 	});
 
 	it("saves the first real edit after an unchanged open", async () => {
 		setTitle();
 		const autosaver = build();
-		autosaver.markSaved();
+		// The echo a real open produces: metadata written back with identical content.
 		store.getState().updateMetadata({ title: "Moon Rabbit" });
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
@@ -247,7 +213,6 @@ describe("createAutosaver", () => {
 	it("holds saves while suspended and takes them again on resume", async () => {
 		setTitle();
 		const autosaver = build();
-		autosaver.markSaved();
 		autosaver.suspend();
 
 		edit();
@@ -264,7 +229,6 @@ describe("createAutosaver", () => {
 	it("stays quiet on resume when nothing was held", async () => {
 		setTitle();
 		const autosaver = build();
-		autosaver.markSaved();
 		edit();
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
@@ -280,7 +244,6 @@ describe("createAutosaver", () => {
 	it("persists a pending edit before suspending", async () => {
 		setTitle();
 		const autosaver = build();
-		autosaver.markSaved();
 		edit();
 		autosaver.schedule();
 
@@ -303,7 +266,6 @@ describe("createAutosaver", () => {
 			onSaved,
 			onError,
 		});
-		autosaver.markSaved();
 
 		edit();
 		autosaver.schedule();

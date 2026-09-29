@@ -12,11 +12,11 @@ type RequestOptions = {
 	signal?: AbortSignal;
 };
 
-async function readErrorMessage(res: Response): Promise<string> {
-	const body: unknown = await res.json().catch(() => undefined);
+async function readErrorMessage(response: Response): Promise<string> {
+	const body: unknown = await response.json().catch(() => undefined);
 	return (
 		ApiErrorEnvelope.safeParse(body).data?.error ??
-		`${res.status} ${res.statusText}`
+		`${response.status} ${response.statusText}`
 	);
 }
 
@@ -32,10 +32,10 @@ function buildInit(method: string, body: unknown): RequestInit {
 
 export function buildUrl(url: string, params?: QueryParams): string {
 	if (!params) return url;
-	const qs = new URLSearchParams(
+	const query = new URLSearchParams(
 		mapValues(omitBy(params, isUndefined), String),
 	).toString();
-	return qs ? `${url}?${qs}` : url;
+	return query ? `${url}?${query}` : url;
 }
 
 /** The request never reached the server (offline, stalled connection, DNS). */
@@ -58,18 +58,18 @@ export async function apiFetch(
 	url: string,
 	{ method = "GET", body, params, signal }: RequestOptions = {},
 ): Promise<Response> {
-	const res = await fetch(buildUrl(url, params), {
+	const response = await fetch(buildUrl(url, params), {
 		...buildInit(method, body),
 		signal,
 	}).catch(asUnreachable);
-	if (!res.ok) throw new Error(await readErrorMessage(res));
-	return res;
+	if (!response.ok) throw new Error(await readErrorMessage(response));
+	return response;
 }
 
 export async function apiJson<T>(
 	url: string,
 	options?: RequestOptions,
 ): Promise<T> {
-	const res = await apiFetch(url, options);
-	return res.json() as Promise<T>;
+	const response = await apiFetch(url, options);
+	return response.json() as Promise<T>;
 }
