@@ -4,7 +4,7 @@ import type { Descendant, Editor } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { forElement, type GenerationNode } from "@/lib/generation/graph";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode, resolver } from "@/lib/generation/resolveGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
@@ -50,6 +50,9 @@ const context = () => ({
 
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => context,
+}));
+vi.mock("@/lib/generation/LiveGraphProvider", () => ({
+	useLiveGraph: () => resolver(context()),
 }));
 
 function makeElement(

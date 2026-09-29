@@ -8,7 +8,7 @@ import {
 	type GenerationNode,
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode, resolver } from "@/lib/generation/resolveGraph";
 import { createProjectStore } from "@/lib/project/store";
 
 // Memos hold across renders, as React's do: the bug is a graph kept from an
@@ -52,6 +52,9 @@ const context = () => ({
 });
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => context,
+}));
+vi.mock("@/lib/generation/LiveGraphProvider", () => ({
+	useLiveGraph: () => resolver(context()),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");

@@ -1,3 +1,4 @@
+import identity from "lodash/identity";
 import {
 	resolveElementConnector,
 	type ElementConnector,
@@ -38,21 +39,26 @@ const toNode = (
 	},
 });
 
-/** One graph's worth of state: nodes shared within it, and the cycle guard. */
-const resolver = (ctx: BuildContext) => {
-	const resolved = new Map<string, JobNode>();
+/** An id alone does not name a node: it carries the label it was reached under. */
+export const nodeKey = (id: string, ...rest: (string | undefined)[]) =>
+	[id, ...rest].join("\n");
+
+/**
+ * One graph's worth of state: nodes shared within it, and the cycle guard.
+ * `settle` has the last word on every node built, which is how a graph hands
+ * back a node it already holds.
+ */
+export const resolver = (
+	ctx: BuildContext,
+	settle: (node: GenerationNode) => GenerationNode = identity,
+) => {
+	const resolved = new Map<string, GenerationNode>();
 	const resolving = new Set<string>();
 
-	const build = ({ element, plugins: override, label }: ElementNode) => {
-		const { id } = element;
-		const existing = resolved.get(id);
-		if (existing) return existing;
-		if (resolving.has(id))
-			throw new Error(`Cyclic generation dependency at "${id}"`);
-		resolving.add(id);
-
-		const connector = resolveElementConnector(element, ctx.registry, ctx.state);
-		const plugins = override ?? connector.config.plugins ?? [];
+	const edgesOf = (
+		element: CanvasContentElement,
+		plugins: ConnectorPlugin[],
+	) => {
 		const edges = plugins.flatMap((plugin) =>
 			(plugin.dependencies ?? []).flatMap((declared) =>
 				declared
@@ -63,23 +69,42 @@ const resolver = (ctx: BuildContext) => {
 		const keys = edges.map(([key]) => key);
 		const shared = keys.find((key, i) => keys.indexOf(key) !== i);
 		if (shared)
-			throw new Error(`Two dependencies of "${id}" share the key "${shared}"`);
-		const node = toNode(
-			element,
-			connector,
-			plugins,
-			Object.fromEntries(edges),
-			label,
-		);
+			throw new Error(
+				`Two dependencies of "${element.id}" share the key "${shared}"`,
+			);
+		return Object.fromEntries(edges);
+	};
 
-		resolving.delete(id);
-		resolved.set(id, node);
-		return node;
+	const build = ({ element, plugins: override, label }: ElementNode) => {
+		const { id } = element;
+		const key = nodeKey(id, label);
+		const existing = resolved.get(key);
+		if (existing) return existing;
+		if (resolving.has(id))
+			throw new Error(`Cyclic generation dependency at "${id}"`);
+		resolving.add(id);
+
+		// A graph outlives a build that throws, and the next one must throw the same.
+		try {
+			const connector = resolveElementConnector(
+				element,
+				ctx.registry,
+				ctx.state,
+			);
+			const plugins = override ?? connector.config.plugins ?? [];
+			const node = settle(
+				toNode(element, connector, plugins, edgesOf(element, plugins), label),
+			);
+			resolved.set(key, node);
+			return node;
+		} finally {
+			resolving.delete(id);
+		}
 	};
 
 	const resolve = (dep: NodeSpec): GenerationNode => {
 		const named = dep(ctx);
-		return isElementNode(named) ? build(named) : named;
+		return isElementNode(named) ? build(named) : settle(named);
 	};
 
 	return resolve;
@@ -88,7 +113,7 @@ const resolver = (ctx: BuildContext) => {
 export const buildNode = (spec: NodeSpec, ctx: BuildContext): GenerationNode =>
 	resolver(ctx)(spec);
 
-/** One graph, so a shared node is built once and a root reached as a dependency keeps no label. */
+/** One graph, so a node two roots share is built once. */
 export const buildNodes = (
 	specs: NodeSpec[],
 	ctx: BuildContext,

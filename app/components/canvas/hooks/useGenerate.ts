@@ -14,8 +14,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 export function useGenerateNode(spec: NodeSpec) {
 	const queue = useGenerationQueue();
 	const context = useBuildContext();
-	const build = useCallback(() => buildNode(spec, context()), [spec, context]);
-	const node = useLiveNode(build);
+	const node = useLiveNode(spec);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 

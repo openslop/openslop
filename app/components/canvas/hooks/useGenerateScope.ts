@@ -9,7 +9,7 @@ import {
 	forElement,
 	isNodeStale,
 	needsGeneration,
-	type BuildContext,
+	type GenerationNode,
 } from "@/lib/generation/graph";
 import { buildNodes } from "@/lib/generation/resolveGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
@@ -40,6 +40,8 @@ export type GenerateCounts = Pick<
 >;
 
 const noun = (count: number) => (count === 1 ? "element" : "elements");
+
+const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);
 
 /** Covers every reason there is no work: no elements, none with a prompt, or a
  * script still being written. */
@@ -77,18 +79,11 @@ export function useGenerateScope(
 	const editor = useSlateStatic();
 	const context = useBuildContext();
 
-	const buildScope = useCallback(
-		(ctx: BuildContext) =>
-			buildNodes(select(editor).map(forElement), ctx).filter(
-				(node) => node.inputs.prompt,
-			),
+	const specs = useCallback(
+		() => select(editor).map(forElement),
 		[select, editor],
 	);
-	const buildLive = useCallback(
-		() => buildScope(context()),
-		[buildScope, context],
-	);
-	const nodes = useLiveNodes(buildLive);
+	const nodes = useLiveNodes(specs).filter(hasPrompt);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -107,10 +102,12 @@ export function useGenerateScope(
 	const run = useCallback(() => {
 		const ctx = context();
 		queue.enqueueGraph(
-			buildScope(ctx).filter((node) => needsGeneration(node, queue)),
+			buildNodes(specs(), ctx)
+				.filter(hasPrompt)
+				.filter((node) => needsGeneration(node, queue)),
 			ctx,
 		);
-	}, [queue, buildScope, context]);
+	}, [queue, specs, context]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

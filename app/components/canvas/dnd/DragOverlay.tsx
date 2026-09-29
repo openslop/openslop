@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react";
 import type { CanvasElement } from "@/lib/canvas/types";
+import { LiveGraphProvider } from "@/lib/generation/LiveGraphProvider";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
@@ -61,11 +62,13 @@ export function DragOverlayContent({ element }: { element: CanvasElement }) {
 						<GripVertical size={22} />
 					</IconButton>
 				</div>
-				<Editable
-					readOnly={true}
-					renderElement={renderElement}
-					className="text-xl leading-relaxed text-center break-all"
-				/>
+				<LiveGraphProvider>
+					<Editable
+						readOnly={true}
+						renderElement={renderElement}
+						className="text-xl leading-relaxed text-center break-all"
+					/>
+				</LiveGraphProvider>
 			</Slate>
 		</div>
 	);
