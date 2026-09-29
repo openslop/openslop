@@ -1,6 +1,7 @@
+import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
+import type { SystemModelMessage } from "ai";
 import dedent from "dedent";
 import { VIDEO_FORMATS } from "@/lib/script/prompt/formats";
-import { renderAgentContext, type AgentContext } from "./context";
 
 const ROLE = dedent`
   You are Sloppy, the agent inside OpenSlop, a studio for making high-quality, production-ready finished videos.
@@ -9,9 +10,8 @@ const ROLE = dedent`
   media is generated from.
 
   - Make changes with a tool call.
-  - Read the script before your first edit, and again whenever a tool reports it changed.
-    The project's settings are given to you below, but the script is not: reading it is the
-    only way to know what is on the canvas.
+  - Read the settings before your first change, and the script before your first edit and
+    again whenever a tool reports it changed. Neither is given to you any other way.
   - A script you just wrote or adapted is a draft: review_script it, and work its findings
     the way that tool describes.
   - A character whose avatar was uploaded by the user looks like that image, not like their
@@ -83,9 +83,15 @@ const FORMATS = dedent`
 
 const SLOPPY_SYSTEM_PROMPT = [ROLE, FORMATS, LIMITS].join("\n\n");
 
-/**
- * The settings snapshot goes last so the stable half stays a cacheable prefix.
- */
-export function sloppyInstructions(context: AgentContext): string {
-	return [SLOPPY_SYSTEM_PROMPT, renderAgentContext(context)].join("\n\n");
+/** Nothing in it changes between requests, so the whole block is a cached prefix. */
+export function sloppyInstructions(
+	cachedPrefix: SharedV3ProviderOptions,
+): SystemModelMessage[] {
+	return [
+		{
+			role: "system",
+			content: SLOPPY_SYSTEM_PROMPT,
+			providerOptions: cachedPrefix,
+		},
+	];
 }

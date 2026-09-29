@@ -37,13 +37,13 @@ function statesOf(states: ElementState[]): string[] {
 	);
 }
 
-/** Settings live in the per-request context block; this reads what it cannot carry. */
+/** What read_settings does not carry: the canvas itself. */
 export const readScript = defineTool({
 	description: dedent`
 	  Read the canvas: the project's characters, the script as XML with the \`id\` of every
 	  element, then where each element's generation stands: ungenerated, queued, generating,
 	  generated, stale (and why), failed (and the error), or pinned to an upload. The
-	  project's settings arrive with every request; this is the script.
+	  settings are in read_settings; this is the script.
 
 	  Read before your first edit, and again after anything changed the script. Ids and text
 	  move when a script is edited, so editing from a stale reading fails.

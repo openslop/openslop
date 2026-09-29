@@ -9,7 +9,6 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { stringifyError } from "@/lib/errors";
 import { sloppyInstructions } from "@/lib/agent/prompt";
-import { agentContextSchema, type AgentContext } from "@/lib/agent/context";
 import {
 	toolCallsMade,
 	upsertMessage,
@@ -35,7 +34,6 @@ export const agentTurnSchema = <TModel extends ModelRef>(
 		.object({
 			projectId: z.uuid(),
 			message: z.unknown(),
-			context: agentContextSchema,
 		})
 		.and(model);
 
@@ -43,7 +41,6 @@ export type AgentTurnRequest = {
 	projectId: string;
 	userId: string;
 	message: SloppyMessage;
-	context: AgentContext;
 	model: string;
 	llm: () => Promise<LLMProvider>;
 };
@@ -71,7 +68,9 @@ export async function streamAgentTurn(
 	await saveConversationMessage(conversationId, incoming);
 
 	const carried = stored?.metadata?.workSeconds ?? 0;
-	const { model, providerOptions } = llm.agentModel(request.model);
+	const { model, providerOptions, cachedPrefix } = llm.agentModel(
+		request.model,
+	);
 
 	const modelMessages = pruneMessages({
 		messages: await convertToModelMessages(pruneTranscript(messages), {
@@ -83,13 +82,14 @@ export async function streamAgentTurn(
 	const startedAt = Date.now();
 	const result = streamText({
 		model,
-		instructions: sloppyInstructions(request.context),
+		instructions: sloppyInstructions(cachedPrefix),
 		messages: modelMessages,
 		tools: SLOPPY_TOOLS,
 		// Withdrawing the tools is what ends a runaway turn: the model has nothing
 		// left to call, so it answers the user instead of looping again.
 		toolChoice: toolCallsMade(messages) >= MAX_TOOL_CALLS ? "none" : "auto",
 		providerOptions,
+		onFinish: ({ usage }) => logger.info({ usage }, "Sloppy turn usage"),
 	});
 
 	return createUIMessageStreamResponse({

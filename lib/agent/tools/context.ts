@@ -8,6 +8,7 @@ import type {
 	Metadata,
 	MetadataCharacter,
 } from "@/lib/project/types";
+import type { AgentContext } from "../context";
 
 /** An element's generated picture and the prompt behind it, never the rest of the result. */
 export type ElementImage = {
@@ -32,6 +33,7 @@ export type AgentToolContext = {
 		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
 	readMetadata: () => Metadata;
+	readSettings: () => AgentContext;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
