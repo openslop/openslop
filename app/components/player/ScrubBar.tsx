@@ -65,13 +65,13 @@ const thumbStyle: CSSProperties = { left: "calc(var(--scrub-pos) * 100%)" };
 
 export function segmentStyle(segs: readonly ScrubSegment[]): CSSProperties[] {
 	let start = 0;
-	return segs.map((seg) => {
+	return segs.map(({ basis }) => {
 		const style = {
-			flexBasis: `${seg.basis * 100}%`,
+			flexBasis: `${basis * 100}%`,
 			"--seg-start": start,
-			"--seg-scale": seg.basis > 0 ? 1 / seg.basis : 0,
+			"--seg-scale": basis > 0 ? 1 / basis : 0,
 		} as CSSProperties;
-		start += seg.basis;
+		start += basis;
 		return style;
 	});
 }
@@ -92,39 +92,38 @@ export function ScrubBar({
 	onScrubStart,
 	onScrubEnd,
 	onHoverChange,
-	segments,
+	segments = SINGLE,
 	disabled,
 	className,
 	children,
 }: ScrubBarProps) {
 	const trackRef = useRef<HTMLDivElement>(null);
 	const [hoverRatio, setHoverRatio] = useState<number | null>(null);
-	const continuous = !segments;
-	const segs = segments ?? SINGLE;
+	const continuous = segments === SINGLE;
 
-	const hoverFrom = (e: PointerEvent<HTMLElement>): ScrubHover | null => {
+	const hoverFrom = (event: PointerEvent<HTMLElement>): ScrubHover | null => {
 		const rect = trackRef.current?.getBoundingClientRect();
 		if (!rect) return null;
-		const x = e.clientX - rect.left;
+		const x = event.clientX - rect.left;
 		return { x, width: rect.width, ratio: clamp(x / rect.width, 0, 1) };
 	};
 
 	const drag = usePointerDrag({
 		onStart: onScrubStart,
-		onMove: (e) => {
-			const hover = hoverFrom(e);
+		onMove: (event) => {
+			const hover = hoverFrom(event);
 			if (hover) onScrub(hover.ratio);
 		},
 		onEnd: onScrubEnd,
 	});
 
-	const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-		const hover = hoverFrom(e);
+	const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+		const hover = hoverFrom(event);
 		if (hover) {
 			setHoverRatio(hover.ratio);
 			onHoverChange?.(hover);
 		}
-		drag.onPointerMove(e);
+		drag.onPointerMove(event);
 	};
 
 	const onPointerLeave = () => {
@@ -133,19 +132,19 @@ export function ScrubBar({
 	};
 
 	const track = useMemo(() => {
-		const styles = segmentStyle(segs);
+		const styles = segmentStyle(segments);
 		return (
 			<div
 				className={cn("flex h-1 w-full", continuous ? "gap-0" : "gap-[2px]")}
 			>
-				{segs.map((seg, i) => (
+				{segments.map(({ id }, index) => (
 					<div
-						key={seg.id}
+						key={id}
 						className={cn(
 							"relative h-full overflow-hidden bg-scrub-track",
 							continuous && "rounded-full",
 						)}
-						style={styles[i]}
+						style={styles[index]}
 					>
 						<div
 							className="absolute inset-y-0 left-0 bg-scrub-hover"
@@ -159,7 +158,7 @@ export function ScrubBar({
 				))}
 			</div>
 		);
-	}, [segs, continuous]);
+	}, [segments, continuous]);
 
 	return (
 		<div

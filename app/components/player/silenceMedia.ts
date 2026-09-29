@@ -7,7 +7,7 @@
  */
 export function silenceMediaIn(node: HTMLElement | null) {
 	if (!node) return;
-	for (const el of node.querySelectorAll("audio, video")) {
-		if (el instanceof HTMLMediaElement && !el.paused) el.pause();
+	for (const media of node.querySelectorAll("audio, video")) {
+		if (media instanceof HTMLMediaElement && !media.paused) media.pause();
 	}
 }

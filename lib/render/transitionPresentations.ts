@@ -16,7 +16,7 @@ type Presentation = TransitionPresentation<any>;
 
 const PRESENTATIONS: Record<
 	TransitionType,
-	(dims: Dimensions) => Presentation
+	(dimensions: Dimensions) => Presentation
 > = {
 	none: () => none(),
 	fade: () => fade(),
@@ -29,7 +29,7 @@ const PRESENTATIONS: Record<
 
 export function getPresentation(
 	name: TransitionType,
-	dims: Dimensions,
+	dimensions: Dimensions,
 ): Presentation {
-	return PRESENTATIONS[name](dims);
+	return PRESENTATIONS[name](dimensions);
 }

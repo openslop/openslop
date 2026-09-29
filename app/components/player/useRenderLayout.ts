@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
-import type { CanvasElement, SceneElement } from "@/lib/canvas/types";
+import type { SceneElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import {
 	useGenerationQueue,
@@ -29,14 +29,14 @@ export function useRenderLayout(editor: Editor): {
 	// the per-keystroke render path: they update when the rendered video would.
 	const layoutKey = useSlateSelector(
 		useCallback(
-			(e: Editor) => getLayoutKey(e.children, transitionType),
+			({ children }: Editor) => getLayoutKey(children, transitionType),
 			[transitionType],
 		),
 	);
 
-	const { layout, scenes } = useMemo(() => {
-		const elements = editor.children as CanvasElement[];
-		const resolved = resolveElements(elements, queue.getElementSnapshot, {
+	return useMemo(() => {
+		const scenes = editor.children.filter(isSceneElement);
+		const resolved = resolveElements(scenes, queue.getElementSnapshot, {
 			captionsEnabled,
 		});
 		return {
@@ -45,7 +45,7 @@ export function useRenderLayout(editor: Editor): {
 				aspectRatio,
 				captionStyle,
 			}),
-			scenes: elements.filter(isSceneElement),
+			scenes,
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
@@ -58,6 +58,4 @@ export function useRenderLayout(editor: Editor): {
 		captionStyle,
 		queue,
 	]);
-
-	return { layout, scenes };
 }

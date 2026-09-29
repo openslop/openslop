@@ -1,11 +1,10 @@
-import type { CanvasElementType } from "@/lib/canvas/types";
-import type {
-	ResolvedElement,
-	Sequence,
-	VideoConfig,
-	RenderLayout,
+import {
+	DEFAULT_CONFIG,
+	type ResolvedElement,
+	type Sequence,
+	type VideoConfig,
+	type RenderLayout,
 } from "./types";
-import { DEFAULT_CONFIG } from "./types";
 import {
 	type AspectRatio,
 	ASPECT_RATIO_DIMENSIONS,
@@ -51,7 +50,7 @@ function createSequence(
 	return { element, start, duration: Math.max(duration, MIN_DURATION_SEC) };
 }
 
-type SequenceMap = Partial<Record<CanvasElementType, Sequence[]>>;
+type SequenceMap = RenderLayout["sequences"];
 
 /**
  * Lays down `element.loops` copies, each `stride` after the last. A stride
@@ -95,14 +94,15 @@ export function buildRenderLayout(
 	elements: ResolvedElement[],
 	options?: BuildLayoutOptions,
 ): RenderLayout {
-	const aspectDims = options?.aspectRatio
+	const dimensions = options?.aspectRatio
 		? ASPECT_RATIO_DIMENSIONS[options.aspectRatio].output
 		: undefined;
-	const cfg = { ...DEFAULT_CONFIG, ...aspectDims, ...options };
+	const config = { ...DEFAULT_CONFIG, ...dimensions, ...options };
 	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
 	// Scenes are laid down one rounded duration at a time while layers are
 	// positioned from the accumulated seconds; snapping here keeps them equal.
-	const onGrid = (sec: number) => toSeconds(toFrames(sec, cfg.fps), cfg.fps);
+	const onGrid = (sec: number) =>
+		toSeconds(toFrames(sec, config.fps), config.fps);
 	const transitionDurationSec = onGrid(transitionOverlapSec(transitionType));
 	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
@@ -153,26 +153,24 @@ export function buildRenderLayout(
 		}
 	}
 
-	const lastEntry = series.at(-1);
-	const totalDurationSec = lastEntry ? lastEntry.start + lastEntry.duration : 0;
+	const last = series.at(-1);
+	const totalDurationSec = last ? last.start + last.duration : 0;
 
-	for (const seqs of Object.values(sequences)) {
-		for (const seq of seqs) {
-			const end = seq.start + seq.duration;
-			if (end > totalDurationSec) {
-				seq.duration = Math.max(MIN_DURATION_SEC, totalDurationSec - seq.start);
-			}
+	for (const sequence of Object.values(sequences).flat()) {
+		const { start } = sequence;
+		if (start + sequence.duration > totalDurationSec) {
+			sequence.duration = Math.max(MIN_DURATION_SEC, totalDurationSec - start);
 		}
 	}
 
 	return {
-		...cfg,
+		...config,
 		series,
 		sequences,
 		totalDurationSec,
 		totalFrames: Math.max(
 			2,
-			Math.ceil(totalDurationSec * cfg.fps - FRAME_EPSILON),
+			Math.ceil(totalDurationSec * config.fps - FRAME_EPSILON),
 		),
 		transitionType,
 		transitionDurationSec,

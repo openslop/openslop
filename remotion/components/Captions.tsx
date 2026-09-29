@@ -24,8 +24,8 @@ export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
 
 	const { words, startTimes } = useMemo(
 		() => ({
-			words: timestamps.map((ts) => ts.text),
-			startTimes: timestamps.map((ts) => ts.start),
+			words: timestamps.map(({ text }) => text),
+			startTimes: timestamps.map(({ start }) => start),
 		}),
 		[timestamps],
 	);

@@ -38,8 +38,8 @@ const TOUCH_EPSILON = 1e-6;
 
 /** A scene's own span ends where the next begins, minus the cross-fade they share. */
 function trimOverlap(series: Sequence[], overlapSec: number): Sequence[] {
-	return series.map((sequence, i) =>
-		i === series.length - 1
+	return series.map((sequence, index) =>
+		index === series.length - 1
 			? sequence
 			: { ...sequence, duration: Math.max(0, sequence.duration - overlapSec) },
 	);

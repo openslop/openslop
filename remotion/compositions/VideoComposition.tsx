@@ -139,20 +139,20 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	);
 	const transitionSeriesNodes = useMemo(
 		() =>
-			series.map((seq, i) => (
-				<Fragment key={seq.element.id}>
-					{i > 0 && transitionFrames > 0 && (
+			series.map(({ element, duration }, index) => (
+				<Fragment key={element.id}>
+					{index > 0 && transitionFrames > 0 && (
 						<TransitionSeries.Transition
 							presentation={presentation}
 							timing={transitionTiming}
 						/>
 					)}
 					<TransitionSeries.Sequence
-						durationInFrames={toFrames(seq.duration, fps)}
+						durationInFrames={toFrames(duration, fps)}
 						premountFor={toFrames(FOREGROUND_PREMOUNT_SEC, fps)}
 					>
 						<SequenceContent
-							element={seq.element}
+							element={element}
 							transitionDurationSec={transitionDurationSec}
 						/>
 					</TransitionSeries.Sequence>
@@ -169,16 +169,16 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	);
 	const layeredSequenceNodes = useMemo(
 		() =>
-			Object.entries(sequences).flatMap(([type, seqs]) =>
-				(seqs ?? []).map((seq, i) => (
+			Object.entries(sequences).flatMap(([type, sequencesOfType]) =>
+				(sequencesOfType ?? []).map(({ element, start, duration }, index) => (
 					<Sequence
-						key={`${type}-${seq.element.id}-${i}`}
-						from={toFrames(seq.start, fps)}
-						durationInFrames={toFrames(seq.duration, fps)}
+						key={`${type}-${element.id}-${index}`}
+						from={toFrames(start, fps)}
+						durationInFrames={toFrames(duration, fps)}
 						premountFor={toFrames(LAYER_PREMOUNT_SEC, fps)}
 					>
 						<SequenceContent
-							element={seq.element}
+							element={element}
 							transitionDurationSec={transitionDurationSec}
 						/>
 					</Sequence>

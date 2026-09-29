@@ -11,7 +11,7 @@ export function QueueProgressBar() {
 	// A reloaded project seeds its finished results back into the queue, so `done`
 	// is nonzero before anything runs; only report progress while generating.
 	const generating = active > 0;
-	const pct = generating ? (done / total) * 100 : 0;
+	const percent = generating ? (done / total) * 100 : 0;
 
 	return (
 		<PlayerShimmer>
@@ -24,7 +24,7 @@ export function QueueProgressBar() {
 					aria-valuenow={generating ? done : 0}
 					aria-label="Generation progress"
 				>
-					<div className={styles.fill} style={{ width: `${pct}%` }} />
+					<div className={styles.fill} style={{ width: `${percent}%` }} />
 				</div>
 				<div className="text-label text-muted-foreground">
 					{generating ? `${done} of ${total} generated` : "Preparing…"}
