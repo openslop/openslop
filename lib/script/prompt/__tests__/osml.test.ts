@@ -40,6 +40,12 @@ describe("osmlSpec", () => {
 		);
 	});
 
+	it("names the loop counts an element keeps, for sound and for music", () => {
+		const allowed = "Allowed values: 1, 2, 3, 4, 5, 6, 7, 8.";
+		expect(spec).toContain(`${allowed} Use more for a sound`);
+		expect(spec).toContain(`${allowed} Use more for music`);
+	});
+
 	it("sets the visual cadence without dictating what the script opens with", () => {
 		expect(spec).toContain(
 			"a new visual (image or video) at least once before every sentence",
