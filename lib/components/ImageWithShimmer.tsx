@@ -30,9 +30,7 @@ export function ImageWithShimmer({
 					setSettled(true);
 				}}
 			/>
-			{!settled && (
-				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-			)}
+			{!settled && <Skeleton className="absolute inset-0" />}
 		</>
 	);
 }

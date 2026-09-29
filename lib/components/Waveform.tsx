@@ -121,9 +121,7 @@ export function Waveform({
 					className="absolute inset-0 bg-foreground"
 					style={{ ...maskStyle, clipPath: "inset(0 100% 0 0)" }}
 				/>
-				{loading && (
-					<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-				)}
+				{loading && <Skeleton className="absolute inset-0" />}
 			</div>
 			<audio
 				ref={audioRef}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil, X, type IconComponent } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
@@ -75,10 +76,7 @@ export function AssetTile({
 					</div>
 				)}
 				{status === "generating" && (
-					<div
-						className="shimmer-surface absolute inset-0 rounded-md"
-						aria-hidden
-					/>
+					<Skeleton className="absolute inset-0" aria-hidden />
 				)}
 				{isGenerationActive(status) && (
 					<GenerationIndicator

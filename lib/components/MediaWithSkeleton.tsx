@@ -42,9 +42,7 @@ export function MediaWithSkeleton({
 				className={`w-full h-full ${fitClass} ${videoInteractive ? "" : "pointer-events-none"}`}
 				onLoadedData={() => setVideoLoaded(true)}
 			/>
-			{!videoLoaded && (
-				<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-			)}
+			{!videoLoaded && <Skeleton className="absolute inset-0" />}
 		</>
 	);
 }
