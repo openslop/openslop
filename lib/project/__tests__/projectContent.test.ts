@@ -47,6 +47,31 @@ describe("parseProjectContent", () => {
 		expect(content.generation.el1).toEqual(snapshot);
 	});
 
+	it("opens a result generated before inputs carried dependencies", () => {
+		const { pinned: _, ...legacy } = snapshot;
+		const result = { durationSec: 0, imageUrl: "a.png" };
+		const attributes = { style: "noir" };
+		const content = parseProjectContent({
+			script: "",
+			store: {},
+			generation: {
+				el1: {
+					...legacy,
+					result,
+					connectorType: "image",
+					resultInputs: { prompt: "a sunset", attributes },
+				},
+			},
+		});
+
+		expect(content.generation.el1).toEqual({
+			...snapshot,
+			result,
+			connectorType: "image",
+			resultInputs: { prompt: "a sunset", attributes, dependencies: {} },
+		});
+	});
+
 	it("throws on a structurally wrong row", () => {
 		expect(() =>
 			parseProjectContent({ script: null, store: {}, generation: {} }),
