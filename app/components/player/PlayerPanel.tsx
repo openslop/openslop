@@ -18,10 +18,7 @@ function FitToAspectRatio({
 	children: ReactNode;
 }) {
 	return (
-		<div
-			className="flex h-full w-full items-center justify-center"
-			style={{ containerType: "size" }}
-		>
+		<div className="@container-size flex h-full w-full items-center justify-center">
 			<div
 				style={{
 					width: `min(100cqw, calc(100cqh * ${ratio}))`,

@@ -75,7 +75,7 @@ export function VolumeControl() {
 			</IconButton>
 			<div className="hidden @[420px]:block">
 				<ScrubBar
-					className="w-[4.5rem]"
+					className="w-18"
 					ariaLabel="Volume"
 					value={muted ? 0 : volume}
 					onScrub={onVolumeChange}

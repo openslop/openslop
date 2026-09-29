@@ -86,8 +86,7 @@ export function SloppyComposer() {
 					}
 				}}
 				placeholder="Write or change the script…"
-				style={{ fieldSizing: "content" }}
-				className="max-h-40 w-full resize-none overflow-y-auto bg-transparent font-body text-label text-panel-fg caret-accent outline-none placeholder:text-muted-foreground focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30"
+				className="field-sizing-content max-h-40 w-full resize-none overflow-y-auto bg-transparent font-body text-label text-panel-fg caret-accent outline-none placeholder:text-muted-foreground focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30"
 			/>
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-center gap-1">

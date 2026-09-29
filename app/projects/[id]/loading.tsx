@@ -150,10 +150,7 @@ export default function Loading() {
 				<div className="relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
 					<div className="flex min-h-0 flex-1 overflow-hidden">
 						{/* Scene list */}
-						<div
-							className="flex-1 overflow-y-auto"
-							style={{ scrollbarGutter: "stable" }}
-						>
+						<div className="flex-1 overflow-y-auto [scrollbar-gutter:stable]">
 							<div className="mx-auto max-w-6xl px-4 py-4">
 								<div className="mb-3 flex h-8 items-center">
 									<Skeleton className="h-7 w-48 rounded-md" />

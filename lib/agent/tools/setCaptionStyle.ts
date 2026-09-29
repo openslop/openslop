@@ -9,6 +9,7 @@ import {
 import {
 	CAPTION_ALIGN_X,
 	CAPTION_ALIGN_Y,
+	CAPTION_BASE_HEIGHT,
 	CAPTION_CASINGS,
 	CAPTION_PALETTE,
 	CAPTION_RANGES,
@@ -40,7 +41,7 @@ export const setCaptionStyle = defineTool({
 
 	  - preset: ${CAPTION_PRESET_KEYS.join(", ")}
 	  - font: ${CAPTION_FONTS.join(", ")}
-	  - fontSize: ${range(CAPTION_RANGES.fontSize)}, authored against a 1080px-tall frame
+	  - fontSize: ${range(CAPTION_RANGES.fontSize)}, authored against a ${CAPTION_BASE_HEIGHT}px-tall frame
 	  - casing: ${CAPTION_CASINGS.join(", ")}
 	  - alignX: ${CAPTION_ALIGN_X.join(", ")}; alignY: ${CAPTION_ALIGN_Y.join(", ")}
 	  - maxWordsPerLine: ${range(CAPTION_RANGES.maxWordsPerLine)}

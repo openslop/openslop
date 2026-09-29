@@ -1,5 +1,5 @@
 import { GripVertical, Plus } from "@/components/ui/icon";
-import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
+import type { DraggableSyntheticListeners } from "@dnd-kit/core";
 import { ActionMenu } from "@/components/ui/action-menu";
 import { IconButton } from "@/components/ui/icon-button";
 
@@ -49,7 +49,7 @@ export function InsertMenu<K extends string>({
 export function DragHandle({
 	listeners,
 }: {
-	listeners?: SyntheticListenerMap;
+	listeners?: DraggableSyntheticListeners;
 }) {
 	return (
 		<IconButton

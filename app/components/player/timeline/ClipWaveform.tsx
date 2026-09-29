@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PEAK_COUNT } from "@/lib/components/peaks";
 import { soundwaveMaskStyle, toBarHeights } from "@/lib/components/soundwave";
 import { usePeaks } from "@/lib/components/usePeaks";
 import { clamp, cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ const SAMPLE_SPACING_PX = 2;
 /** Sample counts snap to this so a resize doesn't rebuild the mask per pixel. */
 const SAMPLE_QUANTUM = 16;
 // Past the count `loadPeaks` extracts, more samples only repeat themselves.
-const SAMPLE_RANGE = { min: 8, max: 200 };
+const SAMPLE_RANGE = { min: 8, max: PEAK_COUNT };
 
 /**
  * The clip's audio as a mask-painted envelope, so it takes its colour from the

@@ -1,6 +1,6 @@
 import { memoAsync } from "@/lib/memoAsync";
 
-const PEAK_COUNT = 200;
+export const PEAK_COUNT = 200;
 
 let sharedAudioContext: AudioContext | null = null;
 const getAudioContext = () => (sharedAudioContext ??= new AudioContext());

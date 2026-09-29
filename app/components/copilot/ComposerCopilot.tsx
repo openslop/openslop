@@ -271,8 +271,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 									handleSubmit();
 							}}
 							placeholder={pasting ? SCRIPT_PLACEHOLDER : undefined}
-							style={{ fieldSizing: "content" }}
-							className="max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+							className="field-sizing-content max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
 						{!hasText && !activeTemplate && !pasting && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">

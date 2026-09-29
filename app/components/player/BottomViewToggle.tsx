@@ -17,5 +17,12 @@ const OPTIONS: MediaToggleOption<BottomView>[] = BOTTOM_VIEW_KEYS.map(
 
 export function BottomViewToggle() {
 	const { view, setView } = useBottomView();
-	return <MediaToggle value={view} options={OPTIONS} onChange={setView} />;
+	return (
+		<MediaToggle
+			ariaLabel="Bottom panel view"
+			value={view}
+			options={OPTIONS}
+			onChange={setView}
+		/>
+	);
 }

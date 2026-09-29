@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { unauthorized } from "@/lib/api/response";
 import { createPublicRouteHandler } from "@/lib/api/route-handler";
+import { ACCESS_CODE_LENGTH } from "@/lib/auth/accessCode";
 import { createClient } from "@/lib/supabase/server";
 
 const Outcome = z.enum(["valid", "invalid", "inactive", "expired"]);
@@ -17,7 +18,7 @@ const ValidateCodeRequest = z.object(
 	{
 		code: z
 			.string({ error: INVALID_FORMAT })
-			.length(6, { message: INVALID_FORMAT }),
+			.length(ACCESS_CODE_LENGTH, { message: INVALID_FORMAT }),
 	},
 	INVALID_FORMAT,
 );
