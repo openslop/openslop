@@ -77,10 +77,17 @@ export function SloppyPanel() {
 	const messages = useSloppyMessages();
 	const { loading } = useSloppy();
 	const endRef = useRef<HTMLDivElement>(null);
+	const lastSentId = useRef<string>(undefined);
 
+	// Jump to the bottom once per sent message (and once for a restored
+	// transcript), then leave scrolling to the user while the reply streams.
+	const sentId = messages?.findLast((m) => m.role === "user")?.id;
 	useEffect(() => {
-		if (endRef.current) scrollIntoContainer(endRef.current, "end", "auto");
-	}, [messages]);
+		if (!endRef.current || sentId === lastSentId.current) return;
+		const restoring = lastSentId.current === undefined;
+		lastSentId.current = sentId;
+		scrollIntoContainer(endRef.current, "end", restoring ? "auto" : "smooth");
+	}, [sentId]);
 
 	return (
 		<div
