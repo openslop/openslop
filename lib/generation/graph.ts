@@ -104,7 +104,7 @@ export type NodeResult = {
 
 /** The read half of the queue, declared here so the graph depends on nothing. */
 export type NodeResults = {
-	getElementSnapshot(id?: string): NodeResult;
+	getElementSnapshot(id: string): NodeResult;
 };
 
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>

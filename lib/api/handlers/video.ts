@@ -1,9 +1,5 @@
 import type { ModelRef, VideoGenerateParams } from "@/lib/connectors/types";
-import {
-	jobVendorParams,
-	providerForJob,
-	type JobHandler,
-} from "../job-handlers";
+import { jobVendorParams, providerForJob, type JobHandler } from "./base";
 
 type VideoMetadata = { providerJobId?: string };
 

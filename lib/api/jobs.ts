@@ -39,11 +39,6 @@ const JobRowSchema = z.object({
 
 export type JobRow = z.infer<typeof JobRowSchema>;
 
-export type AssetQueueMessage = {
-	jobId: string;
-	connectorType: JobConnectorType;
-};
-
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
@@ -109,9 +104,7 @@ export async function updateJob(
 
 export async function enqueueJob(
 	jobId: string,
-	connectorType: JobConnectorType,
 	options?: { delaySeconds: number },
 ): Promise<void> {
-	const message: AssetQueueMessage = { jobId, connectorType };
-	await send(ASSET_QUEUE_TOPIC, message, options);
+	await send(ASSET_QUEUE_TOPIC, { jobId }, options);
 }

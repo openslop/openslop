@@ -62,7 +62,7 @@ export class GenerationQueue implements NodeResults {
 	onCommitted = this.committed.subscribe;
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
-	getElementSnapshot = (id?: string): ElementSnapshot => this.snapshots.get(id);
+	getElementSnapshot = (id: string): ElementSnapshot => this.snapshots.get(id);
 	getResultVersion = () => this.snapshots.getResultVersion();
 	getActiveCount = () => this.snapshots.getActiveCount();
 	getGeneratedCount = () => this.snapshots.getGeneratedCount();

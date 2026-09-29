@@ -70,16 +70,18 @@ function CharacterAssetTile({
 	onRemove?: () => void;
 }) {
 	const { editCharacter } = useAssetEditors();
-	const elementId = characterAvatarElementId(name);
 	const previewUrl = useQueueSelector((queue) =>
 		characterAvatarUrl(queue, name),
+	);
+	const status = useQueueSelector(
+		(queue) => queue.getElementSnapshot(characterAvatarElementId(name)).status,
 	);
 	return (
 		<AssetTile
 			name={name}
 			previewUrl={previewUrl}
 			Icon={User}
-			elementId={elementId}
+			status={status}
 			onEdit={() => editCharacter(name)}
 			onRemove={onRemove}
 			removeAffordance="corner"

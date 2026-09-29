@@ -2,8 +2,10 @@
 
 import { Pencil, X, type IconComponent } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import { isGenerationActive } from "@/lib/generation/snapshots";
+import {
+	isGenerationActive,
+	type GenerationStatus,
+} from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
 import { GenerationIndicator } from "./GenerationIndicator";
 import { RemoveCrossButton } from "./RemoveCrossButton";
@@ -33,7 +35,7 @@ export function AssetTile({
 	name,
 	previewUrl,
 	Icon,
-	elementId,
+	status = "idle",
 	onEdit,
 	onRemove,
 	removeAffordance = "overlay",
@@ -42,16 +44,13 @@ export function AssetTile({
 	name: string;
 	previewUrl?: string;
 	Icon: IconComponent;
-	elementId?: string;
+	status?: GenerationStatus;
 	onEdit?: () => void;
 	onRemove?: () => void;
 	/** "corner" pins a pill-style cross outside the tile so it can coexist with the edit overlay. */
 	removeAffordance?: "overlay" | "corner";
 	fallback?: "initial" | "icon";
 }) {
-	const status = useQueueSelector(
-		(q) => q.getElementSnapshot(elementId).status,
-	);
 	const fallbackContent =
 		fallback === "icon" ? (
 			<Icon className="h-5 w-5" />

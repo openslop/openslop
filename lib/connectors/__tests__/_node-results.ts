@@ -23,6 +23,6 @@ export function stubAvatarResults(
 		]),
 	);
 	return {
-		getElementSnapshot: (id) => (id ? byId.get(id) : undefined) ?? EMPTY,
+		getElementSnapshot: (id) => byId.get(id) ?? EMPTY,
 	};
 }

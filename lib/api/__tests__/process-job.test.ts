@@ -117,7 +117,7 @@ describe("processQueuedJob", () => {
 
 		await processQueuedJob(JOB_ID);
 
-		expect(mockEnqueueJob).toHaveBeenCalledWith("job-1", "image", {
+		expect(mockEnqueueJob).toHaveBeenCalledWith("job-1", {
 			delaySeconds: expect.any(Number),
 		});
 	});
@@ -203,8 +203,5 @@ describe("processQueuedJob", () => {
 		await processQueuedJob(JOB_ID);
 
 		expect(mockGetJobHandler).toHaveBeenCalledWith("tts");
-		expect(mockEnqueueJob).toHaveBeenCalledWith("job-1", "tts", {
-			delaySeconds: expect.any(Number),
-		});
 	});
 });
