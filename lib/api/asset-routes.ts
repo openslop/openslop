@@ -44,7 +44,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 				connectorType: type,
 				request,
 			});
-			await enqueueJob(id, type);
+			await enqueueJob(id);
 			return NextResponse.json({ jobId: id, status: "pending" });
 		},
 	});

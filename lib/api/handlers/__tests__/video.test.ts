@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { ModelRef, VideoGenerateParams } from "@/lib/connectors/types";
-import type { TypedJobRow } from "@/lib/api/job-handlers";
+import type { TypedJobRow } from "../base";
 import { videoHandler } from "../video";
 
 const generate = vi.fn();

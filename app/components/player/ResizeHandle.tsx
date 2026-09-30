@@ -1,8 +1,7 @@
 "use client";
 
 import type { PointerDragProps } from "@/lib/components/usePointerDrag";
-
-type ResizeAxis = "vertical" | "horizontal";
+import type { ResizeAxis } from "./useResize";
 
 const fade = (direction: "to right" | "to bottom") =>
 	`linear-gradient(${direction}, transparent, black 20%, black 80%, transparent)`;

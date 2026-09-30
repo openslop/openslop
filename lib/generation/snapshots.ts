@@ -77,8 +77,7 @@ export class SnapshotStore {
 
 	notify = this.emitter.notify;
 
-	get = (id?: string): ElementSnapshot =>
-		(id && this.state.get(id)) || EMPTY_SNAPSHOT;
+	get = (id: string): ElementSnapshot => this.state.get(id) ?? EMPTY_SNAPSHOT;
 
 	/** Bumps whenever any element's result changes, so observers can rederive. */
 	getResultVersion = () => this.resultVersion;

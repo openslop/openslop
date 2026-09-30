@@ -49,14 +49,14 @@ export function useAgentTools(editor: Editor) {
 				elementImage: (id) => {
 					const element = findNodeById(editor, id)?.[0];
 					if (!element) return undefined;
-					const pictureId = element.type === "image" ? element.id : undefined;
-					const { status, result } = queue.getElementSnapshot(pictureId);
+					const { status, result } = queue.getElementSnapshot(element.id);
 					return {
 						type: element.type,
 						prompt: getPromptText(element),
-						picture: pictureId
-							? { status, url: getPrimaryUrl(result, "image") }
-							: undefined,
+						picture:
+							element.type === "image"
+								? { status, url: getPrimaryUrl(result, "image") }
+								: undefined,
 					};
 				},
 				elementStates: () => {

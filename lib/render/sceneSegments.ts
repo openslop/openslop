@@ -21,7 +21,7 @@ export type SequenceIndex = ReadonlyMap<string, Sequence>;
  * the render payload carries the ordered `series`, not this projection of it.
  */
 export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
-	return new Map(series.map((seq) => [seq.element.id, seq]));
+	return new Map(series.map((sequence) => [sequence.element.id, sequence]));
 }
 
 export function findSceneSequence(
@@ -37,7 +37,7 @@ export function findSceneSequence(
  * `toFrames` rounds. Segment starts are arbitrary reals, so comparing a rounded
  * playhead against an unrounded boundary reports the previous segment whenever
  * the seek rounded down. Rounding both sides the same way makes a seek to
- * `toFrames(seg.start, fps)` land in `seg` by construction.
+ * `toFrames(segment.start, fps)` land in `segment` by construction.
  */
 export function findSegmentIndexAtFrame(
 	segments: SceneSegment[],
@@ -46,7 +46,7 @@ export function findSegmentIndexAtFrame(
 ): number {
 	if (segments.length === 0) return -1;
 	const index = segments.findIndex(
-		(seg) => frame < toFrames(seg.start + seg.duration, fps),
+		({ start, duration }) => frame < toFrames(start + duration, fps),
 	);
 	return index === -1 ? segments.length - 1 : index;
 }
@@ -63,24 +63,24 @@ function toThumbnail(element: ResolvedElement): SeekThumbnail | null {
  * bar contiguous.
  */
 export function buildSceneSegments(layout: RenderLayout): SceneSegment[] {
-	const out: SceneSegment[] = [];
-	for (const seq of layout.series) {
-		const prev = out.at(-1);
-		if (prev?.sceneId === seq.element.sceneId) {
-			prev.duration = seq.start + seq.duration - prev.start;
+	const segments: SceneSegment[] = [];
+	for (const { element, start, duration } of layout.series) {
+		const last = segments.at(-1);
+		if (last?.sceneId === element.sceneId) {
+			last.duration = start + duration - last.start;
 			continue;
 		}
-		if (prev) {
-			prev.duration = Math.max(0, prev.duration - layout.transitionDurationSec);
+		if (last) {
+			last.duration = Math.max(0, last.duration - layout.transitionDurationSec);
 		}
-		out.push({
-			id: seq.element.id,
-			sceneId: seq.element.sceneId,
-			label: `Scene ${seq.element.sceneNumber}`,
-			start: seq.start,
-			duration: seq.duration,
-			thumbnail: toThumbnail(seq.element),
+		segments.push({
+			id: element.id,
+			sceneId: element.sceneId,
+			label: `Scene ${element.sceneNumber}`,
+			start,
+			duration,
+			thumbnail: toThumbnail(element),
 		});
 	}
-	return out;
+	return segments;
 }
