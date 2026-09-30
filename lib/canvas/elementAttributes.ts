@@ -2,6 +2,7 @@ import omit from "lodash/omit";
 import pick from "lodash/pick";
 import {
 	DEFAULT_DURATION,
+	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
@@ -47,7 +48,6 @@ const LOOPS = boundsOf(LOOPS_OPTIONS);
 const DURATION = boundsOf(DURATION_OPTIONS);
 
 const DEFAULT_VOLUME = VOLUME.max;
-const DEFAULT_LOOPS = 1;
 
 /** Converts the 0–10 authoring scale to the 0–1 gain players expect. */
 export function volumeToGain(volume: number): number {
@@ -81,7 +81,7 @@ export function getDuration(element: CanvasContentElement): number {
 export function getLoops(element: CanvasContentElement): number {
 	return clampedNumber(element.layoutAttributes?.loops, {
 		...LOOPS,
-		fallback: DEFAULT_LOOPS,
+		fallback: Number(DEFAULT_LOOPS),
 	});
 }
 

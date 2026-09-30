@@ -1,6 +1,7 @@
 import dedent from "dedent";
 import {
 	DEFAULT_DURATION,
+	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 } from "@/lib/canvas/types";
@@ -79,7 +80,7 @@ export function osmlSpec(language: string): string {
 		## <sound>
 		- A sound effect that no <video> already makes. The body is a short, plain sound prompt, like rain, wind, a fire crackling or footsteps.
 		- Place it right before the line it belongs to.
-		- loops: how many times it plays back to back (default 1). Allowed values: ${LOOPS_OPTIONS.join(", ")}. Use more for a sound that fills a scene, like rain or wind, and 1 for a single moment, like a door. Example:
+		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. Use more for a sound that fills a scene, like rain or wind, and 1 for a single moment, like a door. Example:
 		  <sound loops="4">Wind</sound>
 		  <narration emotion="peaceful">They walked through the windy forest.</narration>
 		- Never a voice: no sighs, gasps, laughter or crying.
@@ -88,6 +89,6 @@ export function osmlSpec(language: string): string {
 		- Music for the mood of part of the story. The body is a short, plain music prompt. Example: <music length="long">Soft, slow, sad piano for a breakup</music>
 		- Change the music every few scenes.
 		- length: ${Object.values(MusicLength).join(", ")}.
-		- loops: how many times it plays back to back (default 1). Allowed values: ${LOOPS_OPTIONS.join(", ")}. Use more for music that should fill several scenes.
+		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. Use more for music that should fill several scenes.
 	`;
 }

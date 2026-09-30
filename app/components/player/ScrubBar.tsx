@@ -166,14 +166,13 @@ export function ScrubBar({
 			aria-label={ariaLabel}
 			aria-disabled={disabled || undefined}
 			className={cn(
-				"group relative flex items-center",
+				"group relative flex touch-none items-center",
 				disabled ? "pointer-events-none opacity-50" : "cursor-pointer",
 				SCRUB_BAR_HEIGHT,
 				className,
 			)}
 			style={
 				{
-					touchAction: "none",
 					"--scrub-pos": value,
 					"--scrub-preview": hoverRatio ?? 0,
 				} as CSSProperties

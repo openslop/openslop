@@ -26,10 +26,7 @@ export function canvasVersionStorage(projectId: string): CanvasVersionStorage {
 				.order("created_at", { ascending: false })
 				.limit(LIST_LIMIT);
 			if (error) throw error;
-			return z
-				.array(MetaSchema)
-				.parse(data ?? [])
-				.map(toVersion);
+			return z.array(MetaSchema).parse(data).map(toVersion);
 		},
 
 		async read(id) {

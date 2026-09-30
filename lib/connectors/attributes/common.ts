@@ -1,5 +1,7 @@
 import { ArrowsStretch, Freeze, Repeat, Trim } from "@/components/ui/icon";
 import {
+	DEFAULT_DURATION,
+	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
@@ -9,10 +11,10 @@ import {
 	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
 } from "@/lib/project/aspectRatio";
-import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
+import { DEFAULT_MOTION, MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
 import type { AttributeDef } from "./schema";
 
-/** Attribute leaves shared across multiple connector types; each type supplies its own default. */
+/** Attribute leaves shared across multiple connector types. */
 export const volumeDef = (defaultValue: string): AttributeDef => ({
 	key: "volume",
 	label: "Volume",
@@ -20,27 +22,27 @@ export const volumeDef = (defaultValue: string): AttributeDef => ({
 	default: defaultValue,
 });
 
-export const motionDef = (defaultValue: string): AttributeDef => ({
+export const motionDef: AttributeDef = {
 	key: "motion",
 	label: "Motion",
 	edit: { kind: "enum", options: MOTION_EFFECTS },
-	default: defaultValue,
-});
+	default: DEFAULT_MOTION,
+};
 
-export const durationDef = (defaultValue: string): AttributeDef => ({
+export const durationDef: AttributeDef = {
 	key: "duration",
 	label: "Duration",
 	unit: "s",
 	edit: { kind: "enum", options: DURATION_OPTIONS },
-	default: defaultValue,
-});
+	default: DEFAULT_DURATION,
+};
 
-export const loopsDef = (defaultValue: string): AttributeDef => ({
+export const loopsDef: AttributeDef = {
 	key: "loops",
 	label: "Loops",
 	edit: { kind: "enum", options: LOOPS_OPTIONS },
-	default: defaultValue,
-});
+	default: DEFAULT_LOOPS,
+};
 
 export const resolutionDef = (
 	options: readonly VideoResolution[],

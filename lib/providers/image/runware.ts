@@ -14,6 +14,8 @@ type RawImageResult = { data: string; format: ImageFormat } & WithMetadata;
 
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
+const DEFAULT_SIZE = { width: 2848, height: 1600 };
+
 export class RunwareImage
 	extends BaseProvider<VendorParams<ImageGenerateParams>, RawImageResult>
 	implements ImageProvider
@@ -47,8 +49,8 @@ export class RunwareImage
 			const results = await runware.imageInference({
 				positivePrompt: params.prompt,
 				model: params.model,
-				width: params.width ?? 2848,
-				height: params.height ?? 1600,
+				width: params.width ?? DEFAULT_SIZE.width,
+				height: params.height ?? DEFAULT_SIZE.height,
 				outputType: "base64Data",
 				outputFormat: RUNWARE_FORMATS[format],
 				numberResults: 1,

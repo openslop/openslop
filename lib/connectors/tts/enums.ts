@@ -56,6 +56,7 @@ export const TTS_LANGUAGES = [
 	"pa",
 ] as const;
 export type TTSLanguage = (typeof TTS_LANGUAGES)[number];
+export const DEFAULT_TTS_LANGUAGE: TTSLanguage = "en";
 
 export const TTS_ACCENTS = [
 	"american",
