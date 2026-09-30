@@ -338,7 +338,7 @@ describe("createSpeakerVoicePlugin", () => {
 				canvas: [],
 				registry: DEFAULT_CONNECTOR_REGISTRY,
 			});
-			return node && "inputs" in node ? node.inputs.attributes : undefined;
+			return node && "node" in node ? node.node.inputs.attributes : undefined;
 		};
 
 		it("is the voice's pair once picked, and the element's own until then", () => {

@@ -32,11 +32,11 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
 			.map(lowerCase),
 		...Object.values(node.dependsOn)
 			.filter(
-				(dep) =>
+				({ node: dep }) =>
 					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
 					needsGeneration(dep, results),
 			)
-			.map((dep) => dep.label ?? "an upstream element"),
+			.map(({ label }) => label ?? "an upstream element"),
 	]);
 }
 

@@ -38,7 +38,7 @@ const forPreviousVisual =
 		const element = previousVisual(canvas, id);
 		return element
 			? { element, label: LABEL }
-			: sourceNode(derivedNodeId("first", id), {}, LABEL);
+			: { node: sourceNode(derivedNodeId("first", id), {}), label: LABEL };
 	};
 
 /** No result means the empty leaf: nothing came before the video. */

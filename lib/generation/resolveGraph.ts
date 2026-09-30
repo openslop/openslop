@@ -9,6 +9,7 @@ import { getPromptText } from "./inputs";
 import {
 	isElementNode,
 	type BuildContext,
+	type Edge,
 	type ElementNode,
 	type GenerationNode,
 	type JobNode,
@@ -20,11 +21,9 @@ const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	dependsOn: Record<string, GenerationNode>,
-	label: string | undefined,
+	dependsOn: Record<string, Edge>,
 ): JobNode => ({
 	id: element.id,
-	label,
 	inputs: {
 		prompt: getPromptText(element),
 		attributes: element.generationAttributes ?? {},
@@ -38,10 +37,6 @@ const toNode = (
 		config: { ...connector.config, plugins },
 	},
 });
-
-/** An id alone does not name a node: it carries the label it was reached under. */
-export const nodeKey = (id: string, ...rest: (string | undefined)[]) =>
-	[id, ...rest].join("\n");
 
 /**
  * One graph's worth of state: nodes shared within it, and the cycle guard.
@@ -63,7 +58,7 @@ export const resolver = (
 			(plugin.dependencies ?? []).flatMap((declared) =>
 				declared
 					.specs(element)
-					.map(([key, spec]) => [key, resolve(spec)] as const),
+					.map(([key, spec]) => [key, reach(spec)] as const),
 			),
 		);
 		const keys = edges.map(([key]) => key);
@@ -75,10 +70,9 @@ export const resolver = (
 		return Object.fromEntries(edges);
 	};
 
-	const build = ({ element, plugins: override, label }: ElementNode) => {
+	const build = ({ element, plugins: override }: ElementNode) => {
 		const { id } = element;
-		const key = nodeKey(id, label);
-		const existing = resolved.get(key);
+		const existing = resolved.get(id);
 		if (existing) return existing;
 		if (resolving.has(id))
 			throw new Error(`Cyclic generation dependency at "${id}"`);
@@ -93,21 +87,23 @@ export const resolver = (
 			);
 			const plugins = override ?? connector.config.plugins ?? [];
 			const node = settle(
-				toNode(element, connector, plugins, edgesOf(element, plugins), label),
+				toNode(element, connector, plugins, edgesOf(element, plugins)),
 			);
-			resolved.set(key, node);
+			resolved.set(id, node);
 			return node;
 		} finally {
 			resolving.delete(id);
 		}
 	};
 
-	const resolve = (dep: NodeSpec): GenerationNode => {
-		const named = dep(ctx);
-		return isElementNode(named) ? build(named) : settle(named);
+	const reach = (spec: NodeSpec): Edge => {
+		const named = spec(ctx);
+		return isElementNode(named)
+			? { node: build(named), label: named.label }
+			: { ...named, node: settle(named.node) };
 	};
 
-	return resolve;
+	return (spec: NodeSpec): GenerationNode => reach(spec).node;
 };
 
 export const buildNode = (spec: NodeSpec, ctx: BuildContext): GenerationNode =>

@@ -110,10 +110,19 @@ describe("character-voices plugin", () => {
 
 		expect(declared).toMatchObject([
 			{
-				id: "project:voice:Sol",
-				inputs: { attributes: { voiceId: "v-sol", ...CARTESIA } },
+				node: {
+					id: "project:voice:Sol",
+					inputs: { attributes: { voiceId: "v-sol", ...CARTESIA } },
+				},
+				label: "Sol's voice",
 			},
-			{ id: "project:voice:Mira", inputs: { attributes: { voiceId: "" } } },
+			{
+				node: {
+					id: "project:voice:Mira",
+					inputs: { attributes: { voiceId: "" } },
+				},
+				label: "Mira's voice",
+			},
 		]);
 	});
 

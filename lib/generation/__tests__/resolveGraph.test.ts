@@ -71,15 +71,14 @@ describe("resolveGraph", () => {
 		expect(resolve(offCanvas).inputs.attributes.kind).toBe("avatar");
 	});
 
-	it("labels a dependency for its dependent without renaming the node itself", () => {
+	it("labels the edge to a dependency rather than the node it reaches", () => {
 		const image = element("img", "image");
 		const video = element("vid", "video", { startFrame: "previous" });
 		const canvas = [image, video];
 
-		expect(resolveOn(video, canvas).dependsOn.previousVisual?.label).toBe(
-			"the previous visual",
-		);
-		expect(resolveOn(image, canvas).label).toBeUndefined();
+		const edge = resolveOn(video, canvas).dependsOn.previousVisual;
+		expect(edge?.label).toBe("the previous visual");
+		expect(edge?.node).toEqual(resolveOn(image, canvas));
 	});
 
 	it("keys each edge by the name its plugin declared", () => {
@@ -113,9 +112,9 @@ describe("resolveGraph", () => {
 	it("gives a referenced avatar its own art-style and reference-image edges", () => {
 		const avatar = Object.values(
 			resolve(element("img", "image", { characters: "Alice" })).dependsOn,
-		).find((node) => node.id === characterAvatarElementId("Alice"));
+		).find(({ node }) => node.id === characterAvatarElementId("Alice"))?.node;
 		expect(
-			Object.values(avatar?.dependsOn ?? {}).map((node) => node.id),
+			Object.values(avatar?.dependsOn ?? {}).map(({ node }) => node.id),
 		).toEqual([
 			"project:artStyle",
 			"project:referenceImages",
@@ -178,7 +177,7 @@ describe("resolveGraph", () => {
 		const img = element("img", "image");
 		const el = element("vid-1", "video", { startFrame: "previous" });
 		const video = resolveOn(el, [img, el]);
-		const frame = video.dependsOn.previousVisual;
+		const frame = video.dependsOn.previousVisual?.node;
 		if (!frame) throw new Error("expected a previous-visual dependency");
 
 		const queue = new GenerationQueue();

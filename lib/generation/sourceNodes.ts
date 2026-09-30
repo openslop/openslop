@@ -9,26 +9,24 @@ import { sourceNode, type NodeSpec } from "./graph";
  * Leaves of the graph. A plugin that declares one inherits staleness on every
  * change to it, which is what keeps reads from drifting out of the inputs.
  */
-export const forReferenceImages: NodeSpec = ({ state }) =>
-	sourceNode(
-		"project:referenceImages",
-		{ urls: state.referenceImages.join(",") },
-		"the reference images",
-	);
+export const forReferenceImages: NodeSpec = ({ state }) => ({
+	node: sourceNode("project:referenceImages", {
+		urls: state.referenceImages.join(","),
+	}),
+	label: "the reference images",
+});
 
-export const forArtStyle: NodeSpec = ({ state }) =>
-	sourceNode(
-		"project:artStyle",
-		{ style: state.metadata.style.trim() },
-		"the art style",
-	);
+export const forArtStyle: NodeSpec = ({ state }) => ({
+	node: sourceNode("project:artStyle", { style: state.metadata.style.trim() }),
+	label: "the art style",
+});
 
-export const forAspectRatio: NodeSpec = ({ state }) =>
-	sourceNode(
-		"project:aspectRatio",
-		{ aspectRatio: state.metadata.videoSettings.aspectRatio },
-		"the aspect ratio",
-	);
+export const forAspectRatio: NodeSpec = ({ state }) => ({
+	node: sourceNode("project:aspectRatio", {
+		aspectRatio: state.metadata.videoSettings.aspectRatio,
+	}),
+	label: "the aspect ratio",
+});
 
 export const voiceNodeId = (characterName?: string) =>
 	`project:voice:${characterName ?? "narrator"}`;
@@ -47,11 +45,13 @@ export const forVoice =
 	({ state }) => {
 		const voice = metadataVoiceFor(state.metadata, characterName);
 		const model = resolveModel("tts", voice, ...candidates);
-		return sourceNode(
-			voiceNodeId(characterName),
-			{ voiceId: voice?.voiceId ?? "", ...model },
-			`${characterName ?? "the narrator"}'s voice`,
-		);
+		return {
+			node: sourceNode(voiceNodeId(characterName), {
+				voiceId: voice?.voiceId ?? "",
+				...model,
+			}),
+			label: `${characterName ?? "the narrator"}'s voice`,
+		};
 	};
 
 export const aspectDimensions = (state: ProjectData) =>

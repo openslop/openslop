@@ -47,12 +47,11 @@ const contextNow = (registry = DEFAULT_CONNECTOR_REGISTRY) => {
 	}));
 };
 
-const tone = dependency(
-	"tone",
-	({ generationAttributes }) =>
-		() =>
-			sourceNode("project:tone", { tone: generationAttributes?.tone ?? "" }),
-);
+const tone = dependency("tone", ({ generationAttributes }) => () => ({
+	node: sourceNode("project:tone", {
+		tone: generationAttributes?.tone ?? "",
+	}),
+}));
 const TONED: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: { plugins: [{ name: "tone", dependencies: [tone] }] },
@@ -102,23 +101,22 @@ describe("liveGraph", () => {
 		const third = element("third", "video", "a tilt", linked);
 		edit(first, second, third);
 
-		const reached = read(second).dependsOn.previousVisual;
+		const reached = read(second).dependsOn.previousVisual?.node;
 
 		expect(reached?.id).toBe("first");
-		expect(read(third).dependsOn.previousVisual?.dependsOn.previousVisual).toBe(
-			reached,
-		);
+		expect(
+			read(third).dependsOn.previousVisual?.node.dependsOn.previousVisual?.node,
+		).toBe(reached);
 	});
 
-	it("labels a dependency for its dependent without renaming the node itself", () => {
+	it("labels the edge to a dependency and shares the node it reaches", () => {
 		const image = element("img", "image", "a sunset");
 		const video = element("vid", "video", "a pan", linked);
 		edit(image, video);
 
-		expect(read(video).dependsOn.previousVisual?.label).toBe(
-			"the previous visual",
-		);
-		expect(read(image).label).toBeUndefined();
+		const edge = read(video).dependsOn.previousVisual;
+		expect(edge?.label).toBe("the previous visual");
+		expect(edge?.node).toBe(read(image));
 	});
 
 	it("keeps a node that reads as it did a revision ago", () => {
@@ -143,7 +141,7 @@ describe("liveGraph", () => {
 		expect([read(warm), read(cold)]).toEqual(before);
 		expect(read(warm)).toBe(before[0]);
 		expect(read(cold)).toBe(before[1]);
-		expect(read(cold).dependsOn.tone?.inputs.attributes.tone).toBe("cold");
+		expect(read(cold).dependsOn.tone?.node.inputs.attributes.tone).toBe("cold");
 	});
 
 	it("replaces an edited node and every node that depends on it", () => {
@@ -156,7 +154,7 @@ describe("liveGraph", () => {
 		edit(element("first", "video", "a slow pan", linked), second, narration);
 
 		expect(read(second)).not.toBe(dependent);
-		expect(read(second).dependsOn.previousVisual?.inputs.prompt).toBe(
+		expect(read(second).dependsOn.previousVisual?.node.inputs.prompt).toBe(
 			"a slow pan",
 		);
 		expect(read(narration)).toBe(bystander);
@@ -172,7 +170,7 @@ describe("liveGraph", () => {
 		edit(other, image, video);
 
 		expect(read(video)).not.toBe(before);
-		expect(read(video).dependsOn.previousVisual?.id).toBe("img");
+		expect(read(video).dependsOn.previousVisual?.node.id).toBe("img");
 	});
 
 	it("reads the project again when its state changes, keeping what reads the same", () => {
@@ -186,7 +184,7 @@ describe("liveGraph", () => {
 		context = contextNow();
 
 		expect(read(image)).not.toBe(styled);
-		expect(read(image).dependsOn.artStyle?.inputs.attributes.style).toBe(
+		expect(read(image).dependsOn.artStyle?.node.inputs.attributes.style).toBe(
 			"noir",
 		);
 		expect(read(narration)).toBe(spoken);

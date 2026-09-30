@@ -17,7 +17,7 @@ import { GenerationQueue } from "../queue";
 const config: ConnectorConfig = {};
 
 const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, node]));
+	Object.fromEntries(nodes.map((node) => [node.id, { node }]));
 
 function node(
 	id: string,
@@ -191,7 +191,7 @@ describe("isSameGraph", () => {
 	});
 
 	it("sees a dependency stand in for an element, and the reverse", () => {
-		const leaf = sourceNode("~first:a", {}, "the previous visual");
+		const leaf = sourceNode("~first:a", {});
 		expect(isSameGraph(node("a", [leaf]), node("a", [node("b")]))).toBe(false);
 	});
 

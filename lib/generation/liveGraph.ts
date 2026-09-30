@@ -4,10 +4,11 @@ import {
 	isSameGraph,
 	isSourceNode,
 	type BuildContext,
+	type Edge,
 	type GenerationNode,
 	type NodeSpec,
 } from "./graph";
-import { nodeKey, resolver } from "./resolveGraph";
+import { resolver } from "./resolveGraph";
 
 type Revision = {
 	document: Editor["children"];
@@ -17,11 +18,16 @@ type Revision = {
 
 /** Elements may read one source differently, as two narrations do a voice through their own models. */
 const keyOf = (node: GenerationNode) =>
-	nodeKey(node.id, node.label, isSourceNode(node) ? node.identity : undefined);
+	isSourceNode(node) ? `${node.id}\n${node.identity}` : node.id;
+
+/** The same dependencies, by identity, under the same keys and labels. */
+const sameEdges = (a: Record<string, Edge>, b: Record<string, Edge>) =>
+	shallow(Object.keys(a), Object.keys(b)) &&
+	Object.entries(a).every(([key, edge]) => shallow(edge, b[key]));
 
 /** Edges settle before their node, so ones that changed are told apart without a walk into them. */
 const readsTheSame = (a: GenerationNode, b: GenerationNode) =>
-	shallow(a.dependsOn, b.dependsOn) && isSameGraph(a, b);
+	sameEdges(a.dependsOn, b.dependsOn) && isSameGraph(a, b);
 
 /**
  * A document's graph as its readers see it. However many read it, a revision

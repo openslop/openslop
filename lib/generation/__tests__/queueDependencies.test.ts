@@ -15,7 +15,7 @@ vi.mock("../generateForElement", () => ({
 const config: ConnectorConfig = {};
 
 const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, node]));
+	Object.fromEntries(nodes.map((node) => [node.id, { node }]));
 
 function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	const job: GenerationJob = {

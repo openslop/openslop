@@ -24,7 +24,7 @@ vi.mock("../generateForElement", () => ({
 }));
 
 const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, node]));
+	Object.fromEntries(nodes.map((node) => [node.id, { node }]));
 
 type JobOverrides = Partial<GenerationJob> & {
 	inputs?: GenerationInputs;

@@ -4,6 +4,7 @@ import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
 	derivedNodeId,
 	sourceNode,
+	type Edge,
 	type GenerationJob,
 	type GenerationNode,
 } from "../graph";
@@ -12,8 +13,13 @@ import { staleReason } from "../staleReason";
 
 const config: ConnectorConfig = {};
 
-const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, node]));
+/** Each dependency, named as its dependent names it when a label is given. */
+const byId = (edges: (GenerationNode | Edge)[]) =>
+	Object.fromEntries(
+		edges.map((edge) =>
+			"node" in edge ? [edge.node.id, edge] : [edge.id, { node: edge }],
+		),
+	);
 
 function node(
 	id: string,
@@ -21,12 +27,10 @@ function node(
 		prompt = id,
 		attributes = {},
 		dependsOn = [],
-		label,
 	}: {
 		prompt?: string;
 		attributes?: Record<string, string>;
-		dependsOn?: GenerationNode[];
-		label?: string;
+		dependsOn?: (GenerationNode | Edge)[];
 	} = {},
 ): GenerationNode {
 	const job: GenerationJob = {
@@ -40,7 +44,6 @@ function node(
 		id,
 		inputs: { prompt, attributes },
 		dependsOn: byId(dependsOn),
-		label,
 		job,
 	};
 }
@@ -90,10 +93,10 @@ describe("staleReason", () => {
 
 	it("names an upstream avatar by its character", () => {
 		const queue = new GenerationQueue();
-		const avatar = node(derivedNodeId("avatar", "Red"), {
-			label: "Red's avatar",
+		const avatar = node(derivedNodeId("avatar", "Red"));
+		const image = node("a", {
+			dependsOn: [{ node: avatar, label: "Red's avatar" }],
 		});
-		const image = node("a", { dependsOn: [avatar] });
 		commit(queue, avatar, "red.png");
 		commit(queue, image, "a.png");
 
@@ -120,7 +123,12 @@ describe("staleReason", () => {
 		const queue = new GenerationQueue();
 		const withStyle = (style: string) =>
 			node("a", {
-				dependsOn: [sourceNode("project:artStyle", { style }, "the art style")],
+				dependsOn: [
+					{
+						node: sourceNode("project:artStyle", { style }),
+						label: "the art style",
+					},
+				],
 			});
 		commit(queue, withStyle("watercolor"), "a.png");
 
@@ -132,13 +140,11 @@ describe("staleReason", () => {
 	it("names a dependency that is itself stale, even though its output has not changed", () => {
 		const queue = new GenerationQueue();
 		const refs = (urls: string) =>
-			sourceNode("project:referenceImages", { urls }, "the reference images");
+			sourceNode("project:referenceImages", { urls });
 		const avatar = (urls: string) =>
-			node(derivedNodeId("avatar", "Red"), {
-				dependsOn: [refs(urls)],
-				label: "Red's avatar",
-			});
-		const image = (urls: string) => node("a", { dependsOn: [avatar(urls)] });
+			node(derivedNodeId("avatar", "Red"), { dependsOn: [refs(urls)] });
+		const image = (urls: string) =>
+			node("a", { dependsOn: [{ node: avatar(urls), label: "Red's avatar" }] });
 
 		commit(queue, avatar("a.png"), "red.png");
 		commit(queue, image("a.png"), "a.png");
@@ -153,7 +159,12 @@ describe("staleReason", () => {
 		const withStyle = (prompt: string, style: string) =>
 			node("a", {
 				prompt,
-				dependsOn: [sourceNode("project:artStyle", { style }, "the art style")],
+				dependsOn: [
+					{
+						node: sourceNode("project:artStyle", { style }),
+						label: "the art style",
+					},
+				],
 			});
 		commit(queue, withStyle("a knight", "watercolor"), "a.png");
 

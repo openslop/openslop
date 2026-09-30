@@ -37,9 +37,7 @@ type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
 	/** Keyed by the name the declaring plugin gave the edge, which is how its result reaches that plugin. */
-	dependsOn: Record<string, GenerationNode>;
-	/** How the node reads when a dependent has to name it to the user. */
-	label?: string;
+	dependsOn: Record<string, Edge>;
 };
 
 /**
@@ -55,10 +53,18 @@ export type JobNode = NodeBase & { job: GenerationJob };
 /** A node and its edges. */
 export type GenerationNode = SourceNode | JobNode;
 
+/**
+ * A dependency as its dependent reaches it. The label is how the dependent
+ * names it to the user, so one node can read differently to each dependent:
+ * an image is "the previous visual" only to the video after it.
+ */
+export type Edge = { node: GenerationNode; label?: string };
+
 /** A node still to be built. `plugins` replaces the registry chain. */
 export type ElementNode = {
 	element: CanvasContentElement;
 	plugins?: ConnectorPlugin[];
+	/** Carried onto the edge that reaches it; see `Edge`. */
 	label?: string;
 };
 
@@ -77,13 +83,13 @@ export type BuildContext = {
 
 /**
  * Declares which node to build without saying how; only the builder knows the
- * registry and the state. A source-node spec returns its node directly.
+ * registry and the state. A source-node spec returns its edge directly.
  */
-export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
+export type NodeSpec = (ctx: BuildContext) => ElementNode | Edge;
 
-/** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
+/** Only an unbuilt node carries an element; never add one to `Edge`. */
 export const isElementNode = (
-	value: ElementNode | GenerationNode,
+	value: ElementNode | Edge,
 ): value is ElementNode => "element" in value;
 
 /**
@@ -131,14 +137,12 @@ export const derivedNodeId = (kind: string, key: string): NodeId =>
 export function sourceNode(
 	id: NodeId,
 	attributes: Record<string, string | number>,
-	label?: string,
 ): SourceNode {
 	const inputs = { prompt: "", attributes };
 	return {
 		id,
 		inputs,
 		dependsOn: {},
-		label,
 		job: null,
 		identity: serializeInputs({ ...inputs, dependencies: {} }),
 	};
@@ -166,7 +170,7 @@ export function nodeInputs(
 	return {
 		...node.inputs,
 		dependencies: Object.fromEntries(
-			Object.values(node.dependsOn).map((dep) => [
+			Object.values(node.dependsOn).map(({ node: dep }) => [
 				dep.id,
 				nodeIdentity(dep, results),
 			]),
@@ -184,7 +188,7 @@ export function needsGeneration(
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	return (
-		Object.values(node.dependsOn).some((dep) =>
+		Object.values(node.dependsOn).some(({ node: dep }) =>
 			needsGeneration(dep, results),
 		) || !isEqual(nodeInputs(node, results), snapshot.resultInputs)
 	);
@@ -204,7 +208,7 @@ export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
 	const visit = (node: GenerationNode) => {
 		if (seen.has(node.id)) return;
 		seen.add(node.id);
-		for (const dep of Object.values(node.dependsOn)) visit(dep);
+		for (const { node: dep } of Object.values(node.dependsOn)) visit(dep);
 		ordered.push(node);
 	};
 	for (const root of roots) visit(root);
