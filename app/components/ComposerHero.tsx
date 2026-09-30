@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
+import { useOpenWorkspace } from "@/lib/script/ScriptProvider";
+import { useStartBlank } from "@/lib/script/useStartBlank";
 import { useTemplate } from "@/lib/templates/useTemplate";
 import { useSloppy } from "./sloppy/SloppyProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
@@ -10,13 +11,14 @@ import ComposerCopilot from "./copilot/ComposerCopilot";
 import TemplateGallery from "./TemplateGallery";
 
 export default function ComposerHero() {
-	const { setShowWorkspace, startBlank } = useScriptControl();
+	const openWorkspace = useOpenWorkspace();
+	const startBlank = useStartBlank();
 	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
 
 	const start = (brief: string) => {
-		setShowWorkspace(true);
+		openWorkspace();
 		send(brief);
 	};
 

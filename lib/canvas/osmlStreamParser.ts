@@ -80,8 +80,8 @@ export class OSMLStreamParser {
 			this.nodes.push(createCanvasNode(type, { id, attrs, defaultModels }));
 			return;
 		}
-		// Non-canvas tags (metadata_*) pass through as generic nodes; the
-		// metadata sync layer reads them by tag name.
+		// Non-canvas tags (metadata_*) pass through as generic nodes;
+		// `collectMetadata` reads them by tag name.
 		this.nodes.push({
 			id: makeNodeId(),
 			type,

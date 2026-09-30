@@ -1,10 +1,11 @@
-import { Editor, Transforms } from "slate";
+import { Editor, Transforms, type Element } from "slate";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
 	type CanvasEditor,
 	type SceneElement,
 } from "@/lib/canvas/types";
+import { isSceneElement } from "@/lib/canvas/scenes";
 
 export const content = (
 	type: CanvasContentElement["type"],
@@ -28,4 +29,13 @@ export function seedScene(editor: CanvasEditor, node: SceneElement): void {
 	});
 	Editor.normalize(editor, { force: true });
 	Transforms.select(editor, Editor.end(editor, []));
+}
+
+/** The element types of each scene, with a root node outside any scene marked `!`. */
+export function shape(editor: Editor): string[][] {
+	return editor.children.map((s) =>
+		isSceneElement(s)
+			? s.children.map((c) => c.type)
+			: [`!${(s as Element).type}`],
+	);
 }

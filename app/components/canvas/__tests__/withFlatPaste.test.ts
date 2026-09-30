@@ -6,18 +6,10 @@ import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
 import { CanvasEditor } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
-import { content, scene, seedScene } from "./fixtures";
+import { content, scene, seedScene, shape } from "./fixtures";
 
 function makeEditor(): CanvasEditor {
 	return withNodeId(withFlatPaste(withScenes(withReact(createEditor()))));
-}
-
-function shape(editor: Editor): string[][] {
-	return editor.children.map((s) =>
-		isSceneElement(s)
-			? s.children.map((c) => c.type)
-			: [`!${(s as Element).type}`],
-	);
 }
 
 function hasNestedScene(editor: Editor): boolean {
