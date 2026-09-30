@@ -2,8 +2,9 @@ import omit from "lodash/omit";
 import pick from "lodash/pick";
 import {
 	DEFAULT_DURATION,
-	DURATION_MAX,
-	DURATION_MIN,
+	DURATION_OPTIONS,
+	LOOPS_OPTIONS,
+	VOLUME_OPTIONS,
 	type CanvasContentElement,
 	type SplitAttributes,
 } from "@/lib/canvas/types";
@@ -36,49 +37,50 @@ export const flatAttributes = (element: SplitAttributes) => ({
 	...element.layoutAttributes,
 });
 
-const VOLUME_MIN = 0;
-const VOLUME_MAX = 10;
-const DEFAULT_VOLUME = VOLUME_MAX;
+const boundsOf = (options: readonly string[]) => {
+	const values = options.map(Number);
+	return { min: Math.min(...values), max: Math.max(...values) };
+};
+
+const VOLUME = boundsOf(VOLUME_OPTIONS);
+const LOOPS = boundsOf(LOOPS_OPTIONS);
+const DURATION = boundsOf(DURATION_OPTIONS);
+
+const DEFAULT_VOLUME = VOLUME.max;
+const DEFAULT_LOOPS = 1;
 
 /** Converts the 0–10 authoring scale to the 0–1 gain players expect. */
 export function volumeToGain(volume: number): number {
-	return volume / VOLUME_MAX;
+	return volume / VOLUME.max;
 }
 
-function clampedAttribute(
-	element: CanvasContentElement,
-	key: string,
+function clampedNumber(
+	raw: string | undefined,
 	{ min, max, fallback }: { min: number; max: number; fallback: number },
 ): number {
-	const raw = flatAttributes(element)[key]?.trim();
-	if (!raw) return fallback;
-	const value = Number(raw);
+	const text = raw?.trim();
+	if (!text) return fallback;
+	const value = Number(text);
 	return Number.isFinite(value) ? clamp(value, min, max) : fallback;
 }
 
 export function getVolume(element: CanvasContentElement): number {
-	return clampedAttribute(element, "volume", {
-		min: VOLUME_MIN,
-		max: VOLUME_MAX,
+	return clampedNumber(element.layoutAttributes?.volume, {
+		...VOLUME,
 		fallback: DEFAULT_VOLUME,
 	});
 }
 
 export function getDuration(element: CanvasContentElement): number {
-	return clampedAttribute(element, "duration", {
-		min: DURATION_MIN,
-		max: DURATION_MAX,
+	return clampedNumber(element.generationAttributes?.duration, {
+		...DURATION,
 		fallback: Number(DEFAULT_DURATION),
 	});
 }
 
-const LOOPS_MAX = 1000;
-const DEFAULT_LOOPS = 1;
-
 export function getLoops(element: CanvasContentElement): number {
-	return clampedAttribute(element, "loops", {
-		min: DEFAULT_LOOPS,
-		max: LOOPS_MAX,
+	return clampedNumber(element.layoutAttributes?.loops, {
+		...LOOPS,
 		fallback: DEFAULT_LOOPS,
 	});
 }
