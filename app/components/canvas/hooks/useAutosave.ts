@@ -10,8 +10,7 @@ const TOAST_OPTIONS = {
 	id: "autosave",
 	position: "bottom-right" as const,
 	className:
-		"!bg-muted !border !border-border !text-muted-foreground !text-xs !shadow-none !rounded-md !py-1.5 !px-2.5 !min-h-0 !w-auto",
-	unstyled: false,
+		"!bg-muted !border !border-border !text-muted-foreground !text-label !shadow-none !rounded-md !py-1.5 !px-2.5 !min-h-0 !w-auto",
 	duration: 1500,
 };
 

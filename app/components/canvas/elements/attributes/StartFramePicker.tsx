@@ -57,9 +57,7 @@ function FrameTile({
 function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
 	const previous = usePreviousPictures(element, [START_FRAME]);
 	if (previous.kind === "loading")
-		return (
-			<Skeleton className="absolute inset-0 animate-none shimmer-surface" />
-		);
+		return <Skeleton className="absolute inset-0" />;
 	const [opening] = previous.kind === "ready" ? previous.pictures : [];
 	if (!opening) return <Transition className="h-5 w-5" />;
 	return <MediaWithSkeleton outputKind="image" src={opening.url} alt="" />;

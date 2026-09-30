@@ -6,7 +6,12 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { TTS_GENDERS, type TTSSpeed } from "@/lib/connectors/tts/enums";
+import {
+	DEFAULT_TTS_EMOTION,
+	DEFAULT_TTS_SPEED,
+	TTS_GENDERS,
+	type TTSSpeed,
+} from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
@@ -241,9 +246,9 @@ export class CartesiaTTS
 				},
 				add_timestamps: true,
 				generation_config: {
-					speed: CARTESIA_SPEED[params.speed ?? "medium"],
+					speed: CARTESIA_SPEED[params.speed ?? DEFAULT_TTS_SPEED],
 					volume: CARTESIA_VOLUME,
-					emotion: params.emotion || "neutral",
+					emotion: params.emotion || DEFAULT_TTS_EMOTION,
 				},
 			};
 			for await (const response of socket.generate(request)) {

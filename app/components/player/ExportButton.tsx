@@ -56,7 +56,7 @@ export function ExportButton() {
 				align="end"
 				side="top"
 				sideOffset={8}
-				className="w-80 p-3 font-medium"
+				className="w-80 font-medium"
 			>
 				<div className="flex items-center justify-between">
 					<span className="text-label font-semibold">Export</span>

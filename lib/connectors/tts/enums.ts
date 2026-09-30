@@ -9,6 +9,7 @@ export type TTSPitch = (typeof TTS_PITCHES)[number];
 
 export const TTS_SPEEDS = ["slow", "medium", "fast"] as const;
 export type TTSSpeed = (typeof TTS_SPEEDS)[number];
+export const DEFAULT_TTS_SPEED: TTSSpeed = "medium";
 
 export const TTS_LANGUAGES = [
 	"en",
@@ -132,3 +133,4 @@ export enum TTSEmotion {
 }
 
 export const TTS_EMOTIONS = Object.values(TTSEmotion) as TTSEmotion[];
+export const DEFAULT_TTS_EMOTION = TTSEmotion.Neutral;

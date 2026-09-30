@@ -54,8 +54,8 @@ export function TimelineRuler({
 	return (
 		<div
 			role="presentation"
-			className={`relative shrink-0 cursor-pointer select-none text-border ${RULER_HEIGHT}`}
-			style={{ touchAction: "none", ...dots(spacing) }}
+			className={`relative shrink-0 cursor-pointer touch-none select-none text-border ${RULER_HEIGHT}`}
+			style={dots(spacing)}
 			{...drag}
 		>
 			{ticks.map((seconds, index) => (

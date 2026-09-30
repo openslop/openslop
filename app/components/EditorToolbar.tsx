@@ -29,7 +29,7 @@ function Breadcrumbs() {
 			aria-label="Breadcrumb"
 			className="absolute inset-y-0 left-1/2 flex max-w-[40vw] -translate-x-1/2 items-center"
 		>
-			<ol className="flex min-w-0 items-center gap-1.5 text-label font-[475] text-foreground">
+			<ol className="flex min-w-0 items-center gap-1.5 text-label font-book text-foreground">
 				<li className="shrink-0">
 					<Button
 						variant="ghost"
@@ -95,7 +95,8 @@ function EditorToolbarComponent() {
 					{generating && (
 						<TooltipIconButton
 							label="Cancel generation"
-							className="self-center bg-muted text-muted-foreground hover:text-foreground"
+							variant="quiet"
+							className="self-center bg-muted"
 							onClick={() => queue.cancelAll()}
 						>
 							<X className="h-3 w-3" aria-hidden="true" />

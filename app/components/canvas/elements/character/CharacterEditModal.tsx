@@ -30,7 +30,7 @@ import { useProject } from "@/lib/project/useProject";
 import type { ElementVersion } from "@/lib/generation/versions";
 import type { MetadataCharacter } from "@/lib/project/types";
 import { UploadImageButton } from "@/lib/upload/UploadImageButton";
-import { useGenerateNode } from "../../hooks/useGenerate";
+import { useGenerateNode } from "@/app/components/canvas/hooks/useGenerate";
 import { GenerateButton, StaleIndicator } from "../GenerateButton";
 import { MediaResult } from "../preview/results";
 import { ElementHistoryPopover } from "../ElementHistoryPopover";

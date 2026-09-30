@@ -150,10 +150,7 @@ export function ElementContainer({
 							className="relative min-w-0 rounded-xl border border-transparent bg-element-input px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30"
 						>
 							{isEmpty && (
-								<div
-									style={{ userSelect: "none" }}
-									className="pointer-events-none absolute top-2.5 start-3 text-start text-label text-muted-foreground"
-								>
+								<div className="pointer-events-none absolute top-2.5 start-3 text-start text-label text-muted-foreground select-none">
 									{config.placeholder}
 								</div>
 							)}
