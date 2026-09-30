@@ -1,35 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
-import { catchError, type ErrorInfo } from "next/error";
+import { Component, type ReactNode } from "react";
 import { toastError } from "@/lib/toastError";
-import { Button } from "@/components/ui/button";
 
-function ToastErrorFallback(
-	{ label }: { label?: string },
-	{ error, retry }: ErrorInfo,
-) {
-	useEffect(() => {
-		toastError(error, label);
-	}, [error, label]);
-
-	return (
-		<div
-			role="alert"
-			className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center"
-		>
-			<p className="text-body text-muted-foreground">
-				{label ? `${label} failed to render.` : "Something went wrong."}
-			</p>
-			<Button size="sm" onClick={retry}>
-				Try again
-			</Button>
-		</div>
-	);
-}
+type Props = { children: ReactNode; label?: string };
+type State = { hasError: boolean };
 
 /**
- * Catches render errors in its subtree, toasts them, and shows a fallback with
- * a retry button. Built on Next's `catchError` so the error clears on navigation.
+ * Catches render errors in its subtree, surfaces them via a sonner toast, and
+ * renders nothing in place of the broken subtree. Use to keep one misbehaving
+ * widget from blanking the whole app.
  */
-export const ToastErrorBoundary = catchError(ToastErrorFallback);
+export class ToastErrorBoundary extends Component<Props, State> {
+	state: State = { hasError: false };
+
+	static getDerivedStateFromError(): State {
+		return { hasError: true };
+	}
+
+	componentDidCatch(error: unknown) {
+		toastError(error, this.props.label);
+	}
+
+	render() {
+		return this.state.hasError ? null : this.props.children;
+	}
+}
