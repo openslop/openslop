@@ -126,7 +126,7 @@ describe("API routes", () => {
 				connectorType: "image",
 				request: expect.objectContaining({ prompt: "cat" }),
 			});
-			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "image");
+			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
 		it("persists projectId and strips it from the provider request", async () => {
@@ -208,7 +208,10 @@ describe("API routes", () => {
 			);
 			expect(res.status).toBe(200);
 			expect((await res.json()).jobId).toBe("job-abc");
-			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "video");
+			expect(mockCreateJob).toHaveBeenCalledWith(
+				expect.objectContaining({ connectorType: "video" }),
+			);
+			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
 		referenceImagesSuite(
@@ -324,7 +327,10 @@ describe("API routes", () => {
 			const json = await res.json();
 			expect(res.status).toBe(200);
 			expect(json.jobId).toBe("job-abc");
-			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "music");
+			expect(mockCreateJob).toHaveBeenCalledWith(
+				expect.objectContaining({ connectorType: "music" }),
+			);
+			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
 		it("returns 400 for missing prompt", async () => {
@@ -343,7 +349,10 @@ describe("API routes", () => {
 			const json = await res.json();
 			expect(res.status).toBe(200);
 			expect(json.jobId).toBe("job-abc");
-			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "sfx");
+			expect(mockCreateJob).toHaveBeenCalledWith(
+				expect.objectContaining({ connectorType: "sfx" }),
+			);
+			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
 		it("returns 400 for invalid model", async () => {
@@ -419,7 +428,10 @@ describe("API routes", () => {
 			const json = await res.json();
 			expect(res.status).toBe(200);
 			expect(json.jobId).toBe("job-abc");
-			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "tts");
+			expect(mockCreateJob).toHaveBeenCalledWith(
+				expect.objectContaining({ connectorType: "tts" }),
+			);
+			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
 		it("returns 400 when voiceId missing", async () => {

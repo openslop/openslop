@@ -16,8 +16,7 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 	const job = await loadJobForProcessing(jobId);
 	if (isTerminal(job.status)) return;
 
-	const connectorType = job.connector_type;
-	const handler = getJobHandler(connectorType);
+	const handler = getJobHandler(job.connector_type);
 
 	if (job.status !== "processing") {
 		await updateJob(jobId, { status: "processing" });
@@ -50,7 +49,5 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 		return;
 	}
 
-	await enqueueJob(jobId, connectorType, {
-		delaySeconds: PENDING_RETRY_SECONDS,
-	});
+	await enqueueJob(jobId, { delaySeconds: PENDING_RETRY_SECONDS });
 }

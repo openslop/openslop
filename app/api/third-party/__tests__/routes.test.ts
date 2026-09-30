@@ -60,7 +60,7 @@ describe("POST /api/third-party/image", () => {
 				}),
 			}),
 		);
-		expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc", "image");
+		expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 	});
 
 	it("refuses a model OpenSlop hosts, which has its own route", async () => {
