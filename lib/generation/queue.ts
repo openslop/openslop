@@ -1,3 +1,5 @@
+import compact from "lodash/compact";
+import { ASSET_URL_FIELDS } from "../connectors/assetUrl";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
 import { createEmitter } from "../store/emitter";
@@ -19,8 +21,13 @@ import {
 	type GenerationJob,
 	type GenerationNode,
 	type JobNode,
-	type NodeResults,
 } from "./graph";
+
+/** What a dependent records about a dependency's output. */
+const resultIdentity = (result: AssetResult | null): string =>
+	result
+		? compact(ASSET_URL_FIELDS.map((field) => result[field])).join("|")
+		: "";
 
 type ActiveJob = {
 	controller: AbortController;
@@ -38,7 +45,7 @@ type QueuedJob = {
  * time and never before their dependencies have settled. All per-element state
  * lives in the snapshot store; the queue owns only what is in flight.
  */
-export class GenerationQueue implements NodeResults {
+export class GenerationQueue {
 	private readonly snapshots: SnapshotStore;
 	private readonly ticker = new ElapsedTicker((elapsed) =>
 		this.onTick(elapsed),
@@ -63,6 +70,16 @@ export class GenerationQueue implements NodeResults {
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id?: string): ElementSnapshot => this.snapshots.get(id);
+
+	/**
+	 * What a dependent records about `node`. A source node's output is its
+	 * input, so its identity is settled when it is built; a job node's is the
+	 * result held for it now, which arrives after the graph is built.
+	 */
+	identityOf = (node: GenerationNode): string =>
+		isSourceNode(node)
+			? node.identity
+			: resultIdentity(this.snapshots.get(node.id).result);
 	getResultVersion = () => this.snapshots.getResultVersion();
 	getActiveCount = () => this.snapshots.getActiveCount();
 	getGeneratedCount = () => this.snapshots.getGeneratedCount();

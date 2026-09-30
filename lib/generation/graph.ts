@@ -1,4 +1,3 @@
-import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
 import isEqualWith from "lodash/isEqualWith";
 import type {
@@ -6,11 +5,9 @@ import type {
 	CanvasElementType,
 } from "@/lib/canvas/types";
 import { elementById } from "@/lib/canvas/scenes";
-import { ASSET_URL_FIELDS } from "@/lib/connectors/assetUrl";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AssetConnectorType,
-	AssetResult,
 	ConnectorConfig,
 	ConnectorPlugin,
 	ModelRef,
@@ -21,6 +18,7 @@ import {
 	type GenerationInputs,
 	type NodeInputs,
 } from "./inputs";
+import type { GenerationQueue } from "./queue";
 
 export type NodeId = string;
 
@@ -100,19 +98,6 @@ export const forElement =
 	(element: CanvasContentElement): NodeSpec =>
 	({ canvas }) => ({ element: elementById(canvas, element.id) ?? element });
 
-/** What the graph reads back about a node the queue has settled. */
-export type NodeResult = {
-	result: AssetResult | null;
-	resultInputs: GenerationInputs | null;
-	/** The result was supplied rather than generated, so it is never regenerated. */
-	pinned: boolean;
-};
-
-/** The read half of the queue, declared here so the graph depends on nothing. */
-export type NodeResults = {
-	getElementSnapshot(id?: string): NodeResult;
-};
-
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	node.job === null;
 
@@ -148,33 +133,16 @@ export function sourceNode(
 	};
 }
 
-/** What a dependent records about a dependency's output. */
-export function resultIdentity(result: AssetResult | null): string {
-	if (!result) return "";
-	return compact(ASSET_URL_FIELDS.map((field) => result[field])).join("|");
-}
-
-/**
- * A source node's output is its input, so its identity is settled when it is
- * built. A job node's is the result the queue holds for it now, which arrives
- * after the graph is built.
- */
-function nodeIdentity(node: GenerationNode, results: NodeResults): string {
-	return isSourceNode(node)
-		? node.identity
-		: resultIdentity(results.getElementSnapshot(node.id).result);
-}
-
 export function nodeInputs(
 	node: GenerationNode,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): GenerationInputs {
 	return {
 		...node.inputs,
 		dependencies: Object.fromEntries(
 			Object.values(node.dependsOn).map(({ node: dep }) => [
 				dep.id,
-				nodeIdentity(dep, results),
+				queue.identityOf(dep),
 			]),
 		),
 	};
@@ -182,26 +150,26 @@ export function nodeInputs(
 
 export function needsGeneration(
 	node: GenerationNode,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): boolean {
 	if (isSourceNode(node)) return false;
-	const snapshot = results.getElementSnapshot(node.id);
+	const snapshot = queue.getElementSnapshot(node.id);
 	if (!snapshot.result) return true;
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	return (
 		Object.values(node.dependsOn).some(({ node: dep }) =>
-			needsGeneration(dep, results),
-		) || !isEqual(nodeInputs(node, results), snapshot.resultInputs)
+			needsGeneration(dep, queue),
+		) || !isEqual(nodeInputs(node, queue), snapshot.resultInputs)
 	);
 }
 
 export const isNodeStale = (
 	node: GenerationNode,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): boolean =>
-	Boolean(results.getElementSnapshot(node.id).result) &&
-	needsGeneration(node, results);
+	Boolean(queue.getElementSnapshot(node.id).result) &&
+	needsGeneration(node, queue);
 
 /** Every node reachable from `roots`, dependencies before their dependents. */
 export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
