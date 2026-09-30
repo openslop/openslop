@@ -14,6 +14,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { useCaptionStyle } from "@/lib/captions/useCaptionStyle";
 import { formatBytes } from "@/lib/format";
 import { RESOLUTIONS, scaleForWidth } from "@/lib/project/resolutions";
 import { BASE_WIDTH } from "@/lib/render/types";
@@ -28,6 +29,7 @@ const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
 
 export function ExportButton() {
 	const { layout, ready } = useLayout();
+	const [captionStyle] = useCaptionStyle();
 	const { loading } = useSloppy();
 	const { state, render, reset, open, setOpen } = useRender();
 	const [width, setWidth] = useState(BASE_WIDTH);
@@ -127,7 +129,9 @@ export function ExportButton() {
 							type="button"
 							variant="generate"
 							size="sm"
-							onClick={() => render(layout, scaleForWidth(width))}
+							onClick={() =>
+								render({ ...layout, captionStyle }, scaleForWidth(width))
+							}
 							disabled={disabled}
 							className="w-full"
 						>

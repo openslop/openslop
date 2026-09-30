@@ -45,8 +45,10 @@ export type RenderLayout = {
 	totalFrames: number;
 	transitionType: TransitionType;
 	transitionDurationSec: number;
-	captionStyle: CaptionStyle;
 };
+
+/** What an export is rendered from: the layout, plus the look every caption shares. */
+export type RenderInputProps = RenderLayout & { captionStyle: CaptionStyle };
 
 export const COMPOSITION_ID = "VideoComposition";
 

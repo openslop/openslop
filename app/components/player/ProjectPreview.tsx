@@ -3,6 +3,7 @@
 import type { CallbackListener, PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
 import { useEffect, useState, type MutableRefObject, type Ref } from "react";
+import { useCaptionStyle } from "@/lib/captions/useCaptionStyle";
 import type { RenderLayout } from "@/lib/render/types";
 import { ToastErrorBoundary } from "../ToastErrorBoundary";
 import { ActiveSceneSync } from "./ActiveSceneSync";
@@ -15,10 +16,12 @@ const fullSizeStyle = { width: "100%", height: "100%" };
 
 const RemotionPlayer = dynamic(
 	async () => {
-		const [{ Player }, { VideoComposition }] = await Promise.all([
-			import("@remotion/player"),
-			import("@/remotion/compositions/VideoComposition"),
-		]);
+		const [{ Player }, { VideoComposition }, { CaptionStyleProvider }] =
+			await Promise.all([
+				import("@remotion/player"),
+				import("@/remotion/compositions/VideoComposition"),
+				import("@/remotion/components/Captions"),
+			]);
 
 		function RemotionPlayerInner({
 			layout,
@@ -29,21 +32,24 @@ const RemotionPlayer = dynamic(
 			playerRef: Ref<PlayerRef>;
 			controls: boolean;
 		}) {
+			const [captionStyle] = useCaptionStyle();
 			return (
-				<Player
-					ref={playerRef}
-					component={VideoComposition}
-					inputProps={layout}
-					durationInFrames={layout.totalFrames}
-					fps={layout.fps}
-					compositionWidth={layout.width}
-					compositionHeight={layout.height}
-					style={fullSizeStyle}
-					clickToPlay={false}
-					controls={controls}
-					acknowledgeRemotionLicense
-					numberOfSharedAudioTags={10}
-				/>
+				<CaptionStyleProvider value={captionStyle}>
+					<Player
+						ref={playerRef}
+						component={VideoComposition}
+						inputProps={layout}
+						durationInFrames={layout.totalFrames}
+						fps={layout.fps}
+						compositionWidth={layout.width}
+						compositionHeight={layout.height}
+						style={fullSizeStyle}
+						clickToPlay={false}
+						controls={controls}
+						acknowledgeRemotionLicense
+						numberOfSharedAudioTags={10}
+					/>
+				</CaptionStyleProvider>
 			);
 		}
 

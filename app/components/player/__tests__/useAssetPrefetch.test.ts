@@ -5,7 +5,6 @@ import type {
 	Sequence,
 	RenderLayout,
 } from "@/lib/render/types";
-import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import {
 	awaitPrefetch,
 	collectUrls,
@@ -53,7 +52,6 @@ function layout(partial: Partial<RenderLayout>): RenderLayout {
 		height: 1080,
 		totalDurationSec: 1,
 		totalFrames: 30,
-		captionStyle: DEFAULT_CAPTION_STYLE,
 		transitionType: "none",
 		transitionDurationSec: 0,
 		...partial,

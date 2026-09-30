@@ -9,10 +9,6 @@ import {
 	type AspectRatio,
 	ASPECT_RATIO_DIMENSIONS,
 } from "../project/aspectRatio";
-import {
-	DEFAULT_CAPTION_STYLE,
-	type CaptionStyle,
-} from "../captions/captionStyle";
 import { blankScene } from "./blankScene";
 import { loopStrideSec } from "./audioFade";
 import { toFrames, toSeconds } from "./frames";
@@ -25,7 +21,6 @@ import {
 export type BuildLayoutOptions = Partial<VideoConfig> & {
 	transitionType?: TransitionType;
 	aspectRatio?: AspectRatio;
-	captionStyle?: CaptionStyle;
 };
 
 /**
@@ -174,6 +169,5 @@ export function buildRenderLayout(
 		),
 		transitionType,
 		transitionDurationSec,
-		captionStyle: options?.captionStyle ?? DEFAULT_CAPTION_STYLE,
 	};
 }

@@ -20,7 +20,7 @@ import { getPresentation } from "@/lib/render/transitionPresentations";
 import { audioVolume } from "@/lib/render/audioVolume";
 import { volumeToGain } from "@/lib/canvas/elementAttributes";
 import { ELEMENT_TYPES } from "@/lib/canvas/types";
-import { CaptionStyleProvider, Captions } from "../components/Captions";
+import { Captions } from "../components/Captions";
 import { MotionLayer } from "../components/MotionLayer";
 
 const coverStyle: React.CSSProperties = {
@@ -126,7 +126,6 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	height,
 	transitionType,
 	transitionDurationSec,
-	captionStyle,
 }) => {
 	const transitionFrames = toFrames(transitionDurationSec, fps);
 	const transitionTiming = useMemo(
@@ -188,11 +187,9 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	);
 
 	return (
-		<CaptionStyleProvider value={captionStyle}>
-			<AbsoluteFill style={blackBg}>
-				<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
-				{layeredSequenceNodes}
-			</AbsoluteFill>
-		</CaptionStyleProvider>
+		<AbsoluteFill style={blackBg}>
+			<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
+			{layeredSequenceNodes}
+		</AbsoluteFill>
 	);
 };

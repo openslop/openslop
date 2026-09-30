@@ -2,7 +2,7 @@ import { apiJson, UnreachableError } from "@/lib/clients/http";
 import { POLL_INTERVAL_MS } from "@/lib/providers/poll";
 import { sleep } from "@/lib/utils";
 import type { RenderHandle, RenderProgress } from "./render-api";
-import type { RenderLayout } from "./types";
+import type { RenderInputProps } from "./types";
 
 export type RenderUpdate =
 	| { status: "rendering"; progress: number }
@@ -13,12 +13,12 @@ export type RenderUpdate =
  * A render that fails upstream throws, so callers handle one error path.
  */
 export async function* runRender(
-	layout: RenderLayout,
+	inputProps: RenderInputProps,
 	scale?: number,
 ): AsyncGenerator<RenderUpdate> {
 	const handle = await apiJson<RenderHandle>("/api/render", {
 		method: "POST",
-		body: { inputProps: layout, scale },
+		body: { inputProps, scale },
 	});
 	yield { status: "rendering", progress: 0 };
 

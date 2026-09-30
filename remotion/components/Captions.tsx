@@ -10,8 +10,8 @@ import {
 } from "@/lib/captions/captionStyle";
 import { toSeconds } from "@/lib/render/frames";
 
-// Caption styling applies to every caption in the composition, so it rides a
-// provider rather than threading through the sequence layers that never read it.
+// Caption styling is a look, not layout, so whoever hosts the composition
+// provides it.
 const [CaptionStyleContext, useCaptionStyle] =
 	createRequiredContext<CaptionStyle>("CaptionStyleContext");
 

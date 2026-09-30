@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiJson, UnreachableError } from "@/lib/clients/http";
-import type { RenderLayout } from "../types";
+import type { RenderInputProps } from "../types";
 import { runRender, type RenderUpdate } from "../render-client";
 
 vi.mock("@/lib/clients/http", async (importOriginal) => ({
@@ -10,7 +10,10 @@ vi.mock("@/lib/clients/http", async (importOriginal) => ({
 
 const apiJsonMock = vi.mocked(apiJson);
 
-const LAYOUT = { series: [], sequences: {} } as unknown as RenderLayout;
+const INPUT_PROPS = {
+	series: [],
+	sequences: {},
+} as unknown as RenderInputProps;
 const HANDLE = { renderId: "r1", bucketName: "b1" };
 
 /** Drains the generator while letting the poll delay elapse between yields. */
@@ -40,13 +43,13 @@ afterEach(() => {
 });
 
 describe("runRender", () => {
-	it("submits the layout, then polls until the output is ready", async () => {
+	it("submits the input props, then polls until the output is ready", async () => {
 		apiJsonMock
 			.mockResolvedValueOnce(HANDLE)
 			.mockResolvedValueOnce({ type: "progress", progress: 0.4 })
 			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1024 });
 
-		const seen = await collect(runRender(LAYOUT, 0.5));
+		const seen = await collect(runRender(INPUT_PROPS, 0.5));
 
 		expect(seen).toEqual([
 			{ status: "rendering", progress: 0 },
@@ -55,7 +58,7 @@ describe("runRender", () => {
 		]);
 		expect(apiJsonMock).toHaveBeenNthCalledWith(1, "/api/render", {
 			method: "POST",
-			body: { inputProps: LAYOUT, scale: 0.5 },
+			body: { inputProps: INPUT_PROPS, scale: 0.5 },
 		});
 		expect(apiJsonMock).toHaveBeenNthCalledWith(2, "/api/render/progress", {
 			method: "POST",
@@ -69,7 +72,7 @@ describe("runRender", () => {
 			.mockRejectedValueOnce(new UnreachableError(new TypeError()))
 			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1024 });
 
-		const seen = await collect(runRender(LAYOUT));
+		const seen = await collect(runRender(INPUT_PROPS));
 
 		expect(seen.at(-1)).toEqual({
 			status: "done",
@@ -84,7 +87,7 @@ describe("runRender", () => {
 			.mockResolvedValueOnce(HANDLE)
 			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1 });
 
-		await collect(runRender(LAYOUT));
+		await collect(runRender(INPUT_PROPS));
 
 		expect(apiJsonMock).toHaveBeenCalledTimes(2);
 	});
@@ -94,12 +97,16 @@ describe("runRender", () => {
 			.mockResolvedValueOnce(HANDLE)
 			.mockResolvedValueOnce({ type: "error", message: "Render failed" });
 
-		await expect(collect(runRender(LAYOUT))).rejects.toThrow("Render failed");
+		await expect(collect(runRender(INPUT_PROPS))).rejects.toThrow(
+			"Render failed",
+		);
 	});
 
 	it("propagates a failure to start the render", async () => {
 		apiJsonMock.mockRejectedValueOnce(new Error("Unauthorized"));
 
-		await expect(collect(runRender(LAYOUT))).rejects.toThrow("Unauthorized");
+		await expect(collect(runRender(INPUT_PROPS))).rejects.toThrow(
+			"Unauthorized",
+		);
 	});
 });

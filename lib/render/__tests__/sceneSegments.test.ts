@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
-import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import {
 	buildSceneSegments,
 	buildSequenceIndex,
@@ -135,7 +134,6 @@ const layout = (
 	height: 1080,
 	totalDurationSec: 0,
 	totalFrames: 0,
-	captionStyle: DEFAULT_CAPTION_STYLE,
 	transitionType: "none",
 	transitionDurationSec,
 });
