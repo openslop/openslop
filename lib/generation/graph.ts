@@ -154,10 +154,12 @@ export function resultIdentity(result: AssetResult | null): string {
 	return compact(ASSET_URL_FIELDS.map((field) => result[field])).join("|");
 }
 
-export function nodeIdentity(
-	node: GenerationNode,
-	results: NodeResults,
-): string {
+/**
+ * A source node's output is its input, so its identity is settled when it is
+ * built. A job node's is the result the queue holds for it now, which arrives
+ * after the graph is built.
+ */
+function nodeIdentity(node: GenerationNode, results: NodeResults): string {
 	return isSourceNode(node)
 		? node.identity
 		: resultIdentity(results.getElementSnapshot(node.id).result);
