@@ -29,12 +29,12 @@ export function PlayerPlacementProvider({ children }: { children: ReactNode }) {
 	const [narrowViewport, setNarrowViewport] = useState(false);
 
 	useEffect(() => {
-		const mql = window.matchMedia(NARROW_QUERY);
-		const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
-			setNarrowViewport(e.matches);
-		onChange(mql);
-		mql.addEventListener("change", onChange);
-		return () => mql.removeEventListener("change", onChange);
+		const mediaQuery = window.matchMedia(NARROW_QUERY);
+		const onChange = ({ matches }: MediaQueryListEvent | MediaQueryList) =>
+			setNarrowViewport(matches);
+		onChange(mediaQuery);
+		mediaQuery.addEventListener("change", onChange);
+		return () => mediaQuery.removeEventListener("change", onChange);
 	}, []);
 
 	/** Hiding keeps the preferred side, so showing the player again restores it. */

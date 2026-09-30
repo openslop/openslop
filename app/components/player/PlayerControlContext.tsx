@@ -12,9 +12,8 @@ type PlayerControl = {
 	playFromFrame: (frame: number) => void;
 };
 
-const [Ctx, usePlayerControl] = createRequiredContext<PlayerControl>(
-	"PlayerControlContext",
-);
+const [PlayerControlContext, usePlayerControl] =
+	createRequiredContext<PlayerControl>("PlayerControlContext");
 export { usePlayerControl };
 
 export function PlayerControlProvider({ children }: { children: ReactNode }) {
@@ -36,5 +35,5 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 		[player, playFromFrame],
 	);
 
-	return <Ctx value={value}>{children}</Ctx>;
+	return <PlayerControlContext value={value}>{children}</PlayerControlContext>;
 }

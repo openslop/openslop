@@ -36,9 +36,9 @@ export function SegmentedSeekBar() {
 
 	const scrubSegments = useMemo(
 		() =>
-			segments.map((seg) => ({
-				id: seg.id,
-				basis: seg.duration / totalDurationSec,
+			segments.map(({ id, duration }) => ({
+				id,
+				basis: duration / totalDurationSec,
 			})),
 		[segments, totalDurationSec],
 	);

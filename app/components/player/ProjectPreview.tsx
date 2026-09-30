@@ -69,8 +69,8 @@ export function ProjectPreview({
 	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
 	useEffect(() => {
 		if (!player) return;
-		const handler: CallbackListener<"fullscreenchange"> = (e) =>
-			setIsFullscreen(e.detail.isFullscreen);
+		const handler: CallbackListener<"fullscreenchange"> = ({ detail }) =>
+			setIsFullscreen(detail.isFullscreen);
 		player.addEventListener("fullscreenchange", handler);
 		return () => player.removeEventListener("fullscreenchange", handler);
 	}, [player]);

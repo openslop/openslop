@@ -34,7 +34,7 @@ function ramp(frame: number, duration: number, from: number, to: number) {
  */
 const SPECS: Record<
 	ActiveMotionEffect,
-	(frame: number, d: number) => Components
+	(frame: number, duration: number) => Components
 > = {
 	kenBurnsIn: (f, d) => ({
 		tx: ramp(f, d, -3, 3),
@@ -88,8 +88,8 @@ export function coverScale(
 	rotation: number,
 	aspectRatio: number,
 ): number {
-	const rad = (Math.abs(rotation) * Math.PI) / 180;
-	const rotationCover = Math.cos(rad) + aspectRatio * Math.sin(rad);
+	const radians = (Math.abs(rotation) * Math.PI) / 180;
+	const rotationCover = Math.cos(radians) + aspectRatio * Math.sin(radians);
 	const translateCover = (2 * Math.max(Math.abs(tx), Math.abs(ty))) / 100;
 	return rotationCover + translateCover;
 }

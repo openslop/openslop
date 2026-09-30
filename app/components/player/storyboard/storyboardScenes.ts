@@ -16,11 +16,11 @@ export function buildStoryboardScenes(
 	segments: SceneSegment[],
 ): StoryboardScene[] {
 	const startBySceneId = new Map(
-		segments.map((seg) => [seg.sceneId, seg.start]),
+		segments.map(({ sceneId, start }) => [sceneId, start]),
 	);
-	return scenes.map((scene, i) => ({
+	return scenes.map((scene, index) => ({
 		scene,
-		sceneIndex: i + 1,
+		sceneIndex: index + 1,
 		foreground: scene.children.find(isForeground) ?? null,
 		start: startBySceneId.get(scene.id) ?? null,
 	}));
