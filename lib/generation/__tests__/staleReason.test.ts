@@ -4,22 +4,15 @@ import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
 	derivedNodeId,
 	sourceNode,
-	type Edge,
+	type Dependency,
 	type GenerationJob,
 	type GenerationNode,
 } from "../graph";
 import { GenerationQueue } from "../queue";
 import { staleReason } from "../staleReason";
+import { byId } from "./_graph";
 
 const config: ConnectorConfig = {};
-
-/** Each dependency, named as its dependent names it when a label is given. */
-const byId = (edges: (GenerationNode | Edge)[]) =>
-	Object.fromEntries(
-		edges.map((edge) =>
-			"node" in edge ? [edge.node.id, edge] : [edge.id, { node: edge }],
-		),
-	);
 
 function node(
 	id: string,
@@ -30,7 +23,7 @@ function node(
 	}: {
 		prompt?: string;
 		attributes?: Record<string, string>;
-		dependsOn?: (GenerationNode | Edge)[];
+		dependsOn?: (GenerationNode | Dependency)[];
 	} = {},
 ): GenerationNode {
 	const job: GenerationJob = {
@@ -103,19 +96,6 @@ describe("staleReason", () => {
 		commit(queue, avatar, "red-v2.png");
 		expect(staleReason(image, queue)).toBe(
 			"Red's avatar changed — regenerate to update",
-		);
-	});
-
-	it("falls back to a shrug for a dependency with no label", () => {
-		const queue = new GenerationQueue();
-		const dep = node("dep");
-		const image = node("a", { dependsOn: [dep] });
-		commit(queue, dep, "dep.png");
-		commit(queue, image, "a.png");
-
-		commit(queue, dep, "dep-v2.png");
-		expect(staleReason(image, queue)).toBe(
-			"An upstream element changed — regenerate to update",
 		);
 	});
 

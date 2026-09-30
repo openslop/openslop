@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateStatic } from "slate-react";
 import {
@@ -7,9 +7,9 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import {
 	forElement,
+	hasPrompt,
 	isNodeStale,
 	needsGeneration,
-	type GenerationNode,
 } from "@/lib/generation/graph";
 import { buildNodes } from "@/lib/generation/resolveGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
@@ -40,8 +40,6 @@ export type GenerateCounts = Pick<
 >;
 
 const noun = (count: number) => (count === 1 ? "element" : "elements");
-
-const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);
 
 /** Covers every reason there is no work: no elements, none with a prompt, or a
  * script still being written. */
@@ -83,7 +81,8 @@ export function useGenerateScope(
 		() => select(editor).map(forElement),
 		[select, editor],
 	);
-	const nodes = useLiveNodes(specs).filter(hasPrompt);
+	const live = useLiveNodes(specs);
+	const nodes = useMemo(() => live.filter(hasPrompt), [live]);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -102,9 +101,9 @@ export function useGenerateScope(
 	const run = useCallback(() => {
 		const ctx = context();
 		queue.enqueueGraph(
-			buildNodes(specs(), ctx)
-				.filter(hasPrompt)
-				.filter((node) => needsGeneration(node, queue)),
+			buildNodes(specs(), ctx).filter(
+				(node) => hasPrompt(node) && needsGeneration(node, queue),
+			),
 			ctx,
 		);
 	}, [queue, specs, context]);

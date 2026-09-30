@@ -3,7 +3,7 @@ import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
-import { avatarQueue } from "@/lib/connectors/__tests__/_avatar-queue";
+import { avatarQueue } from "./_avatar-queue";
 import {
 	artStyleReferences,
 	deriveArtStyle,

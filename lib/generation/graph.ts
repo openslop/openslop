@@ -1,5 +1,4 @@
 import isEqual from "lodash/isEqual";
-import isEqualWith from "lodash/isEqualWith";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -34,8 +33,8 @@ export type GenerationJob = {
 type NodeBase = {
 	id: NodeId;
 	inputs: NodeInputs;
-	/** Keyed by the name the declaring plugin gave the edge, which is how its result reaches that plugin. */
-	dependsOn: Record<string, Edge>;
+	/** Keyed by the name the declaring plugin gave the dependency, which is how its result reaches that plugin. */
+	dependsOn: Record<string, Dependency>;
 };
 
 /**
@@ -52,18 +51,16 @@ export type JobNode = NodeBase & { job: GenerationJob };
 export type GenerationNode = SourceNode | JobNode;
 
 /**
- * A dependency as its dependent reaches it. The label is how the dependent
- * names it to the user, so one node can read differently to each dependent:
- * an image is "the previous visual" only to the video after it.
+ * A node as its dependent reaches it. The label is how the dependent names it
+ * to the user, so one node can read differently to each dependent: an image is
+ * "the previous visual" only to the video after it.
  */
-export type Edge = { node: GenerationNode; label?: string };
+export type Dependency = { node: GenerationNode; label: string };
 
 /** A node still to be built. `plugins` replaces the registry chain. */
 export type ElementNode = {
 	element: CanvasContentElement;
 	plugins?: ConnectorPlugin[];
-	/** Carried onto the edge that reaches it; see `Edge`. */
-	label?: string;
 };
 
 /**
@@ -81,13 +78,13 @@ export type BuildContext = {
 
 /**
  * Declares which node to build without saying how; only the builder knows the
- * registry and the state. A source-node spec returns its edge directly.
+ * registry and the state. A source-node spec returns its node directly.
  */
-export type NodeSpec = (ctx: BuildContext) => ElementNode | Edge;
+export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
 
-/** Only an unbuilt node carries an element; never add one to `Edge`. */
+/** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
 export const isElementNode = (
-	value: ElementNode | Edge,
+	value: ElementNode | GenerationNode,
 ): value is ElementNode => "element" in value;
 
 /**
@@ -101,17 +98,8 @@ export const forElement =
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	node.job === null;
 
-const ignoringJob = (_a: unknown, _b: unknown, key?: unknown) =>
-	key === "job" ? true : undefined;
-
-/**
- * Whether two builds read the same thing: the same nodes, inputs and edges.
- * The job, which is how a node runs, is not compared.
- */
-export const isSameGraph = (
-	a: GenerationNode | GenerationNode[] | null,
-	b: GenerationNode | GenerationNode[],
-): boolean => isEqualWith(a, b, ignoringJob);
+/** A node with no prompt has nothing to generate from. */
+export const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);
 
 const DERIVED_PREFIX = "~";
 

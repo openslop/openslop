@@ -36,7 +36,7 @@ function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
 					needsGeneration(dep, queue),
 			)
-			.map(({ label }) => label ?? "an upstream element"),
+			.map(({ label }) => label),
 	]);
 }
 

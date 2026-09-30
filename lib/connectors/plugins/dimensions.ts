@@ -20,7 +20,9 @@ export function createDimensionsPlugin(
 ): ConnectorPlugin<Dimensioned> {
 	return {
 		name: "dimensions",
-		dependencies: [dependency("aspectRatio", () => forAspectRatio)],
+		dependencies: [
+			dependency("aspectRatio", "the aspect ratio", () => forAspectRatio),
+		],
 		beforeGenerate(params, ctx) {
 			const dims = aspectDimensions(requireContext(ctx, "state", "dimensions"));
 			if (kind === "image") return { ...params, ...dims.image };

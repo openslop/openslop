@@ -12,7 +12,7 @@ import type {
 	ReferenceAudio,
 } from "@/lib/connectors/types";
 import type { DependencyDeclaration } from "@/lib/generation/dependency";
-import { forVoice } from "@/lib/generation/sourceNodes";
+import { forVoice, voiceLabel } from "@/lib/generation/sourceNodes";
 
 const NAME = "character-voices";
 
@@ -47,7 +47,7 @@ async function characterVoice(
 export const characterVoices: DependencyDeclaration = {
 	specs: (element) =>
 		parseCharacterNames(element.generationAttributes?.[CHARACTERS_ATTR]).map(
-			(name) => [`voice:${name}`, forVoice(name)] as const,
+			(name) => [`voice:${name}`, forVoice(name), voiceLabel(name)] as const,
 		),
 };
 

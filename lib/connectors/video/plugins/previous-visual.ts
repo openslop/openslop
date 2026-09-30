@@ -25,8 +25,6 @@ export type ParamsWithPreviousVisual = {
 	[CONTINUITY_ATTR]?: string;
 };
 
-const LABEL = "the previous visual";
-
 /**
  * The visual before an element in document order. Resolved at build time, so
  * reordering the script changes what it names and stales the dependent. With
@@ -36,9 +34,7 @@ const forPreviousVisual =
 	(id: string): NodeSpec =>
 	({ canvas }) => {
 		const element = previousVisual(canvas, id);
-		return element
-			? { element, label: LABEL }
-			: { node: sourceNode(derivedNodeId("first", id), {}), label: LABEL };
+		return element ? { element } : sourceNode(derivedNodeId("first", id), {});
 	};
 
 /** No result means the empty leaf: nothing came before the video. */
@@ -55,6 +51,7 @@ async function previousPictures(
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
 export const previousVisualDependency = dependency(
 	"previousVisual",
+	"the previous visual",
 	({ id, generationAttributes: attrs = {} }) =>
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
 		attrs[CONTINUITY_ATTR] === "true"

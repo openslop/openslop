@@ -1,10 +1,10 @@
+import isEqual from "lodash/isEqual";
 import type { Editor } from "slate";
 import { shallow } from "zustand/shallow";
 import {
-	isSameGraph,
 	isSourceNode,
 	type BuildContext,
-	type Edge,
+	type Dependency,
 	type GenerationNode,
 	type NodeSpec,
 } from "./graph";
@@ -21,13 +21,20 @@ const keyOf = (node: GenerationNode) =>
 	isSourceNode(node) ? `${node.id}\n${node.identity}` : node.id;
 
 /** The same dependencies, by identity, under the same keys and labels. */
-const sameEdges = (a: Record<string, Edge>, b: Record<string, Edge>) =>
+const sameDependencies = (
+	a: Record<string, Dependency>,
+	b: Record<string, Dependency>,
+) =>
 	shallow(Object.keys(a), Object.keys(b)) &&
-	Object.entries(a).every(([key, edge]) => shallow(edge, b[key]));
+	Object.entries(a).every(([key, dependency]) => shallow(dependency, b[key]));
 
-/** Edges settle before their node, so ones that changed are told apart without a walk into them. */
+/**
+ * Dependencies settle before their node, so ones that changed are told apart
+ * without a walk into them. The key has matched the id, and the job, which is how a
+ * node runs rather than what it reads, is not compared.
+ */
 const readsTheSame = (a: GenerationNode, b: GenerationNode) =>
-	sameEdges(a.dependsOn, b.dependsOn) && isSameGraph(a, b);
+	sameDependencies(a.dependsOn, b.dependsOn) && isEqual(a.inputs, b.inputs);
 
 /**
  * A document's graph as its readers see it. However many read it, a revision

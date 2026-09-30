@@ -9,7 +9,7 @@ import { getPromptText } from "./inputs";
 import {
 	isElementNode,
 	type BuildContext,
-	type Edge,
+	type Dependency,
 	type ElementNode,
 	type GenerationNode,
 	type JobNode,
@@ -21,7 +21,7 @@ const toNode = (
 	element: CanvasContentElement,
 	connector: ElementConnector,
 	plugins: ConnectorPlugin[],
-	dependsOn: Record<string, Edge>,
+	dependsOn: Record<string, Dependency>,
 ): JobNode => ({
 	id: element.id,
 	inputs: {
@@ -50,24 +50,27 @@ export const resolver = (
 	const resolved = new Map<string, GenerationNode>();
 	const resolving = new Set<string>();
 
-	const edgesOf = (
+	const dependenciesOf = (
 		element: CanvasContentElement,
 		plugins: ConnectorPlugin[],
 	) => {
-		const edges = plugins.flatMap((plugin) =>
+		const dependencies = plugins.flatMap((plugin) =>
 			(plugin.dependencies ?? []).flatMap((declared) =>
 				declared
 					.specs(element)
-					.map(([key, spec]) => [key, reach(spec)] as const),
+					.map(
+						([key, spec, label]) =>
+							[key, { node: resolve(spec), label }] as const,
+					),
 			),
 		);
-		const keys = edges.map(([key]) => key);
+		const keys = dependencies.map(([key]) => key);
 		const shared = keys.find((key, i) => keys.indexOf(key) !== i);
 		if (shared)
 			throw new Error(
 				`Two dependencies of "${element.id}" share the key "${shared}"`,
 			);
-		return Object.fromEntries(edges);
+		return Object.fromEntries(dependencies);
 	};
 
 	const build = ({ element, plugins: override }: ElementNode) => {
@@ -87,7 +90,7 @@ export const resolver = (
 			);
 			const plugins = override ?? connector.config.plugins ?? [];
 			const node = settle(
-				toNode(element, connector, plugins, edgesOf(element, plugins)),
+				toNode(element, connector, plugins, dependenciesOf(element, plugins)),
 			);
 			resolved.set(id, node);
 			return node;
@@ -96,14 +99,12 @@ export const resolver = (
 		}
 	};
 
-	const reach = (spec: NodeSpec): Edge => {
+	const resolve = (spec: NodeSpec): GenerationNode => {
 		const named = spec(ctx);
-		return isElementNode(named)
-			? { node: build(named), label: named.label }
-			: { ...named, node: settle(named.node) };
+		return isElementNode(named) ? build(named) : settle(named);
 	};
 
-	return (spec: NodeSpec): GenerationNode => reach(spec).node;
+	return resolve;
 };
 
 export const buildNode = (spec: NodeSpec, ctx: BuildContext): GenerationNode =>

@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import type { Editor } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import {
 	forElement,
 	needsGeneration,
 	type GenerationNode,
+	type NodeSpec,
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
-import { buildNode, resolver } from "@/lib/generation/resolveGraph";
+import { liveGraph } from "@/lib/generation/liveGraph";
+import { buildNode } from "@/lib/generation/resolveGraph";
 import { createProjectStore } from "@/lib/project/store";
 
 // Memos hold across renders, as React's do: the bug is a graph kept from an
@@ -53,8 +56,14 @@ const context = () => ({
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => context,
 }));
+// The real live graph, over a document replaced on each edit.
+const graph = liveGraph({
+	get children() {
+		return canvas;
+	},
+} as unknown as Editor);
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
-	useLiveGraph: () => resolver(context()),
+	useLiveGraph: () => (spec: NodeSpec) => graph(spec, context),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");

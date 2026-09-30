@@ -24,7 +24,6 @@ export const forCharacterAvatar =
 	({ state }) => ({
 		element: characterAvatarElement(state, name),
 		plugins: buildCharacterAvatarPlugins(name),
-		label: `${name}'s avatar`,
 	});
 
 /**

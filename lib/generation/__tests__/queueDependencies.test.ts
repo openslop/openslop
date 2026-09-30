@@ -4,6 +4,7 @@ import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
 import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { EMPTY_CONTEXT } from "./_context";
+import { byId } from "./_graph";
 
 type GenerateFn = (...args: unknown[]) => Promise<AssetResult>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
@@ -13,9 +14,6 @@ vi.mock("../generateForElement", () => ({
 }));
 
 const config: ConnectorConfig = {};
-
-const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, { node }]));
 
 function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	const job: GenerationJob = {

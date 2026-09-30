@@ -47,17 +47,19 @@ const contextNow = (registry = DEFAULT_CONNECTOR_REGISTRY) => {
 	}));
 };
 
-const tone = dependency("tone", ({ generationAttributes }) => () => ({
-	node: sourceNode("project:tone", {
-		tone: generationAttributes?.tone ?? "",
-	}),
-}));
+const tone = dependency(
+	"tone",
+	"the tone",
+	({ generationAttributes }) =>
+		() =>
+			sourceNode("project:tone", { tone: generationAttributes?.tone ?? "" }),
+);
 const TONED: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: { plugins: [{ name: "tone", dependencies: [tone] }] },
 };
 
-const twice = dependency("style", () => forArtStyle);
+const twice = dependency("style", "the art style", () => forArtStyle);
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: { plugins: [{ name: "twice", dependencies: [twice, twice] }] },
