@@ -116,7 +116,7 @@ export class AnthropicLLM implements LLMProvider {
 			model: this.model(params.model),
 			instructions,
 			messages: [{ role: "user" as const, content }],
-			maxOutputTokens: params.maxTokens || DEFAULT_MAX_TOKENS,
+			maxOutputTokens: params.maxTokens ?? DEFAULT_MAX_TOKENS,
 			providerOptions: {
 				anthropic: thinking(params.thinkingLevel || DEFAULT_THINKING_LEVEL),
 			},

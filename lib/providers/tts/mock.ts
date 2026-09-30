@@ -1,21 +1,14 @@
-import type {
-	TTSGenerateParams,
-	VoiceInfo,
-	VoiceSearchParams,
-} from "@/lib/connectors/types";
+import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
-import type { TTSProvider } from "./base";
+import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 
 const PREVIEW_HOST = new URL(BLOB_BASE).hostname;
 
-export class MockTTS
-	extends MockProvider<TTSGenerateParams>
-	implements TTSProvider
-{
+export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 	protected readonly variants = [
 		{
 			id: "1",
