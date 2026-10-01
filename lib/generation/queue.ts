@@ -1,5 +1,3 @@
-import compact from "lodash/compact";
-import { ASSET_URL_FIELDS } from "../connectors/assetUrl";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
 import { createEmitter } from "../store/emitter";
@@ -9,25 +7,16 @@ import {
 } from "./concurrency";
 import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
-import type { GenerationInputs } from "./inputs";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
+import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
 import {
 	flattenGraph,
 	isSourceNode,
-	needsGeneration,
-	nodeInputs,
 	type BuildContext,
-	type GenerationJob,
 	type GenerationNode,
 	type JobNode,
 } from "./graph";
-
-/** What a dependent records about a dependency's output. */
-const resultIdentity = (result: AssetResult | null): string =>
-	result
-		? compact(ASSET_URL_FIELDS.map((field) => result[field])).join("|")
-		: "";
 
 type ActiveJob = {
 	controller: AbortController;
@@ -70,16 +59,6 @@ export class GenerationQueue {
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id: string): ElementSnapshot => this.snapshots.get(id);
-
-	/**
-	 * What a dependent records about `node`. A source node's output is its
-	 * input, so its identity is settled when it is built; a job node's is the
-	 * result held for it now, which arrives after the graph is built.
-	 */
-	identityOf = (node: GenerationNode): string =>
-		isSourceNode(node)
-			? node.identity
-			: resultIdentity(this.snapshots.get(node.id).result);
 	getResultVersion = () => this.snapshots.getResultVersion();
 	getActiveCount = () => this.snapshots.getActiveCount();
 	getGeneratedCount = () => this.snapshots.getGeneratedCount();
@@ -177,7 +156,7 @@ export class GenerationQueue {
 			elementId: node.id,
 			elementType: node.job.elementType,
 			connectorType: node.job.connectorType,
-			inputs: nodeInputs(node, this),
+			inputs: generationInputs(node, this),
 			result,
 			pinned,
 		});
@@ -238,7 +217,7 @@ export class GenerationQueue {
 			);
 			if (index === -1) break;
 			const [queued] = this.pending.splice(index, 1);
-			if (queued) this.runJob(queued);
+			if (queued) void this.runJob(queued);
 		}
 		this.releaseBlocked();
 	}
@@ -278,69 +257,53 @@ export class GenerationQueue {
 		return Object.fromEntries(entries);
 	}
 
-	private runJob({ node, context }: QueuedJob) {
+	/** A cancelled job settles into nothing: whoever aborted it already cleaned up. */
+	private async runJob({ node, context }: QueuedJob) {
 		const { job } = node;
-		const { elementId } = job;
+		const { elementId, elementType, connectorType } = job;
 		const controller = new AbortController();
-		this.active.set(elementId, {
-			controller,
-			connectorType: job.connectorType,
-		});
+		const { signal } = controller;
+		this.active.set(elementId, { controller, connectorType });
 
 		this.snapshots.update(elementId, { status: "generating", seconds: 0 });
 		this.snapshots.notify();
 		this.ticker.start(elementId);
 
-		const inputs = nodeInputs(node, this);
-		generateForElement(
-			job,
-			inputs,
-			this.dependencyResults(node),
-			context,
-			controller.signal,
-		)
-			.then((result) => this.handleJobSuccess(job, inputs, result, controller))
-			.catch((error) => this.handleJobError(elementId, error, controller))
-			.finally(() => this.finalizeJob(elementId, controller));
+		const inputs = generationInputs(node, this);
+		const dependencies = this.dependencyResults(node);
+		try {
+			const result = await generateForElement(
+				job,
+				inputs,
+				dependencies,
+				context,
+				signal,
+			);
+			if (signal.aborted) return;
+			this.commit({
+				elementId,
+				elementType,
+				connectorType,
+				inputs,
+				result,
+				pinned: false,
+			});
+		} catch (error) {
+			if (signal.aborted) return;
+			console.error(`Generation failed for element ${elementId}:`, error);
+			this.snapshots.update(elementId, {
+				status: "idle",
+				seconds: 0,
+				result: null,
+				error: errorMessage(error),
+			});
+			this.snapshots.notify();
+		} finally {
+			if (!signal.aborted) this.finalizeJob(elementId);
+		}
 	}
 
-	private handleJobSuccess(
-		job: GenerationJob,
-		inputs: GenerationInputs,
-		result: AssetResult,
-		controller: AbortController,
-	) {
-		if (controller.signal.aborted) return;
-		this.commit({
-			elementId: job.elementId,
-			elementType: job.elementType,
-			connectorType: job.connectorType,
-			inputs,
-			result,
-			pinned: false,
-		});
-	}
-
-	private handleJobError(
-		elementId: string,
-		error: unknown,
-		controller: AbortController,
-	) {
-		if (controller.signal.aborted) return;
-		console.error(`Generation failed for element ${elementId}:`, error);
-		this.snapshots.update(elementId, {
-			status: "idle",
-			seconds: 0,
-			result: null,
-			error: errorMessage(error),
-		});
-		this.snapshots.notify();
-	}
-
-	// Both terminal handlers notify (commit on success, handleJobError on
-	// failure), so this only does queue bookkeeping.
-	private finalizeJob(elementId: string, controller: AbortController) {
-		if (controller.signal.aborted) return;
+	private finalizeJob(elementId: string) {
 		this.ticker.stop(elementId);
 		this.active.delete(elementId);
 		this.processQueue();

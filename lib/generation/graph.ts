@@ -1,4 +1,3 @@
-import isEqual from "lodash/isEqual";
 import type {
 	CanvasContentElement,
 	CanvasElementType,
@@ -12,12 +11,7 @@ import type {
 	ModelRef,
 } from "@/lib/connectors/types";
 import type { ProjectData, ProjectStore } from "@/lib/project/store";
-import {
-	serializeInputs,
-	type GenerationInputs,
-	type NodeInputs,
-} from "./inputs";
-import type { GenerationQueue } from "./queue";
+import { serializeInputs, type NodeInputs } from "./inputs";
 
 export type NodeId = string;
 
@@ -113,44 +107,6 @@ export function sourceNode(
 		identity: serializeInputs({ ...inputs, dependencies: {} }),
 	};
 }
-
-export function nodeInputs(
-	node: GenerationNode,
-	queue: GenerationQueue,
-): GenerationInputs {
-	return {
-		...node.inputs,
-		dependencies: Object.fromEntries(
-			Object.values(node.dependsOn).map(({ node: dep }) => [
-				dep.id,
-				queue.identityOf(dep),
-			]),
-		),
-	};
-}
-
-export function needsGeneration(
-	node: GenerationNode,
-	queue: GenerationQueue,
-): boolean {
-	if (isSourceNode(node)) return false;
-	const snapshot = queue.getElementSnapshot(node.id);
-	if (!snapshot.result) return true;
-	// The user supplied this result; drifting project state must not replace it.
-	if (snapshot.pinned) return false;
-	return (
-		Object.values(node.dependsOn).some(({ node: dep }) =>
-			needsGeneration(dep, queue),
-		) || !isEqual(nodeInputs(node, queue), snapshot.resultInputs)
-	);
-}
-
-export const isNodeStale = (
-	node: GenerationNode,
-	queue: GenerationQueue,
-): boolean =>
-	Boolean(queue.getElementSnapshot(node.id).result) &&
-	needsGeneration(node, queue);
 
 /** Every node reachable from `roots`, dependencies before their dependents. */
 export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {

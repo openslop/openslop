@@ -1,4 +1,5 @@
-import type { Dependency, GenerationNode } from "../graph";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import type { Dependency, GenerationNode, JobNode } from "../graph";
 
 /** Dependencies keyed by node id. A bare node is named by its id. */
 export const byId = (dependencies: (GenerationNode | Dependency)[]) =>
@@ -9,3 +10,20 @@ export const byId = (dependencies: (GenerationNode | Dependency)[]) =>
 				: [dependency.id, { node: dependency, label: dependency.id }],
 		),
 	);
+
+/** An image job whose prompt is its id. */
+export const jobNode = (
+	id: string,
+	dependsOn: GenerationNode[] = [],
+): JobNode => ({
+	id,
+	inputs: { prompt: id, attributes: {} },
+	dependsOn: byId(dependsOn),
+	job: {
+		elementId: id,
+		elementType: "image",
+		connectorType: "image",
+		model: DEFAULT_MODELS.image,
+		config: {},
+	},
+});

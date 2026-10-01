@@ -261,8 +261,6 @@ describe("GenerationQueue", () => {
 
 			await vi.runAllTimersAsync();
 
-			// handleJobError owns the failure notify (finalizeJob no longer
-			// notifies), so the error must still reach subscribers.
 			expect(listener).toHaveBeenCalled();
 			expect(generationQueue.getElementSnapshot("err3").error).toBe("boom");
 		});
@@ -840,7 +838,7 @@ describe("GenerationQueue", () => {
 		});
 
 		it("keeps staleness correct after rehydration", async () => {
-			const { isNodeStale } = await import("../graph");
+			const { isNodeStale } = await import("../staleness");
 			const q = new GenerationQueue({
 				initialState: { h3: idleEntry },
 			});
