@@ -1,11 +1,11 @@
 import { Descendant } from "slate";
-import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
-import { getContentElements, isSceneElement } from "@/lib/canvas/scenes";
+import type { CanvasContentElement, ParsedElement } from "./types";
+import { getContentElements, isSceneElement } from "./scenes";
 import { withoutCaretMarker } from "./constants";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import { flatAttributes } from "./elementAttributes";
 import { escapeXml } from "./xmlEscape";
 
-const sceneMarker = (n: number) => `\n--- Scene ${n} ---\n`;
+const sceneMarker = (sceneNumber: number) => `\n--- Scene ${sceneNumber} ---\n`;
 
 export function getElementText(element: ParsedElement): string {
 	return element.children.map((child) => child.text).join("");

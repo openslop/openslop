@@ -100,10 +100,9 @@ const VIDEO_FORMAT_OPTIONS: SettingPillOption<VideoFormat>[] =
 const LANGUAGE_OPTIONS: SettingPillOption<LanguageChoice>[] =
 	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
 
-const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map((t) => ({
-	value: t.id,
-	label: t.name,
-}));
+const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map(
+	({ id, name }) => ({ value: id, label: name }),
+);
 
 function AttachMenu({
 	openPicker,

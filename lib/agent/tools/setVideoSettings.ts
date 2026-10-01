@@ -29,12 +29,12 @@ export const setVideoSettings = defineTool({
 
 	  Lengths, with the spoken-word budget each carries:
 	  - auto: no budget. The script runs as long as the material needs.
-	${VIDEO_LENGTH_TARGETS.map((l) => `  - ${l}: ${VIDEO_LENGTH_SPECS[l].minWords} to ${VIDEO_LENGTH_SPECS[l].maxWords} words`).join("\n")}
+	${VIDEO_LENGTH_TARGETS.map((length) => `  - ${length}: ${VIDEO_LENGTH_SPECS[length].minWords} to ${VIDEO_LENGTH_SPECS[length].maxWords} words`).join("\n")}
 
 	  Formats, which decide what the next written script is made of. Set one only when the
 	  user asks for it; on auto the writer picks the format closest to the brief.
 	  - auto: the writer chooses.
-	${VIDEO_FORMAT_TARGETS.map((f) => `  - ${f}: ${VIDEO_FORMAT_SPECS[f].summary}`).join("\n")}
+	${VIDEO_FORMAT_TARGETS.map((format) => `  - ${format}: ${VIDEO_FORMAT_SPECS[format].summary}`).join("\n")}
 	`,
 	input: z
 		.object({

@@ -128,21 +128,21 @@ const MOCK_RESPONSES: {
 	respond: (params: LLMGenerateParams) => string;
 }[] = [
 	{
-		matches: (p) => /describe the visual art style/i.test(p),
+		matches: (prompt) => /describe the visual art style/i.test(prompt),
 		respond: () => MOCK_STYLE,
 	},
 	{
-		matches: (p) => p.startsWith(OUTLINE_INSTRUCTION),
+		matches: (prompt) => prompt.startsWith(OUTLINE_INSTRUCTION),
 		respond: () => MOCK_OUTLINE,
 	},
 	{
-		matches: (p) => p.startsWith(REVIEW_INSTRUCTION),
+		matches: (prompt) => prompt.startsWith(REVIEW_INSTRUCTION),
 		respond: () => NO_FINDINGS,
 	},
 ];
 
 function mockResponse(params: LLMGenerateParams): string {
-	const match = MOCK_RESPONSES.find((m) => m.matches(params.prompt));
+	const match = MOCK_RESPONSES.find((mock) => mock.matches(params.prompt));
 	return match ? match.respond(params) : MOCK_SCRIPT;
 }
 
@@ -162,20 +162,20 @@ export class MockLLM implements LLMProvider {
 	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
 		await sleep(500);
 		const text = mockResponse(params);
-		let i = 0;
-		while (i < text.length) {
+		let offset = 0;
+		while (offset < text.length) {
 			const size = 1 + Math.floor(Math.random() * 12);
 			await sleep(20 + Math.random() * 40);
-			yield { text: text.slice(i, i + size), done: false };
-			i += size;
+			yield { text: text.slice(offset, offset + size), done: false };
+			offset += size;
 		}
 		yield { text: "", done: true };
 	}
 
-	agentModel(model: string): AgentModel {
+	agentModel(modelId: string): AgentModel {
 		return {
 			model: mockAgentModel(),
-			modelId: model,
+			modelId,
 			providerOptions: {},
 			cachedPrefix: {},
 		};
@@ -208,23 +208,19 @@ function lastToolResult(
 ): { toolName: string; text: string } | null {
 	// Scoped to the turn in flight: what the one before it read described a
 	// canvas that has since been edited.
-	const asked = prompt.findLastIndex((message) => message.role === "user");
-	for (const message of prompt.slice(asked + 1).reverse()) {
-		if (message.role !== "tool" || typeof message.content === "string")
-			continue;
-		const result = [...message.content]
-			.reverse()
-			.find((part) => part.type === "tool-result");
-		if (result) {
-			return { toolName: result.toolName, text: outputText(result.output) };
-		}
-	}
-	return null;
+	const askedAt = prompt.findLastIndex((message) => message.role === "user");
+	const result = prompt
+		.slice(askedAt + 1)
+		.flatMap((message) => (message.role === "tool" ? message.content : []))
+		.findLast((part) => part.type === "tool-result");
+	return result
+		? { toolName: result.toolName, text: outputText(result.output) }
+		: null;
 }
 
 /** What the user actually asked for, apart from the prompt around it. */
 function lastUserText(prompt: LanguageModelV3Prompt): string {
-	const user = [...prompt].reverse().find((m) => m.role === "user");
+	const user = prompt.findLast((message) => message.role === "user");
 	return user ? textOf(user) : "";
 }
 

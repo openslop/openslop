@@ -43,17 +43,17 @@ function useTranscript(projectId: string): SloppyMessage[] | null {
 	const [restored, setRestored] = useState<SloppyMessage[] | null>(null);
 
 	useEffect(() => {
-		let current = true;
+		let cancelled = false;
 		loadAgentTranscript(projectId)
 			.then((messages) => {
-				if (current) setRestored(messages);
+				if (!cancelled) setRestored(messages);
 			})
 			.catch((error) => {
 				toastError(error, "Could not load Sloppy");
-				if (current) setRestored([]);
+				if (!cancelled) setRestored([]);
 			});
 		return () => {
-			current = false;
+			cancelled = true;
 		};
 	}, [projectId]);
 

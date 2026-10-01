@@ -7,8 +7,8 @@ import {
 	SCENE_TYPE,
 } from "./types";
 
-export const isSceneElement = (n: unknown): n is SceneElement =>
-	Element.isElement(n) && n.type === SCENE_TYPE;
+export const isSceneElement = (node: unknown): node is SceneElement =>
+	Element.isElement(node) && node.type === SCENE_TYPE;
 
 /** The scene holding the node at `path`. `withScenes` guarantees content has one. */
 export function parentSceneId(editor: Editor, path: Path): string {
@@ -47,5 +47,5 @@ export function previousVisual(
 }
 
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
-	return nodes.filter(isSceneElement).findIndex((n) => n.id === sceneId) + 1;
+	return nodes.filter(isSceneElement).findIndex(({ id }) => id === sceneId) + 1;
 }
