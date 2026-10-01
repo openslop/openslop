@@ -49,11 +49,7 @@ export type JobNode = NodeBase & { job: GenerationJob };
 
 export type GenerationNode = SourceNode | JobNode;
 
-/**
- * A node as its dependent reaches it. The label is how the dependent names it
- * to the user, so one node can read differently to each dependent: an image is
- * "the previous visual" only to the video after it.
- */
+/** Each dependent names `node` its own way, so `label` lives on the edge. */
 export type Dependency = { node: GenerationNode; label: string };
 
 /** `plugins` replaces the registry chain. */
