@@ -1,7 +1,8 @@
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { modelRefSchema } from "@/lib/connectors/models";
-import { derivedNodeId, type NodeResults } from "@/lib/generation/graph";
+import { derivedNodeId } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementVersion } from "@/lib/generation/versions";
 import type { ProjectData } from "./store";
 import type { MetadataCharacter } from "./types";
@@ -12,30 +13,30 @@ export const characterAvatarElementId = (name: string) =>
 export const isCharacterAvatarId = (id: string) =>
 	id.startsWith(characterAvatarElementId(""));
 
-const avatarSnapshot = (results: NodeResults, name: string) =>
-	results.getElementSnapshot(characterAvatarElementId(name));
+const avatarSnapshot = (queue: GenerationQueue, name: string) =>
+	queue.getElementSnapshot(characterAvatarElementId(name));
 
 /** A character's avatar is whatever its node last produced. */
-export const characterAvatarUrl = (results: NodeResults, name: string) =>
-	getPrimaryUrl(avatarSnapshot(results, name).result, "image");
+export const characterAvatarUrl = (queue: GenerationQueue, name: string) =>
+	getPrimaryUrl(avatarSnapshot(queue, name).result, "image");
 
 /** The avatar's url only when the user supplied it: a pinned result. */
 export function uploadedAvatarUrl(
-	results: NodeResults,
+	queue: GenerationQueue,
 	name: string,
 ): string | undefined {
-	const { result, pinned } = avatarSnapshot(results, name);
+	const { result, pinned } = avatarSnapshot(queue, name);
 	return pinned ? getPrimaryUrl(result, "image") : undefined;
 }
 
 export type CharacterAvatarState = "none" | "generated" | "uploaded";
 
 export function characterAvatarState(
-	results: NodeResults,
+	queue: GenerationQueue,
 	name: string,
 ): CharacterAvatarState {
-	if (!characterAvatarUrl(results, name)) return "none";
-	return uploadedAvatarUrl(results, name) ? "uploaded" : "generated";
+	if (!characterAvatarUrl(queue, name)) return "none";
+	return uploadedAvatarUrl(queue, name) ? "uploaded" : "generated";
 }
 
 export function characterFromAvatarInputs(

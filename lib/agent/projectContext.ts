@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import type { Editor } from "slate";
 import { isScriptEmpty } from "@/lib/canvas/scenes";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import type { NodeResults } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
 import { characterAvatarState } from "@/lib/project/characterAvatar";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import type { ProjectData } from "@/lib/project/store";
@@ -13,7 +13,7 @@ import type { AgentContext } from "./context";
 
 function toAgentContext(
 	state: ProjectData,
-	results: NodeResults,
+	queue: GenerationQueue,
 	scriptIsEmpty: boolean,
 ): AgentContext {
 	const { metadata } = state;
@@ -33,7 +33,7 @@ function toAgentContext(
 			([name, character]) => ({
 				name,
 				hasAppearance: character.appearance.trim().length > 0,
-				avatar: characterAvatarState(results, name),
+				avatar: characterAvatarState(queue, name),
 			}),
 		),
 		referenceImageCount: state.referenceImages.length,

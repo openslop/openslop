@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateStatic } from "slate-react";
 import {
@@ -7,11 +7,11 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import {
 	forElement,
+	hasPrompt,
 	isNodeStale,
 	needsGeneration,
-	type BuildContext,
 } from "@/lib/generation/graph";
-import { buildNodes } from "@/lib/generation/resolveGraph";
+import { buildNodes } from "@/lib/generation/generationGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNodes } from "@/lib/generation/useLiveNodes";
@@ -77,18 +77,12 @@ export function useGenerateScope(
 	const editor = useSlateStatic();
 	const context = useBuildContext();
 
-	const buildScope = useCallback(
-		(ctx: BuildContext) =>
-			buildNodes(select(editor).map(forElement), ctx).filter(
-				(node) => node.inputs.prompt,
-			),
+	const specs = useCallback(
+		() => select(editor).map(forElement),
 		[select, editor],
 	);
-	const buildLive = useCallback(
-		() => buildScope(context()),
-		[buildScope, context],
-	);
-	const nodes = useLiveNodes(buildLive);
+	const live = useLiveNodes(specs);
+	const nodes = useMemo(() => live.filter(hasPrompt), [live]);
 
 	const active = useQueueSelector((q) =>
 		nodes.some((node) =>
@@ -107,10 +101,12 @@ export function useGenerateScope(
 	const run = useCallback(() => {
 		const ctx = context();
 		queue.enqueueGraph(
-			buildScope(ctx).filter((node) => needsGeneration(node, queue)),
+			buildNodes(specs(), ctx).filter(
+				(node) => hasPrompt(node) && needsGeneration(node, queue),
+			),
 			ctx,
 		);
-	}, [queue, buildScope, context]);
+	}, [queue, specs, context]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

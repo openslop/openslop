@@ -3,9 +3,9 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { forElement, type NodeSpec } from "@/lib/generation/graph";
+import { forElement, hasPrompt, type NodeSpec } from "@/lib/generation/graph";
 import { staleReason } from "@/lib/generation/staleReason";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/generationGraph";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNode } from "@/lib/generation/useLiveNodes";
 import type { CanvasContentElement } from "@/lib/canvas/types";
@@ -14,8 +14,7 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 export function useGenerateNode(spec: NodeSpec) {
 	const queue = useGenerationQueue();
 	const context = useBuildContext();
-	const build = useCallback(() => buildNode(spec, context()), [spec, context]);
-	const node = useLiveNode(build);
+	const node = useLiveNode(spec);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
@@ -23,7 +22,7 @@ export function useGenerateNode(spec: NodeSpec) {
 	const generate = useCallback(() => {
 		const ctx = context();
 		const current = buildNode(spec, ctx);
-		if (!current.inputs.prompt) {
+		if (!hasPrompt(current)) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
@@ -42,7 +41,7 @@ export function useGenerateNode(spec: NodeSpec) {
 		error: snapshot.error,
 		pinned: snapshot.pinned,
 		staleReason: reason,
-		hasPrompt: Boolean(node.inputs.prompt),
+		hasPrompt: hasPrompt(node),
 		hasResult: Boolean(snapshot.result),
 		generate,
 		discard,

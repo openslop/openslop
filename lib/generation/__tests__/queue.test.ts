@@ -15,6 +15,7 @@ import type { GenerationJob, GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import type { CommittedVersion } from "../versions";
 import { EMPTY_CONTEXT } from "./_context";
+import { byId } from "./_graph";
 
 type GenerateFn = (...args: unknown[]) => Promise<unknown>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
@@ -22,9 +23,6 @@ let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
 vi.mock("../generateForElement", () => ({
 	generateForElement: (...args: unknown[]) => generateMock(...args),
 }));
-
-const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, node]));
 
 type JobOverrides = Partial<GenerationJob> & {
 	inputs?: GenerationInputs;

@@ -3,7 +3,7 @@ import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
-import { stubAvatarResults } from "@/lib/connectors/__tests__/_node-results";
+import { avatarQueue } from "./_avatar-queue";
 import {
 	artStyleReferences,
 	deriveArtStyle,
@@ -27,7 +27,7 @@ describe("artStyleReferences", () => {
 		expect(
 			artStyleReferences(
 				project(),
-				stubAvatarResults({
+				avatarQueue({
 					Mira: { imageUrl: "https://example.com/uploaded.jpg", pinned: true },
 					Generated: { imageUrl: "https://example.com/generated.jpg" },
 				}),
@@ -39,7 +39,7 @@ describe("artStyleReferences", () => {
 	});
 
 	it("is empty when nothing has been uploaded", () => {
-		expect(artStyleReferences(project(), stubAvatarResults({}))).toEqual([]);
+		expect(artStyleReferences(project(), avatarQueue({}))).toEqual([]);
 	});
 });
 
@@ -51,7 +51,7 @@ describe("uploadedAvatarUrls", () => {
 		expect(
 			uploadedAvatarUrls(
 				project(),
-				stubAvatarResults({
+				avatarQueue({
 					Mira: { imageUrl: "https://example.com/uploaded.jpg", pinned: true },
 				}),
 			),
@@ -72,7 +72,7 @@ describe("deriveArtStyle", () => {
 	it("returns nothing and skips the model when there is nothing to read", async () => {
 		const model = llm("unused");
 
-		const style = await deriveArtStyle(model, project(), stubAvatarResults({}));
+		const style = await deriveArtStyle(model, project(), avatarQueue({}));
 
 		expect(style).toBe("");
 		expect(model.generate).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe("deriveArtStyle", () => {
 		project().setReferenceImages(["https://example.com/a.jpg"]);
 		const model = llm("  Soft watercolor, pastel palette.  ");
 
-		const style = await deriveArtStyle(model, project(), stubAvatarResults({}));
+		const style = await deriveArtStyle(model, project(), avatarQueue({}));
 
 		expect(style).toBe("Soft watercolor, pastel palette.");
 		expect(model.generate.mock.calls[0][0]).toMatchObject({

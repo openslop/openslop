@@ -5,7 +5,7 @@ import { applyTemplate } from "@/lib/templates/applyTemplate";
 import { getTemplateById } from "@/lib/templates/templates";
 import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
 import { needsGeneration } from "@/lib/generation/graph";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/generationGraph";
 import { characterAvatarElementId } from "../characterAvatar";
 import { createProjectStore, type ProjectStore } from "../store";
 

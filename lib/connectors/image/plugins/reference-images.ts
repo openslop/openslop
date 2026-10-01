@@ -16,6 +16,7 @@ export type ParamsWithReferenceImages = {
 /** Declared only while inherited, so an override neither reads nor stales on project references. */
 export const projectReferenceImages = dependency(
 	"referenceImages",
+	"the reference images",
 	(element) =>
 		element.generationAttributes?.[REFERENCE_IMAGES_ATTR] === undefined
 			? forReferenceImages

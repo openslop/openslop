@@ -7,8 +7,8 @@ import {
 	needsGeneration,
 	nodeInputs,
 	type GenerationNode,
-	type NodeResults,
 } from "./graph";
+import type { GenerationQueue } from "./queue";
 
 /** How many changes are named before the rest are counted off. */
 const MAX_NAMED = 3;
@@ -16,10 +16,10 @@ const MAX_NAMED = 3;
 const list = new Intl.ListFormat("en", { type: "conjunction" });
 
 /** Everything about `node` that no longer matches the result it produced. */
-function changedInputs(node: GenerationNode, results: NodeResults): string[] {
-	const previous = results.getElementSnapshot(node.id).resultInputs;
+function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
+	const previous = queue.getElementSnapshot(node.id).resultInputs;
 	if (!previous) return [];
-	const current = nodeInputs(node, results);
+	const current = nodeInputs(node, queue);
 
 	const attributeKeys = union(
 		Object.keys(current.attributes),
@@ -32,11 +32,11 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
 			.map(lowerCase),
 		...Object.values(node.dependsOn)
 			.filter(
-				(dep) =>
+				({ node: dep }) =>
 					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
-					needsGeneration(dep, results),
+					needsGeneration(dep, queue),
 			)
-			.map((dep) => dep.label ?? "an upstream element"),
+			.map(({ label }) => label),
 	]);
 }
 
@@ -46,10 +46,10 @@ function changedInputs(node: GenerationNode, results: NodeResults): string[] {
  */
 export function staleReason(
 	node: GenerationNode,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): string | null {
-	if (!isNodeStale(node, results)) return null;
-	const changes = changedInputs(node, results);
+	if (!isNodeStale(node, queue)) return null;
+	const changes = changedInputs(node, queue);
 	const named = changes.slice(0, MAX_NAMED);
 	const rest = changes.length - named.length;
 	if (rest > 0) named.push(`${rest} more`);

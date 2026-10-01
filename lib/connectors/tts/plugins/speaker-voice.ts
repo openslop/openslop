@@ -1,7 +1,7 @@
 import omit from "lodash/omit";
 import { requireContext } from "@/lib/connectors/plugins";
 import { dependency } from "@/lib/generation/dependency";
-import { forVoice } from "@/lib/generation/sourceNodes";
+import { forVoice, voiceLabel } from "@/lib/generation/sourceNodes";
 import { resolveVoice } from "@/lib/project/types";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import type {
@@ -30,6 +30,7 @@ const voiceModel = (
 
 export const speakerVoice = dependency(
 	"voice",
+	({ generationAttributes: attrs }) => voiceLabel(attrs?.name),
 	({ generationAttributes: attrs }) => forVoice(attrs?.name, attrs),
 );
 

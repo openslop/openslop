@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import compact from "lodash/compact";
 import type { LLMConnector } from "@/lib/connectors/types";
-import type { NodeResults } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
 import { uploadedAvatarUrl } from "./characterAvatar";
 import type { ProjectData } from "./store";
 
@@ -10,29 +10,29 @@ const DERIVE_PROMPT = dedent`Describe the visual art style of the attached refer
 /** Generated avatars already carry the style, so reading them back is circular. */
 export function uploadedAvatarUrls(
 	state: ProjectData,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): string[] {
 	return compact(
 		Object.keys(state.metadata.characters).map((name) =>
-			uploadedAvatarUrl(results, name),
+			uploadedAvatarUrl(queue, name),
 		),
 	);
 }
 
 export function artStyleReferences(
 	state: ProjectData,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): string[] {
-	return [...state.referenceImages, ...uploadedAvatarUrls(state, results)];
+	return [...state.referenceImages, ...uploadedAvatarUrls(state, queue)];
 }
 
 /** "" when there is nothing to read, so callers can leave the style alone. */
 export async function deriveArtStyle(
 	llm: Pick<LLMConnector, "generate">,
 	state: ProjectData,
-	results: NodeResults,
+	queue: GenerationQueue,
 ): Promise<string> {
-	const referenceImages = artStyleReferences(state, results);
+	const referenceImages = artStyleReferences(state, queue);
 	if (referenceImages.length === 0) return "";
 	const { text } = await llm.generate({
 		prompt: DERIVE_PROMPT,

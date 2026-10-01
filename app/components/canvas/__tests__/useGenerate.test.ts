@@ -6,9 +6,10 @@ import {
 	forElement,
 	needsGeneration,
 	type GenerationNode,
+	type NodeSpec,
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode, createGraphFor } from "@/lib/generation/generationGraph";
 import { createProjectStore } from "@/lib/project/store";
 
 // Memos hold across renders, as React's do: the bug is a graph kept from an
@@ -53,6 +54,11 @@ const context = () => ({
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => context,
 }));
+const graphFor = createGraphFor();
+vi.mock("@/lib/generation/LiveGraphProvider", () => ({
+	useResolveNode: () => (spec: NodeSpec) =>
+		graphFor(canvas, context).resolve(spec),
+}));
 
 const { useGenerate } = await import("../hooks/useGenerate");
 const { useGenerateScope } = await import("../hooks/useGenerateScope");
@@ -86,7 +92,7 @@ function regenerateImageFromItsCard() {
 
 const queuedImage = (spy: ReturnType<typeof vi.spyOn>) => {
 	const roots = spy.mock.calls[0]?.[0] as GenerationNode[];
-	return roots[0]?.dependsOn.previousVisual;
+	return roots[0]?.dependsOn.previousVisual?.node;
 };
 
 let enqueue: ReturnType<typeof vi.spyOn>;

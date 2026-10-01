@@ -10,28 +10,23 @@ import { sourceNode, type NodeSpec } from "./graph";
  * change to it, which is what keeps reads from drifting out of the inputs.
  */
 export const forReferenceImages: NodeSpec = ({ state }) =>
-	sourceNode(
-		"project:referenceImages",
-		{ urls: state.referenceImages.join(",") },
-		"the reference images",
-	);
+	sourceNode("project:referenceImages", {
+		urls: state.referenceImages.join(","),
+	});
 
 export const forArtStyle: NodeSpec = ({ state }) =>
-	sourceNode(
-		"project:artStyle",
-		{ style: state.metadata.style.trim() },
-		"the art style",
-	);
+	sourceNode("project:artStyle", { style: state.metadata.style.trim() });
 
 export const forAspectRatio: NodeSpec = ({ state }) =>
-	sourceNode(
-		"project:aspectRatio",
-		{ aspectRatio: state.metadata.videoSettings.aspectRatio },
-		"the aspect ratio",
-	);
+	sourceNode("project:aspectRatio", {
+		aspectRatio: state.metadata.videoSettings.aspectRatio,
+	});
 
 export const voiceNodeId = (characterName?: string) =>
 	`project:voice:${characterName ?? "narrator"}`;
+
+export const voiceLabel = (characterName?: string) =>
+	`${characterName ?? "the narrator"}'s voice`;
 
 /**
  * What an element reads of its voice: the id picked for it and the pair it
@@ -47,11 +42,10 @@ export const forVoice =
 	({ state }) => {
 		const voice = metadataVoiceFor(state.metadata, characterName);
 		const model = resolveModel("tts", voice, ...candidates);
-		return sourceNode(
-			voiceNodeId(characterName),
-			{ voiceId: voice?.voiceId ?? "", ...model },
-			`${characterName ?? "the narrator"}'s voice`,
-		);
+		return sourceNode(voiceNodeId(characterName), {
+			voiceId: voice?.voiceId ?? "",
+			...model,
+		});
 	};
 
 export const aspectDimensions = (state: ProjectData) =>

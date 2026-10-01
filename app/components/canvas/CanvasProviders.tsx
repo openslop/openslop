@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Slate } from "slate-react";
 import { composeProviders } from "@/lib/components/composeProviders";
+import { LiveGraphProvider } from "@/lib/generation/LiveGraphProvider";
 import { CanvasHistoryProvider } from "@/lib/project/CanvasHistoryProvider";
 import { RenderLayoutProvider } from "../player/RenderLayoutContext";
 import { BottomViewProvider } from "../player/BottomViewContext";
@@ -18,6 +19,7 @@ import { EditorPanelProvider } from "./panel/EditorPanelContext";
 import { useEditorSession } from "./hooks/useEditorSession";
 
 const CanvasScopedProviders = composeProviders(
+	LiveGraphProvider,
 	RenderProvider,
 	RenderLayoutProvider,
 	PlayerPlacementProvider,

@@ -15,7 +15,8 @@ import styles from "../styles/sortable.module.css";
 /**
  * Previews the dragged node in a scratch editor holding only that node. What a
  * node would otherwise read off its own document (scene number, collapsed
- * state) is resolved against the real canvas, which this renders inside of.
+ * state, its generation graph) is resolved against the real canvas, which
+ * this renders inside of.
  */
 export function DragOverlayContent({ element }: { element: CanvasElement }) {
 	const editor = useMemo(() => withReact(createEditor()), []);

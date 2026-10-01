@@ -6,7 +6,7 @@ import { forArtStyle } from "@/lib/generation/sourceNodes";
 export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {
 	return {
 		name: "art-style",
-		dependencies: [dependency("artStyle", () => forArtStyle)],
+		dependencies: [dependency("artStyle", "the art style", () => forArtStyle)],
 		transformPrompt(prompt, ctx) {
 			const { metadata } = requireContext(ctx, "state", "art-style");
 			const style = metadata.style.trim();

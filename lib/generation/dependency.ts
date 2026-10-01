@@ -7,27 +7,34 @@ export type DependencyResults = Record<string, AssetResult>;
 
 type Readable = { dependencies?: DependencyResults };
 
-/** The edges a plugin adds to an element's node, keyed as their results come back. */
+/**
+ * The dependencies a plugin adds to an element's node, keyed as their results
+ * come back, each with how the element names it to the user.
+ */
 export interface DependencyDeclaration {
 	specs(
 		element: CanvasContentElement,
-	): readonly (readonly [string, NodeSpec])[];
+	): readonly (readonly [key: string, spec: NodeSpec, label: string])[];
 }
 
 /** One node, declared once and read back through the same handle. */
-export interface Dependency extends DependencyDeclaration {
+export interface DependencyHandle extends DependencyDeclaration {
 	read(ctx: Readable): AssetResult | undefined;
 }
 
-/** A null spec declares no edge. */
+/** A null spec declares no dependency. */
 export function dependency(
 	key: string,
+	label: string | ((element: CanvasContentElement) => string),
 	spec: (element: CanvasContentElement) => NodeSpec | null,
-): Dependency {
+): DependencyHandle {
 	return {
 		specs: (element) => {
 			const nodeSpec = spec(element);
-			return nodeSpec ? [[key, nodeSpec]] : [];
+			if (!nodeSpec) return [];
+			return [
+				[key, nodeSpec, typeof label === "string" ? label : label(element)],
+			];
 		},
 		read: (ctx) => ctx.dependencies?.[key],
 	};

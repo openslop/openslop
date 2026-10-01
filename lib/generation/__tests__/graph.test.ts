@@ -4,7 +4,6 @@ import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
 	flattenGraph,
 	isNodeStale,
-	isSameGraph,
 	needsGeneration,
 	nodeInputs,
 	sourceNode,
@@ -13,11 +12,9 @@ import {
 	type JobNode,
 } from "../graph";
 import { GenerationQueue } from "../queue";
+import { byId } from "./_graph";
 
 const config: ConnectorConfig = {};
-
-const byId = (nodes: GenerationNode[]) =>
-	Object.fromEntries(nodes.map((node) => [node.id, node]));
 
 function node(
 	id: string,
@@ -156,48 +153,5 @@ describe("flattenGraph", () => {
 			"left",
 			"right",
 		]);
-	});
-});
-
-describe("isSameGraph", () => {
-	it("is true for two builds that read the same thing", () => {
-		expect(isSameGraph(node("a", [node("b")]), node("a", [node("b")]))).toBe(
-			true,
-		);
-	});
-
-	it("sees a changed prompt", () => {
-		const changed = { ...node("a"), inputs: { prompt: "b", attributes: {} } };
-		expect(isSameGraph(node("a"), changed)).toBe(false);
-	});
-
-	it("sees a changed attribute", () => {
-		expect(isSameGraph(node("a"), node("a", [], { style: "noir" }))).toBe(
-			false,
-		);
-	});
-
-	it("sees a dependency edited, not just replaced", () => {
-		const edited = { ...node("b"), inputs: { prompt: "b2", attributes: {} } };
-		expect(isSameGraph(node("a", [node("b")]), node("a", [edited]))).toBe(
-			false,
-		);
-	});
-
-	it("sees a dependency swapped for another element", () => {
-		expect(isSameGraph(node("a", [node("b")]), node("a", [node("c")]))).toBe(
-			false,
-		);
-	});
-
-	it("sees a dependency stand in for an element, and the reverse", () => {
-		const leaf = sourceNode("~first:a", {}, "the previous visual");
-		expect(isSameGraph(node("a", [leaf]), node("a", [node("b")]))).toBe(false);
-	});
-
-	it("ignores the job, which is how a node runs rather than what it reads", () => {
-		const a = node("a");
-		const reconfigured = { ...a, job: { ...a.job, config: { plugins: [] } } };
-		expect(isSameGraph(a, reconfigured)).toBe(true);
 	});
 });

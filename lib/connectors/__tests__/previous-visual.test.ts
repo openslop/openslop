@@ -97,15 +97,20 @@ describe("previous-visual plugin", () => {
 			(attrs) => {
 				expect(declaredOn(video(attrs), [image, video(attrs)])).toEqual({
 					element: image,
-					label: "the previous visual",
 				});
+				expect(previousVisualDependency.specs(video(attrs))[0]?.[2]).toBe(
+					"the previous visual",
+				);
 			},
 		);
 
 		it("declares an empty leaf when nothing comes before the video", () => {
 			expect(
 				declaredOn(video({ startFrame: "previous" }), [video(), image]),
-			).toMatchObject({ job: null });
+			).toMatchObject({
+				inputs: { prompt: "", attributes: {} },
+				dependsOn: {},
+			});
 		});
 	});
 

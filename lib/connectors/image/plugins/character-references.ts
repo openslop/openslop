@@ -17,7 +17,9 @@ export type ParamsWithCharacters = {
 };
 
 const avatarOf = (name: string) =>
-	dependency(`avatar:${name}`, () => forCharacterAvatar(name));
+	dependency(`avatar:${name}`, `${name}'s avatar`, () =>
+		forCharacterAvatar(name),
+	);
 
 export const characterAvatars: DependencyDeclaration = {
 	specs: (element) =>

@@ -89,7 +89,7 @@ describe("createReferenceImagesPlugin", () => {
 			children: [],
 		} as unknown as CanvasContentElement;
 		expect(projectReferenceImages.specs(element)).toEqual([
-			["referenceImages", forReferenceImages],
+			["referenceImages", forReferenceImages, "the reference images"],
 		]);
 		expect(
 			projectReferenceImages.specs({

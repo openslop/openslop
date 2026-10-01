@@ -115,6 +115,10 @@ describe("character-voices plugin", () => {
 			},
 			{ id: "project:voice:Mira", inputs: { attributes: { voiceId: "" } } },
 		]);
+		expect(characterVoices.specs(element).map(([, , label]) => label)).toEqual([
+			"Sol's voice",
+			"Mira's voice",
+		]);
 	});
 
 	it("borrows each character's voice from their speech on their own pair, named after them", async () => {
