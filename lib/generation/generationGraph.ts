@@ -108,23 +108,18 @@ export class GenerationGraph {
 		element: CanvasContentElement,
 		plugins: ConnectorPlugin[],
 	) {
-		const dependencies = plugins.flatMap((plugin) =>
-			(plugin.dependencies ?? []).flatMap((declared) =>
-				declared
-					.specs(element)
-					.map(
-						([key, spec, label]) =>
-							[key, { node: this.resolve(spec), label }] as const,
-					),
-			),
-		);
-		const keys = dependencies.map(([key]) => key);
-		const duplicate = keys.find((key, i) => keys.indexOf(key) !== i);
-		if (duplicate)
-			throw new Error(
-				`Two dependencies of "${element.id}" share the key "${duplicate}"`,
-			);
-		return Object.fromEntries(dependencies);
+		const declared = plugins
+			.flatMap((plugin) => plugin.dependencies ?? [])
+			.flatMap((declaration) => declaration.specs(element));
+		const dependsOn: Record<string, Dependency> = {};
+		for (const [key, spec, label] of declared) {
+			if (Object.hasOwn(dependsOn, key))
+				throw new Error(
+					`Two dependencies of "${element.id}" share the key "${key}"`,
+				);
+			dependsOn[key] = { node: this.resolve(spec), label };
+		}
+		return dependsOn;
 	}
 
 	private intern(node: GenerationNode) {
