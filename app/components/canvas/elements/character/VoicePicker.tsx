@@ -16,6 +16,7 @@ import type {
 } from "@/lib/connectors/types";
 import { useTTSConnector } from "@/lib/connectors/tts/useTTSConnector";
 import { useVoiceSearch } from "@/lib/connectors/tts/useVoiceSearch";
+import { cn } from "@/lib/utils";
 import { FieldLabel } from "./fields";
 
 function PreviewPlayButton({
@@ -27,10 +28,9 @@ function PreviewPlayButton({
 	const [playing, setPlaying] = useState(false);
 	const [loading, setLoading] = useState(false);
 
-	const toggle = async (e: React.MouseEvent) => {
-		e.stopPropagation();
+	const toggle = async () => {
 		const audio = audioRef.current;
-		if (!audio || loading) return;
+		if (!audio) return;
 		if (!audio.paused) {
 			audio.pause();
 			return;
@@ -56,8 +56,7 @@ function PreviewPlayButton({
 			<TooltipIconButton
 				label={playing ? "Pause" : "Play"}
 				onClick={toggle}
-				aria-busy={loading}
-				aria-disabled={loading}
+				unavailable={loading}
 			>
 				{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
 			</TooltipIconButton>
@@ -68,6 +67,52 @@ function PreviewPlayButton({
 const SKELETON_ROWS = 5;
 const VOICE_TAG_CLASS =
 	"shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground";
+
+export function VoiceRow({
+	voice,
+	selected,
+	onSelect,
+	loadPreview,
+}: {
+	voice: VoiceInfo;
+	selected: boolean;
+	onSelect: () => void;
+	loadPreview: () => Promise<string | undefined>;
+}) {
+	return (
+		<div
+			className={cn(
+				"flex min-w-0 items-center gap-2 rounded-md pr-2 transition-colors",
+				selected ? "bg-muted" : "hover:bg-voice-hover",
+			)}
+		>
+			<button
+				type="button"
+				aria-pressed={selected}
+				onClick={onSelect}
+				className="flex min-w-0 flex-1 flex-col gap-1 rounded-md py-1 pl-2 text-left focus-ring"
+			>
+				<span className="flex min-w-0 items-center gap-1.5">
+					<span className="min-w-0 flex-1 truncate text-label text-foreground">
+						{voice.name}
+					</span>
+					{[voice.language, voice.gender].filter(Boolean).map((tag) => (
+						<span key={tag} className={VOICE_TAG_CLASS}>
+							{tag}
+						</span>
+					))}
+					{selected && <Check className="h-3 w-3 shrink-0 text-accent" />}
+				</span>
+				{voice.description && (
+					<span className="truncate text-label text-muted-foreground">
+						{voice.description}
+					</span>
+				)}
+			</button>
+			{voice.previewUrl && <PreviewPlayButton load={loadPreview} />}
+		</div>
+	);
+}
 
 export function VoicePicker({
 	filters,
@@ -112,55 +157,17 @@ export function VoicePicker({
 					</span>
 				)}
 				{search.status === "ready" &&
-					search.voices.map((voice) => {
-						const selected = voice.id === selectedVoiceId;
-						return (
-							<div
-								key={voice.id}
-								role="button"
-								tabIndex={0}
-								onClick={() => onSelect(voice)}
-								onKeyDown={(e) => {
-									if (e.target !== e.currentTarget) return;
-									if (e.key === "Enter" || e.key === " ") {
-										e.preventDefault();
-										onSelect(voice);
-									}
-								}}
-								className={`flex min-w-0 cursor-pointer flex-col gap-1 rounded-md px-2 py-1 transition-colors ${
-									selected ? "bg-muted" : "hover:bg-voice-hover"
-								}`}
-							>
-								<div className="flex min-w-0 items-center gap-1.5">
-									<span className="min-w-0 flex-1 truncate text-label text-foreground">
-										{voice.name}
-									</span>
-									{[voice.language, voice.gender].filter(Boolean).map((tag) => (
-										<span key={tag} className={VOICE_TAG_CLASS}>
-											{tag}
-										</span>
-									))}
-									{selected && (
-										<Check className="h-3 w-3 shrink-0 text-accent" />
-									)}
-								</div>
-								{(voice.description || voice.previewUrl) && (
-									<div className="flex min-w-0 items-center justify-between gap-2">
-										<span className="min-w-0 flex-1 truncate text-label text-muted-foreground">
-											{voice.description}
-										</span>
-										{voice.previewUrl && (
-											<PreviewPlayButton
-												load={async () =>
-													(await connector.voicePreview(voice.id))?.url
-												}
-											/>
-										)}
-									</div>
-								)}
-							</div>
-						);
-					})}
+					search.voices.map((voice) => (
+						<VoiceRow
+							key={voice.id}
+							voice={voice}
+							selected={voice.id === selectedVoiceId}
+							onSelect={() => onSelect(voice)}
+							loadPreview={async () =>
+								(await connector.voicePreview(voice.id))?.url
+							}
+						/>
+					))}
 			</div>
 		</div>
 	);
