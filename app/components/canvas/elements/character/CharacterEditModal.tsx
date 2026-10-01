@@ -12,7 +12,6 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	MountedDialog,
 } from "@/components/ui/dialog";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
@@ -39,28 +38,6 @@ import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
 import { VoiceSection } from "./VoiceMetadataFields";
 
 export function CharacterEditModal({
-	open,
-	onOpenChange,
-	name,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	name?: string;
-}) {
-	return (
-		<MountedDialog open={open && !!name} onOpenChange={onOpenChange}>
-			{name && (
-				<CharacterEditDialogBody
-					key={name}
-					name={name}
-					onClose={() => onOpenChange(false)}
-				/>
-			)}
-		</MountedDialog>
-	);
-}
-
-function CharacterEditDialogBody({
 	name,
 	onClose,
 }: {
