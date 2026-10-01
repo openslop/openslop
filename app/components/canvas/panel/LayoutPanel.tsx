@@ -10,11 +10,12 @@ import { MediaToggle } from "@/components/ui/media-toggle";
 import { useAutoScroll } from "@/app/components/scene-selection/AutoScrollContext";
 import { BottomViewToggle } from "@/app/components/player/BottomViewToggle";
 import { PlayerPlacementToggle } from "@/app/components/player/PlayerPlacementToggle";
-import { useViewMode } from "../ViewModeContext";
+import { useHasCollapsed, useViewMode } from "../ViewModeContext";
 import { PanelCard, PanelField } from "./PanelCard";
 
 export function LayoutPanel() {
-	const { hasCollapsed, expandAll, collapseAll } = useViewMode();
+	const { expandAll, collapseAll } = useViewMode();
+	const hasCollapsed = useHasCollapsed();
 	const { enabled, setEnabled } = useAutoScroll();
 
 	return (

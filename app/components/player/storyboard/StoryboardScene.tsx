@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from "react";
 import {
 	ACTIVE_SCENE_CLASS,
-	useActiveSceneId,
+	useIsActiveScene,
 } from "@/app/components/scene-selection/ActiveSceneContext";
 import { ForegroundPreview } from "@/app/components/canvas/elements/ForegroundPreview";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ export function StoryboardScene({
 	onSelect: () => void;
 	onRequestDelete: () => void;
 }) {
-	const isActive = useActiveSceneId() === item.scene.id;
+	const isActive = useIsActiveScene(item.scene.id);
 
 	const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
 		if (event.key !== "Delete" && event.key !== "Backspace") return;

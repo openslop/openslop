@@ -2,9 +2,9 @@ import { RenderElementProps } from "slate-react";
 import type { SceneElement } from "@/lib/canvas/types";
 import {
 	ACTIVE_SCENE_CLASS,
-	useActiveSceneId,
+	useIsActiveScene,
 } from "@/app/components/scene-selection/ActiveSceneContext";
-import { useViewMode } from "../ViewModeContext";
+import { useSceneCollapsed } from "../ViewModeContext";
 import styles from "../styles/sortable.module.css";
 import { SceneContainer } from "../elements/SceneContainer";
 import { useSceneIndex } from "../hooks/useSceneIndex";
@@ -19,14 +19,14 @@ export function SortableScene({
 	element: SceneElement;
 	children: React.ReactNode;
 }) {
-	const isActive = useActiveSceneId() === element.id;
-	const { isCollapsed } = useViewMode();
+	const isActive = useIsActiveScene(element.id);
+	const collapsed = useSceneCollapsed(element.id);
 	const sceneIndex = useSceneIndex(element.id);
 	return (
 		<SortableItem
 			sceneId={element.id}
 			sortableType="scene"
-			disabled={!isCollapsed(element.id)}
+			disabled={!collapsed}
 			wrapperClassName={`${styles.scene} border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? "border-transparent" : "border-border"}`}
 			contentClassName={isActive ? ACTIVE_SCENE_CLASS : undefined}
 			attributes={attributes}

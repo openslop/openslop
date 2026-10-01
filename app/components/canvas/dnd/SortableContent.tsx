@@ -9,7 +9,7 @@ import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
-import { useViewMode } from "../ViewModeContext";
+import { useSceneCollapsed } from "../ViewModeContext";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
 import { SortableItem } from "./SortableItem";
@@ -37,12 +37,11 @@ export function SortableContent({
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const editor = useSlateStatic();
-	const { isCollapsed } = useViewMode();
 	const defaultModels = useResolveDefaultModels();
 
 	const path = ReactEditor.findPath(editor, element);
 	const sceneId = parentSceneId(editor, path);
-	const collapsed = isCollapsed(sceneId);
+	const collapsed = useSceneCollapsed(sceneId);
 	const Content = collapsed ? CompactElement : ElementContainer;
 
 	const insertGap = useDropIndex(sceneId) === path[path.length - 1];
