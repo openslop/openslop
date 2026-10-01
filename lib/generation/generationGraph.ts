@@ -10,6 +10,7 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import {
 	isSourceNode,
+	isUnbuiltElement,
 	type BuildContext,
 	type Dependency,
 	type UnbuiltElement,
@@ -70,7 +71,7 @@ export class GenerationGraph {
 
 	resolve = (spec: NodeSpec): GenerationNode => {
 		const target = spec(this.ctx);
-		return "element" in target
+		return isUnbuiltElement(target)
 			? this.buildElement(target)
 			: this.intern(target);
 	};

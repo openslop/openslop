@@ -92,6 +92,10 @@ export const forElement =
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
 	!("job" in node);
 
+export const isUnbuiltElement = (
+	target: UnbuiltElement | SourceNode,
+): target is UnbuiltElement => "element" in target;
+
 /** A node with no prompt has nothing to generate from. */
 export const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);
 
