@@ -14,6 +14,7 @@ import type {
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
 import type { ProjectData, ProjectStore } from "@/lib/project/store";
+import { DEFAULT_TTS_LANGUAGE } from "./enums";
 
 export type Speaker = {
 	name?: string;
@@ -52,7 +53,7 @@ export async function resolveVoiceId(
 	if (speaker.voiceId) return speaker.voiceId;
 	const [found] = await searchVoices({
 		...pick(speaker.traits, VOICE_SEARCH_KEYS),
-		language: speaker.traits.language || "en",
+		language: speaker.traits.language || DEFAULT_TTS_LANGUAGE,
 	});
 	if (!found) throw new Error("No matching voice found");
 	setResolvedVoiceId(store, speaker, found.id);

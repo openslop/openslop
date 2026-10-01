@@ -1,6 +1,4 @@
 import { AttributeSchema } from "../attributes/schema";
-import { DEFAULT_DURATION } from "@/lib/canvas/types";
-import { DEFAULT_MOTION } from "@/lib/render/motionEffectNames";
 import {
 	durationDef,
 	loopDef,
@@ -21,9 +19,9 @@ export const videoAttributesFor = (model: ModelRef) =>
 		uploadedFrameDef,
 		{ ...referenceImagesDef, edit: { kind: "images", continuity: true } },
 		resolutionDef(modelEntry("video", model).resolutions),
-		durationDef(DEFAULT_DURATION),
+		durationDef,
 		trimToDialogueDef,
 		loopDef,
 		volumeDef("5"),
-		motionDef(DEFAULT_MOTION),
+		motionDef,
 	]);
