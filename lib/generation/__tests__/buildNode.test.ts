@@ -15,7 +15,7 @@ import {
 	type BuildContext,
 } from "../graph";
 import { GenerationQueue } from "../queue";
-import { buildNode } from "../resolveGraph";
+import { buildNode } from "../generationGraph";
 
 let store: ProjectStore;
 
@@ -52,7 +52,7 @@ beforeEach(() => {
 		.updateMetadata({ characters: { Alice: { appearance: "red hair" } } });
 });
 
-describe("resolveGraph", () => {
+describe("buildNode", () => {
 	// A card's spec is made at render, but Slate notifies selectors before the
 	// next render, so the spec can hold the element as it was one edit ago.
 	it("builds from the element on the canvas, not the one the spec captured", () => {

@@ -107,7 +107,10 @@ describe("previous-visual plugin", () => {
 		it("declares an empty leaf when nothing comes before the video", () => {
 			expect(
 				declaredOn(video({ startFrame: "previous" }), [video(), image]),
-			).toMatchObject({ job: null });
+			).toMatchObject({
+				inputs: { prompt: "", attributes: {} },
+				dependsOn: {},
+			});
 		});
 	});
 

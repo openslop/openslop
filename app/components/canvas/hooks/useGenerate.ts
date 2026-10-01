@@ -5,7 +5,7 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { forElement, hasPrompt, type NodeSpec } from "@/lib/generation/graph";
 import { staleReason } from "@/lib/generation/staleReason";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/generationGraph";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNode } from "@/lib/generation/useLiveNodes";
 import type { CanvasContentElement } from "@/lib/canvas/types";

@@ -3,7 +3,7 @@ import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import type { NodeSpec } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { buildNode } from "@/lib/generation/generationGraph";
 import { characterAvatarElement } from "@/lib/project/characterAvatar";
 import type { ProjectStore } from "@/lib/project/store";
 import { createArtStylePlugin } from "./art-style";

@@ -3,13 +3,8 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant, Editor } from "slate";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
-import {
-	forElement,
-	type GenerationNode,
-	type NodeSpec,
-} from "@/lib/generation/graph";
-import { liveGraph } from "@/lib/generation/liveGraph";
-import { buildNode } from "@/lib/generation/resolveGraph";
+import { forElement, type GenerationNode } from "@/lib/generation/graph";
+import { buildNode, GenerationGraph } from "@/lib/generation/generationGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
@@ -56,12 +51,8 @@ const context = () => ({
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => context,
 }));
-// Each render seeds a new document, so each gets its own live graph.
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
-	useLiveGraph: () => {
-		const graph = liveGraph(editorUnderTest);
-		return (spec: NodeSpec) => graph(spec, context);
-	},
+	useResolveNode: () => new GenerationGraph(context()).resolve,
 }));
 
 function makeElement(

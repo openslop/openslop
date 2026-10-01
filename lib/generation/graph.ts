@@ -42,12 +42,11 @@ type NodeBase = {
  * changes once built, so its identity is settled at construction rather than
  * re-serialized for every dependent that asks.
  */
-export type SourceNode = NodeBase & { job: null; identity: string };
+export type SourceNode = NodeBase & { identity: string };
 
 /** A unit of generation: something the queue can run. */
 export type JobNode = NodeBase & { job: GenerationJob };
 
-/** A node and its edges. */
 export type GenerationNode = SourceNode | JobNode;
 
 /**
@@ -57,8 +56,8 @@ export type GenerationNode = SourceNode | JobNode;
  */
 export type Dependency = { node: GenerationNode; label: string };
 
-/** A node still to be built. `plugins` replaces the registry chain. */
-export type ElementNode = {
+/** `plugins` replaces the registry chain. */
+export type UnbuiltElement = {
 	element: CanvasContentElement;
 	plugins?: ConnectorPlugin[];
 };
@@ -78,14 +77,9 @@ export type BuildContext = {
 
 /**
  * Declares which node to build without saying how; only the builder knows the
- * registry and the state. A source-node spec returns its node directly.
+ * registry and the state.
  */
-export type NodeSpec = (ctx: BuildContext) => ElementNode | GenerationNode;
-
-/** Only an unbuilt node carries an element; never add one to `GenerationNode`. */
-export const isElementNode = (
-	value: ElementNode | GenerationNode,
-): value is ElementNode => "element" in value;
+export type NodeSpec = (ctx: BuildContext) => UnbuiltElement | SourceNode;
 
 /**
  * The element as the canvas being built has it. The given one stands in only
@@ -96,7 +90,7 @@ export const forElement =
 	({ canvas }) => ({ element: elementById(canvas, element.id) ?? element });
 
 export const isSourceNode = (node: GenerationNode): node is SourceNode =>
-	node.job === null;
+	!("job" in node);
 
 /** A node with no prompt has nothing to generate from. */
 export const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);
@@ -116,7 +110,6 @@ export function sourceNode(
 		id,
 		inputs,
 		dependsOn: {},
-		job: null,
 		identity: serializeInputs({ ...inputs, dependencies: {} }),
 	};
 }

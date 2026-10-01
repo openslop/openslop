@@ -11,7 +11,7 @@ import {
 	isNodeStale,
 	needsGeneration,
 } from "@/lib/generation/graph";
-import { buildNodes } from "@/lib/generation/resolveGraph";
+import { buildNodes } from "@/lib/generation/generationGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNodes } from "@/lib/generation/useLiveNodes";

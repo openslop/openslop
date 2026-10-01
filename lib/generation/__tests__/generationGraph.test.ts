@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Editor } from "slate";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { Descendant } from "slate";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import { getContentElements } from "@/lib/canvas/scenes";
 import {
@@ -14,7 +14,7 @@ import {
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { dependency } from "../dependency";
 import { forElement, sourceNode, type BuildContext } from "../graph";
-import { liveGraph } from "../liveGraph";
+import { GenerationGraph } from "../generationGraph";
 import { forArtStyle } from "../sourceNodes";
 
 const element = (
@@ -32,20 +32,16 @@ const element = (
 const linked = { continuity: "true" };
 
 let store: ProjectStore;
-let editor: Editor;
-let graph: ReturnType<typeof liveGraph>;
-let context: () => BuildContext;
+let document: Descendant[];
+let registry: ConnectorRegistry;
+let graph: GenerationGraph;
 
-/** A context as `useBuildContext` makes it: one identity per project state. */
-const contextNow = (registry = DEFAULT_CONNECTOR_REGISTRY) => {
-	const state = store.getState();
-	return vi.fn(() => ({
-		store,
-		state,
-		canvas: getContentElements(editor.children),
-		registry,
-	}));
-};
+const contextNow = (): BuildContext => ({
+	store,
+	state: store.getState(),
+	canvas: getContentElements(document),
+	registry,
+});
 
 const tone = dependency(
 	"tone",
@@ -65,27 +61,27 @@ const UNBUILDABLE: ConnectorRegistry = {
 	image: { plugins: [{ name: "twice", dependencies: [twice, twice] }] },
 };
 
-/** A document is a new array for every edit, as Slate hands it back. */
 const edit = (...elements: CanvasContentElement[]) => {
 	const scene: SceneElement = {
 		id: "scene-1",
 		type: SCENE_TYPE,
 		children: elements,
 	};
-	editor.children = [scene];
+	document = [scene];
+	graph = new GenerationGraph(contextNow(), graph);
 };
 
-const read = (of: CanvasContentElement) => graph(forElement(of), context);
+const read = (of: CanvasContentElement) => graph.resolve(forElement(of));
 
 beforeEach(() => {
 	store = createProjectStore();
-	editor = { children: [] } as unknown as Editor;
-	graph = liveGraph(editor);
-	context = contextNow();
+	document = [];
+	registry = DEFAULT_CONNECTOR_REGISTRY;
+	graph = new GenerationGraph(contextNow());
 });
 
-describe("liveGraph", () => {
-	it("builds a revision once, however many read it", () => {
+describe("GenerationGraph", () => {
+	it("builds a node once, however many read it", () => {
 		const image = element("img", "image", "a sunset");
 		const video = element("vid", "video", "a pan");
 		edit(image, video);
@@ -94,7 +90,6 @@ describe("liveGraph", () => {
 		read(video);
 
 		expect(read(image)).toBe(node);
-		expect(context).toHaveBeenCalledTimes(1);
 	});
 
 	it("shares a node between every dependent that reaches it", () => {
@@ -134,7 +129,7 @@ describe("liveGraph", () => {
 	it("keeps each of two nodes that read one source differently", () => {
 		const warm = element("warm", "image", "a sunset", { tone: "warm" });
 		const cold = element("cold", "image", "a glacier", { tone: "cold" });
-		context = contextNow(TONED);
+		registry = TONED;
 		edit(warm, cold, element("nar", "narration", "hello"));
 		const before = [read(warm), read(cold)];
 
@@ -183,7 +178,7 @@ describe("liveGraph", () => {
 		const spoken = read(narration);
 
 		store.getState().updateMetadata({ style: "noir" });
-		context = contextNow();
+		graph = new GenerationGraph(contextNow(), graph);
 
 		expect(read(image)).not.toBe(styled);
 		expect(read(image).dependsOn.artStyle?.node.inputs.attributes.style).toBe(
@@ -194,7 +189,7 @@ describe("liveGraph", () => {
 
 	it("throws the same for every reader of a node that cannot be built", () => {
 		const image = element("img", "image", "a sunset");
-		context = contextNow(UNBUILDABLE);
+		registry = UNBUILDABLE;
 		edit(image);
 		const failure = 'Two dependencies of "img" share the key "style"';
 
