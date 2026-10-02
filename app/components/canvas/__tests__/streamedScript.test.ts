@@ -6,7 +6,7 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { createProjectStore } from "@/lib/project/store";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
-import { createScriptWriter } from "@/lib/script/streamScript";
+import { createScriptWriter } from "@/lib/script/scriptWriter";
 import { withLayout } from "../plugins/withLayout";
 import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";

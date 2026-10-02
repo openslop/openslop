@@ -5,7 +5,7 @@ import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { useOpenWorkspace } from "./ScriptProvider";
-import { createScriptWriter } from "./streamScript";
+import { createScriptWriter } from "./scriptWriter";
 
 export function useStartBlank(): () => void {
 	const editor = useSlateStatic();
