@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { bodySchema, byokModel, hostedModel } from "../generation-schema";
+import {
+	bodySchema,
+	byokModel,
+	hostedModel,
+	LLM_FIELDS,
+} from "../generation-schema";
 
 describe("bodySchema with a hosted model", () => {
 	const schema = bodySchema(hostedModel("image"), {});
@@ -74,5 +79,21 @@ describe("bodySchema with BYOK models", () => {
 				model: "Slop Image v1",
 			}).success,
 		).toBe(false);
+	});
+});
+
+describe("LLM fields", () => {
+	const schema = bodySchema(hostedModel("llm"), LLM_FIELDS);
+	const withMaxTokens = (maxTokens: unknown) =>
+		schema.safeParse({ prompt: "hi", model: "Slop LLM v1", maxTokens });
+
+	it("takes a positive whole maxTokens", () => {
+		expect(withMaxTokens(4096).data?.maxTokens).toBe(4096);
+	});
+
+	it.each([0, 1.5, "4096"])("refuses maxTokens %j", (maxTokens) => {
+		expect(withMaxTokens(maxTokens).error?.issues[0]?.message).toBe(
+			"maxTokens must be a positive integer",
+		);
 	});
 });
