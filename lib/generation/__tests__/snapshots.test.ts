@@ -57,7 +57,7 @@ describe("SnapshotStore", () => {
 		});
 	});
 
-	it("bumps the result version only when a result actually changes", () => {
+	it("bumps the result version only when a held result actually changes", () => {
 		const store = new SnapshotStore();
 		expect(store.getResultVersion()).toBe(0);
 
@@ -70,8 +70,14 @@ describe("SnapshotStore", () => {
 		store.update("a", { seconds: 3 });
 		expect(store.getResultVersion()).toBe(1);
 
-		store.remove("a");
+		store.update("a", { resultInputs: inputs("edited") });
 		expect(store.getResultVersion()).toBe(2);
+
+		store.update("a", { pinned: true });
+		expect(store.getResultVersion()).toBe(3);
+
+		store.remove("a");
+		expect(store.getResultVersion()).toBe(4);
 	});
 
 	it("keeps a settled result on reset but forgets an untouched element", () => {

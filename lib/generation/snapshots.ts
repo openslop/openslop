@@ -45,6 +45,11 @@ const settled = (state: Record<string, ElementSnapshot>) =>
 		]),
 	);
 
+const RESULT_FIELDS = ["result", "resultInputs", "pinned"] as const;
+
+/** The part of a snapshot the result version tracks. */
+export type HeldResult = Pick<ElementSnapshot, (typeof RESULT_FIELDS)[number]>;
+
 export type ActiveGenerationStatus = Exclude<GenerationStatus, "idle">;
 
 /** A generation is active from the moment it is queued until it settles. */
@@ -79,7 +84,7 @@ export class SnapshotStore {
 
 	get = (id: string): ElementSnapshot => this.state.get(id) ?? EMPTY_SNAPSHOT;
 
-	/** Bumps whenever any element's result changes, so observers can rederive. */
+	/** Bumps whenever any element's held result changes, so observers can rederive. */
 	getResultVersion = () => this.resultVersion;
 
 	all = (): Record<string, ElementSnapshot> => Object.fromEntries(this.state);
@@ -101,9 +106,12 @@ export class SnapshotStore {
 		this.count((s) => !isGenerationActive(s.status) && s.result != null);
 
 	update(id: string, patch: Partial<ElementSnapshot>) {
-		if ("result" in patch && patch.result !== this.get(id).result)
+		const current = this.get(id);
+		if (
+			RESULT_FIELDS.some((key) => key in patch && patch[key] !== current[key])
+		)
 			this.resultVersion++;
-		this.state.set(id, { ...this.get(id), ...patch });
+		this.state.set(id, { ...current, ...patch });
 	}
 
 	remove(id: string) {

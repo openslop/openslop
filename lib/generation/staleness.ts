@@ -1,10 +1,12 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
+import memoizeOne from "memoize-one";
 import { ASSET_URL_FIELDS } from "../connectors/assetUrl";
 import type { AssetResult } from "../connectors/types";
 import { isSourceNode, type GenerationNode } from "./graph";
 import type { GenerationInputs } from "./inputs";
 import type { GenerationQueue } from "./queue";
+import type { HeldResult } from "./snapshots";
 
 const resultIdentity = (result: AssetResult | null): string =>
 	result
@@ -36,12 +38,9 @@ export function generationInputs(
 	};
 }
 
-export function needsGeneration(
-	node: GenerationNode,
-	queue: GenerationQueue,
-): boolean {
+function judge(node: GenerationNode, queue: GenerationQueue): boolean {
 	if (isSourceNode(node)) return false;
-	const snapshot = queue.getElementSnapshot(node.id);
+	const snapshot: HeldResult = queue.getElementSnapshot(node.id);
 	if (!snapshot.result) return true;
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
@@ -50,6 +49,24 @@ export function needsGeneration(
 			needsGeneration(dep, queue),
 		) || !isEqual(generationInputs(node, queue), snapshot.resultInputs)
 	);
+}
+
+// Every card asks on every queue update; judge a node once per set of results, not once per dependent.
+const verdictsFor = memoizeOne(
+	(_queue: GenerationQueue, _resultVersion: number) =>
+		new WeakMap<GenerationNode, boolean>(),
+);
+
+export function needsGeneration(
+	node: GenerationNode,
+	queue: GenerationQueue,
+): boolean {
+	const verdicts = verdictsFor(queue, queue.getResultVersion());
+	const known = verdicts.get(node);
+	if (known !== undefined) return known;
+	const verdict = judge(node, queue);
+	verdicts.set(node, verdict);
+	return verdict;
 }
 
 export const isNodeStale = (
