@@ -33,7 +33,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	elementImage: () => undefined,
 	elementStates: () => [],
 	readMetadata: () => metadata,
-	readSettings: () => ({
+	readContext: () => ({
 		title: metadata.title,
 		style: metadata.style,
 		language: metadata.language,

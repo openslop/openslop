@@ -35,7 +35,7 @@ export function useAgentTools(editor: Editor) {
 	const store = useProjectStoreHandle();
 	const defaultModels = useResolveDefaultModels();
 	const queue = useGenerationQueue();
-	const readSettings = useAgentContext(editor);
+	const readContext = useAgentContext(editor);
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
@@ -85,7 +85,7 @@ export function useAgentTools(editor: Editor) {
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,
-				readSettings,
+				readContext,
 				editScript: (ops) => applyRefineOps(editor, ops, defaultModels()),
 				// The stream appends what it cannot find by id, so the canvas is cleared
 				// first or the new script stacks under the old one.
@@ -121,7 +121,7 @@ export function useAgentTools(editor: Editor) {
 			store,
 			defaultModels,
 			queue,
-			readSettings,
+			readContext,
 		],
 	);
 }
