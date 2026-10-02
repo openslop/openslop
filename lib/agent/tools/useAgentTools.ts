@@ -35,7 +35,7 @@ export function useAgentTools(editor: Editor) {
 	const store = useProjectStoreHandle();
 	const defaultModels = useResolveDefaultModels();
 	const queue = useGenerationQueue();
-	const readSettings = useAgentContext(editor);
+	const readContext = useAgentContext(editor);
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
@@ -87,7 +87,7 @@ export function useAgentTools(editor: Editor) {
 					return text;
 				},
 				readMetadata: () => store.getState().metadata,
-				readSettings,
+				readContext,
 				editScript: (ops) => applyRefineOps(editor, ops, defaultModels()),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
@@ -109,6 +109,6 @@ export function useAgentTools(editor: Editor) {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, connectorConfig, store, defaultModels, queue, readSettings],
+		[editor, connectorConfig, store, defaultModels, queue, readContext],
 	);
 }

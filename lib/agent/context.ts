@@ -56,15 +56,15 @@ function renderCharacters(characters: AgentContext["characters"]): string {
 		.join("; ");
 }
 
-export function renderAgentContext(ctx: AgentContext): string {
-	const budget = videoLengthBudget(ctx.length);
+export function renderAgentContext(context: AgentContext): string {
+	const budget = videoLengthBudget(context.length);
 	const length = budget
-		? `${ctx.length} (${budget.minWords} to ${budget.maxWords} spoken words)`
+		? `${context.length} (${budget.minWords} to ${budget.maxWords} spoken words)`
 		: "auto (no target; write to fit the material)";
 	const format =
-		ctx.format === "auto"
+		context.format === "auto"
 			? "auto (pick the one that fits the brief)"
-			: videoFormatLabel(ctx.format);
+			: videoFormatLabel(context.format);
 
 	return dedent`
 		# The project
@@ -72,15 +72,15 @@ export function renderAgentContext(ctx: AgentContext): string {
 		Settings as of this reading. The script itself is not here; read_script is the
 		only way to see it.
 
-		- title: ${ctx.title || UNSET}
-		- art style: ${ctx.style || UNSET}
-		- language: ${languageLabel(ctx.language)}
+		- title: ${context.title || UNSET}
+		- art style: ${context.style || UNSET}
+		- language: ${languageLabel(context.language)}
 		- target length: ${length}
 		- format: ${format}
-		- aspect ratio: ${ctx.aspectRatio}
-		- template: ${ctx.templateName ?? "none"}
-		- narrator voice: ${renderNarrator(ctx.narration)}
-		- reference images: ${ctx.referenceImageCount}
-		- characters: ${renderCharacters(ctx.characters)}
-		- canvas: ${ctx.scriptIsEmpty ? "empty" : "has a script on it"}`;
+		- aspect ratio: ${context.aspectRatio}
+		- template: ${context.templateName ?? "none"}
+		- narrator voice: ${renderNarrator(context.narration)}
+		- reference images: ${context.referenceImageCount}
+		- characters: ${renderCharacters(context.characters)}
+		- canvas: ${context.scriptIsEmpty ? "empty" : "has a script on it"}`;
 }

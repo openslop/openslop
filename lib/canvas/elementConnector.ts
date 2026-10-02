@@ -12,7 +12,7 @@ import type {
 	ConnectorConfig,
 	ModelRef,
 } from "@/lib/connectors/types";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import { flatAttributes } from "./elementAttributes";
 import {
 	ELEMENT_TYPES,
 	type CanvasContentElement,

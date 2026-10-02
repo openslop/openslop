@@ -44,7 +44,7 @@ function Transcript({
 	messages: SloppyMessage[];
 	working: boolean;
 }) {
-	const [restored] = useState(messages.length);
+	const [restoredCount] = useState(messages.length);
 
 	if (messages.length === 0) {
 		return (
@@ -59,7 +59,7 @@ function Transcript({
 					key={message.id}
 					message={message}
 					streaming={working && index === messages.length - 1}
-					entering={index >= restored}
+					entering={index >= restoredCount}
 				/>
 			))}
 			{working && (
@@ -81,7 +81,7 @@ export function SloppyPanel() {
 
 	// Jump to the bottom once per sent message (and once for a restored
 	// transcript), then leave scrolling to the user while the reply streams.
-	const sentId = messages?.findLast((m) => m.role === "user")?.id;
+	const sentId = messages?.findLast((message) => message.role === "user")?.id;
 	useEffect(() => {
 		if (!endRef.current || sentId === lastSentId.current) return;
 		const restoring = lastSentId.current === undefined;

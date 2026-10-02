@@ -64,9 +64,8 @@ export function SloppyComposer() {
 
 	const submit = () => {
 		if (!hasText || loading) return;
-		const message = value;
 		setValue("");
-		send(message);
+		send(value);
 	};
 
 	return (

@@ -2,10 +2,7 @@ import { send } from "@vercel/queue";
 import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
 import { z } from "zod";
-import {
-	BundleResponseSchema,
-	type BundleResponse,
-} from "@/lib/api/asset-bundle";
+import { BundleResponseSchema, type BundleResponse } from "./asset-bundle";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";

@@ -8,7 +8,7 @@ import {
 	VOLUME_OPTIONS,
 	type CanvasContentElement,
 	type SplitAttributes,
-} from "@/lib/canvas/types";
+} from "./types";
 import { clamp } from "@/lib/utils";
 import {
 	DEFAULT_MOTION,

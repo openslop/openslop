@@ -11,7 +11,7 @@ import {
 	ELEMENT_TYPES,
 	type CanvasElementType,
 	type ElementTypeSpec,
-} from "@/lib/canvas/types";
+} from "./types";
 
 export interface ElementConfig extends ElementTypeSpec {
 	type: CanvasElementType;
