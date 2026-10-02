@@ -5,6 +5,8 @@ export const VIDEO_LENGTH_TARGETS = [
 	"3-5m",
 	"5-10m",
 	"10-15m",
+	"15-20m",
+	"20-30m",
 ] as const;
 
 /** `auto` is a choice, not an absence: write to fit the material, on no budget. */
@@ -53,6 +55,8 @@ export const VIDEO_LENGTH_SPECS = {
 	"3-5m": spec("3-5 min", 180, 300),
 	"5-10m": spec("5-10 min", 300, 600),
 	"10-15m": spec("10-15 min", 600, 900),
+	"15-20m": spec("15-20 min", 900, 1200),
+	"20-30m": spec("20-30 min", 1200, 1800),
 } satisfies Record<VideoLengthTarget, VideoLengthSpec>;
 
 /** The spoken-word budget a length imposes, or nothing when it imposes none. */
