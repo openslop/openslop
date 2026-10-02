@@ -13,12 +13,12 @@ export { useResolveNode };
 
 export function LiveGraphProvider({ children }: { children: ReactNode }) {
 	const editor = useSlateStatic();
-	const context = useBuildContext();
+	const buildContext = useBuildContext();
 	const [graphFor] = useState(createGraphFor);
 
 	const resolve = useCallback(
-		(spec: NodeSpec) => graphFor(editor.children, context).resolve(spec),
-		[editor, graphFor, context],
+		(spec: NodeSpec) => graphFor(editor.children, buildContext).resolve(spec),
+		[editor, graphFor, buildContext],
 	);
 
 	return <LiveGraphContext value={resolve}>{children}</LiveGraphContext>;

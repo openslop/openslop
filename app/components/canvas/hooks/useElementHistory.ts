@@ -34,8 +34,8 @@ export function useLoadElementHistory(): (elementId: string) => void {
 		// A failure shows in the list itself; a toast on top would be noise.
 		history
 			.load(elementId)
-			.catch((err: unknown) =>
-				console.error("Failed to read generation history", err),
+			.catch((error: unknown) =>
+				console.error("Failed to read generation history", error),
 			);
 	};
 }

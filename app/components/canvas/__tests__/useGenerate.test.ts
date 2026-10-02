@@ -45,19 +45,19 @@ const store = createProjectStore();
 let canvas: CanvasContentElement[] = [];
 // Like the real hook, the context keeps its identity while text inside an
 // element changes, and reads the canvas when it is made.
-const context = () => ({
+const buildContext = () => ({
 	store,
 	state: store.getState(),
 	canvas,
 	registry: DEFAULT_CONNECTOR_REGISTRY,
 });
 vi.mock("@/lib/generation/useBuildContext", () => ({
-	useBuildContext: () => context,
+	useBuildContext: () => buildContext,
 }));
 const graphFor = createGraphFor();
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
 	useResolveNode: () => (spec: NodeSpec) =>
-		graphFor(canvas, context).resolve(spec),
+		graphFor(canvas, buildContext).resolve(spec),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");
@@ -84,7 +84,7 @@ const edited = element("img", "image", "a sunrise");
 /** The image as it was regenerated from its own card: current, not stale. */
 function regenerateImageFromItsCard() {
 	canvas = [edited, video];
-	queue.commitResult(buildNode(forElement(edited), context()), {
+	queue.commitResult(buildNode(forElement(edited), buildContext()), {
 		imageUrl: "https://img/sunrise.png",
 		durationSec: 0,
 	});

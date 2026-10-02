@@ -69,9 +69,9 @@ export function createAutosaver({
 			lastSaved = input;
 			onSaved();
 			saved.notify(input);
-		} catch (err) {
-			console.error("Autosave failed", err);
-			onError(err);
+		} catch (error) {
+			console.error("Autosave failed", error);
+			onError(error);
 		}
 	};
 

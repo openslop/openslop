@@ -24,8 +24,8 @@ const contextNow = () =>
 		canvas: getContentElements(editor.children),
 		registry: DEFAULT_CONNECTOR_REGISTRY,
 	}));
-let context = contextNow();
-vi.mock("../useBuildContext", () => ({ useBuildContext: () => context }));
+let buildContext = contextNow();
+vi.mock("../useBuildContext", () => ({ useBuildContext: () => buildContext }));
 
 type Resolve = (spec: NodeSpec) => GenerationNode;
 let resolve: Resolve;
@@ -57,7 +57,7 @@ const edit = (...elements: CanvasContentElement[]) => {
 
 beforeEach(() => {
 	root = createRoot(container);
-	context = contextNow();
+	buildContext = contextNow();
 	edit();
 });
 
@@ -74,7 +74,7 @@ describe("LiveGraphProvider", () => {
 		resolve(forElement(other));
 
 		expect(resolve(forElement(image))).toBe(node);
-		expect(context).toHaveBeenCalledTimes(1);
+		expect(buildContext).toHaveBeenCalledTimes(1);
 	});
 
 	it("builds a new revision when the document changes", () => {
@@ -86,7 +86,7 @@ describe("LiveGraphProvider", () => {
 		edit(element("img", "a sunrise"));
 
 		expect(resolve(forElement(image)).inputs.prompt).toBe("a sunrise");
-		expect(context).toHaveBeenCalledTimes(2);
+		expect(buildContext).toHaveBeenCalledTimes(2);
 	});
 
 	it("builds a new revision when the project context changes", () => {
@@ -96,7 +96,7 @@ describe("LiveGraphProvider", () => {
 		resolve(forElement(image));
 
 		store.getState().updateMetadata({ style: "noir" });
-		context = contextNow();
+		buildContext = contextNow();
 		render();
 
 		expect(

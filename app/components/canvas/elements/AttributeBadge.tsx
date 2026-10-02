@@ -150,9 +150,9 @@ export function AttributeBadge({
 		<SelectMenu
 			value={value}
 			onChange={handleSelect}
-			options={spec.edit.options.map((opt) => ({
-				value: opt,
-				label: formatValue(opt, spec.unit),
+			options={spec.edit.options.map((option) => ({
+				value: option,
+				label: formatValue(option, spec.unit),
 			}))}
 			contentClassName="max-h-64 min-w-24"
 			itemClassName={className}

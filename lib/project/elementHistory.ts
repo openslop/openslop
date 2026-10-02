@@ -74,8 +74,7 @@ export async function fetchElementVersions(
 	projectId: string,
 	elementId: string,
 ): Promise<ElementVersion[]> {
-	const supabase = createClient();
-	const { data, error } = await supabase
+	const { data, error } = await createClient()
 		.from(TABLE)
 		.select(COLUMNS)
 		.eq("project_id", projectId)
