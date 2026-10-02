@@ -4,7 +4,9 @@
 }
 
 /* Skips style recalc and paint for offscreen scenes during a drag. `auto`
-   caches each scene's real height, so the scrollbar settles after first paint. */
+   caches each scene's real height, so the scrollbar settles after first paint.
+   It also clips paint to its box, so it goes on the element dnd-kit transforms:
+   on a static wrapper, a scene shifted into a neighbour's slot is clipped away. */
 .scene {
 	content-visibility: auto;
 	contain-intrinsic-size: auto 600px;
