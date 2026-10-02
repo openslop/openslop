@@ -46,10 +46,13 @@ type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
 /** Remote sources stream in at an unknown size, so they upload in chunks. */
 async function sourceOf(
 	file: BundleFile,
+	provider: string,
 ): Promise<{ body: PutBody; multipart: boolean }> {
 	if ("data" in file) return { body: file.data, multipart: false };
 	const res = await fetchOk(file.url, `Failed to fetch "${file.key}"`);
-	if (!res.body) throw new Error(`Empty response body for "${file.key}"`);
+	// Vercel rejects empty uploads as "Invalid body"
+	if (!res.body || res.headers.get("content-length") === "0")
+		throw new Error(`Empty file for "${file.key}" from ${provider}`);
 	return { body: res.body, multipart: true };
 }
 
@@ -137,7 +140,7 @@ export class AssetBundle {
 
 		await Promise.all(
 			files.map(async (file) => {
-				const { body, multipart } = await sourceOf(file);
+				const { body, multipart } = await sourceOf(file, provider);
 				return put(`${basePath}/${file.filename}`, body, {
 					access: "public",
 					contentType: file.contentType,

@@ -13,6 +13,11 @@ import {
 	DEFAULT_VIDEO_RESOLUTION,
 } from "@/lib/project/aspectRatio";
 
+const FINISHED: Record<string, VideoJobStatus> = {
+	success: "completed",
+	error: "failed",
+};
+
 function toVideoJob(video: {
 	taskUUID: string;
 	status: string;
@@ -22,7 +27,7 @@ function toVideoJob(video: {
 		url: video.videoURL,
 		metadata: {
 			jobId: video.taskUUID,
-			status: video.status as VideoJobStatus,
+			status: FINISHED[video.status] ?? "processing",
 		},
 	};
 }

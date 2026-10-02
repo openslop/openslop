@@ -191,29 +191,46 @@ describe("AssetBundle", () => {
 			);
 		});
 
+		const remoteVideo = {
+			key: "video",
+			filename: "output.mp4",
+			contentType: "video/mp4",
+			url: "https://cdn.example.com/video.mp4",
+		};
+
 		it("re-hosts remote files by streaming them into our own blob", async () => {
-			const body = new ReadableStream();
-			vi.stubGlobal(
-				"fetch",
-				vi.fn().mockResolvedValue({ ok: true, body, status: 200 }),
-			);
+			const res = new Response("fake-video");
+			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(res));
 
 			const result = await AssetBundle.upload("video", "runware", [
-				{
-					key: "video",
-					filename: "output.mp4",
-					contentType: "video/mp4",
-					url: "https://cdn.example.com/video.mp4",
-				},
+				remoteVideo,
 			]);
 
 			expect(fetch).toHaveBeenCalledWith("https://cdn.example.com/video.mp4");
 			expect(result.result.video).toBe("output.mp4");
 			expect(putMock).toHaveBeenCalledWith(
 				expect.stringMatching(/^assets\/video\/runware\/.+\/output\.mp4$/),
-				body,
+				res.body,
 				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
 			);
+
+			vi.unstubAllGlobals();
+		});
+
+		it("names the file and provider when a remote file comes back with no bytes", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi
+					.fn()
+					.mockResolvedValue(
+						new Response("", { headers: { "content-length": "0" } }),
+					),
+			);
+
+			await expect(
+				AssetBundle.upload("video", "runware", [remoteVideo]),
+			).rejects.toThrow('Empty file for "video" from runware');
+			expect(putMock).not.toHaveBeenCalled();
 
 			vi.unstubAllGlobals();
 		});
@@ -230,14 +247,7 @@ describe("AssetBundle", () => {
 			);
 
 			await expect(
-				AssetBundle.upload("video", "runware", [
-					{
-						key: "video",
-						filename: "output.mp4",
-						contentType: "video/mp4",
-						url: "https://cdn.example.com/gone.mp4",
-					},
-				]),
+				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toThrow(/video.*404.*Not Found/);
 
 			vi.unstubAllGlobals();
