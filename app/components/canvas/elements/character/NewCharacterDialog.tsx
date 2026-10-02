@@ -9,29 +9,12 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	MountedDialog,
 } from "@/components/ui/dialog";
 import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProject } from "@/lib/project/useProject";
 
 export function NewCharacterDialog({
-	open,
-	onOpenChange,
-	onCreated,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	onCreated: (name: string) => void;
-}) {
-	return (
-		<MountedDialog open={open} onOpenChange={onOpenChange}>
-			<NewCharacterDialogBody onCreated={onCreated} />
-		</MountedDialog>
-	);
-}
-
-function NewCharacterDialogBody({
 	onCreated,
 }: {
 	onCreated: (name: string) => void;

@@ -7,15 +7,10 @@ import {
 	LAYOUT_ATTRIBUTE_KEYS,
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
-import {
-	flattenGraph,
-	forElement,
-	isNodeStale,
-	needsGeneration,
-	type BuildContext,
-} from "../graph";
+import { flattenGraph, forElement, type BuildContext } from "../graph";
 import { GenerationQueue } from "../queue";
 import { buildNode } from "../generationGraph";
+import { isNodeStale, needsGeneration } from "../staleness";
 
 let store: ProjectStore;
 

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useProject } from "@/lib/project/useProject";
+import { useProject } from "./useProject";
 import type { VideoSettings } from "./videoSettings";
 
 /** One knob from the project's video settings; always set, never a fallback. */

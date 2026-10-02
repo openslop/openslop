@@ -8,8 +8,8 @@ import {
 	SCENE_TYPE,
 } from "./types";
 
-export const isSceneElement = (n: unknown): n is SceneElement =>
-	Element.isElement(n) && n.type === SCENE_TYPE;
+export const isSceneElement = (node: unknown): node is SceneElement =>
+	Element.isElement(node) && node.type === SCENE_TYPE;
 
 /** The scene holding the node at `path`. `withScenes` guarantees content has one. */
 export function parentSceneId(editor: Editor, path: Path): string {

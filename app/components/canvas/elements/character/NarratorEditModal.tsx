@@ -8,27 +8,12 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	MountedDialog,
 } from "@/components/ui/dialog";
 import { useProject } from "@/lib/project/useProject";
 import type { MetadataVoice } from "@/lib/project/types";
 import { VoiceSection } from "./VoiceMetadataFields";
 
-export function NarratorEditModal({
-	open,
-	onOpenChange,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-}) {
-	return (
-		<MountedDialog open={open} onOpenChange={onOpenChange}>
-			<NarratorEditDialogBody onClose={() => onOpenChange(false)} />
-		</MountedDialog>
-	);
-}
-
-function NarratorEditDialogBody({ onClose }: { onClose: () => void }) {
+export function NarratorEditModal({ onClose }: { onClose: () => void }) {
 	const narration = useProject((s) => s.metadata.narration);
 	const setNarration = useProject((s) => s.setNarration);
 

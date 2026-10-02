@@ -34,7 +34,7 @@ export type AgentToolContext = {
 		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
 	readMetadata: () => Metadata;
-	readSettings: () => AgentContext;
+	readContext: () => AgentContext;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;

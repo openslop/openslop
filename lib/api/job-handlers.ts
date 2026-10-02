@@ -5,7 +5,7 @@ import type {
 	ModelRef,
 	MusicGenerateParams,
 	SFXGenerateParams,
-	TTSGenerateParams,
+	VoicedTTSParams,
 } from "@/lib/connectors/types";
 import {
 	jobVendorParams,
@@ -39,7 +39,7 @@ const HANDLERS: Record<JobConnectorType, JobHandler> = {
 	sfx: assetHandler<SFXGenerateParams & ModelRef>((job) =>
 		providerForJob("sfx", job),
 	),
-	tts: assetHandler<TTSGenerateParams & ModelRef>((job) =>
+	tts: assetHandler<VoicedTTSParams & ModelRef>((job) =>
 		providerForJob("tts", job),
 	),
 	video: videoHandler,

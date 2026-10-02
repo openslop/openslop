@@ -20,7 +20,7 @@ export function MediaWithSkeleton({
 	videoInteractive = false,
 	objectFit = "cover",
 }: MediaWithSkeletonProps) {
-	const [videoLoaded, setVideoLoaded] = useState(false);
+	const [videoSettled, setVideoSettled] = useState(false);
 	const fitClass = objectFit === "contain" ? "object-contain" : "object-cover";
 
 	if (outputKind === "image") {
@@ -40,9 +40,10 @@ export function MediaWithSkeleton({
 				src={src}
 				controls={videoInteractive}
 				className={`w-full h-full ${fitClass} ${videoInteractive ? "" : "pointer-events-none"}`}
-				onLoadedData={() => setVideoLoaded(true)}
+				onLoadedData={() => setVideoSettled(true)}
+				onError={() => setVideoSettled(true)}
 			/>
-			{!videoLoaded && <Skeleton className="absolute inset-0" />}
+			{!videoSettled && <Skeleton className="absolute inset-0" />}
 		</>
 	);
 }

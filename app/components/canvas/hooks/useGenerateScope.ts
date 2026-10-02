@@ -5,14 +5,10 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import {
-	forElement,
-	hasPrompt,
-	isNodeStale,
-	needsGeneration,
-} from "@/lib/generation/graph";
+import { forElement, hasPrompt } from "@/lib/generation/graph";
 import { buildNodes } from "@/lib/generation/generationGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { isNodeStale, needsGeneration } from "@/lib/generation/staleness";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNodes } from "@/lib/generation/useLiveNodes";
 import type { CanvasContentElement } from "@/lib/canvas/types";

@@ -95,10 +95,15 @@ export const TTS_FIELDS = {
 
 export const AUDIO_FIELDS = optionalDurationSeconds;
 
+const INVALID_MAX_TOKENS = "maxTokens must be a positive integer";
+
 export const LLM_FIELDS = {
 	systemPrompt: z.string().optional(),
 	thinkingLevel: z.enum(THINKING_LEVELS).optional(),
-	maxTokens: z.number().optional(),
+	maxTokens: z
+		.int({ error: INVALID_MAX_TOKENS })
+		.positive({ error: INVALID_MAX_TOKENS })
+		.optional(),
 	temperature: z.number().optional(),
 	...optionalReferenceImages,
 	stream: z.boolean().optional(),

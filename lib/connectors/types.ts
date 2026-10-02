@@ -236,6 +236,9 @@ export type TTSGenerateParams = ConnectorGenerateParams & {
 	format?: string;
 };
 
+/** A TTS request after its speaker's voice is resolved. */
+export type VoicedTTSParams = TTSGenerateParams & { voiceId: string };
+
 export type VoiceInfo = {
 	id: string;
 	name: string;

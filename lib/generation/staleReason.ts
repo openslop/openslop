@@ -2,13 +2,9 @@ import lowerCase from "lodash/lowerCase";
 import union from "lodash/union";
 import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
-import {
-	isNodeStale,
-	needsGeneration,
-	nodeInputs,
-	type GenerationNode,
-} from "./graph";
+import type { GenerationNode } from "./graph";
 import type { GenerationQueue } from "./queue";
+import { generationInputs, isNodeStale, needsGeneration } from "./staleness";
 
 /** How many changes are named before the rest are counted off. */
 const MAX_NAMED = 3;
@@ -19,7 +15,7 @@ const list = new Intl.ListFormat("en", { type: "conjunction" });
 function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 	const previous = queue.getElementSnapshot(node.id).resultInputs;
 	if (!previous) return [];
-	const current = nodeInputs(node, queue);
+	const current = generationInputs(node, queue);
 
 	const attributeKeys = union(
 		Object.keys(current.attributes),

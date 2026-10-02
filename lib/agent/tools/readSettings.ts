@@ -16,6 +16,6 @@ export const readSettings = defineTool({
 	output: z.string(),
 	icon: Settings,
 	label: "Reading the settings",
-	execute: async (_input, ctx) => renderAgentContext(ctx.readSettings()),
+	execute: async (_input, ctx) => renderAgentContext(ctx.readContext()),
 	snapshot: true,
 });

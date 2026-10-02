@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import { Dialog } from "@/components/ui/dialog";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { ArtStyleModal } from "../style/ArtStyleModal";
 import { CharacterEditModal } from "./CharacterEditModal";
@@ -32,10 +33,7 @@ export { useAssetEditors };
  */
 export function AssetEditProvider({ children }: { children: ReactNode }) {
 	const [editing, setEditing] = useState<AssetEdit | null>(null);
-	const onOpenChange = (open: boolean) => {
-		if (!open) setEditing(null);
-	};
-	const character = editing?.kind === "character" ? editing : undefined;
+	const close = () => setEditing(null);
 
 	const editors = useMemo<AssetEditors>(
 		() => ({
@@ -50,24 +48,25 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 	return (
 		<AssetEditContext value={editors}>
 			{children}
-			<NewCharacterDialog
-				open={editing?.kind === "create"}
-				onOpenChange={onOpenChange}
-				onCreated={editors.editCharacter}
-			/>
-			<CharacterEditModal
-				open={character !== undefined}
-				onOpenChange={onOpenChange}
-				name={character?.name}
-			/>
-			<NarratorEditModal
-				open={editing?.kind === "narrator"}
-				onOpenChange={onOpenChange}
-			/>
-			<ArtStyleModal
-				open={editing?.kind === "style"}
-				onOpenChange={onOpenChange}
-			/>
+			<Dialog
+				open={editing !== null}
+				onOpenChange={(open) => {
+					if (!open) close();
+				}}
+			>
+				{editing?.kind === "create" && (
+					<NewCharacterDialog onCreated={editors.editCharacter} />
+				)}
+				{editing?.kind === "character" && (
+					<CharacterEditModal
+						key={editing.name}
+						name={editing.name}
+						onClose={close}
+					/>
+				)}
+				{editing?.kind === "narrator" && <NarratorEditModal onClose={close} />}
+				{editing?.kind === "style" && <ArtStyleModal onClose={close} />}
+			</Dialog>
 		</AssetEditContext>
 	);
 }

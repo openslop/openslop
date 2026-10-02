@@ -12,5 +12,5 @@ export type LLMRequest = VendorParams<LLMGenerateParams>;
 export interface LLMProvider extends ProviderContract {
 	generate(params: LLMRequest): Promise<LLMGenerateResult>;
 	stream(params: LLMRequest): AsyncGenerator<LLMStreamChunk>;
-	agentModel(model: string): AgentModel;
+	agentModel(modelId: string): AgentModel;
 }
