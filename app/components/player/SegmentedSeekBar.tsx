@@ -11,6 +11,7 @@ import { usePlayerScrub } from "./usePlayerScrub";
 import { useLayout } from "./RenderLayoutContext";
 
 const HOVER_SETTLE_MS = 80;
+const KEY_SEEK_SEC = 5;
 
 export function SegmentedSeekBar() {
 	const { player } = usePlayerControl();
@@ -59,8 +60,9 @@ export function SegmentedSeekBar() {
 			ariaLabel="Seek"
 			disabled={!player || segments.length === 0}
 			value={progress}
-			segments={scrubSegments.length > 0 ? scrubSegments : undefined}
+			segments={scrubSegments}
 			onScrub={(ratio) => scrub.seekTo(toScrubFrame(ratio))}
+			keyStep={KEY_SEEK_SEC / totalDurationSec}
 			onScrubStart={scrub.start}
 			onScrubEnd={scrub.end}
 			onHoverChange={setHover}

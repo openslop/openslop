@@ -48,6 +48,8 @@ export function ScenePill() {
 	);
 }
 
+const VOLUME_KEY_STEP = 0.05;
+
 export function VolumeControl() {
 	const { player } = usePlayerControl();
 	const volume = usePlayerVolume();
@@ -66,7 +68,11 @@ export function VolumeControl() {
 
 	return (
 		<div className="flex items-center gap-1.5">
-			<IconButton onClick={toggleMute} ariaLabel={muted ? "Unmute" : "Mute"}>
+			<IconButton
+				onClick={toggleMute}
+				ariaLabel={muted ? "Unmute" : "Mute"}
+				disabled={!player}
+			>
 				{muted || volume === 0 ? (
 					<VolumeX className="h-4 w-4" />
 				) : (
@@ -79,6 +85,8 @@ export function VolumeControl() {
 					ariaLabel="Volume"
 					value={muted ? 0 : volume}
 					onScrub={onVolumeChange}
+					keyStep={VOLUME_KEY_STEP}
+					disabled={!player}
 				/>
 			</div>
 		</div>
@@ -93,7 +101,11 @@ export function FullscreenButton() {
 		else player.requestFullscreen();
 	};
 	return (
-		<IconButton onClick={onFullscreen} ariaLabel="Fullscreen">
+		<IconButton
+			onClick={onFullscreen}
+			ariaLabel="Fullscreen"
+			disabled={!player}
+		>
 			<Maximize className="h-4 w-4" />
 		</IconButton>
 	);
