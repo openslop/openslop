@@ -2,7 +2,6 @@ import { unstable_cache } from "next/cache";
 import Cartesia from "@cartesia/cartesia-js";
 import type {
 	TextTimestamp,
-	TTSGenerateParams,
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
@@ -16,8 +15,7 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";
-import type { VendorParams } from "@/lib/connectors/models";
-import type { TTSProvider } from "./base";
+import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
 import type {
@@ -141,7 +139,7 @@ const toVoiceInfo = (voice: Voice): VoiceInfo => ({
 });
 
 export class CartesiaTTS
-	extends BaseProvider<VendorParams<TTSGenerateParams>, RawTTSResult>
+	extends BaseProvider<TTSRequest, RawTTSResult>
 	implements TTSProvider
 {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
@@ -227,8 +225,7 @@ export class CartesiaTTS
 		return voices.map(toVoiceInfo);
 	}
 
-	protected async _generate(params: VendorParams<TTSGenerateParams>) {
-		if (!params.voiceId) throw new Error("voiceId is required");
+	protected async _generate(params: TTSRequest) {
 		const socket = await this.client.tts.websocket();
 		await socket.connect();
 

@@ -33,6 +33,7 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
+import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareVideo } from "../video/runware";
 
 const MODEL = "bytedance:seedance@2.0-fast";
@@ -460,7 +461,7 @@ describe("RunwareVideo", () => {
 			mockVideoInference.mockResolvedValue([
 				{
 					taskUUID: "job-arr",
-					status: "completed",
+					status: "success",
 					videoURL: "https://v.mp4",
 				},
 			]);
@@ -548,7 +549,7 @@ describe("RunwareVideo", () => {
 	describe("poll", () => {
 		it("stamps the completed asset with the duration that was requested", async () => {
 			mockGetResponse.mockResolvedValue([
-				{ taskUUID: "job-1", status: "completed", videoURL: "https://r.mp4" },
+				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
 			]);
 
 			const provider = new RunwareVideo("test-key");
@@ -566,7 +567,7 @@ describe("RunwareVideo", () => {
 			mockGetResponse.mockResolvedValue([
 				{
 					taskUUID: "job-1",
-					status: "completed",
+					status: "success",
 					videoURL: "https://result.mp4",
 				},
 			]);
@@ -584,16 +585,16 @@ describe("RunwareVideo", () => {
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 
-		it("reports pending with the upstream status while the job runs", async () => {
+		it("keeps a job that has a url but has not succeeded out of the store", async () => {
 			mockGetResponse.mockResolvedValue([
 				{
 					taskUUID: "job-1",
 					status: "processing",
+					videoURL: "https://early.mp4",
 				},
 			]);
 
-			const provider = new RunwareVideo("test-key");
-			const result = await provider.poll("job-1", {
+			const result = await new RunwareVideo("test-key").poll("job-1", {
 				prompt: "test",
 				model: MODEL,
 			});
@@ -602,20 +603,34 @@ describe("RunwareVideo", () => {
 				kind: "pending",
 				metadata: { jobId: "job-1", status: "processing" },
 			});
+			expect(AssetBundle.upload).not.toHaveBeenCalled();
 		});
 
-		it("reports a failed job as its own outcome, not as pending", async () => {
+		it("fails a job that errored even when it carries a url", async () => {
 			mockGetResponse.mockResolvedValue([
-				{ taskUUID: "job-1", status: "failed" },
+				{ taskUUID: "job-1", status: "error", videoURL: "https://bad.mp4" },
 			]);
 
-			const provider = new RunwareVideo("test-key");
-			const result = await provider.poll("job-1", {
+			const result = await new RunwareVideo("test-key").poll("job-1", {
 				prompt: "test",
 				model: MODEL,
 			});
 
 			expect(result).toEqual({ kind: "failed" });
+			expect(AssetBundle.upload).not.toHaveBeenCalled();
+		});
+
+		it("fails loudly when a job succeeded without a video", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "success" },
+			]);
+
+			await expect(
+				new RunwareVideo("test-key").poll("job-1", {
+					prompt: "test",
+					model: MODEL,
+				}),
+			).rejects.toThrow("completed without a video");
 		});
 
 		it("throws when job not found", async () => {
