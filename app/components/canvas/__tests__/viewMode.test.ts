@@ -1,28 +1,26 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createViewModeStore } from "../ViewModeContext";
 
 const store = (sceneIds: string[] = ["scene-1", "scene-2"]) =>
 	createViewModeStore(() => sceneIds);
 
+const collapsed = (mode: ReturnType<typeof store>) => [
+	...mode.getState().collapsed,
+];
+
 describe("createViewModeStore", () => {
 	it("starts with every scene expanded", () => {
-		const mode = store();
-
-		expect(mode.isCollapsed("scene-1")).toBe(false);
-		expect(mode.hasCollapsed()).toBe(false);
+		expect(collapsed(store())).toEqual([]);
 	});
 
 	it("folds and unfolds one scene, leaving the others alone", () => {
 		const mode = store();
 
-		mode.toggle("scene-1");
-		expect(mode.isCollapsed("scene-1")).toBe(true);
-		expect(mode.isCollapsed("scene-2")).toBe(false);
-		expect(mode.hasCollapsed()).toBe(true);
+		mode.getState().toggle("scene-1");
+		expect(collapsed(mode)).toEqual(["scene-1"]);
 
-		mode.toggle("scene-1");
-		expect(mode.isCollapsed("scene-1")).toBe(false);
-		expect(mode.hasCollapsed()).toBe(false);
+		mode.getState().toggle("scene-1");
+		expect(collapsed(mode)).toEqual([]);
 	});
 
 	it("collapses the scenes the document holds when asked, not when made", () => {
@@ -30,31 +28,17 @@ describe("createViewModeStore", () => {
 		const mode = store(sceneIds);
 		sceneIds.push("scene-2");
 
-		mode.collapseAll();
+		mode.getState().collapseAll();
 
-		expect(mode.isCollapsed("scene-1")).toBe(true);
-		expect(mode.isCollapsed("scene-2")).toBe(true);
+		expect(collapsed(mode)).toEqual(["scene-1", "scene-2"]);
 	});
 
 	it("expands every scene at once", () => {
 		const mode = store();
-		mode.collapseAll();
+		mode.getState().collapseAll();
 
-		mode.expandAll();
+		mode.getState().expandAll();
 
-		expect(mode.isCollapsed("scene-1")).toBe(false);
-		expect(mode.hasCollapsed()).toBe(false);
-	});
-
-	it("notifies subscribers on every change", () => {
-		const mode = store();
-		const listener = vi.fn();
-		mode.subscribe(listener);
-
-		mode.toggle("scene-1");
-		mode.collapseAll();
-		mode.expandAll();
-
-		expect(listener).toHaveBeenCalledTimes(3);
+		expect(collapsed(mode)).toEqual([]);
 	});
 });

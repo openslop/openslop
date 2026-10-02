@@ -1,3 +1,4 @@
+import memoizeOne from "memoize-one";
 import { Element, Node, type Descendant, type Editor, type Path } from "slate";
 import { withoutCaretMarker } from "./constants";
 import { isForeground } from "./guards";
@@ -46,6 +47,16 @@ export function previousVisual(
 	return at < 0 ? undefined : elements.slice(0, at).findLast(isForeground);
 }
 
+// Every scene asks for its number on every edit, so the document is numbered
+// once per revision rather than searched once per scene.
+const numberScenes = memoizeOne(
+	(nodes: Descendant[]) =>
+		new Map(
+			nodes.filter(isSceneElement).map((scene, index) => [scene.id, index + 1]),
+		),
+);
+
+/** 1-based, or 0 for an id that is not a scene of `nodes`. */
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
-	return nodes.filter(isSceneElement).findIndex((n) => n.id === sceneId) + 1;
+	return numberScenes(nodes).get(sceneId) ?? 0;
 }

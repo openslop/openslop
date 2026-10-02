@@ -2,60 +2,54 @@
 
 import { useState, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
+import { createStore, type StoreApi } from "zustand/vanilla";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { createStoreContext } from "@/lib/store/createStoreContext";
-import { createEmitter, type Emitter } from "@/lib/store/emitter";
 
-type ViewModeActions = {
+type ViewMode = {
+	collapsed: ReadonlySet<string>;
 	toggle: (sceneId: string) => void;
 	expandAll: () => void;
 	collapseAll: () => void;
 };
 
-export type ViewModeStore = ViewModeActions & {
-	isCollapsed: (sceneId: string) => boolean;
-	hasCollapsed: () => boolean;
-	subscribe: Emitter["subscribe"];
-};
+export function createViewModeStore(
+	sceneIds: () => string[],
+): StoreApi<ViewMode> {
+	return createStore<ViewMode>()((set) => ({
+		collapsed: new Set(),
+		toggle: (sceneId) =>
+			set(({ collapsed }) => {
+				const next = new Set(collapsed);
+				if (!next.delete(sceneId)) next.add(sceneId);
+				return { collapsed: next };
+			}),
+		expandAll: () => set({ collapsed: new Set() }),
+		collapseAll: () => set({ collapsed: new Set(sceneIds()) }),
+	}));
+}
 
 /**
  * Every scene and every element card asks whether its scene is collapsed.
  * Holding the collapsed set in the context would re-render all of them when one
  * scene folds; holding a store re-renders only that scene and its cards.
  */
-export function createViewModeStore(sceneIds: () => string[]): ViewModeStore {
-	const { subscribe, notify } = createEmitter();
-	let collapsed = new Set<string>();
-	const setCollapsed = (next: Set<string>) => {
-		collapsed = next;
-		notify();
-	};
-	return {
-		isCollapsed: (sceneId) => collapsed.has(sceneId),
-		hasCollapsed: () => collapsed.size > 0,
-		toggle: (sceneId) => {
-			const next = new Set(collapsed);
-			if (!next.delete(sceneId)) next.add(sceneId);
-			setCollapsed(next);
-		},
-		expandAll: () => setCollapsed(new Set()),
-		collapseAll: () => setCollapsed(new Set(sceneIds())),
-		subscribe,
-	};
+const [ViewModeContext, useViewModeStore, useViewModeSelector] =
+	createStoreContext<StoreApi<ViewMode>>("ViewModeContext");
+
+/** Only the actions, which never change: what is collapsed is read through the hooks below, which subscribe. */
+export function useViewMode(): Omit<ViewMode, "collapsed"> {
+	return useViewModeStore().getState();
 }
 
-const [ViewModeContext, useViewModeStore, useViewModeSelector] =
-	createStoreContext<ViewModeStore>("ViewModeContext");
-
-/** Only the actions: what is collapsed is read through the hooks below, which subscribe. */
-export const useViewMode: () => ViewModeActions = useViewModeStore;
-
 export function useSceneCollapsed(sceneId: string): boolean {
-	return useViewModeSelector((mode) => mode.isCollapsed(sceneId));
+	return useViewModeSelector((store) =>
+		store.getState().collapsed.has(sceneId),
+	);
 }
 
 export function useHasCollapsed(): boolean {
-	return useViewModeSelector((mode) => mode.hasCollapsed());
+	return useViewModeSelector((store) => store.getState().collapsed.size > 0);
 }
 
 export function ViewModeProvider({ children }: { children: ReactNode }) {
