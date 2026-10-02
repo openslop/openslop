@@ -112,7 +112,12 @@ export function TimelineClip({
 						/>
 					</div>
 				) : (
-					<ClipWaveform src={element.url} width={width} className="h-full" />
+					<ClipWaveform
+						src={element.url}
+						width={width}
+						played={clip.duration / element.durationSec}
+						className="h-full"
+					/>
 				)}
 			</div>
 			{sceneNumber ? (
