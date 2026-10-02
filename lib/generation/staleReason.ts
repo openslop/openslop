@@ -3,12 +3,8 @@ import union from "lodash/union";
 import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
 import type { GenerationNode } from "./graph";
-import {
-	generationInputs,
-	isNodeStale,
-	needsGeneration,
-	type SnapshotReader,
-} from "./staleness";
+import type { GenerationQueue } from "./queue";
+import { generationInputs, isNodeStale, needsGeneration } from "./staleness";
 
 /** How many changes are named before the rest are counted off. */
 const MAX_NAMED = 3;
@@ -16,7 +12,7 @@ const MAX_NAMED = 3;
 const list = new Intl.ListFormat("en", { type: "conjunction" });
 
 /** Everything about `node` that no longer matches the result it produced. */
-function changedInputs(node: GenerationNode, queue: SnapshotReader): string[] {
+function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 	const previous = queue.getElementSnapshot(node.id).resultInputs;
 	if (!previous) return [];
 	const current = generationInputs(node, queue);
@@ -46,7 +42,7 @@ function changedInputs(node: GenerationNode, queue: SnapshotReader): string[] {
  */
 export function staleReason(
 	node: GenerationNode,
-	queue: SnapshotReader,
+	queue: GenerationQueue,
 ): string | null {
 	if (!isNodeStale(node, queue)) return null;
 	const changes = changedInputs(node, queue);

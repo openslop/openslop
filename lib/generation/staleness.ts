@@ -4,12 +4,7 @@ import { ASSET_URL_FIELDS } from "../connectors/assetUrl";
 import type { AssetResult } from "../connectors/types";
 import { isSourceNode, type GenerationNode } from "./graph";
 import type { GenerationInputs } from "./inputs";
-import type { ElementSnapshot } from "./snapshots";
-
-/** All that staleness reads of the queue. */
-export type SnapshotReader = {
-	getElementSnapshot: (id: string) => ElementSnapshot;
-};
+import type { GenerationQueue } from "./queue";
 
 const resultIdentity = (result: AssetResult | null): string =>
 	result
@@ -21,14 +16,14 @@ const resultIdentity = (result: AssetResult | null): string =>
  * so its identity is settled when it is built; a job node's is the result held
  * for it now, which arrives after the graph is built.
  */
-const identityOf = (node: GenerationNode, queue: SnapshotReader): string =>
+const identityOf = (node: GenerationNode, queue: GenerationQueue): string =>
 	isSourceNode(node)
 		? node.identity
 		: resultIdentity(queue.getElementSnapshot(node.id).result);
 
 export function generationInputs(
 	node: GenerationNode,
-	queue: SnapshotReader,
+	queue: GenerationQueue,
 ): GenerationInputs {
 	return {
 		...node.inputs,
@@ -43,7 +38,7 @@ export function generationInputs(
 
 export function needsGeneration(
 	node: GenerationNode,
-	queue: SnapshotReader,
+	queue: GenerationQueue,
 ): boolean {
 	if (isSourceNode(node)) return false;
 	const snapshot = queue.getElementSnapshot(node.id);
@@ -59,7 +54,7 @@ export function needsGeneration(
 
 export const isNodeStale = (
 	node: GenerationNode,
-	queue: SnapshotReader,
+	queue: GenerationQueue,
 ): boolean =>
 	Boolean(queue.getElementSnapshot(node.id).result) &&
 	needsGeneration(node, queue);
