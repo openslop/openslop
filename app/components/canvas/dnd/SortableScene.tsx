@@ -1,5 +1,6 @@
 import { RenderElementProps } from "slate-react";
 import type { SceneElement } from "@/lib/canvas/types";
+import { cn } from "@/lib/utils";
 import {
 	ACTIVE_SCENE_CLASS,
 	useIsActiveScene,
@@ -27,8 +28,8 @@ export function SortableScene({
 			sceneId={element.id}
 			sortableType="scene"
 			disabled={!collapsed}
-			wrapperClassName={`${styles.scene} border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? "border-transparent" : "border-border"}`}
-			contentClassName={isActive ? ACTIVE_SCENE_CLASS : undefined}
+			wrapperClassName={`border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0 ${isActive ? "border-transparent" : "border-border"}`}
+			contentClassName={cn(styles.scene, isActive && ACTIVE_SCENE_CLASS)}
 			attributes={attributes}
 			element={element}
 		>
