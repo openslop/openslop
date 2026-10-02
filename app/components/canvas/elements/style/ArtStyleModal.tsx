@@ -9,7 +9,6 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	MountedDialog,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useConfig } from "@/lib/config/ConfigProvider";
@@ -32,21 +31,7 @@ import { ArtStylePresets } from "./ArtStylePresets";
 
 const DESCRIPTION_ID = "art-style-description";
 
-export function ArtStyleModal({
-	open,
-	onOpenChange,
-}: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-}) {
-	return (
-		<MountedDialog open={open} onOpenChange={onOpenChange}>
-			<ArtStyleDialogBody onClose={() => onOpenChange(false)} />
-		</MountedDialog>
-	);
-}
-
-function ArtStyleDialogBody({ onClose }: { onClose: () => void }) {
+export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const { connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
