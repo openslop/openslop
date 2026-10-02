@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { Editor } from "slate";
-import { clearEditor, findNodeById } from "@/lib/canvas/editorOps";
+import { findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
@@ -23,7 +23,8 @@ import { getPromptText } from "@/lib/generation/inputs";
 import { applyRefineOps } from "@/lib/script/refine/applyOps";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useScriptControl } from "@/lib/script/ScriptProvider";
+import type { ScriptSource } from "@/lib/script/prompt/build";
+import { streamScript } from "@/lib/script/streamScript";
 import { elementState } from "../elementState";
 import { useAgentContext } from "../projectContext";
 import type { AgentToolContext } from "./context";
@@ -31,7 +32,6 @@ import { executeToolCall } from "./registry";
 
 export function useAgentTools(editor: Editor) {
 	const { connectorConfig } = useConfig();
-	const { runScript } = useScriptControl();
 	const store = useProjectStoreHandle();
 	const defaultModels = useResolveDefaultModels();
 	const queue = useGenerationQueue();
@@ -39,6 +39,10 @@ export function useAgentTools(editor: Editor) {
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
+			const llm = () =>
+				createConnector("llm", defaultModels().llm, connectorConfig.llm);
+			const draftScript = (source: ScriptSource) =>
+				streamScript({ editor, store, defaultModels }, llm(), source, signal);
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
@@ -75,9 +79,7 @@ export function useAgentTools(editor: Editor) {
 					);
 				},
 				generateText: async (prompt, options) => {
-					const model = defaultModels().llm;
-					const llm = createConnector("llm", model, connectorConfig.llm);
-					const { text } = await llm.generate({ prompt, ...options });
+					const { text } = await llm().generate({ prompt, ...options });
 					if (!text.trim())
 						throw new Error(
 							"The model spent its whole output budget thinking and replied with nothing. Ask for less thinking, or for a shorter answer.",
@@ -87,16 +89,9 @@ export function useAgentTools(editor: Editor) {
 				readMetadata: () => store.getState().metadata,
 				readSettings,
 				editScript: (ops) => applyRefineOps(editor, ops, defaultModels()),
-				// The stream appends what it cannot find by id, so the canvas is cleared
-				// first or the new script stacks under the old one.
-				writeScript: (brief) => {
-					clearEditor(editor);
-					return runScript({ kind: "brief", brief }, signal);
-				},
-				adaptScript: (script, notes) => {
-					clearEditor(editor);
-					return runScript({ kind: "adapt", script, notes }, signal);
-				},
+				writeScript: (brief) => draftScript({ kind: "brief", brief }),
+				adaptScript: (script, notes) =>
+					draftScript({ kind: "adapt", script, notes }),
 				setMetadata: (patch) => store.getState().updateMetadata(patch),
 				setCharacter: (raw, patch) => {
 					const name = normalizeCharacterName(raw);
@@ -114,14 +109,6 @@ export function useAgentTools(editor: Editor) {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[
-			editor,
-			connectorConfig,
-			runScript,
-			store,
-			defaultModels,
-			queue,
-			readSettings,
-		],
+		[editor, connectorConfig, store, defaultModels, queue, readSettings],
 	);
 }

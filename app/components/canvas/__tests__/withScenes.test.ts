@@ -5,7 +5,7 @@ import { withScenes } from "../plugins/withScenes";
 import { withNodeId } from "../plugins/withNodeId";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
-import { content, scene } from "./fixtures";
+import { content, scene, shape } from "./fixtures";
 
 function makeEditor() {
 	return withNodeId(withScenes(withReact(createEditor())));
@@ -21,14 +21,6 @@ function setChildren(editor: Editor, children: Element[]) {
 		}
 	});
 	Editor.normalize(editor, { force: true });
-}
-
-function shape(editor: Editor): string[][] {
-	return editor.children.map((s) =>
-		isSceneElement(s)
-			? s.children.map((c) => c.type)
-			: [`!${(s as Element).type}`],
-	);
 }
 
 describe("withScenes", () => {
