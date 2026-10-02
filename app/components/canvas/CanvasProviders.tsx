@@ -9,7 +9,6 @@ import { RenderLayoutProvider } from "../player/RenderLayoutContext";
 import { BottomViewProvider } from "../player/BottomViewContext";
 import { PlayerPlacementProvider } from "../player/PlayerPlacementContext";
 import { PlayerControlProvider } from "../player/PlayerControlContext";
-import { RenderProvider } from "../player/RenderProvider";
 import { ActiveSceneProvider } from "../scene-selection/ActiveSceneContext";
 import { AutoScrollProvider } from "../scene-selection/AutoScrollContext";
 import { ViewModeProvider } from "./ViewModeContext";
@@ -20,7 +19,6 @@ import { useEditorSession } from "./hooks/useEditorSession";
 
 const CanvasScopedProviders = composeProviders(
 	LiveGraphProvider,
-	RenderProvider,
 	RenderLayoutProvider,
 	PlayerPlacementProvider,
 	BottomViewProvider,
@@ -34,7 +32,7 @@ const CanvasScopedProviders = composeProviders(
 
 /**
  * Opens the editor session and composes every canvas-scoped provider (document,
- * version history, render, video layout, player placement and control, bottom
+ * version history, video layout, player placement and control, bottom
  * view, scene selection, auto-scroll, collapse state) into a single boundary,
  * so the top-level view stays a flat orchestrator. The document lives
  * in `<Slate>`, so consumers subscribe to the slices they need and a keystroke

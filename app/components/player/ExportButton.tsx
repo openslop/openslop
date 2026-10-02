@@ -18,8 +18,8 @@ import { formatBytes } from "@/lib/format";
 import { RESOLUTIONS, scaleForWidth } from "@/lib/project/resolutions";
 import { BASE_WIDTH } from "@/lib/render/types";
 import { useSloppy } from "../sloppy/SloppyProvider";
-import { useRender } from "./RenderProvider";
 import { useLayout } from "./RenderLayoutContext";
+import { useExport } from "./useExport";
 
 const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
 	value: String(resolution.width),
@@ -29,7 +29,7 @@ const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
 export function ExportButton() {
 	const { layout, ready } = useLayout();
 	const { loading } = useSloppy();
-	const { state, render, reset, open, setOpen } = useRender();
+	const { state, exportVideo, reset, open, setOpen } = useExport();
 	const [width, setWidth] = useState(BASE_WIDTH);
 
 	const disabled = loading || !layout.series.length || !ready;
@@ -64,7 +64,7 @@ export function ExportButton() {
 				</div>
 				<Separator bleed />
 
-				{(state.status === "invoking" || state.status === "rendering") && (
+				{(state.status === "starting" || state.status === "rendering") && (
 					<div className="animate-fadeInUp flex flex-col gap-2">
 						<div className="flex items-center justify-between text-label font-medium">
 							<span className="flex items-center gap-2">
@@ -127,7 +127,7 @@ export function ExportButton() {
 							type="button"
 							variant="generate"
 							size="sm"
-							onClick={() => render(layout, scaleForWidth(width))}
+							onClick={() => exportVideo(layout, scaleForWidth(width))}
 							disabled={disabled}
 							className="w-full"
 						>
