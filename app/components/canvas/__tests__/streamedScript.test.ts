@@ -30,13 +30,9 @@ const SCENES = [
 ];
 
 function written(chunks: string[]): CanvasEditor {
-	const defaultModels = () => ({});
-	const editor = withNodeId(
-		withScenes(withLayout(defaultModels)(withReact(createEditor()))),
-	);
-	chunks.forEach(
-		createScriptWriter({ editor, store: createProjectStore(), defaultModels }),
-	);
+	const editor = withNodeId(withScenes(withLayout(withReact(createEditor()))));
+	editor.defaultModels = () => ({});
+	chunks.forEach(createScriptWriter({ editor, store: createProjectStore() }));
 	return editor;
 }
 

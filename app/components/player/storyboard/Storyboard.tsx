@@ -5,7 +5,6 @@ import { ReactEditor, useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { removeElement } from "@/app/components/canvas/utils/nodeOps";
 import { insertScene } from "@/lib/canvas/insertScene";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useLayout } from "../RenderLayoutContext";
 import { useSelectScene } from "../useSelectScene";
 import { SceneInsertHandle } from "./SceneInsertHandle";
@@ -19,7 +18,6 @@ export function Storyboard() {
 	const editor = useSlateStatic();
 	const { layout, segments, scenes } = useLayout();
 	const selectScene = useSelectScene();
-	const defaultModels = useResolveDefaultModels();
 	const [deleting, setDeleting] = useState<StoryboardSceneData>();
 
 	const items = useMemo(
@@ -34,7 +32,7 @@ export function Storyboard() {
 		const at = anchor
 			? ReactEditor.findPath(editor, anchor)
 			: [editor.children.length];
-		insertScene(editor, at, defaultModels());
+		insertScene(editor, at);
 	};
 
 	return (

@@ -21,12 +21,13 @@ function createCanvasEditor(
 	const editor = flow(
 		withHistory,
 		withReact,
-		withLayout(defaultModels),
+		withLayout,
 		withScenes,
 		withFlatPaste,
 		withNodeId,
-		withOSMLClipboard(defaultModels),
+		withOSMLClipboard,
 	)(createEditor());
+	editor.defaultModels = defaultModels;
 	// Loading an empty script would seed the layout's narration ahead of the first one streamed in.
 	if (script) applyScriptToEditor(editor, script, defaultModels(), sceneId);
 	return editor;

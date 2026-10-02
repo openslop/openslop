@@ -30,7 +30,8 @@ function makeEditor(seed: SceneElement) {
 	base.setFragmentData = vi.fn();
 	base.insertTextData = insertTextData;
 
-	const editor: CanvasEditor = withOSMLClipboard(() => ({}))(base);
+	const editor = withOSMLClipboard(base);
+	editor.defaultModels = () => ({});
 	seedScene(editor, seed);
 
 	return { editor, insertTextData };

@@ -5,13 +5,11 @@ import { collectMetadata } from "@/lib/canvas/osmlMetadata";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { OSMLStreamParser } from "@/lib/canvas/osmlStreamParser";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
-import type { ConnectorModels } from "@/lib/connectors/models";
 import type { ProjectStore } from "@/lib/project/store";
 
 export type ScriptCanvas = {
 	editor: Editor;
 	store: ProjectStore;
-	defaultModels: () => ConnectorModels;
 };
 
 function writeElement(
@@ -40,13 +38,12 @@ function writeElement(
 export function createScriptWriter({
 	editor,
 	store,
-	defaultModels,
 }: ScriptCanvas): (chunk: string) => void {
 	const parser = new OSMLStreamParser();
 	let seen = 0;
 
 	return (chunk) => {
-		if (!parser.appendChunk(chunk, defaultModels())) return;
+		if (!parser.appendChunk(chunk, editor.defaultModels())) return;
 		const nodes = parser.getNodes();
 		// Text only ever reaches the last node, so all but the last one seen are final.
 		const changed = nodes.slice(Math.max(0, seen - 1));

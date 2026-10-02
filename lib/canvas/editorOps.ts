@@ -4,7 +4,6 @@ import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasContentElement, CanvasElement } from "@/lib/canvas/types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
-import type { ConnectorModels } from "@/lib/connectors/models";
 import type { ElementVersion } from "@/lib/generation/versions";
 import {
 	flatAttributes,
@@ -101,15 +100,12 @@ export function retypeNode(
 	path: Path,
 	element: CanvasContentElement,
 	type: CanvasContentElement["type"],
-	{
-		attrs = {},
-		defaultModels,
-	}: { attrs?: Record<string, string>; defaultModels?: ConnectorModels } = {},
+	{ attrs = {} }: { attrs?: Record<string, string> } = {},
 ): void {
 	const replacement = createCanvasNode(type, {
 		id: element.id,
 		attrs: { ...preservedAttributes(element, type), ...attrs },
-		defaultModels,
+		defaultModels: editor.defaultModels(),
 	});
 	Transforms.setNodes(
 		editor,

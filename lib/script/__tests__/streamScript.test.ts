@@ -8,11 +8,11 @@ import { createProjectStore } from "@/lib/project/store";
 import { sleep } from "@/lib/utils";
 import { streamScript } from "../streamScript";
 
-const makeCanvas = () => ({
-	editor: createEditor(),
-	store: createProjectStore(),
-	defaultModels: () => ({}),
-});
+const makeCanvas = () => {
+	const editor = createEditor();
+	editor.defaultModels = () => ({});
+	return { editor, store: createProjectStore() };
+};
 
 const elements = (editor: Editor): [type: string, text: string][] =>
 	editor.children
