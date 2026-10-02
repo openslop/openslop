@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { sourceNode, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { generationInputs, isNodeStale, needsGeneration } from "../staleness";
@@ -50,6 +50,7 @@ describe("isNodeStale", () => {
 		const image = node("image", [avatar]);
 		commit(queue, avatar, "avatar.png");
 		commit(queue, image, "image.png");
+		expect(isNodeStale(image, queue)).toBe(false);
 
 		commit(queue, avatar, "avatar-v2.png");
 		expect(isNodeStale(image, queue)).toBe(true);
@@ -100,6 +101,30 @@ describe("isNodeStale", () => {
 		const queue = new GenerationQueue();
 		queue.discard("el");
 		expect(needsGeneration(node("el"), queue)).toBe(true);
+	});
+
+	it("judges again when the result it holds is committed for other inputs", () => {
+		const queue = new GenerationQueue();
+		const result = { imageUrl: "image.png", durationSec: 0 };
+		const withRefs = (urls: string) =>
+			node("image", [sourceNode("project:refs", { urls })]);
+		const edited = withRefs("b.png");
+		queue.commitResult(withRefs("a.png"), result);
+		expect(needsGeneration(edited, queue)).toBe(true);
+
+		queue.commitResult(edited, result);
+		expect(needsGeneration(edited, queue)).toBe(false);
+	});
+
+	it("judges a chain once, not once per dependent", () => {
+		const queue = new GenerationQueue();
+		const chain: GenerationNode[] = [];
+		for (let i = 0; i < 50; i++) chain.push(node(`shot-${i}`, chain.slice(-1)));
+		for (const shot of chain) commit(queue, shot, `${shot.id}.png`);
+		const read = vi.spyOn(queue, "getElementSnapshot");
+
+		expect(chain.some((shot) => needsGeneration(shot, queue))).toBe(false);
+		expect(read.mock.calls.length).toBeLessThanOrEqual(2 * chain.length);
 	});
 
 	it("never marks a source node stale", () => {
