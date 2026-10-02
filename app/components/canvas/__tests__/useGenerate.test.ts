@@ -4,11 +4,11 @@ import type { CanvasContentElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import {
 	forElement,
-	needsGeneration,
 	type GenerationNode,
 	type NodeSpec,
 } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
+import { needsGeneration } from "@/lib/generation/staleness";
 import { buildNode, createGraphFor } from "@/lib/generation/generationGraph";
 import { createProjectStore } from "@/lib/project/store";
 

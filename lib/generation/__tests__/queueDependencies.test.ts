@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
-import { isNodeStale, type GenerationJob, type GenerationNode } from "../graph";
+import type { GenerationJob, GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
+import { isNodeStale } from "../staleness";
 import { EMPTY_CONTEXT } from "./_context";
 import { byId } from "./_graph";
 
