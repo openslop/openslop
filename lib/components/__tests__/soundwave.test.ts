@@ -53,4 +53,16 @@ describe("toBarHeights", () => {
 	it("draws silence without peaks", () => {
 		expect(toBarHeights([], 8)).toEqual(toBarHeights([0], 8));
 	});
+
+	it("covers only the span of the peaks it is asked for", () => {
+		const loudThenSilent = [1, 1, 1, 1, 0, 0, 0, 0];
+		expect(toBarHeights(loudThenSilent, 4, 0.5)).toEqual([100, 100, 100, 100]);
+	});
+
+	it("runs on in silence past the end of the peaks", () => {
+		const heights = toBarHeights([1, 1], 4, 2);
+		const [silence] = toBarHeights([], 1);
+		expect(heights[0]).toBe(100);
+		expect(heights[3]).toBe(silence);
+	});
 });
