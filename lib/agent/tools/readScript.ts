@@ -6,10 +6,9 @@ import {
 	type MetadataVoice,
 } from "@/lib/project/types";
 import { Eye } from "@/components/ui/icon";
+import { UNSET } from "../context";
 import type { ElementState } from "../elementState";
 import { defineTool } from "./defineTool";
-
-const UNSET = "unset";
 
 function section(heading: string, lines: string[]): string {
 	return [`## ${heading}`, ...lines].join("\n");

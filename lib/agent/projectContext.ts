@@ -25,9 +25,7 @@ function toAgentContext(
 		length: metadata.videoSettings.length,
 		format: metadata.videoSettings.format,
 		aspectRatio: metadata.videoSettings.aspectRatio,
-		templateName: metadata.templateId
-			? getTemplateById(metadata.templateId)?.name
-			: undefined,
+		templateName: getTemplateById(metadata.templateId)?.name,
 		narration: metadata.narration,
 		characters: Object.entries(metadata.characters).map(
 			([name, character]) => ({

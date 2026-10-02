@@ -1,6 +1,6 @@
 import compact from "lodash/compact";
 import type { Metadata } from "@/lib/project/types";
-import { getTemplate } from "@/lib/templates/templates";
+import { getTemplateById } from "@/lib/templates/templates";
 import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
 import { osmlSpec } from "./osml";
@@ -31,16 +31,16 @@ function promptParts(
 			instruction: source.script,
 		};
 
-	const { templateId } = metadata;
-	if (templateId)
+	const template = getTemplateById(metadata.templateId);
+	if (template)
 		return {
 			guidance: [
 				formatSection(metadata),
 				lengthSection(metadata),
-				getTemplate(templateId).systemPrompt,
+				template.systemPrompt,
 			],
 			instruction: templatePrompt(
-				templateId,
+				template,
 				source.brief,
 				spokenLanguage(metadata, "the same language that the user_input is in"),
 			),

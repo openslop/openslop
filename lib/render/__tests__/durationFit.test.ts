@@ -17,6 +17,7 @@ const length = (over: Partial<ElementLength> = {}): ElementLength => ({
 	dialogueIds: ["n1"],
 	durationSec: 10,
 	trimToDialogue: true,
+	decidedBy: "dialogue",
 	...over,
 });
 

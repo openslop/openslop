@@ -2,10 +2,7 @@ import dedent from "dedent";
 import { z } from "zod";
 import type { ElementLength } from "@/lib/render/elementLengths";
 import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
-import {
-	NARRATION_WORDS_PER_MINUTE,
-	secondsForWords,
-} from "@/lib/project/videoLength";
+import { NARRATION_WORDS_PER_MINUTE } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./defineTool";
 
@@ -14,29 +11,24 @@ const WORDS_PER_SECOND = Math.round(NARRATION_WORDS_PER_MINUTE / 60);
 const dialogue = ({ words, dialogueIds }: ElementLength) =>
 	`${words} words of dialogue (${dialogueIds.join(", ")})`;
 
-/** Which of its duration, its dialogue or the minimum set the length. */
-const reason = (length: ElementLength) => {
-	const { trimToDialogue, durationSec, words } = length;
-	const dialogueSec = secondsForWords(words);
-	const untrimmed = !trimToDialogue && durationSec !== undefined;
-
-	if (
-		untrimmed &&
-		durationSec >= dialogueSec &&
-		durationSec >= MIN_DURATION_SEC
-	) {
-		const after = words === 0 ? "no dialogue" : dialogue(length);
-		return `its full duration, untrimmed; ${after} after it`;
-	}
-	if (words === 0 || dialogueSec < MIN_DURATION_SEC)
-		return "the minimum, no dialogue after it";
-	if (untrimmed)
-		return `${dialogue(length)} after it, longer than its ${seconds(durationSec)} duration`;
-	return `${dialogue(length)} after it`;
+const REASONS: Record<
+	ElementLength["decidedBy"],
+	(length: ElementLength) => string
+> = {
+	duration: (length) =>
+		`its full duration, untrimmed; ${length.words === 0 ? "no dialogue" : dialogue(length)} after it`,
+	dialogue: (length) =>
+		length.trimToDialogue || length.durationSec === undefined
+			? `${dialogue(length)} after it`
+			: `${dialogue(length)} after it, longer than its ${seconds(length.durationSec)} duration`,
+	minimum: (length) =>
+		length.words === 0
+			? "the minimum, no dialogue after it"
+			: `the minimum, longer than the ${dialogue(length)} after it`,
 };
 
 const line = (length: ElementLength) =>
-	`Scene ${length.sceneNumber} ${length.type} ${length.id}: ${seconds(length.seconds)}, ${reason(length)}.`;
+	`Scene ${length.sceneNumber} ${length.type} ${length.id}: ${seconds(length.seconds)}, ${REASONS[length.decidedBy](length)}.`;
 
 export const measureElementLengths = defineTool({
 	description: dedent`

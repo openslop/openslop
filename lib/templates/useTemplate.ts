@@ -21,7 +21,7 @@ export function useTemplate(): {
 	const setTemplate = useProject((s) => s.setTemplate);
 
 	return {
-		template: templateId ? getTemplateById(templateId) : undefined,
+		template: getTemplateById(templateId),
 		applyTemplate: useCallback(
 			(id: string) => applyTemplate(store, id, queue, connectorConfig),
 			[store, queue, connectorConfig],

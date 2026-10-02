@@ -1980,9 +1980,9 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 
 const TEMPLATE_MAP = new Map(TEMPLATES.map((t) => [t.id, t]));
 
-/** Optional lookup for ids from outside the app, where a miss is a stale id. */
-export function getTemplateById(id: string): Template | undefined {
-	return TEMPLATE_MAP.get(id);
+/** Lookup for a stored id, where a miss is a template that has left the catalog. */
+export function getTemplateById(id: string | undefined): Template | undefined {
+	return id === undefined ? undefined : TEMPLATE_MAP.get(id);
 }
 
 /** Lookup for ids sourced from `TEMPLATES`, where a miss is a programming error. */
