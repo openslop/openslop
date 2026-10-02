@@ -1,25 +1,17 @@
 "use client";
 
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useState,
-	type ReactNode,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import { errorMessage } from "@/lib/errors";
+import { runRender, type RenderUpdate } from "@/lib/render/render-client";
+import type { RenderLayout } from "@/lib/render/types";
 import { ExportDoneToast, ExportProgressToast } from "./ExportToast";
-import { useRendering } from "./useRendering";
 
-type RenderContextValue = ReturnType<typeof useRendering> & {
-	open: boolean;
-	setOpen: (open: boolean) => void;
-};
-
-const [RenderContext, useRender] =
-	createRequiredContext<RenderContextValue>("RenderContext");
-export { useRender };
+type ExportState =
+	| { status: "idle" }
+	| { status: "starting" }
+	| RenderUpdate
+	| { status: "error"; message: string };
 
 const TOAST_ID = "export";
 const TOAST_OPTIONS = {
@@ -28,8 +20,9 @@ const TOAST_OPTIONS = {
 	position: "bottom-right" as const,
 };
 
-export function RenderProvider({ children }: { children: ReactNode }) {
-	const { state, render, reset } = useRendering();
+/** The export the popover shows. A toast stands in while the popover is closed. */
+export function useExport() {
+	const [state, setState] = useState<ExportState>({ status: "idle" });
 	const [open, setOpenState] = useState(false);
 
 	// Sonner restores focus when it leaves the toast list, and Radix treats that
@@ -46,7 +39,7 @@ export function RenderProvider({ children }: { children: ReactNode }) {
 			toast.dismiss(TOAST_ID);
 			return;
 		}
-		if (state.status === "invoking" || state.status === "rendering") {
+		if (state.status === "starting" || state.status === "rendering") {
 			const progress = state.status === "rendering" ? state.progress : 0;
 			toast.custom(
 				() => (
@@ -86,9 +79,20 @@ export function RenderProvider({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
-	const value = useMemo(
-		() => ({ state, render, reset, open, setOpen }),
-		[state, render, reset, open, setOpen],
-	);
-	return <RenderContext value={value}>{children}</RenderContext>;
+	const exportVideo = async (layout: RenderLayout, scale?: number) => {
+		setState({ status: "starting" });
+		try {
+			for await (const update of runRender(layout, scale)) setState(update);
+		} catch (error) {
+			setState({ status: "error", message: errorMessage(error) });
+		}
+	};
+
+	return {
+		state,
+		exportVideo,
+		reset: () => setState({ status: "idle" }),
+		open,
+		setOpen,
+	};
 }
