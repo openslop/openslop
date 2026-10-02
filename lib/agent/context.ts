@@ -6,7 +6,7 @@ import { type MetadataVoice, voiceTraitEntries } from "@/lib/project/types";
 import { type VideoLength, videoLengthBudget } from "@/lib/project/videoLength";
 import { type VideoFormat, videoFormatLabel } from "@/lib/project/videoFormat";
 
-const UNSET = "not set";
+export const UNSET = "not set";
 
 /** The project as it stands, in the terms the model reasons about. */
 export type AgentContext = {

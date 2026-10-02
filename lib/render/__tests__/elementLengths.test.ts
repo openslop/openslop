@@ -127,6 +127,32 @@ describe("measureElementLengths", () => {
 		expect(lengths[0]).toMatchObject({ id: image.id, words: 0, seconds: 1 });
 	});
 
+	it("names which of the duration, the dialogue and the minimum set each length", () => {
+		const untrimmed = { duration: "8", trimToDialogue: "false" };
+
+		const lengths = measureElementLengths([
+			scene(
+				element("video", "A pan.", untrimmed),
+				element("narration", words(9)),
+				element("video", "A zoom.", untrimmed),
+				element("narration", words(90)),
+				element("image", "A forest."),
+				element("narration", words(9)),
+				element("image", "A clearing."),
+				element("narration", words(2)),
+				element("image", "A river."),
+			),
+		]);
+
+		expect(lengths.map(({ decidedBy }) => decidedBy)).toEqual([
+			"duration",
+			"dialogue",
+			"dialogue",
+			"minimum",
+			"minimum",
+		]);
+	});
+
 	it("measures an empty canvas as nothing", () => {
 		expect(measureElementLengths([])).toEqual([]);
 	});

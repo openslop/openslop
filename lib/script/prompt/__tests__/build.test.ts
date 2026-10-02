@@ -86,6 +86,14 @@ describe("buildScriptPrompt", () => {
 		expect(prompt).toContain(getTemplate(template.id).exampleText);
 	});
 
+	it("writes from the brief alone when the stored template has left the catalog", () => {
+		const source = { kind: "brief", brief: "a barista" } as const;
+
+		expect(
+			buildScriptPrompt(metadata({ templateId: "left-the-catalog" }), source),
+		).toEqual(buildScriptPrompt(metadata(), source));
+	});
+
 	it("passes an adapted script through verbatim and drops the length budget", () => {
 		const script = "NARRATOR\nHigh above the sleepy hills.";
 		const { system, prompt } = buildScriptPrompt(metadata(), {

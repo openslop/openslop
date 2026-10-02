@@ -66,6 +66,20 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("names an unset appearance or voice rather than leaving it blank", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_script", input: {} },
+			context({
+				readMetadata: () =>
+					MetadataSchema.parse({ characters: { Wolf: { appearance: "" } } }),
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"- Wolf: not set (voice: not set)",
+		);
+	});
+
 	it("hands back the settings, which the prompt no longer carries", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_settings", input: {} },
@@ -381,6 +395,7 @@ describe("executeToolCall", () => {
 		dialogueIds: [],
 		durationSec: seconds,
 		trimToDialogue: false,
+		decidedBy: "duration" as const,
 	});
 
 	it("reports what each visual is on screen for, and the dialogue holding it", async () => {
@@ -396,6 +411,7 @@ describe("executeToolCall", () => {
 						words: 90,
 						dialogueIds: ["nar1"],
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 					{
 						id: "ai1",
@@ -405,6 +421,17 @@ describe("executeToolCall", () => {
 						words: 0,
 						dialogueIds: [],
 						trimToDialogue: true,
+						decidedBy: "minimum",
+					},
+					{
+						id: "img2",
+						type: "image",
+						sceneNumber: 3,
+						seconds: 1,
+						words: 2,
+						dialogueIds: ["nar2"],
+						trimToDialogue: true,
+						decidedBy: "minimum",
 					},
 				],
 			}),
@@ -415,6 +442,9 @@ describe("executeToolCall", () => {
 		);
 		expect(outcome.ok && outcome.output).toContain(
 			"Scene 2 video ai1: 1.0s, the minimum, no dialogue after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 3 image img2: 1.0s, the minimum, longer than the 2 words of dialogue (nar2) after it.",
 		);
 	});
 
@@ -434,6 +464,7 @@ describe("executeToolCall", () => {
 						durationSec: 5,
 						words: 90,
 						dialogueIds: ["nar2"],
+						decidedBy: "dialogue",
 					},
 				],
 			}),
@@ -465,6 +496,7 @@ describe("executeToolCall", () => {
 						dialogueIds: ["nar1"],
 						durationSec: 10,
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 					{
 						id: "img1",
@@ -474,6 +506,7 @@ describe("executeToolCall", () => {
 						words: 90,
 						dialogueIds: ["nar2"],
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 				],
 				editScript: (applied) => {
@@ -507,6 +540,7 @@ describe("executeToolCall", () => {
 						dialogueIds: [],
 						durationSec: 10,
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 					{
 						id: "vid1",
@@ -517,6 +551,7 @@ describe("executeToolCall", () => {
 						dialogueIds: ["nar2"],
 						durationSec: 15,
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 				],
 			}),
@@ -542,6 +577,7 @@ describe("executeToolCall", () => {
 						dialogueIds: ["nar1"],
 						durationSec: 5,
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 				],
 				editScript: () => {
@@ -567,6 +603,7 @@ describe("executeToolCall", () => {
 						dialogueIds: ["nar1"],
 						durationSec: 5,
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 				],
 			}),
@@ -590,6 +627,7 @@ describe("executeToolCall", () => {
 						words: 90,
 						dialogueIds: ["nar1"],
 						trimToDialogue: true,
+						decidedBy: "dialogue",
 					},
 				],
 			}),

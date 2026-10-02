@@ -25,6 +25,8 @@ export type ElementLength = {
 	durationSec?: number;
 	/** Whether it yields to its dialogue, or plays its own length in full. */
 	trimToDialogue: boolean;
+	/** Which of its own duration, its dialogue or the minimum set `seconds`. */
+	decidedBy: "duration" | "dialogue" | "minimum";
 };
 
 type Span = {
@@ -39,6 +41,17 @@ const ownDuration = (element: CanvasContentElement): number | undefined =>
 	ELEMENT_TYPES[element.type].outputKind === "video"
 		? getDuration(element)
 		: undefined;
+
+const decide = (
+	ownSec: number,
+	dialogueSec: number,
+): Pick<ElementLength, "seconds" | "decidedBy"> => {
+	if (ownSec >= dialogueSec && ownSec >= MIN_DURATION_SEC)
+		return { seconds: ownSec, decidedBy: "duration" };
+	if (dialogueSec >= MIN_DURATION_SEC)
+		return { seconds: dialogueSec, decidedBy: "dialogue" };
+	return { seconds: MIN_DURATION_SEC, decidedBy: "minimum" };
+};
 
 const toLength = ({
 	element,
@@ -56,11 +69,7 @@ const toLength = ({
 		dialogueIds,
 		durationSec,
 		trimToDialogue,
-		seconds: Math.max(
-			secondsForWords(words),
-			trimToDialogue ? 0 : (durationSec ?? 0),
-			MIN_DURATION_SEC,
-		),
+		...decide(trimToDialogue ? 0 : (durationSec ?? 0), secondsForWords(words)),
 	};
 };
 
