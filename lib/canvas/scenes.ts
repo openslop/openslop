@@ -47,8 +47,7 @@ export function previousVisual(
 	return at < 0 ? undefined : elements.slice(0, at).findLast(isForeground);
 }
 
-// Every scene asks for its number on every edit, so the document is numbered
-// once per revision rather than searched once per scene.
+// Every scene reads its number on every edit; number the document once, not once per scene.
 const numberScenes = memoizeOne(
 	(nodes: Descendant[]) =>
 		new Map(
@@ -56,7 +55,6 @@ const numberScenes = memoizeOne(
 		),
 );
 
-/** 1-based, or 0 for an id that is not a scene of `nodes`. */
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
 	return numberScenes(nodes).get(sceneId) ?? 0;
 }

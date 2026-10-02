@@ -29,15 +29,10 @@ export function createViewModeStore(
 	}));
 }
 
-/**
- * Every scene and every element card asks whether its scene is collapsed.
- * Holding the collapsed set in the context would re-render all of them when one
- * scene folds; holding a store re-renders only that scene and its cards.
- */
+// A store, not a context value, so folding one scene re-renders only that scene.
 const [ViewModeContext, useViewModeStore, useViewModeSelector] =
 	createStoreContext<StoreApi<ViewMode>>("ViewModeContext");
 
-/** Only the actions, which never change: what is collapsed is read through the hooks below, which subscribe. */
 export function useViewMode(): Omit<ViewMode, "collapsed"> {
 	return useViewModeStore().getState();
 }

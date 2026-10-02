@@ -6,11 +6,7 @@ import { createStoreContext } from "@/lib/store/createStoreContext";
 
 export const ACTIVE_SCENE_CLASS = "scene-active bg-element-card";
 
-/**
- * Every scene asks whether it is the active one, and a change flips the answer
- * for two of them. Holding the id in the context would re-render all of them
- * each time the playhead crosses a cut; holding a store re-renders those two.
- */
+// A store, not a context value, so a change re-renders only the two scenes it flips.
 const [ActiveSceneContext, useActiveSceneStore, useActiveSceneSelector] =
 	createStoreContext<StoreApi<string | null>>("ActiveSceneContext");
 
