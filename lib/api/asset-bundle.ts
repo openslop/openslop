@@ -43,20 +43,6 @@ export type BundleFile = BundleFileData | BundleFileRemote;
 
 type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
 
-/** Blob turns an upload of no bytes down as "Invalid body", which names neither the file nor the cause. */
-function failingWhenEmpty(label: string) {
-	let bytes = 0;
-	return new TransformStream<Uint8Array, Uint8Array>({
-		transform(chunk, controller) {
-			bytes += chunk.byteLength;
-			controller.enqueue(chunk);
-		},
-		flush() {
-			if (bytes === 0) throw new Error(label);
-		},
-	});
-}
-
 /** Remote sources stream in at an unknown size, so they upload in chunks. */
 async function sourceOf(
 	file: BundleFile,
@@ -64,12 +50,10 @@ async function sourceOf(
 ): Promise<{ body: PutBody; multipart: boolean }> {
 	if ("data" in file) return { body: file.data, multipart: false };
 	const res = await fetchOk(file.url, `Failed to fetch "${file.key}"`);
-	const empty = `Empty file for "${file.key}" from ${provider}`;
-	if (!res.body) throw new Error(empty);
-	return {
-		body: res.body.pipeThrough(failingWhenEmpty(empty)),
-		multipart: true,
-	};
+	// Vercel rejects empty uploads as "Invalid body"
+	if (!res.body || res.headers.get("content-length") === "0")
+		throw new Error(`Empty file for "${file.key}" from ${provider}`);
+	return { body: res.body, multipart: true };
 }
 
 export const BundleResponseSchema = BundleContentsSchema.extend({

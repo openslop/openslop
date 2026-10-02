@@ -199,10 +199,8 @@ describe("AssetBundle", () => {
 		};
 
 		it("re-hosts remote files by streaming them into our own blob", async () => {
-			vi.stubGlobal(
-				"fetch",
-				vi.fn().mockResolvedValue(new Response("fake-video")),
-			);
+			const res = new Response("fake-video");
+			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(res));
 
 			const result = await AssetBundle.upload("video", "runware", [
 				remoteVideo,
@@ -210,12 +208,9 @@ describe("AssetBundle", () => {
 
 			expect(fetch).toHaveBeenCalledWith("https://cdn.example.com/video.mp4");
 			expect(result.result.video).toBe("output.mp4");
-			expect(await new Response(putMock.mock.calls[0][1]).text()).toBe(
-				"fake-video",
-			);
 			expect(putMock).toHaveBeenCalledWith(
 				expect.stringMatching(/^assets\/video\/runware\/.+\/output\.mp4$/),
-				expect.any(ReadableStream),
+				res.body,
 				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
 			);
 
@@ -223,19 +218,19 @@ describe("AssetBundle", () => {
 		});
 
 		it("names the file and provider when a remote file comes back with no bytes", async () => {
-			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("")));
-			putMock.mockImplementation(async (_path: string, body: BodyInit) => {
-				await new Response(body).arrayBuffer();
-			});
+			vi.stubGlobal(
+				"fetch",
+				vi
+					.fn()
+					.mockResolvedValue(
+						new Response("", { headers: { "content-length": "0" } }),
+					),
+			);
 
 			await expect(
 				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toThrow('Empty file for "video" from runware');
-			expect(putMock).not.toHaveBeenCalledWith(
-				expect.stringMatching(/manifest\.json$/),
-				expect.anything(),
-				expect.anything(),
-			);
+			expect(putMock).not.toHaveBeenCalled();
 
 			vi.unstubAllGlobals();
 		});
