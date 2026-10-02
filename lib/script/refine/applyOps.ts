@@ -6,7 +6,6 @@ import {
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
 import { insertElement } from "@/lib/canvas/insertElement";
-import type { ConnectorModels } from "@/lib/connectors/models";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -17,19 +16,18 @@ export function applyRefineOp(
 	editor: Editor,
 	op: RefineOp,
 	anchorMap: Record<string, string>,
-	defaultModels?: ConnectorModels,
 ): RefineOpResult {
 	let result: RefineOpResult = OK;
 	Editor.withoutNormalizing(editor, () => {
 		switch (op.op) {
 			case "insert":
-				result = applyInsert(editor, op, anchorMap, defaultModels);
+				result = applyInsert(editor, op, anchorMap);
 				break;
 			case "remove":
 				result = applyRemove(editor, op);
 				break;
 			case "set":
-				result = applySet(editor, op, defaultModels);
+				result = applySet(editor, op);
 				break;
 		}
 	});
@@ -44,12 +42,9 @@ export function applyRefineOp(
 export function applyRefineOps(
 	editor: Editor,
 	ops: RefineOp[],
-	defaultModels?: ConnectorModels,
 ): { applied: number; failures: string[] } {
 	const anchorMap: Record<string, string> = {};
-	const results = ops.map((op) =>
-		applyRefineOp(editor, op, anchorMap, defaultModels),
-	);
+	const results = ops.map((op) => applyRefineOp(editor, op, anchorMap));
 	return {
 		applied: results.filter((result) => result.ok).length,
 		failures: results.flatMap((result) => (result.ok ? [] : [result.reason])),
@@ -77,7 +72,6 @@ function applyInsert(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
-	defaultModels?: ConnectorModels,
 ): RefineOpResult {
 	const at = resolveInsertPath(editor, op, anchorMap);
 	if (!at) {
@@ -90,7 +84,6 @@ function applyInsert(
 	const id = insertElement(editor, op.type, at, {
 		attrs: op.attrs,
 		text: op.text,
-		defaultModels,
 	});
 
 	if (op.anchor_id) {
@@ -112,13 +105,12 @@ function applyRemove(
 function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
-	defaultModels?: ConnectorModels,
 ): RefineOpResult {
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 
 	const retype = op.type && op.type !== entry[0].type ? op.type : undefined;
-	if (retype) retypeNode(editor, entry[1], entry[0], retype, { defaultModels });
+	if (retype) retypeNode(editor, entry[1], entry[0], retype);
 	const target = retype ? findNodeById(editor, op.id) : entry;
 	if (!target)
 		return { ok: false, reason: `set: could not retype element "${op.id}"` };

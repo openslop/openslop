@@ -1,6 +1,7 @@
 import type { BaseEditor } from "slate";
 import type { ReactEditor } from "slate-react";
 import { z } from "zod";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
@@ -108,7 +109,15 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-export type CanvasEditor = BaseEditor & ReactEditor & { id?: string };
+export type CanvasEditor = BaseEditor &
+	ReactEditor & {
+		id?: string;
+		/**
+		 * The models a new element takes its own from, read per element: the
+		 * project's can change mid-session.
+		 */
+		defaultModels: () => ConnectorModels;
+	};
 
 export type SplitAttributes = {
 	generationAttributes?: Record<string, string>;

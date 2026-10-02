@@ -8,7 +8,6 @@ import type {
 import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { useSceneCollapsed } from "../ViewModeContext";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
@@ -37,7 +36,6 @@ export function SortableContent({
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const editor = useSlateStatic();
-	const defaultModels = useResolveDefaultModels();
 
 	const path = ReactEditor.findPath(editor, element);
 	const sceneId = parentSceneId(editor, path);
@@ -57,11 +55,9 @@ export function SortableContent({
 	const handleInsert = useCallback(
 		(type: CanvasElementType) => {
 			const elementPath = ReactEditor.findPath(editor, element);
-			insertElement(editor, type, Path.next(elementPath), {
-				defaultModels: defaultModels(),
-			});
+			insertElement(editor, type, Path.next(elementPath));
 		},
-		[editor, element, defaultModels],
+		[editor, element],
 	);
 
 	return (

@@ -41,7 +41,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { applyRefineOp, applyRefineOps } from "../applyOps";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -70,8 +70,12 @@ function scene(children: CanvasContentElement[], id = "s1"): SceneElement {
 	return { id, type: "scene", children };
 }
 
-function makeEditor(scenes: SceneElement[]) {
+function makeEditor(
+	scenes: SceneElement[],
+	defaultModels: ConnectorModels = {},
+) {
 	const editor = createEditor();
+	editor.defaultModels = () => defaultModels;
 	editor.children = scenes;
 	return editor;
 }
@@ -397,6 +401,17 @@ describe("applyRefineOp — set", () => {
 			startFrame: "n0",
 			motion: "kenBurnsIn",
 		});
+	});
+
+	it("puts a retyped element on the editor's default model for its new type", () => {
+		const pinned = { provider: "runware", model: "Seedance 2 Fast" } as const;
+		const editor = makeEditor([scene([content("image", "n1", "a wolf")])], {
+			video: pinned,
+		});
+
+		applyRefineOp(editor, { op: "set", id: "n1", type: "video" }, {});
+
+		expect(flatAttributes(getNode(editor, "n1"))).toMatchObject(pinned);
 	});
 });
 

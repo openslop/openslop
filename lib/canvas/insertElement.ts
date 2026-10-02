@@ -6,9 +6,12 @@ export function insertElement(
 	editor: Editor,
 	type: CanvasElementType,
 	at: Path,
-	overrides?: Omit<CreateNodeOptions, "id">,
+	overrides?: Pick<CreateNodeOptions, "attrs" | "text">,
 ): string {
-	const node = createCanvasNode(type, overrides);
+	const node = createCanvasNode(type, {
+		...overrides,
+		defaultModels: editor.defaultModels(),
+	});
 	Transforms.insertNodes(editor, node, { at });
 	return node.id;
 }

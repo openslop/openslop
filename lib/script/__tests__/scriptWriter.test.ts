@@ -1,15 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, type Editor } from "slate";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { createProjectStore } from "@/lib/project/store";
 import { createScriptWriter } from "../scriptWriter";
 
-const makeCanvas = () => ({
-	editor: createEditor(),
-	store: createProjectStore(),
-	defaultModels: () => ({}),
-});
+const makeCanvas = (defaultModels: ConnectorModels = {}) => {
+	const editor = createEditor();
+	editor.defaultModels = () => defaultModels;
+	return { editor, store: createProjectStore() };
+};
 
 const elements = (editor: Editor): [type: string, text: string][] =>
 	editor.children
@@ -29,6 +31,17 @@ describe("createScriptWriter", () => {
 		expect(elements(canvas.editor)).toEqual([
 			["narration", "Once upon a time, far away"],
 		]);
+	});
+
+	it("starts a streamed element on the editor's default model", () => {
+		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
+		const canvas = makeCanvas({ tts: pinned });
+
+		createScriptWriter(canvas)("<narration>Once upon a time</narration>\n");
+
+		expect(
+			canvas.editor.children.filter(isContentElement).map(flatAttributes),
+		).toMatchObject([pinned]);
 	});
 
 	it("writes later text through the editor, never into the node it inserted", () => {

@@ -15,11 +15,12 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import { insertElement } from "../insertElement";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
-function makeEditor() {
+function makeEditor(defaultModels: ConnectorModels = {}) {
 	const editor = createEditor();
+	editor.defaultModels = () => defaultModels;
 	editor.children = [
 		{
 			id: "scene-1",
@@ -79,13 +80,11 @@ describe("insertElement", () => {
 		expect(flatAttributes(inserted)).toMatchObject(DEFAULT_MODELS.image);
 	});
 
-	it("passes the project's configured model to the new element", () => {
+	it("gives the new element the editor's default model", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const editor = makeEditor();
+		const editor = makeEditor({ image: pinned });
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "image", [0, 1], {
-				defaultModels: { image: pinned },
-			});
+			insertElement(editor, "image", [0, 1]);
 		});
 
 		const scene = editor.children[0] as {

@@ -1,4 +1,3 @@
-import { ReactEditor } from "slate-react";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import {
 	assignIdRecursively,
@@ -6,7 +5,7 @@ import {
 	stripIds,
 } from "@/lib/canvas/nodeUtils";
 
-export const withNodeId = (editor: ReactEditor): CanvasEditor => {
+export const withNodeId = (editor: CanvasEditor): CanvasEditor => {
 	const { apply, insertFragment } = editor;
 
 	editor.insertFragment = (fragment) => {

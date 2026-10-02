@@ -42,7 +42,7 @@ export function useAgentTools(editor: Editor) {
 			const llm = () =>
 				createConnector("llm", defaultModels().llm, connectorConfig.llm);
 			const draftScript = (source: ScriptSource) =>
-				streamScript({ editor, store, defaultModels }, llm(), source, signal);
+				streamScript({ editor, store }, llm(), source, signal);
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
@@ -88,7 +88,7 @@ export function useAgentTools(editor: Editor) {
 				},
 				readMetadata: () => store.getState().metadata,
 				readContext,
-				editScript: (ops) => applyRefineOps(editor, ops, defaultModels()),
+				editScript: (ops) => applyRefineOps(editor, ops),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
