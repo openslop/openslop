@@ -1,7 +1,6 @@
-import { useSlateStatic } from "slate-react";
+import { useSlateSelector } from "slate-react";
 import { sceneIndexOf } from "@/lib/canvas/scenes";
 
 export function useSceneIndex(sceneId: string): number {
-	const editor = useSlateStatic();
-	return sceneIndexOf(editor.children, sceneId);
+	return useSlateSelector((editor) => sceneIndexOf(editor.children, sceneId));
 }

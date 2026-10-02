@@ -9,7 +9,7 @@ import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
 import { SceneContainer } from "../elements/SceneContainer";
 import { useSceneIndex } from "../hooks/useSceneIndex";
-import { useViewMode } from "../ViewModeContext";
+import { useSceneCollapsed } from "../ViewModeContext";
 import styles from "../styles/sortable.module.css";
 
 /**
@@ -26,8 +26,7 @@ export function DragOverlayContent({ element }: { element: CanvasElement }) {
 	);
 
 	const sceneIndex = useSceneIndex(element.id);
-	const { isCollapsed } = useViewMode();
-	const collapsed = isSceneElement(element) && isCollapsed(element.id);
+	const collapsed = useSceneCollapsed(element.id);
 
 	const renderElement = useCallback(
 		({ attributes, children, element: node }: RenderElementProps) => {
