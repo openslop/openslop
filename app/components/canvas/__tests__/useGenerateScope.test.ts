@@ -41,7 +41,7 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 // context rather than standing up the config and project providers.
 const store = createProjectStore();
 
-const context = () => ({
+const buildContext = () => ({
 	store,
 	state: store.getState(),
 	canvas: [],
@@ -49,10 +49,10 @@ const context = () => ({
 });
 
 vi.mock("@/lib/generation/useBuildContext", () => ({
-	useBuildContext: () => context,
+	useBuildContext: () => buildContext,
 }));
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
-	useResolveNode: () => new GenerationGraph(context()).resolve,
+	useResolveNode: () => new GenerationGraph(buildContext()).resolve,
 }));
 
 function makeElement(
@@ -75,7 +75,7 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	queue.commitResult(buildNode(forElement(element), context()), {
+	queue.commitResult(buildNode(forElement(element), buildContext()), {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,
 	});

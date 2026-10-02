@@ -71,7 +71,7 @@ export function useGenerateScope(
 ): GenerateScope {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();
-	const context = useBuildContext();
+	const buildContext = useBuildContext();
 
 	const specs = useCallback(
 		() => select(editor).map(forElement),
@@ -95,14 +95,14 @@ export function useGenerateScope(
 
 	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
-		const ctx = context();
+		const context = buildContext();
 		queue.enqueueGraph(
-			buildNodes(specs(), ctx).filter(
+			buildNodes(specs(), context).filter(
 				(node) => hasPrompt(node) && needsGeneration(node, queue),
 			),
-			ctx,
+			context,
 		);
-	}, [queue, specs, context]);
+	}, [queue, specs, buildContext]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

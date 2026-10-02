@@ -26,8 +26,8 @@ export function useAutosave(
 			projectId,
 			read,
 			onSaved: () => toast("Saved", TOAST_OPTIONS),
-			onError: (err) =>
-				toastError(err, "Save failed", {
+			onError: (error) =>
+				toastError(error, "Save failed", {
 					...TOAST_OPTIONS,
 					duration: 4000,
 				}),
@@ -41,9 +41,9 @@ export function useAutosave(
 	useEffect(() => {
 		let lastVersion = queue.getResultVersion();
 		return queue.subscribe(() => {
-			const v = queue.getResultVersion();
-			if (v === lastVersion) return;
-			lastVersion = v;
+			const version = queue.getResultVersion();
+			if (version === lastVersion) return;
+			lastVersion = version;
 			autosaver.schedule();
 		});
 	}, [queue, autosaver]);

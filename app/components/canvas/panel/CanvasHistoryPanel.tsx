@@ -140,8 +140,8 @@ export function CanvasHistoryPanel() {
 					version={version}
 					state={rowState(version, index)}
 					onView={() =>
-						history.preview(version.id).catch((err: unknown) => {
-							toastError(err, "Opening this version failed");
+						history.preview(version.id).catch((error: unknown) => {
+							toastError(error, "Opening this version failed");
 						})
 					}
 					onRestore={history.restore}

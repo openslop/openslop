@@ -135,8 +135,8 @@ export class GenerationGraph {
 
 export const createGraphFor = () => {
 	let graph: GenerationGraph | undefined;
-	return memoizeOne((_document: unknown, context: () => BuildContext) => {
-		graph = new GenerationGraph(context(), graph);
+	return memoizeOne((_document: unknown, buildContext: () => BuildContext) => {
+		graph = new GenerationGraph(buildContext(), graph);
 		return graph;
 	});
 };

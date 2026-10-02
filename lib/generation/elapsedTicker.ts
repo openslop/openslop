@@ -15,7 +15,7 @@ export class ElapsedTicker {
 			this.onTick(
 				Array.from(this.starts, ([startedId, start]) => [
 					startedId,
-					((now - start) / 1000) | 0,
+					Math.trunc((now - start) / 1000),
 				]),
 			);
 		}, 1000);

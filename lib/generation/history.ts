@@ -35,11 +35,9 @@ export class ElementHistory {
 		const inFlight = this.loading.get(elementId);
 		if (inFlight) return inFlight;
 		this.failed.delete(elementId);
-		const load = this.storage
+		const pending = this.storage
 			.read(elementId)
-			.then((stored) => {
-				this.log.hydrate(elementId, stored);
-			})
+			.then((stored) => this.log.hydrate(elementId, stored))
 			.catch((error: unknown) => {
 				this.failed.add(elementId);
 				throw error;
@@ -48,8 +46,8 @@ export class ElementHistory {
 				this.loading.delete(elementId);
 				this.emitter.notify();
 			});
-		this.loading.set(elementId, load);
-		return load;
+		this.loading.set(elementId, pending);
+		return pending;
 	};
 
 	record = async (committed: CommittedVersion): Promise<void> => {

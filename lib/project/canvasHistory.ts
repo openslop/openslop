@@ -64,8 +64,8 @@ export class CanvasHistory {
 		this.setState({ status: "loading" });
 		try {
 			this.setState({ versions: await this.storage.list(), status: "ready" });
-		} catch (err) {
-			console.error("Failed to read canvas history", err);
+		} catch (error) {
+			console.error("Failed to read canvas history", error);
 			this.setState({ status: "failed" });
 		}
 	};

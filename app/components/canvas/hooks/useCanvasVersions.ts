@@ -33,8 +33,8 @@ export function useCanvasVersions(
 			autosaver.onProjectSaved(({ script, store, generation }) => {
 				history
 					.record({ script, store, generation })
-					.catch((err: unknown) =>
-						toastError(err, "Saving this version failed"),
+					.catch((error: unknown) =>
+						toastError(error, "Saving this version failed"),
 					);
 			}),
 		[autosaver, history],
