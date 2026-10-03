@@ -57,10 +57,8 @@ describe("RunwareVideo", () => {
 				model: MODEL,
 			});
 
-			expect(result).toEqual({
-				url: undefined,
-				metadata: { jobId: "job-1", status: "processing" },
-			});
+			expect(result).toBe("job-1");
+			expect(AssetBundle.upload).not.toHaveBeenCalled();
 			expect(mockVideoInference).toHaveBeenCalledWith({
 				positivePrompt: "a sunset",
 				model: "bytedance:seedance@2.0-fast",
@@ -469,8 +467,7 @@ describe("RunwareVideo", () => {
 			const provider = new RunwareVideo("test-key");
 			const result = await provider.submit({ prompt: "test", model: MODEL });
 
-			expect(result.metadata.jobId).toBe("job-arr");
-			expect(result.url).toBe("https://v.mp4");
+			expect(result).toBe("job-arr");
 		});
 
 		it("asks the SDK for the ack rather than the finished video", async () => {
@@ -505,44 +502,6 @@ describe("RunwareVideo", () => {
 				provider.submit({ prompt: "test", model: MODEL }),
 			).rejects.toThrow("fail");
 			expect(mockDisconnect).toHaveBeenCalled();
-		});
-	});
-
-	describe("generate", () => {
-		it("submits and returns BundleResponse with metadata", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-1",
-				status: "processing",
-			});
-
-			const provider = new RunwareVideo("test-key");
-			const result = await provider.generate({
-				prompt: "a sunset",
-				model: MODEL,
-			});
-
-			expect(result.provider).toBe("runware");
-			expect(result.metadata).toEqual({
-				jobId: "job-1",
-				status: "processing",
-				durationSec: 5,
-			});
-		});
-
-		it("uses custom duration in metadata", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-2",
-				status: "processing",
-			});
-
-			const provider = new RunwareVideo("test-key");
-			const result = await provider.generate({
-				prompt: "test",
-				model: MODEL,
-				duration: 10,
-			});
-
-			expect(result.metadata.durationSec).toBe(10);
 		});
 	});
 
@@ -599,10 +558,7 @@ describe("RunwareVideo", () => {
 				model: MODEL,
 			});
 
-			expect(result).toEqual({
-				kind: "pending",
-				metadata: { jobId: "job-1", status: "processing" },
-			});
+			expect(result).toEqual({ kind: "pending" });
 			expect(AssetBundle.upload).not.toHaveBeenCalled();
 		});
 

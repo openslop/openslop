@@ -151,7 +151,7 @@ export class RunwareVideo extends BaseVideoProvider {
 		return validateRunwareKey(this.apiKey);
 	}
 
-	async submit(params: VideoRequest) {
+	async submit(params: VideoRequest): Promise<string> {
 		if (!isModelId(params.model))
 			throw new Error(`Runware has no video model "${params.model}"`);
 		const conditioning = await CONDITIONERS[params.model](params.prompt, {
@@ -174,19 +174,8 @@ export class RunwareVideo extends BaseVideoProvider {
 			const video = Array.isArray(result) ? result[0] : result;
 			if (!video?.taskUUID)
 				throw new Error("Runware video inference returned no task");
-			return toVideoJob(video);
+			return video.taskUUID;
 		});
-	}
-
-	protected async _generate(params: VideoRequest): Promise<VideoJob> {
-		const job = await this.submit(params);
-		return {
-			...job,
-			metadata: {
-				...job.metadata,
-				durationSec: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
-			},
-		};
 	}
 
 	protected async _poll(jobId: string): Promise<VideoJob> {
