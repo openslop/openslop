@@ -1,5 +1,5 @@
-import type { VideoJob, VideoProviderResponse } from "./base";
-import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
+import type { FinishedVideo, VideoJob, VideoProviderResponse } from "./base";
+import { BaseVideoProvider } from "./base";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { ValidationResult } from "@/lib/connectors/providerKey";
 import { mockDelay, pickRandom } from "../mock-utils";
@@ -19,27 +19,22 @@ export class MockVideo extends BaseVideoProvider {
 		return { ok: true };
 	}
 
-	protected async store(result: VideoJob): Promise<VideoProviderResponse> {
+	protected async store({
+		url,
+		metadata,
+	}: FinishedVideo): Promise<VideoProviderResponse> {
 		return {
-			id: result.metadata.jobId,
+			id: metadata.jobId,
 			type: this.blobConfig.type,
 			provider: this.blobConfig.provider,
-			result: {
-				video: result.url ?? "",
-			},
-			metadata: result.metadata,
+			result: { video: url },
+			metadata,
 		};
 	}
 
-	protected async _generate(): Promise<VideoJob> {
+	async submit(): Promise<string> {
 		await mockDelay(2000);
-		return {
-			metadata: {
-				jobId: "mock-job",
-				status: "processing",
-				durationSec: DEFAULT_VIDEO_DURATION_SEC,
-			},
-		};
+		return "mock-job";
 	}
 
 	protected async _poll(jobId: string): Promise<VideoJob> {
