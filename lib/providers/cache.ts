@@ -33,18 +33,18 @@ type PineconeCacheOptions<Args extends unknown[], Result> = {
  */
 export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 	method: (this: This, ...args: Args) => Promise<Result>,
-	opts: PineconeCacheOptions<Args, Result>,
+	options: PineconeCacheOptions<Args, Result>,
 ): (this: This, ...args: Args) => Promise<Result> {
 	const apiKey = process.env.PINECONE_API_KEY;
 	if (!apiKey) return method;
 
 	const index = new Pinecone({ apiKey })
-		.index(opts.index)
-		.namespace(opts.namespace ?? "");
-	const threshold = opts.threshold ?? DEFAULT_THRESHOLD;
-	const serialize = opts.serialize ?? defaultSerialize;
+		.index(options.index)
+		.namespace(options.namespace ?? "");
+	const threshold = options.threshold ?? DEFAULT_THRESHOLD;
+	const serialize = options.serialize ?? defaultSerialize;
 
-	const topK = opts.rank ? RANKED_TOP_K : 1;
+	const topK = options.rank ? RANKED_TOP_K : 1;
 
 	return async function (this: This, ...args: Args): Promise<Result> {
 		const description = serialize(...args);
@@ -59,13 +59,13 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 			const eligible: CacheMatch[] = (matches ?? [])
 				.filter((match) => (match.score ?? 0) >= threshold)
 				.map(({ score, metadata }) => ({ score, metadata }));
-			const hit = opts.rank ? opts.rank(eligible, ...args) : eligible[0];
+			const hit = options.rank ? options.rank(eligible, ...args) : eligible[0];
 			if (hit?.metadata) {
-				const cached = opts.fromMetadata(hit.metadata);
+				const cached = options.fromMetadata(hit.metadata);
 				if (cached !== undefined) return cached;
 			}
-		} catch (err) {
-			logger.error(err, "[pinecone-cache] read failed; falling through");
+		} catch (error) {
+			logger.error(error, "[pinecone-cache] read failed; falling through");
 		}
 
 		const result = await method.call(this, ...args);
@@ -76,12 +76,12 @@ export function pineconeCache<Args extends unknown[], Result, This = unknown>(
 						{
 							id: randomUUID(),
 							values: vector,
-							metadata: opts.toMetadata(result, description),
+							metadata: options.toMetadata(result, description),
 						},
 					],
 				});
-			} catch (err) {
-				logger.error(err, "[pinecone-cache] write failed");
+			} catch (error) {
+				logger.error(error, "[pinecone-cache] write failed");
 			}
 		}
 		return result;
