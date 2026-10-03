@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { clamp } from "@/lib/utils";
+import { toSeconds } from "@/lib/render/frames";
 import { findSegmentIndexAtFrame } from "@/lib/render/sceneSegments";
+import { formatTime } from "@/lib/render/timestamps";
 import { usePlayerControl } from "./PlayerControlContext";
 import { usePlayerFrame } from "./usePlayerState";
 import { SeekTooltip } from "./SeekTooltip";
@@ -58,6 +60,7 @@ export function SegmentedSeekBar() {
 		<ScrubBar
 			className="w-full"
 			ariaLabel="Seek"
+			ariaValueText={`${formatTime(toSeconds(frame, layout.fps))} of ${formatTime(totalDurationSec)}`}
 			disabled={!player || segments.length === 0}
 			value={progress}
 			segments={scrubSegments}

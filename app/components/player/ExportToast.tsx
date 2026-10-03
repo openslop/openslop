@@ -11,9 +11,6 @@ import { formatBytes } from "@/lib/format";
 const cardClass =
 	"flex w-[320px] items-center gap-3 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-elevation-5";
 
-const viewButtonClass =
-	"shrink-0 rounded-md px-2 py-1 text-label font-medium text-accent transition-colors hover:bg-button-hover";
-
 export function ExportProgressToast({
 	progress,
 	onView,
@@ -28,9 +25,15 @@ export function ExportProgressToast({
 				<span className="text-label font-medium">Exporting video…</span>
 				<Progress value={progress * 100} />
 			</div>
-			<button type="button" onClick={onView} className={viewButtonClass}>
+			<Button
+				type="button"
+				variant="link"
+				size="xs"
+				onClick={onView}
+				className="shrink-0"
+			>
 				View
-			</button>
+			</Button>
 		</div>
 	);
 }
@@ -52,7 +55,7 @@ export function ExportDoneToast({
 				<button
 					type="button"
 					onClick={onView}
-					className="text-left text-label font-medium hover:underline"
+					className="rounded-sm text-left text-label font-medium hover:underline focus-ring"
 				>
 					Export ready
 				</button>

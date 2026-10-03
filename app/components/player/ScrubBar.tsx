@@ -31,6 +31,8 @@ interface ScrubBarProps {
 	/** Filled portion, 0–1. */
 	value: number;
 	ariaLabel: string;
+	/** What a screen reader says for the value; the percent when absent. */
+	ariaValueText?: string;
 	/** Fired with the 0–1 ratio on press, during drag, and on a slider key. */
 	onScrub: (ratio: number) => void;
 	/** How far one arrow key moves the value, as a 0–1 ratio. */
@@ -113,6 +115,7 @@ export function scrubKeyTarget(
 export function ScrubBar({
 	value,
 	ariaLabel,
+	ariaValueText,
 	onScrub,
 	keyStep,
 	onScrubStart,
@@ -205,6 +208,7 @@ export function ScrubBar({
 			aria-valuemin={0}
 			aria-valuemax={100}
 			aria-valuenow={Math.round(value * 100)}
+			aria-valuetext={ariaValueText}
 			aria-disabled={disabled || undefined}
 			className={cn(
 				"group relative flex touch-none items-center rounded-md focus-ring",
