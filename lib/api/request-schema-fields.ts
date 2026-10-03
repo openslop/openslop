@@ -10,8 +10,8 @@ const POSITIVE_NUMBER = "must be a positive number";
 
 const optionalPositiveNumber = z
 	.union([z.number(), z.string()])
-	.transform((v) =>
-		typeof v === "string" && v.trim() === "" ? NaN : Number(v),
+	.transform((value) =>
+		typeof value === "string" && value.trim() === "" ? NaN : Number(value),
 	)
 	.pipe(
 		z.number({ error: POSITIVE_NUMBER }).positive({ error: POSITIVE_NUMBER }),
@@ -65,6 +65,4 @@ export const imageFile = (maxBytes: number) =>
 
 export const requiredVoiceId = z
 	.string({ error: "voiceId is required" })
-	.min(1, {
-		message: "voiceId is required",
-	});
+	.min(1, { message: "voiceId is required" });
