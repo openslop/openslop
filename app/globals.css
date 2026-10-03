@@ -654,7 +654,19 @@
 @media (prefers-reduced-motion: reduce) {
 	.animate-fadeInUp,
 	.shimmer,
-	.shimmer-surface {
+	.shimmer-surface,
+	[class*="animate-in"],
+	[class*="animate-out"] {
 		animation: none;
+	}
+
+	@keyframes flashFade {
+		0%,
+		100% {
+			opacity: 0;
+		}
+		20% {
+			opacity: 1;
+		}
 	}
 }

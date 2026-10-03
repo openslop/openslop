@@ -52,7 +52,7 @@ function UserProfile() {
 	};
 
 	return (
-		<div className="fixed left-5 top-4 z-[100] animate-in fade-in duration-300 motion-reduce:transition-none">
+		<div className="fixed left-5 top-4 z-[100] animate-in fade-in duration-300">
 			<DropdownMenu modal={false}>
 				<DropdownMenuTrigger asChild>
 					<button
