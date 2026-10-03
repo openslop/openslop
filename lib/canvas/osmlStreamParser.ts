@@ -1,5 +1,5 @@
 import type { ParsedElement } from "./types";
-import { isCanvasElementType } from "./guards";
+import { isAssetType, isCanvasElementType } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import type { ConnectorModels } from "@/lib/connectors/models";
@@ -75,17 +75,15 @@ export class OSMLStreamParser {
 		attributes: Record<string, string>,
 		defaultModels?: ConnectorModels,
 	): void {
-		if (isCanvasElementType(type)) {
+		if (isCanvasElementType(type) || isAssetType(type)) {
 			const { id, ...attrs } = attributes;
 			this.nodes.push(createCanvasNode(type, { id, attrs, defaultModels }));
 			return;
 		}
-		// Non-canvas tags (metadata_*) pass through as generic nodes;
-		// `collectMetadata` reads them by tag name.
+		// An unknown tag still takes its own text, which would otherwise run into the element before it.
 		this.nodes.push({
 			id: makeNodeId(),
 			type,
-			customAttributes: attributes,
 			children: [{ id: makeNodeId(), type, text: "" }],
 		});
 	}

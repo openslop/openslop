@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseProjectContent } from "../projectContent";
+import { VideoSettingsSchema } from "../videoSettings";
 
 const snapshot = {
 	status: "idle",
@@ -15,13 +16,12 @@ describe("parseProjectContent", () => {
 	it("types the JSON columns of a saved row", () => {
 		const content = parseProjectContent({
 			script: "<scene />",
-			store: { metadata: { title: "T" }, referenceImages: ["a.png"] },
+			store: { videoSettings: { aspectRatio: "9:16" } },
 			generation: { el1: snapshot },
 		});
 
 		expect(content.script).toBe("<scene />");
-		expect(content.store.metadata.title).toBe("T");
-		expect(content.store.referenceImages).toEqual(["a.png"]);
+		expect(content.store.videoSettings.aspectRatio).toBe("9:16");
 		expect(content.generation.el1).toEqual(snapshot);
 	});
 
@@ -32,7 +32,9 @@ describe("parseProjectContent", () => {
 			generation: {},
 		});
 
-		expect(content.store.referenceImages).toEqual([]);
+		expect(content.store).toEqual({
+			videoSettings: VideoSettingsSchema.parse({}),
+		});
 		expect(content.generation).toEqual({});
 	});
 
@@ -47,7 +49,7 @@ describe("parseProjectContent", () => {
 		expect(content.generation.el1).toEqual(snapshot);
 	});
 
-	it("opens a result generated before inputs carried dependencies", () => {
+	it("opens a result generated before inputs carried dependencies or reads", () => {
 		const { pinned: _, ...legacy } = snapshot;
 		const result = { durationSec: 0, imageUrl: "a.png" };
 		const attributes = { style: "noir" };
@@ -68,7 +70,12 @@ describe("parseProjectContent", () => {
 			...snapshot,
 			result,
 			connectorType: "image",
-			resultInputs: { prompt: "a sunset", attributes, dependencies: {} },
+			resultInputs: {
+				prompt: "a sunset",
+				attributes,
+				reads: {},
+				dependencies: {},
+			},
 		});
 	});
 

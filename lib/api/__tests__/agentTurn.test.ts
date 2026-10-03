@@ -151,7 +151,7 @@ describe("streamAgentTurn", () => {
 			{
 				type: "tool-call",
 				toolCallId: "call-1",
-				toolName: "set_metadata",
+				toolName: "set_title",
 				input: '{"title": <parameter name="title">Moon Cat}',
 			},
 			{ ...finish, finishReason: { unified: "tool-calls", raw: "tool_use" } },
@@ -161,7 +161,7 @@ describe("streamAgentTurn", () => {
 			expect.objectContaining({
 				type: "tool-input-error",
 				toolCallId: "call-1",
-				toolName: "set_metadata",
+				toolName: "set_title",
 			}),
 		);
 		expect(chunks.map((chunk) => chunk.type)).not.toContain("error");

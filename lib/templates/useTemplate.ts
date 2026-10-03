@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback } from "react";
-import { useConfig } from "@/lib/config/ConfigProvider";
+import { useSlateStatic } from "slate-react";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { useProject } from "@/lib/project/useProject";
+import { useBuildContext } from "@/lib/generation/useBuildContext";
+import { setProjectSettings } from "@/lib/canvas/assetOps";
+import { useProjectSettings } from "@/lib/canvas/useAssets";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { applyTemplate } from "./applyTemplate";
 import { getTemplateById, type Template } from "./templates";
@@ -14,18 +16,21 @@ export function useTemplate(): {
 	applyTemplate: (templateId: string) => void;
 	clearTemplate: () => void;
 } {
-	const { connectorConfig } = useConfig();
+	const editor = useSlateStatic();
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
-	const templateId = useProject((s) => s.metadata.templateId);
-	const setTemplate = useProject((s) => s.setTemplate);
+	const buildContext = useBuildContext();
+	const { template } = useProjectSettings();
 
 	return {
-		template: getTemplateById(templateId),
+		template: getTemplateById(template),
 		applyTemplate: useCallback(
-			(id: string) => applyTemplate(store, id, queue, connectorConfig),
-			[store, queue, connectorConfig],
+			(id: string) => applyTemplate(editor, store, queue, buildContext, id),
+			[editor, store, queue, buildContext],
 		),
-		clearTemplate: useCallback(() => setTemplate(undefined), [setTemplate]),
+		clearTemplate: useCallback(
+			() => setProjectSettings(editor, { template: null }),
+			[editor],
+		),
 	};
 }

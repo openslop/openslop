@@ -1,11 +1,7 @@
 import { previousVisual } from "@/lib/canvas/scenes";
+import { withReferences } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import { dependency } from "@/lib/generation/dependency";
-import {
-	derivedNodeId,
-	sourceNode,
-	type NodeSpec,
-} from "@/lib/generation/graph";
 import { captureFrames } from "@/lib/connectors/video/captureFrames";
 import {
 	CONTINUITY_ATTR,
@@ -25,19 +21,7 @@ export type ParamsWithPreviousVisual = {
 	[CONTINUITY_ATTR]?: string;
 };
 
-/**
- * The visual before an element in document order. Resolved at build time, so
- * reordering the script changes what it names and stales the dependent. With
- * nothing before it, an empty leaf stands in and the dependent reads no result.
- */
-const forPreviousVisual =
-	(id: string): NodeSpec =>
-	({ canvas }) => {
-		const element = previousVisual(canvas, id);
-		return element ? { element } : sourceNode(derivedNodeId("first", id), {});
-	};
-
-/** No result means the empty leaf: nothing came before the video. */
+/** No result means nothing came before the video. */
 async function previousPictures(
 	source: AssetResult | undefined,
 	frames: readonly FrameKey[],
@@ -52,11 +36,11 @@ async function previousPictures(
 export const previousVisualDependency = dependency(
 	"previousVisual",
 	"the previous visual",
-	({ id, generationAttributes: attrs = {} }) =>
+	({ id, generationAttributes: attrs = {} }, { canvas }) =>
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
 		attrs[CONTINUITY_ATTR] === "true"
-			? forPreviousVisual(id)
-			: null,
+			? previousVisual(canvas, id)
+			: undefined,
 );
 
 /** Opening on the previous visual takes its end as the start frame; linking adds its beginning and middle as references. */
@@ -83,13 +67,10 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 				continuity === "true"
 					? await previousPictures(source, CONTINUITY_FRAMES)
 					: [];
-			return {
-				...params,
-				...(frameImage && { frameImage }),
-				...(references.length > 0 && {
-					referenceImages: [...(params.referenceImages ?? []), ...references],
-				}),
-			};
+			return withReferences(
+				{ ...params, ...(frameImage && { frameImage }) },
+				references,
+			);
 		},
 	};
 }

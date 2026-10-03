@@ -5,13 +5,13 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createEditor } from "slate";
 import { Slate, withReact } from "slate-react";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { StartFramePicker } from "../StartFramePicker";
 
-vi.mock("@/app/components/canvas/utils/nodeOps", () => ({
-	updateElementAttrs: vi.fn(),
+vi.mock("@/lib/canvas/editorOps", () => ({
+	mergeAttrs: vi.fn(),
 }));
 vi.mock("../usePreviousPictures", () => ({
 	usePreviousPictures: () => ({ kind: "ready", pictures: [] }),
@@ -90,7 +90,7 @@ describe("StartFramePicker", () => {
 
 		act(() => tile("Previous scene")?.click());
 
-		expect(updateElementAttrs).toHaveBeenCalledWith(
+		expect(mergeAttrs).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.anything(),
 			{ startFrame: "previous", uploadedFrame: PICTURE },

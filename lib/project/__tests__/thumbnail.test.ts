@@ -1,80 +1,45 @@
 import { describe, expect, it } from "vitest";
-import type { AssetConnectorType, AssetResult } from "@/lib/connectors/types";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import { characterAvatarElementId } from "../characterAvatar";
+import type { CanvasContentElement } from "@/lib/canvas/types";
 import { pickThumbnailUrl } from "../thumbnail";
+import { resultQueue } from "./_canvas";
 
-const entry = (
+const element = (
 	id: string,
-	connectorType: AssetConnectorType | null,
-	result: Partial<AssetResult> | null,
-): [string, ElementSnapshot] => [
+	type: CanvasContentElement["type"] = "image",
+): CanvasContentElement => ({
 	id,
-	{
-		status: "idle",
-		seconds: 0,
-		result: result && { durationSec: 0, ...result },
-		error: null,
-		resultInputs: null,
-		connectorType,
-		pinned: false,
-	},
-];
+	type,
+	children: [{ id: `${id}-t`, type, text: "" }],
+});
+
+const SCRIPT = [element("1", "narration"), element("2", "video"), element("3")];
 
 describe("pickThumbnailUrl", () => {
-	it("returns null for no entries", () => {
-		expect(pickThumbnailUrl([])).toBeNull();
-	});
-
-	it("returns the first image url in iteration order", () => {
-		expect(
-			pickThumbnailUrl([
-				entry("1", "tts", { audioUrl: "n.mp3" }),
-				entry("2", "image", { imageUrl: "a.png" }),
-				entry("3", "image", { imageUrl: "b.png" }),
-			]),
-		).toBe("a.png");
-	});
-
-	it("ignores entries without an image url, whatever their connector", () => {
-		expect(
-			pickThumbnailUrl([
-				entry("1", "tts", { audioUrl: "n.mp3" }),
-				entry("2", "video", { videoUrl: "v.mp4" }),
-				entry("3", "sfx", { audioUrl: "s.mp3" }),
-				entry("4", "music", { audioUrl: "m.mp3" }),
-			]),
-		).toBeNull();
-	});
-
-	it("ignores entries with no result", () => {
-		expect(pickThumbnailUrl([entry("1", "image", null)])).toBeNull();
-	});
-
-	it("skips character avatar entries", () => {
-		expect(
-			pickThumbnailUrl([
-				entry(characterAvatarElementId("Alice"), "image", {
-					imageUrl: "avatar.png",
-				}),
-				entry("scene-1", "image", { imageUrl: "scene.png" }),
-			]),
-		).toBe("scene.png");
-	});
-
-	// A video element's frame is as much a picture of the project as a still is.
-	it("takes the image url a video element carries beside its videoUrl", () => {
-		expect(
-			pickThumbnailUrl([
-				entry("1", "tts", { audioUrl: "n.mp3" }),
-				entry("2", "video", { imageUrl: "frame.png", videoUrl: "video.mp4" }),
-			]),
-		).toBe("frame.png");
-	});
-
-	it("returns null for a video with only a videoUrl", () => {
-		expect(
-			pickThumbnailUrl([entry("1", "video", { videoUrl: "video.mp4" })]),
-		).toBeNull();
+	it.each([
+		["an empty script", [], {}, null],
+		["no result yet", SCRIPT, {}, null],
+		[
+			"results without a picture",
+			SCRIPT,
+			{ "1": { audioUrl: "n.mp3" }, "2": { videoUrl: "v.mp4" } },
+			null,
+		],
+		[
+			"the first picture in document order, whenever it was generated",
+			SCRIPT,
+			{
+				"3": { imageUrl: "b.png" },
+				"2": { imageUrl: "a.png", videoUrl: "v.mp4" },
+			},
+			"a.png",
+		],
+		[
+			"no avatar, since it belongs to no element of the script",
+			SCRIPT,
+			{ "cast-alice": { imageUrl: "avatar.png" }, "3": { imageUrl: "b.png" } },
+			"b.png",
+		],
+	])("picks from %s", (_, script, results, thumbnail) => {
+		expect(pickThumbnailUrl(script, resultQueue(results))).toBe(thumbnail);
 	});
 });

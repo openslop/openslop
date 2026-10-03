@@ -19,9 +19,12 @@ const sceneWithId = (id: string): SceneElement => ({
 
 const scene = sceneWithId("scene-id");
 
+const historyEditor = () =>
+	Object.assign(withHistory(createEditor()), { defaultModels: () => ({}) });
+
 describe("applyScriptToEditor", () => {
 	it("does not save project load operations to undo history", () => {
-		const editor = withHistory(createEditor());
+		const editor = historyEditor();
 		const osml = serializeOSMLWithScenes([scene]);
 
 		applyScriptToEditor(editor, osml);
@@ -31,7 +34,7 @@ describe("applyScriptToEditor", () => {
 	});
 
 	it("drops undo entries that point into the replaced document", () => {
-		const editor = withHistory(createEditor());
+		const editor = historyEditor();
 		const two = serializeOSMLWithScenes([sceneWithId("a"), sceneWithId("b")]);
 		applyScriptToEditor(editor, two);
 

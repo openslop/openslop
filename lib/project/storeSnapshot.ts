@@ -1,22 +1,16 @@
 import { z } from "zod";
 import type { ProjectData, ProjectStore } from "./store";
-import { MetadataSchema } from "./types";
+import { VideoSettingsSchema } from "./videoSettings";
 
-/** A new field on `ProjectData` will not compile until it is added here too. */
 const ProjectStoreSnapshotSchema = z.object({
-	metadata: z.preprocess((value) => value ?? {}, MetadataSchema),
-	referenceImages: z.array(z.string()).default([]),
+	videoSettings: VideoSettingsSchema,
 }) satisfies z.ZodType<ProjectData>;
 
 export function extractStoreSnapshot(store: ProjectStore): ProjectData {
-	const { metadata, referenceImages } = store.getState();
-	return structuredClone({ metadata, referenceImages });
+	return structuredClone({ videoSettings: store.getState().videoSettings });
 }
 
-/**
- * The `store` column is untyped JSON. Parse it into a complete snapshot once
- * here so callers can trust the types; a structurally wrong row throws.
- */
+/** The `store` column is untyped JSON, parsed once here. */
 export function parseStoreSnapshot(raw: unknown): ProjectData {
 	return ProjectStoreSnapshotSchema.parse(raw ?? {});
 }

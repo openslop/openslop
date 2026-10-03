@@ -5,7 +5,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
-import { forElement, hasPrompt } from "@/lib/generation/graph";
+import { hasPrompt } from "@/lib/generation/graph";
 import { buildNodes } from "@/lib/generation/generationGraph";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { isNodeStale, needsGeneration } from "@/lib/generation/staleness";
@@ -73,11 +73,8 @@ export function useGenerateScope(
 	const editor = useSlateStatic();
 	const buildContext = useBuildContext();
 
-	const specs = useCallback(
-		() => select(editor).map(forElement),
-		[select, editor],
-	);
-	const live = useLiveNodes(specs);
+	const elements = useCallback(() => select(editor), [select, editor]);
+	const live = useLiveNodes(elements);
 	const nodes = useMemo(() => live.filter(hasPrompt), [live]);
 
 	const active = useQueueSelector((q) =>
@@ -97,12 +94,12 @@ export function useGenerateScope(
 	const run = useCallback(() => {
 		const context = buildContext();
 		queue.enqueueGraph(
-			buildNodes(specs(), context).filter(
+			buildNodes(elements(), context).filter(
 				(node) => hasPrompt(node) && needsGeneration(node, queue),
 			),
-			context,
+			buildContext,
 		);
-	}, [queue, specs, buildContext]);
+	}, [queue, elements, buildContext]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 

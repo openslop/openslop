@@ -1,7 +1,7 @@
 import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/elementConfigs";
 import { TRIM_TO_DIALOGUE_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { formatTimeRange } from "@/lib/render/timestamps";

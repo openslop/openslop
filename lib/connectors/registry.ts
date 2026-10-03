@@ -1,20 +1,23 @@
+import type { GeneratedType } from "@/lib/canvas/types";
+import { createArtStylePlugin } from "./image/plugins/art-style";
+import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
+import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
+import { createDimensionsPlugin } from "./plugins/dimensions";
 import { buildVisualPlugins } from "./plugins/visualChain";
 import { createSpeakerVoicePlugin } from "./tts/plugins/speaker-voice";
 import { createCharacterVoicesPlugin } from "./video/plugins/character-voices";
 import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
 import { createPreviousVisualPlugin } from "./video/plugins/previous-visual";
-import type { ConnectorConfig, ConnectorType } from "./types";
+import type { ConnectorConfig } from "./types";
 
-/**
- * How each connector type is configured. One config per type, not per provider:
- * plugins are what the connector type does, not what one vendor does, and which
- * provider a generation runs on is the model's decision.
- */
-export type ConnectorRegistry = Record<ConnectorType, ConnectorConfig>;
+/** The plugins each generated type installs: all a type does that another does not. */
+export type ConnectorRegistry = Record<GeneratedType, ConnectorConfig>;
+
+const speech: ConnectorConfig = { plugins: [createSpeakerVoicePlugin()] };
 
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
-	llm: {},
-	tts: { plugins: [createSpeakerVoicePlugin()] },
+	narration: speech,
+	character: speech,
 	image: { plugins: buildVisualPlugins("image") },
 	video: {
 		plugins: [
@@ -26,6 +29,14 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 			createVideoOutputRulesPlugin(),
 		],
 	},
-	sfx: {},
+	sound: {},
 	music: {},
+	cast: {
+		plugins: [
+			createCharacterAvatarPlugin(),
+			createArtStylePlugin(),
+			createReferenceImagesPlugin(),
+			createDimensionsPlugin("image"),
+		],
+	},
 };

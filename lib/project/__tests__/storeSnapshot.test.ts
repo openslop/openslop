@@ -1,40 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
-import { DEFAULT_VIDEO_LENGTH } from "@/lib/project/videoLength";
-import { DEFAULT_VIDEO_FORMAT } from "@/lib/project/videoFormat";
 import { createProjectStore } from "../store";
-import { MetadataSchema } from "../types";
 import { extractStoreSnapshot, parseStoreSnapshot } from "../storeSnapshot";
+import { VideoSettingsSchema } from "../videoSettings";
 
 describe("storeSnapshot", () => {
-	it("extracts a method-free snapshot", () => {
+	it("extracts a method-free snapshot, detached from its store", () => {
 		const store = createProjectStore();
-		store.getState().updateMetadata({ title: "Hello" });
-		store.getState().setReferenceImages(["a.png"]);
-
 		const snap = extractStoreSnapshot(store);
 
-		expect(JSON.stringify(snap)).toContain('"title":"Hello"');
-		expect(snap.referenceImages).toEqual(["a.png"]);
-		for (const value of Object.values(snap)) {
-			expect(typeof value).not.toBe("function");
-		}
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
+
+		expect(snap).toEqual({ videoSettings: VideoSettingsSchema.parse({}) });
 	});
 
 	it("round-trips through createProjectStore", () => {
 		const src = createProjectStore();
-		src.getState().updateMetadata({
-			title: "T",
-			style: "noir",
-			narration: { age: "adult" },
+		src.getState().updateVideoSettings({
+			aspectRatio: "9:16",
+			transitionType: "fade",
+			captions: false,
 		});
-		src.getState().setReferenceImages(["x", "y"]);
 
 		const after = createProjectStore(extractStoreSnapshot(src)).getState();
-		expect(after.metadata.title).toBe("T");
-		expect(after.metadata.style).toBe("noir");
-		expect(after.metadata.narration.age).toBe("adult");
-		expect(after.referenceImages).toEqual(["x", "y"]);
+		expect(after.videoSettings).toEqual(src.getState().videoSettings);
 	});
 
 	it("creates the same store from an empty parsed snapshot as from nothing", () => {
@@ -47,42 +36,42 @@ describe("storeSnapshot", () => {
 describe("parseStoreSnapshot", () => {
 	it("fills defaults for absent and partial rows", () => {
 		expect(parseStoreSnapshot(null)).toEqual({
-			metadata: MetadataSchema.parse({}),
-			referenceImages: [],
+			videoSettings: VideoSettingsSchema.parse({}),
 		});
-		expect(parseStoreSnapshot({ metadata: { title: "T" } }).metadata).toEqual(
-			MetadataSchema.parse({ title: "T" }),
-		);
+		expect(
+			parseStoreSnapshot({ videoSettings: { aspectRatio: "9:16" } })
+				.videoSettings,
+		).toEqual(VideoSettingsSchema.parse({ aspectRatio: "9:16" }));
 	});
 
 	it("keeps a stored row intact and completes its video settings", () => {
-		const metadata = {
-			title: "T",
-			style: "noir",
-			language: "es" as const,
-			narration: { age: "adult" as const },
-			characters: {
-				Ada: { appearance: "tall", gender: "feminine" as const },
-			},
-			videoSettings: {
-				aspectRatio: "9:16" as const,
-				transitionType: "fade" as const,
-			},
+		const videoSettings = {
+			aspectRatio: "9:16" as const,
+			transitionType: "fade" as const,
 		};
-		const parsed = parseStoreSnapshot({ metadata, referenceImages: ["a.png"] });
 
-		expect(parsed).toMatchObject({ metadata, referenceImages: ["a.png"] });
-		expect(parsed.metadata.videoSettings).toEqual({
-			...metadata.videoSettings,
-			length: DEFAULT_VIDEO_LENGTH,
-			format: DEFAULT_VIDEO_FORMAT,
+		expect(parseStoreSnapshot({ videoSettings }).videoSettings).toEqual({
+			...videoSettings,
 			captions: true,
 			captionStyle: DEFAULT_CAPTION_STYLE,
 		});
 	});
 
+	it("keeps only the video settings of a row that carries other fields", () => {
+		expect(
+			parseStoreSnapshot({
+				videoSettings: { aspectRatio: "9:16", length: "60s", format: "x" },
+				metadata: { title: "T" },
+				referenceImages: ["a.png"],
+			}),
+		).toEqual({
+			videoSettings: VideoSettingsSchema.parse({ aspectRatio: "9:16" }),
+		});
+	});
+
 	it("throws on a structurally invalid row", () => {
-		expect(() => parseStoreSnapshot({ metadata: { title: 42 } })).toThrow();
-		expect(() => parseStoreSnapshot({ referenceImages: "a.png" })).toThrow();
+		expect(() =>
+			parseStoreSnapshot({ videoSettings: { aspectRatio: 42 } }),
+		).toThrow();
 	});
 });

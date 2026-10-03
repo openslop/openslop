@@ -3,12 +3,15 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import type { GenerationNode, NodeSpec } from "./graph";
+import type { ScriptElement } from "@/lib/canvas/types";
+import type { GenerationNode } from "./graph";
 import { createGraphFor } from "./generationGraph";
 import { useBuildContext } from "./useBuildContext";
 
 const [LiveGraphContext, useResolveNode] =
-	createRequiredContext<(spec: NodeSpec) => GenerationNode>("LiveGraphContext");
+	createRequiredContext<(element: ScriptElement) => GenerationNode>(
+		"LiveGraphContext",
+	);
 export { useResolveNode };
 
 export function LiveGraphProvider({ children }: { children: ReactNode }) {
@@ -17,7 +20,8 @@ export function LiveGraphProvider({ children }: { children: ReactNode }) {
 	const [graphFor] = useState(createGraphFor);
 
 	const resolve = useCallback(
-		(spec: NodeSpec) => graphFor(editor.children, buildContext).resolve(spec),
+		(element: ScriptElement) =>
+			graphFor(editor.children, buildContext).resolve(element),
 		[editor, graphFor, buildContext],
 	);
 

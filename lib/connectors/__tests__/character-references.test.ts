@@ -6,26 +6,46 @@ import {
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
+import { asset } from "@/lib/canvas/__tests__/_assets";
+import { buildCtx, edgesOf } from "./_state-ctx";
 
-/** Keyed by declaring them for an element that names these characters. */
+const image = (characters: string): CanvasContentElement => ({
+	id: "img",
+	type: "image",
+	generationAttributes: { characters },
+	children: [],
+});
+
 function avatarResults(
 	avatars: Record<string, string>,
 ): Record<string, AssetResult> {
-	const element: CanvasContentElement = {
-		id: "img",
-		type: "image",
-		generationAttributes: { characters: Object.keys(avatars).join(", ") },
-		children: [],
-	};
-	const urls = Object.values(avatars);
+	const names = Object.keys(avatars);
+	const canvas = names.map((name) => asset("cast", { name }));
 	return Object.fromEntries(
 		characterAvatars
-			.specs(element)
-			.flatMap(([key], i) =>
-				urls[i] ? [[key, { imageUrl: urls[i], durationSec: 0 }]] : [],
-			),
+			.edges(image(names.join(", ")), buildCtx(canvas))
+			.flatMap(([key], i) => {
+				const url = avatars[names[i] ?? ""];
+				return url ? [[key, { imageUrl: url, durationSec: 0 }]] : [];
+			}),
 	);
 }
+
+describe("characterAvatars", () => {
+	it("depends on each named character's cast element, and on nothing for a name the cast does not know", () => {
+		const canvas = [
+			asset("cast", { name: "Red" }),
+			asset("cast", { name: "Wolf" }),
+		];
+
+		expect(
+			edgesOf(characterAvatars, image("Wolf, Ghost, Red"), canvas),
+		).toEqual([
+			["avatar:Wolf", "cast:Wolf", "Wolf's avatar"],
+			["avatar:Red", "cast:Red", "Red's avatar"],
+		]);
+	});
+});
 
 describe("character-references plugin", () => {
 	let plugin: ConnectorPlugin<ParamsWithCharacters>;

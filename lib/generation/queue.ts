@@ -7,26 +7,21 @@ import {
 } from "./concurrency";
 import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
+import { prepareNode } from "./generationGraph";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
-import {
-	flattenGraph,
-	isSourceNode,
-	type BuildContext,
-	type GenerationNode,
-	type JobNode,
-} from "./graph";
+import { flattenGraph, type BuildContext, type GenerationNode } from "./graph";
 
 type ActiveJob = {
 	controller: AbortController;
 	connectorType: AssetConnectorType;
 };
 
-/** A node waiting to run, with the project and canvas it will run against. */
+/** A node waiting to run, and where it reads the project and canvas from when it does. */
 type QueuedJob = {
-	node: JobNode;
-	context: BuildContext;
+	node: GenerationNode;
+	context: () => BuildContext;
 };
 
 /**
@@ -78,13 +73,13 @@ export class GenerationQueue {
 
 	/**
 	 * Roots are always queued: asking to generate something means regenerating
-	 * it. Every job in the batch runs against `context`.
+	 * it. Each job is built again from `context` when it runs.
 	 */
-	enqueueGraph(roots: GenerationNode[], context: BuildContext) {
+	enqueueGraph(roots: GenerationNode[], context: () => BuildContext) {
 		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
 		for (const node of flattenGraph(roots)) {
-			if (isSourceNode(node) || this.snapshots.isActive(node.id)) continue;
+			if (this.snapshots.isActive(node.id)) continue;
 			if (!rootIds.has(node.id) && !needsGeneration(node, this)) continue;
 			this.snapshots.update(node.id, {
 				status: "queued",
@@ -149,8 +144,6 @@ export class GenerationQueue {
 		result: AssetResult,
 		{ pinned = false }: { pinned?: boolean } = {},
 	): void {
-		if (isSourceNode(node))
-			throw new Error(`Source node "${node.id}" cannot hold a result`);
 		this.cancel(node.id);
 		this.commit({
 			elementId: node.id,
@@ -196,8 +189,7 @@ export class GenerationQueue {
 	private blockingDependency(node: GenerationNode) {
 		return Object.values(node.dependsOn).find(
 			({ node: dep }) =>
-				!isSourceNode(dep) &&
-				(this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result),
+				this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result,
 		)?.node;
 	}
 
@@ -229,12 +221,7 @@ export class GenerationQueue {
 		return this.snapshots.get(dep.id).error ?? this.blockedByError(dep);
 	}
 
-	/**
-	 * Nothing running and nothing runnable means a dependency never arrived, so
-	 * release what is left rather than leaving it queued forever. A dependency
-	 * that failed is reported on the dependent too: a derived node has no card of
-	 * its own, so its error would otherwise never reach anyone.
-	 */
+	/** Nothing running or runnable means a dependency never arrived: release the rest, its error on each dependent. */
 	private releaseBlocked() {
 		if (this.active.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
@@ -269,14 +256,11 @@ export class GenerationQueue {
 		this.snapshots.notify();
 		this.ticker.start(elementId);
 
-		const inputs = generationInputs(node, this);
-		const dependencies = this.dependencyResults(node);
 		try {
+			const prepared = await prepareNode(node, context);
 			const result = await generateForElement(
-				job,
-				inputs,
-				dependencies,
-				context,
+				prepared,
+				this.dependencyResults(prepared),
 				signal,
 			);
 			if (signal.aborted) return;
@@ -284,7 +268,7 @@ export class GenerationQueue {
 				elementId,
 				elementType,
 				connectorType,
-				inputs,
+				inputs: generationInputs(prepared, this),
 				result,
 				pinned: false,
 			});

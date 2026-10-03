@@ -4,13 +4,14 @@ import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { createProjectStore } from "@/lib/project/store";
+import { assetId } from "@/lib/canvas/types";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { createScriptWriter } from "../scriptWriter";
 
-const makeCanvas = (defaultModels: ConnectorModels = {}) => {
+const makeEditor = (defaultModels: ConnectorModels = {}) => {
 	const editor = createEditor();
 	editor.defaultModels = () => defaultModels;
-	return { editor, store: createProjectStore() };
+	return editor;
 };
 
 const elements = (editor: Editor): [type: string, text: string][] =>
@@ -20,87 +21,93 @@ const elements = (editor: Editor): [type: string, text: string][] =>
 
 describe("createScriptWriter", () => {
 	it("grows an element in the document as its text arrives", () => {
-		const canvas = makeCanvas();
-		const write = createScriptWriter(canvas);
+		const editor = makeEditor();
+		const write = createScriptWriter(editor);
 
 		write("<narration>");
 		write("Once upon");
-		expect(elements(canvas.editor)).toEqual([["narration", "Once upon"]]);
+		expect(elements(editor)).toEqual([["narration", "Once upon"]]);
 
 		write(" a time, far away");
-		expect(elements(canvas.editor)).toEqual([
+		expect(elements(editor)).toEqual([
 			["narration", "Once upon a time, far away"],
 		]);
 	});
 
 	it("starts a streamed element on the editor's default model", () => {
 		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const canvas = makeCanvas({ tts: pinned });
+		const editor = makeEditor({ tts: pinned });
 
-		createScriptWriter(canvas)("<narration>Once upon a time</narration>\n");
+		createScriptWriter(editor)("<narration>Once upon a time</narration>\n");
 
 		expect(
-			canvas.editor.children.filter(isContentElement).map(flatAttributes),
+			editor.children.filter(isContentElement).map(flatAttributes),
 		).toMatchObject([pinned]);
 	});
 
 	it("writes later text through the editor, never into the node it inserted", () => {
-		const canvas = makeCanvas();
-		const write = createScriptWriter(canvas);
+		const editor = makeEditor();
+		const write = createScriptWriter(editor);
 		write("<narration>");
 		write("Once upon");
-		const inserted = canvas.editor.children[0];
+		const inserted = editor.children[0];
 
 		write(" a time, far away");
 
-		expect(canvas.editor.children[0]).not.toBe(inserted);
+		expect(editor.children[0]).not.toBe(inserted);
 		expect(inserted).toMatchObject({
 			children: [{}, { text: "Once upon" }],
 		});
 	});
 
 	it("holds an element back until it has text", () => {
-		const canvas = makeCanvas();
-		const write = createScriptWriter(canvas);
+		const editor = makeEditor();
+		const write = createScriptWriter(editor);
 
 		write("<image>a wolf</image>\n<narration>");
-		expect(elements(canvas.editor)).toEqual([["image", "a wolf"]]);
+		expect(elements(editor)).toEqual([["image", "a wolf"]]);
 
 		write("The wolf howled at the moon");
-		expect(elements(canvas.editor)).toEqual([
+		expect(elements(editor)).toEqual([
 			["image", "a wolf"],
 			["narration", "The wolf howled at the moon"],
 		]);
 	});
 
 	it("writes every element of a chunk, however many it carries", () => {
-		const canvas = makeCanvas();
+		const editor = makeEditor();
 		const lines = ["one", "two", "three", "four", "five"];
 
-		createScriptWriter(canvas)(
+		createScriptWriter(editor)(
 			lines.map((line) => `<narration>${line}</narration>`).join("\n"),
 		);
 
-		expect(elements(canvas.editor)).toEqual(
-			lines.map((line) => ["narration", line]),
-		);
+		expect(elements(editor)).toEqual(lines.map((line) => ["narration", line]));
 	});
 
-	it("patches the project from metadata tags and keeps them off the canvas", () => {
-		const canvas = makeCanvas();
-		const write = createScriptWriter(canvas);
+	it("writes the script after the assets already on the canvas", () => {
+		const editor = makeEditor();
+		const style = createCanvasNode("style", {
+			id: assetId("style"),
+			text: "noir",
+		});
+		editor.children = [style];
 
-		write("<metadata_title>The Wolf</metadata_title>\n");
-		write('<metadata_character name="Ayla" gender="feminine">A tall ');
-		write("hunter in furs</metadata_character>\n");
+		createScriptWriter(editor)("<narration>Snow fell.</narration>");
+
+		expect(editor.children[0]).toBe(style);
+		expect(elements(editor)).toEqual([["narration", "Snow fell."]]);
+	});
+
+	it("leaves an asset tag the model wrote off the canvas", () => {
+		const editor = makeEditor();
+		const write = createScriptWriter(editor);
+
+		write('<cast name="Ayla">A tall hunter in furs</cast>\n');
 		write("<narration>Snow fell.</narration>");
 
-		const { metadata } = canvas.store.getState();
-		expect(metadata.title).toBe("The Wolf");
-		expect(metadata.characters.Ayla).toMatchObject({
-			appearance: "A tall hunter in furs",
-			gender: "feminine",
-		});
-		expect(elements(canvas.editor)).toEqual([["narration", "Snow fell."]]);
+		expect(editor.children.map((node) => "type" in node && node.type)).toEqual([
+			"narration",
+		]);
 	});
 });

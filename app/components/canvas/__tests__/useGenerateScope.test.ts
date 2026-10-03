@@ -1,21 +1,20 @@
 import { createProjectStore } from "@/lib/project/store";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant, Editor } from "slate";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import {
+	DEFAULT_CONNECTOR_REGISTRY,
+	type ConnectorRegistry,
+} from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
-import { forElement, type GenerationNode } from "@/lib/generation/graph";
+import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generationGraph";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
-const registry: ConnectorRegistry = {
-	llm: {},
-	tts: {},
-	image: {},
-	video: {},
-	sfx: {},
-	music: {},
-};
+// No plugins, so no element depends on another and each is judged alone.
+const registry = Object.fromEntries(
+	Object.keys(DEFAULT_CONNECTOR_REGISTRY).map((type) => [type, {}]),
+) as ConnectorRegistry;
 
 let editorUnderTest: Editor;
 
@@ -39,13 +38,13 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 
 // The hook under test is about which elements get queued, so bind a real
 // context rather than standing up the config and project providers.
-const store = createProjectStore();
+const state = createProjectStore().getState();
 
 const buildContext = () => ({
-	store,
-	state: store.getState(),
+	state,
 	canvas: [],
 	registry,
+	setAsset: () => {},
 });
 
 vi.mock("@/lib/generation/useBuildContext", () => ({
@@ -75,7 +74,7 @@ function wrapInScene(elements: CanvasContentElement[]): SceneElement {
 
 /** Commit a result for `element` as if it had just been generated. */
 function commitCurrent(element: CanvasContentElement) {
-	queue.commitResult(buildNode(forElement(element), buildContext()), {
+	queue.commitResult(buildNode(element, buildContext()), {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,
 	});

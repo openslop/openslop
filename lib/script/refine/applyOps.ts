@@ -1,11 +1,14 @@
 import { Editor, Path, Transforms } from "slate";
+import { setAsset } from "@/lib/canvas/assetOps";
 import {
 	findNodeById,
 	mergeAttrs,
 	retypeNode,
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
+import { isAssetType, isContentElement } from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insertElement";
+import { isSceneElement } from "@/lib/canvas/scenes";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -57,7 +60,10 @@ function resolveInsertPath(
 	anchorMap: Record<string, string>,
 ): Path | null {
 	if (!op.anchor_id) {
-		return op.position === "before" ? [0, 0] : [editor.children.length];
+		const firstScene = editor.children.findIndex(isSceneElement);
+		return op.position === "before" && firstScene >= 0
+			? [firstScene, 0]
+			: [editor.children.length];
 	}
 
 	const resolvedId = anchorMap[op.anchor_id] ?? op.anchor_id;
@@ -73,6 +79,11 @@ function applyInsert(
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
 ): RefineOpResult {
+	if (isAssetType(op.type)) {
+		setAsset(editor, op.type, op.attrs?.name, op);
+		return OK;
+	}
+
 	const at = resolveInsertPath(editor, op, anchorMap);
 	if (!at) {
 		return {
@@ -108,20 +119,19 @@ function applySet(
 ): RefineOpResult {
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
+	const [found, at] = entry;
 
-	const retype = op.type && op.type !== entry[0].type ? op.type : undefined;
-	if (retype) retypeNode(editor, entry[1], entry[0], retype);
-	const target = retype ? findNodeById(editor, op.id) : entry;
-	if (!target)
-		return { ok: false, reason: `set: could not retype element "${op.id}"` };
-	const [element, path] = target;
-
+	if (op.type && op.type !== found.type) {
+		if (!isContentElement(found))
+			return { ok: false, reason: `set: asset "${op.id}" keeps its type` };
+		retypeNode(editor, at, found, op.type);
+	}
 	if (op.attrs) {
-		mergeAttrs(editor, path, element, op.attrs);
+		mergeAttrs(editor, op.id, op.attrs);
 	}
 
 	if (op.text !== undefined) {
-		updateNodeText(editor, path, op.text);
+		updateNodeText(editor, op.id, op.text);
 	}
 	return OK;
 }

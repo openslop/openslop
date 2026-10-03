@@ -1,58 +1,39 @@
 import omit from "lodash/omit";
-import { requireContext } from "@/lib/connectors/plugins";
-import { dependency } from "@/lib/generation/dependency";
-import { forVoice, voiceLabel } from "@/lib/generation/sourceNodes";
-import { resolveVoice } from "@/lib/project/types";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import { findAsset } from "@/lib/canvas/assets";
+import type { ScriptElement } from "@/lib/canvas/types";
+import { resolveModel } from "@/lib/connectors/models";
 import type {
 	ConnectorPlugin,
-	ModelRef,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
-import type { ProjectData } from "@/lib/project/store";
-import { resolveVoiceId, speakerFor, VOICE_SEARCH_KEYS } from "../speakers";
+import { settleVoice, speakerVoice, VOICE_SEARCH_KEYS } from "../voices";
 
-const NAME = "speaker-voice";
+const speakingModel = (
+	{ generationAttributes: attrs }: ScriptElement,
+	canvas: readonly unknown[],
+) =>
+	resolveModel(
+		"tts",
+		findAsset(canvas, "voice", attrs?.name)?.generationAttributes,
+		attrs,
+	);
 
-/**
- * Speech speaks with the pair its voice picked in the voice's editor, and
- * with the pair it was created with until the voice picks one.
- */
-const voiceModel = (
-	element: CanvasContentElement,
-	state: ProjectData,
-): ModelRef =>
-	resolveVoice(
-		state.metadata,
-		element.generationAttributes?.name,
-		element.generationAttributes,
-	).model;
-
-export const speakerVoice = dependency(
-	"voice",
-	({ generationAttributes: attrs }) => voiceLabel(attrs?.name),
-	({ generationAttributes: attrs }) => forVoice(attrs?.name, attrs),
-);
-
+/** Speech speaks in its speaker's voice, on the pair that voice was found on. */
 export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
-		name: NAME,
-		model: voiceModel,
-		dependencies: [speakerVoice],
-		async beforeGenerate(params, ctx) {
-			const { metadata } = requireContext(ctx, "state", NAME);
-			const model = requireContext(ctx, "model", NAME);
-			const speaker = speakerFor(metadata, params.name, model);
-			const voiced = speaker
-				? { ...params, ...speaker.traits, voiceId: speaker.voiceId }
-				: params;
-			if (voiced.voiceId) return voiced;
-			const voiceId = await resolveVoiceId(
-				{ name: params.name, model, traits: voiced },
-				requireContext(ctx, "searchVoices", NAME),
-				requireContext(ctx, "store", NAME),
-			);
-			return { ...omit(voiced, VOICE_SEARCH_KEYS), voiceId };
-		},
+		name: "speaker-voice",
+		model: speakingModel,
+		reads: (element, ctx) =>
+			speakerVoice(element.generationAttributes?.name).reads(element, ctx),
+		prepare: (element, { canvas }) =>
+			settleVoice(
+				element.generationAttributes?.name,
+				speakingModel(element, canvas),
+				canvas,
+			),
+		beforeGenerate: (params, ctx) => ({
+			...omit(params, VOICE_SEARCH_KEYS),
+			voiceId: speakerVoice(params.name).value(ctx).voiceId,
+		}),
 	};
 }

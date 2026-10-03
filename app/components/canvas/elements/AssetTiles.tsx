@@ -1,36 +1,33 @@
 "use client";
 
 import { Image, Mic, Palette, User, UserPlus } from "@/components/ui/icon";
-import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import {
-	characterAvatarElementId,
-	characterAvatarUrl,
-} from "@/lib/project/characterAvatar";
-import { useProject } from "@/lib/project/useProject";
+import { useCastNames } from "@/lib/canvas/useAssets";
+import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
+import { useReferenceImages } from "../hooks/useReferenceImages";
 import { AddAssetTile } from "./AddAssetTile";
 import { AssetTile } from "./AssetTile";
 import { useAssetEditors } from "./character/AssetEditProvider";
 
 export function NarratorAssetTile() {
-	const { openNarrator } = useAssetEditors();
+	const { editAsset } = useAssetEditors();
 	return (
 		<AssetTile
 			name="Narrator"
 			Icon={Mic}
 			fallback="icon"
-			onEdit={openNarrator}
+			onEdit={() => editAsset("voice")}
 		/>
 	);
 }
 
 export function ArtStyleAssetTile() {
-	const { openArtStyle } = useAssetEditors();
+	const { editAsset } = useAssetEditors();
 	return (
 		<AssetTile
 			name="Art style"
 			Icon={Palette}
 			fallback="icon"
-			onEdit={openArtStyle}
+			onEdit={() => editAsset("style")}
 		/>
 	);
 }
@@ -52,8 +49,7 @@ export function CharacterAssetTiles({
 }: {
 	onRemove?: (name: string) => void;
 }) {
-	const characters = useProject((s) => s.metadata.characters);
-	return Object.keys(characters).map((name) => (
+	return useCastNames().map((name) => (
 		<CharacterAssetTile
 			key={`character:${name}`}
 			name={name}
@@ -69,20 +65,15 @@ function CharacterAssetTile({
 	name: string;
 	onRemove?: () => void;
 }) {
-	const { editCharacter } = useAssetEditors();
-	const previewUrl = useQueueSelector((queue) =>
-		characterAvatarUrl(queue, name),
-	);
-	const status = useQueueSelector(
-		(queue) => queue.getElementSnapshot(characterAvatarElementId(name)).status,
-	);
+	const { editAsset } = useAssetEditors();
+	const { url: previewUrl, status } = useCharacterAvatar(name);
 	return (
 		<AssetTile
 			name={name}
 			previewUrl={previewUrl}
 			Icon={User}
 			status={status}
-			onEdit={() => editCharacter(name)}
+			onEdit={() => editAsset("cast", name)}
 			onRemove={onRemove}
 			removeAffordance="corner"
 		/>
@@ -108,9 +99,6 @@ export function ReferenceTiles({
 }
 
 export function ReferenceAssetTiles() {
-	const referenceImages = useProject((s) => s.referenceImages);
-	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
-	return (
-		<ReferenceTiles urls={referenceImages} onRemove={removeReferenceImage} />
-	);
+	const { urls, remove } = useReferenceImages();
+	return <ReferenceTiles urls={urls} onRemove={remove} />;
 }

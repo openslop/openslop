@@ -1,21 +1,15 @@
-import { useCallback } from "react";
 import { useProject } from "./useProject";
+import type { DeepPartial } from "./types";
 import type { VideoSettings } from "./videoSettings";
 
-/** One knob from the project's video settings; always set, never a fallback. */
 export function useVideoSetting<K extends keyof VideoSettings>(
 	key: K,
 ): VideoSettings[K] {
-	return useProject((s) => s.metadata.videoSettings[key]);
+	return useProject((s) => s.videoSettings[key]);
 }
 
-/** Writes the knobs `useVideoSetting` reads: the only way the UI changes them. */
 export function useUpdateVideoSettings(): (
-	patch: Partial<VideoSettings>,
+	patch: DeepPartial<VideoSettings>,
 ) => void {
-	const updateMetadata = useProject((s) => s.updateMetadata);
-	return useCallback(
-		(patch) => updateMetadata({ videoSettings: patch }),
-		[updateMetadata],
-	);
+	return useProject((s) => s.updateVideoSettings);
 }

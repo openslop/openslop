@@ -1,7 +1,7 @@
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_CONFIGS } from "./elementConfigs";
 import { splitTextDirection } from "../utils/textDirection";
 
 export function CompactElement({

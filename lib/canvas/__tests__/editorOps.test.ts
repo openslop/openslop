@@ -16,6 +16,8 @@ import {
 	flatAttributes,
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
+import { isAssetElement } from "../guards";
+import { asset } from "./_assets";
 
 /** Mirrors `createCanvasNode`: a caret marker leaf, then the body. */
 function content(
@@ -68,6 +70,41 @@ describe("findNodeById", () => {
 	});
 });
 
+describe("writes by id", () => {
+	it("land on the element wherever it is, asset or scene", () => {
+		const editor = createEditor();
+		editor.children = [
+			asset("style"),
+			asset("cast", { name: "Mia" }),
+			scene([content("narration", "n1"), content("image", "img1")]),
+		];
+
+		mergeAttrs(editor, "img1", { style: "ink" });
+		mergeAttrs(editor, "cast:Mia", { age: "9" });
+
+		expect(findNodeById(editor, "img1")?.[0].generationAttributes).toEqual({
+			style: "ink",
+		});
+		expect(findNodeById(editor, "cast:Mia")).toMatchObject([
+			{ generationAttributes: { name: "Mia", age: "9" } },
+			[1],
+		]);
+	});
+
+	it("throw for an element that is not on the canvas, and change nothing", () => {
+		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const before = JSON.stringify(editor.children);
+
+		expect(() => mergeAttrs(editor, "gone", { style: "ink" })).toThrow(
+			/"gone" is not on the canvas/,
+		);
+		expect(() => updateNodeText(editor, "style", "ink")).toThrow(
+			/"style" is not on the canvas/,
+		);
+		expect(JSON.stringify(editor.children)).toBe(before);
+	});
+});
+
 describe("findElementById", () => {
 	it("finds a content element by id", () => {
 		const editor = makeEditor([
@@ -99,13 +136,13 @@ describe("updateNodeText", () => {
 	it("no-ops when text is identical", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 		const before = JSON.stringify(editor.children);
-		updateNodeText(editor, [0, 0], "hello");
+		updateNodeText(editor, "n1", "hello");
 		expect(JSON.stringify(editor.children)).toBe(before);
 	});
 
 	it("appends diff when new text is a prefix extension", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hel")])]);
-		updateNodeText(editor, [0, 0], "hello world");
+		updateNodeText(editor, "n1", "hello world");
 		expect(Editor.string(editor, [0, 0])).toBe(
 			`${ZERO_WIDTH_SPACE}hello world`,
 		);
@@ -115,20 +152,20 @@ describe("updateNodeText", () => {
 		const editor = makeEditor([
 			scene([content("narration", "n1", "old text")]),
 		]);
-		updateNodeText(editor, [0, 0], "new text");
+		updateNodeText(editor, "n1", "new text");
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}new text`);
 	});
 
 	it("no-ops when the caller re-sends text that carries the marker", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 		const before = JSON.stringify(editor.children);
-		updateNodeText(editor, [0, 0], `${ZERO_WIDTH_SPACE}hello`);
+		updateNodeText(editor, "n1", `${ZERO_WIDTH_SPACE}hello`);
 		expect(JSON.stringify(editor.children)).toBe(before);
 	});
 
 	it("leaves the marker in place when the text is cleared", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
-		updateNodeText(editor, [0, 0], "");
+		updateNodeText(editor, "n1", "");
 		expect(Editor.string(editor, [0, 0])).toBe(ZERO_WIDTH_SPACE);
 	});
 
@@ -139,9 +176,31 @@ describe("updateNodeText", () => {
 			children: [{ id: "n1-t", type: "narration", text: "hello" }],
 		};
 		const editor = makeEditor([scene([stripped])]);
-		updateNodeText(editor, [0, 0], "hello there");
+		updateNodeText(editor, "n1", "hello there");
 		expect(Editor.string(editor, [0, 0])).toBe(
 			`${ZERO_WIDTH_SPACE}hello there`,
+		);
+	});
+});
+
+describe("updateNodeText on an asset", () => {
+	// Assets are void on the canvas, which a plain text edit would skip.
+	it("rewrites a void asset's text", () => {
+		const editor = createEditor();
+		editor.isVoid = (element) => isAssetElement(element);
+		editor.children = [
+			asset("style", { text: "ink wash" }),
+			scene([content("narration", "n1")]),
+		];
+
+		updateNodeText(editor, "style", "oil paint");
+		expect(Editor.string(editor, [0], { voids: true })).toBe(
+			`${ZERO_WIDTH_SPACE}oil paint`,
+		);
+
+		updateNodeText(editor, "style", "oil paint, thick");
+		expect(Editor.string(editor, [0], { voids: true })).toBe(
+			`${ZERO_WIDTH_SPACE}oil paint, thick`,
 		);
 	});
 });
@@ -217,7 +276,7 @@ describe("mergeAttrs", () => {
 		const el = content("character", "n1", "", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
-		mergeAttrs(editor, [0, 0], el, { emotion: "excited" });
+		mergeAttrs(editor, "n1", { emotion: "excited" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(flatAttributes(node.children[0])).toEqual({
@@ -233,7 +292,7 @@ describe("mergeAttrs", () => {
 		});
 		const editor = makeEditor([scene([el])]);
 
-		mergeAttrs(editor, [0, 0], el, { emotion: null });
+		mergeAttrs(editor, "n1", { emotion: null });
 
 		const node = editor.children[0] as SceneElement;
 		expect(flatAttributes(node.children[0])).toEqual({ name: "Lyra" });
@@ -243,7 +302,7 @@ describe("mergeAttrs", () => {
 		const el = content("narration", "n1");
 		const editor = makeEditor([scene([el])]);
 
-		mergeAttrs(editor, [0, 0], el, { emotion: "calm" });
+		mergeAttrs(editor, "n1", { emotion: "calm" });
 
 		const node = editor.children[0] as SceneElement;
 		expect(flatAttributes(node.children[0])).toEqual({ emotion: "calm" });
@@ -251,16 +310,20 @@ describe("mergeAttrs", () => {
 });
 
 describe("clearEditor", () => {
-	it("empties the document, so a new script does not stack under the old one", () => {
+	it("empties the script so a new one does not stack under it, keeping the assets", () => {
+		const style = asset("style", { text: "ink wash" });
+		const cast = asset("cast", { name: "Mia" });
 		const editor = createEditor();
 		editor.children = [
-			content("narration", "n1", "old"),
-			content("image", "i1"),
+			style,
+			cast,
+			scene([content("narration", "n1", "old")], "s1"),
+			scene([content("image", "i1")], "s2"),
 		];
 
 		clearEditor(editor);
 
-		expect(editor.children).toEqual([]);
+		expect(editor.children).toEqual([style, cast]);
 	});
 });
 
@@ -269,7 +332,10 @@ describe("applyNodeVersion", () => {
 		elementType: CanvasContentElement["type"] | undefined,
 		attributes: Record<string, string>,
 		prompt: string,
-	) => ({ elementType, inputs: { prompt, attributes, dependencies: {} } });
+	) => ({
+		elementType,
+		inputs: { prompt, attributes, dependencies: {}, reads: {} },
+	});
 
 	// A video restored to an image version it once was goes back to being an
 	// image, without the start frame the video alone had.
@@ -280,11 +346,7 @@ describe("applyNodeVersion", () => {
 		});
 		const editor = makeEditor([scene([el])]);
 
-		applyNodeVersion(
-			editor,
-			[0, 0],
-			version("image", { style: "ink" }, "a fox"),
-		);
+		applyNodeVersion(editor, "n1", version("image", { style: "ink" }, "a fox"));
 
 		const node = (editor.children[0] as SceneElement).children[0];
 		expect(node.type).toBe("image");
@@ -295,7 +357,7 @@ describe("applyNodeVersion", () => {
 		const el = content("image", "n1", "a fox");
 		const editor = makeEditor([scene([el])]);
 
-		applyNodeVersion(editor, [0, 0], version("image", {}, "a wolf"));
+		applyNodeVersion(editor, "n1", version("image", {}, "a wolf"));
 
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
 	});
@@ -306,7 +368,7 @@ describe("applyNodeVersion", () => {
 
 		applyNodeVersion(
 			editor,
-			[0, 0],
+			"n1",
 			version(undefined, { style: "oil" }, "a fox"),
 		);
 

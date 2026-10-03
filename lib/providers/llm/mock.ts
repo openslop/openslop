@@ -10,28 +10,51 @@ import type {
 	LLMStreamChunk,
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
+import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import { isAssetElement } from "@/lib/canvas/guards";
+import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
+import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
 import { animateImageScene } from "@/lib/script/refine/animatePrompt";
+import type { RefineOp } from "@/lib/script/refine/types";
 import { sleep } from "@/lib/utils";
 import type { AgentModel } from "./agentModel";
 import type { LLMProvider } from "./base";
 
-const MOCK_SCRIPT = `<metadata_title>Little Red</metadata_title>
+const MOCK_TITLE = "Little Red";
 
-<metadata_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</metadata_style>
+/** The assets the mock script is written against, as the edit a real agent makes before writing. */
+const MOCK_ASSETS: RefineOp[] =
+	parseOSML(`<style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</style>
 
-<metadata_narration gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind" language="en"></metadata_narration>
+<voice gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind" language="en"></voice>
 
-<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright, cheerful, youthful" language="en">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</metadata_character>
+<cast name="Red">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</cast>
 
-<metadata_character name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" description="gentle, soft-spoken, kind" language="en">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</metadata_character>
+<voice name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright, cheerful, youthful" language="en"></voice>
 
-<metadata_character name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</metadata_character>
+<cast name="Wolf">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</cast>
 
-<metadata_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</metadata_character>
+<voice name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" description="gentle, soft-spoken, kind" language="en"></voice>
 
-<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
+<cast name="Mother">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</cast>
+
+<voice name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></voice>
+
+<cast name="Granny">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</cast>
+
+<voice name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></voice>
+`)
+		.filter(isAssetElement)
+		.map((asset) => ({
+			op: "insert",
+			type: asset.type,
+			attrs: flatAttributes(asset),
+			text: getElementBodyText(asset),
+		}));
+
+const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
 
 <music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
 
@@ -123,27 +146,16 @@ Twists: The "big bad wolf" is the kindest soul in the forest; Owl has been silen
 
 Resolution: Red and Wolf arrive together at Granny's cottage, share their baskets, and the village learns that friendship can grow in the most unlikely places.`;
 
-const MOCK_RESPONSES: {
-	matches: (prompt: string) => boolean;
-	respond: (params: LLMGenerateParams) => string;
-}[] = [
-	{
-		matches: (prompt) => /describe the visual art style/i.test(prompt),
-		respond: () => MOCK_STYLE,
-	},
-	{
-		matches: (prompt) => prompt.startsWith(OUTLINE_INSTRUCTION),
-		respond: () => MOCK_OUTLINE,
-	},
-	{
-		matches: (prompt) => prompt.startsWith(REVIEW_INSTRUCTION),
-		respond: () => NO_FINDINGS,
-	},
+const MOCK_RESPONSES: [matches: (prompt: string) => boolean, text: string][] = [
+	[(prompt) => /describe the visual art style/i.test(prompt), MOCK_STYLE],
+	[(prompt) => prompt.startsWith(OUTLINE_INSTRUCTION), MOCK_OUTLINE],
+	[(prompt) => prompt.startsWith(REVIEW_INSTRUCTION), NO_FINDINGS],
 ];
 
-function mockResponse(params: LLMGenerateParams): string {
-	const match = MOCK_RESPONSES.find((mock) => mock.matches(params.prompt));
-	return match ? match.respond(params) : MOCK_SCRIPT;
+function mockResponse({ prompt }: LLMGenerateParams): string {
+	return (
+		MOCK_RESPONSES.find(([matches]) => matches(prompt))?.[1] ?? MOCK_SCRIPT
+	);
 }
 
 export class MockLLM implements LLMProvider {
@@ -182,7 +194,8 @@ export class MockLLM implements LLMProvider {
 	}
 }
 
-const ELEMENT_ID = /id="([^"]+)"/;
+/** The first element that says something: a blank canvas still holds an empty one. */
+const ELEMENT_ID = /id="([^"]+)"[^>]*>[^<]/;
 const IMAGE_ID = /<image[^>]*\bid="([^"]+)"/;
 
 /** What a script reads as between one scene marker and the next. */
@@ -202,20 +215,19 @@ function outputText(output: { type: string; value?: unknown }): string {
 	return typeof output.value === "string" ? output.value : "";
 }
 
-/** What the editor last reported back, which is what a step is a reaction to. */
-function lastToolResult(
-	prompt: LanguageModelV3Prompt,
-): { toolName: string; text: string } | null {
+/** What the editor reported back this turn, oldest first. */
+function turnToolResults(prompt: LanguageModelV3Prompt): ToolResult[] {
 	// Scoped to the turn in flight: what the one before it read described a
 	// canvas that has since been edited.
 	const askedAt = prompt.findLastIndex((message) => message.role === "user");
-	const result = prompt
+	return prompt
 		.slice(askedAt + 1)
 		.flatMap((message) => (message.role === "tool" ? message.content : []))
-		.findLast((part) => part.type === "tool-result");
-	return result
-		? { toolName: result.toolName, text: outputText(result.output) }
-		: null;
+		.flatMap((part) =>
+			part.type === "tool-result"
+				? [{ toolName: part.toolName, text: outputText(part.output) }]
+				: [],
+		);
 }
 
 /** What the user actually asked for, apart from the prompt around it. */
@@ -242,38 +254,32 @@ function parts(
 const MOCK_THOUGHT =
 	"Reading the canvas to see what is already on it. Working out which scene the request points at, which elements sit inside that scene, and what the script currently says about each of them. Weighing whether this reads as a question to answer or as an edit to make, since the two want different tools, and a wrong guess there means an edit nobody asked for. Then picking the smallest change that does what was asked, so nothing else in the script has to move around, and nothing already on the canvas gets rewritten by accident. ";
 
+type ToolResult = { toolName: string; text: string };
+
+type MockStep = { say: string; toolName?: string; input?: unknown };
+
+const READ_SCRIPT: MockStep = {
+	say: "Reading the script. ",
+	toolName: "read_script",
+	input: {},
+};
+
 /**
  * Only edits when the message reads like a request to change something, so a
  * plain question gets a plain answer the way a real model would give one.
  */
-function mockCall(prompt: LanguageModelV3Prompt) {
-	const asked = lastUserText(prompt);
+function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 	const scene = animateImageScene(asked);
-	const last = lastToolResult(prompt);
-
-	// The canvas is never in the prompt, so a step that has not read it, or that
-	// just replaced it, has nothing to work from.
-	if (!last || last.toolName === "write_script") {
-		return { say: "Reading the script. ", toolName: "read_script", input: {} };
-	}
-
-	if (last.toolName === "edit_script") {
-		return {
-			say: "Done. That is as much as a mock can do without an API key.",
-		};
-	}
-
-	const script = last.text;
 	const elementId =
 		scene === null
-			? ELEMENT_ID.exec(script)?.[1]
+			? ELEMENT_ID.exec(sceneSection(script, 1))?.[1]
 			: IMAGE_ID.exec(sceneSection(script, scene))?.[1];
 
 	if (!elementId) {
 		return {
-			say: "Writing a script onto the canvas. ",
-			toolName: "write_script",
-			input: { brief: "A short mock story, written without an API key." },
+			say: "Naming the project. ",
+			toolName: "set_title",
+			input: { title: MOCK_TITLE },
 		};
 	}
 
@@ -303,6 +309,35 @@ function mockCall(prompt: LanguageModelV3Prompt) {
 			],
 		},
 	};
+}
+
+/** A new project is named, given its assets, then written; a replaced script is read again. */
+const NEXT_STEP: Record<string, (results: ToolResult[]) => MockStep> = {
+	write_script: () => READ_SCRIPT,
+	set_title: () => ({
+		say: "Setting up the cast and the art style. ",
+		toolName: "edit_script",
+		input: { ops: MOCK_ASSETS },
+	}),
+	edit_script: (results) =>
+		results.some((result) => result.toolName === "set_title")
+			? {
+					say: "Writing a script onto the canvas. ",
+					toolName: "write_script",
+					input: { brief: "A short mock story, written without an API key." },
+				}
+			: { say: "Done. That is as much as a mock can do without an API key." },
+};
+
+function mockCall(prompt: LanguageModelV3Prompt): MockStep {
+	const results = turnToolResults(prompt);
+	const last = results.at(-1);
+	// The canvas is never in the prompt, so a turn reads it before anything else.
+	if (!last) return READ_SCRIPT;
+	return (
+		NEXT_STEP[last.toolName]?.(results) ??
+		afterReading(lastUserText(prompt), last)
+	);
 }
 
 /**

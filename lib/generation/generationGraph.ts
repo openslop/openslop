@@ -1,49 +1,11 @@
 import isEqual from "lodash/isEqual";
 import memoizeOne from "memoize-one";
 import { shallow } from "zustand/shallow";
-import {
-	resolveElementConnector,
-	type ElementConnector,
-} from "@/lib/canvas/elementConnector";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import { resolveElementConnector } from "@/lib/canvas/elementConnector";
+import type { ScriptElement } from "@/lib/canvas/types";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
-import {
-	isSourceNode,
-	isUnbuiltElement,
-	type BuildContext,
-	type Dependency,
-	type UnbuiltElement,
-	type GenerationNode,
-	type JobNode,
-	type NodeId,
-	type NodeSpec,
-} from "./graph";
-
-const toJobNode = (
-	element: CanvasContentElement,
-	connector: ElementConnector,
-	plugins: ConnectorPlugin[],
-	dependsOn: Record<string, Dependency>,
-): JobNode => ({
-	id: element.id,
-	inputs: {
-		prompt: getPromptText(element),
-		attributes: element.generationAttributes ?? {},
-	},
-	dependsOn,
-	job: {
-		elementId: element.id,
-		elementType: element.type,
-		connectorType: connector.type,
-		model: connector.model,
-		config: { ...connector.config, plugins },
-	},
-});
-
-/** Two elements may read one source differently, as two narrations do a voice. */
-const keyOf = (node: GenerationNode) =>
-	isSourceNode(node) ? `${node.id}\n${node.identity}` : node.id;
+import type { BuildContext, Dependency, GenerationNode, NodeId } from "./graph";
 
 const sameDependencies = (
 	a: Record<string, Dependency>,
@@ -58,8 +20,8 @@ const isUnchanged = (before: GenerationNode, after: GenerationNode) =>
 	isEqual(before.inputs, after.inputs);
 
 export class GenerationGraph {
-	private readonly nodes = new Map<string, GenerationNode>();
-	private readonly previousNodes: Map<string, GenerationNode>;
+	private readonly nodes = new Map<NodeId, GenerationNode>();
+	private readonly previousNodes: Map<NodeId, GenerationNode>;
 	private readonly visiting = new Set<NodeId>();
 
 	constructor(
@@ -69,14 +31,11 @@ export class GenerationGraph {
 		this.previousNodes = previous?.nodes ?? new Map();
 	}
 
-	resolve = (spec: NodeSpec): GenerationNode => {
-		const target = spec(this.ctx);
-		return isUnbuiltElement(target)
-			? this.buildElement(target)
-			: this.intern(target);
-	};
+	resolve = (element: ScriptElement): GenerationNode =>
+		this.nodes.get(element.id) ??
+		this.build(this.ctx.canvas.find(({ id }) => id === element.id) ?? element);
 
-	private buildElement({ element, plugins: override }: UnbuiltElement) {
+	private build(element: ScriptElement): GenerationNode {
 		const { id } = element;
 		const cached = this.nodes.get(id);
 		if (cached) return cached;
@@ -85,50 +44,52 @@ export class GenerationGraph {
 		this.visiting.add(id);
 
 		try {
-			const connector = resolveElementConnector(
-				element,
-				this.ctx.registry,
-				this.ctx.state,
-			);
-			const plugins = override ?? connector.config.plugins ?? [];
-			return this.intern(
-				toJobNode(
-					element,
-					connector,
-					plugins,
-					this.dependenciesOf(element, plugins),
-				),
-			);
+			const { registry, canvas } = this.ctx;
+			const connector = resolveElementConnector(element, registry, canvas);
+			const plugins = connector.config.plugins ?? [];
+			return this.intern({
+				id,
+				inputs: {
+					prompt: getPromptText(element),
+					attributes: element.generationAttributes ?? {},
+					reads: Object.assign(
+						{},
+						...plugins.map((plugin) => plugin.reads?.(element, this.ctx)),
+					),
+				},
+				dependsOn: this.dependenciesOf(element, plugins),
+				job: {
+					elementId: id,
+					elementType: element.type,
+					connectorType: connector.type,
+					model: connector.model,
+					config: connector.config,
+				},
+			});
 		} finally {
 			this.visiting.delete(id);
 		}
 	}
 
-	private dependenciesOf(
-		element: CanvasContentElement,
-		plugins: ConnectorPlugin[],
-	) {
+	private dependenciesOf(element: ScriptElement, plugins: ConnectorPlugin[]) {
 		const declared = plugins
 			.flatMap((plugin) => plugin.dependencies ?? [])
-			.flatMap((declaration) => declaration.specs(element));
+			.flatMap((declaration) => declaration.edges(element, this.ctx));
 		const dependsOn: Record<string, Dependency> = {};
-		for (const [key, spec, label] of declared) {
+		for (const [key, target, label] of declared) {
 			if (Object.hasOwn(dependsOn, key))
 				throw new Error(
 					`Two dependencies of "${element.id}" share the key "${key}"`,
 				);
-			dependsOn[key] = { node: this.resolve(spec), label };
+			dependsOn[key] = { node: this.build(target), label };
 		}
 		return dependsOn;
 	}
 
 	private intern(node: GenerationNode) {
-		const key = keyOf(node);
-		const cached = this.nodes.get(key);
-		if (cached) return cached;
-		const previous = this.previousNodes.get(key);
+		const previous = this.previousNodes.get(node.id);
 		const kept = previous && isUnchanged(previous, node) ? previous : node;
-		this.nodes.set(key, kept);
+		this.nodes.set(node.id, kept);
 		return kept;
 	}
 }
@@ -141,10 +102,29 @@ export const createGraphFor = () => {
 	});
 };
 
-export const buildNode = (spec: NodeSpec, ctx: BuildContext): GenerationNode =>
-	new GenerationGraph(ctx).resolve(spec);
+/** Writes what the node's plugins settle, then builds it again from the canvas as written. */
+export async function prepareNode(
+	node: GenerationNode,
+	context: () => BuildContext,
+): Promise<GenerationNode> {
+	const ctx = context();
+	const element = ctx.canvas.find(({ id }) => id === node.id);
+	if (!element) throw new Error(`Element "${node.id}" left the canvas`);
+	const writes = await Promise.all(
+		(node.job.config.plugins ?? []).map(
+			(plugin) => plugin.prepare?.(element, ctx) ?? [],
+		),
+	);
+	for (const write of writes.flat()) ctx.setAsset(write);
+	return buildNode(element, context());
+}
+
+export const buildNode = (
+	element: ScriptElement,
+	ctx: BuildContext,
+): GenerationNode => new GenerationGraph(ctx).resolve(element);
 
 export const buildNodes = (
-	specs: NodeSpec[],
+	elements: ScriptElement[],
 	ctx: BuildContext,
-): GenerationNode[] => specs.map(new GenerationGraph(ctx).resolve);
+): GenerationNode[] => elements.map(new GenerationGraph(ctx).resolve);

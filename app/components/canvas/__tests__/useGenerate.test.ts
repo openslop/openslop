@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { CanvasContentElement, ScriptElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import {
-	forElement,
-	type GenerationNode,
-	type NodeSpec,
-} from "@/lib/generation/graph";
+import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
 import { buildNode, createGraphFor } from "@/lib/generation/generationGraph";
@@ -41,23 +37,23 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 	useQueueSelector: <T>(selector: (q: GenerationQueue) => T) => selector(queue),
 }));
 
-const store = createProjectStore();
+const state = createProjectStore().getState();
 let canvas: CanvasContentElement[] = [];
 // Like the real hook, the context keeps its identity while text inside an
 // element changes, and reads the canvas when it is made.
 const buildContext = () => ({
-	store,
-	state: store.getState(),
+	state,
 	canvas,
 	registry: DEFAULT_CONNECTOR_REGISTRY,
+	setAsset: () => {},
 });
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => buildContext,
 }));
 const graphFor = createGraphFor();
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
-	useResolveNode: () => (spec: NodeSpec) =>
-		graphFor(canvas, buildContext).resolve(spec),
+	useResolveNode: () => (target: ScriptElement) =>
+		graphFor(canvas, buildContext).resolve(target),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");
@@ -84,7 +80,7 @@ const edited = element("img", "image", "a sunrise");
 /** The image as it was regenerated from its own card: current, not stale. */
 function regenerateImageFromItsCard() {
 	canvas = [edited, video];
-	queue.commitResult(buildNode(forElement(edited), buildContext()), {
+	queue.commitResult(buildNode(edited, buildContext()), {
 		imageUrl: "https://img/sunrise.png",
 		durationSec: 0,
 	});
@@ -130,3 +126,15 @@ describe("generating after the element it depends on changed", () => {
 		expect(dependency && needsGeneration(dependency, queue)).toBe(false);
 	});
 });
+
+it.each([
+	["an element", () => render(useVideoGeneration).generate()],
+	["a scope", () => render(useVideoScope).run()],
+])(
+	"hands the queue the context factory when %s is generated, so each job reads the canvas as it runs",
+	(_, generate) => {
+		generate();
+
+		expect(enqueue).toHaveBeenCalledWith(expect.any(Array), buildContext);
+	},
+);

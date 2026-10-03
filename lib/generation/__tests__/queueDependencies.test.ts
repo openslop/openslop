@@ -11,7 +11,13 @@ type GenerateFn = (...args: unknown[]) => Promise<AssetResult>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
 
 vi.mock("../generateForElement", () => ({
-	generateForElement: (...args: unknown[]) => generateMock(...args),
+	generateForElement: ({ job, inputs }: GenerationNode, ...rest: unknown[]) =>
+		generateMock(job, inputs, ...rest),
+}));
+
+vi.mock("../generationGraph", async (original) => ({
+	...(await original<typeof import("../generationGraph")>()),
+	prepareNode: async (node: GenerationNode) => node,
 }));
 
 const config: ConnectorConfig = {};
@@ -26,7 +32,7 @@ function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
 	};
 	return {
 		id,
-		inputs: { prompt: id, attributes: {} },
+		inputs: { prompt: id, attributes: {}, reads: {} },
 		dependsOn: byId(dependsOn),
 		job,
 	};
@@ -62,7 +68,7 @@ describe("dependency ordering", () => {
 		const alice = node("avatar:Alice");
 		const bob = node("avatar:Bob");
 		const image = node("image", [alice]);
-		queue.enqueueGraph([image, bob], EMPTY_CONTEXT);
+		queue.enqueueGraph([image, bob], () => EMPTY_CONTEXT);
 		await vi.advanceTimersByTimeAsync(0);
 
 		// Bob finishing frees a batch slot, but the image depends on Alice.
@@ -81,11 +87,11 @@ describe("dependency ordering", () => {
 		// enqueueGraph walks the graph itself, so a node reached only through
 		// another dependency still gets queued: here a video opening on an image
 		// that in turn draws a character.
-		const avatar = node("~avatar:Alice");
+		const avatar = node("cast:Alice");
 		const frame = node("img", [avatar]);
-		queue.enqueueGraph([node("vid-1", [frame])], EMPTY_CONTEXT);
+		queue.enqueueGraph([node("vid-1", [frame])], () => EMPTY_CONTEXT);
 
-		expect(queue.getElementSnapshot("~avatar:Alice").status).not.toBe("idle");
+		expect(queue.getElementSnapshot("cast:Alice").status).not.toBe("idle");
 		expect(queue.getElementSnapshot("img").status).not.toBe("idle");
 		expect(queue.getElementSnapshot("vid-1").status).toBe("queued");
 	});
@@ -93,10 +99,10 @@ describe("dependency ordering", () => {
 	it("visits a dependency shared by two roots once", () => {
 		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
 
-		const avatar = node("~avatar:Alice");
+		const avatar = node("cast:Alice");
 		queue.enqueueGraph(
 			[node("a", [avatar]), node("b", [avatar])],
-			EMPTY_CONTEXT,
+			() => EMPTY_CONTEXT,
 		);
 
 		expect(queue.getActiveCount()).toBe(3);
@@ -111,7 +117,7 @@ describe("dependency ordering", () => {
 		);
 
 		const avatar = node("avatar:Alice");
-		queue.enqueueGraph([node("image", [avatar])], EMPTY_CONTEXT);
+		queue.enqueueGraph([node("image", [avatar])], () => EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		const imageCall = generateMock.mock.calls.find(
@@ -132,7 +138,7 @@ describe("dependency ordering", () => {
 
 		const alice = node("avatar:Alice");
 		const image = node("image", [alice]);
-		queue.enqueueGraph([image, node("avatar:Bob")], EMPTY_CONTEXT);
+		queue.enqueueGraph([image, node("avatar:Bob")], () => EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("image").result).not.toBeNull();
@@ -144,7 +150,7 @@ describe("dependency ordering", () => {
 		const avatar = node("avatar:Alice");
 		queue.commitResult(avatar, { imageUrl: "existing.png", durationSec: 0 });
 
-		queue.enqueueGraph([node("image", [avatar])], EMPTY_CONTEXT);
+		queue.enqueueGraph([node("image", [avatar])], () => EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		expect(startedIds()).toEqual(["image"]);
@@ -160,9 +166,9 @@ describe("dependency ordering", () => {
 
 		const image = node("image", [node("avatar:Alice")]);
 		queue.commitResult(image, { imageUrl: "existing.png", durationSec: 0 });
-		queue.enqueueGraph([node("avatar:Alice")], EMPTY_CONTEXT);
+		queue.enqueueGraph([node("avatar:Alice")], () => EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
-		queue.enqueueGraph([image], EMPTY_CONTEXT);
+		queue.enqueueGraph([image], () => EMPTY_CONTEXT);
 		await vi.runAllTimersAsync();
 
 		// The image never ran, so the URL it already held is still good.
@@ -180,7 +186,10 @@ describe("dependency ordering", () => {
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
-		queue.enqueueGraph([node("image", [node("avatar:Alice")])], EMPTY_CONTEXT);
+		queue.enqueueGraph(
+			[node("image", [node("avatar:Alice")])],
+			() => EMPTY_CONTEXT,
+		);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("image").status).toBe("idle");
@@ -190,13 +199,16 @@ describe("dependency ordering", () => {
 
 	it("reports a failed dependency on the dependent that was waiting on it", async () => {
 		generateMock.mockImplementation((job) =>
-			(job as GenerationJob).elementId === "~avatar:Alice"
+			(job as GenerationJob).elementId === "cast:Alice"
 				? Promise.reject(new Error("avatar boom"))
 				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
-		queue.enqueueGraph([node("image", [node("~avatar:Alice")])], EMPTY_CONTEXT);
+		queue.enqueueGraph(
+			[node("image", [node("cast:Alice")])],
+			() => EMPTY_CONTEXT,
+		);
 		await vi.runAllTimersAsync();
 
 		// A derived node has no card, so its failure has to surface on the element.
@@ -211,7 +223,10 @@ describe("dependency ordering", () => {
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
-		queue.enqueueGraph([node("a", [node("b", [node("c")])])], EMPTY_CONTEXT);
+		queue.enqueueGraph(
+			[node("a", [node("b", [node("c")])])],
+			() => EMPTY_CONTEXT,
+		);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("b").error).toMatch(/root boom/);
@@ -221,7 +236,10 @@ describe("dependency ordering", () => {
 	it("leaves no error on a dependent released for a reason other than failure", async () => {
 		generateMock.mockResolvedValue({ imageUrl: "x.png", durationSec: 0 });
 
-		queue.enqueueGraph([node("image", [node("avatar:Alice")])], EMPTY_CONTEXT);
+		queue.enqueueGraph(
+			[node("image", [node("avatar:Alice")])],
+			() => EMPTY_CONTEXT,
+		);
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("image").error).toBeNull();

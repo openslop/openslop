@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { toastError } from "@/lib/toastError";
 import { createAutosaver, type Autosaver } from "@/lib/project/autosave";
-import type { ProjectContent } from "@/lib/project/projectDocument";
+import type { ProjectDocument } from "@/lib/project/projectDocument";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
 
@@ -16,7 +16,7 @@ const TOAST_OPTIONS = {
 
 export function useAutosave(
 	projectId: string,
-	read: () => ProjectContent,
+	document: ProjectDocument,
 ): Autosaver {
 	const queue = useGenerationQueue();
 	const store = useProjectStoreHandle();
@@ -24,7 +24,8 @@ export function useAutosave(
 	const [autosaver] = useState(() =>
 		createAutosaver({
 			projectId,
-			read,
+			read: document.read,
+			details: document.details,
 			onSaved: () => toast("Saved", TOAST_OPTIONS),
 			onError: (error) =>
 				toastError(error, "Save failed", {

@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Descendant, Editor } from "slate";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { createEditor, type Descendant } from "slate";
+import { findAsset, getAssets } from "@/lib/canvas/assets";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
@@ -32,14 +37,17 @@ vi.mock("react", () => ({
 	},
 }));
 
-let children: Descendant[] = [];
 // One editor for the life of a test, as Slate's own is: only `children` is
 // swapped, and that swap is what a document revision means.
-const editor = {
-	get children() {
-		return children;
+const editor = createEditor();
+editor.defaultModels = () => ({});
+let children: Descendant[] = [];
+Object.defineProperty(editor, "children", {
+	get: () => children,
+	set: (next: Descendant[]) => {
+		children = next;
 	},
-} as unknown as Editor;
+});
 vi.mock("slate-react", () => ({
 	useSlateStatic: () => editor,
 }));
@@ -99,16 +107,39 @@ describe("useBuildContext", () => {
 		children = document(video("vid-1", "shot one"));
 		const before = render(useBuildContext);
 
-		store.getState().updateMetadata({ style: "noir" });
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
 		expect(render(useBuildContext)).not.toBe(before);
 	});
 
-	it("carries the store its state was read from, for a build to write to", () => {
-		children = document();
-		const context = render(useBuildContext)();
+	it("reads every element of the document, assets first", () => {
+		const style = createCanvasNode("style", { text: "noir" });
+		children = [style, ...document(video("vid-1", "shot one"))];
 
-		expect(context.store).toBe(store);
-		expect(context.state).toBe(store.getState());
+		const { canvas } = render(useBuildContext)();
+
+		expect(canvas.map(({ id }) => id)).toEqual(["style", "vid-1"]);
+	});
+
+	it.each([
+		["merges a write onto the asset it names", [{ gender: "feminine" }]],
+		["creates the asset a write names when it is missing", []],
+	])("%s", (_, existing) => {
+		const voices = existing.map((attrs) =>
+			createCanvasNode("voice", { attrs }),
+		);
+		children = [...voices, ...document(video("vid-1", "shot one"))];
+
+		render(useBuildContext)().setAsset({
+			type: "voice",
+			attrs: { voiceId: "v1" },
+		});
+
+		const written = findAsset(children, "voice");
+		expect(getAssets(children)).toHaveLength(1);
+		expect(written && flatAttributes(written)).toMatchObject({
+			...existing[0],
+			voiceId: "v1",
+		});
 	});
 });

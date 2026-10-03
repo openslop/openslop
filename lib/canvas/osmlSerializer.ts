@@ -1,6 +1,7 @@
 import { Descendant } from "slate";
-import type { CanvasContentElement, ParsedElement } from "./types";
-import { getContentElements, isSceneElement } from "./scenes";
+import { getAssets } from "./assets";
+import type { ParsedElement, ScriptElement } from "./types";
+import { isSceneElement } from "./scenes";
 import { withoutCaretMarker } from "./constants";
 import { flatAttributes } from "./elementAttributes";
 import { escapeXml } from "./xmlEscape";
@@ -16,7 +17,7 @@ export function getElementBodyText(element: ParsedElement): string {
 	return withoutCaretMarker(getElementText(element));
 }
 
-function serializeElement(element: CanvasContentElement): string {
+function serializeElement(element: ScriptElement): string {
 	const attrString = Object.entries({
 		id: element.id,
 		...flatAttributes(element),
@@ -26,17 +27,15 @@ function serializeElement(element: CanvasContentElement): string {
 	return `<${element.type}${attrString}>${escapeXml(getElementBodyText(element))}</${element.type}>\n`;
 }
 
-export function serializeOSML(descendants: Descendant[]): string {
-	return getContentElements(descendants).map(serializeElement).join("").trim();
-}
-
+/** The whole document: the assets, then each scene under its marker. */
 export function serializeOSMLWithScenes(descendants: Descendant[]): string {
-	return descendants
+	const scenes = descendants
 		.filter(isSceneElement)
 		.map(
 			(scene, index) =>
 				sceneMarker(index + 1) + scene.children.map(serializeElement).join(""),
-		)
+		);
+	return [...getAssets(descendants).map(serializeElement), ...scenes]
 		.join("")
 		.trim();
 }

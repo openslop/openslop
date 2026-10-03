@@ -6,9 +6,11 @@ import { defineTool } from "./defineTool";
 
 export const writeScript = defineTool({
 	description: dedent`
-	  Write a new script onto the canvas from a brief. This clears the canvas and starts
-	  from scratch. Use this to start a project, or when the user asks for a fresh start on
-	  a different idea. For any change to an existing script, however large, use edit_script.
+	  Write a new script onto the canvas from a brief. This clears the script and starts
+	  from scratch; the assets stay, and the script is written against them, so the cast,
+	  voices and art style it needs go on the canvas first. Use this to start a project, or
+	  when the user asks for a fresh start on a different idea. For any change to an
+	  existing script, however large, use edit_script.
 
 	  The brief is the writer's whole instruction: anything from a one-line premise to a
 	  full treatment, carrying the genre, tone, characters, structure and constraints the

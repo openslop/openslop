@@ -1,189 +1,242 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { characterAvatarElementId } from "@/lib/project/characterAvatar";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import type { ElementType, ScriptElement } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
-import { flattenGraph, forElement, type BuildContext } from "../graph";
+import { flattenGraph, type BuildContext, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { buildNode } from "../generationGraph";
+import { staleReason } from "../staleReason";
 import { isNodeStale, needsGeneration } from "../staleness";
 
 let store: ProjectStore;
+let assets: ScriptElement[];
+
+const make = (
+	type: ElementType,
+	text = "",
+	attrs: Record<string, string> = {},
+	id?: string,
+) => createCanvasNode(type, { id, attrs, text });
+
+const cast = (name: string, appearance: string) =>
+	make("cast", appearance, { name });
 
 const element = (
 	id: string,
-	type: CanvasContentElement["type"],
+	type: "image" | "video" | "narration",
 	customAttributes?: Record<string, string>,
-): CanvasContentElement => ({
+): ScriptElement => ({
 	id,
 	type,
 	...splitAttributes({ ...customAttributes }),
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
-const context = (canvas: CanvasContentElement[]): BuildContext => ({
-	store,
+const context = (canvas: ScriptElement[]): BuildContext => ({
 	state: store.getState(),
-	canvas,
+	canvas: [...assets, ...canvas],
 	registry: DEFAULT_CONNECTOR_REGISTRY,
+	setAsset: () => {},
 });
 
-const resolveOn = (el: CanvasContentElement, canvas: CanvasContentElement[]) =>
-	buildNode(forElement(el), context(canvas));
+const resolveOn = (el: ScriptElement, canvas: ScriptElement[]) =>
+	buildNode(el, context(canvas));
 
-const resolve = (el: CanvasContentElement) => resolveOn(el, []);
+const resolve = (el: ScriptElement) => resolveOn(el, []);
 
-const idsOf = (el: CanvasContentElement) =>
+const idsOf = (el: ScriptElement) =>
 	flattenGraph([resolve(el)]).map((node) => node.id);
+
+const edgesOf = (node: GenerationNode) =>
+	Object.fromEntries(
+		Object.entries(node.dependsOn).map(([key, { node: dep }]) => [key, dep.id]),
+	);
+
+const commit = (queue: GenerationQueue, node: GenerationNode, url: string) =>
+	queue.commitResult(node, { imageUrl: url, durationSec: 0 });
+
+const generateAll = (queue: GenerationQueue, root: GenerationNode) => {
+	for (const node of flattenGraph([root]))
+		commit(queue, node, `${node.id}.out`);
+};
 
 beforeEach(() => {
 	store = createProjectStore();
-	store
-		.getState()
-		.updateMetadata({ characters: { Alice: { appearance: "red hair" } } });
+	assets = [
+		make("style", "noir"),
+		make("references", "", { images: "a.png" }),
+		cast("Alice", "red hair"),
+	];
 });
 
 describe("buildNode", () => {
-	// A card's spec is made at render, but Slate notifies selectors before the
-	// next render, so the spec can hold the element as it was one edit ago.
-	it("builds from the element on the canvas, not the one the spec captured", () => {
+	// Slate notifies selectors before the next render, so the handed element can be one edit old.
+	it("builds from the element on the canvas, not the one it was handed", () => {
 		const stale = element("vid", "video", { duration: "10" });
 		const canvas = [element("vid", "video", { duration: "11" })];
 
-		const node = resolveOn(stale, canvas);
-
-		expect(node.inputs.attributes.duration).toBe("11");
-		expect(node.inputs.attributes).toBe(canvas[0].generationAttributes);
+		expect(resolveOn(stale, canvas).inputs.attributes).toBe(
+			canvas[0]?.generationAttributes,
+		);
 	});
 
 	it("builds the given element when the canvas does not carry it", () => {
-		const offCanvas = element("avatar", "image", { kind: "avatar" });
+		const offCanvas = element("gone", "video", { duration: "5" });
 
-		expect(resolve(offCanvas).inputs.attributes.kind).toBe("avatar");
+		expect(resolve(offCanvas).inputs.attributes.duration).toBe("5");
 	});
 
-	it("labels the edge to a dependency rather than the node it reaches", () => {
-		const image = element("img", "image");
-		const video = element("vid", "video", { startFrame: "previous" });
-		const canvas = [image, video];
+	it.each([
+		["image", "image"],
+		["narration", "tts"],
+		["cast", "image"],
+	] as const)("builds a %s on the %s connector", (type, connectorType) => {
+		assets = [];
+		const target = make(type, "said", {}, "target");
 
-		const edge = resolveOn(video, canvas).dependsOn.previousVisual;
-		expect(edge?.label).toBe("the previous visual");
-		expect(edge?.node).toEqual(resolveOn(image, canvas));
-	});
+		const node = resolve(target);
 
-	it("keys each edge by the name its plugin declared", () => {
-		const video = element("vid", "video", { startFrame: "previous" });
-
-		expect(Object.keys(resolveOn(video, [video]).dependsOn)).toEqual([
-			"artStyle",
-			"referenceImages",
-			"aspectRatio",
-			"previousVisual",
-		]);
-	});
-
-	it("depends on the project state an image reads", () => {
-		expect(idsOf(element("img", "image"))).toEqual([
-			"project:artStyle",
-			"project:referenceImages",
-			"project:aspectRatio",
-			"img",
-		]);
-	});
-
-	it("depends on the avatar of each referenced character", () => {
-		const ids = idsOf(element("img", "image", { characters: "Alice" }));
-		expect(ids).toContain(characterAvatarElementId("Alice"));
-		expect(ids.indexOf(characterAvatarElementId("Alice"))).toBeLessThan(
-			ids.indexOf("img"),
-		);
-	});
-
-	it("gives a referenced avatar its own art-style and reference-image edges", () => {
-		const avatar = Object.values(
-			resolve(element("img", "image", { characters: "Alice" })).dependsOn,
-		).find(({ node }) => node.id === characterAvatarElementId("Alice"))?.node;
-		expect(
-			Object.values(avatar?.dependsOn ?? {}).map(({ node }) => node.id),
-		).toEqual([
-			"project:artStyle",
-			"project:referenceImages",
-			"project:aspectRatio",
-		]);
-	});
-
-	it("does not depend on avatars of characters it does not reference", () => {
-		store.getState().setCharacter("Bob", { appearance: "tall" });
-		const ids = idsOf(element("img", "image", { characters: "Alice" }));
-		expect(ids).not.toContain(characterAvatarElementId("Bob"));
-	});
-
-	// Ported from the deleted getGenerationInputs tests: node inputs are exactly
-	// the authored attributes, minus the centralized layout contract.
-	it("keeps generation-affecting attributes as the node's own inputs", () => {
-		const node = resolve(
-			element("vid-1", "video", {
-				model: "Slop Video v1",
-				duration: "5",
-			}),
-		);
-		expect(node.inputs.prompt).toBe("a sunset");
-		expect(node.inputs.attributes).toEqual({
-			model: "Slop Video v1",
-			duration: "5",
+		expect(node.id).toBe(target.id);
+		expect(node.inputs.prompt).toBe("said");
+		expect(node.job).toMatchObject({
+			elementId: target.id,
+			elementType: type,
+			connectorType,
 		});
 	});
 
-	it("strips exactly the centralized LAYOUT_ATTRIBUTE_KEYS contract", () => {
+	it.each(["title", "project", "voice", "style", "references"] as const)(
+		"builds no node for a %s, which generates nothing",
+		(type) => {
+			expect(() => resolve(make(type))).toThrow(
+				`A ${type} element generates nothing`,
+			);
+		},
+	);
+
+	it("keys each labelled edge by the name its plugin declared", () => {
+		const img = element("img", "image");
+		const video = element("vid", "video", {
+			startFrame: "previous",
+			characters: "Alice",
+		});
+		assets = [...assets, make("voice", "", { name: "Alice" })];
+
+		const node = resolveOn(video, [img, video]);
+
+		expect(edgesOf(node)).toEqual({
+			"avatar:Alice": "cast:Alice",
+			previousVisual: "img",
+		});
+		expect(node.dependsOn.previousVisual?.label).toBe("the previous visual");
+	});
+
+	it("reads the style and the references an image is drawn with, depending on neither", () => {
+		const img = element("img", "image");
+
+		expect(idsOf(img)).toEqual(["img"]);
+		expect(resolve(img).inputs.reads).toMatchObject({
+			"the art style": "noir",
+			"the reference images": "a.png",
+		});
+	});
+
+	it.each([
+		["an asset that is not on the canvas", "image", {}],
+		["a character the cast does not know", "image", { characters: "Nobody" }],
+		["a video with nothing before it", "video", { startFrame: "previous" }],
+	] as const)("declares no edge for %s", (name, type, attrs) => {
+		if (name.startsWith("an asset")) assets = [];
+		const el = element("el", type, attrs);
+
+		expect(resolveOn(el, [el]).dependsOn).toEqual({});
+	});
+
+	it("depends on the cast element of each character it shows, and no other", () => {
+		assets = [...assets, cast("Bob", "tall")];
+		const ids = idsOf(element("img", "image", { characters: "Alice" }));
+
+		expect(ids).toEqual(["cast:Alice", "img"]);
+	});
+
+	it("goes stale once a character it shows joins the cast", () => {
+		const queue = new GenerationQueue();
+		const img = element("img", "image", { characters: "Bob" });
+		generateAll(queue, resolve(img));
+		expect(isNodeStale(resolve(img), queue)).toBe(false);
+
+		assets = [...assets, cast("Bob", "tall")];
+
+		expect(isNodeStale(resolve(img), queue)).toBe(true);
+	});
+
+	it("visits a dependency shared by the element and the visual before it only once", () => {
+		const img = element("img", "image", { characters: "Alice" });
+		const video = element("vid", "video", {
+			startFrame: "previous",
+			characters: "Alice",
+		});
+
+		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
+			(node) => node.id,
+		);
+		expect(ids).toEqual(["cast:Alice", "img", "vid"]);
+	});
+
+	it("keeps generation attributes as inputs and strips every layout key", () => {
 		const layoutOnly = Object.fromEntries(
 			LAYOUT_ATTRIBUTE_KEYS.map((key) => [key, "1"]),
 		);
 		const node = resolve(
 			element("vid-1", "video", { ...layoutOnly, model: "Slop Video v1" }),
 		);
-		for (const key of LAYOUT_ATTRIBUTE_KEYS) {
-			expect(node.inputs.attributes).not.toHaveProperty(key);
-		}
+
 		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
 	});
 
-	it("sizes a video from the project aspect ratio via its dependency", () => {
-		const ids = idsOf(element("vid-1", "video"));
-		expect(ids).toContain("project:aspectRatio");
-	});
+	describe("the project state a node reads", () => {
+		const reframe = () =>
+			store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
-	it("builds the visual a video opens on ahead of the video", () => {
-		const img = element("img", "image");
-		const video = element("vid-1", "video", { startFrame: "previous" });
+		it("stales a result when the aspect ratio it read changes", () => {
+			const queue = new GenerationQueue();
+			const img = element("img", "image");
+			generateAll(queue, resolve(img));
+			expect(isNodeStale(resolve(img), queue)).toBe(false);
 
-		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
-			(node) => node.id,
-		);
-		expect(ids).toContain("img");
-		expect(ids.indexOf("img")).toBeLessThan(ids.indexOf("vid-1"));
+			reframe();
+
+			expect(staleReason(resolve(img), queue)).toBe(
+				"The aspect ratio changed — regenerate to update",
+			);
+		});
+
+		it("leaves a node that reads nothing alone when it changes", () => {
+			const queue = new GenerationQueue();
+			const sound = make("sound", "rain", {}, "sound");
+			generateAll(queue, resolve(sound));
+
+			reframe();
+
+			expect(resolve(sound).inputs.reads).toEqual({});
+			expect(isNodeStale(resolve(sound), queue)).toBe(false);
+		});
 	});
 
 	it("marks a video stale when its start frame is replaced by an upload", () => {
 		const img = element("img", "image");
 		const el = element("vid-1", "video", { startFrame: "previous" });
 		const video = resolveOn(el, [img, el]);
-		const frame = video.dependsOn.previousVisual?.node;
-		if (!frame) throw new Error("expected a previous-visual dependency");
-
 		const queue = new GenerationQueue();
-		const commit = (node: typeof video, url: string) =>
-			queue.commitResult(node, { imageUrl: url, durationSec: 0 });
-
-		commit(frame, "frame.png");
-		commit(video, "video.mp4");
+		generateAll(queue, video);
 		expect(isNodeStale(video, queue)).toBe(false);
 
-		commit(frame, "uploaded.png");
+		commit(queue, resolveOn(img, [img, el]), "uploaded.png");
 		expect(isNodeStale(video, queue)).toBe(true);
 	});
 
@@ -192,35 +245,53 @@ describe("buildNode", () => {
 		const img = element("img", "image");
 		const other = element("other", "image");
 		const el = element("vid-1", "video", { startFrame: "previous" });
-		const video = resolveOn(el, [img, el]);
-		queue.commitResult(resolveOn(img, [img, el]), {
-			imageUrl: "frame.png",
-			durationSec: 0,
-		});
-		queue.commitResult(video, { videoUrl: "video.mp4", durationSec: 5 });
-		expect(isNodeStale(video, queue)).toBe(false);
+		generateAll(queue, resolveOn(el, [img, el]));
 
 		expect(isNodeStale(resolveOn(el, [img, other, el]), queue)).toBe(true);
 	});
 
-	// An upload replaces a generated result with the user's own image. Project
-	// state drifting underneath it must not let Generate All overwrite it.
-	it("regenerates a generated image when the art style changes", () => {
+	it("regenerates a generated image when the art style is edited", () => {
 		const queue = new GenerationQueue();
 		const img = element("img", "image");
-
-		queue.commitResult(resolve(img), {
-			imageUrl: "generated.png",
-			durationSec: 0,
-		});
+		generateAll(queue, resolve(img));
 		expect(needsGeneration(resolve(img), queue)).toBe(false);
 
-		store.getState().updateMetadata({ style: "noir" });
+		assets = [make("style", "watercolor"), ...assets.slice(1)];
+
 		expect(needsGeneration(resolve(img), queue)).toBe(true);
+		expect(staleReason(resolve(img), queue)).toBe(
+			"The art style changed — regenerate to update",
+		);
 	});
 
-	it("visits a dependency shared by the element and its avatar only once", () => {
-		const ids = idsOf(element("img", "image", { characters: "Alice" }));
-		expect(ids.filter((id) => id === "project:artStyle")).toHaveLength(1);
+	describe("speech and the voice it is spoken in", () => {
+		const line = element("line", "narration");
+		const voice = (attrs: Record<string, string>) => {
+			assets = [make("voice", "", attrs)];
+		};
+
+		it("reads the voice its speaker chose, depending on nothing", () => {
+			voice({ voiceId: "v-1" });
+			const node = resolve(line);
+
+			expect(edgesOf(node)).toEqual({});
+			expect(
+				JSON.parse(node.inputs.reads["the narrator's voice"] ?? "{}"),
+			).toMatchObject({ voiceId: "v-1" });
+		});
+
+		it("stays current while only the search filters change, and stales when another voice is chosen", () => {
+			const queue = new GenerationQueue();
+			voice({ voiceId: "v-1", gender: "feminine" });
+			generateAll(queue, resolve(line));
+			voice({ voiceId: "v-1", gender: "masculine", language: "fr" });
+			expect(isNodeStale(resolve(line), queue)).toBe(false);
+
+			voice({ voiceId: "v-2", gender: "masculine" });
+
+			expect(staleReason(resolve(line), queue)).toBe(
+				"The narrator's voice changed — regenerate to update",
+			);
+		});
 	});
 });

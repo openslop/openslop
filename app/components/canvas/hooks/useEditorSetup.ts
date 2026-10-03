@@ -3,42 +3,49 @@ import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { withHistory } from "slate-history";
 import flow from "lodash/flow";
+import { projectModels } from "@/lib/canvas/assets";
 import type { CanvasEditor } from "@/lib/canvas/types";
-import type { ConnectorModels } from "@/lib/connectors/models";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { applyScriptToEditor } from "@/lib/project/applyScript";
-import { withNodeId } from "../plugins/withNodeId";
+import { useAccountStoreHandle } from "@/lib/user/AccountStoreProvider";
+import type { AccountStore } from "@/lib/user/accountStore";
+import { withAssets } from "../plugins/withAssets";
 import { withLayout } from "../plugins/withLayout";
+import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
 
 function createCanvasEditor(
 	script: string,
-	defaultModels: () => ConnectorModels,
+	account: AccountStore,
 	sceneId: (index: number) => string,
 ): CanvasEditor {
 	const editor = flow(
 		withHistory,
 		withReact,
 		withLayout,
+		withAssets,
 		withScenes,
 		withFlatPaste,
 		withNodeId,
 		withOSMLClipboard,
 	)(createEditor());
-	editor.defaultModels = defaultModels;
-	// Loading an empty script would seed the layout's narration ahead of the first one streamed in.
-	if (script) applyScriptToEditor(editor, script, defaultModels(), sceneId);
+	editor.defaultModels = (nodes = editor.children) =>
+		resolveDefaultModels({
+			project: projectModels(nodes),
+			account: account.getState().models,
+		});
+	if (script) applyScriptToEditor(editor, script, sceneId);
 	return editor;
 }
 
 export function useEditorSetup(script: string): CanvasEditor {
-	const defaultModels = useResolveDefaultModels();
+	const account = useAccountStoreHandle();
 	// Scene ids render as data-scene-id, so the server render and hydration must mint the same ones.
 	const idPrefix = useId();
 	const [editor] = useState(() =>
-		createCanvasEditor(script, defaultModels, (index) => `${idPrefix}${index}`),
+		createCanvasEditor(script, account, (index) => `${idPrefix}${index}`),
 	);
 	return editor;
 }

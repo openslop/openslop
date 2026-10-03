@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+	isAssetElement,
+	isAssetType,
 	isCanvasElementType,
 	isContentElement,
 	isForeground,
 	isParsedContentElement,
+	isScriptElement,
 } from "../guards";
 import type { ParsedElement } from "../types";
 
@@ -19,17 +22,39 @@ describe("isCanvasElementType", () => {
 		expect(isCanvasElementType("video")).toBe(true);
 	});
 
-	it("rejects scene, metadata and unknown tags", () => {
+	it("rejects scene, asset and unknown tags", () => {
 		expect(isCanvasElementType("scene")).toBe(false);
-		expect(isCanvasElementType("metadata_title")).toBe(false);
+		expect(isCanvasElementType("cast")).toBe(false);
 		expect(isCanvasElementType("nonsense")).toBe(false);
 	});
 });
 
 describe("isParsedContentElement", () => {
-	it("narrows canvas nodes and rejects metadata nodes", () => {
+	it("narrows canvas nodes and rejects assets and unknown tags", () => {
 		expect(isParsedContentElement(parsed("music"))).toBe(true);
-		expect(isParsedContentElement(parsed("metadata_character"))).toBe(false);
+		expect(isParsedContentElement(parsed("cast"))).toBe(false);
+		expect(isParsedContentElement(parsed("nonsense"))).toBe(false);
+	});
+});
+
+describe("isAssetType", () => {
+	it("accepts the asset types and nothing else", () => {
+		expect(["cast", "voice", "style", "references"].every(isAssetType)).toBe(
+			true,
+		);
+		expect(["image", "scene", "toString"].some(isAssetType)).toBe(false);
+	});
+});
+
+describe("isAssetElement and isScriptElement", () => {
+	it.each([
+		[{ id: "a", type: "voice", children: [] }, true, true],
+		[{ id: "a", type: "image", children: [] }, false, true],
+		[{ id: "a", type: "scene", children: [] }, false, false],
+		[{ text: "plain" }, false, false],
+	])("%o: asset %s, script %s", (node, asset, script) => {
+		expect(isAssetElement(node)).toBe(asset);
+		expect(isScriptElement(node)).toBe(script);
 	});
 });
 

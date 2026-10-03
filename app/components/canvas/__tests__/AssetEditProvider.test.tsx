@@ -23,9 +23,9 @@ vi.mock("../elements/character/CharacterEditModal", () => ({
 		<button data-dialog={`character ${props.name}`} onClick={props.onClose} />
 	),
 }));
-vi.mock("../elements/character/NarratorEditModal", () => ({
-	NarratorEditModal: ({ onClose }: { onClose: () => void }) => (
-		<button data-dialog="narrator" onClick={onClose} />
+vi.mock("../elements/character/AssetDialog", () => ({
+	AssetDialog: (props: { title: string; onClose: () => void }) => (
+		<button data-dialog={props.title.toLowerCase()} onClick={props.onClose} />
 	),
 }));
 vi.mock("../elements/style/ArtStyleModal", () => ({
@@ -67,13 +67,13 @@ describe("AssetEditProvider", () => {
 	});
 
 	it("shows only the dialog of the asset opened last", () => {
-		act(() => editors.openNarrator());
+		act(() => editors.editAsset("voice"));
 		expect(openDialogs()).toEqual(["narrator"]);
 
-		act(() => editors.openArtStyle());
+		act(() => editors.editAsset("style"));
 		expect(openDialogs()).toEqual(["style"]);
 
-		act(() => editors.editCharacter("Mia"));
+		act(() => editors.editAsset("cast", "Mia"));
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
@@ -85,8 +85,13 @@ describe("AssetEditProvider", () => {
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
+	it("opens a character's voice in their own dialog", () => {
+		act(() => editors.editAsset("voice", "Mia"));
+		expect(openDialogs()).toEqual(["character Mia"]);
+	});
+
 	it("unmounts the dialog when it closes", () => {
-		act(() => editors.openNarrator());
+		act(() => editors.editAsset("voice"));
 
 		clickDialog();
 		expect(openDialogs()).toEqual([]);

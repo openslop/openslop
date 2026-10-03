@@ -1,188 +1,63 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type {
-	AssetConnectorType,
-	AssetResult,
-	ConnectorConfig,
-	GenerationContext,
-} from "@/lib/connectors/types";
+import type { AssetResult, GenerationContext } from "@/lib/connectors/types";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import type { GenerationInputs } from "../inputs";
-import type { GenerationJob } from "../graph";
+import type { GenerationNode } from "../graph";
 
 const mockGenerate =
 	vi.fn<
 		(params: unknown, context: GenerationContext) => Promise<AssetResult>
 	>();
 
-vi.mock("@/lib/connectors/factory", () => ({
-	createConnector: vi.fn(() => ({
-		generate: mockGenerate,
-	})),
+vi.mock("@/lib/connectors/factory", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/connectors/factory")>()),
+	createConnector: vi.fn(() => ({ generate: mockGenerate })),
 }));
 
 import { generateForElement } from "../generateForElement";
 import { createConnector } from "@/lib/connectors/factory";
-import { EMPTY_CONTEXT } from "./_context";
+import { jobNode } from "./_graph";
 
-const config: ConnectorConfig = {};
-
-function makeJob(connectorType: AssetConnectorType): GenerationJob {
-	return {
-		elementId: "el-1",
-		elementType: "image",
-		connectorType,
-		model: DEFAULT_MODELS[connectorType],
-		config,
-	};
-}
-
-const inputs = (
-	prompt: string,
-	attributes: Record<string, string> = {},
-): GenerationInputs => ({ prompt, attributes, dependencies: {} });
-
-const generationContext = (dependencies: Record<string, AssetResult> = {}) => ({
-	dependencies,
-	state: EMPTY_CONTEXT.state,
-	store: EMPTY_CONTEXT.store,
-	speech: expect.any(Function),
-});
+const node: GenerationNode = {
+	...jobNode("a sunset"),
+	inputs: {
+		prompt: "a sunset",
+		attributes: { width: "1024" },
+		reads: { "the art style": "noir" },
+	},
+};
 
 describe("generateForElement", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("creates connector and calls generate with correct params", async () => {
-		const expected: AssetResult = {
-			imageUrl: "https://example.com/img.png",
-			durationSec: 0,
-		};
+	it("generates on the job's connector with the node's inputs, dependency results and signal", async () => {
+		const expected: AssetResult = { imageUrl: "img.png", durationSec: 0 };
 		mockGenerate.mockResolvedValue(expected);
+		const dependencies = {
+			previousVisual: { imageUrl: "frame.png", durationSec: 0 },
+		};
+		const { signal } = new AbortController();
 
-		const result = await generateForElement(
-			makeJob("image"),
-			inputs("a sunset", { width: "1024" }),
-			{},
-			EMPTY_CONTEXT,
-		);
+		const result = await generateForElement(node, dependencies, signal);
 
 		expect(createConnector).toHaveBeenCalledWith(
 			"image",
 			DEFAULT_MODELS.image,
-			config,
+			{},
 		);
 		expect(mockGenerate).toHaveBeenCalledWith(
 			{ prompt: "a sunset", width: "1024" },
-			generationContext(),
+			{ dependencies, reads: { "the art style": "noir" }, signal },
 		);
-		expect(result).toEqual(expected);
-	});
-
-	// The connector is built for the job's model and stamps it itself.
-	it("builds the connector for the job's model", async () => {
-		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 0 });
-
-		await generateForElement(
-			makeJob("music"),
-			inputs("jazz beat"),
-			{},
-			EMPTY_CONTEXT,
-		);
-
-		expect(createConnector).toHaveBeenCalledWith(
-			"music",
-			DEFAULT_MODELS.music,
-			config,
-		);
-		expect(mockGenerate).toHaveBeenCalledWith(
-			{ prompt: "jazz beat" },
-			generationContext(),
-		);
-	});
-
-	it("merges attributes into generate call", async () => {
-		mockGenerate.mockResolvedValue({ audioUrl: "x", durationSec: 5 });
-
-		await generateForElement(
-			makeJob("tts"),
-			inputs("hello world", { voiceId: "voice-1", speed: "fast" }),
-			{},
-			EMPTY_CONTEXT,
-		);
-
-		expect(mockGenerate).toHaveBeenCalledWith(
-			{ prompt: "hello world", voiceId: "voice-1", speed: "fast" },
-			generationContext(),
-		);
-	});
-
-	it("forwards dependency results to the connector", async () => {
-		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
-		// The canvas image a video opens on, resolved by the queue before it ran.
-		const dependencies = {
-			"img-1": {
-				imageUrl: "https://example.com/frame.png",
-				durationSec: 0,
-			},
-		};
-
-		await generateForElement(
-			makeJob("video"),
-			inputs("a sunset", { startFrame: "img-1" }),
-			dependencies,
-			EMPTY_CONTEXT,
-		);
-
-		expect(mockGenerate).toHaveBeenCalledWith(
-			expect.anything(),
-			generationContext(dependencies),
-		);
-	});
-
-	it("forwards the abort signal in the generation context", async () => {
-		mockGenerate.mockResolvedValue({ imageUrl: "x", durationSec: 0 });
-		const { signal } = new AbortController();
-
-		await generateForElement(
-			makeJob("image"),
-			inputs("test"),
-			{},
-			EMPTY_CONTEXT,
-			signal,
-		);
-
-		expect(mockGenerate).toHaveBeenCalledWith(
-			expect.anything(),
-			expect.objectContaining({ signal }),
-		);
-	});
-
-	it("lends plugins speech on a pair, configured as the registry the graph was built with has it", async () => {
-		mockGenerate.mockResolvedValue({ videoUrl: "x", durationSec: 5 });
-		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
-
-		await generateForElement(
-			makeJob("video"),
-			inputs("they talk"),
-			{},
-			EMPTY_CONTEXT,
-		);
-
-		const [, context] = mockGenerate.mock.calls[0] ?? [];
-		context?.speech?.(cartesia);
-		expect(createConnector).toHaveBeenLastCalledWith(
-			"tts",
-			cartesia,
-			EMPTY_CONTEXT.registry.tts,
-		);
+		expect(result).toBe(expected);
 	});
 
 	it("propagates errors from connector.generate", async () => {
 		mockGenerate.mockRejectedValue(new Error("generation failed"));
 
-		await expect(
-			generateForElement(makeJob("image"), inputs("test"), {}, EMPTY_CONTEXT),
-		).rejects.toThrow("generation failed");
+		await expect(generateForElement(node, {})).rejects.toThrow(
+			"generation failed",
+		);
 	});
 });

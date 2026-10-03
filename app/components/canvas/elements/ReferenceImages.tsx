@@ -1,9 +1,9 @@
 "use client";
 
 import { ImagePlus } from "@/components/ui/icon";
-import { useProject } from "@/lib/project/useProject";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { AddAssetTile } from "./AddAssetTile";
+import { useReferenceImages } from "../hooks/useReferenceImages";
 import { ReferenceTiles } from "./AssetTiles";
 
 /** Reference image tiles for a caller-owned list, plus the tile that uploads more. */
@@ -39,15 +39,6 @@ export function ReferenceImagePicker({
 
 /** The project's reference images, plus the tile that adds more. */
 export function ReferenceImages() {
-	const referenceImages = useProject((s) => s.referenceImages);
-	const addReferenceImages = useProject((s) => s.addReferenceImages);
-	const removeReferenceImage = useProject((s) => s.removeReferenceImage);
-
-	return (
-		<ReferenceImagePicker
-			urls={referenceImages}
-			onAdd={addReferenceImages}
-			onRemove={removeReferenceImage}
-		/>
-	);
+	const { urls, add, remove } = useReferenceImages();
+	return <ReferenceImagePicker urls={urls} onAdd={add} onRemove={remove} />;
 }

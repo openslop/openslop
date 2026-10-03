@@ -1,9 +1,11 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Descendant } from "slate";
+import { findAsset, getScriptElements } from "@/lib/canvas/assets";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import { getContentElements } from "@/lib/canvas/scenes";
 import {
 	SCENE_TYPE,
+	type AssetElement,
 	type CanvasContentElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
@@ -11,11 +13,13 @@ import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
-import { createProjectStore, type ProjectStore } from "@/lib/project/store";
+import type { AssetWrite, ConnectorPlugin } from "@/lib/connectors/types";
+import { createProjectStore } from "@/lib/project/store";
 import { dependency } from "../dependency";
-import { forElement, sourceNode, type BuildContext } from "../graph";
-import { GenerationGraph } from "../generationGraph";
-import { forArtStyle } from "../sourceNodes";
+import type { BuildContext } from "../graph";
+import { buildNode, GenerationGraph, prepareNode } from "../generationGraph";
+import { GenerationQueue } from "../queue";
+import { isNodeStale } from "../staleness";
 
 const element = (
 	id: string,
@@ -31,31 +35,21 @@ const element = (
 
 const linked = { continuity: "true" };
 
-let store: ProjectStore;
+let assets: AssetElement[];
 let document: Descendant[];
 let registry: ConnectorRegistry;
 let graph: GenerationGraph;
 
 const contextNow = (): BuildContext => ({
-	store,
-	state: store.getState(),
-	canvas: getContentElements(document),
+	state: createProjectStore().getState(),
+	canvas: getScriptElements([...assets, ...document]),
 	registry,
+	setAsset: () => {},
 });
 
-const tone = dependency(
-	"tone",
-	"the tone",
-	({ generationAttributes }) =>
-		() =>
-			sourceNode("project:tone", { tone: generationAttributes?.tone ?? "" }),
+const twice = dependency("avatar", "Red's avatar", (_, { canvas }) =>
+	findAsset(canvas, "cast", "Red"),
 );
-const TONED: ConnectorRegistry = {
-	...DEFAULT_CONNECTOR_REGISTRY,
-	image: { plugins: [{ name: "tone", dependencies: [tone] }] },
-};
-
-const twice = dependency("style", "the art style", () => forArtStyle);
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: { plugins: [{ name: "twice", dependencies: [twice, twice] }] },
@@ -71,10 +65,10 @@ const edit = (...elements: CanvasContentElement[]) => {
 	graph = new GenerationGraph(contextNow(), graph);
 };
 
-const read = (of: CanvasContentElement) => graph.resolve(forElement(of));
+const read = (of: CanvasContentElement) => graph.resolve(of);
 
 beforeEach(() => {
-	store = createProjectStore();
+	assets = [];
 	document = [];
 	registry = DEFAULT_CONNECTOR_REGISTRY;
 	graph = new GenerationGraph(contextNow());
@@ -126,21 +120,6 @@ describe("GenerationGraph", () => {
 		expect(read(image)).toBe(before);
 	});
 
-	it("keeps each of two nodes that read one source differently", () => {
-		const warm = element("warm", "image", "a sunset", { tone: "warm" });
-		const cold = element("cold", "image", "a glacier", { tone: "cold" });
-		registry = TONED;
-		edit(warm, cold, element("nar", "narration", "hello"));
-		const before = [read(warm), read(cold)];
-
-		edit(warm, cold, element("nar", "narration", "hello there"));
-
-		expect([read(warm), read(cold)]).toEqual(before);
-		expect(read(warm)).toBe(before[0]);
-		expect(read(cold)).toBe(before[1]);
-		expect(read(cold).dependsOn.tone?.node.inputs.attributes.tone).toBe("cold");
-	});
-
 	it("replaces an edited node and every node that depends on it", () => {
 		const second = element("second", "video", "a zoom", linked);
 		const narration = element("nar", "narration", "hello");
@@ -170,30 +149,94 @@ describe("GenerationGraph", () => {
 		expect(read(video).dependsOn.previousVisual?.node.id).toBe("img");
 	});
 
-	it("reads the project again when its state changes, keeping what reads the same", () => {
+	it("reads the assets again when they change, keeping what reads the same", () => {
 		const image = element("img", "image", "a sunset");
 		const narration = element("nar", "narration", "hi");
 		edit(image, narration);
 		const styled = read(image);
 		const spoken = read(narration);
 
-		store.getState().updateMetadata({ style: "noir" });
+		assets = [createCanvasNode("style", { text: "noir" })];
 		graph = new GenerationGraph(contextNow(), graph);
 
 		expect(read(image)).not.toBe(styled);
-		expect(read(image).dependsOn.artStyle?.node.inputs.attributes.style).toBe(
-			"noir",
-		);
+		expect(read(image).inputs.reads["the art style"]).toBe("noir");
 		expect(read(narration)).toBe(spoken);
 	});
 
 	it("throws the same for every reader of a node that cannot be built", () => {
 		const image = element("img", "image", "a sunset");
 		registry = UNBUILDABLE;
+		assets = [createCanvasNode("cast", { attrs: { name: "Red" } })];
 		edit(image);
-		const failure = 'Two dependencies of "img" share the key "style"';
+		const failure = 'Two dependencies of "img" share the key "avatar"';
 
 		expect(() => read(image)).toThrow(failure);
 		expect(() => read(image)).toThrow(failure);
+	});
+});
+
+describe("prepareNode", () => {
+	const voice = (voiceId: string): AssetWrite => ({
+		type: "voice",
+		attrs: { voiceId },
+	});
+	const settling = (...writes: AssetWrite[]): ConnectorPlugin => ({
+		name: "settle",
+		prepare: async () => writes,
+	});
+	const readsVoice: ConnectorPlugin = {
+		name: "voice",
+		reads: (_, { canvas }) => ({
+			voice: findAsset(canvas, "voice")?.generationAttributes?.voiceId ?? "",
+		}),
+	};
+	const image = element("img", "image", "a sunset");
+	const setAsset = vi.fn(({ type, attrs }: AssetWrite) => {
+		assets = [...assets, createCanvasNode(type, { attrs })];
+	});
+	const writing = (): BuildContext => ({ ...contextNow(), setAsset });
+	const prepare = (...plugins: ConnectorPlugin[]) => {
+		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins } };
+		edit(image);
+		return prepareNode(read(image), writing);
+	};
+
+	beforeEach(() => {
+		setAsset.mockClear();
+	});
+
+	it("writes what every plugin settles through setAsset, in plugin order", async () => {
+		await prepare(
+			settling(voice("v-1")),
+			{ name: "none" },
+			settling(voice("v-2")),
+		);
+
+		expect(setAsset.mock.calls.map(([write]) => write)).toEqual([
+			voice("v-1"),
+			voice("v-2"),
+		]);
+	});
+
+	it("builds the node again from the canvas as written, so its result is current once committed", async () => {
+		const prepared = await prepare(settling(voice("v-found")), readsVoice);
+		const queue = new GenerationQueue();
+		queue.commitResult(prepared, { imageUrl: "img.png", durationSec: 0 });
+
+		expect(prepared.inputs.reads.voice).toBe("v-found");
+		expect(isNodeStale(buildNode(image, contextNow()), queue)).toBe(false);
+	});
+
+	it("fails loudly when the element left the canvas", async () => {
+		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins: [] } };
+		edit(image);
+		const node = read(image);
+		edit();
+
+		await expect(prepareNode(node, writing)).rejects.toThrow(
+			'Element "img" left the canvas',
+		);
+		expect(setAsset).not.toHaveBeenCalled();
 	});
 });

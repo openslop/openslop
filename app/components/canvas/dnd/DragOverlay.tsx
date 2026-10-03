@@ -4,9 +4,11 @@ import { useCallback, useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react";
 import type { CanvasElement } from "@/lib/canvas/types";
+import { isAssetElement } from "@/lib/canvas/guards";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
+import { HiddenAsset } from "../elements/HiddenAsset";
 import { SceneContainer } from "../elements/SceneContainer";
 import { useSceneIndex } from "../hooks/useSceneIndex";
 import { useSceneCollapsed } from "../ViewModeContext";
@@ -40,6 +42,8 @@ export function DragOverlayContent({ element }: { element: CanvasElement }) {
 						{children}
 					</SceneContainer>
 				);
+			if (isAssetElement(node))
+				return <HiddenAsset attributes={attributes}>{children}</HiddenAsset>;
 			const Content = collapsed ? CompactElement : ElementContainer;
 			return (
 				<Content attributes={attributes} element={node}>

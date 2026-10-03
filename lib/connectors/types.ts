@@ -1,10 +1,10 @@
 import { z } from "zod";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { AssetType, ScriptElement } from "@/lib/canvas/types";
 import type {
 	DependencyDeclaration,
 	DependencyResults,
 } from "@/lib/generation/dependency";
-import type { ProjectData, ProjectStore } from "@/lib/project/store";
+import type { BuildContext } from "@/lib/generation/graph";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
@@ -91,15 +91,10 @@ export const HostedVoicePreviewSchema = z.object({
 export type HostedVoicePreview = z.infer<typeof HostedVoicePreviewSchema>;
 
 export interface PluginContext {
-	searchVoices?: VoiceSearchFn;
-	/** Speech on a pair, for a type that borrows voices. */
-	speech?: (model: ModelRef) => TTSConnector;
 	/** Read through the handles that declared them. */
 	dependencies?: DependencyResults;
-	/** The project state the node's inputs were resolved against. */
-	state?: ProjectData;
-	/** Only written to: plugins read `state`, the snapshot their inputs were recorded against. */
-	store?: ProjectStore;
+	/** What the node's plugins read, as its inputs recorded it. */
+	reads?: Record<string, string>;
 	/** The pair the connector runs on. */
 	model?: ModelRef;
 	/** Aborts when the caller cancels the generation. */
@@ -109,8 +104,15 @@ export interface PluginContext {
 /** The parts of a plugin context the caller supplies per generation. */
 export type GenerationContext = Pick<
 	PluginContext,
-	"dependencies" | "state" | "store" | "signal" | "speech"
+	"dependencies" | "reads" | "signal"
 >;
+
+/** Attributes to write onto an asset before generating, adding it when there is none. */
+export type AssetWrite = {
+	type: AssetType;
+	name?: string;
+	attrs: Record<string, string>;
+};
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
@@ -123,7 +125,11 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.
 	 */
-	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
+	model?(element: ScriptElement, canvas: ScriptElement[]): ModelRef;
+	/** Values the node reads off the canvas or the settings, recorded in its inputs so a change stales it. */
+	reads?(element: ScriptElement, ctx: BuildContext): Record<string, string>;
+	/** Assets to write before the node is built to run, such as the voice a search found. */
+	prepare?(element: ScriptElement, ctx: BuildContext): Promise<AssetWrite[]>;
 	beforeGenerate?(
 		params: TParams,
 		ctx: PluginContext,

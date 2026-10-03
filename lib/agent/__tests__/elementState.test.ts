@@ -9,7 +9,11 @@ import { EMPTY_CONTEXT } from "@/lib/generation/__tests__/_context";
 
 const config: ConnectorConfig = {};
 
-function node(id: string, prompt = id): GenerationNode {
+function node(
+	id: string,
+	prompt = id,
+	reads: Record<string, string> = {},
+): GenerationNode {
 	const job: GenerationJob = {
 		elementId: id,
 		elementType: "image",
@@ -17,7 +21,12 @@ function node(id: string, prompt = id): GenerationNode {
 		model: DEFAULT_MODELS.image,
 		config,
 	};
-	return { id, inputs: { prompt, attributes: {} }, dependsOn: {}, job };
+	return {
+		id,
+		inputs: { prompt, attributes: {}, reads },
+		dependsOn: {},
+		job,
+	};
 }
 
 const image = (imageUrl: string): AssetResult => ({ imageUrl, durationSec: 0 });
@@ -67,6 +76,20 @@ describe("elementState", () => {
 		});
 	});
 
+	it("names what the element reads when only that changed", () => {
+		const queue = new GenerationQueue();
+		queue.commitResult(
+			node("a", "a", { "the art style": "ink" }),
+			image("a.png"),
+		);
+
+		expect(stateOf(node("a", "a", { "the art style": "oil" }), queue)).toEqual({
+			id: "a",
+			state: "stale",
+			detail: "The art style changed — regenerate to update",
+		});
+	});
+
 	it("reads a failure with its error", () => {
 		const queue = new GenerationQueue();
 		queue.setError("a", "Provider returned 503");
@@ -80,7 +103,7 @@ describe("elementState", () => {
 
 	it("reads what the queue is working on by its status", () => {
 		const queue = new GenerationQueue({ limits: { image: 1 } });
-		queue.enqueueGraph([node("a"), node("b")], EMPTY_CONTEXT);
+		queue.enqueueGraph([node("a"), node("b")], () => EMPTY_CONTEXT);
 
 		expect(stateOf(node("a"), queue).state).toBe("generating");
 		expect(stateOf(node("b"), queue).state).toBe("queued");
