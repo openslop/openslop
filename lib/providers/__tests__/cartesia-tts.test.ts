@@ -54,7 +54,8 @@ vi.mock("@ai-sdk/openai", () => ({
 
 import type Cartesia from "@cartesia/cartesia-js";
 import { TTSEmotion } from "@/lib/connectors/tts/enums";
-import { CartesiaTTS, collectVoices, pcmDurationSec } from "../tts/cartesia";
+import { AssetBundle } from "@/lib/api/asset-bundle";
+import { CartesiaTTS, collectVoices } from "../tts/cartesia";
 
 /** pcm_f32le @ 44.1kHz mono: 4 bytes per sample. */
 const PCM_BYTES_PER_SEC = 44100 * 4;
@@ -196,14 +197,6 @@ describe("collectVoices", () => {
 	});
 });
 
-describe("pcmDurationSec", () => {
-	it("converts raw pcm_f32le byte length to seconds", () => {
-		expect(pcmDurationSec(PCM_BYTES_PER_SEC)).toBe(1);
-		expect(pcmDurationSec(PCM_BYTES_PER_SEC / 2)).toBe(0.5);
-		expect(pcmDurationSec(0)).toBe(0);
-	});
-});
-
 const MODEL = "sonic-3.6";
 
 describe("CartesiaTTS", () => {
@@ -240,6 +233,30 @@ describe("CartesiaTTS", () => {
 			expect(result.result.timestamps).toBe("url");
 			expect(mockConnect).toHaveBeenCalled();
 			expect(mockClose).toHaveBeenCalled();
+		});
+
+		it("stores the streamed chunks as one WAV file", async () => {
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: Buffer.from([1, 2, 3, 4]) },
+					{ type: "chunk", audio: Buffer.from([5, 6, 7, 8]) },
+					{ type: "done", done: true },
+				]),
+			);
+
+			await new CartesiaTTS("test-key").generate({
+				prompt: "hello world",
+				voiceId: "voice-1",
+				model: MODEL,
+			});
+
+			const [, , files] = vi.mocked(AssetBundle.upload).mock.calls[0];
+			const audio = files.find((file) => file.key === "audio");
+			if (!audio || !("data" in audio) || !Buffer.isBuffer(audio.data))
+				throw new Error("Expected the audio file to carry its bytes");
+			expect(audio.contentType).toBe("audio/wav");
+			expect(audio.data.toString("latin1", 0, 4)).toBe("RIFF");
+			expect([...audio.data.subarray(44)]).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
 		});
 
 		it("reports duration from the audio length, not the last word timestamp", async () => {
