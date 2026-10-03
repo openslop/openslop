@@ -6,16 +6,10 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
-import {
-	connectorModelsSchema,
-	hasModel,
-	modelRefSchema,
-	resolveModel,
-	sameModel,
-} from "@/lib/connectors/models";
-import type { ModelPick, ModelRef } from "@/lib/connectors/types";
+import { modelRefSchema } from "@/lib/connectors/models";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
-import { VideoSettingsSchema } from "./videoSettings";
+import { DEFAULT_VIDEO_FORMAT, VIDEO_FORMAT_CHOICES } from "./videoFormat";
+import { DEFAULT_VIDEO_LENGTH, VIDEO_LENGTHS } from "./videoLength";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
 
@@ -34,9 +28,8 @@ export const voiceTraitsSchema = z.object({
 	language: languageSchema,
 });
 
-export const MetadataVoiceSchema = voiceTraitsSchema.extend({
+export const VoiceSchema = voiceTraitsSchema.extend({
 	voiceId: optionalString,
-	resolvedVoiceId: optionalString,
 	provider: modelRefSchema.shape.provider.optional().catch(undefined),
 	model: optionalString,
 });
@@ -67,82 +60,26 @@ export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 	limit: z.coerce.number().int().positive().optional().catch(undefined),
 });
 
-export type MetadataVoice = z.infer<typeof MetadataVoiceSchema>;
+export type Voice = z.infer<typeof VoiceSchema>;
 
-const voiceIsOn = (voice: MetadataVoice, model: ModelRef) =>
-	hasModel("tts", voice) && sameModel(voice, model);
-
-/** The id a voice has on a model: picked, or else found by an earlier search. */
-export const voiceIdOn = (
-	voice: MetadataVoice,
-	model: ModelRef,
-): string | undefined =>
-	voiceIsOn(voice, model)
-		? (voice.voiceId ?? voice.resolvedVoiceId)
-		: undefined;
-
-/** The voice moved to a model. Its ids stay behind on the pair they were found on. */
-export const voiceOnModel = <V extends MetadataVoice>(
-	voice: V,
-	model: ModelRef,
-): V =>
-	voiceIsOn(voice, model)
-		? voice
-		: {
-				...voice,
-				provider: model.provider,
-				model: model.model,
-				voiceId: undefined,
-				resolvedVoiceId: undefined,
-			};
-
-export const MetadataCharacterSchema = MetadataVoiceSchema.extend({
-	appearance: z.string(),
-	avatarModel: modelRefSchema.optional().catch(undefined),
-});
-
-export type MetadataCharacter = z.infer<typeof MetadataCharacterSchema>;
-
-export const metadataVoiceFor = (
-	metadata: {
-		narration: MetadataVoice;
-		characters: Record<string, MetadataVoice>;
-	},
-	characterName?: string,
-): MetadataVoice | undefined =>
-	characterName ? metadata.characters[characterName] : metadata.narration;
-
-/**
- * The pair a voice speaks with, or else the first pair the candidates name,
- * and the voice's id there if it has one.
- */
-export function resolveVoice(
-	metadata: Parameters<typeof metadataVoiceFor>[0],
-	characterName: string | undefined,
-	...candidates: (ModelPick | undefined)[]
-): { model: ModelRef; voiceId?: string } {
-	const voice = metadataVoiceFor(metadata, characterName);
-	const model = resolveModel("tts", voice, ...candidates);
-	return { model, voiceId: voice && voiceIdOn(voice, model) };
-}
-
-export const MetadataSchema = z.object({
-	title: z.string().default(""),
-	style: z.string().default(""),
+/** What the project's `project` element says: how its scripts are written, each with a default. */
+export const ProjectSettingsSchema = z.object({
 	language: z
 		.enum(LANGUAGE_CHOICES)
 		.default(AUTO_LANGUAGE)
 		.catch(AUTO_LANGUAGE),
-	narration: MetadataVoiceSchema.default({}),
-	characters: z.record(z.string(), MetadataCharacterSchema).default({}),
-	videoSettings: VideoSettingsSchema,
-	/** The model each connector type generates with, when the project pins one. */
-	models: connectorModelsSchema.default({}),
-	/** The template the project's scripts are written against, when it has one. */
-	templateId: optionalString,
+	length: z
+		.enum(VIDEO_LENGTHS)
+		.default(DEFAULT_VIDEO_LENGTH)
+		.catch(DEFAULT_VIDEO_LENGTH),
+	format: z
+		.enum(VIDEO_FORMAT_CHOICES)
+		.default(DEFAULT_VIDEO_FORMAT)
+		.catch(DEFAULT_VIDEO_FORMAT),
+	template: optionalString,
 });
 
-export type Metadata = z.infer<typeof MetadataSchema>;
+export type ProjectSettings = z.infer<typeof ProjectSettingsSchema>;
 
 export type DeepPartial<T> = T extends object
 	? { [K in keyof T]?: DeepPartial<T[K]> }

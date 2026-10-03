@@ -8,11 +8,7 @@ import {
 	vi,
 } from "vitest";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import {
-	AUTOSAVE_DEBOUNCE_MS,
-	buildProjectSave,
-	createAutosaver,
-} from "../autosave";
+import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
 import type { ProjectContent } from "../projectDocument";
 import {
 	createProjectStore,
@@ -40,46 +36,20 @@ const content = (
 	generation: ProjectContent["generation"] = {},
 ): ProjectContent => ({ script, store, generation });
 
-const snapshot = (title: string): ProjectData => ({
-	metadata: {
-		title,
-		style: "",
-		narration: {},
-		characters: {},
-	} as ProjectData["metadata"],
-	referenceImages: [],
-});
-
-describe("buildProjectSave", () => {
-	it("names the project from its metadata title", () => {
-		const input = buildProjectSave(content(snapshot("Moon Rabbit"), "<osml/>"));
-		expect(input.name).toBe("Moon Rabbit");
-		expect(input.script).toBe("<osml/>");
-		expect(input.thumbnail_url).toBeNull();
-	});
-
-	it("falls back to Untitled when the title is blank", () => {
-		expect(buildProjectSave(content(snapshot("  "), "")).name).toBe("Untitled");
-	});
-
-	it("picks the thumbnail from the generation snapshot", () => {
-		const input = buildProjectSave(
-			content(snapshot("x"), "", { a: imageSnapshot("https://cdn/a.png") }),
-		);
-		expect(input.thumbnail_url).toBe("https://cdn/a.png");
-	});
-});
-
 describe("createAutosaver", () => {
 	let projectId: string;
 	let store: ProjectStore;
 	let onSaved: Mock<() => void>;
 	let onError: Mock<(error: unknown) => void>;
+	let name: string;
+	let thumbnailUrl: string | null;
+	const details = () => ({ name, thumbnail_url: thumbnailUrl });
 
 	const build = () =>
 		createAutosaver({
 			projectId,
 			read: () => content(extractStoreSnapshot(store), "<osml/>"),
+			details,
 			onSaved,
 			onError,
 		});
@@ -92,7 +62,9 @@ describe("createAutosaver", () => {
 		onError = vi.fn<(error: unknown) => void>();
 		projectId = `p-${saveProject.mock.calls.length}-${Math.random()}`;
 		store = createProjectStore();
-		refCount = 0;
+		edits = 0;
+		name = "Untitled";
+		thumbnailUrl = null;
 	});
 
 	afterEach(() => {
@@ -101,17 +73,15 @@ describe("createAutosaver", () => {
 	});
 
 	const setTitle = () => {
-		store.getState().updateMetadata({ title: "Moon Rabbit" });
+		name = "Moon Rabbit";
 	};
 
-	let refCount = 0;
+	let edits = 0;
 	const edit = () => {
-		refCount += 1;
+		edits += 1;
 		store
 			.getState()
-			.setReferenceImages(
-				Array.from({ length: refCount }, (_, i) => `https://cdn/ref-${i}.png`),
-			);
+			.updateVideoSettings({ captionStyle: { fontSize: 40 + edits * 2 } });
 	};
 
 	it("coalesces a burst of changes into one save", async () => {
@@ -159,8 +129,9 @@ describe("createAutosaver", () => {
 	it("saves the first real edit after an unchanged open", async () => {
 		setTitle();
 		const autosaver = build();
-		// The echo a real open produces: metadata written back with identical content.
-		store.getState().updateMetadata({ title: "Moon Rabbit" });
+		store.getState().updateVideoSettings({
+			aspectRatio: store.getState().videoSettings.aspectRatio,
+		});
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 		expect(saveProject).not.toHaveBeenCalled();
@@ -181,8 +152,9 @@ describe("createAutosaver", () => {
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 		expect(saveProject).toHaveBeenCalledTimes(1);
 
-		// Same content again: an idempotent write, not a change.
-		store.getState().setReferenceImages([...store.getState().referenceImages]);
+		store
+			.getState()
+			.updateVideoSettings({ captionStyle: { fontSize: 40 + edits * 2 } });
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 
@@ -195,11 +167,27 @@ describe("createAutosaver", () => {
 		const autosaver = createAutosaver({
 			projectId,
 			read: () => content(extractStoreSnapshot(store), "<osml/>", generation),
+			details,
 			onSaved,
 			onError,
 		});
 
 		generation = { a: imageSnapshot("https://cdn/a.png") };
+		autosaver.schedule();
+		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+		expect(saveProject).toHaveBeenCalledTimes(1);
+		expect(saveProject).toHaveBeenCalledWith(
+			projectId,
+			expect.objectContaining({ generation }),
+		);
+	});
+
+	it("saves the thumbnail the document shows as the debounce fires", async () => {
+		setTitle();
+		const autosaver = build();
+
+		thumbnailUrl = "https://cdn/a.png";
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 
@@ -263,6 +251,7 @@ describe("createAutosaver", () => {
 		const autosaver = createAutosaver({
 			projectId,
 			read: () => content(extractStoreSnapshot(store), script),
+			details,
 			onSaved,
 			onError,
 		});

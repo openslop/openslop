@@ -28,13 +28,15 @@ import {
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
-import { useProject } from "@/lib/project/useProject";
+import { useReferenceImages } from "@/app/components/canvas/hooks/useReferenceImages";
+import { useSlateStatic } from "slate-react";
+import { setProjectModels, setProjectSettings } from "@/lib/canvas/assetOps";
+import { useProjectSettings } from "@/lib/canvas/useAssets";
 import {
 	LANGUAGE_CHOICES,
 	languageLabel,
 	type LanguageChoice,
 } from "@/lib/project/language";
-import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { ASPECT_RATIOS, type AspectRatio } from "@/lib/project/aspectRatio";
 import {
@@ -111,7 +113,7 @@ function AttachMenu({
 	openPicker: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateCharacter, openNarrator, openArtStyle } = useAssetEditors();
+	const { openCreateCharacter, editAsset } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -130,13 +132,13 @@ function AttachMenu({
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: openNarrator,
+			onSelect: () => editAsset("voice"),
 		},
 		{
 			key: "art-style",
 			label: "Set art style",
 			icon: <Palette className={iconClass} />,
-			onSelect: openArtStyle,
+			onSelect: () => editAsset("style"),
 		},
 	];
 
@@ -206,13 +208,15 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const [intent, setIntent] = useState<ComposerIntent>("story");
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
-	const videoLength = useVideoSetting("length");
-	const videoFormat = useVideoSetting("format");
 	const updateVideoSettings = useUpdateVideoSettings();
-	const addReferenceImages = useProject((s) => s.addReferenceImages);
-	const [language, setLanguage] = useScriptLanguage();
+	const editor = useSlateStatic();
+	const {
+		length: videoLength,
+		format: videoFormat,
+		language,
+	} = useProjectSettings();
+	const { add: addReferenceImages } = useReferenceImages();
 	const model = useDefaultModels().llm;
-	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	const {
 		openPicker,
@@ -230,7 +234,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const chooseIntent = (next: ComposerIntent) => {
 		setIntent(next);
 		if (next === "script")
-			updateVideoSettings({ length: "auto", format: "auto" });
+			setProjectSettings(editor, { length: "auto", format: "auto" });
 	};
 
 	const handleSubmit = () => {
@@ -299,7 +303,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={VIDEO_FORMAT_OPTIONS}
 							disabled={pasting}
 							onChange={(next: VideoFormat) =>
-								updateVideoSettings({ format: next })
+								setProjectSettings(editor, { format: next })
 							}
 						/>
 						<SettingPill
@@ -307,12 +311,14 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							icon={<Translate className="mr-1 h-3 w-3" />}
 							value={language}
 							options={LANGUAGE_OPTIONS}
-							onChange={setLanguage}
+							onChange={(next: LanguageChoice) =>
+								setProjectSettings(editor, { language: next })
+							}
 						/>
 						<ModelSelect
 							type="llm"
 							value={model}
-							onChange={(llm) => updateMetadata({ models: { llm } })}
+							onChange={(llm) => setProjectModels(editor, { llm })}
 						>
 							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
 								<ProviderIcon
@@ -330,7 +336,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={VIDEO_LENGTH_OPTIONS}
 							disabled={pasting}
 							onChange={(next: VideoLength) =>
-								updateVideoSettings({ length: next })
+								setProjectSettings(editor, { length: next })
 							}
 						/>
 						{activeTemplate && (

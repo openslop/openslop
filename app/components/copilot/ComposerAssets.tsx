@@ -9,25 +9,22 @@ import {
 } from "@/app/components/canvas/elements/AssetTiles";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { deleteCharacter } from "@/lib/project/deleteCharacter";
-import { useProject } from "@/lib/project/useProject";
+import { useSlateSelector, useSlateStatic } from "slate-react";
+import { removeAsset } from "@/lib/canvas/assetOps";
+import { assetText } from "@/lib/canvas/assets";
 
 export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
-	const store = useProjectStoreHandle();
-	const queue = useGenerationQueue();
-	const narration = useProject((s) => s.metadata.narration);
-	const hasArtStyle = useProject((s) => Boolean(s.metadata.style.trim()));
+	const editor = useSlateStatic();
+	const hasArtStyle = useSlateSelector(
+		(editor) => assetText(editor.children, "style") !== "",
+	);
 
 	const [deletingName, setDeletingName] = useState<string>();
-
-	const hasNarration = Object.keys(narration).length > 0;
 
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
 			{hasArtStyle && <ArtStyleAssetTile />}
-			{hasNarration && <NarratorAssetTile />}
+			<NarratorAssetTile />
 			<CharacterAssetTiles onRemove={setDeletingName} />
 			<ReferenceAssetTiles />
 			{Array.from({ length: uploadingCount }).map((_, i) => (
@@ -37,9 +34,9 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 				target={deletingName}
 				onClose={() => setDeletingName(undefined)}
 				title={(name) => `Delete ${name}?`}
-				description="This permanently removes the character and its avatar. It can't be undone."
+				description="This removes the character and their avatar."
 				actionLabel="Delete character"
-				onConfirm={(name) => deleteCharacter(store, queue, name)}
+				onConfirm={(name) => removeAsset(editor, "cast", name)}
 			/>
 		</div>
 	);

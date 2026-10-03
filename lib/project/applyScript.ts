@@ -1,6 +1,6 @@
 import { Editor, Transforms } from "slate";
 import { HistoryEditor } from "slate-history";
-import type { ConnectorModels } from "@/lib/connectors/models";
+import type { CanvasEditor } from "@/lib/canvas/types";
 import { deserializeWithScenes } from "./serialize";
 
 /**
@@ -8,12 +8,16 @@ import { deserializeWithScenes } from "./serialize";
  * entries point at paths this swap removes.
  */
 export function applyScriptToEditor(
-	editor: Editor,
+	editor: CanvasEditor,
 	script: string,
-	defaultModels?: ConnectorModels,
 	sceneId?: (index: number) => string,
 ): void {
-	const scenes = deserializeWithScenes(script, defaultModels, sceneId);
+	const parsed = deserializeWithScenes(script);
+	const nodes = deserializeWithScenes(
+		script,
+		editor.defaultModels(parsed),
+		sceneId,
+	);
 
 	const replaceChildren = () => {
 		Editor.withoutNormalizing(editor, () => {
@@ -21,7 +25,7 @@ export function applyScriptToEditor(
 				at: [],
 				match: (_node, path) => path.length === 1,
 			});
-			Transforms.insertNodes(editor, scenes, { at: [0] });
+			Transforms.insertNodes(editor, nodes, { at: [0] });
 		});
 		Editor.normalize(editor, { force: true });
 	};

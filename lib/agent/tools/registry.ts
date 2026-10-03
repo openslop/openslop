@@ -9,23 +9,17 @@ import { editScript } from "./editScript";
 import { fitDurations } from "./fitDurations";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
-import { readSettings } from "./readSettings";
 import { reviewScript } from "./reviewScript";
 import { setCaptionStyle } from "./setCaptionStyle";
-import { setCharacter } from "./setCharacter";
 import { setLanguage } from "./setLanguage";
-import { setMetadata } from "./setMetadata";
-import { setNarrator } from "./setNarrator";
+import { setTitle } from "./setTitle";
 import { setVideoSettings } from "./setVideoSettings";
-import { viewAvatar } from "./viewAvatar";
 import { viewImage } from "./viewImage";
-import { viewReferenceImages } from "./viewReferenceImages";
 import { writeScript } from "./writeScript";
 
 /** Registration is the contract: one entry is a tool's whole definition. */
 const TOOLS = {
 	read_script: readScript,
-	read_settings: readSettings,
 	edit_script: editScript,
 	write_script: writeScript,
 	adapt_script: adaptScript,
@@ -33,16 +27,12 @@ const TOOLS = {
 	set_video_settings: setVideoSettings,
 	set_caption_style: setCaptionStyle,
 	set_language: setLanguage,
-	view_reference_images: viewReferenceImages,
-	view_avatar: viewAvatar,
 	view_image: viewImage,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
 	measure_element_lengths: measureElementLengths,
 	fit_durations: fitDurations,
-	set_metadata: setMetadata,
-	set_narrator: setNarrator,
-	set_character: setCharacter,
+	set_title: setTitle,
 };
 
 export type AgentToolName = keyof typeof TOOLS;

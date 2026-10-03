@@ -1,63 +1,77 @@
 import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
-import type {
+import {
 	AttributeSchema,
-	ModelPick,
+	type ModelPick,
 } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import type { ProjectData } from "@/lib/project/store";
+import { VOICE_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import type {
 	AssetConnectorType,
 	ConnectorConfig,
 	ModelRef,
 } from "@/lib/connectors/types";
 import { flatAttributes } from "./elementAttributes";
+import { isAssetType } from "./guards";
 import {
+	connectorOf,
 	ELEMENT_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
+	type AssetType,
+	type ElementType,
+	type GeneratedType,
+	type ScriptElement,
 } from "./types";
 
-export type ElementConnector = {
+type ElementConnector = {
 	type: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
 };
 
+/** The connector, model and plugins an element generates with: its type's, whatever the type. */
 export function resolveElementConnector(
-	element: CanvasContentElement,
+	element: ScriptElement,
 	registry: ConnectorRegistry,
-	state: ProjectData,
+	canvas: ScriptElement[],
 ): ElementConnector {
-	const type = ELEMENT_TYPES[element.type].connector;
-	const config = registry[type];
+	const type = connectorOf(element.type);
+	if (!type) throw new Error(`A ${element.type} element generates nothing`);
+	const config = registry[element.type as GeneratedType];
 	const supplier = config.plugins?.find((plugin) => plugin.model);
 	return {
 		type,
 		model: resolveModel(
 			type,
-			supplier?.model?.(element, state),
+			supplier?.model?.(element, canvas),
 			element.generationAttributes,
 		),
 		config,
 	};
 }
 
+const NO_ATTRIBUTES = AttributeSchema.from([]);
+
+/** An asset's attributes are its own, never its connector's. */
+const ASSET_ATTRIBUTES: Partial<Record<AssetType, AttributeSchema>> = {
+	voice: VOICE_ATTRIBUTES,
+};
+
 export function attributeSchemaFor(
-	type: CanvasElementType,
+	type: ElementType,
 	attributes: Record<string, string>,
 ): AttributeSchema {
-	const connector = ELEMENT_TYPES[type].connector;
+	if (isAssetType(type)) return ASSET_ATTRIBUTES[type] ?? NO_ATTRIBUTES;
+	const { connector } = ELEMENT_TYPES[type];
 	return resolveAttributeSchema(connector, resolveModel(connector, attributes));
 }
 
-export const elementSchema = (element: CanvasContentElement): AttributeSchema =>
+export const elementSchema = (element: ScriptElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
 
-/** The element's own model, picked from its connector type's. */
-export const elementModelPick = (element: CanvasContentElement): ModelPick => ({
-	kind: "model",
-	type: ELEMENT_TYPES[element.type].connector,
-	...ELEMENT_MODEL,
-});
+/** The element's own model, picked from its connector type's. Only asked of a type with models. */
+export function elementModelPick(element: ScriptElement): ModelPick {
+	const type = connectorOf(element.type);
+	if (!type) throw new Error(`A ${element.type} element has no model`);
+	return { kind: "model", type, ...ELEMENT_MODEL };
+}

@@ -1,7 +1,7 @@
 import type { Descendant } from "slate";
 import { getContentElements } from "./scenes";
 import { getElementBodyText } from "./osmlSerializer";
-import { ELEMENT_TYPES } from "./types";
+import { isSpeech } from "./guards";
 
 export const countWords = (text: string) =>
 	text.split(/\s+/).filter(Boolean).length;
@@ -9,7 +9,7 @@ export const countWords = (text: string) =>
 /** Words the TTS engine will speak: narration and dialogue, nothing else. */
 export function countSpokenWords(descendants: Descendant[]): number {
 	return getContentElements(descendants)
-		.filter((element) => ELEMENT_TYPES[element.type].connector === "tts")
+		.filter(isSpeech)
 		.reduce(
 			(total, element) => total + countWords(getElementBodyText(element)),
 			0,

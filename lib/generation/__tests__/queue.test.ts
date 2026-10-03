@@ -21,8 +21,21 @@ type GenerateFn = (...args: unknown[]) => Promise<unknown>;
 let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
 
 vi.mock("../generateForElement", () => ({
-	generateForElement: (...args: unknown[]) => generateMock(...args),
+	generateForElement: ({ job, inputs }: GenerationNode, ...rest: unknown[]) =>
+		generateMock(job, inputs, ...rest),
 }));
+
+vi.mock("../generationGraph", async (original) => ({
+	...(await original<typeof import("../generationGraph")>()),
+	prepareNode: async (node: GenerationNode) => node,
+}));
+
+const blankInputs = (prompt = "p"): GenerationInputs => ({
+	prompt,
+	attributes: {},
+	reads: {},
+	dependencies: {},
+});
 
 type JobOverrides = Partial<GenerationJob> & {
 	inputs?: GenerationInputs;
@@ -32,7 +45,7 @@ type JobOverrides = Partial<GenerationJob> & {
 function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 	const config: ConnectorConfig = {};
 	const {
-		inputs = { prompt: "test prompt", attributes: {}, dependencies: {} },
+		inputs = blankInputs("test prompt"),
 		dependsOn = [],
 		...rest
 	} = overrides;
@@ -46,7 +59,11 @@ function makeJob(id: string, overrides: JobOverrides = {}): GenerationNode {
 	};
 	return {
 		id,
-		inputs: { prompt: inputs.prompt, attributes: inputs.attributes },
+		inputs: {
+			prompt: inputs.prompt,
+			attributes: inputs.attributes,
+			reads: inputs.reads,
+		},
 		dependsOn: byId(dependsOn),
 		job,
 	};
@@ -89,12 +106,12 @@ describe("GenerationQueue", () => {
 			const unsub = generationQueue.subscribe(listener);
 
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("sub-1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("sub-1")], () => EMPTY_CONTEXT);
 			expect(listener).toHaveBeenCalled();
 
 			const callCount = listener.mock.calls.length;
 			unsub();
-			generationQueue.enqueueGraph([makeJob("sub-2")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("sub-2")], () => EMPTY_CONTEXT);
 			// After unsubscribe, listener should not be called again
 			// (sub-2 is a new job so enqueue would normally notify)
 			// Note: sub-1 might still be generating, but sub-2 is different
@@ -108,7 +125,7 @@ describe("GenerationQueue", () => {
 	describe("enqueue", () => {
 		it("sets element status to generating when under the concurrency limit", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("e1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("e1")], () => EMPTY_CONTEXT);
 
 			const snap = generationQueue.getElementSnapshot("e1");
 			expect(snap.status).toBe("generating");
@@ -122,10 +139,10 @@ describe("GenerationQueue", () => {
 			// Fill the image limit (3)
 			generationQueue.enqueueGraph(
 				[makeJob("b1"), makeJob("b2"), makeJob("b3")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			// 4th job should be queued, not generating
-			generationQueue.enqueueGraph([makeJob("b4")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("b4")], () => EMPTY_CONTEXT);
 
 			expect(generationQueue.getElementSnapshot("b1").status).toBe(
 				"generating",
@@ -155,7 +172,7 @@ describe("GenerationQueue", () => {
 					makeJob("t1", { connectorType: "tts" }),
 					makeJob("t2", { connectorType: "tts" }),
 				],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 
 			expect(queue.getElementSnapshot("i1").status).toBe("generating");
@@ -171,10 +188,10 @@ describe("GenerationQueue", () => {
 			const listener = vi.fn();
 			generationQueue.subscribe(listener);
 
-			generationQueue.enqueueGraph([makeJob("dup1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("dup1")], () => EMPTY_CONTEXT);
 			const firstCount = listener.mock.calls.length;
 
-			generationQueue.enqueueGraph([makeJob("dup1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("dup1")], () => EMPTY_CONTEXT);
 			// No additional notifications because the element was skipped
 			expect(listener).toHaveBeenCalledTimes(firstCount);
 
@@ -187,7 +204,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph(
 				[makeJob("m1"), makeJob("m2")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 
 			expect(generationQueue.getElementSnapshot("m1").status).toBe(
@@ -203,11 +220,11 @@ describe("GenerationQueue", () => {
 
 		it("does not notify if no new jobs were added", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("existing")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("existing")], () => EMPTY_CONTEXT);
 
 			const listener = vi.fn();
 			generationQueue.subscribe(listener);
-			generationQueue.enqueueGraph([makeJob("existing")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("existing")], () => EMPTY_CONTEXT);
 			expect(listener).not.toHaveBeenCalled();
 
 			generationQueue.discard("existing");
@@ -219,7 +236,7 @@ describe("GenerationQueue", () => {
 			const result = { url: "https://example.com/image.png" };
 			generateMock.mockResolvedValue(result);
 
-			generationQueue.enqueueGraph([makeJob("ok1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("ok1")], () => EMPTY_CONTEXT);
 			await vi.runAllTimersAsync();
 
 			const snap = generationQueue.getElementSnapshot("ok1");
@@ -233,7 +250,7 @@ describe("GenerationQueue", () => {
 		it("stores error message on failure", async () => {
 			generateMock.mockRejectedValue(new Error("generation failed"));
 
-			generationQueue.enqueueGraph([makeJob("err1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("err1")], () => EMPTY_CONTEXT);
 			await vi.runAllTimersAsync();
 
 			const snap = generationQueue.getElementSnapshot("err1");
@@ -245,7 +262,7 @@ describe("GenerationQueue", () => {
 		it("converts non-Error throws to string", async () => {
 			generateMock.mockRejectedValue("string error");
 
-			generationQueue.enqueueGraph([makeJob("err2")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("err2")], () => EMPTY_CONTEXT);
 			await vi.runAllTimersAsync();
 
 			expect(generationQueue.getElementSnapshot("err2").error).toBe(
@@ -255,7 +272,7 @@ describe("GenerationQueue", () => {
 
 		it("notifies subscribers when a job fails", async () => {
 			generateMock.mockRejectedValue(new Error("boom"));
-			generationQueue.enqueueGraph([makeJob("err3")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("err3")], () => EMPTY_CONTEXT);
 			const listener = vi.fn();
 			generationQueue.subscribe(listener);
 
@@ -269,7 +286,7 @@ describe("GenerationQueue", () => {
 	describe("cancel", () => {
 		it("cancels a generating job and resets to idle", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("c1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("c1")], () => EMPTY_CONTEXT);
 			expect(generationQueue.getElementSnapshot("c1").status).toBe(
 				"generating",
 			);
@@ -284,13 +301,13 @@ describe("GenerationQueue", () => {
 		it("preserves previous result after cancellation", async () => {
 			const result = { url: "https://example.com/prev.png" };
 			generateMock.mockResolvedValue(result);
-			generationQueue.enqueueGraph([makeJob("c2")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("c2")], () => EMPTY_CONTEXT);
 			await vi.runAllTimersAsync();
 			expect(generationQueue.getElementSnapshot("c2").result).toEqual(result);
 
 			// Re-enqueue and cancel during generation
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("c2")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("c2")], () => EMPTY_CONTEXT);
 			generationQueue.cancel("c2");
 
 			const snap = generationQueue.getElementSnapshot("c2");
@@ -305,10 +322,11 @@ describe("GenerationQueue", () => {
 			expect(listener).not.toHaveBeenCalled();
 		});
 
-		it("aborts the signal handed to the job so its poll stops", () => {
+		it("aborts the signal handed to the job so its poll stops", async () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("c3")], EMPTY_CONTEXT);
-			const signal = generateMock.mock.calls[0]?.[4] as AbortSignal;
+			generationQueue.enqueueGraph([makeJob("c3")], () => EMPTY_CONTEXT);
+			await vi.advanceTimersByTimeAsync(0);
+			const signal = generateMock.mock.calls[0]?.[3] as AbortSignal;
 			expect(signal.aborted).toBe(false);
 
 			generationQueue.cancel("c3");
@@ -319,7 +337,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph(
 				[makeJob("p1"), makeJob("p2"), makeJob("p3"), makeJob("p4")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			expect(generationQueue.getElementSnapshot("p4").status).toBe("queued");
 
@@ -340,7 +358,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph(
 				[makeJob("a1"), makeJob("a2"), makeJob("a3"), makeJob("a4")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 
 			generationQueue.cancelAll();
@@ -352,14 +370,15 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("a4").status).toBe("idle");
 		});
 
-		it("aborts every in-flight job's signal", () => {
+		it("aborts every in-flight job's signal", async () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph(
 				[makeJob("a5"), makeJob("a6")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
+			await vi.advanceTimersByTimeAsync(0);
 			const signals = generateMock.mock.calls.map(
-				(call) => call[4] as AbortSignal,
+				(call) => call[3] as AbortSignal,
 			);
 			expect(signals).toHaveLength(2);
 
@@ -371,7 +390,7 @@ describe("GenerationQueue", () => {
 	describe("discard", () => {
 		it("removes element state entirely", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("d1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("d1")], () => EMPTY_CONTEXT);
 
 			generationQueue.discard("d1");
 			const snap = generationQueue.getElementSnapshot("d1");
@@ -390,7 +409,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph(
 				[makeJob("d2"), makeJob("d3"), makeJob("d4"), makeJob("d5")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			expect(generationQueue.getElementSnapshot("d5").status).toBe("queued");
 
@@ -423,7 +442,7 @@ describe("GenerationQueue", () => {
 				durationSec: 0,
 			};
 			const node = makeJob("sm1", {
-				inputs: { prompt: "p", attributes: {}, dependencies: {} },
+				inputs: blankInputs(),
 			});
 			generationQueue.commitResult(node, result);
 
@@ -431,11 +450,7 @@ describe("GenerationQueue", () => {
 			expect(snap.status).toBe("idle");
 			expect(snap.result).toEqual(result);
 			expect(snap.error).toBeNull();
-			expect(snap.resultInputs).toEqual({
-				prompt: "p",
-				attributes: {},
-				dependencies: {},
-			});
+			expect(snap.resultInputs).toEqual(blankInputs());
 			// Without this, pickThumbnailUrl skips the upload and the project card
 			// stays blank (no job ran to set connectorType).
 			expect(snap.connectorType).toBe("image");
@@ -448,13 +463,20 @@ describe("GenerationQueue", () => {
 			// ever hitting generate — pickThumbnailUrl must still find the image.
 			generationQueue.commitResult(
 				makeJob("scene-1", {
-					inputs: { prompt: "", attributes: {}, dependencies: {} },
+					inputs: blankInputs(""),
 				}),
 				{ imageUrl: "https://example.com/upload.png", durationSec: 0 },
 			);
 
 			const thumbnail = pickThumbnailUrl(
-				Object.entries(generationQueue.snapshot()),
+				[
+					{
+						id: "scene-1",
+						type: "image",
+						children: [{ id: "scene-1-t", type: "image", text: "" }],
+					},
+				],
+				generationQueue,
 			);
 			expect(thumbnail).toBe("https://example.com/upload.png");
 
@@ -467,8 +489,11 @@ describe("GenerationQueue", () => {
 				durationSec: 0,
 			};
 			generateMock.mockResolvedValue(generated);
-			const inputs = { prompt: "p", attributes: {}, dependencies: {} };
-			generationQueue.enqueueGraph([makeJob("sm2", { inputs })], EMPTY_CONTEXT);
+			const inputs = blankInputs();
+			generationQueue.enqueueGraph(
+				[makeJob("sm2", { inputs })],
+				() => EMPTY_CONTEXT,
+			);
 			await vi.runAllTimersAsync();
 			expect(generationQueue.getElementSnapshot("sm2").result).toEqual(
 				generated,
@@ -523,8 +548,11 @@ describe("GenerationQueue", () => {
 					resolveGenerate = resolve;
 				}),
 			);
-			const inputs = { prompt: "p", attributes: {}, dependencies: {} };
-			generationQueue.enqueueGraph([makeJob("sm6", { inputs })], EMPTY_CONTEXT);
+			const inputs = blankInputs();
+			generationQueue.enqueueGraph(
+				[makeJob("sm6", { inputs })],
+				() => EMPTY_CONTEXT,
+			);
 			expect(generationQueue.getElementSnapshot("sm6").status).toBe(
 				"generating",
 			);
@@ -564,9 +592,13 @@ describe("GenerationQueue", () => {
 			const inputs = {
 				prompt: "p",
 				attributes: { a: "1", b: "2" },
+				reads: {},
 				dependencies: {},
 			};
-			generationQueue.enqueueGraph([makeJob("rr1", { inputs })], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph(
+				[makeJob("rr1", { inputs })],
+				() => EMPTY_CONTEXT,
+			);
 			await vi.runAllTimersAsync();
 			generationQueue.setError("rr1", "stale");
 			expect(generationQueue.getElementSnapshot("rr1").result).toBeNull();
@@ -591,14 +623,17 @@ describe("GenerationQueue", () => {
 				durationSec: 0,
 			};
 			generateMock.mockResolvedValue(first);
-			const inputs = { prompt: "p", attributes: {}, dependencies: {} };
-			generationQueue.enqueueGraph([makeJob("rr2", { inputs })], EMPTY_CONTEXT);
+			const inputs = blankInputs();
+			generationQueue.enqueueGraph(
+				[makeJob("rr2", { inputs })],
+				() => EMPTY_CONTEXT,
+			);
 			await vi.runAllTimersAsync();
 
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph(
 				[makeJob("rr2", { inputs: { ...inputs, prompt: "next" } })],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			await vi.advanceTimersByTimeAsync(0);
 
@@ -622,11 +657,11 @@ describe("GenerationQueue", () => {
 				imageUrl: "https://example.com/up.png",
 				durationSec: 0,
 			};
-			const shared = { prompt: "p", attributes: {}, dependencies: {} };
+			const shared = blankInputs();
 			generateMock.mockResolvedValue({ imageUrl: "gen.png", durationSec: 0 });
 			generationQueue.enqueueGraph(
 				[makeJob("rr3", { inputs: shared })],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			await vi.runAllTimersAsync();
 			expect(generationQueue.getElementSnapshot("rr3").pinned).toBe(false);
@@ -650,7 +685,7 @@ describe("GenerationQueue", () => {
 				imageUrl: "https://example.com/gen.png",
 				durationSec: 0,
 			};
-			const shared = { prompt: "p", attributes: {}, dependencies: {} };
+			const shared = blankInputs();
 			generationQueue.commitResult(
 				makeJob("rr4", { inputs: shared }),
 				{ imageUrl: "https://example.com/up.png", durationSec: 0 },
@@ -687,7 +722,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.enqueueGraph(
 				[makeJob("q1"), makeJob("q2"), makeJob("q3"), makeJob("q4")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 
 			expect(generationQueue.getElementSnapshot("q4").status).toBe("queued");
@@ -711,7 +746,7 @@ describe("GenerationQueue", () => {
 	describe("timer", () => {
 		it("increments seconds while generating", async () => {
 			generateMock.mockReturnValue(new Promise(() => {}));
-			generationQueue.enqueueGraph([makeJob("t1")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("t1")], () => EMPTY_CONTEXT);
 
 			expect(generationQueue.getElementSnapshot("t1").seconds).toBe(0);
 
@@ -727,7 +762,7 @@ describe("GenerationQueue", () => {
 	describe("committed versions", () => {
 		const generate = async (id: string, url: string) => {
 			generateMock.mockResolvedValue({ url, durationSec: 0 });
-			generationQueue.enqueueGraph([makeJob(id)], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob(id)], () => EMPTY_CONTEXT);
 			await vi.advanceTimersByTimeAsync(0);
 		};
 
@@ -774,7 +809,7 @@ describe("GenerationQueue", () => {
 			seconds: 0,
 			result: { url: "u", durationSec: 2 },
 			error: null,
-			resultInputs: { prompt: "p", attributes: {}, dependencies: {} },
+			resultInputs: blankInputs(),
 			connectorType: "image" as const,
 			pinned: false,
 		};
@@ -783,7 +818,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockResolvedValue(idleEntry.result);
 			generationQueue.enqueueGraph(
 				[makeJob("s1", { inputs: idleEntry.resultInputs })],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			await vi.advanceTimersByTimeAsync(0);
 
@@ -814,7 +849,7 @@ describe("GenerationQueue", () => {
 			seconds: 0,
 			result: { url: "u", durationSec: 2 },
 			error: null,
-			resultInputs: { prompt: "p", attributes: {}, dependencies: {} },
+			resultInputs: blankInputs(),
 			connectorType: "image" as const,
 			pinned: false,
 		};
@@ -849,7 +884,7 @@ describe("GenerationQueue", () => {
 			expect(
 				isNodeStale(
 					makeJob("h3", {
-						inputs: { prompt: "different", attributes: {}, dependencies: {} },
+						inputs: blankInputs("different"),
 					}),
 					q,
 				),
@@ -872,7 +907,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(pending());
 			generationQueue.enqueueGraph(
 				[makeJob("a"), makeJob("b"), makeJob("c")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 
 			expect(total()).toBe(3);
@@ -883,8 +918,14 @@ describe("GenerationQueue", () => {
 
 		it("does not count an already-queued item twice", () => {
 			generateMock.mockReturnValue(pending());
-			generationQueue.enqueueGraph([makeJob("a"), makeJob("b")], EMPTY_CONTEXT);
-			generationQueue.enqueueGraph([makeJob("a"), makeJob("c")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph(
+				[makeJob("a"), makeJob("b")],
+				() => EMPTY_CONTEXT,
+			);
+			generationQueue.enqueueGraph(
+				[makeJob("a"), makeJob("c")],
+				() => EMPTY_CONTEXT,
+			);
 
 			expect(total()).toBe(3);
 
@@ -895,7 +936,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(pending());
 			generationQueue.enqueueGraph(
 				[makeJob("a"), makeJob("b"), makeJob("c")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			generationQueue.cancel("b");
 
@@ -909,7 +950,7 @@ describe("GenerationQueue", () => {
 			generateMock.mockReturnValue(pending());
 			generationQueue.enqueueGraph(
 				[makeJob("a"), makeJob("b"), makeJob("c")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			generationQueue.discard("b");
 
@@ -936,7 +977,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.enqueueGraph(
 				[makeJob("a"), makeJob("b"), makeJob("c")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			rejectA(new Error("boom"));
 			await vi.advanceTimersByTimeAsync(0);
@@ -973,7 +1014,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.enqueueGraph(
 				[makeJob("a"), makeJob("b"), makeJob("c")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 			resolveA({ url: "a" });
 			resolveB({ url: "b" });
@@ -986,7 +1027,7 @@ describe("GenerationQueue", () => {
 			// already-finished items.
 			generationQueue.enqueueGraph(
 				[makeJob("d"), makeJob("e"), makeJob("f")],
-				EMPTY_CONTEXT,
+				() => EMPTY_CONTEXT,
 			);
 
 			expect(generationQueue.getGeneratedCount()).toBe(2);
@@ -1005,7 +1046,7 @@ describe("GenerationQueue", () => {
 				)
 				.mockReturnValue(pending());
 
-			generationQueue.enqueueGraph([makeJob("a")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("a")], () => EMPTY_CONTEXT);
 			resolveA({ url: "a" });
 			await vi.advanceTimersByTimeAsync(0);
 
@@ -1015,7 +1056,7 @@ describe("GenerationQueue", () => {
 			expect(total()).toBe(1);
 
 			// A fresh job joins the still-counted completion instead of replacing it.
-			generationQueue.enqueueGraph([makeJob("b")], EMPTY_CONTEXT);
+			generationQueue.enqueueGraph([makeJob("b")], () => EMPTY_CONTEXT);
 
 			expect(generationQueue.getGeneratedCount()).toBe(1);
 			expect(total()).toBe(2);

@@ -3,18 +3,11 @@
 import { getImageProps } from "next/image";
 import { User } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import { characterAvatarUrl } from "@/lib/project/characterAvatar";
+import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { RemoveCrossButton } from "./RemoveCrossButton";
 
 /** `size-6` in CSS pixels. */
 const AVATAR_PX = 24;
-
-function useCharacterAvatarUrl(name?: string) {
-	return useQueueSelector((queue) =>
-		name ? characterAvatarUrl(queue, name) : undefined,
-	);
-}
 
 function CharacterAvatar({
 	name,
@@ -63,7 +56,7 @@ export function CharacterPill({
 	name?: string;
 	onRemove?: () => void;
 }) {
-	const avatarUrl = useCharacterAvatarUrl(name);
+	const { url: avatarUrl } = useCharacterAvatar(name);
 	return (
 		<div
 			className={`group/pill relative inline-flex h-6 max-w-[140px] shrink-0 items-center rounded-md transition-colors hover:bg-button-hover ${

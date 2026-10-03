@@ -5,15 +5,19 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { videoAttributesFor } from "@/lib/connectors/video/attributes";
-import { createProjectStore } from "@/lib/project/store";
 import { createCanvasNode } from "../createCanvasNode";
 import {
+	attributeSchemaFor,
 	elementModelPick,
 	elementSchema,
 	resolveElementConnector,
 } from "../elementConnector";
 import type { CanvasContentElement } from "../types";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import {
+	flatAttributes,
+	splitAttributes,
+} from "@/lib/canvas/elementAttributes";
+import { asset } from "./_assets";
 
 function element(
 	type: CanvasContentElement["type"],
@@ -29,20 +33,19 @@ function element(
 
 const registry = DEFAULT_CONNECTOR_REGISTRY;
 const imageDefaults = registry.image;
-const state = createProjectStore().getState();
 
 describe("resolveElementConnector", () => {
 	it("maps the element type to its connector type", () => {
 		expect(
-			resolveElementConnector(element("narration"), registry, state).type,
+			resolveElementConnector(element("narration"), registry, []).type,
 		).toBe("tts");
-		expect(
-			resolveElementConnector(element("video"), registry, state).type,
-		).toBe("video");
+		expect(resolveElementConnector(element("video"), registry, []).type).toBe(
+			"video",
+		);
 	});
 
 	it("falls back to the recommendation when nothing is pinned", () => {
-		expect(resolveElementConnector(element("image"), registry, state)).toEqual({
+		expect(resolveElementConnector(element("image"), registry, [])).toEqual({
 			type: "image",
 			model: DEFAULT_IMAGE_MODEL,
 			config: imageDefaults,
@@ -52,27 +55,23 @@ describe("resolveElementConnector", () => {
 	it("keeps a pinned model over the recommendation", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
 		expect(
-			resolveElementConnector(element("image", pinned), registry, state).model,
+			resolveElementConnector(element("image", pinned), registry, []).model,
 		).toEqual(pinned);
 	});
 
 	it("falls back when the pinned provider no longer serves the model", () => {
-		const { model, config } = resolveElementConnector(
+		const connector = resolveElementConnector(
 			element("image", { provider: "retired-vendor", model: "Slop Image v1" }),
 			registry,
-			state,
+			[],
 		);
-		expect(model).toEqual(DEFAULT_IMAGE_MODEL);
-		expect(config).toBe(imageDefaults);
+		expect(connector.model).toEqual(DEFAULT_IMAGE_MODEL);
+		expect(connector.config).toBe(imageDefaults);
 	});
 });
 
 describe("resolveElementConnector for speech", () => {
-	const voiced = (narration: Record<string, string>) => {
-		const store = createProjectStore();
-		store.getState().updateMetadata({ narration });
-		return store.getState();
-	};
+	const voiced = (attrs: Record<string, string>) => [asset("voice", { attrs })];
 	const own = { provider: "cartesia", model: "Sonic 3.6" };
 
 	it("speaks with the pair its voice picked, over its own", () => {
@@ -85,20 +84,51 @@ describe("resolveElementConnector for speech", () => {
 		).toEqual(DEFAULT_MODELS.tts);
 	});
 
-	it("speaks with its own pair until the voice picks one", () => {
+	it("speaks with its own pair while its speaker has no voice element", () => {
+		expect(
+			resolveElementConnector(element("narration", own), registry, []).model,
+		).toEqual(own);
 		expect(
 			resolveElementConnector(
-				element("narration", own),
+				element("character", { name: "Red", ...own }),
 				registry,
-				voiced({ gender: "feminine" }),
+				voiced(DEFAULT_MODELS.tts),
 			).model,
 		).toEqual(own);
 	});
 
 	it("falls back to the recommendation when neither names a model", () => {
 		expect(
-			resolveElementConnector(element("character"), registry, state).model,
+			resolveElementConnector(element("character"), registry, []).model,
 		).toEqual(DEFAULT_MODELS.tts);
+	});
+});
+
+describe("resolveElementConnector for a cast element", () => {
+	it("draws the character's look on the image connector, with the model it pins", () => {
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
+		const cast = asset("cast", { name: "Mia", attrs: pinned });
+
+		expect(resolveElementConnector(cast, registry, [cast])).toEqual({
+			type: "image",
+			model: pinned,
+			config: registry.cast,
+		});
+	});
+});
+
+describe("resolveElementConnector for metadata", () => {
+	it("throws, since metadata never generates", () => {
+		for (const type of [
+			"title",
+			"project",
+			"voice",
+			"style",
+			"references",
+		] as const)
+			expect(() => resolveElementConnector(asset(type), registry, [])).toThrow(
+				/generates nothing/,
+			);
 	});
 });
 
@@ -108,10 +138,10 @@ describe("createCanvasNode", () => {
 			attrs: { provider: "retired-vendor" },
 		});
 
-		expect(resolveElementConnector(node, registry, state).model).toEqual(
+		expect(resolveElementConnector(node, registry, []).model).toEqual(
 			DEFAULT_IMAGE_MODEL,
 		);
-		expect(resolveElementConnector(node, registry, state).config).toBe(
+		expect(resolveElementConnector(node, registry, []).config).toBe(
 			imageDefaults,
 		);
 	});
@@ -129,7 +159,57 @@ describe("elementSchema", () => {
 	});
 });
 
+describe("asset schemas", () => {
+	const voice = attributeSchemaFor("voice", {});
+
+	it("lets a voice set its traits, each one optional, describe itself in text, and carry its speech pair", () => {
+		expect(voice.keys).toEqual([
+			"gender",
+			"language",
+			"age",
+			"pitch",
+			"accent",
+			"description",
+			"provider",
+			"model",
+		]);
+		expect(voice.defaultAttributes).toEqual(DEFAULT_MODELS.tts);
+	});
+
+	it("gives every asset but a voice nothing to set beside its text", () => {
+		for (const type of [
+			"title",
+			"project",
+			"cast",
+			"style",
+			"references",
+		] as const)
+			expect(attributeSchemaFor(type, {}).keys).toEqual([]);
+	});
+
+	it("keeps what an asset holds outside its schema when it is created", () => {
+		expect(
+			flatAttributes(
+				asset("voice", {
+					name: "Mia",
+					attrs: { ...DEFAULT_MODELS.tts, voiceId: "v1", gender: "feminine" },
+				}),
+			),
+		).toEqual({
+			name: "Mia",
+			...DEFAULT_MODELS.tts,
+			voiceId: "v1",
+			gender: "feminine",
+		});
+	});
+});
+
 describe("elementModelPick", () => {
+	it("picks a cast's model from the image models, and throws for a type that does not generate", () => {
+		expect(() => elementModelPick(asset("style"))).toThrow(/no model/);
+		expect(elementModelPick(asset("cast", { name: "Mia" })).type).toBe("image");
+	});
+
 	it("picks the element's own pair from its connector type's models", () => {
 		expect(elementModelPick(element("narration"))).toEqual({
 			kind: "model",

@@ -4,8 +4,8 @@ import { useSlateStatic } from "slate-react";
 import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
+import type { ScriptElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import {
 	NO_FRAME,
@@ -54,7 +54,7 @@ function FrameTile({
 	);
 }
 
-function PreviousVisualPreview({ element }: { element: CanvasContentElement }) {
+function PreviousVisualPreview({ element }: { element: ScriptElement }) {
 	const previous = usePreviousPictures(element, [START_FRAME]);
 	if (previous.kind === "loading")
 		return <Skeleton className="absolute inset-0" />;
@@ -70,7 +70,7 @@ export function StartFramePicker({
 	label,
 	hideLabel,
 }: {
-	element: CanvasContentElement;
+	element: ScriptElement;
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;
@@ -84,7 +84,7 @@ export function StartFramePicker({
 		element.layoutAttributes?.[UPLOADED_FRAME_ATTR] ??
 		(usesUpload ? frame : undefined);
 	const setFrame = (next: string, upload = uploaded ?? null) =>
-		updateElementAttrs(editor, element, {
+		mergeAttrs(editor, element.id, {
 			[attrKey]: next,
 			[UPLOADED_FRAME_ATTR]: upload,
 		});

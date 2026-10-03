@@ -8,6 +8,9 @@ import {
 	type CanvasContentElement,
 	type SceneElement,
 } from "@/lib/canvas/types";
+import { isAssetElement } from "@/lib/canvas/guards";
+import { isSceneElement } from "@/lib/canvas/scenes";
+import { getPromptText } from "@/lib/generation/inputs";
 import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
 import {
 	flatAttributes,
@@ -24,6 +27,9 @@ const makeEl = (
 	...splitAttributes(attrs ?? {}),
 	children: [{ id: `${type}-t`, type, text }],
 });
+
+const scenesOf = (...args: Parameters<typeof deserializeWithScenes>) =>
+	deserializeWithScenes(...args).filter(isSceneElement);
 
 const makeScene = (children: CanvasContentElement[]): SceneElement => ({
 	id: "scene-id",
@@ -52,7 +58,7 @@ describe("deserializeWithScenes", () => {
 	});
 
 	it("turns BLANK_SCRIPT into one scene holding one empty narration", () => {
-		const scenes = deserializeWithScenes(BLANK_SCRIPT);
+		const scenes = scenesOf(BLANK_SCRIPT);
 
 		expect(scenes).toHaveLength(1);
 		expect(scenes[0].children).toHaveLength(1);
@@ -60,7 +66,7 @@ describe("deserializeWithScenes", () => {
 	});
 
 	it("names scenes with the given id factory", () => {
-		const scenes = deserializeWithScenes(
+		const scenes = scenesOf(
 			"<narration>a</narration>\n--- Scene 2 ---\n<narration>b</narration>",
 			undefined,
 			(index) => `scene-${index}`,
@@ -69,15 +75,73 @@ describe("deserializeWithScenes", () => {
 		expect(scenes.map((scene) => scene.id)).toEqual(["scene-0", "scene-1"]);
 	});
 
-	it("keeps metadata tags out of the scene", () => {
-		const scenes = deserializeWithScenes(
-			'<metadata_character name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright" language="en">A girl</metadata_character><narration>hello</narration>',
+	it("keeps tags the canvas does not know out of the document", () => {
+		const nodes = deserializeWithScenes(
+			'<metadata_character name="Red" gender="feminine">A girl</metadata_character><narration>hello</narration>',
 		);
 
-		expect(scenes).toHaveLength(1);
-		expect(scenes[0].children.map((child) => child.type)).toEqual([
-			"narration",
+		expect(nodes).toHaveLength(1);
+		expect(
+			scenesOf("<unknown>x</unknown><narration>hello</narration>"),
+		).toEqual([
+			expect.objectContaining({
+				children: [expect.objectContaining({ type: "narration" })],
+			}),
 		]);
+	});
+
+	it("puts the assets ahead of the scenes, wherever the script wrote them", () => {
+		const nodes = deserializeWithScenes(
+			[
+				'<style id="style">noir</style>',
+				"<narration>a</narration>",
+				"--- Scene 2 ---",
+				'<cast id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</cast>',
+				"<narration>b</narration>",
+			].join("\n"),
+		);
+
+		expect(nodes.map((node) => node.type)).toEqual([
+			"style",
+			"cast",
+			SCENE_TYPE,
+			SCENE_TYPE,
+		]);
+		const cast = nodes[1];
+		expect(cast).toMatchObject({
+			id: "cast:Ada",
+			generationAttributes: {
+				name: "Ada",
+				provider: "runware",
+				model: "Seedream 5 Lite",
+			},
+		});
+		expect(isAssetElement(cast) && getPromptText(cast)).toBe("tall");
+		expect(
+			scenesOf('<cast name="Ada">tall</cast><narration>b</narration>')[0]
+				?.children,
+		).toHaveLength(1);
+	});
+
+	it("makes no scene of a script that holds only assets", () => {
+		const nodes = deserializeWithScenes(
+			'<style>noir</style>\n--- Scene 1 ---\n<references images="a.png"></references>',
+		);
+
+		expect(nodes.map((node) => node.type)).toEqual(["style", "references"]);
+	});
+
+	it("round-trips assets through serializeOSMLWithScenes", () => {
+		const osml = [
+			'<style id="style">noir &amp; "moody"</style>',
+			'<voice id="narrator" provider="openslop" model="Slop TTS v1" gender="feminine"></voice>',
+			'<cast id="cast:Ada &lt;the first&gt;" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</cast>',
+			'<references id="references" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></references>',
+		].join("\n");
+
+		expect(serializeOSMLWithScenes(deserializeWithScenes(osml))).toBe(
+			osml.replace('"moody"', "&quot;moody&quot;"),
+		);
 	});
 
 	it("round-trips quotes and angle brackets in attributes and text", () => {
@@ -89,7 +153,7 @@ describe("deserializeWithScenes", () => {
 			]),
 		];
 
-		const scenes = deserializeWithScenes(serializeOSMLWithScenes(original));
+		const scenes = scenesOf(serializeOSMLWithScenes(original));
 
 		const image = scenes[0].children[0];
 		expect(image.type).toBe("image");
@@ -108,7 +172,7 @@ describe("deserializeWithScenes", () => {
 		];
 
 		const osml = serializeOSMLWithScenes(original);
-		const scenes = deserializeWithScenes(osml);
+		const scenes = scenesOf(osml);
 
 		expect(scenes).toHaveLength(2);
 

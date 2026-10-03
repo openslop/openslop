@@ -1,19 +1,21 @@
+import type { Editor } from "slate";
+import { getAssets } from "@/lib/canvas/assets";
 import { clearEditor } from "@/lib/canvas/editorOps";
 import type { LLMConnector } from "@/lib/connectors/types";
 import { buildScriptPrompt, type ScriptSource } from "./prompt/build";
-import { createScriptWriter, type ScriptCanvas } from "./scriptWriter";
+import { createScriptWriter } from "./scriptWriter";
 
-/** Replaces the canvas with a script the model writes from `source`. */
+/** Replaces the script on the canvas with one the model writes from `source`, against the assets already there. */
 export async function streamScript(
-	canvas: ScriptCanvas,
+	editor: Editor,
 	llm: LLMConnector,
 	source: ScriptSource,
 	signal?: AbortSignal,
 ): Promise<void> {
-	clearEditor(canvas.editor);
-	const write = createScriptWriter(canvas);
+	clearEditor(editor);
+	const write = createScriptWriter(editor);
 	const { system, prompt } = buildScriptPrompt(
-		canvas.store.getState().metadata,
+		getAssets(editor.children),
 		source,
 	);
 

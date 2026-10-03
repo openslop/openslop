@@ -4,7 +4,6 @@ import { isSceneElement } from "@/lib/canvas/scenes";
 import { countWords } from "@/lib/canvas/spokenWords";
 import {
 	ELEMENT_TYPES,
-	FOREGROUND_TYPES,
 	type CanvasContentElement,
 	type CanvasElementType,
 } from "@/lib/canvas/types";
@@ -85,11 +84,12 @@ const walk = (descendants: Descendant[]): Walk => {
 		sceneNumber += 1;
 
 		for (const element of node.children) {
-			if (FOREGROUND_TYPES.has(element.type)) {
+			const { role } = ELEMENT_TYPES[element.type];
+			if (role === "foreground") {
 				spans.push({ element, sceneNumber, words: 0, dialogueIds: [] });
 				continue;
 			}
-			if (ELEMENT_TYPES[element.type].connector !== "tts") continue;
+			if (role !== "overlay") continue;
 			const words = countWords(getElementBodyText(element));
 			const open = spans.at(-1);
 			if (!open) {

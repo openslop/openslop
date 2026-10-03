@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
 import {
-	derivedNodeId,
-	sourceNode,
 	type Dependency,
 	type GenerationJob,
 	type GenerationNode,
@@ -19,10 +17,12 @@ function node(
 	{
 		prompt = id,
 		attributes = {},
+		reads = {},
 		dependsOn = [],
 	}: {
 		prompt?: string;
 		attributes?: Record<string, string>;
+		reads?: Record<string, string>;
 		dependsOn?: (GenerationNode | Dependency)[];
 	} = {},
 ): GenerationNode {
@@ -35,7 +35,7 @@ function node(
 	};
 	return {
 		id,
-		inputs: { prompt, attributes },
+		inputs: { prompt, attributes, reads },
 		dependsOn: byId(dependsOn),
 		job,
 	};
@@ -86,7 +86,7 @@ describe("staleReason", () => {
 
 	it("names an upstream avatar by its character", () => {
 		const queue = new GenerationQueue();
-		const avatar = node(derivedNodeId("avatar", "Red"));
+		const avatar = node("cast:Red");
 		const image = node("a", {
 			dependsOn: [{ node: avatar, label: "Red's avatar" }],
 		});
@@ -99,37 +99,33 @@ describe("staleReason", () => {
 		);
 	});
 
-	it("names a project source node", () => {
+	it("names what it read verbatim, where an attribute is lowercased", () => {
 		const queue = new GenerationQueue();
-		const withStyle = (style: string) =>
+		const voiced = (voice: string) =>
 			node("a", {
-				dependsOn: [
-					{
-						node: sourceNode("project:artStyle", { style }),
-						label: "the art style",
-					},
-				],
+				attributes: { voiceId: voice },
+				reads: { "Red's voice": voice },
 			});
-		commit(queue, withStyle("watercolor"), "a.png");
+		commit(queue, voiced("v1"), "a.png");
 
-		expect(staleReason(withStyle("noir"), queue)).toBe(
-			"The art style changed — regenerate to update",
+		expect(staleReason(voiced("v2"), queue)).toBe(
+			"Voice id and Red's voice changed — regenerate to update",
 		);
 	});
 
 	it("names a dependency that is itself stale, even though its output has not changed", () => {
 		const queue = new GenerationQueue();
-		const refs = (urls: string) =>
-			sourceNode("project:referenceImages", { urls });
-		const avatar = (urls: string) =>
-			node(derivedNodeId("avatar", "Red"), { dependsOn: [refs(urls)] });
-		const image = (urls: string) =>
-			node("a", { dependsOn: [{ node: avatar(urls), label: "Red's avatar" }] });
+		const avatar = (style: string) =>
+			node("cast:Red", { reads: { "the art style": style } });
+		const image = (style: string) =>
+			node("a", {
+				dependsOn: [{ node: avatar(style), label: "Red's avatar" }],
+			});
 
-		commit(queue, avatar("a.png"), "red.png");
-		commit(queue, image("a.png"), "a.png");
+		commit(queue, avatar("noir"), "red.png");
+		commit(queue, image("noir"), "a.png");
 
-		expect(staleReason(image("b.png"), queue)).toBe(
+		expect(staleReason(image("watercolor"), queue)).toBe(
 			"Red's avatar changed — regenerate to update",
 		);
 	});
@@ -137,15 +133,7 @@ describe("staleReason", () => {
 	it("lists several causes together", () => {
 		const queue = new GenerationQueue();
 		const withStyle = (prompt: string, style: string) =>
-			node("a", {
-				prompt,
-				dependsOn: [
-					{
-						node: sourceNode("project:artStyle", { style }),
-						label: "the art style",
-					},
-				],
-			});
+			node("a", { prompt, reads: { "the art style": style } });
 		commit(queue, withStyle("a knight", "watercolor"), "a.png");
 
 		expect(staleReason(withStyle("a wizard", "noir"), queue)).toBe(

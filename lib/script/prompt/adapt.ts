@@ -13,7 +13,7 @@ export const notesSection = (notes: string): string => dedent`
 	### Notes from the user
 
 	These came with the script and are about it, not part of it. Let them guide the format, the
-	visuals, sound and music, and the style and voice metadata. Never speak them.
+	visuals, sound and music. Never speak them.
 
 	${notes}
 `;

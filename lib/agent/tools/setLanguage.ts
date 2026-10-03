@@ -18,7 +18,7 @@ export const setLanguage = defineTool({
 	icon: Translate,
 	label: "Setting the language",
 	execute: async ({ language }, ctx) => {
-		ctx.setMetadata({ language });
+		ctx.setAsset("project", undefined, { attrs: { language } });
 		return `Set the language to ${languageLabel(language)}. It applies to the next script written; what is on the canvas is unchanged.`;
 	},
 });

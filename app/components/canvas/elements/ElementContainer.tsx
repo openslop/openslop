@@ -2,23 +2,20 @@ import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { elementModelPick, elementSchema } from "@/lib/canvas/elementConnector";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/textDirection";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
-import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ModelAttribute } from "./attributes/ModelAttribute";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
 import { ElementHistoryButton } from "./ElementHistoryButton";
-import { ElementVoiceButton } from "./ElementVoiceButton";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { ElementGenerationProvider } from "./ElementGenerationContext";
-import { AnimateButton } from "./AnimateButton";
-import { ElementUploadButton } from "./ElementUploadButton";
+import { AttributeRows } from "./AttributeRows";
+import { ELEMENT_CONFIGS } from "./elementConfigs";
 import {
 	Popover,
 	PopoverContent,
@@ -52,8 +49,7 @@ function ElementSettings({
 	element: CanvasContentElement;
 	specs: Record<string, AttributeSpec>;
 }) {
-	const entries = Object.entries(specs);
-	if (entries.length === 0) return null;
+	if (Object.keys(specs).length === 0) return null;
 	return (
 		<Popover>
 			<SimpleTooltip label="Settings">
@@ -65,19 +61,7 @@ function ElementSettings({
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
 				<div className="mb-2 text-label font-semibold">Settings</div>
-				<div className="flex flex-col gap-2">
-					{entries.map(([key, spec]) => (
-						<div key={key} className="flex items-center justify-between gap-3">
-							<span className="shrink-0 text-label">{spec.label}</span>
-							<AttributeBadge
-								element={element}
-								attrKey={key}
-								spec={spec}
-								hideLabel
-							/>
-						</div>
-					))}
-				</div>
+				<AttributeRows element={element} specs={specs} />
 			</PopoverContent>
 		</Popover>
 	);
@@ -120,7 +104,7 @@ export function ElementContainer({
 										{config.label}
 									</span>
 								</span>
-								<ElementCharacters element={element} />
+								{config.lead && <config.lead element={element} />}
 								{!schema.hidesModel && (
 									<ModelAttribute
 										element={element}
@@ -137,7 +121,9 @@ export function ElementContainer({
 									element={element}
 									specs={schema.settingsAttributes}
 								/>
-								<ElementVoiceButton element={element} />
+								{config.tools?.map((Tool, index) => (
+									<Tool key={index} element={element} />
+								))}
 								<ElementHistoryButton element={element} />
 							</div>
 							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto">
@@ -163,8 +149,9 @@ export function ElementContainer({
 							contentEditable={false}
 						>
 							<ElementStaleIndicator />
-							<ElementUploadButton />
-							<AnimateButton element={element} />
+							{config.actions?.map((Action, index) => (
+								<Action key={index} element={element} />
+							))}
 							<ElementGenerateButton />
 						</div>
 					</div>
@@ -182,7 +169,7 @@ export function ElementContainer({
 					className="flex-1 min-w-0 flex items-center select-none"
 					contentEditable={false}
 				>
-					<OutputPreview element={element} />
+					<OutputPreview outputKind={config.outputKind} />
 				</div>
 			</div>
 		</ElementGenerationProvider>

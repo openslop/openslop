@@ -4,6 +4,7 @@ import { withoutCaretMarker } from "./constants";
 import { isForeground } from "./guards";
 import {
 	type CanvasContentElement,
+	type ScriptElement,
 	type SceneElement,
 	SCENE_TYPE,
 } from "./types";
@@ -33,14 +34,8 @@ export const isScriptEmpty = (nodes: Descendant[]): boolean =>
 		(element) => withoutCaretMarker(Node.string(element)).trim() === "",
 	);
 
-export const elementById = (
-	elements: CanvasContentElement[],
-	id: string,
-): CanvasContentElement | undefined =>
-	elements.find((element) => element.id === id);
-
 export function previousVisual(
-	elements: CanvasContentElement[],
+	elements: ScriptElement[],
 	id: string,
 ): CanvasContentElement | undefined {
 	const at = elements.findIndex((element) => element.id === id);

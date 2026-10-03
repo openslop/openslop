@@ -17,7 +17,6 @@ export function AnimateButton({ element }: { element: CanvasContentElement }) {
 	const { send, loading } = useSloppy();
 	const { setActive } = useEditorPanel();
 
-	if (element.type !== "image") return null;
 	const picture = result?.imageUrl;
 
 	return (

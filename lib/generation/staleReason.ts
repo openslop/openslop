@@ -17,15 +17,17 @@ function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 	if (!previous) return [];
 	const current = generationInputs(node, queue);
 
-	const attributeKeys = union(
-		Object.keys(current.attributes),
-		Object.keys(previous.attributes),
-	);
+	const changedKeys = (
+		now: Record<string, unknown>,
+		then: Record<string, unknown>,
+	) =>
+		union(Object.keys(now), Object.keys(then)).filter(
+			(key) => now[key] !== then[key],
+		);
 	return uniq([
 		...(current.prompt !== previous.prompt ? ["the prompt"] : []),
-		...attributeKeys
-			.filter((key) => current.attributes[key] !== previous.attributes[key])
-			.map(lowerCase),
+		...changedKeys(current.attributes, previous.attributes).map(lowerCase),
+		...changedKeys(current.reads, previous.reads),
 		...Object.values(node.dependsOn)
 			.filter(
 				({ node: dep }) =>

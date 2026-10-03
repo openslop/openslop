@@ -6,7 +6,7 @@ import type {
 	CanvasElementType,
 } from "@/lib/canvas/types";
 import { parentSceneId } from "@/lib/canvas/scenes";
-import { ELEMENT_LIST } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_LIST } from "../elements/elementConfigs";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { useSceneCollapsed } from "../ViewModeContext";
 import { CompactElement } from "../elements/CompactElement";

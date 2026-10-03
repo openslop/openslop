@@ -1,16 +1,18 @@
-import { requireContext } from "@/lib/connectors/plugins";
+import { assetText } from "@/lib/canvas/assets";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { dependency } from "@/lib/generation/dependency";
-import { forArtStyle } from "@/lib/generation/sourceNodes";
+import { reading } from "@/lib/generation/dependency";
+
+const style = reading("the art style", (_, { canvas }) =>
+	assetText(canvas, "style"),
+);
 
 export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {
 	return {
 		name: "art-style",
-		dependencies: [dependency("artStyle", "the art style", () => forArtStyle)],
+		reads: style.reads,
 		transformPrompt(prompt, ctx) {
-			const { metadata } = requireContext(ctx, "state", "art-style");
-			const style = metadata.style.trim();
-			return style ? `${style}. ${prompt}` : prompt;
+			const value = style.value(ctx);
+			return value ? `${value}. ${prompt}` : prompt;
 		},
 	};
 }

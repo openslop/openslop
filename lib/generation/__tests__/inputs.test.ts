@@ -5,7 +5,7 @@ const inputs = (
 	prompt: string,
 	attributes: Record<string, string> = {},
 	dependencies: Record<string, string> = {},
-): GenerationInputs => ({ prompt, attributes, dependencies });
+): GenerationInputs => ({ prompt, attributes, reads: {}, dependencies });
 
 describe("serializeInputs", () => {
 	it("produces a stable string for identical inputs", () => {

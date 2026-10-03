@@ -5,21 +5,39 @@ import {
 	SLOPPY_TOOLS,
 	SNAPSHOT_TOOLS,
 	executeToolCall,
+	presentToolCall,
 } from "../tools/registry";
+import type { AssetPatch } from "@/lib/canvas/assetOps";
+import type { AssetType } from "@/lib/canvas/types";
+import { asset } from "@/lib/canvas/__tests__/_assets";
+import type { DeepPartial } from "@/lib/project/types";
 import {
-	MetadataSchema,
-	type DeepPartial,
-	type Metadata,
-} from "@/lib/project/types";
+	VideoSettingsSchema,
+	type VideoSettings,
+} from "@/lib/project/videoSettings";
+import {
+	TTS_ACCENTS,
+	TTS_AGES,
+	TTS_GENDERS,
+	TTS_LANGUAGES,
+	TTS_PITCHES,
+} from "@/lib/connectors/tts/enums";
 import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 
-const metadata = MetadataSchema.parse({
-	title: "Little Red",
-	style: "claymation",
-	videoSettings: { length: "3-5m" },
-	characters: { Red: { appearance: "a girl in a red cloak", age: "child" } },
+const project = asset("project", { attrs: { length: "3-5m" } });
+
+type AssetWrite = [AssetType, string | undefined, AssetPatch];
+
+const recordAssets = (writes: AssetWrite[]) => ({
+	setAsset: (type: AssetType, name: string | undefined, patch: AssetPatch) =>
+		void writes.push([type, name, patch]),
+});
+
+const recordVideoSettings = (patches: DeepPartial<VideoSettings>[]) => ({
+	setVideoSettings: (patch: DeepPartial<VideoSettings>) =>
+		void patches.push(patch),
 });
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
@@ -28,67 +46,28 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	measureElementLengths: () => [],
 	measureRuntime: () => 0,
 	generateText: async () => "an outline",
-	referenceImages: () => [],
-	avatarUrl: () => undefined,
 	elementImage: () => undefined,
 	elementStates: () => [],
-	readMetadata: () => metadata,
-	readContext: () => ({
-		title: metadata.title,
-		style: metadata.style,
-		language: metadata.language,
-		format: metadata.videoSettings.format,
-		length: metadata.videoSettings.length,
-		aspectRatio: metadata.videoSettings.aspectRatio,
-		narration: metadata.narration,
-		characters: [],
-		referenceImageCount: 0,
-		scriptIsEmpty: false,
-	}),
+	readAssets: () => [project],
+	readVideoSettings: () => VideoSettingsSchema.parse({ aspectRatio: "9:16" }),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
-	setMetadata: () => {},
-	setCharacter: (name) => ({ name, created: !(name in metadata.characters) }),
+	setAsset: () => {},
+	setVideoSettings: () => {},
 	...over,
 });
 
 describe("executeToolCall", () => {
-	it("hands back the script and the settings around it", async () => {
+	it("hands back the script and the aspect ratio it renders at, with no character list beside it", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
 		);
 
 		expect(outcome.ok && outcome.output).toContain("<narration>hi</narration>");
-		expect(outcome.ok && outcome.output).toContain(
-			"- Red: a girl in a red cloak (voice: child)",
-		);
-	});
-
-	it("names an unset appearance or voice rather than leaving it blank", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "read_script", input: {} },
-			context({
-				readMetadata: () =>
-					MetadataSchema.parse({ characters: { Wolf: { appearance: "" } } }),
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain(
-			"- Wolf: not set (voice: not set)",
-		);
-	});
-
-	it("hands back the settings, which the prompt no longer carries", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "read_settings", input: {} },
-			context(),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("- title: Little Red");
-		expect(outcome.ok && outcome.output).toContain("- art style: claymation");
-		expect(SNAPSHOT_TOOLS.has("read_settings")).toBe(true);
+		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
+		expect(outcome.ok && outcome.output).not.toContain("Characters");
 	});
 
 	it("says the canvas is empty rather than handing back nothing", async () => {
@@ -165,78 +144,40 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("changes only the settings it was given", async () => {
-		const patches: unknown[] = [];
+	it.each([
+		[
+			"set_title",
+			{ title: "Moon Cat" },
+			["title", undefined, { text: "Moon Cat" }],
+		],
+		[
+			"set_language",
+			{ language: "es" },
+			["project", undefined, { attrs: { language: "es" } }],
+		],
+	])(
+		"%s writes onto its element and nothing else",
+		async (toolName, input, write) => {
+			const writes: AssetWrite[] = [];
+			const outcome = await executeToolCall(
+				{ toolName, input },
+				context(recordAssets(writes)),
+			);
+
+			expect(writes).toEqual([write]);
+			expect(outcome.ok).toBe(true);
+		},
+	);
+
+	it("refuses a call that names no title, rather than writing nothing", async () => {
+		const writes: AssetWrite[] = [];
 		const outcome = await executeToolCall(
-			{ toolName: "set_metadata", input: { title: "Moon Cat" } },
-			context({ setMetadata: (patch) => void patches.push(patch) }),
+			{ toolName: "set_title", input: {} },
+			context(recordAssets(writes)),
 		);
 
-		expect(patches).toEqual([{ title: "Moon Cat" }]);
-		expect(outcome).toEqual({ ok: true, output: "Set the title." });
-	});
-
-	it("refuses a call that names no setting, rather than writing nothing", async () => {
-		const patches: unknown[] = [];
-		const outcome = await executeToolCall(
-			{ toolName: "set_metadata", input: {} },
-			context({ setMetadata: (patch) => void patches.push(patch) }),
-		);
-
-		expect(patches).toEqual([]);
+		expect(writes).toEqual([]);
 		expect(outcome.ok).toBe(false);
-	});
-
-	it("maps the narrator's traits onto the voice the project reads in", async () => {
-		const patches: unknown[] = [];
-		await executeToolCall(
-			{ toolName: "set_narrator", input: { age: "child" } },
-			context({ setMetadata: (patch) => void patches.push(patch) }),
-		);
-
-		expect(patches).toEqual([{ narration: { age: "child" } }]);
-	});
-
-	it("says a character is new, so the model knows its avatar is not drawn", async () => {
-		const outcome = await executeToolCall(
-			{
-				toolName: "set_character",
-				input: { name: "Wolf", appearance: "a grey wolf" },
-			},
-			context(),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("Added Wolf");
-	});
-
-	it("changes a character the project already knows", async () => {
-		const edits: unknown[] = [];
-		const outcome = await executeToolCall(
-			{
-				toolName: "set_character",
-				input: { name: "Red", pitch: "high" },
-			},
-			context({
-				setCharacter: (name, patch) => {
-					edits.push([name, patch]);
-					return { name, created: false };
-				},
-			}),
-		);
-
-		expect(edits).toEqual([["Red", { pitch: "high" }]]);
-		expect(outcome).toEqual({ ok: true, output: "Changed Red." });
-	});
-
-	it("answers with the name the project settled on, not the one it was asked with", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "set_character", input: { name: "big bad wolf" } },
-			context({
-				setCharacter: () => ({ name: "Big Bad Wolf", created: true }),
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("Added Big Bad Wolf");
 	});
 
 	it("puts the user's own script on the canvas untouched", async () => {
@@ -256,18 +197,26 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(true);
 	});
 
-	it("says a setting change does not reshape what is already on the canvas", async () => {
+	it("writes only the settings it was given, and says they shape the next script", async () => {
+		const writes: AssetWrite[] = [];
+		const patches: DeepPartial<VideoSettings>[] = [];
 		const outcome = await executeToolCall(
-			{ toolName: "set_video_settings", input: { length: "5-10m" } },
-			context(),
+			{
+				toolName: "set_video_settings",
+				input: { length: "5-10m", aspect_ratio: "9:16" },
+			},
+			context({ ...recordAssets(writes), ...recordVideoSettings(patches) }),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("5-10m");
+		expect(writes).toStrictEqual([
+			["project", undefined, { attrs: { length: "5-10m" } }],
+		]);
+		expect(patches).toEqual([{ aspectRatio: "9:16" }]);
 		expect(outcome.ok && outcome.output).toContain("next script");
 	});
 
 	it("applies a caption preset whole, with overrides on top", async () => {
-		const patches: DeepPartial<Metadata>[] = [];
+		const patches: DeepPartial<VideoSettings>[] = [];
 		const outcome = await executeToolCall(
 			{
 				toolName: "set_caption_style",
@@ -277,10 +226,10 @@ describe("executeToolCall", () => {
 					activeWord: { fill: "#ffe14d" },
 				},
 			},
-			context({ setMetadata: (patch) => void patches.push(patch) }),
+			context(recordVideoSettings(patches)),
 		);
 
-		const style = patches[0]?.videoSettings?.captionStyle;
+		const style = patches[0]?.captionStyle;
 		expect(style).toMatchObject({
 			font: "bangers",
 			alignY: "top",
@@ -291,23 +240,23 @@ describe("executeToolCall", () => {
 	});
 
 	it("sends only the caption field it was given, so the rest of the style stands", async () => {
-		const patches: DeepPartial<Metadata>[] = [];
+		const patches: DeepPartial<VideoSettings>[] = [];
 		await executeToolCall(
 			{ toolName: "set_caption_style", input: { fontSize: 120 } },
-			context({ setMetadata: (patch) => void patches.push(patch) }),
+			context(recordVideoSettings(patches)),
 		);
 
-		expect(patches[0]?.videoSettings?.captionStyle).toEqual({ fontSize: 120 });
+		expect(patches[0]?.captionStyle).toEqual({ fontSize: 120 });
 	});
 
 	it("turns captions off without disturbing their style", async () => {
-		const patches: DeepPartial<Metadata>[] = [];
+		const patches: DeepPartial<VideoSettings>[] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "set_caption_style", input: { captions: false } },
-			context({ setMetadata: (patch) => void patches.push(patch) }),
+			context(recordVideoSettings(patches)),
 		);
 
-		expect(patches[0]?.videoSettings).toEqual({
+		expect(patches[0]).toEqual({
 			captions: false,
 			captionStyle: {},
 		});
@@ -351,7 +300,7 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		// The fixture metadata targets 3-5m: 180s to 300s.
+		// The fixture project targets 3-5m: 180s to 300s.
 		expect(outcome.ok && outcome.output).toContain("240.0s of video");
 		expect(outcome.ok && outcome.output).toContain("700 spoken words");
 		expect(outcome.ok && outcome.output).toContain("within the target range");
@@ -377,8 +326,7 @@ describe("executeToolCall", () => {
 			context({
 				countSpokenWords: () => 1000,
 				measureRuntime: () => 600,
-				readMetadata: () =>
-					MetadataSchema.parse({ videoSettings: { length: "auto" } }),
+				readAssets: () => [asset("project", { attrs: { length: "auto" } })],
 			}),
 		);
 
@@ -649,66 +597,47 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("hands over the reference images for the model to look at", async () => {
+	it.each([
+		["a generated image", "img-1", "image"],
+		["a character's avatar through their cast element", "cast-1", "cast"],
+		["every uploaded reference image", "references", "references"],
+	] as const)("hands over %s with its prompt", async (_, id, type) => {
+		const urls = ["https://example.com/a.jpg", "https://example.com/b.jpg"];
 		const outcome = await executeToolCall(
-			{ toolName: "view_reference_images", input: {} },
-			context({ referenceImages: () => ["https://example.com/a.jpg"] }),
-		);
-
-		expect(outcome.ok && outcome.output).toEqual({
-			urls: ["https://example.com/a.jpg"],
-		});
-	});
-
-	it("says there is nothing to look at rather than handing over an empty set", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "view_reference_images", input: {} },
-			context(),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("No reference images");
-	});
-
-	it("hands over a character's avatar by name", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "view_avatar", input: { name: "Mira" } },
-			context({ avatarUrl: () => "https://example.com/mira.png" }),
-		);
-
-		expect(outcome.ok && outcome.output).toEqual({
-			name: "Mira",
-			url: "https://example.com/mira.png",
-		});
-	});
-
-	it("says an avatar does not exist yet rather than inventing one", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "view_avatar", input: { name: "Mira" } },
-			context(),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("no avatar image yet");
-	});
-
-	it("hands over a generated image with the prompt that made it", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "img-1" } },
+			{ toolName: "view_image", input: { id } },
 			context({
-				elementImage: () => ({
-					type: "image",
-					prompt: "a wolf at the door",
-					picture: { status: "idle", url: "https://example.com/wolf.png" },
-				}),
+				elementImage: (asked) =>
+					asked === id
+						? { type, prompt: "a wolf", pictures: { status: "idle", urls } }
+						: undefined,
 			}),
 		);
 
 		expect(outcome.ok && outcome.output).toEqual({
-			id: "img-1",
-			prompt: "a wolf at the door",
-			url: "https://example.com/wolf.png",
+			id,
+			prompt: "a wolf",
+			urls,
 		});
+	});
+
+	it.each([
+		["an avatar not drawn yet", "cast", "idle", "has not been generated yet"],
+		["an image still generating", "image", "generating", "is still generating"],
+		["an asset that holds no picture", "style", undefined, "is a style"],
+		["an element that generates no picture", "video", undefined, "is a video"],
+	] as const)("refuses %s", async (_, type, status, error) => {
+		const outcome = await executeToolCall(
+			{ toolName: "view_image", input: { id: "x" } },
+			context({
+				elementImage: () => ({
+					type,
+					prompt: "",
+					pictures: status && { status, urls: [] },
+				}),
+			}),
+		);
+
+		expect(!outcome.ok && outcome.errorText).toContain(error);
 	});
 
 	it("says an element id is not on the canvas rather than inventing a result", async () => {
@@ -717,40 +646,7 @@ describe("executeToolCall", () => {
 			context(),
 		);
 
-		expect(outcome.ok).toBe(false);
 		expect(!outcome.ok && outcome.errorText).toContain("no element nope");
-	});
-
-	it("refuses an element that generates no picture", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "vid-1" } },
-			context({
-				elementImage: () => ({
-					type: "video",
-					prompt: "a wolf running",
-					picture: undefined,
-				}),
-			}),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("is a video");
-	});
-
-	it("reports how far along an image is when there is nothing to look at yet", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "img-1" } },
-			context({
-				elementImage: () => ({
-					type: "image",
-					prompt: "a wolf at the door",
-					picture: { status: "generating", url: undefined },
-				}),
-			}),
-		);
-
-		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("is still generating");
 	});
 
 	it("outlines a brief through one focused generation", async () => {
@@ -824,7 +720,6 @@ describe("SLOPPY_TOOLS", () => {
 	it("offers the model exactly the tools the editor can run", () => {
 		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
 			"read_script",
-			"read_settings",
 			"edit_script",
 			"write_script",
 			"adapt_script",
@@ -832,22 +727,29 @@ describe("SLOPPY_TOOLS", () => {
 			"set_video_settings",
 			"set_caption_style",
 			"set_language",
-			"view_reference_images",
-			"view_avatar",
 			"view_image",
 			"outline_story",
 			"measure_total_length",
 			"measure_element_lengths",
 			"fit_durations",
-			"set_metadata",
-			"set_narrator",
-			"set_character",
+			"set_title",
 		]);
 	});
 
-	it("declares no executor, so a step stops at the call for the editor to run", () => {
-		for (const tool of Object.values(SLOPPY_TOOLS)) {
-			expect(tool.execute).toBeUndefined();
+	it("lists each asset type an edit can set up, and a voice's traits with their options", () => {
+		const { description } = SLOPPY_TOOLS.edit_script;
+
+		for (const type of ["cast", "voice", "style", "references"]) {
+			expect(description).toContain(`- ${type}: `);
+		}
+		for (const options of [
+			TTS_GENDERS,
+			TTS_AGES,
+			TTS_PITCHES,
+			TTS_ACCENTS,
+			TTS_LANGUAGES,
+		]) {
+			expect(description).toContain(`(${options.join(" | ")})`);
 		}
 	});
 });
@@ -875,15 +777,33 @@ describe("a call the editor cannot run", () => {
 	});
 });
 
+describe("presentToolCall", () => {
+	it("presents a call to a tool the editor can run", () => {
+		expect(presentToolCall("set_title", { title: "Moon Cat" })).toMatchObject({
+			label: "Naming the project",
+		});
+	});
+
+	it.each([
+		"set_metadata",
+		"set_character",
+		"set_narrator",
+		"view_avatar",
+		"view_reference_images",
+	])(
+		"presents nothing for %s, which a stored transcript still holds",
+		(name) => {
+			expect(presentToolCall(name, { name: "Red" })).toBeNull();
+		},
+	);
+});
+
 describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
-			"read_settings",
 			"review_script",
-			"view_avatar",
 			"view_image",
-			"view_reference_images",
 		]);
 	});
 

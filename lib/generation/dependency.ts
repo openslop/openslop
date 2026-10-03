@@ -1,41 +1,65 @@
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ScriptElement } from "@/lib/canvas/types";
 import type { AssetResult } from "@/lib/connectors/types";
-import type { NodeSpec } from "./graph";
+import type { BuildContext } from "./graph";
 
 /** Keyed as the handles declared them. */
 export type DependencyResults = Record<string, AssetResult>;
 
 type Readable = { dependencies?: DependencyResults };
 
-/**
- * The dependencies a plugin adds to an element's node, keyed as their results
- * come back, each with how the element names it to the user.
- */
+type Edge = readonly [key: string, target: ScriptElement, label: string];
+
+/** The elements a plugin makes an element read, keyed as their results return, labelled for the user. */
 export interface DependencyDeclaration {
-	specs(
-		element: CanvasContentElement,
-	): readonly (readonly [key: string, spec: NodeSpec, label: string])[];
+	edges(element: ScriptElement, ctx: BuildContext): readonly Edge[];
 }
 
-/** One node, declared once and read back through the same handle. */
+/** One element, declared once and read back through the same handle. */
 export interface DependencyHandle extends DependencyDeclaration {
 	read(ctx: Readable): AssetResult | undefined;
 }
 
-/** A null spec declares no dependency. */
+/** Picking nothing declares no dependency. */
 export function dependency(
 	key: string,
-	label: string | ((element: CanvasContentElement) => string),
-	spec: (element: CanvasContentElement) => NodeSpec | null,
+	label: string,
+	pick: (
+		element: ScriptElement,
+		ctx: BuildContext,
+	) => ScriptElement | undefined,
 ): DependencyHandle {
 	return {
-		specs: (element) => {
-			const nodeSpec = spec(element);
-			if (!nodeSpec) return [];
-			return [
-				[key, nodeSpec, typeof label === "string" ? label : label(element)],
-			];
+		edges: (element, ctx) => {
+			const target = pick(element, ctx);
+			if (!target) return [];
+			return [[key, target, label]];
 		},
 		read: (ctx) => ctx.dependencies?.[key],
+	};
+}
+
+/** One dependency per name an element lists, each read back by that name. */
+export function dependencyPerName(
+	names: (element: ScriptElement) => string[],
+	one: (name: string) => DependencyHandle,
+) {
+	return {
+		edges: (element: ScriptElement, ctx: BuildContext) =>
+			names(element).flatMap((name) => one(name).edges(element, ctx)),
+		read: (name: string, ctx: Readable) => one(name).read(ctx),
+	};
+}
+
+/** A value read off the canvas or the settings, recorded under `label` and read back at generation. */
+export function reading(
+	label: string,
+	read: (element: ScriptElement, ctx: BuildContext) => string | undefined,
+) {
+	return {
+		reads: (element: ScriptElement, ctx: BuildContext) => {
+			const value = read(element, ctx);
+			return value === undefined ? {} : { [label]: value };
+		},
+		value: (ctx: { reads?: Record<string, string> }) => ctx.reads?.[label],
 	};
 }

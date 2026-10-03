@@ -1,17 +1,17 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
 import {
+	ASSET_TYPES,
+	type AssetType,
 	CANVAS_ELEMENT_TYPES,
-	type CanvasElementType,
-	ELEMENT_TYPES,
+	type ElementType,
 } from "@/lib/canvas/types";
 import {
 	type AttributeEdit,
 	TOGGLE_VALUES,
 } from "@/lib/connectors/attributes/schema";
-import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { EffectType } from "@/lib/connectors/image/enums";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/videoPrompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
@@ -25,8 +25,8 @@ const PICTURE_ATTRIBUTES = [
 	`overlays ${enumeration(Object.values(EffectType))}`,
 ];
 
-/** Attributes the OSML prompt teaches that no connector schema carries. */
-const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
+/** Attributes the OSML prompt teaches that no schema carries. */
+const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 	character: ["name"],
 	image: PICTURE_ATTRIBUTES,
 	video: [
@@ -34,6 +34,8 @@ const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
 		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
+	cast: ["name"],
+	voice: ["name (the character's; none for the narrator)"],
 };
 
 /** Attributes Sloppy can write by hand: enums with their options, and free text. */
@@ -46,25 +48,47 @@ const describeAttribute = (key: string, edit?: AttributeEdit): string[] => {
 // TODO(#743): this reads each type's recommended model, which holds while a type
 // has one or two models. Once a canvas mixes providers/models within a type, Sloppy
 // needs a tool that resolves the schema for one element's own pair before editing it.
-const attributesFor = (type: CanvasElementType): string[] => {
-	const connector = ELEMENT_TYPES[type].connector;
-	const schema = resolveAttributeSchema(connector, DEFAULT_MODELS[connector]);
-	return Object.entries(schema.allAttributes).flatMap(([key, { edit }]) =>
-		describeAttribute(key, edit),
+const attributesFor = (type: ElementType): string[] =>
+	Object.entries(attributeSchemaFor(type, {}).allAttributes).flatMap(
+		([key, { edit }]) => describeAttribute(key, edit),
 	);
-};
+
+const attributesByType = (types: readonly ElementType[]) =>
+	types
+		.map((type) => ({
+			type,
+			attributes: [...(SCRIPT_ATTRIBUTES[type] ?? []), ...attributesFor(type)],
+		}))
+		.filter(({ attributes }) => attributes.length > 0)
+		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
+		.join("\n");
 
 const ELEMENT_TYPE_NAMES = [...CANVAS_ELEMENT_TYPES];
+const ASSET_TYPE_NAMES = Object.keys(ASSET_TYPES) as AssetType[];
 
-const ATTRIBUTES_BY_TYPE = ELEMENT_TYPE_NAMES.map(
-	(type) =>
-		`- ${type}: ${[...(SCRIPT_ATTRIBUTES[type] ?? []), ...attributesFor(type)].join(", ")}`,
-).join("\n");
+const ASSETS = dedent`
+	Assets sit ahead of the first scene, and every scene draws on them. They are edited the
+	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
+	asset already exists changes that one instead.
+	- title: the project's name, as its text. Change it with set_title.
+	- project: the language, length, format and template the script is written to. Change
+	  them with set_language and set_video_settings.
+	- cast: a character. \`name\` is the exact name their lines and every \`characters\` list
+	  use, and never changes. The text is what they look like, in English, written like an
+	  image prompt: their avatar is drawn from it, and every visual that lists them is drawn
+	  from that avatar.
+	- voice: how a speaker sounds, with no text. A voice is described, never picked.
+	- style: the art style every visual is drawn in, as its text, in English: the medium,
+	  linework, colors and lighting. Never a place, setting, subject or time of day.
+	- references: the pictures every visual is drawn after. The user uploads these; look at
+	  them with view_image.
+`;
 
 export const editScript = defineTool({
 	description: dedent`
-	  Change the script on the canvas: add, remove, rewrite, retype or reorder elements.
-	  Every element carries an \`id\`. Reference ids you read; never invent one.
+	  Change the canvas: add, remove, rewrite, retype or reorder the script's elements, and
+	  set up the assets it draws on. Every element carries an \`id\`. Reference ids you read;
+	  never invent one.
 
 	  - insert: place a new element before or after \`anchor_id\`. Omit \`anchor_id\` to append,
 	    or to prepend with position "before". Each insert resolves independently, so several
@@ -79,7 +103,12 @@ export const editScript = defineTool({
 	  Element types: ${ELEMENT_TYPE_NAMES.join(", ")}
 
 	  Attributes by type, all string values:
-	  ${ATTRIBUTES_BY_TYPE}
+	  ${attributesByType(ELEMENT_TYPE_NAMES)}
+
+	  Asset types: ${ASSET_TYPE_NAMES.join(", ")}
+
+	  ${ASSETS}
+	  ${attributesByType(ASSET_TYPE_NAMES)}
 
 	  ${VIDEO_PROMPT_FORMAT}
 

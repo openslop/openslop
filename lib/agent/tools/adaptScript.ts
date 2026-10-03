@@ -5,14 +5,17 @@ import { defineTool } from "./defineTool";
 
 export const adaptScript = defineTool({
 	description: dedent`
-	  Put text the user wrote onto the canvas, keeping their words. This clears the canvas and
+	  Put text the user wrote onto the canvas, keeping their words. This clears the script and
 	  starts from scratch. Use it whenever the message carries the script itself: a screenplay,
 	  a draft, prose, a transcript, lyrics, anything already written.
 
 	  Send the script span and nothing else. What you send is converted, not just stored:
-	  prose that carries no annotation becomes narration, and the project's title, art style,
-	  narrator voice and character appearances are all derived from it. A mood note or a
-	  "here's my script:" caught in the span is read as a line to speak.
+	  prose that carries no annotation becomes narration. A mood note or a "here's my
+	  script:" caught in the span is read as a line to speak.
+
+	  The conversion writes the script only. Read the text yourself first and set what it
+	  needs: the title with set_title, and its characters, voices and art style as assets
+	  with edit_script.
 
 	  Screenplay furniture is stripped for you, so leave slug lines, stage directions and
 	  character cues where they are. Nothing is invented either: the conversion adds visuals,
@@ -23,8 +26,8 @@ export const adaptScript = defineTool({
 
 	  Everything else in the message is still theirs, so place it:
 	  - what they said about the look, mood, pacing or delivery goes in 'notes'
-	  - a setting they stated outright has its own tool: set_metadata, set_narrator,
-	    set_video_settings, set_language, set_character
+	  - a setting they stated outright has its own tool: set_title, set_video_settings,
+	    set_language, or edit_script for a character, a voice or the art style
 	  - an instruction about the text itself ("make this shorter") is carried out with
 	    edit_script after this call, not by editing what you pass in
 	`,

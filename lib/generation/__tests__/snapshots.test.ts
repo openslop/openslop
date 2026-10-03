@@ -6,6 +6,7 @@ import { SnapshotStore, type ElementSnapshot } from "../snapshots";
 const inputs = (prompt: string): GenerationInputs => ({
 	prompt,
 	attributes: {},
+	reads: {},
 	dependencies: {},
 });
 

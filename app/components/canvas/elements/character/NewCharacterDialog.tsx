@@ -10,31 +10,28 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { useSlateStatic } from "slate-react";
+import { setAsset } from "@/lib/canvas/assetOps";
+import { useCastNames } from "@/lib/canvas/useAssets";
 import { normalizeCharacterName } from "@/lib/project/characterName";
-import { useProject } from "@/lib/project/useProject";
 
 export function NewCharacterDialog({
 	onCreated,
 }: {
 	onCreated: (name: string) => void;
 }) {
-	const characters = useProject((s) => s.metadata.characters);
-	const setCharacter = useProject((s) => s.setCharacter);
-	const defaultModels = useResolveDefaultModels();
+	const editor = useSlateStatic();
+	const names = useCastNames();
 	const [name, setName] = useState("");
 
 	const normalized = normalizeCharacterName(name);
-	const collision = !!normalized && !!characters[normalized];
+	const collision = names.includes(normalized);
 	const canSubmit = !!normalized && !collision;
 
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();
 		if (!canSubmit) return;
-		setCharacter(normalized, {
-			appearance: "",
-			avatarModel: defaultModels().image,
-		});
+		setAsset(editor, "cast", normalized);
 		onCreated(normalized);
 	};
 

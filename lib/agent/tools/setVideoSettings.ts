@@ -1,6 +1,8 @@
 import dedent from "dedent";
+import isUndefined from "lodash/isUndefined";
+import omitBy from "lodash/omitBy";
 import { z } from "zod";
-import { ASPECT_RATIOS } from "@/lib/project/aspectRatio";
+import { AspectRatioSchema } from "@/lib/project/aspectRatio";
 import {
 	VIDEO_LENGTHS,
 	VIDEO_LENGTH_SPECS,
@@ -40,20 +42,17 @@ export const setVideoSettings = defineTool({
 		.object({
 			length: z.enum(VIDEO_LENGTHS).optional(),
 			format: z.enum(VIDEO_FORMAT_CHOICES).optional(),
-			aspect_ratio: z.enum(ASPECT_RATIOS).optional(),
+			aspect_ratio: AspectRatioSchema.optional(),
 		})
 		.refine(notEmpty, named("setting")),
 	output: z.string(),
 	icon: Hourglass,
 	label: "Adjusting the video settings",
 	execute: async ({ length, format, aspect_ratio }, ctx) => {
-		ctx.setMetadata({
-			videoSettings: {
-				...(length !== undefined && { length }),
-				...(format !== undefined && { format }),
-				...(aspect_ratio !== undefined && { aspectRatio: aspect_ratio }),
-			},
+		ctx.setAsset("project", undefined, {
+			attrs: omitBy({ length, format }, isUndefined),
 		});
+		if (aspect_ratio) ctx.setVideoSettings({ aspectRatio: aspect_ratio });
 
 		const changed = [
 			length !== undefined && `length to ${length}`,

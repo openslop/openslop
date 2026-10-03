@@ -10,6 +10,7 @@ vi.mock("@/lib/toastError", () => ({ toastError }));
 const inputs = (prompt: string): GenerationInputs => ({
 	prompt,
 	attributes: {},
+	reads: {},
 	dependencies: {},
 });
 

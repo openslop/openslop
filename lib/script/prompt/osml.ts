@@ -9,15 +9,7 @@ import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
 import { VIDEO_FORMATS } from "./formats";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
-import {
-	TTS_ACCENTS,
-	TTS_AGES,
-	TTS_GENDERS,
-	TTS_EMOTIONS,
-	TTS_LANGUAGES,
-	TTS_PITCHES,
-	TTS_SPEEDS,
-} from "@/lib/connectors/tts/enums";
+import { TTS_EMOTIONS, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { languagePrompt } from "./language";
 import { VIDEO_PROMPT_FORMAT } from "./videoPrompt";
 
@@ -31,22 +23,7 @@ export function osmlSpec(language: string): string {
 		${languagePrompt(language)}
 
 		## Order
-		1. <metadata_title>, then <metadata_style>, then <metadata_narration>, then one <metadata_character> per character.
-		2. The story, using only the elements your format allows. There must be a new visual (image or video) at least once before every sentence in a character or narration element.
-
-		## Metadata tags
-		- <metadata_title>: a short title of 1 to 4 words. Example: <metadata_title>Little Red</metadata_title>
-		- <metadata_style>: how everything is drawn: the medium, linework, colors and lighting. Never a place, a setting, a subject or a time of day. Example: <metadata_style>Warm earth tones. Whimsical storybook illustration with soft watercolors and warm lighting.</metadata_style>
-		- <metadata_narration>: an empty tag for the narrator's voice. Example: <metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise" language="en"></metadata_narration>
-		- <metadata_character>: one per character (except the narrator). The body says what they look like, written like an image prompt. name is their exact name in the story. Example:
-		  <metadata_character name="Mia" gender="feminine" age="child" pitch="high" accent="american" description="curious" language="en">A girl around ten years old with warm brown skin, dark curly hair just past her shoulders, bright hazel eyes and a small gap between her front teeth. She wears a mustard-yellow cardigan, rolled-up denim overalls and scuffed red sneakers.</metadata_character>
-		- Both voice tags take these attributes:
-		  - gender: ${TTS_GENDERS.join(", ")}.
-		  - age: ${TTS_AGES.join(", ")}.
-		  - pitch: ${TTS_PITCHES.join(", ")}.
-		  - accent: ${TTS_ACCENTS.join(", ")}.
-		  - description: a word or two for the voice, like Warm, Deep, Upbeat or Soft.
-		  - language: ISO 639-1 code of the language the narration and dialogue are written in. Allowed values: ${TTS_LANGUAGES.join(", ")}.
+		Write the story and nothing else, using only the elements your format allows. There must be a new visual (image or video) at least once before every sentence in a character or narration element.
 
 		## Speech
 		- <narration>: what the narrator says. Example: <narration emotion="neutral">The sun was setting in the west.</narration>

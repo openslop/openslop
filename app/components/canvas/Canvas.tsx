@@ -10,11 +10,14 @@ import {
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import { findElementById } from "@/lib/canvas/editorOps";
+import { isAssetElement } from "@/lib/canvas/guards";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { AssetsSection } from "./elements/AssetsSection";
+import { HiddenAsset } from "./elements/HiddenAsset";
+import { ProjectTitle } from "./ProjectTitle";
 import { AssetEditProvider } from "./elements/character/AssetEditProvider";
 
 export default function Canvas() {
@@ -42,6 +45,8 @@ export default function Canvas() {
 
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
+		if (element.type === "title") return <ProjectTitle {...props} />;
+		if (isAssetElement(element)) return <HiddenAsset {...props} />;
 		if (isSceneElement(element))
 			return <SortableScene {...props} element={element} />;
 		return <SortableContent {...props} element={element} />;

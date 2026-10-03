@@ -7,12 +7,12 @@ import {
 	type CanvasVersionStorage,
 } from "../canvasHistory";
 import type { ProjectContent, ProjectDocument } from "../projectDocument";
-import { MetadataSchema } from "../types";
+import { VideoSettingsSchema } from "../videoSettings";
 
 /** A version is identified by its script here; the other fields ride along. */
 const content = (script: string): ProjectContent => ({
 	script,
-	store: { metadata: MetadataSchema.parse({}), referenceImages: [] },
+	store: { videoSettings: VideoSettingsSchema.parse({}) },
 	generation: {},
 });
 
@@ -54,6 +54,7 @@ function fakeDocument() {
 		write: (next) => {
 			live = next;
 		},
+		details: () => ({ name: "Untitled", thumbnail_url: null }),
 	};
 	return document;
 }

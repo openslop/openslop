@@ -4,6 +4,7 @@ import {
 	runBeforeGenerate,
 	runOnError,
 	runTransformPrompt,
+	withReferences,
 } from "../plugins";
 import type { ConnectorPlugin } from "../types";
 
@@ -81,6 +82,26 @@ describe("plugins", () => {
 		];
 		await expect(runBeforeGenerate(plugins, {}, {})).rejects.toThrow(
 			"hook failed",
+		);
+	});
+});
+
+describe("withReferences", () => {
+	const params = (referenceImages?: string[]) =>
+		referenceImages ? { prompt: "a", referenceImages } : { prompt: "a" };
+
+	it.each([
+		[
+			"adds the urls after the references already there",
+			["x"],
+			["y", "z"],
+			["x", "y", "z"],
+		],
+		["starts a list when there is none", undefined, ["y"], ["y"]],
+		["leaves no empty list behind", [], [], undefined],
+	])("%s", (_, own, urls, expected) => {
+		expect(withReferences(params(own), urls)).toEqual(
+			expected ? { prompt: "a", referenceImages: expected } : { prompt: "a" },
 		);
 	});
 });

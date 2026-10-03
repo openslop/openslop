@@ -1,37 +1,34 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpTTSConnector } from "../tts/connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
-import { createProjectStore } from "@/lib/project/store";
+import { asset } from "@/lib/canvas/__tests__/_assets";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
+import { readsOf } from "./_state-ctx";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
-
-function projectContext() {
-	const store = createProjectStore();
-	return { store, state: store.getState() };
-}
 
 const config = {
 	model: { provider: "openslop", model: "Slop TTS v1" },
 } as const;
 
-function mockSuccess() {
-	mockGatewaySequence([
-		{ submitStatus: "pending" },
-		{
-			pollStatus: "completed",
-			result: {
-				id: TEST_ID,
-				type: "tts",
-				provider: "openslop",
-				result: { audio: "output.wav", timestamps: "timestamps.json" },
-			},
+const SUCCESS: Parameters<typeof mockGatewaySequence>[0] = [
+	{ submitStatus: "pending" },
+	{
+		pollStatus: "completed",
+		result: {
+			id: TEST_ID,
+			type: "tts",
+			provider: "openslop",
+			result: { audio: "output.wav", timestamps: "timestamps.json" },
 		},
-		{ payload: [{ text: "hello", start: 0, end: 0.5 }] },
-	]);
-}
+	},
+	{ payload: [{ text: "hello", start: 0, end: 0.5 }] },
+];
+
+const mockSuccess = () => mockGatewaySequence(SUCCESS);
 
 describe("BaseTTSConnector", () => {
 	beforeEach(() => {
@@ -48,46 +45,24 @@ describe("BaseTTSConnector", () => {
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
-	it("resolves voice via speaker-voice plugin when no voiceId", async () => {
-		mockSuccess();
-		const connector = new HttpTTSConnector({
-			...config,
-			plugins: [createSpeakerVoicePlugin()],
+	it("speaks in the voice its speaker's voice settled, through the speaker-voice plugin", async () => {
+		const fetchSpy = mockGatewaySequence(SUCCESS);
+		const plugin = createSpeakerVoicePlugin();
+		const connector = new HttpTTSConnector({ ...config, plugins: [plugin] });
+		const narrator = asset("voice", {
+			attrs: { ...config.model, voiceId: "voice-42" },
 		});
-		vi.spyOn(connector, "searchVoices").mockResolvedValue([
-			{ id: "voice-42", name: "Test Voice", description: "" },
-		]);
+		const reads = readsOf(plugin, createCanvasNode("narration"), [narrator]);
 
 		const result = await connector.generate(
 			{ prompt: "hello", gender: "masculine", accent: "american" },
-			projectContext(),
+			{ reads },
 		);
 
-		expect(connector.searchVoices).toHaveBeenCalledWith({
-			query: undefined,
-			gender: "masculine",
-			age: undefined,
-			pitch: undefined,
-			accent: "american",
-			description: undefined,
-			language: "en",
-		});
 		expect(result.audioUrl).toBe(AUDIO_URL);
-	});
-
-	it("throws when no matching voice found via speaker-voice plugin", async () => {
-		const connector = new HttpTTSConnector({
-			...config,
-			plugins: [createSpeakerVoicePlugin()],
-		});
-		vi.spyOn(connector, "searchVoices").mockResolvedValue([]);
-
-		await expect(
-			connector.generate(
-				{ prompt: "hello", gender: "masculine" },
-				projectContext(),
-			),
-		).rejects.toThrow("No matching voice found");
+		const submitted = String(fetchSpy.mock.calls[0]?.[1]?.body);
+		expect(JSON.parse(submitted)).toMatchObject({ voiceId: "voice-42" });
+		expect(submitted).not.toContain("masculine");
 	});
 
 	it("runs transformPrompt on prompt field", async () => {

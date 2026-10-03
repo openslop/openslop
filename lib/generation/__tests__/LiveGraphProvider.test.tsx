@@ -4,11 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import type { Descendant } from "slate";
-import { getContentElements } from "@/lib/canvas/scenes";
-import { SCENE_TYPE, type CanvasContentElement } from "@/lib/canvas/types";
+import { getScriptElements } from "@/lib/canvas/assets";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import {
+	SCENE_TYPE,
+	type CanvasContentElement,
+	type ScriptElement,
+} from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore } from "@/lib/project/store";
-import { forElement, type GenerationNode, type NodeSpec } from "../graph";
+import type { GenerationNode } from "../graph";
 import { LiveGraphProvider, useResolveNode } from "../LiveGraphProvider";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -16,18 +21,18 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 const editor = { children: [] as Descendant[] };
 vi.mock("slate-react", () => ({ useSlateStatic: () => editor }));
 
-const store = createProjectStore();
+const state = createProjectStore().getState();
 const contextNow = () =>
 	vi.fn(() => ({
-		store,
-		state: store.getState(),
-		canvas: getContentElements(editor.children),
+		state,
+		canvas: getScriptElements(editor.children),
 		registry: DEFAULT_CONNECTOR_REGISTRY,
+		setAsset: () => {},
 	}));
 let buildContext = contextNow();
 vi.mock("../useBuildContext", () => ({ useBuildContext: () => buildContext }));
 
-type Resolve = (spec: NodeSpec) => GenerationNode;
+type Resolve = (element: ScriptElement) => GenerationNode;
 let resolve: Resolve;
 function Reader({ onRead }: { onRead: (resolve: Resolve) => void }) {
 	onRead(useResolveNode());
@@ -70,10 +75,10 @@ describe("LiveGraphProvider", () => {
 		edit(image, other);
 		render();
 
-		const node = resolve(forElement(image));
-		resolve(forElement(other));
+		const node = resolve(image);
+		resolve(other);
 
-		expect(resolve(forElement(image))).toBe(node);
+		expect(resolve(image)).toBe(node);
 		expect(buildContext).toHaveBeenCalledTimes(1);
 	});
 
@@ -81,27 +86,25 @@ describe("LiveGraphProvider", () => {
 		const image = element("img", "a sunset");
 		edit(image);
 		render();
-		resolve(forElement(image));
+		resolve(image);
 
 		edit(element("img", "a sunrise"));
 
-		expect(resolve(forElement(image)).inputs.prompt).toBe("a sunrise");
+		expect(resolve(image).inputs.prompt).toBe("a sunrise");
 		expect(buildContext).toHaveBeenCalledTimes(2);
 	});
 
-	it("builds a new revision when the project context changes", () => {
+	it("builds a new revision when an asset joins the document", () => {
 		const image = element("img", "a sunset");
 		edit(image);
 		render();
-		resolve(forElement(image));
+		resolve(image);
 
-		store.getState().updateMetadata({ style: "noir" });
-		buildContext = contextNow();
-		render();
+		editor.children = [
+			createCanvasNode("style", { text: "noir" }),
+			...editor.children,
+		];
 
-		expect(
-			resolve(forElement(image)).dependsOn.artStyle?.node.inputs.attributes
-				.style,
-		).toBe("noir");
+		expect(resolve(image).inputs.reads["the art style"]).toBe("noir");
 	});
 });

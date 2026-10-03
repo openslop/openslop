@@ -66,17 +66,14 @@ export const setCaptionStyle = defineTool({
 	icon: TextBox,
 	label: "Styling the captions",
 	execute: async ({ preset, captions, ...overrides }, ctx) => {
-		// Metadata patches are deep-merged, so a partial style lands on the stored one.
 		const captionStyle =
 			preset === undefined
 				? overrides
 				: merge({}, captionPresetStyle(preset), overrides);
 
-		ctx.setMetadata({
-			videoSettings: {
-				captionStyle,
-				...(captions !== undefined && { captions }),
-			},
+		ctx.setVideoSettings({
+			captionStyle,
+			...(captions !== undefined && { captions }),
 		});
 
 		const changed = [

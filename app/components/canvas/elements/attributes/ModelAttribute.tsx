@@ -7,8 +7,8 @@ import {
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
 import { MODEL_PROVENANCE } from "@/app/components/models/provenance";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
+import type { ScriptElement } from "@/lib/canvas/types";
 import type { ModelPick } from "@/lib/connectors/attributes/schema";
 import { modelSourceFor, resolveModel } from "@/lib/connectors/models";
 import { useModelChain } from "@/lib/connectors/useDefaultModels";
@@ -20,7 +20,7 @@ export function ModelAttribute({
 	label,
 	className,
 }: {
-	element: CanvasContentElement;
+	element: ScriptElement;
 	pick: ModelPick;
 	label: string;
 	className?: string;
@@ -40,7 +40,7 @@ export function ModelAttribute({
 			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(type, value, chain)]}`}
 			footer={<ConfigureModelsItem />}
 			onChange={(next) =>
-				updateElementAttrs(editor, element, {
+				mergeAttrs(editor, element.id, {
 					[providerAttr]: next.provider,
 					[key]: next.model,
 				})
