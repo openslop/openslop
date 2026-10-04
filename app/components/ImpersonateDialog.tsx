@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
 	DialogContent,
 	DialogDescription,
@@ -31,6 +31,7 @@ export default function ImpersonateDialog({
 }
 
 function ImpersonateDialogBody() {
+	const errorId = useId();
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -75,13 +76,22 @@ function ImpersonateDialogBody() {
 					autoFocus
 					required
 					value={email}
-					onChange={(e) => setEmail(e.target.value)}
+					onChange={(e) => {
+						setEmail(e.target.value);
+						setError("");
+					}}
 					placeholder="user@example.com"
 					aria-label="User email"
+					aria-invalid={!!error}
+					aria-describedby={error ? errorId : undefined}
 				/>
 
 				{error && (
-					<span role="alert" className="text-label-xs text-destructive">
+					<span
+						id={errorId}
+						role="alert"
+						className="text-label-xs text-destructive"
+					>
 						{error}
 					</span>
 				)}

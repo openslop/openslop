@@ -144,7 +144,9 @@ export function VoicePicker({
 				</ModelSelect>
 			</div>
 			{search.status === "failed" && (
-				<span className="text-label-xs text-destructive">{search.message}</span>
+				<span role="alert" className="text-label-xs text-destructive">
+					{search.message}
+				</span>
 			)}
 			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{search.status === "loading" &&

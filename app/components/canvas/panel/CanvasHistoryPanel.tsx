@@ -103,7 +103,10 @@ export function CanvasHistoryPanel() {
 	if (status === "failed")
 		return (
 			<div className="flex flex-col items-start gap-2">
-				<p className="flex items-center gap-1.5 text-label-xs text-destructive">
+				<p
+					role="alert"
+					className="flex items-center gap-1.5 text-label-xs text-destructive"
+				>
 					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
 					Could not load history.
 				</p>

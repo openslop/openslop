@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useId, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
@@ -19,6 +19,7 @@ const INCOMPLETE_CODE = `Enter all ${ACCESS_CODE_LENGTH} characters of your acce
 
 export default function AccessCodeInput() {
 	const router = useRouter();
+	const errorId = useId();
 	const [values, setValues] = useState<string[]>(emptyAccessCode);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -97,7 +98,12 @@ export default function AccessCodeInput() {
 			className="flex w-full flex-col gap-4 sm:gap-6"
 		>
 			<div>
-				<div className="flex gap-2 justify-center">
+				<div
+					role="group"
+					aria-label="Access code"
+					aria-describedby={error ? errorId : undefined}
+					className="flex gap-2 justify-center"
+				>
 					{values.map((value, index) => (
 						<input
 							key={index}
@@ -113,29 +119,30 @@ export default function AccessCodeInput() {
 							onPaste={index === 0 ? handlePaste : undefined}
 							disabled={loading}
 							aria-label={`Code character ${index + 1}`}
+							aria-invalid={!!error}
 							spellCheck={false}
 							autoComplete="off"
-							className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
+							className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
 							autoFocus={index === 0}
 						/>
 					))}
 				</div>
 				{error && (
 					<p
-						aria-live="polite"
+						id={errorId}
+						role="alert"
 						className="mt-3 text-center text-body text-destructive"
 					>
 						{error}
 					</p>
 				)}
-				{loading && (
-					<p
-						aria-live="polite"
-						className="mt-3 text-center text-body text-muted-foreground"
-					>
-						Validating&hellip;
-					</p>
-				)}
+				<div role="status">
+					{loading && (
+						<p className="mt-3 text-center text-body text-muted-foreground">
+							Validating&hellip;
+						</p>
+					)}
+				</div>
 			</div>
 			<Button
 				type="submit"
