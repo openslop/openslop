@@ -65,8 +65,8 @@ export function ErrorMessage({ message }: { message: string }) {
 	const handleCopy = async () => {
 		try {
 			await navigator.clipboard.writeText(message);
-		} catch (e) {
-			console.error("Failed to copy error message:", e);
+		} catch (error) {
+			console.error("Failed to copy error message:", error);
 			return;
 		}
 		setCopied(true);

@@ -32,9 +32,9 @@ export function captionWordsAt(
 	const lineStart = Math.floor(wordIndex / perLine) * perLine;
 	const activeInLine = wordIndex - lineStart;
 
-	return words.slice(lineStart, lineStart + perLine).map((text, i) => ({
+	return words.slice(lineStart, lineStart + perLine).map((text, index) => ({
 		text,
-		active: i === activeInLine,
-		hidden: reveal === "word" && i > activeInLine,
+		active: index === activeInLine,
+		hidden: reveal === "word" && index > activeInLine,
 	}));
 }

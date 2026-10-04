@@ -21,7 +21,7 @@ export function CaptionPreview({ style }: { style: CaptionStyle }) {
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const { ref, width: available } = useElementWidth<HTMLDivElement>();
 	const [playing, setPlaying] = useState(false);
-	const output = ASPECT_RATIO_DIMENSIONS[aspectRatio].output;
+	const { output } = ASPECT_RATIO_DIMENSIONS[aspectRatio];
 	const scale = Math.min(available / output.width, MAX_HEIGHT / output.height);
 	const height = Math.round(output.height * scale);
 	const activeIndex = useCaptionCycle(CAPTION_SAMPLE_WORDS.length, playing);

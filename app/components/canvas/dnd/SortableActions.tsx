@@ -23,17 +23,17 @@ export function InsertMenu<K extends string>({
 	if (options.length === 0) return null;
 	return (
 		<ActionMenu
-			items={options.map((option) => ({
-				key: option.key,
-				label: option.label,
+			items={options.map(({ key, label, icon, iconBgClass, colorClass }) => ({
+				key,
+				label,
 				icon: (
 					<span
-						className={`${option.iconBgClass} ${option.colorClass} mr-1 inline-flex size-6 items-center justify-center rounded-md`}
+						className={`${iconBgClass} ${colorClass} mr-1 inline-flex size-6 items-center justify-center rounded-md`}
 					>
-						{option.icon}
+						{icon}
 					</span>
 				),
-				onSelect: () => onInsert(option.key),
+				onSelect: () => onInsert(key),
 			}))}
 			contentClassName="w-40"
 			itemClassName="rounded-lg py-1"
