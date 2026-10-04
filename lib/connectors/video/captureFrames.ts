@@ -12,6 +12,8 @@ import { FRAMES, type FrameKey } from "./startFrame";
 
 const JPEG_QUALITY = 0.92;
 
+const PREVIEW_VIDEOS_KEPT = 40;
+
 const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
 
 export type Frames = Record<FrameKey, Blob>;
@@ -54,8 +56,10 @@ async function decodeFrames(videoUrl: string): Promise<Frames> {
 	}
 }
 
-/** Browser only. A hosted video never changes, so it is decoded once. */
-export const previewFrames = memoAsync(decodeFrames, (videoUrl) => videoUrl);
+/** Browser only. A hosted video never changes, so it is decoded once while it is among the latest. */
+export const previewFrames = memoAsync(decodeFrames, (videoUrl) => videoUrl, {
+	max: PREVIEW_VIDEOS_KEPT,
+});
 
 const uploadFrame = memoAsync(
 	async (videoUrl: string, key: FrameKey): Promise<string> => {

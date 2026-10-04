@@ -10,6 +10,7 @@ const media = vi.hoisted(() => ({
 	unencodable: false,
 	dispose: vi.fn(),
 	inputs: 0,
+	uploads: 0,
 }));
 
 vi.mock("mediabunny", () => ({
@@ -48,7 +49,10 @@ vi.mock("mediabunny", () => ({
 }));
 
 vi.mock("@/lib/upload/uploadImage", () => ({
-	uploadImage: async (file: File) => `https://img/${await file.text()}`,
+	uploadImage: async (file: File) => {
+		media.uploads++;
+		return `https://img/${await file.text()}`;
+	},
 }));
 
 const { previewFrames, captureFrames } = await import("../captureFrames");
@@ -63,6 +67,7 @@ beforeEach(() => {
 	media.unencodable = false;
 	media.dispose.mockReset();
 	media.inputs = 0;
+	media.uploads = 0;
 });
 
 describe("captureFrames", () => {
@@ -113,5 +118,24 @@ describe("previewFrames", () => {
 		expect(await frames.middle.text()).toBe("frame@4.5");
 		expect(await frames.last.text()).toBe("frame@8.5");
 		expect(media.inputs).toBe(1);
+	});
+
+	it("drops the frames of old videos without ever uploading a frame twice", async () => {
+		await captureFrames("https://vid/old.mp4", ["last"]);
+		for (let n = 0; n < 60; n++)
+			await previewFrames(`https://vid/newer-${n}.mp4`);
+		expect(media.inputs).toBe(61);
+		expect(media.uploads).toBe(1);
+
+		await captureFrames("https://vid/old.mp4", ["last"]);
+		expect(media.inputs).toBe(61);
+		expect(media.uploads).toBe(1);
+
+		await captureFrames("https://vid/old.mp4", ["first"]);
+		expect(media.inputs).toBe(62);
+		expect(media.uploads).toBe(2);
+
+		await previewFrames("https://vid/newer-59.mp4");
+		expect(media.inputs).toBe(62);
 	});
 });
