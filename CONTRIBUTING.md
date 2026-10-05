@@ -21,19 +21,12 @@ See [Getting started](README.md#getting-started) in the README:
 
 ### Running the generation queue
 
-Generations go through [Vercel Queues](https://vercel.com/docs/queues). On `npm run dev`, `send()` publishes to the real queue service and the SDK runs the handler in your dev server, so you need a Vercel OIDC token from a linked project.
-
-Until [local mode](https://github.com/openslop/openslop/issues/379) lands, here's the workaround: link the repo to a project on your own free Vercel Hobby account. Hobby includes 1M Queue API operations a month and you never need to deploy.
+Generations need a Vercel OIDC token. If you're not on our Vercel team, link a project on your own free Hobby account (no deploy needed) and pull its token:
 
 ```bash
-npm i -g vercel
-vercel link            # create a new project in your account
-vercel env pull .env.local
+vercel link
+vercel env pull .env.local   # overwrites .env.local; rerun when the token expires (~12h)
 ```
-
-- `vercel env pull` overwrites `.env.local`, so back up your other vars first and add them back after
-- Jobs go to the `asset-generate` topic in your own project, so your test messages stay out of everyone else's queue
-- The token expires after about 12 hours. If `send()` fails with "Failed to get OIDC token for local development", run `vercel env pull` again
 
 ## Before you open a PR
 
