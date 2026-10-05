@@ -30,6 +30,36 @@ describe("memoAsync", () => {
 		expect(make).toHaveBeenCalledTimes(2);
 	});
 
+	it("keeps only the most recently used keys when given a max", async () => {
+		const make = vi.fn((key: string) => Promise.resolve(`made ${key}`));
+		const memoized = memoAsync(make, (key) => key, { max: 2 });
+
+		await memoized("a");
+		await memoized("b");
+		await memoized("a");
+		await memoized("c");
+		expect(make).toHaveBeenCalledTimes(3);
+
+		await memoized("a");
+		await memoized("c");
+		expect(make).toHaveBeenCalledTimes(3);
+
+		await memoized("b");
+		expect(make).toHaveBeenCalledTimes(4);
+	});
+
+	it("forgets a rejection so the next call tries again, with a max", async () => {
+		const make = vi
+			.fn<(key: string) => Promise<string>>()
+			.mockRejectedValueOnce(new Error("the moment, not the input"))
+			.mockResolvedValueOnce("made a");
+		const memoized = memoAsync(make, (key) => key, { max: 1 });
+
+		await expect(memoized("a")).rejects.toThrow("the moment");
+		await expect(memoized("a")).resolves.toBe("made a");
+		expect(make).toHaveBeenCalledTimes(2);
+	});
+
 	it("keys on every argument the resolver names", async () => {
 		const make = vi.fn((url: string, frame: string) =>
 			Promise.resolve(`${frame}@${url}`),
