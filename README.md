@@ -218,31 +218,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 
-### Running the generation queue locally
-
-Asset generation runs on [Vercel Queues](https://vercel.com/docs/queues). In `npm run dev`, `send()` publishes to the real queue service, then the SDK runs the handler in your dev server. Publishing needs a Vercel OIDC token, so you need a linked Vercel project.
-
-Until [local mode (#379)](https://github.com/openslop/openslop/issues/379) lands, use this workaround if you're not on the openslop Vercel team: link the repo to a project on your own free Hobby account. Hobby includes 1M Queue API operations a month, and you never need to deploy.
-
-1. Install the Vercel CLI and link a new project in your account:
-
-```bash
-npm i -g vercel
-vercel link
-```
-
-2. Pull the token into your env file:
-
-```bash
-vercel env pull .env.local
-```
-
-This writes `VERCEL_OIDC_TOKEN` and overwrites `.env.local`, so back up your other variables first and add them back after.
-
-3. Start the dev server with `npm run dev`. Jobs go to the `asset-generate` topic in your own project, so your test messages stay out of everyone else's queue.
-
-The token expires after about 12 hours. Run `vercel env pull` again when `send()` fails with "Failed to get OIDC token for local development."
-
 ## Tech stack
 
 | Layer     | Tech                                                                                                         |
