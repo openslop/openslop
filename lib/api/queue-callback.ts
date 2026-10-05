@@ -1,3 +1,4 @@
+import type { RetryHandler } from "@vercel/queue";
 import { z } from "zod";
 
 // `handleCallback` does not authenticate the delivery, so treat the message as
@@ -12,3 +13,9 @@ export function parseAssetQueueCallback(message: unknown): string {
 	}
 	return parsed.data.jobId;
 }
+
+const MAX_RETRY_DELAY_SECONDS = 300;
+
+export const retryWithBackoff: RetryHandler = (_error, { deliveryCount }) => ({
+	afterSeconds: Math.min(MAX_RETRY_DELAY_SECONDS, 5 * 2 ** deliveryCount),
+});
