@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { findAsset } from "@/lib/canvas/assets";
+import { findAsset, NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { ScriptElement } from "@/lib/canvas/types";
+import { assetId, type ScriptElement } from "@/lib/canvas/types";
 import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	type ConnectorRegistry,
@@ -31,8 +31,11 @@ const context = (): BuildContext => ({
 	state: createProjectStore().getState(),
 	canvas,
 	registry,
-	setAsset: ({ type, attrs }) => {
-		canvas = [...canvas, createCanvasNode(type, { attrs })];
+	setAsset: ({ type, name, attrs }) => {
+		canvas = [
+			...canvas,
+			createCanvasNode(type, { attrs: name ? { name, ...attrs } : attrs }),
+		];
 	},
 });
 
@@ -81,20 +84,55 @@ describe("running a graph", () => {
 		expect(isNodeStale(nodeOf("img"), queue)).toBe(false);
 	});
 
-	describe("the prepare step", () => {
-		const settleSeed: ConnectorPlugin = {
-			name: "seed",
-			reads: (_, ctx) => ({
-				seed:
-					findAsset(ctx.canvas, "project")?.generationAttributes?.seed ?? "",
+	it("records the avatar an image was sent, so one replaced mid-flight leaves the image stale", async () => {
+		canvas = [
+			createCanvasNode("cast", {
+				id: assetId("cast", "Red"),
+				attrs: { name: "Red" },
+				text: "red hood",
 			}),
-			prepare: async () => [{ type: "project", attrs: { seed: "7" } }],
+			createCanvasNode("image", {
+				id: "img",
+				attrs: { characters: "Red" },
+				text: "a lighthouse",
+			}),
+		];
+		const queue = new GenerationQueue();
+		const avatar = nodeOf(assetId("cast", "Red"));
+		queue.commitResult(avatar, { imageUrl: "red.png", durationSec: 0 });
+		let finish = (_: AssetResult) => {};
+		mediaGenerate.mockImplementation(
+			() => new Promise((resolve) => (finish = resolve)),
+		);
+
+		queue.enqueueGraph([nodeOf("img")], context);
+		await vi.waitFor(() => expect(mediaGenerate).toHaveBeenCalledOnce());
+		queue.commitResult(avatar, { imageUrl: "red-2.png", durationSec: 0 });
+		finish({ imageUrl: "img.png", durationSec: 0 });
+
+		await vi.waitFor(() =>
+			expect(queue.getElementSnapshot("img").result).toBeTruthy(),
+		);
+		expect(isNodeStale(nodeOf("img"), queue)).toBe(true);
+	});
+
+	describe("the prepare step", () => {
+		const settleVoice: ConnectorPlugin = {
+			name: "voice",
+			reads: (_, ctx) => ({
+				voice:
+					findAsset(ctx.canvas, "cast", NARRATOR)?.generationAttributes
+						?.voiceId ?? "",
+			}),
+			prepare: async () => [
+				{ type: "cast", name: NARRATOR, attrs: { voiceId: "v-7" } },
+			],
 		};
 
 		beforeEach(() => {
 			registry = {
 				...DEFAULT_CONNECTOR_REGISTRY,
-				image: { plugins: [settleSeed] },
+				image: { plugins: [settleVoice] },
 			};
 			canvas = [createCanvasNode("image", { id: "img", text: "a lighthouse" })];
 			mediaGenerate.mockResolvedValue({ imageUrl: "img.png", durationSec: 0 });
@@ -109,10 +147,12 @@ describe("running a graph", () => {
 				expect(queue.getElementSnapshot("img").result).toBeTruthy(),
 			);
 
-			expect(byId("project").generationAttributes?.seed).toBe("7");
-			expect(mediaGenerate.mock.calls[0]?.[1].reads?.seed).toBe("7");
-			expect(queue.getElementSnapshot("img").resultInputs?.reads.seed).toBe(
-				"7",
+			expect(
+				byId(assetId("cast", NARRATOR)).generationAttributes?.voiceId,
+			).toBe("v-7");
+			expect(mediaGenerate.mock.calls[0]?.[1].reads?.voice).toBe("v-7");
+			expect(queue.getElementSnapshot("img").resultInputs?.reads.voice).toBe(
+				"v-7",
 			);
 			expect(isNodeStale(nodeOf("img"), queue)).toBe(false);
 			expect(isNodeStale(before, queue)).toBe(true);

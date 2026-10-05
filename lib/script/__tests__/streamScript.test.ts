@@ -6,6 +6,7 @@ import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
 import type { LLMConnector } from "@/lib/connectors/types";
+import { ProjectSettingsSchema } from "@/lib/project/types";
 import { sleep } from "@/lib/utils";
 import { streamScript } from "../streamScript";
 
@@ -30,6 +31,8 @@ const topLevelTypes = (editor: Editor) =>
 	editor.children.map((node) => "type" in node && node.type);
 
 const nextTurn = () => sleep(0);
+
+const DEFAULT_SETTINGS = ProjectSettingsSchema.parse({});
 
 /** Streams each burst's chunks back to back, with a turn of the event loop between bursts. */
 const llmStreaming = (bursts: string[][], failure?: Error) => {
@@ -63,7 +66,7 @@ describe("streamScript", () => {
 			["ouse at dusk</image>"],
 		]);
 
-		await streamScript(editor, llm, brief);
+		await streamScript(editor, DEFAULT_SETTINGS, llm, brief);
 
 		expect(prompts).toHaveLength(1);
 		expect(prompts[0]).toContain("a lighthouse");
@@ -94,7 +97,7 @@ describe("streamScript", () => {
 			["<narration>A new story</narration>"],
 		]);
 
-		await streamScript(editor, llm, brief);
+		await streamScript(editor, DEFAULT_SETTINGS, llm, brief);
 
 		expect(prompts).toEqual(["a lighthouse"]);
 		expect(systems[0]).toContain("muted watercolor");
@@ -103,23 +106,18 @@ describe("streamScript", () => {
 		expect(topLevelTypes(editor)).toEqual(["style", "cast", "narration"]);
 	});
 
-	it("writes to the settings the project element holds", async () => {
+	it("writes to the project's settings", async () => {
 		const editor = makeEditor();
-		const project = createCanvasNode("project", {
-			id: assetId("project"),
-			attrs: { length: "1-3m", language: "es" },
+		const settings = ProjectSettingsSchema.parse({
+			length: "1-3m",
+			language: "es",
 		});
-		Transforms.insertNodes(editor, project, { at: [0] });
 		const { llm, systems } = llmStreaming([["<narration>Hola</narration>"]]);
 
-		await streamScript(editor, llm, brief);
+		await streamScript(editor, settings, llm, brief);
 
 		expect(systems[0]).toContain("# Length");
 		expect(systems[0]).toContain("es (ISO 639-1)");
-		expect(editor.children[0]).toMatchObject({
-			id: project.id,
-			generationAttributes: project.generationAttributes,
-		});
 	});
 
 	it("lands each burst of chunks as one change to the document", async () => {
@@ -130,7 +128,7 @@ describe("streamScript", () => {
 			[", far", " away", "</narration>"],
 		]);
 
-		await streamScript(editor, llm, brief);
+		await streamScript(editor, DEFAULT_SETTINGS, llm, brief);
 		await nextTurn();
 
 		expect(editor.onChange).toHaveBeenCalledTimes(2);
@@ -146,9 +144,9 @@ describe("streamScript", () => {
 			new Error("the connection dropped"),
 		);
 
-		await expect(streamScript(editor, llm, brief)).rejects.toThrow(
-			"the connection dropped",
-		);
+		await expect(
+			streamScript(editor, DEFAULT_SETTINGS, llm, brief),
+		).rejects.toThrow("the connection dropped");
 		expect(elements(editor)).toEqual([["narration", "Once upon a time"]]);
 	});
 
@@ -162,8 +160,8 @@ describe("streamScript", () => {
 			[", far away</narration>"],
 		]);
 
-		await expect(streamScript(editor, llm, brief)).rejects.toThrow(
-			"the document refused the write",
-		);
+		await expect(
+			streamScript(editor, DEFAULT_SETTINGS, llm, brief),
+		).rejects.toThrow("the document refused the write");
 	});
 });

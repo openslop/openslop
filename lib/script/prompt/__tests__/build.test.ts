@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { assetId } from "@/lib/canvas/types";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { AssetElement, AssetType } from "@/lib/canvas/types";
+import type { AssetType } from "@/lib/canvas/types";
+import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import {
+	ProjectSettingsSchema,
+	type ProjectSettings,
+} from "@/lib/project/types";
 import { buildScriptPrompt, scriptRules } from "../build";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
@@ -13,19 +18,17 @@ const asset = <T extends AssetType>(
 	attrs: Record<string, string> = {},
 ) => createCanvasNode(type, { id: assetId(type, attrs.name), attrs, text });
 
-const project = (
-	settings: Record<string, string> = {},
-	assets: AssetElement[] = [],
-): AssetElement[] => [asset("project", "", settings), ...assets];
+const settingsOf = (settings: Partial<ProjectSettings> = {}) =>
+	ProjectSettingsSchema.parse(settings);
 
-const lengthOf = (length: "1-3m" | "auto") => project({ length });
+const lengthOf = (length: "1-3m" | "auto") => settingsOf({ length });
 
 const template = TEMPLATES[0];
 if (!template) throw new Error("expected a template fixture");
 
 describe("buildScriptPrompt", () => {
 	it("gives a brief the length budget and the format spec, and passes it through", () => {
-		const { system, prompt } = buildScriptPrompt(lengthOf("1-3m"), {
+		const { system, prompt } = buildScriptPrompt([], lengthOf("1-3m"), {
 			kind: "brief",
 			brief: "a rabbit finds a lantern",
 		});
@@ -37,7 +40,7 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("orders the length budget ahead of the format spec", () => {
-		const { system } = buildScriptPrompt(lengthOf("1-3m"), {
+		const { system } = buildScriptPrompt([], lengthOf("1-3m"), {
 			kind: "brief",
 			brief: "a brief",
 		});
@@ -48,19 +51,19 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("holds a brief to the format the user picked, and only then", () => {
-		const formatOf = (format: "faceless" | "auto") => project({ format });
+		const formatOf = (format: "faceless" | "auto") => settingsOf({ format });
 		const brief = { kind: "brief", brief: "a brief" } as const;
 
-		expect(buildScriptPrompt(formatOf("faceless"), brief).system).toContain(
+		expect(buildScriptPrompt([], formatOf("faceless"), brief).system).toContain(
 			"The user picked the Faceless format",
 		);
-		expect(buildScriptPrompt(formatOf("auto"), brief).system).not.toContain(
+		expect(buildScriptPrompt([], formatOf("auto"), brief).system).not.toContain(
 			"The user picked the",
 		);
 	});
 
 	it("leaves a brief on auto with no budget to write to", () => {
-		const { system } = buildScriptPrompt(lengthOf("auto"), {
+		const { system } = buildScriptPrompt([], lengthOf("auto"), {
 			kind: "brief",
 			brief: "a brief",
 		});
@@ -69,7 +72,7 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("keeps a pasted script's notes out of the text but in the guidance", () => {
-		const { system, prompt } = buildScriptPrompt(lengthOf("auto"), {
+		const { system, prompt } = buildScriptPrompt([], lengthOf("auto"), {
 			kind: "adapt",
 			script: "NARRATOR\nOnce upon a time.",
 			notes: "warm and slow, lots of wide shots",
@@ -82,7 +85,8 @@ describe("buildScriptPrompt", () => {
 
 	it("pastiches the project's template and keeps the brief as the topic", () => {
 		const { system, prompt } = buildScriptPrompt(
-			project({ template: template.id }),
+			[],
+			settingsOf({ template: template.id }),
 			{ kind: "brief", brief: "a barista" },
 		);
 
@@ -95,13 +99,17 @@ describe("buildScriptPrompt", () => {
 		const source = { kind: "brief", brief: "a barista" } as const;
 
 		expect(
-			buildScriptPrompt(project({ template: "left-the-catalog" }), source),
-		).toEqual(buildScriptPrompt(project(), source));
+			buildScriptPrompt(
+				[],
+				settingsOf({ template: "left-the-catalog" }),
+				source,
+			),
+		).toEqual(buildScriptPrompt([], settingsOf(), source));
 	});
 
 	it("passes an adapted script through verbatim and drops the length budget", () => {
 		const script = "NARRATOR\nHigh above the sleepy hills.";
-		const { system, prompt } = buildScriptPrompt(project(), {
+		const { system, prompt } = buildScriptPrompt([], settingsOf(), {
 			kind: "adapt",
 			script,
 		});
@@ -114,7 +122,8 @@ describe("buildScriptPrompt", () => {
 	it("adapts verbatim even when the project has a template", () => {
 		const script = "a line the user wrote";
 		const { system, prompt } = buildScriptPrompt(
-			project({ template: template.id }),
+			[],
+			settingsOf({ template: template.id }),
 			{ kind: "adapt", script },
 		);
 
@@ -124,11 +133,12 @@ describe("buildScriptPrompt", () => {
 
 	it("carries the art style, narrator and characters on the canvas", () => {
 		const { system } = buildScriptPrompt(
-			project({}, [
+			[
 				asset("style", "muted watercolor"),
-				asset("voice", "", { gender: "feminine" }),
+				asset("cast", "", { name: NARRATOR, ...NO_AVATAR, gender: "feminine" }),
 				asset("cast", "a small grey rabbit", { name: "Lumi" }),
-			]),
+			],
+			settingsOf(),
 			{ kind: "brief", brief: "a brief" },
 		);
 
@@ -138,12 +148,12 @@ describe("buildScriptPrompt", () => {
 		expect(system).toContain("- gender: feminine");
 		expect(system).toContain("# Characters");
 		expect(system).toContain("a small grey rabbit");
+		expect(system).not.toContain(`## ${NARRATOR}`);
 	});
 
 	it("lists a character's voice and appearance under their name", () => {
 		const preamble = projectPreamble([
-			asset("cast", "a freckled girl", { name: "Mira" }),
-			asset("voice", "", { name: "Mira", age: "child" }),
+			asset("cast", "a freckled girl", { name: "Mira", age: "child" }),
 		]);
 
 		expect(preamble).toContain(
@@ -154,15 +164,17 @@ describe("buildScriptPrompt", () => {
 
 	it("says nothing of a project whose canvas holds no assets", () => {
 		expect(projectPreamble([])).toBe("");
-		expect(projectPreamble(project({ language: "es" }))).toBe("");
 	});
 
 	it("hands a review the same rules the writer was given, minus the budget it cannot judge", () => {
-		const styled = project({}, [asset("style", "muted watercolor")]);
-		const rules = scriptRules(styled);
+		const styled = [asset("style", "muted watercolor")];
+		const rules = scriptRules(styled, settingsOf());
 
 		expect(
-			buildScriptPrompt(styled, { kind: "brief", brief: "a brief" }).system,
+			buildScriptPrompt(styled, settingsOf(), {
+				kind: "brief",
+				brief: "a brief",
+			}).system,
 		).toContain(rules);
 		expect(rules).toContain("The story script must be written");
 		expect(rules).toContain("muted watercolor");
@@ -170,13 +182,13 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("names the declared language, and defers to the input when it is auto", () => {
-		const declared = buildScriptPrompt(project({ language: "es" }), {
+		const declared = buildScriptPrompt([], settingsOf({ language: "es" }), {
 			kind: "brief",
 			brief: "a brief",
 		});
 		expect(declared.system).toContain("es (ISO 639-1)");
 
-		const auto = buildScriptPrompt([], {
+		const auto = buildScriptPrompt([], settingsOf(), {
 			kind: "brief",
 			brief: "a brief",
 		});

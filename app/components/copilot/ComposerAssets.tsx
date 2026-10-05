@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import {
-	ArtStyleAssetTile,
 	CharacterAssetTiles,
-	NarratorAssetTile,
 	ReferenceAssetTiles,
+	ArtStyleAssetTile,
 } from "@/app/components/canvas/elements/AssetTiles";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +23,6 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
 			{hasArtStyle && <ArtStyleAssetTile />}
-			<NarratorAssetTile />
 			<CharacterAssetTiles onRemove={setDeletingName} />
 			<ReferenceAssetTiles />
 			{Array.from({ length: uploadingCount }).map((_, i) => (

@@ -2,10 +2,11 @@
 
 import { act, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { findAsset } from "@/lib/canvas/assets";
+import { findAsset, NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import { useAsset } from "@/lib/canvas/useAssets";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
 import { click, mountOnCanvas } from "../../../__tests__/_mount";
 
@@ -72,65 +73,82 @@ vi.mock("../VoicePicker", () => ({
 
 const { VoiceEditor } = await import("../VoiceEditor");
 
+function CastVoice({ name }: { name: string }) {
+	const cast = useAsset("cast", name);
+	return cast ? <VoiceEditor cast={cast} /> : null;
+}
+
 let canvas: ReturnType<typeof mountOnCanvas>;
 afterEach(() => canvas.unmount());
 
-const voiceOn = (name?: string) => {
-	const element = findAsset(canvas.editor.children, "voice", name);
+const castOn = (name: string) => {
+	const element = findAsset(canvas.editor.children, "cast", name);
 	return element && flatAttributes(element);
 };
 
-const voice = (name?: string, attrs: Record<string, string> = {}) =>
-	asset("voice", { name, attrs });
+const DEFAULT_VOICE = {
+	voiceProvider: DEFAULT_MODELS.tts.provider,
+	voiceModel: DEFAULT_MODELS.tts.model,
+};
+
+const narrator = (attrs: Record<string, string> = {}) =>
+	asset("cast", { name: NARRATOR, attrs: { ...NO_AVATAR, ...attrs } });
 
 describe("VoiceEditor", () => {
-	it("renders nothing for a voice that is not on the canvas", () => {
-		canvas = mountOnCanvas();
-
-		canvas.render(<VoiceEditor name="Mia" />);
-
-		expect(document.body.querySelector("section")).toBeNull();
-		expect(canvas.editor.children).toEqual([]);
-	});
-
-	it("writes a trait onto the voice element already there and searches by it", async () => {
-		canvas = mountOnCanvas([voice(undefined, { age: "child" })]);
-		canvas.render(<VoiceEditor />);
+	it("writes a trait onto the cast member and searches by it", async () => {
+		canvas = mountOnCanvas([narrator({ age: "child" })]);
+		canvas.render(<CastVoice name={NARRATOR} />);
 
 		await pick("feminine");
 
 		expect(canvas.editor.children).toHaveLength(1);
-		expect(voiceOn()).toEqual({
-			...DEFAULT_MODELS.tts,
+		expect(castOn(NARRATOR)).toEqual({
+			name: NARRATOR,
+			...NO_AVATAR,
+			...DEFAULT_MODELS.image,
+			...DEFAULT_VOICE,
 			age: "child",
 			gender: "feminine",
 		});
 		expect(picker.filters).toEqual({ gender: "feminine", age: "child" });
 	});
 
-	it("writes a character's picked voice to that character's voice element", async () => {
-		canvas = mountOnCanvas([voice(), voice("Mia")]);
-		canvas.render(<VoiceEditor name="Mia" />);
+	it("writes a picked voice to that cast member alone", async () => {
+		canvas = mountOnCanvas([narrator(), asset("cast", { name: "Mia" })]);
+		canvas.render(<CastVoice name="Mia" />);
 
 		await click('[data-pick="voice"]');
 
-		expect(voiceOn("Mia")).toEqual({
+		expect(castOn("Mia")).toEqual({
 			name: "Mia",
-			...picker.model,
+			...DEFAULT_MODELS.image,
+			voiceProvider: picker.model.provider,
+			voiceModel: picker.model.model,
 			voiceId: "aria",
 		});
-		expect(voiceOn()).toEqual(DEFAULT_MODELS.tts);
+		expect(castOn(NARRATOR)).toEqual({
+			name: NARRATOR,
+			...NO_AVATAR,
+			...DEFAULT_MODELS.image,
+			...DEFAULT_VOICE,
+		});
 		expect(picker.selectedVoiceId).toBe("aria");
 	});
 
 	it("leaves a picked voice behind when the voice moves to another model", async () => {
-		canvas = mountOnCanvas([voice()]);
-		canvas.render(<VoiceEditor />);
+		canvas = mountOnCanvas([narrator()]);
+		canvas.render(<CastVoice name={NARRATOR} />);
 		await click('[data-pick="voice"]');
 
 		await click('[data-pick="model"]');
 
-		expect(voiceOn()).toEqual(OTHER);
+		expect(castOn(NARRATOR)).toEqual({
+			name: NARRATOR,
+			...NO_AVATAR,
+			...DEFAULT_MODELS.image,
+			voiceProvider: OTHER.provider,
+			voiceModel: OTHER.model,
+		});
 		expect(picker.selectedVoiceId).toBeUndefined();
 	});
 });

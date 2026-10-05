@@ -1,6 +1,5 @@
 import dedent from "dedent";
 import { z } from "zod";
-import { projectSettings } from "@/lib/canvas/assets";
 import { videoLengthBudget } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./defineTool";
@@ -25,7 +24,7 @@ export const measureTotalLength = defineTool({
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const runtime = ctx.measureRuntime();
-		const { length } = projectSettings(ctx.readAssets());
+		const { length } = ctx.readProjectSettings();
 		const measured = `${seconds(runtime)} of video, about ${minutes(runtime)} minutes, carrying ${words} spoken words.`;
 
 		const budget = videoLengthBudget(length);

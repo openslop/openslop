@@ -68,6 +68,17 @@ describe("a script streamed onto the canvas", () => {
 		expect(scenes(editor)).toEqual(SCENES);
 	});
 
+	it("replaces the empty narration a canvas of only assets is seeded with", () => {
+		const editor = written([]);
+		editor.children = [asset("title", { text: "Moon" })];
+		editor.normalize({ force: true });
+		expect(scenes(editor)).toEqual([["narration"]]);
+
+		createScriptWriter(editor)(SCRIPT);
+
+		expect(scenes(editor)).toEqual(SCENES);
+	});
+
 	it("starts a blank project on one scene holding the welcome line", () => {
 		const editor = written([BLANK_SCRIPT]);
 

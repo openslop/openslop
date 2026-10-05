@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Descendant } from "slate";
-import { findAsset, getScriptElements } from "@/lib/canvas/assets";
+import { findAsset, getScriptElements, NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import {
@@ -178,7 +178,8 @@ describe("GenerationGraph", () => {
 
 describe("prepareNode", () => {
 	const voice = (voiceId: string): AssetWrite => ({
-		type: "voice",
+		type: "cast",
+		name: NARRATOR,
 		attrs: { voiceId },
 	});
 	const settling = (...writes: AssetWrite[]): ConnectorPlugin => ({
@@ -188,12 +189,17 @@ describe("prepareNode", () => {
 	const readsVoice: ConnectorPlugin = {
 		name: "voice",
 		reads: (_, { canvas }) => ({
-			voice: findAsset(canvas, "voice")?.generationAttributes?.voiceId ?? "",
+			voice:
+				findAsset(canvas, "cast", NARRATOR)?.generationAttributes?.voiceId ??
+				"",
 		}),
 	};
 	const image = element("img", "image", "a sunset");
-	const setAsset = vi.fn(({ type, attrs }: AssetWrite) => {
-		assets = [...assets, createCanvasNode(type, { attrs })];
+	const setAsset = vi.fn(({ type, name, attrs }: AssetWrite) => {
+		assets = [
+			...assets,
+			createCanvasNode(type, { attrs: name ? { name, ...attrs } : attrs }),
+		];
 	});
 	const writing = (): BuildContext => ({ ...contextNow(), setAsset });
 	const prepare = (...plugins: ConnectorPlugin[]) => {

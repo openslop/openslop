@@ -48,7 +48,12 @@ vi.mock("@/lib/connectors/factory", () => ({
 import { applyRefineOp, applyRefineOps } from "../applyOps";
 import type { RefineOp } from "../types";
 import { assetId } from "@/lib/canvas/types";
-import { getAssets } from "@/lib/canvas/assets";
+import {
+	getAssets,
+	NARRATOR,
+	NO_AVATAR,
+	voiceAttrs,
+} from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { getPromptText } from "@/lib/generation/inputs";
 import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
@@ -595,7 +600,7 @@ describe("applyRefineOp — mixed operations", () => {
 });
 
 describe("applyRefineOp — assets", () => {
-	const TTS = DEFAULT_MODELS.tts;
+	const CAST = { ...DEFAULT_MODELS.image, ...voiceAttrs(DEFAULT_MODELS.tts) };
 
 	const describeAssets = (editor: Editor) =>
 		getAssets(editor.children).map((asset) => [
@@ -644,11 +649,10 @@ describe("applyRefineOp — assets", () => {
 		]);
 	});
 
-	it("rewrites the character or voice already under that name", () => {
+	it("rewrites the cast member already under that name, voice and all", () => {
 		const editor = makeCanvas([
-			asset("cast", "a girl", { name: "Mia" }),
+			asset("cast", "a girl", { name: "Mia", age: "child" }),
 			asset("cast", "a boy", { name: "Kai" }),
-			asset("voice", "", { name: "Mia", age: "child" }),
 		]);
 
 		apply(
@@ -656,32 +660,29 @@ describe("applyRefineOp — assets", () => {
 			{
 				op: "insert",
 				type: "cast",
-				attrs: { name: "Mia" },
+				attrs: { name: "Mia", pitch: "high" },
 				text: "a girl in a yellow cardigan",
 			},
 			{
 				op: "insert",
-				type: "voice",
-				attrs: { name: "Mia", pitch: "high" },
-				text: "",
-			},
-			{
-				op: "insert",
-				type: "voice",
-				attrs: { name: "Kai", pitch: "low" },
-				text: "",
+				type: "cast",
+				attrs: { name: "Lumi", pitch: "low" },
+				text: "a grey rabbit",
 			},
 		);
 
 		expect(describeAssets(editor)).toEqual([
-			["cast:Mia", expect.anything(), "a girl in a yellow cardigan"],
-			["cast:Kai", expect.anything(), "a boy"],
-			["voice:Mia", { ...TTS, name: "Mia", age: "child", pitch: "high" }, ""],
-			["voice:Kai", { ...TTS, name: "Kai", pitch: "low" }, ""],
+			[
+				"cast:Mia",
+				{ ...CAST, name: "Mia", age: "child", pitch: "high" },
+				"a girl in a yellow cardigan",
+			],
+			["cast:Kai", { ...CAST, name: "Kai" }, "a boy"],
+			["cast:Lumi", { ...CAST, name: "Lumi", pitch: "low" }, "a grey rabbit"],
 		]);
 	});
 
-	it("keeps one style, one narrator voice and one references element", () => {
+	it("keeps one style, one narrator and one references element", () => {
 		const editor = makeCanvas([
 			asset("style", "noir"),
 			asset("references", "", { images: "a.png" }),
@@ -696,21 +697,34 @@ describe("applyRefineOp — assets", () => {
 				attrs: { images: "a.png,b.png" },
 				text: "",
 			},
-			{ op: "insert", type: "voice", attrs: { age: "adult" }, text: "" },
-			{ op: "insert", type: "voice", attrs: { pitch: "low" }, text: "" },
+			{
+				op: "insert",
+				type: "cast",
+				attrs: { name: NARRATOR, age: "adult" },
+				text: "",
+			},
+			{
+				op: "insert",
+				type: "cast",
+				attrs: { name: NARRATOR, pitch: "low" },
+				text: "",
+			},
 		);
 
 		expect(describeAssets(editor)).toEqual([
 			["style", {}, "muted watercolor"],
+			[
+				"cast:Narrator",
+				{ ...CAST, ...NO_AVATAR, name: NARRATOR, age: "adult", pitch: "low" },
+				"",
+			],
 			["references", { images: "a.png,b.png" }, ""],
-			["narrator", { ...TTS, age: "adult", pitch: "low" }, ""],
 		]);
 	});
 
 	it("sets an asset's text and attributes by its id", () => {
 		const editor = makeCanvas([
-			asset("cast", "a girl", { name: "Mia" }),
-			asset("voice", "", { name: "Mia", age: "child", pitch: "high" }),
+			asset("cast", "a girl", { name: "Mia", age: "child", pitch: "high" }),
 		]);
 
 		const result = apply(
@@ -718,15 +732,18 @@ describe("applyRefineOp — assets", () => {
 			{ op: "set", id: "cast:Mia", text: "a girl with a red scarf" },
 			{
 				op: "set",
-				id: "voice:Mia",
+				id: "cast:Mia",
 				attrs: { age: "adult", pitch: null },
 			},
 		);
 
 		expect(result).toEqual({ applied: 2, failures: [] });
 		expect(describeAssets(editor)).toEqual([
-			["cast:Mia", expect.anything(), "a girl with a red scarf"],
-			["voice:Mia", { ...TTS, name: "Mia", age: "adult" }, ""],
+			[
+				"cast:Mia",
+				{ ...CAST, name: "Mia", age: "adult" },
+				"a girl with a red scarf",
+			],
 		]);
 	});
 
@@ -742,13 +759,11 @@ describe("applyRefineOp — assets", () => {
 		expect(describeAssets(editor)).toEqual([["style", {}, "noir"]]);
 	});
 
-	it("removes only the character, leaving their voice and every list that names them", () => {
+	it("removes only the character, leaving every list that names them", () => {
 		const editor = makeCanvas(
 			[
 				asset("cast", "a girl", { name: "Mia" }),
 				asset("cast", "a boy", { name: "Kai" }),
-				asset("voice", "", { name: "Mia" }),
-				asset("voice", "", { name: "Kai" }),
 			],
 			[
 				content("image", "both", "a park", { characters: "Mia,Kai" }),
@@ -760,11 +775,7 @@ describe("applyRefineOp — assets", () => {
 			applied: 1,
 			failures: [],
 		});
-		expect(describeAssets(editor).map(([id]) => id)).toEqual([
-			"cast:Kai",
-			"voice:Mia",
-			"voice:Kai",
-		]);
+		expect(describeAssets(editor).map(([id]) => id)).toEqual(["cast:Kai"]);
 		expect(flatAttributes(getNode(editor, "both")).characters).toBe("Mia,Kai");
 		expect(flatAttributes(getNode(editor, "alone")).characters).toBe("Mia");
 	});

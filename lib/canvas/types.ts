@@ -105,37 +105,27 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-export type AssetType =
-	| "title"
-	| "project"
-	| "cast"
-	| "voice"
-	| "style"
-	| "references";
+export type AssetType = "title" | "cast" | "style" | "references";
 
 type AssetTypeSpec = {
 	connector?: AssetConnectorType;
-	/** The id of the type's unnamed asset, when it is not the type itself. */
-	unnamedId?: string;
-	/** Written in place on the canvas, where the rest are locked and edited from a dialog. */
+	/** Written in place on the canvas; the rest are tiles the caret selects whole. */
 	editable?: true;
 };
 
-/** Elements ahead of the scenes. Only a character's look generates; the rest are metadata. */
+/** Elements ahead of the scenes, in canvas order. Only a character's look generates; the rest are metadata. */
 export const ASSET_TYPES: Record<AssetType, AssetTypeSpec> = {
 	title: { editable: true },
-	project: {},
-	cast: { connector: "image" },
-	voice: { unnamedId: "narrator" },
 	style: {},
+	cast: { connector: "image" },
 	references: {},
 };
 
 export type ElementType = CanvasElementType | AssetType;
 
-/** A named asset is `type:name`; a type's unnamed one has its own fixed id. */
+/** A named asset is `type:name`; a type's unnamed one is the type itself. */
 export const assetId = (type: AssetType, name?: string): string =>
-	name ? `${type}:${name}` : (ASSET_TYPES[type].unnamedId ?? type);
+	name ? `${type}:${name}` : type;
 
 const CONNECTORS: Record<ElementType, { connector?: AssetConnectorType }> = {
 	...ELEMENT_TYPES,
@@ -161,8 +151,8 @@ export const ElementTypeSchema = z.enum(
 export type CanvasEditor = BaseEditor &
 	ReactEditor & {
 		id?: string;
-		/** Resolved per call against `nodes`' project element, which can change mid-session. */
-		defaultModels: (nodes?: readonly unknown[]) => ConnectorModels;
+		/** Resolved per call, since the project's and account's pins change mid-session. */
+		defaultModels: () => ConnectorModels;
 	};
 
 export type SplitAttributes = {

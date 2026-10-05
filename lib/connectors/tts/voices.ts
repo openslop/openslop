@@ -1,6 +1,12 @@
 import pick from "lodash/pick";
-import { findAsset, projectSettings, voiceOf } from "@/lib/canvas/assets";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import {
+	castVoice,
+	findAsset,
+	NARRATOR,
+	voiceAttrs,
+	voiceOf,
+} from "@/lib/canvas/assets";
+import type { BuildContext } from "@/lib/generation/graph";
 import { reading } from "@/lib/generation/dependency";
 import { declaredLanguage, type LanguageChoice } from "@/lib/project/language";
 import { VoiceSchema, VOICE_TRAITS, type Voice } from "@/lib/project/types";
@@ -15,18 +21,15 @@ import { DEFAULT_TTS_LANGUAGE } from "./enums";
 
 export const VOICE_SEARCH_KEYS = [...VOICE_TRAITS, "query"] as const;
 
-const voiceLabel = (name?: string) => `${name ?? "the narrator"}'s voice`;
+const voiceLabel = (name = NARRATOR) => `${name}'s voice`;
 
 const CHOSEN_VOICE_KEYS = ["provider", "model", "voiceId"] as const;
 
 /** The voice a speaker has chosen, recorded so choosing another stales whoever speaks in it. */
-export const speakerVoice = (name?: string) => {
+export const speakerVoice = (name = NARRATOR) => {
 	const voice = reading(voiceLabel(name), (_, { canvas }) => {
-		const element = findAsset(canvas, "voice", name);
-		return (
-			element &&
-			JSON.stringify(pick(flatAttributes(element), CHOSEN_VOICE_KEYS))
-		);
+		const cast = findAsset(canvas, "cast", name);
+		return cast && JSON.stringify(pick(castVoice(cast), CHOSEN_VOICE_KEYS));
 	});
 	return {
 		reads: voice.reads,
@@ -50,12 +53,13 @@ async function findVoice(
 	return found.id;
 }
 
-/** Searches by the voice's filters when it has no voice on `model`, and settles the find onto it. */
+/** Searches by the voice's filters when it has no voice on `model`; a speaker the cast lacks is added. */
 export async function settleVoice(
-	name: string | undefined,
+	name = NARRATOR,
 	model: ModelRef,
-	canvas: readonly unknown[],
+	{ canvas, state }: BuildContext,
 ): Promise<AssetWrite[]> {
+	const { language } = state.settings;
 	const voice = voiceOf(canvas, name);
 	if (
 		voice.voiceId &&
@@ -63,10 +67,6 @@ export async function settleVoice(
 		voice.model === model.model
 	)
 		return [];
-	const voiceId = await findVoice(
-		model,
-		voice,
-		projectSettings(canvas).language,
-	);
-	return [{ type: "voice", name, attrs: { ...model, voiceId } }];
+	const voiceId = await findVoice(model, voice, language);
+	return [{ type: "cast", name, attrs: voiceAttrs({ ...model, voiceId }) }];
 }

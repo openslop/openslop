@@ -28,23 +28,16 @@ const MOCK_TITLE = "Little Red";
 const MOCK_ASSETS: RefineOp[] =
 	parseOSML(`<style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</style>
 
-<voice gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind" language="en"></voice>
+<cast name="Narrator" avatar="none" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="warm, grandmotherly, kind" language="en"></cast>
 
-<cast name="Red">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</cast>
+<cast name="Red" gender="feminine" age="child" pitch="high" accent="american" voiceDescription="bright, cheerful, youthful" language="en">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</cast>
 
-<voice name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright, cheerful, youthful" language="en"></voice>
+<cast name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" voiceDescription="gentle, soft-spoken, kind" language="en">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</cast>
 
-<cast name="Wolf">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</cast>
+<cast name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="caring, gentle, melodic" language="en">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</cast>
 
-<voice name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" description="gentle, soft-spoken, kind" language="en"></voice>
+<cast name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</cast>
 
-<cast name="Mother">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</cast>
-
-<voice name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></voice>
-
-<cast name="Granny">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</cast>
-
-<voice name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></voice>
 `)
 		.filter(isAssetElement)
 		.map((asset) => ({

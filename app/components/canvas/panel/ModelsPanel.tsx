@@ -5,14 +5,13 @@ import { Settings } from "@/components/ui/icon";
 import { ModelDefaultControl } from "@/app/components/models/ModelDefaultControl";
 import { MODEL_GROUPS } from "@/lib/connectors/modelGroups";
 import { useModelChain } from "@/lib/connectors/useDefaultModels";
-import { useSlateStatic } from "slate-react";
-import { setProjectModels } from "@/lib/canvas/assetOps";
+import { useProject } from "@/lib/project/useProject";
 import { useSettings } from "@/lib/settings/useSettings";
 import { PanelCard } from "./PanelCard";
 
 export function ModelsPanel() {
 	const chain = useModelChain();
-	const editor = useSlateStatic();
+	const updateModels = useProject((state) => state.updateModels);
 	const settings = useSettings();
 
 	return (
@@ -24,7 +23,7 @@ export function ModelsPanel() {
 						tier="project"
 						chain={chain}
 						label={label}
-						onChange={(models) => setProjectModels(editor, models)}
+						onChange={updateModels}
 						className="w-full"
 					/>
 				</PanelCard>

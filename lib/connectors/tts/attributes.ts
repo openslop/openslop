@@ -1,6 +1,6 @@
 import { AttributeSchema } from "../attributes/schema";
 import { volumeDef } from "../attributes/common";
-import { ELEMENT_MODEL, modelDefs } from "../attributes/model";
+import { modelDefs } from "../attributes/model";
 import {
 	DEFAULT_TTS_EMOTION,
 	DEFAULT_TTS_SPEED,
@@ -38,7 +38,7 @@ const trait = (key: string, label: string, options: readonly string[]) => ({
 	edit: { kind: "enum" as const, options },
 });
 
-/** A voice element is described by its traits; which voice they found is picked beside them. */
+/** A cast member's voice is described by its traits; which voice they found is picked beside them. */
 export const VOICE_ATTRIBUTES = AttributeSchema.from(
 	[
 		trait("gender", "Gender", TTS_GENDERS),
@@ -47,12 +47,16 @@ export const VOICE_ATTRIBUTES = AttributeSchema.from(
 		trait("pitch", "Pitch", TTS_PITCHES),
 		trait("accent", "Accent", TTS_ACCENTS),
 		{
-			key: "description",
+			key: "voiceDescription",
 			label: "Description",
 			edit: { kind: "text", placeholder: "How the voice sounds", rows: 2 },
 		},
 		// The voice picker sets the pair; it is carried so a voice always has one.
-		...modelDefs("tts", { ...ELEMENT_MODEL, hidden: true }),
+		...modelDefs("tts", {
+			key: "voiceModel",
+			providerAttr: "voiceProvider",
+			hidden: true,
+		}),
 	],
 	{ hideModel: true },
 );

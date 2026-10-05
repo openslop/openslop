@@ -49,9 +49,7 @@ export const setVideoSettings = defineTool({
 	icon: Hourglass,
 	label: "Adjusting the video settings",
 	execute: async ({ length, format, aspect_ratio }, ctx) => {
-		ctx.setAsset("project", undefined, {
-			attrs: omitBy({ length, format }, isUndefined),
-		});
+		ctx.setProjectSettings(omitBy({ length, format }, isUndefined));
 		if (aspect_ratio) ctx.setVideoSettings({ aspectRatio: aspect_ratio });
 
 		const changed = [

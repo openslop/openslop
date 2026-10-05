@@ -3,14 +3,12 @@
 import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
-import { useMemo } from "react";
 import {
 	assetText,
+	avatarNames,
 	castNames,
 	findAsset,
 	getAssets,
-	projectModels,
-	projectSettings,
 } from "./assets";
 import type { AssetElement, AssetType } from "./types";
 
@@ -25,6 +23,11 @@ const selectCastNames = (editor: Editor) => castNames(editor.children);
 export const useCastNames = (): string[] =>
 	useSlateSelector(selectCastNames, shallow);
 
+const selectAvatarNames = (editor: Editor) => avatarNames(editor.children);
+
+export const useAvatarNames = (): string[] =>
+	useSlateSelector(selectAvatarNames, shallow);
+
 export const useAsset = <T extends AssetType>(
 	type: T,
 	name?: string,
@@ -34,14 +37,3 @@ export const useAsset = <T extends AssetType>(
 const selectTitle = (editor: Editor) => assetText(editor.children, "title");
 
 export const useProjectTitle = (): string => useSlateSelector(selectTitle);
-
-/** The project's script settings, re-parsed only when its `project` element changes. */
-export function useProjectSettings() {
-	const element = useAsset("project");
-	return useMemo(() => projectSettings(element ? [element] : []), [element]);
-}
-
-export function useProjectModels() {
-	const element = useAsset("project");
-	return useMemo(() => projectModels(element ? [element] : []), [element]);
-}

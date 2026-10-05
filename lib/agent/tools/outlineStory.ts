@@ -1,6 +1,5 @@
 import dedent from "dedent";
 import { z } from "zod";
-import { projectSettings } from "@/lib/canvas/assets";
 import { spokenLanguage } from "@/lib/script/prompt/language";
 import { outlinePrompt } from "@/lib/script/prompt/outline";
 import { Pencil } from "@/components/ui/icon";
@@ -33,7 +32,7 @@ export const outlineStory = defineTool({
 	label: "Outlining the story",
 	execute: async ({ brief }, ctx) => {
 		const language = spokenLanguage(
-			projectSettings(ctx.readAssets()),
+			ctx.readProjectSettings(),
 			"the same language as that input",
 		);
 		return ctx.generateText(outlinePrompt(brief, language), {

@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { memo } from "react";
+import { Fragment, memo } from "react";
 import {
 	History,
 	Home,
+	Info,
+	InfoFill,
 	Layout,
 	type IconComponent,
 	SlidersAlt,
 	SlidersAltFill,
+	StockAlt,
+	StockAltFill,
 	InsertElement,
 	InsertElementFill,
 	Robot,
@@ -16,13 +20,20 @@ import {
 	TextBox,
 	TextBoxFill,
 } from "@/components/ui/icon";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/SloppyComposer";
 import { SloppyPanel } from "@/app/components/sloppy/SloppyPanel";
 import { useEditorPanel } from "./EditorPanelContext";
-import { PINNED_PANEL_KEYS, RAIL_PANEL_KEYS, type PanelKey } from "./panelKeys";
+import {
+	PINNED_PANEL_KEYS,
+	RAIL_PANEL_GROUPS,
+	type PanelKey,
+} from "./panelKeys";
+import { AssetsPanel } from "./AssetsPanel";
 import { CanvasHistoryPanel } from "./CanvasHistoryPanel";
 import { ModelsPanel } from "./ModelsPanel";
+import { ProjectPanel } from "./ProjectPanel";
 import { CaptionsPanel } from "./CaptionsPanel";
 import { LayoutPanel } from "./LayoutPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -36,6 +47,18 @@ type PanelEntry = {
 };
 
 const PANELS: Record<PanelKey, PanelEntry> = {
+	assets: {
+		label: "Assets",
+		icon: StockAlt,
+		iconActive: StockAltFill,
+		Panel: AssetsPanel,
+	},
+	project: {
+		label: "Project",
+		icon: Info,
+		iconActive: InfoFill,
+		Panel: ProjectPanel,
+	},
 	layout: {
 		label: "Layout",
 		icon: Layout,
@@ -141,13 +164,17 @@ function EditorSidebarComponent() {
 				className="flex w-14 shrink-0 flex-col items-center gap-1 pt-4 mr-2 pl-1 lg:w-[72px]"
 			>
 				<RailItem icon={Home} label="Home" href="/" />
-				<div className="my-1 h-px w-full bg-border" />
-				{RAIL_PANEL_KEYS.map((key) => (
-					<PanelRailItem key={key} panelKey={key} />
+				{RAIL_PANEL_GROUPS.map((group) => (
+					<Fragment key={group.join()}>
+						<Separator className="my-1" />
+						{group.map((key) => (
+							<PanelRailItem key={key} panelKey={key} />
+						))}
+					</Fragment>
 				))}
 
 				<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
-					<div className="my-1 h-px w-full bg-border" />
+					<Separator className="my-1" />
 					{PINNED_PANEL_KEYS.map((key) => (
 						<PanelRailItem key={key} panelKey={key} />
 					))}

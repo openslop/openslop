@@ -41,7 +41,7 @@ export function useAgentTools(editor: Editor) {
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
 			const llm = () => createConnector("llm", editor.defaultModels().llm);
 			const draftScript = (source: ScriptSource) =>
-				streamScript(editor, llm(), source, signal);
+				streamScript(editor, store.getState().settings, llm(), source, signal);
 			const picturesOf = (element: ScriptElement): ElementImage["pictures"] => {
 				if (element.type === "references")
 					return { status: "idle", urls: referenceUrls([element]) };
@@ -85,6 +85,7 @@ export function useAgentTools(editor: Editor) {
 				},
 				readAssets: () => getAssets(editor.children),
 				readVideoSettings: () => store.getState().videoSettings,
+				readProjectSettings: () => store.getState().settings,
 				editScript: (ops) => applyRefineOps(editor, ops),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
@@ -92,6 +93,7 @@ export function useAgentTools(editor: Editor) {
 				setAsset: (type, name, patch) => setAsset(editor, type, name, patch),
 				setVideoSettings: (patch) =>
 					store.getState().updateVideoSettings(patch),
+				setProjectSettings: (patch) => store.getState().updateSettings(patch),
 			};
 			return executeToolCall(call, ctx);
 		},

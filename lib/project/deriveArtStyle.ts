@@ -1,6 +1,6 @@
 import dedent from "dedent";
 import compact from "lodash/compact";
-import { castNames, referenceUrls } from "@/lib/canvas/assets";
+import { avatarNames, referenceUrls } from "@/lib/canvas/assets";
 import { assetId, type AssetElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { LLMConnector } from "@/lib/connectors/types";
@@ -14,7 +14,7 @@ export function uploadedAvatarUrls(
 	queue: GenerationQueue,
 ): string[] {
 	return compact(
-		castNames(assets).map((name) => {
+		avatarNames(assets).map((name) => {
 			const { result, pinned } = queue.getElementSnapshot(
 				assetId("cast", name),
 			);

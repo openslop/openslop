@@ -6,6 +6,7 @@ import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { removeAsset } from "@/lib/canvas/assetOps";
+import { hasAvatar } from "@/lib/canvas/assets";
 import { elementModelPick } from "@/lib/canvas/elementConnector";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset } from "@/lib/canvas/useAssets";
@@ -39,7 +40,11 @@ export function CharacterEditModal({
 	return (
 		<AssetDialog
 			title={name}
-			description="Edits save automatically. Regenerate the avatar after changing the appearance."
+			description={
+				hasAvatar(cast)
+					? "Edits save automatically. Regenerate the avatar after changing the appearance."
+					: "Edits save automatically."
+			}
 			onClose={onClose}
 			actions={
 				<Button
@@ -54,38 +59,40 @@ export function CharacterEditModal({
 				</Button>
 			}
 		>
-			<ElementGenerationProvider element={cast}>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<div className="flex min-w-0 flex-col gap-2">
-						<TextAreaField
-							className="min-h-0 flex-1"
-							label="Appearance"
-							aside={
-								<div className="flex items-center gap-1">
-									<ModelAttribute
-										element={cast}
-										pick={elementModelPick(cast)}
-										label="Avatar model"
-									/>
-									<ElementHistoryButton element={cast} />
-								</div>
-							}
-							value={getElementBodyText(cast)}
-							onChange={(text) => updateNodeText(editor, cast.id, text)}
-							placeholder="Describe the character's look"
-						/>
-						<div className="flex items-center justify-end gap-2">
-							<ElementStaleIndicator />
-							<ElementGenerateButton />
+			{hasAvatar(cast) && (
+				<ElementGenerationProvider element={cast}>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<div className="flex min-w-0 flex-col gap-2">
+							<TextAreaField
+								className="min-h-0 flex-1"
+								label="Appearance"
+								aside={
+									<div className="flex items-center gap-1">
+										<ModelAttribute
+											element={cast}
+											pick={elementModelPick(cast)}
+											label="Avatar model"
+										/>
+										<ElementHistoryButton element={cast} />
+									</div>
+								}
+								value={getElementBodyText(cast)}
+								onChange={(text) => updateNodeText(editor, cast.id, text)}
+								placeholder="Describe the character's look"
+							/>
+							<div className="flex items-center justify-end gap-2">
+								<ElementStaleIndicator />
+								<ElementGenerateButton />
+							</div>
+						</div>
+						<div className="relative">
+							<OutputPreview outputKind="image" />
+							<ElementUploadButton className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border" />
 						</div>
 					</div>
-					<div className="relative">
-						<OutputPreview outputKind="image" />
-						<ElementUploadButton className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border" />
-					</div>
-				</div>
-			</ElementGenerationProvider>
-			<VoiceEditor name={name} />
+				</ElementGenerationProvider>
+			)}
+			<VoiceEditor cast={cast} />
 
 			<ConfirmDeleteDialog
 				target={confirmDelete ? name : undefined}

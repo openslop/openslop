@@ -39,7 +39,7 @@ describe("isParsedContentElement", () => {
 
 describe("isAssetType", () => {
 	it("accepts the asset types and nothing else", () => {
-		expect(["cast", "voice", "style", "references"].every(isAssetType)).toBe(
+		expect(["title", "cast", "style", "references"].every(isAssetType)).toBe(
 			true,
 		);
 		expect(["image", "scene", "toString"].some(isAssetType)).toBe(false);
@@ -48,7 +48,7 @@ describe("isAssetType", () => {
 
 describe("isAssetElement and isScriptElement", () => {
 	it.each([
-		[{ id: "a", type: "voice", children: [] }, true, true],
+		[{ id: "a", type: "cast", children: [] }, true, true],
 		[{ id: "a", type: "image", children: [] }, false, true],
 		[{ id: "a", type: "scene", children: [] }, false, false],
 		[{ text: "plain" }, false, false],

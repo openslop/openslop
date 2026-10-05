@@ -2,44 +2,19 @@
 
 import { useMemo } from "react";
 import { useSlateStatic } from "slate-react";
+import { castVoice, voiceAttrs } from "@/lib/canvas/assets";
 import { elementSchema } from "@/lib/canvas/elementConnector";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import type { AssetElement } from "@/lib/canvas/types";
-import { useAsset } from "@/lib/canvas/useAssets";
 import { hasModel, resolveModel, sameModel } from "@/lib/connectors/models";
-import { VoiceSchema, voiceTraitsSchema } from "@/lib/project/types";
+import { voiceTraitsSchema } from "@/lib/project/types";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
-import { setAsset } from "@/lib/canvas/assetOps";
-import { Button } from "@/components/ui/button";
-import { Plus } from "@/components/ui/icon";
 import { AttributeFields, FieldLabel } from "./fields";
 import { VoicePicker } from "./VoicePicker";
 
-/** A speaker's voice element: the traits that describe it, and the voice they find. */
-export function VoiceEditor({ name }: { name?: string }) {
+/** A cast member's voice: the traits that describe it, and the voice they find. */
+export function VoiceEditor({ cast }: { cast: AssetElement<"cast"> }) {
 	const editor = useSlateStatic();
-	const element = useAsset("voice", name);
-	if (element) return <VoiceFields element={element} />;
-	return (
-		<Button
-			type="button"
-			variant="outline"
-			size="sm"
-			className="self-start"
-			onClick={() => setAsset(editor, "voice", name)}
-		>
-			<Plus />
-			Add voice
-		</Button>
-	);
-}
-
-function VoiceFields({ element }: { element: AssetElement<"voice"> }) {
-	const editor = useSlateStatic();
-	const voice = useMemo(
-		() => VoiceSchema.parse(flatAttributes(element)),
-		[element],
-	);
+	const voice = useMemo(() => castVoice(cast), [cast]);
 	const filters = useMemo(() => voiceTraitsSchema.parse(voice), [voice]);
 	const model = resolveModel("tts", voice);
 	const onModel = hasModel("tts", voice);
@@ -52,19 +27,26 @@ function VoiceFields({ element }: { element: AssetElement<"voice"> }) {
 		>
 			<FieldLabel>Voice</FieldLabel>
 			<AttributeFields
-				element={element}
-				specs={elementSchema(element).settingsAttributes}
+				element={cast}
+				specs={elementSchema(cast).settingsAttributes}
 			/>
 			<VoicePicker
 				filters={filters}
 				model={model}
 				selectedVoiceId={onModel ? voiceId : undefined}
 				onSelect={(picked) =>
-					mergeAttrs(editor, element.id, { ...model, voiceId: picked.id })
+					mergeAttrs(
+						editor,
+						cast.id,
+						voiceAttrs({ ...model, voiceId: picked.id }),
+					)
 				}
 				onModelChange={(next) => {
 					if (!onModel || !sameModel(voice, next))
-						mergeAttrs(editor, element.id, { ...next, voiceId: null });
+						mergeAttrs(editor, cast.id, {
+							...voiceAttrs(next),
+							voiceId: null,
+						});
 				}}
 			/>
 		</section>

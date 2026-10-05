@@ -1,8 +1,13 @@
-import { Transforms, type Editor } from "slate";
-import { findNodeById, updateNodeText } from "@/lib/canvas/editorOps";
+import { Editor, Transforms } from "slate";
+import {
+	clearEditor,
+	findNodeById,
+	updateNodeText,
+} from "@/lib/canvas/editorOps";
 import { isParsedContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { OSMLStreamParser } from "@/lib/canvas/osmlStreamParser";
+import { isScriptEmpty } from "@/lib/canvas/scenes";
 import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
 
 function writeElement(
@@ -16,9 +21,13 @@ function writeElement(
 		updateNodeText(editor, node.id, text);
 		return;
 	}
-	// The parser keeps appending to its own node, so the document takes a copy.
-	Transforms.insertNodes(editor, structuredClone(node), {
-		at: [editor.children.length],
+	// Replaces an empty script's placeholder in one normalization, so withLayout seeds none back.
+	Editor.withoutNormalizing(editor, () => {
+		if (isScriptEmpty(editor.children)) clearEditor(editor);
+		// The parser keeps appending to its own node, so the document takes a copy.
+		Transforms.insertNodes(editor, structuredClone(node), {
+			at: [editor.children.length],
+		});
 	});
 }
 

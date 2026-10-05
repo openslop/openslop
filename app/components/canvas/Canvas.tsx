@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useMemo, KeyboardEvent } from "react";
-import { Editable, RenderElementProps, useSlateStatic } from "slate-react";
+import {
+	Editable,
+	RenderElementProps,
+	useSlateSelector,
+	useSlateStatic,
+} from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -10,15 +15,15 @@ import {
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import { findElementById } from "@/lib/canvas/editorOps";
+import { findAsset } from "@/lib/canvas/assets";
 import { isAssetElement } from "@/lib/canvas/guards";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
-import { AssetsSection } from "./elements/AssetsSection";
-import { HiddenAsset } from "./elements/HiddenAsset";
+import { AssetActions } from "./elements/AssetActions";
+import { AssetBlock } from "./elements/AssetBlock";
 import { ProjectTitle } from "./ProjectTitle";
-import { AssetEditProvider } from "./elements/character/AssetEditProvider";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -45,12 +50,16 @@ export default function Canvas() {
 
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
-		if (element.type === "title") return <ProjectTitle {...props} />;
-		if (isAssetElement(element)) return <HiddenAsset {...props} />;
+		if (isAssetElement(element))
+			return <AssetBlock {...props} element={element} />;
 		if (isSceneElement(element))
 			return <SortableScene {...props} element={element} />;
 		return <SortableContent {...props} element={element} />;
 	}, []);
+
+	const untitled = useSlateSelector(
+		(editor) => !findAsset(editor.children, "title"),
+	);
 
 	const activeElement = useMemo(
 		() =>
@@ -61,33 +70,36 @@ export default function Canvas() {
 	);
 
 	return (
-		<AssetEditProvider>
-			<DragTransferContext value={dragTransferStore}>
-				<DndContext
-					sensors={sensors}
-					collisionDetection={pointerWithin}
-					onDragStart={handleDragStart}
-					onDragOver={handleDragOver}
-					onDragEnd={handleDragEnd}
-					onDragCancel={handleDragCancel}
+		<DragTransferContext value={dragTransferStore}>
+			<DndContext
+				sensors={sensors}
+				collisionDetection={pointerWithin}
+				onDragStart={handleDragStart}
+				onDragOver={handleDragOver}
+				onDragEnd={handleDragEnd}
+				onDragCancel={handleDragCancel}
+			>
+				{untitled && (
+					<>
+						<ProjectTitle empty />
+						<AssetActions />
+					</>
+				)}
+				<SortableContext
+					items={sceneItems}
+					strategy={verticalListSortingStrategy}
 				>
-					<AssetsSection />
-					<SortableContext
-						items={sceneItems}
-						strategy={verticalListSortingStrategy}
-					>
-						<Editable
-							placeholder="Start typing your story…"
-							renderElement={renderElement}
-							onKeyDown={handleKeyDown}
-							className="font-body text-body leading-relaxed focus-ring"
-						/>
-					</SortableContext>
-					<DragOverlay>
-						{activeElement && <DragOverlayContent element={activeElement} />}
-					</DragOverlay>
-				</DndContext>
-			</DragTransferContext>
-		</AssetEditProvider>
+					<Editable
+						placeholder="Start typing your story…"
+						renderElement={renderElement}
+						onKeyDown={handleKeyDown}
+						className="font-body text-body leading-relaxed focus-ring"
+					/>
+				</SortableContext>
+				<DragOverlay>
+					{activeElement && <DragOverlayContent element={activeElement} />}
+				</DragOverlay>
+			</DndContext>
+		</DragTransferContext>
 	);
 }

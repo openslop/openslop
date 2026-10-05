@@ -1,13 +1,16 @@
 import isNil from "lodash/isNil";
-import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
 import without from "lodash/without";
 import xor from "lodash/xor";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/referenceImages";
-import type { ConnectorModels } from "@/lib/connectors/models";
-import { findAsset, formatModel, REFERENCE_URLS_ATTR } from "./assets";
+import {
+	assetDefaults,
+	findAsset,
+	NARRATOR,
+	REFERENCE_URLS_ATTR,
+} from "./assets";
 import { createCanvasNode } from "./createCanvasNode";
 import {
 	CHARACTERS_ATTR,
@@ -16,19 +19,24 @@ import {
 } from "./characterNames";
 import { mergeAttrs, updateNodeText, type AttributeChanges } from "./editorOps";
 import { isAssetElement } from "./guards";
-import { isSceneElement } from "./scenes";
 import {
+	ASSET_TYPES,
 	assetId,
 	type AssetElement,
 	type AssetType,
 	type ScriptElement,
 } from "./types";
 
-/** Adds an asset after the others, ahead of the first scene. */
+const ASSET_ORDER = Object.keys(ASSET_TYPES);
+
+const rank = (node: unknown) =>
+	isAssetElement(node) ? ASSET_ORDER.indexOf(node.type) : ASSET_ORDER.length;
+
+/** Adds an asset after the others of its type, in the order `ASSET_TYPES` lists them. */
 export function insertAsset(editor: Editor, asset: AssetElement): void {
-	const firstScene = editor.children.findIndex(isSceneElement);
+	const next = editor.children.findIndex((node) => rank(node) > rank(asset));
 	Transforms.insertNodes(editor, asset, {
-		at: [firstScene < 0 ? editor.children.length : firstScene],
+		at: [next < 0 ? editor.children.length : next],
 	});
 }
 
@@ -46,7 +54,10 @@ export function setAsset(
 		insertAsset(
 			editor,
 			createCanvasNode(type, {
-				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
+				attrs: omitBy(
+					{ name, ...assetDefaults(type, name), ...attrs },
+					isNil,
+				) as Record<string, string>,
 				text,
 				defaultModels: editor.defaultModels(),
 			}),
@@ -57,7 +68,15 @@ export function setAsset(
 	if (text !== undefined) updateNodeText(editor, asset.id, text);
 }
 
+/** The speaker's cast member, added when the cast lacks one: the narrator when no one is named. */
+export function ensureSpeaker(editor: Editor, name = NARRATOR): string {
+	if (!findAsset(editor.children, "cast", name)) setAsset(editor, "cast", name);
+	return name;
+}
+
+/** The project's reference images; none leaves no references element behind. */
 export function setReferenceImages(editor: Editor, urls: string[]): void {
+	if (urls.length === 0) return removeAsset(editor, "references");
 	setAsset(editor, "references", undefined, {
 		attrs: { [REFERENCE_URLS_ATTR]: serializeReferenceImages(uniq(urls)) },
 	});
@@ -99,13 +118,3 @@ export function removeAsset(
 		match: (node) => isAssetElement(node) && node.id === id,
 	});
 }
-
-export const setProjectSettings = (
-	editor: Editor,
-	attrs: AttributeChanges,
-): void => setAsset(editor, "project", undefined, { attrs });
-
-export const setProjectModels = (
-	editor: Editor,
-	models: ConnectorModels,
-): void => setProjectSettings(editor, mapValues(models, formatModel));

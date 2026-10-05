@@ -1,5 +1,5 @@
 import dedent from "dedent";
-import { assetText, castNames, voiceOf } from "@/lib/canvas/assets";
+import { assetText, avatarNames, voiceOf } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -48,7 +48,7 @@ export function projectPreamble(assets: AssetElement[]): string {
 
 			${voice}`);
 
-	const cast = castNames(assets);
+	const cast = avatarNames(assets);
 	if (cast.length > 0) {
 		sections.push(dedent`
 			# Characters

@@ -15,6 +15,7 @@ import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import type { ScriptElement } from "@/lib/canvas/types";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { cn } from "@/lib/utils";
+import { useWriteThrough } from "@/app/components/canvas/hooks/useWriteThrough";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (
@@ -42,6 +43,7 @@ export function TextAreaField({
 	className?: string;
 }) {
 	const id = useId();
+	const [draft, setDraft] = useWriteThrough(value, onChange);
 	return (
 		<div className={cn("flex flex-col gap-1", className)}>
 			<div className="flex min-h-6 items-center justify-between gap-2">
@@ -54,8 +56,8 @@ export function TextAreaField({
 				id={id}
 				size="sm"
 				rows={rows}
-				value={value}
-				onChange={(e) => onChange(e.target.value)}
+				value={draft}
+				onChange={(e) => setDraft(e.target.value)}
 				placeholder={placeholder}
 				className="grow resize-none"
 			/>
@@ -74,13 +76,14 @@ function TextField({
 	onChange: (value: string) => void;
 	placeholder?: string;
 }) {
+	const [draft, setDraft] = useWriteThrough(value ?? "", onChange);
 	return (
 		<label className="flex flex-col gap-1">
 			<FieldLabel>{label}</FieldLabel>
 			<Input
 				size="sm"
-				value={value ?? ""}
-				onChange={(e) => onChange(e.target.value)}
+				value={draft}
+				onChange={(e) => setDraft(e.target.value)}
 				placeholder={placeholder}
 			/>
 		</label>

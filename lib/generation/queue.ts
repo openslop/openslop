@@ -258,6 +258,7 @@ export class GenerationQueue {
 
 		try {
 			const prepared = await prepareNode(node, context);
+			const inputs = generationInputs(prepared, this);
 			const result = await generateForElement(
 				prepared,
 				this.dependencyResults(prepared),
@@ -268,7 +269,7 @@ export class GenerationQueue {
 				elementId,
 				elementType,
 				connectorType,
-				inputs: generationInputs(prepared, this),
+				inputs,
 				result,
 				pinned: false,
 			});

@@ -1,15 +1,10 @@
 import compact from "lodash/compact";
+import isString from "lodash/isString";
+import pickBy from "lodash/pickBy";
 import type { Descendant } from "slate";
 import { parseReferenceImages } from "@/lib/connectors/attributes/referenceImages";
 import { getPromptText } from "@/lib/generation/inputs";
-import {
-	VoiceSchema,
-	ProjectSettingsSchema,
-	type Voice,
-	type ProjectSettings,
-} from "@/lib/project/types";
-import { modelRefSchema, type ConnectorModels } from "@/lib/connectors/models";
-import { CONNECTOR_TYPES, type ModelRef } from "@/lib/connectors/types";
+import { VoiceSchema, type Voice } from "@/lib/project/types";
 import { flatAttributes } from "./elementAttributes";
 import { isAssetElement } from "./guards";
 import { getContentElements } from "./scenes";
@@ -42,13 +37,36 @@ export const findAsset = <T extends AssetType>(
 	);
 };
 
-export const castNames = (nodes: readonly unknown[]): string[] =>
-	compact(
-		nodes
-			.filter(isAssetElement)
-			.filter((asset) => asset.type === "cast")
-			.map((asset) => asset.generationAttributes?.name),
+/** Speaks every line no character does: a cast member with a voice and no avatar. */
+export const NARRATOR = "Narrator";
+
+export const NO_AVATAR = { avatar: "none" } as const;
+
+/** What a new asset starts with: the narrator has no avatar. */
+export const assetDefaults = (
+	type: AssetType,
+	name?: string,
+): Record<string, string> =>
+	type === "cast" && name === NARRATOR ? NO_AVATAR : {};
+
+const casts = (nodes: readonly unknown[]): AssetElement<"cast">[] =>
+	nodes.filter(
+		(node): node is AssetElement<"cast"> =>
+			isAssetElement(node) && node.type === "cast",
 	);
+
+export const hasAvatar = (cast: AssetElement<"cast">): boolean =>
+	cast.generationAttributes?.avatar !== NO_AVATAR.avatar;
+
+const namesOf = (members: AssetElement<"cast">[]): string[] =>
+	compact(members.map((cast) => cast.generationAttributes?.name));
+
+export const castNames = (nodes: readonly unknown[]): string[] =>
+	namesOf(casts(nodes));
+
+/** The cast members a picture can show. */
+export const avatarNames = (nodes: readonly unknown[]): string[] =>
+	namesOf(casts(nodes).filter(hasAvatar));
 
 export const assetText = (
 	nodes: readonly unknown[],
@@ -64,29 +82,33 @@ export const referenceUrls = (nodes: readonly unknown[]): string[] =>
 		findAsset(nodes, "references")?.generationAttributes?.[REFERENCE_URLS_ATTR],
 	) ?? [];
 
-/** What is known of a speaker's voice: nothing for a name the cast does not know. */
-export const voiceOf = (nodes: readonly unknown[], name?: string): Voice =>
-	VoiceSchema.parse(flatAttributes(findAsset(nodes, "voice", name) ?? {}));
-
-export const projectSettings = (nodes: readonly unknown[]): ProjectSettings =>
-	ProjectSettingsSchema.parse(
-		flatAttributes(findAsset(nodes, "project") ?? {}),
-	);
-
-/** A model the project pins is stored as `provider/model` under its connector type. */
-export const formatModel = ({ provider, model }: ModelRef) =>
-	`${provider}/${model}`;
-
-export const projectModels = (nodes: readonly unknown[]): ConnectorModels => {
-	const attrs = flatAttributes(findAsset(nodes, "project") ?? {});
-	return Object.fromEntries(
-		CONNECTOR_TYPES.flatMap((type) => {
-			const [provider, ...model] = attrs[type]?.split("/") ?? [];
-			const pick = modelRefSchema.safeParse({
-				provider,
-				model: model.join("/"),
-			});
-			return pick.success ? [[type, pick.data]] : [];
-		}),
-	);
+/** A cast member's voice, read off its voice-prefixed keys. */
+export const castVoice = (cast?: AssetElement<"cast">): Voice => {
+	const attrs = flatAttributes(cast ?? {});
+	return VoiceSchema.parse({
+		...attrs,
+		provider: attrs.voiceProvider,
+		model: attrs.voiceModel,
+		description: attrs.voiceDescription,
+	});
 };
+
+export const voiceAttrs = ({
+	provider,
+	model,
+	description,
+	...traits
+}: Partial<Voice>): Record<string, string> =>
+	pickBy(
+		{
+			...traits,
+			voiceProvider: provider,
+			voiceModel: model,
+			voiceDescription: description,
+		},
+		isString,
+	);
+
+/** What is known of a speaker's voice, the narrator's when no one is named. */
+export const voiceOf = (nodes: readonly unknown[], name = NARRATOR): Voice =>
+	castVoice(findAsset(nodes, "cast", name));

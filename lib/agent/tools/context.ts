@@ -4,7 +4,7 @@ import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementState } from "../elementState";
 import type { ElementLength } from "@/lib/render/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
-import type { DeepPartial } from "@/lib/project/types";
+import type { DeepPartial, ProjectSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/videoSettings";
 
 /** An element's pictures and the prompt behind them, never the rest of the result. */
@@ -30,6 +30,7 @@ export type AgentToolContext = {
 	) => Promise<string>;
 	readAssets: () => AssetElement[];
 	readVideoSettings: () => VideoSettings;
+	readProjectSettings: () => ProjectSettings;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
@@ -39,4 +40,5 @@ export type AgentToolContext = {
 		patch: AssetPatch,
 	) => void;
 	setVideoSettings: (patch: DeepPartial<VideoSettings>) => void;
+	setProjectSettings: (patch: Partial<ProjectSettings>) => void;
 };

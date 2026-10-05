@@ -80,13 +80,13 @@ describe("writes by id", () => {
 		];
 
 		mergeAttrs(editor, "img1", { style: "ink" });
-		mergeAttrs(editor, "cast:Mia", { age: "9" });
+		mergeAttrs(editor, "cast:Mia", { age: "child" });
 
 		expect(findNodeById(editor, "img1")?.[0].generationAttributes).toEqual({
 			style: "ink",
 		});
 		expect(findNodeById(editor, "cast:Mia")).toMatchObject([
-			{ generationAttributes: { name: "Mia", age: "9" } },
+			{ generationAttributes: { name: "Mia", age: "child" } },
 			[1],
 		]);
 	});

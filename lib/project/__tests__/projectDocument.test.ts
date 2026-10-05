@@ -1,8 +1,6 @@
 import { createEditor, type Editor } from "slate";
 import { withHistory } from "slate-history";
 import { describe, expect, it } from "vitest";
-import { projectModels } from "@/lib/canvas/assets";
-import { setProjectModels } from "@/lib/canvas/assetOps";
 import type { SceneElement } from "@/lib/canvas/types";
 import { GenerationQueue } from "@/lib/generation/queue";
 import {
@@ -12,6 +10,7 @@ import {
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { createProjectDocument, type ProjectContent } from "../projectDocument";
 import { createProjectStore } from "../store";
+import { ProjectSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 import { resultQueue } from "./_canvas";
 
@@ -22,17 +21,16 @@ const BYOK = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const UNPINNED = `<image model="Slop Image v1">a sunset</image>`;
 const PINNED = `<image provider="openslop" model="Slop Image v1">a sunset</image>`;
 
-const projectPinning = (models: ConnectorModels) =>
-	models.image
-		? `<project id="project" image="${models.image.provider}/${models.image.model}"></project>\n`
-		: "";
-
 const contentWith = (
 	script: string,
 	models: ConnectorModels = {},
 ): ProjectContent => ({
-	script: `${projectPinning(models)}${script}`,
-	store: { videoSettings: VideoSettingsSchema.parse({}) },
+	script,
+	store: {
+		videoSettings: VideoSettingsSchema.parse({}),
+		settings: ProjectSettingsSchema.parse({}),
+		models,
+	},
 	generation: {},
 });
 
@@ -52,12 +50,12 @@ const setup = (
 	queue = new GenerationQueue(),
 ) => {
 	const editor = withHistory(createEditor());
-	editor.defaultModels = (nodes = editor.children) =>
+	const store = createProjectStore();
+	editor.defaultModels = () =>
 		resolveDefaultModels({
-			project: projectModels(nodes),
+			project: store.getState().models,
 			account: accountModels,
 		});
-	const store = createProjectStore();
 	const document = createProjectDocument({ editor, store, queue });
 	return { editor, store, document };
 };
@@ -73,17 +71,17 @@ describe("createProjectDocument.write", () => {
 	});
 
 	it("resolves against the version's pins, not the live project's", () => {
-		const { editor, document } = setup();
-		setProjectModels(editor, { image: RECOMMENDED });
+		const { editor, store, document } = setup();
+		store.getState().updateModels({ image: RECOMMENDED });
 
 		document.write(contentWith(UNPINNED, { image: BYOK }));
 
 		expect(imageAttrs(editor, 0)).toMatchObject(BYOK);
-		expect(projectModels(editor.children)).toEqual({ image: BYOK });
+		expect(store.getState().models).toEqual({ image: BYOK });
 	});
 });
 
-const ASSETS = `<style id="style">noir</style>\n<cast id="cast:Ada" name="Ada" provider="openslop" model="Slop Image v1">tall</cast>`;
+const ASSETS = `<style id="style">noir</style>\n<cast id="cast:Ada" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Ada" provider="openslop" model="Slop Image v1">tall</cast>`;
 const SCENE = `--- Scene 1 ---\n<narration id="line">hello</narration>\n<image id="shot">a sunset</image>`;
 
 describe("createProjectDocument.read", () => {

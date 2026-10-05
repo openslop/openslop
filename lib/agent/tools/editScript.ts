@@ -1,5 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
+import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
 import {
 	ASSET_TYPES,
@@ -34,8 +35,10 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
-	cast: ["name"],
-	voice: ["name (the character's; none for the narrator)"],
+	cast: [
+		`name (${NARRATOR} for the narrator)`,
+		`avatar ${enumeration([NO_AVATAR.avatar])} (only the narrator's)`,
+	],
 };
 
 /** Attributes Sloppy can write by hand: enums with their options, and free text. */
@@ -71,13 +74,12 @@ const ASSETS = dedent`
 	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
 	asset already exists changes that one instead.
 	- title: the project's name, as its text. Change it with set_title.
-	- project: the language, length, format and template the script is written to. Change
-	  them with set_language and set_video_settings.
-	- cast: a character. \`name\` is the exact name their lines and every \`characters\` list
-	  use, and never changes. The text is what they look like, in English, written like an
-	  image prompt: their avatar is drawn from it, and every visual that lists them is drawn
-	  from that avatar.
-	- voice: how a speaker sounds, with no text. A voice is described, never picked.
+	- cast: a speaker, with how they sound as its voice attributes. A voice is described,
+	  never picked. \`name\` is the exact name their lines and every \`characters\` list use,
+	  and never changes. The text is what they look like, in English, written like an image
+	  prompt: their avatar is drawn from it, and every visual that lists them is drawn from
+	  that avatar. The narrator is the cast member named ${NARRATOR}, with \`avatar="none"\`
+	  and no text: it speaks every line no character does.
 	- style: the art style every visual is drawn in, as its text, in English: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
 	- references: the pictures every visual is drawn after. The user uploads these; look at

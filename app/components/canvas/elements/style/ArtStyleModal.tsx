@@ -16,14 +16,11 @@ import {
 } from "@/lib/project/deriveArtStyle";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset, useAssets } from "@/lib/canvas/useAssets";
-import { Textarea } from "@/components/ui/textarea";
 import { setAsset } from "@/lib/canvas/assetOps";
 import { AssetDialog } from "../character/AssetDialog";
-import { FieldLabel } from "../character/fields";
+import { FieldLabel, TextAreaField } from "../character/fields";
 import { ReferenceImages } from "../ReferenceImages";
 import { ArtStylePresets } from "./ArtStylePresets";
-
-const DESCRIPTION_ID = "art-style-description";
 
 export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const queue = useGenerationQueue();
@@ -69,36 +66,30 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 				</div>
 			</section>
 
-			<div className="flex flex-col gap-2">
-				<label htmlFor={DESCRIPTION_ID}>
-					<FieldLabel>Art Style Description</FieldLabel>
-				</label>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					className="self-start"
-					disabled={!hasReferences || deriving}
-					onClick={deriveFromReferences}
-					tooltip={
-						hasReferences
-							? undefined
-							: "Use reference images and character avatars for art style description: upload some first"
-					}
-				>
-					{deriving && <Spinner className="text-current" />}
-					Use references
-				</Button>
-				<Textarea
-					size="sm"
-					id={DESCRIPTION_ID}
-					rows={5}
-					value={style}
-					onChange={(e) => setStyle(e.target.value)}
-					placeholder="Describe the look of every image, or paste a full image prompt"
-					className="resize-none"
-				/>
-			</div>
+			<TextAreaField
+				label="Art Style Description"
+				aside={
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						disabled={!hasReferences || deriving}
+						onClick={deriveFromReferences}
+						tooltip={
+							hasReferences
+								? undefined
+								: "Use reference images and character avatars for art style description: upload some first"
+						}
+					>
+						{deriving && <Spinner className="text-current" />}
+						Use references
+					</Button>
+				}
+				rows={5}
+				value={style}
+				onChange={setStyle}
+				placeholder="Describe the look of every image, or paste a full image prompt"
+			/>
 
 			<ArtStylePresets value={style} onSelect={setStyle} />
 		</AssetDialog>

@@ -37,7 +37,7 @@ export const reviewScript = defineTool({
 		const script = ctx.readScript().trim();
 		if (!script) return "The canvas is empty, so there is nothing to review.";
 		return ctx.generateText(reviewPrompt(script, format), {
-			systemPrompt: scriptRules(ctx.readAssets()),
+			systemPrompt: scriptRules(ctx.readAssets(), ctx.readProjectSettings()),
 		});
 	},
 	snapshot: true,

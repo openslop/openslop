@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
+import { voiceAttrs } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ScriptElement } from "@/lib/canvas/types";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
@@ -53,9 +54,9 @@ const video = (characters?: string, model: ModelRef = SEEDANCE) =>
 	});
 
 const voice = (name: string, voiceId?: string) =>
-	asset("voice", {
+	asset("cast", {
 		name,
-		attrs: voiceId ? { ...DEFAULT_TTS_MODEL, voiceId } : {},
+		attrs: voiceId ? voiceAttrs({ ...DEFAULT_TTS_MODEL, voiceId }) : {},
 	});
 
 const prepare = async (
@@ -95,9 +96,9 @@ describe("character-voices plugin", () => {
 				prepare("Sol, Mira", [voice("Sol", "v-sol"), voice("Mira")]),
 			).resolves.toEqual([
 				{
-					type: "voice",
+					type: "cast",
 					name: "Mira",
-					attrs: { ...DEFAULT_TTS_MODEL, voiceId: "v-found" },
+					attrs: voiceAttrs({ ...DEFAULT_TTS_MODEL, voiceId: "v-found" }),
 				},
 			]);
 			expect(tts.searchVoices).toHaveBeenCalledOnce();

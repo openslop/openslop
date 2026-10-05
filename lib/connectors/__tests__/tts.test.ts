@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpTTSConnector } from "../tts/connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import { asset } from "@/lib/canvas/__tests__/_assets";
+import { NARRATOR, voiceAttrs } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
@@ -45,12 +46,13 @@ describe("BaseTTSConnector", () => {
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
-	it("speaks in the voice its speaker's voice settled, through the speaker-voice plugin", async () => {
+	it("speaks in the voice settled on its speaker's cast, through the speaker-voice plugin", async () => {
 		const fetchSpy = mockGatewaySequence(SUCCESS);
 		const plugin = createSpeakerVoicePlugin();
 		const connector = new HttpTTSConnector({ ...config, plugins: [plugin] });
-		const narrator = asset("voice", {
-			attrs: { ...config.model, voiceId: "voice-42" },
+		const narrator = asset("cast", {
+			name: NARRATOR,
+			attrs: voiceAttrs({ ...config.model, voiceId: "voice-42" }),
 		});
 		const reads = readsOf(plugin, createCanvasNode("narration"), [narrator]);
 

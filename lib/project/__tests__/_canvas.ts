@@ -5,8 +5,7 @@ import type { AssetResult } from "@/lib/connectors/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { BuildContext } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
-import type { ProjectData } from "../store";
-import { VideoSettingsSchema } from "../videoSettings";
+import { createProjectStore, type ProjectData } from "../store";
 
 export function makeEditor(defaultModels: ConnectorModels = {}): Editor {
 	const editor = createEditor();
@@ -16,7 +15,7 @@ export function makeEditor(defaultModels: ConnectorModels = {}): Editor {
 
 export const buildContextOf = (
 	nodes: Descendant[],
-	state: ProjectData = { videoSettings: VideoSettingsSchema.parse({}) },
+	state: ProjectData = createProjectStore().getState(),
 ): BuildContext => ({
 	state,
 	canvas: getScriptElements(nodes),

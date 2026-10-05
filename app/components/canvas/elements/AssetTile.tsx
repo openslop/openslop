@@ -7,6 +7,7 @@ import {
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
+import { cn } from "@/lib/utils";
 import { GenerationIndicator } from "./GenerationIndicator";
 import { RemoveCrossButton } from "./RemoveCrossButton";
 
@@ -40,6 +41,8 @@ export function AssetTile({
 	onRemove,
 	removeAffordance = "overlay",
 	fallback = "initial",
+	selected = false,
+	fill = false,
 }: {
 	name: string;
 	previewUrl?: string;
@@ -50,6 +53,8 @@ export function AssetTile({
 	/** "corner" pins a pill-style cross outside the tile so it can coexist with the edit overlay. */
 	removeAffordance?: "overlay" | "corner";
 	fallback?: "initial" | "icon";
+	selected?: boolean;
+	fill?: boolean;
 }) {
 	const fallbackContent =
 		fallback === "icon" ? (
@@ -58,8 +63,18 @@ export function AssetTile({
 			name.trim().charAt(0).toUpperCase()
 		);
 	return (
-		<div className="group/tile relative flex w-16 flex-col gap-1 sm:w-20">
-			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
+		<div
+			className={cn(
+				"group/tile relative flex flex-col gap-1",
+				!fill && "w-16 sm:w-20",
+			)}
+		>
+			<div
+				className={cn(
+					"relative aspect-square overflow-hidden rounded-md border bg-card",
+					selected ? "border-accent ring-2 ring-accent" : "border-border",
+				)}
+			>
 				{previewUrl ? (
 					<ImageWithShimmer
 						key={previewUrl}

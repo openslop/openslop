@@ -1,9 +1,8 @@
 import { Editor } from "slate";
-import { findAsset } from "@/lib/canvas/assets";
+import { findAsset, NARRATOR, voiceAttrs } from "@/lib/canvas/assets";
 import {
 	removeAssets,
 	setAsset,
-	setProjectSettings,
 	setReferenceImages,
 } from "@/lib/canvas/assetOps";
 import { buildNode } from "@/lib/generation/generationGraph";
@@ -23,22 +22,24 @@ export function applyTemplate(
 	const template = getTemplate(templateId);
 	const project = store.getState();
 	project.reset();
+	project.updateSettings({ template: template.id, length: template.length });
 
 	const characters = Object.entries(template.characters ?? {});
 	Editor.withoutNormalizing(editor, () => {
 		removeAssets(editor);
-		setProjectSettings(editor, {
-			template: template.id,
-			length: template.length,
-		});
+
 		setAsset(editor, "style", undefined, {
 			text: template.style.description,
 		});
-		setAsset(editor, "voice", undefined, { attrs: template.narration });
+		setAsset(editor, "cast", NARRATOR, {
+			attrs: voiceAttrs(template.narration),
+		});
 		setReferenceImages(editor, template.referenceImages);
 		for (const [name, { appearance, avatar: _, ...voice }] of characters) {
-			setAsset(editor, "cast", name, { text: appearance });
-			setAsset(editor, "voice", name, { attrs: voice });
+			setAsset(editor, "cast", name, {
+				text: appearance,
+				attrs: voiceAttrs(voice),
+			});
 		}
 	});
 

@@ -1,5 +1,4 @@
 import compact from "lodash/compact";
-import { projectSettings } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import type { ProjectSettings } from "@/lib/project/types";
 import { getTemplateById } from "@/lib/templates/templates";
@@ -58,23 +57,24 @@ function promptParts(
  * Also the review's system prompt. What only one source contributes (a length
  * budget, a template, a pasted script's notes) stays with that source.
  */
-export function scriptRules(assets: AssetElement[]): string {
+export function scriptRules(
+	assets: AssetElement[],
+	settings: ProjectSettings,
+): string {
 	return compact([
 		projectPreamble(assets),
-		osmlSpec(spokenLanguage(projectSettings(assets), INPUT_LANGUAGE)),
+		osmlSpec(spokenLanguage(settings, INPUT_LANGUAGE)),
 	]).join("\n\n");
 }
 
 export function buildScriptPrompt(
 	assets: AssetElement[],
+	settings: ProjectSettings,
 	source: ScriptSource,
 ): ScriptPrompt {
-	const { guidance, instruction } = promptParts(
-		source,
-		projectSettings(assets),
-	);
+	const { guidance, instruction } = promptParts(source, settings);
 	return {
-		system: compact([...guidance, scriptRules(assets)]).join("\n\n"),
+		system: compact([...guidance, scriptRules(assets, settings)]).join("\n\n"),
 		prompt: instruction,
 	};
 }

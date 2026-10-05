@@ -1,64 +1,45 @@
-import { Editor, Range, type Point, type TextUnit } from "slate";
+import { Editor, Element, type Location, type Node } from "slate";
 import { isAssetElement } from "@/lib/canvas/guards";
 import { ASSET_TYPES, type CanvasEditor } from "@/lib/canvas/types";
 
-const isLocked = (node: unknown) =>
-	isAssetElement(node) && !ASSET_TYPES[node.type].editable;
-
-/** Locked assets are voids the keyboard never reaches; Slate alone would still delete one whole. */
+/** Every asset but the title is a tile: a void the caret selects whole and a delete removes. */
 export const withAssets = (editor: CanvasEditor): CanvasEditor => {
-	const {
-		isVoid,
-		isSelectable,
-		apply,
-		deleteBackward,
-		deleteForward,
-		deleteFragment,
-		insertBreak,
-	} = editor;
+	const { isVoid, mergeNodes, insertBreak, insertFragment } = editor;
 
-	const blockAt = ({ path }: Point) => editor.children[path[0] ?? -1];
-	const crossesAnAsset = (from: Point, to: Point) =>
-		blockAt(from) !== blockAt(to) &&
-		(isAssetElement(blockAt(from)) || isAssetElement(blockAt(to)));
-
-	editor.isVoid = (element) => isLocked(element) || isVoid(element);
-
-	editor.isSelectable = (element) =>
-		!isLocked(element) && isSelectable(element);
-
-	editor.apply = (operation) => {
-		if (operation.type === "set_selection") {
-			const next = { ...editor.selection, ...operation.newProperties };
-			if (
-				Range.isRange(next) &&
-				Range.points(next).some(([point]) => isLocked(blockAt(point)))
-			)
-				return;
-		}
-		apply(operation);
+	const isBlock = (node: Node) =>
+		Element.isElement(node) && Editor.isBlock(editor, node);
+	const mergesIntoAsset = (at: Location) => {
+		const [block] = Editor.nodes(editor, {
+			at,
+			match: isBlock,
+			mode: "lowest",
+		});
+		const previous =
+			block &&
+			Editor.previous(editor, { at: block[1], match: isBlock, mode: "lowest" });
+		return isAssetElement(previous?.[0]);
 	};
 
-	const withinItsBlock =
-		(remove: (unit: TextUnit) => void, step: typeof Editor.before) =>
-		(unit: TextUnit) => {
-			const { selection } = editor;
-			const target = selection && step(editor, selection, { unit });
-			if (!selection || !target || !crossesAnAsset(selection.anchor, target))
-				remove(unit);
-		};
-	editor.deleteBackward = withinItsBlock(deleteBackward, Editor.before);
-	editor.deleteForward = withinItsBlock(deleteForward, Editor.after);
+	editor.isVoid = (element) =>
+		(isAssetElement(element) && !ASSET_TYPES[element.type].editable) ||
+		isVoid(element);
 
-	editor.deleteFragment = (direction) => {
-		const { selection } = editor;
-		if (!selection || !crossesAnAsset(selection.anchor, selection.focus))
-			deleteFragment(direction);
+	editor.mergeNodes = (options = {}) => {
+		const at = options.at ?? editor.selection;
+		if (!at || !mergesIntoAsset(at)) mergeNodes(options);
+	};
+
+	// The document already holds a pasted tile's id; a pasted title is only text.
+	editor.insertFragment = (fragment) => {
+		insertFragment(
+			fragment.filter((n) => !(Element.isElement(n) && editor.isVoid(n))),
+		);
 	};
 
 	editor.insertBreak = () => {
 		const { selection } = editor;
-		if (!selection || !isAssetElement(blockAt(selection.anchor))) insertBreak();
+		const block = selection && editor.children[selection.anchor.path[0] ?? -1];
+		if (!isAssetElement(block)) insertBreak();
 	};
 
 	return editor;

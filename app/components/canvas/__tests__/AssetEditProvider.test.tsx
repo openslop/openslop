@@ -3,6 +3,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { createEditor } from "slate";
+import { Slate, withReact } from "slate-react";
 import {
 	AssetEditProvider,
 	useAssetEditors,
@@ -23,11 +25,6 @@ vi.mock("../elements/character/CharacterEditModal", () => ({
 		<button data-dialog={`character ${props.name}`} onClick={props.onClose} />
 	),
 }));
-vi.mock("../elements/character/AssetDialog", () => ({
-	AssetDialog: (props: { title: string; onClose: () => void }) => (
-		<button data-dialog={props.title.toLowerCase()} onClick={props.onClose} />
-	),
-}));
 vi.mock("../elements/style/ArtStyleModal", () => ({
 	ArtStyleModal: ({ onClose }: { onClose: () => void }) => (
 		<button data-dialog="style" onClick={onClose} />
@@ -35,6 +32,7 @@ vi.mock("../elements/style/ArtStyleModal", () => ({
 }));
 
 let editors: AssetEditors;
+const editor = withReact(createEditor());
 function Tiles({ onRead }: { onRead: (editors: AssetEditors) => void }) {
 	onRead(useAssetEditors());
 	return null;
@@ -52,9 +50,11 @@ beforeEach(() => {
 	root = createRoot(container);
 	act(() =>
 		root.render(
-			<AssetEditProvider>
-				<Tiles onRead={(read) => (editors = read)} />
-			</AssetEditProvider>,
+			<Slate editor={editor} initialValue={[]}>
+				<AssetEditProvider>
+					<Tiles onRead={(read) => (editors = read)} />
+				</AssetEditProvider>
+			</Slate>,
 		),
 	);
 });
@@ -67,8 +67,11 @@ describe("AssetEditProvider", () => {
 	});
 
 	it("shows only the dialog of the asset opened last", () => {
-		act(() => editors.editAsset("voice"));
-		expect(openDialogs()).toEqual(["narrator"]);
+		act(() => editors.editAsset("references"));
+		expect(openDialogs()).toEqual(["style"]);
+
+		act(() => editors.editAsset("cast", "Narrator"));
+		expect(openDialogs()).toEqual(["character Narrator"]);
 
 		act(() => editors.editAsset("style"));
 		expect(openDialogs()).toEqual(["style"]);
@@ -85,13 +88,8 @@ describe("AssetEditProvider", () => {
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
-	it("opens a character's voice in their own dialog", () => {
-		act(() => editors.editAsset("voice", "Mia"));
-		expect(openDialogs()).toEqual(["character Mia"]);
-	});
-
 	it("unmounts the dialog when it closes", () => {
-		act(() => editors.editAsset("voice"));
+		act(() => editors.editAsset("style"));
 
 		clickDialog();
 		expect(openDialogs()).toEqual([]);

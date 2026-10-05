@@ -12,12 +12,7 @@ export function applyScriptToEditor(
 	script: string,
 	sceneId?: (index: number) => string,
 ): void {
-	const parsed = deserializeWithScenes(script);
-	const nodes = deserializeWithScenes(
-		script,
-		editor.defaultModels(parsed),
-		sceneId,
-	);
+	const nodes = deserializeWithScenes(script, editor.defaultModels(), sceneId);
 
 	const replaceChildren = () => {
 		Editor.withoutNormalizing(editor, () => {

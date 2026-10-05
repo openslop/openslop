@@ -41,18 +41,15 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 					speakerVoice(name).reads(element, ctx),
 				),
 			),
-		async prepare(element, { canvas }) {
+		async prepare(element, ctx) {
+			const { canvas } = ctx;
 			if (!listens(resolveModel("video", element.generationAttributes)))
 				return [];
 			const writes = await Promise.all(
 				shownCharacters(element)
-					.filter((name) => findAsset(canvas, "voice", name))
+					.filter((name) => findAsset(canvas, "cast", name))
 					.map((name) =>
-						settleVoice(
-							name,
-							resolveModel("tts", voiceOf(canvas, name)),
-							canvas,
-						),
+						settleVoice(name, resolveModel("tts", voiceOf(canvas, name)), ctx),
 					),
 			);
 			return writes.flat();

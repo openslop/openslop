@@ -9,8 +9,11 @@ import {
 } from "../tools/registry";
 import type { AssetPatch } from "@/lib/canvas/assetOps";
 import type { AssetType } from "@/lib/canvas/types";
-import { asset } from "@/lib/canvas/__tests__/_assets";
-import type { DeepPartial } from "@/lib/project/types";
+import {
+	ProjectSettingsSchema,
+	type DeepPartial,
+	type ProjectSettings,
+} from "@/lib/project/types";
 import {
 	VideoSettingsSchema,
 	type VideoSettings,
@@ -26,13 +29,16 @@ import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 
-const project = asset("project", { attrs: { length: "3-5m" } });
-
 type AssetWrite = [AssetType, string | undefined, AssetPatch];
 
 const recordAssets = (writes: AssetWrite[]) => ({
 	setAsset: (type: AssetType, name: string | undefined, patch: AssetPatch) =>
 		void writes.push([type, name, patch]),
+});
+
+const recordProjectSettings = (patches: Partial<ProjectSettings>[]) => ({
+	setProjectSettings: (patch: Partial<ProjectSettings>) =>
+		void patches.push(patch),
 });
 
 const recordVideoSettings = (patches: DeepPartial<VideoSettings>[]) => ({
@@ -48,13 +54,15 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	generateText: async () => "an outline",
 	elementImage: () => undefined,
 	elementStates: () => [],
-	readAssets: () => [project],
+	readAssets: () => [],
 	readVideoSettings: () => VideoSettingsSchema.parse({ aspectRatio: "9:16" }),
+	readProjectSettings: () => ProjectSettingsSchema.parse({ length: "3-5m" }),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
 	setAsset: () => {},
 	setVideoSettings: () => {},
+	setProjectSettings: () => {},
 	...over,
 });
 
@@ -144,30 +152,29 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it.each([
-		[
-			"set_title",
-			{ title: "Moon Cat" },
-			["title", undefined, { text: "Moon Cat" }],
-		],
-		[
-			"set_language",
-			{ language: "es" },
-			["project", undefined, { attrs: { language: "es" } }],
-		],
-	])(
-		"%s writes onto its element and nothing else",
-		async (toolName, input, write) => {
-			const writes: AssetWrite[] = [];
-			const outcome = await executeToolCall(
-				{ toolName, input },
-				context(recordAssets(writes)),
-			);
+	it("set_title writes onto the title element and nothing else", async () => {
+		const writes: AssetWrite[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_title", input: { title: "Moon Cat" } },
+			context(recordAssets(writes)),
+		);
 
-			expect(writes).toEqual([write]);
-			expect(outcome.ok).toBe(true);
-		},
-	);
+		expect(writes).toEqual([["title", undefined, { text: "Moon Cat" }]]);
+		expect(outcome.ok).toBe(true);
+	});
+
+	it("set_language writes the project's language and nothing else", async () => {
+		const writes: AssetWrite[] = [];
+		const settings: Partial<ProjectSettings>[] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "set_language", input: { language: "es" } },
+			context({ ...recordAssets(writes), ...recordProjectSettings(settings) }),
+		);
+
+		expect(settings).toEqual([{ language: "es" }]);
+		expect(writes).toEqual([]);
+		expect(outcome.ok).toBe(true);
+	});
 
 	it("refuses a call that names no title, rather than writing nothing", async () => {
 		const writes: AssetWrite[] = [];
@@ -198,19 +205,20 @@ describe("executeToolCall", () => {
 	});
 
 	it("writes only the settings it was given, and says they shape the next script", async () => {
-		const writes: AssetWrite[] = [];
+		const settings: Partial<ProjectSettings>[] = [];
 		const patches: DeepPartial<VideoSettings>[] = [];
 		const outcome = await executeToolCall(
 			{
 				toolName: "set_video_settings",
 				input: { length: "5-10m", aspect_ratio: "9:16" },
 			},
-			context({ ...recordAssets(writes), ...recordVideoSettings(patches) }),
+			context({
+				...recordProjectSettings(settings),
+				...recordVideoSettings(patches),
+			}),
 		);
 
-		expect(writes).toStrictEqual([
-			["project", undefined, { attrs: { length: "5-10m" } }],
-		]);
+		expect(settings).toStrictEqual([{ length: "5-10m" }]);
 		expect(patches).toEqual([{ aspectRatio: "9:16" }]);
 		expect(outcome.ok && outcome.output).toContain("next script");
 	});
@@ -326,7 +334,8 @@ describe("executeToolCall", () => {
 			context({
 				countSpokenWords: () => 1000,
 				measureRuntime: () => 600,
-				readAssets: () => [asset("project", { attrs: { length: "auto" } })],
+				readProjectSettings: () =>
+					ProjectSettingsSchema.parse({ length: "auto" }),
 			}),
 		);
 
@@ -736,10 +745,10 @@ describe("SLOPPY_TOOLS", () => {
 		]);
 	});
 
-	it("lists each asset type an edit can set up, and a voice's traits with their options", () => {
+	it("lists each asset type an edit can set up, and a cast member's voice traits with their options", () => {
 		const { description } = SLOPPY_TOOLS.edit_script;
 
-		for (const type of ["cast", "voice", "style", "references"]) {
+		for (const type of ["cast", "style", "references"]) {
 			expect(description).toContain(`- ${type}: `);
 		}
 		for (const options of [

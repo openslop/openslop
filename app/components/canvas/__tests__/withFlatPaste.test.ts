@@ -4,6 +4,8 @@ import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
+import { withAssets } from "../plugins/withAssets";
+import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { CanvasEditor } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { content, scene, seedScene, shape } from "./fixtures";
@@ -57,5 +59,20 @@ describe("withFlatPaste", () => {
 		expect(types).toContain("music");
 		expect(types).toContain("video");
 		expect(hasNestedScene(editor)).toBe(false);
+	});
+
+	it("leaves the tiles of a pasted fragment behind", () => {
+		const editor = withAssets(makeEditor());
+		seedScene(editor, scene([content("narration", "n0")]));
+
+		editor.insertFragment([
+			scene([content("image", "i1")], "ps1"),
+			createCanvasNode("cast", { attrs: { name: "Mia" } }),
+			scene([content("sound", "snd1")], "ps2"),
+		]);
+
+		const types = shape(editor).flat();
+		expect(types).toContain("sound");
+		expect(types).not.toContain("cast");
 	});
 });

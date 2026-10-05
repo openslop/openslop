@@ -29,9 +29,7 @@ import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
 import { useReferenceImages } from "@/app/components/canvas/hooks/useReferenceImages";
-import { useSlateStatic } from "slate-react";
-import { setProjectModels, setProjectSettings } from "@/lib/canvas/assetOps";
-import { useProjectSettings } from "@/lib/canvas/useAssets";
+import { useProject } from "@/lib/project/useProject";
 import {
 	LANGUAGE_CHOICES,
 	languageLabel,
@@ -113,7 +111,7 @@ function AttachMenu({
 	openPicker: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateCharacter, editAsset } = useAssetEditors();
+	const { openCreateCharacter, editAsset, editSpeaker } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -132,7 +130,7 @@ function AttachMenu({
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: () => editAsset("voice"),
+			onSelect: () => editSpeaker(),
 		},
 		{
 			key: "art-style",
@@ -209,12 +207,13 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const updateVideoSettings = useUpdateVideoSettings();
-	const editor = useSlateStatic();
+	const updateModels = useProject((state) => state.updateModels);
+	const updateSettings = useProject((state) => state.updateSettings);
 	const {
 		length: videoLength,
 		format: videoFormat,
 		language,
-	} = useProjectSettings();
+	} = useProject((state) => state.settings);
 	const { add: addReferenceImages } = useReferenceImages();
 	const model = useDefaultModels().llm;
 
@@ -233,8 +232,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	/** A pasted script sets its own length and format, so both go back to auto. */
 	const chooseIntent = (next: ComposerIntent) => {
 		setIntent(next);
-		if (next === "script")
-			setProjectSettings(editor, { length: "auto", format: "auto" });
+		if (next === "script") updateSettings({ length: "auto", format: "auto" });
 	};
 
 	const handleSubmit = () => {
@@ -302,9 +300,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							value={videoFormat}
 							options={VIDEO_FORMAT_OPTIONS}
 							disabled={pasting}
-							onChange={(next: VideoFormat) =>
-								setProjectSettings(editor, { format: next })
-							}
+							onChange={(next: VideoFormat) => updateSettings({ format: next })}
 						/>
 						<SettingPill
 							name="Language"
@@ -312,13 +308,13 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							value={language}
 							options={LANGUAGE_OPTIONS}
 							onChange={(next: LanguageChoice) =>
-								setProjectSettings(editor, { language: next })
+								updateSettings({ language: next })
 							}
 						/>
 						<ModelSelect
 							type="llm"
 							value={model}
-							onChange={(llm) => setProjectModels(editor, { llm })}
+							onChange={(llm) => updateModels({ llm })}
 						>
 							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
 								<ProviderIcon
@@ -335,9 +331,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							value={videoLength}
 							options={VIDEO_LENGTH_OPTIONS}
 							disabled={pasting}
-							onChange={(next: VideoLength) =>
-								setProjectSettings(editor, { length: next })
-							}
+							onChange={(next: VideoLength) => updateSettings({ length: next })}
 						/>
 						{activeTemplate && (
 							<SettingPill

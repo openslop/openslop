@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
+import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ElementType, ScriptElement } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
@@ -110,7 +111,7 @@ describe("buildNode", () => {
 		});
 	});
 
-	it.each(["title", "project", "voice", "style", "references"] as const)(
+	it.each(["title", "style", "references"] as const)(
 		"builds no node for a %s, which generates nothing",
 		(type) => {
 			expect(() => resolve(make(type))).toThrow(
@@ -125,7 +126,6 @@ describe("buildNode", () => {
 			startFrame: "previous",
 			characters: "Alice",
 		});
-		assets = [...assets, make("voice", "", { name: "Alice" })];
 
 		const node = resolveOn(video, [img, video]);
 
@@ -267,7 +267,7 @@ describe("buildNode", () => {
 	describe("speech and the voice it is spoken in", () => {
 		const line = element("line", "narration");
 		const voice = (attrs: Record<string, string>) => {
-			assets = [make("voice", "", attrs)];
+			assets = [make("cast", "", { name: NARRATOR, ...NO_AVATAR, ...attrs })];
 		};
 
 		it("reads the voice its speaker chose, depending on nothing", () => {
@@ -276,7 +276,7 @@ describe("buildNode", () => {
 
 			expect(edgesOf(node)).toEqual({});
 			expect(
-				JSON.parse(node.inputs.reads["the narrator's voice"] ?? "{}"),
+				JSON.parse(node.inputs.reads["Narrator's voice"] ?? "{}"),
 			).toMatchObject({ voiceId: "v-1" });
 		});
 
@@ -290,7 +290,7 @@ describe("buildNode", () => {
 			voice({ voiceId: "v-2", gender: "masculine" });
 
 			expect(staleReason(resolve(line), queue)).toBe(
-				"The narrator's voice changed — regenerate to update",
+				"Narrator's voice changed — regenerate to update",
 			);
 		});
 	});

@@ -6,6 +6,7 @@ import {
 	serializeOSMLWithScenes,
 } from "../osmlSerializer";
 import { ZERO_WIDTH_SPACE } from "../constants";
+import { NARRATOR, NO_AVATAR } from "../assets";
 import { createCanvasNode } from "../createCanvasNode";
 import { parseOSML } from "../osmlStreamParser";
 import {
@@ -54,19 +55,21 @@ describe("serializeOSMLWithScenes", () => {
 		const result = serializeOSMLWithScenes([
 			asset("style", { text: "ink wash" }),
 			wrap(el("narration", "Hello")),
-			asset("voice", {
+			asset("cast", {
 				name: "Mia & Co",
 				attrs: {
 					gender: "feminine",
-					provider: "cartesia",
-					model: "Sonic 3.6",
+					provider: "runware",
+					model: "Seedream 5 Lite",
+					voiceProvider: "cartesia",
+					voiceModel: "Sonic 3.6",
 				},
 			}),
 		]);
 
 		expect(result.split("\n")).toEqual([
 			'<style id="style">ink wash</style>',
-			'<voice id="voice:Mia &amp; Co" provider="cartesia" model="Sonic 3.6" name="Mia &amp; Co" gender="feminine"></voice>',
+			'<cast id="cast:Mia &amp; Co" voiceProvider="cartesia" voiceModel="Sonic 3.6" name="Mia &amp; Co" gender="feminine" provider="runware" model="Seedream 5 Lite"></cast>',
 			"",
 			"--- Scene 1 ---",
 			'<narration id="e1">Hello</narration>',
@@ -156,8 +159,9 @@ describe("serialize round trip", () => {
 		const saved = serializeOSMLWithScenes([
 			asset("style", { text: "ink wash" }),
 			asset("cast", { name: "Mia", text: "Brown hair" }),
-			asset("voice", {
-				attrs: { gender: "feminine", voiceId: "v1" },
+			asset("cast", {
+				name: NARRATOR,
+				attrs: { ...NO_AVATAR, gender: "feminine", voiceId: "v1" },
 			}),
 			references("https://img/a.png?x=1&y=2", "https://img/b.png"),
 			wrap(createCanvasNode("narration", { id: "n1", text: "first" })),
@@ -169,7 +173,7 @@ describe("serialize round trip", () => {
 		expect(reloaded.map((node) => node.type)).toEqual([
 			"style",
 			"cast",
-			"voice",
+			"cast",
 			"references",
 			SCENE_TYPE,
 			SCENE_TYPE,
@@ -178,8 +182,9 @@ describe("serialize round trip", () => {
 			[
 				asset("style", { text: "ink wash" }),
 				asset("cast", { name: "Mia", text: "Brown hair" }),
-				asset("voice", {
-					attrs: { gender: "feminine", voiceId: "v1" },
+				asset("cast", {
+					name: NARRATOR,
+					attrs: { ...NO_AVATAR, gender: "feminine", voiceId: "v1" },
 				}),
 				references("https://img/a.png?x=1&y=2", "https://img/b.png"),
 			].map(withoutLeafIds),

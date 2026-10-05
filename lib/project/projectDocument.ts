@@ -43,8 +43,9 @@ export function createProjectDocument({
 		}),
 
 		write: (content) => {
-			applyScriptToEditor(editor, content.script);
+			// The script is read on the project's pinned models, so they land first.
 			store.setState(content.store);
+			applyScriptToEditor(editor, content.script);
 			queue.replaceSnapshots(content.generation);
 		},
 

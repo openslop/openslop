@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
 import { createProjectStore } from "../store";
 import { extractStoreSnapshot, parseStoreSnapshot } from "../storeSnapshot";
+import { ProjectSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
+
+const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
 
 describe("storeSnapshot", () => {
 	it("extracts a method-free snapshot, detached from its store", () => {
@@ -10,8 +13,14 @@ describe("storeSnapshot", () => {
 		const snap = extractStoreSnapshot(store);
 
 		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
+		store.getState().updateModels({ image: RUNWARE });
+		store.getState().updateSettings({ language: "fr" });
 
-		expect(snap).toEqual({ videoSettings: VideoSettingsSchema.parse({}) });
+		expect(snap).toEqual({
+			videoSettings: VideoSettingsSchema.parse({}),
+			settings: ProjectSettingsSchema.parse({}),
+			models: {},
+		});
 	});
 
 	it("round-trips through createProjectStore", () => {
@@ -22,8 +31,13 @@ describe("storeSnapshot", () => {
 			captions: false,
 		});
 
+		src.getState().updateModels({ image: RUNWARE });
+		src.getState().updateSettings({ language: "fr", template: "pov-life" });
+
 		const after = createProjectStore(extractStoreSnapshot(src)).getState();
 		expect(after.videoSettings).toEqual(src.getState().videoSettings);
+		expect(after.settings).toEqual(src.getState().settings);
+		expect(after.models).toEqual({ image: RUNWARE });
 	});
 
 	it("creates the same store from an empty parsed snapshot as from nothing", () => {
@@ -37,11 +51,16 @@ describe("parseStoreSnapshot", () => {
 	it("fills defaults for absent and partial rows", () => {
 		expect(parseStoreSnapshot(null)).toEqual({
 			videoSettings: VideoSettingsSchema.parse({}),
+			settings: ProjectSettingsSchema.parse({}),
+			models: {},
 		});
 		expect(
 			parseStoreSnapshot({ videoSettings: { aspectRatio: "9:16" } })
 				.videoSettings,
 		).toEqual(VideoSettingsSchema.parse({ aspectRatio: "9:16" }));
+		expect(
+			parseStoreSnapshot({ settings: { length: "under-1m" } }).settings,
+		).toEqual(ProjectSettingsSchema.parse({ length: "under-1m" }));
 	});
 
 	it("keeps a stored row intact and completes its video settings", () => {
@@ -57,7 +76,7 @@ describe("parseStoreSnapshot", () => {
 		});
 	});
 
-	it("keeps only the video settings of a row that carries other fields", () => {
+	it("keeps only the video settings, settings and models of a row that carries other fields", () => {
 		expect(
 			parseStoreSnapshot({
 				videoSettings: { aspectRatio: "9:16", length: "60s", format: "x" },
@@ -66,6 +85,8 @@ describe("parseStoreSnapshot", () => {
 			}),
 		).toEqual({
 			videoSettings: VideoSettingsSchema.parse({ aspectRatio: "9:16" }),
+			settings: ProjectSettingsSchema.parse({}),
+			models: {},
 		});
 	});
 

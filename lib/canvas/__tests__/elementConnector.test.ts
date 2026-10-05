@@ -5,6 +5,7 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { videoAttributesFor } from "@/lib/connectors/video/attributes";
+import { NARRATOR, NO_AVATAR, voiceAttrs } from "../assets";
 import { createCanvasNode } from "../createCanvasNode";
 import {
 	attributeSchemaFor,
@@ -71,7 +72,12 @@ describe("resolveElementConnector", () => {
 });
 
 describe("resolveElementConnector for speech", () => {
-	const voiced = (attrs: Record<string, string>) => [asset("voice", { attrs })];
+	const voiced = (pair: typeof DEFAULT_MODELS.tts) => [
+		asset("cast", {
+			name: NARRATOR,
+			attrs: { ...NO_AVATAR, ...voiceAttrs(pair) },
+		}),
+	];
 	const own = { provider: "cartesia", model: "Sonic 3.6" };
 
 	it("speaks with the pair its voice picked, over its own", () => {
@@ -84,7 +90,7 @@ describe("resolveElementConnector for speech", () => {
 		).toEqual(DEFAULT_MODELS.tts);
 	});
 
-	it("speaks with its own pair while its speaker has no voice element", () => {
+	it("speaks with its own pair while its speaker has no cast member", () => {
 		expect(
 			resolveElementConnector(element("narration", own), registry, []).model,
 		).toEqual(own);
@@ -119,13 +125,7 @@ describe("resolveElementConnector for a cast element", () => {
 
 describe("resolveElementConnector for metadata", () => {
 	it("throws, since metadata never generates", () => {
-		for (const type of [
-			"title",
-			"project",
-			"voice",
-			"style",
-			"references",
-		] as const)
+		for (const type of ["title", "style", "references"] as const)
 			expect(() => resolveElementConnector(asset(type), registry, [])).toThrow(
 				/generates nothing/,
 			);
@@ -160,44 +160,40 @@ describe("elementSchema", () => {
 });
 
 describe("asset schemas", () => {
-	const voice = attributeSchemaFor("voice", {});
+	const cast = attributeSchemaFor("cast", {});
 
-	it("lets a voice set its traits, each one optional, describe itself in text, and carry its speech pair", () => {
-		expect(voice.keys).toEqual([
+	it("lets a cast member set its voice's traits, each one optional, describe the voice, and carry its speech pair", () => {
+		expect(cast.keys).toEqual([
 			"gender",
 			"language",
 			"age",
 			"pitch",
 			"accent",
-			"description",
-			"provider",
-			"model",
+			"voiceDescription",
+			"voiceProvider",
+			"voiceModel",
 		]);
-		expect(voice.defaultAttributes).toEqual(DEFAULT_MODELS.tts);
+		expect(cast.defaultAttributes).toEqual(voiceAttrs(DEFAULT_MODELS.tts));
 	});
 
-	it("gives every asset but a voice nothing to set beside its text", () => {
-		for (const type of [
-			"title",
-			"project",
-			"cast",
-			"style",
-			"references",
-		] as const)
+	it("gives every asset but a cast member nothing to set beside its text", () => {
+		for (const type of ["title", "style", "references"] as const)
 			expect(attributeSchemaFor(type, {}).keys).toEqual([]);
 	});
 
 	it("keeps what an asset holds outside its schema when it is created", () => {
 		expect(
 			flatAttributes(
-				asset("voice", {
+				asset("cast", {
 					name: "Mia",
-					attrs: { ...DEFAULT_MODELS.tts, voiceId: "v1", gender: "feminine" },
+					attrs: { ...NO_AVATAR, voiceId: "v1", gender: "feminine" },
 				}),
 			),
 		).toEqual({
 			name: "Mia",
-			...DEFAULT_MODELS.tts,
+			...DEFAULT_IMAGE_MODEL,
+			...voiceAttrs(DEFAULT_MODELS.tts),
+			...NO_AVATAR,
 			voiceId: "v1",
 			gender: "feminine",
 		});

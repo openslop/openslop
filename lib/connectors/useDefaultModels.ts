@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useProjectModels } from "@/lib/canvas/useAssets";
+import { useProject } from "@/lib/project/useProject";
 import { useAccount } from "@/lib/user/useAccount";
 import {
 	resolveDefaultModels,
@@ -10,7 +10,7 @@ import {
 } from "./models";
 
 export function useModelChain(): ModelDefaults {
-	const project = useProjectModels();
+	const project = useProject((state) => state.models);
 	const account = useAccount((state) => state.models);
 	return useMemo(() => ({ project, account }), [project, account]);
 }

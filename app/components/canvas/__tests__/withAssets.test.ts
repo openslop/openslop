@@ -9,24 +9,22 @@ import {
 import { withReact } from "slate-react";
 import { assetId } from "@/lib/canvas/types";
 import { setAsset } from "@/lib/canvas/assetOps";
-import { findAsset, getAssets, assetText } from "@/lib/canvas/assets";
+import { findAsset, assetText } from "@/lib/canvas/assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { withAssets } from "../plugins/withAssets";
 import { content, scene } from "./fixtures";
 
-const ASSETS = [
-	createCanvasNode("style", { id: assetId("style"), text: "noir" }),
-	createCanvasNode("cast", {
-		id: assetId("cast", "Mia"),
-		attrs: { name: "Mia" },
-		text: "a girl",
-	}),
-	createCanvasNode("voice", {
-		id: assetId("voice", "Mia"),
-		attrs: { name: "Mia", age: "child" },
-	}),
-];
+const TITLE = createCanvasNode("title", { text: "Moon" });
+const STYLE = createCanvasNode("style", { id: assetId("style"), text: "noir" });
+const CAST = createCanvasNode("cast", {
+	id: assetId("cast", "Mia"),
+	attrs: { name: "Mia" },
+	text: "a girl",
+});
+const REFERENCES = createCanvasNode("references", {
+	id: assetId("references"),
+});
 
 const bare = (children: Descendant[]) => {
 	const editor = withAssets(withReact(createEditor()));
@@ -35,38 +33,34 @@ const bare = (children: Descendant[]) => {
 	return editor;
 };
 
-const makeEditor = () =>
-	bare([...ASSETS.slice(0, 2), scene([content("narration", "n1", "hello")])]);
+const script = () => scene([content("narration", "n1", "hello")]);
 
-const scriptAt = (editor: Editor) =>
+const indexOf = (editor: Editor, type: string) =>
 	editor.children.findIndex(
-		(node) => Element.isElement(node) && node.type === "scene",
+		(node) => Element.isElement(node) && node.type === type,
 	);
 
+const types = (editor: Editor) =>
+	editor.children.flatMap((node) =>
+		Element.isElement(node) ? [node.type] : [],
+	);
+
+const selectScriptStart = (editor: Editor) =>
+	Transforms.select(editor, Editor.start(editor, [indexOf(editor, "scene")]));
+
 describe("withAssets", () => {
-	it("makes every asset but the title void and unselectable, and leaves the script editable", () => {
-		const editor = bare([
-			createCanvasNode("title", { text: "Moon" }),
-			...ASSETS,
-			scene([content("narration", "n1", "hello")]),
-		]);
-		const narration = content("narration", "n1", "hello");
+	it("makes every asset but the title a void", () => {
+		const editor = bare([TITLE, STYLE, CAST, REFERENCES, script()]);
 
 		expect(
 			editor.children.flatMap((node) =>
-				Element.isElement(node) && editor.isSelectable(node) ? [node.type] : [],
+				Element.isElement(node) && editor.isVoid(node) ? [node.type] : [],
 			),
-		).toEqual(["title", "scene"]);
-		expect(
-			getAssets(editor.children)
-				.filter((asset) => !editor.isVoid(asset))
-				.map(({ type }) => type),
-		).toEqual(["title"]);
-		expect(editor.isVoid(narration)).toBe(false);
+		).toEqual(["style", "cast", "references"]);
 	});
 
 	it("still lets a writer change an asset's text", () => {
-		const editor = makeEditor();
+		const editor = bare([STYLE, script()]);
 
 		setAsset(editor, "style", undefined, { text: "watercolor" });
 
@@ -74,98 +68,102 @@ describe("withAssets", () => {
 		expect(style && getElementBodyText(style)).toBe("watercolor");
 	});
 
-	it("keeps the caret in the script when it moves back past the assets", () => {
-		const editor = bare([
-			...ASSETS,
-			scene([content("narration", "n1", "hello")]),
-		]);
-		const start = Editor.start(editor, [ASSETS.length]);
-		Transforms.select(editor, start);
+	it("selects the tile ahead of the script when the caret moves back onto it", () => {
+		const editor = bare([STYLE, CAST, script()]);
+		selectScriptStart(editor);
 
 		Transforms.move(editor, { reverse: true });
 
-		expect(editor.selection?.anchor).toEqual(start);
+		expect(editor.selection?.anchor.path[0]).toBe(indexOf(editor, "cast"));
 	});
 
-	it("refuses a selection placed inside an asset", () => {
-		const editor = makeEditor();
+	it("deletes the tile ahead of the script on backspace", () => {
+		const editor = bare([STYLE, CAST, script()]);
+		selectScriptStart(editor);
 
-		Transforms.select(editor, { path: [0, 0], offset: 0 });
-
-		expect(editor.selection).toBeNull();
-	});
-
-	it.each([
-		["backspacing", (editor: Editor) => editor.deleteBackward("character")],
-		["deleting forward", (editor: Editor) => editor.deleteForward("character")],
-	])("leaves the assets alone when %s through the script", (_, press) => {
-		const editor = makeEditor();
-		const assets = getAssets(editor.children);
-		Transforms.select(editor, Editor.start(editor, [scriptAt(editor)]));
-
-		for (let i = 0; i < 8; i++) press(editor);
-
-		expect(getAssets(editor.children)).toEqual(assets);
-	});
-
-	it("leaves the assets alone when the whole script is deleted", () => {
-		const editor = makeEditor();
-		const assets = getAssets(editor.children);
-		Transforms.select(editor, Editor.range(editor, [scriptAt(editor)]));
-
-		editor.deleteFragment();
 		editor.deleteBackward("character");
 
-		expect(getAssets(editor.children)).toEqual(assets);
+		expect(types(editor)).toEqual(["style", "scene"]);
+	});
+
+	it("does nothing on Enter while a tile is selected", () => {
+		const editor = bare([STYLE, script()]);
+		const before = editor.children;
+		Transforms.select(editor, Editor.start(editor, [0]));
+
+		editor.insertBreak();
+
+		expect(editor.children).toBe(before);
 	});
 });
 
 describe("withAssets and the title", () => {
-	const titled = () =>
-		bare([
-			createCanvasNode("project"),
-			createCanvasNode("voice"),
-			createCanvasNode("style"),
-			createCanvasNode("references"),
-			createCanvasNode("title", { text: "Moon" }),
-			scene([content("narration", "n1", "hello")]),
-		]);
-	const titleAt = (editor: Editor) =>
-		editor.children.findIndex(
-			(node) => Element.isElement(node) && node.type === "title",
-		);
-
 	it("lets the caret in and types into the title", () => {
-		const editor = titled();
-		const end = Editor.end(editor, [titleAt(editor)]);
+		const editor = bare([TITLE, STYLE, script()]);
+		const end = Editor.end(editor, [0]);
 
 		Transforms.select(editor, end);
 		editor.insertText(" Cat");
 
-		expect(editor.selection?.anchor.path.slice(0, 1)).toEqual([
-			titleAt(editor),
-		]);
+		expect(editor.selection?.anchor.path.slice(0, 1)).toEqual([0]);
 		expect(assetText(editor.children, "title")).toBe("Moon Cat");
 	});
 
 	it("refuses Enter inside the title", () => {
-		const editor = titled();
+		const editor = bare([TITLE, script()]);
 		const before = editor.children;
-		Transforms.select(editor, Editor.end(editor, [titleAt(editor)]));
+		Transforms.select(editor, Editor.end(editor, [0]));
 
 		editor.insertBreak();
 
 		expect(editor.children).toBe(before);
 	});
 
-	it("does not merge the first scene into the title on backspace", () => {
-		const editor = titled();
-		expect(scriptAt(editor)).toBe(titleAt(editor) + 1);
+	it.each([
+		[
+			"backspacing at the start of the script",
+			(editor: Editor) => {
+				selectScriptStart(editor);
+				editor.deleteBackward("character");
+			},
+		],
+		[
+			"deleting forward at the end of the title",
+			(editor: Editor) => {
+				Transforms.select(editor, Editor.end(editor, [0]));
+				editor.deleteForward("character");
+			},
+		],
+	])("never merges the script into the title when %s", (_, press) => {
+		const editor = bare([TITLE, script()]);
 		const before = editor.children;
-		Transforms.select(editor, Editor.start(editor, [scriptAt(editor)]));
 
-		editor.deleteBackward("character");
+		press(editor);
 
-		expect(editor.children).toBe(before);
+		expect(editor.children).toEqual(before);
+	});
+
+	it("types over a selection from the title into the script without merging them", () => {
+		const editor = bare([TITLE, CAST, script()]);
+		Transforms.select(editor, {
+			anchor: { path: [0, 1], offset: 2 },
+			focus: { path: [2, 0, 0], offset: 2 },
+		});
+
+		editor.insertText("x");
+
+		expect(assetText(editor.children, "title")).toBe("Mox");
+		expect(types(editor)).toEqual(["title", "scene"]);
+		expect(Editor.string(editor, [indexOf(editor, "scene")])).toBe("llo");
+	});
+
+	it("keeps the title when the whole document is deleted", () => {
+		const editor = bare([TITLE, STYLE, script()]);
+		Transforms.select(editor, Editor.range(editor, []));
+
+		editor.deleteFragment();
+
+		expect(types(editor)[0]).toBe("title");
+		expect(findAsset(editor.children, "style")).toBeUndefined();
 	});
 });

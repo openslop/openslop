@@ -2,16 +2,19 @@ import type { Editor } from "slate";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
 	assetText,
+	avatarNames,
 	castNames,
 	findAsset,
 	getAssets,
-	projectSettings,
+	hasAvatar,
+	NARRATOR,
 	referenceUrls,
+	voiceAttrs,
 	voiceOf,
 } from "@/lib/canvas/assets";
 import {
+	ensureSpeaker,
 	setAsset,
-	setProjectSettings,
 	setReferenceImages,
 } from "@/lib/canvas/assetOps";
 import { buildNode } from "@/lib/generation/generationGraph";
@@ -31,6 +34,7 @@ let store: ProjectStore;
 
 const buildContext = () => buildContextOf(editor.children, store.getState());
 const assets = () => getAssets(editor.children);
+const settings = () => store.getState().settings;
 
 const apply = (templateId: string) =>
 	applyTemplate(editor, store, queue, buildContext, templateId);
@@ -50,10 +54,20 @@ describe("applyTemplate", () => {
 			...voice
 		} = getTemplate("pov-life").characters?.Protagonist ?? {};
 
-		expect(castNames(assets())).toEqual(["Protagonist"]);
+		expect(avatarNames(assets())).toEqual(["Protagonist"]);
 		const cast = findAsset(assets(), "cast", "Protagonist");
 		expect(cast && getPromptText(cast)).toBe(appearance);
 		expect(voiceOf(assets(), "Protagonist")).toMatchObject(voice);
+	});
+
+	it("casts the narrator with the template's narration voice and no avatar", () => {
+		apply("pov-life");
+		const narrator = findAsset(assets(), "cast", NARRATOR);
+
+		expect(narrator && hasAvatar(narrator)).toBe(false);
+		expect(voiceOf(assets())).toMatchObject(
+			VoiceSchema.parse(getTemplate("pov-life").narration),
+		);
 	});
 
 	it("does not leak characters from a previous template", () => {
@@ -61,25 +75,25 @@ describe("applyTemplate", () => {
 		expect(castNames(assets())).toContain("Protagonist");
 
 		apply("sleep-story");
-		expect(castNames(assets())).toEqual(
-			Object.keys(getTemplate("sleep-story").characters ?? {}),
-		);
-		expect(findAsset(assets(), "voice", "Protagonist")).toBeUndefined();
+		expect(castNames(assets())).toEqual([
+			NARRATOR,
+			...Object.keys(getTemplate("sleep-story").characters ?? {}),
+		]);
 	});
 
 	it("records which template the project writes against", () => {
 		apply("pov-life");
-		expect(projectSettings(editor.children).template).toBe("pov-life");
+		expect(settings().template).toBe("pov-life");
 
 		apply("sleep-story");
-		expect(projectSettings(editor.children).template).toBe("sleep-story");
+		expect(settings().template).toBe("sleep-story");
 	});
 
 	it("clears the template without disturbing what it applied", () => {
 		apply("pov-life");
-		setProjectSettings(editor, { template: undefined });
+		store.getState().updateSettings({ template: undefined });
 
-		expect(projectSettings(editor.children).template).toBeUndefined();
+		expect(settings().template).toBeUndefined();
 		expect(castNames(assets())).toContain("Protagonist");
 	});
 
@@ -96,9 +110,7 @@ describe("applyTemplate", () => {
 
 	it("sets the video length the template is written for", () => {
 		apply("pov-life");
-		expect(projectSettings(editor.children).length).toBe(
-			getTemplate("pov-life").length,
-		);
+		expect(settings().length).toBe(getTemplate("pov-life").length);
 	});
 
 	it("replaces any earlier reference images with the template's", () => {
@@ -117,7 +129,9 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes the user's narrator voice before applying", () => {
-		setAsset(editor, "voice", undefined, { attrs: { accent: "british" } });
+		setAsset(editor, "cast", ensureSpeaker(editor), {
+			attrs: voiceAttrs({ accent: "british", voiceId: "v-mine" }),
+		});
 
 		apply("pov-life");
 		expect(voiceOf(assets())).toEqual({

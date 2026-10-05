@@ -80,14 +80,14 @@ describe("OSMLStreamParser", () => {
 		expect(getElementBodyText(style)).toBe("ink wash");
 	});
 
-	it("parses voice and references tags with their attributes as written", () => {
-		const [voice, references] = parseOSML(
-			'<voice name="Mia" gender="masculine" age="adult" voiceId="v1"></voice>' +
+	it("parses a cast's voice and references tags with their attributes as written", () => {
+		const [cast, references] = parseOSML(
+			'<cast name="Mia" gender="masculine" age="adult" voiceId="v1"></cast>' +
 				'<references images="https://img/a.png,https://img/b.png"></references>',
 		);
 
-		expect(voice).toMatchObject({
-			type: "voice",
+		expect(cast).toMatchObject({
+			type: "cast",
 			generationAttributes: {
 				name: "Mia",
 				gender: "masculine",
@@ -101,17 +101,17 @@ describe("OSMLStreamParser", () => {
 		});
 	});
 
-	it("draws a cast on the default image model, and a voice on the speech model, when they name none", () => {
+	it("draws a cast on the default image model, and its voice on the speech model, when it names neither", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const [cast, voice] = parseOSML(
-			'<cast name="Mia">Brown hair</cast><voice name="Mia"></voice>',
-			{ image: pinned },
-		);
+		const [cast] = parseOSML('<cast name="Mia">Brown hair</cast>', {
+			image: pinned,
+		});
 
-		expect(cast.generationAttributes).toEqual({ name: "Mia", ...pinned });
-		expect(voice.generationAttributes).toEqual({
+		expect(cast.generationAttributes).toEqual({
 			name: "Mia",
-			...DEFAULT_TTS_MODEL,
+			...pinned,
+			voiceProvider: DEFAULT_TTS_MODEL.provider,
+			voiceModel: DEFAULT_TTS_MODEL.model,
 		});
 	});
 

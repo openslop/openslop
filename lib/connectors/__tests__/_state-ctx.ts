@@ -12,11 +12,17 @@ import type {
 } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
+import { ProjectSettingsSchema } from "@/lib/project/types";
 import { VideoSettingsSchema } from "@/lib/project/videoSettings";
 
 export const projectState = (
 	videoSettings: Partial<ProjectData["videoSettings"]> = {},
-): ProjectData => ({ videoSettings: VideoSettingsSchema.parse(videoSettings) });
+	settings: Partial<ProjectData["settings"]> = {},
+): ProjectData => ({
+	videoSettings: VideoSettingsSchema.parse(videoSettings),
+	settings: ProjectSettingsSchema.parse(settings),
+	models: {},
+});
 
 export const buildCtx = (
 	canvas: ScriptElement[] = [],

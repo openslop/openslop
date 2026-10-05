@@ -62,7 +62,7 @@ export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 
 export type Voice = z.infer<typeof VoiceSchema>;
 
-/** What the project's `project` element says: how its scripts are written, each with a default. */
+/** How the project's scripts are written, each with a default. */
 export const ProjectSettingsSchema = z.object({
 	language: z
 		.enum(LANGUAGE_CHOICES)

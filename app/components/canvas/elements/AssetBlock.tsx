@@ -1,0 +1,63 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { useFocused, useSelected, type RenderElementProps } from "slate-react";
+import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
+import type { AssetElement, AssetType } from "@/lib/canvas/types";
+import { ProjectTitle } from "../ProjectTitle";
+import { AssetActions } from "./AssetActions";
+import {
+	CharacterAssetTile,
+	ReferenceAssetTiles,
+	ArtStyleAssetTile,
+} from "./AssetTiles";
+
+type ViewProps = Omit<RenderElementProps, "element"> & {
+	element: AssetElement;
+	selected: boolean;
+};
+
+type TileProps = Pick<ViewProps, "element" | "selected">;
+
+const tile = (render: (props: TileProps) => ReactNode) =>
+	function Tile({ attributes, children, element, selected }: ViewProps) {
+		return (
+			<div {...attributes} className="mr-2 mb-2 inline-block align-top">
+				<div contentEditable={false} className="flex gap-2 select-none">
+					{render({ element, selected })}
+				</div>
+				{children}
+			</div>
+		);
+	};
+
+const VIEWS: Record<AssetType, (props: ViewProps) => ReactNode> = {
+	title: ({ attributes, children, element }) => (
+		<div {...attributes}>
+			<ProjectTitle empty={getElementBodyText(element) === ""}>
+				{children}
+			</ProjectTitle>
+			<AssetActions />
+		</div>
+	),
+	style: tile(({ selected }) => <ArtStyleAssetTile selected={selected} />),
+	cast: tile(({ element, selected }) => (
+		<CharacterAssetTile
+			name={element.generationAttributes?.name ?? ""}
+			selected={selected}
+		/>
+	)),
+	references: tile(({ selected }) => (
+		<ReferenceAssetTiles selected={selected} />
+	)),
+};
+
+export function AssetBlock({
+	element,
+	...props
+}: Omit<RenderElementProps, "element"> & { element: AssetElement }) {
+	const selected = useSelected();
+	const focused = useFocused();
+	const View = VIEWS[element.type];
+	return <View {...props} element={element} selected={selected && focused} />;
+}

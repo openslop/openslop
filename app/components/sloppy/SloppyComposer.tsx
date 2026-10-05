@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useSlateStatic } from "slate-react";
 import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
 import { inlineControlClassName } from "@/components/ui/select-menu";
 import {
@@ -9,7 +8,7 @@ import {
 	ModelSelectTrigger,
 } from "@/app/components/models/ModelSelect";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
-import { setProjectModels } from "@/lib/canvas/assetOps";
+import { useProject } from "@/lib/project/useProject";
 import { PanelCard } from "../canvas/panel/PanelCard";
 import { ActionButton } from "../copilot/ActionButton";
 import { useSloppy } from "./SloppyProvider";
@@ -17,12 +16,12 @@ import { nextSuggestion, SUGGESTIONS } from "./suggestions";
 
 function ModelPicker() {
 	const model = useDefaultModels().llm;
-	const editor = useSlateStatic();
+	const updateModels = useProject((state) => state.updateModels);
 	return (
 		<ModelSelect
 			type="llm"
 			value={model}
-			onChange={(llm) => setProjectModels(editor, { llm })}
+			onChange={(llm) => updateModels({ llm })}
 			side="top"
 		>
 			<ModelSelectTrigger model={model} label="Model" />
