@@ -91,13 +91,11 @@ export function CharacterEditModal({
 							/>
 							<div className="flex items-center justify-end gap-2">
 								<ElementStaleIndicator />
+								<ElementUploadButton />
 								<ElementGenerateButton />
 							</div>
 						</div>
-						<div className="relative">
-							<OutputPreview outputKind="image" />
-							<ElementUploadButton className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border" />
-						</div>
+						<OutputPreview outputKind="image" />
 					</div>
 				</ElementGenerationProvider>
 			)}
