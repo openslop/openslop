@@ -25,7 +25,7 @@ export function useCaptionCycle(wordCount: number, playing: boolean): number {
 			return;
 
 		const id = setInterval(
-			() => setIndex((prev) => (prev + 1) % wordCount),
+			() => setIndex((current) => (current + 1) % wordCount),
 			WORD_MS,
 		);
 		return () => clearInterval(id);

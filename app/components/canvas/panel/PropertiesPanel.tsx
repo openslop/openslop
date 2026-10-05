@@ -2,10 +2,7 @@
 
 import { SelectField } from "@/components/ui/select-field";
 import startCase from "lodash/startCase";
-import {
-	TRANSITION_TYPES,
-	type TransitionType,
-} from "@/lib/render/transitions";
+import { TRANSITION_TYPES } from "@/lib/render/transitions";
 import {
 	useUpdateVideoSettings,
 	useVideoSetting,
@@ -21,16 +18,13 @@ export function PropertiesPanel() {
 	const transitionType = useVideoSetting("transitionType");
 	const updateVideoSettings = useUpdateVideoSettings();
 
-	const setTransitionType = (value: TransitionType) =>
-		updateVideoSettings({ transitionType: value });
-
 	return (
 		<PanelCard title="Transition">
 			<PanelField label="Transition">
 				<SelectField
 					value={transitionType}
 					options={OPTIONS}
-					onChange={setTransitionType}
+					onChange={(value) => updateVideoSettings({ transitionType: value })}
 					ariaLabel="Transition"
 				/>
 			</PanelField>

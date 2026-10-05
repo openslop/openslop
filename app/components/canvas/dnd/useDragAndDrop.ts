@@ -50,8 +50,7 @@ export function useDragAndDrop(editor: Editor) {
 	);
 
 	const handleDragEnd = useCallback(
-		(event: DragEndEvent) => {
-			const { active, over } = event;
+		({ active, over }: DragEndEvent) => {
 			setActiveId(null);
 			dragTransferStore.set(null);
 
