@@ -245,7 +245,7 @@ lib/
   canvas/        Slate document model: element types, guards, OSML parse/serialize
   script/        Script context and refinement
   project/       Per-project Zustand store, autosave, persistence
-  video/         Scene layout and render client
+  render/        Scene layout and render client
   templates/     Prompt templates offered in the composer
   upload/        Client-side image upload
   supabase/      Browser/server Supabase clients
