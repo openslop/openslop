@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import type { ApiErrorEnvelope } from "./error-envelope";
 
 function errorResponse(error: string, status: number) {
-	const body: ApiErrorEnvelope = { error };
-	return NextResponse.json(body, { status });
+	return NextResponse.json<ApiErrorEnvelope>({ error }, { status });
 }
 
 export function badRequest(message: string) {

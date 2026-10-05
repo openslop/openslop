@@ -11,14 +11,14 @@ const SSE_HEADERS = {
 } as const;
 
 export function createSSEStreamResponse<T>(
-	iter: AsyncIterable<T>,
+	chunks: AsyncIterable<T>,
 	label: string,
 ): Response {
 	const encoder = new TextEncoder();
 	const stream = new ReadableStream({
 		async start(controller) {
 			try {
-				for await (const chunk of iter) {
+				for await (const chunk of chunks) {
 					controller.enqueue(encoder.encode(formatSSE(chunk)));
 				}
 				controller.close();
