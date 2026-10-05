@@ -5,8 +5,8 @@ import {
 	getFunctionName,
 	getSiteName,
 	REGION,
-} from "@/lib/render/lambda-config";
-import { RenderRequest, type RenderHandle } from "@/lib/render/render-api";
+} from "@/lib/render/lambdaConfig";
+import { RenderRequest, type RenderHandle } from "@/lib/render/renderApi";
 import { COMPOSITION_ID } from "@/lib/render/types";
 
 export const POST = createSessionRouteHandler({

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiJson, UnreachableError } from "@/lib/clients/http";
 import type { RenderLayout } from "../types";
-import { runRender, type RenderUpdate } from "../render-client";
+import { runRender, type RenderUpdate } from "../renderClient";
 
 vi.mock("@/lib/clients/http", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@/lib/clients/http")>()),
