@@ -91,7 +91,7 @@ export function AssetTile({
 					className="z-10 opacity-0 group-hover/tile:opacity-100"
 				/>
 			)}
-			<span className="truncate text-badge text-muted-foreground" title={name}>
+			<span className="truncate text-center text-badge text-muted-foreground" title={name}>
 				{name}
 			</span>
 		</div>
