@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { ApiErrorEnvelope } from "./error-envelope";
+import type { ApiErrorEnvelope } from "./errorEnvelope";
 
 function errorResponse(error: string, status: number) {
 	return NextResponse.json<ApiErrorEnvelope>({ error }, { status });

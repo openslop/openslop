@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
 	optionalImageDimensions,
 	optionalVideoDuration,
-} from "../request-schema-fields";
+} from "../requestSchemaFields";
 
 const schema = z.object({
 	...optionalImageDimensions,

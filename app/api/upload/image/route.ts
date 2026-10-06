@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AssetBundle } from "@/lib/api/asset-bundle";
-import { imageFile } from "@/lib/api/request-schema-fields";
+import { imageFile } from "@/lib/api/requestSchemaFields";
 import { createSessionFormRouteHandler } from "@/lib/api/route-handler";
 import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload/imageFiles";
 

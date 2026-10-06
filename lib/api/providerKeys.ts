@@ -14,7 +14,7 @@ import {
 import type { Provider } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { byokProviderField } from "./request-schema-fields";
+import { byokProviderField } from "./requestSchemaFields";
 
 /**
  * The account has no key for a provider it was asked to generate with. An

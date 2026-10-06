@@ -8,7 +8,7 @@ import {
 	readProviderKey,
 } from "@/lib/api/providerKeys";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
-import { byokProviderField } from "@/lib/api/request-schema-fields";
+import { byokProviderField } from "@/lib/api/requestSchemaFields";
 import { createSessionParamRouteHandler } from "@/lib/api/route-handler";
 
 const paramsSchema = z.object({ provider: byokProviderField });

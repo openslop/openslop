@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import { notFound } from "./response";
-import { withApiAccess, withPublic, withSession } from "./with-auth";
+import { withApiAccess, withPublic, withSession } from "./withAuth";
 import {
 	parseBody,
 	parseFormData,

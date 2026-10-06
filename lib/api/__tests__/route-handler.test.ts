@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { imageFile } from "../request-schema-fields";
+import { imageFile } from "../requestSchemaFields";
 import { createJobPollHandler } from "../asset-routes";
 import { HOSTED } from "../route-families";
 import { bodySchema, hostedModel } from "../generation-schema";

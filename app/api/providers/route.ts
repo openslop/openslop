@@ -3,7 +3,7 @@ import { z } from "zod";
 import { providerKeyCheck, saveProviderKey } from "@/lib/api/providerKeys";
 import { MIN_KEY_LENGTH } from "@/lib/connectors/providerKey";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
-import { byokProviderField } from "@/lib/api/request-schema-fields";
+import { byokProviderField } from "@/lib/api/requestSchemaFields";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
 
 const saveSchema = z.object({

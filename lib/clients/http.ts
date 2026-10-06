@@ -1,7 +1,7 @@
 import isUndefined from "lodash/isUndefined";
 import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
-import { ApiErrorEnvelope } from "@/lib/api/error-envelope";
+import { ApiErrorEnvelope } from "@/lib/api/errorEnvelope";
 
 export type QueryParams = Record<string, string | number | undefined>;
 

@@ -19,7 +19,7 @@ import {
 	optionalVideoDuration,
 	optionalVideoResolution,
 	requiredVoiceId,
-} from "./request-schema-fields";
+} from "./requestSchemaFields";
 
 const hostedModelNames = (type: ConnectorType) =>
 	listModels(type)

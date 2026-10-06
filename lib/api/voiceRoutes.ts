@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { ModelRef } from "@/lib/connectors/types";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 import { voicePreview } from "@/lib/providers/tts/voicePreview";
-import { requiredVoiceId } from "./request-schema-fields";
+import { requiredVoiceId } from "./requestSchemaFields";
 import type { RouteFamily } from "./route-families";
 
 export const createVoiceSearchHandler = <TPicked extends ModelRef>(
