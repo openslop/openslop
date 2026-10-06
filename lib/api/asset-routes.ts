@@ -61,12 +61,11 @@ export const createJobPollHandler = (
 		handle: async ({ user, params }) => {
 			const job = await getJob(params.jobId, user.id);
 			if (!job) return notFound();
-			const view: JobPoll = {
+			return NextResponse.json<JobPoll>({
 				jobId: job.id,
 				status: job.status,
 				result: job.result,
 				error: job.error,
-			};
-			return NextResponse.json(view);
+			});
 		},
 	});

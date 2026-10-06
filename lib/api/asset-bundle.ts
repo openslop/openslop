@@ -100,12 +100,8 @@ export class AssetBundle {
 	}
 
 	static fromResponse(response: BundleResponse): AssetBundle {
-		const url = AssetBundle.buildUrl(
-			response.type,
-			response.provider,
-			response.id,
-		);
-		return new AssetBundle(url, response);
+		const { type, provider, id } = response;
+		return new AssetBundle(AssetBundle.buildUrl(type, provider, id), response);
 	}
 
 	static async load(

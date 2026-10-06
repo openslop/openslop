@@ -9,12 +9,12 @@ type SceneRule = (editor: CanvasEditor, entry: NodeEntry) => boolean;
 
 const adoptIntoPreviousScene: SceneRule = (editor, [node, path]) => {
 	if (!isContentElement(node) || !Path.hasPrevious(path)) return false;
-	const prevPath = Path.previous(path);
-	const prevNode = Node.getIf(editor, prevPath);
-	if (!isSceneElement(prevNode)) return false;
+	const previousPath = Path.previous(path);
+	const previousScene = Node.getIf(editor, previousPath);
+	if (!isSceneElement(previousScene)) return false;
 	Transforms.moveNodes(editor, {
 		at: path,
-		to: [...prevPath, prevNode.children.length],
+		to: [...previousPath, previousScene.children.length],
 	});
 	return true;
 };

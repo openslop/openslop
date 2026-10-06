@@ -35,15 +35,15 @@ async function withParsed<TData>(
 
 function routeHandler(authTier: AuthTier, parse: ParseSource) {
 	return function createHandler<TSchema extends z.ZodType>(
-		opts: RouteOptions<
+		options: RouteOptions<
 			TSchema,
 			{ user: User; input: z.infer<TSchema>; request: NextRequest }
 		>,
 	) {
 		return async (request: NextRequest) =>
-			authTier(opts.label, (user) =>
-				withParsed(parse(request, opts.schema, opts.label), (input) =>
-					opts.handle({ user, input, request }),
+			authTier(options.label, (user) =>
+				withParsed(parse(request, options.schema, options.label), (input) =>
+					options.handle({ user, input, request }),
 				),
 			);
 	};
@@ -71,7 +71,7 @@ export const createSessionFormRouteHandler = routeHandler(
  */
 function paramRouteHandler(authTier: AuthTier) {
 	return function createHandler<TSchema extends z.ZodType>(
-		opts: RouteOptions<
+		options: RouteOptions<
 			TSchema,
 			{ user: User; params: z.infer<TSchema>; request: NextRequest }
 		>,
@@ -80,10 +80,10 @@ function paramRouteHandler(authTier: AuthTier) {
 			request: NextRequest,
 			context: { params: Promise<unknown> },
 		) =>
-			authTier(opts.label, async (user) => {
-				const parsed = opts.schema.safeParse(await context.params);
+			authTier(options.label, async (user) => {
+				const parsed = options.schema.safeParse(await context.params);
 				if (!parsed.success) return notFound();
-				return opts.handle({ user, params: parsed.data, request });
+				return options.handle({ user, params: parsed.data, request });
 			});
 	};
 }
@@ -93,15 +93,15 @@ export const createSessionParamRouteHandler = paramRouteHandler(withSession);
 
 function publicRouteHandler(parse: ParseSource) {
 	return function createHandler<TSchema extends z.ZodType>(
-		opts: RouteOptions<
+		options: RouteOptions<
 			TSchema,
 			{ input: z.infer<TSchema>; request: NextRequest }
 		>,
 	) {
 		return async (request: NextRequest) =>
-			withPublic(opts.label, () =>
-				withParsed(parse(request, opts.schema, opts.label), (input) =>
-					opts.handle({ input, request }),
+			withPublic(options.label, () =>
+				withParsed(parse(request, options.schema, options.label), (input) =>
+					options.handle({ input, request }),
 				),
 			);
 	};

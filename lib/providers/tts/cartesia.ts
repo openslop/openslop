@@ -15,6 +15,7 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";
+import { pcmDurationSec, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
@@ -28,12 +29,11 @@ import type {
 } from "@cartesia/cartesia-js/resources/voices.mjs";
 
 type RawTTSResult = {
-	data: string;
+	data: Buffer;
 	textTimestamps: TextTimestamp[];
 } & WithMetadata;
 
 const SAMPLE_RATE = 44100;
-const NUM_CHANNELS = 1;
 const ENCODING: RawEncoding = "pcm_f32le";
 const CARTESIA_VOLUME = 1.0;
 
@@ -45,7 +45,7 @@ const CARTESIA_SPEED: Record<TTSSpeed, number> = {
 
 const PCM_WAV_PARAMS: Record<
 	RawEncoding,
-	{ audioFormat: number; bitsPerSample: number }
+	Pick<PcmFormat, "audioFormat" | "bitsPerSample">
 > = {
 	pcm_f32le: { audioFormat: 3, bitsPerSample: 32 },
 	pcm_s16le: { audioFormat: 1, bitsPerSample: 16 },
@@ -53,39 +53,14 @@ const PCM_WAV_PARAMS: Record<
 	pcm_alaw: { audioFormat: 6, bitsPerSample: 8 },
 };
 
-const { audioFormat: AUDIO_FORMAT, bitsPerSample: BITS_PER_SAMPLE } =
-	PCM_WAV_PARAMS[ENCODING];
-const BLOCK_ALIGN = NUM_CHANNELS * (BITS_PER_SAMPLE / 8);
-const BYTE_RATE = SAMPLE_RATE * BLOCK_ALIGN;
+const STREAMED_FORMAT: PcmFormat = {
+	...PCM_WAV_PARAMS[ENCODING],
+	sampleRate: SAMPLE_RATE,
+	channels: 1,
+};
 
-/**
- * Duration of the raw PCM Cartesia streamed back. Word timestamps can't stand in
- * for it: they stop at the last word, and are absent entirely when the model
- * emits no timestamp frames.
- */
-export function pcmDurationSec(byteLength: number): number {
-	return byteLength / BYTE_RATE;
-}
-
-function wrapPcmInWav(pcm: Buffer): Buffer {
-	const header = Buffer.alloc(44);
-
-	header.write("RIFF", 0);
-	header.writeUInt32LE(36 + pcm.length, 4);
-	header.write("WAVE", 8);
-	header.write("fmt ", 12);
-	header.writeUInt32LE(16, 16);
-	header.writeUInt16LE(AUDIO_FORMAT, 20);
-	header.writeUInt16LE(NUM_CHANNELS, 22);
-	header.writeUInt32LE(SAMPLE_RATE, 24);
-	header.writeUInt32LE(BYTE_RATE, 28);
-	header.writeUInt16LE(BLOCK_ALIGN, 32);
-	header.writeUInt16LE(BITS_PER_SAMPLE, 34);
-	header.write("data", 36);
-	header.writeUInt32LE(pcm.length, 40);
-
-	return Buffer.concat([header, pcm]);
-}
+/** Room for a brief pause before the next line, so back-to-back lines sound natural. */
+const TRAILING_PAUSE_SEC = 1;
 
 const PREVIEW_HOST = "files.cartesia.ai";
 const PAGE_SIZE = 100;
@@ -173,7 +148,7 @@ export class CartesiaTTS
 			{
 				key: "audio",
 				filename: "output.wav",
-				data: Buffer.from(result.data, "base64"),
+				data: result.data,
 				contentType: "audio/wav",
 			},
 			{
@@ -268,11 +243,13 @@ export class CartesiaTTS
 			}
 
 			return {
-				data: wrapPcmInWav(pcm).toString("base64"),
+				data: wavFromPcm(pcm, STREAMED_FORMAT),
 				textTimestamps,
-				// We add an extra second for brief pauses between audio segments
-				// to make it sound more natural
-				metadata: { durationSec: pcmDurationSec(pcm.length) + 1 },
+				// Word timestamps stop at the last word, and may be absent.
+				metadata: {
+					durationSec:
+						pcmDurationSec(pcm.length, STREAMED_FORMAT) + TRAILING_PAUSE_SEC,
+				},
 			};
 		} finally {
 			socket.close();

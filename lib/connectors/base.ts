@@ -52,9 +52,8 @@ export abstract class BaseConnector<
 	async generate(params: TParams, ctx: PluginContext = {}): Promise<TResult> {
 		try {
 			const prepared = await this.prepareParams(params, ctx);
-			let result = await this._generate(prepared, ctx.signal);
-			result = await runAfterGenerate(this.plugins, result, ctx);
-			return result;
+			const result = await this._generate(prepared, ctx.signal);
+			return await runAfterGenerate(this.plugins, result, ctx);
 		} catch (error) {
 			await runOnError(this.plugins, stringifyError(error), ctx);
 			throw error;

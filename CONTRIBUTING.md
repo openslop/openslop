@@ -19,6 +19,15 @@ See [Getting started](README.md#getting-started) in the README:
 - We do not yet support [local mode](https://github.com/openslop/openslop/issues/379), so until then you'll need to link to your own Supabase and Vercel accounts via filling in .env.local
 - Supabase is the only hard requirement. Vercel Blob is needed for real generations (that's where providers store output), mocks skip it. Provider keys go in the app, leave them out and you get mocks, so no need to pay for an API
 
+### Running the generation queue
+
+Generations need a Vercel OIDC token. If you're not on our Vercel team, link a project on your own free Hobby account (no deploy needed) and pull its token:
+
+```bash
+vercel link
+vercel env pull .env.local   # overwrites .env.local; rerun when the token expires (~12h)
+```
+
 ## Before you open a PR
 
 Run these (this is what runs in CI):
