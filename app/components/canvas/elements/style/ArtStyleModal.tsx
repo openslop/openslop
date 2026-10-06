@@ -26,10 +26,10 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();
 	const assets = useAssets();
-	const element = useAsset("style");
+	const element = useAsset("asset_style");
 	const style = element ? getElementBodyText(element) : "";
 	const setStyle = (text: string) =>
-		setAsset(editor, "style", undefined, { text });
+		setAsset(editor, "asset_style", undefined, { text });
 
 	const [deriving, setDeriving] = useState(false);
 	const model = useDefaultModels().llm;
@@ -68,6 +68,7 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 
 			<TextAreaField
 				label="Art Style Description"
+				autoFocus
 				aside={
 					<Button
 						type="button"

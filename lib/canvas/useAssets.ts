@@ -6,7 +6,7 @@ import { shallow } from "zustand/shallow";
 import {
 	assetText,
 	avatarNames,
-	castNames,
+	characterNames,
 	findAsset,
 	getAssets,
 } from "./assets";
@@ -18,10 +18,11 @@ const selectAssets = (editor: Editor) => getAssets(editor.children);
 export const useAssets = (): AssetElement[] =>
 	useSlateSelector(selectAssets, shallow);
 
-const selectCastNames = (editor: Editor) => castNames(editor.children);
+const selectCharacterNames = (editor: Editor) =>
+	characterNames(editor.children);
 
-export const useCastNames = (): string[] =>
-	useSlateSelector(selectCastNames, shallow);
+export const useCharacterNames = (): string[] =>
+	useSlateSelector(selectCharacterNames, shallow);
 
 const selectAvatarNames = (editor: Editor) => avatarNames(editor.children);
 
@@ -34,6 +35,7 @@ export const useAsset = <T extends AssetType>(
 ): AssetElement<T> | undefined =>
 	useSlateSelector((editor) => findAsset(editor.children, type, name));
 
-const selectTitle = (editor: Editor) => assetText(editor.children, "title");
+const selectTitle = (editor: Editor) =>
+	assetText(editor.children, "asset_title");
 
 export const useProjectTitle = (): string => useSlateSelector(selectTitle);

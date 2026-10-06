@@ -17,10 +17,10 @@ const { AttributeRows } = await import("../AttributeRows");
 let canvas: ReturnType<typeof mountOnCanvas>;
 afterEach(() => canvas.unmount());
 
-const cast = (attrs: Record<string, string>) =>
-	asset("cast", { name: "Mia", attrs });
+const character = (attrs: Record<string, string>) =>
+	asset("asset_character", { name: "Mia", attrs });
 
-const renderRows = (element: ReturnType<typeof cast>) =>
+const renderRows = (element: ReturnType<typeof character>) =>
 	canvas.render(
 		<AttributeRows
 			element={element}
@@ -41,7 +41,7 @@ const control = (label: string) =>
 
 describe("AttributeRows", () => {
 	it("lists one labelled control per attribute, showing the element's value", () => {
-		const element = cast({ gender: "feminine" });
+		const element = character({ gender: "feminine" });
 		canvas = mountOnCanvas([element]);
 
 		renderRows(element);

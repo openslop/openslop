@@ -80,12 +80,12 @@ describe("streamScript", () => {
 	it("keeps the assets on the canvas and writes the script against them", async () => {
 		const editor = makeEditor();
 		const assets = [
-			createCanvasNode("style", {
-				id: assetId("style"),
+			createCanvasNode("asset_style", {
+				id: assetId("asset_style"),
 				text: "muted watercolor",
 			}),
-			createCanvasNode("cast", {
-				id: assetId("cast", "Lumi"),
+			createCanvasNode("asset_character", {
+				id: assetId("asset_character", "Lumi"),
 				attrs: { name: "Lumi" },
 				text: "a small grey rabbit",
 			}),
@@ -103,7 +103,11 @@ describe("streamScript", () => {
 		expect(systems[0]).toContain("muted watercolor");
 		expect(systems[0]).toContain("## Lumi");
 		expect(editor.children.slice(0, 2)).toEqual(assets);
-		expect(topLevelTypes(editor)).toEqual(["style", "cast", "narration"]);
+		expect(topLevelTypes(editor)).toEqual([
+			"asset_style",
+			"asset_character",
+			"narration",
+		]);
 	});
 
 	it("writes to the project's settings", async () => {

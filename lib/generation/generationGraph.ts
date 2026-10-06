@@ -1,6 +1,7 @@
 import isEqual from "lodash/isEqual";
 import memoizeOne from "memoize-one";
 import { shallow } from "zustand/shallow";
+import { ownAttributes } from "@/lib/canvas/assets";
 import { resolveElementConnector } from "@/lib/canvas/elementConnector";
 import type { ScriptElement } from "@/lib/canvas/types";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
@@ -51,7 +52,7 @@ export class GenerationGraph {
 				id,
 				inputs: {
 					prompt: getPromptText(element),
-					attributes: element.generationAttributes ?? {},
+					attributes: ownAttributes(element),
 					reads: Object.assign(
 						{},
 						...plugins.map((plugin) => plugin.reads?.(element, this.ctx)),

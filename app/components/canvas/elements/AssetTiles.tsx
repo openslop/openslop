@@ -2,7 +2,7 @@
 
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import { hasAvatar, NARRATOR } from "@/lib/canvas/assets";
-import { useAsset, useCastNames } from "@/lib/canvas/useAssets";
+import { useAsset, useCharacterNames } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import { AssetTile } from "./AssetTile";
@@ -18,12 +18,12 @@ export function ArtStyleAssetTile({ selected }: TileProps) {
 			Icon={Palette}
 			fallback="icon"
 			selected={selected}
-			onEdit={() => editAsset("style")}
+			onEdit={() => editAsset("asset_style")}
 		/>
 	);
 }
 
-/** The narrator before it has a cast: editing it gives the narrator one. */
+/** The narrator before it has an asset: editing it gives the narrator one. */
 export function NarratorTile() {
 	const { editSpeaker } = useAssetEditors();
 	return (
@@ -41,7 +41,7 @@ export function CharacterAssetTiles({
 }: {
 	onRemove?: (name: string) => void;
 }) {
-	return useCastNames().map((name) => (
+	return useCharacterNames().map((name) => (
 		<CharacterAssetTile
 			key={`character:${name}`}
 			name={name}
@@ -59,8 +59,8 @@ export function CharacterAssetTile({
 	onRemove?: () => void;
 }) {
 	const { editAsset } = useAssetEditors();
-	const cast = useAsset("cast", name);
-	const avatar = !cast || hasAvatar(cast);
+	const character = useAsset("asset_character", name);
+	const avatar = !character || hasAvatar(character);
 	const { url: previewUrl, status } = useCharacterAvatar(name);
 	return (
 		<AssetTile
@@ -69,7 +69,7 @@ export function CharacterAssetTile({
 			Icon={avatar ? User : Mic}
 			fallback={avatar ? "initial" : "icon"}
 			status={status}
-			onEdit={() => editAsset("cast", name)}
+			onEdit={() => editAsset("asset_character", name)}
 			onRemove={onRemove}
 			removeAffordance="corner"
 			{...tile}

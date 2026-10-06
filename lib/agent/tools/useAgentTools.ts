@@ -43,7 +43,7 @@ export function useAgentTools(editor: Editor) {
 			const draftScript = (source: ScriptSource) =>
 				streamScript(editor, store.getState().settings, llm(), source, signal);
 			const picturesOf = (element: ScriptElement): ElementImage["pictures"] => {
-				if (element.type === "references")
+				if (element.type === "asset_references")
 					return { status: "idle", urls: referenceUrls([element]) };
 				if (connectorOf(element.type) !== "image") return undefined;
 				const { status, result } = queue.getElementSnapshot(element.id);

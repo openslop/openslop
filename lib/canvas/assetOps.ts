@@ -68,16 +68,17 @@ export function setAsset(
 	if (text !== undefined) updateNodeText(editor, asset.id, text);
 }
 
-/** The speaker's cast member, added when the cast lacks one: the narrator when no one is named. */
+/** The speaker's character, added when there is none: the narrator when no one is named. */
 export function ensureSpeaker(editor: Editor, name = NARRATOR): string {
-	if (!findAsset(editor.children, "cast", name)) setAsset(editor, "cast", name);
+	if (!findAsset(editor.children, "asset_character", name))
+		setAsset(editor, "asset_character", name);
 	return name;
 }
 
 /** The project's reference images; none leaves no references element behind. */
 export function setReferenceImages(editor: Editor, urls: string[]): void {
-	if (urls.length === 0) return removeAsset(editor, "references");
-	setAsset(editor, "references", undefined, {
+	if (urls.length === 0) return removeAsset(editor, "asset_references");
+	setAsset(editor, "asset_references", undefined, {
 		attrs: { [REFERENCE_URLS_ATTR]: serializeReferenceImages(uniq(urls)) },
 	});
 }

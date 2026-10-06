@@ -38,7 +38,7 @@ describe("reviewPrompt", () => {
 
 		expect(prompt).toContain("Judge only the scenes of the script below.");
 		expect(prompt).toContain(
-			"The cast, voice, style and reference elements ahead of the first scene are the project's assets, and outside the scope of this review.",
+			"The asset elements ahead of the first scene are the project's assets, and outside the scope of this review.",
 		);
 	});
 

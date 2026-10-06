@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useSlateStatic } from "slate-react";
-import { castVoice, voiceAttrs } from "@/lib/canvas/assets";
+import { characterVoice, voiceAttrs } from "@/lib/canvas/assets";
 import { elementSchema } from "@/lib/canvas/elementConnector";
 import type { AssetElement } from "@/lib/canvas/types";
 import { hasModel, resolveModel, sameModel } from "@/lib/connectors/models";
@@ -11,10 +11,14 @@ import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { AttributeFields, FieldLabel } from "./fields";
 import { VoicePicker } from "./VoicePicker";
 
-/** A cast member's voice: the traits that describe it, and the voice they find. */
-export function VoiceEditor({ cast }: { cast: AssetElement<"cast"> }) {
+/** A character's voice: the traits that describe it, and the voice they find. */
+export function VoiceEditor({
+	character,
+}: {
+	character: AssetElement<"asset_character">;
+}) {
 	const editor = useSlateStatic();
-	const voice = useMemo(() => castVoice(cast), [cast]);
+	const voice = useMemo(() => characterVoice(character), [character]);
 	const filters = useMemo(() => voiceTraitsSchema.parse(voice), [voice]);
 	const model = resolveModel("tts", voice);
 	const onModel = hasModel("tts", voice);
@@ -27,8 +31,8 @@ export function VoiceEditor({ cast }: { cast: AssetElement<"cast"> }) {
 		>
 			<FieldLabel>Voice</FieldLabel>
 			<AttributeFields
-				element={cast}
-				specs={elementSchema(cast).settingsAttributes}
+				element={character}
+				specs={elementSchema(character).settingsAttributes}
 			/>
 			<VoicePicker
 				filters={filters}
@@ -37,13 +41,13 @@ export function VoiceEditor({ cast }: { cast: AssetElement<"cast"> }) {
 				onSelect={(picked) =>
 					mergeAttrs(
 						editor,
-						cast.id,
+						character.id,
 						voiceAttrs({ ...model, voiceId: picked.id }),
 					)
 				}
 				onModelChange={(next) => {
 					if (!onModel || !sameModel(voice, next))
-						mergeAttrs(editor, cast.id, {
+						mergeAttrs(editor, character.id, {
 							...voiceAttrs(next),
 							voiceId: null,
 						});

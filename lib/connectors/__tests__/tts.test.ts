@@ -46,11 +46,11 @@ describe("BaseTTSConnector", () => {
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
-	it("speaks in the voice settled on its speaker's cast, through the speaker-voice plugin", async () => {
+	it("speaks in the voice settled on its speaker's character, through the speaker-voice plugin", async () => {
 		const fetchSpy = mockGatewaySequence(SUCCESS);
 		const plugin = createSpeakerVoicePlugin();
 		const connector = new HttpTTSConnector({ ...config, plugins: [plugin] });
-		const narrator = asset("cast", {
+		const narrator = asset("asset_character", {
 			name: NARRATOR,
 			attrs: voiceAttrs({ ...config.model, voiceId: "voice-42" }),
 		});

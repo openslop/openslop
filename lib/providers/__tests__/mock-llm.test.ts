@@ -42,7 +42,7 @@ const EMPTY_CANVAS = "## Script\nThe canvas is empty.";
 const WRITTEN_CANVAS = [
 	"## Script",
 	"```xml",
-	'<cast id="c1" name="Red">A girl in a red cloak.</cast>',
+	'<asset_character id="c1" name="Red">A girl in a red cloak.</asset_character>',
 	"--- Scene 1 ---",
 	'<narration id="n1">Once upon a time.</narration>',
 	'<image id="img1">A cottage at dawn.</image>',
@@ -133,7 +133,7 @@ describe("the mock agent model", () => {
 		expect(assets.toolName).toBe("edit_script");
 		const { ops } = assets.input as { ops: { op: string; type: string }[] };
 		expect(new Set(ops.map(({ op, type }) => `${op} ${type}`))).toEqual(
-			new Set(["insert style", "insert cast"]),
+			new Set(["insert asset_style", "insert asset_character"]),
 		);
 		prompt.push(...ran("edit_script", `Applied ${ops.length} operations.`));
 

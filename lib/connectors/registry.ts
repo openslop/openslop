@@ -31,7 +31,7 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	},
 	sound: {},
 	music: {},
-	cast: {
+	asset_character: {
 		plugins: [
 			createCharacterAvatarPlugin(),
 			createArtStylePlugin(),

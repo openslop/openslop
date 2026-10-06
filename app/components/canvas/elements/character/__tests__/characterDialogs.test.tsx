@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { castNames, findAsset } from "@/lib/canvas/assets";
+import { characterNames, findAsset } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { content, scene } from "../../../__tests__/fixtures";
@@ -25,7 +25,9 @@ vi.mock("../../ElementHistoryButton", () => ({
 }));
 vi.mock("../../ElementUploadButton", () => ({ ElementUploadButton: Nothing }));
 vi.mock("../../OutputPreview", () => ({ OutputPreview: Nothing }));
-vi.mock("../../attributes/ModelAttribute", () => ({ ModelAttribute: Nothing }));
+vi.mock("../../attributes/ModelAttribute", () => ({
+	ModelAttribute: () => <button type="button">Avatar model</button>,
+}));
 vi.mock("../VoiceEditor", () => ({ VoiceEditor: Nothing }));
 vi.mock("@/components/ui/confirm-delete-dialog", () => ({
 	ConfirmDeleteDialog: (props: { target?: string; onConfirm: () => void }) =>
@@ -47,11 +49,11 @@ const field = <T extends HTMLElement>(selector: string) => {
 };
 
 const mia = (appearance: string) =>
-	asset("cast", { name: "Mia", text: appearance });
+	asset("asset_character", { name: "Mia", text: appearance });
 
 const appearanceOf = (name: string) => {
-	const cast = findAsset(canvas.editor.children, "cast", name);
-	return cast && getElementBodyText(cast);
+	const character = findAsset(canvas.editor.children, "asset_character", name);
+	return character && getElementBodyText(character);
 };
 
 describe("NewCharacterDialog", () => {
@@ -64,7 +66,7 @@ describe("NewCharacterDialog", () => {
 		);
 	afterEach(() => onCreated.mockClear());
 
-	it("adds a cast element under the name and hands the name on", async () => {
+	it("adds a character asset under the name and hands the name on", async () => {
 		canvas = mountOnCanvas();
 		open();
 
@@ -74,12 +76,14 @@ describe("NewCharacterDialog", () => {
 		);
 		await click('button[type="submit"]');
 
-		expect(castNames(canvas.editor.children)).toEqual(["Mia"]);
-		expect(canvas.editor.children[0]).toMatchObject({ id: "cast:Mia" });
+		expect(characterNames(canvas.editor.children)).toEqual(["Mia"]);
+		expect(canvas.editor.children[0]).toMatchObject({
+			id: "asset_character:Mia",
+		});
 		expect(onCreated).toHaveBeenCalledWith("Mia");
 	});
 
-	it("refuses a name the cast already has", async () => {
+	it("refuses a name a character already has", async () => {
 		canvas = mountOnCanvas([mia("a girl")]);
 		open();
 
@@ -105,7 +109,7 @@ describe("CharacterEditModal", () => {
 		);
 	afterEach(() => onClose.mockClear());
 
-	it("shows the appearance the cast element holds and writes edits back to it", async () => {
+	it("shows the appearance the character asset holds and writes edits back to it", async () => {
 		canvas = mountOnCanvas([mia("a girl")]);
 		open();
 		const appearance = field<HTMLTextAreaElement>("textarea");
@@ -117,7 +121,14 @@ describe("CharacterEditModal", () => {
 		expect(canvas.editor.children).toHaveLength(1);
 	});
 
-	it("renders nothing for a name the cast does not know", () => {
+	it("opens on the appearance, not on the controls beside it", () => {
+		canvas = mountOnCanvas([mia("a girl")]);
+		open();
+
+		expect(document.activeElement).toBe(field("textarea"));
+	});
+
+	it("renders nothing for a name no character has", () => {
 		canvas = mountOnCanvas([scene([content("narration", "n1", "hello")])]);
 
 		open();
@@ -135,7 +146,7 @@ describe("CharacterEditModal", () => {
 		await act(async () => remove?.click());
 		await click('[data-confirm="Mia"]');
 
-		expect(castNames(canvas.editor.children)).toEqual([]);
+		expect(characterNames(canvas.editor.children)).toEqual([]);
 		expect(onClose).toHaveBeenCalledOnce();
 	});
 });

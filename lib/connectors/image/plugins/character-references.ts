@@ -17,7 +17,7 @@ export type ParamsWithCharacters = {
 
 export const characterAvatars = dependencyPerName(shownCharacters, (name) =>
 	dependency(`avatar:${name}`, `${name}'s avatar`, (_, { canvas }) =>
-		findAsset(canvas, "cast", name),
+		findAsset(canvas, "asset_character", name),
 	),
 );
 

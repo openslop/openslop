@@ -19,11 +19,11 @@ function statesOf(states: ElementState[]): string[] {
 export const readScript = defineTool({
 	description: dedent`
 	  Read the project: the canvas as XML with the \`id\` of every element, first the assets
-	  (the title, the project element with its language, length, format and template, each
-	  character as a cast element, the voices, the art style and the reference images), then
-	  the script scene by scene. After it, the aspect ratio the video renders at, and where
-	  each generated element stands: ungenerated, queued, generating, generated, stale (and
-	  why), failed (and the error), or pinned to an upload.
+	  (the title, each character as an asset_character element with their voice, the art style and the
+	  reference images), then the script scene by scene. After it, the render settings (the
+	  language, target length, format, template and aspect ratio), and where each generated
+	  element stands: ungenerated, queued, generating, generated, stale (and why), failed (and
+	  the error), or pinned to an upload.
 
 	  Read before your first edit, and again after anything changed the canvas. Ids and text
 	  move when it is edited, so editing from a stale reading fails.
@@ -34,11 +34,16 @@ export const readScript = defineTool({
 	label: "Reading the script",
 	execute: async (_input, ctx) => {
 		const script = ctx.readScript().trim();
+		const { language, length, format, template } = ctx.readProjectSettings();
 		return [
 			section("Script", [
 				script ? `\`\`\`xml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
 			section("Render settings", [
+				`- language: ${language}`,
+				`- length: ${length}`,
+				`- format: ${format}`,
+				`- template: ${template ?? "none"}`,
 				`- aspect ratio: ${ctx.readVideoSettings().aspectRatio}`,
 			]),
 			section("Generation state", statesOf(ctx.elementStates())),

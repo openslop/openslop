@@ -11,7 +11,7 @@ export function useStartBlank(): () => void {
 	const openWorkspace = useOpenWorkspace();
 
 	return () => {
-		setAsset(editor, "title", undefined, { text: "Untitled" });
+		setAsset(editor, "asset_title", undefined, { text: "Untitled" });
 		openWorkspace();
 		createScriptWriter(editor)(BLANK_SCRIPT);
 	};

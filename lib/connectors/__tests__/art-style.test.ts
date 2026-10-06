@@ -21,13 +21,13 @@ describe("createArtStylePlugin", () => {
 	it.each([
 		[
 			"prepends the style's text",
-			[asset("style", { text: "cinematic anime" })],
+			[asset("asset_style", { text: "cinematic anime" })],
 			"cinematic anime. a cat on a roof",
 		],
 		["leaves the prompt alone without a style", [], "a cat on a roof"],
 		[
 			"leaves the prompt alone when the style says nothing",
-			[asset("style")],
+			[asset("asset_style")],
 			"a cat on a roof",
 		],
 	])("%s", (_, styles, expected) => {
@@ -37,7 +37,7 @@ describe("createArtStylePlugin", () => {
 	});
 
 	it("reads the style's text as the art style", () => {
-		const style = asset("style", { text: "noir" });
+		const style = asset("asset_style", { text: "noir" });
 		expect(readsOf(plugin, image, [style, image])).toEqual({
 			"the art style": "noir",
 		});

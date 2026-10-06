@@ -105,7 +105,8 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-export type AssetType = "title" | "cast" | "style" | "references";
+export type AssetType =
+	`asset_${"title" | "style" | "character" | "references"}`;
 
 type AssetTypeSpec = {
 	connector?: AssetConnectorType;
@@ -115,10 +116,10 @@ type AssetTypeSpec = {
 
 /** Elements ahead of the scenes, in canvas order. Only a character's look generates; the rest are metadata. */
 export const ASSET_TYPES: Record<AssetType, AssetTypeSpec> = {
-	title: { editable: true },
-	style: {},
-	cast: { connector: "image" },
-	references: {},
+	asset_title: { editable: true },
+	asset_style: {},
+	asset_character: { connector: "image" },
+	asset_references: {},
 };
 
 export type ElementType = CanvasElementType | AssetType;
@@ -137,7 +138,7 @@ export const connectorOf = (
 	type: ElementType,
 ): AssetConnectorType | undefined => CONNECTORS[type].connector;
 
-export type GeneratedType = CanvasElementType | "cast";
+export type GeneratedType = CanvasElementType | "asset_character";
 
 export const isGenerated = (
 	element: ScriptElement,

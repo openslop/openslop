@@ -12,14 +12,14 @@ import { NewCharacterDialog } from "./NewCharacterDialog";
 
 export type AssetEditors = {
 	editAsset: (type: ModalAsset, name?: string) => void;
-	/** Opens a speaker's dialog, the narrator's when no one is named, adding them to the cast first. */
+	/** Opens a speaker's dialog, the narrator's when no one is named, adding the character first. */
 	editSpeaker: (name?: string) => void;
 	openCreateCharacter: () => void;
 };
 
 type DialogProps = { name?: string; onClose: () => void };
 
-type ModalAsset = Exclude<AssetType, "title">;
+type ModalAsset = Exclude<AssetType, "asset_title">;
 
 const characterDialog = ({ name = "", onClose }: DialogProps) => (
 	<CharacterEditModal key={name} name={name} onClose={onClose} />
@@ -29,11 +29,11 @@ const artStyleDialog = ({ onClose }: DialogProps) => (
 	<ArtStyleModal onClose={onClose} />
 );
 
-/** The dialog each asset type is edited in. A cast member's look and voice share one. */
+/** The dialog each asset type is edited in. A character's look and voice share one. */
 const ASSET_DIALOGS: Record<ModalAsset, (props: DialogProps) => ReactNode> = {
-	cast: characterDialog,
-	style: artStyleDialog,
-	references: artStyleDialog,
+	asset_character: characterDialog,
+	asset_style: artStyleDialog,
+	asset_references: artStyleDialog,
 };
 
 /** The one asset dialog open at a time, so two can never stack. */
@@ -57,7 +57,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 			editSpeaker: (name) =>
 				setEditing({
 					kind: "edit",
-					type: "cast",
+					type: "asset_character",
 					name: ensureSpeaker(editor, name),
 				}),
 			openCreateCharacter: () => setEditing({ kind: "create" }),
@@ -76,7 +76,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 			>
 				{editing?.kind === "create" && (
 					<NewCharacterDialog
-						onCreated={(name) => editors.editAsset("cast", name)}
+						onCreated={(name) => editors.editAsset("asset_character", name)}
 					/>
 				)}
 				{editing?.kind === "edit" &&

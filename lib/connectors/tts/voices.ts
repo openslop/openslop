@@ -1,6 +1,6 @@
 import pick from "lodash/pick";
 import {
-	castVoice,
+	characterVoice,
 	findAsset,
 	NARRATOR,
 	voiceAttrs,
@@ -28,8 +28,11 @@ const CHOSEN_VOICE_KEYS = ["provider", "model", "voiceId"] as const;
 /** The voice a speaker has chosen, recorded so choosing another stales whoever speaks in it. */
 export const speakerVoice = (name = NARRATOR) => {
 	const voice = reading(voiceLabel(name), (_, { canvas }) => {
-		const cast = findAsset(canvas, "cast", name);
-		return cast && JSON.stringify(pick(castVoice(cast), CHOSEN_VOICE_KEYS));
+		const character = findAsset(canvas, "asset_character", name);
+		return (
+			character &&
+			JSON.stringify(pick(characterVoice(character), CHOSEN_VOICE_KEYS))
+		);
 	});
 	return {
 		reads: voice.reads,
@@ -53,7 +56,7 @@ async function findVoice(
 	return found.id;
 }
 
-/** Searches by the voice's filters when it has no voice on `model`; a speaker the cast lacks is added. */
+/** Searches by the voice's filters when it has no voice on `model`; a speaker with no character is given one. */
 export async function settleVoice(
 	name = NARRATOR,
 	model: ModelRef,
@@ -68,5 +71,7 @@ export async function settleVoice(
 	)
 		return [];
 	const voiceId = await findVoice(model, voice, language);
-	return [{ type: "cast", name, attrs: voiceAttrs({ ...model, voiceId }) }];
+	return [
+		{ type: "asset_character", name, attrs: voiceAttrs({ ...model, voiceId }) },
+	];
 }

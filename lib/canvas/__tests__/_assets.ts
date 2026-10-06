@@ -18,4 +18,4 @@ export const asset = <T extends AssetType>(
 	});
 
 export const references = (...urls: string[]) =>
-	asset("references", { attrs: { images: urls.join(",") } });
+	asset("asset_references", { attrs: { images: urls.join(",") } });

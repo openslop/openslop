@@ -136,7 +136,7 @@ function AttachMenu({
 			key: "art-style",
 			label: "Set art style",
 			icon: <Palette className={iconClass} />,
-			onSelect: () => editAsset("style"),
+			onSelect: () => editAsset("asset_style"),
 		},
 	];
 

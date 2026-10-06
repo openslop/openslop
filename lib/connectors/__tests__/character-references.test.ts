@@ -20,7 +20,7 @@ function avatarResults(
 	avatars: Record<string, string>,
 ): Record<string, AssetResult> {
 	const names = Object.keys(avatars);
-	const canvas = names.map((name) => asset("cast", { name }));
+	const canvas = names.map((name) => asset("asset_character", { name }));
 	return Object.fromEntries(
 		characterAvatars
 			.edges(image(names.join(", ")), buildCtx(canvas))
@@ -32,17 +32,17 @@ function avatarResults(
 }
 
 describe("characterAvatars", () => {
-	it("depends on each named character's cast element, and on nothing for a name the cast does not know", () => {
+	it("depends on each named character's character asset, and on nothing for a name no character has", () => {
 		const canvas = [
-			asset("cast", { name: "Red" }),
-			asset("cast", { name: "Wolf" }),
+			asset("asset_character", { name: "Red" }),
+			asset("asset_character", { name: "Wolf" }),
 		];
 
 		expect(
 			edgesOf(characterAvatars, image("Wolf, Ghost, Red"), canvas),
 		).toEqual([
-			["avatar:Wolf", "cast:Wolf", "Wolf's avatar"],
-			["avatar:Red", "cast:Red", "Red's avatar"],
+			["avatar:Wolf", "asset_character:Wolf", "Wolf's avatar"],
+			["avatar:Red", "asset_character:Red", "Red's avatar"],
 		]);
 	});
 });

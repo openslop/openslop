@@ -38,7 +38,7 @@ const trait = (key: string, label: string, options: readonly string[]) => ({
 	edit: { kind: "enum" as const, options },
 });
 
-/** A cast member's voice is described by its traits; which voice they found is picked beside them. */
+/** A character's voice is described by its traits; which voice they found is picked beside them. */
 export const VOICE_ATTRIBUTES = AttributeSchema.from(
 	[
 		trait("gender", "Gender", TTS_GENDERS),

@@ -35,7 +35,7 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
-	cast: [
+	asset_character: [
 		`name (${NARRATOR} for the narrator)`,
 		`avatar ${enumeration([NO_AVATAR.avatar])} (only the narrator's)`,
 	],
@@ -73,16 +73,16 @@ const ASSETS = dedent`
 	Assets sit ahead of the first scene, and every scene draws on them. They are edited the
 	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
 	asset already exists changes that one instead.
-	- title: the project's name, as its text. Change it with set_title.
-	- cast: a speaker, with how they sound as its voice attributes. A voice is described,
+	- asset_title: the project's name, as its text. Change it with set_title.
+	- asset_character: a speaker, with how they sound as its voice attributes. A voice is described,
 	  never picked. \`name\` is the exact name their lines and every \`characters\` list use,
 	  and never changes. The text is what they look like, in English, written like an image
 	  prompt: their avatar is drawn from it, and every visual that lists them is drawn from
-	  that avatar. The narrator is the cast member named ${NARRATOR}, with \`avatar="none"\`
+	  that avatar. The narrator is the asset_character named ${NARRATOR}, with \`avatar="none"\`
 	  and no text: it speaks every line no character does.
-	- style: the art style every visual is drawn in, as its text, in English: the medium,
+	- asset_style: the art style every visual is drawn in, as its text, in English: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
-	- references: the pictures every visual is drawn after. The user uploads these; look at
+	- asset_references: the pictures every visual is drawn after. The user uploads these; look at
 	  them with view_image.
 `;
 

@@ -15,7 +15,7 @@ import { assetText } from "@/lib/canvas/assets";
 export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 	const editor = useSlateStatic();
 	const hasArtStyle = useSlateSelector(
-		(editor) => assetText(editor.children, "style") !== "",
+		(editor) => assetText(editor.children, "asset_style") !== "",
 	);
 
 	const [deletingName, setDeletingName] = useState<string>();
@@ -34,7 +34,7 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 				title={(name) => `Delete ${name}?`}
 				description="This removes the character and their avatar."
 				actionLabel="Delete character"
-				onConfirm={(name) => removeAsset(editor, "cast", name)}
+				onConfirm={(name) => removeAsset(editor, "asset_character", name)}
 			/>
 		</div>
 	);

@@ -5,8 +5,8 @@ import { useAsset } from "@/lib/canvas/useAssets";
 import { ArtStyleAssetTile, NarratorTile } from "./AssetTiles";
 
 export function AssetActions() {
-	const hasArtStyle = useAsset("style") !== undefined;
-	const hasNarrator = useAsset("cast", NARRATOR) !== undefined;
+	const hasArtStyle = useAsset("asset_style") !== undefined;
+	const hasNarrator = useAsset("asset_character", NARRATOR) !== undefined;
 	return (
 		<section
 			contentEditable={false}

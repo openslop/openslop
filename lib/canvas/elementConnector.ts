@@ -54,7 +54,7 @@ const NO_ATTRIBUTES = AttributeSchema.from([]);
 
 /** An asset's attributes are its own, never its connector's. */
 const ASSET_ATTRIBUTES: Partial<Record<AssetType, AttributeSchema>> = {
-	cast: VOICE_ATTRIBUTES,
+	asset_character: VOICE_ATTRIBUTES,
 };
 
 export function attributeSchemaFor(

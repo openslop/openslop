@@ -27,7 +27,7 @@ vi.mock("../elements/character/CharacterEditModal", () => ({
 }));
 vi.mock("../elements/style/ArtStyleModal", () => ({
 	ArtStyleModal: ({ onClose }: { onClose: () => void }) => (
-		<button data-dialog="style" onClick={onClose} />
+		<button data-dialog="asset_style" onClick={onClose} />
 	),
 }));
 
@@ -67,16 +67,16 @@ describe("AssetEditProvider", () => {
 	});
 
 	it("shows only the dialog of the asset opened last", () => {
-		act(() => editors.editAsset("references"));
-		expect(openDialogs()).toEqual(["style"]);
+		act(() => editors.editAsset("asset_references"));
+		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("cast", "Narrator"));
+		act(() => editors.editAsset("asset_character", "Narrator"));
 		expect(openDialogs()).toEqual(["character Narrator"]);
 
-		act(() => editors.editAsset("style"));
-		expect(openDialogs()).toEqual(["style"]);
+		act(() => editors.editAsset("asset_style"));
+		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("cast", "Mia"));
+		act(() => editors.editAsset("asset_character", "Mia"));
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
@@ -89,7 +89,7 @@ describe("AssetEditProvider", () => {
 	});
 
 	it("unmounts the dialog when it closes", () => {
-		act(() => editors.editAsset("style"));
+		act(() => editors.editAsset("asset_style"));
 
 		clickDialog();
 		expect(openDialogs()).toEqual([]);

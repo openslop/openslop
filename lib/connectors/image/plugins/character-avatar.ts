@@ -1,9 +1,9 @@
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 
-type CastParams = { prompt: string; name?: string };
+type CharacterParams = { prompt: string; name?: string };
 
-/** Frames a cast element's appearance, its prompt, as the character's portrait. */
-export function createCharacterAvatarPlugin(): ConnectorPlugin<CastParams> {
+/** Frames a character's appearance, its prompt, as the character's portrait. */
+export function createCharacterAvatarPlugin(): ConnectorPlugin<CharacterParams> {
 	return {
 		name: "character-avatar",
 		beforeGenerate: ({ prompt, name, ...params }) => ({

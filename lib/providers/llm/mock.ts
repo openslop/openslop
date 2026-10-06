@@ -26,17 +26,17 @@ const MOCK_TITLE = "Little Red";
 
 /** The assets the mock script is written against, as the edit a real agent makes before writing. */
 const MOCK_ASSETS: RefineOp[] =
-	parseOSML(`<style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</style>
+	parseOSML(`<asset_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</asset_style>
 
-<cast name="Narrator" avatar="none" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="warm, grandmotherly, kind" language="en"></cast>
+<asset_character name="Narrator" avatar="none" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="warm, grandmotherly, kind" language="en"></asset_character>
 
-<cast name="Red" gender="feminine" age="child" pitch="high" accent="american" voiceDescription="bright, cheerful, youthful" language="en">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</cast>
+<asset_character name="Red" gender="feminine" age="child" pitch="high" accent="american" voiceDescription="bright, cheerful, youthful" language="en">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</asset_character>
 
-<cast name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" voiceDescription="gentle, soft-spoken, kind" language="en">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</cast>
+<asset_character name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" voiceDescription="gentle, soft-spoken, kind" language="en">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</asset_character>
 
-<cast name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="caring, gentle, melodic" language="en">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</cast>
+<asset_character name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="caring, gentle, melodic" language="en">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</asset_character>
 
-<cast name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</cast>
+<asset_character name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" voiceDescription="caring, gentle, melodic" language="en">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</asset_character>
 
 `)
 		.filter(isAssetElement)
@@ -308,7 +308,7 @@ function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 const NEXT_STEP: Record<string, (results: ToolResult[]) => MockStep> = {
 	write_script: () => READ_SCRIPT,
 	set_title: () => ({
-		say: "Setting up the cast and the art style. ",
+		say: "Setting up the characters and the art style. ",
 		toolName: "edit_script",
 		input: { ops: MOCK_ASSETS },
 	}),

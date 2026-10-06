@@ -86,7 +86,7 @@ describe("staleReason", () => {
 
 	it("names an upstream avatar by its character", () => {
 		const queue = new GenerationQueue();
-		const avatar = node("cast:Red");
+		const avatar = node("asset_character:Red");
 		const image = node("a", {
 			dependsOn: [{ node: avatar, label: "Red's avatar" }],
 		});
@@ -116,7 +116,7 @@ describe("staleReason", () => {
 	it("names a dependency that is itself stale, even though its output has not changed", () => {
 		const queue = new GenerationQueue();
 		const avatar = (style: string) =>
-			node("cast:Red", { reads: { "the art style": style } });
+			node("asset_character:Red", { reads: { "the art style": style } });
 		const image = (style: string) =>
 			node("a", {
 				dependsOn: [{ node: avatar(style), label: "Red's avatar" }],

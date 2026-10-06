@@ -57,8 +57,8 @@ describe("a script streamed onto the canvas", () => {
 
 	it("lands after the assets already on the canvas, which stay outside every scene", () => {
 		const assets = [
-			asset("style", { text: "muted watercolor" }),
-			asset("cast", { name: "Ayla", text: "a keeper" }),
+			asset("asset_style", { text: "muted watercolor" }),
+			asset("asset_character", { name: "Ayla", text: "a keeper" }),
 		];
 
 		const editor = written(SCRIPT.match(/[^]{1,7}/g) ?? [], assets);
@@ -70,7 +70,7 @@ describe("a script streamed onto the canvas", () => {
 
 	it("replaces the empty narration a canvas of only assets is seeded with", () => {
 		const editor = written([]);
-		editor.children = [asset("title", { text: "Moon" })];
+		editor.children = [asset("asset_title", { text: "Moon" })];
 		editor.normalize({ force: true });
 		expect(scenes(editor)).toEqual([["narration"]]);
 

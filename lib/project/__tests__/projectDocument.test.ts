@@ -81,7 +81,7 @@ describe("createProjectDocument.write", () => {
 	});
 });
 
-const ASSETS = `<style id="style">noir</style>\n<cast id="cast:Ada" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Ada" provider="openslop" model="Slop Image v1">tall</cast>`;
+const ASSETS = `<asset_style id="asset_style">noir</asset_style>\n<asset_character id="asset_character:Ada" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Ada" provider="openslop" model="Slop Image v1">tall</asset_character>`;
 const SCENE = `--- Scene 1 ---\n<narration id="line">hello</narration>\n<image id="shot">a sunset</image>`;
 
 describe("createProjectDocument.read", () => {
@@ -110,7 +110,10 @@ describe("createProjectDocument.details", () => {
 	])("its thumbnail is %s", (_, shots, thumbnail) => {
 		const { document } = setup(
 			{},
-			resultQueue({ "cast:Ada": { imageUrl: "avatar.png" }, ...shots }),
+			resultQueue({
+				"asset_character:Ada": { imageUrl: "avatar.png" },
+				...shots,
+			}),
 		);
 		document.write({
 			...contentWith(`${ASSETS}\n${SCENE}`),

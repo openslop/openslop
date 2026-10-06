@@ -28,28 +28,28 @@ export function applyTemplate(
 	Editor.withoutNormalizing(editor, () => {
 		removeAssets(editor);
 
-		setAsset(editor, "style", undefined, {
+		setAsset(editor, "asset_style", undefined, {
 			text: template.style.description,
 		});
-		setAsset(editor, "cast", NARRATOR, {
+		setAsset(editor, "asset_character", NARRATOR, {
 			attrs: voiceAttrs(template.narration),
 		});
 		setReferenceImages(editor, template.referenceImages);
 		for (const [name, { appearance, avatar: _, ...voice }] of characters) {
-			setAsset(editor, "cast", name, {
+			setAsset(editor, "asset_character", name, {
 				text: appearance,
 				attrs: voiceAttrs(voice),
 			});
 		}
 	});
 
-	// Built after the reset and the cast land, so each avatar records what the template set.
+	// Built after the reset and the characters land, so each avatar records what the template set.
 	const context = { ...buildContext(), state: store.getState() };
 	for (const [name, { avatar }] of characters) {
-		const cast = findAsset(editor.children, "cast", name);
-		if (avatar && cast)
+		const character = findAsset(editor.children, "asset_character", name);
+		if (avatar && character)
 			queue.commitResult(
-				buildNode(cast, context),
+				buildNode(character, context),
 				{ imageUrl: avatar, durationSec: 0 },
 				{ pinned: true },
 			);

@@ -2,7 +2,7 @@
 
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useCastNames } from "@/lib/canvas/useAssets";
+import { useCharacterNames } from "@/lib/canvas/useAssets";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import { CharacterAssetTile, ReferenceTile } from "../elements/AssetTiles";
@@ -12,7 +12,7 @@ import { PanelCard } from "./PanelCard";
 
 function CharactersCard() {
 	const { openCreateCharacter } = useAssetEditors();
-	const names = useCastNames();
+	const names = useCharacterNames();
 	return (
 		<PanelCard
 			title="Characters"

@@ -13,7 +13,7 @@ import { toggleShownCharacter } from "@/lib/canvas/assetOps";
 import { shownCharacters } from "@/lib/canvas/characterNames";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
 import type { CanvasContentElement } from "@/lib/canvas/types";
-import { useAvatarNames, useCastNames } from "@/lib/canvas/useAssets";
+import { useAvatarNames, useCharacterNames } from "@/lib/canvas/useAssets";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { CharacterPill } from "./CharacterPill";
 
@@ -81,7 +81,7 @@ export function CharacterSwitcher({
 	element: CanvasContentElement;
 }) {
 	const editor = useSlateStatic();
-	const names = useCastNames();
+	const names = useCharacterNames();
 	const currentName = element.generationAttributes?.name;
 
 	if (names.length === 0) return <CharacterPill name={currentName} />;

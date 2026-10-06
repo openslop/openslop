@@ -9,8 +9,11 @@ import { withLayout } from "../plugins/withLayout";
 import { content, scene } from "./fixtures";
 
 const ASSETS = [
-	createCanvasNode("style", { text: "noir" }),
-	createCanvasNode("cast", { attrs: { name: "Mia" }, text: "a girl" }),
+	createCanvasNode("asset_style", { text: "noir" }),
+	createCanvasNode("asset_character", {
+		attrs: { name: "Mia" },
+		text: "a girl",
+	}),
 ];
 
 const normalized = (

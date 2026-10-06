@@ -87,8 +87,8 @@ describe("createScriptWriter", () => {
 
 	it("writes the script after the assets already on the canvas", () => {
 		const editor = makeEditor();
-		const style = createCanvasNode("style", {
-			id: assetId("style"),
+		const style = createCanvasNode("asset_style", {
+			id: assetId("asset_style"),
 			text: "noir",
 		});
 		editor.children = [style];
@@ -103,7 +103,9 @@ describe("createScriptWriter", () => {
 		const editor = makeEditor();
 		const write = createScriptWriter(editor);
 
-		write('<cast name="Ayla">A tall hunter in furs</cast>\n');
+		write(
+			'<asset_character name="Ayla">A tall hunter in furs</asset_character>\n',
+		);
 		write("<narration>Snow fell.</narration>");
 
 		expect(editor.children.map((node) => "type" in node && node.type)).toEqual([

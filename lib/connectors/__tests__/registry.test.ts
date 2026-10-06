@@ -5,7 +5,7 @@ import { DEFAULT_CONNECTOR_REGISTRY } from "../registry";
 describe("DEFAULT_CONNECTOR_REGISTRY", () => {
 	it("holds an entry for every generated type, and none for metadata", () => {
 		expect(Object.keys(DEFAULT_CONNECTOR_REGISTRY).sort()).toEqual(
-			[...Object.keys(ELEMENT_TYPES), "cast"].sort(),
+			[...Object.keys(ELEMENT_TYPES), "asset_character"].sort(),
 		);
 	});
 });

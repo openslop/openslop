@@ -32,6 +32,7 @@ export function TextAreaField({
 	onChange,
 	placeholder,
 	rows = 4,
+	autoFocus,
 	className,
 }: {
 	label: string;
@@ -40,6 +41,7 @@ export function TextAreaField({
 	onChange: (value: string) => void;
 	placeholder?: string;
 	rows?: number;
+	autoFocus?: boolean;
 	className?: string;
 }) {
 	const id = useId();
@@ -56,6 +58,7 @@ export function TextAreaField({
 				id={id}
 				size="sm"
 				rows={rows}
+				autoFocus={autoFocus}
 				value={draft}
 				onChange={(e) => setDraft(e.target.value)}
 				placeholder={placeholder}

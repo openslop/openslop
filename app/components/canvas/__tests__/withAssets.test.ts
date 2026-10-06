@@ -15,15 +15,18 @@ import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { withAssets } from "../plugins/withAssets";
 import { content, scene } from "./fixtures";
 
-const TITLE = createCanvasNode("title", { text: "Moon" });
-const STYLE = createCanvasNode("style", { id: assetId("style"), text: "noir" });
-const CAST = createCanvasNode("cast", {
-	id: assetId("cast", "Mia"),
+const TITLE = createCanvasNode("asset_title", { text: "Moon" });
+const STYLE = createCanvasNode("asset_style", {
+	id: assetId("asset_style"),
+	text: "noir",
+});
+const CAST = createCanvasNode("asset_character", {
+	id: assetId("asset_character", "Mia"),
 	attrs: { name: "Mia" },
 	text: "a girl",
 });
-const REFERENCES = createCanvasNode("references", {
-	id: assetId("references"),
+const REFERENCES = createCanvasNode("asset_references", {
+	id: assetId("asset_references"),
 });
 
 const bare = (children: Descendant[]) => {
@@ -56,15 +59,15 @@ describe("withAssets", () => {
 			editor.children.flatMap((node) =>
 				Element.isElement(node) && editor.isVoid(node) ? [node.type] : [],
 			),
-		).toEqual(["style", "cast", "references"]);
+		).toEqual(["asset_style", "asset_character", "asset_references"]);
 	});
 
 	it("still lets a writer change an asset's text", () => {
 		const editor = bare([STYLE, script()]);
 
-		setAsset(editor, "style", undefined, { text: "watercolor" });
+		setAsset(editor, "asset_style", undefined, { text: "watercolor" });
 
-		const style = findAsset(editor.children, "style");
+		const style = findAsset(editor.children, "asset_style");
 		expect(style && getElementBodyText(style)).toBe("watercolor");
 	});
 
@@ -74,7 +77,9 @@ describe("withAssets", () => {
 
 		Transforms.move(editor, { reverse: true });
 
-		expect(editor.selection?.anchor.path[0]).toBe(indexOf(editor, "cast"));
+		expect(editor.selection?.anchor.path[0]).toBe(
+			indexOf(editor, "asset_character"),
+		);
 	});
 
 	it("deletes the tile ahead of the script on backspace", () => {
@@ -83,7 +88,7 @@ describe("withAssets", () => {
 
 		editor.deleteBackward("character");
 
-		expect(types(editor)).toEqual(["style", "scene"]);
+		expect(types(editor)).toEqual(["asset_style", "scene"]);
 	});
 
 	it("does nothing on Enter while a tile is selected", () => {
@@ -106,7 +111,7 @@ describe("withAssets and the title", () => {
 		editor.insertText(" Cat");
 
 		expect(editor.selection?.anchor.path.slice(0, 1)).toEqual([0]);
-		expect(assetText(editor.children, "title")).toBe("Moon Cat");
+		expect(assetText(editor.children, "asset_title")).toBe("Moon Cat");
 	});
 
 	it("refuses Enter inside the title", () => {
@@ -152,8 +157,8 @@ describe("withAssets and the title", () => {
 
 		editor.insertText("x");
 
-		expect(assetText(editor.children, "title")).toBe("Mox");
-		expect(types(editor)).toEqual(["title", "scene"]);
+		expect(assetText(editor.children, "asset_title")).toBe("Mox");
+		expect(types(editor)).toEqual(["asset_title", "scene"]);
 		expect(Editor.string(editor, [indexOf(editor, "scene")])).toBe("llo");
 	});
 
@@ -163,7 +168,7 @@ describe("withAssets and the title", () => {
 
 		editor.deleteFragment();
 
-		expect(types(editor)[0]).toBe("title");
-		expect(findAsset(editor.children, "style")).toBeUndefined();
+		expect(types(editor)[0]).toBe("asset_title");
+		expect(findAsset(editor.children, "asset_style")).toBeUndefined();
 	});
 });

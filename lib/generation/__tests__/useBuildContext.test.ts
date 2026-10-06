@@ -113,30 +113,30 @@ describe("useBuildContext", () => {
 	});
 
 	it("reads every element of the document, assets first", () => {
-		const style = createCanvasNode("style", { text: "noir" });
+		const style = createCanvasNode("asset_style", { text: "noir" });
 		children = [style, ...document(video("vid-1", "shot one"))];
 
 		const { canvas } = render(useBuildContext)();
 
-		expect(canvas.map(({ id }) => id)).toEqual(["style", "vid-1"]);
+		expect(canvas.map(({ id }) => id)).toEqual(["asset_style", "vid-1"]);
 	});
 
 	it.each([
 		["merges a write onto the asset it names", [{ gender: "feminine" }]],
 		["creates the asset a write names when it is missing", []],
 	])("%s", (_, existing) => {
-		const casts = existing.map((attrs) =>
-			createCanvasNode("cast", { attrs: { name: "Red", ...attrs } }),
+		const characters = existing.map((attrs) =>
+			createCanvasNode("asset_character", { attrs: { name: "Red", ...attrs } }),
 		);
-		children = [...casts, ...document(video("vid-1", "shot one"))];
+		children = [...characters, ...document(video("vid-1", "shot one"))];
 
 		render(useBuildContext)().setAsset({
-			type: "cast",
+			type: "asset_character",
 			name: "Red",
 			attrs: { voiceId: "v1" },
 		});
 
-		const written = findAsset(children, "cast", "Red");
+		const written = findAsset(children, "asset_character", "Red");
 		expect(getAssets(children)).toHaveLength(1);
 		expect(written && flatAttributes(written)).toMatchObject({
 			...existing[0],

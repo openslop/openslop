@@ -55,8 +55,11 @@ beforeEach(() => {
 describe("running a graph", () => {
 	it("runs the avatar an image shows first, and hands the image what it read off the canvas", async () => {
 		canvas = [
-			createCanvasNode("style", { text: "noir" }),
-			createCanvasNode("cast", { attrs: { name: "Red" }, text: "red hood" }),
+			createCanvasNode("asset_style", { text: "noir" }),
+			createCanvasNode("asset_character", {
+				attrs: { name: "Red" },
+				text: "red hood",
+			}),
 			createCanvasNode("image", {
 				id: "img",
 				attrs: { characters: "Red" },
@@ -86,8 +89,8 @@ describe("running a graph", () => {
 
 	it("records the avatar an image was sent, so one replaced mid-flight leaves the image stale", async () => {
 		canvas = [
-			createCanvasNode("cast", {
-				id: assetId("cast", "Red"),
+			createCanvasNode("asset_character", {
+				id: assetId("asset_character", "Red"),
 				attrs: { name: "Red" },
 				text: "red hood",
 			}),
@@ -98,7 +101,7 @@ describe("running a graph", () => {
 			}),
 		];
 		const queue = new GenerationQueue();
-		const avatar = nodeOf(assetId("cast", "Red"));
+		const avatar = nodeOf(assetId("asset_character", "Red"));
 		queue.commitResult(avatar, { imageUrl: "red.png", durationSec: 0 });
 		let finish = (_: AssetResult) => {};
 		mediaGenerate.mockImplementation(
@@ -121,11 +124,11 @@ describe("running a graph", () => {
 			name: "voice",
 			reads: (_, ctx) => ({
 				voice:
-					findAsset(ctx.canvas, "cast", NARRATOR)?.generationAttributes
-						?.voiceId ?? "",
+					findAsset(ctx.canvas, "asset_character", NARRATOR)
+						?.generationAttributes?.voiceId ?? "",
 			}),
 			prepare: async () => [
-				{ type: "cast", name: NARRATOR, attrs: { voiceId: "v-7" } },
+				{ type: "asset_character", name: NARRATOR, attrs: { voiceId: "v-7" } },
 			],
 		};
 
@@ -148,7 +151,8 @@ describe("running a graph", () => {
 			);
 
 			expect(
-				byId(assetId("cast", NARRATOR)).generationAttributes?.voiceId,
+				byId(assetId("asset_character", NARRATOR)).generationAttributes
+					?.voiceId,
 			).toBe("v-7");
 			expect(mediaGenerate.mock.calls[0]?.[1].reads?.voice).toBe("v-7");
 			expect(queue.getElementSnapshot("img").resultInputs?.reads.voice).toBe(

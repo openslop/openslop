@@ -30,7 +30,7 @@ The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/a
 
 ## Models and keys
 
-`MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech uses the voice pair stored on its speaker's cast element, if it has one. Defaults resolve element, then project, then account, then the recommendation.
+`MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech uses the voice pair stored on its speaker's `asset_character`, if it has one. Defaults resolve element, then project, then account, then the recommendation.
 
 The two route families are defined in `lib/api/route-families.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
 
@@ -38,10 +38,10 @@ User keys live in Supabase Vault. They are read by the service role only for the
 
 ## Canvas and generation
 
-The Slate document (`lib/canvas/`) is the project. Assets come first, then the scenes. Asset types are declared in `ASSET_TYPES` (`lib/canvas/types.ts`).
+The Slate document (`lib/canvas/`) is the project. Assets come first, then the scenes. Asset types are declared in `ASSET_TYPES` (`lib/canvas/types.ts`), and every one is named `asset_*`, which the `AssetType` type enforces.
 
 - **Metadata elements** never generate: the title, the art style and the reference images. The title is editable text; every other asset is a tile the caret selects whole and a delete removes.
-- **Generated elements**: narration, character lines, images, video, sound, music, and `cast`. A cast element is a speaker: its text and avatar are how they look, and its voice attributes how they sound. The narrator is the cast member named Narrator, with `avatar="none"`.
+- **Generated elements**: narration, character lines, images, video, sound, music, and `asset_character`. An `asset_character` is a speaker: its text and avatar are how they look, and its voice attributes how they sound. The narrator is the `asset_character` named Narrator, with `avatar="none"`.
 
 `lib/project/` keeps what is not on the canvas in a Zustand store: the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template) and the project's pinned default models. It also owns saving and version history.
 

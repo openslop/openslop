@@ -50,7 +50,7 @@ export function createProjectDocument({
 		},
 
 		details: () => ({
-			name: deriveProjectName(assetText(editor.children, "title")),
+			name: deriveProjectName(assetText(editor.children, "asset_title")),
 			thumbnail_url: pickThumbnailUrl(
 				getContentElements(editor.children),
 				queue,

@@ -36,7 +36,10 @@ describe("pickThumbnailUrl", () => {
 		[
 			"no avatar, since it belongs to no element of the script",
 			SCRIPT,
-			{ "cast-alice": { imageUrl: "avatar.png" }, "3": { imageUrl: "b.png" } },
+			{
+				"asset_character:Alice": { imageUrl: "avatar.png" },
+				"3": { imageUrl: "b.png" },
+			},
 			"b.png",
 		],
 	])("picks from %s", (_, script, results, thumbnail) => {

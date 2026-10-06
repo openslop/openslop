@@ -3,7 +3,7 @@ import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { reading } from "@/lib/generation/dependency";
 
 const style = reading("the art style", (_, { canvas }) =>
-	assetText(canvas, "style"),
+	assetText(canvas, "asset_style"),
 );
 
 export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {

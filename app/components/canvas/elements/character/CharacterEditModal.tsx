@@ -32,16 +32,16 @@ export function CharacterEditModal({
 	onClose: () => void;
 }) {
 	const editor = useSlateStatic();
-	const cast = useAsset("cast", name);
+	const character = useAsset("asset_character", name);
 	const [confirmDelete, setConfirmDelete] = useState(false);
 
-	if (!cast) return null;
+	if (!character) return null;
 
 	return (
 		<AssetDialog
 			title={name}
 			description={
-				hasAvatar(cast)
+				hasAvatar(character)
 					? "Edits save automatically. Regenerate the avatar after changing the appearance."
 					: "Edits save automatically."
 			}
@@ -59,25 +59,26 @@ export function CharacterEditModal({
 				</Button>
 			}
 		>
-			{hasAvatar(cast) && (
-				<ElementGenerationProvider element={cast}>
+			{hasAvatar(character) && (
+				<ElementGenerationProvider element={character}>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="flex min-w-0 flex-col gap-2">
 							<TextAreaField
 								className="min-h-0 flex-1"
 								label="Appearance"
+								autoFocus
 								aside={
 									<div className="flex items-center gap-1">
 										<ModelAttribute
-											element={cast}
-											pick={elementModelPick(cast)}
+											element={character}
+											pick={elementModelPick(character)}
 											label="Avatar model"
 										/>
-										<ElementHistoryButton element={cast} />
+										<ElementHistoryButton element={character} />
 									</div>
 								}
-								value={getElementBodyText(cast)}
-								onChange={(text) => updateNodeText(editor, cast.id, text)}
+								value={getElementBodyText(character)}
+								onChange={(text) => updateNodeText(editor, character.id, text)}
 								placeholder="Describe the character's look"
 							/>
 							<div className="flex items-center justify-end gap-2">
@@ -92,7 +93,7 @@ export function CharacterEditModal({
 					</div>
 				</ElementGenerationProvider>
 			)}
-			<VoiceEditor cast={cast} />
+			<VoiceEditor character={character} />
 
 			<ConfirmDeleteDialog
 				target={confirmDelete ? name : undefined}
@@ -101,7 +102,7 @@ export function CharacterEditModal({
 				description="This removes the character and their avatar. Undo from the canvas to bring them back."
 				actionLabel="Delete character"
 				onConfirm={() => {
-					removeAsset(editor, "cast", name);
+					removeAsset(editor, "asset_character", name);
 					onClose();
 				}}
 			/>

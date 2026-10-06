@@ -74,18 +74,18 @@ describe("writes by id", () => {
 	it("land on the element wherever it is, asset or scene", () => {
 		const editor = createEditor();
 		editor.children = [
-			asset("style"),
-			asset("cast", { name: "Mia" }),
+			asset("asset_style"),
+			asset("asset_character", { name: "Mia" }),
 			scene([content("narration", "n1"), content("image", "img1")]),
 		];
 
 		mergeAttrs(editor, "img1", { style: "ink" });
-		mergeAttrs(editor, "cast:Mia", { age: "child" });
+		mergeAttrs(editor, "asset_character:Mia", { age: "child" });
 
 		expect(findNodeById(editor, "img1")?.[0].generationAttributes).toEqual({
 			style: "ink",
 		});
-		expect(findNodeById(editor, "cast:Mia")).toMatchObject([
+		expect(findNodeById(editor, "asset_character:Mia")).toMatchObject([
 			{ generationAttributes: { name: "Mia", age: "child" } },
 			[1],
 		]);
@@ -98,8 +98,8 @@ describe("writes by id", () => {
 		expect(() => mergeAttrs(editor, "gone", { style: "ink" })).toThrow(
 			/"gone" is not on the canvas/,
 		);
-		expect(() => updateNodeText(editor, "style", "ink")).toThrow(
-			/"style" is not on the canvas/,
+		expect(() => updateNodeText(editor, "asset_style", "ink")).toThrow(
+			/"asset_style" is not on the canvas/,
 		);
 		expect(JSON.stringify(editor.children)).toBe(before);
 	});
@@ -189,16 +189,16 @@ describe("updateNodeText on an asset", () => {
 		const editor = createEditor();
 		editor.isVoid = (element) => isAssetElement(element);
 		editor.children = [
-			asset("style", { text: "ink wash" }),
+			asset("asset_style", { text: "ink wash" }),
 			scene([content("narration", "n1")]),
 		];
 
-		updateNodeText(editor, "style", "oil paint");
+		updateNodeText(editor, "asset_style", "oil paint");
 		expect(Editor.string(editor, [0], { voids: true })).toBe(
 			`${ZERO_WIDTH_SPACE}oil paint`,
 		);
 
-		updateNodeText(editor, "style", "oil paint, thick");
+		updateNodeText(editor, "asset_style", "oil paint, thick");
 		expect(Editor.string(editor, [0], { voids: true })).toBe(
 			`${ZERO_WIDTH_SPACE}oil paint, thick`,
 		);
@@ -311,19 +311,19 @@ describe("mergeAttrs", () => {
 
 describe("clearEditor", () => {
 	it("empties the script so a new one does not stack under it, keeping the assets", () => {
-		const style = asset("style", { text: "ink wash" });
-		const cast = asset("cast", { name: "Mia" });
+		const style = asset("asset_style", { text: "ink wash" });
+		const character = asset("asset_character", { name: "Mia" });
 		const editor = createEditor();
 		editor.children = [
 			style,
-			cast,
+			character,
 			scene([content("narration", "n1", "old")], "s1"),
 			scene([content("image", "i1")], "s2"),
 		];
 
 		clearEditor(editor);
 
-		expect(editor.children).toEqual([style, cast]);
+		expect(editor.children).toEqual([style, character]);
 	});
 });
 

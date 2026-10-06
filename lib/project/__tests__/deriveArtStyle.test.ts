@@ -14,13 +14,16 @@ import {
 } from "../deriveArtStyle";
 
 const references = (...urls: string[]) =>
-	createCanvasNode("references", {
-		id: assetId("references"),
+	createCanvasNode("asset_references", {
+		id: assetId("asset_references"),
 		attrs: { [REFERENCE_URLS_ATTR]: urls.join(",") },
 	});
 
-const cast = (name: string) =>
-	createCanvasNode("cast", { id: assetId("cast", name), attrs: { name } });
+const character = (name: string) =>
+	createCanvasNode("asset_character", {
+		id: assetId("asset_character", name),
+		attrs: { name },
+	});
 
 describe("artStyleReferences", () => {
 	it("combines reference images with uploaded avatars, excluding generated ones", () => {
@@ -28,15 +31,15 @@ describe("artStyleReferences", () => {
 			artStyleReferences(
 				[
 					references("https://example.com/reference.jpg"),
-					cast("Mira"),
-					cast("Generated"),
+					character("Mira"),
+					character("Generated"),
 				],
 				resultQueue({
-					[assetId("cast", "Mira")]: {
+					[assetId("asset_character", "Mira")]: {
 						imageUrl: "https://example.com/uploaded.jpg",
 						pinned: true,
 					},
-					[assetId("cast", "Generated")]: {
+					[assetId("asset_character", "Generated")]: {
 						imageUrl: "https://example.com/generated.jpg",
 					},
 				}),
@@ -48,7 +51,9 @@ describe("artStyleReferences", () => {
 	});
 
 	it("is empty when nothing has been uploaded", () => {
-		expect(artStyleReferences([cast("Mira")], resultQueue({}))).toEqual([]);
+		expect(artStyleReferences([character("Mira")], resultQueue({}))).toEqual(
+			[],
+		);
 	});
 });
 
@@ -56,9 +61,9 @@ describe("uploadedAvatarUrls", () => {
 	it("leaves out the reference images", () => {
 		expect(
 			uploadedAvatarUrls(
-				[references("https://example.com/reference.jpg"), cast("Mira")],
+				[references("https://example.com/reference.jpg"), character("Mira")],
 				resultQueue({
-					[assetId("cast", "Mira")]: {
+					[assetId("asset_character", "Mira")]: {
 						imageUrl: "https://example.com/uploaded.jpg",
 						pinned: true,
 					},
@@ -67,12 +72,12 @@ describe("uploadedAvatarUrls", () => {
 		).toEqual(["https://example.com/uploaded.jpg"]);
 	});
 
-	it("leaves out an upload held for a character no longer in the cast", () => {
+	it("leaves out an upload held for a character no longer among the characters", () => {
 		expect(
 			uploadedAvatarUrls(
-				[cast("Mira")],
+				[character("Mira")],
 				resultQueue({
-					[assetId("cast", "Gone")]: {
+					[assetId("asset_character", "Gone")]: {
 						imageUrl: "https://example.com/gone.jpg",
 						pinned: true,
 					},

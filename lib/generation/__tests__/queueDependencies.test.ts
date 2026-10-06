@@ -87,11 +87,13 @@ describe("dependency ordering", () => {
 		// enqueueGraph walks the graph itself, so a node reached only through
 		// another dependency still gets queued: here a video opening on an image
 		// that in turn draws a character.
-		const avatar = node("cast:Alice");
+		const avatar = node("asset_character:Alice");
 		const frame = node("img", [avatar]);
 		queue.enqueueGraph([node("vid-1", [frame])], () => EMPTY_CONTEXT);
 
-		expect(queue.getElementSnapshot("cast:Alice").status).not.toBe("idle");
+		expect(queue.getElementSnapshot("asset_character:Alice").status).not.toBe(
+			"idle",
+		);
 		expect(queue.getElementSnapshot("img").status).not.toBe("idle");
 		expect(queue.getElementSnapshot("vid-1").status).toBe("queued");
 	});
@@ -99,7 +101,7 @@ describe("dependency ordering", () => {
 	it("visits a dependency shared by two roots once", () => {
 		generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
 
-		const avatar = node("cast:Alice");
+		const avatar = node("asset_character:Alice");
 		queue.enqueueGraph(
 			[node("a", [avatar]), node("b", [avatar])],
 			() => EMPTY_CONTEXT,
@@ -199,14 +201,14 @@ describe("dependency ordering", () => {
 
 	it("reports a failed dependency on the dependent that was waiting on it", async () => {
 		generateMock.mockImplementation((job) =>
-			(job as GenerationJob).elementId === "cast:Alice"
+			(job as GenerationJob).elementId === "asset_character:Alice"
 				? Promise.reject(new Error("avatar boom"))
 				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 
 		queue.enqueueGraph(
-			[node("image", [node("cast:Alice")])],
+			[node("image", [node("asset_character:Alice")])],
 			() => EMPTY_CONTEXT,
 		);
 		await vi.runAllTimersAsync();

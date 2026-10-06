@@ -67,13 +67,15 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 });
 
 describe("executeToolCall", () => {
-	it("hands back the script and the aspect ratio it renders at, with no character list beside it", async () => {
+	it("hands back the script and the settings it renders with, with no character list beside it", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
 		);
 
 		expect(outcome.ok && outcome.output).toContain("<narration>hi</narration>");
+		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
+		expect(outcome.ok && outcome.output).toContain("- template: none");
 		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
 		expect(outcome.ok && outcome.output).not.toContain("Characters");
 	});
@@ -159,7 +161,7 @@ describe("executeToolCall", () => {
 			context(recordAssets(writes)),
 		);
 
-		expect(writes).toEqual([["title", undefined, { text: "Moon Cat" }]]);
+		expect(writes).toEqual([["asset_title", undefined, { text: "Moon Cat" }]]);
 		expect(outcome.ok).toBe(true);
 	});
 
@@ -608,8 +610,12 @@ describe("executeToolCall", () => {
 
 	it.each([
 		["a generated image", "img-1", "image"],
-		["a character's avatar through their cast element", "cast-1", "cast"],
-		["every uploaded reference image", "references", "references"],
+		[
+			"a character's avatar through their character asset",
+			"asset_character:Ada",
+			"asset_character",
+		],
+		["every uploaded reference image", "asset_references", "asset_references"],
 	] as const)("hands over %s with its prompt", async (_, id, type) => {
 		const urls = ["https://example.com/a.jpg", "https://example.com/b.jpg"];
 		const outcome = await executeToolCall(
@@ -630,10 +636,25 @@ describe("executeToolCall", () => {
 	});
 
 	it.each([
-		["an avatar not drawn yet", "cast", "idle", "has not been generated yet"],
+		[
+			"an avatar not drawn yet",
+			"asset_character",
+			"idle",
+			"has not been generated yet",
+		],
 		["an image still generating", "image", "generating", "is still generating"],
-		["an asset that holds no picture", "style", undefined, "is a style"],
-		["an element that generates no picture", "video", undefined, "is a video"],
+		[
+			"an asset that holds no picture",
+			"asset_style",
+			undefined,
+			"is of type asset_style",
+		],
+		[
+			"an element that generates no picture",
+			"video",
+			undefined,
+			"is of type video",
+		],
 	] as const)("refuses %s", async (_, type, status, error) => {
 		const outcome = await executeToolCall(
 			{ toolName: "view_image", input: { id: "x" } },
@@ -745,10 +766,10 @@ describe("SLOPPY_TOOLS", () => {
 		]);
 	});
 
-	it("lists each asset type an edit can set up, and a cast member's voice traits with their options", () => {
+	it("lists each asset type an edit can set up, and a character's voice traits with their options", () => {
 		const { description } = SLOPPY_TOOLS.edit_script;
 
-		for (const type of ["cast", "style", "references"]) {
+		for (const type of ["asset_character", "asset_style", "asset_references"]) {
 			expect(description).toContain(`- ${type}: `);
 		}
 		for (const options of [

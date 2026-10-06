@@ -134,9 +134,13 @@ describe("buildScriptPrompt", () => {
 	it("carries the art style, narrator and characters on the canvas", () => {
 		const { system } = buildScriptPrompt(
 			[
-				asset("style", "muted watercolor"),
-				asset("cast", "", { name: NARRATOR, ...NO_AVATAR, gender: "feminine" }),
-				asset("cast", "a small grey rabbit", { name: "Lumi" }),
+				asset("asset_style", "muted watercolor"),
+				asset("asset_character", "", {
+					name: NARRATOR,
+					...NO_AVATAR,
+					gender: "feminine",
+				}),
+				asset("asset_character", "a small grey rabbit", { name: "Lumi" }),
 			],
 			settingsOf(),
 			{ kind: "brief", brief: "a brief" },
@@ -153,7 +157,10 @@ describe("buildScriptPrompt", () => {
 
 	it("lists a character's voice and appearance under their name", () => {
 		const preamble = projectPreamble([
-			asset("cast", "a freckled girl", { name: "Mira", age: "child" }),
+			asset("asset_character", "a freckled girl", {
+				name: "Mira",
+				age: "child",
+			}),
 		]);
 
 		expect(preamble).toContain(
@@ -167,7 +174,7 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("hands a review the same rules the writer was given, minus the budget it cannot judge", () => {
-		const styled = [asset("style", "muted watercolor")];
+		const styled = [asset("asset_style", "muted watercolor")];
 		const rules = scriptRules(styled, settingsOf());
 
 		expect(

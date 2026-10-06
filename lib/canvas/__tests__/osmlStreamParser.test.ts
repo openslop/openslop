@@ -64,30 +64,33 @@ describe("OSMLStreamParser", () => {
 
 	it("parses asset tags into assets under their fixed ids, keeping attributes and text", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
-		const [cast, style] = parseOSML(
-			'<cast name="Mia" provider="runware" model="Seedream 5 Lite">Brown hair</cast>' +
-				'<style id="e9">ink wash</style>',
+		const [character, style] = parseOSML(
+			'<asset_character name="Mia" provider="runware" model="Seedream 5 Lite">Brown hair</asset_character>' +
+				'<asset_style id="e9">ink wash</asset_style>',
 		);
 
-		expect(isAssetElement(cast) && isAssetElement(style)).toBe(true);
-		expect(cast).toMatchObject({
-			id: "cast:Mia",
-			type: "cast",
+		expect(isAssetElement(character) && isAssetElement(style)).toBe(true);
+		expect(character).toMatchObject({
+			id: "asset_character:Mia",
+			type: "asset_character",
 			generationAttributes: { name: "Mia", ...pinned },
 		});
-		expect(style).toMatchObject({ id: "style", generationAttributes: {} });
-		expect(getElementBodyText(cast)).toBe("Brown hair");
+		expect(style).toMatchObject({
+			id: "asset_style",
+			generationAttributes: {},
+		});
+		expect(getElementBodyText(character)).toBe("Brown hair");
 		expect(getElementBodyText(style)).toBe("ink wash");
 	});
 
-	it("parses a cast's voice and references tags with their attributes as written", () => {
-		const [cast, references] = parseOSML(
-			'<cast name="Mia" gender="masculine" age="adult" voiceId="v1"></cast>' +
-				'<references images="https://img/a.png,https://img/b.png"></references>',
+	it("parses a character's voice and references tags with their attributes as written", () => {
+		const [character, references] = parseOSML(
+			'<asset_character name="Mia" gender="masculine" age="adult" voiceId="v1"></asset_character>' +
+				'<asset_references images="https://img/a.png,https://img/b.png"></asset_references>',
 		);
 
-		expect(cast).toMatchObject({
-			type: "cast",
+		expect(character).toMatchObject({
+			type: "asset_character",
 			generationAttributes: {
 				name: "Mia",
 				gender: "masculine",
@@ -96,18 +99,21 @@ describe("OSMLStreamParser", () => {
 			},
 		});
 		expect(references).toMatchObject({
-			type: "references",
+			type: "asset_references",
 			generationAttributes: { images: "https://img/a.png,https://img/b.png" },
 		});
 	});
 
-	it("draws a cast on the default image model, and its voice on the speech model, when it names neither", () => {
+	it("draws a character on the default image model, and its voice on the speech model, when it names neither", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const [cast] = parseOSML('<cast name="Mia">Brown hair</cast>', {
-			image: pinned,
-		});
+		const [character] = parseOSML(
+			'<asset_character name="Mia">Brown hair</asset_character>',
+			{
+				image: pinned,
+			},
+		);
 
-		expect(cast.generationAttributes).toEqual({
+		expect(character.generationAttributes).toEqual({
 			name: "Mia",
 			...pinned,
 			voiceProvider: DEFAULT_TTS_MODEL.provider,
@@ -117,15 +123,17 @@ describe("OSMLStreamParser", () => {
 
 	it("parses assets and canvas tags in the order they were written", () => {
 		const s = new OSMLStreamParser();
-		s.appendChunk("<style>dark moody tones</style>");
+		s.appendChunk("<asset_style>dark moody tones</asset_style>");
 		s.appendChunk("<narration>Once upon a time</narration>");
-		s.appendChunk('<cast name="Bob">tall and thin</cast>');
+		s.appendChunk(
+			'<asset_character name="Bob">tall and thin</asset_character>',
+		);
 
 		const nodes = s.getNodes() as ParsedElement[];
 		expect(nodes.map((node) => node.type)).toEqual([
-			"style",
+			"asset_style",
 			"narration",
-			"cast",
+			"asset_character",
 		]);
 		expect(getElementBodyText(nodes[0])).toBe("dark moody tones");
 	});

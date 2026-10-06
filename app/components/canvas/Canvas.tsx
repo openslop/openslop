@@ -58,7 +58,7 @@ export default function Canvas() {
 	}, []);
 
 	const untitled = useSlateSelector(
-		(editor) => !findAsset(editor.children, "title"),
+		(editor) => !findAsset(editor.children, "asset_title"),
 	);
 
 	const activeElement = useMemo(

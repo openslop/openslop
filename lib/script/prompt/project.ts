@@ -16,7 +16,7 @@ function renderVoice(voice: Voice): string {
 }
 
 function renderCharacter(assets: AssetElement[], name: string): string {
-	const appearance = assetText(assets, "cast", name);
+	const appearance = assetText(assets, "asset_character", name);
 	const body = [
 		renderVoice(voiceOf(assets, name)),
 		appearance && `- appearance: ${appearance}`,
@@ -29,7 +29,7 @@ function renderCharacter(assets: AssetElement[], name: string): string {
 export function projectPreamble(assets: AssetElement[]): string {
 	const sections: string[] = [];
 
-	const style = assetText(assets, "style");
+	const style = assetText(assets, "asset_style");
 	if (style) {
 		sections.push(dedent`
 			# Art Style
@@ -48,14 +48,14 @@ export function projectPreamble(assets: AssetElement[]): string {
 
 			${voice}`);
 
-	const cast = avatarNames(assets);
-	if (cast.length > 0) {
+	const names = avatarNames(assets);
+	if (names.length > 0) {
 		sections.push(dedent`
 			# Characters
 
-			The cast. Name a character exactly as written here, and never describe how one looks in a prompt:
+			The characters. Name one exactly as written here, and never describe how one looks in a prompt:
 
-			${cast.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
+			${names.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
 	}
 
 	return sections.join("\n\n");

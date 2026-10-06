@@ -24,8 +24,8 @@ const make = (
 	id?: string,
 ) => createCanvasNode(type, { id, attrs, text });
 
-const cast = (name: string, appearance: string) =>
-	make("cast", appearance, { name });
+const character = (name: string, appearance: string) =>
+	make("asset_character", appearance, { name });
 
 const element = (
 	id: string,
@@ -69,9 +69,9 @@ const generateAll = (queue: GenerationQueue, root: GenerationNode) => {
 beforeEach(() => {
 	store = createProjectStore();
 	assets = [
-		make("style", "noir"),
-		make("references", "", { images: "a.png" }),
-		cast("Alice", "red hair"),
+		make("asset_style", "noir"),
+		make("asset_references", "", { images: "a.png" }),
+		character("Alice", "red hair"),
 	];
 });
 
@@ -95,7 +95,7 @@ describe("buildNode", () => {
 	it.each([
 		["image", "image"],
 		["narration", "tts"],
-		["cast", "image"],
+		["asset_character", "image"],
 	] as const)("builds a %s on the %s connector", (type, connectorType) => {
 		assets = [];
 		const target = make(type, "said", {}, "target");
@@ -111,7 +111,7 @@ describe("buildNode", () => {
 		});
 	});
 
-	it.each(["title", "style", "references"] as const)(
+	it.each(["asset_title", "asset_style", "asset_references"] as const)(
 		"builds no node for a %s, which generates nothing",
 		(type) => {
 			expect(() => resolve(make(type))).toThrow(
@@ -130,7 +130,7 @@ describe("buildNode", () => {
 		const node = resolveOn(video, [img, video]);
 
 		expect(edgesOf(node)).toEqual({
-			"avatar:Alice": "cast:Alice",
+			"avatar:Alice": "asset_character:Alice",
 			previousVisual: "img",
 		});
 		expect(node.dependsOn.previousVisual?.label).toBe("the previous visual");
@@ -148,7 +148,7 @@ describe("buildNode", () => {
 
 	it.each([
 		["an asset that is not on the canvas", "image", {}],
-		["a character the cast does not know", "image", { characters: "Nobody" }],
+		["a character no character has", "image", { characters: "Nobody" }],
 		["a video with nothing before it", "video", { startFrame: "previous" }],
 	] as const)("declares no edge for %s", (name, type, attrs) => {
 		if (name.startsWith("an asset")) assets = [];
@@ -157,20 +157,20 @@ describe("buildNode", () => {
 		expect(resolveOn(el, [el]).dependsOn).toEqual({});
 	});
 
-	it("depends on the cast element of each character it shows, and no other", () => {
-		assets = [...assets, cast("Bob", "tall")];
+	it("depends on the character asset of each character it shows, and no other", () => {
+		assets = [...assets, character("Bob", "tall")];
 		const ids = idsOf(element("img", "image", { characters: "Alice" }));
 
-		expect(ids).toEqual(["cast:Alice", "img"]);
+		expect(ids).toEqual(["asset_character:Alice", "img"]);
 	});
 
-	it("goes stale once a character it shows joins the cast", () => {
+	it("goes stale once a character it shows joins the characters", () => {
 		const queue = new GenerationQueue();
 		const img = element("img", "image", { characters: "Bob" });
 		generateAll(queue, resolve(img));
 		expect(isNodeStale(resolve(img), queue)).toBe(false);
 
-		assets = [...assets, cast("Bob", "tall")];
+		assets = [...assets, character("Bob", "tall")];
 
 		expect(isNodeStale(resolve(img), queue)).toBe(true);
 	});
@@ -185,7 +185,27 @@ describe("buildNode", () => {
 		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
 			(node) => node.id,
 		);
-		expect(ids).toEqual(["cast:Alice", "img", "vid"]);
+		expect(ids).toEqual(["asset_character:Alice", "img", "vid"]);
+	});
+
+	it("leaves a character's portrait fresh when their voice changes", () => {
+		const queue = new GenerationQueue();
+		const img = element("img", "image", { characters: "Alice" });
+		generateAll(queue, resolve(img));
+
+		assets = [
+			...assets.filter(({ type }) => type !== "asset_character"),
+			make("asset_character", "red hair", {
+				name: "Alice",
+				age: "child",
+				voiceDescription: "gravelly",
+				voiceProvider: "cartesia",
+				voiceModel: "sonic-2",
+				voiceId: "v1",
+			}),
+		];
+
+		expect(isNodeStale(resolve(img), queue)).toBe(false);
 	});
 
 	it("keeps generation attributes as inputs and strips every layout key", () => {
@@ -256,7 +276,7 @@ describe("buildNode", () => {
 		generateAll(queue, resolve(img));
 		expect(needsGeneration(resolve(img), queue)).toBe(false);
 
-		assets = [make("style", "watercolor"), ...assets.slice(1)];
+		assets = [make("asset_style", "watercolor"), ...assets.slice(1)];
 
 		expect(needsGeneration(resolve(img), queue)).toBe(true);
 		expect(staleReason(resolve(img), queue)).toBe(
@@ -267,7 +287,9 @@ describe("buildNode", () => {
 	describe("speech and the voice it is spoken in", () => {
 		const line = element("line", "narration");
 		const voice = (attrs: Record<string, string>) => {
-			assets = [make("cast", "", { name: NARRATOR, ...NO_AVATAR, ...attrs })];
+			assets = [
+				make("asset_character", "", { name: NARRATOR, ...NO_AVATAR, ...attrs }),
+			];
 		};
 
 		it("reads the voice its speaker chose, depending on nothing", () => {

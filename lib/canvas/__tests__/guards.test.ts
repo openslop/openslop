@@ -24,7 +24,7 @@ describe("isCanvasElementType", () => {
 
 	it("rejects scene, asset and unknown tags", () => {
 		expect(isCanvasElementType("scene")).toBe(false);
-		expect(isCanvasElementType("cast")).toBe(false);
+		expect(isCanvasElementType("asset_character")).toBe(false);
 		expect(isCanvasElementType("nonsense")).toBe(false);
 	});
 });
@@ -32,23 +32,28 @@ describe("isCanvasElementType", () => {
 describe("isParsedContentElement", () => {
 	it("narrows canvas nodes and rejects assets and unknown tags", () => {
 		expect(isParsedContentElement(parsed("music"))).toBe(true);
-		expect(isParsedContentElement(parsed("cast"))).toBe(false);
+		expect(isParsedContentElement(parsed("asset_character"))).toBe(false);
 		expect(isParsedContentElement(parsed("nonsense"))).toBe(false);
 	});
 });
 
 describe("isAssetType", () => {
 	it("accepts the asset types and nothing else", () => {
-		expect(["title", "cast", "style", "references"].every(isAssetType)).toBe(
-			true,
-		);
+		expect(
+			[
+				"asset_title",
+				"asset_character",
+				"asset_style",
+				"asset_references",
+			].every(isAssetType),
+		).toBe(true);
 		expect(["image", "scene", "toString"].some(isAssetType)).toBe(false);
 	});
 });
 
 describe("isAssetElement and isScriptElement", () => {
 	it.each([
-		[{ id: "a", type: "cast", children: [] }, true, true],
+		[{ id: "a", type: "asset_character", children: [] }, true, true],
 		[{ id: "a", type: "image", children: [] }, false, true],
 		[{ id: "a", type: "scene", children: [] }, false, false],
 		[{ text: "plain" }, false, false],

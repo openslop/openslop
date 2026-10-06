@@ -93,50 +93,54 @@ describe("deserializeWithScenes", () => {
 	it("puts the assets ahead of the scenes, wherever the script wrote them", () => {
 		const nodes = deserializeWithScenes(
 			[
-				'<style id="style">noir</style>',
+				'<asset_style id="asset_style">noir</asset_style>',
 				"<narration>a</narration>",
 				"--- Scene 2 ---",
-				'<cast id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</cast>',
+				'<asset_character id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</asset_character>',
 				"<narration>b</narration>",
 			].join("\n"),
 		);
 
 		expect(nodes.map((node) => node.type)).toEqual([
-			"style",
-			"cast",
+			"asset_style",
+			"asset_character",
 			SCENE_TYPE,
 			SCENE_TYPE,
 		]);
-		const cast = nodes[1];
-		expect(cast).toMatchObject({
-			id: "cast:Ada",
+		const character = nodes[1];
+		expect(character).toMatchObject({
+			id: "asset_character:Ada",
 			generationAttributes: {
 				name: "Ada",
 				provider: "runware",
 				model: "Seedream 5 Lite",
 			},
 		});
-		expect(isAssetElement(cast) && getPromptText(cast)).toBe("tall");
+		expect(isAssetElement(character) && getPromptText(character)).toBe("tall");
 		expect(
-			scenesOf('<cast name="Ada">tall</cast><narration>b</narration>')[0]
-				?.children,
+			scenesOf(
+				'<asset_character name="Ada">tall</asset_character><narration>b</narration>',
+			)[0]?.children,
 		).toHaveLength(1);
 	});
 
 	it("makes no scene of a script that holds only assets", () => {
 		const nodes = deserializeWithScenes(
-			'<style>noir</style>\n--- Scene 1 ---\n<references images="a.png"></references>',
+			'<asset_style>noir</asset_style>\n--- Scene 1 ---\n<asset_references images="a.png"></asset_references>',
 		);
 
-		expect(nodes.map((node) => node.type)).toEqual(["style", "references"]);
+		expect(nodes.map((node) => node.type)).toEqual([
+			"asset_style",
+			"asset_references",
+		]);
 	});
 
 	it("round-trips assets through serializeOSMLWithScenes", () => {
 		const osml = [
-			'<style id="style">noir &amp; "moody"</style>',
-			'<cast id="cast:Narrator" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Narrator" avatar="none" provider="openslop" model="Slop Image v1" gender="feminine"></cast>',
-			'<cast id="cast:Ada &lt;the first&gt;" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</cast>',
-			'<references id="references" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></references>',
+			'<asset_style id="asset_style">noir &amp; "moody"</asset_style>',
+			'<asset_character id="asset_character:Narrator" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Narrator" avatar="none" provider="openslop" model="Slop Image v1" gender="feminine"></asset_character>',
+			'<asset_character id="asset_character:Ada &lt;the first&gt;" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</asset_character>',
+			'<asset_references id="asset_references" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></asset_references>',
 		].join("\n");
 
 		expect(serializeOSMLWithScenes(deserializeWithScenes(osml))).toBe(

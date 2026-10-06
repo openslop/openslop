@@ -54,7 +54,7 @@ const video = (characters?: string, model: ModelRef = SEEDANCE) =>
 	});
 
 const voice = (name: string, voiceId?: string) =>
-	asset("cast", {
+	asset("asset_character", {
 		name,
 		attrs: voiceId ? voiceAttrs({ ...DEFAULT_TTS_MODEL, voiceId }) : {},
 	});
@@ -96,7 +96,7 @@ describe("character-voices plugin", () => {
 				prepare("Sol, Mira", [voice("Sol", "v-sol"), voice("Mira")]),
 			).resolves.toEqual([
 				{
-					type: "cast",
+					type: "asset_character",
 					name: "Mira",
 					attrs: voiceAttrs({ ...DEFAULT_TTS_MODEL, voiceId: "v-found" }),
 				},
@@ -105,7 +105,7 @@ describe("character-voices plugin", () => {
 		});
 
 		it.each([
-			["a character outside the cast", "Ghost", [], SEEDANCE],
+			["a character with no character asset", "Ghost", [], SEEDANCE],
 			["a video model that does not listen", "Mira", [voice("Mira")], KLING],
 			["a video with no characters", undefined, [], SEEDANCE],
 		])("searches no voice for %s", async (_, characters, canvas, model) => {

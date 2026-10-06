@@ -32,7 +32,7 @@ const tile = (render: (props: TileProps) => ReactNode) =>
 	};
 
 const VIEWS: Record<AssetType, (props: ViewProps) => ReactNode> = {
-	title: ({ attributes, children, element }) => (
+	asset_title: ({ attributes, children, element }) => (
 		<div {...attributes}>
 			<ProjectTitle empty={getElementBodyText(element) === ""}>
 				{children}
@@ -40,14 +40,16 @@ const VIEWS: Record<AssetType, (props: ViewProps) => ReactNode> = {
 			<AssetActions />
 		</div>
 	),
-	style: tile(({ selected }) => <ArtStyleAssetTile selected={selected} />),
-	cast: tile(({ element, selected }) => (
+	asset_style: tile(({ selected }) => (
+		<ArtStyleAssetTile selected={selected} />
+	)),
+	asset_character: tile(({ element, selected }) => (
 		<CharacterAssetTile
 			name={element.generationAttributes?.name ?? ""}
 			selected={selected}
 		/>
 	)),
-	references: tile(({ selected }) => (
+	asset_references: tile(({ selected }) => (
 		<ReferenceAssetTiles selected={selected} />
 	)),
 };

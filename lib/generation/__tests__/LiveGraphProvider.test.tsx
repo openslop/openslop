@@ -101,7 +101,7 @@ describe("LiveGraphProvider", () => {
 		resolve(image);
 
 		editor.children = [
-			createCanvasNode("style", { text: "noir" }),
+			createCanvasNode("asset_style", { text: "noir" }),
 			...editor.children,
 		];
 

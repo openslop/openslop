@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
 	assetText,
 	avatarNames,
-	castNames,
+	characterNames,
 	findAsset,
 	getAssets,
 	hasAvatar,
@@ -46,7 +46,7 @@ describe("applyTemplate", () => {
 		queue = new GenerationQueue();
 	});
 
-	it("puts the template's cast on the canvas, each with their look and voice", () => {
+	it("puts the template's characters on the canvas, each with their look and voice", () => {
 		apply("pov-life");
 		const {
 			appearance,
@@ -55,14 +55,14 @@ describe("applyTemplate", () => {
 		} = getTemplate("pov-life").characters?.Protagonist ?? {};
 
 		expect(avatarNames(assets())).toEqual(["Protagonist"]);
-		const cast = findAsset(assets(), "cast", "Protagonist");
-		expect(cast && getPromptText(cast)).toBe(appearance);
+		const character = findAsset(assets(), "asset_character", "Protagonist");
+		expect(character && getPromptText(character)).toBe(appearance);
 		expect(voiceOf(assets(), "Protagonist")).toMatchObject(voice);
 	});
 
-	it("casts the narrator with the template's narration voice and no avatar", () => {
+	it("gives the narrator the template's narration voice and no avatar", () => {
 		apply("pov-life");
-		const narrator = findAsset(assets(), "cast", NARRATOR);
+		const narrator = findAsset(assets(), "asset_character", NARRATOR);
 
 		expect(narrator && hasAvatar(narrator)).toBe(false);
 		expect(voiceOf(assets())).toMatchObject(
@@ -72,10 +72,10 @@ describe("applyTemplate", () => {
 
 	it("does not leak characters from a previous template", () => {
 		apply("pov-life");
-		expect(castNames(assets())).toContain("Protagonist");
+		expect(characterNames(assets())).toContain("Protagonist");
 
 		apply("sleep-story");
-		expect(castNames(assets())).toEqual([
+		expect(characterNames(assets())).toEqual([
 			NARRATOR,
 			...Object.keys(getTemplate("sleep-story").characters ?? {}),
 		]);
@@ -94,16 +94,16 @@ describe("applyTemplate", () => {
 		store.getState().updateSettings({ template: undefined });
 
 		expect(settings().template).toBeUndefined();
-		expect(castNames(assets())).toContain("Protagonist");
+		expect(characterNames(assets())).toContain("Protagonist");
 	});
 
 	it("wipes the user's title and style, taking the template's style", () => {
-		setAsset(editor, "title", undefined, { text: "My Draft" });
-		setAsset(editor, "style", undefined, { text: "noir" });
+		setAsset(editor, "asset_title", undefined, { text: "My Draft" });
+		setAsset(editor, "asset_style", undefined, { text: "noir" });
 		apply("pov-life");
 
-		expect(assetText(editor.children, "title")).toBe("");
-		expect(assetText(assets(), "style")).toBe(
+		expect(assetText(editor.children, "asset_title")).toBe("");
+		expect(assetText(assets(), "asset_style")).toBe(
 			getTemplate("pov-life").style?.description,
 		);
 	});
@@ -129,7 +129,7 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes the user's narrator voice before applying", () => {
-		setAsset(editor, "cast", ensureSpeaker(editor), {
+		setAsset(editor, "asset_character", ensureSpeaker(editor), {
 			attrs: voiceAttrs({ accent: "british", voiceId: "v-mine" }),
 		});
 
@@ -171,11 +171,11 @@ describe("applyTemplate", () => {
 		expect(assets().length).toBe(editor.children.length - 1);
 	});
 
-	it("pins each prebuilt avatar on its cast element, fresh on arrival", () => {
+	it("pins each prebuilt avatar on its character asset, fresh on arrival", () => {
 		apply("pov-life");
-		const cast = findAsset(assets(), "cast", "Protagonist");
-		if (!cast) throw new Error("The template cast no Protagonist");
-		const node = buildNode(cast, buildContext());
+		const character = findAsset(assets(), "asset_character", "Protagonist");
+		if (!character) throw new Error("The template has no Protagonist");
+		const node = buildNode(character, buildContext());
 		const snapshot = queue.getElementSnapshot(node.id);
 
 		expect(snapshot.result?.imageUrl).toBe(

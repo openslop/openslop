@@ -14,7 +14,7 @@ export interface TemplateShowcase {
 	examplePrompt: string;
 }
 
-/** A character's voice and look, and the prebuilt avatar their cast element is given. */
+/** A character's voice and look, and the prebuilt avatar their asset is given. */
 type TemplateCharacter = Voice & {
 	appearance: string;
 	avatar?: string;
@@ -76,7 +76,7 @@ export const TEMPLATES: Template[] = [
 		systemPrompt: dedent`
 # Important
 - The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images and videos where appropriate.
-- The Protagonist is already in the cast: use him like a regular character in the story.
+- The Protagonist is already one of the characters: use him like a regular character in the story.
 - Never mention any specific ages in the image and video prompts, just generic ones like young man.
 		`,
 		exampleText: dedent`
@@ -411,7 +411,7 @@ Add motion to all images and videos. All narrations should have speed="slow".
 - This is an Explainer: every visual, including every title card, is a <video>. Nobody speaks inside the videos; the narrator carries every word.
 - Every video is a single continuous shot labelled Shot 1, with one camera move or a static frame. Never add a Shot 2.
 - The main character is always called Ethan, and Ethan must always be present in the character list of videos where relevant.
-- Ethan is already in the cast: use him like a regular character in the story.
+- Ethan is already one of the characters: use him like a regular character in the story.
 		`,
 		exampleText: dedent`
 #Music: Tense, minimal electronic pulse with a low sub bass and a slow ticking hi-hat, building unease
@@ -914,7 +914,7 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 		systemPrompt: dedent`
 # Important
 - The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images and videos where appropriate.
-- The Protagonist is already in the cast: use him like a regular character in the story.
+- The Protagonist is already one of the characters: use him like a regular character in the story.
 - Add appropriate motion to each image.
 		`,
 		exampleText: dedent`
@@ -1338,7 +1338,7 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 - Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
 - Each person's segment opens on the same portrait grid of everyone in the video, zooming smoothly into that person's portrait.
 - Every video in a person's segment shows a white banner at the top reading their name, with dates or ages as small corner text where the narration states them.
-- Never describe the real people's looks in the prompts. Their appearance belongs in their cast element; refer to them by name only.
+- Never describe the real people's looks in the prompts. Their appearance belongs in their asset_character element; refer to them by name only.
 		`,
 		exampleText: dedent`
 #Music: Slow, somber documentary piano over a soft string pad, restrained and respectful

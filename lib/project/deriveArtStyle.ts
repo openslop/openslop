@@ -16,7 +16,7 @@ export function uploadedAvatarUrls(
 	return compact(
 		avatarNames(assets).map((name) => {
 			const { result, pinned } = queue.getElementSnapshot(
-				assetId("cast", name),
+				assetId("asset_character", name),
 			);
 			return pinned ? getPrimaryUrl(result, "image") : undefined;
 		}),
