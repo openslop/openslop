@@ -22,8 +22,8 @@ export function generationInputs(
 	return {
 		...node.inputs,
 		dependencies: Object.fromEntries(
-			Object.values(node.dependsOn).map(({ node: dep }) => [
-				dep.id,
+			Object.values(node.dependsOn).map(({ node: dep, label }) => [
+				label,
 				identityOf(dep, queue),
 			]),
 		),

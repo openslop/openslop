@@ -28,12 +28,9 @@ function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 		...(current.prompt !== previous.prompt ? ["the prompt"] : []),
 		...changedKeys(current.attributes, previous.attributes).map(lowerCase),
 		...changedKeys(current.reads, previous.reads),
+		...changedKeys(current.dependencies, previous.dependencies),
 		...Object.values(node.dependsOn)
-			.filter(
-				({ node: dep }) =>
-					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
-					needsGeneration(dep, queue),
-			)
+			.filter(({ node: dep }) => needsGeneration(dep, queue))
 			.map(({ label }) => label),
 	]);
 }

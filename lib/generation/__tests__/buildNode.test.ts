@@ -175,6 +175,22 @@ describe("buildNode", () => {
 		expect(isNodeStale(resolve(img), queue)).toBe(true);
 	});
 
+	it("drops a character's avatar from the pictures showing them once it is switched off", () => {
+		const queue = new GenerationQueue();
+		const img = element("img", "image", { characters: "Alice" });
+		generateAll(queue, resolve(img));
+
+		assets = [
+			...assets.filter(({ type }) => type !== "asset_character"),
+			make("asset_character", "red hair", { name: "Alice", ...NO_AVATAR }),
+		];
+
+		expect(idsOf(img)).toEqual(["img"]);
+		expect(staleReason(resolve(img), queue)).toBe(
+			"Alice's avatar changed — regenerate to update",
+		);
+	});
+
 	it("visits a dependency shared by the element and the visual before it only once", () => {
 		const img = element("img", "image", { characters: "Alice" });
 		const video = element("vid", "video", {

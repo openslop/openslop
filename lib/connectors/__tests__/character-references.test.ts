@@ -7,6 +7,7 @@ import {
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
 import { asset } from "@/lib/canvas/__tests__/_assets";
+import { NO_AVATAR } from "@/lib/canvas/assets";
 import { buildCtx, edgesOf } from "./_state-ctx";
 
 const image = (characters: string): CanvasContentElement => ({
@@ -44,6 +45,14 @@ describe("characterAvatars", () => {
 			["avatar:Wolf", "asset_character:Wolf", "Wolf's avatar"],
 			["avatar:Red", "asset_character:Red", "Red's avatar"],
 		]);
+	});
+
+	it("depends on nothing for a character with no avatar", () => {
+		const canvas = [
+			asset("asset_character", { name: "Red", attrs: { ...NO_AVATAR } }),
+		];
+
+		expect(edgesOf(characterAvatars, image("Red"), canvas)).toEqual([]);
 	});
 });
 

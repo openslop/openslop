@@ -7,7 +7,7 @@ import {
 import { withReferences } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { dependency, dependencyPerName } from "@/lib/generation/dependency";
-import { findAsset } from "@/lib/canvas/assets";
+import { findAsset, hasAvatar } from "@/lib/canvas/assets";
 
 export type ParamsWithCharacters = {
 	prompt: string;
@@ -16,9 +16,10 @@ export type ParamsWithCharacters = {
 };
 
 export const characterAvatars = dependencyPerName(shownCharacters, (name) =>
-	dependency(`avatar:${name}`, `${name}'s avatar`, (_, { canvas }) =>
-		findAsset(canvas, "asset_character", name),
-	),
+	dependency(`avatar:${name}`, `${name}'s avatar`, (_, { canvas }) => {
+		const character = findAsset(canvas, "asset_character", name);
+		return character && hasAvatar(character) ? character : undefined;
+	}),
 );
 
 /** Avatars arrive as dependency results, so this never races the jobs making them. */
