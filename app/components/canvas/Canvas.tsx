@@ -21,7 +21,6 @@ import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
-import { AssetActions } from "./elements/AssetActions";
 import { AssetBlock } from "./elements/AssetBlock";
 import { ProjectTitle } from "./ProjectTitle";
 
@@ -79,12 +78,7 @@ export default function Canvas() {
 				onDragEnd={handleDragEnd}
 				onDragCancel={handleDragCancel}
 			>
-				{untitled && (
-					<>
-						<ProjectTitle empty />
-						<AssetActions />
-					</>
-				)}
+				{untitled && <ProjectTitle empty />}
 				<SortableContext
 					items={sceneItems}
 					strategy={verticalListSortingStrategy}

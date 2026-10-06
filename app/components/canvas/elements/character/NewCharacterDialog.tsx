@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
 import { setAsset } from "@/lib/canvas/assetOps";
+import { NARRATOR } from "@/lib/canvas/assets";
 import { useCharacterNames } from "@/lib/canvas/useAssets";
 import { normalizeCharacterName } from "@/lib/project/characterName";
 
@@ -41,7 +42,8 @@ export function NewCharacterDialog({
 				<DialogHeader>
 					<DialogTitle>New character</DialogTitle>
 					<DialogDescription>
-						Pick a name. You can fill in the details next.
+						Pick a name, or {NARRATOR} for the voice that reads the narration.
+						You can fill in the details next.
 					</DialogDescription>
 				</DialogHeader>
 

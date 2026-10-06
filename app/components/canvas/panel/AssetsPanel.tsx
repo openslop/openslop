@@ -5,7 +5,11 @@ import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useCharacterNames } from "@/lib/canvas/useAssets";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { useReferenceImages } from "../hooks/useReferenceImages";
-import { CharacterAssetTile, ReferenceTile } from "../elements/AssetTiles";
+import {
+	ArtStyleAssetTile,
+	CharacterAssetTile,
+	ReferenceTile,
+} from "../elements/AssetTiles";
 import { useAssetEditors } from "../elements/character/AssetEditProvider";
 import { PagedTiles } from "./PagedTiles";
 import { PanelCard } from "./PanelCard";
@@ -77,9 +81,20 @@ function ReferencesCard() {
 	);
 }
 
+function ArtStyleCard() {
+	return (
+		<PanelCard title="Art style">
+			<PagedTiles label="Art style" empty="">
+				{[<ArtStyleAssetTile key="asset_style" fill />]}
+			</PagedTiles>
+		</PanelCard>
+	);
+}
+
 export function AssetsPanel() {
 	return (
 		<>
+			<ArtStyleCard />
 			<CharactersCard />
 			<ReferencesCard />
 		</>

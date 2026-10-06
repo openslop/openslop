@@ -6,11 +6,11 @@ import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { removeAsset } from "@/lib/canvas/assetOps";
-import { hasAvatar } from "@/lib/canvas/assets";
+import { hasAvatar, NO_AVATAR } from "@/lib/canvas/assets";
 import { elementModelPick } from "@/lib/canvas/elementConnector";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset } from "@/lib/canvas/useAssets";
-import { updateNodeText } from "@/lib/canvas/editorOps";
+import { mergeAttrs, updateNodeText } from "@/lib/canvas/editorOps";
 import { ModelAttribute } from "../attributes/ModelAttribute";
 import { ElementGenerationProvider } from "../ElementGenerationContext";
 import {
@@ -21,7 +21,7 @@ import { ElementHistoryButton } from "../ElementHistoryButton";
 import { ElementUploadButton } from "../ElementUploadButton";
 import { OutputPreview } from "../OutputPreview";
 import { AssetDialog } from "./AssetDialog";
-import { TextAreaField } from "./fields";
+import { SwitchField, TextAreaField } from "./fields";
 import { VoiceEditor } from "./VoiceEditor";
 
 export function CharacterEditModal({
@@ -59,6 +59,15 @@ export function CharacterEditModal({
 				</Button>
 			}
 		>
+			<SwitchField
+				label="Avatar"
+				checked={hasAvatar(character)}
+				onCheckedChange={(on) =>
+					mergeAttrs(editor, character.id, {
+						avatar: on ? null : NO_AVATAR.avatar,
+					})
+				}
+			/>
 			{hasAvatar(character) && (
 				<ElementGenerationProvider element={character}>
 					<div className="grid gap-4 sm:grid-cols-2">

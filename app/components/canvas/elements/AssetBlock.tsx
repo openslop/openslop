@@ -5,7 +5,6 @@ import { useFocused, useSelected, type RenderElementProps } from "slate-react";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import type { AssetElement, AssetType } from "@/lib/canvas/types";
 import { ProjectTitle } from "../ProjectTitle";
-import { AssetActions } from "./AssetActions";
 import {
 	CharacterAssetTile,
 	ReferenceAssetTiles,
@@ -37,7 +36,6 @@ const VIEWS: Record<AssetType, (props: ViewProps) => ReactNode> = {
 			<ProjectTitle empty={getElementBodyText(element) === ""}>
 				{children}
 			</ProjectTitle>
-			<AssetActions />
 		</div>
 	),
 	asset_style: tile(({ selected }) => (

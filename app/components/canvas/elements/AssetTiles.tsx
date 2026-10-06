@@ -1,7 +1,7 @@
 "use client";
 
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
-import { hasAvatar, NARRATOR } from "@/lib/canvas/assets";
+import { hasAvatar } from "@/lib/canvas/assets";
 import { useAsset, useCharacterNames } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { useReferenceImages } from "../hooks/useReferenceImages";
@@ -10,28 +10,15 @@ import { useAssetEditors } from "./character/AssetEditProvider";
 
 type TileProps = { selected?: boolean; fill?: boolean };
 
-export function ArtStyleAssetTile({ selected }: TileProps) {
+export function ArtStyleAssetTile(tile: TileProps) {
 	const { editAsset } = useAssetEditors();
 	return (
 		<AssetTile
 			name="Art style"
 			Icon={Palette}
 			fallback="icon"
-			selected={selected}
 			onEdit={() => editAsset("asset_style")}
-		/>
-	);
-}
-
-/** The narrator before it has an asset: editing it gives the narrator one. */
-export function NarratorTile() {
-	const { editSpeaker } = useAssetEditors();
-	return (
-		<AssetTile
-			name={NARRATOR}
-			Icon={Mic}
-			fallback="icon"
-			onEdit={() => editSpeaker()}
+			{...tile}
 		/>
 	);
 }

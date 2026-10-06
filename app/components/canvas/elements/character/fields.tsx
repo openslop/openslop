@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SelectMenuItem, SelectMenuTrigger } from "@/components/ui/select-menu";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
@@ -64,6 +65,26 @@ export function TextAreaField({
 				placeholder={placeholder}
 				className="grow resize-none"
 			/>
+		</div>
+	);
+}
+
+export function SwitchField({
+	label,
+	checked,
+	onCheckedChange,
+}: {
+	label: string;
+	checked: boolean;
+	onCheckedChange: (checked: boolean) => void;
+}) {
+	const id = useId();
+	return (
+		<div className="flex min-h-6 items-center gap-2">
+			<label htmlFor={id} className="flex">
+				<FieldLabel>{label}</FieldLabel>
+			</label>
+			<Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
 		</div>
 	);
 }

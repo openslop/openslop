@@ -37,7 +37,7 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 	asset_character: [
 		`name (${NARRATOR} for the narrator)`,
-		`avatar ${enumeration([NO_AVATAR.avatar])} (only the narrator's)`,
+		`avatar ${enumeration([NO_AVATAR.avatar])} (a voice with no picture, like the narrator)`,
 	],
 };
 

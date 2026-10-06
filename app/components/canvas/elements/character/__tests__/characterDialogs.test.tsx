@@ -3,7 +3,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { characterNames, findAsset } from "@/lib/canvas/assets";
+import {
+	characterNames,
+	findAsset,
+	NARRATOR,
+	NO_AVATAR,
+} from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { content, scene } from "../../../__tests__/fixtures";
@@ -83,6 +88,22 @@ describe("NewCharacterDialog", () => {
 		expect(onCreated).toHaveBeenCalledWith("Mia");
 	});
 
+	it("makes a character named narrator the narrator, with no avatar", async () => {
+		canvas = mountOnCanvas();
+		open();
+
+		await type(
+			field<HTMLInputElement>('input[aria-label="Character name"]'),
+			"narrator",
+		);
+		await click('button[type="submit"]');
+
+		expect(
+			findAsset(canvas.editor.children, "asset_character", NARRATOR),
+		).toMatchObject({ generationAttributes: NO_AVATAR });
+		expect(onCreated).toHaveBeenCalledWith(NARRATOR);
+	});
+
 	it("refuses a name a character already has", async () => {
 		canvas = mountOnCanvas([mia("a girl")]);
 		open();
@@ -126,6 +147,26 @@ describe("CharacterEditModal", () => {
 		open();
 
 		expect(document.activeElement).toBe(field("textarea"));
+	});
+
+	it("turns a character's avatar off and back on", async () => {
+		canvas = mountOnCanvas([mia("a girl")]);
+		open();
+
+		await click('button[role="switch"]');
+		expect(
+			findAsset(canvas.editor.children, "asset_character", "Mia"),
+		).toMatchObject({
+			generationAttributes: NO_AVATAR,
+		});
+		expect(document.body.querySelector("textarea")).toBeNull();
+
+		await click('button[role="switch"]');
+		expect(
+			findAsset(canvas.editor.children, "asset_character", "Mia")
+				?.generationAttributes?.avatar,
+		).toBeUndefined();
+		expect(document.body.querySelector("textarea")).not.toBeNull();
 	});
 
 	it("renders nothing for a name no character has", () => {
