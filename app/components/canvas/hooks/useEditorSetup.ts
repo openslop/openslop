@@ -10,7 +10,7 @@ import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import type { ProjectStore } from "@/lib/project/store";
 import { useAccountStoreHandle } from "@/lib/user/AccountStoreProvider";
 import type { AccountStore } from "@/lib/user/accountStore";
-import { withAssets } from "../plugins/withAssets";
+import { withHead } from "../plugins/withHead";
 import { withLayout } from "../plugins/withLayout";
 import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";
@@ -26,7 +26,7 @@ function createCanvasEditor(
 		withHistory,
 		withReact,
 		withLayout,
-		withAssets,
+		withHead,
 		withScenes,
 		withFlatPaste,
 		withNodeId,
@@ -37,7 +37,7 @@ function createCanvasEditor(
 			project: project.getState().models,
 			account: account.getState().models,
 		});
-	if (script) applyScriptToEditor(editor, script, sceneId);
+	applyScriptToEditor(editor, script, sceneId);
 	return editor;
 }
 

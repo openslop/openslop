@@ -1,7 +1,6 @@
 import { Element } from "slate";
 import {
 	ASSET_TYPES,
-	CANVAS_ELEMENT_TYPES,
 	ELEMENT_TYPES,
 	type AssetElement,
 	type AssetType,
@@ -10,12 +9,12 @@ import {
 	type ElementRole,
 	type ParsedElement,
 	type ScriptElement,
+	TITLE_TYPE,
+	type TitleElement,
 } from "./types";
 
-const ELEMENT_TYPE_NAMES: ReadonlySet<string> = CANVAS_ELEMENT_TYPES;
-
 export const isCanvasElementType = (type: string): type is CanvasElementType =>
-	ELEMENT_TYPE_NAMES.has(type);
+	Object.hasOwn(ELEMENT_TYPES, type);
 
 export const isContentElement = (node: unknown): node is CanvasContentElement =>
 	Element.isElement(node) && isCanvasElementType(node.type);
@@ -33,6 +32,15 @@ export const isAssetType = (type: string): type is AssetType =>
 
 export const isAssetElement = (node: unknown): node is AssetElement =>
 	Element.isElement(node) && isAssetType(node.type);
+
+export const isTitleElement = (node: unknown): node is TitleElement =>
+	Element.isElement(node) && node.type === TITLE_TYPE;
+
+/** The title and the asset tiles, ahead of the scenes. */
+export const isHeadElement = (
+	node: unknown,
+): node is TitleElement | AssetElement =>
+	isTitleElement(node) || isAssetElement(node);
 
 export const isScriptElement = (node: unknown): node is ScriptElement =>
 	isContentElement(node) || isAssetElement(node);

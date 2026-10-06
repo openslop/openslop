@@ -98,10 +98,8 @@ describe("withReferences", () => {
 			["x", "y", "z"],
 		],
 		["starts a list when there is none", undefined, ["y"], ["y"]],
-		["leaves no empty list behind", [], [], undefined],
+		["adds nothing when there are no urls", undefined, [], undefined],
 	])("%s", (_, own, urls, expected) => {
-		expect(withReferences(params(own), urls)).toEqual(
-			expected ? { prompt: "a", referenceImages: expected } : { prompt: "a" },
-		);
+		expect(withReferences(params(own), urls)).toEqual(params(expected));
 	});
 });

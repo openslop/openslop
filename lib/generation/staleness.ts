@@ -1,5 +1,6 @@
 import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
+import mapValues from "lodash/mapValues";
 import memoizeOne from "memoize-one";
 import { ASSET_URL_FIELDS } from "../connectors/assetUrl";
 import type { GenerationNode } from "./graph";
@@ -21,12 +22,7 @@ export function generationInputs(
 ): GenerationInputs {
 	return {
 		...node.inputs,
-		dependencies: Object.fromEntries(
-			Object.values(node.dependsOn).map(({ node: dep, label }) => [
-				label,
-				identityOf(dep, queue),
-			]),
-		),
+		dependencies: mapValues(node.dependsOn, (dep) => identityOf(dep, queue)),
 	};
 }
 
@@ -36,9 +32,8 @@ function judge(node: GenerationNode, queue: GenerationQueue): boolean {
 	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	return (
-		Object.values(node.dependsOn).some(({ node: dep }) =>
-			needsGeneration(dep, queue),
-		) || !isEqual(generationInputs(node, queue), snapshot.resultInputs)
+		Object.values(node.dependsOn).some((dep) => needsGeneration(dep, queue)) ||
+		!isEqual(generationInputs(node, queue), snapshot.resultInputs)
 	);
 }
 

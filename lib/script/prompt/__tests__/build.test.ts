@@ -169,6 +169,19 @@ describe("buildScriptPrompt", () => {
 		expect(preamble).not.toContain("# Narration Voice");
 	});
 
+	it("lists a voice-only character with their voice and no appearance", () => {
+		const preamble = projectPreamble([
+			asset("asset_character", "a hidden caller", {
+				name: "Voice",
+				...NO_AVATAR,
+				pitch: "low",
+			}),
+		]);
+
+		expect(preamble).toContain("## Voice\n\n- pitch: low");
+		expect(preamble).not.toContain("a hidden caller");
+	});
+
 	it("says nothing of a project whose canvas holds no assets", () => {
 		expect(projectPreamble([])).toBe("");
 	});

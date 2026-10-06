@@ -4,7 +4,6 @@ import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
 import {
-	assetText,
 	avatarNames,
 	characterNames,
 	findAsset,
@@ -40,8 +39,3 @@ export const useAsset = <T extends AssetType>(
 	name?: string,
 ): AssetElement<T> | undefined =>
 	useSlateSelector((editor) => findAsset(editor.children, type, name));
-
-const selectTitle = (editor: Editor) =>
-	assetText(editor.children, "asset_title");
-
-export const useProjectTitle = (): string => useSlateSelector(selectTitle);

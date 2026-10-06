@@ -6,7 +6,7 @@ import {
 	type ParamsWithPreviousVisual,
 } from "../video/plugins/previous-visual";
 import type { AssetResult, ConnectorPlugin } from "../types";
-import { edgesOf } from "./_state-ctx";
+import { dependenciesOf } from "./_state-ctx";
 
 const captureFrames = vi.hoisted(() =>
 	vi.fn(async (_url: string, frames: readonly string[]) =>
@@ -20,7 +20,7 @@ vi.mock("@/lib/connectors/video/captureFrames", () => ({
 const declaredOn = (
 	element: CanvasContentElement,
 	canvas: CanvasContentElement[] = [image, element],
-) => edgesOf(previousVisualDependency, element, canvas);
+) => dependenciesOf(previousVisualDependency, element, canvas);
 
 const video = (attrs: Record<string, string> = {}): CanvasContentElement => ({
 	id: "video-1",
@@ -36,7 +36,7 @@ const image: CanvasContentElement = {
 };
 
 const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {
-	previousVisual: {
+	"the previous visual": {
 		imageUrl: "https://img/poster.png",
 		videoUrl: "https://vid/a.mp4",
 		durationSec: 5,
@@ -44,7 +44,7 @@ const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {
 };
 
 const PREVIOUS_IMAGE_RESULT: Record<string, AssetResult> = {
-	previousVisual: { imageUrl: "https://img/sunset.png", durationSec: 0 },
+	"the previous visual": { imageUrl: "https://img/sunset.png", durationSec: 0 },
 };
 
 describe("previous-visual plugin", () => {
@@ -68,10 +68,10 @@ describe("previous-visual plugin", () => {
 
 	describe("dependencies", () => {
 		it("declares none when unlinked without a previous start frame", () => {
-			expect(declaredOn(video())).toEqual([]);
-			expect(declaredOn(video({ continuity: "false" }))).toEqual([]);
+			expect(declaredOn(video())).toEqual({});
+			expect(declaredOn(video({ continuity: "false" }))).toEqual({});
 			expect(declaredOn(video({ startFrame: "https://img/a.png" }))).toEqual(
-				[],
+				{},
 			);
 		});
 
@@ -81,16 +81,16 @@ describe("previous-visual plugin", () => {
 		])(
 			"declares the visual before the video, by document order, for %o",
 			(attrs) => {
-				expect(declaredOn(video(attrs))).toEqual([
-					["previousVisual", "img-1", "the previous visual"],
-				]);
+				expect(declaredOn(video(attrs))).toEqual({
+					"the previous visual": "img-1",
+				});
 			},
 		);
 
 		it("declares none when nothing comes before the video", () => {
 			expect(
 				declaredOn(video({ startFrame: "previous" }), [video(), image]),
-			).toEqual([]);
+			).toEqual({});
 		});
 	});
 
@@ -203,7 +203,12 @@ describe("previous-visual plugin", () => {
 			await expect(
 				before(
 					{ prompt: "slow pan", startFrame: "previous" },
-					{ previousVisual: { audioUrl: "https://a/x.mp3", durationSec: 3 } },
+					{
+						"the previous visual": {
+							audioUrl: "https://a/x.mp3",
+							durationSec: 3,
+						},
+					},
 				),
 			).rejects.toThrow(/no picture/);
 		});

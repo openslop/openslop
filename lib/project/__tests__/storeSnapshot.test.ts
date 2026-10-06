@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
-import { createProjectStore } from "../store";
-import { extractStoreSnapshot, parseStoreSnapshot } from "../storeSnapshot";
+import {
+	createProjectStore,
+	extractStoreSnapshot,
+	ProjectDataSchema,
+} from "../store";
 import { ProjectSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
+
+const parse = (raw: unknown) => ProjectDataSchema.parse(raw);
 
 const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
 
@@ -41,26 +46,25 @@ describe("storeSnapshot", () => {
 	});
 
 	it("creates the same store from an empty parsed snapshot as from nothing", () => {
-		expect(
-			extractStoreSnapshot(createProjectStore(parseStoreSnapshot(null))),
-		).toEqual(extractStoreSnapshot(createProjectStore()));
+		expect(extractStoreSnapshot(createProjectStore(parse(null)))).toEqual(
+			extractStoreSnapshot(createProjectStore()),
+		);
 	});
 });
 
-describe("parseStoreSnapshot", () => {
+describe("ProjectDataSchema", () => {
 	it("fills defaults for absent and partial rows", () => {
-		expect(parseStoreSnapshot(null)).toEqual({
+		expect(parse(null)).toEqual({
 			videoSettings: VideoSettingsSchema.parse({}),
 			settings: ProjectSettingsSchema.parse({}),
 			models: {},
 		});
 		expect(
-			parseStoreSnapshot({ videoSettings: { aspectRatio: "9:16" } })
-				.videoSettings,
+			parse({ videoSettings: { aspectRatio: "9:16" } }).videoSettings,
 		).toEqual(VideoSettingsSchema.parse({ aspectRatio: "9:16" }));
-		expect(
-			parseStoreSnapshot({ settings: { length: "under-1m" } }).settings,
-		).toEqual(ProjectSettingsSchema.parse({ length: "under-1m" }));
+		expect(parse({ settings: { length: "under-1m" } }).settings).toEqual(
+			ProjectSettingsSchema.parse({ length: "under-1m" }),
+		);
 	});
 
 	it("keeps a stored row intact and completes its video settings", () => {
@@ -69,7 +73,7 @@ describe("parseStoreSnapshot", () => {
 			transitionType: "fade" as const,
 		};
 
-		expect(parseStoreSnapshot({ videoSettings }).videoSettings).toEqual({
+		expect(parse({ videoSettings }).videoSettings).toEqual({
 			...videoSettings,
 			captions: true,
 			captionStyle: DEFAULT_CAPTION_STYLE,
@@ -78,7 +82,7 @@ describe("parseStoreSnapshot", () => {
 
 	it("keeps only the video settings, settings and models of a row that carries other fields", () => {
 		expect(
-			parseStoreSnapshot({
+			parse({
 				videoSettings: { aspectRatio: "9:16", length: "60s", format: "x" },
 				metadata: { title: "T" },
 				referenceImages: ["a.png"],
@@ -91,8 +95,6 @@ describe("parseStoreSnapshot", () => {
 	});
 
 	it("throws on a structurally invalid row", () => {
-		expect(() =>
-			parseStoreSnapshot({ videoSettings: { aspectRatio: 42 } }),
-		).toThrow();
+		expect(() => parse({ videoSettings: { aspectRatio: 42 } })).toThrow();
 	});
 });

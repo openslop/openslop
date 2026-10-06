@@ -1,9 +1,6 @@
 import { z } from "zod";
 import type { AssetType, ScriptElement } from "@/lib/canvas/types";
-import type {
-	DependencyDeclaration,
-	DependencyResults,
-} from "@/lib/generation/dependency";
+import type { DependencyResults } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspectRatio";
@@ -95,17 +92,9 @@ export interface PluginContext {
 	dependencies?: DependencyResults;
 	/** What the node's plugins read, as its inputs recorded it. */
 	reads?: Record<string, string>;
-	/** The pair the connector runs on. */
-	model?: ModelRef;
 	/** Aborts when the caller cancels the generation. */
 	signal?: AbortSignal;
 }
-
-/** The parts of a plugin context the caller supplies per generation. */
-export type GenerationContext = Pick<
-	PluginContext,
-	"dependencies" | "reads" | "signal"
->;
 
 /** Attributes to write onto an asset before generating, adding it when there is none. */
 export type AssetWrite = {
@@ -120,7 +109,10 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * Declaring a node is what makes the element wait for it, go stale with it
 	 * and receive its result; an undeclared read goes stale-blind.
 	 */
-	dependencies?: readonly DependencyDeclaration[];
+	dependencies?(
+		element: ScriptElement,
+		ctx: BuildContext,
+	): Record<string, ScriptElement>;
 	/**
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.

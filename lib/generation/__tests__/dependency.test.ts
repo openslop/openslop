@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ScriptElement } from "@/lib/canvas/types";
-import { dependency, dependencyPerName, reading } from "../dependency";
+import { dependency, reading } from "../dependency";
 import { EMPTY_CONTEXT } from "./_context";
 
 const named = (id: string, name: string): ScriptElement =>
@@ -11,28 +11,21 @@ const mia = named("mia", "Mia");
 const bob = named("bob", "Bob");
 const ctx = { ...EMPTY_CONTEXT, canvas: [mia, bob] };
 
-const perName = dependencyPerName(
-	() => ["Mia", "Ghost", "Bob"],
-	(name) =>
-		dependency(`of:${name}`, `${name}'s`, (_, { canvas }) =>
-			canvas.find((element) => element.generationAttributes?.name === name),
-		),
+const bobs = dependency("Bob's", (_, { canvas }) =>
+	canvas.find((element) => element.generationAttributes?.name === "Bob"),
 );
 
-describe("dependencyPerName", () => {
-	it("declares one edge per listed name that picks an element, keyed by that name", () => {
-		expect(perName.edges(mia, ctx)).toEqual([
-			["of:Mia", mia, "Mia's"],
-			["of:Bob", bob, "Bob's"],
-		]);
+describe("dependency", () => {
+	it("declares the element it picks under its label, and nothing when it picks none", () => {
+		expect(bobs.dependencies(mia, ctx)).toEqual({ "Bob's": bob });
+		expect(bobs.dependencies(mia, { ...ctx, canvas: [mia] })).toEqual({});
 	});
 
-	it("reads each result back by the name it was declared for", () => {
+	it("reads back the result handed over under its label", () => {
 		const result = { durationSec: 0, imageUrl: "https://img/bob.png" };
-		const dependencies = { "of:Bob": result };
 
-		expect(perName.read("Bob", { dependencies })).toBe(result);
-		expect(perName.read("Mia", { dependencies })).toBeUndefined();
+		expect(bobs.result({ dependencies: { "Bob's": result } })).toBe(result);
+		expect(bobs.result({ dependencies: {} })).toBeUndefined();
 	});
 });
 

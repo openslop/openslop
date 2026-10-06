@@ -88,7 +88,7 @@ function regenerateImageFromItsCard() {
 
 const queuedImage = (spy: ReturnType<typeof vi.spyOn>) => {
 	const roots = spy.mock.calls[0]?.[0] as GenerationNode[];
-	return roots[0]?.dependsOn.previousVisual?.node;
+	return roots[0]?.dependsOn["the previous visual"];
 };
 
 let enqueue: ReturnType<typeof vi.spyOn>;

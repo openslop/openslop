@@ -1,15 +1,8 @@
 import type { ScriptElement } from "@/lib/canvas/types";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import type {
-	ConnectorPlugin,
-	ModelRef,
-	PluginContext,
-} from "@/lib/connectors/types";
-import type {
-	DependencyDeclaration,
-	DependencyResults,
-} from "@/lib/generation/dependency";
+import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
+import mapValues from "lodash/mapValues";
+import type { DependencyResults } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { ProjectData } from "@/lib/project/store";
 import { ProjectSettingsSchema } from "@/lib/project/types";
@@ -40,12 +33,10 @@ export const buildCtx = (
 export const pluginCtx = ({
 	reads = {},
 	dependencies = {},
-	model = DEFAULT_MODELS.tts,
 }: {
 	reads?: Record<string, string>;
 	dependencies?: DependencyResults;
-	model?: ModelRef;
-} = {}): PluginContext => ({ reads, dependencies, model });
+} = {}): PluginContext => ({ reads, dependencies });
 
 export const readsOf = (
 	plugin: Pick<ConnectorPlugin, "reads">,
@@ -54,11 +45,12 @@ export const readsOf = (
 	state?: ProjectData,
 ) => plugin.reads?.(element, buildCtx(canvas, { state })) ?? {};
 
-export const edgesOf = (
-	declaration: DependencyDeclaration,
+export const dependenciesOf = (
+	plugin: Pick<ConnectorPlugin, "dependencies">,
 	element: ScriptElement,
 	canvas: ScriptElement[] = [],
 ) =>
-	declaration
-		.edges(element, buildCtx(canvas))
-		.map(([key, target, label]) => [key, target.id, label]);
+	mapValues(
+		plugin.dependencies?.(element, buildCtx(canvas)) ?? {},
+		({ id }) => id,
+	);

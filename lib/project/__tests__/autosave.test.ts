@@ -12,10 +12,10 @@ import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
 import type { ProjectContent } from "../projectDocument";
 import {
 	createProjectStore,
+	extractStoreSnapshot,
 	type ProjectData,
 	type ProjectStore,
 } from "../store";
-import { extractStoreSnapshot } from "../storeSnapshot";
 
 const saveProject = vi.hoisted(() => vi.fn());
 vi.mock("../api", () => ({ saveProject }));

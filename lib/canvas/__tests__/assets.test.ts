@@ -171,15 +171,6 @@ describe("voiceOf", () => {
 	});
 });
 
-describe("assetText of the title", () => {
-	it("is the title asset's text, or empty with no title", () => {
-		expect(
-			assetText([asset("asset_title", { text: "Night shift" })], "asset_title"),
-		).toBe("Night shift");
-		expect(assetText([scene], "asset_title")).toBe("");
-	});
-});
-
 describe("characterVoice and voiceAttrs", () => {
 	it("round-trip a voice through a character's attributes, apart from its image model", () => {
 		const voice = {

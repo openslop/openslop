@@ -27,6 +27,7 @@ import { createCanvasNode } from "../createCanvasNode";
 import { shownCharacters } from "../characterNames";
 import { findNodeById } from "../editorOps";
 import { getContentElements } from "../scenes";
+import { createTitle } from "../title";
 import type { CanvasContentElement, SceneElement } from "../types";
 import { asset, references } from "./_assets";
 
@@ -96,15 +97,15 @@ describe("insertAsset", () => {
 		},
 	);
 
-	it("puts the title on top", () => {
+	it("keeps the title on top", () => {
 		const editor = makeEditor([
-			asset("asset_style"),
+			createTitle("Moon"),
 			scene("s1", narration("n1")),
 		]);
 
-		insertAsset(editor, asset("asset_title"));
+		insertAsset(editor, asset("asset_style"));
 
-		expect(ids(editor.children)).toEqual(["asset_title", "asset_style", "s1"]);
+		expect(ids(editor.children)).toEqual(["title", "asset_style", "s1"]);
 	});
 });
 

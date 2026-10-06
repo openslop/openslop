@@ -18,9 +18,9 @@ function statesOf(states: ElementState[]): string[] {
 
 export const readScript = defineTool({
 	description: dedent`
-	  Read the project: the canvas as XML with the \`id\` of every element, first the assets
-	  (the title, each character as an asset_character element with their voice, the art style and the
-	  reference images), then the script scene by scene. After it, the render settings (the
+	  Read the project: the canvas as XML with the \`id\` of every element, first the title, then
+	  the assets (each character as an asset_character element with their voice, the art style and
+	  the reference images), then the script scene by scene. After it, the render settings (the
 	  language, target length, format, template and aspect ratio), and where each generated
 	  element stands: ungenerated, queued, generating, generated, stale (and why), failed (and
 	  the error), or pinned to an upload.

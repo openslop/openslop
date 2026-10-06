@@ -125,11 +125,7 @@ describe("resolveElementConnector for a character asset", () => {
 
 describe("resolveElementConnector for metadata", () => {
 	it("throws, since metadata never generates", () => {
-		for (const type of [
-			"asset_title",
-			"asset_style",
-			"asset_references",
-		] as const)
+		for (const type of ["asset_style", "asset_references"] as const)
 			expect(() => resolveElementConnector(asset(type), registry, [])).toThrow(
 				/generates nothing/,
 			);
@@ -181,11 +177,7 @@ describe("asset schemas", () => {
 	});
 
 	it("gives every asset but a character nothing to set beside its text", () => {
-		for (const type of [
-			"asset_title",
-			"asset_style",
-			"asset_references",
-		] as const)
+		for (const type of ["asset_style", "asset_references"] as const)
 			expect(attributeSchemaFor(type, {}).keys).toEqual([]);
 	});
 

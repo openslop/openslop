@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useAsset, useCharacters } from "@/lib/canvas/useAssets";
@@ -14,29 +15,58 @@ import { useAssetEditors } from "../elements/character/AssetEditProvider";
 import { PagedTiles } from "./PagedTiles";
 import { PanelCard } from "./PanelCard";
 
+function AssetCard({
+	title,
+	empty,
+	add,
+	children,
+}: {
+	title: string;
+	empty: string;
+	add?: { label: string; onClick: () => void; busy?: boolean };
+	children: ReactNode[];
+}) {
+	return (
+		<PanelCard
+			title={title}
+			action={
+				add && (
+					<TooltipIconButton
+						label={add.label}
+						size="header"
+						variant="quiet"
+						disabled={add.busy}
+						onClick={add.onClick}
+					>
+						{add.busy ? (
+							<Loader2 size={14} className="animate-spin" />
+						) : (
+							<Plus size={14} />
+						)}
+					</TooltipIconButton>
+				)
+			}
+		>
+			<PagedTiles label={title} empty={empty}>
+				{children}
+			</PagedTiles>
+		</PanelCard>
+	);
+}
+
 function CharactersCard() {
 	const { openCreateCharacter } = useAssetEditors();
 	const characters = useCharacters();
 	return (
-		<PanelCard
+		<AssetCard
 			title="Characters"
-			action={
-				<TooltipIconButton
-					label="Add character"
-					size="header"
-					variant="quiet"
-					onClick={openCreateCharacter}
-				>
-					<Plus size={14} />
-				</TooltipIconButton>
-			}
+			empty="No characters yet"
+			add={{ label: "Add character", onClick: openCreateCharacter }}
 		>
-			<PagedTiles label="Characters" empty="No characters yet">
-				{characters.map((character) => (
-					<CharacterAssetTile key={character.id} character={character} fill />
-				))}
-			</PagedTiles>
-		</PanelCard>
+			{characters.map((character) => (
+				<CharacterAssetTile key={character.id} character={character} fill />
+			))}
+		</AssetCard>
 	);
 }
 
@@ -47,26 +77,17 @@ function ReferencesCard() {
 		onUpload: add,
 	});
 	return (
-		<PanelCard
-			title="References"
-			action={
-				<TooltipIconButton
-					label="Add reference image"
-					size="header"
-					variant="quiet"
-					disabled={uploading}
-					onClick={openPicker}
-				>
-					{uploading ? (
-						<Loader2 size={14} className="animate-spin" />
-					) : (
-						<Plus size={14} />
-					)}
-				</TooltipIconButton>
-			}
-		>
+		<>
 			{inputElement}
-			<PagedTiles label="References" empty="No reference images yet">
+			<AssetCard
+				title="References"
+				empty="No reference images yet"
+				add={{
+					label: "Add reference image",
+					onClick: openPicker,
+					busy: uploading,
+				}}
+			>
 				{urls.map((url, index) => (
 					<ReferenceTile
 						key={`${index}:${url}`}
@@ -76,8 +97,8 @@ function ReferencesCard() {
 						fill
 					/>
 				))}
-			</PagedTiles>
-		</PanelCard>
+			</AssetCard>
+		</>
 	);
 }
 
@@ -85,25 +106,17 @@ function ArtStyleCard() {
 	const { editAsset } = useAssetEditors();
 	const hasStyle = useAsset("asset_style") !== undefined;
 	return (
-		<PanelCard
+		<AssetCard
 			title="Art style"
-			action={
-				!hasStyle && (
-					<TooltipIconButton
-						label="Add art style"
-						size="header"
-						variant="quiet"
-						onClick={() => editAsset("asset_style")}
-					>
-						<Plus size={14} />
-					</TooltipIconButton>
-				)
+			empty="No art style yet"
+			add={
+				hasStyle
+					? undefined
+					: { label: "Add art style", onClick: () => editAsset("asset_style") }
 			}
 		>
-			<PagedTiles label="Art style" empty="No art style yet">
-				{hasStyle ? [<ArtStyleAssetTile key="asset_style" fill />] : []}
-			</PagedTiles>
-		</PanelCard>
+			{hasStyle ? [<ArtStyleAssetTile key="asset_style" fill />] : []}
+		</AssetCard>
 	);
 }
 

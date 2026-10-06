@@ -12,13 +12,11 @@ import { NewCharacterDialog } from "./NewCharacterDialog";
 
 export type AssetEditors = {
 	/** Opens the asset's dialog, adding the asset first when there is none. */
-	editAsset: (type: ModalAsset, name?: string) => void;
+	editAsset: (type: AssetType, name?: string) => void;
 	openCreateCharacter: () => void;
 };
 
 type DialogProps = { name?: string; onClose: () => void };
-
-type ModalAsset = Exclude<AssetType, "asset_title">;
 
 const characterDialog = ({ name = "", onClose }: DialogProps) => (
 	<CharacterEditModal key={name} name={name} onClose={onClose} />
@@ -29,7 +27,7 @@ const artStyleDialog = ({ onClose }: DialogProps) => (
 );
 
 /** The dialog each asset type is edited in. A character's look and voice share one. */
-const ASSET_DIALOGS: Record<ModalAsset, (props: DialogProps) => ReactNode> = {
+const ASSET_DIALOGS: Record<AssetType, (props: DialogProps) => ReactNode> = {
 	asset_character: characterDialog,
 	asset_style: artStyleDialog,
 	asset_references: artStyleDialog,
@@ -38,7 +36,7 @@ const ASSET_DIALOGS: Record<ModalAsset, (props: DialogProps) => ReactNode> = {
 /** The one asset dialog open at a time, so two can never stack. */
 type AssetEdit =
 	| { kind: "create" }
-	| { kind: "edit"; type: ModalAsset; name?: string };
+	| { kind: "edit"; type: AssetType; name?: string };
 
 const [AssetEditContext, useAssetEditors] =
 	createRequiredContext<AssetEditors>("AssetEditProvider");

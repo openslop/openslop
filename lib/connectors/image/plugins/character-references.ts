@@ -6,7 +6,7 @@ import {
 } from "@/lib/canvas/characterNames";
 import { withReferences } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { dependency, dependencyPerName } from "@/lib/generation/dependency";
+import { dependency } from "@/lib/generation/dependency";
 import { findAsset, hasAvatar } from "@/lib/canvas/assets";
 
 export type ParamsWithCharacters = {
@@ -15,25 +15,28 @@ export type ParamsWithCharacters = {
 	[CHARACTERS_ATTR]?: string;
 };
 
-export const characterAvatars = dependencyPerName(shownCharacters, (name) =>
-	dependency(`avatar:${name}`, `${name}'s avatar`, (_, { canvas }) => {
+const characterAvatar = (name: string) =>
+	dependency(`${name}'s avatar`, (_, { canvas }) => {
 		const character = findAsset(canvas, "asset_character", name);
 		return character && hasAvatar(character) ? character : undefined;
-	}),
-);
+	});
 
 /** Avatars arrive as dependency results, so this never races the jobs making them. */
 export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCharacters> {
 	return {
 		name: "character-references",
-		dependencies: [characterAvatars],
+		dependencies: (element, ctx) =>
+			Object.assign(
+				{},
+				...shownCharacters(element).map((name) =>
+					characterAvatar(name).dependencies(element, ctx),
+				),
+			),
 		beforeGenerate(params, ctx) {
 			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
-			if (!characters) return params;
-
 			const avatars = compact(
 				parseCharacterNames(characters).map(
-					(name) => characterAvatars.read(name, ctx)?.imageUrl,
+					(name) => characterAvatar(name).result(ctx)?.imageUrl,
 				),
 			);
 			if (avatars.length === 0) return rest;

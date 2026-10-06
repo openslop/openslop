@@ -21,7 +21,7 @@ import { DEFAULT_TTS_LANGUAGE } from "./enums";
 
 export const VOICE_SEARCH_KEYS = [...VOICE_TRAITS, "query"] as const;
 
-const voiceLabel = (name = NARRATOR) => `${name}'s voice`;
+const voiceLabel = (name: string) => `${name}'s voice`;
 
 const CHOSEN_VOICE_KEYS = ["provider", "model", "voiceId"] as const;
 

@@ -1,5 +1,4 @@
-import type { AssetPatch } from "@/lib/canvas/assetOps";
-import type { AssetElement, AssetType, ElementType } from "@/lib/canvas/types";
+import type { AssetElement, ElementType } from "@/lib/canvas/types";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementState } from "../elementState";
 import type { ElementLength } from "@/lib/render/elementLengths";
@@ -34,11 +33,7 @@ export type AgentToolContext = {
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
-	setAsset: (
-		type: AssetType,
-		name: string | undefined,
-		patch: AssetPatch,
-	) => void;
+	setTitle: (title: string) => void;
 	setVideoSettings: (patch: DeepPartial<VideoSettings>) => void;
 	setProjectSettings: (patch: Partial<ProjectSettings>) => void;
 };

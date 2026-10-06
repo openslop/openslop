@@ -5,10 +5,11 @@ import { getAssets } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
+import { createTitle } from "@/lib/canvas/title";
 import type { AssetElement, CanvasEditor } from "@/lib/canvas/types";
 import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { createScriptWriter } from "@/lib/script/scriptWriter";
-import { withAssets } from "../plugins/withAssets";
+import { withHead } from "../plugins/withHead";
 import { withLayout } from "../plugins/withLayout";
 import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";
@@ -32,7 +33,7 @@ const SCENES = [
 
 function written(chunks: string[], assets: AssetElement[] = []): CanvasEditor {
 	const editor = withNodeId(
-		withScenes(withAssets(withLayout(withReact(createEditor())))),
+		withScenes(withHead(withLayout(withReact(createEditor())))),
 	);
 	editor.defaultModels = () => ({});
 	editor.children = assets;
@@ -41,7 +42,7 @@ function written(chunks: string[], assets: AssetElement[] = []): CanvasEditor {
 }
 
 const scenes = (editor: CanvasEditor) =>
-	shape(editor).slice(getAssets(editor.children).length);
+	shape(editor).filter(([first]) => !first?.startsWith("!"));
 
 describe("a script streamed onto the canvas", () => {
 	it("opens a scene at each visual as the text trickles in, adding no asset", () => {
@@ -63,14 +64,14 @@ describe("a script streamed onto the canvas", () => {
 
 		const editor = written(SCRIPT.match(/[^]{1,7}/g) ?? [], assets);
 
-		expect(editor.children.slice(0, 2)).toEqual(assets);
+		expect(editor.children.slice(1, 3)).toEqual(assets);
 		expect(getAssets(editor.children)).toEqual(assets);
 		expect(scenes(editor)).toEqual(SCENES);
 	});
 
-	it("replaces the empty narration a canvas of only assets is seeded with", () => {
+	it("replaces the empty narration a canvas of only its title and assets is seeded with", () => {
 		const editor = written([]);
-		editor.children = [asset("asset_title", { text: "Moon" })];
+		editor.children = [createTitle("Moon"), asset("asset_style")];
 		editor.normalize({ force: true });
 		expect(scenes(editor)).toEqual([["narration"]]);
 

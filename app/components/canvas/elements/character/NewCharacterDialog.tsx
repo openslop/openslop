@@ -10,8 +10,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useSlateStatic } from "slate-react";
-import { setAsset } from "@/lib/canvas/assetOps";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { useCharacterNames } from "@/lib/canvas/useAssets";
 import { normalizeCharacterName } from "@/lib/project/characterName";
@@ -21,7 +19,6 @@ export function NewCharacterDialog({
 }: {
 	onCreated: (name: string) => void;
 }) {
-	const editor = useSlateStatic();
 	const names = useCharacterNames();
 	const [name, setName] = useState("");
 
@@ -32,7 +29,6 @@ export function NewCharacterDialog({
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();
 		if (!canSubmit) return;
-		setAsset(editor, "asset_character", normalized);
 		onCreated(normalized);
 	};
 

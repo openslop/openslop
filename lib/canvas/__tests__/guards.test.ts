@@ -40,12 +40,7 @@ describe("isParsedContentElement", () => {
 describe("isAssetType", () => {
 	it("accepts the asset types and nothing else", () => {
 		expect(
-			[
-				"asset_title",
-				"asset_character",
-				"asset_style",
-				"asset_references",
-			].every(isAssetType),
+			["asset_character", "asset_style", "asset_references"].every(isAssetType),
 		).toBe(true);
 		expect(["image", "scene", "toString"].some(isAssetType)).toBe(false);
 	});

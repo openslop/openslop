@@ -1,14 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { CanvasContentElement, ScriptElement } from "@/lib/canvas/types";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import {
-	characterAvatars,
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { NO_AVATAR } from "@/lib/canvas/assets";
-import { buildCtx, edgesOf } from "./_state-ctx";
+import { dependenciesOf } from "./_state-ctx";
 
 const image = (characters: string): CanvasContentElement => ({
 	id: "img",
@@ -20,31 +19,31 @@ const image = (characters: string): CanvasContentElement => ({
 function avatarResults(
 	avatars: Record<string, string>,
 ): Record<string, AssetResult> {
-	const names = Object.keys(avatars);
-	const canvas = names.map((name) => asset("asset_character", { name }));
 	return Object.fromEntries(
-		characterAvatars
-			.edges(image(names.join(", ")), buildCtx(canvas))
-			.flatMap(([key], i) => {
-				const url = avatars[names[i] ?? ""];
-				return url ? [[key, { imageUrl: url, durationSec: 0 }]] : [];
-			}),
+		Object.entries(avatars).flatMap(([name, url]) =>
+			url ? [[`${name}'s avatar`, { imageUrl: url, durationSec: 0 }]] : [],
+		),
 	);
 }
 
-describe("characterAvatars", () => {
+describe("character avatar dependencies", () => {
+	const avatarsOf = (characters: string, canvas: ScriptElement[]) =>
+		dependenciesOf(
+			createCharacterReferencesPlugin(),
+			image(characters),
+			canvas,
+		);
+
 	it("depends on each named character's character asset, and on nothing for a name no character has", () => {
 		const canvas = [
 			asset("asset_character", { name: "Red" }),
 			asset("asset_character", { name: "Wolf" }),
 		];
 
-		expect(
-			edgesOf(characterAvatars, image("Wolf, Ghost, Red"), canvas),
-		).toEqual([
-			["avatar:Wolf", "asset_character:Wolf", "Wolf's avatar"],
-			["avatar:Red", "asset_character:Red", "Red's avatar"],
-		]);
+		expect(avatarsOf("Wolf, Ghost, Red", canvas)).toEqual({
+			"Wolf's avatar": "asset_character:Wolf",
+			"Red's avatar": "asset_character:Red",
+		});
 	});
 
 	it("depends on nothing for a character with no avatar", () => {
@@ -52,7 +51,7 @@ describe("characterAvatars", () => {
 			asset("asset_character", { name: "Red", attrs: { ...NO_AVATAR } }),
 		];
 
-		expect(edgesOf(characterAvatars, image("Red"), canvas)).toEqual([]);
+		expect(avatarsOf("Red", canvas)).toEqual({});
 	});
 });
 

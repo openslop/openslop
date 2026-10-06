@@ -5,7 +5,7 @@ import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
 import {
 	ASSET_TYPES,
 	type AssetType,
-	CANVAS_ELEMENT_TYPES,
+	CanvasElementTypeSchema,
 	type ElementType,
 } from "@/lib/canvas/types";
 import {
@@ -66,14 +66,14 @@ const attributesByType = (types: readonly ElementType[]) =>
 		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
 		.join("\n");
 
-const ELEMENT_TYPE_NAMES = [...CANVAS_ELEMENT_TYPES];
+const ELEMENT_TYPE_NAMES = CanvasElementTypeSchema.options;
 const ASSET_TYPE_NAMES = Object.keys(ASSET_TYPES) as AssetType[];
 
 const ASSETS = dedent`
 	Assets sit ahead of the first scene, and every scene draws on them. They are edited the
 	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
-	asset already exists changes that one instead.
-	- asset_title: the project's name, as its text. Change it with set_title.
+	asset already exists changes that one instead. The title is not an asset: change it with
+	set_title.
 	- asset_character: a speaker, with how they sound as its voice attributes. A voice is described,
 	  never picked. \`name\` is the exact name their lines and every \`characters\` list use,
 	  and never changes. The text is what they look like, in English, written like an image

@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import type { Editor } from "slate";
 import compact from "lodash/compact";
 import { getAssets, referenceUrls } from "@/lib/canvas/assets";
-import { setAsset } from "@/lib/canvas/assetOps";
+import { setTitle } from "@/lib/canvas/title";
 import { findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
@@ -90,7 +90,7 @@ export function useAgentTools(editor: Editor) {
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
-				setAsset: (type, name, patch) => setAsset(editor, type, name, patch),
+				setTitle: (title) => setTitle(editor, title),
 				setVideoSettings: (patch) =>
 					store.getState().updateVideoSettings(patch),
 				setProjectSettings: (patch) => store.getState().updateSettings(patch),

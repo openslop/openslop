@@ -1,12 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { AssetResult, GenerationContext } from "@/lib/connectors/types";
+import type { AssetResult, PluginContext } from "@/lib/connectors/types";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { GenerationNode } from "../graph";
 
 const mockGenerate =
-	vi.fn<
-		(params: unknown, context: GenerationContext) => Promise<AssetResult>
-	>();
+	vi.fn<(params: unknown, context: PluginContext) => Promise<AssetResult>>();
 
 vi.mock("@/lib/connectors/factory", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@/lib/connectors/factory")>()),

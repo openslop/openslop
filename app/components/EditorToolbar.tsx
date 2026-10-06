@@ -6,7 +6,7 @@ import { Check, Lock, Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useProjectTitle } from "@/lib/canvas/useAssets";
+import { useProjectTitle } from "@/lib/canvas/useProjectTitle";
 import {
 	useGenerationQueue,
 	useQueueSelector,

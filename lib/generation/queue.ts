@@ -188,9 +188,9 @@ export class GenerationQueue {
 	/** The dependency holding `node` back, if any: it gates until it settles. */
 	private blockingDependency(node: GenerationNode) {
 		return Object.values(node.dependsOn).find(
-			({ node: dep }) =>
+			(dep) =>
 				this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result,
-		)?.node;
+		);
 	}
 
 	private hasCapacity(connectorType: AssetConnectorType) {
@@ -235,12 +235,10 @@ export class GenerationQueue {
 	}
 
 	private dependencyResults(node: GenerationNode): Record<string, AssetResult> {
-		const entries = Object.entries(node.dependsOn).flatMap(
-			([key, { node: dep }]) => {
-				const { result } = this.snapshots.get(dep.id);
-				return result ? [[key, result] as const] : [];
-			},
-		);
+		const entries = Object.entries(node.dependsOn).flatMap(([label, dep]) => {
+			const { result } = this.snapshots.get(dep.id);
+			return result ? [[label, result] as const] : [];
+		});
 		return Object.fromEntries(entries);
 	}
 
@@ -257,7 +255,9 @@ export class GenerationQueue {
 		this.ticker.start(elementId);
 
 		try {
-			const prepared = await prepareNode(node, context);
+			const prepared = await prepareNode(node, context, signal);
+			if (this.blockingDependency(prepared))
+				return this.requeue(prepared, context);
 			const inputs = generationInputs(prepared, this);
 			const result = await generateForElement(
 				prepared,
@@ -286,6 +286,13 @@ export class GenerationQueue {
 		} finally {
 			if (!signal.aborted) this.finalizeJob(elementId);
 		}
+	}
+
+	/** A dependency the prepare step brought in runs first, and the job waits for it. */
+	private requeue(node: GenerationNode, context: () => BuildContext) {
+		this.active.delete(node.id);
+		this.snapshots.resetToIdle(node.id);
+		this.enqueueGraph([node], context);
 	}
 
 	private finalizeJob(elementId: string) {

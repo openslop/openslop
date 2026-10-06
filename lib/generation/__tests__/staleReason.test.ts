@@ -1,14 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { ConnectorConfig } from "@/lib/connectors/types";
-import {
-	type Dependency,
-	type GenerationJob,
-	type GenerationNode,
-} from "../graph";
+import { type GenerationJob, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { staleReason } from "../staleReason";
-import { byId } from "./_graph";
 
 const config: ConnectorConfig = {};
 
@@ -18,12 +13,12 @@ function node(
 		prompt = id,
 		attributes = {},
 		reads = {},
-		dependsOn = [],
+		dependsOn = {},
 	}: {
 		prompt?: string;
 		attributes?: Record<string, string>;
 		reads?: Record<string, string>;
-		dependsOn?: (GenerationNode | Dependency)[];
+		dependsOn?: Record<string, GenerationNode>;
 	} = {},
 ): GenerationNode {
 	const job: GenerationJob = {
@@ -36,7 +31,7 @@ function node(
 	return {
 		id,
 		inputs: { prompt, attributes, reads },
-		dependsOn: byId(dependsOn),
+		dependsOn,
 		job,
 	};
 }
@@ -88,7 +83,7 @@ describe("staleReason", () => {
 		const queue = new GenerationQueue();
 		const avatar = node("asset_character:Red");
 		const image = node("a", {
-			dependsOn: [{ node: avatar, label: "Red's avatar" }],
+			dependsOn: { "Red's avatar": avatar },
 		});
 		commit(queue, avatar, "red.png");
 		commit(queue, image, "a.png");
@@ -119,7 +114,7 @@ describe("staleReason", () => {
 			node("asset_character:Red", { reads: { "the art style": style } });
 		const image = (style: string) =>
 			node("a", {
-				dependsOn: [{ node: avatar(style), label: "Red's avatar" }],
+				dependsOn: { "Red's avatar": avatar(style) },
 			});
 
 		commit(queue, avatar("noir"), "red.png");

@@ -65,24 +65,7 @@ describe("NewCharacterDialog", () => {
 		);
 	afterEach(() => onCreated.mockClear());
 
-	it("adds a character asset under the name and hands the name on", async () => {
-		canvas = mountOnCanvas();
-		open();
-
-		await type(
-			field<HTMLInputElement>('input[aria-label="Character name"]'),
-			"Mia",
-		);
-		await click('button[type="submit"]');
-
-		expect(characterNames(canvas.editor.children)).toEqual(["Mia"]);
-		expect(canvas.editor.children[0]).toMatchObject({
-			id: "asset_character:Mia",
-		});
-		expect(onCreated).toHaveBeenCalledWith("Mia");
-	});
-
-	it("makes a character named narrator the narrator, with no avatar", async () => {
+	it("hands on the name, normalized, and adds nothing itself", async () => {
 		canvas = mountOnCanvas();
 		open();
 
@@ -92,10 +75,8 @@ describe("NewCharacterDialog", () => {
 		);
 		await click('button[type="submit"]');
 
-		expect(
-			findAsset(canvas.editor.children, "asset_character", NARRATOR),
-		).toMatchObject({ generationAttributes: NO_AVATAR });
 		expect(onCreated).toHaveBeenCalledWith(NARRATOR);
+		expect(canvas.editor.children).toEqual([]);
 	});
 
 	it("refuses a name a character already has", async () => {

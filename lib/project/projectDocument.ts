@@ -1,13 +1,16 @@
 import type { Editor } from "slate";
-import { assetText } from "@/lib/canvas/assets";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
+import { titleText } from "@/lib/canvas/title";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { applyScriptToEditor } from "./applyScript";
-import type { ProjectData, ProjectStore } from "./store";
+import {
+	extractStoreSnapshot,
+	type ProjectData,
+	type ProjectStore,
+} from "./store";
 import { deriveProjectName } from "./projectName";
-import { extractStoreSnapshot } from "./storeSnapshot";
 import { pickThumbnailUrl } from "./thumbnail";
 
 export type ProjectContent = {
@@ -50,7 +53,7 @@ export function createProjectDocument({
 		},
 
 		details: () => ({
-			name: deriveProjectName(assetText(editor.children, "asset_title")),
+			name: deriveProjectName(titleText(editor.children)),
 			thumbnail_url: pickThumbnailUrl(
 				getContentElements(editor.children),
 				queue,

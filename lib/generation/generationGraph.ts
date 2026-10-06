@@ -6,18 +6,11 @@ import { resolveElementConnector } from "@/lib/canvas/elementConnector";
 import type { ScriptElement } from "@/lib/canvas/types";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
-import type { BuildContext, Dependency, GenerationNode, NodeId } from "./graph";
-
-const sameDependencies = (
-	a: Record<string, Dependency>,
-	b: Record<string, Dependency>,
-) =>
-	shallow(Object.keys(a), Object.keys(b)) &&
-	Object.entries(a).every(([key, dependency]) => shallow(dependency, b[key]));
+import type { BuildContext, GenerationNode, NodeId } from "./graph";
 
 /** `job` is not compared: it is how a node runs, not what it reads. */
 const isUnchanged = (before: GenerationNode, after: GenerationNode) =>
-	sameDependencies(before.dependsOn, after.dependsOn) &&
+	shallow(before.dependsOn, after.dependsOn) &&
 	isEqual(before.inputs, after.inputs);
 
 export class GenerationGraph {
@@ -76,16 +69,16 @@ export class GenerationGraph {
 	}
 
 	private dependenciesOf(element: ScriptElement, plugins: ConnectorPlugin[]) {
-		const declared = plugins
-			.flatMap((plugin) => plugin.dependencies ?? [])
-			.flatMap((declaration) => declaration.edges(element, this.ctx));
-		const dependsOn: Record<string, Dependency> = {};
-		for (const [key, target, label] of declared) {
-			if (Object.hasOwn(dependsOn, key))
+		const declared = plugins.flatMap((plugin) =>
+			Object.entries(plugin.dependencies?.(element, this.ctx) ?? {}),
+		);
+		const dependsOn: Record<string, GenerationNode> = {};
+		for (const [label, target] of declared) {
+			if (Object.hasOwn(dependsOn, label))
 				throw new Error(
-					`Two dependencies of "${element.id}" share the key "${key}"`,
+					`Two dependencies of "${element.id}" share the label "${label}"`,
 				);
-			dependsOn[key] = { node: this.build(target), label };
+			dependsOn[label] = this.build(target);
 		}
 		return dependsOn;
 	}
@@ -110,6 +103,7 @@ export const createGraphFor = () => {
 export async function prepareNode(
 	node: GenerationNode,
 	context: () => BuildContext,
+	signal: AbortSignal,
 ): Promise<GenerationNode> {
 	const ctx = context();
 	const element = ctx.canvas.find(({ id }) => id === node.id);
@@ -119,6 +113,7 @@ export async function prepareNode(
 			(plugin) => plugin.prepare?.(element, ctx) ?? [],
 		),
 	);
+	signal.throwIfAborted();
 	for (const write of writes.flat()) ctx.setAsset(write);
 	return buildNode(element, context());
 }

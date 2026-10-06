@@ -9,13 +9,13 @@ import {
 import { withReact } from "slate-react";
 import { assetId } from "@/lib/canvas/types";
 import { setAsset } from "@/lib/canvas/assetOps";
-import { findAsset, assetText } from "@/lib/canvas/assets";
+import { findAsset } from "@/lib/canvas/assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import { withAssets } from "../plugins/withAssets";
+import { createTitle, titleText } from "@/lib/canvas/title";
+import { withHead } from "../plugins/withHead";
 import { content, scene } from "./fixtures";
 
-const TITLE = createCanvasNode("asset_title", { text: "Moon" });
 const STYLE = createCanvasNode("asset_style", {
 	id: assetId("asset_style"),
 	text: "noir",
@@ -30,7 +30,7 @@ const REFERENCES = createCanvasNode("asset_references", {
 });
 
 const bare = (children: Descendant[]) => {
-	const editor = withAssets(withReact(createEditor()));
+	const editor = withHead(withReact(createEditor()));
 	editor.defaultModels = () => ({});
 	editor.children = children;
 	return editor;
@@ -51,9 +51,9 @@ const types = (editor: Editor) =>
 const selectScriptStart = (editor: Editor) =>
 	Transforms.select(editor, Editor.start(editor, [indexOf(editor, "scene")]));
 
-describe("withAssets", () => {
-	it("makes every asset but the title a void", () => {
-		const editor = bare([TITLE, STYLE, CAST, REFERENCES, script()]);
+describe("withHead and the asset tiles", () => {
+	it("makes every asset a void", () => {
+		const editor = bare([STYLE, CAST, REFERENCES, script()]);
 
 		expect(
 			editor.children.flatMap((node) =>
@@ -102,20 +102,34 @@ describe("withAssets", () => {
 	});
 });
 
-describe("withAssets and the title", () => {
-	it("lets the caret in and types into the title", () => {
-		const editor = bare([TITLE, STYLE, script()]);
-		const end = Editor.end(editor, [0]);
+const titled = (children: Descendant[]) =>
+	bare([createTitle("Moon"), ...children]);
 
-		Transforms.select(editor, end);
+describe("withHead and the title", () => {
+	it("lets the caret in and types into the title", () => {
+		const editor = titled([STYLE, script()]);
+
+		Transforms.select(editor, Editor.end(editor, [0]));
 		editor.insertText(" Cat");
 
 		expect(editor.selection?.anchor.path.slice(0, 1)).toEqual([0]);
-		expect(assetText(editor.children, "asset_title")).toBe("Moon Cat");
+		expect(titleText(editor.children)).toBe("Moon Cat");
+	});
+
+	it("refuses a soft break inside the title but writes one in the script", () => {
+		const editor = titled([script()]);
+
+		Transforms.select(editor, Editor.end(editor, [0]));
+		editor.insertSoftBreak();
+		selectScriptStart(editor);
+		editor.insertSoftBreak();
+
+		expect(titleText(editor.children)).toBe("Moon");
+		expect(Editor.string(editor, [1])).toContain("\nhello");
 	});
 
 	it("refuses Enter inside the title", () => {
-		const editor = bare([TITLE, script()]);
+		const editor = titled([script()]);
 		const before = editor.children;
 		Transforms.select(editor, Editor.end(editor, [0]));
 
@@ -140,7 +154,7 @@ describe("withAssets and the title", () => {
 			},
 		],
 	])("never merges the script into the title when %s", (_, press) => {
-		const editor = bare([TITLE, script()]);
+		const editor = titled([script()]);
 		const before = editor.children;
 
 		press(editor);
@@ -149,26 +163,26 @@ describe("withAssets and the title", () => {
 	});
 
 	it("types over a selection from the title into the script without merging them", () => {
-		const editor = bare([TITLE, CAST, script()]);
+		const editor = titled([CAST, script()]);
 		Transforms.select(editor, {
-			anchor: { path: [0, 1], offset: 2 },
+			anchor: { path: [0, 0], offset: 2 },
 			focus: { path: [2, 0, 0], offset: 2 },
 		});
 
 		editor.insertText("x");
 
-		expect(assetText(editor.children, "asset_title")).toBe("Mox");
-		expect(types(editor)).toEqual(["asset_title", "scene"]);
-		expect(Editor.string(editor, [indexOf(editor, "scene")])).toBe("llo");
+		expect(titleText(editor.children)).toBe("Mox");
+		expect(types(editor)).toEqual(["title", "scene"]);
+		expect(Editor.string(editor, [1])).toBe("llo");
 	});
 
 	it("keeps the title when the whole document is deleted", () => {
-		const editor = bare([TITLE, STYLE, script()]);
+		const editor = titled([STYLE, script()]);
 		Transforms.select(editor, Editor.range(editor, []));
 
 		editor.deleteFragment();
 
-		expect(types(editor)[0]).toBe("asset_title");
+		expect(types(editor)[0]).toBe("title");
 		expect(findAsset(editor.children, "asset_style")).toBeUndefined();
 	});
 });

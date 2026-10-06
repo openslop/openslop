@@ -14,7 +14,6 @@ import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
 import { ElementHistoryButton } from "./ElementHistoryButton";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { ElementGenerationProvider } from "./ElementGenerationContext";
-import { AttributeRows } from "./AttributeRows";
 import { ELEMENT_CONFIGS } from "./elementConfigs";
 import {
 	Popover,
@@ -61,7 +60,19 @@ function ElementSettings({
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
 				<div className="mb-2 text-label font-semibold">Settings</div>
-				<AttributeRows element={element} specs={specs} />
+				<div className="flex flex-col gap-2">
+					{Object.entries(specs).map(([key, spec]) => (
+						<div key={key} className="flex items-center justify-between gap-3">
+							<span className="shrink-0 text-label">{spec.label}</span>
+							<AttributeBadge
+								element={element}
+								attrKey={key}
+								spec={spec}
+								hideLabel
+							/>
+						</div>
+					))}
+				</div>
 			</PopoverContent>
 		</Popover>
 	);

@@ -6,9 +6,14 @@ import {
 	retypeNode,
 	updateNodeText,
 } from "@/lib/canvas/editorOps";
-import { isAssetType, isContentElement } from "@/lib/canvas/guards";
+import {
+	isAssetElement,
+	isAssetType,
+	isContentElement,
+} from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { isSceneElement } from "@/lib/canvas/scenes";
+import { ASSET_TYPES } from "@/lib/canvas/types";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -69,7 +74,7 @@ function resolveInsertPath(
 	const resolvedId = anchorMap[op.anchor_id] ?? op.anchor_id;
 	const entry =
 		findNodeById(editor, resolvedId) ?? findNodeById(editor, op.anchor_id);
-	if (!entry) return null;
+	if (!entry || !isContentElement(entry[0])) return null;
 
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
 }
@@ -80,7 +85,16 @@ function applyInsert(
 	anchorMap: Record<string, string>,
 ): RefineOpResult {
 	if (isAssetType(op.type)) {
-		setAsset(editor, op.type, op.attrs?.name, op);
+		const name = op.attrs?.name;
+		if (!name !== !ASSET_TYPES[op.type].named)
+			return {
+				ok: false,
+				reason: `insert: ${op.type} ${name ? "takes no" : "needs a"} name`,
+			};
+		setAsset(editor, op.type, name, {
+			attrs: op.attrs,
+			text: op.text || undefined,
+		});
 		return OK;
 	}
 
@@ -88,7 +102,7 @@ function applyInsert(
 	if (!at) {
 		return {
 			ok: false,
-			reason: `insert: anchor "${op.anchor_id}" no longer exists`,
+			reason: `insert: no script element "${op.anchor_id}" to anchor on`,
 		};
 	}
 
@@ -120,6 +134,12 @@ function applySet(
 	const entry = findNodeById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 	const [found, at] = entry;
+
+	if (isAssetElement(found) && op.attrs && "name" in op.attrs)
+		return {
+			ok: false,
+			reason: `set: an asset's name never changes; remove "${op.id}" and insert it again`,
+		};
 
 	if (op.type && op.type !== found.type) {
 		if (!isContentElement(found))

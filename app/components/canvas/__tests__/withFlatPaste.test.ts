@@ -4,7 +4,7 @@ import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
-import { withAssets } from "../plugins/withAssets";
+import { withHead } from "../plugins/withHead";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { CanvasEditor } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
@@ -62,7 +62,7 @@ describe("withFlatPaste", () => {
 	});
 
 	it("leaves the tiles of a pasted fragment behind", () => {
-		const editor = withAssets(makeEditor());
+		const editor = withHead(makeEditor());
 		seedScene(editor, scene([content("narration", "n0")]));
 
 		editor.insertFragment([

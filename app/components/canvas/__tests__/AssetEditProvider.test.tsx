@@ -5,6 +5,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createEditor } from "slate";
 import { Slate, withReact } from "slate-react";
+import { findAsset, NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
 import {
 	AssetEditProvider,
 	useAssetEditors,
@@ -81,12 +82,23 @@ describe("AssetEditProvider", () => {
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
-	it("hands a new character to its edit dialog", () => {
+	it("adds a new character and hands it to its edit dialog", () => {
 		act(() => editors.openCreateCharacter());
 		expect(openDialogs()).toEqual(["create"]);
 
 		clickDialog();
+		expect(findAsset(editor.children, "asset_character", "Mia")).toMatchObject({
+			id: "asset_character:Mia",
+		});
 		expect(openDialogs()).toEqual(["character Mia"]);
+	});
+
+	it("adds the narrator with no avatar", () => {
+		act(() => editors.editAsset("asset_character", NARRATOR));
+
+		expect(
+			findAsset(editor.children, "asset_character", NARRATOR),
+		).toMatchObject({ generationAttributes: NO_AVATAR });
 	});
 
 	it("unmounts the dialog when it closes", () => {

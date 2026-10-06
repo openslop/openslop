@@ -7,8 +7,6 @@ import {
 	executeToolCall,
 	presentToolCall,
 } from "../tools/registry";
-import type { AssetPatch } from "@/lib/canvas/assetOps";
-import type { AssetType } from "@/lib/canvas/types";
 import {
 	ProjectSettingsSchema,
 	type DeepPartial,
@@ -28,13 +26,6 @@ import {
 import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
-
-type AssetWrite = [AssetType, string | undefined, AssetPatch];
-
-const recordAssets = (writes: AssetWrite[]) => ({
-	setAsset: (type: AssetType, name: string | undefined, patch: AssetPatch) =>
-		void writes.push([type, name, patch]),
-});
 
 const recordProjectSettings = (patches: Partial<ProjectSettings>[]) => ({
 	setProjectSettings: (patch: Partial<ProjectSettings>) =>
@@ -60,7 +51,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
-	setAsset: () => {},
+	setTitle: () => {},
 	setVideoSettings: () => {},
 	setProjectSettings: () => {},
 	...over,
@@ -154,38 +145,36 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("set_title writes onto the title element and nothing else", async () => {
-		const writes: AssetWrite[] = [];
+	it("set_title writes the title", async () => {
+		const titles: string[] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "set_title", input: { title: "Moon Cat" } },
-			context(recordAssets(writes)),
+			context({ setTitle: (title) => void titles.push(title) }),
 		);
 
-		expect(writes).toEqual([["asset_title", undefined, { text: "Moon Cat" }]]);
+		expect(titles).toEqual(["Moon Cat"]);
 		expect(outcome.ok).toBe(true);
 	});
 
-	it("set_language writes the project's language and nothing else", async () => {
-		const writes: AssetWrite[] = [];
+	it("set_language writes the project's language", async () => {
 		const settings: Partial<ProjectSettings>[] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "set_language", input: { language: "es" } },
-			context({ ...recordAssets(writes), ...recordProjectSettings(settings) }),
+			context(recordProjectSettings(settings)),
 		);
 
 		expect(settings).toEqual([{ language: "es" }]);
-		expect(writes).toEqual([]);
 		expect(outcome.ok).toBe(true);
 	});
 
 	it("refuses a call that names no title, rather than writing nothing", async () => {
-		const writes: AssetWrite[] = [];
+		const titles: string[] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "set_title", input: {} },
-			context(recordAssets(writes)),
+			context({ setTitle: (title) => void titles.push(title) }),
 		);
 
-		expect(writes).toEqual([]);
+		expect(titles).toEqual([]);
 		expect(outcome.ok).toBe(false);
 	});
 

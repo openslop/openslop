@@ -3,7 +3,7 @@ import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
 import without from "lodash/without";
 import xor from "lodash/xor";
-import { Editor, Transforms } from "slate";
+import { Editor, Element, Transforms, type Node } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/referenceImages";
 import { assetDefaults, findAsset, REFERENCE_URLS_ATTR } from "./assets";
 import { createCanvasNode } from "./createCanvasNode";
@@ -17,17 +17,20 @@ import { isAssetElement } from "./guards";
 import {
 	ASSET_TYPES,
 	assetId,
+	TITLE_TYPE,
 	type AssetElement,
 	type AssetType,
 	type ScriptElement,
 } from "./types";
 
-const ASSET_ORDER = Object.keys(ASSET_TYPES);
+const HEAD_ORDER: string[] = [TITLE_TYPE, ...Object.keys(ASSET_TYPES)];
 
-const rank = (node: unknown) =>
-	isAssetElement(node) ? ASSET_ORDER.indexOf(node.type) : ASSET_ORDER.length;
+const rank = (node: Node) => {
+	const at = Element.isElement(node) ? HEAD_ORDER.indexOf(node.type) : -1;
+	return at < 0 ? HEAD_ORDER.length : at;
+};
 
-/** Adds an asset after the others of its type, in the order `ASSET_TYPES` lists them. */
+/** Adds an asset after the title and the others of its type, in the order `ASSET_TYPES` lists them. */
 export function insertAsset(editor: Editor, asset: AssetElement): void {
 	const next = editor.children.findIndex((node) => rank(node) > rank(asset));
 	Transforms.insertNodes(editor, asset, {
@@ -35,7 +38,7 @@ export function insertAsset(editor: Editor, asset: AssetElement): void {
 	});
 }
 
-export type AssetPatch = { attrs?: AttributeChanges; text?: string };
+type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
 /** Writes the asset `type` holds under `name`, adding it when there is none. */
 export function setAsset(

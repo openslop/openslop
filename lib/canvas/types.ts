@@ -62,10 +62,6 @@ export type CanvasElementType = keyof typeof ELEMENT_TYPES;
 
 const ALL_ELEMENT_TYPES = Object.keys(ELEMENT_TYPES) as CanvasElementType[];
 
-export const CANVAS_ELEMENT_TYPES: ReadonlySet<CanvasElementType> = new Set(
-	ALL_ELEMENT_TYPES,
-);
-
 export const CanvasElementTypeSchema = z.enum(
 	ALL_ELEMENT_TYPES as [CanvasElementType, ...CanvasElementType[]],
 );
@@ -105,20 +101,16 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-export type AssetType =
-	`asset_${"title" | "style" | "character" | "references"}`;
+export const TITLE_TYPE = "title" as const;
 
-type AssetTypeSpec = {
-	connector?: AssetConnectorType;
-	/** Written in place on the canvas; the rest are tiles the caret selects whole. */
-	editable?: true;
-};
+export type AssetType = `asset_${"style" | "character" | "references"}`;
 
-/** Elements ahead of the scenes, in canvas order. Only a character's look generates; the rest are metadata. */
+type AssetTypeSpec = { connector?: AssetConnectorType; named?: true };
+
+/** Tiles between the title and the scenes, in canvas order. Only a character's look generates; the rest are metadata. */
 export const ASSET_TYPES: Record<AssetType, AssetTypeSpec> = {
-	asset_title: { editable: true },
 	asset_style: {},
-	asset_character: { connector: "image" },
+	asset_character: { connector: "image", named: true },
 	asset_references: {},
 };
 
@@ -181,11 +173,18 @@ export type SceneElement = {
 	children: CanvasContentElement[];
 };
 
-export type CanvasElement = SceneElement | ScriptElement;
+/** The project's name, written in place at the top of the canvas. */
+export type TitleElement = {
+	id: typeof TITLE_TYPE;
+	type: typeof TITLE_TYPE;
+	children: CanvasText[];
+};
+
+export type CanvasElement = TitleElement | SceneElement | ScriptElement;
 
 export type CanvasText = {
 	id: string;
-	type: ElementType;
+	type: ElementType | typeof TITLE_TYPE;
 	text: string;
 };
 

@@ -13,6 +13,7 @@ import {
 	voiceOf,
 } from "@/lib/canvas/assets";
 import { setAsset, setReferenceImages } from "@/lib/canvas/assetOps";
+import { createTitle, setTitle, titleText } from "@/lib/canvas/title";
 import { buildNode } from "@/lib/generation/generationGraph";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { getPromptText } from "@/lib/generation/inputs";
@@ -94,11 +95,11 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes the user's title and style, taking the template's style", () => {
-		setAsset(editor, "asset_title", undefined, { text: "My Draft" });
+		setTitle(editor, "My Draft");
 		setAsset(editor, "asset_style", undefined, { text: "noir" });
 		apply("pov-life");
 
-		expect(assetText(editor.children, "asset_title")).toBe("");
+		expect(titleText(editor.children)).toBe("");
 		expect(assetText(assets(), "asset_style")).toBe(
 			getTemplate("pov-life").style?.description,
 		);
@@ -148,6 +149,7 @@ describe("applyTemplate", () => {
 
 	it("leaves the script's scenes where they are", () => {
 		editor.children = [
+			createTitle(),
 			{
 				id: "scene",
 				type: "scene",
@@ -164,7 +166,7 @@ describe("applyTemplate", () => {
 		apply("pov-life");
 
 		expect(editor.children.at(-1)).toMatchObject({ id: "scene" });
-		expect(assets().length).toBe(editor.children.length - 1);
+		expect(assets().length).toBe(editor.children.length - 2);
 	});
 
 	it("pins each prebuilt avatar on its character asset, fresh on arrival", () => {

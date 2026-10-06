@@ -11,27 +11,27 @@ const MAX_NAMED = 3;
 
 const list = new Intl.ListFormat("en", { type: "conjunction" });
 
+const changedKeys = (
+	now: Record<string, unknown>,
+	then: Record<string, unknown>,
+) =>
+	union(Object.keys(now), Object.keys(then)).filter(
+		(key) => now[key] !== then[key],
+	);
+
 /** Everything about `node` that no longer matches the result it produced. */
 function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 	const previous = queue.getElementSnapshot(node.id).resultInputs;
 	if (!previous) return [];
 	const current = generationInputs(node, queue);
-
-	const changedKeys = (
-		now: Record<string, unknown>,
-		then: Record<string, unknown>,
-	) =>
-		union(Object.keys(now), Object.keys(then)).filter(
-			(key) => now[key] !== then[key],
-		);
 	return uniq([
 		...(current.prompt !== previous.prompt ? ["the prompt"] : []),
 		...changedKeys(current.attributes, previous.attributes).map(lowerCase),
 		...changedKeys(current.reads, previous.reads),
 		...changedKeys(current.dependencies, previous.dependencies),
-		...Object.values(node.dependsOn)
-			.filter(({ node: dep }) => needsGeneration(dep, queue))
-			.map(({ label }) => label),
+		...Object.entries(node.dependsOn)
+			.filter(([, dep]) => needsGeneration(dep, queue))
+			.map(([label]) => label),
 	]);
 }
 

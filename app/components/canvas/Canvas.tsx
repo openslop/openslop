@@ -1,12 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, KeyboardEvent } from "react";
-import {
-	Editable,
-	RenderElementProps,
-	useSlateSelector,
-	useSlateStatic,
-} from "slate-react";
+import { useCallback, useMemo } from "react";
+import { Editable, RenderElementProps, useSlateStatic } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -15,14 +10,13 @@ import {
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
 import { findElementById } from "@/lib/canvas/editorOps";
-import { findAsset } from "@/lib/canvas/assets";
-import { isAssetElement } from "@/lib/canvas/guards";
+import { isAssetElement, isTitleElement } from "@/lib/canvas/guards";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
 import { AssetBlock } from "./elements/AssetBlock";
-import { ProjectTitle } from "./ProjectTitle";
+import { TitleBlock } from "./elements/TitleBlock";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -37,28 +31,16 @@ export default function Canvas() {
 		handleDragCancel,
 	} = useDragAndDrop(editor);
 
-	const handleKeyDown = useCallback(
-		(event: KeyboardEvent<HTMLDivElement>) => {
-			if (event.shiftKey && event.key === "Enter") {
-				event.preventDefault();
-				editor.insertText("\n");
-			}
-		},
-		[editor],
-	);
-
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
+		if (isTitleElement(element))
+			return <TitleBlock {...props} element={element} />;
 		if (isAssetElement(element))
 			return <AssetBlock {...props} element={element} />;
 		if (isSceneElement(element))
 			return <SortableScene {...props} element={element} />;
 		return <SortableContent {...props} element={element} />;
 	}, []);
-
-	const untitled = useSlateSelector(
-		(editor) => !findAsset(editor.children, "asset_title"),
-	);
 
 	const activeElement = useMemo(
 		() =>
@@ -78,7 +60,6 @@ export default function Canvas() {
 				onDragEnd={handleDragEnd}
 				onDragCancel={handleDragCancel}
 			>
-				{untitled && <ProjectTitle empty />}
 				<SortableContext
 					items={sceneItems}
 					strategy={verticalListSortingStrategy}
@@ -86,7 +67,6 @@ export default function Canvas() {
 					<Editable
 						placeholder="Start typing your story…"
 						renderElement={renderElement}
-						onKeyDown={handleKeyDown}
 						className="font-body text-body leading-relaxed focus-ring"
 					/>
 				</SortableContext>

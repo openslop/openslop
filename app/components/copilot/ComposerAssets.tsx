@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-	CharacterAssetTiles,
+	CharacterAssetTile,
 	ReferenceAssetTiles,
 	ArtStyleAssetTile,
 } from "@/app/components/canvas/elements/AssetTiles";
@@ -11,9 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSlateSelector, useSlateStatic } from "slate-react";
 import { removeAsset } from "@/lib/canvas/assetOps";
 import { assetText } from "@/lib/canvas/assets";
+import { useCharacters } from "@/lib/canvas/useAssets";
 
 export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 	const editor = useSlateStatic();
+	const characters = useCharacters();
 	const hasArtStyle = useSlateSelector(
 		(editor) => assetText(editor.children, "asset_style") !== "",
 	);
@@ -23,7 +25,15 @@ export function ComposerAssets({ uploadingCount }: { uploadingCount: number }) {
 	return (
 		<div className="flex flex-wrap gap-2 pb-2">
 			{hasArtStyle && <ArtStyleAssetTile />}
-			<CharacterAssetTiles onRemove={setDeletingName} />
+			{characters.map((character) => (
+				<CharacterAssetTile
+					key={character.id}
+					character={character}
+					onRemove={() =>
+						setDeletingName(character.generationAttributes?.name ?? "")
+					}
+				/>
+			))}
 			<ReferenceAssetTiles />
 			{Array.from({ length: uploadingCount }).map((_, i) => (
 				<Skeleton key={i} className="aspect-square w-16 shrink-0 sm:w-20" />

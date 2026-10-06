@@ -52,7 +52,7 @@ describe("parseProjectContent", () => {
 		expect(content.generation.el1).toEqual(snapshot);
 	});
 
-	it("opens a result generated before inputs carried dependencies or reads", () => {
+	it("opens a result generated before inputs carried dependencies", () => {
 		const { pinned: _, ...legacy } = snapshot;
 		const result = { durationSec: 0, imageUrl: "a.png" };
 		const attributes = { style: "noir" };
@@ -64,7 +64,7 @@ describe("parseProjectContent", () => {
 					...legacy,
 					result,
 					connectorType: "image",
-					resultInputs: { prompt: "a sunset", attributes },
+					resultInputs: { prompt: "a sunset", attributes, reads: {} },
 				},
 			},
 		});

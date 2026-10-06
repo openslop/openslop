@@ -1,17 +1,4 @@
-import omit from "lodash/omit";
 import type { ConnectorPlugin, PluginContext } from "./types";
-
-export function requireContext<K extends keyof PluginContext>(
-	ctx: PluginContext,
-	key: K,
-	plugin: string,
-): NonNullable<PluginContext[K]> {
-	const value = ctx[key];
-	if (value === undefined) {
-		throw new Error(`${plugin} plugin requires ${key} in its context`);
-	}
-	return value;
-}
 
 type TransformHook = "beforeGenerate" | "afterGenerate" | "transformPrompt";
 
@@ -68,13 +55,15 @@ export async function runOnError(
 	}
 }
 
-/** Adds reference images after those the params already carry; params never carry an empty list. */
+/** Adds reference images after those the params already carry. */
 export function withReferences<T extends { referenceImages?: string[] }>(
 	params: T,
 	urls: string[],
 ): T {
-	const referenceImages = [...(params.referenceImages ?? []), ...urls];
-	return referenceImages.length === 0
-		? (omit(params, "referenceImages") as T)
-		: { ...params, referenceImages };
+	return urls.length === 0
+		? params
+		: {
+				...params,
+				referenceImages: [...(params.referenceImages ?? []), ...urls],
+			};
 }

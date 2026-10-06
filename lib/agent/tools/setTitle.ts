@@ -12,7 +12,7 @@ export const setTitle = defineTool({
 	icon: SlidersHorizontal,
 	label: "Naming the project",
 	execute: async ({ title }, ctx) => {
-		ctx.setAsset("asset_title", undefined, { text: title });
+		ctx.setTitle(title);
 		return `Set the title to ${title}.`;
 	},
 });

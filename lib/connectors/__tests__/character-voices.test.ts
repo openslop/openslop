@@ -71,13 +71,13 @@ const prepare = async (
 const before = async (
 	params: ParamsWithCharacterVoices,
 	canvas: ScriptElement[] = [],
-	model: ModelRef | null = SEEDANCE,
+	model: ModelRef = SEEDANCE,
 ) => {
 	if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
-	return plugin.beforeGenerate(params, {
-		...pluginCtx({ reads: readsOf(plugin, video(params.characters), canvas) }),
-		model: model ?? undefined,
-	});
+	return plugin.beforeGenerate(
+		{ ...params, ...model },
+		pluginCtx({ reads: readsOf(plugin, video(params.characters), canvas) }),
+	);
 };
 
 describe("character-voices plugin", () => {
@@ -124,6 +124,7 @@ describe("character-voices plugin", () => {
 			).resolves.toEqual({
 				prompt: "they talk",
 				characters: "Sol, Mira",
+				...SEEDANCE,
 				referenceAudios: [
 					{ url: "https://audio/v-sol.mp3", durationSec: 6, speaker: "Sol" },
 					{ url: "https://audio/v-mira.mp3", durationSec: 6, speaker: "Mira" },
@@ -152,14 +153,8 @@ describe("character-voices plugin", () => {
 			const params = { prompt: "they talk", characters };
 			await expect(
 				before(params, [voice("Sol", "v-sol")], model),
-			).resolves.toEqual(params);
+			).resolves.toEqual({ ...params, ...model });
 			expect(tts.voicePreview).not.toHaveBeenCalled();
-		});
-
-		it("fails loudly without the pair it runs on", async () => {
-			await expect(
-				before({ prompt: "they talk", characters: "Sol" }, [], null),
-			).rejects.toThrow(/requires model/);
 		});
 	});
 });

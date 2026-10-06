@@ -34,7 +34,6 @@ async function previousPictures(
 
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
 export const previousVisualDependency = dependency(
-	"previousVisual",
 	"the previous visual",
 	({ id, generationAttributes: attrs = {} }, { canvas }) =>
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
@@ -47,7 +46,7 @@ export const previousVisualDependency = dependency(
 export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPreviousVisual> {
 	return {
 		name: "previous-visual",
-		dependencies: [previousVisualDependency],
+		dependencies: previousVisualDependency.dependencies,
 		async beforeGenerate(
 			{
 				[START_FRAME_ATTR]: frame = NO_FRAME,
@@ -56,7 +55,7 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 			},
 			ctx,
 		) {
-			const source = previousVisualDependency.read(ctx);
+			const source = previousVisualDependency.result(ctx);
 			const [frameImage] =
 				frame === PREVIOUS_VISUAL
 					? await previousPictures(source, [START_FRAME])

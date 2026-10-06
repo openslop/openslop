@@ -3,7 +3,6 @@
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import { hasAvatar } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
-import { useCharacters } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import { AssetTile } from "./AssetTile";
@@ -24,27 +23,13 @@ export function ArtStyleAssetTile(tile: TileProps) {
 	);
 }
 
-export function CharacterAssetTiles({
-	onRemove,
-}: {
-	onRemove?: (name: string) => void;
-}) {
-	return useCharacters().map((character) => (
-		<CharacterAssetTile
-			key={character.id}
-			character={character}
-			onRemove={onRemove}
-		/>
-	));
-}
-
 export function CharacterAssetTile({
 	character,
 	onRemove,
 	...tile
 }: TileProps & {
 	character: AssetElement;
-	onRemove?: (name: string) => void;
+	onRemove?: () => void;
 }) {
 	const { editAsset } = useAssetEditors();
 	const name = character.generationAttributes?.name ?? "";
@@ -58,7 +43,7 @@ export function CharacterAssetTile({
 			fallback={avatar ? "initial" : "icon"}
 			status={status}
 			onEdit={() => editAsset("asset_character", name)}
-			onRemove={onRemove && (() => onRemove(name))}
+			onRemove={onRemove}
 			removeAffordance="corner"
 			{...tile}
 		/>

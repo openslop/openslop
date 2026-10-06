@@ -34,6 +34,7 @@ const element = (
 });
 
 const linked = { continuity: "true" };
+const PREVIOUS = "the previous visual";
 
 let assets: AssetElement[];
 let document: Descendant[];
@@ -47,12 +48,18 @@ const contextNow = (): BuildContext => ({
 	setAsset: () => {},
 });
 
-const twice = dependency("avatar", "Red's avatar", (_, { canvas }) =>
-	findAsset(canvas, "asset_character", "Red"),
+const { dependencies: redsAvatar } = dependency(
+	"Red's avatar",
+	(_, { canvas }) => findAsset(canvas, "asset_character", "Red"),
 );
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
-	image: { plugins: [{ name: "twice", dependencies: [twice, twice] }] },
+	image: {
+		plugins: [
+			{ name: "first", dependencies: redsAvatar },
+			{ name: "second", dependencies: redsAvatar },
+		],
+	},
 };
 
 const edit = (...elements: CanvasContentElement[]) => {
@@ -92,12 +99,10 @@ describe("GenerationGraph", () => {
 		const third = element("third", "video", "a tilt", linked);
 		edit(first, second, third);
 
-		const reached = read(second).dependsOn.previousVisual?.node;
+		const reached = read(second).dependsOn[PREVIOUS];
 
 		expect(reached?.id).toBe("first");
-		expect(
-			read(third).dependsOn.previousVisual?.node.dependsOn.previousVisual?.node,
-		).toBe(reached);
+		expect(read(third).dependsOn[PREVIOUS]?.dependsOn[PREVIOUS]).toBe(reached);
 	});
 
 	it("labels the edge to a dependency and shares the node it reaches", () => {
@@ -105,9 +110,7 @@ describe("GenerationGraph", () => {
 		const video = element("vid", "video", "a pan", linked);
 		edit(image, video);
 
-		const edge = read(video).dependsOn.previousVisual;
-		expect(edge?.label).toBe("the previous visual");
-		expect(edge?.node).toBe(read(image));
+		expect(read(video).dependsOn[PREVIOUS]).toBe(read(image));
 	});
 
 	it("keeps a node that reads as it did a revision ago", () => {
@@ -130,9 +133,7 @@ describe("GenerationGraph", () => {
 		edit(element("first", "video", "a slow pan", linked), second, narration);
 
 		expect(read(second)).not.toBe(dependent);
-		expect(read(second).dependsOn.previousVisual?.node.inputs.prompt).toBe(
-			"a slow pan",
-		);
+		expect(read(second).dependsOn[PREVIOUS]?.inputs.prompt).toBe("a slow pan");
 		expect(read(narration)).toBe(bystander);
 	});
 
@@ -146,7 +147,7 @@ describe("GenerationGraph", () => {
 		edit(other, image, video);
 
 		expect(read(video)).not.toBe(before);
-		expect(read(video).dependsOn.previousVisual?.node.id).toBe("img");
+		expect(read(video).dependsOn[PREVIOUS]?.id).toBe("img");
 	});
 
 	it("reads the assets again when they change, keeping what reads the same", () => {
@@ -169,7 +170,7 @@ describe("GenerationGraph", () => {
 		registry = UNBUILDABLE;
 		assets = [createCanvasNode("asset_character", { attrs: { name: "Red" } })];
 		edit(image);
-		const failure = 'Two dependencies of "img" share the key "avatar"';
+		const failure = `Two dependencies of "img" share the label "Red's avatar"`;
 
 		expect(() => read(image)).toThrow(failure);
 		expect(() => read(image)).toThrow(failure);
@@ -205,7 +206,7 @@ describe("prepareNode", () => {
 	const prepare = (...plugins: ConnectorPlugin[]) => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins } };
 		edit(image);
-		return prepareNode(read(image), writing);
+		return prepareNode(read(image), writing, new AbortController().signal);
 	};
 
 	beforeEach(() => {
@@ -234,15 +235,29 @@ describe("prepareNode", () => {
 		expect(isNodeStale(buildNode(image, contextNow()), queue)).toBe(false);
 	});
 
+	it("writes nothing once the job is cancelled", async () => {
+		registry = {
+			...DEFAULT_CONNECTOR_REGISTRY,
+			image: { plugins: [settling(voice("v-1"))] },
+		};
+		edit(image);
+		const controller = new AbortController();
+		const prepared = prepareNode(read(image), writing, controller.signal);
+		controller.abort();
+
+		await expect(prepared).rejects.toThrow();
+		expect(setAsset).not.toHaveBeenCalled();
+	});
+
 	it("fails loudly when the element left the canvas", async () => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins: [] } };
 		edit(image);
 		const node = read(image);
 		edit();
 
-		await expect(prepareNode(node, writing)).rejects.toThrow(
-			'Element "img" left the canvas',
-		);
+		await expect(
+			prepareNode(node, writing, new AbortController().signal),
+		).rejects.toThrow('Element "img" left the canvas');
 		expect(setAsset).not.toHaveBeenCalled();
 	});
 });

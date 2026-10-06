@@ -237,7 +237,7 @@ describe("applyRefineOp — insert", () => {
 
 		expect(result).toEqual({
 			ok: false,
-			reason: 'insert: anchor "nonexistent" no longer exists',
+			reason: 'insert: no script element "nonexistent" to anchor on',
 		});
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
@@ -757,6 +757,73 @@ describe("applyRefineOp — assets", () => {
 				"a girl with a red scarf",
 			],
 		]);
+	});
+
+	it.each([
+		[
+			{ type: "asset_character", attrs: {} },
+			"insert: asset_character needs a name",
+		],
+		[
+			{ type: "asset_style", attrs: { name: "Noir" } },
+			"insert: asset_style takes no name",
+		],
+	] as const)(
+		"refuses an asset insert named against its type: %j",
+		(op, failure) => {
+			const editor = makeCanvas([]);
+
+			expect(apply(editor, { op: "insert", text: "x", ...op })).toEqual({
+				applied: 0,
+				failures: [failure],
+			});
+			expect(getAssets(editor.children)).toEqual([]);
+		},
+	);
+
+	it("keeps an asset's description when an insert rewrites it with no text", () => {
+		const editor = makeCanvas([
+			asset("asset_character", "a girl", { name: "Mia" }),
+		]);
+
+		apply(editor, {
+			op: "insert",
+			type: "asset_character",
+			attrs: { name: "Mia", age: "adult" },
+			text: "",
+		});
+
+		expect(describeAssets(editor)[0]?.[2]).toBe("a girl");
+	});
+
+	it("refuses to rename an asset, which would orphan its id", () => {
+		const editor = makeCanvas([
+			asset("asset_character", "a girl", { name: "Mia" }),
+		]);
+
+		expect(
+			apply(editor, {
+				op: "set",
+				id: "asset_character:Mia",
+				attrs: { name: "Lumi" },
+			}).failures,
+		).toEqual([
+			'set: an asset\'s name never changes; remove "asset_character:Mia" and insert it again',
+		]);
+	});
+
+	it("refuses to anchor a script element on an asset", () => {
+		const editor = makeCanvas([asset("asset_style", "noir")]);
+
+		expect(
+			apply(editor, {
+				op: "insert",
+				anchor_id: "asset_style",
+				type: "sound",
+				text: "rain",
+			}).failures,
+		).toEqual(['insert: no script element "asset_style" to anchor on']);
+		expect(topLevelTypes(editor)).toEqual(["asset_style", "scene"]);
 	});
 
 	it("refuses to retype an asset, and says why", () => {

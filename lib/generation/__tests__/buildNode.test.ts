@@ -55,7 +55,7 @@ const idsOf = (el: ScriptElement) =>
 
 const edgesOf = (node: GenerationNode) =>
 	Object.fromEntries(
-		Object.entries(node.dependsOn).map(([key, { node: dep }]) => [key, dep.id]),
+		Object.entries(node.dependsOn).map(([label, dep]) => [label, dep.id]),
 	);
 
 const commit = (queue: GenerationQueue, node: GenerationNode, url: string) =>
@@ -111,7 +111,7 @@ describe("buildNode", () => {
 		});
 	});
 
-	it.each(["asset_title", "asset_style", "asset_references"] as const)(
+	it.each(["asset_style", "asset_references"] as const)(
 		"builds no node for a %s, which generates nothing",
 		(type) => {
 			expect(() => resolve(make(type))).toThrow(
@@ -120,7 +120,7 @@ describe("buildNode", () => {
 		},
 	);
 
-	it("keys each labelled edge by the name its plugin declared", () => {
+	it("keys each edge by the label its plugin declared", () => {
 		const img = element("img", "image");
 		const video = element("vid", "video", {
 			startFrame: "previous",
@@ -130,10 +130,9 @@ describe("buildNode", () => {
 		const node = resolveOn(video, [img, video]);
 
 		expect(edgesOf(node)).toEqual({
-			"avatar:Alice": "asset_character:Alice",
-			previousVisual: "img",
+			"Alice's avatar": "asset_character:Alice",
+			"the previous visual": "img",
 		});
-		expect(node.dependsOn.previousVisual?.label).toBe("the previous visual");
 	});
 
 	it("reads the style and the references an image is drawn with, depending on neither", () => {

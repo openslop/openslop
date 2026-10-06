@@ -9,16 +9,17 @@ import {
 import type {
 	AssetResult,
 	ConnectorPlugin,
-	GenerationContext,
+	PluginContext,
 } from "@/lib/connectors/types";
 import { createProjectStore } from "@/lib/project/store";
 import type { BuildContext } from "../graph";
+import { dependency } from "../dependency";
 import { buildNode } from "../generationGraph";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 
 const mediaGenerate =
-	vi.fn<(params: object, context: GenerationContext) => Promise<AssetResult>>();
+	vi.fn<(params: object, context: PluginContext) => Promise<AssetResult>>();
 vi.mock("@/lib/connectors/factory", async (original) => ({
 	...(await original<typeof import("@/lib/connectors/factory")>()),
 	createConnector: () => ({ generate: mediaGenerate }),
@@ -80,7 +81,7 @@ describe("running a graph", () => {
 		);
 		expect(mediaGenerate).toHaveBeenCalledTimes(2);
 		const [, imageContext] = mediaGenerate.mock.calls[1] ?? [];
-		expect(imageContext?.dependencies?.["avatar:Red"]?.imageUrl).toBe(
+		expect(imageContext?.dependencies?.["Red's avatar"]?.imageUrl).toBe(
 			"red.png",
 		);
 		expect(imageContext?.reads?.["the art style"]).toBe("noir");
@@ -117,6 +118,50 @@ describe("running a graph", () => {
 			expect(queue.getElementSnapshot("img").result).toBeTruthy(),
 		);
 		expect(isNodeStale(nodeOf("img"), queue)).toBe(true);
+	});
+
+	it("runs a dependency the prepare step brings in before the job that needs it", async () => {
+		const pullsInWave: ConnectorPlugin = {
+			name: "pulls-in-wave",
+			prepare: async () => [
+				{ type: "asset_character", name: NARRATOR, attrs: { voiceId: "v-7" } },
+			],
+			dependencies: dependency("the wave", (_, { canvas }) =>
+				findAsset(canvas, "asset_character", NARRATOR)
+					? canvas.find(({ id }) => id === "wave")
+					: undefined,
+			).dependencies,
+		};
+		registry = {
+			...DEFAULT_CONNECTOR_REGISTRY,
+			image: { plugins: [pullsInWave] },
+		};
+		canvas = [
+			createCanvasNode("video", { id: "wave", text: "a wave" }),
+			createCanvasNode("image", { id: "img", text: "a lighthouse" }),
+		];
+		const queue = new GenerationQueue();
+		mediaGenerate.mockImplementation(async ({ prompt }: { prompt?: string }) =>
+			prompt === "a wave"
+				? { videoUrl: "wave.mp4", durationSec: 4 }
+				: { imageUrl: "img.png", durationSec: 0 },
+		);
+
+		queue.enqueueGraph([nodeOf("img")], context);
+
+		await vi.waitFor(() =>
+			expect(queue.getElementSnapshot("img").result).toBeTruthy(),
+		);
+		expect(mediaGenerate.mock.calls.map(([params]) => params)).toMatchObject([
+			{ prompt: "a wave" },
+			{ prompt: "a lighthouse" },
+		]);
+		expect(mediaGenerate.mock.calls[1]?.[1].dependencies?.["the wave"]).toEqual(
+			{
+				videoUrl: "wave.mp4",
+				durationSec: 4,
+			},
+		);
 	});
 
 	describe("the prepare step", () => {

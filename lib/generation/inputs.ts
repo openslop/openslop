@@ -8,7 +8,7 @@ const NodeInputsSchema = z.object({
 	prompt: z.string(),
 	attributes: z.record(z.string(), z.union([z.string(), z.number()])),
 	/** What its plugins read off the canvas and the settings, keyed by how the user names it. */
-	reads: z.record(z.string(), z.string()).default({}),
+	reads: z.record(z.string(), z.string()),
 });
 
 export type NodeInputs = z.infer<typeof NodeInputsSchema>;

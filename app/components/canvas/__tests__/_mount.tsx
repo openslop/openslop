@@ -48,21 +48,3 @@ export const type = (
 		);
 		field.dispatchEvent(new Event("input", { bubbles: true }));
 	});
-
-/** Stands in for SelectMenu: one button per option, marked `data-option`. */
-export const SelectMenuStub = (props: {
-	onChange: (value: string) => void;
-	options: { value: string }[];
-	children: ReactNode;
-}) => (
-	<>
-		{props.children}
-		{props.options.map(({ value }) => (
-			<button
-				key={value}
-				data-option={value}
-				onClick={() => props.onChange(value)}
-			/>
-		))}
-	</>
-);

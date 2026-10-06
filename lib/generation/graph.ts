@@ -24,15 +24,12 @@ export type GenerationJob = {
 export type GenerationNode = {
 	id: NodeId;
 	inputs: NodeInputs;
-	/** Keyed by the name the declaring plugin gave the dependency, which is how its result reaches that plugin. */
-	dependsOn: Record<string, Dependency>;
+	/** Keyed by the label the declaring plugin gave the dependency, which is how its result reaches that plugin. */
+	dependsOn: Record<string, GenerationNode>;
 	job: GenerationJob;
 };
 
-/** Each dependent names `node` its own way, so `label` lives on the edge. */
-export type Dependency = { node: GenerationNode; label: string };
-
-/** Snapshots of what a build reads, so a queued job generates from what its inputs recorded. */
+/** What a build reads, and the writer `prepare` puts its assets through. */
 export type BuildContext = {
 	state: ProjectData;
 	canvas: ScriptElement[];
@@ -50,7 +47,7 @@ export function flattenGraph(roots: GenerationNode[]): GenerationNode[] {
 	const visit = (node: GenerationNode) => {
 		if (seen.has(node.id)) return;
 		seen.add(node.id);
-		for (const { node: dep } of Object.values(node.dependsOn)) visit(dep);
+		for (const dep of Object.values(node.dependsOn)) visit(dep);
 		ordered.push(node);
 	};
 	for (const root of roots) visit(root);

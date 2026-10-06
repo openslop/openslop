@@ -5,6 +5,7 @@ import {
 	setAsset,
 	setReferenceImages,
 } from "@/lib/canvas/assetOps";
+import { setTitle } from "@/lib/canvas/title";
 import { buildNode } from "@/lib/generation/generationGraph";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
@@ -26,6 +27,7 @@ export function applyTemplate(
 
 	const characters = Object.entries(template.characters ?? {});
 	Editor.withoutNormalizing(editor, () => {
+		setTitle(editor, "");
 		removeAssets(editor);
 
 		setAsset(editor, "asset_style", undefined, {

@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { GenerationSnapshotSchema } from "@/lib/generation/snapshots";
 import type { ProjectContent } from "./projectDocument";
-import { parseStoreSnapshot } from "./storeSnapshot";
+import { ProjectDataSchema } from "./store";
 
 /** A saved project, whether the project row or one of its versions. */
 const ProjectContentSchema = z.object({
 	script: z.string(),
-	store: z.unknown().transform(parseStoreSnapshot),
+	store: ProjectDataSchema,
 	generation: GenerationSnapshotSchema,
 }) satisfies z.ZodType<ProjectContent>;
 

@@ -1,5 +1,13 @@
 import dedent from "dedent";
-import { assetText, avatarNames, voiceOf } from "@/lib/canvas/assets";
+import {
+	assetText,
+	characterVoice,
+	getCharacters,
+	hasAvatar,
+	NARRATOR,
+	voiceOf,
+} from "@/lib/canvas/assets";
+import { getPromptText } from "@/lib/generation/inputs";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -15,15 +23,15 @@ function renderVoice(voice: Voice): string {
 		.join("\n");
 }
 
-function renderCharacter(assets: AssetElement[], name: string): string {
-	const appearance = assetText(assets, "asset_character", name);
+function renderCharacter(character: AssetElement<"asset_character">): string {
+	const appearance = hasAvatar(character) && getPromptText(character);
 	const body = [
-		renderVoice(voiceOf(assets, name)),
+		renderVoice(characterVoice(character)),
 		appearance && `- appearance: ${appearance}`,
 	]
 		.filter(Boolean)
 		.join("\n");
-	return `## ${name}\n\n${body}`;
+	return `## ${character.generationAttributes?.name}\n\n${body}`;
 }
 
 export function projectPreamble(assets: AssetElement[]): string {
@@ -48,14 +56,16 @@ export function projectPreamble(assets: AssetElement[]): string {
 
 			${voice}`);
 
-	const names = avatarNames(assets);
-	if (names.length > 0) {
+	const characters = getCharacters(assets).filter(
+		(character) => character.generationAttributes?.name !== NARRATOR,
+	);
+	if (characters.length > 0) {
 		sections.push(dedent`
 			# Characters
 
 			The characters. Name one exactly as written here, and never describe how one looks in a prompt:
 
-			${names.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
+			${characters.map(renderCharacter).join("\n\n")}`);
 	}
 
 	return sections.join("\n\n");
