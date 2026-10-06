@@ -5,12 +5,7 @@ import without from "lodash/without";
 import xor from "lodash/xor";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/referenceImages";
-import {
-	assetDefaults,
-	findAsset,
-	NARRATOR,
-	REFERENCE_URLS_ATTR,
-} from "./assets";
+import { assetDefaults, findAsset, REFERENCE_URLS_ATTR } from "./assets";
 import { createCanvasNode } from "./createCanvasNode";
 import {
 	CHARACTERS_ATTR,
@@ -68,11 +63,13 @@ export function setAsset(
 	if (text !== undefined) updateNodeText(editor, asset.id, text);
 }
 
-/** The character, added when there is none: the narrator when no one is named. */
-export function ensureCharacter(editor: Editor, name = NARRATOR): string {
-	if (!findAsset(editor.children, "asset_character", name))
-		setAsset(editor, "asset_character", name);
-	return name;
+/** The asset, added when there is none. */
+export function ensureAsset(
+	editor: Editor,
+	type: AssetType,
+	name?: string,
+): void {
+	if (!findAsset(editor.children, type, name)) setAsset(editor, type, name);
 }
 
 /** The project's reference images; none leaves no references element behind. */

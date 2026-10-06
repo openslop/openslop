@@ -2,7 +2,7 @@
 
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useCharacters } from "@/lib/canvas/useAssets";
+import { useAsset, useCharacters } from "@/lib/canvas/useAssets";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import {
@@ -82,10 +82,26 @@ function ReferencesCard() {
 }
 
 function ArtStyleCard() {
+	const { editAsset } = useAssetEditors();
+	const hasStyle = useAsset("asset_style") !== undefined;
 	return (
-		<PanelCard title="Art style">
-			<PagedTiles label="Art style" empty="">
-				{[<ArtStyleAssetTile key="asset_style" fill />]}
+		<PanelCard
+			title="Art style"
+			action={
+				!hasStyle && (
+					<TooltipIconButton
+						label="Add art style"
+						size="header"
+						variant="quiet"
+						onClick={() => editAsset("asset_style")}
+					>
+						<Plus size={14} />
+					</TooltipIconButton>
+				)
+			}
+		>
+			<PagedTiles label="Art style" empty="No art style yet">
+				{hasStyle ? [<ArtStyleAssetTile key="asset_style" fill />] : []}
 			</PagedTiles>
 		</PanelCard>
 	);

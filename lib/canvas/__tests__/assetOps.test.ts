@@ -5,7 +5,7 @@ import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
-	ensureCharacter,
+	ensureAsset,
 	removeAsset,
 	insertAsset,
 	removeAssets,
@@ -323,11 +323,11 @@ describe("the characters a visual shows", () => {
 	});
 });
 
-describe("ensureCharacter", () => {
-	it("adds the narrator without an avatar when no one is named", () => {
+describe("ensureAsset", () => {
+	it("adds the narrator without an avatar", () => {
 		const editor = makeEditor([scene("s1", narration("n1"))]);
 
-		expect(ensureCharacter(editor)).toBe(NARRATOR);
+		ensureAsset(editor, "asset_character", NARRATOR);
 
 		expect(ids(editor.children)).toEqual(["asset_character:Narrator", "s1"]);
 		expect(
@@ -336,10 +336,10 @@ describe("ensureCharacter", () => {
 		).toMatchObject(NO_AVATAR);
 	});
 
-	it("adds a named speaker with an avatar", () => {
+	it("adds any other character with an avatar", () => {
 		const editor = makeEditor();
 
-		expect(ensureCharacter(editor, "Mia")).toBe("Mia");
+		ensureAsset(editor, "asset_character", "Mia");
 
 		expect(
 			findAsset(editor.children, "asset_character", "Mia")
@@ -347,14 +347,22 @@ describe("ensureCharacter", () => {
 		).not.toHaveProperty("avatar");
 	});
 
-	it("leaves an existing speaker alone", () => {
+	it("adds an empty art style", () => {
+		const editor = makeEditor([scene("s1", narration("n1"))]);
+
+		ensureAsset(editor, "asset_style");
+
+		expect(ids(editor.children)).toEqual(["asset_style", "s1"]);
+	});
+
+	it("leaves an existing asset alone", () => {
 		const mia = asset("asset_character", {
 			name: "Mia",
 			attrs: { gender: "feminine" },
 		});
 		const editor = makeEditor([mia]);
 
-		ensureCharacter(editor, "Mia");
+		ensureAsset(editor, "asset_character", "Mia");
 
 		expect(editor.children).toEqual([mia]);
 	});

@@ -2,6 +2,7 @@
 
 import { Mic } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { NARRATOR } from "@/lib/canvas/assets";
 import type { CanvasContentElement } from "@/lib/canvas/types";
 import { useAssetEditors } from "./character/AssetEditProvider";
 import { HeaderIconButton } from "./HeaderIconButton";
@@ -12,8 +13,12 @@ export function ElementVoiceButton({
 }: {
 	element: CanvasContentElement;
 }) {
-	const { editCharacter } = useAssetEditors();
-	const open = () => editCharacter(element.generationAttributes?.name);
+	const { editAsset } = useAssetEditors();
+	const open = () =>
+		editAsset(
+			"asset_character",
+			element.generationAttributes?.name ?? NARRATOR,
+		);
 
 	return (
 		<SimpleTooltip label="Edit voice">

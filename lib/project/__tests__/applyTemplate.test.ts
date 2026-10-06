@@ -12,11 +12,7 @@ import {
 	voiceAttrs,
 	voiceOf,
 } from "@/lib/canvas/assets";
-import {
-	ensureCharacter,
-	setAsset,
-	setReferenceImages,
-} from "@/lib/canvas/assetOps";
+import { setAsset, setReferenceImages } from "@/lib/canvas/assetOps";
 import { buildNode } from "@/lib/generation/generationGraph";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { getPromptText } from "@/lib/generation/inputs";
@@ -129,7 +125,7 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes the user's narrator voice before applying", () => {
-		setAsset(editor, "asset_character", ensureCharacter(editor), {
+		setAsset(editor, "asset_character", NARRATOR, {
 			attrs: voiceAttrs({ accent: "british", voiceId: "v-mine" }),
 		});
 

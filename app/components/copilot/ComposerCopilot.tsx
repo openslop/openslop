@@ -30,6 +30,7 @@ import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
 import { useReferenceImages } from "@/app/components/canvas/hooks/useReferenceImages";
 import { useProject } from "@/lib/project/useProject";
+import { NARRATOR } from "@/lib/canvas/assets";
 import {
 	LANGUAGE_CHOICES,
 	languageLabel,
@@ -111,7 +112,7 @@ function AttachMenu({
 	openPicker: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateCharacter, editAsset, editCharacter } = useAssetEditors();
+	const { openCreateCharacter, editAsset } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -130,7 +131,7 @@ function AttachMenu({
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: () => editCharacter(),
+			onSelect: () => editAsset("asset_character", NARRATOR),
 		},
 		{
 			key: "art-style",

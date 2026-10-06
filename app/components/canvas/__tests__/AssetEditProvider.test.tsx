@@ -71,13 +71,13 @@ describe("AssetEditProvider", () => {
 		act(() => editors.editAsset("asset_references"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editCharacter());
+		act(() => editors.editAsset("asset_character", "Narrator"));
 		expect(openDialogs()).toEqual(["character Narrator"]);
 
 		act(() => editors.editAsset("asset_style"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editCharacter("Mia"));
+		act(() => editors.editAsset("asset_character", "Mia"));
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 

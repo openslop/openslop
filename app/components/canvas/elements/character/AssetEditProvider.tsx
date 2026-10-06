@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
-import { ensureCharacter } from "@/lib/canvas/assetOps";
+import { ensureAsset } from "@/lib/canvas/assetOps";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import type { AssetType } from "@/lib/canvas/types";
 import { ArtStyleModal } from "../style/ArtStyleModal";
@@ -11,9 +11,8 @@ import { CharacterEditModal } from "./CharacterEditModal";
 import { NewCharacterDialog } from "./NewCharacterDialog";
 
 export type AssetEditors = {
+	/** Opens the asset's dialog, adding the asset first when there is none. */
 	editAsset: (type: ModalAsset, name?: string) => void;
-	/** Opens a character's dialog, the narrator's when no one is named, adding the character first. */
-	editCharacter: (name?: string) => void;
 	openCreateCharacter: () => void;
 };
 
@@ -53,13 +52,10 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 
 	const editors = useMemo<AssetEditors>(
 		() => ({
-			editAsset: (type, name) => setEditing({ kind: "edit", type, name }),
-			editCharacter: (name) =>
-				setEditing({
-					kind: "edit",
-					type: "asset_character",
-					name: ensureCharacter(editor, name),
-				}),
+			editAsset: (type, name) => {
+				ensureAsset(editor, type, name);
+				setEditing({ kind: "edit", type, name });
+			},
 			openCreateCharacter: () => setEditing({ kind: "create" }),
 		}),
 		[editor],
@@ -75,7 +71,9 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				}}
 			>
 				{editing?.kind === "create" && (
-					<NewCharacterDialog onCreated={editors.editCharacter} />
+					<NewCharacterDialog
+						onCreated={(name) => editors.editAsset("asset_character", name)}
+					/>
 				)}
 				{editing?.kind === "edit" &&
 					ASSET_DIALOGS[editing.type]({ name: editing.name, onClose: close })}

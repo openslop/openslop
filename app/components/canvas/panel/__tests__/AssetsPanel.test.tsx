@@ -2,6 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { findAsset } from "@/lib/canvas/assets";
 import { AssetEditProvider } from "../../elements/character/AssetEditProvider";
 import { click, mountOnCanvas } from "../../__tests__/_mount";
 import { AssetsPanel } from "../AssetsPanel";
@@ -30,11 +31,24 @@ const openDialog = () =>
 	document.body.querySelector<HTMLElement>("[data-dialog]")?.dataset.dialog;
 
 describe("AssetsPanel", () => {
-	it("opens the art style from its card before the canvas has one", async () => {
+	it("adds the art style and opens it from the card's add button", async () => {
 		open();
 
-		await click('button[aria-label="Edit Art style"]');
+		await click('button[aria-label="Add art style"]');
 
+		expect(findAsset(canvas.editor.children, "asset_style")).toBeDefined();
 		expect(openDialog()).toBe("asset_style");
+	});
+
+	it("offers no second art style once there is one", async () => {
+		open();
+		await click('button[aria-label="Add art style"]');
+
+		expect(
+			document.body.querySelector('button[aria-label="Add art style"]'),
+		).toBeNull();
+		expect(
+			document.body.querySelector('button[aria-label="Edit Art style"]'),
+		).not.toBeNull();
 	});
 });
