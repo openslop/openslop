@@ -5,7 +5,6 @@ import { hasAvatar, NARRATOR } from "@/lib/canvas/assets";
 import { useAsset, useCastNames } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { useReferenceImages } from "../hooks/useReferenceImages";
-import { AddAssetTile } from "./AddAssetTile";
 import { AssetTile } from "./AssetTile";
 import { useAssetEditors } from "./character/AssetEditProvider";
 
@@ -24,28 +23,15 @@ export function ArtStyleAssetTile({ selected }: TileProps) {
 	);
 }
 
-export function AddArtStyleTile() {
-	const { editAsset } = useAssetEditors();
-	if (useAsset("style")) return null;
-	return (
-		<AddAssetTile
-			label="Art style"
-			ariaLabel="Add art style"
-			Icon={Palette}
-			onClick={() => editAsset("style")}
-		/>
-	);
-}
-
-export function AddNarratorTile() {
+/** The narrator before it has a cast: editing it gives the narrator one. */
+export function NarratorTile() {
 	const { editSpeaker } = useAssetEditors();
-	if (useAsset("cast", NARRATOR)) return null;
 	return (
-		<AddAssetTile
-			label={NARRATOR}
-			ariaLabel="Add narrator"
+		<AssetTile
+			name={NARRATOR}
 			Icon={Mic}
-			onClick={() => editSpeaker()}
+			fallback="icon"
+			onEdit={() => editSpeaker()}
 		/>
 	);
 }
