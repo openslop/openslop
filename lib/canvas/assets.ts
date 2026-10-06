@@ -1,11 +1,11 @@
 import compact from "lodash/compact";
 import isString from "lodash/isString";
-import omit from "lodash/omit";
+import mapKeys from "lodash/mapKeys";
 import pickBy from "lodash/pickBy";
 import type { Descendant } from "slate";
 import { parseReferenceImages } from "@/lib/connectors/attributes/referenceImages";
 import { getPromptText } from "@/lib/generation/inputs";
-import { VoiceSchema, VOICE_TRAITS, type Voice } from "@/lib/project/types";
+import { VoiceSchema, type Voice } from "@/lib/project/types";
 import { flatAttributes } from "./elementAttributes";
 import { isAssetElement } from "./guards";
 import { getContentElements } from "./scenes";
@@ -50,7 +50,7 @@ export const assetDefaults = (
 ): Record<string, string> =>
 	type === "asset_character" && name === NARRATOR ? NO_AVATAR : {};
 
-const characters = (
+export const getCharacters = (
 	nodes: readonly unknown[],
 ): AssetElement<"asset_character">[] =>
 	nodes.filter(
@@ -58,19 +58,18 @@ const characters = (
 			isAssetElement(node) && node.type === "asset_character",
 	);
 
-export const hasAvatar = (
-	character: AssetElement<"asset_character">,
-): boolean => character.generationAttributes?.avatar !== NO_AVATAR.avatar;
+export const hasAvatar = (character: AssetElement): boolean =>
+	character.generationAttributes?.avatar !== NO_AVATAR.avatar;
 
 const namesOf = (members: AssetElement<"asset_character">[]): string[] =>
 	compact(members.map((character) => character.generationAttributes?.name));
 
 export const characterNames = (nodes: readonly unknown[]): string[] =>
-	namesOf(characters(nodes));
+	namesOf(getCharacters(nodes));
 
 /** The characters a picture can show. */
 export const avatarNames = (nodes: readonly unknown[]): string[] =>
-	namesOf(characters(nodes).filter(hasAvatar));
+	namesOf(getCharacters(nodes).filter(hasAvatar));
 
 export const assetText = (
 	nodes: readonly unknown[],
@@ -88,50 +87,36 @@ export const referenceUrls = (nodes: readonly unknown[]): string[] =>
 		],
 	) ?? [];
 
-/** A character's voice, read off its voice-prefixed keys. */
+const VOICE_FIELDS = Object.keys(VoiceSchema.shape);
+
+const RENAMED_VOICE_FIELDS: Record<string, string> = {
+	provider: "voiceProvider",
+	model: "voiceModel",
+	description: "voiceDescription",
+};
+
+const voiceAttr = (field: string) => RENAMED_VOICE_FIELDS[field] ?? field;
+
+/** The keys a character's voice is kept under. */
+export const VOICE_KEYS = VOICE_FIELDS.map(voiceAttr);
+
+/** A character's voice, read off its voice keys. */
 export const characterVoice = (
 	character?: AssetElement<"asset_character">,
 ): Voice => {
 	const attrs = flatAttributes(character ?? {});
-	return VoiceSchema.parse({
-		...attrs,
-		provider: attrs.voiceProvider,
-		model: attrs.voiceModel,
-		description: attrs.voiceDescription,
-	});
+	return VoiceSchema.parse(
+		Object.fromEntries(
+			VOICE_FIELDS.map((field) => [field, attrs[voiceAttr(field)]]),
+		),
+	);
 };
 
-export const voiceAttrs = ({
-	provider,
-	model,
-	description,
-	...traits
-}: Partial<Voice>): Record<string, string> =>
+export const voiceAttrs = (voice: Partial<Voice>): Record<string, string> =>
 	pickBy(
-		{
-			...traits,
-			voiceProvider: provider,
-			voiceModel: model,
-			voiceDescription: description,
-		},
+		mapKeys(voice, (_, field) => voiceAttr(field)),
 		isString,
 	);
-
-const VOICE_KEYS = [
-	...VOICE_TRAITS.filter((trait) => trait !== "description"),
-	"voiceDescription",
-	"voiceProvider",
-	"voiceModel",
-	"voiceId",
-];
-
-/** What an element generates from: a character's portrait is not drawn from their voice. */
-export const ownAttributes = (
-	element: ScriptElement,
-): Record<string, string> =>
-	element.type === "asset_character"
-		? omit(element.generationAttributes, VOICE_KEYS)
-		: (element.generationAttributes ?? {});
 
 /** What is known of a speaker's voice, the narrator's when no one is named. */
 export const voiceOf = (nodes: readonly unknown[], name = NARRATOR): Voice =>

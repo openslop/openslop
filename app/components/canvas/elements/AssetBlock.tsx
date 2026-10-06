@@ -42,10 +42,7 @@ const VIEWS: Record<AssetType, (props: ViewProps) => ReactNode> = {
 		<ArtStyleAssetTile selected={selected} />
 	)),
 	asset_character: tile(({ element, selected }) => (
-		<CharacterAssetTile
-			name={element.generationAttributes?.name ?? ""}
-			selected={selected}
-		/>
+		<CharacterAssetTile character={element} selected={selected} />
 	)),
 	asset_references: tile(({ selected }) => (
 		<ReferenceAssetTiles selected={selected} />

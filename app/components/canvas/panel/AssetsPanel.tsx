@@ -2,7 +2,7 @@
 
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useCharacterNames } from "@/lib/canvas/useAssets";
+import { useCharacters } from "@/lib/canvas/useAssets";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import {
@@ -16,7 +16,7 @@ import { PanelCard } from "./PanelCard";
 
 function CharactersCard() {
 	const { openCreateCharacter } = useAssetEditors();
-	const names = useCharacterNames();
+	const characters = useCharacters();
 	return (
 		<PanelCard
 			title="Characters"
@@ -32,8 +32,8 @@ function CharactersCard() {
 			}
 		>
 			<PagedTiles label="Characters" empty="No characters yet">
-				{names.map((name) => (
-					<CharacterAssetTile key={name} name={name} fill />
+				{characters.map((character) => (
+					<CharacterAssetTile key={character.id} character={character} fill />
 				))}
 			</PagedTiles>
 		</PanelCard>

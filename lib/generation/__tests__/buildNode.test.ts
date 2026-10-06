@@ -81,9 +81,9 @@ describe("buildNode", () => {
 		const stale = element("vid", "video", { duration: "10" });
 		const canvas = [element("vid", "video", { duration: "11" })];
 
-		expect(resolveOn(stale, canvas).inputs.attributes).toBe(
-			canvas[0]?.generationAttributes,
-		);
+		expect(resolveOn(stale, canvas).inputs.attributes).toEqual({
+			duration: "11",
+		});
 	});
 
 	it("builds the given element when the canvas does not carry it", () => {

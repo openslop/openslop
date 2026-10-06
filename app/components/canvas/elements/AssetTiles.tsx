@@ -2,7 +2,8 @@
 
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import { hasAvatar } from "@/lib/canvas/assets";
-import { useAsset, useCharacterNames } from "@/lib/canvas/useAssets";
+import type { AssetElement } from "@/lib/canvas/types";
+import { useCharacters } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import { AssetTile } from "./AssetTile";
@@ -28,26 +29,26 @@ export function CharacterAssetTiles({
 }: {
 	onRemove?: (name: string) => void;
 }) {
-	return useCharacterNames().map((name) => (
+	return useCharacters().map((character) => (
 		<CharacterAssetTile
-			key={`character:${name}`}
-			name={name}
-			onRemove={onRemove && (() => onRemove(name))}
+			key={character.id}
+			character={character}
+			onRemove={onRemove}
 		/>
 	));
 }
 
 export function CharacterAssetTile({
-	name,
+	character,
 	onRemove,
 	...tile
 }: TileProps & {
-	name: string;
-	onRemove?: () => void;
+	character: AssetElement;
+	onRemove?: (name: string) => void;
 }) {
 	const { editAsset } = useAssetEditors();
-	const character = useAsset("asset_character", name);
-	const avatar = !character || hasAvatar(character);
+	const name = character.generationAttributes?.name ?? "";
+	const avatar = hasAvatar(character);
 	const { url: previewUrl, status } = useCharacterAvatar(name);
 	return (
 		<AssetTile
@@ -57,7 +58,7 @@ export function CharacterAssetTile({
 			fallback={avatar ? "initial" : "icon"}
 			status={status}
 			onEdit={() => editAsset("asset_character", name)}
-			onRemove={onRemove}
+			onRemove={onRemove && (() => onRemove(name))}
 			removeAffordance="corner"
 			{...tile}
 		/>
