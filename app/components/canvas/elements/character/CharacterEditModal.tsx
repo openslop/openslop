@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useSlateStatic } from "slate-react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
-import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { removeAsset } from "@/lib/canvas/assetOps";
 import { hasAvatar, NO_AVATAR } from "@/lib/canvas/assets";
 import { elementModelPick } from "@/lib/canvas/elementConnector";
@@ -33,7 +31,6 @@ export function CharacterEditModal({
 }) {
 	const editor = useSlateStatic();
 	const character = useAsset("asset_character", name);
-	const [confirmDelete, setConfirmDelete] = useState(false);
 
 	if (!character) return null;
 
@@ -51,7 +48,10 @@ export function CharacterEditModal({
 					type="button"
 					variant="outline"
 					size="sm"
-					onClick={() => setConfirmDelete(true)}
+					onClick={() => {
+						removeAsset(editor, "asset_character", name);
+						onClose();
+					}}
 					className="text-muted-foreground sm:mr-auto"
 				>
 					<Trash2 />
@@ -103,18 +103,6 @@ export function CharacterEditModal({
 				</ElementGenerationProvider>
 			)}
 			<VoiceEditor character={character} />
-
-			<ConfirmDeleteDialog
-				target={confirmDelete ? name : undefined}
-				onClose={() => setConfirmDelete(false)}
-				title={(target) => `Delete ${target}?`}
-				description="This removes the character and their avatar. Undo from the canvas to bring them back."
-				actionLabel="Delete character"
-				onConfirm={() => {
-					removeAsset(editor, "asset_character", name);
-					onClose();
-				}}
-			/>
 		</AssetDialog>
 	);
 }

@@ -34,12 +34,6 @@ vi.mock("../../attributes/ModelAttribute", () => ({
 	ModelAttribute: () => <button type="button">Avatar model</button>,
 }));
 vi.mock("../VoiceEditor", () => ({ VoiceEditor: Nothing }));
-vi.mock("@/components/ui/confirm-delete-dialog", () => ({
-	ConfirmDeleteDialog: (props: { target?: string; onConfirm: () => void }) =>
-		props.target ? (
-			<button data-confirm={props.target} onClick={props.onConfirm} />
-		) : null,
-}));
 
 const { CharacterEditModal } = await import("../CharacterEditModal");
 const { NewCharacterDialog } = await import("../NewCharacterDialog");
@@ -177,7 +171,7 @@ describe("CharacterEditModal", () => {
 		expect(document.body.querySelector("textarea")).toBeNull();
 	});
 
-	it("deletes the character once confirmed, and closes", async () => {
+	it("deletes the character at once, and closes", async () => {
 		canvas = mountOnCanvas([mia("a girl")]);
 		open();
 
@@ -185,7 +179,6 @@ describe("CharacterEditModal", () => {
 			(button) => button.textContent === "Delete",
 		);
 		await act(async () => remove?.click());
-		await click('[data-confirm="Mia"]');
 
 		expect(characterNames(canvas.editor.children)).toEqual([]);
 		expect(onClose).toHaveBeenCalledOnce();
