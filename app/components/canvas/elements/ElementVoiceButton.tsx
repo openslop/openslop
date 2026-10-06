@@ -12,8 +12,8 @@ export function ElementVoiceButton({
 }: {
 	element: CanvasContentElement;
 }) {
-	const { editSpeaker } = useAssetEditors();
-	const open = () => editSpeaker(element.generationAttributes?.name);
+	const { editCharacter } = useAssetEditors();
+	const open = () => editCharacter(element.generationAttributes?.name);
 
 	return (
 		<SimpleTooltip label="Edit voice">

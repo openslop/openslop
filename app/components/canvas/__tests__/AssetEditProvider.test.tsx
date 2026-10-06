@@ -33,6 +33,7 @@ vi.mock("../elements/style/ArtStyleModal", () => ({
 
 let editors: AssetEditors;
 const editor = withReact(createEditor());
+editor.defaultModels = () => ({});
 function Tiles({ onRead }: { onRead: (editors: AssetEditors) => void }) {
 	onRead(useAssetEditors());
 	return null;
@@ -70,13 +71,13 @@ describe("AssetEditProvider", () => {
 		act(() => editors.editAsset("asset_references"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_character", "Narrator"));
+		act(() => editors.editCharacter());
 		expect(openDialogs()).toEqual(["character Narrator"]);
 
 		act(() => editors.editAsset("asset_style"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_character", "Mia"));
+		act(() => editors.editCharacter("Mia"));
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 

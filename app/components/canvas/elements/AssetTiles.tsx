@@ -46,7 +46,7 @@ export function CharacterAssetTile({
 	character: AssetElement;
 	onRemove?: (name: string) => void;
 }) {
-	const { editAsset } = useAssetEditors();
+	const { editCharacter } = useAssetEditors();
 	const name = character.generationAttributes?.name ?? "";
 	const avatar = hasAvatar(character);
 	const { url: previewUrl, status } = useCharacterAvatar(name);
@@ -57,7 +57,7 @@ export function CharacterAssetTile({
 			Icon={avatar ? User : Mic}
 			fallback={avatar ? "initial" : "icon"}
 			status={status}
-			onEdit={() => editAsset("asset_character", name)}
+			onEdit={() => editCharacter(name)}
 			onRemove={onRemove && (() => onRemove(name))}
 			removeAffordance="corner"
 			{...tile}

@@ -13,7 +13,7 @@ import {
 	voiceOf,
 } from "@/lib/canvas/assets";
 import {
-	ensureSpeaker,
+	ensureCharacter,
 	setAsset,
 	setReferenceImages,
 } from "@/lib/canvas/assetOps";
@@ -129,7 +129,7 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes the user's narrator voice before applying", () => {
-		setAsset(editor, "asset_character", ensureSpeaker(editor), {
+		setAsset(editor, "asset_character", ensureCharacter(editor), {
 			attrs: voiceAttrs({ accent: "british", voiceId: "v-mine" }),
 		});
 

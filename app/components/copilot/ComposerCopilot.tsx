@@ -111,7 +111,7 @@ function AttachMenu({
 	openPicker: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateCharacter, editAsset, editSpeaker } = useAssetEditors();
+	const { openCreateCharacter, editAsset, editCharacter } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -130,7 +130,7 @@ function AttachMenu({
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: () => editSpeaker(),
+			onSelect: () => editCharacter(),
 		},
 		{
 			key: "art-style",

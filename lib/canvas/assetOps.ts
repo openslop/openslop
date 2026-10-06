@@ -68,8 +68,8 @@ export function setAsset(
 	if (text !== undefined) updateNodeText(editor, asset.id, text);
 }
 
-/** The speaker's character, added when there is none: the narrator when no one is named. */
-export function ensureSpeaker(editor: Editor, name = NARRATOR): string {
+/** The character, added when there is none: the narrator when no one is named. */
+export function ensureCharacter(editor: Editor, name = NARRATOR): string {
 	if (!findAsset(editor.children, "asset_character", name))
 		setAsset(editor, "asset_character", name);
 	return name;

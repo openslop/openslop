@@ -5,7 +5,7 @@ import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
-	ensureSpeaker,
+	ensureCharacter,
 	removeAsset,
 	insertAsset,
 	removeAssets,
@@ -323,11 +323,11 @@ describe("the characters a visual shows", () => {
 	});
 });
 
-describe("ensureSpeaker", () => {
+describe("ensureCharacter", () => {
 	it("adds the narrator without an avatar when no one is named", () => {
 		const editor = makeEditor([scene("s1", narration("n1"))]);
 
-		expect(ensureSpeaker(editor)).toBe(NARRATOR);
+		expect(ensureCharacter(editor)).toBe(NARRATOR);
 
 		expect(ids(editor.children)).toEqual(["asset_character:Narrator", "s1"]);
 		expect(
@@ -339,7 +339,7 @@ describe("ensureSpeaker", () => {
 	it("adds a named speaker with an avatar", () => {
 		const editor = makeEditor();
 
-		expect(ensureSpeaker(editor, "Mia")).toBe("Mia");
+		expect(ensureCharacter(editor, "Mia")).toBe("Mia");
 
 		expect(
 			findAsset(editor.children, "asset_character", "Mia")
@@ -354,7 +354,7 @@ describe("ensureSpeaker", () => {
 		});
 		const editor = makeEditor([mia]);
 
-		ensureSpeaker(editor, "Mia");
+		ensureCharacter(editor, "Mia");
 
 		expect(editor.children).toEqual([mia]);
 	});
