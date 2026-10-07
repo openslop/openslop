@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useCallback, useState, type SyntheticEvent } from "react";
 import Image, { type ImageProps } from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -16,10 +16,14 @@ export function ImageWithShimmer({
 	...props
 }: ImageProps) {
 	const [settled, setSettled] = useState(false);
+	const settleIfLoaded = useCallback((img: HTMLImageElement | null) => {
+		if (img?.complete) setSettled(true);
+	}, []);
 	return (
 		<>
 			<Image
 				{...props}
+				ref={settleIfLoaded}
 				alt={alt}
 				onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
 					onLoad?.(event);
