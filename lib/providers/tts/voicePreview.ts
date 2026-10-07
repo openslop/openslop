@@ -1,5 +1,5 @@
 import type { HostedVoicePreview } from "@/lib/connectors/types";
-import { audioOf, hostedAudio } from "../hosted-audio";
+import { audioOf, hostedAudio } from "../hostedAudio";
 import type { TTSProvider } from "./base";
 
 /**

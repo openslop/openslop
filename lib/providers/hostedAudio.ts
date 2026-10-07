@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { HostedVoicePreview } from "@/lib/connectors/types";
-import { audioDurationSec } from "./audio-duration";
+import { audioDurationSec } from "./audioDuration";
 
 export type AudioBytes = { data: ArrayBuffer; contentType: string };
 

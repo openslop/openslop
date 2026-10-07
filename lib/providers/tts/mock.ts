@@ -1,6 +1,6 @@
 import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
-import { MockProvider } from "../mock-base";
+import { MockProvider } from "../mockBase";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voicePreview";
 

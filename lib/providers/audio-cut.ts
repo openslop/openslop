@@ -1,6 +1,6 @@
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { HostedVoicePreview } from "@/lib/connectors/types";
-import { type AudioBytes, audioOf, hostedAudio } from "./hosted-audio";
+import { type AudioBytes, audioOf, hostedAudio } from "./hostedAudio";
 
 type Mediabunny = typeof import("mediabunny");
 
