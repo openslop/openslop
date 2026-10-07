@@ -1,6 +1,5 @@
 import type { Editor } from "slate";
 import { getAssets } from "@/lib/canvas/assets";
-import { clearEditor } from "@/lib/canvas/editorOps";
 import type { LLMConnector } from "@/lib/connectors/types";
 import type { ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, type ScriptSource } from "./prompt/build";
@@ -14,7 +13,6 @@ export async function streamScript(
 	source: ScriptSource,
 	signal?: AbortSignal,
 ): Promise<void> {
-	clearEditor(editor);
 	const write = createScriptWriter(editor);
 	const { system, prompt } = buildScriptPrompt(
 		getAssets(editor.children),

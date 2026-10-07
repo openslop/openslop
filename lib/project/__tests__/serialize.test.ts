@@ -11,7 +11,7 @@ import {
 import { isAssetElement } from "@/lib/canvas/guards";
 import { isSceneElement } from "@/lib/canvas/scenes";
 import { getPromptText } from "@/lib/generation/inputs";
-import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
+import { deserializeWithScenes, splitScenes } from "../serialize";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -55,14 +55,6 @@ describe("splitScenes", () => {
 describe("deserializeWithScenes", () => {
 	it("returns [] for empty input", () => {
 		expect(deserializeWithScenes("")).toEqual([]);
-	});
-
-	it("turns BLANK_SCRIPT into one scene holding one empty narration", () => {
-		const scenes = scenesOf(BLANK_SCRIPT);
-
-		expect(scenes).toHaveLength(1);
-		expect(scenes[0].children).toHaveLength(1);
-		expect(scenes[0].children[0].type).toBe("narration");
 	});
 
 	it("names scenes with the given id factory", () => {

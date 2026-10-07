@@ -6,7 +6,6 @@ import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import type { AssetElement, CanvasEditor } from "@/lib/canvas/types";
-import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { createScriptWriter } from "@/lib/script/scriptWriter";
 import { withAssets } from "../plugins/withAssets";
 import { withLayout } from "../plugins/withLayout";
@@ -68,6 +67,19 @@ describe("a script streamed onto the canvas", () => {
 		expect(scenes(editor)).toEqual(SCENES);
 	});
 
+	it("replaces the script already on the canvas once the first element arrives", () => {
+		const editor = written(["<narration>An old draft.</narration>"]);
+		const write = createScriptWriter(editor);
+
+		write("<image>");
+		expect(getContentElements(editor.children).map(getElementBodyText)).toEqual(
+			["An old draft."],
+		);
+
+		write(SCRIPT);
+		expect(scenes(editor)).toEqual(SCENES);
+	});
+
 	it("replaces the empty narration a canvas of only assets is seeded with", () => {
 		const editor = written([]);
 		editor.children = [asset("asset_style")];
@@ -77,14 +89,5 @@ describe("a script streamed onto the canvas", () => {
 		createScriptWriter(editor)(SCRIPT);
 
 		expect(scenes(editor)).toEqual(SCENES);
-	});
-
-	it("starts a blank project on one scene holding the welcome line", () => {
-		const editor = written([BLANK_SCRIPT]);
-
-		expect(scenes(editor)).toEqual([["narration"]]);
-		expect(getContentElements(editor.children).map(getElementBodyText)).toEqual(
-			[expect.stringContaining("Welcome to OpenSlop")],
-		);
 	});
 });

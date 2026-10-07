@@ -78,7 +78,7 @@ const ASSETS = dedent`
 	  prompt. Their avatar is drawn from it, and every visual that lists them is drawn from that
 	  avatar.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described,
-	  never picked. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
+	  never picked; always set its language to the one its lines are in. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
 	  character does, and has no avatar.
 	- asset_style: the art style every visual is drawn in, as its text, in English: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.

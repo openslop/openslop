@@ -89,6 +89,12 @@ describe("character-voices plugin", () => {
 		expect(plugin.dependencies).toBeUndefined();
 	});
 
+	it("reads no voice for a video model that does not listen", () => {
+		expect(
+			readsOf(plugin, video("Sol", KLING), [voice("Sol", "v-sol")]),
+		).toEqual({});
+	});
+
 	describe("prepare", () => {
 		it("settles a voice on each character whose voice has no id yet", async () => {
 			await expect(

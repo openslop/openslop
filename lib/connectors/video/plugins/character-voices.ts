@@ -5,6 +5,7 @@ import {
 	parseCharacterNames,
 	shownCharacters,
 } from "@/lib/canvas/characterNames";
+import type { ScriptElement } from "@/lib/canvas/types";
 import { createConnector } from "@/lib/connectors/factory";
 import { modelEntry, resolveModel } from "@/lib/connectors/models";
 import { settleVoice, speakerVoice } from "@/lib/connectors/tts/voices";
@@ -23,6 +24,11 @@ export type ParamsWithCharacterVoices = Partial<ModelRef> & {
 const listens = (model: ModelRef) =>
 	Boolean(modelEntry("video", model).referenceAudios);
 
+const heardCharacters = (element: ScriptElement) =>
+	listens(resolveModel("video", element.generationAttributes))
+		? shownCharacters(element)
+		: [];
+
 const voicedNames = (params: ParamsWithCharacterVoices) =>
 	listens(resolveModel("video", params))
 		? parseCharacterNames(params[CHARACTERS_ATTR])
@@ -35,16 +41,14 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 		reads: (element, ctx) =>
 			Object.assign(
 				{},
-				...shownCharacters(element).map((name) =>
+				...heardCharacters(element).map((name) =>
 					speakerVoice(name).reads(element, ctx),
 				),
 			),
 		async prepare(element, ctx) {
 			const { canvas } = ctx;
-			if (!listens(resolveModel("video", element.generationAttributes)))
-				return [];
 			const writes = await Promise.all(
-				shownCharacters(element)
+				heardCharacters(element)
 					.filter((name) => findAsset(canvas, "asset_voice", name))
 					.map((name) =>
 						settleVoice(name, resolveModel("tts", voiceOf(canvas, name)), ctx),

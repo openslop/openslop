@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, type Descendant } from "slate";
+import { createEditor, Editor, Node, Transforms, type Descendant } from "slate";
 import { withReact } from "slate-react";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
@@ -54,5 +54,16 @@ describe("withLayout", () => {
 		const children = [...ASSETS, ...SCRIPT];
 
 		expect(normalized(children)).toEqual(children);
+	});
+
+	it("keeps a soft break inside its element", () => {
+		const editor = withLayout(withReact(createEditor()));
+		editor.children = [scene([content("narration", "n1", "hello")])];
+		Transforms.select(editor, Editor.end(editor, [0]));
+
+		editor.insertSoftBreak();
+
+		expect(editor.children).toHaveLength(1);
+		expect(Node.string(editor.children[0])).toBe("hello\n");
 	});
 });

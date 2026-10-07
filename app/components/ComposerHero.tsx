@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useOpenWorkspace } from "@/lib/script/ScriptProvider";
-import { useStartBlank } from "@/lib/script/useStartBlank";
 import { useTemplate } from "@/lib/templates/useTemplate";
 import { useSloppy } from "./sloppy/SloppyProvider";
 import BackToMySlopLink from "./BackToMySlopLink";
@@ -12,7 +11,6 @@ import TemplateGallery from "./TemplateGallery";
 
 export default function ComposerHero() {
 	const openWorkspace = useOpenWorkspace();
-	const startBlank = useStartBlank();
 	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
@@ -42,7 +40,7 @@ export default function ComposerHero() {
 				variant="ghost"
 				size="sm"
 				className="mt-3 text-muted-foreground"
-				onClick={startBlank}
+				onClick={openWorkspace}
 			>
 				Skip to a blank canvas
 			</Button>
