@@ -26,8 +26,8 @@ export const adaptScript = defineTool({
 
 	  Everything else in the message is still theirs, so place it:
 	  - what they said about the look, mood, pacing or delivery goes in 'notes'
-	  - a setting they stated outright has its own tool: set_title, set_video_settings,
-	    set_language, or edit_script for a character, a voice or the art style
+	  - a setting they stated outright has its own tool: set_title, update_script_settings,
+	    update_video_settings, or edit_script for a character, a voice or the art style
 	  - an instruction about the text itself ("make this shorter") is carried out with
 	    edit_script after this call, not by editing what you pass in
 	`,

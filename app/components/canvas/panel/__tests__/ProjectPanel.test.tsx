@@ -32,7 +32,7 @@ const triggers = () =>
 describe("ProjectPanel", () => {
 	it("shows the settings the project was created with, none of them changeable", async () => {
 		const store = createProjectStore();
-		store.getState().updateSettings({
+		store.getState().updateScriptSettings({
 			language: "fr",
 			template: "sleep-story",
 		});

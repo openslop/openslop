@@ -5,7 +5,7 @@ import {
 	extractStoreSnapshot,
 	ProjectDataSchema,
 } from "../store";
-import { ProjectSettingsSchema } from "../types";
+import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 
 const parse = (raw: unknown) => ProjectDataSchema.parse(raw);
@@ -19,11 +19,12 @@ describe("storeSnapshot", () => {
 
 		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 		store.getState().updateModels({ image: RUNWARE });
-		store.getState().updateSettings({ language: "fr" });
+		store.getState().updateScriptSettings({ language: "fr" });
 
 		expect(snap).toEqual({
+			title: "",
 			videoSettings: VideoSettingsSchema.parse({}),
-			settings: ProjectSettingsSchema.parse({}),
+			scriptSettings: ScriptSettingsSchema.parse({}),
 			models: {},
 		});
 	});
@@ -37,12 +38,16 @@ describe("storeSnapshot", () => {
 		});
 
 		src.getState().updateModels({ image: RUNWARE });
-		src.getState().updateSettings({ language: "fr", template: "pov-life" });
+		src
+			.getState()
+			.updateScriptSettings({ language: "fr", template: "pov-life" });
+		src.getState().setTitle("Moon Cat");
 
 		const after = createProjectStore(extractStoreSnapshot(src)).getState();
 		expect(after.videoSettings).toEqual(src.getState().videoSettings);
-		expect(after.settings).toEqual(src.getState().settings);
+		expect(after.scriptSettings).toEqual(src.getState().scriptSettings);
 		expect(after.models).toEqual({ image: RUNWARE });
+		expect(after.title).toBe("Moon Cat");
 	});
 
 	it("creates the same store from an empty parsed snapshot as from nothing", () => {
@@ -55,16 +60,17 @@ describe("storeSnapshot", () => {
 describe("ProjectDataSchema", () => {
 	it("fills defaults for absent and partial rows", () => {
 		expect(parse(null)).toEqual({
+			title: "",
 			videoSettings: VideoSettingsSchema.parse({}),
-			settings: ProjectSettingsSchema.parse({}),
+			scriptSettings: ScriptSettingsSchema.parse({}),
 			models: {},
 		});
 		expect(
 			parse({ videoSettings: { aspectRatio: "9:16" } }).videoSettings,
 		).toEqual(VideoSettingsSchema.parse({ aspectRatio: "9:16" }));
-		expect(parse({ settings: { length: "under-1m" } }).settings).toEqual(
-			ProjectSettingsSchema.parse({ length: "under-1m" }),
-		);
+		expect(
+			parse({ scriptSettings: { length: "under-1m" } }).scriptSettings,
+		).toEqual(ScriptSettingsSchema.parse({ length: "under-1m" }));
 	});
 
 	it("keeps a stored row intact and completes its video settings", () => {
@@ -80,7 +86,7 @@ describe("ProjectDataSchema", () => {
 		});
 	});
 
-	it("keeps only the video settings, settings and models of a row that carries other fields", () => {
+	it("keeps only the title, video settings, script settings and models of a row that carries other fields", () => {
 		expect(
 			parse({
 				videoSettings: { aspectRatio: "9:16", length: "60s", format: "x" },
@@ -88,8 +94,9 @@ describe("ProjectDataSchema", () => {
 				referenceImages: ["a.png"],
 			}),
 		).toEqual({
+			title: "",
 			videoSettings: VideoSettingsSchema.parse({ aspectRatio: "9:16" }),
-			settings: ProjectSettingsSchema.parse({}),
+			scriptSettings: ScriptSettingsSchema.parse({}),
 			models: {},
 		});
 	});

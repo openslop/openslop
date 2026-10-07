@@ -13,7 +13,6 @@ import {
 	voiceOf,
 } from "@/lib/canvas/assets";
 import { setAsset, setReferenceImages } from "@/lib/canvas/assetOps";
-import { createTitle, setTitle, titleText } from "@/lib/canvas/title";
 import { buildNode } from "@/lib/generation/generationGraph";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { getPromptText } from "@/lib/generation/inputs";
@@ -31,7 +30,7 @@ let store: ProjectStore;
 
 const buildContext = () => buildContextOf(editor.children, store.getState());
 const assets = () => getAssets(editor.children);
-const settings = () => store.getState().settings;
+const settings = () => store.getState().scriptSettings;
 
 const apply = (templateId: string) =>
 	applyTemplate(editor, store, queue, buildContext, templateId);
@@ -88,18 +87,18 @@ describe("applyTemplate", () => {
 
 	it("clears the template without disturbing what it applied", () => {
 		apply("pov-life");
-		store.getState().updateSettings({ template: undefined });
+		store.getState().updateScriptSettings({ template: undefined });
 
 		expect(settings().template).toBeUndefined();
 		expect(characterNames(assets())).toContain("Protagonist");
 	});
 
 	it("wipes the user's title and style, taking the template's style", () => {
-		setTitle(editor, "My Draft");
+		store.getState().setTitle("My Draft");
 		setAsset(editor, "asset_style", undefined, { text: "noir" });
 		apply("pov-life");
 
-		expect(titleText(editor.children)).toBe("");
+		expect(store.getState().title).toBe("");
 		expect(assetText(assets(), "asset_style")).toBe(
 			getTemplate("pov-life").style?.description,
 		);
@@ -149,7 +148,6 @@ describe("applyTemplate", () => {
 
 	it("leaves the script's scenes where they are", () => {
 		editor.children = [
-			createTitle(),
 			{
 				id: "scene",
 				type: "scene",
@@ -166,7 +164,7 @@ describe("applyTemplate", () => {
 		apply("pov-life");
 
 		expect(editor.children.at(-1)).toMatchObject({ id: "scene" });
-		expect(assets().length).toBe(editor.children.length - 2);
+		expect(assets().length).toBe(editor.children.length - 1);
 	});
 
 	it("pins each prebuilt avatar on its character asset, fresh on arrival", () => {

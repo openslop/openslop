@@ -1,7 +1,6 @@
 import type { Editor } from "slate";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
-import { titleText } from "@/lib/canvas/title";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { applyScriptToEditor } from "./applyScript";
@@ -53,7 +52,7 @@ export function createProjectDocument({
 		},
 
 		details: () => ({
-			name: deriveProjectName(titleText(editor.children)),
+			name: deriveProjectName(store.getState().title),
 			thumbnail_url: pickThumbnailUrl(
 				getContentElements(editor.children),
 				queue,

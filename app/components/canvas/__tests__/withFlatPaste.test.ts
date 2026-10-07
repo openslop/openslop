@@ -4,7 +4,7 @@ import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
-import { withHead } from "../plugins/withHead";
+import { withAssets } from "../plugins/withAssets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { CanvasEditor } from "@/lib/canvas/types";
 import { isSceneElement } from "@/lib/canvas/scenes";
@@ -61,8 +61,8 @@ describe("withFlatPaste", () => {
 		expect(hasNestedScene(editor)).toBe(false);
 	});
 
-	it("leaves the tiles of a pasted fragment behind", () => {
-		const editor = withHead(makeEditor());
+	it("lifts the tiles of a pasted fragment out of the scenes", () => {
+		const editor = withAssets(makeEditor());
 		seedScene(editor, scene([content("narration", "n0")]));
 
 		editor.insertFragment([

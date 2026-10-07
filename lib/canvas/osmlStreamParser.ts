@@ -3,8 +3,7 @@ import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { createCanvasNode } from "./createCanvasNode";
-import { createTitle } from "./title";
-import { TITLE_TYPE, type ParsedElement } from "./types";
+import type { ParsedElement } from "./types";
 import { unescapeXml } from "./xmlEscape";
 
 const MIN_BUFFER_LENGTH = 5;
@@ -76,10 +75,6 @@ export class OSMLStreamParser {
 		attributes: Record<string, string>,
 		defaultModels?: ConnectorModels,
 	): void {
-		if (type === TITLE_TYPE) {
-			this.nodes.push(createTitle());
-			return;
-		}
 		if (isCanvasElementType(type) || isAssetType(type)) {
 			const { id, ...attrs } = attributes;
 			this.nodes.push(createCanvasNode(type, { id, attrs, defaultModels }));

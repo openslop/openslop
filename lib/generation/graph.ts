@@ -31,7 +31,7 @@ export type GenerationNode = {
 
 /** What a build reads, and the writer `prepare` puts its assets through. */
 export type BuildContext = {
-	state: ProjectData;
+	state: Omit<ProjectData, "title">;
 	canvas: ScriptElement[];
 	registry: ConnectorRegistry;
 	setAsset: (write: AssetWrite) => void;

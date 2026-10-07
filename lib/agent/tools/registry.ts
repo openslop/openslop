@@ -10,10 +10,9 @@ import { fitDurations } from "./fitDurations";
 import { outlineStory } from "./outlineStory";
 import { readScript } from "./readScript";
 import { reviewScript } from "./reviewScript";
-import { setCaptionStyle } from "./setCaptionStyle";
-import { setLanguage } from "./setLanguage";
 import { setTitle } from "./setTitle";
-import { setVideoSettings } from "./setVideoSettings";
+import { updateScriptSettings } from "./updateScriptSettings";
+import { updateVideoSettings } from "./updateVideoSettings";
 import { viewImage } from "./viewImage";
 import { writeScript } from "./writeScript";
 
@@ -24,9 +23,8 @@ const TOOLS = {
 	write_script: writeScript,
 	adapt_script: adaptScript,
 	review_script: reviewScript,
-	set_video_settings: setVideoSettings,
-	set_caption_style: setCaptionStyle,
-	set_language: setLanguage,
+	update_script_settings: updateScriptSettings,
+	update_video_settings: updateVideoSettings,
 	view_image: viewImage,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,

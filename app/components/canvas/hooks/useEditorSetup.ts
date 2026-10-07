@@ -10,7 +10,7 @@ import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import type { ProjectStore } from "@/lib/project/store";
 import { useAccountStoreHandle } from "@/lib/user/AccountStoreProvider";
 import type { AccountStore } from "@/lib/user/accountStore";
-import { withHead } from "../plugins/withHead";
+import { withAssets } from "../plugins/withAssets";
 import { withLayout } from "../plugins/withLayout";
 import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";
@@ -26,7 +26,7 @@ function createCanvasEditor(
 		withHistory,
 		withReact,
 		withLayout,
-		withHead,
+		withAssets,
 		withScenes,
 		withFlatPaste,
 		withNodeId,

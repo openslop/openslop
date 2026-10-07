@@ -9,8 +9,6 @@ import {
 	type ElementRole,
 	type ParsedElement,
 	type ScriptElement,
-	TITLE_TYPE,
-	type TitleElement,
 } from "./types";
 
 export const isCanvasElementType = (type: string): type is CanvasElementType =>
@@ -32,15 +30,6 @@ export const isAssetType = (type: string): type is AssetType =>
 
 export const isAssetElement = (node: unknown): node is AssetElement =>
 	Element.isElement(node) && isAssetType(node.type);
-
-export const isTitleElement = (node: unknown): node is TitleElement =>
-	Element.isElement(node) && node.type === TITLE_TYPE;
-
-/** The title and the asset tiles, ahead of the scenes. */
-export const isHeadElement = (
-	node: unknown,
-): node is TitleElement | AssetElement =>
-	isTitleElement(node) || isAssetElement(node);
 
 export const isScriptElement = (node: unknown): node is ScriptElement =>
 	isContentElement(node) || isAssetElement(node);

@@ -7,9 +7,9 @@ import {
 	type ConnectorModels,
 } from "@/lib/connectors/models";
 import {
-	ProjectSettingsSchema,
+	ScriptSettingsSchema,
 	type DeepPartial,
-	type ProjectSettings,
+	type ScriptSettings,
 } from "./types";
 import { VideoSettingsSchema, type VideoSettings } from "./videoSettings";
 
@@ -19,8 +19,9 @@ const orEmpty = (value: unknown) => value ?? {};
 export const ProjectDataSchema = z.preprocess(
 	orEmpty,
 	z.object({
+		title: z.string().default(""),
 		videoSettings: VideoSettingsSchema,
-		settings: z.preprocess(orEmpty, ProjectSettingsSchema),
+		scriptSettings: z.preprocess(orEmpty, ScriptSettingsSchema),
 		/** The models this project pins per connector type, ahead of the account's. */
 		models: connectorModelsSchema.default({}),
 	}),
@@ -29,8 +30,9 @@ export const ProjectDataSchema = z.preprocess(
 export type ProjectData = z.infer<typeof ProjectDataSchema>;
 
 export type ProjectContext = ProjectData & {
+	setTitle: (title: string) => void;
 	updateVideoSettings: (partial: DeepPartial<VideoSettings>) => void;
-	updateSettings: (settings: Partial<ProjectSettings>) => void;
+	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
 	updateModels: (models: ConnectorModels) => void;
 	reset: () => void;
 };
@@ -48,13 +50,14 @@ export function createProjectStore(
 	return createStore<ProjectContext>()(
 		immer((set) => ({
 			...initial,
+			setTitle: (title) => set({ title }),
 			updateVideoSettings: (partial) =>
 				set((state) => {
 					merge(state.videoSettings, partial);
 				}),
-			updateSettings: (settings) =>
+			updateScriptSettings: (settings) =>
 				set((state) => {
-					Object.assign(state.settings, settings);
+					Object.assign(state.scriptSettings, settings);
 				}),
 			updateModels: (models) =>
 				set((state) => {

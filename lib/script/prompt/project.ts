@@ -12,7 +12,7 @@ import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
 	type Voice,
-	type ProjectSettings,
+	type ScriptSettings,
 } from "@/lib/project/types";
 import { videoLengthBudget } from "@/lib/project/videoLength";
 import { videoFormatLabel } from "@/lib/project/videoFormat";
@@ -72,7 +72,7 @@ export function projectPreamble(assets: AssetElement[]): string {
 }
 
 /** Empty on `auto`: the writer then picks the format closest to the brief. */
-export function formatSection({ format }: ProjectSettings): string {
+export function formatSection({ format }: ScriptSettings): string {
 	if (format === "auto") return "";
 
 	return dedent`
@@ -82,7 +82,7 @@ export function formatSection({ format }: ProjectSettings): string {
 }
 
 /** Empty on `auto`: no budget is a budget the model would otherwise invent. */
-export function lengthSection({ length }: ProjectSettings): string {
+export function lengthSection({ length }: ScriptSettings): string {
 	const budget = videoLengthBudget(length);
 	if (!budget) return "";
 	const { minWords, maxWords } = budget;

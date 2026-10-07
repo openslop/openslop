@@ -112,6 +112,14 @@ describe("useBuildContext", () => {
 		expect(render(useBuildContext)).not.toBe(before);
 	});
 
+	it("keeps its identity while the title is typed", () => {
+		const before = render(useBuildContext);
+
+		store.getState().setTitle("Moon");
+
+		expect(render(useBuildContext)).toBe(before);
+	});
+
 	it("reads every element of the document, assets first", () => {
 		const style = createCanvasNode("asset_style", { text: "noir" });
 		children = [style, ...document(video("vid-1", "shot one"))];

@@ -630,7 +630,7 @@ describe("applyRefineOp — assets", () => {
 	const apply = (editor: Editor, ...ops: RefineOp[]) =>
 		applyRefineOps(editor, ops);
 
-	it("inserts a new asset after the others and ahead of the scenes", () => {
+	it("inserts a new asset at the top, ahead of the scenes", () => {
 		const editor = makeCanvas([asset("asset_style", "noir")]);
 
 		const result = apply(editor, {
@@ -642,11 +642,11 @@ describe("applyRefineOp — assets", () => {
 
 		expect(result).toEqual({ applied: 1, failures: [] });
 		expect(topLevelTypes(editor)).toEqual([
-			"asset_style",
 			"asset_character",
+			"asset_style",
 			"scene",
 		]);
-		expect(describeAssets(editor)[1]).toEqual([
+		expect(describeAssets(editor)[0]).toEqual([
 			"asset_character:Mia",
 			expect.objectContaining({ name: "Mia" }),
 			"a girl in a yellow cardigan",
@@ -677,16 +677,16 @@ describe("applyRefineOp — assets", () => {
 
 		expect(describeAssets(editor)).toEqual([
 			[
+				"asset_character:Lumi",
+				{ ...CAST, name: "Lumi", pitch: "low" },
+				"a grey rabbit",
+			],
+			[
 				"asset_character:Mia",
 				{ ...CAST, name: "Mia", age: "child", pitch: "high" },
 				"a girl in a yellow cardigan",
 			],
 			["asset_character:Kai", { ...CAST, name: "Kai" }, "a boy"],
-			[
-				"asset_character:Lumi",
-				{ ...CAST, name: "Lumi", pitch: "low" },
-				"a grey rabbit",
-			],
 		]);
 	});
 
@@ -720,12 +720,12 @@ describe("applyRefineOp — assets", () => {
 		);
 
 		expect(describeAssets(editor)).toEqual([
-			["asset_style", {}, "muted watercolor"],
 			[
 				"asset_character:Narrator",
 				{ ...CAST, ...NO_AVATAR, name: NARRATOR, age: "adult", pitch: "low" },
 				"",
 			],
+			["asset_style", {}, "muted watercolor"],
 			["asset_references", { images: "a.png,b.png" }, ""],
 		]);
 	});

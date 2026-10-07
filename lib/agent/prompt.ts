@@ -26,7 +26,7 @@ const ROLE = dedent`
     reference images first, otherwise a pinned asset_character element. Look with view_image, then
     insert the style in the same turn. An art style that is already set stands.
   - When the target length is auto, decide it before write_script and set it with
-    set_video_settings. A runtime the user asked for comes first, then one an outline
+    update_script_settings. A runtime the user asked for comes first, then one an outline
     states: set the option that covers it, or the closest one. Otherwise choose what fits
     the format of the story.
   - Look at what an element generated with view_image before saying anything about how it

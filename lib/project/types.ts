@@ -63,7 +63,7 @@ export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 export type Voice = z.infer<typeof VoiceSchema>;
 
 /** How the project's scripts are written, each with a default. */
-export const ProjectSettingsSchema = z.object({
+export const ScriptSettingsSchema = z.object({
 	language: z
 		.enum(LANGUAGE_CHOICES)
 		.default(AUTO_LANGUAGE)
@@ -79,7 +79,7 @@ export const ProjectSettingsSchema = z.object({
 	template: optionalString,
 });
 
-export type ProjectSettings = z.infer<typeof ProjectSettingsSchema>;
+export type ScriptSettings = z.infer<typeof ScriptSettingsSchema>;
 
 export type DeepPartial<T> = T extends object
 	? { [K in keyof T]?: DeepPartial<T[K]> }

@@ -3,10 +3,7 @@ import { assetId } from "@/lib/canvas/types";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { AssetType } from "@/lib/canvas/types";
 import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
-import {
-	ProjectSettingsSchema,
-	type ProjectSettings,
-} from "@/lib/project/types";
+import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, scriptRules } from "../build";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
@@ -18,8 +15,8 @@ const asset = <T extends AssetType>(
 	attrs: Record<string, string> = {},
 ) => createCanvasNode(type, { id: assetId(type, attrs.name), attrs, text });
 
-const settingsOf = (settings: Partial<ProjectSettings> = {}) =>
-	ProjectSettingsSchema.parse(settings);
+const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
+	ScriptSettingsSchema.parse(settings);
 
 const lengthOf = (length: "1-3m" | "auto") => settingsOf({ length });
 

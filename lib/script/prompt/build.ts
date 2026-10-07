@@ -1,6 +1,6 @@
 import compact from "lodash/compact";
 import type { AssetElement } from "@/lib/canvas/types";
-import type { ProjectSettings } from "@/lib/project/types";
+import type { ScriptSettings } from "@/lib/project/types";
 import { getTemplateById } from "@/lib/templates/templates";
 import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
@@ -21,7 +21,7 @@ export type ScriptPrompt = { system: string; prompt: string };
  */
 function promptParts(
 	source: ScriptSource,
-	settings: ProjectSettings,
+	settings: ScriptSettings,
 ): { guidance: string[]; instruction: string } {
 	if (source.kind === "adapt")
 		return {
@@ -59,7 +59,7 @@ function promptParts(
  */
 export function scriptRules(
 	assets: AssetElement[],
-	settings: ProjectSettings,
+	settings: ScriptSettings,
 ): string {
 	return compact([
 		projectPreamble(assets),
@@ -69,7 +69,7 @@ export function scriptRules(
 
 export function buildScriptPrompt(
 	assets: AssetElement[],
-	settings: ProjectSettings,
+	settings: ScriptSettings,
 	source: ScriptSource,
 ): ScriptPrompt {
 	const { guidance, instruction } = promptParts(source, settings);

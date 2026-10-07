@@ -3,8 +3,8 @@
 import { useCallback } from "react";
 import type { Editor } from "slate";
 import compact from "lodash/compact";
+import pick from "lodash/pick";
 import { getAssets, referenceUrls } from "@/lib/canvas/assets";
-import { setTitle } from "@/lib/canvas/title";
 import { findNodeById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
@@ -41,7 +41,13 @@ export function useAgentTools(editor: Editor) {
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
 			const llm = () => createConnector("llm", editor.defaultModels().llm);
 			const draftScript = (source: ScriptSource) =>
-				streamScript(editor, store.getState().settings, llm(), source, signal);
+				streamScript(
+					editor,
+					store.getState().scriptSettings,
+					llm(),
+					source,
+					signal,
+				);
 			const picturesOf = (element: ScriptElement): ElementImage["pictures"] => {
 				if (element.type === "asset_references")
 					return { status: "idle", urls: referenceUrls([element]) };
@@ -84,16 +90,16 @@ export function useAgentTools(editor: Editor) {
 					return text;
 				},
 				readAssets: () => getAssets(editor.children),
-				readVideoSettings: () => store.getState().videoSettings,
-				readProjectSettings: () => store.getState().settings,
+				readProject: () => store.getState(),
 				editScript: (ops) => applyRefineOps(editor, ops),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
-				setTitle: (title) => setTitle(editor, title),
-				setVideoSettings: (patch) =>
-					store.getState().updateVideoSettings(patch),
-				setProjectSettings: (patch) => store.getState().updateSettings(patch),
+				...pick(store.getState(), [
+					"setTitle",
+					"updateScriptSettings",
+					"updateVideoSettings",
+				]),
 			};
 			return executeToolCall(call, ctx);
 		},

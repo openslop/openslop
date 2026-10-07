@@ -3,8 +3,7 @@ import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementState } from "../elementState";
 import type { ElementLength } from "@/lib/render/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
-import type { DeepPartial, ProjectSettings } from "@/lib/project/types";
-import type { VideoSettings } from "@/lib/project/videoSettings";
+import type { ProjectContext, ProjectData } from "@/lib/project/store";
 
 /** An element's pictures and the prompt behind them, never the rest of the result. */
 export type ElementImage = {
@@ -14,8 +13,11 @@ export type ElementImage = {
 	pictures: { status: GenerationStatus; urls: string[] } | undefined;
 };
 
-/** What a tool can do to the canvas, never the parts it is built from. */
-export type AgentToolContext = {
+/** What a tool can do to the project, never the parts it is built from. */
+export type AgentToolContext = Pick<
+	ProjectContext,
+	"setTitle" | "updateScriptSettings" | "updateVideoSettings"
+> & {
 	readScript: () => string;
 	countSpokenWords: () => number;
 	measureElementLengths: () => ElementLength[];
@@ -28,12 +30,8 @@ export type AgentToolContext = {
 		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
 	readAssets: () => AssetElement[];
-	readVideoSettings: () => VideoSettings;
-	readProjectSettings: () => ProjectSettings;
+	readProject: () => ProjectData;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
-	setTitle: (title: string) => void;
-	setVideoSettings: (patch: DeepPartial<VideoSettings>) => void;
-	setProjectSettings: (patch: Partial<ProjectSettings>) => void;
 };

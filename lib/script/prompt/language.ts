@@ -1,12 +1,12 @@
 import dedent from "dedent";
 import { declaredLanguage } from "@/lib/project/language";
-import type { ProjectSettings } from "@/lib/project/types";
+import type { ScriptSettings } from "@/lib/project/types";
 
 export const INPUT_LANGUAGE =
 	"the language of the user's own topic or script, or English when that is unclear";
 
 export function spokenLanguage(
-	settings: ProjectSettings,
+	settings: ScriptSettings,
 	fallback: string,
 ): string {
 	const language = declaredLanguage(settings.language);

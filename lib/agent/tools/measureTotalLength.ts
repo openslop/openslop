@@ -24,7 +24,7 @@ export const measureTotalLength = defineTool({
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const runtime = ctx.measureRuntime();
-		const { length } = ctx.readProjectSettings();
+		const { length } = ctx.readProject().scriptSettings;
 		const measured = `${seconds(runtime)} of video, about ${minutes(runtime)} minutes, carrying ${words} spoken words.`;
 
 		const budget = videoLengthBudget(length);

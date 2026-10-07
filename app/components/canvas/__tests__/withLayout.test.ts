@@ -5,12 +5,10 @@ import type { ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import { createTitle, titleText } from "@/lib/canvas/title";
 import { withLayout } from "../plugins/withLayout";
 import { content, scene } from "./fixtures";
 
-const HEAD = [
-	createTitle("Moon"),
+const ASSETS = [
 	createCanvasNode("asset_style", { text: "noir" }),
 	createCanvasNode("asset_character", {
 		attrs: { name: "Mia" },
@@ -32,28 +30,15 @@ const normalized = (
 };
 
 describe("withLayout", () => {
-	it("seeds an empty document with an empty title and one narration", () => {
-		const children = normalized([]);
-
-		expect(children.map((node) => "type" in node && node.type)).toEqual([
-			"title",
-			"narration",
-		]);
-		expect(titleText(children)).toBe("");
+	it("seeds an empty document with one narration", () => {
+		expect(normalized([])).toMatchObject([{ type: "narration" }]);
 	});
 
-	it("seeds a document that holds only its title and assets with one narration, after the last of them", () => {
-		const children = normalized([...HEAD]);
+	it("seeds a document that holds only assets with one narration, after the last of them", () => {
+		const children = normalized([...ASSETS]);
 
-		expect(children.slice(0, -1)).toEqual(HEAD);
+		expect(children.slice(0, -1)).toEqual(ASSETS);
 		expect(children.at(-1)).toMatchObject({ type: "narration" });
-	});
-
-	it("puts a title on top of a document that has none", () => {
-		const [title, ...rest] = normalized(SCRIPT);
-
-		expect(title).toMatchObject({ type: "title" });
-		expect(rest).toEqual(SCRIPT);
 	});
 
 	it("seeds the narration with the model the project speaks in", () => {
@@ -65,8 +50,8 @@ describe("withLayout", () => {
 		).toMatchObject(pinned);
 	});
 
-	it("leaves a document that holds a title and a script alone", () => {
-		const children = [...HEAD, ...SCRIPT];
+	it("leaves a document that holds a script alone", () => {
+		const children = [...ASSETS, ...SCRIPT];
 
 		expect(normalized(children)).toEqual(children);
 	});

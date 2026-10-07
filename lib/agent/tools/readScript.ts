@@ -1,6 +1,7 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
+import { deriveProjectName } from "@/lib/project/projectName";
 import type { ElementState } from "../elementState";
 import { defineTool } from "./defineTool";
 
@@ -18,12 +19,12 @@ function statesOf(states: ElementState[]): string[] {
 
 export const readScript = defineTool({
 	description: dedent`
-	  Read the project: the canvas as XML with the \`id\` of every element, first the title, then
-	  the assets (each character as an asset_character element with their voice, the art style and
-	  the reference images), then the script scene by scene. After it, the render settings (the
-	  language, target length, format, template and aspect ratio), and where each generated
-	  element stands: ungenerated, queued, generating, generated, stale (and why), failed (and
-	  the error), or pinned to an upload.
+	  Read the project: the canvas as XML with the \`id\` of every element, first the assets
+	  (each character as an asset_character element with their voice, the art style and the
+	  reference images), then the script scene by scene. After it, the project: its title, script
+	  settings (language, target length, format, template) and aspect ratio. Last, where each
+	  generated element stands: ungenerated, queued, generating, generated, stale (and why),
+	  failed (and the error), or pinned to an upload.
 
 	  Read before your first edit, and again after anything changed the canvas. Ids and text
 	  move when it is edited, so editing from a stale reading fails.
@@ -34,17 +35,18 @@ export const readScript = defineTool({
 	label: "Reading the script",
 	execute: async (_input, ctx) => {
 		const script = ctx.readScript().trim();
-		const { language, length, format, template } = ctx.readProjectSettings();
+		const { title, scriptSettings, videoSettings } = ctx.readProject();
 		return [
 			section("Script", [
 				script ? `\`\`\`xml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
-			section("Render settings", [
-				`- language: ${language}`,
-				`- length: ${length}`,
-				`- format: ${format}`,
-				`- template: ${template ?? "none"}`,
-				`- aspect ratio: ${ctx.readVideoSettings().aspectRatio}`,
+			section("Project", [
+				`- title: ${deriveProjectName(title)}`,
+				`- language: ${scriptSettings.language}`,
+				`- length: ${scriptSettings.length}`,
+				`- format: ${scriptSettings.format}`,
+				`- template: ${scriptSettings.template ?? "none"}`,
+				`- aspect ratio: ${videoSettings.aspectRatio}`,
 			]),
 			section("Generation state", statesOf(ctx.elementStates())),
 		].join("\n\n");

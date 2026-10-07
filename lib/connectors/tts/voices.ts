@@ -62,7 +62,7 @@ export async function settleVoice(
 	model: ModelRef,
 	{ canvas, state }: BuildContext,
 ): Promise<AssetWrite[]> {
-	const { language } = state.settings;
+	const { language } = state.scriptSettings;
 	const voice = voiceOf(canvas, name);
 	if (
 		voice.voiceId &&

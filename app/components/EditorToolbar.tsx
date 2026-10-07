@@ -6,11 +6,11 @@ import { Check, Lock, Sparkles, X } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useProjectTitle } from "@/lib/canvas/useProjectTitle";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/GenerationQueueProvider";
+import { useProject } from "@/lib/project/useProject";
 import { useGenerateAll } from "./canvas/hooks/useGenerateAll";
 import {
 	countPhrase,
@@ -22,7 +22,7 @@ import { ExportButton } from "./player/ExportButton";
 import editorStyles from "./Editor.module.css";
 
 function Breadcrumbs() {
-	const title = useProjectTitle();
+	const title = useProject((state) => state.title);
 
 	return (
 		<nav

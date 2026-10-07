@@ -1,7 +1,7 @@
 import { Descendant } from "slate";
 import type { ParsedElement } from "./types";
 import { isSceneElement } from "./scenes";
-import { isHeadElement } from "./guards";
+import { isAssetElement } from "./guards";
 import { withoutCaretMarker } from "./constants";
 import { flatAttributes } from "./elementAttributes";
 import { escapeXml } from "./xmlEscape";
@@ -27,7 +27,7 @@ function serializeElement(element: ParsedElement): string {
 	return `<${element.type}${attrString}>${escapeXml(getElementBodyText(element))}</${element.type}>\n`;
 }
 
-/** The whole document: the title, the assets, then each scene under its marker. */
+/** The whole document: the assets, then each scene under its marker. */
 export function serializeOSMLWithScenes(descendants: Descendant[]): string {
 	const scenes = descendants
 		.filter(isSceneElement)
@@ -35,7 +35,10 @@ export function serializeOSMLWithScenes(descendants: Descendant[]): string {
 			(scene, index) =>
 				sceneMarker(index + 1) + scene.children.map(serializeElement).join(""),
 		);
-	return [...descendants.filter(isHeadElement).map(serializeElement), ...scenes]
+	return [
+		...descendants.filter(isAssetElement).map(serializeElement),
+		...scenes,
+	]
 		.join("")
 		.trim();
 }

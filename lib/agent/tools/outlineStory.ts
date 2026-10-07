@@ -32,7 +32,7 @@ export const outlineStory = defineTool({
 	label: "Outlining the story",
 	execute: async ({ brief }, ctx) => {
 		const language = spokenLanguage(
-			ctx.readProjectSettings(),
+			ctx.readProject().scriptSettings,
 			"the same language as that input",
 		);
 		return ctx.generateText(outlinePrompt(brief, language), {

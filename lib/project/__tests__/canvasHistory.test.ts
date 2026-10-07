@@ -7,15 +7,16 @@ import {
 	type CanvasVersionStorage,
 } from "../canvasHistory";
 import type { ProjectContent, ProjectDocument } from "../projectDocument";
-import { ProjectSettingsSchema } from "../types";
+import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 
 /** A version is identified by its script here; the other fields ride along. */
 const content = (script: string): ProjectContent => ({
 	script,
 	store: {
+		title: "",
 		videoSettings: VideoSettingsSchema.parse({}),
-		settings: ProjectSettingsSchema.parse({}),
+		scriptSettings: ScriptSettingsSchema.parse({}),
 		models: {},
 	},
 	generation: {},

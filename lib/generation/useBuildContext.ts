@@ -8,19 +8,21 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProject } from "@/lib/project/useProject";
 import type { BuildContext } from "./graph";
 
-/** Reads the canvas per call so an edit never re-renders the caller; store changes must rebuild. */
+/** Reads the canvas per call so an edit never re-renders the caller; settings changes must rebuild. */
 export function useBuildContext(): () => BuildContext {
 	const { connectorConfig: registry } = useConfig();
-	const state = useProject((store) => store);
+	const videoSettings = useProject((state) => state.videoSettings);
+	const scriptSettings = useProject((state) => state.scriptSettings);
+	const models = useProject((state) => state.models);
 	const editor = useSlateStatic();
 	return useCallback(
 		() => ({
-			state,
+			state: { videoSettings, scriptSettings, models },
 			canvas: getScriptElements(editor.children),
 			registry,
 			setAsset: ({ type, name, attrs }) =>
 				setAsset(editor, type, name, { attrs }),
 		}),
-		[registry, state, editor],
+		[registry, videoSettings, scriptSettings, models, editor],
 	);
 }

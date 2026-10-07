@@ -209,12 +209,14 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const updateVideoSettings = useUpdateVideoSettings();
 	const updateModels = useProject((state) => state.updateModels);
-	const updateSettings = useProject((state) => state.updateSettings);
+	const updateScriptSettings = useProject(
+		(state) => state.updateScriptSettings,
+	);
 	const {
 		length: videoLength,
 		format: videoFormat,
 		language,
-	} = useProject((state) => state.settings);
+	} = useProject((state) => state.scriptSettings);
 	const { add: addReferenceImages } = useReferenceImages();
 	const model = useDefaultModels().llm;
 
@@ -233,7 +235,8 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	/** A pasted script sets its own length and format, so both go back to auto. */
 	const chooseIntent = (next: ComposerIntent) => {
 		setIntent(next);
-		if (next === "script") updateSettings({ length: "auto", format: "auto" });
+		if (next === "script")
+			updateScriptSettings({ length: "auto", format: "auto" });
 	};
 
 	const handleSubmit = () => {
@@ -301,7 +304,9 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							value={videoFormat}
 							options={VIDEO_FORMAT_OPTIONS}
 							disabled={pasting}
-							onChange={(next: VideoFormat) => updateSettings({ format: next })}
+							onChange={(next: VideoFormat) =>
+								updateScriptSettings({ format: next })
+							}
 						/>
 						<SettingPill
 							name="Language"
@@ -309,7 +314,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							value={language}
 							options={LANGUAGE_OPTIONS}
 							onChange={(next: LanguageChoice) =>
-								updateSettings({ language: next })
+								updateScriptSettings({ language: next })
 							}
 						/>
 						<ModelSelect
@@ -332,7 +337,9 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							value={videoLength}
 							options={VIDEO_LENGTH_OPTIONS}
 							disabled={pasting}
-							onChange={(next: VideoLength) => updateSettings({ length: next })}
+							onChange={(next: VideoLength) =>
+								updateScriptSettings({ length: next })
+							}
 						/>
 						{activeTemplate && (
 							<SettingPill

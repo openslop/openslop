@@ -6,7 +6,7 @@ import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
 import type { LLMConnector } from "@/lib/connectors/types";
-import { ProjectSettingsSchema } from "@/lib/project/types";
+import { ScriptSettingsSchema } from "@/lib/project/types";
 import { sleep } from "@/lib/utils";
 import { streamScript } from "../streamScript";
 
@@ -32,7 +32,7 @@ const topLevelTypes = (editor: Editor) =>
 
 const nextTurn = () => sleep(0);
 
-const DEFAULT_SETTINGS = ProjectSettingsSchema.parse({});
+const DEFAULT_SETTINGS = ScriptSettingsSchema.parse({});
 
 /** Streams each burst's chunks back to back, with a turn of the event loop between bursts. */
 const llmStreaming = (bursts: string[][], failure?: Error) => {
@@ -112,7 +112,7 @@ describe("streamScript", () => {
 
 	it("writes to the project's settings", async () => {
 		const editor = makeEditor();
-		const settings = ProjectSettingsSchema.parse({
+		const settings = ScriptSettingsSchema.parse({
 			length: "1-3m",
 			language: "es",
 		});

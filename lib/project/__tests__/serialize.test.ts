@@ -10,7 +10,6 @@ import {
 } from "@/lib/canvas/types";
 import { isAssetElement } from "@/lib/canvas/guards";
 import { isSceneElement } from "@/lib/canvas/scenes";
-import { createTitle, titleText } from "@/lib/canvas/title";
 import { getPromptText } from "@/lib/generation/inputs";
 import { BLANK_SCRIPT, deserializeWithScenes, splitScenes } from "../serialize";
 import {
@@ -74,18 +73,6 @@ describe("deserializeWithScenes", () => {
 		);
 
 		expect(scenes.map((scene) => scene.id)).toEqual(["scene-0", "scene-1"]);
-	});
-
-	it("round-trips the title ahead of the assets and scenes", () => {
-		const script = serializeOSMLWithScenes([
-			makeScene([makeEl("narration", "hello")]),
-			createTitle("Moon & Back"),
-		]);
-
-		const nodes = deserializeWithScenes(script);
-
-		expect(nodes.map((node) => node.type)).toEqual(["title", "scene"]);
-		expect(titleText(nodes)).toBe("Moon & Back");
 	});
 
 	it("keeps tags the canvas does not know out of the document", () => {

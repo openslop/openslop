@@ -5,7 +5,6 @@ import {
 	setAsset,
 	setReferenceImages,
 } from "@/lib/canvas/assetOps";
-import { setTitle } from "@/lib/canvas/title";
 import { buildNode } from "@/lib/generation/generationGraph";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
@@ -23,11 +22,13 @@ export function applyTemplate(
 	const template = getTemplate(templateId);
 	const project = store.getState();
 	project.reset();
-	project.updateSettings({ template: template.id, length: template.length });
+	project.updateScriptSettings({
+		template: template.id,
+		length: template.length,
+	});
 
 	const characters = Object.entries(template.characters ?? {});
 	Editor.withoutNormalizing(editor, () => {
-		setTitle(editor, "");
 		removeAssets(editor);
 
 		setAsset(editor, "asset_style", undefined, {

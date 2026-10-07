@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseProjectContent } from "../projectContent";
-import { ProjectSettingsSchema } from "../types";
+import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 
 const snapshot = {
@@ -34,8 +34,9 @@ describe("parseProjectContent", () => {
 		});
 
 		expect(content.store).toEqual({
+			title: "",
 			videoSettings: VideoSettingsSchema.parse({}),
-			settings: ProjectSettingsSchema.parse({}),
+			scriptSettings: ScriptSettingsSchema.parse({}),
 			models: {},
 		});
 		expect(content.generation).toEqual({});

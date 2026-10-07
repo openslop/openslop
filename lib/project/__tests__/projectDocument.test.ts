@@ -10,7 +10,7 @@ import {
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { createProjectDocument, type ProjectContent } from "../projectDocument";
 import { createProjectStore } from "../store";
-import { ProjectSettingsSchema } from "../types";
+import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 import { resultQueue } from "./_canvas";
 
@@ -27,8 +27,9 @@ const contentWith = (
 ): ProjectContent => ({
 	script,
 	store: {
+		title: "",
 		videoSettings: VideoSettingsSchema.parse({}),
-		settings: ProjectSettingsSchema.parse({}),
+		scriptSettings: ScriptSettingsSchema.parse({}),
 		models,
 	},
 	generation: {},
@@ -100,6 +101,14 @@ describe("createProjectDocument.read", () => {
 });
 
 describe("createProjectDocument.details", () => {
+	it("names the project after the title the store holds", () => {
+		const { document } = setup();
+		const content = contentWith(SCENE);
+		document.write({ ...content, store: { ...content.store, title: "Moon" } });
+
+		expect(document.details().name).toBe("Moon");
+	});
+
 	it.each([
 		[
 			"the script's first picture, never an avatar",

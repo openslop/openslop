@@ -2,10 +2,9 @@ import {
 	SCENE_TYPE,
 	type AssetElement,
 	type SceneElement,
-	type TitleElement,
 } from "@/lib/canvas/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
-import { isHeadElement, isParsedContentElement } from "@/lib/canvas/guards";
+import { isAssetElement, isParsedContentElement } from "@/lib/canvas/guards";
 import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { makeNodeId } from "@/lib/canvas/nodeUtils";
 import type { ConnectorModels } from "@/lib/connectors/models";
@@ -21,12 +20,12 @@ export function splitScenes(osml: string): string[] {
 		.filter((chunk) => chunk.length > 0);
 }
 
-/** The document a script saves: its title and assets first, then a scene per marker that holds content. */
+/** The document a script saves: its assets first, then a scene per marker that holds content. */
 export function deserializeWithScenes(
 	osml: string,
 	defaultModels?: ConnectorModels,
 	sceneId: (index: number) => string = makeNodeId,
-): (TitleElement | AssetElement | SceneElement)[] {
+): (AssetElement | SceneElement)[] {
 	const chunks = splitScenes(osml).map((sceneOsml) =>
 		parseOSML(sceneOsml, defaultModels),
 	);
@@ -40,5 +39,5 @@ export function deserializeWithScenes(
 				children,
 			}),
 		);
-	return [...chunks.flat().filter(isHeadElement), ...scenes];
+	return [...chunks.flat().filter(isAssetElement), ...scenes];
 }

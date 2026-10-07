@@ -7,15 +7,9 @@ import {
 	executeToolCall,
 	presentToolCall,
 } from "../tools/registry";
-import {
-	ProjectSettingsSchema,
-	type DeepPartial,
-	type ProjectSettings,
-} from "@/lib/project/types";
-import {
-	VideoSettingsSchema,
-	type VideoSettings,
-} from "@/lib/project/videoSettings";
+import { ProjectDataSchema } from "@/lib/project/store";
+import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
+import type { VideoSettings } from "@/lib/project/videoSettings";
 import {
 	TTS_ACCENTS,
 	TTS_AGES,
@@ -27,15 +21,25 @@ import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 
-const recordProjectSettings = (patches: Partial<ProjectSettings>[]) => ({
-	setProjectSettings: (patch: Partial<ProjectSettings>) =>
+const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
+	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
 		void patches.push(patch),
 });
 
 const recordVideoSettings = (patches: DeepPartial<VideoSettings>[]) => ({
-	setVideoSettings: (patch: DeepPartial<VideoSettings>) =>
+	updateVideoSettings: (patch: DeepPartial<VideoSettings>) =>
 		void patches.push(patch),
 });
+
+const project = (
+	over: { title?: string; scriptSettings?: Partial<ScriptSettings> } = {},
+) =>
+	ProjectDataSchema.parse({
+		title: "Moon Cat",
+		scriptSettings: { length: "3-5m" },
+		videoSettings: { aspectRatio: "9:16" },
+		...over,
+	});
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
@@ -46,14 +50,13 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	elementImage: () => undefined,
 	elementStates: () => [],
 	readAssets: () => [],
-	readVideoSettings: () => VideoSettingsSchema.parse({ aspectRatio: "9:16" }),
-	readProjectSettings: () => ProjectSettingsSchema.parse({ length: "3-5m" }),
+	readProject: () => project(),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
 	setTitle: () => {},
-	setVideoSettings: () => {},
-	setProjectSettings: () => {},
+	updateVideoSettings: () => {},
+	updateScriptSettings: () => {},
 	...over,
 });
 
@@ -64,6 +67,7 @@ describe("executeToolCall", () => {
 			context(),
 		);
 
+		expect(outcome.ok && outcome.output).toContain("- title: Moon Cat");
 		expect(outcome.ok && outcome.output).toContain("<narration>hi</narration>");
 		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
 		expect(outcome.ok && outcome.output).toContain("- template: none");
@@ -71,12 +75,16 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).not.toContain("Characters");
 	});
 
-	it("says the canvas is empty rather than handing back nothing", async () => {
+	it("says the canvas is empty and the project untitled rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
-			context({ readScript: () => "  " }),
+			context({
+				readScript: () => "  ",
+				readProject: () => project({ title: "" }),
+			}),
 		);
 
+		expect(outcome.ok && outcome.output).toContain("- title: Untitled");
 		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
 		expect(outcome.ok && outcome.output).toContain(
 			"## Generation state\nNone yet.",
@@ -156,17 +164,6 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(true);
 	});
 
-	it("set_language writes the project's language", async () => {
-		const settings: Partial<ProjectSettings>[] = [];
-		const outcome = await executeToolCall(
-			{ toolName: "set_language", input: { language: "es" } },
-			context(recordProjectSettings(settings)),
-		);
-
-		expect(settings).toEqual([{ language: "es" }]);
-		expect(outcome.ok).toBe(true);
-	});
-
 	it("refuses a call that names no title, rather than writing nothing", async () => {
 		const titles: string[] = [];
 		const outcome = await executeToolCall(
@@ -195,34 +192,41 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(true);
 	});
 
-	it("writes only the settings it was given, and says they shape the next script", async () => {
-		const settings: Partial<ProjectSettings>[] = [];
-		const patches: DeepPartial<VideoSettings>[] = [];
+	it("update_script_settings writes only the settings it was given, and says they shape the next script", async () => {
+		const settings: Partial<ScriptSettings>[] = [];
 		const outcome = await executeToolCall(
 			{
-				toolName: "set_video_settings",
-				input: { length: "5-10m", aspect_ratio: "9:16" },
+				toolName: "update_script_settings",
+				input: { language: "es", length: "5-10m" },
 			},
-			context({
-				...recordProjectSettings(settings),
-				...recordVideoSettings(patches),
-			}),
+			context(recordScriptSettings(settings)),
 		);
 
-		expect(settings).toStrictEqual([{ length: "5-10m" }]);
-		expect(patches).toEqual([{ aspectRatio: "9:16" }]);
+		expect(settings).toStrictEqual([{ language: "es", length: "5-10m" }]);
 		expect(outcome.ok && outcome.output).toContain("next script");
 	});
 
-	it("applies a caption preset whole, with overrides on top", async () => {
+	it("update_video_settings writes the aspect ratio and transition it was given", async () => {
+		const patches: DeepPartial<VideoSettings>[] = [];
+		await executeToolCall(
+			{
+				toolName: "update_video_settings",
+				input: { aspectRatio: "9:16", transitionType: "fade" },
+			},
+			context(recordVideoSettings(patches)),
+		);
+
+		expect(patches).toEqual([{ aspectRatio: "9:16", transitionType: "fade" }]);
+	});
+
+	it("applies a caption preset whole, with a caption style on top", async () => {
 		const patches: DeepPartial<VideoSettings>[] = [];
 		const outcome = await executeToolCall(
 			{
-				toolName: "set_caption_style",
+				toolName: "update_video_settings",
 				input: {
-					preset: "karaoke",
-					alignY: "top",
-					activeWord: { fill: "#ffe14d" },
+					captionPreset: "karaoke",
+					captionStyle: { alignY: "top", activeWord: { fill: "#ffe14d" } },
 				},
 			},
 			context(recordVideoSettings(patches)),
@@ -235,13 +239,16 @@ describe("executeToolCall", () => {
 			activeWord: { fill: "#ffe14d", bold: false },
 		});
 		expect(CaptionStyleSchema.safeParse(style).success).toBe(true);
-		expect(outcome.ok && outcome.output).toContain("Karaoke preset");
+		expect(outcome.ok && outcome.output).toContain("Karaoke caption preset");
 	});
 
 	it("sends only the caption field it was given, so the rest of the style stands", async () => {
 		const patches: DeepPartial<VideoSettings>[] = [];
 		await executeToolCall(
-			{ toolName: "set_caption_style", input: { fontSize: 120 } },
+			{
+				toolName: "update_video_settings",
+				input: { captionStyle: { fontSize: 120 } },
+			},
 			context(recordVideoSettings(patches)),
 		);
 
@@ -250,45 +257,35 @@ describe("executeToolCall", () => {
 
 	it("turns captions off without disturbing their style", async () => {
 		const patches: DeepPartial<VideoSettings>[] = [];
-		const outcome = await executeToolCall(
-			{ toolName: "set_caption_style", input: { captions: false } },
+		await executeToolCall(
+			{ toolName: "update_video_settings", input: { captions: false } },
 			context(recordVideoSettings(patches)),
 		);
 
-		expect(patches[0]).toEqual({
-			captions: false,
-			captionStyle: {},
-		});
-		expect(outcome.ok && outcome.output).toContain("captions off");
+		expect(patches[0]).toEqual({ captions: false });
 	});
 
 	it("rejects a caption size the panel could not set either", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "set_caption_style", input: { fontSize: 400 } },
+			{
+				toolName: "update_video_settings",
+				input: { captionStyle: { fontSize: 400 } },
+			},
 			context(),
 		);
 
 		expect(outcome.ok).toBe(false);
-		expect(!outcome.ok && outcome.errorText).toContain("set_caption_style");
+		expect(!outcome.ok && outcome.errorText).toContain("update_video_settings");
 	});
 
-	it("rejects a caption call that names nothing to change", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "set_caption_style", input: {} },
-			context(),
-		);
+	it.each(["update_script_settings", "update_video_settings"])(
+		"%s rejects a call that changes nothing",
+		async (toolName) => {
+			const outcome = await executeToolCall({ toolName, input: {} }, context());
 
-		expect(outcome.ok).toBe(false);
-	});
-
-	it("rejects a setting call that changes nothing", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "set_video_settings", input: {} },
-			context(),
-		);
-
-		expect(outcome.ok).toBe(false);
-	});
+			expect(outcome.ok).toBe(false);
+		},
+	);
 
 	it("reports the runtime against the project's target length", async () => {
 		const outcome = await executeToolCall(
@@ -325,8 +322,7 @@ describe("executeToolCall", () => {
 			context({
 				countSpokenWords: () => 1000,
 				measureRuntime: () => 600,
-				readProjectSettings: () =>
-					ProjectSettingsSchema.parse({ length: "auto" }),
+				readProject: () => project({ scriptSettings: { length: "auto" } }),
 			}),
 		);
 
@@ -743,9 +739,8 @@ describe("SLOPPY_TOOLS", () => {
 			"write_script",
 			"adapt_script",
 			"review_script",
-			"set_video_settings",
-			"set_caption_style",
-			"set_language",
+			"update_script_settings",
+			"update_video_settings",
 			"view_image",
 			"outline_story",
 			"measure_total_length",

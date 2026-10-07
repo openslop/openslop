@@ -7,7 +7,6 @@ import { getPromptText } from "@/lib/generation/inputs";
 import {
 	ensureAsset,
 	removeAsset,
-	insertAsset,
 	removeAssets,
 	removeShownCharacter,
 	setAsset,
@@ -27,7 +26,6 @@ import { createCanvasNode } from "../createCanvasNode";
 import { shownCharacters } from "../characterNames";
 import { findNodeById } from "../editorOps";
 import { getContentElements } from "../scenes";
-import { createTitle } from "../title";
 import type { CanvasContentElement, SceneElement } from "../types";
 import { asset, references } from "./_assets";
 
@@ -64,52 +62,22 @@ const shownBy = (editor: ReturnType<typeof makeEditor>) =>
 		(element) => element.generationAttributes?.characters,
 	);
 
-describe("insertAsset", () => {
-	it.each([
-		{
-			doc: [asset("asset_style"), scene("s1", narration("n1")), scene("s2")],
-			expected: ["asset_style", "asset_character:Mia", "s1", "s2"],
-		},
-		{
-			doc: [scene("s1", narration("n1"))],
-			expected: ["asset_character:Mia", "s1"],
-		},
-		{ doc: [], expected: ["asset_character:Mia"] },
-		{
-			doc: [
-				asset("asset_character", { name: "Kai" }),
-				asset("asset_references"),
-			],
-			expected: [
-				"asset_character:Kai",
-				"asset_character:Mia",
-				"asset_references",
-			],
-		},
-	])(
-		"adds after the assets of its type, ahead of the later types and the scenes: $expected",
-		({ doc, expected }) => {
-			const editor = makeEditor(doc);
-
-			insertAsset(editor, asset("asset_character", { name: "Mia" }));
-
-			expect(ids(editor.children)).toEqual(expected);
-		},
-	);
-
-	it("keeps the title on top", () => {
+describe("setAsset", () => {
+	it("adds a new asset at the top, ahead of the script", () => {
 		const editor = makeEditor([
-			createTitle("Moon"),
+			asset("asset_character", { name: "Kai" }),
 			scene("s1", narration("n1")),
 		]);
 
-		insertAsset(editor, asset("asset_style"));
+		setAsset(editor, "asset_style", undefined);
 
-		expect(ids(editor.children)).toEqual(["title", "asset_style", "s1"]);
+		expect(ids(editor.children)).toEqual([
+			"asset_style",
+			"asset_character:Kai",
+			"s1",
+		]);
 	});
-});
 
-describe("setAsset", () => {
 	it("adds an asset under its fixed id, then updates it in place", () => {
 		const editor = makeEditor();
 

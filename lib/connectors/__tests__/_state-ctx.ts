@@ -4,18 +4,12 @@ import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
 import mapValues from "lodash/mapValues";
 import type { DependencyResults } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
-import type { ProjectData } from "@/lib/project/store";
-import { ProjectSettingsSchema } from "@/lib/project/types";
-import { VideoSettingsSchema } from "@/lib/project/videoSettings";
+import { ProjectDataSchema, type ProjectData } from "@/lib/project/store";
 
 export const projectState = (
 	videoSettings: Partial<ProjectData["videoSettings"]> = {},
-	settings: Partial<ProjectData["settings"]> = {},
-): ProjectData => ({
-	videoSettings: VideoSettingsSchema.parse(videoSettings),
-	settings: ProjectSettingsSchema.parse(settings),
-	models: {},
-});
+	scriptSettings: Partial<ProjectData["scriptSettings"]> = {},
+): ProjectData => ProjectDataSchema.parse({ videoSettings, scriptSettings });
 
 export const buildCtx = (
 	canvas: ScriptElement[] = [],

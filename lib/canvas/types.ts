@@ -101,13 +101,11 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-export const TITLE_TYPE = "title" as const;
-
 export type AssetType = `asset_${"style" | "character" | "references"}`;
 
 type AssetTypeSpec = { connector?: AssetConnectorType; named?: true };
 
-/** Tiles between the title and the scenes, in canvas order. Only a character's look generates; the rest are metadata. */
+/** Tiles ahead of the scenes. Only a character's look generates; the rest are metadata. */
 export const ASSET_TYPES: Record<AssetType, AssetTypeSpec> = {
 	asset_style: {},
 	asset_character: { connector: "image", named: true },
@@ -173,18 +171,11 @@ export type SceneElement = {
 	children: CanvasContentElement[];
 };
 
-/** The project's name, written in place at the top of the canvas. */
-export type TitleElement = {
-	id: typeof TITLE_TYPE;
-	type: typeof TITLE_TYPE;
-	children: CanvasText[];
-};
-
-export type CanvasElement = TitleElement | SceneElement | ScriptElement;
+export type CanvasElement = SceneElement | ScriptElement;
 
 export type CanvasText = {
 	id: string;
-	type: ElementType | typeof TITLE_TYPE;
+	type: ElementType;
 	text: string;
 };
 

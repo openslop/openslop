@@ -19,7 +19,7 @@ export function useTemplate(): {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
-	const template = useProject((state) => state.settings.template);
+	const template = useProject((state) => state.scriptSettings.template);
 
 	return {
 		template: getTemplateById(template),
@@ -28,7 +28,7 @@ export function useTemplate(): {
 			[editor, store, queue, buildContext],
 		),
 		clearTemplate: useCallback(
-			() => store.getState().updateSettings({ template: undefined }),
+			() => store.getState().updateScriptSettings({ template: undefined }),
 			[store],
 		),
 	};

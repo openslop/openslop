@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createProjectStore } from "../store";
-import { ProjectSettingsSchema } from "../types";
+import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 
 const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
@@ -28,13 +28,15 @@ describe("project store", () => {
 		expect(store.getState().models).toEqual({ image: SLOP, llm: CLAUDE });
 	});
 
-	it("updateSettings changes the settings it names and keeps the others", () => {
+	it("updateScriptSettings changes the settings it names and keeps the others", () => {
 		const store = createProjectStore();
-		store.getState().updateSettings({ language: "fr", template: "pov-life" });
-		store.getState().updateSettings({ length: "under-1m" });
+		store
+			.getState()
+			.updateScriptSettings({ language: "fr", template: "pov-life" });
+		store.getState().updateScriptSettings({ length: "under-1m" });
 
-		expect(store.getState().settings).toEqual(
-			ProjectSettingsSchema.parse({
+		expect(store.getState().scriptSettings).toEqual(
+			ScriptSettingsSchema.parse({
 				language: "fr",
 				template: "pov-life",
 				length: "under-1m",
@@ -49,14 +51,16 @@ describe("project store", () => {
 			captions: false,
 		});
 		store.getState().updateModels({ image: RUNWARE });
-		store.getState().updateSettings({ language: "fr" });
+		store.getState().updateScriptSettings({ language: "fr" });
 
 		store.getState().reset();
 
 		expect(store.getState().videoSettings).toEqual(
 			VideoSettingsSchema.parse({}),
 		);
-		expect(store.getState().settings).toEqual(ProjectSettingsSchema.parse({}));
+		expect(store.getState().scriptSettings).toEqual(
+			ScriptSettingsSchema.parse({}),
+		);
 		expect(store.getState().models).toEqual({});
 	});
 });

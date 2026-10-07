@@ -43,7 +43,7 @@ function FixedSetting({
 
 export function ProjectPanel() {
 	const { language, length, format, template } = useProject(
-		(state) => state.settings,
+		(state) => state.scriptSettings,
 	);
 
 	return (
