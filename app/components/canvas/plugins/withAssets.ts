@@ -6,9 +6,9 @@ const duplicateAt = (children: Node[]) =>
 	children.findIndex(
 		(node, at) =>
 			isAssetElement(node) &&
-			children.findIndex(
-				(other) => isAssetElement(other) && other.id === node.id,
-			) < at,
+			children
+				.slice(0, at)
+				.some((earlier) => isAssetElement(earlier) && earlier.id === node.id),
 	);
 
 const strayAt = (children: Node[]) =>
