@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, Editor } from "slate";
+import { createEditor, Editor, type Descendant } from "slate";
 import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
@@ -17,6 +17,9 @@ import {
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
 import { isAssetElement } from "../guards";
+import { buildCtx } from "@/lib/connectors/__tests__/_state-ctx";
+import { buildNode } from "@/lib/generation/generationGraph";
+import { findAsset } from "../assets";
 import { asset } from "./_assets";
 
 /** Mirrors `createCanvasNode`: a caret marker leaf, then the body. */
@@ -41,9 +44,9 @@ function scene(children: CanvasContentElement[], id = "s1"): SceneElement {
 	return { id, type: "scene", children };
 }
 
-function makeEditor(scenes: SceneElement[]) {
+function makeEditor(children: Descendant[]) {
 	const editor = createEditor();
-	editor.children = scenes;
+	editor.children = children;
 	return editor;
 }
 
@@ -351,6 +354,31 @@ describe("applyNodeVersion", () => {
 		const node = (editor.children[0] as SceneElement).children[0];
 		expect(node.type).toBe("image");
 		expect(node.generationAttributes).toEqual({ style: "ink" });
+	});
+
+	it("restores an avatar version without touching the character's voice", () => {
+		const avatar = asset("asset_avatar", { name: "Mia", text: "brown hair" });
+		const voice = asset("asset_voice", {
+			name: "Mia",
+			attrs: { gender: "feminine", voiceId: "v1" },
+		});
+		const editor = makeEditor([
+			avatar,
+			voice,
+			scene([content("narration", "n1")]),
+		]);
+		const { inputs } = buildNode(avatar, buildCtx([avatar, voice]));
+		updateNodeText(editor, avatar.id, "red hair");
+
+		applyNodeVersion(editor, avatar.id, {
+			elementType: avatar.type,
+			inputs: { ...inputs, dependencies: {} },
+		});
+
+		expect(findAsset(editor.children, "asset_voice", "Mia")).toEqual(voice);
+		expect(findAsset(editor.children, "asset_avatar", "Mia")).toMatchObject({
+			generationAttributes: avatar.generationAttributes,
+		});
 	});
 
 	it("restores the prompt the version was generated from", () => {

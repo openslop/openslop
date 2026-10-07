@@ -27,16 +27,12 @@ export function AssetStrip({
 	);
 	const [deletingName, setDeletingName] = useState<string>();
 
-	const empty =
-		!hasArtStyle &&
-		names.length === 0 &&
-		references.urls.length === 0 &&
-		uploadingCount === 0;
-	if (empty) return null;
-
 	return (
 		<>
-			<ul aria-label="Assets" className="flex flex-wrap gap-2 pb-2">
+			<ul
+				aria-label="Assets"
+				className="flex flex-wrap gap-2 pb-2 empty:hidden"
+			>
 				{hasArtStyle && (
 					<li>
 						<ArtStyleAssetTile />
