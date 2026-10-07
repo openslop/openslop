@@ -6,8 +6,12 @@ import { Dialog } from "@/components/ui/dialog";
 import { characterNames, findAsset, NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import { content, scene } from "../../../__tests__/fixtures";
-import { click, mountOnCanvas, type } from "../../../__tests__/_mount";
+import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
+import {
+	click,
+	mountOnCanvas,
+	type,
+} from "@/app/components/canvas/__tests__/_mount";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 

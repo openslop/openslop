@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Descendant } from "slate";
 import { findAsset } from "@/lib/canvas/assets";
 import { references } from "@/lib/canvas/__tests__/_assets";
-import { AssetEditProvider } from "../../elements/character/AssetEditProvider";
-import { click, mountOnCanvas } from "../../__tests__/_mount";
+import { AssetEditProvider } from "@/app/components/canvas/elements/character/AssetEditProvider";
+import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { AssetsPanel } from "../AssetsPanel";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });

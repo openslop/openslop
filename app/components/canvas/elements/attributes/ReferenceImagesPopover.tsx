@@ -9,7 +9,7 @@ import {
 	parseReferenceImages,
 	serializeReferenceImages,
 } from "@/lib/connectors/attributes/referenceImages";
-import { useReferenceImages } from "../../hooks/useReferenceImages";
+import { useReferenceImages } from "@/app/components/canvas/hooks/useReferenceImages";
 import { ReferenceImagePicker } from "../ReferenceImages";
 import { AttributeTrigger } from "./AttributeTrigger";
 

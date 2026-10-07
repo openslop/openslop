@@ -317,7 +317,7 @@ const NEXT_STEP: Record<string, (results: ToolResult[]) => MockStep> = {
 		input: { ops: MOCK_ASSETS },
 	}),
 	edit_script: (results) =>
-		results.some((result) => result.toolName === "set_title")
+		results.at(-2)?.toolName === "set_title"
 			? {
 					say: "Writing a script onto the canvas. ",
 					toolName: "write_script",

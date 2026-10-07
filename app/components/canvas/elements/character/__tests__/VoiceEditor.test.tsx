@@ -8,7 +8,7 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import type { ModelRef, VoiceInfo } from "@/lib/connectors/types";
-import { click, mountOnCanvas } from "../../../__tests__/_mount";
+import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 

@@ -8,7 +8,7 @@
 
 1. **Write.** Sloppy adds the assets a script needs to the canvas, then sends a prompt to the LLM route, which streams OSML back. The parser inserts elements into the Slate canvas as they arrive.
 2. **Generate.** The client queues stale graph nodes, dependencies first, and posts each to an asset route. The route records a `jobs` row and enqueues it on the Vercel Queue. A worker runs the job's handler, uploads the result to Vercel Blob, and the client polls until it arrives. A video job redelivers itself to poll the vendor.
-3. **Save.** The canvas, the render settings and the generation snapshots save to the `projects` row, with autosaved history in `canvas_versions`.
+3. **Save.** The canvas, the project store (title, render and script settings, pinned models) and the generation snapshots save to the `projects` row, with autosaved history in `canvas_versions`.
 4. **Render.** Remotion Lambdas render chunks in parallel into an MP4 in S3.
 
 ## Sloppy
@@ -63,7 +63,7 @@ Supabase Postgres with row-level security. Queue workers use the service role.
 
 | Table             | Purpose                                                             |
 | ----------------- | ------------------------------------------------------------------- |
-| `projects`        | Canvas (as OSML), render settings and generation snapshots          |
+| `projects`        | Canvas (as OSML), project store and generation snapshots            |
 | `canvas_versions` | Autosaved history of those columns                                  |
 | `jobs`            | Async generation jobs: `pending → processing → completed \| failed` |
 | `provider_keys`   | One row per user and provider: vault id, last four, status          |

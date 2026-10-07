@@ -157,6 +157,25 @@ describe("the mock agent model", () => {
 		expect(answer.text).not.toBe("");
 	});
 
+	it("writes a new project once, even when the ask reads like an edit", async () => {
+		const prompt = user("add a scene about a fox");
+		const steps = [
+			["read_script", EMPTY_CANVAS],
+			["set_title", "Set the title."],
+			["edit_script", "Applied 3 operations."],
+			["write_script", "The script is on the canvas."],
+			["read_script", WRITTEN_CANVAS],
+			["edit_script", "Applied 1 operation."],
+		] as const;
+
+		for (const [toolName, result] of steps) {
+			expect((await step(prompt)).toolName).toBe(toolName);
+			prompt.push(...ran(toolName, result));
+		}
+
+		expect((await step(prompt)).toolName).toBeUndefined();
+	});
+
 	it("makes one edit to a script already on the canvas, then finishes", async () => {
 		const prompt = user("make the opening warmer");
 
