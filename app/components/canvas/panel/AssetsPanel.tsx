@@ -9,7 +9,7 @@ import { useReferenceImages } from "../hooks/useReferenceImages";
 import {
 	ArtStyleAssetTile,
 	CharacterAssetTile,
-	ReferenceTile,
+	ReferenceAssetTile,
 } from "../elements/AssetTiles";
 import { useAssetEditors } from "../elements/character/AssetEditProvider";
 import { PagedTiles } from "./PagedTiles";
@@ -89,7 +89,7 @@ function ReferencesCard() {
 				}}
 			>
 				{urls.map((url, index) => (
-					<ReferenceTile
+					<ReferenceAssetTile
 						key={`${index}:${url}`}
 						url={url}
 						index={index}

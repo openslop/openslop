@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, X, type IconComponent } from "@/components/ui/icon";
+import { Pencil, type IconComponent } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	isGenerationActive,
@@ -39,7 +39,6 @@ export function AssetTile({
 	status = "idle",
 	onEdit,
 	onRemove,
-	removeAffordance = "overlay",
 	fallback = "initial",
 	fill = false,
 }: {
@@ -49,8 +48,6 @@ export function AssetTile({
 	status?: GenerationStatus;
 	onEdit?: () => void;
 	onRemove?: () => void;
-	/** "corner" pins a pill-style cross outside the tile so it can coexist with the edit overlay. */
-	removeAffordance?: "overlay" | "corner";
 	fallback?: "initial" | "icon";
 	fill?: boolean;
 }) {
@@ -104,17 +101,8 @@ export function AssetTile({
 						onClick={onEdit}
 					/>
 				)}
-				{onRemove &&
-					removeAffordance === "overlay" &&
-					status !== "generating" && (
-						<OverlayButton
-							icon={X}
-							label={`Remove ${name}`}
-							onClick={onRemove}
-						/>
-					)}
 			</div>
-			{onRemove && removeAffordance === "corner" && status !== "generating" && (
+			{onRemove && status !== "generating" && (
 				<RemoveCrossButton
 					label={`Remove ${name}`}
 					onClick={onRemove}

@@ -2,7 +2,9 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { Descendant } from "slate";
 import { findAsset } from "@/lib/canvas/assets";
+import { references } from "@/lib/canvas/__tests__/_assets";
 import { AssetEditProvider } from "../../elements/character/AssetEditProvider";
 import { click, mountOnCanvas } from "../../__tests__/_mount";
 import { AssetsPanel } from "../AssetsPanel";
@@ -16,8 +18,8 @@ vi.mock("../../elements/style/ArtStyleModal", () => ({
 let canvas: ReturnType<typeof mountOnCanvas>;
 afterEach(() => canvas.unmount());
 
-const open = () => {
-	canvas = mountOnCanvas();
+const open = (children: Descendant[] = []) => {
+	canvas = mountOnCanvas(children);
 	canvas.render(
 		<TooltipProvider>
 			<AssetEditProvider>
@@ -50,5 +52,13 @@ describe("AssetsPanel", () => {
 		expect(
 			document.body.querySelector('button[aria-label="Edit Art style"]'),
 		).not.toBeNull();
+	});
+
+	it("opens the art style dialog from a reference image", async () => {
+		open([references("https://img/a.png")]);
+
+		await click('button[aria-label="Edit Reference 1"]');
+
+		expect(openDialog()).toBe("asset_style");
 	});
 });

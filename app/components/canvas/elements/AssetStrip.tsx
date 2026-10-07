@@ -11,7 +11,7 @@ import { useReferenceImages } from "../hooks/useReferenceImages";
 import {
 	ArtStyleAssetTile,
 	CharacterAssetTile,
-	ReferenceTile,
+	ReferenceAssetTile,
 } from "./AssetTiles";
 
 export function AssetStrip({
@@ -52,7 +52,7 @@ export function AssetStrip({
 				))}
 				{references.urls.map((url, index) => (
 					<li key={`reference:${index}:${url}`}>
-						<ReferenceTile
+						<ReferenceAssetTile
 							url={url}
 							index={index}
 							onRemove={() => references.remove(index)}

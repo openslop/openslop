@@ -44,7 +44,6 @@ function AvatarAssetTile({ name, ...tile }: CharacterTileProps) {
 			fallback="initial"
 			status={status}
 			onEdit={() => editAsset("asset_avatar", name)}
-			removeAffordance="corner"
 			{...tile}
 		/>
 	);
@@ -58,30 +57,37 @@ function VoiceAssetTile({ name, ...tile }: CharacterTileProps) {
 			Icon={Mic}
 			fallback="icon"
 			onEdit={() => editAsset("asset_voice", name)}
-			removeAffordance="corner"
 			{...tile}
 		/>
 	);
 }
 
-export function ReferenceTile({
-	url,
-	index,
-	onRemove,
-	...tile
-}: TileProps & {
+type ReferenceTileProps = TileProps & {
 	url: string;
 	index: number;
 	onRemove: () => void;
-}) {
+};
+
+export function ReferenceTile({
+	url,
+	index,
+	...tile
+}: ReferenceTileProps & { onEdit?: () => void }) {
 	return (
 		<AssetTile
 			name={`Reference ${index + 1}`}
 			previewUrl={url}
 			Icon={Image}
-			onRemove={onRemove}
 			{...tile}
 		/>
+	);
+}
+
+/** A project reference, edited in the art style dialog. */
+export function ReferenceAssetTile(tile: ReferenceTileProps) {
+	const { editAsset } = useAssetEditors();
+	return (
+		<ReferenceTile {...tile} onEdit={() => editAsset("asset_references")} />
 	);
 }
 
