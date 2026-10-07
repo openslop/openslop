@@ -38,7 +38,7 @@ const trait = (key: string, label: string, options: readonly string[]) => ({
 	edit: { kind: "enum" as const, options },
 });
 
-/** A character's voice is described by its traits; which voice they found is picked beside them. */
+/** A voice is described by its traits; the voice they find is picked beside them. */
 export const VOICE_ATTRIBUTES = AttributeSchema.from(
 	[
 		trait("gender", "Gender", TTS_GENDERS),
@@ -47,14 +47,14 @@ export const VOICE_ATTRIBUTES = AttributeSchema.from(
 		trait("pitch", "Pitch", TTS_PITCHES),
 		trait("accent", "Accent", TTS_ACCENTS),
 		{
-			key: "voiceDescription",
+			key: "description",
 			label: "Description",
 			edit: { kind: "text", placeholder: "How the voice sounds", rows: 2 },
 		},
 		// The voice picker sets the pair; it is carried so a voice always has one.
 		...modelDefs("tts", {
-			key: "voiceModel",
-			providerAttr: "voiceProvider",
+			key: "model",
+			providerAttr: "provider",
 			hidden: true,
 		}),
 	],

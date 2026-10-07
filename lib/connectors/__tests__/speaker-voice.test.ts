@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { assetDefaults, NARRATOR, voiceAttrs } from "@/lib/canvas/assets";
+import { NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ScriptElement } from "@/lib/canvas/types";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
@@ -46,16 +46,13 @@ const line = (name?: string, attrs: Record<string, string> = {}) =>
 		? createCanvasNode("character", { id: "c1", attrs: { name, ...attrs } })
 		: createCanvasNode("narration", { id: "n1", attrs });
 
-const character = (name: string, voice: Partial<Voice> = {}) =>
-	asset("asset_character", {
-		name,
-		attrs: { ...voiceAttrs(voice), ...assetDefaults("asset_character", name) },
-	});
+const voice = (name: string, attrs: Partial<Voice> = {}) =>
+	asset("asset_voice", { name, attrs });
 
 const settled = (name: string, model: ModelRef) => ({
-	type: "asset_character",
+	type: "asset_voice",
 	name,
-	attrs: voiceAttrs({ ...model, voiceId: "v-found" }),
+	attrs: { ...model, voiceId: "v-found" },
 });
 
 const readOff = (element: ScriptElement, canvas: ScriptElement[]) =>
@@ -82,7 +79,7 @@ describe("createSpeakerVoicePlugin", () => {
 	describe("what it reads", () => {
 		it("reads the voice chosen for the narrator, and for the character a line names", () => {
 			const chosen = { ...DEFAULT_TTS_MODEL, voiceId: "v-1" };
-			const canvas = [character(NARRATOR, chosen), character("Red", chosen)];
+			const canvas = [voice(NARRATOR, chosen), voice("Red", chosen)];
 
 			expect(readsOf(plugin, line(), canvas)).toEqual({
 				"Narrator's voice": JSON.stringify(chosen),
@@ -92,7 +89,7 @@ describe("createSpeakerVoicePlugin", () => {
 			});
 		});
 
-		it("reads no voice while the speaker has no character asset", () => {
+		it("reads no voice while the speaker has no voice asset", () => {
 			expect(readsOf(plugin, line("Ghost"), [])).not.toHaveProperty(
 				"Ghost's voice",
 			);
@@ -100,7 +97,7 @@ describe("createSpeakerVoicePlugin", () => {
 
 		it("reads neither the search filters nor the project's language, so changing them stales nothing", () => {
 			const chosen = { ...DEFAULT_TTS_MODEL, voiceId: "v-1" };
-			const filtered = character(NARRATOR, {
+			const filtered = voice(NARRATOR, {
 				...chosen,
 				gender: "feminine",
 				language: "fr",
@@ -113,7 +110,7 @@ describe("createSpeakerVoicePlugin", () => {
 					[filtered],
 					projectState({}, { language: "es" }),
 				),
-			).toEqual(readsOf(plugin, line(), [character(NARRATOR, chosen)]));
+			).toEqual(readsOf(plugin, line(), [voice(NARRATOR, chosen)]));
 		});
 	});
 
@@ -121,9 +118,9 @@ describe("createSpeakerVoicePlugin", () => {
 		const own = line(undefined, CARTESIA);
 
 		it("is the pair its voice was found on, over its own", () => {
-			expect(
-				plugin.model?.(own, [character(NARRATOR, DEFAULT_TTS_MODEL)]),
-			).toEqual(DEFAULT_TTS_MODEL);
+			expect(plugin.model?.(own, [voice(NARRATOR, DEFAULT_TTS_MODEL)])).toEqual(
+				DEFAULT_TTS_MODEL,
+			);
 		});
 
 		it("is its own while its speaker has no voice", () => {
@@ -133,7 +130,7 @@ describe("createSpeakerVoicePlugin", () => {
 
 	describe("prepare", () => {
 		it("settles nothing for a speaker whose voice already has an id on its pair", async () => {
-			const red = character("Red", { ...DEFAULT_TTS_MODEL, voiceId: "v-red" });
+			const red = voice("Red", { ...DEFAULT_TTS_MODEL, voiceId: "v-red" });
 
 			await expect(prepare(line("Red", CARTESIA), [red])).resolves.toEqual([]);
 			expect(tts.searchVoices).not.toHaveBeenCalled();
@@ -143,7 +140,7 @@ describe("createSpeakerVoicePlugin", () => {
 			[
 				"the voice's pair, over the line's own",
 				[
-					character("Red", {
+					voice("Red", {
 						...CARTESIA,
 						gender: "masculine",
 						accent: "british",
@@ -153,13 +150,13 @@ describe("createSpeakerVoicePlugin", () => {
 				{ gender: "masculine", accent: "british", language: "en" },
 			],
 			[
-				"the line's own, while it has no character asset",
+				"the line's own, while it has no voice asset",
 				[],
 				CARTESIA,
 				{ language: "en" },
 			],
 		])(
-			"finds a voice by the speaker's traits on %s, and settles it on their character asset",
+			"finds a voice by the speaker's traits on %s, and settles it on their voice asset",
 			async (_, canvas, own, search) => {
 				await expect(prepare(line("Red", own), canvas)).resolves.toEqual([
 					settled("Red", CARTESIA),
@@ -171,13 +168,13 @@ describe("createSpeakerVoicePlugin", () => {
 			},
 		);
 
-		it("settles the narrator's voice onto the narrator's character for a narration", async () => {
-			await expect(prepare(line(), [character(NARRATOR)])).resolves.toEqual([
+		it("settles the narrator's voice onto the narrator's voice asset for a narration", async () => {
+			await expect(prepare(line(), [voice(NARRATOR)])).resolves.toEqual([
 				settled(NARRATOR, DEFAULT_TTS_MODEL),
 			]);
 		});
 
-		it("settles onto the narrator's character for a narration even with no narrator yet", async () => {
+		it("settles onto the narrator's voice asset for a narration even with no narrator yet", async () => {
 			await expect(prepare(line(), [])).resolves.toEqual([
 				settled(NARRATOR, DEFAULT_TTS_MODEL),
 			]);
@@ -187,7 +184,7 @@ describe("createSpeakerVoicePlugin", () => {
 			["the project's language over the voice's own", "es", "es"],
 			["the voice's own language on auto", undefined, "fr"],
 		] as const)("searches in %s", async (_, setting, language) => {
-			await prepare(line(), [character(NARRATOR, { language: "fr" })], setting);
+			await prepare(line(), [voice(NARRATOR, { language: "fr" })], setting);
 
 			expect(tts.searchVoices).toHaveBeenCalledWith(DEFAULT_TTS_MODEL, {
 				language,
@@ -197,15 +194,15 @@ describe("createSpeakerVoicePlugin", () => {
 		it("throws when no voice matches", async () => {
 			tts.searchVoices.mockResolvedValue([]);
 
-			await expect(prepare(line(), [character(NARRATOR)])).rejects.toThrow(
+			await expect(prepare(line(), [voice(NARRATOR)])).rejects.toThrow(
 				"No matching voice found",
 			);
 		});
 	});
 
 	describe("beforeGenerate", () => {
-		it("speaks with the voice its speaker's character recorded, over its own, without the traits it searched by", async () => {
-			const red = character("Red", { ...DEFAULT_TTS_MODEL, voiceId: "v-red" });
+		it("speaks with the voice its speaker's voice asset recorded, over its own, without the traits it searched by", async () => {
+			const red = voice("Red", { ...DEFAULT_TTS_MODEL, voiceId: "v-red" });
 
 			await expect(
 				before(

@@ -7,14 +7,12 @@ import {
 	assetText,
 	avatarNames,
 	characterNames,
-	characterVoice,
 	findAsset,
 	getAssets,
 	getScriptElements,
 	NARRATOR,
-	NO_AVATAR,
 	referenceUrls,
-	voiceAttrs,
+	voiceFrom,
 	voiceOf,
 } from "../assets";
 import { createCanvasNode } from "../createCanvasNode";
@@ -26,47 +24,50 @@ const scene: SceneElement = { id: "s1", type: "scene", children: [narration] };
 
 describe("createCanvasNode for an asset", () => {
 	it("gives it its fixed id over any id it is given, its name and its text", () => {
-		const character = createCanvasNode("asset_character", {
+		const avatar = createCanvasNode("asset_avatar", {
 			id: "e1",
 			attrs: { name: "Mia" },
 			text: "warm",
 		});
 
-		expect(character).toMatchObject({
-			id: "asset_character:Mia",
-			type: "asset_character",
+		expect(avatar).toMatchObject({
+			id: "asset_avatar:Mia",
+			type: "asset_avatar",
 			generationAttributes: { name: "Mia" },
 		});
-		expect(getPromptText(character)).toBe("warm");
+		expect(getPromptText(avatar)).toBe("warm");
 		expect(createCanvasNode("asset_style", { id: "e1" }).id).toBe(
 			"asset_style",
 		);
 	});
 
-	it("draws a character on the default image model and voices it on the default voice model, or the recommended ones", () => {
+	it("draws an avatar on the default image model, or the recommended one", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const character = (defaultModels = {}) =>
-			createCanvasNode("asset_character", {
+		const avatar = (defaultModels = {}) =>
+			createCanvasNode("asset_avatar", {
 				attrs: { name: "Mia" },
 				defaultModels,
-			});
+			}).generationAttributes;
 
-		expect(
-			character({ image: pinned, tts: cartesia }).generationAttributes,
-		).toEqual({ name: "Mia", ...pinned, ...voiceAttrs(cartesia) });
-		expect(character().generationAttributes).toEqual({
-			name: "Mia",
-			...DEFAULT_IMAGE_MODEL,
-			...voiceAttrs(DEFAULT_TTS_MODEL),
-		});
+		expect(avatar({ image: pinned })).toEqual({ name: "Mia", ...pinned });
+		expect(avatar()).toEqual({ name: "Mia", ...DEFAULT_IMAGE_MODEL });
+	});
+
+	it("puts a voice on the default speech model, or the recommended one", () => {
+		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
+		const voice = (defaultModels = {}) =>
+			createCanvasNode("asset_voice", { attrs: { name: "Mia" }, defaultModels })
+				.generationAttributes;
+
+		expect(voice({ tts: cartesia })).toEqual({ name: "Mia", ...cartesia });
+		expect(voice()).toEqual({ name: "Mia", ...DEFAULT_TTS_MODEL });
 	});
 });
 
 describe("getAssets and getScriptElements", () => {
 	it("pick the assets out in order, then the content of each scene", () => {
 		const style = asset("asset_style");
-		const mia = asset("asset_character", { name: "Mia" });
+		const mia = asset("asset_avatar", { name: "Mia" });
 
 		expect(getAssets([style, scene, mia])).toEqual([style, mia]);
 		expect(getScriptElements([style, scene, mia])).toEqual([
@@ -79,15 +80,17 @@ describe("getAssets and getScriptElements", () => {
 
 describe("findAsset", () => {
 	const style = asset("asset_style", { text: "ink wash" });
-	const mia = asset("asset_character", { name: "Mia" });
-	const bob = asset("asset_character", { name: "Bob" });
+	const mia = asset("asset_avatar", { name: "Mia" });
+	const bob = asset("asset_avatar", { name: "Bob" });
+	const bobsVoice = asset("asset_voice", { name: "Bob" });
 	const refs = references("https://img/a.png");
-	const nodes = [style, mia, bob, refs, scene];
+	const nodes = [style, mia, bob, bobsVoice, refs, scene];
 
 	it("finds an asset by type and name", () => {
-		expect(findAsset(nodes, "asset_character", "Bob")).toBe(bob);
-		expect(findAsset(nodes, "asset_character", "Ghost")).toBeUndefined();
-		expect(findAsset(nodes, "asset_character")).toBeUndefined();
+		expect(findAsset(nodes, "asset_avatar", "Bob")).toBe(bob);
+		expect(findAsset(nodes, "asset_voice", "Bob")).toBe(bobsVoice);
+		expect(findAsset(nodes, "asset_voice", "Mia")).toBeUndefined();
+		expect(findAsset(nodes, "asset_avatar")).toBeUndefined();
 		expect(findAsset(nodes, "asset_style")).toBe(style);
 		expect(findAsset(nodes, "asset_references")).toBe(refs);
 	});
@@ -105,7 +108,7 @@ describe("assetText of the style", () => {
 			assetText([asset("asset_style", { text: "ink wash" })], "asset_style"),
 		).toBe("ink wash");
 		expect(
-			assetText([asset("asset_character", { name: "Mia" })], "asset_style"),
+			assetText([asset("asset_avatar", { name: "Mia" })], "asset_style"),
 		).toBe("");
 	});
 });
@@ -122,32 +125,33 @@ describe("referenceUrls", () => {
 
 describe("characterNames and avatarNames", () => {
 	const nodes = [
-		asset("asset_character", { name: "Mia" }),
-		asset("asset_character", { name: NARRATOR, attrs: NO_AVATAR }),
+		asset("asset_avatar", { name: "Mia" }),
+		asset("asset_voice", { name: "Mia" }),
+		asset("asset_voice", { name: NARRATOR }),
 		scene,
-		asset("asset_character", { name: "Bob" }),
+		asset("asset_avatar", { name: "Bob" }),
 	];
 
-	it("list the characters in document order, the narrator among them", () => {
-		expect(characterNames(nodes)).toEqual(["Mia", NARRATOR, "Bob"]);
+	it("lists everyone with a look or a voice once, the narrator among them", () => {
+		expect(characterNames(nodes)).toEqual(["Mia", "Bob", NARRATOR]);
 	});
 
-	it("leave out the narrator when listing who a picture can show", () => {
+	it("lists only who has an avatar as who a picture can show", () => {
 		expect(avatarNames(nodes)).toEqual(["Mia", "Bob"]);
 	});
 });
 
 describe("voiceOf", () => {
-	it("reads a character's voice keys, the narrator's when no one is named", () => {
+	it("reads a speaker's voice, the narrator's when no one is named", () => {
 		const nodes = [
-			asset("asset_character", {
+			asset("asset_voice", {
 				name: NARRATOR,
-				attrs: { ...NO_AVATAR, gender: "masculine", voiceId: "v-narrator" },
+				attrs: { gender: "masculine", voiceId: "v-narrator" },
 			}),
-			asset("asset_character", {
+			asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
+			asset("asset_voice", {
 				name: "Mia",
-				attrs: { gender: "feminine", voiceDescription: "husky" },
-				text: "Brown hair",
+				attrs: { gender: "feminine", description: "husky" },
 			}),
 		];
 
@@ -165,14 +169,14 @@ describe("voiceOf", () => {
 
 	it("is empty, never missing, for a speaker nothing is known of", () => {
 		expect(voiceOf([])).toEqual({});
-		expect(
-			voiceOf([asset("asset_character", { name: "Mia" })], "Ghost"),
-		).toEqual({});
+		expect(voiceOf([asset("asset_voice", { name: "Mia" })], "Ghost")).toEqual(
+			{},
+		);
 	});
 });
 
-describe("characterVoice and voiceAttrs", () => {
-	it("round-trip a voice through a character's attributes, apart from its image model", () => {
+describe("voiceFrom", () => {
+	it("reads a voice asset's attributes as the voice, leaving its name out", () => {
 		const voice = {
 			provider: "cartesia",
 			model: "Sonic 3.6",
@@ -181,22 +185,13 @@ describe("characterVoice and voiceAttrs", () => {
 			gender: "feminine",
 			accent: "british",
 		} as const;
-		const attrs = voiceAttrs(voice);
 
-		expect(attrs).toEqual({
-			voiceProvider: "cartesia",
-			voiceModel: "Sonic 3.6",
-			voiceId: "v1",
-			voiceDescription: "husky",
-			gender: "feminine",
-			accent: "british",
-		});
 		expect(
-			characterVoice(asset("asset_character", { name: "Mia", attrs })),
+			voiceFrom(asset("asset_voice", { name: "Mia", attrs: voice })),
 		).toEqual(voice);
 	});
 
-	it("is empty, never missing, with no character", () => {
-		expect(characterVoice()).toEqual({});
+	it("is empty, never missing, with no voice", () => {
+		expect(voiceFrom()).toEqual({});
 	});
 });

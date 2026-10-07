@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Transforms, type Editor } from "slate";
-import { assetId } from "@/lib/canvas/types";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
@@ -80,15 +80,8 @@ describe("streamScript", () => {
 	it("keeps the assets on the canvas and writes the script against them", async () => {
 		const editor = makeEditor();
 		const assets = [
-			createCanvasNode("asset_style", {
-				id: assetId("asset_style"),
-				text: "muted watercolor",
-			}),
-			createCanvasNode("asset_character", {
-				id: assetId("asset_character", "Lumi"),
-				attrs: { name: "Lumi" },
-				text: "a small grey rabbit",
-			}),
+			asset("asset_style", { text: "muted watercolor" }),
+			asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
 		];
 		Transforms.insertNodes(editor, [...assets, oldScene()], {
 			at: [0],
@@ -105,7 +98,7 @@ describe("streamScript", () => {
 		expect(editor.children.slice(0, 2)).toEqual(assets);
 		expect(topLevelTypes(editor)).toEqual([
 			"asset_style",
-			"asset_character",
+			"asset_avatar",
 			"narration",
 		]);
 	});

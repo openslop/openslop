@@ -58,7 +58,7 @@ describe("a script streamed onto the canvas", () => {
 	it("lands after the assets already on the canvas, which stay outside every scene", () => {
 		const assets = [
 			asset("asset_style", { text: "muted watercolor" }),
-			asset("asset_character", { name: "Ayla", text: "a keeper" }),
+			asset("asset_avatar", { name: "Ayla", text: "a keeper" }),
 		];
 
 		const editor = written(SCRIPT.match(/[^]{1,7}/g) ?? [], assets);

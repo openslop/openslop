@@ -1,11 +1,5 @@
 import pick from "lodash/pick";
-import {
-	characterVoice,
-	findAsset,
-	NARRATOR,
-	voiceAttrs,
-	voiceOf,
-} from "@/lib/canvas/assets";
+import { findAsset, NARRATOR, voiceFrom, voiceOf } from "@/lib/canvas/assets";
 import type { BuildContext } from "@/lib/generation/graph";
 import { reading } from "@/lib/generation/dependency";
 import { declaredLanguage, type LanguageChoice } from "@/lib/project/language";
@@ -28,11 +22,8 @@ const CHOSEN_VOICE_KEYS = ["provider", "model", "voiceId"] as const;
 /** The voice a speaker has chosen, recorded so choosing another stales whoever speaks in it. */
 export const speakerVoice = (name = NARRATOR) => {
 	const voice = reading(voiceLabel(name), (_, { canvas }) => {
-		const character = findAsset(canvas, "asset_character", name);
-		return (
-			character &&
-			JSON.stringify(pick(characterVoice(character), CHOSEN_VOICE_KEYS))
-		);
+		const asset = findAsset(canvas, "asset_voice", name);
+		return asset && JSON.stringify(pick(voiceFrom(asset), CHOSEN_VOICE_KEYS));
 	});
 	return {
 		reads: voice.reads,
@@ -56,7 +47,7 @@ async function findVoice(
 	return found.id;
 }
 
-/** Searches by the voice's filters when it has no voice on `model`; a speaker with no character is given one. */
+/** Searches by the voice's filters when it has no voice on `model`; a speaker with no voice is given one. */
 export async function settleVoice(
 	name = NARRATOR,
 	model: ModelRef,
@@ -71,7 +62,5 @@ export async function settleVoice(
 	)
 		return [];
 	const voiceId = await findVoice(model, voice, language);
-	return [
-		{ type: "asset_character", name, attrs: voiceAttrs({ ...model, voiceId }) },
-	];
+	return [{ type: "asset_voice", name, attrs: { ...model, voiceId } }];
 }

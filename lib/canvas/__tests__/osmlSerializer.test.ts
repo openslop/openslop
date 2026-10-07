@@ -6,7 +6,7 @@ import {
 	serializeOSMLWithScenes,
 } from "../osmlSerializer";
 import { ZERO_WIDTH_SPACE } from "../constants";
-import { NARRATOR, NO_AVATAR } from "../assets";
+import { NARRATOR } from "../assets";
 import { createCanvasNode } from "../createCanvasNode";
 import { parseOSML } from "../osmlStreamParser";
 import {
@@ -55,21 +55,19 @@ describe("serializeOSMLWithScenes", () => {
 		const result = serializeOSMLWithScenes([
 			asset("asset_style", { text: "ink wash" }),
 			wrap(el("narration", "Hello")),
-			asset("asset_character", {
+			asset("asset_voice", {
 				name: "Mia & Co",
 				attrs: {
 					gender: "feminine",
-					provider: "runware",
-					model: "Seedream 5 Lite",
-					voiceProvider: "cartesia",
-					voiceModel: "Sonic 3.6",
+					provider: "cartesia",
+					model: "Sonic 3.6",
 				},
 			}),
 		]);
 
 		expect(result.split("\n")).toEqual([
 			'<asset_style id="asset_style">ink wash</asset_style>',
-			'<asset_character id="asset_character:Mia &amp; Co" voiceProvider="cartesia" voiceModel="Sonic 3.6" name="Mia &amp; Co" gender="feminine" provider="runware" model="Seedream 5 Lite"></asset_character>',
+			'<asset_voice id="asset_voice:Mia &amp; Co" provider="cartesia" model="Sonic 3.6" name="Mia &amp; Co" gender="feminine"></asset_voice>',
 			"",
 			"--- Scene 1 ---",
 			'<narration id="e1">Hello</narration>',
@@ -158,10 +156,10 @@ describe("serialize round trip", () => {
 	it("keeps the assets, ahead of the scenes, through a save and reload", () => {
 		const saved = serializeOSMLWithScenes([
 			asset("asset_style", { text: "ink wash" }),
-			asset("asset_character", { name: "Mia", text: "Brown hair" }),
-			asset("asset_character", {
+			asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
+			asset("asset_voice", {
 				name: NARRATOR,
-				attrs: { ...NO_AVATAR, gender: "feminine", voiceId: "v1" },
+				attrs: { gender: "feminine", voiceId: "v1" },
 			}),
 			references("https://img/a.png?x=1&y=2", "https://img/b.png"),
 			wrap(createCanvasNode("narration", { id: "n1", text: "first" })),
@@ -172,8 +170,8 @@ describe("serialize round trip", () => {
 
 		expect(reloaded.map((node) => node.type)).toEqual([
 			"asset_style",
-			"asset_character",
-			"asset_character",
+			"asset_avatar",
+			"asset_voice",
 			"asset_references",
 			SCENE_TYPE,
 			SCENE_TYPE,
@@ -181,10 +179,10 @@ describe("serialize round trip", () => {
 		expect(reloaded.slice(0, 4)).toEqual(
 			[
 				asset("asset_style", { text: "ink wash" }),
-				asset("asset_character", { name: "Mia", text: "Brown hair" }),
-				asset("asset_character", {
+				asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
+				asset("asset_voice", {
 					name: NARRATOR,
-					attrs: { ...NO_AVATAR, gender: "feminine", voiceId: "v1" },
+					attrs: { gender: "feminine", voiceId: "v1" },
 				}),
 				references("https://img/a.png?x=1&y=2", "https://img/b.png"),
 			].map(withoutLeafIds),

@@ -3,13 +3,7 @@
 import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
-import {
-	avatarNames,
-	characterNames,
-	findAsset,
-	getAssets,
-	getCharacters,
-} from "./assets";
+import { avatarNames, characterNames, findAsset, getAssets } from "./assets";
 import type { AssetElement, AssetType } from "./types";
 
 const selectAssets = (editor: Editor) => getAssets(editor.children);
@@ -17,11 +11,6 @@ const selectAssets = (editor: Editor) => getAssets(editor.children);
 /** The project's assets, re-read only when one of them changes. */
 export const useAssets = (): AssetElement[] =>
 	useSlateSelector(selectAssets, shallow);
-
-const selectCharacters = (editor: Editor) => getCharacters(editor.children);
-
-export const useCharacters = (): AssetElement<"asset_character">[] =>
-	useSlateSelector(selectCharacters, shallow);
 
 const selectCharacterNames = (editor: Editor) =>
 	characterNames(editor.children);

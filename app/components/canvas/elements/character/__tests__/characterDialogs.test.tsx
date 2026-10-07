@@ -3,12 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import {
-	characterNames,
-	findAsset,
-	NARRATOR,
-	NO_AVATAR,
-} from "@/lib/canvas/assets";
+import { characterNames, findAsset, NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { content, scene } from "../../../__tests__/fixtures";
@@ -33,7 +28,9 @@ vi.mock("../../OutputPreview", () => ({ OutputPreview: Nothing }));
 vi.mock("../../attributes/ModelAttribute", () => ({
 	ModelAttribute: () => <button type="button">Avatar model</button>,
 }));
-vi.mock("../VoiceEditor", () => ({ VoiceEditor: Nothing }));
+vi.mock("../VoiceEditor", () => ({
+	VoiceEditor: () => <div data-voice-editor />,
+}));
 
 const { CharacterEditModal } = await import("../CharacterEditModal");
 const { NewCharacterDialog } = await import("../NewCharacterDialog");
@@ -48,12 +45,34 @@ const field = <T extends HTMLElement>(selector: string) => {
 };
 
 const mia = (appearance: string) =>
-	asset("asset_character", { name: "Mia", text: appearance });
+	asset("asset_avatar", { name: "Mia", text: appearance });
+
+const miaVoice = () => asset("asset_voice", { name: "Mia" });
 
 const appearanceOf = (name: string) => {
-	const character = findAsset(canvas.editor.children, "asset_character", name);
-	return character && getElementBodyText(character);
+	const avatar = findAsset(canvas.editor.children, "asset_avatar", name);
+	return avatar && getElementBodyText(avatar);
 };
+
+const switchOf = (label: string) => {
+	const labelled = Array.from(document.body.querySelectorAll("label")).find(
+		(each) => each.textContent === label,
+	);
+	const found = labelled && document.getElementById(labelled.htmlFor);
+	if (!found) throw new Error(`no ${label} switch`);
+	return found;
+};
+
+const flip = (label: string) => act(async () => switchOf(label).click());
+
+const isOn = (label: string) =>
+	switchOf(label).getAttribute("aria-checked") === "true";
+
+const has = (type: "asset_avatar" | "asset_voice") =>
+	findAsset(canvas.editor.children, type, "Mia") !== undefined;
+
+const voiceEditorShown = () =>
+	document.body.querySelector("[data-voice-editor]") !== null;
 
 describe("NewCharacterDialog", () => {
 	const onCreated = vi.fn();
@@ -79,8 +98,11 @@ describe("NewCharacterDialog", () => {
 		expect(canvas.editor.children).toEqual([]);
 	});
 
-	it("refuses a name a character already has", async () => {
-		canvas = mountOnCanvas([mia("a girl")]);
+	it.each([
+		["a look", () => mia("a girl")],
+		["a voice", miaVoice],
+	])("refuses a name a character already has %s under", async (_, held) => {
+		canvas = mountOnCanvas([held()]);
 		open();
 
 		await type(
@@ -105,7 +127,7 @@ describe("CharacterEditModal", () => {
 		);
 	afterEach(() => onClose.mockClear());
 
-	it("shows the appearance the character asset holds and writes edits back to it", async () => {
+	it("shows the appearance the avatar asset holds and writes edits back to it", async () => {
 		canvas = mountOnCanvas([mia("a girl")]);
 		open();
 		const appearance = field<HTMLTextAreaElement>("textarea");
@@ -124,36 +146,55 @@ describe("CharacterEditModal", () => {
 		expect(document.activeElement).toBe(field("textarea"));
 	});
 
-	it("turns a character's avatar off and back on", async () => {
-		canvas = mountOnCanvas([mia("a girl")]);
+	it("turns a character's avatar off and back on, keeping their voice", async () => {
+		canvas = mountOnCanvas([mia("a girl"), miaVoice()]);
 		open();
+		expect(isOn("Avatar")).toBe(true);
 
-		await click('button[role="switch"]');
-		expect(
-			findAsset(canvas.editor.children, "asset_character", "Mia"),
-		).toMatchObject({
-			generationAttributes: NO_AVATAR,
-		});
+		await flip("Avatar");
+		expect(has("asset_avatar")).toBe(false);
+		expect(has("asset_voice")).toBe(true);
+		expect(isOn("Avatar")).toBe(false);
 		expect(document.body.querySelector("textarea")).toBeNull();
 
-		await click('button[role="switch"]');
-		expect(
-			findAsset(canvas.editor.children, "asset_character", "Mia")
-				?.generationAttributes?.avatar,
-		).toBeUndefined();
+		await flip("Avatar");
+		expect(has("asset_avatar")).toBe(true);
 		expect(document.body.querySelector("textarea")).not.toBeNull();
 	});
 
-	it("renders nothing for a name no character has", () => {
+	it("turns a character's voice off and back on, keeping their avatar", async () => {
+		canvas = mountOnCanvas([mia("a girl"), miaVoice()]);
+		open();
+		expect(isOn("Voice")).toBe(true);
+		expect(voiceEditorShown()).toBe(true);
+
+		await flip("Voice");
+		expect(has("asset_voice")).toBe(false);
+		expect(appearanceOf("Mia")).toBe("a girl");
+		expect(voiceEditorShown()).toBe(false);
+
+		await flip("Voice");
+		expect(has("asset_voice")).toBe(true);
+		expect(voiceEditorShown()).toBe(true);
+	});
+
+	it("starts a name no character has with the avatar and voice off", () => {
 		canvas = mountOnCanvas([scene([content("narration", "n1", "hello")])]);
 
 		open();
 
+		expect(isOn("Avatar")).toBe(false);
+		expect(isOn("Voice")).toBe(false);
 		expect(document.body.querySelector("textarea")).toBeNull();
+		expect(voiceEditorShown()).toBe(false);
 	});
 
-	it("deletes the character at once, and closes", async () => {
-		canvas = mountOnCanvas([mia("a girl")]);
+	it("deletes the character's look and voice at once, and closes", async () => {
+		canvas = mountOnCanvas([
+			mia("a girl"),
+			miaVoice(),
+			asset("asset_voice", { name: NARRATOR }),
+		]);
 		open();
 
 		const remove = Array.from(document.body.querySelectorAll("button")).find(
@@ -161,7 +202,7 @@ describe("CharacterEditModal", () => {
 		);
 		await act(async () => remove?.click());
 
-		expect(characterNames(canvas.editor.children)).toEqual([]);
+		expect(characterNames(canvas.editor.children)).toEqual([NARRATOR]);
 		expect(onClose).toHaveBeenCalledOnce();
 	});
 });

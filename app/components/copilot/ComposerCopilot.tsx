@@ -131,7 +131,7 @@ function AttachMenu({
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: () => editAsset("asset_character", NARRATOR),
+			onSelect: () => editAsset("asset_voice", NARRATOR),
 		},
 		{
 			key: "art-style",

@@ -67,12 +67,12 @@ describe("withFlatPaste", () => {
 
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),
-			createCanvasNode("asset_character", { attrs: { name: "Mia" } }),
+			createCanvasNode("asset_avatar", { attrs: { name: "Mia" } }),
 			scene([content("sound", "snd1")], "ps2"),
 		]);
 
 		const types = shape(editor).flat();
 		expect(types).toContain("sound");
-		expect(types).not.toContain("asset_character");
+		expect(types).not.toContain("asset_avatar");
 	});
 });

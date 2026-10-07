@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useAsset, useCharacters } from "@/lib/canvas/useAssets";
+import { useAsset, useCharacterNames } from "@/lib/canvas/useAssets";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import {
@@ -56,15 +56,15 @@ function AssetCard({
 
 function CharactersCard() {
 	const { openCreateCharacter } = useAssetEditors();
-	const characters = useCharacters();
+	const names = useCharacterNames();
 	return (
 		<AssetCard
 			title="Characters"
 			empty="No characters yet"
 			add={{ label: "Add character", onClick: openCreateCharacter }}
 		>
-			{characters.map((character) => (
-				<CharacterAssetTile key={character.id} character={character} fill />
+			{names.map((name) => (
+				<CharacterAssetTile key={name} name={name} fill />
 			))}
 		</AssetCard>
 	);

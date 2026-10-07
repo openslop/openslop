@@ -78,7 +78,7 @@ describe("stripIds", () => {
 	});
 
 	it("keeps the id that names an asset", () => {
-		const node = asset("asset_character", { name: "Mia" });
+		const node = asset("asset_avatar", { name: "Mia" });
 
 		expect((stripIds(node) as Element).id).toBe(node.id);
 	});

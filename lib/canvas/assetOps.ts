@@ -5,7 +5,7 @@ import without from "lodash/without";
 import xor from "lodash/xor";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/referenceImages";
-import { assetDefaults, findAsset, REFERENCE_URLS_ATTR } from "./assets";
+import { findAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
 import { createCanvasNode } from "./createCanvasNode";
 import {
 	CHARACTERS_ATTR,
@@ -30,10 +30,7 @@ export function setAsset(
 		Transforms.insertNodes(
 			editor,
 			createCanvasNode(type, {
-				attrs: omitBy(
-					{ name, ...assetDefaults(type, name), ...attrs },
-					isNil,
-				) as Record<string, string>,
+				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
 				text,
 				defaultModels: editor.defaultModels(),
 			}),
@@ -97,4 +94,16 @@ export function removeAsset(
 		at: [],
 		match: (node) => isAssetElement(node) && node.id === id,
 	});
+}
+
+/** A new character speaks, and is drawn unless they are the narrator. */
+export function addCharacter(editor: Editor, name: string): void {
+	ensureAsset(editor, "asset_voice", name);
+	if (name !== NARRATOR) ensureAsset(editor, "asset_avatar", name);
+}
+
+/** A character's look and voice. */
+export function removeCharacter(editor: Editor, name: string): void {
+	removeAsset(editor, "asset_avatar", name);
+	removeAsset(editor, "asset_voice", name);
 }

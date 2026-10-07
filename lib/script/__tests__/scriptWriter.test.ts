@@ -103,9 +103,7 @@ describe("createScriptWriter", () => {
 		const editor = makeEditor();
 		const write = createScriptWriter(editor);
 
-		write(
-			'<asset_character name="Ayla">A tall hunter in furs</asset_character>\n',
-		);
+		write('<asset_avatar name="Ayla">A tall hunter in furs</asset_avatar>\n');
 		write("<narration>Snow fell.</narration>");
 
 		expect(editor.children.map((node) => "type" in node && node.type)).toEqual([

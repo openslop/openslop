@@ -1,5 +1,5 @@
 import { Editor } from "slate";
-import { findAsset, NARRATOR, voiceAttrs } from "@/lib/canvas/assets";
+import { findAsset, NARRATOR } from "@/lib/canvas/assets";
 import {
 	removeAssets,
 	setAsset,
@@ -34,25 +34,21 @@ export function applyTemplate(
 		setAsset(editor, "asset_style", undefined, {
 			text: template.style.description,
 		});
-		setAsset(editor, "asset_character", NARRATOR, {
-			attrs: voiceAttrs(template.narration),
-		});
+		setAsset(editor, "asset_voice", NARRATOR, { attrs: template.narration });
 		setReferenceImages(editor, template.referenceImages);
 		for (const [name, { appearance, avatar: _, ...voice }] of characters) {
-			setAsset(editor, "asset_character", name, {
-				text: appearance,
-				attrs: voiceAttrs(voice),
-			});
+			setAsset(editor, "asset_avatar", name, { text: appearance });
+			setAsset(editor, "asset_voice", name, { attrs: voice });
 		}
 	});
 
 	// Built after the reset and the characters land, so each avatar records what the template set.
 	const context = { ...buildContext(), state: store.getState() };
 	for (const [name, { avatar }] of characters) {
-		const character = findAsset(editor.children, "asset_character", name);
-		if (avatar && character)
+		const asset = findAsset(editor.children, "asset_avatar", name);
+		if (avatar && asset)
 			queue.commitResult(
-				buildNode(character, context),
+				buildNode(asset, context),
 				{ imageUrl: avatar, durationSec: 0 },
 				{ pinned: true },
 			);

@@ -101,15 +101,31 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-export type AssetType = `asset_${"style" | "character" | "references"}`;
+type AssetSpec = { named?: true };
 
-type AssetTypeSpec = { connector?: AssetConnectorType; named?: true };
+type GeneratedAssetSpec = AssetSpec & { connector: AssetConnectorType };
 
-/** Tiles ahead of the scenes. Only a character's look generates; the rest are metadata. */
-export const ASSET_TYPES: Record<AssetType, AssetTypeSpec> = {
+export const GENERATED_ASSET_TYPES = {
+	asset_avatar: { connector: "image", named: true },
+} as const satisfies Record<`asset_${string}`, GeneratedAssetSpec>;
+
+export const METADATA_ASSET_TYPES = {
+	asset_voice: { named: true },
 	asset_style: {},
-	asset_character: { connector: "image", named: true },
 	asset_references: {},
+} as const satisfies Record<`asset_${string}`, AssetSpec>;
+
+export type AssetType =
+	| keyof typeof GENERATED_ASSET_TYPES
+	| keyof typeof METADATA_ASSET_TYPES;
+
+/** Tiles ahead of the scenes. */
+export const ASSET_TYPES: Record<
+	AssetType,
+	AssetSpec & Partial<GeneratedAssetSpec>
+> = {
+	...GENERATED_ASSET_TYPES,
+	...METADATA_ASSET_TYPES,
 };
 
 export type ElementType = CanvasElementType | AssetType;
@@ -128,7 +144,9 @@ export const connectorOf = (
 	type: ElementType,
 ): AssetConnectorType | undefined => CONNECTORS[type].connector;
 
-export type GeneratedType = CanvasElementType | "asset_character";
+export type GeneratedType =
+	| CanvasElementType
+	| keyof typeof GENERATED_ASSET_TYPES;
 
 export const isGenerated = (
 	element: ScriptElement,

@@ -13,7 +13,7 @@ const NOT_READY: Record<GenerationStatus, string> = {
 export const viewImage = defineTool({
 	description: dedent`
 	  Look at the pictures an element holds: what an image generated, a character's avatar
-	  (their asset_character element) or the reference images the user uploaded (the
+	  (their asset_avatar element) or the reference images the user uploaded (the
 	  asset_references element). You receive the pictures themselves alongside the prompt behind them, so you
 	  can say whether a result matches what was asked for. Take the id from read_script.
 	  What you see is gone next turn, so act on it in this one.

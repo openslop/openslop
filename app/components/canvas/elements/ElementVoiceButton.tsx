@@ -15,10 +15,7 @@ export function ElementVoiceButton({
 }) {
 	const { editAsset } = useAssetEditors();
 	const open = () =>
-		editAsset(
-			"asset_character",
-			element.generationAttributes?.name ?? NARRATOR,
-		);
+		editAsset("asset_voice", element.generationAttributes?.name ?? NARRATOR);
 
 	return (
 		<SimpleTooltip label="Edit voice">

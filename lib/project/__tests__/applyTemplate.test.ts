@@ -6,16 +6,13 @@ import {
 	characterNames,
 	findAsset,
 	getAssets,
-	hasAvatar,
 	NARRATOR,
 	referenceUrls,
-	voiceAttrs,
 	voiceOf,
 } from "@/lib/canvas/assets";
 import { setAsset, setReferenceImages } from "@/lib/canvas/assetOps";
 import { buildNode } from "@/lib/generation/generationGraph";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { getPromptText } from "@/lib/generation/inputs";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
 import { applyTemplate } from "@/lib/templates/applyTemplate";
@@ -51,16 +48,14 @@ describe("applyTemplate", () => {
 		} = getTemplate("pov-life").characters?.Protagonist ?? {};
 
 		expect(avatarNames(assets())).toEqual(["Protagonist"]);
-		const character = findAsset(assets(), "asset_character", "Protagonist");
-		expect(character && getPromptText(character)).toBe(appearance);
+		expect(assetText(assets(), "asset_avatar", "Protagonist")).toBe(appearance);
 		expect(voiceOf(assets(), "Protagonist")).toMatchObject(voice);
 	});
 
 	it("gives the narrator the template's narration voice and no avatar", () => {
 		apply("pov-life");
-		const narrator = findAsset(assets(), "asset_character", NARRATOR);
 
-		expect(narrator && hasAvatar(narrator)).toBe(false);
+		expect(findAsset(assets(), "asset_avatar", NARRATOR)).toBeUndefined();
 		expect(voiceOf(assets())).toMatchObject(
 			VoiceSchema.parse(getTemplate("pov-life").narration),
 		);
@@ -125,8 +120,8 @@ describe("applyTemplate", () => {
 	});
 
 	it("wipes the user's narrator voice before applying", () => {
-		setAsset(editor, "asset_character", NARRATOR, {
-			attrs: voiceAttrs({ accent: "british", voiceId: "v-mine" }),
+		setAsset(editor, "asset_voice", NARRATOR, {
+			attrs: { accent: "british", voiceId: "v-mine" },
 		});
 
 		apply("pov-life");
@@ -167,11 +162,11 @@ describe("applyTemplate", () => {
 		expect(assets().length).toBe(editor.children.length - 1);
 	});
 
-	it("pins each prebuilt avatar on its character asset, fresh on arrival", () => {
+	it("pins each prebuilt avatar on its avatar asset, fresh on arrival", () => {
 		apply("pov-life");
-		const character = findAsset(assets(), "asset_character", "Protagonist");
-		if (!character) throw new Error("The template has no Protagonist");
-		const node = buildNode(character, buildContext());
+		const avatar = findAsset(assets(), "asset_avatar", "Protagonist");
+		if (!avatar) throw new Error("The template has no Protagonist");
+		const node = buildNode(avatar, buildContext());
 		const snapshot = queue.getElementSnapshot(node.id);
 
 		expect(snapshot.result?.imageUrl).toBe(

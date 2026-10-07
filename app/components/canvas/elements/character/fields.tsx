@@ -72,10 +72,12 @@ export function TextAreaField({
 export function SwitchField({
 	label,
 	checked,
+	disabled,
 	onCheckedChange,
 }: {
 	label: string;
 	checked: boolean;
+	disabled?: boolean;
 	onCheckedChange: (checked: boolean) => void;
 }) {
 	const id = useId();
@@ -84,7 +86,12 @@ export function SwitchField({
 			<label htmlFor={id} className="flex">
 				<FieldLabel>{label}</FieldLabel>
 			</label>
-			<Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+			<Switch
+				id={id}
+				checked={checked}
+				disabled={disabled}
+				onCheckedChange={onCheckedChange}
+			/>
 		</div>
 	);
 }

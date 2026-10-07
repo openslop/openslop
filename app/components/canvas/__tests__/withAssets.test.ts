@@ -16,7 +16,8 @@ import { withNodeId } from "../plugins/withNodeId";
 import { content, scene } from "./fixtures";
 
 const STYLE = asset("asset_style", { text: "noir" });
-const CAST = asset("asset_character", { name: "Mia", text: "a girl" });
+const CAST = asset("asset_avatar", { name: "Mia", text: "a girl" });
+const VOICE = asset("asset_voice", { name: "Mia" });
 const REFERENCES = asset("asset_references");
 
 const bare = (children: Descendant[], plugins = withAssets) => {
@@ -41,13 +42,18 @@ const selectScriptStart = (editor: Editor) =>
 
 describe("withAssets", () => {
 	it("makes every asset a void", () => {
-		const editor = bare([STYLE, CAST, REFERENCES, script()]);
+		const editor = bare([STYLE, CAST, VOICE, REFERENCES, script()]);
 
 		expect(
 			editor.children.flatMap((node) =>
 				Element.isElement(node) && editor.isVoid(node) ? [node.type] : [],
 			),
-		).toEqual(["asset_style", "asset_character", "asset_references"]);
+		).toEqual([
+			"asset_style",
+			"asset_avatar",
+			"asset_voice",
+			"asset_references",
+		]);
 	});
 
 	it("still lets a writer change an asset's text", () => {
@@ -66,7 +72,7 @@ describe("withAssets", () => {
 		Transforms.move(editor, { reverse: true });
 
 		expect(editor.selection?.anchor.path[0]).toBe(
-			indexOf(editor, "asset_character"),
+			indexOf(editor, "asset_avatar"),
 		);
 	});
 
@@ -95,7 +101,7 @@ describe("withAssets", () => {
 		Transforms.insertNodes(editor, CAST, { at: [2] });
 
 		expect(ids(editor)).toEqual([
-			"asset_character:Mia",
+			"asset_avatar:Mia",
 			"asset_style",
 			"s1",
 			"s2",

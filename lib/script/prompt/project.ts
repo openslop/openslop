@@ -1,13 +1,11 @@
 import dedent from "dedent";
+import without from "lodash/without";
 import {
 	assetText,
-	characterVoice,
-	getCharacters,
-	hasAvatar,
+	characterNames,
 	NARRATOR,
 	voiceOf,
 } from "@/lib/canvas/assets";
-import { getPromptText } from "@/lib/generation/inputs";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -23,15 +21,15 @@ function renderVoice(voice: Voice): string {
 		.join("\n");
 }
 
-function renderCharacter(character: AssetElement<"asset_character">): string {
-	const appearance = hasAvatar(character) && getPromptText(character);
+function renderCharacter(assets: AssetElement[], name: string): string {
+	const appearance = assetText(assets, "asset_avatar", name);
 	const body = [
-		renderVoice(characterVoice(character)),
+		renderVoice(voiceOf(assets, name)),
 		appearance && `- appearance: ${appearance}`,
 	]
 		.filter(Boolean)
 		.join("\n");
-	return `## ${character.generationAttributes?.name}\n\n${body}`;
+	return `## ${name}\n\n${body}`;
 }
 
 export function projectPreamble(assets: AssetElement[]): string {
@@ -56,16 +54,14 @@ export function projectPreamble(assets: AssetElement[]): string {
 
 			${voice}`);
 
-	const characters = getCharacters(assets).filter(
-		(character) => character.generationAttributes?.name !== NARRATOR,
-	);
+	const characters = without(characterNames(assets), NARRATOR);
 	if (characters.length > 0) {
 		sections.push(dedent`
 			# Characters
 
 			The characters. Name one exactly as written here, and never describe how one looks in a prompt:
 
-			${characters.map(renderCharacter).join("\n\n")}`);
+			${characters.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
 	}
 
 	return sections.join("\n\n");

@@ -5,7 +5,7 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { videoAttributesFor } from "@/lib/connectors/video/attributes";
-import { NARRATOR, NO_AVATAR, voiceAttrs } from "../assets";
+import { NARRATOR } from "../assets";
 import { createCanvasNode } from "../createCanvasNode";
 import {
 	attributeSchemaFor,
@@ -73,10 +73,7 @@ describe("resolveElementConnector", () => {
 
 describe("resolveElementConnector for speech", () => {
 	const voiced = (pair: typeof DEFAULT_MODELS.tts) => [
-		asset("asset_character", {
-			name: NARRATOR,
-			attrs: { ...NO_AVATAR, ...voiceAttrs(pair) },
-		}),
+		asset("asset_voice", { name: NARRATOR, attrs: pair }),
 	];
 	const own = { provider: "cartesia", model: "Sonic 3.6" };
 
@@ -90,7 +87,7 @@ describe("resolveElementConnector for speech", () => {
 		).toEqual(DEFAULT_MODELS.tts);
 	});
 
-	it("speaks with its own pair while its speaker has no character", () => {
+	it("speaks with its own pair while its speaker has no voice", () => {
 		expect(
 			resolveElementConnector(element("narration", own), registry, []).model,
 		).toEqual(own);
@@ -110,22 +107,26 @@ describe("resolveElementConnector for speech", () => {
 	});
 });
 
-describe("resolveElementConnector for a character asset", () => {
+describe("resolveElementConnector for an avatar", () => {
 	it("draws the character's look on the image connector, with the model it pins", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
-		const character = asset("asset_character", { name: "Mia", attrs: pinned });
+		const avatar = asset("asset_avatar", { name: "Mia", attrs: pinned });
 
-		expect(resolveElementConnector(character, registry, [character])).toEqual({
+		expect(resolveElementConnector(avatar, registry, [avatar])).toEqual({
 			type: "image",
 			model: pinned,
-			config: registry.asset_character,
+			config: registry.asset_avatar,
 		});
 	});
 });
 
 describe("resolveElementConnector for metadata", () => {
 	it("throws, since metadata never generates", () => {
-		for (const type of ["asset_style", "asset_references"] as const)
+		for (const type of [
+			"asset_voice",
+			"asset_style",
+			"asset_references",
+		] as const)
 			expect(() => resolveElementConnector(asset(type), registry, [])).toThrow(
 				/generates nothing/,
 			);
@@ -160,40 +161,42 @@ describe("elementSchema", () => {
 });
 
 describe("asset schemas", () => {
-	const character = attributeSchemaFor("asset_character", {});
+	const voice = attributeSchemaFor("asset_voice", {});
 
-	it("lets a character set its voice's traits, each one optional, describe the voice, and carry its speech pair", () => {
-		expect(character.keys).toEqual([
+	it("lets a voice set its traits, each one optional, describe itself, and carry its speech pair", () => {
+		expect(voice.keys).toEqual([
 			"gender",
 			"language",
 			"age",
 			"pitch",
 			"accent",
-			"voiceDescription",
-			"voiceProvider",
-			"voiceModel",
+			"description",
+			"provider",
+			"model",
 		]);
-		expect(character.defaultAttributes).toEqual(voiceAttrs(DEFAULT_MODELS.tts));
+		expect(voice.defaultAttributes).toEqual(DEFAULT_MODELS.tts);
 	});
 
-	it("gives every asset but a character nothing to set beside its text", () => {
-		for (const type of ["asset_style", "asset_references"] as const)
+	it("gives every asset but a voice nothing to set beside its text", () => {
+		for (const type of [
+			"asset_avatar",
+			"asset_style",
+			"asset_references",
+		] as const)
 			expect(attributeSchemaFor(type, {}).keys).toEqual([]);
 	});
 
 	it("keeps what an asset holds outside its schema when it is created", () => {
 		expect(
 			flatAttributes(
-				asset("asset_character", {
+				asset("asset_voice", {
 					name: "Mia",
-					attrs: { ...NO_AVATAR, voiceId: "v1", gender: "feminine" },
+					attrs: { voiceId: "v1", gender: "feminine" },
 				}),
 			),
 		).toEqual({
 			name: "Mia",
-			...DEFAULT_IMAGE_MODEL,
-			...voiceAttrs(DEFAULT_MODELS.tts),
-			...NO_AVATAR,
+			...DEFAULT_MODELS.tts,
 			voiceId: "v1",
 			gender: "feminine",
 		});
@@ -201,11 +204,14 @@ describe("asset schemas", () => {
 });
 
 describe("elementModelPick", () => {
-	it("picks a character's model from the image models, and throws for a type that does not generate", () => {
+	it("picks an avatar's model from the image models, and throws for a type that does not generate", () => {
 		expect(() => elementModelPick(asset("asset_style"))).toThrow(/no model/);
-		expect(
-			elementModelPick(asset("asset_character", { name: "Mia" })).type,
-		).toBe("image");
+		expect(() =>
+			elementModelPick(asset("asset_voice", { name: "Mia" })),
+		).toThrow(/no model/);
+		expect(elementModelPick(asset("asset_avatar", { name: "Mia" })).type).toBe(
+			"image",
+		);
 	});
 
 	it("picks the element's own pair from its connector type's models", () => {

@@ -4,18 +4,25 @@ import type { ReactNode } from "react";
 import { useFocused, useSelected, type RenderElementProps } from "slate-react";
 import type { AssetElement, AssetType } from "@/lib/canvas/types";
 import {
-	CharacterAssetTile,
-	ReferenceAssetTiles,
 	ArtStyleAssetTile,
+	AvatarAssetTile,
+	ReferenceAssetTiles,
+	VoiceAssetTile,
 } from "./AssetTiles";
+
+const nameOf = (element: AssetElement) =>
+	element.generationAttributes?.name ?? "";
 
 const TILES: Record<
 	AssetType,
 	(props: { element: AssetElement; selected: boolean }) => ReactNode
 > = {
 	asset_style: ({ selected }) => <ArtStyleAssetTile selected={selected} />,
-	asset_character: ({ element, selected }) => (
-		<CharacterAssetTile character={element} selected={selected} />
+	asset_avatar: ({ element, selected }) => (
+		<AvatarAssetTile name={nameOf(element)} selected={selected} />
+	),
+	asset_voice: ({ element, selected }) => (
+		<VoiceAssetTile name={nameOf(element)} selected={selected} />
 	),
 	asset_references: ({ selected }) => (
 		<ReferenceAssetTiles selected={selected} />

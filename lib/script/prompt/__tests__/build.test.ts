@@ -1,19 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assetId } from "@/lib/canvas/types";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { AssetType } from "@/lib/canvas/types";
-import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import { NARRATOR } from "@/lib/canvas/assets";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, scriptRules } from "../build";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
 import { VIDEO_LENGTH_SPECS } from "@/lib/project/videoLength";
-
-const asset = <T extends AssetType>(
-	type: T,
-	text = "",
-	attrs: Record<string, string> = {},
-) => createCanvasNode(type, { id: assetId(type, attrs.name), attrs, text });
 
 const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
 	ScriptSettingsSchema.parse(settings);
@@ -131,13 +123,12 @@ describe("buildScriptPrompt", () => {
 	it("carries the art style, narrator and characters on the canvas", () => {
 		const { system } = buildScriptPrompt(
 			[
-				asset("asset_style", "muted watercolor"),
-				asset("asset_character", "", {
+				asset("asset_style", { text: "muted watercolor" }),
+				asset("asset_voice", {
 					name: NARRATOR,
-					...NO_AVATAR,
-					gender: "feminine",
+					attrs: { gender: "feminine" },
 				}),
-				asset("asset_character", "a small grey rabbit", { name: "Lumi" }),
+				asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
 			],
 			settingsOf(),
 			{ kind: "brief", brief: "a brief" },
@@ -154,10 +145,8 @@ describe("buildScriptPrompt", () => {
 
 	it("lists a character's voice and appearance under their name", () => {
 		const preamble = projectPreamble([
-			asset("asset_character", "a freckled girl", {
-				name: "Mira",
-				age: "child",
-			}),
+			asset("asset_avatar", { name: "Mira", text: "a freckled girl" }),
+			asset("asset_voice", { name: "Mira", attrs: { age: "child" } }),
 		]);
 
 		expect(preamble).toContain(
@@ -168,15 +157,19 @@ describe("buildScriptPrompt", () => {
 
 	it("lists a voice-only character with their voice and no appearance", () => {
 		const preamble = projectPreamble([
-			asset("asset_character", "a hidden caller", {
-				name: "Voice",
-				...NO_AVATAR,
-				pitch: "low",
-			}),
+			asset("asset_voice", { name: "Voice", attrs: { pitch: "low" } }),
 		]);
 
 		expect(preamble).toContain("## Voice\n\n- pitch: low");
-		expect(preamble).not.toContain("a hidden caller");
+		expect(preamble).not.toContain("- appearance:");
+	});
+
+	it("lists a character with no voice by their appearance alone", () => {
+		const preamble = projectPreamble([
+			asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
+		]);
+
+		expect(preamble).toContain("## Lumi\n\n- appearance: a small grey rabbit");
 	});
 
 	it("says nothing of a project whose canvas holds no assets", () => {
@@ -184,7 +177,7 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("hands a review the same rules the writer was given, minus the budget it cannot judge", () => {
-		const styled = [asset("asset_style", "muted watercolor")];
+		const styled = [asset("asset_style", { text: "muted watercolor" })];
 		const rules = scriptRules(styled, settingsOf());
 
 		expect(

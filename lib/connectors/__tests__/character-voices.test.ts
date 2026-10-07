@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { voiceAttrs } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ScriptElement } from "@/lib/canvas/types";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
@@ -54,9 +53,9 @@ const video = (characters?: string, model: ModelRef = SEEDANCE) =>
 	});
 
 const voice = (name: string, voiceId?: string) =>
-	asset("asset_character", {
+	asset("asset_voice", {
 		name,
-		attrs: voiceId ? voiceAttrs({ ...DEFAULT_TTS_MODEL, voiceId }) : {},
+		attrs: voiceId ? { ...DEFAULT_TTS_MODEL, voiceId } : {},
 	});
 
 const prepare = async (
@@ -96,16 +95,16 @@ describe("character-voices plugin", () => {
 				prepare("Sol, Mira", [voice("Sol", "v-sol"), voice("Mira")]),
 			).resolves.toEqual([
 				{
-					type: "asset_character",
+					type: "asset_voice",
 					name: "Mira",
-					attrs: voiceAttrs({ ...DEFAULT_TTS_MODEL, voiceId: "v-found" }),
+					attrs: { ...DEFAULT_TTS_MODEL, voiceId: "v-found" },
 				},
 			]);
 			expect(tts.searchVoices).toHaveBeenCalledOnce();
 		});
 
 		it.each([
-			["a character with no character asset", "Ghost", [], SEEDANCE],
+			["a character with no voice asset", "Ghost", [], SEEDANCE],
 			["a video model that does not listen", "Mira", [voice("Mira")], KLING],
 			["a video with no characters", undefined, [], SEEDANCE],
 		])("searches no voice for %s", async (_, characters, canvas, model) => {

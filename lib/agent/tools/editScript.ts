@@ -1,6 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
-import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import { NARRATOR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
 import {
 	ASSET_TYPES,
@@ -35,10 +35,8 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
-	asset_character: [
-		`name (${NARRATOR} for the narrator)`,
-		`avatar ${enumeration([NO_AVATAR.avatar])} (a voice with no picture, like the narrator)`,
-	],
+	asset_avatar: ["name"],
+	asset_voice: [`name (${NARRATOR} for the narrator)`],
 };
 
 /** Attributes Sloppy can write by hand: enums with their options, and free text. */
@@ -70,16 +68,18 @@ const ELEMENT_TYPE_NAMES = CanvasElementTypeSchema.options;
 const ASSET_TYPE_NAMES = Object.keys(ASSET_TYPES) as AssetType[];
 
 const ASSETS = dedent`
-	Assets sit ahead of the first scene, and every scene draws on them. They are edited the
+	Assets sit ahead of the first scene and are global to the project. They are edited the
 	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
 	asset already exists changes that one instead. The title is not an asset: change it with
 	set_title.
-	- asset_character: a speaker, with how they sound as its voice attributes. A voice is described,
-	  never picked. \`name\` is the exact name their lines and every \`characters\` list use,
-	  and never changes. The text is what they look like, in English, written like an image
-	  prompt: their avatar is drawn from it, and every visual that lists them is drawn from
-	  that avatar. The narrator is the asset_character named ${NARRATOR}, with \`avatar="none"\`
-	  and no text: it speaks every line no character does.
+	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
+	lines and every \`characters\` list use, which never changes. A character has either or both.
+	- asset_avatar: what a character looks like, as its text, in English, written like an image
+	  prompt. Their avatar is drawn from it, and every visual that lists them is drawn from that
+	  avatar.
+	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described,
+	  never picked. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
+	  character does, and has no avatar.
 	- asset_style: the art style every visual is drawn in, as its text, in English: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
 	- asset_references: the pictures every visual is drawn after. The user uploads these; look at

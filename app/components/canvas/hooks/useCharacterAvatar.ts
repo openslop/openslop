@@ -4,7 +4,7 @@ import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 
 /** A character's avatar is whatever their asset last generated. */
 export function useCharacterAvatar(name = "") {
-	const id = assetId("asset_character", name);
+	const id = assetId("asset_avatar", name);
 	return {
 		url: useQueueSelector((q) =>
 			getPrimaryUrl(q.getElementSnapshot(id).result, "image"),

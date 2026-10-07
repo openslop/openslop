@@ -96,30 +96,30 @@ describe("deserializeWithScenes", () => {
 				'<asset_style id="asset_style">noir</asset_style>',
 				"<narration>a</narration>",
 				"--- Scene 2 ---",
-				'<asset_character id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</asset_character>',
+				'<asset_avatar id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</asset_avatar>',
 				"<narration>b</narration>",
 			].join("\n"),
 		);
 
 		expect(nodes.map((node) => node.type)).toEqual([
 			"asset_style",
-			"asset_character",
+			"asset_avatar",
 			SCENE_TYPE,
 			SCENE_TYPE,
 		]);
-		const character = nodes[1];
-		expect(character).toMatchObject({
-			id: "asset_character:Ada",
+		const avatar = nodes[1];
+		expect(avatar).toMatchObject({
+			id: "asset_avatar:Ada",
 			generationAttributes: {
 				name: "Ada",
 				provider: "runware",
 				model: "Seedream 5 Lite",
 			},
 		});
-		expect(isAssetElement(character) && getPromptText(character)).toBe("tall");
+		expect(isAssetElement(avatar) && getPromptText(avatar)).toBe("tall");
 		expect(
 			scenesOf(
-				'<asset_character name="Ada">tall</asset_character><narration>b</narration>',
+				'<asset_avatar name="Ada">tall</asset_avatar><narration>b</narration>',
 			)[0]?.children,
 		).toHaveLength(1);
 	});
@@ -138,8 +138,9 @@ describe("deserializeWithScenes", () => {
 	it("round-trips assets through serializeOSMLWithScenes", () => {
 		const osml = [
 			'<asset_style id="asset_style">noir &amp; "moody"</asset_style>',
-			'<asset_character id="asset_character:Narrator" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Narrator" avatar="none" provider="openslop" model="Slop Image v1" gender="feminine"></asset_character>',
-			'<asset_character id="asset_character:Ada &lt;the first&gt;" voiceProvider="openslop" voiceModel="Slop TTS v1" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</asset_character>',
+			'<asset_voice id="asset_voice:Narrator" provider="openslop" model="Slop TTS v1" name="Narrator" gender="feminine"></asset_voice>',
+			'<asset_avatar id="asset_avatar:Ada &lt;the first&gt;" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</asset_avatar>',
+			'<asset_voice id="asset_voice:Ada &lt;the first&gt;" provider="openslop" model="Slop TTS v1" name="Ada &lt;the first&gt;"></asset_voice>',
 			'<asset_references id="asset_references" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></asset_references>',
 		].join("\n");
 

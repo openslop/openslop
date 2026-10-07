@@ -6,7 +6,6 @@ import {
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { NO_AVATAR } from "@/lib/canvas/assets";
 import { dependenciesOf } from "./_state-ctx";
 
 const image = (characters: string): CanvasContentElement => ({
@@ -34,22 +33,20 @@ describe("character avatar dependencies", () => {
 			canvas,
 		);
 
-	it("depends on each named character's character asset, and on nothing for a name no character has", () => {
+	it("depends on each named character's avatar, and on nothing for a name no avatar has", () => {
 		const canvas = [
-			asset("asset_character", { name: "Red" }),
-			asset("asset_character", { name: "Wolf" }),
+			asset("asset_avatar", { name: "Red" }),
+			asset("asset_avatar", { name: "Wolf" }),
 		];
 
 		expect(avatarsOf("Wolf, Ghost, Red", canvas)).toEqual({
-			"Wolf's avatar": "asset_character:Wolf",
-			"Red's avatar": "asset_character:Red",
+			"Wolf's avatar": "asset_avatar:Wolf",
+			"Red's avatar": "asset_avatar:Red",
 		});
 	});
 
-	it("depends on nothing for a character with no avatar", () => {
-		const canvas = [
-			asset("asset_character", { name: "Red", attrs: { ...NO_AVATAR } }),
-		];
+	it("depends on nothing for a character with only a voice", () => {
+		const canvas = [asset("asset_voice", { name: "Red" })];
 
 		expect(avatarsOf("Red", canvas)).toEqual({});
 	});

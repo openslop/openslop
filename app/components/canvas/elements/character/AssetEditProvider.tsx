@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
-import { ensureAsset } from "@/lib/canvas/assetOps";
+import { addCharacter, ensureAsset } from "@/lib/canvas/assetOps";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import type { AssetType } from "@/lib/canvas/types";
 import { ArtStyleModal } from "../style/ArtStyleModal";
@@ -16,27 +16,18 @@ export type AssetEditors = {
 	openCreateCharacter: () => void;
 };
 
-type DialogProps = { name?: string; onClose: () => void };
-
-const characterDialog = ({ name = "", onClose }: DialogProps) => (
-	<CharacterEditModal key={name} name={name} onClose={onClose} />
-);
-
-const artStyleDialog = ({ onClose }: DialogProps) => (
-	<ArtStyleModal onClose={onClose} />
-);
-
-/** The dialog each asset type is edited in. A character's look and voice share one. */
-const ASSET_DIALOGS: Record<AssetType, (props: DialogProps) => ReactNode> = {
-	asset_character: characterDialog,
-	asset_style: artStyleDialog,
-	asset_references: artStyleDialog,
-};
-
 /** The one asset dialog open at a time, so two can never stack. */
 type AssetEdit =
 	| { kind: "create" }
-	| { kind: "edit"; type: AssetType; name?: string };
+	| { kind: "character"; name: string }
+	| { kind: "artStyle" };
+
+const DIALOG_OF: Record<AssetType, (name?: string) => AssetEdit> = {
+	asset_avatar: (name = "") => ({ kind: "character", name }),
+	asset_voice: (name = "") => ({ kind: "character", name }),
+	asset_style: () => ({ kind: "artStyle" }),
+	asset_references: () => ({ kind: "artStyle" }),
+};
 
 const [AssetEditContext, useAssetEditors] =
 	createRequiredContext<AssetEditors>("AssetEditProvider");
@@ -52,7 +43,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 		() => ({
 			editAsset: (type, name) => {
 				ensureAsset(editor, type, name);
-				setEditing({ kind: "edit", type, name });
+				setEditing(DIALOG_OF[type](name));
 			},
 			openCreateCharacter: () => setEditing({ kind: "create" }),
 		}),
@@ -70,11 +61,20 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 			>
 				{editing?.kind === "create" && (
 					<NewCharacterDialog
-						onCreated={(name) => editors.editAsset("asset_character", name)}
+						onCreated={(name) => {
+							addCharacter(editor, name);
+							setEditing({ kind: "character", name });
+						}}
 					/>
 				)}
-				{editing?.kind === "edit" &&
-					ASSET_DIALOGS[editing.type]({ name: editing.name, onClose: close })}
+				{editing?.kind === "character" && (
+					<CharacterEditModal
+						key={editing.name}
+						name={editing.name}
+						onClose={close}
+					/>
+				)}
+				{editing?.kind === "artStyle" && <ArtStyleModal onClose={close} />}
 			</Dialog>
 		</AssetEditContext>
 	);

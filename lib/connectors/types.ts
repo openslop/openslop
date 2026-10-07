@@ -118,8 +118,6 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * somewhere other than the element itself.
 	 */
 	model?(element: ScriptElement, canvas: ScriptElement[]): ModelRef;
-	/** Attributes the element carries but is not generated from, kept out of its inputs. */
-	ignores?: readonly string[];
 	/** Values the node reads off the canvas or the settings, recorded in its inputs so a change stales it. */
 	reads?(element: ScriptElement, ctx: BuildContext): Record<string, string>;
 	/** Assets to write before the node is built to run, such as the voice a search found. */

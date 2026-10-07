@@ -5,7 +5,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createEditor } from "slate";
 import { Slate, withReact } from "slate-react";
-import { findAsset, NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import { findAsset, getAssets, NARRATOR } from "@/lib/canvas/assets";
 import {
 	AssetEditProvider,
 	useAssetEditors,
@@ -14,12 +14,14 @@ import {
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
+const created = vi.hoisted(() => ({ name: "Mia" }));
+
 vi.mock("../elements/character/NewCharacterDialog", () => ({
 	NewCharacterDialog: ({
 		onCreated,
 	}: {
 		onCreated: (name: string) => void;
-	}) => <button data-dialog="create" onClick={() => onCreated("Mia")} />,
+	}) => <button data-dialog="create" onClick={() => onCreated(created.name)} />,
 }));
 vi.mock("../elements/character/CharacterEditModal", () => ({
 	CharacterEditModal: (props: { name: string; onClose: () => void }) => (
@@ -47,8 +49,10 @@ const dialogs = () =>
 	Array.from(container.querySelectorAll<HTMLElement>("[data-dialog]"));
 const openDialogs = () => dialogs().map((dialog) => dialog.dataset.dialog);
 const clickDialog = () => act(() => dialogs()[0]?.click());
+const assetIds = () => getAssets(editor.children).map(({ id }) => id);
 
 beforeEach(() => {
+	created.name = "Mia";
 	root = createRoot(container);
 	act(() =>
 		root.render(
@@ -72,33 +76,44 @@ describe("AssetEditProvider", () => {
 		act(() => editors.editAsset("asset_references"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_character", "Narrator"));
+		act(() => editors.editAsset("asset_voice", NARRATOR));
 		expect(openDialogs()).toEqual(["character Narrator"]);
 
 		act(() => editors.editAsset("asset_style"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_character", "Mia"));
+		act(() => editors.editAsset("asset_avatar", "Mia"));
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
-	it("adds a new character and hands it to its edit dialog", () => {
+	it("adds a new character's look and voice and hands them to their edit dialog", () => {
 		act(() => editors.openCreateCharacter());
 		expect(openDialogs()).toEqual(["create"]);
 
 		clickDialog();
-		expect(findAsset(editor.children, "asset_character", "Mia")).toMatchObject({
-			id: "asset_character:Mia",
-		});
+		expect(assetIds()).toEqual(
+			expect.arrayContaining(["asset_avatar:Mia", "asset_voice:Mia"]),
+		);
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
-	it("adds the narrator with no avatar", () => {
-		act(() => editors.editAsset("asset_character", NARRATOR));
+	it("adds a new narrator as a voice with no avatar", () => {
+		created.name = NARRATOR;
+		act(() => editors.openCreateCharacter());
 
+		clickDialog();
+		expect(findAsset(editor.children, "asset_voice", NARRATOR)).toBeDefined();
 		expect(
-			findAsset(editor.children, "asset_character", NARRATOR),
-		).toMatchObject({ generationAttributes: NO_AVATAR });
+			findAsset(editor.children, "asset_avatar", NARRATOR),
+		).toBeUndefined();
+		expect(openDialogs()).toEqual(["character Narrator"]);
+	});
+
+	it("adds only the asset it opens", () => {
+		act(() => editors.editAsset("asset_voice", "Kai"));
+
+		expect(findAsset(editor.children, "asset_voice", "Kai")).toBeDefined();
+		expect(findAsset(editor.children, "asset_avatar", "Kai")).toBeUndefined();
 	});
 
 	it("unmounts the dialog when it closes", () => {

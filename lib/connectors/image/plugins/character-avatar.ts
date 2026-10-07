@@ -1,4 +1,3 @@
-import { VOICE_KEYS } from "@/lib/canvas/assets";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 
 type CharacterParams = { prompt: string; name?: string };
@@ -7,7 +6,6 @@ type CharacterParams = { prompt: string; name?: string };
 export function createCharacterAvatarPlugin(): ConnectorPlugin<CharacterParams> {
 	return {
 		name: "character-avatar",
-		ignores: VOICE_KEYS,
 		beforeGenerate: ({ prompt, name, ...params }) => ({
 			...params,
 			prompt: [

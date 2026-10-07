@@ -3,12 +3,16 @@
 import { useSlateStatic } from "slate-react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
-import { removeAsset } from "@/lib/canvas/assetOps";
-import { hasAvatar, NO_AVATAR } from "@/lib/canvas/assets";
+import {
+	ensureAsset,
+	removeAsset,
+	removeCharacter,
+} from "@/lib/canvas/assetOps";
 import { elementModelPick } from "@/lib/canvas/elementConnector";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset } from "@/lib/canvas/useAssets";
-import { mergeAttrs, updateNodeText } from "@/lib/canvas/editorOps";
+import { updateNodeText } from "@/lib/canvas/editorOps";
+import type { AssetType } from "@/lib/canvas/types";
 import { ModelAttribute } from "../attributes/ModelAttribute";
 import { ElementGenerationProvider } from "../ElementGenerationContext";
 import {
@@ -30,15 +34,16 @@ export function CharacterEditModal({
 	onClose: () => void;
 }) {
 	const editor = useSlateStatic();
-	const character = useAsset("asset_character", name);
-
-	if (!character) return null;
+	const avatar = useAsset("asset_avatar", name);
+	const voice = useAsset("asset_voice", name);
+	const toggle = (type: AssetType) => (on: boolean) =>
+		on ? ensureAsset(editor, type, name) : removeAsset(editor, type, name);
 
 	return (
 		<AssetDialog
 			title={name}
 			description={
-				hasAvatar(character)
+				avatar
 					? "Edits save automatically. Regenerate the avatar after changing the appearance."
 					: "Edits save automatically."
 			}
@@ -49,7 +54,7 @@ export function CharacterEditModal({
 					variant="outline"
 					size="sm"
 					onClick={() => {
-						removeAsset(editor, "asset_character", name);
+						removeCharacter(editor, name);
 						onClose();
 					}}
 					className="text-muted-foreground sm:mr-auto"
@@ -61,15 +66,12 @@ export function CharacterEditModal({
 		>
 			<SwitchField
 				label="Avatar"
-				checked={hasAvatar(character)}
-				onCheckedChange={(on) =>
-					mergeAttrs(editor, character.id, {
-						avatar: on ? null : NO_AVATAR.avatar,
-					})
-				}
+				checked={avatar !== undefined}
+				disabled={!voice}
+				onCheckedChange={toggle("asset_avatar")}
 			/>
-			{hasAvatar(character) && (
-				<ElementGenerationProvider element={character}>
+			{avatar && (
+				<ElementGenerationProvider element={avatar}>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="flex min-w-0 flex-col gap-2">
 							<TextAreaField
@@ -79,15 +81,15 @@ export function CharacterEditModal({
 								aside={
 									<div className="flex items-center gap-1">
 										<ModelAttribute
-											element={character}
-											pick={elementModelPick(character)}
+											element={avatar}
+											pick={elementModelPick(avatar)}
 											label="Avatar model"
 										/>
-										<ElementHistoryButton element={character} />
+										<ElementHistoryButton element={avatar} />
 									</div>
 								}
-								value={getElementBodyText(character)}
-								onChange={(text) => updateNodeText(editor, character.id, text)}
+								value={getElementBodyText(avatar)}
+								onChange={(text) => updateNodeText(editor, avatar.id, text)}
 								placeholder="Describe the character's look"
 							/>
 							<div className="flex items-center justify-end gap-2">
@@ -102,7 +104,13 @@ export function CharacterEditModal({
 					</div>
 				</ElementGenerationProvider>
 			)}
-			<VoiceEditor character={character} />
+			<SwitchField
+				label="Voice"
+				checked={voice !== undefined}
+				disabled={!avatar}
+				onCheckedChange={toggle("asset_voice")}
+			/>
+			{voice && <VoiceEditor asset={voice} />}
 		</AssetDialog>
 	);
 }

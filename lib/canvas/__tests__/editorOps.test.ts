@@ -75,17 +75,17 @@ describe("writes by id", () => {
 		const editor = createEditor();
 		editor.children = [
 			asset("asset_style"),
-			asset("asset_character", { name: "Mia" }),
+			asset("asset_voice", { name: "Mia" }),
 			scene([content("narration", "n1"), content("image", "img1")]),
 		];
 
 		mergeAttrs(editor, "img1", { style: "ink" });
-		mergeAttrs(editor, "asset_character:Mia", { age: "child" });
+		mergeAttrs(editor, "asset_voice:Mia", { age: "child" });
 
 		expect(findNodeById(editor, "img1")?.[0].generationAttributes).toEqual({
 			style: "ink",
 		});
-		expect(findNodeById(editor, "asset_character:Mia")).toMatchObject([
+		expect(findNodeById(editor, "asset_voice:Mia")).toMatchObject([
 			{ generationAttributes: { name: "Mia", age: "child" } },
 			[1],
 		]);
@@ -312,7 +312,7 @@ describe("mergeAttrs", () => {
 describe("clearEditor", () => {
 	it("empties the script so a new one does not stack under it, keeping the assets", () => {
 		const style = asset("asset_style", { text: "ink wash" });
-		const character = asset("asset_character", { name: "Mia" });
+		const character = asset("asset_avatar", { name: "Mia" });
 		const editor = createEditor();
 		editor.children = [
 			style,

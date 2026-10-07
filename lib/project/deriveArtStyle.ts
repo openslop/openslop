@@ -1,6 +1,6 @@
 import dedent from "dedent";
 import compact from "lodash/compact";
-import { getCharacters, hasAvatar, referenceUrls } from "@/lib/canvas/assets";
+import { getAvatars, referenceUrls } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { LLMConnector } from "@/lib/connectors/types";
@@ -14,12 +14,10 @@ export function uploadedAvatarUrls(
 	queue: GenerationQueue,
 ): string[] {
 	return compact(
-		getCharacters(assets)
-			.filter(hasAvatar)
-			.map(({ id }) => {
-				const { result, pinned } = queue.getElementSnapshot(id);
-				return pinned ? getPrimaryUrl(result, "image") : undefined;
-			}),
+		getAvatars(assets).map(({ id }) => {
+			const { result, pinned } = queue.getElementSnapshot(id);
+			return pinned ? getPrimaryUrl(result, "image") : undefined;
+		}),
 	);
 }
 

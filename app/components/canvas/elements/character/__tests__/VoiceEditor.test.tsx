@@ -2,7 +2,7 @@
 
 import { act, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { findAsset, NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import { findAsset, NARRATOR } from "@/lib/canvas/assets";
 import { useAsset } from "@/lib/canvas/useAssets";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { asset } from "@/lib/canvas/__tests__/_assets";
@@ -73,88 +73,65 @@ vi.mock("../VoicePicker", () => ({
 
 const { VoiceEditor } = await import("../VoiceEditor");
 
-function CharacterVoice({ name }: { name: string }) {
-	const character = useAsset("asset_character", name);
-	return character ? <VoiceEditor character={character} /> : null;
+function VoiceOf({ name }: { name: string }) {
+	const voice = useAsset("asset_voice", name);
+	return voice ? <VoiceEditor asset={voice} /> : null;
 }
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 afterEach(() => canvas.unmount());
 
-const characterOn = (name: string) => {
-	const element = findAsset(canvas.editor.children, "asset_character", name);
+const voiceOn = (name: string) => {
+	const element = findAsset(canvas.editor.children, "asset_voice", name);
 	return element && flatAttributes(element);
 };
 
-const DEFAULT_VOICE = {
-	voiceProvider: DEFAULT_MODELS.tts.provider,
-	voiceModel: DEFAULT_MODELS.tts.model,
-};
-
-const narrator = (attrs: Record<string, string> = {}) =>
-	asset("asset_character", {
-		name: NARRATOR,
-		attrs: { ...NO_AVATAR, ...attrs },
-	});
+const voice = (name: string, attrs: Record<string, string> = {}) =>
+	asset("asset_voice", { name, attrs });
 
 describe("VoiceEditor", () => {
-	it("writes a trait onto the character and searches by it", async () => {
-		canvas = mountOnCanvas([narrator({ age: "child" })]);
-		canvas.render(<CharacterVoice name={NARRATOR} />);
+	it("writes a trait onto the voice and searches by it", async () => {
+		canvas = mountOnCanvas([voice(NARRATOR, { age: "child" })]);
+		canvas.render(<VoiceOf name={NARRATOR} />);
 
 		await pick("feminine");
 
 		expect(canvas.editor.children).toHaveLength(1);
-		expect(characterOn(NARRATOR)).toEqual({
+		expect(voiceOn(NARRATOR)).toEqual({
 			name: NARRATOR,
-			...NO_AVATAR,
-			...DEFAULT_MODELS.image,
-			...DEFAULT_VOICE,
+			...DEFAULT_MODELS.tts,
 			age: "child",
 			gender: "feminine",
 		});
 		expect(picker.filters).toEqual({ gender: "feminine", age: "child" });
 	});
 
-	it("writes a picked voice to that character alone", async () => {
-		canvas = mountOnCanvas([
-			narrator(),
-			asset("asset_character", { name: "Mia" }),
-		]);
-		canvas.render(<CharacterVoice name="Mia" />);
+	it("writes a picked voice to that speaker alone", async () => {
+		canvas = mountOnCanvas([voice(NARRATOR), voice("Mia")]);
+		canvas.render(<VoiceOf name="Mia" />);
 
 		await click('[data-pick="voice"]');
 
-		expect(characterOn("Mia")).toEqual({
+		expect(voiceOn("Mia")).toEqual({
 			name: "Mia",
-			...DEFAULT_MODELS.image,
-			voiceProvider: picker.model.provider,
-			voiceModel: picker.model.model,
+			...picker.model,
 			voiceId: "aria",
 		});
-		expect(characterOn(NARRATOR)).toEqual({
+		expect(voiceOn(NARRATOR)).toEqual({
 			name: NARRATOR,
-			...NO_AVATAR,
-			...DEFAULT_MODELS.image,
-			...DEFAULT_VOICE,
+			...DEFAULT_MODELS.tts,
 		});
 		expect(picker.selectedVoiceId).toBe("aria");
 	});
 
 	it("leaves a picked voice behind when the voice moves to another model", async () => {
-		canvas = mountOnCanvas([narrator()]);
-		canvas.render(<CharacterVoice name={NARRATOR} />);
+		canvas = mountOnCanvas([voice(NARRATOR)]);
+		canvas.render(<VoiceOf name={NARRATOR} />);
 		await click('[data-pick="voice"]');
 
 		await click('[data-pick="model"]');
 
-		expect(characterOn(NARRATOR)).toEqual({
-			name: NARRATOR,
-			...NO_AVATAR,
-			...DEFAULT_MODELS.image,
-			voiceProvider: OTHER.provider,
-			voiceModel: OTHER.model,
-		});
+		expect(voiceOn(NARRATOR)).toEqual({ name: NARRATOR, ...OTHER });
 		expect(picker.selectedVoiceId).toBeUndefined();
 	});
 });

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import { NARRATOR, NO_AVATAR } from "@/lib/canvas/assets";
+import { NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import type { ElementType, ScriptElement } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
@@ -24,8 +24,8 @@ const make = (
 	id?: string,
 ) => createCanvasNode(type, { id, attrs, text });
 
-const character = (name: string, appearance: string) =>
-	make("asset_character", appearance, { name });
+const avatar = (name: string, appearance: string) =>
+	make("asset_avatar", appearance, { name });
 
 const element = (
 	id: string,
@@ -71,7 +71,7 @@ beforeEach(() => {
 	assets = [
 		make("asset_style", "noir"),
 		make("asset_references", "", { images: "a.png" }),
-		character("Alice", "red hair"),
+		avatar("Alice", "red hair"),
 	];
 });
 
@@ -95,7 +95,7 @@ describe("buildNode", () => {
 	it.each([
 		["image", "image"],
 		["narration", "tts"],
-		["asset_character", "image"],
+		["asset_avatar", "image"],
 	] as const)("builds a %s on the %s connector", (type, connectorType) => {
 		assets = [];
 		const target = make(type, "said", {}, "target");
@@ -130,7 +130,7 @@ describe("buildNode", () => {
 		const node = resolveOn(video, [img, video]);
 
 		expect(edgesOf(node)).toEqual({
-			"Alice's avatar": "asset_character:Alice",
+			"Alice's avatar": "asset_avatar:Alice",
 			"the previous visual": "img",
 		});
 	});
@@ -147,7 +147,7 @@ describe("buildNode", () => {
 
 	it.each([
 		["an asset that is not on the canvas", "image", {}],
-		["a character no character has", "image", { characters: "Nobody" }],
+		["a character with no avatar", "image", { characters: "Nobody" }],
 		["a video with nothing before it", "video", { startFrame: "previous" }],
 	] as const)("declares no edge for %s", (name, type, attrs) => {
 		if (name.startsWith("an asset")) assets = [];
@@ -156,33 +156,30 @@ describe("buildNode", () => {
 		expect(resolveOn(el, [el]).dependsOn).toEqual({});
 	});
 
-	it("depends on the character asset of each character it shows, and no other", () => {
-		assets = [...assets, character("Bob", "tall")];
+	it("depends on the avatar of each character it shows, and no other", () => {
+		assets = [...assets, avatar("Bob", "tall")];
 		const ids = idsOf(element("img", "image", { characters: "Alice" }));
 
-		expect(ids).toEqual(["asset_character:Alice", "img"]);
+		expect(ids).toEqual(["asset_avatar:Alice", "img"]);
 	});
 
-	it("goes stale once a character it shows joins the characters", () => {
+	it("goes stale once a character it shows is given an avatar", () => {
 		const queue = new GenerationQueue();
 		const img = element("img", "image", { characters: "Bob" });
 		generateAll(queue, resolve(img));
 		expect(isNodeStale(resolve(img), queue)).toBe(false);
 
-		assets = [...assets, character("Bob", "tall")];
+		assets = [...assets, avatar("Bob", "tall")];
 
 		expect(isNodeStale(resolve(img), queue)).toBe(true);
 	});
 
-	it("drops a character's avatar from the pictures showing them once it is switched off", () => {
+	it("drops a character's avatar from the pictures showing them once it is removed", () => {
 		const queue = new GenerationQueue();
 		const img = element("img", "image", { characters: "Alice" });
 		generateAll(queue, resolve(img));
 
-		assets = [
-			...assets.filter(({ type }) => type !== "asset_character"),
-			make("asset_character", "red hair", { name: "Alice", ...NO_AVATAR }),
-		];
+		assets = assets.filter(({ type }) => type !== "asset_avatar");
 
 		expect(idsOf(img)).toEqual(["img"]);
 		expect(staleReason(resolve(img), queue)).toBe(
@@ -200,7 +197,7 @@ describe("buildNode", () => {
 		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
 			(node) => node.id,
 		);
-		expect(ids).toEqual(["asset_character:Alice", "img", "vid"]);
+		expect(ids).toEqual(["asset_avatar:Alice", "img", "vid"]);
 	});
 
 	it("leaves a character's portrait fresh when their voice changes", () => {
@@ -209,13 +206,13 @@ describe("buildNode", () => {
 		generateAll(queue, resolve(img));
 
 		assets = [
-			...assets.filter(({ type }) => type !== "asset_character"),
-			make("asset_character", "red hair", {
+			...assets,
+			make("asset_voice", "", {
 				name: "Alice",
 				age: "child",
-				voiceDescription: "gravelly",
-				voiceProvider: "cartesia",
-				voiceModel: "sonic-2",
+				description: "gravelly",
+				provider: "cartesia",
+				model: "sonic-2",
 				voiceId: "v1",
 			}),
 		];
@@ -302,9 +299,7 @@ describe("buildNode", () => {
 	describe("speech and the voice it is spoken in", () => {
 		const line = element("line", "narration");
 		const voice = (attrs: Record<string, string>) => {
-			assets = [
-				make("asset_character", "", { name: NARRATOR, ...NO_AVATAR, ...attrs }),
-			];
+			assets = [make("asset_voice", "", { name: NARRATOR, ...attrs })];
 		};
 
 		it("reads the voice its speaker chose, depending on nothing", () => {

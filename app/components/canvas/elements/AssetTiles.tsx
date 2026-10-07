@@ -1,8 +1,7 @@
 "use client";
 
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
-import { hasAvatar } from "@/lib/canvas/assets";
-import type { AssetElement } from "@/lib/canvas/types";
+import { useAsset } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import { AssetTile } from "./AssetTile";
@@ -23,27 +22,43 @@ export function ArtStyleAssetTile(tile: TileProps) {
 	);
 }
 
-export function CharacterAssetTile({
-	character,
-	onRemove,
-	...tile
-}: TileProps & {
-	character: AssetElement;
-	onRemove?: () => void;
-}) {
+type CharacterTileProps = TileProps & { name: string; onRemove?: () => void };
+
+/** A character by their look, or by their voice when they have no look. */
+export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
+	const hasAvatar = useAsset("asset_avatar", name) !== undefined;
+	return hasAvatar ? (
+		<AvatarAssetTile name={name} {...tile} />
+	) : (
+		<VoiceAssetTile name={name} {...tile} />
+	);
+}
+
+export function AvatarAssetTile({ name, ...tile }: CharacterTileProps) {
 	const { editAsset } = useAssetEditors();
-	const name = character.generationAttributes?.name ?? "";
-	const avatar = hasAvatar(character);
-	const { url: previewUrl, status } = useCharacterAvatar(name);
+	const { url, status } = useCharacterAvatar(name);
 	return (
 		<AssetTile
 			name={name}
-			previewUrl={avatar ? previewUrl : undefined}
-			Icon={avatar ? User : Mic}
-			fallback={avatar ? "initial" : "icon"}
+			previewUrl={url}
+			Icon={User}
+			fallback="initial"
 			status={status}
-			onEdit={() => editAsset("asset_character", name)}
-			onRemove={onRemove}
+			onEdit={() => editAsset("asset_avatar", name)}
+			removeAffordance="corner"
+			{...tile}
+		/>
+	);
+}
+
+export function VoiceAssetTile({ name, ...tile }: CharacterTileProps) {
+	const { editAsset } = useAssetEditors();
+	return (
+		<AssetTile
+			name={name}
+			Icon={Mic}
+			fallback="icon"
+			onEdit={() => editAsset("asset_voice", name)}
 			removeAffordance="corner"
 			{...tile}
 		/>

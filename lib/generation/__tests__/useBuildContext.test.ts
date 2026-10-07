@@ -133,18 +133,18 @@ describe("useBuildContext", () => {
 		["merges a write onto the asset it names", [{ gender: "feminine" }]],
 		["creates the asset a write names when it is missing", []],
 	])("%s", (_, existing) => {
-		const characters = existing.map((attrs) =>
-			createCanvasNode("asset_character", { attrs: { name: "Red", ...attrs } }),
+		const voices = existing.map((attrs) =>
+			createCanvasNode("asset_voice", { attrs: { name: "Red", ...attrs } }),
 		);
-		children = [...characters, ...document(video("vid-1", "shot one"))];
+		children = [...voices, ...document(video("vid-1", "shot one"))];
 
 		render(useBuildContext)().setAsset({
-			type: "asset_character",
+			type: "asset_voice",
 			name: "Red",
 			attrs: { voiceId: "v1" },
 		});
 
-		const written = findAsset(children, "asset_character", "Red");
+		const written = findAsset(children, "asset_voice", "Red");
 		expect(getAssets(children)).toHaveLength(1);
 		expect(written && flatAttributes(written)).toMatchObject({
 			...existing[0],

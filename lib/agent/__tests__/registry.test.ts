@@ -596,9 +596,9 @@ describe("executeToolCall", () => {
 	it.each([
 		["a generated image", "img-1", "image"],
 		[
-			"a character's avatar through their character asset",
-			"asset_character:Ada",
-			"asset_character",
+			"a character's avatar through their avatar asset",
+			"asset_avatar:Ada",
+			"asset_avatar",
 		],
 		["every uploaded reference image", "asset_references", "asset_references"],
 	] as const)("hands over %s with its prompt", async (_, id, type) => {
@@ -623,7 +623,7 @@ describe("executeToolCall", () => {
 	it.each([
 		[
 			"an avatar not drawn yet",
-			"asset_character",
+			"asset_avatar",
 			"idle",
 			"has not been generated yet",
 		],
@@ -753,7 +753,12 @@ describe("SLOPPY_TOOLS", () => {
 	it("lists each asset type an edit can set up, and a character's voice traits with their options", () => {
 		const { description } = SLOPPY_TOOLS.edit_script;
 
-		for (const type of ["asset_character", "asset_style", "asset_references"]) {
+		for (const type of [
+			"asset_avatar",
+			"asset_voice",
+			"asset_style",
+			"asset_references",
+		]) {
 			expect(description).toContain(`- ${type}: `);
 		}
 		for (const options of [

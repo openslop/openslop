@@ -10,7 +10,7 @@ import { content, scene } from "./fixtures";
 
 const ASSETS = [
 	createCanvasNode("asset_style", { text: "noir" }),
-	createCanvasNode("asset_character", {
+	createCanvasNode("asset_avatar", {
 		attrs: { name: "Mia" },
 		text: "a girl",
 	}),

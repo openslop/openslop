@@ -50,7 +50,7 @@ const contextNow = (): BuildContext => ({
 
 const { dependencies: redsAvatar } = dependency(
 	"Red's avatar",
-	(_, { canvas }) => findAsset(canvas, "asset_character", "Red"),
+	(_, { canvas }) => findAsset(canvas, "asset_avatar", "Red"),
 );
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
@@ -168,7 +168,7 @@ describe("GenerationGraph", () => {
 	it("throws the same for every reader of a node that cannot be built", () => {
 		const image = element("img", "image", "a sunset");
 		registry = UNBUILDABLE;
-		assets = [createCanvasNode("asset_character", { attrs: { name: "Red" } })];
+		assets = [createCanvasNode("asset_avatar", { attrs: { name: "Red" } })];
 		edit(image);
 		const failure = `Two dependencies of "img" share the label "Red's avatar"`;
 
@@ -179,7 +179,7 @@ describe("GenerationGraph", () => {
 
 describe("prepareNode", () => {
 	const voice = (voiceId: string): AssetWrite => ({
-		type: "asset_character",
+		type: "asset_voice",
 		name: NARRATOR,
 		attrs: { voiceId },
 	});
@@ -191,7 +191,7 @@ describe("prepareNode", () => {
 		name: "voice",
 		reads: (_, { canvas }) => ({
 			voice:
-				findAsset(canvas, "asset_character", NARRATOR)?.generationAttributes
+				findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
 					?.voiceId ?? "",
 		}),
 	};
