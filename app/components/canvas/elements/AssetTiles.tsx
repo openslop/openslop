@@ -3,11 +3,10 @@
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import { useAsset } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
-import { useReferenceImages } from "../hooks/useReferenceImages";
 import { AssetTile } from "./AssetTile";
 import { useAssetEditors } from "./character/AssetEditProvider";
 
-type TileProps = { selected?: boolean; fill?: boolean };
+type TileProps = { fill?: boolean };
 
 export function ArtStyleAssetTile(tile: TileProps) {
 	const { editAsset } = useAssetEditors();
@@ -34,7 +33,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 	);
 }
 
-export function AvatarAssetTile({ name, ...tile }: CharacterTileProps) {
+function AvatarAssetTile({ name, ...tile }: CharacterTileProps) {
 	const { editAsset } = useAssetEditors();
 	const { url, status } = useCharacterAvatar(name);
 	return (
@@ -51,7 +50,7 @@ export function AvatarAssetTile({ name, ...tile }: CharacterTileProps) {
 	);
 }
 
-export function VoiceAssetTile({ name, ...tile }: CharacterTileProps) {
+function VoiceAssetTile({ name, ...tile }: CharacterTileProps) {
 	const { editAsset } = useAssetEditors();
 	return (
 		<AssetTile
@@ -89,8 +88,7 @@ export function ReferenceTile({
 export function ReferenceTiles({
 	urls,
 	onRemove,
-	selected,
-}: TileProps & {
+}: {
 	urls: string[];
 	onRemove: (index: number) => void;
 }) {
@@ -99,13 +97,7 @@ export function ReferenceTiles({
 			key={`reference:${index}:${url}`}
 			url={url}
 			index={index}
-			selected={selected}
 			onRemove={() => onRemove(index)}
 		/>
 	));
-}
-
-export function ReferenceAssetTiles({ selected }: TileProps) {
-	const { urls, remove } = useReferenceImages();
-	return <ReferenceTiles urls={urls} onRemove={remove} selected={selected} />;
 }

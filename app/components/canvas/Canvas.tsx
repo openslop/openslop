@@ -15,7 +15,6 @@ import { isSceneElement } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
 import { DragOverlayContent } from "./dnd/DragOverlay";
-import { AssetBlock } from "./elements/AssetBlock";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -33,7 +32,11 @@ export default function Canvas() {
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
 		if (isAssetElement(element))
-			return <AssetBlock {...props} element={element} />;
+			return (
+				<div {...props.attributes} hidden>
+					{props.children}
+				</div>
+			);
 		if (isSceneElement(element))
 			return <SortableScene {...props} element={element} />;
 		return <SortableContent {...props} element={element} />;

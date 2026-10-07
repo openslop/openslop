@@ -38,7 +38,7 @@ User keys live in Supabase Vault. They are read by the service role only for the
 
 ## Canvas and generation
 
-The Slate document (`lib/canvas/`) is the project. Assets come first, then the scenes. Asset types are declared in `GENERATED_ASSET_TYPES` and `METADATA_ASSET_TYPES` (`lib/canvas/types.ts`), and every one is named `asset_*`, which their types enforce. Every asset is a tile the caret selects whole and a delete removes, one per id.
+The Slate document (`lib/canvas/`) is the project. Assets come first, then the scenes. Asset types are declared in `GENERATED_ASSET_TYPES` and `METADATA_ASSET_TYPES` (`lib/canvas/types.ts`), and every one is named `asset_*`, which their types enforce. Each id appears once. The asset strip above the script shows them, one tile per character, and their nodes stay out of the caret's reach.
 
 - **Metadata elements** never generate: `asset_voice`, `asset_style` and `asset_references`.
 - **Generated elements**: narration, character lines, images, video, sound, music, and `asset_avatar`.

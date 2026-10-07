@@ -41,7 +41,6 @@ export function AssetTile({
 	onRemove,
 	removeAffordance = "overlay",
 	fallback = "initial",
-	selected = false,
 	fill = false,
 }: {
 	name: string;
@@ -53,7 +52,6 @@ export function AssetTile({
 	/** "corner" pins a pill-style cross outside the tile so it can coexist with the edit overlay. */
 	removeAffordance?: "overlay" | "corner";
 	fallback?: "initial" | "icon";
-	selected?: boolean;
 	fill?: boolean;
 }) {
 	const fallbackContent =
@@ -69,12 +67,7 @@ export function AssetTile({
 				!fill && "w-16 sm:w-20",
 			)}
 		>
-			<div
-				className={cn(
-					"relative aspect-square overflow-hidden rounded-md border bg-card",
-					selected ? "border-accent ring-2 ring-accent" : "border-border",
-				)}
-			>
+			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
 				{previewUrl ? (
 					<ImageWithShimmer
 						key={previewUrl}

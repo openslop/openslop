@@ -56,7 +56,7 @@ import {
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./ActionButton";
-import { ComposerAssets } from "./ComposerAssets";
+import { AssetStrip } from "@/app/components/canvas/elements/AssetStrip";
 import {
 	SettingPill,
 	SettingPillButton,
@@ -260,7 +260,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<ComposerAssets uploadingCount={uploadingCount} />
+				<AssetStrip uploadingCount={uploadingCount} />
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />

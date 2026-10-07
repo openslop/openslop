@@ -5,6 +5,7 @@ import UserProfile from "./UserProfile";
 import { EditorToolbar } from "./EditorToolbar";
 import Canvas from "./canvas/Canvas";
 import { CanvasVersionBanner } from "./canvas/CanvasVersionBanner";
+import { AssetStrip } from "./canvas/elements/AssetStrip";
 import { ProjectTitle } from "./ProjectTitle";
 import { AssetEditProvider } from "./canvas/elements/character/AssetEditProvider";
 import { EditorSidebar } from "./canvas/panel/EditorSidebar";
@@ -33,6 +34,7 @@ export default function PostPromptView() {
 								<div className="flex-1 overflow-y-auto [scrollbar-gutter:stable]">
 									<div className="mx-auto max-w-6xl px-4 py-4">
 										<ProjectTitle />
+										<AssetStrip />
 										<Canvas />
 									</div>
 								</div>

@@ -65,37 +65,37 @@ describe("withAssets", () => {
 		expect(style && getElementBodyText(style)).toBe("watercolor");
 	});
 
-	it("selects the tile ahead of the script when the caret moves back onto it", () => {
+	it("sends a caret that moves onto an asset back to the start of the script", () => {
 		const editor = bare([STYLE, CAST, script()]);
 		selectScriptStart(editor);
 
 		Transforms.move(editor, { reverse: true });
+		editor.onChange();
 
-		expect(editor.selection?.anchor.path[0]).toBe(
-			indexOf(editor, "asset_avatar"),
+		expect(editor.selection?.anchor).toEqual(
+			Editor.start(editor, [indexOf(editor, "scene")]),
 		);
 	});
 
-	it("deletes the tile ahead of the script on backspace", () => {
+	it("leaves the assets alone on backspace at the start of the script", () => {
 		const editor = bare([STYLE, CAST, script()]);
 		selectScriptStart(editor);
 
 		editor.deleteBackward("character");
 
-		expect(ids(editor)).toEqual(["asset_style", "s1"]);
+		expect(ids(editor)).toEqual(["asset_style", "asset_avatar:Mia", "s1"]);
 	});
 
-	it("does nothing on Enter while a tile is selected", () => {
-		const editor = bare([STYLE, script()]);
-		const before = editor.children;
-		Transforms.select(editor, Editor.start(editor, [0]));
+	it("takes the assets along in a selection of the whole canvas", () => {
+		const editor = bare([STYLE, CAST, script()]);
+		Transforms.select(editor, Editor.range(editor, []));
 
-		editor.insertBreak();
-
-		expect(editor.children).toBe(before);
+		expect(editor.getFragment().map((node) => "id" in node && node.id)).toEqual(
+			["asset_style", "asset_avatar:Mia", "s1"],
+		);
 	});
 
-	it("moves a tile added among the scenes up ahead of the script", () => {
+	it("moves an asset added among the scenes up ahead of the script", () => {
 		const editor = bare([STYLE, script(), script("s2")]);
 
 		Transforms.insertNodes(editor, CAST, { at: [2] });
@@ -111,15 +111,15 @@ describe("withAssets", () => {
 	it.each([
 		["character", CAST],
 		["art style", STYLE],
-	])("keeps the %s it holds when a copy of it is pasted", (_, tile) => {
-		const editor = bare([tile, script()], (editor) =>
+	])("keeps the %s it holds when a copy of it is pasted", (_, held) => {
+		const editor = bare([held, script()], (editor) =>
 			withNodeId(withAssets(editor)),
 		);
 		Transforms.select(editor, Editor.end(editor, [1]));
 
-		editor.insertFragment([structuredClone(tile)]);
+		editor.insertFragment([structuredClone(held)]);
 
-		expect(ids(editor)).toEqual([tile.id, "s1"]);
-		expect(editor.children[0]).toBe(tile);
+		expect(ids(editor)).toEqual([held.id, "s1"]);
+		expect(editor.children[0]).toBe(held);
 	});
 });
