@@ -47,10 +47,12 @@ export const viewImage = defineTool({
 			throw new Error(
 				`${id} is of type ${element.type}, which holds no picture to look at.`,
 			);
+		const why =
+			pictures.kind === "generated"
+				? NOT_READY[pictures.status]
+				: "has no reference images uploaded";
 		if (pictures.urls.length === 0)
-			throw new Error(
-				`${id} ${NOT_READY[pictures.status]}, so there is nothing to look at.`,
-			);
+			throw new Error(`${id} ${why}, so there is nothing to look at.`);
 		return { id, prompt: element.prompt, urls: pictures.urls };
 	},
 	snapshot: true,

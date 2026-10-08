@@ -80,13 +80,12 @@ const before = async (
 };
 
 describe("character-voices plugin", () => {
-	it("reads the voice each shown character has chosen, and declares no dependency", () => {
+	it("reads the voice each shown character has chosen", () => {
 		expect(
 			readsOf(plugin, video("Sol, Ghost"), [voice("Sol", "v-sol")]),
 		).toEqual({
 			"Sol's voice": JSON.stringify({ ...DEFAULT_TTS_MODEL, voiceId: "v-sol" }),
 		});
-		expect(plugin.dependencies).toBeUndefined();
 	});
 
 	it("reads no voice for a video model that does not listen", () => {
@@ -109,8 +108,17 @@ describe("character-voices plugin", () => {
 			expect(tts.searchVoices).toHaveBeenCalledOnce();
 		});
 
+		it("gives a heard character with no voice asset a voice, so their own line never stales the video", async () => {
+			await expect(prepare("Owl", [])).resolves.toEqual([
+				{
+					type: "asset_voice",
+					name: "Owl",
+					attrs: { ...DEFAULT_TTS_MODEL, voiceId: "v-found" },
+				},
+			]);
+		});
+
 		it.each([
-			["a character with no voice asset", "Ghost", [], SEEDANCE],
 			["a video model that does not listen", "Mira", [voice("Mira")], KLING],
 			["a video with no characters", undefined, [], SEEDANCE],
 		])("searches no voice for %s", async (_, characters, canvas, model) => {

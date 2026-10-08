@@ -6,17 +6,8 @@ import {
 	isContentElement,
 	isElementType,
 	isForeground,
-	isParsedContentElement,
 	isCanvasElement,
 } from "../guards";
-import type { ParsedElement } from "../types";
-
-const parsed = (type: string): ParsedElement => ({
-	id: "n1",
-	type,
-	children: [{ id: "t1", type, text: "" }],
-});
-
 describe("isContentType", () => {
 	it("accepts declared element types", () => {
 		expect(isContentType("image")).toBe(true);
@@ -36,14 +27,6 @@ describe("isElementType", () => {
 			true,
 		);
 		expect(["scene", "nonsense", "toString"].some(isElementType)).toBe(false);
-	});
-});
-
-describe("isParsedContentElement", () => {
-	it("narrows canvas nodes and rejects assets and unknown tags", () => {
-		expect(isParsedContentElement(parsed("music"))).toBe(true);
-		expect(isParsedContentElement(parsed("asset_avatar"))).toBe(false);
-		expect(isParsedContentElement(parsed("nonsense"))).toBe(false);
 	});
 });
 

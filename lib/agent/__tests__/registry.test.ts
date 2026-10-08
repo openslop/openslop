@@ -49,6 +49,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	generateText: async () => "an outline",
 	elementImage: () => undefined,
 	elementStates: () => [],
+	isScriptEmpty: () => false,
 	readAssets: () => [],
 	readProject: () => project(),
 	editScript: () => ({ applied: 0, failures: [] }),
@@ -608,7 +609,7 @@ describe("executeToolCall", () => {
 			context({
 				elementImage: (asked) =>
 					asked === id
-						? { type, prompt: "a wolf", pictures: { status: "idle", urls } }
+						? { type, prompt: "a wolf", pictures: { kind: "uploaded", urls } }
 						: undefined,
 			}),
 		);
@@ -624,10 +625,21 @@ describe("executeToolCall", () => {
 		[
 			"an avatar not drawn yet",
 			"asset_avatar",
-			"idle",
+			{ kind: "generated", status: "idle", urls: [] },
 			"has not been generated yet",
 		],
-		["an image still generating", "image", "generating", "is still generating"],
+		[
+			"an image still generating",
+			"image",
+			{ kind: "generated", status: "generating", urls: [] },
+			"is still generating",
+		],
+		[
+			"reference images never uploaded",
+			"asset_references",
+			{ kind: "uploaded", urls: [] },
+			"has no reference images uploaded",
+		],
 		[
 			"an asset that holds no picture",
 			"asset_style",
@@ -640,14 +652,14 @@ describe("executeToolCall", () => {
 			undefined,
 			"is of type video",
 		],
-	] as const)("refuses %s", async (_, type, status, error) => {
+	] as const)("refuses %s", async (_, type, pictures, error) => {
 		const outcome = await executeToolCall(
 			{ toolName: "view_image", input: { id: "x" } },
 			context({
 				elementImage: () => ({
 					type,
 					prompt: "",
-					pictures: status && { status, urls: [] },
+					pictures: pictures && { ...pictures, urls: [] },
 				}),
 			}),
 		);
@@ -716,11 +728,12 @@ describe("executeToolCall", () => {
 		expect(budgets[0]).toBeUndefined();
 	});
 
-	it("spends no generation reviewing an empty canvas", async () => {
+	it("spends no generation reviewing a canvas that holds only assets", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "review_script", input: {} },
 			context({
-				readScript: () => "  ",
+				readScript: () => '<asset_style id="asset_style">Ink</asset_style>',
+				isScriptEmpty: () => true,
 				generateText: async () => {
 					throw new Error("reviewed an empty canvas");
 				},
@@ -803,18 +816,9 @@ describe("presentToolCall", () => {
 		});
 	});
 
-	it.each([
-		"set_metadata",
-		"set_character",
-		"set_narrator",
-		"view_avatar",
-		"view_reference_images",
-	])(
-		"presents nothing for %s, which a stored transcript still holds",
-		(name) => {
-			expect(presentToolCall(name, { name: "Red" })).toBeNull();
-		},
-	);
+	it("presents nothing for a tool it does not know", () => {
+		expect(presentToolCall("set_narrator", { name: "Red" })).toBeNull();
+	});
 });
 
 describe("tool flags", () => {

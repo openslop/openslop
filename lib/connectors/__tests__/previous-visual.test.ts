@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ContentElement } from "@/lib/canvas/types";
 import {
 	createPreviousVisualPlugin,
-	previousVisualDependency,
 	type ParamsWithPreviousVisual,
 } from "../video/plugins/previous-visual";
 import type { AssetResult, ConnectorPlugin } from "../types";
@@ -20,7 +19,7 @@ vi.mock("@/lib/connectors/video/captureFrames", () => ({
 const declaredOn = (
 	element: ContentElement,
 	canvas: ContentElement[] = [image, element],
-) => dependenciesOf(previousVisualDependency, element, canvas);
+) => dependenciesOf(createPreviousVisualPlugin(), element, canvas);
 
 const video = (attrs: Record<string, string> = {}): ContentElement => ({
 	id: "video-1",

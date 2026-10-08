@@ -21,7 +21,7 @@ import { Film } from "@/components/ui/icon";
 import { ASPECT_RATIOS, AspectRatioSchema } from "@/lib/project/aspectRatio";
 import { TRANSITION_TYPES } from "@/lib/render/transitions";
 import { defineTool } from "./defineTool";
-import { named, notEmpty } from "./inputs";
+import { atLeastOne } from "./inputs";
 
 /** Derived from the style itself, so the tool can express exactly what the panel can. */
 const textStylePatch = CaptionStyleSchema.shape.base.partial();
@@ -68,7 +68,7 @@ export const updateVideoSettings = defineTool({
 			captionPreset: z.enum(CAPTION_PRESET_KEYS).optional(),
 			captionStyle: stylePatch.optional(),
 		})
-		.refine(notEmpty, named("video setting")),
+		.refine(...atLeastOne("video setting")),
 	output: z.string(),
 	icon: Film,
 	label: "Updating the video settings",

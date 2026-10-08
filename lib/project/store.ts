@@ -13,19 +13,18 @@ import {
 } from "./types";
 import { VideoSettingsSchema, type VideoSettings } from "./videoSettings";
 
-const orEmpty = (value: unknown) => value ?? {};
-
 /** Everything else the project holds is on the canvas. Parsing fills every default. */
-export const ProjectDataSchema = z.preprocess(
-	orEmpty,
-	z.object({
-		title: z.string().default(""),
-		videoSettings: VideoSettingsSchema,
-		scriptSettings: z.preprocess(orEmpty, ScriptSettingsSchema),
-		/** The models this project pins per connector type, ahead of the account's. */
-		models: connectorModelsSchema.default({}),
-	}),
-);
+export const ProjectDataSchema = z.object({
+	title: z.string().default(""),
+	videoSettings: VideoSettingsSchema.default(() =>
+		VideoSettingsSchema.parse({}),
+	),
+	scriptSettings: ScriptSettingsSchema.default(() =>
+		ScriptSettingsSchema.parse({}),
+	),
+	/** The models this project pins per connector type, ahead of the account's. */
+	models: connectorModelsSchema.default({}),
+});
 
 export type ProjectData = z.infer<typeof ProjectDataSchema>;
 

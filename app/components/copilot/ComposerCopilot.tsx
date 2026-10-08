@@ -38,10 +38,7 @@ import {
 } from "@/lib/project/language";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { ASPECT_RATIOS, type AspectRatio } from "@/lib/project/aspectRatio";
-import {
-	useUpdateVideoSettings,
-	useVideoSetting,
-} from "@/lib/project/useVideoSetting";
+import { useVideoSetting } from "@/lib/project/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
 	videoLengthLabel,
@@ -207,7 +204,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const [intent, setIntent] = useState<ComposerIntent>("story");
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
-	const updateVideoSettings = useUpdateVideoSettings();
+	const updateVideoSettings = useProject((state) => state.updateVideoSettings);
 	const updateModels = useProject((state) => state.updateModels);
 	const updateScriptSettings = useProject(
 		(state) => state.updateScriptSettings,

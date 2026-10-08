@@ -27,7 +27,6 @@ describe("osmlSpec", () => {
 
 	it("asks for the story alone, since the assets are already on the canvas", () => {
 		expect(spec).toContain("Write the story and nothing else");
-		expect(spec).not.toContain("metadata_");
 	});
 
 	it("ties each image to the moment its narration describes without dropping the standalone-prompt rule", () => {

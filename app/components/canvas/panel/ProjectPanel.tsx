@@ -1,6 +1,5 @@
 "use client";
 
-import noop from "lodash/noop";
 import type { ReactNode } from "react";
 import {
 	FilmSlate,
@@ -9,7 +8,8 @@ import {
 	Translate,
 	type IconComponent,
 } from "@/components/ui/icon";
-import { SelectField } from "@/components/ui/select-field";
+import { SelectMenuTrigger } from "@/components/ui/select-menu";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useProject } from "@/lib/project/useProject";
 import { languageLabel } from "@/lib/project/language";
 import { videoFormatLabel } from "@/lib/project/videoFormat";
@@ -29,14 +29,12 @@ function FixedSetting({
 }) {
 	return (
 		<PanelField label={label}>
-			<SelectField
-				ariaLabel={label}
-				value="current"
-				options={[{ value: "current", label: value, Icon }]}
-				onChange={noop}
-				tooltip="Set when the project was created"
-				unavailable
-			/>
+			<SimpleTooltip label="Set when the project was created">
+				<SelectMenuTrigger aria-label={label} aria-disabled>
+					<Icon size={12} />
+					{value}
+				</SelectMenuTrigger>
+			</SimpleTooltip>
 		</PanelField>
 	);
 }

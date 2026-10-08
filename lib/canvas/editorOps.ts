@@ -17,7 +17,6 @@ import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { createCanvasElement } from "./createCanvasElement";
 import { attributeSchemaFor } from "./elementConnector";
 import { isCanvasElement } from "./guards";
-import { isScene } from "./scenes";
 import { makeNodeId } from "./nodeUtils";
 import { preservedAttributes } from "./preservedAttributes";
 
@@ -50,26 +49,20 @@ function requireElement(editor: Editor, id: string): NodeEntry<CanvasElement> {
 	return found;
 }
 
-/** Empties the script, keeping the assets; normalization puts back a blank element for what streams in next. */
-export function clearEditor(editor: Editor): void {
-	Transforms.removeNodes(editor, { at: [], match: isScene });
-}
-
-export function duplicateElementAt(
-	editor: Editor,
-	element: ContentElement,
-	at: Path,
-): string {
-	const copy: ContentElement = {
-		...element,
-		id: makeNodeId(),
-		children: element.children.map((child) => ({
-			...child,
+export function duplicateElement(editor: Editor, id: string): void {
+	const [element, path] = requireElement(editor, id);
+	Transforms.insertNodes(
+		editor,
+		{
+			...element,
 			id: makeNodeId(),
-		})),
-	};
-	Transforms.insertNodes(editor, copy, { at: Path.next(at) });
-	return copy.id;
+			children: element.children.map((child) => ({
+				...child,
+				id: makeNodeId(),
+			})),
+		},
+		{ at: Path.next(path) },
+	);
 }
 
 /**
@@ -83,7 +76,6 @@ export function updateElementText(
 	newText: string,
 ): void {
 	const [, path] = requireElement(editor, id);
-	// Locked assets are void; this is the one way their text changes.
 	const voids = true;
 	const currentText = Editor.string(editor, path, { voids });
 	const nextText = ZERO_WIDTH_SPACE + withoutCaretMarker(newText);

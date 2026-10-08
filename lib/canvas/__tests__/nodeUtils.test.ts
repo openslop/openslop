@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { Element } from "slate";
 import type { ContentElement } from "../types";
 import { makeNodeId, assignIdRecursively, stripIds } from "../nodeUtils";
-import { asset } from "./_assets";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -75,12 +74,6 @@ describe("stripIds", () => {
 
 		const stripped = stripIds(node) as Element;
 		expect(stripped.id).toBeUndefined();
-	});
-
-	it("keeps the id that names an asset", () => {
-		const node = asset("asset_avatar", { name: "Mia" });
-
-		expect((stripIds(node) as Element).id).toBe(node.id);
 	});
 
 	it("recurses into element children", () => {

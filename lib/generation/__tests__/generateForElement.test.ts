@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { AssetResult, PluginContext } from "@/lib/connectors/types";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import type { GenerationNode } from "../graph";
 
 const mockGenerate =
 	vi.fn<(params: unknown, context: PluginContext) => Promise<AssetResult>>();
@@ -15,14 +14,10 @@ import { generateForElement } from "../generateForElement";
 import { createConnector } from "@/lib/connectors/factory";
 import { jobNode } from "./_graph";
 
-const node: GenerationNode = {
-	...jobNode("a sunset"),
-	inputs: {
-		prompt: "a sunset",
-		attributes: { width: "1024" },
-		reads: { "the art style": "noir" },
-	},
-};
+const node = jobNode("a sunset", [], {
+	attributes: { width: "1024" },
+	reads: { "the art style": "noir" },
+});
 
 describe("generateForElement", () => {
 	beforeEach(() => {

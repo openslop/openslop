@@ -68,11 +68,6 @@ describe("deserializeWithScenes", () => {
 	});
 
 	it("keeps tags the canvas does not know out of the document", () => {
-		const nodes = deserializeWithScenes(
-			'<metadata_character name="Red" gender="feminine">A girl</metadata_character><narration>hello</narration>',
-		);
-
-		expect(nodes).toHaveLength(1);
 		expect(
 			scenesOf("<unknown>x</unknown><narration>hello</narration>"),
 		).toEqual([
@@ -85,7 +80,7 @@ describe("deserializeWithScenes", () => {
 	it("puts the assets ahead of the scenes, wherever the script wrote them", () => {
 		const nodes = deserializeWithScenes(
 			[
-				'<asset_style id="asset_style">noir</asset_style>',
+				'<asset_style id="style">noir</asset_style>',
 				"<narration>a</narration>",
 				"--- Scene 2 ---",
 				'<asset_avatar id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</asset_avatar>',
@@ -101,7 +96,7 @@ describe("deserializeWithScenes", () => {
 		]);
 		const avatar = nodes[1];
 		expect(avatar).toMatchObject({
-			id: "asset_avatar:Ada",
+			id: "ada",
 			generationAttributes: {
 				name: "Ada",
 				provider: "runware",
@@ -129,11 +124,11 @@ describe("deserializeWithScenes", () => {
 
 	it("round-trips assets through serializeOSMLWithScenes", () => {
 		const osml = [
-			'<asset_style id="asset_style">noir &amp; "moody"</asset_style>',
-			'<asset_voice id="asset_voice:Narrator" provider="openslop" model="Slop TTS v1" name="Narrator" gender="feminine"></asset_voice>',
-			'<asset_avatar id="asset_avatar:Ada &lt;the first&gt;" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</asset_avatar>',
-			'<asset_voice id="asset_voice:Ada &lt;the first&gt;" provider="openslop" model="Slop TTS v1" name="Ada &lt;the first&gt;"></asset_voice>',
-			'<asset_references id="asset_references" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></asset_references>',
+			'<asset_style id="a1">noir &amp; "moody"</asset_style>',
+			'<asset_voice id="a2" provider="openslop" model="Slop TTS v1" name="Narrator" gender="feminine"></asset_voice>',
+			'<asset_avatar id="a3" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</asset_avatar>',
+			'<asset_voice id="a4" provider="openslop" model="Slop TTS v1" name="Ada &lt;the first&gt;"></asset_voice>',
+			'<asset_references id="a5" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></asset_references>',
 		].join("\n");
 
 		expect(serializeOSMLWithScenes(deserializeWithScenes(osml))).toBe(

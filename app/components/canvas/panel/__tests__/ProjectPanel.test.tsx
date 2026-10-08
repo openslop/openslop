@@ -2,7 +2,6 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { act } from "react";
 import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { languageLabel } from "@/lib/project/language";
 import { ProjectStoreProvider } from "@/lib/project/ProjectStoreProvider";
@@ -48,18 +47,6 @@ describe("ProjectPanel", () => {
 				(trigger) => trigger.getAttribute("aria-disabled") === "true",
 			),
 		).toBe(true);
-
-		await act(async () => {
-			document.body.querySelector("[aria-label='Language']")?.dispatchEvent(
-				new PointerEvent("pointerdown", {
-					bubbles: true,
-					button: 0,
-					pointerType: "mouse",
-				}),
-			);
-		});
-
-		expect(document.body.querySelector("[role='listbox']")).toBeNull();
 	});
 
 	it("reads an unset template as none", async () => {

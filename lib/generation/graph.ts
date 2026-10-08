@@ -13,14 +13,12 @@ export type NodeId = string;
 
 /** How a node runs: the connector and its configuration. */
 export type GenerationJob = {
-	elementId: string;
 	elementType: ElementType;
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
 };
 
-/** A unit of generation: one element, what it reads, and how it runs. */
 export type GenerationNode = {
 	id: NodeId;
 	inputs: NodeInputs;
@@ -38,7 +36,6 @@ export const buildSettings = ({
 	scriptSettings,
 });
 
-/** What a build reads, and the writer `prepare` puts its assets through. */
 export type BuildContext = {
 	state: ReturnType<typeof buildSettings>;
 	canvas: CanvasElement[];

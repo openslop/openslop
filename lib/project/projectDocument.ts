@@ -9,7 +9,6 @@ import {
 	type ProjectData,
 	type ProjectStore,
 } from "./store";
-import { deriveProjectName } from "./projectName";
 import { pickThumbnailUrl } from "./thumbnail";
 
 export type SavedProject = {
@@ -52,7 +51,7 @@ export function createProjectDocument({
 		},
 
 		details: () => ({
-			name: deriveProjectName(store.getState().title),
+			name: store.getState().title.trim() || "Untitled",
 			thumbnail_url: pickThumbnailUrl(
 				getContentElements(editor.children),
 				queue,

@@ -1,47 +1,32 @@
 import { Editor, Transforms } from "slate";
-import {
-	clearEditor,
-	findElementById,
-	updateElementText,
-} from "@/lib/canvas/editorOps";
-import { isParsedContentElement } from "@/lib/canvas/guards";
+import { findElementById, updateElementText } from "@/lib/canvas/editorOps";
+import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { OSMLStreamParser } from "@/lib/canvas/osmlStreamParser";
+import { isScene } from "@/lib/canvas/scenes";
 import type { ContentElement } from "@/lib/canvas/types";
-
-function appendElement(editor: Editor, node: ContentElement): void {
-	// The parser keeps appending to its own node, so the document takes a copy.
-	Transforms.insertNodes(editor, structuredClone(node), {
-		at: [editor.children.length],
-	});
-}
-
-function replaceScript(editor: Editor, node: ContentElement): void {
-	// One normalization, so withLayout seeds nothing into the cleared script.
-	Editor.withoutNormalizing(editor, () => {
-		clearEditor(editor);
-		appendElement(editor, node);
-	});
-}
 
 /** Replaces the canvas's script with OSML as it arrives: the first element clears the old script, the rest append, each growing as its text streams in. */
 export function createScriptWriter(editor: Editor): (chunk: string) => void {
 	const parser = new OSMLStreamParser();
 	let seen = 0;
-	let replaced = false;
+	let cleared = false;
 
 	const write = (node: ContentElement) => {
 		const text = getElementBodyText(node);
 		if (!text) return;
+		if (findElementById(editor, node.id))
+			return updateElementText(editor, node.id, text);
 
-		if (findElementById(editor, node.id)) {
-			updateElementText(editor, node.id, text);
-		} else if (replaced) {
-			appendElement(editor, node);
-		} else {
-			replaceScript(editor, node);
-			replaced = true;
-		}
+		// One normalization, so withLayout seeds nothing into the cleared script.
+		Editor.withoutNormalizing(editor, () => {
+			if (!cleared) Transforms.removeNodes(editor, { at: [], match: isScene });
+			cleared = true;
+			// The parser keeps appending to its own node, so the document takes a copy.
+			Transforms.insertNodes(editor, structuredClone(node), {
+				at: [editor.children.length],
+			});
+		});
 	};
 
 	return (chunk) => {
@@ -51,6 +36,6 @@ export function createScriptWriter(editor: Editor): (chunk: string) => void {
 		const changed = nodes.slice(Math.max(0, seen - 1));
 		seen = nodes.length;
 
-		changed.filter(isParsedContentElement).forEach(write);
+		changed.filter(isContentElement).forEach(write);
 	};
 }

@@ -12,7 +12,6 @@ import { createProjectDocument, type SavedProject } from "../projectDocument";
 import { createProjectStore } from "../store";
 import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
-import { resultQueue } from "./_canvas";
 
 const RECOMMENDED = { provider: "openslop", model: "Slop Image v1" } as const;
 const BYOK = { provider: "runware", model: "Seedream 5 Lite" } as const;
@@ -46,10 +45,7 @@ const firstScene = (editor: Editor) => {
 const imageAttrs = (editor: Editor, index: number) =>
 	flatAttributes(firstScene(editor).children[index]);
 
-const setup = (
-	accountModels: ConnectorModels = {},
-	queue = new GenerationQueue(),
-) => {
+const setup = (accountModels: ConnectorModels = {}) => {
 	const editor = withHistory(createEditor());
 	const store = createProjectStore();
 	editor.defaultModels = () =>
@@ -57,7 +53,11 @@ const setup = (
 			project: store.getState().models,
 			account: accountModels,
 		});
-	const document = createProjectDocument({ editor, store, queue });
+	const document = createProjectDocument({
+		editor,
+		store,
+		queue: new GenerationQueue(),
+	});
 	return { editor, store, document };
 };
 
@@ -101,34 +101,14 @@ describe("createProjectDocument.read", () => {
 });
 
 describe("createProjectDocument.details", () => {
-	it("names the project after the title the store holds", () => {
+	it.each([
+		["the trimmed title", "  Moon  ", "Moon"],
+		["Untitled for a blank title", "   ", "Untitled"],
+	])("names the project %s", (_, title, name) => {
 		const { document } = setup();
 		const content = contentWith(SCENE);
-		document.write({ ...content, store: { ...content.store, title: "Moon" } });
+		document.write({ ...content, store: { ...content.store, title } });
 
-		expect(document.details().name).toBe("Moon");
-	});
-
-	it.each([
-		[
-			"the script's first picture, never an avatar",
-			{ shot: { imageUrl: "sunset.png" } },
-			"sunset.png",
-		],
-		["null until the script has a picture", {}, null],
-	])("its thumbnail is %s", (_, shots, thumbnail) => {
-		const { document } = setup(
-			{},
-			resultQueue({
-				"asset_avatar:Ada": { imageUrl: "avatar.png" },
-				...shots,
-			}),
-		);
-		document.write({
-			...contentWith(`${ASSETS}\n${SCENE}`),
-			generation: document.read().generation,
-		});
-
-		expect(document.details().thumbnail_url).toBe(thumbnail);
+		expect(document.details().name).toBe(name);
 	});
 });

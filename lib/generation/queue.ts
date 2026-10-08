@@ -18,7 +18,6 @@ type ActiveJob = {
 	connectorType: AssetConnectorType;
 };
 
-/** A node waiting to run, and where it reads the project and canvas from when it does. */
 type QueuedJob = {
 	node: GenerationNode;
 	context: () => BuildContext;
@@ -244,8 +243,10 @@ export class GenerationQueue {
 
 	/** A cancelled job settles into nothing: whoever aborted it already cleaned up. */
 	private async runJob({ node, context }: QueuedJob) {
-		const { job } = node;
-		const { elementId, elementType, connectorType } = job;
+		const {
+			id: elementId,
+			job: { elementType, connectorType },
+		} = node;
 		const controller = new AbortController();
 		const { signal } = controller;
 		this.active.set(elementId, { controller, connectorType });
@@ -256,8 +257,6 @@ export class GenerationQueue {
 
 		try {
 			const prepared = await prepareNode(node, context, signal);
-			if (this.blockingDependency(prepared))
-				return this.requeue(prepared, context);
 			const inputs = generationInputs(prepared, this);
 			const result = await generateForElement(
 				prepared,
@@ -286,13 +285,6 @@ export class GenerationQueue {
 		} finally {
 			if (!signal.aborted) this.finalizeJob(elementId);
 		}
-	}
-
-	/** A dependency the prepare step brought in runs first, and the job waits for it. */
-	private requeue(node: GenerationNode, context: () => BuildContext) {
-		this.active.delete(node.id);
-		this.snapshots.resetToIdle(node.id);
-		this.enqueueGraph([node], context);
 	}
 
 	private finalizeJob(elementId: string) {

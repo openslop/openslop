@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
-import { assetId } from "../types";
 import {
 	assetText,
 	avatarNames,
@@ -23,7 +22,7 @@ const narration = createCanvasElement("narration", { id: "n1", text: "hello" });
 const scene: Scene = { id: "s1", type: "scene", children: [narration] };
 
 describe("createCanvasElement for an asset", () => {
-	it("gives it its fixed id over any id it is given, its name and its text", () => {
+	it("gives it the id, name and text it is given", () => {
 		const avatar = createCanvasElement("asset_avatar", {
 			id: "e1",
 			attrs: { name: "Mia" },
@@ -31,14 +30,11 @@ describe("createCanvasElement for an asset", () => {
 		});
 
 		expect(avatar).toMatchObject({
-			id: "asset_avatar:Mia",
+			id: "e1",
 			type: "asset_avatar",
 			generationAttributes: { name: "Mia" },
 		});
 		expect(getPromptText(avatar)).toBe("warm");
-		expect(createCanvasElement("asset_style", { id: "e1" }).id).toBe(
-			"asset_style",
-		);
 	});
 
 	it("draws an avatar on the default image model, or the recommended one", () => {
@@ -95,14 +91,6 @@ describe("findAsset", () => {
 		expect(findAsset(nodes, "asset_avatar")).toBeUndefined();
 		expect(findAsset(nodes, "asset_style")).toBe(style);
 		expect(findAsset(nodes, "asset_references")).toBe(refs);
-	});
-
-	it("does not take a content element that happens to hold an asset's id", () => {
-		const impostor = createCanvasElement("image", {
-			id: assetId("asset_style"),
-		});
-
-		expect(findAsset([impostor], "asset_style")).toBeUndefined();
 	});
 });
 

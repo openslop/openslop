@@ -5,7 +5,7 @@ import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
-import type { CanvasElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
 import {
 	NO_FRAME,
@@ -54,7 +54,7 @@ function FrameTile({
 	);
 }
 
-function PreviousVisualPreview({ element }: { element: CanvasElement }) {
+function PreviousVisualPreview({ element }: { element: ContentElement }) {
 	const previous = usePreviousPictures(element, [START_FRAME]);
 	if (previous.kind === "loading")
 		return <Skeleton className="absolute inset-0" />;
@@ -70,7 +70,7 @@ export function StartFramePicker({
 	label,
 	hideLabel,
 }: {
-	element: CanvasElement;
+	element: ContentElement;
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;

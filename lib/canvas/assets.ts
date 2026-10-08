@@ -2,17 +2,12 @@ import compact from "lodash/compact";
 import uniq from "lodash/uniq";
 import type { Descendant } from "slate";
 import { parseReferenceImages } from "@/lib/connectors/attributes/referenceImages";
-import { getPromptText } from "@/lib/generation/inputs";
 import { VoiceSchema, type Voice } from "@/lib/project/types";
 import { flatAttributes } from "./elementAttributes";
 import { isAssetElement } from "./guards";
+import { getElementBodyText } from "./osmlSerializer";
 import { getContentElements } from "./scenes";
-import {
-	assetId,
-	type AssetElement,
-	type AssetType,
-	type CanvasElement,
-} from "./types";
+import type { AssetElement, AssetType, CanvasElement } from "./types";
 
 export const REFERENCE_URLS_ATTR = "images";
 
@@ -25,16 +20,22 @@ export const getCanvasElements = (nodes: Descendant[]): CanvasElement[] => [
 	...getContentElements(nodes),
 ];
 
+/** An asset is what it holds and for whom, never its id. */
+export const isAsset = <T extends AssetType>(
+	node: unknown,
+	type: T,
+	name?: string,
+): node is AssetElement<T> =>
+	isAssetElement(node) &&
+	node.type === type &&
+	node.generationAttributes?.name === name;
+
 export const findAsset = <T extends AssetType>(
 	nodes: readonly unknown[],
 	type: T,
 	name?: string,
-): AssetElement<T> | undefined => {
-	const id = assetId(type, name);
-	return nodes.find(
-		(node): node is AssetElement<T> => isAssetElement(node) && node.id === id,
-	);
-};
+): AssetElement<T> | undefined =>
+	nodes.find((node) => isAsset(node, type, name));
 
 export const NARRATOR = "Narrator";
 
@@ -67,7 +68,7 @@ export const assetText = (
 	name?: string,
 ): string => {
 	const asset = findAsset(nodes, type, name);
-	return asset ? getPromptText(asset) : "";
+	return asset ? getElementBodyText(asset).trim() : "";
 };
 
 export const referenceUrls = (nodes: readonly unknown[]): string[] =>

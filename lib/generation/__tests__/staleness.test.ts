@@ -12,7 +12,7 @@ describe("generationInputs", () => {
 		const queue = new GenerationQueue();
 		const avatar = node("avatar");
 		const image = node("image", [avatar, node("previous")], {
-			"the aspect ratio": "16:9",
+			reads: { "the aspect ratio": "16:9" },
 		});
 		commit(queue, avatar, "avatar.png");
 
@@ -55,7 +55,7 @@ describe("isNodeStale", () => {
 	it("is true once something it read changes", () => {
 		const queue = new GenerationQueue();
 		const framed = (aspectRatio: string) =>
-			node("image", [], { "the aspect ratio": aspectRatio });
+			node("image", [], { reads: { "the aspect ratio": aspectRatio } });
 		commit(queue, framed("16:9"), "image.png");
 
 		expect(isNodeStale(framed("16:9"), queue)).toBe(false);
@@ -65,7 +65,7 @@ describe("isNodeStale", () => {
 	it("propagates through a dependency that itself needs regenerating", () => {
 		const queue = new GenerationQueue();
 		const avatar = (style: string) =>
-			node("avatar", [], { "the art style": style });
+			node("avatar", [], { reads: { "the art style": style } });
 		const image = (style: string) => node("image", [avatar(style)]);
 
 		commit(queue, avatar("noir"), "avatar.png");
@@ -81,7 +81,7 @@ describe("isNodeStale", () => {
 	it("never marks a committed upload stale, however far its inputs drift", () => {
 		const queue = new GenerationQueue();
 		const uploaded = (style: string) =>
-			node("el", [], { "the art style": style });
+			node("el", [], { reads: { "the art style": style } });
 		queue.commitResult(
 			uploaded("noir"),
 			{ imageUrl: "uploaded.png", durationSec: 0 },
@@ -102,7 +102,7 @@ describe("isNodeStale", () => {
 		const queue = new GenerationQueue();
 		const result = { imageUrl: "image.png", durationSec: 0 };
 		const withRefs = (aspectRatio: string) =>
-			node("image", [], { "the aspect ratio": aspectRatio });
+			node("image", [], { reads: { "the aspect ratio": aspectRatio } });
 		const edited = withRefs("9:16");
 		queue.commitResult(withRefs("16:9"), result);
 		expect(needsGeneration(edited, queue)).toBe(true);

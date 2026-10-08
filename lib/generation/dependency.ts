@@ -2,7 +2,6 @@ import type { GeneratedElement, CanvasElement } from "@/lib/canvas/types";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { BuildContext } from "./graph";
 
-/** Keyed by the label each dependency was declared under. */
 export type DependencyResults = Record<string, AssetResult>;
 
 /** An element generated first and handed over under `label`; picking nothing declares no dependency. */

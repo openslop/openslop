@@ -24,8 +24,7 @@ export function useAutosave(
 	const [autosaver] = useState(() =>
 		createAutosaver({
 			projectId,
-			read: document.read,
-			details: document.details,
+			document,
 			onSaved: () => toast("Saved", TOAST_OPTIONS),
 			onError: (error) =>
 				toastError(error, "Save failed", {

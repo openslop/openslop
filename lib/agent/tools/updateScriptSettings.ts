@@ -13,7 +13,7 @@ import {
 } from "@/lib/project/videoFormat";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
-import { named, notEmpty } from "./inputs";
+import { atLeastOne } from "./inputs";
 
 export const updateScriptSettings = defineTool({
 	description: dedent`
@@ -24,8 +24,6 @@ export const updateScriptSettings = defineTool({
 	  - language: what narration and dialogue are written in. "auto" follows whatever language
 	    the user writes in. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}
 	  - length: how long the video runs, as the spoken-word budget the next script is held to.
-	    If it is auto, set it before write_script: use the runtime the user asked for, else the
-	    one the outline gives, and pick the length that fits it or the closest one.
 	    - auto: no budget. The script runs as long as the material needs.
 	${VIDEO_LENGTH_TARGETS.map((length) => `    - ${length}: ${VIDEO_LENGTH_SPECS[length].minWords} to ${VIDEO_LENGTH_SPECS[length].maxWords} words`).join("\n")}
 	  - format: what the next script is made of. Set one only when the user asks for it.
@@ -38,7 +36,7 @@ export const updateScriptSettings = defineTool({
 			length: z.enum(VIDEO_LENGTHS).optional(),
 			format: z.enum(VIDEO_FORMAT_CHOICES).optional(),
 		})
-		.refine(notEmpty, named("script setting")),
+		.refine(...atLeastOne("script setting")),
 	output: z.string(),
 	icon: Hourglass,
 	label: "Updating the script settings",

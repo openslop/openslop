@@ -212,10 +212,8 @@ function outputText(output: { type: string; value?: unknown }): string {
 	return typeof output.value === "string" ? output.value : "";
 }
 
-/** What the editor reported back this turn, oldest first. */
 function turnToolResults(prompt: LanguageModelV3Prompt): ToolResult[] {
-	// Scoped to the turn in flight: what the one before it read described a
-	// canvas that has since been edited.
+	// An earlier turn's reads describe a canvas that has since been edited.
 	const askedAt = prompt.findLastIndex((message) => message.role === "user");
 	return prompt
 		.slice(askedAt + 1)

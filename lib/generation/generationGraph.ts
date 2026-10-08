@@ -62,7 +62,6 @@ export class GenerationGraph {
 				},
 				dependsOn: this.dependenciesOf(element, plugins),
 				job: {
-					elementId: id,
 					elementType: element.type,
 					connectorType: connector.type,
 					model: connector.model,
@@ -110,7 +109,6 @@ export const createGraphFor = () => {
 	);
 };
 
-/** Writes what the node's plugins settle, then builds it again from the canvas as written. */
 export async function prepareNode(
 	node: GenerationNode,
 	context: () => BuildContext,

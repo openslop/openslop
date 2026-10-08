@@ -1,5 +1,5 @@
 import { Descendant } from "slate";
-import type { ParsedElement } from "./types";
+import type { CanvasElement } from "./types";
 import { isScene } from "./scenes";
 import { isAssetElement } from "./guards";
 import { withoutCaretMarker } from "./constants";
@@ -8,16 +8,16 @@ import { escapeXml } from "./xmlEscape";
 
 const sceneMarker = (sceneNumber: number) => `\n--- Scene ${sceneNumber} ---\n`;
 
-export function getElementText(element: ParsedElement): string {
+export function getElementText(element: CanvasElement): string {
 	return element.children.map((child) => child.text).join("");
 }
 
 /** What the user actually typed, with the caret marker leaf left behind. */
-export function getElementBodyText(element: ParsedElement): string {
+export function getElementBodyText(element: CanvasElement): string {
 	return withoutCaretMarker(getElementText(element));
 }
 
-function serializeElement(element: ParsedElement): string {
+function serializeElement(element: CanvasElement): string {
 	const attrString = Object.entries({
 		id: element.id,
 		...flatAttributes(element),

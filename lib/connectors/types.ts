@@ -79,8 +79,6 @@ export type ModelRef = { provider: Provider; model: string };
 
 export type ModelPick = { provider?: string; model?: string };
 
-export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
-
 /** A voice's preview at a URL anyone can fetch, and how long it plays. */
 export const HostedVoicePreviewSchema = z.object({
 	url: z.url({ error: "A hosted preview needs an HTTP(S) URL" }),
@@ -225,14 +223,7 @@ export type TTSResult = AssetResult & {
 
 export type TTSGenerateParams = ConnectorGenerateParams & {
 	voiceId?: string;
-	gender?: TTSGender;
-	age?: string;
-	pitch?: string;
-	accent?: string;
-	description?: string;
 	name?: string;
-	query?: string;
-	language?: string;
 	speed?: TTSSpeed;
 	emotion?: TTSEmotion;
 	format?: string;

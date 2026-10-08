@@ -1,10 +1,13 @@
-import { assetId } from "@/lib/canvas/types";
+import { useSlateSelector } from "slate-react";
+import { findAsset } from "@/lib/canvas/assets";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
 
 /** A character's avatar is whatever their asset last generated. */
 export function useCharacterAvatar(name = "") {
-	const id = assetId("asset_avatar", name);
+	const id = useSlateSelector(
+		(editor) => findAsset(editor.children, "asset_avatar", name)?.id ?? "",
+	);
 	return {
 		url: useQueueSelector((q) =>
 			getPrimaryUrl(q.getElementSnapshot(id).result, "image"),

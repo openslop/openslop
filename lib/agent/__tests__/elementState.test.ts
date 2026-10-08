@@ -1,33 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
-import type { GenerationJob, GenerationNode } from "@/lib/generation/graph";
+import type { AssetResult } from "@/lib/connectors/types";
+import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { staleReason } from "@/lib/generation/staleReason";
 import { elementState } from "../elementState";
 import { EMPTY_CONTEXT } from "@/lib/generation/__tests__/_context";
+import { jobNode } from "@/lib/generation/__tests__/_graph";
 
-const config: ConnectorConfig = {};
-
-function node(
-	id: string,
-	prompt = id,
-	reads: Record<string, string> = {},
-): GenerationNode {
-	const job: GenerationJob = {
-		elementId: id,
-		elementType: "image",
-		connectorType: "image",
-		model: DEFAULT_MODELS.image,
-		config,
-	};
-	return {
-		id,
-		inputs: { prompt, attributes: {}, reads },
-		dependsOn: {},
-		job,
-	};
-}
+const node = (id: string, prompt = id, reads: Record<string, string> = {}) =>
+	jobNode(id, [], { prompt, reads });
 
 const image = (imageUrl: string): AssetResult => ({ imageUrl, durationSec: 0 });
 

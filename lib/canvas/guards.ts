@@ -9,7 +9,6 @@ import {
 	type ContentType,
 	type ElementRole,
 	type ElementType,
-	type ParsedElement,
 	type CanvasElement,
 } from "./types";
 
@@ -38,8 +37,3 @@ export const isElementType = (type: string): type is ElementType =>
 
 export const isCanvasElement = (node: unknown): node is CanvasElement =>
 	Element.isElement(node) && isElementType(node.type);
-
-/** Narrows a parsed OSML node to a content element, leaving out assets and tags the canvas does not know. */
-export const isParsedContentElement = (
-	node: ParsedElement,
-): node is ParsedElement & ContentElement => isContentType(node.type);

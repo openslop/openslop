@@ -52,22 +52,24 @@ describe("serializeOSMLWithScenes", () => {
 	});
 
 	it("writes the assets ahead of the first scene, wherever they sit", () => {
+		const style = asset("asset_style", { text: "ink wash" });
+		const voice = asset("asset_voice", {
+			name: "Mia & Co",
+			attrs: {
+				gender: "feminine",
+				provider: "cartesia",
+				model: "Sonic 3.6",
+			},
+		});
 		const result = serializeOSMLWithScenes([
-			asset("asset_style", { text: "ink wash" }),
+			style,
 			wrap(el("narration", "Hello")),
-			asset("asset_voice", {
-				name: "Mia & Co",
-				attrs: {
-					gender: "feminine",
-					provider: "cartesia",
-					model: "Sonic 3.6",
-				},
-			}),
+			voice,
 		]);
 
 		expect(result.split("\n")).toEqual([
-			'<asset_style id="asset_style">ink wash</asset_style>',
-			'<asset_voice id="asset_voice:Mia &amp; Co" provider="cartesia" model="Sonic 3.6" name="Mia &amp; Co" gender="feminine"></asset_voice>',
+			`<asset_style id="${style.id}">ink wash</asset_style>`,
+			`<asset_voice id="${voice.id}" provider="cartesia" model="Sonic 3.6" name="Mia &amp; Co" gender="feminine"></asset_voice>`,
 			"",
 			"--- Scene 1 ---",
 			'<narration id="e1">Hello</narration>',
@@ -150,7 +152,7 @@ describe("serialize round trip", () => {
 	});
 
 	it("keeps the assets, ahead of the scenes, through a save and reload", () => {
-		const saved = serializeOSMLWithScenes([
+		const assets = [
 			asset("asset_style", { text: "ink wash" }),
 			asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
 			asset("asset_voice", {
@@ -158,6 +160,9 @@ describe("serialize round trip", () => {
 				attrs: { gender: "feminine", voiceId: "v1" },
 			}),
 			references("https://img/a.png?x=1&y=2", "https://img/b.png"),
+		];
+		const saved = serializeOSMLWithScenes([
+			...assets,
 			wrap(createCanvasElement("narration", { id: "n1", text: "first" })),
 			wrap(createCanvasElement("narration", { id: "n2", text: "second" })),
 		]);
@@ -172,17 +177,7 @@ describe("serialize round trip", () => {
 			SCENE_TYPE,
 			SCENE_TYPE,
 		]);
-		expect(reloaded.slice(0, 4)).toEqual(
-			[
-				asset("asset_style", { text: "ink wash" }),
-				asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
-				asset("asset_voice", {
-					name: NARRATOR,
-					attrs: { gender: "feminine", voiceId: "v1" },
-				}),
-				references("https://img/a.png?x=1&y=2", "https://img/b.png"),
-			].map(withoutLeafIds),
-		);
+		expect(reloaded.slice(0, 4)).toEqual(assets.map(withoutLeafIds));
 		expect(serializeOSMLWithScenes(reloaded)).toBe(saved);
 	});
 

@@ -1,4 +1,5 @@
 import { Editor, Range, Transforms, type Node, type Point } from "slate";
+import { isAsset } from "@/lib/canvas/assets";
 import { isAssetElement } from "@/lib/canvas/guards";
 import type { CanvasEditor } from "@/lib/canvas/types";
 
@@ -8,7 +9,9 @@ const duplicateAt = (children: Node[]) =>
 			isAssetElement(node) &&
 			children
 				.slice(0, at)
-				.some((earlier) => isAssetElement(earlier) && earlier.id === node.id),
+				.some((earlier) =>
+					isAsset(earlier, node.type, node.generationAttributes?.name),
+				),
 	);
 
 const strayAt = (children: Node[]) =>
@@ -32,11 +35,8 @@ export const withAssets = (editor: CanvasEditor): CanvasEditor => {
 
 	editor.onChange = (options) => {
 		if (inAsset(caret())) {
-			const firstScene = editor.children.findIndex(
-				(node) => !isAssetElement(node),
-			);
-			if (firstScene >= 0)
-				Transforms.select(editor, Editor.start(editor, [firstScene]));
+			const script = editor.children.findIndex((node) => !isAssetElement(node));
+			Transforms.select(editor, Editor.start(editor, [script]));
 		}
 		onChange(options);
 	};

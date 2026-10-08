@@ -56,15 +56,12 @@ describe("BaseTTSConnector", () => {
 		});
 		const reads = readsOf(plugin, createCanvasElement("narration"), [narrator]);
 
-		const result = await connector.generate(
-			{ prompt: "hello", gender: "masculine", accent: "american" },
-			{ reads },
-		);
+		const result = await connector.generate({ prompt: "hello" }, { reads });
 
 		expect(result.audioUrl).toBe(AUDIO_URL);
-		const submitted = String(fetchSpy.mock.calls[0]?.[1]?.body);
-		expect(JSON.parse(submitted)).toMatchObject({ voiceId: "voice-42" });
-		expect(submitted).not.toContain("masculine");
+		expect(JSON.parse(String(fetchSpy.mock.calls[0]?.[1]?.body))).toMatchObject(
+			{ voiceId: "voice-42" },
+		);
 	});
 
 	it("runs transformPrompt on prompt field", async () => {

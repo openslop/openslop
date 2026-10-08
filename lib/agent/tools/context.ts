@@ -10,7 +10,10 @@ export type ElementImage = {
 	type: ElementType;
 	prompt: string;
 	/** Absent when the element's type holds no picture, so there is never one to wait for. */
-	pictures: { status: GenerationStatus; urls: string[] } | undefined;
+	pictures:
+		| { kind: "generated"; status: GenerationStatus; urls: string[] }
+		| { kind: "uploaded"; urls: string[] }
+		| undefined;
 };
 
 /** What a tool can do to the project, never the parts it is built from. */
@@ -19,6 +22,7 @@ export type AgentToolContext = Pick<
 	"setTitle" | "updateScriptSettings" | "updateVideoSettings"
 > & {
 	readScript: () => string;
+	isScriptEmpty: () => boolean;
 	countSpokenWords: () => number;
 	measureElementLengths: () => ElementLength[];
 	measureRuntime: () => number;

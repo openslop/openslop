@@ -13,9 +13,7 @@ export const adaptScript = defineTool({
 	  prose that carries no annotation becomes narration. A mood note or a "here's my
 	  script:" caught in the span is read as a line to speak.
 
-	  The conversion writes the script only. Read the text yourself first and set what it
-	  needs: the title with set_title, and its characters, voices and art style as assets
-	  with edit_script.
+	  The conversion writes the script only, against the assets already on the canvas.
 
 	  Screenplay furniture is stripped for you, so leave slug lines, stage directions and
 	  character cues where they are. Nothing is invented either: the conversion adds visuals,

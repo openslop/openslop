@@ -1,16 +1,17 @@
 "use client";
 
 import { useCallback } from "react";
-import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import compact from "lodash/compact";
 import pick from "lodash/pick";
 import { getAssets, referenceUrls } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import { isScriptEmpty } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import {
+	connectorOf,
 	isGenerated,
-	type ElementType,
 	type CanvasElement,
 } from "@/lib/canvas/types";
 import {
@@ -32,9 +33,8 @@ import { elementState } from "../elementState";
 import type { AgentToolContext, ElementImage } from "./context";
 import { executeToolCall } from "./registry";
 
-type PicturesOf = (element: CanvasElement) => ElementImage["pictures"];
-
-export function useAgentTools(editor: Editor) {
+export function useAgentTools() {
+	const editor = useSlateStatic();
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
@@ -50,20 +50,20 @@ export function useAgentTools(editor: Editor) {
 					source,
 					signal,
 				);
-			const generated: PicturesOf = (element) => {
+			const picturesOf = (element: CanvasElement): ElementImage["pictures"] => {
+				if (element.type === "asset_references")
+					return { kind: "uploaded", urls: referenceUrls([element]) };
+				if (connectorOf(element.type) !== "image") return undefined;
 				const { status, result } = queue.getElementSnapshot(element.id);
-				return { status, urls: compact([getPrimaryUrl(result, "image")]) };
-			};
-			const picturesOf: Partial<Record<ElementType, PicturesOf>> = {
-				image: generated,
-				asset_avatar: generated,
-				asset_references: (element) => ({
-					status: "idle",
-					urls: referenceUrls([element]),
-				}),
+				return {
+					kind: "generated",
+					status,
+					urls: compact([getPrimaryUrl(result, "image")]),
+				};
 			};
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
+				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				measureElementLengths: () => measureElementLengths(editor.children),
 				measureRuntime: () => measureRuntime(editor.children),
@@ -73,7 +73,7 @@ export function useAgentTools(editor: Editor) {
 						element && {
 							type: element.type,
 							prompt: getPromptText(element),
-							pictures: picturesOf[element.type]?.(element),
+							pictures: picturesOf(element),
 						}
 					);
 				},

@@ -64,18 +64,9 @@ export type Voice = z.infer<typeof VoiceSchema>;
 
 /** How the project's scripts are written, each with a default. */
 export const ScriptSettingsSchema = z.object({
-	language: z
-		.enum(LANGUAGE_CHOICES)
-		.default(AUTO_LANGUAGE)
-		.catch(AUTO_LANGUAGE),
-	length: z
-		.enum(VIDEO_LENGTHS)
-		.default(DEFAULT_VIDEO_LENGTH)
-		.catch(DEFAULT_VIDEO_LENGTH),
-	format: z
-		.enum(VIDEO_FORMAT_CHOICES)
-		.default(DEFAULT_VIDEO_FORMAT)
-		.catch(DEFAULT_VIDEO_FORMAT),
+	language: z.enum(LANGUAGE_CHOICES).catch(AUTO_LANGUAGE),
+	length: z.enum(VIDEO_LENGTHS).catch(DEFAULT_VIDEO_LENGTH),
+	format: z.enum(VIDEO_FORMAT_CHOICES).catch(DEFAULT_VIDEO_FORMAT),
 	template: optionalString,
 });
 

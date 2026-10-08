@@ -11,7 +11,6 @@ import type { GenerationQueue } from "@/lib/generation/queue";
 import type { ProjectStore } from "@/lib/project/store";
 import { getTemplate } from "./templates";
 
-/** Starts the project over on a template: its settings, and its assets on the canvas. */
 export function applyTemplate(
 	editor: Editor,
 	store: ProjectStore,

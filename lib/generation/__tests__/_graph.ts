@@ -1,24 +1,30 @@
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import type { AssetConnectorType } from "@/lib/connectors/types";
 import keyBy from "lodash/keyBy";
 import type { GenerationNode } from "../graph";
+import type { NodeInputs } from "../inputs";
 
 /** Dependencies labelled by their node ids. */
 export const byId = (dependencies: GenerationNode[]) =>
 	keyBy(dependencies, "id");
 
-/** An image job whose prompt is its id. */
+/** An image job whose prompt is its id unless given one. */
 export const jobNode = (
 	id: string,
 	dependsOn: GenerationNode[] = [],
-	reads: Record<string, string> = {},
+	{
+		prompt = id,
+		attributes = {},
+		reads = {},
+		connectorType = "image",
+	}: Partial<NodeInputs> & { connectorType?: AssetConnectorType } = {},
 ): GenerationNode => ({
 	id,
-	inputs: { prompt: id, attributes: {}, reads },
+	inputs: { prompt, attributes, reads },
 	dependsOn: byId(dependsOn),
 	job: {
-		elementId: id,
 		elementType: "image",
-		connectorType: "image",
+		connectorType,
 		model: DEFAULT_MODELS.image,
 		config: {},
 	},

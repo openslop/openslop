@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { IconComponent } from "@/components/ui/icon";
 import {
 	Select,
 	SelectContent,
@@ -9,12 +8,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { SimpleTooltip } from "@/components/ui/tooltip";
 
 export interface SelectFieldOption<T extends string> {
 	value: T;
 	label: ReactNode;
-	Icon?: IconComponent;
 	disabled?: boolean;
 }
 
@@ -31,37 +28,17 @@ export function SelectField<T extends string>({
 	options,
 	onChange,
 	ariaLabel,
-	tooltip,
-	unavailable = false,
 }: {
 	value: T;
 	options: readonly SelectFieldOption<T>[];
 	onChange: (value: T) => void;
 	ariaLabel: string;
-	tooltip?: string;
-	/** Shown but never opened, and still hoverable so a tooltip can explain why. */
-	unavailable?: boolean;
 }) {
-	const trigger = (
-		<SelectTrigger
-			size="sm"
-			aria-label={ariaLabel}
-			aria-disabled={unavailable || undefined}
-		>
-			<SelectValue />
-		</SelectTrigger>
-	);
 	return (
-		<Select
-			value={value}
-			onValueChange={(next) => onChange(next as T)}
-			open={unavailable ? false : undefined}
-		>
-			{tooltip == null ? (
-				trigger
-			) : (
-				<SimpleTooltip label={tooltip}>{trigger}</SimpleTooltip>
-			)}
+		<Select value={value} onValueChange={(next) => onChange(next as T)}>
+			<SelectTrigger size="sm" aria-label={ariaLabel}>
+				<SelectValue />
+			</SelectTrigger>
 			<SelectContent>
 				{options.map((option) => (
 					<SelectItem
@@ -70,14 +47,7 @@ export function SelectField<T extends string>({
 						disabled={option.disabled}
 						className="text-label"
 					>
-						{option.Icon ? (
-							<span className="flex items-center gap-1.5">
-								<option.Icon size={12} />
-								{option.label}
-							</span>
-						) : (
-							option.label
-						)}
+						{option.label}
 					</SelectItem>
 				))}
 			</SelectContent>

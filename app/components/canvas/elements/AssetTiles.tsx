@@ -25,33 +25,20 @@ type CharacterTileProps = TileProps & { name: string; onRemove?: () => void };
 
 /** A character by their look, or by their voice when they have no look. */
 export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
-	const hasAvatar = useHasAsset("asset_avatar", name);
-	return hasAvatar ? (
-		<AvatarAssetTile name={name} {...tile} />
-	) : (
-		<VoiceAssetTile name={name} {...tile} />
-	);
-}
-
-function AvatarAssetTile({ name, ...tile }: CharacterTileProps) {
 	const { editAsset } = useAssetEditors();
-	const { url, status } = useCharacterAvatar(name);
-	return (
+	const hasAvatar = useHasAsset("asset_avatar", name);
+	const avatar = useCharacterAvatar(name);
+	return hasAvatar ? (
 		<AssetTile
 			name={name}
-			previewUrl={url}
+			previewUrl={avatar.url}
 			Icon={User}
 			fallback="initial"
-			status={status}
+			status={avatar.status}
 			onEdit={() => editAsset("asset_avatar", name)}
 			{...tile}
 		/>
-	);
-}
-
-function VoiceAssetTile({ name, ...tile }: CharacterTileProps) {
-	const { editAsset } = useAssetEditors();
-	return (
+	) : (
 		<AssetTile
 			name={name}
 			Icon={Mic}
@@ -89,21 +76,4 @@ export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	return (
 		<ReferenceTile {...tile} onEdit={() => editAsset("asset_references")} />
 	);
-}
-
-export function ReferenceTiles({
-	urls,
-	onRemove,
-}: {
-	urls: string[];
-	onRemove: (index: number) => void;
-}) {
-	return urls.map((url, index) => (
-		<ReferenceTile
-			key={`reference:${url}`}
-			url={url}
-			index={index}
-			onRemove={() => onRemove(index)}
-		/>
-	));
 }

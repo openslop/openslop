@@ -1,5 +1,4 @@
 import compact from "lodash/compact";
-import { findAsset, voiceOf } from "@/lib/canvas/assets";
 import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
@@ -41,13 +40,10 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 				),
 			),
 		async prepare(element, ctx) {
-			const { canvas } = ctx;
 			const writes = await Promise.all(
-				heardCharacters(element.generationAttributes)
-					.filter((name) => findAsset(canvas, "asset_voice", name))
-					.map((name) =>
-						settleVoice(name, resolveModel("tts", voiceOf(canvas, name)), ctx),
-					),
+				heardCharacters(element.generationAttributes).map((name) =>
+					settleVoice(name, ctx),
+				),
 			);
 			return writes.flat();
 		},

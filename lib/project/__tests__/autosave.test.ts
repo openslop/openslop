@@ -48,8 +48,10 @@ describe("createAutosaver", () => {
 	const build = () =>
 		createAutosaver({
 			projectId,
-			read: () => content(extractStoreSnapshot(store), "<osml/>"),
-			details,
+			document: {
+				read: () => content(extractStoreSnapshot(store), "<osml/>"),
+				details,
+			},
 			onSaved,
 			onError,
 		});
@@ -166,8 +168,10 @@ describe("createAutosaver", () => {
 		let generation: SavedProject["generation"] = {};
 		const autosaver = createAutosaver({
 			projectId,
-			read: () => content(extractStoreSnapshot(store), "<osml/>", generation),
-			details,
+			document: {
+				read: () => content(extractStoreSnapshot(store), "<osml/>", generation),
+				details,
+			},
 			onSaved,
 			onError,
 		});
@@ -250,8 +254,10 @@ describe("createAutosaver", () => {
 		);
 		const autosaver = createAutosaver({
 			projectId,
-			read: () => content(extractStoreSnapshot(store), script),
-			details,
+			document: {
+				read: () => content(extractStoreSnapshot(store), script),
+				details,
+			},
 			onSaved,
 			onError,
 		});

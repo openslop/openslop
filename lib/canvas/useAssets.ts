@@ -8,7 +8,6 @@ import type { AssetElement, AssetType } from "./types";
 
 const selectAssets = (editor: Editor) => getAssets(editor.children);
 
-/** The project's assets, re-read only when one of them changes. */
 export const useAssets = (): AssetElement[] =>
 	useSlateSelector(selectAssets, shallow);
 

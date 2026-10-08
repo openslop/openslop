@@ -2,15 +2,13 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
-import { createEditor } from "slate";
-import { Slate, withReact } from "slate-react";
-import { findAsset, getAssets, NARRATOR } from "@/lib/canvas/assets";
+import { findAsset, NARRATOR } from "@/lib/canvas/assets";
 import {
 	AssetEditProvider,
 	useAssetEditors,
 	type AssetEditors,
 } from "../elements/character/AssetEditProvider";
+import { mountOnCanvas } from "./_mount";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -35,37 +33,29 @@ vi.mock("../elements/style/ArtStyleModal", () => ({
 }));
 
 let editors: AssetEditors;
-const editor = withReact(createEditor());
-editor.defaultModels = () => ({});
 function Tiles({ onRead }: { onRead: (editors: AssetEditors) => void }) {
 	onRead(useAssetEditors());
 	return null;
 }
 
-const container = document.body.appendChild(document.createElement("div"));
-let root: Root;
+let canvas: ReturnType<typeof mountOnCanvas>;
+const editor = () => canvas.editor;
 
 const dialogs = () =>
-	Array.from(container.querySelectorAll<HTMLElement>("[data-dialog]"));
+	Array.from(document.body.querySelectorAll<HTMLElement>("[data-dialog]"));
 const openDialogs = () => dialogs().map((dialog) => dialog.dataset.dialog);
 const clickDialog = () => act(() => dialogs()[0]?.click());
-const assetIds = () => getAssets(editor.children).map(({ id }) => id);
-
 beforeEach(() => {
 	created.name = "Mia";
-	root = createRoot(container);
-	act(() =>
-		root.render(
-			<Slate editor={editor} initialValue={[]}>
-				<AssetEditProvider>
-					<Tiles onRead={(read) => (editors = read)} />
-				</AssetEditProvider>
-			</Slate>,
-		),
+	canvas = mountOnCanvas();
+	canvas.render(
+		<AssetEditProvider>
+			<Tiles onRead={(read) => (editors = read)} />
+		</AssetEditProvider>,
 	);
 });
 
-afterEach(() => act(() => root.unmount()));
+afterEach(() => canvas.unmount());
 
 describe("AssetEditProvider", () => {
 	it("mounts no dialog until a tile opens one", () => {
@@ -91,9 +81,8 @@ describe("AssetEditProvider", () => {
 		expect(openDialogs()).toEqual(["create"]);
 
 		clickDialog();
-		expect(assetIds()).toEqual(
-			expect.arrayContaining(["asset_avatar:Mia", "asset_voice:Mia"]),
-		);
+		expect(findAsset(editor().children, "asset_avatar", "Mia")).toBeDefined();
+		expect(findAsset(editor().children, "asset_voice", "Mia")).toBeDefined();
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
@@ -102,9 +91,9 @@ describe("AssetEditProvider", () => {
 		act(() => editors.openCreateCharacter());
 
 		clickDialog();
-		expect(findAsset(editor.children, "asset_voice", NARRATOR)).toBeDefined();
+		expect(findAsset(editor().children, "asset_voice", NARRATOR)).toBeDefined();
 		expect(
-			findAsset(editor.children, "asset_avatar", NARRATOR),
+			findAsset(editor().children, "asset_avatar", NARRATOR),
 		).toBeUndefined();
 		expect(openDialogs()).toEqual(["character Narrator"]);
 	});
@@ -112,8 +101,8 @@ describe("AssetEditProvider", () => {
 	it("adds only the asset it opens", () => {
 		act(() => editors.editAsset("asset_voice", "Kai"));
 
-		expect(findAsset(editor.children, "asset_voice", "Kai")).toBeDefined();
-		expect(findAsset(editor.children, "asset_avatar", "Kai")).toBeUndefined();
+		expect(findAsset(editor().children, "asset_voice", "Kai")).toBeDefined();
+		expect(findAsset(editor().children, "asset_avatar", "Kai")).toBeUndefined();
 	});
 
 	it("unmounts the dialog when it closes", () => {

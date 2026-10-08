@@ -14,7 +14,6 @@ export interface TemplateShowcase {
 	examplePrompt: string;
 }
 
-/** A character's voice and look, and the prebuilt avatar their asset is given. */
 type TemplateCharacter = Voice & {
 	appearance: string;
 	avatar?: string;

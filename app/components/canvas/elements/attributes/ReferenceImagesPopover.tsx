@@ -4,7 +4,7 @@ import { useSlateStatic } from "slate-react";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent } from "@/components/ui/popover";
-import type { CanvasElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import {
 	parseReferenceImages,
 	serializeReferenceImages,
@@ -19,7 +19,7 @@ const summarize = (override: string[] | undefined, projectCount: number) => {
 };
 
 export interface ReferenceImagesPopoverProps {
-	element: CanvasElement;
+	element: ContentElement;
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;

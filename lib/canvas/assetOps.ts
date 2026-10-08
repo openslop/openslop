@@ -6,7 +6,7 @@ import without from "lodash/without";
 import xor from "lodash/xor";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/referenceImages";
-import { findAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
+import { findAsset, isAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
 import { createCanvasElement } from "./createCanvasElement";
 import {
 	CHARACTERS_ATTR,
@@ -19,12 +19,7 @@ import {
 	type AttributeChanges,
 } from "./editorOps";
 import { isAssetElement } from "./guards";
-import {
-	assetId,
-	type AssetElement,
-	type AssetType,
-	type CanvasElement,
-} from "./types";
+import type { AssetType, CanvasElement } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
@@ -52,7 +47,6 @@ export function setAsset(
 	if (text !== undefined) updateElementText(editor, asset.id, text);
 }
 
-/** The asset, added when there is none. */
 export function ensureAsset(
 	editor: Editor,
 	type: AssetType,
@@ -61,9 +55,7 @@ export function ensureAsset(
 	if (!findAsset(editor.children, type, name)) setAsset(editor, type, name);
 }
 
-/** The project's reference images; none leaves no references element behind. */
 export function setReferenceImages(editor: Editor, urls: string[]): void {
-	if (urls.length === 0) return removeAsset(editor, "asset_references");
 	setAsset(editor, "asset_references", undefined, {
 		attrs: { [REFERENCE_URLS_ATTR]: serializeReferenceImages(uniq(urls)) },
 	});
@@ -99,10 +91,9 @@ export function removeAsset(
 	type: AssetType,
 	name?: string,
 ): void {
-	const id = assetId(type, name);
 	Transforms.removeNodes(editor, {
 		at: [],
-		match: (node) => isAssetElement(node) && node.id === id,
+		match: (node) => isAsset(node, type, name),
 	});
 }
 
@@ -112,18 +103,13 @@ export function addCharacter(editor: Editor, name: string): void {
 	if (name !== NARRATOR) ensureAsset(editor, "asset_avatar", name);
 }
 
-/** A character's look and voice, handed back so they can be restored. */
-export function removeCharacter(editor: Editor, name: string): AssetElement[] {
+/** Removes a character's look and voice, returning what puts them back. */
+export function removeCharacter(editor: Editor, name: string): () => void {
 	const removed = compact([
 		findAsset(editor.children, "asset_avatar", name),
 		findAsset(editor.children, "asset_voice", name),
 	]);
 	removeAsset(editor, "asset_avatar", name);
 	removeAsset(editor, "asset_voice", name);
-	return removed;
-}
-
-/** Puts removed assets back; a copy already on the canvas gives way to them. */
-export function restoreAssets(editor: Editor, assets: AssetElement[]): void {
-	Transforms.insertNodes(editor, assets, { at: [0] });
+	return () => Transforms.insertNodes(editor, removed, { at: [0] });
 }

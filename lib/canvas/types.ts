@@ -116,10 +116,6 @@ export type AssetType = keyof typeof ASSET_TYPES;
 
 export type ElementType = ContentType | AssetType;
 
-/** A named asset is `type:name`; a type's unnamed one is the type itself. */
-export const assetId = (type: AssetType, name?: string): string =>
-	name ? `${type}:${name}` : type;
-
 export const ELEMENT_TYPES: Record<ElementType, ElementSpec> = {
 	...CONTENT_TYPES,
 	...ASSET_TYPES,
@@ -127,7 +123,6 @@ export const ELEMENT_TYPES: Record<ElementType, ElementSpec> = {
 
 type Specs = typeof CONTENT_TYPES & typeof ASSET_TYPES;
 
-/** Every type whose spec names a connector. */
 export type GeneratedType = {
 	[T in ElementType]: Specs[T] extends { connector: AssetConnectorType }
 		? T
@@ -161,7 +156,6 @@ export type SplitAttributes = {
 	layoutAttributes?: Record<string, string>;
 };
 
-/** An element of type `T`. */
 export type ElementOf<T extends ElementType> = SplitAttributes & {
 	id: string;
 	type: T;
@@ -189,12 +183,6 @@ export type CanvasText = {
 	id: string;
 	type: ElementType;
 	text: string;
-};
-
-export type ParsedElement = SplitAttributes & {
-	id: string;
-	type: string;
-	children: { id: string; type: string; text: string }[];
 };
 
 declare module "slate" {

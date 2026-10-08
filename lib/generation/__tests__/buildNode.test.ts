@@ -29,7 +29,7 @@ const make = <T extends ElementType>(
 ) => createCanvasElement(type, { id, attrs, text });
 
 const avatar = (name: string, appearance: string) =>
-	make("asset_avatar", appearance, { name });
+	make("asset_avatar", appearance, { name }, `avatar-${name}`);
 
 const element = (
 	id: string,
@@ -109,7 +109,6 @@ describe("buildNode", () => {
 		expect(node.id).toBe(target.id);
 		expect(node.inputs.prompt).toBe("said");
 		expect(node.job).toMatchObject({
-			elementId: target.id,
 			elementType: type,
 			connectorType,
 		});
@@ -125,7 +124,7 @@ describe("buildNode", () => {
 		const node = resolveOn(video, [img, video]);
 
 		expect(edgesOf(node)).toEqual({
-			"Alice's avatar": "asset_avatar:Alice",
+			"Alice's avatar": "avatar-Alice",
 			"the previous visual": "img",
 		});
 	});
@@ -155,7 +154,7 @@ describe("buildNode", () => {
 		assets = [...assets, avatar("Bob", "tall")];
 		const ids = idsOf(element("img", "image", { characters: "Alice" }));
 
-		expect(ids).toEqual(["asset_avatar:Alice", "img"]);
+		expect(ids).toEqual(["avatar-Alice", "img"]);
 	});
 
 	it("goes stale once a character it shows is given an avatar", () => {
@@ -192,7 +191,7 @@ describe("buildNode", () => {
 		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
 			(node) => node.id,
 		);
-		expect(ids).toEqual(["asset_avatar:Alice", "img", "vid"]);
+		expect(ids).toEqual(["avatar-Alice", "img", "vid"]);
 	});
 
 	it("leaves a character's portrait fresh when their voice changes", () => {

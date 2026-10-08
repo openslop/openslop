@@ -33,7 +33,7 @@ async function previousPictures(
 }
 
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
-export const previousVisualDependency = dependency(
+const previousVisualDependency = dependency(
 	"the previous visual",
 	({ id, generationAttributes: attrs = {} }, { canvas }) =>
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||

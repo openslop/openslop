@@ -121,7 +121,7 @@ describe("useBuildContext", () => {
 
 		const { canvas } = render(useBuildContext)();
 
-		expect(canvas.map(({ id }) => id)).toEqual(["asset_style", "vid-1"]);
+		expect(canvas.map(({ id }) => id)).toEqual([style.id, "vid-1"]);
 	});
 
 	it.each([

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +14,7 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { useTTSConnector } from "@/lib/connectors/tts/useTTSConnector";
+import { createConnector } from "@/lib/connectors/factory";
 import { useVoiceSearch } from "@/lib/connectors/tts/useVoiceSearch";
 import { cn } from "@/lib/utils";
 import { FieldLabel } from "./fields";
@@ -127,7 +127,11 @@ export function VoicePicker({
 	onSelect: (voice: VoiceInfo) => void;
 	onModelChange: (model: ModelRef) => void;
 }) {
-	const connector = useTTSConnector(model);
+	const { provider, model: name } = model;
+	const connector = useMemo(
+		() => createConnector("tts", { provider, model: name }),
+		[provider, name],
+	);
 	const search = useVoiceSearch(filters, connector);
 
 	return (

@@ -1,5 +1,4 @@
 import {
-	assetId,
 	connectorOf,
 	type ElementOf,
 	type ElementType,
@@ -8,7 +7,6 @@ import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { attributeSchemaFor } from "./elementConnector";
-import { isAssetType } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 
 export type CreateElementOptions = {
@@ -31,9 +29,7 @@ export function createCanvasElement<T extends ElementType>(
 	};
 	const attributes = attributeSchemaFor(type, attrs).resolve(attrs, defaults);
 	return {
-		id: isAssetType(type)
-			? assetId(type, opts.attrs?.name)
-			: (opts.id ?? makeNodeId()),
+		id: opts.id ?? makeNodeId(),
 		type,
 		...splitAttributes(attributes),
 		children: [

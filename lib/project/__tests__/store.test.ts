@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createProjectStore } from "../store";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
+import {
+	createProjectStore,
+	extractStoreSnapshot,
+	ProjectDataSchema,
+} from "../store";
 import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 
@@ -62,5 +67,68 @@ describe("project store", () => {
 			ScriptSettingsSchema.parse({}),
 		);
 		expect(store.getState().models).toEqual({});
+	});
+});
+
+describe("store snapshot", () => {
+	it("extracts a method-free snapshot, detached from its store", () => {
+		const store = createProjectStore();
+		const snap = extractStoreSnapshot(store);
+
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
+		store.getState().updateModels({ image: RUNWARE });
+		store.getState().updateScriptSettings({ language: "fr" });
+
+		expect(snap).toEqual({
+			title: "",
+			videoSettings: VideoSettingsSchema.parse({}),
+			scriptSettings: ScriptSettingsSchema.parse({}),
+			models: {},
+		});
+	});
+
+	it("round-trips through createProjectStore", () => {
+		const src = createProjectStore();
+		src.getState().updateVideoSettings({
+			aspectRatio: "9:16",
+			transitionType: "fade",
+			captions: false,
+		});
+		src.getState().updateModels({ image: RUNWARE });
+		src
+			.getState()
+			.updateScriptSettings({ language: "fr", template: "pov-life" });
+		src.getState().setTitle("Moon Cat");
+
+		const after = createProjectStore(extractStoreSnapshot(src)).getState();
+		expect(after.videoSettings).toEqual(src.getState().videoSettings);
+		expect(after.scriptSettings).toEqual(src.getState().scriptSettings);
+		expect(after.models).toEqual({ image: RUNWARE });
+		expect(after.title).toBe("Moon Cat");
+	});
+});
+
+describe("ProjectDataSchema", () => {
+	it("completes partial settings", () => {
+		const parsed = ProjectDataSchema.parse({
+			videoSettings: { aspectRatio: "9:16", transitionType: "fade" },
+			scriptSettings: { length: "under-1m" },
+		});
+
+		expect(parsed.videoSettings).toEqual({
+			aspectRatio: "9:16",
+			transitionType: "fade",
+			captions: true,
+			captionStyle: DEFAULT_CAPTION_STYLE,
+		});
+		expect(parsed.scriptSettings).toEqual(
+			ScriptSettingsSchema.parse({ length: "under-1m" }),
+		);
+	});
+
+	it("throws on a structurally invalid row", () => {
+		expect(() =>
+			ProjectDataSchema.parse({ videoSettings: { aspectRatio: 42 } }),
+		).toThrow();
 	});
 });

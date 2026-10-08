@@ -4,7 +4,6 @@ import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { assetId } from "@/lib/canvas/types";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { createScriptWriter } from "../scriptWriter";
 
@@ -87,10 +86,7 @@ describe("createScriptWriter", () => {
 
 	it("writes the script after the assets already on the canvas", () => {
 		const editor = makeEditor();
-		const style = createCanvasElement("asset_style", {
-			id: assetId("asset_style"),
-			text: "noir",
-		});
+		const style = createCanvasElement("asset_style", { text: "noir" });
 		editor.children = [style];
 
 		createScriptWriter(editor)("<narration>Snow fell.</narration>");

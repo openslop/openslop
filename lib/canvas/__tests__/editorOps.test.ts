@@ -4,8 +4,7 @@ import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
 	applyElementVersion,
-	clearEditor,
-	duplicateElementAt,
+	duplicateElement,
 	findBlockById,
 	findElementById,
 	updateElementText,
@@ -75,20 +74,21 @@ describe("findElementById", () => {
 
 describe("writes by id", () => {
 	it("land on the element wherever it is, asset or scene", () => {
+		const voice = asset("asset_voice", { name: "Mia" });
 		const editor = createEditor();
 		editor.children = [
 			asset("asset_style"),
-			asset("asset_voice", { name: "Mia" }),
+			voice,
 			scene([content("narration", "n1"), content("image", "img1")]),
 		];
 
 		mergeAttrs(editor, "img1", { style: "ink" });
-		mergeAttrs(editor, "asset_voice:Mia", { age: "child" });
+		mergeAttrs(editor, voice.id, { age: "child" });
 
 		expect(findElementById(editor, "img1")?.[0].generationAttributes).toEqual({
 			style: "ink",
 		});
-		expect(findElementById(editor, "asset_voice:Mia")).toMatchObject([
+		expect(findElementById(editor, voice.id)).toMatchObject([
 			{ generationAttributes: { name: "Mia", age: "child" } },
 			[1],
 		]);
@@ -101,8 +101,8 @@ describe("writes by id", () => {
 		expect(() => mergeAttrs(editor, "gone", { style: "ink" })).toThrow(
 			/"gone" is not on the canvas/,
 		);
-		expect(() => updateElementText(editor, "asset_style", "ink")).toThrow(
-			/"asset_style" is not on the canvas/,
+		expect(() => updateElementText(editor, "lost", "ink")).toThrow(
+			/"lost" is not on the canvas/,
 		);
 		expect(JSON.stringify(editor.children)).toBe(before);
 	});
@@ -189,26 +189,24 @@ describe("updateElementText", () => {
 describe("updateElementText on an asset", () => {
 	// Assets are void on the canvas, which a plain text edit would skip.
 	it("rewrites a void asset's text", () => {
+		const style = asset("asset_style", { text: "ink wash" });
 		const editor = createEditor();
 		editor.isVoid = (element) => isAssetElement(element);
-		editor.children = [
-			asset("asset_style", { text: "ink wash" }),
-			scene([content("narration", "n1")]),
-		];
+		editor.children = [style, scene([content("narration", "n1")])];
 
-		updateElementText(editor, "asset_style", "oil paint");
+		updateElementText(editor, style.id, "oil paint");
 		expect(Editor.string(editor, [0], { voids: true })).toBe(
 			`${ZERO_WIDTH_SPACE}oil paint`,
 		);
 
-		updateElementText(editor, "asset_style", "oil paint, thick");
+		updateElementText(editor, style.id, "oil paint, thick");
 		expect(Editor.string(editor, [0], { voids: true })).toBe(
 			`${ZERO_WIDTH_SPACE}oil paint, thick`,
 		);
 	});
 });
 
-describe("duplicateElementAt", () => {
+describe("duplicateElement", () => {
 	it("inserts the copy directly after the original", () => {
 		const editor = makeEditor([
 			scene([
@@ -217,14 +215,10 @@ describe("duplicateElementAt", () => {
 			]),
 		]);
 
-		const copyId = duplicateElementAt(
-			editor,
-			content("narration", "n1", "hello"),
-			[0, 0],
-		);
+		duplicateElement(editor, "n1");
 
 		const children = (editor.children[0] as Scene).children;
-		expect(children.map((c) => c.id)).toEqual(["n1", copyId, "img1"]);
+		expect(children.map((c) => c.id)).toEqual(["n1", children[1].id, "img1"]);
 		expect(Editor.string(editor, [0, 1])).toBe(Editor.string(editor, [0, 0]));
 	});
 
@@ -232,10 +226,10 @@ describe("duplicateElementAt", () => {
 		const el = content("character", "c1", "line", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
-		const copyId = duplicateElementAt(editor, el, [0, 0]);
+		duplicateElement(editor, "c1");
 
 		const copy = (editor.children[0] as Scene).children[1];
-		expect(copyId).not.toBe("c1");
+		expect(copy.id).not.toBe("c1");
 		expect(flatAttributes(copy)).toEqual({ name: "Lyra" });
 		expect(copy.children.map((leaf) => leaf.id)).not.toContain("c1-t");
 		expect(new Set(copy.children.map((leaf) => leaf.id)).size).toBe(2);
@@ -309,24 +303,6 @@ describe("mergeAttrs", () => {
 
 		const node = editor.children[0] as Scene;
 		expect(flatAttributes(node.children[0])).toEqual({ emotion: "calm" });
-	});
-});
-
-describe("clearEditor", () => {
-	it("empties the script so a new one does not stack under it, keeping the assets", () => {
-		const style = asset("asset_style", { text: "ink wash" });
-		const character = asset("asset_avatar", { name: "Mia" });
-		const editor = createEditor();
-		editor.children = [
-			style,
-			character,
-			scene([content("narration", "n1", "old")], "s1"),
-			scene([content("image", "i1")], "s2"),
-		];
-
-		clearEditor(editor);
-
-		expect(editor.children).toEqual([style, character]);
 	});
 });
 

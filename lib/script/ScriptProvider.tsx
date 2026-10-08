@@ -26,7 +26,6 @@ export function ScriptProvider({
 	children: ReactNode;
 }) {
 	const [script] = useState(initialScript);
-	// Assets set up ahead of a script are still the composer's to show.
 	const [showWorkspace, setShowWorkspace] = useState(
 		() => !isScriptEmpty(deserializeWithScenes(initialScript)),
 	);

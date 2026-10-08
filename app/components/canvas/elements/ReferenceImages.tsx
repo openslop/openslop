@@ -4,7 +4,7 @@ import { ImagePlus } from "@/components/ui/icon";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { AddAssetTile } from "./AddAssetTile";
 import { useReferenceImages } from "../hooks/useReferenceImages";
-import { ReferenceTiles } from "./AssetTiles";
+import { ReferenceTile } from "./AssetTiles";
 
 /** Reference image tiles for a caller-owned list, plus the tile that uploads more. */
 export function ReferenceImagePicker({
@@ -23,7 +23,14 @@ export function ReferenceImagePicker({
 
 	return (
 		<>
-			<ReferenceTiles urls={urls} onRemove={onRemove} />
+			{urls.map((url, index) => (
+				<ReferenceTile
+					key={`reference:${url}`}
+					url={url}
+					index={index}
+					onRemove={() => onRemove(index)}
+				/>
+			))}
 			<AddAssetTile
 				label="Reference"
 				ariaLabel="Add reference image"

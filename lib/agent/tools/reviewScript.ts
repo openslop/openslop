@@ -34,9 +34,9 @@ export const reviewScript = defineTool({
 	icon: Search,
 	label: "Reviewing the script",
 	execute: async ({ format }, ctx) => {
-		const script = ctx.readScript().trim();
-		if (!script) return "The canvas is empty, so there is nothing to review.";
-		return ctx.generateText(reviewPrompt(script, format), {
+		if (ctx.isScriptEmpty())
+			return "The script is empty, so there is nothing to review.";
+		return ctx.generateText(reviewPrompt(ctx.readScript(), format), {
 			systemPrompt: scriptRules(
 				ctx.readAssets(),
 				ctx.readProject().scriptSettings,

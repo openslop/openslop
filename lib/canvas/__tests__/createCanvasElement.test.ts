@@ -134,12 +134,4 @@ describe("createCanvasElement", () => {
 		expect(flatAttributes(avatar)).toMatchObject(DEFAULT_MODELS.image);
 		expect(flatAttributes(style)).toEqual({});
 	});
-
-	it("fixes an asset's id by its name, whatever id is given", () => {
-		expect(
-			createCanvasElement("asset_voice", { id: "x", attrs: { name: "Mia" } })
-				.id,
-		).toBe("asset_voice:Mia");
-		expect(createCanvasElement("asset_style").id).toBe("asset_style");
-	});
 });

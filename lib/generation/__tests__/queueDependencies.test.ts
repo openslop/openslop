@@ -1,18 +1,25 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
-import type { GenerationJob, GenerationNode } from "../graph";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+} from "vitest";
+import type { AssetResult } from "@/lib/connectors/types";
+import type { generateForElement } from "../generateForElement";
+import type { GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 import { EMPTY_CONTEXT } from "./_context";
-import { byId } from "./_graph";
+import { jobNode as node } from "./_graph";
 
-type GenerateFn = (...args: unknown[]) => Promise<AssetResult>;
-let generateMock: ReturnType<typeof vi.fn<GenerateFn>>;
+let generateMock: Mock<typeof generateForElement>;
 
 vi.mock("../generateForElement", () => ({
-	generateForElement: ({ job, inputs }: GenerationNode, ...rest: unknown[]) =>
-		generateMock(job, inputs, ...rest),
+	generateForElement: (...args: Parameters<typeof generateForElement>) =>
+		generateMock(...args),
 }));
 
 vi.mock("../generationGraph", async (original) => ({
@@ -20,49 +27,29 @@ vi.mock("../generationGraph", async (original) => ({
 	prepareNode: async (node: GenerationNode) => node,
 }));
 
-const config: ConnectorConfig = {};
-
-function node(id: string, dependsOn: GenerationNode[] = []): GenerationNode {
-	const job: GenerationJob = {
-		elementId: id,
-		elementType: "image",
-		connectorType: "image",
-		model: DEFAULT_MODELS.image,
-		config,
-	};
-	return {
-		id,
-		inputs: { prompt: id, attributes: {}, reads: {} },
-		dependsOn: byId(dependsOn),
-		job,
-	};
-}
-
 let queue: GenerationQueue;
 
 beforeEach(() => {
 	vi.useFakeTimers();
-	generateMock = vi.fn();
+	generateMock = vi.fn<typeof generateForElement>();
 	// The batch size from the issue's repro: two avatars can fill it.
 	queue = new GenerationQueue({ limits: { image: 2 } });
 });
 
 afterEach(() => vi.useRealTimers());
 
-const startedIds = () =>
-	generateMock.mock.calls.map((call) => (call[0] as GenerationJob).elementId);
+const startedIds = () => generateMock.mock.calls.map(([node]) => node.id);
 
 describe("dependency ordering", () => {
 	it("holds a dependent until its own dependency resolves, not just any job", async () => {
 		let releaseAlice: (result: AssetResult) => void = () => {};
-		generateMock.mockImplementation((job) => {
-			const { elementId } = job as GenerationJob;
-			if (elementId === "avatar:Alice") {
+		generateMock.mockImplementation(({ id }) => {
+			if (id === "avatar:Alice") {
 				return new Promise<AssetResult>((resolve) => {
 					releaseAlice = resolve;
 				});
 			}
-			return Promise.resolve({ imageUrl: `${elementId}.png`, durationSec: 0 });
+			return Promise.resolve({ imageUrl: `${id}.png`, durationSec: 0 });
 		});
 
 		const alice = node("avatar:Alice");
@@ -111,9 +98,9 @@ describe("dependency ordering", () => {
 	});
 
 	it("passes resolved dependency results to the dependent's job", async () => {
-		generateMock.mockImplementation((job) =>
+		generateMock.mockImplementation(({ id }) =>
 			Promise.resolve({
-				imageUrl: `${(job as GenerationJob).elementId}.png`,
+				imageUrl: `${id}.png`,
 				durationSec: 0,
 			}),
 		);
@@ -123,17 +110,17 @@ describe("dependency ordering", () => {
 		await vi.runAllTimersAsync();
 
 		const imageCall = generateMock.mock.calls.find(
-			(call) => (call[0] as GenerationJob).elementId === "image",
+			([node]) => node.id === "image",
 		);
-		expect(imageCall?.[2]).toEqual({
+		expect(imageCall?.[1]).toEqual({
 			"avatar:Alice": { imageUrl: "avatar:Alice.png", durationSec: 0 },
 		});
 	});
 
 	it("does not mark a freshly generated dependent stale", async () => {
-		generateMock.mockImplementation((job) =>
+		generateMock.mockImplementation(({ id }) =>
 			Promise.resolve({
-				imageUrl: `${(job as GenerationJob).elementId}.png`,
+				imageUrl: `${id}.png`,
 				durationSec: 0,
 			}),
 		);
@@ -159,8 +146,8 @@ describe("dependency ordering", () => {
 	});
 
 	it("keeps a dependent's existing result when a dependency fails", async () => {
-		generateMock.mockImplementation((job) =>
-			(job as GenerationJob).elementId === "avatar:Alice"
+		generateMock.mockImplementation(({ id }) =>
+			id === "avatar:Alice"
 				? Promise.reject(new Error("avatar boom"))
 				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
 		);
@@ -181,8 +168,8 @@ describe("dependency ordering", () => {
 	});
 
 	it("releases a dependent that can never run instead of leaving it queued", async () => {
-		generateMock.mockImplementation((job) =>
-			(job as GenerationJob).elementId === "avatar:Alice"
+		generateMock.mockImplementation(({ id }) =>
+			id === "avatar:Alice"
 				? Promise.reject(new Error("avatar boom"))
 				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
 		);
@@ -200,8 +187,8 @@ describe("dependency ordering", () => {
 	});
 
 	it("reports a failed dependency on the dependent that was waiting on it", async () => {
-		generateMock.mockImplementation((job) =>
-			(job as GenerationJob).elementId === "asset_avatar:Alice"
+		generateMock.mockImplementation(({ id }) =>
+			id === "asset_avatar:Alice"
 				? Promise.reject(new Error("avatar boom"))
 				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
 		);
@@ -213,13 +200,12 @@ describe("dependency ordering", () => {
 		);
 		await vi.runAllTimersAsync();
 
-		// A derived node has no card, so its failure has to surface on the element.
 		expect(queue.getElementSnapshot("image").error).toMatch(/avatar boom/);
 	});
 
 	it("carries a failure across a chain of blocked dependencies", async () => {
-		generateMock.mockImplementation((job) =>
-			(job as GenerationJob).elementId === "c"
+		generateMock.mockImplementation(({ id }) =>
+			id === "c"
 				? Promise.reject(new Error("root boom"))
 				: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
 		);

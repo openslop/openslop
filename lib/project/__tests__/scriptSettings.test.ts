@@ -29,7 +29,6 @@ describe("ScriptSettingsSchema", () => {
 				length: "forever",
 				format: "Film",
 				template: "",
-				image: "openslop/Slop Image v1",
 			},
 			DEFAULTS,
 		],

@@ -10,7 +10,6 @@ import {
 	removeAssets,
 	removeCharacter,
 	removeShownCharacter,
-	restoreAssets,
 	setAsset,
 	setReferenceImages,
 	toggleShownCharacter,
@@ -29,7 +28,7 @@ import { shownCharacters } from "../characterNames";
 import { findElementById } from "../editorOps";
 import { getContentElements } from "../scenes";
 import type { AssetType, ContentElement, Scene } from "../types";
-import { asset, references } from "./_assets";
+import { asset, labels, references } from "./_assets";
 
 const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
@@ -52,9 +51,6 @@ function makeEditor(
 	return editor;
 }
 
-const ids = (nodes: Descendant[]) =>
-	nodes.map((node) => ("id" in node ? node.id : "text"));
-
 const shownBy = (editor: ReturnType<typeof makeEditor>) =>
 	getContentElements(editor.children).map(
 		(element) => element.generationAttributes?.characters,
@@ -69,14 +65,14 @@ describe("setAsset", () => {
 
 		setAsset(editor, "asset_style", undefined);
 
-		expect(ids(editor.children)).toEqual([
+		expect(labels(editor.children)).toEqual([
 			"asset_style",
 			"asset_avatar:Kai",
 			"s1",
 		]);
 	});
 
-	it("adds an asset under its fixed id, then updates it in place", () => {
+	it("adds an asset, then updates it in place", () => {
 		const editor = makeEditor();
 
 		setAsset(editor, "asset_avatar", "Mia", {
@@ -91,7 +87,6 @@ describe("setAsset", () => {
 		expect(getAssets(editor.children)).toHaveLength(1);
 		const avatar = findAsset(editor.children, "asset_avatar", "Mia");
 		expect(avatar).toMatchObject({
-			id: "asset_avatar:Mia",
 			generationAttributes: { name: "Mia", model: "Slop Image v1" },
 		});
 		expect(avatar && getPromptText(avatar)).toBe("Red hair");
@@ -162,7 +157,7 @@ describe("setAsset", () => {
 });
 
 describe("setReferenceImages", () => {
-	it("holds the deduped list on one references element, and removes it when emptied", () => {
+	it("holds the deduped list on one references element, kept when emptied", () => {
 		const editor = makeEditor([
 			references("https://img/x.png"),
 			scene("s1", narration("n1")),
@@ -174,7 +169,7 @@ describe("setReferenceImages", () => {
 			"https://img/a.png",
 		]);
 
-		expect(ids(editor.children)).toEqual(["asset_references", "s1"]);
+		expect(labels(editor.children)).toEqual(["asset_references", "s1"]);
 		expect(referenceUrls(editor.children)).toEqual([
 			"https://img/a.png",
 			"https://img/b.png",
@@ -182,7 +177,8 @@ describe("setReferenceImages", () => {
 
 		setReferenceImages(editor, []);
 
-		expect(ids(editor.children)).toEqual(["s1"]);
+		expect(labels(editor.children)).toEqual(["asset_references", "s1"]);
+		expect(referenceUrls(editor.children)).toEqual([]);
 	});
 });
 
@@ -230,7 +226,7 @@ describe("removeAsset and removeCharacter", () => {
 
 		removeCharacter(editor, "Mia");
 
-		expect(ids(getAssets(editor.children))).toEqual([
+		expect(labels(getAssets(editor.children))).toEqual([
 			"asset_style",
 			"asset_avatar:Bob",
 			"asset_voice:Narrator",
@@ -243,7 +239,7 @@ describe("removeAsset and removeCharacter", () => {
 		const editor = makeCharacters();
 		const before = getAssets(editor.children).map(flatAttributes);
 
-		restoreAssets(editor, removeCharacter(editor, "Mia"));
+		removeCharacter(editor, "Mia")();
 
 		expect(getAssets(editor.children).map(flatAttributes)).toEqual(
 			expect.arrayContaining(before),
@@ -266,7 +262,7 @@ describe("removeAsset and removeCharacter", () => {
 
 		removeAsset(editor, "asset_style");
 
-		expect(ids(getAssets(editor.children))).toEqual([
+		expect(labels(getAssets(editor.children))).toEqual([
 			"asset_avatar:Mia",
 			"asset_voice:Mia",
 			"asset_avatar:Bob",
@@ -310,7 +306,7 @@ describe("addCharacter", () => {
 
 		addCharacter(editor, "Mia");
 
-		expect(ids(editor.children)).toEqual(
+		expect(labels(editor.children)).toEqual(
 			expect.arrayContaining(["asset_avatar:Mia", "asset_voice:Mia"]),
 		);
 	});
@@ -320,7 +316,7 @@ describe("addCharacter", () => {
 
 		addCharacter(editor, NARRATOR);
 
-		expect(ids(editor.children)).toEqual(["asset_voice:Narrator", "s1"]);
+		expect(labels(editor.children)).toEqual(["asset_voice:Narrator", "s1"]);
 	});
 });
 
@@ -330,7 +326,7 @@ describe("ensureAsset", () => {
 
 		ensureAsset(editor, "asset_style");
 
-		expect(ids(editor.children)).toEqual(["asset_style", "s1"]);
+		expect(labels(editor.children)).toEqual(["asset_style", "s1"]);
 	});
 
 	it("leaves an existing asset alone", () => {

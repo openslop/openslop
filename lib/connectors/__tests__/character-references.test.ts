@@ -34,14 +34,12 @@ describe("character avatar dependencies", () => {
 		);
 
 	it("depends on each named character's avatar, and on nothing for a name no avatar has", () => {
-		const canvas = [
-			asset("asset_avatar", { name: "Red" }),
-			asset("asset_avatar", { name: "Wolf" }),
-		];
+		const red = asset("asset_avatar", { name: "Red" });
+		const wolf = asset("asset_avatar", { name: "Wolf" });
 
-		expect(avatarsOf("Wolf, Ghost, Red", canvas)).toEqual({
-			"Wolf's avatar": "asset_avatar:Wolf",
-			"Red's avatar": "asset_avatar:Red",
+		expect(avatarsOf("Wolf, Ghost, Red", [red, wolf])).toEqual({
+			"Wolf's avatar": wolf.id,
+			"Red's avatar": red.id,
 		});
 	});
 

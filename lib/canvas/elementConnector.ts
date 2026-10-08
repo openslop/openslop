@@ -29,7 +29,7 @@ type ElementConnector = {
 	config: ConnectorConfig;
 };
 
-/** The connector, model and plugins an element generates with: its type's, whatever the type. */
+/** The connector, model and plugins an element generates with. */
 export function resolveElementConnector(
 	element: GeneratedElement,
 	registry: ConnectorRegistry,

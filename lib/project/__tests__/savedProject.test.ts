@@ -53,36 +53,6 @@ describe("parseSavedProject", () => {
 		expect(content.generation.el1).toEqual(snapshot);
 	});
 
-	it("opens a result generated before inputs carried dependencies", () => {
-		const { pinned: _, ...legacy } = snapshot;
-		const result = { durationSec: 0, imageUrl: "a.png" };
-		const attributes = { style: "noir" };
-		const content = parseSavedProject({
-			script: "",
-			store: {},
-			generation: {
-				el1: {
-					...legacy,
-					result,
-					connectorType: "image",
-					resultInputs: { prompt: "a sunset", attributes, reads: {} },
-				},
-			},
-		});
-
-		expect(content.generation.el1).toEqual({
-			...snapshot,
-			result,
-			connectorType: "image",
-			resultInputs: {
-				prompt: "a sunset",
-				attributes,
-				reads: {},
-				dependencies: {},
-			},
-		});
-	});
-
 	it("throws on a structurally wrong row", () => {
 		expect(() =>
 			parseSavedProject({ script: null, store: {}, generation: {} }),

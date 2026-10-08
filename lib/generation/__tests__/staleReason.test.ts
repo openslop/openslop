@@ -1,40 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import type { ConnectorConfig } from "@/lib/connectors/types";
-import { type GenerationJob, type GenerationNode } from "../graph";
+import type { GenerationNode } from "../graph";
+import type { NodeInputs } from "../inputs";
 import { GenerationQueue } from "../queue";
 import { staleReason } from "../staleReason";
+import { jobNode } from "./_graph";
 
-const config: ConnectorConfig = {};
-
-function node(
+const node = (
 	id: string,
 	{
-		prompt = id,
-		attributes = {},
-		reads = {},
 		dependsOn = {},
-	}: {
-		prompt?: string;
-		attributes?: Record<string, string>;
-		reads?: Record<string, string>;
-		dependsOn?: Record<string, GenerationNode>;
-	} = {},
-): GenerationNode {
-	const job: GenerationJob = {
-		elementId: id,
-		elementType: "image",
-		connectorType: "image",
-		model: DEFAULT_MODELS.image,
-		config,
-	};
-	return {
-		id,
-		inputs: { prompt, attributes, reads },
-		dependsOn,
-		job,
-	};
-}
+		...inputs
+	}: Partial<NodeInputs> & { dependsOn?: Record<string, GenerationNode> } = {},
+): GenerationNode => ({ ...jobNode(id, [], inputs), dependsOn });
 
 const commit = (queue: GenerationQueue, target: GenerationNode, url: string) =>
 	queue.commitResult(target, { imageUrl: url, durationSec: 0 });

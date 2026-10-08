@@ -5,7 +5,7 @@ import { DEFAULT_TRANSITION } from "@/lib/render/transitions";
 import { VideoSettingsSchema } from "../videoSettings";
 
 describe("VideoSettingsSchema", () => {
-	it("completes an absent or partial setting block", () => {
+	it("completes an empty or partial setting block", () => {
 		const defaults = {
 			transitionType: DEFAULT_TRANSITION,
 			aspectRatio: DEFAULT_ASPECT_RATIO,
@@ -13,17 +13,11 @@ describe("VideoSettingsSchema", () => {
 			captionStyle: DEFAULT_CAPTION_STYLE,
 		};
 
-		expect(VideoSettingsSchema.parse(undefined)).toEqual(defaults);
+		expect(VideoSettingsSchema.parse({})).toEqual(defaults);
 		expect(VideoSettingsSchema.parse({ aspectRatio: "9:16" })).toEqual({
 			...defaults,
 			aspectRatio: "9:16",
 		});
-	});
-
-	it("drops the settings that moved onto the canvas", () => {
-		expect(
-			VideoSettingsSchema.parse({ length: "10-15m", format: "faceless" }),
-		).toEqual(VideoSettingsSchema.parse({}));
 	});
 
 	it("keeps every stored setting", () => {

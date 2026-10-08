@@ -201,7 +201,7 @@ describe("createSpeakerVoicePlugin", () => {
 	});
 
 	describe("beforeGenerate", () => {
-		it("speaks with the voice its speaker's voice asset recorded, over its own, without the traits it searched by", async () => {
+		it("speaks with the voice its speaker's voice asset recorded, over its own", async () => {
 			const red = voice("Red", { ...DEFAULT_TTS_MODEL, voiceId: "v-red" });
 
 			await expect(
@@ -211,8 +211,6 @@ describe("createSpeakerVoicePlugin", () => {
 						name: "Red",
 						...DEFAULT_TTS_MODEL,
 						voiceId: "v-own",
-						gender: "feminine",
-						query: "warm",
 						speed: "fast",
 					},
 					readOff(line("Red"), [red]),
