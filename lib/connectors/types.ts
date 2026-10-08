@@ -4,7 +4,6 @@ import type {
 	GeneratedElement,
 	CanvasElement,
 } from "@/lib/canvas/types";
-import type { DependencyResults } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspectRatio";
@@ -90,8 +89,8 @@ export const HostedVoicePreviewSchema = z.object({
 export type HostedVoicePreview = z.infer<typeof HostedVoicePreviewSchema>;
 
 export interface PluginContext {
-	/** Read through the handles that declared them. */
-	dependencies?: DependencyResults;
+	/** Keyed by the label each plugin declared them under. */
+	dependencies?: Record<string, AssetResult>;
 	/** What the node's plugins read, as its inputs recorded it. */
 	reads?: Record<string, string>;
 	/** Aborts when the caller cancels the generation. */
@@ -114,14 +113,17 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	dependencies?(
 		element: CanvasElement,
 		ctx: BuildContext,
-	): Record<string, GeneratedElement>;
+	): Record<string, GeneratedElement | undefined>;
 	/**
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.
 	 */
 	model?(element: CanvasElement, canvas: CanvasElement[]): ModelRef;
 	/** Values the node reads off the canvas or the settings, recorded in its inputs so a change stales it. */
-	reads?(element: CanvasElement, ctx: BuildContext): Record<string, string>;
+	reads?(
+		element: CanvasElement,
+		ctx: BuildContext,
+	): Record<string, string | undefined>;
 	/** Assets to write before the node is built to run, such as the voice a search found. */
 	prepare?(element: CanvasElement, ctx: BuildContext): Promise<AssetWrite[]>;
 	beforeGenerate?(

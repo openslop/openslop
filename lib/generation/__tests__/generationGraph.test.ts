@@ -15,9 +15,15 @@ import {
 } from "@/lib/connectors/registry";
 import type { AssetWrite, ConnectorPlugin } from "@/lib/connectors/types";
 import { createProjectStore } from "@/lib/project/store";
-import { dependency } from "../dependency";
 import type { BuildContext } from "../graph";
-import { buildNode, GenerationGraph, prepareNode } from "../generationGraph";
+import {
+	buildNode,
+	GenerationGraph,
+	pluginDependencies,
+	pluginReads,
+	prepareNode,
+} from "../generationGraph";
+import { EMPTY_CONTEXT } from "./_context";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 
@@ -48,10 +54,9 @@ const contextNow = (): BuildContext => ({
 	setAsset: () => {},
 });
 
-const { dependencies: redsAvatar } = dependency(
-	"Red's avatar",
-	(_, { canvas }) => findAsset(canvas, "asset_avatar", "Red"),
-);
+const redsAvatar: ConnectorPlugin["dependencies"] = (_, { canvas }) => ({
+	"Red's avatar": findAsset(canvas, "asset_avatar", "Red"),
+});
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: {
@@ -259,5 +264,33 @@ describe("prepareNode", () => {
 			prepareNode(node, writing, new AbortController().signal),
 		).rejects.toThrow('Element "img" left the canvas');
 		expect(setAsset).not.toHaveBeenCalled();
+	});
+});
+
+describe("what the plugins declare", () => {
+	const image = createCanvasElement("image", { id: "img" });
+	const avatar = createCanvasElement("asset_avatar", {
+		attrs: { name: "Red" },
+	});
+	const declaring: ConnectorPlugin = {
+		name: "declaring",
+		reads: () => ({
+			"the art style": "noir",
+			"the references": undefined,
+			"the language": "",
+		}),
+		dependencies: () => ({ "Red's avatar": avatar, "Bob's avatar": undefined }),
+	};
+
+	it("records only the values a plugin found, leaving out empty ones", () => {
+		expect(pluginReads([declaring], image, EMPTY_CONTEXT)).toEqual({
+			"the art style": "noir",
+		});
+	});
+
+	it("depends only on the elements a plugin found", () => {
+		expect(pluginDependencies([declaring], image, EMPTY_CONTEXT)).toEqual([
+			["Red's avatar", avatar],
+		]);
 	});
 });

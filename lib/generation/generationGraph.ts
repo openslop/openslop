@@ -1,4 +1,5 @@
 import isEqual from "lodash/isEqual";
+import pickBy from "lodash/pickBy";
 import memoizeOne from "memoize-one";
 import { shallow } from "zustand/shallow";
 import { resolveElementConnector } from "@/lib/canvas/elementConnector";
@@ -15,6 +16,29 @@ export const generatedById = (canvas: CanvasElement[], id: string) =>
 	canvas.find(
 		(element): element is GeneratedElement =>
 			isGenerated(element) && element.id === id,
+	);
+
+const isPresent = <T>(value: T | undefined): value is T => Boolean(value);
+
+/** What the plugins read off the canvas and the settings; an empty or missing value is left out. */
+export const pluginReads = (
+	plugins: ConnectorPlugin[],
+	element: GeneratedElement,
+	ctx: BuildContext,
+): Record<string, string> =>
+	pickBy(
+		Object.assign({}, ...plugins.map((plugin) => plugin.reads?.(element, ctx))),
+		isPresent,
+	);
+
+/** The elements the plugins depend on, by label; one they found none of is left out. */
+export const pluginDependencies = (
+	plugins: ConnectorPlugin[],
+	element: GeneratedElement,
+	ctx: BuildContext,
+): [string, GeneratedElement][] =>
+	plugins.flatMap((plugin) =>
+		Object.entries(pickBy(plugin.dependencies?.(element, ctx), isPresent)),
 	);
 
 /** `job` is not compared: it is how a node runs, not what it reads. */
@@ -55,10 +79,7 @@ export class GenerationGraph {
 				inputs: {
 					prompt: getPromptText(element),
 					attributes: element.generationAttributes ?? {},
-					reads: Object.assign(
-						{},
-						...plugins.map((plugin) => plugin.reads?.(element, this.ctx)),
-					),
+					reads: pluginReads(plugins, element, this.ctx),
 				},
 				dependsOn: this.dependenciesOf(element, plugins),
 				job: {
@@ -77,11 +98,12 @@ export class GenerationGraph {
 		element: GeneratedElement,
 		plugins: ConnectorPlugin[],
 	) {
-		const declared = plugins.flatMap((plugin) =>
-			Object.entries(plugin.dependencies?.(element, this.ctx) ?? {}),
-		);
 		const dependsOn: Record<string, GenerationNode> = {};
-		for (const [label, target] of declared) {
+		for (const [label, target] of pluginDependencies(
+			plugins,
+			element,
+			this.ctx,
+		)) {
 			if (Object.hasOwn(dependsOn, label))
 				throw new Error(
 					`Two dependencies of "${element.id}" share the label "${label}"`,

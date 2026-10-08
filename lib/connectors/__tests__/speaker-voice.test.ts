@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
-import type { CanvasElement } from "@/lib/canvas/types";
+import type { CanvasElement, GeneratedElement } from "@/lib/canvas/types";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import type {
@@ -55,7 +55,7 @@ const settled = (name: string, model: ModelRef) => ({
 	attrs: { ...model, voiceId: "v-found" },
 });
 
-const readOff = (element: CanvasElement, canvas: CanvasElement[]) =>
+const readOff = (element: GeneratedElement, canvas: CanvasElement[]) =>
 	pluginCtx({ reads: readsOf(plugin, element, canvas) });
 
 const prepare = async (

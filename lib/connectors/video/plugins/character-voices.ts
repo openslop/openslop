@@ -5,7 +5,11 @@ import {
 } from "@/lib/canvas/characterNames";
 import { createConnector } from "@/lib/connectors/factory";
 import { modelEntry, resolveModel } from "@/lib/connectors/models";
-import { settleVoice, speakerVoice } from "@/lib/connectors/tts/voices";
+import {
+	recordedVoice,
+	settleVoice,
+	voiceReads,
+} from "@/lib/connectors/tts/voices";
 import type {
 	ConnectorPlugin,
 	ModelRef,
@@ -32,13 +36,8 @@ const heardCharacters = (
 export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharacterVoices> {
 	return {
 		name: "character-voices",
-		reads: (element, ctx) =>
-			Object.assign(
-				{},
-				...heardCharacters(element.generationAttributes).map((name) =>
-					speakerVoice(name).reads(element, ctx),
-				),
-			),
+		reads: ({ generationAttributes: attrs }, { canvas }) =>
+			voiceReads(canvas, heardCharacters(attrs)),
 		async prepare(element, ctx) {
 			const writes = await Promise.all(
 				heardCharacters(element.generationAttributes).map((name) =>
@@ -51,7 +50,7 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 			const voices = compact(
 				await Promise.all(
 					heardCharacters(params).map(async (name) => {
-						const voice = speakerVoice(name).value(ctx);
+						const voice = recordedVoice(ctx, name);
 						if (!voice.voiceId) return undefined;
 						const preview = await createConnector(
 							"tts",

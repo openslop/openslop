@@ -1,8 +1,14 @@
-import type { CanvasElement } from "@/lib/canvas/types";
+import type { CanvasElement, GeneratedElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
-import mapValues from "lodash/mapValues";
-import type { DependencyResults } from "@/lib/generation/dependency";
+import type {
+	AssetResult,
+	ConnectorPlugin,
+	PluginContext,
+} from "@/lib/connectors/types";
+import {
+	pluginDependencies,
+	pluginReads,
+} from "@/lib/generation/generationGraph";
 import type { BuildContext } from "@/lib/generation/graph";
 import { ProjectDataSchema, type ProjectData } from "@/lib/project/store";
 
@@ -29,22 +35,23 @@ export const pluginCtx = ({
 	dependencies = {},
 }: {
 	reads?: Record<string, string>;
-	dependencies?: DependencyResults;
+	dependencies?: Record<string, AssetResult>;
 } = {}): PluginContext => ({ reads, dependencies });
 
 export const readsOf = (
-	plugin: Pick<ConnectorPlugin, "reads">,
-	element: CanvasElement,
+	plugin: ConnectorPlugin,
+	element: GeneratedElement,
 	canvas: CanvasElement[] = [],
 	state?: ProjectData,
-) => plugin.reads?.(element, buildCtx(canvas, { state })) ?? {};
+) => pluginReads([plugin], element, buildCtx(canvas, { state }));
 
 export const dependenciesOf = (
-	plugin: Pick<ConnectorPlugin, "dependencies">,
-	element: CanvasElement,
+	plugin: ConnectorPlugin,
+	element: GeneratedElement,
 	canvas: CanvasElement[] = [],
 ) =>
-	mapValues(
-		plugin.dependencies?.(element, buildCtx(canvas)) ?? {},
-		({ id }) => id,
+	Object.fromEntries(
+		pluginDependencies([plugin], element, buildCtx(canvas)).map(
+			([label, { id }]) => [label, id],
+		),
 	);
