@@ -38,11 +38,36 @@ User keys live in Supabase Vault. They are read by the service role only for the
 
 ## Canvas and generation
 
-The Slate document (`lib/canvas/`) is the project. Assets come first, then the scenes. Asset types are declared in `GENERATED_ASSET_TYPES` and `METADATA_ASSET_TYPES` (`lib/canvas/types.ts`), and every one is named `asset_*`, which their types enforce. Each id appears once. The asset strip above the script shows them, one tile per character, and their nodes stay out of the caret's reach.
+![The canvas model: what block, node, element, scene, content and asset mean, and how they nest](./docs/canvas-model.svg)
 
-- **Metadata elements** never generate: `asset_voice`, `asset_style` and `asset_references`.
-- **Generated elements**: narration, character lines, images, video, sound, music, and `asset_avatar`.
-- **Characters**: an `asset_avatar` and an `asset_voice` sharing a `name`. The avatar's text is how they look; the voice's attributes are how they sound. A character has either or both. The narrator is the `asset_voice` named Narrator.
+> To edit the diagram, open [`docs/canvas-model.excalidraw`](./docs/canvas-model.excalidraw) at [excalidraw.com](https://excalidraw.com), then re-export the SVG to `docs/canvas-model.svg`.
+
+The Slate document (`lib/canvas/`) is the project. Each term below means one thing everywhere in the code:
+
+| Term          | Type                            | Means                                                                                                                                                                                        |
+| ------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Canvas**    | `editor.children`               | The Slate document. It is the project.                                                                                                                                                       |
+| **Node**      | Slate `Node`                    | Any Slate node: the editor, a block or a text leaf. A _graph node_ (`GenerationNode`) is separate: one per generated element, in `lib/generation/`.                                          |
+| **Block**     | `CanvasBlock`                   | A scene or an element.                                                                                                                                                                       |
+| **Scene**     | `Scene`                         | A group of content. A scene is a block, not an element.                                                                                                                                      |
+| **Element**   | `CanvasElement`, `ElementOf<T>` | Content or an asset. It holds text and attributes, and its type is an `ElementType` declared in `ELEMENT_TYPES`.                                                                             |
+| **Content**   | `ContentElement`                | An element inside a scene. It plays on the timeline; its type is declared in `CONTENT_TYPES` with a role and a layer.                                                                        |
+| **Asset**     | `AssetElement`                  | An element ahead of the scenes. Its type is declared in `ASSET_TYPES` and named `asset_*`.                                                                                                   |
+| **Generated** | `GeneratedElement`              | An element whose type names a connector: every content type, and `asset_avatar`. Each is a node in the generation graph.                                                                     |
+| **Metadata**  |                                 | An asset with no connector: `asset_voice`, `asset_style` and `asset_references`. Plugins read it; it is never a graph node.                                                                  |
+| **Character** |                                 | An `asset_avatar` and/or an `asset_voice` sharing a `name`. The avatar's text is how they look; the voice's attributes are how they sound. The narrator is the `asset_voice` named Narrator. |
+
+The hierarchy:
+
+```
+Canvas
+├─ Asset elements      (block, element, asset)
+└─ Scenes              (block)
+   └─ Content elements (block, element, content)
+      └─ Text leaves   (node)
+```
+
+Assets come first, then the scenes. Each id appears once: a named asset's id is `type:name`. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates when its spec names a connector. How each type takes its model, attributes and id is one table in `lib/canvas/elementConnector.ts`.
 
 `lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template) and the project's pinned default models. It also owns saving and version history.
 
@@ -55,7 +80,7 @@ Each generated element is a node in a dependency graph (`lib/generation/`). A no
 
 A node regenerates when it has no result, when a dependency regenerates, or when its inputs changed. The queue runs dependencies first, with a concurrency limit per connector type, and builds each node again from the live canvas when its job starts.
 
-Each element type's card controls are declared in `app/components/canvas/elements/elementConfigs.tsx`.
+Each content type's card controls are declared in `app/components/canvas/elements/elementConfigs.tsx`.
 
 ## Data
 

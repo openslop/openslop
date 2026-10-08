@@ -9,12 +9,12 @@ import {
 } from "@dnd-kit/sortable";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
-import { findElementById } from "@/lib/canvas/editorOps";
+import { findBlockById } from "@/lib/canvas/editorOps";
 import { isAssetElement } from "@/lib/canvas/guards";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
-import { DragOverlayContent } from "./dnd/DragOverlay";
+import { DragOverlayPreview } from "./dnd/DragOverlay";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -37,16 +37,18 @@ export default function Canvas() {
 					{props.children}
 				</div>
 			);
-		if (isSceneElement(element))
-			return <SortableScene {...props} element={element} />;
+		if (isScene(element))
+			return (
+				<SortableScene attributes={props.attributes} scene={element}>
+					{props.children}
+				</SortableScene>
+			);
 		return <SortableContent {...props} element={element} />;
 	}, []);
 
-	const activeElement = useMemo(
+	const activeBlock = useMemo(
 		() =>
-			activeId
-				? (findElementById(editor, String(activeId))?.[0] ?? null)
-				: null,
+			activeId ? (findBlockById(editor, String(activeId))?.[0] ?? null) : null,
 		[editor, activeId],
 	);
 
@@ -71,7 +73,7 @@ export default function Canvas() {
 					/>
 				</SortableContext>
 				<DragOverlay>
-					{activeElement && <DragOverlayContent element={activeElement} />}
+					{activeBlock && <DragOverlayPreview block={activeBlock} />}
 				</DragOverlay>
 			</DndContext>
 		</DragTransferContext>

@@ -1,29 +1,30 @@
 import { Editor, Transforms, type Element } from "slate";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
+	type ContentElement,
 	type CanvasEditor,
-	type SceneElement,
+	type Scene,
 } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 
 export const content = (
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	id: string = type,
 	text = "",
-): CanvasContentElement => ({
+): ContentElement => ({
 	id,
 	type,
 	children: [{ id: `${id}-t`, type, text }],
 });
 
-export const scene = (
-	children: CanvasContentElement[],
-	id = "s",
-): SceneElement => ({ id, type: SCENE_TYPE, children });
+export const scene = (children: ContentElement[], id = "s"): Scene => ({
+	id,
+	type: SCENE_TYPE,
+	children,
+});
 
 /** Leaves the editor normalized with a caret, the state plugins assume they run in. */
-export function seedScene(editor: CanvasEditor, node: SceneElement): void {
+export function seedScene(editor: CanvasEditor, node: Scene): void {
 	Editor.withoutNormalizing(editor, () => {
 		Transforms.insertNodes(editor, node);
 	});
@@ -34,8 +35,6 @@ export function seedScene(editor: CanvasEditor, node: SceneElement): void {
 /** The element types of each scene, with a root node outside any scene marked `!`. */
 export function shape(editor: Editor): string[][] {
 	return editor.children.map((s) =>
-		isSceneElement(s)
-			? s.children.map((c) => c.type)
-			: [`!${(s as Element).type}`],
+		isScene(s) ? s.children.map((c) => c.type) : [`!${(s as Element).type}`],
 	);
 }

@@ -3,7 +3,7 @@ import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import {
 	CONTINUITY_ATTR,
 	continuityDef,
@@ -27,7 +27,7 @@ const PILL =
 	"bg-secondary text-secondary-foreground text-label px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
 
 interface AttributeBadgeProps {
-	element: ScriptElement;
+	element: CanvasElement;
 	attrKey: string;
 	spec: AttributeSpec;
 	hideLabel?: boolean;

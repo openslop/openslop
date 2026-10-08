@@ -12,7 +12,7 @@ import {
 import { deriveProjectName } from "./projectName";
 import { pickThumbnailUrl } from "./thumbnail";
 
-export type ProjectContent = {
+export type SavedProject = {
 	script: string;
 	store: ProjectData;
 	generation: Record<string, ElementSnapshot>;
@@ -22,8 +22,8 @@ export type ProjectContent = {
 export type ProjectDetails = { name: string; thumbnail_url: string | null };
 
 export interface ProjectDocument {
-	read(): ProjectContent;
-	write(content: ProjectContent): void;
+	read(): SavedProject;
+	write(content: SavedProject): void;
 	details(): ProjectDetails;
 }
 

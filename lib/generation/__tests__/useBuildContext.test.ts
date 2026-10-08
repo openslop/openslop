@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEditor, type Descendant } from "slate";
 import { findAsset, getAssets } from "@/lib/canvas/assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import {
 	flatAttributes,
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
@@ -63,7 +63,7 @@ vi.mock("@/lib/project/ProjectStoreProvider", () => ({
 
 const { useBuildContext } = await import("../useBuildContext");
 
-const video = (id: string, text: string): CanvasContentElement => ({
+const video = (id: string, text: string): ContentElement => ({
 	id,
 	type: "video",
 	...splitAttributes({ continuity: "true" }),
@@ -71,8 +71,8 @@ const video = (id: string, text: string): CanvasContentElement => ({
 });
 
 /** A document is a new array for every edit, as Slate hands it back. */
-const document = (...elements: CanvasContentElement[]): Descendant[] => [
-	{ id: "scene-1", type: SCENE_TYPE, children: elements } as SceneElement,
+const document = (...elements: ContentElement[]): Descendant[] => [
+	{ id: "scene-1", type: SCENE_TYPE, children: elements } as Scene,
 ];
 
 beforeEach(() => {
@@ -116,7 +116,7 @@ describe("useBuildContext", () => {
 	});
 
 	it("reads every element of the document, assets first", () => {
-		const style = createCanvasNode("asset_style", { text: "noir" });
+		const style = createCanvasElement("asset_style", { text: "noir" });
 		children = [style, ...document(video("vid-1", "shot one"))];
 
 		const { canvas } = render(useBuildContext)();
@@ -129,7 +129,7 @@ describe("useBuildContext", () => {
 		["creates the asset a write names when it is missing", []],
 	])("%s", (_, existing) => {
 		const voices = existing.map((attrs) =>
-			createCanvasNode("asset_voice", { attrs: { name: "Red", ...attrs } }),
+			createCanvasElement("asset_voice", { attrs: { name: "Red", ...attrs } }),
 		);
 		children = [...voices, ...document(video("vid-1", "shot one"))];
 

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { ScriptElement } from "@/lib/canvas/types";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import type { CanvasElement } from "@/lib/canvas/types";
 import { createArtStylePlugin } from "@/lib/connectors/image/plugins/art-style";
 import { pluginCtx, readsOf } from "./_state-ctx";
 
 const plugin = createArtStylePlugin();
-const image = createCanvasNode("image", { id: "i1" });
+const image = createCanvasElement("image", { id: "i1" });
 
-const readOff = (canvas: ScriptElement[]) =>
+const readOff = (canvas: CanvasElement[]) =>
 	pluginCtx({ reads: readsOf(plugin, image, canvas) });
 
 const transform = (prompt: string, ctx = pluginCtx()) => {

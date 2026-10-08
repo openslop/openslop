@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
 	isAssetElement,
 	isAssetType,
-	isCanvasElementType,
+	isContentType,
 	isContentElement,
+	isElementType,
 	isForeground,
 	isParsedContentElement,
-	isScriptElement,
+	isCanvasElement,
 } from "../guards";
 import type { ParsedElement } from "../types";
 
@@ -16,16 +17,25 @@ const parsed = (type: string): ParsedElement => ({
 	children: [{ id: "t1", type, text: "" }],
 });
 
-describe("isCanvasElementType", () => {
+describe("isContentType", () => {
 	it("accepts declared element types", () => {
-		expect(isCanvasElementType("image")).toBe(true);
-		expect(isCanvasElementType("video")).toBe(true);
+		expect(isContentType("image")).toBe(true);
+		expect(isContentType("video")).toBe(true);
 	});
 
 	it("rejects scene, asset and unknown tags", () => {
-		expect(isCanvasElementType("scene")).toBe(false);
-		expect(isCanvasElementType("asset_avatar")).toBe(false);
-		expect(isCanvasElementType("nonsense")).toBe(false);
+		expect(isContentType("scene")).toBe(false);
+		expect(isContentType("asset_avatar")).toBe(false);
+		expect(isContentType("nonsense")).toBe(false);
+	});
+});
+
+describe("isElementType", () => {
+	it("accepts content and asset types, and nothing else", () => {
+		expect(["narration", "music", "asset_voice"].every(isElementType)).toBe(
+			true,
+		);
+		expect(["scene", "nonsense", "toString"].some(isElementType)).toBe(false);
 	});
 });
 
@@ -48,7 +58,7 @@ describe("isAssetType", () => {
 	});
 });
 
-describe("isAssetElement and isScriptElement", () => {
+describe("isAssetElement and isCanvasElement", () => {
 	it.each([
 		[{ id: "a", type: "asset_avatar", children: [] }, true, true],
 		[{ id: "v", type: "asset_voice", children: [] }, true, true],
@@ -57,7 +67,7 @@ describe("isAssetElement and isScriptElement", () => {
 		[{ text: "plain" }, false, false],
 	])("%o: asset %s, script %s", (node, asset, script) => {
 		expect(isAssetElement(node)).toBe(asset);
-		expect(isScriptElement(node)).toBe(script);
+		expect(isCanvasElement(node)).toBe(script);
 	});
 });
 

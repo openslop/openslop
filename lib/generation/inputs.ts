@@ -1,7 +1,7 @@
 import { Node } from "slate";
 import { z } from "zod";
 import { withoutCaretMarker } from "@/lib/canvas/constants";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 
 /** What a node generates from, apart from the results of its dependencies. */
 const NodeInputsSchema = z.object({
@@ -34,6 +34,6 @@ export function serializeInputs(inputs: GenerationInputs): string {
 	});
 }
 
-export function getPromptText(element: ScriptElement): string {
+export function getPromptText(element: CanvasElement): string {
 	return withoutCaretMarker(Node.string(element)).trim();
 }

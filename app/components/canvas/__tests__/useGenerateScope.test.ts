@@ -8,7 +8,7 @@ import {
 import { GenerationQueue } from "@/lib/generation/queue";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generationGraph";
-import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
+import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 // No plugins, so no element depends on another and each is judged alone.
@@ -56,10 +56,10 @@ vi.mock("@/lib/generation/LiveGraphProvider", () => ({
 
 function makeElement(
 	id: string,
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	attrs?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id,
 		type,
@@ -68,12 +68,12 @@ function makeElement(
 	};
 }
 
-function wrapInScene(elements: CanvasContentElement[]): SceneElement {
+function wrapInScene(elements: ContentElement[]): Scene {
 	return { id: "scene-1", type: "scene", children: elements };
 }
 
 /** Commit a result for `element` as if it had just been generated. */
-function commitCurrent(element: CanvasContentElement) {
+function commitCurrent(element: ContentElement) {
 	queue.commitResult(buildNode(element, buildContext()), {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,
@@ -83,7 +83,7 @@ function commitCurrent(element: CanvasContentElement) {
 const { useGenerateAll } = await import("../hooks/useGenerateAll");
 const { useGenerateScope } = await import("../hooks/useGenerateScope");
 
-function useScopeForAll(elements: CanvasContentElement[]) {
+function useScopeForAll(elements: ContentElement[]) {
 	const children: Descendant[] = [wrapInScene(elements)];
 	// Stands in for Slate's provider by seeding the document the selector reads.
 	// eslint-disable-next-line react-hooks/globals
@@ -91,7 +91,7 @@ function useScopeForAll(elements: CanvasContentElement[]) {
 	return useGenerateAll();
 }
 
-function useGenerateAllFor(elements: CanvasContentElement[]) {
+function useGenerateAllFor(elements: ContentElement[]) {
 	useScopeForAll(elements).run();
 	return enqueuedIds();
 }
@@ -240,7 +240,7 @@ describe("useGenerateScope", () => {
 
 describe("scope description", () => {
 	const useDescription = (
-		elements: CanvasContentElement[],
+		elements: ContentElement[],
 		subject: Parameters<typeof useGenerateScope>[1] = "project",
 	) => useGenerateScope(() => elements, subject).description;
 

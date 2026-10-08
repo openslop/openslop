@@ -11,7 +11,7 @@ import {
 	assetId,
 	type AssetElement,
 	type AssetType,
-	type ScriptElement,
+	type CanvasElement,
 } from "./types";
 
 export const REFERENCE_URLS_ATTR = "images";
@@ -20,7 +20,7 @@ export const getAssets = (nodes: Descendant[]): AssetElement[] =>
 	nodes.filter(isAssetElement);
 
 /** Every element a generation can read, assets first, in document order. */
-export const getScriptElements = (nodes: Descendant[]): ScriptElement[] => [
+export const getCanvasElements = (nodes: Descendant[]): CanvasElement[] => [
 	...getAssets(nodes),
 	...getContentElements(nodes),
 ];

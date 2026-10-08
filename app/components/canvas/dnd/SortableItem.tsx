@@ -2,7 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RenderElementProps } from "slate-react";
 import type { SortableData } from "@/lib/canvas/dragOps";
-import type { CanvasElement } from "@/lib/canvas/types";
+import type { CanvasBlock } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import styles from "../styles/sortable.module.css";
 import { splitTextDirection } from "../utils/textDirection";
@@ -15,13 +15,13 @@ interface SortableItemProps {
 	sortableType: SortableData["type"];
 	wrapperClassName?: string;
 	wrapperStyle?: React.CSSProperties;
-	contentClassName?: string;
+	innerClassName?: string;
 	insertMenu?: React.ReactNode;
 	menuOpen?: boolean;
 	disabled?: boolean;
 	readOnly?: boolean;
 	attributes: RenderElementProps["attributes"];
-	element: CanvasElement;
+	block: CanvasBlock;
 	children: React.ReactNode;
 }
 
@@ -30,13 +30,13 @@ export function SortableItem({
 	sortableType,
 	wrapperClassName,
 	wrapperStyle,
-	contentClassName,
+	innerClassName,
 	insertMenu,
 	menuOpen,
 	disabled,
 	readOnly,
 	attributes,
-	element,
+	block,
 	children,
 }: SortableItemProps) {
 	const {
@@ -48,7 +48,7 @@ export function SortableItem({
 		isSorting,
 		attributes: sortableAttributes,
 	} = useSortable({
-		id: element.id,
+		id: block.id,
 		data: { type: sortableType, sceneId } satisfies SortableData,
 		disabled,
 	});
@@ -58,7 +58,7 @@ export function SortableItem({
 	return (
 		<div {...nodeAttributes} className={wrapperClassName} style={wrapperStyle}>
 			<div
-				className={cn(styles.sortable, contentClassName)}
+				className={cn(styles.sortable, innerClassName)}
 				{...sortableAttributes}
 				ref={setNodeRef}
 				style={{

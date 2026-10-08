@@ -3,7 +3,7 @@ import type { CanvasEditor } from "@/lib/canvas/types";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { parseOSML } from "@/lib/canvas/osmlStreamParser";
 import { splitScenes } from "@/lib/project/serialize";
-import { isContentElement, isScriptElement } from "@/lib/canvas/guards";
+import { isContentElement, isCanvasElement } from "@/lib/canvas/guards";
 
 /** A fragment keeps the ancestor chain, so a few words would still carry their tags. */
 const coversWholeElement = (editor: CanvasEditor, at: Range) =>
@@ -30,7 +30,7 @@ export const withOSMLClipboard = (editor: CanvasEditor): CanvasEditor => {
 	editor.insertTextData = (data) => {
 		const elements = splitScenes(data.getData("text/plain"))
 			.flatMap((sceneOsml) => parseOSML(sceneOsml, editor.defaultModels()))
-			.filter(isScriptElement);
+			.filter(isCanvasElement);
 		if (elements.length === 0) return insertTextData(data);
 		editor.insertFragment(elements);
 		return true;

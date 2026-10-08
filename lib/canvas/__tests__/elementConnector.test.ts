@@ -6,14 +6,16 @@ import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { videoAttributesFor } from "@/lib/connectors/video/attributes";
 import { NARRATOR } from "../assets";
-import { createCanvasNode } from "../createCanvasNode";
+import { createCanvasElement } from "../createCanvasElement";
 import {
 	attributeSchemaFor,
 	elementModelPick,
 	elementSchema,
+	fixedIdOf,
+	modelFor,
 	resolveElementConnector,
 } from "../elementConnector";
-import type { CanvasContentElement } from "../types";
+import type { ContentElement } from "../types";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -21,9 +23,9 @@ import {
 import { asset } from "./_assets";
 
 function element(
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id: "n1",
 		type,
@@ -120,9 +122,9 @@ describe("resolveElementConnector for an avatar", () => {
 	});
 });
 
-describe("createCanvasNode", () => {
+describe("createCanvasElement", () => {
 	it("stores the resolved pair, so the element names its own provider", () => {
-		const node = createCanvasNode("image", {
+		const node = createCanvasElement("image", {
 			attrs: { provider: "retired-vendor" },
 		});
 
@@ -204,5 +206,26 @@ describe("elementModelPick", () => {
 			key: "model",
 			providerAttr: "provider",
 		});
+	});
+});
+
+describe("modelFor", () => {
+	it("gives a generated type its own model, else the scoped default", () => {
+		const pinned = { provider: "openslop", model: "Slop Image v1" } as const;
+		expect(modelFor("image", {}, { image: pinned })).toEqual(pinned);
+		expect(modelFor("asset_avatar", {}, {})).toEqual(DEFAULT_MODELS.image);
+	});
+
+	it("gives metadata no model", () => {
+		expect(modelFor("asset_voice", {}, DEFAULT_MODELS)).toEqual({});
+		expect(modelFor("asset_style", {}, DEFAULT_MODELS)).toEqual({});
+	});
+});
+
+describe("fixedIdOf", () => {
+	it("fixes an asset's id by its name, and leaves content's open", () => {
+		expect(fixedIdOf("asset_voice", "Mia")).toBe("asset_voice:Mia");
+		expect(fixedIdOf("asset_style")).toBe("asset_style");
+		expect(fixedIdOf("image", "Mia")).toBeUndefined();
 	});
 });

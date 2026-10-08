@@ -2,7 +2,7 @@ import { z } from "zod";
 import type {
 	AssetType,
 	GeneratedElement,
-	ScriptElement,
+	CanvasElement,
 } from "@/lib/canvas/types";
 import type { DependencyResults } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
@@ -114,18 +114,18 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	 * and receive its result; an undeclared read goes stale-blind.
 	 */
 	dependencies?(
-		element: ScriptElement,
+		element: CanvasElement,
 		ctx: BuildContext,
 	): Record<string, GeneratedElement>;
 	/**
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.
 	 */
-	model?(element: ScriptElement, canvas: ScriptElement[]): ModelRef;
+	model?(element: CanvasElement, canvas: CanvasElement[]): ModelRef;
 	/** Values the node reads off the canvas or the settings, recorded in its inputs so a change stales it. */
-	reads?(element: ScriptElement, ctx: BuildContext): Record<string, string>;
+	reads?(element: CanvasElement, ctx: BuildContext): Record<string, string>;
 	/** Assets to write before the node is built to run, such as the voice a search found. */
-	prepare?(element: ScriptElement, ctx: BuildContext): Promise<AssetWrite[]>;
+	prepare?(element: CanvasElement, ctx: BuildContext): Promise<AssetWrite[]>;
 	beforeGenerate?(
 		params: TParams,
 		ctx: PluginContext,

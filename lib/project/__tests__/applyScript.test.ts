@@ -2,10 +2,10 @@ import { createEditor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { describe, expect, it } from "vitest";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
-import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
+import { SCENE_TYPE, type Scene } from "@/lib/canvas/types";
 import { applyScriptToEditor } from "../applyScript";
 
-const sceneWithId = (id: string): SceneElement => ({
+const sceneWithId = (id: string): Scene => ({
 	id,
 	type: SCENE_TYPE,
 	children: [

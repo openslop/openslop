@@ -1,5 +1,5 @@
 import { assetId } from "../types";
-import { createCanvasNode } from "../createCanvasNode";
+import { createCanvasElement } from "../createCanvasElement";
 import type { AssetElement, AssetType } from "../types";
 
 /** An asset as the canvas holds it: under its fixed id, named when it belongs to a character. */
@@ -11,7 +11,7 @@ export const asset = <T extends AssetType>(
 		text,
 	}: { name?: string; attrs?: Record<string, string>; text?: string } = {},
 ): AssetElement<T> =>
-	createCanvasNode(type, {
+	createCanvasElement(type, {
 		id: assetId(type, name),
 		attrs: name ? { name, ...attrs } : attrs,
 		text,

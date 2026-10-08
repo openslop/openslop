@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Editor, Element } from "slate";
-import type {
-	AssetElement,
-	CanvasContentElement,
-	SceneElement,
-} from "@/lib/canvas/types";
+import type { AssetElement, ContentElement, Scene } from "@/lib/canvas/types";
 
 // No connector model stamped here — these tests exercise refine-op mechanics
 // (insert/remove/set/anchor tracking), not attribute-schema resolution, which
@@ -58,11 +54,11 @@ import {
 const ZWSP = "\u200B";
 
 function content(
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	id: string,
 	text = "",
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id,
 		type,
@@ -74,14 +70,11 @@ function content(
 	};
 }
 
-function scene(children: CanvasContentElement[], id = "s1"): SceneElement {
+function scene(children: ContentElement[], id = "s1"): Scene {
 	return { id, type: "scene", children };
 }
 
-function makeEditor(
-	scenes: SceneElement[],
-	defaultModels: ConnectorModels = {},
-) {
+function makeEditor(scenes: Scene[], defaultModels: ConnectorModels = {}) {
 	const editor = createEditor();
 	editor.defaultModels = () => defaultModels;
 	editor.children = scenes;
@@ -94,17 +87,17 @@ function getContentIds(editor: Editor): string[] {
 		at: [],
 		match: (n) => Element.isElement(n) && n.type !== "scene",
 	})) {
-		ids.push((node as CanvasContentElement).id);
+		ids.push((node as ContentElement).id);
 	}
 	return ids;
 }
 
-function getNode(editor: Editor, id: string): CanvasContentElement {
+function getNode(editor: Editor, id: string): ContentElement {
 	const [node] = Editor.nodes(editor, {
 		at: [],
 		match: (n) => Element.isElement(n) && n.id === id,
 	});
-	return node[0] as CanvasContentElement;
+	return node[0] as ContentElement;
 }
 
 function getContentTexts(editor: Editor): string[] {
@@ -113,7 +106,7 @@ function getContentTexts(editor: Editor): string[] {
 		at: [],
 		match: (n) => Element.isElement(n) && n.type !== "scene",
 	})) {
-		const el = node as CanvasContentElement;
+		const el = node as ContentElement;
 		texts.push(
 			el.children
 				.map((c) => c.text)
@@ -230,7 +223,7 @@ describe("applyRefineOp — insert", () => {
 
 		expect(result).toEqual({
 			ok: false,
-			reason: 'insert: no script element "nonexistent" to anchor on',
+			reason: 'insert: no element "nonexistent" to anchor on',
 		});
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
@@ -250,12 +243,12 @@ describe("applyRefineOp — insert", () => {
 			anchorMap,
 		);
 
-		const nodes: CanvasContentElement[] = [];
+		const nodes: ContentElement[] = [];
 		for (const [node] of Editor.nodes(editor, {
 			at: [],
 			match: (n) => Element.isElement(n) && n.type === "sound",
 		})) {
-			nodes.push(node as CanvasContentElement);
+			nodes.push(node as ContentElement);
 		}
 		expect(flatAttributes(nodes[0])).toEqual({
 			loops: "3",
@@ -605,7 +598,7 @@ describe("applyRefineOp — assets", () => {
 
 	const makeCanvas = (
 		assets: AssetElement[],
-		children: CanvasContentElement[] = [content("narration", "n1", "hello")],
+		children: ContentElement[] = [content("narration", "n1", "hello")],
 	) => {
 		const editor = makeEditor([scene(children)]);
 		editor.children = [...assets, ...editor.children];
@@ -817,7 +810,7 @@ describe("applyRefineOp — assets", () => {
 				type: "sound",
 				text: "rain",
 			}).failures,
-		).toEqual(['insert: no script element "asset_style" to anchor on']);
+		).toEqual(['insert: no element "asset_style" to anchor on']);
 		expect(topLevelTypes(editor)).toEqual(["asset_style", "scene"]);
 	});
 

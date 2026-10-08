@@ -7,22 +7,22 @@ import {
 } from "../osmlSerializer";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import { NARRATOR } from "../assets";
-import { createCanvasNode } from "../createCanvasNode";
+import { createCanvasElement } from "../createCanvasElement";
 import { parseOSML } from "../osmlStreamParser";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import { deserializeWithScenes } from "@/lib/project/serialize";
 import { asset, references } from "./_assets";
 
 function el(
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id: "e1",
 		type,
@@ -31,7 +31,7 @@ function el(
 	};
 }
 
-const wrap = (...children: CanvasContentElement[]): SceneElement => ({
+const wrap = (...children: ContentElement[]): Scene => ({
 	id: "scene-1",
 	type: SCENE_TYPE,
 	children,
@@ -77,7 +77,7 @@ describe("serializeOSMLWithScenes", () => {
 
 describe("getElementText", () => {
 	it("extracts joined text from children", () => {
-		const element: CanvasContentElement = {
+		const element: ContentElement = {
 			id: "e1",
 			type: "narration",
 			children: [
@@ -90,7 +90,7 @@ describe("getElementText", () => {
 });
 
 describe("getElementBodyText", () => {
-	const marked = (...texts: string[]): CanvasContentElement => ({
+	const marked = (...texts: string[]): ContentElement => ({
 		id: "e1",
 		type: "narration",
 		children: texts.map((text, i) => ({
@@ -132,16 +132,12 @@ const withoutLeafIds = (element: Descendant) =>
 		: element;
 
 describe("serialize round trip", () => {
-	const reload = (scene: SceneElement): SceneElement =>
-		wrap(
-			...(parseOSML(
-				serializeOSMLWithScenes([scene]),
-			) as CanvasContentElement[]),
-		);
+	const reload = (scene: Scene): Scene =>
+		wrap(...(parseOSML(serializeOSMLWithScenes([scene])) as ContentElement[]));
 
 	it("does not grow the script each time it is saved and reloaded", () => {
 		let scene = wrap(
-			createCanvasNode("narration", {
+			createCanvasElement("narration", {
 				id: "e1",
 				text: "hello",
 			}),
@@ -162,8 +158,8 @@ describe("serialize round trip", () => {
 				attrs: { gender: "feminine", voiceId: "v1" },
 			}),
 			references("https://img/a.png?x=1&y=2", "https://img/b.png"),
-			wrap(createCanvasNode("narration", { id: "n1", text: "first" })),
-			wrap(createCanvasNode("narration", { id: "n2", text: "second" })),
+			wrap(createCanvasElement("narration", { id: "n1", text: "first" })),
+			wrap(createCanvasElement("narration", { id: "n2", text: "second" })),
 		]);
 
 		const reloaded = deserializeWithScenes(saved);
@@ -191,7 +187,7 @@ describe("serialize round trip", () => {
 	});
 
 	it("keeps a reloaded empty element recognisably empty", () => {
-		const scene = reload(wrap(createCanvasNode("narration", { id: "e1" })));
+		const scene = reload(wrap(createCanvasElement("narration", { id: "e1" })));
 		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
 });

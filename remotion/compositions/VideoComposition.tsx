@@ -19,7 +19,7 @@ import { audioEnvelopeFrames, audioFadeSec } from "@/lib/render/audioFade";
 import { getPresentation } from "@/lib/render/transitionPresentations";
 import { audioVolume } from "@/lib/render/audioVolume";
 import { volumeToGain } from "@/lib/canvas/elementAttributes";
-import { ELEMENT_TYPES } from "@/lib/canvas/types";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { CaptionStyleProvider, Captions } from "../components/Captions";
 import { MotionLayer } from "../components/MotionLayer";
 
@@ -101,7 +101,7 @@ function SequenceContent({
 		case "visual":
 			return (
 				<MotionLayer effect={element.motion}>
-					{ELEMENT_TYPES[element.type].outputKind === "image" ? (
+					{CONTENT_TYPES[element.type].outputKind === "image" ? (
 						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
 					) : (
 						<VideoElementPlayer element={element} />

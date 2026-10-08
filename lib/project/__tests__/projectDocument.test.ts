@@ -1,14 +1,14 @@
 import { createEditor, type Editor } from "slate";
 import { withHistory } from "slate-history";
 import { describe, expect, it } from "vitest";
-import type { SceneElement } from "@/lib/canvas/types";
+import type { Scene } from "@/lib/canvas/types";
 import { GenerationQueue } from "@/lib/generation/queue";
 import {
 	resolveDefaultModels,
 	type ConnectorModels,
 } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
-import { createProjectDocument, type ProjectContent } from "../projectDocument";
+import { createProjectDocument, type SavedProject } from "../projectDocument";
 import { createProjectStore } from "../store";
 import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
@@ -24,7 +24,7 @@ const PINNED = `<image provider="openslop" model="Slop Image v1">a sunset</image
 const contentWith = (
 	script: string,
 	models: ConnectorModels = {},
-): ProjectContent => ({
+): SavedProject => ({
 	script,
 	store: {
 		title: "",
@@ -37,7 +37,7 @@ const contentWith = (
 
 const firstScene = (editor: Editor) => {
 	const scene = editor.children.find(
-		(node): node is SceneElement => "type" in node && node.type === "scene",
+		(node): node is Scene => "type" in node && node.type === "scene",
 	);
 	if (!scene) throw new Error("no scene");
 	return scene;

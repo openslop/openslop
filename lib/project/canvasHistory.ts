@@ -1,6 +1,6 @@
 import { createEmitter } from "@/lib/store/emitter";
 import type { Autosaver } from "./autosave";
-import type { ProjectContent, ProjectDocument } from "./projectDocument";
+import type { SavedProject, ProjectDocument } from "./projectDocument";
 
 export type CanvasVersion = {
 	id: string;
@@ -15,9 +15,9 @@ export type CanvasHistoryState = {
 
 export interface CanvasVersionStorage {
 	list(): Promise<CanvasVersion[]>;
-	read(id: string): Promise<ProjectContent>;
-	create(content: ProjectContent): Promise<CanvasVersion>;
-	update(id: string, content: ProjectContent): Promise<CanvasVersion>;
+	read(id: string): Promise<SavedProject>;
+	create(content: SavedProject): Promise<CanvasVersion>;
+	update(id: string, content: SavedProject): Promise<CanvasVersion>;
 }
 
 /**
@@ -41,7 +41,7 @@ export class CanvasHistory {
 	/** The version still absorbing saves, and when it stops taking them. */
 	private open: { id: string; until: number } | null = null;
 	/** What the canvas returns to, held for as long as a preview lasts. */
-	private stash: ProjectContent | null = null;
+	private stash: SavedProject | null = null;
 	private readonly emitter = createEmitter();
 
 	constructor(
@@ -70,7 +70,7 @@ export class CanvasHistory {
 		}
 	};
 
-	record = async (content: ProjectContent): Promise<void> => {
+	record = async (content: SavedProject): Promise<void> => {
 		const open = this.open && Date.now() < this.open.until ? this.open : null;
 		const version = open
 			? await this.storage.update(open.id, content)

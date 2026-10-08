@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 import { resolveElements } from "../resolve";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
 function makeElement(
 	id: string,
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id,
 		type,
@@ -21,7 +21,7 @@ function makeElement(
 	};
 }
 
-const wrap = (children: CanvasContentElement[]): SceneElement => ({
+const wrap = (children: ContentElement[]): Scene => ({
 	id: "scene-1",
 	type: SCENE_TYPE,
 	children,
@@ -128,7 +128,7 @@ describe("resolveElements", () => {
 	});
 
 	it("assigns correct roles and layers for all element types", () => {
-		const types: CanvasContentElement["type"][] = [
+		const types: ContentElement["type"][] = [
 			"image",
 			"video",
 			"narration",

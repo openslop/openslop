@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Descendant } from "slate";
-import { findAsset, getScriptElements, NARRATOR } from "@/lib/canvas/assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { findAsset, getCanvasElements, NARRATOR } from "@/lib/canvas/assets";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import {
 	SCENE_TYPE,
 	type AssetElement,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import {
 	DEFAULT_CONNECTOR_REGISTRY,
@@ -23,10 +23,10 @@ import { isNodeStale } from "../staleness";
 
 const element = (
 	id: string,
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	attributes: Record<string, string> = {},
-): CanvasContentElement => ({
+): ContentElement => ({
 	id,
 	type,
 	...splitAttributes(attributes),
@@ -43,7 +43,7 @@ let graph: GenerationGraph;
 
 const contextNow = (): BuildContext => ({
 	state: createProjectStore().getState(),
-	canvas: getScriptElements([...assets, ...document]),
+	canvas: getCanvasElements([...assets, ...document]),
 	registry,
 	setAsset: () => {},
 });
@@ -62,8 +62,8 @@ const UNBUILDABLE: ConnectorRegistry = {
 	},
 };
 
-const edit = (...elements: CanvasContentElement[]) => {
-	const scene: SceneElement = {
+const edit = (...elements: ContentElement[]) => {
+	const scene: Scene = {
 		id: "scene-1",
 		type: SCENE_TYPE,
 		children: elements,
@@ -72,7 +72,7 @@ const edit = (...elements: CanvasContentElement[]) => {
 	graph = new GenerationGraph(contextNow(), graph);
 };
 
-const read = (of: CanvasContentElement) => graph.resolve(of);
+const read = (of: ContentElement) => graph.resolve(of);
 
 beforeEach(() => {
 	assets = [];
@@ -157,7 +157,7 @@ describe("GenerationGraph", () => {
 		const styled = read(image);
 		const spoken = read(narration);
 
-		assets = [createCanvasNode("asset_style", { text: "noir" })];
+		assets = [createCanvasElement("asset_style", { text: "noir" })];
 		graph = new GenerationGraph(contextNow(), graph);
 
 		expect(read(image)).not.toBe(styled);
@@ -168,7 +168,7 @@ describe("GenerationGraph", () => {
 	it("throws the same for every reader of a node that cannot be built", () => {
 		const image = element("img", "image", "a sunset");
 		registry = UNBUILDABLE;
-		assets = [createCanvasNode("asset_avatar", { attrs: { name: "Red" } })];
+		assets = [createCanvasElement("asset_avatar", { attrs: { name: "Red" } })];
 		edit(image);
 		const failure = `Two dependencies of "img" share the label "Red's avatar"`;
 
@@ -199,7 +199,7 @@ describe("prepareNode", () => {
 	const setAsset = vi.fn(({ type, name, attrs }: AssetWrite) => {
 		assets = [
 			...assets,
-			createCanvasNode(type, { attrs: name ? { name, ...attrs } : attrs }),
+			createCanvasElement(type, { attrs: name ? { name, ...attrs } : attrs }),
 		];
 	});
 	const writing = (): BuildContext => ({ ...contextNow(), setAsset });

@@ -7,7 +7,7 @@ import { ensureAsset, removeAsset } from "@/lib/canvas/assetOps";
 import { elementModelPick } from "@/lib/canvas/elementConnector";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset } from "@/lib/canvas/useAssets";
-import { updateNodeText } from "@/lib/canvas/editorOps";
+import { updateElementText } from "@/lib/canvas/editorOps";
 import type { AssetType } from "@/lib/canvas/types";
 import { ModelAttribute } from "../attributes/ModelAttribute";
 import { ElementGenerationProvider } from "../ElementGenerationContext";
@@ -86,7 +86,7 @@ export function CharacterEditModal({
 									</div>
 								}
 								value={getElementBodyText(avatar)}
-								onChange={(text) => updateNodeText(editor, avatar.id, text)}
+								onChange={(text) => updateElementText(editor, avatar.id, text)}
 								placeholder="Describe the character's look"
 							/>
 							<div className="flex items-center justify-end gap-2">

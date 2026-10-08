@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { preservedAttributes } from "../preservedAttributes";
-import type { CanvasContentElement } from "../types";
+import type { ContentElement } from "../types";
 
 function element(
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id: "n1",
 		type,

@@ -10,7 +10,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 }));
 
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { isSceneElement } from "../scenes";
+import { isScene } from "../scenes";
 import { insertScene } from "../insertScene";
 import { flatAttributes } from "../elementAttributes";
 
@@ -41,8 +41,8 @@ describe("insertScene", () => {
 		});
 
 		const inserted = editor.children[0];
-		expect(isSceneElement(inserted)).toBe(true);
-		if (!isSceneElement(inserted)) return;
+		expect(isScene(inserted)).toBe(true);
+		if (!isScene(inserted)) return;
 		expect(inserted.children).toHaveLength(1);
 		expect(inserted.children[0].type).toBe("image");
 	});
@@ -55,7 +55,7 @@ describe("insertScene", () => {
 		});
 
 		const inserted = editor.children[0];
-		if (!isSceneElement(inserted)) throw new Error("expected a scene");
+		if (!isScene(inserted)) throw new Error("expected a scene");
 		expect(flatAttributes(inserted.children[0])).toMatchObject(pinned);
 	});
 
@@ -68,6 +68,6 @@ describe("insertScene", () => {
 
 		expect(editor.children).toHaveLength(2);
 		const inserted = editor.children[1];
-		expect(isSceneElement(inserted) && inserted.id).toBe(id);
+		expect(isScene(inserted) && inserted.id).toBe(id);
 	});
 });

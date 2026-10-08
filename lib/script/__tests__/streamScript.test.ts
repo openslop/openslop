@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Transforms, type Editor } from "slate";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import { SCENE_TYPE, type SceneElement } from "@/lib/canvas/types";
+import { SCENE_TYPE, type Scene } from "@/lib/canvas/types";
 import type { LLMConnector } from "@/lib/connectors/types";
 import { ScriptSettingsSchema } from "@/lib/project/types";
 import { sleep } from "@/lib/utils";
@@ -21,10 +21,10 @@ const elements = (editor: Editor): [type: string, text: string][] =>
 		.filter(isContentElement)
 		.map((element) => [element.type, getElementBodyText(element)]);
 
-const oldScene = (): SceneElement => ({
+const oldScene = (): Scene => ({
 	id: "old-scene",
 	type: SCENE_TYPE,
-	children: [createCanvasNode("narration", { text: "the old script" })],
+	children: [createCanvasElement("narration", { text: "the old script" })],
 });
 
 const topLevelTypes = (editor: Editor) =>

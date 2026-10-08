@@ -1,4 +1,4 @@
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { ConnectorPlugin, PluginContext } from "@/lib/connectors/types";
 import mapValues from "lodash/mapValues";
@@ -12,7 +12,7 @@ export const projectState = (
 ): ProjectData => ProjectDataSchema.parse({ videoSettings, scriptSettings });
 
 export const buildCtx = (
-	canvas: ScriptElement[] = [],
+	canvas: CanvasElement[] = [],
 	{
 		state = projectState(),
 		setAsset = () => {},
@@ -34,15 +34,15 @@ export const pluginCtx = ({
 
 export const readsOf = (
 	plugin: Pick<ConnectorPlugin, "reads">,
-	element: ScriptElement,
-	canvas: ScriptElement[] = [],
+	element: CanvasElement,
+	canvas: CanvasElement[] = [],
 	state?: ProjectData,
 ) => plugin.reads?.(element, buildCtx(canvas, { state })) ?? {};
 
 export const dependenciesOf = (
 	plugin: Pick<ConnectorPlugin, "dependencies">,
-	element: ScriptElement,
-	canvas: ScriptElement[] = [],
+	element: CanvasElement,
+	canvas: CanvasElement[] = [],
 ) =>
 	mapValues(
 		plugin.dependencies?.(element, buildCtx(canvas)) ?? {},

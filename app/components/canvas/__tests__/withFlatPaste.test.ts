@@ -5,9 +5,9 @@ import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
 import { withAssets } from "../plugins/withAssets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { CanvasEditor } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import { content, scene, seedScene, shape } from "./fixtures";
 
 function makeEditor(): CanvasEditor {
@@ -16,8 +16,7 @@ function makeEditor(): CanvasEditor {
 
 function hasNestedScene(editor: Editor): boolean {
 	return editor.children.some(
-		(n) =>
-			isSceneElement(n) && n.children.some((c) => isSceneElement(c as Element)),
+		(n) => isScene(n) && n.children.some((c) => isScene(c as Element)),
 	);
 }
 
@@ -67,7 +66,7 @@ describe("withFlatPaste", () => {
 
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),
-			createCanvasNode("asset_avatar", { attrs: { name: "Mia" } }),
+			createCanvasElement("asset_avatar", { attrs: { name: "Mia" } }),
 			scene([content("sound", "snd1")], "ps2"),
 		]);
 

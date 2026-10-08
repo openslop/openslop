@@ -4,11 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import type { Descendant } from "slate";
-import { getScriptElements } from "@/lib/canvas/assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { getCanvasElements } from "@/lib/canvas/assets";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
+	type ContentElement,
 	type GeneratedElement,
 } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
@@ -26,7 +26,7 @@ const state = store.getState();
 const contextNow = () =>
 	vi.fn(() => ({
 		state,
-		canvas: getScriptElements(editor.children),
+		canvas: getCanvasElements(editor.children),
 		registry: DEFAULT_CONNECTOR_REGISTRY,
 		setAsset: () => {},
 	}));
@@ -58,13 +58,13 @@ const render = () =>
 		),
 	);
 
-const element = (id: string, text: string): CanvasContentElement => ({
+const element = (id: string, text: string): ContentElement => ({
 	id,
 	type: "image",
 	children: [{ id: `${id}-t`, type: "image", text }],
 });
 
-const edit = (...elements: CanvasContentElement[]) => {
+const edit = (...elements: ContentElement[]) => {
 	editor.children = [{ id: "scene-1", type: SCENE_TYPE, children: elements }];
 };
 
@@ -109,7 +109,7 @@ describe("LiveGraphProvider", () => {
 		resolve(image);
 
 		editor.children = [
-			createCanvasNode("asset_style", { text: "noir" }),
+			createCanvasElement("asset_style", { text: "noir" }),
 			...editor.children,
 		];
 

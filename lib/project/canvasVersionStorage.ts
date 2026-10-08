@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import type { CanvasVersion, CanvasVersionStorage } from "./canvasHistory";
-import { PROJECT_CONTENT_COLUMNS, parseProjectContent } from "./projectContent";
+import { SAVED_PROJECT_COLUMNS, parseSavedProject } from "./savedProject";
 
 const TABLE = "canvas_versions";
 
@@ -32,11 +32,11 @@ export function canvasVersionStorage(projectId: string): CanvasVersionStorage {
 		async read(id) {
 			const { data, error } = await createClient()
 				.from(TABLE)
-				.select(PROJECT_CONTENT_COLUMNS)
+				.select(SAVED_PROJECT_COLUMNS)
 				.eq("id", id)
 				.single();
 			if (error) throw error;
-			return parseProjectContent(data);
+			return parseSavedProject(data);
 		},
 
 		async create(content) {

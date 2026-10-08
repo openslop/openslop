@@ -1,22 +1,22 @@
 import { Editor, Transforms } from "slate";
 import {
 	clearEditor,
-	findNodeById,
-	updateNodeText,
+	findElementById,
+	updateElementText,
 } from "@/lib/canvas/editorOps";
 import { isParsedContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { OSMLStreamParser } from "@/lib/canvas/osmlStreamParser";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 
-function appendElement(editor: Editor, node: CanvasContentElement): void {
+function appendElement(editor: Editor, node: ContentElement): void {
 	// The parser keeps appending to its own node, so the document takes a copy.
 	Transforms.insertNodes(editor, structuredClone(node), {
 		at: [editor.children.length],
 	});
 }
 
-function replaceScript(editor: Editor, node: CanvasContentElement): void {
+function replaceScript(editor: Editor, node: ContentElement): void {
 	// One normalization, so withLayout seeds nothing into the cleared script.
 	Editor.withoutNormalizing(editor, () => {
 		clearEditor(editor);
@@ -30,12 +30,12 @@ export function createScriptWriter(editor: Editor): (chunk: string) => void {
 	let seen = 0;
 	let replaced = false;
 
-	const write = (node: CanvasContentElement) => {
+	const write = (node: ContentElement) => {
 		const text = getElementBodyText(node);
 		if (!text) return;
 
-		if (findNodeById(editor, node.id)) {
-			updateNodeText(editor, node.id, text);
+		if (findElementById(editor, node.id)) {
+			updateElementText(editor, node.id, text);
 		} else if (replaced) {
 			appendElement(editor, node);
 		} else {

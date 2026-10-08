@@ -7,7 +7,7 @@ import { createEditor } from "slate";
 import { Slate, withReact } from "slate-react";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { StartFramePicker } from "../StartFramePicker";
 
 vi.mock("@/lib/canvas/editorOps", () => ({
@@ -28,13 +28,13 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const PICTURE = "https://img/frame.png";
 
-const videoWith = (attributes: Record<string, string>): CanvasContentElement =>
+const videoWith = (attributes: Record<string, string>): ContentElement =>
 	({
 		id: "v1",
 		type: "video",
 		...splitAttributes(attributes),
 		children: [{ id: "text", type: "video", text: "" }],
-	}) as unknown as CanvasContentElement;
+	}) as unknown as ContentElement;
 
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
@@ -48,7 +48,7 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
-function openPicker(element: CanvasContentElement) {
+function openPicker(element: ContentElement) {
 	const editor = withReact(createEditor());
 	act(() =>
 		root.render(

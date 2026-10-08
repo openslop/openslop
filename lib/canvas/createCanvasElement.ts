@@ -1,17 +1,11 @@
-import {
-	assetId,
-	connectorOf,
-	type CanvasNode,
-	type ElementType,
-} from "@/lib/canvas/types";
-import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
+import type { ElementOf, ElementType } from "@/lib/canvas/types";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { isAssetType } from "./guards";
-import { attributeSchemaFor } from "./elementConnector";
+import { attributeSchemaFor, fixedIdOf, modelFor } from "./elementConnector";
 import { makeNodeId } from "./nodeUtils";
 
-export type CreateNodeOptions = {
+export type CreateElementOptions = {
 	id?: string;
 	attrs?: Record<string, string>;
 	text?: string;
@@ -19,21 +13,16 @@ export type CreateNodeOptions = {
 	defaultModels?: ConnectorModels;
 };
 
-export function createCanvasNode<T extends ElementType>(
+export function createCanvasElement<T extends ElementType>(
 	type: T,
-	opts: CreateNodeOptions = {},
-): CanvasNode<T> {
-	const connector = connectorOf(type);
+	opts: CreateElementOptions = {},
+): ElementOf<T> {
 	const defaults = opts.defaultModels ?? {};
-	const attrs = {
-		...opts.attrs,
-		...(connector && resolveModel(connector, opts.attrs, defaults[connector])),
-	};
+	const given = opts.attrs ?? {};
+	const attrs = { ...given, ...modelFor(type, given, defaults) };
 	const attributes = attributeSchemaFor(type, attrs).resolve(attrs, defaults);
 	return {
-		id: isAssetType(type)
-			? assetId(type, opts.attrs?.name)
-			: (opts.id ?? makeNodeId()),
+		id: fixedIdOf(type, given.name) ?? opts.id ?? makeNodeId(),
 		type,
 		...splitAttributes(attributes),
 		children: [

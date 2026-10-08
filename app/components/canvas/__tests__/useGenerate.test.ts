@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import type {
-	CanvasContentElement,
-	GeneratedElement,
-} from "@/lib/canvas/types";
+import type { ContentElement, GeneratedElement } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
@@ -41,7 +38,7 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 }));
 
 const state = createProjectStore().getState();
-let canvas: CanvasContentElement[] = [];
+let canvas: ContentElement[] = [];
 // Like the real hook, the context keeps its identity while text inside an
 // element changes, and reads the canvas when it is made.
 const buildContext = () => ({
@@ -64,10 +61,10 @@ const { useGenerateScope } = await import("../hooks/useGenerateScope");
 
 const element = (
 	id: string,
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	attrs: Record<string, string> = {},
-): CanvasContentElement => ({
+): ContentElement => ({
 	id,
 	type,
 	...splitAttributes(attrs),

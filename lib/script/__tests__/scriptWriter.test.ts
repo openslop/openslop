@@ -5,7 +5,7 @@ import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { assetId } from "@/lib/canvas/types";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { createScriptWriter } from "../scriptWriter";
 
 const makeEditor = (defaultModels: ConnectorModels = {}) => {
@@ -87,7 +87,7 @@ describe("createScriptWriter", () => {
 
 	it("writes the script after the assets already on the canvas", () => {
 		const editor = makeEditor();
-		const style = createCanvasNode("asset_style", {
+		const style = createCanvasElement("asset_style", {
 			id: assetId("asset_style"),
 			text: "noir",
 		});

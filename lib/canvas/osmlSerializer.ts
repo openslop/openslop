@@ -1,6 +1,6 @@
 import { Descendant } from "slate";
 import type { ParsedElement } from "./types";
-import { isSceneElement } from "./scenes";
+import { isScene } from "./scenes";
 import { isAssetElement } from "./guards";
 import { withoutCaretMarker } from "./constants";
 import { flatAttributes } from "./elementAttributes";
@@ -30,7 +30,7 @@ function serializeElement(element: ParsedElement): string {
 /** The whole document: the assets, then each scene under its marker. */
 export function serializeOSMLWithScenes(descendants: Descendant[]): string {
 	const scenes = descendants
-		.filter(isSceneElement)
+		.filter(isScene)
 		.map(
 			(scene, index) =>
 				sceneMarker(index + 1) + scene.children.map(serializeElement).join(""),

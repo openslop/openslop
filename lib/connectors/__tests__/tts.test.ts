@@ -3,7 +3,7 @@ import { HttpTTSConnector } from "../tts/connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { NARRATOR } from "@/lib/canvas/assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
 import { readsOf } from "./_state-ctx";
@@ -54,7 +54,7 @@ describe("BaseTTSConnector", () => {
 			name: NARRATOR,
 			attrs: { ...config.model, voiceId: "voice-42" },
 		});
-		const reads = readsOf(plugin, createCanvasNode("narration"), [narrator]);
+		const reads = readsOf(plugin, createCanvasElement("narration"), [narrator]);
 
 		const result = await connector.generate(
 			{ prompt: "hello", gender: "masculine", accent: "american" },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseProjectContent } from "../projectContent";
+import { parseSavedProject } from "../savedProject";
 import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../videoSettings";
 
@@ -13,9 +13,9 @@ const snapshot = {
 	pinned: false,
 };
 
-describe("parseProjectContent", () => {
+describe("parseSavedProject", () => {
 	it("types the JSON columns of a saved row", () => {
-		const content = parseProjectContent({
+		const content = parseSavedProject({
 			script: "<scene />",
 			store: { videoSettings: { aspectRatio: "9:16" } },
 			generation: { el1: snapshot },
@@ -27,7 +27,7 @@ describe("parseProjectContent", () => {
 	});
 
 	it("fills a fresh row's empty store", () => {
-		const content = parseProjectContent({
+		const content = parseSavedProject({
 			script: "",
 			store: {},
 			generation: {},
@@ -44,7 +44,7 @@ describe("parseProjectContent", () => {
 
 	it("opens a row saved before snapshots carried pinned", () => {
 		const { pinned: _, ...legacy } = snapshot;
-		const content = parseProjectContent({
+		const content = parseSavedProject({
 			script: "",
 			store: {},
 			generation: { el1: legacy },
@@ -57,7 +57,7 @@ describe("parseProjectContent", () => {
 		const { pinned: _, ...legacy } = snapshot;
 		const result = { durationSec: 0, imageUrl: "a.png" };
 		const attributes = { style: "noir" };
-		const content = parseProjectContent({
+		const content = parseSavedProject({
 			script: "",
 			store: {},
 			generation: {
@@ -85,10 +85,10 @@ describe("parseProjectContent", () => {
 
 	it("throws on a structurally wrong row", () => {
 		expect(() =>
-			parseProjectContent({ script: null, store: {}, generation: {} }),
+			parseSavedProject({ script: null, store: {}, generation: {} }),
 		).toThrow();
 		expect(() =>
-			parseProjectContent({
+			parseSavedProject({
 				script: "",
 				store: {},
 				generation: { el1: { status: "done" } },

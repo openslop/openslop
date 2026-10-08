@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createDimensionsPlugin } from "@/lib/connectors/plugins/dimensions";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { pluginCtx, projectState, readsOf } from "./_state-ctx";
 
-const image = createCanvasNode("image", { id: "i1" });
+const image = createCanvasElement("image", { id: "i1" });
 const portraitState = projectState({ aspectRatio: "9:16" });
 const portrait = pluginCtx({
 	reads: readsOf(createDimensionsPlugin("image"), image, [], portraitState),

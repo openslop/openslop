@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { pickThumbnailUrl } from "../thumbnail";
 import { resultQueue } from "./_canvas";
 
 const element = (
 	id: string,
-	type: CanvasContentElement["type"] = "image",
-): CanvasContentElement => ({
+	type: ContentElement["type"] = "image",
+): ContentElement => ({
 	id,
 	type,
 	children: [{ id: `${id}-t`, type, text: "" }],

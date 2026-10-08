@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Element } from "slate";
-import type { CanvasContentElement } from "../types";
+import type { ContentElement } from "../types";
 import { makeNodeId, assignIdRecursively, stripIds } from "../nodeUtils";
 import { asset } from "./_assets";
 import {
@@ -122,7 +122,7 @@ describe("stripIds", () => {
 			children: [{ type: "image" as const, text: "", id: "t1" }],
 		} as Element;
 
-		const stripped = stripIds(node) as CanvasContentElement;
+		const stripped = stripIds(node) as ContentElement;
 		expect(stripped.type).toBe("image");
 		expect(flatAttributes(stripped)).toEqual({ src: "url" });
 	});

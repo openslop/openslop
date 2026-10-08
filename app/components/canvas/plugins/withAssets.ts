@@ -32,9 +32,11 @@ export const withAssets = (editor: CanvasEditor): CanvasEditor => {
 
 	editor.onChange = (options) => {
 		if (inAsset(caret())) {
-			const script = editor.children.findIndex((node) => !isAssetElement(node));
-			if (script >= 0)
-				Transforms.select(editor, Editor.start(editor, [script]));
+			const firstScene = editor.children.findIndex(
+				(node) => !isAssetElement(node),
+			);
+			if (firstScene >= 0)
+				Transforms.select(editor, Editor.start(editor, [firstScene]));
 		}
 		onChange(options);
 	};

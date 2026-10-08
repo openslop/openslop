@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findAsset, NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import { assetId, type ScriptElement } from "@/lib/canvas/types";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { assetId, type CanvasElement } from "@/lib/canvas/types";
 import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	type ConnectorRegistry,
@@ -26,7 +26,7 @@ vi.mock("@/lib/connectors/factory", async (original) => ({
 	createConnector: () => ({ generate: mediaGenerate }),
 }));
 
-let canvas: ScriptElement[];
+let canvas: CanvasElement[];
 let registry: ConnectorRegistry;
 
 const context = (): BuildContext => ({
@@ -36,7 +36,7 @@ const context = (): BuildContext => ({
 	setAsset: ({ type, name, attrs }) => {
 		canvas = [
 			...canvas,
-			createCanvasNode(type, { attrs: name ? { name, ...attrs } : attrs }),
+			createCanvasElement(type, { attrs: name ? { name, ...attrs } : attrs }),
 		];
 	},
 });
@@ -57,12 +57,12 @@ beforeEach(() => {
 describe("running a graph", () => {
 	it("runs the avatar an image shows first, and hands the image what it read off the canvas", async () => {
 		canvas = [
-			createCanvasNode("asset_style", { text: "noir" }),
-			createCanvasNode("asset_avatar", {
+			createCanvasElement("asset_style", { text: "noir" }),
+			createCanvasElement("asset_avatar", {
 				attrs: { name: "Red" },
 				text: "red hood",
 			}),
-			createCanvasNode("image", {
+			createCanvasElement("image", {
 				id: "img",
 				attrs: { characters: "Red" },
 				text: "a lighthouse",
@@ -92,7 +92,7 @@ describe("running a graph", () => {
 	it("records the avatar an image was sent, so one replaced mid-flight leaves the image stale", async () => {
 		canvas = [
 			asset("asset_avatar", { name: "Red", text: "red hood" }),
-			createCanvasNode("image", {
+			createCanvasElement("image", {
 				id: "img",
 				attrs: { characters: "Red" },
 				text: "a lighthouse",
@@ -134,8 +134,8 @@ describe("running a graph", () => {
 			image: { plugins: [pullsInWave] },
 		};
 		canvas = [
-			createCanvasNode("video", { id: "wave", text: "a wave" }),
-			createCanvasNode("image", { id: "img", text: "a lighthouse" }),
+			createCanvasElement("video", { id: "wave", text: "a wave" }),
+			createCanvasElement("image", { id: "img", text: "a lighthouse" }),
 		];
 		const queue = new GenerationQueue();
 		mediaGenerate.mockImplementation(async ({ prompt }: { prompt?: string }) =>
@@ -179,7 +179,9 @@ describe("running a graph", () => {
 				...DEFAULT_CONNECTOR_REGISTRY,
 				image: { plugins: [settleVoice] },
 			};
-			canvas = [createCanvasNode("image", { id: "img", text: "a lighthouse" })];
+			canvas = [
+				createCanvasElement("image", { id: "img", text: "a lighthouse" }),
+			];
 			mediaGenerate.mockResolvedValue({ imageUrl: "img.png", durationSec: 0 });
 		});
 

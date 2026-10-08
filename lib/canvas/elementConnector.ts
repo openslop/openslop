@@ -1,10 +1,11 @@
+import mapValues from "lodash/mapValues";
 import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
 import {
 	AttributeSchema,
 	type ModelPick,
 } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import { resolveModel } from "@/lib/connectors/models";
+import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { VOICE_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import type {
@@ -13,14 +14,14 @@ import type {
 	ModelRef,
 } from "@/lib/connectors/types";
 import { flatAttributes } from "./elementAttributes";
-import { isAssetType } from "./guards";
 import {
+	assetId,
 	connectorOf,
-	ELEMENT_TYPES,
+	CONTENT_TYPES,
 	type AssetType,
 	type ElementType,
 	type GeneratedElement,
-	type ScriptElement,
+	type CanvasElement,
 } from "./types";
 
 type ElementConnector = {
@@ -33,7 +34,7 @@ type ElementConnector = {
 export function resolveElementConnector(
 	element: GeneratedElement,
 	registry: ConnectorRegistry,
-	canvas: ScriptElement[],
+	canvas: CanvasElement[],
 ): ElementConnector {
 	const type = connectorOf(element.type);
 	const config = registry[element.type];
@@ -49,23 +50,69 @@ export function resolveElementConnector(
 	};
 }
 
-const NO_ATTRIBUTES = AttributeSchema.from([]);
+type Attrs = Record<string, string>;
 
-/** An asset's attributes are its own, never its connector's. */
-const ASSET_ATTRIBUTES: Partial<Record<AssetType, AttributeSchema>> = {
-	asset_voice: VOICE_ATTRIBUTES,
+/** How an element type takes its model, its attributes and its id. */
+type ElementRules = {
+	model(attrs: Attrs, defaults: ConnectorModels): Partial<ModelRef>;
+	attributes(attrs: Attrs): AttributeSchema;
+	id(name?: string): string | undefined;
 };
 
-export function attributeSchemaFor(
-	type: ElementType,
-	attributes: Record<string, string>,
-): AttributeSchema {
-	if (isAssetType(type)) return ASSET_ATTRIBUTES[type] ?? NO_ATTRIBUTES;
-	const { connector } = ELEMENT_TYPES[type];
-	return resolveAttributeSchema(connector, resolveModel(connector, attributes));
-}
+const NO_ATTRIBUTES = AttributeSchema.from([]);
 
-export const elementSchema = (element: ScriptElement): AttributeSchema =>
+const generatesOn = (
+	connector: AssetConnectorType,
+): Omit<ElementRules, "id"> => ({
+	model: (attrs, defaults) =>
+		resolveModel(connector, attrs, defaults[connector]),
+	attributes: (attrs) =>
+		resolveAttributeSchema(connector, resolveModel(connector, attrs)),
+});
+
+const holds = (schema = NO_ATTRIBUTES): Omit<ElementRules, "id"> => ({
+	model: () => ({}),
+	attributes: () => schema,
+});
+
+const content = (connector: AssetConnectorType): ElementRules => ({
+	...generatesOn(connector),
+	id: () => undefined,
+});
+
+const asset = (
+	type: AssetType,
+	rules: Omit<ElementRules, "id">,
+): ElementRules => ({ ...rules, id: (name) => assetId(type, name) });
+
+const RULES: Record<ElementType, ElementRules> = {
+	...mapValues(CONTENT_TYPES, ({ connector }) => content(connector)),
+	asset_avatar: asset("asset_avatar", {
+		...generatesOn(connectorOf("asset_avatar")),
+		attributes: () => NO_ATTRIBUTES,
+	}),
+	asset_voice: asset("asset_voice", holds(VOICE_ATTRIBUTES)),
+	asset_style: asset("asset_style", holds()),
+	asset_references: asset("asset_references", holds()),
+};
+
+export const attributeSchemaFor = (
+	type: ElementType,
+	attributes: Attrs,
+): AttributeSchema => RULES[type].attributes(attributes);
+
+/** The model a new element of `type` takes: its own, else the scoped default. Metadata takes none. */
+export const modelFor = (
+	type: ElementType,
+	attributes: Attrs,
+	defaults: ConnectorModels,
+): Partial<ModelRef> => RULES[type].model(attributes, defaults);
+
+/** The id an element's type fixes for it, as an asset's name does; content takes any. */
+export const fixedIdOf = (type: ElementType, name?: string) =>
+	RULES[type].id(name);
+
+export const elementSchema = (element: CanvasElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
 
 /** The element's own model, picked from its connector type's. */

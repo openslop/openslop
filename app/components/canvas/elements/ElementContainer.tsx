@@ -1,6 +1,6 @@
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { elementModelPick, elementSchema } from "@/lib/canvas/elementConnector";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
@@ -27,7 +27,7 @@ function ElementAttributeBadges({
 	element,
 	specs,
 }: {
-	element: CanvasContentElement;
+	element: ContentElement;
 	specs: Record<string, AttributeSpec>;
 }) {
 	return Object.entries(specs).map(([key, spec]) => (
@@ -45,7 +45,7 @@ function ElementSettings({
 	element,
 	specs,
 }: {
-	element: CanvasContentElement;
+	element: ContentElement;
 	specs: Record<string, AttributeSpec>;
 }) {
 	if (Object.keys(specs).length === 0) return null;
@@ -80,7 +80,7 @@ function ElementSettings({
 
 interface ElementContainerProps {
 	attributes: RenderElementProps["attributes"];
-	element: CanvasContentElement;
+	element: ContentElement;
 	children: React.ReactNode;
 }
 

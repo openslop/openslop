@@ -1,5 +1,5 @@
 import { isForeground } from "@/lib/canvas/guards";
-import { ELEMENT_TYPES, type SceneElement } from "@/lib/canvas/types";
+import { CONTENT_TYPES, type Scene } from "@/lib/canvas/types";
 import { toFrames } from "./frames";
 import type { ResolvedElement, Sequence, RenderLayout } from "./types";
 
@@ -25,7 +25,7 @@ export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
 }
 
 export function findSceneSequence(
-	scene: SceneElement,
+	scene: Scene,
 	index: SequenceIndex,
 ): Sequence | undefined {
 	const foreground = scene.children.find(isForeground);
@@ -52,7 +52,7 @@ export function findSegmentIndexAtFrame(
 }
 
 function toThumbnail(element: ResolvedElement): SeekThumbnail | null {
-	const { outputKind } = ELEMENT_TYPES[element.type];
+	const { outputKind } = CONTENT_TYPES[element.type];
 	if (outputKind === "audio") return null;
 	return { url: element.url, kind: outputKind };
 }

@@ -1,10 +1,10 @@
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import type { GenerationQueue } from "@/lib/generation/queue";
 
 /** The first picture the script generated: what the project looks like. */
 export function pickThumbnailUrl(
-	elements: CanvasContentElement[],
+	elements: ContentElement[],
 	queue: Pick<GenerationQueue, "getElementSnapshot">,
 ): string | null {
 	for (const { id } of elements) {

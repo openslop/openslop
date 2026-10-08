@@ -1,4 +1,4 @@
-import type { ElementType, ScriptElement } from "@/lib/canvas/types";
+import type { ElementType, CanvasElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AssetConnectorType,
@@ -41,7 +41,7 @@ export const buildSettings = ({
 /** What a build reads, and the writer `prepare` puts its assets through. */
 export type BuildContext = {
 	state: ReturnType<typeof buildSettings>;
-	canvas: ScriptElement[];
+	canvas: CanvasElement[];
 	registry: ConnectorRegistry;
 	setAsset: (write: AssetWrite) => void;
 };

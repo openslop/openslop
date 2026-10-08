@@ -1,6 +1,6 @@
 import omit from "lodash/omit";
 import { voiceOf } from "@/lib/canvas/assets";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import { resolveModel } from "@/lib/connectors/models";
 import type {
 	ConnectorPlugin,
@@ -9,7 +9,7 @@ import type {
 import { settleVoice, speakerVoice, VOICE_SEARCH_KEYS } from "../voices";
 
 const speakingModel = (
-	{ generationAttributes: attrs }: ScriptElement,
+	{ generationAttributes: attrs }: CanvasElement,
 	canvas: readonly unknown[],
 ) => resolveModel("tts", voiceOf(canvas, attrs?.name), attrs);
 

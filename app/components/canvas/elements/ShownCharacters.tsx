@@ -3,15 +3,11 @@
 import { useSlateStatic } from "slate-react";
 import { removeShownCharacter } from "@/lib/canvas/assetOps";
 import { shownCharacters } from "@/lib/canvas/characterNames";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { CharacterPill } from "./CharacterPill";
 import { CharactersPicker } from "./CharactersPicker";
 
-export function ShownCharacters({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function ShownCharacters({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
 	return (
 		<>

@@ -3,16 +3,12 @@
 import { Mic } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { NARRATOR } from "@/lib/canvas/assets";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { useAssetEditors } from "./character/AssetEditProvider";
 import { HeaderIconButton } from "./HeaderIconButton";
 
 /** Opens the editor of the voice a speech element speaks with: its speaker's, or else the narrator's. */
-export function ElementVoiceButton({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function ElementVoiceButton({ element }: { element: ContentElement }) {
 	const { editAsset } = useAssetEditors();
 	const open = () =>
 		editAsset("asset_voice", element.generationAttributes?.name ?? NARRATOR);

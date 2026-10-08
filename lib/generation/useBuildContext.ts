@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
-import { getScriptElements } from "@/lib/canvas/assets";
+import { getCanvasElements } from "@/lib/canvas/assets";
 import { setAsset } from "@/lib/canvas/assetOps";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
@@ -16,7 +16,7 @@ export function useBuildContext(): () => BuildContext {
 	return useCallback(
 		() => ({
 			state: buildSettings(store.getState()),
-			canvas: getScriptElements(editor.children),
+			canvas: getCanvasElements(editor.children),
 			registry,
 			setAsset: ({ type, name, attrs }) =>
 				setAsset(editor, type, name, { attrs }),

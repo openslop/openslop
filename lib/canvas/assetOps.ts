@@ -7,19 +7,23 @@ import xor from "lodash/xor";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/referenceImages";
 import { findAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
-import { createCanvasNode } from "./createCanvasNode";
+import { createCanvasElement } from "./createCanvasElement";
 import {
 	CHARACTERS_ATTR,
 	formatCharacterNames,
 	shownCharacters,
 } from "./characterNames";
-import { mergeAttrs, updateNodeText, type AttributeChanges } from "./editorOps";
+import {
+	mergeAttrs,
+	updateElementText,
+	type AttributeChanges,
+} from "./editorOps";
 import { isAssetElement } from "./guards";
 import {
 	assetId,
 	type AssetElement,
 	type AssetType,
-	type ScriptElement,
+	type CanvasElement,
 } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
@@ -35,7 +39,7 @@ export function setAsset(
 	if (!asset) {
 		Transforms.insertNodes(
 			editor,
-			createCanvasNode(type, {
+			createCanvasElement(type, {
 				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
 				text,
 				defaultModels: editor.defaultModels(),
@@ -45,7 +49,7 @@ export function setAsset(
 		return;
 	}
 	mergeAttrs(editor, asset.id, attrs);
-	if (text !== undefined) updateNodeText(editor, asset.id, text);
+	if (text !== undefined) updateElementText(editor, asset.id, text);
 }
 
 /** The asset, added when there is none. */
@@ -71,7 +75,7 @@ export function removeAssets(editor: Editor): void {
 
 const editShown = (
 	editor: Editor,
-	element: ScriptElement,
+	element: CanvasElement,
 	edit: (names: string[]) => string[],
 ): void =>
 	mergeAttrs(editor, element.id, {
@@ -80,13 +84,13 @@ const editShown = (
 
 export const toggleShownCharacter = (
 	editor: Editor,
-	element: ScriptElement,
+	element: CanvasElement,
 	name: string,
 ): void => editShown(editor, element, (names) => xor(names, [name]));
 
 export const removeShownCharacter = (
 	editor: Editor,
-	element: ScriptElement,
+	element: CanvasElement,
 	name: string,
 ): void => editShown(editor, element, (names) => without(names, name));
 

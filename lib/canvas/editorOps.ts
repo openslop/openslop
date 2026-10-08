@@ -3,9 +3,9 @@ import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type {
-	CanvasContentElement,
+	ContentElement,
+	CanvasBlock,
 	CanvasElement,
-	ScriptElement,
 } from "@/lib/canvas/types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { ElementVersion } from "@/lib/generation/versions";
@@ -14,53 +14,53 @@ import {
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
-import { createCanvasNode } from "./createCanvasNode";
+import { createCanvasElement } from "./createCanvasElement";
 import { attributeSchemaFor } from "./elementConnector";
-import { isScriptElement } from "./guards";
-import { isSceneElement } from "./scenes";
+import { isCanvasElement } from "./guards";
+import { isScene } from "./scenes";
 import { makeNodeId } from "./nodeUtils";
 import { preservedAttributes } from "./preservedAttributes";
 
-/** Any canvas element by id — scenes included. Use {@link findNodeById} when a scene will not do. */
-export function findElementById(
+/** Any block by id, a scene or an element. Use {@link findElementById} when a scene will not do. */
+export function findBlockById(
 	editor: Editor,
 	id: string,
-): NodeEntry<CanvasElement> | null {
-	const [entry] = Editor.nodes<CanvasElement>(editor, {
+): NodeEntry<CanvasBlock> | null {
+	const [entry] = Editor.nodes<CanvasBlock>(editor, {
 		at: [],
 		match: (n) => Element.isElement(n) && n.id === id,
 	});
 	return entry ?? null;
 }
 
-export function findNodeById(
+export function findElementById(
 	editor: Editor,
 	id: string,
-): NodeEntry<ScriptElement> | null {
-	const [entry] = Editor.nodes<ScriptElement>(editor, {
+): NodeEntry<CanvasElement> | null {
+	const [entry] = Editor.nodes<CanvasElement>(editor, {
 		at: [],
-		match: (n) => isScriptElement(n) && n.id === id,
+		match: (n) => isCanvasElement(n) && n.id === id,
 	});
 	return entry ?? null;
 }
 
-function requireNode(editor: Editor, id: string): NodeEntry<ScriptElement> {
-	const found = findNodeById(editor, id);
+function requireElement(editor: Editor, id: string): NodeEntry<CanvasElement> {
+	const found = findElementById(editor, id);
 	if (!found) throw new Error(`Element "${id}" is not on the canvas`);
 	return found;
 }
 
 /** Empties the script, keeping the assets; normalization puts back a blank element for what streams in next. */
 export function clearEditor(editor: Editor): void {
-	Transforms.removeNodes(editor, { at: [], match: isSceneElement });
+	Transforms.removeNodes(editor, { at: [], match: isScene });
 }
 
-export function duplicateNode(
+export function duplicateElementAt(
 	editor: Editor,
-	element: CanvasContentElement,
+	element: ContentElement,
 	at: Path,
 ): string {
-	const copy: CanvasContentElement = {
+	const copy: ContentElement = {
 		...element,
 		id: makeNodeId(),
 		children: element.children.map((child) => ({
@@ -77,12 +77,12 @@ export function duplicateNode(
  * full-range replace below spans the marker leaf, so writing raw text would drop
  * the guard and leave a cleared element looking non-empty.
  */
-export function updateNodeText(
+export function updateElementText(
 	editor: Editor,
 	id: string,
 	newText: string,
 ): void {
-	const [, path] = requireNode(editor, id);
+	const [, path] = requireElement(editor, id);
 	// Locked assets are void; this is the one way their text changes.
 	const voids = true;
 	const currentText = Editor.string(editor, path, { voids });
@@ -105,13 +105,13 @@ export function updateNodeText(
 /**
  * Makes an element another type in place, keeping its id and text.
  */
-export function retypeNode(
+export function retypeElement(
 	editor: Editor,
 	path: Path,
-	element: CanvasContentElement,
-	type: CanvasContentElement["type"],
+	element: ContentElement,
+	type: ContentElement["type"],
 ): void {
-	const replacement = createCanvasNode(type, {
+	const replacement = createCanvasElement(type, {
 		id: element.id,
 		attrs: preservedAttributes(element, type),
 		defaultModels: editor.defaultModels(),
@@ -145,16 +145,16 @@ export function replaceGenerationAttrs(
  * the inputs alone would leave an element of one type holding another type's
  * attributes.
  */
-export function applyNodeVersion(
+export function applyElementVersion(
 	editor: Editor,
 	id: string,
 	{ elementType, inputs }: Pick<ElementVersion, "elementType" | "inputs">,
 ): void {
-	const [, path] = requireNode(editor, id);
+	const [, path] = requireElement(editor, id);
 	if (elementType)
 		Transforms.setNodes(editor, { type: elementType }, { at: path });
 	replaceGenerationAttrs(editor, path, inputs.attributes);
-	updateNodeText(editor, id, inputs.prompt);
+	updateElementText(editor, id, inputs.prompt);
 }
 
 /** A nil value deletes its key. */
@@ -172,7 +172,7 @@ export function mergeAttrs(
 	id: string,
 	attrs: AttributeChanges,
 ): void {
-	const [element, path] = requireNode(editor, id);
+	const [element, path] = requireElement(editor, id);
 	const current = flatAttributes(element);
 	const merged = withAttrs(current, attrs);
 	const reconciled = withAttrs(

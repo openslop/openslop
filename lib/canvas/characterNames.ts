@@ -1,5 +1,5 @@
 import uniq from "lodash/uniq";
-import type { ScriptElement } from "./types";
+import type { CanvasElement } from "./types";
 
 export const CHARACTERS_ATTR = "characters";
 
@@ -17,7 +17,7 @@ export function parseCharacterNames(value: string | undefined): string[] {
 	);
 }
 
-export const shownCharacters = (element: ScriptElement): string[] =>
+export const shownCharacters = (element: CanvasElement): string[] =>
 	parseCharacterNames(element.generationAttributes?.[CHARACTERS_ATTR]);
 
 /** Inverse of `parseCharacterNames`; an empty list clears the attribute. */

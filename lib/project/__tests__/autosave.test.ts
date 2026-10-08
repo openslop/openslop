@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
-import type { ProjectContent } from "../projectDocument";
+import type { SavedProject } from "../projectDocument";
 import {
 	createProjectStore,
 	extractStoreSnapshot,
@@ -33,8 +33,8 @@ const imageSnapshot = (imageUrl: string): ElementSnapshot => ({
 const content = (
 	store: ProjectData,
 	script: string,
-	generation: ProjectContent["generation"] = {},
-): ProjectContent => ({ script, store, generation });
+	generation: SavedProject["generation"] = {},
+): SavedProject => ({ script, store, generation });
 
 describe("createAutosaver", () => {
 	let projectId: string;
@@ -163,7 +163,7 @@ describe("createAutosaver", () => {
 
 	it("still saves when only the generation snapshot changed", async () => {
 		setTitle();
-		let generation: ProjectContent["generation"] = {};
+		let generation: SavedProject["generation"] = {};
 		const autosaver = createAutosaver({
 			projectId,
 			read: () => content(extractStoreSnapshot(store), "<osml/>", generation),

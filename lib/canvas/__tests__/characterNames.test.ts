@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type {
-	CanvasContentElement,
-	CanvasElementType,
-} from "@/lib/canvas/types";
+import type { ContentElement, ContentType } from "@/lib/canvas/types";
 import {
 	formatCharacterNames,
 	parseCharacterNames,
@@ -44,9 +41,9 @@ describe("formatCharacterNames", () => {
 });
 
 function makeElement(
-	type: CanvasElementType,
+	type: ContentType,
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id: "e1",
 		type,

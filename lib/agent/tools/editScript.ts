@@ -5,7 +5,7 @@ import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
 import {
 	ASSET_TYPES,
 	type AssetType,
-	CanvasElementTypeSchema,
+	ContentTypeSchema,
 	type ElementType,
 } from "@/lib/canvas/types";
 import {
@@ -64,7 +64,7 @@ const attributesByType = (types: readonly ElementType[]) =>
 		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
 		.join("\n");
 
-const ELEMENT_TYPE_NAMES = CanvasElementTypeSchema.options;
+const ELEMENT_TYPE_NAMES = ContentTypeSchema.options;
 const ASSET_TYPE_NAMES = Object.keys(ASSET_TYPES) as AssetType[];
 
 const ASSETS = dedent`

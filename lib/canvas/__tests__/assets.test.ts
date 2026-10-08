@@ -9,22 +9,22 @@ import {
 	characterNames,
 	findAsset,
 	getAssets,
-	getScriptElements,
+	getCanvasElements,
 	NARRATOR,
 	referenceUrls,
 	voiceFrom,
 	voiceOf,
 } from "../assets";
-import { createCanvasNode } from "../createCanvasNode";
-import type { SceneElement } from "../types";
+import { createCanvasElement } from "../createCanvasElement";
+import type { Scene } from "../types";
 import { asset, references } from "./_assets";
 
-const narration = createCanvasNode("narration", { id: "n1", text: "hello" });
-const scene: SceneElement = { id: "s1", type: "scene", children: [narration] };
+const narration = createCanvasElement("narration", { id: "n1", text: "hello" });
+const scene: Scene = { id: "s1", type: "scene", children: [narration] };
 
-describe("createCanvasNode for an asset", () => {
+describe("createCanvasElement for an asset", () => {
 	it("gives it its fixed id over any id it is given, its name and its text", () => {
-		const avatar = createCanvasNode("asset_avatar", {
+		const avatar = createCanvasElement("asset_avatar", {
 			id: "e1",
 			attrs: { name: "Mia" },
 			text: "warm",
@@ -36,7 +36,7 @@ describe("createCanvasNode for an asset", () => {
 			generationAttributes: { name: "Mia" },
 		});
 		expect(getPromptText(avatar)).toBe("warm");
-		expect(createCanvasNode("asset_style", { id: "e1" }).id).toBe(
+		expect(createCanvasElement("asset_style", { id: "e1" }).id).toBe(
 			"asset_style",
 		);
 	});
@@ -44,7 +44,7 @@ describe("createCanvasNode for an asset", () => {
 	it("draws an avatar on the default image model, or the recommended one", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
 		const avatar = (defaultModels = {}) =>
-			createCanvasNode("asset_avatar", {
+			createCanvasElement("asset_avatar", {
 				attrs: { name: "Mia" },
 				defaultModels,
 			}).generationAttributes;
@@ -56,21 +56,23 @@ describe("createCanvasNode for an asset", () => {
 	it("puts a voice on the default speech model, or the recommended one", () => {
 		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
 		const voice = (defaultModels = {}) =>
-			createCanvasNode("asset_voice", { attrs: { name: "Mia" }, defaultModels })
-				.generationAttributes;
+			createCanvasElement("asset_voice", {
+				attrs: { name: "Mia" },
+				defaultModels,
+			}).generationAttributes;
 
 		expect(voice({ tts: cartesia })).toEqual({ name: "Mia", ...cartesia });
 		expect(voice()).toEqual({ name: "Mia", ...DEFAULT_TTS_MODEL });
 	});
 });
 
-describe("getAssets and getScriptElements", () => {
+describe("getAssets and getCanvasElements", () => {
 	it("pick the assets out in order, then the content of each scene", () => {
 		const style = asset("asset_style");
 		const mia = asset("asset_avatar", { name: "Mia" });
 
 		expect(getAssets([style, scene, mia])).toEqual([style, mia]);
-		expect(getScriptElements([style, scene, mia])).toEqual([
+		expect(getCanvasElements([style, scene, mia])).toEqual([
 			style,
 			mia,
 			narration,
@@ -96,7 +98,9 @@ describe("findAsset", () => {
 	});
 
 	it("does not take a content element that happens to hold an asset's id", () => {
-		const impostor = createCanvasNode("image", { id: assetId("asset_style") });
+		const impostor = createCanvasElement("image", {
+			id: assetId("asset_style"),
+		});
 
 		expect(findAsset([impostor], "asset_style")).toBeUndefined();
 	});

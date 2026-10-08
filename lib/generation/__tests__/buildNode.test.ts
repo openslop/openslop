@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { NARRATOR } from "@/lib/canvas/assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import type {
 	ElementType,
 	GeneratedElement,
-	ScriptElement,
+	CanvasElement,
 } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import {
@@ -19,14 +19,14 @@ import { staleReason } from "../staleReason";
 import { isNodeStale, needsGeneration } from "../staleness";
 
 let store: ProjectStore;
-let assets: ScriptElement[];
+let assets: CanvasElement[];
 
 const make = <T extends ElementType>(
 	type: T,
 	text = "",
 	attrs: Record<string, string> = {},
 	id?: string,
-) => createCanvasNode(type, { id, attrs, text });
+) => createCanvasElement(type, { id, attrs, text });
 
 const avatar = (name: string, appearance: string) =>
 	make("asset_avatar", appearance, { name });
@@ -42,14 +42,14 @@ const element = (
 	children: [{ id: `${id}-t`, type, text: "a sunset" }],
 });
 
-const context = (canvas: ScriptElement[]): BuildContext => ({
+const context = (canvas: CanvasElement[]): BuildContext => ({
 	state: store.getState(),
 	canvas: [...assets, ...canvas],
 	registry: DEFAULT_CONNECTOR_REGISTRY,
 	setAsset: () => {},
 });
 
-const resolveOn = (el: GeneratedElement, canvas: ScriptElement[]) =>
+const resolveOn = (el: GeneratedElement, canvas: CanvasElement[]) =>
 	buildNode(el, context(canvas));
 
 const resolve = (el: GeneratedElement) => resolveOn(el, []);

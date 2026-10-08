@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import { isGenerated, type ScriptElement } from "@/lib/canvas/types";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { isGenerated, type CanvasElement } from "@/lib/canvas/types";
 import { dependency, reading } from "../dependency";
 import { EMPTY_CONTEXT } from "./_context";
 
-const named = (id: string, name: string): ScriptElement =>
-	createCanvasNode("image", { id, attrs: { name } });
+const named = (id: string, name: string): CanvasElement =>
+	createCanvasElement("image", { id, attrs: { name } });
 
 const mia = named("mia", "Mia");
 const bob = named("bob", "Bob");
@@ -39,9 +39,9 @@ describe("reading", () => {
 
 	it("records what it reads under its label, and nothing when there is nothing to read", () => {
 		expect(nameOf.reads(mia, ctx)).toEqual({ "the name": "Mia" });
-		expect(nameOf.reads(createCanvasNode("image", { id: "x" }), ctx)).toEqual(
-			{},
-		);
+		expect(
+			nameOf.reads(createCanvasElement("image", { id: "x" }), ctx),
+		).toEqual({});
 	});
 
 	it("reads back the value its inputs recorded, not what the canvas says now", () => {

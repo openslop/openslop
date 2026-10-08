@@ -6,7 +6,7 @@ import {
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
-	type CanvasContentElement,
+	type ContentElement,
 	type SplitAttributes,
 } from "./types";
 import { clamp } from "@/lib/utils";
@@ -64,42 +64,40 @@ function clampedNumber(
 	return Number.isFinite(value) ? clamp(value, min, max) : fallback;
 }
 
-export function getVolume(element: CanvasContentElement): number {
+export function getVolume(element: ContentElement): number {
 	return clampedNumber(element.layoutAttributes?.volume, {
 		...VOLUME,
 		fallback: DEFAULT_VOLUME,
 	});
 }
 
-export function getDuration(element: CanvasContentElement): number {
+export function getDuration(element: ContentElement): number {
 	return clampedNumber(element.generationAttributes?.duration, {
 		...DURATION,
 		fallback: Number(DEFAULT_DURATION),
 	});
 }
 
-export function getLoops(element: CanvasContentElement): number {
+export function getLoops(element: ContentElement): number {
 	return clampedNumber(element.layoutAttributes?.loops, {
 		...LOOPS,
 		fallback: Number(DEFAULT_LOOPS),
 	});
 }
 
-export const getLoop = (element: CanvasContentElement): boolean =>
+export const getLoop = (element: ContentElement): boolean =>
 	element.layoutAttributes?.loop === "true";
 
 /** Absent means trimmed: a visual yields to its dialogue unless it says otherwise. */
-export const getTrimToDialogue = (element: CanvasContentElement): boolean =>
+export const getTrimToDialogue = (element: ContentElement): boolean =>
 	element.layoutAttributes?.trimToDialogue !== "false";
 
-export function getMotion(element: CanvasContentElement): MotionEffect {
+export function getMotion(element: ContentElement): MotionEffect {
 	const raw = element.layoutAttributes?.motion;
 	return isMotionEffect(raw) ? raw : DEFAULT_MOTION;
 }
 
-export function layoutAttributeSignature(
-	element: CanvasContentElement,
-): string {
+export function layoutAttributeSignature(element: ContentElement): string {
 	return LAYOUT_ATTRIBUTE_KEYS.map(
 		(key) => element.layoutAttributes?.[key] ?? "",
 	).join(":");

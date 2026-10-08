@@ -5,13 +5,13 @@ import type { Editor } from "slate";
 import compact from "lodash/compact";
 import pick from "lodash/pick";
 import { getAssets, referenceUrls } from "@/lib/canvas/assets";
-import { findNodeById } from "@/lib/canvas/editorOps";
+import { findElementById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
 import {
-	connectorOf,
 	isGenerated,
-	type ScriptElement,
+	type ElementType,
+	type CanvasElement,
 } from "@/lib/canvas/types";
 import {
 	measureElementLengths,
@@ -32,6 +32,8 @@ import { elementState } from "../elementState";
 import type { AgentToolContext, ElementImage } from "./context";
 import { executeToolCall } from "./registry";
 
+type PicturesOf = (element: CanvasElement) => ElementImage["pictures"];
+
 export function useAgentTools(editor: Editor) {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
@@ -48,12 +50,17 @@ export function useAgentTools(editor: Editor) {
 					source,
 					signal,
 				);
-			const picturesOf = (element: ScriptElement): ElementImage["pictures"] => {
-				if (element.type === "asset_references")
-					return { status: "idle", urls: referenceUrls([element]) };
-				if (connectorOf(element.type) !== "image") return undefined;
+			const generated: PicturesOf = (element) => {
 				const { status, result } = queue.getElementSnapshot(element.id);
 				return { status, urls: compact([getPrimaryUrl(result, "image")]) };
+			};
+			const picturesOf: Partial<Record<ElementType, PicturesOf>> = {
+				image: generated,
+				asset_avatar: generated,
+				asset_references: (element) => ({
+					status: "idle",
+					urls: referenceUrls([element]),
+				}),
 			};
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
@@ -61,12 +68,12 @@ export function useAgentTools(editor: Editor) {
 				measureElementLengths: () => measureElementLengths(editor.children),
 				measureRuntime: () => measureRuntime(editor.children),
 				elementImage: (id) => {
-					const element = findNodeById(editor, id)?.[0];
+					const element = findElementById(editor, id)?.[0];
 					return (
 						element && {
 							type: element.type,
 							prompt: getPromptText(element),
-							pictures: picturesOf(element),
+							pictures: picturesOf[element.type]?.(element),
 						}
 					);
 				},

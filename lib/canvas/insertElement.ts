@@ -1,14 +1,17 @@
 import { Editor, Path, Transforms } from "slate";
-import type { CanvasElementType } from "./types";
-import { createCanvasNode, type CreateNodeOptions } from "./createCanvasNode";
+import type { ContentType } from "./types";
+import {
+	createCanvasElement,
+	type CreateElementOptions,
+} from "./createCanvasElement";
 
 export function insertElement(
 	editor: Editor,
-	type: CanvasElementType,
+	type: ContentType,
 	at: Path,
-	overrides?: Pick<CreateNodeOptions, "attrs" | "text">,
+	overrides?: Pick<CreateElementOptions, "attrs" | "text">,
 ): string {
-	const node = createCanvasNode(type, {
+	const node = createCanvasElement(type, {
 		...overrides,
 		defaultModels: editor.defaultModels(),
 	});

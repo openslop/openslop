@@ -5,11 +5,11 @@ import {
 } from "@/lib/canvas/osmlSerializer";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import { isAssetElement } from "@/lib/canvas/guards";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import { getPromptText } from "@/lib/generation/inputs";
 import { deserializeWithScenes, splitScenes } from "../serialize";
 import {
@@ -18,10 +18,10 @@ import {
 } from "@/lib/canvas/elementAttributes";
 
 const makeEl = (
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	attrs?: Record<string, string>,
-): CanvasContentElement => ({
+): ContentElement => ({
 	id: `${type}-id`,
 	type,
 	...splitAttributes(attrs ?? {}),
@@ -29,9 +29,9 @@ const makeEl = (
 });
 
 const scenesOf = (...args: Parameters<typeof deserializeWithScenes>) =>
-	deserializeWithScenes(...args).filter(isSceneElement);
+	deserializeWithScenes(...args).filter(isScene);
 
-const makeScene = (children: CanvasContentElement[]): SceneElement => ({
+const makeScene = (children: ContentElement[]): Scene => ({
 	id: "scene-id",
 	type: SCENE_TYPE,
 	children,

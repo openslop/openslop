@@ -1,8 +1,8 @@
-import { isAssetType, isCanvasElementType } from "./guards";
+import { isElementType } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 import { parseXmlTag } from "./parseXmlTag";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { createCanvasNode } from "./createCanvasNode";
+import { createCanvasElement } from "./createCanvasElement";
 import type { ParsedElement } from "./types";
 import { unescapeXml } from "./xmlEscape";
 
@@ -75,9 +75,9 @@ export class OSMLStreamParser {
 		attributes: Record<string, string>,
 		defaultModels?: ConnectorModels,
 	): void {
-		if (isCanvasElementType(type) || isAssetType(type)) {
+		if (isElementType(type)) {
 			const { id, ...attrs } = attributes;
-			this.nodes.push(createCanvasNode(type, { id, attrs, defaultModels }));
+			this.nodes.push(createCanvasElement(type, { id, attrs, defaultModels }));
 			return;
 		}
 		// An unknown tag still takes its own text, which would otherwise run into the element before it.

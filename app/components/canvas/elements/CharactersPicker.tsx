@@ -12,7 +12,7 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { toggleShownCharacter } from "@/lib/canvas/assetOps";
 import { shownCharacters } from "@/lib/canvas/characterNames";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { useAvatarNames, useCharacterNames } from "@/lib/canvas/useAssets";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { CharacterPill } from "./CharacterPill";
@@ -45,11 +45,7 @@ function ProjectCharactersMenu({
 }
 
 /** Multi-select add picker (image elements: many characters per element). */
-export function CharactersPicker({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function CharactersPicker({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
 	const names = useAvatarNames();
 	const disabled = names.length === 0;
@@ -75,11 +71,7 @@ export function CharactersPicker({
 }
 
 /** Single-select switcher (character elements: exactly one character per element). */
-export function CharacterSwitcher({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function CharacterSwitcher({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
 	const names = useCharacterNames();
 	const currentName = element.generationAttributes?.name;

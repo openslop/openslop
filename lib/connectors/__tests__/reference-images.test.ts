@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { references } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
 import { pluginCtx, readsOf } from "./_state-ctx";
 
 const plugin = createReferenceImagesPlugin();
 
 const image = (attrs: Record<string, string> = {}) =>
-	createCanvasNode("image", { id: "el", attrs });
+	createCanvasElement("image", { id: "el", attrs });
 
 const OWN = "https://img/own.png, https://img/two.png";
 

@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { MagicVideo } from "@/components/ui/icon";
 import { useSloppy } from "@/app/components/sloppy/SloppyProvider";
 import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { animateImagePrompt } from "@/lib/script/refine/animatePrompt";
 import { useEditorPanel } from "../panel/EditorPanelContext";
 import { useElementGeneration } from "./ElementGenerationContext";
 
-export function AnimateButton({ element }: { element: CanvasContentElement }) {
+export function AnimateButton({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
 	const { result, status } = useElementGeneration();
 	const { send, loading } = useSloppy();

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import type { SceneElement } from "@/lib/canvas/types";
+import type { Scene } from "@/lib/canvas/types";
 import type { SceneSegment } from "@/lib/render/sceneSegments";
 import { buildStoryboardScenes } from "../storyboard/storyboardScenes";
 
-const scene = (id: string, childTypes: string[]): SceneElement => ({
+const scene = (id: string, childTypes: string[]): Scene => ({
 	id,
 	type: "scene",
 	children: childTypes.map((type, i) => ({
 		id: `${id}-${i}`,
-		type: type as SceneElement["children"][number]["type"],
+		type: type as Scene["children"][number]["type"],
 		children: [],
 	})),
 });

@@ -3,7 +3,7 @@ import isEqual from "lodash/isEqual";
 import PQueue from "p-queue";
 import { createEmitter } from "@/lib/store/emitter";
 import { saveProject, type SaveProjectInput } from "./api";
-import type { ProjectContent, ProjectDetails } from "./projectDocument";
+import type { SavedProject, ProjectDetails } from "./projectDocument";
 
 export const AUTOSAVE_DEBOUNCE_MS = 2000;
 
@@ -13,7 +13,7 @@ export interface AutosaverOptions {
 	 * Produces the content to save. Called once at construction for the baseline
 	 * and then when the debounce fires, so serializing stays off the per-keystroke path.
 	 */
-	read: () => ProjectContent;
+	read: () => SavedProject;
 	details: () => ProjectDetails;
 	onSaved: () => void;
 	onError: (error: unknown) => void;

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { NARRATOR } from "@/lib/canvas/assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { ScriptElement } from "@/lib/canvas/types";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import type { CanvasElement } from "@/lib/canvas/types";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import type {
@@ -43,8 +43,8 @@ const plugin = createSpeakerVoicePlugin();
 
 const line = (name?: string, attrs: Record<string, string> = {}) =>
 	name
-		? createCanvasNode("character", { id: "c1", attrs: { name, ...attrs } })
-		: createCanvasNode("narration", { id: "n1", attrs });
+		? createCanvasElement("character", { id: "c1", attrs: { name, ...attrs } })
+		: createCanvasElement("narration", { id: "n1", attrs });
 
 const voice = (name: string, attrs: Partial<Voice> = {}) =>
 	asset("asset_voice", { name, attrs });
@@ -55,12 +55,12 @@ const settled = (name: string, model: ModelRef) => ({
 	attrs: { ...model, voiceId: "v-found" },
 });
 
-const readOff = (element: ScriptElement, canvas: ScriptElement[]) =>
+const readOff = (element: CanvasElement, canvas: CanvasElement[]) =>
 	pluginCtx({ reads: readsOf(plugin, element, canvas) });
 
 const prepare = async (
-	element: ScriptElement,
-	canvas: ScriptElement[],
+	element: CanvasElement,
+	canvas: CanvasElement[],
 	language?: Voice["language"],
 ) => {
 	if (!plugin.prepare) throw new Error("no prepare");

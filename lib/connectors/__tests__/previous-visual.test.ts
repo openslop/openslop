@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import {
 	createPreviousVisualPlugin,
 	previousVisualDependency,
@@ -18,18 +18,18 @@ vi.mock("@/lib/connectors/video/captureFrames", () => ({
 }));
 
 const declaredOn = (
-	element: CanvasContentElement,
-	canvas: CanvasContentElement[] = [image, element],
+	element: ContentElement,
+	canvas: ContentElement[] = [image, element],
 ) => dependenciesOf(previousVisualDependency, element, canvas);
 
-const video = (attrs: Record<string, string> = {}): CanvasContentElement => ({
+const video = (attrs: Record<string, string> = {}): ContentElement => ({
 	id: "video-1",
 	type: "video",
 	generationAttributes: attrs,
 	children: [{ id: "t", type: "video", text: "slow pan" }],
 });
 
-const image: CanvasContentElement = {
+const image: ContentElement = {
 	id: "img-1",
 	type: "image",
 	children: [{ id: "t", type: "image", text: "a sunset" }],

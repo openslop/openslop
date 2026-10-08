@@ -1,5 +1,5 @@
 import type { Descendant } from "slate";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import type { TransitionType } from "./transitions";
 import { layoutAttributeSignature } from "../canvas/elementAttributes";
 
@@ -14,7 +14,7 @@ export function getLayoutKey(
 	transitionType: TransitionType,
 ): string {
 	const elementsKey = nodes
-		.filter(isSceneElement)
+		.filter(isScene)
 		.flatMap((scene) =>
 			scene.children.map(
 				(element) =>

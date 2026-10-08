@@ -1,10 +1,10 @@
 import { Editor, Path, Transforms } from "slate";
 import { setAsset } from "@/lib/canvas/assetOps";
 import {
-	findNodeById,
+	findElementById,
 	mergeAttrs,
-	retypeNode,
-	updateNodeText,
+	retypeElement,
+	updateElementText,
 } from "@/lib/canvas/editorOps";
 import {
 	isAssetElement,
@@ -12,8 +12,8 @@ import {
 	isContentElement,
 } from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insertElement";
-import { isSceneElement } from "@/lib/canvas/scenes";
-import { ASSET_TYPES } from "@/lib/canvas/types";
+import { isScene } from "@/lib/canvas/scenes";
+import { ELEMENT_TYPES } from "@/lib/canvas/types";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -65,7 +65,7 @@ function resolveInsertPath(
 	anchorMap: Record<string, string>,
 ): Path | null {
 	if (!op.anchor_id) {
-		const firstScene = editor.children.findIndex(isSceneElement);
+		const firstScene = editor.children.findIndex(isScene);
 		return op.position === "before" && firstScene >= 0
 			? [firstScene, 0]
 			: [editor.children.length];
@@ -73,7 +73,8 @@ function resolveInsertPath(
 
 	const resolvedId = anchorMap[op.anchor_id] ?? op.anchor_id;
 	const entry =
-		findNodeById(editor, resolvedId) ?? findNodeById(editor, op.anchor_id);
+		findElementById(editor, resolvedId) ??
+		findElementById(editor, op.anchor_id);
 	if (!entry || !isContentElement(entry[0])) return null;
 
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
@@ -86,7 +87,7 @@ function applyInsert(
 ): RefineOpResult {
 	if (isAssetType(op.type)) {
 		const name = op.attrs?.name;
-		if (!name !== !ASSET_TYPES[op.type].named)
+		if (!name !== !ELEMENT_TYPES[op.type].named)
 			return {
 				ok: false,
 				reason: `insert: ${op.type} ${name ? "takes no" : "needs a"} name`,
@@ -102,7 +103,7 @@ function applyInsert(
 	if (!at) {
 		return {
 			ok: false,
-			reason: `insert: no script element "${op.anchor_id}" to anchor on`,
+			reason: `insert: no element "${op.anchor_id}" to anchor on`,
 		};
 	}
 
@@ -121,7 +122,7 @@ function applyRemove(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "remove" }>,
 ): RefineOpResult {
-	const entry = findNodeById(editor, op.id);
+	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `remove: no element "${op.id}"` };
 	Transforms.removeNodes(editor, { at: entry[1] });
 	return OK;
@@ -131,7 +132,7 @@ function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
 ): RefineOpResult {
-	const entry = findNodeById(editor, op.id);
+	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 	const [found, at] = entry;
 
@@ -144,14 +145,14 @@ function applySet(
 	if (op.type && op.type !== found.type) {
 		if (!isContentElement(found))
 			return { ok: false, reason: `set: asset "${op.id}" keeps its type` };
-		retypeNode(editor, at, found, op.type);
+		retypeElement(editor, at, found, op.type);
 	}
 	if (op.attrs) {
 		mergeAttrs(editor, op.id, op.attrs);
 	}
 
 	if (op.text !== undefined) {
-		updateNodeText(editor, op.id, op.text);
+		updateElementText(editor, op.id, op.text);
 	}
 	return OK;
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { ScriptElement } from "@/lib/canvas/types";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import type { CanvasElement } from "@/lib/canvas/types";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import {
 	createCharacterVoicesPlugin,
@@ -47,7 +47,7 @@ beforeEach(() => {
 const plugin = createCharacterVoicesPlugin();
 
 const video = (characters?: string, model: ModelRef = SEEDANCE) =>
-	createCanvasNode("video", {
+	createCanvasElement("video", {
 		id: "video-1",
 		attrs: characters ? { characters, ...model } : model,
 	});
@@ -60,7 +60,7 @@ const voice = (name: string, voiceId?: string) =>
 
 const prepare = async (
 	characters: string | undefined,
-	canvas: ScriptElement[],
+	canvas: CanvasElement[],
 	model: ModelRef = SEEDANCE,
 ) => {
 	if (!plugin.prepare) throw new Error("no prepare");
@@ -69,7 +69,7 @@ const prepare = async (
 
 const before = async (
 	params: ParamsWithCharacterVoices,
-	canvas: ScriptElement[] = [],
+	canvas: CanvasElement[] = [],
 	model: ModelRef = SEEDANCE,
 ) => {
 	if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");

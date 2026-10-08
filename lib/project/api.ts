@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
-import type { ProjectContent } from "./projectDocument";
+import type { SavedProject } from "./projectDocument";
 
 export const ProjectRowSchema = z.object({
 	id: z.string(),
@@ -16,7 +16,7 @@ export const PROJECT_ROW_COLUMNS = Object.keys(ProjectRowSchema.shape).join(
 	", ",
 );
 
-export type SaveProjectInput = ProjectContent & {
+export type SaveProjectInput = SavedProject & {
 	name: string;
 	thumbnail_url: string | null;
 };

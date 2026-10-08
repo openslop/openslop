@@ -10,7 +10,7 @@ import { findAsset } from "@/lib/canvas/assets";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { content, scene, seedScene } from "./fixtures";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import type { CanvasEditor, SceneElement } from "@/lib/canvas/types";
+import type { CanvasEditor, Scene } from "@/lib/canvas/types";
 
 function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
 	const store = { ...initial };
@@ -26,7 +26,7 @@ function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
  * The real base handlers need a mounted DOM, so they are stubbed: the assertions
  * here are about what the plugin does versus what it hands back to the default.
  */
-function makeEditor(seed: SceneElement) {
+function makeEditor(seed: Scene) {
 	const base = withNodeId(
 		withFlatPaste(withScenes(withAssets(withReact(createEditor())))),
 	);

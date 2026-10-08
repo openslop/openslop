@@ -5,13 +5,13 @@ import { resolveElementConnector } from "@/lib/canvas/elementConnector";
 import {
 	isGenerated,
 	type GeneratedElement,
-	type ScriptElement,
+	type CanvasElement,
 } from "@/lib/canvas/types";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import type { BuildContext, GenerationNode, NodeId } from "./graph";
 
-export const generatedById = (canvas: ScriptElement[], id: string) =>
+export const generatedById = (canvas: CanvasElement[], id: string) =>
 	canvas.find(
 		(element): element is GeneratedElement =>
 			isGenerated(element) && element.id === id,

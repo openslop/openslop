@@ -11,7 +11,7 @@ import { isGenerationActive } from "@/lib/generation/snapshots";
 import { isNodeStale, needsGeneration } from "@/lib/generation/staleness";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNodes } from "@/lib/generation/useLiveNodes";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 
 export type GenerateScope = {
 	/** Nothing in scope carries a prompt, so there is nothing to generate. */
@@ -66,7 +66,7 @@ function describe(
  * and what it queues are decided in one place. Memoize `select`.
  */
 export function useGenerateScope(
-	select: (editor: Editor) => CanvasContentElement[],
+	select: (editor: Editor) => ContentElement[],
 	subject: GenerateSubject,
 ): GenerateScope {
 	const queue = useGenerationQueue();

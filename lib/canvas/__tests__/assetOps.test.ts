@@ -23,23 +23,24 @@ import {
 	NARRATOR,
 	referenceUrls,
 } from "../assets";
-import { createCanvasNode } from "../createCanvasNode";
+import { createCanvasElement } from "../createCanvasElement";
 import { flatAttributes } from "../elementAttributes";
 import { shownCharacters } from "../characterNames";
-import { findNodeById } from "../editorOps";
+import { findElementById } from "../editorOps";
 import { getContentElements } from "../scenes";
-import type { AssetType, CanvasContentElement, SceneElement } from "../types";
+import type { AssetType, ContentElement, Scene } from "../types";
 import { asset, references } from "./_assets";
 
 const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
-const narration = (id: string) => createCanvasNode("narration", { id });
+const narration = (id: string) => createCanvasElement("narration", { id });
 
-const scene = (
-	id: string,
-	...children: CanvasContentElement[]
-): SceneElement => ({ id, type: "scene", children });
+const scene = (id: string, ...children: ContentElement[]): Scene => ({
+	id,
+	type: "scene",
+	children,
+});
 
 function makeEditor(
 	children: Descendant[] = [],
@@ -207,8 +208,7 @@ describe("removeAsset and removeCharacter", () => {
 		type: "image" | "video",
 		id: string,
 		characters: string,
-	): CanvasContentElement =>
-		createCanvasNode(type, { id, attrs: { characters } });
+	): ContentElement => createCanvasElement(type, { id, attrs: { characters } });
 	const makeCharacters = () =>
 		makeEditor([
 			asset("asset_style", { text: "ink wash" }),
@@ -278,9 +278,9 @@ describe("removeAsset and removeCharacter", () => {
 
 describe("the characters a visual shows", () => {
 	const shot = () =>
-		createCanvasNode("image", { id: "img1", attrs: { characters: "Mia" } });
+		createCanvasElement("image", { id: "img1", attrs: { characters: "Mia" } });
 	const live = (editor: ReturnType<typeof makeEditor>) => {
-		const found = findNodeById(editor, "img1");
+		const found = findElementById(editor, "img1");
 		if (!found) throw new Error("img1 is gone");
 		return found[0];
 	};

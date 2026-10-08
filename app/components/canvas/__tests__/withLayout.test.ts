@@ -4,13 +4,13 @@ import { withReact } from "slate-react";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
-import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { withLayout } from "../plugins/withLayout";
 import { content, scene } from "./fixtures";
 
 const ASSETS = [
-	createCanvasNode("asset_style", { text: "noir" }),
-	createCanvasNode("asset_avatar", {
+	createCanvasElement("asset_style", { text: "noir" }),
+	createCanvasElement("asset_avatar", {
 		attrs: { name: "Mia" },
 		text: "a girl",
 	}),

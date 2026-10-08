@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { cn } from "@/lib/utils";
 import { useWriteThrough } from "@/app/components/canvas/hooks/useWriteThrough";
@@ -170,7 +170,7 @@ export function AttributeFields({
 	element,
 	specs,
 }: {
-	element: ScriptElement;
+	element: CanvasElement;
 	specs: Record<string, AttributeSpec>;
 }) {
 	const editor = useSlateStatic();

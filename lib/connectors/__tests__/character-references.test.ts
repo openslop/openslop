@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { CanvasContentElement, ScriptElement } from "@/lib/canvas/types";
+import type { ContentElement, CanvasElement } from "@/lib/canvas/types";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import {
 	createCharacterReferencesPlugin,
@@ -8,7 +8,7 @@ import {
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { dependenciesOf } from "./_state-ctx";
 
-const image = (characters: string): CanvasContentElement => ({
+const image = (characters: string): ContentElement => ({
 	id: "img",
 	type: "image",
 	generationAttributes: { characters },
@@ -26,7 +26,7 @@ function avatarResults(
 }
 
 describe("character avatar dependencies", () => {
-	const avatarsOf = (characters: string, canvas: ScriptElement[]) =>
+	const avatarsOf = (characters: string, canvas: CanvasElement[]) =>
 		dependenciesOf(
 			createCharacterReferencesPlugin(),
 			image(characters),

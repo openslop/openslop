@@ -8,7 +8,7 @@ import {
 } from "@/app/components/models/ModelSelect";
 import { MODEL_PROVENANCE } from "@/app/components/models/provenance";
 import { mergeAttrs } from "@/lib/canvas/editorOps";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import type { ModelPick } from "@/lib/connectors/attributes/schema";
 import { modelSourceFor, resolveModel } from "@/lib/connectors/models";
 import { useModelChain } from "@/lib/connectors/useDefaultModels";
@@ -20,7 +20,7 @@ export function ModelAttribute({
 	label,
 	className,
 }: {
-	element: ScriptElement;
+	element: CanvasElement;
 	pick: ModelPick;
 	label: string;
 	className?: string;

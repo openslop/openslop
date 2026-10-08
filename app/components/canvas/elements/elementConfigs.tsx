@@ -9,10 +9,10 @@ import {
 	type IconComponent,
 } from "@/components/ui/icon";
 import {
-	ELEMENT_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
-	type ElementTypeSpec,
+	CONTENT_TYPES,
+	type ContentElement,
+	type ContentType,
+	type ContentSpec,
 } from "@/lib/canvas/types";
 import { AnimateButton } from "./AnimateButton";
 import { CharacterSwitcher } from "./CharactersPicker";
@@ -21,13 +21,13 @@ import { ElementVoiceButton } from "./ElementVoiceButton";
 import { ShownCharacters } from "./ShownCharacters";
 
 type ElementControl = ComponentType<{
-	element: CanvasContentElement;
+	element: ContentElement;
 	className?: string;
 }>;
 
-/** How an element type looks on the canvas, and the controls its card adds to every card's own. */
-interface ElementConfig extends ElementTypeSpec {
-	type: CanvasElementType;
+/** How a content type looks on the canvas, and the controls its card adds to every card's own. */
+interface ElementConfig extends ContentSpec {
+	type: ContentType;
 	label: string;
 	Icon: IconComponent;
 	/** Tint for the square type-icon container, keyed to the media-type color. */
@@ -43,9 +43,9 @@ interface ElementConfig extends ElementTypeSpec {
 	actions?: ElementControl[];
 }
 
-type ElementPresentation = Omit<ElementConfig, keyof ElementTypeSpec | "type">;
+type ElementPresentation = Omit<ElementConfig, keyof ContentSpec | "type">;
 
-const PRESENTATION: Record<CanvasElementType, ElementPresentation> = {
+const PRESENTATION: Record<ContentType, ElementPresentation> = {
 	narration: {
 		label: "Narration",
 		Icon: Voice,
@@ -97,10 +97,10 @@ const PRESENTATION: Record<CanvasElementType, ElementPresentation> = {
 };
 
 export const ELEMENT_CONFIGS = Object.fromEntries(
-	(Object.keys(ELEMENT_TYPES) as CanvasElementType[]).map((type) => [
+	(Object.keys(CONTENT_TYPES) as ContentType[]).map((type) => [
 		type,
-		{ type, ...ELEMENT_TYPES[type], ...PRESENTATION[type] },
+		{ type, ...CONTENT_TYPES[type], ...PRESENTATION[type] },
 	]),
-) as Record<CanvasElementType, ElementConfig>;
+) as Record<ContentType, ElementConfig>;
 
 export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

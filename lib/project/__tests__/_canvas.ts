@@ -1,5 +1,5 @@
 import { createEditor, type Descendant, type Editor } from "slate";
-import { getScriptElements } from "@/lib/canvas/assets";
+import { getCanvasElements } from "@/lib/canvas/assets";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { AssetResult } from "@/lib/connectors/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
@@ -18,7 +18,7 @@ export const buildContextOf = (
 	state: ProjectData = createProjectStore().getState(),
 ): BuildContext => ({
 	state,
-	canvas: getScriptElements(nodes),
+	canvas: getCanvasElements(nodes),
 	registry: DEFAULT_CONNECTOR_REGISTRY,
 	setAsset: () => {},
 });

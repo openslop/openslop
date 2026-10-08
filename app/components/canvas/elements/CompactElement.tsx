@@ -1,6 +1,6 @@
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { ELEMENT_CONFIGS } from "./elementConfigs";
 import { splitTextDirection } from "../utils/textDirection";
 
@@ -10,7 +10,7 @@ export function CompactElement({
 	children,
 }: {
 	attributes: RenderElementProps["attributes"];
-	element: CanvasContentElement;
+	element: ContentElement;
 	children: React.ReactNode;
 }) {
 	const config = ELEMENT_CONFIGS[element.type];

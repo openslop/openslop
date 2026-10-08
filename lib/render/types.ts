@@ -1,8 +1,4 @@
-import type {
-	CanvasElementType,
-	ElementRole,
-	LayerType,
-} from "@/lib/canvas/types";
+import type { ContentType, ElementRole, LayerType } from "@/lib/canvas/types";
 import type { TextTimestamp } from "@/lib/connectors/types";
 import type { CaptionStyle } from "../captions/captionStyle";
 import type { MotionEffect } from "./motionEffectNames";
@@ -10,7 +6,7 @@ import type { TransitionType } from "./transitions";
 
 export type ResolvedElement = {
 	id: string;
-	type: CanvasElementType;
+	type: ContentType;
 	role: ElementRole;
 	layer: LayerType;
 	/** The scene that holds it, and its place in the document. */
@@ -37,7 +33,7 @@ export type Sequence = {
 
 export type RenderLayout = {
 	series: Sequence[];
-	sequences: Partial<Record<CanvasElementType, Sequence[]>>;
+	sequences: Partial<Record<ContentType, Sequence[]>>;
 	fps: number;
 	width: number;
 	height: number;
