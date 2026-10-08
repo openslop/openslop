@@ -1,3 +1,4 @@
+import compact from "lodash/compact";
 import isNil from "lodash/isNil";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
@@ -14,7 +15,12 @@ import {
 } from "./characterNames";
 import { mergeAttrs, updateNodeText, type AttributeChanges } from "./editorOps";
 import { isAssetElement } from "./guards";
-import { assetId, type AssetType, type ScriptElement } from "./types";
+import {
+	assetId,
+	type AssetElement,
+	type AssetType,
+	type ScriptElement,
+} from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
@@ -102,8 +108,18 @@ export function addCharacter(editor: Editor, name: string): void {
 	if (name !== NARRATOR) ensureAsset(editor, "asset_avatar", name);
 }
 
-/** A character's look and voice. */
-export function removeCharacter(editor: Editor, name: string): void {
+/** A character's look and voice, handed back so they can be restored. */
+export function removeCharacter(editor: Editor, name: string): AssetElement[] {
+	const removed = compact([
+		findAsset(editor.children, "asset_avatar", name),
+		findAsset(editor.children, "asset_voice", name),
+	]);
 	removeAsset(editor, "asset_avatar", name);
 	removeAsset(editor, "asset_voice", name);
+	return removed;
+}
+
+/** Puts removed assets back; a copy already on the canvas gives way to them. */
+export function restoreAssets(editor: Editor, assets: AssetElement[]): void {
+	Transforms.insertNodes(editor, assets, { at: [0] });
 }

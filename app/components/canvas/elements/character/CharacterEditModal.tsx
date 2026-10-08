@@ -3,11 +3,7 @@
 import { useSlateStatic } from "slate-react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
-import {
-	ensureAsset,
-	removeAsset,
-	removeCharacter,
-} from "@/lib/canvas/assetOps";
+import { ensureAsset, removeAsset } from "@/lib/canvas/assetOps";
 import { elementModelPick } from "@/lib/canvas/elementConnector";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset } from "@/lib/canvas/useAssets";
@@ -23,6 +19,7 @@ import { ElementHistoryButton } from "../ElementHistoryButton";
 import { ElementUploadButton } from "../ElementUploadButton";
 import { OutputPreview } from "../OutputPreview";
 import { AssetDialog } from "./AssetDialog";
+import { deleteCharacter } from "./deleteCharacter";
 import { SwitchField, TextAreaField } from "./fields";
 import { VoiceEditor } from "./VoiceEditor";
 
@@ -54,7 +51,7 @@ export function CharacterEditModal({
 					variant="outline"
 					size="sm"
 					onClick={() => {
-						removeCharacter(editor, name);
+						deleteCharacter(editor, name);
 						onClose();
 					}}
 					className="text-muted-foreground sm:mr-auto"

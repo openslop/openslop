@@ -10,6 +10,7 @@ import {
 	removeAssets,
 	removeCharacter,
 	removeShownCharacter,
+	restoreAssets,
 	setAsset,
 	setReferenceImages,
 	toggleShownCharacter,
@@ -23,6 +24,7 @@ import {
 	referenceUrls,
 } from "../assets";
 import { createCanvasNode } from "../createCanvasNode";
+import { flatAttributes } from "../elementAttributes";
 import { shownCharacters } from "../characterNames";
 import { findNodeById } from "../editorOps";
 import { getContentElements } from "../scenes";
@@ -235,6 +237,18 @@ describe("removeAsset and removeCharacter", () => {
 		]);
 		expect(characterNames(editor.children)).toEqual(["Bob", NARRATOR]);
 		expect(shownBy(editor)).toEqual(shown);
+	});
+
+	it("restores what it removed, the character's look and voice back as they were", () => {
+		const editor = makeCharacters();
+		const before = getAssets(editor.children).map(flatAttributes);
+
+		restoreAssets(editor, removeCharacter(editor, "Mia"));
+
+		expect(getAssets(editor.children).map(flatAttributes)).toEqual(
+			expect.arrayContaining(before),
+		);
+		expect(characterNames(editor.children)).toEqual(["Mia", "Bob", NARRATOR]);
 	});
 
 	it("removes only the avatar, so the character keeps its voice and drops out of pictures", () => {

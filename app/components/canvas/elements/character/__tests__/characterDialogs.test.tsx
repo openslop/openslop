@@ -16,6 +16,8 @@ import {
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const Nothing = () => null;
+const toast = vi.fn();
+vi.mock("sonner", () => ({ toast }));
 vi.mock("../../ElementGenerationContext", () => ({
 	ElementGenerationProvider: ({ children }: { children: ReactNode }) =>
 		children,
@@ -208,5 +210,25 @@ describe("CharacterEditModal", () => {
 
 		expect(characterNames(canvas.editor.children)).toEqual([NARRATOR]);
 		expect(onClose).toHaveBeenCalledOnce();
+	});
+
+	it("brings the character back from the toast's undo", async () => {
+		canvas = mountOnCanvas([mia("a girl"), miaVoice()]);
+		open();
+
+		const remove = Array.from(document.body.querySelectorAll("button")).find(
+			(button) => button.textContent === "Delete",
+		);
+		await act(async () => remove?.click());
+		const [message, { action }] = toast.mock.lastCall ?? [];
+		act(() => action.onClick());
+
+		expect(message).toBe("Deleted Mia");
+		expect(characterNames(canvas.editor.children)).toEqual(["Mia"]);
+		expect(
+			getElementBodyText(
+				findAsset(canvas.editor.children, "asset_avatar", "Mia") ?? mia(""),
+			),
+		).toBe("a girl");
 	});
 });

@@ -2,9 +2,9 @@
 
 import { useSlateStatic } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { removeCharacter } from "@/lib/canvas/assetOps";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/useAssets";
 import { useReferenceImages } from "../hooks/useReferenceImages";
+import { deleteCharacter } from "./character/deleteCharacter";
 import {
 	ArtStyleAssetTile,
 	CharacterAssetTile,
@@ -32,7 +32,7 @@ export function AssetStrip({
 				<li key={name}>
 					<CharacterAssetTile
 						name={name}
-						onRemove={() => removeCharacter(editor, name)}
+						onRemove={() => deleteCharacter(editor, name)}
 					/>
 				</li>
 			))}
