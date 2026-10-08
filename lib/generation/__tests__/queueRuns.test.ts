@@ -14,6 +14,7 @@ import type {
 } from "@/lib/connectors/types";
 import { createProjectStore } from "@/lib/project/store";
 import type { BuildContext } from "../graph";
+import { read } from "../declare";
 import { buildNode, generatedById } from "../generationGraph";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
@@ -119,11 +120,14 @@ describe("running a graph", () => {
 	describe("the prepare step", () => {
 		const settleVoice: ConnectorPlugin = {
 			name: "voice",
-			reads: (_, ctx) => ({
-				voice:
-					findAsset(ctx.canvas, "asset_voice", NARRATOR)?.generationAttributes
-						?.voiceId ?? "",
-			}),
+			reads: [
+				read(
+					"voice",
+					(_, { canvas }) =>
+						findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
+							?.voiceId ?? "",
+				),
+			],
 			prepare: async () => [
 				{ type: "asset_voice", name: NARRATOR, attrs: { voiceId: "v-7" } },
 			],

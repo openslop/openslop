@@ -27,7 +27,12 @@ export const pluginReads = (
 	ctx: BuildContext,
 ): Record<string, string> =>
 	pickBy(
-		Object.assign({}, ...plugins.map((plugin) => plugin.reads?.(element, ctx))),
+		Object.assign(
+			{},
+			...plugins.flatMap((plugin) =>
+				(plugin.reads ?? []).map((reads) => reads(element, ctx)),
+			),
+		),
 		isPresent,
 	);
 
@@ -38,7 +43,9 @@ export const pluginDependencies = (
 	ctx: BuildContext,
 ): [string, GeneratedElement][] =>
 	plugins.flatMap((plugin) =>
-		Object.entries(pickBy(plugin.dependencies?.(element, ctx), isPresent)),
+		(plugin.dependencies ?? []).flatMap((dependencies) =>
+			Object.entries(pickBy(dependencies(element, ctx), isPresent)),
+		),
 	);
 
 /** `job` is not compared: it is how a node runs, not what it reads. */

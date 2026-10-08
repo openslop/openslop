@@ -23,6 +23,7 @@ import {
 	pluginReads,
 	prepareNode,
 } from "../generationGraph";
+import { depend, read } from "../declare";
 import { EMPTY_CONTEXT } from "./_context";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
@@ -54,15 +55,15 @@ const contextNow = (): BuildContext => ({
 	setAsset: () => {},
 });
 
-const redsAvatar: ConnectorPlugin["dependencies"] = (_, { canvas }) => ({
-	"Red's avatar": findAsset(canvas, "asset_avatar", "Red"),
-});
+const redsAvatar = depend("Red's avatar", (_, { canvas }) =>
+	findAsset(canvas, "asset_avatar", "Red"),
+);
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: {
 		plugins: [
-			{ name: "first", dependencies: redsAvatar },
-			{ name: "second", dependencies: redsAvatar },
+			{ name: "first", dependencies: [redsAvatar] },
+			{ name: "second", dependencies: [redsAvatar] },
 		],
 	},
 };
@@ -77,7 +78,7 @@ const edit = (...elements: ContentElement[]) => {
 	graph = new GenerationGraph(contextNow(), graph);
 };
 
-const read = (of: ContentElement) => graph.resolve(of);
+const nodeOf = (of: ContentElement) => graph.resolve(of);
 
 beforeEach(() => {
 	assets = [];
@@ -92,10 +93,10 @@ describe("GenerationGraph", () => {
 		const video = element("vid", "video", "a pan");
 		edit(image, video);
 
-		const node = read(image);
-		read(video);
+		const node = nodeOf(image);
+		nodeOf(video);
 
-		expect(read(image)).toBe(node);
+		expect(nodeOf(image)).toBe(node);
 	});
 
 	it("shares a node between every dependent that reaches it", () => {
@@ -104,10 +105,12 @@ describe("GenerationGraph", () => {
 		const third = element("third", "video", "a tilt", linked);
 		edit(first, second, third);
 
-		const reached = read(second).dependsOn[PREVIOUS];
+		const reached = nodeOf(second).dependsOn[PREVIOUS];
 
 		expect(reached?.id).toBe("first");
-		expect(read(third).dependsOn[PREVIOUS]?.dependsOn[PREVIOUS]).toBe(reached);
+		expect(nodeOf(third).dependsOn[PREVIOUS]?.dependsOn[PREVIOUS]).toBe(
+			reached,
+		);
 	});
 
 	it("labels the edge to a dependency and shares the node it reaches", () => {
@@ -115,31 +118,33 @@ describe("GenerationGraph", () => {
 		const video = element("vid", "video", "a pan", linked);
 		edit(image, video);
 
-		expect(read(video).dependsOn[PREVIOUS]).toBe(read(image));
+		expect(nodeOf(video).dependsOn[PREVIOUS]).toBe(nodeOf(image));
 	});
 
 	it("keeps a node that reads as it did a revision ago", () => {
 		const image = element("img", "image", "a sunset");
 		edit(image, element("nar", "narration", "hello"));
-		const before = read(image);
+		const before = nodeOf(image);
 
 		edit(image, element("nar", "narration", "hello there"));
 
-		expect(read(image)).toBe(before);
+		expect(nodeOf(image)).toBe(before);
 	});
 
 	it("replaces an edited node and every node that depends on it", () => {
 		const second = element("second", "video", "a zoom", linked);
 		const narration = element("nar", "narration", "hello");
 		edit(element("first", "video", "a pan", linked), second, narration);
-		const dependent = read(second);
-		const bystander = read(narration);
+		const dependent = nodeOf(second);
+		const bystander = nodeOf(narration);
 
 		edit(element("first", "video", "a slow pan", linked), second, narration);
 
-		expect(read(second)).not.toBe(dependent);
-		expect(read(second).dependsOn[PREVIOUS]?.inputs.prompt).toBe("a slow pan");
-		expect(read(narration)).toBe(bystander);
+		expect(nodeOf(second)).not.toBe(dependent);
+		expect(nodeOf(second).dependsOn[PREVIOUS]?.inputs.prompt).toBe(
+			"a slow pan",
+		);
+		expect(nodeOf(narration)).toBe(bystander);
 	});
 
 	it("replaces a node whose dependency became another element", () => {
@@ -147,27 +152,27 @@ describe("GenerationGraph", () => {
 		const other = element("other", "image", "a sunrise");
 		const video = element("vid", "video", "a pan", linked);
 		edit(image, other, video);
-		const before = read(video);
+		const before = nodeOf(video);
 
 		edit(other, image, video);
 
-		expect(read(video)).not.toBe(before);
-		expect(read(video).dependsOn[PREVIOUS]?.id).toBe("img");
+		expect(nodeOf(video)).not.toBe(before);
+		expect(nodeOf(video).dependsOn[PREVIOUS]?.id).toBe("img");
 	});
 
 	it("reads the assets again when they change, keeping what reads the same", () => {
 		const image = element("img", "image", "a sunset");
 		const narration = element("nar", "narration", "hi");
 		edit(image, narration);
-		const styled = read(image);
-		const spoken = read(narration);
+		const styled = nodeOf(image);
+		const spoken = nodeOf(narration);
 
 		assets = [createCanvasElement("asset_style", { text: "noir" })];
 		graph = new GenerationGraph(contextNow(), graph);
 
-		expect(read(image)).not.toBe(styled);
-		expect(read(image).inputs.reads["the art style"]).toBe("noir");
-		expect(read(narration)).toBe(spoken);
+		expect(nodeOf(image)).not.toBe(styled);
+		expect(nodeOf(image).inputs.reads["the art style"]).toBe("noir");
+		expect(nodeOf(narration)).toBe(spoken);
 	});
 
 	it("throws the same for every reader of a node that cannot be built", () => {
@@ -177,8 +182,8 @@ describe("GenerationGraph", () => {
 		edit(image);
 		const failure = `Two dependencies of "img" share the label "Red's avatar"`;
 
-		expect(() => read(image)).toThrow(failure);
-		expect(() => read(image)).toThrow(failure);
+		expect(() => nodeOf(image)).toThrow(failure);
+		expect(() => nodeOf(image)).toThrow(failure);
 	});
 });
 
@@ -194,11 +199,14 @@ describe("prepareNode", () => {
 	});
 	const readsVoice: ConnectorPlugin = {
 		name: "voice",
-		reads: (_, { canvas }) => ({
-			voice:
-				findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
-					?.voiceId ?? "",
-		}),
+		reads: [
+			read(
+				"voice",
+				(_, { canvas }) =>
+					findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
+						?.voiceId ?? "",
+			),
+		],
 	};
 	const image = element("img", "image", "a sunset");
 	const setAsset = vi.fn(({ type, name, attrs }: AssetWrite) => {
@@ -211,7 +219,7 @@ describe("prepareNode", () => {
 	const prepare = (...plugins: ConnectorPlugin[]) => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins } };
 		edit(image);
-		return prepareNode(read(image), writing, new AbortController().signal);
+		return prepareNode(nodeOf(image), writing, new AbortController().signal);
 	};
 
 	beforeEach(() => {
@@ -247,7 +255,7 @@ describe("prepareNode", () => {
 		};
 		edit(image);
 		const controller = new AbortController();
-		const prepared = prepareNode(read(image), writing, controller.signal);
+		const prepared = prepareNode(nodeOf(image), writing, controller.signal);
 		controller.abort();
 
 		await expect(prepared).rejects.toThrow();
@@ -257,7 +265,7 @@ describe("prepareNode", () => {
 	it("fails loudly when the element left the canvas", async () => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins: [] } };
 		edit(image);
-		const node = read(image);
+		const node = nodeOf(image);
 		edit();
 
 		await expect(
@@ -274,12 +282,16 @@ describe("what the plugins declare", () => {
 	});
 	const declaring: ConnectorPlugin = {
 		name: "declaring",
-		reads: () => ({
-			"the art style": "noir",
-			"the references": undefined,
-			"the language": "",
-		}),
-		dependencies: () => ({ "Red's avatar": avatar, "Bob's avatar": undefined }),
+		reads: [
+			() => ({
+				"the art style": "noir",
+				"the references": undefined,
+				"the language": "",
+			}),
+		],
+		dependencies: [
+			() => ({ "Red's avatar": avatar, "Bob's avatar": undefined }),
+		],
 	};
 
 	it("records only the values a plugin found, leaving out empty ones", () => {

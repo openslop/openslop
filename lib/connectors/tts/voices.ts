@@ -1,5 +1,7 @@
 import pick from "lodash/pick";
 import { findAsset, NARRATOR, voiceFrom, voiceOf } from "@/lib/canvas/assets";
+import type { CanvasElement } from "@/lib/canvas/types";
+import type { Read } from "@/lib/generation/declare";
 import type { BuildContext } from "@/lib/generation/graph";
 import { declaredLanguage } from "@/lib/project/language";
 import { VoiceSchema, VOICE_TRAITS, type Voice } from "@/lib/project/types";
@@ -13,16 +15,18 @@ const CHOSEN_VOICE_KEYS = ["provider", "model", "voiceId"] as const;
 const voiceLabel = (name: string) => `${name}'s voice`;
 
 /** The voices the speakers have chosen, recorded so choosing another stales whoever speaks in them. */
-export const voiceReads = (canvas: readonly unknown[], names: string[]) =>
-	Object.fromEntries(
-		names.map((name) => {
-			const asset = findAsset(canvas, "asset_voice", name);
-			return [
-				voiceLabel(name),
-				asset && JSON.stringify(pick(voiceFrom(asset), CHOSEN_VOICE_KEYS)),
-			];
-		}),
-	);
+export const chosenVoices =
+	(speakers: (element: CanvasElement) => string[]): Read =>
+	(element, { canvas }) =>
+		Object.fromEntries(
+			speakers(element).map((name) => {
+				const asset = findAsset(canvas, "asset_voice", name);
+				return [
+					voiceLabel(name),
+					asset && JSON.stringify(pick(voiceFrom(asset), CHOSEN_VOICE_KEYS)),
+				];
+			}),
+		);
 
 export const recordedVoice = (ctx: PluginContext, name = NARRATOR): Voice =>
 	VoiceSchema.parse(JSON.parse(ctx.reads?.[voiceLabel(name)] ?? "{}"));

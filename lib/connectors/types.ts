@@ -1,9 +1,6 @@
 import { z } from "zod";
-import type {
-	AssetType,
-	GeneratedElement,
-	CanvasElement,
-} from "@/lib/canvas/types";
+import type { AssetType, CanvasElement } from "@/lib/canvas/types";
+import type { Dependency, Read } from "@/lib/generation/declare";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspectRatio";
@@ -106,24 +103,15 @@ export type AssetWrite = {
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
-	/**
-	 * Declaring a node is what makes the element wait for it, go stale with it
-	 * and receive its result; an undeclared read goes stale-blind.
-	 */
-	dependencies?(
-		element: CanvasElement,
-		ctx: BuildContext,
-	): Record<string, GeneratedElement | undefined>;
+	/** What the element waits for, goes stale with and receives the results of. */
+	dependencies?: readonly Dependency[];
 	/**
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.
 	 */
 	model?(element: CanvasElement, canvas: CanvasElement[]): ModelRef;
-	/** Values the node reads off the canvas or the settings, recorded in its inputs so a change stales it. */
-	reads?(
-		element: CanvasElement,
-		ctx: BuildContext,
-	): Record<string, string | undefined>;
+	/** What the element records off the canvas or the settings, so a change stales it. */
+	reads?: readonly Read[];
 	/** Assets to write before the node is built to run, such as the voice a search found. */
 	prepare?(element: CanvasElement, ctx: BuildContext): Promise<AssetWrite[]>;
 	beforeGenerate?(
