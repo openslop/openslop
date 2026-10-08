@@ -1,8 +1,14 @@
-import type { ElementOf, ElementType } from "@/lib/canvas/types";
-import type { ConnectorModels } from "@/lib/connectors/models";
+import {
+	assetId,
+	connectorOf,
+	type ElementOf,
+	type ElementType,
+} from "@/lib/canvas/types";
+import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
-import { attributeSchemaFor, fixedIdOf, modelFor } from "./elementConnector";
+import { attributeSchemaFor } from "./elementConnector";
+import { isAssetType } from "./guards";
 import { makeNodeId } from "./nodeUtils";
 
 export type CreateElementOptions = {
@@ -17,12 +23,17 @@ export function createCanvasElement<T extends ElementType>(
 	type: T,
 	opts: CreateElementOptions = {},
 ): ElementOf<T> {
+	const connector = connectorOf(type);
 	const defaults = opts.defaultModels ?? {};
-	const given = opts.attrs ?? {};
-	const attrs = { ...given, ...modelFor(type, given, defaults) };
+	const attrs = {
+		...opts.attrs,
+		...(connector && resolveModel(connector, opts.attrs, defaults[connector])),
+	};
 	const attributes = attributeSchemaFor(type, attrs).resolve(attrs, defaults);
 	return {
-		id: fixedIdOf(type, given.name) ?? opts.id ?? makeNodeId(),
+		id: isAssetType(type)
+			? assetId(type, opts.attrs?.name)
+			: (opts.id ?? makeNodeId()),
 		type,
 		...splitAttributes(attributes),
 		children: [
