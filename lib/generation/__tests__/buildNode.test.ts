@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { ElementType, ScriptElement } from "@/lib/canvas/types";
+import type {
+	ElementType,
+	GeneratedElement,
+	ScriptElement,
+} from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
@@ -17,8 +21,8 @@ import { isNodeStale, needsGeneration } from "../staleness";
 let store: ProjectStore;
 let assets: ScriptElement[];
 
-const make = (
-	type: ElementType,
+const make = <T extends ElementType>(
+	type: T,
 	text = "",
 	attrs: Record<string, string> = {},
 	id?: string,
@@ -31,7 +35,7 @@ const element = (
 	id: string,
 	type: "image" | "video" | "narration",
 	customAttributes?: Record<string, string>,
-): ScriptElement => ({
+): GeneratedElement => ({
 	id,
 	type,
 	...splitAttributes({ ...customAttributes }),
@@ -45,12 +49,12 @@ const context = (canvas: ScriptElement[]): BuildContext => ({
 	setAsset: () => {},
 });
 
-const resolveOn = (el: ScriptElement, canvas: ScriptElement[]) =>
+const resolveOn = (el: GeneratedElement, canvas: ScriptElement[]) =>
 	buildNode(el, context(canvas));
 
-const resolve = (el: ScriptElement) => resolveOn(el, []);
+const resolve = (el: GeneratedElement) => resolveOn(el, []);
 
-const idsOf = (el: ScriptElement) =>
+const idsOf = (el: GeneratedElement) =>
 	flattenGraph([resolve(el)]).map((node) => node.id);
 
 const edgesOf = (node: GenerationNode) =>
@@ -110,15 +114,6 @@ describe("buildNode", () => {
 			connectorType,
 		});
 	});
-
-	it.each(["asset_style", "asset_references"] as const)(
-		"builds no node for a %s, which generates nothing",
-		(type) => {
-			expect(() => resolve(make(type))).toThrow(
-				`A ${type} element generates nothing`,
-			);
-		},
-	);
 
 	it("keys each edge by the label its plugin declared", () => {
 		const img = element("img", "image");

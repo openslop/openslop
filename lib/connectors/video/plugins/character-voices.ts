@@ -3,9 +3,7 @@ import { findAsset, voiceOf } from "@/lib/canvas/assets";
 import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
-	shownCharacters,
 } from "@/lib/canvas/characterNames";
-import type { ScriptElement } from "@/lib/canvas/types";
 import { createConnector } from "@/lib/connectors/factory";
 import { modelEntry, resolveModel } from "@/lib/connectors/models";
 import { settleVoice, speakerVoice } from "@/lib/connectors/tts/voices";
@@ -24,14 +22,11 @@ export type ParamsWithCharacterVoices = Partial<ModelRef> & {
 const listens = (model: ModelRef) =>
 	Boolean(modelEntry("video", model).referenceAudios);
 
-const heardCharacters = (element: ScriptElement) =>
-	listens(resolveModel("video", element.generationAttributes))
-		? shownCharacters(element)
-		: [];
-
-const voicedNames = (params: ParamsWithCharacterVoices) =>
-	listens(resolveModel("video", params))
-		? parseCharacterNames(params[CHARACTERS_ATTR])
+const heardCharacters = (
+	attrs: Partial<ModelRef> & { [CHARACTERS_ATTR]?: string } = {},
+) =>
+	listens(resolveModel("video", attrs))
+		? parseCharacterNames(attrs[CHARACTERS_ATTR])
 		: [];
 
 /** The voices of the characters in a video, as reference audios named after them, for a model that listens. */
@@ -41,14 +36,14 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 		reads: (element, ctx) =>
 			Object.assign(
 				{},
-				...heardCharacters(element).map((name) =>
+				...heardCharacters(element.generationAttributes).map((name) =>
 					speakerVoice(name).reads(element, ctx),
 				),
 			),
 		async prepare(element, ctx) {
 			const { canvas } = ctx;
 			const writes = await Promise.all(
-				heardCharacters(element)
+				heardCharacters(element.generationAttributes)
 					.filter((name) => findAsset(canvas, "asset_voice", name))
 					.map((name) =>
 						settleVoice(name, resolveModel("tts", voiceOf(canvas, name)), ctx),
@@ -59,7 +54,7 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 		async beforeGenerate(params, ctx) {
 			const voices = compact(
 				await Promise.all(
-					voicedNames(params).map(async (name) => {
+					heardCharacters(params).map(async (name) => {
 						const voice = speakerVoice(name).value(ctx);
 						if (!voice.voiceId) return undefined;
 						const preview = await createConnector(

@@ -42,8 +42,7 @@ export function applyTemplate(
 		}
 	});
 
-	// Built after the reset and the characters land, so each avatar records what the template set.
-	const context = { ...buildContext(), state: store.getState() };
+	const context = buildContext();
 	for (const [name, { avatar }] of characters) {
 		const asset = findAsset(editor.children, "asset_avatar", name);
 		if (avatar && asset)

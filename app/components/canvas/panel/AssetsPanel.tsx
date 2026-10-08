@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useAsset, useCharacterNames } from "@/lib/canvas/useAssets";
+import { useCharacterNames, useHasAsset } from "@/lib/canvas/useAssets";
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { useReferenceImages } from "../hooks/useReferenceImages";
 import {
@@ -90,7 +90,7 @@ function ReferencesCard() {
 			>
 				{urls.map((url, index) => (
 					<ReferenceAssetTile
-						key={`${index}:${url}`}
+						key={url}
 						url={url}
 						index={index}
 						onRemove={() => remove(index)}
@@ -104,7 +104,7 @@ function ReferencesCard() {
 
 function ArtStyleCard() {
 	const { editAsset } = useAssetEditors();
-	const hasStyle = useAsset("asset_style") !== undefined;
+	const hasStyle = useHasAsset("asset_style");
 	return (
 		<AssetCard
 			title="Art style"

@@ -1,7 +1,7 @@
 "use client";
 
 import { Image, Mic, Palette, User } from "@/components/ui/icon";
-import { useAsset } from "@/lib/canvas/useAssets";
+import { useHasAsset } from "@/lib/canvas/useAssets";
 import { useCharacterAvatar } from "../hooks/useCharacterAvatar";
 import { AssetTile } from "./AssetTile";
 import { useAssetEditors } from "./character/AssetEditProvider";
@@ -25,7 +25,7 @@ type CharacterTileProps = TileProps & { name: string; onRemove?: () => void };
 
 /** A character by their look, or by their voice when they have no look. */
 export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
-	const hasAvatar = useAsset("asset_avatar", name) !== undefined;
+	const hasAvatar = useHasAsset("asset_avatar", name);
 	return hasAvatar ? (
 		<AvatarAssetTile name={name} {...tile} />
 	) : (
@@ -100,7 +100,7 @@ export function ReferenceTiles({
 }) {
 	return urls.map((url, index) => (
 		<ReferenceTile
-			key={`reference:${index}:${url}`}
+			key={`reference:${url}`}
 			url={url}
 			index={index}
 			onRemove={() => onRemove(index)}

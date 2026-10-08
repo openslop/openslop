@@ -15,7 +15,7 @@ import type {
 import { createProjectStore } from "@/lib/project/store";
 import type { BuildContext } from "../graph";
 import { dependency } from "../dependency";
-import { buildNode } from "../generationGraph";
+import { buildNode, generatedById } from "../generationGraph";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 
@@ -42,7 +42,7 @@ const context = (): BuildContext => ({
 });
 
 const byId = (id: string) => {
-	const found = canvas.find((element) => element.id === id);
+	const found = generatedById(canvas, id);
 	if (!found) throw new Error(`no element ${id}`);
 	return found;
 };
@@ -125,7 +125,7 @@ describe("running a graph", () => {
 			],
 			dependencies: dependency("the wave", (_, { canvas }) =>
 				findAsset(canvas, "asset_voice", NARRATOR)
-					? canvas.find(({ id }) => id === "wave")
+					? generatedById(canvas, "wave")
 					: undefined,
 			).dependencies,
 		};
@@ -193,7 +193,8 @@ describe("running a graph", () => {
 			);
 
 			expect(
-				byId(assetId("asset_voice", NARRATOR)).generationAttributes?.voiceId,
+				findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
+					?.voiceId,
 			).toBe("v-7");
 			expect(mediaGenerate.mock.calls[0]?.[1].reads?.voice).toBe("v-7");
 			expect(queue.getElementSnapshot("img").resultInputs?.reads.voice).toBe(

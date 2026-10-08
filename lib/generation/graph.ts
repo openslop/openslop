@@ -29,9 +29,18 @@ export type GenerationNode = {
 	job: GenerationJob;
 };
 
+/** The settings a build reads, so the live graph rebuilds when one changes. */
+export const buildSettings = ({
+	videoSettings,
+	scriptSettings,
+}: ProjectData) => ({
+	videoSettings,
+	scriptSettings,
+});
+
 /** What a build reads, and the writer `prepare` puts its assets through. */
 export type BuildContext = {
-	state: Omit<ProjectData, "title">;
+	state: ReturnType<typeof buildSettings>;
 	canvas: ScriptElement[];
 	registry: ConnectorRegistry;
 	setAsset: (write: AssetWrite) => void;

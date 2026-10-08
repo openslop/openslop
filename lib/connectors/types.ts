@@ -1,5 +1,9 @@
 import { z } from "zod";
-import type { AssetType, ScriptElement } from "@/lib/canvas/types";
+import type {
+	AssetType,
+	GeneratedElement,
+	ScriptElement,
+} from "@/lib/canvas/types";
 import type { DependencyResults } from "@/lib/generation/dependency";
 import type { BuildContext } from "@/lib/generation/graph";
 import type { WithMetadata } from "@/lib/providers/base";
@@ -112,7 +116,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	dependencies?(
 		element: ScriptElement,
 		ctx: BuildContext,
-	): Record<string, ScriptElement>;
+	): Record<string, GeneratedElement>;
 	/**
 	 * The model the element generates on, for a type whose model is picked
 	 * somewhere other than the element itself.

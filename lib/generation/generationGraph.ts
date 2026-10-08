@@ -2,10 +2,20 @@ import isEqual from "lodash/isEqual";
 import memoizeOne from "memoize-one";
 import { shallow } from "zustand/shallow";
 import { resolveElementConnector } from "@/lib/canvas/elementConnector";
-import type { ScriptElement } from "@/lib/canvas/types";
+import {
+	isGenerated,
+	type GeneratedElement,
+	type ScriptElement,
+} from "@/lib/canvas/types";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
 import type { BuildContext, GenerationNode, NodeId } from "./graph";
+
+export const generatedById = (canvas: ScriptElement[], id: string) =>
+	canvas.find(
+		(element): element is GeneratedElement =>
+			isGenerated(element) && element.id === id,
+	);
 
 /** `job` is not compared: it is how a node runs, not what it reads. */
 const isUnchanged = (before: GenerationNode, after: GenerationNode) =>
@@ -24,11 +34,11 @@ export class GenerationGraph {
 		this.previousNodes = previous?.nodes ?? new Map();
 	}
 
-	resolve = (element: ScriptElement): GenerationNode =>
+	resolve = (element: GeneratedElement): GenerationNode =>
 		this.nodes.get(element.id) ??
-		this.build(this.ctx.canvas.find(({ id }) => id === element.id) ?? element);
+		this.build(generatedById(this.ctx.canvas, element.id) ?? element);
 
-	private build(element: ScriptElement): GenerationNode {
+	private build(element: GeneratedElement): GenerationNode {
 		const { id } = element;
 		const cached = this.nodes.get(id);
 		if (cached) return cached;
@@ -64,7 +74,10 @@ export class GenerationGraph {
 		}
 	}
 
-	private dependenciesOf(element: ScriptElement, plugins: ConnectorPlugin[]) {
+	private dependenciesOf(
+		element: GeneratedElement,
+		plugins: ConnectorPlugin[],
+	) {
 		const declared = plugins.flatMap((plugin) =>
 			Object.entries(plugin.dependencies?.(element, this.ctx) ?? {}),
 		);
@@ -89,10 +102,12 @@ export class GenerationGraph {
 
 export const createGraphFor = () => {
 	let graph: GenerationGraph | undefined;
-	return memoizeOne((_document: unknown, buildContext: () => BuildContext) => {
-		graph = new GenerationGraph(buildContext(), graph);
-		return graph;
-	});
+	return memoizeOne(
+		(buildContext: () => BuildContext, ..._revision: unknown[]) => {
+			graph = new GenerationGraph(buildContext(), graph);
+			return graph;
+		},
+	);
 };
 
 /** Writes what the node's plugins settle, then builds it again from the canvas as written. */
@@ -102,7 +117,7 @@ export async function prepareNode(
 	signal: AbortSignal,
 ): Promise<GenerationNode> {
 	const ctx = context();
-	const element = ctx.canvas.find(({ id }) => id === node.id);
+	const element = generatedById(ctx.canvas, node.id);
 	if (!element) throw new Error(`Element "${node.id}" left the canvas`);
 	const writes = await Promise.all(
 		(node.job.config.plugins ?? []).map(
@@ -115,11 +130,11 @@ export async function prepareNode(
 }
 
 export const buildNode = (
-	element: ScriptElement,
+	element: GeneratedElement,
 	ctx: BuildContext,
 ): GenerationNode => new GenerationGraph(ctx).resolve(element);
 
 export const buildNodes = (
-	elements: ScriptElement[],
+	elements: GeneratedElement[],
 	ctx: BuildContext,
 ): GenerationNode[] => elements.map(new GenerationGraph(ctx).resolve);

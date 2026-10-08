@@ -1,4 +1,4 @@
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { GeneratedElement, ScriptElement } from "@/lib/canvas/types";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { BuildContext } from "./graph";
 
@@ -11,13 +11,13 @@ export function dependency(
 	pick: (
 		element: ScriptElement,
 		ctx: BuildContext,
-	) => ScriptElement | undefined,
+	) => GeneratedElement | undefined,
 ) {
 	return {
 		dependencies: (
 			element: ScriptElement,
 			ctx: BuildContext,
-		): Record<string, ScriptElement> => {
+		): Record<string, GeneratedElement> => {
 			const target = pick(element, ctx);
 			return target ? { [label]: target } : {};
 		},

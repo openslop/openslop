@@ -8,9 +8,9 @@ import { staleReason } from "@/lib/generation/staleReason";
 import { buildNode } from "@/lib/generation/generationGraph";
 import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { useLiveNode } from "@/lib/generation/useLiveNodes";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { GeneratedElement } from "@/lib/canvas/types";
 
-export function useGenerate(element: ScriptElement) {
+export function useGenerate(element: GeneratedElement) {
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
 	const node = useLiveNode(element);

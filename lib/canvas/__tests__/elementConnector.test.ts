@@ -120,19 +120,6 @@ describe("resolveElementConnector for an avatar", () => {
 	});
 });
 
-describe("resolveElementConnector for metadata", () => {
-	it("throws, since metadata never generates", () => {
-		for (const type of [
-			"asset_voice",
-			"asset_style",
-			"asset_references",
-		] as const)
-			expect(() => resolveElementConnector(asset(type), registry, [])).toThrow(
-				/generates nothing/,
-			);
-	});
-});
-
 describe("createCanvasNode", () => {
 	it("stores the resolved pair, so the element names its own provider", () => {
 		const node = createCanvasNode("image", {
@@ -204,11 +191,7 @@ describe("asset schemas", () => {
 });
 
 describe("elementModelPick", () => {
-	it("picks an avatar's model from the image models, and throws for a type that does not generate", () => {
-		expect(() => elementModelPick(asset("asset_style"))).toThrow(/no model/);
-		expect(() =>
-			elementModelPick(asset("asset_voice", { name: "Mia" })),
-		).toThrow(/no model/);
+	it("picks an avatar's model from the image models", () => {
 		expect(elementModelPick(asset("asset_avatar", { name: "Mia" })).type).toBe(
 			"image",
 		);

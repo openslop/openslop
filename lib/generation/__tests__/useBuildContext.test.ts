@@ -57,10 +57,6 @@ vi.mock("@/lib/config/ConfigProvider", () => ({
 }));
 
 let store: ProjectStore;
-vi.mock("@/lib/project/useProject", () => ({
-	useProject: <T>(selector: (state: unknown) => T) =>
-		selector(store.getState()),
-}));
 vi.mock("@/lib/project/ProjectStoreProvider", () => ({
 	useProjectStoreHandle: () => store,
 }));
@@ -103,21 +99,20 @@ describe("useBuildContext", () => {
 		expect(context().canvas[0]?.children[0]?.text).toBe("shot one, rewritten");
 	});
 
-	it("changes when the project state changes, which a build also reads", () => {
-		children = document(video("vid-1", "shot one"));
+	it("keeps its identity while the settings change", () => {
 		const before = render(useBuildContext);
 
 		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
-		expect(render(useBuildContext)).not.toBe(before);
+		expect(render(useBuildContext)).toBe(before);
 	});
 
-	it("keeps its identity while the title is typed", () => {
-		const before = render(useBuildContext);
+	it("reads the settings when called, not when rendered", () => {
+		const context = render(useBuildContext);
 
-		store.getState().setTitle("Moon");
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
-		expect(render(useBuildContext)).toBe(before);
+		expect(context().state.videoSettings.aspectRatio).toBe("9:16");
 	});
 
 	it("reads every element of the document, assets first", () => {

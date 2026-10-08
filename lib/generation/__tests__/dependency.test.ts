@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
-import type { ScriptElement } from "@/lib/canvas/types";
+import { isGenerated, type ScriptElement } from "@/lib/canvas/types";
 import { dependency, reading } from "../dependency";
 import { EMPTY_CONTEXT } from "./_context";
 
@@ -12,7 +12,9 @@ const bob = named("bob", "Bob");
 const ctx = { ...EMPTY_CONTEXT, canvas: [mia, bob] };
 
 const bobs = dependency("Bob's", (_, { canvas }) =>
-	canvas.find((element) => element.generationAttributes?.name === "Bob"),
+	canvas
+		.filter(isGenerated)
+		.find((element) => element.generationAttributes?.name === "Bob"),
 );
 
 describe("dependency", () => {

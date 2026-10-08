@@ -9,10 +9,10 @@ import { createCanvasNode } from "@/lib/canvas/createCanvasNode";
 import {
 	SCENE_TYPE,
 	type CanvasContentElement,
-	type ScriptElement,
+	type GeneratedElement,
 } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import { createProjectStore } from "@/lib/project/store";
+import { createProjectStore, type ProjectContext } from "@/lib/project/store";
 import type { GenerationNode } from "../graph";
 import { LiveGraphProvider, useResolveNode } from "../LiveGraphProvider";
 
@@ -21,7 +21,8 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 const editor = { children: [] as Descendant[] };
 vi.mock("slate-react", () => ({ useSlateStatic: () => editor }));
 
-const state = createProjectStore().getState();
+const store = createProjectStore();
+const state = store.getState();
 const contextNow = () =>
 	vi.fn(() => ({
 		state,
@@ -31,8 +32,15 @@ const contextNow = () =>
 	}));
 let buildContext = contextNow();
 vi.mock("../useBuildContext", () => ({ useBuildContext: () => buildContext }));
+vi.mock("@/lib/project/useProject", async () => {
+	const { useStore } = await import("zustand");
+	return {
+		useProject: <T,>(selector: (state: ProjectContext) => T) =>
+			useStore(store, selector),
+	};
+});
 
-type Resolve = (element: ScriptElement) => GenerationNode;
+type Resolve = (element: GeneratedElement) => GenerationNode;
 let resolve: Resolve;
 function Reader({ onRead }: { onRead: (resolve: Resolve) => void }) {
 	onRead(useResolveNode());
@@ -106,5 +114,17 @@ describe("LiveGraphProvider", () => {
 		];
 
 		expect(resolve(image).inputs.reads["the art style"]).toBe("noir");
+	});
+
+	it("builds a new revision when the settings change", () => {
+		const image = element("img", "a sunset");
+		edit(image);
+		render();
+		resolve(image);
+
+		act(() => store.getState().updateVideoSettings({ aspectRatio: "9:16" }));
+		resolve(image);
+
+		expect(buildContext).toHaveBeenCalledTimes(2);
 	});
 });

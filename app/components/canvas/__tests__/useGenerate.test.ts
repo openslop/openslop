@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import type { CanvasContentElement, ScriptElement } from "@/lib/canvas/types";
+import type {
+	CanvasContentElement,
+	GeneratedElement,
+} from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
@@ -52,8 +55,8 @@ vi.mock("@/lib/generation/useBuildContext", () => ({
 }));
 const graphFor = createGraphFor();
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
-	useResolveNode: () => (target: ScriptElement) =>
-		graphFor(canvas, buildContext).resolve(target),
+	useResolveNode: () => (target: GeneratedElement) =>
+		graphFor(buildContext, canvas).resolve(target),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");

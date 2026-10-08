@@ -19,7 +19,7 @@ import {
 	ELEMENT_TYPES,
 	type AssetType,
 	type ElementType,
-	type GeneratedType,
+	type GeneratedElement,
 	type ScriptElement,
 } from "./types";
 
@@ -31,13 +31,12 @@ type ElementConnector = {
 
 /** The connector, model and plugins an element generates with: its type's, whatever the type. */
 export function resolveElementConnector(
-	element: ScriptElement,
+	element: GeneratedElement,
 	registry: ConnectorRegistry,
 	canvas: ScriptElement[],
 ): ElementConnector {
 	const type = connectorOf(element.type);
-	if (!type) throw new Error(`A ${element.type} element generates nothing`);
-	const config = registry[element.type as GeneratedType];
+	const config = registry[element.type];
 	const supplier = config.plugins?.find((plugin) => plugin.model);
 	return {
 		type,
@@ -69,9 +68,9 @@ export function attributeSchemaFor(
 export const elementSchema = (element: ScriptElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
 
-/** The element's own model, picked from its connector type's. Only asked of a type with models. */
-export function elementModelPick(element: ScriptElement): ModelPick {
-	const type = connectorOf(element.type);
-	if (!type) throw new Error(`A ${element.type} element has no model`);
-	return { kind: "model", type, ...ELEMENT_MODEL };
-}
+/** The element's own model, picked from its connector type's. */
+export const elementModelPick = (element: GeneratedElement): ModelPick => ({
+	kind: "model",
+	type: connectorOf(element.type),
+	...ELEMENT_MODEL,
+});

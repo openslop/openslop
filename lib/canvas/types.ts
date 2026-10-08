@@ -139,19 +139,20 @@ const CONNECTORS: Record<ElementType, { connector?: AssetConnectorType }> = {
 	...ASSET_TYPES,
 };
 
-/** What a type generates on; metadata generates nothing. */
-export const connectorOf = (
-	type: ElementType,
-): AssetConnectorType | undefined => CONNECTORS[type].connector;
-
 export type GeneratedType =
 	| CanvasElementType
 	| keyof typeof GENERATED_ASSET_TYPES;
 
+/** What a type generates on; metadata generates nothing. */
+export function connectorOf(type: GeneratedType): AssetConnectorType;
+export function connectorOf(type: ElementType): AssetConnectorType | undefined;
+export function connectorOf(type: ElementType) {
+	return CONNECTORS[type].connector;
+}
+
 export const isGenerated = (
 	element: ScriptElement,
-): element is CanvasNode<GeneratedType> =>
-	connectorOf(element.type) !== undefined;
+): element is GeneratedElement => connectorOf(element.type) !== undefined;
 
 export const ElementTypeSchema = z.enum(
 	Object.keys(CONNECTORS) as [ElementType, ...ElementType[]],
@@ -182,6 +183,8 @@ export type AssetElement<T extends AssetType = AssetType> = CanvasNode<T>;
 
 /** Anything on the canvas that holds text and attributes: all but a scene. */
 export type ScriptElement = CanvasContentElement | AssetElement;
+
+export type GeneratedElement = CanvasNode<GeneratedType>;
 
 export type SceneElement = {
 	id: string;

@@ -84,7 +84,7 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: Untitled");
+		expect(outcome.ok && outcome.output).toContain("- title: not set");
 		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
 		expect(outcome.ok && outcome.output).toContain(
 			"## Generation state\nNone yet.",

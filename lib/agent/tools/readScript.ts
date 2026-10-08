@@ -1,7 +1,6 @@
 import dedent from "dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
-import { deriveProjectName } from "@/lib/project/projectName";
 import type { ElementState } from "../elementState";
 import { defineTool } from "./defineTool";
 
@@ -41,7 +40,7 @@ export const readScript = defineTool({
 				script ? `\`\`\`xml\n${script}\n\`\`\`` : "The canvas is empty.",
 			]),
 			section("Project", [
-				`- title: ${deriveProjectName(title)}`,
+				`- title: ${title.trim() || "not set"}`,
 				`- language: ${scriptSettings.language}`,
 				`- length: ${scriptSettings.length}`,
 				`- format: ${scriptSettings.format}`,

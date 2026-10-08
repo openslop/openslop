@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
-import type { ScriptElement } from "@/lib/canvas/types";
+import type { GeneratedElement } from "@/lib/canvas/types";
 import { useGenerate } from "../hooks/useGenerate";
 
 type ElementGeneration = ReturnType<typeof useGenerate>;
@@ -16,7 +16,7 @@ export function ElementGenerationProvider({
 	element,
 	children,
 }: {
-	element: ScriptElement;
+	element: GeneratedElement;
 	children: ReactNode;
 }) {
 	const generation = useGenerate(element);

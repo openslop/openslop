@@ -28,3 +28,8 @@ export const useAsset = <T extends AssetType>(
 	name?: string,
 ): AssetElement<T> | undefined =>
 	useSlateSelector((editor) => findAsset(editor.children, type, name));
+
+export const useHasAsset = (type: AssetType, name?: string): boolean =>
+	useSlateSelector(
+		(editor) => findAsset(editor.children, type, name) !== undefined,
+	);
