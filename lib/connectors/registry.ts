@@ -32,7 +32,6 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	sound: {},
 	music: {},
 	asset_avatar: {
-		// No character-references: an avatar depending on avatars could depend on itself.
 		plugins: [
 			createCharacterAvatarPlugin(),
 			createArtStylePlugin(),
