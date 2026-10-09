@@ -55,15 +55,6 @@ export async function runOnError(
 	}
 }
 
-/** Adds reference images after those the params already carry. */
-export function withReferences<T extends { referenceImages?: string[] }>(
-	params: T,
-	urls: string[],
-): T {
-	return urls.length === 0
-		? params
-		: {
-				...params,
-				referenceImages: [...(params.referenceImages ?? []), ...urls],
-			};
-}
+/** A `mergeWith` customizer: a list is appended to, anything else replaced. */
+export const appendArrays = (current: unknown, added: unknown) =>
+	Array.isArray(current) ? current.concat(added) : undefined;

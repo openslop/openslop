@@ -97,7 +97,7 @@ describe("previous-visual plugin", () => {
 		it("leaves an unlinked video with no start frame alone", async () => {
 			await expect(
 				before({ prompt: "slow pan", continuity: "false" }),
-			).resolves.toEqual({ prompt: "slow pan" });
+			).resolves.toEqual({ prompt: "slow pan", referenceImages: [] });
 		});
 
 		it("opens on a picture by URL without a dependency", async () => {
@@ -106,6 +106,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/a.png",
+				referenceImages: [],
 			});
 		});
 
@@ -118,6 +119,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/sunset.png",
+				referenceImages: [],
 			});
 		});
 
@@ -140,7 +142,7 @@ describe("previous-visual plugin", () => {
 					startFrame: "previous",
 					continuity: "true",
 				}),
-			).resolves.toEqual({ prompt: "slow pan" });
+			).resolves.toEqual({ prompt: "slow pan", referenceImages: [] });
 		});
 
 		it("opens on a previous video's end alone", async () => {
@@ -149,6 +151,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/last.png",
+				referenceImages: [],
 			});
 			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4", ["last"]);
 		});

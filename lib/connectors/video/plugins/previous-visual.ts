@@ -1,5 +1,6 @@
 import { previousVisual } from "@/lib/canvas/scenes";
-import { withReferences } from "@/lib/connectors/plugins";
+import mergeWith from "lodash/mergeWith";
+import { appendArrays } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { Dependency } from "@/lib/generation/declare";
 import { captureFrames } from "@/lib/connectors/video/captureFrames";
@@ -70,9 +71,11 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 				continuity === "true"
 					? await previousPictures(source, CONTINUITY_FRAMES)
 					: [];
-			return withReferences(
-				{ ...params, ...(frameImage && { frameImage }) },
-				references,
+			return mergeWith(
+				{},
+				params,
+				{ ...(frameImage && { frameImage }), referenceImages: references },
+				appendArrays,
 			);
 		},
 	};

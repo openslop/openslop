@@ -1,10 +1,11 @@
+import mergeWith from "lodash/mergeWith";
 import { describe, expect, it } from "vitest";
 import {
 	runAfterGenerate,
 	runBeforeGenerate,
 	runOnError,
 	runTransformPrompt,
-	withReferences,
+	appendArrays,
 } from "../plugins";
 import type { ConnectorPlugin } from "../types";
 
@@ -86,20 +87,22 @@ describe("plugins", () => {
 	});
 });
 
-describe("withReferences", () => {
-	const params = (referenceImages?: string[]) =>
-		referenceImages ? { prompt: "a", referenceImages } : { prompt: "a" };
-
+describe("appendArrays", () => {
 	it.each([
 		[
-			"adds the urls after the references already there",
-			["x"],
-			["y", "z"],
-			["x", "y", "z"],
+			"appends to a list",
+			{ refs: ["x"] },
+			{ refs: ["y", "z"] },
+			{ refs: ["x", "y", "z"] },
 		],
-		["starts a list when there is none", undefined, ["y"], ["y"]],
-		["adds nothing when there are no urls", undefined, [], undefined],
-	])("%s", (_, own, urls, expected) => {
-		expect(withReferences(params(own), urls)).toEqual(params(expected));
+		["starts a list when there is none", {}, { refs: ["y"] }, { refs: ["y"] }],
+		[
+			"replaces anything else",
+			{ prompt: "a" },
+			{ prompt: "b" },
+			{ prompt: "b" },
+		],
+	])("%s", (_, params, patch, expected) => {
+		expect(mergeWith({}, params, patch, appendArrays)).toEqual(expected);
 	});
 });

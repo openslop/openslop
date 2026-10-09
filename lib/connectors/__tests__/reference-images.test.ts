@@ -16,7 +16,7 @@ describe("createReferenceImagesPlugin", () => {
 	const EXISTING = "https://img/existing.png";
 
 	it.each([
-		["leaves params alone with none anywhere", {}, {}, [], {}],
+		["adds no images with none anywhere", {}, {}, [], { referenceImages: [] }],
 		[
 			"uses the project's images",
 			{},
@@ -50,7 +50,7 @@ describe("createReferenceImagesPlugin", () => {
 			{},
 			{ referenceImagesOverride: "" },
 			[references(STORE)],
-			{},
+			{ referenceImages: [] },
 		],
 	])("%s", (_, own, attrs, canvas, expected) => {
 		const ctx = pluginCtx({ reads: readsOf(plugin, image(attrs), canvas) });

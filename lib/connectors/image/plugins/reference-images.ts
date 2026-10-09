@@ -4,7 +4,8 @@ import {
 	REFERENCE_IMAGES_ATTR,
 	serializeReferenceImages,
 } from "@/lib/connectors/attributes/referenceImages";
-import { withReferences } from "@/lib/connectors/plugins";
+import mergeWith from "lodash/mergeWith";
+import { appendArrays } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import type { Read } from "@/lib/generation/declare";
 
@@ -33,9 +34,15 @@ export function createReferenceImagesPlugin(): ConnectorPlugin<ParamsWithReferen
 		reads: [inheritedReferences],
 		beforeGenerate(params, ctx) {
 			const { [REFERENCE_IMAGES_ATTR]: override, ...rest } = params;
-			return withReferences(
+			return mergeWith(
+				{},
 				rest,
-				parseReferenceImages(override ?? ctx.reads?.[PROJECT_REFERENCES]) ?? [],
+				{
+					referenceImages:
+						parseReferenceImages(override ?? ctx.reads?.[PROJECT_REFERENCES]) ??
+						[],
+				},
+				appendArrays,
 			);
 		},
 	};

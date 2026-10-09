@@ -4,7 +4,8 @@ import {
 	parseCharacterNames,
 	shownCharacters,
 } from "@/lib/canvas/characterNames";
-import { withReferences } from "@/lib/connectors/plugins";
+import mergeWith from "lodash/mergeWith";
+import { appendArrays } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import type { Dependency } from "@/lib/generation/declare";
 import { findAsset } from "@/lib/canvas/assets";
@@ -39,9 +40,11 @@ export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCha
 			);
 			if (avatars.length === 0) return rest;
 
-			return withReferences(
-				{ ...rest, prompt: `${rest.prompt}. No nameplates` },
-				avatars,
+			return mergeWith(
+				{},
+				rest,
+				{ prompt: `${rest.prompt}. No nameplates`, referenceImages: avatars },
+				appendArrays,
 			);
 		},
 	};
