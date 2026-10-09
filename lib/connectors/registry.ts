@@ -1,5 +1,8 @@
 import type { GeneratedType } from "@/lib/canvas/types";
+import { createArtStylePlugin } from "./image/plugins/art-style";
 import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
+import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
+import { createDimensionsPlugin } from "./plugins/dimensions";
 import { buildVisualPlugins } from "./plugins/visualChain";
 import { createSpeakerVoicePlugin } from "./tts/plugins/speaker-voice";
 import { createCharacterVoicesPlugin } from "./video/plugins/character-voices";
@@ -29,6 +32,12 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	sound: {},
 	music: {},
 	asset_avatar: {
-		plugins: [createCharacterAvatarPlugin(), ...buildVisualPlugins("image")],
+		// No character-references: an avatar depending on avatars could depend on itself.
+		plugins: [
+			createCharacterAvatarPlugin(),
+			createArtStylePlugin(),
+			createReferenceImagesPlugin(),
+			createDimensionsPlugin("image"),
+		],
 	},
 };

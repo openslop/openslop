@@ -134,6 +134,21 @@ describe("buildNode", () => {
 		expect(resolveOn(el, [el]).dependsOn).toEqual({});
 	});
 
+	it("builds an avatar showing itself without depending on it", () => {
+		const red = make("asset_avatar", "red hood", {
+			name: "Red",
+			characters: "Red",
+		});
+
+		const node = resolveOn(red, [red]);
+
+		expect(node.dependsOn).toEqual({});
+		expect(node.inputs.reads).toMatchObject({
+			"the art style": "noir",
+			"the reference images": "a.png",
+		});
+	});
+
 	it("depends on the avatar of each character it shows, and no other", () => {
 		assets = [...assets, avatar("Bob", "tall")];
 		const ids = idsOf(element("img", "image", { characters: "Alice" }));
