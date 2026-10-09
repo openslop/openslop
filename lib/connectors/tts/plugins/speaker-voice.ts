@@ -1,3 +1,4 @@
+import pick from "lodash/pick";
 import { speakerOf, voiceOf } from "@/lib/canvas/assets";
 import type {
 	ConnectorPlugin,
@@ -10,7 +11,7 @@ export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "speaker-voice",
 		model: ({ generationAttributes: attrs }, canvas) =>
-			voiceOf(canvas, speakerOf(attrs)),
+			pick(voiceOf(canvas, speakerOf(attrs)), ["provider", "model"]),
 		reads: [
 			chosenVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
 		],
