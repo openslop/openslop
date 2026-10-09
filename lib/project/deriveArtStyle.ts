@@ -30,5 +30,7 @@ export async function deriveArtStyle(
 		maxTokens: 4096,
 		thinkingLevel: "low",
 	});
-	return text.trim();
+	const style = text.trim();
+	if (!style) throw new Error("The model described no art style");
+	return style;
 }

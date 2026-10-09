@@ -17,6 +17,7 @@ import {
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { useAsset, useAssets } from "@/lib/canvas/useAssets";
 import { setAsset } from "@/lib/canvas/assetOps";
+import { toastError } from "@/lib/toastError";
 import { AssetDialog } from "../character/AssetDialog";
 import { FieldLabel, TextAreaField } from "../character/fields";
 import { ReferenceImages } from "../ReferenceImages";
@@ -41,11 +42,14 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const deriveFromReferences = async () => {
 		setDeriving(true);
 		try {
-			const derived = await deriveArtStyle(
-				createConnector("llm", model),
-				artStyleReferences(assets, queue),
+			setStyle(
+				await deriveArtStyle(
+					createConnector("llm", model),
+					artStyleReferences(assets, queue),
+				),
 			);
-			if (derived) setStyle(derived);
+		} catch (error) {
+			toastError(error, "Deriving the art style failed");
 		} finally {
 			setDeriving(false);
 		}

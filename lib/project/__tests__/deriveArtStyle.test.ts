@@ -57,4 +57,10 @@ describe("deriveArtStyle", () => {
 			referenceImages: ["https://example.com/a.jpg"],
 		});
 	});
+
+	it("throws when the model describes nothing", async () => {
+		await expect(
+			deriveArtStyle(llm("  "), ["https://example.com/a.jpg"]),
+		).rejects.toThrow("The model described no art style");
+	});
 });
