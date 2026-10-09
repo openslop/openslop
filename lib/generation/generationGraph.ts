@@ -19,40 +19,23 @@ export const generatedById = (canvas: CanvasElement[], id: string) =>
 			isGenerated(element) && element.id === id,
 	);
 
-const mergeUniqueLabels = <T>(
-	records: Record<string, T | undefined>[],
-): Record<string, T> => {
+type Declared = { reads: string; dependencies: GeneratedElement };
+
+/** What the plugins declare of one kind, by label; a label two plugins share is refused, an empty value left out. */
+export const pluginRecords = <K extends keyof Declared>(
+	plugins: ConnectorPlugin[],
+	kind: K,
+	element: GeneratedElement,
+	ctx: BuildContext,
+): Record<string, Declared[K]> => {
+	const records = plugins.flatMap((plugin) =>
+		(plugin[kind] ?? []).map((declare) => declare(element, ctx)),
+	);
 	const labels = records.flatMap(Object.keys);
 	const repeated = labels.find((label, i) => labels.indexOf(label) !== i);
 	if (repeated) throw new Error(`Two plugins declare "${repeated}"`);
 	return pickBy(Object.assign({}, ...records));
 };
-
-/** What the plugins read off the canvas and the settings; an empty or missing value is left out. */
-export const pluginReads = (
-	plugins: ConnectorPlugin[],
-	element: GeneratedElement,
-	ctx: BuildContext,
-): Record<string, string> =>
-	mergeUniqueLabels(
-		plugins.flatMap((plugin) =>
-			(plugin.reads ?? []).map((reads) => reads(element, ctx)),
-		),
-	);
-
-/** The elements the plugins depend on, by label; one they found none of is left out. */
-export const pluginDependencies = (
-	plugins: ConnectorPlugin[],
-	element: GeneratedElement,
-	ctx: BuildContext,
-): Record<string, GeneratedElement> =>
-	mergeUniqueLabels(
-		plugins.flatMap((plugin) =>
-			(plugin.dependencies ?? []).map((dependencies) =>
-				dependencies(element, ctx),
-			),
-		),
-	);
 
 /** `job` is not compared: it is how a node runs, not what it reads. */
 const isUnchanged = (before: GenerationNode, after: GenerationNode) =>
@@ -92,7 +75,7 @@ export class GenerationGraph {
 				inputs: {
 					prompt: getPromptText(element),
 					attributes: element.generationAttributes ?? {},
-					reads: pluginReads(plugins, element, this.ctx),
+					reads: pluginRecords(plugins, "reads", element, this.ctx),
 				},
 				dependsOn: this.dependenciesOf(element, plugins),
 				job: {
@@ -111,8 +94,9 @@ export class GenerationGraph {
 		element: GeneratedElement,
 		plugins: ConnectorPlugin[],
 	) {
-		return mapValues(pluginDependencies(plugins, element, this.ctx), (target) =>
-			this.build(target),
+		return mapValues(
+			pluginRecords(plugins, "dependencies", element, this.ctx),
+			(target) => this.build(target),
 		);
 	}
 

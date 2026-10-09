@@ -5,10 +5,7 @@ import type {
 	ConnectorPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
-import {
-	pluginDependencies,
-	pluginReads,
-} from "@/lib/generation/generationGraph";
+import { pluginRecords } from "@/lib/generation/generationGraph";
 import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { ProjectData } from "@/lib/project/store";
 
@@ -25,10 +22,14 @@ export const readsOf = (
 	element: GeneratedElement,
 	canvas: CanvasElement[] = [],
 	state?: ProjectData,
-) => pluginReads([plugin], element, buildCtx(canvas, { state }));
+) => pluginRecords([plugin], "reads", element, buildCtx(canvas, { state }));
 
 export const dependenciesOf = (
 	plugin: ConnectorPlugin,
 	element: GeneratedElement,
 	canvas: CanvasElement[] = [],
-) => mapValues(pluginDependencies([plugin], element, buildCtx(canvas)), "id");
+) =>
+	mapValues(
+		pluginRecords([plugin], "dependencies", element, buildCtx(canvas)),
+		"id",
+	);

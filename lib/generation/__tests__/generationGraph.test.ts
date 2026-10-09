@@ -18,8 +18,7 @@ import type { BuildContext } from "../graph";
 import {
 	generatedById,
 	GenerationGraph,
-	pluginDependencies,
-	pluginReads,
+	pluginRecords,
 	prepareNode,
 } from "../generationGraph";
 import { buildCtx, EMPTY_CONTEXT } from "./_context";
@@ -250,20 +249,27 @@ describe("what the plugins declare", () => {
 	};
 
 	it("records only the values a plugin found, leaving out empty ones", () => {
-		expect(pluginReads([declaring], image, EMPTY_CONTEXT)).toEqual({
+		expect(pluginRecords([declaring], "reads", image, EMPTY_CONTEXT)).toEqual({
 			"the art style": "noir",
 		});
 	});
 
 	it("depends only on the elements a plugin found", () => {
-		expect(pluginDependencies([declaring], image, EMPTY_CONTEXT)).toEqual({
+		expect(
+			pluginRecords([declaring], "dependencies", image, EMPTY_CONTEXT),
+		).toEqual({
 			"Red's avatar": avatar,
 		});
 	});
 
 	it("refuses two plugins declaring the same label", () => {
 		expect(() =>
-			pluginDependencies([declaring, declaring], image, EMPTY_CONTEXT),
+			pluginRecords(
+				[declaring, declaring],
+				"dependencies",
+				image,
+				EMPTY_CONTEXT,
+			),
 		).toThrow(`Two plugins declare "Red's avatar"`);
 	});
 });
