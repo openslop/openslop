@@ -7,7 +7,6 @@ import {
 	type AssetType,
 	type ContentElement,
 	type ContentType,
-	type ElementRole,
 	type ElementType,
 	type CanvasElement,
 } from "./types";
@@ -18,13 +17,11 @@ const isContentType = (type: string): type is ContentType =>
 export const isContentElement = (node: unknown): node is ContentElement =>
 	Element.isElement(node) && isContentType(node.type);
 
-const roleOf = (node: unknown): ElementRole | undefined =>
-	isContentElement(node) ? CONTENT_TYPES[node.type].role : undefined;
-
 export const isForeground = (node: unknown): node is ContentElement =>
-	roleOf(node) === "foreground";
+	isContentElement(node) && CONTENT_TYPES[node.type].role === "foreground";
 
-export const isSpeech = (node: unknown): boolean => roleOf(node) === "overlay";
+export const isSpeech = (node: unknown): boolean =>
+	isContentElement(node) && CONTENT_TYPES[node.type].connector === "tts";
 
 export const isAssetType = (type: string): type is AssetType =>
 	Object.hasOwn(ASSET_TYPES, type);

@@ -1,5 +1,6 @@
 import type { Descendant } from "slate";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
+import { isSpeech } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
 import { countWords } from "@/lib/canvas/spokenWords";
 import {
@@ -84,12 +85,11 @@ const walk = (descendants: Descendant[]): Walk => {
 		sceneNumber += 1;
 
 		for (const element of node.children) {
-			const { role } = CONTENT_TYPES[element.type];
-			if (role === "foreground") {
+			if (CONTENT_TYPES[element.type].role === "foreground") {
 				spans.push({ element, sceneNumber, words: 0, dialogueIds: [] });
 				continue;
 			}
-			if (role !== "overlay") continue;
+			if (!isSpeech(element)) continue;
 			const words = countWords(getElementBodyText(element));
 			const open = spans.at(-1);
 			if (!open) {
