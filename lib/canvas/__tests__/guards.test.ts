@@ -2,73 +2,42 @@ import { describe, expect, it } from "vitest";
 import {
 	isAssetElement,
 	isAssetType,
-	isContentType,
 	isContentElement,
 	isElementType,
 	isForeground,
 	isCanvasElement,
 } from "../guards";
-describe("isContentType", () => {
-	it("accepts declared element types", () => {
-		expect(isContentType("image")).toBe(true);
-		expect(isContentType("video")).toBe(true);
-	});
 
-	it("rejects scene, asset and unknown tags", () => {
-		expect(isContentType("scene")).toBe(false);
-		expect(isContentType("asset_avatar")).toBe(false);
-		expect(isContentType("nonsense")).toBe(false);
-	});
-});
-
-describe("isElementType", () => {
-	it("accepts content and asset types, and nothing else", () => {
-		expect(["narration", "music", "asset_voice"].every(isElementType)).toBe(
-			true,
-		);
-		expect(["scene", "nonsense", "toString"].some(isElementType)).toBe(false);
-	});
-});
-
-describe("isAssetType", () => {
-	it("accepts the asset types and nothing else", () => {
-		expect(
-			["asset_avatar", "asset_voice", "asset_style", "asset_references"].every(
-				isAssetType,
-			),
-		).toBe(true);
-		expect(["image", "scene", "toString"].some(isAssetType)).toBe(false);
-	});
-});
-
-describe("isAssetElement and isCanvasElement", () => {
+describe("guards", () => {
 	it.each([
-		[{ id: "a", type: "asset_avatar", children: [] }, true, true],
-		[{ id: "v", type: "asset_voice", children: [] }, true, true],
-		[{ id: "a", type: "image", children: [] }, false, true],
-		[{ id: "a", type: "scene", children: [] }, false, false],
-		[{ text: "plain" }, false, false],
-	])("%o: asset %s, script %s", (node, asset, script) => {
-		expect(isAssetElement(node)).toBe(asset);
-		expect(isCanvasElement(node)).toBe(script);
-	});
-});
+		["asset_avatar", true, true, false, false],
+		["asset_voice", true, true, false, false],
+		["asset_style", true, true, false, false],
+		["asset_references", true, true, false, false],
+		["image", true, false, true, true],
+		["music", true, false, true, false],
+		["narration", true, false, true, false],
+		["scene", false, false, false, false],
+		["toString", false, false, false, false],
+	])(
+		"%s: element %s, asset %s, content %s, foreground %s",
+		(type, element, asset, content, foreground) => {
+			const node = { id: "n", type, children: [] };
 
-describe("isContentElement", () => {
-	it("requires a slate element of a canvas type", () => {
-		expect(isContentElement({ id: "a", type: "image", children: [] })).toBe(
-			true,
-		);
-		expect(isContentElement({ id: "a", type: "scene", children: [] })).toBe(
-			false,
-		);
-		expect(isContentElement({ text: "plain" })).toBe(false);
-	});
-});
+			expect(isElementType(type)).toBe(element);
+			expect(isCanvasElement(node)).toBe(element);
+			expect(isAssetType(type)).toBe(asset);
+			expect(isAssetElement(node)).toBe(asset);
+			expect(isContentElement(node)).toBe(content);
+			expect(isForeground(node)).toBe(foreground);
+		},
+	);
 
-describe("isForeground", () => {
-	it("only accepts foreground-role element types", () => {
-		expect(isForeground({ id: "a", type: "image", children: [] })).toBe(true);
-		expect(isForeground({ id: "a", type: "music", children: [] })).toBe(false);
+	it("rejects a text leaf", () => {
+		const leaf = { text: "plain" };
+
+		expect(isCanvasElement(leaf)).toBe(false);
+		expect(isAssetElement(leaf)).toBe(false);
+		expect(isContentElement(leaf)).toBe(false);
 	});
 });

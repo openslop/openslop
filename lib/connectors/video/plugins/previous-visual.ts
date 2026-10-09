@@ -1,7 +1,7 @@
 import { previousVisual } from "@/lib/canvas/scenes";
 import { withReferences } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
-import { depend } from "@/lib/generation/declare";
+import type { Dependency } from "@/lib/generation/declare";
 import { captureFrames } from "@/lib/connectors/video/captureFrames";
 import {
 	CONTINUITY_ATTR,
@@ -32,21 +32,25 @@ async function previousPictures(
 	throw new Error("The previous visual generated no picture to hand on");
 }
 
+const PREVIOUS = "the previous visual";
+
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
-const previous = depend(
-	"the previous visual",
-	({ id, generationAttributes: attrs = {} }, { canvas }) =>
+const previousWhenLinked: Dependency = (
+	{ id, generationAttributes: attrs = {} },
+	{ canvas },
+) => ({
+	[PREVIOUS]:
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
 		attrs[CONTINUITY_ATTR] === "true"
 			? previousVisual(canvas, id)
 			: undefined,
-);
+});
 
 /** Opening on the previous visual takes its end as the start frame; linking adds its beginning and middle as references. */
 export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPreviousVisual> {
 	return {
 		name: "previous-visual",
-		dependencies: [previous],
+		dependencies: [previousWhenLinked],
 		async beforeGenerate(
 			{
 				[START_FRAME_ATTR]: frame = NO_FRAME,
@@ -55,7 +59,7 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 			},
 			ctx,
 		) {
-			const source = previous.result(ctx);
+			const source = ctx.dependencies?.[PREVIOUS];
 			const [frameImage] =
 				frame === PREVIOUS_VISUAL
 					? await previousPictures(source, [START_FRAME])

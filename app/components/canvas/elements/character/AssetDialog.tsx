@@ -9,7 +9,6 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 
-/** The frame every asset dialog shares: what it edits, its editor, and the way out. */
 export function AssetDialog({
 	title,
 	description,

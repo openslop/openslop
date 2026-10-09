@@ -7,17 +7,14 @@ import {
 	createCharacterVoicesPlugin,
 	type ParamsWithCharacterVoices,
 } from "../video/plugins/character-voices";
-import type { ModelRef, TTSConnector, VoiceSearchParams } from "../types";
-import { buildCtx, pluginCtx, readsOf } from "./_state-ctx";
+import type { ModelRef } from "../types";
+import { buildCtx } from "@/lib/generation/__tests__/_context";
+import { pluginCtx, readsOf } from "./_state-ctx";
+import { resetTts, tts } from "./_tts-mock";
 
-const tts = vi.hoisted(() => ({
-	searchVoices: vi.fn(),
-	voicePreview: vi.fn(),
-	createConnector: vi.fn(),
-}));
 vi.mock("@/lib/connectors/factory", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@/lib/connectors/factory")>()),
-	createConnector: tts.createConnector,
+	createConnector: (await import("./_tts-mock")).tts.createConnector,
 }));
 
 const SEEDANCE = { provider: "openslop", model: "Slop Video v1" } as const;
@@ -25,22 +22,11 @@ const KLING = { provider: "openslop", model: "Slop Video v1 Fast" } as const;
 const MUTE = "v-mute";
 
 beforeEach(() => {
-	tts.searchVoices.mockReset();
-	tts.searchVoices.mockResolvedValue([
-		{ id: "v-found", name: "Found", description: "" },
-	]);
-	tts.voicePreview.mockReset();
+	resetTts();
 	tts.voicePreview.mockImplementation(async (voiceId: string) =>
 		voiceId === MUTE
 			? undefined
 			: { url: `https://audio/${voiceId}.mp3`, durationSec: 6 },
-	);
-	tts.createConnector.mockImplementation(
-		(_type: string, model: ModelRef): Partial<TTSConnector> => ({
-			searchVoices: (params: VoiceSearchParams) =>
-				tts.searchVoices(model, params),
-			voicePreview: tts.voicePreview,
-		}),
 	);
 });
 

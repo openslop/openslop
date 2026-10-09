@@ -39,6 +39,9 @@ export const findAsset = <T extends AssetType>(
 
 export const NARRATOR = "Narrator";
 
+export const speakerOf = (attrs?: { name?: string }): string =>
+	attrs?.name ?? NARRATOR;
+
 const assetsOf =
 	<T extends AssetType>(type: T) =>
 	(nodes: readonly unknown[]): AssetElement<T>[] =>
@@ -58,7 +61,6 @@ const namesOf = (assets: AssetElement[]): string[] =>
 export const characterNames = (nodes: readonly unknown[]): string[] =>
 	uniq(namesOf([...getAvatars(nodes), ...getVoices(nodes)]));
 
-/** The characters a picture can show. */
 export const avatarNames = (nodes: readonly unknown[]): string[] =>
 	namesOf(getAvatars(nodes));
 
@@ -81,6 +83,5 @@ export const referenceUrls = (nodes: readonly unknown[]): string[] =>
 export const voiceFrom = (voice?: AssetElement<"asset_voice">): Voice =>
 	VoiceSchema.parse(flatAttributes(voice ?? {}));
 
-/** A speaker's voice, the narrator's when no one is named. */
 export const voiceOf = (nodes: readonly unknown[], name = NARRATOR): Voice =>
 	voiceFrom(findAsset(nodes, "asset_voice", name));

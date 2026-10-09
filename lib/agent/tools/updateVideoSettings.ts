@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import merge from "lodash/merge";
 import { z } from "zod";
 import {

@@ -1,6 +1,7 @@
 import { createEmitter } from "@/lib/store/emitter";
 import type { Autosaver } from "./autosave";
-import type { SavedProject, ProjectDocument } from "./projectDocument";
+import type { ProjectDocument } from "./projectDocument";
+import type { SavedProject } from "./savedProject";
 
 export type CanvasVersion = {
 	id: string;

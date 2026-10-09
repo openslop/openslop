@@ -1,5 +1,5 @@
+import mapValues from "lodash/mapValues";
 import type { CanvasElement, GeneratedElement } from "@/lib/canvas/types";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type {
 	AssetResult,
 	ConnectorPlugin,
@@ -9,26 +9,8 @@ import {
 	pluginDependencies,
 	pluginReads,
 } from "@/lib/generation/generationGraph";
-import type { BuildContext } from "@/lib/generation/graph";
-import { ProjectDataSchema, type ProjectData } from "@/lib/project/store";
-
-export const projectState = (
-	videoSettings: Partial<ProjectData["videoSettings"]> = {},
-	scriptSettings: Partial<ProjectData["scriptSettings"]> = {},
-): ProjectData => ProjectDataSchema.parse({ videoSettings, scriptSettings });
-
-export const buildCtx = (
-	canvas: CanvasElement[] = [],
-	{
-		state = projectState(),
-		setAsset = () => {},
-	}: Partial<Pick<BuildContext, "state" | "setAsset">> = {},
-): BuildContext => ({
-	state,
-	canvas,
-	registry: DEFAULT_CONNECTOR_REGISTRY,
-	setAsset,
-});
+import { buildCtx } from "@/lib/generation/__tests__/_context";
+import type { ProjectData } from "@/lib/project/store";
 
 export const pluginCtx = ({
 	reads = {},
@@ -49,9 +31,4 @@ export const dependenciesOf = (
 	plugin: ConnectorPlugin,
 	element: GeneratedElement,
 	canvas: CanvasElement[] = [],
-) =>
-	Object.fromEntries(
-		pluginDependencies([plugin], element, buildCtx(canvas)).map(
-			([label, { id }]) => [label, id],
-		),
-	);
+) => mapValues(pluginDependencies([plugin], element, buildCtx(canvas)), "id");

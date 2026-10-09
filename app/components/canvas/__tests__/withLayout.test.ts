@@ -4,16 +4,13 @@ import { withReact } from "slate-react";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { withLayout } from "../plugins/withLayout";
 import { content, scene } from "./fixtures";
 
 const ASSETS = [
-	createCanvasElement("asset_style", { text: "noir" }),
-	createCanvasElement("asset_avatar", {
-		attrs: { name: "Mia" },
-		text: "a girl",
-	}),
+	asset("asset_style", { text: "noir" }),
+	asset("asset_avatar", { name: "Mia", text: "a girl" }),
 ];
 
 const SCRIPT = [scene([content("narration", "n1", "hello")])];

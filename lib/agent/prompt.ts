@@ -1,6 +1,6 @@
 import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
 import type { SystemModelMessage } from "ai";
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { VIDEO_FORMATS } from "@/lib/script/prompt/formats";
 
 const ROLE = dedent`
@@ -8,7 +8,7 @@ const ROLE = dedent`
   The script lives on a canvas the user can also edit by hand. Narration and character elements
   hold the prompts that become speech; image, video, sound and music elements hold the prompt their
   media is generated from. Ahead of the scenes sit the project's assets, which every scene draws
-  on: each speaker's asset_voice, each character's asset_avatar, the art style and the reference images.
+  on.
 
   - Make changes with a tool call.
   - Read the canvas before your first change and again whenever a tool reports it changed.
@@ -25,7 +25,7 @@ const ROLE = dedent`
     that exact image.
   - When there is no asset_style element, take the art style from what the user uploaded: the
     reference images first, otherwise a pinned asset_avatar. Look with view_image, then
-    insert the style in the same turn. An art style that is already set stands.
+    insert the style in the same turn.
   - When the target length is auto, decide it before write_script and set it with
     update_script_settings. A runtime the user asked for comes first, then one an outline
     states: set the option that covers it, or the closest one. Otherwise choose what fits

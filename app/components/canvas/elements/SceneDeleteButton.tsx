@@ -1,6 +1,6 @@
 import { useSlateStatic } from "slate-react";
 import { DeleteButton as DeleteIconButton } from "@/components/ui/delete-button";
-import { removeBlock } from "@/app/components/canvas/utils/blockOps";
+import { removeBlock } from "@/lib/canvas/editorOps";
 import type { Scene } from "@/lib/canvas/types";
 
 export function SceneDeleteButton({ scene }: { scene: Scene }) {
@@ -10,7 +10,7 @@ export function SceneDeleteButton({ scene }: { scene: Scene }) {
 		<DeleteIconButton
 			ariaLabel="Delete scene"
 			onMouseDown={(e) => e.preventDefault()}
-			onClick={() => removeBlock(editor, scene)}
+			onClick={() => removeBlock(editor, scene.id)}
 		/>
 	);
 }

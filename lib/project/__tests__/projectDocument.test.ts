@@ -8,10 +8,9 @@ import {
 	type ConnectorModels,
 } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
-import { createProjectDocument, type SavedProject } from "../projectDocument";
-import { createProjectStore } from "../store";
-import { ScriptSettingsSchema } from "../types";
-import { VideoSettingsSchema } from "../videoSettings";
+import { createProjectDocument } from "../projectDocument";
+import type { SavedProject } from "../savedProject";
+import { createProjectStore, ProjectDataSchema } from "../store";
 
 const RECOMMENDED = { provider: "openslop", model: "Slop Image v1" } as const;
 const BYOK = { provider: "runware", model: "Seedream 5 Lite" } as const;
@@ -25,12 +24,7 @@ const contentWith = (
 	models: ConnectorModels = {},
 ): SavedProject => ({
 	script,
-	store: {
-		title: "",
-		videoSettings: VideoSettingsSchema.parse({}),
-		scriptSettings: ScriptSettingsSchema.parse({}),
-		models,
-	},
+	store: ProjectDataSchema.parse({ models }),
 	generation: {},
 });
 
@@ -82,7 +76,7 @@ describe("createProjectDocument.write", () => {
 	});
 });
 
-const ASSETS = `<asset_style id="asset_style">noir</asset_style>\n<asset_avatar id="asset_avatar:Ada" name="Ada" provider="openslop" model="Slop Image v1">tall</asset_avatar>\n<asset_voice id="asset_voice:Ada" provider="openslop" model="Slop TTS v1" name="Ada"></asset_voice>`;
+const ASSETS = `<asset_style id="style">noir</asset_style>\n<asset_avatar id="avatar" name="Ada" provider="openslop" model="Slop Image v1">tall</asset_avatar>\n<asset_voice id="voice" provider="openslop" model="Slop TTS v1" name="Ada"></asset_voice>`;
 const SCENE = `--- Scene 1 ---\n<narration id="line">hello</narration>\n<image id="shot">a sunset</image>`;
 
 describe("createProjectDocument.read", () => {

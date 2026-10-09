@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
-import type { SavedProject } from "../projectDocument";
+import type { SavedProject } from "../savedProject";
 import {
 	createProjectStore,
 	extractStoreSnapshot,
@@ -45,13 +45,12 @@ describe("createAutosaver", () => {
 	let thumbnailUrl: string | null;
 	const details = () => ({ name, thumbnail_url: thumbnailUrl });
 
-	const build = () =>
+	const build = (
+		read = () => content(extractStoreSnapshot(store), "<osml/>"),
+	) =>
 		createAutosaver({
 			projectId,
-			document: {
-				read: () => content(extractStoreSnapshot(store), "<osml/>"),
-				details,
-			},
+			document: { read, details },
 			onSaved,
 			onError,
 		});
@@ -65,7 +64,7 @@ describe("createAutosaver", () => {
 		projectId = `p-${saveProject.mock.calls.length}-${Math.random()}`;
 		store = createProjectStore();
 		edits = 0;
-		name = "Untitled";
+		name = "Moon Rabbit";
 		thumbnailUrl = null;
 	});
 
@@ -73,10 +72,6 @@ describe("createAutosaver", () => {
 		vi.useRealTimers();
 		vi.restoreAllMocks();
 	});
-
-	const setTitle = () => {
-		name = "Moon Rabbit";
-	};
 
 	let edits = 0;
 	const edit = () => {
@@ -87,7 +82,6 @@ describe("createAutosaver", () => {
 	};
 
 	it("coalesces a burst of changes into one save", async () => {
-		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -108,7 +102,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("flush runs a pending save immediately", async () => {
-		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -119,7 +112,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("does not save the document it was built from", async () => {
-		setTitle();
 		const autosaver = build();
 
 		autosaver.schedule();
@@ -129,7 +121,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("saves the first real edit after an unchanged open", async () => {
-		setTitle();
 		const autosaver = build();
 		store.getState().updateVideoSettings({
 			aspectRatio: store.getState().videoSettings.aspectRatio,
@@ -147,7 +138,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("skips a repeat of a payload it just saved", async () => {
-		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -164,17 +154,10 @@ describe("createAutosaver", () => {
 	});
 
 	it("still saves when only the generation snapshot changed", async () => {
-		setTitle();
 		let generation: SavedProject["generation"] = {};
-		const autosaver = createAutosaver({
-			projectId,
-			document: {
-				read: () => content(extractStoreSnapshot(store), "<osml/>", generation),
-				details,
-			},
-			onSaved,
-			onError,
-		});
+		const autosaver = build(() =>
+			content(extractStoreSnapshot(store), "<osml/>", generation),
+		);
 
 		generation = { a: imageSnapshot("https://cdn/a.png") };
 		autosaver.schedule();
@@ -188,7 +171,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("saves the thumbnail the document shows as the debounce fires", async () => {
-		setTitle();
 		const autosaver = build();
 
 		thumbnailUrl = "https://cdn/a.png";
@@ -203,7 +185,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("holds saves while suspended and takes them again on resume", async () => {
-		setTitle();
 		const autosaver = build();
 		autosaver.suspend();
 
@@ -219,7 +200,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("stays quiet on resume when nothing was held", async () => {
-		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -234,7 +214,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("persists a pending edit before suspending", async () => {
-		setTitle();
 		const autosaver = build();
 		edit();
 		autosaver.schedule();
@@ -246,21 +225,12 @@ describe("createAutosaver", () => {
 	});
 
 	it("saves the document as it stood when suspend was called", async () => {
-		setTitle();
 		let script = "live";
 		let release = () => {};
 		saveProject.mockImplementationOnce(
 			() => new Promise<void>((resolve) => (release = () => resolve())),
 		);
-		const autosaver = createAutosaver({
-			projectId,
-			document: {
-				read: () => content(extractStoreSnapshot(store), script),
-				details,
-			},
-			onSaved,
-			onError,
-		});
+		const autosaver = build(() => content(extractStoreSnapshot(store), script));
 
 		edit();
 		autosaver.schedule();
@@ -283,7 +253,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("reports every save to its subscribers until they unsubscribe", async () => {
-		setTitle();
 		const autosaver = build();
 		const seen: string[] = [];
 		const stop = autosaver.onProjectSaved(({ script }) => seen.push(script));
@@ -303,7 +272,6 @@ describe("createAutosaver", () => {
 	});
 
 	it("reports a failed save instead of throwing", async () => {
-		setTitle();
 		const boom = new Error("offline");
 		saveProject.mockRejectedValue(boom);
 		const autosaver = build();

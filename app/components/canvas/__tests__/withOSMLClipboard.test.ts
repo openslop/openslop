@@ -113,7 +113,7 @@ describe("withOSMLClipboard paste", () => {
 
 		paste(
 			editor,
-			'<asset_style id="asset_style">noir</asset_style>\n--- Scene 1 ---\n<image id="i1">a sunset</image>',
+			'<asset_style id="style">noir</asset_style>\n--- Scene 1 ---\n<image id="i1">a sunset</image>',
 		);
 
 		const style = findAsset(editor.children, "asset_style");

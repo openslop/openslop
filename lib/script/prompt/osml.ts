@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,

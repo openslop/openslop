@@ -2,42 +2,29 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { resolveElementConnector } from "@/lib/canvas/elementConnector";
 import type { CanvasElement, GeneratedElement } from "@/lib/canvas/types";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
+import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import type {
 	ModelRef,
 	PluginContext,
-	TTSConnector,
 	TTSGenerateParams,
-	VoiceSearchParams,
 } from "@/lib/connectors/types";
 import type { Voice } from "@/lib/project/types";
-import { buildCtx, pluginCtx, projectState, readsOf } from "./_state-ctx";
+import { buildCtx, projectState } from "@/lib/generation/__tests__/_context";
+import { pluginCtx, readsOf } from "./_state-ctx";
+import { resetTts, tts } from "./_tts-mock";
 
-const tts = vi.hoisted(() => ({
-	searchVoices: vi.fn(),
-	createConnector: vi.fn(),
-}));
 vi.mock("@/lib/connectors/factory", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@/lib/connectors/factory")>()),
-	createConnector: tts.createConnector,
+	createConnector: (await import("./_tts-mock")).tts.createConnector,
 }));
 
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
-beforeEach(() => {
-	tts.searchVoices.mockReset();
-	tts.searchVoices.mockResolvedValue([
-		{ id: "v-found", name: "Found", description: "" },
-	]);
-	tts.createConnector.mockImplementation(
-		(_type: string, model: ModelRef): Partial<TTSConnector> => ({
-			searchVoices: (params: VoiceSearchParams) =>
-				tts.searchVoices(model, params),
-		}),
-	);
-});
+beforeEach(resetTts);
 
 const plugin = createSpeakerVoicePlugin();
 
@@ -117,14 +104,17 @@ describe("createSpeakerVoicePlugin", () => {
 	describe("the model speech speaks with", () => {
 		const own = line(undefined, CARTESIA);
 
+		const modelOf = (canvas: CanvasElement[]) =>
+			resolveElementConnector(own, DEFAULT_CONNECTOR_REGISTRY, canvas).model;
+
 		it("is the pair its voice was found on, over its own", () => {
-			expect(plugin.model?.(own, [voice(NARRATOR, DEFAULT_TTS_MODEL)])).toEqual(
+			expect(modelOf([voice(NARRATOR, DEFAULT_TTS_MODEL)])).toEqual(
 				DEFAULT_TTS_MODEL,
 			);
 		});
 
 		it("is its own while its speaker has no voice", () => {
-			expect(plugin.model?.(own, [])).toEqual(CARTESIA);
+			expect(modelOf([])).toEqual(CARTESIA);
 		});
 	});
 
@@ -168,17 +158,17 @@ describe("createSpeakerVoicePlugin", () => {
 			},
 		);
 
-		it("settles the narrator's voice onto the narrator's voice asset for a narration", async () => {
-			await expect(prepare(line(), [voice(NARRATOR)])).resolves.toEqual([
-				settled(NARRATOR, DEFAULT_TTS_MODEL),
-			]);
-		});
-
-		it("settles onto the narrator's voice asset for a narration even with no narrator yet", async () => {
-			await expect(prepare(line(), [])).resolves.toEqual([
-				settled(NARRATOR, DEFAULT_TTS_MODEL),
-			]);
-		});
+		it.each([
+			["with a narrator voice", [voice(NARRATOR)]],
+			["with no narrator yet", []],
+		])(
+			"settles a narration's voice onto the narrator's voice asset %s",
+			async (_, canvas) => {
+				await expect(prepare(line(), canvas)).resolves.toEqual([
+					settled(NARRATOR, DEFAULT_TTS_MODEL),
+				]);
+			},
+		);
 
 		it.each([
 			["the project's language over the voice's own", "es", "es"],

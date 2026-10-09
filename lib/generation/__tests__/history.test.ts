@@ -1,18 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
 import { ElementHistory, type ElementVersionStorage } from "../history";
-import type { GenerationInputs } from "../inputs";
+import { inputsFor } from "./_graph";
 import type { CommittedVersion, ElementVersion } from "../versions";
 
 const { toastError } = vi.hoisted(() => ({ toastError: vi.fn() }));
 vi.mock("@/lib/toastError", () => ({ toastError }));
-
-const inputs = (prompt: string): GenerationInputs => ({
-	prompt,
-	attributes: {},
-	reads: {},
-	dependencies: {},
-});
 
 const result = (imageUrl: string): AssetResult => ({
 	imageUrl,
@@ -22,7 +15,7 @@ const result = (imageUrl: string): AssetResult => ({
 const version = (prompt: string, url = `${prompt}.png`): CommittedVersion => ({
 	elementId: "a",
 	connectorType: "image",
-	inputs: inputs(prompt),
+	inputs: inputsFor(prompt),
 	result: result(url),
 	pinned: false,
 });

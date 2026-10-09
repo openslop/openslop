@@ -30,7 +30,11 @@ import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
 import { streamScript } from "@/lib/script/streamScript";
 import { elementState } from "../elementState";
-import type { AgentToolContext, ElementImage } from "./context";
+import {
+	PROJECT_SETTERS,
+	type AgentToolContext,
+	type ElementImage,
+} from "./context";
 import { executeToolCall } from "./registry";
 
 export function useAgentTools() {
@@ -102,11 +106,7 @@ export function useAgentTools() {
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
-				...pick(store.getState(), [
-					"setTitle",
-					"updateScriptSettings",
-					"updateVideoSettings",
-				]),
+				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);
 		},

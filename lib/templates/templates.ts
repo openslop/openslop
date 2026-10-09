@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { ArtStyle } from "@/lib/project/artStyles";
 import type { Voice } from "@/lib/project/types";

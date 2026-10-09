@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { element } from "@/lib/canvas/__tests__/_assets";
 import type { ContentElement, GeneratedElement } from "@/lib/canvas/types";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
 import { buildNode, createGraphFor } from "@/lib/generation/generationGraph";
-import { createProjectStore } from "@/lib/project/store";
+import { buildCtx } from "@/lib/generation/__tests__/_context";
 
 // Memos hold across renders, as React's do: the bug is a graph kept from an
 // earlier render. Each render reads its slots back in call order.
@@ -37,16 +36,10 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 	useQueueSelector: <T>(selector: (q: GenerationQueue) => T) => selector(queue),
 }));
 
-const state = createProjectStore().getState();
 let canvas: ContentElement[] = [];
 // Like the real hook, the context keeps its identity while text inside an
 // element changes, and reads the canvas when it is made.
-const buildContext = () => ({
-	state,
-	canvas,
-	registry: DEFAULT_CONNECTOR_REGISTRY,
-	setAsset: () => {},
-});
+const buildContext = () => buildCtx(canvas);
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => buildContext,
 }));
@@ -58,18 +51,6 @@ vi.mock("@/lib/generation/LiveGraphProvider", () => ({
 
 const { useGenerate } = await import("../hooks/useGenerate");
 const { useGenerateScope } = await import("../hooks/useGenerateScope");
-
-const element = (
-	id: string,
-	type: ContentElement["type"],
-	text: string,
-	attrs: Record<string, string> = {},
-): ContentElement => ({
-	id,
-	type,
-	...splitAttributes(attrs),
-	children: [{ id: `${id}-t`, type, text }],
-});
 
 const image = element("img", "image", "a sunset");
 const video = element("vid", "video", "Shot 1: slow pan", {

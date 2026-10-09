@@ -21,10 +21,7 @@ import {
 	type SegmentedControlOption,
 } from "@/components/ui/segmented-control";
 import AnimatedPlaceholder from "@/app/components/AnimatedPlaceholder";
-import {
-	AssetEditProvider,
-	useAssetEditors,
-} from "@/app/components/canvas/elements/character/AssetEditProvider";
+import { useAssetEditors } from "@/app/components/canvas/elements/character/AssetEditProvider";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
@@ -191,16 +188,11 @@ interface ComposerCopilotProps {
 	onSubmit: (brief: string) => void;
 }
 
-/** The asset dialogs mount here so the composer's tiles and menu open their own. */
-export default function ComposerCopilot(props: ComposerCopilotProps) {
-	return (
-		<AssetEditProvider>
-			<Composer {...props} />
-		</AssetEditProvider>
-	);
-}
-
-function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
+export default function ComposerCopilot({
+	value,
+	onValueChange,
+	onSubmit,
+}: ComposerCopilotProps) {
 	const [intent, setIntent] = useState<ComposerIntent>("story");
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");

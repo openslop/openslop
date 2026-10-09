@@ -2,17 +2,10 @@ import isNil from "lodash/isNil";
 import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
-import type {
-	ContentElement,
-	CanvasBlock,
-	CanvasElement,
-} from "@/lib/canvas/types";
+import type { ContentElement, CanvasBlock, CanvasElement } from "./types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { ElementVersion } from "@/lib/generation/versions";
-import {
-	flatAttributes,
-	splitAttributes,
-} from "@/lib/canvas/elementAttributes";
+import { flatAttributes, splitAttributes } from "./elementAttributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { createCanvasElement } from "./createCanvasElement";
 import { attributeSchemaFor } from "./elementConnector";
@@ -30,6 +23,12 @@ export function findBlockById(
 		match: (n) => Element.isElement(n) && n.id === id,
 	});
 	return entry ?? null;
+}
+
+export function removeBlock(editor: Editor, id: string): void {
+	const found = findBlockById(editor, id);
+	if (!found) throw new Error(`Block "${id}" is not on the canvas`);
+	Transforms.removeNodes(editor, { at: found[1] });
 }
 
 export function findElementById(

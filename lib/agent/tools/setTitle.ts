@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { SlidersHorizontal } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";

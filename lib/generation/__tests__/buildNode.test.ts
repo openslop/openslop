@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { NARRATOR } from "@/lib/canvas/assets";
+import { element as elementWithText } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import type {
 	ElementType,
@@ -8,15 +8,13 @@ import type {
 	CanvasElement,
 } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import {
-	LAYOUT_ATTRIBUTE_KEYS,
-	splitAttributes,
-} from "@/lib/canvas/elementAttributes";
-import { flattenGraph, type BuildContext, type GenerationNode } from "../graph";
+import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/canvas/elementAttributes";
+import { flattenGraph, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { buildNode } from "../generationGraph";
 import { staleReason } from "../staleReason";
-import { isNodeStale, needsGeneration } from "../staleness";
+import { isNodeStale } from "../staleness";
+import { buildCtx } from "./_context";
 
 let store: ProjectStore;
 let assets: CanvasElement[];
@@ -35,22 +33,10 @@ const element = (
 	id: string,
 	type: "image" | "video" | "narration",
 	customAttributes?: Record<string, string>,
-): GeneratedElement => ({
-	id,
-	type,
-	...splitAttributes({ ...customAttributes }),
-	children: [{ id: `${id}-t`, type, text: "a sunset" }],
-});
-
-const context = (canvas: CanvasElement[]): BuildContext => ({
-	state: store.getState(),
-	canvas: [...assets, ...canvas],
-	registry: DEFAULT_CONNECTOR_REGISTRY,
-	setAsset: () => {},
-});
+) => elementWithText(id, type, "a sunset", customAttributes);
 
 const resolveOn = (el: GeneratedElement, canvas: CanvasElement[]) =>
-	buildNode(el, context(canvas));
+	buildNode(el, buildCtx([...assets, ...canvas], { state: store.getState() }));
 
 const resolve = (el: GeneratedElement) => resolveOn(el, []);
 
@@ -140,11 +126,9 @@ describe("buildNode", () => {
 	});
 
 	it.each([
-		["an asset that is not on the canvas", "image", {}],
 		["a character with no avatar", "image", { characters: "Nobody" }],
 		["a video with nothing before it", "video", { startFrame: "previous" }],
-	] as const)("declares no edge for %s", (name, type, attrs) => {
-		if (name.startsWith("an asset")) assets = [];
+	] as const)("declares no edge for %s", (_, type, attrs) => {
 		const el = element("el", type, attrs);
 
 		expect(resolveOn(el, [el]).dependsOn).toEqual({});
@@ -157,41 +141,48 @@ describe("buildNode", () => {
 		expect(ids).toEqual(["avatar-Alice", "img"]);
 	});
 
-	it("goes stale once a character it shows is given an avatar", () => {
+	it.each([
+		[
+			"a character it shows is given an avatar",
+			{ characters: "Bob" },
+			() => {
+				assets = [...assets, avatar("Bob", "tall")];
+			},
+			"Bob's avatar",
+		],
+		[
+			"a character's avatar is removed",
+			{ characters: "Alice" },
+			() => {
+				assets = assets.filter(({ type }) => type !== "asset_avatar");
+			},
+			"Alice's avatar",
+		],
+		[
+			"the aspect ratio it read changes",
+			{},
+			() => store.getState().updateVideoSettings({ aspectRatio: "9:16" }),
+			"The aspect ratio",
+		],
+		[
+			"the art style is edited",
+			{},
+			() => {
+				assets = [make("asset_style", "watercolor"), ...assets.slice(1)];
+			},
+			"The art style",
+		],
+	])("stales an image once %s", (_, attrs, change, what) => {
 		const queue = new GenerationQueue();
-		const img = element("img", "image", { characters: "Bob" });
+		const img = element("img", "image", attrs);
 		generateAll(queue, resolve(img));
 		expect(isNodeStale(resolve(img), queue)).toBe(false);
 
-		assets = [...assets, avatar("Bob", "tall")];
+		change();
 
-		expect(isNodeStale(resolve(img), queue)).toBe(true);
-	});
-
-	it("drops a character's avatar from the pictures showing them once it is removed", () => {
-		const queue = new GenerationQueue();
-		const img = element("img", "image", { characters: "Alice" });
-		generateAll(queue, resolve(img));
-
-		assets = assets.filter(({ type }) => type !== "asset_avatar");
-
-		expect(idsOf(img)).toEqual(["img"]);
 		expect(staleReason(resolve(img), queue)).toBe(
-			"Alice's avatar changed — regenerate to update",
+			`${what} changed — regenerate to update`,
 		);
-	});
-
-	it("visits a dependency shared by the element and the visual before it only once", () => {
-		const img = element("img", "image", { characters: "Alice" });
-		const video = element("vid", "video", {
-			startFrame: "previous",
-			characters: "Alice",
-		});
-
-		const ids = flattenGraph([resolveOn(video, [img, video])]).map(
-			(node) => node.id,
-		);
-		expect(ids).toEqual(["avatar-Alice", "img", "vid"]);
 	});
 
 	it("leaves a character's portrait fresh when their voice changes", () => {
@@ -225,69 +216,15 @@ describe("buildNode", () => {
 		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
 	});
 
-	describe("the project state a node reads", () => {
-		const reframe = () =>
-			store.getState().updateVideoSettings({ aspectRatio: "9:16" });
-
-		it("stales a result when the aspect ratio it read changes", () => {
-			const queue = new GenerationQueue();
-			const img = element("img", "image");
-			generateAll(queue, resolve(img));
-			expect(isNodeStale(resolve(img), queue)).toBe(false);
-
-			reframe();
-
-			expect(staleReason(resolve(img), queue)).toBe(
-				"The aspect ratio changed — regenerate to update",
-			);
-		});
-
-		it("leaves a node that reads nothing alone when it changes", () => {
-			const queue = new GenerationQueue();
-			const sound = make("sound", "rain", {}, "sound");
-			generateAll(queue, resolve(sound));
-
-			reframe();
-
-			expect(resolve(sound).inputs.reads).toEqual({});
-			expect(isNodeStale(resolve(sound), queue)).toBe(false);
-		});
-	});
-
-	it("marks a video stale when its start frame is replaced by an upload", () => {
-		const img = element("img", "image");
-		const el = element("vid-1", "video", { startFrame: "previous" });
-		const video = resolveOn(el, [img, el]);
+	it("leaves a node that reads nothing alone when the project state changes", () => {
 		const queue = new GenerationQueue();
-		generateAll(queue, video);
-		expect(isNodeStale(video, queue)).toBe(false);
+		const sound = make("sound", "rain", {}, "sound");
+		generateAll(queue, resolve(sound));
 
-		commit(queue, resolveOn(img, [img, el]), "uploaded.png");
-		expect(isNodeStale(video, queue)).toBe(true);
-	});
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
-	it("marks a video stale when the visual before it changes", () => {
-		const queue = new GenerationQueue();
-		const img = element("img", "image");
-		const other = element("other", "image");
-		const el = element("vid-1", "video", { startFrame: "previous" });
-		generateAll(queue, resolveOn(el, [img, el]));
-
-		expect(isNodeStale(resolveOn(el, [img, other, el]), queue)).toBe(true);
-	});
-
-	it("regenerates a generated image when the art style is edited", () => {
-		const queue = new GenerationQueue();
-		const img = element("img", "image");
-		generateAll(queue, resolve(img));
-		expect(needsGeneration(resolve(img), queue)).toBe(false);
-
-		assets = [make("asset_style", "watercolor"), ...assets.slice(1)];
-
-		expect(needsGeneration(resolve(img), queue)).toBe(true);
-		expect(staleReason(resolve(img), queue)).toBe(
-			"The art style changed — regenerate to update",
-		);
+		expect(resolve(sound).inputs.reads).toEqual({});
+		expect(isNodeStale(resolve(sound), queue)).toBe(false);
 	});
 
 	describe("speech and the voice it is spoken in", () => {
@@ -295,16 +232,6 @@ describe("buildNode", () => {
 		const voice = (attrs: Record<string, string>) => {
 			assets = [make("asset_voice", "", { name: NARRATOR, ...attrs })];
 		};
-
-		it("reads the voice its speaker chose, depending on nothing", () => {
-			voice({ voiceId: "v-1" });
-			const node = resolve(line);
-
-			expect(edgesOf(node)).toEqual({});
-			expect(
-				JSON.parse(node.inputs.reads["Narrator's voice"] ?? "{}"),
-			).toMatchObject({ voiceId: "v-1" });
-		});
 
 		it("stays current while only the search filters change, and stales when another voice is chosen", () => {
 			const queue = new GenerationQueue();

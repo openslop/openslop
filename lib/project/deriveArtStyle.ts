@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import compact from "lodash/compact";
 import { getAvatars, referenceUrls } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";

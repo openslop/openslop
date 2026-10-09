@@ -1,4 +1,5 @@
 import isEqual from "lodash/isEqual";
+import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
 import memoizeOne from "memoize-one";
 import { shallow } from "zustand/shallow";
@@ -20,20 +21,25 @@ export const generatedById = (canvas: CanvasElement[], id: string) =>
 
 const isPresent = <T>(value: T | undefined): value is T => Boolean(value);
 
+const declared = <T>(
+	records: Record<string, T | undefined>[],
+): Record<string, T> => {
+	const labels = records.flatMap(Object.keys);
+	const repeated = labels.find((label, i) => labels.indexOf(label) !== i);
+	if (repeated) throw new Error(`Two plugins declare "${repeated}"`);
+	return pickBy(Object.assign({}, ...records), isPresent);
+};
+
 /** What the plugins read off the canvas and the settings; an empty or missing value is left out. */
 export const pluginReads = (
 	plugins: ConnectorPlugin[],
 	element: GeneratedElement,
 	ctx: BuildContext,
 ): Record<string, string> =>
-	pickBy(
-		Object.assign(
-			{},
-			...plugins.flatMap((plugin) =>
-				(plugin.reads ?? []).map((reads) => reads(element, ctx)),
-			),
+	declared(
+		plugins.flatMap((plugin) =>
+			(plugin.reads ?? []).map((reads) => reads(element, ctx)),
 		),
-		isPresent,
 	);
 
 /** The elements the plugins depend on, by label; one they found none of is left out. */
@@ -41,10 +47,12 @@ export const pluginDependencies = (
 	plugins: ConnectorPlugin[],
 	element: GeneratedElement,
 	ctx: BuildContext,
-): [string, GeneratedElement][] =>
-	plugins.flatMap((plugin) =>
-		(plugin.dependencies ?? []).flatMap((dependencies) =>
-			Object.entries(pickBy(dependencies(element, ctx), isPresent)),
+): Record<string, GeneratedElement> =>
+	declared(
+		plugins.flatMap((plugin) =>
+			(plugin.dependencies ?? []).map((dependencies) =>
+				dependencies(element, ctx),
+			),
 		),
 	);
 
@@ -105,19 +113,9 @@ export class GenerationGraph {
 		element: GeneratedElement,
 		plugins: ConnectorPlugin[],
 	) {
-		const dependsOn: Record<string, GenerationNode> = {};
-		for (const [label, target] of pluginDependencies(
-			plugins,
-			element,
-			this.ctx,
-		)) {
-			if (Object.hasOwn(dependsOn, label))
-				throw new Error(
-					`Two dependencies of "${element.id}" share the label "${label}"`,
-				);
-			dependsOn[label] = this.build(target);
-		}
-		return dependsOn;
+		return mapValues(pluginDependencies(plugins, element, this.ctx), (target) =>
+			this.build(target),
+		);
 	}
 
 	private intern(node: GenerationNode) {

@@ -1,17 +1,16 @@
 import { assetText } from "@/lib/canvas/assets";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { read } from "@/lib/generation/declare";
 
-const artStyle = read("the art style", (_, { canvas }) =>
-	assetText(canvas, "asset_style"),
-);
+const ART_STYLE = "the art style";
 
 export function createArtStylePlugin(): ConnectorPlugin<{ prompt: string }> {
 	return {
 		name: "art-style",
-		reads: [artStyle],
+		reads: [
+			(_, { canvas }) => ({ [ART_STYLE]: assetText(canvas, "asset_style") }),
+		],
 		transformPrompt(prompt, ctx) {
-			const style = artStyle.value(ctx);
+			const style = ctx.reads?.[ART_STYLE];
 			return style ? `${style}. ${prompt}` : prompt;
 		},
 	};

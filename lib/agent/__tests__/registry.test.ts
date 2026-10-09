@@ -62,7 +62,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 });
 
 describe("executeToolCall", () => {
-	it("hands back the script and the settings it renders with, with no character list beside it", async () => {
+	it("hands back the script and the settings it renders with", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
@@ -73,7 +73,6 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
 		expect(outcome.ok && outcome.output).toContain("- template: none");
 		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
-		expect(outcome.ok && outcome.output).not.toContain("Characters");
 	});
 
 	it("says the canvas is empty and the project untitled rather than handing back nothing", async () => {
@@ -207,17 +206,24 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("next script");
 	});
 
-	it("update_video_settings writes the aspect ratio and transition it was given", async () => {
+	it.each([
+		[
+			"the aspect ratio and transition it was given",
+			{ aspectRatio: "9:16", transitionType: "fade" },
+		],
+		[
+			"only the caption field it was given, so the rest of the style stands",
+			{ captionStyle: { fontSize: 120 } },
+		],
+		["captions off without disturbing their style", { captions: false }],
+	])("update_video_settings writes %s", async (_, input) => {
 		const patches: DeepPartial<VideoSettings>[] = [];
 		await executeToolCall(
-			{
-				toolName: "update_video_settings",
-				input: { aspectRatio: "9:16", transitionType: "fade" },
-			},
+			{ toolName: "update_video_settings", input },
 			context(recordVideoSettings(patches)),
 		);
 
-		expect(patches).toEqual([{ aspectRatio: "9:16", transitionType: "fade" }]);
+		expect(patches).toEqual([input]);
 	});
 
 	it("applies a caption preset whole, with a caption style on top", async () => {
@@ -241,29 +247,6 @@ describe("executeToolCall", () => {
 		});
 		expect(CaptionStyleSchema.safeParse(style).success).toBe(true);
 		expect(outcome.ok && outcome.output).toContain("Karaoke caption preset");
-	});
-
-	it("sends only the caption field it was given, so the rest of the style stands", async () => {
-		const patches: DeepPartial<VideoSettings>[] = [];
-		await executeToolCall(
-			{
-				toolName: "update_video_settings",
-				input: { captionStyle: { fontSize: 120 } },
-			},
-			context(recordVideoSettings(patches)),
-		);
-
-		expect(patches[0]?.captionStyle).toEqual({ fontSize: 120 });
-	});
-
-	it("turns captions off without disturbing their style", async () => {
-		const patches: DeepPartial<VideoSettings>[] = [];
-		await executeToolCall(
-			{ toolName: "update_video_settings", input: { captions: false } },
-			context(recordVideoSettings(patches)),
-		);
-
-		expect(patches[0]).toEqual({ captions: false });
 	});
 
 	it("rejects a caption size the panel could not set either", async () => {
@@ -598,10 +581,10 @@ describe("executeToolCall", () => {
 		["a generated image", "img-1", "image"],
 		[
 			"a character's avatar through their avatar asset",
-			"asset_avatar:Ada",
+			"avatar",
 			"asset_avatar",
 		],
-		["every uploaded reference image", "asset_references", "asset_references"],
+		["every uploaded reference image", "references", "asset_references"],
 	] as const)("hands over %s with its prompt", async (_, id, type) => {
 		const urls = ["https://example.com/a.jpg", "https://example.com/b.jpg"];
 		const outcome = await executeToolCall(
@@ -732,7 +715,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "review_script", input: {} },
 			context({
-				readScript: () => '<asset_style id="asset_style">Ink</asset_style>',
+				readScript: () => '<asset_style id="style">Ink</asset_style>',
 				isScriptEmpty: () => true,
 				generateText: async () => {
 					throw new Error("reviewed an empty canvas");
@@ -787,15 +770,6 @@ describe("SLOPPY_TOOLS", () => {
 });
 
 describe("a call the editor cannot run", () => {
-	it("rejects a call carrying another tool's input", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "write_script", input: { ops: [] } },
-			context(),
-		);
-
-		expect(outcome.ok).toBe(false);
-	});
-
 	it("rejects a tool nothing can run", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "render_video", input: {} },

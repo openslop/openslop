@@ -48,7 +48,8 @@ function ElementSettings({
 	element: ContentElement;
 	specs: Record<string, AttributeSpec>;
 }) {
-	if (Object.keys(specs).length === 0) return null;
+	const entries = Object.entries(specs);
+	if (entries.length === 0) return null;
 	return (
 		<Popover>
 			<SimpleTooltip label="Settings">
@@ -61,7 +62,7 @@ function ElementSettings({
 			<PopoverContent align="start" className="w-64 border border-border">
 				<div className="mb-2 text-label font-semibold">Settings</div>
 				<div className="flex flex-col gap-2">
-					{Object.entries(specs).map(([key, spec]) => (
+					{entries.map(([key, spec]) => (
 						<div key={key} className="flex items-center justify-between gap-3">
 							<span className="shrink-0 text-label">{spec.label}</span>
 							<AttributeBadge

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Descendant } from "slate";
-import { findAsset, getCanvasElements, NARRATOR } from "@/lib/canvas/assets";
+import { getCanvasElements, NARRATOR } from "@/lib/canvas/assets";
+import { asset, element } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import {
 	SCENE_TYPE,
 	type AssetElement,
@@ -14,31 +14,15 @@ import {
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
 import type { AssetWrite, ConnectorPlugin } from "@/lib/connectors/types";
-import { createProjectStore } from "@/lib/project/store";
 import type { BuildContext } from "../graph";
 import {
-	buildNode,
+	generatedById,
 	GenerationGraph,
 	pluginDependencies,
 	pluginReads,
 	prepareNode,
 } from "../generationGraph";
-import { depend, read } from "../declare";
-import { EMPTY_CONTEXT } from "./_context";
-import { GenerationQueue } from "../queue";
-import { isNodeStale } from "../staleness";
-
-const element = (
-	id: string,
-	type: ContentElement["type"],
-	text: string,
-	attributes: Record<string, string> = {},
-): ContentElement => ({
-	id,
-	type,
-	...splitAttributes(attributes),
-	children: [{ id: `${id}-t`, type, text }],
-});
+import { buildCtx, EMPTY_CONTEXT } from "./_context";
 
 const linked = { continuity: "true" };
 const PREVIOUS = "the previous visual";
@@ -48,22 +32,19 @@ let document: Descendant[];
 let registry: ConnectorRegistry;
 let graph: GenerationGraph;
 
-const contextNow = (): BuildContext => ({
-	state: createProjectStore().getState(),
-	canvas: getCanvasElements([...assets, ...document]),
-	registry,
-	setAsset: () => {},
-});
+const contextNow = (): BuildContext =>
+	buildCtx(getCanvasElements([...assets, ...document]), { registry });
 
-const redsAvatar = depend("Red's avatar", (_, { canvas }) =>
-	findAsset(canvas, "asset_avatar", "Red"),
-);
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
 	image: {
 		plugins: [
-			{ name: "first", dependencies: [redsAvatar] },
-			{ name: "second", dependencies: [redsAvatar] },
+			{
+				name: "itself",
+				dependencies: [
+					(self, { canvas }) => ({ self: generatedById(canvas, self.id) }),
+				],
+			},
 		],
 	},
 };
@@ -107,18 +88,10 @@ describe("GenerationGraph", () => {
 
 		const reached = nodeOf(second).dependsOn[PREVIOUS];
 
-		expect(reached?.id).toBe("first");
+		expect(reached).toBe(nodeOf(first));
 		expect(nodeOf(third).dependsOn[PREVIOUS]?.dependsOn[PREVIOUS]).toBe(
 			reached,
 		);
-	});
-
-	it("labels the edge to a dependency and shares the node it reaches", () => {
-		const image = element("img", "image", "a sunset");
-		const video = element("vid", "video", "a pan", linked);
-		edit(image, video);
-
-		expect(nodeOf(video).dependsOn[PREVIOUS]).toBe(nodeOf(image));
 	});
 
 	it("keeps a node that reads as it did a revision ago", () => {
@@ -178,9 +151,8 @@ describe("GenerationGraph", () => {
 	it("throws the same for every reader of a node that cannot be built", () => {
 		const image = element("img", "image", "a sunset");
 		registry = UNBUILDABLE;
-		assets = [createCanvasElement("asset_avatar", { attrs: { name: "Red" } })];
 		edit(image);
-		const failure = `Two dependencies of "img" share the label "Red's avatar"`;
+		const failure = `Cyclic generation dependency at "img"`;
 
 		expect(() => nodeOf(image)).toThrow(failure);
 		expect(() => nodeOf(image)).toThrow(failure);
@@ -197,29 +169,18 @@ describe("prepareNode", () => {
 		name: "settle",
 		prepare: async () => writes,
 	});
-	const readsVoice: ConnectorPlugin = {
-		name: "voice",
-		reads: [
-			read(
-				"voice",
-				(_, { canvas }) =>
-					findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
-						?.voiceId ?? "",
-			),
-		],
-	};
 	const image = element("img", "image", "a sunset");
 	const setAsset = vi.fn(({ type, name, attrs }: AssetWrite) => {
-		assets = [
-			...assets,
-			createCanvasElement(type, { attrs: name ? { name, ...attrs } : attrs }),
-		];
+		assets = [...assets, asset(type, { name, attrs })];
 	});
 	const writing = (): BuildContext => ({ ...contextNow(), setAsset });
-	const prepare = (...plugins: ConnectorPlugin[]) => {
+	const prepare = (
+		plugins: ConnectorPlugin[],
+		signal = new AbortController().signal,
+	) => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins } };
 		edit(image);
-		return prepareNode(nodeOf(image), writing, new AbortController().signal);
+		return prepareNode(nodeOf(image), writing, signal);
 	};
 
 	beforeEach(() => {
@@ -227,11 +188,11 @@ describe("prepareNode", () => {
 	});
 
 	it("writes what every plugin settles through setAsset, in plugin order", async () => {
-		await prepare(
+		await prepare([
 			settling(voice("v-1")),
 			{ name: "none" },
 			settling(voice("v-2")),
-		);
+		]);
 
 		expect(setAsset.mock.calls.map(([write]) => write)).toEqual([
 			voice("v-1"),
@@ -239,23 +200,9 @@ describe("prepareNode", () => {
 		]);
 	});
 
-	it("builds the node again from the canvas as written, so its result is current once committed", async () => {
-		const prepared = await prepare(settling(voice("v-found")), readsVoice);
-		const queue = new GenerationQueue();
-		queue.commitResult(prepared, { imageUrl: "img.png", durationSec: 0 });
-
-		expect(prepared.inputs.reads.voice).toBe("v-found");
-		expect(isNodeStale(buildNode(image, contextNow()), queue)).toBe(false);
-	});
-
 	it("writes nothing once the job is cancelled", async () => {
-		registry = {
-			...DEFAULT_CONNECTOR_REGISTRY,
-			image: { plugins: [settling(voice("v-1"))] },
-		};
-		edit(image);
 		const controller = new AbortController();
-		const prepared = prepareNode(nodeOf(image), writing, controller.signal);
+		const prepared = prepare([settling(voice("v-1"))], controller.signal);
 		controller.abort();
 
 		await expect(prepared).rejects.toThrow();
@@ -301,8 +248,14 @@ describe("what the plugins declare", () => {
 	});
 
 	it("depends only on the elements a plugin found", () => {
-		expect(pluginDependencies([declaring], image, EMPTY_CONTEXT)).toEqual([
-			["Red's avatar", avatar],
-		]);
+		expect(pluginDependencies([declaring], image, EMPTY_CONTEXT)).toEqual({
+			"Red's avatar": avatar,
+		});
+	});
+
+	it("refuses two plugins declaring the same label", () => {
+		expect(() =>
+			pluginDependencies([declaring, declaring], image, EMPTY_CONTEXT),
+		).toThrow(`Two plugins declare "Red's avatar"`);
 	});
 });

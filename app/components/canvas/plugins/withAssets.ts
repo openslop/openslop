@@ -20,7 +20,7 @@ const strayAt = (children: Node[]) =>
 			isAssetElement(node) && at > 0 && !isAssetElement(children[at - 1]),
 	);
 
-/** Every asset is a void, one per id, ahead of the script and out of the caret's reach. */
+/** Every asset is a void, one per type and name, ahead of the script and out of the caret's reach. */
 export const withAssets = (editor: CanvasEditor): CanvasEditor => {
 	const { isVoid, normalizeNode, onChange, deleteBackward } = editor;
 

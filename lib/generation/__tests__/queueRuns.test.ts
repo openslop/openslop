@@ -12,12 +12,11 @@ import type {
 	ConnectorPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
-import { createProjectStore } from "@/lib/project/store";
 import type { BuildContext } from "../graph";
-import { read } from "../declare";
 import { buildNode, generatedById } from "../generationGraph";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
+import { buildCtx } from "./_context";
 
 const mediaGenerate =
 	vi.fn<(params: object, context: PluginContext) => Promise<AssetResult>>();
@@ -29,17 +28,13 @@ vi.mock("@/lib/connectors/factory", async (original) => ({
 let canvas: CanvasElement[];
 let registry: ConnectorRegistry;
 
-const context = (): BuildContext => ({
-	state: createProjectStore().getState(),
-	canvas,
-	registry,
-	setAsset: ({ type, name, attrs }) => {
-		canvas = [
-			...canvas,
-			createCanvasElement(type, { attrs: name ? { name, ...attrs } : attrs }),
-		];
-	},
-});
+const context = (): BuildContext =>
+	buildCtx(canvas, {
+		registry,
+		setAsset: ({ type, name, attrs }) => {
+			canvas = [...canvas, asset(type, { name, attrs })];
+		},
+	});
 
 const byId = (id: string) => {
 	const found = generatedById(canvas, id);
@@ -121,12 +116,11 @@ describe("running a graph", () => {
 		const settleVoice: ConnectorPlugin = {
 			name: "voice",
 			reads: [
-				read(
-					"voice",
-					(_, { canvas }) =>
+				(_, { canvas }) => ({
+					voice:
 						findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
 							?.voiceId ?? "",
-				),
+				}),
 			],
 			prepare: async () => [
 				{ type: "asset_voice", name: NARRATOR, attrs: { voiceId: "v-7" } },

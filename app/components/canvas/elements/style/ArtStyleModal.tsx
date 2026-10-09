@@ -41,12 +41,11 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const deriveFromReferences = async () => {
 		setDeriving(true);
 		try {
-			setStyle(
-				await deriveArtStyle(
-					createConnector("llm", model),
-					artStyleReferences(assets, queue),
-				),
+			const derived = await deriveArtStyle(
+				createConnector("llm", model),
+				artStyleReferences(assets, queue),
 			);
+			if (derived) setStyle(derived);
 		} finally {
 			setDeriving(false);
 		}

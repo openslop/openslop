@@ -33,7 +33,6 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			name={name}
 			previewUrl={avatar.url}
 			Icon={User}
-			fallback="initial"
 			status={avatar.status}
 			onEdit={() => editAsset("asset_avatar", name)}
 			{...tile}
@@ -70,7 +69,6 @@ export function ReferenceTile({
 	);
 }
 
-/** A project reference, edited in the art style dialog. */
 export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	const { editAsset } = useAssetEditors();
 	return (

@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { scriptRules } from "@/lib/script/prompt/build";
 import { VIDEO_FORMAT_NAMES } from "@/lib/script/prompt/formats";

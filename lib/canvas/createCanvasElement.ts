@@ -1,10 +1,6 @@
-import {
-	connectorOf,
-	type ElementOf,
-	type ElementType,
-} from "@/lib/canvas/types";
+import { connectorOf, type ElementOf, type ElementType } from "./types";
 import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { splitAttributes } from "./elementAttributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { attributeSchemaFor } from "./elementConnector";
 import { makeNodeId } from "./nodeUtils";

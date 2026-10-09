@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEditor, Editor } from "slate";
+import { Editor } from "slate";
 
 vi.mock("@/lib/connectors/factory", () => ({
 	resolveAttributeSchema: () => ({
@@ -13,29 +13,29 @@ import type { ConnectorModels } from "@/lib/connectors/models";
 import { isScene } from "../scenes";
 import { insertScene } from "../insertScene";
 import { flatAttributes } from "../elementAttributes";
+import { makeEditor } from "./_assets";
 
-function makeEditor(defaultModels: ConnectorModels = {}) {
-	const editor = createEditor();
-	editor.defaultModels = () => defaultModels;
-	editor.children = [
-		{
-			id: "scene-1",
-			type: "scene",
-			children: [
-				{
-					id: "img-1",
-					type: "image",
-					children: [{ id: "t1", type: "image", text: "a cat" }],
-				},
-			],
-		},
-	];
-	return editor;
-}
+const seededEditor = (defaultModels: ConnectorModels = {}) =>
+	makeEditor(
+		[
+			{
+				id: "scene-1",
+				type: "scene",
+				children: [
+					{
+						id: "img-1",
+						type: "image",
+						children: [{ id: "t1", type: "image", text: "a cat" }],
+					},
+				],
+			},
+		],
+		defaultModels,
+	);
 
 describe("insertScene", () => {
 	it("inserts a scene holding one foreground element", () => {
-		const editor = makeEditor();
+		const editor = seededEditor();
 		Editor.withoutNormalizing(editor, () => {
 			insertScene(editor, [0]);
 		});
@@ -49,7 +49,7 @@ describe("insertScene", () => {
 
 	it("starts the scene's element on the editor's default model", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const editor = makeEditor({ image: pinned });
+		const editor = seededEditor({ image: pinned });
 		Editor.withoutNormalizing(editor, () => {
 			insertScene(editor, [0]);
 		});
@@ -60,7 +60,7 @@ describe("insertScene", () => {
 	});
 
 	it("inserts at the given path", () => {
-		const editor = makeEditor();
+		const editor = seededEditor();
 		let id = "";
 		Editor.withoutNormalizing(editor, () => {
 			id = insertScene(editor, [1]);

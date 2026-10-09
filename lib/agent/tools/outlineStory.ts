@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { spokenLanguage } from "@/lib/script/prompt/language";
 import { outlinePrompt } from "@/lib/script/prompt/outline";

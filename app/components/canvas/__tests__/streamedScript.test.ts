@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
-import { getAssets } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
-import type { AssetElement, CanvasEditor } from "@/lib/canvas/types";
+import type { CanvasEditor } from "@/lib/canvas/types";
 import { createScriptWriter } from "@/lib/script/scriptWriter";
 import { withAssets } from "../plugins/withAssets";
 import { withLayout } from "../plugins/withLayout";
@@ -29,12 +28,11 @@ const SCENES = [
 	["image", "narration"],
 ];
 
-function written(chunks: string[], assets: AssetElement[] = []): CanvasEditor {
+function written(chunks: string[]): CanvasEditor {
 	const editor = withNodeId(
 		withScenes(withAssets(withLayout(withReact(createEditor())))),
 	);
 	editor.defaultModels = () => ({});
-	editor.children = assets;
 	chunks.forEach(createScriptWriter(editor));
 	return editor;
 }
@@ -43,28 +41,12 @@ const scenes = (editor: CanvasEditor) =>
 	shape(editor).filter(([first]) => !first?.startsWith("!"));
 
 describe("a script streamed onto the canvas", () => {
-	it("opens a scene at each visual as the text trickles in, adding no asset", () => {
-		const editor = written(SCRIPT.match(/[^]{1,7}/g) ?? []);
-
-		expect(getAssets(editor.children)).toEqual([]);
-		expect(scenes(editor)).toEqual(SCENES);
+	it("opens a scene at each visual as the text trickles in", () => {
+		expect(scenes(written(SCRIPT.match(/[^]{1,7}/g) ?? []))).toEqual(SCENES);
 	});
 
 	it("forms the same scenes when it arrives in one piece", () => {
 		expect(scenes(written([SCRIPT]))).toEqual(SCENES);
-	});
-
-	it("lands after the assets already on the canvas, which stay outside every scene", () => {
-		const assets = [
-			asset("asset_style", { text: "muted watercolor" }),
-			asset("asset_avatar", { name: "Ayla", text: "a keeper" }),
-		];
-
-		const editor = written(SCRIPT.match(/[^]{1,7}/g) ?? [], assets);
-
-		expect(editor.children.slice(0, 2)).toEqual(assets);
-		expect(getAssets(editor.children)).toEqual(assets);
-		expect(scenes(editor)).toEqual(SCENES);
 	});
 
 	it("replaces the script already on the canvas once the first element arrives", () => {

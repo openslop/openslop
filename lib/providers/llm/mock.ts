@@ -24,7 +24,6 @@ import type { LLMProvider } from "./base";
 
 const MOCK_TITLE = "Little Red";
 
-/** The assets the mock script is written against, as the edit a real agent makes before writing. */
 const MOCK_ASSETS: RefineOp[] =
 	parseOSML(`<asset_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</asset_style>
 

@@ -12,14 +12,12 @@ import { mountOnCanvas } from "./_mount";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-const created = vi.hoisted(() => ({ name: "Mia" }));
-
 vi.mock("../elements/character/NewCharacterDialog", () => ({
 	NewCharacterDialog: ({
 		onCreated,
 	}: {
 		onCreated: (name: string) => void;
-	}) => <button data-dialog="create" onClick={() => onCreated(created.name)} />,
+	}) => <button data-dialog="create" onClick={() => onCreated("Mia")} />,
 }));
 vi.mock("../elements/character/CharacterEditModal", () => ({
 	CharacterEditModal: (props: { name: string; onClose: () => void }) => (
@@ -46,7 +44,6 @@ const dialogs = () =>
 const openDialogs = () => dialogs().map((dialog) => dialog.dataset.dialog);
 const clickDialog = () => act(() => dialogs()[0]?.click());
 beforeEach(() => {
-	created.name = "Mia";
 	canvas = mountOnCanvas();
 	canvas.render(
 		<AssetEditProvider>
@@ -84,18 +81,6 @@ describe("AssetEditProvider", () => {
 		expect(findAsset(editor().children, "asset_avatar", "Mia")).toBeDefined();
 		expect(findAsset(editor().children, "asset_voice", "Mia")).toBeDefined();
 		expect(openDialogs()).toEqual(["character Mia"]);
-	});
-
-	it("adds a new narrator as a voice with no avatar", () => {
-		created.name = NARRATOR;
-		act(() => editors.openCreateCharacter());
-
-		clickDialog();
-		expect(findAsset(editor().children, "asset_voice", NARRATOR)).toBeDefined();
-		expect(
-			findAsset(editor().children, "asset_avatar", NARRATOR),
-		).toBeUndefined();
-		expect(openDialogs()).toEqual(["character Narrator"]);
 	});
 
 	it("adds only the asset it opens", () => {

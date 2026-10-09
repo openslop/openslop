@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { LANGUAGE_CHOICES, languageLabel } from "@/lib/project/language";
 import {

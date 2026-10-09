@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEditor, type Descendant } from "slate";
 import { findAsset, getAssets } from "@/lib/canvas/assets";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import {
 	flatAttributes,
@@ -124,14 +125,11 @@ describe("useBuildContext", () => {
 		expect(canvas.map(({ id }) => id)).toEqual([style.id, "vid-1"]);
 	});
 
-	it.each([
-		["merges a write onto the asset it names", [{ gender: "feminine" }]],
-		["creates the asset a write names when it is missing", []],
-	])("%s", (_, existing) => {
-		const voices = existing.map((attrs) =>
-			createCanvasElement("asset_voice", { attrs: { name: "Red", ...attrs } }),
-		);
-		children = [...voices, ...document(video("vid-1", "shot one"))];
+	it("writes an asset through to the document", () => {
+		children = [
+			asset("asset_voice", { name: "Red", attrs: { gender: "feminine" } }),
+			...document(video("vid-1", "shot one")),
+		];
 
 		render(useBuildContext)().setAsset({
 			type: "asset_voice",
@@ -142,7 +140,7 @@ describe("useBuildContext", () => {
 		const written = findAsset(children, "asset_voice", "Red");
 		expect(getAssets(children)).toHaveLength(1);
 		expect(written && flatAttributes(written)).toMatchObject({
-			...existing[0],
+			gender: "feminine",
 			voiceId: "v1",
 		});
 	});

@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { DURATION_MAX } from "@/lib/canvas/types";
 import {

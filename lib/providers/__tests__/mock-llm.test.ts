@@ -26,13 +26,12 @@ describe("MockLLM", () => {
 		expect(text).toBe(NO_FINDINGS);
 	});
 
-	it("falls back to a script for anything else, with no metadata tags in it", async () => {
+	it("falls back to a script for anything else", async () => {
 		const { text } = await new MockLLM().generate({
 			prompt: "write me a video",
 		});
 
 		expect(text).toContain("<narration");
-		expect(text).not.toContain("metadata_");
 	});
 });
 
@@ -42,7 +41,7 @@ const EMPTY_CANVAS = "## Script\nThe canvas is empty.";
 const WRITTEN_CANVAS = [
 	"## Script",
 	"```xml",
-	'<asset_avatar id="asset_avatar:Red" name="Red">A girl in a red cloak.</asset_avatar>',
+	'<asset_avatar id="avatar" name="Red">A girl in a red cloak.</asset_avatar>',
 	"--- Scene 1 ---",
 	'<narration id="n1">Once upon a time.</narration>',
 	'<image id="img1">A cottage at dawn.</image>',

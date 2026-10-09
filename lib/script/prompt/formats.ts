@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { VIDEO_FORMAT_SPECS } from "@/lib/project/videoFormat";
 
 export const VIDEO_FORMAT = {

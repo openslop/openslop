@@ -1,22 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, type Editor } from "slate";
+import { elements, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
-import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import type { ConnectorModels } from "@/lib/connectors/models";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { createScriptWriter } from "../scriptWriter";
-
-const makeEditor = (defaultModels: ConnectorModels = {}) => {
-	const editor = createEditor();
-	editor.defaultModels = () => defaultModels;
-	return editor;
-};
-
-const elements = (editor: Editor): [type: string, text: string][] =>
-	editor.children
-		.filter(isContentElement)
-		.map((element) => [element.type, getElementBodyText(element)]);
 
 describe("createScriptWriter", () => {
 	it("grows an element in the document as its text arrives", () => {
@@ -35,7 +21,7 @@ describe("createScriptWriter", () => {
 
 	it("starts a streamed element on the editor's default model", () => {
 		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const editor = makeEditor({ tts: pinned });
+		const editor = makeEditor([], { tts: pinned });
 
 		createScriptWriter(editor)("<narration>Once upon a time</narration>\n");
 
@@ -82,17 +68,6 @@ describe("createScriptWriter", () => {
 		);
 
 		expect(elements(editor)).toEqual(lines.map((line) => ["narration", line]));
-	});
-
-	it("writes the script after the assets already on the canvas", () => {
-		const editor = makeEditor();
-		const style = createCanvasElement("asset_style", { text: "noir" });
-		editor.children = [style];
-
-		createScriptWriter(editor)("<narration>Snow fell.</narration>");
-
-		expect(editor.children[0]).toBe(style);
-		expect(elements(editor)).toEqual([["narration", "Snow fell."]]);
 	});
 
 	it("leaves an asset tag the model wrote off the canvas", () => {

@@ -1,18 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
-import type { GenerationInputs } from "../inputs";
+import { inputsFor } from "./_graph";
 import {
 	activeVersionIndex,
 	VersionLog,
 	type ElementVersion,
 } from "../versions";
-
-const inputs = (prompt: string): GenerationInputs => ({
-	prompt,
-	attributes: {},
-	reads: {},
-	dependencies: {},
-});
 
 const result = (imageUrl: string): AssetResult => ({
 	imageUrl,
@@ -30,7 +23,7 @@ const version = (
 	elementId: "a",
 	createdAt,
 	connectorType: "image",
-	inputs: inputs(prompt),
+	inputs: inputsFor(prompt),
 	result: result(url),
 	pinned: false,
 });
@@ -99,14 +92,18 @@ describe("activeVersionIndex", () => {
 	it("finds the version whose inputs made the result on screen", () => {
 		const snapshot = {
 			result: result("b.png"),
-			resultInputs: inputs("b"),
+			resultInputs: inputsFor("b"),
 			pinned: false,
 		};
 		expect(activeVersionIndex(versions, snapshot)).toBe(1);
 	});
 
 	it("highlights nothing when a failed regeneration left stale inputs behind", () => {
-		const snapshot = { result: null, resultInputs: inputs("b"), pinned: false };
+		const snapshot = {
+			result: null,
+			resultInputs: inputsFor("b"),
+			pinned: false,
+		};
 		expect(activeVersionIndex(versions, snapshot)).toBe(-1);
 	});
 });

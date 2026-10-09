@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
 import type { GenerationStatus } from "@/lib/generation/snapshots";

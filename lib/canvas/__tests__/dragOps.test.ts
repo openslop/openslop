@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createEditor } from "slate";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { crossSceneTransfer, moveDraggedElement } from "../dragOps";
+import { makeEditor } from "./_assets";
 
 function content(id: string): ContentElement {
 	return {
@@ -13,12 +13,6 @@ function content(id: string): ContentElement {
 
 function scene(id: string, children: ContentElement[]): Scene {
 	return { id, type: "scene", children };
-}
-
-function makeEditor(scenes: Scene[]) {
-	const editor = createEditor();
-	editor.children = scenes;
-	return editor;
 }
 
 const layout = (editor: ReturnType<typeof makeEditor>) =>

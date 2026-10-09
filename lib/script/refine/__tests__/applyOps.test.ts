@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEditor, Editor, Element } from "slate";
+import { Editor, Element } from "slate";
 import type { AssetElement, ContentElement, Scene } from "@/lib/canvas/types";
 
 // No connector model stamped here — these tests exercise refine-op mechanics
@@ -43,9 +43,9 @@ vi.mock("@/lib/connectors/factory", () => ({
 import { applyRefineOp, applyRefineOps } from "../applyOps";
 import type { RefineOp } from "../types";
 import { getAssets, NARRATOR } from "@/lib/canvas/assets";
-import { asset, label } from "@/lib/canvas/__tests__/_assets";
+import { asset, label, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { getPromptText } from "@/lib/generation/inputs";
-import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -72,13 +72,6 @@ function content(
 
 function scene(children: ContentElement[], id = "s1"): Scene {
 	return { id, type: "scene", children };
-}
-
-function makeEditor(scenes: Scene[], defaultModels: ConnectorModels = {}) {
-	const editor = createEditor();
-	editor.defaultModels = () => defaultModels;
-	editor.children = scenes;
-	return editor;
 }
 
 function getContentIds(editor: Editor): string[] {
@@ -620,8 +613,10 @@ describe("applyRefineOp — assets", () => {
 		]);
 	});
 
-	it("rewrites the avatar and voice already under that name", () => {
+	it("rewrites the asset already under that type and name, keeping one of each", () => {
 		const editor = makeCanvas([
+			asset("asset_style", { text: "noir" }),
+			asset("asset_references", { attrs: { images: "a.png" } }),
 			asset("asset_avatar", { name: "Mia", text: "a girl" }),
 			asset("asset_voice", { name: "Mia", attrs: { age: "child" } }),
 			asset("asset_avatar", { name: "Kai", text: "a boy" }),
@@ -629,6 +624,13 @@ describe("applyRefineOp — assets", () => {
 
 		apply(
 			editor,
+			{ op: "insert", type: "asset_style", text: "muted watercolor" },
+			{
+				op: "insert",
+				type: "asset_references",
+				attrs: { images: "a.png,b.png" },
+				text: "",
+			},
 			{
 				op: "insert",
 				type: "asset_avatar",
@@ -639,45 +641,6 @@ describe("applyRefineOp — assets", () => {
 				op: "insert",
 				type: "asset_voice",
 				attrs: { name: "Mia", pitch: "high" },
-				text: "",
-			},
-			{
-				op: "insert",
-				type: "asset_voice",
-				attrs: { name: "Lumi", pitch: "low" },
-				text: "",
-			},
-		);
-
-		expect(describeAssets(editor)).toEqual([
-			["asset_voice:Lumi", { ...VOICE, name: "Lumi", pitch: "low" }, ""],
-			[
-				"asset_avatar:Mia",
-				{ ...LOOK, name: "Mia" },
-				"a girl in a yellow cardigan",
-			],
-			[
-				"asset_voice:Mia",
-				{ ...VOICE, name: "Mia", age: "child", pitch: "high" },
-				"",
-			],
-			["asset_avatar:Kai", { ...LOOK, name: "Kai" }, "a boy"],
-		]);
-	});
-
-	it("keeps one style, one narrator and one references element", () => {
-		const editor = makeCanvas([
-			asset("asset_style", { text: "noir" }),
-			asset("asset_references", { attrs: { images: "a.png" } }),
-		]);
-
-		apply(
-			editor,
-			{ op: "insert", type: "asset_style", text: "muted watercolor" },
-			{
-				op: "insert",
-				type: "asset_references",
-				attrs: { images: "a.png,b.png" },
 				text: "",
 			},
 			{
@@ -702,6 +665,17 @@ describe("applyRefineOp — assets", () => {
 			],
 			["asset_style", {}, "muted watercolor"],
 			["asset_references", { images: "a.png,b.png" }, ""],
+			[
+				"asset_avatar:Mia",
+				{ ...LOOK, name: "Mia" },
+				"a girl in a yellow cardigan",
+			],
+			[
+				"asset_voice:Mia",
+				{ ...VOICE, name: "Mia", age: "child", pitch: "high" },
+				"",
+			],
+			["asset_avatar:Kai", { ...LOOK, name: "Kai" }, "a boy"],
 		]);
 	});
 

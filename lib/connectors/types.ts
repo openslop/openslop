@@ -103,14 +103,9 @@ export type AssetWrite = {
 
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
-	/** What the element waits for, goes stale with and receives the results of. */
 	dependencies?: readonly Dependency[];
-	/**
-	 * The model the element generates on, for a type whose model is picked
-	 * somewhere other than the element itself.
-	 */
-	model?(element: CanvasElement, canvas: CanvasElement[]): ModelRef;
-	/** What the element records off the canvas or the settings, so a change stales it. */
+	/** The model the element generates on, when it is picked somewhere other than the element. */
+	model?(element: CanvasElement, canvas: CanvasElement[]): ModelPick;
 	reads?: readonly Read[];
 	/** Assets to write before the node is built to run, such as the voice a search found. */
 	prepare?(element: CanvasElement, ctx: BuildContext): Promise<AssetWrite[]>;

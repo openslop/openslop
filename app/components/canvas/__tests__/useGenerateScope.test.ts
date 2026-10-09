@@ -1,4 +1,3 @@
-import { createProjectStore } from "@/lib/project/store";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant, Editor } from "slate";
 import {
@@ -6,10 +5,11 @@ import {
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
+import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generationGraph";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { element } from "@/lib/canvas/__tests__/_assets";
 
 // No plugins, so no element depends on another and each is judged alone.
 const registry = Object.fromEntries(
@@ -38,14 +38,8 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 
 // The hook under test is about which elements get queued, so bind a real
 // context rather than standing up the config and project providers.
-const state = createProjectStore().getState();
 
-const buildContext = () => ({
-	state,
-	canvas: [],
-	registry,
-	setAsset: () => {},
-});
+const buildContext = () => buildCtx([], { registry });
 
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => buildContext,
@@ -54,19 +48,12 @@ vi.mock("@/lib/generation/LiveGraphProvider", () => ({
 	useResolveNode: () => new GenerationGraph(buildContext()).resolve,
 }));
 
-function makeElement(
+const makeElement = (
 	id: string,
 	type: ContentElement["type"],
 	text: string,
 	attrs?: Record<string, string>,
-): ContentElement {
-	return {
-		id,
-		type,
-		...splitAttributes({ provider: "openslop", ...attrs }),
-		children: [{ id: `${id}-t`, type, text }],
-	};
-}
+) => element(id, type, text, { provider: "openslop", ...attrs });
 
 function wrapInScene(elements: ContentElement[]): Scene {
 	return { id: "scene-1", type: "scene", children: elements };

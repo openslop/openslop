@@ -3,12 +3,12 @@ import { nanoid } from "nanoid";
 
 export const makeNodeId = () => nanoid(16);
 
-/** Drops the ids a copy must not share. */
 export const stripIds = (node: Node): Node => {
-	if (!Element.isElement(node)) return { ...node };
-	const children = node.children.map(stripIds);
-	const { id: _, ...rest } = node;
-	return { ...rest, children } as Element;
+	if (Element.isElement(node)) {
+		const { id: _, ...rest } = node;
+		return { ...rest, children: node.children.map(stripIds) } as Element;
+	}
+	return { ...node };
 };
 
 export const assignIdRecursively = (node: Node) => {

@@ -2,7 +2,7 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 import keyBy from "lodash/keyBy";
 import type { GenerationNode } from "../graph";
-import type { NodeInputs } from "../inputs";
+import type { GenerationInputs, NodeInputs } from "../inputs";
 
 /** Dependencies labelled by their node ids. */
 export const byId = (dependencies: GenerationNode[]) =>
@@ -29,3 +29,9 @@ export const jobNode = (
 		config: {},
 	},
 });
+
+export const inputsFor = (
+	prompt = "p",
+	attributes: Record<string, string> = {},
+	dependencies: Record<string, string> = {},
+): GenerationInputs => ({ prompt, attributes, reads: {}, dependencies });

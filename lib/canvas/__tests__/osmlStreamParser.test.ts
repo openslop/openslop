@@ -4,7 +4,6 @@ import { getElementBodyText, getElementText } from "../osmlSerializer";
 import { isAssetElement } from "../guards";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
-import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 describe("OSMLStreamParser", () => {
@@ -103,18 +102,13 @@ describe("OSMLStreamParser", () => {
 		});
 	});
 
-	it("draws an avatar on the default image model, and speaks a voice on the speech model, when they name none", () => {
+	it("puts an asset that names no model on the default one", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const [avatar, voice] = parseOSML(
-			'<asset_avatar name="Mia">Brown hair</asset_avatar><asset_voice name="Mia"></asset_voice>',
-			{ image: pinned },
-		);
+		const [avatar] = parseOSML('<asset_avatar name="Mia"></asset_avatar>', {
+			image: pinned,
+		});
 
 		expect(avatar.generationAttributes).toEqual({ name: "Mia", ...pinned });
-		expect(voice.generationAttributes).toEqual({
-			name: "Mia",
-			...DEFAULT_TTS_MODEL,
-		});
 	});
 
 	it("parses assets and canvas tags in the order they were written", () => {

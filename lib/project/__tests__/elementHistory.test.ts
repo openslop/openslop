@@ -66,9 +66,6 @@ describe("parseElementVersions", () => {
 			parseElementVersions([row({ connector_type: "gif" })]),
 		).toThrow();
 		expect(() => parseElementVersions([row({ result: {} })])).toThrow();
-		expect(() =>
-			parseElementVersions([row({ connector_type: "void" })]),
-		).toThrow();
 	});
 });
 

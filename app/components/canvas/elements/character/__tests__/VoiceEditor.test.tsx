@@ -41,10 +41,6 @@ const pick = (option: string) =>
 		item.click();
 	});
 
-vi.mock("@/lib/connectors/useDefaultModels", () => ({
-	useDefaultModels: () => ({}),
-}));
-
 const OTHER: ModelRef = { provider: "cartesia", model: "Sonic 3.6" };
 const ARIA: VoiceInfo = {
 	id: "aria",

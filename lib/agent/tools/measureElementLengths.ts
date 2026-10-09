@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import type { ElementLength } from "@/lib/render/elementLengths";
 import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";

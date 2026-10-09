@@ -11,10 +11,10 @@ import {
 	type ContentElement,
 	type GeneratedElement,
 } from "@/lib/canvas/types";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore, type ProjectContext } from "@/lib/project/store";
 import type { GenerationNode } from "../graph";
 import { LiveGraphProvider, useResolveNode } from "../LiveGraphProvider";
+import { buildCtx } from "./_context";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -24,12 +24,7 @@ vi.mock("slate-react", () => ({ useSlateStatic: () => editor }));
 const store = createProjectStore();
 const state = store.getState();
 const contextNow = () =>
-	vi.fn(() => ({
-		state,
-		canvas: getCanvasElements(editor.children),
-		registry: DEFAULT_CONNECTOR_REGISTRY,
-		setAsset: () => {},
-	}));
+	vi.fn(() => buildCtx(getCanvasElements(editor.children), { state }));
 let buildContext = contextNow();
 vi.mock("../useBuildContext", () => ({ useBuildContext: () => buildContext }));
 vi.mock("@/lib/project/useProject", async () => {

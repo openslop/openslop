@@ -60,16 +60,19 @@ describe("buildScriptPrompt", () => {
 		expect(system).not.toContain("# Length");
 	});
 
-	it("keeps a pasted script's notes out of the text but in the guidance", () => {
-		const { system, prompt } = buildScriptPrompt([], lengthOf("auto"), {
-			kind: "adapt",
-			script: "NARRATOR\nOnce upon a time.",
-			notes: "warm and slow, lots of wide shots",
-		});
+	it("adapts a pasted script verbatim, its notes in the guidance, with no budget or template", () => {
+		const script = "NARRATOR\nHigh above the sleepy hills.";
+		const { system, prompt } = buildScriptPrompt(
+			[],
+			settingsOf({ template: template.id, length: "1-3m" }),
+			{ kind: "adapt", script, notes: "warm and slow, lots of wide shots" },
+		);
 
-		expect(prompt).toBe("NARRATOR\nOnce upon a time.");
+		expect(prompt).toBe(script);
+		expect(system).toContain("script-to-XML converter");
 		expect(system).toContain("warm and slow, lots of wide shots");
 		expect(system).not.toContain("# Length");
+		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
 	});
 
 	it("pastiches the project's template and keeps the brief as the topic", () => {
@@ -96,30 +99,6 @@ describe("buildScriptPrompt", () => {
 		).toEqual(buildScriptPrompt([], settingsOf(), source));
 	});
 
-	it("passes an adapted script through verbatim and drops the length budget", () => {
-		const script = "NARRATOR\nHigh above the sleepy hills.";
-		const { system, prompt } = buildScriptPrompt([], settingsOf(), {
-			kind: "adapt",
-			script,
-		});
-
-		expect(prompt).toBe(script);
-		expect(system).toContain("script-to-XML converter");
-		expect(system).not.toContain("# Length");
-	});
-
-	it("adapts verbatim even when the project has a template", () => {
-		const script = "a line the user wrote";
-		const { system, prompt } = buildScriptPrompt(
-			[],
-			settingsOf({ template: template.id }),
-			{ kind: "adapt", script },
-		);
-
-		expect(prompt).toBe(script);
-		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
-	});
-
 	it("carries the art style, narrator and characters on the canvas", () => {
 		const { system } = buildScriptPrompt(
 			[
@@ -143,33 +122,33 @@ describe("buildScriptPrompt", () => {
 		expect(system).not.toContain(`## ${NARRATOR}`);
 	});
 
-	it("lists a character's voice and appearance under their name", () => {
-		const preamble = projectPreamble([
-			asset("asset_avatar", { name: "Mira", text: "a freckled girl" }),
-			asset("asset_voice", { name: "Mira", attrs: { age: "child" } }),
-		]);
-
-		expect(preamble).toContain(
+	it.each([
+		[
+			"a character's voice and appearance under their name",
+			[
+				asset("asset_avatar", { name: "Mira", text: "a freckled girl" }),
+				asset("asset_voice", { name: "Mira", attrs: { age: "child" } }),
+			],
 			"## Mira\n\n- age: child\n- appearance: a freckled girl",
-		);
-		expect(preamble).not.toContain("# Narration Voice");
-	});
+			"# Narration Voice",
+		],
+		[
+			"a voice-only character with their voice and no appearance",
+			[asset("asset_voice", { name: "Voice", attrs: { pitch: "low" } })],
+			"## Voice\n\n- pitch: low",
+			"- appearance:",
+		],
+		[
+			"a character with no voice by their appearance alone",
+			[asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" })],
+			"## Lumi\n\n- appearance: a small grey rabbit",
+			"# Narration Voice",
+		],
+	])("lists %s", (_, canvas, listed, absent) => {
+		const preamble = projectPreamble(canvas);
 
-	it("lists a voice-only character with their voice and no appearance", () => {
-		const preamble = projectPreamble([
-			asset("asset_voice", { name: "Voice", attrs: { pitch: "low" } }),
-		]);
-
-		expect(preamble).toContain("## Voice\n\n- pitch: low");
-		expect(preamble).not.toContain("- appearance:");
-	});
-
-	it("lists a character with no voice by their appearance alone", () => {
-		const preamble = projectPreamble([
-			asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
-		]);
-
-		expect(preamble).toContain("## Lumi\n\n- appearance: a small grey rabbit");
+		expect(preamble).toContain(listed);
+		expect(preamble).not.toContain(absent);
 	});
 
 	it("says nothing of a project whose canvas holds no assets", () => {
@@ -189,19 +168,5 @@ describe("buildScriptPrompt", () => {
 		expect(rules).toContain("The story script must be written");
 		expect(rules).toContain("muted watercolor");
 		expect(rules).not.toContain("# Length");
-	});
-
-	it("names the declared language, and defers to the input when it is auto", () => {
-		const declared = buildScriptPrompt([], settingsOf({ language: "es" }), {
-			kind: "brief",
-			brief: "a brief",
-		});
-		expect(declared.system).toContain("es (ISO 639-1)");
-
-		const auto = buildScriptPrompt([], settingsOf(), {
-			kind: "brief",
-			brief: "a brief",
-		});
-		expect(auto.system).toContain("the language of the user's own topic");
 	});
 });

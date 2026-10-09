@@ -166,7 +166,6 @@ export type ContentElement = ElementOf<ContentType>;
 
 export type AssetElement<T extends AssetType = AssetType> = ElementOf<T>;
 
-/** Content or an asset: anything on the canvas that holds text and attributes, so all but a scene. */
 export type CanvasElement = ContentElement | AssetElement;
 
 export type GeneratedElement = ElementOf<GeneratedType>;

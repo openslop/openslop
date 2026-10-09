@@ -2,20 +2,10 @@ import type { Editor } from "slate";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import type { GenerationQueue } from "@/lib/generation/queue";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { applyScriptToEditor } from "./applyScript";
-import {
-	extractStoreSnapshot,
-	type ProjectData,
-	type ProjectStore,
-} from "./store";
+import type { SavedProject } from "./savedProject";
+import { extractStoreSnapshot, type ProjectStore } from "./store";
 import { pickThumbnailUrl } from "./thumbnail";
-
-export type SavedProject = {
-	script: string;
-	store: ProjectData;
-	generation: Record<string, ElementSnapshot>;
-};
 
 /** What the project row stores beside the content, derived from it. */
 export type ProjectDetails = { name: string; thumbnail_url: string | null };

@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 
 /** Exported so the mock LLM can recognise a review prompt. */
 export const REVIEW_INSTRUCTION = "Thoroughly review this script";

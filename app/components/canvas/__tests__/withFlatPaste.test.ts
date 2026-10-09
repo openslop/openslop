@@ -5,7 +5,7 @@ import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
 import { withAssets } from "../plugins/withAssets";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { CanvasEditor } from "@/lib/canvas/types";
 import { isScene } from "@/lib/canvas/scenes";
 import { content, scene, seedScene, shape } from "./fixtures";
@@ -66,7 +66,7 @@ describe("withFlatPaste", () => {
 
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),
-			createCanvasElement("asset_avatar", { attrs: { name: "Mia" } }),
+			asset("asset_avatar", { name: "Mia" }),
 			scene([content("sound", "snd1")], "ps2"),
 		]);
 

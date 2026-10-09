@@ -1,25 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEditor, Transforms, type Editor } from "slate";
-import { asset } from "@/lib/canvas/__tests__/_assets";
+import { Transforms, type Editor } from "slate";
+import { asset, elements, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
-import { isContentElement } from "@/lib/canvas/guards";
-import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { SCENE_TYPE, type Scene } from "@/lib/canvas/types";
 import type { LLMConnector } from "@/lib/connectors/types";
 import { ScriptSettingsSchema } from "@/lib/project/types";
 import { sleep } from "@/lib/utils";
 import { streamScript } from "../streamScript";
-
-const makeEditor = () => {
-	const editor = createEditor();
-	editor.defaultModels = () => ({});
-	return editor;
-};
-
-const elements = (editor: Editor): [type: string, text: string][] =>
-	editor.children
-		.filter(isContentElement)
-		.map((element) => [element.type, getElementBodyText(element)]);
 
 const oldScene = (): Scene => ({
 	id: "old-scene",

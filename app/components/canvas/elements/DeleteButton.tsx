@@ -1,6 +1,6 @@
 import { useSlateStatic } from "slate-react";
 import { DeleteButton as DeleteIconButton } from "@/components/ui/delete-button";
-import { removeBlock } from "@/app/components/canvas/utils/blockOps";
+import { removeBlock } from "@/lib/canvas/editorOps";
 import type { ContentElement } from "@/lib/canvas/types";
 
 export function DeleteButton({ element }: { element: ContentElement }) {
@@ -11,7 +11,7 @@ export function DeleteButton({ element }: { element: ContentElement }) {
 			ariaLabel="Delete element"
 			size="header"
 			onMouseDown={(e) => e.preventDefault()}
-			onClick={() => removeBlock(editor, element)}
+			onClick={() => removeBlock(editor, element.id)}
 		/>
 	);
 }

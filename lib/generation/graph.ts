@@ -1,3 +1,4 @@
+import pick from "lodash/pick";
 import type { ElementType, CanvasElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
@@ -28,13 +29,8 @@ export type GenerationNode = {
 };
 
 /** The settings a build reads, so the live graph rebuilds when one changes. */
-export const buildSettings = ({
-	videoSettings,
-	scriptSettings,
-}: ProjectData) => ({
-	videoSettings,
-	scriptSettings,
-});
+export const buildSettings = (state: ProjectData) =>
+	pick(state, ["videoSettings", "scriptSettings"]);
 
 export type BuildContext = {
 	state: ReturnType<typeof buildSettings>;
@@ -43,7 +39,6 @@ export type BuildContext = {
 	setAsset: (write: AssetWrite) => void;
 };
 
-/** A node with no prompt has nothing to generate from. */
 export const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);
 
 /** Every node reachable from `roots`, dependencies before their dependents. */

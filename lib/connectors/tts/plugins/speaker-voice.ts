@@ -1,31 +1,24 @@
+import { speakerOf, voiceOf } from "@/lib/canvas/assets";
 import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
-import { NARRATOR } from "@/lib/canvas/assets";
-import {
-	chosenVoices,
-	recordedVoice,
-	settleVoice,
-	voiceModel,
-} from "../voices";
+import { chosenVoices, recordedVoice, settleVoice } from "../voices";
 
 /** Speech speaks in its speaker's voice, on the pair that voice was found on. */
 export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "speaker-voice",
 		model: ({ generationAttributes: attrs }, canvas) =>
-			voiceModel(canvas, attrs?.name, attrs),
+			voiceOf(canvas, speakerOf(attrs)),
 		reads: [
-			chosenVoices(({ generationAttributes: attrs }) => [
-				attrs?.name ?? NARRATOR,
-			]),
+			chosenVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
 		],
 		prepare: ({ generationAttributes: attrs }, ctx) =>
-			settleVoice(attrs?.name, ctx, attrs),
+			settleVoice(speakerOf(attrs), ctx, attrs),
 		beforeGenerate: (params, ctx) => ({
 			...params,
-			voiceId: recordedVoice(ctx, params.name).voiceId,
+			voiceId: recordedVoice(ctx, speakerOf(params)).voiceId,
 		}),
 	};
 }

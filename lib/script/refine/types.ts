@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
 
 const ELEMENT_TEXT =
-	"The element's content: the spoken line for narration and character, the prompt for image, video, sound and music, the appearance for asset_avatar, the description for asset_style.";
+	"The element's content: the spoken line for narration and character, the prompt for image, video, sound and music.";
 
 const insertOp = z.object({
 	op: z.literal("insert"),

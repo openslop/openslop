@@ -1,13 +1,8 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
-import {
-	ASSET_TYPES,
-	type AssetType,
-	ContentTypeSchema,
-	type ElementType,
-} from "@/lib/canvas/types";
+import { ElementTypeSchema, type ElementType } from "@/lib/canvas/types";
 import {
 	type AttributeEdit,
 	TOGGLE_VALUES,
@@ -35,8 +30,6 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
-	asset_avatar: ["name"],
-	asset_voice: [`name (${NARRATOR} for the narrator)`],
 };
 
 /** Attributes Sloppy can write by hand: enums with their options, and free text. */
@@ -64,9 +57,6 @@ const attributesByType = (types: readonly ElementType[]) =>
 		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
 		.join("\n");
 
-const ELEMENT_TYPE_NAMES = ContentTypeSchema.options;
-const ASSET_TYPE_NAMES = Object.keys(ASSET_TYPES) as AssetType[];
-
 const ASSETS = dedent`
 	Assets sit ahead of the first scene and are global to the project. They are edited the
 	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
@@ -74,16 +64,15 @@ const ASSETS = dedent`
 	set_title.
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
 	lines and every \`characters\` list use, which never changes. A character has either or both.
-	- asset_avatar: what a character looks like, as its text, in English, written like an image
+	- asset_avatar: what a character looks like, as its text, written like an image
 	  prompt. Their avatar is drawn from it, and every visual that lists them is drawn from that
 	  avatar.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described,
 	  never picked; always set its language to the one its lines are in. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
 	  character does, and has no avatar.
-	- asset_style: the art style every visual is drawn in, as its text, in English: the medium,
+	- asset_style: the art style every visual is drawn in, as its text: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
-	- asset_references: the pictures every visual is drawn after. The user uploads these; look at
-	  them with view_image.
+	- asset_references: the pictures every visual is drawn after. The user uploads these.
 `;
 
 export const editScript = defineTool({
@@ -102,21 +91,18 @@ export const editScript = defineTool({
 
 	  To move an element, remove it and insert it again.
 
-	  Element types: ${ELEMENT_TYPE_NAMES.join(", ")}
-
-	  Attributes by type, all string values:
-	  ${attributesByType(ELEMENT_TYPE_NAMES)}
-
-	  Asset types: ${ASSET_TYPE_NAMES.join(", ")}
+	  Element types: ${ElementTypeSchema.options.join(", ")}
 
 	  ${ASSETS}
-	  ${attributesByType(ASSET_TYPE_NAMES)}
+
+	  Attributes by type, all string values:
+	  ${attributesByType(ElementTypeSchema.options)}
 
 	  ${VIDEO_PROMPT_FORMAT}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
 	  surrounding script, whatever language the request is in. Image, video, sound and music
-	  prompts are always in English, except speech quoted inside a video prompt.
+	  prompts, avatar and style text are always in English, except speech quoted inside a video prompt.
 	`,
 	input: z.object({
 		ops: z

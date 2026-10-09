@@ -18,6 +18,8 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 
 const ZWSP = "​";
+const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
+const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
 describe("createCanvasElement", () => {
 	it("backfills defaultAttributes for sound (loops=1)", () => {
@@ -125,13 +127,20 @@ describe("createCanvasElement", () => {
 		expect(node.children[1].text).toBe("");
 	});
 
-	it("gives an avatar an image model, and the art style none", () => {
-		const avatar = createCanvasElement("asset_avatar", {
-			attrs: { name: "Mia" },
-		});
-		const style = createCanvasElement("asset_style");
-
-		expect(flatAttributes(avatar)).toMatchObject(DEFAULT_MODELS.image);
-		expect(flatAttributes(style)).toEqual({});
-	});
+	it.each([
+		["asset_avatar", { image: PINNED }, PINNED],
+		["asset_avatar", {}, DEFAULT_MODELS.image],
+		["asset_voice", { tts: CARTESIA }, CARTESIA],
+		["asset_voice", {}, DEFAULT_MODELS.tts],
+		["asset_style", { image: PINNED }, {}],
+	] as const)(
+		"puts a new %s on the default model %o, or the recommended one",
+		(type, defaultModels, model) => {
+			const node = createCanvasElement(type, {
+				attrs: { name: "Mia" },
+				defaultModels,
+			});
+			expect(flatAttributes(node)).toEqual({ name: "Mia", ...model });
+		},
+	);
 });

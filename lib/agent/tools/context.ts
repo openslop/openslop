@@ -16,10 +16,16 @@ export type ElementImage = {
 		| undefined;
 };
 
+export const PROJECT_SETTERS = [
+	"setTitle",
+	"updateScriptSettings",
+	"updateVideoSettings",
+] as const;
+
 /** What a tool can do to the project, never the parts it is built from. */
 export type AgentToolContext = Pick<
 	ProjectContext,
-	"setTitle" | "updateScriptSettings" | "updateVideoSettings"
+	(typeof PROJECT_SETTERS)[number]
 > & {
 	readScript: () => string;
 	isScriptEmpty: () => boolean;

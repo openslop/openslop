@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { videoLengthBudget } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";

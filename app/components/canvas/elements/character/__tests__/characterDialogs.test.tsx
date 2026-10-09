@@ -195,7 +195,7 @@ describe("CharacterEditModal", () => {
 		expect(voiceEditorShown()).toBe(false);
 	});
 
-	it("deletes the character's look and voice at once, and closes", async () => {
+	it("deletes the character's look and voice at once, closes, and brings them back from the toast's undo", async () => {
 		canvas = mountOnCanvas([
 			mia("a girl"),
 			miaVoice(),
@@ -210,25 +210,12 @@ describe("CharacterEditModal", () => {
 
 		expect(characterNames(canvas.editor.children)).toEqual([NARRATOR]);
 		expect(onClose).toHaveBeenCalledOnce();
-	});
 
-	it("brings the character back from the toast's undo", async () => {
-		canvas = mountOnCanvas([mia("a girl"), miaVoice()]);
-		open();
-
-		const remove = Array.from(document.body.querySelectorAll("button")).find(
-			(button) => button.textContent === "Delete",
-		);
-		await act(async () => remove?.click());
 		const [message, { action }] = toast.mock.lastCall ?? [];
 		act(() => action.onClick());
 
 		expect(message).toBe("Deleted Mia");
-		expect(characterNames(canvas.editor.children)).toEqual(["Mia"]);
-		expect(
-			getElementBodyText(
-				findAsset(canvas.editor.children, "asset_avatar", "Mia") ?? mia(""),
-			),
-		).toBe("a girl");
+		expect(characterNames(canvas.editor.children)).toEqual(["Mia", NARRATOR]);
+		expect(appearanceOf("Mia")).toBe("a girl");
 	});
 });

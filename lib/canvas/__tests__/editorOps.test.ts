@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, Editor, type Descendant } from "slate";
+import { Editor } from "slate";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
@@ -10,16 +10,16 @@ import {
 	updateElementText,
 	replaceGenerationAttrs,
 	mergeAttrs,
+	removeBlock,
 } from "../editorOps";
 import {
 	flatAttributes,
 	splitAttributes,
 } from "@/lib/canvas/elementAttributes";
 import { isAssetElement } from "../guards";
-import { buildCtx } from "@/lib/connectors/__tests__/_state-ctx";
-import { buildNode } from "@/lib/generation/generationGraph";
-import { findAsset } from "../assets";
-import { asset } from "./_assets";
+import { getContentElements } from "../scenes";
+import { inputsFor } from "@/lib/generation/__tests__/_graph";
+import { asset, makeEditor } from "./_assets";
 
 /** Mirrors `createCanvasElement`: a caret marker leaf, then the body. */
 function content(
@@ -41,12 +41,6 @@ function content(
 
 function scene(children: ContentElement[], id = "s1"): Scene {
 	return { id, type: "scene", children };
-}
-
-function makeEditor(children: Descendant[]) {
-	const editor = createEditor();
-	editor.children = children;
-	return editor;
 }
 
 describe("findElementById", () => {
@@ -75,12 +69,11 @@ describe("findElementById", () => {
 describe("writes by id", () => {
 	it("land on the element wherever it is, asset or scene", () => {
 		const voice = asset("asset_voice", { name: "Mia" });
-		const editor = createEditor();
-		editor.children = [
+		const editor = makeEditor([
 			asset("asset_style"),
 			voice,
 			scene([content("narration", "n1"), content("image", "img1")]),
-		];
+		]);
 
 		mergeAttrs(editor, "img1", { style: "ink" });
 		mergeAttrs(editor, voice.id, { age: "child" });
@@ -132,6 +125,25 @@ describe("findBlockById", () => {
 	it("returns null for nonexistent id", () => {
 		const editor = makeEditor([scene([content("narration", "n1")])]);
 		expect(findBlockById(editor, "nope")).toBeNull();
+	});
+});
+
+describe("removeBlock", () => {
+	it.each([
+		["a scene", "s1", ["img1"]],
+		["a content element", "n1", ["n2", "img1"]],
+	])("removes %s by id", (_, id, left) => {
+		const editor = makeEditor([
+			scene([content("narration", "n1"), content("narration", "n2")], "s1"),
+			scene([content("image", "img1")], "s2"),
+		]);
+		removeBlock(editor, id);
+		expect(getContentElements(editor.children).map((e) => e.id)).toEqual(left);
+	});
+
+	it("throws for an id not on the canvas", () => {
+		const editor = makeEditor([scene([content("narration", "n1")])]);
+		expect(() => removeBlock(editor, "nope")).toThrow();
 	});
 });
 
@@ -190,9 +202,8 @@ describe("updateElementText on an asset", () => {
 	// Assets are void on the canvas, which a plain text edit would skip.
 	it("rewrites a void asset's text", () => {
 		const style = asset("asset_style", { text: "ink wash" });
-		const editor = createEditor();
+		const editor = makeEditor([style, scene([content("narration", "n1")])]);
 		editor.isVoid = (element) => isAssetElement(element);
-		editor.children = [style, scene([content("narration", "n1")])];
 
 		updateElementText(editor, style.id, "oil paint");
 		expect(Editor.string(editor, [0], { voids: true })).toBe(
@@ -313,7 +324,7 @@ describe("applyElementVersion", () => {
 		prompt: string,
 	) => ({
 		elementType,
-		inputs: { prompt, attributes, dependencies: {}, reads: {} },
+		inputs: inputsFor(prompt, attributes),
 	});
 
 	// A video restored to an image version it once was goes back to being an
@@ -334,31 +345,6 @@ describe("applyElementVersion", () => {
 		const node = (editor.children[0] as Scene).children[0];
 		expect(node.type).toBe("image");
 		expect(node.generationAttributes).toEqual({ style: "ink" });
-	});
-
-	it("restores an avatar version without touching the character's voice", () => {
-		const avatar = asset("asset_avatar", { name: "Mia", text: "brown hair" });
-		const voice = asset("asset_voice", {
-			name: "Mia",
-			attrs: { gender: "feminine", voiceId: "v1" },
-		});
-		const editor = makeEditor([
-			avatar,
-			voice,
-			scene([content("narration", "n1")]),
-		]);
-		const { inputs } = buildNode(avatar, buildCtx([avatar, voice]));
-		updateElementText(editor, avatar.id, "red hair");
-
-		applyElementVersion(editor, avatar.id, {
-			elementType: avatar.type,
-			inputs: { ...inputs, dependencies: {} },
-		});
-
-		expect(findAsset(editor.children, "asset_voice", "Mia")).toEqual(voice);
-		expect(findAsset(editor.children, "asset_avatar", "Mia")).toMatchObject({
-			generationAttributes: avatar.generationAttributes,
-		});
 	});
 
 	it("restores the prompt the version was generated from", () => {

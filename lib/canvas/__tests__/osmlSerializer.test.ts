@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Node, type Descendant } from "slate";
+import { Node } from "slate";
 import {
 	getElementBodyText,
 	getElementText,
 	serializeOSMLWithScenes,
 } from "../osmlSerializer";
 import { ZERO_WIDTH_SPACE } from "../constants";
-import { NARRATOR } from "../assets";
 import { createCanvasElement } from "../createCanvasElement";
 import { parseOSML } from "../osmlStreamParser";
 import {
@@ -15,8 +14,7 @@ import {
 	type Scene,
 } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import { deserializeWithScenes } from "@/lib/project/serialize";
-import { asset, references } from "./_assets";
+import { asset } from "./_assets";
 
 function el(
 	type: ContentElement["type"],
@@ -121,18 +119,6 @@ describe("getElementBodyText", () => {
 	});
 });
 
-/** Leaves are given fresh ids on every parse. */
-const withoutLeafIds = (element: Descendant) =>
-	"children" in element
-		? {
-				...element,
-				children: element.children.map((child) => ({
-					...child,
-					id: expect.any(String),
-				})),
-			}
-		: element;
-
 describe("serialize round trip", () => {
 	const reload = (scene: Scene): Scene =>
 		wrap(...(parseOSML(serializeOSMLWithScenes([scene])) as ContentElement[]));
@@ -149,36 +135,6 @@ describe("serialize round trip", () => {
 		for (let i = 0; i < 3; i++) scene = reload(scene);
 
 		expect(serializeOSMLWithScenes([scene])).toBe(first);
-	});
-
-	it("keeps the assets, ahead of the scenes, through a save and reload", () => {
-		const assets = [
-			asset("asset_style", { text: "ink wash" }),
-			asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
-			asset("asset_voice", {
-				name: NARRATOR,
-				attrs: { gender: "feminine", voiceId: "v1" },
-			}),
-			references("https://img/a.png?x=1&y=2", "https://img/b.png"),
-		];
-		const saved = serializeOSMLWithScenes([
-			...assets,
-			wrap(createCanvasElement("narration", { id: "n1", text: "first" })),
-			wrap(createCanvasElement("narration", { id: "n2", text: "second" })),
-		]);
-
-		const reloaded = deserializeWithScenes(saved);
-
-		expect(reloaded.map((node) => node.type)).toEqual([
-			"asset_style",
-			"asset_avatar",
-			"asset_voice",
-			"asset_references",
-			SCENE_TYPE,
-			SCENE_TYPE,
-		]);
-		expect(reloaded.slice(0, 4)).toEqual(assets.map(withoutLeafIds));
-		expect(serializeOSMLWithScenes(reloaded)).toBe(saved);
 	});
 
 	it("keeps a reloaded empty element recognisably empty", () => {

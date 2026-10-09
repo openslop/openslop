@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Film } from "@/components/ui/icon";
 import { defineTool } from "./defineTool";
@@ -12,8 +12,6 @@ export const adaptScript = defineTool({
 	  Send the script span and nothing else. What you send is converted, not just stored:
 	  prose that carries no annotation becomes narration. A mood note or a "here's my
 	  script:" caught in the span is read as a line to speak.
-
-	  The conversion writes the script only, against the assets already on the canvas.
 
 	  Screenplay furniture is stripped for you, so leave slug lines, stage directions and
 	  character cues where they are. Nothing is invented either: the conversion adds visuals,

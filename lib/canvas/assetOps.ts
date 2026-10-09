@@ -1,4 +1,3 @@
-import compact from "lodash/compact";
 import isNil from "lodash/isNil";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
@@ -23,7 +22,6 @@ import type { AssetType, CanvasElement } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
-/** Writes the asset `type` holds under `name`, adding it when there is none. */
 export function setAsset(
 	editor: Editor,
 	type: AssetType,
@@ -105,11 +103,9 @@ export function addCharacter(editor: Editor, name: string): void {
 
 /** Removes a character's look and voice, returning what puts them back. */
 export function removeCharacter(editor: Editor, name: string): () => void {
-	const removed = compact([
-		findAsset(editor.children, "asset_avatar", name),
-		findAsset(editor.children, "asset_voice", name),
-	]);
-	removeAsset(editor, "asset_avatar", name);
-	removeAsset(editor, "asset_voice", name);
+	const theirs = (node: unknown) =>
+		isAsset(node, "asset_avatar", name) || isAsset(node, "asset_voice", name);
+	const removed = editor.children.filter(theirs);
+	Transforms.removeNodes(editor, { at: [], match: theirs });
 	return () => Transforms.insertNodes(editor, removed, { at: [0] });
 }

@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { declaredLanguage } from "@/lib/project/language";
 import type { ScriptSettings } from "@/lib/project/types";
 

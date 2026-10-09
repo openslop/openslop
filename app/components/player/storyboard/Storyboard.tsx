@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { removeBlock } from "@/app/components/canvas/utils/blockOps";
+import { removeBlock } from "@/lib/canvas/editorOps";
 import { insertScene } from "@/lib/canvas/insertScene";
 import { useLayout } from "../RenderLayoutContext";
 import { useSelectScene } from "../useSelectScene";
@@ -58,7 +58,7 @@ export function Storyboard() {
 				title={(item) => `Delete scene ${item.sceneIndex}?`}
 				description="This removes the scene and everything in it. Undo from the canvas to bring it back."
 				actionLabel="Delete scene"
-				onConfirm={(item) => removeBlock(editor, item.scene)}
+				onConfirm={(item) => removeBlock(editor, item.scene.id)}
 			/>
 		</section>
 	);

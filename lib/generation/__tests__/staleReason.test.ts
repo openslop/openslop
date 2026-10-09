@@ -58,7 +58,7 @@ describe("staleReason", () => {
 
 	it("names an upstream avatar by its character", () => {
 		const queue = new GenerationQueue();
-		const avatar = node("asset_avatar:Red");
+		const avatar = node("avatar");
 		const image = node("a", {
 			dependsOn: { "Red's avatar": avatar },
 		});
@@ -73,22 +73,22 @@ describe("staleReason", () => {
 
 	it("names what it read verbatim, where an attribute is lowercased", () => {
 		const queue = new GenerationQueue();
-		const voiced = (voice: string) =>
+		const edited = (value: string) =>
 			node("a", {
-				attributes: { voiceId: voice },
-				reads: { "Red's voice": voice },
+				attributes: { startFrame: value },
+				reads: { "Red's voice": value },
 			});
-		commit(queue, voiced("v1"), "a.png");
+		commit(queue, edited("v1"), "a.png");
 
-		expect(staleReason(voiced("v2"), queue)).toBe(
-			"Voice id and Red's voice changed — regenerate to update",
+		expect(staleReason(edited("v2"), queue)).toBe(
+			"Start frame and Red's voice changed — regenerate to update",
 		);
 	});
 
 	it("names a dependency that is itself stale, even though its output has not changed", () => {
 		const queue = new GenerationQueue();
 		const avatar = (style: string) =>
-			node("asset_avatar:Red", { reads: { "the art style": style } });
+			node("avatar", { reads: { "the art style": style } });
 		const image = (style: string) =>
 			node("a", {
 				dependsOn: { "Red's avatar": avatar(style) },

@@ -67,7 +67,7 @@ Canvas
       └─ Text leaves   (node)
 ```
 
-Assets come first, then the scenes. Each id appears once: a named asset's id is `type:name`. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/elementConnector.ts`).
+Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/elementConnector.ts`).
 
 `lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template) and the project's pinned default models. It also owns saving and version history.
 

@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, type Descendant } from "slate";
-import type { ConnectorModels } from "@/lib/connectors/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
@@ -28,7 +26,7 @@ import { shownCharacters } from "../characterNames";
 import { findElementById } from "../editorOps";
 import { getContentElements } from "../scenes";
 import type { AssetType, ContentElement, Scene } from "../types";
-import { asset, labels, references } from "./_assets";
+import { asset, labels, makeEditor, references } from "./_assets";
 
 const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
@@ -40,16 +38,6 @@ const scene = (id: string, ...children: ContentElement[]): Scene => ({
 	type: "scene",
 	children,
 });
-
-function makeEditor(
-	children: Descendant[] = [],
-	defaultModels: ConnectorModels = {},
-) {
-	const editor = createEditor();
-	editor.defaultModels = () => defaultModels;
-	editor.children = children;
-	return editor;
-}
 
 const shownBy = (editor: ReturnType<typeof makeEditor>) =>
 	getContentElements(editor.children).map(

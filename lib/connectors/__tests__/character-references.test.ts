@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { ContentElement, CanvasElement } from "@/lib/canvas/types";
-import type { AssetResult, ConnectorPlugin } from "../types";
+import type { AssetResult } from "../types";
 import {
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
@@ -51,109 +51,48 @@ describe("character avatar dependencies", () => {
 });
 
 describe("character-references plugin", () => {
-	let plugin: ConnectorPlugin<ParamsWithCharacters>;
-	let dependencies: Record<string, AssetResult>;
+	const RED = "https://img/red.png";
+	const GRANNY = "https://img/granny.png";
 
-	const setupCharacters = (avatars: Record<string, string>) => {
-		dependencies = avatarResults(avatars);
-	};
+	it.each([
+		[
+			"resolves character names to avatar URLs",
+			{ Red: RED, Granny: GRANNY },
+			"Red,Granny",
+			{ prompt: "Hello. No nameplates", referenceImages: [RED, GRANNY] },
+		],
+		[
+			"handles whitespace in character CSV",
+			{ Red: RED, Granny: GRANNY },
+			" Red , Granny ",
+			{ prompt: "Hello. No nameplates", referenceImages: [RED, GRANNY] },
+		],
+		[
+			"filters out characters without avatars and unknown names",
+			{ Red: RED, Granny: "" },
+			"Red,Granny,Unknown",
+			{ prompt: "Hello. No nameplates", referenceImages: [RED] },
+		],
+		[
+			"strips characters from params when no avatars found",
+			{ Wolf: "" },
+			"Wolf",
+			{ prompt: "Hello" },
+		],
+		[
+			"returns params unchanged when no characters attribute",
+			{},
+			undefined,
+			{
+				prompt: "Hello",
+			},
+		],
+	])("%s", (_, avatars, characters, expected) => {
+		const { beforeGenerate } = createCharacterReferencesPlugin();
+		const params: ParamsWithCharacters = { prompt: "Hello", characters };
 
-	function runBeforeGenerate(params: ParamsWithCharacters) {
-		if (!plugin.beforeGenerate) {
-			throw new Error(`Plugin "${plugin.name}" has no beforeGenerate hook`);
-		}
-		return plugin.beforeGenerate(params, { dependencies });
-	}
-
-	beforeEach(() => {
-		dependencies = {};
-		plugin = createCharacterReferencesPlugin();
-	});
-
-	it("resolves character names to avatar URLs", () => {
-		setupCharacters({
-			Red: "https://img/red.png",
-			Granny: "https://img/granny.png",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Red meets Granny",
-			characters: "Red,Granny",
-		});
-
-		expect(result).toEqual({
-			prompt: "Red meets Granny. No nameplates",
-			referenceImages: ["https://img/red.png", "https://img/granny.png"],
-		});
-	});
-
-	it("strips characters from params when no avatars found", () => {
-		setupCharacters({
-			Wolf: "",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "The wolf howls",
-			characters: "Wolf",
-		});
-
-		expect(result).toEqual({ prompt: "The wolf howls" });
-		expect(result).not.toHaveProperty("characters");
-	});
-
-	it("returns params unchanged when no characters attribute", () => {
-		const params: ParamsWithCharacters = { prompt: "A sunset" };
-		const result = runBeforeGenerate(params);
-		expect(result).toEqual(params);
-	});
-
-	it("handles whitespace in character CSV", () => {
-		setupCharacters({
-			Alice: "https://img/alice.png",
-			Bob: "https://img/bob.png",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Hello",
-			characters: " Alice , Bob ",
-		});
-
-		expect(result).toEqual({
-			prompt: "Hello. No nameplates",
-			referenceImages: ["https://img/alice.png", "https://img/bob.png"],
-		});
-	});
-
-	it("filters out characters without avatars", () => {
-		setupCharacters({
-			Alice: "https://img/alice.png",
-			Bob: "",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Hello",
-			characters: "Alice,Bob",
-		});
-
-		expect(result).toEqual({
-			prompt: "Hello. No nameplates",
-			referenceImages: ["https://img/alice.png"],
-		});
-	});
-
-	it("filters out unknown character names", () => {
-		setupCharacters({
-			Alice: "https://img/alice.png",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Hello",
-			characters: "Alice,Unknown",
-		});
-
-		expect(result).toEqual({
-			prompt: "Hello. No nameplates",
-			referenceImages: ["https://img/alice.png"],
-		});
+		expect(
+			beforeGenerate?.(params, { dependencies: avatarResults(avatars) }),
+		).toEqual(expected);
 	});
 });

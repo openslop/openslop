@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import without from "lodash/without";
 import {
 	assetText,
@@ -59,7 +59,7 @@ export function projectPreamble(assets: AssetElement[]): string {
 		sections.push(dedent`
 			# Characters
 
-			The characters. Name one exactly as written here, and never describe how one looks in a prompt:
+			The characters. Name one exactly as written here:
 
 			${characters.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
 	}

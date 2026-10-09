@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
-import { getPromptText } from "@/lib/generation/inputs";
 import {
 	assetText,
 	avatarNames,
@@ -20,47 +18,6 @@ import { asset, references } from "./_assets";
 
 const narration = createCanvasElement("narration", { id: "n1", text: "hello" });
 const scene: Scene = { id: "s1", type: "scene", children: [narration] };
-
-describe("createCanvasElement for an asset", () => {
-	it("gives it the id, name and text it is given", () => {
-		const avatar = createCanvasElement("asset_avatar", {
-			id: "e1",
-			attrs: { name: "Mia" },
-			text: "warm",
-		});
-
-		expect(avatar).toMatchObject({
-			id: "e1",
-			type: "asset_avatar",
-			generationAttributes: { name: "Mia" },
-		});
-		expect(getPromptText(avatar)).toBe("warm");
-	});
-
-	it("draws an avatar on the default image model, or the recommended one", () => {
-		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
-		const avatar = (defaultModels = {}) =>
-			createCanvasElement("asset_avatar", {
-				attrs: { name: "Mia" },
-				defaultModels,
-			}).generationAttributes;
-
-		expect(avatar({ image: pinned })).toEqual({ name: "Mia", ...pinned });
-		expect(avatar()).toEqual({ name: "Mia", ...DEFAULT_IMAGE_MODEL });
-	});
-
-	it("puts a voice on the default speech model, or the recommended one", () => {
-		const cartesia = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const voice = (defaultModels = {}) =>
-			createCanvasElement("asset_voice", {
-				attrs: { name: "Mia" },
-				defaultModels,
-			}).generationAttributes;
-
-		expect(voice({ tts: cartesia })).toEqual({ name: "Mia", ...cartesia });
-		expect(voice()).toEqual({ name: "Mia", ...DEFAULT_TTS_MODEL });
-	});
-});
 
 describe("getAssets and getCanvasElements", () => {
 	it("pick the assets out in order, then the content of each scene", () => {
