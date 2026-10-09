@@ -130,13 +130,18 @@ describe("the mock agent model", () => {
 
 		const assets = await step(prompt);
 		expect(assets.toolName).toBe("edit_script");
-		const { ops } = assets.input as { ops: { op: string; type: string }[] };
+		const { ops } = assets.input as {
+			ops: { op: string; type: string; attrs: Record<string, string> }[];
+		};
 		expect(new Set(ops.map(({ op, type }) => `${op} ${type}`))).toEqual(
 			new Set([
 				"insert asset_style",
 				"insert asset_avatar",
 				"insert asset_voice",
 			]),
+		);
+		expect(ops.flatMap(({ attrs }) => Object.keys(attrs))).not.toContain(
+			"model",
 		);
 		prompt.push(...ran("edit_script", `Applied ${ops.length} operations.`));
 

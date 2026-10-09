@@ -19,15 +19,13 @@ export const generatedById = (canvas: CanvasElement[], id: string) =>
 			isGenerated(element) && element.id === id,
 	);
 
-const isPresent = <T>(value: T | undefined): value is T => Boolean(value);
-
-const declared = <T>(
+const mergeUniqueLabels = <T>(
 	records: Record<string, T | undefined>[],
 ): Record<string, T> => {
 	const labels = records.flatMap(Object.keys);
 	const repeated = labels.find((label, i) => labels.indexOf(label) !== i);
 	if (repeated) throw new Error(`Two plugins declare "${repeated}"`);
-	return pickBy(Object.assign({}, ...records), isPresent);
+	return pickBy(Object.assign({}, ...records));
 };
 
 /** What the plugins read off the canvas and the settings; an empty or missing value is left out. */
@@ -36,7 +34,7 @@ export const pluginReads = (
 	element: GeneratedElement,
 	ctx: BuildContext,
 ): Record<string, string> =>
-	declared(
+	mergeUniqueLabels(
 		plugins.flatMap((plugin) =>
 			(plugin.reads ?? []).map((reads) => reads(element, ctx)),
 		),
@@ -48,7 +46,7 @@ export const pluginDependencies = (
 	element: GeneratedElement,
 	ctx: BuildContext,
 ): Record<string, GeneratedElement> =>
-	declared(
+	mergeUniqueLabels(
 		plugins.flatMap((plugin) =>
 			(plugin.dependencies ?? []).map((dependencies) =>
 				dependencies(element, ctx),

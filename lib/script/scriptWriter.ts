@@ -15,7 +15,7 @@ export function createScriptWriter(editor: Editor): (chunk: string) => void {
 	const write = (node: ContentElement) => {
 		const text = getElementBodyText(node);
 		if (!text) return;
-		if (findElementById(editor, node.id))
+		if (cleared && findElementById(editor, node.id))
 			return updateElementText(editor, node.id, text);
 
 		// One normalization, so withLayout seeds nothing into the cleared script.

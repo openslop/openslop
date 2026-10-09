@@ -3,6 +3,7 @@ import type {
 	LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
+import omit from "lodash/omit";
 import type { ValidationResult } from "@/lib/connectors/providerKey";
 import type {
 	LLMGenerateParams,
@@ -46,7 +47,7 @@ const MOCK_ASSETS: RefineOp[] =
 		.map((asset) => ({
 			op: "insert",
 			type: asset.type,
-			attrs: flatAttributes(asset),
+			attrs: omit(flatAttributes(asset), ["provider", "model"]),
 			text: getElementBodyText(asset),
 		}));
 

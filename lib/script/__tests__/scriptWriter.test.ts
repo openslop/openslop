@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { elements, makeEditor } from "@/lib/canvas/__tests__/_assets";
+import { element, elements, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
 import { isContentElement } from "@/lib/canvas/guards";
+import { SCENE_TYPE } from "@/lib/canvas/types";
 import { createScriptWriter } from "../scriptWriter";
 
 describe("createScriptWriter", () => {
@@ -16,6 +17,28 @@ describe("createScriptWriter", () => {
 		write(" a time, far away");
 		expect(elements(editor)).toEqual([
 			["narration", "Once upon a time, far away"],
+		]);
+	});
+
+	it("replaces the old script even when the first element reuses an old id", () => {
+		const editor = makeEditor([
+			{
+				id: "s1",
+				type: SCENE_TYPE,
+				children: [
+					element("old1", "narration", "Old"),
+					element("old2", "narration", "Older"),
+				],
+			},
+		]);
+
+		createScriptWriter(editor)(
+			'<narration id="old1">A</narration>\n<narration>B</narration>\n',
+		);
+
+		expect(elements(editor)).toEqual([
+			["narration", "A"],
+			["narration", "B"],
 		]);
 	});
 
