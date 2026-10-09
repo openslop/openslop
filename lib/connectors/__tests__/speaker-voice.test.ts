@@ -8,6 +8,7 @@ import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-v
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import type {
+	AssetWrite,
 	ModelRef,
 	PluginContext,
 	TTSGenerateParams,
@@ -49,12 +50,19 @@ const prepare = async (
 	element: CanvasElement,
 	canvas: CanvasElement[],
 	language?: Voice["language"],
+	signal = new AbortController().signal,
 ) => {
 	if (!plugin.prepare) throw new Error("no prepare");
-	return plugin.prepare(
+	const writes: AssetWrite[] = [];
+	await plugin.prepare(
 		element,
-		buildCtx(canvas, { state: projectState({}, { language }) }),
+		buildCtx(canvas, {
+			state: projectState({}, { language }),
+			setAsset: (write) => writes.push(write),
+		}),
+		signal,
 	);
+	return writes;
 };
 
 const before = (params: TTSGenerateParams, ctx: PluginContext) => {
@@ -179,6 +187,19 @@ describe("createSpeakerVoicePlugin", () => {
 			expect(tts.searchVoices).toHaveBeenCalledWith(DEFAULT_TTS_MODEL, {
 				language,
 			});
+		});
+
+		it("writes nothing once the job is cancelled", async () => {
+			const controller = new AbortController();
+			const settling = prepare(
+				line(),
+				[voice(NARRATOR)],
+				undefined,
+				controller.signal,
+			);
+			controller.abort();
+
+			await expect(settling).rejects.toThrow();
 		});
 
 		it("throws when no voice matches", async () => {

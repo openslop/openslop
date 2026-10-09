@@ -39,13 +39,12 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 		reads: [
 			chosenVoices(({ generationAttributes: attrs }) => heardCharacters(attrs)),
 		],
-		async prepare(element, ctx) {
-			const writes = await Promise.all(
+		async prepare(element, ctx, signal) {
+			await Promise.all(
 				heardCharacters(element.generationAttributes).map((name) =>
-					settleVoice(name, ctx),
+					settleVoice(name, ctx, signal),
 				),
 			);
-			return writes.flat();
 		},
 		async beforeGenerate(params, ctx) {
 			const voices = compact(

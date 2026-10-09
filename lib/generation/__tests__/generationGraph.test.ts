@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Descendant } from "slate";
-import { getCanvasElements, NARRATOR } from "@/lib/canvas/assets";
+import { findAsset, getCanvasElements, NARRATOR } from "@/lib/canvas/assets";
 import { asset, element } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import {
@@ -160,24 +160,22 @@ describe("GenerationGraph", () => {
 });
 
 describe("prepareNode", () => {
-	const voice = (voiceId: string): AssetWrite => ({
-		type: "asset_voice",
-		name: NARRATOR,
-		attrs: { voiceId },
-	});
-	const settling = (...writes: AssetWrite[]): ConnectorPlugin => ({
-		name: "settle",
-		prepare: async () => writes,
-	});
 	const image = element("img", "image", "a sunset");
 	const setAsset = vi.fn(({ type, name, attrs }: AssetWrite) => {
 		assets = [...assets, asset(type, { name, attrs })];
 	});
 	const writing = (): BuildContext => ({ ...contextNow(), setAsset });
-	const prepare = (
-		plugins: ConnectorPlugin[],
-		signal = new AbortController().signal,
-	) => {
+	const readsVoice: ConnectorPlugin = {
+		name: "voice",
+		reads: [
+			(_, { canvas }) => ({
+				voice:
+					findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
+						?.voiceId ?? "",
+			}),
+		],
+	};
+	const prepare = (plugins: ConnectorPlugin[], signal: AbortSignal) => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins } };
 		edit(image);
 		return prepareNode(nodeOf(image), writing, signal);
@@ -187,26 +185,36 @@ describe("prepareNode", () => {
 		setAsset.mockClear();
 	});
 
-	it("writes what every plugin settles through setAsset, in plugin order", async () => {
-		await prepare([
-			settling(voice("v-1")),
-			{ name: "none" },
-			settling(voice("v-2")),
-		]);
+	it("hands every plugin the element, the build context and the job's signal", async () => {
+		const { signal } = new AbortController();
+		const plugin = { name: "settle", prepare: vi.fn(async () => {}) };
 
-		expect(setAsset.mock.calls.map(([write]) => write)).toEqual([
-			voice("v-1"),
-			voice("v-2"),
-		]);
+		await prepare([plugin, { name: "none" }], signal);
+
+		expect(plugin.prepare).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ id: "img" }),
+			expect.objectContaining({ setAsset }),
+			signal,
+		);
 	});
 
-	it("writes nothing once the job is cancelled", async () => {
-		const controller = new AbortController();
-		const prepared = prepare([settling(voice("v-1"))], controller.signal);
-		controller.abort();
+	it("builds the node on what the plugins left on the canvas", async () => {
+		const prepared = await prepare(
+			[
+				{
+					...readsVoice,
+					prepare: async (_, ctx) =>
+						ctx.setAsset({
+							type: "asset_voice",
+							name: NARRATOR,
+							attrs: { voiceId: "v-1" },
+						}),
+				},
+			],
+			new AbortController().signal,
+		);
 
-		await expect(prepared).rejects.toThrow();
-		expect(setAsset).not.toHaveBeenCalled();
+		expect(prepared.inputs.reads).toEqual({ voice: "v-1" });
 	});
 
 	it("fails loudly when the element left the canvas", async () => {

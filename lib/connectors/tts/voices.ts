@@ -7,7 +7,7 @@ import { declaredLanguage } from "@/lib/project/language";
 import { VoiceSchema, VOICE_TRAITS, type Voice } from "@/lib/project/types";
 import { createConnector } from "../factory";
 import { hasModel, resolveModel } from "../models";
-import type { AssetWrite, ModelPick, PluginContext } from "../types";
+import type { ModelPick, PluginContext } from "../types";
 import { DEFAULT_TTS_LANGUAGE } from "./enums";
 
 const CHOSEN_VOICE_KEYS = ["provider", "model", "voiceId"] as const;
@@ -34,11 +34,12 @@ export const recordedVoice = (ctx: PluginContext, name: string): Voice =>
 /** Searches by the voice's traits when it has no voice on a model of its own, in the project's language when it declares one. */
 export async function settleVoice(
 	name: string,
-	{ canvas, state }: BuildContext,
+	{ canvas, state, setAsset }: BuildContext,
+	signal: AbortSignal,
 	fallback?: ModelPick,
-): Promise<AssetWrite[]> {
+): Promise<void> {
 	const voice = voiceOf(canvas, name);
-	if (voice.voiceId && hasModel("tts", voice)) return [];
+	if (voice.voiceId && hasModel("tts", voice)) return;
 	const model = resolveModel("tts", voice, fallback);
 	const [found] = await createConnector("tts", model).searchVoices({
 		...pick(voice, VOICE_TRAITS),
@@ -48,7 +49,10 @@ export async function settleVoice(
 			DEFAULT_TTS_LANGUAGE,
 	});
 	if (!found) throw new Error("No matching voice found");
-	return [
-		{ type: "asset_voice", name, attrs: { ...model, voiceId: found.id } },
-	];
+	signal.throwIfAborted();
+	setAsset({
+		type: "asset_voice",
+		name,
+		attrs: { ...model, voiceId: found.id },
+	});
 }

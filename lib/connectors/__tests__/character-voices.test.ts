@@ -7,7 +7,7 @@ import {
 	createCharacterVoicesPlugin,
 	type ParamsWithCharacterVoices,
 } from "../video/plugins/character-voices";
-import type { ModelRef } from "../types";
+import type { AssetWrite, ModelRef } from "../types";
 import { buildCtx } from "@/lib/generation/__tests__/_context";
 import { pluginCtx, readsOf } from "./_state-ctx";
 import { resetTts, tts } from "./_tts-mock";
@@ -50,7 +50,13 @@ const prepare = async (
 	model: ModelRef = SEEDANCE,
 ) => {
 	if (!plugin.prepare) throw new Error("no prepare");
-	return plugin.prepare(video(characters, model), buildCtx(canvas));
+	const writes: AssetWrite[] = [];
+	await plugin.prepare(
+		video(characters, model),
+		buildCtx(canvas, { setAsset: (write) => writes.push(write) }),
+		new AbortController().signal,
+	);
+	return writes;
 };
 
 const before = async (

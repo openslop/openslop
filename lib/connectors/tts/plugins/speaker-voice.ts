@@ -15,8 +15,8 @@ export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 		reads: [
 			chosenVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
 		],
-		prepare: ({ generationAttributes: attrs }, ctx) =>
-			settleVoice(speakerOf(attrs), ctx, attrs),
+		prepare: ({ generationAttributes: attrs }, ctx, signal) =>
+			settleVoice(speakerOf(attrs), ctx, signal, attrs),
 		beforeGenerate: (params, ctx) => ({
 			...params,
 			voiceId: recordedVoice(ctx, speakerOf(params)).voiceId,

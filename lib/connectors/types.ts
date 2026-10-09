@@ -94,7 +94,7 @@ export interface PluginContext {
 	signal?: AbortSignal;
 }
 
-/** Attributes to write onto an asset before generating, adding it when there is none. */
+/** Attributes to write onto an asset, adding it when there is none. */
 export type AssetWrite = {
 	type: AssetType;
 	name?: string;
@@ -107,8 +107,12 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	/** The model the element generates on, when it is picked somewhere other than the element. */
 	model?(element: CanvasElement, canvas: CanvasElement[]): ModelPick;
 	reads?: readonly Read[];
-	/** Assets to write before the node is built to run, such as the voice a search found. */
-	prepare?(element: CanvasElement, ctx: BuildContext): Promise<AssetWrite[]>;
+	/** Work to finish before the node is built to run, such as settling the voice a search finds. */
+	prepare?(
+		element: CanvasElement,
+		ctx: BuildContext,
+		signal: AbortSignal,
+	): Promise<void>;
 	beforeGenerate?(
 		params: TParams,
 		ctx: PluginContext,

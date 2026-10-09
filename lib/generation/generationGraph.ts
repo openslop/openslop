@@ -144,13 +144,11 @@ export async function prepareNode(
 	const ctx = context();
 	const element = generatedById(ctx.canvas, node.id);
 	if (!element) throw new Error(`Element "${node.id}" left the canvas`);
-	const writes = await Promise.all(
-		(node.job.config.plugins ?? []).map(
-			(plugin) => plugin.prepare?.(element, ctx) ?? [],
+	await Promise.all(
+		(node.job.config.plugins ?? []).map((plugin) =>
+			plugin.prepare?.(element, ctx, signal),
 		),
 	);
-	signal.throwIfAborted();
-	for (const write of writes.flat()) ctx.setAsset(write);
 	return buildNode(element, context());
 }
 

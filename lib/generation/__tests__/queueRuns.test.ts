@@ -122,9 +122,12 @@ describe("running a graph", () => {
 							?.voiceId ?? "",
 				}),
 			],
-			prepare: async () => [
-				{ type: "asset_voice", name: NARRATOR, attrs: { voiceId: "v-7" } },
-			],
+			prepare: async (_, { setAsset }) =>
+				setAsset({
+					type: "asset_voice",
+					name: NARRATOR,
+					attrs: { voiceId: "v-7" },
+				}),
 		};
 
 		beforeEach(() => {
