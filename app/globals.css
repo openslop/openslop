@@ -160,6 +160,8 @@
 	--scene-active-shadow: color-mix(in oklab, var(--grey-900) 18%, transparent);
 	--generate: #3b2b32;
 	--generate-foreground: #ffffff;
+	--user-message: var(--generate);
+	--user-message-foreground: var(--generate-foreground);
 	--generate-hover: #4f4046;
 	--generate-disabled: #c9c5c9;
 	--generate-disabled-foreground: var(--grey-500);
@@ -296,6 +298,8 @@
 	--scene-active-shadow: rgba(0, 0, 0, 0.55);
 	--generate: #e2dde0;
 	--generate-foreground: #231e21;
+	--user-message: var(--primary);
+	--user-message-foreground: var(--primary-foreground);
 	--generate-hover: #a09c9e;
 	--generate-disabled: #403a3e;
 	--generate-disabled-foreground: var(--grey-500);
@@ -364,6 +368,8 @@
 	--color-resizer-hover: var(--resizer-hover);
 	--color-generate: var(--generate);
 	--color-generate-foreground: var(--generate-foreground);
+	--color-user-message: var(--user-message);
+	--color-user-message-foreground: var(--user-message-foreground);
 	--color-generate-hover: var(--generate-hover);
 	--color-generate-disabled: var(--generate-disabled);
 	--color-generate-disabled-foreground: var(--generate-disabled-foreground);
