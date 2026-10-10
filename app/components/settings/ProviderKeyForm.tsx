@@ -25,6 +25,7 @@ export function ProviderKeyForm({
 	const meta = PROVIDER_CATALOG[provider];
 	const saveKey = useAccount((state) => state.saveKey);
 	const fieldId = useId();
+	const errorId = useId();
 	const [apiKey, setApiKey] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -63,8 +64,13 @@ export function ProviderKeyForm({
 				autoComplete="off"
 				spellCheck={false}
 				value={apiKey}
-				onChange={(event) => setApiKey(event.target.value)}
+				onChange={(event) => {
+					setApiKey(event.target.value);
+					setError(null);
+				}}
 				placeholder="Paste in your API key here"
+				aria-invalid={!!error}
+				aria-describedby={error ? errorId : undefined}
 			/>
 			<div className="flex flex-wrap items-center gap-2">
 				<Button
@@ -91,7 +97,7 @@ export function ProviderKeyForm({
 				</Button>
 			</div>
 			{error && (
-				<p role="alert" className="text-label-xs text-destructive">
+				<p id={errorId} role="alert" className="text-label-xs text-destructive">
 					{error}
 				</p>
 			)}
