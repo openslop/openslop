@@ -1,7 +1,7 @@
 import {
 	PINNED_PANEL_KEYS,
 	RAIL_PANEL_GROUPS,
-} from "@/app/components/canvas/panel/panelKeys";
+} from "@/app/components/canvas/panel/panel-keys";
 import { Fragment } from "react";
 import { DotGrid } from "@/components/ui/dot-grid";
 import { Separator } from "@/components/ui/separator";

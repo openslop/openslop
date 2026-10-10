@@ -1,7 +1,7 @@
 import { CONTENT_TYPES, type CanvasBlock } from "@/lib/canvas/types";
 import { isScene } from "@/lib/canvas/scenes";
 import { getPromptText } from "@/lib/generation/inputs";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ResolvedElement } from "./types";
 import {
@@ -10,7 +10,7 @@ import {
 	getMotion,
 	getTrimToDialogue,
 	getVolume,
-} from "../canvas/elementAttributes";
+} from "../canvas/element-attributes";
 
 export function resolveElements(
 	blocks: CanvasBlock[],

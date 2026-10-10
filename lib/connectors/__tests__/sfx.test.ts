@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpSFXConnector } from "../sfx/connector";
 import type { ConnectorPlugin } from "../types";
-import { mockGatewaySuccess } from "./_gatewayMock";
+import { mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/sfx/openslop/${TEST_ID}/output.mp3`;

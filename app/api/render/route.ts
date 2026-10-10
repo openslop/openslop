@@ -1,12 +1,12 @@
 import { renderMediaOnLambda } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
-import { createSessionRouteHandler } from "@/lib/api/routeHandler";
+import { createSessionRouteHandler } from "@/lib/api/route-handler";
 import {
 	getFunctionName,
 	getSiteName,
 	REGION,
-} from "@/lib/render/lambdaConfig";
-import { RenderRequest, type RenderHandle } from "@/lib/render/renderApi";
+} from "@/lib/render/lambda-config";
+import { RenderRequest, type RenderHandle } from "@/lib/render/render-api";
 import { COMPOSITION_ID } from "@/lib/render/types";
 
 export const POST = createSessionRouteHandler({

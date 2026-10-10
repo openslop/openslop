@@ -5,7 +5,7 @@ import type {
 } from "@/lib/connectors/types";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ProviderContract } from "../base";
-import type { AgentModel } from "./agentModel";
+import type { AgentModel } from "./agent-model";
 
 export type LLMRequest = VendorParams<LLMGenerateParams>;
 

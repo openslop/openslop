@@ -1,5 +1,5 @@
 import type { ImageGenerateParams } from "@/lib/connectors/types";
-import type { BundleFile } from "@/lib/api/assetBundle";
+import type { BundleFile } from "@/lib/api/asset-bundle";
 import {
 	DEFAULT_IMAGE_FORMAT,
 	IMAGE_MIME_TYPES,

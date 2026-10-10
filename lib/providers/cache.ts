@@ -6,7 +6,7 @@ import {
 	type RecordMetadata,
 } from "@pinecone-database/pinecone";
 import { z } from "zod";
-import { AssetBundle, type BundleResponse } from "@/lib/api/assetBundle";
+import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { embedText } from "./embed";
 

@@ -1,4 +1,4 @@
-import { isByokProvider } from "@/lib/connectors/providerCatalog";
+import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
 
 export const OPENSLOP_API_PREFIX = "/api/v1";

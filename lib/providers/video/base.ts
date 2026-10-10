@@ -1,6 +1,6 @@
-import { AssetBundle, type BundleResponse } from "@/lib/api/assetBundle";
+import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import type { VendorParams } from "@/lib/connectors/models";
-import type { ValidationResult } from "@/lib/connectors/providerKey";
+import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import type { ProviderContract } from "../base";
 

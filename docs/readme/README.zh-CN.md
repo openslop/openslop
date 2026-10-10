@@ -56,11 +56,11 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 打一行字。选 16:9 或 9:16、一种语言、一个模型和一个时长，或者直接粘贴你已有的脚本。没头绪的话，还有七个模板可以帮你起步。
 
-[编辑器 →](../../app/components/copilot/ComposerCopilot.tsx)
+[编辑器 →](../../app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
     <img src="../../assets/features/describe-light.svg" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 **盒子里还有：**
 
-- **[字幕](../../app/components/canvas/panel/CaptionsPanel.tsx)** — 六种预设、十二种字体、逐词或逐行显示，每种颜色、描边和位置都随你改。
-- **[导出最高 4K](../../app/components/player/ExportButton.tsx)** — 在 Remotion Lambda 上分块并行渲染，交给你一个 MP4。
-- **[版本历史](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — 边做边自动保存，合并成检查点。查看任意版本并恢复。
+- **[字幕](../../app/components/canvas/panel/captions-panel.tsx)** — 六种预设、十二种字体、逐词或逐行显示，每种颜色、描边和位置都随你改。
+- **[导出最高 4K](../../app/components/player/export-button.tsx)** — 在 Remotion Lambda 上分块并行渲染，交给你一个 MP4。
+- **[版本历史](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 边做边自动保存，合并成检查点。查看任意版本并恢复。
 - **[角色和画风](../../app/components/canvas/elements/AssetsSection.tsx)** — 给角色起一次名，每张图片、每句配音和每个头像都保持一致。
 - **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一位旁白和一个时长。
 - **[开发用的 mock](../../.env.example)** — 不填某个提供商的密钥，它的调用就会回退到预置结果，让你不花钱也能开发。

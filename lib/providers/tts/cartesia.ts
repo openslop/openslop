@@ -11,14 +11,14 @@ import {
 	TTS_GENDERS,
 	type TTSSpeed,
 } from "@/lib/connectors/tts/enums";
-import type { BundleFile } from "@/lib/api/assetBundle";
+import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";
 import { pcmDurationSec, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
-import { fetchAllowedVoicePreview } from "./voicePreview";
-import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
+import { fetchAllowedVoicePreview } from "./voice-preview";
+import { buildQueryText, rankBySimilarity } from "./voice-similarity";
 import type {
 	GenerationRequest,
 	RawEncoding,

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { providerKeyCheck, saveProviderKey } from "@/lib/api/providerKeys";
-import { MIN_KEY_LENGTH } from "@/lib/connectors/providerKey";
+import { providerKeyCheck, saveProviderKey } from "@/lib/api/provider-keys";
+import { MIN_KEY_LENGTH } from "@/lib/connectors/provider-key";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
-import { byokProviderField } from "@/lib/api/requestSchemaFields";
-import { createSessionRouteHandler } from "@/lib/api/routeHandler";
+import { byokProviderField } from "@/lib/api/request-schema-fields";
+import { createSessionRouteHandler } from "@/lib/api/route-handler";
 
 const saveSchema = z.object({
 	provider: byokProviderField,

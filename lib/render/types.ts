@@ -1,7 +1,7 @@
 import type { ContentType, ElementRole, LayerType } from "@/lib/canvas/types";
 import type { TextTimestamp } from "@/lib/connectors/types";
-import type { CaptionStyle } from "../captions/captionStyle";
-import type { MotionEffect } from "./motionEffectNames";
+import type { CaptionStyle } from "../captions/caption-style";
+import type { MotionEffect } from "./motion-effect-names";
 import type { TransitionType } from "./transitions";
 
 export type ResolvedElement = {

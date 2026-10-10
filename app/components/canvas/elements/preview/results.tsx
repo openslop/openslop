@@ -1,14 +1,14 @@
 import { useState, type CSSProperties } from "react";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { AudioPlayer } from "../AudioPlayer";
-import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
-import { GenerationIndicator } from "../GenerationIndicator";
+import { AudioPlayer } from "../audio-player";
+import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
+import { GenerationIndicator } from "../generation-indicator";
 import type {
 	GenerationState,
 	PlaceholderProps,
 	PreviewOverlays,
 } from "./status";
-import { PlaceholderBallsLoader } from "./placeholderBalls";
+import { PlaceholderBallsLoader } from "./placeholder-balls";
 import {
 	AUDIO_SAMPLE_COUNT,
 	soundwaveMaskStyle,

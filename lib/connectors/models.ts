@@ -2,7 +2,7 @@ import { z } from "zod";
 import { DEFAULT_IMAGE_MODEL, IMAGE_MODELS } from "./image/models";
 import { DEFAULT_LLM_MODEL, LLM_MODELS } from "./llm/models";
 import { DEFAULT_MUSIC_MODEL, MUSIC_MODELS } from "./music/models";
-import { isProvider } from "./providerCatalog";
+import { isProvider } from "./provider-catalog";
 import { DEFAULT_SFX_MODEL, SFX_MODELS } from "./sfx/models";
 import { DEFAULT_TTS_MODEL, TTS_MODELS } from "./tts/models";
 import {

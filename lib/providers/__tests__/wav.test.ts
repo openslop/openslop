@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { audioDurationSec } from "../audioDuration";
+import { audioDurationSec } from "../audio-duration";
 import { pcmDurationSec, wavFromPcm, type PcmFormat } from "../wav";
 
 const FLOAT_MONO: PcmFormat = {

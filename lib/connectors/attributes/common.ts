@@ -10,8 +10,11 @@ import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
 import {
 	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
-} from "@/lib/project/aspectRatio";
-import { DEFAULT_MOTION, MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
+} from "@/lib/project/aspect-ratio";
+import {
+	DEFAULT_MOTION,
+	MOTION_EFFECTS,
+} from "@/lib/render/motion-effect-names";
 import type { AttributeDef } from "./schema";
 
 /** Attribute leaves shared across multiple connector types. */

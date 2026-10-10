@@ -9,7 +9,7 @@ import {
 } from "../tools/registry";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
-import type { VideoSettings } from "@/lib/project/videoSettings";
+import type { VideoSettings } from "@/lib/project/video-settings";
 import {
 	TTS_ACCENTS,
 	TTS_AGES,
@@ -17,7 +17,7 @@ import {
 	TTS_LANGUAGES,
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
-import { CaptionStyleSchema } from "@/lib/captions/captionStyle";
+import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import AuthForm from "../components/AuthForm";
-import { AuthFooterLink } from "../components/AuthFooterLink";
+import AuthForm from "../components/auth-form";
+import { AuthFooterLink } from "../components/auth-footer-link";
 import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {

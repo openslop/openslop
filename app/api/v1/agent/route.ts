@@ -1,4 +1,4 @@
-import { createAgentRouteHandler } from "@/lib/api/llmRoutes";
-import { HOSTED } from "@/lib/api/routeFamilies";
+import { createAgentRouteHandler } from "@/lib/api/llm-routes";
+import { HOSTED } from "@/lib/api/route-families";
 
 export const POST = createAgentRouteHandler(HOSTED);

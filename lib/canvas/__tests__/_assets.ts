@@ -1,10 +1,10 @@
 import compact from "lodash/compact";
 import { createEditor, type Descendant, type Editor } from "slate";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { createCanvasElement } from "../createCanvasElement";
+import { createCanvasElement } from "../create-canvas-element";
 import { isAssetElement, isContentElement } from "../guards";
-import { splitAttributes } from "../elementAttributes";
-import { getElementBodyText } from "../osmlSerializer";
+import { splitAttributes } from "../element-attributes";
+import { getElementBodyText } from "../osml-serializer";
 import type { AssetElement, AssetType, ContentElement } from "../types";
 
 /** An asset as the canvas holds it, named when it belongs to a character. */

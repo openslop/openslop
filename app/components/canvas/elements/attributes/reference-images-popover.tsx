@@ -1,0 +1,99 @@
+"use client";
+
+import { useSlateStatic } from "slate-react";
+import { mergeAttrs } from "@/lib/canvas/editor-ops";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent } from "@/components/ui/popover";
+import type { ContentElement } from "@/lib/canvas/types";
+import {
+	parseReferenceImages,
+	serializeReferenceImages,
+} from "@/lib/connectors/attributes/reference-images";
+import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
+import { ReferenceImagePicker } from "../reference-images";
+import { AttributeTrigger } from "./attribute-trigger";
+
+const summarize = (override: string[] | undefined, projectCount: number) => {
+	if (!override) return `Project (${projectCount})`;
+	return override.length ? `${override.length} custom` : "None";
+};
+
+export interface ReferenceImagesPopoverProps {
+	element: ContentElement;
+	attrKey: string;
+	label: string;
+	hideLabel?: boolean;
+	/** References the element adds beyond these, counted in the summary. */
+	added?: number;
+	children?: React.ReactNode;
+}
+
+/**
+ * This element's reference images. With no override it shows the project's and
+ * says so; the first add or remove copies them onto the element, from where they
+ * stop tracking the project until reset.
+ */
+export function ReferenceImagesPopover({
+	element,
+	attrKey,
+	label,
+	hideLabel = false,
+	added = 0,
+	children,
+}: ReferenceImagesPopoverProps) {
+	const editor = useSlateStatic();
+	const { urls: projectImages } = useReferenceImages();
+	const override = parseReferenceImages(
+		element.generationAttributes?.[attrKey],
+	);
+	const urls = override ?? projectImages;
+
+	const setOverride = (next: string[]) =>
+		mergeAttrs(editor, element.id, {
+			[attrKey]: serializeReferenceImages(next),
+		});
+
+	const summary =
+		summarize(override, projectImages.length) +
+		(added > 0 ? ` + ${added}` : "");
+	const tooltip = `${label}: ${summary}`;
+
+	return (
+		<Popover>
+			<AttributeTrigger tooltip={tooltip}>
+				{!hideLabel && <span className="opacity-70 mr-1">{label}</span>}
+				{summary}
+			</AttributeTrigger>
+			<PopoverContent align="end" className="w-72">
+				<div className="mb-2 flex items-baseline justify-between gap-2">
+					<span className="text-label text-muted-foreground">
+						{override ? "Custom for this element" : "Using project references"}
+					</span>
+					{override && (
+						<Button
+							variant="link"
+							size="sm"
+							className="h-auto p-0"
+							tooltip="Use the project's reference images"
+							onClick={() =>
+								mergeAttrs(editor, element.id, { [attrKey]: null })
+							}
+						>
+							Reset
+						</Button>
+					)}
+				</div>
+				<div className="flex flex-wrap gap-2">
+					<ReferenceImagePicker
+						urls={urls}
+						onAdd={(added) => setOverride([...urls, ...added])}
+						onRemove={(index) =>
+							setOverride(urls.filter((_, i) => i !== index))
+						}
+					/>
+				</div>
+				{children}
+			</PopoverContent>
+		</Popover>
+	);
+}

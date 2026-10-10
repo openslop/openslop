@@ -35,20 +35,11 @@ const eslintConfig = defineConfig([
 		},
 	},
 	{
-		// File names match their main export. Directories stay free: app/ folders are URL segments.
 		plugins: { unicorn },
-		ignores: [
-			// shadcn CLI writes kebab-case files
-			"components/ui/**",
-			"app/**/{not-found,global-error,global-not-found,opengraph-image,twitter-image,apple-icon}.{ts,tsx}",
-		],
 		rules: {
 			"unicorn/filename-case": [
 				"error",
-				{
-					cases: { camelCase: true, pascalCase: true },
-					checkDirectories: false,
-				},
+				{ case: "kebabCase", checkDirectories: false },
 			],
 		},
 	},

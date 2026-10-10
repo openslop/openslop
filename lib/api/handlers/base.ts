@@ -1,9 +1,9 @@
 import { vendorParams } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
 import type { ProviderType } from "@/lib/providers/types";
-import type { BundleResponse } from "../assetBundle";
+import type { BundleResponse } from "../asset-bundle";
 import type { JobConnectorType, JobRow } from "../jobs";
-import { providerForPick } from "../routeFamilies";
+import { providerForPick } from "../route-families";
 
 export type JobRequest<TReq extends ModelRef = ModelRef> = {
 	user_id: string;

@@ -4,14 +4,14 @@ import type { ReferenceAudio } from "@/lib/connectors/types";
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
 import pickBy from "lodash/pickBy";
-import { cutVoice, secondsCap } from "../audioCut";
+import { cutVoice, secondsCap } from "../audio-cut";
 import { validateRunwareKey, withRunware } from "../runware";
 import type { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
 import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
 	DEFAULT_VIDEO_RESOLUTION,
-} from "@/lib/project/aspectRatio";
+} from "@/lib/project/aspect-ratio";
 
 const FINISHED: Record<string, VideoJobStatus> = {
 	success: "completed",

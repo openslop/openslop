@@ -3,7 +3,7 @@ import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { GenerationIndicator } from "../GenerationIndicator";
+import { GenerationIndicator } from "../generation-indicator";
 import type {
 	GenerationState,
 	PlaceholderProps,

@@ -5,13 +5,13 @@ import {
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 } from "@/lib/canvas/types";
-import { MOTION_EFFECTS } from "@/lib/render/motionEffectNames";
+import { MOTION_EFFECTS } from "@/lib/render/motion-effect-names";
 import { VIDEO_FORMATS } from "./formats";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import { TTS_EMOTIONS, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { languagePrompt } from "./language";
-import { VIDEO_PROMPT_FORMAT } from "./videoPrompt";
+import { VIDEO_PROMPT_FORMAT } from "./video-prompt";
 
 export function osmlSpec(language: string): string {
 	return dedent`

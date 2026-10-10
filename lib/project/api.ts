@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
-import type { ProjectMeta } from "./projectDocument";
-import type { SavedProject } from "./savedProject";
+import type { ProjectMeta } from "./project-document";
+import type { SavedProject } from "./saved-project";
 
 export const ProjectRowSchema = z.object({
 	id: z.string(),

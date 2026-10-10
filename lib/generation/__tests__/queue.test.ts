@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { pickThumbnailUrl } from "@/lib/project/thumbnail";
 import type { AssetResult } from "@/lib/connectors/types";
-import type { generateForElement } from "../generateForElement";
+import type { generateForElement } from "../generate-for-element";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 import type { CommittedVersion } from "../versions";
@@ -17,7 +17,7 @@ import { inputsFor, jobNode as makeJob } from "./_graph";
 
 let generateMock: Mock<typeof generateForElement>;
 
-vi.mock("../generateForElement", () => ({
+vi.mock("../generate-for-element", () => ({
 	generateForElement: (...args: Parameters<typeof generateForElement>) =>
 		generateMock(...args),
 }));

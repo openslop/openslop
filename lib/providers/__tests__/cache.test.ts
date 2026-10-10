@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BundleResponse } from "@/lib/api/assetBundle";
+import type { BundleResponse } from "@/lib/api/asset-bundle";
 
 const mockQuery = vi.fn();
 const mockUpsert = vi.fn();
@@ -277,7 +277,7 @@ describe("audio rows", () => {
 
 	it("resolves a relative filename to an absolute URL under the bundle's path", async () => {
 		const { toAudioRow } = await loadCache();
-		const { AssetBundle } = await import("@/lib/api/assetBundle");
+		const { AssetBundle } = await import("@/lib/api/asset-bundle");
 		const m = toAudioRow(
 			{
 				id: "abc123",

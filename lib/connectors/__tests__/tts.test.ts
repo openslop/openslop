@@ -1,8 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpTTSConnector } from "../tts/connector";
-import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speakerVoice";
+import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import type { ConnectorPlugin } from "../types";
-import { mockGatewaySequence } from "./_gatewayMock";
+import { mockGatewaySequence } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;

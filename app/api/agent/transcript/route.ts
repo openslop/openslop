@@ -4,7 +4,7 @@ import {
 	findConversation,
 	listConversationMessages,
 } from "@/lib/api/conversations";
-import { createSessionQueryRouteHandler } from "@/lib/api/routeHandler";
+import { createSessionQueryRouteHandler } from "@/lib/api/route-handler";
 
 export const GET = createSessionQueryRouteHandler({
 	schema: z.object({ projectId: z.uuid() }),

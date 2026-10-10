@@ -13,7 +13,7 @@
 
 ## Sloppy
 
-The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/agent/`, turns run by `lib/api/agentTurn.ts`). The server streams text and tool calls; the client runs each tool against the Slate editor and posts the result back until the model answers in text. Only the client writes the project.
+The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/agent/`, turns run by `lib/api/agent-turn.ts`). The server streams text and tool calls; the client runs each tool against the Slate editor and posts the result back until the model answers in text. Only the client writes the project.
 
 ## Vocabulary
 
@@ -32,7 +32,7 @@ The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/a
 
 `MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech speaks on its speaker's `asset_voice` pair, not its own. The `voice` connector type offers the TTS models. Defaults resolve element, then project, then account, then the recommendation.
 
-The two route families are defined in `lib/api/routeFamilies.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
+The two route families are defined in `lib/api/route-families.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
 
 User keys live in Supabase Vault. They are read by the service role only for the request that uses them and are never sent to a client. A key is verified by calling the vendor.
 
@@ -67,7 +67,7 @@ Canvas
       └─ Text leaves   (node)
 ```
 
-Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/elementConnector.ts`).
+Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/element-connector.ts`).
 
 `lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template) and the project's pinned default models. It also owns saving and version history.
 
@@ -79,7 +79,7 @@ Each generated element is a node in a dependency graph (`lib/generation/`). A no
 
 A node regenerates when it has no result, when a dependency regenerates, or when its inputs changed. The queue runs dependencies first, with a concurrency limit per connector type, and builds each node again from the live canvas when its job starts.
 
-Each content type's card controls are declared in `app/components/canvas/elements/elementConfigs.tsx`.
+Each content type's card controls are declared in `app/components/canvas/elements/element-configs.tsx`.
 
 ## Data
 
@@ -107,7 +107,7 @@ Generated assets live in Vercel Blob as public CDN URLs.
   - an entry in the provider catalog;
   - a models map under `lib/connectors/<type>/<provider>/`;
   - a class per type in the vendor table, each with `validate()`.
-- **New media type:** a connector, a provider, a models map, a row in `lib/api/assetRoutes.ts`, and two route files.
+- **New media type:** a connector, a provider, a models map, a row in `lib/api/asset-routes.ts`, and two route files.
 - **Per-type generation behaviour:** a plugin, installed in `lib/connectors/registry.ts`.
 
 Tests live in `__tests__` folders next to the code.

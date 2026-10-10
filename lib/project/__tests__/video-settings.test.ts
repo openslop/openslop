@@ -1,0 +1,39 @@
+import { describe, expect, it } from "vitest";
+import { DEFAULT_ASPECT_RATIO } from "../aspect-ratio";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/caption-style";
+import { DEFAULT_TRANSITION } from "@/lib/render/transitions";
+import { VideoSettingsSchema } from "../video-settings";
+
+describe("VideoSettingsSchema", () => {
+	it("completes an empty or partial setting block", () => {
+		const defaults = {
+			transitionType: DEFAULT_TRANSITION,
+			aspectRatio: DEFAULT_ASPECT_RATIO,
+			captions: true,
+			captionStyle: DEFAULT_CAPTION_STYLE,
+		};
+
+		expect(VideoSettingsSchema.parse({})).toEqual(defaults);
+		expect(VideoSettingsSchema.parse({ aspectRatio: "9:16" })).toEqual({
+			...defaults,
+			aspectRatio: "9:16",
+		});
+	});
+
+	it("keeps every stored setting", () => {
+		const stored = {
+			transitionType: "fade" as const,
+			aspectRatio: "9:16" as const,
+			captions: false,
+			captionStyle: { ...DEFAULT_CAPTION_STYLE, casing: "upper" as const },
+		};
+		expect(VideoSettingsSchema.parse(stored)).toEqual(stored);
+	});
+
+	it("rejects an unknown value rather than silently defaulting it", () => {
+		expect(() => VideoSettingsSchema.parse({ aspectRatio: "4:3" })).toThrow();
+		expect(() =>
+			VideoSettingsSchema.parse({ transitionType: "Film" }),
+		).toThrow();
+	});
+});

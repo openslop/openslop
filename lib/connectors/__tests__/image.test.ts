@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpImageConnector } from "../image/connector";
 import type { AssetResult, ConnectorPlugin } from "../types";
-import { mockGatewaySuccess } from "./_gatewayMock";
+import { mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
 const BUNDLE_URL = `/assets/image/openslop/${TEST_ID}`;

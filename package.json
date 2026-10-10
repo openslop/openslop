@@ -19,8 +19,8 @@
 		"knip": "knip",
 		"format:check": "prettier --check .",
 		"remotion:studio": "remotion studio",
-		"deploy:remotion-function": "bun scripts/deployRemotionFunction.ts",
-		"deploy:remotion-site": "bun scripts/deployRemotionSite.ts",
+		"deploy:remotion-function": "bun scripts/deploy-remotion-function.ts",
+		"deploy:remotion-site": "bun scripts/deploy-remotion-site.ts",
 		"prepare": "husky"
 	},
 	"lint-staged": {

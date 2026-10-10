@@ -5,7 +5,7 @@ import { inputsFor } from "./_graph";
 import type { CommittedVersion, ElementVersion } from "../versions";
 
 const { toastError } = vi.hoisted(() => ({ toastError: vi.fn() }));
-vi.mock("@/lib/toastError", () => ({ toastError }));
+vi.mock("@/lib/toast-error", () => ({ toastError }));
 
 const result = (imageUrl: string): AssetResult => ({
 	imageUrl,

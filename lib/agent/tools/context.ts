@@ -1,7 +1,7 @@
 import type { AssetElement, ElementType } from "@/lib/canvas/types";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
-import type { ElementState } from "../elementState";
-import type { ElementLength } from "@/lib/render/elementLengths";
+import type { ElementState } from "../element-state";
+import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
 

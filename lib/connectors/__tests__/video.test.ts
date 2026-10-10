@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpVideoConnector } from "../video/connector";
 import type { ConnectorPlugin } from "../types";
-import { mockGatewaySequence, mockGatewaySuccess } from "./_gatewayMock";
+import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
 const VIDEO_URL = "https://cdn.example.com/v.mp4";

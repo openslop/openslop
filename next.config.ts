@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import { BLOB_BASE_URL } from "./lib/blob";
 
-// Must track the same blob URLs lib/blob.ts + lib/api/assetBundle.ts read —
+// Must track the same blob URLs lib/blob.ts + lib/api/asset-bundle.ts read —
 // an unlisted hostname 404s in an optimized <Image> (e.g. ProjectsList).
 const blobHostnames = Array.from(
 	new Set(

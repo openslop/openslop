@@ -1,4 +1,4 @@
-import { createAssetRouteHandler } from "@/lib/api/assetRoutes";
-import { HOSTED } from "@/lib/api/routeFamilies";
+import { createAssetRouteHandler } from "@/lib/api/asset-routes";
+import { HOSTED } from "@/lib/api/route-families";
 
 export const POST = createAssetRouteHandler(HOSTED, "music");

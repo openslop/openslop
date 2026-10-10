@@ -11,12 +11,12 @@ import { Input } from "@/components/ui/input";
 import { SelectMenuItem, SelectMenuTrigger } from "@/components/ui/select-menu";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { mergeAttrs } from "@/lib/canvas/editorOps";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import { mergeAttrs } from "@/lib/canvas/editor-ops";
+import { flatAttributes } from "@/lib/canvas/element-attributes";
 import type { CanvasElement } from "@/lib/canvas/types";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { cn } from "@/lib/utils";
-import { useWriteThrough } from "@/app/components/canvas/hooks/useWriteThrough";
+import { useWriteThrough } from "@/app/components/canvas/hooks/use-write-through";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
 	return (

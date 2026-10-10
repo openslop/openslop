@@ -1,4 +1,4 @@
-import { BYOK } from "@/lib/api/routeFamilies";
-import { createVoiceSearchHandler } from "@/lib/api/voiceRoutes";
+import { BYOK } from "@/lib/api/route-families";
+import { createVoiceSearchHandler } from "@/lib/api/voice-routes";
 
 export const GET = createVoiceSearchHandler(BYOK);

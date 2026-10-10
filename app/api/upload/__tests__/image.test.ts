@@ -6,7 +6,7 @@ vi.mock("@/lib/api/auth", () => ({
 	getUser: () => mockGetUser(),
 }));
 
-const { AssetBundle } = await import("@/lib/api/assetBundle");
+const { AssetBundle } = await import("@/lib/api/asset-bundle");
 const { POST } = await import("@/app/api/upload/image/route");
 const mockUpload = vi.spyOn(AssetBundle, "upload");
 

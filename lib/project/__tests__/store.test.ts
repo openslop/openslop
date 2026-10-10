@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/caption-style";
 import {
 	createProjectStore,
 	extractStoreSnapshot,
 	ProjectDataSchema,
 } from "../store";
 import { ScriptSettingsSchema } from "../types";
-import { VideoSettingsSchema } from "../videoSettings";
+import { VideoSettingsSchema } from "../video-settings";
 
 const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const SLOP = { provider: "openslop", model: "Slop Image v1" } as const;

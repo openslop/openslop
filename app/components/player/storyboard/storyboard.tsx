@@ -1,0 +1,65 @@
+"use client";
+
+import { Fragment, useMemo, useState } from "react";
+import { ReactEditor, useSlateStatic } from "slate-react";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { removeBlock } from "@/lib/canvas/editor-ops";
+import { insertScene } from "@/lib/canvas/insert-scene";
+import { useLayout } from "../render-layout-context";
+import { useSelectScene } from "../use-select-scene";
+import { SceneInsertHandle } from "./scene-insert-handle";
+import {
+	buildStoryboardScenes,
+	type StoryboardScene as StoryboardSceneData,
+} from "./storyboard-scenes";
+import { StoryboardScene } from "./storyboard-scene";
+
+export function Storyboard() {
+	const editor = useSlateStatic();
+	const { layout, segments, scenes } = useLayout();
+	const selectScene = useSelectScene();
+	const [deleting, setDeleting] = useState<StoryboardSceneData>();
+
+	const items = useMemo(
+		() => buildStoryboardScenes(scenes, segments),
+		[scenes, segments],
+	);
+
+	const aspectRatio = `${layout.width} / ${layout.height}`;
+
+	const addSceneBefore = (index: number) => {
+		const anchor = items[index]?.scene;
+		const at = anchor
+			? ReactEditor.findPath(editor, anchor)
+			: [editor.children.length];
+		insertScene(editor, at);
+	};
+
+	return (
+		<section
+			aria-label="Storyboard"
+			className="scrollbar-overlay flex shrink-0 items-start overflow-x-auto border-t border-border px-3 py-4"
+		>
+			{items.map((item, index) => (
+				<Fragment key={item.scene.id}>
+					<SceneInsertHandle onInsert={() => addSceneBefore(index)} />
+					<StoryboardScene
+						item={item}
+						aspectRatio={aspectRatio}
+						onSelect={() => selectScene(item.scene.id, item.start)}
+						onRequestDelete={() => setDeleting(item)}
+					/>
+				</Fragment>
+			))}
+			<SceneInsertHandle onInsert={() => addSceneBefore(items.length)} />
+			<ConfirmDeleteDialog
+				target={deleting}
+				onClose={() => setDeleting(undefined)}
+				title={(item) => `Delete scene ${item.sceneIndex}?`}
+				description="This removes the scene and everything in it. Undo from the canvas to bring it back."
+				actionLabel="Delete scene"
+				onConfirm={(item) => removeBlock(editor, item.scene.id)}
+			/>
+		</section>
+	);
+}

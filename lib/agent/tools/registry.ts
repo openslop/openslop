@@ -2,19 +2,19 @@ import { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
-import { adaptScript } from "./adaptScript";
-import { measureElementLengths } from "./measureElementLengths";
-import { measureTotalLength } from "./measureTotalLength";
-import { editScript } from "./editScript";
-import { fitDurations } from "./fitDurations";
-import { outlineStory } from "./outlineStory";
-import { readScript } from "./readScript";
-import { reviewScript } from "./reviewScript";
-import { setTitle } from "./setTitle";
-import { updateScriptSettings } from "./updateScriptSettings";
-import { updateVideoSettings } from "./updateVideoSettings";
-import { viewImage } from "./viewImage";
-import { writeScript } from "./writeScript";
+import { adaptScript } from "./adapt-script";
+import { measureElementLengths } from "./measure-element-lengths";
+import { measureTotalLength } from "./measure-total-length";
+import { editScript } from "./edit-script";
+import { fitDurations } from "./fit-durations";
+import { outlineStory } from "./outline-story";
+import { readScript } from "./read-script";
+import { reviewScript } from "./review-script";
+import { setTitle } from "./set-title";
+import { updateScriptSettings } from "./update-script-settings";
+import { updateVideoSettings } from "./update-video-settings";
+import { viewImage } from "./view-image";
+import { writeScript } from "./write-script";
 
 /** Registration is the contract: one entry is a tool's whole definition. */
 const TOOLS = {
