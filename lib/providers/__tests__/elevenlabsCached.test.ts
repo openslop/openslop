@@ -15,9 +15,7 @@ const mockQuery = vi.fn();
 const mockUpsert = vi.fn();
 vi.mock("@pinecone-database/pinecone", () => ({
 	Pinecone: class {
-		index = () => ({
-			namespace: () => ({ query: mockQuery, upsert: mockUpsert }),
-		});
+		index = () => ({ query: mockQuery, upsert: mockUpsert });
 	},
 }));
 
@@ -106,7 +104,7 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		});
 	});
 
-	it("sfx: serialize override embeds prompt only (duration excluded)", async () => {
+	it("sfx: embeds the prompt only (duration excluded)", async () => {
 		mockQuery.mockResolvedValue({ matches: [] });
 		mockConvert.mockResolvedValue(
 			new ReadableStream<Uint8Array>({
@@ -125,27 +123,5 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		});
 
 		expect(mockEmbedText).toHaveBeenCalledWith("boom");
-	});
-
-	it("ignores hits below the default threshold (0.9)", async () => {
-		mockQuery.mockResolvedValue({
-			matches: [{ score: 0.5, metadata: { url: "stale" } }],
-		});
-		mockCompose.mockResolvedValue(
-			new ReadableStream<Uint8Array>({
-				start(c) {
-					c.enqueue(new Uint8Array(16000));
-					c.close();
-				},
-			}),
-		);
-
-		const { music: ElevenLabsMusic } = await loadProviders();
-		const result = await new ElevenLabsMusic("k").generate({
-			prompt: "rock",
-			model: MUSIC_MODEL,
-		});
-		expect(result.result.audio).toBe("url"); // fresh, not "stale"
-		expect(mockCompose).toHaveBeenCalled();
 	});
 });

@@ -1,105 +1,39 @@
 import { randomUUID } from "node:crypto";
 import minBy from "lodash/minBy";
-import { Pinecone, type RecordMetadata } from "@pinecone-database/pinecone";
+import {
+	type Index,
+	Pinecone,
+	type RecordMetadata,
+} from "@pinecone-database/pinecone";
 import { z } from "zod";
 import { AssetBundle, type BundleResponse } from "@/lib/api/assetBundle";
 import { logger } from "@/lib/api/logger";
 import { embedText } from "./embed";
 
-export type CacheMatch = { score?: number; metadata?: RecordMetadata };
+type AudioPrompt = { prompt: string; durationSeconds?: number };
 
-const DEFAULT_THRESHOLD = 0.8;
-const RANKED_TOP_K = 5;
-const defaultSerialize = (...args: unknown[]): string => JSON.stringify(args);
+type CacheMatch = { score?: number; metadata?: RecordMetadata };
 
-type PineconeCacheOptions<Args extends unknown[], Result> = {
-	index: string;
-	toMetadata: (result: Result, description: string) => RecordMetadata;
-	/** Return `undefined` when the stored row can't be rehydrated, forcing a miss. */
-	fromMetadata: (metadata: RecordMetadata) => Result | undefined;
-	threshold?: number;
-	serialize?: (...args: Args) => string;
-	namespace?: string;
-	/**
-	 * Best-effort tiebreaker over the threshold-eligible candidates. When set,
-	 * Pinecone is queried for several neighbors and `rank` picks the winner.
-	 * Return `undefined` to force a miss.
-	 */
-	rank?: (candidates: CacheMatch[], ...args: Args) => CacheMatch | undefined;
+export type AudioPromptCache = {
+	readThrough(
+		params: AudioPrompt,
+		produce: () => Promise<BundleResponse>,
+	): Promise<BundleResponse>;
 };
 
-/**
- * Wraps an async method with a Pinecone vector-similarity read-through cache.
- */
-export function pineconeCache<Args extends unknown[], Result, This = unknown>(
-	method: (this: This, ...args: Args) => Promise<Result>,
-	options: PineconeCacheOptions<Args, Result>,
-): (this: This, ...args: Args) => Promise<Result> {
-	const apiKey = process.env.PINECONE_API_KEY;
-	if (!apiKey) return method;
+const SIMILARITY_THRESHOLD = 0.8;
+const NEIGHBORS = 5;
 
-	const index = new Pinecone({ apiKey })
-		.index(options.index)
-		.namespace(options.namespace ?? "");
-	const threshold = options.threshold ?? DEFAULT_THRESHOLD;
-	const serialize = options.serialize ?? defaultSerialize;
-
-	const topK = options.rank ? RANKED_TOP_K : 1;
-
-	return async function (this: This, ...args: Args): Promise<Result> {
-		const description = serialize(...args);
-		let vector: number[] | undefined;
-		try {
-			vector = await embedText(description);
-			const { matches } = await index.query({
-				vector,
-				topK,
-				includeMetadata: true,
-			});
-			const eligible: CacheMatch[] = (matches ?? [])
-				.filter((match) => (match.score ?? 0) >= threshold)
-				.map(({ score, metadata }) => ({ score, metadata }));
-			const hit = options.rank ? options.rank(eligible, ...args) : eligible[0];
-			if (hit?.metadata) {
-				const cached = options.fromMetadata(hit.metadata);
-				if (cached !== undefined) return cached;
-			}
-		} catch (error) {
-			logger.error(error, "[pinecone-cache] read failed; falling through");
-		}
-
-		const result = await method.call(this, ...args);
-		if (vector) {
-			try {
-				await index.upsert({
-					records: [
-						{
-							id: randomUUID(),
-							values: vector,
-							metadata: options.toMetadata(result, description),
-						},
-					],
-				});
-			} catch (error) {
-				logger.error(error, "[pinecone-cache] write failed");
-			}
-		}
-		return result;
-	};
-}
-
-/**
- * Picks the candidate whose stored `duration` is closest to `params.durationSeconds`.
- * If the caller didn't specify a duration, falls back to the top similarity match.
- */
-export const rankByNearestDuration = <P extends { durationSeconds?: number }>(
-	candidates: CacheMatch[],
-	params: P,
+export const bestMatch = (
+	matches: CacheMatch[],
+	durationSeconds: number | undefined,
 ): CacheMatch | undefined => {
-	const target = params.durationSeconds;
-	if (target == null) return candidates[0];
-	return minBy(candidates, (candidate) =>
-		Math.abs(Number(candidate.metadata?.duration ?? 0) - target),
+	const similar = matches.filter(
+		(match) => (match.score ?? 0) >= SIMILARITY_THRESHOLD,
+	);
+	if (durationSeconds == null) return similar[0];
+	return minBy(similar, (match) =>
+		Math.abs(Number(match.metadata?.duration ?? 0) - durationSeconds),
 	);
 };
 
@@ -109,28 +43,107 @@ const audioRow = z.object({
 	description: z.string(),
 });
 
-/**
- * Reusable strategy for any method returning an audio BundleResponse. Stores
- * the *resolved* absolute URL so cache hits round-trip through
- * `AssetBundle.resolve` without reconstructing a bogus path.
- */
-export const audioBundleCache = (type: string) => ({
-	toMetadata: (r: BundleResponse, description: string): RecordMetadata => ({
-		url: AssetBundle.fromResponse(r).resolve("audio"),
-		duration: Number(r.metadata?.durationSec ?? 0),
-		description,
-	}),
-	fromMetadata: (m: RecordMetadata): BundleResponse | undefined => {
-		// `audioUrl` is the legacy key for rows written before the rename.
-		const row = audioRow.safeParse({ ...m, url: m.url ?? m.audioUrl });
-		if (!row.success) return undefined;
-		const { url, duration, description } = row.data;
-		return {
-			id: url,
-			type,
-			provider: "pinecone-cache",
-			result: { audio: url },
-			metadata: { durationSec: duration, cached: true, description },
-		};
-	},
+type AudioRow = z.infer<typeof audioRow>;
+
+/** Stores the resolved absolute URL so a hit round-trips without rebuilding a path. */
+export const toAudioRow = (
+	result: BundleResponse,
+	description: string,
+): AudioRow => ({
+	url: AssetBundle.fromResponse(result).resolve("audio"),
+	duration: Number(result.metadata?.durationSec ?? 0),
+	description,
 });
+
+export const fromAudioRow = (
+	metadata: RecordMetadata,
+	type: string,
+): BundleResponse | undefined => {
+	// `audioUrl` is the legacy key for rows written before the rename.
+	const row = audioRow.safeParse({
+		...metadata,
+		url: metadata.url ?? metadata.audioUrl,
+	});
+	if (!row.success) return undefined;
+	const { url, duration, description } = row.data;
+	return {
+		id: url,
+		type,
+		provider: "pinecone-cache",
+		result: { audio: url },
+		metadata: { durationSec: duration, cached: true, description },
+	};
+};
+
+const logged = (message: string) => (error: unknown) => {
+	logger.error(error, message);
+	return undefined;
+};
+
+class PineconeAudioCache implements AudioPromptCache {
+	constructor(
+		private readonly index: Index,
+		private readonly type: string,
+	) {}
+
+	async readThrough(
+		params: AudioPrompt,
+		produce: () => Promise<BundleResponse>,
+	): Promise<BundleResponse> {
+		const vector = await embedText(params.prompt).catch(
+			logged("[pinecone-cache] read failed; falling through"),
+		);
+		if (!vector) return produce();
+
+		const cached = await this.lookup(vector, params.durationSeconds).catch(
+			logged("[pinecone-cache] read failed; falling through"),
+		);
+		if (cached) return cached;
+
+		const result = await produce();
+		await this.store(vector, result, params.prompt).catch(
+			logged("[pinecone-cache] write failed"),
+		);
+		return result;
+	}
+
+	private async lookup(vector: number[], durationSeconds?: number) {
+		const { matches } = await this.index.query({
+			vector,
+			topK: NEIGHBORS,
+			includeMetadata: true,
+		});
+		const hit = bestMatch(matches ?? [], durationSeconds);
+		return hit?.metadata && fromAudioRow(hit.metadata, this.type);
+	}
+
+	private async store(
+		vector: number[],
+		result: BundleResponse,
+		description: string,
+	) {
+		await this.index.upsert({
+			records: [
+				{
+					id: randomUUID(),
+					values: vector,
+					metadata: toAudioRow(result, description),
+				},
+			],
+		});
+	}
+}
+
+const uncached: AudioPromptCache = {
+	readThrough: (_params, produce) => produce(),
+};
+
+export function audioPromptCache(
+	indexName: string,
+	type: string,
+): AudioPromptCache {
+	const apiKey = process.env.PINECONE_API_KEY;
+	if (!apiKey) return uncached;
+	const index = new Pinecone({ apiKey }).index({ name: indexName });
+	return new PineconeAudioCache(index, type);
+}
