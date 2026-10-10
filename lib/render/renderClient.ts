@@ -1,7 +1,7 @@
 import { apiJson, UnreachableError } from "@/lib/clients/http";
 import { POLL_INTERVAL_MS } from "@/lib/providers/poll";
 import { sleep } from "@/lib/utils";
-import type { RenderHandle, RenderProgress } from "./render-api";
+import type { RenderHandle, RenderProgress } from "./renderApi";
 import type { RenderLayout } from "./types";
 
 export type RenderUpdate =
