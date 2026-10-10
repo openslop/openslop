@@ -53,6 +53,6 @@ Two opt-in treatments, both quiet:
 
 shadcn-consistent primitives in `components/ui/`, built with `class-variance-authority`, tokens only. Icons are a masked SVG set (`components/ui/icons/`, one file per category), filled.
 
-Button `variant` sets color only: `default` (near-black inverse, in-tool actions), `accent` (blurple, hero/auth CTAs), `generate` (the `--generate` family, including its disabled state), `panel` (the side panel's quiet look, for chrome next to a primary action), plus `secondary` / `outline` / `ghost` / `destructive` / `link`. Size comes from the `size` prop (`sm`/`default`/`cta`/`lg`/`icon`): never hand-size with `h-*`, `px-*`, or `text-*`; add a named size instead.
+Button `variant` sets color only: `default` (near-black inverse, in-tool actions), `accent` (blurple, hero/auth CTAs), `generate` (the `--generate` family, including its disabled state), `panel` (the side panel's quiet look, for chrome next to a primary action), plus `secondary` / `outline` / `ghost` / `destructive` / `link`. Size comes from the `size` prop (`xs`/`sm`/`default`/`cta`/`lg`/`icon`): never hand-size with `h-*`, `px-*`, or `text-*`; add a named size instead.
 
 Style an unavailable control through the `unavailable:` variant, which covers `:disabled` and `aria-disabled` alike, so one that stays hoverable for its tooltip still looks unavailable.

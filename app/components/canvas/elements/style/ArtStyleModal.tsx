@@ -1,17 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
-import {
-	DialogBody,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { useConfig } from "@/lib/config/ConfigProvider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -19,76 +11,72 @@ import {
 import { createConnector } from "@/lib/connectors/factory";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import {
+	artStyleReferences,
 	deriveArtStyle,
-	uploadedAvatarUrls,
 } from "@/lib/project/deriveArtStyle";
-import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useProject } from "@/lib/project/useProject";
-import { Textarea } from "@/components/ui/textarea";
-import { FieldLabel } from "../character/fields";
+import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
+import { useAsset, useAssets } from "@/lib/canvas/useAssets";
+import { setAsset } from "@/lib/canvas/assetOps";
+import { toastError } from "@/lib/toastError";
+import { AssetDialog } from "../character/AssetDialog";
+import { FieldLabel, TextAreaField } from "../character/fields";
 import { ReferenceImages } from "../ReferenceImages";
 import { ArtStylePresets } from "./ArtStylePresets";
 
-const DESCRIPTION_ID = "art-style-description";
-
 export function ArtStyleModal({ onClose }: { onClose: () => void }) {
-	const { connectorConfig } = useConfig();
 	const queue = useGenerationQueue();
-	const store = useProjectStoreHandle();
-	const style = useProject((s) => s.metadata.style);
-	const updateMetadata = useProject((s) => s.updateMetadata);
-	const setStyle = (next: string) => updateMetadata({ style: next });
+	const editor = useSlateStatic();
+	const assets = useAssets();
+	const element = useAsset("asset_style");
+	const style = element ? getElementBodyText(element) : "";
+	const setStyle = (text: string) =>
+		setAsset(editor, "asset_style", undefined, { text });
 
 	const [deriving, setDeriving] = useState(false);
 	const model = useDefaultModels().llm;
 
-	const uploadedCount = useProject((s) => s.referenceImages.length);
-	const avatarCount = useQueueSelector(
-		(q) => uploadedAvatarUrls(store.getState(), q).length,
+	const hasReferences = useQueueSelector(
+		(q) => artStyleReferences(assets, q).length > 0,
 	);
-	const hasReferences = uploadedCount + avatarCount > 0;
 
 	const deriveFromReferences = async () => {
 		setDeriving(true);
 		try {
-			const derived = await deriveArtStyle(
-				createConnector("llm", model, connectorConfig.llm),
-				store.getState(),
-				queue,
+			setStyle(
+				await deriveArtStyle(
+					createConnector("llm", model),
+					artStyleReferences(assets, queue),
+				),
 			);
-			if (derived) setStyle(derived);
+		} catch (error) {
+			toastError(error, "Deriving the art style failed");
 		} finally {
 			setDeriving(false);
 		}
 	};
 
 	return (
-		<DialogContent className="max-w-3xl">
-			<DialogHeader className="shrink-0">
-				<DialogTitle>Art style</DialogTitle>
-				<DialogDescription>
-					This text is added to every image, including character avatars. For a
-					closer match, also upload reference images in the style you want.
-				</DialogDescription>
-			</DialogHeader>
+		<AssetDialog
+			title="Art style"
+			description="This text is added to every image, including character avatars. For a closer match, also upload reference images in the style you want."
+			className="max-w-3xl"
+			onClose={onClose}
+		>
+			<section aria-label="Reference images" className="flex flex-col gap-2">
+				<FieldLabel>Reference images</FieldLabel>
+				<div className="flex flex-wrap gap-2">
+					<ReferenceImages />
+				</div>
+			</section>
 
-			<DialogBody>
-				<section aria-label="Reference images" className="flex flex-col gap-2">
-					<FieldLabel>Reference images</FieldLabel>
-					<div className="flex flex-wrap gap-2">
-						<ReferenceImages />
-					</div>
-				</section>
-
-				<div className="flex flex-col gap-2">
-					<label htmlFor={DESCRIPTION_ID}>
-						<FieldLabel>Art Style Description</FieldLabel>
-					</label>
+			<TextAreaField
+				label="Art Style Description"
+				autoFocus
+				aside={
 					<Button
 						type="button"
 						variant="outline"
 						size="sm"
-						className="self-start"
 						disabled={!hasReferences || deriving}
 						onClick={deriveFromReferences}
 						tooltip={
@@ -100,25 +88,14 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 						{deriving && <Spinner className="text-current" />}
 						Use references
 					</Button>
-					<Textarea
-						size="sm"
-						id={DESCRIPTION_ID}
-						rows={5}
-						value={style}
-						onChange={(e) => setStyle(e.target.value)}
-						placeholder="Describe the look of every image, or paste a full image prompt"
-						className="resize-none"
-					/>
-				</div>
+				}
+				rows={5}
+				value={style}
+				onChange={setStyle}
+				placeholder="Describe the look of every image, or paste a full image prompt"
+			/>
 
-				<ArtStylePresets value={style} onSelect={setStyle} />
-			</DialogBody>
-
-			<DialogFooter className="shrink-0">
-				<Button type="button" size="sm" onClick={onClose}>
-					Done
-				</Button>
-			</DialogFooter>
-		</DialogContent>
+			<ArtStylePresets value={style} onSelect={setStyle} />
+		</AssetDialog>
 	);
 }

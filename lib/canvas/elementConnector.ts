@@ -1,63 +1,79 @@
 import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
-import type {
+import {
 	AttributeSchema,
-	ModelPick,
+	type ModelPick,
 } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import type { ProjectData } from "@/lib/project/store";
+import { VOICE_ATTRIBUTES } from "@/lib/connectors/voice/attributes";
 import type {
 	AssetConnectorType,
 	ConnectorConfig,
 	ModelRef,
 } from "@/lib/connectors/types";
 import { flatAttributes } from "./elementAttributes";
+import { isAssetType } from "./guards";
 import {
-	ELEMENT_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
+	connectorOf,
+	CONTENT_TYPES,
+	type AssetType,
+	type ElementType,
+	type GeneratedElement,
+	type CanvasElement,
 } from "./types";
 
-export type ElementConnector = {
+type ElementConnector = {
 	type: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
 };
 
+/** The connector, model and plugins an element generates with. */
 export function resolveElementConnector(
-	element: CanvasContentElement,
+	element: GeneratedElement,
 	registry: ConnectorRegistry,
-	state: ProjectData,
+	canvas: CanvasElement[],
 ): ElementConnector {
-	const type = ELEMENT_TYPES[element.type].connector;
-	const config = registry[type];
+	const type = connectorOf(element.type);
+	const config = registry[element.type];
 	const supplier = config.plugins?.find((plugin) => plugin.model);
 	return {
 		type,
 		model: resolveModel(
 			type,
-			supplier?.model?.(element, state),
+			supplier?.model?.(element, canvas),
 			element.generationAttributes,
 		),
 		config,
 	};
 }
 
+const NO_ATTRIBUTES = AttributeSchema.from([]);
+
+/** An asset's attributes are its own; content takes its connector's. */
+const ASSET_ATTRIBUTES: Record<AssetType, AttributeSchema> = {
+	asset_avatar: NO_ATTRIBUTES,
+	asset_voice: VOICE_ATTRIBUTES,
+	asset_style: NO_ATTRIBUTES,
+	asset_references: NO_ATTRIBUTES,
+};
+
 export function attributeSchemaFor(
-	type: CanvasElementType,
+	type: ElementType,
 	attributes: Record<string, string>,
 ): AttributeSchema {
-	const connector = ELEMENT_TYPES[type].connector;
+	if (isAssetType(type)) return ASSET_ATTRIBUTES[type];
+	const { connector } = CONTENT_TYPES[type];
 	return resolveAttributeSchema(connector, resolveModel(connector, attributes));
 }
 
-export const elementSchema = (element: CanvasContentElement): AttributeSchema =>
+export const elementSchema = (element: CanvasElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
 
 /** The element's own model, picked from its connector type's. */
-export const elementModelPick = (element: CanvasContentElement): ModelPick => ({
+export const elementModelPick = (element: GeneratedElement): ModelPick => ({
 	kind: "model",
-	type: ELEMENT_TYPES[element.type].connector,
+	type: connectorOf(element.type),
 	...ELEMENT_MODEL,
 });

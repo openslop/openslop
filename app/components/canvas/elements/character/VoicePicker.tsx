@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 import {
 	ConfigureModelsItem,
 	ModelSelect,
@@ -14,16 +16,13 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { useTTSConnector } from "@/lib/connectors/tts/useTTSConnector";
+import { createConnector } from "@/lib/connectors/factory";
+import { stringifyError } from "@/lib/errors";
 import { useVoiceSearch } from "@/lib/connectors/tts/useVoiceSearch";
 import { cn } from "@/lib/utils";
 import { FieldLabel } from "./fields";
 
-function PreviewPlayButton({
-	load,
-}: {
-	load: () => Promise<string | undefined>;
-}) {
+function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [playing, setPlaying] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -37,9 +36,14 @@ function PreviewPlayButton({
 		}
 		if (!audio.src) {
 			setLoading(true);
-			const src = await load().finally(() => setLoading(false));
-			if (!src) return;
-			audio.src = src;
+			try {
+				audio.src = await load();
+			} catch (error) {
+				toast.error(`Couldn't load the preview: ${stringifyError(error)}`);
+				return;
+			} finally {
+				setLoading(false);
+			}
 		}
 		void audio.play().catch(() => setPlaying(false));
 	};
@@ -58,7 +62,13 @@ function PreviewPlayButton({
 				onClick={toggle}
 				unavailable={loading}
 			>
-				{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+				{loading ? (
+					<Spinner />
+				) : playing ? (
+					<Pause className="h-4 w-4" />
+				) : (
+					<Play className="h-4 w-4" />
+				)}
 			</TooltipIconButton>
 		</>
 	);
@@ -77,10 +87,12 @@ export function VoiceRow({
 	voice: VoiceInfo;
 	selected: boolean;
 	onSelect: () => void;
-	loadPreview: () => Promise<string | undefined>;
+	loadPreview: () => Promise<string>;
 }) {
 	return (
 		<div
+			role="group"
+			aria-label={voice.name}
 			className={cn(
 				"flex min-w-0 items-center gap-2 rounded-md pr-2 transition-colors",
 				selected ? "bg-muted" : "hover:bg-voice-hover",
@@ -127,7 +139,11 @@ export function VoicePicker({
 	onSelect: (voice: VoiceInfo) => void;
 	onModelChange: (model: ModelRef) => void;
 }) {
-	const connector = useTTSConnector(model);
+	const { provider, model: modelName } = model;
+	const connector = useMemo(
+		() => createConnector("tts", { provider, model: modelName }),
+		[provider, modelName],
+	);
 	const search = useVoiceSearch(filters, connector);
 
 	return (
@@ -135,7 +151,7 @@ export function VoicePicker({
 			<div className="flex items-center justify-between gap-2">
 				<FieldLabel>Voices</FieldLabel>
 				<ModelSelect
-					type="tts"
+					type="voice"
 					value={model}
 					onChange={onModelChange}
 					footer={<ConfigureModelsItem />}
@@ -144,7 +160,9 @@ export function VoicePicker({
 				</ModelSelect>
 			</div>
 			{search.status === "failed" && (
-				<span className="text-label-xs text-destructive">{search.message}</span>
+				<span role="alert" className="text-label-xs text-destructive">
+					{search.message}
+				</span>
 			)}
 			<div className="flex max-h-64 min-w-0 flex-col gap-0.5 overflow-y-auto">
 				{search.status === "loading" &&
@@ -164,7 +182,7 @@ export function VoicePicker({
 							selected={voice.id === selectedVoiceId}
 							onSelect={() => onSelect(voice)}
 							loadPreview={async () =>
-								(await connector.voicePreview(voice.id))?.url
+								(await connector.voicePreview(voice.id)).url
 							}
 						/>
 					))}

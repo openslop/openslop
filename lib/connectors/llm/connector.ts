@@ -32,12 +32,11 @@ export class HttpLLMConnector
 		params: LLMGenerateParams,
 		signal?: AbortSignal,
 	): AsyncGenerator<LLMStreamChunk> {
-		const ctx = this.contextFor();
 		try {
-			const prepared = await this.prepareParams(params, ctx);
+			const prepared = await this.prepareParams(params, {});
 			yield* this.gateway.stream(prepared, signal);
 		} catch (error) {
-			await runOnError(this.plugins, stringifyError(error), ctx);
+			await runOnError(this.plugins, stringifyError(error), {});
 			throw error;
 		}
 	}

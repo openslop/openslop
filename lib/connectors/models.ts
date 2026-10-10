@@ -26,6 +26,7 @@ export const MODELS: {
 } = {
 	llm: LLM_MODELS,
 	tts: TTS_MODELS,
+	voice: TTS_MODELS,
 	image: IMAGE_MODELS,
 	video: VIDEO_MODELS,
 	sfx: SFX_MODELS,
@@ -35,6 +36,7 @@ export const MODELS: {
 export const DEFAULT_MODELS: Record<ConnectorType, ModelRef> = {
 	llm: DEFAULT_LLM_MODEL,
 	tts: DEFAULT_TTS_MODEL,
+	voice: DEFAULT_TTS_MODEL,
 	image: DEFAULT_IMAGE_MODEL,
 	video: DEFAULT_VIDEO_MODEL,
 	sfx: DEFAULT_SFX_MODEL,

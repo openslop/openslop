@@ -1,9 +1,9 @@
 import pickBy from "lodash/pickBy";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/referenceImages";
 import { CHARACTERS_ATTR } from "./characterNames";
-import type { CanvasContentElement, CanvasElementType } from "./types";
+import type { ContentElement, ContentType } from "./types";
 
-type ElementTypeGroup = readonly CanvasElementType[];
+type ElementTypeGroup = readonly ContentType[];
 
 /** Attributes that survive a retype, by the types they mean the same thing on. */
 const PRESERVED_ATTRIBUTE_TYPES: Partial<Record<string, ElementTypeGroup>> = {
@@ -12,8 +12,8 @@ const PRESERVED_ATTRIBUTE_TYPES: Partial<Record<string, ElementTypeGroup>> = {
 };
 
 export function preservedAttributes(
-	source: CanvasContentElement,
-	targetType: CanvasElementType,
+	source: ContentElement,
+	targetType: ContentType,
 ): Record<string, string> {
 	return pickBy(source.generationAttributes ?? {}, (_, attribute) =>
 		PRESERVED_ATTRIBUTE_TYPES[attribute]?.includes(targetType),

@@ -233,7 +233,7 @@ lib/
   canvas/        Modèle de document Slate : types d'éléments, gardes, parse/sérialisation OSML
   script/        Contexte et affinage du script
   project/       Store Zustand par projet, sauvegarde automatique, persistance
-  video/         Mise en page des scènes et client de rendu
+  render/        Mise en page des scènes et client de rendu
   templates/     Modèles de prompt proposés dans le composeur
   upload/        Envoi d'images côté client
   supabase/      Clients Supabase navigateur/serveur

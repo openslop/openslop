@@ -4,7 +4,7 @@ import { useMemo, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
 import { useQueueSelector } from "@/lib/generation/GenerationQueueProvider";
-import type { SceneElement } from "@/lib/canvas/types";
+import type { Scene } from "@/lib/canvas/types";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
 import {
 	buildSceneSegments,
@@ -20,7 +20,7 @@ type RenderLayoutValue = {
 	layout: RenderLayout;
 	ready: boolean;
 	segments: SceneSegment[];
-	scenes: SceneElement[];
+	scenes: Scene[];
 	sequenceByElementId: SequenceIndex;
 };
 
@@ -47,7 +47,7 @@ export function RenderLayoutProvider({ children }: { children: ReactNode }) {
 }
 
 /** The rendered sequence a scene's foreground element occupies, if it has one. */
-export function useSceneSequence(scene: SceneElement): Sequence | undefined {
+export function useSceneSequence(scene: Scene): Sequence | undefined {
 	const { sequenceByElementId } = useLayout();
 	return findSceneSequence(scene, sequenceByElementId);
 }

@@ -3,7 +3,7 @@ import { toFrames } from "../frames";
 import { isBlankScene } from "../blankScene";
 import { buildRenderLayout, type BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
-import type { CanvasElementType } from "@/lib/canvas/types";
+import type { ContentType } from "@/lib/canvas/types";
 
 // The rendered transition overlap: TRANSITION_DURATION_SEC (0.4s) snapped to the
 // 24fps frame grid, which is what <TransitionSeries> actually lays down.
@@ -12,7 +12,7 @@ const OVERLAP = 10 / 24;
 // effect slides back so it overlaps the tail of the one before it.
 const LOOP_OVERLAP = 4 / 24;
 
-function seqs(layout: RenderLayout, type: CanvasElementType): Sequence[] {
+function seqs(layout: RenderLayout, type: ContentType): Sequence[] {
 	const s = layout.sequences[type];
 	expect(s).toBeDefined();
 	return s as Sequence[];

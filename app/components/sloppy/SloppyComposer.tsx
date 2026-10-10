@@ -16,12 +16,12 @@ import { nextSuggestion, SUGGESTIONS } from "./suggestions";
 
 function ModelPicker() {
 	const model = useDefaultModels().llm;
-	const updateMetadata = useProject((state) => state.updateMetadata);
+	const updateModels = useProject((state) => state.updateModels);
 	return (
 		<ModelSelect
 			type="llm"
 			value={model}
-			onChange={(llm) => updateMetadata({ models: { llm } })}
+			onChange={(llm) => updateModels({ llm })}
 			side="top"
 		>
 			<ModelSelectTrigger model={model} label="Model" />

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { useSlateStatic } from "slate-react";
 import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
@@ -66,9 +65,8 @@ function useTranscript(projectId: string): SloppyMessage[] | null {
  * answers with text instead of another call.
  */
 export function SloppyProvider({ children }: { children: ReactNode }) {
-	const editor = useSlateStatic();
 	const { projectId } = useConfig();
-	const runTool = useAgentTools(editor);
+	const runTool = useAgentTools();
 	const restored = useTranscript(projectId);
 	const model = useDefaultModels().llm;
 	const turnModel = useRef<ModelRef>(undefined);

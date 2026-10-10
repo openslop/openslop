@@ -9,7 +9,7 @@ import { UserProvider } from "@/lib/user/UserProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createProjectStore } from "@/lib/project/store";
 import { ProjectStoreProvider } from "@/lib/project/ProjectStoreProvider";
-import type { ProjectContent } from "@/lib/project/projectDocument";
+import type { SavedProject } from "@/lib/project/savedProject";
 import { GenerationQueueProvider } from "@/lib/generation/GenerationQueueProvider";
 import { ElementHistoryProvider } from "@/lib/generation/ElementHistoryProvider";
 import { elementHistoryStorage } from "@/lib/project/elementHistory";
@@ -22,7 +22,7 @@ export default function ProjectEditor({
 	providerKeys,
 }: {
 	projectId: string;
-	initial: ProjectContent;
+	initial: SavedProject;
 	user: User;
 	providerKeys: ProviderKeyRecord[];
 }): ReactNode {

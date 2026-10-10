@@ -3,8 +3,8 @@ import { createEditor, Editor, Element, Transforms } from "slate";
 import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withNodeId } from "../plugins/withNodeId";
-import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import type { ContentElement, Scene } from "@/lib/canvas/types";
+import { isScene } from "@/lib/canvas/scenes";
 import { content, scene, shape } from "./fixtures";
 
 function makeEditor() {
@@ -29,14 +29,14 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [content("image", "i1")]);
 			expect(shape(editor)).toEqual([["image"]]);
-			expect(isSceneElement(editor.children[0])).toBe(true);
+			expect(isScene(editor.children[0])).toBe(true);
 		});
 
 		it("wraps a single non-foreground at root in a scene (leading orphan)", () => {
 			const editor = makeEditor();
 			setChildren(editor, [content("narration", "n1")]);
 			expect(shape(editor)).toEqual([["narration"]]);
-			expect(isSceneElement(editor.children[0])).toBe(true);
+			expect(isScene(editor.children[0])).toBe(true);
 		});
 
 		it("absorbs a loose trailing non-foreground into the previous scene", () => {
@@ -218,7 +218,7 @@ describe("withScenes", () => {
 
 		it("streaming inserts collect overlays into the correct scenes", () => {
 			const editor = makeEditor();
-			const sequence: CanvasContentElement[] = [
+			const sequence: ContentElement[] = [
 				content("narration", "n1"),
 				content("narration", "n2"),
 				content("image", "i1"),
@@ -242,7 +242,7 @@ describe("withScenes", () => {
 			setChildren(editor, [
 				scene([content("image", "i1"), content("video", "v1")], "s1"),
 			]);
-			const ids = editor.children.map((n) => (n as SceneElement).id);
+			const ids = editor.children.map((n) => (n as Scene).id);
 			expect(ids).toHaveLength(2);
 			expect(ids[0]).toBeTruthy();
 			expect(ids[1]).toBeTruthy();
@@ -255,9 +255,9 @@ describe("withScenes", () => {
 				scene([content("narration", "n1"), content("image", "i1")], "s1"),
 				scene([content("character", "ch1"), content("video", "v1")], "s2"),
 			]);
-			const before = editor.children.map((n) => (n as SceneElement).id);
+			const before = editor.children.map((n) => (n as Scene).id);
 			Editor.normalize(editor, { force: true });
-			const after = editor.children.map((n) => (n as SceneElement).id);
+			const after = editor.children.map((n) => (n as Scene).id);
 			expect(after).toEqual(before);
 		});
 	});

@@ -1,46 +1,35 @@
-import { Transforms, type Editor } from "slate";
-import { findNodeById, updateNodeText } from "@/lib/canvas/editorOps";
-import { isParsedContentElement } from "@/lib/canvas/guards";
-import { collectMetadata } from "@/lib/canvas/osmlMetadata";
+import { Editor, Transforms } from "slate";
+import { findElementById, updateElementText } from "@/lib/canvas/editorOps";
+import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { OSMLStreamParser } from "@/lib/canvas/osmlStreamParser";
-import type { CanvasContentElement, ParsedElement } from "@/lib/canvas/types";
-import type { ProjectStore } from "@/lib/project/store";
+import { isScene, isScriptEmpty } from "@/lib/canvas/scenes";
+import type { ContentElement } from "@/lib/canvas/types";
 
-export type ScriptCanvas = {
-	editor: Editor;
-	store: ProjectStore;
-};
+const clearScript = (editor: Editor) =>
+	Transforms.removeNodes(editor, { at: [], match: isScene });
 
-function writeElement(
-	editor: Editor,
-	node: ParsedElement & CanvasContentElement,
-): void {
-	const text = getElementBodyText(node);
-	if (!text) return;
-
-	const entry = findNodeById(editor, node.id);
-	if (entry) {
-		updateNodeText(editor, entry[1], text);
-		return;
-	}
-	// The parser keeps appending to its own node, so the document takes a copy.
-	Transforms.insertNodes(editor, structuredClone(node), {
-		at: [editor.children.length],
-	});
-}
-
-/**
- * Writes OSML onto the canvas as it arrives. An element lands at the end of
- * the document once it has text and grows with it; a `metadata_*` tag patches
- * the project instead.
- */
-export function createScriptWriter({
-	editor,
-	store,
-}: ScriptCanvas): (chunk: string) => void {
+/** Clears the canvas's script, then writes OSML onto it as it arrives, each element growing as its text streams in. */
+export function createScriptWriter(editor: Editor): (chunk: string) => void {
+	clearScript(editor);
 	const parser = new OSMLStreamParser();
 	let seen = 0;
+
+	const write = (node: ContentElement) => {
+		const text = getElementBodyText(node);
+		if (!text) return;
+		if (findElementById(editor, node.id))
+			return updateElementText(editor, node.id, text);
+
+		// One normalization, so withLayout seeds no narration back over the empty script it replaces.
+		Editor.withoutNormalizing(editor, () => {
+			if (isScriptEmpty(editor.children)) clearScript(editor);
+			// The parser keeps appending to its own node, so the document takes a copy.
+			Transforms.insertNodes(editor, structuredClone(node), {
+				at: [editor.children.length],
+			});
+		});
+	};
 
 	return (chunk) => {
 		if (!parser.appendChunk(chunk, editor.defaultModels())) return;
@@ -49,8 +38,6 @@ export function createScriptWriter({
 		const changed = nodes.slice(Math.max(0, seen - 1));
 		seen = nodes.length;
 
-		store.getState().updateMetadata(collectMetadata(changed));
-		for (const node of changed.filter(isParsedContentElement))
-			writeElement(editor, node);
+		changed.filter(isContentElement).forEach(write);
 	};
 }

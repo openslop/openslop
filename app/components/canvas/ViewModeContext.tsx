@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import { createStoreContext } from "@/lib/store/createStoreContext";
 
 type ViewMode = {
@@ -51,7 +51,7 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
 	const editor = useSlateStatic();
 	const [store] = useState(() =>
 		createViewModeStore(() =>
-			editor.children.filter(isSceneElement).map((scene) => scene.id),
+			editor.children.filter(isScene).map((scene) => scene.id),
 		),
 	);
 	return <ViewModeContext value={store}>{children}</ViewModeContext>;

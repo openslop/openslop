@@ -2,29 +2,22 @@
 
 import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
-import { getContentElements } from "@/lib/canvas/scenes";
+import { getCanvasElements } from "@/lib/canvas/assets";
 import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useProject } from "@/lib/project/useProject";
-import type { BuildContext } from "./graph";
+import { buildSettings, type BuildContext } from "./graph";
 
-/**
- * The canvas is read when the context is made, not when the hook renders, so a
- * document edit never re-renders the caller. Project state is subscribed to: a
- * build reads it, and nothing else would rebuild when it changes.
- */
+/** Reads the canvas and the settings per call, so an edit never re-renders the caller. */
 export function useBuildContext(): () => BuildContext {
 	const { connectorConfig: registry } = useConfig();
-	const state = useProject((store) => store);
 	const store = useProjectStoreHandle();
 	const editor = useSlateStatic();
 	return useCallback(
 		() => ({
-			store,
-			state,
-			canvas: getContentElements(editor.children),
+			state: buildSettings(store.getState()),
+			canvas: getCanvasElements(editor.children),
 			registry,
 		}),
-		[registry, store, state, editor],
+		[registry, store, editor],
 	);
 }

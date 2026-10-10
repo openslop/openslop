@@ -1,17 +1,17 @@
 import { Transforms, type Editor, type Path } from "slate";
-import { createCanvasNode } from "./createCanvasNode";
+import { createCanvasElement } from "./createCanvasElement";
 import { makeNodeId } from "./nodeUtils";
-import { SCENE_TYPE, type SceneElement } from "./types";
+import { SCENE_TYPE, type Scene } from "./types";
 
 /** The foreground a new scene starts with; `withScenes` drops one without it. */
 const NEW_SCENE_ELEMENT = "image";
 
 export function insertScene(editor: Editor, at: Path): string {
-	const scene: SceneElement = {
+	const scene: Scene = {
 		id: makeNodeId(),
 		type: SCENE_TYPE,
 		children: [
-			createCanvasNode(NEW_SCENE_ELEMENT, {
+			createCanvasElement(NEW_SCENE_ELEMENT, {
 				defaultModels: editor.defaultModels(),
 			}),
 		],

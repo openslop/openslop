@@ -10,31 +10,25 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
+import { NARRATOR } from "@/lib/canvas/assets";
+import { useCharacterNames } from "@/lib/canvas/useAssets";
 import { normalizeCharacterName } from "@/lib/project/characterName";
-import { useProject } from "@/lib/project/useProject";
 
 export function NewCharacterDialog({
 	onCreated,
 }: {
 	onCreated: (name: string) => void;
 }) {
-	const characters = useProject((s) => s.metadata.characters);
-	const setCharacter = useProject((s) => s.setCharacter);
-	const defaultModels = useResolveDefaultModels();
+	const names = useCharacterNames();
 	const [name, setName] = useState("");
 
 	const normalized = normalizeCharacterName(name);
-	const collision = !!normalized && !!characters[normalized];
+	const collision = names.includes(normalized);
 	const canSubmit = !!normalized && !collision;
 
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();
 		if (!canSubmit) return;
-		setCharacter(normalized, {
-			appearance: "",
-			avatarModel: defaultModels().image,
-		});
 		onCreated(normalized);
 	};
 
@@ -44,7 +38,8 @@ export function NewCharacterDialog({
 				<DialogHeader>
 					<DialogTitle>New character</DialogTitle>
 					<DialogDescription>
-						Pick a name. You can fill in the details next.
+						Pick a name, or {NARRATOR} for the voice that reads the narration.
+						You can fill in the details next.
 					</DialogDescription>
 				</DialogHeader>
 

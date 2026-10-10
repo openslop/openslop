@@ -1,21 +1,20 @@
-import { createProjectStore } from "@/lib/project/store";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Descendant, Editor } from "slate";
-import type { ConnectorRegistry } from "@/lib/connectors/registry";
+import {
+	DEFAULT_CONNECTOR_REGISTRY,
+	type ConnectorRegistry,
+} from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
-import { forElement, type GenerationNode } from "@/lib/generation/graph";
+import { buildCtx } from "@/lib/generation/__tests__/_context";
+import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generationGraph";
-import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import type { ContentElement, Scene } from "@/lib/canvas/types";
+import { element } from "@/lib/canvas/__tests__/_assets";
 
-const registry: ConnectorRegistry = {
-	llm: {},
-	tts: {},
-	image: {},
-	video: {},
-	sfx: {},
-	music: {},
-};
+// No plugins, so no element depends on another and each is judged alone.
+const registry = Object.fromEntries(
+	Object.keys(DEFAULT_CONNECTOR_REGISTRY).map((type) => [type, {}]),
+) as ConnectorRegistry;
 
 let editorUnderTest: Editor;
 
@@ -39,14 +38,8 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 
 // The hook under test is about which elements get queued, so bind a real
 // context rather than standing up the config and project providers.
-const store = createProjectStore();
 
-const buildContext = () => ({
-	store,
-	state: store.getState(),
-	canvas: [],
-	registry,
-});
+const buildContext = () => buildCtx([], { registry });
 
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => buildContext,
@@ -55,27 +48,20 @@ vi.mock("@/lib/generation/LiveGraphProvider", () => ({
 	useResolveNode: () => new GenerationGraph(buildContext()).resolve,
 }));
 
-function makeElement(
+const makeElement = (
 	id: string,
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	attrs?: Record<string, string>,
-): CanvasContentElement {
-	return {
-		id,
-		type,
-		...splitAttributes({ provider: "openslop", ...attrs }),
-		children: [{ id: `${id}-t`, type, text }],
-	};
-}
+) => element(id, type, text, { provider: "openslop", ...attrs });
 
-function wrapInScene(elements: CanvasContentElement[]): SceneElement {
+function wrapInScene(elements: ContentElement[]): Scene {
 	return { id: "scene-1", type: "scene", children: elements };
 }
 
 /** Commit a result for `element` as if it had just been generated. */
-function commitCurrent(element: CanvasContentElement) {
-	queue.commitResult(buildNode(forElement(element), buildContext()), {
+function commitCurrent(element: ContentElement) {
+	queue.commitResult(buildNode(element, buildContext()), {
 		imageUrl: "https://example.com/asset.png",
 		durationSec: 0,
 	});
@@ -84,7 +70,7 @@ function commitCurrent(element: CanvasContentElement) {
 const { useGenerateAll } = await import("../hooks/useGenerateAll");
 const { useGenerateScope } = await import("../hooks/useGenerateScope");
 
-function useScopeForAll(elements: CanvasContentElement[]) {
+function useScopeForAll(elements: ContentElement[]) {
 	const children: Descendant[] = [wrapInScene(elements)];
 	// Stands in for Slate's provider by seeding the document the selector reads.
 	// eslint-disable-next-line react-hooks/globals
@@ -92,7 +78,7 @@ function useScopeForAll(elements: CanvasContentElement[]) {
 	return useGenerateAll();
 }
 
-function useGenerateAllFor(elements: CanvasContentElement[]) {
+function useGenerateAllFor(elements: ContentElement[]) {
 	useScopeForAll(elements).run();
 	return enqueuedIds();
 }
@@ -241,7 +227,7 @@ describe("useGenerateScope", () => {
 
 describe("scope description", () => {
 	const useDescription = (
-		elements: CanvasContentElement[],
+		elements: ContentElement[],
 		subject: Parameters<typeof useGenerateScope>[1] = "project",
 	) => useGenerateScope(() => elements, subject).description;
 

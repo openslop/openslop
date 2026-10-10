@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
-import type { CanvasElementType } from "../types";
+import type { ContentType } from "../types";
 import { countSpokenWords } from "../spokenWords";
 
 let nextId = 0;
-const element = (type: CanvasElementType, text: string) => {
+const element = (type: ContentType, text: string) => {
 	const id = `e${nextId++}`;
 	return { id, type, children: [{ id: `${id}-t`, type, text }] };
 };

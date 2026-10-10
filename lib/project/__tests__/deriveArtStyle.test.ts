@@ -1,35 +1,29 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { asset, references } from "@/lib/canvas/__tests__/_assets";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 } from "@/lib/connectors/types";
-import { avatarQueue } from "./_avatar-queue";
-import {
-	artStyleReferences,
-	deriveArtStyle,
-	uploadedAvatarUrls,
-} from "../deriveArtStyle";
-import { createProjectStore, type ProjectStore } from "../store";
+import { resultQueue } from "./_canvas";
+import { artStyleReferences, deriveArtStyle } from "../deriveArtStyle";
 
-let store: ProjectStore;
-const project = () => store.getState();
-
-beforeEach(() => {
-	store = createProjectStore();
-});
+const avatar = (name: string) => asset("asset_avatar", { name });
 
 describe("artStyleReferences", () => {
 	it("combines reference images with uploaded avatars, excluding generated ones", () => {
-		project().setReferenceImages(["https://example.com/reference.jpg"]);
-		project().setCharacter("Mira", { appearance: "blue hair" });
-		project().setCharacter("Generated", { appearance: "green hair" });
-
+		const mira = avatar("Mira");
+		const generated = avatar("Generated");
 		expect(
 			artStyleReferences(
-				project(),
-				avatarQueue({
-					Mira: { imageUrl: "https://example.com/uploaded.jpg", pinned: true },
-					Generated: { imageUrl: "https://example.com/generated.jpg" },
+				[references("https://example.com/reference.jpg"), mira, generated],
+				resultQueue({
+					[mira.id]: {
+						imageUrl: "https://example.com/uploaded.jpg",
+						pinned: true,
+					},
+					[generated.id]: {
+						imageUrl: "https://example.com/generated.jpg",
+					},
 				}),
 			),
 		).toEqual([
@@ -39,23 +33,7 @@ describe("artStyleReferences", () => {
 	});
 
 	it("is empty when nothing has been uploaded", () => {
-		expect(artStyleReferences(project(), avatarQueue({}))).toEqual([]);
-	});
-});
-
-describe("uploadedAvatarUrls", () => {
-	it("leaves out reference images, which the project store owns", () => {
-		project().setReferenceImages(["https://example.com/reference.jpg"]);
-		project().setCharacter("Mira", { appearance: "blue hair" });
-
-		expect(
-			uploadedAvatarUrls(
-				project(),
-				avatarQueue({
-					Mira: { imageUrl: "https://example.com/uploaded.jpg", pinned: true },
-				}),
-			),
-		).toEqual(["https://example.com/uploaded.jpg"]);
+		expect(artStyleReferences([avatar("Mira")], resultQueue({}))).toEqual([]);
 	});
 });
 
@@ -69,24 +47,20 @@ describe("deriveArtStyle", () => {
 		),
 	});
 
-	it("returns nothing and skips the model when there is nothing to read", async () => {
-		const model = llm("unused");
-
-		const style = await deriveArtStyle(model, project(), avatarQueue({}));
-
-		expect(style).toBe("");
-		expect(model.generate).not.toHaveBeenCalled();
-	});
-
 	it("describes the references and trims the result", async () => {
-		project().setReferenceImages(["https://example.com/a.jpg"]);
 		const model = llm("  Soft watercolor, pastel palette.  ");
 
-		const style = await deriveArtStyle(model, project(), avatarQueue({}));
+		const style = await deriveArtStyle(model, ["https://example.com/a.jpg"]);
 
 		expect(style).toBe("Soft watercolor, pastel palette.");
 		expect(model.generate.mock.calls[0][0]).toMatchObject({
 			referenceImages: ["https://example.com/a.jpg"],
 		});
+	});
+
+	it("throws when the model describes nothing", async () => {
+		await expect(
+			deriveArtStyle(llm("  "), ["https://example.com/a.jpg"]),
+		).rejects.toThrow("The model described no art style");
 	});
 });

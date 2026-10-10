@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { toast } from "sonner";
-import { runRender, type RenderUpdate } from "@/lib/render/render-client";
+import { runRender, type RenderUpdate } from "@/lib/render/renderClient";
 import type { RenderLayout } from "@/lib/render/types";
 import { useExport } from "../useExport";
 
@@ -13,7 +13,7 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 vi.mock("sonner", () => ({
 	toast: { custom: vi.fn(), error: vi.fn(), dismiss: vi.fn() },
 }));
-vi.mock("@/lib/render/render-client", () => ({ runRender: vi.fn() }));
+vi.mock("@/lib/render/renderClient", () => ({ runRender: vi.fn() }));
 vi.mock("../ExportToast", () => ({
 	ExportProgressToast: (props: { progress: number; onView: () => void }) => (
 		<button data-toast={`progress ${props.progress}`} onClick={props.onView} />

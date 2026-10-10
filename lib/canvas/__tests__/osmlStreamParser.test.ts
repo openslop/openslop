@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { OSMLStreamParser, parseOSML } from "../osmlStreamParser";
-import { getElementText } from "../osmlSerializer";
-import type { ParsedElement } from "@/lib/canvas/types";
+import { getElementBodyText, getElementText } from "../osmlSerializer";
+import { isAssetElement } from "../guards";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/canvas/elementAttributes";
@@ -10,7 +10,7 @@ describe("OSMLStreamParser", () => {
 	it("parses a single complete tag", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk("<image>a sunset</image>");
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("image");
@@ -24,7 +24,7 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk('ice">Hello');
 		s.appendChunk(" world</character>");
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("character");
 		expect(flatAttributes(nodes[0]).name).toBe("Alice");
@@ -37,7 +37,7 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk("<narration>");
 		s.appendChunk("Some long narration text here");
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(nodes).toHaveLength(1);
 		expect(getElementText(nodes[0])).toContain("Some long narration text here");
 	});
@@ -47,84 +47,90 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk("<narration>Rock &a");
 		s.appendChunk("mp; Roll forever</narration>");
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(getElementText(nodes[0])).toContain("Rock & Roll forever");
 	});
 
-	it("preserves raw tag name for unknown tags", () => {
-		const s = new OSMLStreamParser();
-		s.appendChunk("<unknowntag>content</unknowntag>");
+	it("drops an unknown tag along with its text", () => {
+		const nodes = parseOSML(
+			"<narration>Once</narration><unknowntag>stray words</unknowntag>",
+		);
 
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("unknowntag");
+		expect(nodes.map((node) => [node.type, getElementBodyText(node)])).toEqual([
+			["narration", "Once"],
+		]);
 	});
 
-	it("parses metadata_style metadata tag", () => {
-		const s = new OSMLStreamParser();
-		s.appendChunk(
-			"<metadata_style>Warm earth tones with watercolor style</metadata_style>",
+	it("parses asset tags into assets, keeping their ids, attributes and text", () => {
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
+		const [avatar, style] = parseOSML(
+			'<asset_avatar name="Mia" provider="runware" model="Seedream 5 Lite">Brown hair</asset_avatar>' +
+				'<asset_style id="e9">ink wash</asset_style>',
 		);
 
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("metadata_style");
-		expect(nodes[0].children[0].text).toBe(
-			"Warm earth tones with watercolor style",
-		);
+		expect(isAssetElement(avatar) && isAssetElement(style)).toBe(true);
+		expect(avatar).toMatchObject({
+			type: "asset_avatar",
+			generationAttributes: { name: "Mia", ...pinned },
+		});
+		expect(style).toMatchObject({
+			id: "e9",
+			generationAttributes: {},
+		});
+		expect(getElementBodyText(avatar)).toBe("Brown hair");
+		expect(getElementBodyText(style)).toBe("ink wash");
 	});
 
-	it("parses metadata_character metadata tag with name attribute", () => {
-		const s = new OSMLStreamParser();
-		s.appendChunk(
-			'<metadata_character name="Mia">Brown hair, green eyes</metadata_character>',
+	it("parses voice and references tags with their attributes as written", () => {
+		const [voice, references] = parseOSML(
+			'<asset_voice name="Mia" gender="masculine" age="adult" voiceId="v1"></asset_voice>' +
+				'<asset_references images="https://img/a.png,https://img/b.png"></asset_references>',
 		);
 
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("metadata_character");
-		expect(nodes[0].customAttributes?.name).toBe("Mia");
-		expect(nodes[0].children[0].text).toBe("Brown hair, green eyes");
-	});
-
-	it("parses metadata_narration with voice attributes", () => {
-		const s = new OSMLStreamParser();
-		s.appendChunk(
-			'<metadata_narration gender="masculine" age="adult" pitch="low" accent="british" description="wise"></metadata_narration>',
-		);
-
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("metadata_narration");
-		expect(nodes[0].customAttributes).toEqual({
-			gender: "masculine",
-			age: "adult",
-			pitch: "low",
-			accent: "british",
-			description: "wise",
+		expect(voice).toMatchObject({
+			type: "asset_voice",
+			generationAttributes: {
+				name: "Mia",
+				gender: "masculine",
+				age: "adult",
+				voiceId: "v1",
+			},
+		});
+		expect(references).toMatchObject({
+			type: "asset_references",
+			generationAttributes: { images: "https://img/a.png,https://img/b.png" },
 		});
 	});
 
-	it("parses mixed canvas and metadata tags", () => {
-		const s = new OSMLStreamParser();
-		s.appendChunk("<metadata_style>dark moody tones</metadata_style>");
-		s.appendChunk("<narration>Once upon a time</narration>");
-		s.appendChunk(
-			'<metadata_character name="Bob">tall and thin</metadata_character>',
-		);
+	it("puts an asset that names no model on the default one", () => {
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
+		const [avatar] = parseOSML('<asset_avatar name="Mia"></asset_avatar>', {
+			image: pinned,
+		});
 
-		const nodes = s.getNodes() as ParsedElement[];
-		expect(nodes).toHaveLength(3);
-		expect(nodes[0].type).toBe("metadata_style");
-		expect(nodes[1].type).toBe("narration");
-		expect(nodes[2].type).toBe("metadata_character");
+		expect(avatar.generationAttributes).toEqual({ name: "Mia", ...pinned });
+	});
+
+	it("parses assets and canvas tags in the order they were written", () => {
+		const s = new OSMLStreamParser();
+		s.appendChunk("<asset_style>dark moody tones</asset_style>");
+		s.appendChunk("<narration>Once upon a time</narration>");
+		s.appendChunk('<asset_avatar name="Bob">tall and thin</asset_avatar>');
+
+		const nodes = s.getNodes();
+		expect(nodes.map((node) => node.type)).toEqual([
+			"asset_style",
+			"narration",
+			"asset_avatar",
+		]);
+		expect(getElementBodyText(nodes[0])).toBe("dark moody tones");
 	});
 
 	it("parses attributes correctly", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk('<sound effect="thunder" volume="8">boom</sound>');
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(nodes).toHaveLength(1);
 		expect(flatAttributes(nodes[0])).toMatchObject({
 			effect: "thunder",
@@ -144,7 +150,7 @@ describe("OSMLStreamParser", () => {
 		s.appendChunk("<sound>thunder</sound>");
 		s.appendChunk("<music>epic orchestral</music>");
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(flatAttributes(nodes[0]).loops).toBe("1");
 		expect(flatAttributes(nodes[1]).loops).toBe("1");
 	});
@@ -153,7 +159,7 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk('<sound id="abc">thunder</sound>');
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(nodes[0].id).toBe("abc");
 		expect(flatAttributes(nodes[0]).id).toBeUndefined();
 	});
@@ -162,7 +168,7 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk('<video startFrame="img1">a dark forest</video>');
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(nodes).toHaveLength(1);
 		expect(nodes[0].type).toBe("video");
 		expect(flatAttributes(nodes[0]).startFrame).toBe("img1");
@@ -173,7 +179,7 @@ describe("OSMLStreamParser", () => {
 		const s = new OSMLStreamParser();
 		s.appendChunk("<image>a sunset</image>");
 
-		const nodes = s.getNodes() as ParsedElement[];
+		const nodes = s.getNodes();
 		expect(flatAttributes(nodes[0])).toMatchObject(DEFAULT_IMAGE_MODEL);
 	});
 });

@@ -233,7 +233,7 @@ lib/
   canvas/        Slate 문서 모델: 요소 유형, 가드, OSML 파싱/직렬화
   script/        스크립트 컨텍스트와 다듬기
   project/       프로젝트별 Zustand 스토어, 자동 저장, 영속화
-  video/         장면 레이아웃과 렌더 클라이언트
+  render/        장면 레이아웃과 렌더 클라이언트
   templates/     컴포저에서 제공하는 프롬프트 템플릿
   upload/        클라이언트 측 이미지 업로드
   supabase/      브라우저/서버 Supabase 클라이언트

@@ -1,81 +1,95 @@
 "use client";
 
 import { useCallback } from "react";
-import type { Editor } from "slate";
-import { findNodeById } from "@/lib/canvas/editorOps";
+import { useSlateStatic } from "slate-react";
+import compact from "lodash/compact";
+import pick from "lodash/pick";
+import { getAssets, referenceUrls } from "@/lib/canvas/assets";
+import { findElementById } from "@/lib/canvas/editorOps";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
-import { getContentElements } from "@/lib/canvas/scenes";
+import { isScriptEmpty } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spokenWords";
+import {
+	connectorOf,
+	isGenerated,
+	type CanvasElement,
+} from "@/lib/canvas/types";
 import {
 	measureElementLengths,
 	measureRuntime,
 } from "@/lib/render/elementLengths";
-import { useConfig } from "@/lib/config/ConfigProvider";
-import { forElement } from "@/lib/generation/graph";
 import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { buildNode } from "@/lib/generation/generationGraph";
+import { buildNodes } from "@/lib/generation/generationGraph";
 import { staleReason } from "@/lib/generation/staleReason";
-import { characterAvatarUrl } from "@/lib/project/characterAvatar";
+import { useBuildContext } from "@/lib/generation/useBuildContext";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
 import { createConnector } from "@/lib/connectors/factory";
-import { useResolveDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { getPromptText } from "@/lib/generation/inputs";
 import { applyRefineOps } from "@/lib/script/refine/applyOps";
-import { normalizeCharacterName } from "@/lib/project/characterName";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
 import { streamScript } from "@/lib/script/streamScript";
 import { elementState } from "../elementState";
-import { useAgentContext } from "../projectContext";
-import type { AgentToolContext } from "./context";
+import {
+	PROJECT_SETTERS,
+	type AgentToolContext,
+	type ElementImage,
+} from "./context";
 import { executeToolCall } from "./registry";
 
-export function useAgentTools(editor: Editor) {
-	const { connectorConfig } = useConfig();
+export function useAgentTools() {
+	const editor = useSlateStatic();
 	const store = useProjectStoreHandle();
-	const defaultModels = useResolveDefaultModels();
 	const queue = useGenerationQueue();
-	const readContext = useAgentContext(editor);
+	const buildContext = useBuildContext();
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
-			const llm = () =>
-				createConnector("llm", defaultModels().llm, connectorConfig.llm);
+			const llm = () => createConnector("llm", editor.defaultModels().llm);
 			const draftScript = (source: ScriptSource) =>
-				streamScript({ editor, store }, llm(), source, signal);
+				streamScript(
+					editor,
+					store.getState().scriptSettings,
+					llm(),
+					source,
+					signal,
+				);
+			const picturesOf = (element: CanvasElement): ElementImage["pictures"] => {
+				if (element.type === "asset_references")
+					return { kind: "uploaded", urls: referenceUrls([element]) };
+				if (connectorOf(element.type) !== "image") return undefined;
+				const { status, result } = queue.getElementSnapshot(element.id);
+				return {
+					kind: "generated",
+					status,
+					urls: compact([getPrimaryUrl(result, "image")]),
+				};
+			};
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
+				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				measureElementLengths: () => measureElementLengths(editor.children),
 				measureRuntime: () => measureRuntime(editor.children),
-				referenceImages: () => store.getState().referenceImages,
-				avatarUrl: (name) => characterAvatarUrl(queue, name),
 				elementImage: (id) => {
-					const element = findNodeById(editor, id)?.[0];
-					if (!element) return undefined;
-					const { status, result } = queue.getElementSnapshot(element.id);
-					return {
-						type: element.type,
-						prompt: getPromptText(element),
-						picture:
-							element.type === "image"
-								? { status, url: getPrimaryUrl(result, "image") }
-								: undefined,
-					};
+					const element = findElementById(editor, id)?.[0];
+					return (
+						element && {
+							type: element.type,
+							prompt: getPromptText(element),
+							pictures: picturesOf(element),
+						}
+					);
 				},
 				elementStates: () => {
-					const ctx = {
-						store,
-						state: store.getState(),
-						canvas: getContentElements(editor.children),
-						registry: connectorConfig,
-					};
-					return ctx.canvas.map((element) =>
-						elementState(
-							element.id,
-							queue.getElementSnapshot(element.id),
-							staleReason(buildNode(forElement(element), ctx), queue),
-						),
+					const context = buildContext();
+					return buildNodes(context.canvas.filter(isGenerated), context).map(
+						(node) =>
+							elementState(
+								node.id,
+								queue.getElementSnapshot(node.id),
+								staleReason(node, queue),
+							),
 					);
 				},
 				generateText: async (prompt, options) => {
@@ -86,29 +100,16 @@ export function useAgentTools(editor: Editor) {
 						);
 					return text;
 				},
-				readMetadata: () => store.getState().metadata,
-				readContext,
+				readAssets: () => getAssets(editor.children),
+				readProject: () => store.getState(),
 				editScript: (ops) => applyRefineOps(editor, ops),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
-				setMetadata: (patch) => store.getState().updateMetadata(patch),
-				setCharacter: (raw, patch) => {
-					const name = normalizeCharacterName(raw);
-					const { metadata, setCharacter, updateCharacter } = store.getState();
-					const created = !(name in metadata.characters);
-					if (created)
-						setCharacter(name, {
-							appearance: "",
-							avatarModel: defaultModels().image,
-							...patch,
-						});
-					else updateCharacter(name, patch);
-					return { name, created };
-				},
+				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, connectorConfig, store, defaultModels, queue, readContext],
+		[editor, store, queue, buildContext],
 	);
 }

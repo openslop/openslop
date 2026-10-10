@@ -1,9 +1,9 @@
 import { useSlateStatic } from "slate-react";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import {
 	CONTINUITY_ATTR,
 	continuityDef,
@@ -27,7 +27,7 @@ const PILL =
 	"bg-secondary text-secondary-foreground text-label px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
 
 interface AttributeBadgeProps {
-	element: CanvasContentElement;
+	element: ContentElement;
 	attrKey: string;
 	spec: AttributeSpec;
 	hideLabel?: boolean;
@@ -127,7 +127,7 @@ export function AttributeBadge({
 	}
 
 	const handleSelect = (next: string) => {
-		updateElementAttrs(editor, element, { [attrKey]: next });
+		mergeAttrs(editor, element.id, { [attrKey]: next });
 	};
 
 	if (spec.edit.kind === "toggle") {

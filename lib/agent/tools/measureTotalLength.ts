@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { videoLengthBudget } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
@@ -24,7 +24,7 @@ export const measureTotalLength = defineTool({
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const runtime = ctx.measureRuntime();
-		const { length } = ctx.readMetadata().videoSettings;
+		const { length } = ctx.readProject().scriptSettings;
 		const measured = `${seconds(runtime)} of video, about ${minutes(runtime)} minutes, carrying ${words} spoken words.`;
 
 		const budget = videoLengthBudget(length);

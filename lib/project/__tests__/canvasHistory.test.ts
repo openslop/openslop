@@ -6,18 +6,19 @@ import {
 	type CanvasVersion,
 	type CanvasVersionStorage,
 } from "../canvasHistory";
-import type { ProjectContent, ProjectDocument } from "../projectDocument";
-import { MetadataSchema } from "../types";
+import type { ProjectDocument } from "../projectDocument";
+import type { SavedProject } from "../savedProject";
+import { ProjectDataSchema } from "../store";
 
 /** A version is identified by its script here; the other fields ride along. */
-const content = (script: string): ProjectContent => ({
+const content = (script: string): SavedProject => ({
 	script,
-	store: { metadata: MetadataSchema.parse({}), referenceImages: [] },
+	store: ProjectDataSchema.parse({}),
 	generation: {},
 });
 
 function fakeStorage() {
-	const rows = new Map<string, ProjectContent>();
+	const rows = new Map<string, SavedProject>();
 	let next = 0;
 	const version = (id: string): CanvasVersion => ({
 		id,
@@ -48,12 +49,13 @@ function fakeStorage() {
 
 function fakeDocument() {
 	let live = content("live");
-	const document: ProjectDocument & { current: () => ProjectContent } = {
+	const document: ProjectDocument & { current: () => SavedProject } = {
 		current: () => live,
 		read: () => live,
 		write: (next) => {
 			live = next;
 		},
+		meta: () => ({ name: "Untitled", thumbnail_url: null }),
 	};
 	return document;
 }

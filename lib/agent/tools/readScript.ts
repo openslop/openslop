@@ -1,31 +1,11 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import {
-	voiceTraitEntries,
-	type Metadata,
-	type MetadataVoice,
-} from "@/lib/project/types";
 import { Eye } from "@/components/ui/icon";
-import { UNSET } from "../context";
 import type { ElementState } from "../elementState";
 import { defineTool } from "./defineTool";
 
 function section(heading: string, lines: string[]): string {
 	return [`## ${heading}`, ...lines].join("\n");
-}
-
-function voiceOf(voice: MetadataVoice): string {
-	const values = voiceTraitEntries(voice).map(([, value]) => value);
-	return values.length > 0 ? values.join(", ") : UNSET;
-}
-
-function charactersOf(metadata: Metadata): string[] {
-	const entries = Object.entries(metadata.characters);
-	if (entries.length === 0) return ["None yet."];
-	return entries.map(
-		([name, character]) =>
-			`- ${name}: ${character.appearance || UNSET} (voice: ${voiceOf(character)})`,
-	);
 }
 
 function statesOf(states: ElementState[]): string[] {
@@ -36,28 +16,35 @@ function statesOf(states: ElementState[]): string[] {
 	);
 }
 
-/** What read_settings does not carry: the canvas itself. */
 export const readScript = defineTool({
 	description: dedent`
-	  Read the canvas: the project's characters, the script as XML with the \`id\` of every
-	  element, then where each element's generation stands: ungenerated, queued, generating,
-	  generated, stale (and why), failed (and the error), or pinned to an upload. The
-	  settings are in read_settings; this is the script.
+	  Read the project: the canvas as XML with the \`id\` of every element, first the assets,
+	  then the script scene by scene. After it, the project: its title, script
+	  settings (language, target length, format, template) and aspect ratio. Last, where each
+	  generated element stands: ungenerated, queued, generating, generated, stale (and why),
+	  failed (and the error), or pinned to an upload.
 
-	  Read before your first edit, and again after anything changed the script. Ids and text
-	  move when a script is edited, so editing from a stale reading fails.
+	  Read before your first edit, and again after anything changed the canvas. Ids and text
+	  move when it is edited, so editing from a stale reading fails.
 	`,
 	input: z.object({}),
 	output: z.string(),
 	icon: Eye,
 	label: "Reading the script",
 	execute: async (_input, ctx) => {
-		const metadata = ctx.readMetadata();
 		const script = ctx.readScript().trim();
+		const { title, scriptSettings, videoSettings } = ctx.readProject();
 		return [
-			section("Characters", charactersOf(metadata)),
 			section("Script", [
 				script ? `\`\`\`xml\n${script}\n\`\`\`` : "The canvas is empty.",
+			]),
+			section("Project", [
+				`- title: ${title.trim() || "not set"}`,
+				`- language: ${scriptSettings.language}`,
+				`- length: ${scriptSettings.length}`,
+				`- format: ${scriptSettings.format}`,
+				`- template: ${scriptSettings.template ?? "none"}`,
+				`- aspect ratio: ${videoSettings.aspectRatio}`,
 			]),
 			section("Generation state", statesOf(ctx.elementStates())),
 		].join("\n\n");

@@ -1,6 +1,6 @@
 import { Transforms, Path, Node, NodeEntry } from "slate";
-import { CanvasEditor, SceneElement, SCENE_TYPE } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { CanvasEditor, Scene, SCENE_TYPE } from "@/lib/canvas/types";
+import { isScene } from "@/lib/canvas/scenes";
 import { isContentElement, isForeground } from "@/lib/canvas/guards";
 import { makeNodeId } from "@/lib/canvas/nodeUtils";
 
@@ -11,7 +11,7 @@ const adoptIntoPreviousScene: SceneRule = (editor, [node, path]) => {
 	if (!isContentElement(node) || !Path.hasPrevious(path)) return false;
 	const previousPath = Path.previous(path);
 	const previousScene = Node.getIf(editor, previousPath);
-	if (!isSceneElement(previousScene)) return false;
+	if (!isScene(previousScene)) return false;
 	Transforms.moveNodes(editor, {
 		at: path,
 		to: [...previousPath, previousScene.children.length],
@@ -21,7 +21,7 @@ const adoptIntoPreviousScene: SceneRule = (editor, [node, path]) => {
 
 const wrapOrphanContent: SceneRule = (editor, [node, path]) => {
 	if (!isContentElement(node)) return false;
-	const wrapper: SceneElement = {
+	const wrapper: Scene = {
 		id: makeNodeId(),
 		type: SCENE_TYPE,
 		children: [],
@@ -31,15 +31,15 @@ const wrapOrphanContent: SceneRule = (editor, [node, path]) => {
 };
 
 // Must precede Slate's default normalizer, which would otherwise insert a text
-// child into the empty scene and violate SceneElement.children.
+// child into the empty scene and violate Scene.children.
 const removeEmptyScene: SceneRule = (editor, [node, path]) => {
-	if (!isSceneElement(node) || node.children.length > 0) return false;
+	if (!isScene(node) || node.children.length > 0) return false;
 	Transforms.removeNodes(editor, { at: path });
 	return true;
 };
 
 const splitExtraForeground: SceneRule = (editor, [node, path]) => {
-	if (!isSceneElement(node)) return false;
+	if (!isScene(node)) return false;
 	const firstForeground = node.children.findIndex(isForeground);
 	if (firstForeground === -1) return false;
 	const secondForeground = node.children.findIndex(
@@ -48,22 +48,22 @@ const splitExtraForeground: SceneRule = (editor, [node, path]) => {
 	if (secondForeground === -1) return false;
 	Transforms.splitNodes(editor, {
 		at: [...path, secondForeground],
-		match: isSceneElement,
+		match: isScene,
 	});
 	return true;
 };
 
 const mergeForegroundlessScene: SceneRule = (editor, [node, path]) => {
-	if (!isSceneElement(node) || node.children.some(isForeground)) return false;
+	if (!isScene(node) || node.children.some(isForeground)) return false;
 	if (
 		Path.hasPrevious(path) &&
-		isSceneElement(Node.getIf(editor, Path.previous(path)))
+		isScene(Node.getIf(editor, Path.previous(path)))
 	) {
 		Transforms.mergeNodes(editor, { at: path });
 		return true;
 	}
 	const nextPath = Path.next(path);
-	if (isSceneElement(Node.getIf(editor, nextPath))) {
+	if (isScene(Node.getIf(editor, nextPath))) {
 		Transforms.mergeNodes(editor, { at: nextPath });
 		return true;
 	}

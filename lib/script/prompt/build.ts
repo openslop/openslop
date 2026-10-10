@@ -1,5 +1,6 @@
 import compact from "lodash/compact";
-import type { Metadata } from "@/lib/project/types";
+import type { AssetElement } from "@/lib/canvas/types";
+import type { ScriptSettings } from "@/lib/project/types";
 import { getTemplateById } from "@/lib/templates/templates";
 import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
@@ -20,7 +21,7 @@ export type ScriptPrompt = { system: string; prompt: string };
  */
 function promptParts(
 	source: ScriptSource,
-	metadata: Metadata,
+	settings: ScriptSettings,
 ): { guidance: string[]; instruction: string } {
 	if (source.kind === "adapt")
 		return {
@@ -31,23 +32,23 @@ function promptParts(
 			instruction: source.script,
 		};
 
-	const template = getTemplateById(metadata.templateId);
+	const template = getTemplateById(settings.template);
 	if (template)
 		return {
 			guidance: [
-				formatSection(metadata),
-				lengthSection(metadata),
+				formatSection(settings),
+				lengthSection(settings),
 				template.systemPrompt,
 			],
 			instruction: templatePrompt(
 				template,
 				source.brief,
-				spokenLanguage(metadata, "the same language that the user_input is in"),
+				spokenLanguage(settings, "the same language that the user_input is in"),
 			),
 		};
 
 	return {
-		guidance: [formatSection(metadata), lengthSection(metadata)],
+		guidance: [formatSection(settings), lengthSection(settings)],
 		instruction: source.brief,
 	};
 }
@@ -56,20 +57,24 @@ function promptParts(
  * Also the review's system prompt. What only one source contributes (a length
  * budget, a template, a pasted script's notes) stays with that source.
  */
-export function scriptRules(metadata: Metadata): string {
+export function scriptRules(
+	assets: AssetElement[],
+	settings: ScriptSettings,
+): string {
 	return compact([
-		projectPreamble(metadata),
-		osmlSpec(spokenLanguage(metadata, INPUT_LANGUAGE)),
+		projectPreamble(assets),
+		osmlSpec(spokenLanguage(settings, INPUT_LANGUAGE)),
 	]).join("\n\n");
 }
 
 export function buildScriptPrompt(
-	metadata: Metadata,
+	assets: AssetElement[],
+	settings: ScriptSettings,
 	source: ScriptSource,
 ): ScriptPrompt {
-	const { guidance, instruction } = promptParts(source, metadata);
+	const { guidance, instruction } = promptParts(source, settings);
 	return {
-		system: compact([...guidance, scriptRules(metadata)]).join("\n\n"),
+		system: compact([...guidance, scriptRules(assets, settings)]).join("\n\n"),
 		prompt: instruction,
 	};
 }

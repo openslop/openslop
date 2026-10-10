@@ -1,7 +1,7 @@
 import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/MediaWithSkeleton";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
+import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/elementConfigs";
 import { TRIM_TO_DIALOGUE_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { formatTimeRange } from "@/lib/render/timestamps";
@@ -10,7 +10,6 @@ import { ClipWaveform } from "./ClipWaveform";
 import type { TimelineClip as TimelineClipData } from "./timelineRows";
 
 const HEADER_ICON_SIZE = 9;
-const TOOLTIP_MAX_CHARS = 180;
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
@@ -41,17 +40,9 @@ function ClipHeader({
 	return (
 		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
 			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
-			<SimpleTooltip
-				label={
-					<span dir="auto" className="block max-w-xs text-pretty">
-						{truncateMiddle(label, TOOLTIP_MAX_CHARS)}
-					</span>
-				}
-			>
-				<span dir="auto" className="truncate text-badge-xs text-foreground">
-					{fit(label, width)}
-				</span>
-			</SimpleTooltip>
+			<span dir="auto" className="truncate text-badge-xs text-foreground">
+				{fit(label, width)}
+			</span>
 		</span>
 	);
 }

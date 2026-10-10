@@ -1,11 +1,11 @@
 import { getRenderProgress } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
-import { getFunctionName, REGION } from "@/lib/render/lambda-config";
+import { getFunctionName, REGION } from "@/lib/render/lambdaConfig";
 import {
 	RenderHandleRequest,
 	type RenderProgress,
-} from "@/lib/render/render-api";
+} from "@/lib/render/renderApi";
 
 export const POST = createSessionRouteHandler({
 	schema: RenderHandleRequest,

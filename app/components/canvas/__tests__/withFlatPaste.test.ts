@@ -4,8 +4,10 @@ import { withReact } from "slate-react";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
+import { withAssets } from "../plugins/withAssets";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { CanvasEditor } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import { content, scene, seedScene, shape } from "./fixtures";
 
 function makeEditor(): CanvasEditor {
@@ -14,8 +16,7 @@ function makeEditor(): CanvasEditor {
 
 function hasNestedScene(editor: Editor): boolean {
 	return editor.children.some(
-		(n) =>
-			isSceneElement(n) && n.children.some((c) => isSceneElement(c as Element)),
+		(n) => isScene(n) && n.children.some((c) => isScene(c as Element)),
 	);
 }
 
@@ -57,5 +58,20 @@ describe("withFlatPaste", () => {
 		expect(types).toContain("music");
 		expect(types).toContain("video");
 		expect(hasNestedScene(editor)).toBe(false);
+	});
+
+	it("lifts the tiles of a pasted fragment out of the scenes", () => {
+		const editor = withAssets(makeEditor());
+		seedScene(editor, scene([content("narration", "n0")]));
+
+		editor.insertFragment([
+			scene([content("image", "i1")], "ps1"),
+			asset("asset_avatar", { name: "Mia" }),
+			scene([content("sound", "snd1")], "ps2"),
+		]);
+
+		const types = shape(editor).flat();
+		expect(types).toContain("sound");
+		expect(types).not.toContain("asset_avatar");
 	});
 });

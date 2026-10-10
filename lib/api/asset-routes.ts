@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
-import { createJob, enqueueJob, getJob, type JobConnectorType } from "./jobs";
+import { stringifyError } from "@/lib/errors";
+import {
+	createJob,
+	enqueueJob,
+	getJob,
+	updateJob,
+	type JobConnectorType,
+} from "./jobs";
 import {
 	AUDIO_FIELDS,
 	bodySchema,
@@ -44,7 +51,15 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 				connectorType: type,
 				request,
 			});
-			await enqueueJob(id);
+			try {
+				await enqueueJob(id);
+			} catch (error) {
+				await updateJob(id, {
+					status: "failed",
+					error: `Failed to queue job: ${stringifyError(error)}`,
+				});
+				throw error;
+			}
 			return NextResponse.json({ jobId: id, status: "pending" });
 		},
 	});

@@ -1,12 +1,12 @@
 import type { Descendant } from "slate";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isSpeech } from "@/lib/canvas/guards";
+import { isScene } from "@/lib/canvas/scenes";
 import { countWords } from "@/lib/canvas/spokenWords";
 import {
-	ELEMENT_TYPES,
-	FOREGROUND_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
+	CONTENT_TYPES,
+	type ContentElement,
+	type ContentType,
 } from "@/lib/canvas/types";
 import { getDuration, getTrimToDialogue } from "../canvas/elementAttributes";
 import { MIN_DURATION_SEC } from "./scene-builder";
@@ -15,7 +15,7 @@ import { secondsForWords } from "../project/videoLength";
 /** How long one visual holds the screen, and what decides it. */
 export type ElementLength = {
 	id: string;
-	type: CanvasElementType;
+	type: ContentType;
 	sceneNumber: number;
 	seconds: number;
 	/** The spoken words that follow it, up to the next visual. */
@@ -30,15 +30,15 @@ export type ElementLength = {
 };
 
 type Span = {
-	element: CanvasContentElement;
+	element: ContentElement;
 	sceneNumber: number;
 	words: number;
 	dialogueIds: string[];
 };
 
 /** A generated video runs for its own length; a still has none of its own. */
-const ownDuration = (element: CanvasContentElement): number | undefined =>
-	ELEMENT_TYPES[element.type].outputKind === "video"
+const ownDuration = (element: ContentElement): number | undefined =>
+	CONTENT_TYPES[element.type].outputKind === "video"
 		? getDuration(element)
 		: undefined;
 
@@ -81,15 +81,15 @@ const walk = (descendants: Descendant[]): Walk => {
 	let sceneNumber = 0;
 
 	for (const node of descendants) {
-		if (!isSceneElement(node)) continue;
+		if (!isScene(node)) continue;
 		sceneNumber += 1;
 
 		for (const element of node.children) {
-			if (FOREGROUND_TYPES.has(element.type)) {
+			if (CONTENT_TYPES[element.type].role === "foreground") {
 				spans.push({ element, sceneNumber, words: 0, dialogueIds: [] });
 				continue;
 			}
-			if (ELEMENT_TYPES[element.type].connector !== "tts") continue;
+			if (!isSpeech(element)) continue;
 			const words = countWords(getElementBodyText(element));
 			const open = spans.at(-1);
 			if (!open) {

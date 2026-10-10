@@ -1,8 +1,7 @@
-import { requireContext } from "@/lib/connectors/plugins";
-import { dependency } from "@/lib/generation/dependency";
-import { aspectDimensions, forAspectRatio } from "@/lib/generation/sourceNodes";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import {
+	ASPECT_RATIO_DIMENSIONS,
+	AspectRatioSchema,
 	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
 } from "@/lib/project/aspectRatio";
@@ -14,17 +13,22 @@ type Dimensioned = {
 	resolution?: VideoResolution;
 };
 
+const ASPECT_RATIO = "the aspect ratio";
+
 /** Sizes a generation from the project's aspect ratio, and a video from its resolution too. */
 export function createDimensionsPlugin(
 	kind: "image" | "video",
 ): ConnectorPlugin<Dimensioned> {
 	return {
 		name: "dimensions",
-		dependencies: [
-			dependency("aspectRatio", "the aspect ratio", () => forAspectRatio),
+		reads: [
+			(_, { state }) => ({ [ASPECT_RATIO]: state.videoSettings.aspectRatio }),
 		],
 		beforeGenerate(params, ctx) {
-			const dims = aspectDimensions(requireContext(ctx, "state", "dimensions"));
+			const dims =
+				ASPECT_RATIO_DIMENSIONS[
+					AspectRatioSchema.parse(ctx.reads?.[ASPECT_RATIO])
+				];
 			if (kind === "image") return { ...params, ...dims.image };
 			const resolution = params.resolution ?? DEFAULT_VIDEO_RESOLUTION;
 			return { ...params, resolution, ...dims.video[resolution] };

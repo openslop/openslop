@@ -1,17 +1,5 @@
 import type { ConnectorPlugin, PluginContext } from "./types";
 
-export function requireContext<K extends keyof PluginContext>(
-	ctx: PluginContext,
-	key: K,
-	plugin: string,
-): NonNullable<PluginContext[K]> {
-	const value = ctx[key];
-	if (value === undefined) {
-		throw new Error(`${plugin} plugin requires ${key} in its context`);
-	}
-	return value;
-}
-
 type TransformHook = "beforeGenerate" | "afterGenerate" | "transformPrompt";
 
 /** Threads a value through every plugin that implements the hook, in order. */
@@ -66,3 +54,7 @@ export async function runOnError(
 		}
 	}
 }
+
+/** A `mergeWith` customizer: a list is appended to, anything else replaced. */
+export const appendArrays = (current: unknown, added: unknown) =>
+	Array.isArray(current) ? current.concat(added) : undefined;

@@ -1,68 +1,74 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
+import without from "lodash/without";
+import {
+	assetText,
+	characterNames,
+	NARRATOR,
+	voiceOf,
+} from "@/lib/canvas/assets";
+import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
-	type Metadata,
-	type MetadataCharacter,
-	type MetadataVoice,
+	type Voice,
+	type ScriptSettings,
 } from "@/lib/project/types";
 import { videoLengthBudget } from "@/lib/project/videoLength";
 import { videoFormatLabel } from "@/lib/project/videoFormat";
 
-function renderVoice(voice: MetadataVoice): string {
+function renderVoice(voice: Voice): string {
 	return voiceTraitEntries(voice)
 		.map(([trait, value]) => `- ${trait}: ${value}`)
 		.join("\n");
 }
 
-function renderCharacter(name: string, character: MetadataCharacter): string {
-	const voiceLines = renderVoice(character);
-	const appearanceLine = character.appearance
-		? `- appearance: ${character.appearance}`
-		: "";
-	const body = [voiceLines, appearanceLine].filter(Boolean).join("\n");
+function renderCharacter(assets: AssetElement[], name: string): string {
+	const appearance = assetText(assets, "asset_avatar", name);
+	const body = [
+		renderVoice(voiceOf(assets, name)),
+		appearance && `- appearance: ${appearance}`,
+	]
+		.filter(Boolean)
+		.join("\n");
 	return `## ${name}\n\n${body}`;
 }
 
-export function projectPreamble(metadata: Metadata): string {
+export function projectPreamble(assets: AssetElement[]): string {
 	const sections: string[] = [];
 
-	if (metadata.style) {
+	const style = assetText(assets, "asset_style");
+	if (style) {
 		sections.push(dedent`
 			# Art Style
 
-			Below is the exact art style description for the story. Do not change it.
+			Every visual is drawn in this art style. Never restate it in a prompt.
 
-			${metadata.style}`);
+			${style}`);
 	}
 
-	const voice = renderVoice(metadata.narration);
+	const voice = renderVoice(voiceOf(assets));
 	if (voice)
 		sections.push(dedent`
 			# Narration Voice
 
-			Below is the exact voice description for the narrator. Do not change it.
+			The narrator speaks in this voice.
 
 			${voice}`);
 
-	const characterEntries = Object.entries(metadata.characters);
-	if (characterEntries.length > 0) {
-		const blocks = characterEntries.map(([name, character]) =>
-			renderCharacter(name, character),
-		);
+	const characters = without(characterNames(assets), NARRATOR);
+	if (characters.length > 0) {
 		sections.push(dedent`
 			# Characters
 
-			Include the following characters exactly (and others if needed). Do not modify any of the below attributes of these characters (including the name):
+			The characters. Name one exactly as written here:
 
-			${blocks.join("\n\n")}`);
+			${characters.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
 	}
 
 	return sections.join("\n\n");
 }
 
 /** Empty on `auto`: the writer then picks the format closest to the brief. */
-export function formatSection(metadata: Metadata): string {
-	const { format } = metadata.videoSettings;
+export function formatSection({ format }: ScriptSettings): string {
 	if (format === "auto") return "";
 
 	return dedent`
@@ -72,8 +78,8 @@ export function formatSection(metadata: Metadata): string {
 }
 
 /** Empty on `auto`: no budget is a budget the model would otherwise invent. */
-export function lengthSection(metadata: Metadata): string {
-	const budget = videoLengthBudget(metadata.videoSettings.length);
+export function lengthSection({ length }: ScriptSettings): string {
+	const budget = videoLengthBudget(length);
 	if (!budget) return "";
 	const { minWords, maxWords } = budget;
 

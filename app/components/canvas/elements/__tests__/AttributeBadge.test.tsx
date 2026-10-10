@@ -3,19 +3,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { AttributeBadge } from "../AttributeBadge";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { element } from "@/lib/canvas/__tests__/_assets";
 
-const elementWith = (
-	customAttributes: Record<string, string>,
-): CanvasContentElement =>
-	({
-		id: "el",
-		type: "video",
-		...splitAttributes(customAttributes),
-		children: [{ id: "text", type: "video", text: "" }],
-	}) as unknown as CanvasContentElement;
+const elementWith = (customAttributes: Record<string, string>) =>
+	element("el", "video", "", customAttributes);
 
 const motionSpec: AttributeSpec = {
 	label: "Motion",
@@ -23,7 +16,7 @@ const motionSpec: AttributeSpec = {
 };
 
 function render(
-	element: CanvasContentElement,
+	element: ContentElement,
 	spec: AttributeSpec,
 	attrKey = "motion",
 ) {

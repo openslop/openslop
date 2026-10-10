@@ -72,15 +72,17 @@ export async function getJob(
 	return data ? JobRowSchema.parse(data) : null;
 }
 
-export async function loadJobForProcessing(jobId: string): Promise<JobRow> {
+export async function loadJobForProcessing(
+	jobId: string,
+): Promise<JobRow | null> {
 	const supabase = createServiceClient();
 	const { data, error } = await supabase
 		.from("jobs")
 		.select("*")
 		.eq("id", jobId)
-		.single();
-	if (error) throw new Error(`Job ${jobId} not found: ${error.message}`);
-	return JobRowSchema.parse(data);
+		.maybeSingle();
+	if (error) throw new Error(`Failed to load job: ${error.message}`);
+	return data ? JobRowSchema.parse(data) : null;
 }
 
 export async function updateJob(

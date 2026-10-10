@@ -7,10 +7,10 @@ import {
 	useLayout,
 	useSceneSequence,
 } from "@/app/components/player/RenderLayoutContext";
-import type { SceneElement } from "@/lib/canvas/types";
+import type { Scene } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/render/frames";
 
-export function PlayFromHereButton({ scene }: { scene: SceneElement }) {
+export function PlayFromHereButton({ scene }: { scene: Scene }) {
 	const { layout } = useLayout();
 	const { playFromFrame } = usePlayerControl();
 	const seq = useSceneSequence(scene);

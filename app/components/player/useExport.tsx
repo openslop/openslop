@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { errorMessage } from "@/lib/errors";
-import { runRender, type RenderUpdate } from "@/lib/render/render-client";
+import { runRender, type RenderUpdate } from "@/lib/render/renderClient";
 import type { RenderLayout } from "@/lib/render/types";
 import { ExportDoneToast, ExportProgressToast } from "./ExportToast";
 

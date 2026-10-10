@@ -11,7 +11,7 @@ import { PanelCard } from "./PanelCard";
 
 export function ModelsPanel() {
 	const chain = useModelChain();
-	const updateMetadata = useProject((state) => state.updateMetadata);
+	const updateModels = useProject((state) => state.updateModels);
 	const settings = useSettings();
 
 	return (
@@ -23,7 +23,7 @@ export function ModelsPanel() {
 						tier="project"
 						chain={chain}
 						label={label}
-						onChange={(models) => updateMetadata({ models })}
+						onChange={updateModels}
 						className="w-full"
 					/>
 				</PanelCard>

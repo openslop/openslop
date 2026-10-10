@@ -21,26 +21,21 @@ import {
 	type SegmentedControlOption,
 } from "@/components/ui/segmented-control";
 import AnimatedPlaceholder from "@/app/components/AnimatedPlaceholder";
-import {
-	AssetEditProvider,
-	useAssetEditors,
-} from "@/app/components/canvas/elements/character/AssetEditProvider";
+import { useAssetEditors } from "@/app/components/canvas/elements/character/AssetEditProvider";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/templateBrief";
 import { useTemplate } from "@/lib/templates/useTemplate";
+import { useReferenceImages } from "@/app/components/canvas/hooks/useReferenceImages";
 import { useProject } from "@/lib/project/useProject";
+import { NARRATOR } from "@/lib/canvas/assets";
 import {
 	LANGUAGE_CHOICES,
 	languageLabel,
 	type LanguageChoice,
 } from "@/lib/project/language";
-import { useScriptLanguage } from "@/lib/project/useScriptLanguage";
 import { useDefaultModels } from "@/lib/connectors/useDefaultModels";
 import { ASPECT_RATIOS, type AspectRatio } from "@/lib/project/aspectRatio";
-import {
-	useUpdateVideoSettings,
-	useVideoSetting,
-} from "@/lib/project/useVideoSetting";
+import { useVideoSetting } from "@/lib/project/useVideoSetting";
 import {
 	VIDEO_LENGTHS,
 	videoLengthLabel,
@@ -55,7 +50,7 @@ import {
 import { useImageUpload } from "@/lib/upload/useImageUpload";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./ActionButton";
-import { ComposerAssets } from "./ComposerAssets";
+import { AssetStrip } from "@/app/components/canvas/elements/AssetStrip";
 import {
 	SettingPill,
 	SettingPillButton,
@@ -111,7 +106,7 @@ function AttachMenu({
 	openPicker: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateCharacter, openNarrator, openArtStyle } = useAssetEditors();
+	const { openCreateCharacter, editAsset } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -130,13 +125,13 @@ function AttachMenu({
 			key: "narrator",
 			label: "Select narrator voice",
 			icon: <Mic className={iconClass} />,
-			onSelect: openNarrator,
+			onSelect: () => editAsset("asset_voice", NARRATOR),
 		},
 		{
 			key: "art-style",
 			label: "Set art style",
 			icon: <Palette className={iconClass} />,
-			onSelect: openArtStyle,
+			onSelect: () => editAsset("asset_style"),
 		},
 	];
 
@@ -193,26 +188,26 @@ interface ComposerCopilotProps {
 	onSubmit: (brief: string) => void;
 }
 
-/** The asset dialogs mount here so the composer's tiles and menu open their own. */
-export default function ComposerCopilot(props: ComposerCopilotProps) {
-	return (
-		<AssetEditProvider>
-			<Composer {...props} />
-		</AssetEditProvider>
-	);
-}
-
-function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
+export default function ComposerCopilot({
+	value,
+	onValueChange,
+	onSubmit,
+}: ComposerCopilotProps) {
 	const [intent, setIntent] = useState<ComposerIntent>("story");
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
-	const videoLength = useVideoSetting("length");
-	const videoFormat = useVideoSetting("format");
-	const updateVideoSettings = useUpdateVideoSettings();
-	const addReferenceImages = useProject((s) => s.addReferenceImages);
-	const [language, setLanguage] = useScriptLanguage();
+	const updateVideoSettings = useProject((state) => state.updateVideoSettings);
+	const updateModels = useProject((state) => state.updateModels);
+	const updateScriptSettings = useProject(
+		(state) => state.updateScriptSettings,
+	);
+	const {
+		length: videoLength,
+		format: videoFormat,
+		language,
+	} = useProject((state) => state.scriptSettings);
+	const { add: addReferenceImages } = useReferenceImages();
 	const model = useDefaultModels().llm;
-	const updateMetadata = useProject((s) => s.updateMetadata);
 
 	const {
 		openPicker,
@@ -230,7 +225,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 	const chooseIntent = (next: ComposerIntent) => {
 		setIntent(next);
 		if (next === "script")
-			updateVideoSettings({ length: "auto", format: "auto" });
+			updateScriptSettings({ length: "auto", format: "auto" });
 	};
 
 	const handleSubmit = () => {
@@ -254,7 +249,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<ComposerAssets uploadingCount={uploadingCount} />
+				<AssetStrip uploadingCount={uploadingCount} />
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
@@ -299,7 +294,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={VIDEO_FORMAT_OPTIONS}
 							disabled={pasting}
 							onChange={(next: VideoFormat) =>
-								updateVideoSettings({ format: next })
+								updateScriptSettings({ format: next })
 							}
 						/>
 						<SettingPill
@@ -307,12 +302,14 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							icon={<Translate className="mr-1 h-3 w-3" />}
 							value={language}
 							options={LANGUAGE_OPTIONS}
-							onChange={setLanguage}
+							onChange={(next: LanguageChoice) =>
+								updateScriptSettings({ language: next })
+							}
 						/>
 						<ModelSelect
 							type="llm"
 							value={model}
-							onChange={(llm) => updateMetadata({ models: { llm } })}
+							onChange={(llm) => updateModels({ llm })}
 						>
 							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
 								<ProviderIcon
@@ -330,7 +327,7 @@ function Composer({ value, onValueChange, onSubmit }: ComposerCopilotProps) {
 							options={VIDEO_LENGTH_OPTIONS}
 							disabled={pasting}
 							onChange={(next: VideoLength) =>
-								updateVideoSettings({ length: next })
+								updateScriptSettings({ length: next })
 							}
 						/>
 						{activeTemplate && (

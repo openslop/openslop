@@ -1,5 +1,5 @@
 import { deployFunction } from "@remotion/lambda";
-import { LAMBDA_FUNCTION_SPEC, REGION } from "../lib/render/lambda-config";
+import { LAMBDA_FUNCTION_SPEC, REGION } from "../lib/render/lambdaConfig";
 
 const { functionName, alreadyExisted } = await deployFunction({
 	region: REGION,

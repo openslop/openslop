@@ -10,23 +10,11 @@ import { generateForElement } from "./generateForElement";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
-import {
-	flattenGraph,
-	isSourceNode,
-	type BuildContext,
-	type GenerationNode,
-	type JobNode,
-} from "./graph";
+import { flattenGraph, type GenerationNode } from "./graph";
 
 type ActiveJob = {
 	controller: AbortController;
 	connectorType: AssetConnectorType;
-};
-
-/** A node waiting to run, with the project and canvas it will run against. */
-type QueuedJob = {
-	node: JobNode;
-	context: BuildContext;
 };
 
 /**
@@ -39,7 +27,7 @@ export class GenerationQueue {
 	private readonly ticker = new ElapsedTicker((elapsed) =>
 		this.onTick(elapsed),
 	);
-	private pending: QueuedJob[] = [];
+	private pending: GenerationNode[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
@@ -76,22 +64,19 @@ export class GenerationQueue {
 		if (changed) this.snapshots.notify();
 	}
 
-	/**
-	 * Roots are always queued: asking to generate something means regenerating
-	 * it. Every job in the batch runs against `context`.
-	 */
-	enqueueGraph(roots: GenerationNode[], context: BuildContext) {
+	/** Roots are always queued: asking to generate something means regenerating it. */
+	enqueueGraph(roots: GenerationNode[]) {
 		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
 		for (const node of flattenGraph(roots)) {
-			if (isSourceNode(node) || this.snapshots.isActive(node.id)) continue;
+			if (this.snapshots.isActive(node.id)) continue;
 			if (!rootIds.has(node.id) && !needsGeneration(node, this)) continue;
 			this.snapshots.update(node.id, {
 				status: "queued",
 				seconds: 0,
 				connectorType: node.job.connectorType,
 			});
-			this.pending.push({ node, context });
+			this.pending.push(node);
 			added = true;
 		}
 		if (added) {
@@ -149,8 +134,6 @@ export class GenerationQueue {
 		result: AssetResult,
 		{ pinned = false }: { pinned?: boolean } = {},
 	): void {
-		if (isSourceNode(node))
-			throw new Error(`Source node "${node.id}" cannot hold a result`);
 		this.cancel(node.id);
 		this.commit({
 			elementId: node.id,
@@ -189,16 +172,15 @@ export class GenerationQueue {
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
 		this.ticker.stop(id);
-		this.pending = this.pending.filter(({ node }) => node.id !== id);
+		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
 	/** The dependency holding `node` back, if any: it gates until it settles. */
 	private blockingDependency(node: GenerationNode) {
 		return Object.values(node.dependsOn).find(
-			({ node: dep }) =>
-				!isSourceNode(dep) &&
-				(this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result),
-		)?.node;
+			(dep) =>
+				this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result,
+		);
 	}
 
 	private hasCapacity(connectorType: AssetConnectorType) {
@@ -211,13 +193,13 @@ export class GenerationQueue {
 	private processQueue() {
 		for (;;) {
 			const index = this.pending.findIndex(
-				({ node }) =>
+				(node) =>
 					this.hasCapacity(node.job.connectorType) &&
 					!this.blockingDependency(node),
 			);
 			if (index === -1) break;
-			const [queued] = this.pending.splice(index, 1);
-			if (queued) void this.runJob(queued);
+			const [node] = this.pending.splice(index, 1);
+			if (node) void this.runJob(node);
 		}
 		this.releaseBlocked();
 	}
@@ -229,17 +211,12 @@ export class GenerationQueue {
 		return this.snapshots.get(dep.id).error ?? this.blockedByError(dep);
 	}
 
-	/**
-	 * Nothing running and nothing runnable means a dependency never arrived, so
-	 * release what is left rather than leaving it queued forever. A dependency
-	 * that failed is reported on the dependent too: a derived node has no card of
-	 * its own, so its error would otherwise never reach anyone.
-	 */
+	/** Nothing running or runnable means a dependency never arrived: release the rest, its error on each dependent. */
 	private releaseBlocked() {
 		if (this.active.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
-		for (const { node } of blocked) {
+		for (const node of blocked) {
 			const error = this.blockedByError(node);
 			this.snapshots.resetToIdle(node.id);
 			if (error) this.snapshots.update(node.id, { error });
@@ -248,19 +225,19 @@ export class GenerationQueue {
 	}
 
 	private dependencyResults(node: GenerationNode): Record<string, AssetResult> {
-		const entries = Object.entries(node.dependsOn).flatMap(
-			([key, { node: dep }]) => {
-				const { result } = this.snapshots.get(dep.id);
-				return result ? [[key, result] as const] : [];
-			},
-		);
+		const entries = Object.entries(node.dependsOn).flatMap(([label, dep]) => {
+			const { result } = this.snapshots.get(dep.id);
+			return result ? [[label, result] as const] : [];
+		});
 		return Object.fromEntries(entries);
 	}
 
 	/** A cancelled job settles into nothing: whoever aborted it already cleaned up. */
-	private async runJob({ node, context }: QueuedJob) {
-		const { job } = node;
-		const { elementId, elementType, connectorType } = job;
+	private async runJob(node: GenerationNode) {
+		const {
+			id: elementId,
+			job: { elementType, connectorType },
+		} = node;
 		const controller = new AbortController();
 		const { signal } = controller;
 		this.active.set(elementId, { controller, connectorType });
@@ -269,14 +246,11 @@ export class GenerationQueue {
 		this.snapshots.notify();
 		this.ticker.start(elementId);
 
-		const inputs = generationInputs(node, this);
-		const dependencies = this.dependencyResults(node);
 		try {
+			const inputs = generationInputs(node, this);
 			const result = await generateForElement(
-				job,
-				inputs,
-				dependencies,
-				context,
+				node,
+				this.dependencyResults(node),
 				signal,
 			);
 			if (signal.aborted) return;

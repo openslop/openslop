@@ -96,13 +96,15 @@ export function ExportButton() {
 								Download
 							</a>
 						</Button>
-						<button
+						<Button
 							type="button"
+							variant="panel"
+							size="sm"
 							onClick={reset}
-							className="text-label transition-colors hover:text-foreground"
+							className="w-full"
 						>
 							Export again
-						</button>
+						</Button>
 					</div>
 				)}
 

@@ -11,10 +11,11 @@ export const videoHandler: JobHandler<
 		const provider = await providerForJob("video", job);
 		const providerJobId = job.metadata.providerJobId;
 		if (!providerJobId) {
-			const submitted = await provider.generate(jobVendorParams(job));
 			return {
 				kind: "pending",
-				metadata: { providerJobId: submitted.metadata.jobId },
+				metadata: {
+					providerJobId: await provider.submit(jobVendorParams(job)),
+				},
 			};
 		}
 

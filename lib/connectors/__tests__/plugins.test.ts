@@ -1,9 +1,11 @@
+import mergeWith from "lodash/mergeWith";
 import { describe, expect, it } from "vitest";
 import {
 	runAfterGenerate,
 	runBeforeGenerate,
 	runOnError,
 	runTransformPrompt,
+	appendArrays,
 } from "../plugins";
 import type { ConnectorPlugin } from "../types";
 
@@ -82,5 +84,25 @@ describe("plugins", () => {
 		await expect(runBeforeGenerate(plugins, {}, {})).rejects.toThrow(
 			"hook failed",
 		);
+	});
+});
+
+describe("appendArrays", () => {
+	it.each([
+		[
+			"appends to a list",
+			{ refs: ["x"] },
+			{ refs: ["y", "z"] },
+			{ refs: ["x", "y", "z"] },
+		],
+		["starts a list when there is none", {}, { refs: ["y"] }, { refs: ["y"] }],
+		[
+			"replaces anything else",
+			{ prompt: "a" },
+			{ prompt: "b" },
+			{ prompt: "b" },
+		],
+	])("%s", (_, params, patch, expected) => {
+		expect(mergeWith({}, params, patch, appendArrays)).toEqual(expected);
 	});
 });

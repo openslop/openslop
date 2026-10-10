@@ -1,12 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type {
-	CanvasContentElement,
-	CanvasElementType,
-} from "@/lib/canvas/types";
+import type { ContentElement, ContentType } from "@/lib/canvas/types";
 import {
 	formatCharacterNames,
-	getElementCharacterNames,
 	parseCharacterNames,
+	shownCharacters,
 } from "../characterNames";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 
@@ -44,9 +41,9 @@ describe("formatCharacterNames", () => {
 });
 
 function makeElement(
-	type: CanvasElementType,
+	type: ContentType,
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id: "e1",
 		type,
@@ -55,67 +52,25 @@ function makeElement(
 	};
 }
 
-describe("getElementCharacterNames", () => {
-	it("returns empty when no customAttributes", () => {
-		expect(getElementCharacterNames(makeElement("character"))).toEqual([]);
+describe("shownCharacters", () => {
+	it("returns empty when the element lists no characters", () => {
+		expect(shownCharacters(makeElement("image"))).toEqual([]);
+		expect(shownCharacters(makeElement("image", { style: "ink" }))).toEqual([]);
 	});
 
-	it("returns empty when no name or characters attribute", () => {
+	it("parses the characters CSV into trimmed, distinct names", () => {
 		expect(
-			getElementCharacterNames(makeElement("narration", { emotion: "happy" })),
-		).toEqual([]);
-	});
-
-	it("extracts name attribute as a single entry", () => {
-		expect(
-			getElementCharacterNames(makeElement("character", { name: "Alice" })),
-		).toEqual(["Alice"]);
-	});
-
-	it("trims whitespace from name attribute", () => {
-		expect(
-			getElementCharacterNames(makeElement("character", { name: " Alice " })),
-		).toEqual(["Alice"]);
-	});
-
-	it("parses characters CSV into trimmed names", () => {
-		expect(
-			getElementCharacterNames(
-				makeElement("image", { characters: "Red, Granny" }),
+			shownCharacters(
+				makeElement("image", { characters: "Red,,  ,Granny, Red" }),
 			),
 		).toEqual(["Red", "Granny"]);
 	});
 
-	it("filters empty entries from characters CSV", () => {
+	it("leaves out the name a speech element is spoken by", () => {
 		expect(
-			getElementCharacterNames(
-				makeElement("image", { characters: "Red,,  ,Granny" }),
+			shownCharacters(
+				makeElement("image", { name: "Alice", characters: "Red" }),
 			),
-		).toEqual(["Red", "Granny"]);
-	});
-
-	it("concatenates name and characters when both present", () => {
-		expect(
-			getElementCharacterNames(
-				makeElement("image", { name: "Alice", characters: "Red,Granny" }),
-			),
-		).toEqual(["Alice", "Red", "Granny"]);
-	});
-
-	it("deduplicates repeated names while preserving first occurrence order", () => {
-		expect(
-			getElementCharacterNames(
-				makeElement("image", {
-					name: "Alice",
-					characters: "Alice, Red, Alice, Granny, Red",
-				}),
-			),
-		).toEqual(["Alice", "Red", "Granny"]);
-	});
-
-	it("ignores element type — extracts from any element with the attributes", () => {
-		expect(
-			getElementCharacterNames(makeElement("narration", { characters: "Bob" })),
-		).toEqual(["Bob"]);
+		).toEqual(["Red"]);
 	});
 });

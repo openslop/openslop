@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MetadataSchema } from "@/lib/project/types";
+import { VideoSettingsSchema } from "@/lib/project/videoSettings";
 import { CAPTION_PRESETS } from "../captionPresets";
 import { CaptionStyleSchema, DEFAULT_CAPTION_STYLE } from "../captionStyle";
 
@@ -11,9 +11,9 @@ describe("CaptionStyleSchema", () => {
 	});
 
 	it("falls back to the default style instead of failing the project", () => {
-		const metadata = MetadataSchema.parse({
-			videoSettings: { captionStyle: { font: "comic sans" } },
+		const settings = VideoSettingsSchema.parse({
+			captionStyle: { font: "comic sans" },
 		});
-		expect(metadata.videoSettings.captionStyle).toEqual(DEFAULT_CAPTION_STYLE);
+		expect(settings.captionStyle).toEqual(DEFAULT_CAPTION_STYLE);
 	});
 });

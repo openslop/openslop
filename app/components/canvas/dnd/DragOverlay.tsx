@@ -3,8 +3,9 @@ import { IconButton } from "@/components/ui/icon-button";
 import { useCallback, useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react";
-import type { CanvasElement } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import type { CanvasBlock } from "@/lib/canvas/types";
+import { isContentElement } from "@/lib/canvas/guards";
+import { isScene } from "@/lib/canvas/scenes";
 import { CompactElement } from "../elements/CompactElement";
 import { ElementContainer } from "../elements/ElementContainer";
 import { SceneContainer } from "../elements/SceneContainer";
@@ -18,28 +19,27 @@ import styles from "../styles/sortable.module.css";
  * state, its generation graph) is resolved against the real canvas, which
  * this renders inside of.
  */
-export function DragOverlayContent({ element }: { element: CanvasElement }) {
+export function DragOverlayPreview({ block }: { block: CanvasBlock }) {
 	const editor = useMemo(() => withReact(createEditor()), []);
-	const value = useMemo<Descendant[]>(
-		() => [structuredClone(element)],
-		[element],
-	);
+	const value = useMemo<Descendant[]>(() => [structuredClone(block)], [block]);
 
-	const sceneIndex = useSceneIndex(element.id);
-	const collapsed = useSceneCollapsed(element.id);
+	const sceneIndex = useSceneIndex(block.id);
+	const collapsed = useSceneCollapsed(block.id);
 
 	const renderElement = useCallback(
 		({ attributes, children, element: node }: RenderElementProps) => {
-			if (isSceneElement(node))
+			if (isScene(node))
 				return (
 					<SceneContainer
 						attributes={attributes}
-						element={node}
+						scene={node}
 						sceneIndex={sceneIndex}
 					>
 						{children}
 					</SceneContainer>
 				);
+			if (!isContentElement(node))
+				throw new Error(`A ${node.type} element is never dragged`);
 			const Content = collapsed ? CompactElement : ElementContainer;
 			return (
 				<Content attributes={attributes} element={node}>

@@ -1,4 +1,8 @@
+import { z } from "zod";
+
 export const ASPECT_RATIOS = ["16:9", "9:16"] as const;
+
+export const AspectRatioSchema = z.enum(ASPECT_RATIOS);
 
 export type AspectRatio = (typeof ASPECT_RATIOS)[number];
 

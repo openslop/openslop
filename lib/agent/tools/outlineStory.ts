@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { spokenLanguage } from "@/lib/script/prompt/language";
 import { outlinePrompt } from "@/lib/script/prompt/outline";
@@ -32,7 +32,7 @@ export const outlineStory = defineTool({
 	label: "Outlining the story",
 	execute: async ({ brief }, ctx) => {
 		const language = spokenLanguage(
-			ctx.readMetadata(),
+			ctx.readProject().scriptSettings,
 			"the same language as that input",
 		);
 		return ctx.generateText(outlinePrompt(brief, language), {

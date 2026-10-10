@@ -1,68 +1,54 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import { getContentElements } from "@/lib/canvas/scenes";
+import { getCanvasElements } from "@/lib/canvas/assets";
+import { element } from "@/lib/canvas/__tests__/_assets";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type AssetElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
-import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import { dependency } from "../dependency";
-import { forElement, sourceNode, type BuildContext } from "../graph";
-import { GenerationGraph } from "../generationGraph";
-import { forArtStyle } from "../sourceNodes";
-
-const element = (
-	id: string,
-	type: CanvasContentElement["type"],
-	text: string,
-	attributes: Record<string, string> = {},
-): CanvasContentElement => ({
-	id,
-	type,
-	...splitAttributes(attributes),
-	children: [{ id: `${id}-t`, type, text }],
-});
+import type { ConnectorPlugin } from "@/lib/connectors/types";
+import type { BuildContext } from "../graph";
+import {
+	generatedById,
+	GenerationGraph,
+	pluginRecords,
+} from "../generationGraph";
+import { buildCtx, EMPTY_CONTEXT } from "./_context";
 
 const linked = { continuity: "true" };
+const PREVIOUS = "the previous visual";
 
-let store: ProjectStore;
+let assets: AssetElement[];
 let document: Descendant[];
 let registry: ConnectorRegistry;
 let graph: GenerationGraph;
 
-const contextNow = (): BuildContext => ({
-	store,
-	state: store.getState(),
-	canvas: getContentElements(document),
-	registry,
-});
+const contextNow = (): BuildContext =>
+	buildCtx(getCanvasElements([...assets, ...document]), { registry });
 
-const tone = dependency(
-	"tone",
-	"the tone",
-	({ generationAttributes }) =>
-		() =>
-			sourceNode("project:tone", { tone: generationAttributes?.tone ?? "" }),
-);
-const TONED: ConnectorRegistry = {
-	...DEFAULT_CONNECTOR_REGISTRY,
-	image: { plugins: [{ name: "tone", dependencies: [tone] }] },
-};
-
-const twice = dependency("style", "the art style", () => forArtStyle);
 const UNBUILDABLE: ConnectorRegistry = {
 	...DEFAULT_CONNECTOR_REGISTRY,
-	image: { plugins: [{ name: "twice", dependencies: [twice, twice] }] },
+	image: {
+		plugins: [
+			{
+				name: "itself",
+				dependencies: [
+					(self, { canvas }) => ({ self: generatedById(canvas, self.id) }),
+				],
+			},
+		],
+	},
 };
 
-const edit = (...elements: CanvasContentElement[]) => {
-	const scene: SceneElement = {
+const edit = (...elements: ContentElement[]) => {
+	const scene: Scene = {
 		id: "scene-1",
 		type: SCENE_TYPE,
 		children: elements,
@@ -71,10 +57,10 @@ const edit = (...elements: CanvasContentElement[]) => {
 	graph = new GenerationGraph(contextNow(), graph);
 };
 
-const read = (of: CanvasContentElement) => graph.resolve(forElement(of));
+const nodeOf = (of: ContentElement) => graph.resolve(of);
 
 beforeEach(() => {
-	store = createProjectStore();
+	assets = [];
 	document = [];
 	registry = DEFAULT_CONNECTOR_REGISTRY;
 	graph = new GenerationGraph(contextNow());
@@ -86,10 +72,10 @@ describe("GenerationGraph", () => {
 		const video = element("vid", "video", "a pan");
 		edit(image, video);
 
-		const node = read(image);
-		read(video);
+		const node = nodeOf(image);
+		nodeOf(video);
 
-		expect(read(image)).toBe(node);
+		expect(nodeOf(image)).toBe(node);
 	});
 
 	it("shares a node between every dependent that reaches it", () => {
@@ -98,63 +84,38 @@ describe("GenerationGraph", () => {
 		const third = element("third", "video", "a tilt", linked);
 		edit(first, second, third);
 
-		const reached = read(second).dependsOn.previousVisual?.node;
+		const reached = nodeOf(second).dependsOn[PREVIOUS];
 
-		expect(reached?.id).toBe("first");
-		expect(
-			read(third).dependsOn.previousVisual?.node.dependsOn.previousVisual?.node,
-		).toBe(reached);
-	});
-
-	it("labels the edge to a dependency and shares the node it reaches", () => {
-		const image = element("img", "image", "a sunset");
-		const video = element("vid", "video", "a pan", linked);
-		edit(image, video);
-
-		const edge = read(video).dependsOn.previousVisual;
-		expect(edge?.label).toBe("the previous visual");
-		expect(edge?.node).toBe(read(image));
+		expect(reached).toBe(nodeOf(first));
+		expect(nodeOf(third).dependsOn[PREVIOUS]?.dependsOn[PREVIOUS]).toBe(
+			reached,
+		);
 	});
 
 	it("keeps a node that reads as it did a revision ago", () => {
 		const image = element("img", "image", "a sunset");
 		edit(image, element("nar", "narration", "hello"));
-		const before = read(image);
+		const before = nodeOf(image);
 
 		edit(image, element("nar", "narration", "hello there"));
 
-		expect(read(image)).toBe(before);
-	});
-
-	it("keeps each of two nodes that read one source differently", () => {
-		const warm = element("warm", "image", "a sunset", { tone: "warm" });
-		const cold = element("cold", "image", "a glacier", { tone: "cold" });
-		registry = TONED;
-		edit(warm, cold, element("nar", "narration", "hello"));
-		const before = [read(warm), read(cold)];
-
-		edit(warm, cold, element("nar", "narration", "hello there"));
-
-		expect([read(warm), read(cold)]).toEqual(before);
-		expect(read(warm)).toBe(before[0]);
-		expect(read(cold)).toBe(before[1]);
-		expect(read(cold).dependsOn.tone?.node.inputs.attributes.tone).toBe("cold");
+		expect(nodeOf(image)).toBe(before);
 	});
 
 	it("replaces an edited node and every node that depends on it", () => {
 		const second = element("second", "video", "a zoom", linked);
 		const narration = element("nar", "narration", "hello");
 		edit(element("first", "video", "a pan", linked), second, narration);
-		const dependent = read(second);
-		const bystander = read(narration);
+		const dependent = nodeOf(second);
+		const bystander = nodeOf(narration);
 
 		edit(element("first", "video", "a slow pan", linked), second, narration);
 
-		expect(read(second)).not.toBe(dependent);
-		expect(read(second).dependsOn.previousVisual?.node.inputs.prompt).toBe(
+		expect(nodeOf(second)).not.toBe(dependent);
+		expect(nodeOf(second).dependsOn[PREVIOUS]?.inputs.prompt).toBe(
 			"a slow pan",
 		);
-		expect(read(narration)).toBe(bystander);
+		expect(nodeOf(narration)).toBe(bystander);
 	});
 
 	it("replaces a node whose dependency became another element", () => {
@@ -162,38 +123,81 @@ describe("GenerationGraph", () => {
 		const other = element("other", "image", "a sunrise");
 		const video = element("vid", "video", "a pan", linked);
 		edit(image, other, video);
-		const before = read(video);
+		const before = nodeOf(video);
 
 		edit(other, image, video);
 
-		expect(read(video)).not.toBe(before);
-		expect(read(video).dependsOn.previousVisual?.node.id).toBe("img");
+		expect(nodeOf(video)).not.toBe(before);
+		expect(nodeOf(video).dependsOn[PREVIOUS]?.id).toBe("img");
 	});
 
-	it("reads the project again when its state changes, keeping what reads the same", () => {
+	it("reads the assets again when they change, keeping what reads the same", () => {
 		const image = element("img", "image", "a sunset");
 		const narration = element("nar", "narration", "hi");
 		edit(image, narration);
-		const styled = read(image);
-		const spoken = read(narration);
+		const styled = nodeOf(image);
+		const spoken = nodeOf(narration);
 
-		store.getState().updateMetadata({ style: "noir" });
+		assets = [createCanvasElement("asset_style", { text: "noir" })];
 		graph = new GenerationGraph(contextNow(), graph);
 
-		expect(read(image)).not.toBe(styled);
-		expect(read(image).dependsOn.artStyle?.node.inputs.attributes.style).toBe(
-			"noir",
-		);
-		expect(read(narration)).toBe(spoken);
+		expect(nodeOf(image)).not.toBe(styled);
+		expect(nodeOf(image).inputs.reads["the art style"]).toBe("noir");
+		expect(nodeOf(narration)).toBe(spoken);
 	});
 
 	it("throws the same for every reader of a node that cannot be built", () => {
 		const image = element("img", "image", "a sunset");
 		registry = UNBUILDABLE;
 		edit(image);
-		const failure = 'Two dependencies of "img" share the key "style"';
+		const failure = `Cyclic generation dependency at "img"`;
 
-		expect(() => read(image)).toThrow(failure);
-		expect(() => read(image)).toThrow(failure);
+		expect(() => nodeOf(image)).toThrow(failure);
+		expect(() => nodeOf(image)).toThrow(failure);
+	});
+});
+
+describe("what the plugins declare", () => {
+	const image = createCanvasElement("image", { id: "img" });
+	const avatar = createCanvasElement("asset_avatar", {
+		attrs: { name: "Red" },
+	});
+	const declaring: ConnectorPlugin = {
+		name: "declaring",
+		reads: [
+			() => ({
+				"the art style": "noir",
+				"the references": undefined,
+				"the language": "",
+			}),
+		],
+		dependencies: [
+			() => ({ "Red's avatar": avatar, "Bob's avatar": undefined }),
+		],
+	};
+
+	it("records only the values a plugin found, leaving out empty ones", () => {
+		expect(pluginRecords([declaring], "reads", image, EMPTY_CONTEXT)).toEqual({
+			"the art style": "noir",
+		});
+	});
+
+	it("depends only on the elements a plugin found", () => {
+		expect(
+			pluginRecords([declaring], "dependencies", image, EMPTY_CONTEXT),
+		).toEqual({
+			"Red's avatar": avatar,
+		});
+	});
+
+	it("refuses two plugins declaring the same label", () => {
+		expect(() =>
+			pluginRecords(
+				[declaring, declaring],
+				"dependencies",
+				image,
+				EMPTY_CONTEXT,
+			),
+		).toThrow(`Two plugins declare "Red's avatar"`);
 	});
 });

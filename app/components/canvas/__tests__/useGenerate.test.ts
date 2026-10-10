@@ -1,16 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import {
-	forElement,
-	type GenerationNode,
-	type NodeSpec,
-} from "@/lib/generation/graph";
+import { element } from "@/lib/canvas/__tests__/_assets";
+import type { ContentElement, GeneratedElement } from "@/lib/canvas/types";
+import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
 import { buildNode, createGraphFor } from "@/lib/generation/generationGraph";
-import { createProjectStore } from "@/lib/project/store";
+import { buildCtx } from "@/lib/generation/__tests__/_context";
 
 // Memos hold across renders, as React's do: the bug is a graph kept from an
 // earlier render. Each render reads its slots back in call order.
@@ -41,39 +36,21 @@ vi.mock("@/lib/generation/GenerationQueueProvider", () => ({
 	useQueueSelector: <T>(selector: (q: GenerationQueue) => T) => selector(queue),
 }));
 
-const store = createProjectStore();
-let canvas: CanvasContentElement[] = [];
+let canvas: ContentElement[] = [];
 // Like the real hook, the context keeps its identity while text inside an
 // element changes, and reads the canvas when it is made.
-const buildContext = () => ({
-	store,
-	state: store.getState(),
-	canvas,
-	registry: DEFAULT_CONNECTOR_REGISTRY,
-});
+const buildContext = () => buildCtx(canvas);
 vi.mock("@/lib/generation/useBuildContext", () => ({
 	useBuildContext: () => buildContext,
 }));
 const graphFor = createGraphFor();
 vi.mock("@/lib/generation/LiveGraphProvider", () => ({
-	useResolveNode: () => (spec: NodeSpec) =>
-		graphFor(canvas, buildContext).resolve(spec),
+	useResolveNode: () => (target: GeneratedElement) =>
+		graphFor(buildContext, canvas).resolve(target),
 }));
 
 const { useGenerate } = await import("../hooks/useGenerate");
 const { useGenerateScope } = await import("../hooks/useGenerateScope");
-
-const element = (
-	id: string,
-	type: CanvasContentElement["type"],
-	text: string,
-	attrs: Record<string, string> = {},
-): CanvasContentElement => ({
-	id,
-	type,
-	...splitAttributes(attrs),
-	children: [{ id: `${id}-t`, type, text }],
-});
 
 const image = element("img", "image", "a sunset");
 const video = element("vid", "video", "Shot 1: slow pan", {
@@ -84,7 +61,7 @@ const edited = element("img", "image", "a sunrise");
 /** The image as it was regenerated from its own card: current, not stale. */
 function regenerateImageFromItsCard() {
 	canvas = [edited, video];
-	queue.commitResult(buildNode(forElement(edited), buildContext()), {
+	queue.commitResult(buildNode(edited, buildContext()), {
 		imageUrl: "https://img/sunrise.png",
 		durationSec: 0,
 	});
@@ -92,7 +69,7 @@ function regenerateImageFromItsCard() {
 
 const queuedImage = (spy: ReturnType<typeof vi.spyOn>) => {
 	const roots = spy.mock.calls[0]?.[0] as GenerationNode[];
-	return roots[0]?.dependsOn.previousVisual?.node;
+	return roots[0]?.dependsOn["the previous visual"];
 };
 
 let enqueue: ReturnType<typeof vi.spyOn>;

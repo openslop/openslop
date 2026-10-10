@@ -1,7 +1,7 @@
 import { Editor, Path, Transforms, type NodeEntry } from "slate";
-import { findElementById } from "./editorOps";
-import { isSceneElement } from "./scenes";
-import type { CanvasElement } from "./types";
+import { findBlockById } from "./editorOps";
+import { isScene } from "./scenes";
+import type { CanvasBlock } from "./types";
 
 /** What a sortable card tells dnd-kit about itself. */
 export type SortableData = { type: "scene" | "content"; sceneId: string };
@@ -16,8 +16,8 @@ export type DragTransfer = { sceneId: string; atIndex: number };
 const sortableData = (entry: DragEntry) => entry.data.current as SortableData;
 
 /** Content dropped on a scene appends to it; dropped on content, it takes that slot. */
-function contentSlot([node, path]: NodeEntry<CanvasElement>): Path {
-	return isSceneElement(node) ? [...path, node.children.length] : path;
+function contentSlot([node, path]: NodeEntry<CanvasBlock>): Path {
+	return isScene(node) ? [...path, node.children.length] : path;
 }
 
 /**
@@ -30,15 +30,15 @@ export function moveDraggedElement(
 	activeId: string,
 	overId: string,
 ): void {
-	const activeEntry = findElementById(editor, activeId);
-	const overEntry = findElementById(editor, overId);
+	const activeEntry = findBlockById(editor, activeId);
+	const overEntry = findBlockById(editor, overId);
 	if (!activeEntry || !overEntry) return;
 
 	const [activeNode, activePath] = activeEntry;
 	const [overNode, overPath] = overEntry;
 
-	if (isSceneElement(activeNode)) {
-		const to = isSceneElement(overNode) ? overPath : Path.parent(overPath);
+	if (isScene(activeNode)) {
+		const to = isScene(overNode) ? overPath : Path.parent(overPath);
 		if (Path.equals(activePath, to)) return;
 		Transforms.moveNodes(editor, { at: activePath, to });
 		return;
@@ -59,7 +59,7 @@ export function crossSceneTransfer(
 	const from = sortableData(active);
 	const to = sortableData(over);
 	if (from.type === "scene" || from.sceneId === to.sceneId) return null;
-	const overEntry = findElementById(editor, String(over.id));
+	const overEntry = findBlockById(editor, String(over.id));
 	if (!overEntry) return null;
 	const slot = contentSlot(overEntry);
 	return { sceneId: to.sceneId, atIndex: slot[slot.length - 1] };

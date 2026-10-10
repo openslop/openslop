@@ -1,9 +1,8 @@
-import type { ParsedElement } from "./types";
-import { isCanvasElementType } from "./guards";
-import { makeNodeId } from "./nodeUtils";
+import { isElementType } from "./guards";
 import { parseXmlTag } from "./parseXmlTag";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { createCanvasNode } from "./createCanvasNode";
+import { createCanvasElement } from "./createCanvasElement";
+import type { CanvasElement } from "./types";
 import { unescapeXml } from "./xmlEscape";
 
 const MIN_BUFFER_LENGTH = 5;
@@ -15,18 +14,20 @@ const PARTIAL_ENTITY = /&[a-z]*$/i;
 /**
  * Incrementally turns a stream of OSML text chunks into canvas nodes. Feed
  * partial chunks with `appendChunk` as they arrive; completed tags are emitted
- * to `getNodes` and open text keeps appending to the last node.
+ * to `getNodes` and open text keeps appending to the last node. A tag the
+ * canvas does not know is dropped along with its text.
  */
 export class OSMLStreamParser {
 	private buffer = "";
-	private nodes: ParsedElement[] = [];
+	private nodes: CanvasElement[] = [];
+	private current: CanvasElement | undefined;
 
 	appendChunk(chunk: string, defaultModels?: ConnectorModels): boolean {
 		this.buffer += chunk;
 		return this.parseBuffer(defaultModels);
 	}
 
-	getNodes(): ParsedElement[] {
+	getNodes(): CanvasElement[] {
 		return this.nodes;
 	}
 
@@ -63,9 +64,7 @@ export class OSMLStreamParser {
 	}
 
 	private updateCurrent(text: string): void {
-		const current = this.nodes[this.nodes.length - 1];
-		if (!current) return;
-		const lastChild = current.children[current.children.length - 1];
+		const lastChild = this.current?.children.at(-1);
 		if (!lastChild) return;
 		lastChild.text += unescapeXml(text);
 	}
@@ -75,19 +74,14 @@ export class OSMLStreamParser {
 		attributes: Record<string, string>,
 		defaultModels?: ConnectorModels,
 	): void {
-		if (isCanvasElementType(type)) {
-			const { id, ...attrs } = attributes;
-			this.nodes.push(createCanvasNode(type, { id, attrs, defaultModels }));
+		if (!isElementType(type)) {
+			this.current = undefined;
 			return;
 		}
-		// Non-canvas tags (metadata_*) pass through as generic nodes;
-		// `collectMetadata` reads them by tag name.
-		this.nodes.push({
-			id: makeNodeId(),
-			type,
-			customAttributes: attributes,
-			children: [{ id: makeNodeId(), type, text: "" }],
-		});
+		const { id, ...attrs } = attributes;
+		const element = createCanvasElement(type, { id, attrs, defaultModels });
+		this.nodes.push(element);
+		this.current = element;
 	}
 
 	private shouldFlushBuffer(): boolean {
@@ -107,7 +101,7 @@ export class OSMLStreamParser {
 export function parseOSML(
 	osml: string,
 	defaultModels?: ConnectorModels,
-): ParsedElement[] {
+): CanvasElement[] {
 	const parser = new OSMLStreamParser();
 	parser.appendChunk(`${osml}\n`, defaultModels);
 	return parser.getNodes();

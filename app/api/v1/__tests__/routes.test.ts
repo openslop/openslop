@@ -14,10 +14,12 @@ vi.mock("@/lib/api/providers/openslop", () => ({
 
 const mockCreateJob = vi.fn();
 const mockEnqueueJob = vi.fn();
+const mockUpdateJob = vi.fn();
 const mockGetJob = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
+	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
 }));
 
@@ -181,6 +183,17 @@ describe("API routes", () => {
 			const { POST } = await import("@/app/api/v1/image/route");
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 			expect(res.status).toBe(500);
+		});
+
+		it("fails the job when it cannot be queued", async () => {
+			mockEnqueueJob.mockRejectedValue(new Error("queue unavailable"));
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+			expect(res.status).toBe(500);
+			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith("job-abc", {
+				status: "failed",
+				error: expect.stringContaining("queue unavailable"),
+			});
 		});
 
 		referenceImagesSuite(

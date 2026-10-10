@@ -10,7 +10,6 @@ import type {
 	Connector,
 	ConnectorPlugin,
 	ConnectorType,
-	GenerationContext,
 	ModelRef,
 	PluginContext,
 	ResolvedConnectorConfig,
@@ -50,15 +49,7 @@ export abstract class BaseConnector<
 		);
 	}
 
-	protected contextFor(context?: GenerationContext): PluginContext {
-		return { ...context, model: this.model };
-	}
-
-	async generate(
-		params: TParams,
-		context?: GenerationContext,
-	): Promise<TResult> {
-		const ctx = this.contextFor(context);
+	async generate(params: TParams, ctx: PluginContext = {}): Promise<TResult> {
 		try {
 			const prepared = await this.prepareParams(params, ctx);
 			const result = await this._generate(prepared, ctx.signal);

@@ -17,7 +17,12 @@ const row = (overrides: Record<string, unknown> = {}) => ({
 	element_id: "el-1",
 	created_at: "2026-01-01T00:00:00.000Z",
 	connector_type: "image",
-	inputs: { prompt: "a fox", attributes: { style: "ink" }, dependencies: {} },
+	inputs: {
+		prompt: "a fox",
+		attributes: { style: "ink" },
+		reads: {},
+		dependencies: {},
+	},
 	result: { durationSec: 0, imageUrl: "https://cdn/a.png" },
 	pinned: false,
 	...overrides,
@@ -33,6 +38,7 @@ describe("parseElementVersions", () => {
 				inputs: {
 					prompt: "a fox",
 					attributes: { style: "ink" },
+					reads: {},
 					dependencies: {},
 				},
 				result: { durationSec: 0, imageUrl: "https://cdn/a.png" },
@@ -68,7 +74,7 @@ const makeVersion = (
 ): CommittedVersion => ({
 	elementId: "el-1",
 	connectorType: "image",
-	inputs: { prompt: "a fox", attributes: {}, dependencies: {} },
+	inputs: { prompt: "a fox", attributes: {}, reads: {}, dependencies: {} },
 	result: { durationSec: 0, imageUrl: "https://cdn/a.png" },
 	pinned: false,
 	...overrides,

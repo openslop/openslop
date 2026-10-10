@@ -1,43 +1,54 @@
-import { describe, expect, it } from "vitest";
+// @vitest-environment happy-dom
+
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { act } from "react";
+import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
-import { EnumField, TextAreaField, TextField } from "../fields";
+import { type } from "@/app/components/canvas/__tests__/_mount";
+import { TextAreaField } from "../fields";
 
-const noop = () => {};
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-describe("character fields", () => {
-	it("TextField labels its input and passes the placeholder through", () => {
+const container = document.body.appendChild(document.createElement("div"));
+const root = createRoot(container);
+const write = vi.fn();
+const render = (value: string) =>
+	act(() =>
+		root.render(<TextAreaField label="Look" value={value} onChange={write} />),
+	);
+const field = () => {
+	const textarea = container.querySelector("textarea");
+	if (!textarea) throw new Error("no textarea");
+	return textarea;
+};
+
+afterEach(() => act(() => root.render(null)));
+
+describe("TextAreaField", () => {
+	it("labels its textarea and shows the value", () => {
 		const html = renderToStaticMarkup(
-			<TextField
-				label="Description"
-				value={undefined}
-				onChange={noop}
-				placeholder="Free-text"
+			<TextAreaField
+				label="Appearance"
+				value="tall"
+				onChange={write}
+				placeholder="Describe the look"
 			/>,
 		);
-		expect(html).toContain("Description");
-		expect(html).toContain('placeholder="Free-text"');
-	});
-
-	it("TextAreaField labels its textarea and shows the value", () => {
-		const html = renderToStaticMarkup(
-			<TextAreaField label="Appearance" value="tall" onChange={noop} />,
-		);
 		expect(html).toContain("Appearance");
+		expect(html).toContain('placeholder="Describe the look"');
 		expect(html).toContain(">tall</textarea>");
 	});
 
-	it("EnumField's trigger is a button named after the label, empty as a dash", () => {
-		const html = renderToStaticMarkup(
-			<EnumField
-				label="Gender"
-				options={["male", "female"]}
-				value={undefined}
-				onChange={noop}
-			/>,
-		);
-		const trigger = html.match(/<button[^>]*>/)?.[0] ?? "";
-		expect(trigger).toContain('type="button"');
-		expect(trigger).toContain('aria-label="Gender"');
-		expect(html).toContain("—");
+	it("keeps what was typed while the canvas has yet to publish it, then follows an outside change", async () => {
+		await render("tall");
+
+		await type(field(), "tall and thin");
+
+		expect(write).toHaveBeenLastCalledWith("tall and thin");
+		expect(field().value).toBe("tall and thin");
+
+		await render("short");
+
+		expect(field().value).toBe("short");
 	});
 });

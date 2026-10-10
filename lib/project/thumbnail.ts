@@ -1,14 +1,14 @@
+import type { ContentElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import { isCharacterAvatarId } from "./characterAvatar";
+import type { GenerationQueue } from "@/lib/generation/queue";
 
+/** The first picture the script generated: what the project looks like. */
 export function pickThumbnailUrl(
-	entries: Iterable<[string, ElementSnapshot]>,
+	elements: ContentElement[],
+	queue: Pick<GenerationQueue, "getElementSnapshot">,
 ): string | null {
-	for (const [id, snap] of entries) {
-		// A character portrait is not what the project looks like.
-		if (isCharacterAvatarId(id)) continue;
-		const url = getPrimaryUrl(snap.result, "image");
+	for (const { id } of elements) {
+		const url = getPrimaryUrl(queue.getElementSnapshot(id).result, "image");
 		if (url) return url;
 	}
 	return null;

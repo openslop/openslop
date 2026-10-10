@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createEditor } from "slate";
-import type { CanvasContentElement, SceneElement } from "@/lib/canvas/types";
+import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { crossSceneTransfer, moveDraggedElement } from "../dragOps";
+import { makeEditor } from "./_assets";
 
-function content(id: string): CanvasContentElement {
+function content(id: string): ContentElement {
 	return {
 		id,
 		type: "narration",
@@ -11,21 +11,12 @@ function content(id: string): CanvasContentElement {
 	};
 }
 
-function scene(id: string, children: CanvasContentElement[]): SceneElement {
+function scene(id: string, children: ContentElement[]): Scene {
 	return { id, type: "scene", children };
 }
 
-function makeEditor(scenes: SceneElement[]) {
-	const editor = createEditor();
-	editor.children = scenes;
-	return editor;
-}
-
 const layout = (editor: ReturnType<typeof makeEditor>) =>
-	(editor.children as SceneElement[]).map((s) => [
-		s.id,
-		s.children.map((c) => c.id),
-	]);
+	(editor.children as Scene[]).map((s) => [s.id, s.children.map((c) => c.id)]);
 
 describe("moveDraggedElement", () => {
 	it("reorders content within a scene", () => {

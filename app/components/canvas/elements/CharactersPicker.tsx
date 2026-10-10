@@ -9,30 +9,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SelectMenuItem } from "@/components/ui/select-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { getElementCharacterNames } from "@/lib/canvas/characterNames";
-import {
-	setCharacterName,
-	toggleCharacter,
-} from "@/app/components/canvas/utils/characterOps";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { useProject } from "@/lib/project/useProject";
-import { useShallow } from "zustand/react/shallow";
+import { toggleShownCharacter } from "@/lib/canvas/assetOps";
+import { shownCharacters } from "@/lib/canvas/characterNames";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
+import type { ContentElement } from "@/lib/canvas/types";
+import { useAvatarNames, useCharacterNames } from "@/lib/canvas/useAssets";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { CharacterPill } from "./CharacterPill";
 
-function useProjectCharacterNames(): string[] {
-	return useProject(useShallow((s) => Object.keys(s.metadata.characters)));
-}
-
 /** Dropdown listing the project's characters with checkmarks for selected ones. */
 function ProjectCharactersMenu({
+	names,
 	selected,
 	onSelect,
 }: {
+	names: string[];
 	selected: Set<string>;
 	onSelect: (name: string) => void;
 }) {
-	const names = useProjectCharacterNames();
 	return (
 		<DropdownMenuContent align="start" className="max-h-64 min-w-32">
 			{names.map((name) => (
@@ -51,15 +45,11 @@ function ProjectCharactersMenu({
 }
 
 /** Multi-select add picker (image elements: many characters per element). */
-export function CharactersPicker({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function CharactersPicker({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
-	const names = useProjectCharacterNames();
+	const names = useAvatarNames();
 	const disabled = names.length === 0;
-	const selected = new Set(getElementCharacterNames(element));
+	const selected = new Set(shownCharacters(element));
 	const label = disabled ? "No characters in project" : "Add character";
 
 	return (
@@ -72,21 +62,18 @@ export function CharactersPicker({
 				</DropdownMenuTrigger>
 			</SimpleTooltip>
 			<ProjectCharactersMenu
+				names={names}
 				selected={selected}
-				onSelect={(name) => toggleCharacter(editor, element, name)}
+				onSelect={(name) => toggleShownCharacter(editor, element, name)}
 			/>
 		</DropdownMenu>
 	);
 }
 
 /** Single-select switcher (character elements: exactly one character per element). */
-export function CharacterSwitcher({
-	element,
-}: {
-	element: CanvasContentElement;
-}) {
+export function CharacterSwitcher({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
-	const names = useProjectCharacterNames();
+	const names = useCharacterNames();
 	const currentName = element.generationAttributes?.name;
 
 	if (names.length === 0) return <CharacterPill name={currentName} />;
@@ -105,8 +92,9 @@ export function CharacterSwitcher({
 				</button>
 			</DropdownMenuTrigger>
 			<ProjectCharactersMenu
+				names={names}
 				selected={new Set(currentName ? [currentName] : [])}
-				onSelect={(name) => setCharacterName(editor, element, name)}
+				onSelect={(name) => mergeAttrs(editor, element.id, { name })}
 			/>
 		</DropdownMenu>
 	);

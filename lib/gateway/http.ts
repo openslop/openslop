@@ -84,8 +84,8 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 		return voices;
 	}
 
-	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {
-		const { preview } = await apiJson<{ preview?: HostedVoicePreview }>(
+	async voicePreview(voiceId: string): Promise<HostedVoicePreview> {
+		const { preview } = await apiJson<{ preview: HostedVoicePreview }>(
 			`${this.route}/voices/preview`,
 			{ params: { voiceId, ...this.model } },
 		);

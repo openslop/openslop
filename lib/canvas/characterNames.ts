@@ -1,5 +1,5 @@
 import uniq from "lodash/uniq";
-import type { CanvasContentElement } from "./types";
+import type { CanvasElement } from "./types";
 
 export const CHARACTERS_ATTR = "characters";
 
@@ -17,19 +17,10 @@ export function parseCharacterNames(value: string | undefined): string[] {
 	);
 }
 
+export const shownCharacters = (element: CanvasElement): string[] =>
+	parseCharacterNames(element.generationAttributes?.[CHARACTERS_ATTR]);
+
 /** Inverse of `parseCharacterNames`; an empty list clears the attribute. */
 export function formatCharacterNames(names: string[]): string | null {
 	return names.join(", ") || null;
-}
-
-export function getElementCharacterNames(
-	element: CanvasContentElement,
-): string[] {
-	const attrs = element.generationAttributes;
-	if (!attrs) return [];
-	const name = attrs.name?.trim();
-	return uniq([
-		...(name ? [name] : []),
-		...parseCharacterNames(attrs[CHARACTERS_ATTR]),
-	]);
 }
