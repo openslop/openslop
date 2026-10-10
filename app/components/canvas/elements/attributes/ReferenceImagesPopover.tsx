@@ -1,15 +1,15 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent } from "@/components/ui/popover";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import {
 	parseReferenceImages,
 	serializeReferenceImages,
 } from "@/lib/connectors/attributes/referenceImages";
-import { useProject } from "@/lib/project/useProject";
+import { useReferenceImages } from "@/app/components/canvas/hooks/useReferenceImages";
 import { ReferenceImagePicker } from "../ReferenceImages";
 import { AttributeTrigger } from "./AttributeTrigger";
 
@@ -19,7 +19,7 @@ const summarize = (override: string[] | undefined, projectCount: number) => {
 };
 
 export interface ReferenceImagesPopoverProps {
-	element: CanvasContentElement;
+	element: ContentElement;
 	attrKey: string;
 	label: string;
 	hideLabel?: boolean;
@@ -42,14 +42,14 @@ export function ReferenceImagesPopover({
 	children,
 }: ReferenceImagesPopoverProps) {
 	const editor = useSlateStatic();
-	const projectImages = useProject((s) => s.referenceImages);
+	const { urls: projectImages } = useReferenceImages();
 	const override = parseReferenceImages(
 		element.generationAttributes?.[attrKey],
 	);
 	const urls = override ?? projectImages;
 
 	const setOverride = (next: string[]) =>
-		updateElementAttrs(editor, element, {
+		mergeAttrs(editor, element.id, {
 			[attrKey]: serializeReferenceImages(next),
 		});
 
@@ -76,7 +76,7 @@ export function ReferenceImagesPopover({
 							className="h-auto p-0"
 							tooltip="Use the project's reference images"
 							onClick={() =>
-								updateElementAttrs(editor, element, { [attrKey]: null })
+								mergeAttrs(editor, element.id, { [attrKey]: null })
 							}
 						>
 							Reset

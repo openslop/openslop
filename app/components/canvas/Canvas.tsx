@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, KeyboardEvent } from "react";
+import { useCallback, useMemo } from "react";
 import { Editable, RenderElementProps, useSlateStatic } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
@@ -9,13 +9,12 @@ import {
 } from "@dnd-kit/sortable";
 import { useDragAndDrop } from "./dnd/useDragAndDrop";
 import { DragTransferContext } from "./dnd/DragTransferContext";
-import { findElementById } from "@/lib/canvas/editorOps";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { findBlockById } from "@/lib/canvas/editorOps";
+import { isAssetElement } from "@/lib/canvas/guards";
+import { isScene } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/SortableScene";
 import { SortableContent } from "./dnd/SortableContent";
-import { DragOverlayContent } from "./dnd/DragOverlay";
-import { AssetsSection } from "./elements/AssetsSection";
-import { AssetEditProvider } from "./elements/character/AssetEditProvider";
+import { DragOverlayPreview } from "./dnd/DragOverlay";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -30,59 +29,53 @@ export default function Canvas() {
 		handleDragCancel,
 	} = useDragAndDrop(editor);
 
-	const handleKeyDown = useCallback(
-		(event: KeyboardEvent<HTMLDivElement>) => {
-			if (event.shiftKey && event.key === "Enter") {
-				event.preventDefault();
-				editor.insertText("\n");
-			}
-		},
-		[editor],
-	);
-
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
-		if (isSceneElement(element))
-			return <SortableScene {...props} element={element} />;
+		if (isAssetElement(element))
+			return (
+				<div {...props.attributes} hidden>
+					{props.children}
+				</div>
+			);
+		if (isScene(element))
+			return (
+				<SortableScene attributes={props.attributes} scene={element}>
+					{props.children}
+				</SortableScene>
+			);
 		return <SortableContent {...props} element={element} />;
 	}, []);
 
-	const activeElement = useMemo(
+	const activeBlock = useMemo(
 		() =>
-			activeId
-				? (findElementById(editor, String(activeId))?.[0] ?? null)
-				: null,
+			activeId ? (findBlockById(editor, String(activeId))?.[0] ?? null) : null,
 		[editor, activeId],
 	);
 
 	return (
-		<AssetEditProvider>
-			<DragTransferContext value={dragTransferStore}>
-				<DndContext
-					sensors={sensors}
-					collisionDetection={pointerWithin}
-					onDragStart={handleDragStart}
-					onDragOver={handleDragOver}
-					onDragEnd={handleDragEnd}
-					onDragCancel={handleDragCancel}
+		<DragTransferContext value={dragTransferStore}>
+			<DndContext
+				sensors={sensors}
+				collisionDetection={pointerWithin}
+				onDragStart={handleDragStart}
+				onDragOver={handleDragOver}
+				onDragEnd={handleDragEnd}
+				onDragCancel={handleDragCancel}
+			>
+				<SortableContext
+					items={sceneItems}
+					strategy={verticalListSortingStrategy}
 				>
-					<AssetsSection />
-					<SortableContext
-						items={sceneItems}
-						strategy={verticalListSortingStrategy}
-					>
-						<Editable
-							placeholder="Start typing your story…"
-							renderElement={renderElement}
-							onKeyDown={handleKeyDown}
-							className="font-body text-body leading-relaxed focus-ring"
-						/>
-					</SortableContext>
-					<DragOverlay>
-						{activeElement && <DragOverlayContent element={activeElement} />}
-					</DragOverlay>
-				</DndContext>
-			</DragTransferContext>
-		</AssetEditProvider>
+					<Editable
+						placeholder="Start typing your story…"
+						renderElement={renderElement}
+						className="font-body text-body leading-relaxed focus-ring"
+					/>
+				</SortableContext>
+				<DragOverlay>
+					{activeBlock && <DragOverlayPreview block={activeBlock} />}
+				</DragOverlay>
+			</DndContext>
+		</DragTransferContext>
 	);
 }

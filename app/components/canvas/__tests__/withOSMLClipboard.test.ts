@@ -1,14 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Transforms } from "slate";
 import { withReact } from "slate-react";
+import { withAssets } from "../plugins/withAssets";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
 import { withNodeId } from "../plugins/withNodeId";
 import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
+import { findAsset } from "@/lib/canvas/assets";
 import { getContentElements } from "@/lib/canvas/scenes";
 import { content, scene, seedScene } from "./fixtures";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import type { CanvasEditor, SceneElement } from "@/lib/canvas/types";
+import type { CanvasEditor, Scene } from "@/lib/canvas/types";
 
 function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
 	const store = { ...initial };
@@ -24,8 +26,10 @@ function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
  * The real base handlers need a mounted DOM, so they are stubbed: the assertions
  * here are about what the plugin does versus what it hands back to the default.
  */
-function makeEditor(seed: SceneElement) {
-	const base = withNodeId(withFlatPaste(withScenes(withReact(createEditor()))));
+function makeEditor(seed: Scene) {
+	const base = withNodeId(
+		withFlatPaste(withScenes(withAssets(withReact(createEditor())))),
+	);
 	const insertTextData = vi.fn(() => true);
 	base.setFragmentData = vi.fn();
 	base.insertTextData = insertTextData;
@@ -87,8 +91,8 @@ describe("withOSMLClipboard copy", () => {
 });
 
 describe("withOSMLClipboard paste", () => {
-	it("rebuilds elements with their attributes", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
+	it("rebuilds elements with their attributes in place of the empty element at the caret", () => {
+		const { editor } = makeEditor(scene([content("narration", "n0")]));
 
 		const handled = paste(
 			editor,
@@ -101,10 +105,33 @@ describe("withOSMLClipboard paste", () => {
 		expect(elementOfType(editor, "character")?.generationAttributes?.name).toBe(
 			"Lyra",
 		);
+		expect(elementOfType(editor, "narration")).toBeUndefined();
+	});
+
+	it("keeps the assets a script carries", () => {
+		const { editor } = makeEditor(scene([content("narration", "n0")]));
+
+		paste(
+			editor,
+			'<asset_style id="style">noir</asset_style>\n--- Scene 1 ---\n<image id="i1">a sunset</image>',
+		);
+
+		const style = findAsset(editor.children, "asset_style");
+		expect(style && getElementBodyText(style)).toBe("noir");
+		expect(elementOfType(editor, "image")).toBeDefined();
+	});
+
+	it("merges the first element's text into a non-empty element at the caret, as any paste does", () => {
+		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
+
+		paste(editor, '<image id="i1">a sunset</image>');
+
+		const narration = elementOfType(editor, "narration");
+		expect(narration && getElementBodyText(narration)).toBe("starta sunset");
 	});
 
 	it("strips scene markers instead of folding them into element text", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
+		const { editor } = makeEditor(scene([content("narration", "n0")]));
 
 		paste(
 			editor,
@@ -119,11 +146,13 @@ describe("withOSMLClipboard paste", () => {
 	});
 
 	it("mints fresh ids so pasted elements do not share generation state", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
+		const { editor } = makeEditor(scene([content("narration", "n0")]));
 
 		paste(editor, '<image id="i1">a sunset</image>');
 
-		expect(elementOfType(editor, "image")?.id).not.toBe("i1");
+		const image = elementOfType(editor, "image");
+		expect(image).toBeDefined();
+		expect(image?.id).not.toBe("i1");
 	});
 
 	it("defers text that parses to no elements", () => {

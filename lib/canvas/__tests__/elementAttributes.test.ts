@@ -3,7 +3,7 @@ import {
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
-	type CanvasContentElement,
+	type ContentElement,
 } from "@/lib/canvas/types";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
@@ -17,7 +17,7 @@ import {
 	splitAttributes,
 } from "../elementAttributes";
 
-function el(customAttributes?: Record<string, string>): CanvasContentElement {
+function el(customAttributes?: Record<string, string>): ContentElement {
 	return {
 		id: "e1",
 		type: "music",

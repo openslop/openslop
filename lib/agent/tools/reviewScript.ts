@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { scriptRules } from "@/lib/script/prompt/build";
 import { VIDEO_FORMAT_NAMES } from "@/lib/script/prompt/formats";
@@ -34,10 +34,13 @@ export const reviewScript = defineTool({
 	icon: Search,
 	label: "Reviewing the script",
 	execute: async ({ format }, ctx) => {
-		const script = ctx.readScript().trim();
-		if (!script) return "The canvas is empty, so there is nothing to review.";
-		return ctx.generateText(reviewPrompt(script, format), {
-			systemPrompt: scriptRules(ctx.readMetadata()),
+		if (ctx.isScriptEmpty())
+			return "The script is empty, so there is nothing to review.";
+		return ctx.generateText(reviewPrompt(ctx.readScript(), format), {
+			systemPrompt: scriptRules(
+				ctx.readAssets(),
+				ctx.readProject().scriptSettings,
+			),
 		});
 	},
 	snapshot: true,

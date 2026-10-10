@@ -1,19 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import type { CanvasEditor } from "@/lib/canvas/types";
-import { createProjectStore } from "@/lib/project/store";
-import { BLANK_SCRIPT } from "@/lib/project/serialize";
 import { createScriptWriter } from "@/lib/script/scriptWriter";
+import { withAssets } from "../plugins/withAssets";
 import { withLayout } from "../plugins/withLayout";
 import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";
 import { shape } from "./fixtures";
 
-const SCRIPT = `<metadata_title>The Lighthouse</metadata_title>
-<image>A lighthouse at dusk, waves crashing</image>
+const SCRIPT = `<image>A lighthouse at dusk, waves crashing</image>
 <narration>The light had burned for a hundred years.</narration>
 <sound>waves crashing on rocks</sound>
 <video>Ayla climbs the spiral stairs</video>
@@ -30,27 +29,45 @@ const SCENES = [
 ];
 
 function written(chunks: string[]): CanvasEditor {
-	const editor = withNodeId(withScenes(withLayout(withReact(createEditor()))));
+	const editor = withNodeId(
+		withScenes(withAssets(withLayout(withReact(createEditor())))),
+	);
 	editor.defaultModels = () => ({});
-	chunks.forEach(createScriptWriter({ editor, store: createProjectStore() }));
+	chunks.forEach(createScriptWriter(editor));
 	return editor;
 }
 
+const scenes = (editor: CanvasEditor) =>
+	shape(editor).filter(([first]) => !first?.startsWith("!"));
+
 describe("a script streamed onto the canvas", () => {
 	it("opens a scene at each visual as the text trickles in", () => {
-		expect(shape(written(SCRIPT.match(/[^]{1,7}/g) ?? []))).toEqual(SCENES);
+		expect(scenes(written(SCRIPT.match(/[^]{1,7}/g) ?? []))).toEqual(SCENES);
 	});
 
 	it("forms the same scenes when it arrives in one piece", () => {
-		expect(shape(written([SCRIPT]))).toEqual(SCENES);
+		expect(scenes(written([SCRIPT]))).toEqual(SCENES);
 	});
 
-	it("starts a blank project on one scene holding the welcome line", () => {
-		const editor = written([BLANK_SCRIPT]);
-
-		expect(shape(editor)).toEqual([["narration"]]);
+	it("clears the script already on the canvas as soon as it starts", () => {
+		const editor = written(["<narration>An old draft.</narration>"]);
+		const write = createScriptWriter(editor);
 		expect(getContentElements(editor.children).map(getElementBodyText)).toEqual(
-			[expect.stringContaining("Welcome to OpenSlop")],
+			[""],
 		);
+
+		write(SCRIPT);
+		expect(scenes(editor)).toEqual(SCENES);
+	});
+
+	it("replaces the empty narration a canvas of only assets is seeded with", () => {
+		const editor = written([]);
+		editor.children = [asset("asset_style")];
+		editor.normalize({ force: true });
+		expect(scenes(editor)).toEqual([["narration"]]);
+
+		createScriptWriter(editor)(SCRIPT);
+
+		expect(scenes(editor)).toEqual(SCENES);
 	});
 });

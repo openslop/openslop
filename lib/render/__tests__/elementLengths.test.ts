@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
-import type { CanvasElementType } from "@/lib/canvas/types";
+import type { ContentType } from "@/lib/canvas/types";
 import { measureElementLengths, measureRuntime } from "../elementLengths";
 import { buildRenderLayout } from "../scene-builder";
 import type { ResolvedElement } from "../types";
-import { ELEMENT_TYPES } from "@/lib/canvas/types";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { secondsForWords } from "@/lib/project/videoLength";
 import {
 	getTrimToDialogue,
@@ -13,7 +13,7 @@ import {
 
 let nextId = 0;
 const element = (
-	type: CanvasElementType,
+	type: ContentType,
 	text: string,
 	customAttributes?: Record<string, string>,
 ) => {
@@ -201,7 +201,7 @@ describe("against buildRenderLayout", () => {
 		node: ReturnType<typeof element>,
 		durationSec: number,
 	): ResolvedElement => {
-		const spec = ELEMENT_TYPES[node.type];
+		const spec = CONTENT_TYPES[node.type];
 		return {
 			id: node.id,
 			type: node.type,

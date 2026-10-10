@@ -1,25 +1,36 @@
 import { Element } from "slate";
 import {
-	CANVAS_ELEMENT_TYPES,
-	FOREGROUND_TYPES,
-	type CanvasContentElement,
-	type CanvasElementType,
-	type ParsedElement,
+	ASSET_TYPES,
+	CONTENT_TYPES,
+	ELEMENT_TYPES,
+	type AssetElement,
+	type AssetType,
+	type ContentElement,
+	type ContentType,
+	type ElementType,
+	type CanvasElement,
 } from "./types";
 
-const ELEMENT_TYPE_NAMES: ReadonlySet<string> = CANVAS_ELEMENT_TYPES;
+const isContentType = (type: string): type is ContentType =>
+	Object.hasOwn(CONTENT_TYPES, type);
 
-export const isCanvasElementType = (type: string): type is CanvasElementType =>
-	ELEMENT_TYPE_NAMES.has(type);
+export const isContentElement = (node: unknown): node is ContentElement =>
+	Element.isElement(node) && isContentType(node.type);
 
-export const isContentElement = (node: unknown): node is CanvasContentElement =>
-	Element.isElement(node) && isCanvasElementType(node.type);
+export const isForeground = (node: unknown): node is ContentElement =>
+	isContentElement(node) && CONTENT_TYPES[node.type].role === "foreground";
 
-export const isForeground = (node: unknown): node is CanvasContentElement =>
-	isContentElement(node) && FOREGROUND_TYPES.has(node.type);
+export const isSpeech = (node: unknown): boolean =>
+	isContentElement(node) && CONTENT_TYPES[node.type].connector === "tts";
 
-/** Narrows a parsed OSML node to a canvas element, the complement of `collectMetadata`. */
-export const isParsedContentElement = (
-	node: ParsedElement,
-): node is ParsedElement & CanvasContentElement =>
-	isCanvasElementType(node.type);
+export const isAssetType = (type: string): type is AssetType =>
+	Object.hasOwn(ASSET_TYPES, type);
+
+export const isAssetElement = (node: unknown): node is AssetElement =>
+	Element.isElement(node) && isAssetType(node.type);
+
+export const isElementType = (type: string): type is ElementType =>
+	Object.hasOwn(ELEMENT_TYPES, type);
+
+export const isCanvasElement = (node: unknown): node is CanvasElement =>
+	Element.isElement(node) && isElementType(node.type);

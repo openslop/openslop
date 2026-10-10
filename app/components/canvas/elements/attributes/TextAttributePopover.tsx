@@ -4,12 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { useSlateStatic } from "slate-react";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import { updateElementAttrs } from "@/app/components/canvas/utils/nodeOps";
+import type { ContentElement } from "@/lib/canvas/types";
+import { mergeAttrs } from "@/lib/canvas/editorOps";
 import { AttributeTrigger } from "./AttributeTrigger";
 
 interface TextAttributePopoverProps {
-	element: CanvasContentElement;
+	element: ContentElement;
 	attrKey: string;
 	value: string;
 	label: string;
@@ -37,7 +37,7 @@ export function TextAttributePopover({
 	const commit = useCallback(
 		(next: string) => {
 			if (next === value) return;
-			updateElementAttrs(editor, element, { [attrKey]: next });
+			mergeAttrs(editor, element.id, { [attrKey]: next });
 		},
 		[editor, element, attrKey, value],
 	);

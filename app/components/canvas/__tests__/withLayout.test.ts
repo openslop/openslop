@@ -1,26 +1,55 @@
 import { describe, expect, it } from "vitest";
-import { createEditor } from "slate";
+import { createEditor, Editor, Node, Transforms, type Descendant } from "slate";
 import { withReact } from "slate-react";
-import type { CanvasContentElement } from "@/lib/canvas/types";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { withLayout } from "../plugins/withLayout";
+import { content, scene } from "./fixtures";
 
-const seeded = (defaultModels: ConnectorModels) => {
+const ASSETS = [
+	asset("asset_style", { text: "noir" }),
+	asset("asset_avatar", { name: "Mia", text: "a girl" }),
+];
+
+const SCRIPT = [scene([content("narration", "n1", "hello")])];
+
+const normalized = (
+	children: Descendant[],
+	defaultModels: ConnectorModels = {},
+) => {
 	const editor = withLayout(withReact(createEditor()));
 	editor.defaultModels = () => defaultModels;
-	editor.children = [];
+	editor.children = children;
 	editor.normalize({ force: true });
-	return editor.children[0] as CanvasContentElement;
+	return editor.children;
 };
 
 describe("withLayout", () => {
 	it("seeds an empty document with one narration", () => {
-		expect(seeded({})).toMatchObject({ type: "narration" });
+		expect(normalized([])).toMatchObject([{ type: "narration" }]);
 	});
 
-	it("seeds it with the model the project speaks in", () => {
-		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		expect(flatAttributes(seeded({ tts: pinned }))).toMatchObject(pinned);
+	it("seeds a document that holds only assets with one narration, after the last of them", () => {
+		const children = normalized([...ASSETS]);
+
+		expect(children.slice(0, -1)).toEqual(ASSETS);
+		expect(children.at(-1)).toMatchObject({ type: "narration" });
+	});
+
+	it("leaves a document that holds a script alone", () => {
+		const children = [...ASSETS, ...SCRIPT];
+
+		expect(normalized(children)).toEqual(children);
+	});
+
+	it("keeps a soft break inside its element", () => {
+		const editor = withLayout(withReact(createEditor()));
+		editor.children = [scene([content("narration", "n1", "hello")])];
+		Transforms.select(editor, Editor.end(editor, [0]));
+
+		editor.insertSoftBreak();
+
+		expect(editor.children).toHaveLength(1);
+		expect(Node.string(editor.children[0])).toBe("hello\n");
 	});
 });

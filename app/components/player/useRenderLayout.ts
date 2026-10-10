@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
-import type { SceneElement } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import type { Scene } from "@/lib/canvas/types";
+import { isScene } from "@/lib/canvas/scenes";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -16,7 +16,7 @@ import type { RenderLayout } from "@/lib/render/types";
 
 export function useRenderLayout(editor: Editor): {
 	layout: RenderLayout;
-	scenes: SceneElement[];
+	scenes: Scene[];
 } {
 	const queue = useGenerationQueue();
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
@@ -35,7 +35,7 @@ export function useRenderLayout(editor: Editor): {
 	);
 
 	return useMemo(() => {
-		const scenes = editor.children.filter(isSceneElement);
+		const scenes = editor.children.filter(isScene);
 		const resolved = resolveElements(scenes, queue.getElementSnapshot, {
 			captionsEnabled,
 		});

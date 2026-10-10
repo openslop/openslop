@@ -1,24 +1,20 @@
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
-import { ELEMENT_CONFIGS } from "@/lib/canvas/elementConfigs";
 import { elementModelPick, elementSchema } from "@/lib/canvas/elementConnector";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/textDirection";
 import { OutputPreview } from "./OutputPreview";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
-import { ElementCharacters } from "./ElementCharacters";
 import { AttributeBadge } from "./AttributeBadge";
 import { ModelAttribute } from "./attributes/ModelAttribute";
 import { ElementGenerateButton, ElementStaleIndicator } from "./GenerateButton";
 import { ElementHistoryButton } from "./ElementHistoryButton";
-import { ElementVoiceButton } from "./ElementVoiceButton";
 import { HeaderIconButton } from "./HeaderIconButton";
 import { ElementGenerationProvider } from "./ElementGenerationContext";
-import { AnimateButton } from "./AnimateButton";
-import { ElementUploadButton } from "./ElementUploadButton";
+import { ELEMENT_CONFIGS } from "./elementConfigs";
 import {
 	Popover,
 	PopoverContent,
@@ -31,7 +27,7 @@ function ElementAttributeBadges({
 	element,
 	specs,
 }: {
-	element: CanvasContentElement;
+	element: ContentElement;
 	specs: Record<string, AttributeSpec>;
 }) {
 	return Object.entries(specs).map(([key, spec]) => (
@@ -49,7 +45,7 @@ function ElementSettings({
 	element,
 	specs,
 }: {
-	element: CanvasContentElement;
+	element: ContentElement;
 	specs: Record<string, AttributeSpec>;
 }) {
 	const entries = Object.entries(specs);
@@ -85,7 +81,7 @@ function ElementSettings({
 
 interface ElementContainerProps {
 	attributes: RenderElementProps["attributes"];
-	element: CanvasContentElement;
+	element: ContentElement;
 	children: React.ReactNode;
 }
 
@@ -120,7 +116,7 @@ export function ElementContainer({
 										{config.label}
 									</span>
 								</span>
-								<ElementCharacters element={element} />
+								{config.lead && <config.lead element={element} />}
 								{!schema.hidesModel && (
 									<ModelAttribute
 										element={element}
@@ -137,7 +133,9 @@ export function ElementContainer({
 									element={element}
 									specs={schema.settingsAttributes}
 								/>
-								<ElementVoiceButton element={element} />
+								{config.tools?.map((Tool, index) => (
+									<Tool key={index} element={element} />
+								))}
 								<ElementHistoryButton element={element} />
 							</div>
 							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto">
@@ -163,8 +161,9 @@ export function ElementContainer({
 							contentEditable={false}
 						>
 							<ElementStaleIndicator />
-							<ElementUploadButton />
-							<AnimateButton element={element} />
+							{config.actions?.map((Action, index) => (
+								<Action key={index} element={element} />
+							))}
 							<ElementGenerateButton />
 						</div>
 					</div>
@@ -182,7 +181,7 @@ export function ElementContainer({
 					className="flex-1 min-w-0 flex items-center select-none"
 					contentEditable={false}
 				>
-					<OutputPreview element={element} />
+					<OutputPreview outputKind={config.outputKind} />
 				</div>
 			</div>
 		</ElementGenerationProvider>

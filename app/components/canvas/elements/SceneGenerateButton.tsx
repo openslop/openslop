@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { Check, RotateCcw, Sparkles } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Spinner } from "@/components/ui/spinner";
-import type { SceneElement } from "@/lib/canvas/types";
+import type { Scene } from "@/lib/canvas/types";
 import {
 	useGenerateScope,
 	type GenerateCounts,
@@ -18,7 +18,7 @@ function SceneGenerateIcon({ empty, active, pending, stale }: GenerateCounts) {
 	return <Sparkles className="h-4 w-4" />;
 }
 
-export function SceneGenerateButton({ scene }: { scene: SceneElement }) {
+export function SceneGenerateButton({ scene }: { scene: Scene }) {
 	const select = useCallback(() => scene.children, [scene.children]);
 	const scope = useGenerateScope(select, "scene");
 	const unavailable = scope.empty || scope.active || scope.pending === 0;

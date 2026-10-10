@@ -2,47 +2,52 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
+import { useSlateStatic } from "slate-react";
+import { addCharacter, ensureAsset } from "@/lib/canvas/assetOps";
 import { createRequiredContext } from "@/lib/components/createRequiredContext";
+import type { AssetType } from "@/lib/canvas/types";
 import { ArtStyleModal } from "../style/ArtStyleModal";
 import { CharacterEditModal } from "./CharacterEditModal";
-import { NarratorEditModal } from "./NarratorEditModal";
 import { NewCharacterDialog } from "./NewCharacterDialog";
 
-/** Openers for the project's asset dialogs, one per asset an asset tile stands for. */
 export type AssetEditors = {
+	/** Opens the asset's dialog, adding the asset first when there is none. */
+	editAsset: (type: AssetType, name?: string) => void;
 	openCreateCharacter: () => void;
-	editCharacter: (name: string) => void;
-	openNarrator: () => void;
-	openArtStyle: () => void;
 };
 
 /** The one asset dialog open at a time, so two can never stack. */
 type AssetEdit =
 	| { kind: "create" }
 	| { kind: "character"; name: string }
-	| { kind: "narrator" }
-	| { kind: "style" };
+	| { kind: "artStyle" };
+
+const DIALOG_OF: Record<AssetType, (name?: string) => AssetEdit> = {
+	asset_avatar: (name = "") => ({ kind: "character", name }),
+	asset_voice: (name = "") => ({ kind: "character", name }),
+	asset_style: () => ({ kind: "artStyle" }),
+	asset_references: () => ({ kind: "artStyle" }),
+};
 
 const [AssetEditContext, useAssetEditors] =
 	createRequiredContext<AssetEditors>("AssetEditProvider");
 export { useAssetEditors };
 
-/**
- * Mounts the asset dialogs once so every tile beneath opens its own, rather
- * than each view wiring the same four openers down to the tiles that use them.
- */
+/** Mounts the asset dialogs once, so no view wires openers down to its tiles. */
 export function AssetEditProvider({ children }: { children: ReactNode }) {
+	const editor = useSlateStatic();
 	const [editing, setEditing] = useState<AssetEdit | null>(null);
 	const close = () => setEditing(null);
 
 	const editors = useMemo<AssetEditors>(
 		() => ({
+			editAsset: (type, name) => {
+				ensureAsset(editor, type, name);
+				setEditing(DIALOG_OF[type](name));
+			},
 			openCreateCharacter: () => setEditing({ kind: "create" }),
-			editCharacter: (name) => setEditing({ kind: "character", name }),
-			openNarrator: () => setEditing({ kind: "narrator" }),
-			openArtStyle: () => setEditing({ kind: "style" }),
 		}),
-		[],
+		[editor],
 	);
 
 	return (
@@ -55,7 +60,12 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				}}
 			>
 				{editing?.kind === "create" && (
-					<NewCharacterDialog onCreated={editors.editCharacter} />
+					<NewCharacterDialog
+						onCreated={(name) => {
+							addCharacter(editor, name);
+							setEditing({ kind: "character", name });
+						}}
+					/>
 				)}
 				{editing?.kind === "character" && (
 					<CharacterEditModal
@@ -64,8 +74,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 						onClose={close}
 					/>
 				)}
-				{editing?.kind === "narrator" && <NarratorEditModal onClose={close} />}
-				{editing?.kind === "style" && <ArtStyleModal onClose={close} />}
+				{editing?.kind === "artStyle" && <ArtStyleModal onClose={close} />}
 			</Dialog>
 		</AssetEditContext>
 	);

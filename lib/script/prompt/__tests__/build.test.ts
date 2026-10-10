@@ -1,25 +1,23 @@
 import { describe, expect, it } from "vitest";
+import { NARRATOR } from "@/lib/canvas/assets";
+import { asset } from "@/lib/canvas/__tests__/_assets";
+import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, scriptRules } from "../build";
-import { MetadataSchema, type Metadata } from "@/lib/project/types";
+import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
 import { VIDEO_LENGTH_SPECS } from "@/lib/project/videoLength";
 
-const base = MetadataSchema.parse({});
+const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
+	ScriptSettingsSchema.parse(settings);
 
-const metadata = (patch: Partial<Metadata> = {}): Metadata => ({
-	...base,
-	...patch,
-});
-
-const lengthOf = (length: "1-3m" | "auto"): Metadata =>
-	metadata({ videoSettings: { ...base.videoSettings, length } });
+const lengthOf = (length: "1-3m" | "auto") => settingsOf({ length });
 
 const template = TEMPLATES[0];
 if (!template) throw new Error("expected a template fixture");
 
 describe("buildScriptPrompt", () => {
 	it("gives a brief the length budget and the format spec, and passes it through", () => {
-		const { system, prompt } = buildScriptPrompt(lengthOf("1-3m"), {
+		const { system, prompt } = buildScriptPrompt([], lengthOf("1-3m"), {
 			kind: "brief",
 			brief: "a rabbit finds a lantern",
 		});
@@ -31,7 +29,7 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("orders the length budget ahead of the format spec", () => {
-		const { system } = buildScriptPrompt(lengthOf("1-3m"), {
+		const { system } = buildScriptPrompt([], lengthOf("1-3m"), {
 			kind: "brief",
 			brief: "a brief",
 		});
@@ -42,20 +40,19 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("holds a brief to the format the user picked, and only then", () => {
-		const formatOf = (format: "faceless" | "auto"): Metadata =>
-			metadata({ videoSettings: { ...base.videoSettings, format } });
+		const formatOf = (format: "faceless" | "auto") => settingsOf({ format });
 		const brief = { kind: "brief", brief: "a brief" } as const;
 
-		expect(buildScriptPrompt(formatOf("faceless"), brief).system).toContain(
+		expect(buildScriptPrompt([], formatOf("faceless"), brief).system).toContain(
 			"The user picked the Faceless format",
 		);
-		expect(buildScriptPrompt(formatOf("auto"), brief).system).not.toContain(
+		expect(buildScriptPrompt([], formatOf("auto"), brief).system).not.toContain(
 			"The user picked the",
 		);
 	});
 
 	it("leaves a brief on auto with no budget to write to", () => {
-		const { system } = buildScriptPrompt(lengthOf("auto"), {
+		const { system } = buildScriptPrompt([], lengthOf("auto"), {
 			kind: "brief",
 			brief: "a brief",
 		});
@@ -63,21 +60,25 @@ describe("buildScriptPrompt", () => {
 		expect(system).not.toContain("# Length");
 	});
 
-	it("keeps a pasted script's notes out of the text but in the guidance", () => {
-		const { system, prompt } = buildScriptPrompt(lengthOf("auto"), {
-			kind: "adapt",
-			script: "NARRATOR\nOnce upon a time.",
-			notes: "warm and slow, lots of wide shots",
-		});
+	it("adapts a pasted script verbatim, its notes in the guidance, with no budget or template", () => {
+		const script = "NARRATOR\nHigh above the sleepy hills.";
+		const { system, prompt } = buildScriptPrompt(
+			[],
+			settingsOf({ template: template.id, length: "1-3m" }),
+			{ kind: "adapt", script, notes: "warm and slow, lots of wide shots" },
+		);
 
-		expect(prompt).toBe("NARRATOR\nOnce upon a time.");
+		expect(prompt).toBe(script);
+		expect(system).toContain("script-to-XML converter");
 		expect(system).toContain("warm and slow, lots of wide shots");
 		expect(system).not.toContain("# Length");
+		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
 	});
 
 	it("pastiches the project's template and keeps the brief as the topic", () => {
 		const { system, prompt } = buildScriptPrompt(
-			metadata({ templateId: template.id }),
+			[],
+			settingsOf({ template: template.id }),
 			{ kind: "brief", brief: "a barista" },
 		);
 
@@ -90,84 +91,82 @@ describe("buildScriptPrompt", () => {
 		const source = { kind: "brief", brief: "a barista" } as const;
 
 		expect(
-			buildScriptPrompt(metadata({ templateId: "left-the-catalog" }), source),
-		).toEqual(buildScriptPrompt(metadata(), source));
+			buildScriptPrompt(
+				[],
+				settingsOf({ template: "left-the-catalog" }),
+				source,
+			),
+		).toEqual(buildScriptPrompt([], settingsOf(), source));
 	});
 
-	it("passes an adapted script through verbatim and drops the length budget", () => {
-		const script = "NARRATOR\nHigh above the sleepy hills.";
-		const { system, prompt } = buildScriptPrompt(metadata(), {
-			kind: "adapt",
-			script,
-		});
-
-		expect(prompt).toBe(script);
-		expect(system).toContain("script-to-XML converter");
-		expect(system).not.toContain("# Length");
-	});
-
-	it("adapts verbatim even when the project has a template", () => {
-		const script = "a line the user wrote";
-		const { system, prompt } = buildScriptPrompt(
-			metadata({ templateId: template.id }),
-			{ kind: "adapt", script },
-		);
-
-		expect(prompt).toBe(script);
-		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
-	});
-
-	it("carries the project's art style, narrator and characters", () => {
+	it("carries the art style, narrator and characters on the canvas", () => {
 		const { system } = buildScriptPrompt(
-			metadata({
-				style: "muted watercolor",
-				narration: { gender: "feminine" },
-				characters: { Lumi: { appearance: "a small grey rabbit" } },
-			}),
+			[
+				asset("asset_style", { text: "muted watercolor" }),
+				asset("asset_voice", {
+					name: NARRATOR,
+					attrs: { gender: "feminine" },
+				}),
+				asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
+			],
+			settingsOf(),
 			{ kind: "brief", brief: "a brief" },
 		);
 
 		expect(system).toContain("# Art Style");
 		expect(system).toContain("muted watercolor");
 		expect(system).toContain("# Narration Voice");
+		expect(system).toContain("- gender: feminine");
 		expect(system).toContain("# Characters");
 		expect(system).toContain("a small grey rabbit");
+		expect(system).not.toContain(`## ${NARRATOR}`);
 	});
 
-	it("lists a character's appearance as its own line", () => {
-		const { system } = buildScriptPrompt(
-			metadata({
-				characters: { Mira: { appearance: "a freckled girl" } },
-			}),
-			{ kind: "brief", brief: "a brief" },
-		);
+	it.each([
+		[
+			"a character's voice and appearance under their name",
+			[
+				asset("asset_avatar", { name: "Mira", text: "a freckled girl" }),
+				asset("asset_voice", { name: "Mira", attrs: { age: "child" } }),
+			],
+			"## Mira\n\n- age: child\n- appearance: a freckled girl",
+			"# Narration Voice",
+		],
+		[
+			"a voice-only character with their voice and no appearance",
+			[asset("asset_voice", { name: "Voice", attrs: { pitch: "low" } })],
+			"## Voice\n\n- pitch: low",
+			"- appearance:",
+		],
+		[
+			"a character with no voice by their appearance alone",
+			[asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" })],
+			"## Lumi\n\n- appearance: a small grey rabbit",
+			"# Narration Voice",
+		],
+	])("lists %s", (_, canvas, listed, absent) => {
+		const preamble = projectPreamble(canvas);
 
-		expect(system).toContain("- appearance: a freckled girl");
+		expect(preamble).toContain(listed);
+		expect(preamble).not.toContain(absent);
+	});
+
+	it("says nothing of a project whose canvas holds no assets", () => {
+		expect(projectPreamble([])).toBe("");
 	});
 
 	it("hands a review the same rules the writer was given, minus the budget it cannot judge", () => {
-		const project = metadata({ style: "muted watercolor" });
-		const rules = scriptRules(project);
+		const styled = [asset("asset_style", { text: "muted watercolor" })];
+		const rules = scriptRules(styled, settingsOf());
 
 		expect(
-			buildScriptPrompt(project, { kind: "brief", brief: "a brief" }).system,
+			buildScriptPrompt(styled, settingsOf(), {
+				kind: "brief",
+				brief: "a brief",
+			}).system,
 		).toContain(rules);
 		expect(rules).toContain("The story script must be written");
 		expect(rules).toContain("muted watercolor");
 		expect(rules).not.toContain("# Length");
-	});
-
-	it("names the declared language, and defers to the input when it is auto", () => {
-		const declared = buildScriptPrompt(metadata({ language: "es" }), {
-			kind: "brief",
-			brief: "a brief",
-		});
-		expect(declared.system).toContain("es (ISO 639-1)");
-
-		const auto = buildScriptPrompt(metadata(), {
-			kind: "brief",
-			brief: "a brief",
-		});
-		expect(auto.system).toContain("the language of the user's own topic");
 	});
 });

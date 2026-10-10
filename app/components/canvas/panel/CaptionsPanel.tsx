@@ -24,10 +24,8 @@ import {
 	type CaptionReveal,
 } from "@/lib/captions/captionStyle";
 import { useCaptionStyle } from "@/lib/captions/useCaptionStyle";
-import {
-	useUpdateVideoSettings,
-	useVideoSetting,
-} from "@/lib/project/useVideoSetting";
+import { useProject } from "@/lib/project/useProject";
+import { useVideoSetting } from "@/lib/project/useVideoSetting";
 import { CaptionFontLibrary } from "../CaptionFonts";
 import { CaptionFontField } from "./CaptionFontField";
 import { CaptionPresetGrid } from "./CaptionPresetGrid";
@@ -60,7 +58,7 @@ const ALIGN_Y_OPTIONS: MediaToggleOption<CaptionAlignY>[] = [
 
 export function CaptionsPanel() {
 	const captionsEnabled = useVideoSetting("captions");
-	const updateVideoSettings = useUpdateVideoSettings();
+	const updateVideoSettings = useProject((state) => state.updateVideoSettings);
 	const [style, setStyle] = useCaptionStyle();
 
 	return (

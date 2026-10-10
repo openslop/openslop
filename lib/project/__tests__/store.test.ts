@@ -1,140 +1,134 @@
 import { describe, expect, it } from "vitest";
-import { createProjectStore } from "../store";
-import { MetadataSchema } from "../types";
+import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/captionStyle";
+import {
+	createProjectStore,
+	extractStoreSnapshot,
+	ProjectDataSchema,
+} from "../store";
+import { ScriptSettingsSchema } from "../types";
+import { VideoSettingsSchema } from "../videoSettings";
 
-describe("project store updateMetadata", () => {
-	it("sets style without touching characters or narration", () => {
+const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
+const SLOP = { provider: "openslop", model: "Slop Image v1" } as const;
+const CLAUDE = { provider: "anthropic", model: "claude-sonnet" } as const;
+
+describe("project store", () => {
+	it("updateVideoSettings deep-merges, so sibling caption style fields are preserved", () => {
 		const store = createProjectStore();
-		store.getState().updateMetadata({ style: "cinematic" });
+		const before = store.getState().videoSettings.captionStyle;
+		store.getState().updateVideoSettings({ transitionType: "fade" });
+		store.getState().updateVideoSettings({ captionStyle: { fontSize: 99 } });
 
-		expect(store.getState().metadata).toEqual(
-			MetadataSchema.parse({ style: "cinematic" }),
+		expect(store.getState().videoSettings).toMatchObject({
+			transitionType: "fade",
+			captionStyle: { ...before, fontSize: 99 },
+		});
+	});
+
+	it("updateModels pins a connector's model and keeps the others", () => {
+		const store = createProjectStore();
+		store.getState().updateModels({ image: RUNWARE, llm: CLAUDE });
+		store.getState().updateModels({ image: SLOP });
+
+		expect(store.getState().models).toEqual({ image: SLOP, llm: CLAUDE });
+	});
+
+	it("updateScriptSettings changes the settings it names and keeps the others", () => {
+		const store = createProjectStore();
+		store
+			.getState()
+			.updateScriptSettings({ language: "fr", template: "pov-life" });
+		store.getState().updateScriptSettings({ length: "under-1m" });
+
+		expect(store.getState().scriptSettings).toEqual(
+			ScriptSettingsSchema.parse({
+				language: "fr",
+				template: "pov-life",
+				length: "under-1m",
+			}),
 		);
-	});
-
-	it("deep-merges narration so prior voice attributes are preserved", () => {
-		const store = createProjectStore();
-		store.getState().updateMetadata({ narration: { gender: "masculine" } });
-		store.getState().updateMetadata({ narration: { accent: "british" } });
-
-		expect(store.getState().metadata.narration).toEqual({
-			gender: "masculine",
-			accent: "british",
-		});
-	});
-
-	it("preserves sibling character properties across updates", () => {
-		const store = createProjectStore();
-		store.getState().updateMetadata({
-			characters: { Alice: { appearance: "A girl" } },
-		});
-		store.getState().updateMetadata({
-			characters: { Alice: { accent: "british" } },
-		});
-
-		expect(store.getState().metadata.characters["Alice"]).toEqual({
-			appearance: "A girl",
-			accent: "british",
-		});
 	});
 
 	it("reset returns the store to a blank project", () => {
 		const store = createProjectStore();
-		store.getState().updateMetadata({
-			title: "My Project",
-			style: "cinematic",
-			narration: { gender: "masculine" },
-			characters: { Alice: { appearance: "A girl" } },
+		store.getState().updateVideoSettings({
+			aspectRatio: "9:16",
+			captions: false,
 		});
-		store.getState().setReferenceImages(["https://img/ref.png"]);
+		store.getState().updateModels({ image: RUNWARE });
+		store.getState().updateScriptSettings({ language: "fr" });
 
 		store.getState().reset();
 
-		expect(store.getState().metadata).toEqual(MetadataSchema.parse({}));
-		expect(store.getState().referenceImages).toEqual([]);
+		expect(store.getState().videoSettings).toEqual(
+			VideoSettingsSchema.parse({}),
+		);
+		expect(store.getState().scriptSettings).toEqual(
+			ScriptSettingsSchema.parse({}),
+		);
+		expect(store.getState().models).toEqual({});
+	});
+});
+
+describe("store snapshot", () => {
+	it("extracts a method-free snapshot, detached from its store", () => {
+		const store = createProjectStore();
+		const snap = extractStoreSnapshot(store);
+
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
+		store.getState().updateModels({ image: RUNWARE });
+		store.getState().updateScriptSettings({ language: "fr" });
+
+		expect(snap).toEqual({
+			title: "",
+			videoSettings: VideoSettingsSchema.parse({}),
+			scriptSettings: ScriptSettingsSchema.parse({}),
+			models: {},
+		});
 	});
 
-	it("adds new characters without removing existing ones", () => {
-		const store = createProjectStore();
-		store.getState().updateMetadata({
-			characters: { Alice: { appearance: "A girl" } },
+	it("round-trips through createProjectStore", () => {
+		const src = createProjectStore();
+		src.getState().updateVideoSettings({
+			aspectRatio: "9:16",
+			transitionType: "fade",
+			captions: false,
 		});
-		store.getState().updateMetadata({
-			characters: { Bob: { appearance: "A boy" } },
-		});
-
-		expect(Object.keys(store.getState().metadata.characters).sort()).toEqual([
-			"Alice",
-			"Bob",
-		]);
-	});
-
-	it("setCharacter fully replaces a character (clearing previous keys)", () => {
-		const store = createProjectStore();
-		store.getState().updateMetadata({
-			characters: {
-				Alice: { appearance: "A girl", voiceId: "voice-1", accent: "british" },
-			},
-		});
-		store
+		src.getState().updateModels({ image: RUNWARE });
+		src
 			.getState()
-			.setCharacter("Alice", { appearance: "Updated", accent: "american" });
+			.updateScriptSettings({ language: "fr", template: "pov-life" });
+		src.getState().setTitle("Moon Cat");
 
-		expect(store.getState().metadata.characters["Alice"]).toEqual({
-			appearance: "Updated",
-			accent: "american",
+		const after = createProjectStore(extractStoreSnapshot(src)).getState();
+		expect(after.videoSettings).toEqual(src.getState().videoSettings);
+		expect(after.scriptSettings).toEqual(src.getState().scriptSettings);
+		expect(after.models).toEqual({ image: RUNWARE });
+		expect(after.title).toBe("Moon Cat");
+	});
+});
+
+describe("ProjectDataSchema", () => {
+	it("completes partial settings", () => {
+		const parsed = ProjectDataSchema.parse({
+			videoSettings: { aspectRatio: "9:16", transitionType: "fade" },
+			scriptSettings: { length: "under-1m" },
 		});
+
+		expect(parsed.videoSettings).toEqual({
+			aspectRatio: "9:16",
+			transitionType: "fade",
+			captions: true,
+			captionStyle: DEFAULT_CAPTION_STYLE,
+		});
+		expect(parsed.scriptSettings).toEqual(
+			ScriptSettingsSchema.parse({ length: "under-1m" }),
+		);
 	});
 
-	it("updateCharacter merges into the existing entry", () => {
-		const store = createProjectStore();
-		store
-			.getState()
-			.setCharacter("Alice", { appearance: "A girl", accent: "british" });
-		store.getState().updateCharacter("Alice", { age: "adult" });
-
-		expect(store.getState().metadata.characters["Alice"]).toEqual({
-			appearance: "A girl",
-			accent: "british",
-			age: "adult",
-		});
-	});
-
-	it("updateCharacter throws for an unknown character", () => {
-		const store = createProjectStore();
+	it("throws on a structurally invalid row", () => {
 		expect(() =>
-			store.getState().updateCharacter("Nobody", { age: "adult" }),
-		).toThrow(/Nobody/);
-	});
-
-	it("addReferenceImages appends to the existing images", () => {
-		const store = createProjectStore();
-		store.getState().setReferenceImages(["a.png"]);
-		store.getState().addReferenceImages(["b.png", "c.png"]);
-
-		expect(store.getState().referenceImages).toEqual([
-			"a.png",
-			"b.png",
-			"c.png",
-		]);
-	});
-
-	it("removeReferenceImage drops only the image at the given index", () => {
-		const store = createProjectStore();
-		store.getState().setReferenceImages(["a.png", "b.png", "c.png"]);
-		store.getState().removeReferenceImage(1);
-
-		expect(store.getState().referenceImages).toEqual(["a.png", "c.png"]);
-	});
-
-	it("removeCharacter deletes the entry", () => {
-		const store = createProjectStore();
-		store.getState().setCharacter("Alice", { appearance: "A girl" });
-		store.getState().setCharacter("Bob", { appearance: "A boy" });
-		store.getState().removeCharacter("Alice");
-
-		expect(store.getState().metadata.characters).toEqual({
-			Bob: { appearance: "A boy" },
-		});
+			ProjectDataSchema.parse({ videoSettings: { aspectRatio: 42 } }),
+		).toThrow();
 	});
 });

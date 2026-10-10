@@ -1,65 +1,50 @@
 import isEqual from "lodash/isEqual";
+import mapValues from "lodash/mapValues";
+import pickBy from "lodash/pickBy";
 import memoizeOne from "memoize-one";
 import { shallow } from "zustand/shallow";
+import { resolveElementConnector } from "@/lib/canvas/elementConnector";
 import {
-	resolveElementConnector,
-	type ElementConnector,
-} from "@/lib/canvas/elementConnector";
-import type { CanvasContentElement } from "@/lib/canvas/types";
+	isGenerated,
+	type GeneratedElement,
+	type CanvasElement,
+} from "@/lib/canvas/types";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 import { getPromptText } from "./inputs";
-import {
-	isSourceNode,
-	isUnbuiltElement,
-	type BuildContext,
-	type Dependency,
-	type UnbuiltElement,
-	type GenerationNode,
-	type JobNode,
-	type NodeId,
-	type NodeSpec,
-} from "./graph";
+import type { BuildContext, GenerationNode, NodeId } from "./graph";
 
-const toJobNode = (
-	element: CanvasContentElement,
-	connector: ElementConnector,
+export const generatedById = (canvas: CanvasElement[], id: string) =>
+	canvas.find(
+		(element): element is GeneratedElement =>
+			isGenerated(element) && element.id === id,
+	);
+
+type Declared = { reads: string; dependencies: GeneratedElement };
+
+/** What the plugins declare of one kind, by label; a label two plugins share is refused, an empty value left out. */
+export const pluginRecords = <K extends keyof Declared>(
 	plugins: ConnectorPlugin[],
-	dependsOn: Record<string, Dependency>,
-): JobNode => ({
-	id: element.id,
-	inputs: {
-		prompt: getPromptText(element),
-		attributes: element.generationAttributes ?? {},
-	},
-	dependsOn,
-	job: {
-		elementId: element.id,
-		elementType: element.type,
-		connectorType: connector.type,
-		model: connector.model,
-		config: { ...connector.config, plugins },
-	},
-});
-
-/** Two elements may read one source differently, as two narrations do a voice. */
-const keyOf = (node: GenerationNode) =>
-	isSourceNode(node) ? `${node.id}\n${node.identity}` : node.id;
-
-const sameDependencies = (
-	a: Record<string, Dependency>,
-	b: Record<string, Dependency>,
-) =>
-	shallow(Object.keys(a), Object.keys(b)) &&
-	Object.entries(a).every(([key, dependency]) => shallow(dependency, b[key]));
+	kind: K,
+	element: GeneratedElement,
+	ctx: BuildContext,
+): Record<string, Declared[K]> => {
+	const records = plugins.flatMap((plugin) =>
+		(plugin[kind] ?? []).map((declare) => declare(element, ctx)),
+	);
+	const labels = records.flatMap(Object.keys);
+	const repeated = labels.find((label, i) => labels.indexOf(label) !== i);
+	if (repeated) throw new Error(`Two plugins declare "${repeated}"`);
+	return pickBy(Object.assign({}, ...records));
+};
 
 /** `job` is not compared: it is how a node runs, not what it reads. */
 const isUnchanged = (before: GenerationNode, after: GenerationNode) =>
-	sameDependencies(before.dependsOn, after.dependsOn) &&
+	shallow(before.dependsOn, after.dependsOn) &&
 	isEqual(before.inputs, after.inputs);
 
 export class GenerationGraph {
-	private readonly nodes = new Map<string, GenerationNode>();
-	private readonly previousNodes: Map<string, GenerationNode>;
+	private readonly nodes = new Map<NodeId, GenerationNode>();
+	private readonly previousNodes: Map<NodeId, GenerationNode>;
 	private readonly visiting = new Set<NodeId>();
 
 	constructor(
@@ -69,14 +54,11 @@ export class GenerationGraph {
 		this.previousNodes = previous?.nodes ?? new Map();
 	}
 
-	resolve = (spec: NodeSpec): GenerationNode => {
-		const target = spec(this.ctx);
-		return isUnbuiltElement(target)
-			? this.buildElement(target)
-			: this.intern(target);
-	};
+	resolve = (element: GeneratedElement): GenerationNode =>
+		this.nodes.get(element.id) ??
+		this.build(generatedById(this.ctx.canvas, element.id) ?? element);
 
-	private buildElement({ element, plugins: override }: UnbuiltElement) {
+	private build(element: GeneratedElement): GenerationNode {
 		const { id } = element;
 		const cached = this.nodes.get(id);
 		if (cached) return cached;
@@ -85,66 +67,63 @@ export class GenerationGraph {
 		this.visiting.add(id);
 
 		try {
-			const connector = resolveElementConnector(
-				element,
-				this.ctx.registry,
-				this.ctx.state,
-			);
-			const plugins = override ?? connector.config.plugins ?? [];
-			return this.intern(
-				toJobNode(
-					element,
-					connector,
-					plugins,
-					this.dependenciesOf(element, plugins),
-				),
-			);
+			const { registry, canvas } = this.ctx;
+			const connector = resolveElementConnector(element, registry, canvas);
+			const plugins = connector.config.plugins ?? [];
+			return this.intern({
+				id,
+				inputs: {
+					prompt: getPromptText(element),
+					attributes: element.generationAttributes ?? {},
+					reads: pluginRecords(plugins, "reads", element, this.ctx),
+				},
+				dependsOn: this.dependenciesOf(element, plugins),
+				job: {
+					elementType: element.type,
+					connectorType: connector.type,
+					model: connector.model,
+					config: connector.config,
+				},
+			});
 		} finally {
 			this.visiting.delete(id);
 		}
 	}
 
 	private dependenciesOf(
-		element: CanvasContentElement,
+		element: GeneratedElement,
 		plugins: ConnectorPlugin[],
 	) {
-		const declared = plugins
-			.flatMap((plugin) => plugin.dependencies ?? [])
-			.flatMap((declaration) => declaration.specs(element));
-		const dependsOn: Record<string, Dependency> = {};
-		for (const [key, spec, label] of declared) {
-			if (Object.hasOwn(dependsOn, key))
-				throw new Error(
-					`Two dependencies of "${element.id}" share the key "${key}"`,
-				);
-			dependsOn[key] = { node: this.resolve(spec), label };
-		}
-		return dependsOn;
+		return mapValues(
+			pluginRecords(plugins, "dependencies", element, this.ctx),
+			(target) => this.build(target),
+		);
 	}
 
 	private intern(node: GenerationNode) {
-		const key = keyOf(node);
-		const cached = this.nodes.get(key);
-		if (cached) return cached;
-		const previous = this.previousNodes.get(key);
+		const previous = this.previousNodes.get(node.id);
 		const kept = previous && isUnchanged(previous, node) ? previous : node;
-		this.nodes.set(key, kept);
+		this.nodes.set(node.id, kept);
 		return kept;
 	}
 }
 
 export const createGraphFor = () => {
 	let graph: GenerationGraph | undefined;
-	return memoizeOne((_document: unknown, buildContext: () => BuildContext) => {
-		graph = new GenerationGraph(buildContext(), graph);
-		return graph;
-	});
+	return memoizeOne(
+		(buildContext: () => BuildContext, ..._revision: unknown[]) => {
+			graph = new GenerationGraph(buildContext(), graph);
+			return graph;
+		},
+	);
 };
 
-export const buildNode = (spec: NodeSpec, ctx: BuildContext): GenerationNode =>
-	new GenerationGraph(ctx).resolve(spec);
+export const buildNode = (
+	element: GeneratedElement,
+	ctx: BuildContext,
+): GenerationNode => new GenerationGraph(ctx).resolve(element);
 
 export const buildNodes = (
-	specs: NodeSpec[],
+	elements: GeneratedElement[],
 	ctx: BuildContext,
-): GenerationNode[] => specs.map(new GenerationGraph(ctx).resolve);
+): GenerationNode[] => elements.map(new GenerationGraph(ctx).resolve);

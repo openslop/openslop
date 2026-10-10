@@ -33,13 +33,13 @@ describe("reviewPrompt", () => {
 		expect(reviewPrompt(script)).not.toContain(" .");
 	});
 
-	it("keeps the reviewer off metadata, which is a project setting and never a tag", () => {
+	it("keeps the reviewer on the scenes and off the assets ahead of them", () => {
 		const prompt = reviewPrompt(script);
 
+		expect(prompt).toContain("Judge only the scenes of the script below.");
 		expect(prompt).toContain(
-			"Metadata elements are outside the scope of this review",
+			"The asset elements ahead of the first scene are the project's assets, and outside the scope of this review.",
 		);
-		expect(prompt).not.toContain("Metadata tags,");
 	});
 
 	it("asks for every scene, so a long script is not half reviewed", () => {

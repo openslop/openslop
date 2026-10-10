@@ -1,11 +1,13 @@
+import { referenceUrls } from "@/lib/canvas/assets";
 import {
 	parseReferenceImages,
 	REFERENCE_IMAGES_ATTR,
+	serializeReferenceImages,
 } from "@/lib/connectors/attributes/referenceImages";
-import { requireContext } from "@/lib/connectors/plugins";
+import mergeWith from "lodash/mergeWith";
+import { appendArrays } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import { dependency } from "@/lib/generation/dependency";
-import { forReferenceImages } from "@/lib/generation/sourceNodes";
+import type { Read } from "@/lib/generation/declare";
 
 export type ParamsWithReferenceImages = {
 	prompt: string;
@@ -13,32 +15,35 @@ export type ParamsWithReferenceImages = {
 	[REFERENCE_IMAGES_ATTR]?: string;
 };
 
-/** Declared only while inherited, so an override neither reads nor stales on project references. */
-export const projectReferenceImages = dependency(
-	"referenceImages",
-	"the reference images",
-	(element) =>
-		element.generationAttributes?.[REFERENCE_IMAGES_ATTR] === undefined
-			? forReferenceImages
-			: null,
-);
+const PROJECT_REFERENCES = "the reference images";
+
+/** Read only while inherited, so an override neither reads nor stales on the project's. */
+const inheritedReferences: Read = (
+	{ generationAttributes: attrs = {} },
+	{ canvas },
+) => ({
+	[PROJECT_REFERENCES]:
+		attrs[REFERENCE_IMAGES_ATTR] === undefined
+			? serializeReferenceImages(referenceUrls(canvas))
+			: undefined,
+});
 
 export function createReferenceImagesPlugin(): ConnectorPlugin<ParamsWithReferenceImages> {
 	return {
 		name: "reference-images",
-		dependencies: [projectReferenceImages],
+		reads: [inheritedReferences],
 		beforeGenerate(params, ctx) {
-			const {
-				referenceImages: existing = [],
-				[REFERENCE_IMAGES_ATTR]: override,
-				...rest
-			} = params;
-			const urls = [
-				...existing,
-				...(parseReferenceImages(override) ??
-					requireContext(ctx, "state", "reference-images").referenceImages),
-			];
-			return urls.length === 0 ? rest : { ...rest, referenceImages: urls };
+			const { [REFERENCE_IMAGES_ATTR]: override, ...rest } = params;
+			return mergeWith(
+				{},
+				rest,
+				{
+					referenceImages:
+						parseReferenceImages(override ?? ctx.reads?.[PROJECT_REFERENCES]) ??
+						[],
+				},
+				appendArrays,
+			);
 		},
 	};
 }

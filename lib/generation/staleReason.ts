@@ -11,28 +11,27 @@ const MAX_NAMED = 3;
 
 const list = new Intl.ListFormat("en", { type: "conjunction" });
 
+const changedKeys = (
+	now: Record<string, unknown>,
+	then: Record<string, unknown>,
+) =>
+	union(Object.keys(now), Object.keys(then)).filter(
+		(key) => now[key] !== then[key],
+	);
+
 /** Everything about `node` that no longer matches the result it produced. */
 function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 	const previous = queue.getElementSnapshot(node.id).resultInputs;
 	if (!previous) return [];
 	const current = generationInputs(node, queue);
-
-	const attributeKeys = union(
-		Object.keys(current.attributes),
-		Object.keys(previous.attributes),
-	);
 	return uniq([
 		...(current.prompt !== previous.prompt ? ["the prompt"] : []),
-		...attributeKeys
-			.filter((key) => current.attributes[key] !== previous.attributes[key])
-			.map(lowerCase),
-		...Object.values(node.dependsOn)
-			.filter(
-				({ node: dep }) =>
-					current.dependencies[dep.id] !== previous.dependencies[dep.id] ||
-					needsGeneration(dep, queue),
-			)
-			.map(({ label }) => label),
+		...changedKeys(current.attributes, previous.attributes).map(lowerCase),
+		...changedKeys(current.reads, previous.reads),
+		...changedKeys(current.dependencies, previous.dependencies),
+		...Object.entries(node.dependsOn)
+			.filter(([, dep]) => needsGeneration(dep, queue))
+			.map(([label]) => label),
 	]);
 }
 

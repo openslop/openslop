@@ -3,24 +3,24 @@ import { Node } from "slate";
 import {
 	getElementBodyText,
 	getElementText,
-	serializeOSML,
 	serializeOSMLWithScenes,
 } from "../osmlSerializer";
 import { ZERO_WIDTH_SPACE } from "../constants";
-import { createCanvasNode } from "../createCanvasNode";
+import { createCanvasElement } from "../createCanvasElement";
 import { parseOSML } from "../osmlStreamParser";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { asset } from "./_assets";
 
 function el(
-	type: CanvasContentElement["type"],
+	type: ContentElement["type"],
 	text: string,
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id: "e1",
 		type,
@@ -29,105 +29,55 @@ function el(
 	};
 }
 
-const wrap = (...children: CanvasContentElement[]): SceneElement => ({
+const wrap = (...children: ContentElement[]): Scene => ({
 	id: "scene-1",
 	type: SCENE_TYPE,
 	children,
 });
 
-describe("serializeOSML", () => {
-	it("serializes narration with id", () => {
-		const result = serializeOSML([wrap(el("narration", "Hello world"))]);
-		expect(result).toBe('<narration id="e1">Hello world</narration>');
-	});
-
-	it("serializes tagged elements with id", () => {
-		const result = serializeOSML([wrap(el("image", "a sunset"))]);
-		expect(result).toBe('<image id="e1">a sunset</image>');
-	});
-
-	it("includes attributes after id in the tag", () => {
-		const result = serializeOSML([
-			wrap(el("character", "Hi there", { name: "Lyra", emotion: "excited" })),
-		]);
-		expect(result).toBe(
-			'<character id="e1" name="Lyra" emotion="excited">Hi there</character>',
-		);
-	});
-
-	it("flattens scene hierarchy when serializing", () => {
-		const result = serializeOSML([
-			wrap(el("narration", "Once upon a time")),
-			wrap(el("character", "Hello!", { name: "Bob" }), el("image", "forest")),
-		]);
-		expect(result).toBe(
-			'<narration id="e1">Once upon a time</narration>\n<character id="e1" name="Bob">Hello!</character>\n<image id="e1">forest</image>',
-		);
-	});
-
-	it("handles empty attributes", () => {
-		const result = serializeOSML([wrap(el("music", "epic orchestral"))]);
-		expect(result).toBe('<music id="e1">epic orchestral</music>');
-	});
-});
-
-function elWithId(
-	type: CanvasContentElement["type"],
-	id: string,
-	text: string,
-	customAttributes?: Record<string, string>,
-): CanvasContentElement {
-	return {
-		id,
-		type,
-		...splitAttributes(customAttributes ?? {}),
-		children: [{ id: `${id}-t`, type, text }],
-	};
-}
-
 describe("serializeOSMLWithScenes", () => {
-	it("includes scene headers with numbers", () => {
+	it("writes each scene under its marker, attributes after the id", () => {
 		const result = serializeOSMLWithScenes([
-			wrap(elWithId("narration", "n1", "Hello")),
-			wrap(elWithId("image", "img1", "sunset")),
-		]);
-		expect(result).toContain("--- Scene 1 ---");
-		expect(result).toContain("--- Scene 2 ---");
-	});
-
-	it("serializes elements with ids inside scenes", () => {
-		const result = serializeOSMLWithScenes([
-			wrap(elWithId("narration", "n1", "Hello")),
-		]);
-		expect(result).toContain('<narration id="n1">Hello</narration>');
-	});
-
-	it("groups elements under their scene", () => {
-		const result = serializeOSMLWithScenes([
+			wrap(el("narration", "Once upon a time")),
 			wrap(
-				elWithId("narration", "n1", "first"),
-				elWithId("sound", "s1", "rain", { loops: "3" }),
+				el("character", "Hello!", { name: "Bob", emotion: "excited" }),
+				el("image", "forest"),
 			),
 		]);
-		const lines = result.split("\n").filter(Boolean);
-		expect(lines[0]).toBe("--- Scene 1 ---");
-		expect(lines[1]).toContain("n1");
-		expect(lines[2]).toContain("s1");
+		expect(result).toBe(
+			'--- Scene 1 ---\n<narration id="e1">Once upon a time</narration>\n\n--- Scene 2 ---\n<character id="e1" name="Bob" emotion="excited">Hello!</character>\n<image id="e1">forest</image>',
+		);
 	});
 
-	it("ignores non-scene top-level nodes", () => {
-		// serializeOSMLWithScenes only walks scene elements
+	it("writes the assets ahead of the first scene, wherever they sit", () => {
+		const style = asset("asset_style", { text: "ink wash" });
+		const voice = asset("asset_voice", {
+			name: "Mia & Co",
+			attrs: {
+				gender: "feminine",
+				provider: "cartesia",
+				model: "Sonic 3.6",
+			},
+		});
 		const result = serializeOSMLWithScenes([
-			wrap(elWithId("narration", "n1", "hello")),
+			style,
+			wrap(el("narration", "Hello")),
+			voice,
 		]);
-		expect(result).toContain("Scene 1");
-		expect(result).not.toContain("Scene 2");
+
+		expect(result.split("\n")).toEqual([
+			`<asset_style id="${style.id}">ink wash</asset_style>`,
+			`<asset_voice id="${voice.id}" name="Mia &amp; Co" gender="feminine" provider="cartesia" model="Sonic 3.6"></asset_voice>`,
+			"",
+			"--- Scene 1 ---",
+			'<narration id="e1">Hello</narration>',
+		]);
 	});
 });
 
 describe("getElementText", () => {
 	it("extracts joined text from children", () => {
-		const element: CanvasContentElement = {
+		const element: ContentElement = {
 			id: "e1",
 			type: "narration",
 			children: [
@@ -140,7 +90,7 @@ describe("getElementText", () => {
 });
 
 describe("getElementBodyText", () => {
-	const marked = (...texts: string[]): CanvasContentElement => ({
+	const marked = (...texts: string[]): ContentElement => ({
 		id: "e1",
 		type: "narration",
 		children: texts.map((text, i) => ({
@@ -170,25 +120,25 @@ describe("getElementBodyText", () => {
 });
 
 describe("serialize round trip", () => {
-	const reload = (scene: SceneElement): SceneElement =>
-		wrap(...(parseOSML(serializeOSML([scene])) as CanvasContentElement[]));
+	const reload = (scene: Scene): Scene =>
+		wrap(...(parseOSML(serializeOSMLWithScenes([scene])) as ContentElement[]));
 
 	it("does not grow the script each time it is saved and reloaded", () => {
 		let scene = wrap(
-			createCanvasNode("narration", {
+			createCanvasElement("narration", {
 				id: "e1",
 				text: "hello",
 			}),
 		);
-		const first = serializeOSML([scene]);
+		const first = serializeOSMLWithScenes([scene]);
 
 		for (let i = 0; i < 3; i++) scene = reload(scene);
 
-		expect(serializeOSML([scene])).toBe(first);
+		expect(serializeOSMLWithScenes([scene])).toBe(first);
 	});
 
 	it("keeps a reloaded empty element recognisably empty", () => {
-		const scene = reload(wrap(createCanvasNode("narration", { id: "e1" })));
+		const scene = reload(wrap(createCanvasElement("narration", { id: "e1" })));
 		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
 });

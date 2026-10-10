@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ELEMENT_TYPES, type CanvasElementType } from "@/lib/canvas/types";
+import { CONTENT_TYPES, type ContentType } from "@/lib/canvas/types";
 import { isBlankScene } from "@/lib/render/blankScene";
 import {
 	buildRenderLayout,
@@ -10,10 +10,10 @@ import { buildTimelineRows, packLanes } from "../timelineRows";
 
 function el(
 	id: string,
-	type: CanvasElementType,
+	type: ContentType,
 	overrides: Partial<ResolvedElement> = {},
 ): ResolvedElement {
-	const { role, layer } = ELEMENT_TYPES[type];
+	const { role, layer } = CONTENT_TYPES[type];
 	return {
 		id,
 		type,

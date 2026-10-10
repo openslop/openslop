@@ -4,9 +4,7 @@ import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
 import { TTS_ATTRIBUTES } from "./attributes";
 import type {
-	GenerationContext,
 	HostedVoicePreview,
-	PluginContext,
 	ResolvedConnectorConfig,
 	TextTimestamp,
 	TTSConnector,
@@ -36,7 +34,7 @@ export class HttpTTSConnector
 		return this.gateway.searchVoices(params);
 	}
 
-	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {
+	async voicePreview(voiceId: string): Promise<HostedVoicePreview> {
 		return this.gateway.voicePreview(voiceId);
 	}
 
@@ -45,13 +43,6 @@ export class HttpTTSConnector
 		return {
 			...(await super.resolveBundle(bundle)),
 			textTimestamps: await bundle.fetchJson<TextTimestamp[]>("timestamps"),
-		};
-	}
-
-	protected contextFor(context?: GenerationContext): PluginContext {
-		return {
-			...super.contextFor(context),
-			searchVoices: (params) => this.searchVoices(params),
 		};
 	}
 }

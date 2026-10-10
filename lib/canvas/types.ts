@@ -6,20 +6,20 @@ import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
 
-/** How an element behaves on the rendered timeline. */
+/** How an element behaves on the rendered timeline. An overlay is speech: it holds the screen for as long as it talks. */
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
 export type LayerType = "audio" | "visual";
 
-/** The presentation-free facts about an element type. Its look lives in `elementConfigs`. */
-export type ElementTypeSpec = {
+/** The presentation-free facts about a content type. Its look lives in the canvas's `elementConfigs`. */
+export type ContentSpec = {
 	connector: AssetConnectorType;
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
 };
 
-export const ELEMENT_TYPES = {
+export const CONTENT_TYPES = {
 	narration: {
 		connector: "tts",
 		outputKind: "audio",
@@ -56,22 +56,14 @@ export const ELEMENT_TYPES = {
 		role: "background",
 		layer: "audio",
 	},
-} as const satisfies Record<string, ElementTypeSpec>;
+} as const satisfies Record<string, ContentSpec>;
 
-export type CanvasElementType = keyof typeof ELEMENT_TYPES;
+export type ContentType = keyof typeof CONTENT_TYPES;
 
-const ALL_ELEMENT_TYPES = Object.keys(ELEMENT_TYPES) as CanvasElementType[];
+const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
 
-export const CANVAS_ELEMENT_TYPES: ReadonlySet<CanvasElementType> = new Set(
-	ALL_ELEMENT_TYPES,
-);
-
-export const CanvasElementTypeSchema = z.enum(
-	ALL_ELEMENT_TYPES as [CanvasElementType, ...CanvasElementType[]],
-);
-
-export const FOREGROUND_TYPES: ReadonlySet<CanvasElementType> = new Set(
-	ALL_ELEMENT_TYPES.filter((type) => ELEMENT_TYPES[type].role === "foreground"),
+export const ContentTypeSchema = z.enum(
+	ALL_CONTENT_TYPES as [ContentType, ...ContentType[]],
 );
 
 export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
@@ -109,13 +101,53 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
+/** What every element type declares: the connector it generates on, if any. */
+type ElementSpec = { connector?: AssetConnectorType };
+
+/** Tiles ahead of the scenes; one with a connector generates like content does. */
+export const ASSET_TYPES = {
+	asset_avatar: { connector: "image" },
+	asset_voice: { connector: "voice" },
+	asset_style: {},
+	asset_references: {},
+} as const satisfies Record<`asset_${string}`, ElementSpec>;
+
+export type AssetType = keyof typeof ASSET_TYPES;
+
+export type ElementType = ContentType | AssetType;
+
+export const ELEMENT_TYPES: Record<ElementType, ElementSpec> = {
+	...CONTENT_TYPES,
+	...ASSET_TYPES,
+};
+
+type Specs = typeof CONTENT_TYPES & typeof ASSET_TYPES;
+
+export type GeneratedType = {
+	[T in ElementType]: Specs[T] extends { connector: AssetConnectorType }
+		? T
+		: never;
+}[ElementType];
+
+/** What a type generates on; metadata generates nothing. */
+export function connectorOf(type: GeneratedType): AssetConnectorType;
+export function connectorOf(type: ElementType): AssetConnectorType | undefined;
+export function connectorOf(type: ElementType) {
+	return ELEMENT_TYPES[type].connector;
+}
+
+export const isGenerated = (
+	element: CanvasElement,
+): element is GeneratedElement => connectorOf(element.type) !== undefined;
+
+export const ElementTypeSchema = z.enum(
+	Object.keys(ELEMENT_TYPES) as [ElementType, ...ElementType[]],
+);
+
 export type CanvasEditor = BaseEditor &
 	ReactEditor & {
 		id?: string;
-		/**
-		 * The models a new element takes its own from, read per element: the
-		 * project's can change mid-session.
-		 */
+		/** Resolved per call, since the project's and account's pins change mid-session. */
 		defaultModels: () => ConnectorModels;
 	};
 
@@ -124,37 +156,38 @@ export type SplitAttributes = {
 	layoutAttributes?: Record<string, string>;
 };
 
-export type CanvasContentElement = SplitAttributes & {
+export type ElementOf<T extends ElementType> = SplitAttributes & {
 	id: string;
-	type: CanvasElementType;
+	type: T;
 	children: CanvasText[];
 };
 
-export type SceneElement = {
+export type ContentElement = ElementOf<ContentType>;
+
+export type AssetElement<T extends AssetType = AssetType> = ElementOf<T>;
+
+export type CanvasElement = ContentElement | AssetElement;
+
+export type GeneratedElement = ElementOf<GeneratedType>;
+
+export type Scene = {
 	id: string;
 	type: typeof SCENE_TYPE;
-	children: CanvasContentElement[];
+	children: ContentElement[];
 };
 
-export type CanvasElement = SceneElement | CanvasContentElement;
+export type CanvasBlock = Scene | CanvasElement;
 
 export type CanvasText = {
 	id: string;
-	type: CanvasElementType;
+	type: ElementType;
 	text: string;
-};
-
-export type ParsedElement = SplitAttributes & {
-	id: string;
-	type: string;
-	customAttributes?: Record<string, string>;
-	children: { id: string; type: string; text: string }[];
 };
 
 declare module "slate" {
 	interface CustomTypes {
 		Editor: CanvasEditor;
-		Element: CanvasElement;
+		Element: CanvasBlock;
 		Text: CanvasText;
 	}
 }

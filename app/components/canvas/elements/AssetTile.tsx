@@ -1,35 +1,15 @@
 "use client";
 
-import { Pencil, X, type IconComponent } from "@/components/ui/icon";
+import { Pencil, type IconComponent } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	isGenerationActive,
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/ImageWithShimmer";
+import { cn } from "@/lib/utils";
 import { GenerationIndicator } from "./GenerationIndicator";
 import { RemoveCrossButton } from "./RemoveCrossButton";
-
-function OverlayButton({
-	icon: Icon,
-	label,
-	onClick,
-}: {
-	icon: IconComponent;
-	label: string;
-	onClick: () => void;
-}) {
-	return (
-		<button
-			type="button"
-			onClick={onClick}
-			aria-label={label}
-			className="focus-ring absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition group-hover/tile:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
-		>
-			<Icon className="h-3.5 w-3.5" />
-		</button>
-	);
-}
 
 export function AssetTile({
 	name,
@@ -38,8 +18,8 @@ export function AssetTile({
 	status = "idle",
 	onEdit,
 	onRemove,
-	removeAffordance = "overlay",
 	fallback = "initial",
+	fill = false,
 }: {
 	name: string;
 	previewUrl?: string;
@@ -47,9 +27,8 @@ export function AssetTile({
 	status?: GenerationStatus;
 	onEdit?: () => void;
 	onRemove?: () => void;
-	/** "corner" pins a pill-style cross outside the tile so it can coexist with the edit overlay. */
-	removeAffordance?: "overlay" | "corner";
 	fallback?: "initial" | "icon";
+	fill?: boolean;
 }) {
 	const fallbackContent =
 		fallback === "icon" ? (
@@ -58,7 +37,12 @@ export function AssetTile({
 			name.trim().charAt(0).toUpperCase()
 		);
 	return (
-		<div className="group/tile relative flex w-16 flex-col gap-1 sm:w-20">
+		<div
+			className={cn(
+				"group/tile relative flex flex-col gap-1",
+				!fill && "w-16 sm:w-20",
+			)}
+		>
 			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
 				{previewUrl ? (
 					<ImageWithShimmer
@@ -90,23 +74,17 @@ export function AssetTile({
 					</div>
 				)}
 				{onEdit && (
-					<OverlayButton
-						icon={Pencil}
-						label={`Edit ${name}`}
+					<button
+						type="button"
 						onClick={onEdit}
-					/>
+						aria-label={`Edit ${name}`}
+						className="focus-ring absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition group-hover/tile:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
+					>
+						<Pencil className="h-3.5 w-3.5" />
+					</button>
 				)}
-				{onRemove &&
-					removeAffordance === "overlay" &&
-					status !== "generating" && (
-						<OverlayButton
-							icon={X}
-							label={`Remove ${name}`}
-							onClick={onRemove}
-						/>
-					)}
 			</div>
-			{onRemove && removeAffordance === "corner" && status !== "generating" && (
+			{onRemove && status !== "generating" && (
 				<RemoveCrossButton
 					label={`Remove ${name}`}
 					onClick={onRemove}

@@ -1,136 +1,98 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import type { AssetResult, ConnectorPlugin } from "../types";
+import { describe, expect, it } from "vitest";
+import type { ContentElement, CanvasElement } from "@/lib/canvas/types";
+import type { AssetResult } from "../types";
 import {
-	characterAvatars,
 	createCharacterReferencesPlugin,
 	type ParamsWithCharacters,
 } from "@/lib/connectors/image/plugins/character-references";
+import { asset } from "@/lib/canvas/__tests__/_assets";
+import { dependenciesOf } from "./_state-ctx";
 
-/** Keyed by declaring them for an element that names these characters. */
+const image = (characters: string): ContentElement => ({
+	id: "img",
+	type: "image",
+	generationAttributes: { characters },
+	children: [],
+});
+
 function avatarResults(
 	avatars: Record<string, string>,
 ): Record<string, AssetResult> {
-	const element: CanvasContentElement = {
-		id: "img",
-		type: "image",
-		generationAttributes: { characters: Object.keys(avatars).join(", ") },
-		children: [],
-	};
-	const urls = Object.values(avatars);
 	return Object.fromEntries(
-		characterAvatars
-			.specs(element)
-			.flatMap(([key], i) =>
-				urls[i] ? [[key, { imageUrl: urls[i], durationSec: 0 }]] : [],
-			),
+		Object.entries(avatars).flatMap(([name, url]) =>
+			url ? [[`${name}'s avatar`, { imageUrl: url, durationSec: 0 }]] : [],
+		),
 	);
 }
 
+describe("character avatar dependencies", () => {
+	const avatarsOf = (characters: string, canvas: CanvasElement[]) =>
+		dependenciesOf(
+			createCharacterReferencesPlugin(),
+			image(characters),
+			canvas,
+		);
+
+	it("depends on each named character's avatar, and on nothing for a name no avatar has", () => {
+		const red = asset("asset_avatar", { name: "Red" });
+		const wolf = asset("asset_avatar", { name: "Wolf" });
+
+		expect(avatarsOf("Wolf, Ghost, Red", [red, wolf])).toEqual({
+			"Wolf's avatar": wolf.id,
+			"Red's avatar": red.id,
+		});
+	});
+
+	it("depends on nothing for a character with only a voice", () => {
+		const canvas = [asset("asset_voice", { name: "Red" })];
+
+		expect(avatarsOf("Red", canvas)).toEqual({});
+	});
+});
+
 describe("character-references plugin", () => {
-	let plugin: ConnectorPlugin<ParamsWithCharacters>;
-	let dependencies: Record<string, AssetResult>;
+	const RED = "https://img/red.png";
+	const GRANNY = "https://img/granny.png";
 
-	const setupCharacters = (avatars: Record<string, string>) => {
-		dependencies = avatarResults(avatars);
-	};
+	it.each([
+		[
+			"resolves character names to avatar URLs",
+			{ Red: RED, Granny: GRANNY },
+			"Red,Granny",
+			{ prompt: "Hello. No nameplates", referenceImages: [RED, GRANNY] },
+		],
+		[
+			"handles whitespace in character CSV",
+			{ Red: RED, Granny: GRANNY },
+			" Red , Granny ",
+			{ prompt: "Hello. No nameplates", referenceImages: [RED, GRANNY] },
+		],
+		[
+			"filters out characters without avatars and unknown names",
+			{ Red: RED, Granny: "" },
+			"Red,Granny,Unknown",
+			{ prompt: "Hello. No nameplates", referenceImages: [RED] },
+		],
+		[
+			"strips characters from params when no avatars found",
+			{ Wolf: "" },
+			"Wolf",
+			{ prompt: "Hello" },
+		],
+		[
+			"returns params unchanged when no characters attribute",
+			{},
+			undefined,
+			{
+				prompt: "Hello",
+			},
+		],
+	])("%s", (_, avatars, characters, expected) => {
+		const { beforeGenerate } = createCharacterReferencesPlugin();
+		const params: ParamsWithCharacters = { prompt: "Hello", characters };
 
-	function runBeforeGenerate(params: ParamsWithCharacters) {
-		if (!plugin.beforeGenerate) {
-			throw new Error(`Plugin "${plugin.name}" has no beforeGenerate hook`);
-		}
-		return plugin.beforeGenerate(params, { dependencies });
-	}
-
-	beforeEach(() => {
-		dependencies = {};
-		plugin = createCharacterReferencesPlugin();
-	});
-
-	it("resolves character names to avatar URLs", () => {
-		setupCharacters({
-			Red: "https://img/red.png",
-			Granny: "https://img/granny.png",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Red meets Granny",
-			characters: "Red,Granny",
-		});
-
-		expect(result).toEqual({
-			prompt: "Red meets Granny. No nameplates",
-			referenceImages: ["https://img/red.png", "https://img/granny.png"],
-		});
-	});
-
-	it("strips characters from params when no avatars found", () => {
-		setupCharacters({
-			Wolf: "",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "The wolf howls",
-			characters: "Wolf",
-		});
-
-		expect(result).toEqual({ prompt: "The wolf howls" });
-		expect(result).not.toHaveProperty("characters");
-	});
-
-	it("returns params unchanged when no characters attribute", () => {
-		const params: ParamsWithCharacters = { prompt: "A sunset" };
-		const result = runBeforeGenerate(params);
-		expect(result).toEqual(params);
-	});
-
-	it("handles whitespace in character CSV", () => {
-		setupCharacters({
-			Alice: "https://img/alice.png",
-			Bob: "https://img/bob.png",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Hello",
-			characters: " Alice , Bob ",
-		});
-
-		expect(result).toEqual({
-			prompt: "Hello. No nameplates",
-			referenceImages: ["https://img/alice.png", "https://img/bob.png"],
-		});
-	});
-
-	it("filters out characters without avatars", () => {
-		setupCharacters({
-			Alice: "https://img/alice.png",
-			Bob: "",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Hello",
-			characters: "Alice,Bob",
-		});
-
-		expect(result).toEqual({
-			prompt: "Hello. No nameplates",
-			referenceImages: ["https://img/alice.png"],
-		});
-	});
-
-	it("filters out unknown character names", () => {
-		setupCharacters({
-			Alice: "https://img/alice.png",
-		});
-
-		const result = runBeforeGenerate({
-			prompt: "Hello",
-			characters: "Alice,Unknown",
-		});
-
-		expect(result).toEqual({
-			prompt: "Hello. No nameplates",
-			referenceImages: ["https://img/alice.png"],
-		});
+		expect(
+			beforeGenerate?.(params, { dependencies: avatarResults(avatars) }),
+		).toEqual(expected);
 	});
 });

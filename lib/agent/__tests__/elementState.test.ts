@@ -1,24 +1,17 @@
-import { describe, expect, it } from "vitest";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import type { AssetResult, ConnectorConfig } from "@/lib/connectors/types";
-import type { GenerationJob, GenerationNode } from "@/lib/generation/graph";
+import { describe, expect, it, vi } from "vitest";
+import type { AssetResult } from "@/lib/connectors/types";
+import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { staleReason } from "@/lib/generation/staleReason";
 import { elementState } from "../elementState";
-import { EMPTY_CONTEXT } from "@/lib/generation/__tests__/_context";
+import { jobNode } from "@/lib/generation/__tests__/_graph";
 
-const config: ConnectorConfig = {};
+vi.mock("@/lib/generation/generateForElement", () => ({
+	generateForElement: () => new Promise(() => {}),
+}));
 
-function node(id: string, prompt = id): GenerationNode {
-	const job: GenerationJob = {
-		elementId: id,
-		elementType: "image",
-		connectorType: "image",
-		model: DEFAULT_MODELS.image,
-		config,
-	};
-	return { id, inputs: { prompt, attributes: {} }, dependsOn: {}, job };
-}
+const node = (id: string, prompt = id, reads: Record<string, string> = {}) =>
+	jobNode(id, [], { prompt, reads });
 
 const image = (imageUrl: string): AssetResult => ({ imageUrl, durationSec: 0 });
 
@@ -67,6 +60,20 @@ describe("elementState", () => {
 		});
 	});
 
+	it("names what the element reads when only that changed", () => {
+		const queue = new GenerationQueue();
+		queue.commitResult(
+			node("a", "a", { "the art style": "ink" }),
+			image("a.png"),
+		);
+
+		expect(stateOf(node("a", "a", { "the art style": "oil" }), queue)).toEqual({
+			id: "a",
+			state: "stale",
+			detail: "The art style changed — regenerate to update",
+		});
+	});
+
 	it("reads a failure with its error", () => {
 		const queue = new GenerationQueue();
 		queue.setError("a", "Provider returned 503");
@@ -80,7 +87,7 @@ describe("elementState", () => {
 
 	it("reads what the queue is working on by its status", () => {
 		const queue = new GenerationQueue({ limits: { image: 1 } });
-		queue.enqueueGraph([node("a"), node("b")], EMPTY_CONTEXT);
+		queue.enqueueGraph([node("a"), node("b")]);
 
 		expect(stateOf(node("a"), queue).state).toBe("generating");
 		expect(stateOf(node("b"), queue).state).toBe("queued");

@@ -22,10 +22,6 @@ export const createVoiceSearchHandler = <TPicked extends ModelRef>(
 
 const previewParamsSchema = z.object({ voiceId: requiredVoiceId });
 
-/**
- * A preview is fetched from our blob storage if available, otherwise live
- * from the TTS provider and uploaded to blob storage.
- */
 export const createVoicePreviewHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
 ) =>
@@ -35,7 +31,7 @@ export const createVoicePreviewHandler = <TPicked extends ModelRef>(
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
 			return NextResponse.json(
-				{ preview: await voicePreview(tts, input.voiceId) },
+				{ preview: await voicePreview(tts, input) },
 				{ headers: { "Cache-Control": "private, max-age=3600" } },
 			);
 		},

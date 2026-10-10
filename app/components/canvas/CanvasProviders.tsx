@@ -15,6 +15,7 @@ import { ViewModeProvider } from "./ViewModeContext";
 import { ActiveCaptionFont } from "./CaptionFonts";
 import { SloppyProvider } from "../sloppy/SloppyProvider";
 import { EditorPanelProvider } from "./panel/EditorPanelContext";
+import { AssetEditProvider } from "./elements/character/AssetEditProvider";
 import { useEditorSession } from "./hooks/useEditorSession";
 
 const CanvasScopedProviders = composeProviders(
@@ -28,6 +29,7 @@ const CanvasScopedProviders = composeProviders(
 	ViewModeProvider,
 	SloppyProvider,
 	EditorPanelProvider,
+	AssetEditProvider,
 );
 
 /**

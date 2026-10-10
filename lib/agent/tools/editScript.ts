@@ -1,17 +1,13 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import {
-	CANVAS_ELEMENT_TYPES,
-	type CanvasElementType,
-	ELEMENT_TYPES,
-} from "@/lib/canvas/types";
+import { NARRATOR } from "@/lib/canvas/assets";
+import { attributeSchemaFor } from "@/lib/canvas/elementConnector";
+import { ElementTypeSchema, type ElementType } from "@/lib/canvas/types";
 import {
 	type AttributeEdit,
 	TOGGLE_VALUES,
 } from "@/lib/connectors/attributes/schema";
-import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { EffectType } from "@/lib/connectors/image/enums";
-import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/videoPrompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
@@ -25,8 +21,8 @@ const PICTURE_ATTRIBUTES = [
 	`overlays ${enumeration(Object.values(EffectType))}`,
 ];
 
-/** Attributes the OSML prompt teaches that no connector schema carries. */
-const SCRIPT_ATTRIBUTES: Partial<Record<CanvasElementType, string[]>> = {
+/** Attributes the OSML prompt teaches that no schema carries. */
+const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 	character: ["name"],
 	image: PICTURE_ATTRIBUTES,
 	video: [
@@ -46,25 +42,44 @@ const describeAttribute = (key: string, edit?: AttributeEdit): string[] => {
 // TODO(#743): this reads each type's recommended model, which holds while a type
 // has one or two models. Once a canvas mixes providers/models within a type, Sloppy
 // needs a tool that resolves the schema for one element's own pair before editing it.
-const attributesFor = (type: CanvasElementType): string[] => {
-	const connector = ELEMENT_TYPES[type].connector;
-	const schema = resolveAttributeSchema(connector, DEFAULT_MODELS[connector]);
-	return Object.entries(schema.allAttributes).flatMap(([key, { edit }]) =>
-		describeAttribute(key, edit),
+const attributesFor = (type: ElementType): string[] =>
+	Object.entries(attributeSchemaFor(type, {}).allAttributes).flatMap(
+		([key, { edit }]) => describeAttribute(key, edit),
 	);
-};
 
-const ELEMENT_TYPE_NAMES = [...CANVAS_ELEMENT_TYPES];
+const attributesByType = (types: readonly ElementType[]) =>
+	types
+		.map((type) => ({
+			type,
+			attributes: [...(SCRIPT_ATTRIBUTES[type] ?? []), ...attributesFor(type)],
+		}))
+		.filter(({ attributes }) => attributes.length > 0)
+		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
+		.join("\n");
 
-const ATTRIBUTES_BY_TYPE = ELEMENT_TYPE_NAMES.map(
-	(type) =>
-		`- ${type}: ${[...(SCRIPT_ATTRIBUTES[type] ?? []), ...attributesFor(type)].join(", ")}`,
-).join("\n");
+const ASSETS = dedent`
+	Assets sit ahead of the first scene and are global to the project. They are edited the
+	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
+	asset already exists changes that one instead. The title is not an asset: change it with
+	set_title.
+	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
+	lines and every \`characters\` list use, which never changes. A character has either or both.
+	- asset_avatar: what a character looks like, as its text, written like an image
+	  prompt. Their avatar is drawn from it, and every visual that lists them is drawn from that
+	  avatar.
+	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described,
+	  never picked; always set its language to the one its lines are in. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
+	  character does, and has no avatar.
+	- asset_style: the art style every visual is drawn in, as its text: the medium,
+	  linework, colors and lighting. Never a place, setting, subject or time of day.
+	- asset_references: the pictures every visual is drawn after. The user uploads these.
+`;
 
 export const editScript = defineTool({
 	description: dedent`
-	  Change the script on the canvas: add, remove, rewrite, retype or reorder elements.
-	  Every element carries an \`id\`. Reference ids you read; never invent one.
+	  Change the canvas: add, remove, rewrite, retype or reorder the script's elements, and
+	  set up the assets it draws on. Every element carries an \`id\`. Reference ids you read;
+	  never invent one.
 
 	  - insert: place a new element before or after \`anchor_id\`. Omit \`anchor_id\` to append,
 	    or to prepend with position "before". Each insert resolves independently, so several
@@ -76,16 +91,18 @@ export const editScript = defineTool({
 
 	  To move an element, remove it and insert it again.
 
-	  Element types: ${ELEMENT_TYPE_NAMES.join(", ")}
+	  Element types: ${ElementTypeSchema.options.join(", ")}
+
+	  ${ASSETS}
 
 	  Attributes by type, all string values:
-	  ${ATTRIBUTES_BY_TYPE}
+	  ${attributesByType(ElementTypeSchema.options)}
 
 	  ${VIDEO_PROMPT_FORMAT}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
 	  surrounding script, whatever language the request is in. Image, video, sound and music
-	  prompts are always in English, except speech quoted inside a video prompt.
+	  prompts, avatar and style text are always in English, except speech quoted inside a video prompt.
 	`,
 	input: z.object({
 		ops: z

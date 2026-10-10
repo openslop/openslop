@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import { getLayoutKey } from "../layoutKey";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
@@ -10,7 +10,7 @@ import { splitAttributes } from "@/lib/canvas/elementAttributes";
 function el(
 	id: string,
 	customAttributes?: Record<string, string>,
-): CanvasContentElement {
+): ContentElement {
 	return {
 		id,
 		type: "sound",
@@ -20,10 +20,9 @@ function el(
 }
 
 /** One scene holding the elements, which is how the document always nests them. */
-const scene = (
-	children: CanvasContentElement[],
-	id = "scene-1",
-): SceneElement[] => [{ id, type: SCENE_TYPE, children }];
+const scene = (children: ContentElement[], id = "scene-1"): Scene[] => [
+	{ id, type: SCENE_TYPE, children },
+];
 
 describe("getLayoutKey", () => {
 	it("returns the same key for identical element lists", () => {
@@ -73,11 +72,11 @@ describe("getLayoutKey", () => {
 	});
 
 	it("changes when an element moves to another scene", () => {
-		const before: SceneElement[] = [
+		const before: Scene[] = [
 			{ id: "scene-1", type: SCENE_TYPE, children: [el("s1")] },
 			{ id: "scene-2", type: SCENE_TYPE, children: [el("s2")] },
 		];
-		const after: SceneElement[] = [
+		const after: Scene[] = [
 			{ id: "scene-1", type: SCENE_TYPE, children: [el("s1"), el("s2")] },
 			{ id: "scene-2", type: SCENE_TYPE, children: [] },
 		];
@@ -94,7 +93,7 @@ describe("getLayoutKey", () => {
 	it("is stable across text edits (text is not in the element body)", () => {
 		// text lives on children — layout key doesn't reach into it
 		const a = [el("s1")];
-		const b: CanvasContentElement[] = [
+		const b: ContentElement[] = [
 			{
 				id: "s1",
 				type: "sound",

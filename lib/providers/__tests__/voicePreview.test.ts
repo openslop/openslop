@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { VoiceInfo } from "@/lib/connectors/types";
 import type { TTSProvider } from "../tts/base";
 import { fetchAllowedVoicePreview, voicePreview } from "../tts/voicePreview";
@@ -61,9 +60,12 @@ describe("fetchAllowedVoicePreview", () => {
 	});
 });
 
+const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
+
 const getVoice = vi.fn<(id: string) => Promise<VoiceInfo | null>>();
 const fetchVoicePreview = vi.fn<(url: string) => Promise<Response>>();
-const tts = { getVoice, fetchVoicePreview } as unknown as TTSProvider;
+const generate = vi.fn<TTSProvider["generate"]>();
+const tts = { getVoice, fetchVoicePreview, generate } as unknown as TTSProvider;
 
 const PREVIEW_URL = "https://vendor/sol.wav";
 const VOICE: VoiceInfo = {
@@ -87,13 +89,13 @@ describe("voicePreview", () => {
 		getVoice.mockResolvedValue(VOICE);
 	});
 
-	it("fetches, measures and stores a preview it has not seen, under its URL's hash", async () => {
+	it("fetches, measures and stores a preview it has not seen, under its voice's hash", async () => {
 		fetchVoicePreview.mockResolvedValue(upstream(5));
 
-		const preview = await voicePreview(tts, "v-sol");
+		const preview = await voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" });
 
-		expect(preview?.durationSec).toBeCloseTo(5, 2);
-		expect(preview?.url).toMatch(
+		expect(preview.durationSec).toBeCloseTo(5, 2);
+		expect(preview.url).toMatch(
 			/^https:\/\/assets\.test\/assets\/preview\/voice\/[0-9a-f]{64}\/audio$/,
 		);
 		expect(getVoice).toHaveBeenCalledWith("v-sol");
@@ -116,7 +118,9 @@ describe("voicePreview", () => {
 			metadata: { durationSec: 7 },
 		});
 
-		await expect(voicePreview(tts, "v-sol")).resolves.toEqual({
+		await expect(
+			voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" }),
+		).resolves.toEqual({
 			url: "https://assets.test/assets/preview/voice/abc/preview.mp3",
 			durationSec: 7,
 		});
@@ -125,15 +129,16 @@ describe("voicePreview", () => {
 			"voice",
 			expect.stringMatching(/^[0-9a-f]{64}$/),
 		]);
+		expect(getVoice).not.toHaveBeenCalled();
 		expect(fetchVoicePreview).not.toHaveBeenCalled();
 		expect(upload).not.toHaveBeenCalled();
 	});
 
-	it("stores the same URL under the same name every time", async () => {
+	it("stores the same voice under the same name every time", async () => {
 		fetchVoicePreview.mockImplementation(async () => upstream(3));
 
-		await voicePreview(tts, "v-sol");
-		await voicePreview(tts, "v-sol");
+		await voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" });
+		await voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" });
 
 		const [first, second] = upload.mock.calls.map((call) => call[4]?.id);
 		expect(first).toBe(second);
@@ -142,27 +147,80 @@ describe("voicePreview", () => {
 	it("fails loudly when the vendor will not serve the preview", async () => {
 		fetchVoicePreview.mockResolvedValue(upstream(5, 403));
 
-		await expect(voicePreview(tts, "v-sol")).rejects.toThrow(
-			"Voice preview fetch failed (403)",
-		);
+		await expect(
+			voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" }),
+		).rejects.toThrow("Voice preview fetch failed (403)");
 		expect(upload).not.toHaveBeenCalled();
 	});
 });
 
-describe("voicePreview without a preview to host", () => {
-	const load = vi.spyOn(AssetBundle, "load");
+describe("voicePreview for a voice the vendor has no preview of", () => {
+	const { upload } = spyAssetBundle();
+	const fetchMock = vi.fn();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.stubGlobal("fetch", fetchMock);
+		getVoice.mockResolvedValue({ ...VOICE, previewUrl: undefined });
+		generate.mockResolvedValue({
+			id: "spoken",
+			type: "tts",
+			provider: "cartesia",
+			result: { audio: "output.wav" },
+		});
+		fetchMock.mockResolvedValue(upstream(2));
 	});
 
-	it("has nothing for a voice without a preview, or none at all", async () => {
-		getVoice.mockResolvedValueOnce({ ...VOICE, previewUrl: undefined });
-		await expect(voicePreview(tts, "v-sol")).resolves.toBeUndefined();
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
 
-		getVoice.mockResolvedValueOnce(null);
-		await expect(voicePreview(tts, "v-gone")).resolves.toBeUndefined();
+	it.each([
+		[
+			"its own language",
+			"fr",
+			"Bonjour ! Voici à quoi ressemble ma voix. J'espère qu'elle conviendra à votre histoire.",
+		],
+		[
+			"English when it names none",
+			undefined,
+			"Hello! This is how my voice sounds. I hope it suits your story.",
+		],
+	])(
+		"has the voice speak a preview line in %s",
+		async (_, language, prompt) => {
+			getVoice.mockResolvedValue({ ...VOICE, previewUrl: undefined, language });
+			await voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" });
 
-		expect(load).not.toHaveBeenCalled();
+			expect(generate).toHaveBeenCalledWith(
+				expect.objectContaining({ voiceId: "v-sol", prompt }),
+			);
+		},
+	);
+
+	it("has the voice speak a preview line, and stores that", async () => {
+		const preview = await voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" });
+
+		expect(generate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				voiceId: "v-sol",
+				prompt:
+					"Hello! This is how my voice sounds. I hope it suits your story.",
+			}),
+		);
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://assets.test/assets/tts/cartesia/spoken/output.wav",
+		);
+		expect(preview.durationSec).toBeCloseTo(2, 2);
+		expect(upload).toHaveBeenCalledOnce();
+	});
+
+	it("fails loudly for a voice the vendor does not know", async () => {
+		getVoice.mockResolvedValue(null);
+
+		await expect(
+			voicePreview(tts, { ...CARTESIA, voiceId: "v-gone" }),
+		).rejects.toThrow('No voice "v-gone"');
+		expect(generate).not.toHaveBeenCalled();
 	});
 });

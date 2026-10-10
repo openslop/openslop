@@ -1,11 +1,18 @@
 import { Editor, Path, Transforms } from "slate";
+import { setAsset } from "@/lib/canvas/assetOps";
 import {
-	findNodeById,
+	findElementById,
 	mergeAttrs,
-	retypeNode,
-	updateNodeText,
+	retypeElement,
+	updateElementText,
 } from "@/lib/canvas/editorOps";
+import {
+	isAssetElement,
+	isAssetType,
+	isContentElement,
+} from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insertElement";
+import { isScene } from "@/lib/canvas/scenes";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -57,13 +64,17 @@ function resolveInsertPath(
 	anchorMap: Record<string, string>,
 ): Path | null {
 	if (!op.anchor_id) {
-		return op.position === "before" ? [0, 0] : [editor.children.length];
+		const firstScene = editor.children.findIndex(isScene);
+		return op.position === "before" && firstScene >= 0
+			? [firstScene, 0]
+			: [editor.children.length];
 	}
 
 	const resolvedId = anchorMap[op.anchor_id] ?? op.anchor_id;
 	const entry =
-		findNodeById(editor, resolvedId) ?? findNodeById(editor, op.anchor_id);
-	if (!entry) return null;
+		findElementById(editor, resolvedId) ??
+		findElementById(editor, op.anchor_id);
+	if (!entry || !isContentElement(entry[0])) return null;
 
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
 }
@@ -73,11 +84,19 @@ function applyInsert(
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
 ): RefineOpResult {
+	if (isAssetType(op.type)) {
+		setAsset(editor, op.type, op.attrs?.name, {
+			attrs: op.attrs,
+			text: op.text || undefined,
+		});
+		return OK;
+	}
+
 	const at = resolveInsertPath(editor, op, anchorMap);
 	if (!at) {
 		return {
 			ok: false,
-			reason: `insert: anchor "${op.anchor_id}" no longer exists`,
+			reason: `insert: no element "${op.anchor_id}" to anchor on`,
 		};
 	}
 
@@ -96,7 +115,7 @@ function applyRemove(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "remove" }>,
 ): RefineOpResult {
-	const entry = findNodeById(editor, op.id);
+	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `remove: no element "${op.id}"` };
 	Transforms.removeNodes(editor, { at: entry[1] });
 	return OK;
@@ -106,22 +125,27 @@ function applySet(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "set" }>,
 ): RefineOpResult {
-	const entry = findNodeById(editor, op.id);
+	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
+	const [found, at] = entry;
 
-	const retype = op.type && op.type !== entry[0].type ? op.type : undefined;
-	if (retype) retypeNode(editor, entry[1], entry[0], retype);
-	const target = retype ? findNodeById(editor, op.id) : entry;
-	if (!target)
-		return { ok: false, reason: `set: could not retype element "${op.id}"` };
-	const [element, path] = target;
+	if (isAssetElement(found) && op.attrs && "name" in op.attrs)
+		return {
+			ok: false,
+			reason: `set: an asset's name never changes; remove "${op.id}" and insert it again`,
+		};
 
+	if (op.type && op.type !== found.type) {
+		if (!isContentElement(found))
+			return { ok: false, reason: `set: asset "${op.id}" keeps its type` };
+		retypeElement(editor, at, found, op.type);
+	}
 	if (op.attrs) {
-		mergeAttrs(editor, path, element, op.attrs);
+		mergeAttrs(editor, op.id, op.attrs);
 	}
 
 	if (op.text !== undefined) {
-		updateNodeText(editor, path, op.text);
+		updateElementText(editor, op.id, op.text);
 	}
 	return OK;
 }

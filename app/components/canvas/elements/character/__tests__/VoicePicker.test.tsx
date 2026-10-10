@@ -14,13 +14,13 @@ const VOICE: VoiceInfo = {
 	name: "Aria",
 	language: "en",
 	description: "Warm narrator",
-	previewUrl: "https://vendor/aria",
+	previewUrl: "https://vendor/aria.mp3",
 };
 
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 const onSelect = vi.fn();
-const loadPreview = vi.fn(() => new Promise<undefined>(() => {}));
+const loadPreview = vi.fn(() => new Promise<string>(() => {}));
 
 beforeEach(() => {
 	root = createRoot(container);
@@ -31,12 +31,12 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
-const render = (selected: boolean) =>
+const render = (selected: boolean, voice: VoiceInfo = VOICE) =>
 	act(() =>
 		root.render(
 			<TooltipProvider>
 				<VoiceRow
-					voice={VOICE}
+					voice={voice}
 					selected={selected}
 					onSelect={onSelect}
 					loadPreview={loadPreview}
@@ -60,6 +60,12 @@ describe("VoiceRow", () => {
 
 		render(true);
 		expect(selectButton().getAttribute("aria-pressed")).toBe("true");
+	});
+
+	it("offers no preview for a voice the vendor has none of", () => {
+		render(false, { ...VOICE, previewUrl: undefined });
+
+		expect(container.querySelector('button[aria-label="Play"]')).toBeNull();
 	});
 
 	it("selects the voice from the row's own button", () => {

@@ -1,6 +1,6 @@
 import { v5 as uuidv5 } from "uuid";
 import { z } from "zod";
-import { CanvasElementTypeSchema } from "@/lib/canvas/types";
+import { ElementTypeSchema } from "@/lib/canvas/types";
 import {
 	ASSET_CONNECTOR_TYPES,
 	AssetResultSchema,
@@ -20,7 +20,7 @@ const RowSchema = z.object({
 	element_id: z.string(),
 	created_at: z.string(),
 	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
-	element_type: CanvasElementTypeSchema.nullish(),
+	element_type: ElementTypeSchema.nullish(),
 	inputs: GenerationInputsSchema,
 	result: AssetResultSchema,
 	pinned: z.boolean(),

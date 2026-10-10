@@ -12,7 +12,7 @@ import {
 import { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { crossSceneTransfer, moveDraggedElement } from "@/lib/canvas/dragOps";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { isScene } from "@/lib/canvas/scenes";
 import { createDragTransferStore } from "./DragTransferContext";
 
 const SCENE_ID_SEPARATOR = ",";
@@ -21,7 +21,7 @@ const SCENE_ID_SEPARATOR = ",";
 // per-keystroke render path: it re-renders only when the scene order changes.
 const selectSceneIdKey = (editor: Editor) =>
 	editor.children
-		.filter(isSceneElement)
+		.filter(isScene)
 		.map((scene) => scene.id)
 		.join(SCENE_ID_SEPARATOR);
 

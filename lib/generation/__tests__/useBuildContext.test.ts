@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Descendant, Editor } from "slate";
+import { createEditor, type Descendant } from "slate";
+import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import {
 	SCENE_TYPE,
-	type CanvasContentElement,
-	type SceneElement,
+	type ContentElement,
+	type Scene,
 } from "@/lib/canvas/types";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
@@ -32,14 +33,17 @@ vi.mock("react", () => ({
 	},
 }));
 
-let children: Descendant[] = [];
 // One editor for the life of a test, as Slate's own is: only `children` is
 // swapped, and that swap is what a document revision means.
-const editor = {
-	get children() {
-		return children;
+const editor = createEditor();
+editor.defaultModels = () => ({});
+let children: Descendant[] = [];
+Object.defineProperty(editor, "children", {
+	get: () => children,
+	set: (next: Descendant[]) => {
+		children = next;
 	},
-} as unknown as Editor;
+});
 vi.mock("slate-react", () => ({
 	useSlateStatic: () => editor,
 }));
@@ -49,17 +53,13 @@ vi.mock("@/lib/config/ConfigProvider", () => ({
 }));
 
 let store: ProjectStore;
-vi.mock("@/lib/project/useProject", () => ({
-	useProject: <T>(selector: (state: unknown) => T) =>
-		selector(store.getState()),
-}));
 vi.mock("@/lib/project/ProjectStoreProvider", () => ({
 	useProjectStoreHandle: () => store,
 }));
 
 const { useBuildContext } = await import("../useBuildContext");
 
-const video = (id: string, text: string): CanvasContentElement => ({
+const video = (id: string, text: string): ContentElement => ({
 	id,
 	type: "video",
 	...splitAttributes({ continuity: "true" }),
@@ -67,8 +67,8 @@ const video = (id: string, text: string): CanvasContentElement => ({
 });
 
 /** A document is a new array for every edit, as Slate hands it back. */
-const document = (...elements: CanvasContentElement[]): Descendant[] => [
-	{ id: "scene-1", type: SCENE_TYPE, children: elements } as SceneElement,
+const document = (...elements: ContentElement[]): Descendant[] => [
+	{ id: "scene-1", type: SCENE_TYPE, children: elements } as Scene,
 ];
 
 beforeEach(() => {
@@ -95,20 +95,28 @@ describe("useBuildContext", () => {
 		expect(context().canvas[0]?.children[0]?.text).toBe("shot one, rewritten");
 	});
 
-	it("changes when the project state changes, which a build also reads", () => {
-		children = document(video("vid-1", "shot one"));
+	it("keeps its identity while the settings change", () => {
 		const before = render(useBuildContext);
 
-		store.getState().updateMetadata({ style: "noir" });
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
-		expect(render(useBuildContext)).not.toBe(before);
+		expect(render(useBuildContext)).toBe(before);
 	});
 
-	it("carries the store its state was read from, for a build to write to", () => {
-		children = document();
-		const context = render(useBuildContext)();
+	it("reads the settings when called, not when rendered", () => {
+		const context = render(useBuildContext);
 
-		expect(context.store).toBe(store);
-		expect(context.state).toBe(store.getState());
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
+
+		expect(context().state.videoSettings.aspectRatio).toBe("9:16");
+	});
+
+	it("reads every element of the document, assets first", () => {
+		const style = createCanvasElement("asset_style", { text: "noir" });
+		children = [style, ...document(video("vid-1", "shot one"))];
+
+		const { canvas } = render(useBuildContext)();
+
+		expect(canvas.map(({ id }) => id)).toEqual([style.id, "vid-1"]);
 	});
 });

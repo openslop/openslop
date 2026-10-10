@@ -37,7 +37,7 @@ export interface AttributeSpec {
 
 export interface AttributeDef extends AttributeSpec {
 	key: string;
-	/** Value seeded into `customAttributes` when the element is created. */
+	/** Value seeded into the element's attributes when it is created. */
 	default?: string;
 	/** Rendered on the element header rather than inside the settings popover. */
 	badge?: boolean;

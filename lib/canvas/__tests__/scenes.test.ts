@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, type Editor } from "slate";
 import { ZERO_WIDTH_SPACE } from "../constants";
-import type {
-	CanvasContentElement,
-	CanvasElement,
-	SceneElement,
-} from "../types";
+import type { ContentElement, CanvasBlock, Scene } from "../types";
 import {
 	isScriptEmpty,
 	parentSceneId,
@@ -13,16 +9,13 @@ import {
 	sceneIndexOf,
 } from "../scenes";
 
-const scene = (
-	id: string,
-	children: CanvasContentElement[] = [],
-): SceneElement => ({
+const scene = (id: string, children: ContentElement[] = []): Scene => ({
 	id,
 	type: "scene",
 	children,
 });
 
-const narration = (id: string, body = ""): CanvasContentElement => ({
+const narration = (id: string, body = ""): ContentElement => ({
 	id,
 	type: "narration",
 	children: [
@@ -78,7 +71,7 @@ describe("sceneIndexOf", () => {
 });
 
 describe("parentSceneId", () => {
-	const editorWith = (children: CanvasElement[]): Editor => {
+	const editorWith = (children: CanvasBlock[]): Editor => {
 		const editor = createEditor();
 		editor.children = children;
 		return editor;

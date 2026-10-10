@@ -1,38 +1,30 @@
 import type { Editor } from "slate";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osmlSerializer";
+import { getContentElements } from "@/lib/canvas/scenes";
 import type { GenerationQueue } from "@/lib/generation/queue";
-import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import { resolveDefaultModels } from "@/lib/connectors/models";
-import type { AccountStore } from "@/lib/user/accountStore";
 import { applyScriptToEditor } from "./applyScript";
-import type { ProjectData, ProjectStore } from "./store";
-import { extractStoreSnapshot } from "./storeSnapshot";
+import type { SavedProject } from "./savedProject";
+import { extractStoreSnapshot, type ProjectStore } from "./store";
+import { pickThumbnailUrl } from "./thumbnail";
 
-export type ProjectContent = {
-	script: string;
-	store: ProjectData;
-	generation: Record<string, ElementSnapshot>;
-};
+/** What the project row stores beside the content, derived from it. */
+export type ProjectMeta = { name: string; thumbnail_url: string | null };
 
 export interface ProjectDocument {
-	read(): ProjectContent;
-	write(content: ProjectContent): void;
+	read(): SavedProject;
+	write(content: SavedProject): void;
+	meta(): ProjectMeta;
 }
 
-/**
- * The live project as one readable, writable unit: script, metadata and
- * generated results move together, so a version is never half applied.
- */
+/** The canvas, settings and results move as one unit, so a version is never half applied. */
 export function createProjectDocument({
 	editor,
 	store,
 	queue,
-	accountStore,
 }: {
 	editor: Editor;
 	store: ProjectStore;
 	queue: GenerationQueue;
-	accountStore: AccountStore;
 }): ProjectDocument {
 	return {
 		read: () => ({
@@ -42,13 +34,18 @@ export function createProjectDocument({
 		}),
 
 		write: (content) => {
-			const defaultModels = resolveDefaultModels({
-				project: content.store.metadata.models,
-				account: accountStore.getState().models,
-			});
-			applyScriptToEditor(editor, content.script, defaultModels);
+			// The script is read on the project's pinned models, so they land first.
 			store.setState(content.store);
+			applyScriptToEditor(editor, content.script);
 			queue.replaceSnapshots(content.generation);
 		},
+
+		meta: () => ({
+			name: store.getState().title.trim() || "Untitled",
+			thumbnail_url: pickThumbnailUrl(
+				getContentElements(editor.children),
+				queue,
+			),
+		}),
 	};
 }

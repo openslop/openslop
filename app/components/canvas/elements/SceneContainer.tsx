@@ -4,7 +4,7 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { SceneElement } from "@/lib/canvas/types";
+import type { Scene } from "@/lib/canvas/types";
 import { useSceneSequence } from "@/app/components/player/RenderLayoutContext";
 import { isForeground } from "@/lib/canvas/guards";
 import { useDropIndex } from "../dnd/DragTransferContext";
@@ -23,18 +23,18 @@ const SCENE_FRAME_CLASS =
 	"pr-3 py-2 transition-[box-shadow,background-color] duration-200";
 interface SceneProps {
 	attributes: RenderElementProps["attributes"];
-	element: SceneElement;
+	scene: Scene;
 	/** 1-based position in the document, resolved by whoever mounts the scene. */
 	sceneIndex: number;
 	children: React.ReactNode;
 }
 
 /** Opens a gap at the end of the scene while a cross-scene drag would land there. */
-function useDropPadding(element: SceneElement): React.CSSProperties {
-	const dropIndex = useDropIndex(element.id);
+function useDropPadding(scene: Scene): React.CSSProperties {
+	const dropIndex = useDropIndex(scene.id);
 	return {
 		paddingBottom:
-			dropIndex !== null && dropIndex >= element.children.length
+			dropIndex !== null && dropIndex >= scene.children.length
 				? "3rem"
 				: undefined,
 		transition: "padding-bottom 200ms ease",
@@ -45,14 +45,14 @@ function SceneHeader({
 	sceneIndex,
 	collapsed,
 	onToggle,
-	element,
+	scene,
 }: {
 	sceneIndex: number;
 	collapsed: boolean;
 	onToggle: () => void;
-	element: SceneElement;
+	scene: Scene;
 }) {
-	const seq = useSceneSequence(element);
+	const seq = useSceneSequence(scene);
 	const label = (
 		<>
 			Scene {sceneIndex}
@@ -67,9 +67,9 @@ function SceneHeader({
 			ariaLabel={collapsed ? "Expand scene" : "Collapse scene"}
 			rightSlot={
 				<div className="flex items-center gap-1">
-					<SceneGenerateButton scene={element} />
-					<PlayFromHereButton scene={element} />
-					<SceneDeleteButton scene={element} />
+					<SceneGenerateButton scene={scene} />
+					<PlayFromHereButton scene={scene} />
+					<SceneDeleteButton scene={scene} />
 				</div>
 			}
 		/>
@@ -78,16 +78,16 @@ function SceneHeader({
 
 function CollapsedScene({
 	attributes,
-	element,
+	scene,
 	sceneIndex,
 	children,
 }: SceneProps) {
-	const dropPadding = useDropPadding(element);
+	const dropPadding = useDropPadding(scene);
 	const { toggle } = useViewMode();
 
 	const foregroundElement = useMemo(
-		() => element.children.find(isForeground) ?? null,
-		[element.children],
+		() => scene.children.find(isForeground) ?? null,
+		[scene.children],
 	);
 
 	const childArray = Children.toArray(children);
@@ -96,7 +96,7 @@ function CollapsedScene({
 	return (
 		<div
 			{...attributes}
-			data-scene-id={element.id}
+			data-scene-id={scene.id}
 			className={`group/collapsible relative h-32 ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
@@ -107,8 +107,8 @@ function CollapsedScene({
 					<SceneHeader
 						sceneIndex={sceneIndex}
 						collapsed
-						onToggle={() => toggle(element.id)}
-						element={element}
+						onToggle={() => toggle(scene.id)}
+						scene={scene}
 					/>
 				</div>
 				<div className="flex flex-col gap-0.5 flex-1 min-h-0 overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none">
@@ -142,21 +142,21 @@ function CollapsedScene({
 
 function ExpandedScene({
 	attributes,
-	element,
+	scene,
 	sceneIndex,
 	children,
 }: SceneProps) {
-	const dropPadding = useDropPadding(element);
+	const dropPadding = useDropPadding(scene);
 	const { toggle } = useViewMode();
 	const childIds = useMemo(
-		() => element.children.map((child) => child.id),
-		[element.children],
+		() => scene.children.map((child) => child.id),
+		[scene.children],
 	);
 
 	return (
 		<div
 			{...attributes}
-			data-scene-id={element.id}
+			data-scene-id={scene.id}
 			className={`group/collapsible ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
@@ -164,8 +164,8 @@ function ExpandedScene({
 				<SceneHeader
 					sceneIndex={sceneIndex}
 					collapsed={false}
-					onToggle={() => toggle(element.id)}
-					element={element}
+					onToggle={() => toggle(scene.id)}
+					scene={scene}
 				/>
 				<SortableContext
 					items={childIds}
@@ -179,7 +179,7 @@ function ExpandedScene({
 }
 
 export function SceneContainer(props: SceneProps) {
-	return useSceneCollapsed(props.element.id) ? (
+	return useSceneCollapsed(props.scene.id) ? (
 		<CollapsedScene {...props} />
 	) : (
 		<ExpandedScene {...props} />

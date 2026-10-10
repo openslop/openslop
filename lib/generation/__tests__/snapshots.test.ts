@@ -1,13 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
-import type { GenerationInputs } from "../inputs";
+import { inputsFor } from "./_graph";
 import { SnapshotStore, type ElementSnapshot } from "../snapshots";
-
-const inputs = (prompt: string): GenerationInputs => ({
-	prompt,
-	attributes: {},
-	dependencies: {},
-});
 
 const result = (imageUrl: string): AssetResult => ({
 	imageUrl,
@@ -19,7 +13,7 @@ const commit = (store: SnapshotStore, id: string, url: string) =>
 		elementId: id,
 		elementType: "image",
 		connectorType: "image",
-		inputs: inputs(url),
+		inputs: inputsFor(url),
 		result: result(url),
 		pinned: false,
 	});
@@ -44,7 +38,7 @@ describe("SnapshotStore", () => {
 				seconds: 12,
 				result: result("a.png"),
 				error: null,
-				resultInputs: inputs("a.png"),
+				resultInputs: inputsFor("a.png"),
 				connectorType: "image",
 				pinned: true,
 			},
@@ -70,7 +64,7 @@ describe("SnapshotStore", () => {
 		store.update("a", { seconds: 3 });
 		expect(store.getResultVersion()).toBe(1);
 
-		store.update("a", { resultInputs: inputs("edited") });
+		store.update("a", { resultInputs: inputsFor("edited") });
 		expect(store.getResultVersion()).toBe(2);
 
 		store.update("a", { pinned: true });
@@ -104,7 +98,7 @@ describe("SnapshotStore", () => {
 				elementId: "a",
 				elementType: "image",
 				connectorType: "image",
-				inputs: inputs("a.png"),
+				inputs: inputsFor("a.png"),
 				result: result("a.png"),
 				pinned: false,
 			}),

@@ -1,31 +1,37 @@
-import type { CanvasElementType } from "@/lib/canvas/types";
+import type { AssetElement, ElementType } from "@/lib/canvas/types";
 import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementState } from "../elementState";
 import type { ElementLength } from "@/lib/render/elementLengths";
 import type { RefineOp } from "@/lib/script/refine/types";
-import type {
-	DeepPartial,
-	Metadata,
-	MetadataCharacter,
-} from "@/lib/project/types";
-import type { AgentContext } from "../context";
+import type { ProjectContext, ProjectData } from "@/lib/project/store";
 
-/** An element's generated picture and the prompt behind it, never the rest of the result. */
+/** An element's pictures and the prompt behind them, never the rest of the result. */
 export type ElementImage = {
-	type: CanvasElementType;
+	type: ElementType;
 	prompt: string;
-	/** Absent when the element's type makes no picture, so there is never one to wait for. */
-	picture: { status: GenerationStatus; url: string | undefined } | undefined;
+	/** Absent when the element's type holds no picture, so there is never one to wait for. */
+	pictures:
+		| { kind: "generated"; status: GenerationStatus; urls: string[] }
+		| { kind: "uploaded"; urls: string[] }
+		| undefined;
 };
 
-/** What a tool can do to the canvas, never the parts it is built from. */
-export type AgentToolContext = {
+export const PROJECT_SETTERS = [
+	"setTitle",
+	"updateScriptSettings",
+	"updateVideoSettings",
+] as const;
+
+/** What a tool can do to the project, never the parts it is built from. */
+export type AgentToolContext = Pick<
+	ProjectContext,
+	(typeof PROJECT_SETTERS)[number]
+> & {
 	readScript: () => string;
+	isScriptEmpty: () => boolean;
 	countSpokenWords: () => number;
 	measureElementLengths: () => ElementLength[];
 	measureRuntime: () => number;
-	referenceImages: () => string[];
-	avatarUrl: (name: string) => string | undefined;
 	elementImage: (id: string) => ElementImage | undefined;
 	elementStates: () => ElementState[];
 	/** One focused LLM call, for tools whose whole job is a generation. */
@@ -33,14 +39,9 @@ export type AgentToolContext = {
 		prompt: string,
 		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
-	readMetadata: () => Metadata;
-	readContext: () => AgentContext;
+	readAssets: () => AssetElement[];
+	readProject: () => ProjectData;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
-	setMetadata: (patch: DeepPartial<Metadata>) => void;
-	setCharacter: (
-		name: string,
-		patch: Partial<MetadataCharacter>,
-	) => { name: string; created: boolean };
 };

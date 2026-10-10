@@ -1,78 +1,117 @@
+import type { Editor } from "slate";
 import { beforeEach, describe, expect, it } from "vitest";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
-import { GenerationQueue } from "@/lib/generation/queue";
-import { applyTemplate } from "@/lib/templates/applyTemplate";
-import { getTemplateById } from "@/lib/templates/templates";
-import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
+import {
+	assetText,
+	avatarNames,
+	characterNames,
+	findAsset,
+	getAssets,
+	getCanvasElements,
+	NARRATOR,
+	referenceUrls,
+	voiceOf,
+} from "@/lib/canvas/assets";
+import { setAsset, setReferenceImages } from "@/lib/canvas/assetOps";
 import { buildNode } from "@/lib/generation/generationGraph";
+import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
-import { characterAvatarElementId } from "../characterAvatar";
+import { applyTemplate } from "@/lib/templates/applyTemplate";
+import { getTemplate } from "@/lib/templates/templates";
 import { createProjectStore, type ProjectStore } from "../store";
+import { VoiceSchema } from "../types";
+import { makeEditor } from "@/lib/canvas/__tests__/_assets";
+import { buildCtx } from "@/lib/generation/__tests__/_context";
 
+let editor: Editor;
 let queue: GenerationQueue;
 let store: ProjectStore;
 
+const buildContext = () =>
+	buildCtx(getCanvasElements(editor.children), { state: store.getState() });
+const assets = () => getAssets(editor.children);
+const settings = () => store.getState().scriptSettings;
+
 const apply = (templateId: string) =>
-	applyTemplate(store, templateId, queue, DEFAULT_CONNECTOR_REGISTRY);
+	applyTemplate(editor, store, queue, buildContext, templateId);
 
 describe("applyTemplate", () => {
 	beforeEach(() => {
+		editor = makeEditor();
 		store = createProjectStore();
 		queue = new GenerationQueue();
 	});
 
+	it("puts the template's characters on the canvas, each with their look and voice", () => {
+		apply("pov-life");
+		const {
+			appearance,
+			avatar: _,
+			...voice
+		} = getTemplate("pov-life").characters?.Protagonist ?? {};
+
+		expect(avatarNames(assets())).toEqual(["Protagonist"]);
+		expect(assetText(assets(), "asset_avatar", "Protagonist")).toBe(appearance);
+		expect(voiceOf(assets(), "Protagonist")).toMatchObject(voice);
+	});
+
+	it("gives the narrator the template's narration voice in place of the user's, and no avatar", () => {
+		setAsset(editor, "asset_voice", NARRATOR, {
+			attrs: { accent: "british", voiceId: "v-mine" },
+		});
+
+		apply("pov-life");
+
+		expect(findAsset(assets(), "asset_avatar", NARRATOR)).toBeUndefined();
+		expect(voiceOf(assets())).toEqual({
+			...VoiceSchema.parse(getTemplate("pov-life").narration),
+			...DEFAULT_MODELS.tts,
+		});
+	});
+
 	it("does not leak characters from a previous template", () => {
 		apply("pov-life");
-		expect(store.getState().metadata.characters).toHaveProperty("Protagonist");
+		expect(characterNames(assets())).toContain("Protagonist");
 
 		apply("sleep-story");
-		expect(store.getState().metadata.characters).toEqual({});
+		expect(characterNames(assets())).toEqual([
+			NARRATOR,
+			...Object.keys(getTemplate("sleep-story").characters ?? {}),
+		]);
 	});
 
 	it("records which template the project writes against", () => {
 		apply("pov-life");
-		expect(store.getState().metadata.templateId).toBe("pov-life");
+		expect(settings().template).toBe("pov-life");
 
 		apply("sleep-story");
-		expect(store.getState().metadata.templateId).toBe("sleep-story");
+		expect(settings().template).toBe("sleep-story");
 	});
 
-	it("clears the template without disturbing what it applied", () => {
+	it("wipes the user's title and style, taking the template's style", () => {
+		store.getState().setTitle("My Draft");
+		setAsset(editor, "asset_style", undefined, { text: "noir" });
 		apply("pov-life");
-		store.getState().setTemplate(undefined);
 
-		expect(store.getState().metadata.templateId).toBeUndefined();
-		expect(store.getState().metadata.characters).toHaveProperty("Protagonist");
-	});
-
-	it("replaces reference images on switch", () => {
-		apply("pov-life");
-		expect(store.getState().referenceImages.length).toBeGreaterThan(0);
-
-		apply("sleep-story");
-		expect(store.getState().referenceImages).toEqual(
-			getTemplateById("sleep-story")?.referenceImages,
+		expect(store.getState().title).toBe("");
+		expect(assetText(assets(), "asset_style")).toBe(
+			getTemplate("pov-life").style?.description,
 		);
 	});
 
-	it("wipes user-edited metadata fields not set by the next template", () => {
-		const project = store.getState();
-		project.updateMetadata({ title: "My Draft", style: "noir" });
+	it("sets the video length the template is written for", () => {
 		apply("pov-life");
-
-		const { metadata } = store.getState();
-		expect(metadata.title).toBe("");
-		expect(metadata.style).toBe(
-			getTemplateById("pov-life")?.style?.description,
-		);
+		expect(settings().length).toBe(getTemplate("pov-life").length);
 	});
 
-	it("wipes reference images set outside the template before applying", () => {
-		store.getState().setReferenceImages(["user://a.png", "user://b.png"]);
+	it("replaces any earlier reference images with the template's", () => {
+		setReferenceImages(editor, ["user://a.png", "user://b.png"]);
+		apply("pov-life");
+		expect(referenceUrls(assets()).length).toBeGreaterThan(0);
 
 		apply("sleep-story");
-		expect(store.getState().referenceImages).toEqual(
-			getTemplateById("sleep-story")?.referenceImages,
+		expect(referenceUrls(assets())).toEqual(
+			getTemplate("sleep-story").referenceImages,
 		);
 	});
 
@@ -80,39 +119,48 @@ describe("applyTemplate", () => {
 		expect(() => apply("does-not-exist")).toThrow(/Unknown template id/);
 	});
 
-	it("wipes user-set narration before applying", () => {
-		store.getState().updateMetadata({ narration: { accent: "british" } });
+	it("resets the video settings the store holds", () => {
+		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
 		apply("pov-life");
-		expect(store.getState().metadata.narration).toEqual(
-			getTemplateById("pov-life")?.narration ?? {},
+
+		expect(store.getState().videoSettings).toEqual(
+			createProjectStore().getState().videoSettings,
 		);
 	});
 
-	// The avatar resolves against the template's own style and characters, so
-	// seeding before the metadata lands would record the previous project's
-	// inputs and the avatar would be stale on arrival.
-	it("seeds a prebuilt avatar that is not stale on arrival", () => {
-		apply("pov-life");
-		const name = "Protagonist";
-		const node = buildNode(forCharacterAvatar(name), {
-			store,
-			state: store.getState(),
-			canvas: [],
-			registry: DEFAULT_CONNECTOR_REGISTRY,
-		});
+	it("leaves the script's scenes where they are", () => {
+		editor.children = [
+			{
+				id: "scene",
+				type: "scene",
+				children: [
+					{
+						id: "line",
+						type: "narration",
+						children: [{ id: "line-t", type: "narration", text: "hello" }],
+					},
+				],
+			},
+		];
 
-		expect(needsGeneration(node, queue)).toBe(false);
+		apply("pov-life");
+
+		expect(editor.children.at(-1)).toMatchObject({ id: "scene" });
+		expect(assets().length).toBe(editor.children.length - 1);
 	});
 
-	it("seeds prebuilt template avatars as the avatar node's result", () => {
+	it("pins each prebuilt avatar on its avatar asset, fresh on arrival", () => {
 		apply("pov-life");
-		const snapshot = queue.getElementSnapshot(
-			characterAvatarElementId("Protagonist"),
-		);
+		const avatar = findAsset(assets(), "asset_avatar", "Protagonist");
+		if (!avatar) throw new Error("The template has no Protagonist");
+		const node = buildNode(avatar, buildContext());
+		const snapshot = queue.getElementSnapshot(node.id);
+
 		expect(snapshot.result?.imageUrl).toBe(
-			getTemplateById("pov-life")?.characterAvatars?.Protagonist,
+			getTemplate("pov-life").characters?.Protagonist?.avatar,
 		);
-		expect(snapshot.resultInputs).not.toBeNull();
+		expect(snapshot.pinned).toBe(true);
+		expect(needsGeneration(node, queue)).toBe(false);
 	});
 });

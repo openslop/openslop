@@ -3,19 +3,21 @@
 import { useCallback } from "react";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
-import type { GenerationNode, NodeSpec } from "./graph";
+import type { GeneratedElement } from "@/lib/canvas/types";
+import type { GenerationNode } from "./graph";
 import { useResolveNode } from "./LiveGraphProvider";
 
-/** `job` is not compared, so it may be stale: rebuild before running a node. */
-export function useLiveNode(spec: NodeSpec): GenerationNode {
+export function useLiveNode(element: GeneratedElement): GenerationNode {
 	const resolve = useResolveNode();
-	const read = useCallback(() => resolve(spec), [resolve, spec]);
+	const read = useCallback(() => resolve(element), [resolve, element]);
 	return useSlateSelector(read);
 }
 
-/** Memoize `specs`. */
-export function useLiveNodes(specs: () => NodeSpec[]): GenerationNode[] {
+/** Memoize `elements`. */
+export function useLiveNodes(
+	elements: () => GeneratedElement[],
+): GenerationNode[] {
 	const resolve = useResolveNode();
-	const read = useCallback(() => specs().map(resolve), [resolve, specs]);
+	const read = useCallback(() => elements().map(resolve), [resolve, elements]);
 	return useSlateSelector(read, shallow);
 }

@@ -1,9 +1,7 @@
 import { useCallback } from "react";
 import type { CaptionStyle } from "./captionStyle";
-import {
-	useUpdateVideoSettings,
-	useVideoSetting,
-} from "../project/useVideoSetting";
+import { useProject } from "../project/useProject";
+import { useVideoSetting } from "../project/useVideoSetting";
 
 /**
  * The project's caption style plus a patcher. Patches are written as a whole
@@ -15,7 +13,7 @@ export function useCaptionStyle(): [
 	(patch: Partial<CaptionStyle>) => void,
 ] {
 	const style = useVideoSetting("captionStyle");
-	const updateVideoSettings = useUpdateVideoSettings();
+	const updateVideoSettings = useProject((state) => state.updateVideoSettings);
 
 	const setStyle = useCallback(
 		(patch: Partial<CaptionStyle>) =>

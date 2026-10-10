@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Film } from "@/components/ui/icon";
 import { VIDEO_FORMAT_NAMES } from "@/lib/script/prompt/formats";
@@ -6,9 +6,10 @@ import { defineTool } from "./defineTool";
 
 export const writeScript = defineTool({
 	description: dedent`
-	  Write a new script onto the canvas from a brief. This clears the canvas and starts
-	  from scratch. Use this to start a project, or when the user asks for a fresh start on
-	  a different idea. For any change to an existing script, however large, use edit_script.
+	  Write a new script onto the canvas from a brief. This clears the script and starts
+	  from scratch. Use this to start a project, or
+	  when the user asks for a fresh start on a different idea. For any change to an
+	  existing script, however large, use edit_script.
 
 	  The brief is the writer's whole instruction: anything from a one-line premise to a
 	  full treatment, carrying the genre, tone, characters, structure and constraints the

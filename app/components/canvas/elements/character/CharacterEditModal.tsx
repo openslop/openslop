@@ -1,41 +1,27 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useSlateStatic } from "slate-react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
-import { CloseButton } from "@/components/ui/close-button";
-import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { ensureAsset, removeAsset } from "@/lib/canvas/assetOps";
+import { elementModelPick } from "@/lib/canvas/elementConnector";
+import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
+import { useAsset } from "@/lib/canvas/useAssets";
+import { updateElementText } from "@/lib/canvas/editorOps";
+import type { AssetType } from "@/lib/canvas/types";
+import { ModelAttribute } from "../attributes/ModelAttribute";
+import { ElementGenerationProvider } from "../ElementGenerationContext";
 import {
-	DialogBody,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
-import { useGenerationQueue } from "@/lib/generation/GenerationQueueProvider";
-import { isGenerationActive } from "@/lib/generation/snapshots";
-import {
-	ConfigureModelsItem,
-	ModelSelect,
-	ModelSelectTrigger,
-} from "@/app/components/models/ModelSelect";
-import { forCharacterAvatar } from "@/lib/connectors/image/plugins/characterAvatarNode";
-import { resolveModel } from "@/lib/connectors/models";
-import { characterFromAvatarInputs } from "@/lib/project/characterAvatar";
-import { deleteCharacter } from "@/lib/project/deleteCharacter";
-import { useProject } from "@/lib/project/useProject";
-import type { ElementVersion } from "@/lib/generation/versions";
-import type { MetadataCharacter } from "@/lib/project/types";
-import { UploadImageButton } from "@/lib/upload/UploadImageButton";
-import { useGenerateNode } from "@/app/components/canvas/hooks/useGenerate";
-import { GenerateButton, StaleIndicator } from "../GenerateButton";
-import { MediaResult } from "../preview/results";
-import { ElementHistoryPopover } from "../ElementHistoryPopover";
-import { TextAreaField } from "./fields";
-import { StaleAvatarCloseDialog } from "./StaleAvatarCloseDialog";
-import { VoiceSection } from "./VoiceMetadataFields";
+	ElementGenerateButton,
+	ElementStaleIndicator,
+} from "../GenerateButton";
+import { ElementHistoryButton } from "../ElementHistoryButton";
+import { ElementUploadButton } from "../ElementUploadButton";
+import { OutputPreview } from "../OutputPreview";
+import { AssetDialog } from "./AssetDialog";
+import { deleteCharacter } from "./deleteCharacter";
+import { SwitchField, TextAreaField } from "./fields";
+import { VoiceEditor } from "./VoiceEditor";
 
 export function CharacterEditModal({
 	name,
@@ -44,160 +30,84 @@ export function CharacterEditModal({
 	name: string;
 	onClose: () => void;
 }) {
-	const store = useProjectStoreHandle();
-	const queue = useGenerationQueue();
-	const character = useProject((s) => s.metadata.characters[name]);
-	const updateCharacter = useProject((s) => s.updateCharacter);
-
-	const [confirmDelete, setConfirmDelete] = useState(false);
-	const [closeConfirm, setCloseConfirm] = useState(false);
-
-	const avatarSpec = useMemo(() => forCharacterAvatar(name), [name]);
-	const avatar = useGenerateNode(avatarSpec);
-	const avatarUrl = avatar.result?.imageUrl;
-	const restoreAvatar = useCallback(
-		(version: ElementVersion) =>
-			updateCharacter(name, characterFromAvatarInputs(version)),
-		[updateCharacter, name],
-	);
-
-	if (!character) return null;
-
-	const update = (partial: Partial<MetadataCharacter>) =>
-		updateCharacter(name, partial);
-
-	const avatarModel = resolveModel("image", character.avatarModel);
-	const isStale = avatar.staleReason !== null;
-
-	const generating = isGenerationActive(avatar.status);
-	const hasAppearance = Boolean(character.appearance.trim());
-	const generateDisabled = generating || !hasAppearance;
-
-	const requestClose = () => (isStale ? setCloseConfirm(true) : onClose());
-
-	const interceptClose = (e: { preventDefault(): void }) => {
-		if (isStale && !closeConfirm) {
-			e.preventDefault();
-			setCloseConfirm(true);
-		}
-	};
+	const editor = useSlateStatic();
+	const avatar = useAsset("asset_avatar", name);
+	const voice = useAsset("asset_voice", name);
+	const toggle = (type: AssetType) => (on: boolean) =>
+		on ? ensureAsset(editor, type, name) : removeAsset(editor, type, name);
 
 	return (
-		<DialogContent
-			className="max-w-2xl"
-			showCloseButton={false}
-			onEscapeKeyDown={interceptClose}
-			onInteractOutside={interceptClose}
-		>
-			<CloseButton
-				onClick={requestClose}
-				className="absolute right-3 top-3 z-10"
-			/>
-			<DialogHeader className="shrink-0">
-				<DialogTitle>{name}</DialogTitle>
-				<DialogDescription>
-					Edits save automatically. Regenerate the avatar after changing the
-					appearance.
-				</DialogDescription>
-			</DialogHeader>
-
-			<DialogBody>
-				<div className="grid gap-4 sm:grid-cols-2">
-					<div className="flex min-w-0 flex-col gap-2">
-						<TextAreaField
-							className="min-h-0 flex-1"
-							label="Appearance"
-							value={character.appearance}
-							onChange={(appearance) => update({ appearance })}
-							placeholder="Describe the character's look"
-						/>
-						<div className="flex flex-wrap items-center gap-2">
-							<ModelSelect
-								type="image"
-								value={avatarModel}
-								onChange={(next) => update({ avatarModel: next })}
-								footer={<ConfigureModelsItem />}
-							>
-								<ModelSelectTrigger model={avatarModel} label="Avatar model" />
-							</ModelSelect>
-							<div className="ml-auto flex items-center gap-2">
-								<ElementHistoryPopover
-									elementId={avatar.node.id}
-									onRestore={restoreAvatar}
-								/>
-								{avatar.staleReason && (
-									<StaleIndicator reason={avatar.staleReason} />
-								)}
-								<GenerateButton
-									status={avatar.status}
-									hasResult={Boolean(avatarUrl)}
-									disabled={generateDisabled}
-									onGenerate={avatar.generate}
-								/>
-							</div>
-						</div>
-					</div>
-					<div className="relative">
-						<MediaResult
-							url={avatarUrl}
-							outputKind="image"
-							status={avatar.status}
-							seconds={avatar.seconds}
-							error={avatar.error}
-							onDiscard={avatar.discard}
-						/>
-						<UploadImageButton
-							className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border"
-							onUpload={(url) =>
-								queue.commitResult(
-									avatar.node,
-									{ imageUrl: url, durationSec: 0 },
-									{ pinned: true },
-								)
-							}
-						/>
-					</div>
-				</div>
-				<VoiceSection voice={character} onChange={update} />
-			</DialogBody>
-
-			<DialogFooter className="shrink-0">
+		<AssetDialog
+			title={name}
+			description={
+				avatar
+					? "Edits save automatically. Regenerate the avatar after changing the appearance."
+					: "Edits save automatically."
+			}
+			onClose={onClose}
+			actions={
 				<Button
 					type="button"
 					variant="outline"
 					size="sm"
-					onClick={() => setConfirmDelete(true)}
+					onClick={() => {
+						deleteCharacter(editor, name);
+						onClose();
+					}}
 					className="text-muted-foreground sm:mr-auto"
 				>
 					<Trash2 />
 					Delete
 				</Button>
-				<Button type="button" size="sm" onClick={requestClose}>
-					Done
-				</Button>
-			</DialogFooter>
-
-			<ConfirmDeleteDialog
-				target={confirmDelete ? name : undefined}
-				onClose={() => setConfirmDelete(false)}
-				title={(target) => `Delete ${target}?`}
-				description="This permanently removes the character and its avatar. It can't be undone."
-				actionLabel="Delete character"
-				onConfirm={() => {
-					deleteCharacter(store, queue, name);
-					onClose();
-				}}
+			}
+		>
+			<SwitchField
+				label="Avatar"
+				checked={avatar !== undefined}
+				disabled={!voice}
+				onCheckedChange={toggle("asset_avatar")}
 			/>
-			<StaleAvatarCloseDialog
-				open={closeConfirm}
-				onOpenChange={setCloseConfirm}
-				characterName={name}
-				onLeaveStale={onClose}
-				onRegenerate={() => {
-					avatar.generate();
-					onClose();
-				}}
+			{avatar && (
+				<ElementGenerationProvider element={avatar}>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<div className="flex min-w-0 flex-col gap-2">
+							<TextAreaField
+								className="min-h-0 flex-1"
+								label="Appearance"
+								autoFocus
+								aside={
+									<div className="flex items-center gap-1">
+										<ModelAttribute
+											element={avatar}
+											pick={elementModelPick(avatar)}
+											label="Avatar model"
+										/>
+										<ElementHistoryButton element={avatar} />
+									</div>
+								}
+								value={getElementBodyText(avatar)}
+								onChange={(text) => updateElementText(editor, avatar.id, text)}
+								placeholder="Describe the character's look"
+							/>
+							<div className="flex items-center justify-end gap-2">
+								<ElementStaleIndicator />
+								<ElementGenerateButton />
+							</div>
+						</div>
+						<div className="relative">
+							<OutputPreview outputKind="image" />
+							<ElementUploadButton className="absolute left-2 top-2 z-10 bg-card shadow-sm ring-1 ring-border" />
+						</div>
+					</div>
+				</ElementGenerationProvider>
+			)}
+			<SwitchField
+				label="Voice"
+				checked={voice !== undefined}
+				disabled={!avatar}
+				onCheckedChange={toggle("asset_voice")}
 			/>
-		</DialogContent>
+			{voice && <VoiceEditor element={voice} />}
+		</AssetDialog>
 	);
 }

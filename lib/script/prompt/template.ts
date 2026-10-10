@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import type { Template } from "@/lib/templates/templates";
 
 export function templatePrompt(
