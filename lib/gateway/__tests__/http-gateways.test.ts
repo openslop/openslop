@@ -136,14 +136,6 @@ describe("HTTP gateways", () => {
 			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
 		});
 
-		it("hands back nothing for a voice without a preview", async () => {
-			fetchMock.mockResolvedValue(jsonResponse({}));
-
-			await expect(
-				new HttpTTSGateway(HOSTED_TTS).voicePreview("v-mute"),
-			).resolves.toBeUndefined();
-		});
-
 		// A voice search names its model like a generation does, so the route
 		// knows whose key to read.
 		it("names its model when the key is the user's own", async () => {

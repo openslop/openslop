@@ -150,7 +150,7 @@ describe("elementSchema", () => {
 describe("asset schemas", () => {
 	const voice = attributeSchemaFor("asset_voice", {});
 
-	it("lets a voice set its traits, each one optional, describe itself, and carry its speech pair", () => {
+	it("lets a voice set its traits, each one optional, and describe itself", () => {
 		expect(voice.keys).toEqual([
 			"gender",
 			"language",
@@ -158,10 +158,7 @@ describe("asset schemas", () => {
 			"pitch",
 			"accent",
 			"description",
-			"provider",
-			"model",
 		]);
-		expect(voice.defaultAttributes).toEqual(DEFAULT_MODELS.tts);
 	});
 
 	it("gives every asset but a voice nothing to set beside its text", () => {
@@ -178,13 +175,13 @@ describe("asset schemas", () => {
 			flatAttributes(
 				asset("asset_voice", {
 					name: "Mia",
-					attrs: { voiceId: "v1", gender: "feminine" },
+					attrs: { tone: "dry", gender: "feminine" },
 				}),
 			),
 		).toEqual({
 			name: "Mia",
-			...DEFAULT_MODELS.tts,
-			voiceId: "v1",
+			...DEFAULT_MODELS.voice,
+			tone: "dry",
 			gender: "feminine",
 		});
 	});

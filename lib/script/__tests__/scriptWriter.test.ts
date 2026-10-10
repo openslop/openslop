@@ -43,10 +43,10 @@ describe("createScriptWriter", () => {
 	});
 
 	it("starts a streamed element on the editor's default model", () => {
-		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const editor = makeEditor([], { tts: pinned });
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
+		const editor = makeEditor([], { image: pinned });
 
-		createScriptWriter(editor)("<narration>Once upon a time</narration>\n");
+		createScriptWriter(editor)("<image>A forest</image>\n");
 
 		expect(
 			editor.children.filter(isContentElement).map(flatAttributes),

@@ -8,11 +8,14 @@ import type { GenerationInputs } from "./inputs";
 import type { GenerationQueue } from "./queue";
 import type { HeldResult } from "./snapshots";
 
+/** What tells one result from another. */
+const IDENTITY_FIELDS = [...ASSET_URL_FIELDS, "voiceId"] as const;
+
 /** What a dependent records about `node`: the result held for it now, which arrives after the graph is built. */
 const identityOf = (node: GenerationNode, queue: GenerationQueue): string => {
 	const { result } = queue.getElementSnapshot(node.id);
 	return result
-		? compact(ASSET_URL_FIELDS.map((field) => result[field])).join("|")
+		? compact(IDENTITY_FIELDS.map((field) => result[field])).join("|")
 		: "";
 };
 

@@ -1,7 +1,6 @@
 import { z } from "zod";
-import type { AssetType, CanvasElement } from "@/lib/canvas/types";
+import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
-import type { BuildContext } from "@/lib/generation/graph";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspectRatio";
 import type { AttributeSchema } from "./attributes/schema";
@@ -15,6 +14,7 @@ export const ASSET_CONNECTOR_TYPES = [
 	"image",
 	"tts",
 	"video",
+	"voice",
 ] as const;
 
 export type AssetConnectorType = (typeof ASSET_CONNECTOR_TYPES)[number];
@@ -58,6 +58,7 @@ export type VideoModelEntry = ModelEntry & {
 export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
+	voice: ModelEntry;
 	image: ModelEntry;
 	video: VideoModelEntry;
 	sfx: ModelEntry;
@@ -94,25 +95,12 @@ export interface PluginContext {
 	signal?: AbortSignal;
 }
 
-/** Attributes to write onto an asset, adding it when there is none. */
-export type AssetWrite = {
-	type: AssetType;
-	name?: string;
-	attrs: Record<string, string>;
-};
-
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
 	dependencies?: readonly Dependency[];
 	/** The model the element generates on, when it is picked somewhere other than the element. */
 	model?(element: CanvasElement, canvas: CanvasElement[]): ModelPick;
 	reads?: readonly Read[];
-	/** Work to finish before the node is built to run, such as settling the voice a search finds. */
-	prepare?(
-		element: CanvasElement,
-		ctx: BuildContext,
-		signal: AbortSignal,
-	): Promise<void>;
 	beforeGenerate?(
 		params: TParams,
 		ctx: PluginContext,
@@ -154,6 +142,7 @@ export const AssetResultSchema = z.object({
 	audioUrl: z.string().optional(),
 	videoUrl: z.string().optional(),
 	textTimestamps: z.array(TextTimestampSchema).optional(),
+	voiceId: z.string().optional(),
 });
 
 export type AssetResult = z.infer<typeof AssetResultSchema>;
@@ -248,7 +237,7 @@ export interface TTSConnector extends Connector {
 	readonly type: "tts";
 	generate(params: TTSGenerateParams): Promise<TTSResult>;
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
-	voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined>;
+	voicePreview(voiceId: string): Promise<HostedVoicePreview>;
 }
 
 /** Audio a video's speech should sound like, and whose voice it is. */

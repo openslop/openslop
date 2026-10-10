@@ -34,7 +34,7 @@ export class HttpTTSConnector
 		return this.gateway.searchVoices(params);
 	}
 
-	async voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined> {
+	async voicePreview(voiceId: string): Promise<HostedVoicePreview> {
 		return this.gateway.voicePreview(voiceId);
 	}
 

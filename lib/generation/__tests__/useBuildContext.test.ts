@@ -1,12 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEditor, type Descendant } from "slate";
-import { findAsset, getAssets } from "@/lib/canvas/assets";
-import { asset } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
-import {
-	flatAttributes,
-	splitAttributes,
-} from "@/lib/canvas/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/elementAttributes";
 import {
 	SCENE_TYPE,
 	type ContentElement,
@@ -123,25 +118,5 @@ describe("useBuildContext", () => {
 		const { canvas } = render(useBuildContext)();
 
 		expect(canvas.map(({ id }) => id)).toEqual([style.id, "vid-1"]);
-	});
-
-	it("writes an asset through to the document", () => {
-		children = [
-			asset("asset_voice", { name: "Red", attrs: { gender: "feminine" } }),
-			...document(video("vid-1", "shot one")),
-		];
-
-		render(useBuildContext)().setAsset({
-			type: "asset_voice",
-			name: "Red",
-			attrs: { voiceId: "v1" },
-		});
-
-		const written = findAsset(children, "asset_voice", "Red");
-		expect(getAssets(children)).toHaveLength(1);
-		expect(written && flatAttributes(written)).toMatchObject({
-			gender: "feminine",
-			voiceId: "v1",
-		});
 	});
 });

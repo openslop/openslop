@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
@@ -6,6 +6,15 @@ import { staleReason } from "@/lib/generation/staleReason";
 import { elementState } from "../elementState";
 import { EMPTY_CONTEXT } from "@/lib/generation/__tests__/_context";
 import { jobNode } from "@/lib/generation/__tests__/_graph";
+
+vi.mock("@/lib/generation/generationGraph", async (original) => ({
+	...(await original<typeof import("@/lib/generation/generationGraph")>()),
+	rebuildNode: (node: GenerationNode) => node,
+}));
+
+vi.mock("@/lib/generation/generateForElement", () => ({
+	generateForElement: () => new Promise(() => {}),
+}));
 
 const node = (id: string, prompt = id, reads: Record<string, string> = {}) =>
 	jobNode(id, [], { prompt, reads });

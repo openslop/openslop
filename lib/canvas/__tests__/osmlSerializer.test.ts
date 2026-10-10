@@ -67,7 +67,7 @@ describe("serializeOSMLWithScenes", () => {
 
 		expect(result.split("\n")).toEqual([
 			`<asset_style id="${style.id}">ink wash</asset_style>`,
-			`<asset_voice id="${voice.id}" provider="cartesia" model="Sonic 3.6" name="Mia &amp; Co" gender="feminine"></asset_voice>`,
+			`<asset_voice id="${voice.id}" name="Mia &amp; Co" gender="feminine" provider="cartesia" model="Sonic 3.6"></asset_voice>`,
 			"",
 			"--- Scene 1 ---",
 			'<narration id="e1">Hello</narration>',

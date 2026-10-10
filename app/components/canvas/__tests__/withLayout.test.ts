@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 import { createEditor, Editor, Node, Transforms, type Descendant } from "slate";
 import { withReact } from "slate-react";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
-import { isContentElement } from "@/lib/canvas/guards";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { withLayout } from "../plugins/withLayout";
 import { content, scene } from "./fixtures";
@@ -36,15 +34,6 @@ describe("withLayout", () => {
 
 		expect(children.slice(0, -1)).toEqual(ASSETS);
 		expect(children.at(-1)).toMatchObject({ type: "narration" });
-	});
-
-	it("seeds the narration with the model the project speaks in", () => {
-		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const narration = normalized([], { tts: pinned }).at(-1);
-
-		expect(
-			isContentElement(narration) && flatAttributes(narration),
-		).toMatchObject(pinned);
 	});
 
 	it("leaves a document that holds a script alone", () => {

@@ -704,30 +704,6 @@ describe("applyRefineOp — assets", () => {
 		]);
 	});
 
-	it.each([
-		[{ type: "asset_avatar", attrs: {} }, "insert: asset_avatar needs a name"],
-		[{ type: "asset_voice", attrs: {} }, "insert: asset_voice needs a name"],
-		[
-			{ type: "asset_style", attrs: { name: "Noir" } },
-			"insert: asset_style takes no name",
-		],
-		[
-			{ type: "asset_references", attrs: { name: "Mia" } },
-			"insert: asset_references takes no name",
-		],
-	] as const)(
-		"refuses an asset insert named against its type: %j",
-		(op, failure) => {
-			const editor = makeCanvas([]);
-
-			expect(apply(editor, { op: "insert", text: "x", ...op })).toEqual({
-				applied: 0,
-				failures: [failure],
-			});
-			expect(getAssets(editor.children)).toEqual([]);
-		},
-	);
-
 	it("keeps an asset's description when an insert rewrites it with no text", () => {
 		const editor = makeCanvas([
 			asset("asset_avatar", { name: "Mia", text: "a girl" }),

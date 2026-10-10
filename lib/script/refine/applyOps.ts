@@ -13,7 +13,6 @@ import {
 } from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insertElement";
 import { isScene } from "@/lib/canvas/scenes";
-import { ELEMENT_TYPES } from "@/lib/canvas/types";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -86,13 +85,7 @@ function applyInsert(
 	anchorMap: Record<string, string>,
 ): RefineOpResult {
 	if (isAssetType(op.type)) {
-		const name = op.attrs?.name;
-		if (!name !== !ELEMENT_TYPES[op.type].named)
-			return {
-				ok: false,
-				reason: `insert: ${op.type} ${name ? "takes no" : "needs a"} name`,
-			};
-		setAsset(editor, op.type, name, {
+		setAsset(editor, op.type, op.attrs?.name, {
 			attrs: op.attrs,
 			text: op.text || undefined,
 		});

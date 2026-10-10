@@ -107,7 +107,7 @@ export function CharacterEditModal({
 				disabled={!avatar}
 				onCheckedChange={toggle("asset_voice")}
 			/>
-			{voice && <VoiceEditor asset={voice} />}
+			{voice && <VoiceEditor element={voice} />}
 		</AssetDialog>
 	);
 }

@@ -1,15 +1,9 @@
-import compact from "lodash/compact";
 import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
 } from "@/lib/canvas/characterNames";
-import { createConnector } from "@/lib/connectors/factory";
 import { modelEntry, resolveModel } from "@/lib/connectors/models";
-import {
-	chosenVoices,
-	recordedVoice,
-	settleVoice,
-} from "@/lib/connectors/tts/voices";
+import { foundVoice, speakerVoices } from "@/lib/connectors/voice/voices";
 import type {
 	ConnectorPlugin,
 	ModelRef,
@@ -36,30 +30,18 @@ const heardCharacters = (
 export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharacterVoices> {
 	return {
 		name: "character-voices",
-		reads: [
-			chosenVoices(({ generationAttributes: attrs }) => heardCharacters(attrs)),
+		dependencies: [
+			speakerVoices(({ generationAttributes: attrs }) =>
+				heardCharacters(attrs),
+			),
 		],
-		async prepare(element, ctx, signal) {
-			await Promise.all(
-				heardCharacters(element.generationAttributes).map((name) =>
-					settleVoice(name, ctx, signal),
-				),
-			);
-		},
-		async beforeGenerate(params, ctx) {
-			const voices = compact(
-				await Promise.all(
-					heardCharacters(params).map(async (name) => {
-						const voice = recordedVoice(ctx, name);
-						if (!voice.voiceId) return undefined;
-						const preview = await createConnector(
-							"tts",
-							resolveModel("tts", voice),
-						).voicePreview(voice.voiceId);
-						return preview && { ...preview, speaker: name };
-					}),
-				),
-			);
+		beforeGenerate(params, ctx) {
+			const voices = heardCharacters(params).flatMap((speaker) => {
+				const voice = foundVoice(ctx, speaker);
+				return voice?.audioUrl
+					? [{ url: voice.audioUrl, durationSec: voice.durationSec, speaker }]
+					: [];
+			});
 			return voices.length === 0
 				? params
 				: { ...params, referenceAudios: voices };

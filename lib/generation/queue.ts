@@ -7,7 +7,7 @@ import {
 } from "./concurrency";
 import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
-import { prepareNode } from "./generationGraph";
+import { rebuildNode } from "./generationGraph";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
@@ -256,11 +256,11 @@ export class GenerationQueue {
 		this.ticker.start(elementId);
 
 		try {
-			const prepared = await prepareNode(node, context, signal);
-			const inputs = generationInputs(prepared, this);
+			const current = rebuildNode(node, context());
+			const inputs = generationInputs(current, this);
 			const result = await generateForElement(
-				prepared,
-				this.dependencyResults(prepared),
+				current,
+				this.dependencyResults(current),
 				signal,
 			);
 			if (signal.aborted) return;

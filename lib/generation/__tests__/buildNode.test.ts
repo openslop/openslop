@@ -2,16 +2,17 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { element as elementWithText } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
-import type {
-	ElementType,
-	GeneratedElement,
-	CanvasElement,
+import {
+	type ElementType,
+	type GeneratedElement,
+	type CanvasElement,
 } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { LAYOUT_ATTRIBUTE_KEYS } from "@/lib/canvas/elementAttributes";
 import { flattenGraph, type GenerationNode } from "../graph";
 import { GenerationQueue } from "../queue";
 import { buildNode } from "../generationGraph";
+import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { staleReason } from "../staleReason";
 import { isNodeStale } from "../staleness";
 import { buildCtx } from "./_context";
@@ -245,17 +246,30 @@ describe("buildNode", () => {
 	describe("speech and the voice it is spoken in", () => {
 		const line = element("line", "narration");
 		const voice = (attrs: Record<string, string>) => {
-			assets = [make("asset_voice", "", { name: NARRATOR, ...attrs })];
+			assets = [
+				make("asset_voice", "", { name: NARRATOR, ...attrs }, "narrator-voice"),
+			];
 		};
 
-		it("stays current while only the search filters change, and stales when another voice is chosen", () => {
+		it("stays current while its voice stays, and stales when another voice is picked", () => {
 			const queue = new GenerationQueue();
-			voice({ voiceId: "v-1", gender: "feminine" });
+			voice({ ...DEFAULT_TTS_MODEL, pickedVoiceId: "v-1" });
 			generateAll(queue, resolve(line));
-			voice({ voiceId: "v-1", gender: "masculine", language: "fr" });
 			expect(isNodeStale(resolve(line), queue)).toBe(false);
 
-			voice({ voiceId: "v-2", gender: "masculine" });
+			voice({ ...DEFAULT_TTS_MODEL, pickedVoiceId: "v-2" });
+
+			expect(staleReason(resolve(line), queue)).toBe(
+				"Narrator's voice changed — regenerate to update",
+			);
+		});
+
+		it("stales when the traits of a voice it found change", () => {
+			const queue = new GenerationQueue();
+			voice({ ...DEFAULT_TTS_MODEL, gender: "feminine" });
+			generateAll(queue, resolve(line));
+
+			voice({ ...DEFAULT_TTS_MODEL, gender: "masculine" });
 
 			expect(staleReason(resolve(line), queue)).toBe(
 				"Narrator's voice changed — regenerate to update",

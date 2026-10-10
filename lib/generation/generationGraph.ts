@@ -118,20 +118,14 @@ export const createGraphFor = () => {
 	);
 };
 
-export async function prepareNode(
+/** The node as the canvas holds it now. */
+export function rebuildNode(
 	node: GenerationNode,
-	context: () => BuildContext,
-	signal: AbortSignal,
-): Promise<GenerationNode> {
-	const ctx = context();
+	ctx: BuildContext,
+): GenerationNode {
 	const element = generatedById(ctx.canvas, node.id);
 	if (!element) throw new Error(`Element "${node.id}" left the canvas`);
-	await Promise.all(
-		(node.job.config.plugins ?? []).map((plugin) =>
-			plugin.prepare?.(element, ctx, signal),
-		),
-	);
-	return buildNode(element, context());
+	return buildNode(element, ctx);
 }
 
 export const buildNode = (

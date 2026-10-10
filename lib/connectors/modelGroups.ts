@@ -35,7 +35,7 @@ export const MODEL_GROUPS: ModelGroup[] = [
 		key: "voice",
 		label: "Voice",
 		Icon: Voice,
-		types: ["tts"],
+		types: ["voice", "tts"],
 	},
 	{
 		key: "sound",

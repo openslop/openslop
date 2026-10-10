@@ -6,7 +6,7 @@ import {
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
-import { VOICE_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
+import { VOICE_ATTRIBUTES } from "@/lib/connectors/voice/attributes";
 import type {
 	AssetConnectorType,
 	ConnectorConfig,

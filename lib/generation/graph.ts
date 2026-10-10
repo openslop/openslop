@@ -3,7 +3,6 @@ import type { ElementType, CanvasElement } from "@/lib/canvas/types";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import type {
 	AssetConnectorType,
-	AssetWrite,
 	ConnectorConfig,
 	ModelRef,
 } from "@/lib/connectors/types";
@@ -36,7 +35,6 @@ export type BuildContext = {
 	state: ReturnType<typeof buildSettings>;
 	canvas: CanvasElement[];
 	registry: ConnectorRegistry;
-	setAsset: (write: AssetWrite) => void;
 };
 
 export const hasPrompt = (node: GenerationNode) => Boolean(node.inputs.prompt);

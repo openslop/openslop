@@ -1,12 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpTTSConnector } from "../tts/connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
-import { asset } from "@/lib/canvas/__tests__/_assets";
-import { NARRATOR } from "@/lib/canvas/assets";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
-import { readsOf } from "./_state-ctx";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
@@ -46,17 +42,20 @@ describe("BaseTTSConnector", () => {
 		expect(result.textTimestamps).toHaveLength(1);
 	});
 
-	it("speaks in the voice settled on its speaker's voice asset, through the speaker-voice plugin", async () => {
+	it("speaks in the voice its speaker's voice found, through the speaker-voice plugin", async () => {
 		const fetchSpy = mockGatewaySequence(SUCCESS);
-		const plugin = createSpeakerVoicePlugin();
-		const connector = new HttpTTSConnector({ ...config, plugins: [plugin] });
-		const narrator = asset("asset_voice", {
-			name: NARRATOR,
-			attrs: { ...config.model, voiceId: "voice-42" },
+		const connector = new HttpTTSConnector({
+			...config,
+			plugins: [createSpeakerVoicePlugin()],
 		});
-		const reads = readsOf(plugin, createCanvasElement("narration"), [narrator]);
+		const dependencies = {
+			"Narrator's voice": { durationSec: 0, voiceId: "voice-42" },
+		};
 
-		const result = await connector.generate({ prompt: "hello" }, { reads });
+		const result = await connector.generate(
+			{ prompt: "hello" },
+			{ dependencies },
+		);
 
 		expect(result.audioUrl).toBe(AUDIO_URL);
 		expect(JSON.parse(String(fetchSpy.mock.calls[0]?.[1]?.body))).toMatchObject(

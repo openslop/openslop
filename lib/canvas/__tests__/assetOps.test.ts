@@ -125,7 +125,7 @@ describe("setAsset", () => {
 					attrs: { model: "Slop Image v1" },
 				}),
 			],
-			{ image: PINNED, tts: CARTESIA },
+			{ image: PINNED, voice: CARTESIA },
 		);
 
 		setAsset(editor, "asset_avatar", "Mia", { text: "Brown hair" });

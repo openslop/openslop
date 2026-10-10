@@ -39,4 +39,5 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 			createDimensionsPlugin("image"),
 		],
 	},
+	asset_voice: {},
 };

@@ -130,8 +130,8 @@ describe("createCanvasElement", () => {
 	it.each([
 		["asset_avatar", { image: PINNED }, PINNED],
 		["asset_avatar", {}, DEFAULT_MODELS.image],
-		["asset_voice", { tts: CARTESIA }, CARTESIA],
-		["asset_voice", {}, DEFAULT_MODELS.tts],
+		["asset_voice", { voice: CARTESIA }, CARTESIA],
+		["asset_voice", {}, DEFAULT_MODELS.voice],
 		["asset_style", { image: PINNED }, {}],
 	] as const)(
 		"puts a new %s on the default model %o, or the recommended one",

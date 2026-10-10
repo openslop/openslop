@@ -26,7 +26,7 @@ vi.mock("../generateForElement", () => ({
 
 vi.mock("../generationGraph", async (original) => ({
 	...(await original<typeof import("../generationGraph")>()),
-	prepareNode: async (node: GenerationNode) => node,
+	rebuildNode: (node: GenerationNode) => node,
 }));
 
 let generationQueue: GenerationQueue;

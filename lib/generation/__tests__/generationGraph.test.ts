@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
-import { findAsset, getCanvasElements, NARRATOR } from "@/lib/canvas/assets";
-import { asset, element } from "@/lib/canvas/__tests__/_assets";
+import { getCanvasElements } from "@/lib/canvas/assets";
+import { element } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import {
 	SCENE_TYPE,
@@ -13,13 +13,13 @@ import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
-import type { AssetWrite, ConnectorPlugin } from "@/lib/connectors/types";
+import type { ConnectorPlugin } from "@/lib/connectors/types";
 import type { BuildContext } from "../graph";
 import {
 	generatedById,
 	GenerationGraph,
 	pluginRecords,
-	prepareNode,
+	rebuildNode,
 } from "../generationGraph";
 import { buildCtx, EMPTY_CONTEXT } from "./_context";
 
@@ -158,74 +158,29 @@ describe("GenerationGraph", () => {
 	});
 });
 
-describe("prepareNode", () => {
+describe("rebuildNode", () => {
 	const image = element("img", "image", "a sunset");
-	const setAsset = vi.fn(({ type, name, attrs }: AssetWrite) => {
-		assets = [...assets, asset(type, { name, attrs })];
-	});
-	const writing = (): BuildContext => ({ ...contextNow(), setAsset });
-	const readsVoice: ConnectorPlugin = {
-		name: "voice",
-		reads: [
-			(_, { canvas }) => ({
-				voice:
-					findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
-						?.voiceId ?? "",
-			}),
-		],
-	};
-	const prepare = (plugins: ConnectorPlugin[], signal: AbortSignal) => {
-		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins } };
-		edit(image);
-		return prepareNode(nodeOf(image), writing, signal);
-	};
 
 	beforeEach(() => {
-		setAsset.mockClear();
-	});
-
-	it("hands every plugin the element, the build context and the job's signal", async () => {
-		const { signal } = new AbortController();
-		const plugin = { name: "settle", prepare: vi.fn(async () => {}) };
-
-		await prepare([plugin, { name: "none" }], signal);
-
-		expect(plugin.prepare).toHaveBeenCalledExactlyOnceWith(
-			expect.objectContaining({ id: "img" }),
-			expect.objectContaining({ setAsset }),
-			signal,
-		);
-	});
-
-	it("builds the node on what the plugins left on the canvas", async () => {
-		const prepared = await prepare(
-			[
-				{
-					...readsVoice,
-					prepare: async (_, ctx) =>
-						ctx.setAsset({
-							type: "asset_voice",
-							name: NARRATOR,
-							attrs: { voiceId: "v-1" },
-						}),
-				},
-			],
-			new AbortController().signal,
-		);
-
-		expect(prepared.inputs.reads).toEqual({ voice: "v-1" });
-	});
-
-	it("fails loudly when the element left the canvas", async () => {
 		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins: [] } };
+	});
+
+	it("builds the node from the canvas as it is now", () => {
 		edit(image);
-		const node = nodeOf(image);
+		const queued = nodeOf(image);
+		edit(element("img", "image", "a sunrise"));
+
+		expect(rebuildNode(queued, contextNow()).inputs.prompt).toBe("a sunrise");
+	});
+
+	it("fails loudly when the element left the canvas", () => {
+		edit(image);
+		const queued = nodeOf(image);
 		edit();
 
-		await expect(
-			prepareNode(node, writing, new AbortController().signal),
-		).rejects.toThrow('Element "img" left the canvas');
-		expect(setAsset).not.toHaveBeenCalled();
+		expect(() => rebuildNode(queued, contextNow())).toThrow(
+			'Element "img" left the canvas',
+		);
 	});
 });
 

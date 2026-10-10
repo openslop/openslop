@@ -4,22 +4,22 @@ import type {
 	ConnectorPlugin,
 	TTSGenerateParams,
 } from "@/lib/connectors/types";
-import { chosenVoices, recordedVoice, settleVoice } from "../voices";
+import { foundVoice, speakerVoices } from "@/lib/connectors/voice/voices";
 
-/** Speech speaks in its speaker's voice, on the pair that voice was found on. */
+/** Speech speaks in its speaker's voice, on that voice's model. */
 export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "speaker-voice",
 		model: ({ generationAttributes: attrs }, canvas) =>
 			pick(voiceOf(canvas, speakerOf(attrs)), ["provider", "model"]),
-		reads: [
-			chosenVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
+		dependencies: [
+			speakerVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
 		],
-		prepare: ({ generationAttributes: attrs }, ctx, signal) =>
-			settleVoice(speakerOf(attrs), ctx, signal, attrs),
-		beforeGenerate: (params, ctx) => ({
-			...params,
-			voiceId: recordedVoice(ctx, speakerOf(params)).voiceId,
-		}),
+		beforeGenerate: (params, ctx) => {
+			const name = speakerOf(params);
+			const voiceId = foundVoice(ctx, name)?.voiceId;
+			if (!voiceId) throw new Error(`${name} has no voice`);
+			return { ...params, voiceId };
+		},
 	};
 }

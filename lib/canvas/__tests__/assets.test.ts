@@ -95,7 +95,7 @@ describe("voiceOf", () => {
 		const nodes = [
 			asset("asset_voice", {
 				name: NARRATOR,
-				attrs: { gender: "masculine", voiceId: "v-narrator" },
+				attrs: { gender: "masculine" },
 			}),
 			asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
 			asset("asset_voice", {
@@ -107,7 +107,6 @@ describe("voiceOf", () => {
 		expect(voiceOf(nodes)).toEqual({
 			...DEFAULT_TTS_MODEL,
 			gender: "masculine",
-			voiceId: "v-narrator",
 		});
 		expect(voiceOf(nodes, "Mia")).toEqual({
 			...DEFAULT_TTS_MODEL,
@@ -129,7 +128,6 @@ describe("voiceFrom", () => {
 		const voice = {
 			provider: "cartesia",
 			model: "Sonic 3.6",
-			voiceId: "v1",
 			description: "husky",
 			gender: "feminine",
 			accent: "british",

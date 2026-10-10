@@ -30,7 +30,7 @@ The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/a
 
 ## Models and keys
 
-`MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech uses the voice pair stored on its speaker's `asset_voice`, if it has one. Defaults resolve element, then project, then account, then the recommendation.
+`MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech speaks on its speaker's `asset_voice` pair, not its own. The `voice` connector type offers the TTS models. Defaults resolve element, then project, then account, then the recommendation.
 
 The two route families are defined in `lib/api/route-families.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
 
@@ -44,18 +44,18 @@ User keys live in Supabase Vault. They are read by the service role only for the
 
 The Slate document (`lib/canvas/`) is the project. Each term below means one thing everywhere in the code:
 
-| Term          | Type                            | Means                                                                                                                                                                                        |
-| ------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Canvas**    | `editor.children`               | The Slate document. It is the project.                                                                                                                                                       |
-| **Node**      | Slate `Node`                    | Any Slate node: the editor, a block or a text leaf. A _graph node_ (`GenerationNode`) is separate: one per generated element, in `lib/generation/`.                                          |
-| **Block**     | `CanvasBlock`                   | A scene or an element.                                                                                                                                                                       |
-| **Scene**     | `Scene`                         | A group of content. A scene is a block, not an element.                                                                                                                                      |
-| **Element**   | `CanvasElement`, `ElementOf<T>` | Content or an asset. It holds text and attributes, and its type is an `ElementType` declared in `ELEMENT_TYPES`.                                                                             |
-| **Content**   | `ContentElement`                | An element inside a scene. It plays on the timeline; its type is declared in `CONTENT_TYPES` with a role and a layer.                                                                        |
-| **Asset**     | `AssetElement`                  | An element ahead of the scenes. Its type is declared in `ASSET_TYPES` and named `asset_*`.                                                                                                   |
-| **Generated** | `GeneratedElement`              | An element whose type names a connector: every content type, and `asset_avatar`. Each is a node in the generation graph.                                                                     |
-| **Metadata**  |                                 | An asset with no connector: `asset_voice`, `asset_style` and `asset_references`. Plugins read it; it is never a graph node.                                                                  |
-| **Character** |                                 | An `asset_avatar` and/or an `asset_voice` sharing a `name`. The avatar's text is how they look; the voice's attributes are how they sound. The narrator is the `asset_voice` named Narrator. |
+| Term          | Type                            | Means                                                                                                                                                                                                                                                                          |
+| ------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Canvas**    | `editor.children`               | The Slate document. It is the project.                                                                                                                                                                                                                                         |
+| **Node**      | Slate `Node`                    | Any Slate node: the editor, a block or a text leaf. A _graph node_ (`GenerationNode`) is separate: one per generated element, in `lib/generation/`.                                                                                                                            |
+| **Block**     | `CanvasBlock`                   | A scene or an element.                                                                                                                                                                                                                                                         |
+| **Scene**     | `Scene`                         | A group of content. A scene is a block, not an element.                                                                                                                                                                                                                        |
+| **Element**   | `CanvasElement`, `ElementOf<T>` | Content or an asset. It holds text and attributes, and its type is an `ElementType` declared in `ELEMENT_TYPES`.                                                                                                                                                               |
+| **Content**   | `ContentElement`                | An element inside a scene. It plays on the timeline; its type is declared in `CONTENT_TYPES` with a role and a layer.                                                                                                                                                          |
+| **Asset**     | `AssetElement`                  | An element ahead of the scenes. Its type is declared in `ASSET_TYPES` and named `asset_*`.                                                                                                                                                                                     |
+| **Generated** | `GeneratedElement`              | An element whose type names a connector: every content type, `asset_avatar` and `asset_voice`. Each is a node in the generation graph.                                                                                                                                         |
+| **Metadata**  |                                 | An asset with no connector: `asset_style` and `asset_references`. Plugins read it; it is never a graph node.                                                                                                                                                                   |
+| **Character** |                                 | An `asset_avatar` and/or an `asset_voice` sharing a `name`. The avatar's text is how they look; the voice's traits are what its search looks for, and its result is the voice found or picked, with a preview to hear it by. The narrator is the `asset_voice` named Narrator. |
 
 The hierarchy:
 
@@ -75,7 +75,6 @@ Each generated element is a node in a dependency graph (`lib/generation/`). A no
 
 - **Dependencies:** edges to other generated elements, such as a character's avatar or the previous visual.
 - **Reads:** metadata values, recorded under a label. A change makes the result stale, and the stale reason names the label.
-- **Prepare:** writes assets when a job starts, before the node is built to run, such as searching for a voice when the speaker has none on the model. The node is then built from the canvas as written, so those writes don't make the result stale.
 - **Hooks:** `transformPrompt`, `beforeGenerate`, `afterGenerate`.
 
 A node regenerates when it has no result, when a dependency regenerates, or when its inputs changed. The queue runs dependencies first, with a concurrency limit per connector type, and builds each node again from the live canvas when its job starts.

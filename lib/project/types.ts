@@ -29,7 +29,7 @@ export const voiceTraitsSchema = z.object({
 });
 
 export const VoiceSchema = voiceTraitsSchema.extend({
-	voiceId: optionalString,
+	pickedVoiceId: optionalString,
 	provider: modelRefSchema.shape.provider.optional().catch(undefined),
 	model: optionalString,
 });

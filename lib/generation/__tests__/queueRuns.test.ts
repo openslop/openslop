@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { findAsset, NARRATOR } from "@/lib/canvas/assets";
+import { NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import type { CanvasElement } from "@/lib/canvas/types";
@@ -7,11 +7,7 @@ import {
 	DEFAULT_CONNECTOR_REGISTRY,
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
-import type {
-	AssetResult,
-	ConnectorPlugin,
-	PluginContext,
-} from "@/lib/connectors/types";
+import type { AssetResult, PluginContext } from "@/lib/connectors/types";
 import type { BuildContext } from "../graph";
 import { buildNode, generatedById } from "../generationGraph";
 import { GenerationQueue } from "../queue";
@@ -28,13 +24,7 @@ vi.mock("@/lib/connectors/factory", async (original) => ({
 let canvas: CanvasElement[];
 let registry: ConnectorRegistry;
 
-const context = (): BuildContext =>
-	buildCtx(canvas, {
-		registry,
-		setAsset: ({ type, name, attrs }) => {
-			canvas = [...canvas, asset(type, { name, attrs })];
-		},
-	});
+const context = (): BuildContext => buildCtx(canvas, { registry });
 
 const byId = (id: string) => {
 	const found = generatedById(canvas, id);
@@ -112,54 +102,27 @@ describe("running a graph", () => {
 		expect(isNodeStale(nodeOf("img"), queue)).toBe(true);
 	});
 
-	describe("the prepare step", () => {
-		const settleVoice: ConnectorPlugin = {
-			name: "voice",
-			reads: [
-				(_, { canvas }) => ({
-					voice:
-						findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
-							?.voiceId ?? "",
-				}),
-			],
-			prepare: async (_, { setAsset }) =>
-				setAsset({
-					type: "asset_voice",
-					name: NARRATOR,
-					attrs: { voiceId: "v-7" },
-				}),
-		};
+	it("runs a line's voice first, and hands it to the line", async () => {
+		const found = { voiceId: "v-7", audioUrl: "v-7.wav", durationSec: 2 };
+		canvas = [
+			createCanvasElement("asset_voice", {
+				id: "voice",
+				attrs: { name: NARRATOR },
+			}),
+			createCanvasElement("narration", {
+				id: "line",
+				text: "Once upon a time",
+			}),
+		];
+		mediaGenerate
+			.mockResolvedValueOnce(found)
+			.mockResolvedValueOnce({ audioUrl: "line.mp3", durationSec: 1 });
 
-		beforeEach(() => {
-			registry = {
-				...DEFAULT_CONNECTOR_REGISTRY,
-				image: { plugins: [settleVoice] },
-			};
-			canvas = [
-				createCanvasElement("image", { id: "img", text: "a lighthouse" }),
-			];
-			mediaGenerate.mockResolvedValue({ imageUrl: "img.png", durationSec: 0 });
-		});
+		new GenerationQueue().enqueueGraph([nodeOf("line")], context);
 
-		it("writes the asset it settles, generates reading it, and records it so the result stays current", async () => {
-			const queue = new GenerationQueue();
-			const before = nodeOf("img");
-
-			queue.enqueueGraph([before], context);
-			await vi.waitFor(() =>
-				expect(queue.getElementSnapshot("img").result).toBeTruthy(),
-			);
-
-			expect(
-				findAsset(canvas, "asset_voice", NARRATOR)?.generationAttributes
-					?.voiceId,
-			).toBe("v-7");
-			expect(mediaGenerate.mock.calls[0]?.[1].reads?.voice).toBe("v-7");
-			expect(queue.getElementSnapshot("img").resultInputs?.reads.voice).toBe(
-				"v-7",
-			);
-			expect(isNodeStale(nodeOf("img"), queue)).toBe(false);
-			expect(isNodeStale(before, queue)).toBe(true);
+		await vi.waitFor(() => expect(mediaGenerate).toHaveBeenCalledTimes(2));
+		expect(mediaGenerate.mock.calls[1]?.[1].dependencies).toEqual({
+			"Narrator's voice": found,
 		});
 	});
 });

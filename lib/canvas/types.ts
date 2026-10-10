@@ -101,13 +101,13 @@ export const DEFAULT_LOOPS = "1";
 
 export const SCENE_TYPE = "scene" as const;
 
-/** What every element type declares: the connector it generates on, if any, and whether it is one per name. */
-type ElementSpec = { connector?: AssetConnectorType; named?: true };
+/** What every element type declares: the connector it generates on, if any. */
+type ElementSpec = { connector?: AssetConnectorType };
 
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
-	asset_avatar: { connector: "image", named: true },
-	asset_voice: { named: true },
+	asset_avatar: { connector: "image" },
+	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},
 } as const satisfies Record<`asset_${string}`, ElementSpec>;
