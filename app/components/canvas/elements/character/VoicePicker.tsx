@@ -139,10 +139,10 @@ export function VoicePicker({
 	onSelect: (voice: VoiceInfo) => void;
 	onModelChange: (model: ModelRef) => void;
 }) {
-	const { provider, model: name } = model;
+	const { provider, model: modelName } = model;
 	const connector = useMemo(
-		() => createConnector("tts", { provider, model: name }),
-		[provider, name],
+		() => createConnector("tts", { provider, model: modelName }),
+		[provider, modelName],
 	);
 	const search = useVoiceSearch(filters, connector);
 
