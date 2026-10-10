@@ -19,7 +19,6 @@ import {
 	generatedById,
 	GenerationGraph,
 	pluginRecords,
-	rebuildNode,
 } from "../generationGraph";
 import { buildCtx, EMPTY_CONTEXT } from "./_context";
 
@@ -155,32 +154,6 @@ describe("GenerationGraph", () => {
 
 		expect(() => nodeOf(image)).toThrow(failure);
 		expect(() => nodeOf(image)).toThrow(failure);
-	});
-});
-
-describe("rebuildNode", () => {
-	const image = element("img", "image", "a sunset");
-
-	beforeEach(() => {
-		registry = { ...DEFAULT_CONNECTOR_REGISTRY, image: { plugins: [] } };
-	});
-
-	it("builds the node from the canvas as it is now", () => {
-		edit(image);
-		const queued = nodeOf(image);
-		edit(element("img", "image", "a sunrise"));
-
-		expect(rebuildNode(queued, contextNow()).inputs.prompt).toBe("a sunrise");
-	});
-
-	it("fails loudly when the element left the canvas", () => {
-		edit(image);
-		const queued = nodeOf(image);
-		edit();
-
-		expect(() => rebuildNode(queued, contextNow())).toThrow(
-			'Element "img" left the canvas',
-		);
 	});
 });
 

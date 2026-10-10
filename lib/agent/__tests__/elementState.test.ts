@@ -4,13 +4,7 @@ import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { staleReason } from "@/lib/generation/staleReason";
 import { elementState } from "../elementState";
-import { EMPTY_CONTEXT } from "@/lib/generation/__tests__/_context";
 import { jobNode } from "@/lib/generation/__tests__/_graph";
-
-vi.mock("@/lib/generation/generationGraph", async (original) => ({
-	...(await original<typeof import("@/lib/generation/generationGraph")>()),
-	rebuildNode: (node: GenerationNode) => node,
-}));
 
 vi.mock("@/lib/generation/generateForElement", () => ({
 	generateForElement: () => new Promise(() => {}),
@@ -93,7 +87,7 @@ describe("elementState", () => {
 
 	it("reads what the queue is working on by its status", () => {
 		const queue = new GenerationQueue({ limits: { image: 1 } });
-		queue.enqueueGraph([node("a"), node("b")], () => EMPTY_CONTEXT);
+		queue.enqueueGraph([node("a"), node("b")]);
 
 		expect(stateOf(node("a"), queue).state).toBe("generating");
 		expect(stateOf(node("b"), queue).state).toBe("queued");

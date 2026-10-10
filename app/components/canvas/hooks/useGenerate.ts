@@ -25,7 +25,7 @@ export function useGenerate(element: GeneratedElement) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
-		queue.enqueueGraph([current], buildContext);
+		queue.enqueueGraph([current]);
 	}, [queue, element, buildContext]);
 
 	const discard = useCallback(() => {

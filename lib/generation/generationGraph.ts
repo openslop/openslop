@@ -118,16 +118,6 @@ export const createGraphFor = () => {
 	);
 };
 
-/** The node as the canvas holds it now. */
-export function rebuildNode(
-	node: GenerationNode,
-	ctx: BuildContext,
-): GenerationNode {
-	const element = generatedById(ctx.canvas, node.id);
-	if (!element) throw new Error(`Element "${node.id}" left the canvas`);
-	return buildNode(element, ctx);
-}
-
 export const buildNode = (
 	element: GeneratedElement,
 	ctx: BuildContext,

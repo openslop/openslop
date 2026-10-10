@@ -107,15 +107,3 @@ describe("generating after the element it depends on changed", () => {
 		expect(dependency && needsGeneration(dependency, queue)).toBe(false);
 	});
 });
-
-it.each([
-	["an element", () => render(useVideoGeneration).generate()],
-	["a scope", () => render(useVideoScope).run()],
-])(
-	"hands the queue the context factory when %s is generated, so each job reads the canvas as it runs",
-	(_, generate) => {
-		generate();
-
-		expect(enqueue).toHaveBeenCalledWith(expect.any(Array), buildContext);
-	},
-);

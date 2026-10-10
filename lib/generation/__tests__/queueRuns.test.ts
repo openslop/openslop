@@ -60,7 +60,7 @@ describe("running a graph", () => {
 				: { imageUrl: "img.png", durationSec: 0 },
 		);
 
-		queue.enqueueGraph([nodeOf("img")], context);
+		queue.enqueueGraph([nodeOf("img")]);
 
 		await vi.waitFor(() =>
 			expect(queue.getElementSnapshot("img").result).toBeTruthy(),
@@ -91,7 +91,7 @@ describe("running a graph", () => {
 			() => new Promise((resolve) => (finish = resolve)),
 		);
 
-		queue.enqueueGraph([nodeOf("img")], context);
+		queue.enqueueGraph([nodeOf("img")]);
 		await vi.waitFor(() => expect(mediaGenerate).toHaveBeenCalledOnce());
 		queue.commitResult(avatar, { imageUrl: "red-2.png", durationSec: 0 });
 		finish({ imageUrl: "img.png", durationSec: 0 });
@@ -118,7 +118,7 @@ describe("running a graph", () => {
 			.mockResolvedValueOnce(found)
 			.mockResolvedValueOnce({ audioUrl: "line.mp3", durationSec: 1 });
 
-		new GenerationQueue().enqueueGraph([nodeOf("line")], context);
+		new GenerationQueue().enqueueGraph([nodeOf("line")]);
 
 		await vi.waitFor(() => expect(mediaGenerate).toHaveBeenCalledTimes(2));
 		expect(mediaGenerate.mock.calls[1]?.[1].dependencies).toEqual({

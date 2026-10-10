@@ -97,7 +97,6 @@ export function useGenerateScope(
 			buildNodes(elements(), context).filter(
 				(node) => hasPrompt(node) && needsGeneration(node, queue),
 			),
-			buildContext,
 		);
 	}, [queue, elements, buildContext]);
 

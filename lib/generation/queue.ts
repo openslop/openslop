@@ -7,20 +7,14 @@ import {
 } from "./concurrency";
 import { ElapsedTicker } from "./elapsedTicker";
 import { generateForElement } from "./generateForElement";
-import { rebuildNode } from "./generationGraph";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
-import { flattenGraph, type BuildContext, type GenerationNode } from "./graph";
+import { flattenGraph, type GenerationNode } from "./graph";
 
 type ActiveJob = {
 	controller: AbortController;
 	connectorType: AssetConnectorType;
-};
-
-type QueuedJob = {
-	node: GenerationNode;
-	context: () => BuildContext;
 };
 
 /**
@@ -33,7 +27,7 @@ export class GenerationQueue {
 	private readonly ticker = new ElapsedTicker((elapsed) =>
 		this.onTick(elapsed),
 	);
-	private pending: QueuedJob[] = [];
+	private pending: GenerationNode[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
@@ -70,11 +64,8 @@ export class GenerationQueue {
 		if (changed) this.snapshots.notify();
 	}
 
-	/**
-	 * Roots are always queued: asking to generate something means regenerating
-	 * it. Each job is built again from `context` when it runs.
-	 */
-	enqueueGraph(roots: GenerationNode[], context: () => BuildContext) {
+	/** Roots are always queued: asking to generate something means regenerating it. */
+	enqueueGraph(roots: GenerationNode[]) {
 		const rootIds = new Set(roots.map((root) => root.id));
 		let added = false;
 		for (const node of flattenGraph(roots)) {
@@ -85,7 +76,7 @@ export class GenerationQueue {
 				seconds: 0,
 				connectorType: node.job.connectorType,
 			});
-			this.pending.push({ node, context });
+			this.pending.push(node);
 			added = true;
 		}
 		if (added) {
@@ -181,7 +172,7 @@ export class GenerationQueue {
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
 		this.ticker.stop(id);
-		this.pending = this.pending.filter(({ node }) => node.id !== id);
+		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
 	/** The dependency holding `node` back, if any: it gates until it settles. */
@@ -202,13 +193,13 @@ export class GenerationQueue {
 	private processQueue() {
 		for (;;) {
 			const index = this.pending.findIndex(
-				({ node }) =>
+				(node) =>
 					this.hasCapacity(node.job.connectorType) &&
 					!this.blockingDependency(node),
 			);
 			if (index === -1) break;
-			const [queued] = this.pending.splice(index, 1);
-			if (queued) void this.runJob(queued);
+			const [node] = this.pending.splice(index, 1);
+			if (node) void this.runJob(node);
 		}
 		this.releaseBlocked();
 	}
@@ -225,7 +216,7 @@ export class GenerationQueue {
 		if (this.active.size > 0 || this.pending.length === 0) return;
 		const blocked = this.pending;
 		this.pending = [];
-		for (const { node } of blocked) {
+		for (const node of blocked) {
 			const error = this.blockedByError(node);
 			this.snapshots.resetToIdle(node.id);
 			if (error) this.snapshots.update(node.id, { error });
@@ -242,7 +233,7 @@ export class GenerationQueue {
 	}
 
 	/** A cancelled job settles into nothing: whoever aborted it already cleaned up. */
-	private async runJob({ node, context }: QueuedJob) {
+	private async runJob(node: GenerationNode) {
 		const {
 			id: elementId,
 			job: { elementType, connectorType },
@@ -256,11 +247,10 @@ export class GenerationQueue {
 		this.ticker.start(elementId);
 
 		try {
-			const current = rebuildNode(node, context());
-			const inputs = generationInputs(current, this);
+			const inputs = generationInputs(node, this);
 			const result = await generateForElement(
-				current,
-				this.dependencyResults(current),
+				node,
+				this.dependencyResults(node),
 				signal,
 			);
 			if (signal.aborted) return;

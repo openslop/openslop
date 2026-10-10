@@ -7,7 +7,7 @@ import { useConfig } from "@/lib/config/ConfigProvider";
 import { useProjectStoreHandle } from "@/lib/project/ProjectStoreProvider";
 import { buildSettings, type BuildContext } from "./graph";
 
-/** Reads the canvas and the settings per call, so a job built late never runs on what it was queued with. */
+/** Reads the canvas and the settings per call, so an edit never re-renders the caller. */
 export function useBuildContext(): () => BuildContext {
 	const { connectorConfig: registry } = useConfig();
 	const store = useProjectStoreHandle();
