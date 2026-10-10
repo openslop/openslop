@@ -13,7 +13,7 @@
 
 ## Sloppy
 
-The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/agent/`, turns run by `lib/api/agentTurn.ts`). The server streams text and tool calls; the client runs each tool against the Slate editor and posts the result back until the model answers in text. Only the client writes the project.
+The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/agent/`, turns run by `lib/api/agent-turn.ts`). The server streams text and tool calls; the client runs each tool against the Slate editor and posts the result back until the model answers in text. Only the client writes the project.
 
 ## Vocabulary
 
@@ -67,7 +67,7 @@ Canvas
       └─ Text leaves   (node)
 ```
 
-Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/elementConnector.ts`).
+Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/element-connector.ts`).
 
 `lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template) and the project's pinned default models. It also owns saving and version history.
 
@@ -79,7 +79,7 @@ Each generated element is a node in a dependency graph (`lib/generation/`). A no
 
 A node regenerates when it has no result, when a dependency regenerates, or when its inputs changed. The queue runs dependencies first, with a concurrency limit per connector type, and builds each node again from the live canvas when its job starts.
 
-Each content type's card controls are declared in `app/components/canvas/elements/elementConfigs.tsx`.
+Each content type's card controls are declared in `app/components/canvas/elements/element-configs.tsx`.
 
 ## Data
 

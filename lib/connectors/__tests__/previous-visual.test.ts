@@ -12,7 +12,7 @@ const captureFrames = vi.hoisted(() =>
 		frames.map((frame) => `https://img/${frame}.png`),
 	),
 );
-vi.mock("@/lib/connectors/video/captureFrames", () => ({
+vi.mock("@/lib/connectors/video/capture-frames", () => ({
 	captureFrames,
 }));
 

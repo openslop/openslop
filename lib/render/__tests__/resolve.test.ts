@@ -6,7 +6,7 @@ import {
 	type Scene,
 } from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import { splitAttributes } from "@/lib/canvas/elementAttributes";
+import { splitAttributes } from "@/lib/canvas/element-attributes";
 
 function makeElement(
 	id: string,

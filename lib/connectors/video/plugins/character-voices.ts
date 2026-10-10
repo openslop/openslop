@@ -1,7 +1,7 @@
 import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
-} from "@/lib/canvas/characterNames";
+} from "@/lib/canvas/character-names";
 import { modelEntry, resolveModel } from "@/lib/connectors/models";
 import { foundVoice, speakerVoices } from "@/lib/connectors/voice/voices";
 import type {

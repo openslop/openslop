@@ -3,7 +3,7 @@ import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
 	shownCharacters,
-} from "@/lib/canvas/characterNames";
+} from "@/lib/canvas/character-names";
 import mergeWith from "lodash/mergeWith";
 import { appendArrays } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";

@@ -1,4 +1,4 @@
-import type { ValidationResult } from "@/lib/connectors/providerKey";
+import type { ValidationResult } from "@/lib/connectors/provider-key";
 
 export const rejected = (status: number): ValidationResult => ({
 	ok: false,

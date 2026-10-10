@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createDimensionsPlugin } from "@/lib/connectors/plugins/dimensions";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
 import { projectState } from "@/lib/generation/__tests__/_context";
 import { pluginCtx, readsOf } from "./_state-ctx";
 

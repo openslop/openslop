@@ -56,11 +56,11 @@ OpenSlop relie tous vos outils IA préférés dans un seul flux de travail pour 
 
 Tapez une ligne. Choisissez 16:9 ou 9:16, une langue, un modèle et une durée, ou collez un script que vous avez déjà. Sept modèles sont là si vous avez besoin d'un coup de pouce.
 
-[Le composeur →](../../app/components/copilot/ComposerCopilot.tsx)
+[Le composeur →](../../app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
     <img src="../../assets/features/describe-light.svg" alt="La zone de prompt fait défiler des exemples d'idées, puis une ligne est tapée et envoyée" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, R
 
 **Aussi dans la boîte :**
 
-- **[Sous-titres](../../app/components/canvas/panel/CaptionsPanel.tsx)** — Six préréglages, douze polices, apparition mot par mot ou ligne par ligne, et chaque couleur, bordure et placement est à vous de changer.
-- **[Export jusqu'en 4K](../../app/components/player/ExportButton.tsx)** — Rend sur Remotion Lambda en morceaux parallèles et vous livre un MP4.
-- **[Historique des versions](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Sauvegarde automatique pendant que vous travaillez, regroupée en points de contrôle. Consultez n'importe quelle version et restaurez-la.
+- **[Sous-titres](../../app/components/canvas/panel/captions-panel.tsx)** — Six préréglages, douze polices, apparition mot par mot ou ligne par ligne, et chaque couleur, bordure et placement est à vous de changer.
+- **[Export jusqu'en 4K](../../app/components/player/export-button.tsx)** — Rend sur Remotion Lambda en morceaux parallèles et vous livre un MP4.
+- **[Historique des versions](../../app/components/canvas/panel/canvas-history-panel.tsx)** — Sauvegarde automatique pendant que vous travaillez, regroupée en points de contrôle. Consultez n'importe quelle version et restaurez-la.
 - **[Personnages et style graphique](../../app/components/canvas/elements/AssetsSection.tsx)** — Nommez un personnage une fois et chaque image, réplique et avatar reste cohérent.
 - **[Modèles](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, et plus. Chacun amorce un style, un narrateur et une durée.
 - **[Mocks pour le développement](../../.env.example)** — Laissez une clé de fournisseur vide et ses appels retombent sur des résultats préenregistrés, pour que vous puissiez développer sans payer.

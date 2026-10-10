@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { parseSloppyMessage } from "@/lib/agent/messages";
 import { modelEntry, vendorParams } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
-import { agentTurnSchema, streamAgentTurn } from "./agentTurn";
+import { agentTurnSchema, streamAgentTurn } from "./agent-turn";
 import { bodySchema, LLM_FIELDS } from "./generation-schema";
 import { badRequest } from "./response";
 import { createSSEStreamResponse } from "./sse";

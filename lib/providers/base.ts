@@ -1,6 +1,6 @@
 import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
 import { AssetBundle } from "@/lib/api/asset-bundle";
-import type { ValidationResult } from "@/lib/connectors/providerKey";
+import type { ValidationResult } from "@/lib/connectors/provider-key";
 
 export type WithMetadata<
 	T extends Record<string, unknown> = Record<string, unknown>,

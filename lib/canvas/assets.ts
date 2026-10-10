@@ -1,11 +1,11 @@
 import compact from "lodash/compact";
 import uniq from "lodash/uniq";
 import type { Descendant } from "slate";
-import { parseReferenceImages } from "@/lib/connectors/attributes/referenceImages";
+import { parseReferenceImages } from "@/lib/connectors/attributes/reference-images";
 import { VoiceSchema, type Voice } from "@/lib/project/types";
-import { flatAttributes } from "./elementAttributes";
+import { flatAttributes } from "./element-attributes";
 import { isAssetElement } from "./guards";
-import { getElementBodyText } from "./osmlSerializer";
+import { getElementBodyText } from "./osml-serializer";
 import { getContentElements } from "./scenes";
 import type { AssetElement, AssetType, CanvasElement } from "./types";
 

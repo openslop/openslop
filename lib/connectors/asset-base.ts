@@ -2,7 +2,7 @@ import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { ResultKind } from "@/lib/canvas/types";
 import { type AssetGateway, isTerminal } from "@/lib/gateway/base";
 import { awaitCompletion } from "@/lib/providers/poll";
-import { assetUrlField } from "./assetUrl";
+import { assetUrlField } from "./asset-url";
 import { BaseConnector } from "./base";
 import type { ResolvedConnectorConfig } from "./types";
 

@@ -2,7 +2,7 @@ import compact from "lodash/compact";
 import isEqual from "lodash/isEqual";
 import mapValues from "lodash/mapValues";
 import memoizeOne from "memoize-one";
-import { ASSET_URL_FIELDS } from "../connectors/assetUrl";
+import { ASSET_URL_FIELDS } from "../connectors/asset-url";
 import type { GenerationNode } from "./graph";
 import type { GenerationInputs } from "./inputs";
 import type { GenerationQueue } from "./queue";

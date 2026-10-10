@@ -12,8 +12,8 @@ import {
 	type Voice,
 	type ScriptSettings,
 } from "@/lib/project/types";
-import { videoLengthBudget } from "@/lib/project/videoLength";
-import { videoFormatLabel } from "@/lib/project/videoFormat";
+import { videoLengthBudget } from "@/lib/project/video-length";
+import { videoFormatLabel } from "@/lib/project/video-format";
 
 function renderVoice(voice: Voice): string {
 	return voiceTraitEntries(voice)

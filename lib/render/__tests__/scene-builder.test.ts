@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
-import { isBlankScene } from "../blankScene";
+import { isBlankScene } from "../blank-scene";
 import { buildRenderLayout, type BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import type { ContentType } from "@/lib/canvas/types";

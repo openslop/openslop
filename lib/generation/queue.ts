@@ -5,8 +5,8 @@ import {
 	resolveConcurrencyLimits,
 	type ConcurrencyLimits,
 } from "./concurrency";
-import { ElapsedTicker } from "./elapsedTicker";
-import { generateForElement } from "./generateForElement";
+import { ElapsedTicker } from "./elapsed-ticker";
+import { generateForElement } from "./generate-for-element";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";

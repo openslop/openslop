@@ -56,11 +56,11 @@ It runs in your browser, nothing to install. Open-source, free forever. Built by
 
 Type one line. Pick 16:9 or 9:16, a language, a model, and a length, or paste a script you already have. Seven templates are there if you need a nudge.
 
-[The composer →](app/components/copilot/ComposerCopilot.tsx)
+[The composer →](app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/features/describe-dark.svg">
     <img src="./assets/features/describe-light.svg" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 
 **Also in the box:**
 
-- **[Captions](app/components/canvas/panel/CaptionsPanel.tsx)** — Six presets, twelve fonts, word-by-word or line-by-line reveal, and every color, border, and placement is yours to change.
-- **[Export up to 4K](app/components/player/ExportButton.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
-- **[Version history](app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
+- **[Captions](app/components/canvas/panel/captions-panel.tsx)** — Six presets, twelve fonts, word-by-word or line-by-line reveal, and every color, border, and placement is yours to change.
+- **[Export up to 4K](app/components/player/export-button.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
+- **[Version history](app/components/canvas/panel/canvas-history-panel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
 - **[Characters and art style](app/components/canvas/elements/AssetsSection.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.
 - **[Templates](lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, and more. Each seeds a style, a narrator, and a length.
 - **[Mocks for development](.env.example)** — Leave a provider key unset and its calls fall back to canned results, so you can build without paying.

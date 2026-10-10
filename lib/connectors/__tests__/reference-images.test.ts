@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { references } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
 import { createReferenceImagesPlugin } from "@/lib/connectors/image/plugins/reference-images";
 import { pluginCtx, readsOf } from "./_state-ctx";
 

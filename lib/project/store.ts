@@ -11,7 +11,7 @@ import {
 	type DeepPartial,
 	type ScriptSettings,
 } from "./types";
-import { VideoSettingsSchema, type VideoSettings } from "./videoSettings";
+import { VideoSettingsSchema, type VideoSettings } from "./video-settings";
 
 /** Everything else the project holds is on the canvas. Parsing fills every default. */
 export const ProjectDataSchema = z.object({

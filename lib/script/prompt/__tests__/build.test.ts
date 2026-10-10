@@ -5,7 +5,7 @@ import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, scriptRules } from "../build";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
-import { VIDEO_LENGTH_SPECS } from "@/lib/project/videoLength";
+import { VIDEO_LENGTH_SPECS } from "@/lib/project/video-length";
 
 const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
 	ScriptSettingsSchema.parse(settings);

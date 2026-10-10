@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	getElementText,
 	serializeOSMLWithScenes,
-} from "@/lib/canvas/osmlSerializer";
+} from "@/lib/canvas/osml-serializer";
 import {
 	SCENE_TYPE,
 	type ContentElement,
@@ -15,7 +15,7 @@ import { deserializeWithScenes, splitScenes } from "../serialize";
 import {
 	flatAttributes,
 	splitAttributes,
-} from "@/lib/canvas/elementAttributes";
+} from "@/lib/canvas/element-attributes";
 
 const makeEl = (
 	type: ContentElement["type"],

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { isByokProvider } from "@/lib/connectors/providerCatalog";
+import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import type { ProviderType, Providers } from "@/lib/providers/types";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";

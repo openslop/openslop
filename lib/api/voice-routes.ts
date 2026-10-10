@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { ModelRef } from "@/lib/connectors/types";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
-import { voicePreview } from "@/lib/providers/tts/voicePreview";
+import { voicePreview } from "@/lib/providers/tts/voice-preview";
 import { requiredVoiceId } from "./request-schema-fields";
 import type { RouteFamily } from "./route-families";
 

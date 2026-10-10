@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/project/aspectRatio";
+import type { VideoResolution } from "@/lib/project/aspect-ratio";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";

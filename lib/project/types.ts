@@ -8,8 +8,8 @@ import {
 } from "@/lib/connectors/tts/enums";
 import { modelRefSchema } from "@/lib/connectors/models";
 import { AUTO_LANGUAGE, LANGUAGE_CHOICES } from "./language";
-import { DEFAULT_VIDEO_FORMAT, VIDEO_FORMAT_CHOICES } from "./videoFormat";
-import { DEFAULT_VIDEO_LENGTH, VIDEO_LENGTHS } from "./videoLength";
+import { DEFAULT_VIDEO_FORMAT, VIDEO_FORMAT_CHOICES } from "./video-format";
+import { DEFAULT_VIDEO_LENGTH, VIDEO_LENGTHS } from "./video-length";
 
 const optionalString = z.string().min(1).optional().catch(undefined);
 

@@ -11,7 +11,7 @@ import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
 	DEFAULT_VIDEO_RESOLUTION,
-} from "@/lib/project/aspectRatio";
+} from "@/lib/project/aspect-ratio";
 
 const FINISHED: Record<string, VideoJobStatus> = {
 	success: "completed",

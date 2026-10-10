@@ -1,8 +1,8 @@
 import { SCENE_TYPE, type AssetElement, type Scene } from "@/lib/canvas/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { isAssetElement, isContentElement } from "@/lib/canvas/guards";
-import { parseOSML } from "@/lib/canvas/osmlStreamParser";
-import { makeNodeId } from "@/lib/canvas/nodeUtils";
+import { parseOSML } from "@/lib/canvas/osml-stream-parser";
+import { makeNodeId } from "@/lib/canvas/node-utils";
 import type { ConnectorModels } from "@/lib/connectors/models";
 
 export function splitScenes(osml: string): string[] {

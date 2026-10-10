@@ -1,5 +1,5 @@
 import type { ContentElement } from "@/lib/canvas/types";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import type { GenerationQueue } from "@/lib/generation/queue";
 
 /** The first picture the script generated: what the project looks like. */

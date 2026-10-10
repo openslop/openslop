@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
-import type { SavedProject } from "../savedProject";
+import type { SavedProject } from "../saved-project";
 import {
 	createProjectStore,
 	extractStoreSnapshot,

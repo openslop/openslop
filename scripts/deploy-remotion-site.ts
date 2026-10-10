@@ -1,6 +1,6 @@
 import { deploySite, getOrCreateBucket } from "@remotion/lambda";
 import path from "node:path";
-import { getSiteName, REGION } from "../lib/render/lambdaConfig";
+import { getSiteName, REGION } from "../lib/render/lambda-config";
 import { webpackOverride } from "../remotion/webpack-override";
 
 const siteName = getSiteName();

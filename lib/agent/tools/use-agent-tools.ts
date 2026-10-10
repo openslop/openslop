@@ -1,0 +1,115 @@
+"use client";
+
+import { useCallback } from "react";
+import { useSlateStatic } from "slate-react";
+import compact from "lodash/compact";
+import pick from "lodash/pick";
+import { getAssets, referenceUrls } from "@/lib/canvas/assets";
+import { findElementById } from "@/lib/canvas/editor-ops";
+import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
+import { isScriptEmpty } from "@/lib/canvas/scenes";
+import { countSpokenWords } from "@/lib/canvas/spoken-words";
+import {
+	connectorOf,
+	isGenerated,
+	type CanvasElement,
+} from "@/lib/canvas/types";
+import {
+	measureElementLengths,
+	measureRuntime,
+} from "@/lib/render/element-lengths";
+import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
+import { buildNodes } from "@/lib/generation/generation-graph";
+import { staleReason } from "@/lib/generation/stale-reason";
+import { useBuildContext } from "@/lib/generation/use-build-context";
+import { getPrimaryUrl } from "@/lib/connectors/asset-url";
+import { createConnector } from "@/lib/connectors/factory";
+import { getPromptText } from "@/lib/generation/inputs";
+import { applyRefineOps } from "@/lib/script/refine/apply-ops";
+import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
+import type { ScriptSource } from "@/lib/script/prompt/build";
+import { streamScript } from "@/lib/script/stream-script";
+import { elementState } from "../element-state";
+import {
+	PROJECT_SETTERS,
+	type AgentToolContext,
+	type ElementImage,
+} from "./context";
+import { executeToolCall } from "./registry";
+
+export function useAgentTools() {
+	const editor = useSlateStatic();
+	const store = useProjectStoreHandle();
+	const queue = useGenerationQueue();
+	const buildContext = useBuildContext();
+
+	return useCallback(
+		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
+			const llm = () => createConnector("llm", editor.defaultModels().llm);
+			const draftScript = (source: ScriptSource) =>
+				streamScript(
+					editor,
+					store.getState().scriptSettings,
+					llm(),
+					source,
+					signal,
+				);
+			const picturesOf = (element: CanvasElement): ElementImage["pictures"] => {
+				if (element.type === "asset_references")
+					return { kind: "uploaded", urls: referenceUrls([element]) };
+				if (connectorOf(element.type) !== "image") return undefined;
+				const { status, result } = queue.getElementSnapshot(element.id);
+				return {
+					kind: "generated",
+					status,
+					urls: compact([getPrimaryUrl(result, "image")]),
+				};
+			};
+			const ctx: AgentToolContext = {
+				readScript: () => serializeOSMLWithScenes(editor.children),
+				isScriptEmpty: () => isScriptEmpty(editor.children),
+				countSpokenWords: () => countSpokenWords(editor.children),
+				measureElementLengths: () => measureElementLengths(editor.children),
+				measureRuntime: () => measureRuntime(editor.children),
+				elementImage: (id) => {
+					const element = findElementById(editor, id)?.[0];
+					return (
+						element && {
+							type: element.type,
+							prompt: getPromptText(element),
+							pictures: picturesOf(element),
+						}
+					);
+				},
+				elementStates: () => {
+					const context = buildContext();
+					return buildNodes(context.canvas.filter(isGenerated), context).map(
+						(node) =>
+							elementState(
+								node.id,
+								queue.getElementSnapshot(node.id),
+								staleReason(node, queue),
+							),
+					);
+				},
+				generateText: async (prompt, options) => {
+					const { text } = await llm().generate({ prompt, ...options });
+					if (!text.trim())
+						throw new Error(
+							"The model spent its whole output budget thinking and replied with nothing. Ask for less thinking, or for a shorter answer.",
+						);
+					return text;
+				},
+				readAssets: () => getAssets(editor.children),
+				readProject: () => store.getState(),
+				editScript: (ops) => applyRefineOps(editor, ops),
+				writeScript: (brief) => draftScript({ kind: "brief", brief }),
+				adaptScript: (script, notes) =>
+					draftScript({ kind: "adapt", script, notes }),
+				...pick(store.getState(), PROJECT_SETTERS),
+			};
+			return executeToolCall(call, ctx);
+		},
+		[editor, store, queue, buildContext],
+	);
+}

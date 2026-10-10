@@ -5,7 +5,7 @@ import type {
 	ConnectorPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
-import { pluginRecords } from "@/lib/generation/generationGraph";
+import { pluginRecords } from "@/lib/generation/generation-graph";
 import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { ProjectData } from "@/lib/project/store";
 

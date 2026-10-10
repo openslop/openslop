@@ -3,7 +3,7 @@ import mergeWith from "lodash/mergeWith";
 import { appendArrays } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { Dependency } from "@/lib/generation/declare";
-import { captureFrames } from "@/lib/connectors/video/captureFrames";
+import { captureFrames } from "@/lib/connectors/video/capture-frames";
 import {
 	CONTINUITY_ATTR,
 	CONTINUITY_FRAMES,
@@ -12,7 +12,7 @@ import {
 	PREVIOUS_VISUAL,
 	START_FRAME,
 	START_FRAME_ATTR,
-} from "../startFrame";
+} from "../start-frame";
 
 export type ParamsWithPreviousVisual = {
 	prompt: string;

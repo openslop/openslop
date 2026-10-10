@@ -1,0 +1,46 @@
+"use client";
+
+import { useState } from "react";
+import { useElementWidth } from "@/lib/components/use-element-width";
+import { ASPECT_RATIO_DIMENSIONS } from "@/lib/project/aspect-ratio";
+import { CAPTION_SAMPLE_WORDS } from "@/lib/captions/caption-presets";
+import {
+	captionFontSizePx,
+	type CaptionStyle,
+} from "@/lib/captions/caption-style";
+import { useVideoSetting } from "@/lib/project/use-video-setting";
+import { CaptionStage, useCaptionCycle } from "./caption-stage";
+
+const MAX_HEIGHT = 168;
+
+/**
+ * The caption at true scale inside a frame of the project's aspect ratio. It
+ * plays on hover like the preset thumbnails, so an idle panel holds still.
+ */
+export function CaptionPreview({ style }: { style: CaptionStyle }) {
+	const aspectRatio = useVideoSetting("aspectRatio");
+	const { ref, width: available } = useElementWidth<HTMLDivElement>();
+	const [playing, setPlaying] = useState(false);
+	const { output } = ASPECT_RATIO_DIMENSIONS[aspectRatio];
+	const scale = Math.min(available / output.width, MAX_HEIGHT / output.height);
+	const height = Math.round(output.height * scale);
+	const activeIndex = useCaptionCycle(CAPTION_SAMPLE_WORDS.length, playing);
+
+	return (
+		<div
+			ref={ref}
+			onPointerEnter={() => setPlaying(true)}
+			onPointerLeave={() => setPlaying(false)}
+			className="flex justify-center"
+		>
+			<CaptionStage
+				style={style}
+				words={CAPTION_SAMPLE_WORDS}
+				activeIndex={activeIndex}
+				width={Math.round(output.width * scale)}
+				height={height}
+				fontSizePx={captionFontSizePx(style.fontSize, height)}
+			/>
+		</div>
+	);
+}

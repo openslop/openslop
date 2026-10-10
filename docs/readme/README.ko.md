@@ -56,11 +56,11 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 한 줄만 적으세요. 16:9 또는 9:16, 언어, 모델, 길이를 고르거나, 이미 있는 스크립트를 붙여 넣으세요. 힌트가 필요하면 템플릿 일곱 개가 있습니다.
 
-[컴포저 →](../../app/components/copilot/ComposerCopilot.tsx)
+[컴포저 →](../../app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
     <img src="../../assets/features/describe-light.svg" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 **함께 들어 있는 것:**
 
-- **[자막](../../app/components/canvas/panel/CaptionsPanel.tsx)** — 프리셋 여섯 개, 글꼴 열두 개, 단어 단위 또는 줄 단위로 나타나기, 그리고 색, 테두리, 위치 전부를 마음대로 바꿀 수 있습니다.
-- **[최대 4K로 내보내기](../../app/components/player/ExportButton.tsx)** — Remotion Lambda에서 여러 조각을 동시에 렌더링해 MP4를 건네줍니다.
-- **[버전 기록](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — 작업하는 동안 자동 저장되고, 체크포인트로 묶입니다. 어떤 버전이든 보고 되돌릴 수 있습니다.
+- **[자막](../../app/components/canvas/panel/captions-panel.tsx)** — 프리셋 여섯 개, 글꼴 열두 개, 단어 단위 또는 줄 단위로 나타나기, 그리고 색, 테두리, 위치 전부를 마음대로 바꿀 수 있습니다.
+- **[최대 4K로 내보내기](../../app/components/player/export-button.tsx)** — Remotion Lambda에서 여러 조각을 동시에 렌더링해 MP4를 건네줍니다.
+- **[버전 기록](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 작업하는 동안 자동 저장되고, 체크포인트로 묶입니다. 어떤 버전이든 보고 되돌릴 수 있습니다.
 - **[캐릭터와 화풍](../../app/components/canvas/elements/AssetsSection.tsx)** — 캐릭터 이름을 한 번만 정하면 모든 이미지, 음성 대사, 아바타가 일관되게 유지됩니다.
 - **[템플릿](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime 등. 각각 스타일, 내레이터, 길이를 미리 채워 줍니다.
 - **[개발용 목(mock)](../../.env.example)** — 공급자 키를 비워 두면 그 호출은 미리 준비된 결과로 대체되어, 돈을 내지 않고도 개발할 수 있습니다.

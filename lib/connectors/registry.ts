@@ -3,7 +3,7 @@ import { createArtStylePlugin } from "./image/plugins/art-style";
 import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
 import { createDimensionsPlugin } from "./plugins/dimensions";
-import { buildVisualPlugins } from "./plugins/visualChain";
+import { buildVisualPlugins } from "./plugins/visual-chain";
 import { createSpeakerVoicePlugin } from "./tts/plugins/speaker-voice";
 import { createCharacterVoicesPlugin } from "./video/plugins/character-voices";
 import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";

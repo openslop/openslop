@@ -12,7 +12,7 @@ import {
 	voiceFrom,
 	voiceOf,
 } from "../assets";
-import { createCanvasElement } from "../createCanvasElement";
+import { createCanvasElement } from "../create-canvas-element";
 import type { Scene } from "../types";
 import { asset, references } from "./_assets";
 

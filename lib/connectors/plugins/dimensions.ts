@@ -4,7 +4,7 @@ import {
 	AspectRatioSchema,
 	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
-} from "@/lib/project/aspectRatio";
+} from "@/lib/project/aspect-ratio";
 
 type Dimensioned = {
 	prompt: string;

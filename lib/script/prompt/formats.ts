@@ -1,5 +1,5 @@
 import { dedent } from "@/lib/dedent";
-import { VIDEO_FORMAT_SPECS } from "@/lib/project/videoFormat";
+import { VIDEO_FORMAT_SPECS } from "@/lib/project/video-format";
 
 export const VIDEO_FORMAT = {
 	cinematic: VIDEO_FORMAT_SPECS.cinematic.label,

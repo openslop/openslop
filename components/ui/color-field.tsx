@@ -9,7 +9,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { alphaPercent, withAlphaPercent } from "@/lib/color/hexAlpha";
+import { alphaPercent, withAlphaPercent } from "@/lib/color/hex-alpha";
 import { cn } from "@/lib/utils";
 import "./color-field.css";
 

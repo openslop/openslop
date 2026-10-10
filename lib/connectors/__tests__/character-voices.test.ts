@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
+import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
 import {
 	createCharacterVoicesPlugin,
 	type ParamsWithCharacterVoices,

@@ -3,7 +3,7 @@ import isEqual from "lodash/isEqual";
 import PQueue from "p-queue";
 import { createEmitter } from "@/lib/store/emitter";
 import { saveProject, type SaveProjectInput } from "./api";
-import type { ProjectDocument } from "./projectDocument";
+import type { ProjectDocument } from "./project-document";
 
 export const AUTOSAVE_DEBOUNCE_MS = 2000;
 

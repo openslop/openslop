@@ -9,7 +9,7 @@ import {
 	type TextPart,
 } from "ai";
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
-import { parseImageSource } from "@/lib/api/imageSource";
+import { parseImageSource } from "@/lib/api/image-source";
 import { logger } from "@/lib/api/logger";
 import { stringifyError } from "@/lib/errors";
 import {
@@ -17,7 +17,7 @@ import {
 	type ThinkingLevel,
 } from "@/lib/connectors/llm/enums";
 import { validateByProbe } from "../validate";
-import type { AgentModel } from "./agentModel";
+import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [

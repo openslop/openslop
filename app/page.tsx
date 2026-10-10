@@ -2,13 +2,13 @@ import fs from "fs";
 import path from "path";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import OnboardingCard from "./components/OnboardingCard";
-import { AuthFooterLink } from "./components/AuthFooterLink";
-import AccessCodeInput from "./components/AccessCodeInput";
-import ProjectsList from "./components/projects/ProjectsList";
-import { listProviderKeys } from "@/lib/api/providerKeys";
+import OnboardingCard from "./components/onboarding-card";
+import { AuthFooterLink } from "./components/auth-footer-link";
+import AccessCodeInput from "./components/access-code-input";
+import ProjectsList from "./components/projects/projects-list";
+import { listProviderKeys } from "@/lib/api/provider-keys";
 import { PROJECT_ROW_COLUMNS, ProjectRowSchema } from "@/lib/project/api";
-import { UserProvider } from "@/lib/user/UserProvider";
+import { UserProvider } from "@/lib/user/user-provider";
 
 const icons = fs
 	.readdirSync(path.join(process.cwd(), "public/icons"))

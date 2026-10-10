@@ -1,8 +1,8 @@
 import { dedent } from "@/lib/dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
-import type { ArtStyle } from "@/lib/project/artStyles";
+import type { ArtStyle } from "@/lib/project/art-styles";
 import type { Voice } from "@/lib/project/types";
-import type { VideoLength } from "@/lib/project/videoLength";
+import type { VideoLength } from "@/lib/project/video-length";
 
 const templateAsset = (name: string) =>
 	`${BLOB_BASE_URL}/assets/upload/template/${name}`;

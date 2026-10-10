@@ -2,7 +2,7 @@ import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
 import type { TTSProvider, TTSRequest } from "./base";
-import { fetchAllowedVoicePreview } from "./voicePreview";
+import { fetchAllowedVoicePreview } from "./voice-preview";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { NARRATOR } from "@/lib/canvas/assets";
-import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
-import { resolveElementConnector } from "@/lib/canvas/elementConnector";
+import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
+import { resolveElementConnector } from "@/lib/canvas/element-connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";

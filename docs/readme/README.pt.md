@@ -56,11 +56,11 @@ Roda no seu navegador, sem nada para instalar. Código aberto, gratuito para sem
 
 Digite uma linha. Escolha 16:9 ou 9:16, um idioma, um modelo e uma duração, ou cole um roteiro que você já tem. Sete templates estão lá se você precisar de um empurrão.
 
-[O composer →](../../app/components/copilot/ComposerCopilot.tsx)
+[O composer →](../../app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
     <img src="../../assets/features/describe-light.svg" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Os modelos hospedados vêm com sua conta. Cole uma chave da Anthropic, Runware, 
 
 **Também vem na caixa:**
 
-- **[Legendas](../../app/components/canvas/panel/CaptionsPanel.tsx)** — Seis predefinições, doze fontes, revelação palavra por palavra ou linha por linha, e cada cor, borda e posição é sua para mudar.
-- **[Exportação em até 4K](../../app/components/player/ExportButton.tsx)** — Renderiza no Remotion Lambda em blocos paralelos e entrega um MP4.
-- **[Histórico de versões](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Salva automaticamente enquanto você trabalha, agrupado em checkpoints. Veja qualquer versão e restaure.
+- **[Legendas](../../app/components/canvas/panel/captions-panel.tsx)** — Seis predefinições, doze fontes, revelação palavra por palavra ou linha por linha, e cada cor, borda e posição é sua para mudar.
+- **[Exportação em até 4K](../../app/components/player/export-button.tsx)** — Renderiza no Remotion Lambda em blocos paralelos e entrega um MP4.
+- **[Histórico de versões](../../app/components/canvas/panel/canvas-history-panel.tsx)** — Salva automaticamente enquanto você trabalha, agrupado em checkpoints. Veja qualquer versão e restaure.
 - **[Personagens e estilo de arte](../../app/components/canvas/elements/AssetsSection.tsx)** — Dê nome a um personagem uma vez e cada imagem, fala e avatar fica consistente.
 - **[Templates](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime e mais. Cada um define um estilo, um narrador e uma duração.
 - **[Mocks para desenvolvimento](../../.env.example)** — Deixe a chave de um provedor sem definir e as chamadas dele caem em resultados prontos, para você construir sem pagar.

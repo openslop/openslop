@@ -1,12 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
-import { listProviderKeys } from "@/lib/api/providerKeys";
+import { listProviderKeys } from "@/lib/api/provider-keys";
 import {
 	SAVED_PROJECT_COLUMNS,
 	parseSavedProject,
-} from "@/lib/project/savedProject";
+} from "@/lib/project/saved-project";
 import { createClient } from "@/lib/supabase/server";
-import ProjectEditor from "./ProjectEditor";
+import ProjectEditor from "./project-editor";
 
 export default async function ProjectPage({
 	params,

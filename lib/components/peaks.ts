@@ -1,4 +1,4 @@
-import { memoAsync } from "@/lib/memoAsync";
+import { memoAsync } from "@/lib/memo-async";
 
 export const PEAK_COUNT = 200;
 

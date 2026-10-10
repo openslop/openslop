@@ -4,23 +4,23 @@ import type {
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import omit from "lodash/omit";
-import type { ValidationResult } from "@/lib/connectors/providerKey";
+import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type {
 	LLMGenerateParams,
 	LLMGenerateResult,
 	LLMStreamChunk,
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
-import { flatAttributes } from "@/lib/canvas/elementAttributes";
+import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { isAssetElement } from "@/lib/canvas/guards";
-import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
-import { parseOSML } from "@/lib/canvas/osmlStreamParser";
+import { getElementBodyText } from "@/lib/canvas/osml-serializer";
+import { parseOSML } from "@/lib/canvas/osml-stream-parser";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
-import { animateImageScene } from "@/lib/script/refine/animatePrompt";
+import { animateImageScene } from "@/lib/script/refine/animate-prompt";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { sleep } from "@/lib/utils";
-import type { AgentModel } from "./agentModel";
+import type { AgentModel } from "./agent-model";
 import type { LLMProvider } from "./base";
 
 const MOCK_TITLE = "Little Red";

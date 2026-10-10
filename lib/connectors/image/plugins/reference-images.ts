@@ -3,7 +3,7 @@ import {
 	parseReferenceImages,
 	REFERENCE_IMAGES_ATTR,
 	serializeReferenceImages,
-} from "@/lib/connectors/attributes/referenceImages";
+} from "@/lib/connectors/attributes/reference-images";
 import mergeWith from "lodash/mergeWith";
 import { appendArrays } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";

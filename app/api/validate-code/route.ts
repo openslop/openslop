@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { unauthorized } from "@/lib/api/response";
 import { createPublicRouteHandler } from "@/lib/api/route-handler";
-import { ACCESS_CODE_LENGTH } from "@/lib/auth/accessCode";
+import { ACCESS_CODE_LENGTH } from "@/lib/auth/access-code";
 import { createClient } from "@/lib/supabase/server";
 
 const Outcome = z.enum(["valid", "invalid", "inactive", "expired"]);
