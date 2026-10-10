@@ -53,7 +53,7 @@ function Transcript({
 	}
 
 	return (
-		<ol role="log" className="flex flex-col gap-3">
+		<ol className="flex flex-col gap-3">
 			{messages.map((message, index) => (
 				<Row
 					key={message.id}
@@ -91,6 +91,7 @@ export function SloppyPanel() {
 
 	return (
 		<div
+			role="log"
 			aria-busy={messages === null || loading}
 			className="flex flex-col gap-3"
 		>

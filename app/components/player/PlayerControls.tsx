@@ -2,6 +2,7 @@
 
 import { Maximize, Volume2, VolumeX } from "@/components/ui/icon";
 import { scrollToScene } from "@/app/components/canvas/utils/scrollToScene";
+import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { toSeconds } from "@/lib/render/frames";
 import { formatTime } from "@/lib/render/timestamps";
@@ -37,14 +38,16 @@ export function ScenePill() {
 	const active = segments[activeIndex];
 	if (!active) return null;
 	return (
-		<button
+		<Button
 			type="button"
+			variant="secondary"
+			size="xs"
 			onClick={() => scrollToScene(active.sceneId)}
 			aria-label={`Scroll to ${active.label}`}
-			className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-label font-medium text-foreground ring-1 ring-inset ring-border transition-colors hover:bg-button-hover"
+			className="shrink-0"
 		>
 			{active.label}
-		</button>
+		</Button>
 	);
 }
 

@@ -70,7 +70,9 @@ describe("ScrubBar", () => {
 		act(() => root.unmount());
 	});
 
-	const render = (props: { disabled?: boolean; segments?: [] } = {}) => {
+	const render = (
+		props: { disabled?: boolean; segments?: []; ariaValueText?: string } = {},
+	) => {
 		act(() =>
 			root.render(
 				<ScrubBar
@@ -104,6 +106,13 @@ describe("ScrubBar", () => {
 
 		expect(slider.tabIndex).toBe(0);
 		expect(slider.getAttribute("aria-valuenow")).toBe("50");
+	});
+
+	it("reads the percent unless the caller words the value", () => {
+		expect(render().hasAttribute("aria-valuetext")).toBe(false);
+		expect(
+			render({ ariaValueText: "0:12 of 1:30" }).getAttribute("aria-valuetext"),
+		).toBe("0:12 of 1:30");
 	});
 
 	it("scrubs on an arrow key as a zero-length drag", () => {
