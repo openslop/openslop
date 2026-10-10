@@ -3,25 +3,27 @@ import { findElementById, updateElementText } from "@/lib/canvas/editorOps";
 import { isContentElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osmlSerializer";
 import { OSMLStreamParser } from "@/lib/canvas/osmlStreamParser";
-import { isScene } from "@/lib/canvas/scenes";
+import { isScene, isScriptEmpty } from "@/lib/canvas/scenes";
 import type { ContentElement } from "@/lib/canvas/types";
 
-/** Replaces the canvas's script with OSML as it arrives: the first element clears the old script, the rest append, each growing as its text streams in. */
+const clearScript = (editor: Editor) =>
+	Transforms.removeNodes(editor, { at: [], match: isScene });
+
+/** Clears the canvas's script, then writes OSML onto it as it arrives, each element growing as its text streams in. */
 export function createScriptWriter(editor: Editor): (chunk: string) => void {
+	clearScript(editor);
 	const parser = new OSMLStreamParser();
 	let seen = 0;
-	let cleared = false;
 
 	const write = (node: ContentElement) => {
 		const text = getElementBodyText(node);
 		if (!text) return;
-		if (cleared && findElementById(editor, node.id))
+		if (findElementById(editor, node.id))
 			return updateElementText(editor, node.id, text);
 
-		// One normalization, so withLayout seeds nothing into the cleared script.
+		// One normalization, so withLayout seeds no narration back over the empty script it replaces.
 		Editor.withoutNormalizing(editor, () => {
-			if (!cleared) Transforms.removeNodes(editor, { at: [], match: isScene });
-			cleared = true;
+			if (isScriptEmpty(editor.children)) clearScript(editor);
 			// The parser keeps appending to its own node, so the document takes a copy.
 			Transforms.insertNodes(editor, structuredClone(node), {
 				at: [editor.children.length],

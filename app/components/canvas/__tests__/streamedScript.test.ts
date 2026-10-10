@@ -49,13 +49,11 @@ describe("a script streamed onto the canvas", () => {
 		expect(scenes(written([SCRIPT]))).toEqual(SCENES);
 	});
 
-	it("replaces the script already on the canvas once the first element arrives", () => {
+	it("clears the script already on the canvas as soon as it starts", () => {
 		const editor = written(["<narration>An old draft.</narration>"]);
 		const write = createScriptWriter(editor);
-
-		write("<image>");
 		expect(getContentElements(editor.children).map(getElementBodyText)).toEqual(
-			["An old draft."],
+			[""],
 		);
 
 		write(SCRIPT);
