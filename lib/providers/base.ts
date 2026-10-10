@@ -25,7 +25,6 @@ export interface AssetProvider<TParams> extends ProviderContract {
 export abstract class BaseProvider<
 	TParams = unknown,
 	TRawResult extends WithMetadata = WithMetadata,
-	TOutput = BundleResponse,
 > implements ProviderContract {
 	protected abstract readonly blobConfig: { type: string; provider: string };
 
@@ -35,17 +34,17 @@ export abstract class BaseProvider<
 
 	protected abstract _generate(params: TParams): Promise<TRawResult>;
 
-	protected async store(result: TRawResult): Promise<TOutput> {
+	protected async store(result: TRawResult): Promise<BundleResponse> {
 		const files = this.toFiles(result);
 		return AssetBundle.upload(
 			this.blobConfig.type,
 			this.blobConfig.provider,
 			files,
 			result.metadata,
-		) as TOutput;
+		);
 	}
 
-	async generate(params: TParams): Promise<TOutput> {
+	async generate(params: TParams): Promise<BundleResponse> {
 		const result = await this._generate(params);
 		return this.store(result);
 	}

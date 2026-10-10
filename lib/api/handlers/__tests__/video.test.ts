@@ -4,11 +4,11 @@ import type { ModelRef, VideoGenerateParams } from "@/lib/connectors/types";
 import type { TypedJobRow } from "../base";
 import { videoHandler } from "../video";
 
-const generate = vi.fn();
+const submit = vi.fn();
 const poll = vi.fn();
 
 vi.mock("@/lib/api/providers/openslop", () => ({
-	hostedProviderFor: () => ({ generate, poll }),
+	hostedProviderFor: () => ({ submit, poll }),
 }));
 
 type VideoJobRow = TypedJobRow<
@@ -44,20 +44,17 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 describe("videoHandler.process", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		poll.mockResolvedValue({
-			kind: "pending",
-			metadata: { status: "processing" },
-		});
+		poll.mockResolvedValue({ kind: "pending" });
 	});
 
 	it("submits upstream without polling a job it just created", async () => {
-		generate.mockResolvedValue({ metadata: { jobId: "upstream-9" } });
+		submit.mockResolvedValue("upstream-9");
 
 		await expect(videoHandler.process(job({ metadata: {} }))).resolves.toEqual({
 			kind: "pending",
 			metadata: { providerJobId: "upstream-9" },
 		});
-		expect(generate).toHaveBeenCalledWith(VENDOR_PARAMS);
+		expect(submit).toHaveBeenCalledWith(VENDOR_PARAMS);
 		expect(poll).not.toHaveBeenCalled();
 	});
 
@@ -66,7 +63,7 @@ describe("videoHandler.process", () => {
 			kind: "pending",
 			metadata: { providerJobId: "upstream-1" },
 		});
-		expect(generate).not.toHaveBeenCalled();
+		expect(submit).not.toHaveBeenCalled();
 		expect(poll).toHaveBeenCalledWith("upstream-1", VENDOR_PARAMS);
 	});
 
