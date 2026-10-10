@@ -43,14 +43,14 @@ describe("createAutosaver", () => {
 	let onError: Mock<(error: unknown) => void>;
 	let name: string;
 	let thumbnailUrl: string | null;
-	const details = () => ({ name, thumbnail_url: thumbnailUrl });
+	const meta = () => ({ name, thumbnail_url: thumbnailUrl });
 
 	const build = (
 		read = () => content(extractStoreSnapshot(store), "<osml/>"),
 	) =>
 		createAutosaver({
 			projectId,
-			document: { read, details },
+			document: { read, meta },
 			onSaved,
 			onError,
 		});

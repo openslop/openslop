@@ -8,12 +8,12 @@ import { extractStoreSnapshot, type ProjectStore } from "./store";
 import { pickThumbnailUrl } from "./thumbnail";
 
 /** What the project row stores beside the content, derived from it. */
-export type ProjectDetails = { name: string; thumbnail_url: string | null };
+export type ProjectMeta = { name: string; thumbnail_url: string | null };
 
 export interface ProjectDocument {
 	read(): SavedProject;
 	write(content: SavedProject): void;
-	details(): ProjectDetails;
+	meta(): ProjectMeta;
 }
 
 /** The canvas, settings and results move as one unit, so a version is never half applied. */
@@ -40,7 +40,7 @@ export function createProjectDocument({
 			queue.replaceSnapshots(content.generation);
 		},
 
-		details: () => ({
+		meta: () => ({
 			name: store.getState().title.trim() || "Untitled",
 			thumbnail_url: pickThumbnailUrl(
 				getContentElements(editor.children),

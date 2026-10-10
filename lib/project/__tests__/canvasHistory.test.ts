@@ -55,7 +55,7 @@ function fakeDocument() {
 		write: (next) => {
 			live = next;
 		},
-		details: () => ({ name: "Untitled", thumbnail_url: null }),
+		meta: () => ({ name: "Untitled", thumbnail_url: null }),
 	};
 	return document;
 }

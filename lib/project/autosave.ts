@@ -13,7 +13,7 @@ export interface AutosaverOptions {
 	 * Read once at construction for the baseline and then when the debounce
 	 * fires, so serializing stays off the per-keystroke path.
 	 */
-	document: Pick<ProjectDocument, "read" | "details">;
+	document: Pick<ProjectDocument, "read" | "meta">;
 	onSaved: () => void;
 	onError: (error: unknown) => void;
 }
@@ -49,7 +49,7 @@ export function createAutosaver({
 
 	const buildInput = (): SaveProjectInput => ({
 		...document.read(),
-		...document.details(),
+		...document.meta(),
 	});
 
 	let lastSaved = buildInput();

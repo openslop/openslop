@@ -94,7 +94,7 @@ describe("createProjectDocument.read", () => {
 	});
 });
 
-describe("createProjectDocument.details", () => {
+describe("createProjectDocument.meta", () => {
 	it.each([
 		["the trimmed title", "  Moon  ", "Moon"],
 		["Untitled for a blank title", "   ", "Untitled"],
@@ -103,6 +103,6 @@ describe("createProjectDocument.details", () => {
 		const content = contentWith(SCENE);
 		document.write({ ...content, store: { ...content.store, title } });
 
-		expect(document.details().name).toBe(name);
+		expect(document.meta().name).toBe(name);
 	});
 });
