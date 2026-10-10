@@ -2,7 +2,7 @@ import type { FinishedVideo, VideoJob, VideoProviderResponse } from "./base";
 import { BaseVideoProvider } from "./base";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { ValidationResult } from "@/lib/connectors/providerKey";
-import { mockDelay, pickRandom } from "../mock-utils";
+import { mockDelay, pickRandom } from "../mockUtils";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/video/mock`;
 

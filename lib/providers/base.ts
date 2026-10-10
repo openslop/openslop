@@ -1,5 +1,5 @@
-import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import type { BundleFile, BundleResponse } from "@/lib/api/assetBundle";
+import { AssetBundle } from "@/lib/api/assetBundle";
 import type { ValidationResult } from "@/lib/connectors/providerKey";
 
 export type WithMetadata<

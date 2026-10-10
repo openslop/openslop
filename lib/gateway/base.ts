@@ -1,4 +1,4 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { BundleResponse } from "@/lib/api/assetBundle";
 
 export abstract class GatewayClient<TParams = unknown, TResult = unknown> {
 	abstract generate(params: TParams): Promise<TResult>;

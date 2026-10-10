@@ -19,8 +19,8 @@
 		"knip": "knip",
 		"format:check": "prettier --check .",
 		"remotion:studio": "remotion studio",
-		"deploy:remotion-function": "bun scripts/deploy-remotion-function.ts",
-		"deploy:remotion-site": "bun scripts/deploy-remotion-site.ts",
+		"deploy:remotion-function": "bun scripts/deployRemotionFunction.ts",
+		"deploy:remotion-site": "bun scripts/deployRemotionSite.ts",
 		"prepare": "husky"
 	},
 	"lint-staged": {
@@ -94,6 +94,7 @@
 		"@vitest/coverage-v8": "^4.1.11",
 		"eslint": "^9",
 		"eslint-config-next": "16.2.4",
+		"eslint-plugin-unicorn": "^65.0.1",
 		"happy-dom": "^20.14.0",
 		"husky": "^9.1.7",
 		"knip": "^6.16.1",

@@ -1,5 +1,5 @@
 import { beforeEach, vi } from "vitest";
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import { AssetBundle } from "@/lib/api/assetBundle";
 
 /** An empty store at https://assets.test that echoes every upload back. */
 export function spyAssetBundle() {

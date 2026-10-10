@@ -1,13 +1,13 @@
 import type { GeneratedType } from "@/lib/canvas/types";
-import { createArtStylePlugin } from "./image/plugins/art-style";
-import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
-import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
+import { createArtStylePlugin } from "./image/plugins/artStyle";
+import { createCharacterAvatarPlugin } from "./image/plugins/characterAvatar";
+import { createReferenceImagesPlugin } from "./image/plugins/referenceImages";
 import { createDimensionsPlugin } from "./plugins/dimensions";
 import { buildVisualPlugins } from "./plugins/visualChain";
-import { createSpeakerVoicePlugin } from "./tts/plugins/speaker-voice";
-import { createCharacterVoicesPlugin } from "./video/plugins/character-voices";
-import { createVideoOutputRulesPlugin } from "./video/plugins/output-rules";
-import { createPreviousVisualPlugin } from "./video/plugins/previous-visual";
+import { createSpeakerVoicePlugin } from "./tts/plugins/speakerVoice";
+import { createCharacterVoicesPlugin } from "./video/plugins/characterVoices";
+import { createVideoOutputRulesPlugin } from "./video/plugins/outputRules";
+import { createPreviousVisualPlugin } from "./video/plugins/previousVisual";
 import type { ConnectorConfig } from "./types";
 
 /** The plugins each generated type installs: all a type does that another does not. */

@@ -4,7 +4,7 @@ import { isBlankScene } from "@/lib/render/blankScene";
 import {
 	buildRenderLayout,
 	type BuildLayoutOptions,
-} from "@/lib/render/scene-builder";
+} from "@/lib/render/sceneBuilder";
 import type { ResolvedElement } from "@/lib/render/types";
 import { buildTimelineRows, packLanes } from "../timelineRows";
 

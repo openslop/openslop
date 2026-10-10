@@ -4,7 +4,7 @@ import { providerKeyCheck, saveProviderKey } from "@/lib/api/providerKeys";
 import { MIN_KEY_LENGTH } from "@/lib/connectors/providerKey";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/requestSchemaFields";
-import { createSessionRouteHandler } from "@/lib/api/route-handler";
+import { createSessionRouteHandler } from "@/lib/api/routeHandler";
 
 const saveSchema = z.object({
 	provider: byokProviderField,

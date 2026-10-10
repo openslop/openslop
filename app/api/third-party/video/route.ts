@@ -1,4 +1,4 @@
-import { createAssetRouteHandler } from "@/lib/api/asset-routes";
-import { BYOK } from "@/lib/api/route-families";
+import { createAssetRouteHandler } from "@/lib/api/assetRoutes";
+import { BYOK } from "@/lib/api/routeFamilies";
 
 export const POST = createAssetRouteHandler(BYOK, "video");

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { HttpVoiceConnector } from "../voice/connector";
-import { mockGatewaySequence } from "./_gateway-mock";
+import { mockGatewaySequence } from "./_gatewayMock";
 
 const connector = () =>
 	new HttpVoiceConnector({

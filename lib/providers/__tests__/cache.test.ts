@@ -435,7 +435,7 @@ describe("audioBundleCache", () => {
 
 	it("resolves the filename to an absolute URL when r.result.audio is a relative filename", async () => {
 		const { audioBundleCache } = await loadCache();
-		const { AssetBundle } = await import("@/lib/api/asset-bundle");
+		const { AssetBundle } = await import("@/lib/api/assetBundle");
 		const m = audioBundleCache("music").toMetadata(
 			{
 				id: "abc123",

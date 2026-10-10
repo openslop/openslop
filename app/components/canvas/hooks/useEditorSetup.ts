@@ -15,7 +15,7 @@ import { withLayout } from "../plugins/withLayout";
 import { withNodeId } from "../plugins/withNodeId";
 import { withScenes } from "../plugins/withScenes";
 import { withFlatPaste } from "../plugins/withFlatPaste";
-import { withOSMLClipboard } from "../plugins/withOSMLClipboard";
+import { withOSMLClipboard } from "../plugins/withOsmlClipboard";
 
 function createCanvasEditor(
 	script: string,

@@ -9,7 +9,7 @@ import {
 } from "@/lib/generation/GenerationQueueProvider";
 import { getLayoutKey } from "@/lib/render/layoutKey";
 import { resolveElements } from "@/lib/render/resolve";
-import { buildRenderLayout } from "@/lib/render/scene-builder";
+import { buildRenderLayout } from "@/lib/render/sceneBuilder";
 import { useCaptionStyle } from "@/lib/captions/useCaptionStyle";
 import { useVideoSetting } from "@/lib/project/useVideoSetting";
 import type { RenderLayout } from "@/lib/render/types";

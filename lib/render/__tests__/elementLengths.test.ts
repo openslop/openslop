@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { ContentType } from "@/lib/canvas/types";
 import { measureElementLengths, measureRuntime } from "../elementLengths";
-import { buildRenderLayout } from "../scene-builder";
+import { buildRenderLayout } from "../sceneBuilder";
 import type { ResolvedElement } from "../types";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { secondsForWords } from "@/lib/project/videoLength";

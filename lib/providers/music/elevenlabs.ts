@@ -1,4 +1,4 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
+import type { BundleResponse } from "@/lib/api/assetBundle";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import {

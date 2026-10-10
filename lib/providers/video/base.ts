@@ -1,4 +1,4 @@
-import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
+import { AssetBundle, type BundleResponse } from "@/lib/api/assetBundle";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ValidationResult } from "@/lib/connectors/providerKey";
 import type { VideoGenerateParams } from "@/lib/connectors/types";

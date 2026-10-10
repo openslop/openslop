@@ -1,6 +1,6 @@
 import { renderMediaOnLambda } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
-import { createSessionRouteHandler } from "@/lib/api/route-handler";
+import { createSessionRouteHandler } from "@/lib/api/routeHandler";
 import {
 	getFunctionName,
 	getSiteName,

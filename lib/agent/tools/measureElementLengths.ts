@@ -1,7 +1,7 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import type { ElementLength } from "@/lib/render/elementLengths";
-import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
+import { MIN_DURATION_SEC } from "@/lib/render/sceneBuilder";
 import { NARRATION_WORDS_PER_MINUTE } from "@/lib/project/videoLength";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./defineTool";

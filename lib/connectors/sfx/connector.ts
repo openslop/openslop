@@ -1,5 +1,5 @@
 import { HttpAssetGateway } from "@/lib/gateway/http";
-import { BaseAssetConnector } from "../asset-base";
+import { BaseAssetConnector } from "../assetBase";
 import type { AttributeSchema } from "../attributes/schema";
 import { SFX_ATTRIBUTES } from "./attributes";
 import type {

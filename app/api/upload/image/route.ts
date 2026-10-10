@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import { AssetBundle } from "@/lib/api/assetBundle";
 import { imageFile } from "@/lib/api/requestSchemaFields";
-import { createSessionFormRouteHandler } from "@/lib/api/route-handler";
+import { createSessionFormRouteHandler } from "@/lib/api/routeHandler";
 import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload/imageFiles";
 
 const UploadImageForm = z.object(

@@ -1,6 +1,6 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { AllowedOutputFormats } from "@elevenlabs/elevenlabs-js/api";
-import type { BundleFile } from "@/lib/api/asset-bundle";
+import type { BundleFile } from "@/lib/api/assetBundle";
 import { BaseProvider, type WithMetadata } from "./base";
 import { validateByProbe } from "./validate";
 import { streamToBuffer } from "./stream";

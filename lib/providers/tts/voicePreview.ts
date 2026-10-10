@@ -1,4 +1,4 @@
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import { AssetBundle } from "@/lib/api/assetBundle";
 import { vendorParams } from "@/lib/connectors/models";
 import type {
 	HostedVoicePreview,
@@ -7,7 +7,7 @@ import type {
 } from "@/lib/connectors/types";
 import { DEFAULT_TTS_LANGUAGE } from "@/lib/connectors/tts/enums";
 import { languageSchema } from "@/lib/project/types";
-import { audioOf, hostedAudio, type AudioBytes } from "../hosted-audio";
+import { audioOf, hostedAudio, type AudioBytes } from "../hostedAudio";
 import { PREVIEW_LINES } from "./previewLines";
 import type { TTSProvider } from "./base";
 

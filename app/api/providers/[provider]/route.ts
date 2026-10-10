@@ -9,7 +9,7 @@ import {
 } from "@/lib/api/providerKeys";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/requestSchemaFields";
-import { createSessionParamRouteHandler } from "@/lib/api/route-handler";
+import { createSessionParamRouteHandler } from "@/lib/api/routeHandler";
 
 const paramsSchema = z.object({ provider: byokProviderField });
 

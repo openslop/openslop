@@ -1,10 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
+vi.mock("@/lib/api/assetBundle");
 
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import { AssetBundle } from "@/lib/api/assetBundle";
 import { BaseProvider, type WithMetadata } from "../base";
-import type { BundleFile } from "@/lib/api/asset-bundle";
+import type { BundleFile } from "@/lib/api/assetBundle";
 
 type TestParams = { prompt: string; size?: number };
 type TestRawResult = { data: string } & WithMetadata;

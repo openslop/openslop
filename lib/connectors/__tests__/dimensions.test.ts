@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createDimensionsPlugin } from "@/lib/connectors/plugins/dimensions";
 import { createCanvasElement } from "@/lib/canvas/createCanvasElement";
 import { projectState } from "@/lib/generation/__tests__/_context";
-import { pluginCtx, readsOf } from "./_state-ctx";
+import { pluginCtx, readsOf } from "./_stateCtx";
 
 const image = createCanvasElement("image", { id: "i1" });
 const portraitState = projectState({ aspectRatio: "9:16" });

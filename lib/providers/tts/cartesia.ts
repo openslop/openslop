@@ -11,7 +11,7 @@ import {
 	TTS_GENDERS,
 	type TTSSpeed,
 } from "@/lib/connectors/tts/enums";
-import type { BundleFile } from "@/lib/api/asset-bundle";
+import type { BundleFile } from "@/lib/api/assetBundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";

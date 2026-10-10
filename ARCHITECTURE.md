@@ -32,7 +32,7 @@ The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/a
 
 `MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech speaks on its speaker's `asset_voice` pair, not its own. The `voice` connector type offers the TTS models. Defaults resolve element, then project, then account, then the recommendation.
 
-The two route families are defined in `lib/api/route-families.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
+The two route families are defined in `lib/api/routeFamilies.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
 
 User keys live in Supabase Vault. They are read by the service role only for the request that uses them and are never sent to a client. A key is verified by calling the vendor.
 
@@ -107,7 +107,7 @@ Generated assets live in Vercel Blob as public CDN URLs.
   - an entry in the provider catalog;
   - a models map under `lib/connectors/<type>/<provider>/`;
   - a class per type in the vendor table, each with `validate()`.
-- **New media type:** a connector, a provider, a models map, a row in `lib/api/asset-routes.ts`, and two route files.
+- **New media type:** a connector, a provider, a models map, a row in `lib/api/assetRoutes.ts`, and two route files.
 - **Per-type generation behaviour:** a plugin, installed in `lib/connectors/registry.ts`.
 
 Tests live in `__tests__` folders next to the code.

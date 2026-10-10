@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { HttpMusicConnector } from "../music/connector";
 import type { AssetResult, ConnectorPlugin } from "../types";
-import { mockGatewaySuccess } from "./_gateway-mock";
+import { mockGatewaySuccess } from "./_gatewayMock";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/music/openslop/${TEST_ID}/output.mp3`;

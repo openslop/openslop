@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { unauthorized } from "@/lib/api/response";
-import { createPublicRouteHandler } from "@/lib/api/route-handler";
+import { createPublicRouteHandler } from "@/lib/api/routeHandler";
 import { ACCESS_CODE_LENGTH } from "@/lib/auth/accessCode";
 import { createClient } from "@/lib/supabase/server";
 

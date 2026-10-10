@@ -4,10 +4,10 @@ import { parseSloppyMessage } from "@/lib/agent/messages";
 import { modelEntry, vendorParams } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
 import { agentTurnSchema, streamAgentTurn } from "./agentTurn";
-import { bodySchema, LLM_FIELDS } from "./generation-schema";
+import { bodySchema, LLM_FIELDS } from "./generationSchema";
 import { badRequest } from "./response";
 import { createSSEStreamResponse } from "./sse";
-import type { RouteFamily } from "./route-families";
+import type { RouteFamily } from "./routeFamilies";
 
 export const createLLMRouteHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { badRequest } from "@/lib/api/response";
-import { createPublicQueryRouteHandler } from "@/lib/api/route-handler";
+import { createPublicQueryRouteHandler } from "@/lib/api/routeHandler";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 

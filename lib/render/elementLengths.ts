@@ -9,7 +9,7 @@ import {
 	type ContentType,
 } from "@/lib/canvas/types";
 import { getDuration, getTrimToDialogue } from "../canvas/elementAttributes";
-import { MIN_DURATION_SEC } from "./scene-builder";
+import { MIN_DURATION_SEC } from "./sceneBuilder";
 import { secondsForWords } from "../project/videoLength";
 
 /** How long one visual holds the screen, and what decides it. */

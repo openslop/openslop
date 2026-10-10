@@ -5,7 +5,7 @@ import type { ModelRef } from "@/lib/connectors/types";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 import { voicePreview } from "@/lib/providers/tts/voicePreview";
 import { requiredVoiceId } from "./requestSchemaFields";
-import type { RouteFamily } from "./route-families";
+import type { RouteFamily } from "./routeFamilies";
 
 export const createVoiceSearchHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,

@@ -1,4 +1,4 @@
-import { createJobPollHandler } from "@/lib/api/asset-routes";
-import { HOSTED } from "@/lib/api/route-families";
+import { createJobPollHandler } from "@/lib/api/assetRoutes";
+import { HOSTED } from "@/lib/api/routeFamilies";
 
 export const GET = createJobPollHandler(HOSTED);
