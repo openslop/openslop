@@ -4,6 +4,8 @@ import {
 	type MouseEvent,
 	type Ref,
 	useCallback,
+	useEffect,
+	useEffectEvent,
 	useImperativeHandle,
 	useMemo,
 	useRef,
@@ -17,6 +19,7 @@ import {
 	soundwaveMaskStyle,
 	toBarHeights,
 } from "./soundwave";
+import { useMediaSettled } from "./use-media-settled";
 import { usePeaks } from "./use-peaks";
 
 export interface WaveformProps {
@@ -53,10 +56,11 @@ export function Waveform({
 	onFinish,
 }: WaveformProps & { ref?: Ref<WaveformHandle> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
+	const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 	const progressRef = useRef<HTMLDivElement>(null);
 	const decode = usePeaks(src);
-	const [audioSettledFor, setAudioSettledFor] = useState<string | null>(null);
-	const loading = decode.status === "loading" || audioSettledFor !== src;
+	const audioSettled = useMediaSettled(audio);
+	const loading = decode.status === "loading" || !audioSettled;
 
 	const maskStyle = useMemo(
 		() =>
@@ -101,6 +105,19 @@ export function Waveform({
 	);
 	useImperativeHandle(ref, () => handle, [handle]);
 
+	const attachAudio = useCallback((element: HTMLAudioElement | null) => {
+		audioRef.current = element;
+		setAudio(element);
+	}, []);
+
+	const reportLoaded = useEffectEvent((duration: number) => {
+		setProgress(0);
+		onTimeUpdate?.(0, duration);
+	});
+	useEffect(() => {
+		if (audio && audioSettled) reportLoaded(audio.duration || 0);
+	}, [audio, audioSettled]);
+
 	const handleClick = (event: MouseEvent<HTMLDivElement>) => {
 		const rect = event.currentTarget.getBoundingClientRect();
 		handle.seek((event.clientX - rect.left) / rect.width);
@@ -124,7 +141,7 @@ export function Waveform({
 				{loading && <Skeleton className="absolute inset-0" />}
 			</div>
 			<audio
-				ref={audioRef}
+				ref={attachAudio}
 				src={src}
 				crossOrigin="anonymous"
 				preload="metadata"
@@ -134,14 +151,6 @@ export function Waveform({
 					setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
 					onTimeUpdate?.(audio.currentTime, audio.duration || 0);
 				}}
-				onLoadedMetadata={(event) => {
-					const audio = event.currentTarget;
-					setProgress(0);
-					if (Number.isFinite(audio.duration) && audio.duration > 0)
-						setAudioSettledFor(src);
-					onTimeUpdate?.(0, audio.duration || 0);
-				}}
-				onError={() => setAudioSettledFor(src)}
 				onPlay={onPlay}
 				onPause={onPause}
 				onEnded={onFinish}
