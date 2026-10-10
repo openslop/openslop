@@ -35,7 +35,9 @@ export function AddAssetTile({
 					<Icon className="h-4 w-4" />
 				)}
 			</div>
-			<span className="truncate text-center text-badge text-muted-foreground">{label}</span>
+			<span className="truncate text-center text-badge text-muted-foreground">
+				{label}
+			</span>
 		</button>
 	);
 }
