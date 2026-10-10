@@ -2,13 +2,13 @@ import compact from "lodash/compact";
 import {
 	CHARACTERS_ATTR,
 	parseCharacterNames,
-} from "@/lib/canvas/characterNames";
+	shownCharacters,
+} from "@/lib/canvas/character-names";
+import mergeWith from "lodash/mergeWith";
+import { appendArrays } from "@/lib/connectors/plugins";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import {
-	dependency,
-	type DependencyDeclaration,
-} from "@/lib/generation/dependency";
-import { forCharacterAvatar } from "./characterAvatarNode";
+import type { Dependency } from "@/lib/generation/declare";
+import { findAsset } from "@/lib/canvas/assets";
 
 export type ParamsWithCharacters = {
 	prompt: string;
@@ -16,39 +16,36 @@ export type ParamsWithCharacters = {
 	[CHARACTERS_ATTR]?: string;
 };
 
-const avatarOf = (name: string) =>
-	dependency(`avatar:${name}`, `${name}'s avatar`, () =>
-		forCharacterAvatar(name),
-	);
+const avatarLabel = (name: string) => `${name}'s avatar`;
 
-export const characterAvatars: DependencyDeclaration = {
-	specs: (element) =>
-		parseCharacterNames(
-			element.generationAttributes?.[CHARACTERS_ATTR],
-		).flatMap((name) => avatarOf(name).specs(element)),
-};
+const shownAvatars: Dependency = (element, { canvas }) =>
+	Object.fromEntries(
+		shownCharacters(element).map((name) => [
+			avatarLabel(name),
+			findAsset(canvas, "asset_avatar", name),
+		]),
+	);
 
 /** Avatars arrive as dependency results, so this never races the jobs making them. */
 export function createCharacterReferencesPlugin(): ConnectorPlugin<ParamsWithCharacters> {
 	return {
 		name: "character-references",
-		dependencies: [characterAvatars],
+		dependencies: [shownAvatars],
 		beforeGenerate(params, ctx) {
 			const { [CHARACTERS_ATTR]: characters, ...rest } = params;
-			if (!characters) return params;
-
 			const avatars = compact(
 				parseCharacterNames(characters).map(
-					(name) => avatarOf(name).read(ctx)?.imageUrl,
+					(name) => ctx.dependencies?.[avatarLabel(name)]?.imageUrl,
 				),
 			);
 			if (avatars.length === 0) return rest;
 
-			return {
-				...rest,
-				prompt: `${rest.prompt}. No nameplates`,
-				referenceImages: [...(rest.referenceImages ?? []), ...avatars],
-			};
+			return mergeWith(
+				{},
+				rest,
+				{ prompt: `${rest.prompt}. No nameplates`, referenceImages: avatars },
+				appendArrays,
+			);
 		},
 	};
 }

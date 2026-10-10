@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { ResultKind } from "@/lib/canvas/types";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
-import { AudioResultPreview } from "./AudioResultPreview";
+import { getPrimaryUrl } from "@/lib/connectors/asset-url";
+import { AudioResultPreview } from "./audio-result-preview";
 import { MediaResult } from "./results";
 import type { ElementPreviewProps } from "./status";
 

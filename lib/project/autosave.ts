@@ -3,27 +3,17 @@ import isEqual from "lodash/isEqual";
 import PQueue from "p-queue";
 import { createEmitter } from "@/lib/store/emitter";
 import { saveProject, type SaveProjectInput } from "./api";
-import type { ProjectContent } from "./projectDocument";
-import { deriveProjectName } from "./projectName";
-import { pickThumbnailUrl } from "./thumbnail";
+import type { ProjectDocument } from "./project-document";
 
 export const AUTOSAVE_DEBOUNCE_MS = 2000;
-
-export function buildProjectSave(content: ProjectContent): SaveProjectInput {
-	return {
-		...content,
-		name: deriveProjectName(content.store.metadata),
-		thumbnail_url: pickThumbnailUrl(Object.entries(content.generation)),
-	};
-}
 
 export interface AutosaverOptions {
 	projectId: string;
 	/**
-	 * Produces the content to save. Called once at construction for the baseline
-	 * and then when the debounce fires, so serializing stays off the per-keystroke path.
+	 * Read once at construction for the baseline and then when the debounce
+	 * fires, so serializing stays off the per-keystroke path.
 	 */
-	read: () => ProjectContent;
+	document: Pick<ProjectDocument, "read" | "meta">;
 	onSaved: () => void;
 	onError: (error: unknown) => void;
 }
@@ -50,14 +40,17 @@ export interface Autosaver {
  */
 export function createAutosaver({
 	projectId,
-	read,
+	document,
 	onSaved,
 	onError,
 }: AutosaverOptions): Autosaver {
 	const queue = new PQueue({ concurrency: 1 });
 	const saved = createEmitter<SaveProjectInput>();
 
-	const buildInput = (): SaveProjectInput => buildProjectSave(read());
+	const buildInput = (): SaveProjectInput => ({
+		...document.read(),
+		...document.meta(),
+	});
 
 	let lastSaved = buildInput();
 	let suspended = false;

@@ -1,0 +1,109 @@
+import { v5 as uuidv5 } from "uuid";
+import { z } from "zod";
+import { ElementTypeSchema } from "@/lib/canvas/types";
+import {
+	ASSET_CONNECTOR_TYPES,
+	AssetResultSchema,
+} from "@/lib/connectors/types";
+import type { ElementVersionStorage } from "@/lib/generation/history";
+import { GenerationInputsSchema } from "@/lib/generation/inputs";
+import {
+	versionKey,
+	type CommittedVersion,
+	type ElementVersion,
+} from "@/lib/generation/versions";
+import { createClient } from "@/lib/supabase/client";
+
+const TABLE = "element_history";
+
+const RowSchema = z.object({
+	element_id: z.string(),
+	created_at: z.string(),
+	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
+	element_type: ElementTypeSchema.nullish(),
+	inputs: GenerationInputsSchema,
+	result: AssetResultSchema,
+	pinned: z.boolean(),
+});
+
+const toVersion = (row: z.infer<typeof RowSchema>): ElementVersion => ({
+	elementId: row.element_id,
+	createdAt: row.created_at,
+	connectorType: row.connector_type,
+	elementType: row.element_type ?? undefined,
+	inputs: row.inputs,
+	result: row.result,
+	pinned: row.pinned,
+});
+
+const toRow = (projectId: string, version: CommittedVersion) => ({
+	id: versionRowId(projectId, version),
+	project_id: projectId,
+	element_id: version.elementId,
+	connector_type: version.connectorType,
+	element_type: version.elementType ?? null,
+	inputs: version.inputs,
+	result: version.result,
+	pinned: version.pinned,
+});
+
+const COLUMNS =
+	"element_id, created_at, connector_type, element_type, inputs, result, pinned";
+
+/** Changing this re-keys every row, so it is fixed for the table's lifetime. */
+const ROW_ID_NAMESPACE = "5673ca03-e04d-4279-b92d-df493e2b9150";
+
+/**
+ * A version's row is identified by what made it, so the same version always
+ * lands on the same row however little the client happens to have read back.
+ */
+const versionRowId = (projectId: string, version: CommittedVersion): string =>
+	uuidv5(
+		[projectId, version.elementId, versionKey(version)].join("\u0000"),
+		ROW_ID_NAMESPACE,
+	);
+
+export function parseElementVersions(rows: unknown): ElementVersion[] {
+	return z
+		.array(RowSchema)
+		.parse(rows ?? [])
+		.map(toVersion);
+}
+
+export async function fetchElementVersions(
+	projectId: string,
+	elementId: string,
+): Promise<ElementVersion[]> {
+	const { data, error } = await createClient()
+		.from(TABLE)
+		.select(COLUMNS)
+		.eq("project_id", projectId)
+		.eq("element_id", elementId)
+		.order("created_at", { ascending: true });
+	if (error) throw error;
+	return parseElementVersions(data);
+}
+
+/**
+ * A remake overwrites the row its version already has and keeps that row's
+ * `created_at`, so the returned date is the version's first, not this run's.
+ */
+export async function saveElementVersion(
+	projectId: string,
+	version: CommittedVersion,
+): Promise<ElementVersion> {
+	const { data, error } = await createClient()
+		.from(TABLE)
+		.upsert(toRow(projectId, version), { onConflict: "id" })
+		.select(COLUMNS)
+		.single();
+	if (error) throw error;
+	return toVersion(RowSchema.parse(data));
+}
+
+export const elementHistoryStorage = (
+	projectId: string,
+): ElementVersionStorage => ({
+	read: (elementId) => fetchElementVersions(projectId, elementId),
+	write: (version) => saveElementVersion(projectId, version),
+});

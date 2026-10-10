@@ -28,7 +28,7 @@ Follow @CONVENTIONS.md, the canonical coding style for this repo.
 
 ## Design System
 
-Always read `DESIGN.md` before making any visual or UI decisions. Font choices, colors, spacing, the disciplined-violet rule, and the media-type palette are defined there. Do not deviate without explicit user approval. Flag any UI code that doesn't match `DESIGN.md`.
+Always read `DESIGN.md` before making any visual or UI decisions. Font choices, colors, spacing, the accent rule, and the media tints are defined there. Do not deviate without explicit user approval. Flag any UI code that doesn't match `DESIGN.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

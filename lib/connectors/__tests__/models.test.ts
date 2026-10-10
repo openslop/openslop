@@ -12,7 +12,7 @@ import {
 	resolveModel,
 } from "../models";
 import { CONNECTOR_TYPES } from "../types";
-import { DEFAULT_VIDEO_RESOLUTION } from "@/lib/project/aspectRatio";
+import { DEFAULT_VIDEO_RESOLUTION } from "@/lib/project/aspect-ratio";
 
 const SEEDREAM = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const SLOP_IMAGE = DEFAULT_MODELS.image;

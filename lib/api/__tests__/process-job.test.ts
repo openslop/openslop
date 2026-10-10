@@ -145,40 +145,36 @@ describe("processQueuedJob", () => {
 		);
 	});
 
-	it("stops redelivering a job that is still pending past the deadline", async () => {
-		mockLoadJobForProcessing.mockResolvedValue(
-			pendingJob(JOB_TIMEOUT_MS + 60_000),
-		);
-		stubPendingHandler();
+	it("acknowledges a message whose job does not exist", async () => {
+		mockLoadJobForProcessing.mockResolvedValue(null);
 
-		await processQueuedJob(JOB_ID);
+		await expect(processQueuedJob(JOB_ID)).resolves.toBeUndefined();
 
+		expect(mockGetJobHandler).not.toHaveBeenCalled();
+		expect(mockUpdateJob).not.toHaveBeenCalled();
 		expect(mockEnqueueJob).not.toHaveBeenCalled();
-		expect(mockUpdateJob).toHaveBeenCalledWith("job-1", {
-			status: "failed",
-			error: expect.stringContaining("timed out"),
-		});
 	});
 
-	it("still attempts a job that sat in the queue past the deadline", async () => {
-		mockLoadJobForProcessing.mockResolvedValue(
-			pendingJob(JOB_TIMEOUT_MS + 60_000),
-		);
-		const handler = {
-			process: vi
-				.fn()
-				.mockResolvedValue({ kind: "completed", result: { url: "u" } }),
-		};
-		mockGetJobHandler.mockReturnValue(handler);
+	it.each(["pending", "processing"])(
+		"fails a %s job past the deadline without running it again",
+		async (status) => {
+			mockLoadJobForProcessing.mockResolvedValue({
+				...pendingJob(JOB_TIMEOUT_MS + 60_000),
+				status,
+			});
+			const handler = { process: vi.fn() };
+			mockGetJobHandler.mockReturnValue(handler);
 
-		await processQueuedJob(JOB_ID);
+			await processQueuedJob(JOB_ID);
 
-		expect(handler.process).toHaveBeenCalled();
-		expect(mockUpdateJob).toHaveBeenLastCalledWith("job-1", {
-			status: "completed",
-			result: { url: "u" },
-		});
-	});
+			expect(handler.process).not.toHaveBeenCalled();
+			expect(mockEnqueueJob).not.toHaveBeenCalled();
+			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith("job-1", {
+				status: "failed",
+				error: expect.stringContaining("timed out"),
+			});
+		},
+	);
 
 	it("marks the job failed and rethrows when the handler errors", async () => {
 		mockLoadJobForProcessing.mockResolvedValue(pendingJob());

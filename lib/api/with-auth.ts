@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
-import { hasApiAccess, MissingProviderKeyError } from "./providerKeys";
+import { hasApiAccess, MissingProviderKeyError } from "./provider-keys";
 import { logger } from "./logger";
 import { badRequest, forbidden, serverError, unauthorized } from "./response";
 

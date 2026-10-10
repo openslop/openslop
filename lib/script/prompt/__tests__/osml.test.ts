@@ -25,9 +25,8 @@ describe("osmlSpec", () => {
 		expect(declared).not.toContain("the language of the user's own topic");
 	});
 
-	it("asks the script to report its language, the only voice signal auto mode has", () => {
-		expect(spec).toContain("- language: ISO 639-1 code");
-		expect(spec).not.toContain('Default to "en"');
+	it("asks for the story alone, since the assets are already on the canvas", () => {
+		expect(spec).toContain("Write the story and nothing else");
 	});
 
 	it("ties each image to the moment its narration describes without dropping the standalone-prompt rule", () => {
@@ -57,12 +56,6 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("Keep dialogue dead simple");
 		expect(spec).toContain(
 			"Every line must make complete sense to the listener",
-		);
-	});
-
-	it("keeps places and subjects out of the art style, which leads every prompt", () => {
-		expect(spec).toContain(
-			"Never a place, a setting, a subject or a time of day",
 		);
 	});
 

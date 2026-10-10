@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cutVoice, secondsCap, trimAudio } from "../audio-cut";
 import { audioDurationSec } from "../audio-duration";
-import { spyAssetBundle } from "./_assetBundle";
+import { spyAssetBundle } from "./_asset-bundle";
 import { wav } from "./_wav";
 
 describe("secondsCap", () => {

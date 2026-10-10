@@ -2,47 +2,35 @@ import { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
-import { adaptScript } from "./adaptScript";
-import { measureElementLengths } from "./measureElementLengths";
-import { measureTotalLength } from "./measureTotalLength";
-import { editScript } from "./editScript";
-import { fitDurations } from "./fitDurations";
-import { outlineStory } from "./outlineStory";
-import { readScript } from "./readScript";
-import { readSettings } from "./readSettings";
-import { reviewScript } from "./reviewScript";
-import { setCaptionStyle } from "./setCaptionStyle";
-import { setCharacter } from "./setCharacter";
-import { setLanguage } from "./setLanguage";
-import { setMetadata } from "./setMetadata";
-import { setNarrator } from "./setNarrator";
-import { setVideoSettings } from "./setVideoSettings";
-import { viewAvatar } from "./viewAvatar";
-import { viewImage } from "./viewImage";
-import { viewReferenceImages } from "./viewReferenceImages";
-import { writeScript } from "./writeScript";
+import { adaptScript } from "./adapt-script";
+import { measureElementLengths } from "./measure-element-lengths";
+import { measureTotalLength } from "./measure-total-length";
+import { editScript } from "./edit-script";
+import { fitDurations } from "./fit-durations";
+import { outlineStory } from "./outline-story";
+import { readScript } from "./read-script";
+import { reviewScript } from "./review-script";
+import { setTitle } from "./set-title";
+import { updateScriptSettings } from "./update-script-settings";
+import { updateVideoSettings } from "./update-video-settings";
+import { viewImage } from "./view-image";
+import { writeScript } from "./write-script";
 
 /** Registration is the contract: one entry is a tool's whole definition. */
 const TOOLS = {
 	read_script: readScript,
-	read_settings: readSettings,
 	edit_script: editScript,
 	write_script: writeScript,
 	adapt_script: adaptScript,
 	review_script: reviewScript,
-	set_video_settings: setVideoSettings,
-	set_caption_style: setCaptionStyle,
-	set_language: setLanguage,
-	view_reference_images: viewReferenceImages,
-	view_avatar: viewAvatar,
+	update_script_settings: updateScriptSettings,
+	update_video_settings: updateVideoSettings,
 	view_image: viewImage,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
 	measure_element_lengths: measureElementLengths,
 	fit_durations: fitDurations,
-	set_metadata: setMetadata,
-	set_narrator: setNarrator,
-	set_character: setCharacter,
+	set_title: setTitle,
 };
 
 export type AgentToolName = keyof typeof TOOLS;

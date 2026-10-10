@@ -6,7 +6,7 @@ import {
 	isByokProvider,
 	MANAGED_PROVIDER,
 	type BYOKProvider,
-} from "@/lib/connectors/providerCatalog";
+} from "@/lib/connectors/provider-catalog";
 import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import {

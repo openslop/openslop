@@ -1,0 +1,71 @@
+"use client";
+
+import type { ReactNode } from "react";
+import {
+	FilmSlate,
+	Hourglass,
+	Template,
+	Translate,
+	type IconComponent,
+} from "@/components/ui/icon";
+import { SelectMenuTrigger } from "@/components/ui/select-menu";
+import { SimpleTooltip } from "@/components/ui/tooltip";
+import { useProject } from "@/lib/project/use-project";
+import { languageLabel } from "@/lib/project/language";
+import { videoFormatLabel } from "@/lib/project/video-format";
+import { videoLengthLabel } from "@/lib/project/video-length";
+import { getTemplateById } from "@/lib/templates/templates";
+import { PanelCard, PanelField } from "./panel-card";
+
+/** A setting the project was created with, shown as the dropdown it was picked from. */
+function FixedSetting({
+	label,
+	Icon,
+	value,
+}: {
+	label: string;
+	Icon: IconComponent;
+	value: ReactNode;
+}) {
+	return (
+		<PanelField label={label}>
+			<SimpleTooltip label="Set when the project was created">
+				<SelectMenuTrigger aria-label={label} aria-disabled>
+					<Icon size={12} />
+					{value}
+				</SelectMenuTrigger>
+			</SimpleTooltip>
+		</PanelField>
+	);
+}
+
+export function ProjectPanel() {
+	const { language, length, format, template } = useProject(
+		(state) => state.scriptSettings,
+	);
+
+	return (
+		<PanelCard title="Project">
+			<FixedSetting
+				label="Language"
+				Icon={Translate}
+				value={languageLabel(language)}
+			/>
+			<FixedSetting
+				label="Length"
+				Icon={Hourglass}
+				value={videoLengthLabel(length)}
+			/>
+			<FixedSetting
+				label="Format"
+				Icon={FilmSlate}
+				value={videoFormatLabel(format)}
+			/>
+			<FixedSetting
+				label="Template"
+				Icon={Template}
+				value={getTemplateById(template)?.name ?? "None"}
+			/>
+		</PanelCard>
+	);
+}

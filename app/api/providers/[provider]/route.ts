@@ -6,7 +6,7 @@ import {
 	providerKeyCheck,
 	providerKeysView,
 	readProviderKey,
-} from "@/lib/api/providerKeys";
+} from "@/lib/api/provider-keys";
 import { verifyProviderKey } from "@/lib/api/providers/byok";
 import { byokProviderField } from "@/lib/api/request-schema-fields";
 import { createSessionParamRouteHandler } from "@/lib/api/route-handler";

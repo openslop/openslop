@@ -3,9 +3,11 @@ import { NextRequest } from "next/server";
 
 const mockCreateJob = vi.fn();
 const mockEnqueueJob = vi.fn();
+const mockUpdateJob = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
+	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
 	getJob: vi.fn(),
 }));
 

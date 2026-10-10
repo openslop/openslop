@@ -17,8 +17,8 @@ import { BaseProvider, type WithMetadata } from "../base";
 import { validateByProbe } from "../validate";
 import { pcmDurationSec, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
-import { fetchAllowedVoicePreview } from "./voicePreview";
-import { buildQueryText, rankBySimilarity } from "./voiceSimilarity";
+import { fetchAllowedVoicePreview } from "./voice-preview";
+import { buildQueryText, rankBySimilarity } from "./voice-similarity";
 import type {
 	GenerationRequest,
 	RawEncoding,

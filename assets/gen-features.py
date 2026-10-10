@@ -345,7 +345,7 @@ class Card:
         out.append("</g>")
         self.raw("".join(out))
 
-    # PlaceholderBallsLoader, from placeholderBalls.tsx and its module.css: eleven orbs of
+    # PlaceholderBallsLoader, from placeholder-balls.tsx and its module.css: eleven orbs of
     # diameter 400px+size, blurred 58px, hard-light, each orbiting a pivot 400px right of its own
     # left edge, the whole loader scaled 0.5 inside a preview about 146px tall.
     BALLS = [

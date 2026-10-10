@@ -1,39 +1,47 @@
 import merge from "lodash/merge";
+import { z } from "zod";
 import { immer } from "zustand/middleware/immer";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import {
-	MetadataSchema,
+	connectorModelsSchema,
+	type ConnectorModels,
+} from "@/lib/connectors/models";
+import {
+	ScriptSettingsSchema,
 	type DeepPartial,
-	type Metadata,
-	type MetadataCharacter,
-	type MetadataVoice,
+	type ScriptSettings,
 } from "./types";
+import { VideoSettingsSchema, type VideoSettings } from "./video-settings";
 
-/** What a project holds and what its row saves. Generation reads this; only the UI calls the setters. */
-export type ProjectData = {
-	metadata: Metadata;
-	referenceImages: string[];
-};
+/** Everything else the project holds is on the canvas. Parsing fills every default. */
+export const ProjectDataSchema = z.object({
+	title: z.string().default(""),
+	videoSettings: VideoSettingsSchema.default(() =>
+		VideoSettingsSchema.parse({}),
+	),
+	scriptSettings: ScriptSettingsSchema.default(() =>
+		ScriptSettingsSchema.parse({}),
+	),
+	/** The models this project pins per connector type, ahead of the account's. */
+	models: connectorModelsSchema.default({}),
+});
+
+export type ProjectData = z.infer<typeof ProjectDataSchema>;
 
 export type ProjectContext = ProjectData & {
-	updateMetadata: (partial: DeepPartial<Metadata>) => void;
-	setCharacter: (name: string, character: MetadataCharacter) => void;
-	updateCharacter: (name: string, partial: Partial<MetadataCharacter>) => void;
-	removeCharacter: (name: string) => void;
-	setNarration: (narration: MetadataVoice) => void;
-	setTemplate: (templateId: string | undefined) => void;
-	setReferenceImages: (urls: string[]) => void;
-	addReferenceImages: (urls: string[]) => void;
-	removeReferenceImage: (index: number) => void;
+	setTitle: (title: string) => void;
+	updateVideoSettings: (partial: DeepPartial<VideoSettings>) => void;
+	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
+	updateModels: (models: ConnectorModels) => void;
 	reset: () => void;
 };
 
 export type ProjectStore = StoreApi<ProjectContext>;
 
-const freshProject = (): ProjectData => ({
-	metadata: MetadataSchema.parse({}),
-	referenceImages: [],
-});
+const freshProject = (): ProjectData => ProjectDataSchema.parse({});
+
+export const extractStoreSnapshot = (store: ProjectStore): ProjectData =>
+	ProjectDataSchema.parse(store.getState());
 
 export function createProjectStore(
 	initial: ProjectData = freshProject(),
@@ -41,44 +49,18 @@ export function createProjectStore(
 	return createStore<ProjectContext>()(
 		immer((set) => ({
 			...initial,
-			updateMetadata: (partial) =>
+			setTitle: (title) => set({ title }),
+			updateVideoSettings: (partial) =>
 				set((state) => {
-					merge(state.metadata, partial);
+					merge(state.videoSettings, partial);
 				}),
-			setCharacter: (name, character) =>
+			updateScriptSettings: (settings) =>
 				set((state) => {
-					state.metadata.characters[name] = character;
+					Object.assign(state.scriptSettings, settings);
 				}),
-			updateCharacter: (name, partial) =>
+			updateModels: (models) =>
 				set((state) => {
-					const character = state.metadata.characters[name];
-					if (!character)
-						throw new Error(`Cannot update unknown character "${name}"`);
-					Object.assign(character, partial);
-				}),
-			removeCharacter: (name) =>
-				set((state) => {
-					delete state.metadata.characters[name];
-				}),
-			setNarration: (narration) =>
-				set((state) => {
-					state.metadata.narration = narration;
-				}),
-			setTemplate: (templateId) =>
-				set((state) => {
-					state.metadata.templateId = templateId;
-				}),
-			setReferenceImages: (urls) =>
-				set((state) => {
-					state.referenceImages = urls;
-				}),
-			addReferenceImages: (urls) =>
-				set((state) => {
-					state.referenceImages.push(...urls);
-				}),
-			removeReferenceImage: (index) =>
-				set((state) => {
-					state.referenceImages.splice(index, 1);
+					Object.assign(state.models, models);
 				}),
 			reset: () => set(freshProject()),
 		})),

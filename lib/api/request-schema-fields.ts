@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { BYOK_PROVIDERS } from "@/lib/connectors/providerCatalog";
+import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
 import { ReferenceAudioSchema } from "@/lib/connectors/types";
-import { VIDEO_RESOLUTIONS } from "@/lib/project/aspectRatio";
-import { parseImageSource } from "./imageSource";
+import { VIDEO_RESOLUTIONS } from "@/lib/project/aspect-ratio";
+import { parseImageSource } from "./image-source";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
 

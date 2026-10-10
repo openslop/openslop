@@ -8,13 +8,13 @@ import {
 import {
 	type AspectRatio,
 	ASPECT_RATIO_DIMENSIONS,
-} from "../project/aspectRatio";
+} from "../project/aspect-ratio";
 import {
 	DEFAULT_CAPTION_STYLE,
 	type CaptionStyle,
-} from "../captions/captionStyle";
-import { blankScene } from "./blankScene";
-import { loopStrideSec } from "./audioFade";
+} from "../captions/caption-style";
+import { blankScene } from "./blank-scene";
+import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
 import {
 	DEFAULT_TRANSITION,

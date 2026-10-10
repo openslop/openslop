@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Instrument_Serif } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { AppToaster } from "./components/AppToaster";
-import { GlobalErrorToaster } from "./components/GlobalErrorToaster";
-import { ToastErrorBoundary } from "./components/ToastErrorBoundary";
+import { ThemeProvider } from "./components/theme-provider";
+import { AppToaster } from "./components/app-toaster";
+import { GlobalErrorToaster } from "./components/global-error-toaster";
+import { ToastErrorBoundary } from "./components/toast-error-boundary";
 
 const slopella = localFont({
 	src: "../public/fonts/Slopella.woff2",

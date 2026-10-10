@@ -1,4 +1,4 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 
 /** Exported so the mock LLM can recognise a review prompt. */
 export const REVIEW_INSTRUCTION = "Thoroughly review this script";
@@ -9,7 +9,7 @@ export function reviewPrompt(script: string, format?: string): string {
 	return dedent`
 		${REVIEW_INSTRUCTION} against the given rules.${format ? ` It was intended as a ${format}, so judge it accordingly.` : ""}
 
-		Judge only the script below. Metadata elements are outside the scope of this review.
+		Judge only the scenes of the script below. The asset elements ahead of the first scene are the project's assets, and outside the scope of this review.
 
 		Read it as if you're watching a video generated from these prompts, then check it against those rules:
 		- Format: only the elements that format allows, and the startFrame, continuity,

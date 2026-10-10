@@ -56,11 +56,11 @@ Corre en tu navegador, no hay nada que instalar. Código abierto, gratis para si
 
 Escribe una línea. Elige 16:9 o 9:16, un idioma, un modelo y una duración, o pega un guion que ya tengas. Hay siete plantillas por si necesitas un empujón.
 
-[El compositor →](../../app/components/copilot/ComposerCopilot.tsx)
+[El compositor →](../../app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
     <img src="../../assets/features/describe-light.svg" alt="La caja de prompt recorre ideas de ejemplo, luego se escribe una línea y se envía" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Los modelos alojados vienen con tu cuenta. Pega una clave de Anthropic, Runware,
 
 **También en la caja:**
 
-- **[Subtítulos](../../app/components/canvas/panel/CaptionsPanel.tsx)** — Seis preajustes, doce fuentes, aparición palabra por palabra o línea por línea, y cada color, borde y posición es tuyo para cambiarlo.
-- **[Exporta hasta 4K](../../app/components/player/ExportButton.tsx)** — Renderiza en Remotion Lambda en fragmentos paralelos y te entrega un MP4.
-- **[Historial de versiones](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — Guarda automáticamente mientras trabajas, agrupado en puntos de control. Mira cualquier versión y restáurala.
+- **[Subtítulos](../../app/components/canvas/panel/captions-panel.tsx)** — Seis preajustes, doce fuentes, aparición palabra por palabra o línea por línea, y cada color, borde y posición es tuyo para cambiarlo.
+- **[Exporta hasta 4K](../../app/components/player/export-button.tsx)** — Renderiza en Remotion Lambda en fragmentos paralelos y te entrega un MP4.
+- **[Historial de versiones](../../app/components/canvas/panel/canvas-history-panel.tsx)** — Guarda automáticamente mientras trabajas, agrupado en puntos de control. Mira cualquier versión y restáurala.
 - **[Personajes y estilo artístico](../../app/components/canvas/elements/AssetsSection.tsx)** — Nombra un personaje una vez y cada imagen, línea de voz y avatar se mantiene coherente.
 - **[Plantillas](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime y más. Cada una siembra un estilo, un narrador y una duración.
 - **[Mocks para desarrollo](../../.env.example)** — Deja sin definir la clave de un proveedor y sus llamadas devuelven resultados de prueba, así puedes construir sin pagar.
@@ -233,7 +233,7 @@ lib/
   canvas/        Slate document model: element types, guards, OSML parse/serialize
   script/        Script context and refinement
   project/       Per-project Zustand store, autosave, persistence
-  video/         Scene layout and render client
+  render/        Scene layout and render client
   templates/     Prompt templates offered in the composer
   upload/        Client-side image upload
   supabase/      Browser/server Supabase clients

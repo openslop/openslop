@@ -1,5 +1,5 @@
 import { createEmitter } from "@/lib/store/emitter";
-import { toastError } from "@/lib/toastError";
+import { toastError } from "@/lib/toast-error";
 import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 

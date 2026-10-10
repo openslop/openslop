@@ -1,11 +1,6 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
-import {
-	audioBundleCache,
-	pineconeCache,
-	rankByNearestDuration,
-} from "../cache";
+import { audioPromptCache } from "../cache";
 import {
 	BaseElevenLabsAudio,
 	ELEVENLABS_AUDIO_FORMAT,
@@ -15,12 +10,18 @@ import type { SFXProvider } from "../types";
 
 type SFXRequest = VendorParams<SFXGenerateParams>;
 
+const cache = audioPromptCache(process.env.PINECONE_SFX_INDEX || "sfx", "sfx");
+
 export class ElevenLabsSFX
 	extends BaseElevenLabsAudio<SFXRequest>
 	implements SFXProvider
 {
 	protected readonly blobConfig = { type: "sfx", provider: "elevenlabs" };
 	protected readonly outputFormat = ELEVENLABS_AUDIO_FORMAT;
+
+	override generate(params: SFXRequest) {
+		return cache.readThrough(params, () => super.generate(params));
+	}
 
 	protected requestStream(params: SFXRequest) {
 		return this.client.textToSoundEffects.convert({
@@ -31,13 +32,3 @@ export class ElevenLabsSFX
 		});
 	}
 }
-
-ElevenLabsSFX.prototype.generate = pineconeCache<[SFXRequest], BundleResponse>(
-	ElevenLabsSFX.prototype.generate,
-	{
-		index: process.env.PINECONE_SFX_INDEX || "sfx",
-		serialize: ({ prompt }) => prompt,
-		rank: rankByNearestDuration,
-		...audioBundleCache("sfx"),
-	},
-);

@@ -1,0 +1,22 @@
+import type { CanvasEditor } from "@/lib/canvas/types";
+import {
+	assignIdRecursively,
+	makeNodeId,
+	stripIds,
+} from "@/lib/canvas/node-utils";
+
+export const withNodeId = (editor: CanvasEditor): CanvasEditor => {
+	const { apply, insertFragment } = editor;
+
+	editor.insertFragment = (fragment) => {
+		insertFragment(fragment.map(stripIds));
+	};
+
+	editor.apply = (operation) => {
+		if (operation.type === "insert_node") assignIdRecursively(operation.node);
+		if (operation.type === "split_node") operation.properties.id = makeNodeId();
+		return apply(operation);
+	};
+
+	return editor;
+};

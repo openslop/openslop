@@ -11,6 +11,7 @@ const DEFAULT_CONCURRENCY_LIMITS: ConcurrencyLimits = {
 	video: 3,
 	image: 3,
 	tts: 1,
+	voice: 1,
 	music: 1,
 	sfx: 1,
 };

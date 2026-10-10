@@ -1,12 +1,8 @@
 import { z } from "zod";
-import type { CanvasContentElement } from "@/lib/canvas/types";
-import type {
-	DependencyDeclaration,
-	DependencyResults,
-} from "@/lib/generation/dependency";
-import type { ProjectData, ProjectStore } from "@/lib/project/store";
+import type { CanvasElement } from "@/lib/canvas/types";
+import type { Dependency, Read } from "@/lib/generation/declare";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/project/aspectRatio";
+import type { VideoResolution } from "@/lib/project/aspect-ratio";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
@@ -18,6 +14,7 @@ export const ASSET_CONNECTOR_TYPES = [
 	"image",
 	"tts",
 	"video",
+	"voice",
 ] as const;
 
 export type AssetConnectorType = (typeof ASSET_CONNECTOR_TYPES)[number];
@@ -61,6 +58,7 @@ export type VideoModelEntry = ModelEntry & {
 export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
+	voice: ModelEntry;
 	image: ModelEntry;
 	video: VideoModelEntry;
 	sfx: ModelEntry;
@@ -78,8 +76,6 @@ export type ModelRef = { provider: Provider; model: string };
 
 export type ModelPick = { provider?: string; model?: string };
 
-export type VoiceSearchFn = (params: VoiceSearchParams) => Promise<VoiceInfo[]>;
-
 /** A voice's preview at a URL anyone can fetch, and how long it plays. */
 export const HostedVoicePreviewSchema = z.object({
 	url: z.url({ error: "A hosted preview needs an HTTP(S) URL" }),
@@ -91,39 +87,20 @@ export const HostedVoicePreviewSchema = z.object({
 export type HostedVoicePreview = z.infer<typeof HostedVoicePreviewSchema>;
 
 export interface PluginContext {
-	searchVoices?: VoiceSearchFn;
-	/** Speech on a pair, for a type that borrows voices. */
-	speech?: (model: ModelRef) => TTSConnector;
-	/** Read through the handles that declared them. */
-	dependencies?: DependencyResults;
-	/** The project state the node's inputs were resolved against. */
-	state?: ProjectData;
-	/** Only written to: plugins read `state`, the snapshot their inputs were recorded against. */
-	store?: ProjectStore;
-	/** The pair the connector runs on. */
-	model?: ModelRef;
+	/** Keyed by the label each plugin declared them under. */
+	dependencies?: Record<string, AssetResult>;
+	/** What the node's plugins read, as its inputs recorded it. */
+	reads?: Record<string, string>;
 	/** Aborts when the caller cancels the generation. */
 	signal?: AbortSignal;
 }
 
-/** The parts of a plugin context the caller supplies per generation. */
-export type GenerationContext = Pick<
-	PluginContext,
-	"dependencies" | "state" | "store" | "signal" | "speech"
->;
-
 export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 	name: string;
-	/**
-	 * Declaring a node is what makes the element wait for it, go stale with it
-	 * and receive its result; an undeclared read goes stale-blind.
-	 */
-	dependencies?: readonly DependencyDeclaration[];
-	/**
-	 * The model the element generates on, for a type whose model is picked
-	 * somewhere other than the element itself.
-	 */
-	model?(element: CanvasContentElement, state: ProjectData): ModelRef;
+	dependencies?: readonly Dependency[];
+	/** The model the element generates on, when it is picked somewhere other than the element. */
+	model?(element: CanvasElement, canvas: CanvasElement[]): ModelPick;
+	reads?: readonly Read[];
 	beforeGenerate?(
 		params: TParams,
 		ctx: PluginContext,
@@ -165,6 +142,7 @@ export const AssetResultSchema = z.object({
 	audioUrl: z.string().optional(),
 	videoUrl: z.string().optional(),
 	textTimestamps: z.array(TextTimestampSchema).optional(),
+	voiceId: z.string().optional(),
 });
 
 export type AssetResult = z.infer<typeof AssetResultSchema>;
@@ -223,14 +201,7 @@ export type TTSResult = AssetResult & {
 
 export type TTSGenerateParams = ConnectorGenerateParams & {
 	voiceId?: string;
-	gender?: TTSGender;
-	age?: string;
-	pitch?: string;
-	accent?: string;
-	description?: string;
 	name?: string;
-	query?: string;
-	language?: string;
 	speed?: TTSSpeed;
 	emotion?: TTSEmotion;
 	format?: string;
@@ -266,7 +237,7 @@ export interface TTSConnector extends Connector {
 	readonly type: "tts";
 	generate(params: TTSGenerateParams): Promise<TTSResult>;
 	searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]>;
-	voicePreview(voiceId: string): Promise<HostedVoicePreview | undefined>;
+	voicePreview(voiceId: string): Promise<HostedVoicePreview>;
 }
 
 /** Audio a video's speech should sound like, and whose voice it is. */

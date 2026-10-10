@@ -14,7 +14,19 @@ const PENDING_RETRY_SECONDS = 5;
  */
 export async function processQueuedJob(jobId: string): Promise<void> {
 	const job = await loadJobForProcessing(jobId);
+	if (!job) {
+		logger.error({ jobId }, "Dropped a queue message for an unknown job");
+		return;
+	}
 	if (isTerminal(job.status)) return;
+
+	if (Date.now() - Date.parse(job.created_at) > JOB_TIMEOUT_MS) {
+		await updateJob(jobId, {
+			status: "failed",
+			error: `Job timed out after ${JOB_TIMEOUT_MS / 60_000} minutes`,
+		});
+		return;
+	}
 
 	const handler = getJobHandler(job.connector_type);
 
@@ -38,15 +50,6 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 
 	if (!isEqual(job.metadata, outcome.metadata)) {
 		await updateJob(jobId, { metadata: outcome.metadata });
-	}
-
-	const age = Date.now() - Date.parse(job.created_at);
-	if (age > JOB_TIMEOUT_MS) {
-		await updateJob(jobId, {
-			status: "failed",
-			error: `Job timed out after ${JOB_TIMEOUT_MS / 60_000} minutes`,
-		});
-		return;
 	}
 
 	await enqueueJob(jobId, { delaySeconds: PENDING_RETRY_SECONDS });

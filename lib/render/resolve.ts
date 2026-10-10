@@ -1,7 +1,7 @@
-import { ELEMENT_TYPES, type CanvasElement } from "@/lib/canvas/types";
-import { isSceneElement } from "@/lib/canvas/scenes";
+import { CONTENT_TYPES, type CanvasBlock } from "@/lib/canvas/types";
+import { isScene } from "@/lib/canvas/scenes";
 import { getPromptText } from "@/lib/generation/inputs";
-import { getPrimaryUrl } from "@/lib/connectors/assetUrl";
+import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import type { ResolvedElement } from "./types";
 import {
@@ -10,25 +10,25 @@ import {
 	getMotion,
 	getTrimToDialogue,
 	getVolume,
-} from "../canvas/elementAttributes";
+} from "../canvas/element-attributes";
 
 export function resolveElements(
-	elements: CanvasElement[],
+	blocks: CanvasBlock[],
 	getSnapshot: (id: string) => ElementSnapshot,
 	{ captionsEnabled }: { captionsEnabled: boolean },
 ): ResolvedElement[] {
 	const resolved: ResolvedElement[] = [];
 	let sceneNumber = 0;
 
-	for (const scene of elements) {
-		if (!isSceneElement(scene)) continue;
+	for (const scene of blocks) {
+		if (!isScene(scene)) continue;
 		sceneNumber += 1;
 
 		for (const element of scene.children) {
 			const snapshot = getSnapshot(element.id);
 			if (!snapshot.result) continue;
 
-			const spec = ELEMENT_TYPES[element.type];
+			const spec = CONTENT_TYPES[element.type];
 			const url = getPrimaryUrl(snapshot.result, spec.outputKind);
 			if (!url) continue;
 

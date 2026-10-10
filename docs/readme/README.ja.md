@@ -56,11 +56,11 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 一行だけ打ちます。16:9 か 9:16、言語、モデル、長さを選ぶか、すでにある台本を貼り付けます。ひと押しほしいときは、7つのテンプレートがあります。
 
-[コンポーザー →](../../app/components/copilot/ComposerCopilot.tsx)
+[コンポーザー →](../../app/components/copilot/composer-copilot.tsx)
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/ComposerCopilot.tsx"><picture>
+  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
     <img src="../../assets/features/describe-light.svg" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
   </picture></a>
@@ -155,9 +155,9 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 **ほかにも入っています:**
 
-- **[字幕](../../app/components/canvas/panel/CaptionsPanel.tsx)** — 6つのプリセット、12のフォント、単語ごとか行ごとの表示。色、縁取り、位置はすべて自由に変えられます。
-- **[最大 4K で書き出し](../../app/components/player/ExportButton.tsx)** — Remotion Lambda 上で並列のチャンクにしてレンダリングし、MP4 を渡します。
-- **[バージョン履歴](../../app/components/canvas/panel/CanvasHistoryPanel.tsx)** — 作業中に自動保存され、チェックポイントにまとめられます。どのバージョンでも見て、戻せます。
+- **[字幕](../../app/components/canvas/panel/captions-panel.tsx)** — 6つのプリセット、12のフォント、単語ごとか行ごとの表示。色、縁取り、位置はすべて自由に変えられます。
+- **[最大 4K で書き出し](../../app/components/player/export-button.tsx)** — Remotion Lambda 上で並列のチャンクにしてレンダリングし、MP4 を渡します。
+- **[バージョン履歴](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 作業中に自動保存され、チェックポイントにまとめられます。どのバージョンでも見て、戻せます。
 - **[キャラクターとアートスタイル](../../app/components/canvas/elements/AssetsSection.tsx)** — キャラクターに一度名前をつければ、すべての画像、セリフ、アバターが一貫します。
 - **[テンプレート](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime など。それぞれがスタイル、ナレーター、長さの種になります。
 - **[開発用のモック](../../.env.example)** — プロバイダーのキーを未設定のままにすると、その呼び出しは用意された結果に切り替わるので、お金をかけずに開発できます。
@@ -233,7 +233,7 @@ lib/
   canvas/        Slate ドキュメントモデル: 要素の型、ガード、OSML のパースとシリアライズ
   script/        台本のコンテキストと推敲
   project/       プロジェクトごとの Zustand ストア、自動保存、永続化
-  video/         シーンのレイアウトとレンダークライアント
+  render/        シーンのレイアウトとレンダークライアント
   templates/     コンポーザーで提供するプロンプトテンプレート
   upload/        クライアント側の画像アップロード
   supabase/      ブラウザ用・サーバー用の Supabase クライアント

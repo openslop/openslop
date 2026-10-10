@@ -1,5 +1,5 @@
-import type { ValidationResult } from "@/lib/connectors/providerKey";
-import type { BYOKProvider } from "@/lib/connectors/providerCatalog";
+import type { ValidationResult } from "@/lib/connectors/provider-key";
+import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
 import { stringifyError } from "@/lib/errors";
 import { RunwareImage } from "@/lib/providers/image/runware";
 import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
@@ -12,7 +12,7 @@ import {
 	MissingProviderKeyError,
 	readProviderKey,
 	setKeyStatus,
-} from "../providerKeys";
+} from "../provider-keys";
 
 type VendorClass<K extends ProviderType> = new (apiKey: string) => Providers[K];
 

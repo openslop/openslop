@@ -2,7 +2,7 @@ import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
 import type { TTSProvider, TTSRequest } from "./base";
-import { fetchAllowedVoicePreview } from "./voicePreview";
+import { fetchAllowedVoicePreview } from "./voice-preview";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 
@@ -158,8 +158,10 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 	}
 
 	async search(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const shuffled = [...this.voices].sort(() => Math.random() - 0.5);
-		return params.limit ? shuffled.slice(0, params.limit) : shuffled;
+		const found = this.voices.filter(
+			(voice) => !params.gender || voice.gender === params.gender,
+		);
+		return params.limit ? found.slice(0, params.limit) : found;
 	}
 
 	async fetchVoicePreview(url: string): Promise<Response> {

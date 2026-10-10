@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DotGrid } from "@/components/ui/dot-grid";
-import SlopYard from "./components/not-found/SlopYard";
+import SlopYard from "./components/not-found/slop-yard";
 
 export const metadata: Metadata = {
 	title: "404 · OpenSlop",

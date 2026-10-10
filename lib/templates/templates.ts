@@ -1,8 +1,8 @@
-import dedent from "dedent";
+import { dedent } from "@/lib/dedent";
 import { BLOB_BASE_URL } from "@/lib/blob";
-import type { ArtStyle } from "@/lib/project/artStyles";
-import type { MetadataCharacter, MetadataVoice } from "@/lib/project/types";
-import type { VideoLength } from "@/lib/project/videoLength";
+import type { ArtStyle } from "@/lib/project/art-styles";
+import type { Voice } from "@/lib/project/types";
+import type { VideoLength } from "@/lib/project/video-length";
 
 const templateAsset = (name: string) =>
 	`${BLOB_BASE_URL}/assets/upload/template/${name}`;
@@ -14,6 +14,11 @@ export interface TemplateShowcase {
 	examplePrompt: string;
 }
 
+type TemplateCharacter = Voice & {
+	appearance: string;
+	avatar?: string;
+};
+
 export interface Template {
 	id: string;
 	name: string;
@@ -23,12 +28,10 @@ export interface Template {
 	exampleText: string;
 	systemPrompt: string;
 	length: VideoLength;
-	style?: ArtStyle;
+	style: ArtStyle;
 	referenceImages: string[];
-	characters?: Record<string, MetadataCharacter>;
-	/** Prebuilt avatars, seeded as the character avatar nodes' results. */
-	characterAvatars?: Record<string, string>;
-	narration: MetadataVoice;
+	characters?: Record<string, TemplateCharacter>;
+	narration: Voice;
 	showcase: TemplateShowcase;
 }
 
@@ -52,9 +55,9 @@ export const TEMPLATES: Template[] = [
 				description: "American male, neutral accent",
 				appearance:
 					"male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
+				avatar: templateAsset("pov-life-stages-4"),
 			},
 		},
-		characterAvatars: { Protagonist: templateAsset("pov-life-stages-4") },
 		narration: {
 			gender: "masculine",
 			age: "adult",
@@ -72,7 +75,7 @@ export const TEMPLATES: Template[] = [
 		systemPrompt: dedent`
 # Important
 - The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images and videos where appropriate.
-- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story.
+- The Protagonist is already one of the characters: use him like a regular character in the story.
 - Never mention any specific ages in the image and video prompts, just generic ones like young man.
 		`,
 		exampleText: dedent`
@@ -287,9 +290,6 @@ export const TEMPLATES: Template[] = [
 			accent: "british",
 			age: "child",
 			description: "Wistful, young male for emotional narrations",
-			provider: "openslop",
-			model: "Slop TTS v1",
-			voiceId: "4f7f1324-1853-48a6-b294-4e78e8036a83",
 		},
 		showcase: {
 			image: templateAsset("sleep-story-1"),
@@ -385,9 +385,9 @@ Add motion to all images and videos. All narrations should have speed="slow".
 				description: "American male, neutral accent",
 				appearance:
 					"man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers",
+				avatar: templateAsset("finance-tips-1"),
 			},
 		},
-		characterAvatars: { Ethan: templateAsset("finance-tips-1") },
 		narration: {
 			gender: "masculine",
 			age: "adult",
@@ -407,7 +407,7 @@ Add motion to all images and videos. All narrations should have speed="slow".
 - This is an Explainer: every visual, including every title card, is a <video>. Nobody speaks inside the videos; the narrator carries every word.
 - Every video is a single continuous shot labelled Shot 1, with one camera move or a static frame. Never add a Shot 2.
 - The main character is always called Ethan, and Ethan must always be present in the character list of videos where relevant.
-- Do not generate character metadata for Ethan, but do use him like a regular character in the story.
+- Ethan is already one of the characters: use him like a regular character in the story.
 		`,
 		exampleText: dedent`
 #Music: Tense, minimal electronic pulse with a low sub bass and a slow ticking hi-hat, building unease
@@ -889,10 +889,8 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 				description: "Young American man",
 				appearance:
 					"A young everyman with a smooth, rounded egg-shaped head, pale skin, no nose, small black dot eyes, thick straight dark eyebrows, and a faint neutral mouth. He wears a navy baseball cap (worn forward or backward) and casual everyday clothing—hoodies, button-up shirts, or jackets in muted tones.",
+				avatar: templateAsset("pov-financial-lifestyle-5"),
 			},
-		},
-		characterAvatars: {
-			Protagonist: templateAsset("pov-financial-lifestyle-5"),
 		},
 		narration: {
 			gender: "masculine",
@@ -912,7 +910,7 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 		systemPrompt: dedent`
 # Important
 - The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images and videos where appropriate.
-- Do not generate character metadata for the Protagonist, but do use him like a regular character in the story.
+- The Protagonist is already one of the characters: use him like a regular character in the story.
 - Add appropriate motion to each image.
 		`,
 		exampleText: dedent`
@@ -1336,7 +1334,7 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 - Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
 - Each person's segment opens on the same portrait grid of everyone in the video, zooming smoothly into that person's portrait.
 - Every video in a person's segment shows a white banner at the top reading their name, with dates or ages as small corner text where the narration states them.
-- Never describe the real people's looks in the prompts. Their appearance belongs in their character metadata; refer to them by name only.
+- Never describe the real people's looks in the prompts. Their appearance belongs in their asset_avatar element; refer to them by name only.
 		`,
 		exampleText: dedent`
 #Music: Slow, somber documentary piano over a soft string pad, restrained and respectful
