@@ -1,7 +1,9 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
-import { scrollIntoContainer } from "@/lib/components/scroll-into-container";
+import { memo, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "@/components/ui/icon";
+import { useStickToBottom } from "@/lib/components/use-stick-to-bottom";
 import { cn } from "@/lib/utils";
 import { trailingAssistant } from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
@@ -40,11 +42,18 @@ const Row = memo(function Row({
 function Transcript({
 	messages,
 	working,
+	follow,
 }: {
 	messages: SloppyMessage[];
 	working: boolean;
+	follow: () => void;
 }) {
 	const [restoredCount] = useState(messages.length);
+	const sentId = messages.findLast((message) => message.role === "user")?.id;
+	const [restoredSentId] = useState(sentId);
+	useEffect(() => {
+		if (sentId !== restoredSentId) follow();
+	}, [sentId, restoredSentId, follow]);
 
 	if (messages.length === 0) {
 		return (
@@ -76,21 +85,11 @@ function Transcript({
 export function SloppyPanel() {
 	const messages = useSloppyMessages();
 	const { loading } = useSloppy();
-	const endRef = useRef<HTMLDivElement>(null);
-	const lastSentId = useRef<string>(undefined);
-
-	// Jump to the bottom once per sent message (and once for a restored
-	// transcript), then leave scrolling to the user while the reply streams.
-	const sentId = messages?.findLast((message) => message.role === "user")?.id;
-	useEffect(() => {
-		if (!endRef.current || sentId === lastSentId.current) return;
-		const restoring = lastSentId.current === undefined;
-		lastSentId.current = sentId;
-		scrollIntoContainer(endRef.current, "end", restoring ? "auto" : "smooth");
-	}, [sentId]);
+	const { ref, stuck, follow } = useStickToBottom<HTMLDivElement>();
 
 	return (
 		<div
+			ref={ref}
 			role="log"
 			aria-busy={messages === null || loading}
 			className="flex flex-col gap-3"
@@ -98,9 +97,21 @@ export function SloppyPanel() {
 			{messages === null ? (
 				<TranscriptSkeleton />
 			) : (
-				<Transcript messages={messages} working={loading} />
+				<Transcript messages={messages} working={loading} follow={follow} />
 			)}
-			<div ref={endRef} />
+			<div className="sticky bottom-2 flex h-0 justify-center">
+				{!stuck && (
+					<Button
+						variant="secondary"
+						size="xs"
+						className="absolute bottom-0 animate-fadeInUp shadow-elevation-3"
+						onClick={follow}
+					>
+						<ChevronDown />
+						Jump to latest
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 }
