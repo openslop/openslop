@@ -1,4 +1,5 @@
 import compact from "lodash/compact";
+import memoize from "lodash/memoize";
 import uniq from "lodash/uniq";
 import type { Descendant } from "slate";
 import { parseReferenceImages } from "@/lib/connectors/attributes/reference-images";
@@ -11,8 +12,11 @@ import type { AssetElement, AssetType, CanvasElement } from "./types";
 
 export const REFERENCE_URLS_ATTR = "images";
 
-export const getAssets = (nodes: Descendant[]): AssetElement[] =>
-	nodes.filter(isAssetElement);
+// Plugins read assets on every edit, once per element; read each canvas once.
+export const getAssets = memoize((nodes: readonly unknown[]): AssetElement[] =>
+	nodes.filter(isAssetElement),
+);
+getAssets.cache = new WeakMap();
 
 /** Every element a generation can read, assets first, in document order. */
 export const getCanvasElements = (nodes: Descendant[]): CanvasElement[] => [
@@ -35,7 +39,7 @@ export const findAsset = <T extends AssetType>(
 	type: T,
 	name?: string,
 ): AssetElement<T> | undefined =>
-	nodes.find((node) => isAsset(node, type, name));
+	getAssets(nodes).find((node) => isAsset(node, type, name));
 
 export const NARRATOR = "Narrator";
 
@@ -45,9 +49,8 @@ export const speakerOf = (attrs?: { name?: string }): string =>
 const assetsOf =
 	<T extends AssetType>(type: T) =>
 	(nodes: readonly unknown[]): AssetElement<T>[] =>
-		nodes.filter(
-			(node): node is AssetElement<T> =>
-				isAssetElement(node) && node.type === type,
+		getAssets(nodes).filter(
+			(asset): asset is AssetElement<T> => asset.type === type,
 		);
 
 export const getAvatars = assetsOf("asset_avatar");
