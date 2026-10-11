@@ -6,6 +6,7 @@ import {
 } from "@/lib/api/queue-callback";
 
 export const POST = handleCallback(
-	(message: unknown) => processQueuedJob(parseAssetQueueCallback(message)),
+	(message: unknown, { deliveryCount }) =>
+		processQueuedJob(parseAssetQueueCallback(message), deliveryCount),
 	{ retry: retryWithBackoff },
 );

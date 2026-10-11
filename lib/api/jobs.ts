@@ -85,6 +85,19 @@ export async function loadJobForProcessing(
 	return data ? JobRowSchema.parse(data) : null;
 }
 
+/** Takes a pending job for this delivery. False when another delivery got there first. */
+export async function claimJob(jobId: string): Promise<boolean> {
+	const supabase = createServiceClient();
+	const { data, error } = await supabase
+		.from("jobs")
+		.update({ status: "processing" })
+		.eq("id", jobId)
+		.eq("status", "pending")
+		.select("id");
+	if (error) throw new Error(`Failed to claim job: ${error.message}`);
+	return data.length > 0;
+}
+
 export async function updateJob(
 	jobId: string,
 	patch: {
