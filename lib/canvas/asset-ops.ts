@@ -34,7 +34,7 @@ export function setAsset(
 			editor,
 			createCanvasElement(type, {
 				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
-				text,
+				text: text?.trim(),
 				defaultModels: editor.defaultModels(),
 			}),
 			{ at: [0] },

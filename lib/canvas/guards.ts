@@ -11,7 +11,7 @@ import {
 	type CanvasElement,
 } from "./types";
 
-const isContentType = (type: string): type is ContentType =>
+export const isContentType = (type: string): type is ContentType =>
 	Object.hasOwn(CONTENT_TYPES, type);
 
 export const isContentElement = (node: unknown): node is ContentElement =>

@@ -93,6 +93,21 @@ describe("insertElement", () => {
 		expect(flatAttributes(scene.children[1])).toMatchObject(pinned);
 	});
 
+	it("trims the text it is given", () => {
+		const editor = seededEditor();
+		Editor.withoutNormalizing(editor, () => {
+			insertElement(editor, "narration", [0, 1], { text: "  hello  " });
+		});
+
+		const scene = editor.children[0] as {
+			children: Array<{ children: Array<{ text: string }> }>;
+		};
+		expect(scene.children[1].children.map((leaf) => leaf.text)).toEqual([
+			"\u200B",
+			"hello",
+		]);
+	});
+
 	it("element without defaultAttributes gets undefined customAttributes base", () => {
 		const editor = seededEditor();
 		Editor.withoutNormalizing(editor, () => {

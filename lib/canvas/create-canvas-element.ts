@@ -30,7 +30,7 @@ export function createCanvasElement<T extends ElementType>(
 		...splitAttributes(attributes),
 		children: [
 			{ id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
-			{ id: makeNodeId(), type, text: (opts.text ?? "").trim() },
+			{ id: makeNodeId(), type, text: opts.text ?? "" },
 		],
 	};
 }
