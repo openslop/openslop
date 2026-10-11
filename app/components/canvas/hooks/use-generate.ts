@@ -19,8 +19,7 @@ export function useGenerate(element: GeneratedElement) {
 
 	// Built again at the click: a live node's job may lag, see useLiveNode.
 	const generate = useCallback(() => {
-		const context = buildContext();
-		const current = buildNode(element, context);
+		const current = buildNode(element, buildContext());
 		if (!hasPrompt(current)) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;

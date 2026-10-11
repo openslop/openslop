@@ -96,7 +96,7 @@ const namesFlagged = (flag: ToolFlag): ReadonlySet<string> =>
 export const SNAPSHOT_TOOLS = namesFlagged("snapshot");
 
 /** Calls that are part of writing the script, so what is rendered from the canvas is mid-change. */
-export const SCRIPT_TOOLS = namesFlagged("draftsScript");
+export const DRAFTING_TOOLS = namesFlagged("draftsScript");
 
 /** A failure is reported, not thrown: the model reads it as the next observation. */
 export type ToolOutcome =

@@ -36,15 +36,15 @@ export function createCharacterVoicesPlugin(): ConnectorPlugin<ParamsWithCharact
 			),
 		],
 		beforeGenerate(params, ctx) {
-			const voices = heardCharacters(params).flatMap((speaker) => {
+			const referenceAudios = heardCharacters(params).flatMap((speaker) => {
 				const voice = foundVoice(ctx, speaker);
 				return voice?.audioUrl
 					? [{ url: voice.audioUrl, durationSec: voice.durationSec, speaker }]
 					: [];
 			});
-			return voices.length === 0
+			return referenceAudios.length === 0
 				? params
-				: { ...params, referenceAudios: voices };
+				: { ...params, referenceAudios };
 		},
 	};
 }

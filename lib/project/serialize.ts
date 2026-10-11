@@ -18,10 +18,10 @@ export function deserializeWithScenes(
 	defaultModels?: ConnectorModels,
 	sceneId: (index: number) => string = makeNodeId,
 ): (AssetElement | Scene)[] {
-	const chunks = splitScenes(osml).map((sceneOsml) =>
+	const nodesPerScene = splitScenes(osml).map((sceneOsml) =>
 		parseOSML(sceneOsml, defaultModels),
 	);
-	const scenes = chunks
+	const scenes = nodesPerScene
 		.map((nodes) => nodes.filter(isContentElement))
 		.filter((children) => children.length > 0)
 		.map(
@@ -31,5 +31,5 @@ export function deserializeWithScenes(
 				children,
 			}),
 		);
-	return [...chunks.flat().filter(isAssetElement), ...scenes];
+	return [...nodesPerScene.flat().filter(isAssetElement), ...scenes];
 }

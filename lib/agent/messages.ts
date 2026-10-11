@@ -43,9 +43,7 @@ const isPruned = (part: SloppyMessage["parts"][number]) =>
 	part.type === "reasoning" ||
 	(isToolUIPart(part) && SNAPSHOT_TOOLS.has(getToolName(part)));
 
-/**
- * Remove all prior reasoning blocks and snapshots tool results
- */
+/** Drops reasoning and snapshot tool parts from every assistant message that is not the trailing one. */
 export function pruneTranscript(messages: SloppyMessage[]): SloppyMessage[] {
 	return messages.map((message, index) => {
 		if (index === messages.length - 1 || message.role !== "assistant")

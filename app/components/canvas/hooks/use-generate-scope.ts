@@ -92,9 +92,8 @@ export function useGenerateScope(
 
 	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
-		const context = buildContext();
 		queue.enqueueGraph(
-			buildNodes(elements(), context).filter(
+			buildNodes(elements(), buildContext()).filter(
 				(node) => hasPrompt(node) && needsGeneration(node, queue),
 			),
 		);

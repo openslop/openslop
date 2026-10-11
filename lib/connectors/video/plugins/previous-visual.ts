@@ -33,14 +33,14 @@ async function previousPictures(
 	throw new Error("The previous visual generated no picture to hand on");
 }
 
-const PREVIOUS = "the previous visual";
+const PREVIOUS_VISUAL_LABEL = "the previous visual";
 
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
 const previousWhenLinked: Dependency = (
 	{ id, generationAttributes: attrs = {} },
 	{ canvas },
 ) => ({
-	[PREVIOUS]:
+	[PREVIOUS_VISUAL_LABEL]:
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
 		attrs[CONTINUITY_ATTR] === "true"
 			? previousVisual(canvas, id)
@@ -60,7 +60,7 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 			},
 			ctx,
 		) {
-			const source = ctx.dependencies?.[PREVIOUS];
+			const source = ctx.dependencies?.[PREVIOUS_VISUAL_LABEL];
 			const [frameImage] =
 				frame === PREVIOUS_VISUAL
 					? await previousPictures(source, [START_FRAME])

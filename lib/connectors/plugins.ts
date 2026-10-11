@@ -48,11 +48,7 @@ export async function runOnError(
 	error: string,
 	ctx: PluginContext,
 ): Promise<void> {
-	for (const plugin of plugins) {
-		if (plugin.onError) {
-			await plugin.onError(error, ctx);
-		}
-	}
+	for (const plugin of plugins) await plugin.onError?.(error, ctx);
 }
 
 /** A `mergeWith` customizer: a list is appended to, anything else replaced. */

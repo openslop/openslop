@@ -72,10 +72,10 @@ export class CanvasHistory {
 	};
 
 	record = async (content: SavedProject): Promise<void> => {
-		const open = this.open && Date.now() < this.open.until ? this.open : null;
-		const version = open
-			? await this.storage.update(open.id, content)
-			: await this.storage.create(content);
+		const version =
+			this.open && Date.now() < this.open.until
+				? await this.storage.update(this.open.id, content)
+				: await this.storage.create(content);
 		this.open = { id: version.id, until: Date.now() + FOLD_WINDOW_MS };
 		this.setState({
 			versions: [
