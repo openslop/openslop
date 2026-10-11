@@ -62,16 +62,12 @@ describe("readSSE", () => {
 		expect(results).toEqual([{ x: 1 }]);
 	});
 
-	it("skips malformed JSON", async () => {
+	it("throws on a malformed event instead of dropping it", async () => {
 		const stream = makeSSEStream([
 			"data: {bad json}\n\n",
 			'data: {"good":true}\n\n',
 		]);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([{ good: true }]);
+		await expect(Array.fromAsync(readSSE(stream))).rejects.toThrow(SyntaxError);
 	});
 
 	it("returns empty for empty stream", async () => {

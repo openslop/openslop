@@ -38,8 +38,6 @@ function UserProfile() {
 	const [impersonateOpen, setImpersonateOpen] = useState(false);
 	const user = useUser();
 	const settings = useSettings();
-	const email = user.email ?? "";
-	const name: string | undefined = user.user_metadata.full_name;
 
 	const handleLogout = async () => {
 		try {
@@ -66,7 +64,7 @@ function UserProfile() {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="start" className="w-56">
 					<DropdownMenuLabel className="truncate">
-						{name || email.split("@")[0]}
+						{user.name}
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuSub>

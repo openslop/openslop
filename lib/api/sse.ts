@@ -47,11 +47,7 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 
 			for (const part of parts) {
 				if (!part.startsWith("data: ")) continue;
-				try {
-					yield JSON.parse(part.slice(6)) as T;
-				} catch (err) {
-					logger.warn({ err }, "SSE: skipping malformed event");
-				}
+				yield JSON.parse(part.slice(6)) as T;
 			}
 		}
 	} finally {

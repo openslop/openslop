@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { z } from "zod";
 import { AssetBundle } from "../asset-bundle";
 import type { BundleResponse } from "../asset-bundle";
 
@@ -71,60 +72,47 @@ describe("AssetBundle", () => {
 	});
 
 	describe("fetchJson", () => {
-		beforeEach(() => {
-			AssetBundle.baseUrl = "https://blob.example.com";
+		const TimestampsSchema = z.array(
+			z.object({ start: z.number(), end: z.number(), text: z.string() }),
+		);
+		const payload = [{ start: 0, end: 1, text: "hello" }];
+		const bundle = new AssetBundle(
+			"https://blob.example.com/assets/tts/cartesia/abc",
+			{ result: { timestamps: "timestamps.json" } },
+		);
+
+		function stubFetch(response: Partial<Response>) {
+			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+		}
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
 		});
 
-		it("fetches and parses JSON from resolved url", async () => {
-			const payload = { words: [{ start: 0, end: 1, text: "hello" }] };
-			vi.stubGlobal(
-				"fetch",
-				vi.fn().mockResolvedValue({
-					ok: true,
-					status: 200,
-					statusText: "OK",
-					json: () => Promise.resolve(payload),
-				}),
-			);
+		it("fetches the resolved url and parses the body through the schema", async () => {
+			stubFetch({ ok: true, json: () => Promise.resolve(payload) });
 
-			const bundle = new AssetBundle(
-				"https://blob.example.com/assets/tts/cartesia/abc",
-				{
-					result: { timestamps: "timestamps.json" },
-				},
-			);
-
-			const result = await bundle.fetchJson("timestamps");
+			const result = await bundle.fetchJson("timestamps", TimestampsSchema);
 			expect(result).toEqual(payload);
 			expect(fetch).toHaveBeenCalledWith(
 				"https://blob.example.com/assets/tts/cartesia/abc/timestamps.json",
 			);
+		});
 
-			vi.unstubAllGlobals();
+		it("rejects a body the schema does not accept", async () => {
+			stubFetch({ ok: true, json: () => Promise.resolve({ words: payload }) });
+
+			await expect(
+				bundle.fetchJson("timestamps", TimestampsSchema),
+			).rejects.toThrow(z.ZodError);
 		});
 
 		it("throws a descriptive error when the response is not ok", async () => {
-			vi.stubGlobal(
-				"fetch",
-				vi.fn().mockResolvedValue({
-					ok: false,
-					status: 404,
-					statusText: "Not Found",
-				}),
-			);
+			stubFetch({ ok: false, status: 404, statusText: "Not Found" });
 
-			const bundle = new AssetBundle(
-				"https://blob.example.com/assets/tts/cartesia/abc",
-				{
-					result: { timestamps: "timestamps.json" },
-				},
-			);
-
-			await expect(bundle.fetchJson("timestamps")).rejects.toThrow(
-				/timestamps.*404.*Not Found/,
-			);
-
-			vi.unstubAllGlobals();
+			await expect(
+				bundle.fetchJson("timestamps", TimestampsSchema),
+			).rejects.toThrow(/timestamps.*404.*Not Found/);
 		});
 	});
 

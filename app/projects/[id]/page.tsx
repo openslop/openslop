@@ -6,6 +6,7 @@ import {
 	parseSavedProject,
 } from "@/lib/project/saved-project";
 import { createClient } from "@/lib/supabase/server";
+import { AccountSchema } from "@/lib/user/account";
 import ProjectEditor from "./project-editor";
 
 export default async function ProjectPage({
@@ -42,7 +43,7 @@ export default async function ProjectPage({
 			key={id}
 			projectId={id}
 			initial={parseSavedProject(project)}
-			user={user}
+			account={AccountSchema.parse(user)}
 			providerKeys={await listProviderKeys(user)}
 		/>
 	);

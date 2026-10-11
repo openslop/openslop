@@ -128,7 +128,7 @@ export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
  */
 export type ConnectorGenerateParams = Partial<ModelRef> & { prompt: string };
 
-const TextTimestampSchema = z.object({
+export const TextTimestampSchema = z.object({
 	text: z.string(),
 	start: z.number(),
 	end: z.number(),
