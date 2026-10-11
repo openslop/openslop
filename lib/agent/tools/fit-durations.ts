@@ -1,5 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
+import { sceneLabel } from "@/lib/canvas/constants";
 import { DURATION_MAX } from "@/lib/canvas/types";
 import {
 	DURATION_FIT_LEEWAY_SEC,
@@ -9,10 +10,11 @@ import {
 } from "@/lib/render/duration-fit";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import { Hourglass } from "@/components/ui/icon";
+import { plural } from "@/lib/format";
 import { defineTool, seconds } from "./define-tool";
 
 const where = ({ sceneNumber, type, id }: ElementLength) =>
-	`Scene ${sceneNumber} ${type} ${id}`;
+	`${sceneLabel(sceneNumber)} ${type} ${id}`;
 
 const changeLine = ({ length, duration, needed }: DurationFit) =>
 	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${seconds(needed)} of dialogue and leeway.`;
@@ -98,7 +100,7 @@ export const fitDurations = defineTool({
 			...changes.map(changeLine),
 			...short.map(shortLine),
 			leftAlone > 0 &&
-				`${leftAlone} image${leftAlone === 1 ? "" : "s"} or untrimmed video${leftAlone === 1 ? "" : "s"} left alone.`,
+				`${leftAlone} ${plural(leftAlone, "image")} or untrimmed ${plural(leftAlone, "video")} left alone.`,
 			unknown.length > 0 &&
 				`Not a visual on the canvas: ${unknown.join(", ")}. Read the script again.`,
 			failures.length > 0 &&

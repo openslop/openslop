@@ -2,11 +2,9 @@ import { Descendant } from "slate";
 import type { CanvasElement } from "./types";
 import { isScene } from "./scenes";
 import { isAssetElement } from "./guards";
-import { withoutCaretMarker } from "./constants";
+import { sceneMarker, withoutCaretMarker } from "./constants";
 import { flatAttributes } from "./element-attributes";
 import { escapeXml } from "./xml-escape";
-
-const sceneMarker = (sceneNumber: number) => `\n--- Scene ${sceneNumber} ---\n`;
 
 export function getElementText(element: CanvasElement): string {
 	return element.children.map((child) => child.text).join("");

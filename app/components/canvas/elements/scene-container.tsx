@@ -7,6 +7,7 @@ import {
 import type { Scene } from "@/lib/canvas/types";
 import { useSceneSequence } from "@/app/components/player/render-layout-context";
 import { isForeground } from "@/lib/canvas/guards";
+import { sceneLabel } from "@/lib/canvas/constants";
 import { useDropIndex } from "../dnd/drag-transfer-context";
 import { useSceneCollapsed, useViewMode } from "../view-mode-context";
 import { CollapsibleHeader } from "./collapsible-header";
@@ -55,7 +56,7 @@ function SceneHeader({
 	const seq = useSceneSequence(scene);
 	const label = (
 		<>
-			Scene {sceneIndex}
+			{sceneLabel(sceneIndex)}
 			{seq && <SceneTimestamp start={seq.start} duration={seq.duration} />}
 		</>
 	);

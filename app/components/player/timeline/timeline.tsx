@@ -18,7 +18,8 @@ import { useLayout } from "../render-layout-context";
 import { TimelineClip } from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
-import { RULER_HEIGHT, TimelineRuler } from "./timeline-ruler";
+import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
+import { TimelineRuler } from "./timeline-ruler";
 import {
 	buildTimelineRows,
 	type TimelineClip as TimelineClipData,
@@ -26,11 +27,6 @@ import {
 } from "./timeline-rows";
 import { useTimelineZoom } from "./use-timeline-zoom";
 
-const LANE_HEIGHT: Record<LayerType, string> = {
-	visual: "h-20",
-	audio: "h-16",
-};
-const GUTTER_PX = 40;
 /** Runway past the last tick, so its label isn't cut off by the end. */
 const RULER_TAIL_PX = 32;
 const MIN_CLIP_WIDTH_PX = 2;

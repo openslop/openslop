@@ -4,12 +4,8 @@ import { useMemo, type CSSProperties } from "react";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import { formatTime } from "@/lib/render/timestamps";
 import { cn } from "@/lib/utils";
+import { RULER_HEIGHT, RULER_LABEL } from "../dock-layout";
 import { buildTicks, subdivision, tickInterval } from "./timeline-ticks";
-
-export const RULER_HEIGHT = "h-7";
-/** Shared so a readout can line up with the ticks. */
-export const RULER_LABEL = "font-numeric text-label-xs text-muted-foreground";
-export const RULER_LABEL_OFFSET = "top-3.5 -translate-y-1/2";
 
 const dots = (spacing: number): CSSProperties => ({
 	backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",

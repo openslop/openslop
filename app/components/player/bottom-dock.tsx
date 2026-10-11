@@ -1,12 +1,11 @@
 "use client";
 
 import { BottomTransportBar } from "./bottom-transport-bar";
+import { DOCK_DEFAULT_HEIGHT } from "./dock-layout";
 import { BOTTOM_VIEWS } from "./bottom-views";
 import { useBottomView } from "./bottom-view-context";
 import { ResizeHandle } from "./resize-handle";
 import { useResize } from "./use-resize";
-
-const DEFAULT_HEIGHT = 260;
 
 /** The transport bar and its panel, resized by a handle on the dock's top edge. */
 export function BottomDock() {
@@ -14,7 +13,7 @@ export function BottomDock() {
 	const { size, handleProps, resizing } = useResize({
 		axis: "vertical",
 		invert: true,
-		defaultSize: DEFAULT_HEIGHT,
+		defaultSize: DOCK_DEFAULT_HEIGHT,
 		minSize: 160,
 		maxViewportFraction: 0.75,
 	});

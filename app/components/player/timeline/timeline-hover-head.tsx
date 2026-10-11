@@ -3,7 +3,7 @@
 import { useImperativeHandle, useRef, type Ref } from "react";
 import { formatTime } from "@/lib/render/timestamps";
 import { cn } from "@/lib/utils";
-import { RULER_LABEL, RULER_LABEL_OFFSET } from "./timeline-ruler";
+import { RULER_LABEL, RULER_LABEL_OFFSET } from "../dock-layout";
 
 export type HoverHeadHandle = {
 	show(seconds: number): void;

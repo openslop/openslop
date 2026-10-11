@@ -13,6 +13,7 @@ import {
 } from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
+import { selectColumns } from "@/lib/supabase/select-columns";
 import { createServiceClient } from "@/lib/supabase/service";
 import { byokProviderField } from "./request-schema-fields";
 
@@ -28,15 +29,15 @@ export class MissingProviderKeyError extends Error {
 	}
 }
 
-const ProviderKeyRowsSchema = z.array(
-	z.object({
-		provider: byokProviderField,
-		last4: z.string(),
-		status: z.enum(KEY_STATUSES),
-		verified_at: z.string().nullable(),
-		created_at: z.string(),
-	}),
-);
+const ProviderKeyRowSchema = z.object({
+	provider: byokProviderField,
+	last4: z.string(),
+	status: z.enum(KEY_STATUSES),
+	verified_at: z.string().nullable(),
+	created_at: z.string(),
+});
+const ProviderKeyRowsSchema = z.array(ProviderKeyRowSchema);
+const PROVIDER_KEY_COLUMNS = selectColumns(ProviderKeyRowSchema);
 
 const toRecord = (
 	row: z.infer<typeof ProviderKeyRowsSchema>[number],
@@ -77,7 +78,7 @@ export async function listProviderKeys(
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("provider_keys")
-		.select("provider, last4, status, verified_at, created_at")
+		.select(PROVIDER_KEY_COLUMNS)
 		.eq("user_id", user.id)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);

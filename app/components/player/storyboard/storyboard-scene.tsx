@@ -4,6 +4,7 @@ import {
 	useIsActiveScene,
 } from "@/app/components/scene-selection/active-scene-context";
 import { ForegroundPreview } from "@/app/components/canvas/elements/foreground-preview";
+import { sceneLabel } from "@/lib/canvas/constants";
 import { cn } from "@/lib/utils";
 import type { StoryboardScene as StoryboardSceneData } from "./storyboard-scenes";
 
@@ -30,7 +31,7 @@ export function StoryboardScene({
 		<div className="flex shrink-0 flex-col items-center gap-1.5">
 			<button
 				type="button"
-				aria-label={`Scene ${item.sceneIndex}`}
+				aria-label={sceneLabel(item.sceneIndex)}
 				aria-current={isActive ? "true" : undefined}
 				onClick={onSelect}
 				onKeyDown={handleKeyDown}

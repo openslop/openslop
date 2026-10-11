@@ -11,5 +11,10 @@ export const ZERO_WIDTH_SPACE = "\u200B";
 export const withoutCaretMarker = (text: string): string =>
 	text.replaceAll(ZERO_WIDTH_SPACE, "");
 
+export const sceneLabel = (sceneNumber: number): string =>
+	`Scene ${sceneNumber}`;
+
 /** The line a serialized script puts between one scene and the next. */
+export const sceneMarker = (sceneNumber: number): string =>
+	`\n--- ${sceneLabel(sceneNumber)} ---\n`;
 export const SCENE_MARKER_PATTERN = /^---\s*Scene\s+\d+\s*---\s*$/m;

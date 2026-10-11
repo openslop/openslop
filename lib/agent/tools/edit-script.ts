@@ -7,17 +7,25 @@ import {
 	type AttributeEdit,
 	TOGGLE_VALUES,
 } from "@/lib/connectors/attributes/schema";
+import { CHARACTERS_ATTR } from "@/lib/canvas/character-names";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
+import {
+	CONTINUITY_ATTR,
+	NO_FRAME,
+	PREVIOUS_VISUAL,
+	START_FRAME_ATTR,
+} from "@/lib/connectors/video/start-frame";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
+import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
 const enumeration = (values: readonly string[]) => `(${values.join(" | ")})`;
 
 const PICTURE_ATTRIBUTES = [
-	"characters",
+	CHARACTERS_ATTR,
 	`overlays ${enumeration(Object.values(EffectType))}`,
 ];
 
@@ -27,7 +35,7 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 	image: PICTURE_ATTRIBUTES,
 	video: [
 		...PICTURE_ATTRIBUTES,
-		'startFrame (none | previous, or a picture URL: an image\'s URL from view_image, with continuity="false" so the look before it does not fight that picture; leave a URL already set alone)',
+		`${START_FRAME_ATTR} (${NO_FRAME} | ${PREVIOUS_VISUAL}, or a picture URL: an image's URL from view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture; leave a URL already set alone)`,
 	],
 	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };
@@ -112,12 +120,14 @@ export const editScript = defineTool({
 	}),
 	output: z.string(),
 	icon: Pencil,
-	label: ({ ops }) =>
-		`Editing the script (${ops?.length ?? 0} change${ops?.length === 1 ? "" : "s"})`,
+	label: ({ ops }) => {
+		const count = ops?.length ?? 0;
+		return `Editing the script (${count} ${plural(count, "change")})`;
+	},
 	execute: async ({ ops }, ctx) => {
 		const { applied, failures } = ctx.editScript(ops);
 		if (failures.length === 0) {
-			return `Applied ${applied} operation${applied === 1 ? "" : "s"}. The script has changed; read it again before editing further.`;
+			return `Applied ${applied} ${plural(applied, "operation")}. The script has changed; read it again before editing further.`;
 		}
 		return [
 			`Applied ${applied} of ${ops.length} operations.`,

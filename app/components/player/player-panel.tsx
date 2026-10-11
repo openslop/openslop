@@ -3,12 +3,12 @@
 import { memo, type ReactNode } from "react";
 import { getAspectRatioValue } from "@/lib/project/aspect-ratio";
 import { useVideoSetting } from "@/lib/project/use-video-setting";
+import { SIDE_PLAYER_DEFAULT_WIDTH } from "./dock-layout";
 import { ResizeHandle } from "./resize-handle";
 import { useResize } from "./use-resize";
 import { PreviewPanel } from "./preview-panel";
 
 const TOP_DEFAULT = 300;
-const SIDE_DEFAULT = 560;
 
 function FitToAspectRatio({
 	ratio,
@@ -62,7 +62,7 @@ function SidePlayerPanelComponent() {
 
 	const { size, handleProps, resizing } = useResize({
 		axis: "horizontal",
-		defaultSize: SIDE_DEFAULT,
+		defaultSize: SIDE_PLAYER_DEFAULT_WIDTH,
 		minSize: 250,
 		maxViewportFraction: 0.5,
 	});

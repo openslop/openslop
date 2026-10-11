@@ -1,4 +1,5 @@
 import { isForeground } from "@/lib/canvas/guards";
+import { sceneLabel } from "@/lib/canvas/constants";
 import { CONTENT_TYPES, type Scene } from "@/lib/canvas/types";
 import { toFrames } from "./frames";
 import type { ResolvedElement, Sequence, RenderLayout } from "./types";
@@ -76,7 +77,7 @@ export function buildSceneSegments(layout: RenderLayout): SceneSegment[] {
 		segments.push({
 			id: element.id,
 			sceneId: element.sceneId,
-			label: `Scene ${element.sceneNumber}`,
+			label: sceneLabel(element.sceneNumber),
 			start,
 			duration,
 			thumbnail: toThumbnail(element),
