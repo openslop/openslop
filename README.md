@@ -107,11 +107,11 @@ Every scene is a stack of cards: narration, character, image, video, sound, musi
 
 Generate all queues every element and runs dependencies first: the video card a scene continues from before the scene itself, an avatar before the image it appears in. Change a prompt later and the card says **Stale** and why.
 
-[The generation graph →](ARCHITECTURE.md#generation-graph)
+[The generation graph →](ARCHITECTURE.md#canvas-and-generation)
 
 </td>
 <td width="50%">
-  <a href="ARCHITECTURE.md#generation-graph"><picture>
+  <a href="ARCHITECTURE.md#canvas-and-generation"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/features/generate-dark.svg">
     <img src="./assets/features/generate-light.svg" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%">
   </picture></a>
@@ -141,11 +141,11 @@ Watch the cut as it fills in, captions word by word. Four lanes underneath: visu
 
 Hosted models come with your account. Paste a key for Anthropic, Runware, Cartesia, or ElevenLabs and their models show up in every picker. Keys live in Supabase Vault and never reach the browser.
 
-[Models and provider keys →](ARCHITECTURE.md#models-and-provider-keys)
+[Models and provider keys →](ARCHITECTURE.md#models-and-keys)
 
 </td>
 <td width="50%">
-  <a href="ARCHITECTURE.md#models-and-provider-keys"><picture>
+  <a href="ARCHITECTURE.md#models-and-keys"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/features/providers-dark.svg">
     <img src="./assets/features/providers-light.svg" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%">
   </picture></a>
@@ -158,7 +158,7 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 - **[Captions](app/components/canvas/panel/captions-panel.tsx)** — Six presets, twelve fonts, word-by-word or line-by-line reveal, and every color, border, and placement is yours to change.
 - **[Export up to 4K](app/components/player/export-button.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
 - **[Version history](app/components/canvas/panel/canvas-history-panel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
-- **[Characters and art style](app/components/canvas/elements/AssetsSection.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.
+- **[Characters and art style](app/components/canvas/elements/asset-strip.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.
 - **[Templates](lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, and more. Each seeds a style, a narrator, and a length.
 - **[Mocks for development](.env.example)** — Leave a provider key unset and its calls fall back to canned results, so you can build without paying.
 

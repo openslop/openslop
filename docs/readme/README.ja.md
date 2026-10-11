@@ -107,11 +107,11 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 Generate all（すべて生成）は、すべての要素をキューに入れ、依存するものを先に走らせます: シーンが続きとして使う動画カードをそのシーンの前に、それが登場する画像の前にアバターを。あとでプロンプトを変えると、カードが **Stale**（古い）と、その理由を示します。
 
-[生成グラフ →](../../ARCHITECTURE.md#generation-graph)
+[生成グラフ →](../../ARCHITECTURE.md#canvas-and-generation)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#generation-graph"><picture>
+  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
     <img src="../../assets/features/generate-light.svg" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
   </picture></a>
@@ -141,11 +141,11 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 ホストされたモデルはアカウントについてきます。Anthropic、Runware、Cartesia、ElevenLabs のキーを貼り付けると、そのモデルがすべての選択肢に現れます。キーは Supabase Vault に置かれ、ブラウザには決して届きません。
 
-[モデルとプロバイダーキー →](../../ARCHITECTURE.md#models-and-provider-keys)
+[モデルとプロバイダーキー →](../../ARCHITECTURE.md#models-and-keys)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-provider-keys"><picture>
+  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
     <img src="../../assets/features/providers-light.svg" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
   </picture></a>
@@ -158,7 +158,7 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 - **[字幕](../../app/components/canvas/panel/captions-panel.tsx)** — 6つのプリセット、12のフォント、単語ごとか行ごとの表示。色、縁取り、位置はすべて自由に変えられます。
 - **[最大 4K で書き出し](../../app/components/player/export-button.tsx)** — Remotion Lambda 上で並列のチャンクにしてレンダリングし、MP4 を渡します。
 - **[バージョン履歴](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 作業中に自動保存され、チェックポイントにまとめられます。どのバージョンでも見て、戻せます。
-- **[キャラクターとアートスタイル](../../app/components/canvas/elements/AssetsSection.tsx)** — キャラクターに一度名前をつければ、すべての画像、セリフ、アバターが一貫します。
+- **[キャラクターとアートスタイル](../../app/components/canvas/elements/asset-strip.tsx)** — キャラクターに一度名前をつければ、すべての画像、セリフ、アバターが一貫します。
 - **[テンプレート](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime など。それぞれがスタイル、ナレーター、長さの種になります。
 - **[開発用のモック](../../.env.example)** — プロバイダーのキーを未設定のままにすると、その呼び出しは用意された結果に切り替わるので、お金をかけずに開発できます。
 
