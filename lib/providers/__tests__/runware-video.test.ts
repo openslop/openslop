@@ -206,15 +206,12 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		const SOL = {
-			url: "https://audio/sol.mp3",
-			speaker: "Sol",
-			durationSec: 6,
-		};
-		const VOICES = [
-			SOL,
-			{ url: "https://audio/mira.mp3", speaker: "Mira", durationSec: 8 },
-		];
+		const speaking = (name: string, url: string, durationSec: number) => ({
+			name,
+			voice: { url, durationSec },
+		});
+		const SOL = speaking("Sol", "https://audio/sol.mp3", 6);
+		const VOICES = [SOL, speaking("Mira", "https://audio/mira.mp3", 8)];
 
 		it("names each voice Seedance hears after its speaker, following the start frame", async () => {
 			mockVideoInference.mockResolvedValue({
@@ -227,7 +224,7 @@ describe("RunwareVideo", () => {
 				model: MODEL,
 				referenceImages: ["https://img/avatar.png"],
 				frameImage: "https://img/last.png",
-				referenceAudios: VOICES,
+				characterAssets: VOICES,
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
@@ -254,7 +251,7 @@ describe("RunwareVideo", () => {
 			await new RunwareVideo("test-key").submit({
 				prompt: "they talk",
 				model: MODEL,
-				referenceAudios: VOICES,
+				characterAssets: VOICES,
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
@@ -276,17 +273,15 @@ describe("RunwareVideo", () => {
 				taskUUID: "job-a3",
 				status: "processing",
 			});
-			const voices = ["Sol", "Mira", "Ash", "Kai"].map((speaker) => ({
-				url: `https://audio/${speaker}.mp3`,
-				speaker,
-				durationSec: 4,
-			}));
+			const voices = ["Sol", "Mira", "Ash", "Kai"].map((name) =>
+				speaking(name, `https://audio/${name}.mp3`, 4),
+			);
 
 			await new RunwareVideo("test-key").submit({
 				prompt: "they talk",
 				model: MODEL,
 				referenceImages: ["https://img/avatar.png"],
-				referenceAudios: voices,
+				characterAssets: voices,
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
@@ -295,7 +290,7 @@ describe("RunwareVideo", () => {
 						"@Audio 1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio 2 defines Mira's vocal timbre, pitch, and speech cadence. @Audio 3 defines Ash's vocal timbre, pitch, and speech cadence. they talk",
 					inputs: {
 						referenceImages: ["https://img/avatar.png"],
-						referenceAudios: voices.slice(0, 3).map(({ url }) => url),
+						referenceAudios: voices.slice(0, 3).map(({ voice }) => voice.url),
 					},
 				}),
 			);
@@ -306,17 +301,15 @@ describe("RunwareVideo", () => {
 				taskUUID: "job-a6",
 				status: "processing",
 			});
-			const voices = ["Sol", "Mira"].map((speaker) => ({
-				url: `https://audio/${speaker}.mp3`,
-				speaker,
-				durationSec: 10,
-			}));
+			const voices = ["Sol", "Mira"].map((name) =>
+				speaking(name, `https://audio/${name}.mp3`, 10),
+			);
 
 			await new RunwareVideo("test-key").submit({
 				prompt: "they talk",
 				model: MODEL,
 				referenceImages: ["https://img/avatar.png"],
-				referenceAudios: voices,
+				characterAssets: voices,
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
@@ -344,10 +337,10 @@ describe("RunwareVideo", () => {
 				prompt: "they talk",
 				model: MODEL,
 				referenceImages: ["https://img/avatar.png"],
-				referenceAudios: [
-					{ url: "https://audio/blip.mp3", speaker: "Blip", durationSec: 1 },
+				characterAssets: [
+					speaking("Blip", "https://audio/blip.mp3", 1),
 					...VOICES,
-					{ url: "https://audio/long.mp3", speaker: "Long", durationSec: 16 },
+					speaking("Long", "https://audio/long.mp3", 16),
 				],
 			});
 
@@ -377,7 +370,7 @@ describe("RunwareVideo", () => {
 				prompt: "they talk",
 				model: "klingai:kling-video@3.0-turbo",
 				frameImage: "https://img/last.png",
-				referenceAudios: VOICES,
+				characterAssets: VOICES,
 			});
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
@@ -402,6 +395,212 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference.mock.calls[0]?.[0]).not.toHaveProperty(
 				"inputs",
+			);
+		});
+
+		it("gives Seedance the characters' avatars, then the references, then the previous scene", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-s5",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "they talk",
+				model: MODEL,
+				characterAssets: [
+					{ name: "Sol", avatarUrl: "https://img/sol.png" },
+					{ name: "Mira", avatarUrl: "https://img/mira.png" },
+				],
+				referenceImages: ["https://img/ref.png"],
+				continuityFrames: ["https://img/first.png"],
+			});
+
+			expect(mockVideoInference).toHaveBeenCalledWith(
+				expect.objectContaining({
+					positivePrompt: "they talk",
+					inputs: {
+						referenceImages: [
+							"https://img/sol.png",
+							"https://img/mira.png",
+							"https://img/ref.png",
+							"https://img/first.png",
+						],
+					},
+				}),
+			);
+		});
+
+		describe("Kling 3 Omni", () => {
+			const OMNI = "klingai:kling-video@o3-standard";
+			const ELEMENT_ID = expect.stringMatching(/^[\w-]{20}$/);
+
+			const avatar = (name: string) => `https://img/${name}.png`;
+			const pictured = (...names: string[]) =>
+				names.map((name) => ({ name, avatarUrl: avatar(name) }));
+			const asElement = (name: string) => ({
+				id: ELEMENT_ID,
+				description: name,
+				frontalImage: avatar(name),
+				images: [avatar(name)],
+			});
+
+			const omniRequest = async (
+				params: Omit<Parameters<RunwareVideo["submit"]>[0], "model">,
+			) => {
+				mockVideoInference.mockResolvedValue({
+					taskUUID: "job-o",
+					status: "processing",
+				});
+				await new RunwareVideo("test-key").submit({ ...params, model: OMNI });
+				return mockVideoInference.mock.calls[0]?.[0];
+			};
+
+			it("casts each character as an element speaking in its voice, named by its token, with sound on", async () => {
+				const request = await omniRequest({
+					prompt: "they talk",
+					characterAssets: [
+						{
+							name: "Sol",
+							avatarUrl: avatar("Sol"),
+							voice: SOL.voice,
+						},
+						{ name: "Mira", avatarUrl: avatar("Mira") },
+					],
+					width: 720,
+					height: 1280,
+				});
+
+				expect(request).toEqual(
+					expect.objectContaining({
+						positivePrompt:
+							"Sol is <<<element_1>>>. Mira is <<<element_2>>>. they talk",
+						inputs: {
+							elements: [
+								{ ...asElement("Sol"), voices: [SOL.voice.url] },
+								asElement("Mira"),
+							],
+						},
+						providerSettings: { klingai: { sound: true } },
+						width: 720,
+						height: 1280,
+					}),
+				);
+			});
+
+			it("drops a voice under 5 s and cuts one over 30 s", async () => {
+				const request = await omniRequest({
+					prompt: "they talk",
+					characterAssets: [
+						{
+							...pictured("Blip")[0],
+							voice: { url: "https://audio/blip.mp3", durationSec: 3 },
+						},
+						{
+							...pictured("Long")[0],
+							voice: { url: "https://audio/long.mp3", durationSec: 40 },
+						},
+					],
+				});
+
+				expect(request.inputs.elements).toEqual([
+					asElement("Blip"),
+					{ ...asElement("Long"), voices: ["https://audio/long.mp3#30s"] },
+				]);
+			});
+
+			it("leaves a character with no avatar out of the elements", async () => {
+				const request = await omniRequest({
+					prompt: "they talk",
+					characterAssets: [
+						{ name: "Sol", voice: SOL.voice },
+						...pictured("Mira"),
+					],
+				});
+
+				expect(request).toMatchObject({
+					positivePrompt: "Mira is <<<element_1>>>. they talk",
+					inputs: { elements: [asElement("Mira")] },
+				});
+			});
+
+			it("opens on its frame with references, and lets the frame set the size", async () => {
+				const request = await omniRequest({
+					prompt: "animate this",
+					frameImage: "https://img/last.png",
+					referenceImages: ["https://img/ref.png"],
+					resolution: "720p",
+					width: 1280,
+					height: 720,
+				});
+
+				expect(request).toMatchObject({
+					positivePrompt: "animate this",
+					inputs: {
+						frameImages: ["https://img/last.png"],
+						referenceImages: ["https://img/ref.png"],
+					},
+				});
+				expect(request).not.toHaveProperty("width");
+				expect(request).not.toHaveProperty("height");
+				expect(request).not.toHaveProperty("resolution");
+			});
+
+			it("generates from references alone, sized by pixels", async () => {
+				const request = await omniRequest({
+					prompt: "a sunset",
+					referenceImages: ["https://img/ref.png"],
+				});
+
+				expect(request).toMatchObject({
+					inputs: { referenceImages: ["https://img/ref.png"] },
+					width: 1280,
+					height: 720,
+				});
+				expect(request.inputs).not.toHaveProperty("frameImages");
+			});
+
+			const references = ["ref-1", "ref-2", "ref-3"].map(avatar);
+			const continuityFrames = [avatar("first"), avatar("middle")];
+
+			it.each([
+				{
+					case: "seven slots, characters first",
+					frameImage: undefined,
+					characterAssets: pictured("A", "B", "C", "D", "E", "F"),
+					elements: ["A", "B", "C", "D", "E", "F"],
+					referenceImages: [avatar("first")],
+				},
+				{
+					case: "three elements and six slots beside a start frame, previous scene first",
+					frameImage: avatar("last"),
+					characterAssets: pictured("A", "B", "C", "D"),
+					elements: ["A", "B", "C"],
+					referenceImages: [...continuityFrames, avatar("D")],
+				},
+				{
+					case: "the slots the characters leave, previous scene first",
+					frameImage: undefined,
+					characterAssets: pictured("A", "B"),
+					elements: ["A", "B"],
+					referenceImages: [...continuityFrames, ...references],
+				},
+			])(
+				"budgets $case",
+				async ({ frameImage, characterAssets, elements, referenceImages }) => {
+					const request = await omniRequest({
+						prompt: "they talk",
+						frameImage,
+						characterAssets,
+						referenceImages: references,
+						continuityFrames,
+					});
+
+					expect(request.inputs).toEqual({
+						...(frameImage && { frameImages: [frameImage] }),
+						elements: elements.map(asElement),
+						referenceImages,
+					});
+				},
 			);
 		});
 

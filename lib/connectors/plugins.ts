@@ -54,7 +54,3 @@ export async function runOnError(
 		}
 	}
 }
-
-/** A `mergeWith` customizer: a list is appended to, anything else replaced. */
-export const appendArrays = (current: unknown, added: unknown) =>
-	Array.isArray(current) ? current.concat(added) : undefined;

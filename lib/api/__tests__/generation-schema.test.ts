@@ -4,6 +4,7 @@ import {
 	byokModel,
 	hostedModel,
 	LLM_FIELDS,
+	VIDEO_FIELDS,
 } from "../generation-schema";
 
 describe("bodySchema with a hosted model", () => {
@@ -95,5 +96,35 @@ describe("LLM fields", () => {
 		expect(withMaxTokens(maxTokens).error?.issues[0]?.message).toBe(
 			"maxTokens must be a positive integer",
 		);
+	});
+});
+
+describe("video fields", () => {
+	const schema = bodySchema(hostedModel("video"), VIDEO_FIELDS);
+	const video = (fields: Record<string, unknown>) =>
+		schema.safeParse({
+			prompt: "they talk",
+			model: "Slop Video v2",
+			...fields,
+		});
+
+	it("takes named characters, with avatars and voices", () => {
+		const characterAssets = [
+			{
+				name: "Sol",
+				avatarUrl: "https://img/sol.png",
+				voice: { url: "https://audio/sol.mp3", durationSec: 6 },
+			},
+			{ name: "Mira" },
+		];
+
+		expect(video({ characterAssets }).data).toMatchObject({ characterAssets });
+	});
+
+	it("refuses a character whose avatar is not an image source", () => {
+		expect(
+			video({ characterAssets: [{ name: "Sol", avatarUrl: "not a url" }] })
+				.success,
+		).toBe(false);
 	});
 });

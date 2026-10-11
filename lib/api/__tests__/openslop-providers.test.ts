@@ -37,7 +37,7 @@ describe("hostedProviderFor", () => {
 		expect(hostedProviderFor("image", "Slop Image v1")).toBeInstanceOf(
 			MockImage,
 		);
-		expect(hostedProviderFor("video", "Slop Video v1")).toBeInstanceOf(
+		expect(hostedProviderFor("video", "Slop Video v2")).toBeInstanceOf(
 			MockVideo,
 		);
 	});
