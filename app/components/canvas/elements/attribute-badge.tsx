@@ -3,7 +3,12 @@ import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
-import type { ContentElement } from "@/lib/canvas/types";
+import {
+	isToggleOn,
+	TOGGLE_OFF,
+	TOGGLE_ON,
+	type ContentElement,
+} from "@/lib/canvas/types";
 import {
 	CONTINUITY_ATTR,
 	continuityDef,
@@ -134,12 +139,12 @@ export function AttributeBadge({
 		const { on, off } = spec.edit;
 		return (
 			<MediaToggle
-				value={value === "true" ? "true" : "false"}
+				value={isToggleOn(value) ? TOGGLE_ON : TOGGLE_OFF}
 				onChange={handleSelect}
 				ariaLabel={spec.label}
 				options={[
-					{ value: "false", ...off },
-					{ value: "true", ...on },
+					{ value: TOGGLE_OFF, ...off },
+					{ value: TOGGLE_ON, ...on },
 				]}
 				className={className}
 			/>

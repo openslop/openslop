@@ -99,6 +99,12 @@ export const LOOPS_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
 
 export const DEFAULT_LOOPS = "1";
 
+export const TOGGLE_ON = "true";
+export const TOGGLE_OFF = "false";
+
+export const isToggleOn = (value: string | undefined): boolean =>
+	value === TOGGLE_ON;
+
 export const SCENE_TYPE = "scene" as const;
 
 /** What every element type declares: the connector it generates on, if any. */

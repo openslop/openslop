@@ -1,8 +1,9 @@
 import type { IconComponent } from "@/components/ui/icon";
+import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
 import { resolveModel, type ConnectorModels } from "../models";
 import type { ConnectorType } from "../types";
 
-export const TOGGLE_VALUES: readonly string[] = ["false", "true"];
+export const TOGGLE_VALUES: readonly string[] = [TOGGLE_OFF, TOGGLE_ON];
 
 /** One face of a toggle: what it shows and says while in that state. */
 export type ToggleFace = { icon: IconComponent; label: string };

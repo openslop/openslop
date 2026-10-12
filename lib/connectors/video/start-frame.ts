@@ -1,4 +1,5 @@
 import { LinkedOff, LinkedOn } from "@/components/ui/icon";
+import { TOGGLE_ON } from "@/lib/canvas/types";
 import type { AttributeDef } from "../attributes/schema";
 
 export const START_FRAME_ATTR = "startFrame";
@@ -23,7 +24,7 @@ export const continuityDef: AttributeDef = {
 		off: { icon: LinkedOff, label: "Unlink for a fresh look" },
 		on: { icon: LinkedOn, label: "Link the previous scene's look" },
 	},
-	default: "true",
+	default: TOGGLE_ON,
 	hidden: true,
 };
 

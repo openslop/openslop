@@ -5,7 +5,9 @@ import {
 	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
+	TOGGLE_OFF,
 	VOLUME_OPTIONS,
+	isToggleOn,
 	type ContentElement,
 	type SplitAttributes,
 } from "./types";
@@ -86,11 +88,11 @@ export function getLoops(element: ContentElement): number {
 }
 
 export const getLoop = (element: ContentElement): boolean =>
-	element.layoutAttributes?.loop === "true";
+	isToggleOn(element.layoutAttributes?.loop);
 
 /** Absent means trimmed: a visual yields to its dialogue unless it says otherwise. */
 export const getTrimToDialogue = (element: ContentElement): boolean =>
-	element.layoutAttributes?.trimToDialogue !== "false";
+	element.layoutAttributes?.trimToDialogue !== TOGGLE_OFF;
 
 export function getMotion(element: ContentElement): MotionEffect {
 	const raw = element.layoutAttributes?.motion;
