@@ -21,6 +21,8 @@ import {
 } from "./elements/character-mention-menu";
 import { CharacterRef } from "./elements/character-ref";
 import { useCharacterMention } from "./hooks/use-character-mention";
+import { ELEMENT_CONFIGS } from "./elements/element-configs";
+import { ElementErrorBoundary } from "./elements/element-error-boundary";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -53,7 +55,15 @@ export default function Canvas() {
 					{props.children}
 				</SortableScene>
 			);
-		return <SortableContent {...props} element={element} />;
+		return (
+			<ElementErrorBoundary
+				label={ELEMENT_CONFIGS[element.type].label}
+				attributes={props.attributes}
+				leaves={props.children}
+			>
+				<SortableContent {...props} element={element} />
+			</ElementErrorBoundary>
+		);
 	}, []);
 
 	const activeBlock = useMemo(
