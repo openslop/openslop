@@ -49,9 +49,9 @@ export type ModelEntry = ModelMeta & {
 	id: string;
 };
 
-/** A video model also says which output resolutions the vendor renders it at. */
+/** A video model also says which output resolutions the vendor renders it at, its default first. */
 export type VideoModelEntry = ModelEntry & {
-	resolutions: readonly VideoResolution[];
+	resolutions: readonly [VideoResolution, ...VideoResolution[]];
 };
 
 /** What each connector type's catalog entries carry. */

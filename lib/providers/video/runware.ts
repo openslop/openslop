@@ -4,11 +4,10 @@ import { validateRunwareKey, withRunware } from "../runware";
 import type { Conditioner } from "./conditioning";
 import { klingOmni, klingTurbo } from "./kling";
 import { seedance } from "./seedance";
-import type { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
+import { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
 import {
 	ASPECT_RATIO_DIMENSIONS,
 	DEFAULT_ASPECT_RATIO,
-	DEFAULT_VIDEO_RESOLUTION,
 } from "@/lib/project/aspect-ratio";
 
 const FINISHED: Record<string, VideoJobStatus> = {
@@ -33,6 +32,15 @@ function toVideoJob(video: {
 type ModelId =
 	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
 
+const omni = klingOmni({
+	maxReferences: 7,
+	maxElementsWithFrame: 3,
+	minVoiceSec: 5,
+	maxVoiceSec: 30,
+	maxDescription: 100,
+	sound: true,
+});
+
 const CONDITIONERS: Record<ModelId, Conditioner> = {
 	// Runware allows 0.2 s over the 15 s, which covers a cut running a frame long.
 	"bytedance:seedance@2.0-fast": seedance({
@@ -40,22 +48,22 @@ const CONDITIONERS: Record<ModelId, Conditioner> = {
 		maxAudios: 3,
 		minAudioSec: 2,
 		totalAudioSec: 15,
+		voicesNeedPictures: true,
+	}),
+	"bytedance:seedance@2.5": seedance({
+		maxReferences: 30,
+		maxAudios: 10,
+		minAudioSec: 2,
+		totalAudioSec: 30,
+		voicesNeedPictures: false,
 	}),
 	"klingai:kling-video@3.0-turbo": klingTurbo,
-	"klingai:kling-video@o3-standard": klingOmni({
-		maxReferences: 7,
-		maxElementsWithFrame: 3,
-		minVoiceSec: 5,
-		maxVoiceSec: 30,
-		maxDescription: 100,
-		sound: true,
-	}),
+	"klingai:kling-video@o3-standard": omni,
+	"klingai:kling-video@o3-pro": omni,
 };
 
-const isModelId = (model: string): model is ModelId => model in CONDITIONERS;
-
-const DEFAULT_SIZE =
-	ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[DEFAULT_VIDEO_RESOLUTION];
+const runwareModel = (model: string) =>
+	Object.values(RUNWARE_VIDEO_MODELS).find(({ id }) => id === model);
 
 export class RunwareVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "runware" };
@@ -71,19 +79,22 @@ export class RunwareVideo extends BaseVideoProvider {
 	}
 
 	async submit(params: VideoRequest): Promise<string> {
-		if (!isModelId(params.model))
-			throw new Error(`Runware has no video model "${params.model}"`);
-		const conditioning = await CONDITIONERS[params.model]({
+		const entry = runwareModel(params.model);
+		if (!entry) throw new Error(`Runware has no video model "${params.model}"`);
+		const resolution = params.resolution ?? entry.resolutions[0];
+		const size =
+			ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[resolution];
+		const conditioning = await CONDITIONERS[entry.id]({
 			prompt: params.prompt,
 			startFrame: params.frameImage,
 			characters: params.characterAssets ?? [],
 			references: params.referenceImages ?? [],
 			continuityFrames: params.continuityFrames ?? [],
 			size: {
-				width: params.width ?? DEFAULT_SIZE.width,
-				height: params.height ?? DEFAULT_SIZE.height,
+				width: params.width ?? size.width,
+				height: params.height ?? size.height,
 			},
-			resolution: params.resolution,
+			resolution,
 		});
 		return withRunware(this.apiKey, async (runware) => {
 			const result = await runware.videoInference({

@@ -37,6 +37,7 @@ import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareVideo } from "../video/runware";
 
 const MODEL = "bytedance:seedance@2.0-fast";
+const SEEDANCE_25 = "bytedance:seedance@2.5";
 
 describe("RunwareVideo", () => {
 	beforeEach(() => {
@@ -111,7 +112,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image 2 as the first frame. animate this",
+					positivePrompt: "@Image2 as the first frame. animate this",
 					inputs: {
 						frameImages: undefined,
 						referenceImages: ["https://img/avatar.png", "https://img/last.png"],
@@ -134,7 +135,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image 1 as the first frame. animate this",
+					positivePrompt: "@Image1 as the first frame. animate this",
 					inputs: {
 						frameImages: undefined,
 						referenceImages: ["https://img/last.png"],
@@ -156,7 +157,7 @@ describe("RunwareVideo", () => {
 			},
 			{
 				frameImage: "https://img/last.png",
-				positivePrompt: "@Image 9 as the first frame. animate this",
+				positivePrompt: "@Image9 as the first frame. animate this",
 				sent: [...references.slice(0, 8), "https://img/last.png"],
 			},
 		])(
@@ -230,7 +231,7 @@ describe("RunwareVideo", () => {
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
 					positivePrompt:
-						"@Image 2 as the first frame. @Audio 1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio 2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
+						"@Image2 as the first frame. @Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
 					inputs: {
 						referenceImages: ["https://img/avatar.png", "https://img/last.png"],
 						referenceAudios: [
@@ -242,31 +243,39 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("still gives Seedance its voices when there is no picture", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-a2",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "they talk",
+		it.each([
+			{
 				model: MODEL,
-				characterAssets: VOICES,
-			});
+				positivePrompt: "they talk",
+				inputs: undefined,
+			},
+			{
+				model: SEEDANCE_25,
+				positivePrompt:
+					"@Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
+				inputs: {
+					referenceAudios: ["https://audio/sol.mp3", "https://audio/mira.mp3"],
+				},
+			},
+		])(
+			"gives $model voices with no picture only when it takes audio alone",
+			async ({ model, positivePrompt, inputs }) => {
+				mockVideoInference.mockResolvedValue({
+					taskUUID: "job-a2",
+					status: "processing",
+				});
 
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({
-					positivePrompt:
-						"@Audio 1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio 2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
-					inputs: {
-						referenceAudios: [
-							"https://audio/sol.mp3",
-							"https://audio/mira.mp3",
-						],
-					},
-				}),
-			);
-		});
+				await new RunwareVideo("test-key").submit({
+					prompt: "they talk",
+					model,
+					characterAssets: VOICES,
+				});
+
+				const request = mockVideoInference.mock.calls[0]?.[0];
+				expect(request.positivePrompt).toBe(positivePrompt);
+				expect(request.inputs).toEqual(inputs);
+			},
+		);
 
 		it("caps Seedance at three voices, keeping the first ones", async () => {
 			mockVideoInference.mockResolvedValue({
@@ -287,7 +296,7 @@ describe("RunwareVideo", () => {
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
 					positivePrompt:
-						"@Audio 1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio 2 defines Mira's vocal timbre, pitch, and speech cadence. @Audio 3 defines Ash's vocal timbre, pitch, and speech cadence. they talk",
+						"@Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. @Audio3 defines Ash's vocal timbre, pitch, and speech cadence. they talk",
 					inputs: {
 						referenceImages: ["https://img/avatar.png"],
 						referenceAudios: voices.slice(0, 3).map(({ voice }) => voice.url),
@@ -315,7 +324,7 @@ describe("RunwareVideo", () => {
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
 					positivePrompt:
-						"@Audio 1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio 2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
+						"@Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
 					inputs: {
 						referenceImages: ["https://img/avatar.png"],
 						referenceAudios: [
@@ -347,7 +356,7 @@ describe("RunwareVideo", () => {
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
 					positivePrompt:
-						"@Audio 1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio 2 defines Mira's vocal timbre, pitch, and speech cadence. @Audio 3 defines Long's vocal timbre, pitch, and speech cadence. they talk",
+						"@Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. @Audio3 defines Long's vocal timbre, pitch, and speech cadence. they talk",
 					inputs: {
 						referenceImages: ["https://img/avatar.png"],
 						referenceAudios: [
@@ -357,6 +366,33 @@ describe("RunwareVideo", () => {
 						],
 					},
 				}),
+			);
+		});
+
+		it("lets Seedance 2.5 hear ten voices sharing 30 s, and see 30 pictures", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-a9",
+				status: "processing",
+			});
+			const voices = Array.from({ length: 11 }, (_, i) =>
+				speaking(`V${i}`, `https://audio/v${i}.mp3`, 6),
+			);
+			const pictures = Array.from(
+				{ length: 31 },
+				(_, i) => `https://img/ref-${i}.png`,
+			);
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "they talk",
+				model: SEEDANCE_25,
+				referenceImages: pictures,
+				characterAssets: voices,
+			});
+
+			const { inputs } = mockVideoInference.mock.calls[0]?.[0];
+			expect(inputs.referenceImages).toEqual(pictures.slice(0, 30));
+			expect(inputs.referenceAudios).toEqual(
+				voices.slice(0, 10).map(({ voice }) => `${voice.url}#3s`),
 			);
 		});
 
@@ -398,7 +434,7 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("gives Seedance the characters' avatars, then the references, then the previous scene", async () => {
+		it("gives Seedance the characters' avatars by name, then the references, then the previous scene", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-s5",
 				status: "processing",
@@ -417,7 +453,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "they talk",
+					positivePrompt: "@Image1 is Sol. @Image2 is Mira. they talk",
 					inputs: {
 						referenceImages: [
 							"https://img/sol.png",
@@ -487,13 +523,42 @@ describe("RunwareVideo", () => {
 				);
 			});
 
+			it("casts Omni Pro the same way, sized at its own 1080p default", async () => {
+				mockVideoInference.mockResolvedValue({
+					taskUUID: "job-op",
+					status: "processing",
+				});
+
+				await new RunwareVideo("test-key").submit({
+					prompt: "they talk",
+					model: "klingai:kling-video@o3-pro",
+					characterAssets: [
+						{ name: "Sol", avatarUrl: avatar("Sol"), voice: SOL.voice },
+					],
+				});
+
+				const request = mockVideoInference.mock.calls[0]?.[0];
+				expect(request).toEqual(
+					expect.objectContaining({
+						positivePrompt: "Sol is <<<element_1>>>. they talk",
+						inputs: {
+							elements: [{ ...asElement("Sol"), voices: [SOL.voice.url] }],
+						},
+						providerSettings: { klingai: { sound: true } },
+						width: 1920,
+						height: 1080,
+					}),
+				);
+				expect(request).not.toHaveProperty("resolution");
+			});
+
 			it("drops a voice under 5 s and cuts one over 30 s", async () => {
 				const request = await omniRequest({
 					prompt: "they talk",
 					characterAssets: [
 						{
 							...pictured("Blip")[0],
-							voice: { url: "https://audio/blip.mp3", durationSec: 3 },
+							voice: { url: "https://audio/blip.mp3", durationSec: 4 },
 						},
 						{
 							...pictured("Long")[0],
