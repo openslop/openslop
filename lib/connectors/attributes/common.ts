@@ -7,10 +7,7 @@ import {
 	VOLUME_OPTIONS,
 } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
-import {
-	DEFAULT_VIDEO_RESOLUTION,
-	type VideoResolution,
-} from "@/lib/project/aspect-ratio";
+import type { VideoResolution } from "@/lib/project/aspect-ratio";
 import {
 	DEFAULT_MOTION,
 	MOTION_EFFECTS,
@@ -48,12 +45,12 @@ export const loopsDef: AttributeDef = {
 };
 
 export const resolutionDef = (
-	options: readonly VideoResolution[],
+	options: readonly [VideoResolution, ...VideoResolution[]],
 ): AttributeDef => ({
 	key: "resolution",
 	label: "Resolution",
 	edit: { kind: "enum", options },
-	default: DEFAULT_VIDEO_RESOLUTION,
+	default: options[0],
 });
 
 export const formatDef: AttributeDef = {

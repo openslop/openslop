@@ -1,6 +1,4 @@
 import { previousVisual } from "@/lib/canvas/scenes";
-import mergeWith from "lodash/mergeWith";
-import { appendArrays } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { Dependency } from "@/lib/generation/declare";
 import { captureFrames } from "@/lib/connectors/video/capture-frames";
@@ -17,7 +15,7 @@ import {
 export type ParamsWithPreviousVisual = {
 	prompt: string;
 	frameImage?: string;
-	referenceImages?: string[];
+	continuityFrames?: string[];
 	[START_FRAME_ATTR]?: string;
 	[CONTINUITY_ATTR]?: string;
 };
@@ -47,7 +45,7 @@ const previousWhenLinked: Dependency = (
 			: undefined,
 });
 
-/** Opening on the previous visual takes its end as the start frame; linking adds its beginning and middle as references. */
+/** Opening on the previous visual takes its end as the start frame; linking carries on from its beginning and middle. */
 export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPreviousVisual> {
 	return {
 		name: "previous-visual",
@@ -67,16 +65,11 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 					: URL.canParse(frame)
 						? [frame]
 						: [];
-			const references =
+			const continuityFrames =
 				continuity === "true"
 					? await previousPictures(source, CONTINUITY_FRAMES)
 					: [];
-			return mergeWith(
-				{},
-				params,
-				{ ...(frameImage && { frameImage }), referenceImages: references },
-				appendArrays,
-			);
+			return { ...params, ...(frameImage && { frameImage }), continuityFrames };
 		},
 	};
 }

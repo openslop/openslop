@@ -11,10 +11,11 @@ import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import {
 	byokProviderField,
+	optionalCharacterAssets,
+	optionalContinuityFrames,
 	optionalDurationSeconds,
 	optionalFrameImage,
 	optionalImageDimensions,
-	optionalReferenceAudios,
 	optionalReferenceImages,
 	optionalVideoDuration,
 	optionalVideoResolution,
@@ -73,13 +74,15 @@ export const bodySchema = <
 export const IMAGE_FIELDS = {
 	format: z.enum(IMAGE_FORMATS).optional(),
 	...optionalImageDimensions,
+	...optionalCharacterAssets,
 	...optionalReferenceImages,
 } as const;
 
 export const VIDEO_FIELDS = {
+	...optionalCharacterAssets,
 	...optionalReferenceImages,
+	...optionalContinuityFrames,
 	...optionalFrameImage,
-	...optionalReferenceAudios,
 	...optionalVideoDuration,
 	...optionalVideoResolution,
 	...optionalImageDimensions,

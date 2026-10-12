@@ -13,7 +13,6 @@ const OWN = "https://img/own.png, https://img/two.png";
 
 describe("createReferenceImagesPlugin", () => {
 	const STORE = "https://img/store.png";
-	const EXISTING = "https://img/existing.png";
 
 	it.each([
 		["adds no images with none anywhere", {}, {}, [], { referenceImages: [] }],
@@ -23,20 +22,6 @@ describe("createReferenceImagesPlugin", () => {
 			{},
 			[references("https://img/a.png", "https://img/b.png")],
 			{ referenceImages: ["https://img/a.png", "https://img/b.png"] },
-		],
-		[
-			"appends the project's images to the params' own",
-			{ referenceImages: [EXISTING] },
-			{},
-			[references(STORE)],
-			{ referenceImages: [EXISTING, STORE] },
-		],
-		[
-			"keeps the params' own when the project has none",
-			{ referenceImages: [EXISTING] },
-			{},
-			[],
-			{ referenceImages: [EXISTING] },
 		],
 		[
 			"uses the element's override in place of the project's images",
