@@ -1,6 +1,7 @@
 import isEqual from "lodash/isEqual";
 import { stringifyError } from "@/lib/errors";
-import { isTerminal, JOB_TIMEOUT_MS } from "@/lib/gateway/base";
+import { isTerminal } from "@/lib/gateway/base";
+import { failIfExpired } from "./job-deadline";
 import { getJobHandler } from "./job-handlers";
 import { enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
 import { logger } from "./logger";
@@ -13,20 +14,13 @@ const PENDING_RETRY_SECONDS = 5;
  * until it completes or outlives the deadline.
  */
 export async function processQueuedJob(jobId: string): Promise<void> {
-	const job = await loadJobForProcessing(jobId);
-	if (!job) {
+	const loaded = await loadJobForProcessing(jobId);
+	if (!loaded) {
 		logger.error({ jobId }, "Dropped a queue message for an unknown job");
 		return;
 	}
+	const job = await failIfExpired(loaded);
 	if (isTerminal(job.status)) return;
-
-	if (Date.now() - Date.parse(job.created_at) > JOB_TIMEOUT_MS) {
-		await updateJob(jobId, {
-			status: "failed",
-			error: `Job timed out after ${JOB_TIMEOUT_MS / 60_000} minutes`,
-		});
-		return;
-	}
 
 	const handler = getJobHandler(job.connector_type);
 

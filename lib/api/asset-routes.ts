@@ -10,6 +10,7 @@ import {
 	updateJob,
 	type JobConnectorType,
 } from "./jobs";
+import { failIfExpired } from "./job-deadline";
 import {
 	AUDIO_FIELDS,
 	bodySchema,
@@ -74,8 +75,9 @@ export const createJobPollHandler = (
 		schema: z.object({ jobId: z.guid() }),
 		label: "Job poll",
 		handle: async ({ user, params }) => {
-			const job = await getJob(params.jobId, user.id);
-			if (!job) return notFound();
+			const found = await getJob(params.jobId, user.id);
+			if (!found) return notFound();
+			const job = await failIfExpired(found);
 			return NextResponse.json<JobPoll>({
 				jobId: job.id,
 				status: job.status,

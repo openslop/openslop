@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { JOB_TIMEOUT_MS } from "@/lib/gateway/base";
 
 const mockLoadJobForProcessing = vi.fn();
 const mockUpdateJob = vi.fn();
@@ -159,7 +158,7 @@ describe("processQueuedJob", () => {
 		"fails a %s job past the deadline without running it again",
 		async (status) => {
 			mockLoadJobForProcessing.mockResolvedValue({
-				...pendingJob(JOB_TIMEOUT_MS + 60_000),
+				...pendingJob(60 * 60_000),
 				status,
 			});
 			const handler = { process: vi.fn() };

@@ -35,20 +35,9 @@ describe("awaitCompletion", () => {
 			.mockResolvedValueOnce(makeJob("processing"))
 			.mockResolvedValueOnce(makeJob("completed", "https://x.com/done.mp4"));
 
-		const result = await awaitCompletion(poll, "j1", isDone, 10, 5000);
+		const result = await awaitCompletion(poll, "j1", isDone, 10);
 		expect(result.status).toBe("completed");
 		expect(poll).toHaveBeenCalledTimes(3);
-	});
-
-	it("throws on timeout, whether the server answers or not", async () => {
-		const poll = vi.fn().mockResolvedValue(makeJob("processing"));
-		await expect(awaitCompletion(poll, "j1", isDone, 10, 50)).rejects.toThrow(
-			"timed out",
-		);
-		poll.mockRejectedValue(new UnreachableError(new TypeError()));
-		await expect(awaitCompletion(poll, "j1", isDone, 10, 50)).rejects.toThrow(
-			"timed out",
-		);
 	});
 
 	it("passes jobId to pollFn", async () => {
@@ -70,7 +59,7 @@ describe("awaitCompletion", () => {
 			.fn()
 			.mockRejectedValueOnce(new UnreachableError(new TypeError()))
 			.mockResolvedValueOnce(makeJob("completed"));
-		const result = await awaitCompletion(poll, "j1", isDone, 10, 5000);
+		const result = await awaitCompletion(poll, "j1", isDone, 10);
 		expect(result.status).toBe("completed");
 		expect(poll).toHaveBeenCalledTimes(2);
 	});

@@ -1,18 +1,16 @@
 import { UnreachableError } from "@/lib/clients/http";
-import { JOB_TIMEOUT_MS } from "@/lib/gateway/base";
 import { sleep } from "@/lib/utils";
 
 export const POLL_INTERVAL_MS = 5000;
 
+/** Polls until `isDone`; the server owns the deadline and fails expired jobs. */
 export async function awaitCompletion<T>(
 	pollFn: (jobId: string) => Promise<T>,
 	jobId: string,
 	isDone: (result: T) => boolean,
 	intervalMs = POLL_INTERVAL_MS,
-	timeoutMs = JOB_TIMEOUT_MS,
 ): Promise<T> {
-	const deadline = Date.now() + timeoutMs;
-	while (Date.now() < deadline) {
+	for (;;) {
 		try {
 			const result = await pollFn(jobId);
 			if (isDone(result)) return result;
@@ -21,5 +19,4 @@ export async function awaitCompletion<T>(
 		}
 		await sleep(intervalMs);
 	}
-	throw new Error(`Job ${jobId} timed out after ${timeoutMs}ms`);
 }
