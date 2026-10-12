@@ -1,4 +1,8 @@
-import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
+import {
+	AssetBundle,
+	EmptyRemoteFileError,
+	type BundleResponse,
+} from "@/lib/api/asset-bundle";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type { VideoGenerateParams } from "@/lib/connectors/types";
@@ -84,10 +88,15 @@ export abstract class BaseVideoProvider implements VideoProvider {
 				request.duration ??
 				DEFAULT_VIDEO_DURATION_SEC,
 		};
-		return {
-			kind: "ready",
-			asset: await this.store({ url: job.url, metadata }),
-			costUsd: job.costUsd,
-		};
+		try {
+			return {
+				kind: "ready",
+				asset: await this.store({ url: job.url, metadata }),
+				costUsd: job.costUsd,
+			};
+		} catch (error) {
+			if (error instanceof EmptyRemoteFileError) return { kind: "pending" };
+			throw error;
+		}
 	}
 }

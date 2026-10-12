@@ -33,7 +33,7 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import { AssetBundle, EmptyRemoteFileError } from "@/lib/api/asset-bundle";
 import { RunwareVideo } from "../video/runware";
 
 const MODEL = "bytedance:seedance@2.0-fast";
@@ -848,6 +848,22 @@ describe("RunwareVideo", () => {
 
 			expect(result).toEqual({ kind: "pending" });
 			expect(AssetBundle.upload).not.toHaveBeenCalled();
+		});
+
+		it("keeps waiting while a finished video is still served empty", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
+			]);
+			vi.mocked(AssetBundle.upload).mockRejectedValueOnce(
+				new EmptyRemoteFileError("video", "runware"),
+			);
+
+			const result = await new RunwareVideo("test-key").poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			expect(result).toEqual({ kind: "pending" });
 		});
 
 		it("fails a job that errored even when it carries a url", async () => {

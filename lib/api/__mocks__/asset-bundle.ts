@@ -1,5 +1,7 @@
 import { vi } from "vitest";
 
+export class EmptyRemoteFileError extends Error {}
+
 export const AssetBundle = {
 	baseUrl: "",
 	upload: vi.fn(
