@@ -40,6 +40,29 @@ describe("awaitCompletion", () => {
 		expect(poll).toHaveBeenCalledTimes(3);
 	});
 
+	it("gives up when the server stays unreachable", async () => {
+		const poll = vi
+			.fn()
+			.mockRejectedValue(new UnreachableError(new TypeError()));
+		await expect(awaitCompletion(poll, "j1", isDone, 0)).rejects.toThrow(
+			UnreachableError,
+		);
+		expect(poll).toHaveBeenCalledTimes(24);
+	});
+
+	it("resets the unreachable count once the server answers", async () => {
+		const unreachable = new UnreachableError(new TypeError());
+		const poll = vi.fn();
+		for (let i = 0; i < 23; i++) poll.mockRejectedValueOnce(unreachable);
+		poll.mockResolvedValueOnce(makeJob("processing"));
+		for (let i = 0; i < 23; i++) poll.mockRejectedValueOnce(unreachable);
+		poll.mockResolvedValueOnce(makeJob("completed"));
+
+		const result = await awaitCompletion(poll, "j1", isDone, 0);
+		expect(result.status).toBe("completed");
+		expect(poll).toHaveBeenCalledTimes(48);
+	});
+
 	it("passes jobId to pollFn", async () => {
 		const poll = vi.fn().mockResolvedValue(makeJob("completed"));
 		await awaitCompletion(poll, "my-job-id", isDone);
