@@ -43,7 +43,7 @@ describe("GenerationQueue", () => {
 			const snap = generationQueue.getElementSnapshot("unknown-id");
 			expect(snap).toEqual({
 				status: "idle",
-				seconds: 0,
+				startedAt: null,
 				result: null,
 				error: null,
 				resultInputs: null,
@@ -107,7 +107,10 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("b3").status).toBe(
 				"generating",
 			);
-			expect(generationQueue.getElementSnapshot("b4").status).toBe("queued");
+			expect(generationQueue.getElementSnapshot("b4")).toMatchObject({
+				status: "queued",
+				startedAt: null,
+			});
 
 			generationQueue.discard("b1");
 			generationQueue.discard("b2");
@@ -349,7 +352,7 @@ describe("GenerationQueue", () => {
 			const snap = generationQueue.getElementSnapshot("d1");
 			expect(snap).toEqual({
 				status: "idle",
-				seconds: 0,
+				startedAt: null,
 				result: null,
 				error: null,
 				resultInputs: null,
@@ -675,17 +678,14 @@ describe("GenerationQueue", () => {
 		});
 	});
 
-	describe("timer", () => {
-		it("increments seconds while generating", async () => {
+	describe("startedAt", () => {
+		it("is stamped when the job starts and left out of what is saved", () => {
+			vi.setSystemTime(1_000);
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph([makeJob("t1")]);
 
-			expect(generationQueue.getElementSnapshot("t1").seconds).toBe(0);
-
-			await vi.advanceTimersByTimeAsync(3000);
-			expect(generationQueue.getElementSnapshot("t1").seconds).toBeGreaterThan(
-				0,
-			);
+			expect(generationQueue.getElementSnapshot("t1").startedAt).toBe(1_000);
+			expect(generationQueue.snapshot().t1).not.toHaveProperty("startedAt");
 
 			generationQueue.discard("t1");
 		});
@@ -738,7 +738,6 @@ describe("GenerationQueue", () => {
 	describe("snapshot", () => {
 		const idleEntry = {
 			status: "idle" as const,
-			seconds: 0,
 			result: { imageUrl: "u", durationSec: 2 },
 			error: null,
 			resultInputs: inputsFor(),
@@ -761,7 +760,6 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.snapshot()).toEqual({
 				s2: {
 					status: "idle",
-					seconds: 0,
 					result: null,
 					error: "boom",
 					resultInputs: null,
@@ -775,7 +773,7 @@ describe("GenerationQueue", () => {
 	describe("initialState", () => {
 		const idleEntry = {
 			status: "idle" as const,
-			seconds: 0,
+			startedAt: null,
 			result: { imageUrl: "u", durationSec: 2 },
 			error: null,
 			resultInputs: inputsFor(),
@@ -793,12 +791,12 @@ describe("GenerationQueue", () => {
 		it("normalizes stale 'generating' status back to idle", () => {
 			const q = new GenerationQueue({
 				initialState: {
-					h2: { ...idleEntry, status: "generating", seconds: 42 },
+					h2: { ...idleEntry, status: "generating" },
 				},
 			});
 			const snap = q.getElementSnapshot("h2");
 			expect(snap.status).toBe("idle");
-			expect(snap.seconds).toBe(0);
+			expect(snap.startedAt).toBeNull();
 		});
 
 		it("keeps staleness correct after rehydration", async () => {

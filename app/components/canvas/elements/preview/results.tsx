@@ -23,7 +23,7 @@ import {
 export function AudioResult({
 	src,
 	status,
-	seconds,
+	startedAt,
 	topRight,
 }: GenerationState &
 	PreviewOverlays & {
@@ -38,7 +38,7 @@ export function AudioResult({
 				{isGenerationActive(status) && (
 					<GenerationIndicator
 						status={status}
-						seconds={seconds}
+						startedAt={startedAt}
 						className="shrink-0"
 					/>
 				)}
@@ -106,7 +106,7 @@ export function MediaPreview({
 	url,
 	outputKind,
 	status,
-	seconds,
+	startedAt,
 	error,
 	topRight,
 }: GenerationState &
@@ -125,7 +125,7 @@ export function MediaPreview({
 				objectFit="contain"
 			/>
 			{error && <ErrorMessage message={error} />}
-			<ResultOverlay status={status} seconds={seconds} />
+			<ResultOverlay status={status} startedAt={startedAt} />
 			<PreviewChrome topRight={topRight} />
 		</div>
 	);

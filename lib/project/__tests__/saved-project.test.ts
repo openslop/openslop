@@ -3,7 +3,6 @@ import { parseSavedProject } from "../saved-project";
 
 const snapshot = {
 	status: "idle",
-	seconds: 0,
 	result: null,
 	error: null,
 	resultInputs: null,

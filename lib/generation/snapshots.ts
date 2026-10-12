@@ -8,9 +8,8 @@ const GenerationStatusSchema = z.enum(["idle", "queued", "generating"]);
 
 export type GenerationStatus = z.infer<typeof GenerationStatusSchema>;
 
-const ElementSnapshotSchema = z.object({
+const SavedSnapshotSchema = z.object({
 	status: GenerationStatusSchema,
-	seconds: z.number(),
 	result: AssetResultSchema.nullable(),
 	error: z.string().nullable(),
 	resultInputs: GenerationInputsSchema.nullable(),
@@ -19,17 +18,22 @@ const ElementSnapshotSchema = z.object({
 	pinned: z.boolean().default(false),
 });
 
-export type ElementSnapshot = z.infer<typeof ElementSnapshotSchema>;
+export type SavedSnapshot = z.infer<typeof SavedSnapshotSchema>;
+
+export type ElementSnapshot = SavedSnapshot & {
+	/** When its running job started, on this session's clock. */
+	startedAt: number | null;
+};
 
 /** The `generation` column is untyped JSON; parse it once at the boundary. */
 export const GenerationSnapshotSchema = z.record(
 	z.string(),
-	ElementSnapshotSchema,
+	SavedSnapshotSchema,
 );
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
 	status: "idle",
-	seconds: 0,
+	startedAt: null,
 	result: null,
 	error: null,
 	resultInputs: null,
@@ -37,13 +41,16 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	pinned: false,
 };
 
-const settled = (state: Record<string, ElementSnapshot>) =>
+const settled = (state: Record<string, SavedSnapshot>) =>
 	new Map(
 		Object.entries(state).map(([id, snap]) => [
 			id,
-			{ ...snap, status: "idle" as const, seconds: 0 },
+			{ ...snap, status: "idle" as const, startedAt: null },
 		]),
 	);
+
+const saved = ({ startedAt: _, ...snapshot }: ElementSnapshot): SavedSnapshot =>
+	snapshot;
 
 const RESULT_FIELDS = ["result", "resultInputs", "pinned"] as const;
 
@@ -68,11 +75,11 @@ export class SnapshotStore {
 	private readonly emitter = createEmitter();
 	private resultVersion = 0;
 
-	constructor(initialState: Record<string, ElementSnapshot> = {}) {
+	constructor(initialState: Record<string, SavedSnapshot> = {}) {
 		this.state = settled(initialState);
 	}
 
-	replaceAll(state: Record<string, ElementSnapshot>) {
+	replaceAll(state: Record<string, SavedSnapshot>) {
 		this.state = settled(state);
 		this.resultVersion++;
 		this.notify();
@@ -87,7 +94,10 @@ export class SnapshotStore {
 	/** Bumps whenever any element's held result changes, so observers can rederive. */
 	getResultVersion = () => this.resultVersion;
 
-	all = (): Record<string, ElementSnapshot> => Object.fromEntries(this.state);
+	all = (): Record<string, SavedSnapshot> =>
+		Object.fromEntries(
+			Array.from(this.state, ([id, snapshot]) => [id, saved(snapshot)]),
+		);
 
 	ids = (): string[] => Array.from(this.state.keys());
 
@@ -122,7 +132,7 @@ export class SnapshotStore {
 	/** Clears in-flight progress, keeping whatever the element already had. */
 	resetToIdle(id: string) {
 		const { result, error } = this.get(id);
-		if (result || error) this.update(id, { status: "idle", seconds: 0 });
+		if (result || error) this.update(id, { status: "idle", startedAt: null });
 		else this.state.delete(id);
 	}
 
@@ -130,7 +140,7 @@ export class SnapshotStore {
 		const { elementId, result, inputs, connectorType, pinned } = version;
 		this.update(elementId, {
 			status: "idle",
-			seconds: 0,
+			startedAt: null,
 			result,
 			error: null,
 			resultInputs: inputs,

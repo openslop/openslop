@@ -34,7 +34,7 @@ export function useGenerate(element: GeneratedElement) {
 	return {
 		node,
 		status: snapshot.status,
-		seconds: snapshot.seconds,
+		startedAt: snapshot.startedAt,
 		result: snapshot.result,
 		error: snapshot.error,
 		pinned: snapshot.pinned,

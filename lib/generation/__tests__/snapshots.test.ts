@@ -22,7 +22,7 @@ describe("SnapshotStore", () => {
 	it("reports an unknown element as idle and empty", () => {
 		expect(new SnapshotStore().get("nope")).toEqual<ElementSnapshot>({
 			status: "idle",
-			seconds: 0,
+			startedAt: null,
 			result: null,
 			error: null,
 			resultInputs: null,
@@ -35,7 +35,6 @@ describe("SnapshotStore", () => {
 		const store = new SnapshotStore({
 			a: {
 				status: "generating",
-				seconds: 12,
 				result: result("a.png"),
 				error: null,
 				resultInputs: inputsFor("a.png"),
@@ -45,7 +44,7 @@ describe("SnapshotStore", () => {
 		});
 		expect(store.get("a")).toMatchObject({
 			status: "idle",
-			seconds: 0,
+			startedAt: null,
 			pinned: true,
 			result: result("a.png"),
 		});
@@ -61,7 +60,7 @@ describe("SnapshotStore", () => {
 		commit(store, "a", "a.png");
 		expect(store.getResultVersion()).toBe(1);
 
-		store.update("a", { seconds: 3 });
+		store.update("a", { startedAt: 3 });
 		expect(store.getResultVersion()).toBe(1);
 
 		store.update("a", { resultInputs: inputsFor("edited") });
@@ -77,7 +76,7 @@ describe("SnapshotStore", () => {
 	it("keeps a settled result on reset but forgets an untouched element", () => {
 		const store = new SnapshotStore();
 		commit(store, "kept", "kept.png");
-		store.update("kept", { status: "generating", seconds: 4 });
+		store.update("kept", { status: "generating", startedAt: 4 });
 		store.update("bare", { status: "queued" });
 
 		store.resetToIdle("kept");
@@ -85,7 +84,7 @@ describe("SnapshotStore", () => {
 
 		expect(store.get("kept")).toMatchObject({
 			status: "idle",
-			seconds: 0,
+			startedAt: null,
 			result: result("kept.png"),
 		});
 		expect(store.ids()).toEqual(["kept"]);

@@ -34,6 +34,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			previewUrl={avatar.url}
 			Icon={User}
 			status={avatar.status}
+			startedAt={avatar.startedAt}
 			onEdit={() => editAsset("asset_avatar", name)}
 			{...tile}
 		/>

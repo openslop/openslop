@@ -13,5 +13,6 @@ export function useCharacterAvatar(name = "") {
 			getPrimaryUrl(q.getElementSnapshot(id).result, "image"),
 		),
 		status: useQueueSelector((q) => q.getElementSnapshot(id).status),
+		startedAt: useQueueSelector((q) => q.getElementSnapshot(id).startedAt),
 	};
 }

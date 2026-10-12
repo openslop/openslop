@@ -16,6 +16,7 @@ export function AssetTile({
 	previewUrl,
 	Icon,
 	status = "idle",
+	startedAt = null,
 	onEdit,
 	onRemove,
 	fallback = "initial",
@@ -25,6 +26,7 @@ export function AssetTile({
 	previewUrl?: string;
 	Icon: IconComponent;
 	status?: GenerationStatus;
+	startedAt?: number | null;
 	onEdit?: () => void;
 	onRemove?: () => void;
 	fallback?: "initial" | "icon";
@@ -64,6 +66,7 @@ export function AssetTile({
 				{isGenerationActive(status) && (
 					<GenerationIndicator
 						status={status}
+						startedAt={startedAt}
 						size="sm"
 						className="absolute right-1 top-1"
 					/>
